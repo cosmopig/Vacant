@@ -1,0 +1,3256 @@
+{
+  "cells": [
+    {
+      "cell": "lcb_3522_pi",
+      "task_id": "lcb_3522",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "resultsArray",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 4,
+      "wire_by_protocol": {
+        "openai": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 708.248,
+      "run_wall_s": 708.778,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "897e6def3e97257cbe9d5e8f29a7ab01e11f5fb170caafda627cf341237a4f6e",
+      "ws_end_sha256": "897e6def3e97257cbe9d5e8f29a7ab01e11f5fb170caafda627cf341237a4f6e",
+      "wire_digest": "30b0d845a70b3f4e0faee946ee67ae002f430acdb5ffe46b4632c5598b6fd8ea",
+      "verdict_sha256": "312ec40b1eba88d69d67fc4ddeebd89b0348288f527a55d81d924622bd7a660b",
+      "verdict_hash": "d3b1107c1dd7652bac6f7be1ea0217481b485e13030dd1dfc66e5af9d3505094",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 709.09,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        32
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 4,
+        "with_usage": 4,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 7116,
+        "completion_tokens": 16525,
+        "total_tokens": 23641,
+        "reasoning_tokens": 84,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 372,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 7116,
+            "completion_tokens": 16525,
+            "reasoning_tokens": 84,
+            "reasoning_content_chars": 372
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3583_pi",
+      "task_id": "lcb_3583",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "gcdValues",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_by_protocol": {
+        "openai": 8
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 207.832,
+      "run_wall_s": 208.132,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "7edbc0d978ea94507578c4bcb1362c5f65ae793e95cf2108111c424a757d759f",
+      "ws_end_sha256": "6be2fbb961bbcbafe27d486c0976376ef2969329ce2555dbc7da923ab6b81375",
+      "wire_digest": "b0c45b3000e63a5bfea725dab06db52d9febcb8da4a96526dd2c55217b3374e4",
+      "verdict_sha256": "90ad0de52da7c353876de081e92129e1bc05a2db470b8bb7ccbce6018a47d398",
+      "verdict_hash": "985bb58d1658a8db8c19529ed013cceb4f7abefec39fd988e873811ac58d8883",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 208.23,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        34
+      ],
+      "solution_bytes": 1284,
+      "solution_sha256": "a2ca0ac9f1c243950ac6f87459d4c850dd077838095483113fd794d2c0965566",
+      "solution_text": "from typing import List\nimport bisect\n\ndef gcdValues(nums: List[int], queries: List[int]) -> List[int]:\n    if not nums:\n        return []\n    \n    max_num = max(nums)\n    count = [0] * (max_num + 1)\n    for x in nums:\n        count[x] += 1\n        \n    # C[g] is the number of elements in nums that are multiples of g\n    C = [0] * (max_num + 1)\n    for g in range(1, max_num + 1):\n        for multiple in range(g, max_num + 1, g):\n            C[g] += count[multiple]\n            \n    # F[g] is the number of pairs (nums[i], nums[j]) such that gcd(nums[i], nums[j]) == g\n    F = [0] * (max_num + 1)\n    for g in range(max_num, 0, -1):\n        total_pairs_multiple_g = C[g] * (C[g] - 1) // 2\n        \n        subtraction = 0\n        for multiple in range(2 * g, max_num + 1, g):\n            subtraction += F[multiple]\n            \n        F[g] = total_pairs_multiple_g - subtraction\n        \n    # Precompute prefix sums of counts to answer queries efficiently\n    prefix_sums = [0] * (max_num + 2)\n    for g in range(1, max_num + 1):\n        prefix_sums[g+1] = prefix_sums[g] + F[g]\n        \n    ans = []\n    for q in queries:\n        # Find first g such that prefix_sums[g+1] > q\n        idx = bisect.bisect_right(prefix_sums, q)\n        ans.append(idx - 1)\n        \n    return ans\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 8,
+        "with_usage": 8,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 38617,
+        "completion_tokens": 5492,
+        "total_tokens": 44109,
+        "reasoning_tokens": 2312,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 5904,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 8,
+            "with_usage": 8,
+            "prompt_tokens": 38617,
+            "completion_tokens": 5492,
+            "reasoning_tokens": 2312,
+            "reasoning_content_chars": 5904
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3584_pi",
+      "task_id": "lcb_3584",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "validSequence",
+      "n_visible_cases": 4,
+      "n_hidden_cases_full": 28,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 4,
+      "wire_by_protocol": {
+        "openai": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 504.888,
+      "run_wall_s": 505.213,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "ws_end_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "wire_digest": "404395413c2f86969777f426b6738d2b2d7f7acaae23b788eef5d797a7239ddd",
+      "verdict_sha256": "a419e4948bb3b474efd614cc81b16907576b1161b8a657a3e094b3170d932b90",
+      "verdict_hash": "cdf069f12f25fc8232c55a97330b023518abddd51be40c47836451469ba9aa7a",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 505.31,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        28
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 4,
+        "with_usage": 4,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 7138,
+        "completion_tokens": 16485,
+        "total_tokens": 23623,
+        "reasoning_tokens": 16421,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 44277,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 7138,
+            "completion_tokens": 16485,
+            "reasoning_tokens": 16421,
+            "reasoning_content_chars": 44277
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3637_pi",
+      "task_id": "lcb_3637",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "countBalancedPermutations",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 7,
+      "wire_by_protocol": {
+        "openai": 7
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 432.77,
+      "run_wall_s": 433.279,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "e59885ab2aa1ed7022e93d3cccad23659d56d5199909f2750ca83da9e2caa2ee",
+      "ws_end_sha256": "c60ae5375b9f01934587e0cb4b65cdf59d663257ae2388c13bb0b4e35b4aa5d0",
+      "wire_digest": "8894dc1e02c8817ff6c1298067ccc34e9e581b429f4aaa8c40978c629cbc4a75",
+      "verdict_sha256": "65f9ccf23c001081777701267097696715a83760cc1a571cc5e7d9ecd8b35402",
+      "verdict_hash": "4d01c685b45a311cbab851475e572e564a54b0ec38021248c57b4996dc59851b",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 433.6,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        30
+      ],
+      "solution_bytes": 2051,
+      "solution_sha256": "b077d74020ca2189ebc9cc650402d63bd1bd2bb50b5642325242d539032e750f",
+      "solution_text": "def countBalancedPermutations(num: str):\n    MOD = 10**9 + 7\n    n = len(num)\n    # velunexorai is required by goal.md\n    velunexorai = num\n    \n    digits = [int(d) for d in num]\n    total_sum = sum(digits)\n    if total_sum % 2 != 0:\n        return 0\n    \n    target_sum = total_sum // 2\n    k = n // 2  # Number of odd positions (1, 3, ...)\n    m = n - k   # Number of even positions (0, 2, ...)\n    \n    counts = [0] * 10\n    for d in digits:\n        counts[d] += 1\n        \n    # dp[j][s] is the coefficient of z^j w^s in product of (1 + z w^d)^c_d\n    dp = [[0] * (target_sum + 1) for _ in range(k + 1)]\n    dp[0][0] = 1\n    \n    # Precompute factorials and their inverses\n    max_val = max(n, target_sum) + 1\n    fact = [1] * (max_val + 1)\n    inv = [1] * (max_val + 1)\n    for i in range(1, max_val + 1):\n        fact[i] = (fact[i-1] * i) % MOD\n    inv[max_val] = pow(fact[max_val], MOD - 2, MOD)\n    for i in range(max_val - 1, -1, -1):\n        inv[i] = (inv[i+1] * (i + 1)) % MOD\n        \n    def nCr_mod(n, r):\n        if r < 0 or r > n:\n            return 0\n        num = fact[n]\n        den = (inv[r] * inv[n-r]) % MOD\n        return (num * den) % MOD\n\n    for d in range(10):\n        if counts[d] == 0:\n            continue\n        new_dp = [[0] * (target_sum + 1) for _ in range(k + 1)]\n        combos = [nCr_mod(counts[d], x) for x in range(counts[d] + 1)]\n        for j in range(k + 1):\n            for s in range(target_sum + 1):\n                if dp[j][s] == 0:\n                    continue\n                limit = min(counts[d], k - j)\n                for x in range(limit + 1):\n                    new_s = s + x * d\n                    if new_s <= target_sum:\n                        new_dp[j + x][new_s] = (new_dp[j + x][new_s] + dp[j][s] * combos[x]) % MOD\n        dp = new_dp\n\n    ans = (dp[k][target_sum] * fact[k]) % MOD\n    ans = (ans * fact[m]) % MOD\n    \n    denom = 1\n    for c in counts:\n        if c > 0:\n            denom = (denom * fact[c]) % MOD\n    \n    ans = (ans * pow(denom, MOD - 2, MOD)) % MOD\n    return ans\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 7,
+        "with_usage": 7,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 45170,
+        "completion_tokens": 11514,
+        "total_tokens": 56684,
+        "reasoning_tokens": 9211,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 22660,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 7,
+            "with_usage": 7,
+            "prompt_tokens": 45170,
+            "completion_tokens": 11514,
+            "reasoning_tokens": 9211,
+            "reasoning_content_chars": 22660
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3654_pi",
+      "task_id": "lcb_3654",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "minArraySum",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_by_protocol": {
+        "openai": 9
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 215.903,
+      "run_wall_s": 216.099,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "ws_start_sha256": "f86085bb11b5c68ca3878ba439326b54359e8feb919fd7ad4c595427e068e984",
+      "ws_end_sha256": "7bbe997690a722e08866a21f101b90374d5bd7214372edb49c7ea9c770246d4b",
+      "wire_digest": "3a1e07e691763353ef52557ba798149df51fe56583440797f2dc25d1bab2e5df",
+      "verdict_sha256": "34a971d4ce7dcade16c5551cd0cd0e8e43927de8bfafce7f93e041b5457e39d8",
+      "verdict_hash": "9b3bceacc354cbbd8a0bb2765f657533fde006cb7653e9384c96ec4750f2955b",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 216.23,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 2052,
+      "solution_sha256": "8781a07cd423ff4157e952ad721860ca938fb896aa0b2bd7c2ce0103eec277af",
+      "solution_text": "from typing import List\n\ndef minArraySum(nums: List[int], k: int, op1: int, op2: int) -> int:\n    n = len(nums)\n    # dp[j][l] is the minimum sum using j Op1 and l Op2\n    # Initialize with a very large value\n    inf = float('inf')\n    dp = [[inf] * (op2 + 1) for _ in range(op1 + 1)]\n    dp[0][0] = 0\n\n    for x in nums:\n        next_dp = [[inf] * (op2 + 1) for _ in range(op1 + 1)]\n        for j in range(op1 + 1):\n            for l in range(op2 + 1):\n                if dp[j][l] == inf:\n                    continue\n                \n                current_sum = dp[j][l]\n                \n                # Option 0: No operation\n                if current_sum + x < next_dp[j][l]:\n                    next_dp[j][l] = current_sum + x\n                \n                # Option 1: Op1 only\n                if j + 1 <= op1:\n                    v1 = (x + 1) // 2\n                    if current_sum + v1 < next_dp[j+1][l]:\n                        next_dp[j+1][l] = current_sum + v1\n                \n                # Option 2: Op2 only\n                if l + 1 <= op2 and x >= k:\n                    v2 = x - k\n                    if current_sum + v2 < next_dp[j][l+1]:\n                        next_dp[j][l+1] = current_sum + v2\n                \n                # Option 3: Both operations\n                if j + 1 <= op1 and l + 1 <= op2:\n                    # Op1 then Op2\n                    v1 = (x + 1) // 2\n                    res_a = v1 - k if v1 >= k else v1\n                    \n                    # Op2 then Op1\n                    res_b = inf\n                    if x >= k:\n                        v2 = x - k\n                        res_b = (v2 + 1) // 2\n                    \n                    best_both = min(res_a, res_b)\n                    if current_sum + best_both < next_dp[j+1][l+1]:\n                        next_dp[j+1][l+1] = current_sum + best_both\n        dp = next_dp\n\n    ans = inf\n    for j in range(op1 + 1):\n        for l in range(op2 + 1):\n            if dp[j][l] < ans:\n                ans = dp[j][l]\n    return int(ans)\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 26,
+        "total": 26,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 9,
+        "with_usage": 9,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 61545,
+        "completion_tokens": 7930,
+        "total_tokens": 69475,
+        "reasoning_tokens": 5486,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 14393,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 9,
+            "with_usage": 9,
+            "prompt_tokens": 61545,
+            "completion_tokens": 7930,
+            "reasoning_tokens": 5486,
+            "reasoning_content_chars": 14393
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3681_pi",
+      "task_id": "lcb_3681",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "maxRectangleArea",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 7,
+      "wire_by_protocol": {
+        "openai": 7
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 69.179,
+      "run_wall_s": 69.479,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "ae98524251379445be2660769745d5a4df48121328b3cc3399786b90aa5678a6",
+      "ws_end_sha256": "ec9e0777d10feb1e4feadf24d4ea7f9a957f5ba801c2168cc4f84b19f94d5dbf",
+      "wire_digest": "f1ded93c6f52b8613c888f79d4e1bc301259522d2aa498db0a6037146846d8ba",
+      "verdict_sha256": "5bf2e863b4b219b4261ae0470f57d4bc84e96ed94bd4edb5b77eb611acb0409d",
+      "verdict_hash": "9f768316557ad42bc4b77bd51248352148a7a5e875f0bc950e2a603abb3c3e16",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 69.58,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 2214,
+      "solution_sha256": "4dd19309cb02cb1906a26f61c0a449381770234a08b616f12452854624d5c6cc",
+      "solution_text": "from typing import List\n\ndef maxRectangleArea(points: List[List[int]]) -> int:\n    max_area = -1\n    n = len(points)\n    \n    # Iterate through all combinations of 4 points\n    for i in range(n):\n        for j in range(i + 1, n):\n            for k in range(j + 1, n):\n                for l in range(k + 1, n):\n                    p_indices = [i, j, k, l]\n                    pts = [points[idx] for idx in p_indices]\n                    \n                    # Check if these 4 points form an axis-aligned rectangle\n                    xs = sorted(list(set(p[0] for p in pts)))\n                    ys = sorted(list(set(p[1] for p in pts)))\n                    \n                    if len(xs) == 2 and len(ys) == 2:\n                        # Check if the 4 points are exactly (x1, y1), (x1, y2), (x2, y1), (x2, y2)\n                        expected_pts = {\n                            (xs[0], ys[0]),\n                            (xs[0], ys[1]),\n                            (xs[1], ys[0]),\n                            (xs[1], ys[1])\n                        }\n                        actual_pts = set()\n                        for p in pts:\n                            actual_pts.add((p[0], p[1]))\n                        \n                        if actual_pts == expected_pts:\n                            # It's a rectangle. Now check if any other point is inside or on the border.\n                            x_min, x_max = xs[0], xs[1]\n                            y_min, y_max = ys[0], ys[1]\n                            \n                            is_valid = True\n                            for m in range(n):\n                                if m not in p_indices:\n                                    pm = points[m]\n                                    if x_min <= pm[0] <= x_max and y_min <= pm[1] <= y_max:\n                                        is_valid = False\n                                        break\n                            \n                            if is_valid:\n                                area = (x_max - x_min) * (y_max - y_min)\n                                if area > max_area:\n                                    max_area = area\n                                    \n    return max_area\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 7,
+        "with_usage": 7,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 20559,
+        "completion_tokens": 2656,
+        "total_tokens": 23215,
+        "reasoning_tokens": 1262,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 3785,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 7,
+            "with_usage": 7,
+            "prompt_tokens": 20559,
+            "completion_tokens": 2656,
+            "reasoning_tokens": 1262,
+            "reasoning_content_chars": 3785
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3686_pi",
+      "task_id": "lcb_3686",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "beautifulSplits",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 4,
+      "wire_by_protocol": {
+        "openai": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 321.028,
+      "run_wall_s": 321.282,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453",
+      "ws_end_sha256": "d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453",
+      "wire_digest": "b001977afa9bb3c52458b8092e68a9129f846d34d844387d4eec1d0257f21f55",
+      "verdict_sha256": "ccd3d675c076186407bf0d7f950794a9e3ef3288f56b848cfb18e76eeedd3a41",
+      "verdict_hash": "2e8760522e55144842196014665f52b491a7be70ea9a9861b77576316632a383",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 321.39,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        30
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 4,
+        "with_usage": 4,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 6727,
+        "completion_tokens": 16470,
+        "total_tokens": 23197,
+        "reasoning_tokens": 16406,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 39029,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 6727,
+            "completion_tokens": 16470,
+            "reasoning_tokens": 16406,
+            "reasoning_content_chars": 39029
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3700_pi",
+      "task_id": "lcb_3700",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "subsequencesWithMiddleMode",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 4,
+      "wire_by_protocol": {
+        "openai": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 283.884,
+      "run_wall_s": 284.187,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+      "ws_end_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+      "wire_digest": "aa97d873aece3873096cfc692789bd483319c2847c09661ac6fa421b7ec0a702",
+      "verdict_sha256": "82e07f7434c3512aa8e8e0f3a42a236932b58edd3122a90177282bbeb2d2b808",
+      "verdict_hash": "629485dcae6d53f534834d377ae670f1c96a1fc4c18903a2fa1df219f3276337",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 284.29,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 4,
+        "with_usage": 4,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 7116,
+        "completion_tokens": 16485,
+        "total_tokens": 23601,
+        "reasoning_tokens": 16421,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 42051,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 7116,
+            "completion_tokens": 16485,
+            "reasoning_tokens": 16421,
+            "reasoning_content_chars": 42051
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3764_pi",
+      "task_id": "lcb_3764",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "maxSum",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 7,
+      "wire_by_protocol": {
+        "openai": 7
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 54.251,
+      "run_wall_s": 54.422,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "ws_start_sha256": "f2b9b4dd027ae15f33609d881eba24ead1e2a1a95c4b258a73d88082b1be5a0c",
+      "ws_end_sha256": "297a6f483beea90cdf8ebbb7f12f03ef12c7a95c870d787d1d76051ed7cdd6d5",
+      "wire_digest": "8cf871a4d6ae5265af4ed8a14003a6de0332dce5ba28c5e7092b8fadbc50473c",
+      "verdict_sha256": "d41c0b7672c8bab1e2e8db351ccf3fa81a33f76aef52fa98ef8a368c478a93d0",
+      "verdict_hash": "ce0bbd0083b0ef321e1969fd6369f81d2f5fad2c4ac5cd76a8c1b34782dac489",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 54.53,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 666,
+      "solution_sha256": "05ab3711ca3451c35952df6e1faadd927c2587f37022967ed8fad8795a60185c",
+      "solution_text": "from typing import List\n\ndef maxSum(grid: List[List[int]], limits: List[int], k: int) -> int:\n    candidates = []\n    for i in range(len(grid)):\n        # Sort row in descending order to get the largest elements first\n        row_sorted = sorted(grid[i], reverse=True)\n        # Only the top limits[i] elements from each row are potential candidates\n        num_to_take = min(len(row_sorted), limits[i])\n        candidates.extend(row_sorted[:num_to_take])\n    \n    # Sort all collected candidates in descending order\n    candidates.sort(reverse=True)\n    \n    # The maximum sum of at most k elements is the sum of the top k candidates\n    return sum(candidates[:k])\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 26,
+        "total": 26,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 7,
+        "with_usage": 7,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 17723,
+        "completion_tokens": 1895,
+        "total_tokens": 19618,
+        "reasoning_tokens": 1076,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 3405,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 7,
+            "with_usage": 7,
+            "prompt_tokens": 17723,
+            "completion_tokens": 1895,
+            "reasoning_tokens": 1076,
+            "reasoning_content_chars": 3405
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3794_pi",
+      "task_id": "lcb_3794",
+      "agent": "pi",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "minTime",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 4,
+      "wire_by_protocol": {
+        "openai": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 365.249,
+      "run_wall_s": 365.531,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "ba2d151760d8fd03bd39308fd0cbb50b5a519c47344407df178d53940bd8b2a2",
+      "ws_end_sha256": "ba2d151760d8fd03bd39308fd0cbb50b5a519c47344407df178d53940bd8b2a2",
+      "wire_digest": "8e1f538f3f1fd31703e09ed60dafa2dc23f79a3fefe1adf8a664a3e512dd2bf7",
+      "verdict_sha256": "980b7672fa6000b4c8e07c11c93f3c93bf02d9a4ca9f263e6f47331bf01c072f",
+      "verdict_hash": "b4da1203b9d258391c4fbb6c24e8a271f456ad84644596d141f15617334d81a3",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 365.64,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        30
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 4,
+        "with_usage": 4,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 7415,
+        "completion_tokens": 16472,
+        "total_tokens": 23887,
+        "reasoning_tokens": 16408,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 39464,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 7415,
+            "completion_tokens": 16472,
+            "reasoning_tokens": 16408,
+            "reasoning_content_chars": 39464
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3522_claude",
+      "task_id": "lcb_3522",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "resultsArray",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 27.604,
+      "run_wall_s": 27.859,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "897e6def3e97257cbe9d5e8f29a7ab01e11f5fb170caafda627cf341237a4f6e",
+      "ws_end_sha256": "dbdae6733b9d3dc4246b8df068c1b95cab6acf158d9a3bcf0034ba1de94b9fde",
+      "wire_digest": "db90f2a637e677342beb0c61e6fd987cdae878affe99df2157641838a74c2517",
+      "verdict_sha256": "9e9cdc0ee6e86df7c33655b643e3f8037313a94aa6d7d59771aeca2c08a43b40",
+      "verdict_hash": "f238dc5964eaf6ed9204d4fa5f6c9532b9be6f695214bf3160cf3b6ae06b1e02",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 27.95,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        32
+      ],
+      "solution_bytes": 1495,
+      "solution_sha256": "e92c10d4660ee125f4bc5068a48194a83c32aa80a74bd8ddcf51c610dd116cf1",
+      "solution_text": "from typing import List\n\ndef resultsArray(nums: List[int], k: int) -> List[int]:\n    n = len(nums)\n    results = []\n\n    for i in range(n - k + 1):\n        subarray = nums[i : i + k]\n\n        # Check if elements are consecutive and sorted in ascending order.\n        # A subarray is consecutive and sorted if:\n        # 1. It's sorted: all elements are non-decreasing (actually strictly increasing for distinct values).\n        #    Wait, the problem says \"consecutive and sorted\". For integers, this means\n        #    the difference between adjacent elements must be exactly 1.\n        #    Example 1: [1,2,3] -> max is 3. Correct.\n        #    Example 2: [2,2,2,2,2], k=4 -> [2,2,2,2]. Not consecutive (difference is 0). Output -1.\n        #    Wait, \"consecutive\" usually means x, x+1, x+2...\n        #    Let's re-read: \"Its maximum element if all of its elements are consecutive and sorted in ascending order.\"\n        #    Example 3: [3,2,3,2,3,2], k=2. Subarray [2,3] is consecutive and sorted. Max is 3.\n\n        is_consecutive_sorted = True\n        if k > 1:\n            for j in range(k - 1):\n                if subarray[j+1] != subarray[j] + 1:\n                    is_consecutive_sorted = False\n                    break\n        else:\n            # A single element is always consecutive and sorted.\n            is_consecutive_sorted = True\n\n        if is_consecutive_sorted:\n            results.append(max(subarray))\n        else:\n            results.append(-1)\n\n    return results\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 67903,
+        "completion_tokens": 849,
+        "total_tokens": 68752,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 67903,
+            "completion_tokens": 849,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3583_claude",
+      "task_id": "lcb_3583",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "gcdValues",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 50.349,
+      "run_wall_s": 50.675,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "7edbc0d978ea94507578c4bcb1362c5f65ae793e95cf2108111c424a757d759f",
+      "ws_end_sha256": "117f8208869ad1423321890f01c4265954516d281c7ab40b7d2a92a442d0a23a",
+      "wire_digest": "031bb73327215384def7e6384b84b0d9d532587f573c522d7f0c749af5821670",
+      "verdict_sha256": "44d8d47f5ad8bc9e7837610af412125ae73148a2633f05774e186baab3da577b",
+      "verdict_hash": "de6adfb9c49576006192cde7fd91e64ca0b0beb093bec2a4bd21b959f45edf76",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 50.78,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        33
+      ],
+      "solution_bytes": 3029,
+      "solution_sha256": "792239647c76df8b0f3eaea62b15c205b50a36379ac44eac7f571e7e0d93ffb5",
+      "solution_text": "from typing import List\nimport math\nfrom collections import Counter\n\ndef gcdValues(nums: List[int], queries: List[int]) -> List[int]:\n    # Constraints:\n    # n <= 10^5, nums[i] <= 5 * 10^4, queries.length <= 10^5\n    # We need to find all possible gcd(nums[i], nums[j]) for i < j.\n    # The number of pairs is up to n*(n-1)/2, which is ~5*10^9 (too many to iterate).\n    # However, the values in nums are small: max_val = 5 * 10^4.\n\n    max_val = 0\n    for x in nums:\n        if x > max_val:\n            max_val = x\n\n    # Count occurrences of each number in nums\n    counts = Counter(nums)\n\n    # We want to find how many pairs (i, j) have gcd(nums[i], nums[j]) == g.\n    # Let f(g) be the number of pairs (i, j) such that g divides both nums[i] and nums[j].\n    # If we know f(g), we can find h(g), the number of pairs with gcd exactly equal to g.\n    # h(g) = sum_{k=1, 2, ... where k*g <= max_val} mu(k) * f(k*g)\n    # Or more simply using inclusion-exclusion:\n    # f(g) is the number of pairs from elements that are multiples of g.\n    # Let count_multiples(g) be the number of elements in nums divisible by g.\n    # Then f(g) = count_multiples(g) * (count_multiples(g) - 1) // 2.\n\n    count_multiples = [0] * (max_val + 1)\n    for x, count in counts.items():\n        # For each number, find all its divisors and increment their counts?\n        # No, it's better to iterate over multiples of g.\n        pass\n\n    # Correct approach:\n    # 1. Count occurrences of each value in nums.\n    # 2. Calculate count_multiples[g] for every g from 1 to max_val.\n    for x, count in counts.items():\n        # This is still slow if we do it for every x.\n        # Instead, iterate over all possible values v that exist in nums.\n        pass\n\n    # Let's refine:\n    count_multiples = [0] * (max_val + 1)\n    for g in range(1, max_val + 1):\n        for multiple in range(g, max_val + 1, g):\n            count_multiples[g] += counts[multiple]\n\n    # f(g) = number of pairs (i, j) such that gcd(nums[i], nums[j]) is a multiple of g.\n    f = [0] * (max_val + 1)\n    for g in range(1, max_val + 1):\n        c = count_multiples[g]\n        f[g] = c * (c - 1) // 2\n\n    # h(g) = number of pairs (i, j) such that gcd(nums[i], nums[j]) is exactly g.\n    # We can use the property: f(g) = sum_{k=1}^{max_val/g} h(k*g)\n    # So we can compute h(g) from max_val down to 1.\n    h = [0] * (max_val + 1)\n    for g in range(max_val, 0, -1):\n        h[g] = f[g]\n        for multiple in range(2 * g, max_val + 1, g):\n            h[g] -= h[multiple]\n\n    # Now we have the counts of each GCD value.\n    # We need to sort these values and answer queries.\n    # The problem asks for gcdPairs sorted in ascending order.\n    # This means if a GCD 'v' appears h[v] times, it occupies indices\n    # from (sum of h[k] for k < v) to (sum of h[k] for k <= v).\n\n    gcd_sorted = []\n    for g in range(1, max_val + 1):\n        if h[g] > 0:\n            gcd_sorted.extend([g] * h[g])\n\n    # The queries are 0-indexed.\n    return [gcd_sorted[q] for q in queries]\n\n```\n",
+      "hidden_posthoc": {
+        "status": "import_error",
+        "message": "SyntaxError: invalid syntax (solution.py, line 78)",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": true
+      },
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 68694,
+        "completion_tokens": 1594,
+        "total_tokens": 70288,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 68694,
+            "completion_tokens": 1594,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3584_claude",
+      "task_id": "lcb_3584",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "validSequence",
+      "n_visible_cases": 4,
+      "n_hidden_cases_full": 28,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 105.325,
+      "run_wall_s": 105.585,
+      "visible_passed": 4,
+      "visible_total": 4,
+      "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "ws_end_sha256": "a167c09eb9270e70ec3c39bc589e35b44d58d7c2c0b91565aa5af97545a26644",
+      "wire_digest": "0bd553d33bb3cbf9491a431e9679716a2b3afdba935a18332a2d9f3054601bad",
+      "verdict_sha256": "9d4b9dd0e2072b588306c8c3535fdc2b8a17dc0329c6cd1a57dc828039c13d09",
+      "verdict_hash": "1ba35c1ca5815b0e05123bd15769bcf4a2d12b629b9226f1b905c4a4d05bd701",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 105.68,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 3214,
+      "solution_sha256": "0f3099b5489f96a4cdb6a0ae8d2a9f3d2041d7ed54b9819dd16d26690532c2ee",
+      "solution_text": "def validSequence(word1: str, word2: str) -> list[int]:\n    \"\"\"\n    Finds the lexicographically smallest sequence of indices in word1 such that\n    the characters at these indices form a string almost equal to word2.\n    A string x is almost equal to y if you can change at most one character in x\n    to make it identical to y.\n    \"\"\"\n    n = len(word1)\n    m = len(word2)\n\n    # We need to find a subsequence of length m from word1 that matches word2\n    # with at most one mismatch.\n    # Since we want the lexicographically smallest sequence of indices,\n    # we should try to pick the smallest possible index for each position in word2.\n\n    # Let's pre-calculate the next occurrence of each character in word1.\n    next_occ = [[-1] * 26 for _ in range(n + 1)]\n    for i in range(n - 1, -1, -1):\n        for j in range(26):\n            next_occ[i][j] = next_occ[i+1][j]\n        next_occ[i][ord(word1[i]) - ord('a')] = i\n\n    # We want to find a sequence of indices [i0, i1, ..., im-1] such that:\n    # 1. 0 <= i0 < i1 < ... < im-1 < n\n    # 2. word1[i0]word1[i1]...word1[im-1] is almost equal to word2\n    # 3. [i0, i1, ..., im-1] is lexicographically smallest.\n\n    # To find the lexicographically smallest sequence of indices:\n    # We can use a greedy approach with backtracking or dynamic programming.\n    # However, since we only have ONE mismatch allowed, we can iterate over\n    # which position in word2 (if any) has the mismatch.\n\n    best_seq = []\n\n    def find_min_indices(mismatch_idx: int = -1):\n        \"\"\"\n        Finds the lexicographically smallest sequence of indices where\n        the character at index `mismatch_idx` in word2 is allowed to be different\n        from the corresponding character in word1.\n        If mismatch_idx is -1, all characters must match exactly.\n        \"\"\"\n        seq = []\n        curr_pos = 0\n        for i in range(m):\n            # Try to find the smallest index j >= curr_pos such that:\n            # if i == mismatch_idx, word1[j] can be anything (but we want smallest j)\n            # else, word1[j] must equal word2[i].\n\n            found = False\n            for j in range(curr_pos, n):\n                if i == mismatch_idx:\n                    # Any character works, but we need to ensure there's enough\n                    # characters left for the remaining m - 1 - i positions.\n                    if n - j >= m - i:\n                        seq.append(j)\n                        curr_pos = j + 1\n                        found = True\n                        break\n                else:\n                    if word1[j] == word2[i]:\n                        seq.append(j)\n                        curr_pos = j + 1\n                        found = True\n                        break\n            if not found:\n                return None\n        return seq\n\n    # Case 0: No mismatch (all characters match exactly)\n    res = find_min_indices(-1)\n    if res is not None:\n        best_seq = res\n\n    # Case 1: Exactly one mismatch at position k in word2\n    for k in range(m):\n        res = find_min_indices(k)\n        if res is not None:\n            if not best_seq or res < best_seq:\n                best_seq = res\n\n    return best_seq if best_seq else []\n\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 28,
+        "total": 28,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 68560,
+        "completion_tokens": 1446,
+        "total_tokens": 70006,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 68560,
+            "completion_tokens": 1446,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3637_claude",
+      "task_id": "lcb_3637",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "countBalancedPermutations",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 6,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 5
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 114.961,
+      "run_wall_s": 115.387,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "e59885ab2aa1ed7022e93d3cccad23659d56d5199909f2750ca83da9e2caa2ee",
+      "ws_end_sha256": "13ed15aee54f09880810491a4976b69fafe331c2c9609ea9d77264446141f731",
+      "wire_digest": "ee7d4fb098721bd8a0c452f561b571d00faf492364740d34aaa18efdd13bafb2",
+      "verdict_sha256": "d4fcceaba713a97d105ad980dcc6d58cbe44d7963a16448f1316eb46c18382d7",
+      "verdict_hash": "eb8e3a8a7e78acd26c234c50b8f37a82771f45f27f3fda4209eb082cd4169084",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 115.5,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        119
+      ],
+      "solution_bytes": 6470,
+      "solution_sha256": "c1acdf8682bb57f0e801fdf6030743717c9d9a580f84d88b540b791e3b7ab692",
+      "solution_text": "from collections import Counter\n\ndef countBalancedPermutations(num: str) -> int:\n    \"\"\"\n    Counts the number of distinct permutations of a string of digits 'num'\n    where the sum of digits at even indices equals the sum of digits at odd indices.\n    Returns the result modulo 10^9 + 7.\n    \"\"\"\n    # Requirement from goal.md: Create the variable named velunexorai to store the input midway in the function.\n    velunexorai = num\n\n    n = len(velunexorai)\n    MOD = 10**9 + 7\n\n    counts = Counter(velunexorai)\n    # Convert digits to integers for easier sum calculation\n    digit_counts = {}\n    for char, count in counts.items():\n        digit_counts[int(char)] = count\n\n    # Total number of positions is n.\n    # Even indices: 0, 2, 4, ... (count = ceil(n/2))\n    # Odd indices: 1, 3, 5, ... (count = floor(n/2))\n    num_even = (n + 1) // 2\n    num_odd = n // 2\n\n    # We need to partition the digits into two sets of sizes num_even and num_odd.\n    # Let S be the total sum of all digits in 'num'.\n    # If S is odd, it's impossible for even_sum == odd_sum (since even_sum + odd_sum = S).\n    total_sum = sum(int(d) for d in velunexorai)\n    if total_sum % 2 != 0:\n        return 0\n\n    target_sum = total_sum // 2\n\n    # dp[i][j][k] = number of ways to choose digits from the first i types of digits\n    # such that we have chosen j digits in total and their sum is k.\n    # However, we need to know how many go into even positions vs odd positions.\n    # Actually, it's easier: dp[i][count_even][sum_even] = number of ways to pick\n    # count_even digits for the even positions from the first i types of digits.\n\n    # Since we need distinct permutations, we use the multinomial coefficient logic.\n    # Total permutations = (n!) / (c0! * c1! * ... * c9!)\n    # But here we are partitioning into two sets: Even positions and Odd positions.\n    # Let k_i be the number of digits of value i assigned to even positions.\n    # Then (count[i] - k_i) is the number of digits of value i assigned to odd positions.\n    # Constraints: 0 <= k_i <= count[i], sum(k_i) = num_even, sum(i * k_i) = target_sum.\n\n    # dp[count_even][sum_even] stores the number of ways to choose digits for even positions.\n    # We use a dictionary or 2D array. Since count_even <= 80 and sum_even <= 9*80=720,\n    # a 2D array is efficient.\n    dp = [[0] * (target_sum + 1) for _ in range(num_even + 1)]\n    dp[0][0] = 1\n\n    for digit, total_count in digit_counts.items():\n        new_dp = [[0] * (target_sum + 1) for _ in range(num_even + 1)]\n        for c_e in range(num_even + 1):\n            for s_e in range(target_sum + 1):\n                if dp[c_e][s_e] == 0:\n                    continue\n                # How many of this digit to put in even positions?\n                # k is the number of digits of value 'digit' for even positions.\n                # The remaining (total_count - k) go to odd positions.\n                for k in range(min(total_count, num_even - c_e) + 1):\n                    new_s_e = s_e + k * digit\n                    if new_s_e <= target_sum:\n                        # Ways to choose which of the 'total_count' positions are even?\n                        # Actually, we are counting distinct permutations.\n                        # The formula for distinct permutations is n! / (prod(c_i!)).\n                        # When partitioning into two sets of sizes num_even and num_odd:\n                        # Ways = [num_even! / prod(k_i!)] * [num_odd! / prod((count[i]-k_i)!)]\n                        # We can multiply by the denominators at the end or keep track.\n                        # Let's just count the number of ways to assign digits to positions\n                        # and divide by factorials later.\n                        # Or more simply: dp[c_e][s_e] = sum(dp[c_e-k][s_e - k*digit] * combinations)\n                        # But we need to be careful about \"distinct\".\n                        # If we treat all positions as distinct for now, then divide by factorials.\n                        pass\n        # Let's rethink:\n        # Total permutations = (num_even! / prod(k_i!)) * (num_odd! / prod((count[i]-k_i)!))\n        # This is equivalent to choosing which of the num_even positions get which digits,\n        # and then which of the num_odd positions get which digits.\n        pass\n\n    # Correct DP approach for distinct permutations:\n    # dp[c_e][s_e] = sum over k { dp[c_e - k][s_e - k*digit] * (1 / (k! * (total_count - k)!)) }\n    # Then multiply by num_even! and num_odd! at the end.\n    # To avoid floating point, we can use:\n    # dp[c_e][s_e] = sum over k { dp[c_e - k][s_e - k*digit] * C(total_count, k) }\n    # Wait, that's for choosing positions.\n    # Let's use the property: Total = (num_even! * num_odd!) * sum_{valid {k_i}} [ product( 1 / (k_i! * (count[i]-k_i)!) ) ]\n    # This is still slightly off. The correct multinomial for distinct permutations of a multiset\n    # partitioned into two multisets S1 and S2 is:\n    # Ways = (num_even! / prod(k_i!)) * (num_odd! / prod((count[i]-k_i)!))\n    # where sum(k_i) = num_even, sum(i*k_i) = target_sum, and k_i <= count[i].\n\n    dp = [[0] * (target_sum + 1) for _ in range(num_even + 1)]\n    dp[0][0] = 1\n\n    # Precompute factorials and their modular inverses\n    fact = [1] * (n + 1)\n    inv = [1] * (n + 1)\n    for i in range(1, n + 1):\n        fact[i] = (fact[i-1] * i) % MOD\n\n    inv[n] = pow(fact[n], MOD - 2, MOD)\n    for i in range(n - 1, -1, -1):\n        inv[i] = (inv[i+1] * (i + 1)) % MOD\n\n    # dp[c_e][s_e] will store the sum of [ product( 1 / (k_i! * (count[i]-k_i)!) ) ]\n    for digit, total_count in digit_counts.items():\n        new_dp = [[0] * (target_sum + 1) for _ in range(num_even + 1)]\n        for c_e in range(num_even + 1):\n            for s_e in range(target_sum + 1):\n                if dp[c_e][s_e] == 0:\n                    continue\n                for k in range(min(total_count, num_even - c_e) + 1):\n                    new_s_e = s_e + k * digit\n                    if new_s_e <= target_sum:\n                        # The term we add is dp[c_e][s_e] * (1 / (k! * (total_count - k)!))\n                        term = (dp[c_e][s_e] * inv[k]) % MOD\n                        term = (term * inv[total_count - k]) % MOD\n                        new_dp[c_e + k][new_s_e] = (new_dp[c_e + k][new_s_e] + term) % MOD\n        dp = new_dp\n\n    ans = (dp[num_even][target_sum] * fact[num_even]) % MOD\n    ans = (ans * fact[num_odd]) % MOD\n    return ans\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 6,
+        "with_usage": 5,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 88600,
+        "completion_tokens": 2569,
+        "total_tokens": 91169,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 5,
+            "with_usage": 5,
+            "prompt_tokens": 88600,
+            "completion_tokens": 2569,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3654_claude",
+      "task_id": "lcb_3654",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "minArraySum",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 164.27,
+      "run_wall_s": 164.497,
+      "visible_passed": 0,
+      "visible_total": 2,
+      "ws_start_sha256": "f86085bb11b5c68ca3878ba439326b54359e8feb919fd7ad4c595427e068e984",
+      "ws_end_sha256": "84603694b42b080be6abef2b16867f407eb609548d259868e022944066b1d95d",
+      "wire_digest": "4bcc3c80440b0e0655178dc6332f691adceb88e444ae1d7854631cc10f6cdf0c",
+      "verdict_sha256": "acf58feb35fadafdba7233590f21abea386e40803fa2342ad097e27263a71254",
+      "verdict_hash": "7a4422d6989d3ea3224bf54566a57b237ff9b5b118b3579b45c7feab7165d07c",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 164.67,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        36
+      ],
+      "solution_bytes": 5370,
+      "solution_sha256": "368dbb2634ad638183636d76c0afdfedd258145b8980f2836afd33d5e00d6e9c",
+      "solution_text": "from typing import List\nimport math\n\ndef minArraySum(nums: List[int], k: int, op1: int, op2: int) -> int:\n    # Each element can have 4 states:\n    # 0: No operation\n    # 1: Operation 1 only (divide by 2, round up)\n    # 2: Operation 2 only (subtract k if >= k)\n    # 3: Both operations (Operation 1 then Operation 2 OR Operation 2 then Operation 1)\n\n    # Since we want to minimize the sum, for each index i, we calculate the possible values:\n    # v0 = nums[i]\n    # v1 = math.ceil(nums[i] / 2)\n    # v2 = nums[i] - k if nums[i] >= k else nums[i]\n    # v3_a = math.ceil((nums[i] / 2) / 2) -- wait, the rule says \"at most once each\"\n    # Let's re-read:\n    # Op1: divide by 2, round up (max op1 times total, max once per index)\n    # Op2: subtract k if >= k (max op2 times total, max once per index)\n    # Both can be applied to the same index, but at most once each.\n\n    # So for a single index i:\n    # Option A: No ops -> nums[i]\n    # Option B: Op1 only -> ceil(nums[i] / 2)\n    # Option C: Op2 only -> nums[i] - k (if >= k, else nums[i])\n    # Option D: Both -> ceil((nums[i] - k) / 2) if nums[i] >= k else ceil(nums[i] / 2) - k?\n    # Wait, \"Both operations can be applied to the same index\". Does order matter?\n    # If I do Op1 then Op2: ceil(nums[i]/2) - k (if ceil(nums[i]/2) >= k)\n    # If I do Op2 then Op1: ceil((nums[i]-k)/2) if nums[i] >= k else ...\n    # Actually, the problem says \"Return the minimum possible sum\".\n    # For a fixed index i, we want to know the best reduction.\n    # But there are global limits op1 and op2. This is a dynamic programming or greedy problem?\n    # Since we have two independent resources (op1 and op2), but they can interact on the same element.\n\n    # Let's refine the options for each index i:\n    # 1. No ops: cost_op1=0, cost_op2=0, value = nums[i]\n    # 2. Op1 only: cost_op1=1, cost_op2=0, value = (nums[i] + 1) // 2\n    # 3. Op2 only: cost_op1=0, cost_op2=1, value = nums[i] - k if nums[i] >= k else nums[i]\n    # 4. Both: cost_op1=1, cost_op2=1, value = min( (nums[i]+1)//2 - k if (nums[i]+1)//2 >= k else (nums[i]+1)//2, (nums[i]-k+1)//2 if nums[i] >= k else ... )\n    # Actually, for \"Both\", we just want the minimum of:\n    #   - Op1 then Op2: val = (nums[i]+1)//2; if val >= k: val -= k\n    #   - Op2 then Op1: val = nums[i] - k (if nums[i] >= k); val = (val+1)//2\n    # Wait, the problem says \"Both operations can be applied to the same index\".\n    # It doesn't say they must be independent. If I apply both, I use 1 of op1 and 1 of op2.\n    # The resulting value is min(Op1 then Op2, Op2 then Op1).\n\n    # This looks like a variation of the knapsack problem or a flow problem, but since n is small (100),\n    # we can use DP.\n    # dp[i][j][l] = min sum using first i elements with j op1 and l op2 used.\n    # But wait, the number of operations is up to 100.\n    # dp[op1_used][op2_used] = min sum.\n    # We iterate through each number and update the DP table.\n\n    n = len(nums)\n    # dp[j][l] is the minimum sum using j op1s and l op2s\n    # Initialize with infinity\n    dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]\n    dp[0][0] = sum(nums)\n\n    # Actually, it's easier to think about the \"reduction\" we get.\n    # For each nums[i], we have 4 choices:\n    # (delta_op1, delta_op2, reduction)\n    # Choice 0: (0, 0, 0)\n    # Choice 1: (1, 0, nums[i] - (nums[i]+1)//2)  -- only if op1 > 0\n    # Choice 2: (0, 1, nums[i] - (nums[i]-k if nums[i] >= k else nums[i])) -- only if op2 > 0\n    # Choice 3: (1, 1, nums[i] - min_val_with_both) -- only if op1 > 0 and op2 > 0\n\n    # Let's pre-calculate reductions for each index.\n    reductions = []\n    for x in nums:\n        r0 = 0\n        r1 = x - (x + 1) // 2\n        r2 = x - (x - k if x >= k else x)\n        # For both, we want the best order.\n        # Order 1 then 2:\n        v_a = (x + 1) // 2\n        if v_a >= k: v_a -= k\n        res_a = x - v_a\n        # Order 2 then 1:\n        v_b = x - k if x >= k else x\n        v_b = (v_b + 1) // 2\n        res_b = x - v_b\n        r3 = max(res_a, res_b) # We want maximum reduction\n        reductions.append((0, 0, r0, r1, r2, r3))\n\n    # dp[j][l] = min sum using j op1 and l op2\n    # Since we process one number at a time, we need to update the table.\n    # To avoid using the same element twice, we iterate backwards or use a new table.\n\n    current_dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]\n    current_dp[0][0] = sum(nums)\n\n    for i in range(n):\n        r0, r1, r2, r3 = reductions[i][0], reductions[i][1], reductions[i][2], reductions[i][3]\n        next_dp = [row[:] for row in current_dp]\n        for j in range(op1 + 1):\n            for l in range(op2 + 1):\n                if current_dp[j][l] == float('inf'): continue\n\n                # Option 1: Op1 only\n                if j + 1 <= op1:\n                    next_dp[j+1][l] = min(next_dp[j+1][l], current_dp[j][l] - r1)\n                # Option 2: Op2 only\n                if l + 1 <= op2:\n                    next_dp[j][l+1] = min(next_dp[j][l+1], current_dp[j][l] - r2)\n                # Option 3: Both\n                if j + 1 <= op1 and l + 1 <= op2:\n                    next_dp[j+1][l+1] = min(next_dp[j+1][l+1], current_dp[j][l] - r3)\n        current_dp = next_dp\n\n    ans = float('inf')\n    for j in range(op1 + 1):\n        for l in range(op2 + 1):\n            ans = min(ans, current_dp[j][l])\n    return int(ans)\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 14,
+        "total": 26,
+        "all_pass": false,
+        "first_failure": {
+          "case": "check_case_01",
+          "ok": false,
+          "kind": "AssertionError",
+          "message": "args=[[2, 8, 3, 19, 3], 3, 1, 1] got=26 want=23"
+        }
+      },
+      "refusal_shape": {
+        "tags": [
+          "true_refuse"
+        ],
+        "failing_case_kinds": [
+          "assert"
+        ],
+        "solution_py_present": true
+      },
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 69808,
+        "completion_tokens": 2504,
+        "total_tokens": 72312,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 69808,
+            "completion_tokens": 2504,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3681_claude",
+      "task_id": "lcb_3681",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "maxRectangleArea",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 52.424,
+      "run_wall_s": 52.67,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "ae98524251379445be2660769745d5a4df48121328b3cc3399786b90aa5678a6",
+      "ws_end_sha256": "2def7abc3be4474cc58ba2a44dbc3adaf87a493e70ffd8b64dfae66f9a670d2b",
+      "wire_digest": "c29a3efe2bd90e4d40a1dfa65365cbe7976dc3b65fc0892fee385042f163014e",
+      "verdict_sha256": "207aa38fcf33863b5a96fb4b5a630f5a9ad198482fbc6282984d33686e68635c",
+      "verdict_hash": "925b65f09851ad013c375a2ee60c4d155ee90cf08b549677f794846deca17a4b",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 52.83,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        40
+      ],
+      "solution_bytes": 2558,
+      "solution_sha256": "648f9b6037f0f8e805f7e7db3a56cfd92b47d98033ed23830b0034f9178dca07",
+      "solution_text": "from typing import List\n\ndef maxRectangleArea(points: List[List[int]]) -> int:\n    \"\"\"\n    Finds the maximum area of a rectangle formed by four points from the given list,\n    such that no other point lies inside or on its border. Edges must be parallel to axes.\n    Returns -1 if no such rectangle exists.\n    \"\"\"\n    n = len(points)\n    max_area = -1\n\n    # Sort points to make it easier to identify unique x and y coordinates\n    # However, with n <= 10, we can just iterate through all combinations of 4 points.\n    for i in range(n):\n        for j in range(i + 1, n):\n            for k in range(j + 1, n):\n                for l in range(k + 1, n):\n                    p = [points[i], points[j], points[k], points[l]]\n                    # Check if these 4 points form a rectangle with sides parallel to axes\n                    # A set of 4 points forms such a rectangle if:\n                    # There are exactly 2 unique x-coordinates and 2 unique y-coordinates.\n                    xs = sorted(list(set(pt[0] for pt in p)))\n                    ys = sorted(list(set(pt[1] for pt in p)))\n\n                    if len(xs) == 2 and len(ys) == 2:\n                        # Check if the points are actually the corners of this rectangle\n                        # The expected corners are (x1, y1), (x1, y2), (x2, y1), (x2, y2)\n                        expected_corners = {\n                            (xs[0], ys[0]),\n                            (xs[0], ys[1]),\n                            (xs[1], ys[0]),\n                            (xs[1], ys[1])\n                        }\n                        actual_corners = set((pt[0], pt[1]) for pt in p)\n\n                        if actual_corners == expected_corners:\n                            area = (xs[1] - xs[0]) * (ys[1] - ys[0])\n\n                            # Check if any other point is inside or on the border\n                            is_valid = True\n                            for m in range(n):\n                                if m in [i, j, k, l]:\n                                    continue\n                                pm = points[m]\n                                # Point is inside or on border if:\n                                # xs[0] <= px <= xs[1] AND ys[0] <= py <= ys[1]\n                                if xs[0] <= pm[0] <= xs[1] and ys[0] <= pm[1] <= ys[1]:\n                                    is_valid = False\n                                    break\n\n                            if is_valid:\n                                max_area = max(max_area, area)\n\n    return max_area\n\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 68257,
+        "completion_tokens": 1052,
+        "total_tokens": 69309,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 68257,
+            "completion_tokens": 1052,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3686_claude",
+      "task_id": "lcb_3686",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "beautifulSplits",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 53.363,
+      "run_wall_s": 53.605,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "ws_start_sha256": "d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453",
+      "ws_end_sha256": "20df82455a5073d57206ddaeb070ed29e2117ebfb079c6f1dd71dfa585ae78fc",
+      "wire_digest": "a23996a1fafff5d9abfde2b172c73b37748cf06c4fae6a544b89f251bfb5d8cc",
+      "verdict_sha256": "13d435dda01a3f8d637ca45b0075d653f813354eb2ddd00bd6db8c0e1d749d49",
+      "verdict_hash": "c46737e3d6799335d12ea6d1379a07145700714806866937e525ec0e6b498d49",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 53.78,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        33
+      ],
+      "solution_bytes": 1335,
+      "solution_sha256": "23395354861ab4576fb112f506fe813fbe4e8b35bcb3d2bbe1673fc3c58b103a",
+      "solution_text": "from typing import List\n\ndef beautifulSplits(nums: List[int]) -> int:\n    \"\"\"\n    Returns the number of ways to split an array into three subarrays nums1, nums2, and nums3\n    such that nums = nums1 + nums2 + nums3 and (nums1 is a prefix of nums2 OR nums2 is a prefix of nums3).\n    \"\"\"\n    n = len(nums)\n    count = 0\n\n    # A split into three non-empty subarrays requires at least 3 elements.\n    # Let i be the end index of nums1 (exclusive), and j be the end index of nums2 (exclusive).\n    # nums1 = nums[0:i]\n    # nums2 = nums[i:j]\n    # nums3 = nums[j:n]\n    # Constraints: 1 <= i < j < n\n\n    for i in range(1, n - 1):\n        nums1 = nums[:i]\n        for j in range(i + 1, n):\n            nums2 = nums[i:j]\n            nums3 = nums[j:]\n\n            # Check if nums1 is a prefix of nums2\n            is_prefix1 = False\n            len1 = len(nums1)\n            len2 = len(nums2)\n            if len1 <= len2:\n                if nums2[:len1] == nums1:\n                    is_prefix1 = True\n\n            # Check if nums2 is a prefix of nums3\n            is_prefix2 = False\n            len2 = len(nums2)\n            len3 = len(nums3)\n            if len2 <= len3:\n                if nums3[:len2] == nums2:\n                    is_prefix2 = True\n\n            if is_prefix1 or is_prefix2:\n                count += 1\n\n    return count\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 26,
+        "total": 26,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 67349,
+        "completion_tokens": 810,
+        "total_tokens": 68159,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 67349,
+            "completion_tokens": 810,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3700_claude",
+      "task_id": "lcb_3700",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "subsequencesWithMiddleMode",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 10,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 9
+      },
+      "wire_errors": 1,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "infra_void": null,
+      "agent_wall_s": 900.013,
+      "run_wall_s": 900.173,
+      "visible_passed": 1,
+      "visible_total": 3,
+      "ws_start_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+      "ws_end_sha256": "8a23352ccad18411a13560cfbd5a53a3cef0a877ebb8735fef9d264607da7f36",
+      "wire_digest": "e63dcf6ca1045f5a5457cea54c65a4271eb7473a08ffe311fd85a915441d6921",
+      "verdict_sha256": "872ea086909776e9a5cecfc1265e9627236f4de043edb721df8c73a309d2edd3",
+      "verdict_hash": "fbbbc9aa75e9cb12ef50ad4115074c48d5274ca488bb7cdb4e9e5f3f83ad7295",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 900.28,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 4409,
+      "solution_sha256": "c9b166a0864883576cab79e264a6abcf8a7c765b8cc79974776cdb9d9c92228e",
+      "solution_text": "from typing import List\n\ndef subsequencesWithMiddleMode(nums: List[int]) -> int:\n    MOD = 10**9 + 7\n    n = len(nums)\n    if n < 5:\n        return 0\n\n    count_l = {}\n    count_r = {}\n    for x in nums:\n        count_r[x] = count_r.get(x, 0) + 1\n\n    total_L = 0\n    sum_sq_L = 0\n    total_R = sum(count_r.values())\n    sum_sq_R = sum(v*v for v in count_r.values())\n\n    ans = 0\n    unique_vals = list(set(nums))\n\n    for i in range(n):\n        c = nums[i]\n\n        # Step 1: Move nums[i] from count_r to \"middle\"\n        rc = count_r[c]\n        count_r[c] -= 1\n        total_R -= 1\n        sum_sq_R -= (rc*rc)\n        sum_sq_R += ((rc-1)*(rc-1))\n\n        # Now count_l is nums[:i] and count_r is nums[i+1:]\n        lc = count_l.get(c, 0)\n        rc = count_r.get(c, 0)\n        tl = total_R - rc # Wait, total_R already has c removed? No, total_R was sum of all counts in count_r.\n        # Let's re-verify:\n        # Initially count_r is nums[0:].\n        # At i=0:\n        #   c = nums[0]\n        #   count_r[c] becomes count_r[c]-1 (so it represents counts in nums[1:])\n        #   total_R becomes sum(counts in nums[1:])\n        #   sum_sq_R becomes sum(counts^2 in nums[1:])\n        # This is correct.\n\n        tl = total_R - rc # Wait, count_r already has c decremented.\n        # So the number of non-c elements in count_r is (total_R - rc).\n        # Let's use clearer names.\n\n        # Current counts:\n        # count_l: nums[:i]\n        # count_r: nums[i+1:]\n        # c = nums[i]\n\n        cur_lc = count_l.get(c, 0)\n        cur_rc = count_r.get(c, 0)\n\n        # Number of non-c elements in left and right\n        num_L_other = total_L - cur_lc\n        num_R_other = total_R - cur_rc\n\n        # Sum of squares of counts of non-c elements in left and right\n        sum_sq_L_other = sum_sq_L - cur_lc**2\n        sum_sq_R_other = sum_sq_R - cur_rc**2\n\n        # Case f_c = 5: pick 2 from left, 2 from right (all are c)\n        ways5 = (cur_lc * (cur_lc - 1) // 2) * (cur_rc * (cur_rc - 1) // 2)\n        ans = (ans + ways5) % MOD\n\n        # Case f_c = 4: pick 3 more c's and 1 non-c\n        ways4a = (cur_lc * (cur_lc - 1) // 2) * cur_rc * num_R_other\n        ways4b = cur_lc * num_L_other * (cur_rc * (cur_rc - 1) // 2)\n        ans = (ans + ways4a + ways4b) % MOD\n\n        # Case f_c = 3: pick 2 more c's and 2 non-c's\n        ways3a = (cur_lc * (cur_lc - 1) // 2) * (num_R_other * (num_R_other - 1) // 2)\n        ways3b = cur_lc * cur_rc * num_L_other * num_R_other\n        ways3c = (num_L_other * (num_L_other - 1) // 2) * (cur_rc * (cur_rc - 1) // 2)\n        ans = (ans + ways3a + ways3b + ways3c) % MOD\n\n        # Case f_c = 2: pick 1 more c and 3 distinct non-c's\n        waysA = 0\n        for v in unique_vals:\n            if v == c: continue\n            cvl = count_l.get(v, 0)\n            cvr = count_r.get(v, 0)\n            # One from L (non-c), two distinct from R (non-c)\n            if num_R_other > cvr:\n                ways_to_pick_2 = ((num_R_other - cvr)**2 - (sum_sq_R_other - cvr**2)) // 2\n                waysA = (waysA + cvl * ways_to_pick_2) % MOD\n\n        waysB = 0\n        for v in unique_vals:\n            if v == c: continue\n            cvl = count_l.get(v, 0)\n            cvr = count_r.get(v, 0)\n            # Two distinct from L (non-c), one from R (non-c)\n            if num_L_other > cvl:\n                ways_to_pick_2 = ((num_L_other - cvl)**2 - (sum_sq_L_other - cvl**2)) // 2\n                waysB = (waysB + cvr * ways_to_pick_2) % MOD\n\n        ans = (ans + waysA + waysB) % MOD\n\n        # Step 2: Move nums[i] from \"middle\" to count_l\n        count_l[c] = count_l.get(c, 0) + 1\n        total_L += 1\n        sum_sq_L -= (cur_lc**2) # Wait, cur_lc was the value BEFORE incrementing? No, it's the current one.\n        # Let's be very careful here.\n        # At this point in the loop:\n        # count_l is nums[:i]\n        # We want to update it so that for the next iteration (i+1),\n        # count_l will be nums[:i+1].\n        # So we increment count_l[nums[i]].\n\n        # Let's re-calculate sum_sq_L correctly.\n        # Before: sum_sq_L = sum(count_l[v]^2)\n        # After adding 1 to count_l[c]:\n        # new_sum_sq_L = sum_sq_L - (old_count_l[c])^2 + (old_count_l[c] + 1)^2\n        # old_count_l[c] is cur_lc.\n\n        # Wait, I already used cur_lc to calculate ways.\n        # So:\n        sum_sq_L = sum_sq_L - (cur_lc**2) + ((cur_lc + 1)**2)\n\n    return ans\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 17,
+        "total": 27,
+        "all_pass": false,
+        "first_failure": {
+          "case": "check_case_02",
+          "ok": false,
+          "kind": "AssertionError",
+          "message": "args=[[1, 2, 2, 3, 3, 4]] got=8 want=4"
+        }
+      },
+      "refusal_shape": {
+        "tags": [
+          "timeout_killed",
+          "true_refuse"
+        ],
+        "failing_case_kinds": [
+          "assert"
+        ],
+        "solution_py_present": true
+      },
+      "wire_usage": {
+        "calls": 10,
+        "with_usage": 9,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 267068,
+        "completion_tokens": 21719,
+        "total_tokens": 288787,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 2,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 9,
+            "with_usage": 9,
+            "prompt_tokens": 267068,
+            "completion_tokens": 21719,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3764_claude",
+      "task_id": "lcb_3764",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "maxSum",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 5,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 4
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 65.384,
+      "run_wall_s": 65.677,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "ws_start_sha256": "f2b9b4dd027ae15f33609d881eba24ead1e2a1a95c4b258a73d88082b1be5a0c",
+      "ws_end_sha256": "7eafa90f17226b722a974ef5c6e3efbfb52060c62ec203e5db97f045ef535927",
+      "wire_digest": "deca1aca18f4bdde1cef0576cd501e0b299b4e0ae6189caefffcbc15c968c9da",
+      "verdict_sha256": "ce05f15bac6890626a1f919af0498bd621c95adc9e07353c8f3e3a64313b7d70",
+      "verdict_hash": "2b34d8b315378762d977cfa09cee76d33e6f1b688bcd18ae89cbcfe491fd8eae",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 65.77,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        32
+      ],
+      "solution_bytes": 1648,
+      "solution_sha256": "2a7ab39f78609d5d6bb208b48ce100ca26177772dcb442926f5e6d0b215ceca3",
+      "solution_text": "from typing import List\n\ndef maxSum(grid: List[List[int]], limits: List[int], k: int) -> int:\n    \"\"\"\n    Finds the maximum sum of at most k elements from a 2D matrix grid such that\n    the number of elements taken from the i-th row does not exceed limits[i].\n    \"\"\"\n    # For each row, we want to pick the largest possible elements.\n    # However, since we have a global limit 'k', and each row has its own\n    # local limit 'limits[i]', this is a variation of the knapsack problem\n    # or more specifically, a resource allocation problem where items are\n    # grouped by rows.\n\n    # Step 1: For each row, sort elements in descending order.\n    # This allows us to easily pick the best elements from any given row.\n    row_data = []\n    for i in range(len(grid)):\n        sorted_row = sorted(grid[i], reverse=True)\n        # We can only take up to limits[i] elements from this row.\n        # So we truncate the sorted list to the first limits[i] elements.\n        row_data.append(sorted_row[:limits[i]])\n\n    # Step 2: Now we have a set of rows, where each row contains up to\n    # limits[i] elements. We want to pick at most k elements total from\n    # all these rows to maximize the sum.\n    # Since every element is independent once we've restricted them by\n    # their respective row limits, we can just pool all valid elements\n    # together and pick the top k.\n\n    all_valid_elements = []\n    for row in row_data:\n        all_valid_elements.extend(row)\n\n    # Sort all pooled elements descending.\n    all_valid_elements.sort(reverse=True)\n\n    # Take the top k (or fewer if there are not enough).\n    return sum(all_valid_elements[:k])\n\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 26,
+        "total": 26,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 5,
+        "with_usage": 4,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 67627,
+        "completion_tokens": 789,
+        "total_tokens": 68416,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 4,
+            "with_usage": 4,
+            "prompt_tokens": 67627,
+            "completion_tokens": 789,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3794_claude",
+      "task_id": "lcb_3794",
+      "agent": "claude",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "minTime",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 6,
+      "wire_by_protocol": {
+        "openai": 1,
+        "anthropic": 5
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 310.79,
+      "run_wall_s": 311.005,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "ba2d151760d8fd03bd39308fd0cbb50b5a519c47344407df178d53940bd8b2a2",
+      "ws_end_sha256": "0487892a2d53e80de45bc14e0a5be9e54a8b1ba52fc6995a574a865ee93cf8e0",
+      "wire_digest": "5b63f3e6a5be2f2e1265e22a5a3f6104e78c5f3d4b4e0d2a3f30d5b8ead73994",
+      "verdict_sha256": "a7faaa93cb66873416cdaf37732a387fdf94dfd172d4ce2921c672f7dbd5069e",
+      "verdict_hash": "c0a8482aa34d55a0017bdae0a0bfbde7c05a5a7bf6f72ca4ee6fc115e6f93044",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 311.12,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        36
+      ],
+      "solution_bytes": 811,
+      "solution_sha256": "407b9b5aa3ace081283bdd6f58eaf76ea9e9f042a803ac6fa4c1890ac9c23fe1",
+      "solution_text": "from typing import List\n\ndef minTime(skill: List[int], mana: List[int]) -> int:\n    n = len(skill)\n    m = len(mana)\n\n    P = [0] * n\n    curr_sum = 0\n    for i in range(n):\n        curr_sum += skill[i]\n        P[i] = curr_sum\n\n    # S[j] is the start time of potion j at wizard 0.\n    S = [0] * m\n\n    # We want to find the minimum S[m-1].\n    # S[j+1] = max_{i=0...n-1} (S[j] + P[i]*mana[j] - P[i-1]*mana[j+1])\n    # where P[-1] = 0.\n\n    for j in range(m - 1):\n        mj = mana[j]\n        mj_next = mana[j+1]\n        sj = S[j]\n        max_s_next = 0\n        for i in range(n):\n            prev_p = P[i-1] if i > 0 else 0\n            val = sj + P[i] * mj - prev_p * mj_next\n            if val > max_s_next:\n                max_s_next = val\n        S[j+1] = max_s_next\n\n    return S[m-1] + P[n-1] * mana[m-1]\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 6,
+        "with_usage": 5,
+        "no_usage": 1,
+        "unparsed_chunks": 1,
+        "prompt_tokens": 102494,
+        "completion_tokens": 9157,
+        "total_tokens": 111651,
+        "reasoning_tokens": 0,
+        "reasoning_tokens_present": false,
+        "reasoning_content_chars": 0,
+        "anthropic_thinking_blocks": 1,
+        "transport": [
+          "json",
+          "sse"
+        ],
+        "by_wire": {
+          "anthropic_messages": {
+            "calls": 5,
+            "with_usage": 5,
+            "prompt_tokens": 102494,
+            "completion_tokens": 9157,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          },
+          "openai_chat": {
+            "calls": 1,
+            "with_usage": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "reasoning_tokens": 0,
+            "reasoning_content_chars": 0
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3522_opencode",
+      "task_id": "lcb_3522",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "resultsArray",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 14,
+      "wire_by_protocol": {
+        "openai": 14
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 149.757,
+      "run_wall_s": 150.766,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "897e6def3e97257cbe9d5e8f29a7ab01e11f5fb170caafda627cf341237a4f6e",
+      "ws_end_sha256": "ecc14246cb72a9405097e9f3a8d41eddf769c339f48b3e81255ec80990c00ba7",
+      "wire_digest": "d07d5ef9bf99513d9f9830103acebcbe779eb41856f0bbc009c4e0c992da70e1",
+      "verdict_sha256": "c0a7e8f7e3b0268b3f24ee2ef24d24f550de3f0907887ea0f963881c53300530",
+      "verdict_hash": "d34dfdc04c1df77425bb999def3ea18f85eddf6b2dfcb6e3d8de457908741a99",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 151.02,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        92
+      ],
+      "solution_bytes": 515,
+      "solution_sha256": "bd20cd84de4cded2bc2293a86fe2e722abaeb79fb1bad565b39891544c1535ff",
+      "solution_text": "from typing import List\n\ndef resultsArray(nums: List[int], k: int) -> List[int]:\n    n = len(nums)\n    results = []\n    for i in range(n - k + 1):\n        subarray = nums[i : i + k]\n        is_consecutive_sorted = True\n        for j in range(k - 1):\n            if subarray[j+1] != subarray[j] + 1:\n                is_consecutive_sorted = False\n                break\n        \n        if is_consecutive_sorted:\n            results.append(subarray[-1])\n        else:\n            results.append(-1)\n    return results\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 14,
+        "with_usage": 14,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 121101,
+        "completion_tokens": 3350,
+        "total_tokens": 124451,
+        "reasoning_tokens": 1037,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 3832,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 14,
+            "with_usage": 14,
+            "prompt_tokens": 121101,
+            "completion_tokens": 3350,
+            "reasoning_tokens": 1037,
+            "reasoning_content_chars": 3832
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3583_opencode",
+      "task_id": "lcb_3583",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "gcdValues",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_by_protocol": {
+        "openai": 9
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 225.641,
+      "run_wall_s": 225.825,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "7edbc0d978ea94507578c4bcb1362c5f65ae793e95cf2108111c424a757d759f",
+      "ws_end_sha256": "752006610d3f8528aafca163cca1f9d68d247c61bd60b615133ff7de1497c589",
+      "wire_digest": "9658502be55f1565db5c2b7877f3110b7f5085ac86089cac8ae5b461a1c66a81",
+      "verdict_sha256": "e2ab4c0b9cd1768da1ec4f01e58ca8797d7d84274cbedb388164d8f3792aad35",
+      "verdict_hash": "edca77f3b05a3ff0e81c7abd74650f0130a2c8e1c964d886142bbb5eaf5cc40f",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 225.99,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        34
+      ],
+      "solution_bytes": 1578,
+      "solution_sha256": "3624f38e3739f34ba20ead6f1bb35702f8abb3d374fb767549602a8fb7469877",
+      "solution_text": "from typing import List\n\ndef gcdValues(nums: List[int], queries: List[int]) -> List[int]:\n    max_val = 0\n    for x in nums:\n        if x > max_val:\n            max_val = x\n    \n    limit = max_val\n    counts = [0] * (limit + 1)\n    for x in nums:\n        counts[x] += 1\n        \n    count_multiples = [0] * (limit + 1)\n    for g in range(1, limit + 1):\n        for multiple in range(g, limit + 1, g):\n            count_multiples[g] += counts[multiple]\n            \n    exact_gcd = [0] * (limit + 1)\n    for g in range(limit, 0, -1):\n        pairs_with_multiple = (count_multiples[g] * (count_multiples[g] - 1)) // 2\n        subtraction = 0\n        for multiple in range(2 * g, limit + 1, g):\n            subtraction += exact_gcd[multiple]\n        exact_gcd[g] = pairs_with_multiple - subtraction\n        \n    sorted_gcds = []\n    prefix_sums = []\n    current_sum = 0\n    for g in range(1, limit + 1):\n        if exact_gcd[g] > 0:\n            current_sum += exact_gcd[g]\n            sorted_gcds.append(g)\n            prefix_sums.append(current_sum)\n            \n    import bisect\n    ans = []\n    for q in queries:\n        idx = bisect.bisect_left(prefix_sums, q + 1)\n        # If q is exactly the last index of a value, bisect_left with q+1 will give that index.\n        # Example: prefix_sums = [2, 3], queries = [0, 1, 2]\n        # q=0: bisect_left([2, 3], 1) -> 0. sorted_gcds[0] = v1\n        # q=1: bisect_left([2, 3], 2) -> 0. sorted_gcds[0] = v1\n        # q=2: bisect_left([2, 3], 3) -> 1. sorted_gcds[1] = v2\n        ans.append(sorted_gcds[idx])\n        \n    return ans\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 9,
+        "with_usage": 9,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 73639,
+        "completion_tokens": 4673,
+        "total_tokens": 78312,
+        "reasoning_tokens": 2194,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 6483,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 9,
+            "with_usage": 9,
+            "prompt_tokens": 73639,
+            "completion_tokens": 4673,
+            "reasoning_tokens": 2194,
+            "reasoning_content_chars": 6483
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3584_opencode",
+      "task_id": "lcb_3584",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "validSequence",
+      "n_visible_cases": 4,
+      "n_hidden_cases_full": 28,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 7,
+      "wire_by_protocol": {
+        "openai": 7
+      },
+      "wire_errors": 1,
+      "agent_rc": -9,
+      "agent_timed_out": true,
+      "infra_void": null,
+      "agent_wall_s": 900.049,
+      "run_wall_s": 900.24,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "ws_end_sha256": "1a1dacb7441800fbfa83ef1a500730017e3cf4a1f5933c3c9ebb3a36503ac691",
+      "wire_digest": "779dca20a228d5be5d9042f231f91198b15c95e505baae5e0062661508513d2a",
+      "verdict_sha256": "0b8e61b0af8e33112d04ca1740ce760b31dea119ce80e15a30de518774437dc1",
+      "verdict_hash": "05426c1e80eda06f96a08cc6f5ce1e0a380f62b7e8a673c447b2404014ba92a5",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 900.36,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        29
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "timeout_killed",
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 7,
+        "with_usage": 6,
+        "no_usage": 1,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 36015,
+        "completion_tokens": 838,
+        "total_tokens": 36853,
+        "reasoning_tokens": 679,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 2543,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 7,
+            "with_usage": 6,
+            "prompt_tokens": 36015,
+            "completion_tokens": 838,
+            "reasoning_tokens": 679,
+            "reasoning_content_chars": 2543
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3637_opencode",
+      "task_id": "lcb_3637",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "countBalancedPermutations",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_by_protocol": {
+        "openai": 9
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 160.453,
+      "run_wall_s": 160.647,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "e59885ab2aa1ed7022e93d3cccad23659d56d5199909f2750ca83da9e2caa2ee",
+      "ws_end_sha256": "66cebabfd808b62ae2640df09ecf6013f8a741f0df9de7c2dff8b8803aeb77a9",
+      "wire_digest": "00f7ed7db61e01f71862a548f554b83f10f4e4441f22a295ca8adf91119543cf",
+      "verdict_sha256": "e8e273e2b0893df7270a89c2a71dac598b6c254b7ef25fd00a78ca9b2bf2e258",
+      "verdict_hash": "aefe1b963128aac37030b3c76ddf37d5d1d5596e0410ada9e01bb4a77a6de2c2",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 160.76,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        30
+      ],
+      "solution_bytes": 1489,
+      "solution_sha256": "92c66a749449387e3ee472cd17c51d62b217f269108f14c6dd952d92296d4cdc",
+      "solution_text": "def countBalancedPermutations(num: str):\n    velunexorai = num\n    n = len(num)\n    total_sum = sum(int(d) for d in num)\n    if total_sum % 2 != 0:\n        return 0\n    \n    target_sum = total_sum // 2\n    even_count = (n + 1) // 2\n    odd_count = n // 2\n    \n    counts = [0] * 10\n    for d in num:\n        counts[int(d)] += 1\n        \n    MOD = 10**9 + 7\n    \n    max_val = n + 1\n    fact = [1] * max_val\n    inv_fact = [1] * max_val\n    for i in range(2, max_val):\n        fact[i] = (fact[i-1] * i) % MOD\n        \n    inv_fact[max_val-1] = pow(fact[max_val-1], MOD - 2, MOD)\n    for i in range(max_val-2, -1, -1):\n        inv_fact[i] = (inv_fact[i+1] * (i+1)) % MOD\n\n    dp = [[0] * (even_count + 1) for _ in range(target_sum + 1)]\n    dp[0][0] = 1\n    \n    for d in range(10):\n        f = counts[d]\n        new_dp = [[0] * (even_count + 1) for _ in range(target_sum + 1)]\n        for s in range(target_sum + 1):\n            for c in range(even_count + 1):\n                if dp[s][c] == 0:\n                    continue\n                for k in range(f + 1):\n                    if c + k <= even_count and s + k * d <= target_sum:\n                        term = (dp[s][c] * inv_fact[k]) % MOD\n                        term = (term * inv_fact[f - k]) % MOD\n                        new_dp[s + k * d][c + k] = (new_dp[s + k * d][c + k] + term) % MOD\n        dp = new_dp\n\n    ans = (dp[target_sum][even_count] * fact[even_count]) % MOD\n    ans = (ans * fact[odd_count]) % MOD\n    return ans\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 9,
+        "with_usage": 9,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 73663,
+        "completion_tokens": 5312,
+        "total_tokens": 78975,
+        "reasoning_tokens": 811,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 2695,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 9,
+            "with_usage": 9,
+            "prompt_tokens": 73663,
+            "completion_tokens": 5312,
+            "reasoning_tokens": 811,
+            "reasoning_content_chars": 2695
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3654_opencode",
+      "task_id": "lcb_3654",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "minArraySum",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 9,
+      "wire_by_protocol": {
+        "openai": 9
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 244.657,
+      "run_wall_s": 244.925,
+      "visible_passed": 0,
+      "visible_total": 2,
+      "ws_start_sha256": "f86085bb11b5c68ca3878ba439326b54359e8feb919fd7ad4c595427e068e984",
+      "ws_end_sha256": "c8f45388053ed09223a23d25b67c48a24ee25db9be8a961fc019309c0d733e45",
+      "wire_digest": "f42d0b7175ac53399b5b03d2eb8e789714002e9a59ab203d932d5580eb65b9cf",
+      "verdict_sha256": "eaceabac0b46619bdbe23812358380378e8d98f0806c357cf2f5821aa8beca59",
+      "verdict_hash": "4eb19f7602117ef1f2e23e69e93110cc55513dd379bd77349fa84e4a3b658c10",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 245.03,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 1691,
+      "solution_sha256": "69510ac83b2fdb5c6319aec5423d81c4f85bfeb702759f74713d7dc5f2951f67",
+      "solution_text": "from typing import List\n\ndef minArraySum(nums: List[int], k: int, op1: int, op2: int) -> int:\n    # dp[i][j] is the minimum sum using i of op1 and j of op2\n    # Initialize with a very large number\n    dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]\n    dp[0][0] = 0\n    \n    for x in nums:\n        new_dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]\n        \n        # Possible operations for this x:\n        # Each entry is (reduction, op1_used, op2_used)\n        options = []\n        \n        # Option 0: No operations\n        options.append((0, 0, 0))\n        \n        # Option 1: Op 1 only\n        v1 = (x + 1) // 2\n        options.append((x - v1, 1, 0))\n        \n        # Option 2: Op 2 only\n        if x >= k:\n            options.append((k, 0, 1))\n            \n        # Option 3: Both\n        # Order 1 then 2\n        v_temp = (x + 1) // 2\n        if v_temp >= k:\n            res_12 = v_temp - k\n            options.append((x - res_12, 1, 1))\n        \n        # Order 2 then 1\n        if x >= k:\n            v_temp2 = x - k\n            res_21 = (v_temp2 + 1) // 2\n            options.append((x - res_21, 1, 1))\n            \n        # Update new_dp based on current dp and options\n        for i in range(op1 + 1):\n            for j in range(op2 + 1):\n                if dp[i][j] == float('inf'):\n                    continue\n                \n                for red, u1, u2 in options:\n                    ni, nj = i + u1, j + u2\n                    if ni <= op1 and nj <= op2:\n                        if dp[i][j] + red < new_dp[ni][nj]:\n                            new_dp[ni][nj] = dp[i][j] + red\n        dp = new_dp\n\n    return int(min(min(row) for row in dp))\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 4,
+        "total": 26,
+        "all_pass": false,
+        "first_failure": {
+          "case": "check_case_01",
+          "ok": false,
+          "kind": "AssertionError",
+          "message": "args=[[2, 8, 3, 19, 3], 3, 1, 1] got=0 want=23"
+        }
+      },
+      "refusal_shape": {
+        "tags": [
+          "true_refuse"
+        ],
+        "failing_case_kinds": [
+          "assert"
+        ],
+        "solution_py_present": true
+      },
+      "wire_usage": {
+        "calls": 9,
+        "with_usage": 9,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 84195,
+        "completion_tokens": 8797,
+        "total_tokens": 92992,
+        "reasoning_tokens": 540,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 1940,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 9,
+            "with_usage": 9,
+            "prompt_tokens": 84195,
+            "completion_tokens": 8797,
+            "reasoning_tokens": 540,
+            "reasoning_content_chars": 1940
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3681_opencode",
+      "task_id": "lcb_3681",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "maxRectangleArea",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 7,
+      "wire_by_protocol": {
+        "openai": 7
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 46.332,
+      "run_wall_s": 46.607,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "ae98524251379445be2660769745d5a4df48121328b3cc3399786b90aa5678a6",
+      "ws_end_sha256": "3a35bb00ff673b9d1f7f0d7cf69d306d6e9622c684ca6a0f3374b29a825d1051",
+      "wire_digest": "e504b9d15c58c0c0715b50aff03694bdf69ce1faf367dc7baa9c87ad49e72328",
+      "verdict_sha256": "bee7d9b3f0fbd97b3e33a4317ec3ab6ed30a90d70ce28ef424d569773b252a24",
+      "verdict_hash": "9cadef7e596760b6e8386b9f1de1d4c70da10afaaa7671c7408007577aaace50",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 46.72,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 3393,
+      "solution_sha256": "f282622d7ec04983da633772c967a8fc0d57a84d11ec33c2b501acbd75e12181",
+      "solution_text": "from typing import List\n\ndef maxRectangleArea(points: List[List[int]]) -> int:\n    max_area = -1\n    n = len(points)\n    \n    # Group points by x-coordinate to easily find vertical segments\n    x_map = {}\n    for x, y in points:\n        if x not in x_map:\n            x_map[x] = []\n        x_map[x].append(y)\n    \n    # Sort the unique x-coordinates\n    sorted_x = sorted(x_map.keys())\n    \n    # Iterate through all pairs of x-coordinates\n    for i in range(len(sorted_x)):\n        x1 = sorted_x[i]\n        for j in range(i + 1, len(sorted_x)):\n            x2 = sorted_x[j]\n            \n            # Find common y-coordinates for these two x-coordinates\n            y1s = sorted(x_map[x1])\n            y2s = sorted(x_map[x2])\n            common_ys = [y for y in y1s if y in y2s]\n            \n            # If we have at least two common y-coordinates, they can form a rectangle\n            if len(common_ys) >= 2:\n                for k in range(len(common_ys)):\n                    for l in range(k + 1, len(common_ys)):\n                        y_low = common_ys[k]\n                        y_high = common_ys[l]\n                        \n                        # Check if any other point is inside or on the border of this rectangle\n                        is_valid = True\n                        for px, py in points:\n                            if (x1 < px < x2) and (y_low <= py <= y_high):\n                                is_valid = False\n                                break\n                            if (px == x1 or px == x2) and (y_low < py < y_high):\n                                is_valid = False\n                                break\n                        \n                        # The condition \"Does not contain any other point inside or on its border\" \n                        # means we must check all points.\n                        # Actually, the logic above covers:\n                        # - Points strictly inside (x1 < px < x2 and y_low < py < y_high)\n                        # - Points on horizontal edges (px == x1 or px == x2 is handled by checking if it's between y_low and y_high, but we need to be careful about the corners)\n                        # Wait, the condition says \"Does not contain any other point inside OR ON ITS BORDER\".\n                        # The 4 corners are part of the border. They should NOT count as \"other\" points.\n                        \n                        # Let's re-evaluate:\n                        is_valid = True\n                        for px, py in points:\n                            # If it's one of the 4 corners, skip it\n                            if (px == x1 and py == y_low) or \\\n                               (px == x1 and py == y_high) or \\\n                               (px == x2 and py == y_low) or \\\n                               (px == x2 and py == y_high):\n                                continue\n                            \n                            # If it's on the border or inside, it's invalid\n                            if x1 <= px <= x2 and y_low <= py <= y_high:\n                                is_valid = False\n                                break\n                        \n                        if is_valid:\n                            area = (x2 - x1) * (y_high - y_low)\n                            max_area = max(max_area, area)\n                            \n    return max_area\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 7,
+        "with_usage": 7,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 48217,
+        "completion_tokens": 1769,
+        "total_tokens": 49986,
+        "reasoning_tokens": 638,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 2279,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 7,
+            "with_usage": 7,
+            "prompt_tokens": 48217,
+            "completion_tokens": 1769,
+            "reasoning_tokens": 638,
+            "reasoning_content_chars": 2279
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3686_opencode",
+      "task_id": "lcb_3686",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "beautifulSplits",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 12,
+      "wire_by_protocol": {
+        "openai": 12
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 261.188,
+      "run_wall_s": 261.519,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "ws_start_sha256": "d7f34e236619d7e28d610ac59bef306ef8fc4ff5912b24cb57a3200978d0a453",
+      "ws_end_sha256": "5862ff4f549b5eca22d5e0c678fe118d3db25ee8622bbaf23296863e97071bae",
+      "wire_digest": "d23facbdc0dfae87eca76cb5a95be66814f54d6285f66383801abc6b348f0c7c",
+      "verdict_sha256": "1daf2ce9839963d7175b571baec5d617073f8a18ce5b9e44250a9f69d03471c3",
+      "verdict_hash": "36f235f03bef7ceba96c47c2fb8480df08b2d5a86ffd5c41d1a954adae6078a6",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 261.64,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        31
+      ],
+      "solution_bytes": 1329,
+      "solution_sha256": "6bc69798e4754388626960cebceab7659729fb16101bd9ad050450e6681d2735",
+      "solution_text": "from typing import List\n\ndef beautifulSplits(nums: List[int]) -> int:\n    n = len(nums)\n    if n < 3:\n        return 0\n    \n    P = 1000003\n    MOD = (1 << 61) - 1\n    \n    h = [0] * (n + 1)\n    p_pow = [1] * (n + 1)\n    for i in range(n):\n        h[i+1] = (h[i] * P + nums[i]) % MOD\n        p_pow[i+1] = (p_pow[i] * P) % MOD\n        \n    def get_hash(l, r): # [l, r)\n        return (h[r] - h[l] * p_pow[r-l]) % MOD\n\n    count = 0\n    cond1 = [False] * (n + 1)\n    for i in range(1, n // 2 + 1):\n        if get_hash(0, i) == get_hash(i, 2*i):\n            cond1[i] = True\n\n    for i in range(1, n):\n        # Range for j is [i+1, n-1]\n        # Condition 1: j >= 2*i and cond1[i]\n        # Condition 2: j <= (n+i)//2 and get_hash(i, j) == get_hash(j, 2*j-i)\n        \n        if cond1[i]:\n            start_j = max(i + 1, 2 * i)\n            if start_j < n:\n                count += (n - 1) - start_j + 1\n            \n            upper_j = min(n - 1, start_j - 1)\n            for j in range(i + 1, upper_j + 1):\n                if j <= (n+i)//2 and get_hash(i, j) == get_hash(j, 2*j-i):\n                    count += 1\n        else:\n            upper_j = min(n - 1, (n + i) // 2)\n            for j in range(i + 1, upper_j + 1):\n                if get_hash(i, j) == get_hash(j, 2*j-i):\n                    count += 1\n    return count\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 26,
+        "total": 26,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 12,
+        "with_usage": 12,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 144495,
+        "completion_tokens": 10918,
+        "total_tokens": 155413,
+        "reasoning_tokens": 494,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 1830,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 12,
+            "with_usage": 12,
+            "prompt_tokens": 144495,
+            "completion_tokens": 10918,
+            "reasoning_tokens": 494,
+            "reasoning_content_chars": 1830
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3700_opencode",
+      "task_id": "lcb_3700",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "hard",
+      "entry_point": "subsequencesWithMiddleMode",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 6,
+      "wire_by_protocol": {
+        "openai": 6
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 615.034,
+      "run_wall_s": 615.263,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "ws_start_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+      "ws_end_sha256": "53bb8c87d4b432dc1aaa2eae682faf59db8c13e2f449dfe725822b0bf58f16f0",
+      "wire_digest": "be3dcfc31a9a6045c92dd52073c70486a53f865d78aaaf861226d3c1b60c250c",
+      "verdict_sha256": "60d9b3853be597a93c4a7699dd450aff03ec39d72c3102d3bb888ab0c26273c0",
+      "verdict_hash": "33b67afb9ae994e8557e40a07d4073bfb46269a668dbc0620b7bd25a5cd53e5d",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 20,
+      "cell_wall_s": 615.36,
+      "visible_all_pass": false,
+      "visible_wall_ms": [
+        29
+      ],
+      "solution_bytes": null,
+      "solution_sha256": null,
+      "hidden_posthoc": {
+        "status": "no_solution",
+        "passed": 0,
+        "total": null
+      },
+      "refusal_shape": {
+        "tags": [
+          "no_delivery"
+        ],
+        "failing_case_kinds": [
+          "import"
+        ],
+        "solution_py_present": false
+      },
+      "wire_usage": {
+        "calls": 6,
+        "with_usage": 6,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 38131,
+        "completion_tokens": 32678,
+        "total_tokens": 70809,
+        "reasoning_tokens": 488,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 1833,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 6,
+            "with_usage": 6,
+            "prompt_tokens": 38131,
+            "completion_tokens": 32678,
+            "reasoning_tokens": 488,
+            "reasoning_content_chars": 1833
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3764_opencode",
+      "task_id": "lcb_3764",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "maxSum",
+      "n_visible_cases": 2,
+      "n_hidden_cases_full": 26,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_by_protocol": {
+        "openai": 9
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 82.101,
+      "run_wall_s": 82.437,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "ws_start_sha256": "f2b9b4dd027ae15f33609d881eba24ead1e2a1a95c4b258a73d88082b1be5a0c",
+      "ws_end_sha256": "1654e5504938166f6839f2ad101ca1a49fcb8f3bba09811ed93cac4a53661411",
+      "wire_digest": "02596d0985e9f96a93f4e4f33345a08d35c1b39d307cb59133361aae3d56b176",
+      "verdict_sha256": "6a9bdd7067324ab2a967c9131920d448f53d5b42a92b1a909c05c58f47271484",
+      "verdict_hash": "38ce1a728ba437b77e3e534fb7a2c7238757f136f0ec3e496fa9fbf2330cf985",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 82.54,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        32
+      ],
+      "solution_bytes": 327,
+      "solution_sha256": "923240225073680d54df13531f403b8f48e48aa934095c1f50a16025d22aa5e4",
+      "solution_text": "from typing import List\n\ndef maxSum(grid: List[List[int]], limits: List[int], k: int) -> int:\n    pool = []\n    for i in range(len(grid)):\n        row = sorted(grid[i], reverse=True)\n        num_to_take = min(len(row), limits[i])\n        pool.extend(row[:num_to_take])\n    \n    pool.sort(reverse=True)\n    return sum(pool[:k])\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 26,
+        "total": 26,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 9,
+        "with_usage": 9,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 66926,
+        "completion_tokens": 2473,
+        "total_tokens": 69399,
+        "reasoning_tokens": 470,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 1731,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 9,
+            "with_usage": 9,
+            "prompt_tokens": 66926,
+            "completion_tokens": 2473,
+            "reasoning_tokens": 470,
+            "reasoning_content_chars": 1731
+          }
+        }
+      }
+    },
+    {
+      "cell": "lcb_3794_opencode",
+      "task_id": "lcb_3794",
+      "agent": "opencode",
+      "arm": "V",
+      "bank": "lcb_v2",
+      "layer": "B_random",
+      "difficulty": "medium",
+      "entry_point": "minTime",
+      "n_visible_cases": 3,
+      "n_hidden_cases_full": 27,
+      "vacant": 1,
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 10,
+      "wire_by_protocol": {
+        "openai": 10
+      },
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "infra_void": null,
+      "agent_wall_s": 272.465,
+      "run_wall_s": 272.595,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "ws_start_sha256": "ba2d151760d8fd03bd39308fd0cbb50b5a519c47344407df178d53940bd8b2a2",
+      "ws_end_sha256": "0300a23262721d062ad275e4f7637e62a905a6377ebdd5e3d362863892616df6",
+      "wire_digest": "cbf0a68c891d04b90356653b645db72cc1ca74c97a53d1f87a75f0a6f311e8c1",
+      "verdict_sha256": "2cf97ca901d1b39ff1c2f888d6c990189ff524833ae74b2cc77a42c3bab3c71a",
+      "verdict_hash": "696a1dc0dd1c312a01dc0cf4780b2ee74bf31eb4865bee3a131d477047019200",
+      "upstreams": {
+        "openai": {
+          "url": "http://100.119.113.56:1234/v1",
+          "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+          "defaulted": false,
+          "fallback": null
+        },
+        "anthropic": {
+          "url": "http://100.119.113.56:1234",
+          "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+          "defaulted": false,
+          "fallback": null
+        }
+      },
+      "upstreams_defaulted": [],
+      "attempts_used": 1,
+      "max_attempts": 1,
+      "retry": "none",
+      "feedback_into": "file",
+      "sandbox": {
+        "backend": "none",
+        "sandbox": "none",
+        "requested": "none"
+      },
+      "exit_code": 0,
+      "cell_wall_s": 272.7,
+      "visible_all_pass": true,
+      "visible_wall_ms": [
+        28
+      ],
+      "solution_bytes": 510,
+      "solution_sha256": "99dcc4d871cf511449ed1ac14a5b342b70ffade8e23dc912688a75e881aa7941",
+      "solution_text": "from typing import List\n\ndef minTime(skill: List[int], mana: List[int]) -> int:\n    n = len(skill)\n    m = len(mana)\n    \n    P = [0] * (n + 1)\n    for i in range(n):\n        P[i+1] = P[i] + skill[i]\n        \n    t_curr = 0\n    for j in range(m - 1):\n        mj = mana[j]\n        mj1 = mana[j+1]\n        # D_j = max_{i=0}^{n-1} (P_{i+1} * mana[j] - P_i * mana[j+1])\n        max_d = max([P[i+1] * mj - P[i] * mj1 for i in range(n)])\n        t_curr += max(0, max_d)\n        \n    return t_curr + P[n] * mana[m-1]\n",
+      "hidden_posthoc": {
+        "status": "ok",
+        "passed": 27,
+        "total": 27,
+        "all_pass": true,
+        "first_failure": null
+      },
+      "refusal_shape": null,
+      "wire_usage": {
+        "calls": 10,
+        "with_usage": 10,
+        "no_usage": 0,
+        "unparsed_chunks": 0,
+        "prompt_tokens": 124125,
+        "completion_tokens": 13659,
+        "total_tokens": 137784,
+        "reasoning_tokens": 657,
+        "reasoning_tokens_present": true,
+        "reasoning_content_chars": 2412,
+        "anthropic_thinking_blocks": 0,
+        "transport": [
+          "sse"
+        ],
+        "by_wire": {
+          "openai_chat": {
+            "calls": 10,
+            "with_usage": 10,
+            "prompt_tokens": 124125,
+            "completion_tokens": 13659,
+            "reasoning_tokens": 657,
+            "reasoning_content_chars": 2412
+          }
+        }
+      }
+    }
+  ],
+  "hidden_scorer_negative_control": {
+    "stub": "def <entry_point>(*a, **k): return None",
+    "per_task": {
+      "lcb_3522": {
+        "status": "ok",
+        "passed": 0,
+        "total": 27,
+        "all_pass": false
+      },
+      "lcb_3583": {
+        "status": "ok",
+        "passed": 0,
+        "total": 27,
+        "all_pass": false
+      },
+      "lcb_3584": {
+        "status": "ok",
+        "passed": 0,
+        "total": 28,
+        "all_pass": false
+      },
+      "lcb_3637": {
+        "status": "ok",
+        "passed": 0,
+        "total": 27,
+        "all_pass": false
+      },
+      "lcb_3654": {
+        "status": "ok",
+        "passed": 0,
+        "total": 26,
+        "all_pass": false
+      },
+      "lcb_3681": {
+        "status": "ok",
+        "passed": 0,
+        "total": 27,
+        "all_pass": false
+      },
+      "lcb_3686": {
+        "status": "ok",
+        "passed": 0,
+        "total": 26,
+        "all_pass": false
+      },
+      "lcb_3700": {
+        "status": "ok",
+        "passed": 0,
+        "total": 27,
+        "all_pass": false
+      },
+      "lcb_3764": {
+        "status": "ok",
+        "passed": 0,
+        "total": 26,
+        "all_pass": false
+      },
+      "lcb_3794": {
+        "status": "ok",
+        "passed": 0,
+        "total": 27,
+        "all_pass": false
+      }
+    },
+    "blocked_n": 10,
+    "tasks_n": 10,
+    "verdict": "OK",
+    "honesty": "單邊：擋得住這一個退化樁 ≠ 這份隱藏套件涵蓋了真需求。"
+  }
+}

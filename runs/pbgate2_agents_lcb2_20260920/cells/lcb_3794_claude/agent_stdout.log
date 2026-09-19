@@ -1,0 +1,13 @@
+I have implemented the `minTime` function in `solution.py`.
+
+The logic follows these steps:
+1.  **Pre-calculate Prefix Sums**: Let $P[i] = \sum_{k=0}^{i} skill[k]$ be the cumulative skill of wizards up to index $i$. The time taken by wizard $i$ on potion $j$ is $skill[i] \times mana[j]$.
+2.  **Determine Start Times**: Let $S[j]$ be the start time of potion $j$ at wizard 0. Because a potion must pass between wizards immediately, the completion time of potion $j$ by wizard $i$ is $T_{ij} = S[j] + P[i] \times mana[j]$.
+3.  **Apply Constraints**: For each wizard $i$, they can only work on one potion at a time. This means for consecutive potions $j$ and $j+1$, the completion of potion $j$ by wizard $i$ must occur before or at the same time as the start of potion $j+1$ by wizard $i$.
+    *   Wizard $i$ works on potion $j$ during $[T_{i-1, j}, T_{ij}]$. (With $T_{-1, j} = S[j]$).
+    *   The constraint is: $T_{ij} \le T_{i-1, j+1}$.
+    *   Substituting the expressions: $S[j] + P[i] \times mana[j] \le S[j+1] + P[i-1] \times mana[j+1]$.
+4.  **Iterative Calculation**: We find the minimum possible start time for each subsequent potion by taking the maximum required value across all wizards: $S[j+1] = \max_{i=0 \dots n-1} (S[j] + P[i] \times mana[j] - P[i-1] \times mana[j+1])$.
+5.  **Final Result**: The total time is the completion time of the last potion by the last wizard: $T_{n-1, m-1} = S[m-1] + P[n-1] \times mana[m-1]$.
+
+The complexity is $O(n \cdot m)$, which fits within the constraints for $n, m \le 5000$.

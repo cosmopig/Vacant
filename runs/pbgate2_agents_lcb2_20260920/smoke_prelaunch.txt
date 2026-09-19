@@ -1,0 +1,22 @@
+# 發射前冒煙（lcb_3534，A 層，不在被量的 10 題裡）
+## pi
+exit_code=0
+cell_wall_s=109.76
+  accepted            = True
+  requests_seen       = 9
+  wire_by_protocol    = {'openai': 9}
+  visible_passed      = 3
+## claude
+exit_code=0
+cell_wall_s=110.12
+  accepted            = True
+  requests_seen       = 6
+  wire_by_protocol    = {'openai': 1, 'anthropic': 5}
+  visible_passed      = 3
+## opencode
+exit_code=0
+cell_wall_s=182.96
+  accepted            = True
+  requests_seen       = 9
+  wire_by_protocol    = {'openai': 9}
+  visible_passed      = 3

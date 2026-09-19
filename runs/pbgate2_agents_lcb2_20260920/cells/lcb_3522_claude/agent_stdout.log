@@ -1,0 +1,11 @@
+I have read `goal.md` and `contract.md` and implemented the solution in `solution.py`.
+
+The logic follows these requirements:
+- It defines a top-level function `resultsArray(nums, k)`.
+- It iterates through all subarrays of size `k`.
+- For each subarray, it checks if the elements are consecutive and sorted in ascending order (i.e., each element is exactly 1 greater than the previous one).
+- If they are, it appends the maximum element to the results; otherwise, it appends -1.
+- It returns the final list of results.
+
+You can run the tests using:
+`sh run_tests.sh`

@@ -1,0 +1,12 @@
+The task was to implement a function `gcdValues` that calculates the GCD of all possible pairs in an array and returns the value at specific indices after sorting these GCDs.
+
+I have implemented this using:
+1.  **Frequency Counting**: Count occurrences of each number in `nums`.
+2.  **Multiple Counting**: For each potential GCD $g$, count how many numbers in `nums` are multiples of $g$. This is done in $O(M \log M)$ where $M$ is the maximum value in `nums`.
+3.  **Inclusion-Exclusion**: Calculate the number of pairs with $\gcd = g$ by starting from the largest possible $g$ and subtracting counts of its multiples. This also takes $O(M \log M)$.
+4.  **Prefix Sums & Binary Search**: Use prefix sums of the frequencies of each GCD to answer queries in $O(\log M)$ time per query.
+
+The total complexity is $O(n + M \log M + Q \log M)$, which fits well within the constraints ($n, Q \le 10^5$, $M \le 5 \times 10^4$).
+
+I have verified that the solution passes all tests in `tests_visible/`.
+

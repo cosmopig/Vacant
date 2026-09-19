@@ -1,0 +1,10 @@
+I have read the `goal.md` and `contract.md` files and implemented the solution in `solution.py`.
+
+The logic follows these steps:
+1.  **Count Occurrences**: I first count how many times each number appears in the input array `nums`.
+2.  **Calculate Multiples**: For every possible GCD value $g$ (up to the maximum value in `nums`), I calculate how many numbers in `nums` are multiples of $g$.
+3.  **Count Pairs with Multiple GCDs**: The number of pairs $(i, j)$ whose GCD is a multiple of $g$ is given by $\frac{C \times (C-1)}{2}$, where $C$ is the count of numbers divisible by $g$.
+4.  **Inclusion-Exclusion for Exact GCDs**: I use a bottom-up approach (from `max_val` down to 1) to subtract counts of higher multiples from each $g$ to find the exact number of pairs whose GCD is exactly $g$.
+5.  **Sort and Query**: Finally, I construct the sorted list of all GCDs and return the values at the requested query indices.
+
+The solution handles the constraints efficiently ($O(V \log V + Q)$ where $V$ is the maximum value in `nums`).

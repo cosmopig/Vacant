@@ -1,0 +1,15 @@
+The task was to implement a function `countBalancedPermutations` that counts the number of distinct permutations of a string of digits such that the sum of digits at even indices equals the sum of digits at odd indices, modulo $10^9 + 7$.
+
+I have implemented this using dynamic programming. The core idea is:
+1.  Calculate the total sum $S$ of all digits. If $S$ is odd, no balanced permutation exists (return 0).
+2.  The target sum for both even and odd positions must be $T = S/2$.
+3.  Let $k = \lfloor n/2 \rfloor$ be the number of odd positions and $m = \lceil n/2 \rceil$ be the number of even positions.
+4.  We need to choose $k$ digits from the multiset of available digits such that their sum is $T$. The remaining $m$ digits will automatically have a sum of $S - T = S/2$.
+5.  The number of distinct permutations for a fixed selection of digits $\{x_d\}$ (where $x_d$ is the count of digit $d$ in odd positions) is $\frac{k!}{\prod x_d!} \cdot \frac{m!}{\prod (c_d - x_d)!}$, where $c_d$ is the total count of digit $d$.
+6.  The total number of distinct permutations is:
+    $$\sum_{\{x_d\}} \left( \frac{k! m!}{\prod c_d!} \cdot \prod_{d=0}^9 \binom{c_d}{x_d} \right) = \frac{k! m!}{\prod c_d!} \sum_{\{x_d\}} \prod_{d=0}^9 \binom{c_d}{x_d}$$
+    where the sum is over all $\{x_d\}$ such that $\sum x_d = k$ and $\sum d \cdot x_d = T$.
+7.  The DP table `dp[j][s]` stores the coefficient of $z^j w^s$ in the polynomial product $\prod_{d=0}^9 (1 + z w^d)^{c_d}$. Specifically, it computes $\sum_{\{x_d\}} \prod \binom{c_d}{x_d}$ for a given number of digits $j$ and sum $s$.
+8.  The final answer is obtained by multiplying the result from the DP table with $\frac{k! m!}{\prod c_d!}$.
+
+I have verified this logic against the provided examples and it passed all visible tests.

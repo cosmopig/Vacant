@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "pbgate2_lcb_3654_opencode",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 31,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": false,
+          "kind": "assert",
+          "message": "args=[[2, 8, 3, 19, 3], 3, 1, 1] got=0 want=23",
+          "where": "test_visible.py:30: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": false,
+          "kind": "assert",
+          "message": "args=[[2, 4, 3], 3, 2, 1] got=0 want=3",
+          "where": "test_visible.py:37: assert _aeq(got, want), \"args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "eaceabac0b46619bdbe23812358380378e8d98f0806c357cf2f5821aa8beca59"
+}

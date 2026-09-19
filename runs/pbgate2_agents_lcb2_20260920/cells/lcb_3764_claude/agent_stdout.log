@@ -1,0 +1,9 @@
+I have read `goal.md` and `contract.md` and implemented the solution in `solution.py`.
+
+The logic follows these steps:
+1.  **Row-wise Filtering**: For each row $i$, I sort the elements in descending order and keep only the top `limits[i]` elements. This ensures we respect the per-row constraint while keeping the best candidates for each row.
+2.  **Global Selection**: I pool all these "best" elements from every row into a single list.
+3.  **Maximization**: I sort this pooled list in descending order and sum the first $k$ elements (or fewer if the total count is less than $k$). This maximizes the total sum while satisfying both the per-row limits and the global limit $k$.
+
+You can now run the tests using:
+`sh run_tests.sh`
