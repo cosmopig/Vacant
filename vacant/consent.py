@@ -245,7 +245,19 @@ def audit(book: Logbook, who: PublicIdentity) -> dict[str, Any]:
 
     for e in book.entries:
         p = e.payload if isinstance(e.payload, dict) else {}
-        ref = p.get("subject_ref")
+        raw_ref = p.get("subject_ref")
+        # ⚠ **畸形 payload 要記成 problem，不可以拿 `None` 當 key。**
+        #   `p.get()` 回 `Any | None`，直接拿去當 `dict[str, …]` 的 key
+        #   會過執行期但 mypy 會擋（2026-09-19 CI 抓到 6 個）。
+        #   而「靜靜地用 None 當 key」比型別錯更糟：那會讓一筆沒有主體的
+        #   同意紀錄**看起來像一個正常的主體**，帳本就說了謊。
+        if e.type in (GRANT_TYPE, WITHDRAW_TYPE, ERASED_TYPE) and not (
+                isinstance(raw_ref, str) and raw_ref):
+            problems.append(
+                f"seq {e.seq}：{e.type} 的 payload 沒有可用的 subject_ref"
+                f"（{raw_ref!r}）——這一筆不進主體表")
+            continue
+        ref: str = raw_ref if isinstance(raw_ref, str) else ""
         if e.type == GRANT_TYPE:
             subjects[ref] = SubjectStatus(
                 subject_ref=ref, state="granted", grant_seq=e.seq, grant_hash=e.hash(),
