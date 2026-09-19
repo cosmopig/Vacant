@@ -368,3 +368,47 @@ a2d674fadef1ea547a009d3574cc0b4f96dbc5f3b66c81157039853c5060f8f9  standby_frozen
   版面尺規（§三）不是內容也不是措辭，且在橫式下逐像素相同。
 - **鐵律 3**：每一塊的「還不能說的話」都在上面，`venue_check.sh` 第七節
   把量不到的那一條改成明寫「沒量到」。
+
+---
+
+## 八、測試與機器留下來的狀態
+
+### 跑過什麼
+
+| 判準 | 結果 |
+|---|---|
+| `tests/test_serve_twin.py`（含 8 條新的） | 34 passed |
+| `tests/test_qr.py`／`test_twin_events.py`／`test_twin_viewer.py`／`test_twin_fidelity.py`／`test_receipt_viewer.py` | 全過（改名前與改名後各跑一次） |
+| `node ops/exhibit/twin/twin_viewer_node_check.mjs` | 全部通過 |
+| `node ops/exhibit/twin/phone_node_check.mjs` | 全部通過 |
+| `node tools/livecheck.mjs`（vacant_hm） | 全部通過（含新的 L19–L19d） |
+| `node tools/live_e2e.mjs`（vacant_hm） | 全部通過 |
+| `python3 ops/check_repo_links.py` | OK，沒有死連結／死路徑 |
+| `ops/exhibit/twin/venue_check.sh`（vacant-dev，systemd 起的那一份） | **硬傷 0**、5 條 warn，exit 0 |
+
+**全套 `pytest tests/` 我沒有看到它跑完。** 第一次跑到 ~8% 出現一個 `F`，
+但那一輪是**被污染的**：跑到一半有另一個 agent 在同一個工作樹上落了
+`fb7f4bfb`（`vacant` → `vacant_network`，659 個檔案），樹在腳底下被換掉。
+事後把嫌疑檔案 `tests/test_ci_workflows.py`（依累計序號推出來的那一格）
+單獨重跑，**12 passed**。⇒ 那個 `F` 我判定是 mid-run 改名造成的，
+**但我沒有直接證據**（那一輪的 `-q` 輸出沒有測試名）。
+穩定後重開的整套跑在背景，輸出在
+`~/vacant-exhibit-shots-20260919/pytest_full_20260920.txt`。
+
+> ⚠ 這一輪從頭到尾都在**跟另一個 agent 共用同一個工作樹**（記憶裡那條
+> 「並行 agent 要用 worktree 隔離」）。我送出 commit 的時候 index 裡已經有
+> 659 個不是我的檔案，所以兩個 commit 都用 `git commit --only -- <路徑>`
+> 逐檔指定。`git show --name-only` 確認過：10 檔 ＋ 2 檔，沒有夾帶。
+
+### vacant-dev 留下來的狀態（下一個人要知道）
+
+- `vacant-exhibit.service` **enabled ＋ active**，佔著 `8420`／`8899`，
+  30 秒輪播一格（現在 emitted 102、laps 1、skipped 0）。
+  **這是刻意留著的**——它就是這一塊要驗的東西。擋路的話：
+  `sudo systemctl disable --now vacant-exhibit`。
+- `~/exhibit-linux/{Vacant,vacant_hm}` 是 2026-09-19 的快照，**不是 git checkout**，
+  不會自己跟上 repo。
+- 中文字型是**系統套件**了（`fonts-noto-cjk`＋`-extra`，82 個），
+  不再是上一次那兩個手動丟進 `~/.local/share/fonts/` 的檔。
+- 截圖在 `~/shots_20260919/`（27 張）。
+- 我起的兩顆 headless chromium（9223／9224）已經收掉。
