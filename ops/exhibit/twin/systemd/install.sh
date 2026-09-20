@@ -39,7 +39,8 @@ done
 
 if [ "$UNINSTALL" = "1" ]; then
   systemctl disable --now vacant-exhibit.service 2>/dev/null || true
-  rm -f "$UNIT_DIR/vacant-exhibit.service"
+  systemctl disable --now vacant-twin-loop.service 2>/dev/null || true
+  rm -f "$UNIT_DIR/vacant-exhibit.service" "$UNIT_DIR/vacant-twin-loop.service"
   systemctl daemon-reload
   echo "拆掉了。（kiosk 那一支是 user unit："
   echo "  systemctl --user disable --now vacant-exhibit-kiosk.service ）"
@@ -77,22 +78,54 @@ render() {   # $1 = 檔名
 
 if [ "$DRY" = "1" ]; then
   echo "=== vacant-exhibit.service ==="; render vacant-exhibit.service
+  echo; echo "=== vacant-twin-loop.service ==="; render vacant-twin-loop.service
   [ "$KIOSK" = "1" ] && { echo; echo "=== vacant-exhibit-kiosk.service ==="
                           render vacant-exhibit-kiosk.service; }
   exit 0
 fi
 
-chmod +x "$TWIN/exhibit_boot.sh" "$TWIN/exhibit_preflight.sh"
-render vacant-exhibit.service > "$UNIT_DIR/vacant-exhibit.service"
+chmod +x "$TWIN/exhibit_boot.sh" "$TWIN/exhibit_preflight.sh" "$TWIN/twin_loop.sh"
+render vacant-exhibit.service  > "$UNIT_DIR/vacant-exhibit.service"
+render vacant-twin-loop.service > "$UNIT_DIR/vacant-twin-loop.service"
 systemctl daemon-reload
 systemd-analyze verify "$UNIT_DIR/vacant-exhibit.service" \
   || echo "！systemd-analyze 有意見（上面），unit 還是裝上去了" >&2
+systemd-analyze verify "$UNIT_DIR/vacant-twin-loop.service" \
+  || echo "！systemd-analyze 對 twin-loop 有意見（上面），unit 還是裝上去了" >&2
 systemctl enable --now vacant-exhibit.service
+
+# ── 數位分身的迴圈 ─────────────────────────────────────────────────
+# ⚠ **有 token 才 enable。** 沒有 token 它 exit 78，而 Restart=always ＋
+#   StartLimitIntervalSec=0 ＝ 每 15 秒在 journal 裡吼一次、吼一整天。
+#   吼到沒有人看 journal 比安靜更糟。所以：unit 一定裝上去（要用的時候在），
+#   沒 token 就不啟用，**並且在這裡大聲講**——現在有人站在鍵盤前面。
+#   真正的擋門在布展當天：`venue_check.sh` 第八之二節看快照有沒有在更新。
+if [ -s /etc/vacant/twin.env ] || [ -n "${VACANT_TWIN_CLOUD_TOKEN:-}" ]; then
+  systemctl enable --now vacant-twin-loop.service
+  echo "✓ vacant-twin-loop.service 已啟用（分身迴圈：公網→庫→1003→快照）"
+else
+  cat <<'MSG'
+
+⚠⚠ vacant-twin-loop.service **裝了但沒啟用**：找不到 /etc/vacant/twin.env。
+    後果很具體：觀眾掃 QR、投了卡，那張卡**永遠不會變成分身**，
+    而電視畫面一切正常。那是「靜默降級」，不是「0 個觀眾」。
+
+    要接上去（token 不進版控）：
+      sudo install -d -m 755 /etc/vacant
+      sudo install -m 600 /dev/null /etc/vacant/twin.env
+      echo 'VACANT_TWIN_CLOUD_TOKEN=<公網那把>' | sudo tee -a /etc/vacant/twin.env
+      sudo systemctl enable --now vacant-twin-loop.service
+
+    就是不要分身那條線，也請明講（布展當天 venue_check.sh --skip-twin），
+    不要讓它看起來像「量過了，沒問題」。
+MSG
+fi
 
 echo
 echo "裝好了。驗一下（**不要只看 enabled，要看它真的活著**）："
 echo "  systemctl status vacant-exhibit.service"
 echo "  journalctl -u vacant-exhibit -n 40 --no-pager   ← token 印在這裡"
+echo "  systemctl status vacant-twin-loop.service       ← 分身迴圈（visitors.json 誰在寫）"
 echo "  $TWIN/venue_check.sh"
 echo
 echo "⚠ 真正的驗收是**重開機**：sudo reboot，回來之後再跑一次 venue_check.sh。"

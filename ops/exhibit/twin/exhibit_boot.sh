@@ -6,7 +6,18 @@
 # 現在寫進開機腳本。
 #
 #   ┌ 8420  vacant_hm 的靜態站（電視）      ← python3 -m http.server
-#   └ 8899  serve_twin.py（事件流＋/state＋/control＋/r/<cell>＋手機頁）
+#   ├ 8899  serve_twin.py（事件流＋/state＋/control＋/r/<cell>＋手機頁）
+#   └ 8901  twinlink serve（**唯讀**：數位分身真相來源 /visitors.json）
+#
+# ⚠ **8901 那一行是 2026-09-21 補上的。** 在那之前，`twinlink`／`twinstore`／
+#   `visitors.json`／`&twin=` 這四個字在 `exhibit_boot.sh`、`exhibit_preflight.sh`、
+#   `venue_check.sh` 與三個 systemd 檔裡的 grep 命中數**全部是 0**
+#   （正控制：同一個 grep 打在 `twinlink.py` 上 16 命中 ⇒ grep 量得動）。
+#   也就是說：整條「觀眾手機 → 公網 → 庫 → 1003 → 螢幕」的線寫好了、測過了、
+#   **但沒有接在開機路徑上**，而布展當天 venue_check 會印綠。
+#   ⇒ 現在電視網址帶 `&twin=`、開機起唯讀端點、`twinlink loop` 有自己的 unit、
+#     `venue_check.sh` 第八節會去敲它。守著這件事的是
+#     `tests/test_exhibit_twin_wiring.py`（含正控制）。
 #
 # 兩支都只綁在本機。要讓**手機**連得到，加 --lan：那會把 serve_twin 綁到
 # 0.0.0.0，同一個區網（展場的 hotspot）上的任何人都按得動這台電視——
@@ -19,6 +30,8 @@
 #   ./exhibit_boot.sh --dwell 25            沒人按的時候幾秒換一格
 #   ./exhibit_boot.sh --lan --print-host    只印「區網 IP 抓到什麼」就結束
 #                                           （0＝抓到、2＝抓不到並說明；1 是 bug）
+#   ./exhibit_boot.sh --no-twin             不接數位分身（回到 09-21 之前的行為）
+#   ./exhibit_boot.sh --no-twin-loop        起唯讀端點但不起 loop（庫是唯讀的）
 #
 # ⚠ `--lan` **一定會有 token**（2026-09-19 起）。沒給 `--token`／`VACANT_TWIN_TOKEN`
 #   就這一次開機自動生一把，編進 QR 的網址裡。要關得明講 `--no-token`。
@@ -34,6 +47,11 @@ HM="${VACANT_HM:-$(cd "$REPO/.." && pwd)/vacant_hm}"
 PY="${PYTHON:-python3}"
 TV_PORT=8420
 TWIN_PORT=8899
+# 數位分身那一條線（twinstore 真相來源 → twinlink serve 唯讀端點 → 電視 &twin=）。
+STORE_PORT=8901
+NO_TWIN=0
+NO_TWIN_LOOP=0
+TWIN_DB="${VACANT_TWIN_DB:-}"
 DWELL=30
 BIND=127.0.0.1
 KIOSK=0
@@ -58,6 +76,10 @@ while [ $# -gt 0 ]; do
     --dwell)  DWELL="$2"; shift ;;
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
+    --store-port) STORE_PORT="$2"; shift ;;
+    --twin-db)   TWIN_DB="$2"; shift ;;
+    --no-twin)   NO_TWIN=1 ;;
+    --no-twin-loop) NO_TWIN_LOOP=1 ;;
     --token)  TOKEN="$2"; shift ;;
     --no-token)  NO_TOKEN=1 ;;
     --kiosk)  KIOSK=1 ;;
@@ -159,7 +181,7 @@ else
   TOKEN_WHY=off-loopback
 fi
 
-cleanup(){ kill ${TV_PID:-} ${TWIN_PID:-} 2>/dev/null || true; }
+cleanup(){ kill ${TV_PID:-} ${TWIN_PID:-} ${STORE_PID:-} ${LOOP_PID:-} 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
 ( cd "$HM" && exec "$PY" -m http.server "$TV_PORT" --bind 127.0.0.1 >/dev/null 2>&1 ) &
@@ -176,6 +198,33 @@ fi
 "$PY" "$REPO/ops/exhibit/twin/serve_twin.py" "${TWIN_ARGS[@]}" &
 TWIN_PID=$!
 
+# ── 數位分身：唯讀端點（電視 `&twin=` 指的就是這一台）────────────────────
+#
+# ⚠ `twinlink serve` 是 `mode=ro` 開檔——**庫不在的時候每一次 GET 都 500**，
+#   而畫面上只會變成「一個都讀不到」，沒有人查得出為什麼。所以先確保庫在
+#   （`view` 走的是非唯讀建構子，schema 全是 `CREATE ... IF NOT EXISTS`，
+#    對已經有資料的庫是 no-op ⇒ 不會覆寫 1003 上那個真相來源）。
+STORE_URL=""
+if [ "$NO_TWIN" = "0" ]; then
+  TL="$REPO/ops/exhibit/twin/twinlink.py"
+  DBARGS=()
+  [ -n "$TWIN_DB" ] && DBARGS=(--db "$TWIN_DB")
+  # stderr 落盤再取 `$?`。`cmd | tee` 之後的 `$?` 是 tee 的，那個坑在這個 repo
+  # 有名字（工作紀律：不要吞 stderr）。
+  ERRF="$(mktemp -t twinboot)"
+  if ! "$PY" "$TL" "${DBARGS[@]+"${DBARGS[@]}"}" view >/dev/null 2>"$ERRF"; then
+    echo "twinlink 開不了庫 ⇒ 數位分身那一條線起不來：" >&2
+    tail -3 "$ERRF" >&2
+    rm -f "$ERRF"
+    echo "要先把展件跑起來、分身晚點再說，就加 --no-twin（那是一個決定，不是預設）。" >&2
+    exit 2
+  fi
+  rm -f "$ERRF"
+  "$PY" "$TL" "${DBARGS[@]+"${DBARGS[@]}"}" serve --bind 127.0.0.1 --port "$STORE_PORT" &
+  STORE_PID=$!
+  STORE_URL="http://127.0.0.1:$STORE_PORT/visitors.json"
+fi
+
 sleep 1
 
 # ⚠ **驗那個位址真的連得到**，不是只印出來。換一個網路環境、介面抓錯、
@@ -187,8 +236,63 @@ if ! curl -fsS --max-time 3 "http://$HOST:$TWIN_PORT/state" >/dev/null 2>&1; the
 fi
 echo "  ✓ http://$HOST:$TWIN_PORT 自己連得到（QR 指的就是這個）"
 
+# 🔴 **電視那一台以前完全沒有健檢。** `python3 -m http.server` 在埠被佔的時候
+#    當場死掉，而這支腳本照樣把「電視 http://…」印在漂亮橫幅裡——操作員
+#    由下往上讀，看到的是一切正常。橫幅印出來的每一個網址都要先敲過。
+if ! curl -fsS --max-time 3 "http://127.0.0.1:$TV_PORT/world3/index.html" >/dev/null 2>&1; then
+  echo "電視那一頁敲不到：http://127.0.0.1:$TV_PORT/world3/index.html" >&2
+  echo "靜態站沒起來（埠 $TV_PORT 被佔？）⇒ 電視會是白畫面 ⇒ **不繼續**。" >&2
+  exit 2
+fi
+echo "  ✓ http://127.0.0.1:$TV_PORT/world3/index.html 拿得到（電視不會是白的）"
+
+# 唯讀端點也要敲，而且**要敲到欄位**不是只看 200：一個回 200 的空殼跟
+# 一個真的讀得到庫的端點，在 curl 眼裡長得一樣。
+if [ -n "$STORE_URL" ]; then
+  if ! SV=$(curl -fsS --max-time 5 "$STORE_URL" 2>/dev/null); then
+    echo "分身唯讀端點敲不到：$STORE_URL" >&2
+    echo "電視的 &twin= 會指到一個連不到的位址 ⇒ **不繼續**（要跳過就 --no-twin）。" >&2
+    exit 2
+  fi
+  if ! NV=$(printf '%s' "$SV" | "$PY" -c 'import json,sys
+d=json.load(sys.stdin)
+n=(d.get("counts") or {}).get("visitors")
+assert isinstance(n,int) and not isinstance(n,bool), n
+print(n)' 2>/dev/null); then
+    echo "$STORE_URL 回了 200，但讀不到 counts.visitors ⇒ 形狀不對，**不繼續**。" >&2
+    exit 2
+  fi
+  # `${NV}` 的大括號不是風格：bash 3.2 會把後面全形括號的第一個 byte
+  # 吃進變數名，`set -u` 之下當場 unbound variable（2026-09-21 實測踩到）。
+  echo "  ✓ $STORE_URL 讀得到（counts.visitors=${NV}）"
+fi
+
+# ── 數位分身：ingest→generate→publish→export 的迴圈 ─────────────────────
+#
+# 🔴 沒有它，`world3/live/visitors.json` 那個 snapshot **沒有任何東西會去寫**
+#    （commit 進 vacant_hm 的那一份是 `people: []`＋`generated_at: null` 的佔位檔）。
+#    ⇒ 觀眾用手機投的卡永遠不會變成分身，而畫面平靜地說「分身讀本機快照」。
+#    展場那台 Linux 用的是 `vacant-twin-loop.service`（`Restart=always`）；
+#    這裡起的是給「人站在鍵盤前面」那一種跑法用的。
+LOOP_WHY=off
+if [ "$NO_TWIN" = "0" ] && [ "$NO_TWIN_LOOP" = "0" ]; then
+  if [ -n "${VACANT_TWIN_CLOUD_TOKEN:-}" ]; then
+    VACANT_HM="$HM" "$REPO/ops/exhibit/twin/twin_loop.sh" &
+    LOOP_PID=$!
+    LOOP_WHY=on
+  else
+    LOOP_WHY=no-token
+  fi
+elif [ "$NO_TWIN_LOOP" = "1" ]; then
+  LOOP_WHY=off-explicit
+fi
+
 LIVE="http://$HOST:$TWIN_PORT/live/events.jsonl"
 TV_URL="http://127.0.0.1:$TV_PORT/world3/index.html?live=$LIVE&poll=2000"
+# 🔴 `&twin=` 就是電視去讀本機真相來源的那一段。少了它，電視只剩 snapshot
+#    那一層（而且是一個沒人在寫的檔）——`bridge.js` 的來源鏈是
+#    store → snapshot → cloud，第一層在網址裡，不在程式裡。
+[ -n "$STORE_URL" ] && TV_URL="$TV_URL&twin=$STORE_URL"
 PHONE_URL="http://$HOST:$TWIN_PORT/phone.html"
 [ -n "$TOKEN" ] && PHONE_URL="$PHONE_URL?t=$TOKEN"
 
@@ -198,7 +302,21 @@ echo " 電視 　$TV_URL"
 echo " 手機 　$PHONE_URL   ← QR 編的就是這一行"
 echo " 收據 　http://$HOST:$TWIN_PORT/viewer.html"
 echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
+if [ -n "$STORE_URL" ]; then
+  echo " 分身 　${STORE_URL}（唯讀；電視的 &twin= 指這裡）"
+else
+  echo " 分身 　⚠ --no-twin：電視網址沒有 &twin=，分身那一條線整條沒接"
+fi
 echo "───────────────────────────────────────────────"
+case "$LOOP_WHY" in
+  on) echo " ✓ twinlink loop 在跑（快照寫 $HM/world3/live/visitors.json）" ;;
+  no-token)
+    echo " ⚠⚠ twinlink loop **沒有起來**：沒有 VACANT_TWIN_CLOUD_TOKEN。"
+    echo "    ⇒ 公網那個郵箱抄不進來，**觀眾用手機投的卡不會變成分身**。"
+    echo "    ⇒ world3/live/visitors.json 停在上一次寫的樣子（可能是空的佔位檔）。"
+    echo "    這不是「0 個觀眾」，是這條線沒接。展件其他部分照跑。" ;;
+  off-explicit) echo " ⚠ --no-twin-loop：庫是唯讀的，不會有新的人進來（明講的決定）" ;;
+esac
 if [ "$BIND" != "0.0.0.0" ]; then
   echo " ⚠ 只綁本機：手機連不到。展場要用 --lan。"
 else

@@ -14,6 +14,15 @@
 #   開機時就起來。瀏覽器還是需要 `DISPLAY`／`WAYLAND_DISPLAY`，也就是**自動登入
 #   必須是開的**。這兩件事要分開確認，不要以為 enable-linger 就夠了。
 Description=Vacant 展件 · 全螢幕瀏覽器（電視）
+#
+# 2026-09-21：下面 ExecStart 的網址多了 `&twin=http://127.0.0.1:8901/visitors.json`。
+# 那不是裝飾。`bridge.js` 的來源鏈是 store -> snapshot -> cloud，而**第一層
+# （store，也就是 twinlink serve 的唯讀端點）只能從網址進來**——`index.html`
+# 刻意不給它預設值（猜一個位址出來，猜錯就是每輪一次「連線被拒」，
+# 而畫面會長得像「試過本機了」）。少了那一段，電視只剩 snapshot 那一層，
+# 而那個檔在 `vacant-twin-loop.service` 起來之前沒有任何東西會寫。
+# ⚠ 這裡**故意不**等 8901 起來（不像下面等 8420）：分身端點死掉時電視應該
+#   照常演凍結重放、並在畫面右下角講「分身來源讀不到」，而不是黑畫面。
 After=graphical-session.target vacant-exhibit.service
 PartOf=graphical-session.target
 StartLimitIntervalSec=0
@@ -41,7 +50,7 @@ ExecStart=@@CHROME@@ \
   --disable-sync \
   --no-first-run --no-default-browser-check \
   --user-data-dir=%t/vacant-twin-kiosk \
-  "http://127.0.0.1:8420/world3/index.html?live=http://127.0.0.1:8899/live/events.jsonl&poll=2000"
+  "http://127.0.0.1:8420/world3/index.html?live=http://127.0.0.1:8899/live/events.jsonl&poll=2000&twin=http://127.0.0.1:8901/visitors.json"
 Restart=always
 RestartSec=5
 

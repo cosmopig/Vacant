@@ -28,6 +28,8 @@ HM="${VACANT_HM:-$(cd "$REPO/.." && pwd)/vacant_hm}"
 PY="${PYTHON:-python3}"
 TV_PORT=8420
 TWIN_PORT=8899
+STORE_PORT=8901
+NO_TWIN=0
 LAN=0
 FAIL=0
 
@@ -35,6 +37,8 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
+    --store-port) STORE_PORT="$2"; shift ;;
+    --no-twin)   NO_TWIN=1 ;;
     --hm)        HM="$2"; shift ;;
     # 待會 ExecStart 會用 --lan ⇒ 先在這裡把「區網 IP 抓不抓得到」量一次。
     --lan)       LAN=1 ;;
@@ -78,12 +82,16 @@ port_holder() {   # $1=port → "pid cmdline" 或空
         | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2)
   [ -n "$pid" ] && echo "$pid $(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null)"
 }
-for p in "$TV_PORT" "$TWIN_PORT"; do
+PORTS="$TV_PORT $TWIN_PORT"
+# 8901＝`twinlink serve` 的唯讀端點。它以前不在這個名單上，於是「埠被佔」
+# 這一關對數位分身那條線**整條沒有量過**（2026-09-21 補）。
+[ "$NO_TWIN" = "0" ] && PORTS="$PORTS $STORE_PORT"
+for p in $PORTS; do
   H=$(port_holder "$p")
   [ -z "$H" ] && { say "✓ 埠 $p 沒人佔"; continue; }
   PID=${H%% *}; CMD=${H#* }
   case "$CMD" in
-    *serve_twin.py*|*http.server*)
+    *serve_twin.py*|*http.server*|*twinlink.py*)
       if [ "${VACANT_EXHIBIT_KILL_STALE:-0}" = "1" ]; then
         warn "埠 $p 被上一次留下來的展件行程佔著（pid ${PID}）⇒ 砍掉重來"
         kill "$PID" 2>/dev/null; sleep 2; kill -9 "$PID" 2>/dev/null
@@ -118,6 +126,21 @@ if [ "$LAN" = "1" ]; then
     RC=$?
     bad "區網 IP 抓不到（exhibit_boot.sh --print-host 回 ${RC}）：$(echo "$HOSTOUT" | tr '\n' ' ')"
     [ "$RC" = "1" ] && bad "  ⚠ 回 1 而不是 2 ＝ 腳本在某處當場斷掉沒說話，那是 bug 不是環境問題"
+  fi
+fi
+
+# ── 四之二、分身快照寫得進去嗎（擋啟動）──────────────────────────
+# `twinlink loop --out` 寫的就是電視 snapshot 那一層讀的檔。目錄不在／不可寫
+# ＝ loop 每一輪都在 export 那一步炸，而電視只會安靜地停在舊快照上。
+# ⚠ 這裡只量目錄，不去碰那個檔——它是 vacant_hm 版控裡的東西。
+if [ "$NO_TWIN" = "0" ]; then
+  SNAPDIR="$HM/world3/live"
+  if [ ! -d "$SNAPDIR" ]; then
+    bad "分身快照的目錄不在：${SNAPDIR}（VACANT_HM 指對了嗎）"
+  elif [ ! -w "$SNAPDIR" ]; then
+    bad "分身快照的目錄不可寫：$SNAPDIR ⇒ loop 每一輪都會在 export 炸掉"
+  else
+    say "✓ 分身快照寫得進去：$SNAPDIR/visitors.json"
   fi
 fi
 
