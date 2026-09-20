@@ -106,7 +106,11 @@ PTP|INT|INT2|INTQ)
   #   「Vacant 的中介與閘門在**多回合**下還成不成立」。
   # ⚠ 這一句逐字落盤（`argv/*.argv.txt` 與 `pty/*.drive.json`）。
   #   它不含任何隱藏測資（鐵律 2），也不含「你有責任／會被懲罰」（鐵律 1）。
-  TURNS=1; TURNTEXT=""; MINRUN=5; POSTDONE=4
+  TURNS=1; TURNTEXT=""; MINRUN=5; POSTDONE=4; NOQUIT=""
+  # `PTP` ＝ pty 裡的 `pi -p`：它**自己會結束**，沒有人需要按任何鍵。
+  # ⇒ `--no-quit`，一個位元組都不送。（2026-09-20 沒加這個，idle 誤判
+  #   把還在想的 pi 砍掉，10 格裡壞了 8 格。）
+  if [ "$arm" = "PTP" ]; then NOQUIT="--no-quit"; fi
   if [ "$arm" = "INT2" ]; then
     TURNS=2
     TURNTEXT=${TTY_TURN2_TEXT:-'Please run "sh run_tests.sh" now and show me the output. If anything fails or hangs, fix solution.py and run it again.'}
@@ -122,7 +126,7 @@ PTP|INT|INT2|INTQ)
   #   （`mode_oracle.sh` 的 D 格就是量這一條）。summary 改從 run_RUN-ON.json 讀。
   timeout "$OUTER_TIMEOUT" $PY "$REPO/ops/vacantrun/tty_drive.py" \
       --transcript "$ROOT/pty/$name.pty" --report "$ROOT/pty/$name.drive.json" \
-      --done-when-hooklog "$HOOKLOG" --turns "$TURNS" --turn-text "$TURNTEXT" \
+      --done-when-hooklog "$HOOKLOG" --turns "$TURNS" --turn-text "$TURNTEXT" $NOQUIT \
       --idle "${TTY_IDLE:-120}" --cap "${TTY_CAP:-1000}" --grace 60 \
       --min-run "$MINRUN" --post-done "$POSTDONE" \
       -- $PY -m vacant_network.vrun.launcher \

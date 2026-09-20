@@ -1,0 +1,334 @@
+{
+  "left": "PTP",
+  "right": "INT",
+  "rep": "r1",
+  "n": 5,
+  "n_identical": 5,
+  "rows": [
+    {
+      "task": "lcb_3522",
+      "PTP": {
+        "raw_sha256": "1edc2d96321e2557905149d721940f04f4fd44962b4ac0da2aa1bdd9389ab4f8",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "5e659bd8d991c5fdede59360886cbdecd2411e0859c0f76ca337efc55f1bc96d",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "INT": {
+        "raw_sha256": "b95b44dd63e18b10bc81fdda13c60436924ff76292c12bb4f5defbb5d4907029",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "92668cef11907ba1be7fa8aca5e732061a9847442b1c05a86c88f1484b2547f3",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "diff": {},
+      "identical": true
+    },
+    {
+      "task": "lcb_3584",
+      "PTP": {
+        "raw_sha256": "8b37c6f6b0be9f3fc6f18a48fc61d26f8ccdc268f94e43297ab5e21b380d5fa9",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "97d37ef6643b5fe09926807f5a322ad104b34c3ac8cb9d89d20cdf7ca21bf4b6",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "INT": {
+        "raw_sha256": "36177241a3edb31ecb900aba6eee6c8ff5937ab4d26e2b30435a096ab78e5805",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "ee69b29644e9625449f493f0f5cd35d4543bb51ad2a0d1239b9b9d341b6bfe3e",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "diff": {},
+      "identical": true
+    },
+    {
+      "task": "lcb_3649",
+      "PTP": {
+        "raw_sha256": "f2b0852e57ca1ef7e0695e9de3fbda710c8f73a904b923c6cafdee8a83343a3f",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "4d77c842a25203ce0199e1337bfd5a348c11a430a77606fdbb68cbaac607c20b",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "INT": {
+        "raw_sha256": "bf0b71a62a44b62e7f1322c1e8bc9c7392e8ae17c4b3119d94932e9ba2df4fb4",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "61d38488122bd7bc3144e2203572f876143ea07b3b705f296c81a96a641bd4dc",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "diff": {},
+      "identical": true
+    },
+    {
+      "task": "lcb_3715",
+      "PTP": {
+        "raw_sha256": "cbd23f7d5174212f586a9d97fdae328111133740ac163a7e508b05ad6b43b7c7",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "0e9841c455cd3f73f58fd0d06cb22ae6ac4f55f06b6bd5b7049f82d53b1cdf00",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "INT": {
+        "raw_sha256": "7b4b027d78507234091a4315fd550f6fd62f39a26658d0ff6352cb69af040aa6",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "0c79fa05eb244f543fb5a53c3b25f513ae2fdf9b4d3f088ab1c87ca8c8b85831",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "diff": {},
+      "identical": true
+    },
+    {
+      "task": "lcb_3789",
+      "PTP": {
+        "raw_sha256": "3d539ed6b171819f06ca884d0e51dc93159c7d6f267c7fd908c0d8fff3f53896",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "bebb55d24d62e42bb247a13b3e8e6d915aa972b4de076f5bae723e6b604e4075",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "INT": {
+        "raw_sha256": "2b2ab2bbc5abd4e3c0a65a6704caf365c28ecbf5ce8907a1f283dc11efad2960",
+        "raw_bytes": 5983,
+        "model": "gemma-4-12b-it-qat",
+        "n_messages": 2,
+        "roles": [
+          "system",
+          "user"
+        ],
+        "system_sha256_raw": "651ace0e081c891c9a7f1298da95693b822b124ca6383b11006d9220c2409a5e",
+        "system_sha256": "2dcfe9c86cd31f8eda898f18d30ee8159231182a3dea696d951e9213f83aaaa4",
+        "system_chars": 2778,
+        "messages_sha256": "1c563aef49165052533c0ec3418d518ce6c3a3454959d7f73c85ceb435b62401",
+        "tool_names": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "params": {
+          "max_completion_tokens": 16384,
+          "stream": true
+        },
+        "other_keys": [
+          "max_completion_tokens",
+          "store",
+          "stream",
+          "stream_options"
+        ]
+      },
+      "diff": {},
+      "identical": true
+    }
+  ]
+}

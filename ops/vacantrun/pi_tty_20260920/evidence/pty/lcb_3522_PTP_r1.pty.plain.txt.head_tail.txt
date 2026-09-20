@@ -1,0 +1,9 @@
+=== 前 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-1NLt18/extensions/vacant.ts
+The task is completed. I have implemented the `resultsArray` function in `solution.py` according to the requirements specified in `goal.md` and `contract.md`. The solution correctly identifies subarrays of size `k` that are consecutive and sorted in ascending order, returning their maximum element or -1 otherwise. I also verified the implementation by running the provided tests using `run_tests.sh`, which passed successfully.
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 897e6def3e97→707f66a27c76　wire 9 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3522_PTP_r1
+
+=== 後 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-1NLt18/extensions/vacant.ts
+The task is completed. I have implemented the `resultsArray` function in `solution.py` according to the requirements specified in `goal.md` and `contract.md`. The solution correctly identifies subarrays of size `k` that are consecutive and sorted in ascending order, returning their maximum element or -1 otherwise. I also verified the implementation by running the provided tests using `run_tests.sh`, which passed successfully.
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 897e6def3e97→707f66a27c76　wire 9 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3522_PTP_r1

@@ -24,13 +24,15 @@ pi 0.85.1 的 `dist/main.js:resolveAppMode()` 逐字是：
    設好 winsize 與 `TERM`，然後在裡面 exec 使用者給的命令
    （通常是 `python3 -m vacant_network.vrun.launcher … --stdin inherit -- …`）。
 2. 連續把 pty master 的輸出抽乾並落盤（不抽乾子行程會寫爆 pty buffer 卡死）。
-3. **決定什麼時候「人」會離開**，然後模擬那個離開：
-   · 首選訊號＝`--done-when-hooklog <path>` 裡出現 `event == "stop"`
-     （pi extension 的 `agent_end`）——**確定性**，不是猜。
-   · 沒有 hook log 時退回 `--idle <秒>` 的輸出靜默偵測（**啟發式**，會被
-     會自己重繪的 TUI 騙到 ⇒ 落盤記 `done_signal="idle"` 讓判讀的人知道）。
-4. 依序升級送出離開動作，**每一步落盤**：`ctrl_d` → `ctrl_c ×2` → `SIGTERM`
-   → `SIGKILL`。真的是哪一步讓它結束的，寫在 `ended_by` 欄位。
+3. **決定什麼時候「人」會離開**：
+   · 有 `--done-when-hooklog <path>` ⇒ **只看它**，看 `event == "stop"`
+     （pi extension 的 `agent_end`）的筆數到不到 `--turns`。確定性，不是猜。
+   · 沒有 hook log 才退回 `--idle <秒>` 的輸出靜默偵測（**啟發式**）。
+     🔴 **兩者不是 OR**：`pi -p` 在跑的時候 stdout 一個字都不吐，idle 會在
+     120 秒誤判「做完了」然後把還在想的 agent 砍掉（2026-09-20 實測，8 格）。
+4. 模擬離開：**只有 Ctrl-D 一級**（`--no-quit` 則連這一級都不送）。
+   逾時交給 `--cap`，那是唯一會送訊號（SIGTERM→SIGKILL）的地方。
+   真的是哪一步讓它結束的，寫在 `ended_by`（`self`／`ctrl_d`／`sigterm`／`sigkill`）。
 
 ## 誠實邊界（改碼請保留）
 
@@ -153,7 +155,7 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
           hooklog: pathlib.Path | None = None,
           grace_s: float = 60.0, min_run_s: float = 5.0,
           post_done_s: float = 3.0, turns: int = 1,
-          turn_text: str = "",
+          turn_text: str = "", no_quit: bool = False,
           max_transcript_bytes: int = 16 * 1024 * 1024,
           env_extra: dict[str, str] | None = None) -> dict:
     """在一張真 pty 裡跑 `argv`，跑完模擬「人離開」，回一份逐項落盤的報告。"""
@@ -163,6 +165,7 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
         "argv": argv, "rows": rows, "cols": cols,
         "idle_s": idle_s, "cap_s": cap_s, "grace_s": grace_s,
         "post_done_s": post_done_s, "turns_requested": turns,
+        "no_quit": no_quit,
         "turn_text": turn_text or None, "turns_typed": 0,
         "stops_seen": None,
         "hooklog": str(hooklog) if hooklog else None,
@@ -275,7 +278,14 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
                 last_typed_at = now
                 note("typed_turn", n=rep["turns_typed"], stops=stops)
                 send(turn_text.encode("utf-8") + b"\r", f"turn#{rep['turns_typed']}")
-            elif (now - last_out) >= idle_s:
+            elif hooklog is None and (now - last_out) >= idle_s:
+                # 🔴 **有 hook log 就不准用 idle。** 2026-09-20 實測：`pi -p`
+                #   在跑的時候 stdout **一個字都不吐**（print 模式把整段話
+                #   留到最後才寫），⇒ idle 在 120 秒就誤判「做完了」，
+                #   接著整條階梯把**還在想的 pi** 跟 launcher 一起砍掉。
+                #   10 個 PTP 格裡 8 個是這樣死的（`done_signal=idle`、
+                #   `ended_by=sigterm`、`run_*.json` 不存在）。
+                #   idle 只是**沒有 hook log 時的退路**，不是第二個判準。
                 done_seen, done_at = True, now
                 rep["done_signal"] = "idle"
                 note("done", how="idle", quiet_s=round(now - last_out, 2))
@@ -293,33 +303,18 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
             agent_gone = True
             rep["agent_gone_at_s"] = round(now - t0, 3)
             note("agent_gone", how="hooklog_session_end")
-        if not agent_gone:      # agent 還在 ⇒ 階梯照走；收攤了 ⇒ 只等
-            if done_seen and quit_stage == 0 and (now - done_at) >= post_done_s:
-                quit_stage, stage_at = 1, now
-                send(CTRL_D, "ctrl_d")
-            elif quit_stage == 1 and (now - stage_at) >= grace_s:
-                quit_stage, stage_at = 2, now
-                send(CTRL_C, "ctrl_c#1")
-                time.sleep(0.05)
-                send(CTRL_C, "ctrl_c#2")
-            elif quit_stage == 2 and (now - stage_at) >= grace_s:
-                quit_stage, stage_at = 3, now
-                note("signal", sig="SIGTERM")
-                rep["signaled_by"] = "SIGTERM"
-                try:
-                    os.kill(pid, signal.SIGTERM)
-                except OSError as exc:
-                    note("signal_failed", sig="SIGTERM", err=repr(exc))
-            elif quit_stage == 3 and (now - stage_at) >= grace_s:
-                quit_stage, stage_at = 4, now
-                note("signal", sig="SIGKILL")
-                rep["signaled_by"] = "SIGKILL"
-                try:
-                    os.kill(pid, signal.SIGKILL)
-                except OSError as exc:
-                    note("signal_failed", sig="SIGKILL", err=repr(exc))
+        # ── 模擬「人離開」：**只有 Ctrl-D 一級** ──────────────────────
+        #  🔴 原本還有 `Ctrl-C ×2` → `SIGTERM` 兩級。實測 20 個互動格
+        #     **20 個都是 Ctrl-D 就結束**（`ended_by=ctrl_d` 100%），
+        #     那兩級一次都沒幫上忙，卻在 PTP 那一臂砍掉 8 格。
+        #     ⇒ 拿掉。逾時交給 `--cap`（唯一的硬停）。
+        if (not agent_gone and not no_quit
+                and done_seen and quit_stage == 0
+                and (now - done_at) >= post_done_s):
+            quit_stage, stage_at = 1, now
+            send(CTRL_D, "ctrl_d")
 
-        # ── 絕對上限 ──────────────────────────────────────────────────
+        # ── 絕對上限（唯一會送訊號的地方）────────────────────────────
         if (now - t0) >= cap_s and quit_stage < 3:
             note("cap_reached", wall_s=round(now - t0, 1))
             quit_stage, stage_at = 3, now
@@ -329,6 +324,14 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
                 os.kill(pid, signal.SIGTERM)
             except OSError:
                 pass
+        elif quit_stage == 3 and (now - stage_at) >= grace_s:
+            quit_stage, stage_at = 4, now
+            note("signal", sig="SIGKILL")
+            rep["signaled_by"] = "SIGKILL"
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except OSError as exc:
+                note("signal_failed", sig="SIGKILL", err=repr(exc))
 
     fh.close()
     try:
@@ -420,6 +423,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="要幾個 agent 回合（>1 時每個回合結束後打一次 --turn-text）")
     ap.add_argument("--turn-text", default="",
                     help="第 2 個回合起，模擬的人打進去的那一句（逐字落盤）")
+    ap.add_argument("--no-quit", action="store_true",
+                    help="**什麼都不送**，只等子行程自己結束（`pi -p` 那一臂用）")
     ap.add_argument("--self-check", action="store_true",
                     help="只跑量具自檢（正控制＋負控制），不跑命令")
     ap.add_argument("cmd", nargs=argparse.REMAINDER)
@@ -442,6 +447,7 @@ def main(argv: list[str] | None = None) -> int:
                 # `--turns 0` ＝ **人提早關掉終端機**（不等 agent 收工）。
                 # 那是真實情境，不是錯誤用法 ⇒ 不夾成 1。
                 post_done_s=args.post_done, turns=max(0, args.turns),
+                no_quit=args.no_quit,
                 turn_text=args.turn_text,
                 hooklog=(pathlib.Path(args.done_when_hooklog).resolve()
                          if args.done_when_hooklog else None))

@@ -1,0 +1,3 @@
+ORACLE mode=print stdin_tty=1 stdout_tty=1
+Error: PI_STARTUP_BENCHMARK only supports interactive mode
+ORACLE_EXIT=1

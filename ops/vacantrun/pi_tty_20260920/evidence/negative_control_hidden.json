@@ -1,0 +1,36 @@
+{
+  "stub": "def <entry>(*a, **k): return None",
+  "per_task": {
+    "lcb_3522": {
+      "entry": "resultsArray",
+      "status": "fail",
+      "passed": 0,
+      "total": 27
+    },
+    "lcb_3584": {
+      "entry": "validSequence",
+      "status": "fail",
+      "passed": 0,
+      "total": 28
+    },
+    "lcb_3649": {
+      "entry": "findMinimumTime",
+      "status": "fail",
+      "passed": 0,
+      "total": 26
+    },
+    "lcb_3715": {
+      "entry": "maximumCoins",
+      "status": "fail",
+      "passed": 0,
+      "total": 26
+    },
+    "lcb_3789": {
+      "entry": "maxSubarrays",
+      "status": "fail",
+      "passed": 0,
+      "total": 26
+    }
+  },
+  "blocks_all": true
+}

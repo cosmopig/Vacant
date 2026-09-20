@@ -1,0 +1,9 @@
+=== 前 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-1GZdBZ/extensions/vacant.ts
+[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 377a75c47ca3→377a75c47ca3　wire 4 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3715_PTP_r1
+test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]
+
+=== 後 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-1GZdBZ/extensions/vacant.ts
+[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 377a75c47ca3→377a75c47ca3　wire 4 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3715_PTP_r1
+test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]

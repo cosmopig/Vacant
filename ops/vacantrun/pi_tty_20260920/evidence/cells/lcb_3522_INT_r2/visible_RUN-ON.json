@@ -1,0 +1,46 @@
+{
+  "suite": "visible",
+  "task_id": "ttymode_lcb_3522_INT_r2",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 30,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_03",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 3,
+      "total": 3,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 3,
+  "total": 3,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "7fc9200711b6ec8f96063ab111ef209bc24bea6c2d57005edc5e536c5c7c50c0"
+}

@@ -1,0 +1,7 @@
+=== 前 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-KdzMzV/extensions/vacant.ts
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 77297617c942→66fa1d23f0fc　wire 8 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3649_PTP_r1
+
+=== 後 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-KdzMzV/extensions/vacant.ts
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 77297617c942→66fa1d23f0fc　wire 8 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3649_PTP_r1
