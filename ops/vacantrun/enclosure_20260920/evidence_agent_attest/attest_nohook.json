@@ -1,0 +1,55 @@
+{
+  "schema": "vacant-attest/1",
+  "run_id": "nohook",
+  "agent": "pi",
+  "enclosure": {
+    "applied": true,
+    "ns_id": "net:[4026532736]",
+    "policy_sha256": "a36784958d62c5bafe1cef1c191e33fb5aa4186d328aea8cffda5b9f895e5190",
+    "probe": {
+      "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+      "interfaces": [
+        "lo"
+      ],
+      "outer_net_ns": "net:[4026531840]",
+      "ns_differs_from_outer": true,
+      "policy_path": "/run/vacant/policy.json",
+      "policy_present": true,
+      "door_sock": "/run/vacant/relay.sock",
+      "door_reachable": true,
+      "reason": "只有 loopback 一張介面，而且 netns 與圍牆外面不同（硬證據）",
+      "probed_at": 1789872948.032511,
+      "probed_by_pid": 9
+    }
+  },
+  "framework_hook": {
+    "agent": "pi",
+    "contract_version": null,
+    "canary_fired": false,
+    "events_n": null,
+    "log": "/var/tmp/vacant-attest-agent-20260920/ws_nohook/hooks.jsonl",
+    "install_attempted": true,
+    "version_drift": null,
+    "reason": "宣稱裝過掛鉤，但掛鉤日誌根本不存在 ⇒ 掛鉤沒跑。⚠ 這就是 `install-status` 說「✓ 已寫入」而它其實起不來的那一格——不准用安裝推論存在。"
+  },
+  "reconciled": {
+    "relay_calls": 2,
+    "hook_events": null,
+    "unexplained": null,
+    "canary_calls": 0,
+    "refused_path": 0,
+    "unexplained_detail": null,
+    "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+    "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+  },
+  "tier": "B",
+  "attested": false,
+  "b_prime_kind": null,
+  "tier_sentence": "每一個離開這個行程的位元組都留下紀錄；**但分不出哪一通是模型叫的、哪一通是框架自己叫的**。",
+  "tier_reasons": [
+    "圍牆成立、**掛鉤沒燒**（canary_fired=False）",
+    "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+  ],
+  "in_process_model": null,
+  "assembled_at": 1789872953.3301668
+}

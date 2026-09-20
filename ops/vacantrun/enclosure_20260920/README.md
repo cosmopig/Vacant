@@ -30,6 +30,20 @@ bash ops/vacantrun/enclosure_20260920/run_agent.sh opencode
 bash ops/vacantrun/enclosure_20260920/run_attest.sh
 ```
 
+```bash
+# **一張真 agent 的 A 級收據**（pi 0.85.1；八格含三個負控制＋工具改寫探針）
+bash ops/vacantrun/enclosure_20260920/run_agent_attest.sh pi \
+     timing enc noenc nohook rogue mutate_ctl mutate mutate_all
+```
+
+`run_agent_attest.sh` 是 `../../../decisions/DECISION_20260920_FIRST_TIER_A_RECEIPT.md`
+的可重跑版本，也是 `run_agent.sh`（真 agent 在圍牆裡）與 `run_attest.sh`
+（四個欄位＋分級）**併成的一支**。⚠ 它跟 `run_attest.sh` 的差別就是全部：
+**這一支一次都沒有呼叫 `hookcli`**（`grep -c hookcli` ＝ 0），canary 只可能由
+**pi 自己的 extension** 燒起來。2026-09-20 實測
+`tier="A"`／`applied=true`／`canary_fired=true`／`unexplained=0`，22 格判準全綠。
+原始資料在 `evidence_agent_attest/`。
+
 `run_attest.sh` 是 `DECISION_20260920_RECEIPT_ATTESTATION.md` 的可重跑版本：
 `enclosure{ns_id, policy_sha256, applied}`／`framework_hook{…, canary_fired}`／
 `reconciled{relay_calls, hook_events, unexplained}`／`tier` 四個欄位，
@@ -226,6 +240,10 @@ bin/door_http_probe.py      在 enclosure 裡對門講 HTTP，逐格對答案
 bin/write_probe.py          寫入探針，印 errno 名字（EROFS ≠ ENOENT）
 bin/inner.sh                enclosure 內部：拉起 door_guest 再跑 wrap_agent.sh
 evidence/                   上面每一格的原始 JSON 與 log
+run_agent_attest.sh    ← **真 agent 的 A 級收據**：上面兩支併成一支，八格
+bin/agent_attest_inner.sh   enclosure 內部：探針 ＋ 真 agent（**零 hookcli 呼叫**）
+bin/strip_hook_pi.sh        `nohook` 負控制：刪掉 extension 再 exec 真的 pi
+evidence_agent_attest/      A 級那一輪的原始 JSON／掛鉤日誌／門的 journal
 ```
 
 ⚠ **`evidence/` 只有索引與 log，沒有原始 bytes。** `*.req.bin`／`*.resp.bin`
