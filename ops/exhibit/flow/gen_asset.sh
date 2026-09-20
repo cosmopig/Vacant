@@ -128,7 +128,7 @@ print("" if d is None else d)' "$1" "$2" 2>/dev/null; }
 { printf '{"at":"%s","id":"%s","flow_home":"%s","node":"%s","ffprobe":"%s","out":"%s","timeout":%s,"quality":"%s","resume":%s}\n' \
     "$(date -u +%FT%TZ)" "$ID" "$FLOW_HOME" "$(node --version)" \
     "$(ffprobe -version 2>/dev/null | head -1)" "$OUT" "$TIMEOUT" "$QUALITY" "$RESUME"; } > "$LOG_DIR/00_env.json"
-[ -f "$CLI" ] || fail 2 "找不到 flow CLI：$CLI（設 FLOW_HOME 指到它的目錄）"
+[ -f "$CLI" ] || fail 2 "找不到 flow CLI：${CLI}（設 FLOW_HOME 指到它的目錄）"
 command -v ffprobe >/dev/null || fail 2 "沒有 ffprobe，無法驗證影片"
 [ -e "$OUT" ] && fail 2 "輸出檔已存在，不覆蓋：$OUT"
 
@@ -149,7 +149,7 @@ if [ "$RESUME" = "1" ]; then
   say "→ --resume：跳過 prepare/submit，直接續等 id=$ID"
   step 06_submit node "$CLI" job --id "$ID" || fail 8 "--resume 但找不到 job 紀錄：$ID"
 else
-  [ -f "$FLOW_HOME/.flow/jobs/$ID.json" ] && fail 8 "job id 已存在（$ID）。CLI 永不重送同一個 id。要續跑請加 --resume，要新跑請換 id。"
+  [ -f "$FLOW_HOME/.flow/jobs/$ID.json" ] && fail 8 "job id 已存在（${ID}）。CLI 永不重送同一個 id。要續跑請加 --resume，要新跑請換 id。"
   if [ -n "$PROMPT_TEXT" ]; then printf '%s' "$PROMPT_TEXT" > "$LOG_DIR/prompt.raw"
   elif [ -n "$PROMPT_FILE" ]; then cp "$PROMPT_FILE" "$LOG_DIR/prompt.raw"
   else fail 64 "--prompt-file 或 --prompt 要給一個"; fi
@@ -205,7 +205,7 @@ if [ $AWAIT_RC -ne 0 ]; then
   ERR="$(jget "$LOG_DIR/07_await.json" error)"
   step 08_status_after node "$CLI" status || true
   case "$ERR" in
-    AMBIGUOUS_CANDIDATES) fail 7 "新素材多於 --max-candidates=$MAXC，不猜是哪一份（看 07_await.json）";;
+    AMBIGUOUS_CANDIDATES) fail 7 "新素材多於 --max-candidates=${MAXC}，不猜是哪一份（看 07_await.json）";;
     TIMEOUT_UNVERIFIED)   fail 3 "${TIMEOUT}s 內沒量到穩定的新素材。**沒量到 ≠ 生成失敗**（鐵律 3）：額度已經花了，job=$ID 還在，用 --resume 續等／續下載，不要重送。真失敗會在 08_status_after.json 的頁面文字看到錯誤字樣。";;
     *)                    fail 3 "等待階段失敗：$ERR";;
   esac

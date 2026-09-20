@@ -85,15 +85,15 @@ for p in "$TV_PORT" "$TWIN_PORT"; do
   case "$CMD" in
     *serve_twin.py*|*http.server*)
       if [ "${VACANT_EXHIBIT_KILL_STALE:-0}" = "1" ]; then
-        warn "埠 $p 被上一次留下來的展件行程佔著（pid $PID）⇒ 砍掉重來"
+        warn "埠 $p 被上一次留下來的展件行程佔著（pid ${PID}）⇒ 砍掉重來"
         kill "$PID" 2>/dev/null; sleep 2; kill -9 "$PID" 2>/dev/null
-        [ -n "$(port_holder "$p")" ] && bad "砍不掉 pid $PID，埠 $p 還是被佔著"
+        [ -n "$(port_holder "$p")" ] && bad "砍不掉 pid ${PID}，埠 $p 還是被佔著"
       else
-        bad "埠 $p 被上一次留下來的展件行程佔著（pid $PID: $CMD）"
+        bad "埠 $p 被上一次留下來的展件行程佔著（pid $PID: ${CMD}）"
         bad "  ⇒ 設 VACANT_EXHIBIT_KILL_STALE=1 讓它自己砍，或手動 kill $PID"
       fi ;;
     *)
-      bad "埠 $p 被**別的東西**佔著（pid $PID: $CMD）"
+      bad "埠 $p 被**別的東西**佔著（pid $PID: ${CMD}）"
       bad "  ⇒ 這一支不會去砍它。改埠（--twin-port／--tv-port）或先停掉那個服務。" ;;
   esac
 done
@@ -116,7 +116,7 @@ if [ "$LAN" = "1" ]; then
     esac
   else
     RC=$?
-    bad "區網 IP 抓不到（exhibit_boot.sh --print-host 回 $RC）：$(echo "$HOSTOUT" | tr '\n' ' ')"
+    bad "區網 IP 抓不到（exhibit_boot.sh --print-host 回 ${RC}）：$(echo "$HOSTOUT" | tr '\n' ' ')"
     [ "$RC" = "1" ] && bad "  ⚠ 回 1 而不是 2 ＝ 腳本在某處當場斷掉沒說話，那是 bug 不是環境問題"
   fi
 fi

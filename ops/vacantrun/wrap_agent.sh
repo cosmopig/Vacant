@@ -46,7 +46,7 @@ fi
 PROMPT="$*"
 
 if [ -z "${VACANT_RUN_PROXY:-}" ]; then
-    echo "沒有 \$VACANT_RUN_PROXY——這支要跑在 \`vacant run --\` 底下。停。" >&2
+    echo "沒有 \${VACANT_RUN_PROXY}——這支要跑在 \`vacant run --\` 底下。停。" >&2
     exit 2
 fi
 BASE="${VACANT_RUN_PROXY%/}"

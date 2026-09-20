@@ -47,7 +47,7 @@ code() { c=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 8 "$1" 2>/dev/nu
 head_ "一、展件伺服器活著嗎"
 for p in / /state /live/events.jsonl /phone.html /viewer.html; do
   c=$(code "$B$p")
-  [ "$c" = "200" ] && ok "$p → 200" || bad "$p → $c（展件伺服器沒起來或壞了）"
+  [ "$c" = "200" ] && ok "$p → 200" || bad "$p → ${c}（展件伺服器沒起來或壞了）"
 done
 
 head_ "二、電視那一頁拿得到嗎"
@@ -56,10 +56,10 @@ if [ "$SKIP_TV" = "1" ]; then
 else
   c=$(code "http://$HOST:$TV_PORT/world3/index.html")
   [ "$c" = "200" ] && ok "world3/index.html → 200" \
-    || bad "world3/index.html → $c（靜態站沒起來 ⇒ 電視會是白畫面）"
+    || bad "world3/index.html → ${c}（靜態站沒起來 ⇒ 電視會是白畫面）"
   c=$(code "http://$HOST:$TV_PORT/world3/scenes/index.json")
   [ "$c" = "200" ] && ok "scenes/index.json → 200（場景資料在）" \
-    || bad "scenes/index.json → $c（電視會沒有場景）"
+    || bad "scenes/index.json → ${c}（電視會沒有場景）"
 fi
 
 head_ "三、無人值守：沒人按的時候它自己會不會動"
@@ -74,9 +74,9 @@ else
   sleep "$SLEEP"
   N2=$(curl -sS --max-time 8 "$B/state" | python3 -c 'import json,sys;print(json.load(sys.stdin)["emitted"])' 2>/dev/null || echo x)
   if [ "$N1" != "x" ] && [ "$N2" != "x" ] && [ "$N2" -gt "$N1" ]; then
-    ok "輪播在動：emitted $N1 → $N2（沒有人碰它）"
+    ok "輪播在動：emitted $N1 → ${N2}（沒有人碰它）"
   else
-    bad "輪播沒動：emitted $N1 → $N2（無人值守會停在同一格）"
+    bad "輪播沒動：emitted $N1 → ${N2}（無人值守會停在同一格）"
   fi
 fi
 
@@ -110,7 +110,7 @@ else
   else
     ok "中文字型 $N 個"
     for f in "Noto Serif CJK TC" "Noto Sans CJK TC"; do
-      fc-list | grep -qi "${f#Noto }" || warn "找不到 $f（電視的字型堆疊點名要 serif 那一支）"
+      fc-list | grep -qi "${f#Noto }" || warn "找不到 ${f}（電視的字型堆疊點名要 serif 那一支）"
     done
     fc-list :lang=zh | grep -qi "bold" \
       || warn "只有 Regular 沒有 Bold：大標會是合成粗體（能看，但不是設計的樣子）"
@@ -140,9 +140,9 @@ case "$LISTEN" in
     R=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 8 -X POST \
         -H 'content-type: application/json' -d '{"action":"next"}' "$B/control" 2>/dev/null)
     if [ "$R" = "403" ]; then
-      ok "綁在 $LISTEN，沒帶 token → 403（門檻在）"
+      ok "綁在 ${LISTEN}，沒帶 token → 403（門檻在）"
     else
-      bad "綁在 $LISTEN 而且**按得動**（回 $R）：同一個區網上任何人都按得動這台電視"
+      bad "綁在 $LISTEN 而且**按得動**（回 ${R}）：同一個區網上任何人都按得動這台電視"
       bad "  ⇒ 去掉 --no-token，或改用只有展場手機連得到的獨立熱點"
     fi
     # 電視拿不拿得到 token（拿不到＝QR 沒有 token＝全場一顆鍵都按不動）。
@@ -153,7 +153,7 @@ case "$LISTEN" in
     case "$MINE" in
       *"t="*) ok "電視這一端的 phone_url 帶著 token（QR 掃進去按得動）" ;;
       "?"|"") warn "讀不到 /state 的 phone_url，沒量到電視拿不拿得到 token" ;;
-      *)      bad "有 token 但電視這一端的 phone_url **沒有帶**（$MINE）"
+      *)      bad "有 token 但電視這一端的 phone_url **沒有帶**（${MINE}）"
               bad "  ⇒ QR 掃進去是沒有 token 的網址，全場三顆鍵都按不動" ;;
     esac
     # ⚠ 「token 會不會外流給區網上的其他人」**這台機器量不到**。
@@ -164,7 +164,7 @@ case "$LISTEN" in
     warn "  要量：拿另一台連同一個網路的裝置跑"
     warn "  curl -s http://$HOST:$TWIN_PORT/state | grep -o 'phone_url[^,]*'"
     warn "  看得到 t= 就是外流了（那代表 token 只是一個 GET 的距離）" ;;
-  *) ok "只綁 $LISTEN（手機連不到；展場要手機互動才需要 --lan）" ;;
+  *) ok "只綁 ${LISTEN}（手機連不到；展場要手機互動才需要 --lan）" ;;
 esac
 
 head_ "結果"
