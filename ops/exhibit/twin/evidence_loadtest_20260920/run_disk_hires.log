@@ -1,0 +1,41 @@
+暫存目錄：/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/twin_loadtest_z14203eq（不是 ops/exhibit/twin/store/，跟正式真相來源完全分開）
+
+=== 0. 先證明壓測打得動（N=1 基準） ===
+  [OK] append 一列，count 真的 +1 — before=0 after=1
+
+=== 0b. 負控制：verify() 抓不抓得到壞鏈（証明檢查本身沒有睡著）===
+  [OK] 乾淨的鏈：verify().ok
+  [OK] 竄改後：verify().ok 變 False — payload 與 payload_sha256 對不上（內容被改過）
+  [OK] broken_at 指到第 2 列（不是 0、不是別的） — 2
+
+=== 1. 併發寫入（thread，N=5，n5） ===
+  [OK] N=5：5 個 worker 全部沒有例外 — 失敗 0 個，其中 'database is locked' 0 個：[]
+  [OK] N=5：count 增加量＝成功寫入數（before=1） — before=1 after=6 ok_writes=5
+  [OK] N=5：seq 連號無重複無跳號 — len=6 前 5 個=[1, 2, 3, 4, 5] 後 5 個=[2, 3, 4, 5, 6]
+  [OK] N=5：verify() 仍然綠（鏈沒斷） — 全鏈自洽
+
+=== 1b. 併發寫入（process 交叉核對，N=2，px） ===
+  [OK] process N=2：全部行程 returncode==0 — 失敗 0 個：[]
+  [OK] process N=2：count 增加量＝成功數 — before=0 after=2 ok=2
+  [OK] process N=2：verify() 仍然綠 — 全鏈自洽
+
+=== 3a. generate 排隊行為（結構量測，stub 延遲=0.2s，不打 1003） ===
+  [OK] N=5：generate() 是嚴格序列（總時間≈N×delay，不是 N/4×delay） — 實得 1.21s；N×delay=1.00s；若有 4 串並發理論值≈0.45s
+  [OK] N=5：5 筆全部處理完、沒有卡住 — generated=5 remaining=0
+
+=== 3a-2. fallback_deterministic 觸發計數（stub 回亂碼）===
+  [OK] 亂碼觸發全部退化為 fallback_deterministic — degraded=5/5
+  [OK] roster 上的 engine 欄位也確實標成 fallback_deterministic — ['fallback_deterministic', 'fallback_deterministic', 'fallback_deterministic', 'fallback_deterministic', 'fallback_deterministic']
+
+=== 3b. generate race（2 個併發 generate() 打同一顆 store）===
+  [量到] 5 個待生成、2 個併發 generate()：共產生 10 個 GENERATED 事件，其中 5 位觀眾被生成超過一次：{'race-0': 2, 'race-1': 2, 'race-2': 2, 'race-3': 2, 'race-4': 2}
+  [OK] 每位觀眾至少被生成一次（沒有人被漏掉） — ={'race-0': 2, 'race-1': 2, 'race-2': 2, 'race-3': 2, 'race-4': 2}
+  [OK] 鏈本身仍然完整（race 造成的是重複事件，不是壞鏈）
+
+=== 4. 磁碟（400 位觀眾，submitted+generated(fallback)+published(模擬) 全生命週期）===
+  [OK] 400 位觀眾 × 3 事件 = 1200 筆，實際筆數相符 — total_events=1200
+
+======================================================================
+全部檢查綠（負控制與正控制都有跑過）
+報告寫到 ops/exhibit/twin/evidence_loadtest_20260920/report_disk_hires.json
+EXIT_CODE=0

@@ -1,0 +1,204 @@
+{
+  "generated_at": "2026-09-20T14:54:02.906680+00:00",
+  "tmpdir": "/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/twin_loadtest_z14203eq",
+  "levels": [
+    5
+  ],
+  "sections": {
+    "baseline": {
+      "ok": true,
+      "before": 0,
+      "after": 1
+    },
+    "verify_negative_control": {
+      "clean_ok": true,
+      "corrupt_detected": true,
+      "broken_at_correct": true,
+      "verify_after_corruption": {
+        "ok": false,
+        "checked": 1,
+        "broken_at": 2,
+        "reason": "payload 與 payload_sha256 對不上（內容被改過）"
+      }
+    },
+    "concurrent_writers_thread": [
+      {
+        "n": 5,
+        "mode": "thread",
+        "wall_s": 0.0354,
+        "ok": 5,
+        "failed": 0,
+        "database_is_locked_count": 0,
+        "errors_sample": [],
+        "latency_s": {
+          "min": 0.0101,
+          "median": 0.0158,
+          "max": 0.0309
+        },
+        "count_before": 1,
+        "count_after": 6,
+        "chain_verify": {
+          "ok": true,
+          "checked": 6,
+          "broken_at": null,
+          "reason": "全鏈自洽",
+          "head": "2755efc8ebc80e73a68b9f41ac516f24d0b21aa7645cfc1982c62abc03432564",
+          "genesis": "9b62227f72bfe5e7be9297602931304deef2b5806d54a5085557d7bbb39e272e"
+        },
+        "seq_continuous_no_dupes": true
+      }
+    ],
+    "concurrent_writers_process_crosscheck": {
+      "n": 2,
+      "mode": "process",
+      "wall_s": 0.8716,
+      "ok": 2,
+      "failed": 0,
+      "errors_sample": [],
+      "count_before": 0,
+      "count_after": 2,
+      "chain_verify": {
+        "ok": true,
+        "checked": 2,
+        "broken_at": null,
+        "reason": "全鏈自洽",
+        "head": "1add59917860f88f059fad386ed180efc2fdce4e9cb1f7b77ea2ccd74e082a81",
+        "genesis": "738f4d1d3d354e3a22c166b67c0d86c4548ed79181ca8922408676f762afb1f5"
+      }
+    },
+    "generate_serial_structure": {
+      "delay_s": 0.2,
+      "runs": [
+        {
+          "n": 5,
+          "wall_s": 1.209,
+          "expect_serial_s": 1.0,
+          "expect_if_4way_s": 0.45,
+          "is_serial": true,
+          "generate_result": {
+            "ok": true,
+            "generated": 5,
+            "degraded": 0,
+            "remaining": 0
+          },
+          "stub_calls_received": 5
+        }
+      ]
+    },
+    "generate_fallback_trigger": {
+      "generate_result": {
+        "ok": true,
+        "generated": 5,
+        "degraded": 5,
+        "remaining": 0
+      },
+      "engines": [
+        "fallback_deterministic",
+        "fallback_deterministic",
+        "fallback_deterministic",
+        "fallback_deterministic",
+        "fallback_deterministic"
+      ]
+    },
+    "generate_race": {
+      "n_pending": 5,
+      "n_concurrent_loops": 2,
+      "per_generate_call": [
+        {
+          "ok": true,
+          "generated": 5,
+          "degraded": 5,
+          "remaining": 0
+        },
+        {
+          "ok": true,
+          "generated": 5,
+          "degraded": 5,
+          "remaining": 0
+        }
+      ],
+      "total_generated_events": 10,
+      "expected_if_no_race": 5,
+      "duplicated_subjects": {
+        "race-0": 2,
+        "race-1": 2,
+        "race-2": 2,
+        "race-3": 2,
+        "race-4": 2
+      },
+      "duplicate_rate": 1.0
+    },
+    "real_model_small_n": {
+      "skipped": true,
+      "reason": "--hit-1003-n 未指定（預設 0），沒有打 1003"
+    },
+    "disk_usage": {
+      "n_visitors": 400,
+      "total_events": 1200,
+      "size_bytes": {
+        "empty_db": {
+          "main": 4096,
+          "wal": 53592,
+          "shm": 32768,
+          "total_live": 90456
+        },
+        "after_submit": {
+          "main": 180224,
+          "wal": 4120032,
+          "shm": 32768,
+          "total_live": 4333024
+        },
+        "after_generate_fallback": {
+          "main": 348160,
+          "wal": 4120032,
+          "shm": 32768,
+          "total_live": 4500960
+        },
+        "after_publish": {
+          "main": 634880,
+          "wal": 4124152,
+          "shm": 32768,
+          "total_live": 4791800
+        },
+        "after_wal_checkpoint_truncate": {
+          "main": 651264,
+          "wal": 0,
+          "shm": 32768,
+          "total_live": 684032
+        }
+      },
+      "bytes_per_event": {
+        "live_incl_wal_shm": 3917.8,
+        "checkpointed_main_file_only": 542.7
+      },
+      "seven_day_projection_ASSUMPTIONS_NOT_MEASURED": [
+        {
+          "assumption": "保守：50 人/天",
+          "visitors_per_day": 50,
+          "days": 7,
+          "events_est": 1050,
+          "bytes_est": 569856,
+          "mb_est": 0.57
+        },
+        {
+          "assumption": "中：150 人/天",
+          "visitors_per_day": 150,
+          "days": 7,
+          "events_est": 3150,
+          "bytes_est": 1709568,
+          "mb_est": 1.71
+        },
+        {
+          "assumption": "展場硬約束說的『十幾個人同時』乘整天：300 人/天",
+          "visitors_per_day": 300,
+          "days": 7,
+          "events_est": 6300,
+          "bytes_est": 3419136,
+          "mb_est": 3.42
+        }
+      ]
+    }
+  },
+  "fails": [],
+  "all_green": true
+}
