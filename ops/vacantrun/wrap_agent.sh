@@ -52,7 +52,35 @@ fi
 BASE="${VACANT_RUN_PROXY%/}"
 # 每次跑用一個新的設定目錄：設定是**這一次 run 的產物**，不是使用者的狀態。
 CFG="$(mktemp -d "${TMPDIR:-/tmp}/vacant-wrap-XXXXXX")"
-trap 'rm -rf "$CFG"' EXIT
+
+# ── 收尾契約（2026-09-20 補；與 `gateshim` 的三層同一套）────────────────────
+# ⚠ **原本只有 `trap … EXIT`，而 EXIT trap 擋不住 `SIGKILL`。**
+#   pbgate 那幾批用 `timeout 1200` 外包、報告裡好幾格 `agent_rc=-9`
+#   ⇒ 被 `-9` 砍的那一份永遠留在 `/tmp`。2026-09-20 在 vacant-dev 上數到
+#   **467 個殘留、共約 7.4 GB**，磁碟被吃到 **98%**（那台只有 38G，
+#   而這個 repo 的紀律是「塞爆會讓實驗安靜寫壞」）。
+#
+#   層 1  EXIT trap                    一般結束、失敗、Python 例外
+#   層 2  INT/TERM/HUP 也走同一個 trap   溫和的終止（原本沒有）
+#   層 3  **下一跑開場的掃地機**          `SIGKILL`／斷電
+#
+# ⚠ **能說的是「不累積」不是「當下不留」**：被 `kill -9` 的那一份**會**留到
+#   下一次有人跑這支。穩態 O(1) 不是 O(N)。這支從此不跑，那一份就一直在。
+trap 'rm -rf "$CFG"' EXIT INT TERM HUP
+
+# 掃地機：只動**自己這個前綴**、**六小時以上**、而且**沒有行程開著**的。
+# ⚠ 三道門缺一不可——並行跑的別格也在 `/tmp/vacant-wrap-*` 底下。
+#   `lsof` 不在就**不掃**（問不出來 ⇒ 不動，鐵律 3：沒量到 ≠ 量到 0）。
+#   整段包在 `|| true` 裡：**掃地失敗不可以讓這一跑失敗**。
+if command -v lsof >/dev/null 2>&1; then
+    { find "${TMPDIR:-/tmp}" -maxdepth 1 -name 'vacant-wrap-*' -type d -mmin +360 2>/dev/null \
+      | while IFS= read -r _d; do
+          [ "$_d" = "$CFG" ] && continue
+          if [ "$(lsof +D "$_d" 2>/dev/null | tail -n +2 | wc -l | tr -d ' ')" = "0" ]; then
+              rm -rf "$_d" 2>/dev/null || true
+          fi
+        done; } || true
+fi
 
 case "$AGENT" in
 pi)
