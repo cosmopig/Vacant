@@ -1,0 +1,237 @@
+[
+  {
+    "seq": 1,
+    "ts_unix_ms": 1789915858701,
+    "ts_utc": "2026-09-20T14:50:58.701000+00:00",
+    "sub_id": "fbA1",
+    "kind": "submitted",
+    "source": "probe_fallback_1003",
+    "payload_sha256": "3a498777a54f0f82b0c0ae7b7abd2eaf76537bd17e255eabb602a8045b3ab41c",
+    "prev_sha256": "27c5a6ecfe8b406c74866c8fd992d03d5691486af8f8e78a18fc6bc286fc4c94",
+    "row_sha256": "83e65fc1c8aac2ed404ae550e38a00500283b24c1489bc2211a6d14b1daef2a5",
+    "payload": {
+      "card": {
+        "color": "灰藍",
+        "first_line": "先看看有什麼。",
+        "need": "把桌面的檔案分類",
+        "shape": "方正",
+        "texture": "光滑",
+        "vibe": "冷靜、有條理"
+      },
+      "card_text": null,
+      "cloud_status": "probe",
+      "ts": null
+    }
+  },
+  {
+    "seq": 2,
+    "ts_unix_ms": 1789915858701,
+    "ts_utc": "2026-09-20T14:50:58.701000+00:00",
+    "sub_id": "fbA2",
+    "kind": "submitted",
+    "source": "probe_fallback_1003",
+    "payload_sha256": "b010631a31281c59989d9a9182539f2b9db43e6065f92d6912fd19296318e253",
+    "prev_sha256": "83e65fc1c8aac2ed404ae550e38a00500283b24c1489bc2211a6d14b1daef2a5",
+    "row_sha256": "8bab4c0c8943dd18de99c8d58cd58b0390b13ec09b1233892f83464788a30e4a",
+    "payload": {
+      "card": {
+        "color": "暖土",
+        "first_line": "想了很久要怎麼開頭。",
+        "need": "寫一封感謝信",
+        "shape": "圓潤",
+        "texture": "絨面",
+        "vibe": "溫柔、慢熱"
+      },
+      "card_text": null,
+      "cloud_status": "probe",
+      "ts": null
+    }
+  },
+  {
+    "seq": 3,
+    "ts_unix_ms": 1789915858702,
+    "ts_utc": "2026-09-20T14:50:58.702000+00:00",
+    "sub_id": "fbA3",
+    "kind": "submitted",
+    "source": "probe_fallback_1003",
+    "payload_sha256": "bc6e030cfa92a3b97a86df0b933818cc89a387e8a80d5421b357cb168db9203a",
+    "prev_sha256": "8bab4c0c8943dd18de99c8d58cd58b0390b13ec09b1233892f83464788a30e4a",
+    "row_sha256": "8575c887126f667ba359a8477d515113678dd244c3791d2f49cec9d3d9351ed7",
+    "payload": {
+      "card": {
+        "color": "苔綠",
+        "first_line": "先列出來再說。",
+        "need": "整理今天的待辦",
+        "shape": "小巧",
+        "texture": "指紋",
+        "vibe": "急性子、直接"
+      },
+      "card_text": null,
+      "cloud_status": "probe",
+      "ts": null
+    }
+  },
+  {
+    "seq": 4,
+    "ts_unix_ms": 1789915861646,
+    "ts_utc": "2026-09-20T14:51:01.646000+00:00",
+    "sub_id": "fbA1",
+    "kind": "generated",
+    "source": "local:fallback",
+    "payload_sha256": "d24ce21b9434337d45304534a25c794ca51b74e5b132c29312c65cde1418dd7e",
+    "prev_sha256": "8575c887126f667ba359a8477d515113678dd244c3791d2f49cec9d3d9351ed7",
+    "row_sha256": "93fd6e528433bad7dbc6d3f63e790a579fa32fd39b24f6178c8c19ab2966b1cc",
+    "payload": {
+      "arrival": "先看看有什麼。",
+      "degrade_reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+      "degraded_from": "lmstudio:gemma-4-12b-it-qat",
+      "engine": "fallback_deterministic",
+      "handover": "做完了，你看看對不對。",
+      "latency_ms": 2060,
+      "model": null,
+      "working": "讓我試試「把桌面的檔案分類」。（冷靜、有條理）"
+    }
+  },
+  {
+    "seq": 5,
+    "ts_unix_ms": 1789915863664,
+    "ts_utc": "2026-09-20T14:51:03.664000+00:00",
+    "sub_id": "fbA2",
+    "kind": "generated",
+    "source": "local:fallback",
+    "payload_sha256": "cda5d23383bbca1764e68ad2b84c71ae854fdbb9aa08b7ed4ec1f7a6602e5ae9",
+    "prev_sha256": "93fd6e528433bad7dbc6d3f63e790a579fa32fd39b24f6178c8c19ab2966b1cc",
+    "row_sha256": "15ce0d376751041476653990d6f8c6add03c329b43fba65230101df08e1d1591",
+    "payload": {
+      "arrival": "想了很久要怎麼開頭。",
+      "degrade_reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+      "degraded_from": "lmstudio:gemma-4-12b-it-qat",
+      "engine": "fallback_deterministic",
+      "handover": "做完了，你看看對不對。",
+      "latency_ms": 2016,
+      "model": null,
+      "working": "讓我試試「寫一封感謝信」。（溫柔、慢熱）"
+    }
+  },
+  {
+    "seq": 6,
+    "ts_unix_ms": 1789915865691,
+    "ts_utc": "2026-09-20T14:51:05.691000+00:00",
+    "sub_id": "fbA3",
+    "kind": "generated",
+    "source": "local:fallback",
+    "payload_sha256": "13b23728bb517c9eb53983a9d826087e772b34efea918b47559d050f8fa8df79",
+    "prev_sha256": "15ce0d376751041476653990d6f8c6add03c329b43fba65230101df08e1d1591",
+    "row_sha256": "3d9aba7086b9a975782ca8985d9ec4ad921e62c9574691fb1d62775c17e4cbe6",
+    "payload": {
+      "arrival": "先列出來再說。",
+      "degrade_reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+      "degraded_from": "lmstudio:gemma-4-12b-it-qat",
+      "engine": "fallback_deterministic",
+      "handover": "做完了，你看看對不對。",
+      "latency_ms": 2027,
+      "model": null,
+      "working": "讓我試試「整理今天的待辦」。（急性子、直接）"
+    }
+  },
+  {
+    "seq": 7,
+    "ts_unix_ms": 1789915869242,
+    "ts_utc": "2026-09-20T14:51:09.242000+00:00",
+    "sub_id": "fbB1",
+    "kind": "submitted",
+    "source": "probe_fallback_1003",
+    "payload_sha256": "896b4d4f60a554591006998cf1c61905b878d793951b3f55a9a1044c6a33d3c5",
+    "prev_sha256": "3d9aba7086b9a975782ca8985d9ec4ad921e62c9574691fb1d62775c17e4cbe6",
+    "row_sha256": "be0cdf1d39f39202abb723c4f5f89eb4ac954bdbd3a841a0fb23d50ee4c4baa2",
+    "payload": {
+      "card": {
+        "color": "沙金",
+        "first_line": "一本一本來。",
+        "need": "把書按高度排好",
+        "shape": "厚實",
+        "texture": "斑駁",
+        "vibe": "耐心、龜毛"
+      },
+      "card_text": null,
+      "cloud_status": "probe",
+      "ts": null
+    }
+  },
+  {
+    "seq": 8,
+    "ts_unix_ms": 1789915869244,
+    "ts_utc": "2026-09-20T14:51:09.244000+00:00",
+    "sub_id": "fbB2",
+    "kind": "submitted",
+    "source": "probe_fallback_1003",
+    "payload_sha256": "8ae5a0e79052a722aac2c7a9b5bc13f981b505c630dd5e0af7c47a5b5f52d043",
+    "prev_sha256": "be0cdf1d39f39202abb723c4f5f89eb4ac954bdbd3a841a0fb23d50ee4c4baa2",
+    "row_sha256": "c97d366787c85c3da33d464f30443add08c6f7dbcefd68a7bea349f64060fcda",
+    "payload": {
+      "card": {
+        "color": "奶油",
+        "first_line": "先看最舊的那一筆。",
+        "need": "把備忘錄按日期排序",
+        "shape": "修長",
+        "texture": "光滑",
+        "vibe": "謹慎、愛乾淨"
+      },
+      "card_text": null,
+      "cloud_status": "probe",
+      "ts": null
+    }
+  },
+  {
+    "seq": 9,
+    "ts_unix_ms": 1789915898557,
+    "ts_utc": "2026-09-20T14:51:38.557000+00:00",
+    "sub_id": "fbB1",
+    "kind": "generated",
+    "source": "1003:http://127.0.0.1:1234/v1",
+    "payload_sha256": "87f02fc6ba934d40e65ecb550305ec4245ee579cdd7c6a5e8786993fde749e26",
+    "prev_sha256": "c97d366787c85c3da33d464f30443add08c6f7dbcefd68a7bea349f64060fcda",
+    "row_sha256": "79ba8582e62791f9cbd61ba07e62d8405a706910bd08f89bda78a6633c515485",
+    "payload": {
+      "arrival": "又是這片斑駁且沉重的沙金色空間，真讓人焦躁。",
+      "budget_escalated": false,
+      "completion_tokens": 1557,
+      "endpoint": "http://127.0.0.1:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "全部按高度排好了，請您過目有沒有任何不完美。",
+      "latency_ms": 28241,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 114,
+      "reasoning_chars": 4329,
+      "reasoning_tokens": 1483,
+      "working": "一公分都不能錯，每一本書的頂端都要平整對齊。"
+    }
+  },
+  {
+    "seq": 10,
+    "ts_unix_ms": 1789915918382,
+    "ts_utc": "2026-09-20T14:51:58.382000+00:00",
+    "sub_id": "fbB2",
+    "kind": "generated",
+    "source": "1003:http://127.0.0.1:1234/v1",
+    "payload_sha256": "8940a36b069f22723e4b196e9f57c0f0963ea4cd01665607e8e793b312acccdf",
+    "prev_sha256": "79ba8582e62791f9cbd61ba07e62d8405a706910bd08f89bda78a6633c515485",
+    "row_sha256": "1e573e0df5f064540cc2a9f9ceb4b0c80ea3843c7201b089c35e29a02d395e7e",
+    "payload": {
+      "arrival": "環境似乎有些雜亂，我得先從細節處梳理。",
+      "budget_escalated": false,
+      "completion_tokens": 820,
+      "endpoint": "http://127.0.0.1:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "所有的備忘錄都已按日期整齊排列好。",
+      "latency_ms": 19823,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 102,
+      "reasoning_chars": 2235,
+      "reasoning_tokens": 752,
+      "working": "先看最舊的那一筆，確保每一項都對齊。"
+    }
+  }
+]
