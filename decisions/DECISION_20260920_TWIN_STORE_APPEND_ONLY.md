@@ -375,3 +375,55 @@ curl -X POST https://vacant-world.cosmopig.com/api/submit \
 刻意留著不刪），repo 裡放的是那一次跑的**人讀證據**
 （`*_event_stream.json`、`04_cloud_events.jsonl`、verify／stats 輸出）。
 兩者不是同一份東西。
+
+---
+
+## 九、追加（同日稍晚）— 缺口 F 已補：`fallback_deterministic` 在 1003 上實跑過了
+
+第七節原本寫著：「1003 的 `fallback_deterministic` 路徑沒有在 1003 上實跑過
+（只在 Mac 的 selftest 跑過）。1003 上跑的兩次 generate 都是 `--no-fallback`。」
+這裡補上。
+
+一鍵重跑：`ops/exhibit/twin/probe_fallback_1003.sh`（**18/18 綠，退出碼 0**）。
+證據：`ops/exhibit/twin/evidence_1003_fallback_20260920/`。
+
+**做法**：開一個**新** store（`store_fallback_test/twinstore.sqlite3`，
+與既有真相來源 `store/twinstore.sqlite3` 完全分開、都沒有動它）；端點指到
+1003 本機一個沒人聽的埠（`127.0.0.1:19191`）——**不是關掉 1234 的 LM Studio**，
+測試前後都用 `curl 127.0.0.1:1234/v1/models` 確認模型還在（`02_remote_lms_before.json`／
+`13_remote_lms_after.json`）。
+
+* **正控制**：3 張卡、端點指到不通的埠 → **3/3 真的退化**（`roster` 摺疊出來
+  `engine=fallback_deterministic`、`degraded_from=lmstudio:gemma-4-12b-it-qat`），
+  鏈仍綠（`06_remote_verify_after_degrade.json`：`checked=6`）。
+* **負控制**：同一條指令，端點指回真的 `1234`，`--no-fallback`（退化就炸）
+  → **2/2 真模型回話**（`engine=lmstudio:gemma-4-12b-it-qat`，`degraded=0`，
+  沒有炸），鏈仍綠（`10_remote_verify_after_negative.json`：`checked=10`）。
+  **「退化路徑可用」這句話因此才算數**——不是端點永遠打不通所以看起來能退化。
+
+**延遲量測（1003 上，兩個不同的東西，不要混講）**：
+
+1. 純 `fallback_twin()` 查表本身（零網路、零 I/O）：20000 次疊代，
+   均值 **0.87 μs／次**、中位數 ~1.0 μs、p95 ~1.0 μs、最大 6.7 μs
+   （`11_remote_fallback_pure_latency.json`）。**跟 Mac 的「微秒級」一致，
+   1003／Windows 上也成立。**
+2. 🔴 **全路徑**（對不通端點的連線嘗試 ＋ 退化，`generate_one()` 整支）：
+   5 次量測 **2017–2287 ms**，穩定落在 ~2.0–2.3 秒
+   （`12_remote_degrade_path_latency.json`）。**這不是 `fallback_twin()` 慢**，
+   是 1003（Windows）對已拒絕連線的埠，`connect()` 到收到 RST 之間本身就要
+   約 2 秒（`WinError 10061`；裸 socket `connect()` 量測同樣是 ~2 秒，見
+   `02b_dead_endpoint_confirmed.txt`）——這是這次才量到、文件裡以前沒寫的
+   Windows 特性。
+
+   這件事**沒有推翻**「`fallback_deterministic` 是微秒級」這句話（1 是真的），
+   但補了一句原本沒人量過的話：**「一旦決定要退化」是微秒級，
+   「發現要不要退化」不是**——`generate()` 目前逐筆循序處理，
+   一張卡打一次不通的端點就要先吃掉這 ~2 秒，N 張卡全部連不到模型時，
+   最壞情況接近 N × 2 秒起跳，不是攤成微秒級。展場實際互動是非同步輪詢手機
+   （CLAUDE.md 已經寫明「不要把任何一個數字當成展場的延遲」），
+   所以這不影響觀眾體感，但**無人值守的 `loop` 一輪要跑多久**這件事，
+   之前沒人把「連線嘗試的固定成本」算進去過。
+
+**沒動的東西**：1003 既有真相來源（`store/twinstore.sqlite3`）全程沒有寫入；
+1003 的 LM Studio（`127.0.0.1:1234`）全程沒有關過、前後都探測到同一顆模型；
+`store_fallback_test/`（1003 上的測試 store）刻意留著不刪。

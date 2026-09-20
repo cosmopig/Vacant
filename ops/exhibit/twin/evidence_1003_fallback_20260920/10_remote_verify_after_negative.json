@@ -1,0 +1,9 @@
+{
+  "db": "C:\\Users\\w401\\vacant_twin\\store_fallback_test\\twinstore.sqlite3",
+  "ok": true,
+  "checked": 10,
+  "broken_at": null,
+  "reason": "全鏈自洽",
+  "head": "1e573e0df5f064540cc2a9f9ceb4b0c80ea3843c7201b089c35e29a02d395e7e",
+  "genesis": "27c5a6ecfe8b406c74866c8fd992d03d5691486af8f8e78a18fc6bc286fc4c94"
+}

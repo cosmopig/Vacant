@@ -1,0 +1,86 @@
+[
+  {
+    "sub_id": "fbA1",
+    "card": {
+      "color": "灰藍",
+      "first_line": "先看看有什麼。",
+      "need": "把桌面的檔案分類",
+      "shape": "方正",
+      "texture": "光滑",
+      "vibe": "冷靜、有條理"
+    },
+    "twin": {
+      "arrival": "先看看有什麼。",
+      "degrade_reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+      "degraded_from": "lmstudio:gemma-4-12b-it-qat",
+      "engine": "fallback_deterministic",
+      "handover": "做完了，你看看對不對。",
+      "latency_ms": 2060,
+      "model": null,
+      "working": "讓我試試「把桌面的檔案分類」。（冷靜、有條理）"
+    },
+    "submitted_seq": 1,
+    "generated_seq": 4,
+    "published_seq": null,
+    "errors": [],
+    "status": "generated",
+    "card_text": null,
+    "cloud_ts": null
+  },
+  {
+    "sub_id": "fbA2",
+    "card": {
+      "color": "暖土",
+      "first_line": "想了很久要怎麼開頭。",
+      "need": "寫一封感謝信",
+      "shape": "圓潤",
+      "texture": "絨面",
+      "vibe": "溫柔、慢熱"
+    },
+    "twin": {
+      "arrival": "想了很久要怎麼開頭。",
+      "degrade_reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+      "degraded_from": "lmstudio:gemma-4-12b-it-qat",
+      "engine": "fallback_deterministic",
+      "handover": "做完了，你看看對不對。",
+      "latency_ms": 2016,
+      "model": null,
+      "working": "讓我試試「寫一封感謝信」。（溫柔、慢熱）"
+    },
+    "submitted_seq": 2,
+    "generated_seq": 5,
+    "published_seq": null,
+    "errors": [],
+    "status": "generated",
+    "card_text": null,
+    "cloud_ts": null
+  },
+  {
+    "sub_id": "fbA3",
+    "card": {
+      "color": "苔綠",
+      "first_line": "先列出來再說。",
+      "need": "整理今天的待辦",
+      "shape": "小巧",
+      "texture": "指紋",
+      "vibe": "急性子、直接"
+    },
+    "twin": {
+      "arrival": "先列出來再說。",
+      "degrade_reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+      "degraded_from": "lmstudio:gemma-4-12b-it-qat",
+      "engine": "fallback_deterministic",
+      "handover": "做完了，你看看對不對。",
+      "latency_ms": 2027,
+      "model": null,
+      "working": "讓我試試「整理今天的待辦」。（急性子、直接）"
+    },
+    "submitted_seq": 3,
+    "generated_seq": 6,
+    "published_seq": null,
+    "errors": [],
+    "status": "generated",
+    "card_text": null,
+    "cloud_ts": null
+  }
+]

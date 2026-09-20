@@ -1,0 +1,1 @@
+{'iterations': 20000, 'total_seconds': 0.017455200664699078, 'avg_us_per_call': 0.8727600332349539, 'sample_median_us': 0.9993091225624084, 'sample_p95_us': 1.000240445137024, 'sample_max_us': 6.699934601783752, 'note': '純 fallback_twin()，零網路、零 I/O——這是「站著等」那條線的底線保證'}
