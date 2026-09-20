@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-20T15:19:58.058265+00:00",
-  "store_id": "0d6e7bea85b748daab01f49ccfc8a007",
+  "generated_at": "2026-09-20T15:36:07.616005+00:00",
+  "store_id": "86db217bd23d43e180c09813a4fcccc4",
   "chain": {
     "ok": true,
     "checked": 6,
-    "head": "0df43e1cf0a305ecf7ed994badde386abd119a26f23028f629b704641586612a",
-    "genesis": "92c4b45ec5f15c43e6516a3a551cae292f3e7f8cd016e28ef30da3b887b12a1a"
+    "head": "108ea33ee348520650732a7d0230a59c7b11bd56ea0bfd308407fbea35db7ec2",
+    "genesis": "5c1999c38d26ab479f4ab16b7d5018d3abc0c8ef5089eaa74b4da680f42601b4"
   },
   "counts": {
     "visitors": 2,
@@ -28,7 +28,7 @@
       "working": "讓我試試「整理第 99 疊紙」。（慢、固執）",
       "handover": "做完了，你看看對不對。",
       "engine": "fallback_deterministic",
-      "latency_ms": 2,
+      "latency_ms": 1,
       "status": "published",
       "errors": 0
     },
@@ -46,7 +46,7 @@
       "working": "讓我試試「整理　ＡＢＣ１２３　桌面」。（慢、固執）",
       "handover": "做完了，你看看對不對。",
       "engine": "fallback_deterministic",
-      "latency_ms": 2,
+      "latency_ms": 1,
       "status": "published",
       "errors": 0
     }

@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-20T15:19:36.006530+00:00",
-  "store_id": "59f101d8ecfa442fae51fdedf2c78299",
+  "generated_at": "2026-09-20T15:35:43.720210+00:00",
+  "store_id": "1591b14128d74e46a195f53ac36b9f9c",
   "chain": {
     "ok": true,
     "checked": 6,
-    "head": "e13bd8af17595ec676bbdcdf701d80ae9d9cb2abd7a310bace79155945a7992d",
-    "genesis": "e677e3ba7c61643e759974f5b3933173ebf04726fcb25e8b610ac49d0e467fa0"
+    "head": "906a7208bd66fbf9a4ba929f07e0bff5cd9d710a82ed217415c18132aedefc61",
+    "genesis": "2dccd0cff3be6bd33c67517420e1266b0f757fa90eadac9e5a7dbbee16be02cb"
   },
   "counts": {
     "visitors": 2,
@@ -28,7 +28,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 4,
+      "latency_ms": 3,
       "status": "published",
       "errors": 0
     },

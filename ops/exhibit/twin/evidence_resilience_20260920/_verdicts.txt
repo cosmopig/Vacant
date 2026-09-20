@@ -89,7 +89,7 @@ OK|6 [modeldown] needint：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
 OK|6 [modeldown] vibedict：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
 OK|6 [modeldown] surrogate：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
 OK|6 [modeldown] notdict：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
-OK|6b 真 server.js 起來了（PID 20659）
+OK|6b 真 server.js 起來了（PID 29249）
 OK|6b-1 正控制：乾淨的卡送得進真伺服器（得 200）
 記|6b-2 同一個 IP 十秒內第二張卡被擋（429「送太快了」）。server.js 用 req.ip 做視窗，而它**沒有設 trust proxy** ⇒ 展場所有人在同一個 NAT 後面時會互相排擠。⚠ 線上是不是也這樣＝null（沒量：要量就得往生產環境投卡）
 記|6b-3 真伺服器**收下了** lone surrogate（200；PII 過濾不擋這個）⇒ 這條路徑觀眾端可達，不是只有替身雲端才做得出來

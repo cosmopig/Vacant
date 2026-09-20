@@ -1,7 +1,7 @@
 dd: /Volumes/VACANTRES/filler: No space left on device
 5933+0 records in
 5932+0 records out
-6074368 bytes transferred in 0.050220 secs (120955157 bytes/sec)
+6074368 bytes transferred in 0.055183 secs (110076799 bytes/sec)
 Filesystem  1024-blocks Used Available Capacity iused      ifree %iused  Mounted on
 /dev/disk12        6144 6144         0   100%       9 4294967270    0%   /Volumes/VACANTRES
 free_k=0

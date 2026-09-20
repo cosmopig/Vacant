@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-20T15:20:01.626212+00:00",
-  "store_id": "4e9c0398d4d64611abd0abddc854acc4",
+  "generated_at": "2026-09-20T15:36:11.451606+00:00",
+  "store_id": "fd5d4a3ce89040ab931edd79405093f2",
   "chain": {
     "ok": true,
     "checked": 6,
-    "head": "a52ca4e32d84095b633e0eb84da49fb8c1253bca4aefcab1375e14578d0d2b46",
-    "genesis": "b7daef4c8fc50d75329663e67ee0624f288e6fc46180bdf8ec6735299156b39e"
+    "head": "489a10021bb81d6a4746974d635986395577177830ac7c696c1060915cb12629",
+    "genesis": "ee1f6621ea728df88752398c783f3c5e83dee886473a3325e3496525e34f9ec7"
   },
   "counts": {
     "visitors": 2,

@@ -1,5 +1,5 @@
 cycle=1 want=3 reached=1 alive_before=1 alive_after=0 sub=24 gen=0 events=24 verify=1
 cycle=2 want=12 reached=1 alive_before=1 alive_after=0 sub=24 gen=0 events=24 verify=1
 cycle=3 want=20 reached=1 alive_before=1 alive_after=0 sub=24 gen=0 events=24 verify=1
-cycle=4 want=28 reached=1 alive_before=1 alive_after=0 sub=24 gen=5 events=29 verify=1
+cycle=4 want=28 reached=1 alive_before=1 alive_after=0 sub=24 gen=6 events=30 verify=1
 cycle=5 want=40 reached=1 alive_before=1 alive_after=0 sub=24 gen=17 events=41 verify=1

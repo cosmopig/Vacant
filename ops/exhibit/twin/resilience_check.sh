@@ -46,6 +46,10 @@
 #   bash ops/exhibit/twin/resilience_check.sh              # 全部，約 1–2 分鐘
 #   OUT=/tmp/xx bash ops/exhibit/twin/resilience_check.sh  # 換證據目錄
 #   SKIP_DISK=1 bash ops/exhibit/twin/resilience_check.sh  # 跳過 ramdisk 那一節
+#   # Linux 展場機（沒有 hdiutil）：自己掛一個小 tmpfs 再把路徑交給它。
+#   # 大於 128MB 的檔案系統會被**拒絕**——這一節會塞到一個 byte 都不剩。
+#   sudo mount -t tmpfs -o size=6m tmpfs /mnt/twinfull && sudo chown "$USER" /mnt/twinfull
+#   FULL_DIR=/mnt/twinfull bash ops/exhibit/twin/resilience_check.sh
 # 退出碼：0＝全綠；1＝有紅燈；2＝拒絕啟動（埠被佔等，fail-closed）
 set -u
 
@@ -823,8 +827,22 @@ RAM_MNT="/Volumes/$RAM_VOL"
 DISK_MEASURED=0
 if [ "$SKIP_DISK" = "1" ]; then
   note "5 SKIP_DISK=1，這一節沒量 ⇒ 磁碟寫滿的行為＝null（不是「沒問題」）"
+elif [ -n "${FULL_DIR:-}" ]; then
+  # 外面已經掛好一個小檔案系統（Linux 展場機走這條）。
+  # 🔴 **拒絕在大於 128MB 的檔案系統上做這一節**——這一節會把目標塞到一個 byte
+  #    都不剩，指錯地方就是把那台機器塞爆。fail-closed，不要讓人手滑。
+  RAM_MNT="$FULL_DIR"
+  TOT_K="$(df -k "$RAM_MNT" 2>/dev/null | tail -1 | awk '{print $2}')"
+  if [ ! -w "$RAM_MNT" ]; then
+    note "5 FULL_DIR=$FULL_DIR 不可寫 ⇒ 這一節＝null"
+  elif [ -z "$TOT_K" ] || [ "$TOT_K" -gt 131072 ]; then
+    bad "5 拒絕執行：FULL_DIR 的檔案系統有 ${TOT_K}KB（>128MB）。這一節會把它塞滿，不對著真磁碟做"
+  else
+    DISK_MEASURED=1
+    echo "external_mount=$RAM_MNT total_k=$TOT_K" > "$OUT/d5/00_attach.txt"
+  fi
 elif [ ! -x /usr/bin/hdiutil ]; then
-  note "5 這台沒有 hdiutil（非 macOS？）⇒ 磁碟寫滿的行為＝null。Linux 展場機要用 tmpfs 另跑一次"
+  note "5 這台沒有 hdiutil（非 macOS？）⇒ 磁碟寫滿的行為＝null。Linux 展場機自己掛一個小 tmpfs 再跑：sudo mount -t tmpfs -o size=6m tmpfs /mnt/twinfull && sudo chown \$USER /mnt/twinfull && FULL_DIR=/mnt/twinfull bash ops/exhibit/twin/resilience_check.sh"
 elif [ -e "$RAM_MNT" ]; then
   note "5 $RAM_MNT 已經存在，不動別人的東西 ⇒ 這一節＝null"
 else
@@ -896,8 +914,13 @@ if [ "$DISK_MEASURED" = "1" ]; then
   chk "$(kv "$OUT/d5/10_counts_recovered.txt" verify_ok)" "1" "5d 撞過 ENOSPC 之後鏈仍綠"
   cp "$RDB" "$D5/twinstore_after_enospc.sqlite3" 2>/dev/null
   cp "$RJSON" "$D5/visitors_after_recover.json" 2>/dev/null
-  hdiutil detach "$RAM_DEV" > "$OUT/d5/11_detach.txt" 2>&1
-  RAM_DEV=""
+  if [ -n "$RAM_DEV" ]; then
+    hdiutil detach "$RAM_DEV" > "$OUT/d5/11_detach.txt" 2>&1
+    RAM_DEV=""
+  else
+    # FULL_DIR 是外面掛的，不是我掛的 ⇒ 不卸載（只殺自己起的、只拆自己掛的）
+    echo "external_mount=$RAM_MNT 由呼叫端自己卸載" > "$OUT/d5/11_detach.txt"
+  fi
 fi
 
 # ===========================================================================

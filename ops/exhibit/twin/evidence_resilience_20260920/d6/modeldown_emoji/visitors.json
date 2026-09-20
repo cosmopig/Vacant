@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-20T15:19:56.442758+00:00",
-  "store_id": "2fe2f282e996475887ec97d9b818150e",
+  "generated_at": "2026-09-20T15:36:05.787411+00:00",
+  "store_id": "0bca349cd31942718b2e55d19b71dbd8",
   "chain": {
     "ok": true,
     "checked": 6,
-    "head": "e8ec1b244a795723e48ab5f2d5c5e4e4b96ced5bef29005f4513ca7bccc48fce",
-    "genesis": "612974a0de249b79ad863380856c318c62c17228cf1b6c2c3a704d518ffbc311"
+    "head": "1e2d82009a7acc205b9d2841b7a4252db87ed1b79134ab09ba08884f0dc8d678",
+    "genesis": "2c4b17fab09f81ef42f5ffa583352925d7873f8d2389e8c0741d68ef61b8e28b"
   },
   "counts": {
     "visitors": 2,
@@ -28,7 +28,7 @@
       "working": "讓我試試「整理第 99 疊紙」。（慢、固執）",
       "handover": "做完了，你看看對不對。",
       "engine": "fallback_deterministic",
-      "latency_ms": 1,
+      "latency_ms": 0,
       "status": "published",
       "errors": 0
     },
@@ -46,7 +46,7 @@
       "working": "讓我試試「整理🧑‍🚀👩🏽‍🦰🇹🇼桌面」。（慢、固執）",
       "handover": "做完了，你看看對不對。",
       "engine": "fallback_deterministic",
-      "latency_ms": 0,
+      "latency_ms": 1,
       "status": "published",
       "errors": 0
     }

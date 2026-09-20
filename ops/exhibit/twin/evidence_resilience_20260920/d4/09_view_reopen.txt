@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-20T15:19:12.797390+00:00",
-  "store_id": "db389fa52ace4e08b64eb35440e18224",
+  "generated_at": "2026-09-20T15:35:21.775409+00:00",
+  "store_id": "a854b5e275d2482aa328783f84938305",
   "chain": {
     "ok": true,
     "checked": 72,
-    "head": "fbb12350ee1c574d2df551f903a945deea7b0061c0404dac0a0623a794ff7184",
-    "genesis": "0d25907b70e1fe5b74308860fa2627a5a24b21e18d1b54832a37ab155e114315"
+    "head": "d74b2d83672f1da5fc6870b67521c84d76ab016dff32bcbdab5e83bde70b9808",
+    "genesis": "3415f57ed4561b403d5e2b243544f957d2331d2ada0116b1b524c06c0a54477c"
   },
   "counts": {
     "visitors": 24,
@@ -28,7 +28,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 50,
+      "latency_ms": 44,
       "status": "published",
       "errors": 0
     },
@@ -46,7 +46,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 51,
+      "latency_ms": 52,
       "status": "published",
       "errors": 0
     },
@@ -64,7 +64,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 42,
+      "latency_ms": 48,
       "status": "published",
       "errors": 0
     },
@@ -82,7 +82,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 42,
+      "latency_ms": 49,
       "status": "published",
       "errors": 0
     },
@@ -100,7 +100,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 46,
+      "latency_ms": 43,
       "status": "published",
       "errors": 0
     },
@@ -118,7 +118,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 45,
+      "latency_ms": 47,
       "status": "published",
       "errors": 0
     },
@@ -136,7 +136,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 48,
+      "latency_ms": 51,
       "status": "published",
       "errors": 0
     },
@@ -154,7 +154,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 47,
+      "latency_ms": 43,
       "status": "published",
       "errors": 0
     },
@@ -172,7 +172,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 51,
+      "latency_ms": 53,
       "status": "published",
       "errors": 0
     },
@@ -190,7 +190,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 46,
+      "latency_ms": 51,
       "status": "published",
       "errors": 0
     },
@@ -208,7 +208,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 48,
+      "latency_ms": 49,
       "status": "published",
       "errors": 0
     },
@@ -226,7 +226,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 52,
+      "latency_ms": 46,
       "status": "published",
       "errors": 0
     },
@@ -244,7 +244,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 51,
+      "latency_ms": 54,
       "status": "published",
       "errors": 0
     },
@@ -262,7 +262,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 48,
+      "latency_ms": 46,
       "status": "published",
       "errors": 0
     },
@@ -280,7 +280,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 42,
+      "latency_ms": 45,
       "status": "published",
       "errors": 0
     },
@@ -298,7 +298,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 48,
+      "latency_ms": 46,
       "status": "published",
       "errors": 0
     },
@@ -316,7 +316,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 43,
+      "latency_ms": 51,
       "status": "published",
       "errors": 0
     },
@@ -334,7 +334,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 56,
+      "latency_ms": 48,
       "status": "published",
       "errors": 0
     },
@@ -352,7 +352,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 48,
+      "latency_ms": 51,
       "status": "published",
       "errors": 0
     },
@@ -370,7 +370,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 47,
+      "latency_ms": 49,
       "status": "published",
       "errors": 0
     },
@@ -388,7 +388,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 43,
+      "latency_ms": 49,
       "status": "published",
       "errors": 0
     },
@@ -406,7 +406,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 48,
+      "latency_ms": 44,
       "status": "published",
       "errors": 0
     },
@@ -424,7 +424,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 50,
+      "latency_ms": 49,
       "status": "published",
       "errors": 0
     },
@@ -442,7 +442,7 @@
       "working": "替身：動手了。",
       "handover": "替身：交給你。",
       "engine": "lmstudio:fake-1003",
-      "latency_ms": 50,
+      "latency_ms": 43,
       "status": "published",
       "errors": 0
     }

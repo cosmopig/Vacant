@@ -4,6 +4,9 @@
 綠 93／紅 10。十個紅燈全部集中在第 6 節「畸形卡」，而且每一個紅燈的判準都一樣——
 **loop 整個死掉，於是那一批裡那張乾淨的鄰居卡也拿不到分身**（neighbour=0）。
 
+（放在這裡而不是 evidence_resilience_20260920/ 裡面，是因為那個目錄每次重跑
+都會整個 rm -rf 重生；擺進去的話下一次重跑就把這份歷史安靜地刪掉了。）
+
 d6_matrix.txt 是那一輪的完整矩陣（30 格＝15 種畸形卡 × 模型開／關）。
 modelup_* / modeldown_* 是十個紅燈各自的 traceback。
 
@@ -18,7 +21,7 @@ modelup_* / modeldown_* 是十個紅燈各自的 traceback。
 
 publish_retry_growth.txt 是第 1 節量到的另一件事（沒有修，見 SUMMARY.txt 的記錄項）。
 
-修法在同一次 commit 的 twinlink.py（只動失效處理路徑）＋
+修法在 commit e8fd4646 的 twinlink.py（只動失效處理路徑）＋
 tests/test_twinlink_resilience.py（25 項，含對測試自己的負控制：
 把 twinlink.py 換回修前版本，其中 8 項會紅）。
-修完重跑：綠 103／紅 0／記錄 6，就是上一層目錄那一份。
+修完重跑：綠 103／紅 0／記錄 6，在 evidence_resilience_20260920/SUMMARY.txt。
