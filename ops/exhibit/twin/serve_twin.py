@@ -107,6 +107,15 @@ DEFAULT_PACK = TWIN / "twin_pack.json"
 VIEWER = REPO / "examples" / "twin_viewer.html"
 PHONE = TWIN / "phone.html"
 
+#: 🔴 **觀展者的頁**（2026-09-20 人類指定：「你的 QRCODE 應該都要依照這個」）。
+#: 觀眾用自己的手機、自己的 AI 生一張分身卡，卡會顯示在現場螢幕。
+#: ⚠ 這跟 `phone.html`（**導播**頁，「用手機決定要看哪一邊」）是**兩件事**：
+#:   導播頁在展場那台機器上、要 token、只給操作的人；
+#:   觀展者頁在公網上、不帶 token、給觀眾。
+#: ⚠ 展場那台**仍然離線可跑**（電視與事件流都在本機）；需要網路的是**觀眾自己的手機**
+#:   ——而那是本來就需要的（他們要用自己的 ChatGPT／Claude／Gemini）。
+DEFAULT_VISITOR_URL = "https://vacant-world.cosmopig.com"
+
 #: 有人按過之後，那一格至少停這麼久才輪播——**他的選擇不可以 20 秒就被蓋掉**。
 #: （Fable 的觀眾視角稽核：輪播把人的選擇蓋掉 ⇒ 擁有感歸零。）
 HOLD_AFTER_PRESS_S = 45.0
@@ -192,12 +201,19 @@ class Stage:
     """導播台：誰在演、下一個是誰、事件檔寫到哪。所有狀態變更都走這裡。"""
 
     def __init__(self, pack: dict, *, out: pathlib.Path, dwell: float,
-                 base_url: str, token: str = ""):
+                 base_url: str, token: str = "", visitor_url: str = ""):
         self.lock = threading.RLock()
         self.pl = Playlist(pack)
         self.out = out
         self.dwell = dwell
         self.base_url = base_url.rstrip("/")
+        #: 🔴 **觀眾掃的那個 QR 指的地方**（2026-09-20 人類指定）。
+        #: 跟 `base_url` 是**兩件事**，不要合併：
+        #:   `base_url`    ＝ 展場那台機器（區網 IP），`/phone.html` 是**導播**頁、要 token
+        #:   `visitor_url` ＝ **觀展者的頁**，在公網上（觀眾用自己的手機、自己的 AI）
+        #: 觀眾要的是後者；導播頁不是給觀眾的。
+        #: ⚠ 空字串 ⇒ 退回 `phone_url()`（舊行為），但那時 QR 是導播頁，**不是觀眾頁**。
+        self.visitor_url = visitor_url.rstrip("/")
         #: `/control` 的共享密鑰。空字串＝沒有門檻。它只會出現在
         #: **同一台機器**上的客戶端（＝電視）看到的 `phone_url`／QR 裡
         #: （見模組 docstring §4 與 `Handler._is_same_machine`）。
@@ -241,6 +257,18 @@ class Stage:
         """
         base = f"{self.base_url}/phone.html"
         return f"{base}?t={self.token}" if (with_token and self.token) else base
+
+    def qr_target(self, *, with_token: bool = True) -> str:
+        """**QR 裡到底編什麼。** 觀眾掃的是這一個。
+
+        設了 `--visitor-url` ⇒ 就是它，**而且不附 token**
+        （token 是本機 `/control` 的門檻，公網那一頁跟它無關；
+        附上去等於把展場的控制 token 印在一張誰都能拍的圖上）。
+        沒設 ⇒ 退回 `phone_url()`，維持舊行為。
+        """
+        if self.visitor_url:
+            return self.visitor_url
+        return self.phone_url(with_token=with_token)
 
     def _block(self, cell_id: str) -> list[dict]:
         cell = self.pl.cells[cell_id]
@@ -428,6 +456,9 @@ class Stage:
                 # ⚠ `with_token` 由**請求端的位址**決定（Handler）：電視在本機，
                 #   區網上的其他人拿到的是沒有 token 的那一版。
                 "phone_url": self.phone_url(with_token=with_token),
+                # 🔴 電視那一行字要印這個，不是 phone_url（那是導播頁）。
+                "visitor_url": self.visitor_url,
+                "qr_target": self.qr_target(with_token=with_token),
                 "qr_url": f"{self.base_url}/qr.png",
                 # 手機／稽核腳本要知道「這台機器有沒有門檻」。
                 # 只回布林，**不回 token 本身**。
@@ -578,8 +609,9 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/state":
             self._json(st.state(with_token=self._is_same_machine()))
         elif path in ("/qr.png", "/qr.svg"):
-            # 內容＝這一台**真正綁在哪裡**，不是開發時寫死的那個。
-            url = st.phone_url(with_token=self._is_same_machine())
+            # 內容＝**觀眾該去的地方**。設了 --visitor-url 就是觀展者頁（公網、不帶 token）；
+            # 沒設才退回導播頁（這一台真正綁在哪裡，不是開發時寫死的那個）。
+            url = st.qr_target(with_token=self._is_same_machine())
             try:
                 if path.endswith(".svg"):
                     self._send(200, qrlib.to_svg(url).encode("utf-8"),
@@ -649,11 +681,13 @@ def autoplay(stage: Stage, stop: threading.Event) -> None:
 
 def make_server(pack: dict, *, bind: str, port: int, out: pathlib.Path,
                 dwell: float, token: str = "", quiet: bool = False,
-                base_url: str = "") -> tuple[ThreadingHTTPServer, Stage]:
+                base_url: str = "", visitor_url: str = DEFAULT_VISITOR_URL,
+                ) -> tuple[ThreadingHTTPServer, Stage]:
     srv = ThreadingHTTPServer((bind, port), Handler)
     host = bind if bind not in ("0.0.0.0", "") else "127.0.0.1"
     stage = Stage(pack, out=out, dwell=dwell, token=token,
-                  base_url=base_url or f"http://{host}:{srv.server_address[1]}")
+                  base_url=base_url or f"http://{host}:{srv.server_address[1]}",
+                  visitor_url=visitor_url)
     Handler.stage = stage
     Handler.quiet = quiet
     return srv, stage
@@ -707,15 +741,20 @@ def main(argv=None) -> int:
     ap.add_argument("--no-token", action="store_true",
                     help="明確關掉 token（非 loopback 綁定＝區網上任何人都按得動）")
     ap.add_argument("--base-url", default="",
-                    help="手機看得到的位址前綴（收據與 QR 都用它）。"
-                         "展場一定要給區網 IP，不然 QR 會指到 127.0.0.1")
+                    help="手機看得到的位址前綴（收據與導播頁用它）。"
+                         "展場一定要給區網 IP，不然導播頁會指到 127.0.0.1")
+    ap.add_argument("--visitor-url", default=DEFAULT_VISITOR_URL,
+                    help="🔴 **觀眾掃的 QR 指到哪裡**＝觀展者的頁（公網）。"
+                         f"預設 {DEFAULT_VISITOR_URL}。"
+                         "傳空字串就退回舊行為（QR 指導播頁 phone.html）")
     a = ap.parse_args(argv)
 
     pack = json.loads(pathlib.Path(a.pack).read_text(encoding="utf-8"))
     out = pathlib.Path(a.out) if a.out else TWIN / "live" / "events.jsonl"
     token, why = resolve_token(a.bind, a.token, a.no_token)
     srv, stage = make_server(pack, bind=a.bind, port=a.port, out=out,
-                             dwell=a.dwell, token=token, base_url=a.base_url)
+                             dwell=a.dwell, token=token, base_url=a.base_url,
+                             visitor_url=a.visitor_url)
     stop = threading.Event()
     threading.Thread(target=autoplay, args=(stage, stop), daemon=True).start()
     host = a.bind if a.bind != "0.0.0.0" else "127.0.0.1"
