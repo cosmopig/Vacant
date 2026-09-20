@@ -48,6 +48,13 @@ pi 0.85.1 的 `dist/main.js:resolveAppMode()` 逐字是：
    在這裡的對應物是「agent 跑完一回合、TUI 回到輸入框、我們按 Ctrl-D」。
    兩件事不是同一件事，寫報告時不可以混講。
 4. 轉錄有上限（`--max-transcript-bytes`）。截掉了就落 `transcript_truncated`。
+5. **這張 pty 關掉了 `ISIG`**（見 `_disable_isig`），所以它與真人的終端機
+   在「Ctrl-C 會不會變成 SIGINT」這一點上不同。不關的話，pi 退出、終端機
+   還原成 canonical 之後，階梯補送的 Ctrl-C 會把**還在跑驗收的 launcher**
+   一起殺掉。這是 2026-09-20 實際踩到的坑，不是假設。
+6. **agent 收攤（hook log 的 `session_end`）之後階梯就凍結**。之後還在跑的
+   是 launcher 的驗收，那是正常的。沒有這一條，慢的格子會在驗收中途被砍，
+   而症狀是 `run_*.json` 不存在——看起來像「中介失敗」，其實是量具殺的。
 """
 from __future__ import annotations
 
@@ -83,6 +90,30 @@ def _set_winsize(fd: int, rows: int, cols: int) -> None:
         pass
 
 
+def _disable_isig(fd: int) -> bool:
+    """把 pty 的 `ISIG` 關掉，回「有沒有關成」。
+
+    🔴 **這一條是被實測逼出來的（2026-09-20）。** 原本的升級階梯在 Ctrl-D
+    之後會補送 `Ctrl-C ×2`。在**互動的 pi 底下那是無害的**——pi 把終端機設成
+    raw，0x03 只是一個位元組，由 `handleCtrlC()` 讀走。但 **pi 退出之後**
+    它會把終端機還原成 canonical＋`ISIG`，而那時候的 0x03 **會由 line
+    discipline 變成送給前景行程群組的 `SIGINT`** ⇒ 把**還在跑驗收的
+    launcher** 一起殺掉，`run_*.json` 根本不會被寫出來。
+    實際發生過：`lcb_3584_PTP_r1` `ended_by=ctrl_c_twice` 而 run json 不存在。
+
+    關掉 `ISIG` 之後 0x03 永遠只是一個位元組。**這不改變 pi 的行為**
+    （pi 本來就自己關 `ISIG`），只拿掉「pi 不在了還會誤殺父行程」這條路。
+    ⚠ 代價：這張 pty 與真人的終端機**在這一點上不同**。寫在這裡，不要忘。
+    """
+    try:
+        attrs = termios.tcgetattr(fd)
+        attrs[3] &= ~termios.ISIG          # lflag
+        termios.tcsetattr(fd, termios.TCSANOW, attrs)
+        return True
+    except (termios.error, OSError):
+        return False
+
+
 def _hooklog_stop_count(path: pathlib.Path) -> int:
     """hook log 裡有幾筆 `agent_end`（＝跑完了幾個回合）。讀不到回 0。
 
@@ -107,11 +138,20 @@ def _hooklog_stop_count(path: pathlib.Path) -> int:
     return n
 
 
+def _hooklog_has(path: pathlib.Path, event: str) -> bool:
+    """hook log 裡有沒有某個事件。`session_end` ＝ agent 自己已經收攤。"""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    return f'"event": "{event}"' in text or f'"event":"{event}"' in text
+
+
 def drive(argv: list[str], *, transcript: pathlib.Path,
           rows: int = 40, cols: int = 120,
           idle_s: float = 45.0, cap_s: float = 1800.0,
           hooklog: pathlib.Path | None = None,
-          grace_s: float = 25.0, min_run_s: float = 5.0,
+          grace_s: float = 60.0, min_run_s: float = 5.0,
           post_done_s: float = 3.0, turns: int = 1,
           turn_text: str = "",
           max_transcript_bytes: int = 16 * 1024 * 1024,
@@ -130,7 +170,7 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
         # 三態：`None` ＝沒量到。**不准寫 0／False 冒充。**
         "done_signal": None, "ended_by": None, "exit_code": None,
         "signaled_by": None, "bytes_out": 0, "transcript_truncated": False,
-        "child_is_tty": None,
+        "child_is_tty": None, "isig_disabled": None, "agent_gone_at_s": None,
     }
 
     def note(kind: str, **kw) -> None:
@@ -152,6 +192,7 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
             os._exit(127)
     rep["child_pid"] = pid
     _set_winsize(master, rows, cols)
+    rep["isig_disabled"] = _disable_isig(master)    # 見該函式的 🔴
     rep["child_is_tty"] = os.isatty(master)         # master 端；slave 必為 tty
 
     last_out = time.time()
@@ -161,6 +202,7 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
     done_seen = False
     done_at = 0.0
     last_typed_at = t0
+    agent_gone = False
     status = None
     eof = False
 
@@ -242,30 +284,40 @@ def drive(argv: list[str], *, transcript: pathlib.Path,
         #  ⚠ `post_done_s`：`agent_end` 燒完到 TUI 真的回到空輸入框之間有一段。
         #    太早按 Ctrl-D 會落在還沒接手的 editor 上（`onCtrlD` 只在輸入框是空的
         #    時候才收）。等一下再按——真人也不是零延遲。
-        if done_seen and quit_stage == 0 and (now - done_at) >= post_done_s:
-            quit_stage, stage_at = 1, now
-            send(CTRL_D, "ctrl_d")
-        elif quit_stage == 1 and (now - stage_at) >= grace_s:
-            quit_stage, stage_at = 2, now
-            send(CTRL_C, "ctrl_c#1")
-            time.sleep(0.05)
-            send(CTRL_C, "ctrl_c#2")
-        elif quit_stage == 2 and (now - stage_at) >= grace_s:
-            quit_stage, stage_at = 3, now
-            note("signal", sig="SIGTERM")
-            rep["signaled_by"] = "SIGTERM"
-            try:
-                os.kill(pid, signal.SIGTERM)
-            except OSError as exc:
-                note("signal_failed", sig="SIGTERM", err=repr(exc))
-        elif quit_stage == 3 and (now - stage_at) >= grace_s:
-            quit_stage, stage_at = 4, now
-            note("signal", sig="SIGKILL")
-            rep["signaled_by"] = "SIGKILL"
-            try:
-                os.kill(pid, signal.SIGKILL)
-            except OSError as exc:
-                note("signal_failed", sig="SIGKILL", err=repr(exc))
+        #  🔴 **agent 自己收攤之後就不要再升級了。** `session_end` 之後
+        #     還在跑的是 **launcher 的驗收**（每個測試檔上限 `--test-timeout`，
+        #     這一批是 120 秒），那是正常的、不是卡住。繼續升級會把驗收殺掉，
+        #     `run_*.json` 連寫都沒寫（2026-09-20 實際踩到）。
+        if (not agent_gone and hooklog is not None
+                and _hooklog_has(hooklog, "session_end")):
+            agent_gone = True
+            rep["agent_gone_at_s"] = round(now - t0, 3)
+            note("agent_gone", how="hooklog_session_end")
+        if not agent_gone:      # agent 還在 ⇒ 階梯照走；收攤了 ⇒ 只等
+            if done_seen and quit_stage == 0 and (now - done_at) >= post_done_s:
+                quit_stage, stage_at = 1, now
+                send(CTRL_D, "ctrl_d")
+            elif quit_stage == 1 and (now - stage_at) >= grace_s:
+                quit_stage, stage_at = 2, now
+                send(CTRL_C, "ctrl_c#1")
+                time.sleep(0.05)
+                send(CTRL_C, "ctrl_c#2")
+            elif quit_stage == 2 and (now - stage_at) >= grace_s:
+                quit_stage, stage_at = 3, now
+                note("signal", sig="SIGTERM")
+                rep["signaled_by"] = "SIGTERM"
+                try:
+                    os.kill(pid, signal.SIGTERM)
+                except OSError as exc:
+                    note("signal_failed", sig="SIGTERM", err=repr(exc))
+            elif quit_stage == 3 and (now - stage_at) >= grace_s:
+                quit_stage, stage_at = 4, now
+                note("signal", sig="SIGKILL")
+                rep["signaled_by"] = "SIGKILL"
+                try:
+                    os.kill(pid, signal.SIGKILL)
+                except OSError as exc:
+                    note("signal_failed", sig="SIGKILL", err=repr(exc))
 
         # ── 絕對上限 ──────────────────────────────────────────────────
         if (now - t0) >= cap_s and quit_stage < 3:
@@ -359,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--done-when-hooklog", default=None,
                     help="這份 JSONL 出現 event==stop 就算做完（**確定性**）")
     ap.add_argument("--cap", type=float, default=1800.0, help="絕對上限秒數")
-    ap.add_argument("--grace", type=float, default=25.0, help="每一級離開動作等幾秒")
+    ap.add_argument("--grace", type=float, default=60.0, help="每一級離開動作等幾秒")
     ap.add_argument("--min-run", type=float, default=5.0,
                     help="至少跑滿幾秒才開始判「做完了」")
     ap.add_argument("--post-done", type=float, default=3.0,

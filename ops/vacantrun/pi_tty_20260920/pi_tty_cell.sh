@@ -123,7 +123,7 @@ PTP|INT|INT2|INTQ)
   timeout "$OUTER_TIMEOUT" $PY "$REPO/ops/vacantrun/tty_drive.py" \
       --transcript "$ROOT/pty/$name.pty" --report "$ROOT/pty/$name.drive.json" \
       --done-when-hooklog "$HOOKLOG" --turns "$TURNS" --turn-text "$TURNTEXT" \
-      --idle "${TTY_IDLE:-120}" --cap "${TTY_CAP:-1000}" --grace 25 \
+      --idle "${TTY_IDLE:-120}" --cap "${TTY_CAP:-1000}" --grace 60 \
       --min-run "$MINRUN" --post-done "$POSTDONE" \
       -- $PY -m vacant_network.vrun.launcher \
           --workspace "$ws" --run-dir "$rd" --suite "$TPL/$tid/tests_visible" \
