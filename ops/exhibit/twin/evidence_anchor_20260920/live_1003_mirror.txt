@@ -1,0 +1,129 @@
+===== 1. 建 store，塞 6 列 =====
+[PASS] twinstore init (rc=0)
+[PASS] twinstore stats (rc=0)
+{
+  "db": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/live/twinstore.sqlite3",
+  "store_id": "7d51052713c74927ad925d6471e0ec0c",
+  "total": 6,
+  "by_kind": {
+    "submitted": 0,
+    "generated": 0,
+    "published": 0,
+    "error": 0,
+    "ingest_gap": 0,
+    "note": 6
+  },
+  "visitors": 0,
+  "head_seq": 6
+}
+
+===== 2. 錨定金鑰 =====
+[PASS] twinanchor init (rc=0)
+{
+  "created": true,
+  "keydir": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/live/anchor_key",
+  "vacant_id": "zQmXUhfCvswb6YTCfGtBKU5VnLktZgw86vsWUjHHWqKfyNk",
+  "pub": "efc2d593d43950f3b4cbac978ddb071158aa0481d1301fe044deccadd9cc5f8b",
+  "note": "私鑰 identity.key 已 0600；store/ 在 .gitignore、檔名也在 RECORD_SPEC §7 排除清單"
+}
+total 24
+-rw-------@ 1 cosmopig  wheel  119 Sep 20 22:54 identity.key
+-rw-r--r--@ 1 cosmopig  wheel   65 Sep 20 22:54 identity.pub
+-rw-r--r--@ 1 cosmopig  wheel   48 Sep 20 22:54 vacant_id
+
+===== 3. emit 一枚錨 =====
+[PASS] emit (rc=0)
+{
+  "window": [
+    1,
+    7
+  ],
+  "chain_head": "81c2bfc7f8648840da4fbf335c2bd8d48e5a441f02b0f88506218424e17696d8",
+  "retro_audits": {
+    "twinstore_verify": true
+  },
+  "retro_missing": [
+    "prev_anchor_holds"
+  ],
+  "digest": "73ce75d55fa42d262d4b232bce6cc3f2209d582161b9c6e65c26b962e771f2df",
+  "slip": "VTA1 026dca45 7 73ce75d55fa42d262d4b232bce6cc3f2",
+  "anchors_file": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/live/anchors.jsonl"
+}
+紙條：VTA1 026dca45 7 73ce75d55fa42d262d4b232bce6cc3f2
+
+===== 4. 對照組：沒動過 ⇒ 綠 =====
+[PASS] 對照組 verify（釘公鑰＋紙條） (rc=0)
+{'ok': True, 'anchors': 1, 'store_head_seq': 7, 'pubkey_pinned': True}
+slip: {'ok': True, 'slip': 'VTA1 026dca45 7 73ce75d55fa42d262d4b232bce6cc3f2', 'reason': 'ok', 'matched_digest': '73ce75d55fa42d262d4b232bce6cc3f2209d582161b9c6e65c26b962e771f2df'}
+
+===== 5. 出口③：離機副本到「可攜媒體」 =====
+[PASS] mirror --dest (rc=0)
+total 24
+-rw-r--r--@ 1 cosmopig  wheel    65 Sep 20 22:54 anchor_pub.txt
+-rw-r--r--@ 1 cosmopig  wheel   684 Sep 20 22:54 anchors.jsonl
+-rw-r--r--@ 1 cosmopig  wheel  1017 Sep 20 22:54 MIRROR.txt
+--- 副本裡有沒有私鑰（應該是 0 行）：
+       0
+
+===== 6. 出口②：離機副本到 1003（真的 scp）=====
+[PASS] 1003 mkdir（ssh 用 /c/ 方言） (rc=0)
+[PASS] mirror --scp 到 1003（scp 用 C:/ 方言） (rc=0)
+{
+  "scp": {
+    "ok": true,
+    "rc": 0,
+    "target": "w401@100.119.113.56:C:/Users/w401/twinanchor_test/",
+    "cmd": [
+      "scp",
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=10",
+      "/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/tmpyjc5to11/anchors.jsonl",
+      "/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/tmpyjc5to11/anchor_pub.txt",
+      "w401@100.119.113.56:C:/Users/w401/twinanchor_test/"
+    ],
+    "stdout": "",
+    "stderr": ""
+  }
+}
+[PASS] 1003 上真的有那兩個檔 (rc=0)
+total 5
+-rw-r--r-- 1 w401 197121  65 Sep 20 22:54 anchor_pub.txt
+-rw-r--r-- 1 w401 197121 684 Sep 20 22:54 anchors.jsonl
+9dcc710f828f4e1e05c03bb24ddcec3d2a5aca6efd528daea4a2eab58f2596c4 */c/Users/w401/twinanchor_test/anchors.jsonl
+--- 本機 sha256（要一樣）：
+9dcc710f828f4e1e05c03bb24ddcec3d2a5aca6efd528daea4a2eab58f2596c4  /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/live/anchors.jsonl
+
+===== 7. 負控制①：整條重算（拿得到檔案的人做得到的事）=====
+{'before': 7, 'after': 6, 'dropped': [3]}
+[PASS] 前提：twinstore 自己還是綠的（弱點屬實） (rc=0)
+[PASS] 負控制①：錨抓到整條重算 ⇒ 紅 (rc=1)
+store_verify.ok = True  <- store 自己還是綠
+ok = False
+  紅： 錨 #0（窗口尾 7）驗不過：entries_hash 不符（窗口內 episode 被竄改或不完整）
+  紅： 鏈頭退回去了：錨過 seq 7，現在只到 6（尾巴被截掉）
+
+===== 8. 負控制②：截掉鏈尾 =====
+{'before': 6, 'after': 4, 'removed': 2}
+[PASS] 前提：截斷後 twinstore 自己還是綠的（合法前綴） (rc=0)
+[PASS] 負控制②：錨抓到截斷 ⇒ 紅 (rc=1)
+no_rollback = {'ok': False, 'anchored_max_seq': 6, 'store_head_seq': 4, 'reason': '鏈頭退回去了：錨過 seq 6，現在只到 4（尾巴被截掉）'}
+
+===== 9. 負控制③：離機副本才是承重件 =====
+把 1003 上那份抓回來當 pin，重驗被重算過的那個 store
+[PASS] 從 1003 取回離機公鑰 (rc=0)
+[PASS] 負控制③：用 1003 那份 pin 驗被重算的 store ⇒ 紅 (rc=1)
+
+===== 10. 三態：沒給 pin ⇒ null 不是 false =====
+[PASS] 沒給 pin 的 verify（預設不 require）⇒ 0 (rc=0)
+[PASS] 同一個 store 加上 --require-pin ⇒ 1 (rc=1)
+pubkey_pinned = None (必須是 None，不是 False)
+warning: pubkey_pinned=null：沒有給離機公鑰 ⇒ **拿到金鑰的人重簽一整條偵測不到**（誠實邊界 1）。展場請
+
+===== 11. QR（出口④）=====
+[PASS] slip --qr (rc=0)
+/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/live/anchor_qr.png: PNG image data, 328 x 328, 8-bit grayscale, non-interlaced
+
+============================================
+PASS=18  FAIL=0

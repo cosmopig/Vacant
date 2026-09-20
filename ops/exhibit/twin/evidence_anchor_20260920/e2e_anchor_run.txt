@@ -1,0 +1,51 @@
+工作目錄：/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/twinanchor_e2e.vBU1CXuR5u
+
+===== 0. 離線自檢（含模組內建的負控制）=====
+[PASS] twinanchor selftest (rc=0)
+20/20 通過
+
+===== 1. 造一個 store（6 列）＋ 錨定金鑰 =====
+[PASS] twinstore stats (rc=0)
+[PASS] twinanchor init（產專用金鑰） (rc=0)
+[PASS] 私鑰權限 0600（拿到 600） (rc=0)
+
+===== 2. emit 一枚錨，取紙條（出口④）=====
+[PASS] emit (rc=0)
+紙條：VTA1 b5c518bc 7 c0e3ccb7184905b3ba48ab6f11b8dd79
+[PASS] slip --qr 畫得出 PNG (rc=0)
+[PASS] PNG magic (rc=0)
+
+===== 3. 對照組：沒動過 ⇒ 綠 =====
+[PASS] 對照組 verify（釘公鑰＋紙條＋--require-pin） (rc=0)
+
+===== 4. 三態：沒給 pin ⇒ null，不是 false =====
+[PASS] 沒 pin 的 verify（預設不 require） (rc=0)
+[PASS] 同一個 store 加 --require-pin ⇒ 紅 (rc=1)
+pubkey_pinned = None （null 不是 false）
+[PASS] pubkey_pinned 是 null (rc=0)
+
+===== 5. 出口③：可攜媒體副本 =====
+[PASS] mirror --dest (rc=0)
+[PASS] 副本裡沒有私鑰（找到 0 個） (rc=0)
+[PASS] 副本裡有公鑰 (rc=0)
+
+（跳過出口②：沒給 --scp。**這不代表它壞了，也不代表它好** ⇒ 沒量到）
+
+===== 6. 🔴 負控制 A：整條重算 =====
+{'before': 7, 'after': 6, 'dropped': [3]}
+[PASS] 前提：重算之後 twinstore 自己還是綠的（弱點屬實） (rc=0)
+[PASS] 負控制 A：錨抓到整條重算 ⇒ 紅 (rc=1)
+   紅： 錨 #0（窗口尾 7）驗不過：entries_hash 不符（窗口內 episode 被竄改或不完整）
+   紅： 鏈頭退回去了：錨過 seq 7，現在只到 6（尾巴被截掉）
+
+===== 7. 🔴 負控制 B：截掉鏈尾 =====
+{'before': 6, 'after': 4, 'removed': 2}
+[PASS] 前提：截斷之後 twinstore 自己還是綠的（合法前綴） (rc=0)
+[PASS] 負控制 B：錨抓到截斷 ⇒ 紅 (rc=1)
+
+===== 8. 🔴 負控制 C：fail-closed，鏈紅了就拒簽 =====
+[PASS] store 已經被截斷 ⇒ emit 拒簽 (rc=1)
+[PASS] 拒簽理由有講出來（不是安靜失敗） (rc=0)
+
+============================================
+PASS=20  FAIL=0

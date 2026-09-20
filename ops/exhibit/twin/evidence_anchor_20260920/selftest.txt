@@ -1,0 +1,22 @@
+[PASS] 對照組：沒動過的鏈＋釘公鑰＋紙條 ⇒ 綠
+[PASS] 對照組：錨自身成鏈（第二枚接得上第一枚）
+[PASS] 對照組：第一枚的 prev_anchor_holds 進 missing 不是 false
+[PASS] 負控制 A 前提：整條重算之後 twinstore 自己還是綠的（弱點屬實）
+[PASS] 負控制 A：整條重算被錨抓到 ⇒ 紅
+[PASS] 負控制 A：資料真的少了一列
+[PASS] 負控制 B 前提：截斷之後 twinstore 自己還是綠的（合法前綴）
+[PASS] 負控制 B：截斷被錨抓到 ⇒ 紅
+[PASS] 負控制 B：紅的理由指名鏈頭退回去
+[PASS] 負控制 C（誠實邊界 1 的可執行標本）：沒釘公鑰 ⇒ 重簽偵測不到，會綠
+[PASS] 負控制 C：沒釘公鑰時 pubkey_pinned 是 null 不是 false
+[PASS] 負控制 C：釘了離機公鑰 ⇒ 重簽被抓到，紅
+[PASS] 負控制 C：--require-pin 把 null 變紅
+[PASS] 負控制 D：同一把金鑰重簽，公鑰釘不住，但**紙條**抓得到
+[PASS] 負控制 D 對照：釘公鑰這一關在這個情境下是綠的（所以紙條不是多餘的）
+[PASS] 負控制 E：A 的錨鏈接到 B 的 store ⇒ 紅（創世串綁死）
+[PASS] 負控制 F：store 已經紅了 ⇒ 預設拒簽（不替竄改背書）
+[PASS] 負控制 F：--force 簽得下去，但 retro_audits 誠實寫 false
+[PASS] 出口③：離機副本三個檔都在，且公鑰對得上
+[PASS] 出口③：副本裡**沒有**私鑰
+
+20/20 通過

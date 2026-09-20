@@ -1,0 +1,28 @@
+對 tests/test_twinanchor.py 的負控制（2026-09-20）
+=================================================
+方法：把 twinanchor.py 的偵測邏輯逐一換成「永遠說綠」，跑同一批測試，
+看紅在哪。三個破壞紅在**三組不同的測試**上 ⇒ 七道關不是同一道關重複七次。
+（破壞完 md5 對回原檔 1720167c4b6a55242467302969e9ab9f，沒有殘留。）
+
+--- 破壞 ①：verify_all 裡 `ok, why = verify_checkpoint(a, view)` → `ok, why = True, "ok"`
+    （＝把「每一枚錨對現在的 store 重驗」這一關拿掉）
+FAILED tests/test_twinanchor.py::test_full_rewrite_is_caught_by_anchor
+FAILED tests/test_twinanchor.py::test_full_rewrite_without_dropping_anything_is_still_caught
+    ⇒ 39 passed, 2 failed（rc=1）
+
+--- 破壞 ②：公鑰比對 `match = all(...)` → `match = True`
+    （＝把「跟離機公鑰比對」這一關拿掉）
+FAILED tests/test_twinanchor.py::test_resign_with_stolen_key_IS_caught_with_an_offmachine_pin
+FAILED tests/test_twinanchor.py::test_mirrored_pin_actually_catches_a_resign
+    ⇒ 39 passed, 2 failed（rc=1）
+
+--- 破壞 ③：`rolled = view.head_seq() < max_end` → `rolled = False`
+    （＝把「鏈頭不得退回去」這一關拿掉）
+FAILED tests/test_twinanchor.py::test_truncation_is_caught_by_anchor
+    ⇒ 40 passed, 1 failed（rc=1）
+
+觀察（值得記一筆）：破壞 ③ 之下「整條重算」那兩條**沒有紅**——因為
+entries_hash 那一關自己就抓得到。反過來破壞 ① 之下「截斷」那條也沒紅，
+因為 no_rollback 自己就抓得到。**兩關互為備援，不是重複。**
+
+未破壞的對照組：41 passed（rc=0）

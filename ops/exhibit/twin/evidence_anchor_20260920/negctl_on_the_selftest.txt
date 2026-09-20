@@ -1,0 +1,16 @@
+--- ① verify_all 永遠綠（偵測能力拿掉）: rc=1  FAIL 條數=8
+    [FAIL] 負控制 A：整條重算被錨抓到 ⇒ 紅  []
+    [FAIL] 負控制 B：截斷被錨抓到 ⇒ 紅  []
+    [FAIL] 負控制 B：紅的理由指名鏈頭退回去  {"ok": true}
+    [FAIL] 負控制 C：沒釘公鑰時 pubkey_pinned 是 null 不是 false  True
+    [FAIL] 負控制 C：釘了離機公鑰 ⇒ 重簽被抓到，紅  []
+    [FAIL] 負控制 C：--require-pin 把 null 變紅  []
+    [FAIL] 負控制 D：同一把金鑰重簽，公鑰釘不住，但**紙條**抓得到  []
+    [FAIL] 負控制 E：A 的錨鏈接到 B 的 store ⇒ 紅（創世串綁死）  []
+--- ② 整條重算沒真的發生（攻擊拿掉）: rc=1  FAIL 條數=1
+    [FAIL] 負控制 A：整條重算被錨抓到 ⇒ 紅  []
+--- ③ 截斷沒真的發生（攻擊拿掉）: rc=1  FAIL 條數=2
+    [FAIL] 負控制 B：截斷被錨抓到 ⇒ 紅  []
+    [FAIL] 負控制 B：紅的理由指名鏈頭退回去  {"ok": true, "anchored_max_seq": 8, "store_head_seq": 8, "reason": "ok"}
+
+負控制總結： PASS（selftest 量得動，紅得起來）
