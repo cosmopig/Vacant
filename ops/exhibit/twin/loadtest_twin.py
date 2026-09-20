@@ -58,7 +58,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import pathlib
 import sqlite3
 import statistics
@@ -67,8 +66,6 @@ import sys
 import tempfile
 import threading
 import time
-import urllib.error
-import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -77,8 +74,7 @@ TWIN = HERE.parent
 sys.path.insert(0, str(TWIN.parents[2]))
 
 from ops.exhibit.twin.twinstore import (  # noqa: E402
-    KIND_ERROR, KIND_GENERATED, KIND_NOTE, KIND_PUBLISHED, KIND_SUBMITTED,
-    TwinStore,
+    KIND_GENERATED, KIND_NOTE, KIND_PUBLISHED, KIND_SUBMITTED, TwinStore,
 )
 from ops.exhibit.twin import twinlink  # noqa: E402
 
