@@ -350,11 +350,28 @@ curl -X POST https://vacant-world.cosmopig.com/api/submit \
 * `ops/exhibit/twin/probe_pii_filter.py`
 * `ops/exhibit/twin/e2e_twinchain.sh`
 * `ops/exhibit/twin/e2e_1003.sh`
+* `ops/exhibit/twin/serve_check.sh`
 * `tests/test_twinstore.py`
 * `ops/exhibit/twin/evidence_twinchain_20260920/`
 * `ops/exhibit/twin/evidence_1003_20260920/`
 * `ops/exhibit/twin/evidence_live_20260920/`
+* `ops/exhibit/twin/evidence_serve_20260920/`
 
-改動（`~/Documents/GitHub/vacant-world-cloud`，**未 commit、未 push**）：
+改動（`~/Documents/GitHub/vacant-world-cloud`）：
 * `eventlog.js`（新）
 * `server.js`（`/api/all` ＋三處事件記錄 ＋開機橫幅）
+* 🔴 **已 commit 到本機分支 `feat/append-only-eventlog`（166bada），
+  `main` 沒有動，也沒有 push。** push ⇒ Zeabur 自動發布，那是人類的決定。
+  要發：`cd ~/Documents/GitHub/vacant-world-cloud && git checkout main &&
+  git merge feat/append-only-eventlog && git push`。
+  **發完先看 Zeabur 的開機 log 有沒有 `backend=sqlite`**——
+  node:sqlite 要 Node ≥ 22.5，那台跑什麼版本我量不到。
+
+### 執行期資料放哪
+
+`.gitignore` 排除 `ops/exhibit/twin/store/` 與 `evidence_*/**.sqlite3`。
+**這不是「資料可以刪」**：真相來源活在展場那台／1003 的磁碟上
+（`w401@100.119.113.56:/c/Users/w401/vacant_twin/store/twinstore.sqlite3`，
+刻意留著不刪），repo 裡放的是那一次跑的**人讀證據**
+（`*_event_stream.json`、`04_cloud_events.jsonl`、verify／stats 輸出）。
+兩者不是同一份東西。
