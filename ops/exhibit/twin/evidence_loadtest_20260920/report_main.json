@@ -1,0 +1,320 @@
+{
+  "generated_at": "2026-09-20T14:57:31.407960+00:00",
+  "tmpdir": "/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/twin_loadtest_morxenov",
+  "levels": [
+    5,
+    20,
+    50
+  ],
+  "sections": {
+    "baseline": {
+      "ok": true,
+      "before": 0,
+      "after": 1
+    },
+    "verify_negative_control": {
+      "clean_ok": true,
+      "corrupt_detected": true,
+      "broken_at_correct": true,
+      "verify_after_corruption": {
+        "ok": false,
+        "checked": 1,
+        "broken_at": 2,
+        "reason": "payload 與 payload_sha256 對不上（內容被改過）"
+      }
+    },
+    "lock_detection_negative_control": {
+      "n": 8,
+      "errors": [
+        "OperationalError: database is locked",
+        "OperationalError: database is locked",
+        "OperationalError: database is locked",
+        "OperationalError: database is locked",
+        "OperationalError: database is locked",
+        "OperationalError: database is locked",
+        "OperationalError: database is locked"
+      ],
+      "locked_count": 7,
+      "note": "這是繞過 TwinStore、刻意用 timeout=0 的負控制，不代表 twinstore.py 正常路徑會這樣"
+    },
+    "concurrent_writers_thread": [
+      {
+        "n": 5,
+        "mode": "thread",
+        "wall_s": 0.0584,
+        "ok": 5,
+        "failed": 0,
+        "database_is_locked_count": 0,
+        "errors_sample": [],
+        "latency_s": {
+          "min": 0.0152,
+          "median": 0.0228,
+          "max": 0.0526
+        },
+        "count_before": 1,
+        "count_after": 6,
+        "chain_verify": {
+          "ok": true,
+          "checked": 6,
+          "broken_at": null,
+          "reason": "全鏈自洽",
+          "head": "fb2693d4f8a228d43737ed59437c02be604ab397e1f80122b673bccece7854a8",
+          "genesis": "26f87ddb624badb37962a89ba3aaaf2b8a09c50c3f8883663f330a430d3d6587"
+        },
+        "seq_continuous_no_dupes": true
+      },
+      {
+        "n": 20,
+        "mode": "thread",
+        "wall_s": 0.3382,
+        "ok": 20,
+        "failed": 0,
+        "database_is_locked_count": 0,
+        "errors_sample": [],
+        "latency_s": {
+          "min": 0.0352,
+          "median": 0.1252,
+          "max": 0.3205
+        },
+        "count_before": 6,
+        "count_after": 26,
+        "chain_verify": {
+          "ok": true,
+          "checked": 26,
+          "broken_at": null,
+          "reason": "全鏈自洽",
+          "head": "c192c00ad9800ba6aef6e5cbc5b8c06bba2a3d98b9ffc5ee43b2e89f8fa08d70",
+          "genesis": "26f87ddb624badb37962a89ba3aaaf2b8a09c50c3f8883663f330a430d3d6587"
+        },
+        "seq_continuous_no_dupes": true
+      },
+      {
+        "n": 50,
+        "mode": "thread",
+        "wall_s": 0.7975,
+        "ok": 50,
+        "failed": 0,
+        "database_is_locked_count": 0,
+        "errors_sample": [],
+        "latency_s": {
+          "min": 0.0773,
+          "median": 0.2285,
+          "max": 0.759
+        },
+        "count_before": 26,
+        "count_after": 76,
+        "chain_verify": {
+          "ok": true,
+          "checked": 76,
+          "broken_at": null,
+          "reason": "全鏈自洽",
+          "head": "404b82252fd98059823de963a3e1e317f8b96ea8e037716a9f7b7a14f434790a",
+          "genesis": "26f87ddb624badb37962a89ba3aaaf2b8a09c50c3f8883663f330a430d3d6587"
+        },
+        "seq_continuous_no_dupes": true
+      }
+    ],
+    "concurrent_writers_process_crosscheck": {
+      "n": 5,
+      "mode": "process",
+      "wall_s": 2.2337,
+      "ok": 5,
+      "failed": 0,
+      "errors_sample": [],
+      "count_before": 0,
+      "count_after": 5,
+      "chain_verify": {
+        "ok": true,
+        "checked": 5,
+        "broken_at": null,
+        "reason": "全鏈自洽",
+        "head": "755432a55e06bac22c957e59ccf7e8235bd70be574cb91b6d95e413b72c93d41",
+        "genesis": "0bb98ec8f0f314ec35c8c68bb1edf30733f8f787ad515925e8c4331ed87fb5b6"
+      }
+    },
+    "generate_serial_structure": {
+      "delay_s": 1.5,
+      "runs": [
+        {
+          "n": 5,
+          "wall_s": 8.055,
+          "expect_serial_s": 7.5,
+          "expect_if_4way_s": 3.375,
+          "is_serial": true,
+          "generate_result": {
+            "ok": true,
+            "generated": 5,
+            "degraded": 0,
+            "remaining": 0
+          },
+          "stub_calls_received": 5
+        },
+        {
+          "n": 20,
+          "wall_s": 30.176,
+          "expect_serial_s": 30.0,
+          "expect_if_4way_s": 9.0,
+          "is_serial": true,
+          "generate_result": {
+            "ok": true,
+            "generated": 20,
+            "degraded": 0,
+            "remaining": 0
+          },
+          "stub_calls_received": 20
+        }
+      ]
+    },
+    "generate_fallback_trigger": {
+      "generate_result": {
+        "ok": true,
+        "generated": 5,
+        "degraded": 5,
+        "remaining": 0
+      },
+      "engines": [
+        "fallback_deterministic",
+        "fallback_deterministic",
+        "fallback_deterministic",
+        "fallback_deterministic",
+        "fallback_deterministic"
+      ]
+    },
+    "generate_race": {
+      "n_pending": 20,
+      "n_concurrent_loops": 3,
+      "per_generate_call": [
+        {
+          "ok": true,
+          "generated": 20,
+          "degraded": 20,
+          "remaining": 0
+        },
+        {
+          "ok": true,
+          "generated": 20,
+          "degraded": 20,
+          "remaining": 0
+        },
+        {
+          "ok": true,
+          "generated": 20,
+          "degraded": 20,
+          "remaining": 0
+        }
+      ],
+      "total_generated_events": 60,
+      "expected_if_no_race": 20,
+      "duplicated_subjects": {
+        "race-0": 3,
+        "race-1": 3,
+        "race-2": 3,
+        "race-3": 3,
+        "race-4": 3,
+        "race-5": 3,
+        "race-6": 3,
+        "race-7": 3,
+        "race-8": 3,
+        "race-9": 3,
+        "race-10": 3,
+        "race-11": 3,
+        "race-12": 3,
+        "race-13": 3,
+        "race-14": 3,
+        "race-15": 3,
+        "race-16": 3,
+        "race-17": 3,
+        "race-18": 3,
+        "race-19": 3
+      },
+      "duplicate_rate": 1.0
+    },
+    "real_model_small_n": {
+      "n": 2,
+      "wall_s": 59.74,
+      "generate_result": {
+        "ok": true,
+        "generated": 2,
+        "degraded": 0,
+        "remaining": 0
+      },
+      "engines": [
+        "lmstudio:gemma-4-12b-it-qat",
+        "lmstudio:gemma-4-12b-it-qat"
+      ],
+      "latency_ms_per_card": [
+        36771,
+        22964
+      ],
+      "note": "這是對照量級用的極小樣本，不是併發量測；不要拿來講排隊時間"
+    },
+    "disk_usage": {
+      "n_visitors": 50,
+      "total_events": 150,
+      "size_bytes": {
+        "empty_db": {
+          "main": 4096,
+          "wal": 53592,
+          "shm": 32768,
+          "total_live": 90456
+        },
+        "after_submit": {
+          "main": 4096,
+          "wal": 716912,
+          "shm": 32768,
+          "total_live": 753776
+        },
+        "after_generate_fallback": {
+          "main": 4096,
+          "wal": 1392592,
+          "shm": 32768,
+          "total_live": 1429456
+        },
+        "after_publish": {
+          "main": 4096,
+          "wal": 2051792,
+          "shm": 32768,
+          "total_live": 2088656
+        },
+        "after_wal_checkpoint_truncate": {
+          "main": 98304,
+          "wal": 0,
+          "shm": 32768,
+          "total_live": 131072
+        }
+      },
+      "bytes_per_event": {
+        "live_incl_wal_shm": 13321.3,
+        "checkpointed_main_file_only": 655.4
+      },
+      "seven_day_projection_ASSUMPTIONS_NOT_MEASURED": [
+        {
+          "assumption": "保守：50 人/天",
+          "visitors_per_day": 50,
+          "days": 7,
+          "events_est": 1050,
+          "bytes_est": 688128,
+          "mb_est": 0.69
+        },
+        {
+          "assumption": "中：150 人/天",
+          "visitors_per_day": 150,
+          "days": 7,
+          "events_est": 3150,
+          "bytes_est": 2064384,
+          "mb_est": 2.06
+        },
+        {
+          "assumption": "展場硬約束說的『十幾個人同時』乘整天：300 人/天",
+          "visitors_per_day": 300,
+          "days": 7,
+          "events_est": 6300,
+          "bytes_est": 4128768,
+          "mb_est": 4.13
+        }
+      ]
+    }
+  },
+  "fails": [],
+  "all_green": true
+}

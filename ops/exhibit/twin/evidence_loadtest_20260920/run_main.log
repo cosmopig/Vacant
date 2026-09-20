@@ -1,0 +1,61 @@
+暫存目錄：/var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/twin_loadtest_morxenov（不是 ops/exhibit/twin/store/，跟正式真相來源完全分開）
+
+=== 0. 先證明壓測打得動（N=1 基準） ===
+  [OK] append 一列，count 真的 +1 — before=0 after=1
+
+=== 0b. 負控制：verify() 抓不抓得到壞鏈（証明檢查本身沒有睡著）===
+  [OK] 乾淨的鏈：verify().ok
+  [OK] 竄改後：verify().ok 變 False — payload 與 payload_sha256 對不上（內容被改過）
+  [OK] broken_at 指到第 2 列（不是 0、不是別的） — 2
+
+=== 0c. 負控制：故意用極短 busy timeout 逼出 'database is locked' ===
+  [OK] 極短 timeout 下確實撞出至少一個 'database is locked'（證明偵測器沒瞎） — errors=['OperationalError: database is locked', 'OperationalError: database is locked', 'OperationalError: database is locked', 'OperationalError: database is locked', 'OperationalError: database is locked', 'OperationalError: database is locked', 'OperationalError: database is locked']
+
+=== 1. 併發寫入（thread，N=5，n5） ===
+  [OK] N=5：5 個 worker 全部沒有例外 — 失敗 0 個，其中 'database is locked' 0 個：[]
+  [OK] N=5：count 增加量＝成功寫入數（before=1） — before=1 after=6 ok_writes=5
+  [OK] N=5：seq 連號無重複無跳號 — len=6 前 5 個=[1, 2, 3, 4, 5] 後 5 個=[2, 3, 4, 5, 6]
+  [OK] N=5：verify() 仍然綠（鏈沒斷） — 全鏈自洽
+
+=== 1. 併發寫入（thread，N=20，n20） ===
+  [OK] N=20：20 個 worker 全部沒有例外 — 失敗 0 個，其中 'database is locked' 0 個：[]
+  [OK] N=20：count 增加量＝成功寫入數（before=6） — before=6 after=26 ok_writes=20
+  [OK] N=20：seq 連號無重複無跳號 — len=26 前 5 個=[1, 2, 3, 4, 5] 後 5 個=[22, 23, 24, 25, 26]
+  [OK] N=20：verify() 仍然綠（鏈沒斷） — 全鏈自洽
+
+=== 1. 併發寫入（thread，N=50，n50） ===
+  [OK] N=50：50 個 worker 全部沒有例外 — 失敗 0 個，其中 'database is locked' 0 個：[]
+  [OK] N=50：count 增加量＝成功寫入數（before=26） — before=26 after=76 ok_writes=50
+  [OK] N=50：seq 連號無重複無跳號 — len=76 前 5 個=[1, 2, 3, 4, 5] 後 5 個=[72, 73, 74, 75, 76]
+  [OK] N=50：verify() 仍然綠（鏈沒斷） — 全鏈自洽
+
+=== 1b. 併發寫入（process 交叉核對，N=5，px） ===
+  [OK] process N=5：全部行程 returncode==0 — 失敗 0 個：[]
+  [OK] process N=5：count 增加量＝成功數 — before=0 after=5 ok=5
+  [OK] process N=5：verify() 仍然綠 — 全鏈自洽
+
+=== 3a. generate 排隊行為（結構量測，stub 延遲=1.5s，不打 1003） ===
+  [OK] N=5：generate() 是嚴格序列（總時間≈N×delay，不是 N/4×delay） — 實得 8.05s；N×delay=7.50s；若有 4 串並發理論值≈3.38s
+  [OK] N=5：5 筆全部處理完、沒有卡住 — generated=5 remaining=0
+  [OK] N=20：generate() 是嚴格序列（總時間≈N×delay，不是 N/4×delay） — 實得 30.18s；N×delay=30.00s；若有 4 串並發理論值≈9.00s
+  [OK] N=20：20 筆全部處理完、沒有卡住 — generated=20 remaining=0
+
+=== 3a-2. fallback_deterministic 觸發計數（stub 回亂碼）===
+  [OK] 亂碼觸發全部退化為 fallback_deterministic — degraded=5/5
+  [OK] roster 上的 engine 欄位也確實標成 fallback_deterministic — ['fallback_deterministic', 'fallback_deterministic', 'fallback_deterministic', 'fallback_deterministic', 'fallback_deterministic']
+
+=== 3b. generate race（3 個併發 generate() 打同一顆 store）===
+  [量到] 20 個待生成、3 個併發 generate()：共產生 60 個 GENERATED 事件，其中 20 位觀眾被生成超過一次：{'race-0': 3, 'race-1': 3, 'race-2': 3, 'race-3': 3, 'race-4': 3}
+  [OK] 每位觀眾至少被生成一次（沒有人被漏掉） — ={'race-0': 3, 'race-1': 3, 'race-2': 3, 'race-3': 3, 'race-4': 3, 'race-5': 3, 'race-6': 3, 'race-7': 3, 'race-8': 3, 'race-9': 3, 'race-10': 3, 'race-11': 3, 'race-12': 3, 'race-13': 3, 'race-14': 3, 'race-15': 3, 'race-16': 3, 'race-17': 3, 'race-18': 3, 'race-19': 3}
+  [OK] 鏈本身仍然完整（race 造成的是重複事件，不是壞鏈）
+
+=== 3c. 極小 N 真模型對照（N=2，endpoint=http://100.119.113.56:1234/v1，只是對照量級，不是併發量測）===
+  [OK] 真模型 N=2：全部有結果（真跑或退化都算，不能卡住）
+
+=== 4. 磁碟（50 位觀眾，submitted+generated(fallback)+published(模擬) 全生命週期）===
+  [OK] 50 位觀眾 × 3 事件 = 150 筆，實際筆數相符 — total_events=150
+
+======================================================================
+全部檢查綠（負控制與正控制都有跑過）
+報告寫到 ops/exhibit/twin/evidence_loadtest_20260920/report_main_with_real_model.json
+EXIT_CODE=0
