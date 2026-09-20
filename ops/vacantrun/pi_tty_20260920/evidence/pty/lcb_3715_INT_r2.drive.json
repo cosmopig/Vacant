@@ -1,0 +1,71 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant_network.vrun.launcher",
+    "--workspace",
+    "/var/tmp/vacant_tty_20260920/ws_lcb_3715_INT_r2",
+    "--run-dir",
+    "/var/tmp/vacant_tty_20260920/cells/lcb_3715_INT_r2",
+    "--suite",
+    "/var/tmp/vacant_tty_20260920/repo/ops/gain/r534/templates/lcb_3715/tests_visible",
+    "--task-id",
+    "ttymode_lcb_3715_INT_r2",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "120",
+    "--timeout",
+    "900",
+    "--retry",
+    "none",
+    "--stdin",
+    "inherit",
+    "--",
+    "/var/tmp/vacant_tty_20260920/repo/ops/vacantrun/wrap_agent_tty.sh",
+    "pi",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "rows": 40,
+  "cols": 120,
+  "idle_s": 120.0,
+  "cap_s": 1000.0,
+  "grace_s": 60.0,
+  "post_done_s": 4.0,
+  "turns_requested": 1,
+  "turn_text": null,
+  "turns_typed": 0,
+  "stops_seen": 1,
+  "hooklog": "/var/tmp/vacant_tty_20260920/hooks/lcb_3715_INT_r2.jsonl",
+  "t_start": 1789916083.0631742,
+  "events": [
+    {
+      "kind": "done",
+      "t": 220.625,
+      "how": "hooklog_stop",
+      "stops": 1
+    },
+    {
+      "kind": "sent",
+      "t": 224.638,
+      "what": "ctrl_d"
+    },
+    {
+      "kind": "agent_gone",
+      "t": 224.773,
+      "how": "hooklog_session_end"
+    }
+  ],
+  "done_signal": "hooklog_stop",
+  "ended_by": "ctrl_d",
+  "exit_code": 0,
+  "signaled_by": null,
+  "bytes_out": 3628884,
+  "transcript_truncated": false,
+  "child_is_tty": true,
+  "isig_disabled": true,
+  "agent_gone_at_s": 224.771,
+  "child_pid": 4155323,
+  "exit_signal": null,
+  "wall_s": 224.995
+}

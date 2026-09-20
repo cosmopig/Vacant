@@ -1,0 +1,31 @@
+=== 前 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-mCvxr0/extensions/vacant.ts
+The problem asks us to find the maximum number of non-empty subarrays that do not contain any conflicting pairs after removing exactly one pair from a given set of `conflictingPairs`.
+
+### Approach:
+1.  **Identify Constraints**: A subarray $[L, R]$ is invalid if it contains both $a$ and $b$ for some $(a, b) \in S$. Since the array `nums` is $1, 2, \dots, n$, this means $\min(a, b) \ge L$ and $\max(a, b) \le R$.
+2.  **Calculate Initial Count**: For a fixed $R$, let $f(R)$ be the maximum value of $\min(a, b)$ among all pairs $(a, b)$ such that $\max(a, b) \le R$. The number of valid subarrays ending at $R$ is $R - f(R)$. If no such pair exists, $f(R) = 0$.
+3.  **Analyze Removal**: Removing a pair $(x_k, y_k)$ (where $x_k = \min(a_k, b_k)$ and $y_k = \max(a_k, b_k)$) only affects the count for $R \ge y_k$. Specifically, it changes $f(R)$ to $f'(R)$ if $(x_k, y_k)$ was the unique pair that achieved the maximum value $M1[R]$.
+4.  **Efficient Computation**:
+    *   Maintain $M1[R]$ (maximum $\min(a, b)$ for all pairs with $\max \le R$), $C1[R]$ (count of such pairs achieving $M1[R]$), and $M2\_strict[R]$ (the next largest value).
+    *   The change in the total count when removing $(x_k, y_k)$ is $\Delta = \sum_{R=y_k}^n (M1[R] - M2\_strict[R])$ for all $R$ where $M1[R] = x_k$ and $C1[R] = 1$.
+    *   Use prefix sums to calculate these $\Delta$ values efficiently for each pair.
+
+The solution was implemented in `solution.py` and passed the visible tests.
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 4613478cfb83→7542de525168　wire 8 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3789_PTP_r2
+
+=== 後 8KB ===
+HOOK_INSTALL target=/tmp/vacant-wrap-mCvxr0/extensions/vacant.ts
+The problem asks us to find the maximum number of non-empty subarrays that do not contain any conflicting pairs after removing exactly one pair from a given set of `conflictingPairs`.
+
+### Approach:
+1.  **Identify Constraints**: A subarray $[L, R]$ is invalid if it contains both $a$ and $b$ for some $(a, b) \in S$. Since the array `nums` is $1, 2, \dots, n$, this means $\min(a, b) \ge L$ and $\max(a, b) \le R$.
+2.  **Calculate Initial Count**: For a fixed $R$, let $f(R)$ be the maximum value of $\min(a, b)$ among all pairs $(a, b)$ such that $\max(a, b) \le R$. The number of valid subarrays ending at $R$ is $R - f(R)$. If no such pair exists, $f(R) = 0$.
+3.  **Analyze Removal**: Removing a pair $(x_k, y_k)$ (where $x_k = \min(a_k, b_k)$ and $y_k = \max(a_k, b_k)$) only affects the count for $R \ge y_k$. Specifically, it changes $f(R)$ to $f'(R)$ if $(x_k, y_k)$ was the unique pair that achieved the maximum value $M1[R]$.
+4.  **Efficient Computation**:
+    *   Maintain $M1[R]$ (maximum $\min(a, b)$ for all pairs with $\max \le R$), $C1[R]$ (count of such pairs achieving $M1[R]$), and $M2\_strict[R]$ (the next largest value).
+    *   The change in the total count when removing $(x_k, y_k)$ is $\Delta = \sum_{R=y_k}^n (M1[R] - M2\_strict[R])$ for all $R$ where $M1[R] = x_k$ and $C1[R] = 1$.
+    *   Use prefix sums to calculate these $\Delta$ values efficiently for each pair.
+
+The solution was implemented in `solution.py` and passed the visible tests.
+[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 4613478cfb83→7542de525168　wire 8 通　收據 /var/tmp/vacant_tty_20260920/cells/lcb_3789_PTP_r2

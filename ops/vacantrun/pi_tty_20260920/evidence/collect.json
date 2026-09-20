@@ -1,0 +1,2545 @@
+{
+  "root": "/var/tmp/vacant_tty_20260920",
+  "hidden_timeout_s": 60.0,
+  "n": 40,
+  "rows": [
+    {
+      "name": "lcb_3522_INT2_r1",
+      "task": "lcb_3522",
+      "arm": "INT2",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 10,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 92.289,
+      "run_wall_s": 92.585,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 31,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 9
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 9,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 392256
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 92.679,
+        "turns_typed": 1,
+        "stops_seen": 2,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 2,
+        "before_provider_request": 9,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 2,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 2,
+      "solution_bytes": 628,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3522_INTQ_r1",
+      "task": "lcb_3522",
+      "arm": "INTQ",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 2,
+      "wire_errors": 1,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 8.138,
+      "run_wall_s": 25.015,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 6,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 0": 1
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 1,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 13458
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 25.114,
+        "turns_typed": 0,
+        "stops_seen": 0,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 1,
+        "session_end": 1
+      },
+      "hook_tools": {},
+      "agent_end_n": 0,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3522_INT_r1",
+      "task": "lcb_3522",
+      "arm": "INT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 73.538,
+      "run_wall_s": 73.833,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 28,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 8
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 8,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 321233
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 73.929,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 8,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 599,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3522_INT_r2",
+      "task": "lcb_3522",
+      "arm": "INT",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 97.154,
+      "run_wall_s": 97.373,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 423365
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 97.485,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 625,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3522_PRT_r1",
+      "task": "lcb_3522",
+      "arm": "PRT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 96.926,
+      "run_wall_s": 97.218,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 590,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3522_PRT_r2",
+      "task": "lcb_3522",
+      "arm": "PRT",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 145.201,
+      "run_wall_s": 145.344,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 473,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3522_PTP_r1",
+      "task": "lcb_3522",
+      "arm": "PTP",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 42.444,
+      "run_wall_s": 42.642,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 28,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 8
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 8,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 630
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 42.737,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 8,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 631,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3522_PTP_r2",
+      "task": "lcb_3522",
+      "arm": "PTP",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 13,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 74.424,
+      "run_wall_s": 74.589,
+      "visible_passed": 3,
+      "visible_total": 3,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 40,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 12
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 12,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 733
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 74.683,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 12,
+        "pre_tool_use": 11,
+        "tool_result": 11,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 10,
+        "read": 10,
+        "write": 2
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 1375,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 27,
+      "postaudit_hidden_total": 27
+    },
+    {
+      "name": "lcb_3584_INT2_r1",
+      "task": "lcb_3584",
+      "arm": "INT2",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 674.939,
+      "run_wall_s": 675.266,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 4094231
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 675.355,
+        "turns_typed": 1,
+        "stops_seen": 2,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 2,
+        "before_provider_request": 7,
+        "pre_tool_use": 5,
+        "tool_result": 5,
+        "stop": 2,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4
+      },
+      "agent_end_n": 2,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_INTQ_r1",
+      "task": "lcb_3584",
+      "arm": "INTQ",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 2,
+      "wire_errors": 1,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 8.179,
+      "run_wall_s": 11.281,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 6,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 0": 1
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 1,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 13938
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 11.377,
+        "turns_typed": 0,
+        "stops_seen": 0,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 1,
+        "session_end": 1
+      },
+      "hook_tools": {},
+      "agent_end_n": 0,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_INT_r1",
+      "task": "lcb_3584",
+      "arm": "INT",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 368.341,
+      "run_wall_s": 368.528,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 2780901
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 368.619,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_INT_r2",
+      "task": "lcb_3584",
+      "arm": "INT",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 346.676,
+      "run_wall_s": 346.929,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 2211520
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 347.034,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_PRT_r1",
+      "task": "lcb_3584",
+      "arm": "PRT",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 364.65,
+      "run_wall_s": 364.909,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_PRT_r2",
+      "task": "lcb_3584",
+      "arm": "PRT",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 341.13,
+      "run_wall_s": 341.361,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_PTP_r1",
+      "task": "lcb_3584",
+      "arm": "PTP",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 338.751,
+      "run_wall_s": 338.995,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 321
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 339.088,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3584_PTP_r2",
+      "task": "lcb_3584",
+      "arm": "PTP",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 395.548,
+      "run_wall_s": 395.86,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 321
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 395.971,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3649_INT2_r1",
+      "task": "lcb_3649",
+      "arm": "INT2",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 10,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 146.389,
+      "run_wall_s": 146.695,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 31,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 9
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 9,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 728161
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 146.8,
+        "turns_typed": 1,
+        "stops_seen": 2,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 2,
+        "before_provider_request": 9,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 2,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 2,
+      "solution_bytes": 444,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3649_INTQ_r1",
+      "task": "lcb_3649",
+      "arm": "INTQ",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 1,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 8.087,
+      "run_wall_s": 8.268,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 15,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 3,
+        "POST /v1/chat/completions -> 0": 1
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 43598
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 8.358,
+        "turns_typed": 0,
+        "stops_seen": 0,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 0,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3649_INT_r1",
+      "task": "lcb_3649",
+      "arm": "INT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 10,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 131.978,
+      "run_wall_s": 132.28,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 31,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 9
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 9,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 706928
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 132.382,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 9,
+        "pre_tool_use": 8,
+        "tool_result": 8,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 8,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 614,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3649_INT_r2",
+      "task": "lcb_3649",
+      "arm": "INT",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 10,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 517.385,
+      "run_wall_s": 517.583,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 29,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 9
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 9,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 3750878
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 517.681,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 9,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "read": 4,
+        "write": 2,
+        "bash": 8
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 791,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3649_PRT_r1",
+      "task": "lcb_3649",
+      "arm": "PRT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 304.38,
+      "run_wall_s": 304.637,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 26,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 8
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 8,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 8,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 1002,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3649_PRT_r2",
+      "task": "lcb_3649",
+      "arm": "PRT",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 266.461,
+      "run_wall_s": 266.74,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 842,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3649_PTP_r1",
+      "task": "lcb_3649",
+      "arm": "PTP",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 426.428,
+      "run_wall_s": 426.614,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 200
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 426.711,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4,
+        "write": 2
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 650,
+      "postaudit_hidden_status": "timeout",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3649_PTP_r2",
+      "task": "lcb_3649",
+      "arm": "PTP",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 159.971,
+      "run_wall_s": 160.211,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 28,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 8
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 8,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 1218
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 160.313,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 8,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 6,
+        "write": 2,
+        "edit": 2
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 690,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3715_INT2_r1",
+      "task": "lcb_3715",
+      "arm": "INT2",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 275.09,
+      "run_wall_s": 275.354,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 28,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 8
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 8,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 1741416
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 275.459,
+        "turns_typed": 1,
+        "stops_seen": 2,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 2,
+        "before_provider_request": 8,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 2,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "read": 4,
+        "write": 4,
+        "bash": 4
+      },
+      "agent_end_n": 2,
+      "solution_bytes": 2032,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3715_INTQ_r1",
+      "task": "lcb_3715",
+      "arm": "INTQ",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 2,
+      "wire_errors": 1,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 8.138,
+      "run_wall_s": 10.363,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 6,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 0": 1
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 1,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 13818
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 10.467,
+        "turns_typed": 0,
+        "stops_seen": 0,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 1,
+        "session_end": 1
+      },
+      "hook_tools": {},
+      "agent_end_n": 0,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3715_INT_r1",
+      "task": "lcb_3715",
+      "arm": "INT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 371.456,
+      "run_wall_s": 371.614,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 2309797
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 371.721,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 2112,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3715_INT_r2",
+      "task": "lcb_3715",
+      "arm": "INT",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 9,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 224.693,
+      "run_wall_s": 224.847,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 26,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 8
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 8,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 1478743
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 224.995,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 8,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 1581,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3715_PRT_r1",
+      "task": "lcb_3715",
+      "arm": "PRT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 351.296,
+      "run_wall_s": 351.61,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 6,
+        "tool_result": 6,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 2318,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3715_PRT_r2",
+      "task": "lcb_3715",
+      "arm": "PRT",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 309.487,
+      "run_wall_s": 309.797,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3715_PTP_r1",
+      "task": "lcb_3715",
+      "arm": "PTP",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 4,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 345.009,
+      "run_wall_s": 345.269,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 13,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 3
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 3,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 321
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 345.364,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 3,
+        "pre_tool_use": 2,
+        "tool_result": 2,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3715_PTP_r2",
+      "task": "lcb_3715",
+      "arm": "PTP",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 366.237,
+      "run_wall_s": 366.382,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 43079
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 366.481,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_INT2_r1",
+      "task": "lcb_3789",
+      "arm": "INT2",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 471.781,
+      "run_wall_s": 471.96,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 25,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 4088020
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 472.052,
+        "turns_typed": 1,
+        "stops_seen": 2,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 2,
+        "before_provider_request": 7,
+        "pre_tool_use": 5,
+        "tool_result": 5,
+        "stop": 2,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 6,
+        "read": 4
+      },
+      "agent_end_n": 2,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_INTQ_r1",
+      "task": "lcb_3789",
+      "arm": "INTQ",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 2,
+      "wire_errors": 1,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 8.088,
+      "run_wall_s": 11.597,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 6,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 0": 1
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 1,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 13698
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 11.704,
+        "turns_typed": 0,
+        "stops_seen": 0,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 1,
+        "session_end": 1
+      },
+      "hook_tools": {},
+      "agent_end_n": 0,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_INT_r1",
+      "task": "lcb_3789",
+      "arm": "INT",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 727.485,
+      "run_wall_s": 747.794,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 18,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 2932024
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 747.987,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 6,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_INT_r2",
+      "task": "lcb_3789",
+      "arm": "INT",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 277.4,
+      "run_wall_s": 277.729,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [
+          "To resume this session:"
+        ],
+        "tui": [
+          "(vacantproxy)",
+          "Working",
+          "ctrl+c/ctrl+d"
+        ],
+        "bytes": 2132242
+      },
+      "pi_mode_inferred": "interactive",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "ctrl_d",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 277.828,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_PRT_r1",
+      "task": "lcb_3789",
+      "arm": "PRT",
+      "rep": "r1",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 12,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 472.721,
+      "run_wall_s": 472.947,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 31,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 11
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 11,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 11,
+        "pre_tool_use": 7,
+        "tool_result": 7,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 6
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 2695,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    },
+    {
+      "name": "lcb_3789_PRT_r2",
+      "task": "lcb_3789",
+      "arm": "PRT",
+      "rep": "r2",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 343.68,
+      "run_wall_s": 343.882,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": null,
+      "pi_mode_inferred": null,
+      "drive": null,
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_PTP_r1",
+      "task": "lcb_3789",
+      "arm": "PTP",
+      "rep": "r1",
+      "accepted": false,
+      "refused": true,
+      "stop_reason": "visible_fail",
+      "requests_seen": 5,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 397.159,
+      "run_wall_s": 397.332,
+      "visible_passed": 0,
+      "visible_total": 1,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 16,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 4
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 4,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 321
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 20,
+        "exit_signal": null,
+        "wall_s": 397.426,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 4,
+        "pre_tool_use": 3,
+        "tool_result": 3,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 2,
+        "read": 4
+      },
+      "agent_end_n": 1,
+      "solution_bytes": null,
+      "postaudit_hidden_status": "no_solution",
+      "postaudit_hidden_passed": null,
+      "postaudit_hidden_total": null
+    },
+    {
+      "name": "lcb_3789_PTP_r2",
+      "task": "lcb_3789",
+      "arm": "PTP",
+      "rep": "r2",
+      "accepted": true,
+      "refused": false,
+      "stop_reason": "visible_pass",
+      "requests_seen": 8,
+      "wire_errors": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "agent_wall_s": 337.311,
+      "run_wall_s": 337.561,
+      "visible_passed": 2,
+      "visible_total": 2,
+      "wire_quiesced": null,
+      "orphans_killed": null,
+      "tier": "B'",
+      "canary_fired": true,
+      "hook_events_n": 23,
+      "wire_paths": {
+        "GET /v1/models -> 200": 1,
+        "POST /v1/chat/completions -> 200": 7
+      },
+      "wire_canary": 1,
+      "wire_model_calls": 7,
+      "mode_evidence": {
+        "interactive_only": [],
+        "tui": [],
+        "bytes": 1672
+      },
+      "pi_mode_inferred": "print_or_unknown",
+      "drive": {
+        "done_signal": "hooklog_stop",
+        "ended_by": "self",
+        "exit_code": 0,
+        "exit_signal": null,
+        "wall_s": 337.665,
+        "turns_typed": 0,
+        "stops_seen": 1,
+        "child_is_tty": true
+      },
+      "hook_events": {
+        "session_start": 1,
+        "canary": 1,
+        "canary_result": 1,
+        "user_prompt_submit": 1,
+        "before_provider_request": 7,
+        "pre_tool_use": 5,
+        "tool_result": 5,
+        "stop": 1,
+        "session_end": 1
+      },
+      "hook_tools": {
+        "bash": 4,
+        "read": 4,
+        "write": 2
+      },
+      "agent_end_n": 1,
+      "solution_bytes": 1803,
+      "postaudit_hidden_status": "all_pass",
+      "postaudit_hidden_passed": 26,
+      "postaudit_hidden_total": 26
+    }
+  ]
+}

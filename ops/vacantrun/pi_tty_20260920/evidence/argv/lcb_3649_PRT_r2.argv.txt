@@ -1,0 +1,8 @@
+cwd=/var/tmp/vacant_tty_20260920/repo  arm=PRT  task=lcb_3649  rep=2
+task_id=ttymode_lcb_3649_PRT_r2
+hooklog=/var/tmp/vacant_tty_20260920/hooks/lcb_3649_PRT_r2.jsonl
+ENV VACANT_RUN_UPSTREAM_OPENAI=http://100.119.113.56:1234/v1
+ENV VACANT_AGENT_MODEL=gemma-4-12b-it-qat
+ENV VACANT_HOOK_LOG=(set, 三臂皆同)
+workspace_files=./contract.md ./goal.md ./run_tests.sh ./tests_visible/test_visible.py
+cmd=launcher --json -- wrap_agent.sh pi <prompt>

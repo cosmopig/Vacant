@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "ttymode_lcb_3649_PRT_r2",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 31,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "f728ac4d6d533dde9326e92623dbde5b41cd9e475aff406bba3ca78a08a5f38e"
+}

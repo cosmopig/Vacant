@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "bash",
+    "repo/ops/vacantrun/pi_tty_20260920/mode_oracle.sh",
+    "stdoutfile",
+    "/var/tmp/vacant_tty_20260920/oracle/D.stdout"
+  ],
+  "rows": 40,
+  "cols": 120,
+  "idle_s": 8.0,
+  "cap_s": 120.0,
+  "grace_s": 10.0,
+  "hooklog": null,
+  "t_start": 1789911871.1053586,
+  "events": [],
+  "done_signal": null,
+  "ended_by": "self",
+  "exit_code": 1,
+  "signaled_by": null,
+  "bytes_out": 124,
+  "transcript_truncated": false,
+  "child_is_tty": true,
+  "child_pid": 4118792,
+  "exit_signal": null,
+  "wall_s": 0.23
+}

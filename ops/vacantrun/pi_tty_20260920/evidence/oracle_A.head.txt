@@ -1,0 +1,22 @@
+ORACLE mode=plain stdin_tty=1 stdout_tty=1
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                                        
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/var/tmp/vacant_tty_20260920
+0.0%/262k (auto)                                                                                      gemma-4-12b-it-qat pi v0.85.1                                                                                                             
+ escape interrupt · ctrl+c/ctrl+d clear/exit · / commands · ! bash · ctrl+o more                                        
+ Press ctrl+o to show full startup help and loaded resources.                                                           
+                                                                                                                        
+ Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.                                  
+
+
+ Warning: fd not found. Offline mode enabled, skipping download.                                                        
+ Warning: ripgrep not found. Offline mode enabled, skipping download.                                                   
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                                        
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/var/tmp/vacant_tty_20260920
+0.0%/262k (auto)                                                                                      gemma-4-12b-it-qat 
+ORACLE_EXIT=0
