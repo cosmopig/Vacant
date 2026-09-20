@@ -71,21 +71,108 @@ abpi 那批自己就是最乾淨的反例：`launcher.py:676` 判 `refused`、`:
 真正的 `null/VOID` 保留給**基礎設施產不出有效判決**（verifier crash、測試檔缺失、證據損毀）。
 `FAIL → UNKNOWN` 不只是低估錯誤率，**是改掉 gate 的語意**。
 
-## 五、🔴 尚未直驗的部分（引用前必須補）
+## 五、✅ 七項先行研究已直驗（2026-09-20 兩條線平行做完）
 
-報告引述了五個外部系統作為先行研究：**GitHub Agentic Workflows（Safe Outputs／
-Agent Workflow Firewall）、Docker Sandboxes（clone mode／credential proxy）、
-Microsoft Global Secure Access MCP firewall、OpenAI Agents SDK guardrails、
-AgentTrust／AIRGuard／ClawGuard、SLSA／Sigstore（VSA、Rekor）**。
+**43 筆一手來源全文落盤**（MANIFEST 236 → 279，folder `2026-09-20_附身先行研究`，
+全部 `A_全文`、逐筆 sha256、引文以 `grep -F`／`pdftotext` 複驗）。
+34 條主張：**3 條否證、4 條部分成立、其餘已驗證、零條查不到。**
 
-**這些我一個都還沒直驗。** 依 CLAUDE.md §3（先行研究重要的理由是「**不能對觀眾說錯話**」）
-與 `examples/archive_citations.py` 的三級落盤紀律（A 全文／B 僅摘要／人工核對引文，含 sha256），
-**在進入展場文案或任何對外文件之前，這七項要先進 `參考文獻/_引用備份/MANIFEST.json`。**
-拿不到也要記下拿不到。
+### 🔴 否證一：**報告的招牌例子在預設組態下不成立**
 
-⚠ 報告聲稱查的是 `cosmopig/Vacant` 的 **`main`**，而本輪工作在 `integrate/20260919`。
-它對 `envmap.py` 的那條指控**我已逐行直驗為真**（而且比它說的更嚴重：
-本檔第 15 行的誠實邊界句早就承諾了這個行為）。**其餘對本 repo 的指控尚未逐條驗。**
+報告把 GitHub Agentic Workflows 的 SafeOutputs 當成「這次事故的反教材答案」，
+說「若 detection FAIL，workflow 停止，**沒有任何 external write 被執行**」。
+
+**權限分離那半（A1–A4）逐條驗證成立**——agent job 只有 read-only token、
+輸出 buffered 成 `agent_output.json`＋`aw.patch`、獨立 detection job、
+scoped write job 才碰 API。GitHub 自家編譯產物 `q.lock.yml` 是活體佐證。
+
+**但「FAIL ⇒ 不會寫出去」是假的**，三層一手證據逐層收緊：
+- 參考文件：`threat-detection.continue-on-error` **預設 `true`**，
+  「detection warnings/failures produce a caution notice **instead of blocking safe outputs**」
+- 原始碼：`threat_detection_steps.go:264` `continueOnError := true`（註解自己寫 *permissive*）；
+  `parse_threat_detection_results.cjs:510` 的 `mustFail` **只在** `agent_failure`／`parse_error`
+  成立，偵測到威脅走 `core.warning` **不走** `core.setFailed`
+- 編譯產物：`safe_outputs` 的閘門是 `needs.detection.result == 'success'`
+  ——**看 job result 不看裁決 output**，而那個步驟帶 `continue-on-error: true`
+
+⇒ **預設組態下偵測到威脅，PR／issue 照樣開出去。** 架構頁那句
+「terminates before any writes are externalized」**只在 strict mode 成立**，
+GitHub 官方文件在這一點上自相矛盾。
+⚠ 誠實邊界：這是**讀碼＋讀編譯產物**的結論，**沒有實跑一次 gh-aw workflow**。
+
+**這條直接回饋到我們的 P0**：`vrun/publish.py` 刻意**沒有** `--force`／
+`skip_verify`／`continue_on_error`，而且有測試守著。gh-aw 留了那個逃生口，
+於是預設就是不擋。**可以繞過的閘門在需要它的那天一定會被繞過。**
+
+### 🔴 否證二：ClawGuard 有兩篇同名論文，而報告把別人的邊界安在它頭上
+
+- `arXiv:2604.11790v2`（tool-augmented LLM agent 的 runtime security）與
+  `arXiv:2605.06205v1`（**用 SDR 收電磁側通道**偵測 workflow 劫持）**同名但無關**。
+  ⇒ **引用一律要帶 arXiv id。**
+- 報告說「論文明說涵蓋不到繞路的 raw syscall／network path」——
+  ClawGuard 全文 `syscall` **0 次**、`out-of-band` **0 次**（實際數過），
+  而且部分反向：它的規則集明文涵蓋 outbound network destinations 與 shell-level exec。
+  ⇒ **不可以說「論文承認擋不住」。** 那是我們的推論，不是論文的話。
+  （AIRGuard 全文 `syscall` 也是 0 次，用詞是 `out-of-band tool execution`。）
+
+### 🔴 否證三：D2 的出處錯了（主張成立但會被抓）
+
+「output guardrail 無法倒轉已發生的外部 tool side effects」**逐字成立，而且官方寫得更完整**
+——但**只在 JavaScript/TS 版文件裡**。Python 版對應段落把這句省掉了
+（全文語料 5625 筆逐一 regex 掃過，`irreversible`／`cannot recall`／`outside control` 命中皆 **0**）。
+⇒ **引用必須指 JS 版網址。**
+
+### ⚠ 部分成立四條
+
+- **gVisor 不是 gh-aw 的預設**（預設是 Docker container isolation）；MCP gateway 那句是條件句。
+  AWF 防火牆本身**是**預設開。
+- **SLSA G4** 是 `SHOULD` 不是 `MUST`。
+- **VSA 欄位表**：報告點名的六項都在，但**三項其實是 optional**
+  （`verifier.version`／`inputAttestations`／`timeVerified`），`policy.digest` 只是 SHOULD，
+  而且**報告漏了兩個 required**：`resourceUri`、`verifiedLevels`。
+  ⚠ 版本陷阱：`timeVerified` **v1.0 必填、v1.1 起選填**。
+  ⇒ 照報告對齊收據 schema 會做出「以為必填的可省、真正必填的沒做」的東西。
+  **本裁決的 `release.py` 因此是取其結構、自訂欄位**，不是照抄。
+- **G7**：SLSA Provenance **v0.2** 曾經有 `metadata.completeness.*`（fail-closed），
+  **v1.0 移除**搬去 `builder.id` 指向的散文文件，in-toto v1 也沒有。
+  ⇒ 沒有可照抄的欄位，但**可以照抄語意**：VSA `dependencyLevels` 的三態
+  （`None` ＝ *the verifier makes no claims*）＋ v0.2 的 fail-closed 措辭。
+  **`model_wire` 與 `release.coverage` 已照此實作。**
+
+### ✅ 驗證成立、而且對我們最有用的三件
+
+1. **gh-aw 的 staged permission separation**——「它寫不了」而不是「我們不准它寫」。
+   跟 `sandbox.py` 那句「最小 rootfs 之下那條通道**不可表達**」是同一招，
+   只是做在**權限層**。`gateshim.py` 靠攔截＋退出碼，**打完整路徑就繞過**；
+   權限層繞不過，因為 token 不在手上。
+2. **Docker Sandboxes 全部五條成立**（microVM、clone mode 主機 repo 唯讀、
+   direct mode 官方自承無邊界、credential 不以 env／file 進 VM）。
+   ⚠ **可抄的是文件紀律不是機制**：Docker 在同一頁把兩個 opt-out 講明
+   （OAuth `passthrough: true` 跳過 masking、SSH agent forwarding 預設開）。
+   `wireproxy.py` 的 docstring 應該用同一種寫法把自己的 opt-out 列全。
+3. **GSA MCP firewall 全部五條成立，而它的極限正是 enclosure 打的那一點**：
+   升到 protocol primitive 層的代價是必須開 TLS inspection，**而升上去之後
+   仍然看不到 stdio／local MCP**（官方原話）。
+   ⇒ 展場可以講的一句硬話：**連微軟砸全球 SSE 邊緣做 MCP 防火牆，本機 stdio 那條路還是看不到**
+   ——而 Vacant 的 enclosure（netns ＋ **mount ns**）打的正是「把本機那條路拿掉」。
+   兩邊都有一手來源。
+
+### ⚠ 一個跟 Vacant 目標直接衝突的反向事實
+
+**gh-aw 的官方 engine 有 pi，沒有 OpenCode**
+（OpenCode／Aider／Crush／Cursor／Kiro 是 "samples only … not officially supported"）。
+記憶 `vacant-goal-possess-any-agent` 寫「OpenCode 與 pi 絕對一定要」——
+**兩者在 gh-aw 的地位不同，不可混講。**
+
+### ❓ 明講查不到的
+
+- GSA MCP firewall 的**獨立 GA 公告查不到**（`whats-new` 回 404）。
+  最硬的日期只有文件 `ms.date=2026-08-06` 與該檔唯一 commit `2026-08-06T21:28:35Z`。
+  **它是 preview 不是 GA。**
+- 五篇論文全是 arXiv preprint，`doi`／`journal_ref` 皆 `None`，**沒另查 DBLP／ACM／IEEE**。
+  ⇒ **一律不可說「已發表於 X」。**
+- 兩條線的 `WebSearch` 額度都在開始前／第一批就用罄（200/200），全程改 `curl` 直取一手來源。
+  好處是每筆都是原件且落盤，**壞處是沒做過廣泛關鍵字掃描**。
 
 ## 六、定位（採用，但先當內部用語）
 
