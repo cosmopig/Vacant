@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-09-20T15:19:48.131652+00:00",
+  "store_id": "fc2dd2c0afdf4bfda9bef4672b4e47f9",
+  "chain": {
+    "ok": true,
+    "checked": 6,
+    "head": "d5e20802b2b56ae0e26b31002d82db4420f502e75d88ff26c24e1fcefcfea92f",
+    "genesis": "bc01e092a3492ce6bab0cbe2ad439aefc324a9ba8bc03f54ac473bd3343c937e"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 6,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "neighbour",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 99 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 3,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "bad-vibedict",
+      "card": {
+        "need": "x",
+        "vibe": {
+          "a": 1
+        }
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 3,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

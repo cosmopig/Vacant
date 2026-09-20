@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 729, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 717, in main
+    r["ingest"] = ingest(st, a.cloud, a.token)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 181, in ingest
+    store.append(KIND_SUBMITTED, sid, {
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinstore.py", line 230, in append
+    raise ValueError(f"{name} 不可含換行（雜湊鏈用換行當分隔）：{val!r}")
+ValueError: sub_id 不可含換行（雜湊鏈用換行當分隔）：'bad\nid'

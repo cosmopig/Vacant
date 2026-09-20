@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-09-20T15:19:49.845897+00:00",
+  "store_id": "6fe35efd8ea4409d94f3655e440e1033",
+  "chain": {
+    "ok": true,
+    "checked": 4,
+    "head": "f8b5d97fd8f83feb1ee6d30719ad48f9e49830f1e69adf4a39c5ba7ed4c3fca4",
+    "genesis": "b175f95dfe9f943dff722819fa87f23e5aece75ee6160e9b985138a5b6ec06ca"
+  },
+  "counts": {
+    "visitors": 1,
+    "events": 4,
+    "gaps": 0,
+    "errors": 1
+  },
+  "people": [
+    {
+      "id": "neighbour",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 99 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 4,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

@@ -37,6 +37,14 @@
    把後者講成前者就是鐵律 5 的展場版本。
 3. **`ingest` 讀不到的不算 0。** 雲端 4xx/5xx/逾時一律記 `ingest_gap`，
    `pulled` 欄位寫 `null` 不寫 0——「沒量到」跟「量到是零」是兩件事。
+4b. **一張卡的問題不可以變成整個展場的問題（2026-09-20 演練後加上）。**
+   `ingest`／`generate` 對**卡層級**的例外（`CARD_LEVEL_ERRORS`）記一列 `error`
+   然後做下一張；**`sqlite3` 的例外刻意不吞**——真相來源壞掉（磁碟滿、庫毀）
+   要讓 loop 大聲死掉，不可以假裝成「跳過一張卡」而空轉一整天。
+   ⚠ 這不是「畸形卡都處理好了」：它保證的是**別人的卡照樣上得了螢幕**，
+   那張壞卡本身還是沒有分身（`error` 事件留著，可以事後查）。
+   演練＋負控制：`ops/exhibit/twin/resilience_check.sh` 第 6 節。
+
 4. **`/api/queue` 這條路會漏件。** 它只回 `status='queued'`，電視那端一 claim
    就看不到了。要不漏就得走 `/api/all`（本次新增，唯讀、不 claim）。
    雲端還沒部署到有 `/api/all` 的版本時，這一支會**明講自己走的是會漏的那條路**
@@ -115,6 +123,35 @@ def assert_ks1_clean(text: str) -> None:
             raise ValueError(f"KS-1 違規：prompt 含禁語 {bad!r}")
 
 
+#: 🔴 **一張卡的問題，不可以變成整個展場的問題。**
+#: 這幾類例外＝「這一張卡本身有毛病」：跳過它、記一列 `error`、做下一張。
+#: **`sqlite3` 的例外刻意不在裡面**——那是真相來源壞了（磁碟滿、庫毀），
+#: 吞成「跳過一張卡」會讓 loop 空轉一整天而沒有人知道。那種要讓它炸出去。
+#: 演練見 `ops/exhibit/twin/resilience_check.sh` 第 5、6 節。
+CARD_LEVEL_ERRORS = (
+    ValueError, TypeError, AttributeError, KeyError, IndexError,
+    UnicodeError, OverflowError, json.JSONDecodeError,
+)
+
+
+def _safe_text(x: Any, limit: int = 300) -> str:
+    """把任何東西變成**一定存得進事件流**的字串。
+
+    ⚠ 為什麼需要：卡的內容可能含落單代理對（lone surrogate）——
+    `json.loads('"\\ud800"')` 就會產生一個，而 Node 的 `JSON.stringify`
+    會原樣逃脫回去，所以它穿得過整條雲端鏈路。那種字串 `encode("utf-8")`
+    會炸，而雜湊鏈算的就是那個 encode。**連「記下這張卡壞掉」都會炸**，
+    所以錯誤訊息本身要先洗過。
+    """
+    s = str(x).encode("utf-8", "replace").decode("utf-8", "replace")
+    return s[:limit]
+
+
+def _usable_sub_id(sid: Any) -> bool:
+    """這個 id 拿得去當 `sub_id` 嗎（`TwinStore.append` 的前提）。"""
+    return isinstance(sid, str) and bool(sid) and "\n" not in sid
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -171,23 +208,53 @@ def ingest(store: TwinStore, cloud: str, token: str,
         return _ingest_gap(store, cloud, f"回應沒有 items 陣列：{body!r:.200}", mode)
 
     known = set(store.sub_ids())
-    new = 0
+    new, rejected = 0, 0
     for it in items:
         if not isinstance(it, dict):
             continue
         sid = it.get("id")
         if not isinstance(sid, str) or not sid or sid in known:
             continue
-        store.append(KIND_SUBMITTED, sid, {
-            "card": it.get("card"),
-            "card_text": it.get("card_text"),
-            "ts": it.get("ts"),
-            "cloud_status": it.get("status"),
-        }, source=f"cloud:{cloud}")
+        if _usable_sub_id(sid) and _rejected_before(store, sid):
+            continue   # 這張卡上一輪就記過「壞掉」了，不要每輪再記一次
+        try:
+            store.append(KIND_SUBMITTED, sid, {
+                "card": it.get("card"),
+                "card_text": it.get("card_text"),
+                "ts": it.get("ts"),
+                "cloud_status": it.get("status"),
+            }, source=f"cloud:{cloud}")
+        except CARD_LEVEL_ERRORS as e:
+            # 🔴 一張卡進不來，不可以讓 loop 死掉。展場沒有人守著，
+            # loop 一死是**所有人**的卡都不再上螢幕（演練 §6 的乾淨鄰居卡
+            # 在修這段之前拿不到分身）。壞卡記一列 error，繼續做下一張。
+            rejected += 1
+            known.add(sid)
+            store.append(KIND_ERROR, sid if _usable_sub_id(sid) else "_ingest", {
+                "step": "ingest",
+                "reason": f"{type(e).__name__}: {_safe_text(e)}",
+                "rejected_id": _safe_text(sid, 120),
+                "cloud": cloud, "at": _now(),
+            }, source=f"cloud:{cloud}")
+            continue
         known.add(sid)
         new += 1
     return {"ok": True, "mode": mode, "seen": len(items), "pulled": new,
-            "lossy": mode == "queue_lossy"}
+            "rejected": rejected, "lossy": mode == "queue_lossy"}
+
+
+def _rejected_before(store: TwinStore, sid: str) -> bool:
+    """這張卡上一輪就被記成「進不來」了嗎？
+
+    走 `sub_id` 索引，所以是 O(這張卡的事件數) 不是 O(全庫)——
+    不然斷網一整天之後每一輪都要掃幾十萬列。
+    ⚠ 誠實邊界：id 本身不合法（含換行、空字串）的那種卡記在 `_ingest` 名下，
+    **查不到**，於是每一輪各記一列。那是有上限的（壞卡張數×輪數），但不是零。
+    """
+    for e in store.events(sub_id=sid, kind=KIND_ERROR):
+        if (e.get("payload") or {}).get("step") == "ingest":
+            return True
+    return False
 
 
 def _ingest_gap(store: TwinStore, cloud: str, reason: str, mode: str) -> dict[str, Any]:
@@ -263,12 +330,20 @@ def fallback_twin(card: dict[str, Any] | None) -> dict[str, Any]:
     展場斷網或 1003 關機時，畫面仍然有東西可演——但它是查表湊的，
     畫面上必須讀得出差別（CLAUDE.md 展場硬約束 1 的同一條紀律）。
     """
-    c = card or {}
-    need = (c.get("need") or "一件還沒做完的小事").strip()
-    vibe = (c.get("vibe") or "").strip()
-    shape = c.get("shape") or "圓潤"
-    color = c.get("color") or "暖土"
-    first = (c.get("first_line") or "").strip()
+    # ⚠ 這裡**不可以假設 card 是 dict、欄位是 str**。這一支是失效路徑：
+    # 走到這裡的時候 1003 已經不通了，而「卡的形狀不對」在那一刻才第一次
+    # 被碰到——`{"need": 123}` 會讓 `.strip()` 炸，然後炸穿 generate、炸掉
+    # 整個 loop。實測（resilience_check.sh §6 modeldown）就是這樣死的：
+    # 模型活著時一切正常，模型一斷才整支倒下去，最壞的時機。
+    c = card if isinstance(card, dict) else {}
+    def _f(key: str, dflt: str = "") -> str:
+        v = c.get(key)
+        return _safe_text(v, 600).strip() if v not in (None, "") else dflt
+    need = _f("need", "一件還沒做完的小事")
+    vibe = _f("vibe")
+    shape = _f("shape", "圓潤")
+    color = _f("color", "暖土")
+    first = _f("first_line")
     return {
         "arrival": first or f"我是{shape}的那一個，{color}色。這裡就是那個世界嗎？",
         "working": f"讓我試試「{need[:18]}」。" + (f"（{vibe[:12]}）" if vibe else ""),
@@ -326,9 +401,13 @@ def _squeezed_out(r: dict[str, Any]) -> bool:
 def generate_one(card: dict[str, Any] | None, card_text: str | None,
                  endpoint: str, model: str, timeout: float = DEFAULT_GEN_TIMEOUT,
                  allow_fallback: bool = True) -> dict[str, Any]:
-    prompt = build_prompt(card, card_text)
     t0 = time.time()
     try:
+        # ⚠ `build_prompt` 要在 try **裡面**。它在外面的時候，一張
+        # `card` 不是物件的卡（雲端回 `"card": "整理桌面"`）會在這裡
+        # 直接 AttributeError 炸穿整個 loop——**連 fallback 都走不到**，
+        # 而 fallback 存在的全部意義就是「出事了也要有東西上螢幕」。
+        prompt = build_prompt(card, card_text)
         r = _call_model(prompt, endpoint, model, MAX_TOKENS, timeout)
         escalated = False
         if r["parsed"] is None and _squeezed_out(r):
@@ -386,18 +465,33 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
     todo = store.pending(KIND_GENERATED)
     if limit:
         todo = todo[:limit]
-    done, degraded = 0, 0
+    done, degraded, failed = 0, 0, 0
     for sid in todo:
         cur = store.current(sid) or {}
-        twin = generate_one(cur.get("card"), cur.get("card_text"),
-                            endpoint, model, timeout, allow_fallback)
+        try:
+            twin = generate_one(cur.get("card"), cur.get("card_text"),
+                                endpoint, model, timeout, allow_fallback)
+        except CARD_LEVEL_ERRORS as e:
+            if not allow_fallback:
+                raise      # 量測模式：要炸就讓它炸，不要偷偷補一張
+            # 最後一道網。**照樣寫一列 generated**（engine 標退化）：
+            # 不寫的話這張卡每一輪都會再被撿起來、再炸一次，展場一天下來
+            # 就是幾萬列 error，而螢幕上始終少一個人。
+            failed += 1
+            store.append(KIND_ERROR, sid, {
+                "step": "generate",
+                "reason": f"{type(e).__name__}: {_safe_text(e)}", "at": _now(),
+            }, source="local:fallback")
+            twin = fallback_twin(None)
+            twin["degraded_from"] = f"lmstudio:{model}"
+            twin["degrade_reason"] = f"卡的內容算不出分身：{type(e).__name__}: {_safe_text(e, 120)}"
         if twin.get("engine") == "fallback_deterministic":
             degraded += 1
         store.append(KIND_GENERATED, sid, twin,
                      source=f"1003:{endpoint}" if "lmstudio" in str(twin.get("engine"))
                      else "local:fallback")
         done += 1
-    return {"ok": True, "generated": done, "degraded": degraded,
+    return {"ok": True, "generated": done, "degraded": degraded, "failed": failed,
             "remaining": len(store.pending(KIND_GENERATED))}
 
 

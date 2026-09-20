@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-09-20T15:19:54.936549+00:00",
+  "store_id": "68ddf77b79d84c91b734e708c8ddc6f8",
+  "chain": {
+    "ok": true,
+    "checked": 6,
+    "head": "1c5d23a58e0aa83ef083fc61eae18c8c7b5a060e3b64083bf6b86ee53bd37306",
+    "genesis": "ba3f16134f6a25f5e263a01fe4e1c39b5140a56383bfd85307ea9bd26db844b2"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 6,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "neighbour",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 99 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理第 99 疊紙」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 1,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "bad-ctrl",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理\u0000\u0007\r\u001b[31m桌面",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理\u0000\u0007\r\u001b[31m桌面」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 2,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

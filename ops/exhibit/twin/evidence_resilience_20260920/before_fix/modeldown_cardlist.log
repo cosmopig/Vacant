@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 729, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 718, in main
+    r["generate"] = generate(st, a.endpoint, a.model)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 392, in generate
+    twin = generate_one(cur.get("card"), cur.get("card_text"),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 329, in generate_one
+    prompt = build_prompt(card, card_text)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 223, in build_prompt
+    v = c.get(key)
+        ^^^^^
+AttributeError: 'list' object has no attribute 'get'

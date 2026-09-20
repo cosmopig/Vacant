@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 729, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 717, in main
+    r["ingest"] = ingest(st, a.cloud, a.token)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 181, in ingest
+    store.append(KIND_SUBMITTED, sid, {
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinstore.py", line 233, in append
+    payload_sha = _sha(payload_json)
+                  ^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinstore.py", line 132, in _sha
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+                          ^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'utf-8' codec can't encode character '\ud800' in position 17: surrogates not allowed

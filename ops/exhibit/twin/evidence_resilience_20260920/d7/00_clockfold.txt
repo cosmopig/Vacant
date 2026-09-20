@@ -1,0 +1,6 @@
+fold_by_seq=e_new
+fold_if_sorted_by_ts=e_old
+discriminates=1
+verify_ok=1
+ts_monotonic=0
+flagged_by_anything=null

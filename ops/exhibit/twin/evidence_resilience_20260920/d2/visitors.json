@@ -1,0 +1,91 @@
+{
+  "generated_at": "2026-09-20T15:18:58.508207+00:00",
+  "store_id": "e2f49d45b8e5481da50676104fed98a1",
+  "chain": {
+    "ok": true,
+    "checked": 12,
+    "head": "63e0863ba42f35054269dd6ee7e6844fcc4b23c39d9de17e52bd2695a5d12a36",
+    "genesis": "2893b6cfa0655fac08b1da583a717aefeb7551743b9bbe3a32ab3577dab96e7b"
+  },
+  "counts": {
+    "visitors": 4,
+    "events": 12,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "c00",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 0 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 2,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "c01",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 1 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 2,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "c02",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 2 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理第 2 疊紙」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 1,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "c03",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 3 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理第 3 疊紙」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 0,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

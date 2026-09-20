@@ -1,0 +1,2 @@
+neighbour=1
+neighbour_has_twin=1

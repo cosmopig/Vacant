@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-09-20T15:19:58.058265+00:00",
+  "store_id": "0d6e7bea85b748daab01f49ccfc8a007",
+  "chain": {
+    "ok": true,
+    "checked": 6,
+    "head": "0df43e1cf0a305ecf7ed994badde386abd119a26f23028f629b704641586612a",
+    "genesis": "92c4b45ec5f15c43e6516a3a551cae292f3e7f8cd016e28ef30da3b887b12a1a"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 6,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "neighbour",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 99 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理第 99 疊紙」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 2,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "bad-fw",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理　ＡＢＣ１２３　桌面",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理　ＡＢＣ１２３　桌面」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 2,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

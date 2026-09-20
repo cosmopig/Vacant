@@ -1,0 +1,2 @@
+second_submit_http=429
+{"error":"送太快了，請等幾秒再送"}
