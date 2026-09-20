@@ -1,0 +1,7 @@
+{
+  "db": "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-adaefe3b88900fcee/ops/exhibit/twin/evidence_twinchain_20260920/tamper_copy.sqlite3",
+  "ok": false,
+  "checked": 1,
+  "broken_at": 2,
+  "reason": "payload 與 payload_sha256 對不上（內容被改過）"
+}

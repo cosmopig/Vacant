@@ -1,0 +1,9 @@
+{
+  "db": "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-adaefe3b88900fcee/ops/exhibit/twin/evidence_twinchain_20260920/twinstore.sqlite3",
+  "ok": true,
+  "checked": 10,
+  "broken_at": null,
+  "reason": "全鏈自洽",
+  "head": "cb0d7cde97c510b3153d44cc7db75002639c3b2668de81611548eba15e0a714a",
+  "genesis": "5e24013bd3fb56d28408a3694826ebc1809296478722022ee611dbd353c6fce7"
+}

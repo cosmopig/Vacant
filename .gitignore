@@ -17,6 +17,18 @@ var/
 # 私有實驗資料（EvalPlus 官方題庫等）：不進版控
 .vacant-private/
 
+# 展件分身真相來源的**執行期**資料庫。進版控的是
+# `evidence_*/…_events.jsonl`（人讀的事件流）與 verify／stats 的輸出——
+# 二進位 sqlite 檔本身不進，WAL/SHM 更不該進（它們隨時在變）。
+# ⚠ 這不是「資料可以刪」：真相來源活在展場那台／1003 的磁碟上，
+#   repo 裡放的是那一次跑的**證據**，兩者不是同一份東西。
+ops/exhibit/twin/store/
+ops/exhibit/twin/evidence_*/**/*.sqlite3
+ops/exhibit/twin/evidence_*/*.sqlite3
+ops/exhibit/twin/evidence_*/*.sqlite3-wal
+ops/exhibit/twin/evidence_*/*.sqlite3-shm
+ops/exhibit/twin/evidence_*/clouddata/
+
 # session/agent 工作目錄
 # ⚠ 寫 `.claude/` 會讓 git **不下潛**，裡面的 `!` 例外一律失效（2026-09-19 踩過）。
 # 要放行子目錄就得忽略「內容」而不是「目錄本身」：

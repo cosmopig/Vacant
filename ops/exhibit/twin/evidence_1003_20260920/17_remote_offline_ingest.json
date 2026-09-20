@@ -1,0 +1,8 @@
+{
+  "ok": false,
+  "mode": "all",
+  "seen": null,
+  "pulled": null,
+  "reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>",
+  "lossy": true
+}

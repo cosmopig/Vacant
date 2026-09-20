@@ -1,0 +1,5 @@
+(node:63910) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+vacant-world-cloud 聽 3398｜DATA_DIR=/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-adaefe3b88900fcee/ops/exhibit/twin/evidence_1003_20260920/clouddata｜已載回 0 筆
+  事件流 backend=sqlite｜已有 0 列
+  ⚠ 這台是郵箱不是檔案庫：沒掛 volume 重佈署就歸零。永不刪除的那一份在展場本機 twinstore。

@@ -1,0 +1,1 @@
+Error: stepping, twin_event 是 append-only：禁止 DELETE (19)

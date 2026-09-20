@@ -1,0 +1,200 @@
+[
+  {
+    "seq": 1,
+    "ts_unix_ms": 1789913370476,
+    "ts_utc": "2026-09-20T14:09:30.476000+00:00",
+    "sub_id": "2e66a0ed-5858-43c8-bcb2-83c6d7f99c6d",
+    "kind": "submitted",
+    "source": "cloud:http://127.0.0.1:3399",
+    "payload_sha256": "797c8942d68971dfe96da39ce7dfb0c3fb92c66b6c7d93b4c0ec4d9700e14092",
+    "prev_sha256": "5e24013bd3fb56d28408a3694826ebc1809296478722022ee611dbd353c6fce7",
+    "row_sha256": "411493e3281b44c48421e32165f7e8d88613e3f84fa95fd8f23130188144be5f",
+    "payload": {
+      "card": {
+        "color": "暖土",
+        "first_line": "這裡的光有點暖。",
+        "need": "把散在桌上的收據整理成一份清單",
+        "shape": "圓潤",
+        "texture": "指紋",
+        "vibe": "慢、固執、愛乾淨"
+      },
+      "card_text": "需求：把散在桌上的收據整理成一份清單\n形狀：圓潤　質感：指紋　色系：暖土\n氣質：慢、固執、愛乾淨\n第一句話：這裡的光有點暖。",
+      "cloud_status": "queued",
+      "ts": 1789913346124
+    }
+  },
+  {
+    "seq": 2,
+    "ts_unix_ms": 1789913370478,
+    "ts_utc": "2026-09-20T14:09:30.478000+00:00",
+    "sub_id": "0490252b-196f-411c-9c36-6ee9de1ad270",
+    "kind": "submitted",
+    "source": "cloud:http://127.0.0.1:3399",
+    "payload_sha256": "f6628a2b1524bffb4c267d1ac5eaa1ba1b220b771a0293bf1e58d8f3cb6ccf8c",
+    "prev_sha256": "411493e3281b44c48421e32165f7e8d88613e3f84fa95fd8f23130188144be5f",
+    "row_sha256": "b0ff463a19aa5546bc6f046f52069f274b0c2d664a4a052099eb5b34e5c175ab",
+    "payload": {
+      "card": {
+        "color": "灰藍",
+        "first_line": "數字不會騙人。",
+        "need": "幫我把一週的開銷加總起來",
+        "shape": "方正",
+        "texture": "光滑",
+        "vibe": "精準、安靜、不多話"
+      },
+      "card_text": "需求：幫我把一週的開銷加總起來\n形狀：方正　質感：光滑　色系：灰藍\n氣質：精準、安靜、不多話\n第一句話：數字不會騙人。",
+      "cloud_status": "queued",
+      "ts": 1789913357635
+    }
+  },
+  {
+    "seq": 3,
+    "ts_unix_ms": 1789913370480,
+    "ts_utc": "2026-09-20T14:09:30.480000+00:00",
+    "sub_id": "b39b4344-0376-4ed1-a5c5-f94cc44ed667",
+    "kind": "submitted",
+    "source": "cloud:http://127.0.0.1:3399",
+    "payload_sha256": "777d85855ac170b8f93ea610c0a6f8cbede0f316aeaff8bd003d43a057849573",
+    "prev_sha256": "b0ff463a19aa5546bc6f046f52069f274b0c2d664a4a052099eb5b34e5c175ab",
+    "row_sha256": "cd60fefe7a605eba1814155bb79a8335c1fff5dd714659b654c9cc0238199caf",
+    "payload": {
+      "card": {
+        "color": "苔綠",
+        "first_line": "咦，這個我剛剛看過。",
+        "need": "找出清單裡重複的名字",
+        "shape": "小巧",
+        "texture": "絨面",
+        "vibe": "好奇、跳躍、愛問為什麼"
+      },
+      "card_text": "需求：找出清單裡重複的名字\n形狀：小巧　質感：絨面　色系：苔綠\n氣質：好奇、跳躍、愛問為什麼\n第一句話：咦，這個我剛剛看過。",
+      "cloud_status": "queued",
+      "ts": 1789913368905
+    }
+  },
+  {
+    "seq": 4,
+    "ts_unix_ms": 1789913409785,
+    "ts_utc": "2026-09-20T14:10:09.785000+00:00",
+    "sub_id": "2e66a0ed-5858-43c8-bcb2-83c6d7f99c6d",
+    "kind": "generated",
+    "source": "1003:http://100.119.113.56:1234/v1",
+    "payload_sha256": "0cec8fe1c0a8a3c2d24bc4d0927182aaf73c9953b3d2618fd6f76c949ff93adb",
+    "prev_sha256": "cd60fefe7a605eba1814155bb79a8335c1fff5dd714659b654c9cc0238199caf",
+    "row_sha256": "674046e2d73dde9f239dc78ea57a1122cd056b05b810bfc844a7e0ee111450ae",
+    "payload": {
+      "arrival": "這裡的光有點暖。",
+      "budget_escalated": false,
+      "completion_tokens": 816,
+      "endpoint": "http://100.119.113.56:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "已經全部歸類整齊了，請收好這份清單。",
+      "latency_ms": 37463,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 101,
+      "reasoning_chars": 2227,
+      "reasoning_tokens": 753,
+      "working": "每一張都要對齊，就算慢一點也要把位置擺正。"
+    }
+  },
+  {
+    "seq": 5,
+    "ts_unix_ms": 1789913425426,
+    "ts_utc": "2026-09-20T14:10:25.426000+00:00",
+    "sub_id": "0490252b-196f-411c-9c36-6ee9de1ad270",
+    "kind": "generated",
+    "source": "1003:http://100.119.113.56:1234/v1",
+    "payload_sha256": "a255bc30ce0e8dab4649ca96019e1008da7259c1d3f4f378054fee29fbf07273",
+    "prev_sha256": "674046e2d73dde9f239dc78ea57a1122cd056b05b810bfc844a7e0ee111450ae",
+    "row_sha256": "68504be50f035edfaa5c0c82b5bf29a3bff5a1572af725e121643642274c800f",
+    "payload": {
+      "arrival": "靜謐中，秩序清晰可見。",
+      "budget_escalated": false,
+      "completion_tokens": 1250,
+      "endpoint": "http://100.119.113.56:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "資料已彙整，數據無誤。",
+      "latency_ms": 15633,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 80,
+      "reasoning_chars": 3937,
+      "reasoning_tokens": 1200,
+      "working": "開始核對每一筆數值。"
+    }
+  },
+  {
+    "seq": 6,
+    "ts_unix_ms": 1789913459278,
+    "ts_utc": "2026-09-20T14:10:59.278000+00:00",
+    "sub_id": "b39b4344-0376-4ed1-a5c5-f94cc44ed667",
+    "kind": "generated",
+    "source": "1003:http://100.119.113.56:1234/v1",
+    "payload_sha256": "1b15b72b283f3eb32791d0735b1f536d32ca29cf2101764611123905a2249b46",
+    "prev_sha256": "68504be50f035edfaa5c0c82b5bf29a3bff5a1572af725e121643642274c800f",
+    "row_sha256": "bee4e3550c1f0359ffe2bba7e8dc1736af2bf11b4e5e32665b90be4649e7d5f3",
+    "payload": {
+      "arrival": "哇！這裡的顏色好像苔蘚一樣，它是從哪裡長出來的呀？",
+      "budget_escalated": false,
+      "completion_tokens": 1250,
+      "endpoint": "http://100.119.113.56:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "全部找完了喔！下次它們還會再跳出來搗蛋嗎？",
+      "latency_ms": 33850,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 119,
+      "reasoning_chars": 3278,
+      "reasoning_tokens": 1168,
+      "working": "咦，為什麼這個名字會出現兩次？它們是在玩捉迷藏嗎？"
+    }
+  },
+  {
+    "seq": 7,
+    "ts_unix_ms": 1789913460572,
+    "ts_utc": "2026-09-20T14:11:00.572000+00:00",
+    "sub_id": "2e66a0ed-5858-43c8-bcb2-83c6d7f99c6d",
+    "kind": "published",
+    "source": "cloud:http://127.0.0.1:3399",
+    "payload_sha256": "b4bc2216da75ae16deffdf118c27a64600fc71afaef656805b07c544100264fc",
+    "prev_sha256": "bee4e3550c1f0359ffe2bba7e8dc1736af2bf11b4e5e32665b90be4649e7d5f3",
+    "row_sha256": "b972893b4b7f0de5d7822b80a8222b32a69a23d509db80598ab5612469697a47",
+    "payload": {
+      "at": "2026-09-20T14:11:00.571787+00:00",
+      "cloud": "http://127.0.0.1:3399",
+      "http": 200
+    }
+  },
+  {
+    "seq": 8,
+    "ts_unix_ms": 1789913460582,
+    "ts_utc": "2026-09-20T14:11:00.582000+00:00",
+    "sub_id": "0490252b-196f-411c-9c36-6ee9de1ad270",
+    "kind": "published",
+    "source": "cloud:http://127.0.0.1:3399",
+    "payload_sha256": "ee4d2f37470e731ff483a656e52413eb473605c0cfa2eb65a64a99157988d361",
+    "prev_sha256": "b972893b4b7f0de5d7822b80a8222b32a69a23d509db80598ab5612469697a47",
+    "row_sha256": "8a7b8b8720dd9a3bc6264f279ffd3cc687b5f9f6cf1e5fdf99bb22aea040a8b9",
+    "payload": {
+      "at": "2026-09-20T14:11:00.581913+00:00",
+      "cloud": "http://127.0.0.1:3399",
+      "http": 200
+    }
+  },
+  {
+    "seq": 9,
+    "ts_unix_ms": 1789913460593,
+    "ts_utc": "2026-09-20T14:11:00.593000+00:00",
+    "sub_id": "b39b4344-0376-4ed1-a5c5-f94cc44ed667",
+    "kind": "published",
+    "source": "cloud:http://127.0.0.1:3399",
+    "payload_sha256": "82f0cefa568728a38730fd99aa29dba3b6a1ca21d548122b732673f348da53e2",
+    "prev_sha256": "8a7b8b8720dd9a3bc6264f279ffd3cc687b5f9f6cf1e5fdf99bb22aea040a8b9",
+    "row_sha256": "5c17f91e244c81ba82312f1fc649942b265fd303edc35547ce9872d936f44d7c",
+    "payload": {
+      "at": "2026-09-20T14:11:00.593271+00:00",
+      "cloud": "http://127.0.0.1:3399",
+      "http": 200
+    }
+  }
+]

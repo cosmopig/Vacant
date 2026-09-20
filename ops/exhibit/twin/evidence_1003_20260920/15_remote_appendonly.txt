@@ -1,0 +1,2 @@
+BLOCKED UPDATE -> twin_event 是 append-only：禁止 UPDATE，要改就追加一列
+BLOCKED DELETE -> twin_event 是 append-only：禁止 DELETE

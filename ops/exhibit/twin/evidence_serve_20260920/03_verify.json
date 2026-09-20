@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "checked": 3,
+  "broken_at": null,
+  "reason": "全鏈自洽",
+  "head": "0631c8bf9604cdbd49ecb791fea205b2f1fc58bbb395132d6dcde5271ca795c3",
+  "genesis": "71e3ace6af23dec5732e3aae519c64e6be8ff47f9216e640dbd54b03f82192f6"
+}

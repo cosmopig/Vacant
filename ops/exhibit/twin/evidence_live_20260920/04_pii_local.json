@@ -1,0 +1,96 @@
+{
+  "cases": [
+    {
+      "text": "需求：寄給我 a@b.com",
+      "should_block": true,
+      "local_blocked": true,
+      "why": "真的 email",
+      "mismatch": false
+    },
+    {
+      "text": "需求：打給 0912345678",
+      "should_block": true,
+      "local_blocked": true,
+      "why": "真的手機號碼",
+      "mismatch": false
+    },
+    {
+      "text": "需求：聯絡 0912-345-678",
+      "should_block": true,
+      "local_blocked": true,
+      "why": "有連字號的手機號碼",
+      "mismatch": false
+    },
+    {
+      "text": "需求：打 +886912345678",
+      "should_block": true,
+      "local_blocked": true,
+      "why": "國碼手機",
+      "mismatch": false
+    },
+    {
+      "text": "需求：在 2026-09-20 之前整理好桌面",
+      "should_block": false,
+      "local_blocked": true,
+      "why": "ISO 日期（展場最常見）",
+      "mismatch": true
+    },
+    {
+      "text": "需求：把 2026-01-01 到 2026-03-31 的帳整理好",
+      "should_block": false,
+      "local_blocked": true,
+      "why": "日期區間",
+      "mismatch": true
+    },
+    {
+      "text": "需求：整理 2025-2026 兩年的收據",
+      "should_block": false,
+      "local_blocked": true,
+      "why": "年份區間",
+      "mismatch": true
+    },
+    {
+      "text": "需求：把 1999-2024 的照片分類",
+      "should_block": false,
+      "local_blocked": true,
+      "why": "年份區間（更長）",
+      "mismatch": true
+    },
+    {
+      "text": "需求：算一下 12345678 這串數字的位數",
+      "should_block": false,
+      "local_blocked": true,
+      "why": "八位數字（真的只是數字）",
+      "mismatch": true
+    },
+    {
+      "text": "需求：把 2026 09 20 那天的行程排好",
+      "should_block": false,
+      "local_blocked": true,
+      "why": "空白分隔的日期",
+      "mismatch": true
+    },
+    {
+      "text": "需求：整理桌面",
+      "should_block": false,
+      "local_blocked": false,
+      "why": "乾淨短句",
+      "mismatch": false
+    },
+    {
+      "text": "需求：整理 2026 年的收據",
+      "should_block": false,
+      "local_blocked": false,
+      "why": "只有四位數年份",
+      "mismatch": false
+    },
+    {
+      "text": "需求：把 10/15 之前的待辦列出來",
+      "should_block": false,
+      "local_blocked": false,
+      "why": "斜線日期（斜線不在 regex 裡）",
+      "mismatch": false
+    }
+  ],
+  "mismatches": 6
+}
