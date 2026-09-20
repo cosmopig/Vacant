@@ -726,7 +726,11 @@ def main(argv: Iterable[str] | None = None) -> int:
             q.add_argument("--limit", type=int, default=0)
 
     g = s.add_parser("generate")
-    g.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
+    # 預設 None ⇒ 由 `resolve_endpoint()` 探測。
+    # ⚠ 原本預設是 `DEFAULT_ENDPOINT`＝候選裡**唯一需要網路**的那一個，
+    #   而 `resolve_endpoint()` 一個產品呼叫點都沒有（2026-09-21 批判者查到）。
+    #   「擋門存在、沒接上去」——那正是這個 repo 在抓的病。
+    g.add_argument("--endpoint", default=None)
     g.add_argument("--model", default=DEFAULT_MODEL)
     g.add_argument("--limit", type=int, default=0)
     g.add_argument("--timeout", type=float, default=DEFAULT_GEN_TIMEOUT)
@@ -746,7 +750,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     lp = s.add_parser("loop")
     lp.add_argument("--cloud", default=DEFAULT_CLOUD)
     lp.add_argument("--token", required=True)
-    lp.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
+    lp.add_argument("--endpoint", default=None)
     lp.add_argument("--model", default=DEFAULT_MODEL)
     lp.add_argument("--interval", type=float, default=10.0)
     lp.add_argument("--rounds", type=int, default=0, help="0＝永遠（展場無人值守）")
@@ -760,6 +764,13 @@ def main(argv: Iterable[str] | None = None) -> int:
         return serve(pathlib.Path(a.db), a.port, a.bind)
 
     st = TwinStore(a.db)
+    # **端點在這裡解析一次**，而且要講出來挑了哪一個。
+    # 靜靜挑一個跟靜靜用預設值一樣糟——事後查不出那一跑打的是哪個端點。
+    if a.cmd in ("generate", "loop"):
+        _ep = resolve_endpoint(a.endpoint)
+        a.endpoint = _ep["url"]
+        print(json.dumps({"endpoint_resolved": _ep}, ensure_ascii=False),
+              file=sys.stderr, flush=True)
     if a.cmd == "ingest":
         _p(ingest(st, a.cloud, a.token, a.timeout)); return 0
     if a.cmd == "generate":

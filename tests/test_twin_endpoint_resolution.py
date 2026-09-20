@@ -82,3 +82,44 @@ def test_first_reachable_wins(monkeypatch):
     assert r["reachable"] is True and r["how"] == "probed"
     assert r["needs_network"] is False
     assert len(seen) == 2          # 試到第二個就停，沒有多打 Tailscale 那一發
+
+
+def test_cli_actually_calls_the_resolver_not_just_the_tests(tmp_path, monkeypatch):
+    """🔴 **守著它不要再變回死碼。**
+
+    2026-09-21 批判者查到：`resolve_endpoint()` 六條測試全綠，
+    **產品路徑一個呼叫點都沒有**，而 `--endpoint` 的預設是候選裡
+    唯一 `needs_network=True` 的那一個。⇒ 在展場真的下 `twinlink loop`
+    會繞出機殼走 Tailscale，儘管加它的那個 commit 自己論證那是最差的選項。
+    「擋門存在、沒接上去」——這正是本 repo 在抓的病。
+    """
+    import subprocess, sys, json, pathlib
+    root = pathlib.Path(__file__).resolve().parents[1]
+    r = subprocess.run(
+        [sys.executable, "ops/exhibit/twin/twinlink.py",
+         "--db", str(tmp_path / "t.sqlite3"), "generate",
+         "--endpoint", "http://127.0.0.1:1/v1", "--limit", "1"],
+        cwd=root, capture_output=True, text=True, timeout=120)
+    # 解析結果印在 stderr，**不准吞掉**
+    line = next((l for l in r.stderr.splitlines() if "endpoint_resolved" in l), None)
+    assert line, f"CLI 沒有印出端點解析 ⇒ 它沒呼叫 resolve_endpoint。stderr={r.stderr[:300]}"
+    d = json.loads(line)["endpoint_resolved"]
+    assert d["how"] == "explicit" and d["url"] == "http://127.0.0.1:1/v1"
+
+
+def test_cli_default_is_not_the_network_one(tmp_path):
+    """預設**不可以**寫死成需要網路的那一個——要交給探測。"""
+    import ast, pathlib
+    src = pathlib.Path(__file__).resolve().parents[1] / "ops/exhibit/twin/twinlink.py"
+    tree = ast.parse(src.read_text())
+    bad = []
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call)
+                and getattr(node.func, "attr", "") == "add_argument"
+                and any(isinstance(a, ast.Constant) and a.value == "--endpoint"
+                        for a in node.args)):
+            for kw in node.keywords:
+                if kw.arg == "default" and not (
+                        isinstance(kw.value, ast.Constant) and kw.value.value is None):
+                    bad.append(ast.dump(kw.value)[:60])
+    assert not bad, f"--endpoint 的 default 不該寫死：{bad}"
