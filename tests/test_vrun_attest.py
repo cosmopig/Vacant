@@ -378,6 +378,56 @@ def test_hookcli_logs_digest_not_the_command_text(tmp_path, monkeypatch):
     assert '"tool": "Bash"' in blob
 
 
+def test_install_pi_writes_an_auto_discovered_extension(tmp_path):
+    """pi：extension 要落在 `<PI_CODING_AGENT_DIR>/extensions/` 才會被自動載入。
+
+    ⚠ 這一格擋的是「裝到別的地方」那種安靜的失敗——pi 不會警告，
+      它只是不載入，於是 canary 不燒、收據降級，而看起來像掛鉤壞了。
+    """
+    rep = hookcli.install("pi", tmp_path, hook_log=str(tmp_path / "h.jsonl"),
+                          run_id="runP", proxy="http://127.0.0.1:1")
+    assert rep is not None and rep["agent"] == "pi"
+    ext = tmp_path / "extensions" / "vacant.ts"
+    assert ext.is_file() and rep["target"] == str(ext)
+    src = ext.read_text("utf-8")
+    # 掛鉤要呼叫的就是本檔（不依賴 PATH 上有 `vacant`）
+    assert "vacant_network.vrun.hookcli" in src
+    # 契約的環境變數要交給 agent
+    assert rep["env"]["VACANT_HOOK_AGENT"] == "pi"
+    assert rep["env"]["VACANT_RUN_ID"] == "runP"
+    assert "pi" in hookcli.INSTALLERS
+
+
+def test_pi_extension_does_not_forge_turn_openings(tmp_path):
+    """🔴 **`before_provider_request` 不可以被翻譯成回合開端。**
+
+    它跟模型呼叫一對一 ⇒ 算成開端的話每一通都自己解釋自己，`unexplained`
+    會永遠是 0。那不是對帳過了，那是把閘門語意改掉——跟 2026-09-20 把
+    `session_start` 從 `TURN_OPENING_EVENTS` 拿掉是同一條紀律。
+
+    本格是那條紀律的可執行防呆：逐行看 extension 註冊了什麼，
+    **把 pi 的事件對到契約名字之後**，開端只准有那三個。
+    """
+    import re
+    hookcli.install("pi", tmp_path, hook_log=str(tmp_path / "h.jsonl"),
+                    run_id="runP", proxy=None)
+    src = (tmp_path / "extensions" / "vacant.ts").read_text("utf-8")
+    # `pi.on("<pi 事件>"` ⇒ `fire("<契約事件>"` 的對應表
+    pairs = re.findall(r'pi\.on\("([a-z_]+)"[\s\S]{0,400}?fire\("([a-z_]+)"',
+                       src)
+    assert pairs, "解不出對應表就不算量到（不是「沒有問題」）"
+    mapped = dict(pairs)
+    assert mapped["before_agent_start"] == "user_prompt_submit"
+    assert mapped["tool_result"] == "tool_result"
+    assert mapped["tool_call"] == "pre_tool_use"
+    # ⚠ 這一行是重點：模型請求層那個事件**不准**落在開端名單上
+    assert mapped["before_provider_request"] == "before_provider_request"
+    assert mapped["before_provider_request"] not in attest.TURN_OPENING_EVENTS
+    opens = {v for v in mapped.values() if v in attest.TURN_OPENING_EVENTS}
+    assert opens == {"user_prompt_submit", "tool_result"}, (
+        f"開端只准有這兩個（canary 由 hookcli 自己寫），實際 {sorted(opens)}")
+
+
 # ── 6. 簽進鏈：`launcher` 那一段 ───────────────────────────────────────
 
 _VISIBLE = "def test_ok():\n    assert True\n"

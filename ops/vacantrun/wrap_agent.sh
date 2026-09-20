@@ -96,6 +96,28 @@ pi)
   "compat":{"supportsDeveloperRole":false,"supportsReasoningEffort":false},
   "models":[{"id":"$MODEL","name":"m","contextWindow":262144,"maxTokens":16384}]}}}
 EOF
+    # ── 掛鉤（`vacant-hook/1`）：**有 `$VACANT_HOOK_LOG` 才裝** ───────────
+    #   沒有那個變數就整段不執行 ⇒ 既有的 pi 歸檔跑逐位元不變。
+    #   ⚠ **裝了不等於會燒**（裁決 §三-1）：會不會燒由收據端讀日誌決定
+    #     （`attest.probe_framework_hook`）。這裡只寫設定。
+    #   ⚠ pi 的擴充點是 `$PI_CODING_AGENT_DIR/extensions/*.ts`，
+    #     而 `$CFG` 是**這一跑自己的**目錄 ⇒ 不會碰到使用者的 `~/.pi/agent/`
+    #     （尤其 `auth.json`）。
+    if [ -n "${VACANT_HOOK_LOG:-}" ]; then
+        if "${VACANT_PY:-python3}" -c 'import os, pathlib, sys
+from vacant_network.vrun import hookcli
+rep = hookcli.install("pi", pathlib.Path(sys.argv[1]),
+                      hook_log=os.environ["VACANT_HOOK_LOG"],
+                      run_id=os.environ.get("VACANT_RUN_ID", ""),
+                      proxy=os.environ.get("VACANT_RUN_PROXY"))
+sys.stderr.write("HOOK_INSTALL target=%s\n" % (rep and rep.get("target")))' \
+                "$CFG" ; then :; else
+            # fail-visible：裝不起來就講出來。安靜跳過會讓收據上的
+            # `canary_fired=false` 看起來像「掛鉤沒燒」而不是「根本沒裝成」。
+            echo "HOOK_INSTALL_FAILED（掛鉤沒裝成 ⇒ 收據會降級）" >&2
+        fi
+        export VACANT_HOOK_AGENT="${VACANT_HOOK_AGENT:-pi}"
+    fi
     # ⚠ `pi -p` 不給 `< /dev/null` 會永久卡住（2026-09-18 實測，V0 已知）。
     exec pi -p --provider vacantproxy --model m "$PROMPT" < /dev/null
     ;;
