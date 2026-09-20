@@ -618,6 +618,43 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     summary["wire_by_protocol"] = dict(proxy.stats["by_wire"])
     summary["wire_errors"] = proxy.stats["errors"]
     summary["wire_digest"] = proxy.wire_digest()
+    # ── 這個計數是**總數**還是**下界**？收據自己要說得出來 ────────────────
+    #   🔴 2026-09-20 稽核實測：ON 29 格／TEE 24 格，磁碟上的 `*.req.bin`
+    #      比 `index.jsonl` 多 1–2 個，**每一格都恰好 `wire_quiesced == false`**
+    #      （交叉表零例外）。多出來的是 pi 對卡住的請求重送、以及被 `-9` 砍那一刻
+    #      在途的下一通——全部都經過 proxy，所以不影響「有沒有經過」，
+    #      但 `requests_seen` 與 `wire_digest` 不含它們，**而收據說不出這一點**。
+    #
+    #   語意**照抄** SLSA（2026-09-20 直驗，落盤在 `參考文獻/_引用備份/`）：
+    #     · SLSA Provenance **v0.2** 的 `metadata.completeness.*` ——
+    #       「builder 宣稱某些欄位是完整的」，**沒有旗標就視為不完整**（fail-closed）。
+    #       ⚠ v1.0 把它移除搬去 `builder.id` 指向的散文文件，所以 in-band 沒有
+    #       現成欄位可用；我們自訂欄位，但**不自創語意**。
+    #     · VSA `dependencyLevels` 的三態（v1.0 起未變，MUST 級）：
+    #       unset ＝ `the verifier makes no claims`／set-but-empty ＝ 真的沒有。
+    #
+    #   ⚠ **`exact` 是要掙來的**：排空成功**而且**索引數對得上磁碟上的 blob 數，
+    #     兩個條件缺一不可。數不出 blob（目錄不見了）⇒ `None` ＋ 仍判 `lower_bound`。
+    _req_blobs: int | None
+    try:
+        _req_blobs = len(list(wire_dir.glob("*.req.bin")))
+    except OSError:
+        _req_blobs = None
+    _quiesced = not proxy.stats.get("quiesce_timeout", False)
+    _unindexed = (None if _req_blobs is None
+                  else _req_blobs - summary["requests_seen"])
+    summary["model_wire"] = {
+        "requests_indexed": summary["requests_seen"],
+        "request_blobs_persisted": _req_blobs,
+        "unindexed_requests": _unindexed,
+        "wire_quiesced": _quiesced,
+        "quiesce_timeout": proxy.stats.get("quiesce_timeout", False),
+        "count_semantics": ("exact" if (_quiesced and _unindexed == 0)
+                            else "lower_bound"),
+        "note": ("`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ "
+                 "真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，"
+                 "或排空逾時（沒有旗標即視為不完整，fail-closed）"),
+    }
     summary["run_wall_s"] = round(time.time() - t0, 3)
     # ── 認證：**這一跑有沒有在圍牆裡跑過**（裁決 §二 P0）─────────────────
     #   放在這裡（而不是呼叫端）的理由只有一個：**它要進簽章鏈**。
@@ -754,7 +791,12 @@ def _persist(run_dir: pathlib.Path, summary: dict, arm: str | None,
                        .get("framework_hook") or {}).get("canary_fired")),
         unexplained=(((summary.get("attestation") or {})
                       .get("reconciled") or {}).get("unexplained")),
-        attestation_sha256=_attestation_digest(summary.get("attestation")))
+        attestation_sha256=_attestation_digest(summary.get("attestation")),
+        # ⚠ **`requests_seen` 不准單獨存在於收據上。** 沒有這一欄，
+        #   「17 通」讀起來像總數，而它可能是下界。全文在 `run_<ARM>.json`
+        #   的 `model_wire`，鏈上簽的是那兩個判讀所需的欄位。
+        wire_count_semantics=summary["model_wire"]["count_semantics"],
+        wire_quiesced=summary["model_wire"]["wire_quiesced"])
     summary["verdict_hash"] = entry.hash()
     book.save(run_dir / f"receipts_{arm}.ndjson")
     (run_dir / f"receipts_{arm}.pub.json").write_text(json.dumps(
