@@ -52,7 +52,33 @@ INDEXES = [
     ("2026-08-06_信任定義", "index.json"),
     ("2026-08-06_信任定義", "index_add.json"),
     ("2026-08-06_人類運作邏輯", "index.json"),
+    # 2026-09-20 直驗四個產品系統（GitHub Agentic Workflows／Docker Sandboxes／
+    # Microsoft GSA MCP firewall／OpenAI Agents SDK guardrails）。這批不是論文，
+    # 一手來源是官方文件、官方原始碼與官方編譯產物，所以索引用 file_path 不用 pdf_path；
+    # 逐條判定（含 🔴 否證）在同目錄 claims.jsonl。
+    ("2026-09-20_附身先行研究", "index*.json"),
 ]
+
+
+def resolve_indexes() -> list[tuple[str, str]]:
+    """把 INDEXES 的 glob 展開成實際檔名。
+
+    為什麼要 glob：MANIFEST 是**全域單一檔**，但同一天可能有多個並行 session
+    各寫一份索引進同一個資料夾（2026-09-20 就真的發生了：`index.json` 與
+    `index_EFG.json`）。寫死檔名的話，誰最後跑誰的那份進 MANIFEST，
+    另一份會被安靜地掉掉——而「掉了」跟「沒存過」在 MANIFEST 上長得一模一樣。
+    改成掃當下的樹，順序穩定，新增索引不必回來改這張表。
+    """
+    out: list[tuple[str, str]] = []
+    for folder, pattern in INDEXES:
+        if "*" not in pattern:
+            out.append((folder, pattern))
+            continue
+        hits = sorted(p.name for p in (REF / folder).glob(pattern))
+        if not hits:
+            print(f"  跳過（{folder}/{pattern} 無命中）")
+        out.extend((folder, name) for name in hits)
+    return out
 
 
 def sha256(p: Path) -> str:
@@ -269,7 +295,7 @@ def main() -> None:
     entries: list[dict] = []
     seen: set[str] = set()
 
-    for folder, fname in INDEXES:
+    for folder, fname in resolve_indexes():
         idx = REF / folder / fname
         if not idx.exists():
             print(f"  跳過（不存在）：{folder}/{fname}")
@@ -284,7 +310,9 @@ def main() -> None:
                 "id": it.get("id"), "folder": folder, "title": it.get("title"),
                 "year": it.get("year"), "doi": it.get("doi") or None,
             }
-            pdf_rel = it.get("pdf_path")
+            # pdf_path＝論文 PDF；file_path＝網頁／原始碼／編譯產物的存檔。
+            # 兩者都是「全文在手」，差別只在載體，所以走同一條 A_全文 分支。
+            pdf_rel = it.get("pdf_path") or it.get("file_path")
             pdf = (REF / folder / pdf_rel).resolve() if pdf_rel else None
             if it.get("fulltext") and pdf and pdf.exists():
                 rec |= {"證據": "A_全文", "path": str(pdf.relative_to(REF)),
@@ -362,7 +390,7 @@ def main() -> None:
     # 「這條只能靠二手」。理由不是編的——它來自上面真的打過的那幾支 API，
     # 原始回應留在 abstracts/ 裡可以重驗。
     by_key = {(e["folder"], str(e["id"])): e for e in entries}
-    for folder, fname in INDEXES:
+    for folder, fname in resolve_indexes():
         idx = REF / folder / fname
         if not idx.exists():
             continue
