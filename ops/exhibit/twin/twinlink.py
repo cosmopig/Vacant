@@ -55,6 +55,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import sys
 import time
@@ -73,8 +74,69 @@ from ops.exhibit.twin.twinstore import (  # noqa: E402
 )
 
 DEFAULT_CLOUD = "https://vacant-world.cosmopig.com"
-#: 1003。⚠ `ssh 1003` 這個別名會解析到假位址，一律用 IP（量具說謊紀錄）。
-DEFAULT_ENDPOINT = "http://100.119.113.56:1234/v1"
+
+#: **模型端點的候選，依「離線紅線」由強到弱排序。**
+#:
+#: 🔴 2026-09-20 實測釐清的拓樸：**展場搬去的那台實體機器就是 1003（Windows），
+#:    而 `vacant-dev` 是跑在它上面的 VMware 虛擬機**（`systemd-detect-virt` ⇒ `vmware`、
+#:    `ens33` 在 `192.168.76.135/24`、閘道 `192.168.76.2`）。
+#:    ⇒ VM 打 `192.168.76.1:1234`（VMware 主機介面，MAC OUI `00:50:56:c0:`）
+#:      與打 Tailscale 的 `100.119.113.56:1234` **回傳逐 byte 相同**
+#:      （負控制：1004 的回應不同 ⇒ 這個比法有鑑別力）。
+#:
+#: ⚠ **為什麼順序很重要**：人類 2026-09-20 澄清展場**會有網路**（他要遠端桌面進 1003），
+#:    所以這裡**不是**在解離線紅線。理由比那個窄，但仍然成立：
+#:    Tailscale 是一個**額外的、會自己壞掉的依賴**（要聯絡 coordination server、
+#:    會 relay、會換 IP），而主機介面是同一台實體機器內的虛擬網段。
+#:    同一個後端，少一層中間人 ⇒ 少一種展期中途壞掉的方式。
+#:    ⚠ **不要把這段讀成「展場離線可跑」**——那句話要靠整條鏈都在本機，不是靠這個順序。
+ENDPOINT_CANDIDATES: tuple[tuple[str, str, bool], ...] = (
+    ("http://127.0.0.1:1234/v1", "本機（模型就跑在這台）", False),
+    ("http://192.168.76.1:1234/v1", "VMware 主機介面（同一台實體機器，不出機殼）", False),
+    ("http://100.119.113.56:1234/v1", "1003 走 Tailscale（**需要網路**）", True),
+)
+
+#: 最後手段。⚠ `ssh 1003` 這個別名會解析到假位址，一律用 IP（量具說謊紀錄）。
+DEFAULT_ENDPOINT = ENDPOINT_CANDIDATES[-1][0]
+
+
+def resolve_endpoint(explicit: str | None = None, *, timeout: float = 3.0,
+                     probe: bool = True) -> dict:
+    """挑一個模型端點，並**說清楚是怎麼挑的**。
+
+    回 `{"url", "how", "label", "needs_network", "reachable", "tried"}`。
+
+    ⚠ **三態**：一個都探不到時 `reachable` 落 **`None`** 而不是 `False`——
+      「探不到」與「探到是壞的」是兩件事，而且沒有 probe 時我們根本沒量。
+      這種情況仍然回最後一個候選（讓呼叫端自己去撞真正的錯誤訊息），
+      **但 `reachable=None` 會一路寫進事件流**，事後查得出來那一跑是瞎猜的。
+    """
+    if explicit:
+        return {"url": explicit, "how": "explicit", "label": "呼叫端指定",
+                "needs_network": None, "reachable": None, "tried": []}
+    env = os.environ.get("VACANT_TWIN_ENDPOINT", "").strip()
+    if env:
+        return {"url": env, "how": "env:VACANT_TWIN_ENDPOINT", "label": "環境變數",
+                "needs_network": None, "reachable": None, "tried": []}
+    tried = []
+    for url, label, needs_net in ENDPOINT_CANDIDATES:
+        if not probe:
+            break
+        try:
+            with urllib.request.urlopen(
+                    url.rstrip("/") + "/models", timeout=timeout) as r:
+                ok = 200 <= r.status < 300
+        except Exception as exc:                      # noqa: BLE001
+            tried.append({"url": url, "ok": False, "err": type(exc).__name__})
+            continue
+        tried.append({"url": url, "ok": ok})
+        if ok:
+            return {"url": url, "how": "probed", "label": label,
+                    "needs_network": needs_net, "reachable": True, "tried": tried}
+    last = ENDPOINT_CANDIDATES[-1]
+    return {"url": last[0], "how": "fallback_unprobed" if not probe else "none_reachable",
+            "label": last[1], "needs_network": last[2],
+            "reachable": None, "tried": tried}
 DEFAULT_MODEL = "gemma-4-12b-it-qat"
 
 #: ⚠ **不要調小。** 1003 的後端是 thinking 模式：實測（2026-09-20）一發 26-token
