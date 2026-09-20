@@ -44,10 +44,41 @@ agent：**pi 0.85.1**（`$NODE/bin/pi`，node v22.23.2）。
 `attest_inner.sh` 裡的一行 `python3 -m vacant_network.vrun.hookcli session_start`
 ——那證明「契約與兩個探針在圍牆裡會動」，**不證明任何 agent 的掛鉤會燒**。
 
-`run_agent_attest.sh` 與 `bin/agent_attest_inner.sh` **一次都沒有呼叫 hookcli**
-（`grep -c hookcli` 在這兩支上是 0）。唯一寫掛鉤的地方是 `wrap_agent.sh` 的 pi 段，
-它只做一件事：把 extension 寫進**這一跑自己的** `PI_CODING_AGENT_DIR`。
+唯一寫掛鉤的地方是 `wrap_agent.sh` 的 pi 段，它只做一件事：
+把 extension 寫進**這一跑自己的** `PI_CODING_AGENT_DIR`。
 之後 hookcli 被誰執行，是 pi 決定的。
+
+⚠ **這句話第一版是這樣寫的：「`grep -c hookcli` 在這兩支上是 0」——那是沒量就寫的，
+而且一量就是錯的**（分別是 4 與 5，全部是註解裡提到這個名字）。
+量具說謊的第 23 個案例，記在這裡。**量得動的判準長這樣**：
+
+```bash
+cd ops/vacantrun/enclosure_20260920
+for f in run_agent_attest.sh bin/agent_attest_inner.sh bin/attest_inner.sh; do
+  echo "$f = $(grep -v '^[[:space:]]*#' "$f" \
+      | grep -Ec 'hookcli[[:space:]]+(session_start|user_prompt_submit|pre_tool_use|post_tool_use|tool_result|stop|session_end)')"
+done
+# run_agent_attest.sh      = 0
+# bin/agent_attest_inner.sh = 0
+# bin/attest_inner.sh       = 1   ← **正控制**：舊那支真的有呼叫，同一支 grep 抓得到
+```
+
+⚠ 新路徑裡**確實有一行執行到 hookcli**，要講清楚：`agent_attest_inner.sh:81`
+的 `python3 -c "import vacant_network.vrun.hookcli"`。那是 `timing` 那一格在量
+冷啟動成本的 **bare import**——它沒有呼叫 `handle()` 也沒有 `emit()`，
+**一筆事件都不寫、一通 canary 都不打**，而且 `timing` 有自己的工作區、不分級。
+
+### 🔴 但 grep 不是這件事的證據，**掛鉤日誌自己才是**
+
+比字串比對硬一個量級的兩件事：
+
+1. **10 筆事件的 pid 各不相同**（29／32／33／36／37／38／39／40）。
+   `agent_attest_inner.sh` 從頭到尾只 `exec` 了一次 `wrap_agent.sh`；
+   這些 pid 是 **pi 一個一個生出來的子行程**。
+2. **日誌裡有我們不可能知道時機的事件**：`pre_tool_use tool=write`、
+   `tool_result tool=write`、兩筆 `before_provider_request`。
+   腳本不知道 agent 什麼時候要叫工具、什麼時候要送出模型請求
+   ——**只有 pi 知道**。這幾行存在本身就是「pi 在呼叫我們的契約」。
 
 掛鉤日誌逐行（`evidence_agent_attest/hooks_enc.jsonl`，10 筆）：
 
@@ -243,4 +274,31 @@ ssh user1@100.124.254.83 'rm -rf /var/tmp/venc && mkdir -p /var/tmp/venc \
        timing enc noenc nohook rogue mutate_ctl mutate mutate_all'
 ```
 
-收尾印 `RUN_AGENT_ATTEST_DONE fail=<n>`，**fail=0 才算過**（本輪 22 格判準全綠）。
+收尾印 `RUN_AGENT_ATTEST_DONE fail=<n>`，**fail=0 才算過**（本輪 22 格判準全綠、0 紅）。
+
+### 落盤的證據是**committed 的那幾個 byte** 跑出來的
+
+`evidence_agent_attest/SOURCE_SHA256.txt` 釘死產生它的五個檔，
+跟 repo 裡那幾份逐位元相同：
+
+```
+6ea1fe79…  ops/vacantrun/enclosure_20260920/run_agent_attest.sh
+90194067…  ops/vacantrun/enclosure_20260920/bin/agent_attest_inner.sh
+c666ebfd…  ops/vacantrun/enclosure_20260920/bin/strip_hook_pi.sh
+df6b5323…  ops/vacantrun/wrap_agent.sh
+dc050ad7…  vacant_network/vrun/hookcli.py
+```
+
+⚠ **第一輪跑完之後改過註解，所以整套重跑了一次**，落盤的是第二輪。
+兩輪的四個分級欄位完全一致；`mutate_all` 那一格兩輪分別是
+**20 通／61 事件**與 **33 通／100 事件**，`unexplained` 都是 **0**
+——對帳在 33 通的長迴圈上仍然成立，那比 3 通那一格有說服力。
+
+### 真鑰掃描（收據與日誌要進 repo，就要先證明它們乾淨）
+
+`grep -rlE 'sk-ant-|sk-proj-|ghp_|sk-[A-Za-z0-9]{32,}'` 在
+`evidence_agent_attest/` 上 **0 命中**；
+**正控制**：同一支 grep 找 `chat/completions` **命中 2 個檔**
+⇒ 不是 grep 沒讀到那些檔案。
+掛鉤日誌本來就只落雜湊（`hookcli` 誠實邊界 1），
+`pi_diag_*.jsonl` 只落欄位名與長度。

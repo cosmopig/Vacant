@@ -10,7 +10,9 @@
 # ⚠ 這支跟 `run_attest.sh` 的差別**就是全部**：`run_attest.sh` 的 canary 是
 #   **直接呼叫契約**（`hookcli session_start`），這一支的 canary 只可能由
 #   **agent 框架自己的掛鉤**燒起來（`wrap_agent.sh` 把 extension 寫進
-#   per-run 的 `PI_CODING_AGENT_DIR`，本支一次都沒有呼叫 hookcli）。
+#   per-run 的 `PI_CODING_AGENT_DIR`，本支**沒有任何一行以事件參數執行
+#   `hookcli`**——去掉註解之後那個 grep 是 0，而同一支 grep 在
+#   `bin/attest_inner.sh` 上是 1＝正控制）。
 #
 # | cell | 變因 | 預期 |
 # |---|---|---|

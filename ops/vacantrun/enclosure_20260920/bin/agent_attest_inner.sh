@@ -7,7 +7,12 @@
 #
 # ⚠ 這支跟 `attest_inner.sh` 的差別**就是 A 級那一句話的全部**：
 #   `attest_inner.sh` 的 canary 是**直接呼叫契約**（`hookcli session_start`）；
-#   這一支**完全不碰 hookcli**，canary 只可能由 **agent 框架自己的掛鉤**燒起來。
+#   這一支**沒有任何一行以事件參數執行 `hookcli`**（去掉註解後 grep ＝ 0；
+#   同一支 grep 在 `attest_inner.sh` 上是 1＝正控制），canary 只可能由
+#   **agent 框架自己的掛鉤**燒起來。
+#   ⚠ 唯一的例外要講明白：`timing` 那一格有一行
+#   `python3 -c "import vacant_network.vrun.hookcli"`——**bare import**，
+#   不呼叫 `handle()`／`emit()`，一筆事件都不寫、一通 canary 都不打。
 #   所以這一支的 `canary_fired=true` 是「agent 的掛鉤燒的」，不是我們手動燒的。
 #
 # 環境變數（由 `enc.sh --setenv` 帶進來，**值裡不可以有空白**）：

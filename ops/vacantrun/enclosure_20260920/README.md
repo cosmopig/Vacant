@@ -39,8 +39,10 @@ bash ops/vacantrun/enclosure_20260920/run_agent_attest.sh pi \
 `run_agent_attest.sh` 是 `../../../decisions/DECISION_20260920_FIRST_TIER_A_RECEIPT.md`
 的可重跑版本，也是 `run_agent.sh`（真 agent 在圍牆裡）與 `run_attest.sh`
 （四個欄位＋分級）**併成的一支**。⚠ 它跟 `run_attest.sh` 的差別就是全部：
-**這一支一次都沒有呼叫 `hookcli`**（`grep -c hookcli` ＝ 0），canary 只可能由
-**pi 自己的 extension** 燒起來。2026-09-20 實測
+**這一支沒有任何一行以事件參數執行 `hookcli`**（去掉註解之後那個 grep ＝ 0，
+而同一支 grep 在 `bin/attest_inner.sh` 上 ＝ 1，那是正控制），
+canary 只可能由 **pi 自己的 extension** 燒起來。
+⚠ `grep -c hookcli` 本身是 4／5，全部在註解裡——**那個數字不是判準**。2026-09-20 實測
 `tier="A"`／`applied=true`／`canary_fired=true`／`unexplained=0`，22 格判準全綠。
 原始資料在 `evidence_agent_attest/`。
 

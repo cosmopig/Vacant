@@ -20,8 +20,8 @@
       "door_sock": "/var/tmp/vacant-attest-agent-20260920/door/relay.sock",
       "door_reachable": true,
       "reason": "netns 與圍牆外面相同 ⇒ 沒有進到新的 network namespace",
-      "probed_at": 1789872942.7065094,
-      "probed_by_pid": 4019682
+      "probed_at": 1789873967.6051192,
+      "probed_by_pid": 4026067
     }
   },
   "framework_hook": {
@@ -54,5 +54,5 @@
     "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
   ],
   "in_process_model": null,
-  "assembled_at": 1789872947.857443
+  "assembled_at": 1789873973.8975515
 }

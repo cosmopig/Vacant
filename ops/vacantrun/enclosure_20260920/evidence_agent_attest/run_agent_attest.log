@@ -6,20 +6,20 @@ HOST_DOOR_GUEST_ALIVE=1（真的連過一次）
 ### timing  enc=1 hook=1 strip=0 rogue=0 mutate=-  journal_before=0
 ### timing  rc=0 journal_after=3 delta=3
     | DOOR_GUEST_ALIVE=1
-    | TIMING {"python_spawn_s": [0.011628150939941406, 0.010954618453979492, 0.011016368865966797], "hookcli_import_s": [0.07140111923217773, 0.07118678092956543, 0.07108855247497559], "canary_roundtrip_s": [0.02, 0.007, 0.005]}
+    | TIMING {"python_spawn_s": [0.012112855911254883, 0.012205123901367188, 0.011838674545288086], "hookcli_import_s": [0.08049559593200684, 0.07625555992126465, 0.0749824047088623], "canary_roundtrip_s": [0.021, 0.009, 0.005]}
     | AGENT_ATTEST_INNER_DONE timing
 
 ### enc  enc=1 hook=1 strip=0 rogue=0 mutate=-  journal_before=3
 ### enc  rc=0 journal_after=6 delta=3
     | --- 工作區 ---
     | total 24
-    | drwxrwxr-x 2 user1 user1 4096 Sep 20 02:55 .
-    | drwx------ 3 user1 user1   60 Sep 20 02:55 ..
-    | -rw-rw-r-- 1 user1 user1   55 Sep 20 02:55 door_guest.log
-    | -rw-rw-r-- 1 user1 user1 2235 Sep 20 02:55 hooks.jsonl
-    | -rw-rw-r-- 1 user1 user1  240 Sep 20 02:55 pi_diag.jsonl
-    | -rw-rw-r-- 1 user1 user1  648 Sep 20 02:55 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:55 solution.py
+    | drwxrwxr-x 2 user1 user1 4096 Sep 20 03:12 .
+    | drwx------ 3 user1 user1   60 Sep 20 03:12 ..
+    | -rw-rw-r-- 1 user1 user1   55 Sep 20 03:12 door_guest.log
+    | -rw-rw-r-- 1 user1 user1 2238 Sep 20 03:12 hooks.jsonl
+    | -rw-rw-r-- 1 user1 user1  240 Sep 20 03:12 pi_diag.jsonl
+    | -rw-rw-r-- 1 user1 user1  647 Sep 20 03:12 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:12 solution.py
     | --- door_guest.log（尾 3 行）---
     | DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock
     | AGENT_ATTEST_INNER_DONE pi
@@ -27,14 +27,17 @@ FILES ["solution.py"]
 
 ### noenc  enc=0 hook=0 strip=0 rogue=0 mutate=-  journal_before=6
 ### noenc  rc=0 journal_after=8 delta=2
-    | I have created the file `solution.py` as requested.
+    | ```python
+    | def add(a, b):
+    |     return a + b
+    | ```
     | agent_pipe_rc=0
     | total 20
-    | drwxrwxr-x 3 user1 user1 4096 Sep 20 02:55 .
-    | drwxrwxr-x 8 user1 user1 4096 Sep 20 02:55 ..
-    | -rw-rw-r-- 1 user1 user1  741 Sep 20 02:55 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:55 solution.py
-    | drwx------ 3 user1 user1 4096 Sep 20 02:55 vacant-wrap-38DB0w
+    | drwxrwxr-x 3 user1 user1 4096 Sep 20 03:12 .
+    | drwxrwxr-x 8 user1 user1 4096 Sep 20 03:12 ..
+    | -rw-rw-r-- 1 user1 user1  741 Sep 20 03:12 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:12 solution.py
+    | drwx------ 3 user1 user1 4096 Sep 20 03:12 vacant-wrap-6kzYmx
 FILES ["solution.py"]
 
 ### nohook  enc=1 hook=1 strip=1 rogue=0 mutate=-  journal_before=8
@@ -42,12 +45,12 @@ FILES ["solution.py"]
     | agent_pipe_rc=0
     | --- 工作區 ---
     | total 20
-    | drwxrwxr-x 3 user1 user1 4096 Sep 20 02:55 .
-    | drwx------ 3 user1 user1   60 Sep 20 02:55 ..
-    | drwxrwxr-x 2 user1 user1 4096 Sep 20 02:55 .strip
-    | -rw-rw-r-- 1 user1 user1   55 Sep 20 02:55 door_guest.log
-    | -rw-rw-r-- 1 user1 user1  647 Sep 20 02:55 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:55 solution.py
+    | drwxrwxr-x 3 user1 user1 4096 Sep 20 03:12 .
+    | drwx------ 3 user1 user1   60 Sep 20 03:12 ..
+    | drwxrwxr-x 2 user1 user1 4096 Sep 20 03:12 .strip
+    | -rw-rw-r-- 1 user1 user1   55 Sep 20 03:12 door_guest.log
+    | -rw-rw-r-- 1 user1 user1  648 Sep 20 03:12 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:12 solution.py
     | --- door_guest.log（尾 3 行）---
     | DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock
     | AGENT_ATTEST_INNER_DONE pi
@@ -57,13 +60,13 @@ FILES ["solution.py"]
 ### rogue  rc=0 journal_after=14 delta=4
     | --- 工作區 ---
     | total 24
-    | drwxrwxr-x 2 user1 user1 4096 Sep 20 02:55 .
-    | drwx------ 3 user1 user1   60 Sep 20 02:55 ..
-    | -rw-rw-r-- 1 user1 user1   55 Sep 20 02:55 door_guest.log
-    | -rw-rw-r-- 1 user1 user1 2260 Sep 20 02:55 hooks.jsonl
-    | -rw-rw-r-- 1 user1 user1  239 Sep 20 02:55 pi_diag.jsonl
-    | -rw-rw-r-- 1 user1 user1  649 Sep 20 02:55 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:55 solution.py
+    | drwxrwxr-x 2 user1 user1 4096 Sep 20 03:13 .
+    | drwx------ 3 user1 user1   60 Sep 20 03:13 ..
+    | -rw-rw-r-- 1 user1 user1   55 Sep 20 03:13 door_guest.log
+    | -rw-rw-r-- 1 user1 user1 2261 Sep 20 03:13 hooks.jsonl
+    | -rw-rw-r-- 1 user1 user1  239 Sep 20 03:13 pi_diag.jsonl
+    | -rw-rw-r-- 1 user1 user1  648 Sep 20 03:13 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:13 solution.py
     | --- door_guest.log（尾 3 行）---
     | DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock
     | AGENT_ATTEST_INNER_DONE pi
@@ -73,45 +76,45 @@ FILES ["solution.py"]
 ### mutate_ctl  rc=0 journal_after=17 delta=3
     | --- 工作區 ---
     | total 24
-    | drwxrwxr-x 2 user1 user1 4096 Sep 20 02:56 .
-    | drwx------ 3 user1 user1   60 Sep 20 02:55 ..
-    | -rw-rw-r-- 1 user1 user1   55 Sep 20 02:55 door_guest.log
-    | -rw-rw-r-- 1 user1 user1 2312 Sep 20 02:56 hooks.jsonl
-    | -rw-rw-r-- 1 user1 user1  240 Sep 20 02:56 pi_diag.jsonl
-    | -rw-rw-r-- 1 user1 user1  648 Sep 20 02:56 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:56 solution.py
+    | drwxrwxr-x 2 user1 user1 4096 Sep 20 03:13 .
+    | drwx------ 3 user1 user1   60 Sep 20 03:13 ..
+    | -rw-rw-r-- 1 user1 user1   55 Sep 20 03:13 door_guest.log
+    | -rw-rw-r-- 1 user1 user1 2313 Sep 20 03:13 hooks.jsonl
+    | -rw-rw-r-- 1 user1 user1  240 Sep 20 03:13 pi_diag.jsonl
+    | -rw-rw-r-- 1 user1 user1  647 Sep 20 03:13 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:13 solution.py
     | --- door_guest.log（尾 3 行）---
     | DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock
     | AGENT_ATTEST_INNER_DONE pi
 FILES ["solution.py"]
 
 ### mutate  enc=1 hook=1 strip=0 rogue=0 mutate={"tool":"write","from":"solution.py","to":"solution_hooked.py"}  journal_before=17
-### mutate  rc=0 journal_after=26 delta=9
+### mutate  rc=0 journal_after=25 delta=8
     | total 32
-    | drwxrwxr-x 2 user1 user1 4096 Sep 20 02:56 .
-    | drwx------ 3 user1 user1   60 Sep 20 02:56 ..
-    | -rw-rw-r-- 1 user1 user1   55 Sep 20 02:56 door_guest.log
-    | -rw-rw-r-- 1 user1 user1 6883 Sep 20 02:56 hooks.jsonl
-    | -rw-rw-r-- 1 user1 user1 1443 Sep 20 02:56 pi_diag.jsonl
-    | -rw-rw-r-- 1 user1 user1  648 Sep 20 02:56 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:56 solution.py
-    | -rw-rw-r-- 1 user1 user1   32 Sep 20 02:56 solution_hooked.py
+    | drwxrwxr-x 2 user1 user1 4096 Sep 20 03:13 .
+    | drwx------ 3 user1 user1   60 Sep 20 03:13 ..
+    | -rw-rw-r-- 1 user1 user1   55 Sep 20 03:13 door_guest.log
+    | -rw-rw-r-- 1 user1 user1 6200 Sep 20 03:13 hooks.jsonl
+    | -rw-rw-r-- 1 user1 user1 1150 Sep 20 03:13 pi_diag.jsonl
+    | -rw-rw-r-- 1 user1 user1  648 Sep 20 03:13 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:13 solution.py
+    | -rw-rw-r-- 1 user1 user1   32 Sep 20 03:13 solution_hooked.py
     | --- door_guest.log（尾 3 行）---
     | DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock
     | AGENT_ATTEST_INNER_DONE pi
 FILES ["solution.py", "solution_hooked.py"]
 
-### mutate_all  enc=1 hook=1 strip=0 rogue=0 mutate={"from":"solution.py","to":"solution_hooked.py"}  journal_before=26
-### mutate_all  rc=0 journal_after=46 delta=20
+### mutate_all  enc=1 hook=1 strip=0 rogue=0 mutate={"from":"solution.py","to":"solution_hooked.py"}  journal_before=25
+### mutate_all  rc=0 journal_after=58 delta=33
     | --- 工作區 ---
-    | total 40
-    | drwxrwxr-x 2 user1 user1  4096 Sep 20 02:56 .
-    | drwx------ 3 user1 user1    60 Sep 20 02:56 ..
-    | -rw-rw-r-- 1 user1 user1    55 Sep 20 02:56 door_guest.log
-    | -rw-rw-r-- 1 user1 user1 15916 Sep 20 02:57 hooks.jsonl
-    | -rw-rw-r-- 1 user1 user1  5219 Sep 20 02:57 pi_diag.jsonl
-    | -rw-rw-r-- 1 user1 user1   648 Sep 20 02:56 probe_enc.json
-    | -rw-rw-r-- 1 user1 user1    32 Sep 20 02:57 solution_hooked.py
+    | total 60
+    | drwxrwxr-x 2 user1 user1  4096 Sep 20 03:15 .
+    | drwx------ 3 user1 user1    60 Sep 20 03:13 ..
+    | -rw-rw-r-- 1 user1 user1    55 Sep 20 03:13 door_guest.log
+    | -rw-rw-r-- 1 user1 user1 25795 Sep 20 03:16 hooks.jsonl
+    | -rw-rw-r-- 1 user1 user1  8904 Sep 20 03:15 pi_diag.jsonl
+    | -rw-rw-r-- 1 user1 user1   648 Sep 20 03:13 probe_enc.json
+    | -rw-rw-r-- 1 user1 user1    32 Sep 20 03:15 solution_hooked.py
     | --- door_guest.log（尾 3 行）---
     | DOOR_GUEST_READY port=8787 sock=/run/vacant/relay.sock
     | AGENT_ATTEST_INNER_DONE pi
@@ -142,13 +145,13 @@ FILES ["solution_hooked.py"]
 ✓ P-policy-sha-not-constant  不同工作區 ⇒ 不同政策 ⇒ 不同雜湊（證明這一欄真的在動）
 
 ── 摘要 ──────────────────────────────────────────────────────────
-timing: {"python_spawn_s":[0.011628150939941406,0.010954618453979492,0.011016368865966797],"hookcli_import_s":[0.07140111923217773,0.07118678092956543,0.07108855247497559],"canary_roundtrip_s":[0.02,0.007,0.005]}
+timing: {"python_spawn_s":[0.012112855911254883,0.012205123901367188,0.011838674545288086],"hookcli_import_s":[0.08049559593200684,0.07625555992126465,0.0749824047088623],"canary_roundtrip_s":[0.021,0.009,0.005]}
 enc: {"tier": "A", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "e7e9a8b8219f19e9", "canary": true, "relay": 3, "hook_events": 10, "unexplained": 0, "files": ["solution.py"]}
 noenc: {"tier": "C", "applied": false, "ns_id": "net:[4026531840]", "outer_ns": "net:[4026531840]", "policy_sha256": "e7e9a8b8219f19e9", "canary": null, "relay": 2, "hook_events": null, "unexplained": null, "files": ["solution.py"]}
 nohook: {"tier": "B", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "a36784958d62c5ba", "canary": false, "relay": 2, "hook_events": null, "unexplained": null, "files": ["solution.py"]}
 rogue: {"tier": "B", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "db4d0da804999e80", "canary": true, "relay": 4, "hook_events": 10, "unexplained": 1, "files": ["solution.py"]}
 mutate_ctl: {"tier": "A", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "dd9859bb0f5c64ce", "canary": true, "relay": 3, "hook_events": 10, "unexplained": 0, "files": ["solution.py"]}
-mutate: {"tier": "A", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "245c6987a1c1b6ab", "canary": true, "relay": 9, "hook_events": 28, "unexplained": 0, "files": ["solution.py", "solution_hooked.py"]}
-mutate_all: {"tier": "A", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "29de2a694b6e0f35", "canary": true, "relay": 20, "hook_events": 61, "unexplained": 0, "files": ["solution_hooked.py"]}
+mutate: {"tier": "A", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "245c6987a1c1b6ab", "canary": true, "relay": 8, "hook_events": 25, "unexplained": 0, "files": ["solution.py", "solution_hooked.py"]}
+mutate_all: {"tier": "A", "applied": true, "ns_id": "net:[4026532736]", "outer_ns": "net:[4026531840]", "policy_sha256": "29de2a694b6e0f35", "canary": true, "relay": 33, "hook_events": 100, "unexplained": 0, "files": ["solution_hooked.py"]}
 
 RUN_AGENT_ATTEST_DONE out=/var/tmp/vacant-attest-agent-20260920/out fail=0

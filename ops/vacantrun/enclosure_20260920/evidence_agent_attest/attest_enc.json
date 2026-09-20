@@ -18,7 +18,7 @@
       "door_sock": "/run/vacant/relay.sock",
       "door_reachable": true,
       "reason": "只有 loopback 一張介面，而且 netns 與圍牆外面不同（硬證據）",
-      "probed_at": 1789872936.5119512,
+      "probed_at": 1789873950.234231,
       "probed_by_pid": 9
     }
   },
@@ -50,5 +50,5 @@
     "圍牆成立 ＋ 掛鉤 canary 有燒 ＋ 每一通都對得上"
   ],
   "in_process_model": null,
-  "assembled_at": 1789872942.5966396
+  "assembled_at": 1789873967.4831054
 }

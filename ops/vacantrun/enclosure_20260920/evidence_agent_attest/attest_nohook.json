@@ -18,7 +18,7 @@
       "door_sock": "/run/vacant/relay.sock",
       "door_reachable": true,
       "reason": "只有 loopback 一張介面，而且 netns 與圍牆外面不同（硬證據）",
-      "probed_at": 1789872948.032511,
+      "probed_at": 1789873974.0949357,
       "probed_by_pid": 9
     }
   },
@@ -51,5 +51,5 @@
     "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
   ],
   "in_process_model": null,
-  "assembled_at": 1789872953.3301668
+  "assembled_at": 1789873981.2277355
 }

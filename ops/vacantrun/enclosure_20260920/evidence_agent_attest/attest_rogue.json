@@ -18,8 +18,8 @@
       "door_sock": "/run/vacant/relay.sock",
       "door_reachable": true,
       "reason": "只有 loopback 一張介面，而且 netns 與圍牆外面不同（硬證據）",
-      "probed_at": 1789872953.7294264,
-      "probed_by_pid": 11
+      "probed_at": 1789873981.4432619,
+      "probed_by_pid": 9
     }
   },
   "framework_hook": {
@@ -40,9 +40,9 @@
     "refused_path": 0,
     "unexplained_detail": [
       {
-        "call_id": "87c233c136254d2284990793391acc03",
+        "call_id": "b4498fb8676f4573b665f03cdc3c9c8d",
         "path": "/v1/chat/completions",
-        "ts": 1789872957.7570822,
+        "ts": 1789873986.5295997,
         "status": 415
       }
     ],
@@ -57,5 +57,5 @@
     "圍牆成立、掛鉤也燒了，**但對帳沒過**（unexplained=1）⇒ 降到 B：位元組都留下紀錄，但說不出每一通各對應哪一個工具事件"
   ],
   "in_process_model": null,
-  "assembled_at": 1789872959.8393228
+  "assembled_at": 1789873988.6116793
 }

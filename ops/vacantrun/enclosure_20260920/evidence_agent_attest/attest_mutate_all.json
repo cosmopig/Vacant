@@ -18,7 +18,7 @@
       "door_sock": "/run/vacant/relay.sock",
       "door_reachable": true,
       "reason": "只有 loopback 一張介面，而且 netns 與圍牆外面不同（硬證據）",
-      "probed_at": 1789872999.0457592,
+      "probed_at": 1789874031.6237724,
       "probed_by_pid": 9
     }
   },
@@ -26,21 +26,21 @@
     "agent": "pi",
     "contract_version": "vacant-hook/1",
     "canary_fired": true,
-    "events_n": 61,
+    "events_n": 100,
     "log": "/var/tmp/vacant-attest-agent-20260920/ws_mutate_all/hooks.jsonl",
     "install_attempted": true,
     "version_drift": false,
     "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
   },
   "reconciled": {
-    "relay_calls": 20,
-    "hook_events": 61,
+    "relay_calls": 33,
+    "hook_events": 100,
     "unexplained": 0,
     "canary_calls": 1,
     "refused_path": 0,
     "unexplained_detail": [],
     "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
-    "reason": "20 通中繼、20 個回合開端事件 ⇒ 0 通對不上"
+    "reason": "33 通中繼、33 個回合開端事件 ⇒ 0 通對不上"
   },
   "tier": "A",
   "attested": true,
@@ -50,5 +50,5 @@
     "圍牆成立 ＋ 掛鉤 canary 有燒 ＋ 每一通都對得上"
   ],
   "in_process_model": null,
-  "assembled_at": 1789873041.5938077
+  "assembled_at": 1789874164.3439856
 }
