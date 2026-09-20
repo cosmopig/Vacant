@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-09-20T14:13:11.718668+00:00",
+  "store_id": "fe9728a38bb84b11b1002850e565e53b",
+  "chain": {
+    "ok": true,
+    "checked": 4,
+    "head": "71af635e8835f58906077123aef32f2e4ce0faafba1011ef7352a7ba16150747",
+    "genesis": "e30aa64fa36c899c1597d55d381fe42365efb4d0abf18b3bb3938c5d229373b2"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 4,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "7cc59e21-34ac-428a-865a-448b28c35c45",
+      "card": {
+        "color": "赭紅",
+        "first_line": "排完應該會很好看吧。",
+        "need": "把家裡的書按顏色排一次",
+        "shape": "厚實",
+        "texture": "斑駁",
+        "vibe": "懶散、固執、有點浪漫"
+      },
+      "arrival": "這片赭紅色的光影，讓一切都顯得有些慵懶。",
+      "working": "嘖，明明好想就這樣躺著，但為了美感還是得動手。",
+      "handover": "看吧，這排顏色堆疊出的詩意，應該會讓你心動的。",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "latency_ms": 53561,
+      "status": "generated",
+      "errors": 0
+    },
+    {
+      "id": "5d7df9b2-388a-464e-be8c-9d233e564632",
+      "card": {
+        "color": "奶油",
+        "first_line": "我今天想說點好聽的。",
+        "need": "幫我想一句可以貼在冰箱上的話",
+        "shape": "修長",
+        "texture": "光滑",
+        "vibe": "溫柔、慢熱、愛觀察"
+      },
+      "arrival": "這個世界的邊界，在奶油色的光影中緩緩暈開。",
+      "working": "讓我靜靜地觀照文字，試著把溫柔釀進去。",
+      "handover": "這是我為你選下的溫度，希望它能讓你的日子甜一些。",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "latency_ms": 40200,
+      "status": "generated",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

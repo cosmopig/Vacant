@@ -1,0 +1,2 @@
+-rw-r--r-- 1 w401 197121 24576 Sep 20 22:11 /c/Users/w401/vacant_twin/store/twinstore.sqlite3
+rows 2

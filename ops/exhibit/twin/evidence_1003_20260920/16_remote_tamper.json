@@ -1,0 +1,7 @@
+{
+  "db": "C:\\Users\\w401\\vacant_twin\\store\\twinstore.sqlite3.tamper",
+  "ok": false,
+  "checked": 1,
+  "broken_at": 2,
+  "reason": "payload 與 payload_sha256 對不上（內容被改過）"
+}

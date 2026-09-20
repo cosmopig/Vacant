@@ -1,0 +1,15 @@
+{
+  "db": "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-adaefe3b88900fcee/ops/exhibit/twin/evidence_twinchain_20260920/twinstore.sqlite3",
+  "store_id": "d93cba1ae0a04484b994b596a0a0961d",
+  "total": 9,
+  "by_kind": {
+    "submitted": 3,
+    "generated": 3,
+    "published": 3,
+    "error": 0,
+    "ingest_gap": 0,
+    "note": 0
+  },
+  "visitors": 3,
+  "head_seq": 9
+}

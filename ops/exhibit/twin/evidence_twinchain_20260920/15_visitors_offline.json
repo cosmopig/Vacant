@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-09-20T14:11:05.987158+00:00",
+  "store_id": "d93cba1ae0a04484b994b596a0a0961d",
+  "chain": {
+    "ok": true,
+    "checked": 10,
+    "head": "cb0d7cde97c510b3153d44cc7db75002639c3b2668de81611548eba15e0a714a",
+    "genesis": "5e24013bd3fb56d28408a3694826ebc1809296478722022ee611dbd353c6fce7"
+  },
+  "counts": {
+    "visitors": 3,
+    "events": 10,
+    "gaps": 1,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "2e66a0ed-5858-43c8-bcb2-83c6d7f99c6d",
+      "card": {
+        "color": "暖土",
+        "first_line": "這裡的光有點暖。",
+        "need": "把散在桌上的收據整理成一份清單",
+        "shape": "圓潤",
+        "texture": "指紋",
+        "vibe": "慢、固執、愛乾淨"
+      },
+      "arrival": "這裡的光有點暖。",
+      "working": "每一張都要對齊，就算慢一點也要把位置擺正。",
+      "handover": "已經全部歸類整齊了，請收好這份清單。",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "latency_ms": 37463,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "0490252b-196f-411c-9c36-6ee9de1ad270",
+      "card": {
+        "color": "灰藍",
+        "first_line": "數字不會騙人。",
+        "need": "幫我把一週的開銷加總起來",
+        "shape": "方正",
+        "texture": "光滑",
+        "vibe": "精準、安靜、不多話"
+      },
+      "arrival": "靜謐中，秩序清晰可見。",
+      "working": "開始核對每一筆數值。",
+      "handover": "資料已彙整，數據無誤。",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "latency_ms": 15633,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "b39b4344-0376-4ed1-a5c5-f94cc44ed667",
+      "card": {
+        "color": "苔綠",
+        "first_line": "咦，這個我剛剛看過。",
+        "need": "找出清單裡重複的名字",
+        "shape": "小巧",
+        "texture": "絨面",
+        "vibe": "好奇、跳躍、愛問為什麼"
+      },
+      "arrival": "哇！這裡的顏色好像苔蘚一樣，它是從哪裡長出來的呀？",
+      "working": "咦，為什麼這個名字會出現兩次？它們是在玩捉迷藏嗎？",
+      "handover": "全部找完了喔！下次它們還會再跳出來搗蛋嗎？",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "latency_ms": 33850,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

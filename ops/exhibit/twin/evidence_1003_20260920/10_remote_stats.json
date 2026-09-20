@@ -1,0 +1,15 @@
+{
+  "db": "C:\\Users\\w401\\vacant_twin\\store\\twinstore.sqlite3",
+  "store_id": "fe9728a38bb84b11b1002850e565e53b",
+  "total": 4,
+  "by_kind": {
+    "submitted": 2,
+    "generated": 2,
+    "published": 0,
+    "error": 0,
+    "ingest_gap": 0,
+    "note": 0
+  },
+  "visitors": 2,
+  "head_seq": 4
+}

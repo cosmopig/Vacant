@@ -1,0 +1,26 @@
+1. append-only 的牙齒
+  [OK] UPDATE 被擋 — twin_event 是 append-only：禁止 UPDATE，要改就追加一列
+  [OK] DELETE 被擋 — twin_event 是 append-only：禁止 DELETE
+2. 雜湊鏈（正控制：乾淨的鏈要綠）
+  [OK] verify 綠
+3. 摺疊出狀態，不改舊列
+  [OK] status=submitted
+  [OK] status=generated
+  [OK] status=published
+  [OK] 三次狀態變化＝三列事件，舊列一列沒少 — 實得 3
+4. KS-1 可執行防呆（負控制：禁語必須炸）
+  [OK] KS-1 攔禁語
+  [OK] KS-1 放行乾淨 prompt
+5. 離線退路（1003 不通也要出得了分身）
+  [OK] 斷線回 fallback — URLError: <urlopen error timed out>
+  [OK] fallback 有三句
+  [OK] fallback 有標 degraded_from
+6. 斷線 ingest 記 gap 而不是回 0
+  [OK] pulled 是 null 不是 0 — None
+  [OK] 留下 ingest_gap 一列
+7. 負控制：繞過 trigger 竄改一列，verify 必須變紅
+  [OK] 竄改後 verify 變紅 — payload 與 payload_sha256 對不上（內容被改過）
+  [OK] 指得出第一個壞掉的 seq — 1
+  [OK] 重開 store 會把 trigger 補回去
+
+selftest 全綠（含 5 個負控制）

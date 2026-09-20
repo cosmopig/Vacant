@@ -1,0 +1,151 @@
+[
+  {
+    "seq": 1,
+    "ts_unix_ms": 1789913493283,
+    "ts_utc": "2026-09-20T14:11:33.283000+00:00",
+    "sub_id": "7cc59e21-34ac-428a-865a-448b28c35c45",
+    "kind": "submitted",
+    "source": "cloud:http://100.66.177.25:3398",
+    "payload_sha256": "16640e383a845bcdc6b5d929db2b085da434a38b1ee43c833b8e7a42983b2c3b",
+    "prev_sha256": "e30aa64fa36c899c1597d55d381fe42365efb4d0abf18b3bb3938c5d229373b2",
+    "row_sha256": "65a369b84a4120f8498537b832c928c245d512505566844f13e148cbad8978d7",
+    "payload": {
+      "card": {
+        "color": "赭紅",
+        "first_line": "排完應該會很好看吧。",
+        "need": "把家裡的書按顏色排一次",
+        "shape": "厚實",
+        "texture": "斑駁",
+        "vibe": "懶散、固執、有點浪漫"
+      },
+      "card_text": "需求：把家裡的書按顏色排一次\n形狀：厚實　質感：斑駁　色系：赭紅\n氣質：懶散、固執、有點浪漫\n第一句話：排完應該會很好看吧。",
+      "cloud_status": "queued",
+      "ts": 1789913480808
+    }
+  },
+  {
+    "seq": 2,
+    "ts_unix_ms": 1789913493284,
+    "ts_utc": "2026-09-20T14:11:33.284000+00:00",
+    "sub_id": "5d7df9b2-388a-464e-be8c-9d233e564632",
+    "kind": "submitted",
+    "source": "cloud:http://100.66.177.25:3398",
+    "payload_sha256": "12d7a25a8f9d11d3b635c50e9f78fd4616e8a704cd59714700243e8ee182dfdd",
+    "prev_sha256": "65a369b84a4120f8498537b832c928c245d512505566844f13e148cbad8978d7",
+    "row_sha256": "cdfac7a1e68bb3edcb99df95dde865fbdf19d95869986272d447352475164ea7",
+    "payload": {
+      "card": {
+        "color": "奶油",
+        "first_line": "我今天想說點好聽的。",
+        "need": "幫我想一句可以貼在冰箱上的話",
+        "shape": "修長",
+        "texture": "光滑",
+        "vibe": "溫柔、慢熱、愛觀察"
+      },
+      "card_text": "需求：幫我想一句可以貼在冰箱上的話\n形狀：修長　質感：光滑　色系：奶油\n氣質：溫柔、慢熱、愛觀察\n第一句話：我今天想說點好聽的。",
+      "cloud_status": "queued",
+      "ts": 1789913492054
+    }
+  },
+  {
+    "seq": 3,
+    "ts_unix_ms": 1789913548620,
+    "ts_utc": "2026-09-20T14:12:28.620000+00:00",
+    "sub_id": "7cc59e21-34ac-428a-865a-448b28c35c45",
+    "kind": "generated",
+    "source": "1003:http://127.0.0.1:1234/v1",
+    "payload_sha256": "61941373377f20f17dfa30bde09f255860df8adf5f609748a19624a2865b4c7a",
+    "prev_sha256": "cdfac7a1e68bb3edcb99df95dde865fbdf19d95869986272d447352475164ea7",
+    "row_sha256": "ef08a0ebb17abec215badd212955ed0da1a265efdd9f7e486b43c95de4cc9d1c",
+    "payload": {
+      "arrival": "這片赭紅色的光影，讓一切都顯得有些慵懶。",
+      "budget_escalated": false,
+      "completion_tokens": 998,
+      "endpoint": "http://127.0.0.1:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "看吧，這排顏色堆疊出的詩意，應該會讓你心動的。",
+      "latency_ms": 53561,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 114,
+      "reasoning_chars": 2970,
+      "reasoning_tokens": 919,
+      "working": "嘖，明明好想就這樣躺著，但為了美感還是得動手。"
+    }
+  },
+  {
+    "seq": 4,
+    "ts_unix_ms": 1789913588823,
+    "ts_utc": "2026-09-20T14:13:08.823000+00:00",
+    "sub_id": "5d7df9b2-388a-464e-be8c-9d233e564632",
+    "kind": "generated",
+    "source": "1003:http://127.0.0.1:1234/v1",
+    "payload_sha256": "e2bbf296f5fb9044feef4ad339169d5cb36ef76efb2a0f96ad520891e468724b",
+    "prev_sha256": "ef08a0ebb17abec215badd212955ed0da1a265efdd9f7e486b43c95de4cc9d1c",
+    "row_sha256": "71af635e8835f58906077123aef32f2e4ce0faafba1011ef7352a7ba16150747",
+    "payload": {
+      "arrival": "這個世界的邊界，在奶油色的光影中緩緩暈開。",
+      "budget_escalated": false,
+      "completion_tokens": 1885,
+      "endpoint": "http://127.0.0.1:1234/v1",
+      "engine": "lmstudio:gemma-4-12b-it-qat",
+      "handover": "這是我為你選下的溫度，希望它能讓你的日子甜一些。",
+      "latency_ms": 40200,
+      "max_tokens": 2400,
+      "model": "gemma-4-12b-it-qat",
+      "raw_len": 118,
+      "reasoning_chars": 5396,
+      "reasoning_tokens": 1808,
+      "working": "讓我靜靜地觀照文字，試著把溫柔釀進去。"
+    }
+  },
+  {
+    "seq": 5,
+    "ts_unix_ms": 1789913594315,
+    "ts_utc": "2026-09-20T14:13:14.315000+00:00",
+    "sub_id": "7cc59e21-34ac-428a-865a-448b28c35c45",
+    "kind": "published",
+    "source": "cloud:http://100.66.177.25:3398",
+    "payload_sha256": "4c20d985b809bd649fe77cfbaf300c68d8692931a7d8c1d481d9415508e1e96d",
+    "prev_sha256": "71af635e8835f58906077123aef32f2e4ce0faafba1011ef7352a7ba16150747",
+    "row_sha256": "8392153661d4509ca6aa8b127f924e3d89f8659c23d808239ec475251784a1ed",
+    "payload": {
+      "at": "2026-09-20T14:13:14.315273+00:00",
+      "cloud": "http://100.66.177.25:3398",
+      "http": 200
+    }
+  },
+  {
+    "seq": 6,
+    "ts_unix_ms": 1789913594354,
+    "ts_utc": "2026-09-20T14:13:14.354000+00:00",
+    "sub_id": "5d7df9b2-388a-464e-be8c-9d233e564632",
+    "kind": "published",
+    "source": "cloud:http://100.66.177.25:3398",
+    "payload_sha256": "ab4a9e37ea55ee838125c97e33c28b1f93d327b57f8e60e9506c8d308b864511",
+    "prev_sha256": "8392153661d4509ca6aa8b127f924e3d89f8659c23d808239ec475251784a1ed",
+    "row_sha256": "f799b53815ef816fdd447a9878f6215ed6d88b73159b1f47a7dd7a7c73fc5864",
+    "payload": {
+      "at": "2026-09-20T14:13:14.354689+00:00",
+      "cloud": "http://100.66.177.25:3398",
+      "http": 200
+    }
+  },
+  {
+    "seq": 7,
+    "ts_unix_ms": 1789913602521,
+    "ts_utc": "2026-09-20T14:13:22.521000+00:00",
+    "sub_id": "_ingest",
+    "kind": "ingest_gap",
+    "source": "cloud:http://100.66.177.25:3398",
+    "payload_sha256": "3e3789b69abccfb085e85c5507aa77ca0cd8b4d10f950c9d9415f9dfc1d32bc0",
+    "prev_sha256": "f799b53815ef816fdd447a9878f6215ed6d88b73159b1f47a7dd7a7c73fc5864",
+    "row_sha256": "44ea9cd0fd117e25e366b458f9ecf2210e3d543fcbe643c2bcd035f8a6f52b67",
+    "payload": {
+      "at": "2026-09-20T14:13:22.521552+00:00",
+      "cloud": "http://100.66.177.25:3398",
+      "mode": "all",
+      "reason": "URLError: <urlopen error [WinError 10061] 無法連線，因為目標電腦拒絕連線。>"
+    }
+  }
+]
