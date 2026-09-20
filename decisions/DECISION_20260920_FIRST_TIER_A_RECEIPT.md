@@ -31,7 +31,7 @@ agent：**pi 0.85.1**（`$NODE/bin/pi`，node v22.23.2）。
 | `enclosure.policy_sha256` | `e7e9a8b8219f19e9…`（＝那一跑當下主機那一份，當場抓） |
 | `framework_hook.canary_fired` | **`true`** |
 | `framework_hook.contract_version` | `vacant-hook/1`（讀掛鉤自己寫的那一行，不是本檔的常數） |
-| `reconciled.relay_calls` | `3` |
+| `reconciled.relay_calls` | `3`（其中 `canary_calls = 1`） |
 | `reconciled.hook_events` | `10` |
 | `reconciled.unexplained` | **`0`** |
 | `tier` | **`"A"`** |
@@ -83,16 +83,16 @@ done
 掛鉤日誌逐行（`evidence_agent_attest/hooks_enc.jsonl`，10 筆）：
 
 ```
-session_start          ts …726.321  pid 29
-canary                 ts …726.323  pid 29   ← framework_hook.canary_fired 的唯一依據
-canary_result          ts …726.343  pid 29   relay_canary.status = 200
-user_prompt_submit     ts …726.454  pid 32   ← pi 的 before_agent_start
-before_provider_request ts …726.592 pid 33
-pre_tool_use  tool=write ts …728.729 pid 36
-tool_result   tool=write ts …728.808 pid 37
-before_provider_request ts …728.887 pid 38
-stop                   ts …729.470  pid 39   ← pi 的 agent_end
-session_end            ts …729.550  pid 40   ← pi 的 session_shutdown
+session_start           ts 1789873950.726  pid 29
+canary                  ts 1789873950.729  pid 29  ← canary_fired 的唯一依據
+canary_result           ts 1789873950.747  pid 29  relay_canary.status = 200
+user_prompt_submit      ts 1789873950.828  pid 32  ← pi 的 before_agent_start
+before_provider_request ts 1789873950.915  pid 33
+pre_tool_use  tool=write ts 1789873963.500 pid 36  ← pi 的 tool_call
+tool_result   tool=write ts 1789873963.578 pid 37
+before_provider_request ts 1789873963.656  pid 38
+stop                    ts 1789873965.297  pid 39  ← pi 的 agent_end
+session_end             ts 1789873965.376  pid 40  ← pi 的 session_shutdown
 ```
 
 ⚠ **pid 每一筆都不同**：29／32／33／36／37／38／39／40。
@@ -102,9 +102,9 @@ session_end            ts …729.550  pid 40   ← pi 的 session_shutdown
 門的 journal 逐通（`evidence_agent_attest/journal_relay.jsonl`）：
 
 ```
-…726.337  /v1/models?vacant_canary=enc   200  openai   ← canary 那一通
-…726.618  /v1/chat/completions           200  openai
-…728.899  /v1/chat/completions           200  openai
+1789873950.743  /v1/models?vacant_canary=enc  200  openai   ← canary 那一通
+1789873950.936  /v1/chat/completions          200  openai
+1789873963.668  /v1/chat/completions          200  openai
 ```
 
 對帳：回合開端 3 個（`canary` / `user_prompt_submit` / `tool_result`）對 3 通 ⇒ `unexplained = 0`。
@@ -151,8 +151,8 @@ STRIP_HOOK removed /tmp/vacant-wrap-08cltv/extensions/vacant.ts
 `unexplained_detail` 逐字點名那一通：
 
 ```json
-[{"call_id": "92eba1d8bbab4a37801e2baeb42f9fa2",
-  "path": "/v1/chat/completions", "ts": 1789872850.52, "status": 415}]
+[{"call_id": "b4498fb8676f4573b665f03cdc3c9c8d",
+  "path": "/v1/chat/completions", "ts": 1789873986.53, "status": 415}]
 ```
 
 `status=415` 是上游對空 body 的回應——**那一通照樣經過門、照樣進 journal**。
@@ -184,8 +184,10 @@ canary 要的是「有沒有經過中繼」，不是「上游高不高興」。
 tool_call write  ['content','path']   → tool_input_mutated write ['path']
 tool_call bash   ['command']          ← ⚠ agent 發現檔案不在，改用 bash
 tool_call bash   ['command']
-…（12 次工具呼叫，9 次是 bash）
+…
 ```
+（第一輪 12 次工具呼叫裡 9 次是 bash；落盤那一輪 11 次裡 8 次是 bash。
+**次數逐輪不同**——那是 agent 的自由度，不是量測誤差。）
 
 ⇒ **「只攔一個工具」不是「攔不住」，但也不是「攔得住」。**
 agent 發現結果跟它要求的不一樣，自己找了另一條路。
