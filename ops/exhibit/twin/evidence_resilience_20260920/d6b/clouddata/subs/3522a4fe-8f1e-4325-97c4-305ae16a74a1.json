@@ -1,0 +1,14 @@
+{
+  "id": "3522a4fe-8f1e-4325-97c4-305ae16a74a1",
+  "ts": 1789918602159,
+  "status": "queued",
+  "card_text": "需求：\ud800 整理桌面",
+  "card": {
+    "need": "\ud800 整理桌面",
+    "shape": null,
+    "texture": null,
+    "color": null,
+    "vibe": null,
+    "first_line": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "0f0cf50c-34fd-436b-a6ca-8ee54754941d",
+  "ts": 1789918590969,
+  "status": "queued",
+  "card_text": "需求：整理桌面",
+  "card": {
+    "need": "整理桌面",
+    "shape": null,
+    "texture": null,
+    "color": null,
+    "vibe": null,
+    "first_line": null
+  }
+}

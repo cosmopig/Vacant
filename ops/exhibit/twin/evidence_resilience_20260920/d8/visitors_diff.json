@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-09-20T15:36:49.335127+00:00",
+  "store_id": "aaf92023405a4ae389315246ca8a4010",
+  "chain": {
+    "ok": true,
+    "checked": 6,
+    "head": "32c494688e2b07a4439d8aa898cac7c32454ccbbef6304406825e2d3e92bde7a",
+    "genesis": "713be5524300fef39925b383524d1f1540dbaaa142d73215381ffcf1b2da1065"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 6,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "diff-a",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 1 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 3,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "diff-b",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 1 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 3,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

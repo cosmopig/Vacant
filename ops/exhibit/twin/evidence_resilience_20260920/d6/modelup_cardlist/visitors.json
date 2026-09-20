@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-09-20T15:35:52.702397+00:00",
+  "store_id": "861aaab3066340dcae917a107b948fbc",
+  "chain": {
+    "ok": true,
+    "checked": 6,
+    "head": "168ac50fc6584e0ba6d88b347229d9995527e983377cf87e502144f55b4c073d",
+    "genesis": "b10b4391a00464ae525fe4823f72f1f5c83f774a709e1217e5716d54026eae7a"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 6,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "neighbour",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 99 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "替身：我到了。",
+      "working": "替身：動手了。",
+      "handover": "替身：交給你。",
+      "engine": "lmstudio:fake-1003",
+      "latency_ms": 3,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "bad-cardlist",
+      "card": [
+        "整理桌面"
+      ],
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「一件還沒做完的小事」。",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 0,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

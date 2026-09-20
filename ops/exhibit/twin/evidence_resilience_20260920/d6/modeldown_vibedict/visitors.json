@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-09-20T15:36:25.045597+00:00",
+  "store_id": "eac99dfb712f42469c0ed001b30a43b7",
+  "chain": {
+    "ok": true,
+    "checked": 6,
+    "head": "abe2105446d2527d2dbd2ee504a4cf1e4800fbae7b9f3610fe25e5923b171c07",
+    "genesis": "fd3d38cd8c5e940f80f1d1006921028ae6b93c819aee44b67245ca14bd4e4410"
+  },
+  "counts": {
+    "visitors": 2,
+    "events": 6,
+    "gaps": 0,
+    "errors": 0
+  },
+  "people": [
+    {
+      "id": "neighbour",
+      "card": {
+        "color": "暖土",
+        "first_line": null,
+        "need": "整理第 99 疊紙",
+        "shape": "圓潤",
+        "texture": "光滑",
+        "vibe": "慢、固執"
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「整理第 99 疊紙」。（慢、固執）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 1,
+      "status": "published",
+      "errors": 0
+    },
+    {
+      "id": "bad-vibedict",
+      "card": {
+        "need": "x",
+        "vibe": {
+          "a": 1
+        }
+      },
+      "arrival": "我是圓潤的那一個，暖土色。這裡就是那個世界嗎？",
+      "working": "讓我試試「x」。（{'a': 1}）",
+      "handover": "做完了，你看看對不對。",
+      "engine": "fallback_deterministic",
+      "latency_ms": 1,
+      "status": "published",
+      "errors": 0
+    }
+  ],
+  "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。"
+}

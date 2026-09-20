@@ -1,0 +1,1 @@
+wrote /Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/evidence_resilience_20260920/d6/items.json case=long items=2

@@ -1,0 +1,109 @@
+OK|0a 負控制：run 取得到非零退出碼（得 7）
+OK|0a 負控制：stderr 有落盤沒被吞
+OK|0b 負控制：沒人聽的埠回 000（得 000）
+OK|0c 正控制：替身雲端活著回 200（得 200）
+OK|0c 負控制：token 錯回 401（證明量具分得出「連得上」與「有權限」）（得 401）
+OK|0c 負控制：不存在的路徑回 404（不是什麼都回 200）（得 404）
+OK|0d loop 退出碼（得 0）
+OK|0d 兩張卡進庫（得 2）
+OK|0d 模型活著時 engine=lmstudio:*（必中輸入）（得 2）
+OK|0d 沒有無謂退化（得 0）
+OK|0d 鏈綠（得 1）
+OK|0e 負控制：竄改後 verify 變紅（得 0）
+OK|0e 負控制：指得出第一個壞掉的 seq（得 1）
+OK|1a 雲端活著時 ingest 退出碼（得 0）
+OK|1a 三張卡進庫（得 3）
+OK|1a 負控制：雲端活著時 ingest_gap 不會無故遞增（得 0）
+OK|1b 斷網演練成立：輪詢到 http_code=000（不是「我殺了 PID 所以應該斷了」）
+OK|1c 公網斷時 loop 退出碼（不准崩）（得 0）
+OK|1c 每一輪記一列 ingest_gap（跑兩輪）（得 2）
+OK|1c 已在庫的三張照常用真模型生成（得 3）
+OK|1c 鏈仍綠（得 1）
+OK|1c pulled 寫 null 不寫 0（沒量到 ≠ 量到零）
+記|1e 斷網期間 publish 每輪對每張卡重試一次：兩輪 6 列 error（每輪 3＝卡數）。展場預設 --interval 10 ⇒ 每張卡每小時 360 列；100 張卡斷網一天約 86 萬列，verify／export 是 O(列數) 且每輪都跑一次 ⇒ 會愈跑愈慢。沒有退避、沒有上限
+OK|1d 螢幕那份 JSON 有三個人（得 3）
+OK|1d 螢幕那份 JSON 自己說鏈是綠的（得 1）
+OK|2a 正控制：模型活著時 loop 退出碼（得 0）
+OK|2a 正控制：兩張都是真模型（得 2）
+OK|2b 1003 斷線演練成立：輪詢到 http_code=000
+OK|2c 1003 斷時 loop 退出碼（不准崩）（得 0）
+OK|2c 新卡退到 fallback_deterministic（得 2）
+OK|2c 舊卡的 engine 沒有被改寫（append-only）（得 2）
+OK|2c 鏈仍綠（得 1）
+OK|2d 螢幕那一層分得出退化（v_fallback=2）（得 2）
+OK|2d 螢幕那一層分得出真跑（v_real=2）（得 2）
+OK|2d 沒有 engine 是空的（空＝畫面分不出來）（得 0）
+OK|2d 每一次退化都寫得出 degrade_reason（不是只換個 engine 字串）（得 2）
+OK|3a 正控制：兩邊都活著時先把三張卡做完（得 0）
+OK|3b 兩邊都輪詢到 000（演練成立）（得 1）
+OK|3c 兩個都斷時 loop 退出碼（不准崩）（得 0）
+OK|3c 螢幕那份 JSON 還解析得動（得 1）
+OK|3c 三個人都還在（螢幕演得下去）（得 3）
+OK|3c 鏈仍綠（得 1）
+OK|3d 負控制：這一輪全程離線（事後再量一次還是 000）
+OK|4a 至少有一次是在「做到一半」被 kill -9 的（submitted>generated）
+OK|4b kill -9 五次之後鏈仍綠（沒有半寫入的列）（得 1）
+OK|4b SQLite PRAGMA integrity_check=ok
+OK|4b 沒有留下半寫的 visitors.json.tmp
+OK|4c 重啟後 loop 退出碼（得 0）
+OK|4c 24 張卡一張不多一張不少（得 24）
+OK|4c 沒有任何一張卡被生成兩次（重啟不會長出雙胞胎）（得 1）
+OK|4c 沒有任何一張卡被抄進來兩次（得 1）
+OK|4c 鏈綠（得 1）
+OK|4c 螢幕那份 JSON 摺出 24 個人（得 24）
+OK|4c 負控制：新行程重新摺疊，結果逐人相同（得 1）
+OK|5a 正控制：磁碟沒滿時 loop 退出碼 0（得 0）
+OK|5a 正控制：兩張卡做完了（得 2）
+OK|5b ramdisk 真的滿了（剩 0KB）
+OK|5c 磁碟滿了會講話：loop 退出碼 1（不是安靜地假裝跑完）
+OK|5c 螢幕那份 JSON 沒有被寫成半截（原子換檔守住）（得 1）
+OK|5d 清出空間後自己恢復（loop 退出碼 0）（得 0）
+OK|5d 撞過 ENOSPC 之後鏈仍綠（得 1）
+OK|6 [modelup] long：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] ctrl：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] emoji：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] fullwidth：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] empty：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] jsoninj：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] huge：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] idnewline：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] idempty：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] cardstr：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] cardlist：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] needint：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] vibedict：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] surrogate：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modelup] notdict：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] long：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] ctrl：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] emoji：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] fullwidth：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] empty：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] jsoninj：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] huge：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] idnewline：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] idempty：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] cardstr：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] cardlist：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] needint：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] vibedict：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] surrogate：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6 [modeldown] notdict：loop 活著、鏈綠、乾淨鄰居照樣拿到分身
+OK|6b 真 server.js 起來了（PID 29249）
+OK|6b-1 正控制：乾淨的卡送得進真伺服器（得 200）
+記|6b-2 同一個 IP 十秒內第二張卡被擋（429「送太快了」）。server.js 用 req.ip 做視窗，而它**沒有設 trust proxy** ⇒ 展場所有人在同一個 NAT 後面時會互相排擠。⚠ 線上是不是也這樣＝null（沒量：要量就得往生產環境投卡）
+記|6b-3 真伺服器**收下了** lone surrogate（200；PII 過濾不擋這個）⇒ 這條路徑觀眾端可達，不是只有替身雲端才做得出來
+OK|6b-4 ingest 吃得下真伺服器回的那份 /api/all（退出碼 0）
+OK|7a 這個檢查有解析度（照 seq 摺與照 ts 摺會得到不同答案，所以下一項不是廢話）（得 1）
+OK|7a 時鐘倒退後仍摺出「後寫進去的那一列」（得 e_new）
+OK|7a 時鐘倒退不會讓驗鏈變紅（鏈算的是 seq 與雜湊，不是時間）（得 1）
+OK|7a 負控制：這條事件流的 ts 真的是倒退的（得 0）
+記|7b 沒有任何地方檢查 ts 單調（flagged_by_anything=null）⇒ 時鐘倒退**不會出錯也不會被發現**。展場影響：畫面上的時間可能倒著走，排序／摺疊不受影響
+記|7c 沒量到：系統層時鐘跳躍（沒有動這台機器的時鐘，也沒有 faketime）。loop 的間隔用 time.sleep，不看牆鐘
+OK|8a loop 退出碼（得 0）
+OK|8a 同一個 id 投三輪只進庫一次（得 1）
+OK|8a 同一個 id 只生一隻分身（得 1）
+OK|8a 兩個不同 id ＝ 兩個人（得 2）
+OK|8a 螢幕上是兩個人不是四個（得 2）
+OK|8b 負控制：內容相同但 id 不同 ⇒ 真的會變成兩個人（去重不是「什麼都沒抄進來」造成的假綠）（得 2）
+記|8c 誠實邊界：去重的鍵是**雲端給的 id**，不是卡的內容。觀眾在手機上連按兩次送出，雲端會發兩個 id ⇒ 螢幕上就是兩隻分身。要擋那個得在雲端或用內容雜湊，這一層擋不到

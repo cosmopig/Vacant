@@ -1,0 +1,11 @@
+rc=1
+Traceback (most recent call last):
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 823, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 794, in main
+    st = TwinStore(a.db)
+         ^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinstore.py", line 182, in __init__
+    self.conn.execute("PRAGMA journal_mode=WAL")
+sqlite3.OperationalError: unable to open database file

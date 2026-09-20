@@ -1,0 +1,15 @@
+00_loop.log
+01_counts_cycle1.txt
+01_counts_cycle2.txt
+01_counts_cycle3.txt
+01_counts_cycle4.txt
+01_counts_cycle5.txt
+02_cycles.txt
+03_counts_after_kill.txt
+04_integrity.txt
+05_files.txt
+items.json
+s.sqlite3
+s.sqlite3-shm
+s.sqlite3-wal
+tmp_leftovers=0

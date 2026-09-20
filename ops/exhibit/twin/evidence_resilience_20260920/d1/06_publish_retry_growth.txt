@@ -1,0 +1,1 @@
+error_events=6 rounds=2 cards=3 per_round=3 store_bytes=32768

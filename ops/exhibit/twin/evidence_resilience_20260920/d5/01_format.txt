@@ -1,0 +1,6 @@
+Started erase on disk12
+Unmounting disk
+Erasing
+Initialized /dev/rdisk12 as a 6 MB case-insensitive HFS Plus volume
+Mounting disk
+Finished erase on disk12 (VACANTRES)

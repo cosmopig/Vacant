@@ -1,0 +1,21 @@
+resilience_check.sh — 2026-09-20T15:12:59Z
+綠 93／紅 10／記錄 5
+
+== 紅燈 ==
+  - 6 [modelup] idnewline：rc=1 verify=1 鄰居有分身=0 exc=ValueError:
+  - 6 [modelup] cardstr：rc=1 verify=1 鄰居有分身=0 exc=AttributeError:
+  - 6 [modelup] cardlist：rc=1 verify=1 鄰居有分身=0 exc=AttributeError:
+  - 6 [modelup] surrogate：rc=1 verify=1 鄰居有分身=0 exc=UnicodeEncodeError:
+  - 6 [modeldown] idnewline：rc=1 verify=1 鄰居有分身=0 exc=ValueError:
+  - 6 [modeldown] cardstr：rc=1 verify=1 鄰居有分身=0 exc=AttributeError:
+  - 6 [modeldown] cardlist：rc=1 verify=1 鄰居有分身=0 exc=AttributeError:
+  - 6 [modeldown] needint：rc=1 verify=1 鄰居有分身=0 exc=AttributeError:
+  - 6 [modeldown] vibedict：rc=1 verify=1 鄰居有分身=0 exc=AttributeError:
+  - 6 [modeldown] surrogate：rc=1 verify=1 鄰居有分身=0 exc=UnicodeEncodeError:
+
+== 記錄（沒量到／誠實邊界，不是綠也不是紅）==
+  - 1e 斷網期間 publish 每輪對每張卡重試一次：兩輪 6 列 error（每輪 3＝卡數）。展場預設 --interval 10 ⇒ 每張卡每小時 360 列；100 張卡斷網一天約 86 萬列，verify／export 是 O(列數) 且每輪都跑一次 ⇒ 會愈跑愈慢。沒有退避、沒有上限
+  - 6b 真伺服器擋掉了 lone surrogate（{"error":"送太快了，請等幾秒再送"}）
+  - 7b 沒有任何地方檢查 ts 單調（flagged_by_anything=null）⇒ 時鐘倒退**不會出錯也不會被發現**。展場影響：畫面上的時間可能倒著走，排序／摺疊不受影響
+  - 7c 沒量到：系統層時鐘跳躍（沒有動這台機器的時鐘，也沒有 faketime）。loop 的間隔用 time.sleep，不看牆鐘
+  - 8c 誠實邊界：去重的鍵是**雲端給的 id**，不是卡的內容。觀眾在手機上連按兩次送出，雲端會發兩個 id ⇒ 螢幕上就是兩隻分身。要擋那個得在雲端或用內容雜湊，這一層擋不到

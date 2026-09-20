@@ -1,0 +1,72 @@
+Traceback (most recent call last):
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 1344, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/http/client.py", line 1338, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/http/client.py", line 1384, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/http/client.py", line 1333, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/http/client.py", line 1093, in _send_output
+    self.send(msg)
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/http/client.py", line 1037, in send
+    self.connect()
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/http/client.py", line 1003, in connect
+    self.sock = self._create_connection(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/socket.py", line 865, in create_connection
+    raise exceptions[0]
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/socket.py", line 850, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [Errno 61] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 332, in generate_one
+    r = _call_model(prompt, endpoint, model, MAX_TOKENS, timeout)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 288, in _call_model
+    status, body = _http_json(url, {
+                   ^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 133, in _http_json
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 515, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 532, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 1373, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/.local/share/uv/python/cpython-3.12.10-macos-x86_64-none/lib/python3.12/urllib/request.py", line 1347, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 61] Connection refused>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 729, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 718, in main
+    r["generate"] = generate(st, a.endpoint, a.model)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 392, in generate
+    twin = generate_one(cur.get("card"), cur.get("card_text"),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 375, in generate_one
+    out = fallback_twin(card)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/wf_530b199a-bde-4/ops/exhibit/twin/twinlink.py", line 267, in fallback_twin
+    need = (c.get("need") or "一件還沒做完的小事").strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'strip'
