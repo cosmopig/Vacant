@@ -194,6 +194,26 @@ UPSTREAM_VARS: tuple[tuple[str, tuple[str, ...]], ...] = (
                    "ANTHROPIC_API_URL")),
 )
 
+#: **只會洩漏真上游、而且不會被 redirect 蓋掉的那些變數。**
+#:
+#: 🔴 2026-09-20 稽核（Fable ＋ deep-research）查出：`build_child_env` 從父環境
+#:    整份複製、只剝 `SECRET_VARS` ⇒ `VACANT_RUN_UPSTREAM_*` **原樣進了 agent 的
+#:    環境**。實讀跑到一半的 pi 子行程 `/proc/<pid>/environ`：`OPENAI_BASE_URL`
+#:    指 proxy，**而 `VACANT_RUN_UPSTREAM_OPENAI=http://<真後端>:1234/v1` 也在**。
+#:    agent 一句 `curl $VACANT_RUN_UPSTREAM_OPENAI/...` 就繞過中介。
+#:    而本檔第 15 行的誠實邊界句**早就寫著「讀完就從子環境拿掉」——碼沒做到。**
+#:
+#: ⚠ **算出來、不要手寫。** `UPSTREAM_VARS` 裡有 5 個名字（`OPENAI_BASE_URL` 等）
+#:    同時在 `REDIRECT_VARS` 裡，那些**會被改寫成 proxy 位址**，剝掉反而會把中介
+#:    本身拆掉。取差集 ⇒ 以後有人往任一張表加名字都自動正確。
+#:
+#: ⚠ **這是 hygiene 不是 security boundary。** 拿掉變數擋不住 agent 用別的方法
+#:    找到上游（掃描區網、讀設定檔、問模型）。結構性的答案是讓那條路**不存在**
+#:    （netns，見 `sandbox.py` 與 `block_egress.sh`），不是把地址藏起來。
+UPSTREAM_ONLY_VARS: tuple[str, ...] = tuple(sorted(
+    {n for _, names in UPSTREAM_VARS for n in names}
+    - {n for n, _ in REDIRECT_VARS}))
+
 #: 每條路由的**公開 API** 位址。
 #:
 #: ⚠ **2026-09-19 之後這不再是「沒指定時的預設值」。** 它現在只在使用者
@@ -488,6 +508,12 @@ def build_child_env(proxy_url: str, sentinel: str, *,
         if name in child:
             del child[name]
             stripped.append(name)
+    # 真上游位址不進 agent 的環境（見 `UPSTREAM_ONLY_VARS` 的 🔴）。
+    stripped_upstream: list[str] = []
+    for name in UPSTREAM_ONLY_VARS:
+        if name in child:
+            del child[name]
+            stripped_upstream.append(name)
     # 每條路由給一個 sentinel 金鑰：agent 手上沒有真鑰，但 SDK 仍然願意送出請求
     # （多數 SDK 缺 key 會在本機就 raise，那樣連 wire 都到不了）。
     for name in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY"):
@@ -500,6 +526,9 @@ def build_child_env(proxy_url: str, sentinel: str, *,
         "proxy_url": proxy_url,
         "redirected": sorted(redirected),
         "stripped": sorted(stripped),
+        # **分開記**：金鑰與上游位址是兩種不同的洩漏，混成一欄事後查不出
+        # 「那一跑到底有沒有把真後端交給 agent」。
+        "stripped_upstream": sorted(stripped_upstream),
         "sentinel_vars": ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"],
         "note": ("環境變數名單擋不到用設定檔的框架（pi 的 models.json、"
                  "內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"),
