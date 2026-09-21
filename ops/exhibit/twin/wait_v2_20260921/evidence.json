@@ -1,0 +1,137 @@
+{
+  "when": "2026-09-21T19:06:15+08:00",
+  "what": "WAIT-V2：/api/status 加序位與兩個時間戳；手機端在 queued 也講得出話",
+  "fixture": "人造的佇列狀態（4 人在前 ＋ 主角），不是展期真資料；走的是同一支 server.js 與同一頁 index.html",
+  "before_api": {
+    "note": "改動前的 server.js（scratchpad/server.js.before）起在 3714，同一個 id",
+    "GET /api/status/<hero>": {
+      "status": "queued",
+      "origin": "audience"
+    }
+  },
+  "after_api": {
+    "note": "改動後，同一個 id、同一份 DATA_DIR",
+    "GET /api/status/<hero>": {
+      "status": "queued",
+      "origin": "audience",
+      "submitted_at": 1789987922640,
+      "claimed_at": null,
+      "done_at": null,
+      "server_now": 1789988776451,
+      "queue": {
+        "position": 5,
+        "ahead": 4,
+        "ahead_waiting": 3,
+        "ahead_generating": 1,
+        "waiting_total": 4,
+        "generating_now": 1,
+        "stale_claimed": 0
+      }
+    },
+    "GET /api/status/<第一個>": {
+      "status": "queued",
+      "origin": "audience",
+      "submitted_at": 1789988151821,
+      "claimed_at": null,
+      "done_at": null,
+      "server_now": 1789988776454,
+      "queue": {
+        "position": 1,
+        "ahead": 0,
+        "ahead_waiting": 0,
+        "ahead_generating": 0,
+        "waiting_total": 1,
+        "generating_now": 0,
+        "stale_claimed": 0
+      }
+    },
+    "GET /api/status/<正在生成>": {
+      "status": "claimed",
+      "origin": "audience",
+      "submitted_at": 1789987830222,
+      "claimed_at": 1789988082222,
+      "done_at": null,
+      "server_now": 1789988776469,
+      "queue": {
+        "position": null,
+        "ahead": null,
+        "ahead_waiting": null,
+        "ahead_generating": null,
+        "waiting_total": 0,
+        "generating_now": 1,
+        "stale_claimed": 0
+      }
+    },
+    "GET /api/status/<完成>": {
+      "status": "done",
+      "origin": "audience",
+      "submitted_at": 1789987660222,
+      "claimed_at": 1789987880222,
+      "done_at": 1789988190787,
+      "server_now": 1789988776470,
+      "queue": {
+        "position": null,
+        "ahead": null,
+        "ahead_waiting": null,
+        "ahead_generating": null,
+        "waiting_total": 0,
+        "generating_now": 1,
+        "stale_claimed": 0
+      },
+      "verdict": "做完了：桌上那疊紙收進抽屜，花了 4 分鐘。",
+      "matched": "暖土·圓潤",
+      "card_url": "/api/card/00000000-0000-4000-8000-5a1700000007"
+    },
+    "POST /api/submit（真的送一張）": {
+      "http": 200,
+      "body": {
+        "id": "48e1963d-1a5a-4c8b-a240-4495eaab3425",
+        "submitted_at": 1789988776490,
+        "server_now": 1789988776490,
+        "queue": {
+          "position": 2,
+          "ahead": 1,
+          "ahead_waiting": 1,
+          "ahead_generating": 0,
+          "waiting_total": 2,
+          "generating_now": 0,
+          "stale_claimed": 0
+        }
+      }
+    }
+  },
+  "shots": {
+    "00_before_queued_blank.png": {
+      "bytes": 654621,
+      "sha256": "3488d8f7086d5de5829430a9650f4f5a3230d296920adade787f3a62ad966b80"
+    },
+    "01_queued_5th.png": {
+      "bytes": 650110,
+      "sha256": "8a368ce67eb520717dfa9c9456a2c98f82429331f08df6ff1f045c0d36681dc0"
+    },
+    "02_queued_next.png": {
+      "bytes": 619603,
+      "sha256": "a7bd587f2be3643f1f52c417a29447b6936e1dbbaf8470e00736be593cc144b8"
+    },
+    "03_claimed.png": {
+      "bytes": 630881,
+      "sha256": "718e1d773ef9f5d3e8ae096b918583d7081f280c2fe938ab357919eae0034cbb"
+    },
+    "05_done.png": {
+      "bytes": 819078,
+      "sha256": "e906e0fa4bcfa9e55d239871b14261512a78c4dbdafeab4b15ea4e8aedbbffe7"
+    },
+    "06_tick_a.png": {
+      "bytes": 651021,
+      "sha256": "0afe1b24b0cbeca7b705d93f54b0ee4b8348fa89246cad40090571170bb399a8"
+    },
+    "07_tick_b.png": {
+      "bytes": 652566,
+      "sha256": "eb8436fd29fe6bb948f8f34236af5cb76115714b87c95a6ddbd3d2ca890a670d"
+    },
+    "08_tick_compare.png": {
+      "bytes": 99920,
+      "sha256": "a5a668a53ca5225b6d43123e4ee25e9e9fe40a6f3ac45cf9eee3d35058d25902"
+    }
+  }
+}

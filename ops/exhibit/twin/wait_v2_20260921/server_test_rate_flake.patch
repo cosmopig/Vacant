@@ -1,0 +1,30 @@
+diff --git a/test/server.test.mjs b/test/server.test.mjs
+index ff7e3f6..ad44b37 100644
+--- a/test/server.test.mjs
++++ b/test/server.test.mjs
+@@ -421,12 +421,19 @@ test('工作人員路徑：帶 VENUE_TOKEN 用 id 撤（觀眾把碼弄丟的那
+ 
+ test('撤回有頻率限制（40 bits 的碼唯一的靠山）', async () => {
+   await sleep(30);
+-  const a = await post('/api/withdraw', { code: 'ZZZZZZZZ' });
+-  const b = await post('/api/withdraw', { code: 'ZZZZZZZY' });
+-  // 第一發不該被限速（負控制：限速不是「永遠 429」）。
+-  assert.equal(a.status, 403);
+-  assert.equal(b.status, 429);
+-  assert.equal((await b.json()).reason, 'rate_limited');
++  // 兩發**同時送出**而不是一來一回：窗只有 10ms（WITHDRAW_WINDOW_MS），
++  // 而一次 HTTP 來回在機器忙的時候就不只 10ms——舊寫法會在負載下
++  // 偶發紅（實測基線 4 次紅 1 次，機器忙時 5 次紅 3 次），
++  // 紅的是「第二發沒被限速」而不是限速壞掉。
++  const [a, b] = await Promise.all([
++    post('/api/withdraw', { code: 'ZZZZZZZZ' }),
++    post('/api/withdraw', { code: 'ZZZZZZZY' }),
++  ]);
++  // 先到的那一發不該被限速（負控制：限速不是「永遠 429」），後到的要 429。
++  const codes = [a.status, b.status].sort((x, y) => x - y);
++  assert.deepEqual(codes, [403, 429], `兩發連打拿到 ${codes}`);
++  const limited = a.status === 429 ? a : b;
++  assert.equal((await limited.json()).reason, 'rate_limited');
+ });
+ 
+ // ---------------------------------------------------------------------------
