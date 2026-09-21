@@ -1,0 +1,51 @@
+{
+ "source_dir": "r3_q_on",
+ "window_from_s": 22.0,
+ "frames": 120,
+ "span_s": 38.93,
+ "capture_fps": 3.06,
+ "regions": {
+  "q_left": {
+   "n": 119,
+   "min": 3.9685,
+   "median": 5.4927,
+   "max": 10.2929,
+   "mean": 5.6585,
+   "frames_below_0.5": 0
+  },
+  "q_right": {
+   "n": 119,
+   "min": 4.3578,
+   "median": 6.3049,
+   "max": 10.5673,
+   "mean": 6.4702,
+   "frames_below_0.5": 0
+  },
+  "clay_center": {
+   "n": 119,
+   "min": 2.4618,
+   "median": 4.4582,
+   "max": 6.5245,
+   "mean": 4.4457,
+   "frames_below_0.5": 0
+  },
+  "floor_front": {
+   "n": 119,
+   "min": 1.4365,
+   "median": 2.493,
+   "max": 3.989,
+   "mean": 2.5136,
+   "frames_below_0.5": 0
+  },
+  "ambient": {
+   "n": 119,
+   "min": 0.0531,
+   "median": 0.3346,
+   "max": 0.5492,
+   "mean": 0.324,
+   "frames_below_0.5": 117
+  }
+ },
+ "frozen_negative_control": 0.0,
+ "verdict": "QUEUE_MOVING"
+}

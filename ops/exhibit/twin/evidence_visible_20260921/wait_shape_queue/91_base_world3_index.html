@@ -1,0 +1,4262 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vacant World 3</title>
+<style>
+  html,body{margin:0;height:100%;background:#120c07;overflow:hidden;cursor:none}
+  canvas{display:block;width:100vw;height:100vh}
+  body.debug{cursor:default}
+</style>
+<script src="bridge.js?v=5" defer></script>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   Vacant World 3 — 打掉重做版（2026-08-30 人類令：逐張對照劇照重建）
+
+   架構＝預渲染電影板＋活體合成（冒險遊戲手法）：
+     板（codex 依劇照生成的空舞台）→ 活體（144 段鍵控影片精靈）
+     → 動態道具（透明 PNG）→ 覆蓋（光束閃爍/顆粒/暗角）→ 活文字（真資料）
+   world2 的教訓全部帶著：
+   - 文字絕不烙進板（判決與數字是真紀錄，烙死＝把模擬講成證明）
+   - 鍵器單台共享；VS 的 -p.y（半格 bug 抓過）
+   - 影池 LRU cap＋404 黑名單 3 分鐘特赦
+   - 綠幕舉綠牌會被鍵掉（人類抓到）→ 磁性幕片 actm_/magm_ ＋ 鍵器雙模式
+   ══════════════════════════════════════════════════════════════════ */
+"use strict";
+const cv = document.getElementById("cv");
+const cx = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+function resize(){
+  DPR = LITE ? 1 : Math.min(devicePixelRatio || 1, 2);   // 輕量版省一半以上像素
+  W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+  cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
+  buildGrain();
+}
+addEventListener("resize", resize);
+const Q = new URLSearchParams(location.search);
+// 人類 2026-09-21：「畫面太複雜了」。SIMPLE 預設開，`?full=1` 回到舊版。
+// 減的是**層數**不是位置——位置微調救不了三層搶同一塊畫面。
+const SIMPLE = Q.get("full") === null;
+const FAST = Q.has("fast") ? 6 : 1;
+// 輕量版（人類 2026-09-05：「之後要有輕量版讓別人在網路上操作」）：
+// 不載任何影片（20 段背景片 ~12MB＋154 段精靈片 ~26MB），改用靜態板＋PNG 精靈。
+// 故事、監視器、案例輪替、真資料全部保留——少的只有動態影像。
+// 手機或窄螢幕自動啟用；?lite=0 可強制關閉、?lite=1 強制開啟。
+const LITE = Q.get("lite") === "1" ? true
+           : Q.get("lite") === "0" ? false
+           : (innerWidth < 900 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+
+/* ── 板（每場一張，codex 生成後選定變體命名為 sNN.jpg）─────────── */
+const plates = new Map();               // sc → {img, ok}
+function plate(sc){
+  // 板也髒的景借一張中性的板（見 SCENE_PLATE_SUB 的註解：這是權宜不是解法）。
+  const name = SCENE_PLATE_SUB[sc] || plateAlias[sc] || sc;
+  let e = plates.get(name);
+  if (!e){
+    const img = new Image();
+    e = { img, ok: false, fail: false };
+    img.onload = () => e.ok = true;
+    img.onerror = () => e.fail = true;
+    img.src = Q.get("plate_" + sc) || `plates/${name}.jpg`;
+    plates.set(name, e);
+  }
+  return e;
+}
+/* 板光照圖：把板降採樣成 32×18，生物走到哪就吃哪裡的光——
+   「貼在板上」vs「活在光裡」的分水嶺（人類 2026-09-01 點名的融合度問題）。 */
+const lightMaps = new Map();
+function lightMapOf(e){
+  let lm = lightMaps.get(e.img);
+  if (lm || !e.ok) return lm || null;
+  const c = document.createElement("canvas");
+  c.width = 32; c.height = 18;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(e.img, 0, 0, 32, 18);
+  lm = g.getImageData(0, 0, 32, 18).data;
+  lightMaps.set(e.img, lm);
+  return lm;
+}
+function sampleLight(nx, ny){
+  // 取生物「身體中段」的光（腳位 ny 往上抓一點）。雙線性內插：
+  // 32×18 粗格用最近格會「跨一格跳一色」——人類抓的變色主因之一。
+  const e = plate(sceneId);              // 影片板時仍用 jpg 板當光照代理（同一布景）
+  const lm = lightMapOf(e);
+  if (!lm) return { lum: 0.55, r: 1, g: 0.92, b: 0.82 };
+  const fx = Math.max(0, Math.min(30.999, nx * 31));
+  const fy = Math.max(0, Math.min(16.999, (ny - 0.10) * 17));
+  const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+  const at = (x, y, k) => lm[(y * 32 + x) * 4 + k] / 255;
+  const bi = k =>
+    (at(x0,y0,k)*(1-tx) + at(x0+1,y0,k)*tx) * (1-ty) +
+    (at(x0,y0+1,k)*(1-tx) + at(x0+1,y0+1,k)*tx) * ty;
+  const r = bi(0), g2 = bi(1), b = bi(2);
+  const lum = 0.2126*r + 0.7152*g2 + 0.0722*b;
+  const m = Math.max(r, g2, b, 0.04);
+  return { lum, r: r/m, g: g2/m, b: b/m };
+}
+// 每隻生物的光做時間平滑：目標光用「連續位置」採樣（光是空氣不量化），
+// 應用光以 ~0.3s 半衰滑過去——顏色只會「滑」，永遠不會「跳」。
+function smoothLight(cr){
+  const t = sampleLight(cr.nx, cr.ny);
+  if (!cr._lt){ cr._lt = { ...t }; return cr._lt; }
+  const a = 0.10;
+  for (const k of ["lum", "r", "g", "b"]) cr._lt[k] += (t[k] - cr._lt[k]) * a;
+  return cr._lt;
+}
+// v4 場景影片層（SPEC v4：電視畫面＝渲染圖本人在動）。有片就播片、沒片退回板。
+// 這些片是「含生物的整格渲染」，所以有片的場景引擎不再疊人口精靈（BAKED_SCENES）。
+// 可用變體由 scenes/index.json 決定（品質閘門產出：漂移 RMSE>30 的片不列入）。
+// 索引沒到之前先假設 v1；到了就照索引輪換，沒列的場景直接退回 jpg 板。
+let SCENE_INDEX = null;
+// ⚠ `cache: "no-cache"`＝每次載入都去問一次（不是 no-store，命中就 304，4KB 而已）。
+//   2026-09-20 實測踩到：換上 s10 的新素材之後，**index.html 是新的、
+//   `scenes/index.json` 卻是瀏覽器快取裡的舊的**（SimpleHTTP 只給 Last-Modified、
+//   沒有 Cache-Control ⇒ Chrome 走啟發式快取）。結果畫面照舊輪播被判定為髒的
+//   `scene_s10_v2.mp4`，而頁面上**看不出任何異常**。
+//   換素材的人只會「重新載入頁面」，不會想到要清快取 ⇒ 這一行不能省。
+fetch("scenes/index.json", {cache: "no-cache"}).then(r => r.json()).then(j => {
+  SCENE_INDEX = j.scenes || {};
+  warmSceneCache();          // 開場就把全部背景片抓進 HTTP 快取
+}).catch(() => { SCENE_INDEX = {}; });
+// 快取暖機：用 fetch 把 20 段背景片拉進瀏覽器快取（不建 <video>，不吃媒體元素上限）。
+// 之後任何一場要播時，video 元素直接從快取拿＝零網路等待，換場不再閃。
+// 一次一支、序列拉，不跟正在播的那支搶頻寬。
+async function warmSceneCache(){
+  if (LITE) return;                    // 輕量版不預抓影片
+  const urls = [];
+  for (const [sc, vs] of Object.entries(SCENE_INDEX))
+    for (const v of vs) urls.push(`scenes/scene_${sc}_${v}.mp4`);
+  let done = 0;
+  for (const u of urls){
+    try { await fetch(u, { cache: "force-cache" }); done++; } catch(e){}
+    window.__warm = `${done}/${urls.length}`;
+  }
+}
+const sceneVidTurn = {};
+/** `director` 可能還在 TDZ（它在檔案後面才宣告）。`typeof` 對 TDZ 的 const
+ *  也會丟，所以用 try/catch。 */
+function _dirSafe(){ try { return director; } catch (e){ return null; } }
+
+function sceneVariants(sc){
+  if (LITE) return [];                 // 輕量版：不播背景影片，退回 jpg 板
+  // ⚠ **背景影片會演系統裡沒有的機制。** 判準在 SCENE_VIDEO_DEPICTS
+  //   （52 張素材逐張看過之後整理出來的表）。機制不存在 ⇒ 不放那支影片，
+  //   退回靜態板；板也髒的那兩景另外借一張中性的板（SCENE_PLATE_SUB）。
+  const dep = SCENE_VIDEO_DEPICTS[sc];
+  if (dep && !dep.ok(_dirSafe() && _dirSafe().row)) return [];
+  if (SCENE_INDEX === null) return ["v1"];
+  return SCENE_INDEX[sc] || [];
+}
+function sceneVideoSrc(sc){
+  const vs = sceneVariants(sc);
+  if (!vs.length) return null;
+  if (!(sc in sceneVidTurn)) sceneVidTurn[sc] = 0;
+  return `scenes/scene_${sc}_${vs[sceneVidTurn[sc] % vs.length]}.mp4`;
+}
+function sceneVideoReady(sc){
+  const src = sceneVideoSrc(sc);
+  if (!src || videoMissing.has(src)) return null;
+  const v = getVideo(src, { loop: false });   // 不用原生 loop：接縫由雙變體交叉溶接處理
+  return (v && v.readyState >= 2 && v.videoWidth) ? v : null;
+}
+// loop 接縫：當前變體剩 0.6s 時，下一個變體從頭淡入，然後換手（兩個變體輪流，
+// 觀眾看到的是一段永不重播的連續畫面）
+const XF = 0.6;
+// 場景影片曝光補償：A14B i2v 出來的片比劇照暗兩成（實測 still 33.9 → 影格 26.7），
+// 而且第 0 幀亮、第 1 幀起變暗＝每次 loop 起點閃一下。做法：每支片量一次中段亮度，
+// 對照同場 jpg 板的亮度算增益，畫的時候用 filter brightness 拉齊；起播跳過前 0.25s。
+const sceneGain = new Map();
+const sceneMeasCv = document.createElement("canvas"); sceneMeasCv.width = 32; sceneMeasCv.height = 18;
+function meanLuma(imgLike){
+  const g = sceneMeasCv.getContext("2d", { willReadFrequently: true });
+  g.drawImage(imgLike, 0, 0, 32, 18);
+  const d = g.getImageData(0, 0, 32, 18).data; let y = 0;
+  for (let i = 0; i < d.length; i += 4) y += 0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2];
+  return y / (d.length / 4);
+}
+function sceneGainFor(sc, v){
+  const key = v.currentSrc || v.src;
+  if (sceneGain.has(key)) return sceneGain.get(key);
+  if (v.currentTime < 0.4) return 1;                 // 第 0 幀偏亮，等進入穩態再量
+  const e = plate(sc);
+  if (!e.ok) return 1;
+  try {
+    const gv = meanLuma(v), gp = meanLuma(e.img);
+    const g = Math.min(1.5, Math.max(0.8, gp / Math.max(1, gv)));
+    sceneGain.set(key, g);
+    return g;
+  } catch(err){ sceneGain.set(key, 1); return 1; }
+}
+window.__sceneGain = sceneGain;
+function drawCover(v, alpha, sc){
+  const iw = v.videoWidth, ih = v.videoHeight;
+  const k = Math.max(W/iw, H/ih), dw = iw*k, dh = ih*k;
+  const gain = sc ? sceneGainFor(sc, v) : 1;
+  cx.save();
+  cx.globalAlpha = alpha;
+  if (cx.filter !== undefined && Math.abs(gain - 1) > 0.02) cx.filter = `brightness(${gain.toFixed(3)})`;
+  cx.drawImage(v, (W-dw)/2, (H-dh)/2, dw, dh);
+  cx.restore();
+  cx.globalAlpha = 1;
+}
+let lastGoodFrame = null, lastGoodScene = null;
+function drawPlate(sc){
+  const sv = sceneVideoReady(sc);
+  if (!sv && lastGoodFrame && lastGoodScene === sc){
+    // 換手/重載的空窗：沿用上一張好畫面，不要閃回靜態板（人類看到的 fallback）
+    cx.drawImage(lastGoodFrame, 0, 0, W, H);
+    return true;
+  }
+  if (sv){
+    const remain = (sv.duration || 5) - sv.currentTime;
+    const vs = sceneVariants(sc);
+    const nextSrc = vs.length > 1
+      ? `scenes/scene_${sc}_${vs[(sceneVidTurn[sc] + 1) % vs.length]}.mp4` : null;
+    const nv = (nextSrc && !videoMissing.has(nextSrc)) ? getVideo(nextSrc, { loop: false }) : null;
+    if (remain <= XF && nv && nv.readyState >= 2 && nv.videoWidth){
+      if (nv.currentTime > 1 || nv.paused){ nv.currentTime = 0.25; nv.play().catch(()=>{}); }
+      drawCover(sv, 1, sc);
+      drawCover(nv, 1 - Math.max(0, remain) / XF, sc);
+      if (remain <= 0.05 || sv.ended){ sceneVidTurn[sc] += 1; }   // 換手：下一幀主片＝nv
+      return true;
+    }
+    if (sv.ended){ sv.currentTime = 0.25; sv.play().catch(()=>{}); }  // 沒有下一變體：硬接
+    drawCover(sv, 1, sc);
+    // 存一張「最後的好畫面」供空窗期沿用（每 12 幀存一次，成本可忽略）
+    if ((frameCount & 11) === 0){
+      if (!lastGoodFrame){ lastGoodFrame = document.createElement("canvas"); }
+      if (lastGoodFrame.width !== 640){ lastGoodFrame.width = 640; lastGoodFrame.height = 360; }
+      try { lastGoodFrame.getContext("2d").drawImage(cv, 0, 0, 640, 360); lastGoodScene = sc; } catch(e){}
+    }
+    return true;
+  }
+  const e = plate(sc);
+  if (!e.ok){                            // 板還沒到：深棕底不裸奔（僅開發期）
+    cx.fillStyle = "#1c140d"; cx.fillRect(0, 0, W, H);
+    return false;
+  }
+  // cover-fit：1536x1024 → 全螢幕，置中裁切
+  const iw = e.img.naturalWidth, ih = e.img.naturalHeight;
+  const k = Math.max(W/iw, H/ih), dw = iw*k, dh = ih*k;
+  cx.drawImage(e.img, (W-dw)/2, (H-dh)/2, dw, dh);
+  return true;
+}
+// 前景遮擋層：與板同尺寸的透明 PNG（桌子等擋在生物前的布景件），
+// 用與 drawPlate 完全相同的 cover-fit 數學畫 → 像素級對位
+const fgCache = new Map();
+function drawPlateFg(name){
+  let e = fgCache.get(name);
+  if (!e){
+    const img = new Image();
+    e = { img, ok:false };
+    img.onload = () => e.ok = true;
+    img.onerror = () => e.fail = true;
+    img.src = `plates/${name}.png`;
+    fgCache.set(name, e);
+  }
+  if (!e.ok) return;
+  const iw = e.img.naturalWidth, ih = e.img.naturalHeight;
+  const k = Math.max(W/iw, H/ih), dw = iw*k, dh = ih*k;
+  cx.drawImage(e.img, (W-dw)/2, (H-dh)/2, dw, dh);
+}
+/* 道具（透明 PNG；v1..v3 都可指定）──────────────────────────── */
+const propCache = new Map();
+function prop(name){
+  let e = propCache.get(name);
+  if (!e){
+    const img = new Image();
+    e = { img, ok:false };
+    img.onload = () => e.ok = true;
+    img.src = `props/${name}.png`;
+    propCache.set(name, e);
+  }
+  return e.ok ? e.img : null;
+}
+// 畫在標準化座標，h＝相對畫面高
+function drawProp(name, nx, ny, h, { rot=0, alpha=1, anchor="bottom" } = {}){
+  const img = prop(name);
+  if (!img) return false;
+  const w = h * img.naturalWidth / img.naturalHeight;
+  cx.save();
+  cx.translate(nx*W, ny*H);
+  if (rot) cx.rotate(rot);
+  cx.globalAlpha = alpha;
+  cx.drawImage(img, -w*H/2, anchor === "bottom" ? -h*H : -h*H/2, w*H, h*H);
+  cx.restore();
+  cx.globalAlpha = 1;
+  return true;
+}
+// QR：**執行期跟著展場機走，而且常駐**。
+//
+// ⚠ 三個實測問題一起解：
+//   (a) `world3/qr.png` 是 2026-08-30 的骨架佔位圖，比 `phone.html` 早三個星期；
+//       `--lan` 之後手機要連的是展場機的區網 IP（每次開機可能不同）
+//       ⇒ **烤死的 QR 必然指到錯的地方**。改抓 `<展場機>/qr.png`（執行期畫的）。
+//   (b) 舊版只在步 1 出現約 20 秒，而引導有 11 步 ⇒ 中途走過來的人要等好幾分鐘。
+//       ⇒ 改成**每一個畫面都在左上角**。
+//   (c) s01 的陶板**自己就刻了一個大而糊的 QR 紋**，真 QR 疊在上面
+//       ⇒ 相機可能鎖錯。所以不再貼板上。
+//   ⇒ 而且網址一律以文字印在 QR 底下：掃不到還可以用打的。
+//     一張掃不開又沒有替代路徑的 QR 是展場當天最難察覺的故障。
+const qrImg = new Image();
+let qrWanted = null;
+function qrRefresh(){
+  const want = qrSource(LIVE.stage, LIVE.url);
+  if (want === qrWanted) return;
+  qrWanted = want;
+  if (want) qrImg.src = want;
+}
+/** 版面尺規：**不要直接用 `H`**。
+ *
+ *  ⚠ 2026-09-19 在 1080×1920（直式）實測到的：這一整頁的座標都以 `H` 為單位
+ *    （`H*0.04`、`H*0.235`、`s = H*0.165`），那在 16:9 上剛好，但螢幕一變窄，
+ *    `H` 就變成一個**跟可用寬度無關**的大數 ⇒ 左上角那張 QR 漲到蓋住副標
+ *    「用你自己的手機就好」，底下的網址整行橫跨畫面壓在陶板上。
+ *    展場螢幕不保證是 16:9（掛直式的展牆很常見）。
+ *  ⇒ 尺規改成 `min(W, H)`。
+ *
+ *  為什麼是 `min(W, H)` 而不是「寬度撐得起的 16:9 高度」（`min(H, W*9/16)`）：
+ *  後者在**橫式**也會生效（4:3 的 1024×768 會把 QR 從 127px 縮到 95px），
+ *  等於為了修直式去動已經驗過的橫式版面。`min(W, H)` 在任何橫式螢幕上
+ *  **恆等於 `H`**（W>H ⇒ min＝H），所以 1920×1080／1024×768／1280×1024／
+ *  2560×1080／3840×2160 **逐像素與舊版相同、零回歸風險**；
+ *  只有直式（W<H）才換成以寬度為尺規，而那正是壞掉的那一種。
+ *  實測：1080×1920 下 QR 從 317px（蓋住副標）變成 178px（掃得到、不蓋字）。
+ */
+function uiScale(){ return Math.min(W, H); }
+
+function drawQrCorner(){
+  qrRefresh();
+  // 🔴 **觀眾掃的是「觀展者的頁」，不是導播頁**（2026-09-20 人類指定）。
+  //   `visitor_url` ＝ 觀展者頁（公網，觀眾用自己的手機、自己的 AI 生分身卡）
+  //   `phone_url`   ＝ **導播**頁（展場那台、要 token、給操作的人）
+  //   兩件事不要合併。`visitor_url` 沒設才退回舊行為。
+  const st = LIVE.stage;
+  const url = (st && st.visitor_url) || (st && st.phone_url);
+  const isVisitor = !!(st && st.visitor_url);
+  if (!qrWanted || !url) return;                 // 沒接展場機就不要畫一塊空白
+  const U = uiScale();
+  // ⚠ 原本 y=U*0.235 在標題欄裡，實測與大標及 verdictBig 疊在一起。
+  //   移到左下角：中途走過來的人照樣掃得到，但不再跟文字搶。
+  const x = U*0.035, y = SIMPLE ? U*0.700 : U*0.235, s = U*0.150;
+  if (qrImg.complete && qrImg.naturalWidth){
+    cx.save();
+    cx.fillStyle = "#fff";
+    cx.fillRect(x - U*0.006, y - U*0.006, s + U*0.012, s + U*0.012);
+    cx.drawImage(qrImg, x, y, s, s);
+    cx.restore();
+  }
+  cx.save();
+  cx.textAlign = "left";
+  cx.font = serif(U*0.0165, 600);
+  cx.fillStyle = "rgba(240,232,216,0.86)";
+  // ⚠ 字要跟 QR 指的地方一致——指觀展者頁卻寫「決定要看哪一邊」是對觀眾說錯話。
+  cx.fillText(isVisitor ? "用你自己的 AI，做一個你" : "用手機決定要看哪一邊",
+              x, y + s + U*0.030);
+  cx.font = serif(U*0.0155, 500);
+  cx.fillStyle = "rgba(240,232,216,0.62)";
+  cx.fillText(url.replace(/^https?:\/\//, ""), x, y + s + U*0.054);
+  cx.restore();
+}
+// FX 影片層：黑底特效片用 lighter 混合直接疊——不需要鍵器（光是加法的）
+function drawFxVideo(src, nx, ny, h, { alpha = 1, blend = "lighter" } = {}){
+  const v = getVideo(src);
+  if (!v || v.readyState < 2 || !v.videoWidth) return false;
+  const hpx = h * H, wpx = hpx * v.videoWidth / v.videoHeight;
+  cx.save();
+  cx.globalCompositeOperation = blend;
+  cx.globalAlpha = alpha;
+  cx.drawImage(v, nx*W - wpx/2, ny*H - hpx/2, wpx, hpx);
+  cx.restore();
+  cx.globalAlpha = 1;
+  return true;
+}
+
+/* ── 影片精靈管線（world2 實戰件移植）───────────────────────── */
+const VFRAME = { w:1280, h:704, body:500, bottom:40 };
+const videoPool = new Map();
+const VIDEO_CAP = 40;
+const VIDEO_SRC = {
+  agentMove: (id, mv) => `sprites/video/vs_${id}_${mv}.mp4`,
+  act:       (id, mv) => `sprites/video/act_${id}_${mv}.mp4`,
+  actm:      (id, mv) => `sprites/video/actm_${id}_${mv}.mp4`,  // 磁性幕重生版
+  pop:       (id, mv) => `sprites/video/pop_${id}_${mv}.mp4`,
+  spawn:     (id)     => `sprites/video/spawn_${id}.webm`,
+};
+// 鍵器：綠/磁性雙模式。檔名前綴定模式（actm_/magm_/peekm_＝磁性），
+// 未知前綴用首幀角落取樣自動判——綠幕上舉綠牌被鍵掉的修正案。
+const KEY_VS = `attribute vec2 p;varying vec2 uv;
+void main(){uv=vec2(p.x,-p.y)*0.5+0.5;gl_Position=vec4(p,0.,1.);}`;
+const KEY_FS = `precision mediump float;varying vec2 uv;uniform sampler2D t;uniform float mg;uniform vec3 gain;
+void main(){
+  vec3 c = texture2D(t, uv).rgb;
+  float m = mix(c.g - max(c.r, c.b), min(c.r, c.b) - c.g, mg);
+  float a = 1.0 - smoothstep(0.03, 0.14, m);
+  if (mg < 0.5){
+    float spill = clamp(c.g - (c.r+c.b)*0.5, 0.0, 1.0) * step(0.05, a);
+    c.g -= spill * 0.85;
+  } else {
+    float spill = clamp(min(c.r, c.b) - c.g, 0.0, 1.0) * step(0.05, a);
+    c.r -= spill * 0.65; c.b -= spill * 0.65;
+  }
+  c *= gain;                                     // 逐片歸一 × 站位的場景光（RGB）
+  c *= mix(1.07, 0.80, smoothstep(0.20, 0.96, uv.y)); // 舞台打光梯度，與 litSprite 同語彙
+  gl_FragColor = vec4(c * a, a);
+}`;
+class Keyer{
+  constructor(){
+    this.cv = document.createElement("canvas");
+    const gl = this.cv.getContext("webgl", { premultipliedAlpha: true });
+    this.gl = gl;
+    if (!gl){ this.dead = true; return; }
+    const sh = (type, src) => { const o = gl.createShader(type);
+      gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, KEY_VS));
+    gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, KEY_FS));
+    gl.linkProgram(pr); gl.useProgram(pr);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, "p");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    this.uMg = gl.getUniformLocation(pr, "mg");
+    this.uGain = gl.getUniformLocation(pr, "gain");
+    this.tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.tex);
+    for (const p2 of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T])
+      gl.texParameteri(gl.TEXTURE_2D, p2, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  }
+  render(video, magenta, gain){
+    if (this.dead) return null;
+    const gl = this.gl;
+    if (this.cv.width !== video.videoWidth){
+      this.cv.width = video.videoWidth; this.cv.height = video.videoHeight;
+      gl.viewport(0, 0, this.cv.width, this.cv.height);
+    }
+    gl.uniform1f(this.uMg, magenta ? 1 : 0);
+    const g3 = gain || [1, 1, 1];
+    gl.uniform3f(this.uGain, g3[0], g3[1], g3[2]);
+    gl.bindTexture(gl.TEXTURE_2D, this.tex);
+    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video); }
+    catch(e){ return null; }
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    return this.cv;
+  }
+}
+let sharedKeyer = null;
+const keyModeCache = new Map();          // src → true(磁性)/false(綠)
+let probeCv = null;
+function keyMode(src, video){
+  if (keyModeCache.has(src)) return keyModeCache.get(src);
+  if (/\/(actm|magm|peekm|gm)_/.test(src)){ keyModeCache.set(src, true); return true; }
+  // 角落取樣：左上 8x8 均色，magenta＝紅藍高綠低
+  try {
+    if (!probeCv){ probeCv = document.createElement("canvas"); probeCv.width = probeCv.height = 8; }
+    const pctx = probeCv.getContext("2d", { willReadFrequently: true });
+    pctx.drawImage(video, 0, 0, 64, 64, 0, 0, 8, 8);
+    const d = pctx.getImageData(0, 0, 2, 2).data;
+    const mg = Math.min(d[0], d[2]) - d[1] > 40;
+    keyModeCache.set(src, mg);
+    return mg;
+  } catch(e){ return false; }
+}
+/* 逐片亮度歸一：同一隻的 idle/walk/act 是分批生成的，曝光各自漂（人類抓到
+   「亮度陰影不一致超怪」）。以 manifest 那隻的 avg_rgb 當錨，每支片第 6 幀
+   量一次身體平均亮度，之後每幀在鍵器裡乘增益拉齊。未測前借同隻已測片的值。 */
+const normGain = new Map(), cidGain = new Map(), srcFrames = new Map();
+const measCv = document.createElement("canvas"); measCv.width = measCv.height = 24;
+function srcCid(src){ const m = src.match(/(?:vs|act|actm|pop|magm|peekm|spawn)_(c\d\d)/); return m ? m[1] : null; }
+function measureNorm(src, keyerCv, usedGain){
+  try {
+    const mc = measCv.getContext("2d", { willReadFrequently: true });
+    mc.clearRect(0, 0, 24, 24);
+    mc.drawImage(keyerCv, 0, 0, 24, 24);
+    const d = mc.getImageData(0, 0, 24, 24).data;
+    let y = 0, n = 0;
+    for (let i = 0; i < d.length; i += 4){
+      const a = d[i+3];
+      if (a > 60){ y += (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) * 255 / a; n++; }
+    }
+    if (n < 12) return;                          // 這幀身體太小，下幀再測
+    const clipY = (y / n) / (usedGain || 1);
+    const cid = srcCid(src), m2 = cid && manifest[cid];
+    if (!m2 || !m2.avg_rgb){ normGain.set(src, 1); return; }
+    const ref = 0.2126*m2.avg_rgb[0] + 0.7152*m2.avg_rgb[1] + 0.0722*m2.avg_rgb[2];
+    const g = Math.min(1.30, Math.max(0.75, ref / Math.max(1, clipY)));
+    normGain.set(src, g);
+    if (!cidGain.has(cid)) cidGain.set(cid, g);
+  } catch(e){ normGain.set(src, 1); }
+}
+window.__norm = { normGain, cidGain };
+function keyedFrame(src, video, light){
+  if (!sharedKeyer) sharedKeyer = new Keyer();
+  const cid = srcCid(src);
+  const norm = normGain.get(src) ?? (cid && cidGain.get(cid)) ?? 1;
+  // 場景光合成：亮度 0.62..1.18 隨地面光、色向輕推 35% 向光色
+  let g3 = [norm, norm, norm];
+  if (light){
+    const ex = 0.70 + 0.55 * Math.min(1, light.lum * 1.9);
+    const mixc = t => 1 + (t - 1) * 0.22;
+    g3 = [norm * ex * mixc(light.r), norm * ex * mixc(light.g), norm * ex * mixc(light.b)];
+  }
+  const out = sharedKeyer.render(video, keyMode(src, video), g3);
+  if (out && !normGain.has(src)){
+    const k = (srcFrames.get(src) || 0) + 1;
+    srcFrames.set(src, k);
+    if (k >= 6) measureNorm(src, out, (g3[0] + g3[1] + g3[2]) / 3);
+  }
+  return out;
+}
+const videoMissing = new Set();
+setInterval(() => videoMissing.clear(), 180000);
+// 體檢黑名單（逐幀驗屍用；2026-09-01 c25/c09 已重生驗過、清單清空）
+const BAD_CLIPS = [];
+function clipBanned(src){ return BAD_CLIPS.some(b => src.includes(b)); }
+function getVideo(src, { loop = true } = {}){
+  if (LITE) return null;               // 輕量版：所有影片路徑一律退回 PNG 精靈
+  if (videoMissing.has(src) || clipBanned(src)) return null;
+  let e = videoPool.get(src);
+  if (!e){
+    const v = document.createElement("video");
+    v.muted = true; v.loop = loop; v.playsInline = true; v.autoplay = true;
+    v.addEventListener("error", () => videoMissing.add(src), { once: true });
+    v.src = src;
+    v.play().catch(()=>{});
+    e = { v, last: 0 };
+    videoPool.set(src, e);
+    if (videoPool.size > VIDEO_CAP){
+      let oldest = null, t = Infinity;
+      for (const [k, ent] of videoPool)
+        // 只保護「當前場景」的背景片（它每幀都要用）；別場的背景片可以淘汰——
+        // 全部釘住會撞到瀏覽器同時載入媒體元素的上限，結果是全部都載不完
+        // （實測：池裡 17 支場景片、readyState 全部回不到 2）
+        if (ent.last < t && k !== src &&
+            !(k.startsWith("scenes/") &&
+              (k.includes(`_${sceneId}_`) ||
+               (NEXT_SCENE[sceneId] && k.includes(`_${NEXT_SCENE[sceneId]}_`))))){ t = ent.last; oldest = k; }
+      if (oldest){
+        const dead = videoPool.get(oldest);
+        dead.v.pause(); dead.v.removeAttribute("src"); dead.v.load();
+        videoPool.delete(oldest);
+      }
+    }
+  }
+  e.last = performance.now();
+  return e.v;
+}
+
+/* ── 卡司與姿勢圖 ────────────────────────────────────────────── */
+const CAST = [];
+let manifest = {};
+fetch("sprites/cast40/manifest.json").then(r=>r.json()).then(m=>{
+  manifest = m;
+  for (const id of Object.keys(m)){
+    const img = new Image();
+    img.src = `sprites/cast40/${id}.png`;
+    img._id = id;
+    CAST.push(img);
+  }
+  seedPopulation();
+});
+const AGENT_POSES = {};
+for (const id of ["c22","c20","c01","c03","c13","c37"]){
+  AGENT_POSES[id] = [];
+  for (let i = 0; i < 10; i++){
+    const img = new Image();
+    img.src = `sprites/agents/${id}/p${i}.png`;
+    AGENT_POSES[id].push(img);
+  }
+}
+const litCache = new Map();
+function litSprite(img){
+  let c = litCache.get(img);
+  if (c) return c;
+  const w = img.naturalWidth, h = img.naturalHeight;
+  c = new OffscreenCanvas(w, h);
+  const g = c.getContext("2d");
+  g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = "source-atop";
+  const grad = g.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, "rgba(255,228,180,0.16)");
+  grad.addColorStop(0.45, "rgba(255,228,180,0.02)");
+  grad.addColorStop(0.72, "rgba(28,17,8,0.10)");
+  grad.addColorStop(1, "rgba(28,17,8,0.34)");
+  g.fillStyle = grad; g.fillRect(0, 0, w, h);
+  const ao = g.createRadialGradient(w/2, h*0.98, 0, w/2, h*0.98, w*0.55);
+  ao.addColorStop(0, "rgba(15,8,3,0.22)"); ao.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = ao; g.fillRect(0, h*0.7, w, h*0.3);
+  g.globalCompositeOperation = "source-over";
+  litCache.set(img, c);
+  return c;
+}
+// 深度桶只做景深模糊＋極輕壓暗——亮度主責已交給板光照圖（雙重壓暗會把遠景吃成剪影）
+const DEPTH_FILTER = ["none","brightness(0.97)","brightness(0.93) blur(1px)","brightness(0.88) blur(2px)"];
+
+/* ── 實體 ────────────────────────────────────────────────────── */
+const HORIZON = 0.46, FRONT = 0.97;
+function depthScale(ny){ return 0.35 + 0.75 * (ny - HORIZON) / (FRONT - HORIZON); }
+class Creature{
+  constructor(img, poses){
+    this.body = img || null;
+    this.poses = poses || null;
+    this.acting = null;
+    this.nx = 0.1 + Math.random()*0.8;
+    this.ny = HORIZON + 0.08 + Math.random()*(FRONT - HORIZON - 0.14);
+    this.state = "idle"; this.t = Math.random()*10;
+    this.dir = Math.random() < 0.5 ? -1 : 1;
+    this.target = null; this.think = 2 + Math.random()*6;
+    this.spawning = 0;
+    this.onstage = true;                 // 場景選角：不在戲裡就不畫（電影 cut）
+    this.dim = 0;                        // 0..1 剪影壓暗（步 5 兩側）
+    this.wander = true;                  // s11/s00 才漫遊
+  }
+  place(x, y, dir){ this.nx = x; this.ny = y; if (dir) this.dir = dir;
+                    this.state = "idle"; this.target = null; }
+  goTo(x, y, cb){
+    this.reserved = true; this.onArrive = cb || null;
+    this.target = [x, y]; this.state = "walk";
+  }
+  act(name){ this.acting = name; }
+  release(){ this.reserved = false; this.onArrive = null;
+             this.acting = null; this.dim = 0;
+             this.think = 1 + Math.random()*3; }
+  update(dt){
+    this.t += dt; this.think -= dt;
+    if (this._settle > 0) this._settle = Math.max(0, this._settle - dt / 0.22);
+    // 成形進度由片子驅動（draw 裡設 _spawnClip）；只有拿不到片時才用牆鐘倒數，
+    // 否則片還在載入 spawning 就倒完＝成形整段消失（實測抓到）
+    if (this.spawning > 0 && !this._spawnClip)
+      this.spawning = Math.max(0, this.spawning - dt/2.6);
+    if (this.wander && !this.reserved && this.state === "idle" && this.think <= 0){
+      const sc2 = scene();
+      const rg = sc2.region || [0.06, 0.94];
+      const yr = sc2.yr || [HORIZON + 0.08, FRONT - 0.06];
+      this.target = [rg[0] + Math.random()*(rg[1]-rg[0]),
+                     yr[0] + Math.random()*(yr[1]-yr[0])];
+      this.state = "walk";
+    }
+    if (this.state === "walk" && this.target){
+      const [tx, ty] = this.target;
+      const dx = tx - this.nx, dy = ty - this.ny;
+      const d = Math.hypot(dx, dy);
+      if (d < 0.012){
+        this.state = "idle"; this.target = null;
+        this._settle = 1; this._walkT = 0;
+        if (this.onArrive){ const f = this.onArrive; this.onArrive = null; f(this); }
+        else if (!this.reserved) this.think = 2 + Math.random()*7;
+      }
+      else {
+        if (this._walkT === undefined || this.state !== "walk") this._walkT = 0;
+        this._walkT += dt;
+        const easeIn = Math.min(1, this._walkT / 0.35);
+        const easeOut = Math.max(0.35, Math.min(1, d / 0.06));
+        const v = 0.028 * dt * easeIn * easeOut;
+        this.nx += dx/d*v; this.ny += dy/d*v;
+        this.dir = dx < 0 ? -1 : 1;
+      }
+    }
+  }
+  draw(){
+    if (!this.onstage) return;
+    // 12fps 位置量化：邏輯位置連續、畫面位置一格一格挪——真定格的時間性，
+    // 同時讓「走路片原地踏步＋引擎滑行」的滑步感消失（節拍間畫面是靜止的）
+    const beat = Math.floor(performance.now() * 0.012);
+    if (this._beat !== beat){
+      this._beat = beat;
+      this._qx = this.nx; this._qy = this.ny; this._qdir = this.dir;
+    }
+    const qx = this._qx ?? this.nx, qy = this._qy ?? this.ny, qdir = this._qdir ?? this.dir;
+    // spawn 成形片段最先判（world2 教訓：放後面永遠走不到）
+    if (this.spawning > 0 && this.vid){
+      const svSrc = VIDEO_SRC.spawn(this.vid);
+      if (videoMissing.has(svSrc)){ this.spawning = 0; this._spawnClip = false; }
+      const sv = this.spawning > 0 ? getVideo(svSrc, { loop: false }) : null;
+      const skf = (sv && sv.readyState >= 2 && sv.videoWidth)
+        ? keyedFrame(svSrc, sv, smoothLight(this)) : null;
+      if (this.spawning > 0 && !skf) return;            // 載入中：成形前不現完整體
+      if (skf){
+        this._spawnClip = true;
+        this.spawning = Math.max(0.001, 1 - sv.currentTime / (sv.duration || 3));
+        if (sv.ended || sv.currentTime >= (sv.duration || 2) - 0.05){
+          this.spawning = 0; this._spawnClip = false;
+        }
+        const sc0 = depthScale(qy);
+        const vh = (H * 0.30 * sc0) * VFRAME.h / VFRAME.body;
+        const vw = vh * sv.videoWidth / sv.videoHeight;
+        const x0 = qx*W, y0 = qy*H;
+        cx.fillStyle = `rgba(0,0,0,${0.18*(1-this.spawning)})`;
+        cx.beginPath(); cx.ellipse(x0, y0, vh*0.20, vh*0.035, 0, 0, 7); cx.fill();
+        cx.save();
+        cx.translate(x0, y0 + vh * VFRAME.bottom / VFRAME.h);
+        cx.drawImage(skf, -vw/2, -vh, vw, vh);
+        cx.restore();
+        // 成形塵爆：FX 片優先（加法混合），沒有就 PNG 步進
+        if (!drawFxVideo("sprites/video/fx_dustburst.mp4", qx, qy - 0.06, 0.34,
+                         { alpha: this.spawning * 0.9 })){
+          const dq = Math.floor(this.t * 12) % 3;
+          drawProp("dust_burst_v" + (dq + 1), qx, qy + 0.01, 0.16 + 0.10*(1 - this.spawning),
+                   { alpha: this.spawning * 0.85, anchor: "center" });
+        }
+        return;
+      }
+    }
+    if (this.vid && this.spawning <= 0){
+      let src = null;
+      if (this.acting && this.agent){
+        // 舉牌類優先用磁性幕重生版（綠幕舉綠牌會被鍵掉）；404 退綠幕版
+        if (/^card_/.test(this.acting)){
+          const m = VIDEO_SRC.actm(this.vid, this.acting);
+          src = videoMissing.has(m) ? VIDEO_SRC.act(this.vid, this.acting) : m;
+        } else if (this.acting === "lens"){
+          src = `sprites/video/magm_${this.vid}_lens.mp4`;
+        } else if (this.acting === "peek"){
+          src = `sprites/video/peekm_${this.vid}_peek.mp4`;
+        } else {
+          src = VIDEO_SRC.act(this.vid, this.acting);
+        }
+      }
+      if (!src){
+        const mv = this.state === "walk" ? "walk" : "idle";
+        src = this.agent ? VIDEO_SRC.agentMove(this.vid, mv) : VIDEO_SRC.pop(this.vid, mv);
+      }
+      // 片段切換交叉溶接：idle↔walk↔act 不再硬跳（0.22s，人類點名的流暢度）
+      if (this._curSrc !== src){
+        this._prevSrc = this._curSrc; this._curSrc = src;
+        this._swT = performance.now();
+      }
+      const v = src ? getVideo(src) : null;
+      const lt = smoothLight(this);
+      const kf = (v && v.readyState >= 2 && v.videoWidth) ? keyedFrame(src, v, lt) : null;
+      if (kf){
+        const sc = depthScale(qy) * (scene().k || 1) * (this.kscale || 1);
+        let h = H * 0.30 * sc;
+        const vh = h * VFRAME.h / VFRAME.body;
+        const x = qx * W, y = qy * H;
+        // 影子濃度跟著地面亮度：亮處影子實、暗處影子融
+        cx.fillStyle = `rgba(0,0,0,${((0.10 + 0.30*Math.min(1, lt.lum*1.8)) * (0.6+0.4*sc)).toFixed(3)})`;
+        cx.beginPath(); cx.ellipse(x, y, h*0.30, h*0.05, 0, 0, 7); cx.fill();
+        const fadeP = Math.min(1, (performance.now() - (this._swT || 0)) / 320);
+        const bucket = sc > 0.92 ? 0 : sc > 0.75 ? 1 : sc > 0.58 ? 2 : 3;
+        const sq = this._settle > 0 ? 1 - 0.13 * (Math.floor(this._settle * 2.5 * 2) % 2 ? 1 : 0.5) : 1;
+        const drawLayer = (frameCv, vv, alpha) => {
+          // 鍵器是共享 canvas：務必「渲染完立刻畫」，存參考再畫會兩層同畫面
+          const vw2 = vh * vv.videoWidth / vv.videoHeight;
+          cx.save();
+          cx.translate(x, y + vh * VFRAME.bottom / VFRAME.h);
+          if (qdir < 0) cx.scale(-1, 1);
+          if (sq !== 1){ cx.scale(1/Math.sqrt(sq), sq); }
+          if (cx.filter !== undefined){
+            cx.filter = this.dim > 0
+              ? `brightness(${(1 - this.dim*0.65).toFixed(2)}) blur(1px)`
+              : DEPTH_FILTER[bucket];
+          }
+          cx.globalAlpha = alpha;
+          cx.drawImage(frameCv, -vw2/2, -vh, vw2, vh);
+          if (cx.filter !== undefined) cx.filter = "none";
+          cx.restore();
+        };
+        if (fadeP < 1 && this._prevSrc && videoPool.has(this._prevSrc)){
+          const pv = videoPool.get(this._prevSrc).v;
+          if (pv.readyState >= 2 && pv.videoWidth){
+            const pkf = keyedFrame(this._prevSrc, pv, lt);
+            if (pkf) drawLayer(pkf, pv, 1 - fadeP);
+            // 前層畫掉了共享 canvas，當前片要重新渲染
+            drawLayer(keyedFrame(src, v, lt), v, fadeP);
+          } else drawLayer(kf, v, 1);
+        } else {
+          drawLayer(kf, v, 1);
+        }
+        cx.globalAlpha = 1;
+        return;
+      }
+    }
+    // 姿勢圖後援
+    let img = null, hop = 0, tilt = 0;
+    if (this.poses){
+      const AP = { idle:[0,1], walk:[2,3,4,5], carry:[6], write:[7],
+                   card_pass:[8], card_fail:[9], lens:[7] };
+      let key = this.acting || (this.state === "walk" ? "walk" : "idle");
+      const frames = AP[key] || AP.idle;
+      const rate = key === "walk" ? 12 : (key === "idle" ? 1.6 : 12);
+      img = this.poses[frames[Math.floor(this.t * rate) % frames.length]];
+      if (!img || !img.complete || !img.naturalWidth) img = this.body;
+    } else if (this.body){
+      img = this.body;
+      if (this.state === "walk"){
+        const ph = Math.floor(this.t * 12) % 4;
+        hop  = [0, -0.045, 0, -0.045][ph];
+        tilt = [-0.05, 0, 0.05, 0][ph];
+      } else {
+        hop = (Math.floor(this.t * 2) % 2) ? -0.008 : 0;
+      }
+    }
+    if (!img || !img.complete || !img.naturalWidth) return;
+    const lit = litSprite(img);
+    const lt2 = smoothLight(this);
+    const sc = depthScale(qy) * (scene().k || 1) * (this.kscale || 1);
+    let h = H * 0.30 * sc, w = h * img.naturalWidth / img.naturalHeight;
+    const maxW = H * 0.36 * sc;
+    if (w > maxW){ const k = maxW / w; w *= k; h *= k; }
+    const x = qx * W, y = qy * H;
+    cx.fillStyle = `rgba(0,0,0,${(0.10 + 0.30*Math.min(1, lt2.lum*1.8)).toFixed(3)})`;
+    cx.beginPath(); cx.ellipse(x, y, w*0.34, h*0.055, 0, 0, 7); cx.fill();
+    cx.save();
+    cx.translate(x, y + h*hop);
+    if (tilt) cx.rotate(tilt);
+    if (qdir < 0) cx.scale(-1, 1);
+    if (cx.filter !== undefined){
+      const ex = 0.70 + 0.55 * Math.min(1, lt2.lum * 1.9);   // 姿勢圖同步吃場景光
+      cx.filter = this.dim > 0
+        ? `brightness(${(ex * (1 - this.dim*0.65)).toFixed(2)}) blur(1px)`
+        : `brightness(${ex.toFixed(2)})`;
+    }
+    cx.drawImage(lit, -w/2, -h, w, h);
+    if (cx.filter !== undefined) cx.filter = "none";
+    cx.restore();
+  }
+}
+const cast = [];
+const AGENTS = { "careful-1":"c22", "careful-2":"c20", "plain-1":"c01",
+                 "plain-2":"c03", "hasty-1":"c13", "hasty-2":"c37" };
+const byAgent = {};
+let REPLAY = null;
+let _readyResolve; const READY = new Promise(r => _readyResolve = r);
+function checkReady(){ if (REPLAY && Object.keys(byAgent).length >= 6) _readyResolve(); }
+fetch("data/replay_371.json").then(r=>r.json()).then(d=>{ REPLAY = d; checkReady(); });
+function seedPopulation(){
+  for (const [name, id] of Object.entries(AGENTS)){
+    const img = CAST.find(c => c._id === id);
+    if (img){ const cr = new Creature(img, AGENT_POSES[id]); cr.agent = name;
+              cr.vid = id;
+              byAgent[name] = cr; cast.push(cr); }
+  }
+  const used = new Set(Object.values(AGENTS));
+  const extras = CAST.filter(c => !used.has(c._id))
+                     .sort(() => Math.random()-0.5).slice(0, 14);
+  for (const img of extras){ const cr = new Creature(img); cr.vid = img._id;
+                             cast.push(cr); }
+  checkReady();
+}
+const COLOR_ANCHOR = { "暖土":[160,115,75], "赭紅":[155,85,70], "奶油":[225,210,185],
+                       "灰藍":[115,120,130], "苔綠":[125,128,82], "沙金":[195,155,88] };
+function pickCastFor(card){
+  const anchor = COLOR_ANCHOR[card.color] || null;
+  let best = null, bestKey = [-1, Infinity];
+  for (const [id, m] of Object.entries(manifest)){
+    let sc = 0;
+    if (card.shape && m.shape === card.shape) sc += 3;
+    if (card.color && m.color === card.color) sc += 2;
+    if (card.texture && m.texture === card.texture) sc += 1;
+    let cd = 0;
+    if (anchor && m.avg_rgb){
+      cd = (m.avg_rgb[0]-anchor[0])**2 + (m.avg_rgb[1]-anchor[1])**2
+         + (m.avg_rgb[2]-anchor[2])**2;
+    }
+    if (sc > bestKey[0] || (sc === bestKey[0] && cd < bestKey[1])){
+      bestKey = [sc, cd]; best = id;
+    }
+  }
+  return CAST.find(c => c._id === best) || CAST[0];
+}
+
+/* ── 場景表（逐張劇照量出來的站位；SPEC.md 是規格正本）─────────── */
+// stations 的座標是對「該場板」量的；板換變體後用 ?calib=sNN 微調
+const SCENES = {
+  s00:{
+        lights:[{x:0.50,w:1.15}], wash:[[0,1,[255,190,120],0.075]],
+        // ⚠ 這個 sub 是**後備字串**，正常情況下會被 `standbySub()` 換掉
+        //   （數字必須跟真的載進來那一批一致，見 LIVE 區那一段的長註解）。
+        head:"你需要什麼？", sub:"走過 371 件真實任務的一群人", badge:"待機",
+        region:[0.06,0.94], wander:true,
+        slots:[[0.10,0.78],[0.25,0.70],[0.33,0.80],[0.43,0.76],[0.56,0.74],
+               [0.64,0.72],[0.72,0.76],[0.83,0.70],[0.92,0.79]] },
+  s01:{
+        lights:[{x:0.50,w:1.00}], wash:[[0,1,[255,190,120],0.075]],
+        head:"掃一下", sub:"用你自己的手機就好", badge:"步 1",
+        slots:[[0.21,0.82],[0.79,0.82]] },
+  s02:{
+        lights:[{x:0.52,w:0.90}], wash:[[0,1,[255,180,110],0.085]],
+        head:"打開你常用的 AI", sub:"提示詞 我們準備好了", badge:"步 2",
+        slots:[[0.462,0.85]] },   // 貼著發光手機（劇照 41 是靠在手機上偷看）
+  s03:{
+        lights:[{x:0.52,w:1.00}], wash:[[0,1,[255,190,120],0.075]],
+        head:"貼回來 送出", sub:"給多少 你自己決定", badge:"步 3",
+        slots:[[0.455,0.84],[0.07,0.74],[0.16,0.78],[0.27,0.70],
+               [0.79,0.70],[0.88,0.74],[0.95,0.70]] },
+  s04:{
+        lights:[{x:0.50,w:1.30}], wash:[[0,1,[255,200,130],0.10]],
+        head:"世界多了一個人", sub:"那是你託付的需求", badge:"步 4",
+        slots:[[0.50,0.80],[0.10,0.76],[0.22,0.72],[0.33,0.78],[0.66,0.74],
+               [0.78,0.76],[0.88,0.72],[0.94,0.79]] },
+  s05:{
+        lights:[{x:0.51,w:0.90}], wash:[[0,1,[255,185,115],0.085]],
+        head:"他開始想要做什麼", sub:"你的需求 變成他的目標", badge:"步 5",
+        slots:[[0.50,0.82],[0.08,0.72],[0.16,0.76],[0.24,0.70],[0.30,0.78],
+               [0.76,0.72],[0.84,0.76],[0.92,0.70]] },
+  s06:{
+        lights:[{x:0.17,w:0.85,cool:true},{x:0.80,w:0.90}], wash:[[0,0.5,[95,125,185],0.15],[0.5,1,[255,170,80],0.14]],
+        head:"誰來做 不是用猜的", sub:"讓路徑決定誰向前", badge:"步 6",
+        slots:[[0.15,0.82],[0.22,0.86],[0.29,0.83],
+               [0.63,0.86],[0.79,0.82],[0.86,0.79],[0.92,0.77]] },
+  s07:{
+        lights:[{x:0.50,w:1.00}], wash:[[0,1,[255,190,120],0.085]],
+        head:"三個同儕評審", sub:"判不通過 要拿得出反例", badge:"步 7",
+        slots:[[0.32,0.87],[0.51,0.762],[0.69,0.87]], k:1.35 },
+  s08:{
+        lights:[{x:0.30,w:0.90}], wash:[[0,1,[255,185,115],0.085]],
+        head:"被推翻就改", sub:"改完 再驗一次", badge:"步 8",
+        slots:[[0.185,0.795],[0.56,0.77]] },   // 板的紙在左下：寫的人蹲那、紅牌站右
+  s09:{
+        lights:[{x:0.50,w:0.75}], wash:[[0,1,[255,200,140],0.055]],
+        head:"抽樣稽核", sub:"讓每一分信譽有根據", badge:"步 9",
+        slots:[[0.06,0.68],[0.13,0.76],[0.20,0.70],[0.26,0.76],
+               [0.74,0.70],[0.81,0.76],[0.88,0.69],[0.94,0.76]] },
+  s10:{
+        lights:[{x:0.30,w:0.80},{x:0.72,w:0.80}], wash:[[0,0.5,[190,80,60],0.12],[0.5,1,[255,190,120],0.085]],
+        head:"需求 等於 產出嗎", sub:"看起來完成 不等於符合需求", badge:"步 10",
+        slots:[[0.08,0.68],[0.17,0.74],[0.26,0.70],[0.68,0.68],[0.77,0.74],[0.86,0.70]] },
+  // 究責的兩個專屬場景（2026-09-05 新生）：s12 退件＝閘門把交付推回去；
+  // s13 收據鏈＝每一步都留下可獨立重驗的證據。這是 Vacant 加在 agent 之上的東西。
+  s12:{ lights:[{x:0.52,w:0.95}], wash:[[0,1,[255,185,115],0.075]],
+        head:"這一份沒有交出去", sub:"沒過驗收測資，就退回去重做", badge:"擋下",
+        slots:[[0.24,0.86],[0.52,0.84],[0.10,0.70],[0.86,0.72]] },
+  s13:{ lights:[{x:0.42,w:0.90}], wash:[[0,1,[255,200,140],0.06]],
+        head:"每一步都留下收據", sub:"誰做的、驗了什麼、雜湊接著上一筆——你可以自己重驗", badge:"可究責",
+        slots:[[0.64,0.80],[0.14,0.70]] },
+  s11:{
+        lights:[{x:0.16,w:0.42},{x:0.38,w:0.42},{x:0.60,w:0.42},{x:0.82,w:0.42}], wash:[[0,1,[255,190,125],0.075]],
+        // ⚠「這個世界 不會停」＋二十幾個人形在桌前寫字 ＝ 暗示「AI 此刻正在思考」。
+        //   這裡沒有任何東西在跑：它就是那 18 格在重播。
+        // ⚠ 這個 sub 是**後備字串**，正常情況下會被 `loopSub()` 換掉
+        //   （數字要跟真的載進來那一批一致，理由同 s00 的 `standbySub`）。
+        head:"你可以一直看下去", sub:"這些格會一直重播", badge:"步 11",
+        region:[0.07,0.92], wander:true, yr:[0.56,0.88], k:0.62,
+        slots:[[0.10,0.85],[0.27,0.87],[0.41,0.87],[0.58,0.86],[0.70,0.85],
+               [0.88,0.87],[0.06,0.71],[0.22,0.73],[0.38,0.71],[0.60,0.70],
+               [0.79,0.69],[0.16,0.60],[0.47,0.59],[0.66,0.58]] },
+};
+let sceneId = "s00", sceneT = 0, xfade = 0, prevScene = null;
+function scene(){ return SCENES[sceneId]; }
+// s00/s11 有多變體板：每次進場輪換（長開整天不看同一張）
+const PLATE_VARIANTS = { s00:["s00","s00_b","s00_c"], s11:["s11","s11_b","s11_c"] };
+const plateTurn = {};
+// 換場預載：人類看到「fallback 的圖片顯示」＝新場影片還沒載好就先畫了靜態板。
+// 進場 2 秒後就把下一場的片先叫起來（同時最多兩支，不會撞媒體上限）。
+const NEXT_SCENE = { s00:"s01", s01:"s02", s02:"s03", s03:"s11", s04:"s05",
+                     s05:"s06", s06:"s07", s07:"s08", s08:"s09", s09:"s10",
+                     s10:"s13", s11:"s06", s12:"s13", s13:"s11" };
+let preloadedFor = null;
+function preloadNextScene(){
+  if (preloadedFor === sceneId || sceneT < 2) return;
+  preloadedFor = sceneId;
+  // (a) 同一場的下一個變體——loop 換手瞬間最容易閃靜態板
+  const cur = sceneVariants(sceneId);
+  if (cur.length > 1){
+    const nt = (sceneVidTurn[sceneId] ?? 0) + 1;
+    getVideo(`scenes/scene_${sceneId}_${cur[nt % cur.length]}.mp4`, { loop: false });
+  }
+  // (b) 下一場
+  const nx = NEXT_SCENE[sceneId];
+  if (!nx) return;
+  const vs = sceneVariants(nx);
+  if (!vs.length) return;
+  const turn = (sceneVidTurn[nx] ?? -1) + 1;
+  getVideo(`scenes/scene_${nx}_${vs[turn % vs.length]}.mp4`, { loop: false });
+}
+let snapCv = null, snapA = 0;             // 轉場 v2：上一景快照交叉溶接（取代黑幕沉降）
+function setScene(id){
+  if (id === sceneId) return;
+  if (cv.width){
+    if (!snapCv) snapCv = document.createElement("canvas");
+    if (snapCv.width !== W){ snapCv.width = W; snapCv.height = H; }
+    snapCv.getContext("2d").drawImage(cv, 0, 0);
+    snapA = 1;
+  }
+  prevScene = sceneId; xfade = 0;
+  sceneId = id; sceneT = 0; preloadedFor = null;
+  sceneVidTurn[id] = (sceneVidTurn[id] ?? -1) + 1;   // 場景影片變體輪換
+  // 釋放別場的背景片：瀏覽器同時能載入的 <video> 有上限，12 場 ×2 變體全開
+  // 會讓每一支都卡在 readyState<2。只留當前場景這一場。
+  const keepNext = NEXT_SCENE[id];
+  for (const [k, ent] of [...videoPool]){
+    if (!k.startsWith("scenes/") || k.includes(`_${id}_`)) continue;
+    if (keepNext && k.includes(`_${keepNext}_`)) continue;   // 預載的下一場留著
+    try { ent.v.pause(); ent.v.removeAttribute("src"); ent.v.load(); } catch(e){}
+    videoPool.delete(k);
+  }
+  const vs = PLATE_VARIANTS[id];
+  if (vs){
+    plateTurn[id] = ((plateTurn[id] ?? -1) + 1) % vs.length;
+    plateAlias[id] = vs[plateTurn[id]];
+  }
+  const sc = SCENES[id];
+  for (const c of cast) c.wander = !!sc.wander;
+  // 預載下一張板
+  plate(id);
+}
+const plateAlias = {};
+
+/* ── 文字層 ──────────────────────────────────────────────────── */
+function serif(sz, weight){ return `${weight||600} ${sz}px "Songti TC","Noto Serif TC",Georgia,serif`; }
+// 監視器在畫面右側時，大標往左讓位（不然標題會被面板蓋掉）
+function titleCenter(){
+  const monitorOn = director.mode.startsWith("replay") || director.mode === "visitor_receipt";
+  return monitorOn ? W * 0.40 : W / 2;
+}
+function drawTitle(head, sub, tIn){
+  const a = Math.max(0, Math.min(1, (tIn - 0.25) / 0.9));
+  if (a <= 0) return;
+  const e = 1 - Math.pow(1 - a, 3);                // easeOutCubic
+  const rise = (1 - e) * H * 0.014;
+  cx.textAlign = "center";
+  cx.font = serif(H*0.094, 700);
+  // 入場：字距從鬆收攏＋光暈綻放後歸位（電影片頭語彙）
+  if (cx.letterSpacing !== undefined)
+    cx.letterSpacing = `${((1 - e) * H * 0.026).toFixed(1)}px`;
+  cx.shadowColor = `rgba(255,225,170,${0.55 * (1 - e) + 0.12})`;
+  cx.shadowBlur = H * (0.028 * (1 - e) + 0.008);
+  cx.fillStyle = `rgba(240,232,216,${0.96*e})`;
+  const cxx = titleCenter();
+  cx.fillText(head, cxx, H*0.205 + rise);
+  if (cx.letterSpacing !== undefined) cx.letterSpacing = "0px";
+  if (sub){
+    const a2 = Math.max(0, Math.min(1, (tIn - 0.7) / 0.8));
+    cx.font = serif(H*0.031, 500);
+    cx.shadowColor = "rgba(0,0,0,0.5)"; cx.shadowBlur = H*0.006;
+    cx.fillStyle = `rgba(240,232,216,${0.82*a2})`;
+    cx.fillText(sub, cxx, H*0.275 + (1-a2)*H*0.008);
+  }
+  cx.shadowBlur = 0;
+}
+function drawBadge(txt){
+  cx.font = serif(H*0.020, 600);
+  const w = cx.measureText(txt).width + H*0.035;
+  const x = H*0.04, y = H*0.045, h = H*0.038;
+  cx.fillStyle = "rgba(20,12,4,0.35)";
+  cx.strokeStyle = "rgba(240,232,216,0.45)"; cx.lineWidth = Math.max(1, H*0.0012);
+  cx.beginPath(); cx.roundRect(x, y, w, h, h/2); cx.fill(); cx.stroke();
+  cx.fillStyle = "rgba(240,232,216,0.9)";
+  cx.textAlign = "left";
+  cx.fillText(txt, x + H*0.018, y + h*0.68);
+}
+// 世界監視器（人類 2026-09-05：「需要世界監視器，讓使用者看到 Vacant 基於 agent
+// 的獨特之處、為什麼可以究責」）。只顯示落盤真值：誰做的、幾票、抽沒抽中稽核、
+// 收據雜湊、以及開/關這一層的累計漏出對照。沒有的欄位就寫「—」，不編。
+function drawMonitor(d){
+  const t = d.task, row = d.row;
+  if (!t || !row) return;
+  let MROWS = monitorRows(t, LIVE.counters, d.caseTotals);
+  // 人類 2026-09-21：「畫面太複雜了」。13 列對展場觀眾是雜訊——
+  // 他站在那裡十幾秒，讀得完的只有「這一件怎麼了」與「我能不能自己驗」。
+  // ⚠ 砍掉的**不是不誠實**（`?full=1` 全都在），是**移出主畫面**：
+  //   「同儕評審／抽樣稽核＝這條路上沒有這一層」兩列講的是**沒有的東西**，
+  //   對讀得懂的人是誠實，對走過去的人是看不懂的雜訊。
+  if (SIMPLE){
+    const KEEP = ["判決", "證據等級", "收據鏈頭", "同題關掉這層"];
+    MROWS = KEEP.map(k => MROWS.find(r => r.k === k)).filter(Boolean);
+  }
+  // 幾何走 monitorGeom（單一真相來源）：s06 的「開／關」橢圓標要靠它避開面板。
+  // 高度跟著列數走：活模式比凍結重放多兩行（證據等級＋題面雜湊／收據鏈頭拆開），
+  // 多次嘗試的格再多一行（P13）。寫死 9 會把最後一列印到框外面。
+  // 證據說明要**包進面板裡**：它沒有底板的話，遇到亮場景就洗掉了——
+  // 而那一句是誠實宣告，讀不到等於沒講。所以先折行、再決定面板多高。
+  cx.font = serif(H*0.0155, 500);
+  const NOTE = evidenceNote(t);
+  const NLINES = NOTE
+    ? wrapByWidth(NOTE, W*0.255 - H*0.044, s => cx.measureText(s).width) : [];
+  const G = monitorGeom(MROWS.length, W, H, NLINES.length);
+  const W0 = G.w, X = G.x, Y = G.y, PAD = H*0.022;
+  const line = H*0.0295;
+  let y = Y + PAD + line*0.7;
+  cx.save();
+  cx.fillStyle = "rgba(10,7,3,0.62)";
+  cx.strokeStyle = "rgba(240,232,216,0.18)"; cx.lineWidth = Math.max(1, H*0.0012);
+  const boxH = G.h;
+  cx.beginPath(); cx.roundRect(X, Y, W0, boxH, H*0.012); cx.fill(); cx.stroke();
+  const put = (k, v, tone) => {
+    cx.textAlign = "left";
+    cx.font = serif(H*0.0165, 500); cx.fillStyle = "rgba(240,232,216,0.46)";
+    cx.fillText(k, X + PAD, y);
+    cx.font = serif(H*0.0185, 600);
+    cx.fillStyle = tone === "bad" ? "rgba(228,124,102,0.95)"
+                 : tone === "good" ? "rgba(190,222,190,0.95)" : "rgba(240,232,216,0.9)";
+    cx.textAlign = "right";
+    cx.fillText(String(v), X + W0 - PAD, y);
+    y += line;
+  };
+  cx.textAlign = "left";
+  cx.font = serif(H*0.019, 700); cx.fillStyle = "rgba(240,232,216,0.72)";
+  cx.fillText("世界監視器 · 這一筆", X + PAD, y); y += line*1.15;
+  // P4／P5／P7／P9／P10：每一列說什麼由 monitorRows() 決定（純函數，逐句可測）。
+  // 這裡只負責把字印出去——畫面不再自己推論任何一件事。
+  for (const r of MROWS) put(r.k, r.v, r.tone);
+  // 證據等級的完整說明：**放在這一欄（面板裡），不放左上角。**
+  // 左上角是跟置中大標搶位子的空間；這裡有底板、寬度固定、而且跟
+  // 「這一筆」的其他欄位在一起。那一句是誠實宣告（鐵律 5 的展場版）。
+  if (NLINES.length){
+    cx.strokeStyle = "rgba(240,232,216,0.14)";
+    cx.beginPath();
+    cx.moveTo(X + PAD, y - line*0.55); cx.lineTo(X + W0 - PAD, y - line*0.55);
+    cx.stroke();
+    cx.font = serif(H*0.0155, 500);
+    cx.textAlign = "left";
+    cx.fillStyle = "rgba(240,232,216,0.62)";
+    let ny = y - line*0.08;
+    for (const s of NLINES){ cx.fillText(s, X + PAD, ny); ny += H*0.023; }
+  }
+  cx.restore();
+}
+/** 觀眾按下去之後，把因果用**大字**講出來，整格都在。
+ *
+ *  ⚠ 這是 Fable 指出來畫面上一處都沒有的那件事：對照存在，但沒有任何一幀
+ *  說「因為你寫了名字，所以它過了」。監視器那幾行 18px 不負責講這個。 */
+function drawPressed(d){
+  const b = pressedBanner(d && d.task, LIVE.stage);
+  if (!b) return;
+  const cxx = titleCenter(), y = H*0.315;
+  cx.save();
+  cx.textAlign = "center";
+  cx.font = serif(H*0.030, 700);
+  const w = Math.max(cx.measureText(b.head + "　→　" + b.tail).width, 0) + H*0.05;
+  cx.fillStyle = "rgba(10,7,3,0.62)";
+  cx.strokeStyle = "rgba(190,222,190,0.55)";
+  cx.lineWidth = Math.max(1, H*0.0014);
+  cx.beginPath(); cx.roundRect(cxx - w/2, y, w, H*0.058, H*0.010);
+  cx.fill(); cx.stroke();
+  cx.fillStyle = "rgba(240,232,216,0.92)";
+  cx.fillText(b.head, cxx - w/2 + H*0.025 + cx.measureText(b.head).width/2,
+              y + H*0.039);
+  cx.fillStyle = "rgba(190,222,190,0.95)";
+  const tw = cx.measureText(b.tail).width;
+  cx.fillText(b.tail, cxx + w/2 - H*0.025 - tw/2, y + H*0.039);
+  cx.fillStyle = "rgba(240,232,216,0.55)";
+  cx.font = serif(H*0.026, 600);
+  cx.fillText("→", cxx, y + H*0.039);
+  cx.restore();
+}
+/** 分身來源的現況。**橋沒載進來／還沒接上就回 null**，不要編一個狀態出來。
+ *  （判準函式 `twinSourceLine` 吃的就是這個形狀，它自己不碰全域。） */
+function twinState(){
+  try {
+    return (window.WorldBridge && typeof window.WorldBridge.sourceState === "function")
+      ? window.WorldBridge.sourceState() : null;
+  } catch(e){ return null; }
+}
+function drawHonesty(d){
+  cx.font = serif(H*0.015, 500);
+  cx.textAlign = "right";
+  cx.fillStyle = "rgba(240,232,216,0.38)";
+  // P6（A6）：這一行以前寫死「正在發生的真實 agent」。證據等級是**逐格**推出來的，
+  // 現有的格全是 L-none（零模型）⇒ 那句話對每一格都是假的。改成讀事件。
+  const live = d && d.caseKind === "live" ? d.task : null;
+  let line = live ? liveHonesty(live)
+                  : "背景活動＝機制模擬 · 判決與數字＝真紀錄重放";
+  // ⚠ 斷線要蓋過上面兩句：觀眾以為在看現場、實際在看歸檔，那是鐵律 5 的展場版。
+  if (liveStale()) line = "⚠ 現場連線中斷 · 以下是歸檔重放，不是正在發生的事";
+  // 分身從哪裡來（本機優先，公網是退路）。**擺在最前面**：離線紅線比場上
+  // 任何一句都重要，而且退化的時候這是唯一講得出「不會再有新的人進來」的地方。
+  const tw = twinSourceLine(twinState(), Date.now());
+  if (tw) line = tw + " · " + line;
+  // 台上那一位的話是誰生的（真模型／查表）——只有真的有分身在台上才掛。
+  const en = d && d.visitorSub ? twinEngineNote(d.visitorSub) : null;
+  if (en) line = en + " · " + line;
+  const strip = stageStrip(LIVE.stage, d && d.task ? d.task.id : null);
+  if (strip) line += " · " + strip;
+  const txt = line + (LITE ? " · 輕量版（靜態畫面）" : "");
+  const rx = W - H*0.03, ry = H - H*0.028;
+  // ⚠ **警告句要讀得到。** 這一行平常是 38% 不透明度的小字；2026-09-20 實拍
+  //   （evidence/twin_localfirst_20260920/D_lost_midrun_strip.png 的第一版）
+  //   在亮場景底下前半段整個被洗掉——而那半段正是「本機真相來源斷了」。
+  //   監視器那一欄的證據說明早就因為同一個理由加了底板（「讀不到等於沒講」）。
+  //   所以：帶 ⚠ 的時候補一塊底板並提高對比；平常維持原樣，不搶畫面。
+  if (txt.indexOf("⚠") >= 0){
+    const w = cx.measureText(txt).width;
+    cx.fillStyle = "rgba(10,7,3,0.66)";
+    cx.beginPath();
+    cx.roundRect(rx - w - H*0.014, ry - H*0.019, w + H*0.028, H*0.030, H*0.006);
+    cx.fill();
+    cx.fillStyle = "rgba(240,232,216,0.94)";
+  }
+  cx.fillText(txt, rx, ry);
+}
+let _capKey = "", _capT = 0;
+// 案例橫幅：這一筆是「哪一種案例、在 371 筆裡佔多少」——撐過整段重放，
+// 不被各拍的字幕蓋掉（人類 2026-09-05：看不出 Vacant 在 agent 之上帶來什麼）
+function drawCaseBanner(d){
+  if (d.caseKind === "live"){
+    // P6（A6／C2）：**橫幅不再寫死。** 證據等級逐格跟著事件走，L-real 才准講
+    // 「正在發生」；L-none 要講「機制模擬：這一格沒有模型參與」。
+    // 展場版鐵律 5：把模擬講成證明是紅線。
+    const b = liveBanner(d.task);
+    cx.textAlign = "left";
+    const x = H*0.04, y = H*0.115;
+    cx.font = serif(H*0.030, 700);
+    const w = cx.measureText(b.title).width + H*0.05;
+    const edge = b.tone === "good" ? "rgba(190,222,190,0.6)" : "rgba(216,196,138,0.6)";
+    const ink  = b.tone === "good" ? "rgba(190,222,190,0.95)" : "rgba(216,196,138,0.95)";
+    cx.fillStyle = "rgba(10,7,3,0.55)"; cx.strokeStyle = edge;
+    cx.lineWidth = Math.max(1, H*0.0014);
+    cx.beginPath(); cx.roundRect(x, y, w, H*0.088, H*0.010); cx.fill(); cx.stroke();
+    cx.fillStyle = ink;
+    cx.fillText(b.title, x + H*0.025, y + H*0.036 + H*0.014);
+    // ⚠ 說明那一行**不畫在這裡**。左上角是跟置中大標搶位子的空間
+    //   （大標多寬取決於場景的字數），實測會被蓋住後半段。
+    //   它搬到監視器底下那一欄了（drawEvidenceNote）——那一欄是空的。
+    return;
+  }
+  if (!d.caseKind || !d.CASE_LABEL[d.caseKind]) return;
+  const [title, sub] = d.CASE_LABEL[d.caseKind];
+  const txt = title, sub2 = sub(d.caseTotals ? d.caseTotals[d.caseKind] : "—");
+  cx.textAlign = "left";
+  const x = H*0.04, y = H*0.115;
+  cx.font = serif(H*0.030, 700);
+  const titleW = cx.measureText(txt).width;
+  // 這一塊可以用多寬：**不准碰到置中的大標**。大標多寬取決於場景的字數，
+  // 所以每一幀重算，不寫死。（同一個坑活模式那邊犯過一次，見上面。）
+  cx.font = serif(H*0.094, 700);
+  const headW = cx.measureText((scene().head) || "").width;
+  const room = Math.max(H*0.22, Math.min(W*0.30,
+                        titleCenter() - headW/2 - x - H*0.03));
+  cx.font = serif(H*0.0175, 500);
+  const lines = wrapByWidth(sub2, room - H*0.05, s => cx.measureText(s).width);
+  const subW = lines.reduce((m, s) => Math.max(m, cx.measureText(s).width), 0);
+  const lh = H*0.026;
+  const w = Math.min(Math.max(titleW, subW) + H*0.05, room);
+  const boxH = H*0.052 + lines.length * lh + H*0.012;
+  cx.fillStyle = "rgba(10,7,3,0.55)";
+  cx.strokeStyle = d.caseKind === "leaked" || d.caseKind === "blocked"
+    ? "rgba(228,124,102,0.55)" : "rgba(240,232,216,0.28)";
+  cx.lineWidth = Math.max(1, H*0.0014);
+  cx.beginPath(); cx.roundRect(x, y, w, boxH, H*0.010); cx.fill(); cx.stroke();
+  cx.font = serif(H*0.030, 700);
+  cx.fillStyle = d.caseKind === "leaked" ? "rgba(228,124,102,0.95)" : "rgba(240,232,216,0.92)";
+  cx.fillText(txt, x + H*0.025, y + H*0.036);
+  cx.font = serif(H*0.0175, 500);
+  cx.fillStyle = "rgba(240,232,216,0.6)";
+  lines.forEach((s, i) => cx.fillText(s, x + H*0.025, y + H*0.062 + i*lh));
+}
+function drawCaption(caption, capSub){
+  const key = (caption||"") + "|" + (capSub||"");
+  if (key !== _capKey){ _capKey = key; _capT = performance.now(); }
+  const a = Math.min(1, (performance.now() - _capT) / 450);
+  const e = 1 - Math.pow(1 - a, 2);
+  cx.textAlign = "center";
+  if (caption){
+    cx.fillStyle = `rgba(240,232,216,${0.92*e})`;
+    cx.font = serif(H*0.034, 700);
+    cx.shadowColor = "rgba(0,0,0,0.55)"; cx.shadowBlur = H*0.008;
+    cx.fillText(caption, W/2, H*0.895 + (1-e)*H*0.008);
+  }
+  if (capSub){
+    cx.fillStyle = `rgba(240,232,216,${0.62*e})`;
+    cx.font = serif(H*0.019, 500);
+    cx.fillText(capSub, W/2, H*0.94 + (1-e)*H*0.008);
+  }
+  cx.shadowBlur = 0;
+}
+
+/* ── 顆粒與覆蓋 ──────────────────────────────────────────────── */
+let grainLayer = null;
+function buildGrain(){
+  grainLayer = new OffscreenCanvas(256, 256);
+  const g2 = grainLayer.getContext("2d");
+  const im = g2.createImageData(256, 256);
+  for (let i = 0; i < im.data.length; i += 4){
+    const n = 128 + (Math.random()*2-1)*128;
+    im.data[i] = im.data[i+1] = im.data[i+2] = n; im.data[i+3] = 255;
+  }
+  g2.putImageData(im, 0, 0);
+}
+let hazeCv = null;
+function drawOverlays(t){
+  // 背景是影片時，氣氛層要大幅收斂：影片本身已含光束/塵埃/霧，
+  // 再疊一層會把畫面洗白（人類 2026-09-05 的截圖上看得很清楚）
+  // 分層收斂：洗白的元凶是霧靄與塵埃（影片裡已經有了）；色調 wash 是敘事訊息
+  // （s06 的冷暖分色 = 關/開），要留住。
+  const onVideo = !!sceneVideoReady(sceneId);
+  const ATM      = onVideo ? 0.45 : 1;   // 光束
+  const ATM_WASH = onVideo ? 0.70 : 1;   // 色調（敘事用，留多一點）
+  const ATM_HAZE = onVideo ? 0.15 : 1;   // 霧靄（元凶）
+  // 逐場燈位光束（人類點名氛圍不足：不再全場共用一支中央光）：
+  // 入場 1.2s 綻開＋各燈相位錯開的 12fps 呼吸
+  const ph = Math.floor(t * 12) / 12;
+  const bloom = Math.min(1, t / 1.2) ** 0.6 + 0.14 * Math.exp(-2.6 * t);
+  const L = scene().lights || [{ x: 0.5, w: 1.0 }];
+  for (const b of L){
+    const flick = (0.05 + 0.03 * Math.sin(ph * 2.1 + b.x * 9) + 0.015 * Math.sin(ph * 7.7 + b.x * 5)) * bloom;
+    drawProp(b.cool ? "shaft_cool_v1" : "shaft_warm_v1", b.x, 0.92, 1.15 * b.w,
+             { alpha: Math.max(0, flick * ATM), anchor: "bottom" });
+  }
+  // 色調 wash：每場的空氣顏色（soft-light 疊）
+  const wash = scene().wash;
+  if (wash){
+    cx.save(); cx.globalCompositeOperation = "soft-light";
+    for (const [x0, x1, rgb, a] of wash){
+      const g = cx.createLinearGradient(x0*W, 0, x1*W, 0);
+      g.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a*ATM_WASH})`);
+      g.addColorStop(1, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a*0.6*ATM_WASH})`);
+      cx.fillStyle = g; cx.fillRect(x0*W, 0, (x1-x0)*W, H);
+    }
+    cx.restore();
+  }
+  // 地面霧靄：兩團暖霧貼地緩慢漂（空氣是連續時間，不量化）
+  if (!hazeCv){
+    hazeCv = new OffscreenCanvas(256, 128);
+    const g2 = hazeCv.getContext("2d");
+    const rg = g2.createRadialGradient(128, 90, 6, 128, 90, 120);
+    rg.addColorStop(0, "rgba(255,205,150,0.14)"); rg.addColorStop(1, "rgba(255,205,150,0)");
+    g2.fillStyle = rg; g2.fillRect(0, 0, 256, 128);
+  }
+  cx.save(); cx.globalCompositeOperation = "screen";
+  const hs = performance.now() * 0.00002;
+  cx.globalAlpha = 0.5 * ATM_HAZE;
+  cx.drawImage(hazeCv, (0.18 + 0.10*Math.sin(hs*3.1))*W - W*0.3, H*0.62, W*0.62, H*0.36);
+  cx.drawImage(hazeCv, (0.74 + 0.12*Math.sin(hs*2.3 + 2))*W - W*0.3, H*0.66, W*0.62, H*0.34);
+  cx.restore(); cx.globalAlpha = 1;
+  // 光束裡的金塵：跟著每支燈
+  if (sceneId !== "s11" && !onVideo){      // 影片裡已經有塵埃了
+    for (const b of L) drawMotes(t, b.x, b.w);
+  }
+  // 顆粒
+  cx.globalAlpha = 0.04; cx.globalCompositeOperation = "overlay";
+  const ox = (Math.random()*256)|0, oy = (Math.random()*256)|0;
+  for (let x = -ox; x < W; x += 256) for (let y = -oy; y < H; y += 256)
+    cx.drawImage(grainLayer, x, y);
+  cx.globalAlpha = 1; cx.globalCompositeOperation = "source-over";
+}
+
+/* 程序化金塵：光柱裡漂浮的微粒。位置常駐、亮度呼吸、緩慢上飄，
+   12fps 量化讓它跟定格世界同一個時間性。 */
+const motes = Array.from({ length: 42 }, (_, i) => ({
+  x: 0.5 + (Math.random() - 0.5) * 0.34 * (0.4 + Math.random()),
+  y: Math.random(), r: 0.8 + Math.random() * 2.2,
+  ph: Math.random() * 7, sp: 0.006 + Math.random() * 0.02,
+}));
+function drawMotes(t, bx = 0.5, bw = 1){
+  const q = Math.floor(t * 12) / 12;
+  cx.save();
+  cx.globalCompositeOperation = "lighter";
+  for (const m of motes){
+    const y = ((m.y - q * m.sp) % 1 + 1) % 1;
+    const beamHalf = (0.06 + y * 0.22) * bw;           // 光柱錐形範圍（隨燈寬）
+    const mx = bx + (m.x - 0.5);
+    if (Math.abs(mx - bx) > beamHalf) continue;
+    const tw = 0.5 + 0.5 * Math.sin(q * 2.2 + m.ph);
+    const a = 0.10 + 0.16 * tw * (1 - y * 0.55);
+    cx.fillStyle = `rgba(255,224,168,${a.toFixed(3)})`;
+    cx.beginPath();
+    cx.arc(mx * W, y * H, m.r * (H / 900), 0, 7);
+    cx.fill();
+  }
+  cx.restore();
+}
+/* ── 場景專屬繪製（板之上、文字之下）────────────────────────── */
+const fx = { crumples: [], lastCrumple: 0 };
+function sceneDraw(t, dir2){
+  const s12 = Math.floor(t * 12) / 12;    // 定格節奏
+  if (sceneId === "s07") drawPlateFg("fg_s07");   // 桌子遮擋：評審站桌後不是桌上
+  if (sceneId === "s02"){
+    // 手機螢幕呼吸光（額外的活感；板上的光是死的）
+    const br = 0.10 + 0.05 * Math.sin(s12 * 1.4);
+    const g = cx.createRadialGradient(0.545*W, 0.60*H, 0, 0.545*W, 0.60*H, H*0.22);
+    g.addColorStop(0, `rgba(255,205,130,${br})`); g.addColorStop(1, "rgba(255,205,130,0)");
+    cx.save(); cx.globalCompositeOperation = "lighter";
+    cx.fillStyle = g; cx.fillRect(0.30*W, 0.30*H, 0.5*W, 0.6*H);
+    cx.restore();
+  }
+  else if (sceneId === "s03"){
+    // 郵筒吞信：信滑入投遞口 → 口部閃一下暖光（6s 一輪）
+    const cyc = t % 6;
+    if (cyc < 1.1){
+      const p2 = Math.floor((cyc / 1.1) * 8) / 8;
+      const ex = 0.475 + (0.532 - 0.475) * p2, ey = 0.700 - (0.700 - 0.628) * p2;
+      drawProp("envelope_v1", ex, ey, 0.045, { rot: -0.15 + p2*0.2, anchor:"center" });
+    } else if (cyc < 1.7){
+      const f = 1 - (cyc - 1.1) / 0.6;
+      const g = cx.createRadialGradient(0.535*W, 0.625*H, 0, 0.535*W, 0.625*H, H*0.09);
+      g.addColorStop(0, `rgba(255,190,110,${0.5*f})`); g.addColorStop(1, "rgba(255,190,110,0)");
+      cx.save(); cx.globalCompositeOperation = "lighter";
+      cx.fillStyle = g; cx.fillRect(0.4*W, 0.5*H, 0.27*W, 0.25*H);
+      cx.restore();
+    }
+  }
+  if (sceneId === "s01"){
+    // ⚠ 這裡以前把真 QR 貼在陶板上，而**陶板自己就刻了一個 QR 紋**
+    //   （兩層 QR 疊在一起，相機可能鎖錯或解不出來）。
+    //   真 QR 改成常駐左上角（`drawQrCorner`），這一景不再疊第二張。
+  }
+  else if (sceneId === "s05" && dir2.bubbleText){
+    // 思考泡泡＋配對到的真任務關鍵詞（泡泡 PNG 上部是大球，文字放球心）
+    const bob = Math.sin(s12 * 1.8) * H * 0.008;
+    if (!drawProp("thought_bubble_v1", 0.52, 0.46 + bob/H, 0.21, { anchor:"center" })){
+      cx.fillStyle = "rgba(255,225,160,0.32)";
+      cx.beginPath(); cx.ellipse(0.52*W, 0.42*H + bob, H*0.09, H*0.09, 0, 0, 7); cx.fill();
+    }
+    cx.textAlign = "center";
+    cx.font = serif(H*0.023, 600);
+    cx.fillStyle = "rgba(70,45,18,0.92)";
+    cx.fillText(String(dir2.bubbleText).slice(0, 10), 0.52*W, 0.425*H + bob);
+  }
+  else if (sceneId === "s06"){
+    // ⚠ 骰子與光點弧**只有在真的有路由層的時候才畫**（見 showsRoutingVisual）。
+    //   兩批資料都沒有那一層 ⇒ 現在兩個都不畫，畫面與大標才不會互相打臉。
+    if (showsRoutingVisual(dir2 && dir2.row)){
+    // 骰子：翻滾入冷池 → 落地擠壓一拍 → 靜置微顫
+    const dt2 = Math.min(1, t / 1.6);
+    const dx = 0.13 + dt2 * 0.06, dy = 0.55 + dt2 * 0.22;
+    const landed = t >= 1.6;
+    const rot = landed ? 0.12 : Math.floor(t * 8) % 4 * 1.55;
+    const squash = landed && t < 1.85 ? 0.82 : 1;   // 落地擠壓幀
+    cx.save();
+    cx.translate(dx*W, dy*H); cx.scale(1/Math.sqrt(squash), squash); cx.translate(-dx*W, -dy*H);
+    if (!drawProp("dice_v1", dx, dy, 0.10, { rot, anchor:"center" })){
+      cx.save(); cx.translate(dx*W, dy*H); cx.rotate(rot);
+      cx.fillStyle = "#cfc7b8"; const d = H*0.045;
+      cx.beginPath(); cx.roundRect(-d/2, -d/2, d, d, d*0.18); cx.fill();
+      cx.restore();
+    }
+    cx.restore();
+    if (landed && t < 2.5)                          // 落地揚塵一小口
+      drawProp("dust_burst_v2", dx, dy + 0.04, 0.07 + (t-1.6)*0.05,
+               { alpha: Math.max(0, 0.5 - (t-1.6)*0.6), anchor:"center" });
+    // 開側：光點虛線弧（真路由的視覺化）
+    cx.fillStyle = "rgba(255,205,120,0.85)";
+    for (let a = 0; a < 3; a++){
+      for (let i = 0; i < 7; i++){
+        const p2 = i / 6, on = (Math.floor(t*6) + i + a*2) % 3 !== 0;
+        if (!on) continue;
+        const bx = 0.66 + a*0.09, by = 0.52, ex = bx + 0.10, ey = 0.38 - a*0.03;
+        const x = bx + (ex-bx)*p2, y = by + (ey-by)*p2 - Math.sin(p2*Math.PI)*0.06;
+        cx.beginPath(); cx.arc(x*W, y*H, H*0.004*(1+p2), 0, 7); cx.fill();
+      }
+    }
+    }   // ← showsRoutingVisual
+    // 關／開 橢圓標。**這兩個不受上面那道閘門影響**：它們標的是兩條臂
+    // （ON／OFF），而兩條臂 2026-09-19 起真的都跑過了。
+    // ⚠ 1920×1080 實測：「開」那一顆寫死在 (0.80W, 0.42H) ＝ (1536, 453)，
+    //   直接壓在監視器面板的「同題關掉這層」「累計漏出」兩行上面。
+    //   面板的高度是跟著列數長的，所以不能用一個新的魔術數字換掉舊的：
+    //   **問 monitorGeom**，而且兩顆一起下移（只動右邊那顆會左右不對稱）。
+    let labY = 0.42;
+    if (dir2 && dir2.task && dir2.row){
+      // 用說明行數的**上界**（EVIDENCE_NOTE_MAX_LINES）算：讓多了幾 px 無害，
+      // 讓少了就是撞版。實際幾行由 drawMonitor 量，那是同一個 monitorGeom。
+      const g = monitorGeom(
+        monitorRows(dir2.task, LIVE.counters, dir2.caseTotals).length, W, H,
+        EVIDENCE_NOTE_MAX_LINES);
+      const need = (g.y + g.h) / H + 0.075;        // 面板底下再留一個半徑
+      if (0.80*W + H*0.075 > g.x) labY = Math.max(labY, need);
+    }
+    for (const [lx, txt] of [[0.165, "關"], [0.80, "開"]]){
+      cx.strokeStyle = "rgba(240,232,216,0.55)"; cx.lineWidth = H*0.0018;
+      cx.beginPath(); cx.ellipse(lx*W, labY*H, H*0.075, H*0.048, 0, 0, 7); cx.stroke();
+      cx.fillStyle = "rgba(240,232,216,0.92)";
+      cx.font = serif(H*0.052, 700); cx.textAlign = "center";
+      cx.fillText(txt, lx*W, (labY + 0.018)*H);
+    }
+  }
+  else if (sceneId === "s08"){
+    // 紙團拋物線（修訂中每 2.5s 丟一顆，最多 6 顆落地）
+    if (t - fx.lastCrumple > 2.5 && fx.crumples.length < 6){
+      fx.lastCrumple = t;
+      fx.crumples.push({ t0: t, x0: 0.20, y0: 0.72,
+        x1: 0.06 + Math.random()*0.30, y1: 0.86 + Math.random()*0.06 });
+    }
+    for (const cr of fx.crumples){
+      const p2 = Math.min(1, (t - cr.t0) / 0.9);
+      const q = Math.floor(p2 * 8) / 8;    // 定格步進
+      const x = cr.x0 + (cr.x1-cr.x0)*q, y = cr.y0 + (cr.y1-cr.y0)*q - Math.sin(q*Math.PI)*0.10;
+      if (!drawProp("crumple_v" + (1 + (fx.crumples.indexOf(cr) % 3)), x, y, 0.045, { anchor:"center" })){
+        cx.fillStyle = "#d8ccb2";
+        cx.beginPath(); cx.arc(x*W, y*H, H*0.018, 0, 7); cx.fill();
+      }
+    }
+  }
+  else if (sceneId === "s09"){
+    // 放大鏡垂降＋抽中的紙上升發光
+    const drop = Math.min(1, t / 1.5), q = Math.floor(drop * 12) / 12;
+    const gy = 0.14 + q * 0.38 + Math.sin(s12 * 1.3) * 0.008;
+    cx.strokeStyle = "rgba(30,20,10,0.6)"; cx.lineWidth = Math.max(1, H*0.0022);
+    cx.beginPath(); cx.moveTo(0.5*W, 0); cx.lineTo(0.5*W, (gy-0.17)*H); cx.stroke();
+    if (!drawProp("magnifier_cable_v1", 0.5, gy, 0.34, { anchor:"center" })){
+      cx.strokeStyle = "rgba(200,170,110,0.9)"; cx.lineWidth = H*0.009;
+      cx.beginPath(); cx.arc(0.5*W, gy*H, H*0.09, 0, 7); cx.stroke();
+    }
+    if (drop >= 1){
+      const lift = Math.min(1, (t - 1.6) / 1.2), lq = Math.floor(lift * 10) / 10;
+      const py2 = 0.78 - lq * 0.14;
+      cx.save();
+      cx.shadowColor = "rgba(255,215,150,0.8)"; cx.shadowBlur = H*0.03;
+      if (!drawProp("paper_lift_v1", 0.5, py2, 0.12, { anchor:"center" })){
+        cx.fillStyle = "#e9dfc6";
+        cx.fillRect(0.5*W - H*0.045, (py2-0.04)*H, H*0.09, H*0.065);
+      }
+      cx.restore();
+      if (dir2.auditText){
+        cx.font = serif(H*0.017, 500); cx.textAlign = "center";
+        cx.fillStyle = "rgba(240,232,216,0.7)";
+        cx.fillText(dir2.auditText, 0.5*W, 0.92*H);
+      }
+    }
+  }
+  else if (sceneId === "s10" && dir2.verdict){
+    // 左紙紅光脈動（漏出戲的靈魂——板上有裂紋，光要活）
+    if (dir2.verdict.tone === "bad"){
+      drawFxVideo("sprites/video/fx_redglow.mp4", 0.18, 0.855, 0.22, { alpha: 0.55 });
+      const pulse = 0.25 + 0.15 * Math.sin(s12 * 3.2);
+      const g = cx.createRadialGradient(0.18*W, 0.885*H, 0, 0.18*W, 0.885*H, W*0.10);
+      g.addColorStop(0, `rgba(255,70,40,${pulse})`);
+      g.addColorStop(1, "rgba(255,70,40,0)");
+      cx.fillStyle = g;
+      cx.globalCompositeOperation = "lighter";
+      cx.fillRect(0.04*W, 0.74*H, W*0.30, H*0.26);
+      cx.globalCompositeOperation = "source-over";
+    }
+    // ⚠ 實測撞版兩處：baseline 在 0.33H、字高 0.058H ⇒ 字頂到 0.272H，
+    //   蓋住 0.275H 的場景副標；而且置中在 W/2、長句寬到右端碰到監視器面板
+    //   的左邊框（1920 上 x≈1398）。⇒ 跟大標同一個中心（titleCenter，面板
+    //   在的時候是 0.40W）、往下移到 0.46H。
+    cx.textAlign = "center";
+    cx.fillStyle = dir2.verdict.tone === "bad" ? "rgba(226,120,100,0.97)"
+                                               : "rgba(196,224,196,0.97)";
+    cx.font = serif(H*0.058, 700);
+    cx.shadowColor = "rgba(0,0,0,0.6)"; cx.shadowBlur = H*0.012;
+    cx.fillText(dir2.verdict.big, titleCenter(), H*0.46);
+    cx.shadowBlur = 0;
+  }
+  else if (sceneId === "s11" && dir2.moundPuffT > 0){
+    const pp = 1 - dir2.moundPuffT / 1.4;
+    const dq = Math.floor(t * 12) % 3;
+    drawProp("dust_burst_v" + (dq + 1), 0.865, 0.50 - pp * 0.06, 0.10 + pp * 0.12,
+             { alpha: Math.max(0, 0.7 * (1 - pp)), anchor: "center" });
+  }
+  else if (sceneId === "s00"){
+    // 「碰一下開始」漣漪（劇照 27 底部）
+    cx.textAlign = "center";
+    cx.font = serif(H*0.032, 600);
+    cx.fillStyle = "rgba(240,232,216,0.92)";
+    cx.shadowColor = "rgba(0,0,0,0.6)"; cx.shadowBlur = H*0.008;
+    cx.fillText("碰一下開始", W/2, H*0.925);
+    cx.shadowBlur = 0;
+    const rp = (t % 2.4) / 2.4;
+    cx.strokeStyle = `rgba(240,232,216,${0.5*(1-rp)})`;
+    cx.lineWidth = Math.max(1, H*0.0015);
+    cx.beginPath(); cx.ellipse(W/2, H*0.945, H*(0.06+rp*0.10), H*(0.014+rp*0.024), 0, 0, 7); cx.stroke();
+  }
+}
+const PLATE_CALIB = {                    // 板到手後用 ?calib 對位微調
+  s01: { x: 0.502, y: 0.625, w: 0.150, skew: 0.0 },
+};
+
+/* ── 導演（重放＋訪客流程都走電影場景切換）───────────────────── */
+const spawnQueue = [];
+
+/* ══ 抵達層 ═══════════════════════════════════════════════════════════
+   人類 2026-09-21：「觀眾按下送出的那一秒，畫面必須動。」
+
+   ⚠ **抵達 ≠ 成形，這兩件事以前綁在一起，那是這個展件最大的體驗缺陷。**
+     舊路徑只有一句 `spawnQueue.push(sub)`：
+       投卡 → 進佇列 → 等導演有空 → `startVisitor()` → 分身成形走出來。
+     「等導演有空」在演 replay 的時候是整整一格故事（一分鐘起跳），
+     而分身的話本身還要 15–700 秒才生得出來（實測中位 312s）。
+     ⇒ 觀眾按下送出、抬頭看螢幕，**什麼都不會發生**。
+
+   這一層只負責**抵達**：一封信從畫面邊緣飛進來、落到投遞口、塵爆、
+   周圍的黏土人轉頭看過來。它**不吃劇團、不吃影片、不吃模型**——
+   只要一張 PNG（`props/envelope_v*.png`，s03 郵筒吞的就是同一張）
+   跟一個座標。`spawnQueue` 那一條線**一個字都沒改**。
+
+   ⚠ `Object.keys(byAgent).length >= 6` 那道閘門**刻意保留**。
+     它擋的是「劇團還沒到齊就開演」：`startVisitor` 之後 `crowd(7)` 要湊
+     七個圍觀者、`castOf()` 要從六個原型裡取 worker，取不到那一格故事
+     就演不出來（P1／D1 那個「每一筆被靜靜丟棄」的坑就是這樣來的）。
+     抵達不需要這些 ⇒ **拆開之後閘門可以原封不動留著**，這正是拆開的意義。
+     新加的只有 `!arrivals.holding()`：抵達先演 2.8 秒，成形排在它後面，
+     不是取代它。
+
+   ⚠ 造型不動（〈動物園要用人不用抽象生物〉：抽象發光生物已被連續三次
+     否決）。飛進來的是**一封信**，不是發光體；轉頭的是現成的黏土人形。
+
+   ⚠ 畫面上不印觀眾打的原話，只印代號（`visitorCode`，跟 `visitorLabel`
+     同一支）——DECISION_20260921_TWIN_CONSENT_AND_ERASURE §三-3。
+
+   負控制：`?arrive=0` 整層關掉 ⇒ 畫面回到改動前（什麼都不會發生）。
+   ════════════════════════════════════════════════════════════════════ */
+const ARRIVE_ON = Q.get("arrive") !== "0";
+// 抵達要不要 cut 到郵筒那一幕。**分成兩個開關是因為它們的失效模式不同**：
+// 換景會逼瀏覽器去載新板／新精靈，機器慢的時候那一下會卡住整條主執行緒
+// （headless 實測卡了 ~7 秒）。`?arrivecut=0` 只關換景、信照飛，
+// 就是「機器太慢時仍然保得住一秒內有反應」的退路。
+const ARRIVE_CUT = Q.get("arrivecut") !== "0";
+const ARRIVE_HOLD = 2.8;                      // 抵達的優先權有多長（秒）
+// s03 的板上有真的郵筒；投遞口座標＝`sceneDraw` 裡「郵筒吞信」用的同一點。
+const DROP_SLOT = { s03: [0.532, 0.628] };
+/** 沒有郵筒的景，投遞口就是右下角這塊陶牌上的缺口（這一層自己畫，所以
+ *  「卡落到一個看得見的東西上」在**每一個場景**都成立，不只 s03）。 */
+function dockGeom(){
+  const U = uiScale();
+  const w = U * 0.30, h = U * 0.170;
+  return { x: W - U*0.03 - w, y: H*0.905 - h, w, h, U };
+}
+function dropPoint(){
+  const p = DROP_SLOT[sceneId];
+  if (p) return p;
+  const g = dockGeom();
+  return [(g.x + g.w*0.5)/W, (g.y + g.U*0.022)/H];
+}
+/* ── 跟「找到自己」那一條線對齊 ──────────────────────────────────────
+   記號層（`TWINTOKEN-V1`／`MARK-LAYER-V1`，另一條線）把同一個不透明 id 算成
+   一枚記號（詞＋顏色＋形狀），手機上與電視上是**同一枚**。抵達的視覺鉤子
+   由這一層給：**信上蓋的就是他手機上那一枚章**。
+
+   ⚠ 那一支正在被另一個 agent 改。所以這裡一律**防禦式取用**：拿不到、
+     壞了、或被關掉（`?mark=0`），就退回自己的蠟封＋`visitorCode` 代號，
+     **不讓抵達整層跟著垮**。展場的抵達不可以有單點故障。 */
+function arrivalMarkOn(){
+  try { return (typeof MARK_ON === "undefined") ? true : !!MARK_ON; } catch (e) { return true; }
+}
+function arrivalToken(id){
+  try { return (typeof twinToken === "function" && arrivalMarkOn()) ? twinToken(id) : null; }
+  catch (e) { return null; }
+}
+function arrivalGlyph(g, x, y, r, tok, alpha){
+  try {
+    if (tok && typeof twinDrawGlyph === "function"){ twinDrawGlyph(g, x, y, r, tok, alpha); return true; }
+  } catch (e) {}
+  return false;
+}
+function hexRgb(hex, fallback){
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ""));
+  if (!m) return fallback;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+const arrivals = {
+  flying: [],     // 正在飛／剛落地的信
+  waiting: [],    // 已抵達、還沒上台的（陶牌上那幾列）
+  total: 0,       // **這一頁開著的期間**收到幾件（不是「今天」——沒有跨頁帳）
+  dockT: 0, dock: 0, flash: 0, burstT: null, burstAt: null, holdT: 0,
+  marks: [],      // 量測用：每一次抵達的 {id, at, drawnAt}。**不是裝飾**：
+                  // 「按下送出到畫面動」要量得動，量不動就不准說「一秒內」。
+
+  holding(){ return this.holdT > 0; },
+
+  /** 投稿抵達。**同步**執行，不等輪詢、不等影片、不等模型。 */
+  arrive(sub){
+    if (!ARRIVE_ON || !sub) return null;
+    const id = sub.id == null ? "" : String(sub.id);
+    const card = sub.card || {};
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h*31 + id.charCodeAt(i)) >>> 0;
+    // 起飛方位由 id 決定 ⇒ 同一個人每一次都從同一邊飛進來（可辨識性的一半）
+    const side = h % 3;
+    // 記號優先（手機上那一枚章）；拿不到才退回代號＋他挑的顏色。
+    const tok = arrivalToken(id);
+    const a = {
+      id, tok, code: visitorCode(id) || "來客", card,
+      label: tok ? tok.word : (visitorCode(id) || "來客"),
+      // 沒有記號時：蠟封的顏色＝他自己在手機上挑的顏色，而且是 `pickCastFor`
+      // 給分身選造型用的**同一組色錨** ⇒ 卡的顏色跟待會成形的那隻同一個顏色。
+      rgb: tok ? hexRgb(tok.colorHex, [198, 176, 138])
+               : (COLOR_ANCHOR[card.color] || [198, 176, 138]),
+      ev: "envelope_v" + (1 + (h % 3)),
+      from: side === 0 ? [-0.12, 0.90] : side === 1 ? [0.50, 1.14] : [1.12, 0.90],
+      place: this.waiting.length + 1,
+      // 同時三個人投卡不會疊在一起：後到的排隊起飛，0.42 秒一封
+      wait: this.flying.filter(f => f.t < f.dur).length * 0.42,
+      dur: 0.62, landed: false,
+    };
+    a.t = -a.wait;
+    this.total++;
+    this.flying.push(a);
+    this.waiting.push(a);
+    while (this.waiting.length > 12) this.waiting.shift();   // 無人值守一整天不長大
+    this.dockT = 10;
+    this.holdT = ARRIVE_HOLD + a.wait;
+    this.marks.push({ id, at: performance.now(), drawnAt: null });
+    if (this.marks.length > 50) this.marks.shift();
+    // 落點**這一刻就定死，之後不再重算**。舊寫法每一幀問一次 `dropPoint()`，
+    // 換景時落點會從陶牌跳到郵筒 ⇒ 飛到一半的信會瞬移。
+    a.to = dropPoint();
+    // ⚠ **換景排在落地之後**，這是量出來才改的：`enterScene("s03")` 會同時叫起
+    //   新的板與七支精靈片，軟體解碼的機器上那一下把主執行緒整個卡住。
+    //   實測（`ops/exhibit/twin/evidence_visible_20260921/arrival_beat/10_latency`）
+    //   「onSubmission → 信第一次畫出來」：**先換景** 3202／4090／11349 ms，
+    //   **不換景** 134／256 ms。差的那三到十一秒全是換景。
+    //   ⇒ 先讓觀眾看到信落進投遞口（那才是他要的那一秒），再切到郵筒那一幕。
+    //   剪接上也更對：先給反應，再給交代場景的那個鏡頭。
+    a.wantCut = ARRIVE_CUT;
+    a.cutAt = a.dur + 0.35;        // 落地、代號亮出來之後再切
+    return a;
+  },
+
+  /** 分身真的上台了 ⇒ 從陶牌上劃掉，後面的人序位往前遞補。 */
+  spawned(id){
+    const k = String(id);
+    const i = this.waiting.findIndex(a => a.id === k);
+    if (i >= 0) this.waiting.splice(i, 1);
+    for (let j = 0; j < this.waiting.length; j++) this.waiting[j].place = j + 1;
+  },
+
+  /** 落地那一刻：旁邊**沒在演戲的**人轉頭看過來。回傳真的轉了幾個（不猜）。
+   *  只動 `dir`／`state`／`think` 三個欄位，全部是漫遊邏輯自己會收回去的。 */
+  lookAt(px){
+    let n = 0;
+    for (const c of cast){
+      if (!c.onstage || c.reserved || c === director.visitor) continue;
+      if (Math.abs(c.nx - px) > 0.60) continue;
+      c.dir = c.nx > px ? -1 : 1;
+      c.state = "idle"; c.target = null;
+      c.think = 2.6 + Math.random() * 1.4;
+      n++;
+    }
+    return n;
+  },
+
+  update(dt){
+    if (!ARRIVE_ON) return;
+    if (this.holdT > 0) this.holdT = Math.max(0, this.holdT - dt);
+    if (this.dockT > 0) this.dockT = Math.max(0, this.dockT - dt);
+    if (this.flash > 0) this.flash = Math.max(0, this.flash - dt / 0.6);
+    if (this.burstT != null){ this.burstT += dt; if (this.burstT > 0.9) this.burstT = null; }
+    const want = (this.waiting.length || this.dockT > 0) ? 1 : 0;
+    this.dock += (want - this.dock) * Math.min(1, dt * 5);
+    for (const a of this.flying){
+      const was = a.t; a.t += dt;
+      if (!a.landed && was < a.dur && a.t >= a.dur){
+        a.landed = true; this.flash = 1; this.burstT = 0;
+        this.burstAt = a.to;                 // 塵爆炸在**這一封**的落點上
+        a.looked = this.lookAt(a.to[0]);     // 真的轉了幾個，寫下來
+      }
+      // 換景排在這裡（理由見 `arrive()` 那段實測註解）。只切一次。
+      if (a.wantCut && a.t >= a.cutAt){ a.wantCut = false; a.cut = director.toDrop(); }
+    }
+    this.flying = this.flying.filter(a => a.t < a.dur + 1.35);
+  },
+
+  /** 整層畫在**鏡頭變換裡面**（跟著鏡頭呼吸）：陶牌是場上的一塊陶，
+   *  不是 HUD。畫在外面的話，鏡頭推到 1.032 時信會落在缺口旁邊 20 幾 px。 */
+  draw(){
+    if (!ARRIVE_ON) return;
+    const [dx, dy] = this.burstAt || dropPoint();
+    if (this.dock > 0.02) this.drawDock();
+    if (this.flash > 0){
+      const f = this.flash * this.flash;
+      const g = cx.createRadialGradient(dx*W, dy*H, 0, dx*W, dy*H, H*0.11);
+      g.addColorStop(0, `rgba(255,198,118,${0.55*f})`);
+      g.addColorStop(1, "rgba(255,198,118,0)");
+      cx.save(); cx.globalCompositeOperation = "lighter";
+      cx.fillStyle = g; cx.fillRect(dx*W - H*0.12, dy*H - H*0.12, H*0.24, H*0.24);
+      cx.restore();
+    }
+    // 塵爆：**刻意只用 PNG 步進**，不借 `sprites/video/fx_dustburst.mp4`。
+    // 那支 video 元素是影池共用的，成形塵爆正在用它時搶過來會讓兩邊都從
+    // 中間開始播；而且輕量版根本不載影片。少一點漂亮，換「每一次都一樣、
+    // 每一個版本都有」。
+    if (this.burstT != null){
+      const p = Math.min(1, this.burstT / 0.9);
+      drawProp("dust_burst_v" + (1 + (Math.floor(this.burstT * 12) % 3)),
+               dx, dy + 0.012, 0.13 + p * 0.11,
+               { alpha: (1 - p) * 0.88, anchor: "center" });
+    }
+    for (const a of this.flying) this.drawCard(a);
+  },
+
+  drawCard(a){
+    const [dx, dy] = a.to || dropPoint();
+    if (a.t < 0) return;                                  // 還在排隊等起飛
+    const p = Math.min(1, a.t / a.dur);
+    const e = 1 - Math.pow(1 - p, 3);                     // easeOutCubic：飛進來然後坐定
+    const q = Math.floor(e * 12) / 12;                    // 12fps 定格（跟全片同一個節拍）
+    const x = a.from[0] + (dx - a.from[0]) * q;
+    const y = a.from[1] + (dy - a.from[1]) * q - Math.sin(q * Math.PI) * 0.14;
+    const after = Math.max(0, a.t - a.dur);
+    const alpha = after > 0.80 ? Math.max(0, 1 - (after - 0.80) / 0.55) : 1;
+    if (alpha <= 0) return;
+    for (const mk of this.marks)
+      if (mk.id === a.id && mk.drawnAt == null) mk.drawnAt = performance.now();
+    const hh = 0.050 + (1 - q) * 0.024;
+    const rot = (1 - q) * (a.from[0] < 0.5 ? 0.6 : -0.6);
+    const sq = a.landed && after < 0.14 ? 0.86 : 1;       // 落地擠壓一拍
+    cx.save();
+    cx.translate(x*W, y*H); cx.scale(1/Math.sqrt(sq), sq); cx.translate(-x*W, -y*H);
+    if (!drawProp(a.ev, x, y, hh, { rot, alpha, anchor: "center" })){
+      // PNG 少一張也要看得到：展場不能因為一張圖沒載到就「沒有反應」
+      cx.save(); cx.globalAlpha = alpha;
+      cx.translate(x*W, y*H); cx.rotate(rot);
+      const w2 = H*hh*1.45;
+      cx.fillStyle = "#e6dac0"; cx.fillRect(-w2/2, -H*hh/2, w2, H*hh);
+      cx.strokeStyle = "rgba(90,66,36,0.55)"; cx.lineWidth = Math.max(1, H*0.0012);
+      cx.strokeRect(-w2/2, -H*hh/2, w2, H*hh);
+      cx.restore(); cx.globalAlpha = 1;
+    }
+    // 信上蓋的章：有記號就蓋**他手機上那一枚**，沒有就蓋自己的蠟封
+    const [r, g2, b] = a.rgb;
+    if (!arrivalGlyph(cx, x*W, y*H, H*hh*0.30, a.tok, alpha)){
+      cx.save(); cx.globalAlpha = alpha;
+      cx.fillStyle = `rgb(${r},${g2},${b})`;
+      cx.beginPath(); cx.arc(x*W, y*H, H*hh*0.26, 0, 7); cx.fill();
+      cx.strokeStyle = "rgba(30,20,10,0.45)"; cx.lineWidth = Math.max(1, H*0.0014);
+      cx.stroke(); cx.restore(); cx.globalAlpha = 1;
+    }
+    cx.restore();
+    if (a.landed){
+      const ty = (y - hh*1.05)*H;
+      cx.save(); cx.textAlign = "center"; cx.globalAlpha = alpha;
+      cx.shadowColor = "rgba(0,0,0,0.65)"; cx.shadowBlur = H*0.008;
+      cx.font = serif(H*0.027, 700);
+      cx.fillStyle = `rgb(${r},${g2},${b})`;
+      cx.fillText(a.label, x*W, ty);
+      cx.font = serif(H*0.019, 600);
+      cx.fillStyle = "rgba(240,232,216,0.90)";
+      cx.fillText(a.place > 1 ? `收到了 · 你是第 ${a.place} 個` : "收到了",
+                  x*W, ty + H*0.028);
+      if (a.tok){
+        // 跟記號層說同一句話（`MARK_HINT`）：手機上那一枚就是這一枚。
+        cx.font = serif(H*0.0155, 500);
+        cx.fillStyle = "rgba(240,232,216,0.62)";
+        cx.fillText("手機上同一個記號", x*W, ty + H*0.050);
+      }
+      cx.restore(); cx.globalAlpha = 1; cx.shadowBlur = 0;
+    }
+  },
+
+  /** 右下角那塊陶牌。**判準 3 就靠這一塊**：同時三個人投卡，畫面要看得出
+   *  「你是第 2 個」。沒人投的時候完全不出現（`dock` 淡到 0）。 */
+  drawDock(){
+    const g = dockGeom(), U = g.U, A = Math.min(1, this.dock);
+    cx.save();
+    cx.globalAlpha = A;
+    cx.fillStyle = "rgba(10,7,3,0.62)";
+    cx.strokeStyle = "rgba(240,232,216,0.28)";
+    cx.lineWidth = Math.max(1, U*0.0014);
+    cx.beginPath(); cx.roundRect(g.x, g.y, g.w, g.h, U*0.010);
+    cx.fill(); cx.stroke();
+    const mx = g.x + g.w*0.5;
+    cx.fillStyle = "rgba(0,0,0,0.58)";
+    cx.beginPath(); cx.roundRect(mx - U*0.055, g.y + U*0.016, U*0.110, U*0.012, U*0.006);
+    cx.fill();
+    cx.textAlign = "left";
+    cx.font = serif(U*0.020, 700);
+    cx.fillStyle = "rgba(240,232,216,0.92)";
+    cx.fillText("投遞口", g.x + U*0.018, g.y + U*0.052);
+    cx.textAlign = "right";
+    cx.font = serif(U*0.016, 600);
+    cx.fillStyle = "rgba(240,232,216,0.60)";
+    cx.fillText(`這一輪收到 ${this.total} 件`, g.x + g.w - U*0.018, g.y + U*0.052);
+    cx.textAlign = "left";
+    const rows = this.waiting.slice(0, 3);
+    let yy = g.y + U*0.078;
+    for (let i = 0; i < rows.length; i++){
+      const a = rows[i], [r, g2, b] = a.rgb;
+      // 標示層：這一格畫的是**記號本體**（同一支 twinDrawGlyph，手機上也是它），
+      // 不是卡片色系的圓點——陶牌上寫著代號，旁邊就該是那個代號的圖案。
+      // ⚠ 用抵達那一刻算好的 `a.tok`（跟信上蓋的那一枚是同一枚），不重算；
+      //   `arrivalGlyph` 是防禦式的，記號層改壞了也只是退回色點。
+      if (!arrivalGlyph(cx, g.x + U*0.026, yy - U*0.005, U*0.0095, a.tok, 1)){
+        cx.fillStyle = `rgb(${r},${g2},${b})`;
+        cx.beginPath(); cx.arc(g.x + U*0.026, yy - U*0.005, U*0.007, 0, 7); cx.fill();
+      }
+      cx.font = serif(U*0.0165, 600);
+      cx.fillStyle = "rgba(240,232,216,0.90)";
+      cx.fillText(`${i+1}　${a.label}`, g.x + U*0.040, yy);
+      cx.textAlign = "right";
+      cx.font = serif(U*0.0155, 500);
+      cx.fillStyle = i === 0 ? "rgba(190,222,190,0.92)" : "rgba(240,232,216,0.55)";
+      cx.fillText(i === 0 ? "接下來就是他" : "排隊中", g.x + g.w - U*0.018, yy);
+      cx.textAlign = "left";
+      yy += U*0.0215;
+    }
+    if (this.waiting.length > rows.length){
+      cx.font = serif(U*0.0145, 500);
+      cx.fillStyle = "rgba(240,232,216,0.50)";
+      cx.fillText(`…還有 ${this.waiting.length - rows.length} 位在排`, g.x + U*0.040, yy);
+    } else if (!this.waiting.length){
+      cx.font = serif(U*0.0155, 500);
+      cx.fillStyle = "rgba(240,232,216,0.55)";
+      cx.fillText("都上台了", g.x + U*0.040, yy);
+    }
+    cx.font = serif(U*0.0135, 500);
+    cx.fillStyle = "rgba(240,232,216,0.42)";
+    cx.fillText("一次演一位 · 依抵達順序", g.x + U*0.018, g.y + g.h - U*0.014);
+    cx.restore();
+    cx.globalAlpha = 1;
+  },
+};
+// 量測與回歸用的把手（**只讀**）。觸發一律走 `WorldBridge.onSubmission`
+// 那條真路徑——繞過它直接戳 `arrive()` 就量不到「產品路徑通不通」。
+window.__arrivals = arrivals;
+
+// 節拍長度（秒）：[無訪客的環境重放, 有訪客時]。人類 2026-09-03：
+// 「我都還沒做決策還沒做評分，更看不到最終結果」——訪客的故事原本 22 秒跑完，
+// 現場根本看不懂。有訪客時每一拍給足時間，並補上收據結尾。
+const BEAT = { spawn:[0,7], goal:[0,9], route:[6,9], review:[8,13],
+               revise:[6,9], audit:[7,10], verdict:[8,13], receipt:[0,7], chain:[7,7] };
+function beat(name, hasVisitor){ return BEAT[name][hasVisitor ? 1 : 0]; }
+const director = {
+  mode: "invite", t: 0, inviteStep: 0,
+  task: null, row: null, caption: "", capSub: "",
+  verdict: null, bubbleText: null, auditText: null,
+  visitor: null, visitorCard: null, visitorId: null, visitorTask: null,
+  visitorSub: null,          // 整包投稿（含 twin.engine）——誠實列要講「他的話誰生的」
+  cooldown: 4,
+  // ── 邀請輪播：s00→s01→s02→s03→回野生 ──
+  INVITE: [["s00", 14], ["s01", 12], ["s02", 8], ["s03", 9]],
+  // 人類 2026-09-05：「只有可行的、沒有被否決或判決的，看下去很順暢，
+  // 但表明不了 Vacant 在 agent 之上帶來什麼」。實況：371 筆裡 363 筆全票通過，
+  // 隨機抽樣 98% 抽到順的。改成**輪流演五種真案例**，每一種都標出它在 371 筆裡
+  // 的真實佔比——策展是選哪一筆，不是改任何一筆。
+  caseIdx: 0,
+  caseBuckets: null,
+  buildBuckets(){
+    if (this.caseBuckets || !REPLAY) return this.caseBuckets;
+    const ok = t => t.ON && t.ON.votes && t.ON.votes.length && byAgent[t.ON.worker];
+    const ts = REPLAY.tasks.filter(ok);
+    const B = {
+      blocked:  ts.filter(t => !t.ON.accepted),
+      leaked:   ts.filter(t => t.ON.accepted && !t.ON.meets_demand),
+      audited:  ts.filter(t => t.ON.audited),
+      revised:  ts.filter(t => (t.ON.reviser && t.ON.selected_version === "revised")
+                               || (t.ON.votes || []).some(v => !v[1])),
+      contrast: ts.filter(t => t.OFF && t.OFF.accepted && !t.OFF.meets_demand
+                               && t.ON.accepted && t.ON.meets_demand),
+      plain:    ts.filter(t => t.ON.accepted && t.ON.meets_demand && !t.ON.audited),
+    };
+    this.caseTotals = Object.fromEntries(Object.entries(B).map(([k, v]) => [k, v.length]));
+    this.caseTotals.all = ts.length;
+    this.caseTotals.offLeaked = ts.filter(t => t.OFF && t.OFF.accepted && !t.OFF.meets_demand).length;
+    this.caseBuckets = B;
+    return B;
+  },
+  // 輪替順序：先給「不順」的，再給一筆平常的當呼吸
+  CASE_ORDER: ["blocked", "contrast", "audited", "leaked", "revised", "plain"],
+  CASE_LABEL: {
+    blocked:  ["這一筆被擋下來了", n => `371 筆裡有 ${n} 筆沒被收下——擋下來要拿得出反例`],
+    contrast: ["同一題，關掉這一層會怎樣", n => `${n} 筆是這樣：有這層擋住了，沒這層就漏出去`],
+    audited:  ["這一筆被抽中稽核", n => `371 筆裡有 ${n} 筆被抽中，系統重跑一次驗它`],
+    leaked:   ["這一筆漏出去了", n => `有這層也還是漏了 ${n} 筆——機制不是萬靈丹，數字照實給`],
+    revised:  ["這一筆有人投了反對票", n => `只有 ${n} 筆走到反對或修訂——評審大多時候說可以`],
+    plain:    ["這一筆一路通過", n => `多數是這樣：${n} 筆順利交付`],
+  },
+  pick(){
+    if (!REPLAY) return null;
+    const B = this.buildBuckets();
+    if (!B) return null;
+    for (let k = 0; k < this.CASE_ORDER.length; k++){
+      const kind = this.CASE_ORDER[(this.caseIdx + k) % this.CASE_ORDER.length];
+      const pool = B[kind];
+      if (pool && pool.length){
+        this.caseIdx = (this.caseIdx + k + 1) % this.CASE_ORDER.length;
+        this.caseKind = kind;
+        return pool[(Math.random() * pool.length) | 0];
+      }
+    }
+    this.caseKind = null;
+    return null;
+  },
+  stage(slotsAssign){
+    // 場景選角：列出的上台（瞬移到站位＝電影 cut），其他人下台
+    for (const c of cast) c.onstage = false;
+    for (const [c, slot, opts] of slotsAssign){
+      if (!c) continue;
+      c.onstage = true;
+      c.place(slot[0], slot[1], (opts && opts.dir) || (slot[0] < 0.5 ? 1 : -1));
+      c.dim = (opts && opts.dim) || 0;
+      c.acting = (opts && opts.act) || null;
+      c.kscale = (opts && opts.k) || 1;
+      c.reserved = true;
+    }
+  },
+  crowd(n, excl){
+    const ex = new Set(excl || []);
+    return cast.filter(c => !ex.has(c) && !c.agent).slice(0, n);
+  },
+  enterScene(id, assigns){
+    // ⚠ 硬防呆：`s07` 的底圖是烤死的三人評審室（三個人圍桌、兩個舉紅綠牌）。
+    //   這條路上沒有評審層的時候進去，等於用一張 120px 的圖宣告一個
+    //   不存在的機制，而否認只有面板上 18px 的一行。**圖蓋得過字。**
+    //   （P8 已經不會走到這裡；這一道是防止以後有人改壞。）
+    if (id === "s07" && this.row && !this.row.has_review_layer){
+      console.error("[live] 擋下：沒有評審層卻要進 s07（評審室）");
+      id = "s06";
+    }
+    setScene(id);
+    // 大標的改寫收在這一個入口：每一拍只會從這裡進場，所以不會有哪一拍漏掉。
+    this.titleOv = beatTitle(id, this.row);
+    this.t = 0;
+    fx.crumples.length = 0; fx.lastCrumple = 0;
+    if (assigns) this.stage(assigns);
+  },
+  // ── 邀請輪播的選角 ──
+  inviteStage(id){
+    const s = SCENES[id];
+    if (id === "s00"){
+      // 劇照 27 的弧：體型互異的 9 隻鋪開站好，緩慢漫遊
+      const picks = [...cast].sort(() => Math.random()-0.5).slice(0, s.slots.length);
+      this.stage(picks.map((c, i) => [c, s.slots[i]]));
+      for (const c of picks){ c.wander = true; c.reserved = false; }
+    } else if (id === "s01"){
+      const two = this.crowd(2);
+      this.stage([[two[0], s.slots[0], {dir:1}], [two[1], s.slots[1], {dir:-1}]]);
+    } else if (id === "s02"){
+      // 劇照 41：c13 貼著發光手機掩嘴偷看（劇照裡他近半個畫面高）
+      this.stage([[byAgent["hasty-1"], s.slots[0], {dir:1, act:"peek", k:1.5}]]);
+    } else if (id === "s03"){
+      // 劇照 42：一隻拿著信走到投遞口，群眾圍觀
+      const ring = this.crowd(s.slots.length - 1);
+      this.stage([[byAgent["plain-1"], s.slots[0], {dir:1, act:"carry"}],
+        ...ring.map((c, i) => [c, s.slots[i+1]])]);
+    }
+  },
+  /** 有人投卡而現在沒在演故事 ⇒ 直接 cut 到投遞箱那一幕（s03）。
+   *
+   *  s03 的板上本來就有郵筒與圍觀的群眾（劇照 42），`inviteStage("s03")`
+   *  也已經把人擺好了 ⇒ 「信落到箱子上、旁邊的人轉頭」用的**全是現成素材**。
+   *
+   *  ⚠ 正在演 replay／visitor 的時候**不 cut**：打斷一格正在講的故事，比
+   *    晚兩秒看到郵筒更糟。那時候抵達畫在右下角那塊陶牌上（`dockGeom`），
+   *    「一秒內看得出我的東西進去了」一樣成立。
+   *  回傳有沒有真的切（給量測用，不是裝飾）。 */
+  toDrop(){
+    if (this.mode !== "invite" && this.mode !== "ambient") return false;
+    const step = this.INVITE.findIndex(([id]) => id === "s03");
+    if (step < 0) return false;
+    this.mode = "invite"; this.inviteStep = step; this.t = 0;
+    if (sceneId !== "s03"){ this.enterScene("s03"); this.inviteStage("s03"); }
+    return true;
+  },
+  update(dt){
+    this.t += dt; sceneT += dt;
+    if (this.mode === "invite"){
+      // 任何時刻有訪客投遞就插播
+      // ⚠ `arrivals.holding()`＝抵達那 2.8 秒的優先權。閘門（劇團到齊）**沒動**，
+      //   只是在它前面排了「先讓觀眾看到自己的東西落進投遞口」。
+      if (spawnQueue.length && !arrivals.holding()
+          && Object.keys(byAgent).length >= 6 && CAST.length){
+        this.startVisitor(spawnQueue.shift()); return;
+      }
+      // **手機按了鍵也要插播。** 舊版的活模式只在 `ambient` 那一段收事件，
+      // 所以按下去之後畫面還在演「掃一下／打開你常用的 AI／貼回來送出」，
+      // 要等整段引導播完才輪到那一格。展場的承諾是「按下去到電視有反應」，
+      // 不是「按下去，等引導播完再說」。
+      // ⚠ 只讓人按的插播（`livePreempt` 只認 `why: phone*`）——自動輪播
+      //   每 20–30 秒一格，那也插播的話引導就永遠輪不到。
+      if (LIVE.url && LIVE.on){
+        const want = livePreempt(LIVE);
+        if (want){
+          const lt = liveAssemble(LIVE, want);
+          if (lt && this.bindCast(lt)){
+            this.inviteStep = 0; this.caseKind = "live";
+            this.startReplay(lt); return;
+          }
+        }
+      }
+      const [id, dur] = this.INVITE[this.inviteStep];
+      if (sceneId !== id && xfade <= 0) { this.enterScene(id); this.inviteStage(id); }
+      if (this.t > dur){
+        this.t = 0;
+        this.inviteStep++;
+        if (this.inviteStep >= this.INVITE.length){
+          this.inviteStep = 0;
+          this.mode = "ambient"; this.cooldown = 6;
+          this.enterScene("s11");
+          // 野生世界：全員上台漫遊
+          const s = SCENES.s11;
+          cast.forEach((c, i) => { c.onstage = true; c.wander = true; c.reserved = false;
+            if (s.slots[i]) c.place(s.slots[i][0], s.slots[i][1]); });
+          const writers = cast.filter(c => c.agent).slice(0, 3);
+          writers.forEach(c => { c.reserved = true; c.acting = "write"; });
+        } else {
+          const [nid] = this.INVITE[this.inviteStep];
+          this.enterScene(nid); this.inviteStage(nid);
+        }
+      }
+      return;
+    }
+    if (this.mode === "ambient"){
+      if (spawnQueue.length && !arrivals.holding()
+          && Object.keys(byAgent).length >= 6){
+        this.startVisitor(spawnQueue.shift()); return;
+      }
+      // 世界的日常（故事感）：s11 每 12-24s 一個小事件
+      this.bizT = (this.bizT ?? 6) - dt;
+      if (this.bizT <= 0 && sceneId === "s11"){
+        this.bizT = 12 + Math.random() * 12;
+        const r = Math.random();
+        if (r < 0.40){
+          // 交談拍：一隻走向另一隻，面對面停 5 秒
+          const pair = this.crowd(2);
+          if (pair.length === 2){
+            const [a, b] = pair;
+            a.reserved = b.reserved = true;
+            a.goTo(b.nx + (a.nx < b.nx ? -0.055 : 0.055), b.ny + 0.005, (cc) => {
+              cc.dir = cc.nx < b.nx ? 1 : -1; b.dir = -cc.dir;
+              setTimeout(() => { cc.release(); b.release(); }, 5000);
+            });
+          }
+        } else if (r < 0.80){
+          // 搬紙過場：agent 端著紙走到另一張桌
+          const ags = Object.values(byAgent).filter(c => c.onstage && !c.reserved);
+          const ag = ags[(Math.random() * ags.length) | 0];
+          if (ag){
+            ag.reserved = true; ag.acting = "carry";
+            const s11 = SCENES.s11;
+            const slot = s11.slots[(Math.random() * s11.slots.length) | 0];
+            ag.goTo(slot[0], slot[1], cc => {
+              setTimeout(() => { cc.acting = null; cc.release(); }, 1500);
+            });
+          }
+        } else {
+          this.moundPuffT = 1.4;      // 右側土堆噴一口（呼應成形的世界觀）
+        }
+      }
+      if (this.moundPuffT > 0) this.moundPuffT -= dt;
+      this.cooldown -= dt;
+      if (LIVE.url && LIVE.on){                 // 活模式：真 agent 的事件優先
+        const lt = liveAssemble(LIVE, livePreempt(LIVE));
+        // P1（D1）：**頭號路障在這裡。** 舊版寫 `if (lt && byAgent[lt.ON.worker])`，
+        // 而 `byAgent` 的鍵是寫死的六個原型名（careful-1/2、plain-1/2、hasty-1/2），
+        // twin 的居民叫 DUL-89／KAL-52／LIV-51 ⇒ 條件恆假；而 `liveAssemble` 已經
+        // 先把事件從 pending 刪掉了 ⇒ **每一筆被靜靜丟棄，畫面毫無反應、
+        // 主控台沒有半個字**。現在：名字對不上就借一個空著的造型上台，
+        // 畫面上一律用真名。借不到（連一個造型都沒有）才放棄，而且會說出來。
+        if (lt){
+          if (this.bindCast(lt)){ this.caseKind = "live"; this.startReplay(lt); return; }
+          console.warn("[live] 一個造型都借不到，這一格沒有上台：", lt.id);
+          LIVE.dropped.push({ task_id: lt.id, why: "沒有任何可用的造型" });
+        }
+      }
+      if (this.cooldown <= 0 && REPLAY){
+        const t = this.pick();
+        if (t){ this.startReplay(t); return; }
+        this.cooldown = 5;
+      }
+      if (this.t > 46){ this.t = 0; this.mode = "invite"; this.inviteStep = 0; }
+      return;
+    }
+    if (this.mode === "visitor_spawn"){
+      const card = this.visitorCard || {};
+      if (this.t < beat("spawn", true)){
+        // DECISION_20260921_TWIN_CONSENT_AND_ERASURE §三-3：公共大螢幕**不准印
+        // 觀眾打的原話**（以前這裡直接印 card.need 前 26 字）。改成代號＋類別
+        // （visitorLabel），人形與造型分類（shape/color/texture）完全不動。
+        this.caption = this.visitorId ? `他帶著一件事來：${visitorLabel(card, this.visitorId)}` : "";
+        this.capSub = "";
+      } else {
+        // 步 5：目標泡泡
+        this.mode = "visitor_goal";
+        let matched = null;
+        if (window.WorldBridge && REPLAY && card.need){
+          matched = WorldBridge.matchTask(card.need,
+            REPLAY.tasks.map(t=>({id:t.id, prompt:t.prompt, _t:t})));
+        }
+        this.visitorTask = matched && matched.task ? matched.task._t : null;
+        this.bubbleText = this.visitorTask
+          ? (this.visitorTask.keyword_zh || this.visitorTask.id) : "……";
+        const s = SCENES.s05;
+        const sil = this.crowd(7, [this.visitor]);
+        this.enterScene("s05", [
+          [this.visitor, s.slots[0], {dir:1, k:1.25}],
+          ...sil.map((c, i) => [c, s.slots[i+1], {dim: 0.85}]),
+        ]);
+        this.caption = ""; this.capSub = "";
+      }
+      return;
+    }
+    if (this.mode === "visitor_goal"){
+      if (this.t > beat("goal", true)){
+        this.bubbleText = null;
+        const t = this.visitorTask;
+        if (t && t.ON && t.ON.votes && byAgent[t.ON.worker]){
+          this.capSub = `他的需求最像世界做過的 ${t.id}——重放那一次`;
+          this.startReplay(t, true);
+        } else {
+          this.caption = "世界裡沒有夠像的往事";
+          this.capSub = "沒跑過就是沒跑過——他先留下來走走";
+          this.finishVisitor(null);
+          this.mode = "ambient"; this.enterScene("s11");
+          cast.forEach(c => { c.onstage = true; });
+        }
+      }
+      return;
+    }
+    // ── 重放五場（s06→s07→(s08)→(s09)→s10）──
+    // **演到一半也要讓位給手機按鍵。** 一格演完要 20–30 秒；按下去卻要等
+    // 上一格把故事說完，對按鍵的人來說就是「沒反應」。他剛剛選了要看哪一邊，
+    // 把上一格的尾巴放完不是尊重那個選擇。
+    // ⚠ 同樣只認人按的（`livePreempt` 只看 `why: phone*`），而且一次按壓只會
+    //   插播一次——那一格被組起來之後就離開佇列，`livePreempt` 隨即回 null。
+    if (LIVE.url && LIVE.on && !this.visitor){
+      const want = livePreempt(LIVE);
+      if (want){
+        const lt = liveAssemble(LIVE, want);
+        if (lt && this.bindCast(lt)){
+          this.caseKind = "live"; this.startReplay(lt); return;
+        }
+      }
+    }
+    const row = this.row;
+    if (this.mode === "replay_route" && this.t > beat("route", !!this.visitor)){
+      // P8（A1）：**沒有評審層就不要演評審。** 舊版無論如何都進 s07，活模式的
+      // `votes` 恆為 `[]` ⇒ 畫面變成「三人同儕評審：0/0 判可」＋一句系統根本
+      // 沒有的承諾（「判否必須附可執行反例」）。空台子配一個憑空多出來的層。
+      if (!row.has_review_layer){
+        // P8。⚠ 這裡改過兩次，第二次是被**截圖**改回去的：
+        //
+        //   第一版照提案「跳過 s07」。
+        //   第二版我改成「不要跳過，改演閘門」——理由是少演真的東西也是失真。
+        //   1920×1080 實跑截圖打臉：**s07 的底圖是烤死的評審室**
+        //   （`world3/scenes/scene_s07_v*.mp4`：三個人圍著一份文件、兩個舉紅綠牌）。
+        //   字幕寫「這條路上沒有同儕評審」，正上方的畫面卻是三個人在投票。
+        //   **一張圖蓋得過字幕。** 所以回到提案原本的寫法。
+        //
+        // 不是靜默跳過：閘門那句話帶到判決拍的副標上（skipNote），
+        // 而且監視器整格都在講閘門（判決／嘗試次數）。話一句都沒有少，
+        // 少的是一張我們**沒有**的圖——見裁決文「還不能說的話」的素材缺口那一條。
+        const gb = gateBeat(row);
+        this.skipNote = `${gb.caption}；${gb.sub}`;
+        const rb0 = reviseBeat(row);
+        if (rb0){
+          // 重改那一拍留著：s08 的底圖是「一個人在重寫、滿地紙團」，
+          // 那件事在這條路上**是真的**（同一個 agent 帶著失敗原文再跑一次）。
+          // 但舉紅牌那個人要拿掉——這條路上沒有第二個人。
+          const s8 = SCENES.s08;
+          this.mode = "replay_revise";
+          this.enterScene("s08", [
+            [this.castOf(row.worker), s8.slots[0], {act:"write", dir:1}],
+            ...(this.visitor ? [[this.visitor, [0.90, 0.66], {dim:0.4, dir:-1}]] : []),
+          ]);
+          this.caption = rb0.caption; this.capSub = rb0.sub;
+        } else {
+          this.toAuditOrVerdict();
+        }
+        return;
+      }
+      const s = SCENES.s07;
+      const votes = (row.votes || []).slice(0, 3);
+      const marks = [s.slots[0], s.slots[1], s.slots[2]];
+      const assigns = votes.map((v, i) => {
+        const c = this.castOf(v[0]);
+        const actName = i === 0 ? "lens" : (v[1] ? "card_pass" : "card_fail");
+        return [c, marks[i], { act: actName, dir: marks[i][0] < 0.5 ? 1 : -1 }];
+      });
+      if (this.visitor) assigns.push([this.visitor, [0.90, 0.66], {dim: 0.4, dir: -1}]);
+      this.mode = "replay_review";
+      this.enterScene("s07", assigns);
+      const pass = votes.filter(v=>v[1]).length;
+      this.caption = `${votes.length} 人同儕評審：${pass}/${votes.length} 判可`;
+      this.capSub = "判否必須附可執行反例，系統會真的跑一次";
+    }
+    else if (this.mode === "replay_review" && this.t > beat("review", !!this.visitor)){
+      // P12（C1）：Vacant 的重改**不是**「評審推翻之後換人重寫」，而是
+      // 「閘門擋下 → 把可見驗收的失敗原文給它 → **同一個 agent** 再跑一次」。
+      // R530／R532 量到增益的那個東西就是這一段；把它演成換人重寫＝演了別的系統。
+      const rb = reviseBeat(row);
+      if (rb){
+        const s = SCENES.s08;
+        this.mode = "replay_revise";
+        this.enterScene("s08", [
+          [this.castOf(row.reviser || row.worker), s.slots[0], {act:"write", dir:1}],
+          [this.castOf(row.worker), s.slots[1], {act:"card_fail", dir:-1}],
+          ...(this.visitor ? [[this.visitor, [0.90, 0.66], {dim:0.4, dir:-1}]] : []),
+        ]);
+        this.caption = rb.caption;
+        this.capSub = rb.sub;
+      } else {
+        // 沒有走到重改。照實說，不要靜默跳過。
+        // ⚠ 舊版寫「閘門一次就過，沒有再跑一次」。日常中文裡「一次就過」＝
+        //   「第一次就通過」，而這一格的大標是「這一份沒有交出去」、判決是
+        //   「擋下」——同一個畫面自己打自己。原意是「閘門只跑了一次」。
+        this.skipNote = (this.skipNote ? this.skipNote + "；" : "")
+          + (row.has_review_layer ? "這一次沒有進到修訂"
+             : "閘門只跑了一次，沒有再給它第二次機會");
+        this.toAuditOrVerdict();
+      }
+    }
+    else if (this.mode === "replay_revise" && this.t > beat("revise", !!this.visitor)){ this.toAuditOrVerdict(); }
+    else if (this.mode === "replay_audit" && this.t > beat("audit", !!this.visitor)){ this.toVerdict(); }
+    else if (this.mode === "replay_verdict" && this.t > beat("verdict", !!this.visitor)){
+      if (this.visitorId){ this.startReceipt(); }
+      else { this.startChain(); }             // 無訪客：也要看到收據上鏈
+    }
+    else if (this.mode === "replay_chain" && this.t > beat("chain", false)){ this.endReplay(); }
+    else if (this.mode === "visitor_receipt" && this.t > beat("receipt", true)){ this.endReplay(); }
+  },
+  startVisitor(sub){
+    arrivals.spawned(sub.id);       // 陶牌上劃掉這一位（他從「排隊中」變成台上）
+    this.visitorId = sub.id; this.visitorCard = sub.card; this.visitorSub = sub;
+    const img = pickCastFor(sub.card || {});
+    const cr = new Creature(img);
+    cr.vid = img._id;
+    cr.spawning = 1; cr.reserved = true; cr.wander = false;
+    cast.push(cr); this.visitor = cr;
+    marklayer.onStart(sub, cr);      // 標示層：這一隻身上的記號（見 MARK-LAYER 區塊）
+    const s = SCENES.s04;
+    const ring = this.crowd(7, [cr]);
+    this.mode = "visitor_spawn";
+    this.enterScene("s04", [
+      [cr, s.slots[0]],
+      ...ring.map((c, i) => [c, s.slots[i+1]]),
+    ]);
+  },
+  /** P1（D1）：把事件裡的真名綁到 `byAgent` 的某一個造型上。
+   *  綁得到回 true。`castOf(name)` 之後一律用它取造型——**不再直接查 byAgent**。 */
+  bindCast(t){
+    this.castMap = this.castMap || {};
+    const keys = Object.keys(byAgent);
+    if (!keys.length) return false;
+    const names = [t.ON.worker, ...(t.ON.revisions || []).map(r => r.reviser),
+                   ...(t.ON.votes || []).map(v => v[0])].filter(Boolean);
+    // 已經借出去的造型一律先佔住：兩位居民共用一張臉會毀掉剪影辨識度，
+    // 而剪影是展場隔一段距離之後唯一還看得見的東西（ops/exhibit/PLAN.md §四）。
+    const taken = {};
+    for (const k of Object.keys(this.castMap)) taken[this.castMap[k]] = true;
+    for (const n of names){
+      if (this.castMap[n]){ taken[this.castMap[n]] = true; continue; }
+      const pick = castKeyFor(n, keys, taken);
+      if (!pick) return false;
+      this.castMap[n] = pick.key; taken[pick.key] = true;
+      if (pick.borrowed) console.info(`[live] ${n} 沒有自己的造型，借用 ${pick.key} 上台`);
+    }
+    return !!(t.ON.worker && this.castMap[t.ON.worker]);
+  },
+  /** 名字 → 造型。活模式走 castMap，凍結重放直接是原型名。 */
+  castOf(name){
+    if (!name) return null;
+    const k = (this.castMap && this.castMap[name]) || name;
+    return byAgent[k] || null;
+  },
+  startReplay(t, isVisitor){
+    t = normalizeTask(t);
+    this.task = t; this.row = t.ON;
+    this.mode = "replay_route";
+    const s = SCENES.s06;
+    const w = this.castOf(this.row.worker);
+    const others = Object.values(byAgent).filter(c => c !== w).slice(0, 3);
+    const queue = this.crowd(3, [this.visitor]);
+    const assigns = [
+      ...others.map((c, i) => [c, s.slots[i], {dim: 0.35, dir: 1}]),
+      [w, [0.58, 0.84], {dir: 1}],
+      ...queue.map((c, i) => [c, s.slots[4+i] || s.slots[4], {dim: 0.2}]),
+    ];
+    if (this.visitor) assigns.push([this.visitor, [0.94, 0.64], {dim: 0.4, dir: -1}]);
+    this.enterScene("s06", assigns);
+    if (w) w.goTo(0.66, 0.84);
+    const lab = !isVisitor && this.caseKind && this.CASE_LABEL[this.caseKind];
+    this.caption = isVisitor ? "你的需求，交給誰做" : (lab ? lab[0] : "");
+    // P11（A3）：以前這裡寫死「依信譽紀錄路由給 X」。`vacant run` **沒有路由層**
+    // （誰做這一格是人指定的，生產端老實發 `basis:"random"`），而凍結重放的資料
+    // 根本沒記路由依據。兩種情況都不准寫成「依信譽紀錄」。
+    this.capSub = isVisitor || !lab
+      ? routeText(t)
+      : lab[1](this.caseTotals[this.caseKind]);
+  },
+  toAuditOrVerdict(){
+    const row = this.row;
+    if (row.audited){
+      const s = SCENES.s09;
+      this.mode = "replay_audit";
+      const watchers = [...Object.values(byAgent).slice(0, 4), ...this.crowd(4, [this.visitor])];
+      this.enterScene("s09", [
+        ...watchers.slice(0, 8).map((c, i) => [c, s.slots[i], {dim: 0.3}]),
+        ...(this.visitor ? [[this.visitor, [0.94, 0.62], {dim:0.4, dir:-1}]] : []),
+      ]);
+      this.auditText = `抽中 ${this.task.id} · sha256 ${(this.task.sha || "").slice(0,8) || "重驗中"}`;
+      this.caption = ""; this.capSub = "";
+    } else {
+      // A2（P7）：「這條路上沒有這一層」與「有這一層、這次沒抽中」不是同一件事。
+      // 舊版一律印「抽樣沒抽中」＝替一個不存在的抽樣器作證。
+      this.skipNote = (this.skipNote ? this.skipNote + "；" : "")
+        + (row.has_audit_layer ? "抽樣沒抽中這一題，這一次不稽核"
+                               : "這條路上沒有抽樣稽核這一層");
+      this.toVerdict();
+    }
+  },
+  toVerdict(){
+    const row = this.row, t = this.task;
+    this.mode = "replay_verdict";
+    // 被擋下的案子演專屬的「退件」場景——這是 Vacant 最獨特的一刻，不該跟漏出共用畫面
+    const useBlocked = !row.accepted;
+    const s = useBlocked ? SCENES.s12 : SCENES.s10;
+    const left = this.crowd(3, [this.visitor]);
+    const right = Object.values(byAgent).slice(0, 3);
+    if (useBlocked){
+      const w = this.castOf(row.worker);
+      this.enterScene("s12", [
+        [w, s.slots[0], {dir: 1, act: "carry"}],                  // 交付的人
+        // 退件：把它推回去的人。**活模式沒有評審層**（沒有 votes）⇒ 退件的是閘門，
+        // 不是某一個人；這裡就讓一個沒在演的居民站位，字幕那一邊由 P9 講清楚理由。
+        [this.castOf((row.votes||[])[0]?.[0]) || right[0], s.slots[1], {dir: -1}],
+        ...left.slice(0, 2).map((c, i) => [c, s.slots[i+2], {dim: 0.45}]),
+        ...(this.visitor ? [[this.visitor, [0.90, 0.66], {dim:0.35, dir:-1}]] : []),
+      ]);
+    } else {
+      this.enterScene("s10", [
+        ...left.map((c, i) => [c, s.slots[i], {dim: 0.25}]),
+        ...right.map((c, i) => [c, s.slots[i+3], {dim: 0.25}]),
+        ...(this.visitor ? [[this.visitor, [0.5, 0.64], {dir:1}]] : []),
+      ]);
+    }
+    // P5（B1）／P9（A5）：三值一路保到大字上。`accepted` 是 null 就是「沒量」，
+    // 不是「擋下」；`meets_demand` 是 null 就講「沒量」，不准講成「其實漏出」。
+    this.verdict = verdictBig(row);
+    // P10（A4）：`OFF` 是 null ⇒ **同題沒有跑過關掉這層的對照**。
+    // 舊版 `t.OFF || {}` ⇒ `off.accepted` undefined ⇒ 印「也擋下」
+    // ＝替一個沒跑過的反事實作證。展場主視覺就是這個對照，這條錯得最貴。
+    const off = t.OFF;
+    const cmp = offLine(t) || meetsDemandNote(row);
+    // 逾時那幾格要自己講，而且**不要替它編原因**。
+    const parts = [timedOutNote(row), this.skipNote, cmp].filter(Boolean);
+    this.capSub = parts.join("　·　");
+    this.skipNote = null;
+    this.caption = "";
+  },
+  finishVisitor(taskPlayed){
+    this.receiptCreature = this.visitor || this.receiptCreature;
+    if (!this.visitor || !this.visitorId || !window.WorldBridge){
+      this.visitor = null; this.visitorId = null; this.visitorCard = null; this.visitorSub = null; return;
+    }
+    const card = this.visitorCard || {}, id = this.visitorId;
+    const verdictText = taskPlayed
+      ? (this.verdict ? this.verdict.big : "他看見了整個過程")
+      : "他加入了這個世界";
+    const tone = this.verdict ? this.verdict.tone : "good";
+    const cardOpts = {
+      creatureImg: this.visitor.body, need: card.need || "",
+      firstline: card.firstline || card.first_line || "", verdictText, tone,
+      taskId: taskPlayed ? taskPlayed.id : "world-only",
+    };
+    const vidId = this.visitor.vid;
+    WorldBridge.renderShareCard(cardOpts).then(png => {
+      const gifWait = new Promise(resolve => {
+        const tries = [VIDEO_SRC.pop(vidId, "idle"), VIDEO_SRC.agentMove(vidId, "idle")];
+        let settled = false;
+        const done = r => { if (!settled){ settled = true; resolve(r); } };
+        setTimeout(() => done(null), 4000);
+        for (const src of tries){
+          const v = getVideo(src);
+          if (!v) continue;
+          const ok = () => done({ src, v });
+          if (v.readyState >= 2 && v.videoWidth) ok();
+          else { v.addEventListener("canplay", ok, { once: true }); }
+        }
+      });
+      const withGif = gifWait.then(hit => {
+        window.__lastGif = { stage: hit ? "hit:" + hit.src : "no-hit" };
+        if (!hit) return null;
+        const proxy = {
+          get videoWidth(){ return hit.v.videoWidth; },
+          get videoHeight(){ return hit.v.videoHeight; },
+          play(){ return hit.v.play(); }, set currentTime(x){ hit.v.currentTime = x; },
+          __draw(){ return keyedFrame(hit.src, hit.v); },
+        };
+        return WorldBridge.renderShareGif({ ...cardOpts, creatureVideo: proxy })
+          .then(g => { window.__lastGif.stage = "ok:" + (g ? g.length : 0); return g; })
+          .catch(e => { window.__lastGif.stage = "err:" + e.message; return null; });
+      });
+      return withGif.then(gif => {
+        window.__lastGif.sizes = { png: png.length, gif: gif ? gif.length : 0 };
+        return WorldBridge.postResult(id, {
+          verdict: { text: verdictText, tone },
+          matched: { task_id: taskPlayed ? taskPlayed.id : null },
+          card_png: png, ...(gif ? { card_gif: gif } : {}),
+        }).then(r => { window.__lastGif.post = String(r); return r; });
+      });
+    }).catch(e => console.warn("分享卡失敗", e));
+    marklayer.onFinish();            // 標示層：記號跟著他走回群眾，然後收起來
+    this.visitor.reserved = false; this.visitor.wander = true;
+    this.visitor = null; this.visitorId = null; this.visitorCard = null; this.visitorSub = null;
+  },
+  startChain(){
+    // 收據上鏈：這一筆留下什麼證據、憑什麼可以被獨立重驗
+    this.mode = "replay_chain"; this.t = 0;
+    const s = SCENES.s13;
+    const insp = Object.values(byAgent)[0];
+    this.enterScene("s13", [[insp, s.slots[0], {dir: -1, act: "lens", k: 1.1}]]);
+    this.caption = "這一筆的收據已經接上鏈";
+    // B3：印的要是**收據鏈頭**，不是題面雜湊（見 chainBeatSub 的註解）。
+    this.capSub = chainBeatSub(this.task);
+  },
+  startReceipt(){
+    // 訪客的結尾：他的分身站在正中央，畫面告訴他「這就是你的結果，收據在你手機」
+    this.mode = "visitor_receipt"; this.t = 0;
+    const v = this.verdict;
+    this.caption = v ? v.big : "他完成了這件事";
+    this.capSub = "這張收據正在送到你的手機——可以帶走、可以分享";
+    this.finishVisitor(this.visitorTask || null);   // 出卡（非同步）
+    if (this.receiptCreature){
+      const s13 = SCENES.s13;
+      setScene("s13");
+      this.stage([[this.receiptCreature, s13.slots[0], { dir: -1, k: 1.15 }]]);
+    }
+  },
+  endReplay(){
+    if (this.visitorId) this.finishVisitor(this.visitorTask || null);
+    this.visitorTask = null;
+    this.verdict = null; this.auditText = null;
+    this.caption = ""; this.capSub = "";
+    this.caseKind = null;
+    this.mode = "ambient"; this.cooldown = 10 + Math.random()*8;
+    this.enterScene("s11");
+    const s = SCENES.s11;
+    cast.forEach((c, i) => { c.onstage = true; c.wander = true; c.reserved = false; c.dim = 0;
+      c.acting = null;
+      if (s.slots[i]) c.place(s.slots[i][0], s.slots[i][1]); });
+    const writers = cast.filter(c => c.agent).slice(0, 3);
+    writers.forEach(c => { c.reserved = true; c.acting = "write"; });
+  },
+};
+
+/* ── 活模式：接真實 Vacant agent 的事件串流 ──────────────────────
+   規格：world3/docs/LIVE_INTERFACE.md。?live=<url>[&poll=2000][&state=<url>]
+   凍結重放與真跑 agent 吐同一種事件，電視只認事件——換資料源不用改電視。
+   沒給 live 參數就是離線重放（展場預設，鐵律：不能假設有網路）。
+
+   ⚠ v2（2026-09-19，忠實度稽核之後）：**這台電視不准替沒跑過的東西作證。**
+   底下 LIVE-BEGIN 到 LIVE-END 之間**一行都不碰 canvas**：所有「畫面上要說哪一句
+   話」的決定都收在這裡的純函數，繪圖那一側只負責把字印出去。
+   理由是可驗證性——`tools/livecheck.mjs` 把這一段整塊抽出來，拿真事件跑一次，
+   逐句比對它說了什麼。「話對不對」因此是**可執行的判準**，不是讀 code 讀出來的感想。
+   對照表與 P1–P13 的逐條出處：Vacant repo 的
+   `decisions/DECISION_20260919_TWIN_V2_FIDELITY.md` §四。 */
+const LIVE = { url: Q.get("live"), poll: +(Q.get("poll") || 2000),
+               stateUrl: Q.get("state") || null,
+               seen: new Set(), seenQ: [], pending: [], counters: null,
+               lastErr: null, on: false, stage: null, stageErr: null,
+               dropped: [] };
+
+/* === LIVE-BEGIN === 以下到 LIVE-END 之間不碰 DOM／canvas，可整段抽出來單獨測 === */
+
+/** 三值：`true`／`false`／`null`（沒量）。**不准做 `!!`。**
+ *
+ *  P2／P3（B1／B2）：`!!v.meets_demand` 把 null 壓成 false ⇒ 每一格交付都被電視
+ *  宣告成「收了一件其實不合格的東西」＝**憑空捏造一筆隱藏測資失敗**。
+ *  誠實邊界逐字寫著：「沒量」與「量到過」不可以在資料上同形。 */
+function tri(v){ return (v === null || v === undefined) ? null : !!v; }
+
+/** 事件的去重鍵（電視這一端唯一的身分）。 */
+function liveKey(e){ return `${e.ts}|${e.type}|${e.task_id}|${e.arm || ""}|${e.reviewer || ""}`; }
+
+function liveParse(text){
+  const out = [];
+  for (const line of String(text).split("\n")){
+    const t = line.trim();
+    if (!t) continue;
+    try {
+      const j = JSON.parse(t);
+      if (Array.isArray(j.events)) out.push(...j.events); else out.push(j);
+    } catch(e){}
+  }
+  return out;
+}
+
+/** 去重集合有上限（D3）。
+ *
+ *  展場是一整天的無人值守循環：`seen` 沒有上限就會一路長大，而每一輪輪詢又要
+ *  比對整個集合 ⇒ O(n²)。伺服器保證 ts 單調遞增、重播一定帶新的 ts，
+ *  所以丟掉最舊的鍵不會讓舊事件復活。 */
+const LIVE_SEEN_MAX = 4000;
+function liveRemember(L, k){
+  if (L.seen.has(k)) return false;
+  L.seen.add(k); L.seenQ.push(k);
+  while (L.seenQ.length > LIVE_SEEN_MAX) L.seen.delete(L.seenQ.shift());
+  return true;
+}
+
+/** 一格從開場到現在，最多容忍幾輪組不起來就放掉（D2）。
+ *
+ *  `infra_void` 的格子**不簽收據也不發裁決**（`launcher.py:664-665`）。舊版的
+ *  `liveAssemble` 只看 `pending[0]`，遇到這種格子就 `return null` ⇒ **整個佇列
+ *  從此不再播任何東西**。無人值守的展場不能有這種形狀。
+ *  這裡改成：掃過所有 task_id 找收尾了的那一筆；收不了尾的等 N 輪之後放掉，
+ *  **並且記在 `L.dropped` 裡**（畫面上說得出「有一格沒收尾」，不是靜靜丟掉）。 */
+const LIVE_STALE_ROUNDS = 8;
+
+/** 事件 → 一筆可播的紀錄（形狀與 replay_371 的 task 相同，導演不用改）。
+ *
+ *  P13：一格現在有 N 筆 `gate_ran`（每次嘗試各一筆）。`visible_ok` 要取
+ *  **最後一筆**（與 `verdict` 同一次）。取第一次的閘門結果配上最後一次的裁決，
+ *  資料上就長成「驗收沒過 ＋ 收下了」＝ B1 那句紅字的形狀。 */
+function liveAssemble(L, wantId){
+  L = L || LIVE;
+  if (!L.pending.length) return null;
+  const order = [];
+  for (const e of L.pending) if (order.indexOf(e.task_id) < 0) order.push(e.task_id);
+  let tid = null;
+  // `wantId`＝手機剛剛按出來的那一格。**它要插隊**：自動輪播可能已經在佇列裡
+  // 排了幾格，照順序播的話「按下去到電視有反應」就會變成「按下去，等前面播完」。
+  if (wantId && L.pending.some(e => e.task_id === wantId && e.type === "verdict"))
+    tid = wantId;
+  for (const id of tid ? [] : order){
+    if (L.pending.some(e => e.task_id === id && e.type === "verdict")){ tid = id; break; }
+  }
+  if (tid === null){
+    // 沒有任何一格收得了尾：給還沒收尾的那些記一次，超過上限就放掉。
+    L.stale = L.stale || {};
+    for (const id of order){
+      L.stale[id] = (L.stale[id] || 0) + 1;
+      if (L.stale[id] > LIVE_STALE_ROUNDS){
+        const evs = L.pending.filter(e => e.task_id === id);
+        L.pending = L.pending.filter(e => e.task_id !== id);
+        delete L.stale[id];
+        L.dropped.push({ task_id: id, n: evs.length,
+          why: "這一格沒有走到裁決，也沒有收據——沒有收尾的格子不播" });
+      }
+    }
+    return null;
+  }
+  const evs = L.pending.filter(e => e.task_id === tid);
+  L.pending = L.pending.filter(e => e.task_id !== tid);
+  if (L.stale) delete L.stale[tid];
+
+  // ⚠ **一格現在有兩串事件**（`arm: "ON"` 與 `arm: "OFF"`）。
+  //   不分臂的話 `all("draft_done")` 會把 OFF 那一筆也數進 ON 的嘗試次數。
+  //   舊資料沒有 `arm` 欄位 ⇒ 一律當 ON（加資料不准讓現況變壞）。
+  const onEvs = evs.filter(e => (e.arm || "ON") === "ON");
+  const offEvs = evs.filter(e => e.arm === "OFF");
+  const get = t => onEvs.find(e => e.type === t) || {};
+  const all = t => onEvs.filter(e => e.type === t);
+  const v = get("verdict"), rt = get("routed"), op = get("task_opened");
+  const gates = all("gate_ran");
+  const gLast = gates.length ? gates[gates.length - 1] : null;   // P13
+  const revs = all("revised");
+  const au = get("audited");
+  const rc = get("receipt");
+  const row = {
+    worker: rt.worker || null,
+    // P11：路由依據照實讀。`random` ＝ 這條路上沒有路由層。
+    route_basis: rt.type ? (rt.basis || null) : null,
+    route_note: rt.basis_note || "",
+    // A1：沒有 `review_vote` 就是**這條路上沒有這一層**，不是 0/0。
+    votes: all("review_vote").map(e => [e.reviewer, e.verdict === "pass"]),
+    has_review_layer: all("review_vote").length > 0,
+    // A2：沒有 `audited` 事件＝沒有抽樣稽核層，不是「沒抽中」。
+    has_audit_layer: !!au.type,
+    audited: !!au.type, audit_ok: tri(au.ok),
+    // C1／P12：重改是**同一個 agent 帶著自己的失敗原文再跑一次**。
+    attempts: (get("draft_done").of || all("draft_done").length || 1),
+    attempts_used: v.attempts_used ?? null,
+    // ⚠ `arm` 與 `retry_arm` 是**兩個不同的東西**（2026-09-19 分開）。
+    //   `arm` 現在專職分 ON／OFF；重試臂（revise／resample）搬到 `retry_arm`。
+    //   還讀 `arm` 的話這裡會拿到 "ON"，然後重改那一拍會講錯是哪一條臂。
+    retry: v.retry || (revs.length ? (revs[0].retry_arm || null) : null),
+    revisions: revs.map(e => ({ reviser: e.reviser || null,
+                                transition: e.transition || "", attempt: e.attempt })),
+    reviser: revs.length ? (revs[revs.length - 1].reviser || null) : null,
+    selected_version: revs.length ? "revised" : "initial",
+    gates: gates.map(e => ({ passed: tri(e.passed), n_tests: e.n_tests ?? null,
+                             failed_case: e.failed_case || null,
+                             attempt: e.attempt ?? null, of: e.of ?? null })),
+    // ⚠ **被牆鐘上限砍掉**與**自己跑完但沒過**是兩個故事，而兩者的
+    //   `stop_reason` 都是 `visible_fail`。不分開的話，畫面會把
+    //   「我們沒等它」演成「它做不出來」。
+    timed_out: all("draft_done").some(e => e.timed_out === true),
+    // ⚠ `feedback_bytes` 在 `file` 管道底下**每一次都是 0**，那不代表沒有回饋。
+    feedback_delivery: (all("draft_done").find(e => e.feedback_delivery) || {})
+      .feedback_delivery || null,
+    visible_ok: gLast ? tri(gLast.passed) : null,
+    failed_case: gLast ? (gLast.failed_case || null) : null,
+    n_tests: gLast ? (gLast.n_tests ?? null) : null,
+    // P2／P3：三值一路保到畫面上。
+    accepted: tri(v.accepted),
+    meets_demand: tri(v.meets_demand),
+    stop_reason: v.stop_reason || null,
+    blocked_by: v.blocked_by ?? null,
+  };
+  return {
+    id: tid,
+    prompt: op.prompt || "",
+    // P4（B3）：題面 sha256 與收據鏈頭是**兩個不同的 hash**，各自帶一份。
+    prompt_sha256: op.prompt_sha256 || "",
+    chain_head: rc.chain_head || rc.sha256 || "",
+    verify_url: rc.verify_url || "",
+    // P6（A6／C2）：證據等級逐格跟著事件走，不是橫幅寫死。
+    evidence: op.evidence || null,
+    evidence_note: op.evidence_note || "",
+    stratum: op.stratum || null,
+    ON: row,
+    // P10（A4）：**反事實那一臂現在真的跑過了**（2026-09-19 傍晚，54 格兩臂全 L-real）。
+    // ⚠ 但它**沒有裁決**：那一臂沒有閘門、不簽收據，`accepted` 恆為 null。
+    //   唯一能講的是「我們**事後**用同一把尺量」——那是 `postaudit`，
+    //   而它自己帶著 `when/is_verdict/signed` 三個旗標。
+    //   **不准拿 `postaudit.all_pass` 去填 `accepted`**：那會把「關掉這層」
+    //   演成「另一邊也判了」，是 A4 換個方向再犯一次。
+    OFF: offRowData(offEvs),
+    __live: true,
+  };
+}
+
+/* ---- 以下全部是「畫面上要說哪一句話」。一句一個純函數，逐句可測。 ---- */
+
+/** P6（A6）：證據等級 → 橫幅。**L-real 才准講「正在發生」。** */
+// ⚠ **對觀眾寫「AI」，不要寫「模型」。** 整面畫面都是黏土公仔，
+//   「沒有模型參與」在那個畫面上可以讀成「沒有公仔參與」——與我們要講的相反。
+// ⚠ 而且左上角只寫「機制模擬」四個字會被推廣成「整個都是假的，連數字也是」，
+//   剛好和我們要講的相反。所以標題就把界線畫在對的地方：
+//   **真的跑過的是驗收與收據，沒有動手的是 AI。**
+const EVIDENCE_BANNER = {
+  "L-real":    ["AI 真的動手了",
+                "這一筆是真的 AI 做的：它的通道走過 Vacant", "good"],
+  "L-fake":    ["AI 沒有動手",
+                "通道與閘門是真跑的，站在 AI 位置上的是測試用的假上游", "warn"],
+  "L-none":    ["AI 沒有動手",
+                "驗收與收據是真的跑過的；交件是一支腳本寫的，不是 AI 寫的", "warn"],
+  "L-unknown": ["說不出 AI 有沒有動手",
+                "有 AI 通訊，但上游是什麼沒有留下紀錄——不要當成 AI 動手的證據", "warn"],
+};
+function liveBanner(t){
+  const e = t && t.evidence;
+  const b = EVIDENCE_BANNER[e];
+  if (b) return { title: b[0], sub: b[1], tone: b[2] };
+  // 沒有證據等級就**不准講「正在發生」**：講不出來要照實講講不出來。
+  return { title: "證據等級沒有跟著事件過來",
+           sub: "這一格沒有帶證據等級，所以這台電視說不出它是不是真模型跑的",
+           tone: "warn" };
+}
+
+/** P6：右下角那一行誠實列。活模式不再寫死「正在發生的真實 agent」。 */
+// ⚠ **這一行不准寫死數字，也不准寫死「AI 有沒有參與」。**
+//
+// 舊版寫的是「這 **18** 格：驗收和收據是真的跑過的；**AI 沒有參與，交件是腳本寫的**」。
+// 2026-09-20 量了活模式實際播的那一批（`runs/twin_real_20260919/events.jsonl`）：
+// **54 筆、`evidence` 全部 `L-real`**，資料自己的註記逐字是
+// 「真模型真跑：模型通道經過 Vacant（`requests_seen > 0`），上游宣告為真模型端點」。
+// ⇒ 那句話**格數錯（18 vs 54），而且「AI 沒有參與」是假的**
+//   ——還印在觀眾停留最久的待機畫面上。
+//
+// 理由與 `standbySub` 同一條：**數字與宣稱都要跟真的載進來那一批一致。**
+// ⚠ 什麼都沒載進來時**不給數字也不給等級**（鐵律 3：沒量到 ≠ 量到 0）。
+// ⚠ 吃參數不讀全域，形狀與 `standbySub(replay, stage)` 一致——**這是為了測得動**。
+//   2026-09-20：上一版讀 `LIVE.counters`，於是 `tools/livecheck.mjs` 沒辦法餵它不同狀態，
+//   只能斷言一個寫死的字串；那個字串後來被判定為假話而移除 ⇒ livecheck 一載入就
+//   `ReferenceError`、**整支閘門死掉、一條檢查都沒跑**（而且沒有人發現）。
+//   ⇒ 守「性質」不要守「字串」，而守得動的前提是這個函式純。
+function idleHonesty(counters){
+  const c = counters && counters.evidence_counts;
+  const keys = c ? Object.keys(c) : [];
+  const n = c ? keys.reduce((a, k) => a + (c[k] || 0), 0) : null;
+  if (!n) return "驗收與收據是真的跑過的 · 畫面上的人是示意";
+  if (keys.length === 1 && keys[0] === "L-real")
+    return `這 ${n} 格：AI 真的動手了 · 驗收與收據是真的跑過的 · 畫面上的人是示意`;
+  if (keys.length === 1 && keys[0] === "L-none")
+    return `這 ${n} 格：驗收與收據是真的跑過的；AI 沒有參與，交件是腳本寫的 · 畫面上的人是示意`;
+  return `這 ${n} 格：驗收與收據是真的跑過的，AI 有沒有動手逐格不同（看左上角） · 畫面上的人是示意`;
+}
+function liveHonesty(t){
+  // ⚠ 這一行在**每一個畫面**都出現（待機與引導畫面觀眾停最久，那裡以前
+  //   只有一句「機制模擬」）。所以它要能單獨讀懂：真的是什麼、假的是什麼。
+  if (!t) return idleHonesty(LIVE.counters);
+  if (t.evidence === "L-real")
+    return "這一格：AI 真的動手了 · 驗收與收據是真的跑過的 · 畫面上的人是示意";
+  if (t.evidence === "L-none")
+    return "這一格：驗收和收據是真的跑過的；AI 沒有參與，交件是腳本寫的 · 畫面上的人是示意";
+  return "這一格：驗收與收據是真的跑過的，AI 有沒有動手見左上角 · 畫面上的人是示意";
+}
+
+/** P9（A5／C3）：停止理由的四種形狀，各講各的。**沒有一種是評審。** */
+const STOP_TEXT = {
+  "visible_pass":       "驗收過了",
+  "visible_fail":       "沒過客戶的驗收測資",
+  "attempts_exhausted": "改了幾次還是沒過，額度用完",
+  "no_suite":           "沒有驗收套件 ⇒ 一律不交付（fail-closed）",
+  "ungated":            "沒有量：這一格沒跑驗收",
+  // ⚠ 這一條**只有凍結重放（G 實驗）用得到**：那一批真的有評審層。
+  //   `vacant run` 這條路上沒有評審，所以活模式永遠走不到這裡。
+  "review_reject":      "評審判否（那一批有評審層，判否要附可執行反例）",
+};
+function stopReasonText(stop){
+  if (!stop) return "理由未提供";
+  return STOP_TEXT[stop] || `理由未提供（${stop}）`;
+}
+
+/** P5／P9：判決那一行。三值一路保到這裡。 */
+function verdictRow(row){
+  if (row.accepted === null)
+    return { text: `沒量（${stopReasonText(row.stop_reason)}）`, tone: null };
+  if (row.accepted === false)
+    // ⚠ **被時間上限砍掉**與**自己跑完但沒過**是兩個故事，而 `stop_reason`
+    //   一樣是 `visible_fail`。混講就是把「我們沒等它」演成「它做不出來」。
+    return { text: row.timed_out ? "擋下（時間到，被我們砍掉）"
+                                 : `擋下（${stopReasonText(row.stop_reason)}）`,
+             tone: "good" };
+  if (row.meets_demand === null)
+    return { text: "收下 · 有沒有符合需求，沒量", tone: null };
+  return row.meets_demand ? { text: "收下 · 符合需求", tone: "good" }
+                          : { text: "收下 · 其實漏出", tone: "bad" };
+}
+
+/** P5（B1）：判決拍的大字。 */
+function verdictBig(row){
+  if (row.accepted === null)
+    return { big: "沒量——這一格沒有跑驗收", tone: null };
+  if (row.accepted === false)
+    return { big: row.timed_out ? "擋下了——不過它是跑到時間上限被砍的"
+                                : "擋下了", tone: "good" };
+  if (row.meets_demand === null)
+    return { big: "收下了——過了客戶的驗收測資", tone: "good" };
+  return row.meets_demand ? { big: "收下了——而且真的符合需求", tone: "good" }
+                          : { big: "收下了——其實不符需求（漏出）", tone: "bad" };
+}
+
+/** P5（B1）：「符合需求」那一句的註腳。null ⇒ 講清楚為什麼答不出來。 */
+function meetsDemandNote(row){
+  if (row.meets_demand !== null) return "隱藏測資判定，從不出現在題目裡";
+  return "有沒有符合需求，沒量：那要隱藏測資才答得出來，而隱藏測資不進展件";
+}
+
+/** 逾時那幾格的註腳。**不要替它編原因**——為什麼跑那麼久，我們沒有量。 */
+function timedOutNote(row){
+  if (!row.timed_out) return null;
+  return "這一次是跑到時間上限被我們砍掉的，送去驗收的是它寫到一半的工作區"
+       + "——它為什麼跑那麼久，我們沒有量，不要猜";
+}
+
+/** OFF 那一串事件 → 一個**不是裁決**的物件。
+ *
+ *  ⚠ 這裡刻意**不提供** `accepted` 以外的布林捷徑：那一臂沒有閘門、不簽收據，
+ *  它沒有「判決」這回事。過沒過只有一個來源——`postaudit`，而且它自己說
+ *  自己是事後的、非裁決、未簽章。 */
+function offRowData(offEvs){
+  if (!offEvs || !offEvs.length) return null;
+  const v = offEvs.find(e => e.type === "verdict") || {};
+  const d = offEvs.find(e => e.type === "draft_done") || {};
+  const pa = offEvs.find(e => e.type === "postaudit") || null;
+  return {
+    ran: true,
+    infra_void: v.stop_reason === "infra_void",
+    accepted: tri(v.accepted),            // 恆 null——那一臂沒有裁決
+    meets_demand: null,
+    has_receipt: v.has_receipt === true,  // 恆 false——那一臂不簽收據
+    calls_used: d.calls_used ?? null,
+    timed_out: d.timed_out === true,
+    postaudit: pa ? {
+      all_pass: pa.all_pass === true, passed: pa.passed ?? null,
+      n_tests: pa.n_tests ?? null, failed_case: pa.failed_case || null,
+      when: pa.when || null, is_verdict: pa.is_verdict, signed: pa.signed,
+    } : null,
+  };
+}
+
+/** 事後稽核**能不能拿來講**。三個旗標缺一個就不准印成結果。 */
+function postauditUsable(pa){
+  return !!(pa && pa.when === "after_the_run"
+            && pa.is_verdict === false && pa.signed === false
+            && pa.n_tests != null);
+}
+
+/** P10（A4）：同題關掉這一層。**null 是「沒跑過」，不是「也擋下」。** */
+function offRow(t){
+  const off = t && t.OFF;
+  if (!off) return { text: "沒有跑過這個對照", tone: null };
+  if (off.infra_void) return { text: "那一臂跑掛了，沒量到", tone: null };
+  // ⚠ **兩種 OFF 不可以混講。**
+  //   凍結重放（G 實驗）的 OFF 臂**真的被判過**（那一批兩臂都有裁決），
+  //   所以它照實說「也擋下／也收下」。
+  //   twin 的 OFF 臂**沒有閘門、沒有裁決**，`accepted` 恆為 null ——
+  //   那一邊唯一能講的是「我們事後用同一把尺量」。
+  //   用 `accepted` 有沒有值來分，而不是用模式分：**差別由資料決定**。
+  if (off.accepted !== null){
+    if (off.accepted === false) return { text: "也擋下", tone: null };
+    if (off.meets_demand === null)
+      return { text: "收下 · 有沒有符合需求，沒量", tone: null };
+    return off.meets_demand ? { text: "也收下 · 符合", tone: null }
+                            : { text: "收下 · 漏出", tone: "bad" };
+  }
+  if (!postauditUsable(off.postaudit))
+    return { text: "跑了，但沒有事後量", tone: null };
+  const pa = off.postaudit;
+  return { text: `事後量 ${pa.passed}/${pa.n_tests} 過`,
+           tone: pa.all_pass ? null : "bad" };
+}
+
+/** 那一臂**有沒有收據**——展件最核心的那一格差別，值得自己一行。 */
+function offReceiptRow(t){
+  const off = t && t.OFF;
+  if (!off || off.infra_void) return null;
+  // 凍結重放的資料沒有記這件事 ⇒ 不要憑空回答（那一批的 OFF 有沒有收據，
+  // replay_371 裡查不到）。
+  if (off.has_receipt === undefined || off.has_receipt === null) return null;
+  return { text: off.has_receipt ? "有" : "沒有（那一臂不簽收據）",
+           tone: off.has_receipt ? null : "bad" };
+}
+
+function offLine(t){
+  const off = t && t.OFF;
+  if (!off) return "同一題沒有跑過關掉這層的對照——沒跑過就是沒跑過";
+  if (off.infra_void) return "同一題關掉這層那一跑掛了——沒量到就是沒量到";
+  if (off.accepted !== null)
+    // 凍結重放那一批的 OFF 臂真的被判過，照實比。
+    return off.accepted === true && off.meets_demand === false
+      ? "同一題沒有那一層的時候：收下了，而且漏出"
+      : "同一題沒有那一層的時候，那一邊自己的判決就在左邊那一行";
+  if (!postauditUsable(off.postaudit))
+    return "同一題關掉這層：它沒有閘門、沒有收據；這一格沒有事後補量";
+  const pa = off.postaudit;
+  // ⚠ 「事後」兩個字不可以省：那一臂當場沒有判過任何東西。
+  return `同一題關掉這層：沒有閘門、沒有收據；我們事後用同一把尺量，`
+       + `${pa.passed}/${pa.n_tests} 過`;
+}
+
+/** P7（A1／A2）：沒有那一層就說「沒有那一層」。 */
+function reviewRow(row){
+  if (!row.has_review_layer) return { text: "這條路上沒有這一層", tone: null };
+  const pass = row.votes.filter(v => v[1]).length;
+  return { text: `${pass}/${row.votes.length} 判可`,
+           tone: pass < row.votes.length ? "bad" : null };
+}
+function auditRow(row){
+  // 「這條路上沒有這一層」與「有這一層，這次沒抽中」不是同一件事（A2）。
+  if (!row.has_audit_layer) return { text: "這條路上沒有這一層", tone: null };
+  if (!row.audited) return { text: "沒抽中", tone: null };
+  return { text: row.audit_ok ? "抽中 · 重跑通過" : "抽中 · 重跑不符",
+           tone: row.audit_ok ? "good" : "bad" };
+}
+
+/** **每一支背景影片在演哪一個機制，以及那個機制存不存在的判準。**
+ *
+ *  來源：52 張素材逐張抽格看過一遍（2026-09-19 夜）。在那之前是被回報一處
+ *  修一處——s07 評審室、s08 紅牌、s06 骰子，三次都是「字改對了、圖沒有」。
+ *  我當時寫「沒有任何檢查能掃出第四處」，然後第四、五、六處就被找出來了。
+ *  ⇒ 改成一張表：**要嘛在表裡有判準，要嘛沒有人逐張看過**。
+ *
+ *  ⚠ **表裡沒有的景不等於乾淨**，只等於「這一輪沒有人為它寫判準」。
+ *
+ *  `clean` ＝ 那一景的靜態板乾不乾淨（`plates/<sc>.jpg`）。
+ *  板也髒的沒有退路，只能借一張中性的板——見 SCENE_PLATE_SUB。
+ *  2026-09-20：s10 的影片與板都換成新素材 ⇒ `clean` 轉 true、不再借板。
+ *  **s12 還沒換，仍然是 false＋借板。** */
+const SCENE_VIDEO_DEPICTS = {
+  s05: { what: "頭頂浮光＝任務落到這個人身上",
+         why: "不配字卡會被讀成「它在想」或「它被選中」——兩個都是我們沒有的機制",
+         clean: true, ok: () => false },
+  s06: { what: "骰子＋光點弧＝擲骰派工／依信譽派工",
+         why: "這條路上沒有路由層，誰做是人指定的",
+         clean: true, ok: (row) => showsRoutingVisual(row) },
+  s07: { what: "三人圍桌、兩人舉紅綠牌＝同儕評審",
+         why: "`vacant run` 沒有評審層",
+         clean: true, ok: (row) => !!row && row.has_review_layer },
+  s08: { what: "旁邊有人舉紅牌＝評審推翻之後才改",
+         why: "這條路上的重改是閘門擋下、同一個 agent 自己再跑一次",
+         clean: true, ok: (row) => !!row && row.has_review_layer },
+  s09: { what: "吊鏡從 7×4 卡片陣挑一張起來看＝抽樣稽核",
+         why: "沒有抽樣稽核層；每一次交付都跑同一套測資，關掉那臂也是事後全量",
+         clean: true, ok: (row) => !!row && row.has_audit_layer },
+  // s10 **已換成乾淨素材**（2026-09-20，`scene_s10_v4.mp4`＋重生的 `plates/s10.jpg`）。
+  // 舊的那一支（印章壓裂紙、裂縫透紅光 ＋ 一隻巨大人手伸進來按住）演的是
+  // 「毀件」與「人來蓋章判決」，兩個機制都不存在 ⇒ 被擋掉。
+  // ⚠ 舊素材 `scene_s10_v{1,2,3}.mp4` **留在磁碟上當紀錄，但不在 index.json 的
+  //   `scenes.s10` 陣列裡**——`sceneVideoSrc` 是 `vs[turn % vs.length]`，
+  //   留在陣列裡等於每進 4 次就有 3 次播到那隻人手。
+  s10: { what: "投件口亮綠燈、一張完整的黏土紙從口中垂到箱子正面，"
+             + "紙上有一個圓形封緘壓印；左下一疊帶刻痕的卡片",
+         why: "這一拍就是「放行」：綠燈＝通過，紙**平整完好**＝閘門不毀件。"
+             + "畫面裡沒有人、沒有手、箱子沒有眼睛，"
+             + "所以不會被讀成「有人在旁邊評判」——擋不擋是機制判的",
+         clean: true, ok: () => true },
+  s12: { what: "櫃檯泥偶隔著櫃檯收紙 ＋ 托盤四色磚一塊裂 ＋ 後方排隊",
+         why: "有眼睛的收件者＝有人收有人判；色磚＝計分板／信譽紀錄；排隊＝派工",
+         clean: false, ok: () => false },
+};
+
+/** 板也髒的景借哪一張中性的板。
+ *
+ *  ⚠ **這是權宜，不是解法。** s12 的影片與板**都**在演不存在的機制，
+ *  沒有任何乾淨版本。借 `s06` 的板＝左冷右暖兩束光打在空地板上，
+ *  **不演任何機制**，判決那句話由文字扛。
+ *  在「一張假的圖」與「一間空房間」之間選空房間，理由是展場鐵律：
+ *  演沒有的東西＝對觀眾說錯話。
+ *  ⇒ **新素材到位就把那一行刪掉。**
+ *
+ *  s10 那一行已於 2026-09-20 刪除：新素材到位了。
+ *  ⚠ 刪它之前**一定要先確認 `plates/<sc>.jpg` 自己是乾淨的**——
+ *  `LITE`（手機／窄螢幕，預設開）根本不播影片，看到的只有板。
+ *  s10 的舊板（印章壓裂紙＋人手）還在時把這一行拿掉，等於
+ *  「桌機修好了、手機還在說錯話」。所以那張板是從
+ *  `scene_s10_v4.mp4` 第 5.0 秒重抽的，同一份素材、同一個系列。 */
+const SCENE_PLATE_SUB = { s12: "s06" };
+
+/** s06 的**路由視覺**要不要畫（骰子＋光點弧）。
+ *
+ *  ⚠ 這是 `scene_s07` 那個坑的第三次：**字改對了、圖沒有。**
+ *  大標寫「這條路上沒有路由層——不是信譽決定的」，畫面左邊卻在擲兩顆骰子。
+ *  骰子＝擲骰派工、光點弧（原註解逐字寫著「真路由的視覺化」）＝依信譽派工，
+ *  **兩個都是「有路由層」才成立的畫面**。
+ *
+ *  ⚠ 關鍵在 `basis: "random"` 是**被借用的字**：在這條線上它不是
+ *  「擲骰決定」，是「**沒有路由層，誰做這一格是人指定的**」
+ *  （`routeText()` 印的就是那一句，`to_events` 的 `basis_note` 也寫著）。
+ *  所以 `random` **也不准畫骰子**——那會把「人指定的」演成「電腦擲骰決定的」。
+ *
+ *  ⚠ 凍結重放沒有記路由依據 ⇒ 不知道 ⇒ **不畫**。不知道不等於畫一個猜的。
+ *
+ *  ⇒ 只有 `reputation` 才畫。目前兩批資料都畫不出來，那是對的。
+ *  （「關／開」那兩個橢圓標**不受影響**：它們標的是兩條臂，而兩條臂真的都跑過。） */
+function showsRoutingVisual(row){
+  return !!row && row.route_basis === "reputation";
+}
+
+/** P11（A3）：路由依據。`random` ＝ 沒有路由層。 */
+function routeText(t){
+  const row = t.ON, b = row.route_basis;
+  if (b === "reputation") return `任務 ${t.id} · 依信譽紀錄路由給 ${row.worker}`;
+  if (b === "random")
+    return `任務 ${t.id} · 這條路上沒有路由層：誰做這一格是人指定的（${row.worker}）`;
+  return `任務 ${t.id} · 路由依據沒有跟著事件過來（${row.worker || "—"}）`;
+}
+
+/** P12（C1）：重改那一拍。**同一個 agent 帶著自己的失敗原文再跑一次。** */
+function reviseBeat(row){
+  const rv = row.revisions[0];
+  if (!rv) return null;
+  const arm = row.retry || "";
+  // ⚠ `feedback_delivery` 決定回饋**走哪一條管道**。`file` 底下
+  //   `feedback_bytes` 每一次都是 0——那不代表沒有回饋，代表回饋在檔案裡，
+  //   而它有沒有去讀是另一回事（R535 量過檔案這條管道在 wire 上零命中）。
+  const via = row.feedback_delivery === "prompt"
+      ? "把失敗原文接在下一次的題目後面"
+      : row.feedback_delivery === "both"
+        ? "把失敗原文寫進 VACANT_FEEDBACK.md，同時接在題目後面"
+        : "把失敗原文寫進工作區的 VACANT_FEEDBACK.md（它有沒有去讀是另一回事）";
+  const how = arm === "resample"
+    ? "工作區重置回起點、不給失敗原文，同一個 agent 重跑一次"
+    : arm === "revise"
+      ? `${via}，同一個 agent 再跑一次`
+      : (rv.transition || "同一個 agent 再跑一次");
+  return { caption: "閘門擋下 → 把失敗原文給它 → 它自己再跑一次",
+           sub: `${rv.reviser || row.worker}：${how}`,
+           transition: rv.transition || "" };
+}
+
+/** P8（A1）：沒有評審層的時候，s07 演的是**閘門**——那才是 Vacant 這條路上
+ *  第 7 拍真正發生的事（`gate_ran`，LIVE_INTERFACE.md 稱它「主戲」）。
+ *  不是「跳過一拍」，是「把憑空多出來的那一層換成真的那一層」。 */
+function gateBeat(row){
+  const g = row.gates.length ? row.gates[row.gates.length - 1] : null;
+  if (!g) return { caption: "這一格沒有跑驗收",
+                   sub: "沒有驗收套件就不交付（fail-closed）——沒量不等於量了沒過" };
+  const n = g.n_tests == null ? "" : `${g.n_tests} 條`;
+  if (g.passed === true)
+    return { caption: `跑客戶的驗收測資：${n}全過`,
+             sub: "這條路上沒有同儕評審：交付物直接進閘門，過了才交付" };
+  return { caption: `跑客戶的驗收測資：${g.failed_case || "有一條"}沒過`,
+           sub: "這條路上沒有同儕評審：擋下來的是閘門，不是某一個人" };
+}
+
+/** P1（D1）：找不到那個名字的造型怎麼辦。**絕不靜靜丟掉。**
+ *
+ *  `byAgent` 的鍵是寫死的六個原型名（careful-1/2、plain-1/2、hasty-1/2），
+ *  而 twin 的居民叫 DUL-89／KAL-52／LIV-51（`roster.py` 程序生成）⇒ 舊版
+ *  `byAgent[lt.ON.worker]` 恆為 undefined，而 `liveAssemble` 已經先把事件刪掉了
+ *  ⇒ 每一筆被靜靜丟棄、畫面毫無反應、主控台沒有半個字。
+ *
+ *  改法：名字對不上就**借一個空著的造型**，而且畫面上用**真名**。
+ *  回傳 `{ key, borrowed }`；`key` 是 `byAgent` 裡的鍵，`borrowed` 說這是借的。 */
+function castKeyFor(worker, keys, taken){
+  if (!worker) return null;
+  if (keys.indexOf(worker) >= 0) return { key: worker, borrowed: false };
+  const free = keys.filter(k => !taken || !taken[k]);
+  const pool = free.length ? free : keys;
+  if (!pool.length) return null;
+  // 確定性：同一個名字永遠借到同一個造型（同一位居民不會每次換臉）。
+  let h = 0;
+  for (let i = 0; i < worker.length; i++) h = (h * 31 + worker.charCodeAt(i)) >>> 0;
+  return { key: pool[h % pool.length], borrowed: true };
+}
+
+/* MARK-LAYER-V1 BEGIN */
+/* TWINTOKEN-V1 BEGIN — 正本在 Vacant repo 的 ops/exhibit/twin/twintoken.py。
+   這一段在**手機頁**（vacant-world-cloud/public/index.html）與**電視頁**
+   （vacant_hm/world3/index.html）裡逐字相同，而且是 `twintoken.py emit` 吐出來的。
+   `python3 ops/exhibit/twin/twintoken.py --check` 驗三份（Python／手機／電視）
+   算出來的記號完全一樣，含負控制。**手改這裡＝閘門紅。** */
+var TT_SPEC = "vacant-twin-token/v1";
+var TT_WORDS = ["小陶壺","老木椅","白瓷杯","銅鈴鐺","竹掃把","石階梯","紙燈籠","麻布袋","木湯匙","圓窗格","舊懷錶","鐵茶壺","藤編籃","玻璃珠","羊毛毯","長板凳","花磚牆","銅門把","木抽屜","粗麻繩","小水缸","松木盒","棉紗線","貝殼片","河邊石","屋簷角","小梯子","木托盤","瓦楞紙","舊郵票","葡萄藤","橄欖枝","小南瓜","蒲公英","向日葵","常春藤","銀杏葉","楓樹籽","月光石","沙漏瓶","羅盤針","織布梭","陶輪台","窯爐口","烘焙盤","擀麵棍","竹蒸籠","手風琴","口琴盒","小鼓槌","三角鐵","木笛子","風鈴串","摺紙鶴","竹蜻蜓","陀螺繩","彈珠袋","毽子羽","放大鏡","圖釘罐","訂書機","鉛筆屑","橡皮擦","墨水瓶","鵝毛筆","信封蠟","明信片","書籤帶","煤油燈","小火柴","暖爐邊","熱可可","薑餅屋","蜂蜜罐","果醬瓶","麵包籃","奶油刀","陶鍋蓋","雨後泥","晨霧裡","午後光","黃昏線","星星糖","雪花片","冰柱尖","春泥土","夏蟬鳴","秋楓紅","冬柴堆","小溪口","淺灘石","苔蘚坡","山稜線","雲影下","燈塔光","港邊繩"];
+var TT_COLORS = [["朱紅","#e0543a"],["橙黃","#ef9430"],["鵝黃","#f0cc4e"],["竹青","#63b46c"],["湖水","#35b6ae"],["靛藍","#4a83dd"],["紫藤","#9c76e0"],["桃粉","#ec6f9c"]];
+var TT_SHAPES = ["圓","三角","方","菱","星","花","月","葉"];
+var TT_RETIRE_SECONDS = 24.0;
+var TT_RETIRE_TEXT = "記號收起來了";
+var TT_ID_RE = /^[0-9A-Za-z][0-9A-Za-z_-]{2,63}$/;
+var TT_K = [
+0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+/** 同步 SHA-256（ASCII 輸入）。**刻意不用 `crypto.subtle`**：那支是非同步的，
+ *  而記號要在 canvas 的每一格畫出來；而且它在非安全脈絡（file:// 直開的離線頁）
+ *  不存在——展場的紅線是離線可跑。 */
+function ttSha256(ascii){
+  var i, j, n = ascii.length, bytes = new Array(n);
+  for (i = 0; i < n; i++){
+    var c = ascii.charCodeAt(i);
+    if (c > 127) return null;                 // 非 ASCII ⇒ 不是不透明 id，拒算
+    bytes[i] = c;
+  }
+  bytes.push(0x80);
+  while (bytes.length % 64 !== 56) bytes.push(0);
+  var bitLen = n * 8;
+  for (i = 0; i < 4; i++) bytes.push(0);
+  bytes.push((bitLen >>> 24) & 255, (bitLen >>> 16) & 255, (bitLen >>> 8) & 255, bitLen & 255);
+  var H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
+           0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var w = new Array(64);
+  for (i = 0; i < bytes.length; i += 64){
+    for (j = 0; j < 16; j++){
+      w[j] = (bytes[i+j*4] << 24) | (bytes[i+j*4+1] << 16)
+           | (bytes[i+j*4+2] << 8) | bytes[i+j*4+3];
+    }
+    for (j = 16; j < 64; j++){
+      var x = w[j-15], y = w[j-2];
+      var s0 = ((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3);
+      var s1 = ((y >>> 17) | (y << 15)) ^ ((y >>> 19) | (y << 13)) ^ (y >>> 10);
+      w[j] = (w[j-16] + s0 + w[j-7] + s1) | 0;
+    }
+    var a=H[0],b=H[1],c2=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for (j = 0; j < 64; j++){
+      var S1 = ((e >>> 6)|(e << 26)) ^ ((e >>> 11)|(e << 21)) ^ ((e >>> 25)|(e << 7));
+      var ch = (e & f) ^ (~e & g);
+      var t1 = (h + S1 + ch + TT_K[j] + w[j]) | 0;
+      var S0 = ((a >>> 2)|(a << 30)) ^ ((a >>> 13)|(a << 19)) ^ ((a >>> 22)|(a << 10));
+      var mj = (a & b) ^ (a & c2) ^ (b & c2);
+      var t2 = (S0 + mj) | 0;
+      h=g; g=f; f=e; e=(d + t1)|0; d=c2; c2=b; b=a; a=(t1 + t2)|0;
+    }
+    H[0]=(H[0]+a)|0; H[1]=(H[1]+b)|0; H[2]=(H[2]+c2)|0; H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0; H[5]=(H[5]+f)|0; H[6]=(H[6]+g)|0; H[7]=(H[7]+h)|0;
+  }
+  var out = new Array(32);
+  for (i = 0; i < 8; i++){
+    out[i*4] = (H[i] >>> 24) & 255; out[i*4+1] = (H[i] >>> 16) & 255;
+    out[i*4+2] = (H[i] >>> 8) & 255; out[i*4+3] = H[i] & 255;
+  }
+  return out;
+}
+/** 不透明 id → 記號 `{word,color,colorHex,shape,label}`；對不上白名單回 `null`。
+ *  ⚠ 回 `null` 不是回一個空記號——畫面上「沒有記號」與「記號是空白」是兩件事，
+ *  後者會讓觀眾站在螢幕前找一個不存在的東西。 */
+function twinToken(subId){
+  if (typeof subId !== "string" || !TT_ID_RE.test(subId)) return null;
+  var h = ttSha256(TT_SPEC + "|" + subId);
+  if (!h) return null;
+  var w = TT_WORDS[(((h[0] << 16) | (h[1] << 8) | h[2]) >>> 0) % TT_WORDS.length];
+  var c = TT_COLORS[h[3] % TT_COLORS.length];
+  var s = TT_SHAPES[h[4] % TT_SHAPES.length];
+  return { spec: TT_SPEC, word: w, color: c[0], colorHex: c[1], shape: s,
+           label: w + " · " + c[0] + s };
+}
+/** 記號的形狀畫在任何 2D context 上。**手機與電視用的是這同一支**——
+ *  「兩邊是同一個記號」因此不只是資料相同，連畫出來的形也是同一段碼畫的。 */
+function twinShapePath(g, x, y, r, shape){
+  g.beginPath();
+  var i, a;
+  if (shape === "圓"){ g.arc(x, y, r, 0, Math.PI*2); }
+  else if (shape === "三角"){
+    for (i = 0; i < 3; i++){ a = -Math.PI/2 + i*Math.PI*2/3;
+      g[i ? "lineTo" : "moveTo"](x + Math.cos(a)*r, y + Math.sin(a)*r*1.04); }
+    g.closePath();
+  }
+  else if (shape === "方"){
+    var q = r*0.80, rr = r*0.20;
+    g.moveTo(x-q+rr, y-q);
+    g.arcTo(x+q, y-q, x+q, y+q, rr); g.arcTo(x+q, y+q, x-q, y+q, rr);
+    g.arcTo(x-q, y+q, x-q, y-q, rr); g.arcTo(x-q, y-q, x+q, y-q, rr);
+    g.closePath();
+  }
+  else if (shape === "菱"){
+    g.moveTo(x, y-r); g.lineTo(x+r*0.78, y); g.lineTo(x, y+r); g.lineTo(x-r*0.78, y);
+    g.closePath();
+  }
+  else if (shape === "星"){
+    for (i = 0; i < 10; i++){
+      a = -Math.PI/2 + i*Math.PI/5;
+      var rad = (i % 2) ? r*0.44 : r;
+      g[i ? "lineTo" : "moveTo"](x + Math.cos(a)*rad, y + Math.sin(a)*rad);
+    }
+    g.closePath();
+  }
+  else if (shape === "花"){
+    for (i = 0; i < 6; i++){
+      a = i*Math.PI/3;
+      g.moveTo(x + Math.cos(a)*r*0.52 + r*0.48, y + Math.sin(a)*r*0.52);
+      g.arc(x + Math.cos(a)*r*0.52, y + Math.sin(a)*r*0.52, r*0.48, 0, Math.PI*2);
+    }
+  }
+  else if (shape === "月"){
+    g.arc(x + r*0.12, y, r, Math.PI*0.42, Math.PI*1.58, false);
+    g.arc(x - r*0.36, y, r*0.94, Math.PI*1.48, Math.PI*0.52, true);
+    g.closePath();
+  }
+  else {   // 葉
+    g.moveTo(x, y-r);
+    g.quadraticCurveTo(x+r*0.92, y-r*0.22, x, y+r);
+    g.quadraticCurveTo(x-r*0.92, y-r*0.22, x, y-r);
+    g.closePath();
+  }
+}
+/** 記號徽章：一枚有厚度的黏土章。`alpha` 給退役時的淡出用。 */
+function twinDrawGlyph(g, x, y, r, tok, alpha){
+  if (!tok) return;
+  var a = (alpha === undefined) ? 1 : alpha;
+  g.save();
+  g.globalAlpha = a;
+  g.translate(0, r*0.09);
+  g.fillStyle = "rgba(0,0,0,0.42)";              // 黏土的接觸影
+  twinShapePath(g, x, y, r, tok.shape); g.fill();
+  g.translate(0, -r*0.09);
+  g.fillStyle = tok.colorHex;
+  twinShapePath(g, x, y, r, tok.shape); g.fill();
+  g.lineWidth = Math.max(1, r*0.13);             // 奶油色描邊：暗場上才咬得住
+  g.strokeStyle = "rgba(244,236,222,0.92)";
+  twinShapePath(g, x, y, r, tok.shape); g.stroke();
+  g.restore();
+}
+/* TWINTOKEN-V1 END */
+
+/** 訪客的公開標籤：只給**代號＋類別**，絕不印觀眾自己打的原話。
+ *
+ *  DECISION_20260921_TWIN_CONSENT_AND_ERASURE §三-3、人動物園 §5.1-2（只取
+ *  類別不取內容）＋ §5.1-9（旁觀者也是互動者——公共大螢幕的觀眾不是只有
+ *  打字的那個人）。類別沿用 `pickCastFor` 已經在用的 shape/color/texture——
+ *  那本來就是分身的**造型**分類，不是需求內容，所以拿來當類別不會反過來
+ *  洩漏原文。
+ *  ⚠ 人形保留——這支不動 `pickCastFor` 挑造型的邏輯，只是把同一組欄位
+ *  拿來拼一句**看得懂但不含原文**的說明字。
+ *
+ *  🔴 2026-09-21 改：代號從「來客NNN」換成 `twinToken()` 的**三字詞**。
+ *     舊版是這一頁自己算的 `h % 1000`，**手機端算不出同一個值**——
+ *     觀眾手上沒有那個號碼，螢幕上印它等於沒印。現在兩邊跑的是
+ *     `ops/exhibit/twin/twintoken.py` 產生的同一段碼（上面那個 TWINTOKEN 區塊），
+ *     `twintoken.py --check` 是那條等式的閘門。`visitorCode` 的**呼叫端一個字沒改**
+ *     （`arrivals.arrive()` 與 `visitorLabel` 照舊）。 */
+function visitorCode(visitorId){
+  if (!visitorId) return null;
+  const tok = twinToken(String(visitorId));
+  return tok ? tok.word : null;   // 對不上不透明 id ⇒ null，不生一個假代號
+}
+function visitorMark(visitorId){
+  return visitorId ? twinToken(String(visitorId)) : null;
+}
+function visitorCategory(card){
+  card = card || {};
+  const bits = [card.shape, card.color, card.texture].filter(Boolean);
+  return bits.length ? bits.join("／") : null;
+}
+function visitorLabel(card, visitorId){
+  const code = visitorCode(visitorId);
+  const cat = visitorCategory(card);
+  if (code && cat) return `${code} · ${cat}`;
+  if (code) return code;
+  if (cat) return cat;
+  return "一位來客";
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   標示層（MARK）——「螢幕上那一群黏土人裡，哪一個是我？」
+
+   這一層解的是展場動線上一個會讓前面所有工白做的洞：觀眾投完卡、抬頭，
+   螢幕上十幾個黏土人，**他認不出哪一隻是他**。認不出來，提示詞、貼回、
+   生成、上鏈、收據全部沒有著力點。
+
+   做法是三件事，缺一不可：
+
+   1. **同一個記號**（`twinToken`）。手機上有、螢幕上也有，而且是同一段碼
+      算的（TWINTOKEN 區塊）。它是**詞＋顏色＋形狀**，不是 UUID 片段——
+      三公尺外看得清、記得住、講得出口（展場沒有解說員）。
+   2. **他的那一隻看得出來**：頭上一塊陶牌寫著記號、腳下一圈記號顏色的光、
+      其他地方壓暗（`drawSpot`）、鏡頭往他那邊**推近**（`camera()`）。
+   3. **結束有形狀**（人動物園 §5.1-7、Hollanek 2024 建議 1）。演完不是
+      「啪一聲消失」——記號跟著他走回群眾，`TT_RETIRE_SECONDS` 秒之內縮小、
+      變暗，最後印一句「記號收起來了」才不見。之後**不再重演**
+      （DECISION_20260921_TWIN_EXHIBIT_OPEN_RULINGS §二-4b）。
+
+   ⚠ **這一層不碰任何共用狀態。** 不寫 `Creature.dim`（那是 `director.stage`
+     在用的欄位，兩邊搶會讓群眾在別的場景莫名其妙變暗）、不改 `spawnQueue`、
+     不改 `pickCastFor`。壓暗是**畫上去的一層漸層**，不是改別人的欄位。
+   ⚠ **鏡頭只放大不平移**（`camera()` 的 `k >= 1`）。平移會把板的邊緣拉進畫面
+     （s0x 那幾張板只有 3% 餘裕，1920×1080 實跑已經抓過兩次撞版）；
+     以畫面內任一點為心、倍率 ≥1 的縮放**數學上不可能露出邊**。
+     焦點另外夾在 x∈[0.44,0.56]、y∈[0.46,0.60]，免得右下角那塊投遞口陶牌被推出畫面
+     ——這條是量過的（見 `evidence_visible_20260921/mark_token/`），不是估的。
+
+   負控制：`?mark=0` 整層關掉（記號、光圈、壓暗、鏡頭全部沒有）⇒ 畫面回到
+   改動前：一群黏土人，觀眾沒有任何辦法知道哪一個是他。`?markcam=0` 只關鏡頭。
+   ══════════════════════════════════════════════════════════════════════ */
+/** 讀網址參數，但**不假設 `Q` 存在**。
+ *  🔴 這不是防禦性潔癖，是一次真的把鄰線閘門打死的回歸：`tools/livecheck.mjs`
+ *  把 LIVE-BEGIN～LIVE-END 整段抽進 `vm` 沙箱跑，那個沙箱裡**沒有 `Q`、沒有
+ *  `location`**（它只餵 JSON/Math/Number/... 那幾個）。這兩行原本直接寫
+ *  `Q.get(...)`，於是整段一 import 就 `ReferenceError: Q is not defined`
+ *  ——157 條檢查**一條都沒跑**、退出碼 1。那正是 340feaf 修過的同一個病
+ *  （「整道閘門從 73d7562 起就是死的」）的第二次。
+ *  `typeof Q` 對**未宣告**的識別字回 "undefined" 而不丟例外，所以這支在瀏覽器
+ *  （`Q` 宣告在本檔 L40，早於此處，不在 TDZ）與沙箱裡都拿得到正確答案。 */
+function markParam(name){
+  try {
+    if (typeof Q !== "undefined" && Q && typeof Q.get === "function") return Q.get(name);
+  } catch (_e){ /* 沙箱／非瀏覽器：當作沒給參數 */ }
+  return null;
+}
+const MARK_ON  = markParam("mark") !== "0";
+const MARK_CAM = MARK_ON && markParam("markcam") !== "0";
+const MARK_HINT = "手機上同一個記號";
+
+const marklayer = {
+  cur: null,          // {cr, tok, seq, t, id} —— 台上這一位
+  retiring: [],       // 謝幕中（§5.1-7）
+  n: 0,               // 這一輪第幾位上台。**不是「今天第幾位」**——這一頁開著的期間。
+  spot: 0,            // 聚光 0..1
+  camX: 0.5, camY: 0.52, camK: 1,
+
+  /** `director.startVisitor` 叫它。拿不到記號（id 不是不透明 id）就不標——
+   *  標一個算不出來的東西比不標更糟：觀眾會去找一個螢幕上沒有的記號。 */
+  onStart(sub, cr){
+    if (!MARK_ON || !cr) return;
+    const id = (sub && sub.id != null) ? String(sub.id) : "";
+    const tok = twinToken(id);
+    this.n++;
+    this.cur = { cr, tok, seq: this.n, t: 0, id };
+    return tok;
+  },
+
+  /** `director.finishVisitor` 叫它。記號不隨人走，它**慢慢收起來**。 */
+  onFinish(){
+    if (!MARK_ON) return;
+    const c = this.cur;
+    this.cur = null;
+    if (!c || !c.tok || !c.cr) return;
+    c.t = 0;
+    this.retiring.push(c);
+    while (this.retiring.length > 3) this.retiring.shift();   // 無人值守一整天不長大
+  },
+
+  pos(cr){ return [(cr._qx != null ? cr._qx : cr.nx) * W,
+                   (cr._qy != null ? cr._qy : cr.ny) * H]; },
+  scaleOf(cr){ return depthScale(cr._qy != null ? cr._qy : cr.ny)
+                    * (scene().k || 1) * (cr.kscale || 1); },
+  /** 台上那一位「已經成形、而且這一景有他」才算亮著。 */
+  live(){
+    const c = this.cur;
+    return (c && c.tok && c.cr && c.cr.onstage && c.cr.spawning <= 0) ? c : null;
+  },
+
+  update(dt){
+    if (!MARK_ON) return;
+    // 🔴 導演換人了但 `onFinish` 沒被叫到 ⇒ 記號會**永遠亮在一個已經回到群眾裡的人
+    //    頭上**。這不是假設：`finishVisitor` 有一條提前 return
+    //    （`!this.visitor || !this.visitorId || !window.WorldBridge`）根本走不到
+    //    掛鉤那一行。所以不要相信掛鉤一定會來——每一格對一次真相。
+    if (this.cur && director.visitor !== this.cur.cr) this.onFinish();
+    if (this.cur) this.cur.t += dt;
+    for (const r of this.retiring) r.t += dt;
+    this.retiring = this.retiring.filter(r => r.t < TT_RETIRE_SECONDS);
+    const c = this.live();
+    const want = c ? 1 : 0;
+    this.spot += (want - this.spot) * Math.min(1, dt * (c ? 1.9 : 2.6));
+    let fx = 0.5, fy = 0.52;
+    if (c){
+      const p = this.pos(c.cr);
+      fx = Math.max(0.44, Math.min(0.56, p[0] / W));
+      fy = Math.max(0.46, Math.min(0.60, p[1] / H));
+    }
+    this.camX += (fx - this.camX) * Math.min(1, dt * 1.1);
+    this.camY += (fy - this.camY) * Math.min(1, dt * 1.1);
+    this.camK = 1 + 0.035 * this.spot;
+  },
+
+  /** 鏡頭：只放大、不平移（見上面的 ⚠）。關掉就回 `null`，不回 `{k:1}`——
+   *  「沒有鏡頭層」與「鏡頭層在但倍率 1」在除錯時是兩件事。 */
+  camera(){
+    if (!MARK_CAM || this.camK <= 1.0005) return null;
+    return { x: this.camX, y: this.camY, k: this.camK };
+  },
+
+  /** 壓暗：畫在**群眾之後、場景道具與投遞口之前**。畫在最後會把右下角那塊
+   *  陶牌一起壓暗（它離訪客很遠），那是別條線的東西，不准被我這層弄糊。 */
+  drawSpot(){
+    if (!MARK_ON || this.spot <= 0.015) return;
+    const c = this.live();
+    if (!c) return;
+    const p = this.pos(c.cr), sc = this.scaleOf(c.cr);
+    const bodyH = H * 0.30 * sc;
+    const cyy = p[1] - bodyH * 0.45;
+    // ⚠ 內半徑不可以給 0 以外的值再配單一 stop：那會在 r0 上留一圈**看得見的
+    //   硬邊**（1920×1080 實跑抓到，像畫面上多了一個透明圓盤）。從 0 開始、
+    //   中間多兩個 stop，落差才是連續的。
+    const r1 = bodyH * 3.2;
+    const g = cx.createRadialGradient(p[0], cyy, 0, p[0], cyy, r1);
+    const a1 = (0.72 * this.spot);
+    g.addColorStop(0.00, "rgba(6,4,1,0)");
+    g.addColorStop(0.34, "rgba(6,4,1," + (a1 * 0.05).toFixed(3) + ")");
+    g.addColorStop(0.62, "rgba(6,4,1," + (a1 * 0.48).toFixed(3) + ")");
+    g.addColorStop(1.00, "rgba(6,4,1," + a1.toFixed(3) + ")");
+    cx.save();
+    cx.fillStyle = g;
+    cx.fillRect(-W, -H, W * 3, H * 3);      // 漸層外側吃最後一個 stop ⇒ 整面壓暗
+    cx.restore();
+    // 腳下的光圈：顏色＝**記號的顏色**，所以「腳下那圈光」本身也是記號的一部分
+    const pulse = 0.82 + 0.18 * Math.sin(c.t * 2.1);
+    cx.save();
+    cx.globalCompositeOperation = "lighter";
+    cx.globalAlpha = 0.46 * this.spot * pulse;
+    cx.strokeStyle = c.tok.colorHex;
+    cx.lineWidth = Math.max(1.5, bodyH * 0.038);
+    cx.beginPath();
+    cx.ellipse(p[0], p[1], bodyH * 0.40, bodyH * 0.075, 0, 0, 7);
+    cx.stroke();
+    cx.globalAlpha = 0.16 * this.spot * pulse;
+    cx.fillStyle = c.tok.colorHex;
+    cx.beginPath();
+    cx.ellipse(p[0], p[1], bodyH * 0.40, bodyH * 0.075, 0, 0, 7);
+    cx.fill();
+    cx.restore();
+    cx.globalAlpha = 1;
+  },
+
+  /** 陶牌本體。畫在最上面（投遞口之後）——它是整個動線的答案，不准被蓋住。 */
+  draw(){
+    if (!MARK_ON) return;
+    for (const r of this.retiring){
+      const p = Math.min(1, r.t / TT_RETIRE_SECONDS);
+      const a = p < 0.55 ? 1 : Math.max(0, 1 - (p - 0.55) / 0.45);
+      this.plate(r, a, 0.74 + 0.26 * a, p > 0.62 ? TT_RETIRE_TEXT : MARK_HINT);
+    }
+    const c = this.live();
+    if (c){
+      const pop = Math.min(1, c.t / 0.45);
+      const s = pop < 1 ? (0.62 + 0.48 * pop - 0.10 * Math.sin(pop * Math.PI)) : 1;
+      this.plate(c, 1, s, MARK_HINT);
+    }
+  },
+
+  plate(e, alpha, kscale, hint){
+    const cr = e.cr, tok = e.tok;
+    if (!cr || !cr.onstage || !tok || alpha <= 0.012) return;
+    const p = this.pos(cr), sc = this.scaleOf(cr);
+    const bodyH = H * 0.30 * sc;
+    const U = uiScale();
+    const k = (0.82 + 0.18 * sc) * kscale;
+    const gr = U * 0.0285 * k;                       // 記號半徑（1920 寬 ⇒ 約 62px 直徑）
+    const fWord = serif(U * 0.050 * k, 700);
+    const fHint = serif(U * 0.0185 * k, 600);
+    cx.save();
+    cx.font = fWord; const tw = cx.measureText(tok.word).width;
+    cx.font = fHint;
+    // ⚠ 「第 N 位**上台**」不是「第 N 位投卡」。投遞口那塊陶牌數的是抵達，
+    //   這裡數的是上台，而佇列是「新的先演」（裁決 §二-2）⇒ 兩個數會不一樣。
+    //   不把差別寫進字面上，觀眾會以為其中一個數錯了。
+    const seqTxt = "這一輪第 " + e.seq + " 位上台";
+    const hintTxt = seqTxt + " · " + hint;
+    const hw = cx.measureText(hintTxt).width;
+    cx.restore();
+    const padX = U * 0.019 * k, gap = U * 0.013 * k;
+    const pw = Math.max(padX * 2 + gr * 2 + gap + tw, padX * 2 + hw);
+    const ph = U * 0.108 * k;
+    const stemH = U * 0.040 * k;   // 牌子離頭頂遠一點，免得壓在後排那隻臉上
+    // 頭頂上方；夾在畫面裡（含 markcam 放大之後的餘裕，所以留 2% 邊）
+    const anchorY = p[1] - bodyH * 1.02;
+    // 右邊界：世界監視器在的時候，牌子不准壓到它（1920×1080 實跑看到只差幾 px
+    // 就撞上）。`monitorGeom` 的 x 不吃列數，所以拿它當**單一真相來源**問一次，
+    // 不要在這裡重抄 `W*0.255` 那條式子。
+    const monOn = director.mode.indexOf("replay") === 0
+               || director.mode === "visitor_receipt";
+    const rightMax = (monOn && typeof monitorGeom === "function")
+      ? monitorGeom(1, W, H, 0).x - U * 0.014 : W - U * 0.020;
+    const px = Math.max(U * 0.020, Math.min(rightMax - pw, p[0] - pw / 2));
+    const py = Math.max(U * 0.020, anchorY - stemH - ph);
+
+    cx.save();
+    cx.globalAlpha = alpha;
+    // 引線：從牌子底下垂到頭頂，末端一個小點——「是這一隻，不是旁邊那隻」
+    cx.strokeStyle = "rgba(244,236,222,0.62)";
+    cx.lineWidth = Math.max(1, U * 0.0016 * k);
+    cx.beginPath();
+    cx.moveTo(px + pw / 2, py + ph);
+    cx.lineTo(p[0], anchorY);
+    cx.stroke();
+    cx.fillStyle = tok.colorHex;
+    cx.beginPath(); cx.arc(p[0], anchorY, Math.max(1.5, U * 0.0042 * k), 0, 7); cx.fill();
+    // 牌子：暗陶底＋奶油描邊（跟監視器／投遞口同一套語言）
+    cx.shadowColor = "rgba(0,0,0,0.55)"; cx.shadowBlur = U * 0.010 * k;
+    cx.fillStyle = "rgba(14,9,4,0.86)";
+    cx.strokeStyle = "rgba(244,236,222,0.52)";
+    cx.lineWidth = Math.max(1, U * 0.0018 * k);
+    cx.beginPath(); cx.roundRect(px, py, pw, ph, U * 0.011 * k);
+    cx.fill(); cx.shadowBlur = 0; cx.stroke();
+    // 記號本體：跟手機上同一支 `twinDrawGlyph` 畫的
+    const rowY = py + U * 0.039 * k;
+    twinDrawGlyph(cx, px + padX + gr, rowY, gr, tok, 1);
+    cx.textAlign = "left"; cx.textBaseline = "middle";
+    cx.font = fWord; cx.fillStyle = "rgba(246,239,226,0.98)";
+    cx.fillText(tok.word, px + padX + gr * 2 + gap, rowY + U * 0.002 * k);
+    cx.font = fHint; cx.fillStyle = "rgba(240,232,216,0.62)";
+    cx.fillText(hintTxt, px + padX, py + ph - U * 0.023 * k);
+    cx.restore();
+    cx.globalAlpha = 1; cx.textBaseline = "alphabetic"; cx.shadowBlur = 0;
+    // 併排圖要把這塊牌子圈起來。**量出來的**，不是對著截圖用眼睛猜。
+    if (alpha > 0.9) this.lastPlate = { x: px, y: py, w: pw, h: ph };
+  },
+  lastPlate: null,
+};
+/* MARK-LAYER-V1 END */
+
+/** 世界監視器「這一筆」那一塊的每一列。活模式與凍結重放共用同一份判準。 */
+function monitorRows(t, counters, totals){
+  const row = t.ON;
+  const rows = [];
+  // 證據等級擺第一行：它決定底下每一行要怎麼讀（是真模型跑出來的，
+  // 還是機制模擬）。放最後面等於讓人先讀完數字才知道那些數字是什麼。
+  const ev = evidenceRow(t);
+  rows.push({ k: "證據等級", v: ev.text, tone: ev.tone });
+  rows.push({ k: "任務", v: String(t.id).replace("mbppplus_", ""), tone: null });
+  rows.push({ k: "交給誰", v: row.worker || "—", tone: null });
+  const rv = reviewRow(row); rows.push({ k: "同儕評審", v: rv.text, tone: rv.tone });
+  const ar = auditRow(row);  rows.push({ k: "抽樣稽核", v: ar.text, tone: ar.tone });
+  // P4（B3）：題面雜湊與收據鏈頭拆成兩行。一個欄位不准當兩種 hash 用。
+  rows.push({ k: "題面雜湊", v: (t.prompt_sha256 || "").slice(0, 12) || "—", tone: null });
+  rows.push({ k: "收據鏈頭", v: (t.chain_head || "").slice(0, 12) || "—", tone: null });
+  if (row.gates.length > 1)
+    rows.push({ k: "嘗試次數", v: `${row.gates.length} 次（閘門讀最後一次）`, tone: null });
+  const vr = verdictRow(row); rows.push({ k: "判決", v: vr.text, tone: vr.tone });
+  const or = offRow(t);       rows.push({ k: "同題關掉這層", v: or.text, tone: or.tone });
+  const rr = offReceiptRow(t);
+  if (rr) rows.push({ k: "關掉這層有收據嗎", v: rr.text, tone: rr.tone });
+  if (row.timed_out)
+    rows.push({ k: "這一次", v: "跑到時間上限被砍掉", tone: null });
+  // 累計漏出：活模式讀 counters 事件；凍結重放用它自己從 371 筆算出來的真值。
+  // ⚠ 兩邊都給不出來就印「—」。**不准拿一個當另一個用**，也不准填 0——
+  //   「沒量」與「量到 0」不是同一件事（B2 的同一條）。
+  const C = counters, T = totals || {};
+  const on  = C ? C.on_leaked  : T.leaked;
+  const off = C ? C.off_leaked : T.offLeaked;
+  // ⚠ 佔位符不要用「—」：在展場的襯線字體上它跟中文數字「一」幾乎一樣，
+  //   實測有人把「開 — · 關 —」讀成「開 一 · 關 一」，
+  //   而 OFF 臂一格都沒跑過 ⇒ 那是一個憑空生出來的數字。
+  const noData = "沒量";
+  rows.push({ k: "累計漏出", v: `開 ${on ?? noData} · 關 ${off ?? noData}`,
+              tone: (on || off) ? "bad" : null });
+  return rows;
+}
+
+/** 把一段字依「量得到的寬度」折行。CJK 沒有空白，所以逐字折。
+ *
+ *  ⚠ 為什麼需要這個：舊版左上角那個框的寬度**只量標題**，說明那一行卻直接
+ *  畫在框外面 ⇒ 1920×1080 實測，`這一格沒有模型參與：…` 從 x≈75 一路延伸，
+ *  被置中的大標「這一份沒有交出去」整個蓋住，後半段讀不到。
+ *  **那一行就是證據等級的誠實宣告，看不完整等於沒講。**
+ *  寬度量測由呼叫端注入（canvas 的 measureText），所以這一支是純函數。 */
+function wrapByWidth(text, maxW, measure){
+  const out = [];
+  let cur = "";
+  for (const ch of String(text == null ? "" : text)){
+    if (ch === "\n"){ if (cur) out.push(cur); cur = ""; continue; }
+    const next = cur + ch;
+    if (cur && measure(next) > maxW){ out.push(cur); cur = ch; }
+    else cur = next;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+/** 監視器面板的幾何。**s06 的「開／關」橢圓標要靠它避開面板。**
+ *
+ *  ⚠ 實測撞版：面板在 x 1398–1887、y 124–474（1920×1080、9 列），
+ *  而「開」那個橢圓寫死在 (0.80W, 0.42H) ＝ (1536, 453) ⇒ 直接壓在
+ *  「同題關掉這層」與「累計漏出」兩行上面。兩邊各自寫一組座標遲早會分岔，
+ *  所以幾何只有這一份。 */
+const EVIDENCE_NOTE_MAX_LINES = 3;
+function monitorGeom(nRows, W, H, nNote){
+  const w = W * 0.255, pad = H * 0.022, line = H * 0.0295;
+  const note = nNote ? H * 0.014 + nNote * H * 0.023 : 0;
+  return { x: W - w - H * 0.03, y: H * 0.115, w,
+           h: pad + line * (nRows + 1.25) + note };
+}
+
+/** 右上徽章＝**資料從哪來**，不是證據等級。
+ *
+ *  ⚠ 證據等級已經在監視器裡講一次、在左上角大框裡講一次；徽章再講一次，
+ *  1920×1080 實測就是左上角同時出現兩個「機制模擬」。
+ *  而且徽章**不准講「連線中／正在發生」那類暗示即時性的話**：
+ *  事件流是活的，但每一格都是先跑完、簽好章的。兩件事不一樣。 */
+function sourceBadge(isLive){
+  return isLive ? "真紀錄 · 事件流" : "真紀錄重放";
+}
+
+/* ── 分身從哪裡來：本機優先，公網是退路 ────────────────────────────
+ *
+ *  2026-09-20 補上的最後一哩（離線紅線，CLAUDE.md 展場硬約束 2）。
+ *  舊版 `bridge.js` **只認公網** ⇒ 公網一斷，電視就沒有新分身。
+ *  現在來源是一條有序鏈（見 `bridge.js` 檔頭）：
+ *
+ *      store（twinlink serve 唯讀端點）→ snapshot（export 落盤快照）→ cloud（公網）
+ *
+ *  ⚠ 這幾個函式**吃參數不讀全域**，跟 `standbySub`／`idleHonesty` 同一條理由：
+ *    讀全域就測不動，測不動的誠實宣告遲早會變成一句沒人更新的假話
+ *    （2026-09-20 `IDLE_HONESTY` 那一次就是這樣把整支 livecheck 弄死的）。
+ *  ⚠ **「沒量到」不是 0。** `lastOkAt` 是 `null` ＝從頭到尾沒讀成功過，
+ *    這時候畫面不准給秒數（給了就是編一個「斷了 0 秒」出來）。 */
+const TWIN_SOURCE = {
+  store:    { label: "本機真相來源",
+              note: "分身讀本機真相來源 · 拔掉網路線也還在" },
+  snapshot: { label: "本機快照",
+              note: "分身讀本機快照 · 是落盤那一刻的樣子，不是即時的" },
+  // 公網那一層的話**分兩種**，因為它們不是同一件事：
+  //   (a) 本機試過了、讀不到 ⇒ 它真的是「退路」；
+  //   (b) 這一頁**根本沒接本機來源** ⇒ 說「本機讀不到」就是編出來的。
+  // 兩種都帶 ⚠（公網在展場都是脆弱的那一條），但話不一樣。
+  cloud:    { label: "公網",
+              note:     "⚠ 分身改讀公網 · 本機那一份讀不到，這是退路不是常態",
+              noteOnly: "⚠ 分身只讀公網 · 這一頁沒接本機來源，斷網就沒有新的人" },
+};
+
+/** 這個來源算不算「斷了」。判準與 `liveStale()` 同一條：看**距離上一次成功
+ *  多久**，不看「上一次有沒有錯」——一次偶發失敗不該讓畫面喊斷線，
+ *  而**從頭到尾沒成功過**（`lastOkAt` 是 null）要算斷。 */
+function twinStale(st, nowMs){
+  if (!st || !st.configured) return false;   // 根本沒接來源 ⇒ 不是「斷線」
+  if (!st.lastOkAt) return true;             // ⚠ null＝一次都沒成功過
+  const gap = Math.max(10000, (st.intervalMs || 5000) * 3);
+  return (nowMs - st.lastOkAt) > gap;
+}
+
+/** 畫面上那一句：現在讀的是哪一個來源，斷了就講斷了。
+ *
+ *  回 `null` ＝**這一頁沒有接分身來源**（凍結重放模式）。那時候畫面什麼都
+ *  不要講——沒接上跟接上了讀不到是兩件事，不可以在畫面上同形。 */
+function twinSourceLine(st, nowMs){
+  if (!st || !st.configured) return null;
+  if (twinStale(st, nowMs)){
+    if (!st.lastOkAt)
+      return "⚠ 分身來源：一個都讀不到 · 不會有新的人進來";
+    const sec = Math.max(1, Math.round((nowMs - st.lastOkAt) / 1000));
+    const was = TWIN_SOURCE[st.kind] ? TWIN_SOURCE[st.kind].label : "上一個來源";
+    return `⚠ 分身來源：${was}斷了 ${sec} 秒 · 不會有新的人進來`;
+  }
+  const s = TWIN_SOURCE[st.kind];
+  if (!s) return "⚠ 分身來源：說不出是哪一個";
+  if (st.kind === "cloud"){
+    // 這一輪有沒有真的試過本機？試過才叫「退路」。
+    const localTried = (st.tried || []).some(x => x && x.kind !== "cloud");
+    return localTried ? s.note : s.noteOnly;
+  }
+  // 讀得到 ≠ 內容是活的。快照那一層要多問一句（見 twinSnapshotWarning）。
+  return twinSnapshotWarning(st, nowMs) || s.note;
+}
+
+/** 快照多久沒被寫就算「沒人在寫了」。
+ *  跟 `ops/exhibit/twin/venue_check.sh` 第八之二節的 `--twin-max-age-min`
+ *  預設值同一個數字（loop 預設 15 秒一輪 ⇒ 10 分鐘＝連錯 40 輪）。 */
+const TWIN_SNAPSHOT_MAX_AGE_MS = 10 * 60 * 1000;
+
+/** 🔴 **靜默降級：讀得到，但沒有人在寫。**
+ *
+ *  2026-09-21 批判者查到的兩個坑，這一支同時處理：
+ *
+ *  1. 沒帶 `&twin=` 的時候，活模式會組出**只有一層** snapshot 的來源鏈，
+ *     而那個檔（`world3/live/visitors.json`）是 commit 進版控的空佔位檔
+ *     ——`people: []`、`generated_at: null`，**沒有任何東西會去寫它**
+ *     （要 `vacant-twin-loop.service` 起來才有）。
+ *  2. loop 起來過又死掉：檔案還在、還是 200、`lastOkAt` 永遠新鮮，
+ *     內容卻停在三小時前。
+ *
+ *  兩種情況舊版畫面都平靜地說「分身讀本機快照 · 是落盤那一刻的樣子」，
+ *  **一個 ⚠ 都沒有**。觀眾掃 QR、投了卡、站在那裡等一個不會出現的分身。
+ *
+ *  ⚠ **只對 snapshot 那一層問。** `store`（`twinlink serve`）的
+ *    `generated_at` 是**請求當下現算的**，永遠新鮮 ⇒ 拿它判新鮮度毫無鑑別力，
+ *    問了只會給出一個假的綠燈。「端點活著」與「loop 活著」是兩件事。
+ *
+ *  ⚠ **`payloadAt` 是 `null` ＝沒帶時間戳，不是「0 分鐘前」。**
+ *
+ *  回 `null` ＝沒話要說（不是 snapshot、或快照是新鮮的）。吃參數不讀全域。 */
+function twinSnapshotWarning(st, nowMs){
+  if (!st || st.kind !== "snapshot") return null;
+  if (st.payloadAt == null)
+    return "⚠ 分身快照沒有時間戳 · 沒有東西在寫它，不會有新的人進來";
+  const age = nowMs - st.payloadAt;
+  if (age <= TWIN_SNAPSHOT_MAX_AGE_MS) return null;
+  const min = Math.max(1, Math.round(age / 60000));
+  return `⚠ 分身快照停在 ${min} 分鐘前 · 沒有東西在寫它，不會有新的人進來`;
+}
+
+/** 分身的話是誰生的（`twinlink.py` 誠實邊界 2：`engine` 欄位不是裝飾）。
+ *
+ *  `lmstudio:*` ＝真的有一顆模型回了話；`fallback_deterministic` ＝查表湊的。
+ *  **把後者講成前者就是鐵律 5 的展場版本。** 沒帶 `engine` 就說沒帶，不猜。 */
+function twinEngineNote(sub){
+  const e = sub && sub.twin ? sub.twin.engine : null;
+  if (e == null) return null;                       // 沒接分身來源的訪客 ⇒ 不掛這一句
+  if (e === "fallback_deterministic")
+    return "⚠ 他說的話是查表湊的，這一次沒有模型參與";
+  if (String(e).indexOf("lmstudio:") === 0)
+    return "他說的話是本機那台機器上的模型生的";
+  return "他說的話從哪來，資料裡標的是「" + String(e).slice(0, 24) + "」";
+}
+
+/** 證據等級：監視器裡那一行（短），右邊靠齊所以不能太長。 */
+const EV_SHORT = {
+  "L-real": "AI 真的動手了",
+  "L-fake": "假上游 · 不是 AI 的能力",
+  "L-none": "AI 沒有動手 · 交件是腳本寫的",
+  "L-unknown": "上游沒留紀錄",
+};
+function evidenceRow(t){
+  const e = t && t.evidence;
+  if (!e) return { text: "沒有跟著資料過來", tone: null };
+  return { text: EV_SHORT[e] || String(e), tone: e === "L-real" ? "good" : null };
+}
+
+/** 證據等級的完整說明——**那一句不准被蓋掉**。
+ *
+ *  所以它不放左上角（那裡跟置中的大標搶位子，而大標多長取決於場景），
+ *  改放監視器底下那一欄：那一欄本來就是空的，寬度固定，而且跟
+ *  「這一筆」的其他欄位放在一起本來就比較合理。 */
+function evidenceNote(t){
+  if (!t) return "";
+  if (t.evidence_note) return t.evidence_note;
+  if (!t.evidence)
+    return "這一格沒有帶證據等級，所以這台電視說不出它是不是真模型跑的。";
+  return liveBanner(t).sub;
+}
+
+/** 場景的大標是**烤死在場景表裡**的。三句在 `vacant run` 這條路上不成立：
+ *
+ *    s06「誰來做 不是用猜的／讓路徑決定誰向前」 → 這條路上沒有路由層，
+ *        誰做這一格是人指定的。「讓路徑決定」正是 A3 那個錯的最大號字體版。
+ *    s07「三個同儕評審／判不通過 要拿得出反例」 → 沒有評審層。這一拍演的是閘門。
+ *    s08「被推翻就改／改完 再驗一次」 → 沒有人推翻它；是閘門擋下、它自己再跑一次。
+ *
+ *  ⚠ **大標是整個畫面上最大的字。** 字幕改對了、大標還在說謊，等於沒改——
+ *  1920×1080 實測就長這樣：字幕寫「這條路上沒有同儕評審」，
+ *  它正上方 100px 的大標寫「三個同儕評審」。
+ *
+ *  回 null ＝ 用場景表原本那一句（凍結重放那一批真的有那些層，原句是對的）。 */
+function beatTitle(sceneId, row){
+  if (!row) return null;
+  if (sceneId === "s06" && row.route_basis === "random")
+    return { head: "誰來做 是人指定的", sub: "這條路上沒有路由層——不是信譽決定的" };
+  if (sceneId === "s07" && !row.has_review_layer)
+    return { head: "跑客戶的驗收測資", sub: "過了才交付 沒過就擋下" };
+  if (sceneId === "s08" && !row.has_review_layer)
+    return { head: "閘門擋下 它自己再改", sub: "同一個 agent 帶著自己的失敗原文再跑一次" };
+  // s12 的烤死副標是「沒過驗收測資，就退回去重做」——**這一格沒有重做**
+  //（`attempts_used` 是 1），講「重做」是講了一件沒發生的事。
+  if (sceneId === "s12" && (row.gates || []).length <= 1)
+    return { head: "這一份沒有交出去", sub: "沒過客戶的驗收測資，就不交出去" };
+  return null;
+}
+
+/** 手機剛剛按出來、而且已經收得了尾的那一格（`null` ＝ 沒有）。
+ *
+ *  ⚠ 只認**人按的**（`why` 是 `phone*`），不認自動輪播。
+ *  理由：輪播每 20–30 秒就吐一格，如果那也插播，觀眾引導那一段
+ *  （掃 QR ／打開你常用的 AI ／貼回來送出）就永遠輪不到。
+ *  **人按了要立刻有反應；機器自己播的排在後面。** */
+function livePreempt(L){
+  const now = L && L.stage && L.stage.now;
+  if (!now || !now.cell_id) return null;
+  if (!/^phone/.test(String(now.why || ""))) return null;
+  return L.pending.some(e => e.task_id === now.cell_id && e.type === "verdict")
+    ? now.cell_id : null;
+}
+
+/** QR 要抓哪一張（純函數，所以測得到）。
+ *  回 null ＝ 沒有接展場機（離線凍結重放）⇒ 畫面上不要留一塊空白假裝有 QR。 */
+function qrSource(stage, liveUrl){
+  if (stage && stage.qr_url) return stage.qr_url;
+  if (liveUrl && liveUrl.indexOf("/live/events.jsonl") >= 0)
+    return liveUrl.replace("/live/events.jsonl", "/qr.png");
+  return null;
+}
+
+/** **觀眾按下去之後，畫面要把因果講出來。**
+ *
+ *  ⚠ Fable 的觀眾視角稽核：對照其實存在（扣住那格擋下、寫明那格收下），
+ *  但**沒有任何一幀把「因為你寫了名字所以過了」講給觀眾**。
+ *  監視器上那幾行 18px 小字不負責講因果。
+ *
+ *  回 null ＝ 這一格不是他按出來的（輪播的），那就不要假裝是。 */
+function pressedBanner(t, stage){
+  if (!t || !stage || !stage.now) return null;
+  if (!/^phone/.test(String(stage.now.why || ""))) return null;
+  if (stage.now.cell_id !== t.id) return null;
+  const label = stage.now.side_label
+    || (stage.now.side === "pc" ? "告訴它名字" : "不告訴它名字");
+  const row = t.ON;
+  const out = row.accepted === false ? "閘門擋下了，沒有交出去"
+            : row.accepted === true ? "通過客戶的驗收，交出去了"
+            : "這一格沒有跑驗收";
+  return { head: `你按了「${label}」`, tail: out,
+           tone: row.accepted === false ? "good" : "good" };
+}
+
+/** 收據上鏈那一拍的副標。
+ *
+ *  ⚠ **B3 的第三個現場**（前兩個是監視器那一行與 liveAssemble 的欄位）：
+ *  這一拍的字幕是「這一筆的收據已經接上鏈」，底下卻印 `prompt_sha256`
+ *  ——把**題面的 hash** 當成**收據的 hash**。1920×1080 實跑截到：
+ *  同一畫面上監視器寫「題面雜湊 8257ace29752」「收據鏈頭 57f12d1f7d64」，
+ *  而這一行寫「雜湊 8257ace297526128」。**同一個畫面自己打自己。**
+ *
+ *  凍結重放的資料裡**沒有鏈頭** ⇒ 照實說沒有，不准拿題面雜湊充數。 */
+function chainBeatSub(t){
+  const tail = "誰做的、驗了什麼、判了什麼，都在裡面——可以自己重跑";
+  const head = ((t && t.chain_head) || "").slice(0, 16);
+  if (head) return `收據鏈頭 ${head}　·　${tail}`;
+  return `這一批的資料裡沒有帶鏈頭　·　${tail}`;
+}
+
+/** 導播列：手機按了什麼、有沒有人正在自己重驗收據。
+ *
+ *  ⚠ 誠實邊界：電視**不驗簽章**（事件流本身沒有簽章，LIVE_INTERFACE.md §四）。
+ *  所以翻位元那一句只講「有人正在他自己的手機上重算」——那是關於現場發生什麼的
+ *  陳述，不是關於密碼學結果的宣告。**面板不是信任來源。** */
+function stageStrip(stage, playingId){
+  if (!stage) return null;
+  const out = [];
+  const now = stage.now || {};
+  // ⚠ 只在**真的在演那一格**的時候講。舊版在引導畫面（還沒有人掃 QR）就印
+  //   「手機選了：介面寫明」——第一個走過來的人會以為已經有人在玩了。
+  if (now.side && playingId && now.cell_id === playingId)
+    out.push("有人選了：" + (now.side_label
+      || (now.side === "held" ? "不告訴它名字" : "告訴它名字")));
+  // ⚠ 實測抓到的謊：舊版把 `tamper.cell_id` 直接印出來，而那個狀態
+  //   **只能靠明確呼叫 `untamper` 清掉**（伺服器那一端已經加了 TTL ＋ 換格就清）。
+  //   第一個觀眾按完走掉，那行字留在螢幕上 4 分半，對後面每一位觀眾
+  //   **指著一格他們沒看到的東西**。光看畫面看不出來——字在、格式對、措辭也對。
+  //   ⇒ 電視這一端也擋一道（面板不是信任來源，`/state` 也不是）：
+  //     講的那一格不是正在演的那一格，就不准說「這一格」，也不准印 cell_id
+  //     （觀眾看不到那個 id，印出來只會讓他找不到對應的東西）。
+  if (stage.tamper && stage.tamper.cell_id){
+    const playing = (stage.now || {}).cell_id;
+    out.push(stage.tamper.cell_id === playing
+      ? "有人正在自己的手機上重算這一格的收據（這台電視不驗簽章）"
+      : "剛才有人在自己的手機上重算了另一格的收據（這台電視不驗簽章）");
+  }
+  if ((stage.skipped || []).length)
+    out.push(`有 ${stage.skipped.length} 格沒有收尾，沒播`);
+  return out.length ? out.join("　·　") : null;
+}
+
+
+/* ---- 凍結重放（replay_371）→ 同一個形狀 ------------------------------------
+   活模式與凍結重放走**同一組判準函數**。理由不是省程式碼：兩邊用兩套判準的時候，
+   修好的只會是被測到的那一邊。G 實驗那一批**真的有**評審層、抽樣稽核層與 OFF 臂，
+   所以它照實說有；`vacant run` 這條路上沒有，所以它照實說沒有。
+   **差別由資料決定，不由模式決定。** */
+function normalizeReplayRow(r){
+  if (!r) return null;
+  const votes = Array.isArray(r.votes) ? r.votes : [];
+  const hasReview = Array.isArray(r.votes) && r.votes.length > 0;
+  const acc = tri(r.accepted), vis = tri(r.visible_ok);
+  // 停止理由：凍結重放沒有這個欄位，但推得出來的只推推得出來的那些。
+  let stop = null;
+  if (acc === true) stop = "visible_pass";
+  else if (acc === false && vis === false) stop = "visible_fail";
+  else if (acc === false && hasReview && r.passed_review === false) stop = "review_reject";
+  return {
+    worker: r.worker || null,
+    // replay_371 沒有記路由依據 ⇒ null。**沒記就是沒記，不准寫成「依信譽紀錄」。**
+    route_basis: r.basis || null, route_note: "",
+    votes, has_review_layer: hasReview,
+    has_audit_layer: r.audited !== null && r.audited !== undefined,
+    audited: !!r.audited, audit_ok: tri(r.audit_ok),
+    attempts: 1, attempts_used: null, retry: null,
+    revisions: (r.reviser && r.selected_version === "revised")
+      ? [{ reviser: r.reviser, transition: r.revision_transition || "", attempt: 2 }] : [],
+    reviser: r.reviser || null,
+    selected_version: r.selected_version || "initial",
+    gates: vis === null ? []
+      : [{ passed: vis, n_tests: null, failed_case: null, attempt: 1, of: 1 }],
+    visible_ok: vis, failed_case: null, n_tests: null,
+    accepted: acc, meets_demand: tri(r.meets_demand),
+    stop_reason: stop, blocked_by: null,
+    timed_out: false, feedback_delivery: null,
+    // 凍結重放沒記這一臂有沒有收據、也沒有事後稽核 ⇒ **不要編**。
+    infra_void: false, has_receipt: null, postaudit: null, ran: true,
+  };
+}
+function normalizeTask(t){
+  if (!t) return null;
+  if (t.__live) return t;
+  // 原封帶過去（`sha`／`keyword_zh` 之類導演還要用的欄位不能掉），只換兩隻臂，
+  // 並補上活模式才有、凍結重放沒有的那幾個欄位——**補成 null，不是補成一個值**。
+  return Object.assign({}, t, {
+    // 凍結重放的資料裡沒有收據鏈頭。沒有就是沒有，監視器那一行印「—」。
+    chain_head: "", verify_url: "",
+    // 證據等級：那一批是真模型（`source.model` 記著），但**逐格的 requests_seen
+    // 沒有搬進 replay_371** ⇒ 這台電視推不出來，所以不宣告。
+    evidence: null, evidence_note: "", stratum: null,
+    ON: normalizeReplayRow(t.ON), OFF: normalizeReplayRow(t.OFF),
+    __live: false,
+  });
+}
+
+/** 待機那一句話裡的數字：**現在真的載進來的那一批**，不是寫死的 371。
+ *
+ *  ## 371 是什麼（查出來的，不是編的）
+ *
+ *  `data/replay_371.json`（→ `world2/data/replay_371.json`）的 `source` 欄寫著：
+ *
+ *      on_run  runs/g_onoff5_371_r123_20260825
+ *      off_run runs/g_off371_20260825
+ *      model   qwen/qwen3.6-35b-a3b
+ *      note    每一格都是實驗當時落盤的原值，未經加工
+ *
+ *  對照 Vacant repo 的 `runs/INDEX.md`：兩個 run 都是 **2026-08-25 的 MBPP+
+ *  v0.2.0、371 題**（同一份題庫 R529 也在用）。檔案裡 `tasks` 陣列剛好 371 筆。
+ *  **所以 371 對得上，而且對得上的是那一批凍結重放。**
+ *
+ *  ## 為什麼這一行不能寫死
+ *
+ *  活模式（`?live=`）播的是**完全另一批**：`runs/twin_real_20260919`
+ *  ——2026-09-19、`vacant run` 真跑、三位合成居民 × 9 題 × 兩種題面 ＝ 54 格
+ *  （27 對）。它**不是那 371 件的子集**，題庫、模型、跑法、日期全都不同。
+ *  兩批唯一的共同點是「都是跑完落盤的真紀錄，未經加工」。
+ *
+ *  舊版把 371 寫死在 `SCENES.s00.sub` 裡 ⇒ 活模式下畫面先說「走過 371 件
+ *  真實任務的一群人」，接著演 54 格 ⇒ **觀眾會以為眼前這些格就是那 371 件**。
+ *  那不是措辭問題，是一句**在活模式下為真的東西作不實見證**的話。
+ *
+ *  ⇒ 數字改成從**載進來的資料**算：凍結重放 ⇒ `REPLAY.tasks.length`（＝371，
+ *    與舊文案逐字相同）；活模式 ⇒ `/state.pairs.length`（＝27）。
+ *    兩邊都為真，而且永遠不會跟資料漂開。 */
+function standbyCount(replay, stage){
+  // 活模式優先：`REPLAY` 在活模式下**還是會載**（那一行 fetch 是無條件的），
+  // 不先看 stage 就會又印回 371。
+  if (stage && Array.isArray(stage.pairs) && stage.pairs.length) return stage.pairs.length;
+  if (replay && Array.isArray(replay.tasks) && replay.tasks.length) return replay.tasks.length;
+  return null;   // 什麼都還沒載進來 ⇒ 不給數字（沒量到不是量到 0）
+}
+function standbySub(replay, stage){
+  const n = standbyCount(replay, stage);
+  return n == null ? "走過真實任務的一群人" : `走過 ${n} 件真實任務的一群人`;
+}
+
+// s11「你可以一直看下去」的副標同樣帶一個數字。
+// ⚠ 2026-09-20：它原本寫死「這 **18** 格會一直重播」——那是**第四次**同一個病
+//   （371 那個數字、斷線安靜退回重放、`IDLE_HONESTY` 的 18，現在這個）：
+//   **寫死一個當時為真的事實，資料換了之後沒人更新它。**
+//   活模式實際播的是 `runs/twin_real_20260919` 的 **54 格**。
+//   沿用 `standbyCount` 同一個來源，所以兩處永遠一致。
+function loopSub(replay, stage){
+  const n = standbyCount(replay, stage);
+  return n == null ? "這些格會一直重播" : `這 ${n} 格會一直重播`;
+}
+
+/* === LIVE-END === */
+
+async function livePoll(){
+  if (!LIVE.url) return;
+  try {
+    const r = await fetch(LIVE.url, { cache: "no-store" });
+    const evs = liveParse(await r.text());
+    for (const e of evs){
+      if (!liveRemember(LIVE, liveKey(e))) continue;
+      if (e.type === "counters") LIVE.counters = e;
+      else LIVE.pending.push(e);
+    }
+    LIVE.on = true; LIVE.lastErr = null; LIVE.lastOkAt = Date.now();
+  } catch(err){ LIVE.lastErr = String(err).slice(0, 60); }
+}
+
+// **活的那條斷掉時，畫面必須說出來。**
+//
+// 2026-09-20 查到的洞：`livePoll` 的 catch **只寫 `lastErr`，不動 `LIVE.on`**
+// ⇒ 斷線之後 `LIVE.on` 維持 true、`liveAssemble` 拿不到事件、導播掉進
+// `if (this.cooldown <= 0 && REPLAY)` ⇒ **安靜地改播 371 凍結重放**。
+// 底下那行誠實句雖然會跟著變成「真紀錄重放」（所以不算說謊），但
+// **沒有任何地方講「現場斷了」** ⇒ 無人值守的展場沒有人會發現。
+// 人類 2026-09-20：「我們不會有任何 demo 的狀態，只會連接真實的。」
+// ⇒ 退回重放本身可以（展場不能黑畫面），**但不准安靜地退**。
+//
+// ⚠ 判準用「距離上一次成功多久」不是「上一次有沒有錯」：一次偶發的 fetch 失敗
+//   不該讓畫面喊斷線，而**從頭到尾沒成功過**（`lastOkAt` 是 0）要算斷。
+//   門檻＝輪詢間隔 ×3，地板 10 秒。
+function liveStale(){
+  if (!LIVE.url) return false;                 // 根本沒設活模式 ⇒ 不是「斷線」
+  const gap = Math.max(10000, (LIVE.poll || 2000) * 3);
+  return !LIVE.lastOkAt || (Date.now() - LIVE.lastOkAt) > gap;
+}
+// 導播狀態：手機按了什麼。`state` 參數可省略——從 live 網址推得出來。
+function liveStateUrl(){
+  if (LIVE.stateUrl) return LIVE.stateUrl;
+  if (!LIVE.url) return null;
+  return LIVE.url.indexOf("/live/events.jsonl") >= 0
+    ? LIVE.url.replace("/live/events.jsonl", "/state") : null;
+}
+async function liveStatePoll(){
+  const u = liveStateUrl();
+  if (!u) return;
+  try { LIVE.stage = await (await fetch(u, { cache: "no-store" })).json();
+        LIVE.stageErr = null; }
+  catch(err){ LIVE.stageErr = String(err).slice(0, 60); }
+}
+if (LIVE.url){
+  livePoll(); setInterval(livePoll, Math.max(500, LIVE.poll));
+  liveStatePoll(); setInterval(liveStatePoll, Math.max(1000, LIVE.poll));
+}
+
+/* ── 主迴圈 ──────────────────────────────────────────────────── */
+let last = 0, lastFrameTs = performance.now(), frameCount = 0;
+function frame(ts){
+  lastFrameTs = performance.now(); frameCount++;
+  const dt = Math.min((ts - last)/1000, 0.1) * FAST; last = ts;
+  // 鏡頭 v2：入場落點略緊、1.4s ease-out 鬆開（cut 的「坐定」感），
+  // 之後整場緩推 1.00→1.032（鏡頭一直在呼吸）
+  let push;
+  if (sceneT < 1.4){
+    const e = 1 - Math.pow(1 - sceneT/1.4, 3);      // easeOutCubic
+    push = 1.045 - 0.045 * e;
+  } else {
+    push = 1 + Math.min((sceneT - 1.4) / 11, 1) * 0.032;
+  }
+  cx.save();
+  const jb = Math.floor(ts * 0.012);
+  const fract = x => ((x % 1) + 1) % 1;
+  const jx = (fract(Math.sin(jb * 127.1) * 43758.5453) - 0.5) * 1.4;
+  const jy = (fract(Math.sin(jb * 311.7) * 12543.8571) - 0.5) * 1.4;
+  cx.translate(W/2 + jx, H/2 + jy); cx.scale(push, push); cx.translate(-W/2, -H/2);
+  // 標示層的鏡頭：輪到誰就往誰那邊推近一點。**只放大不平移**（k>=1），
+  // 以畫面內任一點為心的放大數學上不可能露出板的邊緣。`?markcam=0` 關掉。
+  const mcam = marklayer.camera();
+  if (mcam){ cx.translate(mcam.x*W, mcam.y*H); cx.scale(mcam.k, mcam.k);
+             cx.translate(-mcam.x*W, -mcam.y*H); }
+  drawPlate(sceneId);
+  preloadNextScene();
+  director.update(dt);
+  arrivals.update(dt);
+  marklayer.update(dt);
+  for (const c of cast) c.update(dt);
+  if (window.__spawnHold){                              // ?scene=s04 驗證凍結（含影片本身）
+    window.__spawnHold.spawning = 0.55;
+    const se = videoPool.get(VIDEO_SRC.spawn(window.__spawnHold.vid));
+    if (se) se.v.loop = true;
+  }
+  // 互斥推開（只推同台的）
+  const on = cast.filter(c => c.onstage);
+  for (let i = 0; i < on.length; i++){
+    for (let j = i+1; j < on.length; j++){
+      const a = on[i], b = on[j];
+      const dx = b.nx - a.nx, dy = (b.ny - a.ny) * 2.4;
+      const d = Math.hypot(dx, dy), min = 0.07;
+      if (d > 0 && d < min){
+        const push2 = (min - d) * 0.5 * dt * 3;
+        const ux = dx/d, uy = dy/d/2.4;
+        if (!a.reserved){ a.nx -= ux*push2; a.ny -= uy*push2; }
+        if (!b.reserved){ b.nx += ux*push2; b.ny += uy*push2; }
+      }
+    }
+  }
+  on.sort((a,b) => a.ny - b.ny);
+  // v4：整格渲染影片在播時，群眾已在畫面裡——只畫訪客分身（s04/s05）與 spawn 中的人
+  const baked = !!sceneVideoReady(sceneId) && sceneId !== "s04" && sceneId !== "s05";
+  for (const c of on){
+    if (baked && c !== director.visitor && !(c.spawning > 0)) continue;
+    c.draw();
+  }
+  marklayer.drawSpot();       // 標示層：壓暗＋腳下光圈（在投遞口之前，別把它弄糊）
+  sceneDraw(sceneT, director);
+  arrivals.draw();            // 抵達層在鏡頭變換裡面（信要落在板上的郵筒口）
+  marklayer.draw();           // 標示層的陶牌：整個動線的答案，不准被蓋住
+  cx.restore();
+  // 交叉溶接：上一景的最後一幀淡出蓋在新景上（0.7s）
+  if (snapA > 0 && snapCv){
+    snapA = Math.max(0, snapA - dt / 0.7);
+    cx.globalAlpha = snapA * snapA;                 // 二次方衰減：尾段乾淨
+    cx.drawImage(snapCv, 0, 0);
+    cx.globalAlpha = 1;
+  }
+  drawOverlays(sceneT);
+  const sc = scene();
+  const tov = director.titleOv;
+  // s00（待機）的副標帶一個數字，而那個數字要跟**現在載進來的那一批**一致
+  // （`standbySub`：371 是凍結重放那一批，活模式是另外 27 對）。
+  const subNow = tov ? tov.sub
+                     : sceneId === "s00" ? standbySub(REPLAY, LIVE.stage)
+                     : sceneId === "s11" ? loopSub(REPLAY, LIVE.stage)
+                     : sc.sub;
+  drawTitle(tov ? tov.head : sc.head, subNow, sceneT);
+  // 徽章＝**資料從哪來**（sourceBadge），不是證據等級。
+  // ⚠ 1920×1080 實測：徽章也印證據等級 ⇒ 左上角同時出現兩個「機制模擬」。
+  //   證據等級在監視器裡（一行）＋左上大框（一個詞）就夠了。
+  drawBadge(director.mode.startsWith("replay")
+    ? sourceBadge(LIVE.on && director.caseKind === "live")
+    : sc.badge);
+  if (director.mode.startsWith("replay") || director.mode === "visitor_receipt"){
+    drawMonitor(director);
+    // ⚠ 底部已經有 drawCaption（大字）＋ drawHonesty（誠實列）兩條。
+    //   再加案例橫幅＝同一塊畫面三條字在搶（人類 2026-09-21 實拍）。
+    if (!director.visitor && !SIMPLE) drawCaseBanner(director);
+  }
+  drawCaption(director.caption, director.capSub);
+  drawPressed(director);
+  drawQrCorner();                     // 常駐：中途走過來的人也掃得到
+  drawHonesty(director);
+  requestAnimationFrame(frame);
+  const heapMB = performance.memory ? (performance.memory.usedJSHeapSize/1048576)|0 : -1;
+  document.title = `sc=${sceneId} mode=${director.mode} pool=${videoPool.size} `
+    + `heap=${heapMB}MB reloads=${sessionStorage.getItem("vw_reloads")||0}`;
+}
+resize();
+requestAnimationFrame(frame);
+
+/* ── 自我驗證：?scene=sNN 直跳（截圖與劇照併排的可執行版）────── */
+addEventListener("load", () => {
+  const sn = Q.get("scene");
+  if (sn && SCENES[sn]){
+    READY.then(() => {
+      director.mode = "hold";            // 凍結導演，純看場景
+      setScene(sn); xfade = 0; sceneT = Q.has("late") ? 8 : 1.2;
+      const s = SCENES[sn];
+      if (sn === "s11"){
+        cast.forEach((c, i) => { c.onstage = true;
+          if (s.slots[i]) c.place(s.slots[i][0], s.slots[i][1]); });
+      } else if (sn === "s07"){
+        const ids = ["careful-1","plain-1","hasty-1"];
+        director.stage(ids.map((n, i) => [byAgent[n], s.slots[i],
+          { act: i === 0 ? "lens" : (i === 1 ? "card_fail" : "card_pass"),
+            dir: s.slots[i][0] < 0.5 ? 1 : -1 }]));
+      } else if (sn === "s08"){
+        director.stage([[byAgent["careful-1"], s.slots[0], {act:"write", dir:1}],
+                        [byAgent["plain-1"], s.slots[1], {act:"card_fail", dir:-1}]]);
+        sceneT = 6;
+      } else if (sn === "s10"){
+        director.verdict = { big:"收下了——其實不符需求（漏出）", tone:"bad" };
+        const cs = cast.filter(c => !c.agent);
+        director.stage([...cs.slice(0,6).map((c,i)=>[c, s.slots[i], {dim:0.25}])]);
+      } else if (sn === "s05"){
+        director.bubbleText = "回文檢查";
+        const cs = cast.filter(c => !c.agent);
+        director.stage([[cs[0], s.slots[0], {dir:1, k:1.25}],
+          ...cs.slice(1,8).map((c,i)=>[c, s.slots[i+1], {dim:0.85}])]);
+      } else if (sn === "s04"){
+        const cs = cast.filter(c => !c.agent);
+        director.stage([[cs[0], s.slots[0]],
+          ...cs.slice(1,8).map((c,i)=>[c, s.slots[i+1]])]);
+        window.__spawnHold = cs[0];        // 驗證用：凍在成形中段
+      } else if (sn === "s09"){
+        const watchers = [...cast].filter(c => !c.agent).slice(0, 8);
+        director.stage(watchers.map((c, i) => [c, s.slots[i], {dim: 0.3}]));
+        director.auditText = "抽中 Mbpp/141 · sha256 3f8a92c1";
+        sceneT = 4;
+      } else if (sn === "s06"){
+        const cold = director.crowd(3);
+        const queue = cast.filter(c => !c.agent && !cold.includes(c)).slice(0, 3);
+        director.stage([
+          ...cold.map((c, i) => [c, s.slots[i], {dim: 0.35, dir: 1}]),
+          [byAgent["careful-2"], [0.62, 0.85], {dir: 1}],
+          ...queue.map((c, i) => [c, s.slots[4+i], {dim: 0.2}]),
+        ]);
+      } else {
+        director.inviteStage(sn);
+      }
+    });
+    return;
+  }
+  // ?demo=spawn：完整訪客流程壓縮跑（E2E 驗證用）
+  if (Q.get("demo") === "spawn"){
+    READY.then(() => {
+      // 走跟真投稿**一樣的兩段**（抵達＋成形），否則 demo 驗不到抵達層。
+      // `&sub=<id>` 讓演練／截圖用**真的** submission id，
+      // 這樣手機上那個記號跟這裡算出來的會是同一個（不是靠人抄）。
+      const sub = { id:(Q.get("sub") || "demo"), ts:0, card:{ need:"把一串數字加起來",
+        shape:"圓潤", color:"暖土", texture:"光滑", first_line:"我來對帳的" }};
+      arrivals.arrive(sub); spawnQueue.push(sub);
+    });
+  }
+});
+/* ── 展場接線＋kiosk ─────────────────────────────────────────────
+   分身來源鏈：**本機優先，公網是退路**（CLAUDE.md 展場硬約束 2）。
+
+     ?twin=<url>      twinlink serve 的唯讀端點（本機真相來源）。`off`＝關掉本機。
+     ?twinfile=<url>  twinlink export 落盤的快照。活模式下預設＝同源 live/visitors.json
+     ?api=<url>       公網收單服務。**永遠排在最後一層。**
+     ?twinpoll=<ms>   輪詢間隔（預設 5000）
+
+   展場的起法（exhibit_boot 印出來的電視網址後面接一段）：
+     …/world3/index.html?live=http://<機器>:8899/live/events.jsonl&poll=2000
+       &twin=http://127.0.0.1:8901/visitors.json
+
+   ⚠ **store 那一層不給預設值。** 猜一個 `127.0.0.1:8901` 出來，猜錯就是
+     每一輪一次「連線被拒」，而且 `sourceState()` 會長得像「試過本機了」。
+     這個 repo 對「沒指定就 fail-closed、不要安靜地去打一個猜的位址」有前例
+     （Vacant repo 的 `envmap.SINK_UPSTREAM`）。
+   ⚠ **快照那一層只在活模式（`?live=`）下才預設開。** 不給參數的那一頁是
+     離線凍結重放，回歸工具也是那樣載它的；在那裡憑空多一條輪詢 ⇒ 檔案不在
+     就每輪一個 404 進 console，而 `tools/regress_check.py` 把 console error
+     判成 FAIL。**沒有要讀分身的頁面就不要去讀。** */
+addEventListener("load", () => {
+  if (!window.WorldBridge) return;
+  const twin = Q.get("twin");
+  const locals = [];
+  if (twin && twin !== "off") locals.push({ kind: "store", url: twin });
+  const tf = Q.get("twinfile") ||
+             ((LIVE.url && twin !== "off") ? "live/visitors.json" : null);
+  if (tf) locals.push({ kind: "snapshot", url: tf });
+  const api = Q.get("api");
+  if (!locals.length && !api) return;          // 這一頁不讀分身（離線凍結重放）
+  // ⚠ **活模式但沒有 `&twin=`**：來源鏈只剩下那個靜態快照，而快照要有
+  //   `vacant-twin-loop.service` 在寫才有意義。展場的網址是
+  //   `exhibit_boot.sh`／kiosk unit 產生的，兩邊都會帶 `&twin=`；
+  //   手打網址漏掉的時候這一行是唯一的線索（畫面那一側由
+  //   `twinSnapshotWarning` 負責，它看的是快照自己的時間戳）。
+  if (LIVE.url && !twin && !api){
+    try {
+      console.warn("[分身] 這個網址沒有 &twin=：只剩快照那一層（" + tf + "）。"
+        + "沒有 twinlink loop 在寫它的話，畫面右下角會說「沒有東西在寫它」。"
+        + "展場的網址長這樣：…&twin=http://127.0.0.1:8901/visitors.json");
+    } catch(e){}
+  }
+  WorldBridge.configure({
+    local: locals,
+    baseUrl: api || "",
+    token: Q.get("token") || "dev-token",
+    // ⚠ 預設 5000 → 1000（2026-09-21）。**這一行是「一秒內」的天花板。**
+    //   抵達層自己是同步的（`onSubmission` 那一刻就開始飛信），所以端到端
+    //   還剩下的延遲**只有這個輪詢間隔**：5 秒的話，觀眾按下送出最壞要站著
+    //   等 5 秒才看到反應——那正是人類點名的那一秒。1000 是 `bridge.js`
+    //   `configure()` 允許的下限（再低會被 `Math.max` 夾回來）。
+    //   代價：本機那份 JSON 每秒讀一次（localhost、幾十 KB），量過不痛。
+    //   要退回舊行為：`?twinpoll=5000`。
+    intervalMs: Math.max(1000, +(Q.get("twinpoll") || 1000)),
+  });
+  // ⚠ **抵達與成形拆成兩件事**（2026-09-21）。以前這裡只有 `spawnQueue.push`，
+  //   而那條線最短要等導演有空、最長要等一整格故事演完 ⇒ 觀眾按下送出的
+  //   那一秒畫面是空的。`arrivals.arrive()` 是**同步**的：同一個 tick 就開始
+  //   飛信，不等輪詢、不等影片、不等模型。成形那條線一個字都沒改。
+  WorldBridge.onSubmission(sub => { arrivals.arrive(sub); spawnQueue.push(sub); });
+  WorldBridge.start();
+  console.log("WorldBridge 已啟動 · 來源鏈",
+    locals.map(s => s.kind + "=" + s.url).concat(api ? ["cloud=" + api] : []).join(" → "));
+});
+addEventListener("keydown", e => {
+  if (e.key === "d") document.body.classList.toggle("debug");
+  if (e.key === "f"){
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(()=>{});
+  }
+});
+setInterval(() => {
+  // 背景分頁 rAF 會被 Chrome 節流——那不是凍結，看門狗不得開槍
+  // （實測：背景掛一夜誤重載 8 次）
+  if (document.hidden){ lastFrameTs = performance.now(); return; }
+  if (performance.now() - lastFrameTs > 10000){
+    sessionStorage.setItem("vw_reloads",
+      (parseInt(sessionStorage.getItem("vw_reloads")||"0") + 1));
+    location.reload();
+  }
+}, 5000);
+addEventListener("error", e => console.warn("未捕捉錯誤", e.message));
+</script>
+</body>
+</html>

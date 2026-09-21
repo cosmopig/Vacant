@@ -1,0 +1,8 @@
+[info] [wait] 參數覆寫 retireS = 99999
+[info] [wait] 參數覆寫 centerS = 999
+[log] WorldBridge 已啟動 · 來源鏈 snapshot=live/visitors_probe.json
+[info] [wait] 等待態開始 p3-r3_q_deg3-143210-1
+[eval@25s] "{\"mode\":\"visitor_wait\",\"waiting\":{\"id\":\"p3-r3_q_deg3-143210-1\",\"phase\":\"forming\",\"stage\":\"center\",\"elapsed\":17.6},\"backlog\":[\"p3-r3_q_deg3-143210-2\",\"p3-r3_q_deg3-143210-3\"],\"spawnQueue\":0,\"arrivalsWaiting\":[\"毽子羽\",\"小陶壺\"],\"marks\":{\"live\":null,\"retiring\":0}}"
+[eval@45s] "{\"mode\":\"visitor_wait\",\"waiting\":{\"id\":\"p3-r3_q_deg3-143210-1\",\"phase\":\"forming\",\"stage\":\"center\",\"elapsed\":37.4},\"backlog\":[\"p3-r3_q_deg3-143210-2\",\"p3-r3_q_deg3-143210-3\"],\"spawnQueue\":0,\"arrivalsWaiting\":[\"毽子羽\",\"小陶壺\"],\"marks\":{\"live\":null,\"retiring\":0}}"
+[eval@58s] "{\"mode\":\"visitor_wait\",\"waiting\":{\"id\":\"p3-r3_q_deg3-143210-1\",\"phase\":\"forming\",\"stage\":\"center\",\"elapsed\":50.4},\"backlog\":[\"p3-r3_q_deg3-143210-2\",\"p3-r3_q_deg3-143210-3\"],\"spawnQueue\":0,\"arrivalsWaiting\":[\"毽子羽\",\"小陶壺\"],\"marks\":{\"live\":null,\"retiring\":0}}"
+[title] sc=s04 mode=visitor_wait pool=15 heap=3MB reloads=0
