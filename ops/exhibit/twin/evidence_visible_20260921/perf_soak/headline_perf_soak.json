@@ -69,5 +69,6 @@
     "screenshot_ms_series": [6691, 8732, 7769, 21168, 47282, 12193, 18447],
     "screenshot_ms_note": "7 次量測全部落在『觀眾站在螢幕前會感覺卡住』的範圍，最糟 47.3 秒，直接重現任務描述的症狀量級"
   },
-  "recommendation_not_applied": "s11『全員上台漫遊』一次把所有人設回 onstage 是刻意的敘事設計（不動視覺邏輯的前提下不該擅自改），但它是唯一一次讓 activeVideos 衝出 MAX_ACTIVE_DECODES 上限、進而撞到看門狗重載的路徑。建議後續：把這個場景的初次 getVideo() 呼叫錯開到 2–3 幀而不是同一幀全發，或是讓 sweepIdleVideos 在偵測到『這一幀 onstage 數暴增』時提前跑一次而不是等下一個 %3 週期——兩個都是載入策略層級的小改，沒有動到任何一幀畫面，但這次任務時間沒有再花時間驗證，留給下一輪。"
+  "recommendation_not_applied": "s11『全員上台漫遊』一次把所有人設回 onstage 是刻意的敘事設計（不動視覺邏輯的前提下不該擅自改），但它是唯一一次讓 activeVideos 衝出 MAX_ACTIVE_DECODES 上限、進而撞到看門狗重載的路徑。建議後續：把這個場景的初次 getVideo() 呼叫錯開到 2–3 幀而不是同一幀全發，或是讓 sweepIdleVideos 在偵測到『這一幀 onstage 數暴增』時提前跑一次而不是等下一個 %3 週期——兩個都是載入策略層級的小改，沒有動到任何一幀畫面，但這次任務時間沒有再花時間驗證，留給下一輪。",
+  "followup_20260921b": "已在同一天第二輪覆核裡補上，見 refine_burst/headline_refine_burst.json ＋ 0003-immediate-decode-cap-enforcement.patch（疊在本檔紀錄的 0001+0002 之上）。做法是第二個方案的變體：不是把 getVideo() 呼叫錯開，而是讓上限判準本身在 getVideo() 每次被讀到時就立即執行一次（跟 sweepIdleVideos() 共用同一份 enforceDecodeCap()），效果等價於『偵測到暴增就提前跑』，但不必真的偵測暴增——每次呼叫都順手檢查，反正 pool<=cap 時是幾乎零成本的早退。量到：同一種突發下 activeVideos 從『突發當下衝到 36（15 次重複測試最糟 23），要等最終收斂』改成『突發當下就是 16，15 次重複測試 0 次破底』。誠實邊界：沒有重跑一次完整 60 分鐘去二次確認『incident_at_t3142s 那種重載不再發生』，這件事本身還沒有被驗證，只驗證了它的上游機制（activeVideos 有沒有被壓住）。"
 }

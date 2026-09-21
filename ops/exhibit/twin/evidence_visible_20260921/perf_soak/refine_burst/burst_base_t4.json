@@ -1,0 +1,51 @@
+{
+  "tag": "base_t4",
+  "url": "http://127.0.0.1:8701/index.html",
+  "throttleRate": 4,
+  "pageErrors": [
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)",
+    "console.error: Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "selfCheck": {
+    "hasPool": true,
+    "hasCast": true,
+    "hasEnforce": false,
+    "hasMax": 16,
+    "poolSizeBefore": 22
+  },
+  "before": {
+    "castLen": 20,
+    "poolSize": 23,
+    "activeBefore": 16
+  },
+  "burst": {
+    "onstageCount": 20,
+    "srcsTouched": 29,
+    "poolSizeAfter": 40,
+    "activeImmediatelyAfter": 36
+  },
+  "afterFewFrames": {
+    "activeAfterFewFrames": 15,
+    "reloads": 0
+  },
+  "verdict": {
+    "immediate_capped": false,
+    "eventually_capped": true
+  }
+}
