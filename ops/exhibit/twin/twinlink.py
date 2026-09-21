@@ -487,10 +487,26 @@ def _call_model(prompt: str, endpoint: str, model: str, budget: int,
         "temperature": 0.8,
         "max_tokens": budget,
     }, timeout=timeout)
+    # 🔴 **LM Studio 的錯誤是用 HTTP 200 ＋ `{"error": …}` 回的**，不是 4xx。
+    #    實測 2026-09-22：端點少打 `/v1` ⇒ `POST …:1234/chat/completions`
+    #    ⇒ `status=200`、`body={"error":"Unexpected endpoint or method."}`、178ms。
+    #    沒有這一段的話，下游看到的是「沒有 choices ⇒ content 空」，
+    #    於是把它判成 `empty_content`，收據上寫「thinking 吃光額度」——
+    #    **一個指向完全錯誤方向的診斷**。展場那天有人照著它去查 thinking 設定，
+    #    會查一整晚，而真正要改的是一個路徑後綴。
+    #    ⚠ 這三件事疊起來才是真正的危險：**靜默**（200）＋**怪錯人**（收據）
+    #      ＋**不可逆**（`pending()` 排除已有 generated 事件的卡 ⇒ 救不回來）。
+    api_err = (body or {}).get("error") if isinstance(body, dict) else None
     msg = ((body or {}).get("choices") or [{}])[0].get("message", {}) or {}
     usage = (body or {}).get("usage") or {}
     text = msg.get("content", "")
     return {
+        # `None` ＝ 這一層沒話說（正常回應）；有字串 ＝ API 明確回報的錯誤。
+        # **不要寫空字串**——空字串會被下游讀成「有錯但沒訊息」。
+        "api_error": (api_err if isinstance(api_err, str)
+                      else (json.dumps(api_err, ensure_ascii=False)
+                            if api_err is not None else None)),
+        "http_status": status,
         "parsed": _parse_model_json(text),
         "text": text,
         "budget": budget,
@@ -534,6 +550,25 @@ def generate_one(card: dict[str, Any] | None, card_text: str | None,
             escalated = True
             r = _call_model(prompt, endpoint, model,
                             MAX_TOKENS * ESCALATE_FACTOR, timeout)
+
+        if r["parsed"] is None and r.get("api_error"):
+            # API 層就回錯了——**這不是模型的問題，不准怪到 thinking 頭上**。
+            why = (f"API 回報錯誤（HTTP {r.get('http_status')}）：{r['api_error']}"
+                   f"｜端點={endpoint}"
+                   + ("　🔴 端點少了 `/v1`？候選端點都長這樣："
+                      f"{ENDPOINT_CANDIDATES[0][0]}"
+                      if not str(endpoint).rstrip('/').endswith('/v1') else ""))
+            if not allow_fallback:
+                raise ValueError(why)
+            out = fallback_twin(card)
+            out["engine"] = "fallback_deterministic"
+            out["degraded_from"] = f"lmstudio:{model}"
+            out["degrade_kind"] = "api_error"      # ← **不是** empty_content
+            out["degrade_reason"] = why
+            out["latency_ms"] = int((time.time() - t0) * 1000)
+            out["reasoning_tokens"] = r["reasoning_tokens"]
+            out["budget_escalated"] = False
+            return out
 
         if r["parsed"] is None:
             # 講清楚是「空的」還是「有字但格式不對」——兩者要修的東西不同。
