@@ -934,8 +934,16 @@ def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1", *,
                         WITHDRAW_PAGE
                         .replace("__ID__", _html_escape(sid))
                         .replace("__STATUS__", _html_escape(str(cur.get("status"))))
-                        .replace("__ACTION__",
-                                 "/withdraw/" + action + (f"?{q}" if q else "")))
+                        # 🔴 `__ACTION__` 也要過 escape。`q` 是**原始 query string**，
+                        #   而這一行把它塞進 HTML 屬性 ⇒ 反射式 script 注入。
+                        #   實跑重現（2026-09-21）：
+                        #     GET /withdraw/v1?a="><script>alert(1)</script>
+                        #     → <form … action="/withdraw/v1?a="><script>alert(1)</script>">
+                        #   `__ID__`／`__STATUS__` 本來就過了，只有這一個漏掉。
+                        #   ⚠ 而這一頁正是「觀眾決定要不要刪掉自己」的那一頁——
+                        #     能改寫它＝能對觀眾謊報按下去會發生什麼。比一般 XSS 嚴重。
+                        .replace("__ACTION__", _html_escape(
+                            "/withdraw/" + action + (f"?{q}" if q else ""))))
                 else:
                     self._send({"error": "只有 /visitors.json /verify /stats"
                                          " /withdraw/<id>"}, 404)
