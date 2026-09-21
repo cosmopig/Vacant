@@ -16,19 +16,25 @@
 ## 現況（先講清楚誰做了什麼）
 
 進場時發現：**`world3/twinseam.js` 已經存在**（2026-09-21 08:53，未進版控），
-是同一天另一條線的產出，把幕 5／6／8／9／9b／16／17 的文案做完了，設計
-（用**記號指名**而不是對不特定多數說「你」）是對的。**我沒有重寫它**——
-兩個互相打架的縫線對展場是最差的結果。
+是同一天另一條線的產出，把幕 5／6／8／9／9b／16／17 的文案做完了，而且
+`../narrative_seam/` 裡**已經有那七拍的截圖、負控制與一支 `install_seam.py`**。
+它的關鍵決定（用**記號指名**而不是對不特定多數說「你」）是對的。
+**我沒有重寫它**——兩個互相打架的縫線對展場是最差的結果。
 
-我做的是它沒做完、而且是本條交付要求的三件事：
+> ⚠ **這一段我先寫錯過：**初稿在這裡寫「它沒有截圖」，並把「補截圖」列成本條的
+> 交付之一。那是假的——`../narrative_seam/` 有 7 張幕截圖 ＋ 3 張負控制
+> ＋ `run.log` 的逐句對照。發現之後就地改掉，順帶把本條的接線方式
+> 從 `.patch` 換成跟它同一個做法的 installer（見下）。
+
+所以本條實際補的是它**沒有**做的部分：
 
 | 缺口 | 狀態 |
 |---|---|
 | **收尾（題目三）** 幕 17 六秒後 s11 回到「這 N 格會一直重播」 | ✅ 新寫幕 18（`scenes/seam_ending.js`） |
 | **等待的那一段（題目一的界線）** 投完卡到輪到他之間，s11 對他說「接下來不會有新的事」 | ✅ 新寫幕 7′（同上） |
-| **完整順序表** 順序散在 SCENES 表／director mode 機／twinseam 的 ORDER，沒有一處看得到全貌與文案 | ✅ `scenes/narrative_order.json`（20 拍） |
-| **沒有截圖** 那些話在不在畫面上，沒有人看過 | ✅ 本目錄 1920×1080 |
-| **🔴 沒有接上產品路徑** `index.html` 根本沒有載 `twinseam.js` | ⚠ **仍未接**，見下面「還沒做的事」 |
+| **完整順序表** 順序散在 SCENES 表／director mode 機／twinseam 的 ORDER（只有標題沒有文案），沒有一處看得到全貌 | ✅ `scenes/narrative_order.json`（20 拍，逐句） |
+| 那兩拍的截圖與負控制 | ✅ 本目錄 |
+| **🔴 沒有接上產品路徑** `index.html` 兩支都沒載 | ⚠ **仍未接**，見下面「還沒做的事」 |
 
 ## 核心發現：s11 有三種人站在它前面，而它只寫了一種
 
@@ -142,13 +148,21 @@ s11 是這個世界的**休息狀態**——沒有在演特定一格的時候，
     $ grep -c twinseam ~/Documents/GitHub/vacant_hm/world3/index.html
     0
 
-`index.html` 不是本條獨佔的檔（而且 2026-09-21 11:03 還有別的代理在寫），
-所以照規矩出 patch 不直接套：
+`index.html` 不是本條獨佔的檔（而且整個上午都有別的代理在寫），所以照規矩
+不直接動，改成兩支**冪等**的 installer，**順序不可對調**：
 
-    cd ~/Documents/GitHub/vacant_hm
-    git apply --check ops/.../narrative_order/wire_in.patch   # 今天是乾淨的
-    git apply         ops/.../narrative_order/wire_in.patch
-    # 還原：刪掉那三行，或 git apply -R
+    # 1) 文案層（鄰線的，掛 twinseam.js）
+    python3 ops/.../narrative_seam/install_seam.py
+    # 2) 收尾層（本條的，掛 scenes/seam_ending.js）
+    python3 ops/.../narrative_order/install_ending.py
+
+    python3 ops/.../narrative_order/install_ending.py --status   # 現在掛著沒有
+    python3 ops/.../narrative_order/install_ending.py --undo     # 一行還原
+
+⚠ **不要用 `wire_in.patch` 去套。** 它留著當紀錄（逐字寫出加了哪三行），
+但 context diff 對一個每幾分鐘變一次的檔遲早會爛。installer 只認 `</body>`，
+別人改什麼都對得上，做兩次也不會插兩行。
+`install_ending.py --status` 還會查**順序有沒有反**（收尾層必須在文案層後面）。
 
 截圖跑的頁面 ＝ **某一版 `index.html` ＋ 這個 patch 的那三行**，其餘一個 byte
 不差。`logs/stage_sha256.txt` 印 `IDENTICAL`。這是「測試綠不等於接上產品路徑」
@@ -203,5 +217,9 @@ sha256 `9f9a1a44…` → `3641c259…` → `5d2b1806…` → `709d717d…`）。
 | `world3/scenes/narrative_order.json` | **新增（本條）** | 20 拍完整順序表（含每一句文案、每一句的家、誠實邊界） |
 | `world3/scenes/seam_ending.js` | **新增（本條）** | 幕 7′（等待）＋幕 18（收尾）。負控制 `?seamend=0`；定格 `?seamend=N`／`?seamwait=N` |
 | `world3/scenes/index.json` | **本條獨佔** | 只加一個 `narrative` 指標鍵；`scenes`／`quality` 一個字沒動（livecheck 165 條仍全過） |
-| `world3/twinseam.js` | 另一條線 | **沒動** |
-| `world3/index.html` | 別人的 | **沒動**，出 `wire_in.patch` |
+| `world3/twinseam.js` | 另一條線（`../narrative_seam/`） | **沒動** |
+| `world3/index.html` | 別人的（整個上午一直在被改） | **沒動**。接線走 `install_ending.py`（冪等、一行還原）；`wire_in.patch` 只當紀錄 |
+
+⚠ **`vacant_hm` 那三個檔沒有 commit**，維持在工作區（跟 `twinseam.js` 一樣）。
+理由：那個 repo 在 `twin/live-mobile` 上同時有十幾個代理在動，
+兩個代理在同一個工作樹 commit 會互吃 index。
