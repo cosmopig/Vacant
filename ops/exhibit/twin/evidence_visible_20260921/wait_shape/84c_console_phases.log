@@ -1,0 +1,7 @@
+[info] [wait] 參數覆寫 retireS = 30
+[info] [wait] 參數覆寫 centerS = 14
+[log] WorldBridge 已啟動 · 來源鏈 snapshot=live/visitors_probe.json
+[info] [wait] 等待態開始 probe-cap_phases-113109
+[info] [wait] 退役儀式 probe-cap_phases-113109
+[info] [wait] 退役完成（生成沒有被取消） probe-cap_phases-113109
+[title] sc=s01 mode=invite pool=40 heap=2MB reloads=0

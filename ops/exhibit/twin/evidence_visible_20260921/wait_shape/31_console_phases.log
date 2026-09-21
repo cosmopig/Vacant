@@ -1,0 +1,6 @@
+[info] [wait] 參數覆寫 retireS = 30
+[info] [wait] 參數覆寫 centerS = 12
+[info] [wait] 等待態開始 demo-8f31c2
+[info] [wait] 退役儀式 demo-8f31c2
+[info] [wait] 退役完成（生成沒有被取消） demo-8f31c2
+[title] sc=s01 mode=invite pool=37 heap=2MB reloads=0
