@@ -181,7 +181,11 @@ def test_generate_last_resort_net(store: TwinStore, monkeypatch) -> None:
     assert r["remaining"] == 0        # ⇒ 下一輪不會再撿起同一張卡再炸一次
     gen = [e for e in store.events(kind=KIND_GENERATED)]
     assert gen[0]["payload"]["engine"] == "fallback_deterministic"
-    assert "算不出分身" in gen[0]["payload"]["degrade_reason"]
+    # 2026-09-21：`degrade_reason` **搬到鏈外**了（它夾帶模型原始回應，
+    # 而模型可能逐字複誦卡上的字）。鏈上留的是分類 `degrade_kind`；
+    # 原因本身照樣讀得到，只是走 `current()` 的鏈外開封。
+    assert gen[0]["payload"]["degrade_kind"] == "ValueError"
+    assert "算不出分身" in (store.current("v1") or {})["twin"]["degrade_reason"]
     assert store.verify()["ok"] is True
 
 

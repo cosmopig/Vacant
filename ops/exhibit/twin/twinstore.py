@@ -22,6 +22,19 @@
                                      └──────────────────────────┘
 ```
 
+## 🔴 原文**不在這條鏈上**（2026-09-21 裁決）
+
+鏈是 append-only ⇒ **原文一旦上鏈就刪不掉，那會讓「刪除證明」變成一句謊**
+（`vacant_network/consent.py` 檔頭逐字）。所以 2026-09-21 起：
+
+* `submitted`／`generated` 的 payload 只放 **commitment**（`sealed="twinvault.v1"`），
+* 原文與 nonce 住在鏈外的檔案庫 `ops/exhibit/twin/twinvault.py`（**刪得掉**），
+* `current()` 讀得到原文，是因為它去檔案庫開封，不是因為鏈上有；
+  撤回之後檔案庫那一份 `unlink()` 掉，同一支 `current()` 就再也拿不到。
+
+⚠ **2026-09-21 之前寫進來的列帶著原文，而且拿不掉。** 那些主體的 `current()`
+會帶 `plaintext_on_chain: True`——**不是瑕疵標記，是事實標記**，不要靜靜隱藏。
+
 ## Append-only 是可執行的，不是慣例
 
 `UPDATE` 與 `DELETE` 由 **SQLite trigger `RAISE(ABORT)`** 擋下（見 `SCHEMA`）。
@@ -67,6 +80,10 @@ from typing import Any, Iterable, Iterator
 
 HERE = pathlib.Path(__file__).resolve()
 TWIN = HERE.parent
+# 讓這一支當腳本跑的時候也 import 得到 `ops.…` 與 `vacant_network.…`
+# （`current()` 要去檔案庫開封）。放在這裡而不是各呼叫端各補一次。
+if str(TWIN.parents[2]) not in sys.path:
+    sys.path.insert(0, str(TWIN.parents[2]))
 
 #: 預設資料庫位置。展場那台、1003、Mac 都跑得起來，路徑用環境變數換。
 #: 放在 `store/` 底下而不是 `live/`，是因為 `live/` 那批是**可重建的輸出**
@@ -75,9 +92,27 @@ DEFAULT_DB = pathlib.Path(
     os.environ.get("VACANT_TWIN_DB") or (TWIN / "store" / "twinstore.sqlite3")
 )
 
+
+def default_vault_root(db_path: pathlib.Path | str) -> pathlib.Path:
+    """檔案庫預設住哪裡：`<庫名>.vault/` 就在庫旁邊。
+
+    跟著庫走而不是跟著目錄走，是因為同一個資料夾可能有兩個庫（演練、正式），
+    共用一個檔案庫會讓 A 庫的撤回把 B 庫的原文刪掉。
+    """
+    p = pathlib.Path(db_path)
+    env = os.environ.get("VACANT_TWIN_VAULT")
+    return pathlib.Path(env) if env else p.parent / (p.stem + ".vault")
+
+
 #: 創世串：鏈的第一列的 `prev_sha256`。含 store_id，讓兩個不同的庫
 #: 不可能長出同一條鏈（否則「把別台的鏈接過來」會驗得過）。
 GENESIS_PREFIX = "vacant.twinstore.v1"
+
+#: 封印標記。payload 帶著它 ⇒ 裡面只有 commitment，原文在 `twinvault` 的檔案庫。
+#: **wire 常數**，改它就讀不懂既有的鏈。定義在這裡是因為它是**鏈格式**的一部分；
+#: `twinvault.SEAL_TAG` 直接 import 這一個（兩邊各寫一份＝早晚會漂）。
+SEAL_TAG = "twinvault.v1"
+
 
 #: 事件種類。**不是狀態機的狀態**，是「發生過什麼」。
 #: 狀態由 `current()` 摺疊算出來。
@@ -87,10 +122,13 @@ KIND_PUBLISHED = "published"   # 結果回寫雲端成功（觀眾手機看得�
 KIND_ERROR = "error"           # 某一步失敗。**失敗也是資料**，不准靜靜丟掉
 KIND_INGEST_GAP = "ingest_gap" # 明知道漏收了（雲端連不上／郵箱歸零）
 KIND_NOTE = "note"             # 人工註記／端到端演練標記
+KIND_WITHDRAWN = "withdrawn"   # 觀眾撤回同意（**宣告**，刪除是下一列）
+KIND_ERASED = "erased"         # 鏈外原文真的被 unlink 了，帶被刪位元組的 sha256
 
 KINDS = (
     KIND_SUBMITTED, KIND_GENERATED, KIND_PUBLISHED,
     KIND_ERROR, KIND_INGEST_GAP, KIND_NOTE,
+    KIND_WITHDRAWN, KIND_ERASED,
 )
 
 SCHEMA = """
@@ -154,7 +192,8 @@ class TwinStore:
     """append-only 事件庫。所有寫入只有一條路：`append()`。"""
 
     def __init__(self, path: pathlib.Path | str = DEFAULT_DB,
-                 read_only: bool = False) -> None:
+                 read_only: bool = False,
+                 vault: pathlib.Path | str | None = None) -> None:
         """`read_only=True` 由 SQLite 層強制唯讀（`mode=ro`），不是靠自律。
 
         ⚠ 為什麼需要這個旗標：預設建構子會 `mkdir` ＋ `executescript(SCHEMA)`
@@ -163,6 +202,8 @@ class TwinStore:
         """
         self.path = pathlib.Path(path)
         self.read_only = read_only
+        self.vault_root = pathlib.Path(vault) if vault else default_vault_root(self.path)
+        self._vault: Any = None
         if read_only:
             uri = "file:" + urllib.request.pathname2url(str(self.path)) + "?mode=ro"
             self.conn = sqlite3.connect(uri, uri=True, timeout=30.0)
@@ -183,6 +224,22 @@ class TwinStore:
         self.conn.execute("PRAGMA synchronous=FULL")  # 展覽現場會直接拔電源
         self.conn.executescript(SCHEMA)
         self._ensure_store_id()
+
+    # -- 鏈外檔案庫 -----------------------------------------------------------
+
+    @property
+    def vault(self) -> Any:
+        """鏈外檔案庫（原文住的地方）。**惰性建立**。
+
+        ⚠ 惰性不是效能考量，是「唯讀真的唯讀」：`TwinVault` 的建構子不 mkdir，
+        讀路徑也不 mkdir，所以 `serve` 的 GET 走過來不會在真相來源旁邊長出目錄。
+        import 也放在函式裡——`twinvault` 需要 `cryptography`，而
+        `twinstore` 的雜湊鏈本身不需要，不要讓核心多綁一個相依。
+        """
+        if self._vault is None:
+            from ops.exhibit.twin.twinvault import TwinVault
+            self._vault = TwinVault(self.vault_root)
+        return self._vault
 
     # -- meta ---------------------------------------------------------------
 
@@ -308,29 +365,76 @@ class TwinStore:
     # -- 摺疊出「現在」（不是欄位，是算出來的） --------------------------------
 
     def current(self, sub_id: str) -> dict[str, Any] | None:
-        """把一個 sub_id 的事件流摺成現況。**沒有任何一列被改過。**"""
+        """把一個 sub_id 的事件流摺成現況。**沒有任何一列被改過。**
+
+        原文（`card`／`card_text`／分身的三句話）**不在鏈上**：這裡看到的是
+        去鏈外檔案庫開封的結果。撤回之後檔案庫那一份被 `unlink()`，
+        同一支函式就回 `None`——「刪了」在讀取面是真的看得到的。
+
+        ⚠ 舊列（2026-09-21 之前）的原文在 payload 裡，拿不掉。那種情況
+        `plaintext_on_chain=True`，**照樣回原文**（它本來就在鏈上，
+        假裝看不到只是自欺）。
+        """
         evs = list(self.events(sub_id=sub_id))
         if not evs:
             return None
         out: dict[str, Any] = {
             "sub_id": sub_id, "card": None, "twin": None,
             "submitted_seq": None, "generated_seq": None, "published_seq": None,
+            "withdrawn_seq": None, "erased_seq": None,
+            "sealed": False, "plaintext_on_chain": False,
             "errors": [], "status": "unknown",
         }
+        card_ref: dict[str, Any] | None = None
+        twin_ref: dict[str, Any] | None = None
         for e in evs:  # 依 seq 遞增，後面的蓋掉前面的 ⇒ 「最後一筆贏」
+            p = e["payload"] if isinstance(e["payload"], dict) else {}
+            sealed = p.get("sealed") == SEAL_TAG
             if e["kind"] == KIND_SUBMITTED:
-                out["card"] = e["payload"].get("card")
-                out["card_text"] = e["payload"].get("card_text")
-                out["cloud_ts"] = e["payload"].get("ts")
                 out["submitted_seq"] = e["seq"]
+                out["cloud_ts"] = p.get("ts")
+                if sealed:
+                    out["sealed"] = True
+                    card_ref = p
+                else:
+                    out["card"] = p.get("card")
+                    out["card_text"] = p.get("card_text")
+                    if p.get("card") is not None or p.get("card_text") is not None:
+                        out["plaintext_on_chain"] = True
             elif e["kind"] == KIND_GENERATED:
-                out["twin"] = e["payload"]
                 out["generated_seq"] = e["seq"]
+                out["twin"] = dict(p)
+                if sealed:
+                    twin_ref = p
+                elif any(p.get(k) for k in ("arrival", "working", "handover")):
+                    out["plaintext_on_chain"] = True
             elif e["kind"] == KIND_PUBLISHED:
                 out["published_seq"] = e["seq"]
+            elif e["kind"] == KIND_WITHDRAWN:
+                out["withdrawn_seq"] = e["seq"]
+            elif e["kind"] == KIND_ERASED:
+                out["erased_seq"] = e["seq"]
+                out["erased_refs"] = [i.get("ref") for i in (p.get("erased") or [])]
             elif e["kind"] == KIND_ERROR:
-                out["errors"].append({"seq": e["seq"], **e["payload"]})
-        if out["published_seq"]:
+                out["errors"].append({"seq": e["seq"], **p})
+
+        # 鏈外開封。**檔案不在就是不在**——不要回一個空字串假裝有東西。
+        if card_ref is not None:
+            plain = self.vault.open_card(sub_id)
+            out["card"] = (plain or {}).get("card")
+            out["card_text"] = (plain or {}).get("card_text")
+            out["card_commitment"] = card_ref.get("commitment")
+            out["card_available"] = plain is not None
+        if twin_ref is not None:
+            plain = self.vault.open_twin(sub_id)
+            out["twin"] = {**dict(twin_ref), **(plain or {})}
+            out["twin_available"] = plain is not None
+
+        if out["erased_seq"]:
+            out["status"] = "erased"
+        elif out["withdrawn_seq"]:
+            out["status"] = "withdrawn"
+        elif out["published_seq"]:
             out["status"] = "published"
         elif out["generated_seq"]:
             out["status"] = "generated"
