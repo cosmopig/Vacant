@@ -159,7 +159,10 @@ def twin_stack(tmp_path):
     db = tmp_path / "t.sqlite3"
     tv_root = tmp_path / "tv"
     (tv_root / "world3" / "live").mkdir(parents=True)
-    subprocess.run(["python3", str(TWIN / "twinlink.py"), "--db", str(db), "view"],
+    # ⚠ `--init` 不是裝飾：`twinlink` 從 2026-09-22 起**拒絕**替不存在的 `--db`
+    #   建空庫（rc 5，誠實邊界 7）。這裡是真的要開一張新的空庫，所以明講。
+    subprocess.run(["python3", str(TWIN / "twinlink.py"), "--init",
+                    "--db", str(db), "view"],
                    check=True, capture_output=True)
     sp, tp = _free_port(), _free_port()
     serve = subprocess.Popen(

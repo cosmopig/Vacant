@@ -1,0 +1,42 @@
+[
+  {
+    "n": 100,
+    "retired_first_round": 40,
+    "first_round_ms": 119.8,
+    "steady_windowed_ms": 32.1,
+    "steady_unwindowed_ms": 34.1,
+    "db_kb": 4.0,
+    "events": 240,
+    "json_kb": 45.8
+  },
+  {
+    "n": 300,
+    "retired_first_round": 240,
+    "first_round_ms": 423.9,
+    "steady_windowed_ms": 111.3,
+    "steady_unwindowed_ms": 144.6,
+    "db_kb": 352.0,
+    "events": 840,
+    "json_kb": 48.6
+  },
+  {
+    "n": 600,
+    "retired_first_round": 540,
+    "first_round_ms": 1894.1,
+    "steady_windowed_ms": 448.1,
+    "steady_unwindowed_ms": 292.7,
+    "db_kb": 984.0,
+    "events": 1740,
+    "json_kb": 52.7
+  },
+  {
+    "n": 1000,
+    "retired_first_round": 940,
+    "first_round_ms": 4437.1,
+    "steady_windowed_ms": 395.3,
+    "steady_unwindowed_ms": 532.8,
+    "db_kb": 1600.0,
+    "events": 2940,
+    "json_kb": 58.2
+  }
+]

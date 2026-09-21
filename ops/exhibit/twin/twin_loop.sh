@@ -19,6 +19,8 @@
 #   VACANT_TWIN_CLOUD_TOKEN  必要。沒有就 **exit 78 並說為什麼**，不是安靜不做事。
 #   VACANT_TWIN_CLOUD        預設 https://vacant-world.cosmopig.com
 #   VACANT_TWIN_DB           預設 <repo>/ops/exhibit/twin/store/twinstore.sqlite3
+#   VACANT_TWIN_INIT         設成 1 才准建一張**新的空庫**（第一次布展）。
+#                            預設不准：路徑打錯要紅，不要安靜地演一個空世界。
 #   VACANT_HM                預設 <repo>/../vacant_hm
 #   VACANT_TWIN_OUT          預設 $VACANT_HM/world3/live/visitors.json
 #   VACANT_TWIN_INTERVAL     預設 15（秒）
@@ -79,9 +81,31 @@ if [ "$PRINT_ONLY" = "0" ] && [ ! -d "$(dirname "$OUT")" ]; then
   exit 2
 fi
 
-CMD=("$PY" "$REPO/ops/exhibit/twin/twinlink.py" --db "$DB" loop
-     --cloud "$CLOUD" --token "$TOKEN"
-     --interval "$INTERVAL" --rounds "$ROUNDS" --out "$OUT")
+# 🔴 庫不在就**現在**講，不要讓 twinlink 安靜地建一張空庫再回綠
+#    （缺陷 C，2026-09-22）。twinlink 自己也擋（rc 5），這裡多擋一層是因為
+#    展場看得到的是這一支印的字，不是 journal 裡那段 JSON。
+WANT_INIT=0
+if [ "${VACANT_TWIN_INIT:-0}" = "1" ]; then
+  WANT_INIT=1
+  echo "⚠ VACANT_TWIN_INIT=1 ⇒ 允許建一張新的空庫：$DB" >&2
+elif [ "$PRINT_ONLY" = "0" ] && [ ! -f "$DB" ]; then
+  echo "✗ 真相來源不在：$DB" >&2
+  echo "  這一支**不會**替你建一個空庫再回綠——那會讓「我沒找到庫」看起來" >&2
+  echo "  跟「今天沒有人來」一樣，而展場沒有人守著。" >&2
+  echo "  · 路徑打錯了？VACANT_TWIN_DB 現在是 ${VACANT_TWIN_DB:-（沒設，用預設）}" >&2
+  echo "  · 真的要開新場地（第一次布展）⇒ VACANT_TWIN_INIT=1 ./twin_loop.sh" >&2
+  exit 5
+fi
+
+# ⚠ **不要用 `"${ARR[@]}"` 展開一個空陣列。** `set -u` 之下 bash 3.2（macOS 內建）
+#   會判 `unbound variable` 直接死掉——判準：
+#   tests/test_exhibit_twin_wiring.py::test_twin_loop_print_cmd_masks_the_token。
+CMD=("$PY" "$REPO/ops/exhibit/twin/twinlink.py" --db "$DB")
+if [ "$WANT_INIT" = "1" ]; then
+  CMD+=(--init)
+fi
+CMD+=(loop --cloud "$CLOUD" --token "$TOKEN"
+      --interval "$INTERVAL" --rounds "$ROUNDS" --out "$OUT")
 if [ -n "${VACANT_TWIN_ENDPOINT:-}" ]; then
   CMD+=(--endpoint "$VACANT_TWIN_ENDPOINT")
 fi

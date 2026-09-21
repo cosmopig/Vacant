@@ -1,0 +1,193 @@
+{
+  "probe": "getproxies_stall",
+  "at": "2026-09-21T23:02:09+0800",
+  "platform": "macOS-15.7.3-x86_64-i386-64bit",
+  "python": "3.12.10",
+  "budget_s": 150.0,
+  "stall_threshold_s": 5.0,
+  "baseline_no_env": {
+    "reps": 6,
+    "runs": [
+      {
+        "seconds": 3.442,
+        "timed_out": false,
+        "wall_s": 4.122,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 4.661,
+        "timed_out": false,
+        "wall_s": 5.248,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 1.375,
+        "timed_out": false,
+        "wall_s": 2.615,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 17.639,
+        "timed_out": false,
+        "wall_s": 18.57,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 11.241,
+        "timed_out": false,
+        "wall_s": 11.855,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 119.825,
+        "timed_out": false,
+        "wall_s": 120.502,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      }
+    ],
+    "max_s": 119.825,
+    "min_s": 1.375,
+    "any_timed_out": false,
+    "stall_observed": true
+  },
+  "with_no_proxy_star": {
+    "reps": 6,
+    "runs": [
+      {
+        "seconds": 0.0,
+        "timed_out": false,
+        "wall_s": 0.847,
+        "n_proxies": 1,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.0,
+        "timed_out": false,
+        "wall_s": 1.743,
+        "n_proxies": 1,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.0,
+        "timed_out": false,
+        "wall_s": 1.923,
+        "n_proxies": 1,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.0,
+        "timed_out": false,
+        "wall_s": 1.153,
+        "n_proxies": 1,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.0,
+        "timed_out": false,
+        "wall_s": 1.181,
+        "n_proxies": 1,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.0,
+        "timed_out": false,
+        "wall_s": 0.427,
+        "n_proxies": 1,
+        "rc": 0,
+        "stderr": null
+      }
+    ],
+    "max_s": 0.0,
+    "min_s": 0.0,
+    "any_timed_out": false,
+    "stall_observed": false
+  },
+  "negctl_irrelevant_env": {
+    "reps": 6,
+    "runs": [
+      {
+        "seconds": 11.347,
+        "timed_out": false,
+        "wall_s": 11.916,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.332,
+        "timed_out": false,
+        "wall_s": 1.648,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.422,
+        "timed_out": false,
+        "wall_s": 1.508,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 0.647,
+        "timed_out": false,
+        "wall_s": 1.163,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 4.415,
+        "timed_out": false,
+        "wall_s": 6.327,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      },
+      {
+        "seconds": 2.616,
+        "timed_out": false,
+        "wall_s": 3.277,
+        "n_proxies": 0,
+        "rc": 0,
+        "stderr": null
+      }
+    ],
+    "max_s": 11.347,
+    "min_s": 0.332,
+    "any_timed_out": false,
+    "stall_observed": true
+  },
+  "honesty": "Mac 的數字。展場是 1003（Windows，getproxies_registry），那台沒量過 ⇒ windows_measured=null。停頓是間歇的：stall_observed=false 只代表這一輪沒撞上。",
+  "windows_measured": null,
+  "previously_observed_stalls_s": [
+    206.33,
+    89.67,
+    49.22,
+    16.08
+  ],
+  "verdict": {
+    "baseline_stalled_this_round": true,
+    "fix_is_fast": true,
+    "negctl_no_improvement": true,
+    "conclusive_this_round": true
+  }
+}
