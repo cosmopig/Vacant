@@ -1,0 +1,455 @@
+{
+ "arm": "after",
+ "out": "S02_after_single",
+ "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+ "n_subs": 1,
+ "clock": "Playwright fake clock（rAF／performance.now 一起接管）",
+ "viewport": "1280x720",
+ "started": "2026-09-21T14:13:49+0800",
+ "loadavg_at_start": [
+  987.64208984375,
+  880.97119140625,
+  501.384765625
+ ],
+ "preState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s00 mode=wait pool=0 heap=0MB reloads=0",
+  "sceneT": 3.3000000000000016,
+  "snapA": 0,
+  "sceneId": "s00",
+  "watchdogWouldFire": 0,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 1621,
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 42225
+ },
+ "warmRealSec": 41.4,
+ "ids": [
+  "S02_after_single-141444-0"
+ ],
+ "anchorFound": true,
+ "anchorVirtualMsFromWrite": 1000,
+ "frames": [
+  {
+   "virtualMs": 0,
+   "file": "f__+0000ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": -0.0,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 60,
+   "file": "f__+0060ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.28,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.064,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 120,
+   "file": "f__+0120ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.49,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.128,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 180,
+   "file": "f__+0180ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.63,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.192,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 250,
+   "file": "f__+0250ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.74,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.256,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 320,
+   "file": "f__+0320ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.81,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.32,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 400,
+   "file": "f__+0400ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.88,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.4,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 500,
+   "file": "f__+0500ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.93,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.512,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 620,
+   "file": "f__+0620ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.96,
+    "burst": 0,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.624,
+      "landed": true,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 760,
+   "file": "f__+0760ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.98,
+    "burst": 0.14400000000000002,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.768,
+      "landed": true,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 900,
+   "file": "f__+0900ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.99,
+    "burst": 0.28800000000000014,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.912,
+      "landed": true,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1100,
+   "file": "f__+1100ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.4800000000000003,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.104,
+      "landed": true,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1400,
+   "file": "f__+1400ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.7840000000000006,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.408,
+      "landed": true,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1800,
+   "file": "f__+1800ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.808,
+      "landed": true,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1
+     }
+    ]
+   }
+  }
+ ],
+ "postState": {
+  "arrivals": {
+   "total": 1,
+   "flying": 1,
+   "waiting": [
+    {
+     "label": "果醬瓶",
+     "place": 1,
+     "looked": {
+      "turned": 4,
+      "stopped": 7
+     }
+    }
+   ],
+   "marks": [
+    {
+     "id": "S02_after_single-141444-0",
+     "at": 1788181307878926,
+     "drawnAt": 1788181307878928
+    }
+   ]
+  },
+  "castReady": 6,
+  "queueLen": 1,
+  "propsLoaded": 6,
+  "title": "sc=s03 mode=wait pool=0 heap=0MB reloads=0",
+  "sceneT": 0.8320000000000006,
+  "snapA": 0,
+  "sceneId": "s03",
+  "watchdogWouldFire": 1,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 1817,
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 1788181307880726
+ },
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+ ],
+ "loadavg_at_end": [
+  916.75146484375,
+  939.00830078125,
+  604.251953125
+ ]
+}

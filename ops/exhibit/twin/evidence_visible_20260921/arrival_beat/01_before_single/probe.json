@@ -1,0 +1,104 @@
+{
+ "label": "before",
+ "variant": "single",
+ "started": "2026-09-21T00:35:52.257Z",
+ "viewport": "1280x720",
+ "url": "http://127.0.0.1:8420/world3/index.html?twinfile=live/visitors.json&twinpoll=1000",
+ "console": [],
+ "polls": [
+  1789950973670,
+  1789951007926,
+  1789951016575
+ ],
+ "settleGaps": [],
+ "pollHealthy": false,
+ "sceneAtTrigger": "sc=s00 mode=invite pool=22 heap=9MB reloads=0",
+ "t0": 1789951007703,
+ "loadToTrigger": 55420,
+ "after": {
+  "title": "sc=s04 mode=visitor_spawn pool=22 heap=9MB reloads=0",
+  "timeOrigin": 1789950952289.6,
+  "arrivals": null
+ },
+ "tHit": 1789951007926,
+ "pollWaitMs": 223,
+ "latency": null,
+ "frameCount": 13,
+ "frameSpanMs": 11828,
+ "fpsMeasured": 1.1,
+ "stillZero": "tHit(帶著這個人的 HTTP 回應送出的那一刻)",
+ "stills": [
+  {
+   "want": -1500,
+   "actual": -1473,
+   "file": "before_single__want-1500ms__real-1473ms.jpg"
+  },
+  {
+   "want": 0,
+   "actual": 1,
+   "file": "before_single__want+0ms__real+1ms.jpg"
+  },
+  {
+   "want": 150,
+   "actual": 1,
+   "file": "before_single__want+150ms__real+1ms.jpg"
+  },
+  {
+   "want": 300,
+   "actual": 1,
+   "file": "before_single__want+300ms__real+1ms.jpg"
+  },
+  {
+   "want": 450,
+   "actual": 746,
+   "file": "before_single__want+450ms__real+746ms.jpg"
+  },
+  {
+   "want": 600,
+   "actual": 746,
+   "file": "before_single__want+600ms__real+746ms.jpg"
+  },
+  {
+   "want": 800,
+   "actual": 746,
+   "file": "before_single__want+800ms__real+746ms.jpg"
+  },
+  {
+   "want": 1000,
+   "actual": 1124,
+   "file": "before_single__want+1000ms__real+1124ms.jpg"
+  },
+  {
+   "want": 1300,
+   "actual": 1315,
+   "file": "before_single__want+1300ms__real+1315ms.jpg"
+  },
+  {
+   "want": 1700,
+   "actual": 1315,
+   "file": "before_single__want+1700ms__real+1315ms.jpg"
+  },
+  {
+   "want": 2200,
+   "actual": 1315,
+   "file": "before_single__want+2200ms__real+1315ms.jpg"
+  },
+  {
+   "want": 3000,
+   "actual": 1315,
+   "file": "before_single__want+3000ms__real+1315ms.jpg"
+  },
+  {
+   "want": 4500,
+   "actual": 1315,
+   "file": "before_single__want+4500ms__real+1315ms.jpg"
+  },
+  {
+   "want": 7000,
+   "actual": 7954,
+   "file": "before_single__want+7000ms__real+7954ms.jpg"
+  }
+ ],
+ "video": null,
+ "videoErr": "ffmpeg version n7.0.1-playwright-build-1011 Copyright (c) 2000-2024 the FFmpeg developers\n  built with Apple clang version 14.0.3 (clang-1403.0.22.14.1)\n  configuration: --pkg-config=pkg-config --pkg-config-flags=--static --extra-cflags=-I//Users/runner/work/playwright-browsers/playwright-browsers/b"
+}

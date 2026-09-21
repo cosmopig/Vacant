@@ -1,0 +1,56 @@
+{
+ "arms": {
+  "posctl_none": {
+   "loads": 3,
+   "vwReloads": 2,
+   "watchdogArmed": null,
+   "watchdogWouldFire": null,
+   "otherIntervals": null,
+   "maxFrameGapMs": null,
+   "reloadBlocked": null,
+   "reloadBlockFailed": null,
+   "reloadDescConfigurable": false
+  },
+  "old_BLOCK_RELOAD": {
+   "loads": 3,
+   "vwReloads": 2,
+   "watchdogArmed": null,
+   "watchdogWouldFire": null,
+   "otherIntervals": null,
+   "maxFrameGapMs": null,
+   "reloadBlocked": 0,
+   "reloadBlockFailed": "TypeError: Cannot redefine property: reload",
+   "reloadDescConfigurable": false
+  },
+  "new_blockwatchdog": {
+   "loads": 1,
+   "vwReloads": 0,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 0,
+   "otherIntervals": 0,
+   "maxFrameGapMs": 32,
+   "reloadBlocked": null,
+   "reloadBlockFailed": null,
+   "reloadDescConfigurable": false
+  },
+  "instrument_freeze12s": {
+   "loads": null,
+   "vwReloads": 0,
+   "watchdogArmed": 0,
+   "watchdogWouldFire": 0,
+   "otherIntervals": 0,
+   "maxFrameGapMs": 12008,
+   "reloadBlocked": null,
+   "reloadBlockFailed": null,
+   "reloadDescConfigurable": false
+  }
+ },
+ "verdict": {
+  "正控制量得動（沒攔就真的被重載走）": true,
+  "舊招攔不住（所以 S03／S05 才會死）": true,
+  "舊招失敗原因是 Location 不可設定": true,
+  "新招擋得住（同一份文件沒被重載）": true,
+  "新招只換掉看門狗那一支": true,
+  "掉幀計數器量得動（凍 12 秒要看得到）": true
+ }
+}

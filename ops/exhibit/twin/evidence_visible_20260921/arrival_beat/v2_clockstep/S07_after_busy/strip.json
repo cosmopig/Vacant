@@ -1,0 +1,466 @@
+{
+ "arm": "after",
+ "out": "S07_after_busy",
+ "url": "http://127.0.0.1:8622/world3/index.frozen.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+ "n_subs": 1,
+ "clock": "Playwright fake clock（rAF／performance.now 一起接管）",
+ "viewport": "1280x720",
+ "started": "2026-09-21T14:29:11+0800",
+ "loadavg_at_start": [
+  996.02978515625,
+  867.72119140625,
+  852.42578125
+ ],
+ "preState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s00 mode=wait pool=0 heap=0MB reloads=0",
+  "sceneT": 2.800000000000001,
+  "snapA": 0,
+  "sceneId": "s00",
+  "watchdogWouldFire": 0,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 2372,
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 41288
+ },
+ "warmRealSec": 40.4,
+ "primedDirector": {
+  "ok": true,
+  "id": "S07_after_busy-prime-143021",
+  "waitedRealSec": 42.5,
+  "mode": "visitor_spawn"
+ },
+ "ids": [
+  "S07_after_busy-143110-0"
+ ],
+ "anchorFound": true,
+ "anchorVirtualMsFromWrite": 1000,
+ "frames": [
+  {
+   "virtualMs": 0,
+   "file": "f__+0000ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": -0.0,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 60,
+   "file": "f__+0060ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.064,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 120,
+   "file": "f__+0120ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.128,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 180,
+   "file": "f__+0180ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.192,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 250,
+   "file": "f__+0250ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.256,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 320,
+   "file": "f__+0320ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.32,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 400,
+   "file": "f__+0400ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.4,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 500,
+   "file": "f__+0500ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.512,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 620,
+   "file": "f__+0620ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.624,
+      "landed": true,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 760,
+   "file": "f__+0760ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.14400000000000002,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.768,
+      "landed": true,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 900,
+   "file": "f__+0900ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.28800000000000014,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.912,
+      "landed": true,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1100,
+   "file": "f__+1100ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.4800000000000003,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.104,
+      "landed": true,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1400,
+   "file": "f__+1400ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.7840000000000006,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.408,
+      "landed": true,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1800,
+   "file": "f__+1800ms.jpg",
+   "state": {
+    "total": 2,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.808,
+      "landed": true,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "訂書機",
+      "place": 1
+     }
+    ]
+   }
+  }
+ ],
+ "postState": {
+  "arrivals": {
+   "total": 2,
+   "flying": 1,
+   "waiting": [
+    {
+     "label": "訂書機",
+     "place": 1,
+     "looked": {
+      "turned": 0,
+      "stopped": 0
+     }
+    }
+   ],
+   "marks": [
+    {
+     "id": "S07_after_busy-prime-143021",
+     "at": 47669,
+     "drawnAt": 47695
+    },
+    {
+     "id": "S07_after_busy-143110-0",
+     "at": 1788182294498412,
+     "drawnAt": 1788182294498416
+    }
+   ]
+  },
+  "castReady": 6,
+  "queueLen": 1,
+  "propsLoaded": 5,
+  "title": "sc=s04 mode=visitor_spawn pool=0 heap=0MB reloads=0",
+  "sceneT": 3.2960000000000025,
+  "snapA": 0,
+  "sceneId": "s04",
+  "watchdogWouldFire": 1,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 2372,
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 1788182294500212
+ },
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+ ],
+ "loadavg_at_end": [
+  840.86572265625,
+  58.955078125,
+  931.2841796875
+ ]
+}

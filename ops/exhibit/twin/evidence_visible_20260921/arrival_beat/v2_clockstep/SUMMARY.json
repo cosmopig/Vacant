@@ -1,0 +1,203 @@
+{
+ "what": "抵達層（投卡那一秒）連續截圖批次的結論表",
+ "zeroPoint": "WorldBridge.onSubmission 回呼進到頁面的那一刻",
+ "clock": "Playwright 假時鐘：每一格的內容落在虛擬時間軸上精確的那一刻",
+ "caveat": [
+  "submitToFirstPaintMs 是頁面自己記的（arrivals.marks 的 at→drawnAt），量的是「回呼到信第一次被畫出來」，不含手機端送出到 snapshot 落盤那一段。",
+  "clayPeopleTurned 只算 dir 真的翻面的；本來就面向投遞口的算在 stopped 裡。",
+  "這台 Mac 同時有十幾個 agent 在跑（load 700–900），掉幀數字是這台的性質。"
+ ],
+ "arms": [
+  {
+   "arm": "S01_before_single",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.before.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T14:17:37+0800",
+   "warmRealSec": 41.9,
+   "loadavg1_start": 998.9,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 2989,
+   "castReady": 6,
+   "sceneAtEnd": "s04",
+   "arrivalLayer": null,
+   "submitToFirstPaintMs": null,
+   "clayPeopleTurned": null,
+   "queueShown": null
+  },
+  {
+   "arm": "S02_after_single",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T14:13:49+0800",
+   "warmRealSec": 41.4,
+   "loadavg1_start": 987.6,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 1817,
+   "castReady": 6,
+   "sceneAtEnd": "s03",
+   "arrivalLayer": {
+    "total": 1,
+    "flying": 1
+   },
+   "submitToFirstPaintMs": [
+    2
+   ],
+   "marksNeverPainted": null,
+   "clayPeopleTurned": 4,
+   "clayPeopleStopped": 7,
+   "queueShown": [
+    {
+     "place": 1,
+     "label": "果醬瓶"
+    }
+   ]
+  },
+  {
+   "arm": "S03_negctl_arrive0",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1&arrive=0",
+   "started": "2026-09-21T13:46:56+0800",
+   "warmRealSec": 41.1,
+   "loadavg1_start": 699.5,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 2465,
+   "castReady": 6,
+   "sceneAtEnd": "s04",
+   "arrivalLayer": {
+    "total": 0,
+    "flying": 0
+   },
+   "submitToFirstPaintMs": null,
+   "marksNeverPainted": null,
+   "clayPeopleTurned": null,
+   "clayPeopleStopped": null,
+   "queueShown": null
+  },
+  {
+   "arm": "S05_before_triple",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.before.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T13:56:32+0800",
+   "warmRealSec": 43.6,
+   "loadavg1_start": 790.5,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 3111,
+   "castReady": 6,
+   "sceneAtEnd": "s00",
+   "arrivalLayer": null,
+   "submitToFirstPaintMs": null,
+   "clayPeopleTurned": null,
+   "queueShown": null
+  },
+  {
+   "arm": "S04_after_triple",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T13:51:19+0800",
+   "warmRealSec": 40.2,
+   "loadavg1_start": 963.9,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 2241,
+   "castReady": 6,
+   "sceneAtEnd": "s03",
+   "arrivalLayer": {
+    "total": 3,
+    "flying": 3
+   },
+   "submitToFirstPaintMs": [
+    8,
+    424,
+    840
+   ],
+   "marksNeverPainted": null,
+   "clayPeopleTurned": 4,
+   "clayPeopleStopped": 7,
+   "queueShown": [
+    {
+     "place": 1,
+     "label": "手風琴"
+    },
+    {
+     "place": 2,
+     "label": "小火柴"
+    },
+    {
+     "place": 3,
+     "label": "蜂蜜罐"
+    }
+   ]
+  },
+  {
+   "arm": "S06_before_busy",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.before.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T14:23:42+0800",
+   "warmRealSec": 41.8,
+   "loadavg1_start": 764.3,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 3750,
+   "castReady": 6,
+   "sceneAtEnd": "s04",
+   "arrivalLayer": null,
+   "submitToFirstPaintMs": null,
+   "clayPeopleTurned": null,
+   "queueShown": null,
+   "primedDirector": {
+    "ok": true,
+    "id": "S06_before_busy-prime-142445",
+    "waitedRealSec": 27.9,
+    "mode": "visitor_spawn"
+   }
+  },
+  {
+   "arm": "S07_after_busy",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.frozen.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T14:29:11+0800",
+   "warmRealSec": 40.4,
+   "loadavg1_start": 996.0,
+   "frameCount": 14,
+   "watchdogArmed": 1,
+   "watchdogWouldFire": 1,
+   "maxFrameGapMs": 2372,
+   "castReady": 6,
+   "sceneAtEnd": "s04",
+   "arrivalLayer": {
+    "total": 2,
+    "flying": 1
+   },
+   "submitToFirstPaintMs": [
+    26,
+    4
+   ],
+   "marksNeverPainted": null,
+   "clayPeopleTurned": 0,
+   "clayPeopleStopped": 0,
+   "queueShown": [
+    {
+     "place": 1,
+     "label": "訂書機"
+    }
+   ],
+   "primedDirector": {
+    "ok": true,
+    "id": "S07_after_busy-prime-143021",
+    "waitedRealSec": 42.5,
+    "mode": "visitor_spawn"
+   }
+  }
+ ],
+ "gaps": null
+}

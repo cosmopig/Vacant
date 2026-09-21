@@ -1,0 +1,27 @@
+{
+ "label": "nocut",
+ "variant": "single",
+ "sceneAtTrigger": "sc=s00 mode=invite pool=23 heap=9MB reloads=0",
+ "settleGaps": [
+  3732,
+  3769,
+  2874,
+  2834,
+  2667
+ ],
+ "pollHealthy": false,
+ "pollWaitMs": 117,
+ "latency": [
+  {
+   "id": "probe-aaa-0001",
+   "hitToCallbackMs": 1146,
+   "callbackToPaintMs": 341,
+   "hitToPaintMs": 1486
+  }
+ ],
+ "fps": 3,
+ "waiting": [],
+ "total": 1,
+ "sceneAfter": "sc=s04 mode=visitor_spawn pool=22 heap=9MB reloads=0",
+ "console": []
+}

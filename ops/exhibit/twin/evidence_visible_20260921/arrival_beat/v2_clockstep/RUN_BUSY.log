@@ -1,0 +1,10 @@
+index.html sha256[0:16] = 8e2ec47497ba191b   14:23:41
+=== before -> S06_before_busy 14:23:41 load=764.28 628.56 791.78
+--- rc=0 14:29:03
+{"arm": "before", "out": "S06_before_busy", "anchorFound": true, "postArrivals": null, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 3750, "loadavg": [995, 851, 846]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json', 'warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路', 'warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路']
+=== after -> S07_after_busy 14:29:03 load=983.22 860.98 849.91
+--- rc=0 14:34:04
+{"arm": "after", "out": "S07_after_busy", "anchorFound": true, "postArrivals": {"total": 2, "flying": 1, "waiting": [{"label": "訂書機", "place": 1, "looked": {"turned": 0, "stopped": 0}}], "marks": [{"id": "S07_after_busy-prime-143021", "at": 47669, "drawnAt": 47695}, {"id": "S07_after_busy-143110-0", "at": 1788182294498412, "drawnAt": 1788182294498416}]}, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 2372, "loadavg": [841, 59, 931]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json']
+run_busy.sh: line 22: SHA2�: unbound variable

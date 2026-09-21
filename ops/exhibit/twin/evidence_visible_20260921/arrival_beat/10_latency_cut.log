@@ -1,0 +1,3 @@
+{"run":0,"tag":"cut","title":"sc=s03 mode=invite pool=24 heap=9MB reloads=0","errs":[],"pollGapsMedianMs":4953,"pollWaitMs":1860,"marks":[{"id":"probe-lat-cut-0-0","hitToCallbackMs":1366,"callbackToPaintMs":4090}],"total":1}
+{"run":1,"tag":"cut","title":"sc=s03 mode=invite pool=23 heap=9MB reloads=0","errs":[],"pollGapsMedianMs":5262,"pollWaitMs":4181,"marks":[{"id":"probe-lat-cut-1-0","hitToCallbackMs":1973,"callbackToPaintMs":11349}],"total":1}
+{"run":2,"tag":"cut","title":"sc=s04 mode=visitor_spawn pool=23 heap=9MB reloads=0","errs":[],"pollGapsMedianMs":6042,"pollWaitMs":319,"marks":[{"id":"probe-lat-cut-2-0","hitToCallbackMs":1155,"callbackToPaintMs":3202}],"total":1}

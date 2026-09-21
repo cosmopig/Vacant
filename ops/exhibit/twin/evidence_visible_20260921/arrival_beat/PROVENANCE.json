@@ -1,0 +1,136 @@
+{
+ "what": "抵達層（arrivals）＝「觀眾按下送出的那一秒，畫面必須動」的證據目錄",
+ "subject": "vacant_hm/world3/index.html（另一個 repo，展件本體）",
+ "revert_in_one_line": "網址加 ?arrive=0 ⇒ ARRIVE_ON=false ⇒ arrive()／update()／draw() 全部提早 return，畫面回到改動前",
+ "read_this_first": [
+  "這個目錄裡有四批，量的是同一件事但量具不同。**引用之前先看這一份，不要把四批的數字混講。**",
+  "看畫面：`v2_clockstep/GIF_busy_before_vs_after.gif`（主證據，會動）與 `v2_clockstep/SHEET_busy.jpg`（同一件事的靜態版）。",
+  "看毫秒：`v3_wall_liveHEAD/SUMMARY_WALL.json` 的 `callbackToPaintMs`（抵達層自己的延遲）。",
+  "有解析度的是 v2_clockstep（畫面）與 v3_wall_liveHEAD 的頁內計時（毫秒）。另外兩批各有已知的量具缺陷，寫在下面，刻意不刪。"
+ ],
+ "batches": {
+  "v2_clockstep": {
+   "when": "2026-09-21 下午",
+   "status": "這一批是結論",
+   "rig": "Playwright 假時鐘（clock.install + pause_at）逐格推進；每一張截圖的內容落在虛擬時間軸上精確的那一刻，與機器忙不忙無關",
+   "zero_point": "WorldBridge.onSubmission 回呼進到頁面的那一刻",
+   "arms": {
+    "S01_before_single": "改動前（git HEAD 的 index.html，onSubmission(sub => spawnQueue.push(sub))），一人投卡",
+    "S02_after_single": "改動後（抵達層），一人投卡",
+    "S03_negctl_arrive0": "負控制：同一份碼 + ?arrive=0，只把抵達層關掉（單變數）",
+    "S05_before_triple": "改動前，同時三人。🔴 anchorFound=false ⇒ 零點沒抓到，十四格落在時間軸的哪裡不知道，不可逐格對照",
+    "S04_after_triple": "改動後，同時三人（判準 3）",
+    "S06_before_busy": "改動前，**導演正在演別人的故事**時投卡（主證據的對照臂）",
+    "S07_after_busy": "改動後，同上情境。服務的是凍結副本 index.frozen.html（sha 8e2ec474…），不是活檔",
+    "v1_smallcard/S02_after_single": "抵達層的第一版（信 0.050H）。機制一樣，只是造型常數太小。留著是為了 SHEET_visual_weight.jpg 那一張比較，**不是獨立證據**"
+   },
+   "the_claim_i_had_to_correct": {
+    "what_i_first_wrote": "「改動前投卡之後畫面沒有任何反應」",
+    "why_it_was_wrong": "S01／S03 的連續截圖自己打臉：+120 ms 就開始淡出、+250 ms 已經是「世界多了一個人」。導演閒著的時候，改動前反應得很快——只是換到的是一格通用開場，跟投卡的是誰無關。",
+    "what_is_actually_true": [
+     "導演閒著時：差別不在快不快，在**出現的那個東西是不是他的**（他的信、他手機上那枚章、他排第幾）。",
+     "導演正在演別人的故事時：改動前那 1.8 秒六格**逐格一樣**，他在畫面上完全不存在（S06）；改動後信照飛照落、陶牌多一列，而故事不被打斷（S07）。這一格才是「完全沒反應」成立的地方，也是展場有人排隊時的常態。"
+    ]
+   },
+   "headline_files": [
+    "SHEET_busy.jpg — 🔴 主證據：導演正忙時投卡，改動前逐格一樣／改動後信落進投遞口",
+    "SHEET_before_after_negctl.jpg — 改動前／改動後／負控制，同一組虛擬時刻並排",
+    "SHEET_triple.jpg — 同時三人（判準 3）",
+    "SHEET_visual_weight.jpg — 同一個機制的兩種視覺重量",
+    "SUMMARY.json — 每一臂的結論欄位（沒量到寫 null）",
+    "motion.json — 每一格相對投卡前那一張的像素差（背書用，見下面的 caveat）",
+    "t_reload.json — 量具自己的四臂驗證（見下面「量具修正」）"
+   ]
+  },
+  "第一批（00_/01_/02_/03_/04_/07_ 開頭那幾個目錄）": {
+   "when": "2026-09-21 上午",
+   "status": "🔴 量具有缺陷，**不可以拿來講「一秒內」**",
+   "defect": "照牆上時鐘截圖。這台 Mac 同時有十幾個 agent 在跑（load 500–900），headless 的 rAF 被餓到 1–3 fps ⇒ 檔名寫 want+150ms 的那一張，real 欄位是 -4ms 或 +1315ms，好幾個 want 值對到同一張真實畫面。量具的解析度比要量的東西還粗。",
+   "why_kept": "它記錄了『換景排在落地前面』那個真問題是怎麼被量出來的（見 10_latency_*.log），而且刪掉等於把一次量具說謊的紀錄抹掉"
+  },
+  "10_latency": {
+   "when": "2026-09-21 上午",
+   "status": "數字為真，但量的是**改動前的排序**",
+   "finding": "onSubmission → 信第一次畫出來：先換景 3202／4090／11349 ms；不換景 134／256 ms。差的那三到十一秒全是 enterScene('s03') 在載新板與七支精靈。",
+   "what_changed_because_of_it": "換景改成排在落地之後（a.cutAt = a.dur + 0.35）。所以這幾個數字**是修改的理由，不是修改後的狀態**。修改後的數字看 v2_clockstep/SUMMARY.json。"
+  },
+  "v3_wall_liveHEAD": {
+   "when": "2026-09-21 傍晚（14:48 兩臂＋16:06 兩臂）",
+   "status": "這一批證的是**現在活著的那一份碼還會動**，不是毫秒解析度的畫面證據",
+   "why_it_exists": [
+    "v2_clockstep 那七臂跑的時候，index.html 的 sha 是 ebabae34／8e2ec474——別的 agent 一直在改同一個檔。**收工當下活著的那一份（e6ff639d1bd2dc29）沒有任何一臂跑過它。**",
+    "這四臂補的就是這個：同一條產品路徑（寫快照 → bridge.js 輪詢 → onSubmission → arrivals），跑在活著的那一份上，加一臂 `?arrive=0` 負控制。"
+   ],
+   "subject_sha256": "e6ff639d1bd2dc298d5c1db4292c9df5a1184f8f8701f3611d61ea32bb13629f",
+   "arms": {
+    "W_after_0 / W_after_1": "抵達層開，一人投卡（只有投卡前那一張截圖＋頁內計時）",
+    "W2_after": "抵達層開，一人投卡，連續截圖＋錄影",
+    "W2_negctl_arrive0": "負控制：同一份碼 + ?arrive=0（單變數）"
+   },
+   "what_it_shows": [
+    "四臂都走真路徑：`arrivals.total` 1／1／1／**0**（負控制）。",
+    "`callbackToPaintMs`＝21／31／183 ms（抵達層自己的延遲：回呼進來到那封信第一次被畫出來）。",
+    "`writeToCallbackMs`＝4359／2153／3401 ms——**這一段是 bridge.js 的輪詢**，不是這次改的層。設定 1000 ms，這台被餓到中位 2.7–6.1 秒。",
+    "陶牌上的排隊欄位在真路徑上也有：`queueShown` 記到 `place:1` ＋那個人的代號（圖釘罐／木托盤）。"
+   ],
+   "🔴 defect": "連續截圖的**檔名時間是假的**：這台 load 300–900，Playwright 拍一張要 2.5–3 秒，`want+150ms` 那一張的 `real` 是 +2811ms。⇒ 這一批**只有零點那一張**（與回呼同步拍的）可以拿來讀時刻，中間那些只能讀「有沒有那封信」。對照表 `SHEET_wall_liveHEAD.jpg` 因此只放兩格。",
+   "not_in_repo": "兩支 `.webm`（8–10 MB，這台只跑得出 1–2.6 fps）留在 scratchpad。**那個 fps 是量測機的性質不是展場機的**，收進 repo 只會讓人誤讀成展件會頓。"
+  }
+ },
+ "instrument_corrections": [
+  {
+   "what": "舊的 `BLOCK_RELOAD`（覆寫 location.reload）是空操作，空了整整兩批",
+   "why": "Location 的屬性在 HTML 規格裡是 [LegacyUnforgeable]（不可設定），Object.defineProperty 直接丟 TypeError: Cannot redefine property: reload，被 try/catch 吞掉",
+   "symptom": "S03_negctl_arrive0 與 S05_before_triple 兩跑死在 Execution context was destroyed；log 上看起來像是機器太慢",
+   "fix": "tools/blockwatchdog.js：在上游攔 setInterval，認出原始碼含 vw_reloads 的那一支（全檔唯一），換成判準逐字相同但記一筆而不是重載的替身",
+   "verified_by": "t_reload.json（四臂：正控制／舊招／新招／計數器凍 12 秒）"
+  },
+  {
+   "what": "`clock.install()` 會蓋掉 `setInterval`，所以攔截要排在它**後面**",
+   "symptom": "第一次修好之後跑出 watchdogArmed: 0（一支看門狗都沒認出來）。那一跑沒死是運氣——停錶之後假時鐘不推進，看門狗才沒開槍；暖機那一段錶還在走，照樣會被重載走。",
+   "fix": "strip.py 裡 pg.clock.install() 排在 pg.add_init_script(BLOCK_RELOAD) 前面",
+   "check": "每一臂的 SUMMARY.json 都有 watchdogArmed，不是 1 就代表那一跑可能被重載過"
+  },
+  {
+   "what": "`lookAt` 舊版把「本來就面向投遞口、畫面一格都沒變」也記成轉頭",
+   "fix": "回傳 {turned, stopped} 分開記；判準寫的是『周圍那群黏土人轉頭看過來』，要拿得出來的是 turned"
+  },
+  {
+   "what": "`watchdogWouldFire` 與 `maxFrameGapMs` 共用同一個 lastFrameTs ⇒ 互相吃掉對方的數字",
+   "symptom": "七臂**每一臂都恰好 watchdogWouldFire=1，而 maxFrameGapMs 只有 1.8–3.8 秒**（門檻 10 秒）。兩個數字互相矛盾。",
+   "cause": "clock.pause_at() 會先把假時鐘快轉到指定時刻再停，那一下 performance.now() 一次跳過 10 秒以上；替身的 interval 先被觸發，而且它會把共用的 lastFrameTs 重設，所以後面那個 rAF 掉幀計數器量不到同一個缺口。",
+   "how_to_read_it": "恰好 1 次 ＝ 停錶那一下的量具假象，**不是畫面凍住**。≥2 次才當成這一跑真的卡過。",
+   "not_fixed_on_purpose": "改了這一批就不是同一個量具。下一批再把兩個計數器拆成各自的變數。"
+  },
+  {
+   "what": "量測期間活的 index.html 一直在被別的 agent 改",
+   "evidence": "第一批五臂開始時 sha[0:16]=ebabae34，結束時 8e2ec474；跑完 S07 再看已經是 e6ff639d。",
+   "impact": "S01–S05 那五臂**嚴格講不是同一份 byte 串**（我自己的抵達層那一段前後比對過是一致的，但整份檔不是）。",
+   "fix_from_S06_onwards": "改成服務一份凍結副本 /world3/index.frozen.html（sha 8e2ec474…）⇒ S06／S07 兩臂比的是同一個 byte 串。",
+   "my_own_slip": "批次跑到一半我自己改過一行註解（指向證據路徑），發現後當場還原並驗證 sha 回到 ebabae34 才繼續。上面那兩次 sha 變動不是這一次造成的。"
+  }
+ ],
+ "caveats": [
+  "submitToFirstPaintMs 量的是『回呼進到頁面 → 信第一次被畫出來』，**不含**手機端送出到 snapshot 落盤、以及 bridge.js 的輪詢間隔（設定 1000 ms，這台機器餓到中位 4–11 秒）。端到端在這台機器上量不準，不寫成結論。",
+  "motion.json 的 whole 欄（整張畫面像素差）**不是判別式**：這個世界本來就一直在動（黏土人在走、12fps 定格、換景淡入淡出），改動前那一臂也有非零底噪，而且換景時兩臂都會衝高。能讀的是 dock 欄搭配截圖，真正的判別式是頁面自己記的 at→drawnAt 與畫面上有沒有那封信。",
+  "最乾淨的那一組數字在導演正忙那兩臂（whole 幾乎不動，訊號全落在 dock）：S06 改動前 dock 9.95→8.34（平的，什麼都沒發生）；S07 改動後 dock 13.71→48.83 於 +620 ms，而 whole 只從 8.47 到 10.19。",
+  "掉幀數字（maxFrameGapMs、watchdogWouldFire）是**這台 load 700–900 的 Mac** 的性質，不是展場機（1003／Windows）的。不可以拿去說展場會凍。",
+  "「周圍那群黏土人轉頭看過來」的 turned 是**當下台上有幾個人在投遞口附近**的函數，每一跑不一樣（實測 4–12）。它證明的是『這件事真的發生了』，不是一個可複製的常數。"
+ ],
+ "motion_artifacts": {
+  "what": "會動的對照（給不看碼的人）",
+  "files": [
+   "v2_clockstep/GIF_busy_before_vs_after.gif — 🔴 主證據：導演正在演別人的故事時投卡，左邊改動前逐格一樣、右邊改動後信落進投遞口，陶牌出現「投遞口 ▲1 <他的代號>」",
+   "v2_clockstep/GIF_negctl_vs_after.gif — 負控制對照：同一份碼只把抵達層關掉"
+  ],
+  "why_gif_not_mp4": "這台機器的 ffmpeg 壞了（`Library not loaded: libx265.215.dylib`），而修它要動 brew、這台正在跑展件（8420）。GIF 用 PIL 就寫得出來。",
+  "honesty": "GIF 的每一格來自**假時鐘**批次，所以每一格的時刻是真的（零點＝onSubmission 回呼）；但**播放速度是給人看的，不是現場秒數**——這句話印在每一格上。"
+ },
+ "where_the_change_lives": {
+  "file": "vacant_hm/world3/index.html（另一個 repo，**未提交的工作樹**，同時有十幾個 agent 在動）",
+  "block": "`/* ══ 抵達層` → `/* ══ 等待態` 之間 397 行，外加 10 個呼叫點",
+  "verbatim_copy": "ARRIVAL_LAYER_extract.js（逐字抄本＋sha＋呼叫點行號）——**不是可 apply 的 patch**，是為了那棵樹被 reset 之後這批證據不會指向空氣",
+  "revert_in_one_line": "網址加 ?arrive=0",
+  "gate_kept_on_purpose": "`Object.keys(byAgent).length >= 6`（劇團到齊才開演）**沒動**。拆開抵達與成形之後它可以原封不動留著，這正是拆開的意義。"
+ }
+}

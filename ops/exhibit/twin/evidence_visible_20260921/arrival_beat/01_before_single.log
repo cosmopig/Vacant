@@ -1,0 +1,14 @@
+{
+ "label": "before",
+ "variant": "single",
+ "sceneAtTrigger": "sc=s00 mode=invite pool=22 heap=9MB reloads=0",
+ "settleGaps": [],
+ "pollHealthy": false,
+ "pollWaitMs": 223,
+ "latency": null,
+ "fps": 1.1,
+ "waiting": null,
+ "total": null,
+ "sceneAfter": "sc=s04 mode=visitor_spawn pool=22 heap=9MB reloads=0",
+ "console": []
+}

@@ -1,0 +1,1553 @@
+{
+ "what": "抵達層（arrivals）＝「觀眾按下送出的那一秒，畫面必須動」的可視化量測",
+ "when": "2026-09-21T14:47:13+0800",
+ "machine": {
+  "loadavg_now": [
+   692.0927734375,
+   908.3515625,
+   951.45654296875
+  ],
+  "note": "同一批有十幾個 agent 在跑，實測 load 500–1000。所有牆上時鐘的端到端數字都被這一點壓住，**不可以拿去代表展場機**。"
+ },
+ "subject": {
+  "file": "vacant_hm/world3/index.html",
+  "sha256_at_measure": "e6ff639d1bd2dc298d5c1db4292c9df5a1184f8f8701f3611d61ea32bb13629f",
+  "git_head": "eff968784efed8b9a86c2a77e658b0bc2d50f155",
+  "git_branch": "twin/live-mobile",
+  "dirty": true,
+  "warning": "這個檔同時被別的 agent 改（MARK 標示層、SIMPLE 精簡模式）。sha256 記的是量測當下的整份檔，不是只有抵達層。"
+ },
+ "revert": "一行還原：網址加 `?arrive=0`（ARRIVE_ON=false ⇒ arrive()／update()／draw() 全部提早 return）",
+ "arms": {
+  "S01_before_single": {
+   "arm": "before",
+   "url": "http://127.0.0.1:8622/world3/index.before.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "n_subs": 1,
+   "anchorFound": true,
+   "warmRealSec": 41.9,
+   "loadavg_at_end": [
+    838.4404296875,
+    597.97705078125,
+    800.77978515625
+   ],
+   "postArrivals": null,
+   "frames": [
+    "f__+0000ms.jpg",
+    "f__+0060ms.jpg",
+    "f__+0120ms.jpg",
+    "f__+0180ms.jpg",
+    "f__+0250ms.jpg",
+    "f__+0320ms.jpg",
+    "f__+0400ms.jpg",
+    "f__+0500ms.jpg",
+    "f__+0620ms.jpg",
+    "f__+0760ms.jpg",
+    "f__+0900ms.jpg",
+    "f__+1100ms.jpg",
+    "f__+1400ms.jpg",
+    "f__+1800ms.jpg"
+   ],
+   "frameStates": [
+    {
+     "ms": 0,
+     "state": null
+    },
+    {
+     "ms": 60,
+     "state": null
+    },
+    {
+     "ms": 120,
+     "state": null
+    },
+    {
+     "ms": 180,
+     "state": null
+    },
+    {
+     "ms": 250,
+     "state": null
+    },
+    {
+     "ms": 320,
+     "state": null
+    },
+    {
+     "ms": 400,
+     "state": null
+    },
+    {
+     "ms": 500,
+     "state": null
+    },
+    {
+     "ms": 620,
+     "state": null
+    },
+    {
+     "ms": 760,
+     "state": null
+    },
+    {
+     "ms": 900,
+     "state": null
+    },
+    {
+     "ms": 1100,
+     "state": null
+    },
+    {
+     "ms": 1400,
+     "state": null
+    },
+    {
+     "ms": 1800,
+     "state": null
+    }
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json",
+    "warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路"
+   ]
+  },
+  "S02_after_single": {
+   "arm": "after",
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "n_subs": 1,
+   "anchorFound": true,
+   "warmRealSec": 41.4,
+   "loadavg_at_end": [
+    916.75146484375,
+    939.00830078125,
+    604.251953125
+   ],
+   "postArrivals": {
+    "total": 1,
+    "flying": 1,
+    "waiting": [
+     {
+      "label": "果醬瓶",
+      "place": 1,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     }
+    ],
+    "marks": [
+     {
+      "id": "S02_after_single-141444-0",
+      "at": 1788181307878926,
+      "drawnAt": 1788181307878928
+     }
+    ]
+   },
+   "frames": [
+    "f__+0000ms.jpg",
+    "f__+0060ms.jpg",
+    "f__+0120ms.jpg",
+    "f__+0180ms.jpg",
+    "f__+0250ms.jpg",
+    "f__+0320ms.jpg",
+    "f__+0400ms.jpg",
+    "f__+0500ms.jpg",
+    "f__+0620ms.jpg",
+    "f__+0760ms.jpg",
+    "f__+0900ms.jpg",
+    "f__+1100ms.jpg",
+    "f__+1400ms.jpg",
+    "f__+1800ms.jpg"
+   ],
+   "frameStates": [
+    {
+     "ms": 0,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": -0.0,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 60,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.28,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.064,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 120,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.49,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.128,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 180,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.63,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.192,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 250,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.74,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.256,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 320,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.81,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.32,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 400,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.88,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.4,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 500,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.93,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.512,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 620,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.96,
+      "burst": 0,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.624,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 760,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.98,
+      "burst": 0.14400000000000002,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.768,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 900,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 0.99,
+      "burst": 0.28800000000000014,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.912,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 1100,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 1,
+      "burst": 0.4800000000000003,
+      "scene": "s03",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 1.104,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 1400,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 1,
+      "burst": 0.7840000000000006,
+      "scene": "s03",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 1.408,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    },
+    {
+     "ms": 1800,
+     "state": {
+      "total": 1,
+      "flying": 1,
+      "dock": 1,
+      "burst": null,
+      "scene": "s03",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 1.808,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "果醬瓶",
+        "place": 1
+       }
+      ]
+     }
+    }
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+   ]
+  },
+  "S03_negctl_arrive0": {
+   "arm": "negctl",
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1&arrive=0",
+   "n_subs": 1,
+   "anchorFound": true,
+   "warmRealSec": 41.1,
+   "loadavg_at_end": [
+    977.69140625,
+    888.13330078125,
+    834.2646484375
+   ],
+   "postArrivals": {
+    "total": 0,
+    "flying": 0,
+    "waiting": [],
+    "marks": []
+   },
+   "frames": [
+    "f__+0000ms.jpg",
+    "f__+0060ms.jpg",
+    "f__+0120ms.jpg",
+    "f__+0180ms.jpg",
+    "f__+0250ms.jpg",
+    "f__+0320ms.jpg",
+    "f__+0400ms.jpg",
+    "f__+0500ms.jpg",
+    "f__+0620ms.jpg",
+    "f__+0760ms.jpg",
+    "f__+0900ms.jpg",
+    "f__+1100ms.jpg",
+    "f__+1400ms.jpg",
+    "f__+1800ms.jpg"
+   ],
+   "frameStates": [
+    {
+     "ms": 0,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 60,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 120,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 180,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 250,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 320,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 400,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 500,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 620,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 760,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 900,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 1100,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 1400,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    },
+    {
+     "ms": 1800,
+     "state": {
+      "total": 0,
+      "flying": 0,
+      "dock": 0,
+      "burst": null,
+      "scene": "s04",
+      "flyingInfo": [],
+      "waiting": []
+     }
+    }
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json",
+    "warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路"
+   ]
+  },
+  "S04_after_triple": {
+   "arm": "after",
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "n_subs": 3,
+   "anchorFound": true,
+   "warmRealSec": 40.2,
+   "loadavg_at_end": [
+    479.18212890625,
+    1.96142578125,
+    910.021484375
+   ],
+   "postArrivals": {
+    "total": 3,
+    "flying": 3,
+    "waiting": [
+     {
+      "label": "手風琴",
+      "place": 1,
+      "looked": {
+       "turned": 4,
+       "stopped": 7
+      }
+     },
+     {
+      "label": "小火柴",
+      "place": 2,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     },
+     {
+      "label": "蜂蜜罐",
+      "place": 3,
+      "looked": {
+       "turned": 0,
+       "stopped": 0
+      }
+     }
+    ],
+    "marks": [
+     {
+      "id": "S04_after_triple-135219-0",
+      "at": 1788179963742200,
+      "drawnAt": 1788179963742208
+     },
+     {
+      "id": "S04_after_triple-135219-1",
+      "at": 1788179963742200,
+      "drawnAt": 1788179963742624
+     },
+     {
+      "id": "S04_after_triple-135219-2",
+      "at": 1788179963742200,
+      "drawnAt": 1788179963743040
+     }
+    ]
+   },
+   "frames": [
+    "f__+0000ms.jpg",
+    "f__+0060ms.jpg",
+    "f__+0120ms.jpg",
+    "f__+0180ms.jpg",
+    "f__+0250ms.jpg",
+    "f__+0320ms.jpg",
+    "f__+0400ms.jpg",
+    "f__+0500ms.jpg",
+    "f__+0620ms.jpg",
+    "f__+0760ms.jpg",
+    "f__+0900ms.jpg",
+    "f__+1100ms.jpg",
+    "f__+1400ms.jpg",
+    "f__+1800ms.jpg"
+   ],
+   "frameStates": [
+    {
+     "ms": 0,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": -0.0,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.42,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.84,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 60,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.28,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.064,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.356,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.776,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 120,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.49,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.128,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.292,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.712,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 180,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.6,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.176,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.244,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.664,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 250,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.74,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.256,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.164,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.584,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 320,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.81,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.32,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.1,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.52,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 400,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.88,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.4,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": -0.02,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.44,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 500,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.92,
+      "burst": null,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.496,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 2,
+        "t": 0.076,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.344,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 620,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.96,
+      "burst": 0,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.624,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       },
+       {
+        "place": 2,
+        "t": 0.204,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.216,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 760,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.98,
+      "burst": 0.14400000000000002,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.768,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       },
+       {
+        "place": 2,
+        "t": 0.348,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": -0.072,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 900,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 0.99,
+      "burst": 0.27200000000000013,
+      "scene": "s00",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 0.896,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       },
+       {
+        "place": 2,
+        "t": 0.476,
+        "landed": false,
+        "looked": null
+       },
+       {
+        "place": 3,
+        "t": 0.056,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 1100,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 1,
+      "burst": 0.064,
+      "scene": "s03",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 1.104,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       },
+       {
+        "place": 2,
+        "t": 0.684,
+        "landed": true,
+        "looked": {
+         "turned": 0,
+         "stopped": 0
+        }
+       },
+       {
+        "place": 3,
+        "t": 0.264,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 1400,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 1,
+      "burst": 0.3680000000000002,
+      "scene": "s03",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 1.408,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       },
+       {
+        "place": 2,
+        "t": 0.988,
+        "landed": true,
+        "looked": {
+         "turned": 0,
+         "stopped": 0
+        }
+       },
+       {
+        "place": 3,
+        "t": 0.568,
+        "landed": false,
+        "looked": null
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    },
+    {
+     "ms": 1800,
+     "state": {
+      "total": 3,
+      "flying": 3,
+      "dock": 1,
+      "burst": 0.3360000000000002,
+      "scene": "s03",
+      "flyingInfo": [
+       {
+        "place": 1,
+        "t": 1.808,
+        "landed": true,
+        "looked": {
+         "turned": 4,
+         "stopped": 7
+        }
+       },
+       {
+        "place": 2,
+        "t": 1.388,
+        "landed": true,
+        "looked": {
+         "turned": 0,
+         "stopped": 0
+        }
+       },
+       {
+        "place": 3,
+        "t": 0.968,
+        "landed": true,
+        "looked": {
+         "turned": 0,
+         "stopped": 0
+        }
+       }
+      ],
+      "waiting": [
+       {
+        "label": "手風琴",
+        "place": 1
+       },
+       {
+        "label": "小火柴",
+        "place": 2
+       },
+       {
+        "label": "蜂蜜罐",
+        "place": 3
+       }
+      ]
+     }
+    }
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+   ]
+  },
+  "S05_before_triple": {
+   "arm": "before",
+   "url": "http://127.0.0.1:8622/world3/index.before.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "n_subs": 3,
+   "anchorFound": false,
+   "warmRealSec": 43.6,
+   "loadavg_at_end": [
+    984.560546875,
+    871.09765625,
+    486.69189453125
+   ],
+   "postArrivals": null,
+   "frames": [
+    "f__+0000ms.jpg",
+    "f__+0060ms.jpg",
+    "f__+0120ms.jpg",
+    "f__+0180ms.jpg",
+    "f__+0250ms.jpg",
+    "f__+0320ms.jpg",
+    "f__+0400ms.jpg",
+    "f__+0500ms.jpg",
+    "f__+0620ms.jpg",
+    "f__+0760ms.jpg",
+    "f__+0900ms.jpg",
+    "f__+1100ms.jpg",
+    "f__+1400ms.jpg",
+    "f__+1800ms.jpg"
+   ],
+   "frameStates": [
+    {
+     "ms": 0,
+     "state": null
+    },
+    {
+     "ms": 60,
+     "state": null
+    },
+    {
+     "ms": 120,
+     "state": null
+    },
+    {
+     "ms": 180,
+     "state": null
+    },
+    {
+     "ms": 250,
+     "state": null
+    },
+    {
+     "ms": 320,
+     "state": null
+    },
+    {
+     "ms": 400,
+     "state": null
+    },
+    {
+     "ms": 500,
+     "state": null
+    },
+    {
+     "ms": 620,
+     "state": null
+    },
+    {
+     "ms": 760,
+     "state": null
+    },
+    {
+     "ms": 900,
+     "state": null
+    },
+    {
+     "ms": 1100,
+     "state": null
+    },
+    {
+     "ms": 1400,
+     "state": null
+    },
+    {
+     "ms": 1800,
+     "state": null
+    }
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json",
+    "warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路"
+   ]
+  }
+ },
+ "wallclock": [],
+ "headline": {
+  "callbackToPaintMs_wallclock": null,
+  "callbackToPaintMs_median": null,
+  "writeToPaintMs_note": "端到端＝輪詢間隔＋這一層。輪詢是 bridge.js 的，設定 1000 ms，但這台機器餓到中位 4–11 秒 ⇒ 端到端在這裡量不準，**不寫成結論**。"
+ }
+}

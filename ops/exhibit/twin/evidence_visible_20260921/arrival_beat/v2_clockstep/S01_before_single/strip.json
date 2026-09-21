@@ -1,0 +1,133 @@
+{
+ "arm": "before",
+ "out": "S01_before_single",
+ "url": "http://127.0.0.1:8622/world3/index.before.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+ "n_subs": 1,
+ "clock": "Playwright fake clock（rAF／performance.now 一起接管）",
+ "viewport": "1280x720",
+ "started": "2026-09-21T14:17:37+0800",
+ "loadavg_at_start": [
+  998.87451171875,
+  956.77783203125,
+  622.28759765625
+ ],
+ "preState": {
+  "arrivals": null,
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s00 mode=invite pool=0 heap=0MB reloads=0",
+  "sceneT": 2.1000000000000005,
+  "snapA": 0,
+  "sceneId": "s00",
+  "watchdogWouldFire": 0,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 2989,
+  "bridgeKind": "snapshot",
+  "bridgeErr": "本機都讀不到，而且沒有設公網退路",
+  "now": 42373
+ },
+ "warmRealSec": 41.9,
+ "ids": [
+  "S01_before_single-141839-0"
+ ],
+ "anchorFound": true,
+ "anchorVirtualMsFromWrite": 1000,
+ "frames": [
+  {
+   "virtualMs": 0,
+   "file": "f__+0000ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 60,
+   "file": "f__+0060ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 120,
+   "file": "f__+0120ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 180,
+   "file": "f__+0180ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 250,
+   "file": "f__+0250ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 320,
+   "file": "f__+0320ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 400,
+   "file": "f__+0400ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 500,
+   "file": "f__+0500ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 620,
+   "file": "f__+0620ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 760,
+   "file": "f__+0760ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 900,
+   "file": "f__+0900ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 1100,
+   "file": "f__+1100ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 1400,
+   "file": "f__+1400ms.jpg",
+   "state": null
+  },
+  {
+   "virtualMs": 1800,
+   "file": "f__+1800ms.jpg",
+   "state": null
+  }
+ ],
+ "postState": {
+  "arrivals": null,
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s04 mode=visitor_spawn pool=0 heap=0MB reloads=0",
+  "sceneT": 1.7760000000000014,
+  "snapA": 0,
+  "sceneId": "s04",
+  "watchdogWouldFire": 1,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 2989,
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 1788181543183658
+ },
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json",
+  "warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路"
+ ],
+ "loadavg_at_end": [
+  838.4404296875,
+  597.97705078125,
+  800.77978515625
+ ]
+}

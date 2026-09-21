@@ -1,0 +1,75 @@
+{
+ "what": "收工前的回歸冒煙（抵達層還畫不畫得出來）＋量測期間活檔被別人改的時間軸",
+ "instrument": "v2_clockstep/tools/smoke.py（假時鐘、走真路徑：寫快照 → bridge 輪詢 → onSubmission → arrivals；四個判準全綠才算過）",
+ "timeline": [
+  {
+   "at": "2026-09-21T16:06/16:09",
+   "sha256_16": "e6ff639d1bd2dc29",
+   "what": "v3 真時鐘四臂跑的就是這一份",
+   "verdict": "OK（arrivals.total=1、callbackToPaintMs 21/31/183）"
+  },
+  {
+   "at": "2026-09-21T16:16–16:19",
+   "sha256_16": "da966d0367412081",
+   "bytes": 296946,
+   "what": "別的 agent 把 twin/wait-shape 併進來，**留下未解決的衝突標記**",
+   "verdict": "🔴 整份 script 在瀏覽器裡掛掉：pageerror `Unexpected token '<<'`，castReady／propsLoaded／sceneId 全 null（不是 0，是根本沒跑起來）",
+   "caveat": "那一份的 bytes 我沒留（只留得下 sha，經 curl 從 8420 那台量到）。⇒ **不能斷言**它就是 `<<<<<<<`，只能說症狀與它一致；16:24 那一份（同樣 ~297 KB）我當場 grep 到 13 個標記，佐證這個判讀。",
+   "not_my_change": "我這一層在那一份裡完好（區塊在 2035–2474 行）"
+  },
+  {
+   "at": "2026-09-21T16:19",
+   "sha256_16": "a95b30ab7a39db99",
+   "bytes": 241798,
+   "what": "被換回沒有衝突標記的那一份",
+   "verdict": "OK"
+  },
+  {
+   "at": "2026-09-21T16:22",
+   "sha256_16": "a95b30ab7a39db99",
+   "what": "回歸冒煙跑在這一份上",
+   "verdict": "PASS：沒有 pageerror／抵達層收到那一筆（走真路徑）／信真的被畫出來過（回呼到第一次畫出來 **28 ms**）／看門狗替身認出來了",
+   "detail": {
+    "arrivals": {
+     "total": 1,
+     "flying": 1
+    },
+    "queueShown": [
+     {
+      "place": 1,
+      "label": "午後光"
+     }
+    ],
+    "looked": {
+     "turned": 4,
+     "stopped": 7
+    },
+    "callbackToPaintMs": 28
+   },
+   "caveat": "冒煙跑完再量一次 sha 已經變成 e479e651——**檔在跑的期間又被改了**。這個 PASS 對應的是開頁那一刻的 a95b30ab。"
+  },
+  {
+   "at": "2026-09-21T16:24",
+   "sha256_16": "e479e651610ea8cc",
+   "bytes": 297020,
+   "what": "合併中途狀態又回來了",
+   "verdict": "🔴 grep 到 13 個 `<<<<<<<`／`>>>>>>> twin/wait-shape`",
+   "where": "衝突落在 2244／2268／2293／2342／2369（**都在抵達層區塊 2035–2474 之內**）與 5503／5530／5560（抵達層與等待態的接縫）"
+  }
+ ],
+ "what_the_conflicts_are": {
+  "2244 / 2268": "信的視覺重量：HEAD 這一側是放大之後的閃光與塵爆（信 0.050H→0.092H 之後配套改的），wait-shape 那一側是放大前的舊常數。**留 HEAD**，不然信變大而光圈沒變 ⇒ 讀成「信後面有一塊亮斑」。",
+  "5530 configure": "輪詢間隔：HEAD 是 400 ms（另一條線量過 1328／556／1123 → 447 ms 的那個改動），wait-shape 那一側還是 1000。**留 HEAD**。",
+  "5560 onSubmission": "HEAD＝`arrive(sub); spawnQueue.push(sub)`；wait-shape＝`arrive(sub); routeSubmission(sub)`。**兩邊都要**：wait-shape 那一側已經包含 `arrivals.arrive(sub)`，而 `routeSubmission` 在所有不適用等待態的情況會退回 `spawnQueue.push(sub)` ⇒ 取 wait-shape 那一側即是併好的結果，**不是二選一丟掉抵達**。"
+ },
+ "i_did_not_touch_it": "這幾個衝突在別人正在跑的合併中途狀態裡（16:19 解過一次、16:24 又回來），我沒有寫那個檔——兩個 agent 同時寫同一個合併中的檔會互相蓋掉。我這一側的正本在 `../ARRIVAL_LAYER_extract.js`（逐字＋sha＋呼叫點行號）。",
+ "state_at_write_time": {
+  "at": "2026-09-21T16:26:33+0800",
+  "sha256_16": "e479e651610ea8cc",
+  "bytes": 297020,
+  "lines": 5611,
+  "conflict_markers": 13,
+  "arrival_layer_present": true,
+  "onSubmission_calls_arrive": true
+ }
+}

@@ -1,0 +1,133 @@
+{
+ "label": "after",
+ "variant": "single",
+ "started": "2026-09-21T00:37:51.905Z",
+ "viewport": "1280x720",
+ "url": "http://127.0.0.1:8420/world3/index.html?twinfile=live/visitors.json&twinpoll=1000",
+ "console": [],
+ "polls": [
+  1789951090229,
+  1789951094517,
+  1789951098257,
+  1789951147933,
+  1789951158474
+ ],
+ "settleGaps": [
+  4288,
+  3740
+ ],
+ "pollHealthy": false,
+ "sceneAtTrigger": "sc=s00 mode=invite pool=29 heap=9MB reloads=1",
+ "t0": 1789951135594,
+ "loadToTrigger": 63463,
+ "after": {
+  "title": "sc=s03 mode=invite pool=22 heap=9MB reloads=1",
+  "timeOrigin": 1789951130540.4,
+  "arrivals": {
+   "total": 1,
+   "waiting": [
+    {
+     "label": "陶鍋蓋",
+     "code": "陶鍋蓋",
+     "place": 1,
+     "tok": "陶鍋蓋 · 橙黃菱"
+    }
+   ],
+   "marks": [
+    {
+     "id": "probe-aaa-0001",
+     "at": 19499.900000095367,
+     "drawnAt": 23772.700000047684
+    }
+   ]
+  }
+ },
+ "tHit": 1789951147933,
+ "pollWaitMs": 12339,
+ "latency": [
+  {
+   "id": "probe-aaa-0001",
+   "hitToCallbackMs": 2107,
+   "callbackToPaintMs": 4273,
+   "hitToPaintMs": 6380
+  }
+ ],
+ "frameCount": 20,
+ "frameSpanMs": 16608,
+ "fpsMeasured": 1.2,
+ "stillZero": "tHit(帶著這個人的 HTTP 回應送出的那一刻)",
+ "stills": [
+  {
+   "want": -1500,
+   "actual": -1721,
+   "file": "after_single__want-1500ms__real-1721ms.jpg"
+  },
+  {
+   "want": 0,
+   "actual": -4,
+   "file": "after_single__want+0ms__real-4ms.jpg"
+  },
+  {
+   "want": 150,
+   "actual": -4,
+   "file": "after_single__want+150ms__real-4ms.jpg"
+  },
+  {
+   "want": 300,
+   "actual": -4,
+   "file": "after_single__want+300ms__real-4ms.jpg"
+  },
+  {
+   "want": 450,
+   "actual": 639,
+   "file": "after_single__want+450ms__real+639ms.jpg"
+  },
+  {
+   "want": 600,
+   "actual": 639,
+   "file": "after_single__want+600ms__real+639ms.jpg"
+  },
+  {
+   "want": 800,
+   "actual": 639,
+   "file": "after_single__want+800ms__real+639ms.jpg"
+  },
+  {
+   "want": 1000,
+   "actual": 639,
+   "file": "after_single__want+1000ms__real+639ms.jpg"
+  },
+  {
+   "want": 1300,
+   "actual": 1483,
+   "file": "after_single__want+1300ms__real+1483ms.jpg"
+  },
+  {
+   "want": 1700,
+   "actual": 1483,
+   "file": "after_single__want+1700ms__real+1483ms.jpg"
+  },
+  {
+   "want": 2200,
+   "actual": 1483,
+   "file": "after_single__want+2200ms__real+1483ms.jpg"
+  },
+  {
+   "want": 3000,
+   "actual": 1483,
+   "file": "after_single__want+3000ms__real+1483ms.jpg"
+  },
+  {
+   "want": 4500,
+   "actual": 1483,
+   "file": "after_single__want+4500ms__real+1483ms.jpg"
+  },
+  {
+   "want": 7000,
+   "actual": 1483,
+   "file": "after_single__want+7000ms__real+1483ms.jpg"
+  }
+ ],
+ "video": null,
+ "videoErr": "ffmpeg version n7.0.1-playwright-build-1011 Copyright (c) 2000-2024 the FFmpeg developers\n  built with Apple clang version 14.0.3 (clang-1403.0.22.14.1)\n  configuration: --pkg-config=pkg-config --pkg-config-flags=--static --extra-cflags=-I//Users/runner/work/playwright-browsers/playwright-browsers/b"
+}

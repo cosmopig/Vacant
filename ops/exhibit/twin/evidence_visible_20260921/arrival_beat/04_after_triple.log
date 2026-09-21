@@ -1,0 +1,17 @@
+{
+ "label": "after",
+ "variant": "triple",
+ "sceneAtTrigger": "sc=s00 mode=invite pool=23 heap=9MB reloads=0",
+ "settleGaps": [
+  12764,
+  3184
+ ],
+ "pollHealthy": false,
+ "pollWaitMs": null,
+ "latency": null,
+ "fps": null,
+ "waiting": [],
+ "total": 0,
+ "sceneAfter": "sc=s00 mode=invite pool=25 heap=9MB reloads=0",
+ "console": []
+}
