@@ -1,0 +1,61 @@
+--- a/world3/index.html
++++ b/world3/index.html
+@@ -549,6 +549,19 @@
+     e.v.play().catch(()=>{});
+   }
+   e.last = performance.now();
++  // 殘餘風險修補（perf_soak key，2026-09-21 第二輪覆核）：60 分鐘＋真人分身泡機
++  // 量到 s11「全員上台漫遊」一次把 cast 全部（29 位）設回 onstage 時，
++  // 全部同一幀讀 getVideo()——但原本的上限只在 sweepIdleVideos() 裡每 3 幀
++  // 才檢查一次；同機負載重、fps 被壓到 <0.2 時，好幾幀的間隔是好幾秒，
++  // activeVideos 在那個窗口內衝到 26（超過 MAX_ACTIVE_DECODES=16），撞上既有
++  // 10 秒無幀看門狗、觸發一次自動重載（見
++  // evidence_visible_20260921/perf_soak/headline_perf_soak.json
++  // 的 incident_at_t3142s）。這裡把同一份判準改成**呼叫端立即執行**：
++  // 一批同幀觸發的 getVideo() 呼叫本身就是同步的 JS，不必等下一次 rAF
++  // 才收斂,所以在單一次瀏覽器事件迴圈内就能把超額壓回上限，不受 fps
++  // 掉多低影響。enforceDecodeCap() 跟 sweepIdleVideos() 共用同一份邏輯
++  // （見下方），純粹是「多一個呼叫點」不是新規則。
++  enforceDecodeCap();
+   return e.v;
+ }
+ 
+@@ -589,21 +602,30 @@
+ //   預設值不變＝這一行不改變任何既有行為，純加一條退路。
+ const MAX_ACTIVE_DECODES = Math.max(1, parseInt(Q.get("maxdecode"), 10) || 16);
+ let __sweepFrame = 0;
+-function sweepIdleVideos(now){
+-  __sweepFrame++;
+-  if (__sweepFrame % 3 !== 0) return;     // 每 3 幀掃一次就夠（40 支以內，O(n log n) 很便宜)
++// enforceDecodeCap()：只做「超過上限就暫停最舊的幾支」，跟 idle 暫停分開。
++// 兩個呼叫點共用同一份判準（getVideo() 每次讀取後立即檢查、sweepIdleVideos()
++// 每 3 幀例行再檢查一次）——立即那個呼叫點負責吃掉突發（s11 全員上台這種
++// 「一幀内幾十次 getVideo()」的情況），例行那個負責背景的緩慢飄移；
++// pool 沒超過上限時提早回傳，40 支以內的日常路徑幾乎零成本。
++function enforceDecodeCap(){
++  if (videoPool.size <= MAX_ACTIVE_DECODES) return;
+   const active = [];
+-  for (const [k, e] of videoPool){
+-    if (e.v.paused) continue;
+-    if (now - e.last > DECODE_IDLE_MS){ e.v.pause(); continue; }
+-    active.push([k, e]);
+-  }
++  for (const [k, e] of videoPool) if (!e.v.paused) active.push([k, e]);
+   if (active.length > MAX_ACTIVE_DECODES){
+     active.sort((a, b) => a[1].last - b[1].last);   // 最舊的排前面
+     const over = active.length - MAX_ACTIVE_DECODES;
+     for (let i = 0; i < over; i++) active[i][1].v.pause();
+   }
+ }
++function sweepIdleVideos(now){
++  __sweepFrame++;
++  if (__sweepFrame % 3 !== 0) return;     // 每 3 幀掃一次就夠（40 支以內，O(n log n) 很便宜)
++  for (const [k, e] of videoPool){
++    if (e.v.paused) continue;
++    if (now - e.last > DECODE_IDLE_MS) e.v.pause();
++  }
++  enforceDecodeCap();
++}
+ 
+ /* ── 卡司與姿勢圖 ────────────────────────────────────────────── */
+ const CAST = [];

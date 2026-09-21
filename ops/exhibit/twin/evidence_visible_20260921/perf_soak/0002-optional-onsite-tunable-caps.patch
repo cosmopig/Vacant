@@ -1,0 +1,27 @@
+--- a/world3/index.html
++++ b/world3/index.html
+@@ -581,7 +581,13 @@
+  *  軟解近似展場 VM 沒有獨顯）調出來的數字，不是理論值；換一台機器能撐
+  *  的並發數不同，需要重新量。 */
+ const DECODE_IDLE_MS = 500;
+-const MAX_ACTIVE_DECODES = 16;
++// ⚠ 加碼（perf_soak key，2026-09-21）：16 是 Mac+swiftshader 近似值調出來的，
++//   不是在展場那台 1003 VMware VM（沒有獨顯給 VM）上量到的——這次泡機當下
++//   1003／1004 都連不上（no route to host），量不到就寫 null，不能假裝驗過。
++//   開一個 query-param escape hatch：日後有機會摸到那台機器時，可以現場
++//   `?maxdecode=8`／`?maxdecode=24` 試繞而不必重新部署整支檔案。
++//   預設值不變＝這一行不改變任何既有行為，純加一條退路。
++const MAX_ACTIVE_DECODES = Math.max(1, parseInt(Q.get("maxdecode"), 10) || 16);
+ let __sweepFrame = 0;
+ function sweepIdleVideos(now){
+   __sweepFrame++;
+@@ -881,7 +887,8 @@
+ // 在忙**的那一位（splice，不是留著只是不畫）——世界還是「記得走過的人」，
+ // 只是記得的量有界。原始種子人口（seedPopulation 的 20 位）不在這個上限裡，
+ // 他們是世界的底色，一直都在。
+-const VISITOR_CAST_CAP = 24;
++// 同上，加一條 `?castcap=` 退路（預設值不變）。
++const VISITOR_CAST_CAP = Math.max(1, parseInt(Q.get("castcap"), 10) || 24);
+ const visitorCast = [];
+ function releaseOldVisitors(){
+   while (visitorCast.length > VISITOR_CAST_CAP){

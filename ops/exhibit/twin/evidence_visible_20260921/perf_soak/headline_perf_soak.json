@@ -1,0 +1,74 @@
+{
+  "key": "perf_soak",
+  "task": "展場長跑效能：凍住 30 秒真因＋加真人分身版的 60 分鐘泡機",
+  "relationship_to_other_agent": "另一個代理（key=asset_loading）在獨立 worktree vacant_hm-perf-assets 已經診斷出同一個根因並落地修法（commit bbbc3b6，78 行，未合併進 vacant_hm 主線）。本輪不重寫那支修法，改用自己另外寫的量測腳本（soak.mjs，零共用程式碼）獨立覆核，並補對方還沒做的：60 分鐘＋真人分身持續注入的長跑、1003 連線嘗試、query-param 可調上限的小加碼 patch。",
+  "live_checkout_conflict": "~/Documents/GitHub/vacant_hm 的 world3/index.html／bridge.js 目前有另一個代理（分支 twin/live-mobile）未 commit 的『抵達層』大改（871 行插入），因此本輪全程只在唯讀／自建的 worktree 裡量測與修改，完全沒有碰 live checkout；修法交付形式是 patch 檔，不是直接改 live 檔。",
+  "environment_caveat": "量測全程這台 Mac 上同時有約 80 個 headless Chrome Helper 行程（15 個並行代理共用同一台機器），fps／RSS／screenshot 絕對毫秒數有雜訊；機制計數（poolSize/activeVideos/castTotal/visitorCastLen）是在同一次 page.evaluate() 內讀值，不受外部 CPU 排程影響，這些數字才是乾淨訊號。",
+  "machine_1003": {
+    "attempted": true,
+    "method": "ssh -o BatchMode=yes -o ConnectTimeout=4 1003 'echo ok'（以及 1004 對照）",
+    "result_1003": "ssh: connect to host 0.0.3.235 port 22: No route to host",
+    "result_1004": "ssh: connect to host 0.0.3.236 port 22: No route to host",
+    "conclusion": "1003/1004 這次量測期間整段連不上，是網路層問題不是帳密問題。量不到就是量不到——展場那台的絕對數字這裡一律寫 null，不假裝驗過。近似替代＝Mac + --disable-gpu --use-gl=swiftshader（software render，逼近 VMware VM 沒有獨顯的情境），沿用 asset_loading 那組已驗證過的近似方法。"
+  },
+  "asset_measurement": {
+    "scenes_dir": { "files": 34, "bytes_total": 26214400, "note": "14 個場景（s00–s13）各 2–4 個變體輪替；本次泡機兩邊都走 s04/s05" },
+    "sprites_video_dir": { "files": 114, "avg_kb": 194, "bytes_total": 22622208 },
+    "combined_on_disk_mb_approx": 46.5,
+    "honesty": "磁碟總量不是瓶頸（46.5MB 輕鬆放進 RAM／OS cache）。瓶頸是同時活著的 <video> 軟解 decode session 數，跟檔案大小無關——這是『pool 是什麼』這題的答案：videoPool 是一個 Map<src,{v:<video>,last}>，修前唯一的淘汰條件是超過 VIDEO_CAP=40 才踢最舊的一支，40 支以內全部 loop=true+autoplay，不管有沒有被畫到都持續解碼。"
+  },
+  "root_cause": {
+    "cause_1_decode": "40 支以內的 <video> 一律 loop+autoplay 不會自動暫停，pool 填滿後等於 ~38-40 支軟體解碼器同時跑，撞上瀏覽器/VM 軟解上限，造成主執行緒／合成器長時間卡住。",
+    "cause_2_cast_leak": "startVisitor() 每次投卡都 new Creature() 推進 cast，pre-fix 沒有任何 cast.splice 移除路徑（確認：全檔案 grep 不到一處）——endReplay()／邀請輪播收尾把 cast 裡每一個成員（含所有歷史訪客）設回 onstage=true，是刻意的敘事設計（s11『全員上台漫遊』），但沒有上限，展期累積的真人投卡會讓這個爆發越滾越大。",
+    "independent_repro": "本輪用自己的腳本在 UNFIXED baseline（無 asset_loading 程式碼、純自己讀 videoPool/cast）重現：page.screenshot() 耗時 6.7s–47.3s（15 分鐘視窗內 7 次量測，中位數 ~12s，最糟 47.3s），跟人類回報的『Page.captureScreenshot 逾時兩次（>30 秒）』同一個量級，不是巧合。"
+  },
+  "fix_reused": {
+    "source_commit": "bbbc3b6 (vacant_hm repo, worktree vacant_hm-perf-assets, branch perf/asset-loading-20260921)",
+    "mechanism": "sweepIdleVideos()：每 3 幀掃一次，>500ms 沒被 getVideo() 讀到就 pause()；同時解碼上限 MAX_ACTIVE_DECODES=16，超過就把最舊的幾支也 pause()。getVideo() 命中已暫停的快取項會自動 play() 續播。VISITOR_CAST_CAP=24：訪客那一批滿了就從 cast 真的 splice 掉最舊、目前沒在忙的一位；原始種子 20 位不算在這個上限裡。",
+    "not_yet_merged": "只存在於 vacant_hm-perf-assets 這個 worktree 的 commit 裡，vacant_hm 主線（twin/live-mobile 分支）還沒有這支修法——需要人類決定跟『抵達層』WIP 的 commit 順序後再合併。"
+  },
+  "my_addon_patch": {
+    "file": "0002-optional-onsite-tunable-caps.patch",
+    "change": "MAX_ACTIVE_DECODES／VISITOR_CAST_CAP 改成可用 ?maxdecode=／?castcap= 覆寫，預設值不變（16／24）。用意：16 是 Mac+swiftshader 調出來的，不是在 1003 上量到的（這次連不上），開一條不用重新部署就能現場試繞的路。",
+    "verified": "puppeteer 讀回：帶參數時 MAX_ACTIVE_DECODES=3／VISITOR_CAST_CAP=5（帶入什麼就是什麼）；不帶參數時 16／24（跟修前預設完全一致，無 pageerror）。"
+  },
+  "soak_60min_with_avatars": {
+    "url": "http://127.0.0.1:8618/index.html（fixed，commit bbbc3b6）",
+    "duration_target_s": 3600,
+    "duration_actual_s": 3654.7,
+    "submit_every_s": 8,
+    "submitted_total": 252,
+    "steady_state_before_incident": {
+      "window_s": "~300–3110",
+      "poolSize": "38–40（封頂在 VIDEO_CAP，跟修前一樣會頂到上限——這是預期的，pool 本身沒有變小，變小的是同時『活著在解碼』的數量）",
+      "activeVideos": "7–10（vs. 對照組 unfixed 同時間窗 35–38，降了約 75–80%）",
+      "castTotal": "21 → 29（緩慢成長，20 位種子＋逐步累積的訪客）",
+      "visitorCastLen": "1 → 9（VISITOR_CAST_CAP=24 這次泡機沒有真的觸發淘汰，因為累積速度沒有快到滿——需要更長／更快的注入才會看到 splice 真的發生；splice 機制本身另有單元等級驗證，見 fix_reused）",
+      "heapMB": "呈鋸齒：2–53MB 隨場景切換（s04 進場時的 canvas/鍵器配置）反覆升降，不是單調爬升——沒有看到洩漏訊號",
+      "reloads": 0
+    },
+    "incident_at_t3142s": {
+      "trigger": "s11『全員上台漫遊』第一次觸發，cast 29/29 全部 onstage，activeVideos 瞬間衝到 26（超過 MAX_ACTIVE_DECODES=16——sweepIdleVideos 是逐幀節流，fps 在這個時間點已經被同機其他代理壓到 <0.2，節流沒有足夠的幀數可以追上這波爆發）",
+      "watchdog_fired": true,
+      "watchdog_mechanism": "index.html 既有的 10 秒無幀自動重載（sessionStorage vw_reloads 計數＋location.reload()，跟人類原本螢幕截圖標題看到的『reloads=1』是同一支機制）",
+      "reloads_counter": "0 → 1，精準卡在同一筆樣本（t=3142.6s）：sessionStorage 已經更新但 cast/videoPool 讀值還是重載前那一瞬間，等於直接把『造成當機的那個瞬間』量到了",
+      "recovery": "重載後頁面完全復原，持續正常運作到 t=3654.7s（收尾截圖畫面正常，見 after60_tEnd.png），全程只有這一次 reload"
+    },
+    "interpretation": "decode 節流＋訪客上限把『穩態』的凍結壓力降了 75–80%，但沒有完全消掉 s11 全員上台那一下瞬間爆發——這次泡機在極端同機負載下still 撞到既有的 10 秒看門狗重載一次。看門狗把『永久凍結』變成『重載一次、螢幕閃一下、繼續跑』，這比原本『卡住不動』對展場好，但不是零體感中斷。"
+  },
+  "contrast_15min_no_fix": {
+    "url": "http://127.0.0.1:8617/index.html（baseline，commit 48b7c65，無 asset_loading 修法）",
+    "duration_s": 920.8,
+    "submit_every_s": 8,
+    "submitted_total": 58,
+    "poolSize_by_t300s": "40（封頂，全程維持 38–40）",
+    "activeVideos_by_t300s": "35–38（全程維持，幾乎沒有暫停過任何一支）",
+    "heapMB_trend": "2 → 35（隨場景切換鋸齒式上升，同樣沒有單調爆量，但基線比 fixed 版高）",
+    "spawnQueueLen_trend": "0 → 54（訪客吸收速度跟不上注入速度，累積中——這是敘事節奏本身的限制，不是這次修法的範圍）",
+    "reloads": 0,
+    "screenshot_ms_series": [6691, 8732, 7769, 21168, 47282, 12193, 18447],
+    "screenshot_ms_note": "7 次量測全部落在『觀眾站在螢幕前會感覺卡住』的範圍，最糟 47.3 秒，直接重現任務描述的症狀量級"
+  },
+  "recommendation_not_applied": "s11『全員上台漫遊』一次把所有人設回 onstage 是刻意的敘事設計（不動視覺邏輯的前提下不該擅自改），但它是唯一一次讓 activeVideos 衝出 MAX_ACTIVE_DECODES 上限、進而撞到看門狗重載的路徑。建議後續：把這個場景的初次 getVideo() 呼叫錯開到 2–3 幀而不是同一幀全發，或是讓 sweepIdleVideos 在偵測到『這一幀 onstage 數暴增』時提前跑一次而不是等下一個 %3 週期——兩個都是載入策略層級的小改，沒有動到任何一幀畫面，但這次任務時間沒有再花時間驗證，留給下一輪。",
+  "followup_20260921b": "已在同一天第二輪覆核裡補上，見 refine_burst/headline_refine_burst.json ＋ 0003-immediate-decode-cap-enforcement.patch（疊在本檔紀錄的 0001+0002 之上）。做法是第二個方案的變體：不是把 getVideo() 呼叫錯開，而是讓上限判準本身在 getVideo() 每次被讀到時就立即執行一次（跟 sweepIdleVideos() 共用同一份 enforceDecodeCap()），效果等價於『偵測到暴增就提前跑』，但不必真的偵測暴增——每次呼叫都順手檢查，反正 pool<=cap 時是幾乎零成本的早退。量到：同一種突發下 activeVideos 從『突發當下衝到 36（15 次重複測試最糟 23），要等最終收斂』改成『突發當下就是 16，15 次重複測試 0 次破底』。誠實邊界：沒有重跑一次完整 60 分鐘去二次確認『incident_at_t3142s 那種重載不再發生』，這件事本身還沒有被驗證，只驗證了它的上游機制（activeVideos 有沒有被壓住）。"
+}

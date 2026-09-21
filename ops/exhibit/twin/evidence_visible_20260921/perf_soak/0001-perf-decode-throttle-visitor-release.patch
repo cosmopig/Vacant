@@ -1,0 +1,160 @@
+From bbbc3b61a740e5a34ca0dae8ce323b5abe184f3a Mon Sep 17 00:00:00 2001
+From: cosmopig <137395688+cosmopig@users.noreply.github.com>
+Date: Mon, 21 Sep 2026 09:00:25 +0800
+Subject: [PATCH] =?UTF-8?q?perf(world3):=20=E5=B1=95=E5=A0=B4=E9=95=B7?=
+ =?UTF-8?q?=E8=B7=91=E6=95=88=E8=83=BD=E2=80=94=E2=80=94=E8=A7=A3=E7=A2=BC?=
+ =?UTF-8?q?=E7=AF=80=E6=B5=81=EF=BC=8B=E8=A8=AA=E5=AE=A2=E7=9C=9F=E7=9A=84?=
+ =?UTF-8?q?=E9=87=8B=E6=94=BE?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+量到的真因（非猜測，方法與數字見
+Vacant repo ops/exhibit/twin/evidence_visible_20260921/asset_loading/）：
+
+1. getVideo() 只在 pool 超過 VIDEO_CAP(40) 才淘汰，但 40 支以內的每一支
+   一律 loop=true+autoplay，瀏覽器不管有沒有被畫到、每一幀持續解碼。
+   ?scene=s11&late=1 直跳對照：修前 22 支全部同時解碼、page.screenshot()
+   要 21.9 秒；修後同一場景 22 支只剩 2 支在解碼、screenshot 7.96 秒。
+   單純放著讓既有 invite→ambient 迴圈跑（無合成訪客）也能在 ~100 秒內
+   把 pool/active 一起頂到 40/40、fps 從 8.7 掉到 0.8，離開 s11 之後
+   active 還卡在 39——舊片沒有真的停，這才是「凍住 30 秒」的機制。
+
+2. startVisitor() 每次投卡都 new Creature() 推進 cast，endReplay() 與
+   邀請輪播收尾那兩處「野生世界：全員上台漫遊」會把 cast 裡每一個成員
+   （含所有歷史訪客）設回 onstage=true。這是刻意的說故事設計，不是要
+   拿掉，但沒有上限的話展期累積幾百筆真人投卡之後，s11 每一幀要個別畫
+   幾百個角色，沒有獨顯的展場 VM 絕對撐不住。
+
+修法（純載入／回收，不動任何一幀的視覺邏輯）：
+- sweepIdleVideos()：500ms 沒被 getVideo() 讀到就暫停解碼（留在 pool
+  裡，讀 paused 的 <video> 不會報錯，只是停在暫停那一幀）；getVideo()
+  命中快取且已暫停時自動 play() 續播。同時解碼上限 16（MAX_ACTIVE_
+  DECODES，這次測到的機器調出來的數字，不是理論值）。
+- VISITOR_CAST_CAP=24：訪客那一批人數設上限，滿了就真的從 cast
+  splice 掉最舊、目前沒有在忙的一位——世界還是「記得走過的人」，
+  只是記得的量有界。原始種子人口（20 位）不在這個上限裡。
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+---
+ world3/index.html | 78 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 78 insertions(+)
+
+diff --git a/world3/index.html b/world3/index.html
+index 4bc6d2b..dba20c7 100644
+--- a/world3/index.html
++++ b/world3/index.html
+@@ -542,11 +542,63 @@ function getVideo(src, { loop = true } = {}){
+         videoPool.delete(oldest);
+       }
+     }
++  } else if (e.v.paused) {
++    // 解碼節流回來的（見 sweepIdleVideos）：留在 pool 裡代表多半還有
++    // readyState≥2 的緩衝，續播不必重抓網路——這才是「暫停」而不是「淘汰」
++    // 的意義。展場長跑：離場的分身要真的釋放，回來的分身要真的續得上。
++    e.v.play().catch(()=>{});
+   }
+   e.last = performance.now();
+   return e.v;
+ }
+ 
++/* ── 解碼節流（展場長跑效能修：資產載入／回收，不動任何一幀的視覺邏輯）───
++ *
++ *  量到的真因（Vacant repo `ops/exhibit/twin/evidence_visible_20260921/asset_loading/`）：
++ *  `getVideo()` 只在 pool **超過** VIDEO_CAP(40) 才淘汰，但 40 支以內的每一支
++ *  一律 `loop=true`＋`autoplay`，瀏覽器會不管有沒有被畫到、每一幀持續解碼。
++ *  實測：不用任何合成訪客、單純放著讓既有的 invite→ambient 迴圈跑，
++ *  ~100 秒內 pool/active 就一起頂到 40/40，fps 從 8.7 掉到 0.8
++ *  （`before_resting.json`，s11「全員上台漫遊」那一格）；離開 s11 之後
++ *  active 還卡在 39——**舊片沒有真的停**，這才是「凍住 30 秒」的機制，
++ *  不是憑感覺猜的。
++ *
++ *  兩層節流：
++ *  1. 閒置暫停——`getVideo()` 每次真的被讀都會刷新 `.last`；超過
++ *     DECODE_IDLE_MS 沒人讀＝這幾幀沒有任何 Creature 畫它，暫停最安全
++ *     （canvas 讀一支 paused 的 <video> 不會報錯，只是畫面停在暫停那一幀，
++ *     反正沒人在畫它）。窗口設 500ms：換場交叉溶接與片段切換交叉溶接
++ *     最長都是 320ms，留一截安全邊界，不會在轉場中途被誤暫停。
++ *  2. 同時解碼上限——就算全部都「這幾幀有被畫到」（s11 全員上台就是這種
++ *     情況：baked=false，每一個 onstage 都個別讀自己的片），瀏覽器軟解
++ *     （展場那台 VMware VM 沒有獨顯給它）撐不住 40 支一起跑。超過
++ *     MAX_ACTIVE_DECODES 就把「這批touched裡最不新鮮」的幾支也暫停——
++ *     那幾位背景漫遊者的動作會停在暫停那一幀（位置仍在走，只是畫面不再翻
++ *     幀），比整頁凍住 30 秒是遠遠划算的退讓，而且退讓的是背景，不是
++ *     正在說故事的訪客（訪客那條路徑幾乎每幀都被讀，`.last` 永遠最新，
++ *     天然排在保留名單前面）。
++ *  誠實邊界：MAX_ACTIVE_DECODES 是**這次測到的機器**（Mac、swiftshader
++ *  軟解近似展場 VM 沒有獨顯）調出來的數字，不是理論值；換一台機器能撐
++ *  的並發數不同，需要重新量。 */
++const DECODE_IDLE_MS = 500;
++const MAX_ACTIVE_DECODES = 16;
++let __sweepFrame = 0;
++function sweepIdleVideos(now){
++  __sweepFrame++;
++  if (__sweepFrame % 3 !== 0) return;     // 每 3 幀掃一次就夠（40 支以內，O(n log n) 很便宜)
++  const active = [];
++  for (const [k, e] of videoPool){
++    if (e.v.paused) continue;
++    if (now - e.last > DECODE_IDLE_MS){ e.v.pause(); continue; }
++    active.push([k, e]);
++  }
++  if (active.length > MAX_ACTIVE_DECODES){
++    active.sort((a, b) => a[1].last - b[1].last);   // 最舊的排前面
++    const over = active.length - MAX_ACTIVE_DECODES;
++    for (let i = 0; i < over; i++) active[i][1].v.pause();
++  }
++}
++
+ /* ── 卡司與姿勢圖 ────────────────────────────────────────────── */
+ const CAST = [];
+ let manifest = {};
+@@ -818,6 +870,29 @@ class Creature{
+   }
+ }
+ const cast = [];
++// 真人訪客釋放（展場長跑效能修，item 3「離場的分身要真的釋放」）：
++// `startVisitor()` 每次投卡都 `new Creature()` 推進 `cast`，而 `endReplay()`／
++// 邀請輪播收尾那兩處「野生世界：全員上台漫遊」會把 `cast` 裡**每一個**成員
++// 設回 onstage=true（含所有歷史訪客）——這是刻意的說故事設計（s11 要呈現
++// 「走過的人都留在這個世界」），不是要拿掉。但沒有上限的話，展期累積幾百
++// 筆真人投卡之後，s11 每一幀都要個別畫（getVideo+WebGL 鍵器）幾百個角色，
++// 這是展場那台沒有獨顯的 VM 絕對撐不住的（量測見 sweepIdleVideos 上方）。
++// 折衷：訪客那一批人數設上限，滿了就真的從 `cast` 移除**最舊、目前沒有
++// 在忙**的那一位（splice，不是留著只是不畫）——世界還是「記得走過的人」，
++// 只是記得的量有界。原始種子人口（seedPopulation 的 20 位）不在這個上限裡，
++// 他們是世界的底色，一直都在。
++const VISITOR_CAST_CAP = 24;
++const visitorCast = [];
++function releaseOldVisitors(){
++  while (visitorCast.length > VISITOR_CAST_CAP){
++    const victim = visitorCast.find(c => !c.reserved && c !== director.visitor);
++    if (!victim) break;               // 上限內的都還在忙——這輪先不動，下次投卡再試
++    visitorCast.splice(visitorCast.indexOf(victim), 1);
++    const ci = cast.indexOf(victim);
++    if (ci >= 0) cast.splice(ci, 1);
++    victim.onstage = false;           // 保險：萬一還有別處存著參照，至少不再被畫
++  }
++}
+ const AGENTS = { "careful-1":"c22", "careful-2":"c20", "plain-1":"c01",
+                  "plain-2":"c03", "hasty-1":"c13", "hasty-2":"c37" };
+ const byAgent = {};
+@@ -1922,6 +1997,8 @@ const director = {
+     cr.vid = img._id;
+     cr.spawning = 1; cr.reserved = true; cr.wander = false;
+     cast.push(cr); this.visitor = cr;
++    visitorCast.push(cr);
++    releaseOldVisitors();   // 真的釋放：見 VISITOR_CAST_CAP 上方長註解
+     const s = SCENES.s04;
+     const ring = this.crowd(7, [cr]);
+     this.mode = "visitor_spawn";
+@@ -3237,6 +3314,7 @@ function frame(ts){
+   drawPressed(director);
+   drawQrCorner();                     // 常駐：中途走過來的人也掃得到
+   drawHonesty(director);
++  sweepIdleVideos(ts);                // 解碼節流：見 sweepIdleVideos 上方長註解
+   requestAnimationFrame(frame);
+   const heapMB = performance.memory ? (performance.memory.usedJSHeapSize/1048576)|0 : -1;
+   document.title = `sc=${sceneId} mode=${director.mode} pool=${videoPool.size} `
+-- 
+2.50.1 (Apple Git-155)
+

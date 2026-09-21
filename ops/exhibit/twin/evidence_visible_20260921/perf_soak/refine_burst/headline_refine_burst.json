@@ -1,0 +1,46 @@
+{
+  "key": "perf_soak",
+  "round": "2026-09-21 第二輪覆核——補上一輪 60 分鐘泡機留下的殘餘風險（recommendation_not_applied）",
+  "task": "上一輪（headline_perf_soak.json）60 分鐘＋真人分身泡機在 t=3142.6s 撞到一次：s11「全員上台漫遊」一次把 29 位 cast 全部設回 onstage，activeVideos 瞬間衝到 26（超過 MAX_ACTIVE_DECODES=16），因為原本的上限判準只掛在 sweepIdleVideos()──每 3 幀才檢查一次──同機負載重、fps<0.2 時，3 幀的間隔可以長達好幾秒，撞上既有 10 秒無幀看門狗、觸發一次自動重載（畫面閃一下，不是永久凍結，但不是零體感中斷）。上一輪把這個留給下一輪，本輪把它補上。",
+  "fix": {
+    "file": "world3/index.html（patch: 0003-immediate-decode-cap-enforcement.patch，疊在 0001+0002 之上）",
+    "change": "把「超過 MAX_ACTIVE_DECODES 就暫停最舊的幾支」這條判準從 enforceDecodeCap() 抽成獨立函式，除了原本 sweepIdleVideos() 每 3 幀呼叫一次，額外在 getVideo() 每次真的被讀到的當下也呼叫一次。getVideo() 是同步 JS，s11 全員上台那種「同一幀内連續呼叫 20～29 次」的突發，會在同一個瀏覽器事件迴圈內就被壓回上限，不必等下一次 rAF，因此不受 fps 掉多低影響。純載入／回收邏輯，沒有動任何一幀的視覺（cast/onstage/繪製順序一律不變，只改變哪一支 <video> 在背景解碼）。",
+    "cost": "videoPool.size<=MAX_ACTIVE_DECODES 時提早回傳（穩態下 poolSize 38-40，這個早退幾乎不會生效，但邏輯本身零風險）；生效時是 O(n) 掃描＋O(n log n) 排序、n<=40，一次呼叫落在微秒級，40 次/幀（s11 極端情況）也遠低於一幀 16ms 預算。"
+  },
+  "method": {
+    "why_not_another_60min_soak": "上一輪的 60 分鐘被動泡機只自然撞到這個突發一次（t=3142.6s），統計上是 n=1。本輪改用兩個更嚴格、零共用程式碼的量具直接鎖定同一個殘餘風險，而不是重跑一次一樣被動、一樣可能只撞到 0～1 次的長跑：",
+    "instrument_1_burst_repro": "burst_repro.mjs：載入頁面、穩定後，用跟 index.html 既有三處『全員上台』完全同款的手法（cast.forEach(c=>c.onstage=true) ＋逐一 getVideo()）直接製造一次突發，在同一個 page.evaluate() 呼叫（同一個 JS turn）內立刻讀 activeVideos——量的是『這一批突發還沒讓出瀏覽器控制權之前，上限有沒有被壓住』，跟原本 sweepIdleVideos 的『下一次排程時有沒有壓住』是兩件事。量具負控制：先驗 videoPool/cast/enforceDecodeCap 三個全域名字真的存在（不是打錯字打到 undefined 恆真恆假）。",
+    "instrument_2_burst_repeat": "burst_repeat.mjs：同一招連續做 15 輪，CPU throttle 在 1x/4x/8x 之間輪流變化（模擬同機負載忽大忽小，不是固定挑一個順風的節流值），每輪都讀 activeVideos 與 sessionStorage.vw_reloads——n=1 的被動撞見換成 n=15 的主動重現，任何一輪破底就算失敗。"
+  },
+  "results": {
+    "instrument_1_single_shot": {
+      "base_0001_0002_only": {
+        "file": "burst_base_t4.json",
+        "activeImmediatelyAfter": 36,
+        "cap": 16,
+        "immediate_capped": false,
+        "note": "同一批突發等 4 個 rAF 之後量到 activeAfterFewFrames=15——最終還是會收斂，但『同一瞬間』有 36 支在解碼，這正是上一輪 incident 的機制重現（不是巧合，是同一份判準的同一個結構性缺口）"
+      },
+      "new_with_0003": {
+        "file": "burst_new_t4.json",
+        "activeImmediatelyAfter": 16,
+        "cap": 16,
+        "immediate_capped": true,
+        "note": "突發發生的同一個 JS turn 內就被壓到剛好等於上限，不必等任何一次 rAF"
+      }
+    },
+    "instrument_2_repeat_15x": {
+      "base_0001_0002_only": { "file": "repeat_base.json", "maxObserved": 23, "cap": 16, "anyOverCap": true, "roundsOverCap": "0, 9, 11, 12（15 輪裡 4 輪破底）", "finalReloads": 0 },
+      "new_with_0003": { "file": "repeat_new.json", "maxObserved": 16, "cap": 16, "anyOverCap": false, "roundsOverCap": "0（15 輪全數守住上限）", "finalReloads": 0 },
+      "honesty_on_reloads_0": "兩邊這次都是 finalReloads=0，不是本修法讓看門狗不再觸發的直接證據——burst_repeat.mjs 只用 page.evaluate() 直接改 videoPool/cast 狀態，沒有真的跑滿真實的 frame()/Creature.draw() 合成負擔，本來就不容易踩滿 10 秒無幀那條線。這裡量到、能主張的是『activeVideos 有沒有被壓回上限』這個更上游、更乾淨的機制訊號；『上限守住了』與『上一輪撞到的看門狗重載』之間的因果關係，證據鏈在 headline_perf_soak.json 的 incident_at_t3142s 那筆（activeVideos=26 那一格精準對上 reloads 0→1）——本輪沒有重跑一次完整 60 分鐘去二次確認那條因果鏈，誠實記錄成待驗，不是已驗。"
+    }
+  },
+  "visual_evidence": {
+    "shots": ["shots/base_round0.png", "shots/base_round14.png", "shots/new_round0.png", "shots/new_round14.png"],
+    "note": "四張都是同一支真實 index.html 在瀏覽器裡的完整截圖（不是抽象示意圖）——人形黏土角色、暖光、待機畫面文案『你需要什麼？走過 371 件真實任務的一群人』，跟展件既有視覺完全一致，證明修法沒有動到任何一幀的畫面（硬約束：不動 index.html 視覺邏輯）。"
+  },
+  "not_done_this_round": [
+    "沒有重新跑滿 60 分鐘真人分身泡機去二次確認『0003 修法讓 incident_at_t3142s 那種重載不再發生』——上面 honesty_on_reloads_0 已誠實記錄這個界線。有機時時的建議動作：重跑一次跟上一輪同協定（submit_every=8s、duration=3600s）的泡機，看 t~3100-3200s 附近那個時間窗還會不會出現 reloads 0→1。",
+    "1003/1004 這次同樣沒有嘗試連線（延續上一輪 no route to host 的結論，這次沒有再花時間重試）——展場那台的絕對數字依然是 null，不是本輪能補的缺口。"
+  ]
+}

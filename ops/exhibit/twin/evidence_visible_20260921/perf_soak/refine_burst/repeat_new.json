@@ -1,0 +1,135 @@
+{
+  "tag": "new",
+  "url": "http://127.0.0.1:8702/index.html",
+  "repeats": 15,
+  "selfCheck": {
+    "hasEnforce": true,
+    "hasMax": 16
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "throttleRate": 1,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 16,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 1,
+      "throttleRate": 4,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 2,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 2,
+      "throttleRate": 8,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 3,
+      "throttleRate": 1,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 4,
+      "throttleRate": 4,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 5,
+      "throttleRate": 8,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 6,
+      "throttleRate": 1,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 2,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 7,
+      "throttleRate": 4,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 8,
+      "throttleRate": 8,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 2,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 9,
+      "throttleRate": 1,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 10,
+      "throttleRate": 4,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 2,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 11,
+      "throttleRate": 8,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 12,
+      "throttleRate": 1,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 13,
+      "throttleRate": 4,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 2,
+      "reloadsSoFar": 0
+    },
+    {
+      "round": 14,
+      "throttleRate": 8,
+      "onstageCount": 10,
+      "poolSize": 40,
+      "immediatelyAfter": 12,
+      "reloadsSoFar": 0
+    }
+  ],
+  "finalReloads": 0,
+  "maxObserved": 16,
+  "anyOverCap": false,
+  "pageErrorsCount": 0
+}
