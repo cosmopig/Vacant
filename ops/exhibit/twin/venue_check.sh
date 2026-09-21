@@ -9,17 +9,29 @@
 #
 # 它**只讀不寫**：不改展件任何一個檔、不動 events.jsonl、一通模型都不打。
 #
-#   ./venue_check.sh                  檢查預設的 8420 / 8899
+#   ./venue_check.sh                  檢查預設的 8420 / 8899 / 8901
 #   ./venue_check.sh --twin-port 8899 --tv-port 8420
 #   ./venue_check.sh --skip-tv        只檢查展件伺服器
+#   ./venue_check.sh --only-twin      只跑第八節（數位分身那一條線）
+#   ./venue_check.sh --skip-twin      不檢查數位分身（明講的決定）
+#
+# ⚠ **第八節是 2026-09-21 補的，而它補的是一個很難看的洞**：在那之前
+#   這一支對 `twinlink`／`twinstore`／`visitors.json`／`&twin=` 的 grep 命中
+#   **是 0**（正控制：同一個 grep 打在 `twinlink.py` 上 16 命中）。
+#   也就是布展當天這一支會印綠，而整條數位分身線一個字都沒被量。
 #
 # 離開碼：0＝可以開展；1＝有硬傷（下面會逐條講是哪一條）。
 set -uo pipefail
 
 TV_PORT=8420
 TWIN_PORT=8899
+STORE_PORT=8901
 HOST=127.0.0.1
 SKIP_TV=0
+SKIP_TWIN=0
+ONLY_TWIN=0
+# 快照多久沒被寫就算「靜默降級」。loop 預設 15 秒一輪，10 分鐘＝連錯 40 輪。
+TWIN_MAX_AGE_MIN=10
 FAIL=0
 WARN=0
 
@@ -27,8 +39,12 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
+    --store-port) STORE_PORT="$2"; shift ;;
+    --twin-max-age-min) TWIN_MAX_AGE_MIN="$2"; shift ;;
     --host)      HOST="$2"; shift ;;
     --skip-tv)   SKIP_TV=1 ;;
+    --skip-twin) SKIP_TWIN=1 ;;
+    --only-twin) ONLY_TWIN=1 ;;
     *) echo "不認得的參數：$1" >&2; exit 2 ;;
   esac
   shift
@@ -44,6 +60,7 @@ head_() { printf "\n\033[1m%s\033[0m\n" "$1"; }
 # 兩邊都印就變成 `000000`，看起來像一個沒人看過的怪狀態碼。
 code() { c=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 8 "$1" 2>/dev/null); echo "${c:-000}"; }
 
+if [ "$ONLY_TWIN" = "0" ]; then
 head_ "一、展件伺服器活著嗎"
 for p in / /state /live/events.jsonl /phone.html /viewer.html; do
   c=$(code "$B$p")
@@ -166,6 +183,111 @@ case "$LISTEN" in
     warn "  看得到 t= 就是外流了（那代表 token 只是一個 GET 的距離）" ;;
   *) ok "只綁 ${LISTEN}（手機連不到；展場要手機互動才需要 --lan）" ;;
 esac
+fi   # ONLY_TWIN
+
+# ── 八、數位分身那一條線（手機 → 公網 → twinstore → 1003 → 螢幕）──────
+#
+# 🔴 這一節量的是**兩件不同的事**，不可以混成一件：
+#
+#   (A) `twinlink serve` 的唯讀端點活著嗎（電視 `&twin=` 指的那一台）。
+#   (B) `twinlink loop` 還在寫快照嗎（`world3/live/visitors.json`）。
+#
+# ⚠ **(A) 量不到 (B)。** serve 的 `/visitors.json` 每次都是現算的，
+#   它的 `generated_at` 永遠是**這一次請求的時間** ⇒ 拿它判新鮮度會永遠是綠的。
+#   loop 死掉的「靜默降級」只有從那個**落盤快照**看得出來，因為那個欄位
+#   記的是 `export` 跑的時刻。這一段以前零觀測。
+#
+# ⚠ **`generated_at: null` 不是「0 分鐘前」**，是「沒有東西寫過它」
+#   （commit 進 vacant_hm 的佔位檔就長這樣）。兩者不可以同形。
+if [ "$SKIP_TWIN" = "1" ]; then
+  head_ "八、數位分身"
+  warn "--skip-twin：整條分身線沒量（＝沒量到，不是量到沒問題）"
+else
+  head_ "八、數位分身：唯讀端點（電視 &twin= 指的那一台）"
+  SB="http://$HOST:$STORE_PORT"
+  c=$(code "$SB/visitors.json")
+  if [ "$c" = "200" ]; then
+    ok "/visitors.json → 200"
+  else
+    bad "/visitors.json → ${c}（twinlink serve 沒起來 ⇒ 電視的 &twin= 是死的）"
+    bad "  ⇒ 開機腳本要帶 --store-port ${STORE_PORT}；手動起：twinlink.py serve --port ${STORE_PORT}"
+  fi
+
+  # 🔴 負控制：一個「什麼都回 200」的東西跟一個真的 twinlink serve，
+  #    在上面那一條裡長得一模一樣。這一條逼它證明自己會說不。
+  cn=$(code "$SB/definitely-not-a-route")
+  if [ "$c" = "200" ]; then
+    [ "$cn" = "404" ] && ok "負控制：/definitely-not-a-route → 404（它真的在路由，不是什麼都回 200）" \
+      || bad "負控制壞了：不存在的路徑回 ${cn} 不是 404 ⇒ 上面那個 200 不算數"
+  fi
+
+  # counts.visitors 讀得到嗎（200 不等於形狀對）
+  if [ "$c" = "200" ]; then
+    NV=$(curl -sS --max-time 8 "$SB/visitors.json" 2>/dev/null | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+n=(d.get("counts") or {}).get("visitors")
+print(n if isinstance(n,int) and not isinstance(n,bool) else "x")' 2>/dev/null || echo x)
+    # ⚠ `${NV}` 的大括號不是風格。bash 3.2（macOS 的 /bin/bash）在 `$NV（`
+    #   這種寫法下會把全形括號的第一個 byte 吃進變數名 ⇒ `set -u` 當場
+    #   `unbound variable` 把整支打死。這支腳本別的地方早就都寫 `${c}`。
+    [ "$NV" != "x" ] && ok "counts.visitors 讀得到：${NV}（庫裡目前幾個人）" \
+      || bad "counts.visitors 讀不到 ⇒ 回的東西形狀不對，電視會把這一層判成失敗"
+  fi
+
+  head_ "八之二、快照還在被寫嗎（loop 活著沒有？靜默降級就是在這裡看）"
+  # 這個判準自己要先被驗過。`age_verdict` 吃一段 JSON，吐 `狀態 分鐘數`：
+  #   fresh／stale／null（沒有東西寫過）／unparsable。
+  age_verdict() {   # stdin = JSON
+    python3 -c '
+import json,sys
+from datetime import datetime, timezone
+lim=float(sys.argv[1])
+try: d=json.load(sys.stdin)
+except Exception: print("unparsable null"); raise SystemExit(0)
+g=d.get("generated_at")
+if g is None: print("null null"); raise SystemExit(0)
+try:
+    t=datetime.fromisoformat(str(g).replace("Z","+00:00"))
+    if t.tzinfo is None: t=t.replace(tzinfo=timezone.utc)
+except Exception: print("unparsable null"); raise SystemExit(0)
+age=(datetime.now(timezone.utc)-t).total_seconds()/60.0
+print(("fresh" if age<=lim else "stale"), round(age,1))
+' "$1"
+  }
+  # 🔴 量具自己的負控制。三個必中的輸入；有一個不對就整節作廢——
+  #    「判成 0 之前先證明量得動」。
+  NC_OK=1
+  [ "$(printf '{"generated_at":"1970-01-01T00:00:00Z"}' | age_verdict "$TWIN_MAX_AGE_MIN" | awk '{print $1}')" = "stale" ] || NC_OK=0
+  [ "$(printf '{"generated_at":null}'                   | age_verdict "$TWIN_MAX_AGE_MIN" | awk '{print $1}')" = "null" ]  || NC_OK=0
+  [ "$(printf 'not json'                                | age_verdict "$TWIN_MAX_AGE_MIN" | awk '{print $1}')" = "unparsable" ] || NC_OK=0
+  if [ "$NC_OK" = "1" ]; then
+    ok "負控制：假的舊時間判 stale、null 判 null、壞 JSON 判 unparsable（尺量得動）"
+  else
+    bad "新鮮度這把尺自己壞了（負控制沒過）⇒ 下面那一條**不算數**"
+  fi
+
+  if [ "$SKIP_TV" = "1" ]; then
+    warn "--skip-tv：拿不到 world3/live/visitors.json，快照新鮮度沒量到（不是量到 0）"
+  elif [ "$NC_OK" = "1" ]; then
+    SNAP_URL="http://$HOST:$TV_PORT/world3/live/visitors.json"
+    SNAP=$(curl -sS --max-time 8 "$SNAP_URL" 2>/dev/null)
+    if [ -z "$SNAP" ]; then
+      bad "拿不到 $SNAP_URL ⇒ 電視 snapshot 那一層是死的（檔不在？靜態站沒起來？）"
+    else
+      V=$(printf '%s' "$SNAP" | age_verdict "$TWIN_MAX_AGE_MIN")
+      case "${V%% *}" in
+        fresh) ok "快照 ${V##* } 分鐘前寫的（loop 活著）" ;;
+        stale) bad "快照 ${V##* } 分鐘前就停了（上限 ${TWIN_MAX_AGE_MIN} 分）⇒ loop 死了或打不到公網"
+               bad "  ⇒ systemctl status vacant-twin-loop.service；journalctl -u vacant-twin-loop -n 40" ;;
+        null)  bad "快照的 generated_at 是 **null** ⇒ 從來沒有東西寫過它"
+               bad "  那是 commit 進 vacant_hm 的空佔位檔。**不是「0 個觀眾」，是這條線沒接上**。"
+               bad "  ⇒ 起 vacant-twin-loop.service（要 VACANT_TWIN_CLOUD_TOKEN），或明講 --skip-twin" ;;
+        *)     bad "快照的 generated_at 解不開 ⇒ 形狀不對，電視會讀到一份自己看不懂的東西" ;;
+      esac
+    fi
+  fi
+fi
 
 head_ "結果"
 if [ "$FAIL" -gt 0 ]; then
@@ -173,6 +295,8 @@ if [ "$FAIL" -gt 0 ]; then
   exit 1
 fi
 printf "  \033[32m硬傷 0 條、%d 條要注意\033[0m\n" "$WARN"
-echo "  ⚠ 這一支證明的是「端點活著、輪播在動、字型在」。"
+echo "  ⚠ 這一支證明的是「端點活著、輪播在動、字型在、分身快照還在被寫」。"
 echo "    它**沒有**驗簽章，也沒有看畫面長什麼樣——那要人真的站到電視前面看一眼。"
+echo "    它也**沒有**證明電視真的去讀了 &twin=（那要開瀏覽器）；"
+echo "    它證明的是那個端點在、快照是新的。兩件事不要混講。"
 exit 0

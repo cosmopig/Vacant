@@ -1,0 +1,46 @@
+[Unit]
+# 數位分身的迴圈：公網郵箱 → twinstore（真相來源）→ 1003 生分身 → 落盤快照。
+#
+# 為什麼它要**自己一份 unit**（2026-09-21）：
+# `vacant-exhibit.service` 管的是兩台伺服器，它們掛掉電視就黑，很明顯。
+# loop 不一樣——它死掉的時候**畫面完全正常**，只是永遠不會有新的人進來，
+# 而觀眾掃了 QR、投了卡、站在那裡等一個永遠不會出現的分身。
+# 那是「靜默降級」，所以它要有自己的 Restart=always 與自己的 journal 身分，
+# 查的時候看得出來是這一支死了還是伺服器死了。
+#
+# ⚠ 這一份是**可以沒有的**：沒有它，展件照跑（凍結重放＋庫裡已經有的分身），
+#   缺的只有「新的人」。但那件事必須**講出來**——`venue_check.sh` 第八之二節
+#   會因為快照不再更新而判硬傷。不准安靜。
+Description=Vacant 展件 · 數位分身迴圈（ingest→generate→publish→export）
+Documentation=file://@@REPO@@/decisions/DECISION_20260919_EXHIBIT_UNATTENDED.md
+# 公網抄不到只是記一列 ingest_gap，不是致命的（twinlink 誠實邊界 1），
+# 但開機時先等一下網路比較不吵。
+After=network-online.target vacant-exhibit.service
+Wants=network-online.target
+# 「10 秒內失敗 5 次就永久放棄」對無人值守是錯的預設：展期一整天沒有人在看。
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=@@USER@@
+Group=@@USER@@
+WorkingDirectory=@@REPO@@
+Environment=PYTHONUNBUFFERED=1
+Environment=VACANT_HM=@@HM@@
+# 🔴 **token 不進版控。** 這一行的 `-` 代表檔案不在也不算失敗——
+#    不在的時候 twin_loop.sh 會 exit 78 並且**印出為什麼**，不是安靜不做事。
+#      sudo install -m 600 /dev/null /etc/vacant/twin.env
+#      echo 'VACANT_TWIN_CLOUD_TOKEN=<公網那把>' | sudo tee -a /etc/vacant/twin.env
+EnvironmentFile=-/etc/vacant/twin.env
+# 命令列寫在 twin_loop.sh 裡，不寫在這裡：unit 檔測不動，而且 systemd 會先
+# 展開 `$VAR`、又不支援 `${FOO:-預設}`。一支腳本兩個問題一起沒有了。
+ExecStart=@@REPO@@/ops/exhibit/twin/twin_loop.sh
+Restart=always
+RestartSec=15
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vacant-twin-loop
+
+[Install]
+WantedBy=multi-user.target

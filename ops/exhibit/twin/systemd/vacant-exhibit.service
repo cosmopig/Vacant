@@ -35,8 +35,14 @@ Environment=VACANT_EXHIBIT_KILL_STALE=1
 # ⚠ `--lan` 要跟下面 ExecStart 的 `--lan` **一致**：preflight 只有拿到它
 #   才會去量「區網 IP 抓不抓得到」，而那一段在 2026-09-19 之前
 #   從來沒有被執行過（見 preflight 第四節的長註解）。
-ExecStartPre=@@REPO@@/ops/exhibit/twin/exhibit_preflight.sh --lan --twin-port 8899 --tv-port 8420
-ExecStart=@@REPO@@/ops/exhibit/twin/exhibit_boot.sh --lan --dwell 30
+# ⚠ `--store-port 8901` ＝ `twinlink serve` 的唯讀端點（數位分身真相來源）。
+#   **兩行都要寫出來**，即使跟預設值一樣：2026-09-21 之前這三個 systemd 檔
+#   對 `twinlink|twinstore|visitors.json|&twin=` 的 grep 命中是 0，
+#   於是整條分身線沒有出現在開機路徑上、也沒有人看得出來它不在。
+#   寫死在這裡，改埠的時候 kiosk 的網址與 venue_check 會被一起想到。
+#   （`vacant-twin-loop.service` 才是寫 world3/live/visitors.json 的那一支。）
+ExecStartPre=@@REPO@@/ops/exhibit/twin/exhibit_preflight.sh --lan --twin-port 8899 --tv-port 8420 --store-port 8901
+ExecStart=@@REPO@@/ops/exhibit/twin/exhibit_boot.sh --lan --dwell 30 --store-port 8901
 
 # 掉了就拉回來。展期一整天沒有人在看 exit code。
 Restart=always
