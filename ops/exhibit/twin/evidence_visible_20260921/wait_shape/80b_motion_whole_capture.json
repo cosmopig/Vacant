@@ -1,24 +1,24 @@
 {
- "source_dir": "cap_main",
- "frames": 276,
- "span_s": 49.5,
- "capture_fps": 5.56,
+ "source_dir": "r_main",
+ "frames": 108,
+ "span_s": 49.12,
+ "capture_fps": 2.18,
  "regions": {
   "clay": {
-   "n": 275,
-   "min": 1.1159,
-   "median": 4.2986,
-   "max": 34.3062,
-   "mean": 4.5427,
+   "n": 107,
+   "min": 1.1557,
+   "median": 5.1609,
+   "max": 51.7217,
+   "mean": 6.87,
    "frames_below_0.5": 0
   },
   "ambient": {
-   "n": 275,
-   "min": 0.0,
-   "median": 0.3246,
-   "max": 17.7922,
-   "mean": 0.6986,
-   "frames_below_0.5": 229
+   "n": 107,
+   "min": 0.016,
+   "median": 0.3501,
+   "max": 18.4642,
+   "mean": 1.0417,
+   "frames_below_0.5": 82
   }
  },
  "frozen_negative_control": 0.0,

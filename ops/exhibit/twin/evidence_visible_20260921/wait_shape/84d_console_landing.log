@@ -1,7 +1,7 @@
 [info] [wait] 參數覆寫 retireS = 99999
 [info] [wait] 參數覆寫 centerS = 999
 [log] WorldBridge 已啟動 · 來源鏈 snapshot=live/visitors_probe.json
-[info] [wait] 等待態開始 probe-cap_land-112919
-[info] [wait] 分身落地 probe-cap_land-112919 late= false engine= lmstudio:gemma-4-12b-it-qat
+[info] [wait] 等待態開始 probe-r_land-115521
+[info] [wait] 分身落地 probe-r_land-115521 late= false engine= lmstudio:gemma-4-12b-it-qat
 [log:error] Failed to load resource: the server responded with a status of 404 (File not found)
-[title] sc=s05 mode=visitor_goal pool=25 heap=2MB reloads=0
+[title] sc=s04 mode=visitor_spawn pool=26 heap=2MB reloads=0

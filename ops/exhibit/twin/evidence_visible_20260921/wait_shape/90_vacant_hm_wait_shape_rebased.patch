@@ -1,7 +1,7 @@
 diff -ruN a/tools/waitcheck.mjs b/tools/waitcheck.mjs
 --- a/tools/waitcheck.mjs	1970-01-01 08:00:00
-+++ b/tools/waitcheck.mjs	2026-09-21 11:38:43
-@@ -0,0 +1,334 @@
++++ b/tools/waitcheck.mjs	2026-09-21 12:11:09
+@@ -0,0 +1,359 @@
 +// 等待態（「給等待一個形狀」）的可執行判準。
 +//
 +// 為什麼要這一支而不是加進 `tools/livecheck.mjs`：2026-09-21 同一天有十幾個
@@ -329,6 +329,31 @@ diff -ruN a/tools/waitcheck.mjs b/tools/waitcheck.mjs
 +        String(A.waitEngineBadge(fresh)));
 +}
 +
++/* ═══ W12 退役那一句讀得到（底板）════════════════════════════════
++   退役字幕是整段等待態唯一的誠實承諾（「帳本上留著『還沒成形』，沒有被丟掉
++   也沒有被演成完成」）。2026-09-21 實拍：退役儀式的背景是光柱＋塵，
++   `drawTitle` 那個 0.82 不透明度的細字副標中段整句被洗掉。
++   「讀不到等於沒講」⇒ 這一句改走 `waitPlate` 的底板。 */
++{
++  const ui = html.indexOf("function drawWaitOverlay(");
++  const uj = html.indexOf("function drawFormingCorner(");
++  const ov = ui >= 0 && uj > ui ? html.slice(ui, uj) : "";
++  check("W12a 抽得到 overlay 那一段", ov.length > 400, `${ov.length} 字元`);
++  check("W12b 退役那一句走底板（waitPlate），不是只交給 drawTitle 的細字",
++        /waitPlateText/.test(ov) && /waitPlate\(\s*d\.waitPlateText/.test(ov));
++  check("W12c 底板只在退役階段出現（平常那句時間不搶畫面）",
++        /waitPlateText\s*&&\s*\(w\.phase\s*===\s*"retiring"/.test(ov));
++  // 同一句話：底板用的就是 waitCaption(...).sub，不是另外寫一份
++  const ui2 = html.indexOf("this.waitPlateText = retiring ? cap.sub : null;");
++  check("W12d 底板的字＝waitCaption(...).sub（沒有第二份措辭）", ui2 > 0);
++  check("W12e 退役時大標的副標讓位（不會同一句印兩次）",
++        /sub:\s*retiring\s*\?\s*null\s*:\s*cap\.sub/.test(html));
++  // 負控制：把底板那一行拿掉，掃描必須抓到
++  const poisoned = ov.replace(/waitPlate\(\s*d\.waitPlateText[^;]*;/, "");
++  check("W12f 負控制：拿掉底板那一行，掃描抓得到",
++        !/waitPlate\(\s*d\.waitPlateText/.test(poisoned));
++}
++
 +/* ═══ 收尾 ══════════════════════════════════════════════════════ */
 +if (ran < MIN_CHECKS){
 +  console.error(`\n🔴 只跑到 ${ran} 條（地板 ${MIN_CHECKS}）——這把尺沒有掃過它該掃的路。`);
@@ -337,9 +362,9 @@ diff -ruN a/tools/waitcheck.mjs b/tools/waitcheck.mjs
 +console.log(fail ? `\n${fail} 條不通過（共 ${ran} 條）` : `\n全部通過（${ran} 條）`);
 +process.exit(fail ? 1 : 0);
 diff -ruN a/world3/index.html b/world3/index.html
---- a/world3/index.html	2026-09-21 11:38:43
-+++ b/world3/index.html	2026-09-21 11:38:43
-@@ -140,6 +140,16 @@
+--- a/world3/index.html	2026-09-21 12:11:09
++++ b/world3/index.html	2026-09-21 12:11:09
+@@ -143,6 +143,16 @@
  
  function sceneVariants(sc){
    if (LITE) return [];                 // 輕量版：不播背景影片，退回 jpg 板
@@ -356,7 +381,7 @@ diff -ruN a/world3/index.html b/world3/index.html
    // ⚠ **背景影片會演系統裡沒有的機制。** 判準在 SCENE_VIDEO_DEPICTS
    //   （52 張素材逐張看過之後整理出來的表）。機制不存在 ⇒ 不放那支影片，
    //   退回靜態板；板也髒的那兩景另外借一張中性的板（SCENE_PLATE_SUB）。
-@@ -1541,6 +1551,457 @@
+@@ -1555,6 +1565,465 @@
    s01: { x: 0.502, y: 0.625, w: 0.150, skew: 0.0 },
  };
  
@@ -703,6 +728,14 @@ diff -ruN a/world3/index.html b/world3/index.html
 +    if (badge) waitPlate(badge, H * 0.315, "rgba(226,186,120,0.60)");
 +  }
 +
++  // (a2) 退役那一句：**同一段字**（`waitCaption(...).sub`），只是改走底板。
++  //      理由見 `director.update` 裡 `waitPlateText` 那段註解——那一句是整段
++  //      等待態唯一的誠實承諾，在光柱＋塵的背景上用細字會被洗掉。
++  //      y 挑 0.248：大標的下緣約在 0.235，底板高 0.058 ⇒ 下緣 0.306，
++  //      剛好落在退化字卡（0.315）上面，兩張同時出現也不疊。
++  if (w && d.waitPlateText && (w.phase === "retiring" || w.phase === "retired"))
++    waitPlate(d.waitPlateText, H * 0.248, "rgba(226,186,138,0.50)");
++
 +  // (b) 角落那一版：他讓出整面螢幕之後**還在跳**
 +  if (w && w.stage === "corner") drawFormingCorner(d, w);
 +
@@ -814,7 +847,7 @@ diff -ruN a/world3/index.html b/world3/index.html
  /* ── 導演（重放＋訪客流程都走電影場景切換）───────────────────── */
  const spawnQueue = [];
  
-@@ -2020,6 +2481,29 @@
+@@ -2034,6 +2503,38 @@
    },
    update(dt){
      this.t += dt; sceneT += dt;
@@ -824,7 +857,16 @@ diff -ruN a/world3/index.html b/world3/index.html
 +      if (!w){ this.mode = "invite"; this.inviteStep = 0; this.t = 0; return; }
 +      const elMs = performance.now() - w.startedAt;
 +      const cap = waitCaption(w.sub, w.id, elMs, TWIN_WAIT, this.waitReach);
-+      this.titleOv = { head: cap.head, sub: cap.sub };
++      // 🔴 **退役那一句要讀得到。** 它講的是「帳本上留著『還沒成形』，沒有被丟掉
++      //    也沒有被演成完成」——整段等待態裡唯一一句誠實承諾。`drawTitle` 的副標
++      //    是 0.82 不透明度的細字，而退役儀式的背景正好是光柱＋塵：2026-09-21 實拍
++      //    （`75_retirement.jpg` 那一格的前後）中段整句被洗掉，只剩頭尾讀得出來。
++      //    這個 repo 對「讀不到等於沒講」已經有前例（監視器底下那一欄的證據說明、
++      //    右下角帶 ⚠ 的那一行都補了底板）⇒ 退役那一句改走 `waitPlate` 的底板，
++      //    大標照舊。**只有退役那一句**這樣做，平常那句時間不搶畫面。
++      const retiring = w.phase === "retiring" || w.phase === "retired";
++      this.titleOv = { head: cap.head, sub: retiring ? null : cap.sub };
++      this.waitPlateText = retiring ? cap.sub : null;
 +      // 「這是**你的**」只講前幾秒——之後畫面自己就說得清楚，字擋著反而礙事。
 +      // ⚠ 這裡用**牆鐘**（elMs）不是 `this.t`：`this.t` 的 dt 有 `Math.min(…,0.1)`
 +      //   上限，畫面掉到 10fps 以下就會走得比真實時間慢（headless 錄影實測
@@ -844,7 +886,7 @@ diff -ruN a/world3/index.html b/world3/index.html
      if (this.mode === "invite"){
        // 任何時刻有訪客投遞就插播
        // ⚠ `arrivals.holding()`＝抵達那 2.8 秒的優先權。閘門（劇團到齊）**沒動**，
-@@ -2275,6 +2759,110 @@
+@@ -2289,6 +2790,110 @@
      else if (this.mode === "replay_chain" && this.t > beat("chain", false)){ this.endReplay(); }
      else if (this.mode === "visitor_receipt" && this.t > beat("receipt", true)){ this.endReplay(); }
    },
@@ -955,7 +997,7 @@ diff -ruN a/world3/index.html b/world3/index.html
    startVisitor(sub){
      arrivals.spawned(sub.id);       // 陶牌上劃掉這一位（他從「排隊中」變成台上）
      this.visitorId = sub.id; this.visitorCard = sub.card; this.visitorSub = sub;
-@@ -3939,6 +4527,213 @@
+@@ -3953,6 +4558,213 @@
    return n == null ? "這些格會一直重播" : `這 ${n} 格會一直重播`;
  }
  
@@ -1169,7 +1211,7 @@ diff -ruN a/world3/index.html b/world3/index.html
  /* === LIVE-END === */
  
  async function livePoll(){
-@@ -4052,6 +4847,11 @@
+@@ -4066,6 +4878,11 @@
    }
    marklayer.drawSpot();       // 標示層：壓暗＋腳下光圈（在投遞口之前，別把它弄糊）
    sceneDraw(sceneT, director);
@@ -1181,7 +1223,7 @@ diff -ruN a/world3/index.html b/world3/index.html
    arrivals.draw();            // 抵達層在鏡頭變換裡面（信要落在板上的郵筒口）
    marklayer.draw();           // 標示層的陶牌：整個動線的答案，不准被蓋住
    cx.restore();
-@@ -4084,6 +4884,7 @@
+@@ -4100,6 +4917,7 @@
    }
    drawCaption(director.caption, director.capSub);
    drawPressed(director);
@@ -1189,7 +1231,7 @@ diff -ruN a/world3/index.html b/world3/index.html
    drawQrCorner();                     // 常駐：中途走過來的人也掃得到
    drawHonesty(director);
    requestAnimationFrame(frame);
-@@ -4159,6 +4960,178 @@
+@@ -4175,6 +4993,178 @@
      });
    }
  });
@@ -1368,7 +1410,7 @@ diff -ruN a/world3/index.html b/world3/index.html
  /* ── 展場接線＋kiosk ─────────────────────────────────────────────
     分身來源鏈：**本機優先，公網是退路**（CLAUDE.md 展場硬約束 2）。
  
-@@ -4217,8 +5190,26 @@
+@@ -4233,8 +5223,26 @@
    // ⚠ **抵達與成形拆成兩件事**（2026-09-21）。以前這裡只有 `spawnQueue.push`，
    //   而那條線最短要等導演有空、最長要等一整格故事演完 ⇒ 觀眾按下送出的
    //   那一秒畫面是空的。`arrivals.arrive()` 是**同步**的：同一個 tick 就開始
