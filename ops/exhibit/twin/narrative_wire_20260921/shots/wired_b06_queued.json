@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "out": "shots/wired_b06_queued.png",
+  "url": "http://127.0.0.1:8477/world3/index.html?seamshot=queued",
+  "shot_at": "2026-09-21T11:08:53.915Z",
+  "dwell_ms": 9000,
+  "expect_scene": "s03",
+  "scene_wait_s": 0.9,
+  "snap_settled": true,
+  "png_bytes": 1962875,
+  "base_sha256": "c90eae8ecb44695b93fb6161d9c84de42285d03d303d6621430ebaefb001bf3e",
+  "copy_algo": "head = tov ? tov.head : sc.head；sub = waitOv ? waitOv : tov ? tov.sub : s00 ? standbySub(REPLAY,LIVE.stage) : s11 ? loopSub(REPLAY,LIVE.stage) : sc.sub",
+  "scene_id": "s03",
+  "head": "棉紗線　排在第 2 位",
+  "sub": "他在右下角那塊牌子上　一次演一位　輪到他就走進來",
+  "title_ov_source": "twinseam.js",
+  "data_twinseam": "queued",
+  "data_seamending": null,
+  "layer_twinseam_loaded": true,
+  "layer_seamending_loaded": true,
+  "script_srcs": [
+    "bridge.js?v=5",
+    "twinseam.js",
+    "scenes/seam_ending.js"
+  ],
+  "director_mode": "seamshot",
+  "waiting_len": 2,
+  "snapA": 0,
+  "viewport": [
+    1920,
+    937
+  ],
+  "scene_index_keys": 14,
+  "console": [
+    "info: [twinseam] 文案層已掛上（幕 5／6／8／9／16／17）。?seam=0 關掉。",
+    "info: [seam_ending] 收尾層已掛上（幕 18）。?seamend=0 關掉、?seamend=N 定格。"
+  ]
+}

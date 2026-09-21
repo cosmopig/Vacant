@@ -1,0 +1,14 @@
+diff --git a/world3/index.html b/world3/index.html
+index 4db4bd4..d008177 100644
+--- a/world3/index.html
++++ b/world3/index.html
+@@ -5646,5 +5646,9 @@ setInterval(() => {
+ }, 5000);
+ addEventListener("error", e => console.warn("未捕捉錯誤", e.message));
+ </script>
++<!-- NARRATIVE-COPY-LAYERS-BEGIN  (install_wire.py；刪掉這三行就完全還原) -->
++<script src="twinseam.js"></script>
++<script src="scenes/seam_ending.js"></script>
++<!-- NARRATIVE-COPY-LAYERS-END -->
+ </body>
+ </html>

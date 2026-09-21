@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "out": "shots/wired_b18_one.png",
+  "url": "http://127.0.0.1:8477/world3/index.html?scene=s11&seamend=1",
+  "shot_at": "2026-09-21T11:16:44.589Z",
+  "dwell_ms": 9000,
+  "expect_scene": "s11",
+  "scene_wait_s": 9.7,
+  "snap_settled": true,
+  "png_bytes": 1953432,
+  "base_sha256": "c90eae8ecb44695b93fb6161d9c84de42285d03d303d6621430ebaefb001bf3e",
+  "copy_algo": "head = tov ? tov.head : sc.head；sub = waitOv ? waitOv : tov ? tov.sub : s00 ? standbySub(REPLAY,LIVE.stage) : s11 ? loopSub(REPLAY,LIVE.stage) : sc.sub",
+  "scene_id": "s11",
+  "head": "他還在",
+  "sub": "剛剛那一位　還在這個畫面裡　下一位 請投卡",
+  "title_ov_source": "scenes/seam_ending.js",
+  "data_twinseam": null,
+  "data_seamending": "loop",
+  "layer_twinseam_loaded": true,
+  "layer_seamending_loaded": true,
+  "script_srcs": [
+    "bridge.js?v=5",
+    "twinseam.js",
+    "scenes/seam_ending.js"
+  ],
+  "director_mode": "hold",
+  "waiting_len": 0,
+  "snapA": 0,
+  "viewport": [
+    1920,
+    937
+  ],
+  "scene_index_keys": 14,
+  "console": [
+    "info: [twinseam] 文案層已掛上（幕 5／6／8／9／16／17）。?seam=0 關掉。",
+    "info: [seam_ending] 收尾層已掛上（幕 18）。?seamend=0 關掉、?seamend=N 定格。"
+  ]
+}
