@@ -1,0 +1,9 @@
+  N1-ON: lookup.on 出現過 是（抓到 1 次輪詢）
+  N1-OFF 覆寫檢查：{"before":"function","after":"function","overrodeRealOne":true}
+  N1-OFF: lookup.on 出現過 否（抓到 0 次輪詢）
+  N2-ON: {"scrollTop":0,"scrollHeight":1177,"clientHeight":844,"h2Top":92.828125,"h2Text":"他到了","h2FullyVisible":true}
+  N2-OFF: {"scrollTop":0,"scrollHeight":1011,"clientHeight":844,"h2Top":-73.75,"h2Text":"他到了","h2FullyVisible":false}
+  R1 /api/result(no card) → HTTP 200
+  R1 伺服器說 status=done card_url=(無)
+  R1 畫面：panel=p5 現在這格="正在成形" 第三格亮了嗎=false
+  R1 判定：✅ 沒說謊——停在正在成形
