@@ -1,0 +1,7 @@
+[info] [wait] 參數覆寫 retireS = 99999
+[info] [wait] 參數覆寫 centerS = 999
+[log] WorldBridge 已啟動 · 來源鏈 snapshot=live/visitors_probe.json
+[info] [wait] 等待態開始 p3-wq-141401-1
+[eval@20s] "{\"now\":23793,\"waitStart\":12065,\"backlog\":[{\"id\":\"2\",\"wqAt\":6964,\"metaAt\":6964},{\"id\":\"3\",\"wqAt\":13606,\"metaAt\":13606}]}"
+[eval@29s] "{\"now\":32751,\"waitStart\":21023,\"backlog\":[{\"id\":\"2\",\"wqAt\":6964,\"metaAt\":6964},{\"id\":\"3\",\"wqAt\":13606,\"metaAt\":13606}]}"
+[title] sc=s04 mode=visitor_wait pool=16 heap=2MB reloads=0

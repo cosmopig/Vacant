@@ -1,0 +1,51 @@
+{
+ "source_dir": "r3_q_off",
+ "window_from_s": 22.0,
+ "frames": 133,
+ "span_s": 39.04,
+ "capture_fps": 3.38,
+ "regions": {
+  "q_left": {
+   "n": 132,
+   "min": 1.6064,
+   "median": 2.353,
+   "max": 5.1558,
+   "mean": 2.6043,
+   "frames_below_0.5": 0
+  },
+  "q_right": {
+   "n": 132,
+   "min": 1.8553,
+   "median": 3.2942,
+   "max": 5.3406,
+   "mean": 3.4794,
+   "frames_below_0.5": 0
+  },
+  "clay_center": {
+   "n": 132,
+   "min": 2.8417,
+   "median": 4.4622,
+   "max": 7.2654,
+   "mean": 4.5573,
+   "frames_below_0.5": 0
+  },
+  "floor_front": {
+   "n": 132,
+   "min": 1.3978,
+   "median": 2.4638,
+   "max": 4.8683,
+   "mean": 2.6131,
+   "frames_below_0.5": 0
+  },
+  "ambient": {
+   "n": 132,
+   "min": 0.0488,
+   "median": 0.3468,
+   "max": 0.5343,
+   "mean": 0.3408,
+   "frames_below_0.5": 128
+  }
+ },
+ "frozen_negative_control": 0.0,
+ "verdict": "INCONCLUSIVE"
+}

@@ -1,0 +1,83 @@
+抽出 LIVE 區段 61696 字元
+[OK    ] W1a 還沒生 ⇒ twinPending true
+[OK    ] W1b 生好了 ⇒ twinPending false
+[OK    ] W1c 有三句話就算好了（status 缺也認）
+[OK    ] W1d 沒帶 twin ⇒ null（不是 false，也不是 true）
+[OK    ] W1e 有 twin 但整包都是 null ⇒ null（沒量到不猜）
+[OK    ] W1f 不認得的 status ⇒ null（不當成好了）
+[OK    ] W2a t=0 沒有成形
+[OK    ] W2b 單調上升
+[OK    ] W2c 🔴 永遠到不了 1（不是進度條）  lim=0.930000
+[OK    ] W2d 🔴 上限離完成還差看得見的一截（殘餘 ≥ 5%）  殘餘=0.070
+[OK    ] W2d2 在實際會發生的時間窗內（≤300 秒）都還沒碰到上限
+[OK    ] W2e 上限本身就 <1（寫死一個 1 進去就是進度條）
+[OK    ] W2f 負控制：線性進度條會在 t=300 走到 1，判準抓得到
+[OK    ] W2g 負控制：`ceil=1` 的漸近曲線也算進度條（會宣稱完成）
+[OK    ] W3a 開場十秒內心跳有高有低  Δ=1.000
+[OK    ] W3b 🔴 第 900 秒（退役門檻）心跳照樣在跳  Δ=1.000
+[OK    ] W3c 🔴 第 3600 秒也還在跳（沒有任何衰減項）  Δ=1.000
+[OK    ] W3d 心跳有回到低點（不是一直亮著）  lo=0.000
+[OK    ] W3e 負控制：把脈動綁成形程度 ⇒ 900 秒後幾乎不動，判準抓得到
+[OK    ] W3f 兩位同時在等的人不同步（相位吃各自的 id）
+[OK    ] W3g waitSeed 確定性
+[OK    ] W4a 剛開始＝forming
+[OK    ] W4b 超過實測上限兩倍＝long
+[OK    ] W4c 到門檻＝retiring
+[OK    ] W4d 儀式演完＝retired
+[OK    ] W4e longS 真的超過實測最大值（不是隨手寫的）
+[OK    ] W4e2 🔴 retireS 被調到 longS 以下，退役照樣發生  35s=retiring 50s=retired
+[OK    ] W4e3 負控制：由前往後判的舊寫法在同一組參數下會答錯
+[OK    ] W4f retireS 遠大於實測最大值（不會把正常的一次判成走掉）
+[OK    ] W5a null 進 null 出（不寫 0 秒）
+[OK    ] W5b 未定義也回 null
+[OK    ] W5c 秒
+[OK    ] W5d 分秒
+[OK    ] W5e 整分不補 0 秒
+[OK    ] W6a 退化那一句逐字相同
+[OK    ] W6b 真模型那一句也逐字相同
+[OK    ] W6c 沒帶 engine ⇒ 不掛（null）
+[OK    ] W6d waitDegraded 三值 true
+[OK    ] W6e waitDegraded 三值 false
+[OK    ] W6f waitDegraded 三值 null（沒帶 engine 不猜）
+[OK    ] W6g 🔴 退化與真模型的大字**不一樣**（畫面上分得出來）
+[OK    ] W6h 退化的副標就是 twinEngineNote 原句
+[OK    ] W6i 沒標 engine 的那一筆不冒充真模型
+[OK    ] W6j 真模型那一筆才是 good
+[OK    ] W7a 🔴 沒有任何一句話含觀眾打的 need 原文
+[OK    ] W7b 🔴 沒有任何一句話含 first_line 原文
+[OK    ] W7c 大標印的是代號（visitorCode）  星星糖
+[OK    ] W7c2 類別本身也是從同一組 shape/color/texture 來的，沒另造一套
+[OK    ] W7c3 代號＋類別合起來仍然還原不出原文
+[OK    ] W7d 負控制：原文塞進去，同一套掃描抓得到
+[OK    ] W8a 一般：講「已經多久」＋「我們量過的是多久」  已經 12 秒 · 我們量過的是 16 到 54 秒
+[OK    ] W8b 🔴 讀不到要蓋過時間那一句  ⚠ 我們讀不到他成形了沒 · 畫面不會自己變成完成
+[OK    ] W8c 超過量過的範圍要直說  已經 1 分 53 秒 · ⚠ 比我們量過的最久那次還久 · 他還在做，沒有卡住
+[OK    ] W8d 退役講「回到土堆」而且不宣稱刪掉  他先回到土堆裡 · 帳本上留著「還沒成形」，沒有被丟掉也沒有被演成完成
+[OK    ] W8e 退役那一句沒有宣稱「已完成」
+[OK    ] W8f 沒量到 elapsed 也不編一個秒數
+[OK    ] W8g 後來才成形的那一位有自己的一句
+[OK    ] W9a 實測帶：min ≤ med ≤ max
+[OK    ] W9b 出處欄位不是空的
+[OK    ] W9c n 是真的樣本數
+[OK    ] W9d 🔴 畫面上沒有「312」也沒有「727」（兩個 repo 都查不到出處）  星星糖 正在成形 已經 0 秒 · 我們量過的是 16 到 54 秒 星星糖 正在成形 已經 30 秒 · 我們量過的是…
+[OK    ] W10a 抽得到繪圖那一段  16733 字元
+[OK    ] W10b 🔴 繪圖段沒有碰 card.need／first_line
+[OK    ] W10c 🔴 繪圖段沒有畫長條（fillRect 寬度綁成形程度那種）
+[OK    ] W10d 繪圖段確實用了漸近曲線與心跳
+[OK    ] W10e 退化走另一組色票（cool／去飽和）
+[OK    ] W10f 負控制：塞一根進度條進去，掃描抓得到
+[OK    ] W11a 抽得到重讀器那一段  1945 字元
+[OK    ] W11b 重讀器裡有「等待中就發現是查表湊的」那一支
+[BROKEN] W11c 🔴 同一支裡要把 cur.sub 換成新讀到的那一筆（字卡的唯一來源）
+[OK    ] W11d 負控制：拿掉那一行，掃描抓得到
+[OK    ] W11e 字卡掛在 w.sub 上（所以不換 sub 就等於沒有字卡）
+[OK    ] W11f 不換 sub ⇒ 沒有字卡（這就是那個 bug 的樣子）
+[OK    ] W11g 換了 sub ⇒ 字卡逐字等於 twinEngineNote  ⚠ 他說的話是查表湊的，這一次沒有模型參與
+[OK    ] W12a 抽得到 overlay 那一段  2612 字元
+[BROKEN] W12b 退役那一句走底板（waitPlate），不是只交給 drawTitle 的細字
+[OK    ] W12c 底板只在退役階段出現（平常那句時間不搶畫面）
+[OK    ] W12d 底板的字＝waitCaption(...).sub（沒有第二份措辭）
+[OK    ] W12e 退役時大標的副標讓位（不會同一句印兩次）
+[OK    ] W12f 負控制：拿掉底板那一行，掃描抓得到
+
+2 條不通過（共 80 條）

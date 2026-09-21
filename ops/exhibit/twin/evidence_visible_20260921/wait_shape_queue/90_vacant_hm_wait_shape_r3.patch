@@ -1,0 +1,1727 @@
+diff -ruN a/tools/waitcheck.mjs b/tools/waitcheck.mjs
+--- a/tools/waitcheck.mjs	2026-09-21 14:42:08
++++ b/tools/waitcheck.mjs	2026-09-21 14:42:08
+@@ -0,0 +1,455 @@
++// 等待態（「給等待一個形狀」）的可執行判準。
++//
++// 為什麼要這一支而不是加進 `tools/livecheck.mjs`：2026-09-21 同一天有十幾個
++// 代理在改同一個 repo，`livecheck.mjs` 這一輪剛被動過（L38／L39）。
++// 一個新檔案＝零合併衝突，而判準一條都不少。
++//
++// 這裡測的是**畫面會說哪一句話、那團東西會不會停**，不是「碼長什麼樣子」：
++//   - `formingLevel` 是**漸近**的 ⇒ 它永遠不會自己走到完成（不是進度條）
++//   - `waitPulse` 在第 900 秒**照樣在跳** ⇒ 等再久畫面都不是凍住的
++//   - 退化的措辭**逐字等於** `twinEngineNote` ⇒ 兩處措辭不會漂
++//   - 等待態的任何一句話裡**不含觀眾打的原文** ⇒ §5.1-2／§5.1-9
++//
++// 用法（node ≥ 18）：node tools/waitcheck.mjs
++import fs from "node:fs";
++import path from "node:path";
++import url from "node:url";
++import vm from "node:vm";
++
++const HERE = path.dirname(url.fileURLToPath(import.meta.url));
++const ROOT = path.resolve(HERE, "..");
++const PAGE = path.join(ROOT, "world3/index.html");
++
++let fail = 0, ran = 0;
++const check = (name, ok, extra = "") => {
++  ran++;
++  console.log(`[${ok ? "OK    " : "BROKEN"}] ${name}${extra ? "  " + extra : ""}`);
++  if (!ok) fail++;
++};
++
++// 🔴 這道閘門自己的負控制（理由與 livecheck.mjs 同一條：一把沒有實際掃過
++//    它要掃的那條路的尺，不該回報通過）。
++const MIN_CHECKS = 30;
++
++/* ---- 抽出 LIVE 區段（等待態的判斷全在裡面）---------------------------- */
++const html = fs.readFileSync(PAGE, "utf8");
++const i = html.indexOf("/* === LIVE-BEGIN ===");
++const j = html.indexOf("/* === LIVE-END === */");
++if (i < 0 || j < 0) { console.error("找不到 LIVE-BEGIN／LIVE-END"); process.exit(2); }
++const src = html.slice(i, j);
++
++const ctx = { JSON, Math, Number, Array, Object, String, Set, Map, console,
++              Boolean, isFinite };
++vm.createContext(ctx);
++vm.runInContext(
++  src + "\n;globalThis.__api={TWIN_WAIT,twinPending,formingLevel,waitPulse,waitSeed,"
++  + "waitPhase,humanDuration,waitEngineBadge,waitDegraded,waitCaption,"
++  + "waitArrivalCaption,waitLateCaption,twinEngineNote,visitorLabel,"
++  + "visitorCode,visitorCategory,waitQueueLine,waitQueueMore};", ctx);
++const A = ctx.__api;
++const C = A.TWIN_WAIT;
++console.log(`抽出 LIVE 區段 ${src.length} 字元`);
++
++/* 觀眾打的原話（測資）。**任何一句畫面文字裡都不准出現。** */
++const RAW_NEED = "幫我把公司報價單的 Excel 整理成一頁摘要";
++const RAW_FIRST = "我是做建材批發的，客戶老是問我同樣的問題";
++const CARD = { need: RAW_NEED, first_line: RAW_FIRST, firstline: RAW_FIRST,
++               shape: "圓潤", color: "暖土", texture: "粗陶" };
++const ID = "2e66a0ed-5858-43c8-bcb2-83c6d7f99c6d";
++
++const subPending  = { id: ID, card: CARD, twin: { arrival: null, working: null,
++                      handover: null, engine: null, status: "submitted" } };
++const subReal     = { id: ID, card: CARD, twin: { arrival: "我到了", working: "我在做",
++                      handover: "交給你", engine: "lmstudio:gemma-4-12b-it-qat",
++                      status: "generated" } };
++const subFallback = { id: ID, card: CARD, twin: { arrival: "我到了", working: "我在做",
++                      handover: "交給你", engine: "fallback_deterministic",
++                      status: "generated" } };
++const subNoEngine = { id: ID, card: CARD, twin: { arrival: "我到了", working: null,
++                      handover: null, engine: null, status: "generated" } };
++const subNoTwin   = { id: ID, card: CARD };
++
++/* ═══ W1 三值：不知道就說不知道 ═════════════════════════════════ */
++check("W1a 還沒生 ⇒ twinPending true", A.twinPending(subPending) === true);
++check("W1b 生好了 ⇒ twinPending false", A.twinPending(subReal) === false);
++check("W1c 有三句話就算好了（status 缺也認）",
++      A.twinPending({ id: ID, card: CARD, twin: { arrival: "我到了", status: null } }) === false);
++check("W1d 沒帶 twin ⇒ null（不是 false，也不是 true）",
++      A.twinPending(subNoTwin) === null);
++check("W1e 有 twin 但整包都是 null ⇒ null（沒量到不猜）",
++      A.twinPending({ id: ID, card: CARD, twin: { arrival: null, working: null,
++        handover: null, engine: null, status: null } }) === null);
++check("W1f 不認得的 status ⇒ null（不當成好了）",
++      A.twinPending({ id: ID, card: CARD, twin: { status: "銀河系" } }) === null);
++
++/* ═══ W2 這不是進度條：成形曲線漸近，永遠不自己完成 ═════════════ */
++{
++  const l0 = A.formingLevel(0, C), l30 = A.formingLevel(30, C);
++  const l300 = A.formingLevel(300, C), lInf = A.formingLevel(1e9, C);
++  check("W2a t=0 沒有成形", l0 === 0);
++  check("W2b 單調上升", l30 > l0 && l300 > l30 && lInf >= l300);
++  check("W2c 🔴 永遠到不了 1（不是進度條）", lInf < 1 && lInf < 1 - 1e-9,
++        `lim=${lInf.toFixed(6)}`);
++  // ⚠ 這一條刻意**不**寫成「連 ceil 都到不了」：`1 - e^(-t/τ)` 在 t≳950 秒
++  //   就會在 double 精度下等於 1（`1 - 1e-17 === 1`），那個「嚴格小於」是數學
++  //   上的事實、不是可觀測的差別。可觀測的差別是**永遠差 1 一大截**：
++  //   畫面上那個人**看得出來還沒成形**（殘餘 ≥ 5%），所以「完成」只可能由
++  //   `director.twinArrived` 造成，不可能由時間造成。
++  check("W2d 🔴 上限離完成還差看得見的一截（殘餘 ≥ 5%）",
++        lInf <= C.ceil && 1 - lInf >= 0.05, `殘餘=${(1 - lInf).toFixed(3)}`);
++  check("W2d2 在實際會發生的時間窗內（≤300 秒）都還沒碰到上限",
++        A.formingLevel(300, C) < C.ceil);
++  check("W2e 上限本身就 <1（寫死一個 1 進去就是進度條）", C.ceil < 1);
++  // 負控制：把曲線換成線性進度條，上面兩條必須抓到
++  const bar = (t) => Math.min(1, t / 300);
++  check("W2f 負控制：線性進度條會在 t=300 走到 1，判準抓得到",
++        bar(300) === 1 && !(bar(1e9) < 1));
++  check("W2g 負控制：`ceil=1` 的漸近曲線也算進度條（會宣稱完成）",
++        !(1 * (1 - Math.exp(-1e9 / C.tauS)) < 1));
++}
++
++/* ═══ W3 「沒有凍住」是可執行的：心跳在第 900 秒照樣在跳 ══════════ */
++{
++  const seed = A.waitSeed(ID);
++  const sample = (t0) => {
++    const v = [];
++    for (let k = 0; k < 240; k++) v.push(A.waitPulse(t0 + k / 24, seed));
++    return { lo: Math.min(...v), hi: Math.max(...v) };
++  };
++  const a = sample(3), b = sample(900), c = sample(3600);
++  check("W3a 開場十秒內心跳有高有低", a.hi - a.lo > 0.5, `Δ=${(a.hi - a.lo).toFixed(3)}`);
++  check("W3b 🔴 第 900 秒（退役門檻）心跳照樣在跳", b.hi - b.lo > 0.5,
++        `Δ=${(b.hi - b.lo).toFixed(3)}`);
++  check("W3c 🔴 第 3600 秒也還在跳（沒有任何衰減項）", c.hi - c.lo > 0.5,
++        `Δ=${(c.hi - c.lo).toFixed(3)}`);
++  check("W3d 心跳有回到低點（不是一直亮著）", b.lo < 0.15, `lo=${b.lo.toFixed(3)}`);
++  // 負控制：一個「會凍住」的實作（跟成形程度綁在一起）必須被抓到
++  const frozen = (t) => A.formingLevel(t, C);
++  const fz = [];
++  for (let k = 0; k < 240; k++) fz.push(frozen(900 + k / 24));
++  check("W3e 負控制：把脈動綁成形程度 ⇒ 900 秒後幾乎不動，判準抓得到",
++        Math.max(...fz) - Math.min(...fz) < 0.01);
++  check("W3f 兩位同時在等的人不同步（相位吃各自的 id）",
++        A.waitPulse(5, A.waitSeed("aaa")) !== A.waitPulse(5, A.waitSeed("bbb")));
++  check("W3g waitSeed 確定性", A.waitSeed(ID) === A.waitSeed(ID) && A.waitSeed(ID) >= 0);
++}
++
++/* ═══ W4 階段 ═══════════════════════════════════════════════════ */
++check("W4a 剛開始＝forming", A.waitPhase(1, C) === "forming");
++check("W4b 超過實測上限兩倍＝long", A.waitPhase(C.longS + 1, C) === "long");
++check("W4c 到門檻＝retiring", A.waitPhase(C.retireS + 1, C) === "retiring");
++check("W4d 儀式演完＝retired",
++      A.waitPhase(C.retireS + C.ceremonyS + 1, C) === "retired");
++check("W4e longS 真的超過實測最大值（不是隨手寫的）", C.longS > C.obsMaxS);
++{
++  // 🔴 迴歸：現場調校把 `?waitretire=` 調到 `longS` 以下的時候，**退役還是要發生**。
++  //    第一版由前往後判階段 ⇒ 那個情況下退役永遠不觸發（實測 45 秒還是 forming，
++  //    儀式一次都沒演）。這一條就是那次的迴歸測。
++  const tuned = { ...C, retireS: 34, ceremonyS: 9 };   // longS 仍是 108
++  check("W4e2 🔴 retireS 被調到 longS 以下，退役照樣發生",
++        A.waitPhase(35, tuned) === "retiring"
++        && A.waitPhase(50, tuned) === "retired",
++        `35s=${A.waitPhase(35, tuned)} 50s=${A.waitPhase(50, tuned)}`);
++  check("W4e3 負控制：由前往後判的舊寫法在同一組參數下會答錯",
++        (35 < tuned.longS ? "forming" : "x") === "forming");
++}
++check("W4f retireS 遠大於實測最大值（不會把正常的一次判成走掉）",
++      C.retireS > C.obsMaxS * 5);
++
++/* ═══ W5 時間講法：沒量到不編一個 0 ═════════════════════════════ */
++check("W5a null 進 null 出（不寫 0 秒）", A.humanDuration(null) === null);
++check("W5b 未定義也回 null", A.humanDuration(undefined) === null);
++check("W5c 秒", A.humanDuration(12000) === "12 秒");
++check("W5d 分秒", A.humanDuration(72000) === "1 分 12 秒");
++check("W5e 整分不補 0 秒", A.humanDuration(120000) === "2 分");
++
++/* ═══ W6 退化：措辭逐字等於 twinEngineNote，不是第二份 ═══════════ */
++check("W6a 退化那一句逐字相同",
++      A.waitEngineBadge(subFallback) === A.twinEngineNote(subFallback)
++      && A.waitEngineBadge(subFallback) === "⚠ 他說的話是查表湊的，這一次沒有模型參與");
++check("W6b 真模型那一句也逐字相同",
++      A.waitEngineBadge(subReal) === A.twinEngineNote(subReal));
++check("W6c 沒帶 engine ⇒ 不掛（null）", A.waitEngineBadge(subNoEngine) === null);
++check("W6d waitDegraded 三值 true", A.waitDegraded(subFallback) === true);
++check("W6e waitDegraded 三值 false", A.waitDegraded(subReal) === false);
++check("W6f waitDegraded 三值 null（沒帶 engine 不猜）",
++      A.waitDegraded(subNoEngine) === null);
++{
++  const real = A.waitArrivalCaption(subReal, ID);
++  const deg = A.waitArrivalCaption(subFallback, ID);
++  const unk = A.waitArrivalCaption(subNoEngine, ID);
++  check("W6g 🔴 退化與真模型的大字**不一樣**（畫面上分得出來）",
++        real.head !== deg.head && deg.head.indexOf("沒有模型參與") >= 0);
++  check("W6h 退化的副標就是 twinEngineNote 原句",
++        deg.sub === A.twinEngineNote(subFallback));
++  check("W6i 沒標 engine 的那一筆不冒充真模型",
++        unk.tone === "warn" && unk.sub.indexOf("沒有標") >= 0);
++  check("W6j 真模型那一筆才是 good", real.tone === "good");
++}
++
++/* ═══ W7 等待態的每一句話都不含觀眾原文 ═════════════════════════ */
++{
++  const texts = [];
++  for (const reach of [true, false, null]){
++    for (const ms of [0, 5000, 60000, C.longS * 1000 + 1000,
++                      C.retireS * 1000 + 1000]){
++      const c = A.waitCaption(subPending, ID, ms, C, reach);
++      texts.push(c.head, c.sub);
++    }
++  }
++  texts.push(A.waitArrivalCaption(subReal, ID).head,
++             A.waitArrivalCaption(subReal, ID).sub,
++             A.waitArrivalCaption(subFallback, ID).head,
++             A.waitLateCaption(subReal, ID));
++  const joined = texts.filter(Boolean).join(" | ");
++  check("W7a 🔴 沒有任何一句話含觀眾打的 need 原文",
++        joined.indexOf(RAW_NEED) < 0 && joined.indexOf("報價單") < 0);
++  check("W7b 🔴 沒有任何一句話含 first_line 原文",
++        joined.indexOf(RAW_FIRST) < 0 && joined.indexOf("建材") < 0);
++  // ⚠ 大標只放代號（`visitorCode`）：1920×1080 實拍證實整串 `visitorLabel`
++  //   會爆出畫面。類別改印在他腳邊那一行（`visitorCategory`，繪圖層）。
++  check("W7c 大標印的是代號（visitorCode）",
++        joined.indexOf(A.visitorCode(ID)) >= 0, A.visitorCode(ID));
++  check("W7c2 類別本身也是從同一組 shape/color/texture 來的，沒另造一套",
++        A.visitorCategory(CARD) === "圓潤／暖土／粗陶");
++  check("W7c3 代號＋類別合起來仍然還原不出原文",
++        (A.visitorCode(ID) + A.visitorCategory(CARD)).indexOf(RAW_NEED) < 0);
++  // 負控制：把原文塞進 caption，掃描必須抓到
++  const poisoned = joined + " | 他帶著一件事來：" + RAW_NEED;
++  check("W7d 負控制：原文塞進去，同一套掃描抓得到",
++        poisoned.indexOf(RAW_NEED) >= 0);
++}
++
++/* ═══ W8 字幕本身：讀不到要講、等太久要講、退役要講 ═════════════ */
++{
++  const now = A.waitCaption(subPending, ID, 12000, C, true);
++  const lost = A.waitCaption(subPending, ID, 12000, C, false);
++  const long = A.waitCaption(subPending, ID, (C.longS + 5) * 1000, C, true);
++  const ret = A.waitCaption(subPending, ID, (C.retireS + 1) * 1000, C, true);
++  check("W8a 一般：講「已經多久」＋「我們量過的是多久」",
++        now.sub.indexOf("已經 12 秒") >= 0
++        && now.sub.indexOf(`${C.obsMinS} 到 ${C.obsMaxS} 秒`) >= 0, now.sub);
++  check("W8b 🔴 讀不到要蓋過時間那一句", lost.sub.indexOf("⚠") === 0
++        && lost.sub.indexOf("讀不到") >= 0, lost.sub);
++  check("W8c 超過量過的範圍要直說", long.sub.indexOf("⚠") >= 0
++        && long.sub.indexOf("比我們量過的最久") >= 0, long.sub);
++  check("W8d 退役講「回到土堆」而且不宣稱刪掉",
++        ret.head.indexOf("沒有成形") >= 0
++        && ret.sub.indexOf("土堆") >= 0
++        && ret.sub.indexOf("刪") < 0, ret.sub);
++  check("W8e 退役那一句沒有宣稱「已完成」",
++        ret.sub.indexOf("完成") >= 0 && ret.sub.indexOf("沒有被演成完成") >= 0);
++  check("W8f 沒量到 elapsed 也不編一個秒數",
++        A.waitCaption(subPending, ID, null, C, true).sub.indexOf("已經") < 0);
++  check("W8g 後來才成形的那一位有自己的一句",
++        A.waitLateCaption(subReal, ID).indexOf("後來還是成形了") >= 0);
++}
++
++/* ═══ W9 螢幕上的數字要有出處 ═══════════════════════════════════ */
++check("W9a 實測帶：min ≤ med ≤ max",
++      C.obsMinS <= C.obsMedS && C.obsMedS <= C.obsMaxS);
++check("W9b 出處欄位不是空的", typeof C.obsSrc === "string" && C.obsSrc.length > 8);
++check("W9c n 是真的樣本數", C.obsN === 7);
++{
++  // 🔴 派工單上那兩個查不到出處的數字，**不准出現在畫面文字裡**。
++  const all = [];
++  for (const ms of [0, 30000, 400000, 800000]) {
++    const c = A.waitCaption(subPending, ID, ms, C, true);
++    all.push(c.head, c.sub);
++  }
++  const s = all.filter(Boolean).join(" ");
++  check("W9d 🔴 畫面上沒有「312」也沒有「727」（兩個 repo 都查不到出處）",
++        s.indexOf("312") < 0 && s.indexOf("727") < 0, s.slice(0, 60) + "…");
++}
++
++/* ═══ W10 掃描原始碼：等待態沒有偷印原文、也沒有偷偷畫進度條 ════ */
++{
++  const wi = html.indexOf("等待態的畫面：一團**屬於他的**黏土");
++  const wj = html.indexOf("/* ── 導演（重放＋訪客流程都走電影場景切換）");
++  const draw = wi >= 0 && wj > wi ? html.slice(wi, wj) : "";
++  check("W10a 抽得到繪圖那一段", draw.length > 2000, `${draw.length} 字元`);
++  check("W10b 🔴 繪圖段沒有碰 card.need／first_line",
++        draw.indexOf("card.need") < 0 && draw.indexOf("first_line") < 0
++        && draw.indexOf("firstline") < 0);
++  check("W10c 🔴 繪圖段沒有畫長條（fillRect 寬度綁成形程度那種）",
++        !/fillRect\([^)]*lv/.test(draw));
++  check("W10d 繪圖段確實用了漸近曲線與心跳",
++        draw.indexOf("formingLevel(") >= 0 && draw.indexOf("waitPulse(") >= 0);
++  check("W10e 退化走另一組色票（cool／去飽和）",
++        draw.indexOf("shaft_cool_v") >= 0 && draw.indexOf("degraded") >= 0);
++  // 負控制：把一根進度條塞進那一段，掃描必須抓到
++  const poisonedDraw = draw + "\ncx.fillRect(x0, y0, 200*lv, 8);";
++  check("W10f 負控制：塞一根進度條進去，掃描抓得到",
++        /fillRect\([^)]*lv/.test(poisonedDraw));
++}
++
++/* ═══ W11 退化那張字卡真的會出現在**產品路徑**上 ══════════════════
++   🔴 這一組是 2026-09-21 用真的來源鏈（靜態快照 → `bridge.js` → `waitResolverTick`）
++      錄影才抓到的：`waitResolverTick` 只翻了 `cur.degraded` 旗標與顏色，
++      **沒有換掉 `cur.sub`**，而 `drawWaitOverlay` (a) 那張字卡的唯一來源
++      就是 `waitEngineBadge(w.sub)`。結果是黏土變成冷灰藍、
++      **「⚠ 他說的話是查表湊的」那一句不出現**——顏色變了而字沒出來。
++
++   先前那張退化截圖之所以是對的，是因為它用 CDP 探針**直接寫 `w.sub`**。
++   那就是「測試綠 ≠ 接上產品路徑」的標本，所以這一組掃的是產品那一條。
++   ⚠ `waitResolverTick` 在 LIVE 區段**外面**（它要 fetch），所以這裡掃原始碼，
++     行為面則用 LIVE 區段裡的 `waitEngineBadge` 直接驗兩種 sub 的結果。 */
++{
++  const ri = html.indexOf("function waitResolverTick()");
++  const rj = html.indexOf("function waitResolverStart()");
++  const res = ri >= 0 && rj > ri ? html.slice(ri, rj) : "";
++  check("W11a 抽得到重讀器那一段", res.length > 500, `${res.length} 字元`);
++  const di = res.indexOf("cur.degraded = true");
++  check("W11b 重讀器裡有「等待中就發現是查表湊的」那一支", di > 0);
++  const branch = di > 0 ? res.slice(di, di + 900) : "";
++  check("W11c 🔴 同一支裡要把 cur.sub 換成新讀到的那一筆（字卡的唯一來源）",
++        /cur\.sub\s*=\s*sub/.test(branch));
++  // 負控制：把那一行拿掉，這把尺必須紅
++  const poisoned = branch.replace(/cur\.sub\s*=\s*sub;?/, "");
++  check("W11d 負控制：拿掉那一行，掃描抓得到",
++        !/cur\.sub\s*=\s*sub/.test(poisoned));
++  // 字卡確實是從 w.sub 來的（不是從 w.degraded 自己編一句）
++  check("W11e 字卡掛在 w.sub 上（所以不換 sub 就等於沒有字卡）",
++        html.indexOf("waitEngineBadge(w.sub)") > 0);
++  // 行為面：同一個人、只差有沒有換掉 sub ⇒ 一句有、一句沒有
++  const stale = { id: ID, card: CARD, twin: { arrival: null, working: null,
++                  handover: null, engine: null, status: "submitted" } };
++  const fresh = { id: ID, card: CARD, twin: { arrival: null, working: null,
++                  handover: null, engine: "fallback_deterministic",
++                  status: "submitted" } };
++  check("W11f 不換 sub ⇒ 沒有字卡（這就是那個 bug 的樣子）",
++        A.waitEngineBadge(stale) == null);
++  check("W11g 換了 sub ⇒ 字卡逐字等於 twinEngineNote",
++        A.waitEngineBadge(fresh) === A.twinEngineNote(fresh)
++        && String(A.waitEngineBadge(fresh)).indexOf("查表湊的") >= 0,
++        String(A.waitEngineBadge(fresh)));
++}
++
++/* ═══ W12 退役那一句讀得到（底板）════════════════════════════════
++   退役字幕是整段等待態唯一的誠實承諾（「帳本上留著『還沒成形』，沒有被丟掉
++   也沒有被演成完成」）。2026-09-21 實拍：退役儀式的背景是光柱＋塵，
++   `drawTitle` 那個 0.82 不透明度的細字副標中段整句被洗掉。
++   「讀不到等於沒講」⇒ 這一句改走 `waitPlate` 的底板。 */
++{
++  const ui = html.indexOf("function drawWaitOverlay(");
++  const uj = html.indexOf("function drawFormingCorner(");
++  const ov = ui >= 0 && uj > ui ? html.slice(ui, uj) : "";
++  check("W12a 抽得到 overlay 那一段", ov.length > 400, `${ov.length} 字元`);
++  check("W12b 退役那一句走底板（waitPlate），不是只交給 drawTitle 的細字",
++        /waitPlateText/.test(ov) && /waitPlate\(\s*d\.waitPlateText/.test(ov));
++  check("W12c 底板只在退役階段出現（平常那句時間不搶畫面）",
++        /waitPlateText\s*&&\s*\(w\.phase\s*===\s*"retiring"/.test(ov));
++  // 同一句話：底板用的就是 waitCaption(...).sub，不是另外寫一份
++  const ui2 = html.indexOf("this.waitPlateText = retiring ? cap.sub : null;");
++  check("W12d 底板的字＝waitCaption(...).sub（沒有第二份措辭）", ui2 > 0);
++  check("W12e 退役時大標的副標讓位（不會同一句印兩次）",
++        /sub:\s*retiring\s*\?\s*null\s*:\s*cap\.sub/.test(html));
++  // 負控制：把底板那一行拿掉，掃描必須抓到
++  const poisoned = ov.replace(/waitPlate\(\s*d\.waitPlateText[^;]*;/, "");
++  check("W12f 負控制：拿掉底板那一行，掃描抓得到",
++        !/waitPlate\(\s*d\.waitPlateText/.test(poisoned));
++}
++
++
++/* ═══ W13 排隊中的那幾團土（2026-09-21 第三輪）══════════════════════
++   等待態一次只演一位，後到的進 `waitBacklog`。三個人同時投卡的實錄顯示
++   第 2、3 位在畫面上只剩投遞口那一列**靜止的文字**——那不是「屬於他的東西
++   在動」。這一組守住那一團土的四件事：
++     (1) 它真的被畫（而且掛在中央那一版同一支繪圖路徑上）
++     (2) **它不成形**（不吃 `formingLevel`）——燈還沒照到他，不可以先演完
++     (3) 它**不講 engine**（顏色變了而字沒出來＝第二輪 §3-1 抓過的錯）
++     (4) 它講「已經多久」，不講「還要多久」 */
++{
++  const L1 = A.waitQueueLine("河邊石", 66000, 1);
++  const L2 = A.waitQueueLine("烘焙盤", 48000, 2);
++  check("W13a 第 1 位講「接下來就是他」，其餘講「排隊中」",
++        L1.sub.indexOf("接下來就是他") === 0 && L2.sub.indexOf("排隊中") === 0,
++        `${L1.sub} ｜ ${L2.sub}`);
++  check("W13b 大字是他的代號（不是類別、不是原話）",
++        L1.head === "河邊石" && L2.head === "烘焙盤");
++  const bad = ["還要", "還剩", "剩下", "預計", "大約", "%", "進度"];
++  check("W13c 講已經多久、不講還剩多久（沒有任何預估字眼）",
++        bad.every(k => L1.sub.indexOf(k) < 0 && L2.sub.indexOf(k) < 0));
++  check("W13d 講得出他已經排了多久", /已經/.test(L1.sub) && /已經/.test(L2.sub));
++  check("W13e 量不到時間就不硬掰一個數字",
++        A.waitQueueLine("河邊石", null, 1).sub === "接下來就是他",
++        A.waitQueueLine("河邊石", null, 1).sub);
++  // 觀眾原話一個字都不上大螢幕
++  const joined = [L1.head, L1.sub, L2.head, L2.sub].join(" ");
++  check("W13f 排隊那兩行裡沒有觀眾打的原文",
++        joined.indexOf(RAW_NEED) < 0 && joined.indexOf(RAW_FIRST) < 0
++        && joined.indexOf("建材") < 0 && joined.indexOf("Excel") < 0);
++  check("W13g 畫不下的要講得出還有幾位",
++        A.waitQueueMore(6, 4) === "另有 2 位在排隊" && A.waitQueueMore(2, 4) === null
++        && A.waitQueueMore(0, 0) === null,
++        String(A.waitQueueMore(6, 4)));
++
++  /* ── 產品路徑：真的有被畫，而且畫在中央那一位同一格 ── */
++  const qi = html.indexOf("function drawFormingQueue(");
++  const qj = html.indexOf("function drawWaitOverlay(");
++  const q = qi >= 0 && qj > qi ? html.slice(qi, qj) : "";
++  check("W13h 抽得到排隊那一段繪圖", q.length > 800, `${q.length} 字元`);
++  check("W13i 它真的被呼叫，而且在 stage === \"center\" 那一支裡",
++        /stage\s*===\s*"center"\)\s*\{[\s\S]{0,400}?drawFormingQueue\(\)/.test(html));
++  check("W13j 🔴 排隊那幾團**不吃 formingLevel**（它們不准自己長完）",
++        q.indexOf("formingLevel") < 0);
++  check("W13k 🔴 排隊那幾團**不講 engine**（顏色變了而字沒出來＝第二輪 §3-1 的錯）",
++        q.indexOf("waitEngineBadge") < 0 && q.indexOf("twinEngineNote") < 0
++        && q.indexOf("degraded") < 0);
++  check("W13l 它在跳（吃 waitPulse，而且吃他自己的 seed）",
++        /waitPulse\(el,\s*m\.seed\)/.test(q));
++  check("W13m 它跟中央那一位用同一支 clayMound（同一種土）",
++        /clayMound\(/.test(q));
++  // 負控制三條：判準要抓得到壞掉的版本
++  check("W13n 負控制：拿掉呼叫，W13i 的判準必須不成立",
++        !/stage\s*===\s*"center"\)\s*\{[\s\S]{0,400}?drawFormingQueue\(\)/
++          .test(html.replace("drawFormingQueue();", "")));
++  check("W13o 負控制：把 formingLevel 塞進去，W13j 的判準必須不成立",
++        (q + "const lv = formingLevel(el, C);").indexOf("formingLevel") >= 0);
++  check("W13p 負控制：把 engine 那一句塞進去，W13k 的判準必須不成立",
++        (q + "waitEngineBadge(sub)").indexOf("waitEngineBadge") >= 0);
++  check("W13q 有整層關掉的開關（視覺的負控制＝把它關掉看得出差別）",
++        /WAITQ_OFF\s*=\s*Q\.get\("waitqueue"\)\s*===\s*"off"/.test(html)
++        && /if\s*\(WAITQ_OFF\)\s*return;/.test(q));
++
++  /* ── 時鐘：排隊那一位的秒數要在他進佇列那一刻蓋章 ── */
++  const rs = html.indexOf("function routeSubmission(sub)");
++  const re_ = html.indexOf("const waitBacklog = []");
++  const rt = rs >= 0 && re_ > rs ? html.slice(rs, re_) : "";
++  check("W13r 進佇列那一刻蓋牆鐘章（秒數才會是他自己的）",
++        /__wqAt\s*=\s*performance\.now\(\)/.test(rt)
++        && rt.indexOf("__wqAt") < rt.indexOf("waitBacklog.push(sub)"));
++  check("W13s 只蓋第一次（被取出又放回去不算重新排隊）",
++        /if\s*\(sub\.__wqAt\s*==\s*null\)/.test(rt));
++
++  /* ── 投遞口那一列不准對著已經在成形的那一位寫「接下來就是他」 ── */
++  const si = html.indexOf("startWaiting(sub){");
++  const sj = html.indexOf("waitTick(){");
++  const sw = si >= 0 && sj > si ? html.slice(si, sj) : "";
++  check("W13t 進到光裡那一刻從投遞口劃掉他（不然同一個畫面自己打自己）",
++        /arrivals\.spawned\(sub\.id\)/.test(sw));
++  check("W13u 負控制：拿掉那一行，W13t 的判準必須不成立",
++        !/arrivals\.spawned\(sub\.id\)/.test(sw.replace(/arrivals\.spawned\(sub\.id\);?/, "")));
++  check("W13v 它跟著 ?waitqueue=off 一起關（負控制要還原成第三輪之前）",
++        /if\s*\(!WAITQ_OFF\)\s*\{[^}]*arrivals\.spawned/.test(sw));
++
++  /* ── 角落那一版不准疊在投遞口板上（讀不到等於沒講）── */
++  const ci = html.indexOf("function drawFormingCorner(");
++  const cj = html.indexOf("/* ── 導演（重放＋訪客流程都走電影場景切換）");
++  const cc = ci >= 0 && cj > ci ? html.slice(ci, cj) : "";
++  check("W13w 抽得到角落那一段", cc.length > 600, `${cc.length} 字元`);
++  check("W13x 投遞口亮著的時候角落卡往上讓（兩張板不疊死）",
++        /dockGeom\(\)\.y\s*-\s*bh/.test(cc));
++  check("W13y 負控制：拿掉讓位那一行，W13x 的判準必須不成立",
++        !/dockGeom\(\)\.y\s*-\s*bh/.test(cc.replace(/dockGeom\(\)\.y\s*-\s*bh[^;]*;/, "")));
++  check("W13z 版面單位跟卡片高度分開（長高的只有底邊，不是整張卡放大）",
++        /const u = H \* 0\.105;/.test(cc) && cc.indexOf("x + bh * 1.02") < 0);
++}
++
++/* ═══ 收尾 ══════════════════════════════════════════════════════ */
++if (ran < MIN_CHECKS){
++  console.error(`\n🔴 只跑到 ${ran} 條（地板 ${MIN_CHECKS}）——這把尺沒有掃過它該掃的路。`);
++  process.exit(2);
++}
++console.log(fail ? `\n${fail} 條不通過（共 ${ran} 條）` : `\n全部通過（${ran} 條）`);
++process.exit(fail ? 1 : 0);
+diff -ruN a/world3/index.html b/world3/index.html
+--- a/world3/index.html	2026-09-21 14:42:08
++++ b/world3/index.html	2026-09-21 14:42:08
+@@ -143,6 +143,16 @@
+ 
+ function sceneVariants(sc){
+   if (LITE) return [];                 // 輕量版：不播背景影片，退回 jpg 板
++  // 🔴 **等待態借 s04 當舞台，但不能用那支背景影片。**
++  //    `scenes/scene_s04_v*.mp4` 演的是「一個人從地裡長出來、**長完**」，
++  //    而且會接回去重播。等待可能長達好幾分鐘，那支片會每隔幾十秒就宣告一次
++  //    「他成形了」，字幕卻同時在說「還在成形」。這個 repo 自己踩過這個坑並
++  //    寫進註解：**一張圖蓋得過字幕**（見 P8 那一段：字幕說沒有評審層、
++  //    底圖卻是三個人在投票，最後是被截圖打臉改回去的）。
++  //    靜態板 `plates/s04.jpg` 正好是**一塊空的、被暖光打亮的地**（量過：
++  //    亮度重心 nx=0.503 ny=0.861），那才是「他還沒出現」該有的樣子。
++  const _d0 = _dirSafe();
++  if (sc === "s04" && _d0 && _d0.wait && _d0.wait.stage === "center") return [];
+   // ⚠ **背景影片會演系統裡沒有的機制。** 判準在 SCENE_VIDEO_DEPICTS
+   //   （52 張素材逐張看過之後整理出來的表）。機制不存在 ⇒ 不放那支影片，
+   //   退回靜態板；板也髒的那兩景另外借一張中性的板（SCENE_PLATE_SUB）。
+@@ -1555,6 +1565,612 @@
+   s01: { x: 0.502, y: 0.625, w: 0.150, skew: 0.0 },
+ };
+ 
++/* ── 等待態的畫面：一團**屬於他的**黏土，在長出他自己 ─────────────
++ *
++ *  判斷全部在 LIVE 區的純函數（`formingLevel`／`waitPulse`／`waitPhase`／
++ *  `waitCaption`）；這一支只負責把它們畫出來，**不自己決定任何一句話**。
++ *
++ *  為什麼不是進度條（人類 2026-09-21 點名不要）：
++ *  進度條宣稱「完成的比例」，而我們**不知道**——我們只知道過了多久。
++ *  這裡的替代品是三層，每一層各自負責一件事：
++ *
++ *    (a) **成形**（`formingLevel`，漸近到 0.93 就不再往上）
++ *        ——「他在長出來」，但**永遠不會自己長完**。真的長完只有一個原因：
++ *        分身真的生出來了（`director.twinArrived`）。
++ *    (b) **心跳**（`waitPulse`，兩拍 lub-dub，永不停）
++ *        ——「沒有卡住」。等 15 分鐘跟等 15 秒，這一層一模一樣地在跳。
++ *        展場沒有解說員，一個不動的畫面就是「它壞了」。
++ *    (c) **他自己**（造型、顏色、心跳相位都從他的卡與不透明 id 折出來）
++ *        ——「這團是**我的**」。⚠ 只用 `visitorLabel` 的代號＋類別，
++ *        **不印觀眾打的任何一個字**（DECISION_20260921_TWIN_CONSENT_AND_ERASURE §三-3）。
++ *
++ *  ⚠ **退化（`fallback_deterministic`）走另一組色票**：暖光換冷光、黏土不上色。
++ *    那一次沒有模型參與，等待根本不存在（微秒級），所以畫面不准長得一樣。
++ *  ⚠ **人形保留。** 這裡成形的輪廓就是等一下會走出來的那一位
++ *    （`pickCastFor` 挑的那張圖），不是抽象發光體。 */
++
++/* 網址參數。
++ *   ?wait=off          **負控制**：整個等待態關掉 ⇒ 回到 2026-09-21 之前的行為
++ *                      （`onSubmission` 直接 push 進佇列，畫面上什麼都不會發生）。
++ *                      「把它關掉、截圖看得出差別」就是這一條的負控制。
++ *   ?waitdemo=1        演練：自己生一位假訪客走完整段（螢幕上會一直標「演練」）。
++ *   ?waitready=<秒>    演練用：幾秒後讓分身落地。`fallback` ⇒ 退化那一條。
++ *   ?waitretire=<秒>   退役門檻（現場調校／演練用）
++ *   ?waittau=<秒>      成形曲線時間常數
++ *   ?waitcenter=<秒>   佔住整格多久 */
++const WAIT_OFF  = Q.get("wait") === "off";
++const WAIT_DEMO = Q.get("waitdemo") === "1";
++// 🔴 **排隊那幾團土**（2026-09-21 第三輪）的負控制：`?waitqueue=off`。
++//   等待態一次只演一位（後到的進 `waitBacklog`）。三個人同時投卡實錄
++//   （`r3_before`）：第 2、3 位在畫面上**只剩投遞口那一列靜止的「排隊中」**
++//   ——那是一行字，不是「屬於他的東西在動」。展場是一班人一起來的。
++const WAITQ_OFF = Q.get("waitqueue") === "off";
++// ⚠ 覆寫**不在這裡執行**：`TWIN_WAIT` 宣告在 LIVE 區（本檔後面），
++//   在這裡呼叫會踩到 const 的 TDZ ⇒ 整頁當場死。套用點在檔尾的展場接線那一段。
++/** 覆寫一個等待態參數。**只准覆寫政策值，量出來的那幾個（`obs*`）不給動**——
++ *  那幾個是落盤證據，用網址就改得掉的話，畫面上那句「我們量過的是…」
++ *  隨時可以被路過的人改成任何數字。 */
++function TWIN_WAIT_OVERRIDE(k, v){
++  if (!(k in TWIN_WAIT) || k.indexOf("obs") === 0) return false;
++  if (!isFinite(v) || v <= 0) return false;
++  TWIN_WAIT[k] = v;
++  console.info("[wait] 參數覆寫", k, "=", v);
++  return true;
++}
++
++/** 他的黏土顏色。`manifest` 量出來的平均色優先，其次卡片色錨，最後暖土。
++ *  退化時整組去飽和——**顏色本身就是一個可看出來的差別**。 */
++function clayRgbFor(img, card, degraded){
++  let rgb = null;
++  const m = img && img._id ? manifest[img._id] : null;
++  if (m && m.avg_rgb) rgb = m.avg_rgb.slice(0, 3);
++  if (!rgb && card && COLOR_ANCHOR[card.color]) rgb = COLOR_ANCHOR[card.color].slice();
++  if (!rgb) rgb = [160, 115, 75];
++  // ⚠ 往暖土靠 40%。純用 `avg_rgb` 的第一版實拍出來是一顆**灰石頭**——
++  //   卡司裡本來就有灰藍色的居民，而這一場是暖光土場，灰的那一團看起來
++  //   像掉在地上的石塊，不像正在被揉的陶土。混色保留他自己的色相，
++  //   但把它放回這個世界的色溫裡。
++  // 量出來的（`ops/exhibit/twin/evidence_visible_20260921/wait/` 那幾張取樣）：
++  // 周圍地板是 rgb≈(217,142,70)、r−b=+147 的強暖橘。純 `avg_rgb` 混出來的土團
++  // r−b 只有 +96，擺在那塊地上**看起來是灰的**——不是它真的灰，是對比之下灰。
++  const WARM = [182, 112, 54];
++  if (degraded !== true){
++    rgb = [0, 1, 2].map(i => Math.round(rgb[i] * 0.45 + WARM[i] * 0.55));
++  }
++  if (degraded === true){
++    const g = Math.round(rgb[0] * 0.30 + rgb[1] * 0.56 + rgb[2] * 0.14);
++    rgb = [Math.round(g * 0.92 + 14), Math.round(g * 0.94 + 12), Math.round(g * 1.02 + 16)];
++  }
++  return rgb;
++}
++function rgbStr(rgb, k, a){
++  return `rgba(${Math.min(255, rgb[0]*k)|0},${Math.min(255, rgb[1]*k)|0},`
++       + `${Math.min(255, rgb[2]*k)|0},${a})`;
++}
++
++/** 黏土團：一個有機的半橢圓，輪廓以 12fps 定格抖動（真定格動畫的時間性）
++ *  ＋ 手捏出來的坑洞斑點。**不是一顆光滑的球**——1920×1080 實拍第一版就是
++ *  一顆米色塑膠圓頂，跟這個世界的陶土質感完全不搭。 */
++function clayMound(x0, y0, halfW, hgt, rgb, seedPh, beat, blurPx){
++  const N = 44;
++  const p = new Path2D();
++  p.moveTo(x0 - halfW, y0);
++  for (let i = 0; i <= N; i++){
++    const a = Math.PI - (Math.PI * i / N);                 // π → 0（上半圈）
++    const wob = 1
++      + 0.085 * Math.sin(a * 3 + seedPh + beat * 0.21)
++      + 0.055 * Math.sin(a * 5.3 - seedPh * 1.7 - beat * 0.13)
++      + 0.030 * Math.sin(a * 9.1 + seedPh * 2.3 + beat * 0.09);
++    p.lineTo(x0 + Math.cos(a) * halfW * wob, y0 - Math.sin(a) * hgt * wob);
++  }
++  p.closePath();
++  const g = cx.createRadialGradient(x0 - halfW * 0.34, y0 - hgt * 0.92, hgt * 0.05,
++                                    x0, y0 + hgt * 0.25, halfW * 1.15);
++  g.addColorStop(0,    rgbStr(rgb, 1.45, 1));
++  g.addColorStop(0.35, rgbStr(rgb, 1.14, 1));
++  g.addColorStop(0.75, rgbStr(rgb, 0.80, 1));
++  g.addColorStop(1,    rgbStr(rgb, 0.46, 1));
++  // ⚠ **blur 要下在 `fill()` 上，不能下在 `clip()+fillRect` 上**：clip 的邊界
++  //   是硬的，模糊只會糊掉填色、邊緣照樣是一圈人孔蓋（第三版實拍證實）。
++  cx.save();
++  if (blurPx && cx.filter !== undefined) cx.filter = `blur(${blurPx}px)`;
++  cx.fillStyle = g;
++  cx.fill(p);
++  cx.restore();
++  // 捏痕：確定性亂數（吃 seedPh），每個定格節拍換一組 ⇒ 表面一直在被揉。
++  // 這一層**不吃 blur**，不然捏痕會糊成一片髒。
++  cx.save();
++  cx.clip(p);
++  for (let k = 0; k < 26; k++){
++    const r1 = Math.sin(k * 12.9898 + seedPh * 7.1 + beat * 0.017) * 43758.5453;
++    const r2 = Math.sin(k * 78.233 + seedPh * 3.7 - beat * 0.011) * 12543.8571;
++    const fx1 = ((r1 % 1) + 1) % 1, fy1 = ((r2 % 1) + 1) % 1;
++    const px = x0 + (fx1 - 0.5) * halfW * 1.8;
++    const py = y0 - fy1 * hgt * 0.95;
++    const rr = hgt * (0.045 + 0.070 * fy1);
++    cx.fillStyle = (k % 3 === 0) ? rgbStr(rgb, 1.45, 0.20) : rgbStr(rgb, 0.50, 0.24);
++    cx.beginPath();
++    cx.ellipse(px, py, rr, rr * 0.62, fx1 * 3, 0, 7);
++    cx.fill();
++  }
++  cx.restore();
++}
++
++/** 那隻手：`props/clay_hand_v1.png` 是一截**小臂＋手**，切口在右邊。
++ *  直接畫會看到一段憑空斷掉的手臂；所以把切口那一端用 alpha 漸層收進黑裡，
++ *  變成「有人從暗處伸手進來揉他」。快取一次，之後都畫同一張。 */
++let _handFade = null;
++function fadedHand(){
++  if (_handFade !== null) return _handFade || null;
++  const img = prop("clay_hand_v1");
++  if (!img) return null;                        // 還沒載好：這一幀不畫（不留空殼）
++  const c = new OffscreenCanvas(img.naturalWidth, img.naturalHeight);
++  const g = c.getContext("2d");
++  g.drawImage(img, 0, 0);
++  g.globalCompositeOperation = "destination-out";
++  const gr = g.createLinearGradient(img.naturalWidth * 0.52, 0, img.naturalWidth, 0);
++  gr.addColorStop(0, "rgba(0,0,0,0)");
++  gr.addColorStop(1, "rgba(0,0,0,1)");
++  g.fillStyle = gr;
++  g.fillRect(0, 0, c.width, c.height);
++  _handFade = c;
++  return c;
++}
++
++/** 等待態整格。`d.wait` 不在就什麼都不畫（**不留一個空殼在畫面上**）。 */
++function drawForming(d){
++  const w = d && d.wait;
++  if (!w) return;
++  const C = TWIN_WAIT;
++  const elMs = performance.now() - w.startedAt;
++  const el = elMs / 1000;
++  const phase = w.phase || waitPhase(el, C);
++  const deg = w.degraded === true;
++  const pulse = waitPulse(el, w.seed);
++  const beat = Math.floor(performance.now() * 0.012);      // 12fps 定格節拍
++
++  // 成形程度：退役儀式那一段**往回退**（沉回土堆），不是直接消失。
++  let lv = formingLevel(el, C);
++  if (phase === "retiring"){
++    const k = Math.min(1, Math.max(0, (el - w.retireAtS) / C.ceremonyS));
++    lv = formingLevel(w.retireAtS, C) * (1 - k * k);
++  } else if (phase === "retired"){
++    lv = 0;
++  }
++
++  const bx = 0.50, by = 0.815;
++  const sc0 = depthScale(by);
++  const x0 = bx * W, y0 = by * H;
++  const bodyH = H * 0.30 * sc0;
++
++  // ── (1) 底下那攤光：心跳在這裡最看得出來（隔 10 公尺也看得到）──
++  const warmK = deg ? 0.0 : 1.0;
++  const poolA = (deg ? 0.16 : 0.34) * (0.52 + 0.48 * pulse)
++              * (phase === "retired" ? 0.25 : 1);
++  drawProp("glow_pool_v" + (1 + (beat % 2)), bx, by + 0.012,
++           bodyH / H * (0.62 + 0.10 * pulse + 0.18 * lv),
++           { alpha: poolA, anchor: "center" });
++
++  // ── (2) 光柱：暖／冷兩套，退化時整根換掉 ──
++  const shaft = (deg ? "shaft_cool_v" : "shaft_warm_v") + (1 + (Math.floor(el * 6) % 3));
++  drawProp(shaft, bx, by - 0.20, 0.60,
++           { alpha: ((deg ? 0.13 : 0.20) + 0.07 * pulse)
++                    * (phase === "retired" ? 0.3 : 1), anchor: "center" });
++
++  // ── (3) 接觸陰影 ──
++  cx.fillStyle = `rgba(0,0,0,${(0.16 + 0.16 * lv).toFixed(3)})`;
++  cx.beginPath();
++  cx.ellipse(x0, y0, bodyH * 0.40, bodyH * 0.062, 0, 0, 7);
++  cx.fill();
++
++  // ── (4)(5) 他從黏土裡長出來 ───────────────────────────────────
++  //
++  //  兩個高度的關係就是整段視覺的骨架，而且它是**刻意算出來的**：
++  //    顯影高度 rev  = h·(0.08 + 0.80·lv)   ← 露出多少
++  //    黏土高度 mound= bodyH·0.32·(1−0.78·lv) ← 蓋住多少
++  //  lv 的上限是 0.93 ⇒ rev 的上限是 h·0.824
++  //  ⇒ **頭頂那 18% 永遠埋在黏土裡**，時間再久都一樣。
++  //    「他完成了」因此只可能由 `director.twinArrived` 造成，不可能由等待造成。
++  //    （1920×1080 實拍第一版沒有這個關係式：黏土比顯影高，等 14 秒畫面上
++  //      只有一顆石頭，什麼都沒長出來。）
++  const img = w.img;
++  let h = bodyH, wd = bodyH * 0.72;
++  if (img && img.complete && img.naturalWidth){
++    wd = h * img.naturalWidth / img.naturalHeight;
++    const maxW = H * 0.36 * sc0;
++    if (wd > maxW){ const k = maxW / wd; wd *= k; h *= k; }
++  }
++  const rev = h * (0.08 + 0.80 * lv);
++  const moundH = bodyH * 0.32 * (1 - 0.78 * lv);
++  // ⚠ 寬度**跟著高度縮**，不然黏土退下去之後會變成一片飄在腳下的灰色薄餅
++  //   （1920×1080 實拍第二版就是這樣）。要的是「一堆土慢慢只剩腳邊一圈」。
++  const halfW = moundH * 1.55 + wd * 0.12;
++
++  if (img && img.complete && img.naturalWidth && rev > 2){
++    const lit = litSprite(img);
++    const breathe = 1 + 0.018 * pulse;                       // 吸一口氣
++    cx.save();
++    cx.translate(x0, y0);
++    cx.scale(1 / Math.sqrt(breathe), breathe);
++    cx.beginPath();
++    cx.rect(-wd, -rev, wd * 2, rev + h * 0.02);
++    cx.clip();
++    cx.globalAlpha = 0.55 + 0.42 * lv;
++    if (cx.filter !== undefined){
++      // ⚠ **曝光要吃同一張光照圖**（`Creature.draw` 用的那條公式）。
++      //   第一版寫死 `brightness(0.7+0.34·lv)`，而隔壁的居民是
++      //   `0.70 + 0.55·min(1, lum·1.9)`——同一塊亮地上，他比旁邊暗一截、
++      //   看起來像一隻灰的。1920×1080 實拍看得很清楚。
++      const lt = sampleLight(bx, by);
++      const ex = (0.70 + 0.55 * Math.min(1, lt.lum * 1.9)) * (0.82 + 0.18 * lv);
++      // 還沒成形的部分比較「濕」：模糊 + 去飽和，隨 lv 收乾
++      cx.filter = `blur(${(2.6 * (1 - lv)).toFixed(2)}px) `
++                + `brightness(${ex.toFixed(2)}) `
++                + `saturate(${deg ? "0.25" : (0.85 + 0.45 * lv).toFixed(2)})`;
++    }
++    cx.drawImage(lit, -wd / 2, -h, wd, h);
++    if (cx.filter !== undefined) cx.filter = "none";
++    cx.globalAlpha = 1;
++    cx.restore();
++  }
++
++  if (moundH > bodyH * 0.015){
++    cx.save();
++    cx.globalAlpha = 0.96;
++    // ⚠ 邊緣要糊一點點。第二版是硬邊橢圓 ⇒ 看起來像地上放了一個人孔蓋，
++    //   不像一堆土。地板本來就鋪著細碎的陶屑，糊 1.8px 才接得上。
++    clayMound(x0, y0 + bodyH * 0.012, halfW, moundH, w.rgb, w.seedPh, beat, 1.8);
++    cx.restore();
++    // 濕黏土的高光：**只在左上那一段**（光從左上打下來），不畫整圈——
++    // 整圈就是一個發光的環，那比硬邊更像人孔蓋。
++    cx.save();
++    cx.globalAlpha = (0.26 + 0.24 * pulse) * (0.4 + 0.6 * (1 - lv));
++    cx.strokeStyle = deg ? "rgba(180,196,214,0.55)" : "rgba(255,214,150,0.80)";
++    cx.lineWidth = Math.max(1, H * 0.0020);
++    cx.beginPath();
++    cx.ellipse(x0, y0 - moundH * 0.10, halfW * 0.92, moundH * 0.92,
++               0, Math.PI * 1.08, Math.PI * 1.62);
++    cx.stroke();
++    cx.restore();
++  }
++
++  // ── (6) 一隻手從暗處伸進來揉他（世界裡本來就有的黏土手臂，不是神之手）──
++  //        ⚠ 退役那一段手要**先收回去**，那是「結束」的第一個動作。
++  if (phase === "forming" || phase === "long"){
++    const hand = fadedHand();
++    if (hand){
++      const step = beat % 6;                                 // 定格：六拍一循環
++      const push = [0.000, 0.008, 0.013, 0.008, 0.000, -0.005][step];
++      const hh = bodyH * 0.42;
++      const hw = hh * hand.width / hand.height;
++      cx.save();
++      // 手隨著他成形**慢慢退開**：早期在揉，後期只是扶著。
++      cx.globalAlpha = 0.38 + 0.54 * (1 - lv);
++      cx.translate(x0 + halfW * 0.75 + bodyH * (0.14 - push * 9),
++                   y0 - moundH * (0.55 + 0.10 * pulse));
++      cx.rotate(0.13 + push * 0.9);
++      cx.drawImage(hand, -hw * 0.16, -hh / 2, hw, hh);
++      cx.restore();
++    }
++  }
++
++  // ── (7) 塵：每 ~3.4 秒一口，退役那一下多一口 ──
++  const puffT = el % 3.4;
++  if (puffT < 0.5 && phase !== "retired"){
++    drawProp("dust_burst_v" + (1 + (beat % 3)), bx, by - 0.02,
++             0.14 + 0.05 * (1 - lv),
++             { alpha: 0.30 * (1 - puffT / 0.5), anchor: "center" });
++  }
++  if (phase === "retiring"){
++    const k = Math.min(1, Math.max(0, (el - w.retireAtS) / C.ceremonyS));
++    drawProp("dust_burst_v" + (1 + (beat % 3)), bx, by - 0.02, 0.18 + 0.12 * k,
++             { alpha: 0.42 * (1 - k), anchor: "center" });
++  }
++
++  // ── (8) 他腳邊那一行：**類別**（代號已經在大標上，不重複佔畫面）。
++  //        ⚠ 只有類別，觀眾打的原話一個字都不上大螢幕。
++  if (w.cat){
++    cx.save();
++    cx.textAlign = "center";
++    cx.font = serif(H * 0.019, 500);
++    // ⚠ 地板是整格最亮的地方，38% 的小字在上面等於沒印
++    //   （`drawHonesty` 那條警告句踩過同一個坑）。給它一層暗影再印。
++    cx.shadowColor = "rgba(8,5,2,0.85)";
++    cx.shadowBlur = H * 0.010;
++    cx.fillStyle = `rgba(246,236,220,${(0.62 + 0.20 * pulse).toFixed(2)})`;
++    cx.fillText(w.cat, x0, y0 + H * 0.042);
++    cx.shadowBlur = 0;
++    cx.restore();
++  }
++
++  // ── (9) 上升的微粒：只在他身上那一柱，讓視線留在他那裡 ──
++  if (phase !== "retired"){
++    cx.save();
++    for (let i = 0; i < 14; i++){
++      const ph = ((el * 0.22 + i * 0.137 + w.seedPh) % 1);
++      const yy = y0 - ph * bodyH * 1.45;
++      const xx = x0 + Math.sin(ph * 6.2 + i) * bodyH * 0.30;
++      const a = 0.30 * Math.sin(Math.PI * ph) * (deg ? 0.5 : 1);
++      cx.fillStyle = deg ? `rgba(190,205,222,${a.toFixed(3)})`
++                         : `rgba(255,208,146,${a.toFixed(3)})`;
++      cx.beginPath();
++      cx.arc(xx, yy, Math.max(1, H * 0.0016 * (0.6 + ph)), 0, 7);
++      cx.fill();
++    }
++    cx.restore();
++  }
++}
++
++/* ══ 排隊中的那幾團土（2026-09-21 第三輪）═══════════════════════════
++ *
++ * 🔴 **要解決的那一格**：等待態一次只演一位——`routeSubmission` 把後到的放進
++ *   `waitBacklog`，前一位落地（或退役）之前不動。三個人同時投卡的實錄
++ *   （`wait_shape_queue/10_BEFORE_*`，t=17.5s 起 `backlog=2` 一路撐到收錄）
++ *   顯示：第 2、3 位在畫面上**只剩投遞口那一列靜止的文字**「排隊中」。
++ *   那是一行字，不是「屬於他的東西在動」——而展場是一班人一起走進來的，
++ *   同時投卡是常態不是邊角。
++ *
++ * **做的事**：把他們的土**先搬到台上**，在光柱外圍站成一圈。每一團吃他自己的
++ * 卡（顏色）與他自己的不透明 id（捏痕相位、心跳週期），所以三團**不一樣**、
++ * 而且**不同步**（`waitPulse` 的 `seed` 本來就是為這件事留的）。
++ *
++ * ⚠ **它們不成形。** 不長高、不長出輪廓、不吃 `formingLevel`——燈還沒照到他，
++ *   畫面不可以先演完。排隊那一段畫面上唯一會變的是**心跳**與**他等了多久**。
++ * ⚠ **不准講「他的分身同時在生成」**：後端併不併行我們沒有量過。
++ */
++const WAIT_QUEUE_SLOTS = [
++  // 光柱左右，比中央那一位更靠前也更小。
++  // ⚠ 左下角 0.035–0.19U × 0.70–0.92U 是 SIMPLE 版 QR 的地盤，右下角是投遞口
++  //   那張板，兩邊都不能踩——這四個位子是扣掉那兩塊之後剩下的地板。
++  [0.330, 0.845], [0.670, 0.845], [0.245, 0.890], [0.755, 0.890],
++];
++
++/** 一位排隊者的繪圖資料，掛在他自己的 `sub` 上快取。
++ *
++ *  🔴 **排隊那一團不講 `engine`，一個字都不講。** 第一版會在 `waitDegraded(sub)`
++ *    為真時把它染成冷灰藍——實拍 `40_REJECTED_排隊也染冷色_沒有字.png`：畫面上
++ *    三團土，一團是冷的，**旁邊一句話都沒有**。那正是第二輪 §3-1 抓到而且修過的
++ *    同一個錯（「顏色變了而字沒出來，等於要觀眾自己看懂顏色的意思」）。
++ *    而修法不能是「在這裡也印一句」：`twinEngineNote` 那一句逐字是
++ *    「他說的話是查表湊的」——他**還沒上台、還沒有話**，那句話在這裡為假；
++ *    另寫一句短的又違反「措辭只有一份」。
++ *  ⇒ 排隊這一段的主張只有三件事：**他的代號、他在排隊、他排了多久**。
++ *    退化留給他進到光裡那一刻，由中央那一版**用字**講（顏色只是伴隨）。
++ *
++ *  `rgb` 因此只吃他自己的卡（`degraded=false`），不吃快照裡的 `engine`。 */
++function waitQueueMeta(sub){
++  if (!sub) return null;
++  let m = sub.__wq;
++  if (!m){
++    const card = sub.card || {};
++    const seed = waitSeed(sub.id);
++    const img = pickCastFor(card);
++    m = sub.__wq = {
++      card, seed, seedPh: (seed % 628) / 100,
++      code: visitorCode(sub.id) || "來客",
++      img,
++      rgb: clayRgbFor(img, card, false),
++      // 他的卡落地那一刻。`routeSubmission` 排進佇列時就蓋章，用的是跟中央
++      // 那一位同一把尺（`performance.now()` 牆鐘，不是會被低幀率拖慢的 `this.t`）。
++      // ⚠ 誠實邊界：這是**這面螢幕看到他的那一刻**，不是他在手機上按下送出
++      //   那一刻（兩支時鐘沒有對過）。快照晚寫，這個數字就偏小。
++      at: (sub.__wqAt != null) ? sub.__wqAt : performance.now(),
++    };
++  }
++  return m;
++}
++
++/** 場上那一圈排隊的土。`waitBacklog` 空的就什麼都不畫。 */
++function drawFormingQueue(){
++  if (WAITQ_OFF) return;
++  if (typeof waitBacklog === "undefined" || !waitBacklog.length) return;
++  const now = performance.now();
++  const beat = Math.floor(now * 0.012);                 // 12fps 定格節拍（跟中央同一拍）
++  const n = Math.min(waitBacklog.length, WAIT_QUEUE_SLOTS.length);
++  for (let i = 0; i < n; i++){
++    const m = waitQueueMeta(waitBacklog[i]);
++    if (!m) continue;
++    const slot = WAIT_QUEUE_SLOTS[i];
++    const nx = slot[0], ny = slot[1];
++    const sc = depthScale(ny);
++    const el = (now - m.at) / 1000;
++    const pulse = waitPulse(el, m.seed);
++    const x0 = nx * W, y0 = ny * H;
++    const hgt = H * 0.055 * sc * (1 + 0.05 * pulse);
++    const halfW = hgt * 1.45;
++
++    // 腳下那一小攤光：隔十公尺看得到的就是這個在跳。
++    cx.save();
++    cx.globalAlpha = 0.20 * (0.55 + 0.45 * pulse);
++    cx.fillStyle = "rgba(255,196,128,1)";
++    cx.beginPath();
++    cx.ellipse(x0, y0 + hgt * 0.10, halfW * 1.05, hgt * 0.30, 0, 0, 7);
++    cx.fill();
++    cx.restore();
++
++    // 接觸陰影（沒有它，土團會像貼在畫面上的貼紙）
++    cx.fillStyle = "rgba(0,0,0,0.20)";
++    cx.beginPath();
++    cx.ellipse(x0, y0, halfW * 0.92, hgt * 0.17, 0, 0, 7);
++    cx.fill();
++
++    // 他的那一團。**跟中央那一位用同一支 `clayMound`**——同一種土、同一種捏法。
++    clayMound(x0, y0, halfW, hgt, m.rgb, m.seedPh, beat, 1.2);
++
++    // 兩行字。⚠ 地板是整格最亮的地方，小字要先給一層暗影再印
++    //   （`drawForming` 腳邊那一行踩過同一個坑）。
++    const line = waitQueueLine(m.code, now - m.at, i + 1);
++    cx.save();
++    cx.textAlign = "center";
++    cx.shadowColor = "rgba(8,5,2,0.85)";
++    cx.shadowBlur = H * 0.010;
++    cx.font = serif(H * 0.0175, 600);
++    cx.fillStyle = "rgba(244,234,218,0.88)";
++    cx.fillText(line.head, x0, y0 + H * 0.028);
++    cx.font = serif(H * 0.0145, 500);
++    cx.fillStyle = `rgba(240,232,216,${(0.52 + 0.14 * pulse).toFixed(2)})`;
++    cx.fillText(line.sub, x0, y0 + H * 0.049);
++    cx.shadowBlur = 0;
++    cx.restore();
++  }
++}
++
++/** 等待態的**介面層**（鏡頭變換之外）：退化字卡、角落那一版、成形那一刻的
++ *  大字、演練標記。跟 `drawForming` 分開的理由跟 `drawCaption` 一樣——
++ *  這幾塊不該跟著鏡頭推移與 12fps 抖動一起晃。 */
++function drawWaitOverlay(d){
++  const w = d && d.wait;
++
++  // (a) 退化字卡：**措辭直接來自 `twinEngineNote`**，不另寫一句
++  if (w && w.degraded){
++    const badge = waitEngineBadge(w.sub);
++    if (badge) waitPlate(badge, H * 0.315, "rgba(226,186,120,0.60)");
++  }
++
++  // (a2) 退役那一句：**同一段字**（`waitCaption(...).sub`），只是改走底板。
++  //      理由見 `director.update` 裡 `waitPlateText` 那段註解——那一句是整段
++  //      等待態唯一的誠實承諾，在光柱＋塵的背景上用細字會被洗掉。
++  //      y 挑 0.248：大標的下緣約在 0.235，底板高 0.058 ⇒ 下緣 0.306，
++  //      剛好落在退化字卡（0.315）上面，兩張同時出現也不疊。
++  if (w && d.waitPlateText && (w.phase === "retiring" || w.phase === "retired"))
++    waitPlate(d.waitPlateText, H * 0.248, "rgba(226,186,138,0.50)");
++
++  // (b) 角落那一版：他讓出整面螢幕之後**還在跳**
++  if (w && w.stage === "corner") drawFormingCorner(d, w);
++
++  // (c) 成形那一刻的大字（含「這一次沒有模型參與」）
++  if (d && d.arrivalNote && performance.now() < d.arrivalNote.until){
++    // ⚠ y 不能再往上：大標的副標在 H*0.275（`drawTitle`），擺 H*0.255 會**疊字**
++    //   ——1920×1080 實拍在 s04 那一格看得很清楚（「來客853 成形了」壓在
++    //   「那是你託付的需求」上面）。
++    const n = d.arrivalNote;
++    waitPlate(n.head, H * 0.345,
++              n.tone === "good" ? "rgba(190,222,190,0.55)" : "rgba(232,160,120,0.70)");
++    if (n.sub){
++      cx.save();
++      cx.textAlign = "center";
++      cx.font = serif(H * 0.021, 500);
++      cx.fillStyle = "rgba(240,232,216,0.78)";
++      cx.shadowColor = "rgba(8,5,2,0.8)"; cx.shadowBlur = H * 0.008;
++      cx.fillText(n.sub, titleCenter(), H * 0.432);
++      cx.shadowBlur = 0;
++      cx.restore();
++    }
++  }
++
++  // (d) 演練標記。**這一條不准拿掉**：`?waitdemo=1` 會憑空生一位訪客，
++  //     螢幕上沒有講清楚就是把模擬演成真的（鐵律 5 的展場版本）。
++  if (WAIT_DEMO){
++    cx.save();
++    cx.textAlign = "center";
++    cx.font = serif(H * 0.018, 700);
++    const t = "演練模式 · 這不是真的觀眾投的卡";
++    const bw = cx.measureText(t).width + H * 0.04;
++    cx.fillStyle = "rgba(60,14,8,0.80)";
++    cx.beginPath();
++    cx.roundRect(W / 2 - bw / 2, H * 0.012, bw, H * 0.034, H * 0.007);
++    cx.fill();
++    cx.fillStyle = "rgba(255,196,160,0.96)";
++    cx.fillText(t, W / 2, H * 0.036);
++    cx.restore();
++  }
++}
++
++/** 中央那張字卡的共用畫法（`drawPressed` 的同一種語彙）。 */
++function waitPlate(text, y, stroke){
++  cx.save();
++  cx.textAlign = "center";
++  cx.font = serif(H * 0.030, 700);
++  const bw = cx.measureText(text).width + H * 0.06;
++  cx.fillStyle = "rgba(10,7,3,0.70)";
++  cx.strokeStyle = stroke;
++  cx.lineWidth = Math.max(1, H * 0.0014);
++  cx.beginPath();
++  cx.roundRect(titleCenter() - bw / 2, y, bw, H * 0.058, H * 0.010);
++  cx.fill(); cx.stroke();
++  cx.fillStyle = "rgba(246,226,186,0.96)";
++  cx.fillText(text, titleCenter(), y + H * 0.039);
++  cx.restore();
++}
++
++/** 角落那一版：整面螢幕還給輪播之後，他縮到右下角**繼續跳**。
++ *
++ *  🔴 這一塊是「不要讓等待變成焦慮」的承重件。整格鎖住 15 分鐘 ⇒ 排在
++ *  後面的人陪他一起等；直接消失 ⇒ 他會以為自己的卡掉了。所以：讓出畫面，
++ *  但**他還在畫面上、還在動、還數得出秒數**。 */
++function drawFormingCorner(d, w){
++  const C = TWIN_WAIT;
++  const elMs = performance.now() - w.startedAt;
++  const el = elMs / 1000;
++  const pulse = waitPulse(el, w.seed);
++  const beat = Math.floor(performance.now() * 0.012);
++  const lv = formingLevel(el, C);
++  // 角落那一版也要講得出後面還有幾位（第三輪）。⚠ 有排隊才長高一行，
++  //   平常維持原本兩行的大小（人類 2026-09-21：「畫面太複雜了」）。
++  const qn = (!WAITQ_OFF && typeof waitBacklog !== "undefined") ? waitBacklog.length : 0;
++  const qmore = waitQueueMore(qn, 0);
++  // ⚠ 版面單位 `u` 跟卡片高度 `bh` **要分開**：舊版兩者同一個數，卡片一長高
++  //   裡面的土團與字級就跟著等比放大，變成另一張卡。長高的只有底邊。
++  const u = H * 0.105;
++  const bw = H * 0.30, bh = u + (qmore ? H * 0.027 : 0);
++  const x = W - bw - H * 0.03;
++  // 🔴 **兩張板疊在一起 ＝ 兩張都讀不到。** 角落這一版跟抵達層的投遞口板
++  //   （`dockGeom()`）算出來的 x 幾乎一樣、y 相差不到一張板 ⇒ 只要有人在排隊
++  //   （投遞口就是那時候才亮），兩張就疊死。實拍：`30_BEFORE_角落卡疊在投遞口上.png`
++  //   ——「木托盤 還在成形」壓在「小梯子／木抽屜」上面，兩邊都看不清楚。
++  //   ⚠ 這是第二輪就在的 bug（角落卡跟投遞口板同一天各自落地），
++  //     第三輪把排隊那幾位講出來之後才撞到。
++  //   修法：投遞口亮著的時候，角落這一版**往上疊一層**；投遞口收起來就回原位。
++  //   （不動抵達層一個字——只讀它的 `dock` 與 `dockGeom()`。）
++  let y = H - bh - H * 0.075;
++  const dockUp = (typeof ARRIVE_ON === "undefined" || ARRIVE_ON)
++              && typeof arrivals !== "undefined" && arrivals.dock > 0.02;
++  if (dockUp) y = Math.min(y, dockGeom().y - bh - H * 0.014);
++
++  cx.save();
++  cx.fillStyle = "rgba(12,8,4,0.62)";
++  cx.strokeStyle = w.degraded ? "rgba(170,190,210,0.40)" : "rgba(226,186,120,0.38)";
++  cx.lineWidth = Math.max(1, H * 0.0012);
++  cx.beginPath();
++  cx.roundRect(x, y, bw, bh, H * 0.010);
++  cx.fill(); cx.stroke();
++
++  // 小小一團，一樣在跳
++  const cxp = x + u * 0.52, cyp = y + u * 0.70;
++  cx.save();
++  cx.globalAlpha = 0.30 + 0.25 * pulse;
++  cx.fillStyle = w.degraded ? "rgba(150,175,200,1)" : "rgba(255,196,128,1)";
++  cx.beginPath();
++  cx.ellipse(cxp, cyp + u * 0.06, u * 0.34, u * 0.08, 0, 0, 7);
++  cx.fill();
++  cx.restore();
++  clayMound(cxp, cyp, u * 0.26 * (1 + 0.05 * pulse),
++            u * (0.30 + 0.16 * (1 - lv)), w.rgb, w.seedPh, beat, 0);
++
++  // ⚠ 這一格只放**代號**。1920×1080 實拍：整串 `visitorLabel`（代號＋三個類別）
++  //   會被卡片切掉，變成「圓潤／暖土／粗」——半個詞比不印還糟。
++  cx.textAlign = "left";
++  cx.fillStyle = "rgba(240,232,216,0.90)";
++  cx.font = serif(H * 0.019, 700);
++  const code = visitorCode(w.id) || "來客";
++  cx.fillText(`${code} 還在成形`, x + u * 1.02, y + u * 0.42);
++  const dur = humanDuration(elMs);
++  cx.fillStyle = "rgba(240,232,216,0.58)";
++  cx.font = serif(H * 0.0155, 500);
++  cx.fillText(dur ? `已經 ${dur} · 他好了就會上台` : "他好了就會上台",
++              x + u * 1.02, y + u * 0.72);
++  // 後面還有人在排隊 ⇒ 講出來。⚠ 這一格畫得下的只有一句話，所以這裡**不列
++  //   他們的代號**（列了會被卡片切掉，半個詞比不印還糟）；代號在他們自己那
++  //   幾團土旁邊，而那幾團只有中央那一版看得到。角落這一版的責任是
++  //   「別讓後面的人以為自己被忘了」。
++  if (qmore){
++    cx.fillStyle = "rgba(240,232,216,0.58)";
++    cx.font = serif(H * 0.0155, 500);
++    cx.fillText(qmore, x + u * 1.02, y + u * 0.72 + H * 0.024);
++  }
++  cx.restore();
++}
++
+ /* ── 導演（重放＋訪客流程都走電影場景切換）───────────────────── */
+ const spawnQueue = [];
+ 
+@@ -2034,6 +2650,38 @@
+   },
+   update(dt){
+     this.t += dt; sceneT += dt;
++    this.waitTick();
++    if (this.mode === "visitor_wait"){
++      const w = this.wait;
++      if (!w){ this.mode = "invite"; this.inviteStep = 0; this.t = 0; return; }
++      const elMs = performance.now() - w.startedAt;
++      const cap = waitCaption(w.sub, w.id, elMs, TWIN_WAIT, this.waitReach);
++      // 🔴 **退役那一句要讀得到。** 它講的是「帳本上留著『還沒成形』，沒有被丟掉
++      //    也沒有被演成完成」——整段等待態裡唯一一句誠實承諾。`drawTitle` 的副標
++      //    是 0.82 不透明度的細字，而退役儀式的背景正好是光柱＋塵：2026-09-21 實拍
++      //    （`75_retirement.jpg` 那一格的前後）中段整句被洗掉，只剩頭尾讀得出來。
++      //    這個 repo 對「讀不到等於沒講」已經有前例（監視器底下那一欄的證據說明、
++      //    右下角帶 ⚠ 的那一行都補了底板）⇒ 退役那一句改走 `waitPlate` 的底板，
++      //    大標照舊。**只有退役那一句**這樣做，平常那句時間不搶畫面。
++      const retiring = w.phase === "retiring" || w.phase === "retired";
++      this.titleOv = { head: cap.head, sub: retiring ? null : cap.sub };
++      this.waitPlateText = retiring ? cap.sub : null;
++      // 「這是**你的**」只講前幾秒——之後畫面自己就說得清楚，字擋著反而礙事。
++      // ⚠ 這裡用**牆鐘**（elMs）不是 `this.t`：`this.t` 的 dt 有 `Math.min(…,0.1)`
++      //   上限，畫面掉到 10fps 以下就會走得比真實時間慢（headless 錄影實測
++      //   跑 5fps ⇒ `this.t` 只有牆鐘的一半）。觀眾等的是真實的秒數。
++      this.caption = (elMs < 4500 && w.phase === "forming")
++        ? "剛剛送出的那一張，是他" : "";
++      this.capSub = "";
++      // 佔住整格的時間到了 ⇒ 讓畫面回輪播，他縮到角落繼續跳（見 TWIN_WAIT.centerS）
++      if (w.phase !== "retiring" && w.phase !== "retired"
++          && elMs > TWIN_WAIT.centerS * 1000){
++        w.stage = "corner";
++        this.titleOv = null; this.caption = ""; this.capSub = "";
++        this.mode = "invite"; this.inviteStep = 0; this.t = 0;
++      }
++      return;
++    }
+     if (this.mode === "invite"){
+       // 任何時刻有訪客投遞就插播
+       // ⚠ `arrivals.holding()`＝抵達那 2.8 秒的優先權。閘門（劇團到齊）**沒動**，
+@@ -2289,6 +2937,120 @@
+     else if (this.mode === "replay_chain" && this.t > beat("chain", false)){ this.endReplay(); }
+     else if (this.mode === "visitor_receipt" && this.t > beat("receipt", true)){ this.endReplay(); }
+   },
++  /* ── 等待態（2026-09-21）──────────────────────────────────────
++   *  ⚠ **介面**（跟同一個檔案裡的「抵達」那一條分工）：這一段**不碰**
++   *    `startVisitor`、不碰 `visitor_spawn` 那一拍、不碰 `finishVisitor`。
++   *    分身生出來之後一律走**既有的**那條路（`spawnQueue`），
++   *    等待態只在「還沒生出來」那一段存在，落地那一刻就把自己清掉。
++   *    唯一新增的共用欄位是 `director.arrivalNote`（由 `drawWaitOverlay`
++   *    自己畫，不跟 `caption`／`capSub` 搶）。 */
++  wait: null,
++  waitReach: null,      // 來源還讀不讀得到：true／false／null（沒量過）
++  arrivalNote: null,
++
++  startWaiting(sub){
++    const card = (sub && sub.card) || {};
++    const img = pickCastFor(card);
++    const seed = waitSeed(sub.id);
++    const deg = waitDegraded(sub) === true;
++    this.wait = {
++      sub, id: sub.id, card, img, seed,
++      seedPh: (seed % 628) / 100,
++      rgb: clayRgbFor(img, card, deg),
++      degraded: deg,
++      label: visitorLabel(card, sub.id),   // 角落那一版用（要帶代號）
++      cat: visitorCategory(card),          // 中央版腳邊那一行（大標已經有代號）
++      startedAt: performance.now(),
++      retireAtS: TWIN_WAIT.retireS,
++      stage: "center",
++      phase: "forming",
++    };
++    this.mode = "visitor_wait";
++    this.t = 0;
++    // 🔴 **從投遞口那一列劃掉他**（2026-09-21 第三輪）。`arrivals.spawned()` 的
++    //   意思是「他從排隊中變成台上」，而他現在就在光柱底下——不劃掉的話，
++    //   投遞口那一列會對著已經在成形的那一位寫「接下來就是他」，
++    //   同一個畫面自己打自己（實拍 `10_BEFORE_三人同時投卡.png`：大標
++    //   「燈塔光 正在成形」，右下角「1 燈塔光 接下來就是他」）。
++    //   ⚠ 這是**呼叫抵達層既有的公開方法**，沒有改抵達層一個字。
++    //   重複呼叫安全（`findIndex` 回 -1 就什麼都不做），`startVisitor` 照舊也會叫。
++    //   ⚠ 跟著 `?waitqueue=off` 一起關：那個開關是**整個第三輪**的負控制，
++    //   關掉要能還原成第三輪之前的畫面，不是還原一半。
++    if (!WAITQ_OFF) { try { arrivals.spawned(sub.id); } catch (e) {} }
++    // 世界不會為了等他而停下來（反焦慮）：旁邊的居民照常在做事。
++    const s = SCENES.s04;
++    const ring = this.crowd(5, []);
++    const ags = Object.values(byAgent).slice(0, 2);
++    this.enterScene("s04", [
++      ...ags.map((c, i) => [c, s.slots[i + 1] || s.slots[1], { act: "write", dim: 0.25 }]),
++      ...ring.map((c, i) => [c, s.slots[i + 3] || s.slots[2], { dim: 0.55 }]),
++    ]);
++    this.titleOv = null;   // 由 update() 每幀從 waitCaption 重算
++    console.info("[wait] 等待態開始", sub.id);
++  },
++
++  /** 每幀一次：階段推進、退役儀式、到期清掉。**一處管**，不散在各 mode。 */
++  waitTick(){
++    const w = this.wait;
++    if (!w) return;
++    const el = (performance.now() - w.startedAt) / 1000;
++    const ph = waitPhase(el, TWIN_WAIT);
++    const was = w.phase;
++    w.phase = ph;
++    // 退役要**回到中央**演完：給結束一個形狀（展望 §5.1-7），不是角落默默消失。
++    if (ph === "retiring" && was !== "retiring"
++        && !this.visitor && (this.mode === "invite" || this.mode === "ambient")){
++      w.stage = "center";
++      this.mode = "visitor_wait";
++      this.t = 0;
++      // ⚠ 儀式要**重新排一次台**。第一版是 `enterScene("s04")` 不帶 assigns ⇒
++      //   `stage()` 不會被呼叫 ⇒ 上一格輪播留在台上的十幾個人原地不動，
++      //   畫面變成一堆半明半暗的人擠在中景。**告別要安靜。**
++      //   四位站遠一點、壓暗，圍著那堆土。
++      {
++        const s4 = SCENES.s04;
++        const ring = this.crowd(4, []);
++        this.enterScene("s04",
++          ring.map((c, i) => [c, s4.slots[i + 1] || s4.slots[1], { dim: 0.62 }]));
++      }
++      console.info("[wait] 退役儀式", w.id);
++    }
++    if (ph === "retired"){
++      // ⚠ **不撤銷生成。** 後來才成形的那一位走正常佇列上台
++      //   （`twinArrived` 會認出他已經退役過，字幕講「後來還是成形了」）。
++      this.retired = this.retired || {};
++      this.retired[w.id] = true;
++      this.wait = null;
++      this.titleOv = null;
++      if (this.mode === "visitor_wait"){
++        this.mode = "invite"; this.inviteStep = 0; this.t = 0;
++      }
++      console.info("[wait] 退役完成（生成沒有被取消）", w.id);
++    }
++  },
++
++  /** 分身真的生出來了。**這裡是等待態唯一的出口**，而且它只做兩件事：
++   *  把自己清掉、把人交給既有的故事線。 */
++  twinArrived(sub){
++    const late = !!(this.retired && this.retired[sub.id]);
++    if (this.wait && this.wait.id === sub.id){
++      this.wait = null;
++      this.titleOv = null;
++      if (this.mode === "visitor_wait"){
++        this.mode = "ambient"; this.cooldown = 0; this.t = 0;
++      }
++    }
++    const cap = waitArrivalCaption(sub, sub.id);
++    this.arrivalNote = {
++      head: late ? waitLateCaption(sub, sub.id) : cap.head,
++      sub: cap.sub, tone: cap.tone,
++      until: performance.now() + 7000,
++    };
++    spawnQueue.push(sub);
++    console.info("[wait] 分身落地", sub.id, "late=", late,
++                 "engine=", sub.twin ? sub.twin.engine : null);
++  },
++
+   startVisitor(sub){
+     arrivals.spawned(sub.id);       // 陶牌上劃掉這一位（他從「排隊中」變成台上）
+     this.visitorId = sub.id; this.visitorCard = sub.card; this.visitorSub = sub;
+@@ -3953,6 +4715,239 @@
+   return n == null ? "這些格會一直重播" : `這 ${n} 格會一直重播`;
+ }
+ 
++/* ═══ 等待態：給等待一個形狀（2026-09-21）══════════════════════════
++ *
++ *  🔴 **這一塊要修的是現場最難解釋的那一格。** 觀眾在手機上按下送出，走到
++ *  電視前面，然後——什麼都沒有。舊版的 `onSubmission` 只做一件事：
++ *  `spawnQueue.push(sub)`，而那個佇列要等 `byAgent` 湊滿六個造型、要等現在
++ *  這一格演完，更要等**分身真的生出來**。生成是真的要時間的：本 repo 落盤
++ *  的實測（見下面 `TWIN_WAIT.obs*` 的出處）是 16–54 秒。畫面上零個像素在動。
++ *
++ *  設計四條（人類 2026-09-21 的四點，逐條對應）：
++ *
++ *  1. **要有一個「屬於他的」東西在動，而且不准是進度條。**
++ *     進度條會宣稱一件我們不知道的事——**完成的比例**。我們知道的只有
++ *     「已經過了多久」。所以成形曲線 `formingLevel` 是**漸近**的：
++ *     `ceil·(1−e^(−t/τ))`，**永遠到不了 1**。畫面上那團黏土會一直逼近他的
++ *     輪廓、但不會自己完成；真的完成只有一個原因——**分身真的生出來了**。
++ *     而「還活著」的訊號由**心跳**（`waitPulse`）與手的定格節拍負責，
++ *     那兩個永遠不停，所以等再久畫面都不會看起來像凍住。
++ *
++ *  2. **退化要看得出來。** `fallback_deterministic` ＝查表湊的、微秒級。
++ *     那時候**根本沒有等待**，演一段五分鐘的成形就是把模擬演成真的
++ *     （鐵律 5 的展場版本）。所以退化走另一條路：暖光換冷光、黏土不上色，
++ *     並且把 `twinEngineNote` 那一句**原字**擺上大字卡。
++ *     ⚠ 措辭沿用 `twinEngineNote`，不另外寫一句——兩處各寫一句遲早會漂。
++ *
++ *  3. **他走了怎麼辦（退役程序）。** 展望 §5.1-7：分身要有一個明確的結束
++ *     儀式，不能畫面直接消失（Hollanek 建議 1，他們記錄到的傷害是
++ *     「關不掉的 persona」）。所以等過門檻之後演一段 `retiring`：手收回去、
++ *     光收成餘燼、黏土沉回土堆。**而且不撤銷生成**——後來才成形的那一位
++ *     走正常佇列上台，字幕講明「後來還是成形了」。
++ *
++ *  4. **不要讓等待變成焦慮。** 兩個做法：世界不停（旁邊的居民照常走動），
++ *     以及**把時間講出來**。講時間不是進度條：進度條說「還剩多少」，
++ *     時間只說「已經多久」＋「我們量過的是多久」。超出量過的範圍就直說
++ *     超出了——那比一根走到 90% 就卡住的長條誠實得多，也比較不嚇人。
++ *
++ *  ⚠ **這一段一行都不碰 canvas**（LIVE 區的規矩）。畫面在 `drawForming`，
++ *    判斷全在這裡，所以 `tools/waitcheck.mjs` 抽得出來、跑得動。 */
++
++/** 等待態的參數。**每一個數字都要講得出它是量出來的還是訂出來的。** */
++const TWIN_WAIT = {
++  // ── 量出來的 ──────────────────────────────────────────────────
++  // 真模型（`engine` 以 `lmstudio:` 開頭且不是 `fake-1003` 那批合成樁）
++  // 在本 repo 落盤證據裡的生成延遲，n=7：
++  //   15633 / 19823 / 28241 / 33850 / 37463 / 40200 / 53561 ms
++  // 出處（Vacant repo）：
++  //   ops/exhibit/twin/evidence_1003_20260920/12_visitors_from_1003.json
++  //   ops/exhibit/twin/evidence_twinchain_20260920/11c_event_stream.json
++  //   ops/exhibit/twin/evidence_1003_fallback_20260920/09_remote_roster_negative.json
++  // 全部是 1003 上的 `lmstudio:gemma-4-12b-it-qat`，2026-09-20。
++  //
++  // ⚠ **派工單上寫的「中位 312 秒、最長 727 秒」在兩個 repo 裡查不到出處**
++  //   （`grep -rn "312 秒"／"727 秒" --include=*.md` 兩邊都零命中，
++  //    全庫 `latency_ms` 的最大值是 53561）。查不到出處的數字**不准印在
++  //   展場螢幕上**——那是對觀眾說一句我們自己驗不了的話。要改這裡，
++  //   請連同新的落盤證據路徑一起改。
++  obsN: 7, obsMinS: 16, obsMedS: 34, obsMaxS: 54,
++  obsSrc: "1003 · gemma-4-12b-it-qat · 2026-09-20 · n=7",
++  // ── 訂出來的（政策，不是量出來的）────────────────────────────
++  tauS: 26,        // 成形曲線時間常數。訂成接近實測中位，讓常見的等待看得到變化
++  ceil: 0.93,      // ⚠ 上限 <1：漸近，永遠不自己完成
++  longS: 108,      // 超過實測最大值兩倍 ⇒ 字幕改口說「比量過的最久還久」
++  retireS: 900,    // 退役門檻（15 分鐘）。⚠ 政策值，不是量出來的
++  ceremonyS: 9,    // 退役儀式演多久
++  // 🔴 **他佔住整面螢幕多久。** 超過就把畫面還給輪播，他縮到角落繼續跳。
++  //   理由是展場現實：一個人等 15 分鐘，後面還有別人站在那裡。整格鎖住
++  //   ＝所有人一起等他，那反而是最焦慮的版本。42 秒蓋得住實測 16–54 秒
++  //   那一段的絕大部分（大多數人根本不會看到角落那一版）。
++  centerS: 42,
++};
++
++/** 這一筆投稿的分身生出來了沒。**三值**：
++ *  `true`＝還在等、`false`＝已經有分身的話了、`null`＝**這筆資料沒帶狀態**
++ *  （不知道就說不知道，不要當成「好了」也不要當成「在等」）。 */
++function twinPending(sub){
++  const t = sub && sub.twin;
++  if (!t) return null;
++  const hasWord = !!(t.arrival || t.working || t.handover);
++  if (hasWord) return false;
++  if (t.status === "generated" || t.status === "published") return false;
++  if (t.status === "submitted") return true;
++  // 有 twin 物件但三句話與 status 都是 null ⇒ 沒量到，不猜
++  if (t.status == null) return null;
++  return null;
++}
++
++/** 成形程度 0..ceil。**漸近，永遠到不了 1。**
++ *  這是刻意的：畫面不准宣稱「快好了」，因為我們不知道。 */
++function formingLevel(elapsedS, C){
++  C = C || TWIN_WAIT;
++  if (!(elapsedS > 0)) return 0;
++  return C.ceil * (1 - Math.exp(-elapsedS / C.tauS));
++}
++
++/** 心跳 0..1（兩拍：lub-dub）。**這是「沒有凍住」的證據**，
++ *  所以它不依賴成形程度，等再久都照跳。`seed` 讓兩位同時在等的人不同步。 */
++function waitPulse(elapsedS, seed){
++  const period = 2.3 + ((seed || 0) % 7) * 0.09;
++  const p = ((elapsedS / period) % 1 + 1) % 1;
++  const g = (x, c, w) => Math.exp(-((x - c) / w) * ((x - c) / w));
++  return Math.min(1, g(p, 0.02, 0.085) + 0.62 * g(p, 0.24, 0.075));
++}
++
++/** 從不透明 id 折出一個小整數種子（造型、節拍相位都吃它）。
++ *  ⚠ 它**還原不出任何原文**，跟 `visitorCode` 同一條理由。 */
++function waitSeed(id){
++  const s = String(id || "");
++  let h = 0;
++  for (let i = 0; i < s.length; i++) h = (h * 33 + s.charCodeAt(i)) >>> 0;
++  return h % 9973;
++}
++
++/** 等待走到哪一段。 */
++function waitPhase(elapsedS, C){
++  C = C || TWIN_WAIT;
++  // ⚠ **由後往前判。** 第一版是由前往後（`el < longS ⇒ forming`），那假設了
++  //   `longS < retireS`。現場調校把 `?waitretire=34` 調到 `longS`(108) 以下之後
++  //   **退役整段永遠不會發生**——實測 45 秒還停在 "forming"，儀式一次都沒演。
++  //   由後往前判就跟兩個門檻的大小關係無關了。
++  if (elapsedS >= C.retireS + C.ceremonyS) return "retired";
++  if (elapsedS >= C.retireS) return "retiring";
++  if (elapsedS >= C.longS) return "long";
++  return "forming";
++}
++
++/** 毫秒 → 中文口語時間。`null` 進 `null` 出（**沒量到不編一個 0 秒**）。 */
++function humanDuration(ms){
++  if (ms == null || !isFinite(ms) || ms < 0) return null;
++  const s = Math.floor(ms / 1000);
++  if (s < 60) return `${s} 秒`;
++  const m = Math.floor(s / 60), r = s % 60;
++  return r ? `${m} 分 ${r} 秒` : `${m} 分`;
++}
++
++/** 退化的那一句。**直接轉呼 `twinEngineNote`**，不另外寫一份措辭。
++ *  回 `null` ＝這一筆沒帶 `engine`（沒量到，不掛）。 */
++function waitEngineBadge(sub){
++  return twinEngineNote(sub);
++}
++
++/** 這一筆是不是「查表湊的」。三值：`true`／`false`／`null`（沒帶 engine）。 */
++function waitDegraded(sub){
++  const e = sub && sub.twin ? sub.twin.engine : null;
++  if (e == null) return null;
++  return e === "fallback_deterministic";
++}
++
++/** 排隊中那一位腳邊的兩行。**純函數**，畫面只負責印。
++ *
++ *  🔴 措辭紀律跟中央那一位同一條：**講已經多久，不講還剩多久**——前面那一位
++ *    什麼時候好，我們不知道。也**不准**講「他的分身同時在生成」：後端是不是
++ *    併行跑，我們沒有量過（`twinlink loop` 那一側到今天都還沒對接過，
++ *    見 `wait_shape/README.md` §十一）。所以只講看得到的三件事：
++ *    他的代號、他在排隊、他排了多久。
++ *
++ *  `place` ＝他在**佇列**裡的第幾位（1 起算；中央那一位不算在裡面）。
++ *  ⚠ 「接下來就是他」這句跟投遞口那一列**逐字相同**，是刻意的：同一個畫面上
++ *    兩處講同一件事，措辭不一致觀眾會以為是兩件事。 */
++function waitQueueLine(code, waitedMs, place){
++  const d = humanDuration(waitedMs);
++  return {
++    head: String(code || "來客"),
++    sub: (place === 1 ? "接下來就是他" : "排隊中") + (d ? ` · 已經 ${d}` : ""),
++  };
++}
++
++/** 排隊的人比位子多時，角落那一版要講得出還有幾位沒畫出來。
++ *  回 `null` ＝畫得下，不用多印一句。 */
++function waitQueueMore(n, shown){
++  const rest = (n | 0) - (shown | 0);
++  return rest > 0 ? `另有 ${rest} 位在排隊` : null;
++}
++
++/** 等待態要印哪兩行字。**純函數**，畫面只負責印。
++ *
++ *  `reach` ＝來源還讀不讀得到（`true`／`false`／`null`＝沒接來源）。
++ *  ⚠ 讀不到要講，而且要蓋過時間那一句——觀眾站在前面等一個
++ *    我們其實已經看不到的東西，那比等久本身糟糕得多。 */
++function waitCaption(sub, visitorId, elapsedMs, C, reach){
++  C = C || TWIN_WAIT;
++  const card = (sub && sub.card) || {};
++  // ⚠ 大標只放**代號**，不放類別。類別印在他腳邊那一行小字。
++  //   1920×1080 實拍：`visitorLabel` 整串（代號＋三個類別）進大標會**兩邊爆出畫面**，
++  //   而且跟換場交叉溶接的上一句疊在一起糊成一團。
++  const who = visitorId ? (visitorCode(visitorId) || "一位來客") : "一位來客";
++  const el = (elapsedMs == null) ? null : elapsedMs / 1000;
++  const phase = (el == null) ? "forming" : waitPhase(el, C);
++  const dur = humanDuration(elapsedMs);
++
++  if (phase === "retiring" || phase === "retired"){
++    return { head: `${who} 今天沒有成形`, sub:
++      "他先回到土堆裡 · 帳本上留著「還沒成形」，沒有被丟掉也沒有被演成完成",
++      tone: "ember" };
++  }
++  if (reach === false){
++    return { head: `${who} 正在成形`,
++             sub: "⚠ 我們讀不到他成形了沒 · 畫面不會自己變成完成",
++             tone: "warn" };
++  }
++  const band = `我們量過的是 ${C.obsMinS} 到 ${C.obsMaxS} 秒`;
++  if (phase === "long"){
++    return { head: `${who} 正在成形`,
++             sub: dur ? `已經 ${dur} · ⚠ 比我們量過的最久那次還久 · 他還在做，沒有卡住`
++                      : "⚠ 比我們量過的最久那次還久 · 他還在做，沒有卡住",
++             tone: "warn" };
++  }
++  return { head: `${who} 正在成形`,
++           sub: dur ? `已經 ${dur} · ${band}` : band,
++           tone: null };
++}
++
++/** 分身終於落地那一刻的字。退化與真模型**長得不一樣**。 */
++function waitArrivalCaption(sub, visitorId){
++  const card = (sub && sub.card) || {};
++  const who = visitorId ? (visitorCode(visitorId) || "一位來客") : "一位來客";
++  const deg = waitDegraded(sub);
++  if (deg === true){
++    return { head: `${who} 成形了 —— 但這一次沒有模型參與`,
++             sub: twinEngineNote(sub), tone: "warn" };
++  }
++  if (deg === null){
++    return { head: `${who} 成形了`,
++             sub: "他說的話從哪來，這一筆沒有標", tone: "warn" };
++  }
++  return { head: `${who} 成形了`, sub: twinEngineNote(sub), tone: "good" };
++}
++
++/** 退役之後才成形的那一位。**不撤銷生成**，所以這一句會真的用到。 */
++function waitLateCaption(sub, visitorId){
++  const card = (sub && sub.card) || {};
++  const who = visitorId ? (visitorCode(visitorId) || "一位來客") : "一位來客";
++  return `${who} 後來還是成形了`;
++}
++
+ /* === LIVE-END === */
+ 
+ async function livePoll(){
+@@ -4066,6 +5061,15 @@
+   }
+   marklayer.drawSpot();       // 標示層：壓暗＋腳下光圈（在投遞口之前，別把它弄糊）
+   sceneDraw(sceneT, director);
++  // 等待態的**世界**那一半（光、黏土、成形中的輪廓、塵、微粒）跟著鏡頭走。
++  // 介面那一半（字卡、角落、演練標記）在 restore 之後，見 drawWaitOverlay。
++  // ⚠ **排在抵達層前面**：成形那一團在舞台中央的地板上，是場上的東西；
++  //   飛進來的信與陶牌是「剛剛發生的事」，要蓋在它上面才讀得出先後。
++  if (director.wait && director.wait.stage === "center"){
++    drawForming(director);
++    // 排隊的那幾團排在他後面畫：中央那一位是主角，圈外那幾團不准蓋住他。
++    drawFormingQueue();
++  }
+   arrivals.draw();            // 抵達層在鏡頭變換裡面（信要落在板上的郵筒口）
+   marklayer.draw();           // 標示層的陶牌：整個動線的答案，不准被蓋住
+   cx.restore();
+@@ -4100,6 +5104,7 @@
+   }
+   drawCaption(director.caption, director.capSub);
+   drawPressed(director);
++  drawWaitOverlay(director);          // 等待態：退化字卡／角落那一版／成形大字
+   drawQrCorner();                     // 常駐：中途走過來的人也掃得到
+   drawHonesty(director);
+   requestAnimationFrame(frame);
+@@ -4175,6 +5180,181 @@
+     });
+   }
+ });
++/* ── 等待態的接線（2026-09-21）───────────────────────────────────
++ *
++ *  🔴 **為什麼重讀器長在這一支、不長在 `bridge.js`**：
++ *  `bridge.js` 的 `deliver()` 以 **id** 去重，一個 id 只會發一次回呼。
++ *  觀眾投卡的那一瞬間，`twinlink` 的視圖裡已經有他了（`status:"submitted"`、
++ *  三句話與 `engine` 全是 `null`），所以電視**收得到他來了**——
++ *  但等分身生出來、同一筆變成 `status:"generated"` 的時候，
++ *  **那一筆不會再發一次**。等待態於是需要一個自己的出口。
++ *
++ *  ⚠ **誠實邊界（改碼時保留）**：
++ *  1. **這支不自己挑來源。** 它只重讀 `WorldBridge.sourceState().url`
++ *     ——也就是**橋上一次真的成功的那一個**。橋沒成功過就回 `null`，
++ *     這時候一通都不打（fail-closed，前例：`envmap.SINK_UPSTREAM`），
++ *     而且畫面會改口說「⚠ 我們讀不到他成形了沒」（`waitCaption` 的 `reach`）。
++ *  2. **只在有人在等的時候跑**，等待一結束就 `clearInterval`。
++ *     展場拔掉網路線的時候不會多出一條每秒敲門的迴圈。
++ *  3. **「讀不到」與「讀到了但他還沒好」是兩件事**，畫面上不同形。 */
++let _waitTimer = null;
++function waitResolverUrl(){
++  const st = twinState();
++  return (st && st.url) ? st.url : null;
++}
++function waitResolverStop(){
++  if (_waitTimer){ clearInterval(_waitTimer); _waitTimer = null; }
++}
++function waitResolverTick(){
++  const w = director.wait;
++  if (!w){ waitResolverStop(); return; }
++  const url = waitResolverUrl();
++  if (!url){ director.waitReach = false; return; }   // 橋一次都沒成功過 ⇒ 不打
++  fetch(url, { cache: "no-store" })
++    .then(r => r.ok ? r.json() : null)
++    .then(j => {
++      const people = (j && Array.isArray(j.people)) ? j.people : null;
++      if (!people){ director.waitReach = false; return; }   // 形狀不認得＝讀不到
++      director.waitReach = true;
++      const cur = director.wait;
++      if (!cur) return;
++      const p = people.find(x => x && x.id === cur.id);
++      if (!p) return;                                        // 還沒進視圖，繼續等
++      const sub = {
++        id: p.id,
++        ts: (typeof p.ts === "number") ? p.ts : null,
++        card: p.card || cur.card,
++        twin: {
++          arrival:  p.arrival  == null ? null : p.arrival,
++          working:  p.working  == null ? null : p.working,
++          handover: p.handover == null ? null : p.handover,
++          engine:   p.engine   == null ? null : p.engine,
++          status:   p.status   == null ? null : p.status,
++        },
++      };
++      // 還在等，但已經知道這一輪是查表湊的 ⇒ 畫面**當場**換成退化那一組色票
++      if (twinPending(sub) !== false){
++        if (waitDegraded(sub) === true && !cur.degraded){
++          cur.degraded = true;
++          cur.rgb = clayRgbFor(cur.img, cur.card, true);
++          // 🔴 **這一行是那張字卡的唯一來源。** `drawWaitOverlay` (a) 掛的是
++          //    `waitEngineBadge(w.sub)`＝`twinEngineNote(w.sub)`，讀的是
++          //    `w.sub.twin.engine`。只翻 `degraded` 旗標而不換掉 `cur.sub`，
++          //    黏土會變成冷灰藍、**但「⚠ 他說的話是查表湊的」那一句不會出現**
++          //    ——顏色變了而字沒出來，等於要觀眾自己看懂顏色的意思。
++          //    2026-09-21 用真的來源鏈（snapshot → bridge → resolver）錄影才看到；
++          //    先前那張退化截圖是 CDP 探針直接寫 `w.sub` 生出來的，
++          //    所以測起來是綠的、產品路徑上是壞的。
++          cur.sub = sub;
++        }
++        return;
++      }
++      waitResolverStop();
++      director.twinArrived(sub);
++    })
++    .catch(() => { director.waitReach = false; });
++}
++function waitResolverStart(){
++  // 演練沒有真的來源可讀。硬跑它只會把畫面打成「⚠ 我們讀不到他成形了沒」，
++  // 那句話在演練裡是**錯的**（沒有東西可讀 ≠ 讀不到），而且會蓋掉要驗的那一句。
++  if (WAIT_DEMO) return;
++  if (_waitTimer) return;
++  _waitTimer = setInterval(waitResolverTick, 2500);
++  waitResolverTick();
++}
++
++/** 抵達層那 2.8 秒的優先權（`ARRIVE_HOLD`）。
++ *
++ *  **防禦式取用**，跟抵達層自己對記號層的做法同一條規矩：抵達層被關掉
++ *  （`?arrive=0`）、或哪天整層被抽掉，這裡只回 `false`，等待態照常開始。
++ *  展場的等待不可以因為別人那一層而有單點故障。 */
++function arrivalsHolding(){
++  try { return (typeof arrivals !== "undefined") && !!arrivals.holding(); }
++  catch (e) { return false; }
++}
++
++/** 投稿進來要走哪一條。**這是等待態唯一的入口。** */
++function routeSubmission(sub){
++  if (WAIT_OFF){ spawnQueue.push(sub); return "off"; }       // 負控制
++  const pending = twinPending(sub);
++  if (pending === true){
++    if (director.wait && director.wait.id === sub.id) return "dup";
++    // ⚠ **抵達那一段先演完再接手**（兩條線併起來之後才會出現的坑）。
++    //   `startWaiting()` 會 `enterScene("s04")`，而 `arrivals.arrive()` 排了
++    //   一次「落地之後切到郵筒那一幕」的換景（`a.cutAt ≈ 0.97s`）——先開等待態
++    //   的話那一刀會在一秒後把 s04 切掉，成形的土堆就落在別的景上。
++    //   走 backlog ⇒ 抵達的 2.8 秒結束後才開場，而那 2.8 秒畫面上是信在飛、
++    //   在落、旁邊的人在轉頭，**一秒都沒有空的**。
++    if (director.wait || director.visitor || arrivalsHolding()){
++      // 已經有人在等／台上有人 ⇒ 不搶，但也**不要把他當成已經成形的**塞進佇列。
++      // 放進待等名單，前一位讓出畫面之後再接。
++      // ⚠ 蓋一個牆鐘章：他排了多久要印在他自己那一團土旁邊（第三輪）。
++      //   **只蓋第一次**——被 backlog tick 取出又放回去不算重新排隊。
++      if (sub.__wqAt == null) sub.__wqAt = performance.now();
++      waitBacklog.push(sub);
++      return "backlog";
++    }
++    director.startWaiting(sub);
++    waitResolverStart();
++    return "wait";
++  }
++  // `false`（已經有話了）與 `null`（沒帶狀態，不知道）都走既有那條路。
++  // ⚠ `null` 不走等待態是刻意的：不知道就不要演一段我們說不出根據的等待。
++  spawnQueue.push(sub);
++  return pending === false ? "ready" : "unknown";
++}
++const waitBacklog = [];
++// ⚠ 500ms 不是 1500ms：抵達那 2.8 秒結束之後再讓觀眾多等最多 1.5 秒，
++//   在展場就是「信落下去了，然後畫面停住」——正好是這一條要消滅的那種空白。
++setInterval(() => {
++  if (WAIT_OFF || !waitBacklog.length) return;
++  if (director.wait || director.visitor || arrivalsHolding()) return;
++  const sub = waitBacklog.shift();
++  director.startWaiting(sub);
++  waitResolverStart();
++}, 500);
++
++/* ── 演練（`?waitdemo=1`）───────────────────────────────────────
++ *  展場前一天要能一個人把這一整段看一遍，而不必真的有人投卡、
++ *  也不必等 1003 生一次。**螢幕上全程標「演練」**（`drawWaitOverlay` (d)）。
++ *  `?waitready=<秒>` 幾秒後落地，`?waitready=fallback` ⇒ 退化那一條。 */
++addEventListener("load", () => {
++  if (Q.get("waitretire")) TWIN_WAIT_OVERRIDE("retireS", +Q.get("waitretire"));
++  if (Q.get("waittau"))    TWIN_WAIT_OVERRIDE("tauS",    +Q.get("waittau"));
++  if (Q.get("waitcenter")) TWIN_WAIT_OVERRIDE("centerS", +Q.get("waitcenter"));
++  if (!WAIT_DEMO) return;
++  const id = "demo-" + (Q.get("waitseed") || "8f31c2");
++  const card = { need: "（演練）", shape: "圓潤", color: "暖土", texture: "粗陶" };
++  const ready = Q.get("waitready");
++  // ⚠ 演練**走的是真的那條路**，不是直接呼叫 `startWaiting`。
++  //   這樣 `?wait=off`（負控制）才真的關得掉——負控制要是走另一條碼，
++  //   它就不是同一件事的對照組了。
++  // ⚠ 這兩句要跟 `WorldBridge.onSubmission` 那一行**逐字同形**（抵達＋路由），
++  //   不然演練看到的就不是觀眾會看到的那一段：少了 `arrivals.arrive()`，
++  //   前 2.8 秒的信、落地、轉頭全部不會發生，而那正是接縫所在。
++  setTimeout(() => {
++    const first = { id, card, ts: null,
++      twin: { arrival: null, working: null, handover: null,
++              engine: null, status: "submitted" } };
++    try { if (typeof arrivals !== "undefined") arrivals.arrive(first); } catch (e) {}
++    routeSubmission(first);
++    director.waitReach = true;      // 演練：假裝來源讀得到（畫面不要喊讀不到）
++  }, 1200);
++  if (ready && ready !== "never"){
++    const deg = ready === "fallback";
++    const secs = deg ? 6 : Math.max(1, +ready || 20);
++    setTimeout(() => {
++      const full = { id, card, ts: null, twin: {
++        arrival: "（演練）我到了", working: "（演練）我在做這件事",
++        handover: "（演練）交給你了",
++        engine: deg ? "fallback_deterministic" : "lmstudio:gemma-4-12b-it-qat",
++        status: "generated" } };
++      if (WAIT_OFF) spawnQueue.push(full);      // 負控制：舊行為，不經等待態
++      else director.twinArrived(full);
++    }, 1200 + secs * 1000);
++  }
++});
++
+ /* ── 展場接線＋kiosk ─────────────────────────────────────────────
+    分身來源鏈：**本機優先，公網是退路**（CLAUDE.md 展場硬約束 2）。
+ 
+@@ -4233,8 +5413,26 @@
+   // ⚠ **抵達與成形拆成兩件事**（2026-09-21）。以前這裡只有 `spawnQueue.push`，
+   //   而那條線最短要等導演有空、最長要等一整格故事演完 ⇒ 觀眾按下送出的
+   //   那一秒畫面是空的。`arrivals.arrive()` 是**同步**的：同一個 tick 就開始
+-  //   飛信，不等輪詢、不等影片、不等模型。成形那條線一個字都沒改。
+-  WorldBridge.onSubmission(sub => { arrivals.arrive(sub); spawnQueue.push(sub); });
++  //   飛信，不等輪詢、不等影片、不等模型。
++  //
++  // ⚠ **這一行是抵達層與等待層唯一的接縫**（2026-09-21，兩條線各自落地後併起來）。
++  //   分工：`arrivals.arrive()` 管**最初那 3 秒**（信飛進來、落進投遞口、旁邊的人
++  //   轉頭）；`routeSubmission()` 管**那 3 秒之後到分身真的成形為止**（幾十秒）。
++  //   兩支互不知道對方存在，可以各自被關掉：`?arrive=0` 只關信、`?wait=off` 只關
++  //   等待態，關掉任何一個另一個照常。`routeSubmission` 內部在**所有**不適用
++  //   等待態的情況（`?wait=off`、`twin.status` 讀不出來、分身已經有話了）都退回
++  //   原本那句 `spawnQueue.push(sub)` ⇒ 抵達層的行為一個字都沒被改到。
++  WorldBridge.onSubmission(sub => { arrivals.arrive(sub); routeSubmission(sub); });
++  // 前瞻相容：橋那一側**如果**哪天有了「同一個人又更新了」的回呼，優先用它，
++  // 我們自己那個重讀器就退場（`waitResolverStop`）。現在沒有，所以 typeof 判斷。
++  if (typeof WorldBridge.onUpdate === "function"){
++    WorldBridge.onUpdate(sub => {
++      if (director.wait && director.wait.id === sub.id && twinPending(sub) === false){
++        waitResolverStop();
++        director.twinArrived(sub);
++      }
++    });
++  }
+   WorldBridge.start();
+   console.log("WorldBridge 已啟動 · 來源鏈",
+     locals.map(s => s.kind + "=" + s.url).concat(api ? ["cloud=" + api] : []).join(" → "));

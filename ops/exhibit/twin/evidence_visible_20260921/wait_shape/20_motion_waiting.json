@@ -1,0 +1,26 @@
+{
+ "source_dir": "f_wait",
+ "frames": 121,
+ "span_s": 41.2,
+ "capture_fps": 2.91,
+ "regions": {
+  "clay": {
+   "n": 120,
+   "min": 1.2245,
+   "median": 4.8658,
+   "max": 60.6652,
+   "mean": 5.6477,
+   "frames_below_0.5": 0
+  },
+  "ambient": {
+   "n": 120,
+   "min": 0.0101,
+   "median": 0.3367,
+   "max": 4.19,
+   "mean": 0.4057,
+   "frames_below_0.5": 103
+  }
+ },
+ "frozen_negative_control": 0.0,
+ "verdict": "MOVING"
+}

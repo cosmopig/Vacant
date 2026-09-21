@@ -1,0 +1,13 @@
+== 1. 重建 theirs（base ＋ patch）
+patching file 'tools/waitcheck.mjs'
+patching file 'world3/index.html'
+== 2. 三方合併到你現在那一份
+   零衝突
+== 3. 放回去（world3/index.html ＋ tools/waitcheck.mjs）
+== 4. 兩把尺
+
+全部通過（80 條）
+
+全部通過（165 條）
+完成。要還原：git -C /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/hmtest2 checkout -- world3/index.html && rm tools/waitcheck.mjs
+工作目錄留在 /var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/tmp.KuoWBjVR89（要自己清）

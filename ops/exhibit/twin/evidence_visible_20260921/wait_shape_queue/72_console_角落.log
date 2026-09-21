@@ -1,0 +1,7 @@
+[info] [wait] 參數覆寫 retireS = 99999
+[log] WorldBridge 已啟動 · 來源鏈 snapshot=live/visitors_probe.json
+[info] [wait] 等待態開始 p3-r3_q_corner2-142343-1
+[eval@25s] "{\"mode\":\"visitor_wait\",\"waiting\":{\"id\":\"p3-r3_q_corner2-142343-1\",\"phase\":\"forming\",\"stage\":\"center\",\"elapsed\":16.5},\"backlog\":[\"p3-r3_q_corner2-142343-2\",\"p3-r3_q_corner2-142343-3\"],\"spawnQueue\":0,\"arrivalsWaiting\":[\"口琴盒\",\"藤編籃\"],\"marks\":{\"live\":null,\"retiring\":0}}"
+[eval@45s] "{\"mode\":\"visitor_wait\",\"waiting\":{\"id\":\"p3-r3_q_corner2-142343-1\",\"phase\":\"forming\",\"stage\":\"center\",\"elapsed\":36.8},\"backlog\":[\"p3-r3_q_corner2-142343-2\",\"p3-r3_q_corner2-142343-3\"],\"spawnQueue\":0,\"arrivalsWaiting\":[\"口琴盒\",\"藤編籃\"],\"marks\":{\"live\":null,\"retiring\":0}}"
+[eval@58s] "{\"mode\":\"invite\",\"waiting\":{\"id\":\"p3-r3_q_corner2-142343-1\",\"phase\":\"forming\",\"stage\":\"corner\",\"elapsed\":49.9},\"backlog\":[\"p3-r3_q_corner2-142343-2\",\"p3-r3_q_corner2-142343-3\"],\"spawnQueue\":0,\"arrivalsWaiting\":[\"口琴盒\",\"藤編籃\"],\"marks\":{\"live\":null,\"retiring\":0}}"
+[title] sc=s02 mode=invite pool=25 heap=2MB reloads=0

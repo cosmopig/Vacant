@@ -1,0 +1,5 @@
+[info] [wait] 參數覆寫 retireS = 99999
+[info] [wait] 參數覆寫 centerS = 999
+[log] WorldBridge 已啟動 · 來源鏈 snapshot=live/visitors_probe.json
+[info] [wait] 等待態開始 probe-r_noarrive-115836
+[title] sc=s04 mode=visitor_wait pool=22 heap=2MB reloads=0

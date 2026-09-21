@@ -1,0 +1,26 @@
+{
+ "source_dir": "r_main_waitonly",
+ "frames": 74,
+ "span_s": 38.26,
+ "capture_fps": 1.91,
+ "regions": {
+  "clay": {
+   "n": 73,
+   "min": 1.7115,
+   "median": 5.1884,
+   "max": 21.5201,
+   "mean": 5.5287,
+   "frames_below_0.5": 0
+  },
+  "ambient": {
+   "n": 73,
+   "min": 0.0371,
+   "median": 0.3329,
+   "max": 5.7269,
+   "mean": 0.4924,
+   "frames_below_0.5": 66
+  }
+ },
+ "frozen_negative_control": 0.0,
+ "verdict": "MOVING"
+}

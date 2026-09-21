@@ -1,0 +1,26 @@
+# 2026-09-21 第三輪：92_rebase.sh 對**當下**的展件樹實跑
+# （鏡像，vacant_hm 本尊一個 byte 都沒動）
+
+2026-09-21 14:42:39
+ours sha256: e6ff639d1bd2dc298d5c1db4292c9df5a1184f8f8701f3611d61ea32bb13629f
+ours 行數:     4526
+
+== 92_rebase.sh ==
+== 1. 重建 theirs（base ＋ patch）
+patching file 'tools/waitcheck.mjs'
+patching file 'world3/index.html'
+== 2. 三方合併到你現在那一份
+   有衝突（1 處）⇒ 交給 92b（它只吃「兩邊各自插入」那一種）
+解了 1 處（等待態在前、現行 wait 區塊在後）
+== 3. 放回去（world3/index.html ＋ tools/waitcheck.mjs）
+== 4. 兩把尺
+
+全部通過（106 條）
+
+全部通過（194 條）
+完成。要還原：git -C /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/mirror4 checkout -- world3/index.html && rm tools/waitcheck.mjs
+工作目錄留在 /var/folders/ls/m71hg5r91kzdh5xxhc3ym_x80000gn/T/tmp.h1XdA0Yybq（要自己清）
+rc=0
+
+合併後 sha256: a67de86e317238e4155a3a44b3b96f7a49d3c0e2a29fd6ab759d136e222b38b5
+合併後 行數:     5724
