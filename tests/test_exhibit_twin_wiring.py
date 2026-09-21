@@ -168,7 +168,31 @@ def twin_stack(tmp_path):
     tv = subprocess.Popen(
         ["python3", "-m", "http.server", str(tp), "--bind", "127.0.0.1"],
         cwd=str(tv_root), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(2.0)
+
+    # ⚠ **不要用固定的 sleep。** 2026-09-21 實測：這台機器上同時有別的工作在
+    #   跑整套測試，兩支 python 兩秒之內起不來 ⇒ 正控制那條假紅。
+    #   （同一個坑也在 `exhibit_boot.sh` 裡，那邊改成 `wait_for` 輪詢。）
+    #   起不來就 `pytest.fail`，**不是 skip**——「沒量到」要看得見。
+    import urllib.error
+    import urllib.request
+
+    def _up(url: str) -> bool:
+        try:
+            with urllib.request.urlopen(url, timeout=2) as r:
+                return r.status == 200
+        except (urllib.error.URLError, OSError):
+            return False
+
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        if (_up(f"http://127.0.0.1:{sp}/visitors.json")
+                and _up(f"http://127.0.0.1:{tp}/")):
+            break
+        time.sleep(0.5)
+    else:
+        serve.terminate(); tv.terminate()
+        pytest.fail(f"30 秒內 twinlink serve（{sp}）或靜態站（{tp}）沒起來")
+
     try:
         yield {"store_port": sp, "tv_port": tp, "serve": serve,
                "snap": tv_root / "world3" / "live" / "visitors.json"}

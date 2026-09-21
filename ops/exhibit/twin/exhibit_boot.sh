@@ -225,12 +225,26 @@ if [ "$NO_TWIN" = "0" ]; then
   STORE_URL="http://127.0.0.1:$STORE_PORT/visitors.json"
 fi
 
-sleep 1
+# ⚠ **不要只 sleep 一次再敲一次。** 2026-09-21 實測：機器忙的時候（另一個
+#   工作在跑整套測試）三支 python 一秒之內起不來，於是這裡會判「起不來」
+#   而其實只是還沒好——那是**誤殺**，而展場開機正是最忙的那一刻
+#   （systemd 同時拉起所有東西、字型快取、瀏覽器）。
+#   ⇒ 改成輪詢一個窗口。**fail-loud 沒有被稀釋**：窗口過完還是敲不到就 exit 2，
+#     只是不再把「還沒好」講成「壞了」。（kiosk unit 等 8420 用的是同一招。）
+BOOT_WAIT_S="${VACANT_EXHIBIT_BOOT_WAIT_S:-20}"
+wait_for() {   # $1=url  → 0 敲到了／1 窗口內都沒敲到
+  local i=0
+  while [ "$i" -lt "$BOOT_WAIT_S" ]; do
+    curl -fsS --max-time 3 "$1" >/dev/null 2>&1 && return 0
+    i=$((i+1)); sleep 1
+  done
+  return 1
+}
 
 # ⚠ **驗那個位址真的連得到**，不是只印出來。換一個網路環境、介面抓錯、
 #   防火牆擋住——三種都會讓 QR 變成一張掃不開的圖，而畫面照樣叫人掃。
-if ! curl -fsS --max-time 3 "http://$HOST:$TWIN_PORT/state" >/dev/null 2>&1; then
-  echo "起來了，但 http://$HOST:$TWIN_PORT/state 連不到自己。" >&2
+if ! wait_for "http://$HOST:$TWIN_PORT/state"; then
+  echo "等了 ${BOOT_WAIT_S}s，http://$HOST:$TWIN_PORT/state 還是連不到自己。" >&2
   echo "QR 會指到一個連不到的位址 ⇒ **不繼續**。" >&2
   exit 2
 fi
@@ -239,8 +253,8 @@ echo "  ✓ http://$HOST:$TWIN_PORT 自己連得到（QR 指的就是這個）"
 # 🔴 **電視那一台以前完全沒有健檢。** `python3 -m http.server` 在埠被佔的時候
 #    當場死掉，而這支腳本照樣把「電視 http://…」印在漂亮橫幅裡——操作員
 #    由下往上讀，看到的是一切正常。橫幅印出來的每一個網址都要先敲過。
-if ! curl -fsS --max-time 3 "http://127.0.0.1:$TV_PORT/world3/index.html" >/dev/null 2>&1; then
-  echo "電視那一頁敲不到：http://127.0.0.1:$TV_PORT/world3/index.html" >&2
+if ! wait_for "http://127.0.0.1:$TV_PORT/world3/index.html"; then
+  echo "等了 ${BOOT_WAIT_S}s，電視那一頁還是敲不到：http://127.0.0.1:$TV_PORT/world3/index.html" >&2
   echo "靜態站沒起來（埠 $TV_PORT 被佔？）⇒ 電視會是白畫面 ⇒ **不繼續**。" >&2
   exit 2
 fi
@@ -249,8 +263,15 @@ echo "  ✓ http://127.0.0.1:$TV_PORT/world3/index.html 拿得到（電視不會
 # 唯讀端點也要敲，而且**要敲到欄位**不是只看 200：一個回 200 的空殼跟
 # 一個真的讀得到庫的端點，在 curl 眼裡長得一樣。
 if [ -n "$STORE_URL" ]; then
+  if ! wait_for "$STORE_URL"; then
+    echo "等了 ${BOOT_WAIT_S}s，分身唯讀端點還是敲不到：$STORE_URL" >&2
+    echo "電視的 &twin= 會指到一個連不到的位址 ⇒ **不繼續**（要跳過就 --no-twin）。" >&2
+    exit 2
+  fi
+  # 上面 wait_for 才剛敲到過，這裡又敲不到 ⇒ 它在這兩秒之間死掉了。
+  # 少見但真實（庫被別的行程鎖住、磁碟滿），所以留著而不是假設不會發生。
   if ! SV=$(curl -fsS --max-time 5 "$STORE_URL" 2>/dev/null); then
-    echo "分身唯讀端點敲不到：$STORE_URL" >&2
+    echo "分身唯讀端點剛剛還在、現在敲不到了：$STORE_URL" >&2
     echo "電視的 &twin= 會指到一個連不到的位址 ⇒ **不繼續**（要跳過就 --no-twin）。" >&2
     exit 2
   fi
@@ -275,6 +296,10 @@ fi
 #    展場那台 Linux 用的是 `vacant-twin-loop.service`（`Restart=always`）；
 #    這裡起的是給「人站在鍵盤前面」那一種跑法用的。
 LOOP_WHY=off
+# ⚠ 這個值要跟 `twin_loop.sh` **算出同一條路徑**，否則橫幅會印一個沒人在寫的檔。
+#   2026-09-21 實跑抓到：橫幅寫死 `$HM/...`，而 `VACANT_TWIN_OUT` 一設，
+#   loop 其實寫到別的地方去了——操作員照著橫幅去看那個檔，會看到它永遠不動。
+TWIN_OUT="${VACANT_TWIN_OUT:-$HM/world3/live/visitors.json}"
 if [ "$NO_TWIN" = "0" ] && [ "$NO_TWIN_LOOP" = "0" ]; then
   if [ -n "${VACANT_TWIN_CLOUD_TOKEN:-}" ]; then
     VACANT_HM="$HM" "$REPO/ops/exhibit/twin/twin_loop.sh" &
@@ -309,11 +334,11 @@ else
 fi
 echo "───────────────────────────────────────────────"
 case "$LOOP_WHY" in
-  on) echo " ✓ twinlink loop 在跑（快照寫 $HM/world3/live/visitors.json）" ;;
+  on) echo " ✓ twinlink loop 在跑（快照寫 ${TWIN_OUT}）" ;;
   no-token)
     echo " ⚠⚠ twinlink loop **沒有起來**：沒有 VACANT_TWIN_CLOUD_TOKEN。"
     echo "    ⇒ 公網那個郵箱抄不進來，**觀眾用手機投的卡不會變成分身**。"
-    echo "    ⇒ world3/live/visitors.json 停在上一次寫的樣子（可能是空的佔位檔）。"
+    echo "    ⇒ ${TWIN_OUT} 停在上一次寫的樣子（可能是空的佔位檔）。"
     echo "    這不是「0 個觀眾」，是這條線沒接。展件其他部分照跑。" ;;
   off-explicit) echo " ⚠ --no-twin-loop：庫是唯讀的，不會有新的人進來（明講的決定）" ;;
 esac
