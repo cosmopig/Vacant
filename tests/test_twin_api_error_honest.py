@@ -107,3 +107,74 @@ def test_負控制_模型正常回話時不准退化(monkeypatch):
     assert out["engine"].startswith("lmstudio:"), (
         "正常回應被推去 fallback ⇒ 上面那幾條只是把功能關掉")
     assert out.get("degrade_kind") is None
+
+
+# ---------------------------------------------------------------------------
+# 被思考擠掉：content 空與 content 被截斷，是同一個病的兩種長相
+# ---------------------------------------------------------------------------
+
+def _seq_http(responses):
+    """依序回不同的東西——用來驗「第一發被擠掉、升額重試第二發成功」。"""
+    calls = {"n": 0}
+    def f(url, payload=None, timeout=30.0, **kw):
+        i = min(calls["n"], len(responses) - 1)
+        calls["n"] += 1
+        return responses[i]
+    f.calls = calls
+    return f
+
+
+GOOD = '{"arrival":"我到了。","working":"我在做事。","handover":"交給你。"}'
+
+
+def test_截斷的_JSON_也要升額重試(monkeypatch):
+    """🔴 2026-09-22 實跑：reasoning 2326／2400（97%），JSON 吐到一半。
+
+    舊判準第一行是 `if text.strip(): return False` ⇒ **有字就不算被擠掉**
+    ⇒ 不升額 ⇒ 32 秒機時白花、觀眾永久拿到查表版。
+    分辨得出來的訊號是 API 自己講的 `finish_reason == "length"`。
+    """
+    truncated = (200, {
+        "choices": [{"finish_reason": "length",
+                     "message": {"content": '{"arrival":"我到了。","work'}}],
+        "usage": {"completion_tokens": 2400,
+                  "completion_tokens_details": {"reasoning_tokens": 2326}}})
+    ok = (200, {"choices": [{"finish_reason": "stop", "message": {"content": GOOD}}],
+                "usage": {"completion_tokens": 60,
+                          "completion_tokens_details": {"reasoning_tokens": 20}}})
+    fake = _seq_http([truncated, ok])
+    monkeypatch.setattr(twinlink, "_http_json", fake)
+    out = twinlink.generate_one(None, CARD, "http://x:1234/v1", "m", 5.0, True)
+    assert fake.calls["n"] == 2, "沒有升額重試——第一發被截斷就直接放棄了"
+    assert out["engine"].startswith("lmstudio:"), "重試成功了卻還是退化"
+    assert out.get("degrade_kind") is None
+
+
+def test_負控制_模型真的不會照格式回話時不要白花機時(monkeypatch):
+    """`finish_reason=stop` ＋ 有字但格式不對 ⇒ **不是**被擠掉，不該升額。
+
+    升額對這一格沒有用（額度不是瓶頸），重試只是把展場的機時燒掉兩倍。
+    """
+    bad = (200, {"choices": [{"finish_reason": "stop",
+                              "message": {"content": "這張卡我看不懂耶"}}],
+                 "usage": {"completion_tokens": 30,
+                           "completion_tokens_details": {"reasoning_tokens": 5}}})
+    fake = _seq_http([bad])
+    monkeypatch.setattr(twinlink, "_http_json", fake)
+    out = twinlink.generate_one(None, CARD, "http://x:1234/v1", "m", 5.0, True)
+    assert fake.calls["n"] == 1, "格式不對也去升額 ⇒ 白燒一倍機時"
+    assert out["degrade_kind"] == "unparseable"
+
+
+def test_負控制_升額重試也失敗就誠實退化(monkeypatch):
+    """重試一次就好。無限重試會讓展場在模型壞掉時卡死。"""
+    truncated = (200, {
+        "choices": [{"finish_reason": "length", "message": {"content": '{"arr'}}],
+        "usage": {"completion_tokens": 2400,
+                  "completion_tokens_details": {"reasoning_tokens": 2340}}})
+    fake = _seq_http([truncated, truncated, truncated])
+    monkeypatch.setattr(twinlink, "_http_json", fake)
+    out = twinlink.generate_one(None, CARD, "http://x:1234/v1", "m", 5.0, True)
+    assert fake.calls["n"] == 2, "重試超過一次 ⇒ 模型壞掉時展場會卡死"
+    assert out["engine"] == "fallback_deterministic"
+    assert out["budget_escalated"] is True, "升過額要誠實記在收據上"

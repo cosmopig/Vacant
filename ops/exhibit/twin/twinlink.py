@@ -497,7 +497,8 @@ def _call_model(prompt: str, endpoint: str, model: str, budget: int,
     #    ⚠ 這三件事疊起來才是真正的危險：**靜默**（200）＋**怪錯人**（收據）
     #      ＋**不可逆**（`pending()` 排除已有 generated 事件的卡 ⇒ 救不回來）。
     api_err = (body or {}).get("error") if isinstance(body, dict) else None
-    msg = ((body or {}).get("choices") or [{}])[0].get("message", {}) or {}
+    choice = ((body or {}).get("choices") or [{}])[0]
+    msg = choice.get("message", {}) or {}
     usage = (body or {}).get("usage") or {}
     text = msg.get("content", "")
     return {
@@ -507,6 +508,10 @@ def _call_model(prompt: str, endpoint: str, model: str, budget: int,
                       else (json.dumps(api_err, ensure_ascii=False)
                             if api_err is not None else None)),
         "http_status": status,
+        # ⚠ **API 自己說的那句「我撞到天花板了」。** `"length"` ＝ 輸出被切掉。
+        #    沒有它的話，「思考把 JSON 吐到一半就沒了」會長得像「模型不會照格式回話」，
+        #    而這兩者要改的東西完全不同（前者加額度、後者改 prompt）。
+        "finish_reason": choice.get("finish_reason"),
         "parsed": _parse_model_json(text),
         "text": text,
         "budget": budget,
@@ -524,6 +529,16 @@ def _squeezed_out(r: dict[str, Any]) -> bool:
     `content` 空 **而且** reasoning 幾乎把額度用完。只看前者會把
     「模型真的沒話說」也判成這個，升額重試就白花一次機時。
     """
+    # 🔴 **撞到天花板就是被擠掉，不管 content 是空的還是被切一半。**
+    #    2026-09-22 實跑抓到：一張卡 reasoning 用掉 2326／2400（97%），
+    #    JSON 吐到一半就沒了 ⇒ `parsed is None`、但 `text` 有字
+    #    ⇒ 舊判準第一行就 `return False` ⇒ **不升額**
+    #    ⇒ 32 秒機時白花、觀眾永久拿到查表版（`pending()` 不會再撿它）。
+    #    「content 空」與「content 被截斷」是**同一個病的兩種長相**，
+    #    而 `finish_reason == "length"` 是 API 自己講出來的那句話。
+    #    ⚠ 這個函式只在 `parsed is None` 時被問，所以這裡不會誤殺解析得出來的回應。
+    if r.get("finish_reason") == "length":
+        return True
     if str(r.get("text") or "").strip():
         return False
     rt = r.get("reasoning_tokens")
