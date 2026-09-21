@@ -222,6 +222,39 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _subject_secrets(store: TwinStore, sub_id: str, *,
+                     card: Any = None, card_text: Any = None) -> list[str]:
+    """這位主體**不准出現在事件流裡**的字串（卡上的原文、生成的句子）。
+
+    nonce 不在裡面：它從來不會出現在例外訊息裡，而讀它要多開一個檔。
+    """
+    objs: list[Any] = [{"card": card, "card_text": card_text}]
+    objs.append(store.vault.open_card(sub_id) or {})
+    objs.append(store.vault.open_twin(sub_id) or {})
+    return twinvault.secrets_for(*objs)
+
+
+def _append_error(store: TwinStore, sub_id: str, ev: dict[str, Any], *,
+                  source: str, secrets: Iterable[str],
+                  safe_reason: str) -> dict[str, Any]:
+    """記一列 `error`——**錯誤事件本身也是上鏈的，所以它也要過原文那把尺。**
+
+    ⚠ 為什麼需要這一層：例外訊息會逐字夾帶內容。
+    `canonical_bytes` 炸在某個字元上就把那個字元印出來；雲端回的錯誤 body
+    可能原樣回貼我們剛送過去的句子。把那種訊息寫進 append-only 鏈，
+    等於從**錯誤路徑**把原文漏上鏈——而那一列一樣刪不掉。
+
+    過不了尺就換成不含內容的固定說法（`reason_redacted=True`，
+    **不是靜靜吞掉**：事後查得出來這裡遮過東西）。
+    """
+    try:
+        twinvault.assert_payload_clean(ev, secrets, kind=KIND_ERROR)
+    except twinvault.GUARD_ERRORS:
+        ev = {"step": ev.get("step"), "reason": safe_reason,
+              "reason_redacted": True, "at": _now()}
+    return store.append(KIND_ERROR, sub_id, ev, source=source)
+
+
 def _http_json(url: str, payload: Any = None, timeout: float = 30.0,
                headers: dict[str, str] | None = None) -> tuple[int, Any]:
     """回 `(status, parsed)`。**不吞例外**——連不上就往上丟，呼叫端決定怎麼記。"""
@@ -312,12 +345,15 @@ def ingest(store: TwinStore, cloud: str, token: str,
             # 在修這段之前拿不到分身）。壞卡記一列 error，繼續做下一張。
             rejected += 1
             known.add(sid)
-            store.append(KIND_ERROR, sid if _usable_sub_id(sid) else "_ingest", {
+            _append_error(store, sid if _usable_sub_id(sid) else "_ingest", {
                 "step": "ingest",
                 "reason": f"{type(e).__name__}: {_safe_text(e)}",
                 "rejected_id": _safe_text(sid, 120),
                 "cloud": cloud, "at": _now(),
-            }, source=f"cloud:{cloud}")
+            }, source=f"cloud:{cloud}",
+                secrets=_subject_secrets(store, sid, card=it.get("card"),
+                                         card_text=it.get("card_text")),
+                safe_reason=f"{type(e).__name__}（訊息夾帶了卡上的內容，不上鏈）")
             continue
         known.add(sid)
         new += 1
@@ -594,10 +630,12 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
             # 不寫的話這張卡每一輪都會再被撿起來、再炸一次，展場一天下來
             # 就是幾萬列 error，而螢幕上始終少一個人。
             failed += 1
-            store.append(KIND_ERROR, sid, {
+            _append_error(store, sid, {
                 "step": "generate",
                 "reason": f"{type(e).__name__}: {_safe_text(e)}", "at": _now(),
-            }, source="local:fallback")
+            }, source="local:fallback",
+                secrets=_subject_secrets(store, sid),
+                safe_reason=f"{type(e).__name__}（訊息夾帶了卡上的內容，不上鏈）")
             twin = fallback_twin(None)
             twin["degraded_from"] = f"lmstudio:{model}"
             twin["degrade_kind"] = type(e).__name__
@@ -650,10 +688,13 @@ def publish(store: TwinStore, cloud: str, token: str,
                          source=f"cloud:{cloud}")
             ok += 1
         except Exception as e:  # noqa: BLE001
-            store.append(KIND_ERROR, sid, {
-                "step": "publish", "reason": f"{type(e).__name__}: {e}",
+            _append_error(store, sid, {
+                "step": "publish", "reason": f"{type(e).__name__}: {_safe_text(e)}",
                 "cloud": cloud, "at": _now(),
-            }, source=f"cloud:{cloud}")
+            }, source=f"cloud:{cloud}",
+                secrets=_subject_secrets(store, sid),
+                safe_reason=f"{type(e).__name__}"
+                            "（雲端回的訊息夾帶了分身的句子，不上鏈）")
             fail += 1
     return {"ok": fail == 0, "published": ok, "failed": fail,
             "note": "publish 失敗不影響現場：螢幕讀的是本機真相來源"}

@@ -156,6 +156,42 @@ def test_ingest_refuses_to_write_when_the_guard_trips(
     assert NEED not in canonical_json(err["payload"])
 
 
+def test_error_events_cannot_leak_plaintext_either(
+        store: TwinStore, monkeypatch) -> None:
+    """🔴 **錯誤路徑也是上鏈的路徑。**
+
+    例外訊息會逐字夾帶內容（`canonical_bytes` 炸在某個字元上就把它印出來）。
+    把那種訊息寫進 append-only 鏈，等於從錯誤路徑把原文漏上鏈——一樣刪不掉。
+    """
+    def boom(self, sub_id, card, card_text, **kw):  # noqa: ANN001
+        raise ValueError("壞在這裡：" + TEXT)       # ← 訊息裡有原文
+
+    monkeypatch.setattr(twinvault.TwinVault, "seal_card", boom)
+    _cloud(monkeypatch, [{"id": "v1", "card": {"need": NEED}, "card_text": TEXT}])
+    r = twinlink.ingest(store, "http://cloud.invalid", "t")
+
+    assert r["rejected"] == 1
+    err = next(store.events(kind=KIND_ERROR))
+    assert err["payload"]["reason_redacted"] is True
+    assert TEXT not in _chain_blob(store)
+    # 正控制：一般的（不含原文的）錯誤訊息照樣留得下來，不是一律遮掉
+    assert "ValueError" in err["payload"]["reason"]
+
+
+def test_ordinary_error_messages_are_not_redacted(
+        store: TwinStore, monkeypatch) -> None:
+    """負控制的另一邊：沒夾帶原文就不准遮——遮太多等於把除錯資訊丟光。"""
+    def boom(self, sub_id, card, card_text, **kw):  # noqa: ANN001
+        raise ValueError("disk full")
+
+    monkeypatch.setattr(twinvault.TwinVault, "seal_card", boom)
+    _cloud(monkeypatch, [{"id": "v1", "card": {"need": NEED}, "card_text": TEXT}])
+    twinlink.ingest(store, "http://cloud.invalid", "t")
+    err = next(store.events(kind=KIND_ERROR))
+    assert "disk full" in err["payload"]["reason"]
+    assert "reason_redacted" not in err["payload"]
+
+
 def test_guard_catches_smuggling_into_a_whitelisted_field() -> None:
     """🔴 結構閘門擋不到的那一類，要靠 `assert_no_plaintext` 擋。
 

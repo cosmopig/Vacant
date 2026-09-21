@@ -68,6 +68,16 @@ vault/
 唯一寫入路徑是 `twinvault.append_sealed()`：**先跑兩層再 `store.append`**。
 鏈是 append-only，所以防呆必須在寫入前跑，事後掃來不及。
 
+**⚠ 錯誤路徑也是上鏈的路徑（自己 review 抓到的第三個洞）。** 例外訊息會逐字
+夾帶內容——`canonical_bytes` 炸在某個字元上就把那個字元印出來，雲端回的錯誤
+body 可能原樣回貼我們剛送過去的句子。把那種訊息寫進 `error` 事件，
+等於**從錯誤路徑把原文漏上鏈**，而那一列一樣刪不掉。
+`twinlink._append_error()` 讓每一列 `error` 也過同一把尺，過不了就換成不含
+內容的固定說法並標 `reason_redacted: true`（**不是靜靜吞掉**）。
+兩邊都有判準：`test_error_events_cannot_leak_plaintext_either`
+與反方向的 `test_ordinary_error_messages_are_not_redacted`
+（沒夾帶原文就不准遮——遮太多等於把除錯資訊丟光）。
+
 **⚠ 第 2 層的 secrets 要篩過，這不是偷懶。** `assert_no_plaintext` 是子字串
 比對，payload 骨架本身是 ASCII（`"sealed"`、`"plain/"`、`"needs"`…），
 commitment 是 64 個 hex。把觀眾打的 `"e"`、`"ab"` 也當 secret ⇒
@@ -225,7 +235,7 @@ python3 ops/exhibit/twin/twinlink.py  selftest     # 原本那 7 節，仍全綠
                           tests/test_twinlink_resilience.py -q
 ```
 
-`tests/test_twinvault.py` 第一條是**量具的負控制**：
+`tests/test_twinvault.py`（24 條）第一條是**量具的負控制**：
 先用 2026-09-21 之前的寫法把原文寫上鏈、證明「鏈上找得到原文」這件事量得出來，
 後面那些「鏈上找不到原文」的綠燈才不是因為我找錯地方。
 
