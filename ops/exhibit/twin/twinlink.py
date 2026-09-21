@@ -45,6 +45,17 @@
    那張壞卡本身還是沒有分身（`error` 事件留著，可以事後查）。
    演練＋負控制：`ops/exhibit/twin/resilience_check.sh` 第 6 節。
 
+5. **`export` 出來的不是「全部的人」，是「現在該上螢幕的人」（2026-09-21 加上）。**
+   視窗（`--recent`）與退役是**展場的策展決定**，不是資料保留政策：
+   `counts.total` 才是整場來過幾位，帳本上一列都沒有少。
+   ⚠ **退役 ≠ 刪除，不准混講。** 刪除是撤回路徑
+   （`decisions/DECISION_20260921_TWIN_CONSENT_AND_ERASURE.md`）那件事。
+
+6. **「螢幕演過他了」我們量不到。** 退役事件裡的 `screen_confirmed` 寫死 `null`：
+   `twinlink` 只知道自己把誰放進 JSON，不知道電視有沒有真的演。
+   要變成 `true` 得等電視那端回報（見同一份報告的「另一側需要配合什麼」）。
+   **沒量到寫 `null` 不寫 `false`。**
+
 4. **`/api/queue` 這條路會漏件。** 它只回 `status='queued'`，電視那端一 claim
    就看不到了。要不漏就得走 `/api/all`（本次新增，唯讀、不 claim）。
    雲端還沒部署到有 `/api/all` 的版本時，這一支會**明講自己走的是會漏的那條路**
@@ -55,9 +66,22 @@
     python3 ops/exhibit/twin/twinlink.py ingest   --cloud URL --token T
     python3 ops/exhibit/twin/twinlink.py generate --endpoint http://100.119.113.56:1234/v1
     python3 ops/exhibit/twin/twinlink.py publish  --cloud URL --token T
-    python3 ops/exhibit/twin/twinlink.py export   --out live/visitors.json
+    python3 ops/exhibit/twin/twinlink.py export   --out live/visitors.json --recent 60
     python3 ops/exhibit/twin/twinlink.py serve    --port 8901      # 唯讀
     python3 ops/exhibit/twin/twinlink.py loop     --cloud URL --token T --endpoint ...
+
+## 螢幕上該有誰（`--recent`／退役，2026-09-21）
+
+第七天任何一次重整，電視原本會**從第一天的第一個人重演**：`build_view()` 回整個
+roster 沒有上限，而 `bridge.js` 的 `seenIds` 在記憶體裡、每次載入都是空的。
+300 人 × 每人 30 秒 ＝ 剛投完卡的觀眾要等 **2.5 小時**才看得到自己。
+
+這一支這一側的解法是三件事，細節與數字的由來見第 4 節的長註解：
+
+* `people` 改成**新到舊**排序 ⇒ 冷啟動先演現在在場的人（**這一項不需要電視配合**）；
+* `--recent N`（預設 60）＋ `arriving`／`fresh` 分級 ⇒ **剛投卡的人永遠在 `people[0]`**；
+* 掉出視窗的人**寫一列退役事件上鏈**，並在 `retirement.retiring[]` 掛 180 秒，
+  讓電視演得出退場（展覽設計 §5.1-7「要給結束一個形狀」）。
 """
 from __future__ import annotations
 
@@ -603,11 +627,226 @@ def publish(store: TwinStore, cloud: str, token: str,
 # ---------------------------------------------------------------------------
 # 4. export / serve —— 真相來源 → 現場螢幕
 # ---------------------------------------------------------------------------
+#
+# 🔴 **為什麼這一節有一個「視窗」（2026-09-21 加上）**
+#
+# 在這之前 `build_view()` 回**整個 roster、沒有上限**，而電視那一端
+# （`vacant_hm/world3/bridge.js`）用**記憶體內**的 `seenIds` 去重、
+# `spawnQueue.shift()` 一次生一個、每人約 30 秒（**估計值**，見下面 `DEFAULT_RECENT`
+# 的註解 1——程式裡沒有這個常數）。
+# 兩件事湊起來的後果：
+#
+#   看門狗 reload／kiosk `Restart=always`／斷電／有人按 F5
+#     ⇒ `seenIds` 清空 ⇒ **整個 roster 重新排隊**
+#     ⇒ 第七天有 300 人時，剛投完卡的觀眾排在 300 個人後面 ≈ **2.5 小時**
+#
+# 不是崩潰，是排隊。**磁碟不是問題**（實測 600 人＝1MB、605 bytes/event、線性）。
+#
+# 這一節解的是「螢幕上該有誰」。它由三個東西構成，判準都是**觀眾體驗**：
+#
+# | 名字 | 是什麼 | 誰被它影響 |
+# |---|---|---|
+# | `--recent N` | 策展參數：世界裡同時「有人」的規模 | 環境感，不影響保證 |
+# | 排序 newest-first | 冷啟動（reload／斷電）先演現在在場的人 | **修掉「從第一天第一個人重演」** |
+# | `arriving`／`fresh` 分級 | 剛投卡的人**永遠在 `people[0]`** | 展件的核心體驗 |
+#
+# ⚠ **保證與 `N` 無關**：`people` 依「可上台時間」新到舊排序，而 `shown = live[:k]`
+#   且 `k ≥ 1` ⇒ 最新的那一位在索引 0，`N` 再小都擠不掉他。`N` 只決定他後面還跟著幾個人。
+#   判準在 `tests/test_twin_recent_window.py::test_the_person_who_just_submitted_is_first`。
 
-def build_view(store: TwinStore) -> dict[str, Any]:
+#: 視窗大小的預設。**這是策展參數不是安全參數**（保證不靠它，見上）。
+#:
+#: 為什麼是 60：
+#: 1. 螢幕節奏**估計** 30 秒／人。
+#:    ⚠ **這是估計值，不是從程式裡抄來的常數**——查過了：電視那一端
+#:    （`vacant_hm/world3/index.html`）一位訪客要走完 `startVisitor` →
+#:    `visitor_spawn` → 成形 → `finishVisitor` 好幾個模式，**沒有一個
+#:    「每人幾秒」的常數**可以引。（`exhibit_boot.sh --dwell 30` 看起來像，
+#:    但那是 `serve_twin.py` 那個**另一個展件**的換格秒數，不是這條線。）
+#:    所以下面推出來的 60 是**量級**不是精算；真要定得準，得去電視那端量
+#:    「投卡到分身站上台」的實際秒數（見報告「另一側需要配合什麼」）。
+#: 2. 冷啟動（reload／斷電／F5）時電視會把整個視窗重走一遍 ⇒ 60 × 30 秒 ＝ **30 分鐘**
+#:    才把世界填滿。因為是 newest-first，觀眾在意的那幾位落在**第一分鐘**，
+#:    30 分鐘是「世界長回原本的厚度」要多久，不是「觀眾要等多久」。
+#: 3. 再大就沒有意義：`bridge.js` 一次生一個，視窗比「冷啟動走得完的量」大的那一截，
+#:    在下一次 reload 之前根本輪不到。
+#: ⚠ 展場可以調。`--recent 0` ＝ 關掉視窗（回到舊行為，**也不會有人退役**）。
+DEFAULT_RECENT = 60
+
+#: 「剛來的」有多新才算剛來。預設 900 秒（15 分鐘）。
+#:
+#: 這個數字是從**同一個檔案裡的常數推出來的**，不是拍的：觀眾投卡到分身上得了螢幕，
+#: 最壞情況 ＝ `DEFAULT_GEN_TIMEOUT`(300s) 的第一發 ＋ 升額重試的第二發（再 300s）
+#: ＋ `loop --interval`(10s) 的一輪 ≈ **610 秒**。900 秒把那個最壞情況整個蓋住還有餘裕，
+#: 所以「卡在生成裡十分鐘」的那個人，一生出來仍然算 `fresh`、仍然插隊。
+DEFAULT_FRESH_WINDOW_S = 900.0
+
+#: `fresh` 的人多到超過視窗時，視窗最多撐到 `recent × 這個倍數`。
+#:
+#: 什麼時候會發生：**模型掛掉**。`fallback_deterministic` 是微秒級的，
+#: 積壓的 300 張卡會在一秒內全部變成 `generated` ⇒ 全部都 `fresh`。
+#: 那時候誠實的做法不是假裝塞得下（物理上 300 人 × 30 秒就是 2.5 小時），
+#: 而是**撐大到 3 倍、其餘記成 `waiting` 讓畫面講得出來**。
+#: ⚠ 被這個上限切掉的人**不退役**——他們還沒輪到，不是「演完了」。
+FRESH_OVERFLOW_FACTOR = 3
+
+#: 退役之後，那個人的「告別」還要在 `retirement.retiring[]` 裡掛多久。
+#: 180 秒 ＝ `loop --interval` 預設 10 秒的 18 輪，也 ＝ 6 個 30 秒的展示格。
+#: 給電視那端足夠的機會把退場演出來，**即使中間被看門狗 reload 打斷一次**。
+RETIRE_GRACE_S = 180.0
+
+#: `retiring[]` 一次最多掛幾個人的告別。
+#:
+#: 為什麼需要上限：**大批退役是會發生的**，而且第一次一定會發生——展場那台庫裡
+#: 已經有幾百人，這個改動上線後的第一次 `export` 會一口氣退掉視窗外的所有人
+#: （實測 600 人 ⇒ 一輪退 540 個，`retiring[]` 沒上限時那份 JSON 是 182 KB）。
+#: 電視在 180 秒的寬限裡最多演得下 `180 ÷ 30 ＝ 6` 格，給兩倍餘裕 ⇒ 12。
+#:
+#: ⚠ **超出的人不是靜靜消失**：`retirement.retiring_pending` 會講出還有幾位，
+#:   電視那端要用一句集體的交代（「另有 N 位同時退場」）代替 N 次個別退場。
+#:   帳本上每一位都有自己那一列，事後查得到。
+RETIRE_SHOW_MAX = 12
+
+#: 退役事件寫在 `KIND_NOTE` 裡的標記。
+#: ⚠ **為什麼不開一個新 kind**：`twinstore.py` 的 `KINDS` 是別人的檔案，
+#:   而且展場那台已經在跑的庫不會因此重算。用 `note` ＋ 標記欄位，
+#:   舊庫直接相容，`verify()` 也照樣從創世走到鏈頭。
+RETIRE_MARK = "retired"
+
+
+def _day_bounds(now_ms: int) -> tuple[int, int]:
+    """回「今天」的起點（UTC 毫秒）與時區偏移（分鐘）。
+
+    ⚠ **刻意用本機時區不是 UTC**：展場在 UTC+8，用 UTC 午夜切會在早上八點
+    （展期正中間）把「今天來過幾位」歸零。偏移一起吐出去，事後查得出來
+    那一份 JSON 的「今天」是哪一段。
+    """
+    dt = datetime.fromtimestamp(now_ms / 1000).astimezone()
+    start = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    off = start.utcoffset()
+    return int(start.timestamp() * 1000), int((off.total_seconds() // 60) if off else 0)
+
+
+def _stage_times(store: TwinStore) -> dict[str, dict[str, int]]:
+    """每個人的「投卡時間」與「可上台時間」。一次掃完，不是每人一次查詢。
+
+    走 `events(kind=...)`（吃 `ix_twin_event_kind` 索引），依 seq 遞增 ⇒
+    **後面的蓋前面的**，所以拿到的是**最後一次** generated：重生成過的人，
+    可上台時間跟著往後走（他確實是「剛剛才又有東西可演」）。
+    """
+    out: dict[str, dict[str, int]] = {}
+    for kind, seq_key, ts_key in (
+            (KIND_SUBMITTED, "submitted_seq", "submitted_ms"),
+            (KIND_GENERATED, "generated_seq", "generated_ms")):
+        for e in store.events(kind=kind):
+            out.setdefault(e["sub_id"], {})[seq_key] = e["seq"]
+            out[e["sub_id"]][ts_key] = e["ts_unix_ms"]
+    return out
+
+
+def _retired_index(store: TwinStore) -> dict[str, dict[str, Any]]:
+    """已經退役的人 → 那一列退役事件。**純讀**，一個位元組都不寫。"""
+    out: dict[str, dict[str, Any]] = {}
+    for e in store.events(kind=KIND_NOTE):
+        p = e.get("payload")
+        if isinstance(p, dict) and p.get("twinlink_event") == RETIRE_MARK:
+            out[e["sub_id"]] = {"at_ms": e["ts_unix_ms"], "seq": e["seq"], **p}
+    return out
+
+
+def _tier(entry: dict[str, Any], now_ms: int, fresh_window_s: float) -> str:
+    """`arriving`（投了卡、分身還沒生出來）／`fresh`（剛上得了台）／`ambient`。"""
+    if entry["generated_ms"] is None:
+        return "arriving"
+    return ("fresh" if now_ms - entry["generated_ms"] <= fresh_window_s * 1000
+            else "ambient")
+
+
+def build_view(store: TwinStore, *,
+               recent: int = DEFAULT_RECENT,
+               fresh_window_s: float = DEFAULT_FRESH_WINDOW_S,
+               retire_grace_s: float = RETIRE_GRACE_S,
+               record_retire: bool = False,
+               now_ms: int | None = None) -> dict[str, Any]:
+    """算出「現在螢幕上該有誰」。
+
+    `record_retire=False` 時**完全不寫**（`serve`／`view` 走這條，庫是唯讀開的）。
+    `export`／`loop` 傳 `True`，那時掉出視窗的人會被**寫一列退役事件上鏈**——
+    退役不是靜靜消失，是帳本上的一件事（展覽設計 §5.1-7「要給結束一個形狀」）。
+
+    ⚠ **退役 ≠ 刪除。** 一列事件都沒有少，`verify()` 照樣從創世走到鏈頭；
+      退役只代表「不再上螢幕」。刪除是 `DECISION_20260921_TWIN_CONSENT_AND_ERASURE.md`
+      的撤回路徑，跟這裡是兩件事，不要混講。
+    """
     v = store.verify()
-    people = []
+    now_ms = int(now_ms if now_ms is not None else time.time() * 1000)
+    day_start_ms, tz_off_min = _day_bounds(now_ms)
+    times = _stage_times(store)
+    retired = _retired_index(store)
+
+    cands: list[dict[str, Any]] = []
     for c in store.roster():
+        t = times.get(c["sub_id"], {})
+        gen_ms = t.get("generated_ms")
+        sub_ms = t.get("submitted_ms")
+        cands.append({
+            "cur": c, "sid": c["sub_id"],
+            # 排序鍵用 **seq** 不用時間戳：seq 嚴格單調，系統時鐘往回跳也不會亂序。
+            "key_seq": t.get("generated_seq") or t.get("submitted_seq") or 0,
+            "generated_ms": gen_ms, "submitted_ms": sub_ms,
+            "stage_ms": gen_ms if gen_ms is not None else sub_ms,
+        })
+    cands.sort(key=lambda x: x["key_seq"], reverse=True)   # 🔴 新到舊
+
+    live = [x for x in cands if x["sid"] not in retired]
+
+    if recent <= 0:
+        # 明示的關窗：回到舊行為，而且**不退役任何人**。
+        shown, waiting, retire_now, hard_cap = live, [], [], 0
+    else:
+        hard_cap = max(1, recent * FRESH_OVERFLOW_FACTOR)
+        # `arriving`／`fresh` 依定義就是最新的那一段 ⇒ 是排序後的前綴。
+        n_must = 0
+        for x in live:
+            if _tier(x, now_ms, fresh_window_s) in ("arriving", "fresh"):
+                n_must += 1
+            else:
+                break
+        k = min(hard_cap, max(recent, n_must))
+        shown, rest = live[:k], live[k:]
+        # 掉出視窗但**還沒輪到**的（被 hard_cap 切掉的 fresh）不退役。
+        retire_now = [x for x in rest
+                      if _tier(x, now_ms, fresh_window_s) == "ambient"]
+        waiting = [x for x in rest
+                   if _tier(x, now_ms, fresh_window_s) != "ambient"]
+
+    if record_retire and retire_now:
+        for x in retire_now:
+            twin = (x["cur"].get("twin") or {})
+            rec = {
+                "twinlink_event": RETIRE_MARK,
+                # 「給結束一個形狀」：退場時他說的那一句，就是他交件時說的那一句。
+                "farewell": twin.get("handover") or twin.get("arrival"),
+                "reason": f"場次輪替：畫面只留最近 {recent} 位",
+                "recent": recent,
+                "stage_ms": x["stage_ms"],
+                # ⚠ 用 `now_ms` 不用 `_now()`：退役事件的時間戳、payload 裡的 `at`、
+                #    以及 `retiring[]` 的 `age_s` 必須來自**同一個時鐘**，
+                #    不然寬限期會算在兩個不同的時間軸上（測試注入時鐘就會炸出來）。
+                "at": datetime.fromtimestamp(now_ms / 1000, timezone.utc).isoformat(),
+                # 🔴 我們**量不到**螢幕到底演過他沒有。沒量到寫 null 不寫 false。
+                #    要變成真的，電視那端得回報（見報告「另一側需要配合什麼」）。
+                "screen_confirmed": None,
+            }
+            # ⚠ `sqlite3` 的例外刻意**不吞**（檔頭誠實邊界 4b）：真相來源壞掉
+            #    要讓 loop 大聲死掉，不可以假裝成「這個人沒退成」而每輪再試一次。
+            store.append(KIND_NOTE, x["sid"], rec, source="local:twinlink.retire",
+                         ts_unix_ms=now_ms)
+            retired[x["sid"]] = {"at_ms": now_ms, "seq": None, **rec}
+
+    people = []
+    for x in shown:
+        c = x["cur"]
         twin = c.get("twin") or {}
         people.append({
             "id": c["sub_id"],
@@ -620,31 +859,134 @@ def build_view(store: TwinStore) -> dict[str, Any]:
             "latency_ms": twin.get("latency_ms"),
             "status": c.get("status"),
             "errors": len(c.get("errors") or []),
+            # 🔴 電視靠這兩個欄位決定「誰先上台」。`arriving`／`fresh` 要插隊。
+            "tier": _tier(x, now_ms, fresh_window_s),
+            "stage_ms": x["stage_ms"],
+            "age_s": (None if x["stage_ms"] is None
+                      else round((now_ms - x["stage_ms"]) / 1000, 1)),
         })
+
+    in_grace = sorted(
+        ({"id": sid,
+          "farewell": r.get("farewell"),
+          "reason": r.get("reason"),
+          "at": r.get("at"),
+          "age_s": round((now_ms - r["at_ms"]) / 1000, 1),
+          "screen_confirmed": r.get("screen_confirmed")}
+         for sid, r in retired.items()
+         if now_ms - r["at_ms"] <= retire_grace_s * 1000),
+        key=lambda d: d["age_s"])
+    # 演得下的才掛出去；剩下的用一個數字交代（見 RETIRE_SHOW_MAX 的註解）。
+    retiring, retiring_pending = in_grace[:RETIRE_SHOW_MAX], len(in_grace) - RETIRE_SHOW_MAX
+
+    n_today = sum(1 for x in cands
+                  if x["submitted_ms"] is not None and x["submitted_ms"] >= day_start_ms)
+    tiers = [p["tier"] for p in people]
+
     return {
         "generated_at": _now(),
         "store_id": store.store_id,
         "chain": {"ok": v["ok"], "checked": v["checked"],
                   "head": v.get("head"), "genesis": v.get("genesis")},
-        "counts": {"visitors": len(people), "events": store.count(),
-                   "gaps": store.count(KIND_INGEST_GAP),
-                   "errors": store.count(KIND_ERROR)},
+        "counts": {
+            # `visitors` 維持原意＝`people` 的長度（相容既有消費端）
+            "visitors": len(people),
+            "shown": len(people),
+            # 🔴 畫面要講得出「今天來過 N 位」靠這兩個
+            "total": len(cands),
+            "today": n_today,
+            "retired": len(retired),
+            "waiting": len(waiting),
+            "arriving": tiers.count("arriving"),
+            "fresh": tiers.count("fresh"),
+            "ambient": tiers.count("ambient"),
+            "events": store.count(),
+            "gaps": store.count(KIND_INGEST_GAP),
+            "errors": store.count(KIND_ERROR),
+        },
+        "day": {"start_utc_ms": day_start_ms, "tz_offset_minutes": tz_off_min,
+                "note": "用展場本機時區切日，不是 UTC（UTC 會在早上八點歸零）"},
+        # 🔴 **庫裡所有人的 id，不受視窗影響。這一欄不是拿來演的。**
+        #
+        # 為什麼非有不可：電視那端（`vacant_hm/world3/bridge.js`）有一本
+        # 「公網來的卡待對帳帳本」，而它的核銷條件寫死是**「本機視圖的
+        # `people[]` 裡真的看得到那個 id」**（`reconcile(localIds)`，
+        # `localIds` 只從 `subsFromView(data).people` 來）。
+        #
+        # 視窗一加上去，那個不變式就被我打破了：一張卡進得了庫、卻排不進
+        # 最近 60 位（例如**生成卡住的那一位**——他是 `arriving`、永遠不退役，
+        # 但只要前面壓了 60 個更新的人就進不了畫面），電視就**永遠核銷不掉**，
+        # 帳本只增不減、每 15 秒重送一次。
+        #
+        # ⚠ 所以核銷要對的是**這一欄**不是 `people`。`people` 是「該上螢幕的人」，
+        #   `roster_ids` 是「庫裡有誰」——兩件事，不要混用：
+        #   拿 `roster_ids` 去生分身 ＝ 把視窗整個繞掉，第七天又從第一個人重演。
+        # ⚠ 含**已退役**的人（退役 ≠ 不存在），所以它只增不減 ⇒ 大小隨人數線性。
+        "roster_ids": [x["sid"] for x in cands],
+        "window": {
+            "recent": recent,
+            "fresh_window_s": fresh_window_s,
+            "hard_cap": hard_cap,
+            "order": "newest_first",
+            "guarantee": ("people 依可上台時間新到舊排序 ⇒ 剛投卡／剛生成的人"
+                          "永遠在 people[0]，recent 再小都擠不掉他。"),
+        },
+        "retirement": {
+            "one_way": True,
+            "grace_s": retire_grace_s,
+            "retired_total": len(retired),
+            "retiring": retiring,
+            # >0 ⇒ 大批退役：電視要改演**一句集體的交代**，不是 N 次個別退場。
+            "retiring_pending": max(0, retiring_pending),
+            "bulk": retiring_pending > 0,
+            "recorded_here": bool(record_retire),
+            "honesty": ("退役＝不再上螢幕，**不是刪除**：事件流一列沒少、"
+                        "verify 照樣從創世走到鏈頭。刪除是撤回路徑那件事。"),
+        },
+        "screen_contract": {
+            "spawn_order": "people 已經排好序，照陣列順序生就對了",
+            "jump_queue": ["arriving", "fresh"],
+            "cold_start": ("重整／斷電之後把整個 people 快轉補齊（不要每人等 30 秒），"
+                           "之後才回到一次一位的節奏"),
+            "play_exit_for": "retirement.retiring[]（演完才算交代過，不要靜靜移除）",
+            "bulk_exit": ("retirement.bulk 為 true ⇒ 改演一句集體的交代，"
+                          "數字在 retirement.retiring_pending"),
+            "caption_counts": "counts.today / counts.total / counts.waiting",
+            # 🔴 電視那端的待對帳帳本要用 roster_ids 核銷，**不是** people
+            "reconcile_against": "roster_ids",
+            "never_spawn_from": ("roster_ids —— 那是「庫裡有誰」不是「該上螢幕的人」，"
+                                 "拿它生分身等於把視窗繞掉"),
+        },
         "people": people,
         "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。",
     }
 
 
-def export(store: TwinStore, out: pathlib.Path) -> dict[str, Any]:
+def export(store: TwinStore, out: pathlib.Path, *,
+           recent: int = DEFAULT_RECENT,
+           fresh_window_s: float = DEFAULT_FRESH_WINDOW_S,
+           record_retire: bool = True,
+           now_ms: int | None = None) -> dict[str, Any]:
+    """寫出螢幕讀的那份 JSON。**這是唯一會寫退役事件的路徑**（`loop` 走它）。"""
     out = pathlib.Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    view = build_view(store)
+    view = build_view(store, recent=recent, fresh_window_s=fresh_window_s,
+                      record_retire=record_retire, now_ms=now_ms)
     tmp = out.with_suffix(out.suffix + ".tmp")
     tmp.write_text(json.dumps(view, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(out)  # 原子換檔：螢幕不會讀到寫到一半的 JSON
-    return {"ok": True, "out": str(out), "visitors": len(view["people"])}
+    return {"ok": True, "out": str(out),
+            "visitors": len(view["people"]),
+            "total": view["counts"]["total"],
+            "today": view["counts"]["today"],
+            "retired": view["counts"]["retired"],
+            "waiting": view["counts"]["waiting"],
+            "window": view["window"]}
 
 
-def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1") -> int:
+def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1", *,
+          recent: int = DEFAULT_RECENT,
+          fresh_window_s: float = DEFAULT_FRESH_WINDOW_S) -> int:
     """唯讀 HTTP。讓別台機器（現場螢幕、1003 以外的機器）讀得到現況。
 
     **唯讀有兩層，都是硬的**：
@@ -652,6 +994,11 @@ def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1") -> int:
     2. `TwinStore(..., read_only=True)` ⇒ SQLite 以 `mode=ro` 開檔。
        第 2 層是必要的——預設建構子會 `mkdir` ＋ `executescript(SCHEMA)`，
        那是寫入，等於**每次 GET 都在對真相來源動手**。
+
+    ⚠ **這條路 `record_retire=False` 寫死**（第三層唯讀）。它照樣**回報**
+      已經記在帳本上的退役，但不會自己記新的——庫是 `mode=ro` 開的，
+      記了也只會炸。「誰在螢幕上」這件事在這裡跟 `export` 算出來一樣，
+      差別只在**誰有權把退役寫下來**：只有 `export`／`loop`。
     """
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -670,7 +1017,9 @@ def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1") -> int:
             try:
                 p = self.path.split("?")[0]
                 if p in ("/", "/visitors.json"):
-                    self._send(build_view(st))
+                    self._send(build_view(st, recent=recent,
+                                          fresh_window_s=fresh_window_s,
+                                          record_retire=False))
                 elif p == "/verify":
                     self._send(st.verify())
                 elif p == "/stats":
@@ -759,7 +1108,72 @@ def selftest() -> int:
         chk("pulled 是 null 不是 0", r["pulled"] is None, repr(r["pulled"]))
         chk("留下 ingest_gap 一列", st.count(KIND_INGEST_GAP) == 1)
 
-        print("7. 負控制：繞過 trigger 竄改一列，verify 必須變紅")
+        print("7. 視窗：積壓 120 人的第七天，剛投卡的那一位在哪裡")
+        # 先把上面測試用的 v1 退掉不算，另外造一批。
+        base_ms = int(time.time() * 1000) - 7 * 86400_000
+        for i in range(120):
+            sid = f"day1_{i:03d}"
+            st.append(KIND_SUBMITTED, sid, {"card": {"need": f"事{i}"}},
+                      source="selftest", ts_unix_ms=base_ms + i * 1000)
+            st.append(KIND_GENERATED, sid,
+                      {"arrival": "嗨", "working": "做", "handover": f"交件{i}",
+                       "engine": "fallback_deterministic"},
+                      source="selftest", ts_unix_ms=base_ms + i * 1000 + 500)
+        st.append(KIND_SUBMITTED, "剛剛那位", {"card": {"need": "現在投的"}},
+                  source="selftest")
+        st.append(KIND_GENERATED, "剛剛那位",
+                  {"arrival": "我剛到", "working": "做", "handover": "交了",
+                   "engine": "fallback_deterministic"}, source="selftest")
+
+        # 負控制（證明這個量法有鑑別力）：照**舊的**排序（提交順序）去找他，
+        # 他排在一百多位之後——量得到「被埋掉」這件事，綠燈才有意義。
+        old_pos = st.sub_ids().index("剛剛那位")
+        chk("負控制：舊排序會把他埋在第 100 位之後", old_pos >= 100, f"舊排序 index={old_pos}")
+
+        view = build_view(st, recent=10, record_retire=False)
+        chk("剛投卡的人在 people[0]", view["people"][0]["id"] == "剛剛那位",
+            view["people"][0]["id"])
+        chk("他被標成 fresh", view["people"][0]["tier"] == "fresh",
+            view["people"][0]["tier"])
+        chk("視窗真的有上限", len(view["people"]) == 10, str(len(view["people"])))
+        chk("total 講得出整場來過幾位", view["counts"]["total"] == 122,
+            str(view["counts"]["total"]))
+        chk("關窗（recent=0）＝舊行為，全部都在",
+            len(build_view(st, recent=0, record_retire=False)["people"]) == 122)
+
+        print("8. 退役：看得見、上鏈、而且不是刪除")
+        before_events = st.count()
+        view = build_view(st, recent=10, record_retire=True)
+        # 122 人 − 視窗 10 ＝ 112 掉出去，但其中 `v1`（第 3 節剛生成的）**還 fresh**，
+        # 只是 seq 舊所以排不進視窗 ⇒ 他記成 `waiting` 不退役（還沒輪到 ≠ 演完了）。
+        chk("掉出視窗的人被寫成退役事件", view["counts"]["retired"] == 111,
+            str(view["counts"]["retired"]))
+        chk("還 fresh 但排不進視窗的人不退役（只是 waiting）",
+            view["counts"]["waiting"] == 1 and view["counts"]["retired"] == 111,
+            f"waiting={view['counts']['waiting']} retired={view['counts']['retired']}")
+        chk("退役有寫進帳本（事件變多不是變少）", st.count() > before_events,
+            f"{before_events} → {st.count()}")
+        chk("畫面拿得到告別詞（不是靜靜消失）",
+            bool(view["retirement"]["retiring"])
+            and all(r["farewell"] for r in view["retirement"]["retiring"]))
+        chk("螢幕演過沒有＝沒量到，寫 null 不寫 false",
+            all(r["screen_confirmed"] is None for r in view["retirement"]["retiring"]))
+        chk("退役 ≠ 刪除：鏈還是綠的", st.verify()["ok"] is True)
+        chk("退役 ≠ 刪除：那個人的事件一列沒少",
+            len(list(st.events(sub_id="day1_000"))) >= 2)
+        # 負控制：`record_retire=False` 的那一條路**一列都不可以寫**
+        n0 = st.count()
+        build_view(st, recent=5, record_retire=False)
+        chk("負控制：唯讀路徑一列都沒寫", st.count() == n0, f"{n0} → {st.count()}")
+        # 負控制：退役是單向的——重新生成不會把他撈回螢幕
+        st.append(KIND_GENERATED, "day1_000",
+                  {"arrival": "我又來了", "working": "做", "handover": "交",
+                   "engine": "fallback_deterministic"}, source="selftest")
+        again = build_view(st, recent=10, record_retire=False)
+        chk("負控制：退役的人重新生成也不會回到螢幕",
+            all(p["id"] != "day1_000" for p in again["people"]))
+
+        print("9. 負控制：繞過 trigger 竄改一列，verify 必須變紅")
         # 用**生連線**改，不能用 TwinStore——`__init__` 會把 trigger 補回去
         # （那是好性質：重開就恢復守衛），但也因此在這裡改不動。
         st.close()
@@ -794,7 +1208,7 @@ def selftest() -> int:
     if fails:
         print(f"selftest 紅：{len(fails)} 項失敗 → {fails}")
         return 1
-    print("selftest 全綠（含 5 個負控制）")
+    print("selftest 全綠（含 9 個負控制）")
     return 0
 
 
@@ -804,6 +1218,21 @@ def selftest() -> int:
 
 def _p(o: Any) -> None:
     print(json.dumps(o, ensure_ascii=False, indent=2))
+
+
+def _add_window_args(q: argparse.ArgumentParser, *, can_retire: bool) -> None:
+    """把視窗參數掛上去。**四個子命令共用同一份**，不然會漂成兩套預設值。"""
+    q.add_argument("--recent", type=int, default=DEFAULT_RECENT,
+                   help=(f"螢幕上同時留幾位（預設 {DEFAULT_RECENT}）。"
+                         "0＝關掉視窗（回到舊行為，也不會有人退役）。"
+                         "⚠ 剛投卡的人永遠在 people[0]，這個值擠不掉他。"))
+    q.add_argument("--fresh-window", type=float, default=DEFAULT_FRESH_WINDOW_S,
+                   dest="fresh_window",
+                   help=(f"幾秒內生成的算「剛來的」（預設 {DEFAULT_FRESH_WINDOW_S:.0f}）。"
+                         "這一群一定進得了畫面，而且電視那端要讓他們插隊。"))
+    if can_retire:
+        q.add_argument("--no-retire", action="store_true",
+                       help="算視窗但**不把退役寫上鏈**（演練／稽核用；展場不要開）")
 
 
 def main(argv: Iterable[str] | None = None) -> int:
@@ -833,13 +1262,15 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     e = s.add_parser("export")
     e.add_argument("--out", default=str(TWIN / "store" / "visitors.json"))
+    _add_window_args(e, can_retire=True)
 
     v = s.add_parser("serve")
     v.add_argument("--port", type=int, default=8901)
     v.add_argument("--bind", default="127.0.0.1")
+    _add_window_args(v, can_retire=False)   # 唯讀：沒有 --no-retire，因為它從不記
 
     s.add_parser("selftest")
-    s.add_parser("view")
+    _add_window_args(s.add_parser("view"), can_retire=False)
 
     lp = s.add_parser("loop")
     lp.add_argument("--cloud", default=DEFAULT_CLOUD)
@@ -849,13 +1280,15 @@ def main(argv: Iterable[str] | None = None) -> int:
     lp.add_argument("--interval", type=float, default=10.0)
     lp.add_argument("--rounds", type=int, default=0, help="0＝永遠（展場無人值守）")
     lp.add_argument("--out", default=str(TWIN / "store" / "visitors.json"))
+    _add_window_args(lp, can_retire=True)
 
     a = ap.parse_args(list(argv) if argv is not None else None)
 
     if a.cmd == "selftest":
         return selftest()
     if a.cmd == "serve":
-        return serve(pathlib.Path(a.db), a.port, a.bind)
+        return serve(pathlib.Path(a.db), a.port, a.bind,
+                     recent=a.recent, fresh_window_s=a.fresh_window)
 
     st = TwinStore(a.db)
     # **端點在這裡解析一次**，而且要講出來挑了哪一個。
@@ -873,10 +1306,17 @@ def main(argv: Iterable[str] | None = None) -> int:
     if a.cmd == "publish":
         _p(publish(st, a.cloud, a.token, a.limit, a.timeout)); return 0
     if a.cmd == "export":
-        _p(export(st, pathlib.Path(a.out))); return 0
+        _p(export(st, pathlib.Path(a.out), recent=a.recent,
+                  fresh_window_s=a.fresh_window,
+                  record_retire=not a.no_retire)); return 0
     if a.cmd == "view":
-        _p(build_view(st)); return 0
+        # `view` 是給人看現況的，**不寫**（跟 serve 同一條紀律）。
+        _p(build_view(st, recent=a.recent, fresh_window_s=a.fresh_window,
+                      record_retire=False)); return 0
     if a.cmd == "loop":
+        # 🔴 視窗要**真的傳到 loop 的 export**。這裡漏掉的話就是
+        #    「旗標存在、產品路徑沒接上去」——展場跑的正是 loop。
+        #    判準：tests/test_twin_recent_window.py::test_loop_cli_passes_the_window
         n = 0
         while True:
             n += 1
@@ -884,7 +1324,9 @@ def main(argv: Iterable[str] | None = None) -> int:
             r["ingest"] = ingest(st, a.cloud, a.token)
             r["generate"] = generate(st, a.endpoint, a.model)
             r["publish"] = publish(st, a.cloud, a.token)
-            r["export"] = export(st, pathlib.Path(a.out))
+            r["export"] = export(st, pathlib.Path(a.out), recent=a.recent,
+                                 fresh_window_s=a.fresh_window,
+                                 record_retire=not a.no_retire)
             print(json.dumps(r, ensure_ascii=False), flush=True)
             if a.rounds and n >= a.rounds:
                 return 0
