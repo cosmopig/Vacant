@@ -429,11 +429,52 @@ def test_qr_encodes_the_runtime_phone_url(pack, tmp_path):
         code, headers, body = c.get("/qr.png")
         assert code == 200 and headers["Content-Type"] == "image/png"
         assert body[:8] == b"\x89PNG\r\n\x1a\n"
-        # 那張圖真的是那個網址畫出來的（逐 byte 相同）
-        assert body == qrlib.to_png(st["phone_url"], scale=8)
+        # ⚠ **這裡不是 `phone_url`。** `make_server` 的 `visitor_url` 有預設值
+        # （`DEFAULT_VISITOR_URL`），而 `qr_target()` 一旦設了 visitor_url 就回它——
+        # 觀眾掃的是**公網那一頁**，不是這台機器的導播頁，而且**刻意不附 token**
+        # （附上去等於把展場的控制 token 印在一張誰都能拍的圖上）。
+        # 2026-09-22：舊斷言寫 `phone_url`，在 visitor_url 有預設值之後就一直紅，
+        # 而它是這個檔案裡唯一的紅 ⇒ 很容易被當成「本來就紅」略過。
+        # 產品是對的、斷言過期了。
+        assert body == qrlib.to_png(stage.qr_target(with_token=False), scale=8)
+        assert stage.qr_target(with_token=False) == stage.visitor_url
+        # token 不准出現在誰都能拍的那張圖裡（負控制的另一半在下一條）
+        assert "t=" not in stage.qr_target(with_token=True)
         code, headers, body = c.get("/qr.svg")
         assert code == 200 and "image/svg+xml" in headers["Content-Type"]
         assert b"<svg" in body
+    finally:
+        srv.shutdown()
+        srv.server_close()
+
+
+def test_沒有_visitor_url_時_QR_必須是執行期算的(pack, tmp_path):
+    """**展場當天最會壞的一格**（原本那條測試守的東西，不能因為預設值改了就丟掉）。
+
+    `vacant_hm/world3/qr.png` 是 2026-08-30 的靜態佔位圖，比 `phone.html` 早三個星期。
+    `--bind 0.0.0.0` 之後手機要連的是展場那台機器的**區網 IP、每次開機可能不同**。
+    烤死的 QR 必然指到錯的地方，而畫面正在叫觀眾「掃一下」。
+
+    ⇒ 明確把 `visitor_url` 關掉（展場沒有公網、或刻意要走區網那一頁）時，
+      QR 的內容必須是**執行期** `base_url` 算出來的那一個。
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from ops.exhibit.twin import qr as qrlib
+    out = tmp_path / "ev2.jsonl"
+    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out, dwell=10_000,
+                               quiet=True, base_url="http://192.168.1.23:8899",
+                               visitor_url="")          # ← 明確關掉
+    t = threading.Thread(target=srv.serve_forever, daemon=True)
+    t.start()
+    try:
+        c = Client(f"http://127.0.0.1:{srv.server_address[1]}")
+        _code, _h, body = c.get("/qr.png")
+        assert body == qrlib.to_png("http://192.168.1.23:8899/phone.html", scale=8)
+        assert b"\x89PNG" in body[:8]
+        # 負控制：**證明這條測得動**——換一個 base_url 就該畫出不一樣的圖，
+        # 否則上面那個相等只是「兩邊都算錯成同一個」。
+        assert body != qrlib.to_png("http://10.9.9.9:8899/phone.html", scale=8)
     finally:
         srv.shutdown()
         srv.server_close()
