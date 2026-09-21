@@ -57,6 +57,8 @@
     python3 ops/exhibit/twin/twinlink.py publish  --cloud URL --token T
     python3 ops/exhibit/twin/twinlink.py export   --out live/visitors.json
     python3 ops/exhibit/twin/twinlink.py serve    --port 8901      # 唯讀
+    python3 ops/exhibit/twin/twinlink.py serve    --port 8901 --allow-withdraw
+    python3 ops/exhibit/twin/twinlink.py withdraw --id <sub_id>   # 紙本撤回走這條
     python3 ops/exhibit/twin/twinlink.py loop     --cloud URL --token T --endpoint ...
 """
 from __future__ import annotations
@@ -68,6 +70,7 @@ import pathlib
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from typing import Any, Iterable
@@ -76,9 +79,10 @@ HERE = pathlib.Path(__file__).resolve()
 TWIN = HERE.parent
 sys.path.insert(0, str(TWIN.parents[2]))
 
+from ops.exhibit.twin import twinvault  # noqa: E402
 from ops.exhibit.twin.twinstore import (  # noqa: E402
-    DEFAULT_DB, KIND_ERROR, KIND_GENERATED, KIND_INGEST_GAP, KIND_NOTE,
-    KIND_PUBLISHED, KIND_SUBMITTED, TwinStore,
+    DEFAULT_DB, KIND_ERASED, KIND_ERROR, KIND_GENERATED, KIND_INGEST_GAP,
+    KIND_NOTE, KIND_PUBLISHED, KIND_SUBMITTED, KIND_WITHDRAWN, TwinStore,
 )
 
 DEFAULT_CLOUD = "https://vacant-world.cosmopig.com"
@@ -218,6 +222,39 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _subject_secrets(store: TwinStore, sub_id: str, *,
+                     card: Any = None, card_text: Any = None) -> list[str]:
+    """這位主體**不准出現在事件流裡**的字串（卡上的原文、生成的句子）。
+
+    nonce 不在裡面：它從來不會出現在例外訊息裡，而讀它要多開一個檔。
+    """
+    objs: list[Any] = [{"card": card, "card_text": card_text}]
+    objs.append(store.vault.open_card(sub_id) or {})
+    objs.append(store.vault.open_twin(sub_id) or {})
+    return twinvault.secrets_for(*objs)
+
+
+def _append_error(store: TwinStore, sub_id: str, ev: dict[str, Any], *,
+                  source: str, secrets: Iterable[str],
+                  safe_reason: str) -> dict[str, Any]:
+    """記一列 `error`——**錯誤事件本身也是上鏈的，所以它也要過原文那把尺。**
+
+    ⚠ 為什麼需要這一層：例外訊息會逐字夾帶內容。
+    `canonical_bytes` 炸在某個字元上就把那個字元印出來；雲端回的錯誤 body
+    可能原樣回貼我們剛送過去的句子。把那種訊息寫進 append-only 鏈，
+    等於從**錯誤路徑**把原文漏上鏈——而那一列一樣刪不掉。
+
+    過不了尺就換成不含內容的固定說法（`reason_redacted=True`，
+    **不是靜靜吞掉**：事後查得出來這裡遮過東西）。
+    """
+    try:
+        twinvault.assert_payload_clean(ev, secrets, kind=KIND_ERROR)
+    except twinvault.GUARD_ERRORS:
+        ev = {"step": ev.get("step"), "reason": safe_reason,
+              "reason_redacted": True, "at": _now()}
+    return store.append(KIND_ERROR, sub_id, ev, source=source)
+
+
 def _http_json(url: str, payload: Any = None, timeout: float = 30.0,
                headers: dict[str, str] | None = None) -> tuple[int, Any]:
     """回 `(status, parsed)`。**不吞例外**——連不上就往上丟，呼叫端決定怎麼記。"""
@@ -280,24 +317,43 @@ def ingest(store: TwinStore, cloud: str, token: str,
         if _usable_sub_id(sid) and _rejected_before(store, sid):
             continue   # 這張卡上一輪就記過「壞掉」了，不要每輪再記一次
         try:
-            store.append(KIND_SUBMITTED, sid, {
-                "card": it.get("card"),
-                "card_text": it.get("card_text"),
-                "ts": it.get("ts"),
-                "cloud_status": it.get("status"),
+            # 🔴 原文**不進 payload**。封印：原文與 nonce 落到鏈外的檔案庫，
+            #    鏈上只留 commitment。`append_sealed` 會先跑兩層可執行防呆
+            #    （結構閘門 ＋ `consent.assert_no_plaintext`）再寫。
+            payload, secs = store.vault.seal_card(
+                sid, it.get("card"), it.get("card_text"),
+                ts=it.get("ts"), cloud_status=it.get("status"))
+            twinvault.append_sealed(store, KIND_SUBMITTED, sid, payload, secs,
+                                    source=f"cloud:{cloud}", what="card")
+        except twinvault.GUARD_ERRORS as e:
+            # 防呆擋下來 ⇒ **這一列不進鏈**（append-only，寧可少一張卡也不要
+            # 寫進去就拿不掉）。理由寫成固定分類，**不要回貼例外訊息**——
+            # 那個訊息可能含原文，而錯誤事件本身也是上鏈的。
+            rejected += 1
+            known.add(sid)
+            store.append(KIND_ERROR, sid if _usable_sub_id(sid) else "_ingest", {
+                "step": "ingest",
+                "reason": "封印防呆擋下這張卡：payload 不合格，沒有寫進鏈",
+                "guard": type(e).__name__,
+                "vault_copy_kept": True,
+                "cloud": cloud, "at": _now(),
             }, source=f"cloud:{cloud}")
+            continue
         except CARD_LEVEL_ERRORS as e:
             # 🔴 一張卡進不來，不可以讓 loop 死掉。展場沒有人守著，
             # loop 一死是**所有人**的卡都不再上螢幕（演練 §6 的乾淨鄰居卡
             # 在修這段之前拿不到分身）。壞卡記一列 error，繼續做下一張。
             rejected += 1
             known.add(sid)
-            store.append(KIND_ERROR, sid if _usable_sub_id(sid) else "_ingest", {
+            _append_error(store, sid if _usable_sub_id(sid) else "_ingest", {
                 "step": "ingest",
                 "reason": f"{type(e).__name__}: {_safe_text(e)}",
                 "rejected_id": _safe_text(sid, 120),
                 "cloud": cloud, "at": _now(),
-            }, source=f"cloud:{cloud}")
+            }, source=f"cloud:{cloud}",
+                secrets=_subject_secrets(store, sid, card=it.get("card"),
+                                         card_text=it.get("card_text")),
+                safe_reason=f"{type(e).__name__}（訊息夾帶了卡上的內容，不上鏈）")
             continue
         known.add(sid)
         new += 1
@@ -491,6 +547,10 @@ def generate_one(card: dict[str, Any] | None, card_text: str | None,
             out = fallback_twin(card)
             out["engine"] = "fallback_deterministic"
             out["degraded_from"] = f"lmstudio:{model}"
+            # 🔴 `degrade_reason` 夾帶模型原始回應（可能逐字複誦卡上的字）
+            #    ⇒ **它不上鏈**，只有 `degrade_kind` 上鏈（`twinvault` 檔頭 5）。
+            out["degrade_kind"] = ("empty_content" if not str(r["text"]).strip()
+                                   else "unparseable")
             out["degrade_reason"] = why
             out["latency_ms"] = int((time.time() - t0) * 1000)
             out["reasoning_tokens"] = r["reasoning_tokens"]
@@ -515,9 +575,35 @@ def generate_one(card: dict[str, Any] | None, card_text: str | None,
             raise
         out = fallback_twin(card)
         out["degraded_from"] = f"lmstudio:{model}"
+        out["degrade_kind"] = type(e).__name__
         out["degrade_reason"] = f"{type(e).__name__}: {e}"
         out["latency_ms"] = int((time.time() - t0) * 1000)
         return out
+
+
+def _seal_generated(store: TwinStore, sid: str, twin: dict[str, Any],
+                    source: str) -> dict[str, Any]:
+    """把生成結果寫上鏈：**三句話進檔案庫，鏈上只有 commitment ＋量測欄位。**
+
+    防呆擋下來的時候不是「跳過這張卡」——跳過的話 `pending()` 下一輪又撿它起來，
+    展場一天就是幾萬次模型呼叫。改成退回**確定性 fallback**（零觀眾文字，
+    一定過得了防呆）再封一次；連那個都過不了就是我們自己的碼壞了，讓它炸出去。
+    """
+    try:
+        payload, secs = store.vault.seal_twin(sid, twin)
+        return twinvault.append_sealed(store, KIND_GENERATED, sid, payload, secs,
+                                       source=source, what="twin")
+    except twinvault.GUARD_ERRORS as e:
+        store.append(KIND_ERROR, sid, {
+            "step": "generate_seal",
+            "reason": "封印防呆擋下這份生成結果，改用確定性 fallback",
+            "guard": type(e).__name__, "at": _now(),
+        }, source="local:fallback")
+        safe = fallback_twin(None)
+        safe["degrade_kind"] = "seal_guard"
+        payload, secs = store.vault.seal_twin(sid, safe)
+        return twinvault.append_sealed(store, KIND_GENERATED, sid, payload, secs,
+                                       source="local:fallback", what="twin")
 
 
 def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
@@ -525,6 +611,10 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
              timeout: float = DEFAULT_GEN_TIMEOUT,
              allow_fallback: bool = True) -> dict[str, Any]:
     todo = store.pending(KIND_GENERATED)
+    # 撤回過的人不再生成。**不是過濾掉「看起來不想要的資料」**——
+    # 是那個人已經說了「刪掉我」，再拿他的卡去打模型就是沒在聽。
+    todo = [s for s in todo
+            if (store.current(s) or {}).get("status") not in ("withdrawn", "erased")]
     if limit:
         todo = todo[:limit]
     done, degraded, failed = 0, 0, 0
@@ -540,18 +630,21 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
             # 不寫的話這張卡每一輪都會再被撿起來、再炸一次，展場一天下來
             # 就是幾萬列 error，而螢幕上始終少一個人。
             failed += 1
-            store.append(KIND_ERROR, sid, {
+            _append_error(store, sid, {
                 "step": "generate",
                 "reason": f"{type(e).__name__}: {_safe_text(e)}", "at": _now(),
-            }, source="local:fallback")
+            }, source="local:fallback",
+                secrets=_subject_secrets(store, sid),
+                safe_reason=f"{type(e).__name__}（訊息夾帶了卡上的內容，不上鏈）")
             twin = fallback_twin(None)
             twin["degraded_from"] = f"lmstudio:{model}"
+            twin["degrade_kind"] = type(e).__name__
             twin["degrade_reason"] = f"卡的內容算不出分身：{type(e).__name__}: {_safe_text(e, 120)}"
         if twin.get("engine") == "fallback_deterministic":
             degraded += 1
-        store.append(KIND_GENERATED, sid, twin,
-                     source=f"1003:{endpoint}" if "lmstudio" in str(twin.get("engine"))
-                     else "local:fallback")
+        _seal_generated(store, sid, twin,
+                        f"1003:{endpoint}" if "lmstudio" in str(twin.get("engine"))
+                        else "local:fallback")
         done += 1
     return {"ok": True, "generated": done, "degraded": degraded, "failed": failed,
             "remaining": len(store.pending(KIND_GENERATED))}
@@ -570,7 +663,11 @@ def publish(store: TwinStore, cloud: str, token: str,
     """
     cloud = cloud.rstrip("/")
     todo = store.pending(KIND_PUBLISHED)
-    todo = [s for s in todo if (store.current(s) or {}).get("generated_seq")]
+    # 撤回過的不回寫。雲端那一份我們刪不到（沒有 delete 路由，`twinvault`
+    # 誠實邊界 2），但至少不要在人家說了「刪掉我」之後又送一份新的過去。
+    todo = [s for s in todo
+            if (store.current(s) or {}).get("generated_seq")
+            and (store.current(s) or {}).get("status") not in ("withdrawn", "erased")]
     if limit:
         todo = todo[:limit]
     ok, fail = 0, 0
@@ -591,10 +688,13 @@ def publish(store: TwinStore, cloud: str, token: str,
                          source=f"cloud:{cloud}")
             ok += 1
         except Exception as e:  # noqa: BLE001
-            store.append(KIND_ERROR, sid, {
-                "step": "publish", "reason": f"{type(e).__name__}: {e}",
+            _append_error(store, sid, {
+                "step": "publish", "reason": f"{type(e).__name__}: {_safe_text(e)}",
                 "cloud": cloud, "at": _now(),
-            }, source=f"cloud:{cloud}")
+            }, source=f"cloud:{cloud}",
+                secrets=_subject_secrets(store, sid),
+                safe_reason=f"{type(e).__name__}"
+                            "（雲端回的訊息夾帶了分身的句子，不上鏈）")
             fail += 1
     return {"ok": fail == 0, "published": ok, "failed": fail,
             "note": "publish 失敗不影響現場：螢幕讀的是本機真相來源"}
@@ -607,19 +707,29 @@ def publish(store: TwinStore, cloud: str, token: str,
 def build_view(store: TwinStore) -> dict[str, Any]:
     v = store.verify()
     people = []
+    withdrawn = 0
     for c in store.roster():
         twin = c.get("twin") or {}
+        gone = c.get("status") in ("withdrawn", "erased")
+        if gone:
+            withdrawn += 1
         people.append({
             "id": c["sub_id"],
-            "card": c.get("card"),
-            "arrival": twin.get("arrival"),
-            "working": twin.get("working"),
-            "handover": twin.get("handover"),
+            # 🔴 撤回過的人，畫面上什麼都不留。原文已經 `unlink()` 了，
+            #    這裡再把它當成「剛好讀不到」而留個空位也不對——狀態要講出來。
+            "card": None if gone else c.get("card"),
+            "arrival": None if gone else twin.get("arrival"),
+            "working": None if gone else twin.get("working"),
+            "handover": None if gone else twin.get("handover"),
             # 🔴 engine 一定要出到畫面層：真模型跟退化查表不可以長得一樣
             "engine": twin.get("engine"),
             "latency_ms": twin.get("latency_ms"),
             "status": c.get("status"),
             "errors": len(c.get("errors") or []),
+            # 原文到底在不在檔案庫裡（撤回之後是 False）；沒有封印過的舊卡是 None。
+            "card_available": c.get("card_available"),
+            # ⚠ 舊列的原文在鏈上拿不掉。這個旗標**不准隱藏**。
+            "plaintext_on_chain": bool(c.get("plaintext_on_chain")),
         })
     return {
         "generated_at": _now(),
@@ -628,10 +738,67 @@ def build_view(store: TwinStore) -> dict[str, Any]:
                   "head": v.get("head"), "genesis": v.get("genesis")},
         "counts": {"visitors": len(people), "events": store.count(),
                    "gaps": store.count(KIND_INGEST_GAP),
-                   "errors": store.count(KIND_ERROR)},
+                   "errors": store.count(KIND_ERROR),
+                   "withdrawn": withdrawn},
         "people": people,
         "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。",
+        "erasure_honesty": (
+            "原文與 nonce 住在鏈外的檔案庫，撤回時真的 unlink()，"
+            "刪除證明（被刪位元組的 sha256）簽上鏈。"
+            "鏈記的是「我們記下我們刪了」，不是「世上沒有副本」；"
+            "雲端郵箱那一份目前刪不到（沒有 delete 路由）。"
+            "plaintext_on_chain=true 的那幾位是 2026-09-21 之前進來的，"
+            "他們的原文在 append-only 鏈上，拿不掉。"),
     }
+
+
+# ---------------------------------------------------------------------------
+# 4b. withdraw —— 撤回 → 上鏈 → 原文 unlink() → PERSONA_ERASED
+# ---------------------------------------------------------------------------
+
+def withdraw(store: TwinStore, sub_id: str, *, reason: str = "subject_request",
+             source: str = "local:withdraw") -> dict[str, Any]:
+    """觀眾撤回同意。**帳本永不刪除，原文真的刪掉。**
+
+    三件事按這個順序（順序本身是規格）：
+    1. `withdrawn` 一列進 append-only 帳本 ＋ 簽章鏈 `CONSENT_WITHDRAW`
+       ——先宣告，才看得見「宣告了但沒做」這個狀態（`consent.py` 誠實邊界 2）；
+    2. 鏈外檔案庫的原文與 **nonce** 一起 `unlink()`
+       ——只刪原文留 nonce ＝ 沒刪（`consent.py` 誠實邊界 4）；
+    3. `erased` 一列（帶被刪位元組的 sha256）＋ 簽章鏈 `PERSONA_ERASED`。
+
+    冪等：已經 erased 的再呼叫一次回 `already=True`，不會多寫。
+    """
+    cur = store.current(sub_id)
+    if cur is None:
+        # 不認識的 id **不寫任何一列**。寫了的話，公網上任何人掃一遍
+        # 就能把 append-only 帳本灌到爆，而那條鏈刪不掉。
+        return {"ok": False, "sub_id": sub_id, "reason": "unknown_id"}
+    if cur.get("erased_seq"):
+        return {"ok": True, "sub_id": sub_id, "already": True,
+                "status": cur.get("status")}
+
+    residual = twinvault.legacy_plaintext_seqs(store, sub_id)
+    store.append(KIND_WITHDRAWN, sub_id, {
+        "v": 1, "reason": str(reason)[:120], "at": _now(),
+    }, source=source)
+    rec = store.vault.withdraw(sub_id, reason=str(reason)[:120])
+    ev = {
+        "v": 1,
+        "signed": rec["signed"],
+        "withdraw_hash": rec.get("withdraw_hash"),
+        "erase_hash": rec.get("erase_hash"),
+        "erased": rec["erased"],
+        "cloud_copy": rec["cloud_copy"],
+        # ⚠ 舊鏈的原文拿不掉。**這幾個 seq 要跟著刪除證明一起留下來**，
+        #   不然「已刪除」這三個字在那幾位身上就是假的。
+        "residual_plaintext_seqs": residual,
+        "fully_erased": not residual,
+        "problems": rec["problems"],
+        "at": _now(),
+    }
+    store.append(KIND_ERASED, sub_id, ev, source=source)
+    return {"ok": True, "sub_id": sub_id, "already": False, **ev}
 
 
 def export(store: TwinStore, out: pathlib.Path) -> dict[str, Any]:
@@ -644,14 +811,65 @@ def export(store: TwinStore, out: pathlib.Path) -> dict[str, Any]:
     return {"ok": True, "out": str(out), "visitors": len(view["people"])}
 
 
-def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1") -> int:
-    """唯讀 HTTP。讓別台機器（現場螢幕、1003 以外的機器）讀得到現況。
+WITHDRAW_PAGE = """<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>撤回我的分身</title>
+<style>
+ body{font:16px/1.7 system-ui,"Noto Sans TC",sans-serif;margin:0;padding:24px;
+      background:#141210;color:#efe9e1;max-width:34rem}
+ h1{font-size:1.3rem;margin:0 0 .6rem}
+ code{background:#262220;padding:.1rem .35rem;border-radius:4px}
+ button{font:inherit;padding:.7rem 1.4rem;margin-top:1rem;border:0;border-radius:8px;
+        background:#c2502f;color:#fff}
+ .note{color:#b7ada2;font-size:.9rem}
+</style></head><body>
+<h1>撤回我的分身</h1>
+<p>代號 <code>__ID__</code>　目前狀態：<code>__STATUS__</code></p>
+<p>按下去會發生三件事，而且每一件都留得下證據：</p>
+<ol>
+<li>「你撤回了」寫進<strong>永不刪除</strong>的帳本（也簽進同意鏈）。</li>
+<li>你打的那段原文與它的 nonce <strong>從檔案庫真的刪掉</strong>。</li>
+<li>刪掉的位元組 sha256 簽上鏈，成為<strong>刪除證明</strong>。</li>
+</ol>
+<p class="note">誠實邊界：鏈記的是「我們記下我們刪了」，不是「世上沒有副本」。
+雲端收件那一份目前刪不到。你手機上的截圖我們也管不到。</p>
+<form method="POST" action="__ACTION__"><button type="submit">確定撤回</button></form>
+<p class="note">這一頁不會自己動手：撤回是 POST，光是打開這一頁什麼都沒發生。</p>
+</body></html>"""
 
-    **唯讀有兩層，都是硬的**：
-    1. 只實作 `do_GET`，沒有任何寫入路徑；
+
+def _html_escape(s: str) -> str:
+    return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+             .replace('"', "&quot;"))
+
+
+def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1", *,
+          allow_withdraw: bool = False, withdraw_token: str | None = None) -> int:
+    """唯讀 HTTP ＋（可選）一條撤回用的寫入路徑。
+
+    **唯讀那一側有兩層，都是硬的，而且沒有因為加了撤回而變鬆**：
+    1. `do_GET` 沒有任何寫入路徑；
     2. `TwinStore(..., read_only=True)` ⇒ SQLite 以 `mode=ro` 開檔。
        第 2 層是必要的——預設建構子會 `mkdir` ＋ `executescript(SCHEMA)`，
        那是寫入，等於**每次 GET 都在對真相來源動手**。
+
+    **撤回另開一條**（`do_POST`），而且：
+
+    · 預設**關著**（`--allow-withdraw` 才開）。現場螢幕那台跑的還是純唯讀。
+    · 它自己開一個**可寫**的 `TwinStore`，不碰唯讀那一個。
+    · `GET /withdraw/<id>` 只是一張確認頁，**不寫任何東西**——
+      不然瀏覽器預抓／爬蟲／聊天軟體展開連結就會把人家的分身刪掉。
+
+    ## token 要不要？（2026-09-21 想過了，結論寫在這裡）
+
+    **預設不要共用 token。** 理由：公網頁上印著「你可以隨時要求我們刪除」，
+    而共用 token 只有工作人員有 ⇒ 觀眾自己撤回不了 ⇒ 那句話還是假的。
+    `sub_id` 本身就是能力憑證（觀眾手機上才有那個代號）。
+
+    誠實邊界：**id 猜得到的話，別人可以撤回你的分身。** 那是破壞不是洩漏——
+    失敗方向朝「刪掉了不該刪的」，而不是「該刪的沒刪」，
+    在這件事上是可以接受的那一邊。要更嚴的場地加 `--withdraw-token`。
     """
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -665,6 +883,29 @@ def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1") -> int:
             self.end_headers()
             self.wfile.write(b)
 
+        def _send_html(self, html: str, code: int = 200) -> None:
+            b = html.encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+
+        def _sub_id(self) -> str | None:
+            path = self.path.split("?")[0]
+            if not path.startswith("/withdraw/"):
+                return None
+            sid = urllib.parse.unquote(path[len("/withdraw/"):])
+            return sid or None
+
+        def _token_ok(self) -> bool:
+            if not withdraw_token:
+                return True
+            q = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            given = (self.headers.get("X-Vacant-Token")
+                     or (q.get("token") or [""])[0])
+            return given == withdraw_token
+
         def do_GET(self) -> None:  # noqa: N802
             st = TwinStore(store_path, read_only=True)
             try:
@@ -676,16 +917,64 @@ def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1") -> int:
                 elif p == "/stats":
                     self._send({"events": st.count(), "visitors": len(st.sub_ids()),
                                 "store_id": st.store_id})
+                elif p.startswith("/withdraw"):
+                    sid = self._sub_id()
+                    if sid is None:
+                        self._send({"error": "用 /withdraw/<你的代號>",
+                                    "enabled": allow_withdraw}, 404)
+                        return
+                    cur = st.current(sid)
+                    if cur is None:
+                        self._send({"error": "unknown_id", "id": sid}, 404)
+                        return
+                    # **唯讀**：只是一張確認頁，按鈕才是 POST。
+                    q = urllib.parse.urlsplit(self.path).query
+                    action = urllib.parse.quote(sid, safe="")
+                    self._send_html(
+                        WITHDRAW_PAGE
+                        .replace("__ID__", _html_escape(sid))
+                        .replace("__STATUS__", _html_escape(str(cur.get("status"))))
+                        .replace("__ACTION__",
+                                 "/withdraw/" + action + (f"?{q}" if q else "")))
                 else:
-                    self._send({"error": "只有 /visitors.json /verify /stats"}, 404)
+                    self._send({"error": "只有 /visitors.json /verify /stats"
+                                         " /withdraw/<id>"}, 404)
             finally:
                 st.close()
+
+        def do_POST(self) -> None:  # noqa: N802
+            sid = self._sub_id()
+            if sid is None:
+                self._send({"error": "只有 POST /withdraw/<id>"}, 404)
+                return
+            if not allow_withdraw:
+                self._send({"error": "這一台沒開撤回（唯讀端點）。"
+                                     "要開請用 --allow-withdraw；"
+                                     "現場也可以走紙本＋CLI withdraw。"}, 405)
+                return
+            if not self._token_ok():
+                self._send({"error": "token 不符"}, 403)
+                return
+            # 有人可能 POST 帶 body；讀掉它，不然 keep-alive 的下一個請求會錯位。
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                n = 0
+            if n > 0:
+                self.rfile.read(min(n, 1 << 16))
+            st = TwinStore(store_path)     # ← 撤回是寫入，另開一個可寫的
+            try:
+                out = withdraw(st, sid, source="serve:withdraw")
+            finally:
+                st.close()
+            self._send(out, 200 if out.get("ok") else 404)
 
         def log_message(self, *a): pass  # noqa: D102, ANN002
 
     srv = ThreadingHTTPServer((bind, port), H)
-    print(f"twinlink serve（唯讀）http://{bind}:{port}/visitors.json  db={store_path}",
-          flush=True)
+    print(f"twinlink serve（唯讀）http://{bind}:{port}/visitors.json  db={store_path}"
+          f"  withdraw={'開' if allow_withdraw else '關'}"
+          f"{'（需 token）' if withdraw_token else ''}", flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
@@ -837,6 +1126,15 @@ def main(argv: Iterable[str] | None = None) -> int:
     v = s.add_parser("serve")
     v.add_argument("--port", type=int, default=8901)
     v.add_argument("--bind", default="127.0.0.1")
+    v.add_argument("--allow-withdraw", action="store_true",
+                   help="開 POST /withdraw/<id>（現場螢幕那台不要開）")
+    v.add_argument("--withdraw-token", default=None,
+                   help="給撤回加一把共用 token。**預設不加**，"
+                        "理由寫在 serve() 的 docstring")
+
+    wd = s.add_parser("withdraw", help="撤回 → 上鏈 → unlink → PERSONA_ERASED")
+    wd.add_argument("--id", required=True)
+    wd.add_argument("--reason", default="subject_request")
 
     s.add_parser("selftest")
     s.add_parser("view")
@@ -855,7 +1153,9 @@ def main(argv: Iterable[str] | None = None) -> int:
     if a.cmd == "selftest":
         return selftest()
     if a.cmd == "serve":
-        return serve(pathlib.Path(a.db), a.port, a.bind)
+        return serve(pathlib.Path(a.db), a.port, a.bind,
+                     allow_withdraw=a.allow_withdraw,
+                     withdraw_token=a.withdraw_token)
 
     st = TwinStore(a.db)
     # **端點在這裡解析一次**，而且要講出來挑了哪一個。
@@ -876,6 +1176,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         _p(export(st, pathlib.Path(a.out))); return 0
     if a.cmd == "view":
         _p(build_view(st)); return 0
+    if a.cmd == "withdraw":
+        out = withdraw(st, a.id, reason=a.reason, source="cli:withdraw")
+        _p(out)
+        return 0 if out.get("ok") else 1
     if a.cmd == "loop":
         n = 0
         while True:
