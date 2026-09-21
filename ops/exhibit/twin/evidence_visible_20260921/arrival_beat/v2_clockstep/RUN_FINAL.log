@@ -1,0 +1,24 @@
+index.html sha256[0:16] = ebabae34d443f085   13:46:53
+=== negctl -> S03_negctl_arrive0 (subs=1) 13:46:53 load=699.46 815.77 799.35
+--- rc=0 13:51:15
+{"arm": "negctl", "out": "S03_negctl_arrive0", "anchorFound": true, "postArrivals": {"total": 0, "flying": 0, "waiting": [], "marks": []}, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 2465, "loadavg": [978, 888, 834]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json', 'warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路']
+=== after -> S04_after_triple (subs=3) 13:51:15 load=973.79 888.81 834.82
+--- rc=0 13:56:27
+{"arm": "after", "out": "S04_after_triple", "anchorFound": true, "postArrivals": {"total": 3, "flying": 3, "waiting": [{"label": "手風琴", "place": 1, "looked": {"turned": 4, "stopped": 7}}, {"label": "小火柴", "place": 2, "looked": {"turned": 0, "stopped": 0}}, {"label": "蜂蜜罐", "place": 3, "looked": {"turned": 0, "stopped": 0}}], "marks": [{"id": "S04_after_triple-135219-0", "at": 1788179963742200, "drawnAt": 1788179963742208}, {"id": "S04_after_triple-135219-1", "at": 1788179963742200, "drawnAt": 1788179963742624}, {"id": "S04_after_triple-135219-2", "at": 1788179963742200, "drawnAt": 1788179963743040}]}, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 2241, "loadavg": [479, 2, 910]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json']
+=== before -> S05_before_triple (subs=3) 13:56:27 load=752.33 113.99 919.18
+--- rc=0 14:13:48
+{"arm": "before", "out": "S05_before_triple", "anchorFound": false, "postArrivals": null, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 3111, "loadavg": [985, 871, 487]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json', 'warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路']
+=== after -> S02_after_single (subs=1) 14:13:49 load=990.92 879.81 498.74
+--- rc=0 14:17:34
+{"arm": "after", "out": "S02_after_single", "anchorFound": true, "postArrivals": {"total": 1, "flying": 1, "waiting": [{"label": "果醬瓶", "place": 1, "looked": {"turned": 4, "stopped": 7}}], "marks": [{"id": "S02_after_single-141444-0", "at": 1788181307878926, "drawnAt": 1788181307878928}]}, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 1817, "loadavg": [917, 939, 604]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json']
+=== before -> S01_before_single (subs=1) 14:17:34 load=998.87 956.78 622.29
+--- rc=0 14:22:14
+{"arm": "before", "out": "S01_before_single", "anchorFound": true, "postArrivals": null, "castReady": 6, "watchdogArmed": 1, "watchdogWouldFire": 1, "maxFrameGapMs": 2989, "loadavg": [838, 598, 801]}
+  console: ['log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json', 'warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路']
+index.html sha256[0:16] after = 8e2ec47497ba191b
+⚠ 碼在這一批期間被改了（別的 agent 也在動這個檔）——五臂不是同一份碼
+ALLDONE_FINAL

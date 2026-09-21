@@ -1,0 +1,31 @@
+{
+ "label": "after",
+ "variant": "single",
+ "sceneAtTrigger": "sc=s00 mode=invite pool=29 heap=9MB reloads=1",
+ "settleGaps": [
+  4288,
+  3740
+ ],
+ "pollHealthy": false,
+ "pollWaitMs": 12339,
+ "latency": [
+  {
+   "id": "probe-aaa-0001",
+   "hitToCallbackMs": 2107,
+   "callbackToPaintMs": 4273,
+   "hitToPaintMs": 6380
+  }
+ ],
+ "fps": 1.2,
+ "waiting": [
+  {
+   "label": "陶鍋蓋",
+   "code": "陶鍋蓋",
+   "place": 1,
+   "tok": "陶鍋蓋 · 橙黃菱"
+  }
+ ],
+ "total": 1,
+ "sceneAfter": "sc=s03 mode=invite pool=22 heap=9MB reloads=1",
+ "console": []
+}

@@ -1,0 +1,16 @@
+{
+ "label": "negctl",
+ "variant": "off",
+ "sceneAtTrigger": "sc=s00 mode=invite pool=30 heap=9MB reloads=0",
+ "settleGaps": [
+  4154
+ ],
+ "pollHealthy": false,
+ "pollWaitMs": 9261,
+ "latency": null,
+ "fps": 0.3,
+ "waiting": [],
+ "total": 0,
+ "sceneAfter": "sc=s00 mode=invite pool=33 heap=9MB reloads=0",
+ "console": []
+}

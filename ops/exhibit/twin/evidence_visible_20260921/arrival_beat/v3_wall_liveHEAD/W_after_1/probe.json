@@ -1,0 +1,312 @@
+{
+ "label": "after",
+ "out": "W_after_1",
+ "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+ "n_subs": 1,
+ "viewport": "1280x720",
+ "started": "2026-09-21T14:49:47+0800",
+ "preState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "bridge": {
+   "configured": true,
+   "kind": "snapshot",
+   "url": "/probe/visitors.json",
+   "lastOkAt": 1789973441487,
+   "lastErr": null,
+   "intervalMs": 1000,
+   "tried": [
+    {
+     "kind": "snapshot",
+     "url": "/probe/visitors.json",
+     "ok": true,
+     "n": 0,
+     "reconciled": 0
+    }
+   ],
+   "payloadAt": null,
+   "cloud": {
+    "mode": null,
+    "claims": false
+   },
+   "cloudOnly": {
+    "pending": 0,
+    "ids": [],
+    "oldestAt": null,
+    "dropped": 0,
+    "handoffUrl": null,
+    "handoff": "off"
+   },
+   "seen": {
+    "n": 0,
+    "persisted": true,
+    "why": null
+   }
+  },
+  "timeOrigin": 1789973409474.4,
+  "now": 32433.699999999255,
+  "title": "sc=s00 mode=wait pool=0 heap=9MB reloads=0",
+  "polls": [
+   {
+    "t0": 1368.6000000014901,
+    "t1": 2554.800000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 7884.5,
+    "t1": 9371.10000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 14405.300000000745,
+    "t1": 15620.699999999255,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 20277,
+    "t1": 21039.60000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 25022.199999999255,
+    "t1": 26038.10000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 30140.800000000745,
+    "t1": 30755.300000000745,
+    "ok": true,
+    "st": 200
+   }
+  ],
+  "frameTs": [
+   99.8,
+   733,
+   1349.7,
+   2116.3,
+   2549.6,
+   3966.3,
+   4982.9,
+   5849.5,
+   6866.1,
+   7882.8,
+   9366,
+   10232.7,
+   11382.6,
+   12365.9,
+   13482.5,
+   14399.1,
+   15499.1,
+   16499,
+   17265.7,
+   18015.7,
+   19365.6,
+   20265.6,
+   21032.2,
+   22248.9,
+   22882.1,
+   23615.4,
+   24248.8,
+   25015.4,
+   26032,
+   26948.7,
+   27681.9,
+   28515.2,
+   29498.5,
+   30131.9,
+   30748.5,
+   31381.8,
+   31998.5
+  ],
+  "frames": 37,
+  "firstFrame": 99.8,
+  "lastFrame": 31998.5,
+  "queueLen": 0,
+  "watchdogArmed": 1,
+  "watchdogWouldFire": 0,
+  "maxFrameGapMs": 1486,
+  "castReady": 6
+ },
+ "ids": [
+  "W_after_1-145044-0"
+ ],
+ "t_write_epoch_ms": 1789973444479.605,
+ "anchor": {
+  "t0_def": "回呼進到頁面（spawnQueue／arrivals.total 增加）",
+  "writeToAnchorMs_outerPolled": 2156,
+  "found": true
+ },
+ "shots": [],
+ "postState": {
+  "arrivals": {
+   "total": 1,
+   "flying": 0,
+   "waiting": [
+    {
+     "label": "小南瓜",
+     "code": "小南瓜",
+     "place": 1,
+     "tok": "小南瓜",
+     "looked": {
+      "turned": 2,
+      "stopped": 7
+     }
+    }
+   ],
+   "marks": [
+    {
+     "id": "W_after_1-145044-0",
+     "at": 37158.199999999255,
+     "drawnAt": 37189.10000000149
+    }
+   ]
+  },
+  "bridge": {
+   "configured": true,
+   "kind": "snapshot",
+   "url": "/probe/visitors.json",
+   "lastOkAt": 1789973453996,
+   "lastErr": null,
+   "intervalMs": 1000,
+   "tried": [
+    {
+     "kind": "snapshot",
+     "url": "/probe/visitors.json",
+     "ok": true,
+     "n": 1,
+     "reconciled": 0
+    }
+   ],
+   "payloadAt": null,
+   "cloud": {
+    "mode": null,
+    "claims": false
+   },
+   "cloudOnly": {
+    "pending": 0,
+    "ids": [],
+    "oldestAt": null,
+    "dropped": 0,
+    "handoffUrl": null,
+    "handoff": "off"
+   },
+   "seen": {
+    "n": 1,
+    "persisted": true,
+    "why": null
+   }
+  },
+  "timeOrigin": 1789973409474.4,
+  "now": 45186.199999999255,
+  "title": "sc=s03 mode=wait pool=0 heap=9MB reloads=0",
+  "polls": [
+   {
+    "t0": 1368.6000000014901,
+    "t1": 2554.800000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 7884.5,
+    "t1": 9371.10000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 14405.300000000745,
+    "t1": 15620.699999999255,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 20277,
+    "t1": 21039.60000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 25022.199999999255,
+    "t1": 26038.10000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 30140.800000000745,
+    "t1": 30755.300000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 33643.900000002235,
+    "t1": 34013,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 35985.900000002235,
+    "t1": 36409.10000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 38935.900000002235,
+    "t1": 39320.60000000149,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 41622.300000000745,
+    "t1": 41920.900000002235,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 43551.5,
+    "t1": 43770.5,
+    "ok": true,
+    "st": 200
+   }
+  ],
+  "frames": 76,
+  "firstFrame": 99.8,
+  "lastFrame": 44931.3,
+  "queueLen": 1,
+  "watchdogArmed": 1,
+  "watchdogWouldFire": 0,
+  "maxFrameGapMs": 1486,
+  "castReady": 6
+ },
+ "latency": [
+  {
+   "id": "W_after_1-145044-0",
+   "writeToCallbackMs": 2153,
+   "callbackToPaintMs": 31,
+   "writeToPaintMs": 2184
+  }
+ ],
+ "fpsWholeRun": 1.7,
+ "fpsAroundEvent": 2.98,
+ "pollGapsMs": {
+  "n": 10,
+  "median": 4745,
+  "max": 6521
+ },
+ "loadavg": [
+  727.84912109375,
+  928.7080078125,
+  955.3828125
+ ],
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+ ],
+ "video": null
+}

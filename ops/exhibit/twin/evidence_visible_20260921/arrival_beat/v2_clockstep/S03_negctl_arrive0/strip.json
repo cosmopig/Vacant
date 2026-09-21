@@ -1,0 +1,255 @@
+{
+ "arm": "negctl",
+ "out": "S03_negctl_arrive0",
+ "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1&arrive=0",
+ "n_subs": 1,
+ "clock": "Playwright fake clock（rAF／performance.now 一起接管）",
+ "viewport": "1280x720",
+ "started": "2026-09-21T13:46:56+0800",
+ "loadavg_at_start": [
+  699.45751953125,
+  815.76708984375,
+  799.353515625
+ ],
+ "preState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s00 mode=wait pool=0 heap=0MB reloads=0",
+  "sceneT": 3.5000000000000018,
+  "snapA": 0,
+  "sceneId": "s00",
+  "watchdogWouldFire": 0,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 2144,
+  "bridgeKind": "snapshot",
+  "bridgeErr": "本機都讀不到，而且沒有設公網退路",
+  "now": 41650
+ },
+ "warmRealSec": 41.1,
+ "ids": [
+  "S03_negctl_arrive0-134800-0"
+ ],
+ "anchorFound": true,
+ "anchorVirtualMsFromWrite": 1000,
+ "frames": [
+  {
+   "virtualMs": 0,
+   "file": "f__+0000ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 60,
+   "file": "f__+0060ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 120,
+   "file": "f__+0120ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 180,
+   "file": "f__+0180ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 250,
+   "file": "f__+0250ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 320,
+   "file": "f__+0320ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 400,
+   "file": "f__+0400ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 500,
+   "file": "f__+0500ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 620,
+   "file": "f__+0620ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 760,
+   "file": "f__+0760ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 900,
+   "file": "f__+0900ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 1100,
+   "file": "f__+1100ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 1400,
+   "file": "f__+1400ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  },
+  {
+   "virtualMs": 1800,
+   "file": "f__+1800ms.jpg",
+   "state": {
+    "total": 0,
+    "flying": 0,
+    "dock": 0,
+    "burst": null,
+    "scene": "s04",
+    "flyingInfo": [],
+    "waiting": []
+   }
+  }
+ ],
+ "postState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s04 mode=visitor_spawn pool=0 heap=0MB reloads=0",
+  "sceneT": 1.7760000000000014,
+  "snapA": 0,
+  "sceneId": "s04",
+  "watchdogWouldFire": 1,
+  "watchdogArmed": 1,
+  "maxFrameGapMs": 2465,
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 1788179705355103
+ },
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json",
+  "warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路"
+ ],
+ "loadavg_at_end": [
+  977.69140625,
+  888.13330078125,
+  834.2646484375
+ ]
+}

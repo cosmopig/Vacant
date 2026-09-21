@@ -1,0 +1,136 @@
+{
+ "label": "nocut",
+ "variant": "single",
+ "started": "2026-09-21T00:44:04.760Z",
+ "viewport": "1280x720",
+ "url": "http://127.0.0.1:8420/world3/index.html?twinfile=live/visitors.json&twinpoll=1000&arrivecut=0",
+ "console": [],
+ "polls": [
+  1789951451901,
+  1789951455633,
+  1789951459402,
+  1789951462276,
+  1789951465110,
+  1789951467777,
+  1789951470293,
+  1789951473416,
+  1789951476146,
+  1789951478392,
+  1789951480526,
+  1789951483056
+ ],
+ "settleGaps": [
+  3732,
+  3769,
+  2874,
+  2834,
+  2667
+ ],
+ "pollHealthy": false,
+ "sceneAtTrigger": "sc=s00 mode=invite pool=23 heap=9MB reloads=0",
+ "t0": 1789951473299,
+ "loadToTrigger": 28510,
+ "after": {
+  "title": "sc=s04 mode=visitor_spawn pool=22 heap=9MB reloads=0",
+  "timeOrigin": 1789951444798.8,
+  "arrivals": {
+   "total": 1,
+   "waiting": [],
+   "marks": [
+    {
+     "id": "probe-aaa-0001",
+     "at": 29762.900000095367,
+     "drawnAt": 30103.400000095367
+    }
+   ]
+  }
+ },
+ "tHit": 1789951473416,
+ "pollWaitMs": 117,
+ "latency": [
+  {
+   "id": "probe-aaa-0001",
+   "hitToCallbackMs": 1146,
+   "callbackToPaintMs": 341,
+   "hitToPaintMs": 1486
+  }
+ ],
+ "frameCount": 39,
+ "frameSpanMs": 12870,
+ "fpsMeasured": 3,
+ "stillZero": "tHit(帶著這個人的 HTTP 回應送出的那一刻)",
+ "stills": [
+  {
+   "want": -1500,
+   "actual": -1377,
+   "file": "nocut_single__want-1500ms__real-1377ms.jpg"
+  },
+  {
+   "want": 0,
+   "actual": 13,
+   "file": "nocut_single__want+0ms__real+13ms.jpg"
+  },
+  {
+   "want": 150,
+   "actual": 13,
+   "file": "nocut_single__want+150ms__real+13ms.jpg"
+  },
+  {
+   "want": 300,
+   "actual": 532,
+   "file": "nocut_single__want+300ms__real+532ms.jpg"
+  },
+  {
+   "want": 450,
+   "actual": 532,
+   "file": "nocut_single__want+450ms__real+532ms.jpg"
+  },
+  {
+   "want": 600,
+   "actual": 532,
+   "file": "nocut_single__want+600ms__real+532ms.jpg"
+  },
+  {
+   "want": 800,
+   "actual": 751,
+   "file": "nocut_single__want+800ms__real+751ms.jpg"
+  },
+  {
+   "want": 1000,
+   "actual": 1157,
+   "file": "nocut_single__want+1000ms__real+1157ms.jpg"
+  },
+  {
+   "want": 1300,
+   "actual": 1157,
+   "file": "nocut_single__want+1300ms__real+1157ms.jpg"
+  },
+  {
+   "want": 1700,
+   "actual": 1542,
+   "file": "nocut_single__want+1700ms__real+1542ms.jpg"
+  },
+  {
+   "want": 2200,
+   "actual": 2007,
+   "file": "nocut_single__want+2200ms__real+2007ms.jpg"
+  },
+  {
+   "want": 3000,
+   "actual": 3090,
+   "file": "nocut_single__want+3000ms__real+3090ms.jpg"
+  },
+  {
+   "want": 4500,
+   "actual": 4615,
+   "file": "nocut_single__want+4500ms__real+4615ms.jpg"
+  },
+  {
+   "want": 7000,
+   "actual": 6943,
+   "file": "nocut_single__want+7000ms__real+6943ms.jpg"
+  }
+ ],
+ "video": null,
+ "videoErr": "ffmpeg version n7.0.1-playwright-build-1011 Copyright (c) 2000-2024 the FFmpeg developers\n  built with Apple clang version 14.0.3 (clang-1403.0.22.14.1)\n  configuration: --pkg-config=pkg-config --pkg-config-flags=--static --extra-cflags=-I//Users/runner/work/playwright-browsers/playwright-browsers/b"
+}

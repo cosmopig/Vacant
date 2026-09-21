@@ -1,0 +1,509 @@
+{
+ "label": "after",
+ "out": "W2_after",
+ "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+ "n_subs": 1,
+ "viewport": "1280x720",
+ "started": "2026-09-21T16:06:00+0800",
+ "preState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "bridge": {
+   "configured": true,
+   "kind": "snapshot",
+   "url": "/probe/visitors.json",
+   "lastOkAt": 1789977984334,
+   "lastErr": null,
+   "intervalMs": 1000,
+   "tried": [
+    {
+     "kind": "snapshot",
+     "url": "/probe/visitors.json",
+     "ok": true,
+     "n": 0,
+     "reconciled": 0
+    }
+   ],
+   "payloadAt": null,
+   "cloud": {
+    "mode": null,
+    "claims": false
+   },
+   "cloudOnly": {
+    "pending": 0,
+    "ids": [],
+    "oldestAt": null,
+    "dropped": 0,
+    "handoffUrl": null,
+    "handoff": "off"
+   },
+   "seen": {
+    "n": 0,
+    "persisted": true,
+    "why": null
+   }
+  },
+  "timeOrigin": 1789977963403.3,
+  "now": 23307.39999999851,
+  "title": "sc=s00 mode=wait pool=0 heap=9MB reloads=0",
+  "polls": [
+   {
+    "t0": 414.69999999925494,
+    "t1": 757.3999999985099,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 2533.89999999851,
+    "t1": 2784.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 4682.5,
+    "t1": 4863.300000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 6778.800000000745,
+    "t1": 7222.599999997765,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 9151.599999997765,
+    "t1": 9751.099999997765,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 12350.099999997765,
+    "t1": 12609.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 14475.099999997765,
+    "t1": 14801.39999999851,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 16854,
+    "t1": 16974.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 19374.300000000745,
+    "t1": 19970.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 22452.800000000745,
+    "t1": 22875,
+    "ok": true,
+    "st": 200
+   }
+  ],
+  "frameTs": [
+   18.1,
+   251.5,
+   384.8,
+   751.4,
+   968.2,
+   1284.8,
+   1784.8,
+   2051.4,
+   2334.7,
+   2518.1,
+   2768,
+   3101.4,
+   3368,
+   3601.4,
+   3834.7,
+   4218,
+   4518,
+   4668,
+   4851.3,
+   5151.3,
+   5301.3,
+   5618,
+   5868,
+   6234.5,
+   6518,
+   6767.9,
+   7217.9,
+   7334.5,
+   7701.2,
+   8017.9,
+   8184.5,
+   8701.1,
+   9134.5,
+   9734.5,
+   10184.4,
+   10667.8,
+   10867.7,
+   11017.7,
+   11167.7,
+   11501,
+   11651,
+   12001,
+   12334.3,
+   12601,
+   13001,
+   13184.3,
+   13417.6,
+   13567.6,
+   13801,
+   14051,
+   14350.9,
+   14467.6,
+   14784.2,
+   15084.2,
+   15200.9,
+   15517.5,
+   15800.9,
+   15950.9,
+   16150.8,
+   16467.5,
+   16850.8,
+   16967.5,
+   17334.2,
+   17634.1,
+   18217.4,
+   18517.4,
+   18934,
+   19367.4,
+   19967.4,
+   20550.6,
+   20917.4,
+   21117.3,
+   21517.3,
+   21817.3,
+   21950.6,
+   22450.6,
+   22867.2
+  ],
+  "frames": 77,
+  "firstFrame": 18.1,
+  "lastFrame": 22867.2,
+  "queueLen": 0,
+  "watchdogArmed": 1,
+  "watchdogWouldFire": 0,
+  "maxFrameGapMs": 599,
+  "castReady": 6
+ },
+ "ids": [
+  "W2_after-160629-0"
+ ],
+ "t_write_epoch_ms": 1789977989410.114,
+ "anchor": {
+  "t0_def": "回呼進到頁面（spawnQueue／arrivals.total 增加）",
+  "writeToAnchorMs_outerPolled": 3494,
+  "found": true
+ },
+ "shots": [
+  {
+   "want": 0,
+   "real": 0,
+   "file": "shot__want+0ms__real+0ms.jpg"
+  },
+  {
+   "want": 150,
+   "real": 2811,
+   "file": "shot__want+150ms__real+2811ms.jpg"
+  },
+  {
+   "want": 300,
+   "real": 5882,
+   "file": "shot__want+300ms__real+5882ms.jpg"
+  },
+  {
+   "want": 450,
+   "real": 8789,
+   "file": "shot__want+450ms__real+8789ms.jpg"
+  },
+  {
+   "want": 600,
+   "real": 11581,
+   "file": "shot__want+600ms__real+11581ms.jpg"
+  },
+  {
+   "want": 800,
+   "real": 14516,
+   "file": "shot__want+800ms__real+14516ms.jpg"
+  },
+  {
+   "want": 1000,
+   "real": 17691,
+   "file": "shot__want+1000ms__real+17691ms.jpg"
+  },
+  {
+   "want": 1300,
+   "real": 19961,
+   "file": "shot__want+1300ms__real+19961ms.jpg"
+  },
+  {
+   "want": 1700,
+   "real": 22442,
+   "file": "shot__want+1700ms__real+22442ms.jpg"
+  },
+  {
+   "want": 2200,
+   "real": 24926,
+   "file": "shot__want+2200ms__real+24926ms.jpg"
+  },
+  {
+   "want": 3000,
+   "real": 27942,
+   "file": "shot__want+3000ms__real+27942ms.jpg"
+  },
+  {
+   "want": 4500,
+   "real": 30337,
+   "file": "shot__want+4500ms__real+30337ms.jpg"
+  },
+  {
+   "want": 7000,
+   "real": 33153,
+   "file": "shot__want+7000ms__real+33153ms.jpg"
+  }
+ ],
+ "postState": {
+  "arrivals": {
+   "total": 1,
+   "flying": 0,
+   "waiting": [],
+   "marks": [
+    {
+     "id": "W2_after-160629-0",
+     "at": 29408.300000000745,
+     "drawnAt": 29591.199999999255
+    }
+   ]
+  },
+  "bridge": {
+   "configured": true,
+   "kind": "snapshot",
+   "url": "/probe/visitors.json",
+   "lastOkAt": 1789978029275,
+   "lastErr": null,
+   "intervalMs": 1000,
+   "tried": [
+    {
+     "kind": "snapshot",
+     "url": "/probe/visitors.json",
+     "ok": true,
+     "n": 1,
+     "reconciled": 0
+    }
+   ],
+   "payloadAt": null,
+   "cloud": {
+    "mode": null,
+    "claims": false
+   },
+   "cloudOnly": {
+    "pending": 0,
+    "ids": [],
+    "oldestAt": null,
+    "dropped": 0,
+    "handoffUrl": null,
+    "handoff": "off"
+   },
+   "seen": {
+    "n": 1,
+    "persisted": true,
+    "why": null
+   }
+  },
+  "timeOrigin": 1789977963403.3,
+  "now": 65873.69999999925,
+  "title": "sc=s04 mode=visitor_spawn pool=0 heap=9MB reloads=0",
+  "polls": [
+   {
+    "t0": 414.69999999925494,
+    "t1": 757.3999999985099,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 2533.89999999851,
+    "t1": 2784.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 4682.5,
+    "t1": 4863.300000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 6778.800000000745,
+    "t1": 7222.599999997765,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 9151.599999997765,
+    "t1": 9751.099999997765,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 12350.099999997765,
+    "t1": 12609.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 14475.099999997765,
+    "t1": 14801.39999999851,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 16854,
+    "t1": 16974.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 19374.300000000745,
+    "t1": 19970.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 22452.800000000745,
+    "t1": 22875,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 25110.39999999851,
+    "t1": 25395.599999997765,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 28369.800000000745,
+    "t1": 28646,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 30843.800000000745,
+    "t1": 31282.800000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 34330.800000000745,
+    "t1": 34787,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 37241.800000000745,
+    "t1": 37631.300000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 40529.599999997765,
+    "t1": 41064.300000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 44011.099999997765,
+    "t1": 44629.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 47184,
+    "t1": 47548.599999997765,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 49878.599999997765,
+    "t1": 50168.5,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 52604,
+    "t1": 53138.699999999255,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 55375.5,
+    "t1": 55800,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 58326.599999997765,
+    "t1": 58824.300000000745,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 61394.199999999255,
+    "t1": 61777.699999999255,
+    "ok": true,
+    "st": 200
+   },
+   {
+    "t0": 64307.599999997765,
+    "t1": 64746,
+    "ok": true,
+    "st": 200
+   }
+  ],
+  "frames": 172,
+  "firstFrame": 18.1,
+  "lastFrame": 65282.2,
+  "queueLen": 0,
+  "watchdogArmed": 1,
+  "watchdogWouldFire": 0,
+  "maxFrameGapMs": 675,
+  "castReady": 6
+ },
+ "latency": [
+  {
+   "id": "W2_after-160629-0",
+   "writeToCallbackMs": 3401,
+   "callbackToPaintMs": 183,
+   "writeToPaintMs": 3584
+  }
+ ],
+ "fpsWholeRun": 2.64,
+ "fpsAroundEvent": 2.84,
+ "pollGapsMs": {
+  "n": 23,
+  "median": 2772,
+  "max": 3487
+ },
+ "loadavg": [
+  320.3564453125,
+  190.376953125,
+  447.06689453125
+ ],
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+ ],
+ "video": "W2_after.webm"
+}

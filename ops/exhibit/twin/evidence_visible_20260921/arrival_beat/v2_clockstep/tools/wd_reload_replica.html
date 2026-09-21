@@ -1,0 +1,19 @@
+<!doctype html><meta charset="utf-8"><body><script>
+// index.html:4283-4292 那個看門狗的**逐字複製**，只把 `lastFrameTs` 預設成
+// 「已經凍了 99 秒」⇒ 下一槍一定要開。
+//
+// 這一頁只回答一個問題：**攔得住 `location.reload()` 嗎。**
+// 判準＝`sessionStorage.wd_loads`（這份文件被載入第幾次）：1 ＝沒被重載走。
+// 替身自己的「凍了多久」計數由另一頁 `wdfreeze.html` 驗（那一頁真的卡住主執行緒）。
+let lastFrameTs = performance.now() - 99999;
+window.__loads = (parseInt(sessionStorage.getItem("wd_loads")||"0") + 1);
+sessionStorage.setItem("wd_loads", window.__loads);
+setInterval(() => {
+  if (document.hidden){ lastFrameTs = performance.now(); return; }
+  if (performance.now() - lastFrameTs > 10000){
+    sessionStorage.setItem("vw_reloads",
+      (parseInt(sessionStorage.getItem("vw_reloads")||"0") + 1));
+    location.reload();
+  }
+}, 5000);
+</script></body>

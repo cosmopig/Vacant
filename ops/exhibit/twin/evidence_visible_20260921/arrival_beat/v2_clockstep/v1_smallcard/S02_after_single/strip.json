@@ -1,0 +1,454 @@
+{
+ "arm": "after",
+ "out": "S02_after_single",
+ "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+ "n_subs": 1,
+ "clock": "Playwright fake clock（rAF／performance.now 一起接管）",
+ "viewport": "1280x720",
+ "started": "2026-09-21T12:38:17+0800",
+ "loadavg_at_start": [
+  643.64990234375,
+  604.185546875,
+  729.69873046875
+ ],
+ "preState": {
+  "arrivals": {
+   "total": 0,
+   "flying": 0,
+   "waiting": [],
+   "marks": []
+  },
+  "castReady": 6,
+  "queueLen": 0,
+  "propsLoaded": 1,
+  "title": "sc=s00 mode=invite pool=0 heap=0MB reloads=0",
+  "sceneT": 0.8999999999999999,
+  "snapA": 0,
+  "sceneId": "s00",
+  "bridgeKind": null,
+  "bridgeErr": "本機都讀不到，而且沒有設公網退路",
+  "now": 50320
+ },
+ "warmRealSec": 46.1,
+ "ids": [
+  "S02_after_single-124029-0"
+ ],
+ "anchorFound": true,
+ "anchorVirtualMsFromWrite": 250,
+ "frames": [
+  {
+   "virtualMs": 0,
+   "file": "f__+0000ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.57,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.16,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 60,
+   "file": "f__+0060ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.69,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.224,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 120,
+   "file": "f__+0120ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.78,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.288,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 180,
+   "file": "f__+0180ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.83,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.336,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 250,
+   "file": "f__+0250ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.89,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.416,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 320,
+   "file": "f__+0320ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.92,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.48,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 400,
+   "file": "f__+0400ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.95,
+    "burst": null,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.56,
+      "landed": false,
+      "looked": null
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 500,
+   "file": "f__+0500ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.97,
+    "burst": 0.032,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.656,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 620,
+   "file": "f__+0620ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.98,
+    "burst": 0.16000000000000003,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.784,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 760,
+   "file": "f__+0760ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 0.99,
+    "burst": 0.30400000000000016,
+    "scene": "s00",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 0.928,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 900,
+   "file": "f__+0900ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.4320000000000003,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.056,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1100,
+   "file": "f__+1100ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": 0.6400000000000005,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.264,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1400,
+   "file": "f__+1400ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.568,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  },
+  {
+   "virtualMs": 1800,
+   "file": "f__+1800ms.jpg",
+   "state": {
+    "total": 1,
+    "flying": 1,
+    "dock": 1,
+    "burst": null,
+    "scene": "s03",
+    "flyingInfo": [
+     {
+      "place": 1,
+      "t": 1.968,
+      "landed": true,
+      "looked": {
+       "turned": 11,
+       "stopped": 17
+      }
+     }
+    ],
+    "waiting": [
+     {
+      "label": "老木椅",
+      "place": 1
+     }
+    ]
+   }
+  }
+ ],
+ "postState": {
+  "arrivals": {
+   "total": 1,
+   "flying": 1,
+   "waiting": [
+    {
+     "label": "老木椅",
+     "place": 1,
+     "looked": {
+      "turned": 11,
+      "stopped": 17
+     }
+    }
+   ],
+   "marks": [
+    {
+     "id": "S02_after_single-124029-0",
+     "at": 57952,
+     "drawnAt": 57968
+    }
+   ]
+  },
+  "castReady": 6,
+  "queueLen": 1,
+  "propsLoaded": 6,
+  "title": "sc=s03 mode=invite pool=0 heap=0MB reloads=1",
+  "sceneT": 0.9920000000000008,
+  "snapA": 0,
+  "sceneId": "s03",
+  "bridgeKind": "snapshot",
+  "bridgeErr": null,
+  "now": 59922
+ },
+ "console": [
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json",
+  "warning: [WorldBridge] 一個來源都讀不到，退避輪詢中：本機都讀不到，而且沒有設公網退路",
+  "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+ ],
+ "loadavg_at_end": [
+  768.28955078125,
+  729.41455078125,
+  733.09716796875
+ ]
+}

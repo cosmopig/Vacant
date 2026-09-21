@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><body><script>
+// 這一頁**真的把主執行緒卡住 12 秒**（rAF 真的停）。它回答的是另一個問題：
+// `blockwatchdog.js` 那個替身**量得動「畫面凍了多久」嗎**。
+//
+// ⚠ 為什麼不用這一頁去測「原版看門狗會不會開槍」：解凍之後，排隊的 rAF
+//   回呼在 setInterval 回呼**之前**跑掉，`lastFrameTs` 先被更新 ⇒ 原版看到的
+//   缺口是 0，一槍都不開。真頁面的凍結形狀不一樣（rAF 迴圈自己在做重活，
+//   一邊掉幀一邊不更新時間戳）。這一頁測不了那個，所以就不假裝測得了。
+window.__frozenForMs = 12000;
+setTimeout(() => { const end = Date.now() + 12000; while (Date.now() < end){} }, 1500);
+</script></body>

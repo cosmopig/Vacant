@@ -1,0 +1,220 @@
+{
+ "what": "真時鐘（wall-clock）臂：端到端走產品路徑（寫快照 → bridge 輪詢 → onSubmission → arrivals）",
+ "subject_sha256_16": "e6ff639d1bd2dc29",
+ "read_this_first": [
+  "**連續截圖的檔名時間在這一批是假的。** 這台 Mac 同時十幾個 agent 在跑，Playwright 拍一張要 2.5–3 秒 ⇒ want+150ms 那一張的 real 是 +2811ms。要看第幾毫秒請看 `callbackToPaintMs`（頁面自己記的），不要看檔名。",
+  "`writeToCallbackMs` 是 **bridge.js 輪詢那一層**的延遲，不是這次改的那一層。設定值 1000 ms，這台機器實測中位 2.7–6.1 秒（被餓到）。展場機（1003）不是這台，**這個數字不可以拿去說展場會等幾秒**。",
+  "負控制 `?arrive=0` 同一份碼、同一條路徑，只把抵達層關掉。"
+ ],
+ "arms": [
+  {
+   "arm": "W_after_0",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T14:47:54+0800",
+   "loadavg1_start": 440.7,
+   "anchor": {
+    "t0_def": "回呼進到頁面（spawnQueue／arrivals.total 增加）",
+    "writeToAnchorMs_outerPolled": 4364,
+    "found": true
+   },
+   "latency": [
+    {
+     "id": "W_after_0-144857-0",
+     "writeToCallbackMs": 4359,
+     "callbackToPaintMs": 21,
+     "writeToPaintMs": 4380
+    }
+   ],
+   "writeToCallbackMs": [
+    4359
+   ],
+   "callbackToPaintMs": [
+    21
+   ],
+   "writeToPaintMs": [
+    4380
+   ],
+   "arrivalsTotal": 1,
+   "queueShown": [
+    {
+     "place": 1,
+     "label": "圖釘罐",
+     "tok": "圖釘罐",
+     "looked": {
+      "turned": 5,
+      "stopped": 7
+     }
+    }
+   ],
+   "fpsWholeRun": 0.95,
+   "fpsAroundEvent": 1.34,
+   "pollGapsMs": {
+    "n": 8,
+    "median": 6097,
+    "max": 7385
+   },
+   "video": null,
+   "shotsRealMs": null,
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+   ]
+  },
+  {
+   "arm": "W_after_1",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T14:49:47+0800",
+   "loadavg1_start": 727.8,
+   "anchor": {
+    "t0_def": "回呼進到頁面（spawnQueue／arrivals.total 增加）",
+    "writeToAnchorMs_outerPolled": 2156,
+    "found": true
+   },
+   "latency": [
+    {
+     "id": "W_after_1-145044-0",
+     "writeToCallbackMs": 2153,
+     "callbackToPaintMs": 31,
+     "writeToPaintMs": 2184
+    }
+   ],
+   "writeToCallbackMs": [
+    2153
+   ],
+   "callbackToPaintMs": [
+    31
+   ],
+   "writeToPaintMs": [
+    2184
+   ],
+   "arrivalsTotal": 1,
+   "queueShown": [
+    {
+     "place": 1,
+     "label": "小南瓜",
+     "tok": "小南瓜",
+     "looked": {
+      "turned": 2,
+      "stopped": 7
+     }
+    }
+   ],
+   "fpsWholeRun": 1.7,
+   "fpsAroundEvent": 2.98,
+   "pollGapsMs": {
+    "n": 10,
+    "median": 4745,
+    "max": 6521
+   },
+   "video": null,
+   "shotsRealMs": null,
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+   ]
+  },
+  {
+   "arm": "W2_after",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1",
+   "started": "2026-09-21T16:06:00+0800",
+   "loadavg1_start": 320.4,
+   "anchor": {
+    "t0_def": "回呼進到頁面（spawnQueue／arrivals.total 增加）",
+    "writeToAnchorMs_outerPolled": 3494,
+    "found": true
+   },
+   "latency": [
+    {
+     "id": "W2_after-160629-0",
+     "writeToCallbackMs": 3401,
+     "callbackToPaintMs": 183,
+     "writeToPaintMs": 3584
+    }
+   ],
+   "writeToCallbackMs": [
+    3401
+   ],
+   "callbackToPaintMs": [
+    183
+   ],
+   "writeToPaintMs": [
+    3584
+   ],
+   "arrivalsTotal": 1,
+   "queueShown": null,
+   "fpsWholeRun": 2.64,
+   "fpsAroundEvent": 2.84,
+   "pollGapsMs": {
+    "n": 23,
+    "median": 2772,
+    "max": 3487
+   },
+   "video": "W2_after.webm",
+   "shotsRealMs": [
+    0,
+    2811,
+    5882,
+    8789,
+    11581,
+    14516,
+    17691,
+    19961,
+    22442,
+    24926,
+    27942,
+    30337,
+    33153
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+   ]
+  },
+  {
+   "arm": "W2_negctl_arrive0",
+   "ran": true,
+   "url": "http://127.0.0.1:8622/world3/index.html?twinfile=/probe/visitors.json&twinpoll=1000&twin=off&lite=1&arrive=0",
+   "started": "2026-09-21T16:07:57+0800",
+   "loadavg1_start": 748.0,
+   "anchor": {
+    "t0_def": "回呼進到頁面（spawnQueue／arrivals.total 增加）",
+    "writeToAnchorMs_outerPolled": 7235,
+    "found": true
+   },
+   "latency": null,
+   "writeToCallbackMs": null,
+   "callbackToPaintMs": null,
+   "writeToPaintMs": null,
+   "arrivalsTotal": 0,
+   "queueShown": null,
+   "fpsWholeRun": 1.46,
+   "fpsAroundEvent": null,
+   "pollGapsMs": {
+    "n": 18,
+    "median": 4012,
+    "max": 7150
+   },
+   "video": "W2_negctl_arrive0.webm",
+   "shotsRealMs": [
+    0,
+    4547,
+    7893,
+    10872,
+    13381,
+    15772,
+    18918,
+    21815,
+    24648,
+    27346,
+    30146,
+    32859,
+    35426
+   ],
+   "console": [
+    "log: WorldBridge 已啟動 · 來源鏈 snapshot=/probe/visitors.json"
+   ]
+  }
+ ],
+ "subject": "vacant_hm/world3/index.html（**這四臂跑的是現在活著的那一份**）",
+ "video_not_in_repo": "W2 兩臂有 .webm（8–10 MB，1–2.6 fps）留在 scratchpad，沒進 repo；會動的對照看 ../v2_clockstep/GIF_*.gif"
+}
