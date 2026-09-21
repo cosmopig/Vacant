@@ -1,0 +1,9 @@
+剝掉 3 行（第 [4252, 4253, 4254] 行）
+=== sha256 ===
+5d2b18062ce03b4addc9fdf8db116872295c410e28897004e7316c7e7396e085  /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/patchtest/world3/index.html   (截圖那一頁的 base ＝ 剝掉三行之後)
+7d008d59ce7306932297dcbbff70ca221fbb6dd145c02cd1ba0c8da327086c71  /private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/stage/index.html   (截圖跑的那一頁)
+709d717d4da5c19e5ad0b6cb6d8e221e160def9cad2213ec7dec319daf85f807  /Users/cosmopig/Documents/GitHub/vacant_hm/world3/index.html   (展件現況，只當紀錄：別的代理一直在改)
+=== base + wire_in.patch vs 截圖那一頁 ===
+IDENTICAL —— 截圖跑的就是「那一版 index.html ＋ 這個 patch」，沒有別的改動
+=== 展件現況 vs 截圖那一頁的 base（別人的改動，本條沒有碰）===
+差異行數（含本條那三行）：14

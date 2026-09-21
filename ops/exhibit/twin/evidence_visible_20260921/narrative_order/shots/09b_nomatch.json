@@ -1,0 +1,6 @@
+Warning: Detected unsettled top-level await at file:///Users/cosmopig/Documents/GitHub/vacant_hm/tools/twinshot.mjs:113
+  const shot = await c.send("Page.captureScreenshot", { format: "png" });
+               ^
+
+
+

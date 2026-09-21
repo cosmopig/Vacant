@@ -1,0 +1,17 @@
+(a) click→p5 實際可見：560.2 ms
+(b) 記號區塊：{
+  "word": "玻璃珠",
+  "say": "橙黃葉，玻璃珠",
+  "sub": "螢幕上有這個記號的，就是你。\n還在排隊——在右下角「投遞口」那一排。\n輪到你了——在台上那一隻的頭上。",
+  "glyphPainted": {
+    "w": 264,
+    "h": 264,
+    "nonTransparentPx": 17328
+  }
+}
+(c) t=0s → panel=p5 steps=抵達了[step now] | 正在成形[step] | 他上場了[step]
+(c) t=30s → panel=p5 steps=抵達了[step now] | 正在成形[step] | 他上場了[step]
+(c) t=60s → panel=p5 steps=抵達了[step now] | 正在成形[step] | 他上場了[step]
+(c) t=120s → panel=p5 steps=抵達了[step now] | 正在成形[step] | 他上場了[step]
+(c) t=300s → panel=p5 steps=抵達了[step now] | 正在成形[step] | 他上場了[step]
+(c) 五個時間點畫面狀態去重後 = 1 種（1 = 五分鐘完全沒變）

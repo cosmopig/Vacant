@@ -1,0 +1,57 @@
+── 完成頁載入時（沒捲）──
+{
+  "wbar": {
+    "top": 767,
+    "height": 46,
+    "opaque": "rgba(12, 7, 2, 0.88)",
+    "zIndex": "6"
+  },
+  "panelPadBottom": "0px",
+  "scrollTop": 0,
+  "scrollHeight": 1177,
+  "clientHeight": 844,
+  "atBottom": false,
+  "covered": [
+    {
+      "txt": "他到了\n      這一隻是示範分身，不是你。\n    ",
+      "overlapPx": 46,
+      "coveredPct": 4
+    },
+    {
+      "txt": "你的撤回碼 · 請截圖\n        PW9K-ZA2",
+      "overlapPx": 46,
+      "coveredPct": 24
+    },
+    {
+      "txt": "換一支手機也能用它把這張卡刪掉",
+      "overlapPx": 17.5,
+      "coveredPct": 75
+    },
+    {
+      "txt": "⚠ 記號是公開的（大螢幕上印它）；撤回碼是秘密的，別讓別",
+      "overlapPx": 22.5,
+      "coveredPct": 48
+    }
+  ]
+}
+── 捲到底 ──
+{
+  "wbar": {
+    "top": 767,
+    "height": 46,
+    "opaque": "rgba(12, 7, 2, 0.88)",
+    "zIndex": "6"
+  },
+  "panelPadBottom": "0px",
+  "scrollTop": 333,
+  "scrollHeight": 1177,
+  "clientHeight": 844,
+  "atBottom": true,
+  "covered": [
+    {
+      "txt": "他到了\n      這一隻是示範分身，不是你。\n    ",
+      "overlapPx": 46,
+      "coveredPct": 4
+    }
+  ]
+}

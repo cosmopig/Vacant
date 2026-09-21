@@ -1,0 +1,4 @@
+{
+  "ok": false,
+  "why": "{\"code\":-32000,\"message\":\"Not attached to an active page\"}"
+}

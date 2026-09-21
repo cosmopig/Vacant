@@ -1,0 +1,52 @@
+{
+  "ok": true,
+  "out": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/shots/t_wait1.png",
+  "strip": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/ab1fa694-341b-43a5-8fb3-2ff0b03bcdff/scratchpad/shots/t_wait1_strip.png",
+  "url": "http://127.0.0.1:8472/stage/index.html?seamwait=1",
+  "dwell_ms": 22000,
+  "png_bytes": 1958261,
+  "strip_bytes": 123186,
+  "source_state": {
+    "configured": false,
+    "kind": null,
+    "url": null,
+    "lastOkAt": null,
+    "lastErr": null,
+    "intervalMs": 5000,
+    "tried": [],
+    "payloadAt": null,
+    "cloud": {
+      "mode": null,
+      "claims": false
+    },
+    "cloudOnly": {
+      "pending": 0,
+      "ids": [],
+      "oldestAt": null,
+      "dropped": 0,
+      "handoffUrl": null,
+      "handoff": "off"
+    },
+    "seen": {
+      "n": 0,
+      "persisted": null,
+      "why": null
+    }
+  },
+  "twin_source_line": null,
+  "twin_stale": false,
+  "visitor_on_stage": null,
+  "twin_engine_note": null,
+  "spawn_queue": 0,
+  "director_mode": "seamwait",
+  "live_on": false,
+  "viewport": [
+    1920,
+    937
+  ],
+  "title": "sc=s11 mode=seamwait pool=22 heap=3MB reloads=0",
+  "console": [
+    "info: [twinseam] 文案層已掛上（幕 5／6／8／9／16／17）。?seam=0 關掉。",
+    "info: [seam_ending] 收尾層已掛上（幕 18）。?seamend=0 關掉、?seamend=N 定格。"
+  ]
+}

@@ -1,0 +1,6 @@
+  按鈕文字 "我不想給我自己的資料" → "正在挑一隻示範分身…"，延遲 144 ms
+  按下到進入「成形中」頁：3847 ms
+  示範分身標示：{"count":2,"texts":["這一隻是示範分身，不是你。","這一隻是示範分身，不是你。"]}
+  伺服器端 origin=preset preset_key=lamp
+  iPhone UA → [{"t":"ChatGPT","href":"https://chatgpt.com/#native"},{"t":"Claude","href":"https://claude.ai/new"},{"t":"Gemini","href":"https://gemini.google.com/app?target=agent"}]
+  Android UA → [{"t":"ChatGPT","href":"intent://chatgpt.com/#Intent;scheme=https;package=com.openai.chatgpt;S.browser_fallback_url=https%3A%2F%2Fchatgpt.com%2F;end"},{"t":"Claude","href":"intent://claude.ai/new#Intent;scheme=https;package=com.anthropic.claude;S.browser_fallback_url=https%3A%2F%2Fclaude.ai%2Fnew;end"},{"t":"Gemini","href":"intent://gemini.google.com/app?target=agent#Intent;scheme=https;package=com.google.android.apps.bard;S.browser_fallback_url=https%3A%2F%2Fgemini.google.com%2Fapp;end"}]

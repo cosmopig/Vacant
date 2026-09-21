@@ -1,0 +1,31 @@
+敘事縫線：把兩個文案層接上 index.html（**這是唯一需要動 index.html 的改動**）
+
+    twinseam.js                幕 5／6／8／9／9b／16／17（另一條線的產出）
+    scenes/seam_ending.js      幕 18（本條線的產出）
+
+兩支都是外掛檔，只透過 `director.titleOv`（`beatTitle()` 已經在用的那一個覆寫口）
+貼字，**渲染邏輯一行都沒動**。順序不可對調：seam_ending.js 要包在 twinseam.js
+的 `arrivals.update` 外面才讓得了位。
+
+套用（在 ~/Documents/GitHub/vacant_hm）：
+    git apply ops/.../wire_in.patch        # 或手動加那三行
+還原（展場硬約束「一行還原」）：
+    刪掉那三行，或 git apply -R ops/.../wire_in.patch
+
+⚠ 這個檔沒有被自動套用：`index.html` 今天同時有別的代理在改
+  （2026-09-21 11:03 還有寫入）。套之前先 `git apply --check`。
+⚠ 若別人已經插過 `<script src="twinseam.js">`，只留一份——插兩次會讓
+  `director.update` 被包兩層。`seam_ending.js` 自己有防呆（`window.__seamEnding`），
+  `twinseam.js` 沒有。
+
+--- a/world3/index.html
++++ b/world3/index.html
+@@ -4242,5 +4242,8 @@
+ }, 5000);
+ addEventListener("error", e => console.warn("未捕捉錯誤", e.message));
+ </script>
++<!-- 敘事縫線：文案層（twinseam.js，幕 5/6/8/9/16/17）＋收尾層（scenes/seam_ending.js，幕 18）。刪掉這兩行就完全還原。 -->
++<script src="twinseam.js"></script>
++<script src="scenes/seam_ending.js"></script>
+ </body>
+ </html>
