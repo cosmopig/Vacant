@@ -1,0 +1,14 @@
+b05_arrived	rc=0	收到了　鉛筆屑	這個記號 跟你手機上那個一樣　你打的字不會上螢幕	twinseam.js
+b06_queued	rc=0	棉紗線　排在第 2 位	他在右下角那塊牌子上　一次演一位　輪到他就走進來	twinseam.js
+b07w1_waiting	rc=0	先看別人的	風鈴串 在右下角排隊　輪到他就走進來	scenes/seam_ending.js
+b07w3_waiting	rc=0	先看別人的	右下角排著 3 位　一次演一位　輪到誰就走進來	scenes/seam_ending.js
+b08_enter	rc=0	鉛筆屑　走進來了	剛剛投進那個口的　就是他	twinseam.js
+b09_goal	rc=0	他開始想要做什麼	鉛筆屑 投的那件事　變成他的目標	twinseam.js
+b09b_nomatch	rc=0	鉛筆屑　先留下來走走	世界裡沒有夠像的往事——沒跑過就是沒跑過	twinseam.js
+b16_receiptA	rc=0	鉛筆屑　拿到收據了	這一批的資料裡沒有帶鏈頭　·　誰做的、驗了什麼、判了什麼，都在裡面——可以自己重跑	twinseam.js
+b17_receiptB	rc=0	鉛筆屑　退到人群裡了	找找看　他還在畫面上　下一位 請投卡	twinseam.js
+b18_one	rc=0	他還在	剛剛那一位　還在這個畫面裡　下一位 請投卡	scenes/seam_ending.js
+b18_many	rc=0	他們都還在	走進來的 3 位　都還在這個畫面裡　下一位 請投卡	scenes/seam_ending.js
+# 註：b05 在整批那一輪 rc=2（等不到 s03，78.9s 後現在是 s06，機器上還躺著上一批的
+# Chrome 孤兒）。上面那一行的 rc 已經改成單獨重跑那一次的結果（19:3x，wait 2.5s，rc=0）。
+# 原始失敗紀錄留在 shots/wired_b05_arrived.log 被覆寫前的那一版之外——覆寫了，所以這裡寫下來。

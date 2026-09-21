@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "out": "shots/NEG_unwired_s04.png",
+  "url": "http://127.0.0.1:8477/world3/index.html?scene=s04&seamshot=enter",
+  "shot_at": "2026-09-21T10:57:48.758Z",
+  "dwell_ms": 9000,
+  "expect_scene": "s04",
+  "scene_wait_s": 0,
+  "snap_settled": true,
+  "png_bytes": 2273662,
+  "base_sha256": "9afc3c1ba66c803442ce3d09badd86eed8f68e5563090133042a12d2d49f9abc",
+  "copy_algo": "head = tov ? tov.head : sc.head；sub = waitOv ? waitOv : tov ? tov.sub : s00 ? standbySub(REPLAY,LIVE.stage) : s11 ? loopSub(REPLAY,LIVE.stage) : sc.sub",
+  "scene_id": "s04",
+  "head": "世界多了一個人",
+  "sub": "那是你託付的需求",
+  "title_ov_source": "index.html(SCENES 烤死字串)",
+  "data_twinseam": null,
+  "data_seamending": null,
+  "layer_twinseam_loaded": false,
+  "layer_seamending_loaded": false,
+  "script_srcs": [
+    "bridge.js?v=5"
+  ],
+  "director_mode": "hold",
+  "waiting_len": 0,
+  "snapA": 0,
+  "viewport": [
+    1920,
+    937
+  ],
+  "scene_index_keys": 14,
+  "console": []
+}

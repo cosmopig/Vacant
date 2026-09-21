@@ -1,0 +1,45 @@
+{
+ "_": [
+  "這一包截圖是對著下面這一版 vacant_hm 拍的。",
+  "`live_*` 是同一時刻**共用工作樹**（8420 服務的那一份）的狀態，",
+  "拿來對照：接線還沒落到本尊上，而且本尊上有別人未提交的改動。"
+ ],
+ "repo": "vacant_hm",
+ "worktree": "/Users/cosmopig/Documents/GitHub/.worktrees/vacant_hm-narrwire",
+ "branch": "twin/narrative-wire-20260921",
+ "commit": "6f62b3f9e2026d32b5a2d503cde7f2c6de77897a",
+ "base_commit": "3356894371985a7890107731c824ad9a8ff5dae8",
+ "files": {
+  "world3/index.html": {
+   "sha256": "c90eae8ecb44695b93fb6161d9c84de42285d03d303d6621430ebaefb001bf3e",
+   "bytes": 302047
+  },
+  "world3/twinseam.js": {
+   "sha256": "5e19437fe83736329630b4f2c21374d428f1d7856c9903a3cca42923c0539533",
+   "bytes": 25084
+  },
+  "world3/scenes/seam_ending.js": {
+   "sha256": "a93cd59d366811367238cfdc8508c34496b4503300657ed7f27c185fe9e815f0",
+   "bytes": 16215
+  },
+  "world3/scenes/narrative_order.json": {
+   "sha256": "4794ccc84b2eed771cc84d316073522d47c4b9e89aaa96a8460d8a543bf4c6c8",
+   "bytes": 35752
+  },
+  "world3/scenes/index.json": {
+   "sha256": "df02e4673ca0d62d993f6b82a0b765868d30c59c84e91fc12fe7404d11b68a32",
+   "bytes": 8020
+  },
+  "world3/bridge.js": {
+   "sha256": "e385b2924b7fcf8ca7828822293acbe474a362be8fd7c362ed3b2e0e9c3261f2",
+   "bytes": 54991
+  }
+ },
+ "live_shared_tree": {
+  "path": "/Users/cosmopig/Documents/GitHub/vacant_hm/world3/index.html",
+  "sha256": "8a1d0c3c953ad86cf80267b2d01ed6bf8896bc0c0a2749a1785a04eb9aa1f518",
+  "wired": false,
+  "note": "🔴 與本分支不同 sha：那個工作樹上有別人**未提交**的 index.html 改動。照檔案所有權規則沒有就地改，交 installer／patch。"
+ },
+ "shot_server": "python3 -m http.server 8477 --directory <上面那個 worktree>（8420／8899 是展件，沒有碰）"
+}

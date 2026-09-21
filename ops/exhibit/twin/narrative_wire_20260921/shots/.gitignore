@@ -1,0 +1,6 @@
+# PNG 原件（1920×1080，共約 31 MB）**不進版控**——進版控的是同名 .jpg
+# （1400 寬、品質 72，共約 2.4 MB）。轉檔有損，所以兩邊的 sha256 都記在
+# shots_manifest.json：JPEG 不冒充原件。
+# 原件重拍：bash ../shoot_all.sh <base_url> . wired  然後 bash ../shoot_neg.sh <base_url> .
+*.png
+*.log
