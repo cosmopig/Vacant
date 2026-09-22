@@ -16,11 +16,19 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
 
-REF = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/專題/參考文獻"
+#: 參考文獻在哪。預設是 iCloud，**但要讓呼叫端指得到別的地方**。
+#: 2026-09-22 的實際狀況：iCloud 上 181 個 PDF 只有 19 個具現化、
+#: 四份索引裡一份怎麼催都下不來，而同一份資料在 `~/Downloads/參考文獻`
+#: 是完整的（277 個檔、181 個 PDF 全在）。
+#: 沒有這個開關的話，唯一的選擇是「跳過」——而證據明明就在手上。
+#:   VACANT_REF_DIR=~/Downloads/參考文獻 pytest tests/test_citation_archive.py
+REF = Path(os.environ["VACANT_REF_DIR"]).expanduser() if os.environ.get("VACANT_REF_DIR") \
+    else Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/專題/參考文獻"
 BACKUP = REF / "_引用備份"
 
 INDEX_FILES = [
