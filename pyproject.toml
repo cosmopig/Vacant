@@ -97,6 +97,9 @@ packages = ["vacant_network", "vacant_network.vrun", "vacant_network.web"]
 vacant_network = ["web/*.html", "web/*.css", "web/*.js"]
 
 [tool.pytest.ini_options]
+markers = [
+  "no_evidence_needed: 這條不需要 iCloud 上的引用證據（用 tmp_path 造假檔）",
+]
 testpaths = ["tests"]
 addopts = "-q"
 pythonpath = ["."]
