@@ -210,6 +210,9 @@ pid 有值、**埠沒人在聽、log 兩個都是 0 byte**；堆疊卡在
 3. **做到好的定義**＝自己裝一次、自己驗：`requests_seen > 0`（proxyd journal）、掛鉤日誌有
    canary、`/vacant status` 回得出來、shim 那條 `pi -p` 退出碼照舊。
    ⚠ 沒有真模型的機器只到 **L-fake**（假上游），要明講；L-real 仍要在 vacant-dev 補。
+   ✅ 2026-09-22 落地：pi extension（`piext.py`，自裝 **L-fake**，`ops/vacantrun/possess_pi_20260922/`）；
+   Claude Code 由 Claude Code 自己在遠端容器裡驗（**L-real**，Haiku 4.5，`ops/vacantrun/possess_claude_20260922/`）
+   ——抓到 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 會讓 `settings.json` 的 base URL 被忽略，環境變數那條不受影響。
 
 ## 一、閘門的可量測定義（仍然有效）
 

@@ -164,6 +164,10 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   （`cli._guided_install`，只提議 `possess.INSTALL_GUIDED_AGENTS`＝pi）。`gateshim` 的 pi 段另寫 per-run
   `settings.json` 的 `defaultProvider=vacant`——自裝驗證抓到：只寫 `models.json` pi 不會**選**它。
   自裝證據 `ops/vacantrun/possess_pi_20260922/`（**L-fake**，pi 0.87.0；L-real 未量）。
+- **Claude Code 自己驗自己**（`ops/vacantrun/possess_claude_20260922/`，**L-real**，Haiku 4.5，真上游）：
+  shim 拒交 20／交付 0；`settings.json` 的 base URL 在 **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`**
+  （Claude Code 遠端容器）下**被忽略、agent 照樣回答**——`requests_seen=0` 而一切看起來正常的活體標本；
+  環境變數那條照樣通。`/v1/code/agent-proxy/ca-cert` 探針被 `route()` 按 path 猜成 `openai` 家族（sink 502）。
 - ~~**pi 的接法要改**~~（已做，研究在 `decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`，
   等裁決）：pi 0.87.0 讀碼——`models-store.json` 是**目錄快取**不是設定（`models.json` 才是）；
   extension 一支就能 `registerProvider`／`registerCommand("vacant")`／`setModel`／燒掛鉤七事件，

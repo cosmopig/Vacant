@@ -186,9 +186,16 @@ CHANNEL_MEASURED: dict[str, str] = {
     # ⚠ Linux 那一格是在**隔離 HOME** 上量的（那台有人類的長壽 session 在跑
     #   Claude Code，不准動真的 settings.json），而且測試時另外補了
     #   `ANTHROPIC_API_KEY`——`wire_claude` 自己**不寫任何金鑰欄位**。
+    # ⚠ 2026-09-22 第三格是在 **Claude Code 遠端容器裡、由 Claude Code 自己**量的
+    #   （`ops/vacantrun/possess_claude_20260922/`，Haiku 4.5，真上游 api.anthropic.com）：
+    #   `settings.json` 的 `env.ANTHROPIC_BASE_URL` 在
+    #   **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 的環境下被忽略**（三格 E／D 零通、C 拆掉
+    #   那個變數就 2 通）；環境變數那條照樣通。shim 那條拒交 20／交付 0 各 `requests_seen=10`。
     "claude": "2026-09-19（macOS，Claude Code 2.1.278，2 通）"
               "／2026-09-20（vacant-dev Ubuntu 24.04，Claude Code 2.1.259，3 通，"
-              "**隔離 HOME**）",
+              "**隔離 HOME**）"
+              "／2026-09-22（Claude Code 遠端容器，2.1.278，Haiku 4.5，settings 路 2 通，"
+              "**但 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 時 settings.json 被忽略**）",
     # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
     #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
     # ⚠ 2026-09-22 在 Claude Code 容器上用 **假上游** 量過 extension 那條
