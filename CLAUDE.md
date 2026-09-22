@@ -177,6 +177,13 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   🔴 **那是天花板不是結論**：工作區附可執行的可見測資，agent 自己跑了 4–22 次迭代到過才收手
   ⇒ 量到的不是 pass@1，閘門在這一批沒有機會發動。要分得開得**把可見測資拿掉**或換更難的題組。
   兩臂共用一個**重試中繼**吸收容器出網 DNS 不穩（416 通吸收 85，0 用盡），它不是 Vacant 的一部分。
+- **抗污染難題的兩臂對照**（`ops/vacantrun/lcb_ab_20260922/`）：LiveCodeBench v6、
+  只收 2025-02-01 之後的比賽（模型自稱截止 2025-01，回憶測試 19/20 答 UNKNOWN、正控制 3/3 過）、
+  medium/hard 各 10 題。**正確率兩臂都 7/20＝35%，McNemar p=1.000（沒有差異）**；
+  但 **OFF 出貨 8 件其中 1 件錯（過了可見、隱藏 8/43 就錯），ON 出貨 7 件全對、拒交 13**。
+  🔴 **第一版整批作廢**：我寫的 OFF 設定沒對齊 `agentwrap.wire_pi`（contextWindow 262144 vs 131072），
+  同一題只差那幾欄就 225s 通過 → 327s 失敗 ⇒ 量具造成的干擾會被誤算到 Vacant 頭上。
+  作廢資料留在 `run_VOID_confounded/`。模型 runaway（單通 4.4MB／39k 字、零工具呼叫）兩臂都踩。
 - **Claude Code 自己驗自己**（`ops/vacantrun/possess_claude_20260922/`，**L-real**，Haiku 4.5，真上游）：
   shim 拒交 20／交付 0；`settings.json` 的 base URL 在 **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`**
   （Claude Code 遠端容器）下**被忽略、agent 照樣回答**——`requests_seen=0` 而一切看起來正常的活體標本；

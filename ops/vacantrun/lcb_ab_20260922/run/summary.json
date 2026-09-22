@@ -1,0 +1,440 @@
+{
+  "n": 20,
+  "void": [],
+  "rows": {
+    "ON": [
+      {
+        "task": "lcbv6_3722",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 249,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 9,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3748",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 190,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "3/3",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3754",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 327,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3760",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 384,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3764",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 331,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3776",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 326,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3785",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 267,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "3/3",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3791",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 161,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3794",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 374,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 9,
+        "visible": "3/3",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3805",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 329,
+        "delivered_file": false,
+        "env_error": true,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3692",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 328,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3696",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 337,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3697",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 492,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 11,
+        "visible": "3/3",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3701",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 329,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3717",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 308,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 6,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "lcbv6_3733",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 325,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 3,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3744",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 327,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3762",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 329,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 5,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3765",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 385,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      },
+      {
+        "task": "lcbv6_3770",
+        "arm": "ON",
+        "hidden": false,
+        "wall_s": 332,
+        "delivered_file": false,
+        "env_error": false,
+        "accepted": false,
+        "stop_reason": "visible_fail",
+        "requests_seen": 4,
+        "visible": "0/1",
+        "ws_same": true
+      }
+    ],
+    "OFF": [
+      {
+        "task": "lcbv6_3722",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 327,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3748",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 363,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3754",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 266,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3760",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 190,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3764",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 326,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3776",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 326,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3785",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 146,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3791",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 212,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3794",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 336,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3805",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 326,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3692",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 419,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3696",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 439,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3697",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 296,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3701",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 326,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3717",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 325,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3733",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 327,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3744",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 244,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3762",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 373,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3765",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 324,
+        "delivered_file": false,
+        "env_error": false
+      },
+      {
+        "task": "lcbv6_3770",
+        "arm": "OFF",
+        "hidden": false,
+        "wall_s": 330,
+        "delivered_file": false,
+        "env_error": false
+      }
+    ]
+  },
+  "off": {
+    "delivered": 8,
+    "correct": 7
+  },
+  "on": {
+    "accepted": 7,
+    "refused": 13,
+    "correct": 7,
+    "false_delivery": 0
+  }
+}

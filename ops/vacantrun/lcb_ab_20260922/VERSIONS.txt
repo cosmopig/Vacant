@@ -1,0 +1,10 @@
+benchmark LiveCodeBench v6（livecodebench/code_generation_lite test6.jsonl）
+source_sha256 bb4c364f71921c4495a6ad15abe1a927350b720009f4933e2e71f8af0f6fd1f5
+sample leetcode, contest_date >= 2025-02-01, medium/hard 各等距 10 題
+agent pi 0.87.0 互動 TUI（真 pty，打字進輸入框）
+model gemma-4-12b-it-qat
+cells 40（20 題 × ON/OFF），0 作廢
+result ON 7/20=35.0%　OFF 7/20=35.0%　McNemar p=1.000
+        ON 拒交 13、假交付 0　｜　OFF 出貨 8、假交付 1
+git 6799788c
+date 2026-09-22T16:51:24Z
