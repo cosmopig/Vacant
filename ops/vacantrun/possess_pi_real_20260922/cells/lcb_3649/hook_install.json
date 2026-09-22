@@ -1,0 +1,29 @@
+{
+  "attempted": true,
+  "agent": "pi",
+  "report": {
+    "agent": "pi",
+    "target": "/tmp/vacant-possess/run-pi-580cef01/extensions/vacant.ts",
+    "env": {
+      "VACANT_HOOK_LOG": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant-run/possess_pi_1790057929_59c1f3/hooks.jsonl",
+      "VACANT_RUN_ID": "possess_pi_1790057929_59c1f3",
+      "VACANT_HOOK_AGENT": "pi",
+      "VACANT_RUN_PROXY": "http://127.0.0.1:38551"
+    },
+    "events": [
+      "session_start",
+      "user_prompt_submit",
+      "pre_tool_use",
+      "tool_result",
+      "before_provider_request",
+      "stop",
+      "session_end"
+    ]
+  },
+  "supported": [
+    "claude",
+    "opencode",
+    "pi"
+  ],
+  "note": "`attempted` 只說我們試過，**不說它在**——裁決 §三-1"
+}

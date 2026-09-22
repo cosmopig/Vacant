@@ -163,7 +163,10 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   `/vacant on|off|status`、掛鉤七事件→`hookcli`），**不再碰 `models.json`**。裸 `vacant` 沒裝過會引導
   （`cli._guided_install`，只提議 `possess.INSTALL_GUIDED_AGENTS`＝pi）。`gateshim` 的 pi 段另寫 per-run
   `settings.json` 的 `defaultProvider=vacant`——自裝驗證抓到：只寫 `models.json` pi 不會**選**它。
-  自裝證據 `ops/vacantrun/possess_pi_20260922/`（**L-fake**，pi 0.87.0；L-real 未量）。
+  自裝證據 `ops/vacantrun/possess_pi_20260922/`（**L-fake**，假上游，含互動 TUI 與 `/vacant`）
+  ＋ **`ops/vacantrun/possess_pi_real_20260922/`（L-real）**：pi 0.87.0 ＋ `gemma-4-12b-it-qat`
+  跑 R534 五題走 shim，**3 交付 exit 0／2 拒交 exit 20**，五條鏈全 OK，`CHANNEL_MEASURED["pi"]` 因此填上。
+  ⚠ 上游是**公開 Funnel 不是 LAN**，且與 `pi_tty_20260920` 那 40 格**三個變因都不同，不可合併相減**。
 - **Claude Code 自己驗自己**（`ops/vacantrun/possess_claude_20260922/`，**L-real**，Haiku 4.5，真上游）：
   shim 拒交 20／交付 0；`settings.json` 的 base URL 在 **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`**
   （Claude Code 遠端容器）下**被忽略、agent 照樣回答**——`requests_seen=0` 而一切看起來正常的活體標本；

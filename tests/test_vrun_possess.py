@@ -918,8 +918,12 @@ def test_pi_install_writes_extension_and_leaves_models_json_byte_identical(
     assert 'registerCommand("vacant"' in body
     assert "vacant_network.vrun.hookcli" in body
     assert mj.read_bytes() == original, "models.json 被動了"
-    # 沒量過就是沒量過：extension 裝了不等於被中介
-    assert st["channel"]["pi"]["verified"] is False
+    # 🔴 **裝了不等於被中介**：`proven` 只有 `mark_proven`（requests_seen > 0）點得亮，
+    #    `install` 自己永遠點不亮它。2026-09-22 `CHANNEL_MEASURED["pi"]` 填上真模型日期
+    #    之後 `verified` 會是 True——那一欄記的是「這條路**有人量過**」，
+    #    **不是「這一次被中介了」**。兩欄不可互相冒充，所以這裡兩條都驗。
+    assert st["channel"]["pi"]["verified"] is bool(possess.CHANNEL_MEASURED["pi"])
+    assert st["channel"]["pi"].get("proven") is not True
     written = {c["path"] for c in st["files"]}
     assert str(mj) not in written
 

@@ -213,6 +213,11 @@ pid 有值、**埠沒人在聽、log 兩個都是 0 byte**；堆疊卡在
    ✅ 2026-09-22 落地：pi extension（`piext.py`，自裝 **L-fake**，`ops/vacantrun/possess_pi_20260922/`）；
    Claude Code 由 Claude Code 自己在遠端容器裡驗（**L-real**，Haiku 4.5，`ops/vacantrun/possess_claude_20260922/`）
    ——抓到 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 會讓 `settings.json` 的 base URL 被忽略，環境變數那條不受影響。
+   ✅ 2026-09-22 稍晚：**pi 的常駐附身拿到 L-real**（`ops/vacantrun/possess_pi_real_20260922/`）——
+   R534 五題、真模型 `gemma-4-12b-it-qat`、走 PATH shim、**3 交付 exit 0／2 拒交 exit 20**、五條鏈全 OK。
+   其中 `lcb_3584` 是 **`agent_rc=0` 卻只 read 沒 write 就宣告完成**，閘門在行程結束那一刻擋下來
+   ——那句跨框架的話在 pi ＋ 真模型 ＋ 常駐路徑上又出現一次。
+   ⚠ 級別全 B′（沒 bwrap）；上游是公開 Funnel 不是 LAN；互動／長任務／並行沒量。
 
 ## 一、閘門的可量測定義（仍然有效）
 

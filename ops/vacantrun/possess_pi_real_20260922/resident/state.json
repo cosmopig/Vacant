@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "installed_at": 1790057921.06641,
+  "installed_at_iso": "2026-09-22T06:18:41+0000",
+  "home": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home",
+  "python": "/home/user/Vacant/.venv/bin/python3",
+  "port": 18791,
+  "upstreams": {
+    "openai": {
+      "url": "https://1003.taild870c4.ts.net/v1",
+      "source": "--upstream"
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "env:ANTHROPIC_BASE_URL"
+    }
+  },
+  "agents": [
+    "pi"
+  ],
+  "not_detected": [],
+  "detected": {
+    "claude": {
+      "agent": "claude",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": "/opt/node22/bin/claude",
+      "binary_via": "path",
+      "version": "2.1.278 (Claude Code)",
+      "present": true
+    },
+    "codex": {
+      "agent": "codex",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    },
+    "opencode": {
+      "agent": "opencode",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    },
+    "pi": {
+      "agent": "pi",
+      "config_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.pi/agent",
+      "config_file_exists": false,
+      "binary": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/pi/node_modules/.bin/pi",
+      "binary_via": "path",
+      "version": "0.87.0",
+      "present": true
+    },
+    "hermes": {
+      "agent": "hermes",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    }
+  },
+  "channel": {
+    "pi": {
+      "ok": true,
+      "files": [
+        {
+          "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.pi/agent/extensions/vacant.ts",
+          "action": "create",
+          "before_sha256": null,
+          "after_sha256": "921d8b3cc52550c592d9a16af8f7ba5314759b38d16ae7008e89da92dbfbaed7",
+          "backup": null,
+          "note": "pi extension：registerProvider(vacant) + /vacant + 掛鉤"
+        }
+      ],
+      "measured": "",
+      "verified": false,
+      "startable": true,
+      "startable_reason": "起得來：探測 listener 收到 1 條連線（**沒有任何模型呼叫**，另一頭只回 503）",
+      "startable_detail": {
+        "startable": true,
+        "measured": true,
+        "connected": true,
+        "env_key": null,
+        "env_key_present": null,
+        "probed_at": "2026-09-22T06:18:40+0000",
+        "binary": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/pi/node_modules/.bin/pi",
+        "argv": [
+          "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/pi/node_modules/.bin/pi",
+          "-p",
+          "ping"
+        ],
+        "stopped_early": true,
+        "rc": null,
+        "elapsed_s": 0.56,
+        "connections": 1,
+        "probe_saw": "",
+        "stderr_head": "",
+        "reason": "起得來：探測 listener 收到 1 條連線（**沒有任何模型呼叫**，另一頭只回 503）"
+      },
+      "proven": true,
+      "proven_note": "requests_seen=7 @ 2026-09-22T06:36:56+0000"
+    }
+  },
+  "shim_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant/possess/bin",
+  "shims": [
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant/possess/bin/pi"
+  ],
+  "service": {
+    "backend": "bare",
+    "pid": 2800,
+    "supervised": false,
+    "boot_persistent": false,
+    "rc": 0,
+    "changes": []
+  },
+  "preflight": {
+    "listening": true,
+    "roundtrip": 200,
+    "detail": "上游回應了"
+  },
+  "systemd_path_env": {
+    "file": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.config/environment.d/50-vacant-possess.conf",
+    "applied_now": false,
+    "changes": [
+      {
+        "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.config/environment.d/50-vacant-possess.conf",
+        "action": "create",
+        "before_sha256": null,
+        "after_sha256": "48809cbce584268b2e4f830323f3c5f23b155c6adbda060da4244d79025e6b80",
+        "backup": null,
+        "note": "systemd --user 的 PATH（environment.d）"
+      }
+    ]
+  },
+  "gate_reach": {
+    "shim_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant/possess/bin",
+    "forms": {
+      "bash -lic": {
+        "why": "人類開終端機",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -lc": {
+        "why": "登入非互動",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -c '. ~/.bashrc'": {
+        "why": "ssh 主機 '指令' 的等價路徑（非真 ssh）",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -c": {
+        "why": "腳本／cron／ExecStart=",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "systemd-run --user": {
+        "why": "展場無人值守迴圈",
+        "available": false,
+        "on_path": null,
+        "note": "⚠ 沒量到，不是量到 False",
+        "error": "Failed to connect to bus: No medium found\n"
+      }
+    },
+    "covered": [],
+    "not_covered": [
+      "bash -lic",
+      "bash -lc",
+      "bash -c '. ~/.bashrc'",
+      "bash -c"
+    ],
+    "unmeasured": [
+      "systemd-run --user"
+    ],
+    "duplicated": {},
+    "interactive_only": false,
+    "headline": "⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）",
+    "measured": true
+  },
+  "agent_posture": {
+    "pi": {
+      "agent": "pi",
+      "sandbox_mode": null,
+      "approval_policy": null,
+      "flags": null,
+      "source": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.pi/agent/extensions/vacant.ts",
+      "measured": false,
+      "note": "這個 agent 的沙箱姿態我們沒有已知的讀法 ⇒ 沒量到（不是「沒有沙箱」）"
+    }
+  },
+  "codex_sandbox_requested": "workspace-write",
+  "warnings": [
+    "⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）",
+    "⚠ `bare` 後端＝自己 fork，**撐不過重開機**，不准說成「常駐」。"
+  ],
+  "files": [
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.pi/agent/extensions/vacant.ts",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "921d8b3cc52550c592d9a16af8f7ba5314759b38d16ae7008e89da92dbfbaed7",
+      "backup": null,
+      "note": "pi extension：registerProvider(vacant) + /vacant + 掛鉤"
+    },
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.config/environment.d/50-vacant-possess.conf",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "48809cbce584268b2e4f830323f3c5f23b155c6adbda060da4244d79025e6b80",
+      "backup": null,
+      "note": "systemd --user 的 PATH（environment.d）"
+    }
+  ]
+}

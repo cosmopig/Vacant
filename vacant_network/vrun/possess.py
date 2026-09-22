@@ -198,10 +198,16 @@ CHANNEL_MEASURED: dict[str, str] = {
               "**但 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 時 settings.json 被忽略**）",
     # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
     #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
-    # ⚠ 2026-09-22 在 Claude Code 容器上用 **假上游** 量過 extension 那條
-    #   （pi 0.87.0；印字＋互動＋shim 拒交格 20／交付格 0；每格 requests_seen ≥ 2；
-    #   `ops/vacantrun/possess_pi_20260922/`）。**L-fake 不填這一格**——這一欄只收真模型。
-    "pi": "",
+    # ✅ 2026-09-22 **這一格終於有真模型證據**（`ops/vacantrun/possess_pi_real_20260922/`）：
+    #   Claude Code 遠端容器、pi **0.87.0**、模型 `gemma-4-12b-it-qat`、上游是人類 LM Studio 的
+    #   **公開 Tailscale Funnel**（不是 LAN 直連 1003）。R534 那五題各一格、走 **PATH shim**
+    #   （命令列零個 vacant）：3 交付 exit 0 ／ 2 拒交 exit 20，模型通數 4–13，
+    #   五條收據鏈 `--selftest` 先過再驗全 OK，`proven` 由 `requests_seen=7` 點亮。
+    #   ⚠ 同日另有一批 **L-fake**（假上游，含互動 TUI 與 `/vacant`）＝`ops/vacantrun/possess_pi_20260922/`。
+    #   ⚠ 沒有 bwrap ⇒ 五格全是 **B′**；互動／長任務／並行**沒量**。
+    "pi": "2026-09-22（Claude Code 遠端容器，pi 0.87.0，gemma-4-12b-it-qat，"
+          "**上游＝公開 Funnel 非 LAN**，R534 五題走 shim：3 交付／2 拒交，"
+          "模型通數 4–13，鏈全 OK，級別 B′）",
     "hermes": "",
 }
 
