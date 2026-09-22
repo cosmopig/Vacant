@@ -16,7 +16,7 @@
 
 | 層 | 機制 | 能說的話 |
 |---|---|---|
-| **通道** | 寫進 agent **自己的常駐設定檔**（`~/.claude/settings.json` 的 `env`、`~/.codex/config.toml`、`~/.config/opencode/opencode.json`、`~/.pi/agent/models.json`、`~/.hermes/config.yaml`） | 關終端機、重開機、開新視窗、**打完整路徑**都照樣指向 proxy。**只有把那幾行刪掉才會失效。** |
+| **通道** | 寫進 agent **自己的常駐設定檔**（`~/.claude/settings.json` 的 `env`、`~/.codex/config.toml`、`~/.config/opencode/opencode.json`、`~/.pi/agent/extensions/vacant.ts`（2026-09-22 起；不再碰 `models.json`）、`~/.hermes/config.yaml`） | 關終端機、重開機、開新視窗、**打完整路徑**都照樣指向 proxy。**只有把那幾行刪掉才會失效。** |
 | **閘門** | `PATH` shim（`~/.vacant/possess/bin/` 排在 `PATH` 前面） | **預設會跑，但打完整路徑就跳過了。** |
 
 ⚠ **本檔任何一處都不准寫「不會被繞過」。** 閘門層做不到；通道層做得到的是
@@ -129,6 +129,11 @@ from . import envmap
 
 # ── 常數 ────────────────────────────────────────────────────────────────
 
+#: 裸 `vacant` 引導安裝會提議的 agent。**只放走 extension、不改寫使用者既有 provider
+#: 的那幾格**（今天只有 pi）；其他 agent 的接線會改寫使用者的常駐設定，要人明講
+#: `vacant install --agent <x>`。
+INSTALL_GUIDED_AGENTS: tuple[str, ...] = ("pi",)
+
 #: 預設的常駐 proxy 埠。被佔用時 `install` 會往上找，**實際用的埠記進 state**。
 DEFAULT_PORT = 8787
 
@@ -186,6 +191,9 @@ CHANNEL_MEASURED: dict[str, str] = {
               "**隔離 HOME**）",
     # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
     #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
+    # ⚠ 2026-09-22 在 Claude Code 容器上用 **假上游** 量過 extension 那條
+    #   （pi 0.87.0；印字＋互動＋shim 拒交格 20／交付格 0；每格 requests_seen ≥ 2；
+    #   `ops/vacantrun/possess_pi_20260922/`）。**L-fake 不填這一格**——這一欄只收真模型。
     "pi": "",
     "hermes": "",
 }
@@ -273,7 +281,8 @@ AGENTS: dict[str, AgentSpec] = {
     "pi": AgentSpec(
         name="pi",
         config_dirs=(".pi/agent", ".pi"),
-        config_file=".pi/agent/models.json",
+        # 2026-09-22 起寫的是 extension，不是 models.json（見 wire_pi）
+        config_file=".pi/agent/extensions/vacant.ts",
         binaries=("pi",),
         bin_hints=(".local/bin/pi", ".bun/bin/pi", ".npm-global/bin/pi",
                    "/opt/homebrew/bin/pi", "/usr/local/bin/pi"),
@@ -731,40 +740,29 @@ def wire_codex(home: pathlib.Path, port: int, backups: pathlib.Path,
 
 
 def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
+            python: str | None = None, models: list[str] | None = None,
             **_: Any) -> list[FileChange]:
-    """`~/.pi/agent/models.json`。
+    """`~/.pi/agent/extensions/vacant.ts`——**一支 extension，不碰 `models.json`**。
 
-    ⚠ **這一格沒有在任何機器上被 `requests_seen` 證實過**（`CHANNEL_MEASURED`
-      是空字串）。而且 `~/.pi/agent/` 底下同時有 `models-store.json`，
-      **哪一份才是 pi 0.85.1 真正讀的那一份，本模組沒有量過**——
-      `ops/vacantrun/wrap_agent.sh` 量到的是 `PI_CODING_AGENT_DIR/models.json`，
-      那是 relocate 那條路，不保證常駐那條路同名。
-      `install-status` 會把這一格標成 `unverified`。
+    2026-09-22 之前這裡改寫 `models.json`（每個 provider 的 `baseUrl` 全部改道＋加一個
+    `vacant` provider）。那一格從來沒有被 `requests_seen` 證實過，而且從 pi 0.87.0 原始碼
+    讀到 `models-store.json` 只是目錄快取、`models.json` 才是設定之後，發現根本不必寫它：
+    extension 在 runtime `pi.registerProvider()`、`pi.setModel()`、`pi.registerCommand("vacant")`
+    就把通道、預設開、`/vacant on|off|status`、掛鉤七事件全部做完（`piext.py` 的 docstring）。
+
+    ⚠ 使用者自己的 provider **一個都不改道**：`/vacant off` 或 `/model` 切走就是不經過
+      Vacant，extension 會留一筆 `vacant_off`，收據不替它說謊（`piext` 誠實邊界 3）。
+    ⚠ `CHANNEL_MEASURED["pi"]` 仍是空字串：**這條常駐路要在 vacant-dev 用真模型量到
+      `requests_seen > 0` 才准填**。本機自裝驗證只到 L-fake（假上游）。
+    ⚠ agent 刪得掉這支檔（實測）。刪掉 ⇒ 下一跑 canary 不燒 ⇒ 收據降級，不是保證。
     """
+    from . import piext
     p = home / AGENTS["pi"].config_file
-    doc = json.loads(p.read_text("utf-8")) if p.is_file() else {}
-    if not isinstance(doc, dict):
-        doc = {}
-    model = os.environ.get("VACANT_AGENT_MODEL", "gemma-4-12b-it-qat")
-    providers = dict(doc.get("providers") or {})
-    for pid, pv in list(providers.items()):
-        if isinstance(pv, dict) and "baseUrl" in pv:
-            pv = dict(pv)
-            pv["baseUrl"] = _base_for("openai", port)
-            providers[pid] = pv
-    providers[PROVIDER_ID] = {
-        "baseUrl": _base_for("openai", port),
-        "api": "openai-completions",
-        "apiKey": "sk-vacant-possess",
-        "compat": {"supportsDeveloperRole": False,
-                   "supportsReasoningEffort": False},
-        "models": [{"id": model, "name": model,
-                    "contextWindow": 262144, "maxTokens": 16384}],
-    }
-    doc["providers"] = providers
-    data = (json.dumps(doc, ensure_ascii=False, indent=2) + "\n").encode()
-    return [write_tracked(home, p, data, backups,
-                          note=f"providers.*.baseUrl + providers.{PROVIDER_ID}")]
+    body = piext.render(port=port, state_dir=str(state_home(home)),
+                        python=python or sys.executable,
+                        package_path=package_path(), models=models or [])
+    return [write_tracked(home, p, body.encode("utf-8"), backups,
+                          note="pi extension：registerProvider(vacant) + /vacant + 掛鉤")]
 
 
 def wire_hermes(home: pathlib.Path, port: int, backups: pathlib.Path,
@@ -1896,9 +1894,14 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     # ── 2. 過了才寫設定檔 ────────────────────────────────────────────
     changes: list[FileChange] = [FileChange(**c) for c in svc.get("changes", [])]
     wired: dict[str, dict] = {}
+    # pi 的 extension 要把裝機當下看得到的模型清單烤進去（拿不到＝空，不是錯）
+    probed_models: list[str] = []
+    if not skip_service and "pi" in wanted:
+        from . import piext
+        probed_models = piext.probe_models(port)
     for a in wanted:
         try:
-            cs = WIRERS[a](h, port, backups)
+            cs = WIRERS[a](h, port, backups, python=py, models=probed_models)
             changes += cs
             wired[a] = {"ok": True, "files": [c.to_json() for c in cs],
                         "measured": CHANNEL_MEASURED.get(a, ""),

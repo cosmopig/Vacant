@@ -191,6 +191,26 @@ pid 有值、**埠沒人在聽、log 兩個都是 0 byte**；堆疊卡在
 
 ---
 
+## 〇-2、🔴 2026-09-22 人類的要求（凌駕本檔其他段落的「下一步」）
+
+人類原話：
+
+> **維持現有的 vacant 的效果，讓他可以在任何的現有 agent 上運作，去執行做好為止，
+> 且自行安裝確認。** 優先以 pi；OpenCode 做不到 `/vacant on` 的話先不管。
+
+三句話的版本：
+
+1. **既有效果一個都不准掉**：通道（proxyd）、閘門（PATH shim、退出碼 `0/20/21/22/23/24/25/26`
+   語意不動）、收據（`ws_verdict`、四欄認證）、`vacant on`（B 路）、四個 agent 的接線。
+2. **pi 的形狀**：`pip install vacant-network` → `vacant`（裸打會引導）或 `vacant install --agent pi`
+   → 照舊打 `pi`，狀態列顯示 `(vacant) <model>`，輸入框 `/vacant on|off|status`。
+   接法＝**一支 extension**（`vacant_network/vrun/piext.py` 渲染、`possess.wire_pi` 寫進
+   `~/.pi/agent/extensions/vacant.ts`），**不再改寫使用者的 `models.json`**。
+   研究與施工順序：`decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`。
+3. **做到好的定義**＝自己裝一次、自己驗：`requests_seen > 0`（proxyd journal）、掛鉤日誌有
+   canary、`/vacant status` 回得出來、shim 那條 `pi -p` 退出碼照舊。
+   ⚠ 沒有真模型的機器只到 **L-fake**（假上游），要明講；L-real 仍要在 vacant-dev 補。
+
 ## 一、閘門的可量測定義（仍然有效）
 
 「閘門會動」是**兩格都成立**，而且**用真模型**：

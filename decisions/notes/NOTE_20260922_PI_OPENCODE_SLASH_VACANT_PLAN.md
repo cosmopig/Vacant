@@ -1,6 +1,6 @@
 # NOTE 2026-09-22 — 「裝一次、打開 pi、`/vacant on`」怎麼用最少的件數做到
 
-> **狀態：研究＋施工計畫，等人類裁決，還沒有動任何產品碼。**
+> **狀態：研究＋施工計畫。P0 與形狀 A 的引導已於同日落地（見 §八）；P1–P4 等人類裁決。**
 > 本份的 pi 事實**全部從 pi 0.87.0 的原始碼與隨附文件讀出來**
 > （`npm install @earendil-works/pi-coding-agent@0.87.0` 到 scratchpad 讀的），
 > vacant-dev 上跑的是 **0.85.1**——兩個版本的差異本份沒有量，引用時要連版本一起講。
@@ -210,3 +210,17 @@ agent_before_settle:
    §3.1 的建議（不改道既有 provider）會讓這條消失。
 3. `cli.py` 的 `_POSSESS_TOP` 只攔 `install`／`uninstall`，`vacant possess status` 才是附身狀態
    ——README 目前沒有任何一行寫 `vacant install`，外人照 README 找不到這條路（「功能在但構不到」＝附身失敗，`goal.md` §三-2）。
+
+---
+
+## 八、2026-09-22 落地紀錄（P0 ＋ 形狀 A 的引導；同一天）
+
+- ✅ `vacant_network/vrun/piext.py`：extension 渲染器；`possess.wire_pi` 只寫
+  `~/.pi/agent/extensions/vacant.ts`，**不碰 `models.json`**；`AGENTS["pi"].config_file` 指到 extension。
+- ✅ 裸 `vacant` 沒裝過 ⇒ `cli._guided_install`（只提議 `INSTALL_GUIDED_AGENTS`＝pi；非 tty 不問不裝）。
+- ✅ `gateshim` pi 段補 per-run `settings.json` `defaultProvider=vacant`——**自裝驗證抓到的既有洞**
+  （只寫 `models.json` pi 不會選它，沒帶 `--provider` 就落到它自己的預設 provider）。
+- ✅ 自裝驗證 **L-fake**：`ops/vacantrun/possess_pi_20260922/`。印字、互動（真 pty、`/vacant status|off|on`）、
+  shim 三格（21／20／0）、收據四張 `--selftest` 先過再驗全 OK、uninstall 逐位元。
+- ⏳ P1（vacant-dev 真模型）、P2（`vacant` 記住綁定）、P3（OpenCode plugin）、P4（`agent_before_settle` 閘門）未動。
+- ⚠ 第 §3.1 那個裁決點本次選了「**不改道使用者既有 provider**」：`/vacant off`／`/model` 切走留 `vacant_off`。

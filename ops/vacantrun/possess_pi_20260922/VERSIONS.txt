@@ -1,0 +1,6 @@
+pi 0.87.0
+node v22.22.2
+python Python 3.11.15
+vacant_network 0.8.0
+kernel 6.18.44-fc-v37
+git dae4c221

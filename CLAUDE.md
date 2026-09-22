@@ -158,7 +158,13 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   （600 格 abpi＋pi_tty），A 路的 pi 通道 `CHANNEL_MEASURED["pi"]` 至今是空字串。
   互動三條件（stdin tty、stdout tty、真 pty）缺一 pi 就**安靜**落回 print
   （`DECISION_20260920_PI_TTY_VS_PRINT_MODE.md`）。**缺「記住上次選誰」**。
-- **pi 的接法要改**（研究在 `decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`，
+- `piext.py` — **pi 產品版 extension 的渲染器**（2026-09-22 落地）：`vacant install --agent pi` 只寫
+  `~/.pi/agent/extensions/vacant.ts`（registerProvider(vacant)→proxyd、session_start 預設 setModel、
+  `/vacant on|off|status`、掛鉤七事件→`hookcli`），**不再碰 `models.json`**。裸 `vacant` 沒裝過會引導
+  （`cli._guided_install`，只提議 `possess.INSTALL_GUIDED_AGENTS`＝pi）。`gateshim` 的 pi 段另寫 per-run
+  `settings.json` 的 `defaultProvider=vacant`——自裝驗證抓到：只寫 `models.json` pi 不會**選**它。
+  自裝證據 `ops/vacantrun/possess_pi_20260922/`（**L-fake**，pi 0.87.0；L-real 未量）。
+- ~~**pi 的接法要改**~~（已做，研究在 `decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`，
   等裁決）：pi 0.87.0 讀碼——`models-store.json` 是**目錄快取**不是設定（`models.json` 才是）；
   extension 一支就能 `registerProvider`／`registerCommand("vacant")`／`setModel`／燒掛鉤七事件，
   **不必碰 `models.json`**；互動模式的閘門觸發點是 `agent_before_settle`。

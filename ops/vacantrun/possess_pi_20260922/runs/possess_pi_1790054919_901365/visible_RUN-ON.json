@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "possess_pi_1790054919_901365",
+  "files": [
+    {
+      "file": "test_add.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 143,
+      "cases": [
+        {
+          "case": "check_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 1,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "58e387be431d9942da8b3ec80e1c678570efa6690c294da41d1edde6eddcd306"
+}

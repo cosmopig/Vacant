@@ -22,7 +22,7 @@ import pathlib
 
 import pytest
 
-from vacant_network.vrun import gateshim, possess
+from vacant_network.vrun import gateshim, piext, possess
 
 
 # ── 1. 偵測 ────────────────────────────────────────────────────────────
@@ -890,3 +890,97 @@ def test_gate_receipt_records_the_posture_it_actually_ran_under():
     # 沒有已知讀法的 agent ⇒ None，不是空字串
     p3 = gateshim.inner_posture("pi", ["-p", "x"])
     assert p3["sandbox_mode"] is None and p3["approval_policy"] is None
+
+
+# ── 10. pi：extension，不碰 models.json（2026-09-22） ──────────────────────
+
+def _pi_ext(h: pathlib.Path) -> pathlib.Path:
+    return h / possess.AGENTS["pi"].config_file
+
+
+def test_pi_install_writes_extension_and_leaves_models_json_byte_identical(
+        tmp_path: pathlib.Path):
+    """`vacant install --agent pi` 寫的是 `~/.pi/agent/extensions/vacant.ts`，
+    使用者的 `models.json` **一個位元都不動**（使用者自己的 provider 不改道）。"""
+    h = tmp_path / "home"
+    (h / ".pi" / "agent").mkdir(parents=True)
+    mj = h / ".pi" / "agent" / "models.json"
+    original = b'{"providers": {"mine": {"baseUrl": "https://keep.example/v1"}}}\n'
+    mj.write_bytes(original)
+    st = _install(h, agents=["pi"])
+    assert st["channel"]["pi"]["ok"] is True, st["channel"]["pi"]
+    ext = _pi_ext(h)
+    assert ext.is_file()
+    body = ext.read_text("utf-8")
+    assert body.startswith(piext.MARK)
+    assert "http://127.0.0.1:18790" in body
+    assert 'registerProvider("vacant"' in body or "registerProvider(PROVIDER" in body
+    assert 'registerCommand("vacant"' in body
+    assert "vacant_network.vrun.hookcli" in body
+    assert mj.read_bytes() == original, "models.json 被動了"
+    # 沒量過就是沒量過：extension 裝了不等於被中介
+    assert st["channel"]["pi"]["verified"] is False
+    written = {c["path"] for c in st["files"]}
+    assert str(mj) not in written
+
+
+def test_pi_uninstall_removes_extension_and_restores_previous_one(
+        tmp_path: pathlib.Path):
+    """使用者原本就有一支同名 extension ⇒ 備份、覆寫、還原逐位元相同。"""
+    h = tmp_path / "home"
+    ext = h / ".pi" / "agent" / "extensions" / "vacant.ts"
+    ext.parent.mkdir(parents=True)
+    theirs = b"// theirs\nexport default function (pi) {}\n"
+    ext.write_bytes(theirs)
+    st = _install(h, agents=["pi"])
+    assert ext.read_bytes() != theirs
+    ch = [c for c in st["files"] if c["path"] == str(ext)][0]
+    assert ch["action"] == "modify" and ch["backup"]
+    rep = possess.uninstall(home=h)
+    assert rep["ok"] is True
+    assert ext.read_bytes() == theirs
+
+
+def test_pi_uninstall_deletes_extension_we_created(tmp_path: pathlib.Path):
+    h = tmp_path / "home"
+    (h / ".pi" / "agent").mkdir(parents=True)
+    _install(h, agents=["pi"])
+    ext = _pi_ext(h)
+    assert ext.is_file()
+    assert possess.uninstall(home=h)["ok"] is True
+    assert not ext.exists()
+
+
+def test_piext_render_is_pure_and_bakes_models():
+    body = piext.render(port=18790, state_dir="/x/state", python="/py",
+                        package_path="/pkg", models=["a", "b"])
+    assert '"/py"' in body and '"/pkg"' in body and '"/x/state"' in body
+    assert '["a", "b"]' in body
+    assert body.count("http://127.0.0.1:18790") >= 1
+    # 每個掛鉤事件都在（與 2026-09-20 A 級那一跑同一組，見 hookcli.install_pi）
+    for ev in ("session_start", "user_prompt_submit", "pre_tool_use", "tool_result",
+               "before_provider_request", "stop", "session_end"):
+        assert f'"{ev}"' in body, ev
+    # 關掉要留痕
+    assert '"vacant_off"' in body
+
+
+def test_piext_is_valid_javascript():
+    """extension 是純 JS（副檔名 .ts 只因為 pi 只認 .ts／.js）。
+    `node --check` 驗語法；沒有 node 就 **skip 並印理由**，不是通過。"""
+    import shutil
+    import subprocess
+    import tempfile
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("這台沒有 node ⇒ extension 語法沒量到（不是通過）")
+    body = piext.render(port=18790, state_dir="/x", python="/py", package_path="/pkg")
+    with tempfile.TemporaryDirectory() as d:
+        f = pathlib.Path(d) / "vacant.mjs"
+        f.write_text(body, "utf-8")
+        r = subprocess.run([node, "--check", str(f)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+
+
+def test_pi_probe_models_returns_empty_not_error_when_nothing_listens():
+    assert piext.probe_models(1, timeout=0.5) == []
