@@ -1,91 +1,112 @@
-# HumanEval × pi 對話介面 × 有/沒有 Vacant —— **量具就緒，跑不完，原因量出來了**
+# HumanEval × pi 對話介面 × 有/沒有 Vacant —— **兩臂都 20/20（100%），分不出高下**
 
-> **狀態：harness 驗證通過，正式批次未跑。** 擋門不是 Vacant、不是 pi、也不是模型，
-> 是**這個容器出網過濾器自己的 DNS 不穩**（`BLOCKER.txt` 有逐通實測）。
-> 硬跑只會產出一整批 `infra_void`，所以停在這裡等一條穩定的路。
+> **結論先講**：在這 20 題上，**有 Vacant 與沒有 Vacant 的正確率都是 100%**。
+> 閘門**一次都沒有拒交**。這不是「Vacant 沒用」也不是「Vacant 有用」——
+> 是**這個題組在這個設定下對這個模型太簡單，量表在天花板，兩臂分不開**。
+> 原因量出來了（§三）：工作區裡附著**可以執行的可見測資**，而 agent 自己反覆跑它
+> （單格 4–22 次）直到通過才收手。**agent 手上已經有閘門要檢查的那把尺。**
 
-## 一、為什麼用 HumanEval
+- 題庫：**openai/human-eval**（MIT，164 題），等距 `range(0,164,8)` ⇒ **20 題**，
+  無隨機種子、無人工挑題。清單 `bank/manifest.json`。
+- agent：**pi 0.87.0 的對話 TUI**（真 pty，把同一句話**打進輸入框**，不是 `pi -p`）
+- 模型：**`gemma-4-12b-it-qat`**（人類的 LM Studio）
+- 40 格全收，**0 格作廢**。ON 臂 20 條收據鏈 `--selftest` 先過再驗，**總判全 OK**。
 
-人類 2026-09-22 要求「**公正的、有量化結果的**」題目，明講不要用本 repo 自己的題庫。
+## 一、結果
 
-- 來源：`https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz`
-  （OpenAI，MIT，164 題），外界有大量公開的 pass@1 數字可對照。
-- 抽樣：**等距 `range(0, 164, 8)` ⇒ 20 題**。沒有隨機種子、沒有人工挑選，
-  「挑好做的題」在流程上不可表達。清單在 `bank/manifest.json`。
-- **可見 ⊂ 隱藏**（與 r534 同一個關係）：可見＝官方 `check()` 的**前 2 條 assert**，
-  閘門看它；隱藏＝官方 `check()` **整份**，一題一個布林 ＝ HumanEval 的標準計分
-  （pass@1，n=1 樣本）⇒ 算出來的比率跟外界公布的是同一把尺。
-- 隱藏那份**永遠不進工作區**，失敗訊息不回饋給模型。
+| | OFF（沒有 Vacant） | ON（有 Vacant） |
+|---|---|---|
+| 寫出 `solution.py` | 20/20 | 20/20 |
+| 閘門放行 | —（沒有閘門） | **20/20** |
+| 閘門拒交 | — | **0/20** |
+| 通過官方隱藏測資 | **20/20** | **20/20** |
+| **正確率**（同分母） | **100.0%** | **100.0%** |
+| 假交付（放行但錯） | —（全部都算出貨，0 件錯） | **0/20** |
+| 每格中位數秒數 | 108 | 111 |
 
-### 尺自己先通過正負控制（`tools/score.py`）
+「正確率」＝通過**官方 `check()` 整份**的題數／總題數。一題一個布林，
+就是 HumanEval 的標準算法。兩臂同分母、同題目、同模型、**同一句輸入**。
+
+逐題表在 `run/summary.json`，20 題全部是「ON 交付 True／OFF 有 True」。
+
+## 二、量具先過了控制
 
 | 控制 | 結果 |
 |---|---|
 | 官方 canonical solution 要全過 | **20/20** ✅ |
-| 退化樁 `def <entry>(*a, **k): return None` 要全擋 | **0/20 過** ✅ |
+| 退化樁 `def <entry>(*a,**k): return None` 要全擋 | **0/20 過** ✅ |
+| ON 臂收據鏈（負控制 `--selftest` 先過） | **20/20 OK** ✅ |
 
-## 二、兩臂的設計（唯一差異＝有沒有 Vacant）
+## 三、🔴 為什麼是 100%：**agent 自己在跑那把尺**
 
-**兩臂都走對話介面**：真 pty 開 TUI，把**同一句話打進輸入框**（不是 `pi -p`，
-也不是命令列帶 prompt）——人類明確要求「最好使用對話的 cli」。
+從轉錄數出來的（`run/pty_transcripts.tar.gz`，逐位元保留）：
 
-| | ON | OFF |
+| 題 | agent 跑 `run_tests.sh` 幾次 | 看到 `pass test_visible` 幾次 |
 |---|---|---|
-| 命令 | `vacant on pi --workspace … --suite … --retry none` | `pi`（自己的 `models.json` 直接指上游） |
-| 模型通道 | 經 Vacant 的 proxy，逐通落盤 | 直連，**沒有任何紀錄** |
-| 結束時 | 跑驗收、簽收據、退出碼＝裁決 | 什麼都不做 |
-| 打進輸入框的話 | 逐字相同 | 逐字相同 |
-| 完成判定／離開 | 同一套（輸出靜默 → `/quit` → Ctrl-D → SIGTERM） | 同一套 |
+| HumanEval_0 | 7 | 8 |
+| HumanEval_96 | 4 | 4 |
+| HumanEval_160 | **22** | 12 |
 
-判定用啟發式的「輸出靜默」而不是掛鉤日誌，理由是 `vacant on` 走 `agentwrap`
-**不裝掛鉤**（掛鉤是 `gateshim` 裝的）⇒ 兩臂只能共用同一個啟發式，至少是同一把尺。
+工作區裡有 `tests_visible/` 與 `run_tests.sh`（那是 HumanEval 契約的一部分：
+題目本來就附範例），**agent 用 bash 工具反覆跑它、改 `solution.py`、再跑**，
+通過才停。而可見測資是隱藏測資的**子集** ⇒ 可見過 ⇒ 隱藏幾乎必過。
 
-## 三、pilot：harness 是通的，被上游打斷
+**所以這一批量到的不是 pass@1。** 公開的 12B 級 pass@1 大約七到八成，
+而這裡是「**有可執行驗收可以自我迭代的 agent**」，那本來就會接近天花板。
 
-`HumanEval_0` ON 臂（`pilot/`）。轉錄 `HumanEval_0_ON.pty` 逐字可讀：
+⇒ **閘門在這一批沒有事情可做**：它要擋的東西（交付物過不了可見驗收）
+一次都沒發生，因為 agent 在交出來之前就自己擋掉了。
+Vacant 在這 20 格加的是**紀錄**（20 條可離線重驗的簽章鏈、逐通 wire log），不是正確率。
 
-1. TUI 起來，狀態列顯示 **`(vacantproxy) gemma-4-12b-it-qat`** ⇒ 通道接上了
-2. 那一句被打進輸入框並送出 ⇒ `Working` 轉了幾秒
-3. **`Error: 403 Host resolves to a private/reserved IP: resolve_no_records`**
-4. `/quit` → pi 結束 → **閘門照樣跑完**：
-   `拒交（visible_fail）　ws 9a2eabdd730f→9a2eabdd730f　wire 1 通`，退出碼 **20**
+## 四、環境補償：**兩臂共用的重試中繼**（`tools/relay.py`）
 
-⇒ **Vacant 這一側每一段都動了**（中介、打字、閘門、收據、工作區雜湊前後相同）。
-   死在第 3 步的是出網。
+容器出網過濾器對 `*.ts.net` 的 DNS 不穩（`BLOCKER.txt`：直連成功率約 42%，
+`403 resolve_no_records` / `503 DNS resolution failure`）。**不修掉它就量不到 agent，只會量到網路。**
 
-## 四、擋門（`BLOCKER.txt` 是逐通實測）
+做法：一個**本機重試中繼**，**兩臂指到逐位元相同的端點** `http://127.0.0.1:19000/v1`
+⇒ 它不可能偏袒任何一臂。只對環境層失敗重試，上游模型自己回的錯**原樣透傳**。
 
-```
-HTTP/2 403  x-deny-reason: resolve_no_records
-HTTP/2 503  DNS resolution failure
-```
-
-| 探測 | 成功率 |
+| 本批總帳（`run/relay.jsonl` 逐通可查） | |
 |---|---|
-| `1003.taild870c4.ts.net` 強制 IPv4 | 4/8 |
-| 同上 強制 IPv6 | **0/8** |
-| 同上 間隔 3 秒 ×12 | 5/12（≈42%） |
-| **對照** `pypi.org`（在容器 `NO_PROXY` 名單裡） | **6/6** |
-| **對照** `api.github.com`（不在名單，政策內被擋） | 0/6 |
-| **對照** 本機自己解析該名字 | 5/6 |
+| 總嘗試 | 416 |
+| 環境失敗被吸收 | **85**（20.4%） |
+| 用盡重試（會導致作廢） | **0** |
 
-一個 agent session 要 5–15 通模型呼叫；每通 42% ⇒ 整段跑完的機率約 `0.42^5 ≈ 1%`。
-**所以這不是「多跑幾次就好」，是路不通。**
+⚠ 它**不是 Vacant 的一部分**，是這台機器的基礎設施補償，跑在 Vacant 外面。
 
-## 五、要跑完需要哪一條（擇一）
+## 五、沿路量到、但不是這一批主結論的兩件事
 
-1. **加入 tailnet**：容器的 `NO_PROXY` **已經包含 `100.64.0.0/10`**
-   ⇒ tailnet 位址**本來就繞過過濾器**，那是設計上穩定的路。
-   需要：人類的 auth key ＋ 放行「啟動 tailscaled」那一類動作（先前被分類器擋下）。
-2. **在 vacant-dev 上跑**：它與 1003 同在 LAN，完全碰不到這個過濾器。
-   `tools/cell.sh` 改一下 `HE_UPSTREAM` 就能直接用。
-3. 換一個**過濾器解析得穩**的公開端點（`*.ts.net` 這個名字實測不穩）。
+1. **本機 3B 跑不動 agent。** 先試過在容器裡跑 `Qwen2.5-Coder-3B-Instruct`（llama.cpp，
+   CPU，4 核）。工具呼叫在**直接打 API 時可用**，但放進 pi 的完整系統提示之後，
+   模型**只寫文字描述步驟、一次工具都不叫**（轉錄可查），跑 181 秒零交付。
+   ⇒ 「換小模型在本機跑」這條路在這台機器上**不成立**，不是速度問題是能力問題。
+   速度另記：prompt 約 26 tok/s、生成約 8.5 tok/s，prefix cache 有效（86s → 8s）。
+2. **pilot 那一格證明 Vacant 這一側每段都動**：TUI 起來、狀態列 `(vacantproxy) <model>`、
+   打字送出、上游 403、`/quit` 之後**閘門照樣判拒交 exit 20 且 `ws` 雜湊前後相同**。
+
+## 六、不能說的
+
+1. **不能說「Vacant 不影響正確率」**——只能說**在這 20 題上分不出來**，因為兩臂都在天花板。
+   n=20 且兩邊都是 20/20，差值的信賴區間涵蓋正負很大的範圍。
+2. **不能說這是 pass@1**——工作區附可執行驗收且 agent 會自我迭代（§三）。
+3. **不能說閘門沒有牙齒**——同一套閘門在**別的題組**上拒交過（`possess_pi_real_20260922`
+   五題裡拒交 2 題；`ab_vacant_onoff_20260922` 的 `lcb_3584` 拒交）。**是這一批沒有機會發動。**
+4. 級別 **B′**（沒有 bwrap）；上游是公開 Funnel 不是 LAN；互動的完成判定是**輸出靜默**的啟發式。
+
+## 七、要分得出高下，下一批該改什麼（擇一）
+
+- **把可見測資從工作區拿掉**：agent 就沒有自我迭代的尺了，閘門變成唯一的檢查。
+  那一批才量得到「閘門有沒有擋下錯的東西」。
+- **換更難的題組**（本 repo 的 LCB v2 那 120 題就分得開：OFF 在同五題上 15/30 正確、**15/30 假交付**）。
+- 兩臂各跑多次取平均——本批每題只跑一次。
 
 ## 重跑
 
 ```
-python3 tools/build.py 8                  # 重建題庫（等距抽樣，確定性）
-bash tools/cell.sh HumanEval_0 ON         # 有 Vacant（對話介面）
-bash tools/cell.sh HumanEval_0 OFF        # 純 pi（對話介面）
-python3 tools/score.py HumanEval_0 <ws>/solution.py   # 官方隱藏尺
+python3 tools/build.py 8                                   # 重建題庫（等距，確定性）
+RELAY_LOG=... python3 tools/relay.py &                     # 兩臂共用的重試中繼
+HE_UPSTREAM=http://127.0.0.1:19000/v1 HE_MODEL=gemma-4-12b-it-qat \
+  bash tools/cell.sh HumanEval_0 ON                        # 有 Vacant（對話介面）
+HE_UPSTREAM=... bash tools/cell.sh HumanEval_0 OFF         # 純 pi（對話介面）
+python3 tools/summarize.py                                 # 兩臂正確率
 ```

@@ -172,6 +172,11 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   **V0 臂退出碼 20 ＋ 收據**，而且四通模型呼叫全 200 ⇒ **失敗可歸因給 agent 不是環境**。
   ⚠ V1（重試）臂**作廢**：模型呼叫被容器出網過濾器回 403（`x-deny-reason: resolve_no_records`），
   不可讀成「重試沒用」。
+- **公開題庫的兩臂對照**（`ops/vacantrun/humaneval_ab_20260922/`）：HumanEval 等距抽 20 題、
+  pi **對話 TUI**（真 pty 打字）、`gemma-4-12b-it-qat`，**ON 與 OFF 都 20/20 ＝ 100%，閘門 0 拒交**。
+  🔴 **那是天花板不是結論**：工作區附可執行的可見測資，agent 自己跑了 4–22 次迭代到過才收手
+  ⇒ 量到的不是 pass@1，閘門在這一批沒有機會發動。要分得開得**把可見測資拿掉**或換更難的題組。
+  兩臂共用一個**重試中繼**吸收容器出網 DNS 不穩（416 通吸收 85，0 用盡），它不是 Vacant 的一部分。
 - **Claude Code 自己驗自己**（`ops/vacantrun/possess_claude_20260922/`，**L-real**，Haiku 4.5，真上游）：
   shim 拒交 20／交付 0；`settings.json` 的 base URL 在 **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`**
   （Claude Code 遠端容器）下**被忽略、agent 照樣回答**——`requests_seen=0` 而一切看起來正常的活體標本；
