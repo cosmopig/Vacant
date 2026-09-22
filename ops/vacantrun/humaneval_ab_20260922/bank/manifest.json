@@ -1,0 +1,115 @@
+{
+  "source": "https://raw.githubusercontent.com/openai/human-eval/master/data/HumanEval.jsonl.gz",
+  "total_in_bank": 164,
+  "stride": 8,
+  "visible_asserts": 2,
+  "picked_n": 20,
+  "picked": [
+    {
+      "task_id": "HumanEval/0",
+      "dir": "HumanEval_0",
+      "entry_point": "has_close_elements"
+    },
+    {
+      "task_id": "HumanEval/8",
+      "dir": "HumanEval_8",
+      "entry_point": "sum_product"
+    },
+    {
+      "task_id": "HumanEval/16",
+      "dir": "HumanEval_16",
+      "entry_point": "count_distinct_characters"
+    },
+    {
+      "task_id": "HumanEval/24",
+      "dir": "HumanEval_24",
+      "entry_point": "largest_divisor"
+    },
+    {
+      "task_id": "HumanEval/40",
+      "dir": "HumanEval_40",
+      "entry_point": "triples_sum_to_zero"
+    },
+    {
+      "task_id": "HumanEval/48",
+      "dir": "HumanEval_48",
+      "entry_point": "is_palindrome"
+    },
+    {
+      "task_id": "HumanEval/56",
+      "dir": "HumanEval_56",
+      "entry_point": "correct_bracketing"
+    },
+    {
+      "task_id": "HumanEval/64",
+      "dir": "HumanEval_64",
+      "entry_point": "vowels_count"
+    },
+    {
+      "task_id": "HumanEval/72",
+      "dir": "HumanEval_72",
+      "entry_point": "will_it_fly"
+    },
+    {
+      "task_id": "HumanEval/80",
+      "dir": "HumanEval_80",
+      "entry_point": "is_happy"
+    },
+    {
+      "task_id": "HumanEval/88",
+      "dir": "HumanEval_88",
+      "entry_point": "sort_array"
+    },
+    {
+      "task_id": "HumanEval/96",
+      "dir": "HumanEval_96",
+      "entry_point": "count_up_to"
+    },
+    {
+      "task_id": "HumanEval/104",
+      "dir": "HumanEval_104",
+      "entry_point": "unique_digits"
+    },
+    {
+      "task_id": "HumanEval/112",
+      "dir": "HumanEval_112",
+      "entry_point": "reverse_delete"
+    },
+    {
+      "task_id": "HumanEval/120",
+      "dir": "HumanEval_120",
+      "entry_point": "maximum"
+    },
+    {
+      "task_id": "HumanEval/128",
+      "dir": "HumanEval_128",
+      "entry_point": "prod_signs"
+    },
+    {
+      "task_id": "HumanEval/136",
+      "dir": "HumanEval_136",
+      "entry_point": "largest_smallest_integers"
+    },
+    {
+      "task_id": "HumanEval/144",
+      "dir": "HumanEval_144",
+      "entry_point": "simplify"
+    },
+    {
+      "task_id": "HumanEval/152",
+      "dir": "HumanEval_152",
+      "entry_point": "compare"
+    },
+    {
+      "task_id": "HumanEval/160",
+      "dir": "HumanEval_160",
+      "entry_point": "do_algebra"
+    }
+  ],
+  "skipped": [
+    {
+      "task_id": "HumanEval/32",
+      "why": "沒有可抽的 assert"
+    }
+  ]
+}

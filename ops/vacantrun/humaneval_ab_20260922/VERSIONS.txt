@@ -1,0 +1,5 @@
+benchmark HumanEval 164 題（openai/human-eval, MIT），等距 stride=8 抽 20 題
+pi 0.87.0 互動 TUI（真 pty，打字進輸入框）
+model gemma-4-12b-it-qat / 上游 https://1003.taild870c4.ts.net/v1
+git ca9e1387
+date 2026-09-22T07:34:04Z
