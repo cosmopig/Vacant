@@ -529,10 +529,31 @@ def _call_model(prompt: str, endpoint: str, model: str, budget: int,
         "temperature": 0.8,
         "max_tokens": budget,
     }, timeout=timeout)
-    msg = ((body or {}).get("choices") or [{}])[0].get("message", {}) or {}
+    # 🔴 **LM Studio 的錯誤是用 HTTP 200 ＋ `{"error": …}` 回的**，不是 4xx。
+    #    實測 2026-09-22：端點少打 `/v1` ⇒ `POST …:1234/chat/completions`
+    #    ⇒ `status=200`、`body={"error":"Unexpected endpoint or method."}`、178ms。
+    #    沒有這一段的話，下游看到的是「沒有 choices ⇒ content 空」，
+    #    於是把它判成 `empty_content`，收據上寫「thinking 吃光額度」——
+    #    **一個指向完全錯誤方向的診斷**。展場那天有人照著它去查 thinking 設定，
+    #    會查一整晚，而真正要改的是一個路徑後綴。
+    #    ⚠ 這三件事疊起來才是真正的危險：**靜默**（200）＋**怪錯人**（收據）
+    #      ＋**不可逆**（`pending()` 排除已有 generated 事件的卡 ⇒ 救不回來）。
+    api_err = (body or {}).get("error") if isinstance(body, dict) else None
+    choice = ((body or {}).get("choices") or [{}])[0]
+    msg = choice.get("message", {}) or {}
     usage = (body or {}).get("usage") or {}
     text = msg.get("content", "")
     return {
+        # `None` ＝ 這一層沒話說（正常回應）；有字串 ＝ API 明確回報的錯誤。
+        # **不要寫空字串**——空字串會被下游讀成「有錯但沒訊息」。
+        "api_error": (api_err if isinstance(api_err, str)
+                      else (json.dumps(api_err, ensure_ascii=False)
+                            if api_err is not None else None)),
+        "http_status": status,
+        # ⚠ **API 自己說的那句「我撞到天花板了」。** `"length"` ＝ 輸出被切掉。
+        #    沒有它的話，「思考把 JSON 吐到一半就沒了」會長得像「模型不會照格式回話」，
+        #    而這兩者要改的東西完全不同（前者加額度、後者改 prompt）。
+        "finish_reason": choice.get("finish_reason"),
         "parsed": _parse_model_json(text),
         "text": text,
         "budget": budget,
@@ -550,6 +571,16 @@ def _squeezed_out(r: dict[str, Any]) -> bool:
     `content` 空 **而且** reasoning 幾乎把額度用完。只看前者會把
     「模型真的沒話說」也判成這個，升額重試就白花一次機時。
     """
+    # 🔴 **撞到天花板就是被擠掉，不管 content 是空的還是被切一半。**
+    #    2026-09-22 實跑抓到：一張卡 reasoning 用掉 2326／2400（97%），
+    #    JSON 吐到一半就沒了 ⇒ `parsed is None`、但 `text` 有字
+    #    ⇒ 舊判準第一行就 `return False` ⇒ **不升額**
+    #    ⇒ 32 秒機時白花、觀眾永久拿到查表版（`pending()` 不會再撿它）。
+    #    「content 空」與「content 被截斷」是**同一個病的兩種長相**，
+    #    而 `finish_reason == "length"` 是 API 自己講出來的那句話。
+    #    ⚠ 這個函式只在 `parsed is None` 時被問，所以這裡不會誤殺解析得出來的回應。
+    if r.get("finish_reason") == "length":
+        return True
     if str(r.get("text") or "").strip():
         return False
     rt = r.get("reasoning_tokens")
@@ -576,6 +607,25 @@ def generate_one(card: dict[str, Any] | None, card_text: str | None,
             escalated = True
             r = _call_model(prompt, endpoint, model,
                             MAX_TOKENS * ESCALATE_FACTOR, timeout)
+
+        if r["parsed"] is None and r.get("api_error"):
+            # API 層就回錯了——**這不是模型的問題，不准怪到 thinking 頭上**。
+            why = (f"API 回報錯誤（HTTP {r.get('http_status')}）：{r['api_error']}"
+                   f"｜端點={endpoint}"
+                   + ("　🔴 端點少了 `/v1`？候選端點都長這樣："
+                      f"{ENDPOINT_CANDIDATES[0][0]}"
+                      if not str(endpoint).rstrip('/').endswith('/v1') else ""))
+            if not allow_fallback:
+                raise ValueError(why)
+            out = fallback_twin(card)
+            out["engine"] = "fallback_deterministic"
+            out["degraded_from"] = f"lmstudio:{model}"
+            out["degrade_kind"] = "api_error"      # ← **不是** empty_content
+            out["degrade_reason"] = why
+            out["latency_ms"] = int((time.time() - t0) * 1000)
+            out["reasoning_tokens"] = r["reasoning_tokens"]
+            out["budget_escalated"] = False
+            return out
 
         if r["parsed"] is None:
             # 講清楚是「空的」還是「有字但格式不對」——兩者要修的東西不同。
