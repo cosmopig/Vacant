@@ -1,0 +1,14 @@
+--- a/public/index.html
++++ b/public/index.html
+@@ -633,7 +633,10 @@
+     if (actx.state === "suspended") actx.resume();
+   } catch(e){ /* 沒有 Web Audio 就算了，閃光跟震動還在 */ }
+ }
+-document.addEventListener("pointerdown", primeAudio, { once: true, passive: true });
++/* 這一行原本是裸呼叫，而 test/page_flow.test.mjs 的 document 樁沒有
++   addEventListener ⇒ 整個 inline script 在 vm 裡炸掉、11 綠變 3 綠 8 紅。
++   包起來跟同檔的 lsGet/lsSet 一致：解鎖音訊失敗不該讓整頁掛掉。 */
++try { document.addEventListener("pointerdown", primeAudio, { once: true, passive: true }); } catch(e){}
+ 
+ function playChime(){
+   if (!actx) return;

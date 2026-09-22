@@ -1,0 +1,387 @@
+
+> vacant-world-cloud@1.0.0 test
+> node --test test/server.test.mjs test/page_flow.test.mjs
+
+TAP version 13
+# Subtest: 送出鍵真的把 self_attested／age_gate 放進 body（§5.1-1、§5.1-8）
+not ok 1 - 送出鍵真的把 self_attested／age_gate 放進 body（§5.1-1、§5.1-8）
+  ---
+  duration_ms: 48.226794
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:132:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:133:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: 負控制：沒勾「這是我自己的」就**不送**（不是送了個 false）
+not ok 2 - 負控制：沒勾「這是我自己的」就**不送**（不是送了個 false）
+  ---
+  duration_ms: 4.04393
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:147:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:148:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 負控制：沒走年齡那一步就直接送 ⇒ age_gate 是 false 不是憑空的 true
+not ok 3 - 負控制：沒走年齡那一步就直接送 ⇒ age_gate 是 false 不是憑空的 true
+  ---
+  duration_ms: 10.695099
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:161:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:162:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 「我不想給我自己的資料」真的走 /api/preset（§5.1-5 不是裝飾）
+not ok 4 - 「我不想給我自己的資料」真的走 /api/preset（§5.1-5 不是裝飾）
+  ---
+  duration_ms: 5.046829
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:174:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:175:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 「我未滿 18 歲、自己一個人」走的是同一條拒絕路，不是死路
+not ok 5 - 「我未滿 18 歲、自己一個人」走的是同一條拒絕路，不是死路
+  ---
+  duration_ms: 3.559291
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:183:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:184:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 拿到 withdraw_code 就存起來、並且顯示在畫面上（換手機也撤得回）
+not ok 6 - 拿到 withdraw_code 就存起來、並且顯示在畫面上（換手機也撤得回）
+  ---
+  duration_ms: 10.490084
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:191:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:192:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 負控制：伺服器沒回 withdraw_code 時，畫面不假裝有一個碼
+not ok 7 - 負控制：伺服器沒回 withdraw_code 時，畫面不假裝有一個碼
+  ---
+  duration_ms: 5.578684
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:204:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:210:19)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 伺服器回錯誤時，錯誤訊息**原樣**顯示（不是「送出失敗」蓋掉理由）
+not ok 8 - 伺服器回錯誤時，錯誤訊息**原樣**顯示（不是「送出失敗」蓋掉理由）
+  ---
+  duration_ms: 3.604889
+  type: 'test'
+  location: '/Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:220:1'
+  failureType: 'testCodeFailure'
+  error: 'document.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    page:236:10
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    makeEnv (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:123:6)
+    TestContext.<anonymous> (file:///Users/cosmopig/Documents/GitHub/vacant-world-cloud/test/page_flow.test.mjs:226:19)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: 撤回頁：按下去真的打 /api/withdraw，body 帶的是那個碼
+ok 9 - 撤回頁：按下去真的打 /api/withdraw，body 帶的是那個碼
+  ---
+  duration_ms: 93.071854
+  type: 'test'
+  ...
+# Subtest: 撤回頁：空白不送（不要對伺服器丟一個必定失敗的請求）
+ok 10 - 撤回頁：空白不送（不要對伺服器丟一個必定失敗的請求）
+  ---
+  duration_ms: 35.727762
+  type: 'test'
+  ...
+# Subtest: 撤回頁不會一打開就自動刪掉（誤觸到這頁不該失去分身）
+ok 11 - 撤回頁不會一打開就自動刪掉（誤觸到這頁不該失去分身）
+  ---
+  duration_ms: 2.72562
+  type: 'test'
+  ...
+# Subtest: 開機橫幅印出事件流 backend 與示範分身自檢（不准靜靜開機）
+ok 12 - 開機橫幅印出事件流 backend 與示範分身自檢（不准靜靜開機）
+  ---
+  duration_ms: 2543.201333
+  type: 'test'
+  ...
+# Subtest: 沒有 self_attested／age_gate 的投稿被擋（400 consent_missing）
+ok 13 - 沒有 self_attested／age_gate 的投稿被擋（400 consent_missing）
+  ---
+  duration_ms: 203.590365
+  type: 'test'
+  ...
+# Subtest: 只勾一個也擋（缺哪一個就講哪一個）
+ok 14 - 只勾一個也擋（缺哪一個就講哪一個）
+  ---
+  duration_ms: 331.208597
+  type: 'test'
+  ...
+# Subtest: 負控制：兩個都 true 就收（否則上面那兩條只是把端點關掉而已）
+ok 15 - 負控制：兩個都 true 就收（否則上面那兩條只是把端點關掉而已）
+  ---
+  duration_ms: 74.52871
+  type: 'test'
+  ...
+# Subtest: 假的 true（字串 "true"／1）不算勾——三態防呆
+ok 16 - 假的 true（字串 "true"／1）不算勾——三態防呆
+  ---
+  duration_ms: 196.376436
+  type: 'test'
+  ...
+# Subtest: 含 email 的卡仍然 422，而且訊息指得出是哪一段
+ok 17 - 含 email 的卡仍然 422，而且訊息指得出是哪一段
+  ---
+  duration_ms: 78.84561
+  type: 'test'
+  ...
+# Subtest: 日期不再被誤判成電話（2026-09-20 那個誤殺）
+ok 18 - 日期不再被誤判成電話（2026-09-20 那個誤殺）
+  ---
+  duration_ms: 145.64528
+  type: 'test'
+  ...
+# Subtest: 負控制：真電話還是擋得下來（放寬日期沒有把電話放走）
+ok 19 - 負控制：真電話還是擋得下來（放寬日期沒有把電話放走）
+  ---
+  duration_ms: 118.721599
+  type: 'test'
+  ...
+# Subtest: 原文在 subs 檔裡、commitment 在事件流裡、原文不在事件流裡
+ok 20 - 原文在 subs 檔裡、commitment 在事件流裡、原文不在事件流裡
+  ---
+  duration_ms: 313.581772
+  type: 'test'
+  ...
+# Subtest: 枚舉類別（形狀／質感／色系）有上鏈，自由文字沒有（§5.1-2 只取類別）
+ok 21 - 枚舉類別（形狀／質感／色系）有上鏈，自由文字沒有（§5.1-2 只取類別）
+  ---
+  duration_ms: 102.018221
+  type: 'test'
+  ...
+# Subtest: 撤回碼錯 → 403，而且原文一個 byte 都沒動（負控制）
+ok 22 - 撤回碼錯 → 403，而且原文一個 byte 都沒動（負控制）
+  ---
+  duration_ms: 100.277145
+  type: 'test'
+  ...
+# Subtest: 撤回碼格式錯 → 400，而且講得出錯在哪（不是籠統一句「碼錯了」）
+ok 23 - 撤回碼格式錯 → 400，而且講得出錯在哪（不是籠統一句「碼錯了」）
+  ---
+  duration_ms: 131.771362
+  type: 'test'
+  ...
+# Subtest: 撤回：原文與 nonce 從整個 DATA_DIR 消失，commitment 留著
+ok 24 - 撤回：原文與 nonce 從整個 DATA_DIR 消失，commitment 留著
+  ---
+  duration_ms: 221.72072
+  type: 'test'
+  ...
+# Subtest: 撤回後展場再回寫 → 409，刪掉的東西不會自己長回來
+ok 25 - 撤回後展場再回寫 → 409，刪掉的東西不會自己長回來
+  ---
+  duration_ms: 117.027449
+  type: 'test'
+  ...
+# Subtest: 再撤一次是冪等的（不會回「碼不對」嚇人）
+ok 26 - 再撤一次是冪等的（不會回「碼不對」嚇人）
+  ---
+  duration_ms: 154.034452
+  type: 'test'
+  ...
+# Subtest: 工作人員路徑：帶 VENUE_TOKEN 用 id 撤（觀眾把碼弄丟的那一格）
+ok 27 - 工作人員路徑：帶 VENUE_TOKEN 用 id 撤（觀眾把碼弄丟的那一格）
+  ---
+  duration_ms: 145.922666
+  type: 'test'
+  ...
+# Subtest: 撤回有頻率限制（40 bits 的碼唯一的靠山）
+ok 28 - 撤回有頻率限制（40 bits 的碼唯一的靠山）
+  ---
+  duration_ms: 43.466436
+  type: 'test'
+  ...
+# Subtest: 不給自己的資料也能參與：/api/preset 走同一條產線
+ok 29 - 不給自己的資料也能參與：/api/preset 走同一條產線
+  ---
+  duration_ms: 77.949909
+  type: 'test'
+  ...
+# Subtest: 指定不存在的示範分身 → 400，而且列得出有哪些（不是安靜給一隻別的）
+ok 30 - 指定不存在的示範分身 → 400，而且列得出有哪些（不是安靜給一隻別的）
+  ---
+  duration_ms: 65.123616
+  type: 'test'
+  ...
+# Subtest: 示範分身輪流出場，不是每次同一隻
+ok 31 - 示範分身輪流出場，不是每次同一隻
+  ---
+  duration_ms: 339.569843
+  type: 'test'
+  ...
+# Subtest: /api/all 的 withdrawals 不吃 since（不然抄寫端永遠看不到撤回）
+ok 32 - /api/all 的 withdrawals 不吃 since（不然抄寫端永遠看不到撤回）
+  ---
+  duration_ms: 133.919089
+  type: 'test'
+  ...
+# Subtest: /api/all 不外流 nonce／撤回碼雜湊（那包會被抄進別人的 append-only 鏈）
+ok 33 - /api/all 不外流 nonce／撤回碼雜湊（那包會被抄進別人的 append-only 鏈）
+  ---
+  duration_ms: 75.135399
+  type: 'test'
+  ...
+# Subtest: /api/all 與 /api/queue 沒 token 一律 401（這條沒被新端點弄鬆）
+ok 34 - /api/all 與 /api/queue 沒 token 一律 401（這條沒被新端點弄鬆）
+  ---
+  duration_ms: 7.276528
+  type: 'test'
+  ...
+# Subtest: 公網頁不再只說「可以刪除」而沒有路——撤回頁存在且打得開
+ok 35 - 公網頁不再只說「可以刪除」而沒有路——撤回頁存在且打得開
+  ---
+  duration_ms: 10.028048
+  type: 'test'
+  ...
+# Subtest: / 的行內 JS 語法正確（現場沒有人會看 console）
+ok 36 - / 的行內 JS 語法正確（現場沒有人會看 console）
+  ---
+  duration_ms: 7.488038
+  type: 'test'
+  ...
+# Subtest: / 的 $("…") 每一個 id 都真的在 DOM 裡
+ok 37 - / 的 $("…") 每一個 id 都真的在 DOM 裡
+  ---
+  duration_ms: 17.648104
+  type: 'test'
+  ...
+# Subtest: /withdraw.html 的行內 JS 語法正確（現場沒有人會看 console）
+ok 38 - /withdraw.html 的行內 JS 語法正確（現場沒有人會看 console）
+  ---
+  duration_ms: 14.384701
+  type: 'test'
+  ...
+# Subtest: /withdraw.html 的 $("…") 每一個 id 都真的在 DOM 裡
+ok 39 - /withdraw.html 的 $("…") 每一個 id 都真的在 DOM 裡
+  ---
+  duration_ms: 8.403175
+  type: 'test'
+  ...
+# Subtest: 負控制：上面那個語法檢查抓得到壞的 JS
+ok 40 - 負控制：上面那個語法檢查抓得到壞的 JS
+  ---
+  duration_ms: 1.797118
+  type: 'test'
+  ...
+# Subtest: lone surrogate 的卡不會讓 commitment 算爆（伺服器不可以因此掛掉）
+ok 41 - lone surrogate 的卡不會讓 commitment 算爆（伺服器不可以因此掛掉）
+  ---
+  duration_ms: 235.823078
+  type: 'test'
+  ...
+1..41
+# tests 41
+# suites 0
+# pass 33
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7142.632501
