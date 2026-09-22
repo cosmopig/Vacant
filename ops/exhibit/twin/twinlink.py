@@ -191,6 +191,9 @@ def resolve_endpoint(explicit: str | None = None, *, timeout: float = 3.0,
     return {"url": last[0], "how": "fallback_unprobed" if not probe else "none_reachable",
             "label": last[1], "needs_network": last[2],
             "reachable": None, "tried": tried}
+#: 送出去的身分。**不要拿掉也不要改回預設**——見 `_http_json` 的註解。
+USER_AGENT = "vacant-twinlink/1 (+https://github.com/cosmopig/Vacant)"
+
 DEFAULT_MODEL = "gemma-4-12b-it-qat"
 
 #: ⚠ **不要調小。** 1003 的後端是 thinking 模式：實測（2026-09-20）一發 26-token
@@ -301,7 +304,17 @@ def _http_json(url: str, payload: Any = None, timeout: float = 30.0,
                headers: dict[str, str] | None = None) -> tuple[int, Any]:
     """回 `(status, parsed)`。**不吞例外**——連不上就往上丟，呼叫端決定怎麼記。"""
     data = None
-    hdr = {"Accept": "application/json"}
+    # 🔴 **一定要送 User-Agent。** Python 預設是 `Python-urllib/3.x`，
+    #    而雲端在 Cloudflare 後面 ⇒ 被當成機器人擋掉：
+    #        curl                    → 200
+    #        urllib（預設 UA）        → **403 · error code: 1010**（依瀏覽器簽章封鎖）
+    #        urllib（帶像樣的 UA）     → 200
+    #    2026-09-22 實測。後果是**整條展場鏈路從來沒有連上過正式雲端**：
+    #    每一次 `ingest`／`publish` 都是 403，螢幕上一個觀眾都不會出現，
+    #    而 log 裡只有一行 `reason: HTTP 403`——現場沒有人會去看那一行。
+    #    （先前測成功的那幾次打的是本機 `127.0.0.1`，不經過 Cloudflare。）
+    #    ⚠ 這不是「偽裝成瀏覽器」：識別自己是誰，只是不要用一個被列黑的預設值。
+    hdr = {"Accept": "application/json", "User-Agent": USER_AGENT}
     if payload is not None:
         data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         hdr["Content-Type"] = "application/json"
@@ -349,12 +362,37 @@ def ingest(store: TwinStore, cloud: str, token: str,
         return _ingest_gap(store, cloud, f"回應沒有 items 陣列：{body!r:.200}", mode)
 
     known = set(store.sub_ids())
-    new, rejected = 0, 0
+    new, rejected, propagated = 0, 0, 0
     for it in items:
         if not isinstance(it, dict):
             continue
         sid = it.get("id")
-        if not isinstance(sid, str) or not sid or sid in known:
+        if not isinstance(sid, str) or not sid:
+            continue
+
+        # 🔴 **觀眾在自己手機上撤回，本機真相來源必須知道。**
+        #    2026-09-22 實跑抓到：`ingest` 只把 `cloud_status` 塞進封印後的
+        #    payload，而 `TwinStore.current()` **不把它摺出來** ⇒ 下游全瞎：
+        #      · `generate()` 的 `status not in ("withdrawn","erased")` 永遠看不到
+        #      · `export()` 對 withdrawn／erased **零引用**
+        #      · 而 `sid in known` 會讓已經抄過的卡**之後永遠不再看一眼**
+        #    ⇒ 展場實際會發生的那條路：投卡 → 上螢幕 → 在手機上撤回
+        #      → 雲端標 withdrawn → **本機永遠不知道** → 他留在大螢幕上。
+        #    伺服器的 409 只擋得住回寫雲端，擋不住電視直接讀本機真相來源（`&twin=`）。
+        #    這是直接違反撤回頁上的承諾，不是效能問題。
+        #    ⚠ 修在**源頭**而不是在 export 加一個過濾：過濾只是不顯示，
+        #      而他要求的是**刪掉**。走 `withdraw()` 那條路才會真的刪原文與 nonce。
+        cstat = it.get("status")
+        if cstat in ("withdrawn", "erased"):
+            if sid in known:
+                r = withdraw(store, sid, reason=f"cloud:{cstat}",
+                             source=f"cloud:{cloud}")
+                if r.get("ok") and not r.get("already"):
+                    propagated += 1
+            # 從沒抄過又已經撤回 ⇒ **根本不要抄進來**。
+            continue
+
+        if sid in known:
             continue
         if _usable_sub_id(sid) and _rejected_before(store, sid):
             continue   # 這張卡上一輪就記過「壞掉」了，不要每輪再記一次
@@ -400,7 +438,10 @@ def ingest(store: TwinStore, cloud: str, token: str,
         known.add(sid)
         new += 1
     return {"ok": True, "mode": mode, "seen": len(items), "pulled": new,
-            "rejected": rejected, "lossy": mode == "queue_lossy"}
+            "rejected": rejected, "lossy": mode == "queue_lossy",
+            # 這一輪把幾個「雲端說撤回了」的人真的在本機刪掉。
+            # **要印出來**：它代表有人按了撤回，而那是展場最該看得見的事件。
+            "withdrawn_propagated": propagated}
 
 
 def _rejected_before(store: TwinStore, sid: str) -> bool:
