@@ -1038,10 +1038,131 @@ def _agent_run_shim(argv: list[str]) -> int:
     return _main(argv)
 
 
+#: 附身層（`vacant_network/vrun/possess.py`）自己有一套很細的參數
+#: （`--agent`／`--upstream`／`--dry-run`／`--service` …），而且它的 usage 行
+#: 早就自稱 `vacant install`。**在 argparse 之前攔截**、原封不動轉過去，
+#: 比在這裡重寫一份 parser 好：重寫一定會漂。
+#:
+#: 🔴 為什麼要接：2026-09-22 查到那 2399 行**從 `vacant` 指令根本叫不到**，
+#:    使用者得打 `python -m vacant_network.vrun.possess install`。
+#:    一個裝得起來卻叫不出來的功能，等於沒有。
+#:
+#: ⚠ `status` 不在這裡：`vacant status` 已經是 trust 開關的狀態（另一件事）。
+#:    附身的狀態走 `vacant possess status`，不搶那個名字。
+_POSSESS_TOP: tuple[str, ...] = ("install", "uninstall")
+
+
+def _possess_shim(raw: list[str]) -> int:
+    from .vrun import possess as _possess
+    return _possess.main(raw)
+
+
+def _on_shim(raw: list[str]) -> int:
+    """`vacant` / `vacant on [agent]` —— 選一個本機有的 CLI agent，在 Vacant 底下開。
+
+    這是「B 路」：**不改使用者任何常駐設定**，只在這一跑之內把 agent 的
+    base url 接到中介上。關掉就沒了。與 `vacant install`（改常駐設定、
+    裝 proxyd 服務、動 shell rc）是兩件事，證據等級也不同——
+    B 這條的中介是量過的（600 格 abpi ＋ pi_tty 兩批），
+    A 那條的 pi 通道至今**沒有被 `requests_seen` 證實過**。
+
+    ⚠ 互動模式的三個條件（`DECISION_20260920_PI_TTY_VS_PRINT_MODE.md` 量出來的）
+      缺一就**安靜**落回 print：stdin 是 tty、stdout 是 tty、真的有一張 pty。
+      這裡把前兩個釘死（`--stdin inherit`、**不給 `--json`**），
+      第三個靠使用者本來就在終端機裡。
+    """
+    import pathlib as _pl
+    import shutil as _sh
+    from .vrun import agentwrap as _aw
+    from .vrun import possess as _possess
+
+    want = raw[0] if raw and not raw[0].startswith("-") else None
+    passthru = raw[1:] if want else raw
+
+    # 偵測：**不要只看 PATH**。「設定目錄在、PATH 上沒有」是實測過的形狀，
+    # possess 為此誤判過兩次，所以借它那一套（含 login shell 探測與
+    # 終端機跳脫序列剝除）。
+    home = _pl.Path.home()
+    found: list[tuple[str, str]] = []
+    for name in _aw.SUPPORTED:
+        spec = _possess.AGENTS.get(name)
+        if spec is None:
+            continue
+        try:
+            det = _possess.detect_one(spec, home, probe_shell=True)
+        except Exception:                                   # noqa: BLE001
+            det = None
+        binary = getattr(det, "binary", None) or _sh.which(name)
+        if binary:
+            found.append((name, str(binary)))
+
+    if not found:
+        sys.stderr.write(
+            "找不到任何接得動的 CLI agent。\n"
+            f"  接得動的：{', '.join(_aw.SUPPORTED)}\n"
+            "  ⚠ 「裝了但不在 PATH 上」是常見狀況——先確認 `command -v <agent>`。\n")
+        return 2
+
+    if want and want not in dict(found):
+        sys.stderr.write(f"{want} 沒有偵測到。本機有的：{', '.join(n for n, _ in found)}\n")
+        return 2
+
+    if not want:
+        if not sys.stdin.isatty():
+            # 🔴 非互動時**不要替人選**。選單的意義就是讓人挑。
+            sys.stderr.write(
+                "不是互動終端機 ⇒ 不出選單，也不替你挑一個。\n"
+                f"  直接指定：vacant on <{'|'.join(n for n, _ in found)}>\n")
+            return 2
+        print("在 Vacant 底下開哪一個？\n")
+        for i, (name, binary) in enumerate(found, 1):
+            m = _aw.CHANNEL_MEASURED.get(name)
+            # 🔴 把「這條通道驗到什麼程度」講出來。使用者有權知道
+            #    自己選的那一條是量過的還是沒量過的。
+            tag = f"通道已驗：{m}" if m else "⚠ 通道**沒量過**——跑完請看 requests_seen"
+            print(f"  {i}) {name:10s} {binary}")
+            print(f"     {tag}")
+        print()
+        try:
+            raw_in = input(f"選 1-{len(found)}（Enter 取消）： ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return 130
+        if not raw_in:
+            return 130
+        if not raw_in.isdigit() or not (1 <= int(raw_in) <= len(found)):
+            sys.stderr.write("不是有效的選項\n")
+            return 2
+        want = found[int(raw_in) - 1][0]
+
+    # ⚠ launcher 會 chdir 到 workspace ⇒ 從**原始碼樹**跑的話子行程 import
+    #   不到 `vacant_network`（pip 裝好的沒這問題）。把套件的父目錄補進
+    #   PYTHONPATH——不補的話失敗訊息是 `No module named 'vacant_network'`，
+    #   而外層只會看到 `agent_rc: 1`，看起來像 agent 自己壞掉。
+    _pkg_parent = str(_pl.Path(__file__).resolve().parent.parent)
+    _pp = os.environ.get("PYTHONPATH", "")
+    if _pkg_parent not in _pp.split(os.pathsep):
+        os.environ["PYTHONPATH"] = (_pkg_parent + os.pathsep + _pp) if _pp else _pkg_parent
+
+    argv = ["--stdin", "inherit", *passthru, "--",
+            sys.executable, "-m", "vacant_network.vrun.agentwrap", want]
+    return _agent_run_shim(argv)
+
+
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
     if raw[:1] == ["run"] and "--" in raw[1:]:
         return _agent_run_shim(raw[1:])
+    if raw[:1] and raw[0] in _POSSESS_TOP:
+        return _possess_shim(raw)
+    if raw[:1] == ["possess"]:
+        # `vacant possess <install|uninstall|status|detect>` —— 完整轉發。
+        return _possess_shim(raw[1:] or ["status"])
+    if raw[:1] == ["on"]:
+        return _on_shim(raw[1:])
+    if not raw:
+        # 裸 `vacant` ＝ 選單。這是使用者最可能敲的東西，不該是一頁 usage。
+        return _on_shim([])
     args = build_parser().parse_args(raw)
     return args.func(args)
 
