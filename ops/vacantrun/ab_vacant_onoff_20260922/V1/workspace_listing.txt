@@ -1,0 +1,5 @@
+./VACANT_FEEDBACK.md
+./contract.md
+./goal.md
+./run_tests.sh
+./tests_visible/test_visible.py

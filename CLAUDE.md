@@ -167,6 +167,11 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   ＋ **`ops/vacantrun/possess_pi_real_20260922/`（L-real）**：pi 0.87.0 ＋ `gemma-4-12b-it-qat`
   跑 R534 五題走 shim，**3 交付 exit 0／2 拒交 exit 20**，五條鏈全 OK，`CHANNEL_MEASURED["pi"]` 因此填上。
   ⚠ 上游是**公開 Funnel 不是 LAN**，且與 `pi_tty_20260920` 那 40 格**三個變因都不同，不可合併相減**。
+- **有 Vacant ↔ 沒有 Vacant 的一格對照**（`ops/vacantrun/ab_vacant_onoff_20260922/`，n=1）：
+  同一題同一模型，**OFF 臂 pi 退出碼 0 而工作區雜湊前後相同**（什麼都沒交，你會以為成功）；
+  **V0 臂退出碼 20 ＋ 收據**，而且四通模型呼叫全 200 ⇒ **失敗可歸因給 agent 不是環境**。
+  ⚠ V1（重試）臂**作廢**：模型呼叫被容器出網過濾器回 403（`x-deny-reason: resolve_no_records`），
+  不可讀成「重試沒用」。
 - **Claude Code 自己驗自己**（`ops/vacantrun/possess_claude_20260922/`，**L-real**，Haiku 4.5，真上游）：
   shim 拒交 20／交付 0；`settings.json` 的 base URL 在 **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`**
   （Claude Code 遠端容器）下**被忽略、agent 照樣回答**——`requests_seen=0` 而一切看起來正常的活體標本；
