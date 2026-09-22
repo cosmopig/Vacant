@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Vacant repo — 工作約束（2026-07-04 起；交付定位 2026-08-06 更正）
 
 ## 現在是什麼
@@ -40,6 +44,26 @@
 展件施工順序與凍結清單見 `專題/Vacant_展望_2026-08-06/04_接下來的步驟.md`。
 **凍結不等於刪掉**：通道分離那六個改動、X-cap／X-check 等證據都很強，但它們不影響
 展場，排在展件可運作之後。
+
+## 開發指令（2026-09-22 補；CI 跑的就是這幾條，`.github/workflows/ci.yml`）
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"   # ⚠ 系統 python 上 pip -e 會被 debian 的 PyJWT 擋下，一律用 .venv
+.venv/bin/python -m pytest tests/ -q                          # 全套（pyproject 已設 testpaths＋pythonpath）
+.venv/bin/python -m pytest tests/test_vrun_possess.py -q      # 單一檔
+.venv/bin/python -m pytest tests/test_vrun_possess.py::test_never_touch_raises -q   # 單一測試
+.venv/bin/python -m pytest tests/ -rs                         # 把每個 skip 的理由印出來（量不到不是通過，鐵律 3）
+ruff check --no-cache --select E9,F63,F7,F82 vacant_network ops examples tests      # 只選「執行期會炸」那組；不准開全套（凍結碼有絕對行號釘子）
+mypy --ignore-missing-imports --follow-imports=silent vacant_network                 # CI 另有 11 個既有債模組的排除清單，只准縮短
+python3 ops/check_repo_links.py --verbose      # 死連結／死路徑／根目錄落單紀錄檔；`--relocate` 一行歸位
+python3 ops/gain/build_runs_index.py --check   # runs/INDEX 沒有漂
+python3 -m build                               # wheel＋sdist；CI 會在 repo 外用全新 venv 裝 wheel 跑 `vacant demo gate`
+```
+
+- 需要 `.vacant-private/` 官方題庫或 iCloud 引用備份的測試在檔案缺席時 **skip 並印理由**，不是紅也不是刪。
+- `vacant` 指令的分派在 `vacant_network/cli.py::main` **argparse 之前**攔四種：`run … -- <cmd>`、
+  `install`／`uninstall`／`possess …`（轉給 `vrun/possess.py`）、`on [agent]`、裸 `vacant`（＝選單）。
+  `vacant status` 是 trust 開關，附身狀態是 `vacant possess status`，不要搶名字。
 
 ## 程式碼地圖（實驗承重件）
 
@@ -125,6 +149,21 @@
   四值裁決 OK→0、VOID→3、BROKEN→1、UNVERIFIABLE→1。
 - `envmap.py` — `SINK_UPSTREAM`／`is_sink`：**未指定 upstream 要 fail-closed**，
   不可以安靜地去打公開 API（`envmap` 誠實邊界 2 有活體標本）。
+
+- `agentwrap.py` ＋ `cli.py::_on_shim` — **`vacant on [agent]`／裸 `vacant`＝選單**（2026-09-22）：
+  「B 路」，**不改使用者任何常駐設定**，在 `vacant run --stdin inherit` 之內建**這一跑自己的**
+  設定目錄（`PI_CODING_AGENT_DIR`／`CODEX_HOME`／`OPENCODE_CONFIG_CONTENT`／`ANTHROPIC_BASE_URL`）
+  再 `exec` agent 的**互動 TUI**。與 `vacant install`（改常駐設定、裝 proxyd 服務、動 shell rc）
+  是兩條路、兩個端點、**兩種證據等級，不可互相背書**：B 路的 pi 通道量過
+  （600 格 abpi＋pi_tty），A 路的 pi 通道 `CHANNEL_MEASURED["pi"]` 至今是空字串。
+  互動三條件（stdin tty、stdout tty、真 pty）缺一 pi 就**安靜**落回 print
+  （`DECISION_20260920_PI_TTY_VS_PRINT_MODE.md`）。**缺「記住上次選誰」**。
+- **pi 的接法要改**（研究在 `decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`，
+  等裁決）：pi 0.87.0 讀碼——`models-store.json` 是**目錄快取**不是設定（`models.json` 才是）；
+  extension 一支就能 `registerProvider`／`registerCommand("vacant")`／`setModel`／燒掛鉤七事件，
+  **不必碰 `models.json`**；互動模式的閘門觸發點是 `agent_before_settle`。
+  產品版 extension 今天**不存在**（只有證據檔 `ops/vacantrun/enclosure_20260920/evidence_agent_attest/vacant_pi_extension.ts`）。
+  OpenCode **沒有** plugin 註冊 slash command 的 API，`/vacant on` 在它上面做不出真開關。
 
 **證據落盤**：`ops/vacantrun/enclosure_20260920/`（圍牆＋門，兩支一鍵重跑，
 `run_probes.sh` **一定先跑負控制**）、`ops/vacantrun/codex_managed_20260920/`
