@@ -119,7 +119,7 @@ VOID 語意、`wrap_agent.sh`、所有歸檔 run。舊的常駐模型通道安�
 `tests/test_intake_server_cli.py`（8）、`tests/test_adapters_core.py`（17）、
 `tests/test_adapters_agents.py`（14）；對抗審查的回歸（§十一）：
 `tests/test_intake_gate_hardening.py`（19）、`tests/test_intake_verifier_hardening.py`（30）、
-`tests/test_adapters_hardening.py`（42）。合計 176。
+`tests/test_adapters_hardening.py`（43）。合計 177。
 
 端到端（**L-fake**：真 agent binary＋照劇本回答的假模型 `ops/intake/mock_model.py`；
 Vacant 不碰模型流量）：`ops/intake/e2e_four_agents.py`，結果見
@@ -203,7 +203,8 @@ total、預設樣式在惡意文字上是平方時間；只靠成果自己的 so
 **驗證那一批 agent 對著修正後的程式碼再重現**：大多數回報「已修、不再重現」；仍部分重現的三條也修了——
 工具層規則漏了 `vacant-network …` 與 `python -m vacant_network.cli …`（README 教被遮蔽時用的名字）；
 本機 reviewer 金鑰簽的「人工審查」看不出是同一個帳號（⇒ 證據標 `same_account`、`independent=false`、
-細節文字寫明）；契約後來加了批准要求時，「已在目的端」那條路沒檢查批准（⇒ 檢查，不查 nonce）。
+細節文字寫明）；契約後來加了批准要求時，「已在目的端」那條路沒檢查批准（⇒ 檢查，不查 nonce）；
+原專案 `.git/hooks` 裡有懸空連結時 `vacant do` 的逃逸量具崩潰、那一跑沒有帳本紀錄（⇒ 記下連結本身，跑之前壞掉記 `infra_void`）。
 另外 `command` 的退出碼 1 同時代表「成果不合格」與「委託者的 python 腳本崩潰」——寫明在 §二與 summary。
 
 **沒有修、改成明講的**（各自寫在該模組的誠實邊界）：

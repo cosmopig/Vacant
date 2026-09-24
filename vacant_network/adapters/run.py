@@ -60,6 +60,20 @@ def origin_digest(base: pathlib.Path, skip: set[pathlib.Path]) -> dict[str, str]
     `__pycache__`、空目錄——正好是植入程式碼最方便的地方）。
     """
     import hashlib
+
+    def leaf(fp: pathlib.Path) -> str:
+        # 懸空的連結（husky／pre-commit 留下的 `.git/hooks/*` 很常見）、讀不了的檔案：
+        # 記下它的樣子，不要讓量具自己崩掉（崩掉的話那一跑就沒有帳本紀錄）。
+        try:
+            if os.path.islink(fp):
+                return "link:" + os.readlink(fp)
+            st = fp.lstat()
+            if st.st_size > 64 * 1024 * 1024:
+                return f"big:{st.st_size}:{st.st_mtime_ns}"
+            return hashlib.sha256(fp.read_bytes()).hexdigest() + f":{st.st_mode:o}"
+        except OSError:
+            return "unreadable"
+
     out: dict[str, str] = {}
     base = base.resolve()
     for root, dirs, files in os.walk(base, followlinks=False):
@@ -73,31 +87,20 @@ def origin_digest(base: pathlib.Path, skip: set[pathlib.Path]) -> dict[str, str]
             if rel_root == "." and d == ".git":
                 for name in _GIT_WATCH:
                     gp = full / name
-                    if gp.is_file():
-                        out[f".git/{name}"] = hashlib.sha256(gp.read_bytes()).hexdigest()
-                    elif gp.is_dir():
+                    if gp.is_dir() and not gp.is_symlink():
                         for g2, _dd, ff in os.walk(gp):
                             for f in ff:
                                 fp = pathlib.Path(g2) / f
-                                out[fp.relative_to(base).as_posix()] = \
-                                    hashlib.sha256(fp.read_bytes()).hexdigest()
+                                out[fp.relative_to(base).as_posix()] = leaf(fp)
+                    elif gp.is_symlink() or gp.exists():
+                        out[f".git/{name}"] = leaf(gp)
                 continue
             keep.append(d)
             out[(full.relative_to(base)).as_posix() + "/"] = "dir"
         dirs[:] = keep
         for f in files:
             fp = r / f
-            rel = fp.relative_to(base).as_posix()
-            try:
-                st = fp.lstat()
-                if os.path.islink(fp):
-                    out[rel] = "link:" + os.readlink(fp)
-                elif st.st_size > 64 * 1024 * 1024:
-                    out[rel] = f"big:{st.st_size}:{st.st_mtime_ns}"
-                else:
-                    out[rel] = hashlib.sha256(fp.read_bytes()).hexdigest() + f":{st.st_mode:o}"
-            except OSError:
-                out[rel] = "unreadable"
+            out[fp.relative_to(base).as_posix()] = leaf(fp)
     return out
 
 
@@ -228,8 +231,15 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
     try:
         for i in range(1, n_max + 1):
             # 基準線每一跑重取：第一跑的逃逸不該被算到之後每一跑頭上
-            origin_before = None if in_place else origin_digest(task.contract.base_dir, skip)
-            launch = build(cur_prompt, ws)
+            try:
+                origin_before = None if in_place else origin_digest(task.contract.base_dir,
+                                                                    skip)
+                launch = build(cur_prompt, ws)
+            except Exception as e:  # noqa: BLE001 — 跑之前就壞了：也要上帳本，不是丟 traceback
+                task.ledger.append("infra_void", {"stage": "before_attempt", "attempt": i,
+                                                  "error": f"{type(e).__name__}: {e}"[:500]})
+                res = {"outcome": None, "void": True, "reasons": [f"before attempt {i}: {e}"]}
+                break
             task.ledger.append("attempt_started", {
                 "attempt": i, "agent": agent, "adapter": "process", "in_place": in_place,
                 "argv0": launch.argv[0] if launch.argv else None,
@@ -249,7 +259,10 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                     launch.cleanup()
             changed: list[str] = []
             if origin_before is not None:
-                changed = _diff(origin_before, origin_digest(task.contract.base_dir, skip))
+                try:
+                    changed = _diff(origin_before, origin_digest(task.contract.base_dir, skip))
+                except Exception as e:  # noqa: BLE001 — 量不到逃逸 ≠ 沒有逃逸
+                    changed = [f"<escape measurement failed: {type(e).__name__}: {e}>"]
             escaped = bool(changed) if origin_before is not None else None
             task.ledger.append("attempt_ended", {"attempt": i, "rc": r["rc"],
                                                  "timed_out": r["timed_out"],

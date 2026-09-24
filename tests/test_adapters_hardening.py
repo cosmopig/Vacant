@@ -391,3 +391,17 @@ def test_submit_does_not_freeze_the_in_project_destination(tmp_path, vhome):
     res = flow.submit(task, proj, source="t")
     m = task.store.load_manifest(res["artifact_sha256"])
     assert not [f for f in m["files"] if f["path"].startswith("published/")]
+
+
+def test_a_dangling_git_hook_link_in_the_original_project_does_not_crash_do(tmp_path, vhome):
+    proj, c = _proj(tmp_path)
+    subprocess.run(["git", "init", "-q", str(proj)], check=True)
+    os.symlink("/nonexistent/husky.sh", proj / ".git" / "hooks" / "pre-commit")
+    task = flow.open_task(c)
+    implant = (f"import os; os.symlink('/nonexistent/x', "
+               f"{str(proj / '.git' / 'hooks' / 'post-checkout')!r}); "
+               f"open('out.txt','w').write('done\\n')")
+    res = RUN.do(task, agent="fake", prompt="p", build=lambda p, ws: _agent(implant))
+    assert res["outcome"] == "accept"
+    a = res["attempts"][0]
+    assert a["workspace_escape"] is True and ".git/hooks/post-checkout" in a["escaped_paths"]
