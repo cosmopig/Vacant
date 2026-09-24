@@ -5,7 +5,7 @@
 > 乾淨的埋錯下給出期望的答案。**不證明**真模型下產出會更接近需求——那是
 > `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md` 的事（草稿，待人類簽字）。
 
-## 1. 四個真 agent × 四個埋錯情境（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`）
+## 1. 四個真 agent × 四個埋錯情境（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；對抗審查修正**之後**重跑）
 
 重跑：
 
