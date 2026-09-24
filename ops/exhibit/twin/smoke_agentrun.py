@@ -73,10 +73,17 @@ def main(argv=None) -> int:
     ap.add_argument("--model", default=twinlink.DEFAULT_MODEL)
     ap.add_argument("--out", required=True)
     ap.add_argument("--timeout", type=float, default=twinagent.DEFAULT_AGENT_TIMEOUT)
+    # 2026-09-24 VM 圍牆（twinenclose.py）：原樣傳給 `twinlink generate`
+    ap.add_argument("--enclose", choices=("off", "auto", "on"), default="off")
+    ap.add_argument("--require-tier", default=None, dest="require_tier")
+    ap.add_argument("--keep-tmp", default=None,
+                    help="把暫存庫留在這個目錄（不刪），給接著的冒煙步驟用")
     a = ap.parse_args(argv)
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    tmp = pathlib.Path(tempfile.mkdtemp(prefix="twin_smoke_"))
+    tmp = (pathlib.Path(a.keep_tmp) if a.keep_tmp
+           else pathlib.Path(tempfile.mkdtemp(prefix="twin_smoke_")))
+    tmp.mkdir(parents=True, exist_ok=True)
     db = tmp / "twinstore.sqlite3"
     events = tmp / "lifecycle.jsonl"
     rep: dict = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -98,7 +105,9 @@ def main(argv=None) -> int:
             rc = twinlink.main(["--db", str(db), "generate", "--endpoint", a.endpoint,
                                 "--model", a.model, "--engine", "agent",
                                 "--parallel", "1", "--agent-timeout", str(a.timeout),
-                                "--events", str(events)])
+                                "--events", str(events), "--enclose", a.enclose]
+                               + (["--require-tier", a.require_tier]
+                                  if a.require_tier else []))
         rep["generate_rc"] = rc
         rep["generate"] = json.loads(buf.getvalue())
         rep["wall_s"] = round(time.time() - t0, 1)
@@ -110,7 +119,8 @@ def main(argv=None) -> int:
             "engine", "degrade_kind", "decision", "reason", "artifacts",
             "arrival", "working", "handover", "lines_from", "run_id", "verdict_hash",
             "stop_reason", "accepted", "requests_seen", "count_semantics",
-            "agent_rc", "agent_timed_out", "latency_ms", "twin_id")}
+            "agent_rc", "agent_timed_out", "latency_ms", "twin_id",
+            "tier", "enclosed", "enclosure_applied", "door_calls")}
         evs = lifecycle.read(events)
         rep["lifecycle"] = {"n": len(evs), "types": [e["type"] for e in evs],
                             "validate_stream": lifecycle.validate_stream(evs)}
@@ -142,7 +152,8 @@ def main(argv=None) -> int:
     finally:
         (out / "smoke_report.json").write_text(
             json.dumps(rep, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        shutil.rmtree(tmp, ignore_errors=True)
+        if not a.keep_tmp:
+            shutil.rmtree(tmp, ignore_errors=True)
     print(json.dumps({k: rep.get(k) for k in ("generate_rc", "wall_s")}
                      | {"engine": (rep.get("twin") or {}).get("engine"),
                         "decision": (rep.get("twin") or {}).get("decision")},

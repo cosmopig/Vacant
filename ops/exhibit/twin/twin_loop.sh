@@ -25,6 +25,12 @@
 #   VACANT_TWIN_OUT          預設 $VACANT_HM/world3/live/visitors.json
 #   VACANT_TWIN_INTERVAL     預設 15（秒）
 #   VACANT_TWIN_ENDPOINT     不設就由 twinlink 自己探（127.0.0.1 → VMware → Tailscale）
+#   ── VM 跑法（2026-09-24，人類裁決「分身迴圈跑在 vacant-dev」；START.md「VM 跑法」）──
+#   VACANT_TWIN_PI           pi 的完整路徑（systemd 的 PATH 上沒有 ~/.local/opt/node-*/bin）
+#   VACANT_TWIN_ENCLOSE      off（預設）／auto／on。VM 上用 **on**：整跑關進 bwrap 圍牆
+#                            （twinenclose.py），起不來就不起 pi，不是安靜地不圍。
+#   VACANT_TWIN_REQUIRE_TIER 例：B。收據級別低於它的那一跑不算分身做的。
+#   VACANT_TWIN_MIN_FREE_MB  磁碟水位（預設 2048）。低於它就停收新分身、畫面與 log 都講。
 #
 # ⚠ **`--out` 指的那個檔就是電視 snapshot 那一層讀的檔。** commit 進 vacant_hm 的
 #   那一份是 `people: []`＋`generated_at: null` 的佔位檔；**在這一支跑起來之前，
@@ -119,11 +125,36 @@ CMD+=(--engine "${VACANT_TWIN_ENGINE:-agent}"
 if [ -n "${VACANT_EVENTS:-}" ]; then
   CMD+=(--events "$VACANT_EVENTS")
 fi
+# 圍牆與級別下限**寫在命令列上**（不是只靠 twinlink 讀環境）：`--print-cmd` 要看得出來
+# 這一台到底有沒有圍、要求幾級——布展時 venue_check 讀的是這一行。
+CMD+=(--enclose "${VACANT_TWIN_ENCLOSE:-off}")
+if [ -n "${VACANT_TWIN_REQUIRE_TIER:-}" ]; then
+  CMD+=(--require-tier "$VACANT_TWIN_REQUIRE_TIER")
+fi
 if [ "$PRINT_ONLY" = "0" ] && [ "${VACANT_TWIN_ENGINE:-agent}" = "agent" ] \
    && ! command -v "${VACANT_TWIN_PI:-pi}" >/dev/null 2>&1; then
   echo "⚠ 這台找不到 pi（${VACANT_TWIN_PI:-pi}）⇒ 分身**不會**真跑，" >&2
   echo "  會退到直打模型（engine=lmstudio:*，degrade_kind=agent_unavailable，沒有收據）。" >&2
   echo "  要真跑：把 pi 0.85.x 放進 PATH，或 VACANT_TWIN_PI=<pi 的完整路徑>。" >&2
+fi
+
+# 🔴 圍牆把 repo 整份唯讀綁進去 ⇒ 庫（與它旁邊的 run 產物）住在 repo 底下的話，
+#    別的分身的 wire log 在圍牆裡讀得到。twinenclose 會逐跑拒絕，這裡在開機就講。
+if [ "$PRINT_ONLY" = "0" ] && [ "${VACANT_TWIN_ENCLOSE:-off}" != "off" ]; then
+  case "$(cd "$(dirname "$DB")" 2>/dev/null && pwd)/" in
+    "$REPO"/*)
+      echo "✗ VACANT_TWIN_ENCLOSE=${VACANT_TWIN_ENCLOSE} 但庫在 repo 底下（${DB}）。" >&2
+      echo "  圍牆把 repo 唯讀綁進去 ⇒ 別的分身的 run 產物在圍牆裡讀得到。" >&2
+      echo "  VM 上把 VACANT_TWIN_DB 放到 checkout 外面（START.md「VM 跑法」）。" >&2
+      exit 2 ;;
+  esac
+fi
+
+if [ "$PRINT_ONLY" = "0" ] && [ "${VACANT_TWIN_ENCLOSE:-off}" = "on" ] \
+   && ! "$PY" "$REPO/ops/exhibit/twin/twinenclose.py" --probe >/dev/null 2>&1; then
+  echo "⚠ VACANT_TWIN_ENCLOSE=on 但這台起不來圍牆（bwrap／AppArmor／不是 Linux）⇒" >&2
+  echo "  分身**不會**真跑（agent_available=False，退到直打模型並標 agent_unavailable）。" >&2
+  echo "  查：$PY $REPO/ops/exhibit/twin/twinenclose.py --probe" >&2
 fi
 
 if [ "$PRINT_ONLY" = "1" ]; then

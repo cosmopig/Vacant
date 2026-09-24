@@ -160,11 +160,23 @@ def test_run_twin_tags_its_cells_as_code(tmp_path):
     assert tv.validate(tvevs, require_task_kind=True) == []
 
 
-def test_an_old_recording_without_task_kind_is_not_given_one():
-    """舊錄影（2026-09-24 之前）caller 沒有 task_kind ⇒ task_opened **不寫**這個欄位。"""
+def test_an_old_recording_without_task_kind_is_not_given_one(tmp_path):
+    """舊錄影（2026-09-24 之前）caller 沒有 task_kind ⇒ task_opened **不寫**這個欄位。
+
+    ⚠ 舊錄影是**在這裡造出來的**（把 repo 那份錄影 caller 裡的 task_kind 拿掉），
+      不依賴 repo 裡剛好躺著一份舊錄影——那份在 D＋E 合併後已經重錄成新的，
+      靠它當前提會讓這條判準跟著錄影檔的年紀漂。
+    """
     recs = S.default_recordings()
     assert recs, "前提：repo 裡有錄影"
     evs = lifecycle.read(recs[0])
+    for e in evs:
+        if e["type"] == "run_started" and isinstance(e.get("caller"), dict):
+            e["caller"].pop("task_kind", None)
+    old_rec = tmp_path / "old_recording.jsonl"
+    old_rec.write_text("".join(json.dumps(e, ensure_ascii=False) + "\n" for e in evs),
+                       encoding="utf-8")
+    recs = [old_rec]
     assert all("task_kind" not in (e.get("caller") or {})
                for e in evs if e["type"] == "run_started"), "前提：那一份是舊錄影"
     tvevs = le.fold(evs, verify_url="/r/{cell}", mode=tv.MODE_REPLAY)
