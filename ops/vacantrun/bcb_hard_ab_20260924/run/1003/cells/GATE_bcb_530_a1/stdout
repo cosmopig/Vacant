@@ -1,0 +1,9 @@
+The task was to identify duplicate entries in a DataFrame based on 'name' and record the age distribution for those duplicates. I have implemented `task_func` in `solution.py`, which:
+1. Checks if the DataFrame is empty or contains negative ages, raising `ValueError` as required.
+2. Rounds down float ages to integers.
+3. Identifies all rows with duplicate names using `df.duplicated(subset='name', keep=False)`.
+4. Returns a `Counter` of age distributions and a histogram plot for the duplicates.
+5. Calculates bins correctly by adjusting min/max ages by 0.5.
+
+The tests passed successfully.
+

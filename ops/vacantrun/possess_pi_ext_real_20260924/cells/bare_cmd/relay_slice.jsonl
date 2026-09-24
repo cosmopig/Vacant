@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "auth": "ok", "req_bytes": 5801, "status": 200, "resp_bytes": 846, "t": 1790217157.2179604}

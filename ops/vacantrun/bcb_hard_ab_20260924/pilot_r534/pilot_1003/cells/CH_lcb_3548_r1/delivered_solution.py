@@ -1,0 +1,76 @@
+import math
+
+def countGoodIntegers(n: int, k: int) -> int:
+    if n == 1:
+        count = 0
+        for i in range(1, 10):
+            if i % k == 0:
+                count += 1
+        return count
+
+    total_good_count = 0
+    
+    # Generate all multisets of size n with digits 0-9
+    def generate_multisets(digit_idx, remaining, current_counts):
+        if digit_idx == 10:
+            if remaining == 0:
+                yield list(current_counts)
+            return
+        for i in range(remaining + 1):
+            current_counts[digit_idx] = i
+            yield from generate_multisets(digit_idx + 1, remaining - i, current_counts)
+
+    # Pre-calculate factorials for efficiency
+    fact = [math.factorial(i) for i in range(n + 1)]
+
+    for counts in generate_multisets(0, n, [0]*10):
+        # Check if it can form a palindrome
+        odd_counts = [i for i, c in enumerate(counts) if c % 2 != 0]
+        if len(odd_counts) > (1 if n % 2 != 0 else 0):
+            continue
+        
+        # Check if any palindromic permutation is divisible by k and has no leading zeros
+        m = n // 2
+        half_counts = [c // 2 for c in counts]
+        mid_digit = -1
+        if n % 2 != 0:
+            mid_digit = odd_counts[0]
+        
+        weights = []
+        for i in range(1, m + 1):
+            weights.append(10**(n - i) + 10**(i - 1))
+        
+        v = mid_digit * (10**m) if n % 2 != 0 else 0
+        
+        def check_divisible(current_half_counts, current_sum, weight_idx):
+            if weight_idx == m:
+                return (current_sum + v) % k == 0
+            
+            for d in range(10):
+                if current_half_counts[d] > 0:
+                    # Leading zero check for the first digit of the palindrome
+                    if weight_idx == 0 and d == 0 and n > 1:
+                        continue
+                    
+                    current_half_counts[d] -= 1
+                    if check_divisible(current_half_counts, current_sum + d * weights[weight_idx], weight_idx + 1):
+                        return True
+                    current_half_counts[d] += 1
+            return False
+
+        if check_divisible(half_counts, 0, 0):
+            # Multiset is good. Count distinct n-digit integers from this multiset.
+            total = fact[n]
+            for c in counts:
+                total //= fact[c]
+            
+            if counts[0] > 0:
+                sub = fact[n - 1]
+                sub //= fact[counts[0] - 1]
+                for i in range(1, 10):
+                    sub //= fact[counts[i]]
+                total -= sub
+            
+            total_good_count += total
+
+    return total_good_count

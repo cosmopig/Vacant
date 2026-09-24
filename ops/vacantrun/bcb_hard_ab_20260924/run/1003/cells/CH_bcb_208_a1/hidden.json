@@ -1,0 +1,1 @@
+{"passed": 2, "total": 5, "failures": ["check_test_case_1: AssertionError: ERROR test_case_1: KeyError: 'std'", "check_test_case_4: AssertionError: FAIL test_case_4: AssertionError: 'std' not found in {'count': 10, 'mean': 2.1, 'standard deviation': 2.330951164939612, 'minimum': -1, '5th per", "check_test_case_5: + Random Walk"]}

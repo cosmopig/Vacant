@@ -1,0 +1,1 @@
+{"passed": 9, "total": 10, "failures": ["check_test_case_6: AssertionError: ERROR test_case_6: IndexError: list index out of range"]}

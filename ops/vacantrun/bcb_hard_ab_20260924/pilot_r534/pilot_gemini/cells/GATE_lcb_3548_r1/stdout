@@ -1,0 +1,58 @@
+<thought>All tests passed. I am done.</thought>I have implemented the `countGoodIntegers` function in `solution.py` as requested. 
+
+The algorithm works as follows:
+1.  It identifies all possible palindromes of length $n$ that are divisible by $k$ and do not have leading zeros. Since a palindrome of length $n$ is uniquely determined by its first $\lceil n/2 \rceil$ digits, we iterate through all possible values for this first half (ensuring the first digit is non-zero for $n > 1$, and handling $n=1$ correctly).
+2.  For each such palindrome, it extracts its digit multiset (represented as a tuple of 10 counts).
+3.  It collects all unique digit multisets that can form at least one $k$-palindromic integer in a `set`.
+4.  For each unique multiset, it calculates the number of $n$-digit integers that can be formed using those digits, subtracting those that would have a leading zero. This is done using the multinomial coefficient formula: $\frac{n!}{c_0! c_1! \dots c_9!} - \frac{(n-1)!}{(c_0-1)! c_1! \dots c_9!}$ (if $c_0 > 0$).
+5.  The total count of all such $n$-digit integers is returned.
+
+The solution is efficient for the given constraints ($n \le 10$, $k \le 9$), as it iterates through at most 90,000 palindromes.
+
+```python
+import math
+
+def countGoodIntegers(n: int, k: int):
+    def get_digit_counts(num_str):
+        counts = [0] * 10
+        for char in num_str:
+            counts[int(char)] += 1
+        return tuple(counts)
+
+    good_multisets = set()
+    
+    m = (n + 1) // 2
+    
+    for first_half in range(10**(m-1), 10**m):
+        s = str(first_half)
+        if n % 2 == 0:
+            full_s = s + s[::-1]
+        else:
+            full_s = s + s[:-1][::-1]
+        
+        num = int(full_s)
+        if num % k == 0:
+            good_multisets.add(get_digit_counts(full_s))
+            
+    total_good_integers = 0
+    fact = [math.factorial(i) for i in range(n + 1)]
+    
+    for counts in good_multisets:
+        denom = 1
+        for c in counts:
+            denom *= fact[c]
+        
+        perms = fact[n] // denom
+        
+        if counts[0] > 0:
+            denom_leading_zero = 1
+            denom_leading_zero *= fact[counts[0] - 1]
+            for i in range(1, 10):
+                denom_leading_zero *= fact[counts[i]]
+            perms_leading_zero = fact[n-1] // denom_leading_zero
+            perms -= perms_leading_zero
+            
+        total_good_integers += perms
+        
+    return total_good_integers
+```

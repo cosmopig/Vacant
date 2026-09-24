@@ -1,0 +1,1 @@
+{"passed": 2, "total": 5, "failures": ["check_test_files_with_content: AssertionError: FAIL test_files_with_content: AssertionError: False is not true", "check_test_files_with_no_content: AssertionError: FAIL test_files_with_no_content: AssertionError: False is not true", "check_test_mixed_case: AssertionError: FAIL test_mixed_case: AssertionError: False is not true"]}

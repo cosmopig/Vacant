@@ -1,0 +1,11 @@
+<|channel>thought
+<channel|>The task was to implement a function `countPairs` that counts the number of pairs $(i, j)$ with $i < j$ such that `nums[i]` and `nums[j]` are "almost equal". Two integers are almost equal if one can be transformed into the other by swapping at most two digits (performing the operation at most once on either integer).
+
+I have implemented this in `solution.py` by:
+1. Iterating through all pairs $(i, j)$ where $i < j$.
+2. Checking if `nums[i]` and `nums[j]` are equal.
+3. If not equal, checking if any single swap of digits in the string representation of `nums[i]` results in the integer value of `nums[j]`.
+4. If that fails, checking if any single swap of digits in the string representation of `nums[j]` results in the integer value of `nums[i]`.
+5. Incrementing the count if either condition is met.
+
+The solution has been verified against the provided tests using `run_tests.sh` and passed all cases.

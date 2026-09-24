@@ -1,0 +1,16 @@
+The tests passed successfully. I have implemented the K-means clustering function in `solution.py` as requested by `goal.md` and `contract.md`.
+
+Summary of changes:
+1.  Created `solution.py` with the required imports and function signature.
+2.  Implemented `task_func`:
+    -   Added validation for `data` being a `pd.DataFrame`.
+    -   Added validation for `n_clusters` being an integer greater than 1.
+    -   Used `sklearn.cluster.KMeans` to perform clustering.
+    -   Generated a scatter plot using `matplotlib`, plotting both the clusters and their centroids.
+    -   Returned the cluster labels as a numpy array and the matplotlib Axes object.
+3.  Verified the implementation by running `run_tests.sh`.
+
+The tests passed:
+- `check_test_cluster_centers`: Passed
+- `check_test_invalid_cluster_number`: Passed
+- `check_test_invalid_data_type`: Passed

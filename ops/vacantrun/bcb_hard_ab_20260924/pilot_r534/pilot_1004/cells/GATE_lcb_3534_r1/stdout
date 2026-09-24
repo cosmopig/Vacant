@@ -1,0 +1,9 @@
+<|channel>thought
+<channel|>The solution is correct and passes all tests. I have implemented the `countPairs` function in `solution.py` as required by the goal and contract.
+
+Summary of implementation:
+- The function `get_all_possible_values(n)` generates all possible integers that can be formed by swapping any two digits of a given integer $n$.
+- It handles leading zeros correctly because `int("03")` becomes `3`.
+- For each pair $(i, j)$ with $i < j$, it checks if `nums[j]` is in the set of values reachable from `nums[i]` by one swap, or vice versa.
+
+The constraints are small ($N \le 100$ and $nums[i] \le 10^6$), so this $O(N^2 \cdot D^2)$ approach (where $D$ is the number of digits) is well within limits.

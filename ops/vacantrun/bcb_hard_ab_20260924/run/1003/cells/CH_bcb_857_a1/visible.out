@@ -1,0 +1,5 @@
+/tmp/tmp.yw1MGLYnaN/solution.py:27: UserWarning: Could not transfer file1.txt: 
+  warnings.warn(f"Could not transfer {filename}: {e}")
+FAIL test_visible.py::check_test_all_extensions  AssertionError: FAIL test_all_extensions: AssertionError: {'transferred_files': ['invalid file name[42 chars]sv']} != ['file1.txt', 'file2.csv', 'file3.xlsx', 'file4.jpg']
+FAIL test_visible.py::check_test_empty_source_directory  AssertionError: FAIL test_empty_source_directory: AssertionError: {'transferred_files': ['file2.csv', 'file1.txt']} != []
+2 check(s) failed

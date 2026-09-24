@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "restored": [
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.config/environment.d/50-vacant-possess.conf",
+      "action": "create",
+      "result": "deleted",
+      "ok": true
+    },
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.pi/agent/extensions/vacant.ts",
+      "action": "create",
+      "result": "deleted",
+      "ok": true
+    }
+  ],
+  "shims": [
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.vacant/possess/bin/pi",
+      "ok": true
+    }
+  ],
+  "service": {
+    "backend": "bare",
+    "rc": 0
+  },
+  "state": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.vacant/possess",
+  "systemd_path_env": {
+    "action": "skipped",
+    "reason": "沒有對正在跑的 manager 動過 ⇒ 不動"
+  },
+  "cfg_sweep": {
+    "parent": "/tmp/vacant-possess",
+    "max_age_s": 0.0,
+    "removed": [],
+    "kept_alive": [],
+    "kept_young": [],
+    "skipped_not_ours": [],
+    "failed": [],
+    "bytes_removed": null
+  },
+  "port_still_open": false,
+  "kept_on_purpose": [
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.vacant/possess/proxyd（常駐 proxy 的 journal）",
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.vacant/possess/uninstall_report.json（本份報告）"
+  ]
+}

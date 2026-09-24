@@ -1,0 +1,16 @@
+The task is complete. I have implemented the `task_func` in `solution.py` which:
+1. Loads data from an Excel file using `pandas`.
+2. Handles `FileNotFoundError` and `ValueError` (for missing sheets).
+3. Calculates mean and standard deviation (`ddof=0`) for each numeric column.
+4. Creates a bar chart with the specified title, X-axis label, and Y-axis label.
+5. Returns the statistics dictionary and the matplotlib figure object.
+
+All tests passed.
+The task is complete. I have implemented the `task_func` in `solution.py` which:
+1. Loads data from an Excel file using `pandas`.
+2. Handles `FileNotFoundError` and `ValueError` (for missing sheets).
+3. Calculates mean and standard deviation (`ddof=0`) for each numeric column.
+4. Creates a bar chart with the specified title, X-axis label, and Y-axis label.
+5. Returns the statistics dictionary and the matplotlib figure object.
+
+All tests passed.

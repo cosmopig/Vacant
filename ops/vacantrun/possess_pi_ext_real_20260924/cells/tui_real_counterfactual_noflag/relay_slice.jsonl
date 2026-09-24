@@ -1,0 +1,8 @@
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219809.8653853}
+{"method": "GET", "path": "/v1/models?vacant_canary=af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219810.0587773}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219810.0712202}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219810.1770413}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219810.17963}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219815.0632498}
+{"method": "POST", "path": "/v1/chat/completions", "auth": "ok", "req_bytes": 5801, "status": 200, "resp_bytes": 846, "t": 1790219823.8981357}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-af0b5df8-01ad-4ee4-b537-dd44ddebf3ff", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219894.9920683}

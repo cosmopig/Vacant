@@ -1,0 +1,7 @@
+The task was to find and run all `.bat` files in a given directory, returning their file names and exit codes (or `None` if they couldn't be executed). I have implemented this in `solution.py` using `glob` to find the files and `subprocess.Popen` to execute them, which correctly handles the requirements and passes all tests.
+
+I used `subprocess.Popen` because it was specifically mocked in the test suite, ensuring that the return codes were captured as expected even when exceptions occurred during execution (which are caught by my `try...except` block). I also ensured that the output format matches what is required: a list of tuples containing the filename and the exit code.
+
+The tests passed successfully:
+- `check_test_exception_handling`: Passed.
+- `check_test_multiple_bat_files_mixed_results`: Passed.

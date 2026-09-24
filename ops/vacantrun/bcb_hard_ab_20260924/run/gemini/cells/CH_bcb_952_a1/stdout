@@ -1,0 +1,82 @@
+<thought>All tests passed!
+
+Wait, let me double check if there's anything else in `goal.md` or `contract.md`.
+`goal.md`:
+- Sanitized by replacing spaces with underscores. (Done)
+- Due dates are set to the current system date. (Done)
+- Raise ValueError if n_tasks is negative. (Done)
+- Return pd.DataFrame with 'Task Name', 'Assigned To', and 'Due Date'. (Done)
+- Signature and imports exactly as specified. (Done)
+
+`contract.md`:
+- `solution.py` at root. (Done)
+- Top-level function `task_func`. (Done)
+- Keep imports and signature. (Done)
+
+One small thing: the `today` calculation.
+`today = datetime.today().strftime("%Y-%m-%d")`
+In `test_visible.py`:
+`self.today_str = datetime.today().strftime("%Y-%m-%d")`
+They should match.
+
+Wait, `datetime.today()` is equivalent to `datetime.now()`.
+
+Is there any chance that `random.seed(seed)` when `seed` is `None` might behave differently than I expect if I don't call it?
+If `seed` is `None`, I am NOT calling `random.seed(seed)`. So it uses the current random state.
+If I DID call `random.seed(None)`, it would also use the current random state (it resets it based on system time).
+So it's functionally equivalent for the purpose of the tests, as long as the tests provide a seed when they want reproducible results.
+The tests DO provide a seed:
+`self.default_seed = 123`
+`df = task_func(self.default_tasks, n_tasks, seed=self.default_seed)`
+
+So everything seems correct.
+
+Let me just check if I should use `datetime.now()` or `datetime.today()`. Both work.
+
+One more thing. The requirement says:
+"The function should output with: pd.DataFrame: Contains columns 'Task Name', 'Assigned To', and 'Due Date', with each row representing an assigned task."
+My code does this.
+
+I'm confident. I'll provide the final response.The task required implementing a function `task_func` that randomly assigns a specified number of tasks to employees and returns a pandas DataFrame with sanitized task names and the current date as the due date.
+
+After analyzing the requirements in `goal.md` and `contract.md`, and reviewing the provided tests in `tests_visible/test_visible.py`, I have implemented the solution in `solution.py`.
+
+Key implementation details:
+1.  **Input Validation**: The function raises a `ValueError` if `n_tasks` is negative.
+2.  **Randomization**: It uses `random.seed(seed)` if a seed is provided. It uses `random.choices` to select both tasks and employees, allowing for `n_tasks` to be greater than the number of available tasks/employees, as required by the tests.
+3.  **Sanitization**: Task names are sanitized by replacing spaces with underscores using `.replace(" ", "_")`.
+4.  **Date Handling**: The due date is set to the current system date in `%Y-%m-%d` format.
+5.  **Output**: It returns a `pd.DataFrame` with the required columns: `'Task Name'`, `'Assigned To'`, and `'Due Date'`.
+
+All tests passed successfully.
+
+```python
+import pandas as pd
+import random
+from datetime import datetime
+
+def task_func(
+    task_list,
+    n_tasks,
+    employees=["John Doe", "Jane Smith", "James Brown", "Mary Johnson", "Robert Davis"],
+    seed=None,
+):
+    if n_tasks < 0:
+        raise ValueError("n_tasks cannot be negative")
+    
+    if seed is not None:
+        random.seed(seed)
+    
+    selected_tasks = random.choices(task_list, k=n_tasks)
+    selected_employees = random.choices(employees, k=n_tasks)
+    
+    today = datetime.today().strftime("%Y-%m-%d")
+    
+    df = pd.DataFrame({
+        "Task Name": [t.replace(" ", "_") for t in selected_tasks],
+        "Assigned To": selected_employees,
+        "Due Date": [today] * n_tasks
+    })
+    
+    return df
+```

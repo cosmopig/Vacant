@@ -1,0 +1,3 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function initializes a Flask application, configures it with mail settings from environment variables (with defaults), initializes the `Flask-Mail` instance, and returns both the instance and the configuration dictionary.
+
+I have also verified that the solution passes all tests using `run_tests.sh`.

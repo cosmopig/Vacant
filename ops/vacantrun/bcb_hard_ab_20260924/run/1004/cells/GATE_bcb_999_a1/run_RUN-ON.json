@@ -1,0 +1,266 @@
+{
+  "task_id": "possess_pi_1790257703_7c8184",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant_network.vrun.gateshim",
+    "--exec",
+    "pi",
+    "-p",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_piext_20260924/bcb_run/1004/ws/GATE_bcb_999_a1",
+  "proxy_url": "http://127.0.0.1:35311",
+  "env": {
+    "proxy_url": "http://127.0.0.1:35311",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "a15e59618bf83f834f12be63316dc12a6682a6a96019feec8c6ff0898c3c67aa",
+  "ws_end_sha256": "d67194e70045a712ee1d82f53181c1a5242c4447998b57bf680a92da0bceda8f",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 34,
+  "wire_by_protocol": {
+    "openai": 34
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "6727228c46863df840ebbcc07ca0fe15ac72b9fa1cb510ac081b97a4cd102000",
+  "verdict_hash": "7762979d3c357e901187828472db395659cacb267d04e5785b9413f0ac3eb5f1",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "a15e59618bf83f834f12be63316dc12a6682a6a96019feec8c6ff0898c3c67aa",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "vacant_network.vrun.gateshim",
+        "--exec",
+        "pi",
+        "-p",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "54104e18fd6b3b4080bd325ec43d744568ad06a9f88e3a177932113a15167cfb",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 747.067,
+      "wire_quiesced": true,
+      "requests_seen": 34,
+      "requests_seen_cumulative": 34,
+      "wire_digest": "29a70405e5f4deeb0e9f0257e145aef24ef2f838b9438b137bf7946d9b337ac0",
+      "ws_end_sha256": "d67194e70045a712ee1d82f53181c1a5242c4447998b57bf680a92da0bceda8f",
+      "frozen_path": "/var/tmp/vacant_piext_20260924/pilot_1004/home_on/.vacant-run/possess_pi_1790257703_7c8184/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "6727228c46863df840ebbcc07ca0fe15ac72b9fa1cb510ac081b97a4cd102000",
+      "visible_path": "/var/tmp/vacant_piext_20260924/pilot_1004/home_on/.vacant-run/possess_pi_1790257703_7c8184/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_test_count_categories_data1 — assert: ERROR test_count_categories_data1: ValueError: The provided column_name 'category' does not exist in the CSV file. [test_visible.py:77: raise AssertionError(\"%s %s: %s\" % (kind, method_name, _vacant_short(tb)))]\ntest_visible.py::check_test_count_categories_data3 — assert: ERROR test_count_categories_data3: ValueError: The provided column_name 'category' does not exist in the CSV file. [test_visible.py:77: raise AssertionError(\"%s %s: %s\" % (kind, method_name, _vacant_short(tb)))]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none",
+    "accept_path": "/var/tmp/vacant_piext_20260924/bcb/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "memory_bytes": 2147483648
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "29a70405e5f4deeb0e9f0257e145aef24ef2f838b9438b137bf7946d9b337ac0",
+  "model_wire": {
+    "requests_indexed": 34,
+    "request_blobs_persisted": 34,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 747.551,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "possess_pi_1790257703_7c8184",
+    "agent": "pi",
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1790258451.0533829,
+        "probed_by_pid": 2
+      }
+    },
+    "framework_hook": {
+      "agent": "pi",
+      "contract_version": "vacant-hook/1",
+      "canary_fired": true,
+      "events_n": 89,
+      "log": "/var/tmp/vacant_piext_20260924/pilot_1004/home_on/.vacant-run/possess_pi_1790257703_7c8184/hooks.jsonl",
+      "install_attempted": true,
+      "version_drift": false,
+      "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+    },
+    "reconciled": {
+      "relay_calls": 34,
+      "hook_events": 89,
+      "unexplained": 7,
+      "canary_calls": 1,
+      "refused_path": 0,
+      "unexplained_detail": [
+        {
+          "call_id": "957e9106ed5646839119993003eb0ddc",
+          "path": "/v1/chat/completions",
+          "ts": 1790257764.5045173,
+          "status": 200
+        },
+        {
+          "call_id": "25c3736d45894b8782098fd031940c7d",
+          "path": "/v1/chat/completions",
+          "ts": 1790257816.429559,
+          "status": 200
+        },
+        {
+          "call_id": "8088ef6d321c4110ba9583626e1f0477",
+          "path": "/v1/chat/completions",
+          "ts": 1790257843.826174,
+          "status": 200
+        },
+        {
+          "call_id": "38ac8bc48e464a99bd6963e04653a99e",
+          "path": "/v1/chat/completions",
+          "ts": 1790257877.858843,
+          "status": 200
+        },
+        {
+          "call_id": "39b149b24e334bf8bd95e34774bb70e1",
+          "path": "/v1/chat/completions",
+          "ts": 1790257934.306294,
+          "status": 200
+        },
+        {
+          "call_id": "14f3658d608b42c38bb8e901f822205f",
+          "path": "/v1/chat/completions",
+          "ts": 1790257981.5200613,
+          "status": 200
+        },
+        {
+          "call_id": "bf8ca93de92d4bcb8bd81ce07a74992b",
+          "path": "/v1/chat/completions",
+          "ts": 1790258019.6093605,
+          "status": 200
+        }
+      ],
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "34 通中繼、27 個回合開端事件 ⇒ 7 通對不上"
+    },
+    "tier": "B'",
+    "attested": false,
+    "b_prime_kind": "channel_not_enclosed",
+    "tier_sentence": "工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。",
+    "tier_reasons": [
+      "掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790258451.0588403
+  },
+  "agent_wall_s": 747.067,
+  "failures": "test_visible.py::check_test_count_categories_data1 — assert: ERROR test_count_categories_data1: ValueError: The provided column_name 'category' does not exist in the CSV file. [test_visible.py:77: raise AssertionError(\"%s %s: %s\" % (kind, method_name, _vacant_short(tb)))]\ntest_visible.py::check_test_count_categories_data3 — assert: ERROR test_count_categories_data3: ValueError: The provided column_name 'category' does not exist in the CSV file. [test_visible.py:77: raise AssertionError(\"%s %s: %s\" % (kind, method_name, _vacant_short(tb)))]"
+}

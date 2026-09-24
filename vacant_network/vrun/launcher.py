@@ -539,6 +539,12 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 summary["sandbox"] = {k: backend_meta.get(k)
                                       for k in ("backend", "sandbox",
                                                 "requested")}
+                # 驗收用哪個 PATH（決定直譯器）與多少記憶體，會改變「參考解過不過得了」
+                # ⇒ 跟著這一跑的紀錄走（2026-09-24：兩個都可由跑閘門的人明講調整，
+                #   見 sandbox.accept_path／DEFAULT_MEMORY_BYTES）。
+                from . import sandbox as _sbx
+                summary["sandbox"]["accept_path"] = _sbx.accept_path()
+                summary["sandbox"]["memory_bytes"] = getattr(sandbox, "memory_bytes", None)
             # `type: ignore[arg-type]`：`has_suite` 的定義（見上面）第一個
             # 連言就是 `suite_dir is not None`，而上一段 `if not has_suite:`
             # 已經 `break` 掉了 False 的情形 ⇒ 到得了這一行時 `suite_dir`

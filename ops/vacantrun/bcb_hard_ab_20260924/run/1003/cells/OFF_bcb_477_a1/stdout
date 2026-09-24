@@ -1,0 +1,17 @@
+The task was to create a DataFrame with random "x" and "y" values and categories from a given list, ensuring each category appears at least once if $N \ge \text{len(CATEGORIES)}$, otherwise sampling without replacement. I have implemented this in `solution.py` and verified it with the provided tests.
+
+The implementation details:
+1.  **Randomness**: Used `np.random.seed(seed)` to ensure reproducibility.
+2.  **Data Generation**: Generated "x" and "y" using `np.random.rand(N)`.
+3.  **Category Logic**: 
+    - If $N \ge \text{len(CATEGORIES)}$, I initialized the list with all categories, filled the rest randomly from `CATEGORIES`, and shuffled.
+    - If $N < \text{len(CATEGORIES)}$, I used `np.random.choice` with `replace=False`.
+4.  **Plotting**: Used `ax.scatter` with a color map to distinguish between categories.
+
+The tests passed successfully.
+```bash
+pass test_visible.py::check_test_case_1
+pass test_visible.py::check_test_case_2
+pass test_visible.py::check_test_case_3
+0 check(s) failed
+```

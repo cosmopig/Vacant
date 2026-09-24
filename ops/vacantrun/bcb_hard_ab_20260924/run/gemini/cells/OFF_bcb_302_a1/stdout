@@ -1,0 +1,49 @@
+<thought>Everything is perfect. I'll finish the task.</thought>I have implemented the `task_func` in `solution.py` according to the requirements specified in `goal.md` and `contract.md`.
+
+The function:
+1.  Checks if the input DataFrame is empty or if the 'Value' column is missing or contains invalid data (non-list elements), raising a `ValueError` in such cases.
+2.  Converts the lists in the 'Value' column into separate columns of a new DataFrame.
+3.  Calculates the Pearson correlation matrix for these columns.
+4.  Optionally generates and returns a heatmap of the correlation matrix using `seaborn`, with the title "Correlation Heatmap", along with the correlation DataFrame.
+5.  Returns the correlation DataFrame if `plot=False`.
+
+The implementation has been verified against the provided tests and passes successfully.
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Constants
+COLUMNS = ['Date', 'Value']
+
+def task_func(df, plot=False):
+    if df.empty:
+        raise ValueError("DataFrame is empty")
+    
+    if 'Value' not in df.columns:
+        raise ValueError("Column 'Value' not found")
+    
+    # Check if all elements in 'Value' are lists
+    for val in df['Value']:
+        if not isinstance(val, list):
+            raise ValueError("All elements in 'Value' column must be lists")
+    
+    # Convert 'Value' column to a DataFrame where each element of the list is a column
+    try:
+        values_list = df['Value'].tolist()
+        values_df = pd.DataFrame(values_list)
+    except Exception:
+        raise ValueError("Invalid 'Value' column content")
+
+    # Calculate Pearson correlation
+    corr_df = values_df.corr()
+
+    if plot:
+        fig, ax = plt.subplots()
+        sns.heatmap(corr_df, ax=ax)
+        ax.set_title("Correlation Heatmap")
+        return corr_df, ax
+    
+    return corr_df
+```

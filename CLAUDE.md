@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Vacant repo — 工作約束（2026-07-04 起；交付定位 2026-08-06 更正）
 
 ## 現在是什麼
@@ -40,6 +44,26 @@
 展件施工順序與凍結清單見 `專題/Vacant_展望_2026-08-06/04_接下來的步驟.md`。
 **凍結不等於刪掉**：通道分離那六個改動、X-cap／X-check 等證據都很強，但它們不影響
 展場，排在展件可運作之後。
+
+## 開發指令（2026-09-22 補；CI 跑的就是這幾條，`.github/workflows/ci.yml`）
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"   # ⚠ 系統 python 上 pip -e 會被 debian 的 PyJWT 擋下，一律用 .venv
+.venv/bin/python -m pytest tests/ -q                          # 全套（pyproject 已設 testpaths＋pythonpath）
+.venv/bin/python -m pytest tests/test_vrun_possess.py -q      # 單一檔
+.venv/bin/python -m pytest tests/test_vrun_possess.py::test_never_touch_raises -q   # 單一測試
+.venv/bin/python -m pytest tests/ -rs                         # 把每個 skip 的理由印出來（量不到不是通過，鐵律 3）
+ruff check --no-cache --select E9,F63,F7,F82 vacant_network ops examples tests      # 只選「執行期會炸」那組；不准開全套（凍結碼有絕對行號釘子）
+mypy --ignore-missing-imports --follow-imports=silent vacant_network                 # CI 另有 11 個既有債模組的排除清單，只准縮短
+python3 ops/check_repo_links.py --verbose      # 死連結／死路徑／根目錄落單紀錄檔；`--relocate` 一行歸位
+python3 ops/gain/build_runs_index.py --check   # runs/INDEX 沒有漂
+python3 -m build                               # wheel＋sdist；CI 會在 repo 外用全新 venv 裝 wheel 跑 `vacant demo gate`
+```
+
+- 需要 `.vacant-private/` 官方題庫或 iCloud 引用備份的測試在檔案缺席時 **skip 並印理由**，不是紅也不是刪。
+- `vacant` 指令的分派在 `vacant_network/cli.py::main` **argparse 之前**攔四種：`run … -- <cmd>`、
+  `install`／`uninstall`／`possess …`（轉給 `vrun/possess.py`）、`on [agent]`、裸 `vacant`（＝選單）。
+  `vacant status` 是 trust 開關，附身狀態是 `vacant possess status`，不要搶名字。
 
 ## 程式碼地圖（實驗承重件）
 
@@ -125,6 +149,59 @@
   四值裁決 OK→0、VOID→3、BROKEN→1、UNVERIFIABLE→1。
 - `envmap.py` — `SINK_UPSTREAM`／`is_sink`：**未指定 upstream 要 fail-closed**，
   不可以安靜地去打公開 API（`envmap` 誠實邊界 2 有活體標本）。
+
+- `agentwrap.py` ＋ `cli.py::_on_shim` — **`vacant on [agent]`／裸 `vacant`＝選單**（2026-09-22）：
+  「B 路」，**不改使用者任何常駐設定**，在 `vacant run --stdin inherit` 之內建**這一跑自己的**
+  設定目錄（`PI_CODING_AGENT_DIR`／`CODEX_HOME`／`OPENCODE_CONFIG_CONTENT`／`ANTHROPIC_BASE_URL`）
+  再 `exec` agent 的**互動 TUI**。與 `vacant install`（改常駐設定、裝 proxyd 服務、動 shell rc）
+  是兩條路、兩個端點、**兩種證據等級，不可互相背書**：B 路的 pi 通道量過
+  （600 格 abpi＋pi_tty），A 路的 pi 通道 `CHANNEL_MEASURED["pi"]` 是 2026-09-24 才量到的（見下一條）。
+  互動三條件（stdin tty、stdout tty、真 pty）缺一 pi 就**安靜**落回 print
+  （`DECISION_20260920_PI_TTY_VS_PRINT_MODE.md`）。**缺「記住上次選誰」**。
+- `piext.py` — **pi 產品版 extension 的渲染器**（2026-09-22 落地）：`vacant install --agent pi` 只寫
+  `~/.pi/agent/extensions/vacant.ts`（registerProvider(vacant)→proxyd、session_start 預設 setModel、
+  `/vacant on|off|status`、掛鉤七事件→`hookcli`），**不再碰 `models.json`**。裸 `vacant` 沒裝過會引導
+  （`cli._guided_install`，只提議 `possess.INSTALL_GUIDED_AGENTS`＝pi）。`gateshim` 的 pi 段另寫 per-run
+  `settings.json` 的 `defaultProvider=vacant`——自裝驗證抓到：只寫 `models.json` pi 不會**選**它。
+  自裝證據 `ops/vacantrun/possess_pi_20260922/`（**L-fake**，假上游，含互動 TUI 與 `/vacant`）
+  ＋ **`ops/vacantrun/possess_pi_real_20260922/`（L-real，但只屬於 PATH shim 那條路）**：pi 0.87.0 ＋
+  `gemma-4-12b-it-qat` 跑 R534 五題走 shim，**3 交付 exit 0／2 拒交 exit 20**，五條鏈全 OK。
+  🔴 **那五格裡常駐 extension 沒被載入**（shim 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，掛鉤是 per-run
+  那支燒的）⇒ 只記在 `possess.SHIM_MEASURED["pi"]`（曾一度拿來填 `CHANNEL_MEASURED`，code review 撤回）。
+  **常駐 extension 那條的 L-real 是另一批**：`ops/vacantrun/possess_pi_ext_real_20260924/`（vacant-dev、
+  pi 完整路徑不經 shim、1004 前面放**要金鑰的中繼**）——R534 五題＋互動 TUI，76 通全在常駐 journal、
+  金鑰借自使用者 `models.json`（字面值／`$VAR`／`!cmd`）。⚠ **這條路只有通道、沒有閘門**：五題裡兩題
+  agent 退出碼 0 沒寫 `solution.py`，沒東西擋。**兩條路兩份證據，不可合講。** 同一跑抓到並修掉五個洞
+  （本機位址上游掉 sink、要金鑰時模型清單錯、切回 vacant 不留痕、`/vacant` 打錯字跑 status、
+  extension 路點不亮 `proven`），修後同機重驗在該 README §七。
+  ⚠ 上游是**公開 Funnel 不是 LAN**，且與 `pi_tty_20260920` 那 40 格**三個變因都不同，不可合併相減**。
+- **有 Vacant ↔ 沒有 Vacant 的一格對照**（`ops/vacantrun/ab_vacant_onoff_20260922/`，n=1）：
+  同一題同一模型，**OFF 臂 pi 退出碼 0 而工作區雜湊前後相同**（什麼都沒交，你會以為成功）；
+  **V0 臂退出碼 20 ＋ 收據**，而且四通模型呼叫全 200 ⇒ **失敗可歸因給 agent 不是環境**。
+  ⚠ V1（重試）臂**作廢**：模型呼叫被容器出網過濾器回 403（`x-deny-reason: resolve_no_records`），
+  不可讀成「重試沒用」。
+- **公開題庫的兩臂對照**（`ops/vacantrun/humaneval_ab_20260922/`）：HumanEval 等距抽 20 題、
+  pi **對話 TUI**（真 pty 打字）、`gemma-4-12b-it-qat`，**ON 與 OFF 都 20/20 ＝ 100%，閘門 0 拒交**。
+  🔴 **那是天花板不是結論**：工作區附可執行的可見測資，agent 自己跑了 4–22 次迭代到過才收手
+  ⇒ 量到的不是 pass@1，閘門在這一批沒有機會發動。要分得開得**把可見測資拿掉**或換更難的題組。
+  兩臂共用一個**重試中繼**吸收容器出網 DNS 不穩（416 通吸收 85，0 用盡），它不是 Vacant 的一部分。
+- **抗污染難題的兩臂對照**（`ops/vacantrun/lcb_ab_20260922/`）：LiveCodeBench v6、
+  只收 2025-02-01 之後的比賽（模型自稱截止 2025-01，回憶測試 19/20 答 UNKNOWN、正控制 3/3 過）、
+  medium/hard 各 10 題。**正確率兩臂都 7/20＝35%，McNemar p=1.000（沒有差異）**；
+  但 **OFF 出貨 8 件其中 1 件錯（過了可見、隱藏 8/43 就錯），ON 出貨 7 件全對、拒交 13**。
+  🔴 **第一版整批作廢**：我寫的 OFF 設定沒對齊 `agentwrap.wire_pi`（contextWindow 262144 vs 131072），
+  同一題只差那幾欄就 225s 通過 → 327s 失敗 ⇒ 量具造成的干擾會被誤算到 Vacant 頭上。
+  作廢資料留在 `run_VOID_confounded/`。模型 runaway（單通 4.4MB／39k 字、零工具呼叫）兩臂都踩。
+- **Claude Code 自己驗自己**（`ops/vacantrun/possess_claude_20260922/`，**L-real**，Haiku 4.5，真上游）：
+  shim 拒交 20／交付 0；`settings.json` 的 base URL 在 **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`**
+  （Claude Code 遠端容器）下**被忽略、agent 照樣回答**——`requests_seen=0` 而一切看起來正常的活體標本；
+  環境變數那條照樣通。`/v1/code/agent-proxy/ca-cert` 探針被 `route()` 按 path 猜成 `openai` 家族（sink 502）。
+- ~~**pi 的接法要改**~~（已做，研究在 `decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`，
+  等裁決）：pi 0.87.0 讀碼——`models-store.json` 是**目錄快取**不是設定（`models.json` 才是）；
+  extension 一支就能 `registerProvider`／`registerCommand("vacant")`／`setModel`／燒掛鉤七事件，
+  **不必碰 `models.json`**；互動模式的閘門觸發點是 `agent_before_settle`。
+  產品版 extension 今天**不存在**（只有證據檔 `ops/vacantrun/enclosure_20260920/evidence_agent_attest/vacant_pi_extension.ts`）。
+  OpenCode **沒有** plugin 註冊 slash command 的 API，`/vacant on` 在它上面做不出真開關。
 
 **證據落盤**：`ops/vacantrun/enclosure_20260920/`（圍牆＋門，兩支一鍵重跑，
 `run_probes.sh` **一定先跑負控制**）、`ops/vacantrun/codex_managed_20260920/`

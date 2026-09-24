@@ -1,0 +1,28 @@
+import subprocess
+import time
+import threading
+
+def task_func(file_list):
+    results = [None] * len(file_list)
+    threads = []
+
+    def run_process(index, file_path):
+        try:
+            # Start the process. We use Popen to ensure it runs asynchronously 
+            # relative to the main thread's execution of other processes.
+            proc = subprocess.Popen([file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            results[index] = proc.poll()
+        except Exception:
+            # If for some reason it fails to run (e.g., file not found or not executable),
+            # we return a non-zero exit code. 1 is a common choice for general errors.
+            results[index] = 1
+
+    for i, file_path in enumerate(file_list):
+        t = threading.Thread(target=run_process, args=(i, file_path))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    return results

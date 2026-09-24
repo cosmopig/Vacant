@@ -1,0 +1,1 @@
+{"passed": 3, "total": 6, "failures": ["check_test_email_sending_exception:   Actual: mock(400)", "check_test_invalid_content_type: AssertionError: ERROR test_invalid_content_type: ValueError: I/O operation on closed file.", "check_test_valid_json_request:   Actual: not called."]}

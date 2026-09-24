@@ -1,0 +1,9 @@
+The task was to create an HTTP POST request handler that validates incoming JSON data and returns appropriate success or error messages. I have implemented this in `solution.py` by defining a class `DataHandler` within the `task_func` function, which inherits from `http.server.BaseHTTPRequestHandler`.
+
+Key features of the implementation:
+1.  **Content-Type Validation**: It checks if the `Content-Type` header is `application/json`. If not, it returns a 400 Bad Request with the message "Content-Type header is not application/json" using `send_error`.
+2.  **JSON Parsing**: It attempts to parse the request body as JSON. If parsing fails, it returns a 400 Bad Request with the message "Invalid JSON".
+3.  **Data Key Validation**: It checks if the parsed JSON object contains the required 'data' key. If missing, it returns a 400 Bad Request with the message "No data key in request".
+4.  **Success Response**: For valid requests, it returns a 200 OK response with the `SUCCESS_RESPONSE` dictionary as a JSON body and sets the `Content-Type: application/json` header.
+
+The solution has been verified against the provided tests using `run_tests.sh`.

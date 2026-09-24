@@ -1,0 +1,42 @@
+The task is completed successfully. I have implemented the `task_func` in `solution.py` as specified by `goal.md` and `contract.md`. The function generates a plot of random time series data for the past 30 days, uses an optional seed for reproducibility, styles it with Arial font (where available), sets the correct labels and title, and handles errors by raising a `ValueError`. I have also verified that all tests pass using `sh run_tests.sh`.
+
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+
+def task_func(seed=42):
+    try:
+        random.seed(seed)
+        
+        # Generate 30 days of data
+        end_date = datetime.now()
+        dates = [end_date - timedelta(days=i) for i in range(30)]
+        dates.sort()
+        
+        values = []
+        current_val = random.uniform(10, 100)
+        for _ in range(30):
+            current_val += random.uniform(-5, 5)
+            values.append(current_val)
+            
+        df = pd.DataFrame({
+            'Date': dates,
+            'Value': values
+        })
+        
+        # Set font to Arial if possible
+        plt.rcParams['font.family'] = 'Arial'
+        
+        fig, ax = plt.subplots()
+        ax.plot(df['Date'], df['Value'])
+        
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Value')
+        ax.set_title('Random Time Series Data')
+        
+        return ax
+    except Exception as e:
+        raise ValueError(f"An error occurred while generating the data or plot: {e}")
+```

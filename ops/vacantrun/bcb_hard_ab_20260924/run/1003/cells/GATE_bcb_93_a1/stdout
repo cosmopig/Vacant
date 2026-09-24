@@ -1,0 +1,8 @@
+The task was to implement a PCA function that returns both the transformed data as a DataFrame and a matplotlib Axes object containing a scatter plot of the results.
+
+I have:
+1. Read `goal.md` and `contract.md`.
+2. Implemented `task_func` in `solution.py` following all requirements, including input validation for `n_components`, PCA execution using `sklearn`, and plotting with `matplotlib`.
+3. Verified the implementation by running the provided tests via `run_tests.sh`.
+
+The solution is complete.

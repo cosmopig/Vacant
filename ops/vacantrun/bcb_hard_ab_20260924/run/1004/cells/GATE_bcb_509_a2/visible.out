@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_custom_delimiter
+pass test_visible.py::check_test_difference_report
+0 check(s) failed

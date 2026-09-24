@@ -1,0 +1,8 @@
+[vacant] pi → http://127.0.0.1:38305（設定在 /tmp/vacant-pi-xrgvfk7l，不碰你的 ~/.pi）
+403 Host resolves to a private/reserved IP: resolve_no_records
+[vacant] pi → http://127.0.0.1:38305（設定在 /tmp/vacant-pi-nfx2pkqn，不碰你的 ~/.pi）
+403 Host resolves to a private/reserved IP: resolve_no_records
+[vacant] pi → http://127.0.0.1:38305（設定在 /tmp/vacant-pi-xnntw18s，不碰你的 ~/.pi）
+403 Host resolves to a private/reserved IP: resolve_no_records
+[vacant run] RUN-ON　拒交（attempts_exhausted）　3/3 次（revise→both）　ws 1a1dacb74418→e450f5c45cac　wire 9 通　收據 /tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/ab/rd_lcb_3584_V1
+test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]

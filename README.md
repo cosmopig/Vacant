@@ -236,6 +236,28 @@ receipts_deliver              RUN-ON        2     2     0       1     1  9a3abd1
 
 ---
 
+## 裝一次就在：pi（2026-09-22）
+
+```bash
+pip install vacant-network
+vacant                    # 還沒裝 ⇒ 偵測本機的 pi、問一句、preflight 過了才寫檔；或 vacant install --agent pi
+pi                        # 之後照舊。狀態列會顯示 (vacant) <model>；輸入框 /vacant on|off|status
+vacant possess status     # 三欄：設定寫了／起得來／被中介過（唯一算數的是 requests_seen）
+vacant uninstall          # 逐位元還原、自驗 sha256
+```
+
+寫進去的只有**一支 extension**（`~/.pi/agent/extensions/vacant.ts`，由
+`vacant_network/vrun/piext.py` 渲染）：它在 runtime 註冊 `vacant` provider 指到常駐 proxyd、
+開 session 就切過去、掛七個事件進掛鉤日誌。**你自己的 `models.json`、`auth.json` 一個位元都不動**。
+`/vacant off` 或 `/model` 切走＝那一段不經過 Vacant，日誌會留一筆 `vacant_off`，收據不替它說謊。
+`pi -p` 走 PATH shim 那條照舊出裁決收據（`0`／`20`／`21`／`23`）；互動 session **不出裁決收據**。
+
+⚠ **證據等級要一起講**：2026-09-22 的自裝驗證（`ops/vacantrun/possess_pi_20260922/`）是
+**假上游（L-fake）**——pi 0.87.0、印字與互動兩種模式、shim 拒交格 exit 20／交付格 exit 0、
+proxyd journal 每一格 `requests_seen ≥ 2`、收據鏈 `--selftest` 先過再驗四跑全 OK。
+**常駐這條路的真模型（L-real）還沒量**，`vacant possess status` 會把 pi 標成「未證實」直到量到。
+extension 在 `$HOME` 底下、agent 刪得掉（實測）；刪掉的那一跑 canary 不燒 ⇒ 收據自動降級。這不是「不會被繞過」。
+
 ## 接上你自己的 agent
 
 `--` 後面照你平常怎麼跑 agent 就怎麼打，`vacant run` 不需要知道那是什麼框架：

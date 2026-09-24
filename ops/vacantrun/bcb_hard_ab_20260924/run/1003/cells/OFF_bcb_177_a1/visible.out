@@ -1,0 +1,6 @@
+[nltk_data] Downloading package punkt to
+[nltk_data]     /var/tmp/vacant_piext_20260924/bcb/venv/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+pass test_visible.py::check_test_case_sensitive_handling
+FAIL test_visible.py::check_test_empty_dataframe  AssertionError: ERROR test_empty_dataframe: ValueError: DataFrame is empty or does not contain necessary columns.
+1 check(s) failed

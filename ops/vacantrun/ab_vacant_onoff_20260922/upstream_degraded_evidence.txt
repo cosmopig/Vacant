@@ -1,0 +1,10 @@
+# 上游 403 的活體證據（2026-09-22T07:15Z，V1 跑完之後立刻量）
+
+$ curl -i https://1003.taild870c4.ts.net/v1/models   （直連，不經 agent proxy）
+HTTP/2 403
+x-deny-reason: resolve_no_records
+Host resolves to a private/reserved IP: resolve_no_records
+
+10 通直連取樣：403 200 403 200 403 200 403 200 403 403  ⇒ 200 只有 4/10
+
+⚠ 這是**容器的出網過濾器**在重新解析主機名之後拒絕的，不是 Vacant、不是模型、不是 LM Studio。

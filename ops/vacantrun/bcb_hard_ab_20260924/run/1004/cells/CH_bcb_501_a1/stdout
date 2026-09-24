@@ -1,0 +1,50 @@
+<|channel>thought
+<channel|>```python
+import xlwt
+import os
+import pandas as pd
+import json
+
+def task_func(json_str, filename, sheet_name="sheet1"):
+    if not isinstance(json_str, (str, bytes, bytearray)):
+        raise TypeError("Input must be a string, bytes, or bytearray")
+    
+    try:
+        data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON: {e}")
+
+    if isinstance(data, list):
+        df = pd.DataFrame(data) if data else pd.DataFrame()
+    else:
+        # If it's a single dictionary, wrap it in a list to make it a row
+        df = pd.DataFrame([data])
+
+    try:
+        workbook = xlwt.Workbook()
+        worksheet = workbook.add_sheet(sheet_name)
+        
+        if not df.empty:
+            # Write headers
+            for i, col in enumerate(df.columns):
+                worksheet.cell_value = (i, 0, str(col))
+            
+            # Write data rows
+            for row_idx, row_data in enumerate(df.values):
+                for col_idx, value in enumerate(row_data):
+                    if value is None:
+                        worksheet.cell_value = (col_idx, row_idx + 1, "")
+                    else:
+                        # xlwt cell_value takes (column, row, value)
+                        # We try to keep it as a number if possible, otherwise string
+                        if isinstance(value, (int, float)):
+                            worksheet.cell_value = (col_idx, row_idx + 1, value)
+                        else:
+                            worksheet.cell_value = (col_idx, row_idx + 1, str(value))
+        
+        workbook.save(filename)
+    except Exception as e:
+        raise Exception(f"Error writing to file: {e}")
+
+    return os.path.abspath(filename)
+```

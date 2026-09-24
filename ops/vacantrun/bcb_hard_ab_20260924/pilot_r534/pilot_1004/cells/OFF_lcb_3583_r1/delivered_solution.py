@@ -1,0 +1,75 @@
+from typing import List
+import math
+from collections import Counter
+
+def gcdValues(nums: List[int], queries: List[int]) -> List[int]:
+    # Constraints: 
+    # n <= 10^5, nums[i] <= 5 * 10^4, queries.length <= 10^5
+    # We need to find all gcd(nums[i], nums[j]) for i < j and sort them.
+    # The number of pairs is n*(n-1)/2, which can be up to ~5 * 10^9.
+    # However, the values in nums are small (up to 5 * 10^4).
+    # Let's count occurrences of each number in nums.
+    max_val = 0
+    counts = Counter()
+    for x in nums:
+        counts[x] += 1
+        if x > max_val:
+            max_val = x
+            
+    # We can find the frequency of each possible GCD value.
+    # Let f(g) be the number of pairs (i, j) such that gcd(nums[i], nums[j]) == g.
+    # Let F(g) be the number of pairs (i, j) such that g divides gcd(nums[i], nums[j]).
+    # This is equivalent to saying both nums[i] and nums[j] are multiples of g.
+    
+    # First, calculate how many numbers in `nums` are multiples of each g from 1 to max_val.
+    multiples_count = [0] * (max_val + 1)
+    for g in range(1, max_val + 1):
+        count_g = 0
+        for multiple in range(g, max_val + 1, g):
+            count_g += counts[multiple]
+        multiples_count[g] = count_g
+
+    # F(g) is the number of pairs (i, j) with i < j such that both nums[i] and nums[j] are multiples of g.
+    # If there are C numbers divisible by g, then there are C * (C - 1) / 2 such pairs.
+    F = [0] * (max_val + 1)
+    for g in range(1, max_val + 1):
+        C = multiples_count[g]
+        F[g] = C * (C - 1) // 2
+
+    # Now we use inclusion-exclusion (or Mobius inversion style) to find f(g).
+    # f(g) = F(g) - sum_{k=2, 3, ... where g*k <= max_val} f(g*k)
+    f = [0] * (max_val + 1)
+    for g in range(max_val, 0, -1):
+        f[g] = F[g]
+        for multiple in range(2 * g, max_val + 1, g):
+            f[g] -= f[multiple]
+
+    # Now we have the frequency of each GCD value.
+    # We need to construct the sorted list of all gcdPairs.
+    # Since queries are up to n*(n-1)/2, and max_val is 5*10^4,
+    # we can use the frequencies to answer queries without constructing the full list.
+    
+    # Sort the unique GCD values that have f[g] > 0.
+    sorted_gcds = []
+    for g in range(1, max_val + 1):
+        if f[g] > 0:
+            sorted_gcds.append((g, f[g]))
+    # sorted_gcds is already sorted by g because we iterated from 1 to max_val.
+
+    # To answer queries efficiently:
+    # The query asks for the element at index q in the sorted list of all gcdPairs.
+    # We can use prefix sums of f[g].
+    
+    ans = []
+    for q in queries:
+        current_q = q
+        found = False
+        for g, count in sorted_gcds:
+            if current_q < count:
+                ans.append(g)
+                found = True
+                break
+            else:
+                current_q -= count
+    
+    return ans

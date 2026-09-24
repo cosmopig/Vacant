@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_bar_chart_labels
+pass test_visible.py::check_test_correct_mean_and_std_values
+0 check(s) failed

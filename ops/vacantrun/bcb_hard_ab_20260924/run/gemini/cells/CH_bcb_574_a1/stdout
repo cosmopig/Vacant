@@ -1,0 +1,102 @@
+<thought>The tests passed!
+
+Wait, let me double check the `test_case_1` requirements.
+`self.assertEqual(len(ax.lines), 2)` - Passed.
+`self.assertEqual(ax.get_xlabel(), 'x')` - Passed.
+`self.assertEqual(ax.get_ylabel(), 'y')` - Passed.
+`self.assertTrue(ax.get_legend() is not None)` - Passed.
+
+`test_case_4`:
+`self.assertIsInstance(ax, plt.Axes)` - Passed.
+`x_data, y_data = ax.lines[0].get_data()`
+`self.assertEqual(len(x_data), 150)` - Passed.
+`self.assertTrue(np.max(np.abs(np.diff(y_data))) <= 0.1 + 1)` - Passed.
+
+The implementation seems correct and fulfills all requirements.
+
+Wait, one thing. The instructions said:
+"You should write self-contained code starting with:
+```
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+import numpy as np
+def task_func(array_length=100, noise_level=0.2):
+```"
+
+My `solution.py` starts with:
+```python
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+import numpy as np
+
+def task_func(array_length=100, noise_level=0.2):
+```
+It includes the imports. The instruction says "starting with", which might mean those imports should be there. I have them.
+
+One more thing: "The function should output with: Axes object: A plot showing the noisy sine wave and its adjusted curve."
+My function returns `ax`, which is the `Axes` object.
+
+I should probably make sure I don't have any extra stuff in `solution.py`.
+
+Let's re-read `goal.md`.
+"Create a noisy sine wave of a specified length and adjusts a curve using curve_fit from scipy.optimize to the data.
+The function should output with:
+    Axes object: A plot showing the noisy sine wave and its adjusted curve."
+
+Everything seems fine. I'll just do a final check of the code.
+`y_pure = np.sin(x)`
+`noise = noise_level * np.random.randn(array_length)`
+`y_noisy = y_pure + noise`
+
+Is it possible that `array_length` is too small for `curve_fit` to work?
+If `array_length=100` (default), it should be fine.
+
+One detail: `fig, ax = plt.subplots()` creates a new figure. This is generally fine when returning an `Axes` object.
+
+Let's check if there is anything else.
+"Keep the imports and the signature exactly as the task gives them."
+My signature: `def task_func(array_length=100, noise_level=0.2):`
+My imports:
+```python
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+import numpy as np
+```
+Matches exactly.
+
+I think I'm done.I have read `goal.md` and `contract.md`, and I have implemented the requested functionality in `solution.py`. 
+
+The `task_func` function:
+1.  Generates a noisy sine wave of the specified `array_length` using `np.sin(x)` and adding Gaussian noise with the given `noise_level`.
+2.  Uses `scipy.optimize.curve_fit` to fit a sine function $a \sin(bx + c)$ to the noisy data.
+3.  Creates a matplotlib plot containing both the noisy data and the fitted curve.
+4.  Returns the `matplotlib.axes.Axes` object.
+
+I have verified the implementation by running the provided tests, and they passed successfully.
+
+```python
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+import numpy as np
+
+def task_func(array_length=100, noise_level=0.2):
+    x = np.linspace(0, 2 * np.pi, array_length)
+    y_pure = np.sin(x)
+    noise = noise_level * np.random.randn(array_length)
+    y_noisy = y_pure + noise
+
+    def sine_func(x, a, b, c):
+        return a * np.sin(b * x + c)
+
+    # Initial guess for curve_fit
+    popt, _ = curve_fit(sine_func, x, y_noisy, p0=[1, 1, 0])
+
+    fig, ax = plt.subplots()
+    ax.plot(x, y_noisy, label='Noisy Sine Wave')
+    ax.plot(x, sine_func(x, *popt), label='Fitted Curve')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+
+    return ax
+```

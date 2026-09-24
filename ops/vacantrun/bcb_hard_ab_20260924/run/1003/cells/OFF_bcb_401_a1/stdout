@@ -1,0 +1,36 @@
+The task was to implement a function `task_func` that initializes a Flask application and a Flask-Mail instance using configurations from environment variables, with specified defaults.
+
+I have implemented the following in `solution.py`:
+1.  Imported necessary modules: `Flask`, `os`, and `Mail`.
+2.  Defined `task_func(app_name)` which:
+    *   Creates a Flask app instance.
+    *   Retrieves configuration values from environment variables with the specified defaults (`MAIL_SERVER='localhost'`, `MAIL_PORT=25`, `MAIL_USE_TLS=False`, `MAIL_USERNAME=None`, `MAIL_PASSWORD=None`).
+    *   Sets these configurations on the Flask app.
+    *   Initializes the `Mail` instance with the app.
+    *   Returns a tuple containing the `Mail` instance and the app's configuration dictionary.
+
+I verified the solution by running the provided tests using `run_tests.sh`, which passed successfully.
+
+```python
+from flask import Flask
+import os
+from flask_mail import Mail
+
+def task_func(app_name):
+    app = Flask(app_name)
+    
+    mail_server = os.environ.get('MAIL_SERVER', 'localhost')
+    mail_port = int(os.environ.get('MAIL_PORT', 25))
+    mail_use_tls = os.environ.get('MAIL_USE_TLS', 'False').lower() == 'true'
+    mail_username = os.environ.get('MAIL_USERNAME')
+    mail_password = os.environ.get('MAIL_PASSWORD')
+
+    app.config['MAIL_SERVER'] = mail_server
+    app.config['MAIL_PORT'] = mail_port
+    app.config['MAIL_USE_TLS'] = mail_use_tls
+    app.config['MAIL_USERNAME'] = mail_username
+    app.config['MAIL_PASSWORD'] = mail_password
+
+    mail = Mail(app)
+    return mail, app.config
+```

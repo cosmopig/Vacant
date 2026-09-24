@@ -1,0 +1,7 @@
+FAIL test_visible.py::check_test_2  AssertionError: ERROR test_2: File "<frozen os>", line 215, in makedirs
+  File "<frozen os>", line 225, in makedirs
+OSError: [Errno 30] Read-only file system: '/path'
+FAIL test_visible.py::check_test_3  AssertionError: ERROR test_3: File "<frozen os>", line 215, in makedirs
+  File "<frozen os>", line 225, in makedirs
+OSError: [Errno 30] Read-only file system: '/path'
+2 check(s) failed

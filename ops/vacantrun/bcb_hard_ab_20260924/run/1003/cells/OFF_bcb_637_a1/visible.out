@@ -1,0 +1,13 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: FAIL test_case_1: AssertionError: Tuples differ: (3, 3) != (10, 5)
+First differing element 0:
+3
+10
+- (3, 3)
++ (10, 5)
+FAIL test_visible.py::check_test_case_2  AssertionError: FAIL test_case_2: AssertionError: Tuples differ: (4, 3) != (50, 5)
+First differing element 0:
+4
+50
+- (4, 3)
++ (50, 5)
+2 check(s) failed

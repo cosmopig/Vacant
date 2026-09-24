@@ -1,0 +1,34 @@
+<thought>Okay, I have successfully implemented the `task_func` in `solution.py` which:
+1. Loads the iris dataset.
+2. Converts it to a pandas DataFrame.
+3. Adds a 'species' column with species names.
+4. Sets the global font to Arial.
+5. Generates a seaborn pair plot colored by species.
+6. Sets the title of the figure to 'Iris Dataset Pair Plot'.
+7. Returns the figure.
+
+The tests passed.
+</thought>I have implemented the requested function in `solution.py`. The function `task_func` loads the iris dataset, sets the global font to Arial, creates a seaborn pair plot colored by species, sets the figure title to 'Iris Dataset Pair Plot', and returns the matplotlib Figure object.
+
+The implementation follows all the constraints provided in `goal.md` and `contract.md`.
+
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_iris
+
+def task_func():
+    iris = load_iris()
+    df = pd.DataFrame(data=iris.data, columns=iris.feature_names)
+    df['species'] = [iris.target_names[i] for i in iris.target]
+    
+    plt.rcParams['font.family'] = 'Arial'
+    
+    g = sns.pairplot(df, hue='species')
+    g.fig.suptitle('Iris Dataset Pair Plot')
+    
+    return g.fig
+```
+
+I have verified the solution by running the provided tests, and they passed.

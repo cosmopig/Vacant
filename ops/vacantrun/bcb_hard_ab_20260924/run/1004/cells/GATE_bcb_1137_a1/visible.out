@@ -1,0 +1,13 @@
+FAIL test_visible.py::check_test_phone_numbers_page_1  AssertionError: FAIL test_phone_numbers_page_1: AssertionError: Lists differ: [] != ['+1234567890']
+Second list contains 1 additional elements.
+First extra element 0:
+'+1234567890'
+- []
++ ['+1234567890']
+FAIL test_visible.py::check_test_phone_numbers_page_2  AssertionError: FAIL test_phone_numbers_page_2: AssertionError: Lists differ: [] != ['+9876543210', '+1122334455']
+Second list contains 2 additional elements.
+First extra element 0:
+'+9876543210'
+- []
++ ['+9876543210', '+1122334455']
+2 check(s) failed

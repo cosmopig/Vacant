@@ -1,0 +1,2 @@
+arm=OFF task=lcb_3534 rep=1 model=gemma-4-12b-it-qat
+prompt=Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.

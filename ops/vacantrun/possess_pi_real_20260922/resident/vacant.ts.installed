@@ -1,0 +1,211 @@
+// vacant-possess-extension/1
+// 由 vacant_network/vrun/piext.py 渲染；`vacant uninstall` 會逐位元還原／刪掉本檔。
+// ⚠ 這支檔在 $HOME 底下，agent 自己刪得掉（實測）。刪掉的那一跑 canary 不會燒，
+//   收據自動降級——本檔不是保證，保證只在 kernel（enclosure）。
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+
+const PY = "/home/user/Vacant/.venv/bin/python3";
+const HOOK_ARGS = ["-m", "vacant_network.vrun.hookcli"];
+const PYPATH = "/home/user/Vacant";
+const STATE = "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant/possess";
+const PORT = 18791;
+const PROVIDER = "vacant";
+const BAKED_MODELS = ["gemma-4-12b-it-qat"];
+const DEFAULT_MODEL = "gemma-4-12b-it-qat";
+const PROXY = "http://127.0.0.1:18791";          // 字面值（不是算出來的）：status／測試要在檔案裡直接看得到端點
+const BASE = PROXY + "/v1";
+
+// ── 掛鉤契約 vacant-hook/1：每個事件 spawn 一次 hookcli，落 JSONL ─────────────
+const runId = randomUUID();
+const hookLog = join(STATE, "hooks", "pi_" + runId + ".jsonl");
+
+function hookEnv() {
+  const env = Object.assign({}, process.env);
+  env.VACANT_HOOK_LOG = hookLog;
+  env.VACANT_RUN_ID = runId;
+  env.VACANT_HOOK_AGENT = "pi";
+  env.VACANT_RUN_PROXY = PROXY;
+  env.PYTHONPATH = PYPATH + (process.env.PYTHONPATH ? ":" + process.env.PYTHONPATH : "");
+  return env;
+}
+
+function fire(event, payload) {
+  try {
+    mkdirSync(join(STATE, "hooks"), { recursive: true });
+    spawnSync(PY, [...HOOK_ARGS, event], {
+      input: JSON.stringify(payload || {}),
+      timeout: 20000, stdio: ["pipe", "ignore", "ignore"], env: hookEnv(),
+    });
+  } catch (e) { /* 掛鉤壞掉不可以弄死 agent（hookcli 誠實邊界 3） */ }
+}
+
+function notify(ctx, text, level) {
+  try { if (ctx && ctx.hasUI && ctx.ui) ctx.ui.notify(text, level || "info"); }
+  catch (e) { /* print 模式沒有 UI */ }
+}
+
+function modelDef(id) {
+  return { id, name: id, reasoning: false, input: ["text"],
+           cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+           contextWindow: 131072, maxTokens: 16384 };
+}
+
+async function proxyAlive(signal) {
+  try {
+    const r = await fetch(BASE + "/models?vacant_canary=status-" + runId, { signal });
+    return { listening: true, status: r.status };
+  } catch (e) {
+    return { listening: false, status: null, error: String(e && e.message || e) };
+  }
+}
+
+function heartbeat() {
+  try {
+    const p = join(STATE, "proxyd", "heartbeat");
+    if (!existsSync(p)) return null;
+    return JSON.parse(readFileSync(p, "utf-8"));
+  } catch (e) { return null; }
+}
+
+function hookLines() {
+  try { return existsSync(hookLog) ? readFileSync(hookLog, "utf-8").split("\n").filter(Boolean).length : 0; }
+  catch (e) { return 0; }
+}
+
+// ── 狀態：這個 session 有沒有開、開之前用的是哪個模型 ────────────────────────
+let enabled = true;
+let previous = null;   // {provider, id} —— /vacant off 切回去用
+
+function pickVacantModel(ctx) {
+  const reg = ctx && ctx.modelRegistry;
+  if (!reg) return null;
+  const want = process.env.VACANT_AGENT_MODEL || DEFAULT_MODEL;
+  const ids = [want, ...BAKED_MODELS];
+  for (const id of ids) {
+    try { const m = reg.find(PROVIDER, id); if (m) return m; } catch (e) { /* 下一個 */ }
+  }
+  try {
+    const all = typeof reg.getAll === "function" ? reg.getAll() : [];
+    for (const m of all) if (m && m.provider === PROVIDER) return m;
+  } catch (e) { /* 沒有 */ }
+  return null;
+}
+
+async function switchOn(pi, ctx, why) {
+  const cur = ctx && ctx.model;
+  if (cur && cur.provider === PROVIDER) return true;
+  const target = pickVacantModel(ctx);
+  if (!target) {
+    notify(ctx, "Vacant：找不到 provider「" + PROVIDER + "」的模型 ⇒ 沒有切換。**這個 session 沒經過 Vacant。**", "error");
+    fire("vacant_on_failed", { reason: "no_model" });
+    return false;
+  }
+  previous = cur ? { provider: cur.provider, id: cur.id } : previous;
+  const ok = await pi.setModel(target);
+  if (!ok) {
+    notify(ctx, "Vacant：pi.setModel 回 false（provider 沒有 auth？）⇒ 沒有切換。**這個 session 沒經過 Vacant。**", "error");
+    fire("vacant_on_failed", { reason: "setModel_false" });
+    return false;
+  }
+  fire("vacant_on", { source: why, model: target.provider + "/" + target.id });
+  return true;
+}
+
+export default function (pi) {
+  // ── 通道：runtime 註冊 provider，**不動使用者的 models.json** ──────────────
+  pi.registerProvider(PROVIDER, {
+    name: "Vacant（常駐 proxyd :" + PORT + "）",
+    baseUrl: BASE,
+    apiKey: "sk-vacant-possess",      // 佔位；proxyd sentinel="" ⇒ Authorization 原樣穿透
+    api: "openai-completions",
+    compat: { supportsDeveloperRole: false, supportsReasoningEffort: false },
+    models: (BAKED_MODELS.length ? BAKED_MODELS : [DEFAULT_MODEL]).map(modelDef),
+    // 上游目錄變了就重抓；這一通同時是一次會進 journal 的 canary。
+    async refreshModels({ signal }) {
+      const r = await fetch(BASE + "/models?vacant_canary=refresh-" + runId, { signal });
+      const body = await r.json();
+      const data = Array.isArray(body && body.data) ? body.data : [];
+      return data.filter((m) => m && typeof m.id === "string").map((m) => modelDef(m.id));
+    },
+  });
+
+  // ── /vacant on | off | status ────────────────────────────────────────────
+  pi.registerCommand("vacant", {
+    description: "Vacant：on（切到中介）／off（切回原模型，留痕）／status（proxyd、通數、掛鉤日誌）",
+    getArgumentCompletions: (prefix) => {
+      const items = ["on", "off", "status"].filter((x) => x.startsWith(prefix || ""))
+        .map((x) => ({ value: x, label: x }));
+      return items.length ? items : null;
+    },
+    handler: async (args, ctx) => {
+      const sub = String(args || "").trim().split(/\s+/)[0] || "status";
+      if (sub === "on") {
+        enabled = true;
+        if (await switchOn(pi, ctx, "command")) {
+          notify(ctx, "Vacant 開：模型呼叫經 " + PROXY + "（provider「" + PROVIDER + "」）", "info");
+        }
+        return;
+      }
+      if (sub === "off") {
+        enabled = false;
+        const cur = ctx && ctx.model;
+        const to = previous;
+        fire("vacant_off", { from: cur ? cur.provider + "/" + cur.id : null,
+                             to: to ? to.provider + "/" + to.id : null });
+        if (to && ctx && ctx.modelRegistry) {
+          let m = null;
+          try { m = ctx.modelRegistry.find(to.provider, to.id); } catch (e) { m = null; }
+          if (m && await pi.setModel(m)) {
+            notify(ctx, "Vacant 關：切回 " + to.provider + "/" + to.id + "。⚠ 這一段不經過 Vacant，掛鉤日誌記了一筆 vacant_off。", "warning");
+            return;
+          }
+        }
+        notify(ctx, "Vacant 關：沒有可切回的先前模型，用 /model 自己選。⚠ 之後的呼叫不經過 Vacant，日誌記了一筆 vacant_off。", "warning");
+        return;
+      }
+      // status
+      const alive = await proxyAlive(ctx && ctx.signal);
+      const hb = heartbeat();
+      const cur = ctx && ctx.model;
+      const onVacant = !!(cur && cur.provider === PROVIDER);
+      const lines = [
+        "Vacant status（這個 session）",
+        "  模型      " + (cur ? cur.provider + "/" + cur.id : "－") + (onVacant ? "  ✓ 經過 Vacant" : "  **✗ 不經過 Vacant**"),
+        "  proxyd    " + PROXY + "  在聽：" + (alive.listening ? "是（/v1/models → " + alive.status + "）" : "**否**（" + (alive.error || "") + "）"),
+        "  通數      " + (hb ? "requests_seen=" + hb.requests_seen + "（機器層級的總量，不是這個 session 的）" : "－ 沒有 heartbeat"),
+        "  掛鉤日誌  " + hookLog + "（" + hookLines() + " 筆）",
+        "  ⚠ 互動 session 不出裁決收據；閘門在 `pi -p` 經 shim 那一條。",
+      ];
+      notify(ctx, lines.join("\n"), onVacant && alive.listening ? "info" : "warning");
+    },
+  });
+
+  // ── 掛鉤七事件（與 2026-09-20 A 級那一跑同一組）＋ 預設開 ───────────────────
+  pi.on("session_start", async (event, ctx) => {
+    fire("session_start", { source: "pi-extension", reason: event && event.reason });
+    if (!enabled) return;
+    const alive = await proxyAlive(ctx && ctx.signal);
+    if (!alive.listening) {
+      notify(ctx, "Vacant：常駐 proxyd " + PROXY + " **沒在聽**。模型仍會指到它 ⇒ 會 connection refused（fail-closed，不會偷偷直連）。看 `vacant possess status`。", "error");
+    }
+    await switchOn(pi, ctx, "session_start");
+  });
+  pi.on("before_agent_start", () => { fire("user_prompt_submit", { source: "pi-extension" }); });
+  pi.on("tool_call", (event) => {
+    fire("pre_tool_use", { tool_name: event && event.toolName, tool_input: (event && event.input) || {} });
+  });
+  pi.on("tool_result", (event) => { fire("tool_result", { tool_name: event && event.toolName }); });
+  pi.on("before_provider_request", () => { fire("before_provider_request", {}); });
+  pi.on("model_select", (event) => {
+    // 使用者用 /model 切走 ＝ 這一段不經過 Vacant。**留痕，不擋。**
+    const m = event && event.model;
+    if (m && m.provider !== PROVIDER) {
+      fire("vacant_off", { from: PROVIDER, to: m.provider + "/" + m.id, source: (event && event.source) || "model_select" });
+    }
+  });
+  pi.on("agent_end", () => { fire("stop", {}); });
+  pi.on("session_shutdown", () => { fire("session_end", {}); });
+}

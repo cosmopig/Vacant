@@ -1,0 +1,41 @@
+from typing import List
+import itertools
+
+def maxRectangleArea(points: List[List[int]]) -> int:
+    max_area = -1
+    
+    # Iterate through all combinations of 4 points
+    for combo in itertools.combinations(points, 4):
+        # Check if these 4 points form an axis-aligned rectangle
+        xs = [p[0] for p in combo]
+        ys = [p[1] for p in combo]
+        
+        unique_xs = sorted(list(set(xs)))
+        unique_ys = sorted(list(set(ys)))
+        
+        if len(unique_xs) == 2 and len(unique_ys) == 2:
+            x1, x2 = unique_xs
+            y1, y2 = unique_ys
+            
+            # The four points must be (x1, y1), (x1, y2), (x2, y1), (x2, y2)
+            expected_points = {(x1, y1), (x1, y2), (x2, y1), (x2, y2)}
+            actual_points = set(tuple(p) for p in combo)
+            
+            if actual_points == expected_points:
+                # It's a valid axis-aligned rectangle. Now check if any other point is inside or on the border.
+                is_valid = True
+                for p in points:
+                    pt = tuple(p)
+                    if pt not in actual_points:
+                        px, py = pt
+                        # Check if point (px, py) is inside or on the boundary of [x1, x2] x [y1, y2]
+                        if x1 <= px <= x2 and y1 <= py <= y2:
+                            is_valid = False
+                            break
+                
+                if is_valid:
+                    area = (x2 - x1) * (y2 - y1)
+                    if area > max_area:
+                        max_area = area
+                        
+    return max_area

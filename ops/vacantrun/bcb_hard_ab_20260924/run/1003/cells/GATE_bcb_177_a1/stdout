@@ -1,0 +1,16 @@
+The task was to extract articles from a DataFrame whose titles contain "like" or "what" (case-insensitive), and then analyze the frequency of each word in their content, excluding punctuation. I have implemented this in `solution.py` following the requirements in `goal.md` and `contract.md`.
+
+Key features of my implementation:
+1.  **Input Validation**: It checks if 'Title' and 'Content' columns exist in the DataFrame; otherwise, it raises a `ValueError`.
+2.  **Filtering**: It uses a case-insensitive regex search to filter rows where the title contains "like" or "what".
+3.  **Word Frequency Analysis**:
+    *   It converts content to strings and removes all punctuation marks defined in `string.punctuation` using `str.translate`.
+    *   It tokenizes the cleaned content into words using `re.findall(r'\w+', ...)`, which captures alphanumeric sequences (including underscores, though they are removed by the punctuation step).
+    *   It counts the frequency of each word and returns a dictionary.
+4.  **Compliance**: The code follows the required imports and function signature specified in both files.
+
+The tests passed successfully:
+- `test_case_sensitive_handling`: Passed (correctly handles case sensitivity for keywords and preserves it for words).
+- `test_empty_dataframe`: Passed (returns an empty dictionary for a DataFrame with columns but no rows, as expected by the test suite).
+
+I have completed the task.

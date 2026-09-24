@@ -1,0 +1,278 @@
+<thought
+Ah, the tests use `unittest.mock.patch` to mock `urllib.request.urlretrieve` and `hashlib.md5`.
+
+In `test_extraction_success`:
+```python
+    def test_extraction_success(self):
+        """Test that a file is extracted if its checksum is valid."""
+        with patch("urllib.request.urlretrieve"), patch("hashlib.md5") as mock_md5:
+            mock_md5.return_value.hexdigest.return_value = EXPECTED_MD5_CHECKSUM
+            result = task_func(self.valid_url)
+            self.assertTrue(result)
+```
+It patches `urlretrieve` so it does nothing (and doesn't raise an exception), and it patches `hashlib.md5` to return the expected checksum.
+
+Wait, `tarfile.open(TARGET_TAR_FILE, "r:gz")` in `task_func` will use the file that was created in `setUp`.
+In `setUp`:
+```python
+    def setUp(self):
+        self.valid_url = "http://example.com/valid.tar.gz"
+        self.invalid_checksum_url = "http://example.com/invalid_checksum.tar.gz"
+        # Create a minimal tar.gz file to simulate download
+        with open("test_file.txt", "w") as f:
+            f.write("test data")
+        with tarfile.open(TARGET_TAR_FILE, "w:gz") as tar:
+            tar.add("test_file.txt")
+```
+So `TARGET_TAR_FILE` is actually a valid tar.gz file.
+
+My implementation seems correct based on these tests.
+
+One detail:
+In `task_func`:
+```python
+    if checksum == EXPECTED_MD5_CHECKSUM:
+        try:
+            with tarfile.open(TARGET_TAR_FILE, "r:gz") as tar:
+                tar.extractall()
+            return True
+        except Exception:
+            return False
+```
+If `tarfile.open` or `tar.extractall()` fails, it returns `False`.
+
+What about the "Otherwise, it deletes the downloaded file" part?
+"If the checksum matches, it extracts the contents of the tar.gz file. Otherwise, it deletes the downloaded file."
+
+This "Otherwise" refers to "If the checksum matches".
+So:
+If checksum matches: extract.
+If checksum doesn't match: delete.
+
+My code:
+```python
+    if checksum == EXPECTED_MD5_CHECKSUM:
+        try:
+            with tarfile.open(TARGET_TAR_FILE, "r:gz") as tar:
+                tar.extractall()
+            return True
+        except Exception:
+            return False
+    else:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+```
+This follows the instruction. If it matches, it tries to extract. If extraction fails, it returns `False`. It doesn't explicitly say to delete it if extraction fails, only if the checksum doesn't match.
+
+Wait, let's re-read:
+"Downloads a tar.gz file from a specified URL, then validates its MD5 checksum against a predefined expected value. If the checksum matches, it extracts the contents of the tar.gz file. Otherwise, it deletes the downloaded file."
+
+It seems my implementation is fine.
+
+Let's double check the return values.
+"bool: Returns True if the file is successfully downloaded, its MD5 checksum matches the expected value, and it is extracted. Returns False if the checksum does not match the expected value or if the download fails."
+
+My code returns `True` if:
+- Download succeeds (no exception in `urlretrieve`).
+- MD5 matches.
+- Extraction succeeds.
+
+It returns `False` if:
+- Download fails.
+- MD5 doesn't match (and it deletes the file).
+- Extraction fails.
+
+One edge case: if MD5 calculation fails.
+```python
+    try:
+        hasher = hashlib.md5()
+        with open(TARGET_TAR_FILE, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hasher.update(chunk)
+        checksum = hasher.hexdigest()
+    except Exception:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+```
+If MD5 calculation fails, it deletes the file and returns `False`. This seems reasonable, although the instructions didn't explicitly say what to do if MD5 calculation fails, but it's a failure in the process.
+
+Wait, the instructions say "Otherwise, it deletes the downloaded file" referring to the checksum match.
+
+Let's re-read the prompt carefully.
+"If the checksum matches, it extracts the contents of the tar.gz file. Otherwise, it deletes the downloaded file."
+
+If checksum matches, but extraction fails, the instruction doesn't say to delete the file. It just says to extract.
+
+However, if extraction fails, the function should return `False`.
+
+Let's look at my code again.
+
+```python
+import urllib.request
+import os
+import hashlib
+import tarfile
+
+# Constants
+TARGET_TAR_FILE = "downloaded_files.tar.gz"
+EXPECTED_MD5_CHECKSUM = "d41d8cd98f00b204e9800998ecf8427e"
+
+def task_func(url):
+    try:
+        urllib.request.urlretrieve(url, TARGET_TAR_FILE)
+    except Exception:
+        return False
+
+    try:
+        hasher = hashlib.md5()
+        with open(TARGET_TAR_FILE, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hasher.update(chunk)
+        checksum = hasher.hexdigest()
+    except Exception:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+
+    if checksum == EXPECTED_MD5_CHECKSUM:
+        try:
+            with tarfile.open(TARGET_TAR_FILE, "r:gz") as tar:
+                tar.extractall()
+            return True
+        except Exception:
+            return False
+    else:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+```
+
+I think this is good.
+
+One more thing: `tar.extractall()` might be insecure if the tar file is malicious (path traversal). But since this is a coding task, I'll stick to the simple `tar.extractall()`.
+
+Actually, I noticed something in my `task_func`. If `urlretrieve` fails, it returns `False` immediately.
+
+Wait, if `urlretrieve` fails, does it leave a partial file? Usually yes. The instructions don't say to delete it if download fails, only if checksum doesn't match.
+
+"Returns False if ... the download fails."
+
+If I want to be extra clean, I could delete it if download fails, but I'll follow the instructions as literally as possible.
+
+One more look at the instruction: "If the checksum matches, it extracts the contents of the tar.gz file. Otherwise, it deletes the downloaded file."
+
+This implies:
+If match -> extract
+If not match -> delete
+
+My code:
+```python
+    if checksum == EXPECTED_MD5_CHECKSUM:
+        try:
+            with tarfile.open(TARGET_TAR_FILE, "r:gz") as tar:
+                tar.extractall()
+            return True
+        except Exception:
+            return False
+    else:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+```
+This matches the "Otherwise" logic.
+
+I'll just make a small improvement to the MD5 part to be slightly more concise.
+
+Actually, the current code is fine.
+
+Wait, I should check if `tarfile` is imported. Yes, I have `import tarfile`.
+
+I am confident with the solution. I'll do one final check on the imports and constants as requested by `contract.md`.
+
+`solution.py` should start with:
+```python
+import urllib.request
+import os
+import hashlib
+import tarfile
+# Constants
+TARGET_TAR_FILE = "downloaded_files.tar.gz"
+EXPECTED_MD5_CHECKSUM = "d41d8cd98f00b204e9800998ecf8427e"
+def task_func(url):
+```
+
+My `solution.py`:
+```python
+import urllib.request
+import os
+import hashlib
+import tarfile
+
+# Constants
+TARGET_TAR_FILE = "downloaded_files.tar.gz"
+EXPECTED_MD5_CHECKSUM = "d41d8cd98f00b204e9800998ecf8427e"
+
+def task_func(url):
+...
+```
+It matches perfectly.
+
+I'll just verify the tests one more time.
+`pass test_visible.py::check_test_download_failure`
+`pass test_visible.py::check_test_extraction_success`
+
+Both passed. I am done.The task was to implement a function `task_func(url)` that downloads a `tar.gz` file, validates its MD5 checksum, and extracts it if the checksum matches. If the checksum does not match, the downloaded file should be deleted.
+
+I have implemented the solution in `solution.py` following the specified requirements and constraints.
+
+```python
+import urllib.request
+import os
+import hashlib
+import tarfile
+
+# Constants
+TARGET_TAR_FILE = "downloaded_files.tar.gz"
+EXPECTED_MD5_CHECKSUM = "d41d8cd98f00b204e9800998ecf8427e"
+
+def task_func(url):
+    try:
+        urllib.request.urlretrieve(url, TARGET_TAR_FILE)
+    except Exception:
+        return False
+
+    try:
+        hasher = hashlib.md5()
+        with open(TARGET_TAR_FILE, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hasher.update(chunk)
+        checksum = hasher.hexdigest()
+    except Exception:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+
+    if checksum == EXPECTED_MD5_CHECKSUM:
+        try:
+            with tarfile.open(TARGET_TAR_FILE, "r:gz") as tar:
+                tar.extractall()
+            return True
+        except Exception:
+            return False
+    else:
+        if os.path.exists(TARGET_TAR_FILE):
+            os.remove(TARGET_TAR_FILE)
+        return False
+```
+
+The provided tests in `tests_visible/test_visible.py` were executed using `sh run_tests.sh` and both passed successfully.
+
+```bash
+sh run_tests.sh
+# Output:
+# pass test_visible.py::check_test_download_failure
+# pass test_visible.py::check_test_extraction_success
+# 0 check(s) failed
+```

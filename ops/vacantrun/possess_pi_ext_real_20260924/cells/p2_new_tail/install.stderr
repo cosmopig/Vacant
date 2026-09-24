@@ -1,0 +1,2 @@
+⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c、systemd-run --user。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）
+⚠ `bare` 後端＝自己 fork，**撐不過重開機**，不准說成「常駐」。

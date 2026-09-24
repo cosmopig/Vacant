@@ -1,0 +1,1 @@
+{"passed": 0, "total": 3, "failures": ["check_test_process_found_restarts_process: ?                ^^^", "check_test_process_not_found_starts_process:   Actual: Popen(['random_non_existent_process'])", "check_test_process_terminates_and_restarts_multiple_instances: ?                ^^^"]}

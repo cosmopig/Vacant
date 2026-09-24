@@ -1,0 +1,1 @@
+{"passed": 5, "total": 6, "failures": ["check_test_return_type: AssertionError: FAIL test_return_type: AssertionError: array([], dtype=int64) is not an instance of <class 'tuple'>"]}

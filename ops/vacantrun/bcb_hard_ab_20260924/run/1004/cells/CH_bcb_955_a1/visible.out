@@ -1,0 +1,5 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: ERROR test_case_1: NameError: name 'myststrings' is not defined. Did you mean: 'mystrings'?
+FAIL test_visible.py::check_test_case_10  AssertionError: ERROR test_case_10: NameError: name 'myststrings' is not defined. Did you mean: 'mystrings'?
+FAIL test_visible.py::check_test_case_2  AssertionError: ERROR test_case_2: NameError: name 'myststrings' is not defined. Did you mean: 'mystrings'?
+FAIL test_visible.py::check_test_case_3  AssertionError: ERROR test_case_3: NameError: name 'myststrings' is not defined. Did you mean: 'mystrings'?
+4 check(s) failed

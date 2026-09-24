@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "he_HumanEval_48_ON",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 157,
+      "cases": [
+        {
+          "case": "check_visible_01",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_visible_02",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "9fa6589878bac32d2bb14b60628c74a7feb1bed69903e97e20a2071889d76a0a"
+}

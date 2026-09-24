@@ -1,0 +1,239 @@
+{
+  "task_id": "possess_pi_1790058576_8e70c2",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user/Vacant/.venv/bin/python3",
+    "-m",
+    "vacant_network.vrun.gateshim",
+    "--exec",
+    "pi",
+    "-p",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/ws_lcb_3715_r1",
+  "proxy_url": "http://127.0.0.1:34269",
+  "env": {
+    "proxy_url": "http://127.0.0.1:34269",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "377a75c47ca3b540a6c3d10c3185d57a83d7ee06cf7d10321aac64f0267e7b5c",
+  "ws_end_sha256": "377a75c47ca3b540a6c3d10c3185d57a83d7ee06cf7d10321aac64f0267e7b5c",
+  "agent_rc": 1,
+  "agent_timed_out": false,
+  "requests_seen": 8,
+  "wire_by_protocol": {
+    "openai": 8
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "visible_fail",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 1,
+  "verdict_sha256": "1cc35754eea2fd7990e52a5c33245106cee135343e5fc59cafaada953110808e",
+  "verdict_hash": "51a8d416ca35a0864c6fdf5134f10b1ac31426117583d72897fb84efa48c1d20",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "377a75c47ca3b540a6c3d10c3185d57a83d7ee06cf7d10321aac64f0267e7b5c",
+      "argv": [
+        "/home/user/Vacant/.venv/bin/python3",
+        "-m",
+        "vacant_network.vrun.gateshim",
+        "--exec",
+        "pi",
+        "-p",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "0d97cade23c0127339daab947413531570ced097ec9661d00679809935fab590",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 1,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 219.663,
+      "wire_quiesced": true,
+      "requests_seen": 8,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "a8ad487e1a484ce4b7705fe25be2331c89e60645fa13ae4110928c1f9bb43405",
+      "ws_end_sha256": "377a75c47ca3b540a6c3d10c3185d57a83d7ee06cf7d10321aac64f0267e7b5c",
+      "frozen_path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant-run/possess_pi_1790058576_8e70c2/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 1,
+      "verdict_sha256": "1cc35754eea2fd7990e52a5c33245106cee135343e5fc59cafaada953110808e",
+      "visible_path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant-run/possess_pi_1790058576_8e70c2/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "https://1003.taild870c4.ts.net/v1",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": true,
+  "wire_blocked": 0,
+  "wire_errors": 4,
+  "wire_digest": "a8ad487e1a484ce4b7705fe25be2331c89e60645fa13ae4110928c1f9bb43405",
+  "model_wire": {
+    "requests_indexed": 8,
+    "request_blobs_persisted": 8,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 220.562,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "possess_pi_1790058576_8e70c2",
+    "agent": "pi",
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531833]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "eth0",
+          "ifb0",
+          "ifb1",
+          "lo"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['eth0', 'ifb0', 'ifb1'] ⇒ 有別的路",
+        "probed_at": 1790058797.1015337,
+        "probed_by_pid": 5192
+      }
+    },
+    "framework_hook": {
+      "agent": "pi",
+      "contract_version": "vacant-hook/1",
+      "canary_fired": true,
+      "events_n": 22,
+      "log": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/five/home/.vacant-run/possess_pi_1790058576_8e70c2/hooks.jsonl",
+      "install_attempted": true,
+      "version_drift": false,
+      "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+    },
+    "reconciled": {
+      "relay_calls": 8,
+      "hook_events": 22,
+      "unexplained": 3,
+      "canary_calls": 1,
+      "refused_path": 0,
+      "unexplained_detail": [
+        {
+          "call_id": "85f26f402ccd4500a657b7591720198e",
+          "path": "/v1/chat/completions",
+          "ts": 1790058634.7910018,
+          "status": 0
+        },
+        {
+          "call_id": "9b7f01e695884074a1898a78b82a1d57",
+          "path": "/v1/chat/completions",
+          "ts": 1790058682.128818,
+          "status": 503
+        },
+        {
+          "call_id": "0f326a4ce62f405eafa5be371524975a",
+          "path": "/v1/chat/completions",
+          "ts": 1790058705.5474875,
+          "status": 0
+        }
+      ],
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "8 通中繼、5 個回合開端事件 ⇒ 3 通對不上"
+    },
+    "tier": "B'",
+    "attested": false,
+    "b_prime_kind": "channel_not_enclosed",
+    "tier_sentence": "工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。",
+    "tier_reasons": [
+      "掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790058797.1020517
+  },
+  "agent_wall_s": 219.663,
+  "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:8: import solution]"
+}

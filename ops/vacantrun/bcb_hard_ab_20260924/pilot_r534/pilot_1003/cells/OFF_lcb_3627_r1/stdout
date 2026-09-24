@@ -1,0 +1,39 @@
+The task was to implement a function `minTimeToReach` that calculates the minimum time to reach the bottom-right corner of a grid where each room has a minimum start time and moving between adjacent rooms takes 1 second.
+
+I have implemented this using Dijkstra's algorithm, which correctly handles the "waiting" condition by taking the maximum of the current time and the target room's `moveTime`, then adding 1 for the travel time.
+
+The solution is in `solution.py` and has passed all visible tests.
+```python
+import heapq
+from typing import List
+
+def minTimeToReach(moveTime: List[List[int]]) -> int:
+    n = len(moveTime)
+    m = len(moveTime[0])
+    
+    # dist[i][j] will store the minimum time to reach room (i, j)
+    dist = [[float('inf')] * m for _ in range(n)]
+    dist[0][0] = 0
+    
+    # Priority queue stores (time, r, c)
+    pq = [(0, 0, 0)]
+    
+    while pq:
+        d, r, c = heapq.heappop(pq)
+        
+        if d > dist[r][c]:
+            continue
+        
+        if r == n - 1 and c == m - 1:
+            return int(d)
+        
+        for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < n and 0 <= nc < m:
+                new_dist = max(d, moveTime[nr][nc]) + 1
+                if new_dist < dist[nr][nc]:
+                    dist[nr][nc] = new_dist
+                    heapq.heappush(pq, (new_dist, nr, nc))
+    
+    return int(dist[n-1][m-1])
+```

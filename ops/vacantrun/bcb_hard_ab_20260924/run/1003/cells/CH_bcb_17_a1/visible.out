@@ -1,0 +1,2 @@
+pass test_visible.py::check_test_process_found_restarts_process
+0 check(s) failed

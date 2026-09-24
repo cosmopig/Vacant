@@ -1,0 +1,9 @@
+The task was to find the maximum area of a rectangle formed by four points from a given set, such that the rectangle has edges parallel to the axes and contains no other points from the set inside or on its border.
+
+I implemented this in `solution.py` by:
+1. Iterating through all combinations of 4 points from the input list.
+2. Checking if each combination forms a valid rectangle with sides parallel to the axes (exactly two unique x-coordinates and two unique y-coordinates, forming four corners).
+3. Verifying that no other point from the input set lies inside or on the border of this rectangle.
+4. Keeping track of the maximum area found among all such valid rectangles.
+
+The solution was tested using `run_tests.sh` and passed all tests.

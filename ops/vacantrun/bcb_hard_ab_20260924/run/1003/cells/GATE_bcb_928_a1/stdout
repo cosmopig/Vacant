@@ -1,0 +1,28 @@
+The task was to create a dictionary containing all possible two-letter combinations of the lowercase English alphabet as keys, with their frequencies in a given word as values. I have implemented this in `solution.py`.
+
+I used `itertools.product` and `string.ascii_lowercase` to generate all 676 possible two-letter combinations. Then, I iterated through the input word to count occurrences of each two-letter substring and populated the dictionary accordingly.
+
+The tests passed successfully.
+
+```python
+from collections import Counter
+import itertools
+import string
+def task_func(word: str) -> dict:
+    # Generate all possible two-letter combinations of lowercase English alphabets
+    combinations = ["".join(p) for p in itertools.product(string.ascii_lowercase, repeat=2)]
+    
+    # Count the frequency of each two-letter substring in the word
+    counts = Counter()
+    for i in range(len(word) - 1):
+        substring = word[i:i+2]
+        if len(substring) == 2 and substring.islower():
+            counts[substring] += 1
+            
+    # Create the result dictionary with all combinations as keys
+    result = {}
+    for combo in combinations:
+        result[combo] = counts.get(combo, 0)
+        
+    return result
+```

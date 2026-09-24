@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_empty_dict  AssertionError: FAIL test_empty_dict: AssertionError: 1 != 0
+FAIL test_visible.py::check_test_files_do_not_exist  AssertionError: FAIL test_files_do_not_exist: AssertionError: 1 != 0
+2 check(s) failed

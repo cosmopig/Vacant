@@ -1,0 +1,51 @@
+The tests passed successfully. I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`.
+
+Summary of changes:
+1.  Read JSON data from `input_file`.
+2.  Collected values for each numeric key across all dictionaries.
+3.  Calculated mean and median using `numpy`.
+4.  Wrote the results to a CSV file with headers `"key"`, `"mean"`, and `"median"`.
+5.  Returned the results dictionary as specified in `goal.md`.
+
+The tests passed, confirming that the implementation meets the requirements.
+```python
+import numpy as np
+from collections import defaultdict
+import json
+import csv
+# Constants
+def task_func(input_file, output_file):
+    with open(input_file, 'r') as f:
+        data = json.load(f)
+
+    field_data = defaultdict(list)
+    for entry in data:
+        for key, value in entry.items():
+            if isinstance(value, (int, float)):
+                field_data[key].append(value)
+
+    results = {}
+    for key, values in field_data.items():
+        if values:
+            results[key] = {
+                "mean": float(np.mean(values)),
+                "median": float(np.median(values))
+            }
+        else:
+            results[key] = {
+                "mean": None,
+                "median": None
+            }
+
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=["key", "mean", "median"])
+        writer.writeheader()
+        for key, stats in results.items():
+            writer.writerow({
+                "key": key,
+                "mean": stats["mean"],
+                "median": stats["median"]
+            })
+
+    return results
+```

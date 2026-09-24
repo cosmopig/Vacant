@@ -1,0 +1,12 @@
+The task was to convert files with specific extensions (`.txt`, `.docx`, `.xlsx`, `.csv`) from a source directory to CSV files in a target directory, where each file's content is stored in a single 'Text' column of the output CSV. I have implemented this in `solution.py` by:
+1.  Checking if the source directory exists and raising `FileNotFoundError` otherwise.
+2.  Iterating through all files in the source directory.
+3.  Extracting text content based on the file extension:
+    -   `.txt`: Reading raw text using UTF-8 encoding.
+    -   `.docx`: Using the `docx` library to extract text from paragraphs and tables.
+    -   `.xlsx`: Using `pandas` to read all sheets, flattening all cell values into a single string joined by newlines (filtering out NaNs).
+    -   `.csv`: Using `pandas` to read the CSV, flattening all values into a single string joined by newlines (filtering out NaNs).
+4.  Saving the extracted content into a new CSV file in the target directory with a 'Text' column.
+5.  Returning the count of successfully converted files.
+
+The tests passed successfully.

@@ -1,0 +1,9 @@
+The tests passed successfully. I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`.
+
+Summary of changes:
+- Created `solution.py` with the requested imports and function signature.
+- Added type checking for datetime objects, raising `TypeError` if any are missing.
+- Counted activities per day of the week using a dictionary.
+- Plotted the results using `matplotlib`, setting the correct labels and title.
+- Returned the `Axes` object.
+- Verified the solution with `run_tests.sh`.

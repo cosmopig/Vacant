@@ -1,0 +1,33 @@
+<thought>The tests passed. I've implemented the requirements.
+
+Wait, I should check if there are any other files or requirements I missed.
+The goal said: "Please write a top-level Python function (do not use class)". I did that.
+"You can only use the standard library." I used `typing.List`.
+"The function must return the answer, do not print it." I did that.
+
+The constraints are $n \le 500$, so my $O(n \cdot k)$ solution is $500 \cdot 500 = 250,000$ operations, which is well within the limits for Python.
+
+I'm done.
+</thought>I have implemented the `resultsArray` function in `solution.py` as requested. The function calculates the "power" of all subarrays of size `k`, where the power is the maximum element if the subarray elements are consecutive and sorted, and -1 otherwise.
+
+I ran the provided tests and they all passed.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    for i in range(n - k + 1):
+        is_consecutive_and_sorted = True
+        for j in range(i, i + k - 1):
+            if nums[j+1] != nums[j] + 1:
+                is_consecutive_and_sorted = False
+                break
+        
+        if is_consecutive_and_sorted:
+            results.append(nums[i + k - 1])
+        else:
+            results.append(-1)
+    return results
+```

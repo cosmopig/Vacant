@@ -1,0 +1,3 @@
+I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function generates sensor data for a given number of hours, including 'Time', 'Temperature', 'Humidity', and 'Pressure', and saves it to a CSV file in the `./output` directory.
+
+I also verified that the solution passes all tests using `run_tests.sh`.

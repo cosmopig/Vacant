@@ -1,0 +1,1 @@
+{"passed": 8, "total": 9, "failures": ["check_test_case_6: AssertionError: ERROR test_case_6: ValueError: Empty JSON data"]}

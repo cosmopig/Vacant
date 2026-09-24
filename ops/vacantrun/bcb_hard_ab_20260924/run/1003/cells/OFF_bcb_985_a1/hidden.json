@@ -1,0 +1,1 @@
+{"passed": 7, "total": 9, "failures": ["check_test_case_4: AssertionError: ERROR test_case_4: OSError: Could not write to /tmp/tmp1q7a5i_c/new_directory/country_population_report.csv", "check_test_case_6: AssertionError: ERROR test_case_6: ValueError: Empty or invalid Countries data"]}

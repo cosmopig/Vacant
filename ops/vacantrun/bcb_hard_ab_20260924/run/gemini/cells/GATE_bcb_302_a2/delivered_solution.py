@@ -1,0 +1,30 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+# Constants
+COLUMNS = ['Date', 'Value']
+def task_func(df, plot=False):
+    if df.empty:
+        raise ValueError("DataFrame is empty")
+    
+    if 'Value' not in df.columns:
+        raise ValueError("Column 'Value' not found in DataFrame")
+    
+    # Check if all elements in 'Value' column are lists
+    for val in df['Value']:
+        if not isinstance(val, list):
+            raise ValueError("Invalid 'Value' column: elements must be lists")
+            
+    # Expand the 'Value' column into a separate DataFrame
+    expanded_df = pd.DataFrame(df['Value'].tolist())
+    
+    # Calculate Pearson correlation
+    corr_df = expanded_df.corr(method='pearson')
+    
+    if plot:
+        fig, ax = plt.subplots()
+        sns.heatmap(corr_df, ax=ax)
+        ax.set_title("Correlation Heatmap")
+        return corr_df, ax
+    else:
+        return corr_df

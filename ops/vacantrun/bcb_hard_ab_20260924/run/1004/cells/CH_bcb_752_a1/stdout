@@ -1,0 +1,18 @@
+<|channel>thought
+<channel|>The task is completed. I have implemented the `task_func` in `solution.py` according to the requirements specified in `goal.md` and `contract.md`.
+
+Summary of implementation:
+1.  **Input Validation**:
+    *   Checked if `data` is a pandas DataFrame.
+    *   Checked if `data` is empty.
+    *   Checked if `target_column` exists in the DataFrame columns.
+    *   Checked if all values in the DataFrame are numeric (handling potential non-numeric types by attempting conversion).
+    *   Checked if `random_state` is an integer.
+    *   Checked if `test_size` is between 0 and 1.
+2.  **Model Training**:
+    *   Split the data into training and test sets using `train_test_split`.
+    *   Trained a `LinearRegression` model on the training set.
+3.  **Output**:
+    *   Returned the R^2 score of the model on the test set as a float.
+
+The tests passed successfully.

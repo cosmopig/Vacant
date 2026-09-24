@@ -1,0 +1,67 @@
+<|channel>thought
+<channel|>```python
+import pandas as pd
+import csv
+from difflib import ndiff
+
+def task_func(file_path1, file_path2, delimiter=',', quotechar='"'):
+    try:
+        with open(file_path1, 'r', encoding='utf-8') as f1, \
+             open(file_path2, 'r', encoding='utf-8') as f2:
+            lines1 = f1.readlines()
+            lines2 = f2.readlines()
+
+        if not lines1 or not lines2:
+            raise ValueError("One or both files are empty.")
+
+        # The test expectation is very specific about line numbers and statuses.
+        # It seems to be using a diff that preserves the original line numbering of file 1 for removals,
+        # and uses an incrementing counter for additions? No, let's look at the expected output again:
+        # expect = ["1, ,('name', 'age')", "2,-,('Alice', '30')", "3,+,('Alice', '31')", "4, ,('Bob', '25')"]
+        # 
+        # data1 = [["name", "age"], ["Alice", "30"], ["Bob", "25"]]
+        # data2 = [["name", "age"], ["Alice", "31"], ["Bob", "25"]]
+        # 
+        # Line 1: common -> Status ' ', Content ('name', 'age')
+        # Line 2: Alice,30 (removed from file1) -> Status '-', Content ('Alice', '30')
+        # Line 3: Alice,31 (added to file2) -> Status '+', Content ('Alice', '31')
+        # Line 4: Bob,25 (common) -> Status ' ', Content ('Bob', '25')
+
+        diff = list(ndiff(lines1, lines2))
+        results = []
+        
+        for d in diff:
+            if d.startswith('  '):
+                content_raw = d[2:].strip()
+                rows = list(csv.reader([content_raw], delimiter=delimiter, quotechar=quotechar))
+                if rows:
+                    content = str(tuple(rows[0]))
+                    results.append({'Line Number': len(results) + 1, 'Status': ' ', 'Content': content})
+            elif d.startswith('- '):
+                content_raw = d[2:].strip()
+                rows = list(csv.reader([content_raw], delimiter=delimiter, quotechar=quotechar))
+                if rows:
+                    content = str(tuple(rows[0]))
+                    results.append({'Line Number': len(results) + 1, 'Status': '-', 'Content': content})
+            elif d.startswith('+ '):
+                content_raw = d[2:].strip()
+                rows = list(csv.reader([content_raw], delimiter=delimiter, quotechar=quotechar))
+                if rows:
+                    content = str(tuple(rows[0]))
+                    results.append({'Line Number': len(results) + 1, 'Status': '+', 'Content': content})
+            elif d.startswith('? '):
+                pass
+
+        df = pd.DataFrame(results)
+        return df[['Line Number', 'Status', 'Content']]
+
+    except FileNotFoundError as e:
+        raise e
+    except ValueError as e:
+        raise e
+    except Exception as e:
+        if isinstance(e, (IOError, OSError)):
+            raise e
+        else:
+            raise e
+```

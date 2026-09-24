@@ -1,0 +1,7 @@
+The task was to implement a function `task_func` that runs a list of files as subprocesses concurrently and returns their exit codes. I have implemented this in `solution.py` using the `threading` module to manage concurrent execution and `subprocess.Popen` to start the processes.
+
+I also ensured that it uses `process.poll()` to retrieve the exit codes, which correctly handles the mocked environment used in the tests.
+
+The tests passed successfully:
+- `check_test_empty_file_list`: Passed.
+- `check_test_multiple_processes_with_different_exit_codes`: Passed.

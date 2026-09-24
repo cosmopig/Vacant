@@ -1,0 +1,10 @@
+The tests passed successfully. I have implemented the `countPairs` function in `solution.py` as required by the goal and contract.
+
+Summary of implementation:
+- The function iterates through all pairs $(i, j)$ where $i < j$.
+- For each pair, it checks if they are equal or "almost equal".
+- Two numbers are almost equal if swapping two digits in one of them makes it numerically equal to the other.
+- It handles leading zeros correctly by converting swapped strings back to integers for comparison.
+- The solution uses only the standard library and follows all constraints.
+
+I'm done.

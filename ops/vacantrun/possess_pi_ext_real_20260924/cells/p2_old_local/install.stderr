@@ -1,0 +1,3 @@
+🔴 常駐 proxy 沒有真上游（openai）：pi 的每一通模型呼叫都會被擋下（502，fail-closed，**不會**偷偷直連公開 API）。在你的設定裡沒找到上游，環境變數也沒有。修法：先 `vacant uninstall`，再 `vacant install --agent pi --upstream openai=<你的端點>`，或先設好 `OPENAI_BASE_URL` 再裝。
+⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c、systemd-run --user。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）
+⚠ `bare` 後端＝自己 fork，**撐不過重開機**，不准說成「常駐」。

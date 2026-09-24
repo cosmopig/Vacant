@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_custom_sheet_name  AssertionError: ERROR test_custom_sheet_name: Exception: Error writing to file: No engine for filetype: 'xls'
+pass test_visible.py::check_test_empty_json
+1 check(s) failed
