@@ -57,6 +57,9 @@ class Criterion:
       "check"  ——確定性檢查，`check` 是 `CHECKS` 裡的名字，`params` 是參數。
       "judge"  ——只能靠評審；`question` 是給評審的是非題（要能用 yes/no 回答）。
     `fallback_judge`：確定性檢查回 unknown 時，要不要升級給評審。
+    `screen`：**反證型**檢查（只會出 rejected 或 unknown，例如 `numbers_supported`）。
+      它的 unknown 意思是「沒有找到反證」，**不參與** accepted 的彙總——否則一條
+      永遠給不出 accepted 的檢查會讓整份規格永遠是 unknown。它的 rejected 照樣一票否決。
     """
     id: str
     kind: str
@@ -64,11 +67,12 @@ class Criterion:
     params: dict = field(default_factory=dict)
     question: str | None = None
     fallback_judge: bool = False
+    screen: bool = False
 
     def to_json(self) -> dict:
         return {"id": self.id, "kind": self.kind, "check": self.check,
                 "params": self.params, "question": self.question,
-                "fallback_judge": self.fallback_judge}
+                "fallback_judge": self.fallback_judge, "screen": self.screen}
 
 
 @dataclass
@@ -298,7 +302,8 @@ def evaluate(spec: Spec, output: str, judge: JudgeFn | None = None, *,
     for c in spec.criteria:
         if c.kind == "check":
             v, ev = CHECKS[c.check](output, c.params, spec)
-            rows.append({"id": c.id, "layer": "check", "verdict": v, "evidence": ev})
+            rows.append({"id": c.id, "layer": "check", "verdict": v, "evidence": ev,
+                         "screen": c.screen})
             if v == UNKNOWN and c.fallback_judge:
                 pending.append(c)
         else:
@@ -339,7 +344,9 @@ def evaluate(spec: Spec, output: str, judge: JudgeFn | None = None, *,
             row.update(layer="judge", verdict=v, evidence=ev)
         tokens = sum(r.tokens for r in {id(x): x for x in res.values()}.values()) if res else 0
         cost = sum((r.cost_usd or 0.0) for r in {id(x): x for x in res.values()}.values()) if res else 0.0
-    return {"verdict": aggregate([r["verdict"] for r in rows]), "criteria": rows,
+    counted = [r["verdict"] for r in rows
+               if not (r.get("screen") and r["verdict"] != REJECTED)]
+    return {"verdict": aggregate(counted), "criteria": rows,
             "judge_tokens": tokens, "judge_calls": calls, "judge_cost_usd": cost,
             "judge_skipped": skipped, "spec_sha256": spec.sha256()}
 

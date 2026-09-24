@@ -1,0 +1,1230 @@
+{
+ "pooled": {
+  "n_rows": 3696,
+  "accept": 2978,
+  "reject": 718,
+  "precision_of_accept": 0.8536,
+  "leak_rate_among_accepted": 0.1464,
+  "false_reject_rate_among_rejected": 0.0,
+  "accuracy": 0.882,
+  "base_rate_hidden_pass": 0.6878,
+  "tokens_per_item": 0
+ },
+ "by_family": {
+  "humanevalplus": {
+   "n_rows": 312,
+   "accept": 277,
+   "reject": 35,
+   "precision_of_accept": 0.9711,
+   "leak_rate_among_accepted": 0.0289,
+   "false_reject_rate_among_rejected": 0.0,
+   "accuracy": 0.9744,
+   "base_rate_hidden_pass": 0.8622,
+   "tokens_per_item": 0
+  },
+  "lcb": {
+   "n_rows": 1807,
+   "accept": 1326,
+   "reject": 481,
+   "precision_of_accept": 0.8439,
+   "leak_rate_among_accepted": 0.1561,
+   "false_reject_rate_among_rejected": 0.0,
+   "accuracy": 0.8854,
+   "base_rate_hidden_pass": 0.6193,
+   "tokens_per_item": 0
+  },
+  "mbppplus": {
+   "n_rows": 1577,
+   "accept": 1375,
+   "reject": 202,
+   "precision_of_accept": 0.8393,
+   "leak_rate_among_accepted": 0.1607,
+   "false_reject_rate_among_rejected": 0.0,
+   "accuracy": 0.8599,
+   "base_rate_hidden_pass": 0.7318,
+   "tokens_per_item": 0
+  }
+ },
+ "runs_n": 131,
+ "per_run": [
+  {
+   "run": "g_e2q_off_lcb_qwenonly_20260902",
+   "family": "lcb",
+   "n": 1,
+   "vis_pass_hid_pass": 0,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_off_failure_rate_20260901c",
+   "family": "mbppplus",
+   "n": 16,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_off_qwen_only_20260901",
+   "family": "mbppplus",
+   "n": 57,
+   "vis_pass_hid_pass": 46,
+   "vis_pass_hid_fail": 8,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r342_3arm_20260830",
+   "family": "mbppplus",
+   "n": 7,
+   "vis_pass_hid_pass": 3,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r345_3arm_20260830",
+   "family": "mbppplus",
+   "n": 5,
+   "vis_pass_hid_pass": 3,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r348_3arm_20260830",
+   "family": "mbppplus",
+   "n": 15,
+   "vis_pass_hid_pass": 8,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r356_3arm_20260830",
+   "family": "mbppplus",
+   "n": 172,
+   "vis_pass_hid_pass": 126,
+   "vis_pass_hid_fail": 29,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 17
+  },
+  {
+   "run": "g_r439_revcheck_20260901",
+   "family": "mbppplus",
+   "n": 13,
+   "vis_pass_hid_pass": 7,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r441_gemma_only_mbpp_b",
+   "family": "mbppplus",
+   "n": 179,
+   "vis_pass_hid_pass": 122,
+   "vis_pass_hid_fail": 28,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 29
+  },
+  {
+   "run": "g_r443_gemma_lcb",
+   "family": "lcb",
+   "n": 91,
+   "vis_pass_hid_pass": 47,
+   "vis_pass_hid_fail": 13,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 31
+  },
+  {
+   "run": "g_r444_conform_mbpp",
+   "family": "mbppplus",
+   "n": 179,
+   "vis_pass_hid_pass": 129,
+   "vis_pass_hid_fail": 27,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 23
+  },
+  {
+   "run": "g_r445_conform_mbpp_ext",
+   "family": "mbppplus",
+   "n": 192,
+   "vis_pass_hid_pass": 135,
+   "vis_pass_hid_fail": 22,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 35
+  },
+  {
+   "run": "g_r447_conform_lcb2",
+   "family": "lcb",
+   "n": 120,
+   "vis_pass_hid_pass": 61,
+   "vis_pass_hid_fail": 18,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 41
+  },
+  {
+   "run": "g_r460_harness_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 5,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460_harness_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r460_harness_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 7,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r460_harness_lcb2_b1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460_harness_lcb2_b2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r460_harness_lcb2_b3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 8,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 9
+  },
+  {
+   "run": "g_r460r1_harness_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r460r1_harness_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r1_harness_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r1_harness_lcb2_b1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r460r1_harness_lcb2_b2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r1_harness_lcb2_b3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 8
+  },
+  {
+   "run": "g_r460r2_harness_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 5,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r460r2_harness_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r2_harness_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r460r2_harness_lcb2_b1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 5,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r2_harness_lcb2_b2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r2_harness_lcb2_b3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r3_harness_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r3_harness_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r3_harness_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r3_harness_lcb2_b1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r3_harness_lcb2_b2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r460r3_harness_lcb2_b3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r4_harness_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r4_harness_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r4_harness_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 5,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r460r4_harness_lcb2_b1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 10
+  },
+  {
+   "run": "g_r460r4_harness_lcb2_b2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r4_harness_lcb2_b3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r5_harness_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 5,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r460r5_harness_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r460r5_harness_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r460r5_harness_lcb2_b1",
+   "family": "lcb",
+   "n": 19,
+   "vis_pass_hid_pass": 7,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 9
+  },
+  {
+   "run": "g_r460r5_harness_lcb2_b2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 8,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 9
+  },
+  {
+   "run": "g_r460r5_harness_lcb2_b3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r461_lcb3_three_arm",
+   "family": "lcb",
+   "n": 189,
+   "vis_pass_hid_pass": 137,
+   "vis_pass_hid_fail": 18,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 34
+  },
+  {
+   "run": "g_r461_off_gate_lcb3",
+   "family": "lcb",
+   "n": 189,
+   "vis_pass_hid_pass": 128,
+   "vis_pass_hid_fail": 15,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 46
+  },
+  {
+   "run": "g_r529_hep_a1",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_hep_a2",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_hep_a3",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_hep_a4",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_hep_a5",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_hep_a6",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_hep_a7",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_hep_a8",
+   "family": "humanevalplus",
+   "n": 16,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r529_lcb3h_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_lcb3h_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_lcb3h_a3",
+   "family": "lcb",
+   "n": 14,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_lcb3m_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 18,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_lcb3m_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_lcb3m_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_r529_lcb3m_a4",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_lcb3m_a5",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_lcb3m_a6",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r529_lcb3m_a7",
+   "family": "lcb",
+   "n": 15,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_r529_mbpp_a1",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_mbpp_a10",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r529_mbpp_a11",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_mbpp_a12",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_mbpp_a13",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_r529_mbpp_a14",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_mbpp_a15",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_mbpp_a16",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r529_mbpp_a17",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r529_mbpp_a18",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_mbpp_a19",
+   "family": "mbppplus",
+   "n": 11,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_mbpp_a2",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r529_mbpp_a3",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_mbpp_a4",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 7,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_mbpp_a5",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_mbpp_a6",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_mbpp_a7",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r529_mbpp_a8",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r529_mbpp_a9",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_hep_a1",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_r532_hep_a2",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 18,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_hep_a3",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_hep_a4",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_r532_hep_a5",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_hep_a6",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_hep_a7",
+   "family": "humanevalplus",
+   "n": 20,
+   "vis_pass_hid_pass": 18,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_hep_a8",
+   "family": "humanevalplus",
+   "n": 16,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_lcb2_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 8,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 9
+  },
+  {
+   "run": "g_r532_lcb2_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r532_lcb2_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r532_lcb2_a4",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 9,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 8
+  },
+  {
+   "run": "g_r532_lcb2_a5",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 10,
+   "vis_pass_hid_fail": 5,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r532_lcb2_a6",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r532_lcb3h_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r532_lcb3h_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r532_lcb3h_a3",
+   "family": "lcb",
+   "n": 14,
+   "vis_pass_hid_pass": 8,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r532_lcb3m_a1",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 12,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 6
+  },
+  {
+   "run": "g_r532_lcb3m_a2",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 19,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_lcb3m_a3",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_lcb3m_a4",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 7
+  },
+  {
+   "run": "g_r532_lcb3m_a5",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r532_lcb3m_a6",
+   "family": "lcb",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 5
+  },
+  {
+   "run": "g_r532_lcb3m_a7",
+   "family": "lcb",
+   "n": 15,
+   "vis_pass_hid_pass": 11,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_mbpp_a1",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_mbpp_a10",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_mbpp_a11",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_mbpp_a12",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a13",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_mbpp_a14",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 0
+  },
+  {
+   "run": "g_r532_mbpp_a15",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a16",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a17",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a18",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 0,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_mbpp_a19",
+   "family": "mbppplus",
+   "n": 11,
+   "vis_pass_hid_pass": 7,
+   "vis_pass_hid_fail": 1,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_mbpp_a2",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 17,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  },
+  {
+   "run": "g_r532_mbpp_a3",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_mbpp_a4",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 13,
+   "vis_pass_hid_fail": 4,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 3
+  },
+  {
+   "run": "g_r532_mbpp_a5",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a6",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 15,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a7",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 2
+  },
+  {
+   "run": "g_r532_mbpp_a8",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 14,
+   "vis_pass_hid_fail": 2,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 4
+  },
+  {
+   "run": "g_r532_mbpp_a9",
+   "family": "mbppplus",
+   "n": 20,
+   "vis_pass_hid_pass": 16,
+   "vis_pass_hid_fail": 3,
+   "vis_fail_hid_pass": 0,
+   "vis_fail_hid_fail": 1
+  }
+ ]
+}

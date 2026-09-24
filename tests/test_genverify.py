@@ -90,3 +90,12 @@ def test_basic_checks():
     assert gv.chk_case("abc def", {"case": "lower"}, None)[0] == ACCEPTED
     assert gv.chk_regex_count("* a\n* b\n", {"pattern": r"^\s*\*\s", "relation": "exactly",
                                              "n": 2}, None)[0] == ACCEPTED
+
+
+def test_screen_criterion_only_vetoes():
+    """反證型檢查：沒找到反證不擋 accepted；找到反證一票否決。"""
+    sp = Spec("t", [Criterion("n", "check", "numbers_supported", screen=True),
+                    Criterion("w", "check", "word_count", {"relation": "at most", "n": 10})],
+              sources={"s": "It cost 1500 dollars."})
+    assert gv.evaluate(sp, "It cost 1500 dollars.")["verdict"] == ACCEPTED
+    assert gv.evaluate(sp, "It cost 1700 dollars.")["verdict"] == REJECTED

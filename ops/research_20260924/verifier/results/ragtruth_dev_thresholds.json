@@ -1,0 +1,146 @@
+{
+ "QA": {
+  "numbers_grid": [
+   {
+    "ignore_small": 0,
+    "fires": 24,
+    "precision": 0.8333333333333334
+   },
+   {
+    "ignore_small": 10,
+    "fires": 7,
+    "precision": 0.8571428571428571
+   },
+   {
+    "ignore_small": 31,
+    "fires": 5,
+    "precision": 0.8
+   }
+  ],
+  "extractive_grid": [
+   {
+    "min_ratio": 0.8,
+    "fires": 2,
+    "precision": 1.0
+   },
+   {
+    "min_ratio": 0.85,
+    "fires": 2,
+    "precision": 1.0
+   },
+   {
+    "min_ratio": 0.9,
+    "fires": 1,
+    "precision": 1.0
+   },
+   {
+    "min_ratio": 0.95,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 1.0,
+    "fires": 0,
+    "precision": null
+   }
+  ],
+  "numbers": null,
+  "extractive": null
+ },
+ "Summary": {
+  "numbers_grid": [
+   {
+    "ignore_small": 0,
+    "fires": 24,
+    "precision": 0.6666666666666666
+   },
+   {
+    "ignore_small": 10,
+    "fires": 22,
+    "precision": 0.6363636363636364
+   },
+   {
+    "ignore_small": 31,
+    "fires": 21,
+    "precision": 0.6190476190476191
+   }
+  ],
+  "extractive_grid": [
+   {
+    "min_ratio": 0.8,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 0.85,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 0.9,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 0.95,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 1.0,
+    "fires": 0,
+    "precision": null
+   }
+  ],
+  "numbers": null,
+  "extractive": null
+ },
+ "Data2txt": {
+  "numbers_grid": [
+   {
+    "ignore_small": 0,
+    "fires": 21,
+    "precision": 0.6666666666666666
+   },
+   {
+    "ignore_small": 10,
+    "fires": 7,
+    "precision": 0.7142857142857143
+   },
+   {
+    "ignore_small": 31,
+    "fires": 3,
+    "precision": 0.6666666666666666
+   }
+  ],
+  "extractive_grid": [
+   {
+    "min_ratio": 0.8,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 0.85,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 0.9,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 0.95,
+    "fires": 0,
+    "precision": null
+   },
+   {
+    "min_ratio": 1.0,
+    "fires": 0,
+    "precision": null
+   }
+  ],
+  "numbers": null,
+  "extractive": null
+ }
+}
