@@ -1,7 +1,7 @@
 | files | hook without trace (ms) | first Pre (ms) | first full look | hooks while it runs, p50 (ms) | warm p50 (ms) | warm p95 (ms) | warm max (ms) | store growth per step (KB) | Stop: check＋trace (ms) | Stop feedback located the line | scanning turned off |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 100 | 132.2 | 206.4 | in hook | — | 141.1 | 218.1 | 218.1 | 12.1 | 180.4 | yes | no |
-| 1000 | 153.2 | 522.0 | in hook | — | 150.2 | 180.5 | 180.5 | 0.9 | 230.7 | yes | no |
-| 10000 | 136.1 | 2798.1 | in hook | — | 226.8 | 270.5 | 270.5 | 0.9 | 582.4 | yes | no |
-| 40000 | 130.8 | 8194.2 | in hook | — | 542.9 | 603.5 | 603.5 | 0.9 | 1794.2 | yes | no |
-| 60000 | 134.2 | 8321.5 | background | 140.5 | 131.7 | 218.9 | 218.9 | 0.0 | 1868.0 | no | workspace has more than 50000 files; narrow it (trace skips ['.cache', '.git', '.mypy_cache', '.pytest_cache', '.ruff_cache', '.tox', '.venv', '__pycache__', 'node_modules', 'venv']) |
+| 100 | 132.6 | 167.4 | in hook | — | 136.2 | 165.5 | 165.5 | 12.1 | 174.6 | yes | no |
+| 1000 | 141.2 | 288.3 | in hook | — | 143.6 | 193.8 | 193.8 | 0.9 | 257.8 | yes | no |
+| 10000 | 133.6 | 3087.4 | in hook | — | 229.5 | 325.1 | 325.1 | 0.9 | 563.1 | yes | no |
+| 40000 | 136.1 | 5737.4 | in hook | — | 557.3 | 597.3 | 597.3 | 0.9 | 1853.9 | yes | no |
+| 60000 | 127.6 | 8309.6 | background | 129.7 | 134.5 | 227.1 | 227.1 | 0.0 | 2093.3 | no | workspace has more than 50000 files; narrow it (trace skips ['.cache', '.git', '.mypy_cache', '.pytest_cache', '.ruff_cache', '.tox', '.venv', '__pycache__', 'node_modules', 'venv']) |

@@ -289,3 +289,147 @@ def test_a_script_written_before_the_background_look_is_a_gap_not_an_input(proj)
     [b] = B.blame_results(rec, c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
     assert (b["state"], b["fault_class"], b["confidence"]) == \
         ("UNOBSERVED", "unattributable", "gap")
+
+
+# ── 對抗審查（大專案，2026-09-24）：每一條一個會紅的回歸 ─────────────────────
+
+def _straddle(p):
+    """背景還在看第一眼時開始的步驟，在背景看完之後才結束（最常見：總有工具在跑）。"""
+    rec = _hook_recorder(p)
+    rec.pre("t1", MAIN, "Write", {"file_path": "report.md"})    # 開始時沒看到
+    R.Recorder(p).baseline()                                     # 背景看完
+    (p / "report.md").write_text("# Q3\nTotal: 999\n")
+    rec = R.Recorder(p)
+    return rec, rec.post("t1", MAIN, "Write", {"file_path": "report.md"}, "")
+
+
+def test_review1_a_step_straddling_the_background_look_leaves_a_gap_not_a_later_blame(proj):
+    p, c, _spawned = proj
+    rec, e = _straddle(p)
+    assert e["writes"] == [] and e["writes_unknown"]
+    [gap] = _events(rec, "unrecorded_change")
+    assert [x["path"] for x in gap["changes"]] == ["report.md"]
+    # 另一個行動者後來只改了標題那一行：不可以因此背「可證明」
+    other = R.Actor("codex", "reviewer")
+    rec.pre("t2", other, "Edit", {"file_path": "report.md"})
+    (p / "report.md").write_text("# Q3 (reviewed)\nTotal: 999\n")
+    rec.post("t2", other, "Edit", {"file_path": "report.md"}, "")
+    [b] = B.blame_results(rec, c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
+    assert (b["state"], b["fault_class"], b["confidence"]) == \
+        ("UNOBSERVED", "unattributable", "gap")
+
+
+def test_review1_the_same_through_settle(proj):
+    p, c, _spawned = proj
+    rec = _hook_recorder(p)
+    rec.pre("t1", MAIN, "Bash", {"command": "long"})
+    R.Recorder(p).baseline()
+    (p / "report.md").write_text("# Q3\nTotal: 999\n")
+    R.Recorder(p).settle(MAIN, "turn_end")                       # 等不到 post
+    [b] = B.blame_results(rec, c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
+    assert b["state"] == "UNOBSERVED" and not b.get("step")
+
+
+def test_review2_a_step_whose_start_was_not_seen_does_not_block_gaps(proj):
+    p, _c, _spawned = proj
+    rec = _hook_recorder(p)
+    rec.pre("t0", MAIN, "Bash", {"command": "long"})             # 開始時沒看到
+    R.Recorder(p).baseline()
+    (p / "report.md").write_text("Total: 999\n")
+    rec = R.Recorder(p)
+    rec.pre("t1", R.Actor("claude", "s2"), "Read", {"file_path": "x"})   # 另一個工作階段
+    assert [x["changes"][0]["path"] for x in _events(rec, "unrecorded_change")] == ["report.md"]
+
+
+def test_review2_checkpoint_path(proj):
+    p, _c, _spawned = proj
+    rec = _hook_recorder(p)
+    rec.pre("t0", MAIN, "Bash", {"command": "long"})
+    R.Recorder(p).baseline()
+    (p / "report.md").write_text("Total: 999\n")
+    R.Recorder(p).checkpoint("blame")
+    assert len(_events(rec, "unrecorded_change")) == 1
+
+
+def test_review3_blame_while_the_first_look_is_still_running_says_not_observed(proj):
+    p, c, _spawned = proj
+    rec = _hook_recorder(p)
+    _step(rec, "t1", "Write", {"file_path": "report.md"},
+          write=(p / "report.md", "# Q3\nTotal: 999\n"))
+    [b] = B.blame_results(rec, c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
+    assert b["state"] == "UNOBSERVED" and "not been observed yet" in b["note"]
+    assert "is not in" not in b["note"]                           # 沒看過就不能說「那裡沒有」
+
+
+def test_review6_an_unreadable_last_view_turns_scanning_off_instead_of_jamming_hooks(proj):
+    p, _c, _spawned = proj
+    rec = R.Recorder(p)
+    _step(rec, "t1", "Bash", {"command": "ls"})
+    last = json.loads(rec.state_path.read_text())["last_index"]
+    rec.blobs.path(last).write_bytes(b"")                          # 當機留下的空檔
+    e = _step(R.Recorder(p), "t2", "Bash", {"command": "ls"})      # 不炸
+    assert "unreadable" in e["writes_unknown"]
+    assert len(_events(rec, "step")) == 2
+
+
+def test_review6_a_truncated_blob_is_rewritten_not_trusted(tmp_path):
+    bl = W.Blobs(tmp_path / "o")
+    sha = bl.put_bytes(b"hello world")
+    bl.path(sha).write_bytes(b"hel")
+    assert bl.put_bytes(b"hello world") == sha and bl.get(sha) == b"hello world"
+
+
+def test_review5_one_huge_file_cannot_hold_a_hook_past_its_deadline(tmp_path):
+    big = tmp_path / "disk.img"
+    with big.open("wb") as f:
+        f.truncate(20 * 1024 * 1024)                               # 稀疏檔
+    with pytest.raises(W.ScanTimeout):
+        W._sha_file(big, deadline=time.monotonic() - 1)
+    assert len(W._sha_file(big)) == 64
+
+
+def test_review4_rebuilt_states_drop_symlinks_like_the_intake(tmp_path, monkeypatch):
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    keys.init_local()
+    p = tmp_path / "proj"
+    (p / ".vacant").mkdir(parents=True)
+    (p / "third_party").mkdir()
+    raw = C.scaffold("links", deliverable=["src/**"])
+    cp = p / ".vacant" / "contract.json"
+    cp.write_text(json.dumps(raw))
+    C.lock(cp)
+    rec = R.Recorder(p)
+    rec.pre("t1", MAIN, "Bash", {"command": "setup"})
+    (p / "src").mkdir()
+    (p / "src" / "app.py").write_text("print(1)\n")
+    (p / "src" / "vendor").symlink_to("../third_party")
+    (p / "src" / ".svn").mkdir()
+    (p / "src" / ".svn" / "entries").write_text("x")
+    e = rec.post("t1", MAIN, "Bash", {"command": "setup"}, "")
+    d = tmp_path / "state"
+    B.Trace(rec).materialize(e["post_index"], d, C.load(cp))
+    assert sorted(x.relative_to(d).as_posix() for x in d.rglob("*")) == ["src", "src/app.py"]
+
+
+def test_review7_a_tampered_keyframe_never_moves_blame_to_another_actor(proj, monkeypatch):
+    p, c, _spawned = proj
+    monkeypatch.setattr(R, "DELTA_MIN_FILES", 5)
+    for i in range(100):
+        (p / "data" / f"f{i:02d}.txt").write_text(str(i))
+    rec = R.Recorder(p)
+    e1 = _step(rec, "t1", "Write", {"file_path": "report.md"},
+               write=(p / "report.md", "# Q3\nTotal: 999\n"))
+    for i in range(100):                                          # 新的關鍵幀
+        (p / "data" / f"f{i:02d}.txt").write_text("changed")
+    _step(rec, "t2", "Bash", {"command": "regen"})
+    sub = R.Actor("claude", "s1", agent="a1", agent_type="Explore")
+    rec.pre("t3", sub, "Edit", {"file_path": "report.md"})
+    (p / "report.md").write_text("# Q3 edited\nTotal: 999\n")
+    rec.post("t3", sub, "Edit", {"file_path": "report.md"}, "")
+    [honest] = B.blame_results(rec, c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
+    assert honest["state"] == "located" and honest["step"]["step"] == "t1"
+    kf = json.loads(rec.blobs.get(e1["post_index"]))[""]["base"]
+    rec.blobs.path(kf).write_bytes(rec.blobs.path(kf).read_bytes().replace(b"f01", b"f98"))
+    [b] = B.blame_results(R.Recorder(p), c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
+    assert (b["state"], b["fault_class"]) == ("UNOBSERVED", "unattributable")
+    assert "can no longer be read" in b["note"]

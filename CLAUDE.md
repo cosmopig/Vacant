@@ -124,7 +124,7 @@
 - `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
   沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）。掛鉤裡一次掃描最多
   `HOOK_SCAN_S`＝8 秒，第一次看超過就改到背景（`recorder baseline`），那段時間「寫了什麼不知道」≠「沒寫」；
-  1000 檔以上存差異索引。量測：`ops/accountability/evidence_20260924/perf/`（4 萬檔 Stop 1.8 秒；超過 5 萬檔關掉）
+  1000 檔以上存差異索引。量測：`ops/accountability/evidence_20260924/perf/`（4 萬檔 Stop 1.9 秒；超過 5 萬檔關掉）；審查：`ops/accountability/review_scale/FINDINGS.md`
 - `capture.py` — 四個 agent 的原生掛鉤 → 病歷（Claude／Codex 的 `tool_use_id`、OpenCode 子 session、pi `toolCallId`；
   逐字稿在工作階段結束時封存，模型 id 標 `claimed`）
 - `locate.py`／`rerun.py`／`blame.py` — 位置 → 引入它的那一步 → 在重建狀態上重跑同一條主張 → 值從哪裡讀來。

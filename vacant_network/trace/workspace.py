@@ -84,10 +84,15 @@ class Entry:
 Index = dict[str, Entry]
 
 
-def _sha_file(p: pathlib.Path) -> str:
+def _sha_file(p: pathlib.Path, deadline: float | None = None) -> str:
+    """整個檔的 sha256。`deadline` 過了 ⇒ `ScanTimeout`（一個 12 GiB 的檔就能讓掛鉤被砍掉：
+    只在檔與檔之間看時限不夠；2026-09-24 大專案審查 #5）。"""
+    import time
     h = hashlib.sha256()
     with p.open("rb") as f:
-        for b in iter(lambda: f.read(1 << 20), b""):
+        for i, b in enumerate(iter(lambda: f.read(1 << 20), b"")):
+            if deadline is not None and i % 16 == 15 and time.monotonic() > deadline:
+                raise ScanTimeout(f"scan passed its deadline while hashing {p.name}")
             h.update(b)
     return h.hexdigest()
 
@@ -104,10 +109,16 @@ class Blobs:
     def has(self, sha: str) -> bool:
         return self.path(sha).is_file()
 
-    def put_bytes(self, data: bytes) -> str:
+    def put_bytes(self, data: bytes, *, durable: bool = False) -> str:
+        """存一份內容，回傳 sha256。已經在庫裡、大小也對 ⇒ 不再寫（大小不對＝當機留下的殘檔，重寫）。
+        `durable`＝fsync 之後才換名（別的檔會指向它的，例如工作區索引）。"""
         sha = hashlib.sha256(data).hexdigest()
         dst = self.path(sha)
-        if not dst.is_file():
+        try:
+            ok = dst.stat().st_size == len(data)
+        except OSError:
+            ok = False
+        if not ok:
             for d in (self.root, dst.parent):
                 d.mkdir(parents=True, exist_ok=True, mode=0o700)
                 try:
@@ -121,6 +132,9 @@ class Blobs:
             try:
                 with os.fdopen(fd, "wb") as f:
                     f.write(data)
+                    if durable:
+                        f.flush()
+                        os.fsync(f.fileno())
                 os.replace(tmp, dst)
             finally:
                 if tmp.exists():
@@ -198,12 +212,12 @@ def scan(root: str | os.PathLike, prev: Index | None = None, *,
                         blobs.put_file(pathlib.Path(full_p), old.sha256)
                     continue
                 if is_secret(rel):
-                    out[rel] = Entry("secret:" + _sha_file(pathlib.Path(full_p)), st.st_size,
-                                     st.st_mtime_ns, x_bit)
+                    out[rel] = Entry("secret:" + _sha_file(pathlib.Path(full_p), deadline),
+                                     st.st_size, st.st_mtime_ns, x_bit)
                     continue
                 if st.st_size > MAX_BLOB:
-                    out[rel] = Entry("big:" + _sha_file(pathlib.Path(full_p)), st.st_size,
-                                     st.st_mtime_ns, x_bit)
+                    out[rel] = Entry("big:" + _sha_file(pathlib.Path(full_p), deadline),
+                                     st.st_size, st.st_mtime_ns, x_bit)
                     continue
                 with open(full_p, "rb") as f:
                     data = f.read()

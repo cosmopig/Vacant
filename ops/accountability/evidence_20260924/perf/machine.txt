@@ -1,4 +1,4 @@
 Linux vm 6.18.44-fc-v37 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
 4
 Python 3.11.15
-measured on the working tree of the commit that adds this directory (parent 0a493ce8)
+measured on the working tree of the commit that fixes the scale review (parent 28d46087); earlier runs of the same script gave a 40k first Pre of 8.2 s and 8.19 s

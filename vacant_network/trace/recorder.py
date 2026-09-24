@@ -133,6 +133,13 @@ def _session_key(actor: dict[str, Any]) -> str:
     return f"{actor.get('platform')}:{actor.get('session')}"
 
 
+def _explains_own_writes(pend: dict[str, Any]) -> bool:
+    """這個還在跑的步驟之後能不能用自己的前後差異解釋它寫了什麼：開始時有看到工作區、
+    而且還沒被界住。開始時沒看到（背景還在看第一眼）的步驟永遠解釋不了——它不可以擋住缺口
+    （2026-09-24 大專案審查 #2）。"""
+    return bool(pend.get("pre_index")) and not pend.get("bound_index")
+
+
 class Recorder:
     """一個專案（工作區根目錄）的追緝紀錄。所有方法都是行程安全的（檔案鎖）。"""
 
@@ -254,7 +261,8 @@ class Recorder:
                 data = json.dumps({"": {"base": key, "del": gone}, **dict(sorted(put.items()))},
                                   separators=(",", ":"), ensure_ascii=False).encode()
         full = data is None
-        sha = self.blobs.put_bytes(data if data is not None else W.dump(idx))
+        # 索引要落盤（fsync）：狀態檔與鏈會指向它，當機後留下空檔＝之後每一次掛鉤都讀不回來（審查 #6）
+        sha = self.blobs.put_bytes(data if data is not None else W.dump(idx), durable=True)
         if full and st is not None:
             st["index_key"] = sha                     # 這一份是完整的：之後的差異對它算
         self._idx_cache[sha] = idx
@@ -323,11 +331,31 @@ class Recorder:
             self._disable_scan(st, f"the background first look did not finish in "
                                    f"{BASELINE_WAIT_S:.0f}s")
             return None, None, None
-        prev = self.load_index(last) if last else None
+        try:
+            prev = self.load_index(last) if last else None
+        except (OSError, ValueError) as e:
+            # 上一次看到的狀態讀不回來（版本庫被改過或壞了）：之後的差異都沒有根據。
+            # 不可以讓每一次掛鉤都在這裡炸掉（審查 #6），也不可以假裝從頭看起——關掉、照實記下
+            self._disable_scan(st, f"the last recorded view of the workspace is unreadable "
+                                   f"({type(e).__name__})")
+            return None, None, last
         idx = self._scan(prev, st)
         if idx is None:
             return prev, None, last
         return prev, idx, self._index_blob(idx, st)
+
+    def _gap_since(self, st: dict[str, Any], prev: W.Index | None, idx: W.Index | None,
+                   idx_sha: str | None, observed_at: str) -> None:
+        """上一次看到之後到現在的改動記成缺口，並把「上一次看到」往前推（同一批改動不再被算一次）。"""
+        if prev is None or idx is None:
+            return
+        gap = [c.to_json() for c in W.diff(prev, idx)]
+        if gap:
+            self._append("unrecorded_change", {"changes": gap, "n": len(gap),
+                                               "before_index": st["last_index"],
+                                               "after_index": idx_sha,
+                                               "observed_at": observed_at})
+        st["last_index"] = idx_sha
 
     def _disable_scan(self, st: dict[str, Any], why: str) -> None:
         st["scan_disabled"] = why
@@ -405,7 +433,7 @@ class Recorder:
             self._finish_open(st, "stale", older_than=STALE_S)
             prev, idx, idx_sha = self._observe(st)
             gap = []
-            blocking = [k for k, v in st["pending"].items() if not v.get("bound_index")]
+            blocking = [k for k, v in st["pending"].items() if _explains_own_writes(v)]
             if prev is not None and idx is not None and not blocking:
                 # 上一次看到之後、而且這段時間沒有任何一步在進行 ⇒ 誰改的沒有紀錄。
                 # 已經有界的孤兒步驟（同一個行動者後來又開始了下一步）不算「在進行」——否則它會
@@ -448,7 +476,11 @@ class Recorder:
             st = self._state()
             self._ensure_session(st, actor)
             pend = st["pending"].pop(step, None)
-            _prev, idx, idx_sha = self._observe(st)
+            prev, idx, idx_sha = self._observe(st)
+            if pend and not pend.get("pre_index"):
+                # 開始時沒看到（背景還在看第一眼），結束時看得到：上一次看到之後的改動可能是它寫的、
+                # 也可能不是——記成缺口，不可以就此消失（否則下一個碰這個檔的人會背；審查 #1）
+                self._gap_since(st, prev, idx, idx_sha, "post_tool_unobserved_start")
             base_sha = pend["pre_index"] if pend else st.get("last_index")
             # 從來沒看過這個工作區（第一個事件就是 post）⇒ 沒有「之前」可比，寫了什麼不知道；
             # 不可以把整個既有工作區算成這一步寫的。這一次沒看 ⇒ 也是不知道
@@ -528,7 +560,9 @@ class Recorder:
             done.append(step)
         if not done:
             return []
-        _prev, idx, idx_sha = self._observe(st)
+        prev, idx, idx_sha = self._observe(st)
+        if any(not st["pending"][s].get("pre_index") for s in done):
+            self._gap_since(st, prev, idx, idx_sha, "open_step_unobserved_start")
         out = []
         for step in done:
             pend = st["pending"].pop(step)
@@ -560,7 +594,8 @@ class Recorder:
         with self._lock():
             st = self._state()
             prev, idx, idx_sha = self._observe(st)
-            if prev is not None and idx is not None and not st["pending"]:
+            if prev is not None and idx is not None and \
+                    not any(v.get("pre_index") for v in st["pending"].values()):
                 gap = [c.to_json() for c in W.diff(prev, idx)]
                 if gap:
                     self._append("unrecorded_change", {"changes": gap, "n": len(gap),
@@ -607,7 +642,8 @@ class Recorder:
             self._finish_open(st, "session_end", session=key)
             prev, idx, idx_sha = self._observe(st)
             gap = [c.to_json() for c in W.diff(prev, idx)] \
-                if prev is not None and idx is not None and not st["pending"] else []
+                if prev is not None and idx is not None and \
+                not any(v.get("pre_index") for v in st["pending"].values()) else []
             if gap:
                 self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                    "before_index": st["last_index"],

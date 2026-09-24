@@ -146,6 +146,10 @@ class Trace:
         self.scan_disabled: str | None = None
         #: 第一次完整觀察之前就有步驟在跑（專案太大、在背景看）：那時已經在的值不能說是「本來就在」
         self.unobserved_start = False
+        #: 第一次看改到背景、還沒看完：到目前為止什麼都沒看到
+        self.first_look_pending = False
+        #: 讀不回來的狀態（版本庫被改過或壞了）：碰到它的追緝一律不歸給任何人
+        self.unreadable: set[str] = set()
         seen_steps: set[str] = set()
         for e in rec.events():
             t = e.get("type")
@@ -206,7 +210,10 @@ class Trace:
                 self.prompts.append(e)
             elif t == "coverage" and e.get("scan_disabled"):
                 self.scan_disabled = str(e["scan_disabled"])
+            elif t == "coverage" and e.get("baseline_deferred"):
+                self.first_look_pending = True
             elif t == "coverage" and isinstance(e.get("baseline"), dict):
+                self.first_look_pending = False
                 bl = e["baseline"]
                 if bl.get("after_unobserved"):
                     self.unobserved_start = True
@@ -223,6 +230,9 @@ class Trace:
             try:
                 self._idx[sha] = self.rec.load_index(sha)
             except (OSError, ValueError):
+                # 讀不回來 ≠ 空的工作區：記下來，追緝碰到它就不歸給任何人（審查：竄改一個關鍵幀
+                # 曾經讓 provable 從真正寫的人移到後來的人身上）
+                self.unreadable.add(sha)
                 self._idx[sha] = {}
         return self._idx[sha]
 
@@ -268,11 +278,14 @@ class Trace:
         類主張在追緝時看得到收件時看不到的檔，而且 4 萬個檔的專案每條主張要寫 8 萬個檔。"""
         idx = self.index(index_sha)
         if contract is not None:
-            from ..intake.artifact import glob_to_regex
+            # 和 `artifact.collect` 同一套規則：符號連結不進隔離區、那幾個目錄永遠跳過
+            from ..intake.artifact import ALWAYS_SKIP_DIRS, glob_to_regex
             inc = [glob_to_regex(p) for p in contract.include]
             exc = [glob_to_regex(p) for p in contract.exclude]
             idx = {r: e for r, e in idx.items()
-                   if any(x.match(r) for x in inc) and not any(x.match(r) for x in exc)}
+                   if not e.sha256.startswith("link:")
+                   and not ALWAYS_SKIP_DIRS.intersection(r.split("/")[:-1])
+                   and any(x.match(r) for x in inc) and not any(x.match(r) for x in exc)}
         return W.materialize(idx, self.rec.blobs, dest)
 
 
@@ -852,6 +865,23 @@ def blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
                    claim_id: str | None = None, sandbox: str = "auto",
                    expected: str | None = None) -> dict[str, Any]:
     """一個位置 → 一個追緝結論（dict，可直接進鏈與報告）。"""
+    res = _blame_location(trace, loc, contract=contract, claim_id=claim_id, sandbox=sandbox,
+                          expected=expected)
+    if trace.unreadable and res.get("state") not in ("UNOBSERVED",):
+        # 有記下來的狀態讀不回來（版本庫被改過或壞了）：沿著版本往回追的結論都可能被換掉，
+        # 不歸給任何人（竄改一個關鍵幀曾經把 provable 移到另一個行動者身上）
+        res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
+                   layer="inference", step=None,
+                   note=f"{len(trace.unreadable)} recorded workspace state(s) can no longer be "
+                        f"read (the store was changed or damaged)")
+        res.pop("candidates", None)
+        res.pop("correct_value_seen", None)
+    return res
+
+
+def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
+                    claim_id: str | None = None, sandbox: str = "auto",
+                    expected: str | None = None) -> dict[str, Any]:
     b = Blamer(trace, contract)
     chain: list[dict[str, Any]] = []
     value = loc.value
@@ -865,6 +895,13 @@ def blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
         res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
                    layer="inference", step=None, chain=[], value=value,
                    note=f"the workspace was not observed step by step ({trace.scan_disabled})")
+        return res
+    if trace.first_look_pending:
+        # 第一次看還在背景：什麼都還沒看到，不可以說「那時候那裡沒有這個值」（大專案審查 #3）
+        res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
+                   layer="inference", step=None, chain=[], value=value,
+                   note="the workspace has not been observed yet (the first full look is still "
+                        "running in the background)")
         return res
     if not value or loc.kind == "missing":
         # 缺的東西沒有值可追：最後寫這個檔的是誰（推論層）

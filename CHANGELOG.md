@@ -28,9 +28,12 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   does not fit moves to the background and the steps before it are recorded as not observed;
   states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at
   40k files); re-runs rebuild only the deliverable, the same files the intake's verifiers see.
-  Measured with the real hook entry point: 40k files → first Pre 8.2 s, later hooks p95 0.6 s,
-  Stop with tracing 1.8 s (`ops/accountability/evidence_20260924/perf/`). Above 50k files the
-  per-step scan is off and the trace says so.
+  Measured with the real hook entry point: 40k files → first Pre 5.7–8.2 s, later hooks p95 0.6 s,
+  Stop with tracing 1.9 s (`ops/accountability/evidence_20260924/perf/`). Above 50k files the
+  per-step scan is off and the trace says so. An adversarial review of this change found 8
+  issues, all fixed (`ops/accountability/review_scale/FINDINGS.md`): a step that started before the
+  first look and ended after it now leaves a gap instead of letting a later editor be blamed;
+  unreadable stored states make the trace say "not observed" instead of blaming anyone.
 
 **The intake is real, and it plugs into pi, Claude Code, OpenCode and Codex without looking at
 model traffic.** Decision: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`.
