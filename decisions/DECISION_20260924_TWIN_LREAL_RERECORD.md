@@ -301,3 +301,21 @@ python3 ops/exhibit/twin/serve_twin.py --check --recording ops/exhibit/twin/reco
 ```
 
 發射指令（要機時）在 `runs/twin_lreal_20260924/launch/batch.sh`（路徑是 vacant-dev 的 `/var/tmp`）。
+
+## 收尾（主線，2026-09-24 同日）
+
+1. **旁註是事後轉寫的。** 這批在旁註程式（`twin.sidecar/1`）合併前發射，照「同一批不換程式」
+   跑完 ⇒ 量的當下沒有寫旁註。主線用 `ops/exhibit/twin/sidecar_from_postaudit.py` 把每格
+   已經存在的 `postaudit_RUN-OFF.json` 換成旁註格式（`recordings/lreal_20260924.sidecar.jsonl`，
+   54 筆，其中 30 筆沒有全過——與 ON 拒交 30 格對得上）。
+   - 不重量、不改錄影一個位元組；只轉寫 run 目錄 `ws_end_sha256` **等於**錄影裡那一跑
+     `run_ended.ws_end_sha256` 的那幾筆（對不上整批不轉，有測試）。
+   - 每筆帶 `derived_from`；`ts_ms` 取那一跑的 `run_ended.ts_ms`（舊檔沒記量完的時間，
+     mtime 會被 checkout 改寫，不拿它當時間）。
+   - 配對收據重建：格子內容逐位元組不變，只多綁了旁註的 sha256。
+2. **錄影撞 id 的規則改成「證據等級高的贏」**（`serve_twin.load_recordings`）。舊規則「先載入的贏」
+   讓照檔名排序在前的 `fixture_*`（L-none）蓋掉這批 L-real，54 格一格都播不出來。
+   同級撞 id 仍然先來的贏；輸的那一份每一格都寫進 `problems`。有負控制。
+3. **展場文案**：本批的數字（救回 1/31、79/79、拒交裡 6 格被砍過、全部 tier=C）只能描述**本批**；
+   官網（vacant-docs-web）目前引用的是 09-19 那批（救回 0/30），那句對 09-19 仍然成立，
+   但展場播的是本批——要不要改由人類決定（官網 push 即上線）。
