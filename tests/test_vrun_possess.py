@@ -988,3 +988,203 @@ def test_piext_is_valid_javascript():
 
 def test_pi_probe_models_returns_empty_not_error_when_nothing_listens():
     assert piext.probe_models(1, timeout=0.5) == []
+
+
+# ── 11. pi 的上游與金鑰（2026-09-24 code review：裸 `vacant` 引導裝 pi 會叫不到模型）──
+
+def _clear_upstream_env(monkeypatch):
+    from vacant_network.vrun import envmap
+    for _w, names in envmap.UPSTREAM_VARS:
+        for n in names:
+            monkeypatch.delenv(n, raising=False)
+    monkeypatch.delenv("PI_CODING_AGENT_DIR", raising=False)
+
+
+def _seed_pi(h: pathlib.Path, providers: dict, default: str | None = None) -> None:
+    d = h / ".pi" / "agent"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "models.json").write_text(json.dumps({"providers": providers}), "utf-8")
+    if default:
+        (d / "settings.json").write_text(json.dumps({"defaultProvider": default}),
+                                         "utf-8")
+
+
+_SECRET = "sk-THIS-IS-THE-USERS-REAL-KEY-0123456789"
+
+
+def test_pi_models_json_is_scanned_for_upstream_and_default_provider_wins(
+        tmp_path: pathlib.Path, monkeypatch):
+    """pi-only 使用者：上游從 `models.json` 找得到，而且 `defaultProvider` 排第一；
+    我們自己的 provider、本機位址、api 對不上 wire 的都跳過。"""
+    _clear_upstream_env(monkeypatch)
+    h = tmp_path / "home"
+    _seed_pi(h, {
+        "vacant": {"baseUrl": "https://ours.example/v1", "api": "openai-completions"},
+        "local": {"baseUrl": "http://127.0.0.1:1234/v1", "api": "openai-completions"},
+        "gem": {"baseUrl": "https://gem.example", "api": "google-generative-ai"},
+        "first": {"baseUrl": "https://first.example/v1", "api": "openai-completions"},
+        "mine": {"baseUrl": "https://mine.example/v1", "api": "openai-responses",
+                 "apiKey": _SECRET},
+        "ant": {"baseUrl": "https://ant.example", "api": "anthropic-messages"},
+    }, default="mine")
+    ups = possess.discover_install_upstreams(h, prefer=["pi"])
+    assert ups["openai"] == {"url": "https://mine.example/v1",
+                             "source": "pi:providers.mine"}
+    assert ups["anthropic"] == {"url": "https://ant.example",
+                                "source": "pi:providers.ant"}
+    assert _SECRET not in json.dumps(ups), "上游描述裡不准出現金鑰"
+    # 沒有 defaultProvider ⇒ 檔內順序第一個合格的
+    (h / ".pi" / "agent" / "settings.json").unlink()
+    assert possess.discover_install_upstreams(h)["openai"]["source"] == \
+        "pi:providers.first"
+
+
+def test_pi_is_scanned_first_only_when_installing_pi(tmp_path: pathlib.Path,
+                                                    monkeypatch):
+    """只裝 pi 時 pi 的設定先掃（否則 extension 借金鑰時 baseUrl 對不上）；
+    沒指定時舊順序（opencode 先）不變。"""
+    _clear_upstream_env(monkeypatch)
+    h = tmp_path / "home"
+    oc = h / ".config" / "opencode"
+    oc.mkdir(parents=True)
+    (oc / "opencode.json").write_text(json.dumps({"provider": {"x": {
+        "options": {"baseURL": "https://opencode.example/v1"}}}}), "utf-8")
+    _seed_pi(h, {"p": {"baseUrl": "https://pi.example/v1",
+                       "api": "openai-completions"}})
+    assert possess.discover_install_upstreams(h)["openai"]["url"] == \
+        "https://opencode.example/v1"
+    assert possess.discover_install_upstreams(h, prefer=["pi"])["openai"]["url"] == \
+        "https://pi.example/v1"
+
+
+def test_pi_install_bakes_upstream_and_key_carrier_but_never_the_key(
+        tmp_path: pathlib.Path, monkeypatch):
+    """🔴 金鑰借、不存：extension 檔、state 目錄底下每一個檔都不准出現金鑰字串；
+    extension 只烤 provider id 與上游 url。"""
+    _clear_upstream_env(monkeypatch)
+    h = tmp_path / "home"
+    _seed_pi(h, {"mine": {"baseUrl": "https://mine.example/v1",
+                          "api": "openai-completions", "apiKey": _SECRET}},
+             default="mine")
+    st = _install(h, agents=["pi"])
+    assert st["upstreams"]["openai"]["source"] == "pi:providers.mine"
+    body = _pi_ext(h).read_text("utf-8")
+    assert _SECRET not in body
+    assert 'const KEY_FROM = "mine";' in body
+    assert 'const UPSTREAM = "https://mine.example/v1";' in body
+    assert "const UPSTREAM_IS_SINK = false;" in body
+    for f in possess.state_home(h).rglob("*"):
+        if f.is_file():
+            assert _SECRET.encode() not in f.read_bytes(), f"金鑰落進了 {f}"
+    assert not any(possess.SINK_WARNING_HEAD in w for w in st["warnings"])
+    assert not any("借不到金鑰" in w for w in st["warnings"])
+
+
+def test_pi_install_with_no_upstream_warns_sink_loudly(tmp_path: pathlib.Path,
+                                                      monkeypatch):
+    """pi-only、沒有任何上游 ⇒ sink（fail-closed 仍然對），但**一定要講**，
+    而且 extension 知道自己是 sink（session_start 會用 error 講）。"""
+    _clear_upstream_env(monkeypatch)
+    h = tmp_path / "home"
+    (h / ".pi" / "agent").mkdir(parents=True)
+    st = _install(h, agents=["pi"])
+    from vacant_network.vrun import envmap
+    assert envmap.is_sink(st["upstreams"]["openai"]["url"])
+    sink = [w for w in st["warnings"] if w.startswith(possess.SINK_WARNING_HEAD)]
+    assert len(sink) == 1 and "pi" in sink[0] and "--upstream openai=" in sink[0]
+    assert "OPENAI_BASE_URL" in sink[0]
+    assert "const UPSTREAM_IS_SINK = true;" in _pi_ext(h).read_text("utf-8")
+    assert "sink" in possess._fmt_status(possess.status(home=h))
+
+
+def test_pi_warns_when_no_provider_carries_a_key_for_the_upstream(
+        tmp_path: pathlib.Path, monkeypatch):
+    """上游來自環境變數、models.json 沒有同 baseUrl 的 provider ⇒ 送佔位金鑰，要講。"""
+    _clear_upstream_env(monkeypatch)
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://env.example/v1")
+    h = tmp_path / "home"
+    _seed_pi(h, {"other": {"baseUrl": "https://other.example/v1",
+                           "api": "openai-completions", "apiKey": _SECRET}})
+    st = _install(h, agents=["pi"])
+    assert st["upstreams"]["openai"]["url"] == "https://env.example/v1"
+    assert any("借不到金鑰" in w for w in st["warnings"])
+    assert 'const KEY_FROM = "";' in _pi_ext(h).read_text("utf-8")
+
+
+def _run_ext_in_node(tmp_path: pathlib.Path, body: str, agent_dir: pathlib.Path):
+    """用假的 `pi` 物件跑 extension 的 factory，拿回 registerProvider 收到的設定。"""
+    import os
+    import shutil
+    import subprocess
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("這台沒有 node ⇒ extension 借金鑰的行為沒量到（不是通過）")
+    ext = tmp_path / "vacant.mjs"
+    ext.write_text(body, "utf-8")
+    harness = tmp_path / "h.mjs"
+    harness.write_text(
+        "const m = await import(" + json.dumps(ext.as_uri()) + ");\n"
+        "let cfg = null;\n"
+        "m.default({registerProvider: (id, c) => { cfg = c; },\n"
+        "           registerCommand: () => {}, on: () => {}});\n"
+        "process.stdout.write(JSON.stringify({apiKey: cfg.apiKey, baseUrl: cfg.baseUrl}));\n",
+        "utf-8")
+    env = dict(os.environ, PI_CODING_AGENT_DIR=str(agent_dir))
+    r = subprocess.run([node, str(harness)], capture_output=True, text=True, env=env,
+                       timeout=30)
+    assert r.returncode == 0, r.stderr
+    return json.loads(r.stdout)
+
+
+def test_piext_borrows_key_config_only_from_provider_with_same_base_url(
+        tmp_path: pathlib.Path):
+    """extension 在 pi 行程裡借金鑰設定字串——**只**借 baseUrl 等於上游的那一個；
+    別家的金鑰絕不送去這個上游。"""
+    agent = tmp_path / "agent"
+    agent.mkdir()
+    (agent / "models.json").write_text(json.dumps({"providers": {
+        "wrong": {"baseUrl": "https://elsewhere.example/v1", "apiKey": "sk-WRONG"},
+        "vacant": {"baseUrl": "https://up.example/v1", "apiKey": "sk-OURS"},
+        "right": {"baseUrl": "https://up.example/v1/", "apiKey": "MY_KEY_ENV"},
+    }}), "utf-8")
+    body = piext.render(port=18790, state_dir=str(tmp_path / "st"), python="/py",
+                        upstream="https://up.example/v1", key_from="right",
+                        pi_agent_dir=str(agent))
+    got = _run_ext_in_node(tmp_path, body, agent)
+    assert got["apiKey"] == "MY_KEY_ENV"        # 設定字串原樣，交給 pi 解析
+    assert got["baseUrl"] == "http://127.0.0.1:18790/v1"   # 通道仍是 proxyd
+    # 上游換成沒有人對得上的 ⇒ 佔位，不借別家的
+    body2 = piext.render(port=18790, state_dir=str(tmp_path / "st"), python="/py",
+                         upstream="https://nobody.example/v1",
+                         pi_agent_dir=str(agent))
+    assert _run_ext_in_node(tmp_path, body2, agent)["apiKey"] == "sk-vacant-possess"
+    # sink ⇒ 不借
+    body3 = piext.render(port=18790, state_dir=str(tmp_path / "st"), python="/py",
+                         upstream="https://up.example/v1", upstream_is_sink=True,
+                         pi_agent_dir=str(agent))
+    assert _run_ext_in_node(tmp_path, body3, agent)["apiKey"] == "sk-vacant-possess"
+
+
+def test_guided_install_does_not_end_in_clean_success_when_upstream_is_sink(
+        tmp_path: pathlib.Path, monkeypatch, capsys):
+    """裸 `vacant` 引導裝完、上游是 sink ⇒ 印 🔴「還不能用」＋修法，退出碼非 0。"""
+    from vacant_network import cli
+    monkeypatch.setattr(possess, "state_home", lambda h: tmp_path / "nostate")
+
+    class _D:
+        present, binary, version = True, "/bin/pi", "0.87.0"
+
+    monkeypatch.setattr(possess, "detect", lambda h, probe_shell=True: {
+        a: _D() for a in possess.AGENTS})
+    monkeypatch.setattr("builtins.input", lambda *_: "y")
+    monkeypatch.setattr(possess, "install", lambda agents: {"warnings": [
+        possess.SINK_WARNING_HEAD + "（openai）：pi …"]})
+    monkeypatch.setattr(possess, "status", lambda: {})
+    monkeypatch.setattr(possess, "_fmt_status", lambda s: "STATUS")
+    rc = cli._guided_install(possess)
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "還不能用" in out and "--upstream openai=" in out and "/vacant off" in out
+    # 對照：沒有 sink 警告 ⇒ 0
+    monkeypatch.setattr(possess, "install", lambda agents: {"warnings": []})
+    assert cli._guided_install(possess) == 0

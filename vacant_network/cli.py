@@ -1098,8 +1098,20 @@ def _guided_install(_possess) -> int | None:
         sys.stderr.write(f"🔴 安裝失敗（一個設定檔都沒動，preflight 擋下）：{e}\n")
         return 1
     print(_possess._fmt_status(_possess.status()))
-    for w in (r.get("warnings") or []):
+    ws = r.get("warnings") or []
+    for w in ws:
         print(w, file=sys.stderr)
+    # 🔴 上游是 sink ⇒ 裝好了但每一通都會被擋。**不准以一個乾淨的成功收尾**
+    #   （2026-09-24 code review：只裝 pi、沒設 OPENAI_BASE_URL 的人會安靜落到這裡）。
+    if any(w.startswith(_possess.SINK_WARNING_HEAD) for w in ws):
+        print("\n🔴 裝好了，但**還不能用**：常駐 proxy 沒有真上游，agent 的每一通模型呼叫"
+              "都會被擋（fail-closed，不會偷偷直連公開 API）。\n"
+              "   修法：vacant uninstall，然後\n"
+              "         vacant install --agent " + cands[0] + " --upstream openai=<你的端點>\n"
+              "   （或先 export OPENAI_BASE_URL=<你的端點> 再裝；"
+              "pi 的話也可以在 ~/.pi/agent/models.json 設一個 provider 的 baseUrl）\n"
+              "   在那之前要用原模型：pi 裡打 /vacant off。")
+        return 1
     return 0 if not r.get("error") else 1
 
 

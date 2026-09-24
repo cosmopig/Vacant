@@ -42,6 +42,18 @@ pi 的 `isExtensionFile` 只認 `.ts`／`.js`（`chunk-4DKZACXI.js`，jiti 載�
    那一條；互動模式的閘門要掛在 `agent_before_settle`，那是另一份裁決（`decisions/notes/
    NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md` §3.3），本檔**沒有做**。
 6. 掛鉤日誌**只落雜湊**（`hookcli` 邊界 1）；本檔不落 prompt、不落工具輸入原文。
+7. **金鑰：借，不存。** `vacant` provider 的 `apiKey` 在 pi 行程裡、factory 那一刻，從
+   `models.json` 裡 **baseUrl 等於 proxyd 上游**的那個 provider 抄它的 `apiKey` **設定字串**
+   （字面值、環境變數名、`!命令` 都原樣抄，交給 pi 自己解析）。所以 Authorization 帶的是
+   使用者自己的金鑰，proxyd `sentinel=""` 原樣穿透、**永不持有**；本檔與 `possess` 的
+   state 也**從不寫入金鑰**（烤進來的只有 provider id 與上游 url）。比對條件是 baseUrl
+   相等——金鑰只送回它本來就要去的主機。找不到 ⇒ 送佔位 `sk-vacant-possess`，
+   `session_start` 會講。金鑰在 `auth.json` 的內建 provider **不借**（`NEVER_TOUCH`）。
+   ⚠ **沒量過**：pi 0.87.0 的 `registerProvider({apiKey})` 是否跟 `models.json` 走同一套
+   解析（env 名／`!命令`）是從文件推的，**還沒有一跑真的用借來的金鑰打到要金鑰的上游**。
+   provider 的自訂 `headers` 也沒有抄。
+8. 上游是 sink（裝機時沒找到上游）⇒ 仍然切到 `vacant`（fail-closed，不偷偷直連），
+   但 `session_start` 會用 error 等級講清楚「每一通都會被擋、怎麼修、`/vacant off` 回原模型」。
 """
 from __future__ import annotations
 
@@ -77,6 +89,10 @@ const PORT = %(port)s;
 const PROVIDER = %(provider)s;
 const BAKED_MODELS = %(models)s;
 const DEFAULT_MODEL = %(default_model)s;
+const UPSTREAM = %(upstream)s;        // proxyd 轉去的地方（裝機時決定；只有 url，沒有金鑰）
+const UPSTREAM_IS_SINK = %(upstream_is_sink)s;
+const KEY_FROM = %(key_from)s;        // 裝機時算出的「金鑰向哪個 provider 借」（只是提示，runtime 仍比對 baseUrl）
+const PI_AGENT_DIR = %(pi_agent_dir)s;
 const PROXY = %(proxy)s;          // 字面值（不是算出來的）：status／測試要在檔案裡直接看得到端點
 const BASE = PROXY + "/v1";
 
@@ -137,6 +153,29 @@ function hookLines() {
   catch (e) { return 0; }
 }
 
+// ── 金鑰：借使用者自己那個 provider 的 apiKey 設定字串（誠實邊界 7）───────────
+//   只借 baseUrl 等於 UPSTREAM 的；抄的是**設定字串**，解析交給 pi。不寫任何檔。
+function normUrl(u) { return String(u || "").trim().replace(/\/+$/, ""); }
+function borrowKey() {
+  if (!UPSTREAM || UPSTREAM_IS_SINK) return null;
+  try {
+    const dir = process.env.PI_CODING_AGENT_DIR || PI_AGENT_DIR;
+    if (!dir) return null;           // 不知道 pi 設定在哪 ⇒ 不借（絕不讀 cwd 的 models.json）
+    const doc = JSON.parse(readFileSync(join(dir, "models.json"), "utf-8"));
+    const provs = (doc && doc.providers) || {};
+    const ids = Object.keys(provs).filter((id) => id !== PROVIDER && id !== "vacantproxy");
+    ids.sort((a, b) => (b === KEY_FROM) - (a === KEY_FROM));
+    for (const id of ids) {
+      const p = provs[id] || {};
+      if (normUrl(p.baseUrl) === normUrl(UPSTREAM) && typeof p.apiKey === "string" && p.apiKey) {
+        return { provider: id, apiKey: p.apiKey };
+      }
+    }
+  } catch (e) { /* 讀不到 models.json ⇒ 不借 */ }
+  return null;
+}
+const BORROWED = borrowKey();
+
 // ── 狀態：這個 session 有沒有開、開之前用的是哪個模型 ────────────────────────
 let enabled = true;
 let previous = null;   // {provider, id} —— /vacant off 切回去用
@@ -181,7 +220,8 @@ export default function (pi) {
   pi.registerProvider(PROVIDER, {
     name: "Vacant（常駐 proxyd :" + PORT + "）",
     baseUrl: BASE,
-    apiKey: "sk-vacant-possess",      // 佔位；proxyd sentinel="" ⇒ Authorization 原樣穿透
+    // 使用者自己的金鑰設定字串（借來的）或佔位；proxyd sentinel="" ⇒ Authorization 原樣穿透
+    apiKey: BORROWED ? BORROWED.apiKey : "sk-vacant-possess",
     api: "openai-completions",
     compat: { supportsDeveloperRole: false, supportsReasoningEffort: false },
     models: (BAKED_MODELS.length ? BAKED_MODELS : [DEFAULT_MODEL]).map(modelDef),
@@ -253,6 +293,11 @@ export default function (pi) {
     if (!alive.listening) {
       notify(ctx, "Vacant：常駐 proxyd " + PROXY + " **沒在聽**。模型仍會指到它 ⇒ 會 connection refused（fail-closed，不會偷偷直連）。看 `vacant possess status`。", "error");
     }
+    if (UPSTREAM_IS_SINK) {
+      notify(ctx, "Vacant：裝機時沒找到你的模型端點 ⇒ proxyd **沒有真上游**，每一通模型呼叫都會被擋（502，fail-closed，不會偷偷直連）。修法：`vacant uninstall` 後 `vacant install --agent pi --upstream openai=<你的端點>`；暫時要用原模型打 /vacant off。", "error");
+    } else if (!BORROWED) {
+      notify(ctx, "Vacant：models.json 裡沒有 baseUrl 等於 " + UPSTREAM + " 的 provider ⇒ 送的是佔位金鑰；上游要金鑰就會 401。", "warning");
+    }
     await switchOn(pi, ctx, "session_start");
   });
   pi.on("before_agent_start", () => { fire("user_prompt_submit", { source: "pi-extension" }); });
@@ -276,8 +321,13 @@ export default function (pi) {
 
 def render(*, port: int, state_dir: str, python: str | None = None,
            package_path: str = "", models: list[str] | None = None,
-           default_model: str | None = None) -> str:
-    """把 extension 渲染成文字。**純函式**：不讀環境、不碰檔案。"""
+           default_model: str | None = None, upstream: str = "",
+           upstream_is_sink: bool = False, key_from: str = "",
+           pi_agent_dir: str = "") -> str:
+    """把 extension 渲染成文字。**純函式**：不讀環境、不碰檔案。
+
+    ⚠ 參數裡**沒有金鑰**，也不准加：金鑰在 pi 行程裡借（誠實邊界 7）。
+    """
     py = python or sys.executable
     return _TEMPLATE % {
         "mark": MARK,
@@ -290,6 +340,10 @@ def render(*, port: int, state_dir: str, python: str | None = None,
         "provider": json.dumps(PROVIDER_ID),
         "models": json.dumps(list(models or []), ensure_ascii=False),
         "default_model": json.dumps(default_model or DEFAULT_MODEL),
+        "upstream": json.dumps(upstream or ""),
+        "upstream_is_sink": json.dumps(bool(upstream_is_sink)),
+        "key_from": json.dumps(key_from or ""),
+        "pi_agent_dir": json.dumps(pi_agent_dir or ""),
     }
 
 
