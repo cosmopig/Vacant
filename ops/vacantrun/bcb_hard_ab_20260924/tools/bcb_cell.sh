@@ -10,13 +10,14 @@ want="$(cd "$TPL/$safe" && find . -type f | sort | tr '\n' ' ')"; got="$(cd "$ws
 [ "$want" = "$got" ] || { echo "工作區與樣板不一致：$got" >&2; echo 3 > $L/rc; exit 3; }
 if [ $arm = OFF ]; then base_env $P/home_off; else base_env $P/home_on; fi
 jf=$P/home_on/.vacant/possess/proxyd/wire/index.jsonl; jb=$(wc -l < $jf 2>/dev/null || echo 0)
-{ echo "arm=$arm task=$tid attempt=$att backend=$BACKEND model=$MODEL"; echo "prompt=$PROMPT"; date -u +%FT%TZ; } > $L/argv.txt
+{ echo "arm=$arm task=$tid attempt=$att backend=$BACKEND model=$MODEL"; echo "prompt=$PROMPT"; echo "containment=bwrap(ro /, rw ws+HOME, tmpfs /tmp, unshare-pid, net shared)"; date -u +%FT%TZ; } > $L/argv.txt
 t0=$(date +%s.%N)
 case $arm in
-  OFF|CH) ( cd "$ws" && timeout 1500 $PI -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
-  GATE)   ( cd "$ws" && export VACANT_SUITE="$TPL/$safe/tests_visible" VACANT_TEST_TIMEOUT=120 \
+  OFF|CH) ( cd "$ws" && timeout 1500 bw "$ws" $PI -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
+  GATE)   ( cd "$ws" && export VACANT_SUITE="$TPL/$safe/tests_visible" VACANT_TEST_TIMEOUT=${BCB_TEST_TIMEOUT:-120} \
+              VACANT_ACCEPT_PATH_PREPEND="$VENV/bin" VACANT_ACCEPT_MEMORY_MB=2048 \
               VACANT_AGENT_MODEL="$MODEL" OPENAI_API_KEY="${PILOT_KEY:-lm-studio}" && \
-            timeout 1500 $HOME/.vacant/possess/bin/pi -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
+            timeout 1500 bw "$ws" $HOME/.vacant/possess/bin/pi -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
 esac
 t1=$(date +%s.%N)
 echo $rc > $L/rc; python3 -c "print(round($t1-$t0,1))" > $L/wall_s
@@ -28,6 +29,6 @@ fi
 [ -f "$ws/solution.py" ] && cp "$ws/solution.py" $L/delivered_solution.py
 # 計分（run 結束之後；隱藏測試永遠不進工作區）：可見與隱藏都只拿 solution.py 去量
 sc=$(mktemp -d); cp -r "$TPL/$safe/tests_visible" "$TPL/$safe/run_tests.sh" $sc/; [ -f "$ws/solution.py" ] && cp "$ws/solution.py" $sc/
-( cd $sc && timeout 300 sh run_tests.sh > $L/visible.out 2>&1; echo $? > $L/visible.rc ); rm -rf $sc
+( cd $sc && ulimit -v 2097152 && timeout 300 sh run_tests.sh > $L/visible.out 2>&1; echo $? > $L/visible.rc ); rm -rf $sc
 $VENV/bin/python $T/bcb_score.py "$HIDDEN/$safe/test_hidden.py" "$ws/solution.py" > $L/hidden.json 2> $L/hidden.stderr
 echo "=== $BACKEND $name rc=$rc wall=$(cat $L/wall_s)s visible_rc=$(cat $L/visible.rc) hidden=$(tr -d '\n ' < $L/hidden.json | head -c 50)"

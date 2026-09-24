@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """隱藏測試計分：把 solution.py 與 test_hidden.py 放進乾淨暫存目錄，逐個 check_* 跑（每個另開行程、各自逾時）。
 判準與 acceptance.py 相同：check_* 正常回傳＝過。沒有 solution.py ⇒ passed=0、total=None。"""
-import json, os, pathlib, shutil, subprocess, sys, tempfile
+import json, os, pathlib, resource, shutil, subprocess, sys, tempfile
 hid, sol = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 if not sol.is_file():
     print(json.dumps({"passed": 0, "total": None, "note": "沒有 solution.py"})); sys.exit(0)
@@ -22,12 +22,17 @@ spec = importlib.util.spec_from_file_location("hid", sys.argv[1]); mod = importl
 spec.loader.exec_module(mod); getattr(mod, sys.argv[2])()
 '''
 out = {"passed": 0, "total": 0, "failures": []}
+MEM = 2048 * 1024 * 1024   # 與閘門的 VACANT_ACCEPT_MEMORY_MB=2048 同一個上限
+
+
+def _lim():
+    resource.setrlimit(resource.RLIMIT_AS, (MEM, MEM))
 with tempfile.TemporaryDirectory() as d:
     w = pathlib.Path(d); shutil.copy2(sol, w / "solution.py"); shutil.copy2(hid, w / "test_hidden.py")
     env = dict(os.environ, MPLBACKEND="Agg")
     try:
         r = subprocess.run([sys.executable, "-c", LIST, "test_hidden.py"], cwd=w, capture_output=True,
-                           text=True, timeout=120, env=env)
+                           text=True, timeout=120, env=env, preexec_fn=_lim)
         info = json.loads((r.stdout or "{}").strip().splitlines()[-1])
     except Exception as e:
         info = {"import_error": f"{type(e).__name__}: {e}"}
@@ -37,7 +42,7 @@ with tempfile.TemporaryDirectory() as d:
         out["total"] += 1
         try:
             r = subprocess.run([sys.executable, "-c", ONE, "test_hidden.py", name], cwd=w, capture_output=True,
-                               text=True, timeout=120, env=env)
+                               text=True, timeout=120, env=env, preexec_fn=_lim)
             ok = r.returncode == 0
             msg = "" if ok else (r.stderr or "").strip().splitlines()[-1:][0][:160] if (r.stderr or "").strip() else f"rc={r.returncode}"
         except subprocess.TimeoutExpired:
