@@ -47,6 +47,23 @@ VACANT_TWIN_INIT=1 ...     # 只有第一次
 下游判成「模型回空的」並在收據上寫「thinking 吃光額度」——指向完全錯誤的方向。
 `ENDPOINT_CANDIDATES` 全部已經帶了；自己手打 `--endpoint` 才會踩。
 
+## 分身是真跑還是退化（2026-09-24 起）
+
+`twin_loop.sh` 預設 `--engine agent`：每位分身在 `vacant run` 底下用 pi **真跑**、
+自己決定任務（裁決 `decisions/DECISION_20260924_TWIN_AGENT_RUN.md`）。
+**這台要有 pi 0.85.x**（`PATH` 上，或 `VACANT_TWIN_PI=<完整路徑>`）。
+
+⚠ **1003（Windows）本機目前沒有 pi**（2026-09-24 查過）；pi 在 vacant-dev（1003 上的 VM）。
+沒有 pi 時 loop 會印一行 ⚠ 並**誠實地**退到直打模型（`engine=lmstudio:*`、
+`degrade_kind=agent_unavailable`、沒有收據）——畫面照實標，不會假裝在真跑。
+
+| 環境變數 | 預設 | 意思 |
+|---|---|---|
+| `VACANT_TWIN_ENGINE` | `agent` | `chat` ＝ 舊路徑 |
+| `VACANT_TWIN_PARALLEL` | `2` | 同時跑幾位（1003 吞吐 4 串封頂） |
+| `VACANT_EVENTS` | 庫旁邊的 `twin_lifecycle.jsonl` | lifecycle 事件檔（B 線 `--live` tail 這一份） |
+| `VACANT_TWIN_AGENTRUNS` | 庫旁邊的 `<庫名>.agentruns/` | 工作區與 run-dir。**loop 與 serve 兩邊要一致**，撤回才刪得到 |
+
 ## 開機之後一定要跑健檢
 
 ```bash

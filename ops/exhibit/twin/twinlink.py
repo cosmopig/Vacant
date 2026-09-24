@@ -11,6 +11,19 @@
 
 所以「觀眾生的那張卡」既沒有落盤的真相來源，也從來沒有真的餵給模型。這一支補那一段。
 
+## 🔴 2026-09-24：分身改成真跑（`generate --engine agent`，預設）
+
+人類的定義：觀眾交出特質 → 我們生成他的分身 → **分身自己決定**想在這個世界做什麼、
+然後做完（實務任務，不是寫程式）。觀眾不下指令。「做得對不對」是 Vacant 的問題，
+這一條線**不發明評分**。所以 `generate` 的主路徑不再是「打模型要三句台詞」，而是：
+
+  特質 → 拋棄式工作區 → `vacant run`（`allow_no_suite`，`accepted=null`）底下跑 pi
+  → 分身寫 `PLAN.md`（決定＋理由）與成品 → 讀回、封進檔案庫、鏈上記 `run_id`／`verdict_hash`
+
+實作在 `ops/exhibit/twin/twinagent.py`，裁決 `decisions/DECISION_20260924_TWIN_AGENT_RUN.md`。
+舊的直打模型路徑留著當**退化**（`--engine chat`，或這台沒有 pi 時自動退），
+`engine` 會照實標出來（見誠實邊界 2）。
+
 ```
  觀眾手機 ──▶ vacant-world.cosmopig.com ──ingest──▶ twinstore.sqlite3 ──generate──▶ 1003 LM Studio
   (公網)         郵箱：會覆寫、會歸零          唯讀抄寫   真相來源：append-only     本機/區網算力
@@ -32,9 +45,12 @@
 
 1. **`publish` 失敗不是錯誤路徑，是常態。** 展場斷網時它會一直失敗，
    而那**不影響現場**——現場讀的是本機。失敗記一列 `error` 就好，不要重試到卡死。
-2. **`engine` 欄位不是裝飾。** `lmstudio:<model>` ＝ 真的有一顆模型回了話；
-   `fallback_deterministic` ＝ 查表湊出來的。畫面上兩者要分得出來，
-   把後者講成前者就是鐵律 5 的展場版本。
+2. **`engine` 欄位不是裝飾。** 三種，畫面上要分得出來：
+   `vacant_run:pi:<model>` ＝ 分身在 `vacant run` 底下真跑、真的打到模型、真的寫了
+   PLAN.md（有收據，`accepted=null`＝沒有客觀標準、不判）；
+   `lmstudio:<model>` ＝ 真的有一顆模型回了話，**但沒經過 vacant run、沒有收據**；
+   `fallback_deterministic` ＝ 查表湊出來的。
+   把後者講成前者就是鐵律 5 的展場版本。退化時 `degraded_from`／`degrade_kind` 講清楚從哪裡退、為什麼。
 3. **`ingest` 讀不到的不算 0。** 雲端 4xx/5xx/逾時一律記 `ingest_gap`，
    `pulled` 欄位寫 `null` 不寫 0——「沒量到」跟「量到是零」是兩件事。
 4b. **一張卡的問題不可以變成整個展場的問題（2026-09-20 演練後加上）。**
@@ -121,7 +137,7 @@ HERE = pathlib.Path(__file__).resolve()
 TWIN = HERE.parent
 sys.path.insert(0, str(TWIN.parents[2]))
 
-from ops.exhibit.twin import twinvault  # noqa: E402
+from ops.exhibit.twin import twinagent, twinvault  # noqa: E402
 from ops.exhibit.twin.twinstore import (  # noqa: E402
     DEFAULT_DB, KIND_ERASED, KIND_ERROR, KIND_GENERATED, KIND_INGEST_GAP,
     KIND_NOTE, KIND_PUBLISHED, KIND_SUBMITTED, KIND_WITHDRAWN, TwinStore,
@@ -232,6 +248,11 @@ def assert_ks1_clean(text: str) -> None:
     for bad in KS1_FORBIDDEN:
         if bad in text:
             raise ValueError(f"KS-1 違規：prompt 含禁語 {bad!r}")
+
+
+# 真跑那三段固定文字也過**這一條線自己的**禁語表（`twinagent` 已過 `memory` 那一份）。
+for _t in (twinagent.SYSTEM_PROMPT, twinagent.FIRST_MESSAGE, twinagent.CALLER_PROMPT):
+    assert_ks1_clean(_t)
 
 
 #: 🔴 **一張卡的問題，不可以變成整個展場的問題。**
@@ -742,7 +763,19 @@ def _seal_generated(store: TwinStore, sid: str, twin: dict[str, Any],
 def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
              model: str = DEFAULT_MODEL, limit: int = 0,
              timeout: float = DEFAULT_GEN_TIMEOUT,
-             allow_fallback: bool = True) -> dict[str, Any]:
+             allow_fallback: bool = True, *,
+             agent: "twinagent.AgentConfig | None" = None,
+             pool: "twinagent.AgentPool | None" = None) -> dict[str, Any]:
+    """生成分身。
+
+    `agent` 給了 ⇒ **主路徑（2026-09-24）**：分身在 `vacant run` 底下用 pi 真跑
+    （`_generate_agent`，裁決 `decisions/DECISION_20260924_TWIN_AGENT_RUN.md`）。
+    `agent=None` ⇒ 舊路徑：直接打模型要三句台詞（`engine=lmstudio:*`，**沒有收據**）。
+    CLI 的 `--engine chat` 走這條；Python 呼叫端不給 `agent` 也走這條（相容既有呼叫點）。
+    """
+    if agent is not None:
+        return _generate_agent(store, endpoint, model, limit, timeout,
+                               allow_fallback, agent=agent, pool=pool)
     todo = store.pending(KIND_GENERATED)
     # 撤回過的人不再生成。**不是過濾掉「看起來不想要的資料」**——
     # 是那個人已經說了「刪掉我」，再拿他的卡去打模型就是沒在聽。
@@ -780,6 +813,124 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
                         else "local:fallback")
         done += 1
     return {"ok": True, "generated": done, "degraded": degraded, "failed": failed,
+            "remaining": len(store.pending(KIND_GENERATED))}
+
+
+def _gone(store: TwinStore, sid: str) -> bool:
+    return (store.current(sid) or {}).get("status") in ("withdrawn", "erased")
+
+
+def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
+                    timeout: float, allow_fallback: bool, *,
+                    agent: "twinagent.AgentConfig",
+                    pool: "twinagent.AgentPool | None") -> dict[str, Any]:
+    """真跑主路徑：提交 → 收成 → 封印。**sqlite 只在這個（主）執行緒碰。**
+
+    `pool=None` ⇒ 開一個臨時佇列、**等全部跑完**（`generate` 子命令）。
+    `pool` 給了 ⇒ 不阻塞：這一輪只提交新的、收成跑完的（`loop` 走這條，
+    還在跑的人這一輪是 `arriving`，電視照樣演「正在抵達」）。
+
+    退化表（裁決 §五）：
+    * 這台跑不起 pi（沒有 pi／bash／包裝）⇒ 舊的直打模型路徑，`degraded_from`
+      標 `vacant_run:pi`、`degrade_kind=agent_unavailable`（**有模型回話，但沒經過 vacant run**）；
+    * 端點探不到 ⇒ 不起 pi、也不打模型（`timeout` 可能長達 300 秒／張）⇒ 直接查表，
+      `degrade_kind=upstream_unreachable`；
+    * 其餘（沒打到模型、沒寫 PLAN.md、infra_void、例外）由 `twinagent.build_twin` 決定。
+    """
+    in_flight = pool.in_flight() if pool is not None else set()
+    todo = [s for s in store.pending(KIND_GENERATED)
+            if s not in in_flight and not _gone(store, s)]
+    if limit:
+        todo = todo[:limit]
+    ok_agent, why_agent = twinagent.agent_available(agent)
+    reachable = twinagent.upstream_reachable(endpoint) if todo else None
+    done = degraded = failed = submitted = discarded = 0
+    real_engine = f"{twinagent.ENGINE_PREFIX}:{model}"
+
+    def _seal(sid: str, twin: dict[str, Any], source: str) -> None:
+        nonlocal done, degraded
+        if twin.get("engine") != real_engine:
+            degraded += 1
+        _seal_generated(store, sid, twin, source)
+        done += 1
+
+    def _mark(twin: dict[str, Any], kind: str, why: str | None = None) -> dict[str, Any]:
+        twin["degraded_from"] = real_engine
+        twin["degrade_kind"] = kind
+        if why:
+            twin["degrade_reason"] = why
+        return twin
+
+    if todo and not ok_agent:
+        # 這台沒有 pi：退到舊路徑。**有模型回話的話 engine 仍是 `lmstudio:*`**
+        # （那是真的），但 `degraded_from` 講清楚它沒有經過 vacant run。
+        for sid in todo:
+            cur = store.current(sid) or {}
+            if reachable:
+                twin = generate_one(cur.get("card"), cur.get("card_text"),
+                                    endpoint, model, timeout, allow_fallback)
+            else:
+                twin = fallback_twin(cur.get("card"))
+            _mark(twin, "agent_unavailable", why_agent)
+            _seal(sid, twin, f"1003:{endpoint}" if "lmstudio" in str(twin.get("engine"))
+                  else "local:fallback")
+        todo = []
+    elif todo and not reachable:
+        for sid in todo:
+            cur = store.current(sid) or {}
+            _seal(sid, _mark(fallback_twin(cur.get("card")), "upstream_unreachable",
+                             f"端點探不到：{endpoint}"), "local:fallback")
+        todo = []
+
+    own_pool = pool is None
+    if todo:
+        # 上游與模型是**行程層級**的環境變數（launcher 從 os.environ 讀）。
+        # 同一個行程裡所有分身打同一個端點，所以設一次就好。
+        os.environ["VACANT_RUN_UPSTREAM_OPENAI"] = endpoint
+        os.environ["VACANT_AGENT_MODEL"] = model
+        if own_pool:
+            pool = twinagent.AgentPool(agent.parallel)
+        for sid in todo:
+            cur = store.current(sid) or {}
+            job = twinagent.job_for(sid, cur.get("card"), cur.get("card_text"), agent)
+            if job is None:
+                _seal(sid, _mark(fallback_twin(None), "no_traits"), "local:fallback")
+                continue
+            if pool.submit(job):
+                submitted += 1
+
+    results = pool.harvest(block=own_pool) if pool is not None else []
+    if own_pool and pool is not None:
+        pool.shutdown(wait=True)
+    for res in results:
+        sid = res["sub_id"]
+        if _gone(store, sid):
+            # 🔴 **跑到一半被撤回**：不封印（那會把他的東西寫回檔案庫），再刪一次
+            #    （撤回那一刻 pi 可能還在寫），並記一列只有類別與計數的 note。
+            rec = twinagent.erase_run_artifacts(agent.work_root, sid)
+            store.append(KIND_NOTE, sid, {
+                "twinlink_event": "late_run_discarded",
+                "run_artifacts_erased": rec["erased"],
+                "run_artifacts_kept_hash_only": rec["kept_hash_only"],
+                "run_artifacts_problems": rec["problems"],
+                "at": _now()}, source="local:twinagent")
+            discarded += 1
+            continue
+        try:
+            twin = twinagent.build_twin(res, model=model, fallback=fallback_twin)
+        except CARD_LEVEL_ERRORS as e:
+            failed += 1
+            twin = _mark(fallback_twin(None), type(e).__name__)
+        _seal(sid, twin, f"vacant_run:{endpoint}"
+              if twin.get("engine") == real_engine else "local:fallback")
+    return {"ok": True, "mode": "agent", "generated": done, "degraded": degraded,
+            "failed": failed, "submitted": submitted, "discarded": discarded,
+            "in_flight": (len(pool.in_flight())
+                          if (pool is not None and not own_pool) else 0),
+            "agent_available": ok_agent,
+            "agent_unavailable_reason": None if ok_agent else why_agent,
+            "upstream_reachable": reachable,
+            "agent": twinagent.describe(agent),
             "remaining": len(store.pending(KIND_GENERATED))}
 
 
@@ -930,6 +1081,9 @@ RETIRE_SHOW_MAX = 12
 #:   舊庫直接相容，`verify()` 也照樣從創世走到鏈頭。
 RETIRE_MARK = "retired"
 
+#: 一定要進得了畫面的 tier。撤回過的人（`withdrawn`）**不在裡面**（缺陷二）。
+MUST_TIERS = ("arriving", "fresh")
+
 
 def _day_bounds(now_ms: int) -> tuple[int, int]:
     """回「今天」的起點（UTC 毫秒）與時區偏移（分鐘）。
@@ -1024,12 +1178,26 @@ def _retired_index(store: TwinStore) -> dict[str, dict[str, Any]]:
     for e in store.events(kind=KIND_NOTE):
         p = e.get("payload")
         if isinstance(p, dict) and p.get("twinlink_event") == RETIRE_MARK:
-            out[e["sub_id"]] = {"at_ms": e["ts_unix_ms"], "seq": e["seq"], **p}
+            # 🔴 2026-09-24 修正（缺陷一）：2026-09-24 之前寫的退役 note 帶著
+            #    `farewell`＝**解封後的分身原文**。那一列拿不掉（append-only），
+            #    但**不准再從這裡讀回去播**——撤回之後它還會出現在 `retiring[]`。
+            #    告別詞一律在播放時從檔案庫讀（`build_view` 的 `_farewell_of`），
+            #    撤回之後就讀不到。殘留那一列由 `twinvault.legacy_plaintext_seqs` 回報。
+            rec = {k: v for k, v in p.items() if k != "farewell"}
+            out[e["sub_id"]] = {"at_ms": e["ts_unix_ms"], "seq": e["seq"], **rec}
     return out
 
 
 def _tier(entry: dict[str, Any], now_ms: int, fresh_window_s: float) -> str:
-    """`arriving`（投了卡、分身還沒生出來）／`fresh`（剛上得了台）／`ambient`。"""
+    """`arriving`（投了卡、分身還沒生出來）／`fresh`（剛上得了台）／`ambient`
+    ／`withdrawn`（撤回或抹除過）。
+
+    🔴 2026-09-24 修正（缺陷二）：撤回過的人**先判**。在這之前，還沒生成就撤回的人
+       `generated_ms` 永遠是 `None` ⇒ 永遠 `arriving` ⇒ 永遠佔「必留」名額、
+       永遠算在 `counts.waiting`（`generate()` 跳過撤回者，他再也不會變成 fresh）。
+    """
+    if entry.get("gone"):
+        return "withdrawn"
     if entry["generated_ms"] is None:
         return "arriving"
     return ("fresh" if now_ms - entry["generated_ms"] <= fresh_window_s * 1000
@@ -1079,6 +1247,7 @@ def build_view(store: TwinStore, *,
             "generated_ms": gen_ms, "submitted_ms": sub_ms,
             "submit_ts_source": t.get("submit_ts_source"),
             "stage_ms": gen_ms if gen_ms is not None else sub_ms,
+            "gone": c.get("status") in ("withdrawn", "erased"),
         })
     # 🔴 新到舊，依**送出時間**。不是 seq，也不混 generated_ms（本機時鐘）。
     cands.sort(key=lambda x: (x["submitted_ms"], x["key_seq"]), reverse=True)
@@ -1094,23 +1263,41 @@ def build_view(store: TwinStore, *,
         #   之後，`arriving`／`fresh` 不再保證是排序後的連續前綴：一個 30 分鐘前
         #   投卡、卡在生成裡、剛剛才生出來的人是 `fresh`，卻排在 20 分鐘前投卡
         #   而早就生完的 `ambient` 後面。照前綴數會**低估**要保留的人數。
-        n_must = sum(1 for x in live
-                     if _tier(x, now_ms, fresh_window_s) in ("arriving", "fresh"))
+        must = [x for x in live
+                if _tier(x, now_ms, fresh_window_s) in MUST_TIERS]
+        n_must = len(must)
         k = min(hard_cap, max(recent, n_must))
-        shown, rest = live[:k], live[k:]
+        # 🔴 2026-09-24 修正（缺陷三）：**先保留必留的，剩下的名額再依送出時間補。**
+        #    在這之前是 `shown = live[:k]`（依送出時間切前綴）。`n_must` 把一位
+        #    「30 分鐘前投卡、剛剛才生出來」的 fresh 算進 k，但切前綴時他排在
+        #    20 分鐘前投卡的 ambient 後面 ⇒ 上不了畫面 ⇒ 15 分鐘後變 ambient
+        #    就被退役——**從沒演過就退場**。
+        #    ⚠ 輸出順序仍然是 `live` 的順序（送出時間新到舊），所以
+        #      「最後一位投卡的人在 people[0]」那條保證不受影響。
+        keep = {x["sid"] for x in must[:k]}
+        for x in live:
+            if len(keep) >= k:
+                break
+            keep.add(x["sid"])
+        shown = [x for x in live if x["sid"] in keep]
+        rest = [x for x in live if x["sid"] not in keep]
         # 掉出視窗但**還沒輪到**的（被 hard_cap 切掉的 fresh）不退役。
+        # 撤回過的人（`withdrawn`）掉出視窗就跟 ambient 一樣退場，不算「還在等」。
         retire_now = [x for x in rest
-                      if _tier(x, now_ms, fresh_window_s) == "ambient"]
+                      if _tier(x, now_ms, fresh_window_s) not in MUST_TIERS]
         waiting = [x for x in rest
-                   if _tier(x, now_ms, fresh_window_s) != "ambient"]
+                   if _tier(x, now_ms, fresh_window_s) in MUST_TIERS]
 
     if record_retire and retire_now:
         for x in retire_now:
-            twin = (x["cur"].get("twin") or {})
             rec = {
                 "twinlink_event": RETIRE_MARK,
                 # 「給結束一個形狀」：退場時他說的那一句，就是他交件時說的那一句。
-                "farewell": twin.get("handover") or twin.get("arrival"),
+                # 🔴 2026-09-24 修正（缺陷一）：**這裡只放參照，不放那句話本身。**
+                #    舊版寫的是 `"farewell": twin["handover"]`——解封後的分身原文
+                #    直接進了 append-only 鏈：撤回刪不掉、抹除證明看不到它、
+                #    `retiring[]` 撤回後還在播。那句話播放時從檔案庫讀（撤回後讀不到）。
+                "farewell_from": "twin.handover",
                 "reason": f"場次輪替：畫面只留最近 {recent} 位",
                 "recent": recent,
                 "stage_ms": x["stage_ms"],
@@ -1137,12 +1324,32 @@ def build_view(store: TwinStore, *,
             withdrawn += 1
         people.append({
             "id": c["sub_id"],
+            # 公開別名：事件流（`vacant.lifecycle/1` 的 `caller.cell_id`）與收據的
+            # `task_id` 用的是它，**不是** `id`（`id` 是撤回的能力憑證）。
+            # 電視要把 B 線的 `--live` 事件接到畫面上的人，就用這一欄。
+            "twin_id": twinagent.public_twin_id(c["sub_id"]),
             # 🔴 撤回過的人，畫面上什麼都不留。原文已經 `unlink()` 了，
             #    這裡再把它當成「剛好讀不到」而留個空位也不對——狀態要講出來。
             "card": None if gone else c.get("card"),
             "arrival": None if gone else twin.get("arrival"),
             "working": None if gone else twin.get("working"),
             "handover": None if gone else twin.get("handover"),
+            # ── 真跑（2026-09-24）：分身**自己決定**的那件事與它做出來的檔 ──
+            # 舊路徑（直打模型）與退化路徑這三欄是 None——不准拿台詞去補。
+            "decision": None if gone else twin.get("decision"),
+            "reason": None if gone else twin.get("reason"),
+            "artifacts": None if gone or not twin.get("artifacts") else [
+                {"name": a.get("name"), "text": a.get("text"),
+                 "truncated": a.get("truncated")}
+                for a in twin["artifacts"] if isinstance(a, dict)],
+            # 這一跑的收據指標（別名、雜湊、計數；**不含內容**）。
+            # `accepted=None` ＝沒有客觀標準、不判——**不是沒過**。
+            "run": ({"run_id": twin.get("run_id"),
+                     "verdict_hash": twin.get("verdict_hash"),
+                     "stop_reason": twin.get("stop_reason"),
+                     "accepted": twin.get("accepted"),
+                     "requests_seen": twin.get("requests_seen")}
+                    if twin.get("run_id") or twin.get("verdict_hash") else None),
             # 🔴 engine 一定要出到畫面層：真模型跟退化查表不可以長得一樣
             "engine": twin.get("engine"),
             "latency_ms": twin.get("latency_ms"),
@@ -1159,18 +1366,27 @@ def build_view(store: TwinStore, *,
                       else round((now_ms - x["stage_ms"]) / 1000, 1)),
         })
 
+    # 🔴 撤回過的人**不出現在 `retiring[]`**（缺陷一）：他說了「刪掉我」，
+    #    退場儀式也不演。他仍然算在 `retired_total`（帳本上那一列還在）。
+    by_sid = {x["sid"]: x for x in cands}
     in_grace = sorted(
         ({"id": sid,
-          "farewell": r.get("farewell"),
           "reason": r.get("reason"),
           "at": r.get("at"),
           "age_s": round((now_ms - r["at_ms"]) / 1000, 1),
           "screen_confirmed": r.get("screen_confirmed")}
          for sid, r in retired.items()
-         if now_ms - r["at_ms"] <= retire_grace_s * 1000),
+         if now_ms - r["at_ms"] <= retire_grace_s * 1000
+         and not (by_sid.get(sid) or {}).get("gone")),
         key=lambda d: d["age_s"])
     # 演得下的才掛出去；剩下的用一個數字交代（見 RETIRE_SHOW_MAX 的註解）。
     retiring, retiring_pending = in_grace[:RETIRE_SHOW_MAX], len(in_grace) - RETIRE_SHOW_MAX
+    # 告別詞**播放時才讀**，而且只讀掛得出去的那幾位（不是整批 in_grace）：
+    # 從 `current()` 讀 ⇒ 封印過的走檔案庫（撤回後讀不到）、舊鏈的走 payload。
+    for r in retiring:
+        cur = (by_sid.get(r["id"]) or {}).get("cur") or {}
+        tw = cur.get("twin") or {}
+        r["farewell"] = tw.get("handover") or tw.get("arrival")
 
     n_today = sum(1 for x in cands
                   if x["submitted_ms"] is not None and x["submitted_ms"] >= day_start_ms)
@@ -1259,6 +1475,10 @@ def build_view(store: TwinStore, *,
         "screen_contract": {
             "spawn_order": "people 已經排好序，照陣列順序生就對了",
             "jump_queue": ["arriving", "fresh"],
+            # 2026-09-24（缺陷二）：撤回過的人 tier 是 withdrawn，畫面欄位全是 null。
+            "never_play_tier": ["withdrawn"],
+            # 事件流（lifecycle）的 caller.cell_id ＝ people[].twin_id（不是 id）
+            "join_live_events_on": "twin_id",
             "cold_start": ("重整／斷電之後把整個 people 快轉補齊（不要每人等 30 秒），"
                            "之後才回到一次一位的節奏"),
             "play_exit_for": "retirement.retiring[]（演完才算交代過，不要靜靜移除）",
@@ -1271,7 +1491,10 @@ def build_view(store: TwinStore, *,
                                  "拿它生分身等於把視窗繞掉"),
         },
         "people": people,
-        "honesty": "engine=lmstudio:* 才是真的有模型回話；fallback_deterministic 是離線查表。",
+        "honesty": ("engine=vacant_run:pi:* ＝分身在 vacant run 底下真跑、自己決定做了"
+                    "一件事（decision／artifacts），run.accepted=null 是「沒有客觀標準、"
+                    "不判」不是「沒過」；lmstudio:* ＝有模型回話但沒經過 vacant run"
+                    "（沒有收據）；fallback_deterministic 是離線查表。"),
         "erasure_honesty": (
             "原文與 nonce 住在鏈外的檔案庫，撤回時真的 unlink()，"
             "刪除證明（被刪位元組的 sha256）簽上鏈。"
@@ -1313,6 +1536,11 @@ def withdraw(store: TwinStore, sub_id: str, *, reason: str = "subject_request",
         "v": 1, "reason": str(reason)[:120], "at": _now(),
     }, source=source)
     rec = store.vault.withdraw(sub_id, reason=str(reason)[:120])
+    # 🔴 真跑（2026-09-24）多出來的落點：wire log（鐵律 3 逐字落盤 ⇒ 裡面有
+    #    TRAITS.md 原文）、凍結快照、stdout／stderr、工作區。**全部刪**，只留收據
+    #    （只有雜湊與計數）。漏刪 wire log 卻回報 `fully_erased` 就是那句謊。
+    ra = twinagent.erase_run_artifacts(
+        twinagent.default_work_root(store.path), sub_id)
     ev = {
         "v": 1,
         "signed": rec["signed"],
@@ -1323,7 +1551,12 @@ def withdraw(store: TwinStore, sub_id: str, *, reason: str = "subject_request",
         # ⚠ 舊鏈的原文拿不掉。**這幾個 seq 要跟著刪除證明一起留下來**，
         #   不然「已刪除」這三個字在那幾位身上就是假的。
         "residual_plaintext_seqs": residual,
-        "fully_erased": not residual,
+        # run 產物：刪了哪幾類（只有類別名、檔數、位元組數）、留了什麼、哪裡出錯。
+        "run_artifacts_erased": ra["erased"],
+        "run_artifacts_kept_hash_only": ra["kept_hash_only"],
+        "run_artifacts_problems": ra["problems"],
+        # **兩個條件同時成立才是 true**：鏈上沒有殘留原文 ＋ run 產物刪除沒有出錯。
+        "fully_erased": not residual and not ra["problems"],
         "problems": rec["problems"],
         "at": _now(),
     }
@@ -1805,6 +2038,35 @@ def _add_window_args(q: argparse.ArgumentParser, *, can_retire: bool) -> None:
                        help="算視窗但**不把退役寫上鏈**（演練／稽核用；展場不要開）")
 
 
+def _add_agent_args(q: argparse.ArgumentParser) -> None:
+    """真跑那幾個旗標。`generate` 與 `loop` 共用同一份（不然會漂成兩套預設）。"""
+    q.add_argument("--engine", choices=("agent", "chat"), default="agent",
+                   help=("agent（預設，主路徑）＝分身在 vacant run 底下用 pi 真跑、"
+                         "自己決定任務；chat ＝舊路徑，直接打模型要三句台詞（沒有收據）。"
+                         "agent 跑不起來（這台沒有 pi）會**誠實地**退到 chat 並標 "
+                         "degrade_kind=agent_unavailable。"))
+    q.add_argument("--parallel", type=int, default=twinagent.DEFAULT_PARALLEL,
+                   help=(f"最多同時跑幾位分身（預設 {twinagent.DEFAULT_PARALLEL}；"
+                         "1003 吞吐 4 串封頂）"))
+    q.add_argument("--agent-timeout", type=float,
+                   default=twinagent.DEFAULT_AGENT_TIMEOUT, dest="agent_timeout",
+                   help="單跑牆鐘上限（秒）")
+    q.add_argument("--events", default=None,
+                   help=("lifecycle 事件檔（展場 live 檔）。預設 VACANT_EVENTS，"
+                         "否則庫旁邊的 twin_lifecycle.jsonl"))
+
+
+def _agent_cfg(a: argparse.Namespace) -> "twinagent.AgentConfig | None":
+    if getattr(a, "engine", "chat") != "agent":
+        return None
+    return twinagent.AgentConfig(
+        work_root=twinagent.default_work_root(a.db),
+        events_path=(pathlib.Path(a.events) if a.events
+                     else twinagent.default_events_path(a.db)),
+        model=a.model, endpoint=a.endpoint,
+        parallel=a.parallel, timeout_s=a.agent_timeout)
+
+
 def main(argv: Iterable[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="twinlink — 手機→公網→DB→1003→螢幕")
     ap.add_argument("--db", default=str(DEFAULT_DB))
@@ -1833,6 +2095,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     g.add_argument("--timeout", type=float, default=DEFAULT_GEN_TIMEOUT)
     g.add_argument("--no-fallback", action="store_true",
                    help="模型不通就炸，不要退化（量測用，展場不要開）")
+    _add_agent_args(g)
 
     e = s.add_parser("export")
     e.add_argument("--out", default=str(TWIN / "store" / "visitors.json"))
@@ -1864,6 +2127,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     lp.add_argument("--rounds", type=int, default=0, help="0＝永遠（展場無人值守）")
     lp.add_argument("--out", default=str(TWIN / "store" / "visitors.json"))
     _add_window_args(lp, can_retire=True)
+    _add_agent_args(lp)
 
     a = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -1895,7 +2159,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         _p(ingest(st, a.cloud, a.token, a.timeout)); return 0
     if a.cmd == "generate":
         _p(generate(st, a.endpoint, a.model, a.limit, a.timeout,
-                    allow_fallback=not a.no_fallback)); return 0
+                    allow_fallback=not a.no_fallback, agent=_agent_cfg(a))); return 0
     if a.cmd == "publish":
         _p(publish(st, a.cloud, a.token, a.limit, a.timeout)); return 0
     if a.cmd == "export":
@@ -1915,19 +2179,39 @@ def main(argv: Iterable[str] | None = None) -> int:
         #    「旗標存在、產品路徑沒接上去」——展場跑的正是 loop。
         #    判準：tests/test_twin_recent_window.py::test_loop_cli_passes_the_window
         n = 0
-        while True:
-            n += 1
-            r = {"round": n, "at": _now()}
-            r["ingest"] = ingest(st, a.cloud, a.token)
-            r["generate"] = generate(st, a.endpoint, a.model)
-            r["publish"] = publish(st, a.cloud, a.token)
-            r["export"] = export(st, pathlib.Path(a.out), recent=a.recent,
-                                 fresh_window_s=a.fresh_window,
-                                 record_retire=not a.no_retire)
-            print(json.dumps(r, ensure_ascii=False), flush=True)
-            if a.rounds and n >= a.rounds:
-                return 0
-            time.sleep(a.interval)
+        acfg = _agent_cfg(a)
+        # 真跑的佇列**跨輪存在**：每一輪只提交新的、收成跑完的，不阻塞 export
+        # （還在跑的人這一輪是 arriving，電視照樣演「正在抵達」）。
+        pool = twinagent.AgentPool(acfg.parallel) if acfg is not None else None
+        try:
+            while True:
+                n += 1
+                r = {"round": n, "at": _now()}
+                r["ingest"] = ingest(st, a.cloud, a.token)
+                r["generate"] = generate(st, a.endpoint, a.model,
+                                         agent=acfg, pool=pool)
+                r["publish"] = publish(st, a.cloud, a.token)
+                r["export"] = export(st, pathlib.Path(a.out), recent=a.recent,
+                                     fresh_window_s=a.fresh_window,
+                                     record_retire=not a.no_retire)
+                print(json.dumps(r, ensure_ascii=False), flush=True)
+                if a.rounds and n >= a.rounds:
+                    if pool is not None and pool.in_flight():
+                        # 有限輪數（演練／測試）：收完還在跑的再走，不留孤兒 run。
+                        pool.wait_idle()
+                        r2 = {"round": "drain", "at": _now(),
+                              "generate": generate(st, a.endpoint, a.model,
+                                                   agent=acfg, pool=pool),
+                              "export": export(st, pathlib.Path(a.out),
+                                               recent=a.recent,
+                                               fresh_window_s=a.fresh_window,
+                                               record_retire=not a.no_retire)}
+                        print(json.dumps(r2, ensure_ascii=False), flush=True)
+                    return 0
+                time.sleep(a.interval)
+        finally:
+            if pool is not None:
+                pool.shutdown(wait=False)
     return 2
 
 

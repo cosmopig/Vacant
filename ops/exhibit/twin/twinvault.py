@@ -135,10 +135,20 @@ TWIN_ON_CHAIN_KEYS: tuple[str, ...] = (
     "engine", "model", "endpoint", "latency_ms", "raw_len",
     "reasoning_tokens", "completion_tokens", "reasoning_chars",
     "max_tokens", "budget_escalated", "degraded_from", "degrade_kind",
+    # ── 2026-09-24 真跑（`twinagent.py`，`decisions/DECISION_20260924_TWIN_AGENT_RUN.md`）──
+    #   鏈上這一列要**指到那一跑**：`run_id`（lifecycle）＋ `verdict_hash`（收據鏈頭）。
+    #   全部是別名、雜湊、計數、固定枚舉——**沒有一個是人講的話**。
+    #   `accepted` 是三值，真跑恆為 `None`（沒有客觀標準、不判）。
+    "twin_id", "run_id", "verdict_hash", "stop_reason", "accepted",
+    "requests_seen", "count_semantics", "agent_rc", "agent_timed_out",
+    "n_artifacts", "lines_from",
 )
 #: 生成結果裡搬進檔案庫的欄位（觀眾看得到的句子＋可能夾帶原文的除錯字串）。
+#: 2026-09-24 起多三個：分身**自己決定**的那件事（`decision`／`reason`）與它做出來的
+#: 檔（`artifacts`）。它們是從觀眾特質衍生的東西，撤回要一起刪。
 TWIN_OFF_CHAIN_KEYS: tuple[str, ...] = (
     "arrival", "working", "handover", "degrade_reason",
+    "decision", "reason", "artifacts",
 )
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -742,11 +752,22 @@ def _now_ms() -> int:
 # ---------------------------------------------------------------------------
 
 def legacy_plaintext_seqs(store: Any, sub_id: str) -> list[int]:
-    """這位主體有哪幾列 payload 裡帶著原文（＝2026-09-21 之前寫進去的）。"""
+    """這位主體有哪幾列 payload 裡帶著原文（拿不掉，撤回時要誠實列出來）。
+
+    三種來源：
+    * `submitted`／`generated`：2026-09-21 之前寫進去的（封印之前）；
+    * **退役 `note` 帶 `farewell`**：2026-09-24 之前的 `build_view` 把解封後的
+      分身原文（交件那句話）寫進退役事件。那一列一樣拿不掉——漏掉它，
+      抹除證明就會在這些人身上說「完全刪掉了」（2026-09-24 code review 缺陷一）。
+    """
     out = []
     for e in store.events(sub_id=sub_id):
         p = e.get("payload")
         if not isinstance(p, dict) or p.get("sealed") == SEAL_TAG:
+            continue
+        if e["kind"] == KIND_NOTE and p.get("twinlink_event") == "retired" \
+                and p.get("farewell"):
+            out.append(e["seq"])
             continue
         if e["kind"] == KIND_SUBMITTED and (
                 p.get("card") is not None or p.get("card_text") is not None):
