@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_30_ord_suffix:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 33,
+      "cases": [
+        {
+          "case": "check_01_ord_suffix",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'ord_suffix' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_30_ord_suffix__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import ord_suffix",
+          "output": ""
+        },
+        {
+          "case": "check_02_ord_suffix",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'ord_suffix' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_30_ord_suffix__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import ord_suffix",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "4e1f4af9b03bbd2a44e5115453d6b3ab0cb023c1ea43d6b2ea0b60bd4f214955"
+}

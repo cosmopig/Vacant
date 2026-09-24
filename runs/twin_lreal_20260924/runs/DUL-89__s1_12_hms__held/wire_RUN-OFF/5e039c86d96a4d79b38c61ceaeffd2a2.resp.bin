@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-9pj5xs504nk39vuppcf2f2","object":"chat.completion.chunk","created":1790237440,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"940902010","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-9pj5xs504nk39vuppcf2f2","object":"chat.completion.chunk","created":1790237440,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solution(seconds):\\n    hours = seconds // 3600\\n    minutes = (seconds % 3600) // 60\\n    secs = seconds % 60\\n    return f\\\"{hours}:{minutes:02d}:{secs:02d}\\\"\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-9pj5xs504nk39vuppcf2f2","object":"chat.completion.chunk","created":1790237440,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-9pj5xs504nk39vuppcf2f2","object":"chat.completion.chunk","created":1790237440,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1488,"completion_tokens":82,"total_tokens":1570,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

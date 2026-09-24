@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-4tcj916bfixms13im4rt","object":"chat.completion.chunk","created":1790239197,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"345639335","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4tcj916bfixms13im4rt","object":"chat.completion.chunk","created":1790239197,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solution(hex_color):\\n    # Remove the hash character if it exists\\n    hex_code = hex_color.lstrip('#')\\n    \\n    # Convert the hex string to an integer, then to a list of 3 integers (RGB)\\n    # We use [int(hex_code[i:i+2], 16) for i in range(0, 6, 2)]\\n    r = int(hex_code[0:2], 16)\\n    g = int(hex_code[2:4], 16)\\n    b = int(hex_code[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\n# Example usage (optional for the task but good for testing):\\n# print(solution(\\\"#FFFFFF\\\"))  # {'r': 255, 'g': 255, 'b': 255}\\n# print(solution(\\\"#000000\\\"))  # {'r': 0, 'g': 0, 'b': 0}\\n# print(solution(\\\"#ff5733\\\"))  # {'r': 255, 'g': 87, 'b': 51}\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-4tcj916bfixms13im4rt","object":"chat.completion.chunk","created":1790239197,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-4tcj916bfixms13im4rt","object":"chat.completion.chunk","created":1790239197,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1500,"completion_tokens":302,"total_tokens":1802,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

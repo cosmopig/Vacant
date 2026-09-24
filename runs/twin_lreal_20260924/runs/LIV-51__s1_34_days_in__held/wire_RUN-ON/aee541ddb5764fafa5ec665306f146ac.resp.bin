@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"929194892","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    # The problem says \\\"The year is the first argument and the month is the second\\\"\\n    # This usually refers to command line arguments in these types of tasks.\\n    if len(sys.argv) < 3:\\n        return\\n    try:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n        \\n        if month == 2:\\n            if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):\\n                print(29)\\n            else:\\n                print(28)\\n        elif month in [4, 6, 9, 11]:\\n            print(30)\\n        else:\\n            print(31)\\n    except ValueError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-16j7f61tftzg9d8nu0jav","object":"chat.completion.chunk","created":1790242931,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2877,"completion_tokens":230,"total_tokens":3107,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_31_money:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 32,
+      "cases": [
+        {
+          "case": "check_01_money",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:10: from solution import money",
+          "output": ""
+        },
+        {
+          "case": "check_02_money",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2/solution.py)",
+          "where": "test_visible.py:18: from solution import money",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "7cdfa2d14d35575d5ce0d370602df0aea7c04bfcbdc70eff8db47be2e7f8cfb1"
+}

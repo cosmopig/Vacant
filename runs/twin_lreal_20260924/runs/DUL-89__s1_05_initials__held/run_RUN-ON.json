@@ -1,0 +1,302 @@
+{
+  "task_id": "s1_05_initials:held",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nTake a person's full name and pull out the initial of each part of\nit. The parts of a name are separated by spaces.\n\nGive them back as a sequence of single upper-case characters, one per\npart, in the order the parts appear.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_lreal_20260924/out/ws/DUL-89__s1_05_initials__held",
+  "proxy_url": "http://127.0.0.1:34929",
+  "env": {
+    "proxy_url": "http://127.0.0.1:34929",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "7259e12e68beeb4eb7bafccae36ffd85a92b09c6ff7fdfab48b2ac93f42a4b62",
+  "ws_end_sha256": "707cd2e59a8494c8513783eb58899ffb6aaab620b99cbf644c4e86dd030466ea",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 12,
+  "wire_by_protocol": {
+    "openai": 12
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "ae45d0823e74056317163f3abb0069190562ab7a702a64a350011ecd76e96f6d",
+  "verdict_hash": "9a3ca6f202ea8e8a27c33e81c1292de42362a5c522929f872adc131018c288be",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_lreal_20260924/out/ws/DUL-89__s1_05_initials__held/VACANT_FEEDBACK.md",
+        "bytes": 863,
+        "sha256": "628ee324d159dca6dc573da162efecfa5c18709da6fd6a30a56e004ffaf73814",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import initials]\ntest_visible.py::check_02_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import initials]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "7259e12e68beeb4eb7bafccae36ffd85a92b09c6ff7fdfab48b2ac93f42a4b62",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nTake a person's full name and pull out the initial of each part of\nit. The parts of a name are separated by spaces.\n\nGive them back as a sequence of single upper-case characters, one per\npart, in the order the parts appear.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "93a5c20423013378b049cdb54a2aeb898c2a9014c08a734166763037fcd49b5d",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 19.723,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 4,
+      "wire_digest": "8e34c2d2faf30ee32b3d48762335380a7964d902dc80fde1d3588c321f0b6474",
+      "ws_end_sha256": "8371fbd545b5c540757408c7b970eb5372b0a0d9942b108cffc6de4f245aa75a",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "ae45d0823e74056317163f3abb0069190562ab7a702a64a350011ecd76e96f6d",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import initials]\ntest_visible.py::check_02_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import initials]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_lreal_20260924/out/ws/DUL-89__s1_05_initials__held/VACANT_FEEDBACK.md",
+        "bytes": 869,
+        "sha256": "00ea0ca9be2573be4421ecc79203327dd19a6be526610034bfa4aece7e6651d2",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 2 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import initials]\ntest_visible.py::check_02_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import initials]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "589aa134cacfe05e4548682e9877e5c807dee373e577e3dd5d941020c35caa35",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nTake a person's full name and pull out the initial of each part of\nit. The parts of a name are separated by spaces.\n\nGive them back as a sequence of single upper-case characters, one per\npart, in the order the parts appear.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "93a5c20423013378b049cdb54a2aeb898c2a9014c08a734166763037fcd49b5d",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 11.943,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "fbc8e4c7cd23384d4863807c90a5f054a09a099523c343d7aaaac64e23cd2cf9",
+      "ws_end_sha256": "7cb7791e1f7f9dd5aa47fa29a2719c06ca4c00b162d824ff23975488f7c468bf",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "ae45d0823e74056317163f3abb0069190562ab7a702a64a350011ecd76e96f6d",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import initials]\ntest_visible.py::check_02_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import initials]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "707cd2e59a8494c8513783eb58899ffb6aaab620b99cbf644c4e86dd030466ea",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nTake a person's full name and pull out the initial of each part of\nit. The parts of a name are separated by spaces.\n\nGive them back as a sequence of single upper-case characters, one per\npart, in the order the parts appear.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "93a5c20423013378b049cdb54a2aeb898c2a9014c08a734166763037fcd49b5d",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 13.611,
+      "wire_quiesced": true,
+      "requests_seen": 4,
+      "requests_seen_cumulative": 12,
+      "wire_digest": "44aa81df52e12699283c580a41dd054528f39ecf58adb09349a0dd1f0ca41867",
+      "ws_end_sha256": "707cd2e59a8494c8513783eb58899ffb6aaab620b99cbf644c4e86dd030466ea",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "ae45d0823e74056317163f3abb0069190562ab7a702a64a350011ecd76e96f6d",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import initials]\ntest_visible.py::check_02_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import initials]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "default",
+      "defaulted": true,
+      "fallback": "sink"
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "upstreams_sinked": [
+    "anthropic"
+  ],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "44aa81df52e12699283c580a41dd054528f39ecf58adb09349a0dd1f0ca41867",
+  "model_wire": {
+    "requests_indexed": 12,
+    "request_blobs_persisted": 12,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 45.551,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "s1_05_initials:held",
+    "agent": null,
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1790239405.8020155,
+        "probed_by_pid": 339947
+      }
+    },
+    "framework_hook": {
+      "agent": null,
+      "contract_version": null,
+      "canary_fired": null,
+      "events_n": null,
+      "log": null,
+      "install_attempted": null,
+      "version_drift": null,
+      "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
+    },
+    "reconciled": {
+      "relay_calls": 12,
+      "hook_events": null,
+      "unexplained": null,
+      "canary_calls": 0,
+      "refused_path": 0,
+      "unexplained_detail": null,
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+    },
+    "tier": "C",
+    "attested": false,
+    "b_prime_kind": null,
+    "tier_sentence": "**未認證**：既沒有圍牆也沒有掛鉤 ⇒ 這一跑不發收據。",
+    "tier_reasons": [
+      "圍牆不成立而且掛鉤沒燒 ⇒ **未受控**。（enclosure.applied=False、canary_fired=None）",
+      "⚠ 掛鉤那一欄是「沒量到」不是「量到 false」",
+      "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790239405.802192
+  },
+  "agent_wall_s": 13.611,
+  "failures": "test_visible.py::check_01_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import initials]\ntest_visible.py::check_02_initials — exception: ImportError: cannot import name 'initials' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import initials]",
+  "lifecycle": {
+    "schema": "vacant.lifecycle/1",
+    "path": "/var/tmp/vacant_lreal_20260924/out/lifecycle/b2_s0.jsonl",
+    "run_id": "3019a72903f14d368b87a2954764310a",
+    "emitted": 25,
+    "emit_errors": 0,
+    "last_error": null
+  }
+}

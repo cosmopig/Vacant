@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_30_ord_suffix:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 36,
+      "cases": [
+        {
+          "case": "check_01_ord_suffix",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_ord_suffix",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "1e6aa52a95e7c825d9f3cd7398f9b96af78498a46c0e26c37fea0aa7f0b30996"
+}

@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"571485307","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\nimport calendar\\n\\ndef main():\\n    if len(sys.argv) < 3:\\n        return\\n    \\n    try:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n        \\n        # calendar.monthrange returns a tuple (first_day_of_week, number_of_days_in_month)\\n        _, days_in_month = calendar.monthrange(year, month)\\n        print(days_in_month)\\n    except ValueError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-x1buy8ledjezwvucfftw4","object":"chat.completion.chunk","created":1790239169,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2274,"completion_tokens":160,"total_tokens":2434,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-vngyadhqm2i3x2f4gkiee5","object":"chat.completion.chunk","created":1790238986,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"262837994","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-vngyadhqm2i3x2f4gkiee5","object":"chat.completion.chunk","created":1790238986,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solve():\\n    import sys\\n\\n    input_data = sys.stdin.read().split()\\n    if len(input_data) < 2:\\n        return\\n\\n    try:\\n        q1 = float(input_data[0])\\n        q2 = float(input_data[1])\\n    except ValueError:\\n        return\\n\\n    if q2 == 0:\\n        print(\\\"\\\")\\n    else:\\n        percentage = (q1 / q2) * 100\\n        print(f\\\"{percentage:.1f}\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-vngyadhqm2i3x2f4gkiee5","object":"chat.completion.chunk","created":1790238986,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-vngyadhqm2i3x2f4gkiee5","object":"chat.completion.chunk","created":1790238986,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1473,"completion_tokens":153,"total_tokens":1626,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

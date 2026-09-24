@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"874417013","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    line = sys.stdin.readline()\\n    if not line:\\n        return\\n    parts = line.split()\\n    if len(parts) < 2:\\n        return\\n    year = int(parts[0])\\n    month = int(parts[1])\\n\\n    if month in [4, 6, 9, 11]:\\n        print(30)\\n    elif month == 2:\\n        if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):\\n            print(29)\\n        else:\\n            print(28)\\n    else:\\n        print(31)\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-8id5ixpowua82gufzj8fpb","object":"chat.completion.chunk","created":1790241272,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1901,"completion_tokens":201,"total_tokens":2102,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

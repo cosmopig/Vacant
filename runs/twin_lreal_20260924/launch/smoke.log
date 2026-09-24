@@ -1,0 +1,53 @@
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+```
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+```
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+```
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+```
+KAL-52__s1_01_addmul__held         ON exit=20   拒交   | OFF 通數=2    事後稽核=沒過
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+KAL-52__s1_01_addmul__pc           ON exit=0    交付   | OFF 通數=2    事後稽核=過
+
+本流 2 格；索引共 2 格：交付 1、拒交 1、作廢 0 → /var/tmp/vacant_lreal_20260924/smoke/twin_index.json
+SMOKE_RC=0

@@ -1,0 +1,302 @@
+{
+  "task_id": "s1_32_pct:held",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nExpress one quantity as a percentage of another.\n\nThe answer is a number rounded to one decimal place. When the second quantity\nis nothing at all, the answer is nothing at all rather than an error.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_32_pct__held",
+  "proxy_url": "http://127.0.0.1:41467",
+  "env": {
+    "proxy_url": "http://127.0.0.1:41467",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "fd4918b20a628d17eb7cf488d436fc391567bd323d0a11d47b1d1ffb9a9b9e6d",
+  "ws_end_sha256": "b4db196a10d7d68f136a0e547e2914102883a6ab12aa2491fde902a9d51b22fb",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 9,
+  "wire_by_protocol": {
+    "openai": 9
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "31c381537dcf550e476b72686e2d3e957fac539b179d3c75efbdf12ad496c671",
+  "verdict_hash": "7269dc6bfd5f4a60138448b8357292665dc90f41f5822a23d4809ad2253de8d4",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_32_pct__held/VACANT_FEEDBACK.md",
+        "bytes": 823,
+        "sha256": "aec926e28b210137e3464e9207b04cc5ae9791122efa42742c14a7267c8a84b9",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import pct]\ntest_visible.py::check_02_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import pct]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "fd4918b20a628d17eb7cf488d436fc391567bd323d0a11d47b1d1ffb9a9b9e6d",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nExpress one quantity as a percentage of another.\n\nThe answer is a number rounded to one decimal place. When the second quantity\nis nothing at all, the answer is nothing at all rather than an error.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "b8c06f335ae38862fde631d9dde618df3daf366e9f7aae3b191b32be8233627c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 31.023,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 3,
+      "wire_digest": "019dce66b460e67525cacf26ddcac6640216d5b9f87503af438609df54e73bca",
+      "ws_end_sha256": "4f89e286fba99ee219f8999c71ab7d009d58428e7bd9953090466370f2e29bbe",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "31c381537dcf550e476b72686e2d3e957fac539b179d3c75efbdf12ad496c671",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import pct]\ntest_visible.py::check_02_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import pct]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_32_pct__held/VACANT_FEEDBACK.md",
+        "bytes": 829,
+        "sha256": "82fc7f6612cc7e7f2b4105d8ff2ec2fa5525514b3216bc07f81697bf6c2de26a",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 2 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import pct]\ntest_visible.py::check_02_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import pct]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "1c1377f83a4ae2b2425b5578d59f73ebab0e1ac413a2eb86f8c883890d24c2a6",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nExpress one quantity as a percentage of another.\n\nThe answer is a number rounded to one decimal place. When the second quantity\nis nothing at all, the answer is nothing at all rather than an error.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "b8c06f335ae38862fde631d9dde618df3daf366e9f7aae3b191b32be8233627c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 57.604,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "0cbd02fc0591ed40738ae92fba475e69df8261b9994b4bc925575e0652c7c5a6",
+      "ws_end_sha256": "1c1377f83a4ae2b2425b5578d59f73ebab0e1ac413a2eb86f8c883890d24c2a6",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "31c381537dcf550e476b72686e2d3e957fac539b179d3c75efbdf12ad496c671",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import pct]\ntest_visible.py::check_02_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import pct]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "b4db196a10d7d68f136a0e547e2914102883a6ab12aa2491fde902a9d51b22fb",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nExpress one quantity as a percentage of another.\n\nThe answer is a number rounded to one decimal place. When the second quantity\nis nothing at all, the answer is nothing at all rather than an error.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "b8c06f335ae38862fde631d9dde618df3daf366e9f7aae3b191b32be8233627c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 47.593,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 9,
+      "wire_digest": "89c2c6d9d406c1dc45dc341fefb2afc371cf34b1d35946d9484a271eb59f99f6",
+      "ws_end_sha256": "b4db196a10d7d68f136a0e547e2914102883a6ab12aa2491fde902a9d51b22fb",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "31c381537dcf550e476b72686e2d3e957fac539b179d3c75efbdf12ad496c671",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import pct]\ntest_visible.py::check_02_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import pct]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "default",
+      "defaulted": true,
+      "fallback": "sink"
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "upstreams_sinked": [
+    "anthropic"
+  ],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "89c2c6d9d406c1dc45dc341fefb2afc371cf34b1d35946d9484a271eb59f99f6",
+  "model_wire": {
+    "requests_indexed": 9,
+    "request_blobs_persisted": 9,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 136.63,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "s1_32_pct:held",
+    "agent": null,
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1790238150.6804295,
+        "probed_by_pid": 339949
+      }
+    },
+    "framework_hook": {
+      "agent": null,
+      "contract_version": null,
+      "canary_fired": null,
+      "events_n": null,
+      "log": null,
+      "install_attempted": null,
+      "version_drift": null,
+      "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
+    },
+    "reconciled": {
+      "relay_calls": 9,
+      "hook_events": null,
+      "unexplained": null,
+      "canary_calls": 0,
+      "refused_path": 0,
+      "unexplained_detail": null,
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+    },
+    "tier": "C",
+    "attested": false,
+    "b_prime_kind": null,
+    "tier_sentence": "**未認證**：既沒有圍牆也沒有掛鉤 ⇒ 這一跑不發收據。",
+    "tier_reasons": [
+      "圍牆不成立而且掛鉤沒燒 ⇒ **未受控**。（enclosure.applied=False、canary_fired=None）",
+      "⚠ 掛鉤那一欄是「沒量到」不是「量到 false」",
+      "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790238150.680657
+  },
+  "agent_wall_s": 47.593,
+  "failures": "test_visible.py::check_01_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import pct]\ntest_visible.py::check_02_pct — exception: ImportError: cannot import name 'pct' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import pct]",
+  "lifecycle": {
+    "schema": "vacant.lifecycle/1",
+    "path": "/var/tmp/vacant_lreal_20260924/out/lifecycle/b2_s2.jsonl",
+    "run_id": "1600832f5b4c468e8b05c038b7d4caf9",
+    "emitted": 22,
+    "emit_errors": 0,
+    "last_error": null
+  }
+}

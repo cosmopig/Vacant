@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_34_days_in:held",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 34,
+      "cases": [
+        {
+          "case": "check_01_days_in",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'days_in' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_34_days_in__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:10: from solution import days_in",
+          "output": ""
+        },
+        {
+          "case": "check_02_days_in",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'days_in' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_34_days_in__held/_frozen_RUN-ON_a3/solution.py)",
+          "where": "test_visible.py:18: from solution import days_in",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "4a25b1e42c0d2816fc6ca9267c0ba96aec2bc373548294305acec789d8ba9fe1"
+}

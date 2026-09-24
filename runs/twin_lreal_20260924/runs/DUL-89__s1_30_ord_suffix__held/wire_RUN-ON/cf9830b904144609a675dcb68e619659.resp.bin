@@ -1,0 +1,4 @@
+data: {"id":"chatcmpl-ve12cqdehjb60m51hsq8dm","object":"chat.completion.chunk","created":1790240018,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ve12cqdehjb60m51hsq8dm","object":"chat.completion.chunk","created":1790240018,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+

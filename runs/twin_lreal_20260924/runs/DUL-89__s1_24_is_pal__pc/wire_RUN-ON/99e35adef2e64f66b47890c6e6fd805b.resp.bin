@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-49s1xyu6u158fsu43k151p","object":"chat.completion.chunk","created":1790237844,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"889767191","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-49s1xyu6u158fsu43k151p","object":"chat.completion.chunk","created":1790237844,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def is_pal(s: str) -> bool:\\n    # Filter out non-alphanumeric characters and convert to lowercase\\n    filtered_chars = [char.lower() for char in s if char.isalnum()]\\n    \\n    # Check if the filtered list of characters reads the same forwards and backwards\\n    return filtered_chars == filtered_chars[::-1]\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-49s1xyu6u158fsu43k151p","object":"chat.completion.chunk","created":1790237844,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-49s1xyu6u158fsu43k151p","object":"chat.completion.chunk","created":1790237844,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1512,"completion_tokens":100,"total_tokens":1612,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

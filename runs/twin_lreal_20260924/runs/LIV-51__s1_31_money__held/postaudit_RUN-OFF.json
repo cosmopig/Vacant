@@ -1,0 +1,44 @@
+{
+  "when": "after_the_run",
+  "is_verdict": false,
+  "signed": false,
+  "ruler": "vacant_network/vrun/acceptance.py::run_suite(suite='visible')——與 ON 臂同一把尺、同一份 tests_visible",
+  "note": "OFF 臂當場沒有量過任何東西。這個判定是事後補的，沒有進收據鏈，也沒有影響那一跑的任何一個位元。",
+  "sandbox": "bwrap",
+  "suite": "visible",
+  "task_id": "s1_31_money:postaudit-off",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 34,
+      "cases": [
+        {
+          "case": "check_01_money",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_31_money__held/_frozen_RUN-OFF/solution.py)",
+          "where": "test_visible.py:10: from solution import money",
+          "output": ""
+        },
+        {
+          "case": "check_02_money",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_31_money__held/_frozen_RUN-OFF/solution.py)",
+          "where": "test_visible.py:18: from solution import money",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "28c9f707cf45c3c2414df852faa768869c5e1fcecf24dc43477994c482d09e36"
+}
