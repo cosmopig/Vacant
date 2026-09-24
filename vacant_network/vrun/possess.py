@@ -784,6 +784,7 @@ def wire_codex(home: pathlib.Path, port: int, backups: pathlib.Path,
 
 def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
             python: str | None = None, models: list[str] | None = None,
+            upstreams: dict[str, dict] | None = None,
             **_: Any) -> list[FileChange]:
     """`~/.pi/agent/extensions/vacant.ts`——**一支 extension，不碰 `models.json`**。
 
@@ -805,9 +806,16 @@ def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
     """
     from . import piext
     p = home / AGENTS["pi"].config_file
+    # 上游與「金鑰向誰借」：只烤 url 與 provider id，**金鑰本身永遠不進這支檔**
+    #（`piext` 誠實邊界 7）。`upstreams` 沒給（舊呼叫者）＝不知道 ⇒ 空字串，
+    # extension 在 runtime 也只會用 baseUrl 比對，不會亂借。
+    up = ((upstreams or {}).get(AGENTS["pi"].wire) or {}).get("url") or ""
     body = piext.render(port=port, state_dir=str(state_home(home)),
                         python=python or sys.executable,
-                        package_path=package_path(), models=models or [])
+                        package_path=package_path(), models=models or [],
+                        upstream=up, upstream_is_sink=bool(up) and envmap.is_sink(up),
+                        key_from=pi_key_carrier(home, up) or "",
+                        pi_agent_dir=str(_pi_agent_dir(home)))
     return [write_tracked(home, p, body.encode("utf-8"), backups,
                           note="pi extension：registerProvider(vacant) + /vacant + 掛鉤")]
 
@@ -883,12 +891,18 @@ WIRERS: dict[str, Callable[..., list[FileChange]]] = {
 # ── 上游來源（裝之前先記下來使用者本來指到哪） ──────────────────────────
 
 def discover_install_upstreams(home: pathlib.Path,
-                               overrides: dict[str, str] | None = None
+                               overrides: dict[str, str] | None = None,
+                               prefer: Iterable[str] = ()
                                ) -> dict[str, dict]:
     """常駐 proxy 要轉去哪。**先讀使用者現在的設定，再讀環境變數。**
 
     找不到 ⇒ `envmap.SINK_UPSTREAM`（fail-closed：開連線之前就 502），
     **不是**公開 API。理由同 `envmap.SINK_UPSTREAM` 的 docstring。
+
+    `prefer`＝這一次要裝的 agent：它們自己的設定檔先掃（`_scan_configs_for_upstream`）。
+    ⚠ 為什麼要分先後：pi 的 extension 借的是「baseUrl 等於上游」那個 provider 的金鑰
+      （`piext` 誠實邊界 7）。只裝 pi、卻讓 opencode 的 baseURL 當上游 ⇒ 兩邊對不上，
+      extension 借不到金鑰、送佔位 ⇒ 401。
     """
     found: dict[str, dict] = {}
     ov = overrides or {}
@@ -906,19 +920,130 @@ def discover_install_upstreams(home: pathlib.Path,
                     url, src = v, f"env:{n}"
                     break
         if url is None:
-            url, src = _scan_configs_for_upstream(home, wire)
+            url, src = _scan_configs_for_upstream(home, wire, prefer=prefer)
         if url is None:
             url, src = envmap.SINK_UPSTREAM, "sink（沒有人指定）"
         found[wire] = {"url": url, "source": src}
     return found
 
 
-def _scan_configs_for_upstream(home: pathlib.Path,
-                               wire: str) -> tuple[str | None, str | None]:
+def _is_local_url(url: str) -> bool:
+    return "127.0.0.1" in url or "localhost" in url
+
+
+#: pi `models.json` 的 `api` 欄 → 我們的 wire。**認不得的就跳過，不猜**
+#: （`google-generative-ai` 之類 proxyd 沒有對應 wire 的，轉過去只會壞）。
+_PI_API_WIRE: dict[str, str] = {
+    "openai-completions": "openai",
+    "openai-responses": "openai",
+    "anthropic-messages": "anthropic",
+}
+
+#: 我們自己（或舊版 `vacant run`）註冊的 provider id——**永遠不能拿來當上游**，
+#: 否則 proxyd 會轉回自己。
+_PI_OWN_PROVIDERS: frozenset[str] = frozenset({"vacant", "vacantproxy"})
+
+
+def _pi_agent_dir(home: pathlib.Path) -> pathlib.Path:
+    return home / ".pi" / "agent"
+
+
+def pi_upstream_providers(home: pathlib.Path, wire: str) -> list[tuple[str, str]]:
+    """pi `~/.pi/agent/models.json` 裡可以當上游的 provider：`[(pid, baseUrl), …]`。
+
+    排序：`settings.json` 的 `defaultProvider` 排第一（那是使用者平常真的在用的），
+    其餘照檔內順序。跳過我們自己的 provider（`_PI_OWN_PROVIDERS`）、本機位址、
+    `api` 認不得或跟 `wire` 不合的。
+
+    ⚠ **只讀 `models.json` 與 `settings.json`，不讀 `auth.json`**（`NEVER_TOUCH`）。
+      回傳值**只有 id 與 url，不含 `apiKey`**——金鑰由 extension 在 pi 行程裡借
+      （`piext` 誠實邊界 7），Python 這一側與 proxyd 永遠不經手。
+    ⚠ 金鑰放在 `auth.json` 的內建 provider（`/login`、`pi auth`）**不會出現在這裡**：
+      它們通常不在 `models.json`，就算在也沒有 `apiKey`。那種使用者會落到 sink
+      ——這是刻意的，讀 `auth.json` 的代價比 fail-closed 高。
+    """
+    d = _pi_agent_dir(home)
+    try:
+        doc = json.loads((d / "models.json").read_text("utf-8"))
+    except (OSError, ValueError):
+        return []
+    provs = doc.get("providers") if isinstance(doc, dict) else None
+    if not isinstance(provs, dict):
+        return []
+    default = None
+    try:
+        sd = json.loads((d / "settings.json").read_text("utf-8"))
+        if isinstance(sd, dict) and isinstance(sd.get("defaultProvider"), str):
+            default = sd["defaultProvider"]
+    except (OSError, ValueError):
+        pass
+    out: list[tuple[str, str]] = []
+    for pid, pv in provs.items():
+        if pid in _PI_OWN_PROVIDERS or not isinstance(pv, dict):
+            continue
+        url = pv.get("baseUrl")
+        if not isinstance(url, str) or not url or _is_local_url(url):
+            continue
+        api = pv.get("api")
+        if not isinstance(api, str):
+            # provider 層沒寫 ⇒ 看模型層；各模型不一致就不猜
+            apis = {m.get("api") for m in (pv.get("models") or [])
+                    if isinstance(m, dict)}
+            api = apis.pop() if len(apis) == 1 else None
+        if _PI_API_WIRE.get(api or "") != wire:
+            continue
+        out.append((str(pid), url))
+    out.sort(key=lambda t: t[0] != default)          # 穩定排序：default 浮到最前
+    return out
+
+
+def _norm_url(u: str) -> str:
+    return (u or "").strip().rstrip("/")
+
+
+def pi_key_carrier(home: pathlib.Path, upstream_url: str) -> str | None:
+    """pi `models.json` 裡 **baseUrl 等於 proxyd 上游**的那個 provider id（沒有 ⇒ `None`）。
+
+    extension 會借這個 provider 的 `apiKey` 設定字串當 `vacant` provider 的 apiKey，
+    讓 Authorization 帶的是**使用者自己的金鑰**、proxyd 原樣穿透（`sentinel=""`）。
+    ⚠ **比對條件是 baseUrl 相等，不是「隨便一個 provider」**：金鑰只能送回它本來
+      就要去的那個主機。借錯 ＝ 把 A 家的金鑰送去 B 家，比 401 糟得多。
+    ⚠ 只回 id，**不回金鑰**；本函式也不看 `apiKey` 欄位的內容。
+    """
+    if not upstream_url or envmap.is_sink(upstream_url):
+        return None
+    want = _norm_url(upstream_url)
+    for wire in ("openai", "anthropic"):
+        for pid, url in pi_upstream_providers(home, wire):
+            if _norm_url(url) == want:
+                return pid
+    return None
+
+
+def _scan_configs_for_upstream(home: pathlib.Path, wire: str,
+                               prefer: Iterable[str] = ()
+                               ) -> tuple[str | None, str | None]:
     """從使用者**現有**的 agent 設定裡挖出他本來指到哪。
 
     ⚠ 只讀設定檔，**不讀任何 auth/憑證檔**。
+    ⚠ `prefer` 裡的 agent 先掃（見 `discover_install_upstreams`）；沒指定時 pi 排最後，
+      舊行為（opencode → codex／claude）不變。
     """
+    if "pi" in set(prefer):
+        got = pi_upstream_providers(home, wire)
+        if got:
+            return got[0][1], f"pi:providers.{got[0][0]}"
+    url, src = _scan_legacy_configs(home, wire)
+    if url is None and "pi" not in set(prefer):
+        got = pi_upstream_providers(home, wire)
+        if got:
+            return got[0][1], f"pi:providers.{got[0][0]}"
+    return url, src
+
+
+def _scan_legacy_configs(home: pathlib.Path,
+                         wire: str) -> tuple[str | None, str | None]:
+    """opencode／codex／claude 三家（2026-09-22 之前就有的那一段，行為不變）。"""
     if wire == "openai":
         p = home / AGENTS["opencode"].config_file
         if p.is_file():
@@ -1880,7 +2005,7 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     det = detect(h, probe_shell=probe_shell)
     wanted = list(agents) if agents else [a for a, d in det.items() if d.present]
     missing = [a for a in wanted if not det[a].present]
-    ups = discover_install_upstreams(h, upstream_overrides)
+    ups = discover_install_upstreams(h, upstream_overrides, prefer=wanted)
 
     plan = {
         "home": str(h), "state": str(state), "python": py,
@@ -1948,7 +2073,8 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
         probed_models = piext.probe_models(port)
     for a in wanted:
         try:
-            cs = WIRERS[a](h, port, backups, python=py, models=probed_models)
+            cs = WIRERS[a](h, port, backups, python=py, models=probed_models,
+                           upstreams=ups)
             changes += cs
             wired[a] = {"ok": True, "files": [c.to_json() for c in cs],
                         "measured": CHANNEL_MEASURED.get(a, ""),
@@ -2001,7 +2127,8 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
         "service": svc, "preflight": pf, "systemd_path_env": sysenv,
         "gate_reach": reach, "agent_posture": posture,
         "codex_sandbox_requested": codex_sandbox_choice(),
-        "warnings": _install_warnings(wired, reach, svc, posture),
+        "warnings": _install_warnings(wired, reach, svc, posture,
+                                      upstreams=ups, home=h),
         "files": [c.to_json() for c in changes],
     }
     (state / "state.json").write_text(
@@ -2009,15 +2136,47 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     return st
 
 
+#: sink 警告的開頭——`cli._guided_install` 用它認出「裝好了但沒有真上游」。
+SINK_WARNING_HEAD = "🔴 常駐 proxy 沒有真上游"
+
+
 def _install_warnings(wired: dict, reach: dict, svc: dict,
-                      posture: dict | None = None) -> list[str]:
+                      posture: dict | None = None,
+                      upstreams: dict | None = None,
+                      home: pathlib.Path | None = None) -> list[str]:
     """`install` 一裝完就要**大聲講**的事。
 
     ⚠ 這一支存在的唯一理由：**不准安靜地只覆蓋一半**。裝好之後回一句
       「✓ 已寫入」而 agent 其實起不來（洞 1）、或閘門只對互動 shell 生效
       （洞 2），就是這個專案在抓的那種病——一份說成功的狀態報告，而東西是壞的。
+    ⚠ 上游解析到 `SINK_UPSTREAM` ＝ 每一通都在開連線之前被擋（fail-closed，對的），
+      但對使用者來說就是「裝好之後 agent 叫不到任何模型」。**這一格一定要講**，
+      而且要講怎麼修（2026-09-24 code review：裸 `vacant` 引導裝 pi 會安靜落到這裡）。
     """
     w: list[str] = []
+    for wire, v in (upstreams or {}).items():
+        users = [a for a, wv in (wired or {}).items()
+                 if wv.get("ok") and AGENTS[a].wire == wire]
+        if users and envmap.is_sink((v or {}).get("url", "")):
+            # 顯示一般人會設的那個（`OPENAI_BASE_URL`），不是我們內部的 `VACANT_RUN_*`
+            var = next((ns[1] if len(ns) > 1 else ns[0]
+                        for ww, ns in envmap.UPSTREAM_VARS if ww == wire and ns), "")
+            w.append(
+                f"{SINK_WARNING_HEAD}（{wire}）：{'、'.join(users)} 的每一通模型呼叫都會被"
+                f"擋下（502，fail-closed，**不會**偷偷直連公開 API）。"
+                f"在你的設定裡沒找到上游，環境變數也沒有。修法：先 `vacant uninstall`，"
+                f"再 `vacant install --agent {users[0]} --upstream {wire}=<你的端點>`"
+                + (f"，或先設好 `{var}` 再裝" if var else "") + "。")
+    pi_w = (wired or {}).get("pi") or {}
+    pi_up = ((upstreams or {}).get(AGENTS["pi"].wire) or {}).get("url", "")
+    if pi_w.get("ok") and pi_up and not envmap.is_sink(pi_up) and home is not None \
+            and pi_key_carrier(home, pi_up) is None:
+        w.append(
+            f"⚠ pi：`~/.pi/agent/models.json` 裡沒有 baseUrl 等於上游 {pi_up} 的 provider "
+            f"⇒ extension 借不到金鑰，送出的是佔位 `sk-vacant-possess`。上游不要金鑰"
+            f"（本機 LM Studio 之類）沒事；要金鑰的會回 401。金鑰放在 `auth.json` 的"
+            f"內建 provider **我們不讀**（NEVER_TOUCH）——在 models.json 加一個同 baseUrl、"
+            f"`apiKey` 填環境變數名的 provider 即可。")
     bad = [a for a, v in (wired or {}).items() if v.get("startable") is False]
     if bad:
         for a in bad:
@@ -2306,8 +2465,11 @@ def _fmt_status(s: dict) -> str:
     L = [f"端點      {s['endpoint']}   在聽：{'是' if s['proxy_listening'] else '**否**'}",
          f"監督      {s['service'].get('backend')}   "
          f"開機自起：{s['service'].get('boot_persistent')}",
-         f"上游      " + "  ".join(f"{w}={v['url']}（{v['source']}）"
-                                   for w, v in (s.get("upstreams") or {}).items()),
+         f"上游      " + "  ".join(
+             f"{w}={v['url']}（{v['source']}）"
+             + ("  🔴 sink：沒有真上游，每一通都會被擋" if envmap.is_sink(v.get("url", ""))
+                else "")
+             for w, v in (s.get("upstreams") or {}).items()),
          f"shim 目錄 {s['shim_dir']}",
          "",
          "通道層（三欄：設定寫了／起得來／被中介過。**不可互相冒充**）："]
