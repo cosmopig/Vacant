@@ -155,6 +155,33 @@ def test_join_upstream_never_doubles_v1():
         "https://api.anthropic.com/v1/messages"
 
 
+def test_join_upstream_openai_compatible_root_that_is_not_v1():
+    """2026-09-24 第一次接真實公開上游（Gemini 的 OpenAI 相容端點）抓到：
+    base 帶路徑、結尾不是 `/v1` ⇒ 舊規則接成 `…/openai/v1/chat/completions`（404）。"""
+    g = "https://generativelanguage.googleapis.com/v1beta/openai"
+    for base in (g, g + "/"):
+        assert join_upstream(base, "/v1/chat/completions", "openai") == \
+            g + "/chat/completions"
+        assert join_upstream(base, "/v1/models?vacant_canary=x", "openai") == \
+            g + "/models?vacant_canary=x"
+    # 反例：原本就對的幾種，一個位元組都不准變
+    assert join_upstream("http://h:1234/v1", "/v1/chat/completions", "openai") == \
+        "http://h:1234/v1/chat/completions"
+    assert join_upstream("http://h:1234", "/v1/chat/completions", "openai") == \
+        "http://h:1234/v1/chat/completions"               # 省略 /v1 的根
+    assert join_upstream("https://api.anthropic.com", "/v1/messages", "anthropic") == \
+        "https://api.anthropic.com/v1/messages"
+    # anthropic 的慣例相反：自訂路徑的閘道照舊接完整 path
+    assert join_upstream("https://gw.example/anthropic", "/v1/messages", "anthropic") == \
+        "https://gw.example/anthropic/v1/messages"
+    # 不是 /v1 開頭的 path（Claude Code 的 /api/hello 探測）不動
+    assert join_upstream(g, "/api/hello", "openai") == g + "/api/hello"
+    # `/v1foo` 不是 `/v1` 前綴
+    assert join_upstream(g, "/v1foo", "openai") == g + "/v1foo"
+    # wire 沒給 ＝ 舊行為
+    assert join_upstream(g, "/v1/chat/completions") == g + "/v1/chat/completions"
+
+
 # ── 負向控制：OFF 與 ON 的 body 必須逐位元相同 ──────────────────────────
 def test_body_bytes_identical_off_vs_on(tmp_path, upstream, monkeypatch):
     base, seen = upstream

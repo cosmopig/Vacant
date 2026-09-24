@@ -179,17 +179,34 @@ class _Stats(TypedDict):
     quiesce_timeout: bool
 
 
-def join_upstream(base: str, path: str) -> str:
+def join_upstream(base: str, path: str, wire: str | None = None) -> str:
     """把進來的 path 接到上游 base 上。
 
     兩種 base 都要對：`http://h:1234/v1`（LM Studio 慣例）與
     `https://api.anthropic.com`（根）。作法是**先把 base 尾巴的 `/v1` 拿掉**
     再接完整 path——不這樣做，`/v1` 會出現兩次，而那是所有「base url 設錯」
     的第一名成因。
+
+    第三種（2026-09-24，第一次接真實公開上游時抓到）：**OpenAI 相容、但根不是 `/v1`**，
+    例如 Gemini 的 `https://generativelanguage.googleapis.com/v1beta/openai`。
+    OpenAI SDK／pi 的慣例是 `baseUrl + "/chat/completions"`——base 本身就是 API 根，
+    版本段已經在裡面。舊規則會接成 `…/v1beta/openai/v1/chat/completions` ⇒ 404，
+    使用者的 provider 一接上 Vacant 就壞。所以 **`wire == "openai"`、base 帶路徑、
+    而且結尾不是 `/v1`** 時，把 client 那邊的 `/v1` 前綴拿掉再接。
+
+    ⚠ 只動 openai 這條：Anthropic SDK 的慣例相反（base **不含** `/v1`，client 自己補
+      `/v1/messages`），自訂路徑的 anthropic 閘道照舊接完整 path。
+    ⚠ base 沒有路徑（`http://h:1234`、`https://api.openai.com`）照舊接完整 path
+      ——那是「使用者省略了 `/v1`」的常見寫法。代價：根就是 API 根、不吃 `/v1` 的服務
+      （路徑為空但端點是 `/chat/completions`）仍然接錯；本規則沒有辦法從字串分辨那一種。
+    ⚠ `wire=None` ＝舊行為，一個位元組都不變（其他呼叫者不受影響）。
     """
     b = base.rstrip("/")
     if b.endswith("/v1"):
-        b = b[: -len("/v1")]
+        return b[: -len("/v1")] + path
+    if wire == "openai" and (path == "/v1" or path.startswith(("/v1/", "/v1?"))):
+        if urllib.parse.urlsplit(b).path not in ("", "/"):
+            return b + path[len("/v1"):]
     return b + path
 
 
@@ -507,7 +524,7 @@ class WireProxy:
             out_headers.append((auth_name, auth_tmpl.format(key=key)))
         out_headers.append(("Content-Length", str(len(sent))))
 
-        target = join_upstream(base, h.path)
+        target = join_upstream(base, h.path, wire)
         u = urllib.parse.urlsplit(target)
         # `dict[str, Any]`：一列索引裡混了 str／int／float／bool／None，
         # 不標的話會被推成 `dict[str, object]`，接著 `rec.get("response_sha256")`
