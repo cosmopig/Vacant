@@ -584,10 +584,23 @@ def exec_inner(agent: str, argv: list[str]) -> int:
         #   那一通根本沒經過這一跑的 proxy，收據誠實地判 B'）。`settings.json` 的
         #   `defaultProvider`／`defaultModel` 是 pi 文件寫明的啟動預設（settings.md）。
         #   使用者明打 `--provider x` 仍然蓋得過——那是他的選擇，收據會照實記。
-        (cfg / "settings.json").write_text(json.dumps({
-            "defaultProvider": "vacant",
-            "defaultModel": model or "gemma-4-12b-it-qat"}, ensure_ascii=False),
-            "utf-8")
+        per_run: dict = {"defaultProvider": "vacant",
+                         "defaultModel": model or "gemma-4-12b-it-qat"}
+        # ⚠ 2026-09-24 接 Gemini（免費層每分鐘 16k 輸入 token）實測：使用者在自己的
+        #   `settings.json` 把 `retry` 調長（撞到 429 時等得夠久），shim 這一跑卻換成
+        #   暫存設定目錄 ⇒ 那份設定不見 ⇒ 用 pi 預設（3 次、2/4/8 秒）⇒ 429 要等 47 秒
+        #   ⇒ agent 放棄 ⇒ 閘門判拒交。**失敗會被算成 agent 的，其實是設定被我們丟掉。**
+        #   所以把使用者的 `retry` 區塊帶進來。**只帶這一塊**：其他設定（套件、extension 路徑、
+        #   預設模型…）帶進來會改變這一跑的形狀，不帶。
+        user_dir = pathlib.Path(os.environ.get("PI_CODING_AGENT_DIR")
+                                or pathlib.Path.home() / ".pi" / "agent")
+        try:
+            user_settings = json.loads((user_dir / "settings.json").read_text("utf-8"))
+        except (OSError, ValueError):
+            user_settings = {}
+        if isinstance(user_settings, dict) and isinstance(user_settings.get("retry"), dict):
+            per_run["retry"] = user_settings["retry"]
+        (cfg / "settings.json").write_text(json.dumps(per_run, ensure_ascii=False), "utf-8")
     elif agent == "opencode":
         env["OPENCODE_CONFIG_DIR"] = str(cfg)
         env["OPENCODE_DISABLE_PROJECT_CONFIG"] = "1"

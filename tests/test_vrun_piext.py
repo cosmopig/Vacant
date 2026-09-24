@@ -94,7 +94,8 @@ if (scenario === "registered") {
   out.defs = providers.vacant.models;
   out.models = out.defs.map((m) => m.id);
   out.apiKey = providers.vacant.apiKey;
-  out.compat = providers.vacant.compat;
+  out.provider_compat = providers.vacant.compat === undefined ? null : providers.vacant.compat;
+  out.model_compats = Object.fromEntries(providers.vacant.models.map((m) => [m.id, m.compat]));
   out.provider_keys = Object.keys(providers.vacant).sort();
 } else if (scenario === "refresh_502_text") {
   globalThis.fetch = withCount(async () => new Response("<html>502 Bad Gateway</html>",
@@ -422,20 +423,32 @@ def test_empty_or_status_still_runs_status(tmp_path, arg):
     assert "模型清單" in out["notes"][0]["text"]
 
 
-def test_compat_is_borrowed_from_the_users_provider(tmp_path):
-    """2026-09-24 接 Gemini 實測：它回 400「Unknown name "store"」，使用者自己要寫
-    `compat.supportsStore:false`。vacant provider 轉去同一個上游，**方言要跟著借**，
-    否則裝了 Vacant 就壞。預設值保留、使用者寫的蓋過去；別家 provider 的 compat 不借。"""
+def test_compat_is_borrowed_onto_every_model_not_the_provider(tmp_path):
+    """2026-09-24 接 Gemini 實測兩件事：(1) 它回 400「Unknown name "store"」，使用者要寫
+    `compat.supportsStore:false`，vacant provider 得跟著借；(2) pi 的 registerProvider **只認
+    model 層的 compat**——寫在 provider 層會被靜靜忽略（那一次就是這樣照樣送出 store）。
+    所以每個 model 都要帶：預設 ← 使用者 provider 層 ← 使用者 model 層；別家 provider 的不借。"""
     provs = _keyed_providers()
     provs["openai"]["compat"] = {"supportsStore": False, "supportsDeveloperRole": True}
-    provs["elsewhere"]["compat"] = {"supportsStore": True, "maxTokensField": "max_tokens"}
+    provs["openai"]["models"][1] = {"id": "gpt-y", "compat": {"maxTokensField": "max_tokens",
+                                                              "supportsStore": True}}
+    provs["elsewhere"]["compat"] = {"supportsStore": True, "thinkingFormat": "qwen"}
     out, _ = _run(tmp_path, "registered", models=[], upstream=UP,
                   pi_agent_dir=_agent_dir(tmp_path, provs))
-    assert out["compat"] == {"supportsDeveloperRole": True, "supportsReasoningEffort": False,
-                             "supportsStore": False}
+    assert out["provider_compat"] is None, "provider 層寫 compat 會被 pi 忽略，不准再寫在那裡"
+    assert out["model_compats"]["gpt-x"] == {"supportsDeveloperRole": True,
+                                             "supportsReasoningEffort": False,
+                                             "supportsStore": False}
+    # model 層蓋過 provider 層
+    assert out["model_compats"]["gpt-y"] == {"supportsDeveloperRole": True,
+                                             "supportsReasoningEffort": False,
+                                             "supportsStore": True,
+                                             "maxTokensField": "max_tokens"}
 
 
 def test_compat_defaults_when_user_provider_has_none(tmp_path):
     out, _ = _run(tmp_path, "registered", models=[], upstream=UP,
                   pi_agent_dir=_agent_dir(tmp_path, _keyed_providers()))
-    assert out["compat"] == {"supportsDeveloperRole": False, "supportsReasoningEffort": False}
+    assert out["provider_compat"] is None
+    for c in out["model_compats"].values():
+        assert c == {"supportsDeveloperRole": False, "supportsReasoningEffort": False}

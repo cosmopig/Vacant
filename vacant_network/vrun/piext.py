@@ -71,9 +71,12 @@ pi 的 `isExtensionFile` 只認 `.ts`／`.js`（`chunk-4DKZACXI.js`，jiti 載�
    （fail-closed，不會繞開），`session_start` 會講。`/vacant on` 先找使用者**現在用的那個
    id**（＝同一個模型、經過 Vacant），找不到才依 `VACANT_AGENT_MODEL`→`DEFAULT_MODEL`→
    第一個。⚠ 同 id 不保證同一個模型設定：借來的欄位以外（model 層 compat、自訂 headers）不一樣。
-10. **compat（上游的方言）也借**：provider 層的 `compat` 物件蓋在預設值上。2026-09-24 接 Gemini
-   的 OpenAI 相容端點實測：它回 400「Unknown name "store"」，使用者要寫 `supportsStore:false`；
-   vacant provider 若不跟著寫，裝了 Vacant 就壞。model 層的 compat、`headers`、`authHeader` 仍不抄。
+10. **compat（上游的方言）也借**，而且**寫在每個 model 上**：預設 ← 使用者 provider 層 ← 使用者
+   model 層。2026-09-24 接 Gemini 的 OpenAI 相容端點實測兩件事：它回 400「Unknown name "store"」，
+   使用者要寫 `supportsStore:false`，vacant provider 不跟著寫就壞；而且 pi 的 `registerProvider`
+   **只認 model 層的 compat**（`ProviderConfig` 沒有這個欄位，寫在 provider 層會被靜靜忽略——本檔在
+   這之前寫死在 provider 層的那份 compat 從來沒生效過，LM Studio 上看不出來是因為它本來就忽略那些欄位）。
+   `headers`、`authHeader` 仍不抄。
 """
 from __future__ import annotations
 
@@ -147,7 +150,7 @@ function notify(ctx, text, level) {
 
 // src ＝ 使用者 models.json 裡那個 provider 的 model 條目（借來的；可缺）。
 // 只抄 name／reasoning／input／contextWindow／maxTokens；cost 不抄（我們不替別人記帳）、
-// headers／authHeader 不抄（誠實邊界 7、9）；compat 另外在 provider 層借（邊界 10）。
+// headers／authHeader 不抄（誠實邊界 7、9）；compat 每個 model 都帶一份（邊界 10）。
 function modelDef(id, src) {
   const s = src && typeof src === "object" ? src : {};
   const pos = (v, d) => (typeof v === "number" && isFinite(v) && v > 0 ? v : d);
@@ -158,7 +161,13 @@ function modelDef(id, src) {
            input: input.length ? input : ["text"],
            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
            contextWindow: pos(s.contextWindow, 131072),
-           maxTokens: pos(s.maxTokens, 16384) };
+           maxTokens: pos(s.maxTokens, 16384),
+           // ⚠ pi 的 registerProvider **只認 model 層的 compat**（ProviderConfig 沒有 compat 欄位，
+           //   custom-provider.md「Model Definition Reference」）。2026-09-24 接 Gemini 實測：
+           //   寫在 provider 層 ⇒ 靜靜被忽略 ⇒ 照樣送 "store" ⇒ 400。所以每個 model 都帶一份：
+           //   預設 ← 使用者 provider 層 ← 使用者 model 層（誠實邊界 10）。
+           compat: Object.assign({}, borrowCompat(),
+                                 s.compat && typeof s.compat === "object" && !Array.isArray(s.compat) ? s.compat : {}) };
 }
 
 // models.json 的 `models` 陣列 → modelDef 清單（條目可以是物件或裸 id 字串；重複 id 只留第一個）
@@ -235,7 +244,7 @@ const BORROWED_MODELS = borrowModels();
 // compat：**上游的方言**。vacant provider 轉去的是同一個上游，就得講同一種方言
 // （2026-09-24 接 Gemini 實測：它不認得 `store` 欄位，使用者自己要寫 `supportsStore:false`，
 //  vacant provider 不跟著寫就 400）。預設值不變，使用者那個 provider 寫了什麼就蓋過去。
-// 只抄 provider 層的 `compat`（物件）；model 層的 compat、headers、authHeader 仍不抄（誠實邊界 10）。
+// 這裡回的是 provider 層那份；modelDef 再疊上 model 層的（誠實邊界 10）。headers、authHeader 仍不抄。
 function borrowCompat() {
   const out = { supportsDeveloperRole: false, supportsReasoningEffort: false };
   const first = BORROWED ? MATCHED.filter((x) => x.id === BORROWED.provider) : [];
@@ -323,8 +332,7 @@ export default function (pi) {
     // 使用者自己的金鑰設定字串（借來的）或佔位；proxyd sentinel="" ⇒ Authorization 原樣穿透
     apiKey: BORROWED ? BORROWED.apiKey : "sk-vacant-possess",
     api: "openai-completions",
-    // 預設 ＋ 使用者那個 provider 自己的 compat（誠實邊界 10）
-    compat: borrowCompat(),
+    // ⚠ compat 不寫在這一層：pi 的 ProviderConfig 沒有這個欄位（寫了也被忽略）。在每個 model 上（modelDef）。
     // 借來的清單 → 裝機時烤進來的 → DEFAULT_MODEL（誠實邊界 9）
     models: baseModels(),
     // 上游目錄變了就重抓；這一通同時是一次會進 journal 的 canary。
