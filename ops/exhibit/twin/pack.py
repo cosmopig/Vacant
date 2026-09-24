@@ -335,6 +335,13 @@ def attempts_of(run_dir: pathlib.Path, summary: dict) -> list[dict]:
     return out
 
 
+#: OFF 臂那兩句說明。事後那條（`pack_off`）與當下那條（`live_events`）共用，
+#: 不然兩條線的字遲早會漂開。
+OFF_ACCEPTED_NOTE = ("`--vacant 0` 這一臂不驗收也不拒交 ⇒ 沒有裁決。"
+                     "`null` 是「沒量」，不是「量了沒過」。")
+OFF_HAS_RECEIPT_NOTE = "OFF 臂不簽收據：觀眾在這一邊沒有任何東西可以自己重驗。"
+
+
 def pack_off(run_dir: pathlib.Path, meta: dict, on_summary: dict) -> dict | None:
     """反事實那一臂：**同一題、關掉這一層**。沒跑過就回 `None`。
 
@@ -401,10 +408,9 @@ def pack_off(run_dir: pathlib.Path, meta: dict, on_summary: dict) -> dict | None
         "stop_reason": s.get("stop_reason"),
         # ⚠ 三值裡的 null：**沒量**。不是「量了沒過」。
         "accepted": None,
-        "accepted_note": "`--vacant 0` 這一臂不驗收也不拒交 ⇒ 沒有裁決。"
-                         "`null` 是「沒量」，不是「量了沒過」。",
+        "accepted_note": OFF_ACCEPTED_NOTE,
         "has_receipt": (run_dir / f"receipts_{ARM_OFF}.ndjson").exists(),
-        "has_receipt_note": "OFF 臂不簽收據：觀眾在這一邊沒有任何東西可以自己重驗。",
+        "has_receipt_note": OFF_HAS_RECEIPT_NOTE,
         "attempts_used": s.get("attempts_used"),
         "ws_start_sha256": s.get("ws_start_sha256"),
         "ws_end_sha256": s.get("ws_end_sha256"),

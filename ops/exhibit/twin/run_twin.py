@@ -195,7 +195,8 @@ def _arm_workspace(out_root: pathlib.Path, cid: str, arm: str) -> pathlib.Path:
 
 
 def run_arm(*, arm, resident, task_id, explicit, out_root, run_dir, argv,
-            retry_arm, max_attempts, sandbox, timeout_s, test_timeout_s) -> dict:
+            retry_arm, max_attempts, sandbox, timeout_s, test_timeout_s,
+            events_path=None, declared_evidence="") -> dict:
     """跑一臂，回 `launcher.run` 的 summary。兩臂共用同一個 run-dir。
 
     共用 run-dir 是安全的：落盤檔名全部帶 `ARM`（`run_RUN-ON.json` ／
@@ -206,8 +207,8 @@ def run_arm(*, arm, resident, task_id, explicit, out_root, run_dir, argv,
     ws = _arm_workspace(out_root, cid, arm)
     build_workspace(ws, task_id, explicit=explicit)
     suite = BANK / task_id / "tests_visible"
-    real_argv = [a.replace("{TASK}", (ws / "TASK.md").read_text(encoding="utf-8"))
-                 for a in argv]
+    task_text = (ws / "TASK.md").read_text(encoding="utf-8")
+    real_argv = [a.replace("{TASK}", task_text) for a in argv]
     return launcher.run(
         real_argv, workspace=ws, run_dir=run_dir, suite_dir=suite,
         # ⚠ 這一行就是實驗處理本身。OFF ＝ 純 tee：不驗收、不簽收據、不拒交。
@@ -220,6 +221,15 @@ def run_arm(*, arm, resident, task_id, explicit, out_root, run_dir, argv,
         retry_arm=retry_arm if arm == "ON" else "none",
         max_attempts=max_attempts if arm == "ON" else None,
         timeout_s=timeout_s, test_timeout_s=test_timeout_s,
+        # ── 活模式：跑的當下就把事件寫出去（`live_events.py` 把它轉成電視的格式）──
+        #   `caller` 是**我們**的標籤（哪一格、哪位居民、題面），Vacant 不驗它；
+        #   證據等級照樣要等 `run_ended.requests_seen` 才推得出來（宣告蓋不過資料）。
+        events_path=events_path,
+        events_caller={"cell_id": cid, "resident": resident.codename,
+                       "task_id": task_id,
+                       "stratum": "pc" if explicit else "held",
+                       "prompt": task_text,
+                       "declared_evidence": declared_evidence or ""},
     )
 
 
@@ -263,7 +273,7 @@ def postaudit_off(run_dir: pathlib.Path, task_id: str, *, sandbox: str,
 
 def run_cell(*, resident, task_id, explicit, out_root, argv, upstream, model,
              retry_arm, max_attempts, sandbox, timeout_s, test_timeout_s,
-             fixture, evidence, arms=ARMS) -> dict:
+             fixture, evidence, arms=ARMS, events_path=None) -> dict:
     cid = cell_id(resident, task_id, explicit)
     run_dir = out_root / "runs" / cid
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -284,7 +294,8 @@ def run_cell(*, resident, task_id, explicit, out_root, argv, upstream, model,
                 out_root=out_root, run_dir=run_dir, argv=argv,
                 retry_arm=retry_arm, max_attempts=max_attempts,
                 sandbox=sandbox, timeout_s=timeout_s,
-                test_timeout_s=test_timeout_s)
+                test_timeout_s=test_timeout_s,
+                events_path=events_path, declared_evidence=evidence)
             per_arm[arm] = {
                 "exit_code": launcher.exit_code(summary),
                 "requests_seen": summary.get("requests_seen"),
@@ -369,6 +380,9 @@ def main(argv_in=None) -> int:
     ap.add_argument("--sandbox", default="auto")
     ap.add_argument("--timeout", type=float, default=None, help="單次 agent 的牆鐘上限")
     ap.add_argument("--test-timeout", type=float, default=30.0)
+    ap.add_argument("--events", default=None,
+                    help="跑的當下把 vacant.lifecycle 事件逐行寫到這個 JSONL；"
+                         "`live_events.py --follow` 把它轉成電視吃的格式")
     ap.add_argument("--merge-only", action="store_true",
                     help="不跑任何東西，只把已落盤的 twin_cell.json 收成索引")
     ap.add_argument("cmd", nargs=argparse.REMAINDER,
@@ -417,7 +431,8 @@ def main(argv_in=None) -> int:
                      model=a.model, retry_arm=a.retry,
                      max_attempts=a.max_attempts, sandbox=a.sandbox,
                      timeout_s=a.timeout, test_timeout_s=a.test_timeout,
-                     fixture=a.fixture, evidence=a.evidence, arms=arms)
+                     fixture=a.fixture, evidence=a.evidence, arms=arms,
+                     events_path=a.events)
         metas.append(m)
         on, off = m["arms"].get("ON", {}), m["arms"].get("OFF", {})
         print("%-34s ON exit=%-4s %-4s | OFF 通數=%-4s 事後稽核=%s%s"

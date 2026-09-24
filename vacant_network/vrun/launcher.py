@@ -122,7 +122,7 @@ import sys
 import time
 import uuid
 
-from . import (acceptance, attest as attestmod, envmap, receipts,
+from . import (acceptance, attest as attestmod, envmap, lifecycle, receipts,
                retry as retrypolicy, wshash)
 from .sandbox import make_sandbox
 from .wireproxy import WireProxy
@@ -261,12 +261,19 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         capture_agent_stdout: bool = False,
         retry_arm: str = "none", max_attempts: int | None = None,
         feedback_into: str = "file",
-        allow_public_upstream: bool = False) -> dict:
+        allow_public_upstream: bool = False,
+        events_path: str | os.PathLike | None = None,
+        events_caller: dict | None = None) -> dict:
     """跑一次（V1：最多 `max_attempts` 次嘗試）。回一份可落盤的 summary。
 
     **預設 `retry_arm="none"`／`feedback_into="file"` ＝ V0／V1 的行為逐字不變**：
     一次嘗試、一筆 `ws_attempt`、一筆 `ws_verdict`、`visible_fail` 還是叫
     `visible_fail`，argv 一個位元都不動。
+
+    `events_path`（或 `VACANT_EVENTS`）給了 ⇒ 跑的當下把 `lifecycle` 事件逐行
+    寫出去（契約與誠實邊界在 `vacant_network/vrun/lifecycle.py`）。沒給 ⇒
+    一個 byte 都不多寫，落盤形狀逐字不變。`events_caller` 是呼叫端的標籤
+    （哪一格、哪位居民），原樣進 `run_started.caller`，**Vacant 不驗它**。
     """
     workspace, run_dir = workspace.resolve(), run_dir.resolve()
     # 收據落在工作區裡會把自己算進樹雜湊（wire log 每一通都在長大）⇒
@@ -318,10 +325,24 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     #   （給改不動 argv 的 wrapper 腳本）。
     allow_public = bool(allow_public_upstream) or envmap.public_upstream_allowed()
     upstream_desc = envmap.describe_upstreams(allow_public=allow_public)
+    # ── 事件流（`lifecycle`）：**觀察到的人當場寫**，不是事後從 run 目錄推 ──
+    #   `em.enabled` 為假時每一個 `emit` 都是空操作 ⇒ 預設行為逐字不變。
+    em = lifecycle.Emitter(lifecycle.resolve_path(events_path),
+                           task_id=task_id, arm=arm)
+    #: proxy 的 handler 執行緒要知道「現在是第幾次嘗試」。單元素 list ＝ 可變的格子。
+    cur_attempt = [0]
+
+    def _on_model_call(rec: dict) -> None:
+        # 誠實邊界 3（lifecycle）：**不帶內容**，只帶「發生了」與它的形狀。
+        em.emit("model_call", attempt=cur_attempt[0], n_total=rec.get("n_total"),
+                wire=rec.get("wire"), blocked=bool(rec.get("blocked")),
+                error=bool(rec.get("error")), elapsed_s=rec.get("elapsed_s"))
+
     proxy = WireProxy(wire_dir=wire_dir,
                       upstreams={w: v["url"] for w, v in upstream_desc.items()},
                       keys=envmap.discover_keys(), sentinel=sentinel,
-                      mode=("act" if vacant_on else "tee"), port=port)
+                      mode=("act" if vacant_on else "tee"), port=port,
+                      on_finish=_on_model_call if em.enabled else None)
     proxy.start()
     child_env, env_meta = envmap.build_child_env(proxy.url, sentinel)
 
@@ -351,6 +372,13 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     # 的 R530 坑）。OFF 臂沒有收據這回事 ⇒ 兩個都是 None。
     ident, book = ((Identity.generate(), Logbook()) if vacant_on
                    else (None, None))
+    em.emit("run_started", vacant=int(vacant_on), retry=retry_arm,
+            max_attempts=n_max, feedback_into=feedback_into,
+            ws_start_sha256=ws_start,
+            caller=(dict(events_caller) if events_caller else None))
+    #: 例外把 `run()` 打穿時，外面仍然要看得到「這一跑結束了」——
+    #: 不然等 `run_ended` 的畫面會永遠等下去（電視的佇列只看最前面那一格）。
+    ended = False
     has_suite = (suite_dir is not None
                  and any(pathlib.Path(suite_dir).glob("test_*.py")))
     sandbox = None
@@ -373,6 +401,7 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
         for attempt in range(1, n_max + 1):
             rec: dict = {"attempt": attempt, "retry": retry_arm,
                          "reset": None, "feedback": None}
+            cur_attempt[0] = attempt
             seen_before = proxy.stats["requests_seen"]
 
             # ── 2') 這一次嘗試之前：重置（resample）或留著（revise）───
@@ -424,6 +453,9 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
             rec["feedback_in_prompt_bytes"] = (
                 n_sub * len(("\n\n" + pending_feedback).encode("utf-8"))
                 if pending_feedback else 0)
+            em.emit("attempt_started", attempt=attempt, max_attempts=n_max,
+                    reset=rec["reset"], feedback_delivery=feedback_into,
+                    feedback_in_prompt_bytes=rec["feedback_in_prompt_bytes"])
 
             # ── 3) spawn agent，等它結束。**那一刻就是交付點。** ──────
             t_a = time.time()
@@ -491,6 +523,11 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
             rec["requests_seen"] = proxy.stats["requests_seen"] - seen_before
             rec["requests_seen_cumulative"] = proxy.stats["requests_seen"]
             rec["wire_digest"] = proxy.wire_digest()
+            em.emit("agent_exited", attempt=attempt, agent_rc=rec["agent_rc"],
+                    timed_out=rec["agent_timed_out"],
+                    agent_wall_s=rec["agent_wall_s"],
+                    requests_seen=rec["requests_seen"],
+                    wire_quiesced=rec["wire_quiesced"])
 
             # ── 4) 凍結 → 驗收 ───────────────────────────────────────
             #  attempt 1 的落點名字**與 V0 逐字相同**（README 印的就是那一行）；
@@ -563,6 +600,10 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 "accepted": ok, "failures": failures,
                 "stop_reason": "visible_pass" if ok else "visible_fail",
             })
+            em.emit("gate_ran", attempt=attempt, passed=ok,
+                    n_passed=result.get("passed"), n_tests=result.get("total"),
+                    failed_case=_first_failed_case(result),
+                    verdict_sha256=result.get("result_sha256"))
 
             # ── 5) 每一次嘗試都簽一筆 `ws_attempt`，**不是只在 happy path**
             _sign_attempt(book, ident, task_id=task_id, arm=arm, rec=rec,
@@ -597,8 +638,25 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                     pending_feedback = text
                 rec["feedback"] = {**meta, "text": text,
                                    "delivery": feedback_into}
+                _raw = text.encode("utf-8")
+                em.emit("feedback_ready", attempt=attempt,
+                        next_attempt=attempt + 1, retry=retry_arm,
+                        delivery=feedback_into, bytes=len(_raw),
+                        text_sha256=hashlib.sha256(_raw).hexdigest())
+    except BaseException as exc:
+        # 不吞：照原樣往上丟。只是在丟之前讓事件流說出「這一跑結束了，沒有裁決」。
+        em.emit("run_ended", stop_reason="launcher_exception", accepted=None,
+                refused=None, infra_void=f"{type(exc).__name__}: {exc}",
+                attempts_used=len(summary["attempts"]),
+                requests_seen=proxy.stats["requests_seen"],
+                count_semantics="lower_bound", ws_end_sha256=None,
+                verdict_sha256=None, has_receipt=False, verdict_hash=None)
+        ended = True
+        raise
     finally:
         proxy.stop()
+        if ended:
+            em.close()
 
     summary["attempts_used"] = len(summary["attempts"])
     # **每一條 wire 的上游位址與它的來歷**，逐跑落盤。
@@ -679,7 +737,34 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     _rollup(summary, n_max)
     assert summary["stop_reason"] in STOP_REASONS, summary["stop_reason"]
     _persist(run_dir, summary, arm if vacant_on else None, ident, book)
+    if em.enabled:
+        # 放在 `_persist` 之後：`verdict_hash` 是簽完收據才有的。
+        em.emit("run_ended", stop_reason=summary["stop_reason"],
+                accepted=summary["accepted"], refused=summary["refused"],
+                infra_void=summary.get("infra_void"),
+                attempts_used=summary["attempts_used"],
+                requests_seen=summary["requests_seen"],
+                count_semantics=summary["model_wire"]["count_semantics"],
+                ws_end_sha256=summary.get("ws_end_sha256"),
+                verdict_sha256=summary.get("verdict_sha256"),
+                has_receipt=summary.get("verdict_hash") is not None,
+                verdict_hash=summary.get("verdict_hash"))
+        em.close()
+        # 事件流寫了幾筆、壞了幾筆，要落在 run 摘要上看得到（寫壞不改裁決，
+        # 但不可以安靜）。**只有開了事件流才重寫**——預設路徑的落盤逐字不變。
+        summary["lifecycle"] = em.manifest()
+        (run_dir / f"run_{summary['arm']}.json").write_text(
+            json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return summary
+
+
+def _first_failed_case(result: dict) -> str | None:
+    """第一個沒過的可見測試名（與 `twin/pack.visible_cases` 同一個走訪順序）。"""
+    for f in result.get("files") or []:
+        for c in f.get("cases") or []:
+            if not c.get("ok"):
+                return c.get("case")
+    return None
 
 
 def _rollup(summary: dict, n_max: int) -> None:
@@ -879,6 +964,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "**預設不准**：沒指定的 wire 會指到一個會拒絕的本機 "
                          "sink，一個 byte 都不出去。環境變數版本＝"
                          f"{envmap.ALLOW_PUBLIC_VAR}=1")
+    ap.add_argument("--events", default=None,
+                    help="跑的當下把 lifecycle 事件逐行寫到這個 JSONL"
+                         f"（契約 {lifecycle.SCHEMA}；環境變數版本＝{lifecycle.ENV_EVENTS}）。"
+                         "**不是證據**，可驗的是收據鏈；寫壞不改裁決")
     ap.add_argument("--json", action="store_true", help="把 summary 印成 JSON")
     ap.add_argument("cmd", nargs=argparse.REMAINDER,
                     help="`--` 之後的整條 agent 命令")
@@ -910,7 +999,8 @@ def main(argv: list[str] | None = None) -> int:
                   capture_agent_stdout=bool(args.json),
                   retry_arm=args.retry, max_attempts=args.max_attempts,
                   feedback_into=args.feedback_into,
-                  allow_public_upstream=args.allow_public_upstream)
+                  allow_public_upstream=args.allow_public_upstream,
+                  events_path=args.events)
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     else:

@@ -100,7 +100,7 @@ import time
 import urllib.parse
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Any, TypedDict, cast
+from typing import Any, Callable, TypedDict, cast
 
 from . import envmap
 
@@ -263,7 +263,8 @@ class WireProxy:
                  host: str = "127.0.0.1", port: int = 0,
                  timeout_s: float = 3600.0,
                  unix_path: str | os.PathLike | None = None,
-                 path_policy: str = "any") -> None:
+                 path_policy: str = "any",
+                 on_finish: Callable[[dict], None] | None = None) -> None:
         if mode not in ("tee", "act"):
             raise ValueError(f"mode 只有 tee／act，收到 {mode!r}")
         if path_policy not in ("any", "model"):
@@ -293,6 +294,11 @@ class WireProxy:
         self._srv: socketserver.TCPServer | None = None
         self._thread: threading.Thread | None = None
         self._host, self._port = host, port
+        #: 每一通**記完帳之後**呼叫一次（`lifecycle.model_call` 從這裡來）。
+        #: 拿到的是索引那一列的**副本**加上 `n_total`（不含 body）。
+        #: ⚠ 它丟任何例外都被吞掉：觀察者壞掉不准讓 proxy 少記一通
+        #:   （`requests_seen` 是中介發生過的唯一證據）。
+        self.on_finish = on_finish
         #: 收據要用的統計。**不含 body**——body 在檔案裡。
         self.stats: _Stats = {"requests_seen": 0, "by_wire": {}, "errors": 0,
                               "blocked": 0, "refused_path": 0,
@@ -608,6 +614,12 @@ class WireProxy:
                 self.stats["blocked"] += 1
             if rec.get("refused_path"):
                 self.stats["refused_path"] += 1
+            n_total = self.stats["requests_seen"]
+        if self.on_finish is not None:
+            try:
+                self.on_finish({**rec, "n_total": n_total})
+            except Exception:                            # noqa: BLE001
+                pass
 
     def _refuse_nonmodel_path(self, h: BaseHTTPRequestHandler, method: str,
                               wire: str, call_id: str, *, rec_t0: float,
