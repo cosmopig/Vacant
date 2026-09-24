@@ -222,7 +222,7 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
     if feedback_mode == "none" and in_place and (attempts or task.contract.max_attempts) > 1:
         raise ValueError("feedback_mode=none re-draws from a clean workspace; not with --in-place")
-    run_id = time.strftime("%Y%m%dT%H%M%S") + f"-{os.getpid()}"
+    run_id = time.strftime("%Y%m%dT%H%M%S") + f"-{os.getpid()}-{os.urandom(3).hex()}"
     base = work_root() / task.task_id / run_id
     try:
         ws = task.contract.base_dir if in_place else prepare_workspace(task.contract,
@@ -371,7 +371,13 @@ def _trace_outcome(traced: dict[str, Any] | None, res: dict[str, Any], *, agent:
         return
     try:
         from ..trace import actors as A
-        A.record_outcome(A.ActorBook(), session_key=f"do:{run_id}", actor={"platform": agent},
+        # 同一個 agent 設定只該有一格：模型用掛鉤看到的主 agent 自稱的那個（審查 consequences#1）
+        rec = traced["rec"]
+        st = rec._state()
+        model = next((v.get("model") for k, v in (st.get("sessions") or {}).items()
+                      if k.startswith(f"{agent}:") and v.get("model")), None)
+        A.record_outcome(A.ActorBook(), session_key=f"do:{run_id}",
+                         actor={"platform": agent, "model": model},
                          accepted=res.get("outcome") == "accept", contract=traced["contract"],
                          workspace=traced["ws"])
     except Exception as e:  # noqa: BLE001

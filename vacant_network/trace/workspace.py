@@ -22,8 +22,11 @@
    `touch -r` 之類刻意還原 mtime 的寫入也看不出來。要保證逐位元，傳 `full=True`（慢）。
 2. 這是 Vacant 在**掛鉤觸發的那一刻**看到的；兩次看之間發生的事（背景行程、使用者自己的編輯、
    agent 繞過掛鉤的寫入）歸不到任何一步——`recorder.py` 把它們記成「沒有紀錄的改動」（究責缺口）。
-3. 不跟隨符號連結；連結本身以 `link:<目標>` 記錄。超過 `MAX_BLOB` 的檔案只記雜湊不存內容
-   （之後無法重建那一個檔，追緝會標成不可重驗）。
+3. 不跟隨符號連結；連結本身（檔案或目錄）以 `link:<目標>` 記錄。超過 `MAX_BLOB` 的檔案只記雜湊
+   不存內容（之後無法重建那一個檔，追緝會標成不可重驗）。
+4. 只讀**一般檔案**：FIFO、裝置、socket 不讀（讀 FIFO 會卡住每一次掛鉤——2026-09-24 審查 recorder#0）。
+5. 看起來像憑證的檔（`SECRET_PATTERNS`：`.env`、私鑰、`auth.json`…）**只記雜湊、不存內容**
+   （`secret:<sha256>`）：改了看得出來，但版本庫裡沒有它（審查 recorder#2）。版本庫本身 0700／0600。
 """
 from __future__ import annotations
 
@@ -32,6 +35,7 @@ import hashlib
 import json
 import os
 import pathlib
+import stat
 from typing import Any
 
 from ..atomic import atomic_write_bytes
@@ -41,6 +45,17 @@ SKIP_DIRS = frozenset({".git", "node_modules", ".venv", "venv", "__pycache__", "
                        ".mypy_cache", ".ruff_cache", ".tox", ".cache"})
 MAX_BLOB = 8 * 1024 * 1024
 MAX_FILES = 50_000
+#: 只記雜湊、不存內容的檔（樣式錨定在工作區根，`**/` 開頭＝任何深度）
+SECRET_PATTERNS = ("**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/*.p12", "**/*.pfx",
+                   "**/id_rsa*", "**/id_ed25519*", "**/id_ecdsa*", "**/id_dsa*", "**/auth.json",
+                   "**/credentials", "**/credentials.*", "**/.netrc", "**/.npmrc", "**/.pypirc",
+                   "**/.git-credentials", "**/*secret*.json", "**/.ssh/**", ".env", ".env.*",
+                   "auth.json", "credentials", "credentials.*", ".netrc", ".npmrc", ".pypirc")
+
+
+def is_secret(rel: str) -> bool:
+    from ..intake.artifact import matches
+    return matches(rel, list(SECRET_PATTERNS))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -85,8 +100,17 @@ class Blobs:
         sha = hashlib.sha256(data).hexdigest()
         dst = self.path(sha)
         if not dst.is_file():
-            dst.parent.mkdir(parents=True, exist_ok=True)
+            for d in (self.root, dst.parent):
+                d.mkdir(parents=True, exist_ok=True, mode=0o700)
+                try:
+                    os.chmod(d, 0o700)
+                except OSError:
+                    pass
             atomic_write_bytes(dst, data)
+            try:
+                os.chmod(dst, 0o600)          # 版本庫裡有工作區的內容：只有自己讀得到
+            except OSError:
+                pass
         return sha
 
     def put_file(self, p: pathlib.Path, sha: str | None = None) -> str:
@@ -112,30 +136,50 @@ def scan(root: str | os.PathLike, prev: Index | None = None, *,
     skip_r = {pathlib.Path(s).resolve() for s in skip}
     for dirpath, dirs, files in os.walk(base, followlinks=False):
         d = pathlib.Path(dirpath)
-        dirs[:] = sorted(x for x in dirs if x not in SKIP_DIRS and (d / x).resolve() not in skip_r)
+        keep = []
+        for x in sorted(dirs):
+            if x in SKIP_DIRS or (d / x).resolve() in skip_r:
+                continue
+            if os.path.islink(d / x):
+                # 目錄的符號連結：記連結本身，不進去（進去會重複、甚至繞圈）
+                try:
+                    rel = (d / x).relative_to(base).as_posix()
+                    out[rel] = Entry("link:" + os.readlink(d / x), 0,
+                                     (d / x).lstat().st_mtime_ns)
+                except OSError:
+                    pass
+                continue
+            keep.append(x)
+        dirs[:] = keep
         for name in sorted(files):
             p = d / name
             rel = p.relative_to(base).as_posix()
             try:
                 st = p.lstat()
-                if os.path.islink(p):
+                if stat.S_ISLNK(st.st_mode):
                     out[rel] = Entry("link:" + os.readlink(p), 0, st.st_mtime_ns)
                     continue
+                if not stat.S_ISREG(st.st_mode):
+                    continue        # FIFO／裝置／socket：不讀（誠實邊界 4）
+                x_bit = bool(st.st_mode & 0o100)
                 old = prev.get(rel)
                 if not full and old is not None and old.size == st.st_size \
-                        and old.mtime_ns == st.st_mtime_ns:
+                        and old.mtime_ns == st.st_mtime_ns and old.exec == x_bit:
                     out[rel] = old
-                    if blobs is not None and st.st_size <= MAX_BLOB and not blobs.has(old.sha256):
+                    if blobs is not None and st.st_size <= MAX_BLOB and ":" not in old.sha256 \
+                            and not blobs.has(old.sha256):
                         blobs.put_file(p, old.sha256)
                     continue
+                if is_secret(rel):
+                    out[rel] = Entry("secret:" + _sha_file(p), st.st_size, st.st_mtime_ns, x_bit)
+                    continue
                 if st.st_size > MAX_BLOB:
-                    out[rel] = Entry("big:" + _sha_file(p), st.st_size, st.st_mtime_ns,
-                                     bool(st.st_mode & 0o100))
+                    out[rel] = Entry("big:" + _sha_file(p), st.st_size, st.st_mtime_ns, x_bit)
                     continue
                 data = p.read_bytes()
                 sha = blobs.put_bytes(data) if blobs is not None \
                     else hashlib.sha256(data).hexdigest()
-                out[rel] = Entry(sha, st.st_size, st.st_mtime_ns, bool(st.st_mode & 0o100))
+                out[rel] = Entry(sha, st.st_size, st.st_mtime_ns, x_bit)
             except OSError:
                 continue            # 掃描中途被刪掉的檔：這一次就是不在
             if len(out) > MAX_FILES:
@@ -203,7 +247,7 @@ def materialize(idx: Index, blobs: Blobs, dest: str | os.PathLike) -> list[str]:
             except OSError:
                 missing.append(rel)
             continue
-        if e.sha256.startswith("big:") or not blobs.has(e.sha256):
+        if e.sha256.startswith(("big:", "secret:")) or not blobs.has(e.sha256):
             missing.append(rel)
             continue
         out.write_bytes(blobs.get(e.sha256))

@@ -33,7 +33,7 @@ def test_only_provable_touches_reputation(book, tmp_path):
     assert [e["kind"] for e in got] == ["provable_fault"]
     st = book.state()
     [cell] = st["cells"]
-    assert cell["provable_faults"] == 1 and cell["key"][0] == "builtin:helper"
+    assert cell["provable_faults"] == 1 and cell["key"][0] == "claude:builtin:helper"
     assert cell["mean"] < 0.5
 
 
@@ -89,4 +89,4 @@ def test_changed_subagent_definition_is_a_new_cell(book, tmp_path):
     a = {"platform": "claude", "agent": "x", "agent_type": "helper"}
     k1 = A.key_of(a, None, tmp_path)
     (d / "helper.md").write_text("v2 — different instructions")
-    assert A.key_of(a, None, tmp_path)[0] != k1[0] and k1[0].startswith("def:helper:")
+    assert A.key_of(a, None, tmp_path)[0] != k1[0] and k1[0].startswith("claude:def:helper:")

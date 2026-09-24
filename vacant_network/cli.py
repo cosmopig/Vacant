@@ -1163,6 +1163,7 @@ _INTAKE_TOP: tuple[str, ...] = ("contract", "check", "submit", "review", "reveri
 _ADAPTER_TOP: tuple[str, ...] = ("do", "hook", "adapters", "install", "uninstall")
 #: 可究責追緝（`vacant_network/trace/`，2026-09-24）：看病歷、人指出錯處。
 _TRACE_TOP: tuple[str, ...] = ("trace", "flag")
+_TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "actors")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1173,7 +1174,9 @@ def main(argv: list[str] | None = None) -> int:
     if raw[:1] and raw[0] in _ADAPTER_TOP:
         from .adapters.cli import main as adapters_main
         return adapters_main(raw)
-    if raw[:1] and raw[0] in _TRACE_TOP:
+    if raw[:1] == ["flag"] or (raw[:1] == ["trace"] and raw[1:2] and (
+            raw[1] in _TRACE_SUB or raw[1].startswith("-"))):
+        # `vacant trace <wire.jsonl>`（MCP tee-proxy 的時間軸）仍走下面的舊指令
         from .trace.cli import main as trace_main
         return trace_main(raw)
     if raw[:1] == ["run"] and "--" in raw[1:]:

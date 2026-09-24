@@ -30,6 +30,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import time
 from typing import Any
 
@@ -50,13 +51,41 @@ def workspace_for(cwd: str | None, contract: Any = None) -> pathlib.Path | None:
     if flag == "0":
         return None
     if contract is not None:
-        return pathlib.Path(contract.base_dir).resolve()
-    if flag != "1" or not cwd:
+        ws = pathlib.Path(contract.base_dir).resolve()
+    elif flag != "1" or not cwd:
         return None
-    ws = pathlib.Path(cwd).resolve()
-    if ws == pathlib.Path(ws.anchor) or ws == pathlib.Path.home().resolve():
-        return None
-    return ws
+    else:
+        ws = pathlib.Path(cwd).resolve()
+    return ws if _traceable(ws) else None
+
+
+def _traceable(ws: pathlib.Path) -> bool:
+    """`/`、家目錄或它的上層（一掃就是整台機器）、Vacant 自己的狀態目錄（或它的上下層）都不追
+    （2026-09-24 審查 recorder#11：原本只比「相等」，契約放在家目錄就把整個家目錄掃進去）。"""
+    from ..intake.statepaths import state_dirs
+    home = pathlib.Path.home().resolve()
+    if ws == pathlib.Path(ws.anchor) or ws == home or ws in home.parents:
+        return False
+    for sd in state_dirs():
+        if ws == sd or sd in ws.parents or ws in sd.parents:
+            return False
+    return True
+
+
+_TASK_NOTE = re.compile(r"<tool-use-id>([^<]+)</tool-use-id>")
+
+
+def prompt_source(agent: str, payload: dict[str, Any], text: str) -> tuple[str, str | None]:
+    """這則「使用者訊息」其實是誰說的（2026-09-24 審查 blame#5、integration#0）：
+    Claude 把背景子 agent 的結果以 `<task-notification>` 送回；Codex 子 agent 的
+    UserPromptSubmit 是父 agent 給它的任務說明。"""
+    t = text.lstrip()
+    if t.startswith("<task-notification>"):
+        m = _TASK_NOTE.search(t)
+        return "subagent_result", (m.group(1).strip() if m else None)
+    if payload.get("agent_id"):
+        return "parent_agent", None
+    return "user", None
 
 
 def actor_of(agent: str, payload: dict[str, Any]) -> R.Actor:
@@ -137,9 +166,11 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
             out = rec.post(step, actor, tool, tool_input, output, error=error)
     elif action == "prompt":
         text = payload.get("prompt")
-        out = rec.prompt(str(text), session=actor.session) if text else None
+        if text:
+            src, tid = prompt_source(agent, payload, str(text))
+            out = rec.prompt(str(text), session=actor.session, source=src, tool_use_id=tid)
     elif action == "stop":
-        out = rec.settle(actor, "turn_end")
+        out = rec.settle(actor, "turn_end")      # 已經在裁決之前收過一次（hook.handle）；冪等
     elif action == "subagent_stop":
         path = payload.get("agent_transcript_path")
         out = seal_transcript(rec, actor, agent, path, role="subagent") if path else None
@@ -147,8 +178,11 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
         tp = payload.get("transcript_path")
         if tp:
             seal_transcript(rec, actor, agent, tp, role="session")
-        out = rec.close(actor, _s(payload.get("reason")))
-        _outcome(rec, actor, contract)
+        reason = _s(payload.get("reason"))
+        out = rec.close(actor, reason)
+        from ..adapters.hookpolicy import NON_TERMINAL_END_REASONS
+        if reason not in NON_TERMINAL_END_REASONS:
+            _outcome(rec, actor, contract)
     _perf(rec, agent, event, time.perf_counter() - t0)
     return out if isinstance(out, dict) else {"n": len(out)} if isinstance(out, list) else None
 
@@ -156,14 +190,18 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
 def _outcome(rec: R.Recorder, actor: R.Actor, contract: Any) -> None:
     """工作階段結束：最後一次回合邊界的檢查結果記成主 agent 這一跑的結果（信譽 adoption 維）。
     這個工作階段沒有檢查過（沒有契約、沒有 Stop）⇒ 不記。"""
-    if contract is None:
+    if contract is None or os.environ.get("VACANT_HOOK_NO_SUBMIT"):
+        # `vacant do` 自己在行程結束後記這一跑（只記一次；2026-09-24 審查 consequences#1）
         return
     try:
         st = json.loads((rec.dir / "feedback_state.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return
-    if not st.get("outcome"):
+    # 只用**這個**工作階段自己的檢查結果；沒檢查過的工作階段不記（審查 consequences#2）
+    mine = (st.get("outcomes") or {}).get(f"{actor.platform}:{actor.session}")
+    if not mine:
         return
+    st = {"outcome": mine}
     from . import actors as A
     model = actor.model or rec.session_info(actor.platform, actor.session).get("model")
     main = {"platform": actor.platform, "session": actor.session, "model": model}

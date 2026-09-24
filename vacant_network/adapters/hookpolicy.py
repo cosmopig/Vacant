@@ -271,7 +271,7 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
 #: `vacant`、`vacant-network`（README 教被遮蔽時改用它）、`python -m vacant_network[.cli|.intake.cli]`
 _VACANT_CLI = r"(?:\bvacant(?:-network)?|-m\s+vacant_network(?:\.cli|\.intake\.cli)?)"
 _AUTHORITY_RE = re.compile(
-    _VACANT_CLI + r"\s+(?:(review|approve|release|withdraw|keys|reverify)\b"
+    _VACANT_CLI + r"\s+(?:(review|approve|release|withdraw|keys|reverify|flag)\b"
     r"|contract\s+(lock|init)\b|intake\s+serve\b)")
 
 

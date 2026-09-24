@@ -40,10 +40,14 @@ FLAG_HEADER = ("The task contract's checks pass, but the task owner marked these
 FOOTER = "Run `vacant check` to re-check before finishing."
 
 
-def finding_id(b: dict[str, Any]) -> str:
+def finding_id(b: dict[str, Any], scope: str = "") -> str:
+    """結論的穩定 id。`scope`＝專案鍵：兩個專案裡「同一條主張、同一個值」是兩件事
+    （2026-09-24 審查 consequences#0：沒有 scope 時撤銷一個會撤到別的專案去）。"""
+    if b.get("finding_id"):
+        return str(b["finding_id"])
     loc = b.get("location") or {}
-    raw = json.dumps([b.get("claim"), loc.get("path"), loc.get("value") or loc.get("note")],
-                     ensure_ascii=False)
+    raw = json.dumps([scope, b.get("claim"), loc.get("path"), loc.get("line"),
+                      loc.get("value") or loc.get("note")], ensure_ascii=False)
     return "f_" + hashlib.sha256(raw.encode()).hexdigest()[:10]
 
 
@@ -87,10 +91,8 @@ def _where(loc: dict[str, Any]) -> str:
 
 
 def agent_lines(b: dict[str, Any]) -> list[str]:
-    """一條追緝結論 → 給 agent 的一到三行（只有事實；沒有行動者）。"""
+    """一條追緝結論 → 給 agent 的一到三行（只有事實；沒有行動者）。隱藏主張不經過這裡。"""
     cid = b.get("claim") or "flag"
-    if b.get("hidden"):
-        return [f"- {cid}: FAIL (details withheld by the task owner)"]
     loc = b.get("location") or {}
     if loc.get("kind") == "missing":
         head = f"- {cid}: FAIL — {loc.get('path')}: {_clip(loc.get('note') or b.get('detail'), 160)}"
@@ -105,13 +107,22 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
     elif b.get("detail") and loc.get("kind") != "missing":
         out.append(f"  check says: {_clip(b['detail'], 160)}")
     src = b.get("source") or {}
-    if b.get("fault_class") == "input" and src.get("kind") in ("input", "file"):
+    shown = b.get("fault_class") == "input" and src.get("observed", True) \
+        and not b.get("source_hidden")
+    if shown and src.get("kind") == "input":
         out.append(f"  the same value is in {src.get('path')}"
                    + (f" line {src['line']}" if src.get("line") else "")
                    + " (the given input); if the input is wrong, say so in the answer")
-    elif b.get("fault_class") == "input" and src.get("kind") == "prompt":
+    elif shown and src.get("kind") == "file":
+        # 繳付物本來就寫著這個值（不是給定的輸入）：照實說，不叫 agent 去「說明輸入有錯」
+        out.append(f"  this value was already in {src.get('path')}"
+                   + (f" line {src['line']}" if src.get("line") else "")
+                   + " before the first recorded step")
+    elif shown and src.get("kind") == "instructions":
+        out.append(f"  the same value is in the instruction file {src.get('path')}")
+    elif shown and src.get("kind") == "prompt":
         out.append("  the same value is in the task's own message")
-    elif b.get("fault_class") == "input" and src.get("kind") == "url":
+    elif shown and src.get("kind") == "url":
         out.append(f"  the same value came from {src.get('ref')}")
     elif b.get("step") and b.get("fault_class") == "agent":
         st = b["step"]
@@ -124,32 +135,62 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
     return out
 
 
+def _clean_lines(lines: list[str], tokens: set[str], cid: str) -> list[str]:
+    """逐行過 KS-1＋行動者防呆：髒的那幾行換成一句中性的話，**不是**整則回饋作廢
+    （2026-09-24 審查 agent_text#2：一行髒掉曾讓人標記、報告、結論全部消失）。"""
+    out = []
+    for ln in lines:
+        try:
+            feedback_ks1_clean(ln, tokens)
+            out.append(ln)
+        except (KS1FeedbackError, Exception):  # noqa: BLE001 — KS1Violation 也在內
+            out.append(f"  (a detail of {cid} was left out)")
+    return out
+
+
 def render_agent(blames: list[dict[str, Any]], results: list[dict[str, Any]],
                  *, previous: dict[str, Any] | None = None,
-                 reasons: list[str] | None = None) -> tuple[str, dict[str, Any]]:
-    """回 `(文字, 狀態)`；狀態存起來當下一次的 `previous`（「這次新增／已解決」）。"""
+                 reasons: list[str] | None = None,
+                 extra_tokens: set[str] | None = None) -> tuple[str, dict[str, Any]]:
+    """回 `(文字, 狀態)`；狀態存起來當下一次的 `previous`（「這次新增／已解決」）。
+
+    隱藏主張：**一條主張一行**「沒過（細節由委託者保留）」，不論它有幾個位置；不標「還沒解決」、
+    不算進「已解決」的數字——那些都會洩漏位置與個數（審查 agent_text#0）。"""
     previous = previous or {}
+    tokens = actor_tokens(blames) | set(extra_tokens or ())
     blamed_claims = {b.get("claim") for b in blames}
     ids_now: dict[str, str] = {}
     body: list[str] = []
+    hidden_done: set[str] = set()
     for b in blames:
         if not b.get("required", True):
             continue
+        cid = str(b.get("claim") or "flag")
+        if b.get("hidden"):
+            if cid not in hidden_done:
+                hidden_done.add(cid)
+                body.append(f"- {cid}: FAIL (details withheld by the task owner)")
+            continue
         fid = finding_id(b)
-        ids_now[fid] = str(b.get("claim"))
+        ids_now[fid] = cid
         lines = agent_lines(b)
         if previous.get("open") and fid in previous["open"]:
             lines[0] += "  (still open)"
-        body += lines
+        body += _clean_lines(lines, tokens, cid)
     for r in results:
         if r.get("status") == "PASS" or not r.get("required", True) \
                 or r.get("claim_id") in blamed_claims:
             continue
-        body.append(f"- {r['claim_id']}: {r['status']}" +
-                    ("" if r.get("hidden") else f" — {_clip(r.get('detail'), 200)}"))
+        line = f"- {r['claim_id']}: {r['status']}" + \
+            ("" if r.get("hidden") else f" — {_clip(r.get('detail'), 200)}")
+        body += _clean_lines([line], tokens, str(r["claim_id"]))
     if not body:
-        body = [f"- {x}" for x in (reasons or [])[:6]]
-    resolved = sorted(set((previous.get("open") or {})) - set(ids_now))
+        body = _clean_lines([f"- {x}" for x in (reasons or [])[:6]], tokens, "the check")
+    hidden_claims = {str(b.get("claim")) for b in blames if b.get("hidden")} | \
+        {str(r.get("claim_id")) for r in results if r.get("hidden")}
+    prev_open = previous.get("open") or {}
+    resolved = sorted(k for k in set(prev_open) - set(ids_now)
+                      if str(prev_open.get(k)) not in hidden_claims)
     if len(body) > MAX_LINES - 3:
         more = len(body) - (MAX_LINES - 4)
         body = body[:MAX_LINES - 4] + [f"- … and {more} more line(s): run `vacant check`"]
@@ -159,9 +200,7 @@ def render_agent(blames: list[dict[str, Any]], results: list[dict[str, Any]],
     if resolved:
         lines.append(f"Resolved since the last check: {len(resolved)}.")
     lines.append(FOOTER)
-    text = "\n".join(lines)
-    text = feedback_ks1_clean(text, actor_tokens(blames))
-    return text, {"open": ids_now, "t": time.time()}
+    return "\n".join(lines), {"open": ids_now, "t": time.time()}
 
 
 # ── 給人的報告 ───────────────────────────────────────────────────────

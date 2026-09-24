@@ -62,23 +62,53 @@ def _def_sha(p: pathlib.Path) -> str | None:
         return None
 
 
+_DEF_DIRS = {
+    "claude": [".claude/agents"],
+    "opencode": [".opencode/agent", ".opencode/agents", ".config/opencode/agent",
+                 ".config/opencode/agents"],
+    "codex": [".codex/agents", ".codex/roles"],
+    "pi": [".pi/agents", ".pi/agent/agents"],
+}
+_NAME_RE = __import__("re").compile(r"(?m)^\s*name\s*[:=]\s*[\"']?([^\"'\n]+?)[\"']?\s*$")
+
+
+def _find_definition(platform: str, name: str, workspace: pathlib.Path | None) -> str | None:
+    """子 agent 的定義檔：檔名相同，或 frontmatter／TOML 的 `name` 相同（Claude、pi 以
+    frontmatter 的 name 認 agent；Codex 的角色是 `.toml`——2026-09-24 批判 §0-9）。"""
+    bases = ([workspace] if workspace else []) + [pathlib.Path.home()]
+    for base in bases:
+        for d in _DEF_DIRS.get(platform, []):
+            root = base / d
+            if not root.is_dir():
+                continue
+            for f in sorted(root.rglob("*")):
+                if f.suffix not in (".md", ".toml") or not f.is_file():
+                    continue
+                if f.stem == name:
+                    return _def_sha(f)
+                try:
+                    head = f.read_text(encoding="utf-8", errors="replace")[:4000]
+                except OSError:
+                    continue
+                m = _NAME_RE.search(head)
+                if m and m.group(1).strip() == name:
+                    return _def_sha(f)
+    return None
+
+
 def definition_of(actor: dict[str, Any], workspace: pathlib.Path | None = None) -> str:
-    """行動者的「記憶」：子 agent 的定義檔改了 ⇒ 新的一格（既有「換了記憶就重來」的語意）。"""
+    """行動者的「記憶」：子 agent 的定義檔改了 ⇒ 新的一格（既有「換了記憶就重來」的語意）。
+    **一律帶平台前綴**：`reputation.py` 的衰減時鐘以 stream 為單位，四個平台的主 agent 若都叫
+    `main`，Codex 跑 400 次會讓 Claude 那一格的證據老化（2026-09-24 批判 §1.1，實測 0.55→0.52）。"""
+    platform = str(actor.get("platform") or "?")
     at = actor.get("agent_type")
     if not actor.get("agent") and not at:
-        return "main"
+        return f"{platform}:main"
     if not at:
-        return "subagent"
+        return f"{platform}:subagent"
     name = str(at)
-    home = pathlib.Path.home()
-    dirs = {"claude": [".claude/agents"], "opencode": [".opencode/agent", ".opencode/agents"],
-            "codex": [".codex/agents"], "pi": [".pi/agents"]}.get(str(actor.get("platform")), [])
-    for base in ([workspace] if workspace else []) + [home]:
-        for d in dirs:
-            sha = _def_sha(base / d / f"{name}.md")
-            if sha:
-                return f"def:{name}:{sha}"
-    return f"builtin:{name}"
+    sha = _find_definition(platform, name, workspace)
+    return f"{platform}:def:{name}:{sha}" if sha else f"{platform}:builtin:{name}"
 
 
 def key_of(actor: dict[str, Any], contract: Any = None,
@@ -87,13 +117,16 @@ def key_of(actor: dict[str, Any], contract: Any = None,
     substrate = f"claimed:{model}" if model else "unknown"
     branch = str(actor.get("platform") or "?")
     if actor.get("version"):
-        branch += "/" + str(actor["version"]).split(".")[0]
+        # 主版本＋次版本（Codex 0.x 的每一版行為都可能不同；批判 §1.1）
+        branch += "/" + ".".join(str(actor["version"]).split(".")[:2])
     return (definition_of(actor, workspace), branch, substrate, family_of(contract))
 
 
 def label(key: tuple[str, str, str, str] | list[str]) -> str:
     st, br, su, _fam = key
-    return f"{br} {st} [{su}]"
+    plat = br.split("/")[0]
+    shown = st[len(plat) + 1:] if st.startswith(plat + ":") else st
+    return f"{br} {shown} [{su}]"
 
 
 class ActorBook:
@@ -180,6 +213,7 @@ def consequences(book: ActorBook, blames: list[dict[str, Any]], *, contract: Any
     for b in blames:
         fid = finding_id(b)
         conf = b.get("confidence")
+        step_id = str((b.get("step") or {}).get("step") or "")
         if conf == "provable" and b.get("step"):
             actor = dict(b["step"].get("actor") or {})
             verifier = ""
@@ -188,12 +222,15 @@ def consequences(book: ActorBook, blames: list[dict[str, Any]], *, contract: Any
                 verifier = claim_by_id(contract, str(b.get("claim"))).verifier
             except (KeyError, AttributeError):
                 pass
-            ev = {"id": f"pf:{fid}", "kind": "provable_fault", "finding_id": fid,
+            ev = {"id": f"pf:{fid}:{step_id}", "kind": "provable_fault", "finding_id": fid,
                   "key": list(key_of(actor, contract, workspace)),
                   "dim": "logical" if verifier in _LOGICAL_VERIFIERS else "factual",
                   "claim": b.get("claim"), "step": b["step"].get("n"),
                   "workspace": str(workspace)}
-        elif conf == "lineage_exact" and b.get("fault_class") == "input":
+        elif conf == "lineage_exact" and b.get("fault_class") == "input" and \
+                (b.get("source") or {}).get("kind") in ("input", "url", "instructions", "prompt",
+                                                         "tool_output"):
+            # 繳付物本來就寫錯（pre_existing 的 file）不是「來源」：不記在來源帳上
             src = b.get("source") or {}
             ref = src.get("path") or src.get("ref") or src.get("kind")
             ev = {"id": f"if:{fid}", "kind": "input_fault", "finding_id": fid,
@@ -234,7 +271,10 @@ def dismiss(book: ActorBook, finding_id: str, reason: str) -> bool:
 
 def recommend(book: ActorBook, family: str) -> list[dict[str, Any]]:
     """這一類任務的紀錄，好的在前；`actionable`＝次數夠（≥ `MIN_N`）才可以拿來做決定。"""
-    rows = [c for c in book.state()["cells"] if c["key"][3] == family and c["key"][0] == "main"]
+    # `main` 沒有平台前綴的是 2026-09-24 早先版本寫的格子：照樣算主 agent
+    rows = [c for c in book.state()["cells"]
+            if c["key"][3] == family and (str(c["key"][0]) == "main"
+                                          or str(c["key"][0]).endswith(":main"))]
     for r in rows:
         r["actionable"] = r["runs"] >= MIN_N
     rows.sort(key=lambda r: (-r["actionable"], -(r["accepted"] / r["runs"] if r["runs"] else 0),
@@ -258,8 +298,19 @@ def pick_agent(book: ActorBook, family: str, candidates: list[str], *,
     """`vacant do --agent auto`：UCB 於主 agent 的格子上。任何候選還不到 `MIN_N` 次 ⇒
     先輪流（挑次數最少的），不拿小樣本做決定。"""
     import math
-    rows = {r["key"][1].split("/")[0]: r for r in recommend(book, family)
-            if r["key"][1].split("/")[0] in candidates}
+    # 一個平台可能有好幾格（不同模型、不同版本）：路由挑的是平台，所以把它的格子加總
+    # （2026-09-24 審查 consequences#3：原本留最後一格，隨便丟掉其他格的紀錄）
+    rows: dict[str, dict[str, Any]] = {}
+    for r in recommend(book, family):
+        plat = r["key"][1].split("/")[0]
+        if plat not in candidates:
+            continue
+        if model_of and model_of.get(plat) and r["key"][2] not in (
+                f"claimed:{model_of[plat]}", "unknown"):
+            continue
+        agg = rows.setdefault(plat, {"runs": 0, "accepted": 0, "provable_faults": 0})
+        for k in ("runs", "accepted", "provable_faults"):
+            agg[k] += int(r[k])
     runs = {a: (rows[a]["runs"] if a in rows else 0) for a in candidates}
     if min(runs.values(), default=0) < MIN_N:
         a = sorted(candidates, key=lambda x: (runs[x], candidates.index(x)))[0]

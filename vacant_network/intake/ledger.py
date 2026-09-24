@@ -64,6 +64,8 @@ EVENT_TYPES = frozenset({
     "withdrawn",           # 撤回
     "infra_void",          # 基礎設施失敗：哪一段、錯誤
     "hook_event",          # agent 生命週期事件摘要（觀測，不是裁決）
+    "trace_head",          # 可究責追緝的病歷鏈頭＋筆數（收件端會簽，截短看得出來；K3）
+    "trace_error",         # 追緝壞了（不影響裁決）
 })
 
 TERMINAL_STATES = ("open", "void", "rejected", "held", "escalated", "accepted",

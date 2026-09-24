@@ -135,6 +135,7 @@ def _blame_where(ws: pathlib.Path, c: Any, where: str, value: str | None) -> dic
 
 def cmd_blame(args: argparse.Namespace) -> int:
     ws, c = _workspace(args)
+    Recorder(ws).checkpoint("blame")          # 行號要對得上現在的檔
     b = _blame_where(ws, c, args.where, args.value)
     if args.json:
         print(json.dumps(b, ensure_ascii=False, indent=1, default=str))
@@ -148,6 +149,13 @@ def cmd_flag(args: argparse.Namespace) -> int:
     rec = Recorder(ws)
     owner = _keys.load_or_create("owner")
     if args.dismiss:
+        known = {str(e.get("finding_id") or e.get("flag_id")) for e in rec.events()
+                 if e["type"] in ("finding", "flag")}
+        if args.dismiss not in known:
+            # 不存在的 id 不收：否則會預先撤銷一個之後才出現的結論（審查 consequences#5）
+            print(f"vacant flag: no finding or flag {args.dismiss!r} in this project's trace "
+                  f"(see `vacant trace show`)", file=sys.stderr)
+            return 2
         doc = _keys.sign_doc(owner, {"kind": "dismiss", "finding_id": args.dismiss,
                                      "reason": args.note or "", "ts": time.time()})
         ref = rec.append("flag", {"flag_id": "d_" + args.dismiss, "dismisses": args.dismiss,
@@ -174,6 +182,7 @@ def cmd_flag(args: argparse.Namespace) -> int:
                                  "ts": time.time()})
     rec.append("flag", {"flag_id": fid, "location": loc.to_json(), "note": args.note or "",
                         "file_sha256": content_sha, "signed": doc, "status": "open"})
+    rec.checkpoint("flag")
     b = B.blame_location(B.Trace(rec), loc, contract=c)
     b["claim"] = f"flag:{fid}"
     rec.append("finding", {"finding_id": fid, "status": "open", "from_flag": True, **{

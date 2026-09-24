@@ -212,7 +212,8 @@ def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contr
 def _localize(contract: Any, res: dict[str, Any], ev: HookEvent,
               why: str | None) -> dict[str, Any] | None:
     from ..trace import stopcheck
-    return stopcheck.localize(contract, res, cwd=ev.cwd, why_open=why)
+    return stopcheck.localize(contract, res, cwd=ev.cwd, why_open=why,
+                              session=f"{ev.agent}:{ev.session_id}")
 
 
 def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, int]:
@@ -228,6 +229,9 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
             _log("errors.jsonl", {"agent": agent, "event": event,
                                   "error": f"contract invalid: {e}"[:500]})
     d = HookDecision("allow")
+    if ev.kind == "stop":
+        # 追緝之前先收掉這個工作階段裡等不到 post 的步驟，否則這一回合看不到它們（integration#5）
+        _trace(agent, event, payload, ev, contract, d)
     if ev.kind == "pre_tool":
         d = decide_pre_tool(ev, contract)
     elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP") \
@@ -248,10 +252,13 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         #   （agent-claude 對照 §3.6），驗證器跑不完就被砍，那一次就不見了。
         #   改成分離的背景行程，掛鉤立刻返回；交件結果（含失敗）照樣進帳本。
         pid = _spawn_submit(contract.path, agent)
-        d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid,
-                                       "trace_finalize": _spawn_finalize(contract, agent, payload,
-                                                                         ev)})
-    _trace(agent, event, payload, ev, contract, d)
+        d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
+    if ev.kind != "stop":
+        _trace(agent, event, payload, ev, contract, d)
+    if ev.kind == "session_end" and contract is not None and ev.reason not in \
+            NON_TERMINAL_END_REASONS and not os.environ.get("VACANT_HOOK_NO_SUBMIT"):
+        # 工作階段結束的追緝報告：和自動交件無關（`submit_on_end=false` 也要有；integration#6）
+        d.record["trace_finalize"] = _spawn_finalize(contract, agent, payload, ev)
     rec = {"agent": agent, "event": event, "kind": ev.kind, "tool": ev.tool,
            "action": d.action, "contract": str(cpath) if cpath else None,
            "command_sha256": (hashlib.sha256(ev.command.encode()).hexdigest()

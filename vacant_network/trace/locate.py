@@ -195,22 +195,49 @@ def _fmt(x: Any) -> str:
         return str(x)
 
 
+def _instance(doc: Any, ptr: str) -> tuple[bool, Any]:
+    cur = doc
+    for part in [x for x in ptr.split("/") if x]:
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        elif isinstance(cur, list) and part.isdigit() and int(part) < len(cur):
+            cur = cur[int(part)]
+        else:
+            return False, None
+    return True, cur
+
+
 def _loc_json_schema(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
                      adir: pathlib.Path) -> list[Location]:
+    """錯的**值**（那個 JSON 位置上的內容），不是路徑——追緝要追的是誰寫了 -5，不是誰寫了鍵名
+    （2026-09-24 審查 blame#3）。缺欄位、根層級的錯 ⇒ 缺的東西。"""
     rel = str(params.get("path"))
     txt = _read(adir, rel)
     if txt is None:
         return [Location(rel, kind="missing", note="not in the deliverable")]
+    try:
+        doc = json.loads(txt)
+    except ValueError:
+        return [Location(rel, note=str(result.get("detail"))[:200])]
     out = []
     for msg in ev.get("errors") or []:
         ptr = str(msg).split(":", 1)[0]
-        key = ptr.rsplit("/", 1)[-1] if ptr != "(root)" else ""
-        ln = None
-        if key and not key.isdigit():
-            i = txt.find(json.dumps(key))
-            if i >= 0:
-                ln = line_col(txt, i)[0]
-        out.append(Location(rel, ln, value=ptr, note=str(msg)[:200]))
+        if ptr == "(root)" or "required property" in str(msg):
+            out.append(Location(rel, kind="missing", value=ptr, note=str(msg)[:200]))
+            continue
+        ok, inst = _instance(doc, ptr)
+        if not ok or isinstance(inst, (dict, list)):
+            out.append(Location(rel, kind="missing", value=ptr, note=str(msg)[:200]))
+            continue
+        val = inst if isinstance(inst, str) else json.dumps(inst)
+        key = ptr.rsplit("/", 1)[-1]
+        ln = col = None
+        start = txt.find(json.dumps(key)) if not key.isdigit() else 0
+        i = txt.find(json.dumps(inst) if not isinstance(inst, str) else json.dumps(inst),
+                     max(start, 0))
+        if i >= 0:
+            ln, col = line_col(txt, i)
+        out.append(Location(rel, ln, col, val, note=f"{ptr}: {str(msg)[:180]}"))
     return out or [Location(rel, note=str(result.get("detail"))[:200])]
 
 
