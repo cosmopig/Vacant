@@ -919,10 +919,15 @@ def test_pi_install_writes_extension_and_leaves_models_json_byte_identical(
     assert "vacant_network.vrun.hookcli" in body
     assert mj.read_bytes() == original, "models.json 被動了"
     # 🔴 **裝了不等於被中介**：`proven` 只有 `mark_proven`（requests_seen > 0）點得亮，
-    #    `install` 自己永遠點不亮它。2026-09-22 `CHANNEL_MEASURED["pi"]` 填上真模型日期
-    #    之後 `verified` 會是 True——那一欄記的是「這條路**有人量過**」，
-    #    **不是「這一次被中介了」**。兩欄不可互相冒充，所以這裡兩條都驗。
-    assert st["channel"]["pi"]["verified"] is bool(possess.CHANNEL_MEASURED["pi"])
+    #    `install` 自己永遠點不亮它。
+    # 🔴 **shim 的真模型證據不准點亮常駐通道**：2026-09-22 那批 L-real 五格全走 PATH shim
+    #    （`PI_CODING_AGENT_DIR` 被搬到暫存目錄、常駐 extension 沒被載入），常駐 extension
+    #    只有 L-fake ⇒ `verified` 必須是 False，shim 的證據在另一欄。
+    assert possess.CHANNEL_MEASURED["pi"] == ""
+    assert st["channel"]["pi"]["verified"] is False
+    assert st["channel"]["pi"]["measured"] == ""
+    assert possess.SHIM_MEASURED["pi"], "shim 那條的真模型證據不可以弄丟"
+    assert st["channel"]["pi"]["shim_measured"] == possess.SHIM_MEASURED["pi"]
     assert st["channel"]["pi"].get("proven") is not True
     written = {c["path"] for c in st["files"]}
     assert str(mj) not in written
@@ -988,3 +993,11 @@ def test_piext_is_valid_javascript():
 
 def test_pi_probe_models_returns_empty_not_error_when_nothing_listens():
     assert piext.probe_models(1, timeout=0.5) == []
+
+
+def test_shim_evidence_never_lights_channel_verified():
+    """`SHIM_MEASURED` 與 `CHANNEL_MEASURED` 是兩條路：shim 有證據的 agent，
+    常駐通道的格子**不會因此**變成有值（兩表不共用字串）。"""
+    for agent, shim in possess.SHIM_MEASURED.items():
+        assert shim, agent
+        assert possess.CHANNEL_MEASURED.get(agent, "") != shim, agent

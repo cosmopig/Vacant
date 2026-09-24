@@ -99,6 +99,9 @@ round-trip，**過了才寫任何一個設定檔**，所以不會因為設定錯
    記的是「`vacant run` 那條路」量過的日期；**常駐設定檔那條路是另一條路**，
    本模組逐個 agent 另外記（`CHANNEL_MEASURED`）。沒量過的格子在
    `install-status` 上會標 `unverified`，不准讀成可用。
+   **PATH shim 那條又是第三條路**（`SHIM_MEASURED`）：shim 在這一跑自己的設定目錄裡
+   起 agent，常駐設定檔不在路上，所以 shim 的真模型成績**不准拿來點亮**
+   `CHANNEL_MEASURED`（2026-09-22 pi 那格就犯過一次，已撤回）。
 3. **憑證一律不讀不寫。** `~/.codex/auth.json`、`~/.pi/agent/auth.json`、
    keychain、`~/.claude/.credentials.json` 都在 `NEVER_TOUCH` 裡，
    而且常駐 proxy 是**原樣轉送 Authorization header**（不換鑰、不存鑰）——
@@ -198,17 +201,44 @@ CHANNEL_MEASURED: dict[str, str] = {
               "**但 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 時 settings.json 被忽略**）",
     # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
     #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
-    # ✅ 2026-09-22 **這一格終於有真模型證據**（`ops/vacantrun/possess_pi_real_20260922/`）：
-    #   Claude Code 遠端容器、pi **0.87.0**、模型 `gemma-4-12b-it-qat`、上游是人類 LM Studio 的
-    #   **公開 Tailscale Funnel**（不是 LAN 直連 1003）。R534 那五題各一格、走 **PATH shim**
-    #   （命令列零個 vacant）：3 交付 exit 0 ／ 2 拒交 exit 20，模型通數 4–13，
+    # ⚠ pi 這一格**到今天仍是空的**，而且是刻意的：本表記的是 `wire_pi` 寫的那支
+    #   **常駐 extension**（`~/.pi/agent/extensions/vacant.ts` → 常駐 proxyd）這條路。
+    #   - 常駐 extension 那條只有 **L-fake**（`ops/vacantrun/possess_pi_20260922/`，假上游）。
+    #   - 2026-09-22 的**真模型**那批（`ops/vacantrun/possess_pi_real_20260922/`）五格**全部走
+    #     PATH shim**：`gateshim.exec_inner` 把 `PI_CODING_AGENT_DIR` 設到這一跑自己的暫存目錄
+    #     （自己的 models.json／settings.json、自己的 per-run 掛鉤 extension、自己的 proxy 埠），
+    #     **常駐那支 extension 在那五格裡從來沒有被載入**（`cells/*/hook_install.json` 的
+    #     `target` 是 `/tmp/vacant-possess/run-pi-*/extensions/vacant.ts`）。
+    #   ⇒ 那批是 **shim 這條路**的證據，記在下面的 `SHIM_MEASURED["pi"]`，
+    #     **不准拿來點亮本表**（2026-09-22 一度填進來，code review 抓到後撤回）。
+    #   ⇒ 本格要等「裝完之後、命令列零個 vacant、pi 載入**常駐** extension、真模型、
+    #     常駐 proxyd journal `requests_seen > 0`」量到才准填。
+    "pi": "",
+    "hermes": "",
+}
+
+
+#: `vacant install` 裝的 **PATH shim（閘門那一側）**這條路，逐個 agent 的**真模型**實測。
+#:
+#: ⚠ 跟 `CHANNEL_MEASURED` **是兩條路、兩份證據，不可互相背書**：
+#:   shim 這條由 `gateshim.exec_inner` 在**這一跑自己的**設定目錄裡起 agent
+#:   （pi 是 `PI_CODING_AGENT_DIR`＝暫存目錄），常駐設定檔／常駐 extension **不在路上**。
+#:   所以這裡有日期**不代表**常駐通道被證實，`install()` 的 `verified` 只看 `CHANNEL_MEASURED`。
+#: ⚠ 反過來也一樣：shim **打完整路徑就繞過**、對 `bash -c` 收不到（`gateshim` 誠實邊界），
+#:   這裡的成績**不涵蓋**那些叫法。
+#: ⚠ 只收 **L-real**（真 agent、真模型、真流量）；L-fake 不進本表。
+#:   本表沒有的 agent ＝**本表沒記**，不是「量過而且失敗」。
+SHIM_MEASURED: dict[str, str] = {
+    # ✅ `ops/vacantrun/possess_pi_real_20260922/`：Claude Code 遠端容器、pi **0.87.0**、
+    #   模型 `gemma-4-12b-it-qat`、上游是人類 LM Studio 的**公開 Tailscale Funnel**
+    #   （不是 LAN 直連 1003）。R534 那五題各一格、走 **PATH shim**（命令列零個 vacant，
+    #   `pi -p`）：3 交付 exit 0 ／ 2 拒交 exit 20，模型通數 4–13，
     #   五條收據鏈 `--selftest` 先過再驗全 OK，`proven` 由 `requests_seen=7` 點亮。
-    #   ⚠ 同日另有一批 **L-fake**（假上游，含互動 TUI 與 `/vacant`）＝`ops/vacantrun/possess_pi_20260922/`。
-    #   ⚠ 沒有 bwrap ⇒ 五格全是 **B′**；互動／長任務／並行**沒量**。
+    #   ⚠ 掛鉤是 shim 當場裝的 **per-run extension** 燒的，不是常駐那支。
+    #   ⚠ 沒有 bwrap ⇒ 五格全是 **B′**；互動／長任務／並行**沒量**；n=5 無 rep。
     "pi": "2026-09-22（Claude Code 遠端容器，pi 0.87.0，gemma-4-12b-it-qat，"
           "**上游＝公開 Funnel 非 LAN**，R534 五題走 shim：3 交付／2 拒交，"
-          "模型通數 4–13，鏈全 OK，級別 B′）",
-    "hermes": "",
+          "模型通數 4–13，鏈全 OK，級別 B′；**常駐 extension 不在路上**）",
 }
 
 
@@ -765,8 +795,12 @@ def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
 
     ⚠ 使用者自己的 provider **一個都不改道**：`/vacant off` 或 `/model` 切走就是不經過
       Vacant，extension 會留一筆 `vacant_off`，收據不替它說謊（`piext` 誠實邊界 3）。
-    ⚠ `CHANNEL_MEASURED["pi"]` 仍是空字串：**這條常駐路要在 vacant-dev 用真模型量到
-      `requests_seen > 0` 才准填**。本機自裝驗證只到 L-fake（假上游）。
+    ⚠ `CHANNEL_MEASURED["pi"]` 仍是空字串：**這支常駐 extension 只有 L-fake**
+      （`ops/vacantrun/possess_pi_20260922/`，假上游）。2026-09-22 的真模型那批
+      （`possess_pi_real_20260922/`）五格全走 PATH shim——shim 把 `PI_CODING_AGENT_DIR`
+      搬到這一跑自己的暫存目錄，**本函式寫的這支檔在那裡不會被載入**——所以那批只記進
+      `SHIM_MEASURED["pi"]`，不准拿來填本格。要用真模型、命令列零個 vacant、常駐 proxyd
+      journal `requests_seen > 0` 量到**這支**被載入才准填。
     ⚠ agent 刪得掉這支檔（實測）。刪掉 ⇒ 下一跑 canary 不燒 ⇒ 收據降級，不是保證。
     """
     from . import piext
@@ -1918,7 +1952,9 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
             changes += cs
             wired[a] = {"ok": True, "files": [c.to_json() for c in cs],
                         "measured": CHANNEL_MEASURED.get(a, ""),
-                        "verified": bool(CHANNEL_MEASURED.get(a))}
+                        "verified": bool(CHANNEL_MEASURED.get(a)),
+                        # shim 那條路的真模型證據**另一欄**，不餵 `verified`
+                        "shim_measured": SHIM_MEASURED.get(a, "")}
         except Exception as e:
             wired[a] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
 

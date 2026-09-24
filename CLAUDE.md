@@ -164,8 +164,11 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   （`cli._guided_install`，只提議 `possess.INSTALL_GUIDED_AGENTS`＝pi）。`gateshim` 的 pi 段另寫 per-run
   `settings.json` 的 `defaultProvider=vacant`——自裝驗證抓到：只寫 `models.json` pi 不會**選**它。
   自裝證據 `ops/vacantrun/possess_pi_20260922/`（**L-fake**，假上游，含互動 TUI 與 `/vacant`）
-  ＋ **`ops/vacantrun/possess_pi_real_20260922/`（L-real）**：pi 0.87.0 ＋ `gemma-4-12b-it-qat`
-  跑 R534 五題走 shim，**3 交付 exit 0／2 拒交 exit 20**，五條鏈全 OK，`CHANNEL_MEASURED["pi"]` 因此填上。
+  ＋ **`ops/vacantrun/possess_pi_real_20260922/`（L-real，但只屬於 PATH shim 那條路）**：pi 0.87.0 ＋
+  `gemma-4-12b-it-qat` 跑 R534 五題走 shim，**3 交付 exit 0／2 拒交 exit 20**，五條鏈全 OK。
+  🔴 **那五格裡常駐 extension 沒被載入**（shim 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，掛鉤是 per-run
+  那支燒的）⇒ 記在 `possess.SHIM_MEASURED["pi"]`，**`CHANNEL_MEASURED["pi"]` 仍是空字串**
+  （曾一度填上，code review 抓到後撤回）。**常駐 extension＝只有 L-fake；L-real＝只有 shim 路**，不可合講。
   ⚠ 上游是**公開 Funnel 不是 LAN**，且與 `pi_tty_20260920` 那 40 格**三個變因都不同，不可合併相減**。
 - **有 Vacant ↔ 沒有 Vacant 的一格對照**（`ops/vacantrun/ab_vacant_onoff_20260922/`，n=1）：
   同一題同一模型，**OFF 臂 pi 退出碼 0 而工作區雜湊前後相同**（什麼都沒交，你會以為成功）；
