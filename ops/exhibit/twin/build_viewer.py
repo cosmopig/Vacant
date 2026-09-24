@@ -107,6 +107,23 @@ def extract_canon(html: str) -> str:
     return html[i:j].rstrip("\n")
 
 
+def with_pack(html: str, pack_text: str) -> str:
+    """同一頁收據頁、換一份內嵌的 `twin-pack`（其餘區塊與 CANON 逐位元組不動）。
+
+    `serve_twin` 用它替**每一份錄影的配對收據**現做一頁（`/v/<錄影>.html`）：
+    頁內的驗證程式是同一份，只有被驗的資料不同。資料一律由頁內 JS 從創世重算，
+    這裡不算任何東西。
+    """
+    pat = re.compile(r'(<script[^>]*id="twin-pack"[^>]*>\n)(.*?)(\n</script>)', re.S)
+    if not pat.search(html):
+        raise ValueError("頁面裡找不到 id=twin-pack 的內嵌區塊")
+    # `</script` 出現在資料裡會提早結束內嵌區塊 ⇒ 頁面被截斷而且不會報錯。
+    if "</script" in pack_text.lower():
+        raise ValueError("資料包裡有 </script，內嵌會把頁面截斷")
+    return pat.sub(lambda m: m.group(1) + pack_text.strip("\n") + m.group(3),
+                   html, count=1)
+
+
 def build(html: str) -> str:
     for block_id in BLOCKS:
         body = expected_block(block_id)
