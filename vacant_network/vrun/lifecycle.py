@@ -4,7 +4,9 @@
 
 在此之前，外面（數位分身的電視、任何觀測台）要知道一跑發生了什麼，只能等它
 **跑完**，再去讀 run 目錄——`run_<ARM>.json`、`visible_*.json`、收據鏈——自己
-推回一串事件（`ops/exhibit/twin/to_events.py` 就是這樣做的）。兩個後果：
+推回一串事件（舊的 `ops/exhibit/twin/to_events.py` 就是這樣做的，2026-09-24 已刪；
+現在分身只吃這一份契約：轉換器是 `ops/exhibit/twin/live_events.py`，電視那一側的
+欄位與誠實規則在 `ops/exhibit/twin/tv_contract.py`）。兩個後果：
 
 1. **畫面跟不上過程。** 真模型一題約 114 秒（E10），那段時間裡外面什麼都看不到。
 2. **外面綁死在 run 目錄的形狀上。** `launcher` 每改一次落盤格式（`_a<n>` 後綴、

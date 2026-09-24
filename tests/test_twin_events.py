@@ -16,6 +16,7 @@
 """
 from __future__ import annotations
 
+import json
 import pathlib
 import sys
 
@@ -25,6 +26,7 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import live_events as le  # noqa: E402
+from ops.exhibit.twin import pair_receipts as pairlib  # noqa: E402
 from ops.exhibit.twin import serve_twin as S  # noqa: E402
 from ops.exhibit.twin import tv_contract as tv  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
@@ -171,3 +173,19 @@ def test_validate_has_teeth(events):
     unsettled = [e for e in events if e["type"] != "verdict"]
     assert tv.validate(unsettled)
     assert tv.validate(unsettled, require_settled=False) == []
+
+
+def test_every_committed_recording_has_its_own_receipts(rec):
+    """錄影那一批要有自己的收據頁，否則播它時觀眾沒有東西可以自己重驗。"""
+    pp = pairlib.pair_path(rec)
+    assert pp.exists(), f"{rec.name} 沒有配對收據 {pp.name}"
+    text = pp.read_text(encoding="utf-8")
+    assert pairlib.check_pair(rec, json.loads(text), pack_text=text) == []
+
+
+def test_receipt_binding_notices_a_changed_recording(rec, tmp_path):
+    """負控制：錄影多一個位元組，進版控的那份收據就不再綁得上。"""
+    moved = tmp_path / rec.name
+    moved.write_bytes(rec.read_bytes() + b"\n")
+    pack = json.loads(pairlib.pair_path(rec).read_text(encoding="utf-8"))
+    assert any("sha256" in b for b in pairlib.check_pair(moved, pack))

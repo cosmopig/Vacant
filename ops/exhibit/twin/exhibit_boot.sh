@@ -33,8 +33,9 @@
 #   ./exhibit_boot.sh --dwell 25            沒人按的時候幾秒換一格
 #   ./exhibit_boot.sh --recording a.jsonl   只重播這一份錄影（可給多次；
 #                                           不給＝ops/exhibit/twin/recordings/*.jsonl）
-#   ./exhibit_boot.sh --live runs/x/lifecycle.jsonl
-#                                           tail 真跑：有真跑就先播真跑，閒下來回到重播
+#   ./exhibit_boot.sh --live runs/x/lifecycle.jsonl --live-runs runs/x
+#                                           tail 真跑：有真跑就先播真跑，閒下來回到重播；
+#                                           --live-runs 讓那幾格跑完就有收據頁
 #   ./exhibit_boot.sh --lan --print-host    只印「區網 IP 抓到什麼」就結束
 #                                           （0＝抓到、2＝抓不到並說明；1 是 bug）
 #   ./exhibit_boot.sh --no-twin             不接數位分身（回到 09-21 之前的行為）
@@ -67,6 +68,7 @@ NO_TOKEN=0
 PRINT_HOST=0
 RECORDINGS=()
 LIVE_SRC=""
+LIVE_RUNS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -85,6 +87,8 @@ while [ $# -gt 0 ]; do
     --dwell)  DWELL="$2"; shift ;;
     --recording) RECORDINGS+=("$2"); shift ;;
     --live)   LIVE_SRC="$2"; shift ;;
+    # 真跑那一次 run_twin.py 的 --out：給了，那一格跑完就即時打包收據（/v/live.html）。
+    --live-runs) LIVE_RUNS="$2"; shift ;;
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
     --store-port) STORE_PORT="$2"; shift ;;
@@ -208,6 +212,7 @@ TWIN_ARGS=(--bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL"
            --base-url "http://$HOST:$TWIN_PORT")
 for R in "${RECORDINGS[@]+"${RECORDINGS[@]}"}"; do TWIN_ARGS+=(--recording "$R"); done
 [ -n "$LIVE_SRC" ] && TWIN_ARGS+=(--live "$LIVE_SRC")
+[ -n "$LIVE_RUNS" ] && TWIN_ARGS+=(--live-runs "$LIVE_RUNS")
 if [ -n "$TOKEN" ]; then
   TWIN_ARGS+=(--token "$TOKEN")
 else
@@ -351,6 +356,11 @@ else
 fi
 if [ -n "$LIVE_SRC" ]; then
   echo " 真跑 　${LIVE_SRC}（mode=live：有真跑就先播，閒下來回到重播）"
+  if [ -n "$LIVE_RUNS" ]; then
+    echo " 　　　 收據：${LIVE_RUNS}（每一格跑完即時打包，/v/live.html）"
+  else
+    echo " 　　　 ⚠ 沒有 --live-runs：真跑那幾格沒有收據頁，/r/<cell> 會照實 404"
+  fi
 fi
 echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
 if [ -n "$STORE_URL" ]; then

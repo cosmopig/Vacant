@@ -30,7 +30,9 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from ops.exhibit.twin import build_viewer  # noqa: E402
 from ops.exhibit.twin import pack as packlib  # noqa: E402
+from ops.exhibit.twin import pair_receipts as pairlib  # noqa: E402
 from ops.exhibit.twin import run_twin  # noqa: E402
 from ops.exhibit.twin import serve_twin as S  # noqa: E402
 from ops.exhibit.twin import tv_contract as tv  # noqa: E402
@@ -60,6 +62,17 @@ def recs(batch) -> list[pathlib.Path]:
 def rpack(batch) -> dict:
     """**同一批**的收據資料包（收據頁的那一份）：鏈頭與錄影對得上。"""
     return packlib.build(batch)
+
+
+@pytest.fixture(scope="module")
+def paired(batch, tmp_path_factory) -> pathlib.Path:
+    """同一批的錄影＋它的配對收據（`X.jsonl` ＋ `X.pack.json`），`record_fixture.sh` 的形狀。"""
+    d = tmp_path_factory.mktemp("paired")
+    rec = d / "fx_small.jsonl"
+    rec.write_bytes((batch / "lifecycle.jsonl").read_bytes())
+    pack = pairlib.build_pair(rec, batch)
+    pairlib.pair_path(rec).write_text(pairlib.dumps(pack), encoding="utf-8")
+    return rec
 
 
 def mk(recs, tmp_path, **kw):
@@ -288,7 +301,7 @@ def test_receipt_page_is_not_offered_for_a_different_run(recs, tmp_path):
     try:
         c = Client(f"http://127.0.0.1:{srv.server_address[1]}")
         cid = sorted(stage.pl.cells)[0]
-        assert cid in stage.receipts, "前提：兩邊的 cell_id 真的撞在一起"
+        assert cid in stage.books[""]["heads"], "前提：兩邊的 cell_id 真的撞在一起"
         code, _loc = c.location(f"/r/{cid}")
         assert code == 404
         why = stage.receipt_why_not(cid)
@@ -990,3 +1003,179 @@ def test_interface_names_are_not_hardcoded_on_linux():
     assert "| cut -d/ -f1 | head -1 || true)" in src, (
         "`ip …` 那條管線少了 `|| true`：`ip` 對不存在的介面回 1，"
         "在 `set -o pipefail` 底下會讓整支腳本 exit 1 而且一個字都不印")
+
+
+# ── 配對收據：錄影那一批有自己的收據頁 ─────────────────────────────
+def _serve(stage_srv):
+    srv, stage = stage_srv
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, stage, Client(f"http://127.0.0.1:{srv.server_address[1]}")
+
+
+def test_paired_recording_gets_its_own_receipt_page(paired, tmp_path):
+    """播 fixture 錄影時 `/r/<cell>` 不再一律 404：轉到**這份錄影自己那一批**的收據頁。"""
+    srv, stage, c = _serve(mk([paired], tmp_path))
+    try:
+        assert stage.recordings[0]["receipts"]["accepted"] is True
+        stage.advance()
+        cid = stage.now["cell_id"]
+        assert stage.now["receipt_available"] is True
+        code, loc = c.location(f"/r/{cid}")
+        assert code == 302 and loc == f"/v/{paired.stem}.html#cell={cid}"
+        code, loc = c.location(f"/r/{cid}?tamper=1")
+        assert loc == f"/v/{paired.stem}.html#cell={cid}&tamper=1"
+        assert stage.press("tamper")["ok"] is True
+        # 那一頁＝同一份收據頁，只換內嵌資料：被驗的就是配對檔那一串
+        code, headers, body = c.get(f"/v/{paired.stem}.html")
+        assert code == 200 and "text/html" in headers["Content-Type"]
+        html = body.decode("utf-8")
+        pair_text = pairlib.pair_path(paired).read_text(encoding="utf-8").strip("\n")
+        assert build_viewer.extract_block(html, "twin-pack") == pair_text
+        base = S.VIEWER.read_text(encoding="utf-8")
+        assert build_viewer.extract_canon(html) == build_viewer.extract_canon(base)
+        assert build_viewer.extract_block(html, "twin-assets") == \
+            build_viewer.extract_block(base, "twin-assets")
+        # 那一頁裡這一格的鏈頭＝電視上演的那一跑
+        pack = json.loads(pair_text)
+        cell = next(x for x in pack["cells"] if x["cell_id"] == cid)
+        assert pairlib.chain_head(cell) == stage.now["verdict_hash"]
+        assert c.location("/v/nope.html")[0] == 404
+        st = c.get_json("/state")
+        assert {b["url"] for b in st["receipt_pages"]} == {f"/v/{paired.stem}.html"}
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_every_cell_of_a_paired_recording_has_a_receipt(paired, tmp_path):
+    srv, stage = mk([paired], tmp_path)
+    try:
+        st = stage.state()
+        assert st["cells"] and all(x["receipt_available"] for x in st["cells"])
+    finally:
+        srv.server_close()
+
+
+def _copy_pair(paired, tmp_path, name="swapped"):
+    rec = tmp_path / f"{name}.jsonl"
+    rec.write_bytes(paired.read_bytes())
+    pp = pairlib.pair_path(rec)
+    pp.write_bytes(pairlib.pair_path(paired).read_bytes())
+    return rec, pp
+
+
+def test_binding_rejects_a_recording_that_changed_under_its_receipts(paired, tmp_path):
+    """**負控制 1（sha256）**：錄影換了、收據沒換 ⇒ 整份收據不收，/r/ 照實 404。
+
+    換法刻意選「lifecycle 契約照樣合格、每一格鏈頭也都一樣」的那一種
+    （檔尾多一個空行）——只有 sha256 那一道抓得到。
+    """
+    rec, _pp = _copy_pair(paired, tmp_path)
+    with rec.open("a", encoding="utf-8") as fh:
+        fh.write("\n")
+    assert lifecycle.validate_stream(lifecycle.read(rec)) == []
+    bad = pairlib.check_pair(rec, json.loads(pairlib.pair_path(rec).read_text("utf-8")))
+    assert bad and all("sha256" in b for b in bad), bad
+    assert any("配對收據" in b for b in S.check_recording(rec))
+    srv, stage, c = _serve(mk([rec], tmp_path))
+    try:
+        rs = stage.recordings[0]["receipts"]
+        assert rs["accepted"] is False and "sha256" in rs["problems"][0]
+        stage.advance()
+        cid = stage.now["cell_id"]
+        code, _ = c.location(f"/r/{cid}")
+        assert code == 404
+        assert c.location(f"/v/{rec.stem}.html")[0] == 404
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_binding_rejects_a_forged_sha_with_the_wrong_chains(paired, tmp_path):
+    """**負控制 2（逐格鏈頭）**：有人連 sha256 一起改——鏈頭對不上照樣不收。"""
+    rec, pp = _copy_pair(paired, tmp_path, "forged")
+    pack = json.loads(pp.read_text("utf-8"))
+    pack["cells"][0]["chain"] = pack["cells"][0]["chain"][:-1]     # 鏈頭換一個
+    pack["recording"]["sha256"] = pairlib.sha256_file(rec)         # sha256 照抄
+    pp.write_text(pairlib.dumps(pack), encoding="utf-8")
+    bad = pairlib.check_pair(rec, pack)
+    assert bad and any("鏈頭對不上" in b for b in bad), bad
+    assert not any("sha256" in b for b in bad), "這一次 sha256 是對的，只有鏈頭能抓"
+    # 另一批的資料包（54 格 L-real）配這份錄影：格子集合就不相等
+    if S.DEFAULT_PACK.exists():
+        other = json.loads(S.DEFAULT_PACK.read_text("utf-8"))
+        other["recording"] = {"sha256": pairlib.sha256_file(rec)}
+        bad = pairlib.check_pair(rec, other)
+        assert any("不是同一批" in b or "鏈頭對不上" in b for b in bad)
+
+
+def test_build_pair_refuses_runs_from_another_batch(paired, tmp_path):
+    """`pair_receipts` 不准拿別批的 run 目錄配這份錄影（沒有放寬的旗標）。"""
+    other = tmp_path / "other_batch"
+    assert run_twin.main(["--out", str(other), "--fixture", "--residents", "1",
+                          "--tasks", "s1_01_addmul", "--sandbox", "none"]) == 0
+    with pytest.raises(SystemExit):
+        pairlib.build_pair(paired, other)
+
+
+def _live_rig(tmp_path, *, live_runs):
+    live = tmp_path / "live" / "lifecycle.jsonl"
+    live.parent.mkdir()
+    root = tmp_path / "live" / "out"
+    srv, stage = mk([], tmp_path, live=live, live_runs=root if live_runs else None,
+                    live_idle_s=60)
+    rc = run_twin.main(["--out", str(root), "--fixture", "--residents", "1",
+                        "--tasks", "s1_01_addmul", "--sandbox", "none",
+                        "--events", str(live)])
+    assert rc == 0
+    return srv, stage
+
+
+def test_live_receipts_are_packed_as_soon_as_the_cell_is_written(tmp_path):
+    """`--live-runs`：真跑那一格跑完、`run_twin` 寫完 `twin_cell.json`，當場打包收據。"""
+    srv, stage = _live_rig(tmp_path, live_runs=True)
+    try:
+        stage.tick()
+        assert stage.mode() == tv.MODE_LIVE
+        cid = stage.now["cell_id"]
+        assert stage.now["mode"] == tv.MODE_LIVE
+        url, why = stage.receipt_target(cid)
+        assert why is None and url == f"/v/{S.LIVE_BOOK}.html#cell={cid}"
+        assert stage.now["receipt_available"] is True
+        html = stage.book_html(S.LIVE_BOOK).decode("utf-8")
+        pack = json.loads(build_viewer.extract_block(html, "twin-pack"))
+        assert sorted(c["cell_id"] for c in pack["cells"]) == sorted(stage.live_cells)
+        cell = next(c for c in pack["cells"] if c["cell_id"] == cid)
+        assert pairlib.chain_head(cell) == stage.live_heads[cid]
+        assert not [x for x in pairlib.PATH_LEAKS if x in json.dumps(pack)]
+        assert stage.state()["live"]["receipts_packed"] == sorted(stage.live_cells)
+    finally:
+        srv.server_close()
+
+
+def test_live_without_live_runs_says_why_there_is_no_receipt(tmp_path):
+    srv, stage = _live_rig(tmp_path, live_runs=False)
+    try:
+        stage.tick()
+        cid = stage.now["cell_id"]
+        url, why = stage.receipt_target(cid)
+        assert url is None and "--live-runs" in why
+        assert stage.now["receipt_available"] is False
+    finally:
+        srv.server_close()
+
+
+def test_a_stale_twin_cell_is_not_packed(tmp_path):
+    """run 目錄裡的 `twin_cell.json` 是這一跑開始**之前**寫的 ⇒ 不打包（可能是上一次的格子），
+    等到期限就照實記一筆錯。"""
+    srv, stage = _live_rig(tmp_path, live_runs=True)
+    try:
+        stage.poll_live()
+        cid = sorted(stage.live_pending)[0]
+        stage.live_pending[cid]["since_ms"] = S.now_ms() + 10 ** 9     # 「還沒寫完」
+        stage._try_pack_live()
+        assert cid in stage.live_pending and cid not in stage.live_cells
+        stage.live_pending[cid]["deadline"] = 0
+        stage._try_pack_live()
+        assert cid not in stage.live_pending and cid not in stage.live_cells
+        assert any("還沒寫完" in e for e in stage.live_errors)
+    finally:
+        srv.server_close()

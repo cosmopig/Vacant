@@ -32,22 +32,47 @@ vacant run --events ──lifecycle.jsonl──▶ live_events.Folder ──▶ 
 |---|---|---|
 | 離線備援（預設） | 不加參數：重播 `ops/exhibit/twin/recordings/*.jsonl` | `replay` |
 | 指定錄影 | `exhibit_boot.sh --recording <檔> [--recording <檔> …]` | `replay` |
-| 現場真跑 | 另一邊 `run_twin.py --events runs/x/lifecycle.jsonl -- …`，這邊 `exhibit_boot.sh --live runs/x/lifecycle.jsonl` | `live`（有真跑就先播；最後一行之後 20 秒沒動靜就回到重播） |
+| 現場真跑 | 另一邊 `run_twin.py --out runs/x --events runs/x/lifecycle.jsonl -- …`，這邊 `exhibit_boot.sh --live runs/x/lifecycle.jsonl --live-runs runs/x` | `live`（有真跑就先播；最後一行之後 20 秒沒動靜就回到重播） |
 
 - 重播保留錄影裡事件的相對間隔，但一格**壓進 `dwell×0.8` 秒內**（只壓不拉）；
   壓縮比在 `/state.replay.compress`／`speedup`。**電視要用 `mode` 在畫面上標「重播」。**
 - 電視事件的欄位與誠實規則：`ops/exhibit/twin/tv_contract.py`（模組 docstring 是契約表，
   `validate` 是可執行版）。新欄位 `mode`、新 type `working`（每一通經過中介的模型呼叫）。
-- 從 run 目錄事後推事件的 `to_events.py` **已刪**。`twin_pack.json` 只剩收據頁（`/r/<cell>`）在用。
-- 開機前驗錄影：`python3 ops/exhibit/twin/serve_twin.py --check`（preflight 會跑）。
+- 從 run 目錄事後推事件的 `to_events.py` **已刪**。資料包只剩收據頁在用。
+- 開機前驗錄影：`python3 ops/exhibit/twin/serve_twin.py --check`（preflight 會跑；
+  有配對收據就連綁定一起驗）。
+
+### 收據頁：每一份錄影配它自己那一批
+
+| 收據從哪來 | `/r/<cell>` 轉去 | 綁定 |
+|---|---|---|
+| 錄影旁邊的 `X.pack.json`（`pair_receipts.py`，與錄影同一次 `run_twin.py`） | `/v/X.html` | 錄影 sha256 ＋ 逐格鏈頭（載入時驗，不過整份不收） |
+| `--live-runs <run_twin --out>`：真跑那一格寫完就即時打包 | `/v/live.html` | 鏈頭＝`run_ended.verdict_hash` |
+| `twin_pack.json`（舊的 54 格 L-real） | `/viewer.html` | 鏈頭相等 |
+
+`/r/<cell>` 一律只轉到**鏈頭＝電視上演的那一跑**的那一頁；找不到就 404 並講明原因。
+頁面都是同一份 `examples/twin_viewer.html`，只換內嵌的資料。
+
+**1003 重跑 L-real 之後怎麼上架**（與 `record_fixture.sh` 同一條）：
+```bash
+python3 ops/exhibit/twin/run_twin.py --out runs/twin_real_X --events runs/twin_real_X/lifecycle.jsonl -- …
+cp runs/twin_real_X/lifecycle.jsonl ops/exhibit/twin/recordings/real_X.jsonl
+python3 ops/exhibit/twin/pair_receipts.py --recording ops/exhibit/twin/recordings/real_X.jsonl \
+    --runs runs/twin_real_X        # 產 real_X.pack.json；鏈頭對不上就不寫
+python3 ops/exhibit/twin/serve_twin.py --check
+```
 
 ⚠ **目前只有 L-none 錄影**（`recordings/fixture_20260924.jsonl`，`record_fixture.sh` 產生：
 腳本抄參考解／壞樁，零模型，畫面會照實說「交件是腳本寫的」）。
 54 格 L-real 那一批是在 lifecycle 出現之前跑的，**沒有錄影**；要在 1003 用
 `run_twin.py --events` 重跑才會有。不准寫「舊 run 目錄 → lifecycle」的轉換器。
 
-⚠ fixture 錄影與 L-real 資料包**共用 cell_id**，但鏈不同 ⇒ 播 fixture 時 `/r/<cell>`
-會回 404 並講明「收據頁內嵌的是另一跑」，不會把觀眾帶去看別的鏈。
+⚠ fixture 錄影與 L-real 資料包**共用 cell_id**，但鏈不同。播 fixture 時 `/r/<cell>`
+轉到 `/v/fixture_20260924.html`（它自己那一批），不會落到 `/viewer.html` 那一批。
+fixture 那一頁的簽章 135/135 驗得過；但**扣住介面那 27 格的交付物樹雜湊在頁面上不重算**：
+`VACANT_FEEDBACK.md` 裡有暫存目錄的絕對路徑，遮掉之後位元組不是 sha256 那一份，
+頁面照實標「不可重算」。`twin_viewer_node_check.mjs` 對那一頁的 N13 會紅
+（「OFF 臂零通數」——fixture 本來就零模型，那條判準是給 L-real 的）。
 
 ## 第一次布展
 
@@ -94,4 +119,7 @@ bash ops/exhibit/twin/venue_check.sh
   在那之前電視拿得到資料、畫面上還不會講。
 - 電視上不再有 `counters`（整批累計）與 OFF 臂的 `postaudit`（事後稽核）：
   它們只能從 run 目錄事後推，lifecycle 裡沒有。要回來得先進 lifecycle 契約。
-- 收據頁只認得 `twin_pack.json` 那一批；錄影／真跑的鏈沒有進收據頁。
+- 真跑的收據要 `--live-runs` 才打包；沒給就 `/r/<cell>` 照實 404（「沒有給 --live-runs」）。
+  `run_twin` 要等 OFF 那一臂跑完才寫 `twin_cell.json`，所以一格跑完到收據上架之間
+  有一段空窗（那段時間 `/r/` 說「還在打包」）；等超過 900 秒就放棄並記在 `/state.live.errors`。
+  **沒有在 1003 上實跑過這一段**，只在本機用 fixture 量過。

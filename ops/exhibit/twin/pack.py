@@ -252,6 +252,20 @@ def delivery_of(run_dir: pathlib.Path, ws_end_sha256: str,
                 item["note"] = f"檔案 {len(raw)} bytes 超過 {MAX_FILE_BYTES}，只留開頭"
             else:
                 item["text"] = text
+            # ⚠ 交付物**本身**也會帶著建置機的絕對路徑：`revise` 寫的
+            #   `VACANT_FEEDBACK.md` 逐字抄了驗收失敗訊息，而那裡面有凍結快照的
+            #   絕對路徑（2026-09-24 配對收據時 `pair_receipts` 的外漏檢查抓到：
+            #   Mac 上沒有沙箱的 fixture 跑，路徑是 /private/var/folders/…）。
+            #   換成佔位符之後這個檔的位元組就不是 sha256 那一份了 ⇒ 這一格
+            #   **照實標成不可重算**，不准用遮過的內容算一個看起來很像的雜湊。
+            if item["text"] is not None:
+                red = redact_paths(item["text"], run_dir)
+                if red != item["text"]:
+                    item["text"] = red
+                    recomputable = False
+                    item["note"] = ("內容裡有建置機的絕對路徑，已換成佔位符；"
+                                    "這個檔的位元組因此不是 sha256 那一份，"
+                                    "這一格的樹雜湊不在頁面上重算")
             files.append(item)
     return {
         "root_claimed": ws_end_sha256,
@@ -525,8 +539,20 @@ def build(runs_root: pathlib.Path) -> dict:
             })
             continue
         cells.append(pack_cell(run_dir))
-    cells.sort(key=lambda c: c["cell_id"])
-    void_cells.sort(key=lambda c: c["cell_id"])
+    runs_label = (str(runs_root.relative_to(REPO)) if runs_root.is_relative_to(REPO)
+                  else str(runs_root))
+    return assemble(cells, void_cells=void_cells, runs_label=runs_label)
+
+
+def assemble(cells: list[dict], *, void_cells: list[dict] = (),
+             runs_label: str) -> dict:
+    """一串 `pack_cell()` 的輸出 → 收據頁吃的資料包（`build` 與現場即時打包共用）。
+
+    `runs_label` 是 `source.runs` 那一欄要印的字——它會印上展場的收據頁，
+    **不准是建置機的絕對路徑**（呼叫端負責；`pair_receipts.check_pair` 會擋）。
+    """
+    cells = sorted(cells, key=lambda c: c["cell_id"])
+    void_cells = sorted(void_cells, key=lambda c: c["cell_id"])
 
     by_resident: dict[str, list[str]] = {}
     for c in cells:
@@ -564,8 +590,7 @@ def build(runs_root: pathlib.Path) -> dict:
     return {
         "v": 2,
         "source": {
-            "runs": str(runs_root.relative_to(REPO)) if runs_root.is_relative_to(REPO)
-                    else str(runs_root),
+            "runs": runs_label,
             "arm": ARM,
             "arm_off": ARM_OFF,
             "ruler": "vacant_network/vrun/verify_receipts.py（沒有第二把尺）",

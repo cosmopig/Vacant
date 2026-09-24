@@ -25,7 +25,7 @@
 #   ./record_fixture.sh --residents 1    少錄一點（冒煙用）
 #   STAMP=20260924 ./record_fixture.sh   檔名的日期（預設今天）
 #
-# 產出：ops/exhibit/twin/recordings/fixture_<STAMP>.jsonl
+# 產出：ops/exhibit/twin/recordings/fixture_<STAMP>.jsonl ＋ 同名 .pack.json（配對收據）
 # 錄完當場用 `serve_twin.py --check` 驗（lifecycle 契約＋電視契約＋路徑不外漏），
 # 過不了**不寫進 recordings/**。
 set -euo pipefail
@@ -60,6 +60,19 @@ if grep -q "$WORK" "$WORK/lifecycle.jsonl"; then
 fi
 "$PY" "$REPO/ops/exhibit/twin/serve_twin.py" --check --recording "$WORK/lifecycle.jsonl"
 
+# ── 同一次執行的收據：錄影要有**自己那一批**的收據頁資料，觀眾才驗得到 ──────
+# 先在暫存目錄裡配好、驗過，兩個檔才一起搬進 recordings/（不留「有錄影沒收據」的半套）。
+# 綁定＝錄影的 sha256 ＋ 逐格鏈頭（pair_receipts.py 的 check_pair）。
+# 1003 重跑 L-real 用的是同一條：run_twin.py --events → pair_receipts.py --runs。
+NAME="$(basename "$OUT")"
+cp "$WORK/lifecycle.jsonl" "$WORK/$NAME"
+PAIR_NAME="${NAME%.jsonl}.pack.json"
+"$PY" "$REPO/ops/exhibit/twin/pair_receipts.py" --recording "$WORK/$NAME" \
+  --runs "$WORK/batch" --out "$WORK/$PAIR_NAME"
+
 mkdir -p "$(dirname "$OUT")"
-cp "$WORK/lifecycle.jsonl" "$OUT"
+cp "$WORK/$NAME" "$OUT"
+cp "$WORK/$PAIR_NAME" "$(dirname "$OUT")/$PAIR_NAME"
+"$PY" "$REPO/ops/exhibit/twin/pair_receipts.py" --check --recording "$OUT"
 echo "✓ 錄影 → ${OUT}（$(wc -l < "$OUT" | tr -d ' ') 行，L-none：交件是腳本寫的）"
+echo "✓ 配對收據 → $(dirname "$OUT")/${PAIR_NAME}"

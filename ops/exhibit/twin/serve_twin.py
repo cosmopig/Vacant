@@ -24,8 +24,20 @@
 | 轉播（現場真跑） | `--live <檔>` | `run_twin.py --events` **正在寫**的那個檔（tail） | `"live"` |
 
 在此之前這一支吃 `twin_pack.json`、呼叫 `to_events.events_for_cell` 從 run 目錄
-**事後推**事件。那一條刪掉了；`twin_pack.json` 現在只剩一個用途：
-**收據頁**（`/r/<cell>` → `examples/twin_viewer.html`，觀眾自己重驗簽章鏈）。
+**事後推**事件。那一條刪掉了；資料包現在只有一個用途：**收據頁**
+（觀眾在自己的瀏覽器裡從創世重驗簽章鏈）。
+
+### 收據頁：每一份錄影配它自己那一批（`pair_receipts.py`）
+
+| 收據從哪來 | 頁面網址 | 綁定 |
+|---|---|---|
+| 錄影 `X.jsonl` 旁邊的 `X.pack.json`（同一次 `run_twin.py` 產的） | `/v/X.html` | sha256＋逐格鏈頭（`pair_receipts.check_pair`，載入時驗，不過整份不收） |
+| `--live` 真跑：`--live-runs` 指到那一次 `run_twin.py --out`，那一格跑完就即時打包 | `/v/live.html` | 打包出來那一格的鏈頭＝`run_ended.verdict_hash` 才收 |
+| `--pack`（預設 `twin_pack.json`，舊的 54 格 L-real） | `/viewer.html` | 只剩「鏈頭相等」那一道 |
+
+`/r/<cell>` 找**鏈頭等於電視上演的那一跑**的那一份（誠實邊界 2），轉到那一頁；
+一份都找不到就 404 並講明。頁面是同一份 `examples/twin_viewer.html`，
+只換內嵌的 `twin-pack` 區塊（`build_viewer.with_pack`）——驗證程式只有一份。
 
 ### 一格＝錄影裡那一格的 `run_started … run_ended` 區段
 
@@ -67,7 +79,8 @@
 | `/live/events.jsonl` | GET | 已經寫出去的電視事件（JSONL，逐筆追加） | 電視 |
 | `/state` | GET | 現在演哪一格、`mode`、重播壓縮比、真跑狀態、導播鍵 | 手機＋電視的導播列 |
 | `/control` | POST | `{"action": "held"｜"pc"｜"tamper"｜"next"｜"resume"｜"untamper"}` | 手機 |
-| `/r/<cell_id>` | GET | 302 → `/viewer.html#cell=<cell_id>`；收據頁裡**沒有這一跑的鏈**就 404 並講明 | 手機 |
+| `/r/<cell_id>` | GET | 302 → 那一跑所在的收據頁 `#cell=<cell_id>`；**沒有一頁有這一跑的鏈**就 404 並講明 | 手機 |
+| `/v/<key>.html` | GET | 配對收據那一頁（`key`＝錄影檔名去掉 `.jsonl`，或 `live`） | 手機 |
 | `/qr.png`／`/qr.svg` | GET | **執行期畫的** QR | 電視 |
 
 附帶：`/viewer.html`（收據頁）、`/phone.html`（手機頁）、`/`（現場說明頁）。
@@ -94,10 +107,10 @@
 
 1. **這一支不驗簽章，也不對觀眾宣告任何驗證結果。** 事件流本身沒有簽章。
    可驗的那一份是 `/r/<cell_id>` 那一頁，它在**觀眾自己的瀏覽器裡**從創世重算。
-2. **收據頁只認得 `twin_pack.json` 裡那一批的鏈。** 錄影（或真跑）那一格的鏈頭
-   與收據頁內嵌的不同（例如 fixture 錄影與 L-real 資料包共用 `cell_id`）
-   ⇒ `/r/<cell>` 回 404 並講明，**不准把觀眾帶去看另一跑的收據**。
-   判準＝`run_ended.verdict_hash` 與收據頁那一條鏈的鏈頭逐字相等。
+2. **不准把觀眾帶去看另一跑的收據。** 錄影與舊資料包可以共用 `cell_id`、鏈卻不同
+   （fixture 錄影與 54 格 L-real 就是這樣）。`/r/<cell>` 只轉到**鏈頭＝電視上演的
+   那一跑的 `run_ended.verdict_hash`** 的那一頁；找不到就 404 並講明。
+   沒有配對收據的錄影、還沒跑完的真跑、沒給 `--live-runs` 的真跑，都落在這一條。
 3. **「翻一個位元」不是電視演出來的。** `tamper` 只記下「有人要翻這一格」並把
    收據頁的網址給他；真正翻、真正重算，發生在**他手上那一頁**。
 4. **`/control` 的門檻是「看得到 QR」，不是身分驗證。**
@@ -114,7 +127,8 @@
 用法：
     python3 ops/exhibit/twin/serve_twin.py                     # 重播 recordings/*.jsonl
     python3 ops/exhibit/twin/serve_twin.py --recording a.jsonl --recording b.jsonl
-    python3 ops/exhibit/twin/serve_twin.py --live runs/twin_live/lifecycle.jsonl
+    python3 ops/exhibit/twin/serve_twin.py --live runs/twin_live/lifecycle.jsonl \
+        --live-runs runs/twin_live          # 真跑那一格跑完就即時打包收據
     python3 ops/exhibit/twin/serve_twin.py --bind 0.0.0.0      # 展場（自動生 token）
 
 電視：
@@ -138,7 +152,9 @@ HERE = pathlib.Path(__file__).resolve()
 REPO = HERE.parents[3]
 sys.path.insert(0, str(REPO))
 
+from ops.exhibit.twin import build_viewer  # noqa: E402
 from ops.exhibit.twin import live_events as lelib  # noqa: E402
+from ops.exhibit.twin import pair_receipts as pairlib  # noqa: E402
 from ops.exhibit.twin import pack as packlib  # noqa: E402
 from ops.exhibit.twin import qr as qrlib  # noqa: E402
 from ops.exhibit.twin import tv_contract as tv  # noqa: E402
@@ -172,6 +188,11 @@ REPLAY_FILL = 0.8
 #: `--live` 的切換門檻（模組 docstring「真跑與重播怎麼切換」）。
 LIVE_IDLE_S = 20.0
 LIVE_STALE_S = 900.0
+#: 真跑那一格 `run_ended` 之後，最多等這麼久讓 `run_twin.py` 寫完 `twin_cell.json`
+#: （OFF 那一臂＋事後稽核都跑完才會寫）。等不到就照實說沒有收據。
+LIVE_PACK_WAIT_S = 900.0
+#: 真跑那一份收據頁的 key（`/v/live.html`）。
+LIVE_BOOK = "live"
 
 #: 兩顆導播鍵 → 那一格是哪一邊的反事實。
 SIDES = ("held", "pc")
@@ -350,19 +371,59 @@ def check_recording(path) -> list[str]:
         return [f"lifecycle 版號不對：{e}"]
     if not tvevs:
         return ["轉不出任何電視事件"]
-    return ["電視契約：" + b for b in tv.validate(tvevs)]
+    bad = ["電視契約：" + b for b in tv.validate(tvevs)]
+    # 配對收據：**有就一定要對**（錄影換了、收據沒換要擋得下來）。沒有則不算錯，
+    # 由 `--check` 另外講明「這份錄影的格子沒有收據頁」。
+    pp = pairlib.pair_path(path)
+    if pp.exists():
+        text = pp.read_text(encoding="utf-8")
+        bad += ["配對收據：" + b for b in pairlib.check_pair(path, json.loads(text),
+                                                        pack_text=text)]
+    return bad
 
 
 def receipt_heads(pack: dict | None) -> dict[str, str]:
-    """收據頁那一批每一格的鏈頭（`/r/<cell>` 的判準，誠實邊界 2）。"""
+    """一份資料包每一格的鏈頭（`/r/<cell>` 的判準，誠實邊界 2）。"""
     if not pack:
         return {}
-    from vacant_network.logbook import LogEntry
-    out = {}
-    for c in pack.get("cells") or []:
-        if c.get("chain"):
-            out[c["cell_id"]] = LogEntry.from_json(json.loads(c["chain"][-1])).hash()
-    return out
+    return {c["cell_id"]: h for c in pack.get("cells") or []
+            if (h := pairlib.chain_head(c))}
+
+
+def book(key: str, pack: dict, *, label: str, text: str | None = None) -> dict:
+    """一份收據頁：`key` 決定網址（空字串＝`/viewer.html`，否則 `/v/<key>.html`）。"""
+    return {"key": key, "label": label, "heads": receipt_heads(pack),
+            "pack_text": text if text is not None else pairlib.dumps(pack),
+            "html": None}
+
+
+def load_receipt_books(paths) -> tuple[list[dict], dict[str, dict]]:
+    """每一份錄影旁邊的 `X.pack.json` → 收據頁。回 `(books, {錄影路徑: 狀態})`。
+
+    ⚠ 綁定過不了（sha256 或逐格鏈頭）⇒ **整份不收**，那一份錄影的格子就沒有收據頁，
+      `/r/<cell>` 照實 404。不准「大部分對得上就先用」。
+    """
+    books, status = [], {}
+    for path in paths:
+        path = pathlib.Path(path)
+        pp = pairlib.pair_path(path)
+        st = {"file": pp.name, "accepted": False, "problems": []}
+        status[_rel(path)] = st
+        if not pp.exists():
+            st["problems"].append("沒有配對收據：這份錄影的格子沒有收據頁可以帶觀眾去")
+            continue
+        try:
+            text = pp.read_text(encoding="utf-8")
+            pack = json.loads(text)
+            bad = pairlib.check_pair(path, pack, pack_text=text)
+        except (OSError, ValueError) as e:
+            bad = [f"讀不了：{type(e).__name__}: {e}"]
+        if bad:
+            st["problems"] = ["配對收據不收：" + b for b in bad[:5]]
+            continue
+        st["accepted"] = True
+        books.append(book(path.stem, pack, label=_rel(pp), text=text.strip("\n")))
+    return books, status
 
 
 class Playlist:
@@ -401,14 +462,20 @@ class Stage:
     def __init__(self, cells: dict[str, dict], *, out: pathlib.Path, dwell: float,
                  base_url: str, token: str = "", visitor_url: str = "",
                  recordings: list[dict] | None = None,
-                 receipts: dict[str, str] | None = None,
+                 books: list[dict] | None = None,
                  live: pathlib.Path | None = None,
+                 live_runs: pathlib.Path | None = None,
                  live_idle_s: float = LIVE_IDLE_S,
                  live_stale_s: float = LIVE_STALE_S):
         self.lock = threading.RLock()
         self.pl = Playlist(cells)
         self.recordings = recordings or []
-        self.receipts = receipts or {}
+        #: 收據頁：key → book。**順序就是找的順序**：錄影自己的配對收據、真跑、最後才是
+        #: `--pack` 那一份（`/viewer.html`）。反正只轉鏈頭相等的那一份，順序只影響
+        #: 「兩份都有同一條鏈」時轉去哪一頁。
+        self.books: dict[str, dict] = {}
+        for b in books or []:
+            self.books.setdefault(b["key"], b)
         self.out = out
         self.dwell = dwell
         self.base_url = base_url.rstrip("/")
@@ -448,6 +515,11 @@ class Stage:
         self.live_errors: list[str] = []
         #: 真跑那邊每一格的鏈頭（`/r/<cell>` 的判準也要看它）。
         self.live_heads: dict[str, str | None] = {}
+        #: `--live-runs`：真跑那一次 `run_twin.py --out`。有它才能即時打包收據。
+        self.live_runs = pathlib.Path(live_runs) if live_runs else None
+        self.live_started_ms: dict[str, int] = {}          # run_id → run_started ts
+        self.live_pending: dict[str, dict] = {}            # cell_id → 等打包的那一格
+        self.live_cells: dict[str, dict] = {}              # cell_id → pack_cell()
         self._was_live = False
         self.out.parent.mkdir(parents=True, exist_ok=True)
         self.out.write_text("", encoding="utf-8")
@@ -471,22 +543,109 @@ class Stage:
         return self.phone_url(with_token=with_token)
 
     # ── 收據頁 ──────────────────────────────────────────────────
-    def receipt_why_not(self, cell_id: str) -> str | None:
-        """`/r/<cell>` 能不能帶觀眾去收據頁。`None`＝可以；否則回理由（誠實邊界 2）。"""
-        head = self.receipts.get(cell_id)
-        if head is None:
-            return "收據頁裡沒有這一格（收據頁只內嵌 twin_pack.json 那一批）"
-        seen = []
+    def _shown_head(self, cell_id: str) -> str | None:
+        """電視上（或稽核分頁上）這一格指的是哪一跑：那一跑 ON 的 `verdict_hash`。"""
+        n = self.now or {}
+        if n.get("cell_id") == cell_id and "verdict_hash" in n:
+            return n["verdict_hash"]
         c = self.pl.cells.get(cell_id)
-        if c is not None and c.get("verdict_hash"):
-            seen.append(c["verdict_hash"])
-        if self.live_heads.get(cell_id):
-            seen.append(self.live_heads[cell_id])
-        for h in seen:
-            if h != head:
-                return ("電視上演的這一跑，鏈頭與收據頁內嵌的那一條不同"
-                        "（錄影或真跑是另一次）。不帶你去看另一跑的收據。")
-        return None
+        if c is not None:
+            return c.get("verdict_hash")
+        return self.live_heads.get(cell_id)
+
+    @staticmethod
+    def book_url(key: str) -> str:
+        return "/viewer.html" if not key else f"/v/{key}.html"
+
+    def receipt_target(self, cell_id: str) -> tuple[str | None, str | None]:
+        """`/r/<cell>` 要轉去哪一頁。回 `(網址, None)` 或 `(None, 為什麼不行)`（誠實邊界 2）。"""
+        head = self._shown_head(cell_id)
+        having = [b for b in self.books.values() if cell_id in b["heads"]]
+        live_cell = (cell_id in self.live_heads
+                     and cell_id not in self.pl.cells) or \
+            ((self.now or {}).get("cell_id") == cell_id
+             and (self.now or {}).get("mode") == tv.MODE_LIVE)
+        if head is None:
+            if live_cell and cell_id in self.live_pending:
+                return None, "這一跑剛結束，收據還在打包（等 run_twin 寫完這一格）"
+            return None, "這一跑沒有簽收據（或還沒跑完）：沒有鏈可以帶你去驗"
+        for b in having:
+            if b["heads"][cell_id] == head:
+                return self.book_url(b["key"]) + f"#cell={cell_id}", None
+        if live_cell:
+            if self.live_runs is None:
+                return None, ("這是現場真跑的一格；沒有給 --live-runs，"
+                              "展場機不知道它的 run 目錄在哪，收據沒有打包進收據頁")
+            if cell_id in self.live_pending:
+                return None, "這一跑剛結束，收據還在打包（等 run_twin 寫完這一格）"
+            return None, "這一格的收據沒有打包成功（原因在 /state.live.errors）"
+        if not having:
+            return None, "收據頁裡沒有這一格（這份錄影沒有配對收據，或配對沒過綁定）"
+        return None, ("電視上演的這一跑，鏈頭與收據頁內嵌的那一條不同"
+                      "（錄影或真跑是另一次）。不帶你去看另一跑的收據。")
+
+    def receipt_why_not(self, cell_id: str) -> str | None:
+        return self.receipt_target(cell_id)[1]
+
+    def book_html(self, key: str) -> bytes | None:
+        """那一份收據頁：同一份 `twin_viewer.html`，只換內嵌的 `twin-pack`。"""
+        with self.lock:
+            b = self.books.get(key)
+            if b is None:
+                return None
+            if b["html"] is None:
+                b["html"] = build_viewer.with_pack(
+                    VIEWER.read_text(encoding="utf-8"), b["pack_text"]).encode("utf-8")
+            return b["html"]
+
+    def _try_pack_live(self) -> None:
+        """真跑那一格跑完 ⇒ 從 `--live-runs` 的 run 目錄即時打包收據。
+
+        只收**鏈頭＝`run_ended.verdict_hash`** 的那一份；`twin_cell.json` 要是
+        這一跑開始之後才寫的（`built_ms`），不然讀到的可能是上一次的格子。
+        """
+        if self.live_runs is None or not self.live_pending:
+            return
+        now_mono = time.monotonic()
+        changed = False
+        for cid, p in list(self.live_pending.items()):
+            run_dir = self.live_runs / "runs" / cid
+            meta = run_dir / "twin_cell.json"
+            try:
+                fresh = (meta.exists() and int(json.loads(
+                    meta.read_text(encoding="utf-8")).get("built_ms") or 0)
+                    >= p["since_ms"])
+            except (OSError, ValueError):
+                fresh = False
+            if not fresh:
+                if now_mono > p["deadline"]:
+                    del self.live_pending[cid]
+                    self.live_errors.append(
+                        f"{cid}：等了 {LIVE_PACK_WAIT_S:g} 秒 run_twin 還沒寫完這一格，"
+                        "收據沒有打包")
+                continue
+            del self.live_pending[cid]
+            try:
+                cell = packlib.pack_cell(run_dir)
+            except Exception as e:  # noqa: BLE001 — 打包壞了要說出來，不准弄死展場
+                self.live_errors.append(f"{cid}：打包收據失敗 {type(e).__name__}: {e}")
+                continue
+            head = pairlib.chain_head(cell)
+            if head != p["head"]:
+                self.live_errors.append(
+                    f"{cid}：run 目錄裡的鏈頭與這一跑的 verdict_hash 不同，不收")
+                continue
+            self.live_cells[cid] = cell
+            changed = True
+        if changed:
+            pack = packlib.assemble(list(self.live_cells.values()),
+                                    runs_label="（現場真跑；run 目錄在展場機上）")
+            text = pairlib.dumps(pack).strip("\n")
+            leaks = [x for x in pairlib.PATH_LEAKS if x in text]
+            if leaks:
+                self.live_errors.append(f"現場收據裡有建置機路徑 {leaks}，不上收據頁")
+                return
+            self.books[LIVE_BOOK] = book(LIVE_BOOK, pack, label="現場真跑", text=text)
 
     # ── 寫檔 ────────────────────────────────────────────────────
     def _write(self, evs: list[dict]) -> None:
@@ -595,7 +754,7 @@ class Stage:
                 "stop_reason": cell.get("stop_reason"),
                 "attempts_used": cell.get("attempts_used"),
                 "receipt_url": self.verify_url(cell_id),
-                "receipt_available": self.receipt_why_not(cell_id) is None,
+                "verdict_hash": cell.get("verdict_hash"),
                 "mode": tv.MODE_REPLAY,
                 "recording": cell["recording"],
                 "why": why,
@@ -606,6 +765,7 @@ class Stage:
             self.deadline = time.monotonic() + (
                 max(self.dwell, HOLD_AFTER_PRESS_S) if why.startswith("phone")
                 else self.dwell)
+            self.now["receipt_available"] = self.receipt_why_not(cell_id) is None
             self._expire_tamper(cell_id)
             return {"ok": True, "now": self.now}
 
@@ -680,6 +840,7 @@ class Stage:
                     side = caller.get("stratum") if caller.get("stratum") in SIDES \
                         else "held"
                     self.n_emitted += 1
+                    self.live_started_ms[ev["run_id"]] = ev["ts_ms"]
                     self.now = {
                         "cell_id": cid, "resident": caller.get("resident"),
                         "task_id": caller.get("task_id") or ev["task_id"],
@@ -689,7 +850,7 @@ class Stage:
                         "evidence_note": "跑完才推得出來（要看這一跑實際經過中介幾通）",
                         "exit_code": None, "stop_reason": None, "attempts_used": None,
                         "receipt_url": self.verify_url(cid),
-                        "receipt_available": False,
+                        "receipt_available": False, "verdict_hash": None,
                         "mode": tv.MODE_LIVE, "recording": None,
                         "why": "live", "at": iso_now(), "n": self.n_emitted,
                     }
@@ -699,6 +860,11 @@ class Stage:
                     cid = run.get("cell_id")
                     if cid:
                         self.live_heads[cid] = ev.get("verdict_hash")
+                        if ev.get("verdict_hash") and self.live_runs is not None:
+                            self.live_pending[cid] = {
+                                "head": ev["verdict_hash"],
+                                "since_ms": self.live_started_ms.get(ev["run_id"], 0),
+                                "deadline": time.monotonic() + LIVE_PACK_WAIT_S}
                     if self.now and self.now.get("cell_id") == cid:
                         self.now.update({
                             "exit_code": exit_code_of(ev),
@@ -707,8 +873,10 @@ class Stage:
                             "evidence": packlib.evidence_level(
                                 requests_seen=int(ev.get("requests_seen") or 0),
                                 declared=run.get("declared_evidence") or ""),
-                            "receipt_available": self.receipt_why_not(cid) is None,
+                            "verdict_hash": ev.get("verdict_hash"),
                         })
+                        self.now["receipt_available"] = \
+                            self.receipt_why_not(cid) is None
             bad = tv.validate(new, require_settled=False)
             if bad:
                 # 違反契約的東西不准上電視；記下來，/state 看得到。
@@ -722,6 +890,11 @@ class Stage:
         """無人值守的那一拍（`autoplay` 每 0.2 秒叫一次）。切換規則見模組 docstring。"""
         with self.lock:
             self.poll_live()
+            self._try_pack_live()
+            if self.now and self.now.get("mode") == tv.MODE_LIVE \
+                    and not self.now.get("receipt_available"):
+                self.now["receipt_available"] = \
+                    self.receipt_why_not(self.now["cell_id"]) is None
             if self.live_active():
                 self._was_live = True
                 return
@@ -810,7 +983,10 @@ class Stage:
                 live = {"path": _rel(self.live_path), "active": mode == tv.MODE_LIVE,
                         "open_runs": len(tail.open_runs), "lines": tail.n_lines,
                         "last_line_age_s": age, "idle_s": self.live_idle_s,
-                        "stale_s": self.live_stale_s, "errors": self.live_errors[-8:]}
+                        "stale_s": self.live_stale_s, "errors": self.live_errors[-8:],
+                        "runs": _rel(self.live_runs) if self.live_runs else None,
+                        "receipts_packed": sorted(self.live_cells),
+                        "receipts_pending": sorted(self.live_pending)}
             honesty = [
                 "事件流沒有簽章。可驗的那一份是收據頁，它在你自己的瀏覽器裡重算。",
                 "這台電視不驗簽章，所以它不會告訴你簽章對不對。",
@@ -879,6 +1055,10 @@ class Stage:
                     for c in sorted(self.pl.cells.values(), key=lambda c: c["cell_id"])
                 ],
                 "recordings": self.recordings,
+                "receipt_pages": [
+                    {"key": b["key"], "url": self.book_url(b["key"]),
+                     "label": b["label"], "cells": len(b["heads"])}
+                    for b in self.books.values()],
                 "source": {
                     "recordings": [r["path"] for r in self.recordings if r["accepted"]],
                     "live": _rel(self.live_path) if self.live_path else None,
@@ -1009,17 +1189,23 @@ class Handler(BaseHTTPRequestHandler):
             self._file(VIEWER, "text/html; charset=utf-8")
         elif path == "/phone.html":
             self._file(PHONE, "text/html; charset=utf-8")
+        elif path.startswith("/v/") and path.endswith(".html"):
+            html = st.book_html(path[3:-len(".html")])
+            if html is None:
+                self._json({"error": "沒有這一份收據頁", "path": path}, 404)
+            else:
+                self._send(200, html, "text/html; charset=utf-8")
         elif path.startswith("/r/"):
             cell = path[3:]
-            why_not = st.receipt_why_not(cell)
+            url, why_not = st.receipt_target(cell)
             if why_not:
                 # 誠實邊界 2：不把觀眾帶去看另一跑的收據。
                 self._json({"error": why_not, "cell_id": cell}, 404)
                 return
             # `#` 之後的東西不會送到伺服器，所以收據頁要吃的是 fragment。
-            frag = f"#cell={cell}" + ("&tamper=1" if "tamper=1" in query else "")
             self.send_response(302)
-            self.send_header("Location", "/viewer.html" + frag)
+            self.send_header("Location",
+                             url + ("&tamper=1" if "tamper=1" in query else ""))
             self._cors()
             self.end_headers()
         else:
@@ -1066,16 +1252,23 @@ def make_server(recordings, *, bind: str, port: int, out: pathlib.Path,
                 dwell: float, token: str = "", quiet: bool = False,
                 base_url: str = "", visitor_url: str = DEFAULT_VISITOR_URL,
                 pack: dict | None = None, live: pathlib.Path | None = None,
+                live_runs: pathlib.Path | None = None,
                 live_idle_s: float = LIVE_IDLE_S, live_stale_s: float = LIVE_STALE_S,
                 ) -> tuple[ThreadingHTTPServer, Stage]:
-    """`recordings`＝lifecycle 錄影檔的路徑清單。`pack`＝收據頁那一份（只給 `/r/`）。"""
+    """`recordings`＝lifecycle 錄影檔的路徑清單（旁邊有 `X.pack.json` 就一併載入）。
+    `pack`＝`/viewer.html` 那一份（舊資料包）。`live_runs`＝真跑的 `run_twin --out`。"""
     cells, info = load_recordings(recordings)
+    books, rstatus = load_receipt_books(recordings)
+    for r in info:
+        r["receipts"] = rstatus.get(r["path"])
+    if pack:
+        books.append(book("", pack, label="--pack（/viewer.html）"))
     srv = ThreadingHTTPServer((bind, port), Handler)
     host = bind if bind not in ("0.0.0.0", "") else "127.0.0.1"
     stage = Stage(cells, out=out, dwell=dwell, token=token,
                   base_url=base_url or f"http://{host}:{srv.server_address[1]}",
                   visitor_url=visitor_url, recordings=info,
-                  receipts=receipt_heads(pack), live=live,
+                  books=books, live=live, live_runs=live_runs,
                   live_idle_s=live_idle_s, live_stale_s=live_stale_s)
     Handler.stage = stage
     Handler.quiet = quiet
@@ -1111,6 +1304,8 @@ def main(argv=None) -> int:
                          f"不給＝{_rel(RECORDINGS_DIR)}/*.jsonl 全部")
     ap.add_argument("--live", default=None, metavar="LIFECYCLE.jsonl",
                     help="tail 正在真跑的 lifecycle 檔；有真跑就先播真跑")
+    ap.add_argument("--live-runs", default=None, metavar="RUN_TWIN_OUT",
+                    help="真跑那一次 run_twin.py 的 --out；給了才能即時打包那一格的收據")
     ap.add_argument("--live-idle", type=float, default=LIVE_IDLE_S,
                     help="真跑最後一行之後幾秒回到錄影輪播")
     ap.add_argument("--live-stale", type=float, default=LIVE_STALE_S,
@@ -1145,9 +1340,14 @@ def main(argv=None) -> int:
         for p in recs:
             bad = check_recording(p)
             n_bad += bool(bad)
+            paired = pairlib.pair_path(p).exists()
             print(("✓ " if not bad else "✗ ") + _rel(p)
+                  + ("（配對收據綁定過）" if paired and not bad else "")
                   + ("" if not bad else "：" + "；".join(bad[:3])),
                   file=sys.stdout if not bad else sys.stderr)
+            if not paired:
+                print(f"! {_rel(p)} 沒有配對收據（{pairlib.pair_path(p).name}）："
+                      "播它的時候 /r/<cell> 會一律 404")
         return 1 if n_bad else 0
     pack_path = pathlib.Path(a.pack) if a.pack else None
     pack = (json.loads(pack_path.read_text(encoding="utf-8"))
@@ -1158,6 +1358,7 @@ def main(argv=None) -> int:
                              dwell=a.dwell, token=token, base_url=a.base_url,
                              visitor_url=a.visitor_url, pack=pack,
                              live=pathlib.Path(a.live) if a.live else None,
+                             live_runs=pathlib.Path(a.live_runs) if a.live_runs else None,
                              live_idle_s=a.live_idle, live_stale_s=a.live_stale)
     for r in stage.recordings:
         mark = "✓" if r["accepted"] else "✗"
@@ -1181,7 +1382,12 @@ def main(argv=None) -> int:
           f"（重播壓進 {a.dwell * REPLAY_FILL:g} 秒內）")
     if a.live:
         print(f"  --live {a.live}：有真跑就先播真跑（閒置 {a.live_idle:g} 秒回到重播）")
-    print(f"  收據頁認得 {len(stage.receipts)} 格（{_rel(pack_path) if pack else '沒有資料包'}）")
+    for b in stage.books.values():
+        print(f"  收據頁 {stage.book_url(b['key'])}：{len(b['heads'])} 格（{b['label']}）")
+    for r in stage.recordings:
+        rs = r.get("receipts") or {}
+        if not rs.get("accepted"):
+            print(f"  ⚠ {r['path']} 的格子沒有收據頁：{(rs.get('problems') or ['?'])[0]}")
     print("  ⚠ 這一支不驗簽章也不宣告驗證結果：可驗的那一份是收據頁（/r/<cell_id>）")
     if why == "auto":
         print(f"  ✓ /control 的 token（這次開機自動生的）：{token}")

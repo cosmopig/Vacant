@@ -579,3 +579,24 @@ def test_infra_void_cells_are_marked_not_counted_as_refusals(pack):
     for v in pack["void_cells"]:
         assert v["infra_void"] or v["stop_reason"], v["cell_id"]
     assert pack["void"] == len(pack["void_cells"])
+
+
+def test_delivery_with_a_build_path_is_redacted_and_marked_not_recomputable(tmp_path):
+    """`revise` 寫的 `VACANT_FEEDBACK.md` 逐字抄了驗收失敗訊息，裡面有凍結快照的絕對路徑
+    （2026-09-24 配對收據時抓到）。遮掉之後位元組就不是 sha256 那一份了 ⇒
+    **照實標成不可重算**，不准用遮過的內容算一個看起來很像的雜湊。"""
+    run_dir = tmp_path / "runs" / "X"
+    frozen = run_dir / "_frozen_RUN-ON"
+    frozen.mkdir(parents=True)
+    leak = "/private/var/folders/zz/T/tmpabc/runs/X/_frozen_RUN-ON/solution.py"
+    (frozen / "VACANT_FEEDBACK.md").write_text(f"ImportError ({leak})\n", encoding="utf-8")
+    (frozen / "solution.py").write_text("def f():\n    return 1\n", encoding="utf-8")
+    d = packlib.delivery_of(run_dir, "root", None)
+    fb = next(f for f in d["files"] if f["path"] == "VACANT_FEEDBACK.md")
+    assert "/private/var/" not in fb["text"] and "<凍結快照>" in fb["text"]
+    assert d["recomputable"] is False and "佔位符" in fb["note"]
+    sol = next(f for f in d["files"] if f["path"] == "solution.py")
+    assert sol["text"] == "def f():\n    return 1\n" and "note" not in sol
+    # 正控制：沒有路徑的交付物照樣可重算
+    (frozen / "VACANT_FEEDBACK.md").unlink()
+    assert packlib.delivery_of(run_dir, "root", None)["recomputable"] is True
