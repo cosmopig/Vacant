@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_31_money:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 34,
+      "cases": [
+        {
+          "case": "check_01_money",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_money",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "c00b28f7555b8406ebd5db88c63cdf9fb022f2a228a9d26b410a2aeb4a0a21ca"
+}

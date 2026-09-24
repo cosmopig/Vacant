@@ -186,17 +186,30 @@ def test_the_same_cell_in_two_recordings_is_not_merged(recs, tmp_path):
 
 
 def test_committed_recordings_load_whole(tmp_path):
-    """進版控的備援錄影：開箱就能播，而且整批都是 L-none（腳本，不是 AI）。"""
+    """進版控的錄影：開箱就能播。fixture 單獨載入時整批是 L-none（腳本，不是 AI）；
+    預設組合裡有 L-real 錄影時，播出去的是 L-real（撞 id 證據等級高的贏，
+    `test_twin_recording_precedence.py`）——2026-09-24 L-real 重錄之後前提改了，判準沒變：
+    **標出來的證據等級必須是那一格真正的來歷**。"""
     recs = S.default_recordings()
     if not recs:
         pytest.skip("recordings/ 裡沒有錄影")
     for p in recs:
         assert S.check_recording(p) == [], p.name
-    srv, stage = mk(recs, tmp_path)
+    fixtures = [p for p in recs if p.name.startswith("fixture_")]
+    if fixtures:
+        srv, stage = mk(fixtures, tmp_path / "fx")
+        try:
+            assert all(r["accepted"] for r in stage.recordings)
+            assert stage.flat and len(stage.pl.pairs) * 2 == len(stage.flat)
+            assert set(stage.evidence_counts()) == {"L-none"}
+        finally:
+            srv.server_close()
+    srv, stage = mk(recs, tmp_path / "all")
     try:
         assert all(r["accepted"] for r in stage.recordings)
         assert stage.flat and len(stage.pl.pairs) * 2 == len(stage.flat)
-        assert set(stage.evidence_counts()) == {"L-none"}
+        want = {"L-real"} if any(p.name.startswith("lreal_") for p in recs) else {"L-none"}
+        assert set(stage.evidence_counts()) == want
     finally:
         srv.server_close()
 

@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-kjvwcg60kkbu56n8v74bsl","object":"chat.completion.chunk","created":1790238607,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"551412640","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-kjvwcg60kkbu56n8v74bsl","object":"chat.completion.chunk","created":1790238607,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def solution(color_hash):\\n    # Remove the hash character\\n    hex_str = color_hash[1:]\\n    \\n    # Convert hex to integers for each channel\\n    r = int(hex_str[0:2], 16)\\n    g = int(hex_str[2:4], 16)\\n    b = int(hex_str[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\n# Example usage (optional for testing):\\n# print(solution(\\\"#FFFFFF\\\"))  # {'r': 255, 'g': 255, 'b': 255}\\n# print(solution(\\\"#000000\\\"))  # {'r': 0, 'g': 0, 'b': 0}\\n# print(solution(\\\"#ff5733\\\"))  # {'r': 255, 'g': 87, 'b': 51}\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-kjvwcg60kkbu56n8v74bsl","object":"chat.completion.chunk","created":1790238607,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-kjvwcg60kkbu56n8v74bsl","object":"chat.completion.chunk","created":1790238607,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1501,"completion_tokens":245,"total_tokens":1746,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

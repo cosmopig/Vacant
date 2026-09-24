@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-h9921p2vqju6sd6n6cti","object":"chat.completion.chunk","created":1790237176,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"289232614","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-h9921p2vqju6sd6n6cti","object":"chat.completion.chunk","created":1790237176,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def money(cents):\\n    dollars = cents // 100\\n    remainder = cents % 100\\n    return f\\\"${dollars}.{remainder:02d}\\\"\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-h9921p2vqju6sd6n6cti","object":"chat.completion.chunk","created":1790237176,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-h9921p2vqju6sd6n6cti","object":"chat.completion.chunk","created":1790237176,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1514,"completion_tokens":60,"total_tokens":1574,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

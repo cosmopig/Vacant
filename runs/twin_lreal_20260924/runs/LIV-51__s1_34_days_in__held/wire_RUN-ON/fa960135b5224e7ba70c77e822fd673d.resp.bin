@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"632671985","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    # The problem says \\\"The year is the first argument and the month is the second\\\"\\n    # This usually refers to command line arguments in these types of tasks.\\n    if len(sys.argv) < 3:\\n        return\\n\\n    try:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n    except ValueError:\\n        return\\n\\n    # Days in each month (non-leap year)\\n    days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]\\n\\n    # Check for leap year\\n    is_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\\n    \\n    if month == 2 and is_leap:\\n        print(29)\\n    else:\\n        # Month is 1-indexed, so we use month - 1\\n        print(days_in_month[month - 1])\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-wvglx71l7rcqx9bq7fnwi","object":"chat.completion.chunk","created":1790243020,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2001,"completion_tokens":302,"total_tokens":2303,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

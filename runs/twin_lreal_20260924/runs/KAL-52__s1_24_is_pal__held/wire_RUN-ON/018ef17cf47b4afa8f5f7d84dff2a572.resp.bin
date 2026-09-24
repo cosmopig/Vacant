@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"784853804","type":"function","function":{"name":"bash","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"command\":\"python3 solution.py << 'EOF'\\nrace car\\nEOF\\n\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-n6y2xj8od29h8g9mcbgbjt","object":"chat.completion.chunk","created":1790237594,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1753,"completion_tokens":31,"total_tokens":1784,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

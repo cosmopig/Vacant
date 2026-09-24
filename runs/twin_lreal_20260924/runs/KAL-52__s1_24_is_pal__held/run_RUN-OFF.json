@@ -1,0 +1,214 @@
+{
+  "task_id": "s1_24_is_pal:held",
+  "arm": "RUN-OFF",
+  "vacant": 0,
+  "argv": [
+    "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nDecide whether a piece of text reads the same forwards and\nbackwards, once letters and digits are the only characters looked at and the\ndifference between upper and lower case is set aside.\n\nText with no letters or digits in it at all counts as reading the same. The\nanswer is a true or false value.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_24_is_pal__held__off",
+  "proxy_url": "http://127.0.0.1:37175",
+  "env": {
+    "proxy_url": "http://127.0.0.1:37175",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "93953935e6486068bd371700e730b18ebe7a3f6b39df2c3ac4e37aa4495414b2",
+  "ws_end_sha256": "029c0fa9b038b7bdb0d3bba6ea5a59bb181323348f2fc9226b00499c509da92d",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 8,
+  "wire_by_protocol": {
+    "openai": 8
+  },
+  "accepted": null,
+  "refused": false,
+  "stop_reason": "ungated",
+  "infra_void": null,
+  "visible_passed": null,
+  "visible_total": null,
+  "verdict_sha256": null,
+  "verdict_hash": null,
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "93953935e6486068bd371700e730b18ebe7a3f6b39df2c3ac4e37aa4495414b2",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nDecide whether a piece of text reads the same forwards and\nbackwards, once letters and digits are the only characters looked at and the\ndifference between upper and lower case is set aside.\n\nText with no letters or digits in it at all counts as reading the same. The\nanswer is a true or false value.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "5c7e392c86cf205837831f12f8242a3cf7367bf1c3cfced92add49c406fa3b64",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 79.637,
+      "wire_quiesced": true,
+      "requests_seen": 8,
+      "requests_seen_cumulative": 8,
+      "wire_digest": "735835f5a806e8f941e3cd5e9cd4e98b34f391d390f068ab3e3babc8cbce744a",
+      "ws_end_sha256": "029c0fa9b038b7bdb0d3bba6ea5a59bb181323348f2fc9226b00499c509da92d",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_24_is_pal__held/_frozen_RUN-OFF",
+      "stop_reason": "ungated",
+      "accepted": null
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "default",
+      "defaulted": true,
+      "fallback": "sink"
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "upstreams_sinked": [
+    "anthropic"
+  ],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "735835f5a806e8f941e3cd5e9cd4e98b34f391d390f068ab3e3babc8cbce744a",
+  "model_wire": {
+    "requests_indexed": 8,
+    "request_blobs_persisted": 8,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 79.71,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "s1_24_is_pal:held",
+    "agent": null,
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1790238013.885358,
+        "probed_by_pid": 339949
+      }
+    },
+    "framework_hook": {
+      "agent": null,
+      "contract_version": null,
+      "canary_fired": null,
+      "events_n": null,
+      "log": null,
+      "install_attempted": null,
+      "version_drift": null,
+      "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
+    },
+    "reconciled": {
+      "relay_calls": 8,
+      "hook_events": null,
+      "unexplained": null,
+      "canary_calls": 0,
+      "refused_path": 0,
+      "unexplained_detail": null,
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+    },
+    "tier": "C",
+    "attested": false,
+    "b_prime_kind": null,
+    "tier_sentence": "**未認證**：既沒有圍牆也沒有掛鉤 ⇒ 這一跑不發收據。",
+    "tier_reasons": [
+      "圍牆不成立而且掛鉤沒燒 ⇒ **未受控**。（enclosure.applied=False、canary_fired=None）",
+      "⚠ 掛鉤那一欄是「沒量到」不是「量到 false」",
+      "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790238013.8854759
+  },
+  "agent_wall_s": 79.637,
+  "failures": "",
+  "lifecycle": {
+    "schema": "vacant.lifecycle/1",
+    "path": "/var/tmp/vacant_lreal_20260924/out/lifecycle/b2_s2.jsonl",
+    "run_id": "329c6598c69c45058452ac69b85140b0",
+    "emitted": 12,
+    "emit_errors": 0,
+    "last_error": null
+  }
+}

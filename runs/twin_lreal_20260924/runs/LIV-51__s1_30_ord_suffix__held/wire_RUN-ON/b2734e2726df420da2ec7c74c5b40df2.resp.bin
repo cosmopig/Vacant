@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"203875311","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    line = sys.stdin.readline()\\n    if not line:\\n        return\\n    try:\\n        n = int(line.strip())\\n    except ValueError:\\n        return\\n\\n    # Ordinal suffix logic\\n    # 1st, 2nd, 3rd, 4th...\\n    # Exceptions are 11th, 12th, 13th (they take 'th' instead of 'st', 'nd', 'rd')\\n    \\n    if n % 100 in [11, 12, 13]:\\n        suffix = \\\"th\\\"\\n    else:\\n        last_digit = n % 10\\n        if last_digit == 1:\\n            suffix = \\\"st\\\"\\n        elif last_digit == 2:\\n            suffix = \\\"nd\\\"\\n        elif last_digit == 3:\\n            suffix = \\\"rd\\\"\\n        else:\\n            suffix = \\\"th\\\"\\n    \\n    print(f\\\"{n}{suffix}\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-jf7yvpcous331eaxdy8vn","object":"chat.completion.chunk","created":1790242267,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":7811,"completion_tokens":267,"total_tokens":8078,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

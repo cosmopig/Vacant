@@ -1,0 +1,83 @@
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+KAL-52__s1_01_addmul__pc           ON exit=0    交付   | OFF 通數=2    事後稽核=過
+<|channel>thought
+<channel|>```python
+def money(cents):
+    dollars = cents // 100
+    remainder = cents % 100
+    return f"${dollars}.{remainder:02d}"
+```
+<|channel>thought
+<channel|>```python
+def money(cents):
+    dollars = cents // 100
+    remainder = cents % 100
+    return f"${dollars}.{remainder:02d}"
+```
+KAL-52__s1_31_money__pc            ON exit=0    交付   | OFF 通數=2    事後稽核=過
+<|channel>thought
+<channel|>```python
+def hms(total_seconds):
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return f"{hours}:{minutes:02d}:{seconds:02d}"
+```
+<|channel>thought
+<channel|>```python
+def hms(total_seconds):
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return f"{hours}:{minutes:02d}:{seconds:02d}"
+```
+DUL-89__s1_12_hms__pc              ON exit=0    交付   | OFF 通數=2    事後稽核=過
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+<|channel>thought
+<channel|>```python
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+```
+LIV-51__s1_01_addmul__pc           ON exit=0    交付   | OFF 通數=2    事後稽核=過
+<|channel>thought
+<channel|>```python
+def money(cents):
+    dollars = cents // 100
+    remainder = cents % 100
+    return f"${dollars}.{remainder:02d}"
+```
+<|channel>thought
+<channel|>```python
+def money(cents):
+    dollars = cents // 100
+    remainder = cents % 100
+    return f"${dollars}.{remainder:02d}"
+```
+LIV-51__s1_31_money__pc            ON exit=0    交付   | OFF 通數=2    事後稽核=過
+
+本流 5 格；索引共 10 格：交付 8、拒交 2、作廢 0 → /var/tmp/vacant_lreal_20260924/out/twin_index.json

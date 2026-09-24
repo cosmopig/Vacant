@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-sfrh44ltg60ebtcj5olaac","object":"chat.completion.chunk","created":1790240946,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"518405008","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sfrh44ltg60ebtcj5olaac","object":"chat.completion.chunk","created":1790240946,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\n\\ndef solve():\\n    try:\\n        year = int(input().split()[0])\\n        month = int(input().split()[1])\\n        \\n        # Use datetime to find the number of days in a month\\n        # We can get the first day of the next month and subtract one day\\n        if month == 12:\\n            next_month = datetime.date(year + 1, 1, 1)\\n        else:\\n            next_month = datetime.date(year, month + 1, 1)\\n            \\n        first_day_of_current_month = datetime.date(year, month, 1)\\n        days_in_month = (next_month - first_day_of_current_month).days\\n        print(days_in_month)\\n    except EOFError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sfrh44ltg60ebtcj5olaac","object":"chat.completion.chunk","created":1790240946,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-sfrh44ltg60ebtcj5olaac","object":"chat.completion.chunk","created":1790240946,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1491,"completion_tokens":223,"total_tokens":1714,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

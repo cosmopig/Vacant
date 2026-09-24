@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"856648856","type":"function","function":{"name":"bash","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"command\":\"python3 -c \\\"from solution import is_palindrome; print(is_palindrome('12321'))\\\" && python3 -c \\\"from solution import is_palindrome; print(is_palindrome('No letters or digits here!'))\\\" && python3 -c \\\"from solution import is_palindrome; print(is_palindrome('Was it a car or a cat I saw?'))\\\"\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-sytwv1067thebjhe35mjhl","object":"chat.completion.chunk","created":1790237911,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2324,"completion_tokens":99,"total_tokens":2423,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

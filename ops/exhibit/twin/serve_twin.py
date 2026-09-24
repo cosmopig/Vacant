@@ -295,6 +295,14 @@ def load_recordings(paths) -> tuple[dict[str, dict], list[dict]]:
 
     ⚠ **整個檔先過 `lifecycle.validate_stream`，過不了整個檔不收**（fail-closed）。
     一個檔裡有一行壞掉代表那份錄影的來歷有問題，挑著用等於替它背書。
+
+    ⚠ **同一格出現在兩份錄影裡：證據等級高的那份贏**（`EVIDENCE_RANK`，2026-09-24）。
+      舊規則是「先載入的贏」，而 `recordings/` 是照檔名排序載入的 ⇒
+      `fixture_*`（L-none，腳本交件）排在 `lreal_*`（L-real）前面，54 格全部撞 id，
+      **真跑那一份一格都播不出來**，`--check` 卻兩份都說過（它一份一份驗）。
+      fixture 的角色是「沒有真跑錄影時的備援」，所以真跑的格子一律蓋過它。
+      同等級撞 id ⇒ 仍然先來的贏。被蓋掉／沒收的格子寫進那份錄影的 `problems`，
+      不是靜靜消失。整格一起換（兩臂同一份來歷），不混兩份錄影的臂。
     """
     cells: dict[str, dict] = {}
     info: list[dict] = []
@@ -328,13 +336,6 @@ def load_recordings(paths) -> tuple[dict[str, dict], list[dict]]:
             if e["type"] == "run_started":
                 caller = e.get("caller") or {}
                 cid = caller.get("cell_id") or e["task_id"]
-                if cid in cells:
-                    # 別的錄影檔已經有這一格：先來的贏，不合併兩份來歷。
-                    ignored.add(rid)
-                    if not any(cid in p for p in rec["problems"]):
-                        rec["problems"].append(
-                            f"{cid} 已經在 {cells[cid]['recording']} 裡，這一份不收")
-                    continue
                 c = local.get(cid)
                 if c is None:
                     c = local[cid] = {
@@ -377,9 +378,31 @@ def load_recordings(paths) -> tuple[dict[str, dict], list[dict]]:
                 "span_ms": (c["segment"][-1]["ts_ms"] - c["segment"][0]["ts_ms"])
                 if c["segment"] else 0,
             })
+            prev = cells.get(cid)
+            if prev is not None:
+                # 別的錄影檔已經有這一格：證據等級高的贏，同級先來的贏。
+                if _evidence_rank(c["evidence"]) <= _evidence_rank(prev["evidence"]):
+                    rec["problems"].append(
+                        f"{cid} 已經在 {prev['recording']} 裡（{prev['evidence']}），"
+                        f"這一份（{c['evidence']}）不收")
+                    continue
+                loser = next((r for r in info if r["path"] == prev["recording"]), None)
+                if loser is not None:
+                    loser["problems"].append(
+                        f"{cid} 被 {rec['path']}（{c['evidence']}）蓋過，"
+                        f"這一份（{prev['evidence']}）不播")
+                    loser["cells"] -= 1
             cells[cid] = c
-        rec["cells"] = len(local)
+            rec["cells"] += 1
     return cells, info
+
+
+#: 同一格撞在兩份錄影時誰贏：真跑 > 假上游 > 沒紀錄上游 > 沒有模型（fixture）。
+EVIDENCE_RANK = {"L-real": 3, "L-fake": 2, "L-unknown": 1, "L-none": 0}
+
+
+def _evidence_rank(level) -> int:
+    return EVIDENCE_RANK.get(level, -1)     # 沒有 run_ended（推不出等級）最低
 
 
 def load_sidecar(path: pathlib.Path, evs: list[dict]) -> tuple[list[dict], dict]:

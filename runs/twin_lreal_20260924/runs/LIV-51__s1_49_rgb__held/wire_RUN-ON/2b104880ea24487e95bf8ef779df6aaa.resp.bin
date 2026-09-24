@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-o43kcmrlbiia06nmf0ge","object":"chat.completion.chunk","created":1790242073,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"140035416","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o43kcmrlbiia06nmf0ge","object":"chat.completion.chunk","created":1790242073,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def hex_to_rgb(hex_str):\\n    # Remove the hash character if present\\n    hex_val = hex_str.lstrip('#')\\n    \\n    # Convert hexadecimal to integer\\n    rgb_int = int(hex_val, 16)\\n    \\n    # Extract R, G, B components\\n    r = (rgb_int >> 16) & 0xFF\\n    g = (rgb_int >> 8) & 0xFF\\n    b = rgb_int & 0xFF\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    if len(sys.argv) > 1:\\n        print(hex_to_rgb(sys.argv[1]))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-o43kcmrlbiia06nmf0ge","object":"chat.completion.chunk","created":1790242073,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-o43kcmrlbiia06nmf0ge","object":"chat.completion.chunk","created":1790242073,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1500,"completion_tokens":198,"total_tokens":1698,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"902966672","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    if len(sys.argv) < 3:\\n        return\\n    try:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n        \\n        # Standard logic for days in month\\n        if month == 2:\\n            if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):\\n                print(29)\\n            else:\\n                print(28)\\n        elif month in [4, 6, 9, 11]:\\n            print(30)\\n        else:\\n            print(31)\\n    except ValueError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-mh0ok00rrlconjo5d3w12","object":"chat.completion.chunk","created":1790242906,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2008,"completion_tokens":203,"total_tokens":2211,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
