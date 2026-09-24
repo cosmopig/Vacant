@@ -1028,12 +1028,14 @@ _SECRET = "sk-THIS-IS-THE-USERS-REAL-KEY-0123456789"
 def test_pi_models_json_is_scanned_for_upstream_and_default_provider_wins(
         tmp_path: pathlib.Path, monkeypatch):
     """pi-only 使用者：上游從 `models.json` 找得到，而且 `defaultProvider` 排第一；
-    我們自己的 provider、本機位址、api 對不上 wire 的都跳過。"""
+    我們自己的 provider、**我們自己的 proxy 位址**、api 對不上 wire 的都跳過。
+    （2026-09-24 之前這裡跳過的是「所有本機位址」，把 LM Studio 的 127.0.0.1:1234 也丟了；
+    本機上游現在會被採用，見 `tests/test_vrun_possess_live_20260924.py`。）"""
     _clear_upstream_env(monkeypatch)
     h = tmp_path / "home"
     _seed_pi(h, {
         "vacant": {"baseUrl": "https://ours.example/v1", "api": "openai-completions"},
-        "local": {"baseUrl": "http://127.0.0.1:1234/v1", "api": "openai-completions"},
+        "local": {"baseUrl": "http://127.0.0.1:8787/v1", "api": "openai-completions"},
         "gem": {"baseUrl": "https://gem.example", "api": "google-generative-ai"},
         "first": {"baseUrl": "https://first.example/v1", "api": "openai-completions"},
         "mine": {"baseUrl": "https://mine.example/v1", "api": "openai-responses",
