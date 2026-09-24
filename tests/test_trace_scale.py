@@ -274,3 +274,18 @@ def test_rebuilt_states_hold_only_the_deliverable_like_the_receiving_end(tmp_pat
     intake = flow.check(c, p, sandbox="none")
     [again] = rerun.run(c, d, sandbox="none")
     assert intake["outcome"] == "accept" and again["status"] == "PASS"
+
+
+def test_a_script_written_before_the_background_look_is_a_gap_not_an_input(proj):
+    """審查（大專案）#1：沒被看到的那一步寫了腳本、被看到的那一步跑它 ⇒ 不是「本來就在的輸入」。"""
+    p, c, _spawned = proj
+    rec = _hook_recorder(p)
+    gen = 'print("# Q3")\nprint("Total:", 9 * 111)\n'
+    _step(rec, "t1", "Write", {"file_path": "gen.py", "content": gen}, write=(p / "gen.py", gen))
+    R.Recorder(p).baseline()
+    rec = R.Recorder(p)
+    _step(rec, "t2", "Bash", {"command": "python3 gen.py > report.md"},
+          write=(p / "report.md", "# Q3\nTotal: 999\n"))
+    [b] = B.blame_results(rec, c, rerun.run(c, p, sandbox="none"), p, sandbox="none")
+    assert (b["state"], b["fault_class"], b["confidence"]) == \
+        ("UNOBSERVED", "unattributable", "gap")

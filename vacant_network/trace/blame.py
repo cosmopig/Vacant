@@ -707,6 +707,12 @@ class Blamer:
             if tr is not None and tr.kind == "gap":
                 chain.append({"via": f"{f} changed with no recorded step", "gap": tr.gap})
                 return Origin("gap", source=tr.gap, note=f"{f} changed outside any step")
+            if tr is None and self.t.unobserved_start:
+                # 背景才看到第一眼：「沒有紀錄的步驟寫過它」不等於「本來就在」
+                chain.append({**j.brief(), "via": f"ran {f}, which was already there when "
+                                                  f"Vacant first managed to look"})
+                return Origin("gap", source={"observed_at": "baseline", "path": f},
+                              note="steps ran before the first full view of the workspace")
             if tr is None:
                 chain.append({**j.brief(), "via": f"ran {f}, which no recorded step wrote"})
                 return Origin("pre_existing", source={"kind": "file", "path": f},
@@ -863,7 +869,12 @@ def blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
     if not value or loc.kind == "missing":
         # 缺的東西沒有值可追：最後寫這個檔的是誰（推論層）
         last = b._last_writer(loc.path, 1 << 62)
-        if last is None:
+        if last is None and trace.unobserved_start:
+            res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
+                       layer="inference", step=None, chain=[],
+                       note="no observed step wrote this file, and steps ran before the first "
+                            "full view of the workspace")
+        elif last is None:
             res.update(state="UNKNOWN", fault_class="unattributable", confidence="heuristic",
                        layer="inference", step=None, chain=[],
                        note="nothing recorded wrote this file")
