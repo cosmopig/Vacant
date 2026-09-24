@@ -52,8 +52,13 @@ EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_ch
 MAX_OUTPUT_BLOB = 2 * 1024 * 1024
 #: 一個步驟開著超過這麼久還沒等到 `post`，就當它不會來了（和 Stop 掛鉤的上限同一個數量級）
 STALE_S = 900.0
-#: 一次掃描超過這麼久 ⇒ 這個專案不再逐步掃描（掛鉤有 30 秒上限；超時＝靜默略過＝更大的缺口）
-SCAN_BUDGET_S = 10.0
+#: 掛鉤裡的一次掃描最多這麼久（掛鉤有 30 秒上限；被 agent 砍掉＝靜默略過＝更大的缺口）。
+#: 第一次看就超過 ⇒ 改在背景看（`baseline`）；之後的增量掃描還超過 ⇒ 這個專案不再逐步掃描
+HOOK_SCAN_S = 8.0
+#: 背景的第一次完整觀察最多等這麼久；過了還沒寫回來 ⇒ 當它失敗了，這個專案不再逐步掃描
+BASELINE_WAIT_S = 600.0
+#: 檔案數到這裡以上，工作區狀態存成對上一份完整索引的差異（見 `_index_blob`）
+DELTA_MIN_FILES = 1000
 #: 事件裡直接列出的清單上限；超過的整份存進版本庫，事件帶它的 sha256（鏈上每筆有 64KB 上限）
 INLINE_LIST = 64
 _LIST_KEYS = ("writes", "reads", "changes")
@@ -139,6 +144,9 @@ class Recorder:
         self.chain_path = self.dir / "chain.ndjson"
         self.state_path = self.dir / "state.json"
         self.skip = set(state_dirs())
+        #: 在掛鉤裡用時由 `capture.py` 設成 `HOOK_SCAN_S`；命令列與 `vacant do` 不設（沒有上限）
+        self.scan_deadline_s: float | None = None
+        self._idx_cache: dict[str, W.Index] = {}
 
     # ── state ────────────────────────────────────────────────────────
     def _state(self) -> dict[str, Any]:
@@ -230,33 +238,146 @@ class Recorder:
         atomic_write_text(self.dir / "head.json", json.dumps({"seq": e.seq, "hash": e.hash()}))
         return {"seq": e.seq, "hash": e.hash()}
 
-    def _index_blob(self, idx: W.Index) -> str:
-        return self.blobs.put_bytes(W.dump(idx))
+    def _index_blob(self, idx: W.Index, st: dict[str, Any] | None = None) -> str:
+        """存一個工作區狀態。大專案存成對「關鍵幀」（上一份完整索引）的差異：每一步都存一份
+        完整索引，4 萬個檔的專案每個有寫檔的步驟要多 4.9 MB。差異檔用 sha256 指向關鍵幀，
+        兩者都是內容定址 ⇒ 還原出來的狀態和存完整索引一樣被雜湊綁住。"""
+        key = (st or {}).get("index_key")
+        base = self._try_load(key) if key else None
+        data = None
+        if base is not None and len(base) >= DELTA_MIN_FILES:
+            put = {p: e.to_json() for p, e in idx.items() if base.get(p) != e}
+            gone = sorted(p for p in base if p not in idx)
+            if not put and not gone:
+                return str(key)                       # 和關鍵幀一樣：同一個狀態、同一個 sha256
+            if len(put) + len(gone) <= max(64, len(base) // 10):
+                data = json.dumps({"": {"base": key, "del": gone}, **dict(sorted(put.items()))},
+                                  separators=(",", ":"), ensure_ascii=False).encode()
+        full = data is None
+        sha = self.blobs.put_bytes(W.dump(idx) if full else data)
+        if full and st is not None:
+            st["index_key"] = sha                     # 這一份是完整的：之後的差異對它算
+        self._idx_cache[sha] = idx
+        return sha
+
+    def _try_load(self, sha: str) -> W.Index | None:
+        try:
+            return self.load_index(sha)
+        except (OSError, ValueError):
+            return None
 
     def load_index(self, sha: str) -> W.Index:
-        return W.load(self.blobs.get(sha))
-
-    def _scan(self, prev: W.Index | None, st: dict[str, Any] | None = None) -> W.Index:
-        """掃一次。太大（檔案數上限、超過 `SCAN_BUDGET_S`）⇒ 記一次 `coverage`，之後這個專案
-        不再逐步掃描、寫入記成不知道——不讓每一次掛鉤都重讀整棵樹、逾時（recorder#9）。"""
-        if st is not None and st.get("scan_disabled"):
-            return prev or {}
-        t0 = time.monotonic()
-        try:
-            idx = W.scan(self.workspace, prev, skip=self.skip, blobs=self.blobs)
-        except ValueError as e:
-            if st is None:
-                raise
-            return self._disable_scan(st, str(e), prev)
-        if st is not None and time.monotonic() - t0 > SCAN_BUDGET_S:
-            return self._disable_scan(st, f"a scan took {time.monotonic() - t0:.1f}s "
-                                          f"(budget {SCAN_BUDGET_S:.0f}s)", idx)
+        """索引是內容定址、不可變的：同一個行程裡讀過就不再讀（`post` 會讀兩次同一份）。
+        回傳的字典不可以改。差異檔（`""` 鍵帶著關鍵幀的 sha256）還原成完整狀態。"""
+        idx = self._idx_cache.get(sha)
+        if idx is None:
+            raw = json.loads(self.blobs.get(sha))
+            meta = raw.pop("", None)
+            if isinstance(meta, dict):
+                base = self.load_index(str(meta["base"]))
+                gone = set(meta.get("del") or [])
+                idx = {p: e for p, e in base.items() if p not in gone}
+                idx.update({str(p): W.Entry.from_json(v) for p, v in raw.items()})
+            else:
+                idx = {str(p): W.Entry.from_json(v) for p, v in raw.items()}
+            self._idx_cache[sha] = idx
         return idx
 
-    def _disable_scan(self, st: dict[str, Any], why: str, idx: W.Index | None) -> W.Index:
+    def _scan(self, prev: W.Index | None,
+              st: dict[str, Any] | None = None) -> W.Index | None:
+        """掃一次；`None`＝這一次沒看（掃描關了、第一次看改到背景、超時）。"""
+        if st is not None and st.get("scan_disabled"):
+            return None
+        deadline = time.monotonic() + self.scan_deadline_s \
+            if (self.scan_deadline_s and st is not None) else None
+        try:
+            # `prev` 是這個紀錄器帶著同一個版本庫掃出來的 ⇒ 它的版本都在庫裡，不逐檔確認
+            return W.scan(self.workspace, prev, skip=self.skip, blobs=self.blobs,
+                          deadline=deadline, prev_stored=True)
+        except W.ScanTimeout as e:
+            if st is None:
+                raise
+            if prev is None:
+                self._defer_baseline(st, str(e))
+            else:
+                self._disable_scan(st, f"an incremental scan passed {self.scan_deadline_s:.0f}s")
+            return None
+        except ValueError as e:                      # 檔案數上限
+            if st is None:
+                raise
+            self._disable_scan(st, str(e))
+            return None
+
+    def _observe(self, st: dict[str, Any]
+                 ) -> tuple[W.Index | None, W.Index | None, str | None]:
+        """`(上一次看到的, 現在, 現在的索引 sha)`。這一次沒看 ⇒ `現在＝None`、sha＝上一次的
+        （掃描關掉之後連舊索引都不讀：大專案每一次掛鉤曾經因此多花半秒）。"""
+        last = st.get("last_index")
+        if st.get("scan_disabled"):
+            return None, None, last
+        if not last and st.get("baseline_pending"):
+            # 背景還在看第一次：這段時間的掛鉤不再各自花掉整個時限去重掃（否則每一步多 8 秒）
+            if time.time() - float(st["baseline_pending"]) < BASELINE_WAIT_S:
+                st["unobserved_before_baseline"] = True
+                return None, None, None
+            self._disable_scan(st, f"the background first look did not finish in "
+                                   f"{BASELINE_WAIT_S:.0f}s")
+            return None, None, None
+        prev = self.load_index(last) if last else None
+        idx = self._scan(prev, st)
+        if idx is None:
+            return prev, None, last
+        return prev, idx, self._index_blob(idx, st)
+
+    def _disable_scan(self, st: dict[str, Any], why: str) -> None:
         st["scan_disabled"] = why
         self._append("coverage", {"scan_disabled": why})
-        return idx or {}
+
+    def _defer_baseline(self, st: dict[str, Any], why: str) -> None:
+        """第一次看就超過掛鉤的時限：在背景把整個工作區看一次（不拿鎖地掃，最後才進鎖寫入）。
+        在它完成之前的步驟都記成「沒觀察到」。"""
+        st["unobserved_before_baseline"] = True
+        st["baseline_pending"] = time.time()
+        self._append("coverage", {"baseline_deferred": why})
+        import subprocess
+        import sys
+        try:
+            subprocess.Popen([sys.executable, "-m", "vacant_network.trace.recorder", "baseline",
+                              str(self.workspace)], stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             start_new_session=True)
+        except OSError:
+            pass
+
+    def baseline(self) -> dict[str, Any]:
+        """把整個工作區看一次（沒有時限、不拿鎖地掃）。已經有人看過了就不動。"""
+        t0 = time.monotonic()
+        try:
+            idx: W.Index | None = W.scan(self.workspace, None, skip=self.skip, blobs=self.blobs)
+            too_big = None
+        except ValueError as e:                      # 檔案數上限：背景也看不完
+            idx, too_big = None, str(e)
+        secs = time.monotonic() - t0
+        with self._lock():
+            st = self._state()
+            if too_big is not None or idx is None:
+                st.pop("baseline_pending", None)
+                if not st.get("last_index") and not st.get("scan_disabled"):
+                    self._disable_scan(st, too_big or "no index")
+                self._save(st)
+                return {"disabled": st.get("scan_disabled")}
+            if st.get("last_index") or st.get("scan_disabled"):
+                st.pop("baseline_pending", None)
+                self._save(st)
+                return {"skipped": "already observed"}
+            sha = self._index_blob(idx, st)
+            st["last_index"] = sha
+            st.pop("baseline_pending", None)
+            info = {"files": len(idx), "seconds": round(secs, 1), "index": sha,
+                    "after_unobserved": bool(st.get("unobserved_before_baseline"))}
+            self._append("coverage", {"baseline": info})
+            self._save(st)
+            return info
 
     def _ensure_session(self, st: dict[str, Any], actor: Actor) -> None:
         key = f"{actor.platform}:{actor.session}"
@@ -282,11 +403,10 @@ class Recorder:
             st = self._state()
             self._ensure_session(st, actor)
             self._finish_open(st, "stale", older_than=STALE_S)
-            prev = self.load_index(st["last_index"]) if st.get("last_index") else None
-            idx = self._scan(prev, st)
+            prev, idx, idx_sha = self._observe(st)
             gap = []
             blocking = [k for k, v in st["pending"].items() if not v.get("bound_index")]
-            if prev is not None and not blocking:
+            if prev is not None and idx is not None and not blocking:
                 # 上一次看到之後、而且這段時間沒有任何一步在進行 ⇒ 誰改的沒有紀錄。
                 # 已經有界的孤兒步驟（同一個行動者後來又開始了下一步）不算「在進行」——否則它會
                 # 一直擋住缺口，兩步之間的改動就此消失（審查 recorder#1）。平行的平台上這會把
@@ -295,10 +415,9 @@ class Recorder:
             if gap:
                 self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                    "before_index": st["last_index"],
-                                                   "after_index": self._index_blob(idx),
+                                                   "after_index": idx_sha,
                                                    "observed_at": "pre_tool",
                                                    "next_actor": actor.to_json()})
-            idx_sha = self._index_blob(idx)
             inp = json.dumps(tool_input, ensure_ascii=False, sort_keys=True, default=str)
             me = _ctx(actor.to_json())
             # 等子 agent 的那個父呼叫（Agent／Task／spawn／wait）不算「同時在寫」：它的寫入就是
@@ -306,12 +425,13 @@ class Recorder:
             busy = [k for k, v in st["pending"].items() if tool_kind(v.get("tool")) != "agent"]
             pend = {"step": step, "actor": actor.to_json(), "tool": tool,
                     "input_blob": self.blobs.put_bytes(inp.encode()),
-                    "pre_index": idx_sha, "t0": time.time(),
+                    "pre_index": idx_sha if idx is not None else None, "t0": time.time(),
                     "concurrent_with": sorted(busy)}
             for k, other in st["pending"].items():
                 if k in busy and tool_kind(tool) != "agent":
                     other.setdefault("concurrent_with", []).append(step)
-                if _ctx(other.get("actor") or {}) == me and not other.get("bound_index"):
+                if _ctx(other.get("actor") or {}) == me and not other.get("bound_index") \
+                        and idx is not None:
                     # 同一個行動者開始了下一步：若它永遠等不到 post，它的寫入最多到這裡為止
                     other["bound_index"] = idx_sha
             st["pending"][step] = pend
@@ -328,12 +448,12 @@ class Recorder:
             st = self._state()
             self._ensure_session(st, actor)
             pend = st["pending"].pop(step, None)
-            prev = self.load_index(st["last_index"]) if st.get("last_index") else None
-            idx = self._scan(prev, st)
+            _prev, idx, idx_sha = self._observe(st)
             base_sha = pend["pre_index"] if pend else st.get("last_index")
             # 從來沒看過這個工作區（第一個事件就是 post）⇒ 沒有「之前」可比，寫了什麼不知道；
-            # 不可以把整個既有工作區算成這一步寫的
-            changes = W.diff(self.load_index(base_sha), idx) if base_sha else []
+            # 不可以把整個既有工作區算成這一步寫的。這一次沒看 ⇒ 也是不知道
+            changes = W.diff(self.load_index(base_sha), idx) \
+                if base_sha and idx is not None else []
             delegated: list[str] = []
             if pend and tool_kind(tool) == "agent":
                 # 子 agent 自己的步驟已經記下它們的寫入；父呼叫只留沒有任何子步驟解釋的那些
@@ -352,7 +472,6 @@ class Recorder:
                     else json.dumps(output, ensure_ascii=False, default=str)).encode()
                 out_blob = self.blobs.put_bytes(data[:MAX_OUTPUT_BLOB])
             inp = json.dumps(tool_input, ensure_ascii=False, sort_keys=True, default=str)
-            idx_sha = self._index_blob(idx)
             st["n_steps"] = int(st.get("n_steps", 0)) + 1
             payload = {
                 "step": step, "n": st["n_steps"], "actor": actor.to_json(), "tool": tool,
@@ -360,15 +479,16 @@ class Recorder:
                 "reads": [r.to_json() for r in (reads or [])],
                 "writes": [c.to_json() for c in changes],
                 "output_blob": out_blob, "error": (error or "")[:500] or None,
-                "pre_index": base_sha, "post_index": idx_sha,
+                "pre_index": base_sha, "post_index": idx_sha if idx is not None else None,
                 "concurrent_with": (pend or {}).get("concurrent_with") or [],
                 "pre_missing": pend is None, "baseline_missing": base_sha is None,
                 "observed_by": "agent_hook",       # 工具名／輸入／輸出；writes 是 vacant_scan
                 "wall_ms": int((time.time() - pend["t0"]) * 1000) if pend else None}
             if delegated:
                 payload["delegated"] = delegated
-            if st.get("scan_disabled"):
-                payload["writes_unknown"] = st["scan_disabled"]
+            if idx is None or not base_sha:
+                payload["writes_unknown"] = st.get("scan_disabled") or "the workspace was not " \
+                    "observed around this step"
             ref = self._append("step", payload)
             st["last_index"] = idx_sha
             self._save(st)
@@ -408,14 +528,14 @@ class Recorder:
             done.append(step)
         if not done:
             return []
-        idx = self._scan(self.load_index(st["last_index"]) if st.get("last_index") else None, st)
-        idx_sha = self._index_blob(idx)
+        _prev, idx, idx_sha = self._observe(st)
         out = []
         for step in done:
             pend = st["pending"].pop(step)
             st["n_steps"] = int(st.get("n_steps", 0)) + 1
-            end_sha = pend.get("bound_index") or idx_sha
-            changes = W.diff(self.load_index(pend["pre_index"]), self.load_index(end_sha))
+            end_sha = pend.get("bound_index") or (idx_sha if idx is not None else None)
+            changes = W.diff(self.load_index(pend["pre_index"]), self.load_index(end_sha)) \
+                if pend.get("pre_index") and end_sha else []
             payload = {"step": step, "n": st["n_steps"], "actor": pend["actor"],
                        "tool": pend["tool"], "input_blob": pend["input_blob"],
                        "writes": [c.to_json() for c in changes], "output_blob": None,
@@ -424,8 +544,10 @@ class Recorder:
                                                  | (set(done) - {step})),
                        "pre_missing": False, "post_missing": why,
                        "observed_by": "vacant_scan"}
+            if not (pend.get("pre_index") and end_sha):
+                payload["writes_unknown"] = "the workspace was not observed around this step"
             out.append({**payload, **self._append("step", payload)})
-        if any(x["post_index"] == idx_sha for x in out):
+        if idx is not None and any(x["post_index"] == idx_sha for x in out):
             # 至少一步的寫入算到了「現在」：上次看到的狀態前進到現在（否則同一批改動會再被記成缺口）。
             # 全部都有界（同一個行動者後來又開始了下一步）⇒ 不前進：界之後沒人解釋的改動，
             # 下一次看的時候照樣是缺口（2026-09-24 審查 recorder#1 的驗證）
@@ -437,10 +559,8 @@ class Recorder:
         回傳現在這個狀態的索引 sha256。"""
         with self._lock():
             st = self._state()
-            prev = self.load_index(st["last_index"]) if st.get("last_index") else None
-            idx = self._scan(prev, st)
-            idx_sha = self._index_blob(idx)
-            if prev is not None and not st["pending"]:
+            prev, idx, idx_sha = self._observe(st)
+            if prev is not None and idx is not None and not st["pending"]:
                 gap = [c.to_json() for c in W.diff(prev, idx)]
                 if gap:
                     self._append("unrecorded_change", {"changes": gap, "n": len(gap),
@@ -449,7 +569,7 @@ class Recorder:
                                                        "observed_at": observed_at})
             st["last_index"] = idx_sha
             self._save(st)
-            return idx_sha
+            return idx_sha or ""
 
     def prompt(self, text: str, *, session: str = "*", source: str = "user",
                tool_use_id: str | None = None) -> dict[str, Any]:
@@ -485,16 +605,14 @@ class Recorder:
             open_steps = sorted(k for k, v in st["pending"].items()
                                 if _session_key(v.get("actor") or {}) == key)
             self._finish_open(st, "session_end", session=key)
-            prev = self.load_index(st["last_index"]) if st.get("last_index") else None
-            idx = self._scan(prev, st)
+            prev, idx, idx_sha = self._observe(st)
             gap = [c.to_json() for c in W.diff(prev, idx)] \
-                if prev is not None and not st["pending"] else []
+                if prev is not None and idx is not None and not st["pending"] else []
             if gap:
                 self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                    "before_index": st["last_index"],
-                                                   "after_index": self._index_blob(idx),
+                                                   "after_index": idx_sha,
                                                    "observed_at": "session_end"})
-            idx_sha = self._index_blob(idx)
             st["sessions"].setdefault(key, {})["closed"] = True
             ref = self._append("session_closed", {"actor": actor.to_json(), "reason": reason,
                                                   "final_index": idx_sha,
@@ -546,3 +664,19 @@ class Recorder:
         if torn:
             return True, f"{len(book)} entries (+{torn} bytes of a torn last line, not counted)"
         return True, f"{len(book)} entries"
+
+
+def main(argv: list[str] | None = None) -> int:
+    """`python -m vacant_network.trace.recorder baseline <工作區>`：背景的第一次完整觀察。"""
+    import sys
+    args = list(sys.argv[1:] if argv is None else argv)
+    if len(args) != 2 or args[0] != "baseline":
+        print("usage: python -m vacant_network.trace.recorder baseline <workspace>",
+              file=sys.stderr)
+        return 2
+    print(json.dumps(Recorder(args[1]).baseline()))
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

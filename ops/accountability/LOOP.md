@@ -54,11 +54,11 @@
 - [x] M5 後果：行動者信譽（沿用 reputation.py）＋路由（推薦／`vacant do --agent auto`；子 agent 的文字路由依裁決 §4.7 不做）
 - [x] M6 四個真 agent 端到端：埋錯情境（agent 自己錯、腳本錯、輸入錯、繞過紀錄）→ 歸因準確率（子 agent 端到端未做：假模型不演子 agent，只有單元測試）
 - [x] M7 真模型增益的預註冊＋可直接跑的 harness（交給團隊在本地模型上跑）
-- [ ] M8 對抗審查 workflow → 修 → 文件（README／CLAUDE.md／AGENTS.md／CHANGELOG）
-- [ ] M9 早上的報告 `ops/accountability/MORNING.md`（繁體中文，好消息與壞消息都寫）
+- [x] M8 對抗審查 workflow → 修 → 文件（README／CLAUDE.md／AGENTS.md／CHANGELOG）
+- [x] M9 早上的報告 `ops/accountability/MORNING.md`（繁體中文，好消息與壞消息都寫）
 
 里程碑之後的改進（有時間就做，由上往下）：更多埋錯情境、Who&When 公開資料上的離線比較、
-效能（大專案的差異掃描）、互動 TUI 的回饋、HTTP 收件口接上追緝。
+~~效能（大專案的差異掃描）~~（2026-09-24 做了：`evidence_20260924/perf/`）、互動 TUI 的回饋、HTTP 收件口接上追緝。
 
 ## 五、每一輪的做法
 

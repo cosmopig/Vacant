@@ -66,11 +66,13 @@ def _flag_blames(rec: Recorder, contract: Any) -> list[dict[str, Any]]:
 def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
              why_open: str | None = None, sandbox: str = "auto",
              workspace: pathlib.Path | None = None,
-             session: str | None = None) -> dict[str, Any] | None:
+             session: str | None = None,
+             scan_deadline_s: float | None = None) -> dict[str, Any] | None:
     ws = workspace or capture.workspace_for(cwd, contract)
     if ws is None:
         return None
     rec = Recorder(ws)
+    rec.scan_deadline_s = scan_deadline_s      # 在掛鉤裡（Stop）：和其他掛鉤同一個掃描時限
     if not rec.chain_path.is_file():
         return None
     rec.checkpoint("check")

@@ -24,6 +24,13 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   analysis) for the preregistered real-model experiment (draft, awaiting sign-off).
 - Evidence (L-fake, four real agents × four planted faults): 16/16 attributions,
   `ops/accountability/evidence_20260924/`.
+- Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
+  does not fit moves to the background and the steps before it are recorded as not observed;
+  states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at
+  40k files); re-runs rebuild only the deliverable, the same files the intake's verifiers see.
+  Measured with the real hook entry point: 40k files → first Pre 8.2 s, later hooks p95 0.6 s,
+  Stop with tracing 1.8 s (`ops/accountability/evidence_20260924/perf/`). Above 50k files the
+  per-step scan is off and the trace says so.
 
 **The intake is real, and it plugs into pi, Claude Code, OpenCode and Codex without looking at
 model traffic.** Decision: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`.

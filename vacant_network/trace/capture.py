@@ -151,6 +151,7 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
     if ws is None:
         return None
     rec = R.Recorder(ws)
+    rec.scan_deadline_s = R.HOOK_SCAN_S      # 在掛鉤裡：掃描有時限（第一次看改到背景）
     actor = actor_of(agent, payload)
     t0 = time.perf_counter()
     out: Any = None

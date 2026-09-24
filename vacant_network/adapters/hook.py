@@ -211,9 +211,10 @@ def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contr
 
 def _localize(contract: Any, res: dict[str, Any], ev: HookEvent,
               why: str | None) -> dict[str, Any] | None:
-    from ..trace import stopcheck
+    from ..trace import recorder, stopcheck
     return stopcheck.localize(contract, res, cwd=ev.cwd, why_open=why,
-                              session=f"{ev.agent}:{ev.session_id}")
+                              session=f"{ev.agent}:{ev.session_id}",
+                              scan_deadline_s=recorder.HOOK_SCAN_S)
 
 
 def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, int]:

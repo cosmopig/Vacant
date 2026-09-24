@@ -38,7 +38,6 @@ import pathlib
 import stat
 from typing import Any
 
-from ..atomic import atomic_write_bytes
 
 #: 不進索引的目錄名（完整路徑元件比對）。`.git` 的內容由 git 自己追；Vacant 的狀態目錄另外排除。
 SKIP_DIRS = frozenset({".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache",
@@ -53,9 +52,18 @@ SECRET_PATTERNS = ("**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/*.p12", "
                    "auth.json", "credentials", "credentials.*", ".netrc", ".npmrc", ".pypirc")
 
 
+_SECRET_RX: list = []
+
+
 def is_secret(rel: str) -> bool:
-    from ..intake.artifact import matches
-    return matches(rel, list(SECRET_PATTERNS))
+    if not _SECRET_RX:                       # 編一次（每個檔都重編曾經佔掉冷掃描的三分之一）
+        from ..intake.artifact import glob_to_regex
+        _SECRET_RX.extend(glob_to_regex(x) for x in SECRET_PATTERNS)
+    return any(rx.match(rel) for rx in _SECRET_RX)
+
+
+class ScanTimeout(Exception):
+    """掃描超過期限（掛鉤裡的掃描有上限：掛鉤被 agent 砍掉＝靜默略過）。"""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -106,11 +114,17 @@ class Blobs:
                     os.chmod(d, 0o700)
                 except OSError:
                     pass
-            atomic_write_bytes(dst, data)
+            # 不 fsync：內容定址、讀的時候驗雜湊（`get`），當機留下的壞檔會被當成「重建不了」，
+            # 不會被當成內容（fsync 曾經佔掉冷掃描的三分之一）
+            tmp = dst.with_name(f"{dst.name}.tmp.{os.getpid()}")
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
             try:
-                os.chmod(dst, 0o600)          # 版本庫裡有工作區的內容：只有自己讀得到
-            except OSError:
-                pass
+                with os.fdopen(fd, "wb") as f:
+                    f.write(data)
+                os.replace(tmp, dst)
+            finally:
+                if tmp.exists():
+                    tmp.unlink()
         return sha
 
     def put_file(self, p: pathlib.Path, sha: str | None = None) -> str:
@@ -127,37 +141,50 @@ class Blobs:
 
 def scan(root: str | os.PathLike, prev: Index | None = None, *,
          skip: set[pathlib.Path] | frozenset[pathlib.Path] = frozenset(),
-         blobs: Blobs | None = None, full: bool = False) -> Index:
+         blobs: Blobs | None = None, full: bool = False,
+         deadline: float | None = None, prev_stored: bool = False) -> Index:
     """掃一次工作區。`prev` 的項目若大小與 mtime 都相同就沿用雜湊（見誠實邊界 1）。
-    給 `blobs` ⇒ 每個**新看到的版本**都存進版本庫。"""
+    給 `blobs` ⇒ 每個**新看到的版本**都存進版本庫；沿用的版本也確認在庫裡——除非
+    `prev_stored`（`prev` 是帶著同一個版本庫掃出來的：它的每個版本在那時都已經存了；
+    逐檔確認曾經佔掉大專案每次掛鉤的三分之一）。`deadline`（`time.monotonic()` 的時刻）
+    過了 ⇒ `ScanTimeout`。"""
+    import time
     base = pathlib.Path(root).resolve()
+    base_s = str(base)
     prev = prev or {}
     out: Index = {}
-    skip_r = {pathlib.Path(s).resolve() for s in skip}
-    for dirpath, dirs, files in os.walk(base, followlinks=False):
-        d = pathlib.Path(dirpath)
+    skip_r = {os.path.realpath(s) for s in skip}
+    # 熱迴圈只用字串路徑（pathlib 的物件開銷曾經佔掉大專案每次掃描的四成）
+    for dirpath, dirs, files in os.walk(base_s, followlinks=False):
+        if deadline is not None and time.monotonic() > deadline:
+            raise ScanTimeout(f"scan passed its deadline after {len(out)} files")
+        rel_dir = os.path.relpath(dirpath, base_s)
+        prefix = "" if rel_dir == "." else rel_dir.replace(os.sep, "/") + "/"
         keep = []
         for x in sorted(dirs):
-            if x in SKIP_DIRS or (d / x).resolve() in skip_r:
+            full_x = os.path.join(dirpath, x)
+            if x in SKIP_DIRS or os.path.realpath(full_x) in skip_r:
                 continue
-            if os.path.islink(d / x):
+            if os.path.islink(full_x):
                 # 目錄的符號連結：記連結本身，不進去（進去會重複、甚至繞圈）
                 try:
-                    rel = (d / x).relative_to(base).as_posix()
-                    out[rel] = Entry("link:" + os.readlink(d / x), 0,
-                                     (d / x).lstat().st_mtime_ns)
+                    out[prefix + x] = Entry("link:" + os.readlink(full_x), 0,
+                                            os.lstat(full_x).st_mtime_ns)
                 except OSError:
                     pass
                 continue
             keep.append(x)
         dirs[:] = keep
-        for name in sorted(files):
-            p = d / name
-            rel = p.relative_to(base).as_posix()
+        for i, name in enumerate(sorted(files)):
+            if deadline is not None and i % 256 == 255 and time.monotonic() > deadline:
+                # 一個目錄裡就有幾萬個檔：只在目錄之間看時限不夠
+                raise ScanTimeout(f"scan passed its deadline after {len(out)} files")
+            full_p = os.path.join(dirpath, name)
+            rel = prefix + name
             try:
-                st = p.lstat()
+                st = os.lstat(full_p)
                 if stat.S_ISLNK(st.st_mode):
-                    out[rel] = Entry("link:" + os.readlink(p), 0, st.st_mtime_ns)
+                    out[rel] = Entry("link:" + os.readlink(full_p), 0, st.st_mtime_ns)
                     continue
                 if not stat.S_ISREG(st.st_mode):
                     continue        # FIFO／裝置／socket：不讀（誠實邊界 4）
@@ -166,17 +193,20 @@ def scan(root: str | os.PathLike, prev: Index | None = None, *,
                 if not full and old is not None and old.size == st.st_size \
                         and old.mtime_ns == st.st_mtime_ns and old.exec == x_bit:
                     out[rel] = old
-                    if blobs is not None and st.st_size <= MAX_BLOB and ":" not in old.sha256 \
-                            and not blobs.has(old.sha256):
-                        blobs.put_file(p, old.sha256)
+                    if blobs is not None and not prev_stored and st.st_size <= MAX_BLOB \
+                            and ":" not in old.sha256 and not blobs.has(old.sha256):
+                        blobs.put_file(pathlib.Path(full_p), old.sha256)
                     continue
                 if is_secret(rel):
-                    out[rel] = Entry("secret:" + _sha_file(p), st.st_size, st.st_mtime_ns, x_bit)
+                    out[rel] = Entry("secret:" + _sha_file(pathlib.Path(full_p)), st.st_size,
+                                     st.st_mtime_ns, x_bit)
                     continue
                 if st.st_size > MAX_BLOB:
-                    out[rel] = Entry("big:" + _sha_file(p), st.st_size, st.st_mtime_ns, x_bit)
+                    out[rel] = Entry("big:" + _sha_file(pathlib.Path(full_p)), st.st_size,
+                                     st.st_mtime_ns, x_bit)
                     continue
-                data = p.read_bytes()
+                with open(full_p, "rb") as f:
+                    data = f.read()
                 sha = blobs.put_bytes(data) if blobs is not None \
                     else hashlib.sha256(data).hexdigest()
                 out[rel] = Entry(sha, st.st_size, st.st_mtime_ns, x_bit)

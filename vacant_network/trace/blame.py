@@ -144,6 +144,8 @@ class Trace:
         self._idx: dict[str, W.Index] = {}
         self.initial: str | None = None
         self.scan_disabled: str | None = None
+        #: 第一次完整觀察之前就有步驟在跑（專案太大、在背景看）：那時已經在的值不能說是「本來就在」
+        self.unobserved_start = False
         seen_steps: set[str] = set()
         for e in rec.events():
             t = e.get("type")
@@ -204,6 +206,12 @@ class Trace:
                 self.prompts.append(e)
             elif t == "coverage" and e.get("scan_disabled"):
                 self.scan_disabled = str(e["scan_disabled"])
+            elif t == "coverage" and isinstance(e.get("baseline"), dict):
+                bl = e["baseline"]
+                if bl.get("after_unobserved"):
+                    self.unobserved_start = True
+                if self.initial is None and bl.get("index"):
+                    self.initial = bl["index"]
             elif t == "session_closed" and self.initial is None and e.get("final_index"):
                 self.initial = e["final_index"]
 
@@ -253,8 +261,19 @@ class Trace:
                 return s.post_index
         return self.initial
 
-    def materialize(self, index_sha: str | None, dest: pathlib.Path) -> list[str]:
-        return W.materialize(self.index(index_sha), self.rec.blobs, dest)
+    def materialize(self, index_sha: str | None, dest: pathlib.Path,
+                    contract: Any = None) -> list[str]:
+        """重建某一步的狀態。給契約 ⇒ 只重建繳付物（include／exclude）——收件口的驗證器也只看得到
+        這些（`flow._verify_manifest` 只放 manifest 裡的檔）；整個工作區重建曾經讓 `command`
+        類主張在追緝時看得到收件時看不到的檔，而且 4 萬個檔的專案每條主張要寫 8 萬個檔。"""
+        idx = self.index(index_sha)
+        if contract is not None:
+            from ..intake.artifact import glob_to_regex
+            inc = [glob_to_regex(p) for p in contract.include]
+            exc = [glob_to_regex(p) for p in contract.exclude]
+            idx = {r: e for r, e in idx.items()
+                   if any(x.match(r) for x in inc) and not any(x.match(r) for x in exc)}
+        return W.materialize(idx, self.rec.blobs, dest)
 
 
 # ── lineage ──────────────────────────────────────────────────────────
@@ -494,6 +513,10 @@ class Blamer:
         intro = self.introducer(path, value, before_seq, line=line)
         if intro is None:
             return Origin("unknown", note=f"{value!r} is not in {path} at that point")
+        if intro == "initial" and self.t.unobserved_start:
+            chain.append({"via": f"{path} already had it when Vacant first managed to look"})
+            return Origin("gap", source={"observed_at": "baseline"},
+                          note="steps ran before the first full view of the workspace")
         if intro == "initial":
             src = {"kind": "file", "path": path, **self._line_of(self.t.initial, path, value)}
             if path in self.inputs:
@@ -798,7 +821,7 @@ def rerun_flip(trace: Trace, contract: Any, claim_id: str, step: Step, loc: L.Lo
                                "line": line_after}
         for tag, sha in (("before", step.pre_index), ("after", step.post_index)):
             d = tmp / tag
-            missing = [m for m in trace.materialize(sha, d) if sees.sees(m)]
+            missing = [m for m in trace.materialize(sha, d, contract) if sees.sees(m)]
             r = rerun.run(contract, d, [claim_id], sandbox=sandbox)[0]
             locs = L.locate(claim, r, d)
             if tag == "before" and line_after is not None:
