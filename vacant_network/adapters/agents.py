@@ -108,6 +108,7 @@ def claude_hooks_doc(*, include_session_end: bool = True) -> dict[str, Any]:
     hooks = {"PreToolUse": [entry("PreToolUse", "*", 30)],
              "PostToolUse": [entry("PostToolUse", "*", 30)],
              "PostToolUseFailure": [entry("PostToolUseFailure", "*", 30)],
+             "SubagentStart": [entry("SubagentStart", None, 30)],
              "SubagentStop": [entry("SubagentStop", None, 30)],
              "UserPromptSubmit": [entry("UserPromptSubmit", None, 30)],
              "Stop": [entry("Stop", None, 600)]}
@@ -566,15 +567,16 @@ def opencode_install(m: INS.Manifest, home: pathlib.Path) -> list[dict[str, Any]
 CODEX_SESSION_SRC = "/<session-flags>/config.toml"
 #: SessionEnd 在 Codex 被夾在 1–3 秒（`normalize_command_hook`），而且只是建議性的。
 CODEX_TIMEOUTS = {"UserPromptSubmit": 30, "PreToolUse": 30, "PostToolUse": 30,
-                  "SubagentStop": 30, "Stop": 600, "SessionEnd": 3}
+                  "SubagentStart": 30, "SubagentStop": 30, "Stop": 600, "SessionEnd": 3}
 _CODEX_SNAKE = {"UserPromptSubmit": "user_prompt_submit",
                 "PreToolUse": "pre_tool_use", "PostToolUse": "post_tool_use",
-                "SubagentStop": "subagent_stop", "Stop": "stop", "SessionEnd": "session_end"}
+                "SubagentStart": "subagent_start", "SubagentStop": "subagent_stop",
+                "Stop": "stop", "SessionEnd": "session_end"}
 #: 每一跑與常駐安裝都掛的事件（UserPromptSubmit／PostToolUse／SubagentStop／SessionEnd 是追緝的
 #: 任務訊息、病歷與逐字稿封存；
 #: `-c` 加的掛鉤也到得了子 agent [capture-codex §0-5 RUN]）
-CODEX_EVENTS = ("UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStop", "Stop",
-                "SessionEnd")
+CODEX_EVENTS = ("UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStart",
+                "SubagentStop", "Stop", "SessionEnd")
 
 
 def codex_handler(event: str) -> dict[str, Any]:

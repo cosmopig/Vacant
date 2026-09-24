@@ -201,7 +201,8 @@ def _agent_tool(tools: list[dict[str, Any]], spec: dict[str, Any]
             args: dict[str, Any] = {"description": desc, "prompt": prompt,
                                     "subagent_type": spec.get("type") or "general-purpose"}
             if "run_in_background" in _props(sch):
-                args["run_in_background"] = False       # 前景：等它做完再往下（背景模式另有實測）
+                # 預設前景（做完才往下）；`background` ⇒ 背景，結果之後以 `<task-notification>` 回來
+                args["run_in_background"] = bool(spec.get("background"))
             return name, args
     if "task" in by:                                     # OpenCode
         return "task", {"description": desc, "prompt": prompt,
@@ -234,7 +235,8 @@ def _shell_tool(tools: list[dict[str, Any]]):
 
 
 def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
-         fed_back: bool = False, role: str | None = None, last_agent_id: str | None = None):
+         fed_back: bool = False, role: str | None = None, last_agent_id: str | None = None,
+         notified: bool = False):
     sc = scenario()
     roles = sc.get("roles") or {}
     if role and isinstance(roles.get(role), dict):
@@ -244,6 +246,21 @@ def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
     steps = sc.get("steps")
     if isinstance(steps, list):
         steps = _expand_agent_steps(steps, tools)
+        # `{"await": "notification"}`：等背景子 agent 的結果回來（不算一步工具呼叫）
+        if any(isinstance(x, dict) and x.get("await") for x in steps):
+            i = 0
+            for k, x in enumerate(steps):
+                if isinstance(x, dict) and x.get("await"):
+                    if i >= n_results and not notified:
+                        return ("text", "Waiting for the delegated task to finish.", None)
+                    continue
+                if i == n_results:
+                    steps = [y for y in steps[k:] if not (isinstance(y, dict) and y.get("await"))]
+                    n_results = 0
+                    break
+                i += 1
+            else:
+                steps, n_results = [], 0
         # 有序的步驟（可究責追緝的埋錯情境要「先寫腳本、再跑它」）：
         # {"run": "<shell 指令>"} 或 {"write": ["<路徑>", "<內容>"]}
         if n_results < len(steps) and tools:
@@ -405,7 +422,10 @@ class H(BaseHTTPRequestHandler):
                                    lambda b: json.dumps(b))
         tools = body.get("tools") or []
         role = role_of(_text_of(msgs[0].get("content")) if msgs else "")
-        kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed, role)
+        notified = any(m.get("role") == "user" and "<task-notification>" in _text_of(m.get("content"))
+                       for m in msgs)
+        kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed, role,
+                          notified=notified)
         log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),

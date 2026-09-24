@@ -41,7 +41,8 @@ from . import recorder as R
 ACTIONS = {
     "UserPromptSubmit": "prompt", "prompt": "prompt",
     "PreToolUse": "pre", "PostToolUse": "post", "PostToolUseFailure": "post",
-    "SubagentStop": "subagent_stop", "Stop": "stop", "SessionEnd": "session_end",
+    "SubagentStop": "subagent_stop", "SubagentStart": "subagent_start",
+    "Stop": "stop", "SessionEnd": "session_end",
     "pre_tool": "pre", "post_tool": "post", "stop": "stop", "session_end": "session_end",
     "subagent_stop": "subagent_stop",
 }
@@ -189,7 +190,10 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
                              spawned_by=link.get("spawned_by"))
     elif action == "stop":
         out = rec.settle(actor, "turn_end")      # 已經在裁決之前收過一次（hook.handle）；冪等
+    elif action == "subagent_start":
+        out = rec.subagent_state(actor, running=True)
     elif action == "subagent_stop":
+        rec.subagent_state(actor, running=False)
         path = payload.get("agent_transcript_path")
         out = seal_transcript(rec, actor, agent, path, role="subagent") if path else None
     elif action == "session_end":

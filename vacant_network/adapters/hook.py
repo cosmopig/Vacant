@@ -47,10 +47,12 @@ from .hookpolicy import (NON_TERMINAL_END_REASONS, HookDecision, HookEvent, deci
 EVENT_MAP: dict[str, dict[str, str]] = {
     "claude": {"PreToolUse": "pre_tool", "PostToolUse": "post_tool",
                "PostToolUseFailure": "post_tool", "Stop": "stop", "SubagentStop": "other",
+               "SubagentStart": "other",
                "SessionEnd": "session_end", "SessionStart": "session_start",
                "UserPromptSubmit": "other"},
     "codex": {"PreToolUse": "pre_tool", "PostToolUse": "post_tool", "Stop": "stop",
-              "SubagentStop": "other", "SessionEnd": "session_end", "SessionStart": "session_start",
+              "SubagentStop": "other", "SubagentStart": "other",
+              "SessionEnd": "session_end", "SessionStart": "session_start",
               "UserPromptSubmit": "other"},
     "opencode": {"pre_tool": "pre_tool", "post_tool": "post_tool", "stop": "stop",
                  "session_end": "session_end", "session_start": "session_start"},
@@ -210,6 +212,17 @@ def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contr
                               "error": f"trace: {type(e).__name__}: {e}"[:500]})
 
 
+def _subagents_running(contract: Any, ev: HookEvent) -> bool:
+    try:
+        from ..trace import capture, recorder
+        ws = capture.workspace_for(ev.cwd, contract)
+        if ws is None or not ev.session_id:
+            return False
+        return bool(recorder.Recorder(ws).running_subagents(f"{ev.agent}:{ev.session_id}"))
+    except Exception:  # noqa: BLE001 — 看不出來就照常驗收
+        return False
+
+
 def _localize(contract: Any, res: dict[str, Any], ev: HookEvent,
               why: str | None) -> dict[str, Any] | None:
     from ..trace import recorder, stopcheck
@@ -236,6 +249,10 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         _trace(agent, event, payload, ev, contract, d)
     if ev.kind == "pre_tool":
         d = decide_pre_tool(ev, contract)
+    elif ev.kind == "stop" and contract is not None and _subagents_running(contract, ev):
+        # 背景的子 agent 還在做（Claude 預設把子 agent 放到背景）：主 agent 的回合結束不是交件的時候，
+        # 這時驗收只會叫它把子 agent 正在做的事重做一遍。等子 agent 回報之後的那一次回合結束再驗
+        d = HookDecision("allow", "", {"stop_check_deferred": "a delegated task is still running"})
     elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP") \
             and os.environ.get("VACANT_FEEDBACK_MODE") != "none":
         from ..intake import flow

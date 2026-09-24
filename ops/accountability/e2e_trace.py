@@ -16,6 +16,7 @@
 情境 F 的「網站」是 `portal.vacant-lab.test`：實驗環境把 agent 的 `http_proxy` 指到假模型（像公司的代理），
 所以 agent 下的指令就是一般的 `curl http://portal.vacant-lab.test/…`。**本機的網址（localhost、這台機器的位址）
 不算外部來源**（agent 可能自己開了伺服器）；Vacant 看不到代理／DNS 把名字指到哪裡，這是誠實邊界。
+| G 背景子 agent（只有 Claude Code）| 同 E，但子 agent 在背景跑；主 agent 從 `<task-notification>` 照抄數字 | 同 E：指到子 agent；那則通知不可以被當成使用者說的話 |
 | E 子 agent 算錯、主 agent 照抄 | 主 agent 用自己的委派工具交給子 agent（`ROLE:sub`）→ 子 agent 讀帳本、把 96 寫進 `figure.txt` → 主 agent 讀它、寫進報告 | `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步（行動者帶子 agent 的 id） |
 
 每個 agent 一個隔離的「使用者」（`ops/intake/e2e_four_agents.Lab`：自己的 HOME、provider 指到
@@ -94,6 +95,21 @@ SCENARIOS: dict[str, dict] = {
         "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
                           {"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
                 "final": "The portal disagrees with the ledger; used the ledger."}},
+    "G_background_subagent_fault": {
+        # Claude Code 預設把子 agent 放到背景：主 agent 先收到「已啟動」，結果之後以一則
+        # `<task-notification>` 使用者訊息回來；主 agent 直接照抄通知裡的數字（沒有讀檔）
+        "steps": [{"agent": {"prompt": "ROLE:sub Add up the amount column of inputs/ledger.csv "
+                                       "and write the total (digits only) to figure.txt.",
+                             "description": "Compute the quarter total", "background": True}},
+                  {"await": "notification"},
+                  {"write": ["report.md", "# Quarter\n\nTotal: 96\n"]}],
+        "final": "Done.",
+        "roles": {"sub": {"steps": [{"run": "cat inputs/ledger.csv"},
+                                    {"write": ["figure.txt", "96\n"]}],
+                          "final": "The quarter total is 96 (written to figure.txt)."}},
+        "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
+                          {"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
+                "final": "Recomputed from the ledger."}},
     "E_subagent_fault": {
         "steps": [{"agent": {"prompt": "ROLE:sub Add up the amount column of inputs/ledger.csv "
                                        "and write the total (digits only) to figure.txt.",
@@ -119,10 +135,15 @@ EXPECT = {
                             "confidence": "gap"},
     "F_web_source_fault": {"state": "located", "fault_class": "input",
                            "confidence": "lineage_exact", "source_kind": "url"},
+    "G_background_subagent_fault": {"state": "located", "fault_class": "agent",
+                                    "confidence": "lineage_internal", "step_writes": "figure.txt",
+                                    "subagent": True},
     "E_subagent_fault": {"state": "located", "fault_class": "agent",
                          "confidence": "lineage_internal", "step_writes": "figure.txt",
                          "subagent": True},
 }
+#: 只在某些平台有意義的情境
+ONLY = {"G_background_subagent_fault": {"claude"}}
 #: pi 沒有內建子 agent：情境 E 用它隨附的範例擴充（另開一個 pi 行程），代理人定義放在隔離的 agent 目錄
 PI_SUBAGENT_EXT = "@earendil-works/pi-coding-agent/examples/extensions/subagent/index.ts"
 PI_WORKER = ("---\nname: worker\ndescription: does one delegated task\n"
@@ -219,7 +240,7 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     lab.proj = lab.root / f"proj-{scn.split('_')[0].lower()}"
     lab.reset_project(f"q-total-{scn.split('_')[0].lower()}")
     lab.mock_log.unlink(missing_ok=True)
-    lab.subagents = scn.startswith("E_")
+    lab.subagents = scn.startswith(("E_", "G_"))
     lab.web = scn.startswith("F_")
     lab.start_mock(SCENARIOS[scn])
     t0 = time.time()
@@ -320,6 +341,8 @@ def main() -> int:
                "install_exit": inst.returncode, "runs": {}}
         try:
             for scn in args.scenarios.split(","):
+                if agent not in ONLY.get(scn, {agent}):
+                    continue                    # 這個平台沒有這種東西（例：背景子 agent）
                 try:
                     res["runs"][scn] = run_one(lab, scn, args.timeout)
                 except Exception as e:  # noqa: BLE001 — 一格壞了照記，不拖垮整張表

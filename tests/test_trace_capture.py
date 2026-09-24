@@ -225,3 +225,31 @@ def test_pi_extension_marks_children_safely():
     assert "delete process.env[MARK]" not in src                # 不再有「誰結束就刪掉」的競賽
     assert "if (who(ctx).parent_session_id) return undefined;" in src
     assert '"subagent_stop" : "session_end"' in src
+
+
+def test_stop_check_waits_while_a_background_subagent_is_still_running(ws, monkeypatch):
+    """Claude 預設把子 agent 放到背景：主 agent 的回合結束時子 agent 還在做。那時驗收只會叫主 agent
+    把子 agent 正在做的事重做一遍——等它回報之後的那一次回合結束再驗（2026-09-24 情境 G）。"""
+    import json as _json
+    from vacant_network.intake import contract as C
+    (ws / ".vacant").mkdir()
+    raw = C.scaffold("bg", deliverable=["report.md"])
+    raw["claims"] = [{"id": "present", "verifier": "exists", "params": {"paths": ["report.md"]}}]
+    raw["hooks"] = {"stop_check": True, "max_feedback_rounds": 2, "submit_on_end": False}
+    (ws / ".vacant" / "contract.json").write_text(_json.dumps(raw))
+    C.lock(ws / ".vacant" / "contract.json")
+    base = {"session_id": "s", "cwd": str(ws)}
+    hook.handle("claude", "SubagentStart", {**base, "agent_id": "a1", "agent_type": "general-purpose"})
+    out, _err, _rc = hook.handle("claude", "Stop", {**base, "stop_hook_active": False})
+    assert "block" not in out                                  # 不催主 agent
+    hook.handle("claude", "SubagentStop", {**base, "agent_id": "a1", "agent_type": "general-purpose"})
+    out, _err, _rc = hook.handle("claude", "Stop", {**base, "stop_hook_active": False})
+    assert '"block"' in out and "report.md" in out            # 子 agent 回報之後照常驗收
+
+
+def test_a_missed_subagent_stop_does_not_block_checks_forever(ws, monkeypatch):
+    rec = R.Recorder(ws)
+    rec.subagent_state(R.Actor("claude", "s", agent="a1"), running=True)
+    assert rec.running_subagents("claude:s") == ["claude:s:a1"]
+    assert rec.running_subagents("claude:s", max_age=0) == []
+    assert rec.running_subagents("claude:other") == []

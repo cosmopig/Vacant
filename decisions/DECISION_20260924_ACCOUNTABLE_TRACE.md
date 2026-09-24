@@ -261,6 +261,14 @@ Codex `multi_agent_v1` 的 `spawn_agent`→`wait_agent`、pi 隨附範例擴充�
 還在跑的呼叫的輸入——對到恰好一個才記。第一版（標記跟著每個呼叫走）被同日的對抗審查打穿六條（平行、被擋的呼叫、
 巢狀、兄弟的類型、tmux、別的專案），見 `ops/accountability/review_subagent_curl/FINDINGS.md`。
 
+### 背景子 agent（同日，情境 G，只有 Claude Code）
+
+Claude 預設把子 agent 放到背景：主 agent 的回合結束時子 agent 還在做，Stop 掛鉤的驗收會說「報告還沒有」、催主 agent
+繼續——主 agent 就把子 agent 正在做的事重做一遍（端到端第一次跑就是這樣）。現在 Claude／Codex 另外掛 `SubagentStart`，
+病歷的狀態記下開始了、還沒結束的子 agent；主 agent 的回合結束時同一個工作階段裡有子 agent 在做 ⇒ 這一次先不驗收
+（記 `stop_check_deferred`，不算回饋輪數），等子 agent 回報之後的那一次回合結束再驗。一小時沒有結束的消息就當成結束
+（漏掉一個事件不可以讓驗收永遠不跑）。子 agent 的結果從 `<task-notification>` 回來、主 agent 照抄 ⇒ 追到子 agent 那一步。
+
 ### 抓網頁的指令（同日，情境 F）
 
 `curl`／`wget`（和 `http`／`xh`／`aria2c`）抓回來的值原本落到「指令自己算出來的」⇒ agent 背推論層的錯。

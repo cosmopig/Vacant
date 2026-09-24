@@ -55,6 +55,8 @@ STALE_S = 900.0
 #: 掛鉤裡的一次掃描最多這麼久（掛鉤有 30 秒上限；被 agent 砍掉＝靜默略過＝更大的缺口）。
 #: 第一次看就超過 ⇒ 改在背景看（`baseline`）；之後的增量掃描還超過 ⇒ 這個專案不再逐步掃描
 HOOK_SCAN_S = 8.0
+#: 子 agent 開始之後這麼久沒有結束的消息 ⇒ 當成已經結束（驗收不可以因為漏掉一個事件就永遠不跑）
+SUBAGENT_MAX_S = 3600.0
 #: 背景的第一次完整觀察最多等這麼久；過了還沒寫回來 ⇒ 當它失敗了，這個專案不再逐步掃描
 BASELINE_WAIT_S = 600.0
 #: 檔案數到這裡以上，工作區狀態存成對上一份完整索引的差異（見 `_index_blob`）
@@ -665,6 +667,29 @@ class Recorder:
             payload["spawned_by"] = spawned_by       # 叫它出來的那一步（父 agent 的工具呼叫）
         with self._lock():
             return self._append("prompt", payload)
+
+    def subagent_state(self, actor: Actor, *, running: bool) -> dict[str, Any]:
+        """子 agent 開始／結束（Claude／Codex 的 SubagentStart／SubagentStop）。只記在狀態裡：
+        用來判斷「主 agent 的回合結束時，還有沒有它叫出來的子 agent 在做事」。"""
+        if not actor.agent:
+            return {}
+        with self._lock():
+            st = self._state()
+            subs = st.setdefault("subagents", {})
+            key = f"{actor.platform}:{actor.session}:{actor.agent}"
+            subs[key] = {"running": running, "t": time.time()}
+            self._save(st)
+            return dict(subs[key])
+
+    def running_subagents(self, session_key: str, *, max_age: float = SUBAGENT_MAX_S
+                          ) -> list[str]:
+        """這個工作階段裡開始了、還沒結束的子 agent（超過 `max_age` 沒消息的當成已經結束：
+        漏掉一個 SubagentStop 不可以讓驗收永遠不跑）。"""
+        now = time.time()
+        subs = self._state().get("subagents") or {}
+        return sorted(k for k, v in subs.items()
+                      if k.startswith(session_key + ":") and v.get("running")
+                      and now - float(v.get("t", 0)) < max_age)
 
     def link_child(self, actor: Actor, parent_agent: str | None,
                    task: str | None = None) -> dict[str, Any]:

@@ -219,3 +219,26 @@ pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
 
 **偏移檢查**：沒有碰真模型 API、沒有連外網；兩項修正都是往「不怪錯人、也不讓 agent 洗掉自己的錯」收；給 agent 的文字沒有行動者。
 - 補記（2026-09-24T22:10Z 那一筆）：`5b44ca86` 上的全套測試失敗集合**等於基線**。
+
+## 2026-09-24T22:45Z — 情境 G：Claude 的背景子 agent（它是預設）——驗收會催主 agent 重做，修了
+
+**做了什麼**
+- 假模型會把子 agent 放到背景（`run_in_background`），並能「等通知」（`{"await": "notification"}`：沒看到
+  `<task-notification>` 之前只回一句話、結束回合）。`e2e_trace.py` 情境 G（只有 Claude Code）：子 agent 在背景把 96
+  寫進 `figure.txt`，主 agent 從通知照抄。
+- 第一次跑露出產品問題：主 agent 的回合在子 agent 還在做時結束 ⇒ Stop 掛鉤驗收說「報告還沒有」⇒ 主 agent 照回饋把
+  子 agent 的工作重做一遍。修：Claude／Codex 另外掛 `SubagentStart`；病歷狀態記下開始了、還沒結束的子 agent
+  （`Recorder.subagent_state`／`running_subagents`）；有子 agent 在做 ⇒ 這次回合結束先不驗收（`stop_check_deferred`），
+  一小時沒消息當成結束。
+- 測試：`tests/test_trace_capture.py` 兩條（背景子 agent 在做時不催、回報之後照常驗；漏掉 SubagentStop 不會永遠不驗）；
+  安裝的掛鉤集合測試加上 `SubagentStart`。
+
+**證據**：情境 G 在真的 Claude Code 上：子 agent 在做時沒有回饋、通知回來後主 agent 照抄 96、回合結束驗收 ⇒ 追到**子 agent**
+寫 `figure.txt` 的那一步（`general-purpose`，帶它的 id），回饋「it was copied from step 4 (Bash); step 5 wrote it into report.md」，
+改好後 accept。全部重跑 **25/25**（Codex 加了 SubagentStart 之後照常啟動、六個情境照過）；有位置的回饋進了模型 16/16、
+改好後 accept 16/16、回饋裡行動者識別 0/25、鏈 25/25、掛鉤 p95 7.0–14.3 ms。
+
+**下一步**：全套測試對基線；之後：平行委派（兩個子 agent 同時寫同一個檔）的端到端，或整理早上報告給人類決定的事。
+
+**偏移檢查**：沒有碰真模型 API；改動是「驗收時機」不是「驗收內容」（等子 agent 回報後照常驗；漏事件一小時後照常驗）；
+給 agent 的文字沒有行動者。

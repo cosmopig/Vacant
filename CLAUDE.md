@@ -119,7 +119,7 @@
 ### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
 
 裁決：`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`（補在收件口之上，不取代）。
-`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，24/24，含子 agent 與錯的網頁）。
+`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，25/25，含前景／背景子 agent 與錯的網頁）。
 
 - `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
   沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）。掛鉤裡一次掃描最多
@@ -128,7 +128,8 @@
 - `capture.py` — 四個 agent 的原生掛鉤 → 病歷（Claude／Codex 的 `tool_use_id`、OpenCode 子 session、pi `toolCallId`；
   逐字稿在工作階段結束時封存，模型 id 標 `claimed`）。pi 的子 agent＝另一個 pi 行程：Vacant 的 pi 擴充留一個固定標記
   （`VACANT_PI_PARENT`：session、pid、專案；子行程驗過祖先與專案才接受），叫它的是哪一個呼叫由 `Recorder.link_child`
-  用任務文字對（對不到不猜）。子 agent 的回合結束不跑驗收。審查：`ops/accountability/review_subagent_curl/FINDINGS.md`。子 agent 端到端：情境 E，4/4
+  用任務文字對（對不到不猜）。子 agent 的回合結束不跑驗收；Claude／Codex 的 `SubagentStart`／`SubagentStop` 記下還在跑的子 agent，主 agent 的
+  回合結束時有子 agent 在做就先不驗收（`Recorder.running_subagents`，一小時沒消息當成結束）。審查：`ops/accountability/review_subagent_curl/FINDINGS.md`。子 agent 端到端：情境 E，4/4
 - `locate.py`／`rerun.py`／`blame.py` — 位置 → 引入它的那一步 → 在重建狀態上重跑同一條主張 → 值從哪裡讀來。
   **只有重跑翻轉的 `provable` 是事實層**；往上追出來的都是推論層（值比對會被巧合騙）。`curl`／`wget` 抓回來的值是外部來源——只在整個指令就是抓網頁、網址不是本機、自己寫過的東西裡沒有這個值時。
   重建只放繳付物（和收件口的隔離區看同一批檔）

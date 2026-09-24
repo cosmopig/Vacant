@@ -29,6 +29,9 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   as a sub-agent of that session (it was treated as a second main agent and asked, at its own
   turn end, for the parent's deliverable). A value that came from `curl`/`wget` output is traced to the
   URL as an outside source (it was blamed on the agent as "the command produced it").
+- While a background sub-agent is still working (Claude Code's default), the end-of-turn check waits:
+  it used to push the main agent to redo the sub-agent's work. `SubagentStart` is now installed for
+  Claude Code and Codex. End to end: 25/25, including Claude's background sub-agent.
 - Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
   does not fit moves to the background and the steps before it are recorded as not observed;
   states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at
