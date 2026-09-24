@@ -475,3 +475,18 @@ def test_encoded_shell_write_regression_still_holds(tmp_path, monkeypatch):
           write=(p / "report.md", "Total: 999\n"))
     [b] = _blames(p, c, rec)
     assert b["confidence"] == "provable" and pathlib.Path(p / "report.md").is_file()
+
+
+def test_recorder11b_vacant_do_workspaces_under_the_work_root_are_traced(tmp_path, monkeypatch):
+    """`vacant do` 的每一個工作區都在工作區根（`$VACANT_HOME-work`）底下：根本身不追，根底下的照追。
+    整個根曾經被當成狀態目錄 ⇒ `vacant do` 一步都沒記（R536 的追緝回饋少了「第幾步」；2026-09-25 冒煙抓到）。"""
+    from vacant_network.intake import statepaths
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    monkeypatch.setenv("VACANT_TRACE", "1")
+    wd = statepaths.work_dir()
+    ws = wd / "task-1" / "20260925T000000-1-abc" / "ws"
+    ws.mkdir(parents=True)
+    assert capture.workspace_for(str(ws)) == ws.resolve()
+    assert capture.workspace_for(str(wd)) is None
+    assert capture.workspace_for(str(tmp_path / "vh" / "trace")) is None

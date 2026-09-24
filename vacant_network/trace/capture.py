@@ -65,13 +65,18 @@ def workspace_for(cwd: str | None, contract: Any = None) -> pathlib.Path | None:
 def _traceable(ws: pathlib.Path) -> bool:
     """`/`、家目錄或它的上層（一掃就是整台機器）、Vacant 自己的狀態目錄（或它的上下層）都不追
     （2026-09-24 審查 recorder#11：原本只比「相等」，契約放在家目錄就把整個家目錄掃進去）。"""
-    from ..intake.statepaths import state_dirs
+    from ..intake.statepaths import state_dir, work_dir
     home = pathlib.Path.home().resolve()
     if ws == pathlib.Path(ws.anchor) or ws == home or ws in home.parents:
         return False
-    for sd in state_dirs():
-        if ws == sd or sd in ws.parents or ws in sd.parents:
-            return False
+    sd = state_dir().resolve()
+    if ws == sd or sd in ws.parents or ws in sd.parents:
+        return False
+    # `vacant do` 的工作區都在工作區根底下：根本身和它的上層不追，根底下的每一個工作區照追
+    # （把整個根當成狀態目錄曾經讓 `vacant do` 一步都沒記——R536 的追緝回饋少了「第幾步」）
+    wd = work_dir().resolve()
+    if ws == wd or ws in wd.parents:
+        return False
     return True
 
 
