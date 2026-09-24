@@ -169,3 +169,5 @@ Claude `general-purpose`／Codex `default`／pi `worker`／OpenCode `subagent`�
 
 **偏移檢查**：沒有碰真模型 API（假金鑰、假端點、隔離 HOME）；給 agent 的文字沒有行動者；E 是推論層，照規則不進信譽；
 pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
+- 補記（2026-09-24T20:40Z 那一筆）：`ecc2ed6d` 上的全套測試失敗集合**等於基線**（逐條 diff 為空）。
+  子 agent 那一輪（`5e4d6f70`／`129afe8d`，動了 pi 擴充與 capture）的全套測試另外在跑。
