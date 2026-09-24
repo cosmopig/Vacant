@@ -171,3 +171,23 @@ Claude `general-purpose`／Codex `default`／pi `worker`／OpenCode `subagent`�
 pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
 - 補記（2026-09-24T20:40Z 那一筆）：`ecc2ed6d` 上的全套測試失敗集合**等於基線**（逐條 diff 為空）。
   子 agent 那一輪（`5e4d6f70`／`129afe8d`，動了 pi 擴充與 capture）的全套測試另外在跑。
+
+## 2026-09-24T21:20Z — 情境 F：網頁本身就錯（`curl`）——原本會怪到 agent 頭上
+
+**做了什麼**
+- 讀程式碼找到的漏洞：值來自 `curl <網址>` 的輸出時，追緝落到「指令自己算出來的」⇒ agent 背錯。抓網頁的工具
+  （WebFetch）早就算外部來源，殼層的 `curl`／`wget` 沒有。修（`blame._fetched_urls`／`_shell_origin`）：值在有紀錄的
+  輸出裡 ⇒ 外部來源（`lineage_exact`，記網址）；輸出導進檔案 ⇒ `heuristic`；指令裡還跑了程式 ⇒ 不叫外部。
+- 假模型會回假網頁（`GET /web/<名>`，`run` 裡的 `{{port}}` 換成它的埠）；`e2e_trace.py` 情境 F（Codex 這一格開
+  `sandbox_workspace_write.network_access`，否則 `curl` 連不到）。
+- 單元測試 3 條（`tests/test_trace_blame.py::test_F_*`；前兩條改之前紅、第三條是對照組）。
+
+**證據**：四個 agent × 六個情境重跑 **24/24**（`evidence_20260924/e2e_trace_*`）。F：四個 agent 都是 `input`／`lineage_exact`、
+來源是那個網址，網址記進來源帳，agent 不背；給 agent 的回饋是「the same value came from http://…/web/q3.txt」。
+有位置的回饋進了模型 15/15 格（Claude／Codex／pi × A／B／C／E／F），改好後 accept 15/15；回饋裡行動者識別 0/24；
+鏈 24/24；掛鉤 p95 7.3–13.8 ms。
+
+**下一步**：子 agent 那一輪的全套測試在跑，完成後對基線（這一輪一起算）；再下一個：平行委派（兩個子 agent 同時寫）、
+或 HTTP 收件口接上追緝。
+
+**偏移檢查**：沒有碰真模型 API、也沒有連外網（假網頁在本機）；所有改動都是往「不怪錯人」那一邊；給 agent 的文字沒有行動者。

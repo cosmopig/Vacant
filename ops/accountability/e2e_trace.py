@@ -11,6 +11,7 @@
 | A 輸入本來就錯 | 讀財務給的摘要（寫著 75）→ 照抄 | `input`／`lineage_exact`，指到 `inputs/summary.txt`；agent 不背 |
 | C 中間的腳本錯 | 寫 `calc.py`（加錯欄）→ 跑它輸出報告 | `agent`／`lineage_internal`，指到**寫腳本**那一步，不是寫報告那一步 |
 | D 沒被記錄的改動（負控制） | agent 寫對的報告；**之後**有人在外面改成 999 | `UNOBSERVED`／`gap`；沒有任何行動者被記 |
+| F 網頁本身就錯 | 用 `curl` 抓財務入口網站的頁面（寫著 58）→ 照抄 | `input`／`lineage_exact`，來源是那個網址；agent 不背 |
 | E 子 agent 算錯、主 agent 照抄 | 主 agent 用自己的委派工具交給子 agent（`ROLE:sub`）→ 子 agent 讀帳本、把 96 寫進 `figure.txt` → 主 agent 讀它、寫進報告 | `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步（行動者帶子 agent 的 id） |
 
 每個 agent 一個隔離的「使用者」（`ops/intake/e2e_four_agents.Lab`：自己的 HOME、provider 指到
@@ -81,6 +82,14 @@ SCENARIOS: dict[str, dict] = {
     "D_unrecorded_change": {
         "steps": [{"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
         "final": "Done."},
+    "F_web_source_fault": {
+        "steps": [{"run": "curl -s http://127.0.0.1:{{port}}/web/q3.txt"},
+                  {"write": ["report.md", "# Quarter\n\nTotal: 58\n"]}],
+        "final": "Done.",
+        "web": {"q3.txt": "Finance portal (preliminary): Q3 total 58\n"},
+        "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
+                          {"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
+                "final": "The portal disagrees with the ledger; used the ledger."}},
     "E_subagent_fault": {
         "steps": [{"agent": {"prompt": "ROLE:sub Add up the amount column of inputs/ledger.csv "
                                        "and write the total (digits only) to figure.txt.",
@@ -104,6 +113,8 @@ EXPECT = {
                        "confidence": "lineage_internal", "step_writes": "calc.py"},
     "D_unrecorded_change": {"state": "UNOBSERVED", "fault_class": "unattributable",
                             "confidence": "gap"},
+    "F_web_source_fault": {"state": "located", "fault_class": "input",
+                           "confidence": "lineage_exact", "source_kind": "url"},
     "E_subagent_fault": {"state": "located", "fault_class": "agent",
                          "confidence": "lineage_internal", "step_writes": "figure.txt",
                          "subagent": True},
@@ -147,6 +158,9 @@ class Lab(E.Lab):
 
     def native_argv(self, prompt: str) -> list[str]:
         argv = super().native_argv(prompt)
+        if self.agent == "codex" and getattr(self, "web", False):
+            # 情境 F：`curl` 要連得到假網頁（workspace-write 預設不給網路）
+            argv[2:2] = ["-c", "sandbox_workspace_write.network_access=true"]
         if self.agent == "pi" and getattr(self, "subagents", False):
             ext = self.bindir.parent / PI_SUBAGENT_EXT
             argv[1:1] = ["-e", str(ext)]
@@ -188,6 +202,8 @@ def judge(scn: str, finding: dict | None) -> dict:
                        f"{exp['step_writes']})")
     if "source_path" in exp and (finding.get("source") or {}).get("path") != exp["source_path"]:
         bad.append(f"source {finding.get('source')}")
+    if "source_kind" in exp and (finding.get("source") or {}).get("kind") != exp["source_kind"]:
+        bad.append(f"source {finding.get('source')}")
     if exp.get("subagent") and not ((finding.get("step") or {}).get("actor") or {}).get("agent"):
         bad.append(f"actor is not a sub-agent ({(finding.get('step') or {}).get('actor')})")
     return {"correct": not bad, "mismatch": bad}
@@ -200,6 +216,7 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     lab.reset_project(f"q-total-{scn.split('_')[0].lower()}")
     lab.mock_log.unlink(missing_ok=True)
     lab.subagents = scn.startswith("E_")
+    lab.web = scn.startswith("F_")
     lab.start_mock(SCENARIOS[scn])
     t0 = time.time()
     try:
@@ -322,7 +339,7 @@ def main() -> int:
 
 
 def summary(r: dict) -> str:
-    lines = ["# e2e_trace — four real agents × five planted-fault scenarios (L-fake)", "",
+    lines = ["# e2e_trace — four real agents × planted-fault scenarios (L-fake)", "",
              f"started {r.get('started')} · finished {r.get('finished')}", "",
              "| agent | scenario | attribution | got (state / class / grade) | step | "
              "feedback reached model | located in feedback | actor id in feedback | "

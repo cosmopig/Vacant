@@ -17,6 +17,7 @@
 劇本（`MOCK_SCENARIO` 指向的 JSON）：`{"files": {"path": "content", ...}, "final": "..."}`，
 或有序的 `{"steps": [{"run": "<指令>"} | {"write": ["<路徑>", "<內容>"]}, ...], "final": "..."}`
 （可究責追緝的埋錯情境，`ops/accountability/e2e_trace.py`）；`fix` 段是看到回饋之後的劇本。
+`GET /web/<名>` 回劇本 `"web"` 裡的那一頁（假的網頁；`run` 裡的 `{{port}}` 換成這個假模型的埠）。
 子 agent：步驟 `{"agent": {"prompt": "ROLE:<角色> …", "description": "…"}}` 用這個 agent 自己的委派工具
 （Claude Code `Agent`／`Task`、OpenCode `task`、pi 範例擴充的 `subagent`）交出去；`"roles": {"<角色>": {劇本}}`
 是子 agent 的劇本——對話**開頭的使用者訊息**裡有 `ROLE:<角色>` 的，照那一份演。
@@ -257,8 +258,9 @@ def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
             if "run" in st:
                 sh = _shell_tool(tools)
                 if sh and sh[0] != "write":
-                    return ("tool", sh[1], tool_args(sh[0], sh[2], "", "", None,
-                                                     raw_cmd=str(st["run"])))
+                    return ("tool", sh[1], tool_args(
+                        sh[0], sh[2], "", "", None,
+                        raw_cmd=str(st["run"]).replace("{{port}}", os.environ.get("MOCK_PORT", ""))))
             else:
                 path, content = st["write"]
                 pk = pick_tool(tools)
@@ -354,6 +356,16 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):  # noqa: N802
         log({"method": "GET", "path": self.path})
+        if self.path.startswith("/web/"):          # 劇本裡的「網頁」（情境 F：網頁本身就錯）
+            page = (scenario().get("web") or {}).get(self.path[len("/web/"):])
+            if page is not None:
+                b = str(page).encode()
+                self.send_response(200)
+                self.send_header("content-type", "text/plain; charset=utf-8")
+                self.send_header("content-length", str(len(b)))
+                self.end_headers()
+                self.wfile.write(b)
+                return None
         if "/models" in self.path:
             return self._json(200, {"object": "list", "data": [
                 {"id": "mock-model", "object": "model", "owned_by": "mock"}], "has_more": False})
@@ -541,6 +553,7 @@ class H(BaseHTTPRequestHandler):
 def main() -> int:
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     httpd = ThreadingHTTPServer(("127.0.0.1", port), H)
+    os.environ["MOCK_PORT"] = str(httpd.server_address[1])     # 劇本的 `{{port}}`
     print(f"mock_model listening on 127.0.0.1:{httpd.server_address[1]}", flush=True)
     try:
         httpd.serve_forever()

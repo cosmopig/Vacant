@@ -191,3 +191,38 @@ def test_encoded_shell_write_still_traces_what_the_agent_read(proj):
           write=(p / "report.md", "Total: 999\n"))
     [f] = _final_blame(proj)
     assert f["step"]["step"] == "t3" and f["confidence"] == "provable"
+
+
+# ── 情境 F：網頁本身就錯（2026-09-24）：`curl` 抓回來的值不是 agent 算的 ──────────
+
+def test_F_a_value_fetched_with_curl_is_an_external_source_not_the_agent(proj):
+    p, c, rec = proj
+    page = "Finance portal, Q3 total: 58\n"
+    _step(rec, "t1", MAIN, "Bash", {"command": "curl -s http://portal.example/q3.txt"}, page)
+    _step(rec, "t2", MAIN, "Write", {"file_path": str(p / "report.md"),
+                                     "content": "# Q3\nTotal: 58\n"},
+          write=(p / "report.md", "# Q3\nTotal: 58\n"))
+    [b] = _final_blame(proj)
+    assert (b["state"], b["fault_class"], b["confidence"]) == ("located", "input",
+                                                              "lineage_exact")
+    assert b["source"]["kind"] == "url" and b["source"]["ref"] == "http://portal.example/q3.txt"
+
+
+def test_F_curl_straight_into_the_report_is_only_an_inference(proj):
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Bash", {"command": "curl -s http://portal.example/q3 > report.md"},
+          "", write=(p / "report.md", "# Q3\nTotal: 58\n"))
+    [b] = _final_blame(proj)
+    assert (b["fault_class"], b["confidence"]) == ("input", "heuristic")    # 輸出沒被記下來
+
+
+def test_F_curl_piped_into_code_is_not_called_external(proj):
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Bash",
+          {"command": "curl -s http://portal.example/q3.csv | python3 -c 'import sys; print(58)'"},
+          "58")
+    _step(rec, "t2", MAIN, "Write", {"file_path": str(p / "report.md"),
+                                     "content": "# Q3\nTotal: 58\n"},
+          write=(p / "report.md", "# Q3\nTotal: 58\n"))
+    [b] = _final_blame(proj)
+    assert b["fault_class"] == "agent"                        # 程式可能自己算出來的

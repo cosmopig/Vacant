@@ -60,6 +60,9 @@ _INTERPRETERS = {"python", "python3", "node", "bash", "sh", "zsh", "ruby", "perl
 _SCRIPT_EXT = {".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".bash", ".rb", ".pl", ".r", ".php",
                ".lua", ".jl", ".awk", ".sql"}
 _REDIRECT = {">", ">>", "1>", "2>", "&>", "1>>", "2>>", "tee", "-o", "--output"}
+#: 從網路抓東西的指令：值若來自它們抓回來的內容，是外部來源，不是 agent 自己算出來的
+_NET_FETCH = {"curl", "wget", "http", "https", "xh", "aria2c", "httpie"}
+_URL_RE = re.compile(r"https?://[^\s'\"<>|;&()]+")
 #: 每一次請求都送給模型的指令檔（批判 §0-8：CLAUDE.md 在 8/8 次請求裡）
 INSTRUCTION_FILES = ("CLAUDE.md", ".claude/CLAUDE.md", "CLAUDE.local.md", "AGENTS.md",
                      "GEMINI.md", ".cursorrules", ".github/copilot-instructions.md")
@@ -501,6 +504,17 @@ class Blamer:
                 after_interp = False
         return reads, scripts, runs_code
 
+    def _fetched_urls(self, s: Step) -> list[str]:
+        """指令裡抓網路的網址（`curl`／`wget`…的引數）。沒有抓網路的指令 ⇒ 空。"""
+        cmd = _command(self.t.input_obj(s)) or ""
+        try:
+            toks = shlex.split(cmd, posix=True)
+        except ValueError:
+            toks = cmd.split()
+        if not any(pathlib.PurePosixPath(x).name.lower() in _NET_FETCH for x in toks):
+            return []
+        return [u for tok in toks for u in _URL_RE.findall(tok)]
+
     def _last_writer(self, path: str, before_seq: int) -> Transition | None:
         last = None
         for tr in self.t.transitions:
@@ -616,7 +630,7 @@ class Blamer:
                 chain.append({**j.brief(), "via": "a command's output"})
                 if L.contains(self.t.input_text(j), value):
                     return self.step_origin(j, value, chain, depth=depth + 1)
-                return self._shell_origin(j, value, chain, depth) or \
+                return self._shell_origin(j, value, chain, depth, in_output=True) or \
                     Origin("agent", step=j, note="the command itself produced the value")
             if kind in ("search", "write"):
                 # 搜尋結果／寫檔工具的回覆：值其實來自工作區裡的某個檔
@@ -701,7 +715,9 @@ class Blamer:
         return None
 
     def _shell_origin(self, j: Step, value: str, chain: list[dict[str, Any]],
-                      depth: int, *, fallback: bool = True) -> Origin | None:
+                      depth: int, *, fallback: bool = True,
+                      in_output: bool = False) -> Origin | None:
+        """殼層指令產生的值從哪裡來。`in_output`＝這個值出現在這一步**有紀錄的輸出**裡。"""
         reads, scripts, runs_code = self._referenced_files(j)
         for f in reads + scripts:
             txt = self.t.file_text(j.pre_index, f)
@@ -730,6 +746,15 @@ class Blamer:
                 chain.append({**j.brief(), "via": f"ran {f}, which no recorded step wrote"})
                 return Origin("pre_existing", source={"kind": "file", "path": f},
                               note=f"{f} was already there and computed the value")
+        urls = self._fetched_urls(j)
+        if urls and not runs_code:
+            # `curl <網址>`：值是抓回來的內容，不是 agent 算的（2026-09-24 情境 F）。
+            # 值就在有紀錄的輸出裡 ⇒ 和抓網頁的工具同級；輸出被導進檔案（沒紀錄）⇒ 只是推論
+            chain.append({**j.brief(), "via": f"fetched {urls[0]}"})
+            return Origin("external", source={"kind": "url", "ref": urls[0], "step": j.n,
+                                              "observed": in_output},
+                          note="the fetched content says this" if in_output else
+                          "the command fetched a page and nothing else in it holds the value")
         if runs_code:
             # 跑了程式卻認不出是哪一支：不可以歸成「指令自己產生的」事實層
             return Origin("unresolved", step=j,

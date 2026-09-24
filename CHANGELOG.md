@@ -22,12 +22,13 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   gaps on the platform integration. Routing is advice to the human and `vacant do --agent auto`.
 - `vacant do --feedback-mode localized|generic|none` and `ops/accountability/r536/` (bank, runner,
   analysis) for the preregistered real-model experiment (draft, awaiting sign-off).
-- Evidence (L-fake, four real agents × five planted faults, one of them a sub-agent that computes
-  the wrong value which the main agent copies): 20/20 attributions, the sub-agent case pointing at
+- Evidence (L-fake, four real agents × six planted faults, one of them a sub-agent that computes
+  the wrong value which the main agent copies, one a wrong web page fetched with `curl`): 24/24 attributions, the sub-agent case pointing at
   the sub-agent's own step on all four agents, `ops/accountability/evidence_20260924/`. pi has no
   built-in sub-agents; a pi process started by an extension during a tool call is now recognised
   as a sub-agent of that session (it was treated as a second main agent and asked, at its own
-  turn end, for the parent's deliverable).
+  turn end, for the parent's deliverable). A value that came from `curl`/`wget` output is traced to the
+  URL as an outside source (it was blamed on the agent as "the command produced it").
 - Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
   does not fit moves to the background and the steps before it are recorded as not observed;
   states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at

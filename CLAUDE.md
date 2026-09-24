@@ -119,7 +119,7 @@
 ### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
 
 裁決：`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`（補在收件口之上，不取代）。
-`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，20/20，含子 agent）。
+`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，24/24，含子 agent 與錯的網頁）。
 
 - `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
   沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）。掛鉤裡一次掃描最多
@@ -129,7 +129,7 @@
   逐字稿在工作階段結束時封存，模型 id 標 `claimed`）。pi 的子 agent＝另一個 pi 行程，靠 Vacant 的 pi 擴充在工具呼叫
   期間放進環境的 `VACANT_PI_PARENT` 認出來（子 agent 的回合結束不跑驗收）。子 agent 端到端：情境 E，4/4
 - `locate.py`／`rerun.py`／`blame.py` — 位置 → 引入它的那一步 → 在重建狀態上重跑同一條主張 → 值從哪裡讀來。
-  **只有重跑翻轉的 `provable` 是事實層**；往上追出來的都是推論層（值比對會被巧合騙）。
+  **只有重跑翻轉的 `provable` 是事實層**；往上追出來的都是推論層（值比對會被巧合騙）。`curl`／`wget` 抓回來的值是外部來源（不是 agent 算的）。
   重建只放繳付物（和收件口的隔離區看同一批檔）
 - `feedback.py`／`stopcheck.py`／`finalize.py` — 給 agent：位置、應有的值、第一次出現的步驟，**沒有行動者**
   （`feedback_ks1_clean` 可執行）；給人：報告＋Claude `systemMessage`

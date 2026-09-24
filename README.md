@@ -82,11 +82,11 @@ vacant flag report.md:2 "市長是 Alice"  # 人指出錯處（owner 金鑰簽�
 vacant trace actors                    # 每個 agent 設定：跑了幾次、過了幾次、幾筆可證明的錯
 ```
 
-四個真 agent × 五個埋錯情境（L-fake）——
+四個真 agent × 六個埋錯情境（L-fake）——
 [`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md)：
-**歸因 20/20**（agent 憑空寫錯 ⇒ 可證明；輸入本來就錯 ⇒ 指到輸入那一行；腳本算錯 ⇒ 指到寫腳本那一步；
-事後有人在外面改檔 ⇒ 缺口、不怪人；子 agent 算錯、主 agent 照抄 ⇒ 指到子 agent 那一步）；有位置的回饋在 Claude Code／Codex／pi 進了模型的下一次請求
-（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/20。裁決：
+**歸因 24/24**（agent 憑空寫錯 ⇒ 可證明；輸入本來就錯 ⇒ 指到輸入那一行；腳本算錯 ⇒ 指到寫腳本那一步；
+事後有人在外面改檔 ⇒ 缺口、不怪人；子 agent 算錯、主 agent 照抄 ⇒ 指到子 agent 那一步；抓回來的網頁本身就錯 ⇒ 指到網址、agent 不背）；有位置的回饋在 Claude Code／Codex／pi 進了模型的下一次請求
+（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/24。裁決：
 [`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
 
 ⚠ **不能讀成**：「Vacant 抓出所有錯」（讀取是下限、只有有紀錄的步驟）、「追緝一定正確」（值比對會被巧合騙；

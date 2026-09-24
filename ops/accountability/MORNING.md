@@ -12,7 +12,7 @@
 
 ## 好消息
 
-1. **歸因 20/20**（四個 agent × 五種埋錯，含子 agent；每一輪審查修正之後都重跑）——`ops/accountability/evidence_20260924/README.md`：
+1. **歸因 24/24**（四個 agent × 六種埋錯，含子 agent 與錯的網頁；每一輪審查修正之後都重跑）——`ops/accountability/evidence_20260924/README.md`：
 
    | 錯從哪裡來 | Vacant 的結論 |
    |---|---|
@@ -20,6 +20,7 @@
    | 給定的輸入本身就錯 | 指到那個輸入檔的那一行；**agent 不背** |
    | agent 寫的腳本算錯 | 指到**寫腳本**的那一步，不是寫報告的那一步 |
    | agent 走了之後有人在外面改檔（負控制） | 記成「沒被記錄的改動」，**不怪任何人** |
+   | 抓回來的**網頁**本身就錯（`curl`） | 指到那個網址；**agent 不背**（原本會被記成「指令自己算出來的」——修了） |
    | **子 agent** 算錯、主 agent 照抄 | 指到**子 agent** 寫錯的那一步（帶子 agent 的 id），不是主 agent 抄的那一步 |
 
 2. **回饋真的到了模型手上**：Claude Code、Codex、pi 的下一次模型請求裡，看得到這樣一段（實錄）：
@@ -30,7 +31,7 @@
      this value first appeared at step 2 (Bash)
    ```
 
-   裡面沒有「是誰」（0/20）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
+   裡面沒有「是誰」（0/24）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
 
 3. **問題不會被淹沒**：輪數用完、或只剩 agent 改不動的（等審查、等證據），Claude Code 直接在畫面上顯示給你
    （`systemMessage`）；任何 agent 都可以 `vacant trace report` 看完整清單；OpenCode `run` 沒有回合邊界可以回饋，
@@ -93,7 +94,7 @@
 ## 五分鐘看懂（建議順序）
 
 1. `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §一、§三、§四-5（等級與後果）、§七（審查改了什麼）
-2. `ops/accountability/evidence_20260924/README.md`（20/20 那張表＋模型真的收到的回饋）
+2. `ops/accountability/evidence_20260924/README.md`（24/24 那張表＋模型真的收到的回饋）
 3. `ops/accountability/review_m8/FINDINGS.md`（47 條）
 4. 在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`
 

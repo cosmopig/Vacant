@@ -101,10 +101,10 @@ vacant flag report.md:2 "the mayor is Alice"   # a person points at a wrong plac
 vacant trace actors                      # per agent configuration: runs, accepted, provable faults
 ```
 
-Four real agents × five planted faults, one of them in a sub-agent (L-fake):
+Four real agents × six planted faults, including a sub-agent and a wrong web page (L-fake):
 [`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) —
-**20/20 attributions correct** (the sub-agent case points at the sub-agent's own step); the located feedback reached the model's next request on Claude Code,
-Codex and pi (not on `opencode run`, a known boundary); 0/20 feedback texts named an actor.
+**24/24 attributions correct** (the sub-agent case points at the sub-agent's own step); the located feedback reached the model's next request on Claude Code,
+Codex and pi (not on `opencode run`, a known boundary); 0/24 feedback texts named an actor.
 Decision: [`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md).
 
 ⚠ **Do not read this as**: "Vacant catches every error" (reads are a lower bound; only recorded steps),
