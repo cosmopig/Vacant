@@ -350,3 +350,36 @@ def test_a_hand_made_record_is_not_served_as_released(served, tmp_path):
     os.rename(moved, pub / "report-001")
     assert (pub / "report-001" / RECORD_NAME).is_file() and rec["decision"]
     assert _get(f"{base}/published/report-001/report.md") == 404
+
+
+# ── 驗證者回報的殘留（同日第三輪）────────────────────────────────────
+
+def test_already_published_needs_an_approval_once_the_contract_requires_one(tmp_path, vhome):
+    cp = _project(tmp_path / "p", EXISTS, destination="dir:pub")
+    task = flow.open_task(cp)
+    flow.submit(task, _ws(tmp_path / "w", {"report.md": "x"}), source="t")
+    assert flow.release(task)["released"] is True
+    raw = json.loads(cp.read_text())
+    raw["release"].update(requires_approval=True, approvers=["nobody"])
+    raw["version"] = 2
+    cp.write_text(json.dumps(raw))
+    flow.lock(cp)
+    task2 = flow.open_task(cp)
+    art = [e for e in task2.ledger.events() if e["type"] == "decision"][-1]["artifact_sha256"]
+    assert flow.reverify(task2, art)["outcome"] == "accept"
+    r = flow.release(task2, artifact_sha256=art)
+    assert r["released"] is False and any("approval" in x for x in r["reasons"])
+    assert flow.status(task2)["state"] != "released" or \
+        flow.status(task2).get("live_under_previous_contract")
+
+
+def test_a_self_signed_local_review_is_marked_same_account(tmp_path, vhome):
+    claims = [{"id": "quality", "verifier": "review", "authority": "quality"}]
+    cp = _project(tmp_path / "p", claims, destination="dir:pub")
+    task = flow.open_task(cp)
+    flow.submit(task, _ws(tmp_path / "w", {"report.md": "x"}), source="t")
+    flow.review(task, claim_id="quality", verdict="pass", reason="ok")
+    res = flow.reverify(task)
+    q = [r for r in res["results"] if r["claim_id"] == "quality"][0]
+    assert q["status"] == "PASS" and "same account" in q["detail"]
+    assert q["evidence"]["independent"] is False

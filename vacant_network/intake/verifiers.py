@@ -566,7 +566,8 @@ def _python_checks(ctx: VerifyContext, claim: Claim):
 
 
 @verifier("command", version="2", params=("argv", "timeout_s", "sandbox", "env"),
-          summary="an owner-supplied command: exit 0 PASS, 1 FAIL, 3 CONFLICT, else UNKNOWN")
+          summary="an owner-supplied command: exit 0 PASS, 1 FAIL, 3 CONFLICT, else UNKNOWN "
+                  "(a python script that crashes also exits 1: map your own errors to 2)")
 def _command(ctx: VerifyContext, claim: Claim):
     """命令來自契約（可信），成果不可信 ⇒ 要跑成果裡的程式碼請設 `sandbox: "auto"`。
 
@@ -650,13 +651,17 @@ def _review(ctx: VerifyContext, claim: Claim):
     for r in sorted(rs, key=lambda r: r.get("ts_ms", 0)):
         latest[str(r.get("reviewer"))] = r
     verdicts = {k: v.get("verdict") for k, v in latest.items()}
-    ev = {"reviews": [{"reviewer": k, "verdict": v} for k, v in sorted(verdicts.items())],
-          "independent": True}
+    local = sorted(k for k, v in latest.items() if v.get("same_account"))
+    ev = {"reviews": [{"reviewer": k, "verdict": v, "same_account": k in local}
+                      for k, v in sorted(verdicts.items())],
+          "independent": not local}
     if len(latest) < need:
         return "UNKNOWN", f"awaiting review ({len(latest)}/{need})", ev
     vals = set(verdicts.values())
+    note = (f" (signed with this machine's own reviewer key — same account as the verifier: "
+            f"{', '.join(local)})") if local else ""
     if vals == {"pass"}:
-        return "PASS", f"{len(latest)} reviewer(s) passed it", ev
+        return "PASS", f"{len(latest)} reviewer(s) passed it{note}", ev
     if vals == {"fail"}:
         reasons = "; ".join(str(v.get("reason", "")) for v in latest.values())[:400]
         return "FAIL", f"reviewers failed it: {reasons}", ev

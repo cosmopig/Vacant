@@ -425,6 +425,18 @@ def gate_release(*, contract: Contract, recipient: Recipient, store: Store,
         if cur and cur.get("artifact_sha256") == artifact_sha256 and not cur.get("withdrawn"):
             # 冪等：同一個版本已經在目的端 ⇒ 只讀回、不再產生任何效果、不消耗批准。
             # （逾時後重試的正確行為是「先查是否已執行」，不是再做一次——報告 §12。）
+            if rel.get("requires_approval"):
+                # 契約後來加了批准要求：這一版在目前的契約下也要有一張綁定它的批准，
+                # 否則帳本會記一筆「在要求批准的契約下放行、卻沒有批准」。這條路不消耗
+                # 任何東西，所以不查 nonce（逾時後的重試仍帶著原本那張批准）。
+                if approval_doc is None:
+                    reasons.append("the contract requires an approval and none was given")
+                else:
+                    reasons += _approval.check(
+                        approval_doc, trust=trust, task_id=task_id,
+                        contract_sha256=contract.sha256, artifact_sha256=artifact_sha256,
+                        destination=recipient.canonical,
+                        allowed=list(rel.get("approvers") or []), used_nonces=set(), now=now)
             if reasons:
                 if not rolled_back:
                     _witness(st, task_id, ledger_hashes)

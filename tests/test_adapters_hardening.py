@@ -108,7 +108,11 @@ def test_reading_signing_keys_is_denied_even_inside_code(tmp_path, vhome):
 
 @pytest.mark.parametrize("cmd", ["vacant review quality pass --reason ok",
                                  "python3 -m vacant_network approve", "vacant release",
-                                 "vacant contract lock", "vacant keys init"])
+                                 "vacant contract lock", "vacant keys init",
+                                 "vacant-network review quality pass --reason ok",
+                                 "vacant-network release",
+                                 "python3 -m vacant_network.cli review quality pass",
+                                 "python3 -m vacant_network.intake.cli approve"])
 def test_the_session_cannot_exercise_other_authorities(tmp_path, vhome, cmd):
     _, c = _proj(tmp_path)
     assert _pre(c, cmd) == "deny"

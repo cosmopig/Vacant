@@ -268,7 +268,8 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
 #: 同一個帳號裡，agent 一行 `vacant review quality pass` 就能替自己蓋「人工審查」的章
 #: （2026-09-24 對抗審查重現）。這條規則跟其他掛鉤規則一樣是**工具層**的（字串比對，
 #: 換個寫法就過得去）——真正的分權是把 reviewer／approver 金鑰放到另一個帳號。
-_VACANT_CLI = r"(?:\bvacant|-m\s+vacant_network)"
+#: `vacant`、`vacant-network`（README 教被遮蔽時改用它）、`python -m vacant_network[.cli|.intake.cli]`
+_VACANT_CLI = r"(?:\bvacant(?:-network)?|-m\s+vacant_network(?:\.cli|\.intake\.cli)?)"
 _AUTHORITY_RE = re.compile(
     _VACANT_CLI + r"\s+(?:(review|approve|release|withdraw|keys|reverify)\b"
     r"|contract\s+(lock|init)\b|intake\s+serve\b)")

@@ -94,6 +94,12 @@ def _lock_for(task: Task) -> Any:
 
 
 def _reviews_for(task: Task, artifact_sha256: str) -> list[dict[str, Any]]:
+    """已驗簽、屬於這個 (task, 契約, 成果) 的審查。`same_account`：簽的是**本機**的 reviewer
+    金鑰——跟 verifier 同一個帳號，agent 的 shell 也叫得到 `vacant review`；那不是另一個人的
+    審查，裁決裡要看得出來（2026-09-24 對抗審查）。"""
+    kf = _keys.key_dir("reviewer", task.root) / "identity.key"
+    local_reviewer = _keys.pub_hex(_keys.load_or_create("reviewer", task.root)) \
+        if kf.is_file() else None
     out = []
     for ev in task.ledger.events():
         if ev["type"] != "review_recorded":
@@ -106,7 +112,8 @@ def _reviews_for(task: Task, artifact_sha256: str) -> list[dict[str, Any]]:
         # 審查綁 (task, 契約, 成果)：契約改版可能把同一個 claim id 改成另一件事
         if p.get("task_id") == task.task_id and p.get("artifact_sha256") == artifact_sha256 \
                 and p.get("contract_sha256") == task.contract.sha256:
-            out.append({**p, "reviewer": who, "ts_ms": ev.get("ts_ms", 0)})
+            out.append({**p, "reviewer": who, "ts_ms": ev.get("ts_ms", 0),
+                        "same_account": doc.get("signer") == local_reviewer})
     return out
 
 
