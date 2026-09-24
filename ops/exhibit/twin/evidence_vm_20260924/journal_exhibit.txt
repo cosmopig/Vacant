@@ -1,0 +1,38 @@
+Started vacant-smoke-exhibit.service - /var/tmp/vacant_twin_vm_smoke/repo/ops/exhibit/twin/exhibit_boot.sh --lan --dwell 30 --tv-port 18420 --twin-port 18899 --store-port 18901 --no-twin-loop --live /var/tmp/vacant_twin_vm_smoke/state/twin_lifecycle.jsonl.
+mktemp: too few X's in template ‘twinboot’
+vacant-smoke-exhibit.service: Main process exited, code=exited, status=1/FAILURE
+vacant-smoke-exhibit.service: Failed with result 'exit-code'.
+Started vacant-smoke-exhibit.service - /var/tmp/vacant_twin_vm_smoke/repo/ops/exhibit/twin/exhibit_boot.sh --lan --dwell 30 --tv-port 18420 --twin-port 18899 --store-port 18901 --no-twin-loop --live /var/tmp/vacant_twin_vm_smoke/state/twin_lifecycle.jsonl.
+  ✓ 錄影 ops/exhibit/twin/recordings/fixture_20260924.jsonl：54 格、594 行
+展件伺服器 http://127.0.0.1:18899/
+  手機頁   http://192.168.76.135:18899/phone.html?t=***（冒煙那次開機自動生、已失效；落盤前遮掉）
+  QR       http://192.168.76.135:18899/qr.png（執行期畫的）
+  電視接法 world3/index.html?live=http://127.0.0.1:18899/live/events.jsonl&poll=2000
+  27 對、54 格、30 秒輪播一格（重播壓進 24 秒內）
+  --live /var/tmp/vacant_twin_vm_smoke/state/twin_lifecycle.jsonl：有真跑就先播真跑（閒置 20 秒回到重播）
+  收據頁 /v/fixture_20260924.html：54 格（ops/exhibit/twin/recordings/fixture_20260924.pack.json）
+  收據頁 /viewer.html：54 格（--pack（/viewer.html））
+  ⚠ 這一支不驗簽章也不宣告驗證結果：可驗的那一份是收據頁（/r/<cell_id>）
+  ✓ /control 要 token（`--token` 指定的），已編進手機頁的網址與 QR
+twinlink serve（唯讀）http://0.0.0.0:18901/visitors.json  db=/var/tmp/vacant_twin_vm_smoke/state/twinstore.sqlite3  withdraw=關
+[serve_twin] "GET /state HTTP/1.1" 200 -
+  ✓ http://192.168.76.135:18899 自己連得到（QR 指的就是這個）
+  ✓ http://192.168.76.135:18420/world3/index.html 拿得到（電視不會是白的）
+  ✓ http://192.168.76.135:18901/visitors.json 讀得到（counts.visitors=1）
+───────────────────────────────────────────────
+ 電視 　http://192.168.76.135:18420/world3/index.html?live=http://192.168.76.135:18899/live/events.jsonl&poll=2000&twin=http://192.168.76.135:18901/visitors.json
+ 手機 　http://192.168.76.135:18899/phone.html?t=***（冒煙那次開機自動生、已失效；落盤前遮掉）   ← QR 編的就是這一行
+ 收據 　http://192.168.76.135:18899/viewer.html
+ 重播 　ops/exhibit/twin/recordings/*.jsonl（mode=replay：畫面上要標「重播」）
+ 真跑 　/var/tmp/vacant_twin_vm_smoke/state/twin_lifecycle.jsonl（mode=live：有真跑就先播，閒下來回到重播）
+ 　　　 ⚠ 沒有 --live-runs：真跑那幾格沒有收據頁，/r/<cell> 會照實 404
+ QR   　http://192.168.76.135:18899/qr.png（執行期畫的）
+ ⚠ --bind-all：8420／8901 綁 0.0.0.0（電視的瀏覽器在另一台）。電視網址用上面那一行。
+ 分身 　http://192.168.76.135:18901/visitors.json（唯讀；電視的 &twin= 指這裡）
+───────────────────────────────────────────────
+ ⚠ --no-twin-loop：庫是唯讀的，不會有新的人進來（明講的決定）
+ ✓ /control 要 token（這次開機自動生的）：***（冒煙那次開機自動生、已失效；落盤前遮掉）
+   重開就會換一把。舊的分頁會收到 403，頁面上會叫他重掃。
+   ⚠ 這不是身分驗證：看得到電視的人都按得動。它擋的是
+     「連上同一個 hotspot、但沒站在展件前面」的人。
+ （Ctrl-C 結束）

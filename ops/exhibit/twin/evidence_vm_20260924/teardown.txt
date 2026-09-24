@@ -1,0 +1,3 @@
+UNITS_LEFT=0
+BASE_EXISTS=no
+/dev/mapper/ubuntu--vg-ubuntu--lv   38G   27G  9.0G  75% /

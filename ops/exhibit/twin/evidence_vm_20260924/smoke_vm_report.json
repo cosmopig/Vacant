@@ -1,0 +1,191 @@
+{
+  "at": "2026-09-24T05:43:50Z",
+  "synthetic": true,
+  "ports": {
+    "tv": 18420,
+    "twin": 18899,
+    "store": 18901
+  },
+  "steps": {
+    "0_gauges": {
+      "hostname": "user1",
+      "pi_version": "/usr/bin/env: ‘node’: No such file or directory",
+      "bwrap": "/usr/bin/bwrap",
+      "enclosure_probe": {
+        "enclosure_available": true,
+        "why": "ok",
+        "enc_sh": "/var/tmp/vacant_twin_vm_smoke/repo/ops/vacantrun/enclosure_20260920/bin/enc.sh"
+      },
+      "lmstudio_models_http": 200,
+      "lmstudio_has_gemma": true,
+      "df_root_free_bytes": 9608429568
+    },
+    "1_probe": {
+      "rc": 0,
+      "stdout_tail": "{\"mismatched\": 0, \"checks\": {\"negctl_tier_C\": true, \"enc_tier_B\": true, \"enc_applied\": true, \"enc_ns_differs\": true, \"enc_door_excess_0\": true, \"enc_receipt_OK\": true, \"bypass_reached_door\": true, \"bypass_door_excess_gt0\": true, \"negctl_escaped_file\": true, \"enc_no_escaped_file\": true}, \"enclosure_available\": true}\n",
+      "stderr_tail": ""
+    },
+    "3_units_started": {
+      "exhibit_rc": 0,
+      "exhibit_err": "Running as unit: vacant-smoke-exhibit.service\n",
+      "loop_rc": 0,
+      "loop_err": "Running as unit: vacant-smoke-loop.service\n"
+    },
+    "3_loop_wall_s": 27.0,
+    "4_twin": {
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "degrade_kind": null,
+      "decision": "我決定製作一份「陽台香草澆水與照顧指南」。",
+      "lines_from": "agent_workspace",
+      "stop_reason": "ungated",
+      "accepted": null,
+      "requests_seen": 5,
+      "count_semantics": "exact",
+      "tier": "B",
+      "enclosed": true,
+      "enclosure_applied": true,
+      "door_calls": 5,
+      "twin_id": "tw-e0550cae18af",
+      "run_id": "4fd10bb68ef540a1ab53a42b2c4cc3f3",
+      "verdict_hash": "e4161cfad81e5652ca56f67a517a2a91c1d3e4e91887b41acb58d6fc6e131d53",
+      "latency_ms": 25148,
+      "n_artifacts": 1,
+      "artifact_names": [
+        "Herb_Care_Guide.md"
+      ],
+      "receipts": [
+        {
+          "verdict": "OK",
+          "tier": "B",
+          "mediated": true
+        }
+      ],
+      "lifecycle": {
+        "n": 9,
+        "types": [
+          "run_started",
+          "attempt_started",
+          "model_call",
+          "model_call",
+          "model_call",
+          "model_call",
+          "model_call",
+          "agent_exited",
+          "run_ended"
+        ],
+        "validate_stream": []
+      },
+      "bytes_on_disk": {
+        "run_dir": 206749,
+        "door_journal": 189030,
+        "workspace": 1789,
+        "wire_RUN-ON": 186687
+      }
+    },
+    "5_exhibit_up_after_s": 0.0,
+    "5_local": {
+      "state": {
+        "http": 200,
+        "bytes": 25600
+      },
+      "visitors": {
+        "http": 200,
+        "bytes": 6749
+      },
+      "visitors_intake": {
+        "accepting": true,
+        "free_bytes": 9603723264,
+        "min_free_bytes": 2147483648,
+        "path": "/var/tmp/vacant_twin_vm_smoke/state/twinstore.agentruns",
+        "reason": null
+      },
+      "visitors_people": 1
+    },
+    "5_1003_barrier": {
+      "done": true,
+      "waited_s": 7.0
+    },
+    "6_disk_gate": {
+      "generate_rc": 0,
+      "held_for_disk": 1,
+      "submitted": 0,
+      "intake_in_report": {
+        "accepting": false,
+        "free_bytes": 9602916352,
+        "min_free_bytes": 104857598951424,
+        "path": "/var/tmp/vacant_twin_vm_smoke/state/twinstore.agentruns",
+        "reason": "磁碟只剩 9158 MB（門檻 99999999 MB） ⇒ 暫停收新分身；已經在跑的會跑完，排隊的人留在佇列裡"
+      },
+      "stderr_warning": [
+        "{\"twinlink_warning\": \"intake_paused\", \"held\": 1, \"reason\": \"磁碟只剩 9158 MB（門檻 99999999 MB） ⇒ 暫停收新分身；已經在跑的會跑完，排隊的人留在佇列裡\"}"
+      ],
+      "view_intake": {
+        "accepting": false,
+        "free_bytes": 9602916352,
+        "min_free_bytes": 104857598951424,
+        "path": "/var/tmp/vacant_twin_vm_smoke/state/twinstore.agentruns",
+        "reason": "磁碟只剩 9158 MB（門檻 99999999 MB） ⇒ 暫停收新分身；已經在跑的會跑完，排隊的人留在佇列裡"
+      },
+      "held_person_still_pending": true,
+      "held_person_status": "submitted",
+      "negative_control": "同一條路徑、門檻 2048 MB 的那一輪（第 3 步）真的起了 run：submitted=1"
+    },
+    "6_withdraw_b": {
+      "ok": true,
+      "fully_erased": true,
+      "run_artifacts_erased": []
+    },
+    "7_close": {
+      "dry_run_rc": 0,
+      "dry_run_changed_nothing": true,
+      "dry_run_would_erase_files": 38,
+      "dry_run_would_erase_bytes": 394849,
+      "close_rc": 0,
+      "summary": {
+        "clean": true,
+        "actions": {
+          "already_erased": 1,
+          "erased": 1
+        },
+        "files_erased": 38,
+        "bytes_erased": 394849,
+        "problems": [],
+        "residue": [],
+        "receipts_verified": 1,
+        "receipts_failed": 0,
+        "twinstore_chain": {
+          "ok": true,
+          "checked": 7
+        },
+        "content_scan": {
+          "files": [
+            "/var/tmp/vacant_twin_vm_smoke/evidence/journal_loop.txt",
+            "/var/tmp/vacant_twin_vm_smoke/state/twin_lifecycle.jsonl"
+          ],
+          "subjects_scanned": 1,
+          "subjects_unscannable": 1,
+          "hits_by_file": {},
+          "clean": true,
+          "note": "命中＝那個檔裡出現了某位觀眾的原文字串（只記檔名與人數）。`subjects_unscannable` 是檔案庫裡已經沒有原文的人——對他們是**沒量到**"
+        },
+        "vault_plaintext_subjects": 1
+      },
+      "work_root_files_left": [
+        "runs/2ebe538a47d97b0efe32b3ae35668e9b/receipts_RUN-ON.ndjson",
+        "runs/2ebe538a47d97b0efe32b3ae35668e9b/receipts_RUN-ON.pub.json",
+        "runs/2ebe538a47d97b0efe32b3ae35668e9b/rows.jsonl"
+      ],
+      "receipts_after_close": [
+        "OK"
+      ],
+      "synthetic_text_hits": {
+        "work_root": 0,
+        "events": 0,
+        "journal_loop": 0,
+        "journal_exhibit": 0
+      },
+      "note": "hits 掃的是合成特質原文與需求欄。events／journal 命中 0 ＝設計上不帶內容那一條在真跑上量到了；work_root 命中 0 ＝閉展刪乾淨了"
+    }
+  },
+  "units_left_after_stop": []
+}
