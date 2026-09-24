@@ -332,11 +332,17 @@ def host_ns_of_pid(pid: int) -> str | None:
 # ── 2. 框架掛鉤探針（讀掛鉤**自己寫下來的那一行**）────────────────────
 
 def read_hook_events(hook_log: str | os.PathLike | None,
-                     *, run_id: str | None = None) -> list[dict] | None:
+                     *, run_id: str | None = None,
+                     since_ts: float | None = None) -> list[dict] | None:
     """讀掛鉤日誌。`None` ＝ **沒有這份日誌**（沒量到），`[]` ＝ 有檔但零事件。
 
     ⚠ 這兩者差很多：沒有檔 ＝ 掛鉤從頭到尾沒被呼叫過（或我們根本沒裝）；
       有檔但零事件 ＝ 有人建了檔卻沒有任何事件，那是壞掉不是沒裝。
+
+    `since_ts`（2026-09-24，給 pi 互動閘門的「一輪」用）：只留 `ts >= since_ts` 的事件。
+    **預設 `None` ＝ 行為逐字不變**（`launcher` 那條路不傳）。
+    ⚠ 給了 `since_ts` 而那一行**沒有可讀的 `ts`** ⇒ 丟掉（放不進窗裡的事件不可以
+      被當成窗裡的回合開端，那會把一通多出來的呼叫解釋掉）。
     """
     if not hook_log:
         return None
@@ -356,6 +362,13 @@ def read_hook_events(hook_log: str | os.PathLike | None,
                 continue
             if run_id and rec.get("run_id") not in (None, run_id):
                 continue
+            if since_ts is not None:
+                try:
+                    t = float(rec.get("ts"))
+                except (TypeError, ValueError):
+                    continue
+                if t < float(since_ts):
+                    continue
             out.append(rec)
     except OSError:
         return None
@@ -604,11 +617,18 @@ def attest(*, agent: str | None = None, run_id: str | None = None,
            relay_index: str | os.PathLike | None = None,
            relay_since: int = 0,
            in_process_model: bool | None = None,
-           host_pid: int | None = None) -> dict:
+           host_pid: int | None = None,
+           hook_since_ts: float | None = None) -> dict:
     """把四個欄位組成一塊，**收據直接放這一塊**。
 
     `enclosure=` 給了就用給的那一份（`--probe` 在圍牆裡量好的）；
     沒給就當場量（`gateshim` 那條路，探針與 agent 同一個行程樹）。
+
+    `hook_since_ts`（2026-09-24，pi 互動閘門用）：**只套在對帳那一塊**——
+    一個長 session 裡的「一輪」＝ journal 從 `relay_since` 之後、掛鉤從
+    `hook_since_ts` 之後。`framework_hook.canary_fired` **仍讀整份日誌**：canary
+    只在 session 開頭燒一次，把它也切掉等於讓每一輪都「沒燒」。
+    **預設 `None` ＝ 輸出逐位元不變**（連 `reconciled` 的欄位集合都不變）。
     """
     enc = enclosure if enclosure is not None else probe_enclosure(
         policy_path=policy_path, door_sock=door_sock)
@@ -620,8 +640,12 @@ def attest(*, agent: str | None = None, run_id: str | None = None,
                                 install_attempted=install_attempted)
     rec = reconcile(relay_calls=read_relay_calls(relay_index,
                                                  since=relay_since),
-                    hook_events=read_hook_events(hook_log, run_id=run_id),
+                    hook_events=read_hook_events(hook_log, run_id=run_id,
+                                                 since_ts=hook_since_ts),
                     run_id=run_id)
+    if hook_since_ts is not None:
+        # 只有給了窗才多這一欄 ⇒ `launcher` 那條路的 attestation（與它的雜湊）不變
+        rec["hook_since_ts"] = hook_since_ts
     g = grade(enc, hook, rec, in_process_model=in_process_model)
     out = {
         "schema": "vacant-attest/1",
