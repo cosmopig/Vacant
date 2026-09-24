@@ -289,9 +289,19 @@ def cmd_report():
                                   "C": inst_level(rows, "cascade")},
             "gt_strict_vs_loose_disagree_prompts": sum(1 for r in rows if all(r["gt_strict"]) != all(r["gt_loose"])),
         }
+    # 配對：同一批題目上比 Haiku 與 Sonnet（Sonnet 只跑了抽樣的 150 題）
+    fs = {f.stem.split("_")[-1]: json.loads(f.read_text())["rows"] for f in RES.glob("ifeval_rows_*.json")}
+    if "haiku" in fs and "sonnet" in fs:
+        ids = {r["idx"] for r in fs["sonnet"]}
+        hs = [r for r in fs["haiku"] if r["idx"] in ids]
+        out["paired_subset_haiku_on_sonnet_items"] = {
+            "n": len(hs), "J_judge_only": metrics(hs, "judge", tokkey="tok_J"),
+            "C_cascade_short_circuit": metrics(hs, "cascade", tokkey="tok_C", short=True),
+            "D_deterministic_only": metrics(hs, "det")}
     (RES / "v1_ifeval_report.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
     for tag, o in out.items():
-        print(tag, json.dumps(o["prompt_level"], indent=1), o["net_tokens_per_item"], o["cost_usd_total"])
+        if "prompt_level" in o:
+            print(tag, json.dumps(o["prompt_level"], indent=1), o["net_tokens_per_item"], o["cost_usd_total"])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,999 @@
+{
+ "haiku": {
+  "overhead_fixed_in_per_call": 460,
+  "J_calls_failed": 0,
+  "prompt_level": {
+   "D_deterministic_only": {
+    "n": 540,
+    "accepted": 307,
+    "rejected": 88,
+    "unknown": 145,
+    "false_accept": 6,
+    "false_reject": 4,
+    "false_accept_rate_among_accepted": 0.0195,
+    "decided_accuracy": 0.9747,
+    "coverage": 0.7315,
+    "accuracy_unknown_as_wrong": 0.713,
+    "tokens_total": 0,
+    "tokens_per_item": 0.0
+   },
+   "J_judge_only": {
+    "n": 540,
+    "accepted": 397,
+    "rejected": 133,
+    "unknown": 10,
+    "false_accept": 46,
+    "false_reject": 55,
+    "false_accept_rate_among_accepted": 0.1159,
+    "decided_accuracy": 0.8094,
+    "coverage": 0.9815,
+    "accuracy_unknown_as_wrong": 0.7944,
+    "tokens_total": 1257370,
+    "tokens_per_item": 2328.5
+   },
+   "C_cascade_short_circuit": {
+    "n": 540,
+    "accepted": 411,
+    "rejected": 128,
+    "unknown": 1,
+    "false_accept": 19,
+    "false_reject": 23,
+    "false_accept_rate_among_accepted": 0.0462,
+    "decided_accuracy": 0.9221,
+    "coverage": 0.9981,
+    "accuracy_unknown_as_wrong": 0.9204,
+    "tokens_total": 317158,
+    "tokens_per_item": 587.3
+   },
+   "C_cascade_no_short_circuit": {
+    "n": 540,
+    "accepted": 411,
+    "rejected": 128,
+    "unknown": 1,
+    "false_accept": 19,
+    "false_reject": 23,
+    "false_accept_rate_among_accepted": 0.0462,
+    "decided_accuracy": 0.9221,
+    "coverage": 0.9981,
+    "accuracy_unknown_as_wrong": 0.9204,
+    "tokens_total": 352046,
+    "tokens_per_item": 651.9
+   }
+  },
+  "net_tokens_per_item": {
+   "J": 1868.5,
+   "C_short": 463.8
+  },
+  "calls_per_item": {
+   "J": 1.0,
+   "C_short": 0.269
+  },
+  "cost_usd_total": {
+   "J": 1.5615,
+   "C_short": 0.3868
+  },
+  "instruction_level": {
+   "D": {
+    "decided": 662,
+    "agree": 649,
+    "unknown": 170,
+    "agreement_on_decided": 0.9804,
+    "by_type": {
+     "change_case:capital_word_frequency": {
+      "n": 25,
+      "agree": 24,
+      "unknown": 0
+     },
+     "change_case:english_capital": {
+      "n": 25,
+      "agree": 22,
+      "unknown": 0
+     },
+     "change_case:english_lowercase": {
+      "n": 39,
+      "agree": 37,
+      "unknown": 0
+     },
+     "combination:repeat_prompt": {
+      "n": 41,
+      "agree": 0,
+      "unknown": 41
+     },
+     "combination:two_responses": {
+      "n": 24,
+      "agree": 0,
+      "unknown": 24
+     },
+     "detectable_content:number_placeholders": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "detectable_content:postscript": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "detectable_format:constrained_response": {
+      "n": 10,
+      "agree": 0,
+      "unknown": 10
+     },
+     "detectable_format:json_format": {
+      "n": 17,
+      "agree": 17,
+      "unknown": 0
+     },
+     "detectable_format:multiple_sections": {
+      "n": 14,
+      "agree": 11,
+      "unknown": 0
+     },
+     "detectable_format:number_bullet_lists": {
+      "n": 31,
+      "agree": 31,
+      "unknown": 0
+     },
+     "detectable_format:number_highlighted_sections": {
+      "n": 47,
+      "agree": 47,
+      "unknown": 0
+     },
+     "detectable_format:title": {
+      "n": 37,
+      "agree": 37,
+      "unknown": 0
+     },
+     "keywords:existence": {
+      "n": 39,
+      "agree": 39,
+      "unknown": 0
+     },
+     "keywords:forbidden_words": {
+      "n": 49,
+      "agree": 49,
+      "unknown": 0
+     },
+     "keywords:frequency": {
+      "n": 42,
+      "agree": 39,
+      "unknown": 0
+     },
+     "keywords:letter_frequency": {
+      "n": 33,
+      "agree": 32,
+      "unknown": 0
+     },
+     "language:response_language": {
+      "n": 31,
+      "agree": 0,
+      "unknown": 31
+     },
+     "length_constraints:nth_paragraph_first_word": {
+      "n": 12,
+      "agree": 0,
+      "unknown": 12
+     },
+     "length_constraints:number_paragraphs": {
+      "n": 27,
+      "agree": 27,
+      "unknown": 0
+     },
+     "length_constraints:number_sentences": {
+      "n": 52,
+      "agree": 0,
+      "unknown": 52
+     },
+     "length_constraints:number_words": {
+      "n": 52,
+      "agree": 52,
+      "unknown": 0
+     },
+     "punctuation:no_comma": {
+      "n": 66,
+      "agree": 66,
+      "unknown": 0
+     },
+     "startend:end_checker": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "startend:quotation": {
+      "n": 41,
+      "agree": 41,
+      "unknown": 0
+     }
+    }
+   },
+   "J": {
+    "decided": 815,
+    "agree": 683,
+    "unknown": 17,
+    "agreement_on_decided": 0.838,
+    "by_type": {
+     "change_case:capital_word_frequency": {
+      "n": 25,
+      "agree": 19,
+      "unknown": 0
+     },
+     "change_case:english_capital": {
+      "n": 25,
+      "agree": 22,
+      "unknown": 1
+     },
+     "change_case:english_lowercase": {
+      "n": 39,
+      "agree": 24,
+      "unknown": 1
+     },
+     "combination:repeat_prompt": {
+      "n": 41,
+      "agree": 35,
+      "unknown": 0
+     },
+     "combination:two_responses": {
+      "n": 24,
+      "agree": 16,
+      "unknown": 1
+     },
+     "detectable_content:number_placeholders": {
+      "n": 26,
+      "agree": 24,
+      "unknown": 1
+     },
+     "detectable_content:postscript": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "detectable_format:constrained_response": {
+      "n": 10,
+      "agree": 8,
+      "unknown": 1
+     },
+     "detectable_format:json_format": {
+      "n": 17,
+      "agree": 17,
+      "unknown": 0
+     },
+     "detectable_format:multiple_sections": {
+      "n": 14,
+      "agree": 13,
+      "unknown": 0
+     },
+     "detectable_format:number_bullet_lists": {
+      "n": 31,
+      "agree": 27,
+      "unknown": 1
+     },
+     "detectable_format:number_highlighted_sections": {
+      "n": 47,
+      "agree": 38,
+      "unknown": 0
+     },
+     "detectable_format:title": {
+      "n": 37,
+      "agree": 35,
+      "unknown": 0
+     },
+     "keywords:existence": {
+      "n": 39,
+      "agree": 38,
+      "unknown": 0
+     },
+     "keywords:forbidden_words": {
+      "n": 49,
+      "agree": 40,
+      "unknown": 4
+     },
+     "keywords:frequency": {
+      "n": 42,
+      "agree": 37,
+      "unknown": 1
+     },
+     "keywords:letter_frequency": {
+      "n": 33,
+      "agree": 31,
+      "unknown": 0
+     },
+     "language:response_language": {
+      "n": 31,
+      "agree": 27,
+      "unknown": 0
+     },
+     "length_constraints:nth_paragraph_first_word": {
+      "n": 12,
+      "agree": 7,
+      "unknown": 0
+     },
+     "length_constraints:number_paragraphs": {
+      "n": 27,
+      "agree": 21,
+      "unknown": 0
+     },
+     "length_constraints:number_sentences": {
+      "n": 52,
+      "agree": 40,
+      "unknown": 1
+     },
+     "length_constraints:number_words": {
+      "n": 52,
+      "agree": 36,
+      "unknown": 0
+     },
+     "punctuation:no_comma": {
+      "n": 66,
+      "agree": 40,
+      "unknown": 5
+     },
+     "startend:end_checker": {
+      "n": 26,
+      "agree": 23,
+      "unknown": 0
+     },
+     "startend:quotation": {
+      "n": 41,
+      "agree": 39,
+      "unknown": 0
+     }
+    }
+   },
+   "C": {
+    "decided": 829,
+    "agree": 780,
+    "unknown": 3,
+    "agreement_on_decided": 0.9409,
+    "by_type": {
+     "change_case:capital_word_frequency": {
+      "n": 25,
+      "agree": 24,
+      "unknown": 0
+     },
+     "change_case:english_capital": {
+      "n": 25,
+      "agree": 22,
+      "unknown": 0
+     },
+     "change_case:english_lowercase": {
+      "n": 39,
+      "agree": 37,
+      "unknown": 0
+     },
+     "combination:repeat_prompt": {
+      "n": 41,
+      "agree": 33,
+      "unknown": 0
+     },
+     "combination:two_responses": {
+      "n": 24,
+      "agree": 15,
+      "unknown": 0
+     },
+     "detectable_content:number_placeholders": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "detectable_content:postscript": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "detectable_format:constrained_response": {
+      "n": 10,
+      "agree": 8,
+      "unknown": 1
+     },
+     "detectable_format:json_format": {
+      "n": 17,
+      "agree": 17,
+      "unknown": 0
+     },
+     "detectable_format:multiple_sections": {
+      "n": 14,
+      "agree": 11,
+      "unknown": 0
+     },
+     "detectable_format:number_bullet_lists": {
+      "n": 31,
+      "agree": 31,
+      "unknown": 0
+     },
+     "detectable_format:number_highlighted_sections": {
+      "n": 47,
+      "agree": 47,
+      "unknown": 0
+     },
+     "detectable_format:title": {
+      "n": 37,
+      "agree": 37,
+      "unknown": 0
+     },
+     "keywords:existence": {
+      "n": 39,
+      "agree": 39,
+      "unknown": 0
+     },
+     "keywords:forbidden_words": {
+      "n": 49,
+      "agree": 49,
+      "unknown": 0
+     },
+     "keywords:frequency": {
+      "n": 42,
+      "agree": 39,
+      "unknown": 0
+     },
+     "keywords:letter_frequency": {
+      "n": 33,
+      "agree": 32,
+      "unknown": 0
+     },
+     "language:response_language": {
+      "n": 31,
+      "agree": 27,
+      "unknown": 0
+     },
+     "length_constraints:nth_paragraph_first_word": {
+      "n": 12,
+      "agree": 7,
+      "unknown": 0
+     },
+     "length_constraints:number_paragraphs": {
+      "n": 27,
+      "agree": 27,
+      "unknown": 0
+     },
+     "length_constraints:number_sentences": {
+      "n": 52,
+      "agree": 41,
+      "unknown": 2
+     },
+     "length_constraints:number_words": {
+      "n": 52,
+      "agree": 52,
+      "unknown": 0
+     },
+     "punctuation:no_comma": {
+      "n": 66,
+      "agree": 66,
+      "unknown": 0
+     },
+     "startend:end_checker": {
+      "n": 26,
+      "agree": 26,
+      "unknown": 0
+     },
+     "startend:quotation": {
+      "n": 41,
+      "agree": 41,
+      "unknown": 0
+     }
+    }
+   }
+  },
+  "gt_strict_vs_loose_disagree_prompts": 14
+ },
+ "sonnet": {
+  "overhead_fixed_in_per_call": 626,
+  "J_calls_failed": 0,
+  "prompt_level": {
+   "D_deterministic_only": {
+    "n": 150,
+    "accepted": 87,
+    "rejected": 23,
+    "unknown": 40,
+    "false_accept": 4,
+    "false_reject": 0,
+    "false_accept_rate_among_accepted": 0.046,
+    "decided_accuracy": 0.9636,
+    "coverage": 0.7333,
+    "accuracy_unknown_as_wrong": 0.7067,
+    "tokens_total": 0,
+    "tokens_per_item": 0.0
+   },
+   "J_judge_only": {
+    "n": 150,
+    "accepted": 97,
+    "rejected": 53,
+    "unknown": 0,
+    "false_accept": 9,
+    "false_reject": 23,
+    "false_accept_rate_among_accepted": 0.0928,
+    "decided_accuracy": 0.7867,
+    "coverage": 1.0,
+    "accuracy_unknown_as_wrong": 0.7867,
+    "tokens_total": 208397,
+    "tokens_per_item": 1389.3
+   },
+   "C_cascade_short_circuit": {
+    "n": 150,
+    "accepted": 109,
+    "rejected": 41,
+    "unknown": 0,
+    "false_accept": 6,
+    "false_reject": 8,
+    "false_accept_rate_among_accepted": 0.055,
+    "decided_accuracy": 0.9067,
+    "coverage": 1.0,
+    "accuracy_unknown_as_wrong": 0.9067,
+    "tokens_total": 52764,
+    "tokens_per_item": 351.8
+   },
+   "C_cascade_no_short_circuit": {
+    "n": 150,
+    "accepted": 109,
+    "rejected": 41,
+    "unknown": 0,
+    "false_accept": 6,
+    "false_reject": 8,
+    "false_accept_rate_among_accepted": 0.055,
+    "decided_accuracy": 0.9067,
+    "coverage": 1.0,
+    "accuracy_unknown_as_wrong": 0.9067,
+    "tokens_total": 54803,
+    "tokens_per_item": 365.4
+   }
+  },
+  "net_tokens_per_item": {
+   "J": 763.3,
+   "C_short": 184.8
+  },
+  "calls_per_item": {
+   "J": 1.0,
+   "C_short": 0.267
+  },
+  "cost_usd_total": {
+   "J": 1.0253,
+   "C_short": 0.2479
+  },
+  "instruction_level": {
+   "D": {
+    "decided": 189,
+    "agree": 184,
+    "unknown": 44,
+    "agreement_on_decided": 0.9735,
+    "by_type": {
+     "change_case:capital_word_frequency": {
+      "n": 5,
+      "agree": 5,
+      "unknown": 0
+     },
+     "change_case:english_capital": {
+      "n": 10,
+      "agree": 8,
+      "unknown": 0
+     },
+     "change_case:english_lowercase": {
+      "n": 13,
+      "agree": 12,
+      "unknown": 0
+     },
+     "combination:repeat_prompt": {
+      "n": 10,
+      "agree": 0,
+      "unknown": 10
+     },
+     "combination:two_responses": {
+      "n": 5,
+      "agree": 0,
+      "unknown": 5
+     },
+     "detectable_content:number_placeholders": {
+      "n": 4,
+      "agree": 4,
+      "unknown": 0
+     },
+     "detectable_content:postscript": {
+      "n": 7,
+      "agree": 7,
+      "unknown": 0
+     },
+     "detectable_format:constrained_response": {
+      "n": 2,
+      "agree": 0,
+      "unknown": 2
+     },
+     "detectable_format:json_format": {
+      "n": 5,
+      "agree": 5,
+      "unknown": 0
+     },
+     "detectable_format:multiple_sections": {
+      "n": 3,
+      "agree": 3,
+      "unknown": 0
+     },
+     "detectable_format:number_bullet_lists": {
+      "n": 6,
+      "agree": 6,
+      "unknown": 0
+     },
+     "detectable_format:number_highlighted_sections": {
+      "n": 14,
+      "agree": 14,
+      "unknown": 0
+     },
+     "detectable_format:title": {
+      "n": 8,
+      "agree": 8,
+      "unknown": 0
+     },
+     "keywords:existence": {
+      "n": 9,
+      "agree": 9,
+      "unknown": 0
+     },
+     "keywords:forbidden_words": {
+      "n": 18,
+      "agree": 18,
+      "unknown": 0
+     },
+     "keywords:frequency": {
+      "n": 16,
+      "agree": 15,
+      "unknown": 0
+     },
+     "keywords:letter_frequency": {
+      "n": 10,
+      "agree": 9,
+      "unknown": 0
+     },
+     "language:response_language": {
+      "n": 7,
+      "agree": 0,
+      "unknown": 7
+     },
+     "length_constraints:nth_paragraph_first_word": {
+      "n": 4,
+      "agree": 0,
+      "unknown": 4
+     },
+     "length_constraints:number_paragraphs": {
+      "n": 8,
+      "agree": 8,
+      "unknown": 0
+     },
+     "length_constraints:number_sentences": {
+      "n": 16,
+      "agree": 0,
+      "unknown": 16
+     },
+     "length_constraints:number_words": {
+      "n": 20,
+      "agree": 20,
+      "unknown": 0
+     },
+     "punctuation:no_comma": {
+      "n": 13,
+      "agree": 13,
+      "unknown": 0
+     },
+     "startend:end_checker": {
+      "n": 7,
+      "agree": 7,
+      "unknown": 0
+     },
+     "startend:quotation": {
+      "n": 13,
+      "agree": 13,
+      "unknown": 0
+     }
+    }
+   },
+   "J": {
+    "decided": 233,
+    "agree": 190,
+    "unknown": 0,
+    "agreement_on_decided": 0.8155,
+    "by_type": {
+     "change_case:capital_word_frequency": {
+      "n": 5,
+      "agree": 5,
+      "unknown": 0
+     },
+     "change_case:english_capital": {
+      "n": 10,
+      "agree": 7,
+      "unknown": 0
+     },
+     "change_case:english_lowercase": {
+      "n": 13,
+      "agree": 8,
+      "unknown": 0
+     },
+     "combination:repeat_prompt": {
+      "n": 10,
+      "agree": 9,
+      "unknown": 0
+     },
+     "combination:two_responses": {
+      "n": 5,
+      "agree": 2,
+      "unknown": 0
+     },
+     "detectable_content:number_placeholders": {
+      "n": 4,
+      "agree": 3,
+      "unknown": 0
+     },
+     "detectable_content:postscript": {
+      "n": 7,
+      "agree": 6,
+      "unknown": 0
+     },
+     "detectable_format:constrained_response": {
+      "n": 2,
+      "agree": 1,
+      "unknown": 0
+     },
+     "detectable_format:json_format": {
+      "n": 5,
+      "agree": 5,
+      "unknown": 0
+     },
+     "detectable_format:multiple_sections": {
+      "n": 3,
+      "agree": 2,
+      "unknown": 0
+     },
+     "detectable_format:number_bullet_lists": {
+      "n": 6,
+      "agree": 6,
+      "unknown": 0
+     },
+     "detectable_format:number_highlighted_sections": {
+      "n": 14,
+      "agree": 11,
+      "unknown": 0
+     },
+     "detectable_format:title": {
+      "n": 8,
+      "agree": 8,
+      "unknown": 0
+     },
+     "keywords:existence": {
+      "n": 9,
+      "agree": 9,
+      "unknown": 0
+     },
+     "keywords:forbidden_words": {
+      "n": 18,
+      "agree": 16,
+      "unknown": 0
+     },
+     "keywords:frequency": {
+      "n": 16,
+      "agree": 15,
+      "unknown": 0
+     },
+     "keywords:letter_frequency": {
+      "n": 10,
+      "agree": 9,
+      "unknown": 0
+     },
+     "language:response_language": {
+      "n": 7,
+      "agree": 6,
+      "unknown": 0
+     },
+     "length_constraints:nth_paragraph_first_word": {
+      "n": 4,
+      "agree": 2,
+      "unknown": 0
+     },
+     "length_constraints:number_paragraphs": {
+      "n": 8,
+      "agree": 7,
+      "unknown": 0
+     },
+     "length_constraints:number_sentences": {
+      "n": 16,
+      "agree": 13,
+      "unknown": 0
+     },
+     "length_constraints:number_words": {
+      "n": 20,
+      "agree": 16,
+      "unknown": 0
+     },
+     "punctuation:no_comma": {
+      "n": 13,
+      "agree": 6,
+      "unknown": 0
+     },
+     "startend:end_checker": {
+      "n": 7,
+      "agree": 7,
+      "unknown": 0
+     },
+     "startend:quotation": {
+      "n": 13,
+      "agree": 11,
+      "unknown": 0
+     }
+    }
+   },
+   "C": {
+    "decided": 233,
+    "agree": 218,
+    "unknown": 0,
+    "agreement_on_decided": 0.9356,
+    "by_type": {
+     "change_case:capital_word_frequency": {
+      "n": 5,
+      "agree": 5,
+      "unknown": 0
+     },
+     "change_case:english_capital": {
+      "n": 10,
+      "agree": 8,
+      "unknown": 0
+     },
+     "change_case:english_lowercase": {
+      "n": 13,
+      "agree": 12,
+      "unknown": 0
+     },
+     "combination:repeat_prompt": {
+      "n": 10,
+      "agree": 10,
+      "unknown": 0
+     },
+     "combination:two_responses": {
+      "n": 5,
+      "agree": 2,
+      "unknown": 0
+     },
+     "detectable_content:number_placeholders": {
+      "n": 4,
+      "agree": 4,
+      "unknown": 0
+     },
+     "detectable_content:postscript": {
+      "n": 7,
+      "agree": 7,
+      "unknown": 0
+     },
+     "detectable_format:constrained_response": {
+      "n": 2,
+      "agree": 1,
+      "unknown": 0
+     },
+     "detectable_format:json_format": {
+      "n": 5,
+      "agree": 5,
+      "unknown": 0
+     },
+     "detectable_format:multiple_sections": {
+      "n": 3,
+      "agree": 3,
+      "unknown": 0
+     },
+     "detectable_format:number_bullet_lists": {
+      "n": 6,
+      "agree": 6,
+      "unknown": 0
+     },
+     "detectable_format:number_highlighted_sections": {
+      "n": 14,
+      "agree": 14,
+      "unknown": 0
+     },
+     "detectable_format:title": {
+      "n": 8,
+      "agree": 8,
+      "unknown": 0
+     },
+     "keywords:existence": {
+      "n": 9,
+      "agree": 9,
+      "unknown": 0
+     },
+     "keywords:forbidden_words": {
+      "n": 18,
+      "agree": 18,
+      "unknown": 0
+     },
+     "keywords:frequency": {
+      "n": 16,
+      "agree": 15,
+      "unknown": 0
+     },
+     "keywords:letter_frequency": {
+      "n": 10,
+      "agree": 9,
+      "unknown": 0
+     },
+     "language:response_language": {
+      "n": 7,
+      "agree": 5,
+      "unknown": 0
+     },
+     "length_constraints:nth_paragraph_first_word": {
+      "n": 4,
+      "agree": 2,
+      "unknown": 0
+     },
+     "length_constraints:number_paragraphs": {
+      "n": 8,
+      "agree": 8,
+      "unknown": 0
+     },
+     "length_constraints:number_sentences": {
+      "n": 16,
+      "agree": 14,
+      "unknown": 0
+     },
+     "length_constraints:number_words": {
+      "n": 20,
+      "agree": 20,
+      "unknown": 0
+     },
+     "punctuation:no_comma": {
+      "n": 13,
+      "agree": 13,
+      "unknown": 0
+     },
+     "startend:end_checker": {
+      "n": 7,
+      "agree": 7,
+      "unknown": 0
+     },
+     "startend:quotation": {
+      "n": 13,
+      "agree": 13,
+      "unknown": 0
+     }
+    }
+   }
+  },
+  "gt_strict_vs_loose_disagree_prompts": 3
+ },
+ "paired_subset_haiku_on_sonnet_items": {
+  "n": 150,
+  "J_judge_only": {
+   "n": 150,
+   "accepted": 109,
+   "rejected": 37,
+   "unknown": 4,
+   "false_accept": 16,
+   "false_reject": 14,
+   "false_accept_rate_among_accepted": 0.1468,
+   "decided_accuracy": 0.7945,
+   "coverage": 0.9733,
+   "accuracy_unknown_as_wrong": 0.7733,
+   "tokens_total": 350972,
+   "tokens_per_item": 2339.8
+  },
+  "C_cascade_short_circuit": {
+   "n": 150,
+   "accepted": 116,
+   "rejected": 33,
+   "unknown": 1,
+   "false_accept": 11,
+   "false_reject": 5,
+   "false_accept_rate_among_accepted": 0.0948,
+   "decided_accuracy": 0.8926,
+   "coverage": 0.9933,
+   "accuracy_unknown_as_wrong": 0.8867,
+   "tokens_total": 90457,
+   "tokens_per_item": 603.0
+  },
+  "D_deterministic_only": {
+   "n": 150,
+   "accepted": 87,
+   "rejected": 23,
+   "unknown": 40,
+   "false_accept": 4,
+   "false_reject": 0,
+   "false_accept_rate_among_accepted": 0.046,
+   "decided_accuracy": 0.9636,
+   "coverage": 0.7333,
+   "accuracy_unknown_as_wrong": 0.7067,
+   "tokens_total": 0,
+   "tokens_per_item": 0.0
+  }
+ }
+}
