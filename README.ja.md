@@ -31,6 +31,32 @@ Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前�
 [`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md)、
 裁定は [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。
 
+## 誤りを起こしたステップまで遡る（説明責任の追跡、2026-09-24〜）
+
+契約のあるプロジェクトでは、Vacant は agent の**各ステップ**を署名チェーンに記録する（四つの agent の
+ネイティブフック＋Vacant 自身が見た作業領域の前後差分。シェルで書かれたファイルもそのステップに帰属）。
+検査が通らないとき：
+
+1. 位置を特定する（ファイル・行・値）；
+2. 追跡する：どのステップが書いたか → そのステップの前後の状態を再構成して**同じ検査を再実行** →
+   その値がどこから読まれたか（与えられた入力、サブエージェントの返答、コマンド出力、agent が書いた
+   スクリプト、ウェブページ、タスクのメッセージ）；
+3. ターンの終わりに agent へ**位置・あるべき値・その値が最初に現れたステップ**を伝える——誰かは言わない（KS-1）；
+4. 埋もれさせない：agent にもう続行を求めないとき、未解決の問題は人へ（Claude Code の `systemMessage` と報告書）；
+5. 帰結：**証明可能**な誤りだけが行為者の信用に入る（slash なし、人が取り消せば正確に元に戻る）。入力の誤りは
+   その出所に記録し、どのステップでも説明できない変更は**説明責任の空白**として誰も責めない。
+
+```bash
+vacant trace show | vacant trace report --check | vacant trace blame report.md:3
+vacant flag report.md:2 "市長は Alice"   |   vacant trace actors
+```
+
+実 agent 四種 × 埋め込んだ誤り四種（L-fake）：
+[`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) ——
+**帰属 16/16 正解**。裁定：[`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
+⚠「すべての誤りを捕まえる」「追跡は常に正しい」「実モデルで成果が要求に近づく」とは読まないこと
+（最後の一つは [R536 事前登録](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md)の草案、署名待ち）。
+
 ## ⚠ 入れる前にこれを読む：`pip install vacant` で入るのは本プロジェクトではない
 
 PyPI の `vacant`（2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylinux`

@@ -27,6 +27,24 @@ project root. It lists:
    `vacant check --json` prints the same thing as JSON.
 3. If a required claim fails, fix the deliverable and run `vacant check` again.
 
+## Reading the feedback at the end of a turn
+
+When the project is traced, the feedback names **where** the problem is, not just which check
+failed:
+
+    - total: FAIL — report.md:3 says "999"
+      expected 69 (column 'amount', 3 rows)
+      this value first appeared at step 2 (Bash)
+
+- `report.md:3 says "999"` — the file, line and value the check objects to.
+- `expected …` — what the check recomputed from the pinned inputs.
+- `this value first appeared at step N (…)` — the tool call in this workspace's history that
+  wrote the value; look at what that step did.
+- `the same value is in inputs/notes.txt line 2 (the given input)` — the value was copied from
+  an input. If that input is wrong, say so in the answer instead of hiding the difference.
+- `the task owner marked these places in the deliverable as wrong` — a person pointed at a
+  place (`vacant flag`); fix it or explain why it stands.
+
 ## Things to know
 
 - `vacant check` is a dry run: it records nothing and publishes nothing.

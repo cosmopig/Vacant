@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+**Accountable trace: who did what, which step put the wrong value in, and the problem is raised
+instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`.
+
+- New `vacant_network.trace`: every tool call of pi, Claude Code, OpenCode and Codex is recorded
+  into one signed chain per project (actor incl. sub-agents, tool, input, output, and the files the
+  step changed — from Vacant's own before/after view of the workspace, so shell writes count);
+  changes no step explains are recorded as accountability gaps, never blamed on anyone.
+- When a check fails: locate (file, line, value) → the step that introduced it → re-run the same
+  check on the rebuilt before/after states (`provable`) → where the value came from (input,
+  sub-agent reply, command output, a script the agent wrote, a web page, the task message).
+  Two layers (fact / inference), five grades, seven fault classes.
+- The end-of-turn feedback now names the location, the expected value and the step where the value
+  first appeared, with no actor in it (`feedback_ks1_clean`, executable). When the agent will not be
+  asked to continue, open issues go to the human (Claude Code `systemMessage`, a report under
+  `$VACANT_HOME/trace/`, `vacant trace report`). `vacant flag` lets a person point at a wrong place.
+- Consequences are events and reputation is replayed from them: only `provable` findings touch an
+  actor (no slash; `vacant flag --dismiss` reverses exactly), input faults are tallied on the source,
+  gaps on the platform integration. Routing is advice to the human and `vacant do --agent auto`.
+- `vacant do --feedback-mode localized|generic|none` and `ops/accountability/r536/` (bank, runner,
+  analysis) for the preregistered real-model experiment (draft, awaiting sign-off).
+- Evidence (L-fake, four real agents × four planted faults): 16/16 attributions,
+  `ops/accountability/evidence_20260924/`.
+
 **The intake is real, and it plugs into pi, Claude Code, OpenCode and Codex without looking at
 model traffic.** Decision: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`.
 

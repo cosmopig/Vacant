@@ -116,6 +116,25 @@
 （`opencode run` 在第一個 idle 就結束）。⚠ `vacant install` 現在是通用安裝器，舊的模型通道常駐安裝是
 `vacant possess install`；`vacant uninstall`（不帶 `--agents`）會一起拆掉它。
 
+### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
+
+裁決：`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`（補在收件口之上，不取代）。
+`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，16/16）。
+
+- `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
+  沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）
+- `capture.py` — 四個 agent 的原生掛鉤 → 病歷（Claude／Codex 的 `tool_use_id`、OpenCode 子 session、pi `toolCallId`；
+  逐字稿在工作階段結束時封存，模型 id 標 `claimed`）
+- `locate.py`／`rerun.py`／`blame.py` — 位置 → 引入它的那一步 → 在重建狀態上重跑同一條主張 → 值從哪裡讀來。
+  **只有重跑翻轉的 `provable` 是事實層**；往上追出來的都是推論層（值比對會被巧合騙）
+- `feedback.py`／`stopcheck.py`／`finalize.py` — 給 agent：位置、應有的值、第一次出現的步驟，**沒有行動者**
+  （`feedback_ks1_clean` 可執行）；給人：報告＋Claude `systemMessage`
+- `actors.py` — 後果是事件、信譽是重播：只有 `provable` 進信譽（**不 slash**；`vacant flag --dismiss` 逐位元反轉）
+- `cli.py` — `vacant trace show|verify|report|blame|actors`、`vacant flag`
+
+🔴 口徑：✅「**在有紀錄的步驟裡**，這個檢查在第 k 步由過轉不過，而第 k 步是 X 做的；證據可重跑。」
+❌「Vacant 抓出所有錯」「追緝一定正確」「真模型下產出更接近需求」（R536 預註冊草稿，**待人類簽字，沒有發射**）。
+
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 
 ⚠ **這 15 支在 2026-09-20 之前完全沒有出現在這張地圖上**，而它現在是「**Vacant 附身在

@@ -73,6 +73,46 @@ lenses, 60 findings each reproduced; fixed and not-fixed are listed in the decis
 The old resident model-channel install still exists
 (`vacant possess install`, or `vacant install --observe-model`) but it no longer decides acceptance.
 
+## Tracing the error back to the step that caused it (accountable trace, from 2026-09-24)
+
+The intake answers "is this deliverable acceptable". In a project with a contract, Vacant also
+records **every step** of the agent into a signed chain (the four agents' native hooks plus
+Vacant's own before/after view of the workspace, so files written by shell commands are attributed
+too). When a check fails it:
+
+1. locates the problem (file, line, value);
+2. traces it: which step wrote it → **re-runs the same check** on the rebuilt state before and after
+   that step → where the value was read from (a given input, a sub-agent's reply, a command's output,
+   a script the agent wrote, a web page, the task message);
+3. tells the agent at the end of the turn **where, what was expected, and at which step the value
+   first appeared** — never who (KS-1);
+4. does not let it drown: when the agent will not be asked to continue, open issues go to the human
+   (Claude Code `systemMessage` and a report);
+5. consequences: only **provable** faults touch an actor's reputation (no slash; a person can dismiss
+   a finding and the effect reverses exactly); input faults are tallied on the source; changes no
+   recorded step explains are **accountability gaps** and blame nobody. Routing is advice to the
+   human, or `vacant do --agent auto`.
+
+```bash
+vacant trace show                        # every step: who, which tool, what it wrote; gaps
+vacant trace report --check              # the open issues (grade, evidence, step, source)
+vacant trace blame report.md:3           # which step put this value here, and from where
+vacant flag report.md:2 "the mayor is Alice"   # a person points at a wrong place (signed)
+vacant trace actors                      # per agent configuration: runs, accepted, provable faults
+```
+
+Four real agents × four planted faults (L-fake):
+[`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) —
+**16/16 attributions correct**; the located feedback reached the model's next request on Claude Code,
+Codex and pi (not on `opencode run`, a known boundary); 0/16 feedback texts named an actor.
+Decision: [`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md).
+
+⚠ **Do not read this as**: "Vacant catches every error" (reads are a lower bound; only recorded steps),
+"the trace is always right" (value matching can be fooled by coincidence — that is why only a re-run
+flip is `provable` and carries consequences), or "outputs get closer to the requirement with real
+models" (this round is L-fake; that is the
+[R536 preregistration](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md), a draft awaiting sign-off).
+
 ## ⚠ Read this before installing: `pip install vacant` does not install this project
 
 The `vacant` name on PyPI (measured 2026-09-19: version 0.4.15, a 7.5 MB

@@ -59,9 +59,16 @@ and `release.destination` (where an accepted version is published — not by you
   decision. `vacant release` only writes a version whose signed decision, contract hash,
   quarantine hashes and (if required) bound approval all check out.
 - The verdict never depends on model traffic, your exit code, or what you say you did.
+- When the project is traced (it has a contract), the end-of-turn feedback names the file, line
+  and value a check objects to, the value the check expected, and the step in this workspace's
+  history where that value first appeared (or the input file it was copied from). It never names
+  who took the step. `vacant trace show` lists the recorded steps; `vacant trace blame <file>:<line>`
+  shows where a value came from.
 
 Design and evidence: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`,
-`ops/intake/evidence_20260924/SUMMARY.md` (pi, Claude Code, OpenCode and Codex, L-fake).
+`ops/intake/evidence_20260924/SUMMARY.md` (pi, Claude Code, OpenCode and Codex, L-fake);
+the trace: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`,
+`ops/accountability/evidence_20260924/README.md` (16/16 planted faults attributed, L-fake).
 
 ## 1. What is enforced, and what is only advice
 

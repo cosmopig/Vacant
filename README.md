@@ -61,6 +61,38 @@ vacant task report            # 每一個開過的任務的終態（含作廢、
 舊的模型通道常駐安裝仍在：`vacant possess install` 或 `vacant install --observe-model`，
 但它從此**不決定**收件。
 
+## 追到造成錯誤的那一步（可究責追緝，2026-09-24 起）
+
+收件口只回答「這份交付合不合格」。有契約的專案，Vacant 另外把 agent 的**每一步**記進一條簽章鏈
+（四個 agent 的原生掛鉤＋Vacant 自己看工作區前後的差異，殼層寫的檔也歸得到那一步），驗收不過時：
+
+1. 定位：哪個檔、哪一行、哪個值；
+2. 追緝：是哪一步寫進去的 → 在重建出來的那一步前後狀態上**重跑同一條驗收** → 那個值是從哪裡讀來的
+   （給定的輸入、子 agent 的回覆、指令輸出、自己寫的腳本、網頁、任務訊息）；
+3. 回饋：回合結束時告訴 agent **位置、應有的值、第一次出現在第幾步**——不提是誰（KS-1）；
+4. 不被淹沒：agent 不再被要求繼續時，未解的問題以 Claude Code 的 `systemMessage` 與報告交給人；
+5. 後果：只有**可證明**的錯進行動者信譽（不 slash，人可以撤銷），輸入錯記在來源上，
+   沒被記錄的改動記成**究責缺口**、不怪任何人；路由只給人建議，或 `vacant do --agent auto`。
+
+```bash
+vacant trace show                      # 每一步：誰、什麼工具、寫了什麼；缺口
+vacant trace report --check            # 未解問題清單（每一條的等級、證據、那一步、來源）
+vacant trace blame report.md:3         # 這個位置的值是哪一步、從哪裡來的
+vacant flag report.md:2 "市長是 Alice"  # 人指出錯處（owner 金鑰簽章；追緝；下一回合告訴 agent）
+vacant trace actors                    # 每個 agent 設定：跑了幾次、過了幾次、幾筆可證明的錯
+```
+
+四個真 agent × 四個埋錯情境（L-fake）——
+[`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md)：
+**歸因 16/16**（agent 憑空寫錯 ⇒ 可證明；輸入本來就錯 ⇒ 指到輸入那一行；腳本算錯 ⇒ 指到寫腳本那一步；
+事後有人在外面改檔 ⇒ 缺口、不怪人）；有位置的回饋在 Claude Code／Codex／pi 進了模型的下一次請求
+（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/16。裁決：
+[`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
+
+⚠ **不能讀成**：「Vacant 抓出所有錯」（讀取是下限、只有有紀錄的步驟）、「追緝一定正確」（值比對會被巧合騙；
+所以只有重跑翻轉的「可證明」才接後果）、「真模型下產出更接近需求」（本輪是 L-fake；
+那是 [R536 預註冊](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md)的事，草稿待簽字）。
+
 ## ⚠ 裝之前先讀這一條：`pip install vacant` 裝到的不是這個專案
 
 PyPI 上的 `vacant`（實測 2026-09-19 為 0.4.15，一個 7.5 MB 的
