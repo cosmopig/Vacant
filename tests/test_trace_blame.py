@@ -380,3 +380,24 @@ def test_a_delegation_that_finishes_first_does_not_take_its_siblings_write(proj)
     [b] = _final_blame(proj)
     assert b["step"]["step"] == "b2" and b["step"]["actor"]["agent"] == "bbb"
     assert b["fault_class"] == "agent"
+
+
+def test_credit_review_a_revert_during_a_delegation_is_not_pinned_on_a_later_step(proj):
+    """委派期間有人把檔改回很早以前的版本（沒有紀錄的改動）：那個版本以前某一步寫過，但那一步不是現在
+    改回來的人；之後只加了一行的另一個工作階段不可以背「可證明」（2026-09-24 審查 credit#5–7）。"""
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Write", {"file_path": str(p / "report.md"),
+                                     "content": "# Q3\nTotal: 999\n"},
+          write=(p / "report.md", "# Q3\nTotal: 999\n"))
+    _step(rec, "t2", MAIN, "Write", {"file_path": str(p / "report.md"),
+                                     "content": "# Q3\nTotal: 60\n"},
+          write=(p / "report.md", "# Q3\nTotal: 60\n"))
+    rec.pre("d1", MAIN, "Agent", {"prompt": "polish"})
+    (p / "report.md").write_text("# Q3\nTotal: 999\n")              # 沒被記到的復原
+    rec.post("d1", MAIN, "Agent", {"prompt": "polish"}, "done")
+    other = R.Actor("codex", "cx")
+    _step(rec, "c1", other, "Bash", {"command": "echo Reviewed. >> report.md"}, "",
+          write=(p / "report.md", "# Q3\nTotal: 999\nReviewed.\n"))
+    [b] = _final_blame(proj)
+    assert b["confidence"] != "provable"
+    assert (b.get("step") or {}).get("step") != "c1"

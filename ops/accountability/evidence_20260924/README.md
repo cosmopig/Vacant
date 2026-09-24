@@ -5,7 +5,7 @@
 > 乾淨的埋錯下給出期望的答案。**不證明**真模型下產出會更接近需求——那是
 > `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md` 的事（草稿，待人類簽字）。
 
-## 1. 四個真 agent × 八個埋錯情境＋Claude 的背景子 agent（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；子 agent／`curl` 的對抗審查修正**之後**重跑）
+## 1. 四個真 agent × 八個埋錯情境＋Claude 的背景子 agent（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；最後一輪對抗審查修正**之後**重跑）
 
 重跑：
 
@@ -27,7 +27,7 @@
 | 給 agent 的回饋裡有行動者識別 | 0/33 |
 | 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F／H／I＋Claude 的 G：22/22 |
 | 病歷簽章鏈驗得過 | 33/33 |
-| 每次掛鉤的額外時間 p95 | 7.2–16 ms（小工作區；大專案見第 3 節）；Codex 的 F、H 兩格各有一次 40–50 ms（那兩格只有 12–13 次掛鉤，p95 就是最慢那一次；p50 5–6 ms） |
+| 每次掛鉤的額外時間 p95 | 6.4–12.6 ms（小工作區；大專案見第 3 節）；Codex 的 H 那一格有一次 59 ms（那一格只有 13 次掛鉤，p95 就是最慢那一次；p50 4.3 ms） |
 | 行動者帳本 | 每個 agent 一格（6 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`、F 記在那個網址；D 記在該平台的整合覆蓋率；E 是推論層（`lineage_internal`），照規則不進信譽 |
 
 模型實際收到的回饋（Claude Code，情境 B，第 2 次請求）：

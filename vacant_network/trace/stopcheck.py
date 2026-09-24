@@ -63,6 +63,19 @@ def _flag_blames(rec: Recorder, contract: Any) -> list[dict[str, Any]]:
     return out
 
 
+def forget_outcome(rec: Recorder, session: str) -> None:
+    """這個工作階段上一次回合邊界的檢查結果作廢（延後驗收時：現況不是那個結果）。"""
+    p = rec.dir / "feedback_state.json"
+    try:
+        state = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    outs = dict(state.get("outcomes") or {})
+    if outs.pop(session, None) is not None:
+        state["outcomes"] = outs
+        p.write_text(json.dumps(state), encoding="utf-8")
+
+
 def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
              why_open: str | None = None, sandbox: str = "auto",
              workspace: pathlib.Path | None = None,

@@ -248,13 +248,17 @@ class Trace:
         """委派呼叫（Agent／task／spawn…）自己不寫檔。它的前後差異裡若有一個版本，是另一個**真正的步驟**
         寫出來的同一個版本（平行的另一個子 agent 還在跑、比這個委派晚收尾），那個檔歸那一步，不歸委派呼叫
         （2026-09-24 情境 I：平行委派時，先結束的那個委派把兄弟子 agent 的寫入掃進了自己的差異）。"""
-        written: dict[tuple[str, str], Step] = {}
+        # 只認「委派之後才收尾、而且做了**一模一樣**的改動（同一個路徑、同一個前版本、同一個後版本）」的步驟：
+        # 只比後版本的話，一個剛好回到舊版本的改動（編輯器復原、沒被記到的步驟）會被接到很早以前寫過那個版本的
+        # 步驟上，版本鏈就被接錯——後來無辜的步驟背「可證明」（2026-09-24 審查 credit#5–7）
+        written: dict[tuple[str, str | None, str], list[Step]] = {}
         for s in self.steps:
             if tool_kind(s.tool) == "agent":
                 continue
             for w in s.writes:
                 if w.get("after") and w.get("after") != w.get("before"):
-                    written.setdefault((str(w["path"]), str(w["after"])), s)
+                    written.setdefault((str(w["path"]), w.get("before"), str(w["after"])),
+                                       []).append(s)
         if not written:
             return
         for tr in self.transitions:
@@ -263,7 +267,8 @@ class Trace:
                 continue
             s = d
             claimed = {str(w["path"]) for w in s.writes
-                       if (str(w["path"]), str(w.get("after"))) in written}
+                       if any(x.seq > s.seq for x in written.get(
+                           (str(w["path"]), w.get("before"), str(w.get("after"))), []))}
             if not claimed:
                 continue
             tr.paths -= claimed

@@ -212,13 +212,20 @@ def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contr
                               "error": f"trace: {type(e).__name__}: {e}"[:500]})
 
 
-def _subagents_running(contract: Any, ev: HookEvent) -> bool:
+def _defer_for_subagents(contract: Any, ev: HookEvent) -> bool:
     try:
-        from ..trace import capture, recorder
+        from ..trace import capture, recorder, stopcheck
         ws = capture.workspace_for(ev.cwd, contract)
         if ws is None or not ev.session_id:
             return False
-        return bool(recorder.Recorder(ws).running_subagents(f"{ev.agent}:{ev.session_id}"))
+        rec = recorder.Recorder(ws)
+        key = f"{ev.agent}:{ev.session_id}"
+        if not rec.should_defer(key):
+            return False
+        # 上一次回合邊界的「過／不過」已經不是現況：不可以在工作階段結束時被當成這一跑的結果
+        # （審查 defer#2：先 accept、之後自己刪掉報告、叫一個背景子 agent、延後、結束 ⇒ 曾經記成成功）
+        stopcheck.forget_outcome(rec, key)
+        return True
     except Exception:  # noqa: BLE001 — 看不出來就照常驗收
         return False
 
@@ -249,9 +256,10 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         _trace(agent, event, payload, ev, contract, d)
     if ev.kind == "pre_tool":
         d = decide_pre_tool(ev, contract)
-    elif ev.kind == "stop" and contract is not None and _subagents_running(contract, ev):
+    elif ev.kind == "stop" and contract is not None and _defer_for_subagents(contract, ev):
         # 背景的子 agent 還在做（Claude 預設把子 agent 放到背景）：主 agent 的回合結束不是交件的時候，
         # 這時驗收只會叫它把子 agent 正在做的事重做一遍。等子 agent 回報之後的那一次回合結束再驗
+        # （連續延後有上限；這個工作階段上一次的驗收結果作廢——之後的工作階段結束以新的驗收為準）
         d = HookDecision("allow", "", {"stop_check_deferred": "a delegated task is still running"})
     elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP") \
             and os.environ.get("VACANT_FEEDBACK_MODE") != "none":

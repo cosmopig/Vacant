@@ -44,13 +44,16 @@
    沒被記錄的改動記在那個平台的整合覆蓋率上。路由＝報告尾端給你的建議，或 `vacant do --agent auto`
    （每個 agent 在這類任務上不到 5 次就先輪流，不拿小樣本做決定）。
 
-5. **三輪對抗審查，67 條，全部重現、全部修掉，每條一個會紅的回歸測試**：
+5. **四輪對抗審查，75 條，全部重現、成立的全部修掉，每條一個會紅的回歸測試**：
    - 核心（47 條，`ops/accountability/review_m8/FINDINGS.md`）：同一個值出現在好幾行時曾經錯怪人；`python3 -u x.py`、
      `cd dir &&` 曾經讓「跑腳本的人」背了「寫腳本的人」的錯；Claude 背景子 agent 的結果曾經被當成**你**說的話。
    - 大專案（8 條，`ops/accountability/review_scale/FINDINGS.md`）：背景還在看第一眼時就開始的步驟，曾經讓**後來只改了
      一行的人**背「可證明」。
    - 子 agent 與網頁（12 條，`ops/accountability/review_subagent_curl/FINDINGS.md`）：pi 的子 agent 標記第一版在平行、
      重載、巢狀、tmux、別的專案下都會認錯主／子；`curl` 第一版可以被拿來洗掉 agent 自己算的值。兩個都重新設計了。
+   - 延後驗收與委派的寫入（8 條，`ops/accountability/review_defer_credit/FINDINGS.md`）：沒回報的子 agent 會讓
+     `--resume` 之後一小時不驗；「同一個版本」只比後版本時，無辜的後來者會背「可證明」；子 agent 能偽造一個「你的」標記
+     （提示注入）——都修了（標記現在要有你的 owner 簽章）。
 
 6. **大專案也在掛鉤的 30 秒上限內**：4 萬檔的專案第一次 5.7–8.2 秒、之後每次掛鉤 p95 0.6 秒、回合結束的追緝 1.9 秒，
    每一步多存 0.9 KB（修之前第一次要 33.8 秒、每一步 4.9 MB）——`ops/accountability/evidence_20260924/perf/`。
@@ -101,7 +104,7 @@
 
 1. `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §一、§三、§四-5（等級與後果）、§七（審查改了什麼）
 2. `ops/accountability/evidence_20260924/README.md`（33/33 那張表、模型真的收到的回饋、大專案的時間）
-3. 三份審查：`ops/accountability/review_m8/`、`review_scale/`、`review_subagent_curl/` 的 `FINDINGS.md`
+3. 四份審查：`ops/accountability/review_m8/`、`review_scale/`、`review_subagent_curl/`、`review_defer_credit/` 的 `FINDINGS.md`
 4. 在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`、
    `vacant flag <檔>:<行> "哪裡錯"`
 

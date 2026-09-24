@@ -57,6 +57,8 @@ STALE_S = 900.0
 HOOK_SCAN_S = 8.0
 #: 子 agent 開始之後這麼久沒有結束的消息 ⇒ 當成已經結束（驗收不可以因為漏掉一個事件就永遠不跑）
 SUBAGENT_MAX_S = 3600.0
+#: 主 agent 的回合結束最多**連續**延後幾次（背景子 agent 還在做）；到了就照常驗收
+MAX_DEFERRALS = 3
 #: 背景的第一次完整觀察最多等這麼久；過了還沒寫回來 ⇒ 當它失敗了，這個專案不再逐步掃描
 BASELINE_WAIT_S = 600.0
 #: 檔案數到這裡以上，工作區狀態存成對上一份完整索引的差異（見 `_index_blob`）
@@ -588,7 +590,8 @@ class Recorder:
 
     def _finish_open(self, st: dict[str, Any], why: str, *,
                      older_than: float | None = None,
-                     session: str | None = None) -> list[dict[str, Any]]:
+                     session: str | None = None,
+                     agent: str | None = None) -> list[dict[str, Any]]:
         """`pre` 之後一直沒等到 `post` 的步驟（Codex：apply_patch 失敗、長跑行程；工作階段被砍）。
         寫入以「它的 pre 到同一個行動者的下一步 pre」估（沒有下一步就到現在），標 `post_missing`
         ——追緝只能當候選，不能當定論。`session`＝只收那個工作階段的（另一個工作階段的 Stop 不可以
@@ -600,6 +603,8 @@ class Recorder:
             if older_than is not None and now - float(pend.get("t0", now)) < older_than:
                 continue
             if session is not None and _session_key(pend.get("actor") or {}) != session:
+                continue
+            if agent is not None and str((pend.get("actor") or {}).get("agent") or "") != agent:
                 continue
             done.append(step)
         if not done:
@@ -689,7 +694,21 @@ class Recorder:
         subs = self._state().get("subagents") or {}
         return sorted(k for k, v in subs.items()
                       if k.startswith(session_key + ":") and v.get("running")
-                      and now - float(v.get("t", 0)) < max_age)
+                      and now - min(float(v.get("t", 0)), now) < max_age)
+
+    def should_defer(self, session_key: str) -> bool:
+        """主 agent 的回合結束要不要先不驗收：有子 agent 在做，而且**連續**延後還沒到上限。
+        不設上限的話，每一回合都先叫一個背景子 agent 的主 agent 就永遠不被驗（2026-09-24 審查 defer#3）。
+        真的驗了（沒子 agent、或到了上限）就把連續次數歸零。"""
+        running = self.running_subagents(session_key)
+        with self._lock():
+            st = self._state()
+            cnt = st.setdefault("deferrals", {})
+            n = int(cnt.get(session_key, 0))
+            defer = bool(running) and n < MAX_DEFERRALS
+            cnt[session_key] = n + 1 if defer else 0
+            self._save(st)
+            return defer
 
     def link_child(self, actor: Actor, parent_agent: str | None,
                    task: str | None = None) -> dict[str, Any]:
@@ -730,10 +749,12 @@ class Recorder:
             return self._append(etype, payload)
 
     def settle(self, actor: Actor, why: str = "turn_end") -> list[dict[str, Any]]:
-        """回合結束：**這個工作階段**還開著的步驟不會再有 `post` 了（背景行程另計，誠實邊界 2）。"""
+        """回合結束：**這個行動者**還開著的步驟不會再有 `post` 了（背景行程另計，誠實邊界 2）。
+        只收它自己的：主 agent 的回合結束時，背景子 agent 可能正在一步的中間（審查 defer#4）。"""
         with self._lock():
             st = self._state()
-            out = self._finish_open(st, why, session=f"{actor.platform}:{actor.session}")
+            out = self._finish_open(st, why, session=f"{actor.platform}:{actor.session}",
+                                    agent=actor.agent or "")
             self._save(st)
             return out
 
@@ -745,6 +766,11 @@ class Recorder:
             open_steps = sorted(k for k, v in st["pending"].items()
                                 if _session_key(v.get("actor") or {}) == key)
             self._finish_open(st, "session_end", session=key)
+            # 工作階段結束：它的子 agent 不會活得比它久（沒送 SubagentStop 的也一樣；審查 defer#1）
+            for k in list((st.get("subagents") or {})):
+                if k.startswith(key + ":"):
+                    st["subagents"][k]["running"] = False
+            (st.get("deferrals") or {}).pop(key, None)
             prev, idx, idx_sha = self._observe(st)
             gap = [c.to_json() for c in W.diff(prev, idx)] \
                 if prev is not None and idx is not None and \

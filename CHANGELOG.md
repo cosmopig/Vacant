@@ -39,6 +39,11 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
 - Parallel delegation: a delegation call that finished first used to take a sibling sub-agent's
   in-flight write as its own; a delegation call never writes files itself, so a file version that a
   real step wrote is credited to that step. End to end on all four agents: 33/33.
+- Review of the last two changes (8 findings, `ops/accountability/review_defer_credit/FINDINGS.md`):
+  a session end now clears sub-agents that never reported; a deferred check voids the session's
+  earlier outcome; at most 3 consecutive deferrals; a turn end settles only the actor's own steps;
+  delegated writes are credited only to a later step with the identical before/after change;
+  flags reach the agent only with a valid owner signature (a sub-agent could inject text as the owner).
 - Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
   does not fit moves to the background and the steps before it are recorded as not observed;
   states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at

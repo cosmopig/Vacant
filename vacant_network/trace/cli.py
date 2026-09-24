@@ -196,12 +196,28 @@ def cmd_flag(args: argparse.Namespace) -> int:
     return 0
 
 
+def _owner_signed(e: dict[str, Any], trust: Any) -> bool:
+    """這個標記／撤銷真的是委託者（owner 金鑰）簽的，而且簽的就是事件裡寫的內容。
+    病歷的鏈是 verifier 金鑰簽的，任何能寫檔的步驟都可以往裡面加一筆「flag」——沒有 owner 簽章的
+    不可以被當成委託者的話回饋給 agent（2026-09-24 審查 credit#8：子 agent 偽造一個標記＝提示注入）。"""
+    doc = e.get("signed")
+    who, why = _keys.verify_doc(doc, trust=trust, role="owner")
+    if who is None or why or not isinstance(doc, dict):
+        return False
+    p = doc.get("payload") or {}
+    if e.get("dismisses"):
+        return p.get("kind") == "dismiss" and p.get("finding_id") == e.get("dismisses")
+    return (p.get("kind") == "flag" and p.get("flag_id") == e.get("flag_id")
+            and p.get("note", "") == e.get("note", "") and p.get("location") == e.get("location"))
+
+
 def open_flags(rec: Recorder) -> list[dict[str, Any]]:
-    """還沒撤銷的人標記（`stopcheck` 會把它們帶進下一次回合邊界的回饋）。"""
+    """還沒撤銷的人標記（`stopcheck` 會把它們帶進下一次回合邊界的回饋）。只收 owner 簽過的。"""
+    trust = _keys.Trust.load()
     flags: dict[str, dict[str, Any]] = {}
     dismissed: set[str] = set()
     for e in rec.events():
-        if e["type"] != "flag":
+        if e["type"] != "flag" or not _owner_signed(e, trust):
             continue
         if e.get("dismisses"):
             dismissed.add(str(e["dismisses"]))

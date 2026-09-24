@@ -129,7 +129,8 @@
   逐字稿在工作階段結束時封存，模型 id 標 `claimed`）。pi 的子 agent＝另一個 pi 行程：Vacant 的 pi 擴充留一個固定標記
   （`VACANT_PI_PARENT`：session、pid、專案；子行程驗過祖先與專案才接受），叫它的是哪一個呼叫由 `Recorder.link_child`
   用任務文字對（對不到不猜）。子 agent 的回合結束不跑驗收；Claude／Codex 的 `SubagentStart`／`SubagentStop` 記下還在跑的子 agent，主 agent 的
-  回合結束時有子 agent 在做就先不驗收（`Recorder.running_subagents`，一小時沒消息當成結束）。審查：`ops/accountability/review_subagent_curl/FINDINGS.md`。子 agent 端到端：情境 E，4/4
+  回合結束時有子 agent 在做就先不驗收（`Recorder.should_defer`：連續最多 3 次、一小時沒消息當成結束、工作階段結束一律清掉）。
+  `vacant flag` 的標記要有 owner 簽章才回饋給 agent（`cli.open_flags`）。審查：`ops/accountability/review_subagent_curl/FINDINGS.md`。子 agent 端到端：情境 E，4/4
 - `locate.py`／`rerun.py`／`blame.py` — 位置 → 引入它的那一步 → 在重建狀態上重跑同一條主張 → 值從哪裡讀來。
   **只有重跑翻轉的 `provable` 是事實層**；往上追出來的都是推論層（值比對會被巧合騙）。`curl`／`wget` 抓回來的值是外部來源——只在整個指令就是抓網頁、網址不是本機、自己寫過的東西裡沒有這個值時。
   重建只放繳付物（和收件口的隔離區看同一批檔）
