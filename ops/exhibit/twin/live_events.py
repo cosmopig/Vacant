@@ -36,6 +36,10 @@
 | `feedback_ready` | — | 不轉（它的位元組數在下一個 `attempt_started` 上，隨 `draft_done` 帶出） |
 | `run_ended` | ON | `verdict` ＋（有收據時）`receipt` |
 | `run_ended` | OFF | `verdict`（`accepted: null`） |
+| 旁註 `postaudit`（`twin.sidecar/1`，**不是** lifecycle） | OFF | `postaudit`（三旗標；只在綁得上那一跑時） |
+
+`counters` 不在這張表上：它不是任何一筆輸入轉出來的，是 `Tally` 依**已經寫出去的**
+電視事件數的（`serve_twin._write` 在每一筆 `verdict`／`postaudit` 之後插一筆）。
 
 ## 誠實邊界（改碼時保留）
 
@@ -48,10 +52,14 @@
    `liveAssemble` 只組「已經有 verdict 的格」）。`working` 讓電視**有資料**在
    114 秒裡動起來，但畫面動不動是電視那一側（A 線）的事；這裡保證的是
    「資料在發生的當下就在檔案裡」。
-3. **OFF 臂的事後稽核（`postaudit`）不從這裡出，電視也就看不到它。**
+3. **OFF 臂的事後稽核（`postaudit`）來自分身自己的旁註，不是 Vacant。**
    那是 `run_twin.postaudit_off` 在一跑結束後另外量的，Vacant 當場沒做這件事，
-   lifecycle 裡沒有它。事後推導那一條刪掉之後，這個數字在電視上**消失了**——
-   要它回來得先進 lifecycle 契約，不准在這裡另開一條推導。
+   lifecycle 裡沒有它、也不准進去（2026-09-24 人類裁決「分身側自己記一份補回」）。
+   `Folder.feed` 認兩個 schema：`vacant.lifecycle/1` 與 `twin.sidecar/1`（`sidecar.py`），
+   其餘一律 `SchemaMismatch`。旁註的 `postaudit` **只在綁得上**時才轉：
+   那一跑這一支親眼看過 `run_started`＋`run_ended`、是 OFF、不是 `infra_void`、
+   `ws_end_sha256` 與 `cell_id` 都對得上。綁不上就不發，理由記在 `dropped`
+   （**不猜**）。它不是從 run 目錄推的：旁註是分身在量的那一刻自己寫的。
 4. **證據等級照樣是推的**（`pack.evidence_level`）：`run_ended.requests_seen == 0`
    一律 `L-none`，`caller.declared_evidence` 蓋不過去。開題那一刻還推不出來，
    `task_opened.evidence` 寫 `null`（不寫宣告值）。
@@ -86,6 +94,7 @@ REPO = HERE.parents[3]
 sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import pack as packlib  # noqa: E402
+from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
 from ops.exhibit.twin import tv_contract as tv  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
 
@@ -95,6 +104,10 @@ ARM_MAP = {"RUN-ON": tv.ARM_ON, "RUN-OFF": tv.ARM_OFF}
 
 class SchemaMismatch(ValueError):
     """契約版號對不上。**不准猜著轉**：換版就是語意可能變了。"""
+
+
+#: `Folder.feed` 認得的 schema：Vacant 當場觀察到的、以及分身自己的旁註。
+SCHEMAS = (lifecycle.SCHEMA, sidecarlib.SCHEMA)
 
 
 class Folder:
@@ -114,6 +127,8 @@ class Folder:
         self._last_ms = 0
         #: 每一跑經過中介的通數（`working.calls_so_far` 的來源）。
         self.calls: dict[str, int] = {}
+        #: 綁不上、所以沒轉的旁註（誠實邊界 3）。呼叫端可以拿去 /state 講明。
+        self.dropped: list[str] = []
 
     def floor(self, ms: int) -> None:
         """之後發的 `ts` 一定晚於 `ms`。同一個輸出檔裡混了兩個來源（重播＋現場）時，
@@ -130,9 +145,11 @@ class Folder:
         return tv.iso(ms)
 
     def feed(self, ev: dict) -> list[dict]:
+        if ev.get("schema") == sidecarlib.SCHEMA:
+            return self._sidecar(ev)
         if ev.get("schema") != lifecycle.SCHEMA:
             raise SchemaMismatch(
-                f"lifecycle 版號是 {ev.get('schema')!r}，這一支只認 {lifecycle.SCHEMA}。"
+                f"版號是 {ev.get('schema')!r}，這一支只認 {SCHEMAS}。"
                 "換版要先改這一支（和它的測試），不准猜著轉。")
         t = ev["type"]
         rid = ev["run_id"]
@@ -219,8 +236,48 @@ class Folder:
                      n_tests=ev.get("n_tests"), failed_case=ev.get("failed_case"),
                      attempt=ev["attempt"], of=None)
         elif t == "run_ended":
+            st.update(ended=True, ws_end=ev.get("ws_end_sha256"),
+                      infra_void=ev.get("infra_void"))
             self._ended(st, ev, emit)
         return out
+
+    def _sidecar(self, ev: dict) -> list[dict]:
+        """分身的旁註 → 電視的 `postaudit`。**綁不上就不發**（誠實邊界 3）。"""
+        t = ev.get("type")
+        rid = ev.get("run_id")
+        why = None
+        st = self.runs.get(rid)
+        if t != "postaudit":
+            why = f"不認得的旁註 type {t!r}"
+        elif (ev.get("when"), ev.get("is_verdict"), ev.get("signed")) != \
+                (tv.WHEN_AFTER, False, False):
+            # 自稱裁決（或沒說自己是事後）的旁註**不轉**——不是替它改正旗標再播。
+            why = "postaudit 的三個旗標不對（when／is_verdict／signed），不當成事後稽核播"
+        elif st is None:
+            why = f"postaudit 綁的那一跑 {rid} 這一支沒看過 run_started"
+        elif st["arm"] != tv.ARM_OFF:
+            why = f"postaudit 綁的那一跑 {rid} 不是 OFF 臂"
+        elif not st.get("ended"):
+            why = f"postaudit 綁的那一跑 {rid} 還沒有 run_ended（事後稽核不能早於那一跑結束）"
+        elif st.get("infra_void"):
+            why = f"postaudit 綁的那一跑 {rid} 是 infra_void（沒跑成就沒有東西可量）"
+        elif ev.get("ws_end_sha256") != st.get("ws_end"):
+            why = f"postaudit 的 ws_end_sha256 與那一跑 {rid} 不同（量的不是那一棵樹）"
+        elif ev.get("cell_id") != st["cell_id"]:
+            why = f"postaudit 的 cell_id 與那一跑 {rid} 的格子不同"
+        if why:
+            self.dropped.append(why)
+            return []
+        return [{"type": "postaudit", "ts": self._ts(ev["ts_ms"]),
+                 "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_OFF,
+                 # ⚠ 三個旗標**寫死**（上面已確認旁註自己也這樣說）：電視這一側
+                 #   不從任何輸入抄這三個值，改碼的人也就沒有地方把它改成裁決。
+                 "when": tv.WHEN_AFTER, "is_verdict": False, "signed": False,
+                 "all_pass": bool(ev.get("all_pass")),
+                 "passed": ev.get("passed"), "n_tests": ev.get("total"),
+                 "failed_case": ev.get("failed_case"),
+                 "ruler": ev.get("ruler"), "note": ev.get("note"),
+                 "ws_end_sha256": ev.get("ws_end_sha256")}]
 
     def _ended(self, st: dict, ev: dict, emit) -> None:
         on = st["arm"] == tv.ARM_ON
@@ -270,11 +327,106 @@ def _sha(text: str) -> str:
 
 
 def fold(events: list[dict], *, verify_url: str, mode: str = tv.MODE_LIVE) -> list[dict]:
-    """一次轉完（測試、離線檢查與重播預演用）。"""
+    """一次轉完（測試、離線檢查與重播預演用）。不發 `counters`（那是播放端的事）。"""
     f = Folder(verify_url=verify_url, mode=mode)
     out: list[dict] = []
     for ev in events:
         out.extend(f.feed(ev))
+    return out
+
+
+def read_recording(path) -> tuple[list[dict], list[dict]]:
+    """一份錄影 → `(lifecycle 事件, 旁註)`。旁註檔不在＝空清單（舊錄影）。"""
+    path = pathlib.Path(path)
+    return lifecycle.read(path), sidecarlib.read(sidecarlib.sidecar_path(path))
+
+
+class Tally:
+    """`counters` 的來源：**已經寫出去的**電視事件逐筆餵進來，數到哪裡算到哪裡。
+
+    - 以 `task_id`（＝格子）為鍵：同一格播第二次**取代**上一次，不重複算。
+      所以「播過的格子」是**不同格子**的數目，不是播放次數。
+    - 一個 `Tally` 只數一種 `mode`（`serve_twin` 重播一個、現場一個）：
+      把錄影與現場加在一起，就是把「以前跑過的」與「此刻在跑的」講成同一批。
+    - OFF 的 `verdict` 再來一次 ⇒ 那一格的舊 `postaudit` 作廢
+      （新的一跑有沒有事後稽核，要等它自己的旁註）。
+
+    ⚠ 真實累計值，不是估計；**沒量到的欄位不發**：沒播過 ON 的格就沒有
+    `total`，沒播過 OFF 就沒有 `off_*`，沒播過 postaudit 就沒有
+    `off_postaudited`／`off_postaudit_not_all_pass`（0/0 會被讀成「全過」）。
+    `audited`／`on_leaked`／`off_leaked` 永遠不發（`tv.COUNTERS_NEVER`）。
+    `blocked`＝ON `accepted` 為 false、`delivered`＝為 true；`null`（沒量／基建壞）
+    兩邊都不算，但算進 `total`。
+    """
+
+    OFF_NOTE = ("OFF 臂沒有裁決可以計數（它不驗收）。off_postaudit 那兩欄是分身**事後**"
+                "用同一份可見驗收量出來的，不是那一跑當場的判定。")
+    SCOPE_NOTE = ("只數這台機器**已經播出去**的格子（同一格播兩次算一格），"
+                  "重播與現場分開數。")
+
+    def __init__(self) -> None:
+        self.cells: dict[str, dict] = {}
+
+    def feed(self, e: dict) -> bool:
+        """回 `True`＝數字變了（呼叫端該發一筆 `counters`）。"""
+        t, cid, arm = e.get("type"), e.get("task_id"), e.get("arm")
+        if t == "verdict" and arm == tv.ARM_ON:
+            self.cells.setdefault(cid, {})["on"] = {
+                "accepted": e.get("accepted"), "evidence": e.get("evidence")}
+            return True
+        if t == "verdict" and arm == tv.ARM_OFF:
+            slot = self.cells.setdefault(cid, {})
+            slot["off"] = {"void": e.get("stop_reason") == "infra_void",
+                           "has_receipt": bool(e.get("has_receipt"))}
+            slot.pop("pa", None)
+            return True
+        if t == "postaudit" and arm == tv.ARM_OFF:
+            self.cells.setdefault(cid, {})["pa"] = {"all_pass": bool(e.get("all_pass"))}
+            return True
+        return False
+
+    def event(self, *, ts: str, mode: str) -> dict:
+        ons = [s["on"] for s in self.cells.values() if "on" in s]
+        offs = [s["off"] for s in self.cells.values()
+                if "off" in s and not s["off"]["void"]]
+        pas = [s["pa"] for s in self.cells.values() if "pa" in s]
+        ev: dict = {"type": "counters", "ts": ts, "task_id": "-", "mode": mode,
+                    "scope_note": self.SCOPE_NOTE}
+        if ons:
+            levels: dict[str, int] = {}
+            for o in ons:
+                if o["evidence"]:
+                    levels[o["evidence"]] = levels.get(o["evidence"], 0) + 1
+            ev.update({
+                "total": len(ons),
+                "blocked": sum(1 for o in ons if o["accepted"] is False),
+                "delivered": sum(1 for o in ons if o["accepted"] is True),
+                "evidence_counts": dict(sorted(levels.items())),
+            })
+        if offs:
+            ev.update({"off_ran": len(offs),
+                       "off_with_receipt": sum(1 for o in offs if o["has_receipt"]),
+                       "off_counters_note": self.OFF_NOTE})
+        if pas:
+            ev.update({"off_postaudited": len(pas),
+                       "off_postaudit_not_all_pass": sum(
+                           1 for p in pas if not p["all_pass"])})
+        return ev
+
+
+def with_counters(evs: list[dict], tallies: dict[str, Tally]) -> list[dict]:
+    """每一筆讓數字變了的事件之後，緊接著插一筆 `counters`（`ts` 與它相同）。
+
+    `ts` 取觸發那一筆的：事件檔的 `ts` 單調不減照樣成立，而去重鍵含 `type`，
+    與觸發那一筆不會撞；觸發事件的 `ts` 在整個檔裡本來就唯一（`Folder._ts`），
+    所以兩筆 `counters` 也不會撞。`tallies` 以 `mode` 為鍵，沒有的 mode 不數。
+    """
+    out: list[dict] = []
+    for e in evs:
+        out.append(e)
+        tally = tallies.get(e.get("mode"))
+        if tally is not None and tally.feed(e):
+            out.append(tally.event(ts=e["ts"], mode=e["mode"]))
     return out
 
 
@@ -341,11 +493,14 @@ def follow(src: pathlib.Path, out: pathlib.Path, *, verify_url: str,
     """
     f = Folder(verify_url=verify_url, mode=mode)
     tail = Tail(src)
+    # 分身的旁註（postaudit）在旁邊的 `X.sidecar.jsonl`；先 lifecycle 後旁註，
+    # 同一輪裡 OFF 的 run_ended 才會在它的 postaudit 之前進 Folder。
+    side = Tail(sidecarlib.sidecar_path(src))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.touch()
     idle, n_out = 0.0, 0
     while True:
-        lines = tail.poll()
+        lines = tail.poll() + side.poll()
         new: list[dict] = []
         for ev in lines:
             new.extend(f.feed(ev))
@@ -375,7 +530,8 @@ def main(argv=None) -> int:
     if a.follow:
         return 0 if follow(src, out, verify_url=a.verify_url, mode=a.mode,
                            interval=a.interval) >= 0 else 1
-    evs = fold(lifecycle.read(src), verify_url=a.verify_url, mode=a.mode)
+    lc, rows = read_recording(src)
+    evs = fold(sidecarlib.merge(lc, rows), verify_url=a.verify_url, mode=a.mode)
     bad = tv.validate(evs)
     out.write_text("".join(json.dumps(e, ensure_ascii=False) + "\n" for e in evs),
                    encoding="utf-8")

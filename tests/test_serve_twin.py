@@ -142,7 +142,11 @@ def test_recording_is_split_into_cells_by_caller(recs):
         # 一格＝ON 那一跑＋OFF 那一跑的區段
         starts = [e for e in c["segment"] if e["type"] == "run_started"]
         assert [e["arm"] for e in starts] == ["RUN-ON", "RUN-OFF"]
-        assert c["segment"][-1]["type"] == "run_ended"
+        # lifecycle 那一段收在 OFF 的 run_ended；分身的旁註（事後稽核）接在它後面
+        lc = [e for e in c["segment"] if e["schema"] == lifecycle.SCHEMA]
+        assert lc[-1]["type"] == "run_ended" and lc[-1]["arm"] == "RUN-OFF"
+        assert c["segment"][-1]["type"] == "postaudit"
+        assert c["segment"][-1]["run_id"] == lc[-1]["run_id"]
         assert c["evidence"] == "L-none"            # fixture：腳本寫的
         assert c["side"] == ("pc" if c["cell_id"].endswith("__pc") else "held")
 
@@ -218,7 +222,8 @@ def test_control_appends_exactly_that_cell(server):
     first = [json.loads(x) for x in stage.out.read_text("utf-8").splitlines() if x.strip()]
     assert first and first[0]["type"] == "task_opened"
     evs = read_events(stage)
-    assert {e["task_id"] for e in evs} == {held}
+    # `counters` 是整批累計（task_id＝"-"），不屬於任何一格
+    assert {e["task_id"] for e in evs if e["type"] != "counters"} == {held}
     assert any(e["type"] == "verdict" for e in evs)
 
 
@@ -381,7 +386,8 @@ def test_replay_keeps_relative_timing_but_fits_in_the_dwell(recs, tmp_path):
             time.sleep(0.02)
         assert not stage.pending, "播出跨度超過了 dwell"
         evs = [json.loads(x) for x in stage.out.read_text("utf-8").splitlines()]
-        assert len(evs) == rp["events"]
+        # `counters` 是寫出去的當下插的，不在那一格的播出計畫裡
+        assert len([e for e in evs if e["type"] != "counters"]) == rp["events"]
         # ts 是**重播當下的牆鐘**，不是錄影當時的
         assert evs[0]["ts"] >= tv.iso(t_start_ms)
         assert tv.validate(evs) == []
@@ -490,7 +496,7 @@ def test_autoplay_walks_pairs_and_truncates_each_lap(recs, tmp_path):
         assert stage.laps == 1
         evs = read_events(stage)
         assert 0 < len(evs) < n_before
-        assert {e["task_id"] for e in evs} == {first_of_lap2}
+        assert {e["task_id"] for e in evs if e["type"] != "counters"} == {first_of_lap2}
         assert stage.last_ts_ms > before_ts             # 截檔不會讓電視重播舊的
     finally:
         srv.server_close()

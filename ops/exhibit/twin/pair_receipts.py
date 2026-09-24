@@ -30,6 +30,18 @@ L-real 那一批），而 fixture 錄影與它共用 `cell_id`、鏈卻不同 �
 
 外加一條：建置機的絕對路徑不准進資料包（它會印上展場的收據頁）。
 
+### 旁註（`X.sidecar.jsonl`，2026-09-24 加）也在綁定裡（`check_sidecar`）
+
+分身自己的旁註（`sidecar.py`：OFF 臂的事後稽核）放在錄影旁邊另一個檔，
+所以第 1 道的 sha256 **原本涵蓋不到它**。補法是資料包另外綁一個
+`pack["recording"]["sidecar"] = {file, sha256, lines}`，三種情形都不收：
+
+- 旁註在、資料包沒綁它（沒被綁的註不准跟著錄影上展場）；
+- 資料包綁了旁註、旁註不在（有人刪掉了事後稽核，畫面會少一句話卻不自知）；
+- sha256 對不上（改了旁註任何一個位元組）。
+
+兩邊都沒有（舊錄影）＝合格：那份錄影就是沒有 postaudit，電視上也不會有。
+
 ## 誠實邊界
 
 1. 綁定證明的是「這份收據與這份錄影是**同一次執行**的產物」，**不證明**那次執行
@@ -55,6 +67,7 @@ REPO = HERE.parents[3]
 sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import pack as packlib  # noqa: E402
+from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
 
 #: 會印上展場螢幕的東西裡不准出現的建置機路徑（與 `serve_twin.PATH_LEAKS` 同一份）。
@@ -92,6 +105,23 @@ def recording_heads(evs: list[dict]) -> dict[str, str | None]:
     return out
 
 
+def check_sidecar(recording: pathlib.Path, pack: dict) -> list[str]:
+    """旁註的 sha256 綁定（模組 docstring「旁註也在綁定裡」）。回問題清單。"""
+    sc = sidecarlib.sidecar_path(recording)
+    bind = (pack.get("recording") or {}).get("sidecar")
+    if bind is None:
+        if sc.exists():
+            return [f"旁註 {sc.name} 在，資料包卻沒有綁它（沒被綁的註不准跟著錄影上展場）"]
+        return []
+    if not sc.exists():
+        return [f"資料包綁了旁註 {bind.get('file')!r}，旁註卻不在（事後稽核被拿掉了）"]
+    got = sha256_file(sc)
+    if bind.get("sha256") != got:
+        return [f"旁註 sha256 綁定對不上：收據綁的是 {str(bind.get('sha256'))[:12]}…，"
+                f"旁註是 {got[:12]}…（旁註或收據其中一個換過）"]
+    return []
+
+
 def check_pair(recording: pathlib.Path, pack: dict, *, pack_text: str | None = None
                ) -> list[str]:
     """兩道綁定＋路徑不外漏。回問題清單（空＝這份收據就是這份錄影的）。"""
@@ -102,6 +132,7 @@ def check_pair(recording: pathlib.Path, pack: dict, *, pack_text: str | None = N
     if bind.get("sha256") != got:
         bad.append(f"sha256 綁定對不上：收據綁的是 {str(bind.get('sha256'))[:12]}…，"
                    f"錄影是 {got[:12]}…（錄影或收據其中一個換過）")
+    bad += check_sidecar(recording, pack)
     text = pack_text if pack_text is not None else json.dumps(pack, ensure_ascii=False)
     bad += [f"建置機的路徑漏進收據資料包：{leak}" for leak in PATH_LEAKS if leak in text]
     heads = {cid: h for cid, h in recording_heads(lifecycle.read(recording)).items()
@@ -134,6 +165,17 @@ def build_pair(recording: pathlib.Path, runs_root: pathlib.Path) -> dict:
         "note": "這份收據與同名錄影是同一次 run_twin.py 的產物。serve_twin 載入前會驗 "
                 "sha256 與逐格鏈頭，對不上就不收。",
     }
+    sc = sidecarlib.sidecar_path(recording)
+    if sc.exists():
+        rows = sidecarlib.read(sc)
+        sbad = sidecarlib.validate(rows, lifecycle_events=lifecycle.read(recording))
+        if sbad:
+            raise SystemExit("旁註綁不上這份錄影，不寫：\n  " + "\n  ".join(sbad[:8]))
+        pack["recording"]["sidecar"] = {
+            "file": sc.name, "sha256": sha256_file(sc), "lines": len(rows),
+            "note": "分身自己的旁註（OFF 臂事後稽核，不是 Vacant 的事件）。"
+                    "與錄影同一次執行；改一個位元組 serve_twin 就不收。",
+        }
     bad = check_pair(recording, pack)
     if bad:
         raise SystemExit("配對不成立，不寫：\n  " + "\n  ".join(bad[:8]))
@@ -163,7 +205,9 @@ def main(argv=None) -> int:
         for b in bad:
             print("✗ " + b, file=sys.stderr)
         if not bad:
-            print(f"✓ {out.name} 綁在 {rec.name} 上（sha256＋逐格鏈頭）")
+            sc = (json.loads(text).get("recording") or {}).get("sidecar")
+            print(f"✓ {out.name} 綁在 {rec.name} 上（sha256＋逐格鏈頭"
+                  + (f"＋旁註 {sc['file']}" if sc else "；沒有旁註") + "）")
         return 1 if bad else 0
     if not a.runs:
         ap.error("要產配對就要給 --runs（同一次執行的 run 目錄）")

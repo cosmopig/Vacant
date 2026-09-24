@@ -57,6 +57,8 @@ vacant run --events ──lifecycle.jsonl──▶ live_events.Folder ──▶ 
 ```bash
 python3 ops/exhibit/twin/run_twin.py --out runs/twin_real_X --events runs/twin_real_X/lifecycle.jsonl -- …
 cp runs/twin_real_X/lifecycle.jsonl ops/exhibit/twin/recordings/real_X.jsonl
+# 分身的旁註（OFF 臂事後稽核）要在 pair_receipts 之前就位，才會被綁進資料包
+cp runs/twin_real_X/lifecycle.sidecar.jsonl ops/exhibit/twin/recordings/real_X.sidecar.jsonl
 python3 ops/exhibit/twin/pair_receipts.py --recording ops/exhibit/twin/recordings/real_X.jsonl \
     --runs runs/twin_real_X        # 產 real_X.pack.json；鏈頭對不上就不寫
 python3 ops/exhibit/twin/serve_twin.py --check
@@ -134,8 +136,12 @@ bash ops/exhibit/twin/venue_check.sh
 - 開機自動啟動（systemd／Windows 排程）沒做也沒測。
 - 電視端（A 線，`vacant_hm/world3`）還沒實作 `mode` 的「重播」標示與 `working`；
   在那之前電視拿得到資料、畫面上還不會講。
-- 電視上不再有 `counters`（整批累計）與 OFF 臂的 `postaudit`（事後稽核）：
-  它們只能從 run 目錄事後推，lifecycle 裡沒有。要回來得先進 lifecycle 契約。
+- `postaudit`（OFF 臂事後稽核）與 `counters`（整批累計）2026-09-24 **補回來了，但不走
+  lifecycle**（人類裁決「分身側自己記一份補回」）：`postaudit` 來自分身自己的旁註
+  `X.sidecar.jsonl`（`sidecar.py`，`run_twin` 量完當下寫、配對收據綁它的 sha256），
+  `counters` 是 `serve_twin` 依**已經播出去的格子**當場數的（重播／現場分開數）。
+  沒有旁註的舊錄影照播，**電視上就沒有 postaudit**。電視端（`vacant_hm`）是否真的
+  把這兩種畫出來、畫成什麼樣，**本機沒量過**。
 - 真跑的收據要 `--live-runs` 才打包；沒給就 `/r/<cell>` 照實 404（「沒有給 --live-runs」）。
   `run_twin` 要等 OFF 那一臂跑完才寫 `twin_cell.json`，所以一格跑完到收據上架之間
   有一段空窗（那段時間 `/r/` 說「還在打包」）；等超過 900 秒就放棄並記在 `/state.live.errors`。
