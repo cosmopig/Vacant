@@ -117,6 +117,34 @@ print("  總計 emitted=%s laps=%s pairs=%s cells=%s" % (
 ' 2>/dev/null || warn "skipped 解不開"
 fi
 
+head_ "四之二、畫面上講不講得出「這是重播」（CLAUDE.md 展場硬約束 1）"
+# 電視事件每一筆都要帶 mode（live／replay），/state 也要有。少了它，
+# 電視沒有資料可以標「重播」——錄下來的東西就會被讀成正在發生。
+curl -sS --max-time 8 "$B/state" 2>/dev/null | python3 -c '
+import json,sys
+s=json.load(sys.stdin)
+m=s.get("mode")
+if m not in ("live","replay"):
+    print("  \033[31m✗\033[0m /state.mode 是 %r（只能是 live／replay）" % (m,)); sys.exit(1)
+r=s.get("replay") or {}
+print("  \033[32m✓\033[0m /state.mode=%s；錄影 %d 份；上一格壓縮比 %s（%s 倍速）" % (
+    m, len([x for x in s.get("recordings") or [] if x.get("accepted")]),
+    r.get("compress","—"), r.get("speedup","—")))
+bad=[x for x in s.get("recordings") or [] if not x.get("accepted")]
+for x in bad:
+    print("  \033[31m✗\033[0m 錄影 %s 整份不收：%s" % (x["path"], (x.get("problems") or ["?"])[0]));
+sys.exit(1 if bad else 0)
+' || FAIL=$((FAIL+1))
+curl -sS --max-time 8 "$B/live/events.jsonl" 2>/dev/null | python3 -c '
+import json,sys
+rows=[json.loads(l) for l in sys.stdin if l.strip()]
+no=[r for r in rows if r.get("mode") not in ("live","replay")]
+if no:
+    print("  \033[31m✗\033[0m 事件流裡有 %d 筆沒有 mode（電視標不出「重播」）" % len(no)); sys.exit(1)
+print("  \033[32m✓\033[0m 事件流 %d 筆都帶 mode（%s）" % (
+    len(rows), ",".join(sorted({r["mode"] for r in rows})) or "還沒有事件"))
+' || FAIL=$((FAIL+1))
+
 head_ "五、中文字型（乾淨的 Linux 會是滿畫面豆腐字）"
 if ! command -v fc-list >/dev/null 2>&1; then
   warn "這台沒有 fc-list，量不到字型（＝沒量到，不是量到 0）：sudo apt install fontconfig"
@@ -142,10 +170,12 @@ if command -v ss >/dev/null 2>&1; then
 else
   warn "沒有 ss，數不到連線"
 fi
+# 事件那一條線上的三支：伺服器、唯一的轉換器、契約。
 grep -rlE "^\s*(import|from)\s+(urllib|requests|httpx)" \
-  "$(dirname "$0")"/serve_twin.py "$(dirname "$0")"/to_events.py 2>/dev/null \
-  | grep -q . && bad "serve_twin/to_events 匯入了對外連線的模組" \
-  || ok "serve_twin／to_events 沒有匯入 urllib／requests／httpx"
+  "$(dirname "$0")"/serve_twin.py "$(dirname "$0")"/live_events.py \
+  "$(dirname "$0")"/tv_contract.py 2>/dev/null \
+  | grep -q . && bad "serve_twin／live_events／tv_contract 匯入了對外連線的模組" \
+  || ok "serve_twin／live_events／tv_contract 沒有匯入 urllib／requests／httpx"
 
 head_ "七、/control 的門檻（--lan 的時候這是展場現實）"
 # ⚠ 這一節在 2026-09-19 從「warn」升成「硬傷」：`--lan` 現在**一定**會有 token

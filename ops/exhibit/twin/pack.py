@@ -498,10 +498,12 @@ def build(runs_root: pathlib.Path) -> dict:
     基建壞掉報成機制擋下來，展場上會變成「Vacant 擋住了一件根本沒發生的交付」。
 
     ⇒ 它被抽出來放進 `void_cells`（帶著 `infra_void` 原文），
-      **不進 `cells`、不進 `evidence_counts`、不進電視的事件流**。
-      不進事件流還有第二個理由：`to_events` 的契約要求每一格都走到 `verdict`，
-      而無裁決的格發不出 `verdict`；漏一格 ⇒ 電視的 `liveAssemble` 只看
-      `pending[0]`，**整個佇列從此卡死**（忠實度對照表 D2）。
+      **不進 `cells`、不進 `evidence_counts`**。
+
+    ⚠ 2026-09-24 起這份資料包**不再產生電視事件**（`to_events.py` 已刪，
+      電視事件只從 lifecycle 來：`live_events.Folder`）。它只剩一個用途：
+      **收據頁**（`examples/twin_viewer.html` 內嵌、`serve_twin` 的 `/r/<cell>`），
+      讓觀眾在自己的瀏覽器裡從創世重驗簽章鏈。
     """
     idx = _read_json(runs_root / "twin_index.json")
     cells, void_cells = [], []

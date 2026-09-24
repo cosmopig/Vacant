@@ -15,6 +15,7 @@
 #   能去跑 apt。布展當天那一關在 `venue_check.sh` 第五節，**那一節是硬傷**。
 #
 #   ./exhibit_preflight.sh [--twin-port 8899] [--tv-port 8420] [--hm <路徑>]
+#                          [--recording <lifecycle.jsonl>]...（不給＝recordings/*.jsonl）
 #
 # 環境變數：
 #   VACANT_EXHIBIT_KILL_STALE=1  埠被**我們自己上一次**留下來的行程佔著時砍掉它
@@ -32,6 +33,7 @@ STORE_PORT=8901
 NO_TWIN=0
 LAN=0
 FAIL=0
+RECORDINGS=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -42,6 +44,7 @@ while [ $# -gt 0 ]; do
     --hm)        HM="$2"; shift ;;
     # 待會 ExecStart 會用 --lan ⇒ 先在這裡把「區網 IP 抓不抓得到」量一次。
     --lan)       LAN=1 ;;
+    --recording) RECORDINGS+=("$2"); shift ;;
     *) echo "preflight：不認得的參數 $1" >&2; exit 2 ;;
   esac
   shift
@@ -52,14 +55,22 @@ bad()  { echo "[preflight] ✗ $*" >&2; FAIL=$((FAIL+1)); }
 warn() { echo "[preflight] ! $*" >&2; }
 
 # ── 一、檔案在不在 ──────────────────────────────────────────────
+# 電視事件只有一個來源：lifecycle 錄影（重播）或 `--live`（真跑）。
+# 2026-09-24 起 `twin_pack.json` **不是事件來源**，只剩收據頁在用 ⇒ 缺它只警告。
+if [ "${#RECORDINGS[@]}" -eq 0 ] \
+   && ! ls "$REPO"/ops/exhibit/twin/recordings/*.jsonl >/dev/null 2>&1; then
+  bad "沒有任何 lifecycle 錄影（ops/exhibit/twin/recordings/*.jsonl）⇒ 展件沒有東西可以重播"
+  bad "  ⇒ bash ops/exhibit/twin/record_fixture.sh（L-none 備援）"
+fi
 [ -f "$REPO/ops/exhibit/twin/twin_pack.json" ] \
-  || bad "沒有資料包 $REPO/ops/exhibit/twin/twin_pack.json ⇒ 展件沒有東西可以播"
+  || warn "沒有 twin_pack.json ⇒ 收據頁（/r/<cell>）一格都認不得，會一律 404 並講明"
 [ -f "$HM/world3/index.html" ] \
   || bad "沒有電視那一頁 $HM/world3/index.html ⇒ 電視會是白畫面（VACANT_HM 指對了嗎）"
 
 # ── 二、import 得起來嗎 ─────────────────────────────────────────
 # ⚠ 這一關擋的是 `cryptography`。`serve_twin.py` 自己只有 stdlib，但它 import 的
-#   `to_events` 會拉 `vacant_network.logbook`，而那個要 `cryptography`——**一個原生 wheel**。
+#   `live_events` 會拉 `vacant_network.vrun.lifecycle`，而 `vacant_network` 這個套件
+#   一 import 就會拉 `cryptography`——**一個原生 wheel**。
 #   乾淨的展場機不保證有（DECISION_20260919_EXHIBIT_LINUX.md §1 的那一段）。
 #   ⚠ **故意不寫套件名。** 直接 import 真正要跑的那一支，比逐個猜套件名可靠——
 #     而且套件名真的會變：2026-09-20 的 `fb7f4bfb` 把 `vacant` 改名成
@@ -73,6 +84,18 @@ from ops.exhibit.twin import serve_twin   # noqa: F401
 else
   bad "serve_twin import 不起來：$(echo "$IMPORT_ERR" | tail -2 | tr '\n' ' ')"
   bad "  多半是缺 cryptography ⇒ sudo apt install -y python3-cryptography"
+fi
+
+# ── 二之二、錄影能不能上展場 ─────────────────────────────────────
+# 兩把尺都要過：lifecycle 契約（`lifecycle.validate_stream`）＋轉出來的電視契約
+# （`tv_contract.validate`，轉換走的是展場用的同一個 `live_events.Folder`）。
+# 過不了的錄影 serve_twin 會整份不收——那等於電視少了一批格子，開機前就要知道。
+REC_ARGS=()
+for R in "${RECORDINGS[@]+"${RECORDINGS[@]}"}"; do REC_ARGS+=(--recording "$R"); done
+if CHK=$("$PY" "$HERE/serve_twin.py" --check "${REC_ARGS[@]+"${REC_ARGS[@]}"}" 2>&1); then
+  say "✓ 錄影過 lifecycle 契約＋電視契約：$(echo "$CHK" | tr '\n' ' ')"
+else
+  bad "錄影過不了契約：$(echo "$CHK" | tail -3 | tr '\n' ' ')"
 fi
 
 # ── 三、埠 ─────────────────────────────────────────────────────
