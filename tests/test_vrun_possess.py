@@ -920,13 +920,17 @@ def test_pi_install_writes_extension_and_leaves_models_json_byte_identical(
     assert mj.read_bytes() == original, "models.json 被動了"
     # 🔴 **裝了不等於被中介**：`proven` 只有 `mark_proven`（requests_seen > 0）點得亮，
     #    `install` 自己永遠點不亮它。
-    # 🔴 **shim 的真模型證據不准點亮常駐通道**：2026-09-22 那批 L-real 五格全走 PATH shim
-    #    （`PI_CODING_AGENT_DIR` 被搬到暫存目錄、常駐 extension 沒被載入），常駐 extension
-    #    只有 L-fake ⇒ `verified` 必須是 False，shim 的證據在另一欄。
-    assert possess.CHANNEL_MEASURED["pi"] == ""
-    assert st["channel"]["pi"]["verified"] is False
-    assert st["channel"]["pi"]["measured"] == ""
+    # 🔴 **兩條路兩份證據**：常駐 extension 的 L-real 是 2026-09-24 那批
+    #    （`possess_pi_ext_real_20260924/`，pi 完整路徑、不經 shim），shim 的是 2026-09-22 那批。
+    #    `verified` 只看常駐通道那一格；shim 的證據在另一欄，而且兩格不准是同一段文字
+    #    （2026-09-22 就是拿 shim 的成績填了常駐那格，code review 撤回）。
+    assert "常駐 extension" in possess.CHANNEL_MEASURED["pi"]
+    assert "2026-09-24" in possess.CHANNEL_MEASURED["pi"]
+    assert "沒有閘門" in possess.CHANNEL_MEASURED["pi"], "只證通道這句不可以掉"
+    assert st["channel"]["pi"]["verified"] is True
+    assert st["channel"]["pi"]["measured"] == possess.CHANNEL_MEASURED["pi"]
     assert possess.SHIM_MEASURED["pi"], "shim 那條的真模型證據不可以弄丟"
+    assert possess.SHIM_MEASURED["pi"] != possess.CHANNEL_MEASURED["pi"]
     assert st["channel"]["pi"]["shim_measured"] == possess.SHIM_MEASURED["pi"]
     assert st["channel"]["pi"].get("proven") is not True
     written = {c["path"] for c in st["files"]}

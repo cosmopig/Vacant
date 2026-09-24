@@ -155,7 +155,7 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   設定目錄（`PI_CODING_AGENT_DIR`／`CODEX_HOME`／`OPENCODE_CONFIG_CONTENT`／`ANTHROPIC_BASE_URL`）
   再 `exec` agent 的**互動 TUI**。與 `vacant install`（改常駐設定、裝 proxyd 服務、動 shell rc）
   是兩條路、兩個端點、**兩種證據等級，不可互相背書**：B 路的 pi 通道量過
-  （600 格 abpi＋pi_tty），A 路的 pi 通道 `CHANNEL_MEASURED["pi"]` 至今是空字串。
+  （600 格 abpi＋pi_tty），A 路的 pi 通道 `CHANNEL_MEASURED["pi"]` 是 2026-09-24 才量到的（見下一條）。
   互動三條件（stdin tty、stdout tty、真 pty）缺一 pi 就**安靜**落回 print
   （`DECISION_20260920_PI_TTY_VS_PRINT_MODE.md`）。**缺「記住上次選誰」**。
 - `piext.py` — **pi 產品版 extension 的渲染器**（2026-09-22 落地）：`vacant install --agent pi` 只寫
@@ -167,8 +167,13 @@ python3 -m build                               # wheel＋sdist；CI 會在 repo 
   ＋ **`ops/vacantrun/possess_pi_real_20260922/`（L-real，但只屬於 PATH shim 那條路）**：pi 0.87.0 ＋
   `gemma-4-12b-it-qat` 跑 R534 五題走 shim，**3 交付 exit 0／2 拒交 exit 20**，五條鏈全 OK。
   🔴 **那五格裡常駐 extension 沒被載入**（shim 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，掛鉤是 per-run
-  那支燒的）⇒ 記在 `possess.SHIM_MEASURED["pi"]`，**`CHANNEL_MEASURED["pi"]` 仍是空字串**
-  （曾一度填上，code review 抓到後撤回）。**常駐 extension＝只有 L-fake；L-real＝只有 shim 路**，不可合講。
+  那支燒的）⇒ 只記在 `possess.SHIM_MEASURED["pi"]`（曾一度拿來填 `CHANNEL_MEASURED`，code review 撤回）。
+  **常駐 extension 那條的 L-real 是另一批**：`ops/vacantrun/possess_pi_ext_real_20260924/`（vacant-dev、
+  pi 完整路徑不經 shim、1004 前面放**要金鑰的中繼**）——R534 五題＋互動 TUI，76 通全在常駐 journal、
+  金鑰借自使用者 `models.json`（字面值／`$VAR`／`!cmd`）。⚠ **這條路只有通道、沒有閘門**：五題裡兩題
+  agent 退出碼 0 沒寫 `solution.py`，沒東西擋。**兩條路兩份證據，不可合講。** 同一跑抓到並修掉五個洞
+  （本機位址上游掉 sink、要金鑰時模型清單錯、切回 vacant 不留痕、`/vacant` 打錯字跑 status、
+  extension 路點不亮 `proven`），修後同機重驗在該 README §七。
   ⚠ 上游是**公開 Funnel 不是 LAN**，且與 `pi_tty_20260920` 那 40 格**三個變因都不同，不可合併相減**。
 - **有 Vacant ↔ 沒有 Vacant 的一格對照**（`ops/vacantrun/ab_vacant_onoff_20260922/`，n=1）：
   同一題同一模型，**OFF 臂 pi 退出碼 0 而工作區雜湊前後相同**（什麼都沒交，你會以為成功）；

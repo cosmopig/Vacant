@@ -1,0 +1,7 @@
+./contract.md
+./goal.md
+./__pycache__/solution.cpython-312.pyc
+./run_tests.sh
+./solution.py
+./tests_visible/__pycache__/test_visible.cpython-312.pyc
+./tests_visible/test_visible.py

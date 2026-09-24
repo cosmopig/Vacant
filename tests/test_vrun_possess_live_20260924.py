@@ -264,6 +264,7 @@ def _pi_line(h: pathlib.Path) -> str:
 
 
 def test_extension_route_lights_proven_and_says_which_route(tmp_path, monkeypatch):
+    measured_before = possess.CHANNEL_MEASURED["pi"]
     h = _installed_pi(tmp_path, monkeypatch)
     assert possess.status(home=h)["channel"]["pi"]["proven"] is False
     hp = _hooks(h, _session())
@@ -289,8 +290,8 @@ def test_extension_route_lights_proven_and_says_which_route(tmp_path, monkeypatc
     hp.unlink()
     again = possess.status(home=h)["channel"]["pi"]
     assert again["proven_via"] == "extension" and "c-good" in again["note"]
-    # 🔴 不因此填 repo 級的實測紀錄
-    assert possess.CHANNEL_MEASURED["pi"] == ""
+    # 🔴 不因此改寫 repo 級的實測紀錄（那一格由歸檔目錄填，不由執行期推論填）
+    assert possess.CHANNEL_MEASURED["pi"] == measured_before
 
 
 def test_extension_route_negative_evidence_from_a_previous_install(tmp_path, monkeypatch):

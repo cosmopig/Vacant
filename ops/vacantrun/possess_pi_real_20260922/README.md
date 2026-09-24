@@ -9,6 +9,8 @@
 > shim 當場裝的 per-run extension。
 > ⇒ 本批只記進 `possess.SHIM_MEASURED["pi"]`；`possess.CHANNEL_MEASURED["pi"]` **仍是空字串**，
 > 常駐 extension 目前只有 L-fake（`../possess_pi_20260922/`）。原文保留不改，以本段為準。
+> （2026-09-24 稍晚：常駐 extension 那條的 L-real 另外量了，見 `../possess_pi_ext_real_20260924/`；
+> 本批仍然只屬於 shim 路。）
 
 > **證據等級：L-real**（真 agent、真模型、真流量）。**pi 的常駐附身那條路第一次拿到真模型證據**
 > ——在這一批之前 `possess.CHANNEL_MEASURED["pi"]` 一直是空字串。

@@ -1,0 +1,228 @@
+{
+  "version": 1,
+  "installed_at": 1790217196.6308277,
+  "installed_at_iso": "2026-09-24T02:33:16+0000",
+  "home": "/var/tmp/vacant_piext_20260924/home",
+  "python": "/usr/bin/python3",
+  "port": 18795,
+  "upstreams": {
+    "openai": {
+      "url": "http://100.124.254.83:18899/v1",
+      "source": "pi:providers.mylab"
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "sink（沒有人指定）"
+    }
+  },
+  "agents": [
+    "pi"
+  ],
+  "not_detected": [],
+  "detected": {
+    "claude": {
+      "agent": "claude",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/claude",
+      "binary_via": "path",
+      "version": "2.1.278 (Claude Code)",
+      "present": true
+    },
+    "codex": {
+      "agent": "codex",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    },
+    "opencode": {
+      "agent": "opencode",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": "/home/user1/.local/opt/node-v22.23.2-linux-x64/bin/opencode",
+      "binary_via": "path",
+      "version": "1.18.31",
+      "present": true
+    },
+    "pi": {
+      "agent": "pi",
+      "config_dir": "/var/tmp/vacant_piext_20260924/home/.pi/agent",
+      "config_file_exists": false,
+      "binary": "/var/tmp/vacant_piext_20260924/pi/node_modules/.bin/pi",
+      "binary_via": "path",
+      "version": "0.87.0",
+      "present": true
+    },
+    "hermes": {
+      "agent": "hermes",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    }
+  },
+  "channel": {
+    "pi": {
+      "ok": true,
+      "files": [
+        {
+          "path": "/var/tmp/vacant_piext_20260924/home/.pi/agent/extensions/vacant.ts",
+          "action": "create",
+          "before_sha256": null,
+          "after_sha256": "48ae40442325f5565ac8b4b880357e8d06be09d39572d85593e5f199618427ca",
+          "backup": null,
+          "note": "pi extension：registerProvider(vacant) + /vacant + 掛鉤"
+        }
+      ],
+      "measured": "",
+      "verified": false,
+      "shim_measured": "2026-09-22（Claude Code 遠端容器，pi 0.87.0，gemma-4-12b-it-qat，**上游＝公開 Funnel 非 LAN**，R534 五題走 shim：3 交付／2 拒交，模型通數 4–13，鏈全 OK，級別 B′；**常駐 extension 不在路上**）",
+      "startable": true,
+      "startable_reason": "起得來：探測 listener 收到 3 條連線（**沒有任何模型呼叫**，另一頭只回 503）",
+      "startable_detail": {
+        "startable": true,
+        "measured": true,
+        "connected": true,
+        "env_key": null,
+        "env_key_present": null,
+        "probed_at": "2026-09-24T02:33:16+0000",
+        "binary": "/var/tmp/vacant_piext_20260924/pi/node_modules/.bin/pi",
+        "argv": [
+          "/var/tmp/vacant_piext_20260924/pi/node_modules/.bin/pi",
+          "-p",
+          "ping"
+        ],
+        "stopped_early": true,
+        "rc": null,
+        "elapsed_s": 0.36,
+        "connections": 3,
+        "probe_saw": "GET /v1/models?vacant_canary=refresh-46041ad1-ed4c-4f16-834a-b914b9aa4ecc HTTP/1.1",
+        "stderr_head": "",
+        "reason": "起得來：探測 listener 收到 3 條連線（**沒有任何模型呼叫**，另一頭只回 503）"
+      }
+    }
+  },
+  "shim_dir": "/var/tmp/vacant_piext_20260924/home/.vacant/possess/bin",
+  "shims": [
+    "/var/tmp/vacant_piext_20260924/home/.vacant/possess/bin/pi"
+  ],
+  "service": {
+    "backend": "bare",
+    "pid": 316119,
+    "supervised": false,
+    "boot_persistent": false,
+    "rc": 0,
+    "changes": []
+  },
+  "preflight": {
+    "listening": true,
+    "roundtrip": 401,
+    "detail": "proxy 活著；上游回非 2xx（sink ⇒ 502 是預期的）"
+  },
+  "systemd_path_env": {
+    "file": "/var/tmp/vacant_piext_20260924/home/.config/environment.d/50-vacant-possess.conf",
+    "applied_now": false,
+    "changes": [
+      {
+        "path": "/var/tmp/vacant_piext_20260924/home/.config/environment.d/50-vacant-possess.conf",
+        "action": "create",
+        "before_sha256": null,
+        "after_sha256": "0c98930d91994599714c3baae639c26a2c609a0a5f67a67175fb6d40ccd313ca",
+        "backup": null,
+        "note": "systemd --user 的 PATH（environment.d）"
+      }
+    ]
+  },
+  "gate_reach": {
+    "shim_dir": "/var/tmp/vacant_piext_20260924/home/.vacant/possess/bin",
+    "forms": {
+      "bash -lic": {
+        "why": "人類開終端機",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -lc": {
+        "why": "登入非互動",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -c '. ~/.bashrc'": {
+        "why": "ssh 主機 '指令' 的等價路徑（非真 ssh）",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -c": {
+        "why": "腳本／cron／ExecStart=",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "systemd-run --user": {
+        "why": "展場無人值守迴圈",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      }
+    },
+    "covered": [],
+    "not_covered": [
+      "bash -lic",
+      "bash -lc",
+      "bash -c '. ~/.bashrc'",
+      "bash -c",
+      "systemd-run --user"
+    ],
+    "unmeasured": [],
+    "duplicated": {},
+    "interactive_only": false,
+    "headline": "⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c、systemd-run --user。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）",
+    "measured": true
+  },
+  "agent_posture": {
+    "pi": {
+      "agent": "pi",
+      "sandbox_mode": null,
+      "approval_policy": null,
+      "flags": null,
+      "source": "/var/tmp/vacant_piext_20260924/home/.pi/agent/extensions/vacant.ts",
+      "measured": false,
+      "note": "這個 agent 的沙箱姿態我們沒有已知的讀法 ⇒ 沒量到（不是「沒有沙箱」）"
+    }
+  },
+  "codex_sandbox_requested": "workspace-write",
+  "warnings": [
+    "⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c、systemd-run --user。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）",
+    "⚠ `bare` 後端＝自己 fork，**撐不過重開機**，不准說成「常駐」。"
+  ],
+  "files": [
+    {
+      "path": "/var/tmp/vacant_piext_20260924/home/.pi/agent/extensions/vacant.ts",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "48ae40442325f5565ac8b4b880357e8d06be09d39572d85593e5f199618427ca",
+      "backup": null,
+      "note": "pi extension：registerProvider(vacant) + /vacant + 掛鉤"
+    },
+    {
+      "path": "/var/tmp/vacant_piext_20260924/home/.config/environment.d/50-vacant-possess.conf",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "0c98930d91994599714c3baae639c26a2c609a0a5f67a67175fb6d40ccd313ca",
+      "backup": null,
+      "note": "systemd --user 的 PATH（environment.d）"
+    }
+  ]
+}

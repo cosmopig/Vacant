@@ -1,0 +1,26 @@
+[
+ {
+  "provider_baseUrl": "http://127.0.0.1:1234/v1",
+  "openai_upstream": "http://unspecified-upstream.vacant.invalid",
+  "source": "sink（沒有人指定）",
+  "key_from": null
+ },
+ {
+  "provider_baseUrl": "http://localhost:11434/v1",
+  "openai_upstream": "http://unspecified-upstream.vacant.invalid",
+  "source": "sink（沒有人指定）",
+  "key_from": null
+ },
+ {
+  "provider_baseUrl": "http://192.168.1.50:1234/v1",
+  "openai_upstream": "http://192.168.1.50:1234/v1",
+  "source": "pi:providers.lmstudio",
+  "key_from": "lmstudio"
+ },
+ {
+  "provider_baseUrl": "http://100.86.226.21:1234/v1",
+  "openai_upstream": "http://100.86.226.21:1234/v1",
+  "source": "pi:providers.lmstudio",
+  "key_from": "lmstudio"
+ }
+]

@@ -1,0 +1,37 @@
+[
+ {
+  "t": 1790219813.7328076,
+  "label": "tui_up",
+  "offset": 8503
+ },
+ {
+  "t": 1790219813.7328155,
+  "label": "/vacant status",
+  "offset": 8503
+ },
+ {
+  "t": 1790219820.107444,
+  "label": "prompt",
+  "offset": 12120
+ },
+ {
+  "t": 1790219880.77663,
+  "label": "/vacant off",
+  "offset": 35044
+ },
+ {
+  "t": 1790219887.2570806,
+  "label": "/vacant on",
+  "offset": 37795
+ },
+ {
+  "t": 1790219893.6654649,
+  "label": "/vacant status",
+  "offset": 40534
+ },
+ {
+  "t": 1790219900.0252771,
+  "label": "/quit",
+  "offset": 44163
+ }
+]

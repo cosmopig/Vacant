@@ -203,24 +203,28 @@ CHANNEL_MEASURED: dict[str, str] = {
               "**隔離 HOME**）"
               "／2026-09-22（Claude Code 遠端容器，2.1.278，Haiku 4.5，settings 路 2 通，"
               "**但 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 時 settings.json 被忽略**）",
-    # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
+    # ⚠ hermes 這格**沒量**（2026-09-19 那台機器上沒有 pi／hermes 的可執行檔；pi 之後另外量了，見下）。
     #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
-    # ⚠ pi 這一格**到今天仍是空的**，而且是刻意的：本表記的是 `wire_pi` 寫的那支
-    #   **常駐 extension**（`~/.pi/agent/extensions/vacant.ts` → 常駐 proxyd）這條路。
-    #   - 常駐 extension 那條只有 **L-fake**（`ops/vacantrun/possess_pi_20260922/`，假上游）。
-    #   - 2026-09-22 的**真模型**那批（`ops/vacantrun/possess_pi_real_20260922/`）五格**全部走
-    #     PATH shim**：`gateshim.exec_inner` 把 `PI_CODING_AGENT_DIR` 設到這一跑自己的暫存目錄
-    #     （自己的 models.json／settings.json、自己的 per-run 掛鉤 extension、自己的 proxy 埠），
-    #     **常駐那支 extension 在那五格裡從來沒有被載入**（`cells/*/hook_install.json` 的
-    #     `target` 是 `/tmp/vacant-possess/run-pi-*/extensions/vacant.ts`）。
-    #   ⇒ 那批是 **shim 這條路**的證據，記在下面的 `SHIM_MEASURED["pi"]`，
-    #     **不准拿來點亮本表**（2026-09-22 一度填進來，code review 抓到後撤回）。
-    #   ⇒ 本格要等「裝完之後、命令列零個 vacant、pi 載入**常駐** extension、真模型、
-    #     常駐 proxyd journal `requests_seen > 0`」量到才准填。
-    #   ⚠ `status()` 在某台機器上推出 `proven_via="extension"`（`extension_proof`）**不會**填本格：
+    # ✅ pi 這一格記的是 `wire_pi` 寫的那支**常駐 extension**（`~/.pi/agent/extensions/vacant.ts`
+    #   → 常駐 proxyd）這條路，**2026-09-24 才有真模型證據**
+    #   （`ops/vacantrun/possess_pi_ext_real_20260924/`）：vacant-dev（Ubuntu 24.04）、隔離 HOME、
+    #   pi **0.87.0**、`gemma-4-12b-it-qat` @ 1004、上游是一個**要金鑰的中繼**（量金鑰有沒有真的送到）。
+    #   `vacant install` 沒給 `--upstream`，上游自己從 pi 的 `models.json` 找到；pi 用**完整路徑**叫
+    #   （不經 shim ⇒ 載入的是常駐那支）。R534 五題 76 通 ＋ 互動 TUI，**每一通都在常駐 journal 裡、
+    #   都帶著從 `models.json` 借來的金鑰**（字面值／`$VAR`／`!cmd` 三種形式都量過，錯的金鑰 401 當負控制）。
+    #   ⚠ **這條路沒有閘門、沒有收據**：五題裡兩題 agent 退出碼 0 卻沒寫 `solution.py`，沒有任何東西擋它。
+    #     本格只證「通道」，不證裁決（裁決在 `SHIM_MEASURED` 那條）。
+    #   ⚠ 1004 是 non-thinking；上游是我們自己放的中繼，真實世界的上游（OpenAI 等）還沒接過；n=5 無 rep。
+    #   ⚠ 歷史：本格在 2026-09-22 一度用 `possess_pi_real_20260922/` 填過——那批五格**全部走 PATH shim**
+    #     （`gateshim.exec_inner` 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，常駐 extension 沒被載入，
+    #     `cells/*/hook_install.json` 的 `target` 是 `/tmp/vacant-possess/run-pi-*/extensions/vacant.ts`），
+    #     code review 抓到後撤回、改記 `SHIM_MEASURED["pi"]`。**兩條路的證據仍然不可互相背書。**
+    #   ⚠ `status()` 在某台機器上推出 `proven_via="extension"`（`extension_proof`）**不會**改寫本格：
     #     那是那台機器那個使用者的執行期狀態，不是歸檔、寫明機器與版本的 repo 級實測紀錄，
-    #     而且 2xx 分不出上游是不是真模型。
-    "pi": "",
+    #     而且 2xx 分不出上游是不是真模型。本格是上面那個歸檔目錄填的。
+    "pi": "2026-09-24（vacant-dev Ubuntu 24.04，pi 0.87.0，gemma-4-12b-it-qat @ 1004 經要金鑰的中繼，"
+          "**常駐 extension 路（pi 完整路徑、不經 shim）**：R534 五題＋互動 TUI，76 通全經常駐 proxyd、"
+          "金鑰借自 models.json；**這條路沒有閘門／收據**）",
     "hermes": "",
 }
 
@@ -803,12 +807,12 @@ def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
 
     ⚠ 使用者自己的 provider **一個都不改道**：`/vacant off` 或 `/model` 切走就是不經過
       Vacant，extension 會留一筆 `vacant_off`，收據不替它說謊（`piext` 誠實邊界 3）。
-    ⚠ `CHANNEL_MEASURED["pi"]` 仍是空字串：**這支常駐 extension 只有 L-fake**
-      （`ops/vacantrun/possess_pi_20260922/`，假上游）。2026-09-22 的真模型那批
-      （`possess_pi_real_20260922/`）五格全走 PATH shim——shim 把 `PI_CODING_AGENT_DIR`
-      搬到這一跑自己的暫存目錄，**本函式寫的這支檔在那裡不會被載入**——所以那批只記進
-      `SHIM_MEASURED["pi"]`，不准拿來填本格。要用真模型、命令列零個 vacant、常駐 proxyd
-      journal `requests_seen > 0` 量到**這支**被載入才准填。
+    ⚠ **這支檔的真模型證據是 `ops/vacantrun/possess_pi_ext_real_20260924/`**（`CHANNEL_MEASURED["pi"]`）：
+      pi 完整路徑、命令列零個 vacant、載入的是**這支**、76 通全在常駐 journal。
+      2026-09-22 的真模型那批（`possess_pi_real_20260922/`）五格全走 PATH shim——shim 把
+      `PI_CODING_AGENT_DIR` 搬到這一跑自己的暫存目錄，**本函式寫的這支檔在那裡不會被載入**——
+      所以那批只記進 `SHIM_MEASURED["pi"]`，兩條路的證據不可互相背書。
+    ⚠ 這條路**只有通道，沒有閘門**：互動或直叫 pi 時沒有驗收、沒有收據（`piext` 誠實邊界 5）。
     ⚠ agent 刪得掉這支檔（實測）。刪掉 ⇒ 下一跑 canary 不燒 ⇒ 收據降級，不是保證。
     """
     from . import piext

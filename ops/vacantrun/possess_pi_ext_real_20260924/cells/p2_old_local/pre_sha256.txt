@@ -1,0 +1,2 @@
+79f1bd9485edeb97cca2cb2423c97db7d3ede73077113d4c94b8eef53b132790  /var/tmp/vacant_piext_20260924/home_p2_old_local/.pi/agent/models.json
+c86f6dd8bda58258b60d700b387ec147387147c2941ab68cc1f8c2d1499dcac2  /var/tmp/vacant_piext_20260924/home_p2_old_local/.pi/agent/settings.json

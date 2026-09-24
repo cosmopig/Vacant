@@ -219,7 +219,10 @@ pid 有值、**埠沒人在聽、log 兩個都是 0 byte**；堆疊卡在
    ——那句跨框架的話在 pi ＋ 真模型 ＋ shim 路徑上又出現一次。
    🔴 **不是常駐附身的 L-real**：shim 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，常駐 extension
    （`~/.pi/agent/extensions/vacant.ts`）那五格沒被載入 ⇒ 記在 `possess.SHIM_MEASURED["pi"]`，
-   `CHANNEL_MEASURED["pi"]` 仍空；常駐 extension 只有 L-fake，L-real 仍要補。
+   `CHANNEL_MEASURED["pi"]` 當時仍空。
+   ✅ 2026-09-24：**常駐 extension 那條也拿到 L-real**（`ops/vacantrun/possess_pi_ext_real_20260924/`，
+   vacant-dev、pi 完整路徑不經 shim、要金鑰的中繼）——76 通全在常駐 journal、金鑰借自 `models.json`。
+   ⚠ 那條路**沒有閘門**：兩題 agent 退出碼 0 沒交件也沒被擋。互動模式的閘門（`agent_before_settle`）仍是下一步。
    ⚠ 級別全 B′（沒 bwrap）；上游是公開 Funnel 不是 LAN；互動／長任務／並行沒量。
 
 ## 一、閘門的可量測定義（仍然有效）

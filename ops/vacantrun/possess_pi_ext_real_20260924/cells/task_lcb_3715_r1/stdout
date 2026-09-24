@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>The problem asks to find the maximum number of coins obtainable by collecting $k$ consecutive bags on a number line, given non-overlapping segments $[l_i, r_i]$ each containing $c_i$ coins per bag.
+
+I have implemented the solution in `solution.py` using a sweep-line/candidate approach:
+1.  **Candidate Points**: The optimal window of size $k$, starting at some coordinate $x$ and ending at $x+k-1$, will always "align" with one of the segment boundaries. Specifically, the maximum must occur when either $x = l_i$ (the start of a segment) or $x+k-1 = r_i$ (the end of a segment), which means $x = r_i - k + 1$.
+2.  **Efficiency**: I collect all such candidate starting positions, sort them, and iterate through them.
+3.  **Summation**: For each candidate $x$, the segments that overlap with $[x, x+k-1]$ form a contiguous range $[j, m]$ in the sorted list of segments (since they are non-overlapping). I use binary search to find this range and prefix sums to quickly calculate the total coins for fully contained segments within that range.
+4.  **Complexity**: The time complexity is $O(N \log N)$ due to sorting and binary searching, which fits well within the constraints ($10^5$ segments).
+
+The tests passed successfully.

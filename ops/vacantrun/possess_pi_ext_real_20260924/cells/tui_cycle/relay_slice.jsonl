@@ -1,0 +1,7 @@
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219754.1955373}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219754.214427}
+{"method": "GET", "path": "/v1/models?vacant_canary=6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219754.3911765}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219754.4037788}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219754.5094051}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219754.5119705}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-6127196f-4235-4edf-bb60-d21926d582d3", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790219767.619481}
