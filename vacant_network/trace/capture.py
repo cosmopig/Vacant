@@ -165,7 +165,8 @@ def _outcome(rec: R.Recorder, actor: R.Actor, contract: Any) -> None:
     if not st.get("outcome"):
         return
     from . import actors as A
-    main = {"platform": actor.platform, "session": actor.session, "model": actor.model}
+    model = actor.model or rec.session_info(actor.platform, actor.session).get("model")
+    main = {"platform": actor.platform, "session": actor.session, "model": model}
     if A.record_outcome(A.ActorBook(), session_key=f"{actor.platform}:{actor.session}",
                         actor=main, accepted=st["outcome"] == "accept", contract=contract,
                         workspace=rec.workspace):

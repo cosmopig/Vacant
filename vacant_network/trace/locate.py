@@ -75,8 +75,9 @@ def occurrences(text: str, value: str) -> list[tuple[int, int, str]]:
         for m in _NUM_RE.finditer(text):
             # 前後不能緊貼數字或小數點（`30720` 裡找不到 `3072`）
             a, b = m.start(), m.end()
-            if (a > 0 and (text[a - 1].isdigit() or text[a - 1] == ".")) or \
-                    (b < len(text) and text[b].isdigit()):
+            # 數字要是一個獨立的 token：`Q3`、`v2`、`x_10`、`30720` 裡都沒有 `3`／`2`／`10`／`3072`
+            if (a > 0 and (text[a - 1].isalnum() or text[a - 1] in "._")) or \
+                    (b < len(text) and (text[b].isalnum() or text[b] == "_")):
                 continue
             v = number_of(m.group(0))
             if v is not None and v == num:

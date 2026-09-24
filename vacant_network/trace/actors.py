@@ -173,7 +173,8 @@ class ActorBook:
 
 
 def consequences(book: ActorBook, blames: list[dict[str, Any]], *, contract: Any,
-                 workspace: pathlib.Path, finding_id) -> list[dict[str, Any]]:
+                 workspace: pathlib.Path, finding_id,
+                 platform: str | None = None) -> list[dict[str, Any]]:
     """把追緝結論變成後果事件（只有 §4.5 表上那幾種）。回傳這一次新記下的。"""
     out = []
     for b in blames:
@@ -200,7 +201,8 @@ def consequences(book: ActorBook, blames: list[dict[str, Any]], *, contract: Any
                   "workspace": str(workspace)}
         elif conf == "gap":
             ev = {"id": f"gap:{fid}", "kind": "gap", "finding_id": fid,
-                  "platform": _platform_hint(b), "workspace": str(workspace)}
+                  "platform": _platform_hint(b) if _platform_hint(b) != "unknown"
+                  else (platform or "unknown"), "workspace": str(workspace)}
         else:
             continue
         if book.record(ev):

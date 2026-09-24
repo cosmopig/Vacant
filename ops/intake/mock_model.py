@@ -14,7 +14,9 @@
 - OpenAI Responses（`POST /v1/responses`，SSE）          ← Codex
 - OpenAI Chat Completions（`POST /v1/chat/completions`） ← pi、OpenCode
 
-劇本（`MOCK_SCENARIO` 指向的 JSON）：`{"files": {"path": "content", ...}, "final": "..."}`。
+劇本（`MOCK_SCENARIO` 指向的 JSON）：`{"files": {"path": "content", ...}, "final": "..."}`，
+或有序的 `{"steps": [{"run": "<指令>"} | {"write": ["<路徑>", "<內容>"]}, ...], "final": "..."}`
+（可究責追緝的埋錯情境，`ops/accountability/e2e_trace.py`）；`fix` 段是看到回饋之後的劇本。
 每一通請求：數對話裡已經有幾個工具結果 k；k < 檔案數 ⇒ 叫一個「寫檔」工具寫第 k 個檔；
 否則回最後那句話。工具從 agent **這一通送來的工具清單**裡挑：先找有「路徑＋內容」參數的
 寫檔工具，沒有就用 shell 工具（`printf <base64> | base64 -d > path`）。
@@ -126,6 +128,17 @@ def tool_args(kind: str, argmap: dict[str, str], path: str, content: str,
 FEEDBACK_MARK = "The task contract's checks do not pass yet"
 
 
+def feedback_excerpt(blob: str) -> str | None:
+    """模型**真的收到**的回饋文字（最後一則，最多 800 字）：量回饋有沒有到、內容是什麼。"""
+    i = blob.rfind(FEEDBACK_MARK)
+    if i < 0:
+        i = blob.rfind("the task owner marked these places")
+    if i < 0:
+        return None
+    return blob[i:i + 800].encode().decode("unicode_escape", "replace") \
+        if "\\n" in blob[i:i + 800] else blob[i:i + 800]
+
+
 def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     """回 `(看過回饋, 回饋之後的工具結果數)`；沒看過回饋 ⇒ 全部的工具結果數。"""
     last = -1
@@ -136,11 +149,38 @@ def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     return last >= 0, sum(1 for it in after if is_result(it))
 
 
+def _shell_tool(tools: list[dict[str, Any]]):
+    return pick_tool([t for t in tools if _tool_name(t).lower() in (
+        "bash", "shell", "exec_command", "local_shell", "run_shell_command")])
+
+
 def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
          fed_back: bool = False):
     sc = scenario()
     if fed_back and isinstance(sc.get("fix"), dict):
         sc = sc["fix"]
+    steps = sc.get("steps")
+    if isinstance(steps, list):
+        # 有序的步驟（可究責追緝的埋錯情境要「先寫腳本、再跑它」）：
+        # {"run": "<shell 指令>"} 或 {"write": ["<路徑>", "<內容>"]}
+        if n_results < len(steps) and tools:
+            st = steps[n_results]
+            if "run" in st:
+                sh = _shell_tool(tools)
+                if sh and sh[0] != "write":
+                    return ("tool", sh[1], tool_args(sh[0], sh[2], "", "", None,
+                                                     raw_cmd=str(st["run"])))
+            else:
+                path, content = st["write"]
+                pk = pick_tool(tools)
+                if pk and pk[0] == "write" and pk[2]["path"] in ("file_path", "filePath") \
+                        and not cwd_hint:
+                    sh = pick_tool([t for t in tools if _tool_name(t) != pk[1]])
+                    if sh and sh[0] != "write":
+                        pk = sh
+                if pk:
+                    return ("tool", pk[1], tool_args(pk[0], pk[2], path, content, cwd_hint))
+        return ("text", str(sc.get("final", "Done.")), None)
     files = list((sc.get("files") or {}).items())
     pre = list(sc.get("pre_commands") or [])
     if n_results < len(pre) and tools:
@@ -255,6 +295,7 @@ class H(BaseHTTPRequestHandler):
         tools = body.get("tools") or []
         kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed)
         log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind,
+             "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [t.get("name") for t in tools][:40], "tool": a if kind == "tool" else None})
         model = body.get("model", "mock")
@@ -304,6 +345,7 @@ class H(BaseHTTPRequestHandler):
         tools = [t for t in (body.get("tools") or []) if isinstance(t, dict)]
         kind, a, b = plan(k, tools, None, fed)
         log({"proto": "responses", "n": n, "k": k, "fed_back": fed, "reply": kind,
+             "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [t.get("name") or t.get("type") for t in tools][:40],
              "tool": a if kind == "tool" else None})
@@ -348,6 +390,7 @@ class H(BaseHTTPRequestHandler):
         tools = body.get("tools") or []
         kind, a, b = plan(k, tools, None, fed)
         log({"proto": "chat", "n": n, "k": k, "fed_back": fed, "reply": kind,
+             "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [(t.get("function") or {}).get("name") for t in tools][:40],
              "tool": a if kind == "tool" else None})

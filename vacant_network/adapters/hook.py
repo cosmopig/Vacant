@@ -175,6 +175,28 @@ def _spawn_submit(contract_path: Any, agent: str) -> int | None:
         return None
 
 
+def _spawn_finalize(contract: Any, agent: str, payload: dict[str, Any],
+                    ev: HookEvent) -> int | None:
+    """工作階段結束的追緝（`trace/finalize.py`）：背景跑，掛鉤立刻返回。沒開追緝就不跑。"""
+    import subprocess
+    try:
+        from ..trace.capture import workspace_for
+        if workspace_for(ev.cwd, contract) is None:
+            return None
+        logf = vacant_state_dir() / "intake" / "hooks" / "finalize.log"
+        logf.parent.mkdir(parents=True, exist_ok=True)
+        with open(logf, "ab") as out:
+            p = subprocess.Popen(
+                [sys.executable, "-m", "vacant_network.trace.finalize", str(contract.path), agent,
+                 str(ev.session_id or "unknown"), str(payload.get("model") or "")],
+                stdin=subprocess.DEVNULL, stdout=out, stderr=out, start_new_session=True)
+        return p.pid
+    except Exception as e:  # noqa: BLE001
+        _log("errors.jsonl", {"agent": agent, "event": "session_end",
+                              "error": f"could not start trace finalize: {e}"[:300]})
+        return None
+
+
 def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contract: Any,
            d: HookDecision) -> None:
     """可究責追緝的病歷（`trace/capture.py`）。壞掉只記錯、不影響裁決（誠實邊界 1）；
@@ -208,10 +230,13 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
     d = HookDecision("allow")
     if ev.kind == "pre_tool":
         d = decide_pre_tool(ev, contract)
-    elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP"):
+    elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP") \
+            and os.environ.get("VACANT_FEEDBACK_MODE") != "none":
         from ..intake import flow
+        generic = os.environ.get("VACANT_FEEDBACK_MODE") == "generic"   # 預註冊實驗的 RF 臂
         d = decide_stop(ev, contract, check_fn=flow.check,
-                        localize=lambda res, why: _localize(contract, res, ev, why))
+                        localize=None if generic else
+                        (lambda res, why: _localize(contract, res, ev, why)))
     elif ev.kind == "session_end" and contract is not None \
             and ev.reason in NON_TERMINAL_END_REASONS:
         d = HookDecision("allow", "", {"submit_skipped": f"reason={ev.reason} (not the end "
@@ -223,7 +248,9 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         #   （agent-claude 對照 §3.6），驗證器跑不完就被砍，那一次就不見了。
         #   改成分離的背景行程，掛鉤立刻返回；交件結果（含失敗）照樣進帳本。
         pid = _spawn_submit(contract.path, agent)
-        d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
+        d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid,
+                                       "trace_finalize": _spawn_finalize(contract, agent, payload,
+                                                                         ev)})
     _trace(agent, event, payload, ev, contract, d)
     rec = {"agent": agent, "event": event, "kind": ev.kind, "tool": ev.tool,
            "action": d.action, "contract": str(cpath) if cpath else None,

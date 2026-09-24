@@ -46,3 +46,31 @@
 
 **偏移檢查**：仍對準「每一步進簽章鏈、追到那一步與行動者、事實回饋、未解問題被提出、信譽＋路由」。
 沒有碰真模型 API、沒有改凍結項（slash 沒用；B 層六情境沒動）、KS-1 有可執行防呆。
+
+## 2026-09-24T19:55Z — M6（四個真 agent 埋錯端到端）＋M7（R536 預註冊草稿與 harness）
+
+**做了什麼**
+- `ops/accountability/e2e_trace.py`：四個真 agent × 四個埋錯情境（B agent 憑空寫錯、A 輸入錯、C 腳本錯、
+  D 事後在外面改檔＝負控制），原生地跑（命令列上沒有 `vacant`），`vacant install` 的常駐掛鉤。
+- 端到端抓到、已修的真問題：
+  1. 用 `printf <base64> | base64 -d > report.md` 寫檔時值不在指令字串裡 ⇒ 誤判「指令自己產生的」。
+     改成先看指令點名的資料／腳本，再看行動者之前讀到了什麼（回歸測試）。
+  2. 重導向的目標（`> report.md`）被當成「指令執行的腳本」⇒ 歸到上一個寫報告的人。
+     改成區分「讀的」與「執行的」（直譯器的引數、`./x`）。
+  3. `3` 會配到 `Q3` 裡的 3 ⇒ 數字必須是獨立 token。
+  4. 同一個 agent 的「錯」與「這一跑的結果」落在兩格（模型 id 只在部分事件上）⇒ 工作階段記住主 agent 自稱的模型。
+  5. OpenCode 的 `dispose` 沒帶工作階段 id ⇒ 四跑疊成一跑。外掛記住主 session。
+  6. `opencode run` 沒有 Stop ⇒ 沒有追緝。工作階段結束時背景跑 `trace/finalize.py`。
+  7. harness 自己的錯：四個情境共用一個專案路徑，讀到的永遠是第一個情境的結論（第一跑的 3 個 MISS 全是這個）。
+- M7：`vacant do --feedback-mode localized|generic|none`（三臂只差這一個）；`ops/accountability/r536/`
+  （題庫產生器：一半題目帶誘餌輸入；執行器：斷點續跑、隱藏檢查、收斂曲線；收官計算：照狀態表）；
+  預註冊草稿 `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md`（**待人類簽字**）。
+
+**證據**：`ops/accountability/evidence_20260924/`——歸因 **16/16**；有位置的回饋在 Claude Code／Codex／pi 進了
+下一次模型請求（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/16；鏈 16/16 驗得過；掛鉤 p95 5.6–10.7 ms。
+R536 管線冒煙（L-fake）：RS 三次都錯、RF／RL 第 2 次改對——只證明管線。
+`tests/test_trace_*.py` 63 條全綠。
+
+**下一步**：M8 對抗審查（workflow）→ 修 → 文件；M9 早上的報告。
+
+**偏移檢查**：沒有碰真模型 API（假金鑰、假端點、隔離 HOME）；沒有改凍結項；R536 沒有發射（等人類簽字）。

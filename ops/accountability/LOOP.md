@@ -45,15 +45,15 @@
 
 ## 四、里程碑（每一項完成＝有測試、lint／mypy 過、commit＋push、PROGRESS 記一筆）
 
-- [ ] M0 設計裁決 `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`
+- [x] M0 設計裁決 `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`
       （論文理由＋Fable 取捨＋四個 agent 可觀測面的實測＋與論文不同之處與理由）
-- [ ] M1 紀錄器：每一步進簽章鏈（四個 agent 的掛鉤＋工作區前後差異＋內容定址快照＋逐字稿對帳）
-- [ ] M2 錯誤位置：驗證器回報位置（檔案＋區段）；`vacant flag` 讓人指出錯處
-- [ ] M3 追緝：逐行歸屬 → 重跑二分（可證明）→ 輸入血緣（錯的值從哪來）→ 分類＋證據等級；簽章的 finding；可重驗
-- [ ] M4 影響繳付物：停止時／`vacant do` 修訂迴圈回饋事實；交件時未解問題清單
-- [ ] M5 後果：行動者信譽（沿用 reputation.py）＋路由（推薦／`vacant do --agent auto`／子 agent）
-- [ ] M6 四個真 agent 端到端：埋錯情境（agent 自己錯、子 agent 帶錯、輸入錯、繞過紀錄）→ 歸因準確率
-- [ ] M7 真模型增益的預註冊＋可直接跑的 harness（交給團隊在本地模型上跑）
+- [x] M1 紀錄器：每一步進簽章鏈（四個 agent 的掛鉤＋工作區前後差異＋內容定址快照＋逐字稿對帳）
+- [x] M2 錯誤位置：驗證器回報位置（檔案＋區段）；`vacant flag` 讓人指出錯處
+- [x] M3 追緝：逐行歸屬 → 重跑二分（可證明）→ 輸入血緣（錯的值從哪來）→ 分類＋證據等級；簽章的 finding；可重驗
+- [x] M4 影響繳付物：停止時／`vacant do` 修訂迴圈回饋事實；交件時未解問題清單
+- [x] M5 後果：行動者信譽（沿用 reputation.py）＋路由（推薦／`vacant do --agent auto`；子 agent 的文字路由依裁決 §4.7 不做）
+- [x] M6 四個真 agent 端到端：埋錯情境（agent 自己錯、腳本錯、輸入錯、繞過紀錄）→ 歸因準確率（子 agent 端到端未做：假模型不演子 agent，只有單元測試）
+- [x] M7 真模型增益的預註冊＋可直接跑的 harness（交給團隊在本地模型上跑）
 - [ ] M8 對抗審查 workflow → 修 → 文件（README／CLAUDE.md／AGENTS.md／CHANGELOG）
 - [ ] M9 早上的報告 `ops/accountability/MORNING.md`（繁體中文，好消息與壞消息都寫）
 

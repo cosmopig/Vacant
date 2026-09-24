@@ -141,3 +141,22 @@ def test_human_flag_is_signed_traced_and_reaches_the_next_turn(proj, capsys):
           write=("report.md", "Total: 60\nMayor: Alice\n"))
     o, _e, _c = hook.handle("claude", "Stop", {"session_id": "F", "cwd": str(p)})
     assert o == ""
+
+
+def test_outcome_and_fault_land_in_the_same_actor_cell(proj):
+    """Codex 的 SessionEnd 不帶 model：結果要記在工具事件自稱的那個模型的格子，不要另開一格
+    （2026-09-24 四 agent 端到端抓到的：同一個 agent 被拆成兩格）。"""
+    from vacant_network.trace import actors as A
+    p = proj
+    base = {"session_id": "cx", "cwd": str(p), "model": "gpt-x", "turn_id": "u1"}
+    t = {**base, "tool_name": "apply_patch", "tool_use_id": "c1",
+         "tool_input": {"command": "*** Begin Patch\n*** Add File: report.md\n+Total: 999"}}
+    hook.handle("codex", "PreToolUse", t)
+    (p / "report.md").write_text("Total: 999\n")
+    hook.handle("codex", "PostToolUse", {**t, "tool_response": "Success."})
+    hook.handle("codex", "Stop", {**base, "stop_hook_active": False})
+    hook.handle("codex", "SessionEnd", {"session_id": "cx", "cwd": str(p), "reason": "other"})
+    cells = A.ActorBook().state()["cells"]
+    assert len(cells) == 1, cells
+    c = cells[0]
+    assert c["key"][2] == "claimed:gpt-x" and c["runs"] == 1 and c["provable_faults"] == 1

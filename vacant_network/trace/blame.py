@@ -54,6 +54,8 @@ _SHELL = {"bash", "shell", "exec_command", "local_shell", "powershell", "run_she
           "shell_command", "exec"}
 _AGENT = {"agent", "task", "spawn_agent", "collaborationspawn_agent", "wait_agent",
           "multi_agent_v1wait_agent", "collaborationwait_agent", "subagent"}
+_INTERPRETERS = {"python", "python3", "node", "bash", "sh", "zsh", "ruby", "perl", "deno", "bun",
+                 "Rscript", "php", "lua", "awk", "source", "."}
 
 
 def tool_kind(tool: str | None) -> str:
@@ -312,20 +314,34 @@ class Blamer:
         except (ValueError, OSError):
             return None
 
-    def _referenced_files(self, s: Step) -> list[str]:
+    def _referenced_files(self, s: Step) -> tuple[list[str], list[str]]:
+        """指令字串點名的工作區檔案：`(讀的, 執行的)`。重導向的目標（`> out`）不算——那是
+        這個指令寫的，不是它用的；只有直譯器的引數或直接執行的路徑算「執行的腳本」。"""
         cmd = _command(self.t.input_obj(s)) or ""
         try:
-            toks = shlex.split(cmd)
+            toks = shlex.split(cmd, posix=True)
         except ValueError:
             toks = cmd.split()
         idx = self.t.index(s.pre_index)
-        out = []
+        reads: list[str] = []
+        scripts: list[str] = []
+        prev = ""
         for tok in toks:
+            if prev in (">", ">>", "1>", "2>", "&>", "1>>", "2>>", "tee") or tok.startswith(">"):
+                prev = tok
+                continue
             for piece in tok.replace("=", " ").split():
                 rel = self._rel(piece.strip("'\"<>|;&()"))
-                if rel and rel in idx and rel not in out:
-                    out.append(rel)
-        return out
+                if not rel or rel not in idx:
+                    continue
+                if rel in reads or rel in scripts:
+                    continue
+                if pathlib.PurePosixPath(prev).name in _INTERPRETERS or piece.startswith("./"):
+                    scripts.append(rel)
+                else:
+                    reads.append(rel)
+            prev = tok
+        return reads, scripts
 
     def _last_writer(self, path: str, before_seq: int) -> Transition | None:
         last = None
@@ -375,8 +391,12 @@ class Blamer:
                     depth: int) -> Origin:
         typed = L.contains(self.t.input_text(s), value)
         if tool_kind(s.tool) == "shell" and not typed:
-            # 值是這個指令算出來／搬過來的：看它點名的檔
-            return self._shell_origin(s, value, chain, depth)
+            # 值不在指令字串裡：可能是指令算出來的（看它點名的檔：資料裡有這個值 ⇒ 追資料；
+            # 腳本是這個工作階段寫的 ⇒ 寫腳本的那一步），也可能只是編碼過（`base64 -d`、
+            # `printf '%b'`）——那就和直接打字一樣，往下看行動者之前觀察到什麼
+            o = self._shell_origin(s, value, chain, depth, fallback=False)
+            if o is not None:
+                return o
         for kind, j, text, ref in self.sources(s):
             if not L.contains(text, value):
                 continue
@@ -419,7 +439,8 @@ class Blamer:
                 chain.append({**j.brief(), "via": "a command's output"})
                 if L.contains(self.t.input_text(j), value):
                     return self.step_origin(j, value, chain, depth=depth + 1)
-                return self._shell_origin(j, value, chain, depth)
+                return self._shell_origin(j, value, chain, depth) or \
+                    Origin("agent", step=j, note="the command itself produced the value")
             chain.append({**j.brief(), "via": f"the output of {j.tool}"})
             return Origin("external", source={"kind": "tool_output", "tool": j.tool,
                                               "step": j.n},
@@ -436,13 +457,14 @@ class Blamer:
         return Origin("agent", step=s, note="no recorded read contains this value")
 
     def _shell_origin(self, j: Step, value: str, chain: list[dict[str, Any]],
-                      depth: int) -> Origin:
-        for f in self._referenced_files(j):
+                      depth: int, *, fallback: bool = True) -> Origin | None:
+        reads, scripts = self._referenced_files(j)
+        for f in reads + scripts:
             txt = self.t.file_text(j.pre_index, f)
             if txt is not None and L.contains(txt, value):
                 chain.append({**j.brief(), "via": f"the command read {f}"})
                 return self.value_origin(f, value, chain, before_seq=j.seq, depth=depth + 1)
-        for f in self._referenced_files(j):
+        for f in scripts:
             tr = self._last_writer(f, j.seq)
             if tr is not None and tr.kind == "step" and tr.step is not None:
                 chain.append({**tr.step.brief(), "via": f"wrote {f}, which the command ran"})
@@ -454,6 +476,8 @@ class Blamer:
             if tr is not None and tr.kind == "gap":
                 chain.append({"via": f"{f} changed with no recorded step", "gap": tr.gap})
                 return Origin("gap", source=tr.gap, note=f"{f} changed outside any step")
+        if not fallback:
+            return None
         return Origin("agent", step=j, note="the command itself produced the value")
 
     def _subagent_step(self, j: Step, value: str) -> Step | None:

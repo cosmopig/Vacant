@@ -75,7 +75,7 @@ def cmd_do(args) -> int:
     res = __import__("vacant_network.adapters.run", fromlist=["do"]).do(
         task, agent=agent, build=build, prompt=prompt, in_place=args.in_place,
         timeout_s=args.timeout, attempts=args.attempts, sandbox=args.sandbox,
-        feedback=lambda r: feedback_text(r, task.contract))
+        feedback=lambda r: feedback_text(r, task.contract), feedback_mode=args.feedback_mode)
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
@@ -229,6 +229,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-hooks", action="store_true",
                    help="do not add Vacant's per-run hooks (process + workspace only)")
     p.add_argument("--sandbox", default="auto")
+    p.add_argument("--feedback-mode", choices=("localized", "generic", "none"),
+                   default="localized",
+                   help="what the next attempt is told: the traced findings (default), the "
+                        "generic check summary, or nothing (a fresh re-draw)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_do, extra=[])
 

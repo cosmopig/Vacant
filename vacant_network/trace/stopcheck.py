@@ -100,7 +100,7 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
     # 後果（只有事實層進信譽；輸入錯記來源；缺口記整合覆蓋率）——也簽進病歷（K6）
     book = A.ActorBook()
     for ev in A.consequences(book, blames, contract=contract, workspace=rec.workspace,
-                             finding_id=F.finding_id):
+                             finding_id=F.finding_id, platform=rec.last_platform()):
         rec.append("consequence", ev)
     state["outcome"] = res.get("outcome")
     st_path.write_text(json.dumps(state), encoding="utf-8")

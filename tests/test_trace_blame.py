@@ -163,3 +163,31 @@ def test_value_fixed_later_moves_the_blame_to_whoever_reintroduced_it(proj):
     _step(rec, "t3", SUB, "Edit", {"new_string": "Total: 999"}, write=(p / "report.md", "Total: 999\n"))
     [b] = _final_blame(proj)
     assert b["step"]["step"] == "t3" and b["confidence"] == "provable"
+
+
+def test_numbers_match_as_whole_tokens_only():
+    from vacant_network.trace import locate as L
+    assert not L.contains("Write the Q3 report (v2, x_10)", "3")
+    assert not L.contains("Write the Q3 report (v2, x_10)", "10")
+    assert not L.contains("population 30720", "3072")
+    assert L.contains("Total: 3,072.", "3072") and L.contains("(3)", "3")
+
+
+def test_encoded_shell_write_still_traces_what_the_agent_read(proj):
+    """劇本（和不少 agent）用 `printf <base64> | base64 -d > report.md` 寫檔：值不在指令字串裡，
+    不可以因此就說「指令自己產生的」——先看行動者之前讀到了什麼（2026-09-24 e2e 抓到的）。"""
+    import base64
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Bash", {"command": "cat data/cities.csv"},
+          {"stdout": "city,population\nSpringfield,3072\n"})
+    b64 = base64.b64encode(b"Population: 3072\n").decode()
+    _step(rec, "t2", MAIN, "Bash", {"command": f"printf '%s' {b64} | base64 -d > report.md"},
+          write=(p / "report.md", "Population: 3072\n"))
+    b = B.blame_location(B.Trace(rec), Location("report.md", 1, value="3072"), contract=c)
+    assert (b["fault_class"], b["confidence"]) == ("input", "lineage_exact")
+    # 而真的沒有讀過、指令裡也看不到的值：仍然是寫下它的那一步
+    b64 = base64.b64encode(b"Total: 999\n").decode()
+    _step(rec, "t3", MAIN, "Bash", {"command": f"printf '%s' {b64} | base64 -d > report.md"},
+          write=(p / "report.md", "Total: 999\n"))
+    [f] = _final_blame(proj)
+    assert f["step"]["step"] == "t3" and f["confidence"] == "provable"

@@ -204,6 +204,17 @@ class Recorder:
         if key not in st["sessions"]:
             st["sessions"][key] = {"first_seen": time.time(), "closed": False}
             self._append("session_seen", {"actor": actor.to_json()})
+        if actor.model and not actor.agent:
+            # 主 agent 自稱的模型（掛鉤不是每個事件都帶）：工作階段結束記結果時用同一格
+            st["sessions"][key]["model"] = actor.model
+        st["last_session"] = key
+
+    def session_info(self, platform: str, session: str) -> dict[str, Any]:
+        return dict(self._state()["sessions"].get(f"{platform}:{session}") or {})
+
+    def last_platform(self) -> str | None:
+        key = self._state().get("last_session")
+        return str(key).split(":", 1)[0] if key else None
 
     # ── the two hook points ──────────────────────────────────────────
     def pre(self, step: str, actor: Actor, tool: str, tool_input: Any) -> dict[str, Any]:

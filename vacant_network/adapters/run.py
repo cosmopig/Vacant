@@ -45,6 +45,7 @@ from ..intake.contract import Contract
 from .hookpolicy import vacant_state_dir
 
 COPY_SKIP = frozenset({".git", "node_modules", "__pycache__", ".venv", ".pytest_cache"})
+FEEDBACK_MODES = ("localized", "generic", "none")
 #: `.git` 裡**會影響下一次 git 指令行為**的部分（objects 是內容定址的，多了不改變行為）。
 _GIT_WATCH = ("config", "HEAD", "index", "packed-refs", "hooks", "refs", "info")
 
@@ -209,8 +210,18 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
 def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Launch],
        prompt: str, in_place: bool = False, timeout_s: float = 1800.0,
        attempts: int | None = None, sandbox: str = "auto",
-       feedback: Callable[[dict[str, Any]], str] | None = None) -> dict[str, Any]:
-    """跑一次（或契約允許的幾次）agent，交件，回裁決。不發布。"""
+       feedback: Callable[[dict[str, Any]], str] | None = None,
+       feedback_mode: str = "localized") -> dict[str, Any]:
+    """跑一次（或契約允許的幾次）agent，交件，回裁決。不發布。
+
+    `feedback_mode`（下一次嘗試的提示裡放什麼；預註冊實驗的三臂只差這一個）：
+    `localized`＝追緝過的回饋（位置、應有的值、第一次出現的步驟）；`generic`＝原本的泛用回饋；
+    `none`＝**重抽**：每一次都從乾淨的工作區、原提示重來（`in_place` 時無法重抽 ⇒ 拒絕）。
+    同一個值也經環境變數傳給 agent 的回合邊界掛鉤，讓工作階段裡的回饋走同一種。"""
+    if feedback_mode not in FEEDBACK_MODES:
+        raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
+    if feedback_mode == "none" and in_place and (attempts or task.contract.max_attempts) > 1:
+        raise ValueError("feedback_mode=none re-draws from a clean workspace; not with --in-place")
     run_id = time.strftime("%Y%m%dT%H%M%S") + f"-{os.getpid()}"
     base = work_root() / task.task_id / run_id
     try:
@@ -235,7 +246,12 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
             try:
                 origin_before = None if in_place else origin_digest(task.contract.base_dir,
                                                                     skip)
+                if feedback_mode == "none" and i > 1:
+                    # 重抽：乾淨的工作區、原提示（上一次的痕跡不留給這一次）
+                    ws = prepare_workspace(task.contract, base / f"ws{i}")
+                    traced = _trace_start(task, ws, prompt, in_place=False)
                 launch = build(cur_prompt, ws)
+                launch.env = {**launch.env, "VACANT_FEEDBACK_MODE": feedback_mode}
             except Exception as e:  # noqa: BLE001 — 跑之前就壞了：也要上帳本，不是丟 traceback
                 task.ledger.append("infra_void", {"stage": "before_attempt", "attempt": i,
                                                   "error": f"{type(e).__name__}: {e}"[:500]})
@@ -282,6 +298,9 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
             history.append({"attempt": i, **r, "workspace_escape": escaped,
                             "escaped_paths": changed[:50],
                             "outcome": res.get("outcome"),
+                            "failing_required": sum(
+                                1 for x in res.get("results") or []
+                                if x.get("required", True) and x.get("status") != "PASS"),
                             "artifact_sha256": res.get("artifact_sha256")})
             last = res.get("outcome") == "accept" or res.get("void") or i == n_max
             tr = _trace_attempt(traced, res, why=None if not last else (
@@ -297,7 +316,9 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                                   "evidence, disagreement) is not something another attempt "
                                   "can fix")
                 break
-            if tr and tr.get("text"):
+            if feedback_mode == "none":
+                cur_prompt = prompt
+            elif feedback_mode == "localized" and tr and tr.get("text"):
                 # 追緝過的回饋：哪個檔哪一行、應該是多少、第一次出現在第幾步（沒有行動者）
                 cur_prompt = prompt + "\n\n" + str(tr["text"])
             elif feedback is not None:

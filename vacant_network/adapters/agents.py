@@ -356,7 +356,10 @@ g.__vacantArgs = g.__vacantArgs || new Map();           // callID -> args (for t
 // Who is acting: a child session is a sub-agent; the trace keys the work by the root session.
 function who(sessionID) {
   const parent = g.__vacantChildSessions.get(sessionID);
-  if (!parent) return { session_id: sessionID };
+  if (!parent) {
+    if (sessionID && !g.__vacantMainSession) g.__vacantMainSession = sessionID;
+    return { session_id: sessionID };
+  }
   let root = parent;
   for (let i = 0; i < 16 && g.__vacantChildSessions.has(root); i++) root = g.__vacantChildSessions.get(root);
   return { session_id: sessionID, parent_session_id: parent, root_session_id: root };
@@ -389,6 +392,8 @@ export const VacantPlugin = async ({ client, directory }) => {
       const props = event.properties || {};
       if (event.type === "session.created" && props.info && props.info.parentID) {
         g.__vacantChildSessions.set(props.info.id, props.info.parentID);
+      } else if (event.type === "session.created" && props.info && !g.__vacantMainSession) {
+        g.__vacantMainSession = props.info.id;
       }
       if (event.type === "session.idle" && !NONINTERACTIVE) {
         const id = props.sessionID;
@@ -409,7 +414,7 @@ export const VacantPlugin = async ({ client, directory }) => {
     dispose: async () => {
       if (g.__vacantEnded) return;
       g.__vacantEnded = true;
-      await ask("session_end", { cwd: directory });
+      await ask("session_end", { cwd: directory, session_id: g.__vacantMainSession });
     },
   };
 };
