@@ -120,3 +120,5 @@ check_repo_links 乾淨。對抗審查 workflow 與全套測試在跑（commit �
 **下一步**：審查結果逐條處理；然後子 agent 的端到端（假模型演子 agent：子 agent 寫錯、主 agent 照抄 ⇒ 追緝指到子 agent）。
 
 **偏移檢查**：沒有碰真模型 API；沒有改凍結項；閘門語意沒動；看不到的一律記「沒觀察到」，沒有怪任何人；給 agent 的文字沒變。
+- 補記（2026-09-24T19:40Z 那一筆）：全套測試失敗集合**等於基線**（`test_cert_*` 5 條＋`test_exhibit_twin_wiring.py`
+  5 條 setup error；逐條 diff 為空）。
