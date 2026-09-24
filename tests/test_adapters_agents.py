@@ -105,7 +105,9 @@ def test_codex_run_overrides_are_valid_toml_values():
 def test_claude_run_settings_keep_hooks_alive_against_project_disable():
     s = A.claude_run_settings()
     assert s["disableAllHooks"] is False
-    assert set(s["hooks"]) == {"PreToolUse", "Stop"}
+    # 追緝的病歷要 PostToolUse(Failure)／SubagentStop／SessionEnd（DECISION_20260924_ACCOUNTABLE_TRACE）
+    assert set(s["hooks"]) == {"PreToolUse", "PostToolUse", "PostToolUseFailure", "SubagentStop",
+                               "UserPromptSubmit", "Stop", "SessionEnd"}
 
 
 def test_claude_refuses_bare():

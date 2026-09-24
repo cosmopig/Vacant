@@ -348,25 +348,61 @@ def _bump_round(session_id: str | None) -> int:
     return n
 
 
-def decide_stop(ev: HookEvent, contract, *, check_fn) -> HookDecision:
+def decide_stop(ev: HookEvent, contract, *, check_fn, localize=None) -> HookDecision:
+    """`localize(res, why_open) -> {"text", "summary", "report", "blames"} | None`：可究責追緝
+    （`trace/stopcheck.py`）。給了就用**有位置、有來源**的回饋取代泛用回饋；agent 不會再被要求
+    繼續的時候（輪數用完、只剩 agent 改不動的、過了但有提示性問題），未解問題以
+    `record["user_message"]` 交給人（Claude Code 顯示成 `systemMessage`），不就此消失。"""
     if contract is None or not contract.hooks.get("stop_check", True):
         return HookDecision("allow")
     res = check_fn(contract, contract.base_dir)
     outcome = res.get("outcome")
-    rec = {"outcome": outcome, "coverage": res.get("coverage")}
+    rec: dict[str, Any] = {"outcome": outcome, "coverage": res.get("coverage")}
+
+    def traced(why: str | None) -> dict[str, Any] | None:
+        if localize is None:
+            return None
+        try:
+            out = localize(res, why)
+        except Exception as e:  # noqa: BLE001 — 追緝壞掉不影響裁決，泛用回饋照送
+            rec["trace_error"] = f"{type(e).__name__}: {e}"[:300]
+            return None
+        if out:
+            rec["trace"] = {"findings": len(out.get("blames") or []), "report": out.get("report")}
+            if why is not None and out.get("summary"):
+                rec["user_message"] = out["summary"]
+        return out
+
+    open_any = [r for r in res.get("results", []) if r.get("status") != "PASS"]
     if outcome == "accept":
-        _rounds_file(ev.session_id).unlink(missing_ok=True)   # 過了 ⇒ 之後的問題有新的輪數
-        return HookDecision("allow", "", rec)
+        # 沒有問題也走一次追緝：之前開著的問題在病歷裡記成「已解決」；人標記的錯處還在
+        # （`vacant flag`）⇒ 契約過了也照樣回饋給 agent（有輪數上限）——標記不擋收件
+        t = traced("accepted; advisory checks still open" if open_any else None)
+        flags = [b for b in (t or {}).get("blames") or []
+                 if str(b.get("claim", "")).startswith("flag:")]
+        if not flags:
+            _rounds_file(ev.session_id).unlink(missing_ok=True)   # 過了 ⇒ 之後的問題有新的輪數
+            return HookDecision("allow", "", rec)
+        n = _bump_round(ev.session_id)
+        rec.update(round=n, flags_open=len(flags))
+        if n > int(contract.hooks.get("max_feedback_rounds", 3)) or not (t or {}).get("text"):
+            rec["rounds_exhausted"] = True
+            traced("feedback rounds used up; places a person marked as wrong are still there")
+            return HookDecision("allow", "", rec)
+        return HookDecision("continue", str((t or {})["text"]), rec)
     required_open = [r for r in res.get("results", [])
                      if r.get("required", True) and r.get("status") != "PASS"]
     if required_open and all(r.get("status") in ("UNKNOWN", "CONFLICT") for r in required_open):
         # 等人工審查、等獨立證據、審查者意見分歧——agent 改工作區改不動這些。
         # 把它推回去只會燒掉回饋輪數（或讓它試圖自己「補」一個審查）。
         rec["not_agent_fixable"] = True
+        traced("waiting on review or evidence the agent cannot supply")
         return HookDecision("allow", "", rec)
     n = _bump_round(ev.session_id)
     rec["round"] = n
     if n > int(contract.hooks.get("max_feedback_rounds", 3)):
         rec["rounds_exhausted"] = True
+        traced("feedback rounds used up; the agent stopped with these open")
         return HookDecision("allow", "", rec)
-    return HookDecision("continue", feedback_text(res, contract), rec)
+    t = traced(None)
+    return HookDecision("continue", (t or {}).get("text") or feedback_text(res, contract), rec)

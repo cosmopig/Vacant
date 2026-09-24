@@ -51,6 +51,18 @@ def cmd_do(args) -> int:
         build = A.generic_build(shlex.split(args.cmd))
         agent = "generic"
     else:
+        if args.agent == "auto":
+            # 非文字的機會通道（DECISION_20260924_ACCOUNTABLE_TRACE §4.7）：依這類任務的紀錄挑；
+            # 次數不夠就輪流探索，不拿小樣本做決定
+            from ..trace import actors as TA
+            have = [n for n, b in A.detect().items() if b]
+            if not have:
+                print("vacant do: --agent auto found none of the four agents on PATH",
+                      file=sys.stderr)
+                return 2
+            pick = TA.pick_agent(TA.ActorBook(), TA.family_of(task.contract), have)
+            print(f"[vacant do] auto → {pick['agent']} ({pick['why']})", file=sys.stderr)
+            args.agent = pick["agent"]
         if args.agent not in A.AGENTS:
             print(f"vacant do: unknown agent {args.agent!r} (known: {', '.join(A.AGENTS)}; "
                   f"or use --cmd)", file=sys.stderr)
@@ -77,6 +89,11 @@ def cmd_do(args) -> int:
         for r in res.get("results", []):
             if r["status"] != "PASS":
                 print(f"  {r['claim_id']}: {r['status']} — {r['detail'][:200]}")
+        tr = res.get("trace") or {}
+        if tr.get("summary"):
+            print("  " + str(tr["summary"]).replace("\n", "\n  "))
+        elif tr.get("report") and oc != "accept":
+            print(f"  open issues: {tr['report']}")
         if oc == "accept":
             print("  next: `vacant release` (nothing has been published yet)")
     if res.get("void"):
@@ -198,7 +215,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("do", help="run an agent headless in an isolated workspace, then submit "
                                  "its work to the intake")
-    p.add_argument("agent", nargs="?", default="", help=f"one of {', '.join(A.AGENTS)}")
+    p.add_argument("agent", nargs="?", default="",
+                   help=f"one of {', '.join(A.AGENTS)}, or `auto` (pick by this task family's "
+                        f"record; explores until each has enough runs)")
     p.add_argument("--cmd", help="any CLI instead: a template with {prompt} / {workspace}")
     p.add_argument("--prompt")
     p.add_argument("--prompt-file")

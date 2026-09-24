@@ -224,6 +224,7 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                 "attempts": [], "workspace": None, "run_dir": str(base), "agent": agent}
     n_max = attempts or task.contract.max_attempts
     skip = _skip_dirs(task.contract)
+    traced = _trace_start(task, ws, prompt, in_place=in_place)
     history: list[dict[str, Any]] = []
     cur_prompt = prompt
     res: dict[str, Any] = {}
@@ -282,7 +283,13 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                             "escaped_paths": changed[:50],
                             "outcome": res.get("outcome"),
                             "artifact_sha256": res.get("artifact_sha256")})
-            if res.get("outcome") == "accept" or res.get("void") or i == n_max:
+            last = res.get("outcome") == "accept" or res.get("void") or i == n_max
+            tr = _trace_attempt(traced, res, why=None if not last else (
+                "the last attempt" if res.get("outcome") != "accept" else None))
+            if tr:
+                history[-1]["trace"] = {k: tr.get(k) for k in ("report", "summary")}
+                res["trace"] = history[-1]["trace"]
+            if last:
                 break
             if not any(x.get("status") == "FAIL" and x.get("required", True)
                        for x in res.get("results", [])):
@@ -290,12 +297,64 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                                   "evidence, disagreement) is not something another attempt "
                                   "can fix")
                 break
-            if feedback is not None:
+            if tr and tr.get("text"):
+                # 追緝過的回饋：哪個檔哪一行、應該是多少、第一次出現在第幾步（沒有行動者）
+                cur_prompt = prompt + "\n\n" + str(tr["text"])
+            elif feedback is not None:
                 cur_prompt = prompt + "\n\n" + feedback(res)
     finally:
         _restore_signal_handlers(old_handlers)
+    _trace_outcome(traced, res, agent=agent, run_id=run_id)
     return {**res, "attempts": history, "workspace": str(ws), "run_dir": str(base),
             "agent": agent}
+
+
+# ── 可究責追緝（`vacant_network/trace/`；DECISION_20260924_ACCOUNTABLE_TRACE）────────
+# 追緝壞掉只記錯，不影響交件與裁決（和掛鉤同一條：誠實邊界不在這一層）。
+
+def _trace_start(task: flow.Task, ws: pathlib.Path, prompt: str, *,
+                 in_place: bool) -> dict[str, Any] | None:
+    """工作區的起點（之後每一步的差異都以它為準）＋任務訊息（追緝判斷「是不是任務給的值」）。"""
+    try:
+        from ..intake import contract as C
+        from ..trace.recorder import Recorder
+        contract = task.contract
+        if not in_place and task.contract.path is not None:
+            rel = task.contract.path.resolve().relative_to(task.contract.base_dir)
+            contract = C.load(ws / rel)          # 隔離工作區裡那一份：輸入從工作區讀
+        rec = Recorder(ws)
+        rec.checkpoint("task_start")
+        rec.prompt(prompt, source="vacant do")
+        return {"rec": rec, "contract": contract, "ws": ws}
+    except Exception as e:  # noqa: BLE001
+        task.ledger.append("trace_error", {"stage": "start", "error": str(e)[:300]})
+        return None
+
+
+def _trace_attempt(traced: dict[str, Any] | None, res: dict[str, Any],
+                   why: str | None) -> dict[str, Any] | None:
+    if traced is None or not res.get("results"):
+        return None
+    try:
+        from ..trace.stopcheck import localize
+        return localize(traced["contract"], res, cwd=str(traced["ws"]), why_open=why,
+                        workspace=traced["ws"])
+    except Exception as e:  # noqa: BLE001
+        res.setdefault("trace_error", f"{type(e).__name__}: {e}"[:300])
+        return None
+
+
+def _trace_outcome(traced: dict[str, Any] | None, res: dict[str, Any], *, agent: str,
+                   run_id: str) -> None:
+    if traced is None or res.get("outcome") is None:
+        return
+    try:
+        from ..trace import actors as A
+        A.record_outcome(A.ActorBook(), session_key=f"do:{run_id}", actor={"platform": agent},
+                         accepted=res.get("outcome") == "accept", contract=traced["contract"],
+                         workspace=traced["ws"])
+    except Exception as e:  # noqa: BLE001
+        res.setdefault("trace_error", f"{type(e).__name__}: {e}"[:300])
 
 
 def _raise_interrupted(signum: int, _frame: Any) -> None:

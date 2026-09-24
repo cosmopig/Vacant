@@ -11,10 +11,10 @@ JSON。這裡做三件事，而且**只有翻譯是各 agent 不同的**：
 
 | agent | 事件（原生） | 拒絕工具的方式 | 回合結束時要求繼續 |
 |---|---|---|---|
-| Claude Code | `PreToolUse`／`Stop`／`SessionEnd` | stdout `hookSpecificOutput.permissionDecision="deny"` | stdout `{"decision":"block","reason":…}` |
-| Codex | `PreToolUse`／`Stop`／`SessionEnd` | exit 2＋stderr 理由（2026-09-20 實測） | stdout `{"decision":"block","reason":…}` |
-| OpenCode | 外掛轉送 `tool.execute.before`／`session.idle` | 外掛讀我們的 JSON 後 `throw` | 外掛把理由當下一則訊息送回 session |
-| pi | extension 轉送 `tool_call`／`agent_before_settle`／`session_shutdown` | extension 回 `{block:true, reason}` | extension 把理由當下一則訊息送回 |
+| Claude Code | `PreToolUse`／`PostToolUse(Failure)`／`SubagentStop`／`Stop`／`SessionEnd` | stdout `hookSpecificOutput.permissionDecision="deny"` | stdout `{"decision":"block","reason":…}` |
+| Codex | `PreToolUse`／`PostToolUse`／`SubagentStop`／`Stop`／`SessionEnd` | exit 2＋stderr 理由（2026-09-20 實測） | stdout `{"decision":"block","reason":…}` |
+| OpenCode | 外掛轉送 `tool.execute.before/after`／`session.idle` | 外掛讀我們的 JSON 後 `throw` | 外掛把理由當下一則訊息送回 session |
+| pi | extension 轉送 `tool_call`／`tool_result`／`agent_before_settle`／`session_shutdown` | extension 回 `{block:true, reason}` | extension 把理由當下一則訊息送回 |
 
 OpenCode 與 pi 的外掛是我們自己寫的（`adapters/agents.py` 裡的原始碼），所以它們跟這支
 之間用的是**我們的**格式：stdout 一行 `{"action": "allow|deny|continue", "reason": …}`。
@@ -45,11 +45,12 @@ from .hookpolicy import (NON_TERMINAL_END_REASONS, HookDecision, HookEvent, deci
 
 #: 原生事件名 → 正規化種類
 EVENT_MAP: dict[str, dict[str, str]] = {
-    "claude": {"PreToolUse": "pre_tool", "PostToolUse": "post_tool", "Stop": "stop",
-               "SubagentStop": "other", "SessionEnd": "session_end",
-               "SessionStart": "session_start", "UserPromptSubmit": "other"},
+    "claude": {"PreToolUse": "pre_tool", "PostToolUse": "post_tool",
+               "PostToolUseFailure": "post_tool", "Stop": "stop", "SubagentStop": "other",
+               "SessionEnd": "session_end", "SessionStart": "session_start",
+               "UserPromptSubmit": "other"},
     "codex": {"PreToolUse": "pre_tool", "PostToolUse": "post_tool", "Stop": "stop",
-              "SessionEnd": "session_end", "SessionStart": "session_start",
+              "SubagentStop": "other", "SessionEnd": "session_end", "SessionStart": "session_start",
               "UserPromptSubmit": "other"},
     "opencode": {"pre_tool": "pre_tool", "post_tool": "post_tool", "stop": "stop",
                  "session_end": "session_end", "session_start": "session_start"},
@@ -133,6 +134,9 @@ def render(agent: str, ev: HookEvent, d: HookDecision) -> tuple[str, str, int]:
                 "permissionDecisionReason": d.reason}}), "", 0
         if ev.kind == "stop" and d.action == "continue":
             return json.dumps({"decision": "block", "reason": d.reason}), "", 0
+        if ev.kind == "stop" and d.record.get("user_message"):
+            # 不再要求 agent 繼續，但問題還在 ⇒ 直接顯示給人（不進模型的上下文）
+            return json.dumps({"systemMessage": d.record["user_message"]}), "", 0
         return "", "", 0
     if agent == "codex":
         if ev.kind == "pre_tool" and d.action == "deny":
@@ -171,6 +175,24 @@ def _spawn_submit(contract_path: Any, agent: str) -> int | None:
         return None
 
 
+def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contract: Any,
+           d: HookDecision) -> None:
+    """可究責追緝的病歷（`trace/capture.py`）。壞掉只記錯、不影響裁決（誠實邊界 1）；
+    記不到的那一段在下一步會變成缺口。"""
+    try:
+        from ..trace import capture
+        capture.observe(agent, event, payload, cwd=ev.cwd, contract=contract, decision=d)
+    except Exception as e:  # noqa: BLE001
+        _log("errors.jsonl", {"agent": agent, "event": event,
+                              "error": f"trace: {type(e).__name__}: {e}"[:500]})
+
+
+def _localize(contract: Any, res: dict[str, Any], ev: HookEvent,
+              why: str | None) -> dict[str, Any] | None:
+    from ..trace import stopcheck
+    return stopcheck.localize(contract, res, cwd=ev.cwd, why_open=why)
+
+
 def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, int]:
     from ..intake import contract as C
 
@@ -188,7 +210,8 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         d = decide_pre_tool(ev, contract)
     elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP"):
         from ..intake import flow
-        d = decide_stop(ev, contract, check_fn=flow.check)
+        d = decide_stop(ev, contract, check_fn=flow.check,
+                        localize=lambda res, why: _localize(contract, res, ev, why))
     elif ev.kind == "session_end" and contract is not None \
             and ev.reason in NON_TERMINAL_END_REASONS:
         d = HookDecision("allow", "", {"submit_skipped": f"reason={ev.reason} (not the end "
@@ -201,10 +224,13 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         #   改成分離的背景行程，掛鉤立刻返回；交件結果（含失敗）照樣進帳本。
         pid = _spawn_submit(contract.path, agent)
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
+    _trace(agent, event, payload, ev, contract, d)
     rec = {"agent": agent, "event": event, "kind": ev.kind, "tool": ev.tool,
            "action": d.action, "contract": str(cpath) if cpath else None,
            "command_sha256": (hashlib.sha256(ev.command.encode()).hexdigest()
-                              if ev.command else None), **d.record}
+                              if ev.command else None),
+           # 給人的訊息含繳付物裡的值：不進事件紀錄（誠實邊界 2），它在病歷目錄的報告裡
+           **{k: v for k, v in d.record.items() if k != "user_message"}}
     _log("events.jsonl", rec)
     if contract is not None and (d.action != "allow" or ev.kind in ("stop", "session_end")):
         try:

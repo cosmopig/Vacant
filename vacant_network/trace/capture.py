@@ -1,0 +1,241 @@
+"""capture — **四個 agent 的原生掛鉤 → 病歷**：誰（行動者）、哪一步（步驟 id）、輸出、逐字稿。
+
+這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §三、§4.8 K1/K6/K12）：
+
+`adapters/hook.py` 每收到一個掛鉤事件就叫 `observe()`。這裡只做翻譯，記錄本身在 `recorder.py`：
+
+| 平台 | 步驟 id | 行動者（子 agent） | 模型 | 失敗 |
+|---|---|---|---|---|
+| Claude Code | `tool_use_id` | `agent_id`／`agent_type`（只在子 agent 裡出現） | 掛鉤沒有；工作階段結束時從逐字稿補（`claimed`） | `PostToolUseFailure.error` |
+| Codex | `tool_use_id`（＝Responses `call_id`） | `agent_id`／`agent_type`；`session_id` 是根工作階段 | 掛鉤帶**要求的** slug（`claimed`） | 沒有失敗事件（apply_patch 失敗不發 PostToolUse ⇒ `post_missing`） |
+| OpenCode | 外掛送 `callID` | 子 session（外掛以 `session.created.parentID` 記下） | — | `output` 內容 |
+| pi | 外掛送 `toolCallId` | pi 沒有內建子 agent | 外掛送 `ctx.model.id`（`claimed`） | `isError` |
+
+量測底稿：`ops/accountability/capture/`（[RUN]＝真 binary＋假模型實跑）。
+
+**什麼時候記**：專案有契約（`vacant.toml`）⇒ 記在契約所在的專案根；否則只在
+`VACANT_TRACE=1` 時記在 `cwd`。`VACANT_TRACE=0` 一律不記。家目錄與 `/` 不記（一掃就是整台機器）。
+
+## 誠實邊界（改碼請保留）
+
+1. 這支在掛鉤行程裡跑，**任何例外都由呼叫端吞掉並記錯**（`hook.py` 誠實邊界 1）——
+   記不到的那一段，下一次 `pre` 會把改動記成缺口，而不是讓 agent 停擺。
+2. 逐字稿是 agent 自己寫的檔（Claude 在 `~/.claude/projects/`、Codex 的 rollout）：
+   工作階段結束時把它**封存**（雜湊＋內容進版本庫＋簽進鏈），之後的竄改可察覺；
+   封存之前的竄改看不出來。從逐字稿讀出的模型 id 一律標 `claimed`。
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import pathlib
+import time
+from typing import Any
+
+from . import recorder as R
+
+#: 原生事件名 → 這支認得的動作（沒列的不記）
+ACTIONS = {
+    "UserPromptSubmit": "prompt", "prompt": "prompt",
+    "PreToolUse": "pre", "PostToolUse": "post", "PostToolUseFailure": "post",
+    "SubagentStop": "subagent_stop", "Stop": "stop", "SessionEnd": "session_end",
+    "pre_tool": "pre", "post_tool": "post", "stop": "stop", "session_end": "session_end",
+}
+MAX_TRANSCRIPT = 64 * 1024 * 1024
+
+
+def workspace_for(cwd: str | None, contract: Any = None) -> pathlib.Path | None:
+    flag = os.environ.get("VACANT_TRACE", "").strip()
+    if flag == "0":
+        return None
+    if contract is not None:
+        return pathlib.Path(contract.base_dir).resolve()
+    if flag != "1" or not cwd:
+        return None
+    ws = pathlib.Path(cwd).resolve()
+    if ws == pathlib.Path(ws.anchor) or ws == pathlib.Path.home().resolve():
+        return None
+    return ws
+
+
+def actor_of(agent: str, payload: dict[str, Any]) -> R.Actor:
+    sid = str(payload.get("session_id") or "unknown")
+    if agent in ("claude", "codex"):
+        return R.Actor(agent, sid, agent=_s(payload.get("agent_id")),
+                       agent_type=_s(payload.get("agent_type")),
+                       model=_s(payload.get("model")))
+    if agent == "opencode":
+        parent = _s(payload.get("parent_session_id"))
+        if parent:          # 子 session ＝ 子 agent；工作階段鍵用根 session
+            return R.Actor(agent, str(payload.get("root_session_id") or parent),
+                           agent=sid, agent_type=_s(payload.get("agent")) or "subagent",
+                           model=_s(payload.get("model")))
+        return R.Actor(agent, sid, model=_s(payload.get("model")))
+    return R.Actor(agent, sid, model=_s(payload.get("model")))
+
+
+def _s(v: Any) -> str | None:
+    return str(v) if v not in (None, "") else None
+
+
+def step_id(agent: str, payload: dict[str, Any], tool: str | None, tool_input: Any) -> str:
+    for k in ("tool_use_id", "call_id", "callID", "toolCallId"):
+        v = payload.get(k)
+        if v:
+            return str(v)
+    # 沒有平台給的 id：同一個工具＋同一份輸入在 pre 與 post 算出同一個 id（重複呼叫會撞在一起，
+    # 那兩步就合成一步——比錯配成別人的步驟好）
+    raw = json.dumps([payload.get("session_id"), payload.get("agent_id"), tool, tool_input],
+                     sort_keys=True, ensure_ascii=False, default=str)
+    return "h:" + hashlib.sha256(raw.encode()).hexdigest()[:16]
+
+
+def _tool_and_input(agent: str, payload: dict[str, Any]) -> tuple[str, Any]:
+    if agent in ("claude", "codex"):
+        return str(payload.get("tool_name") or "?"), payload.get("tool_input") or {}
+    return (str(payload.get("tool") or "?"),
+            payload.get("input") or payload.get("args") or {})
+
+
+def _output_and_error(agent: str, event: str, payload: dict[str, Any]) -> tuple[Any, str | None]:
+    if agent == "claude":
+        if event == "PostToolUseFailure":
+            return None, str(payload.get("error") or "tool failed")
+        return payload.get("tool_response"), None
+    if agent == "codex":
+        return payload.get("tool_response"), None
+    out = payload.get("output")
+    err = payload.get("error")
+    if payload.get("is_error") and not err:
+        err = "tool reported an error"
+    return out, (str(err) if err else None)
+
+
+def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
+            contract: Any = None, decision: Any = None) -> dict[str, Any] | None:
+    """把一個掛鉤事件記進病歷。回傳記下的東西（沒記回 None）。"""
+    action = ACTIONS.get(event) or ACTIONS.get(str(payload.get("hook_event_name") or ""))
+    if action is None:
+        return None
+    ws = workspace_for(cwd, contract)
+    if ws is None:
+        return None
+    rec = R.Recorder(ws)
+    actor = actor_of(agent, payload)
+    t0 = time.perf_counter()
+    out: Any = None
+    if action in ("pre", "post"):
+        tool, tool_input = _tool_and_input(agent, payload)
+        step = step_id(agent, payload, tool, tool_input)
+        if action == "pre" and decision is not None and getattr(decision, "action", "") == "deny":
+            out = rec.denied(step, actor, tool, tool_input, getattr(decision, "reason", ""))
+        elif action == "pre":
+            out = rec.pre(step, actor, tool, tool_input)
+        else:
+            output, error = _output_and_error(agent, event, payload)
+            out = rec.post(step, actor, tool, tool_input, output, error=error)
+    elif action == "prompt":
+        text = payload.get("prompt")
+        out = rec.prompt(str(text), session=actor.session) if text else None
+    elif action == "stop":
+        out = rec.settle(actor, "turn_end")
+    elif action == "subagent_stop":
+        path = payload.get("agent_transcript_path")
+        out = seal_transcript(rec, actor, agent, path, role="subagent") if path else None
+    elif action == "session_end":
+        tp = payload.get("transcript_path")
+        if tp:
+            seal_transcript(rec, actor, agent, tp, role="session")
+        out = rec.close(actor, _s(payload.get("reason")))
+        _outcome(rec, actor, contract)
+    _perf(rec, agent, event, time.perf_counter() - t0)
+    return out if isinstance(out, dict) else {"n": len(out)} if isinstance(out, list) else None
+
+
+def _outcome(rec: R.Recorder, actor: R.Actor, contract: Any) -> None:
+    """工作階段結束：最後一次回合邊界的檢查結果記成主 agent 這一跑的結果（信譽 adoption 維）。
+    這個工作階段沒有檢查過（沒有契約、沒有 Stop）⇒ 不記。"""
+    if contract is None:
+        return
+    try:
+        st = json.loads((rec.dir / "feedback_state.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    if not st.get("outcome"):
+        return
+    from . import actors as A
+    main = {"platform": actor.platform, "session": actor.session, "model": actor.model}
+    if A.record_outcome(A.ActorBook(), session_key=f"{actor.platform}:{actor.session}",
+                        actor=main, accepted=st["outcome"] == "accept", contract=contract,
+                        workspace=rec.workspace):
+        rec.append("consequence", {"kind": "outcome", "accepted": st["outcome"] == "accept",
+                                   "session": actor.session})
+
+
+def _perf(rec: R.Recorder, agent: str, event: str, secs: float) -> None:
+    """掛鉤花了多久（未簽章的量測紀錄；端到端證據拿它算 p95）。"""
+    try:
+        p = rec.dir / "perf.jsonl"
+        with p.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": time.time(), "agent": agent, "event": event,
+                                "ms": round(secs * 1000, 2)}) + "\n")
+    except OSError:
+        pass
+
+
+# ── 逐字稿 ────────────────────────────────────────────────────────────
+
+def models_from_transcript(agent: str, data: bytes) -> dict[str, str]:
+    """步驟 id → 逐字稿**自稱**的模型。Claude：assistant 訊息的 `message.model` 與其中的
+    `tool_use.id`；Codex rollout：最近一個 `turn_context.model` 與 `function_call.call_id`。"""
+    out: dict[str, str] = {}
+    current = None
+    for line in data.decode("utf-8", "replace").splitlines():
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(d, dict):
+            continue
+        if agent == "claude" and d.get("type") == "assistant":
+            msg = d.get("message") or {}
+            model = msg.get("model")
+            for c in msg.get("content") or []:
+                if isinstance(c, dict) and c.get("type") == "tool_use" and c.get("id") and model:
+                    out[str(c["id"])] = str(model)
+        elif agent == "codex":
+            raw_pl = d.get("payload")
+            pl: dict[str, Any] = raw_pl if isinstance(raw_pl, dict) else {}
+            if d.get("type") == "turn_context" and pl.get("model"):
+                current = str(pl["model"])
+            if d.get("type") == "response_item" and current:
+                cid = pl.get("call_id")
+                if cid and pl.get("type") in ("function_call", "custom_tool_call",
+                                               "local_shell_call"):
+                    out[str(cid)] = current
+    return out
+
+
+def seal_transcript(rec: R.Recorder, actor: R.Actor, agent: str, path: Any, *,
+                    role: str) -> dict[str, Any] | None:
+    p = pathlib.Path(str(path)).expanduser()
+    try:
+        size = p.stat().st_size
+        if size > MAX_TRANSCRIPT:
+            data = None
+        else:
+            data = p.read_bytes()
+    except OSError as e:
+        with rec._lock():
+            return rec._append("coverage", {"actor": actor.to_json(), "role": role,
+                                            "missing": "transcript", "path": str(p),
+                                            "error": str(e)[:200]})
+    payload: dict[str, Any] = {"actor": actor.to_json(), "role": role, "path": str(p),
+                               "size": size, "observed_by": "agent_claim"}
+    if data is not None:
+        payload["sha256"] = rec.blobs.put_bytes(data)
+        models = models_from_transcript(agent, data)
+        payload["models_claimed"] = models
+    with rec._lock():
+        return rec._append("transcript", payload)

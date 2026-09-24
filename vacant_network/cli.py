@@ -1161,6 +1161,8 @@ _INTAKE_TOP: tuple[str, ...] = ("contract", "check", "submit", "review", "reveri
 #: ⚠ `install`／`uninstall` 以前進 `possess`（模型通道常駐安裝）；現在進通用安裝器，
 #:   舊行為在 `vacant possess install` 或 `vacant install --observe-model`。
 _ADAPTER_TOP: tuple[str, ...] = ("do", "hook", "adapters", "install", "uninstall")
+#: 可究責追緝（`vacant_network/trace/`，2026-09-24）：看病歷、人指出錯處。
+_TRACE_TOP: tuple[str, ...] = ("trace", "flag")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1171,6 +1173,9 @@ def main(argv: list[str] | None = None) -> int:
     if raw[:1] and raw[0] in _ADAPTER_TOP:
         from .adapters.cli import main as adapters_main
         return adapters_main(raw)
+    if raw[:1] and raw[0] in _TRACE_TOP:
+        from .trace.cli import main as trace_main
+        return trace_main(raw)
     if raw[:1] == ["run"] and "--" in raw[1:]:
         return _agent_run_shim(raw[1:])
     if raw[:1] == ["possess"]:

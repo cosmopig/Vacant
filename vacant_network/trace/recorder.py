@@ -20,7 +20,10 @@
    （論文 4.6.3 實測）。所以本檔另外用 Vacant **自己看到的**工作區差異對帳：沒有任何一步解釋得了的
    改動記成 `unrecorded_change`——**究責缺口，不歸給任何人**。完備性要外部錨定才能更強。
 2. 同時進行的兩步（平行工具呼叫）之間的寫入分不清是誰的：記成 `concurrent_with`，
-   追緝把它標成「多人之一」，不硬選一個。
+   追緝把它標成「多人之一」，不硬選一個。工具呼叫進行中、掛鉤外面發生的改動（使用者自己的編輯、
+   背景行程）也會算進那一步——`post` 之後才寫檔的背景行程則會在下一次看的時候變成缺口。
+   `pre` 之後一直沒等到 `post` 的步驟（Codex 的 apply_patch 失敗與長跑行程不發 PostToolUse）
+   在回合結束、工作階段結束或開了 `STALE_S` 秒之後收尾，標 `post_missing`。
 3. 讀取的判定是**宣告式**的（工具輸入裡的路徑、網址、指令輸出本身）；殼層指令在執行中讀了哪些檔，
    掛鉤看不到（要系統呼叫追蹤才看得到，這裡沒有）。
 """
@@ -43,8 +46,11 @@ from . import workspace as W
 
 TRACE_SCHEMA = "vacant-trace/1"
 EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_change",
-                         "transcript", "session_closed", "finding", "flag"})
+                         "transcript", "session_closed", "finding", "flag", "coverage",
+                         "consequence", "prompt"})
 MAX_OUTPUT_BLOB = 2 * 1024 * 1024
+#: 一個步驟開著超過這麼久還沒等到 `post`，就當它不會來了（和 Stop 掛鉤的上限同一個數量級）
+STALE_S = 900.0
 #: 事件裡直接列出的清單上限；超過的整份存進版本庫，事件帶它的 sha256（鏈上每筆有 64KB 上限）
 INLINE_LIST = 64
 _LIST_KEYS = ("writes", "reads", "changes")
@@ -205,6 +211,7 @@ class Recorder:
         with self._lock():
             st = self._state()
             self._ensure_session(st, actor)
+            self._finish_open(st, "stale", older_than=STALE_S)
             prev = self.load_index(st["last_index"]) if st.get("last_index") else None
             idx = self._scan(prev)
             gap = []
@@ -263,20 +270,109 @@ class Recorder:
                 "pre_index": base_sha, "post_index": idx_sha,
                 "concurrent_with": (pend or {}).get("concurrent_with") or [],
                 "pre_missing": pend is None, "baseline_missing": base_sha is None,
+                "observed_by": "agent_hook",       # 工具名／輸入／輸出；writes 是 vacant_scan
                 "wall_ms": int((time.time() - pend["t0"]) * 1000) if pend else None}
             ref = self._append("step", payload)
             st["last_index"] = idx_sha
             self._save(st)
             return {**payload, **ref}
 
-    def close(self, actor: Actor, reason: str | None = None) -> dict[str, Any]:
-        """工作階段結束：最後再看一次，沒被任何一步解釋的改動記成缺口。"""
+    def denied(self, step: str, actor: Actor, tool: str, tool_input: Any,
+               reason: str) -> dict[str, Any]:
+        """Vacant 在工具執行前拒絕了這一步：記下「它試過」，不掃工作區（工具沒有執行）。"""
+        with self._lock():
+            st = self._state()
+            self._ensure_session(st, actor)
+            inp = json.dumps(tool_input, ensure_ascii=False, sort_keys=True, default=str)
+            st["n_steps"] = int(st.get("n_steps", 0)) + 1
+            payload = {"step": step, "n": st["n_steps"], "actor": actor.to_json(), "tool": tool,
+                       "input_blob": self.blobs.put_bytes(inp.encode()), "writes": [],
+                       "denied": reason[:500], "observed_by": "agent_hook"}
+            ref = self._append("step", payload)
+            self._save(st)
+            return {**payload, **ref}
+
+    def _finish_open(self, st: dict[str, Any], why: str, *,
+                     older_than: float | None = None) -> list[dict[str, Any]]:
+        """`pre` 之後一直沒等到 `post` 的步驟（Codex：apply_patch 失敗、長跑行程；工作階段被砍）。
+        寫入以「它的 pre 到現在」估，標 `post_missing`——追緝只能當候選，不能當定論。"""
+        now = time.time()
+        done = []
+        for step in sorted(st["pending"]):
+            pend = st["pending"][step]
+            if older_than is not None and now - float(pend.get("t0", now)) < older_than:
+                continue
+            done.append(step)
+        if not done:
+            return []
+        idx = self._scan(self.load_index(st["last_index"]) if st.get("last_index") else None)
+        idx_sha = self._index_blob(idx)
+        out = []
+        for step in done:
+            pend = st["pending"].pop(step)
+            st["n_steps"] = int(st.get("n_steps", 0)) + 1
+            changes = W.diff(self.load_index(pend["pre_index"]), idx)
+            payload = {"step": step, "n": st["n_steps"], "actor": pend["actor"],
+                       "tool": pend["tool"], "input_blob": pend["input_blob"],
+                       "writes": [c.to_json() for c in changes], "output_blob": None,
+                       "error": None, "pre_index": pend["pre_index"], "post_index": idx_sha,
+                       "concurrent_with": sorted(set(pend.get("concurrent_with") or [])
+                                                 | (set(done) - {step})),
+                       "pre_missing": False, "post_missing": why,
+                       "observed_by": "vacant_scan"}
+            out.append({**payload, **self._append("step", payload)})
+        st["last_index"] = idx_sha
+        return out
+
+    def checkpoint(self, observed_at: str = "check") -> str:
+        """追緝之前再看一次工作區：上次看到之後、沒有任何步驟在進行時的改動記成缺口。
+        回傳現在這個狀態的索引 sha256。"""
         with self._lock():
             st = self._state()
             prev = self.load_index(st["last_index"]) if st.get("last_index") else None
             idx = self._scan(prev)
+            idx_sha = self._index_blob(idx)
+            if prev is not None and not st["pending"]:
+                gap = [c.to_json() for c in W.diff(prev, idx)]
+                if gap:
+                    self._append("unrecorded_change", {"changes": gap, "n": len(gap),
+                                                       "before_index": st["last_index"],
+                                                       "after_index": idx_sha,
+                                                       "observed_at": observed_at})
+            st["last_index"] = idx_sha
+            self._save(st)
+            return idx_sha
+
+    def prompt(self, text: str, *, session: str = "*", source: str = "user") -> dict[str, Any]:
+        """任務訊息（使用者的話、`vacant do` 送出的提示）：追緝判斷「這個值是不是任務自己給的」。
+        內容只進本機版本庫，鏈上是 sha256。`session="*"`＝這個工作區裡的任何工作階段。"""
+        with self._lock():
+            return self._append("prompt", {"session": session, "source": source,
+                                           "text_blob": self.blobs.put_bytes(text.encode())})
+
+    def append(self, etype: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """追緝結論、人的標記：同一條鏈、同一把鎖。"""
+        with self._lock():
+            return self._append(etype, payload)
+
+    def settle(self, actor: Actor, why: str = "turn_end") -> list[dict[str, Any]]:
+        """回合結束：還開著的步驟不會再有 `post` 了（背景行程另計，見誠實邊界 2）。"""
+        with self._lock():
+            st = self._state()
+            out = self._finish_open(st, why)
+            self._save(st)
+            return out
+
+    def close(self, actor: Actor, reason: str | None = None) -> dict[str, Any]:
+        """工作階段結束：最後再看一次，沒被任何一步解釋的改動記成缺口。"""
+        with self._lock():
+            st = self._state()
+            open_steps = sorted(st["pending"])
+            self._finish_open(st, "session_end")
+            prev = self.load_index(st["last_index"]) if st.get("last_index") else None
+            idx = self._scan(prev)
             gap = [c.to_json() for c in W.diff(prev, idx)] if prev is not None else []
-            if gap and not st["pending"]:
+            if gap:
                 self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                    "before_index": st["last_index"],
                                                    "after_index": self._index_blob(idx),
@@ -286,7 +382,7 @@ class Recorder:
             st["sessions"].setdefault(key, {})["closed"] = True
             ref = self._append("session_closed", {"actor": actor.to_json(), "reason": reason,
                                                   "final_index": idx_sha,
-                                                  "open_steps": sorted(st["pending"])})
+                                                  "open_steps": open_steps})
             st["last_index"] = idx_sha
             self._save(st)
             return ref

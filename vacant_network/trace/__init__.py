@@ -8,10 +8,15 @@
 ——的步驟層版本，並把它接回繳付物：
 
     workspace.py   每一步前後的工作區（增量索引、差異、內容定址版本庫）
-    recorder.py    每一次工具呼叫一筆簽章事件：行動者、工具、讀了什麼、寫了什麼、輸出
-    blame.py       檢查失敗的位置 → 寫下它的那一步 → 重跑證明 → 錯的內容從哪裡讀來
-    feedback.py    把追緝結果以**事實**回給 agent；改不掉的列成未解問題
-    actors.py      責任按行動者累積 → 信譽（沿用 `reputation.py`）→ 路由
+    recorder.py    每一次工具呼叫一筆簽章事件：行動者、工具、輸入、輸出、寫了什麼；缺口
+    capture.py     四個 agent 的原生掛鉤 → recorder（行動者、步驟 id、逐字稿封存）
+    locate.py      不過的主張 → 檔案：行：錯的值
+    rerun.py       在重建出來的某一步狀態上重跑一條主張（同一套驗證器）
+    blame.py       錯的值 → 寫下它的那一步 → 重跑證明 → 從哪裡讀來（兩層、五級）
+    feedback.py    給 agent 的事實回饋（無行動者、KS-1）；給人的未解問題清單
+    stopcheck.py   回合結束那一刻：驗 → 追緝 → 回饋 → 報告 → 後果
+    actors.py      後果：只有事實層進信譽（可撤銷）；輸入錯記來源；路由＝給人的建議＋auto
+    cli.py         `vacant trace show|verify|report|blame|actors`、`vacant flag`
 
 原則（論文）：執行取代意見（錯誤點由重跑與紀錄比對決定）；KS-1（給 agent 的文字只有事實）；
 竄改可察覺≠不可竄改；完整性≠完備性（沒被記錄的改動明講是究責缺口）。
