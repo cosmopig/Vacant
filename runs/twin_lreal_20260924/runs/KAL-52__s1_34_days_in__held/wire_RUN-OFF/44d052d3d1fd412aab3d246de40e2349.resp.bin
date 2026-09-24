@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"878696211","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\nimport sys\\n\\ndef main():\\n    if len(sys.argv) < 3:\\n        return\\n    \\n    try:\\n        year = int(sys.argv[1])\\n        month = int(sys.argv[2])\\n        \\n        # Calculate the first day of the current month\\n        current_date = datetime.date(year, month, 1)\\n        \\n        # Calculate the first day of the next month\\n        if month == 12:\\n            next_date = datetime.date(year + 1, 1, 1)\\n        else:\\n            next_date = datetime.date(year, month + 1, 1)\\n            \\n        # The difference in days is the number of days in the current month\\n        print((next_date - current_date).days)\\n    except ValueError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-ggk3vyjbewr3901vr2ujsv","object":"chat.completion.chunk","created":1790239336,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2112,"completion_tokens":230,"total_tokens":2342,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

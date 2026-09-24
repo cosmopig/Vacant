@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-k5it9n0lar7o334usw3wit","object":"chat.completion.chunk","created":1790237957,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"345216708","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-k5it9n0lar7o334usw3wit","object":"chat.completion.chunk","created":1790237957,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def rgb(code):\\n    # Remove the hash character\\n    hex_code = code[1:]\\n    \\n    # Convert hex to integer\\n    # We can use int(hex_code, 16) but we need to split it into r, g, b\\n    r = int(hex_code[0:2], 16)\\n    g = int(hex_code[2:4], 16)\\n    b = int(hex_code[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-k5it9n0lar7o334usw3wit","object":"chat.completion.chunk","created":1790237957,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-k5it9n0lar7o334usw3wit","object":"chat.completion.chunk","created":1790237957,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1525,"completion_tokens":154,"total_tokens":1679,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

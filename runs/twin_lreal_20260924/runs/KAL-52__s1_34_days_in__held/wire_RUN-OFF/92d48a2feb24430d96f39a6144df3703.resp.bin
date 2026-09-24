@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"643870879","type":"function","function":{"name":"bash","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"command\":\"python3 solution.py 2024 2 && echo \\\"Expected: 29\\\" || echo \\\"Failed\\\"\\npython3 solution.py 2023 2 && echo \\\"Expected: 28\\\" || echo \\\"Failed\\\"\\npython3 solution.py 2000 2 && echo \\\"Expected: 29\\\" || echo \\\"Failed\\\"\\npython3 solution.py 1900 2 && echo \\\"Expected: 28\\\" || echo \\\"Failed\\\"\\npython3 solution.py 2024 12 && echo \\\"Expected: 31\\\" || echo \\\"Failed\\\"\\n\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-ravro1eojbbcnwgck50ljn","object":"chat.completion.chunk","created":1790239343,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2357,"completion_tokens":152,"total_tokens":2509,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,1949 @@
+{
+  "cells": [
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 6,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237404873,
+      "cell_id": "DUL-89__s1_01_addmul__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_01_addmul__held",
+      "task_id": "s1_01_addmul",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237232656,
+      "cell_id": "DUL-89__s1_01_addmul__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_01_addmul__pc",
+      "task_id": "s1_01_addmul",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 12,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790239416434,
+      "cell_id": "DUL-89__s1_05_initials__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__held",
+      "task_id": "s1_05_initials",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238626924,
+      "cell_id": "DUL-89__s1_05_initials__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_05_initials__pc",
+      "task_id": "s1_05_initials",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 12,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237448151,
+      "cell_id": "DUL-89__s1_12_hms__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_12_hms__held",
+      "task_id": "s1_12_hms",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237274799,
+      "cell_id": "DUL-89__s1_12_hms__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_12_hms__pc",
+      "task_id": "s1_12_hms",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 5,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 24,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790238986625,
+      "cell_id": "DUL-89__s1_24_is_pal__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_24_is_pal__held",
+      "task_id": "s1_24_is_pal",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237893898,
+      "cell_id": "DUL-89__s1_24_is_pal__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_24_is_pal__pc",
+      "task_id": "s1_24_is_pal",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": -9,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 1,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 5,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790240677244,
+      "cell_id": "DUL-89__s1_30_ord_suffix__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_30_ord_suffix__held",
+      "task_id": "s1_30_ord_suffix",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 4,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238806824,
+      "cell_id": "DUL-89__s1_30_ord_suffix__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_30_ord_suffix__pc",
+      "task_id": "s1_30_ord_suffix",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 9,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237455006,
+      "cell_id": "DUL-89__s1_31_money__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_31_money__held",
+      "task_id": "s1_31_money",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237333324,
+      "cell_id": "DUL-89__s1_31_money__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_31_money__pc",
+      "task_id": "s1_31_money",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 15,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790239198142,
+      "cell_id": "DUL-89__s1_32_pct__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_32_pct__held",
+      "task_id": "s1_32_pct",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 6,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237957664,
+      "cell_id": "DUL-89__s1_32_pct__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_32_pct__pc",
+      "task_id": "s1_32_pct",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 12,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790241613364,
+      "cell_id": "DUL-89__s1_34_days_in__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_34_days_in__held",
+      "task_id": "s1_34_days_in",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 3,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238879921,
+      "cell_id": "DUL-89__s1_34_days_in__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_34_days_in__pc",
+      "task_id": "s1_34_days_in",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 8,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 32,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790239541497,
+      "cell_id": "DUL-89__s1_49_rgb__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_49_rgb__held",
+      "task_id": "s1_49_rgb",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 3,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238036341,
+      "cell_id": "DUL-89__s1_49_rgb__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "DUL-89",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/DUL-89__s1_49_rgb__pc",
+      "task_id": "s1_49_rgb",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 6,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237188801,
+      "cell_id": "KAL-52__s1_01_addmul__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_01_addmul__held",
+      "task_id": "s1_01_addmul",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237140334,
+      "cell_id": "KAL-52__s1_01_addmul__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_01_addmul__pc",
+      "task_id": "s1_01_addmul",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 12,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237730462,
+      "cell_id": "KAL-52__s1_05_initials__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_05_initials__held",
+      "task_id": "s1_05_initials",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237575358,
+      "cell_id": "KAL-52__s1_05_initials__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_05_initials__pc",
+      "task_id": "s1_05_initials",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 10,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237356454,
+      "cell_id": "KAL-52__s1_12_hms__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_12_hms__held",
+      "task_id": "s1_12_hms",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237188623,
+      "cell_id": "KAL-52__s1_12_hms__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_12_hms__pc",
+      "task_id": "s1_12_hms",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 8,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 17,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790238014047,
+      "cell_id": "KAL-52__s1_24_is_pal__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_24_is_pal__held",
+      "task_id": "s1_24_is_pal",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237615103,
+      "cell_id": "KAL-52__s1_24_is_pal__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_24_is_pal__pc",
+      "task_id": "s1_24_is_pal",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": -9,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 11,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790238973032,
+      "cell_id": "KAL-52__s1_30_ord_suffix__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_30_ord_suffix__held",
+      "task_id": "s1_30_ord_suffix",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 19,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238500173,
+      "cell_id": "KAL-52__s1_30_ord_suffix__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_30_ord_suffix__pc",
+      "task_id": "s1_30_ord_suffix",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 9,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237405367,
+      "cell_id": "KAL-52__s1_31_money__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held",
+      "task_id": "s1_31_money",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237203273,
+      "cell_id": "KAL-52__s1_31_money__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__pc",
+      "task_id": "s1_31_money",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 9,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790238199246,
+      "cell_id": "KAL-52__s1_32_pct__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__held",
+      "task_id": "s1_32_pct",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 6,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237711804,
+      "cell_id": "KAL-52__s1_32_pct__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_32_pct__pc",
+      "task_id": "s1_32_pct",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 17,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790239360249,
+      "cell_id": "KAL-52__s1_34_days_in__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_34_days_in__held",
+      "task_id": "s1_34_days_in",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 3,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238569649,
+      "cell_id": "KAL-52__s1_34_days_in__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_34_days_in__pc",
+      "task_id": "s1_34_days_in",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 22,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790238638168,
+      "cell_id": "KAL-52__s1_49_rgb__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_49_rgb__held",
+      "task_id": "s1_49_rgb",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 3,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237844489,
+      "cell_id": "KAL-52__s1_49_rgb__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "KAL-52",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_49_rgb__pc",
+      "task_id": "s1_49_rgb",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 6,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237476874,
+      "cell_id": "LIV-51__s1_01_addmul__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_01_addmul__held",
+      "task_id": "s1_01_addmul",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237333280,
+      "cell_id": "LIV-51__s1_01_addmul__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_01_addmul__pc",
+      "task_id": "s1_01_addmul",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 12,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790241888964,
+      "cell_id": "LIV-51__s1_05_initials__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_05_initials__held",
+      "task_id": "s1_05_initials",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238903035,
+      "cell_id": "LIV-51__s1_05_initials__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_05_initials__pc",
+      "task_id": "s1_05_initials",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 5,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 13,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237538672,
+      "cell_id": "LIV-51__s1_12_hms__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_12_hms__held",
+      "task_id": "s1_12_hms",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237396202,
+      "cell_id": "LIV-51__s1_12_hms__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_12_hms__pc",
+      "task_id": "s1_12_hms",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": -9,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 6,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 18,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790240345535,
+      "cell_id": "LIV-51__s1_24_is_pal__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_24_is_pal__held",
+      "task_id": "s1_24_is_pal",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238112833,
+      "cell_id": "LIV-51__s1_24_is_pal__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_24_is_pal__pc",
+      "task_id": "s1_24_is_pal",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 11,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790242865462,
+      "cell_id": "LIV-51__s1_30_ord_suffix__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_30_ord_suffix__held",
+      "task_id": "s1_30_ord_suffix",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 5,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 5,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790239118616,
+      "cell_id": "LIV-51__s1_30_ord_suffix__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_30_ord_suffix__pc",
+      "task_id": "s1_30_ord_suffix",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 10,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790237549382,
+      "cell_id": "LIV-51__s1_31_money__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_31_money__held",
+      "task_id": "s1_31_money",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 2,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790237380292,
+      "cell_id": "LIV-51__s1_31_money__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_31_money__pc",
+      "task_id": "s1_31_money",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": -9,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 17,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790241473857,
+      "cell_id": "LIV-51__s1_32_pct__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_32_pct__held",
+      "task_id": "s1_32_pct",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 2,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 6,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790238269417,
+      "cell_id": "LIV-51__s1_32_pct__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_32_pct__pc",
+      "task_id": "s1_32_pct",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 19,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790243077584,
+      "cell_id": "LIV-51__s1_34_days_in__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_34_days_in__held",
+      "task_id": "s1_34_days_in",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 3,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790239212761,
+      "cell_id": "LIV-51__s1_34_days_in__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_34_days_in__pc",
+      "task_id": "s1_34_days_in",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": false,
+          "requests_seen": 4,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 3,
+          "exit_code": 20,
+          "infra_void": null,
+          "requests_seen": 38,
+          "stop_reason": "attempts_exhausted"
+        }
+      },
+      "built_ms": 1790242149374,
+      "cell_id": "LIV-51__s1_49_rgb__held",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 20,
+      "explicit": false,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_49_rgb__held",
+      "task_id": "s1_49_rgb",
+      "v": 2
+    },
+    {
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "{TASK}"
+      ],
+      "arms": {
+        "OFF": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "postaudit_all_pass": true,
+          "requests_seen": 3,
+          "stop_reason": "ungated"
+        },
+        "ON": {
+          "attempts_used": 1,
+          "exit_code": 0,
+          "infra_void": null,
+          "requests_seen": 3,
+          "stop_reason": "visible_pass"
+        }
+      },
+      "built_ms": 1790238423018,
+      "cell_id": "LIV-51__s1_49_rgb__pc",
+      "declared_backend": "1004 100.86.226.21:1234 LM Studio 0.4.17 gemma-4-12b-it-qat（非 thinking）",
+      "declared_evidence": "L-real",
+      "declared_model": "gemma-4-12b-it-qat",
+      "declared_upstream": "http://100.86.226.21:1234",
+      "exit_code": 0,
+      "explicit": true,
+      "resident": "LIV-51",
+      "run_dir": "/var/tmp/vacant_lreal_20260924/out/runs/LIV-51__s1_49_rgb__pc",
+      "task_id": "s1_49_rgb",
+      "v": 2
+    }
+  ],
+  "v": 2
+}

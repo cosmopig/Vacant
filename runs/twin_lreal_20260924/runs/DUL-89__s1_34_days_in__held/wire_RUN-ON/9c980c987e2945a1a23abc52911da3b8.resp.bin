@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-87rkexqeo1p9qf4lfnhswe","object":"chat.completion.chunk","created":1790241211,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"861725800","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-87rkexqeo1p9qf4lfnhswe","object":"chat.completion.chunk","created":1790241211,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\n\\ndef solve():\\n    try:\\n        year = int(input().split()[0])\\n        month = int(input().split()[1])\\n        \\n        # Use a dummy day to find the last day of the month\\n        if month == 12:\\n            next_month = datetime.date(year + 1, 1, 1)\\n        else:\\n            next_month = datetime.date(year, month + 1, 1)\\n            \\n        # The last day is the day before the first day of the next month\\n        last_day = (next_month - datetime.timedelta(days=1)).day\\n        print(last_day)\\n    except EOFError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-87rkexqeo1p9qf4lfnhswe","object":"chat.completion.chunk","created":1790241211,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-87rkexqeo1p9qf4lfnhswe","object":"chat.completion.chunk","created":1790241211,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1491,"completion_tokens":195,"total_tokens":1686,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

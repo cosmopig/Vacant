@@ -1,0 +1,302 @@
+{
+  "task_id": "s1_31_money:held",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+    "pi",
+    "# Task\n\nShow an amount given as a whole number of cents the way it appears on\na receipt in dollars: a dollar sign, then the whole dollars, then a dot, then\nalways exactly two digits of cents.\n\nAmounts below one dollar still show a single zero in front of the dot. Amounts\nare never negative, and the answer is text.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+  ],
+  "workspace": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_31_money__held",
+  "proxy_url": "http://127.0.0.1:45827",
+  "env": {
+    "proxy_url": "http://127.0.0.1:45827",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "5fdc75fda1db07a1a5d2573859924968ba9d679c67b7563deacb11afdd80e8b0",
+  "ws_end_sha256": "17abb347326d99d2420e64ce8be71354a4cc5d6b8997d28aa34f0adde1185ab0",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 9,
+  "wire_by_protocol": {
+    "openai": 9
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 2,
+  "verdict_sha256": "7cdfa2d14d35575d5ce0d370602df0aea7c04bfcbdc70eff8db47be2e7f8cfb1",
+  "verdict_hash": "1ded63044d5872fe8767df86bd5a1b4b9a3b138ffb8832dfc3dbb709942daeb3",
+  "retry": "revise",
+  "max_attempts": 3,
+  "attempts_used": 3,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_31_money__held/VACANT_FEEDBACK.md",
+        "bytes": 839,
+        "sha256": "c4820ca4aee6559329734bbbd6fc40c56f44034ab4e49123cb5cddad97d23f72",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import money]\ntest_visible.py::check_02_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import money]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "5fdc75fda1db07a1a5d2573859924968ba9d679c67b7563deacb11afdd80e8b0",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nShow an amount given as a whole number of cents the way it appears on\na receipt in dollars: a dollar sign, then the whole dollars, then a dot, then\nalways exactly two digits of cents.\n\nAmounts below one dollar still show a single zero in front of the dot. Amounts\nare never negative, and the answer is text.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "f05486be69ba15a0ebcc05bc24ad61b4c224c5116ab8c898d2976b23b45e665c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 66.223,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 3,
+      "wire_digest": "273554868d0ea552d5c23ba2a5375863c9cfb3860e3654cd5aa9edb2fe1e5881",
+      "ws_end_sha256": "0d6dfec02f0fbcba96fb0273454160b14c655a7bf51c85c5b12b166a69ef621f",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "7cdfa2d14d35575d5ce0d370602df0aea7c04bfcbdc70eff8db47be2e7f8cfb1",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON/solution.py) [test_visible.py:10: from solution import money]\ntest_visible.py::check_02_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON/solution.py) [test_visible.py:18: from solution import money]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "revise",
+      "reset": null,
+      "feedback": {
+        "path": "/var/tmp/vacant_lreal_20260924/out/ws/KAL-52__s1_31_money__held/VACANT_FEEDBACK.md",
+        "bytes": 845,
+        "sha256": "3df2a722a67348c1ea79c2c4077c9838364e6ba8b85fca5efa1a15951a0f0091",
+        "text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 2 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_visible.py::check_01_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import money]\ntest_visible.py::check_02_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import money]\n\nFix the working directory. The checks run again when this process exits.\n",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "ae394288f202a565bbcf6ffa0b0ef948b3a3e0af4a529c636b43b7e973839173",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nShow an amount given as a whole number of cents the way it appears on\na receipt in dollars: a dollar sign, then the whole dollars, then a dot, then\nalways exactly two digits of cents.\n\nAmounts below one dollar still show a single zero in front of the dot. Amounts\nare never negative, and the answer is text.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "f05486be69ba15a0ebcc05bc24ad61b4c224c5116ab8c898d2976b23b45e665c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 64.013,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 6,
+      "wire_digest": "f04355101bb5c0afec9cfd09da1c811e5148a3f32ad139e1d4befe2d89404f8e",
+      "ws_end_sha256": "ae394288f202a565bbcf6ffa0b0ef948b3a3e0af4a529c636b43b7e973839173",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "7cdfa2d14d35575d5ce0d370602df0aea7c04bfcbdc70eff8db47be2e7f8cfb1",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:10: from solution import money]\ntest_visible.py::check_02_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a2/solution.py) [test_visible.py:18: from solution import money]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 3,
+      "retry": "revise",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "17abb347326d99d2420e64ce8be71354a4cc5d6b8997d28aa34f0adde1185ab0",
+      "argv": [
+        "/var/tmp/vacant_lreal_20260924/repo/ops/vacantrun/wrap_agent.sh",
+        "pi",
+        "# Task\n\nShow an amount given as a whole number of cents the way it appears on\na receipt in dollars: a dollar sign, then the whole dollars, then a dot, then\nalways exactly two digits of cents.\n\nAmounts below one dollar still show a single zero in front of the dot. Amounts\nare never negative, and the answer is text.\n\nWrite the code in a file called `solution.py` in this directory.\nNothing else is needed and nothing else is read.\n"
+      ],
+      "argv_sha256": "f05486be69ba15a0ebcc05bc24ad61b4c224c5116ab8c898d2976b23b45e665c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 67.155,
+      "wire_quiesced": true,
+      "requests_seen": 3,
+      "requests_seen_cumulative": 9,
+      "wire_digest": "ed1f751be593b533d607946380c6dcaaf224758725cea5e821c0487d67550f4c",
+      "ws_end_sha256": "17abb347326d99d2420e64ce8be71354a4cc5d6b8997d28aa34f0adde1185ab0",
+      "frozen_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a3",
+      "visible_passed": 0,
+      "visible_total": 2,
+      "verdict_sha256": "7cdfa2d14d35575d5ce0d370602df0aea7c04bfcbdc70eff8db47be2e7f8cfb1",
+      "visible_path": "/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/visible_RUN-ON_a3.json",
+      "accepted": false,
+      "failures": "test_visible.py::check_01_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import money]\ntest_visible.py::check_02_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import money]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.86.226.21:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "default",
+      "defaulted": true,
+      "fallback": "sink"
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "upstreams_sinked": [
+    "anthropic"
+  ],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "ed1f751be593b533d607946380c6dcaaf224758725cea5e821c0487d67550f4c",
+  "model_wire": {
+    "requests_indexed": 9,
+    "request_blobs_persisted": 9,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 197.691,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "s1_31_money:held",
+    "agent": null,
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1790237386.4952626,
+        "probed_by_pid": 336714
+      }
+    },
+    "framework_hook": {
+      "agent": null,
+      "contract_version": null,
+      "canary_fired": null,
+      "events_n": null,
+      "log": null,
+      "install_attempted": null,
+      "version_drift": null,
+      "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
+    },
+    "reconciled": {
+      "relay_calls": 9,
+      "hook_events": null,
+      "unexplained": null,
+      "canary_calls": 0,
+      "refused_path": 0,
+      "unexplained_detail": null,
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+    },
+    "tier": "C",
+    "attested": false,
+    "b_prime_kind": null,
+    "tier_sentence": "**未認證**：既沒有圍牆也沒有掛鉤 ⇒ 這一跑不發收據。",
+    "tier_reasons": [
+      "圍牆不成立而且掛鉤沒燒 ⇒ **未受控**。（enclosure.applied=False、canary_fired=None）",
+      "⚠ 掛鉤那一欄是「沒量到」不是「量到 false」",
+      "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790237386.495413
+  },
+  "agent_wall_s": 67.155,
+  "failures": "test_visible.py::check_01_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:10: from solution import money]\ntest_visible.py::check_02_money — exception: ImportError: cannot import name 'money' from 'solution' (/var/tmp/vacant_lreal_20260924/out/runs/KAL-52__s1_31_money__held/_frozen_RUN-ON_a3/solution.py) [test_visible.py:18: from solution import money]",
+  "lifecycle": {
+    "schema": "vacant.lifecycle/1",
+    "path": "/var/tmp/vacant_lreal_20260924/out/lifecycle/b1_s0.jsonl",
+    "run_id": "dbe8a8356d444496be8062be88173c42",
+    "emitted": 22,
+    "emit_errors": 0,
+    "last_error": null
+  }
+}

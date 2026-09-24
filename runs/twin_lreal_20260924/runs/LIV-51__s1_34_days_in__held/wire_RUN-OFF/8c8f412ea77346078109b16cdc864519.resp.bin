@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-shr1g1h200m42e7vadob08","object":"chat.completion.chunk","created":1790243046,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"index":0,"id":"194491519","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-shr1g1h200m42e7vadob08","object":"chat.completion.chunk","created":1790243046,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import datetime\\n\\ndef solve():\\n    try:\\n        year = int(input().split()[0])\\n        month = int(input().split()[1])\\n        \\n        # Using datetime to find the number of days in a month\\n        # We can get the first day of the next month and subtract one day\\n        if month == 12:\\n            next_month = datetime.date(year + 1, 1, 1)\\n        else:\\n            next_month = datetime.date(year, month + 1, 1)\\n            \\n        current_month_first_day = datetime.date(year, month, 1)\\n        days_in_month = (next_month - current_month_first_day).days\\n        print(days_in_month)\\n    except EOFError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-shr1g1h200m42e7vadob08","object":"chat.completion.chunk","created":1790243046,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-shr1g1h200m42e7vadob08","object":"chat.completion.chunk","created":1790243046,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1493,"completion_tokens":219,"total_tokens":1712,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

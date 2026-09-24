@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"712501877","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef main():\\n    input_data = sys.stdin.read().split()\\n    if len(input_data) < 2:\\n        return\\n\\n    try:\\n        q1 = float(input_data[0])\\n        q2 = float(input_data[1])\\n        \\n        if q2 == 0:\\n            # \\\"the answer is nothing at all rather than an error\\\"\\n            pass\\n        else:\\n            percentage = (q1 / q2) * 100\\n            print(f\\\"{round(percentage, 1):.1f}\\\")\\n    except ValueError:\\n        pass\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-cgkods4oyv4hgnvfs4up9","object":"chat.completion.chunk","created":1790241340,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2447,"completion_tokens":178,"total_tokens":2625,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

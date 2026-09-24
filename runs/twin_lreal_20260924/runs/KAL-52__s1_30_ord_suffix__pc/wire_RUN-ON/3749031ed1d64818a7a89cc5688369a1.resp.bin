@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"228312936","type":"function","function":{"name":"edit","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"edits\":[{\"newText\":\"def ord_suffix(n):\\n    if 11 <= n <= 15:\\n        return str(n)\\n    \\n    # Determine the suffix based on the last digit\\n    last_digit = n % 10\\n    \\n    if last_digit == 1:\\n        suffix = \\\"st\\\"\\n    elif last_digit == 2:\\n        suffix = \\\"nd\\\"\\n    elif last_digit == 3:\\n        suffix = \\\"rd\\\"\\n    else:\\n        suffix = \\\"th\\\"\\n        \\n    return f\\\"{n}{suffix}\\\"\\n\",\"oldText\":\"def ord_suffix(n):\\n    if 13 <= n <= 15:\\n        return str(n)\\n    \\n    # Determine the suffix based on the last digit\\n    last_digit = n % 10\\n    \\n    if last_digit == 1:\\n        suffix = \\\"st\\\"\\n    elif last_digit == 2:\\n        suffix = \\\"nd\\\"\\n    elif last_digit == 3:\\n        suffix = \\\"rd\\\"\\n    else:\\n        suffix = \\\"th\\\"\\n        \\n    return f\\\"{n}{suffix}\\\"\\n\",\"path\":\"solution.py\"}],\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-y41510rx8nun2hneggdl","object":"chat.completion.chunk","created":1790237645,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":1948,"completion_tokens":297,"total_tokens":2245,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

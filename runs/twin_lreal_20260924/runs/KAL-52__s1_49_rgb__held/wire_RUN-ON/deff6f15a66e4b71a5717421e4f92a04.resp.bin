@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"762093288","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"def hex_to_rgb(hex_color):\\n    # Remove the hash character if present\\n    hex_code = hex_color.lstrip('#')\\n    \\n    # Convert hexadecimal to integer and then to RGB components\\n    r = int(hex_code[0:2], 16)\\n    g = int(hex_code[2:4], 16)\\n    b = int(hex_code[4:6], 16)\\n    \\n    return {\\\"r\\\": r, \\\"g\\\": g, \\\"b\\\": b}\\n\\nif __name__ == \\\"__main__\\\":\\n    import sys\\n    # Read from stdin as it's the most common way for these tasks\\n    input_data = sys.stdin.read().strip()\\n    if input_data:\\n        print(hex_to_rgb(input_data))\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-wte046hvx3exoqwewz7a9g","object":"chat.completion.chunk","created":1790238551,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":2764,"completion_tokens":212,"total_tokens":2976,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

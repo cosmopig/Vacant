@@ -1,0 +1,38 @@
+{
+  "suite": "visible",
+  "task_id": "s1_30_ord_suffix:pc",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 32,
+      "cases": [
+        {
+          "case": "check_01_ord_suffix",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_02_ord_suffix",
+          "ok": false,
+          "kind": "assert",
+          "message": "ord_suffix args=(12,) got='12' want='12th'",
+          "where": "test_visible.py:22: assert got == want, \"ord_suffix args=%r got=%r want=%r\" % (args, got, want)",
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 2,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "6fb3185b915208abc1469d53a180f956dc48a0ee4c9fa803a027e00bf626946e"
+}

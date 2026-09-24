@@ -1,0 +1,18 @@
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"role":"assistant","content":"<|channel>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"thought"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"content":"<channel|>"},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"223078340","type":"function","function":{"name":"write","arguments":""}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"content\":\"import sys\\n\\ndef solve():\\n    line = sys.stdin.readline()\\n    if not line:\\n        return\\n    try:\\n        n_str = line.strip()\\n        if not n_str:\\n            return\\n        n = int(n_str)\\n    except ValueError:\\n        return\\n\\n    # The prompt says \\\"Write a positive whole number the way it is said when counting positions\\\"\\n    # and \\\"the number itself followed by the two-letter ending that goes with it\\\".\\n    # This means for 1, it's \\\"1st\\\", for 2, it's \\\"2nd\\\", etc.\\n    # The exceptions are 11, 12, 13 which take the plain ending (th).\\n\\n    if n % 100 in [11, 12, 13]:\\n        print(f\\\"{n}th\\\")\\n    else:\\n        last_digit = n % 10\\n        if last_digit == 1:\\n            print(f\\\"{n}st\\\")\\n        elif last_digit == 2:\\n            print(f\\\"{n}nd\\\")\\n        elif last_digit == 3:\\n            print(f\\\"{n}rd\\\")\\n        else:\\n            print(f\\\"{n}th\\\")\\n\\nif __name__ == \\\"__main__\\\":\\n    solve()\\n\",\"path\":\"solution.py\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-43mcfbti7svh1tpuyag5cl","object":"chat.completion.chunk","created":1790242687,"model":"gemma-4-12b-it-qat","system_fingerprint":"gemma-4-12b-it-qat","choices":[],"usage":{"prompt_tokens":4213,"completion_tokens":322,"total_tokens":4535,"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
