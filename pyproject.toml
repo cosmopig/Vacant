@@ -91,7 +91,7 @@ version = { attr = "vacant_network.__version__" }
 # ⚠ 刻意**不**把頂層 `ops` 打進 wheel：PyPI 上 `ops` 是 Juju 的套件，
 #   同名會在別人的 site-packages 裡安靜覆蓋檔案——失敗方式很糟。
 packages = ["vacant_network", "vacant_network.vrun", "vacant_network.web",
-            "vacant_network.intake", "vacant_network.adapters"]
+            "vacant_network.intake", "vacant_network.adapters", "vacant_network.trace"]
 
 [tool.setuptools.package-data]
 # 觀測台的靜態資產隨套件安裝（無 build step；dashboard 由 /static/ 供應）
