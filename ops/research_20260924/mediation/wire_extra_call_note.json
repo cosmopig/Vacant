@@ -1,0 +1,7 @@
+{
+ "what": "W_* 四格裡 wire 比 transcript 多出的那一通（每格恰好一通）的結構特徵。body 檔不入庫（含帳號識別資料，同 possess_claude_20260922 §二-1）；以下只記結構。",
+ "observed_in": ["W_h_code_fix", "W_h_doc_rename", "W_h_doc_summary", "W_A10_task_subagent"],
+ "example_from_W_A10_task_subagent": {"request_bytes": 4298, "model": "claude-haiku-4-5-20251001", "tools_n": 0, "messages_n": 1, "first_text_starts_with": "<session>"},
+ "interpretation": "框架自己發起的側呼叫（看起來是 session 標題生成；transcript 有 ai-title 行但沒有對應的 assistant/requestId）。推論，未由廠商文件證實。",
+ "consequence": "transcript 的 requestId 數是『agent 回合數』，不是『模型呼叫數』；在這個建置上系統性少 1。"
+}

@@ -1,0 +1,145 @@
+{
+ "cell": "A8b_kill_collector_failopen",
+ "model": "claude-haiku-4-5-20251001",
+ "claude_version": "2.1.281 (Claude Code)",
+ "argv_tail": [
+  "--model",
+  "claude-haiku-4-5-20251001",
+  "--output-format",
+  "json",
+  "--permission-mode",
+  "acceptEdits",
+  "--allowedTools",
+  "Bash Write Edit Read Glob Grep Task",
+  "--session-id",
+  "6c9209f0-4ab2-4c60-a8e8-815c568cece5"
+ ],
+ "prompt": "Use Bash to run: sleep 6. Then use the Write tool to create a.txt containing 'a'. Then use the Write tool to create b.txt containing 'b'. Then say done.",
+ "failclosed": false,
+ "agent_rc": 0,
+ "timed_out": false,
+ "killed_for_denials": false,
+ "wall_s": 15.87,
+ "fallback_lines": 8,
+ "ws_diff": {
+  "added": [
+   "a.txt",
+   "b.txt"
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "files_after": [
+  "a.txt",
+  "b.txt"
+ ],
+ "transcript_exists": true,
+ "transcript_sha256": "19720daf8781c48f06248fb23662896d02b5bf487a1bd1f3e3a1063fb1fc8111",
+ "events_n": 2,
+ "event_names": [
+  "SessionStart",
+  "UserPromptSubmit"
+ ],
+ "collector_rejects": 0,
+ "gate": null,
+ "accepted": null,
+ "sealed": {
+  "issued": true,
+  "level": "R-broken"
+ },
+ "verify": {
+  "verdict": "OK",
+  "record_tier": "R-broken",
+  "channel_tier": "unobserved",
+  "claim": "量到不一致（列在 gaps）：這一跑的紀錄與 agent 自己的 transcript 或工作區對不上。",
+  "transcript_recheck": {
+   "append_only": null,
+   "checked": 0,
+   "first_bad": null
+  }
+ },
+ "reconciled": {
+  "contract": "vacant-sidecar/1",
+  "canary_fired": true,
+  "hook_events_n": 2,
+  "prehook_n": 0,
+  "model_requests_reported": 3,
+  "tool_uses_transcript_n": 3,
+  "sidechain_tool_uses_n": 0,
+  "tool_uses_denied_failclosed": [],
+  "tool_uses_without_prehook": [
+   "toolu_014HveQbLNKdWMtbeiVmRKPP",
+   "toolu_019oXMYN2TTw68ALfuvNBsZq",
+   "toolu_01RAdRFbUN7uhsKApWSbBspy"
+  ],
+  "prehook_without_transcript": [],
+  "transcript_append_only": null,
+  "transcript_checkpoints_checked": 0,
+  "ws_changed": [
+   "a.txt",
+   "b.txt"
+  ],
+  "ws_edit_attributed": [],
+  "ws_shell_attributed": [],
+  "ws_unexplained": [
+   "a.txt",
+   "b.txt"
+  ],
+  "hook_cfg_start_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+  "hook_cfg_end_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+  "hook_cfg_changed": false,
+  "failclosed": false,
+  "prehook_not_yet_in_transcript": [],
+  "transcript_grew_after_session_end": null,
+  "hook_events_inside_shell_window": [],
+  "channel_tier": "unobserved",
+  "level": "R-broken",
+  "gaps": [
+   "unrecorded_tool_uses",
+   "ws_unexplained_changes",
+   "transcript_append_only_unmeasured",
+   "not_failclosed"
+  ]
+ },
+ "attack_notes": [
+  "collector stopped at +3.0s"
+ ],
+ "usage": {
+  "input_tokens": 26,
+  "cache_creation_input_tokens": 4848,
+  "cache_read_input_tokens": 86917,
+  "output_tokens": 577,
+  "output_tokens_details": {
+   "thinking_tokens": 308
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4848,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 8,
+    "output_tokens": 70,
+    "cache_read_input_tokens": 30537,
+    "cache_creation_input_tokens": 455,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 455
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "cost_usd": 0.0222947,
+ "num_turns": 4,
+ "result_text": "Done.",
+ "hook_event_span_s": 0.86,
+ "transcript_contains_account_email": true
+}

@@ -1,0 +1,12 @@
+{
+ "verdict": "OK",
+ "record_tier": "R-full",
+ "channel_tier": "unobserved",
+ "claim": "這一跑，工作區每個改動都對得上一個在改動之前就簽進鏈的工具事件（Write/Edit），工具事件與 agent 自己的 transcript 逐 id 對得上；模型呼叫數為 agent 自報，Vacant 沒有觀測模型通道。",
+ "transcript_recheck": {
+  "append_only": true,
+  "checked": 4,
+  "first_bad": null,
+  "final_size": 225000
+ }
+}

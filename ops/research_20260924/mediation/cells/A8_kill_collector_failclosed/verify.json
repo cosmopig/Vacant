@@ -1,0 +1,11 @@
+{
+ "verdict": "OK",
+ "record_tier": "R-partial",
+ "channel_tier": "unobserved",
+ "claim": "有工具層紀錄，但有沒量到的項目（列在 gaps）；不可讀成每一個動作都有事前紀錄。",
+ "transcript_recheck": {
+  "append_only": null,
+  "checked": 0,
+  "first_bad": null
+ }
+}

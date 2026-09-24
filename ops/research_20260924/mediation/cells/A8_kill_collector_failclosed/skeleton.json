@@ -1,0 +1,1 @@
+{"request_ids": ["req_011CfN6biyrEYkPb9K8GqkEK", "req_011CfN6byumexTLpTBRAAD5o"], "tool_uses": [{"id": "toolu_015veLDpQkVh9Tzew82YhYMx", "name": "Bash", "sidechain": false}], "tool_results": ["toolu_015veLDpQkVh9Tzew82YhYMx"], "denied_failclosed": ["toolu_015veLDpQkVh9Tzew82YhYMx"], "files_n": 1, "bad_lines": 0}

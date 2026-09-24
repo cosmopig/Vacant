@@ -1,0 +1,9 @@
+{
+ "hook_process_wall_ms": {
+  "median": 127.3,
+  "p90": 151.5,
+  "n": 30
+ },
+ "in_process_roundtrip_ms": 0.69,
+ "python": "3.11.15"
+}

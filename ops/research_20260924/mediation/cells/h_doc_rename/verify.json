@@ -1,0 +1,12 @@
+{
+ "verdict": "OK",
+ "record_tier": "R-opaque",
+ "channel_tier": "unobserved",
+ "claim": "同 R-full，但有工作區改動只能歸給不透明的 shell 工具：那個 shell 動作有事前紀錄，它改了什麼檔 Vacant 說不出來。",
+ "transcript_recheck": {
+  "append_only": true,
+  "checked": 10,
+  "first_bad": null,
+  "final_size": 234994
+ }
+}

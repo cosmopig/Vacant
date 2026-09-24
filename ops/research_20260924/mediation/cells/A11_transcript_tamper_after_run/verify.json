@@ -1,0 +1,8 @@
+{
+ "verdict": "BROKEN",
+ "reason": "transcript 不是只增",
+ "append_only": false,
+ "checked": 4,
+ "first_bad": 3,
+ "final_size": 223934
+}
