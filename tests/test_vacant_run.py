@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import pathlib
 import sys
 import threading
@@ -279,6 +280,24 @@ def test_accepted_when_visible_suite_passes(tmp_path, upstream, monkeypatch):
     assert s["stop_reason"] == "visible_pass" and s["accepted"] is True
     assert launcher.exit_code(s) == 0
     assert s["ws_end_sha256"] != s["ws_start_sha256"]     # agent 真的寫了東西
+    # 驗收用哪個 PATH／多少記憶體要跟著這一跑的紀錄走（2026-09-24：兩個都可明講調整）
+    from vacant_network.vrun import sandbox as sbx
+    assert s["sandbox"]["accept_path"] == sbx.accept_path()
+    assert s["sandbox"]["memory_bytes"] == sbx.DEFAULT_MEMORY_BYTES
+
+
+def test_accept_path_prepend_is_recorded_and_used(tmp_path, upstream, monkeypatch):
+    """明講的 VACANT_ACCEPT_PATH_PREPEND 要真的進紀錄（不是只在文件裡講）。"""
+    monkeypatch.setenv("OPENAI_BASE_URL", upstream[0])
+    extra = tmp_path / "venvbin"
+    extra.mkdir()
+    monkeypatch.setenv("VACANT_ACCEPT_PATH_PREPEND", str(extra))
+    ws = _ws(tmp_path, "ws")
+    s = launcher.run(_agent(tmp_path, "good"), workspace=ws,
+                     run_dir=tmp_path / "run", suite_dir=_suite(tmp_path),
+                     vacant_on=True, task_id="accept2", sandbox_name="none")
+    assert s["accepted"] is True
+    assert s["sandbox"]["accept_path"].split(os.pathsep)[0] == str(extra)
 
 
 def test_no_suite_is_fail_closed(tmp_path, upstream, monkeypatch):

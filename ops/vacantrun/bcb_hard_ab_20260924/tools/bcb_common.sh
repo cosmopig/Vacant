@@ -27,13 +27,4 @@ base_env() {   # $1 = HOME
   export PI_SKIP_VERSION_CHECK=1
   export PI_OFFLINE=1
 }
-# ── 圍住 agent（預註冊補充 A1）：pi 沒有內建沙箱，無人看管跑 7 小時又在共用機器上 ⇒
-#    每一個 pi 行程（含 GATE 的 shim／launcher）包進 bwrap：根目錄唯讀；只有這一格的工作區、這個後端的
-#    HOME、私有 /tmp 可寫；獨立 PID 空間（kill 碰不到外面）；網路保留（要連模型）。四組一樣。
-#    ⚠ 這是保護機器，不是安全邊界：網路是通的。
-bw() {   # $1 = 工作區；其餘是要跑的指令
-  local ws=$1; shift
-  bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp \
-        --bind "$ws" "$ws" --bind "$HOME" "$HOME" \
-        --unshare-pid --die-with-parent --chdir "$ws" "$@"
-}
+# 圍住 agent：見 bw.sh（預註冊補充 A1）。`timeout` 叫不動 shell 函式，所以是獨立腳本。

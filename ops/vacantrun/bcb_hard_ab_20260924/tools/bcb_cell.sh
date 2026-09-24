@@ -13,11 +13,11 @@ jf=$P/home_on/.vacant/possess/proxyd/wire/index.jsonl; jb=$(wc -l < $jf 2>/dev/n
 { echo "arm=$arm task=$tid attempt=$att backend=$BACKEND model=$MODEL"; echo "prompt=$PROMPT"; echo "containment=bwrap(ro /, rw ws+HOME, tmpfs /tmp, unshare-pid, net shared)"; date -u +%FT%TZ; } > $L/argv.txt
 t0=$(date +%s.%N)
 case $arm in
-  OFF|CH) ( cd "$ws" && timeout 1500 bw "$ws" $PI -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
+  OFF|CH) ( cd "$ws" && timeout 1500 $T/bw.sh "$ws" $PI -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
   GATE)   ( cd "$ws" && export VACANT_SUITE="$TPL/$safe/tests_visible" VACANT_TEST_TIMEOUT=${BCB_TEST_TIMEOUT:-120} \
               VACANT_ACCEPT_PATH_PREPEND="$VENV/bin" VACANT_ACCEPT_MEMORY_MB=2048 \
               VACANT_AGENT_MODEL="$MODEL" OPENAI_API_KEY="${PILOT_KEY:-lm-studio}" && \
-            timeout 1500 bw "$ws" $HOME/.vacant/possess/bin/pi -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
+            timeout 1500 $T/bw.sh "$ws" $HOME/.vacant/possess/bin/pi -p "$PROMPT" < /dev/null > $L/stdout 2> $L/stderr ); rc=$? ;;
 esac
 t1=$(date +%s.%N)
 echo $rc > $L/rc; python3 -c "print(round($t1-$t0,1))" > $L/wall_s
