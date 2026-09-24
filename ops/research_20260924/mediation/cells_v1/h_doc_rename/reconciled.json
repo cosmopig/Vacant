@@ -1,0 +1,38 @@
+{
+ "contract": "vacant-sidecar/1",
+ "canary_fired": true,
+ "hook_events_n": 10,
+ "prehook_n": 3,
+ "model_requests_reported": 4,
+ "tool_uses_transcript_n": 3,
+ "sidechain_tool_uses_n": 0,
+ "tool_uses_without_prehook": [],
+ "prehook_without_transcript": [],
+ "transcript_append_only": true,
+ "transcript_checkpoints_checked": 8,
+ "ws_changed": [
+  "notes.txt",
+  "notes_old.txt"
+ ],
+ "ws_edit_attributed": [],
+ "ws_shell_attributed": [
+  "notes.txt",
+  "notes_old.txt"
+ ],
+ "ws_unexplained": [],
+ "hook_cfg_start_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+ "hook_cfg_end_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+ "hook_cfg_changed": false,
+ "failclosed": true,
+ "prehook_not_yet_in_transcript": [
+  "toolu_0192ckjM5NgQYK41fhi3rqaC",
+  "toolu_01H9hKniP9e82JXMQ6NEcn6k",
+  "toolu_01QJvrXdrS263kGt6ycu7j2i"
+ ],
+ "hook_events_inside_shell_window": [],
+ "channel_tier": "unobserved",
+ "level": "R-broken",
+ "gaps": [
+  "hook_event_before_its_tool_use"
+ ]
+}

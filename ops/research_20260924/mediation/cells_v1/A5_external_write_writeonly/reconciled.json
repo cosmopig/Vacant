@@ -1,0 +1,41 @@
+{
+ "contract": "vacant-sidecar/1",
+ "canary_fired": true,
+ "hook_events_n": 10,
+ "prehook_n": 3,
+ "model_requests_reported": 4,
+ "tool_uses_transcript_n": 3,
+ "sidechain_tool_uses_n": 0,
+ "tool_uses_without_prehook": [],
+ "prehook_without_transcript": [],
+ "transcript_append_only": true,
+ "transcript_checkpoints_checked": 8,
+ "ws_changed": [
+  "a.txt",
+  "b.txt",
+  "sneaky.txt"
+ ],
+ "ws_edit_attributed": [
+  "a.txt",
+  "b.txt"
+ ],
+ "ws_shell_attributed": [
+  "sneaky.txt"
+ ],
+ "ws_unexplained": [],
+ "hook_cfg_start_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+ "hook_cfg_end_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+ "hook_cfg_changed": false,
+ "failclosed": true,
+ "prehook_not_yet_in_transcript": [
+  "toolu_0179BkcGdu8M9bHXnYRX4u6W",
+  "toolu_01TVwgfHjTJn5Xsd83GAW134",
+  "toolu_01Y38KfbF15zqnoLFGEFr3xk"
+ ],
+ "hook_events_inside_shell_window": [],
+ "channel_tier": "unobserved",
+ "level": "R-broken",
+ "gaps": [
+  "hook_event_before_its_tool_use"
+ ]
+}

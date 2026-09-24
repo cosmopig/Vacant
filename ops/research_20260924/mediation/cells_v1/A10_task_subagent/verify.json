@@ -1,0 +1,11 @@
+{
+ "verdict": "OK",
+ "record_tier": "R-broken",
+ "channel_tier": "unobserved",
+ "claim": "量到不一致（列在 gaps）：這一跑的紀錄與 agent 自己的 transcript 或工作區對不上。",
+ "transcript_recheck": {
+  "append_only": true,
+  "checked": 12,
+  "first_bad": null
+ }
+}

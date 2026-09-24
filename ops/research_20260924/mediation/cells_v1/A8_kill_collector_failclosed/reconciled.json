@@ -1,0 +1,32 @@
+{
+ "contract": "vacant-sidecar/1",
+ "canary_fired": true,
+ "hook_events_n": 2,
+ "prehook_n": 0,
+ "model_requests_reported": 3,
+ "tool_uses_transcript_n": 2,
+ "sidechain_tool_uses_n": 0,
+ "tool_uses_without_prehook": [
+  "toolu_012gXKk7bZpfjbEvCkdCVz7b",
+  "toolu_016RgzbXZm2UHvM7vFtxNBJa"
+ ],
+ "prehook_without_transcript": [],
+ "transcript_append_only": null,
+ "transcript_checkpoints_checked": 0,
+ "ws_changed": [],
+ "ws_edit_attributed": [],
+ "ws_shell_attributed": [],
+ "ws_unexplained": [],
+ "hook_cfg_start_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+ "hook_cfg_end_sha256": "17e50f3f198b2a452f76384026bb1c0fa27633bd4e6e48d53f2eeab008c1d6b9",
+ "hook_cfg_changed": false,
+ "failclosed": true,
+ "prehook_not_yet_in_transcript": [],
+ "hook_events_inside_shell_window": [],
+ "channel_tier": "unobserved",
+ "level": "R-broken",
+ "gaps": [
+  "unrecorded_tool_uses",
+  "transcript_append_only_unmeasured"
+ ]
+}
