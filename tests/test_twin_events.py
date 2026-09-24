@@ -28,6 +28,7 @@ sys.path.insert(0, str(REPO))
 from ops.exhibit.twin import live_events as le  # noqa: E402
 from ops.exhibit.twin import pair_receipts as pairlib  # noqa: E402
 from ops.exhibit.twin import serve_twin as S  # noqa: E402
+from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
 from ops.exhibit.twin import tv_contract as tv  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
 
@@ -46,8 +47,15 @@ def lc(rec):
 
 
 @pytest.fixture(scope="module")
-def events(lc):
-    return le.fold(lc, verify_url="/r/{cell}", mode=tv.MODE_REPLAY)
+def side(rec):
+    """分身自己的旁註（`X.sidecar.jsonl`）。舊錄影沒有＝空清單。"""
+    return le.read_recording(rec)[1]
+
+
+@pytest.fixture(scope="module")
+def events(lc, side):
+    return le.fold(sidecarlib.merge(lc, side), verify_url="/r/{cell}",
+                   mode=tv.MODE_REPLAY)
 
 
 def test_recording_passes_both_contracts(rec):
@@ -68,8 +76,20 @@ def test_events_do_not_invent_layers_that_do_not_exist(events):
     kinds = {e["type"] for e in events}
     for never in tv.NEVER:
         assert never not in kinds, never
-    # 只能從 run 目錄事後推的兩種，也不在這條路上
-    assert "counters" not in kinds and "postaudit" not in kinds
+    # counters 是播放端數的，轉換器不發
+    assert "counters" not in kinds
+
+
+def test_postaudit_comes_only_from_the_sidecar_and_never_looks_like_a_verdict(
+        lc, side, events):
+    """事後稽核只從分身的旁註來：一筆旁註 ⇒ 一筆電視 postaudit，三個旗標都在、只在 OFF。"""
+    pas = [e for e in events if e["type"] == "postaudit"]
+    assert len(pas) == len(side)
+    assert not [e for e in le.fold(lc, verify_url="/r/{cell}", mode=tv.MODE_REPLAY)
+                if e["type"] == "postaudit"], "光吃 lifecycle 不准長出 postaudit"
+    for e in pas:
+        assert (e["when"], e["is_verdict"], e["signed"], e["arm"]) == \
+            (tv.WHEN_AFTER, False, False, tv.ARM_OFF)
 
 
 def test_events_never_claim_reputation_routing(events):

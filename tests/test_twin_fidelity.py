@@ -285,16 +285,24 @@ def test_no_event_invents_a_layer_that_does_not_exist():
     kinds = {e["type"] for e in fold(two_attempts())}
     for never in tv.NEVER:
         assert never not in kinds, never
-    # `counters`／`postaudit` 只能從 run 目錄事後推，這條路上沒有它們
-    for gone in ("counters", "postaudit"):
-        assert gone not in tv.EMITTED and gone not in kinds, gone
+    # lifecycle 裡沒有事後稽核 ⇒ 光吃 lifecycle 轉不出 postaudit（它只從分身的旁註來）；
+    # counters 是播放端（serve_twin）數的，Folder 自己不發。
+    assert "postaudit" not in kinds and "counters" not in kinds
 
 
 def test_validate_rejects_the_layers_that_do_not_exist():
     evs = fold(two_attempts())
-    for never in tv.NEVER + ("counters", "postaudit"):
+    for never in tv.NEVER:
         broken = evs + [{"type": never, "ts": "9999", "task_id": "x", "mode": "live"}]
         assert tv.validate(broken), never
+    # 2026-09-24「分身側自己記一份補回」：postaudit／counters 回到白名單，但各有自己的規則
+    assert "postaudit" in tv.EMITTED and "counters" in tv.EMITTED
+    bare_pa = {"type": "postaudit", "ts": "9999", "task_id": "x", "mode": "live",
+               "arm": "OFF"}
+    assert tv.validate(evs + [bare_pa]), "沒帶三個旗標的 postaudit 要被擋"
+    for k in tv.COUNTERS_NEVER:
+        ctr = {"type": "counters", "ts": "9999", "task_id": "-", "mode": "live", k: 0}
+        assert tv.validate(evs + [ctr]), k
 
 
 def test_routed_says_out_loud_that_there_is_no_routing_layer():

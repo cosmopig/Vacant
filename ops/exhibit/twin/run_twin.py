@@ -38,6 +38,11 @@ OFF 那一份交付到底過不過，`vacant run --vacant 0` **答不出來**—
 把它畫成 OFF 臂的裁決，就是把「沒有這一層」演成「這一層在另一邊也跑了」——
 那會把 OFF 臂的意義整個弄反。資料上分得開，頁面才有機會說對。
 
+給了 `--events L.jsonl` 時，量完的當下另外在 `L.sidecar.jsonl` 追加一筆旁註
+（`twin.sidecar/1`，`sidecar.py`），綁那一跑的 `run_id`＋`ws_end_sha256`——電視的
+`postaudit` 只從這裡來。**不寫進 lifecycle**：那一份只放 Vacant 當場觀察到的事
+（2026-09-24 人類裁決「分身側自己記一份補回」）。
+
 ## 兩種模式，同一條程式路徑
 
 | 模式 | argv | requests_seen | 證據等級 |
@@ -271,6 +276,33 @@ def postaudit_off(run_dir: pathlib.Path, task_id: str, *, sandbox: str,
     return out
 
 
+def write_postaudit_sidecar(events_path, pa: dict, *, cell_id: str,
+                            summary: dict) -> dict:
+    """事後稽核**完成的當下**寫一筆旁註（`twin.sidecar/1`），給電視的 `postaudit` 用。
+
+    ⚠ 寫進 `sidecar.sidecar_path(events_path)`（`X.jsonl` 旁邊的 `X.sidecar.jsonl`），
+      **不寫進** lifecycle 那一個檔：那一份是 Vacant 當場觀察到的，這一份是分身事後
+      補量的——人類裁決（2026-09-24）「分身側自己記一份補回」，不准進 lifecycle 契約。
+      為什麼分檔寫在 `sidecar.py` 的 docstring。
+
+    綁定：`run_id`＝OFF 那一跑的 lifecycle `run_id`（`summary["lifecycle"]`）、
+    `ws_end_sha256`＝那一跑的凍結樹。**寫不進去不改變任何結果**，只回報在
+    `twin_cell.json` 的 `arms.OFF.sidecar` 上（不可以安靜）。
+    """
+    from ops.exhibit.twin import sidecar as sidecarlib
+    run_id = (summary.get("lifecycle") or {}).get("run_id")
+    path = sidecarlib.sidecar_path(events_path)
+    if not run_id:
+        return {"written": False, "error": "這一跑沒有 lifecycle run_id，旁註綁不上任何一跑"}
+    row = sidecarlib.postaudit_row(pa, cell_id=cell_id, run_id=run_id,
+                                   ws_end_sha256=summary.get("ws_end_sha256"))
+    err = sidecarlib.append(path, row)
+    if err:
+        print(f"⚠ 旁註寫不進 {path.name}：{err}（那一跑的結果不受影響）",
+              file=sys.stderr)
+    return {"written": err is None, "error": err, "file": path.name}
+
+
 def run_cell(*, resident, task_id, explicit, out_root, argv, upstream, model,
              retry_arm, max_attempts, sandbox, timeout_s, test_timeout_s,
              fixture, evidence, arms=ARMS, events_path=None) -> dict:
@@ -309,6 +341,9 @@ def run_cell(*, resident, task_id, explicit, out_root, argv, upstream, model,
                                    test_timeout_s=test_timeout_s)
                 per_arm[arm]["postaudit_all_pass"] = (
                     None if pa is None else bool(pa.get("all_pass")))
+                if pa is not None and events_path:
+                    per_arm[arm]["sidecar"] = write_postaudit_sidecar(
+                        events_path, pa, cell_id=cid, summary=summary)
     finally:
         os.environ.clear()
         os.environ.update(env_before)
