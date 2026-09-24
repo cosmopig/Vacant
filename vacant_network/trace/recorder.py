@@ -254,7 +254,7 @@ class Recorder:
                 data = json.dumps({"": {"base": key, "del": gone}, **dict(sorted(put.items()))},
                                   separators=(",", ":"), ensure_ascii=False).encode()
         full = data is None
-        sha = self.blobs.put_bytes(W.dump(idx) if full else data)
+        sha = self.blobs.put_bytes(data if data is not None else W.dump(idx))
         if full and st is not None:
             st["index_key"] = sha                     # 這一份是完整的：之後的差異對它算
         self._idx_cache[sha] = idx
