@@ -109,6 +109,22 @@ CMD+=(loop --cloud "$CLOUD" --token "$TOKEN"
 if [ -n "${VACANT_TWIN_ENDPOINT:-}" ]; then
   CMD+=(--endpoint "$VACANT_TWIN_ENDPOINT")
 fi
+# 分身怎麼生（2026-09-24，decisions/DECISION_20260924_TWIN_AGENT_RUN.md）：
+#   agent（預設）＝分身在 vacant run 底下用 pi 真跑、自己決定任務；
+#   chat ＝舊路徑（直打模型要三句台詞，沒有收據）。
+#   這台沒有 pi 的話 agent 會**誠實地**退到 chat 並標 degrade_kind=agent_unavailable
+#   ——**明講出來**，不要讓展場以為在真跑。
+CMD+=(--engine "${VACANT_TWIN_ENGINE:-agent}"
+      --parallel "${VACANT_TWIN_PARALLEL:-2}")
+if [ -n "${VACANT_EVENTS:-}" ]; then
+  CMD+=(--events "$VACANT_EVENTS")
+fi
+if [ "$PRINT_ONLY" = "0" ] && [ "${VACANT_TWIN_ENGINE:-agent}" = "agent" ] \
+   && ! command -v "${VACANT_TWIN_PI:-pi}" >/dev/null 2>&1; then
+  echo "⚠ 這台找不到 pi（${VACANT_TWIN_PI:-pi}）⇒ 分身**不會**真跑，" >&2
+  echo "  會退到直打模型（engine=lmstudio:*，degrade_kind=agent_unavailable，沒有收據）。" >&2
+  echo "  要真跑：把 pi 0.85.x 放進 PATH，或 VACANT_TWIN_PI=<pi 的完整路徑>。" >&2
+fi
 
 if [ "$PRINT_ONLY" = "1" ]; then
   # ⚠ token 遮掉。這一行會被貼進紀錄與 journal。

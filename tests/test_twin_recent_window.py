@@ -399,7 +399,11 @@ def test_retirement_is_visible_and_on_chain(store: TwinStore) -> None:
     notes = [e for e in store.events(kind=KIND_NOTE)
              if e["payload"].get("twinlink_event") == twinlink.RETIRE_MARK]
     assert len(notes) == 25
-    assert notes[0]["payload"]["farewell"] == f"{notes[0]['sub_id']} 交件"
+    # 🔴 2026-09-24（缺陷一）：退役事件**不帶**那句話本身——它是解封後的分身原文，
+    #    寫進 append-only 鏈就撤回不掉。帳本上記的是「從哪裡讀」，畫面播放時才讀。
+    assert "farewell" not in notes[0]["payload"]
+    assert notes[0]["payload"]["farewell_from"] == "twin.handover"
+    assert all(r["farewell"] == f"{r['id']} 交件" for r in ret["retiring"])
     assert notes[0]["source"] == "local:twinlink.retire"
 
 
@@ -530,6 +534,13 @@ def test_window_must_not_break_the_tv_reconciliation(store: TwinStore) -> None:
     # 他很早就投了卡，分身一直沒生出來
     _person(store, "卡住的那位", ms=now - 5 * DAY, generated=False)
     _crowd(store, 200, now_ms=now, days_ago=1)
+    # ⚠ 2026-09-24（缺陷三修正）之後，「arriving 排在一堆更新的 ambient 後面」
+    #   **不再**會讓他掉出畫面——那正是那個缺陷（必留的人被前綴切掉）。
+    #   他現在要掉出畫面，只剩一種合法的方式：**必留的人多到超過 hard_cap**
+    #   （模型掛掉、積壓一口氣湧入）。所以這裡再壓 180 位更新的 arriving
+    #   （recent=60 ⇒ hard_cap=180），把他擠成 `waiting`。
+    for i in range(180):
+        _person(store, f"湧入{i:03d}", ms=now - 60_000 + i * 10, generated=False)
 
     view = twinlink.build_view(store, recent=60, record_retire=True, now_ms=now)
     people_ids = {p["id"] for p in view["people"]}
@@ -542,7 +553,7 @@ def test_window_must_not_break_the_tv_reconciliation(store: TwinStore) -> None:
 
     # 正題：對帳要對得到他
     assert "卡住的那位" in view["roster_ids"], "電視那端永遠核銷不掉他"
-    assert len(view["roster_ids"]) == view["counts"]["total"] == 201
+    assert len(view["roster_ids"]) == view["counts"]["total"] == 381
     # 已退役的人也要在裡面（退役 ≠ 不存在，帳一樣要銷得掉）
     retired_ids = {e["sub_id"] for e in store.events(kind=KIND_NOTE)
                    if e["payload"].get("twinlink_event") == twinlink.RETIRE_MARK}

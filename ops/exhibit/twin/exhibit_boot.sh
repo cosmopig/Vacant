@@ -7,6 +7,9 @@
 #
 #   ┌ 8420  vacant_hm 的靜態站（電視）      ← python3 -m http.server
 #   ├ 8899  serve_twin.py（事件流＋/state＋/control＋/r/<cell>＋手機頁）
+#   │        電視事件只有一個來源：lifecycle 錄影（`recordings/*.jsonl`，重播）
+#   │        或 `--live <lifecycle.jsonl>`（真跑，有就先播）。2026-09-24 起沒有
+#   │        「從 run 目錄事後推事件」那一條了（`to_events.py` 已刪）。
 #   └ 8901  twinlink serve（**唯讀**：數位分身真相來源 /visitors.json）
 #
 # ⚠ **8901 那一行是 2026-09-21 補上的。** 在那之前，`twinlink`／`twinstore`／
@@ -28,6 +31,11 @@
 #   ./exhibit_boot.sh --lan --no-token      明知故犯：區網上任何人都按得動
 #   ./exhibit_boot.sh --hm /path/vacant_hm  vacant_hm 不在預設位置
 #   ./exhibit_boot.sh --dwell 25            沒人按的時候幾秒換一格
+#   ./exhibit_boot.sh --recording a.jsonl   只重播這一份錄影（可給多次；
+#                                           不給＝ops/exhibit/twin/recordings/*.jsonl）
+#   ./exhibit_boot.sh --live runs/x/lifecycle.jsonl --live-runs runs/x
+#                                           tail 真跑：有真跑就先播真跑，閒下來回到重播；
+#                                           --live-runs 讓那幾格跑完就有收據頁
 #   ./exhibit_boot.sh --lan --print-host    只印「區網 IP 抓到什麼」就結束
 #                                           （0＝抓到、2＝抓不到並說明；1 是 bug）
 #   ./exhibit_boot.sh --no-twin             不接數位分身（回到 09-21 之前的行為）
@@ -58,6 +66,9 @@ KIOSK=0
 TOKEN="${VACANT_TWIN_TOKEN:-}"
 NO_TOKEN=0
 PRINT_HOST=0
+RECORDINGS=()
+LIVE_SRC=""
+LIVE_RUNS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -74,6 +85,10 @@ while [ $# -gt 0 ]; do
     --print-host) PRINT_HOST=1 ;;
     --hm)     HM="$2"; shift ;;
     --dwell)  DWELL="$2"; shift ;;
+    --recording) RECORDINGS+=("$2"); shift ;;
+    --live)   LIVE_SRC="$2"; shift ;;
+    # 真跑那一次 run_twin.py 的 --out：給了，那一格跑完就即時打包收據（/v/live.html）。
+    --live-runs) LIVE_RUNS="$2"; shift ;;
     --tv-port)   TV_PORT="$2"; shift ;;
     --twin-port) TWIN_PORT="$2"; shift ;;
     --store-port) STORE_PORT="$2"; shift ;;
@@ -93,9 +108,14 @@ if [ "$PRINT_HOST" = "0" ] && [ ! -f "$HM/world3/index.html" ]; then
   echo "用 --hm <路徑> 指過去，或設 VACANT_HM 環境變數。" >&2
   exit 2
 fi
-if [ "$PRINT_HOST" = "0" ] && [ ! -f "$REPO/ops/exhibit/twin/twin_pack.json" ]; then
-  echo "找不到資料包：$REPO/ops/exhibit/twin/twin_pack.json" >&2
-  echo "先跑：$PY $REPO/ops/exhibit/twin/pack.py --runs <run 目錄>" >&2
+# 電視要播的東西：lifecycle 錄影（重播）。一份都沒有又沒給 --live ⇒ 電視會是空的。
+# ⚠ `twin_pack.json` **不再是事件來源**，只剩收據頁（/r/<cell>）在用；沒有它
+#   展件照樣起得來，只是 /r/<cell> 會一律 404 並講明（不會帶人去看別的鏈）。
+if [ "$PRINT_HOST" = "0" ] && [ -z "$LIVE_SRC" ] && [ "${#RECORDINGS[@]}" -eq 0 ] \
+   && ! ls "$REPO"/ops/exhibit/twin/recordings/*.jsonl >/dev/null 2>&1; then
+  echo "找不到任何 lifecycle 錄影：$REPO/ops/exhibit/twin/recordings/*.jsonl" >&2
+  echo "先跑：bash $REPO/ops/exhibit/twin/record_fixture.sh（L-none 備援），" >&2
+  echo "或用 --recording 指一份、用 --live 接真跑。" >&2
   exit 2
 fi
 
@@ -190,6 +210,9 @@ TV_PID=$!
 # --base-url 就是 QR 會編進去的東西。**一定要傳**，預設值是 127.0.0.1。
 TWIN_ARGS=(--bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL"
            --base-url "http://$HOST:$TWIN_PORT")
+for R in "${RECORDINGS[@]+"${RECORDINGS[@]}"}"; do TWIN_ARGS+=(--recording "$R"); done
+[ -n "$LIVE_SRC" ] && TWIN_ARGS+=(--live "$LIVE_SRC")
+[ -n "$LIVE_RUNS" ] && TWIN_ARGS+=(--live-runs "$LIVE_RUNS")
 if [ -n "$TOKEN" ]; then
   TWIN_ARGS+=(--token "$TOKEN")
 else
@@ -326,6 +349,19 @@ echo "────────────────────────�
 echo " 電視 　$TV_URL"
 echo " 手機 　$PHONE_URL   ← QR 編的就是這一行"
 echo " 收據 　http://$HOST:$TWIN_PORT/viewer.html"
+if [ "${#RECORDINGS[@]}" -gt 0 ]; then
+  echo " 重播 　${RECORDINGS[*]}（mode=replay：畫面上要標「重播」）"
+else
+  echo " 重播 　ops/exhibit/twin/recordings/*.jsonl（mode=replay：畫面上要標「重播」）"
+fi
+if [ -n "$LIVE_SRC" ]; then
+  echo " 真跑 　${LIVE_SRC}（mode=live：有真跑就先播，閒下來回到重播）"
+  if [ -n "$LIVE_RUNS" ]; then
+    echo " 　　　 收據：${LIVE_RUNS}（每一格跑完即時打包，/v/live.html）"
+  else
+    echo " 　　　 ⚠ 沒有 --live-runs：真跑那幾格沒有收據頁，/r/<cell> 會照實 404"
+  fi
+fi
 echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
 if [ -n "$STORE_URL" ]; then
   echo " 分身 　${STORE_URL}（唯讀；電視的 &twin= 指這裡）"

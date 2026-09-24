@@ -1,0 +1,171 @@
+{
+  "at": "2026-09-24T03:14:09Z",
+  "endpoint": "http://192.168.76.1:1234/v1",
+  "model": "gemma-4-12b-it-qat",
+  "synthetic": true,
+  "generate_rc": 0,
+  "generate": {
+    "ok": true,
+    "mode": "agent",
+    "generated": 1,
+    "degraded": 0,
+    "failed": 0,
+    "submitted": 1,
+    "discarded": 0,
+    "in_flight": 0,
+    "agent_available": true,
+    "agent_unavailable_reason": null,
+    "upstream_reachable": true,
+    "agent": {
+      "work_root": "/tmp/twin_smoke_k427zj_f/twinstore.agentruns",
+      "events_path": "/tmp/twin_smoke_k427zj_f/lifecycle.jsonl",
+      "parallel": 1,
+      "timeout_s": 300.0,
+      "argv_prefix": [
+        "bash",
+        "twin_agent.sh"
+      ]
+    },
+    "remaining": 0
+  },
+  "wall_s": 14.7,
+  "twin": {
+    "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+    "degrade_kind": null,
+    "decision": "我決定寫一份「慢節奏週末規劃清單」。",
+    "reason": "因為我覺得週末總是轉瞬即逝，我想透過整理時間來找回一點掌控感。考慮到我喜歡泡茶、念舊且做事較慢的性格，這份計畫會包含留白給自己靜下來的時間。",
+    "artifacts": [
+      {
+        "bytes": 790,
+        "name": "Weekend_Plan.md",
+        "text": "# 慢節奏週末規劃清單\n\n## 週六：回憶與茶香\n- [ ] **上午 10:00 - 11:30**：泡一壺好茶，在陽光下靜坐。不看手機，只是感受茶的香氣。\n- [ ] **下午 14:00 - 16:00**：翻閱舊相冊。挑選出三張最喜歡的照片，並寫下當時的簡單回憶。\n- [ ] **傍晚 17:00 - 18:00**：整理一小塊空間（例如書桌或照片架）。\n\n## 週日：放鬆與準備\n- [ ] **上午 10:30 - 12:00**：慢速早餐，聽一點輕音樂。\n- [ ] **下午 14:00 - 15:30**：寫下下週想完成的三件小事（不要太多，只要三件）。\n- [ ] **晚上 20:00 - 21:00**：準備明天的衣物與簡單的備忘錄。\n\n*備註：如果覺得累了，就先停下來喝杯茶。這份清單是為了享受時間，而不是為了趕進度。*",
+        "truncated": false
+      }
+    ],
+    "arrival": "我決定寫一份「慢節奏週末規劃清單」。",
+    "working": "因為我覺得週末總是轉瞬即逝，我想透過整理時間來找回一點掌控感",
+    "handover": "做好了，放在「Weekend_Plan.md」。",
+    "lines_from": "agent_workspace",
+    "run_id": "6120c37187af426a9fe8230ad2f0a9e9",
+    "verdict_hash": "d468158174e179df33bd4c82097270c9909a2a8b25d7990284ec622a399a6c99",
+    "stop_reason": "ungated",
+    "accepted": null,
+    "requests_seen": 4,
+    "count_semantics": "exact",
+    "agent_rc": 0,
+    "agent_timed_out": false,
+    "latency_ms": 14491,
+    "twin_id": "tw-c23362f30473"
+  },
+  "lifecycle": {
+    "n": 8,
+    "types": [
+      "run_started",
+      "attempt_started",
+      "model_call",
+      "model_call",
+      "model_call",
+      "model_call",
+      "agent_exited",
+      "run_ended"
+    ],
+    "validate_stream": []
+  },
+  "receipts": [
+    {
+      "verdict": "OK",
+      "chain_ok": true,
+      "mediated": true,
+      "tier": "C",
+      "type_counts": {
+        "ws_attempt": 1,
+        "ws_verdict": 1
+      },
+      "failures": []
+    }
+  ],
+  "wire": {
+    "requests": 4,
+    "responses": 4,
+    "responses_with_reasoning_content": 1
+  },
+  "run_dir_before_withdraw": [
+    "_frozen_RUN-ON/",
+    "agent_stderr.log",
+    "agent_stdout.log",
+    "pi_cfg/",
+    "receipts_RUN-ON.ndjson",
+    "receipts_RUN-ON.pub.json",
+    "rows.jsonl",
+    "run_RUN-ON.json",
+    "wire_RUN-ON/"
+  ],
+  "workspace_before_withdraw": [
+    "PLAN.md",
+    "TRAITS.md",
+    "Weekend_Plan.md"
+  ],
+  "withdraw": {
+    "ok": true,
+    "signed": true,
+    "fully_erased": true,
+    "residual_plaintext_seqs": [],
+    "run_artifacts_erased": [
+      {
+        "what": "workspace",
+        "files": 3,
+        "bytes": 1427
+      },
+      {
+        "what": "_frozen_RUN-ON",
+        "files": 3,
+        "bytes": 1427
+      },
+      {
+        "what": "agent_stderr.log",
+        "files": 1,
+        "bytes": 0
+      },
+      {
+        "what": "agent_stdout.log",
+        "files": 1,
+        "bytes": 37
+      },
+      {
+        "what": "pi_cfg",
+        "files": 3,
+        "bytes": 335
+      },
+      {
+        "what": "run_RUN-ON.json",
+        "files": 1,
+        "bytes": 9769
+      },
+      {
+        "what": "wire_RUN-ON",
+        "files": 9,
+        "bytes": 162376
+      }
+    ],
+    "run_artifacts_kept_hash_only": [
+      "receipts_RUN-ON.ndjson",
+      "receipts_RUN-ON.pub.json",
+      "rows.jsonl"
+    ],
+    "run_artifacts_problems": [],
+    "problems": []
+  },
+  "run_dir_after_withdraw": [
+    "receipts_RUN-ON.ndjson",
+    "receipts_RUN-ON.pub.json",
+    "rows.jsonl"
+  ],
+  "workspace_exists_after_withdraw": false,
+  "receipts_after_withdraw": [
+    "OK"
+  ],
+  "synthetic_text_left_under_work_root": false,
+  "erased_event_kind": [
+    "erased"
+  ]
+}

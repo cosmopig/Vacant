@@ -16,7 +16,9 @@ import vm from "node:vm";
 
 const HERE = path.dirname(url.fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "../../..");
-const viewer = path.join(REPO, "examples/twin_viewer.html");
+// 可以指另一頁（例如 serve_twin 替配對收據現做的 /v/<錄影>.html 存下來的那一份）。
+const viewer = process.argv[2] ? path.resolve(process.argv[2])
+                               : path.join(REPO, "examples/twin_viewer.html");
 
 let fail = 0;
 const check = (name, ok, extra = "") => {

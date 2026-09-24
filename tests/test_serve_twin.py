@@ -1,13 +1,19 @@
 """展場機那一支伺服器的可執行判準（`ops/exhibit/twin/serve_twin.py`）。
 
-守的是 `decisions/DECISION_20260919_TWIN_LIVE.md` 的接口契約與四條展場鐵律：
+守的是 `decisions/DECISION_20260919_TWIN_LIVE.md` 的接口契約與四條展場鐵律，
+以及 2026-09-24「刪事後推導，留錄影重播」之後的新形狀：
 
-- 秒級：一次 POST /control ⇒ 事件檔就長出那一格（零模型呼叫）。
-- 離線：只有 stdlib、只綁 loopback、頁面零外部資源。
+- 資料來源只有 lifecycle：`--recording`（重播）與 `--live`（真跑）。
+- 秒級：一次 POST /control ⇒ 那一格馬上開播（第一筆當場寫出），其餘照錄影的
+  相對間隔、壓縮進 `dwell×REPLAY_FILL` 秒內播完；壓縮比落在 `/state.replay`。
+- 每一筆事件都帶 `mode`，重播寫死 `"replay"`（畫面上要講明）。
+- 有真跑就先播真跑、輪播暫停；真跑閒下來回到錄影（切換規則在模組 docstring）。
 - 無人值守：沒人按就自己輪播；一圈播完截檔（去重集合不會無限長）。
 - 一格沒收尾不准卡死整批（D2）：過不了契約自檢的格子跳過並記下原因。
+- 收據頁只認得資料包那一批：鏈頭對不上就 404 並講明，不帶觀眾去看另一跑。
 
 以及一條口徑紅線：**這一支不得宣告任何驗證結果**（面板不是信任來源）。
+⚠ 零模型呼叫：用 `run_twin.py --fixture`（腳本化 agent）現錄一份小錄影。
 """
 from __future__ import annotations
 
@@ -15,6 +21,7 @@ import json
 import pathlib
 import sys
 import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -23,16 +30,63 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from ops.exhibit.twin import build_viewer  # noqa: E402
+from ops.exhibit.twin import pack as packlib  # noqa: E402
+from ops.exhibit.twin import pair_receipts as pairlib  # noqa: E402
+from ops.exhibit.twin import run_twin  # noqa: E402
 from ops.exhibit.twin import serve_twin as S  # noqa: E402
-from ops.exhibit.twin import to_events as tolib  # noqa: E402
+from ops.exhibit.twin import tv_contract as tv  # noqa: E402
+from vacant_network.vrun import lifecycle  # noqa: E402
 
-PACK = ROOT / "ops" / "exhibit" / "twin" / "twin_pack.json"
-pytestmark = pytest.mark.skipif(not PACK.exists(), reason="沒有 twin_pack.json")
+TWIN_PACK = ROOT / "ops" / "exhibit" / "twin" / "twin_pack.json"
 
 
 @pytest.fixture(scope="module")
-def pack() -> dict:
-    return json.loads(PACK.read_text(encoding="utf-8"))
+def batch(tmp_path_factory) -> pathlib.Path:
+    """現錄一份小錄影：1 位居民 × 2 題 × 兩份題面＝4 格（2 對），ON 用 revise。"""
+    out = tmp_path_factory.mktemp("serve_twin_batch")
+    rc = run_twin.main(["--out", str(out), "--fixture", "--residents", "1",
+                        "--tasks", "s1_01_addmul,s1_12_hms", "--sandbox", "none",
+                        "--retry", "revise", "--max-attempts", "2",
+                        "--events", str(out / "lifecycle.jsonl")])
+    assert rc == 0
+    return out
+
+
+@pytest.fixture(scope="module")
+def recs(batch) -> list[pathlib.Path]:
+    return [batch / "lifecycle.jsonl"]
+
+
+@pytest.fixture(scope="module")
+def rpack(batch) -> dict:
+    """**同一批**的收據資料包（收據頁的那一份）：鏈頭與錄影對得上。"""
+    return packlib.build(batch)
+
+
+@pytest.fixture(scope="module")
+def paired(batch, tmp_path_factory) -> pathlib.Path:
+    """同一批的錄影＋它的配對收據（`X.jsonl` ＋ `X.pack.json`），`record_fixture.sh` 的形狀。"""
+    d = tmp_path_factory.mktemp("paired")
+    rec = d / "fx_small.jsonl"
+    rec.write_bytes((batch / "lifecycle.jsonl").read_bytes())
+    pack = pairlib.build_pair(rec, batch)
+    pairlib.pair_path(rec).write_text(pairlib.dumps(pack), encoding="utf-8")
+    return rec
+
+
+def mk(recs, tmp_path, **kw):
+    kw.setdefault("dwell", 10_000)
+    kw.setdefault("quiet", True)
+    return S.make_server(recs, bind="127.0.0.1", port=0,
+                         out=tmp_path / "events.jsonl", **kw)
+
+
+def read_events(stage) -> list[dict]:
+    """讀事件檔之前先快轉：重播是照時間一筆一筆寫的，測試不等那一段。"""
+    stage.flush()
+    return [json.loads(x) for x in stage.out.read_text(encoding="utf-8").splitlines()
+            if x.strip()]
 
 
 class Client:
@@ -69,16 +123,78 @@ class Client:
 
 
 @pytest.fixture
-def server(pack, tmp_path):
-    out = tmp_path / "events.jsonl"
+def server(recs, rpack, tmp_path):
     # dwell 很大 ⇒ 測試期間不會有輪播插進來把斷言弄亂。輪播本身另外測。
-    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                               dwell=10_000, quiet=True)
+    srv, stage = mk(recs, tmp_path, pack=rpack)
     t = threading.Thread(target=srv.serve_forever, daemon=True)
     t.start()
-    yield Client(f"http://127.0.0.1:{srv.server_address[1]}"), stage, out
+    yield Client(f"http://127.0.0.1:{srv.server_address[1]}"), stage, stage.out
     srv.shutdown()
     srv.server_close()
+
+
+# ── 錄影 ────────────────────────────────────────────────────────
+def test_recording_is_split_into_cells_by_caller(recs):
+    cells, info = S.load_recordings(recs)
+    assert info[0]["accepted"] and info[0]["problems"] == []
+    assert len(cells) == 4
+    for c in cells.values():
+        # 一格＝ON 那一跑＋OFF 那一跑的區段
+        starts = [e for e in c["segment"] if e["type"] == "run_started"]
+        assert [e["arm"] for e in starts] == ["RUN-ON", "RUN-OFF"]
+        assert c["segment"][-1]["type"] == "run_ended"
+        assert c["evidence"] == "L-none"            # fixture：腳本寫的
+        assert c["side"] == ("pc" if c["cell_id"].endswith("__pc") else "held")
+
+
+def test_exit_code_follows_the_launcher_rule(batch, recs):
+    """`/state.cells[*].exit_code` 由 `run_ended` 推，規則與 `launcher.exit_code` 同一條。"""
+    from vacant_network.vrun import launcher
+    assert (S.EXIT_ACCEPTED, S.EXIT_REFUSED, S.EXIT_VOID) == \
+        (launcher.EXIT_ACCEPTED, launcher.EXIT_REFUSED, launcher.EXIT_VOID)
+    cells, _ = S.load_recordings(recs)
+    for cid, c in cells.items():
+        meta = json.loads((batch / "runs" / cid / "twin_cell.json").read_text("utf-8"))
+        assert c["exit_code"] == meta["exit_code"], cid
+    assert S.exit_code_of(None) is None, "錄影斷在半路 ⇒ 不猜"
+    assert S.exit_code_of({"infra_void": "x", "refused": False}) == S.EXIT_VOID
+
+
+def test_a_broken_recording_is_refused_whole(recs, tmp_path):
+    """一行壞掉 ⇒ 整份不收（挑著用等於替它背書）。"""
+    lines = recs[0].read_text(encoding="utf-8").splitlines(True)
+    d = json.loads(lines[2])
+    d["seq"] = 99
+    lines[2] = json.dumps(d) + "\n"
+    bad = tmp_path / "broken.jsonl"
+    bad.write_text("".join(lines), encoding="utf-8")
+    cells, info = S.load_recordings([bad])
+    assert cells == {} and info[0]["accepted"] is False and info[0]["problems"]
+    assert S.check_recording(bad)
+    assert S.main(["--check", "--recording", str(bad)]) == 1
+    assert S.main(["--check", "--recording", str(recs[0])]) == 0
+
+
+def test_the_same_cell_in_two_recordings_is_not_merged(recs, tmp_path):
+    cells, info = S.load_recordings([recs[0], recs[0]])
+    assert len(cells) == 4
+    assert info[1]["cells"] == 0 and info[1]["problems"], "第二份要講明為什麼一格都沒收"
+
+
+def test_committed_recordings_load_whole(tmp_path):
+    """進版控的備援錄影：開箱就能播，而且整批都是 L-none（腳本，不是 AI）。"""
+    recs = S.default_recordings()
+    if not recs:
+        pytest.skip("recordings/ 裡沒有錄影")
+    for p in recs:
+        assert S.check_recording(p) == [], p.name
+    srv, stage = mk(recs, tmp_path)
+    try:
+        assert all(r["accepted"] for r in stage.recordings)
+        assert stage.flat and len(stage.pl.pairs) * 2 == len(stage.flat)
+        assert set(stage.evidence_counts()) == {"L-none"}
+    finally:
+        srv.server_close()
 
 
 # ── 接口契約 ────────────────────────────────────────────────────
@@ -87,61 +203,80 @@ def test_state_has_the_three_buttons(server):
     st = c.get_json("/state")
     actions = [b["action"] for b in st["buttons"]]
     assert actions == ["held", "pc", "tamper"]
-    # 前兩顆一定指到**同一題、同一位居民**的兩邊——那才是反事實對照。
     held, pc = st["buttons"][0]["cell_id"], st["buttons"][1]["cell_id"]
     assert held.endswith("__held") and pc.endswith("__pc")
     assert held[:-len("__held")] == pc[:-len("__pc")]
 
 
 def test_control_appends_exactly_that_cell(server):
-    c, _stage, out = server
+    c, stage, _out = server
     st = c.get_json("/state")
     held = st["buttons"][0]["cell_id"]
     code, res = c.post({"action": "held"})
     assert code == 200 and res["ok"] and res["now"]["cell_id"] == held
-    evs = [json.loads(x) for x in out.read_text(encoding="utf-8").split("\n") if x.strip()]
+    # 秒級：第一筆**當場**就在檔案裡（不等錄影的相對間隔）
+    first = [json.loads(x) for x in stage.out.read_text("utf-8").splitlines() if x.strip()]
+    assert first and first[0]["type"] == "task_opened"
+    evs = read_events(stage)
     assert {e["task_id"] for e in evs} == {held}
-    assert [e["type"] for e in evs][0] == "task_opened"
     assert any(e["type"] == "verdict" for e in evs)
 
 
+def test_every_replayed_event_says_replay(server):
+    c, stage, _out = server
+    c.post({"action": "held"})
+    c.post({"action": "pc"})
+    evs = read_events(stage)
+    assert evs and {e["mode"] for e in evs} == {tv.MODE_REPLAY}
+    assert tv.validate(evs) == []
+    assert c.get_json("/state")["mode"] == tv.MODE_REPLAY
+
+
 def test_both_sides_of_one_pair_are_playable(server):
-    c, _stage, out = server
+    c, stage, _out = server
     st = c.get_json("/state")
     held, pc = st["buttons"][0]["cell_id"], st["buttons"][1]["cell_id"]
     c.post({"action": "held"})
     c.post({"action": "pc"})
-    evs = [json.loads(x) for x in out.read_text(encoding="utf-8").split("\n") if x.strip()]
+    evs = read_events(stage)
     ids = [e["task_id"] for e in evs if e["type"] == "task_opened"]
     assert ids == [held, pc]
-    # ⚠ **一格現在有兩串事件**（ON／OFF），所以要指名 ON 那一臂。
-    #   不指名的話後發的 OFF 會蓋掉 ON——而 OFF 的 `accepted` 恆為 null
-    #   （那一臂沒有閘門、沒有裁決）。這個坑電視那一端也踩過同一次。
+
     def on_verdict(tid):
         return next(e for e in evs if e["type"] == "verdict"
-                    and e["task_id"] == tid and e.get("arm", "ON") == "ON")
+                    and e["task_id"] == tid and e.get("arm") == "ON")
     assert on_verdict(held)["accepted"] is False
     assert on_verdict(pc)["accepted"] is True
-    # 而 OFF 那一臂**不准**有裁決
     for e in evs:
         if e["type"] == "verdict" and e.get("arm") == "OFF":
             assert e["accepted"] is None
 
 
+def test_switching_cells_finishes_the_previous_one_first(server):
+    """換格之前上一格要**寫完**：開了沒 verdict 的格子會讓電視的佇列卡死。"""
+    c, stage, _out = server
+    c.post({"action": "held"})
+    assert stage.pending, "前提：上一格還有沒寫出去的事件"
+    c.post({"action": "pc"})
+    evs = read_events(stage)
+    opened = [e["task_id"] for e in evs if e["type"] == "task_opened"]
+    for tid in opened:
+        assert any(e["type"] == "verdict" and e["task_id"] == tid for e in evs), tid
+    assert tv.validate(evs) == []
+
+
 def test_events_are_deduplicable_by_the_tv_key(server):
-    """電視的去重鍵是 `ts|type|task_id|arm|reviewer`。撞鍵＝那一格被靜靜吃掉。"""
-    c, _stage, out = server
+    c, stage, _out = server
     for _ in range(4):
         c.post({"action": "held"})
         c.post({"action": "pc"})
-    evs = [json.loads(x) for x in out.read_text(encoding="utf-8").split("\n") if x.strip()]
-    keys = [f'{e["ts"]}|{e["type"]}|{e["task_id"]}|{e.get("arm","")}|{e.get("reviewer","")}'
-            for e in evs]
+    evs = read_events(stage)
+    keys = [tv.dedup_key(e) for e in evs]
     assert len(set(keys)) == len(keys)
 
 
 def test_per_cell_receipt_redirect(server):
-    """C4：每一格指到自己那一頁，不是全批共用一個字串。"""
+    """C4：每一格指到自己那一頁；收據頁認得那一格（鏈頭對得上）才轉過去。"""
     c, stage, _out = server
     cid = sorted(stage.pl.cells)[0]
     code, loc = c.location(f"/r/{cid}")
@@ -152,12 +287,37 @@ def test_per_cell_receipt_redirect(server):
     assert c.location("/r/" + quote("沒有這一格"))[0] == 404
 
 
+def test_receipt_page_is_not_offered_for_a_different_run(recs, tmp_path):
+    """**誠實邊界 2**：錄影與收據頁共用 cell_id、但鏈不同 ⇒ 404 並講明。
+
+    真實情境：fixture 錄影與 54 格 L-real 資料包的 cell_id 一模一樣。
+    沒有這一條，觀眾掃了收據會看到**另一跑**的鏈，而且驗得過。
+    """
+    if not TWIN_PACK.exists():
+        pytest.skip("沒有 twin_pack.json")
+    other = json.loads(TWIN_PACK.read_text(encoding="utf-8"))
+    srv, stage = mk(recs, tmp_path, pack=other)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        c = Client(f"http://127.0.0.1:{srv.server_address[1]}")
+        cid = sorted(stage.pl.cells)[0]
+        assert cid in stage.books[""]["heads"], "前提：兩邊的 cell_id 真的撞在一起"
+        code, _loc = c.location(f"/r/{cid}")
+        assert code == 404
+        why = stage.receipt_why_not(cid)
+        assert why and "另一跑" in why
+        stage.advance()
+        assert stage.press("tamper")["ok"] is False, "沒有對得上的收據就沒有東西可以翻"
+        assert stage.state()["now"]["receipt_available"] is False
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
 def test_receipt_url_in_events_is_per_cell(server):
-    c, _stage, out = server
+    c, stage, _out = server
     c.post({"action": "held"})
     c.post({"action": "pc"})
-    evs = [json.loads(x) for x in out.read_text(encoding="utf-8").split("\n") if x.strip()]
-    rec = [e for e in evs if e["type"] == "receipt"]
+    rec = [e for e in read_events(stage) if e["type"] == "receipt"]
     assert len(rec) == 2
     assert len({e["verify_url"] for e in rec}) == 2
     for e in rec:
@@ -182,69 +342,229 @@ def test_viewer_and_phone_are_served(server):
         assert needle in body
 
 
+# ── 重播的節奏 ──────────────────────────────────────────────────
+def _stretched(recs, tmp_path, factor=1000) -> pathlib.Path:
+    """把錄影裡**每一格內部**的間隔拉長 factor 倍（模擬真模型一題一兩分鐘）。"""
+    evs = lifecycle.read(recs[0])
+    cell_of, t0 = {}, {}
+    for e in evs:
+        if e["type"] == "run_started":
+            cell_of[e["run_id"]] = e["caller"]["cell_id"]
+        cid = cell_of[e["run_id"]]
+        t0.setdefault(cid, e["ts_ms"])
+        e["ts_ms"] = t0[cid] + (e["ts_ms"] - t0[cid]) * factor
+    p = tmp_path / "stretched.jsonl"
+    p.write_text("".join(json.dumps(e) + "\n" for e in evs), encoding="utf-8")
+    assert lifecycle.validate_stream(lifecycle.read(p)) == []
+    return p
+
+
+def test_replay_keeps_relative_timing_but_fits_in_the_dwell(recs, tmp_path):
+    """一格錄影跨度 ~1000 秒 ⇒ 壓進 dwell×REPLAY_FILL；壓縮比落在 /state。"""
+    dwell = 1.0
+    srv, stage = mk([_stretched(recs, tmp_path)], tmp_path, dwell=dwell)
+    try:
+        t_start_ms = S.now_ms()
+        res = stage.advance()
+        assert res["ok"]
+        rp = stage.state()["replay"]
+        assert rp["span_s"] > 100, "前提：錄影真的很長"
+        assert rp["compress"] < 0.01 and rp["speedup"] > 100
+        assert rp["played_span_s"] <= rp["budget_s"] + 1e-6
+        assert rp["budget_s"] == pytest.approx(dwell * S.REPLAY_FILL)
+        # 一開始只寫出一部分（照相對時間，不是一次倒完）
+        n0 = len(stage.out.read_text("utf-8").splitlines())
+        assert 0 < n0 < rp["events"]
+        deadline = time.monotonic() + dwell * S.REPLAY_FILL + 1.0
+        while stage.pending and time.monotonic() < deadline:
+            stage.pump()
+            time.sleep(0.02)
+        assert not stage.pending, "播出跨度超過了 dwell"
+        evs = [json.loads(x) for x in stage.out.read_text("utf-8").splitlines()]
+        assert len(evs) == rp["events"]
+        # ts 是**重播當下的牆鐘**，不是錄影當時的
+        assert evs[0]["ts"] >= tv.iso(t_start_ms)
+        assert tv.validate(evs) == []
+    finally:
+        srv.server_close()
+
+
+def test_a_short_recording_is_never_stretched(recs, tmp_path):
+    """只壓不拉：錄影本來就比 dwell 短 ⇒ 原速（ratio＝1）。"""
+    srv, stage = mk(recs, tmp_path, dwell=60)
+    try:
+        stage.advance()
+        assert stage.replay["compress"] == 1.0
+        assert stage.replay["played_span_s"] == stage.replay["span_s"]
+    finally:
+        srv.server_close()
+
+
+# ── 真跑優先 ────────────────────────────────────────────────────
+def _one_cell_lines(recs) -> list[str]:
+    lines = recs[0].read_text(encoding="utf-8").splitlines(True)
+    evs = [json.loads(x) for x in lines]
+    cid = evs[0]["caller"]["cell_id"]
+    runs = {e["run_id"] for e in evs if e["type"] == "run_started"
+            and e["caller"]["cell_id"] == cid}
+    return [ln for ln, e in zip(lines, evs) if e["run_id"] in runs]
+
+
+def test_live_takes_over_and_hands_back(recs, tmp_path):
+    live = tmp_path / "live_lifecycle.jsonl"
+    live.write_text(recs[0].read_text(encoding="utf-8"), encoding="utf-8")  # 舊的東西
+    srv, stage = mk(recs, tmp_path, live=live, live_idle_s=0.3, live_stale_s=60)
+    try:
+        # 開機時檔案裡已經有的不是「正在發生」
+        stage.tick()
+        assert stage.mode() == tv.MODE_REPLAY
+        stage.advance()
+        replay_cell = stage.now["cell_id"]
+        assert stage.pending, "前提：重播那一格還沒播完"
+        # ── 真跑來了 ──
+        with live.open("a", encoding="utf-8") as fh:
+            fh.writelines(_one_cell_lines(recs))
+        stage.tick()
+        assert stage.mode() == tv.MODE_LIVE
+        st = stage.state()
+        assert st["mode"] == tv.MODE_LIVE and st["live"]["active"] is True
+        assert st["now"]["why"] == "live" and st["now"]["mode"] == tv.MODE_LIVE
+        evs = [json.loads(x) for x in stage.out.read_text("utf-8").splitlines()]
+        modes = [e["mode"] for e in evs]
+        first_live = modes.index(tv.MODE_LIVE)
+        # 規則 1：重播那一格先快轉寫完（有 verdict），真跑才接上去
+        before = evs[:first_live]
+        assert any(e["type"] == "verdict" and e["task_id"] == replay_cell
+                   for e in before)
+        assert all(m == tv.MODE_LIVE for m in modes[first_live:])
+        assert tv.validate(evs) == []
+        # 規則 3：真跑期間輪播暫停、導播鍵講明
+        res = stage.press("held")
+        assert res["ok"] is False and "真跑" in res["error"]
+        n = stage.n_emitted
+        stage.deadline = 0
+        stage.tick()
+        assert stage.n_emitted == n, "真跑期間輪播不准往前走"
+        # 規則 4：閒下來 ⇒ 回到錄影輪播
+        time.sleep(0.4)
+        stage.tick()
+        assert stage.mode() == tv.MODE_REPLAY
+        assert stage.n_emitted == n + 1 and stage.now["mode"] == tv.MODE_REPLAY
+        assert stage.press("pc")["ok"] is True
+    finally:
+        srv.server_close()
+
+
+def test_an_open_live_run_holds_until_it_goes_stale(recs, tmp_path):
+    live = tmp_path / "live.jsonl"
+    live.write_text("", encoding="utf-8")
+    srv, stage = mk(recs, tmp_path, live=live, live_idle_s=0.1, live_stale_s=0.6)
+    try:
+        with live.open("a", encoding="utf-8") as fh:
+            fh.write(_one_cell_lines(recs)[0])      # 只有 run_started
+        stage.tick()
+        time.sleep(0.3)                             # 過了 idle，但那一跑還開著
+        assert stage.live_active() is True
+        time.sleep(0.4)                             # 過了 stale ⇒ 當它死了
+        assert stage.live_active() is False
+    finally:
+        srv.server_close()
+
+
 # ── 無人值守 ────────────────────────────────────────────────────
-def test_autoplay_walks_pairs_and_truncates_each_lap(pack, tmp_path):
+def test_autoplay_walks_pairs_and_truncates_each_lap(recs, tmp_path):
     """沒人按就自己播；一圈播完截檔（D3：檔案不會一整天無限長）。"""
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    seen = []
-    for _ in range(len(stage.flat)):
-        res = stage.advance()
-        seen.append(res["now"]["cell_id"])
-    assert len(set(seen)) == len(stage.pl.cells)      # 一圈把每一格都播到
-    assert stage.laps == 0                            # 還沒跨圈
-    n_before = len([x for x in out.read_text(encoding="utf-8").split("\n") if x.strip()])
-    assert n_before > 0
-    # 跨圈：**截檔發生在新的一圈開頭**，剛播完那一格要留著（電視不能抓到空檔案）
-    before_ts = stage.ts_ms
-    first_of_lap2 = stage.advance()["now"]["cell_id"]
-    assert stage.laps == 1
-    evs = [x for x in out.read_text(encoding="utf-8").split("\n") if x.strip()]
-    assert 0 < len(evs) < n_before
-    assert {__import__("json").loads(x)["task_id"] for x in evs} == {first_of_lap2}
-    # 下一圈的 ts 還是往前走 ⇒ 截檔不會讓電視重播舊的
-    assert stage.ts_ms > before_ts
+    srv, stage = mk(recs, tmp_path)
+    try:
+        seen = []
+        for _ in range(len(stage.flat)):
+            res = stage.advance()
+            seen.append(res["now"]["cell_id"])
+        assert len(set(seen)) == len(stage.pl.cells)      # 一圈把每一格都播到
+        assert stage.laps == 0
+        stage.flush()      # 展場上 dwell > 播出跨度，換圈時上一格早就寫完了
+        n_before = len(stage.out.read_text("utf-8").splitlines())
+        assert n_before > 0
+        before_ts = stage.last_ts_ms
+        first_of_lap2 = stage.advance()["now"]["cell_id"]
+        assert stage.laps == 1
+        evs = read_events(stage)
+        assert 0 < len(evs) < n_before
+        assert {e["task_id"] for e in evs} == {first_of_lap2}
+        assert stage.last_ts_ms > before_ts             # 截檔不會讓電視重播舊的
+    finally:
+        srv.server_close()
 
 
-def test_a_cell_that_never_settles_is_skipped_not_stuck(pack, tmp_path, monkeypatch):
-    """D2：`infra_void` 不簽收據也不發裁決。一格收不了尾不准卡死整個佇列。"""
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    bad = sorted(stage.pl.cells)[0]
-    real = tolib.events_for_cell
-
-    def broken(cell, **kw):
-        evs = real(cell, **kw)
-        if cell["cell_id"] == bad:
-            return [e for e in evs if e["type"] != "verdict"]   # 模擬 infra_void
-        return evs
-
-    monkeypatch.setattr(tolib, "events_for_cell", broken)
-    played = []
-    for _ in range(len(stage.pl.cells)):
-        res = stage.advance()
-        if res.get("ok"):
-            played.append(res["now"]["cell_id"])
-    assert bad not in played
-    assert len(played) == len(stage.pl.cells) - 1           # 其餘照播
-    assert [s["cell_id"] for s in stage.skipped] == [bad]   # 而且說得出是哪一格
-    assert stage.skipped[0]["reason"]                       # 原因不是空的
+def test_truncation_waits_if_the_last_cell_is_still_playing(recs, tmp_path):
+    """上一格還沒寫完就換圈 ⇒ 先快轉寫完、這一圈**不截**（截了電視那一格等不到收尾）。"""
+    srv, stage = mk(recs, tmp_path)
+    try:
+        for _ in range(len(stage.flat)):
+            stage.advance()
+        assert stage.pending
+        last = stage.now["cell_id"]
+        stage.advance()
+        assert stage.laps == 1
+        evs = read_events(stage)
+        assert any(e["type"] == "verdict" and e["task_id"] == last for e in evs)
+    finally:
+        srv.server_close()
 
 
-def test_skipped_cells_show_up_in_state(pack, tmp_path, monkeypatch):
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    real = tolib.events_for_cell
-    monkeypatch.setattr(
-        tolib, "events_for_cell",
-        lambda cell, **kw: [e for e in real(cell, **kw) if e["type"] != "verdict"])
-    stage.advance()
-    st = stage.state()
-    assert st["skipped"] and st["skipped"][0]["reason"]
-    assert st["now"] is None                      # 沒收尾的格子不准變成「正在演」
+def _drop_on_verdict(recs, tmp_path) -> tuple[pathlib.Path, str]:
+    """錄影斷在半路：第一格 ON 那一跑沒有 `run_ended`（lifecycle 契約照樣合格）。"""
+    evs = lifecycle.read(recs[0])
+    cid = evs[0]["caller"]["cell_id"]
+    on_run = evs[0]["run_id"]
+    kept = [e for e in evs if not (e["run_id"] == on_run and e["type"] == "run_ended")]
+    p = tmp_path / "cut.jsonl"
+    p.write_text("".join(json.dumps(e) + "\n" for e in kept), encoding="utf-8")
+    assert lifecycle.validate_stream(kept) == []
+    return p, cid
+
+
+def test_a_cell_that_never_settles_is_skipped_not_stuck(recs, tmp_path):
+    """D2：錄影斷在半路那一格收不了尾。一格收不了尾不准卡死整個佇列。"""
+    p, bad = _drop_on_verdict(recs, tmp_path)
+    srv, stage = mk([p], tmp_path)
+    try:
+        played = []
+        for _ in range(len(stage.flat)):
+            res = stage.advance()
+            if res.get("ok"):
+                played.append(res["now"]["cell_id"])
+        assert bad not in played
+        assert len(played) == len(stage.pl.cells) - 1           # 其餘照播
+        assert [s["cell_id"] for s in stage.skipped] == [bad]   # 說得出是哪一格
+        assert stage.skipped[0]["reason"]
+        assert tv.validate(read_events(stage)) == []
+        # 同一格再被跳過一次：不重複堆一筆，而是記次數
+        for _ in range(len(stage.flat)):
+            stage.advance()
+        assert [s["cell_id"] for s in stage.skipped] == [bad]
+        assert stage.skipped[0]["times"] == 2
+        # 那一格的退出碼是「不知道」，不是猜一個
+        assert stage.pl.cells[bad]["exit_code"] is None
+    finally:
+        srv.server_close()
+
+
+def test_skipped_cells_show_up_in_state(recs, tmp_path):
+    p, bad = _drop_on_verdict(recs, tmp_path)
+    srv, stage = mk([p], tmp_path)
+    try:
+        stage._seek([i for i, pr in enumerate(stage.pl.pairs)
+                     if bad in (pr["held"], pr["pc"])][0])
+        while stage.flat[stage.cursor][1] != (
+                "held" if bad.endswith("__held") else "pc"):
+            stage.cursor += 1
+        stage.advance()
+        st = stage.state()
+        assert st["skipped"] and st["skipped"][0]["reason"]
+        assert st["now"] is None                      # 沒收尾的格子不准變成「正在演」
+    finally:
+        srv.server_close()
 
 
 # ── 口徑紅線 ────────────────────────────────────────────────────
@@ -270,12 +590,37 @@ def test_state_never_says_trust(server):
     assert "信任" not in phone
 
 
+def test_state_says_it_is_a_replay_in_words(server):
+    """`mode` 是給電視的；`honesty` 是給人讀的——兩邊都要講是重播。"""
+    c, _stage, _out = server
+    st = c.get_json("/state")
+    assert st["mode"] == "replay"
+    assert "重播" in st["honesty"][0]
+    assert "AI 真的動手過" not in json.dumps(st, ensure_ascii=False), \
+        "fixture 錄影是腳本寫的，這句話對它是假的"
+
+
 def test_no_model_call_anywhere_in_this_path(server):
-    """展場鐵律：現場零模型呼叫。這一支連出網的能力都不該有。"""
-    src = (ROOT / "ops" / "exhibit" / "twin" / "serve_twin.py").read_text(encoding="utf-8")
-    for banned in ("import requests", "urllib.request", "httpx", "socket.create_connection",
-                   "openai", "anthropic"):
-        assert banned not in src, banned
+    """展場鐵律：重播零模型呼叫。事件這條線上的三支連出網的能力都不該有。"""
+    for name in ("serve_twin.py", "live_events.py", "tv_contract.py"):
+        src = (ROOT / "ops" / "exhibit" / "twin" / name).read_text(encoding="utf-8")
+        for banned in ("import requests", "urllib.request", "httpx",
+                       "socket.create_connection", "openai", "anthropic"):
+            assert banned not in src, (name, banned)
+
+
+def test_the_posthoc_path_is_gone():
+    """人類裁決（2026-09-24）：只剩 lifecycle 一條路。事後推導那一支不准回來。"""
+    assert not (ROOT / "ops" / "exhibit" / "twin" / "to_events.py").exists()
+    import re
+    imp = re.compile(r"^\s*(from\s+\S+\s+)?import\s+.*\bto_events\b", re.M)
+    for name in ("serve_twin.py", "live_events.py", "tv_contract.py"):
+        src = (ROOT / "ops" / "exhibit" / "twin" / name).read_text(encoding="utf-8")
+        assert not imp.search(src), name
+        assert "events_for_cell(" not in src, name
+    # 正控制：那條 regex 真的抓得到舊的 import 形狀（不然上面永遠是綠的）
+    assert imp.search("from ops.exhibit.twin import to_events as tolib")
+    assert imp.search("    from ops.exhibit.twin import pack, to_events")
 
 
 def test_phone_page_has_no_external_resource():
@@ -289,45 +634,19 @@ def test_phone_page_has_no_external_resource():
     assert "fonts.googleapis" not in html
 
 
-# ── to_events 的逐格吐出模式 ─────────────────────────────────────
-def test_follow_emits_one_cell_at_a_time(pack, tmp_path):
-    out = tmp_path / "follow.jsonl"
-    sizes: list[int] = []
-    tolib.follow(pack, out, verify_url="/r/{cell}", interval=0,
-                 sleep=lambda _s: sizes.append(
-                     len([x for x in out.read_text(encoding="utf-8").split("\n") if x.strip()])))
-    assert len(sizes) == len(pack["cells"])
-    assert sizes == sorted(sizes)                 # 逐格追加，不是一次吐完
-    assert sizes[0] < sizes[-1]
-
-
-def test_verify_url_template_is_per_cell(pack):
-    evs = tolib.build(pack, verify_url="/r/{cell}", t0_ms=1_789_000_000_000)
-    rec = [e for e in evs if e["type"] == "receipt"]
-    assert len({e["verify_url"] for e in rec}) == len(rec)
-    # 沒有佔位符就維持舊行為（`file://` 直開整頁那種用法仍然成立）
-    evs2 = tolib.build(pack, verify_url="twin_viewer.html", t0_ms=1_789_000_000_000)
-    rec2 = [e for e in evs2 if e["type"] == "receipt"]
-    assert {e["verify_url"] for e in rec2} == {"twin_viewer.html"}
-
-
-def test_phone_press_moves_the_autoplay_cursor(pack, tmp_path):
+def test_phone_press_moves_the_autoplay_cursor(recs, tmp_path):
     """人放手之後接下去播的是下一格，不是又回到他剛剛看過的那一格。"""
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    stage.press("pc")                       # 手機把第 0 對的「寫明」那邊叫上來
-    nxt = stage.advance()["now"]["cell_id"]  # 放手之後輪播接下去
-    assert nxt == stage.pl.pair(1)["held"]
+    srv, stage = mk(recs, tmp_path)
+    try:
+        stage.press("pc")                       # 手機把第 0 對的「寫明」那邊叫上來
+        nxt = stage.advance()["now"]["cell_id"]  # 放手之後輪播接下去
+        assert nxt == stage.pl.pair(1)["held"]
+    finally:
+        srv.server_close()
 
 
 def test_phone_node_check_is_runnable_offline():
-    """手機頁那一段判準有自己的 node check，而且離線也跑得過。
-
-    ⚠ 這一條只保證「那一支存在而且跑得動」。它說的每一句話在
-    `ops/exhibit/twin/phone_node_check.mjs` 裡，不在這裡重寫一份——
-    兩份判準遲早會分岔，而分岔的時候沒有人會發現。
-    """
+    """手機頁那一段判準有自己的 node check，而且離線也跑得過。"""
     import shutil
     import subprocess
     if not shutil.which("node"):
@@ -340,73 +659,63 @@ def test_phone_node_check_is_runnable_offline():
 
 
 # ── 翻位元的狀態會自己過期 ──────────────────────────────────────
-def test_tamper_clears_when_the_tv_moves_on(pack, tmp_path):
-    """實測抓到的謊：**舊狀態不會清**。
-
-    `tamper` 舊版只能靠明確呼叫 `untamper` 清掉，而無人值守的展場沒有人會按。
-    第一個觀眾按完走掉，導播列那一行留在螢幕上 4 分半，對後面每一位觀眾
-    指著一格他們沒看到的東西。它不是捏造，是沒有人來收。
-    """
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    stage.advance()
-    first = stage.now["cell_id"]
-    assert stage.press("tamper")["ok"]
-    assert stage.tamper["cell_id"] == first
-    # 同一格還在演 ⇒ 留著
-    assert stage.state()["tamper"]["cell_id"] == first
-    # 電視換格 ⇒ 當場清掉（那句話沒有指涉對象了）
-    stage.advance()
-    assert stage.now["cell_id"] != first
-    assert stage.tamper is None
-    assert stage.state()["tamper"] is None
-
-
-def test_tamper_expires_on_its_own(pack, tmp_path, monkeypatch):
-    """就算電視沒換格，翻位元也會過期：那是瞬間動作，不是狀態。"""
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    stage.advance()
-    stage.press("tamper")
-    assert stage.state()["tamper"] is not None
-    # 把時鐘往前撥超過 TTL（不真的等 45 秒）
-    stage.tamper_mono -= S.TAMPER_TTL_S + 1
-    assert stage.state()["tamper"] is None
-
-
-def test_tamper_state_always_matches_the_cell_on_screen(pack, tmp_path):
-    """`/state` 給出去的 tamper，`cell_id` 必定等於 `now.cell_id`（或為 None）。
-
-    這一條是那個謊的**通用形式**：電視與手機都從 `/state` 讀，
-    只要這個不變量成立，兩端都不可能指著一格沒人在看的東西。
-    """
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    for k in range(len(stage.flat)):
+def test_tamper_clears_when_the_tv_moves_on(recs, rpack, tmp_path):
+    """實測抓到的謊：**舊狀態不會清**（第一個觀眾按完走掉，那行字留 4 分半）。"""
+    srv, stage = mk(recs, tmp_path, pack=rpack)
+    try:
         stage.advance()
-        if k % 3 == 0:
-            stage.press("tamper")
-        st = stage.state()
-        if st["tamper"]:
-            assert st["tamper"]["cell_id"] == st["now"]["cell_id"], k
+        first = stage.now["cell_id"]
+        assert stage.press("tamper")["ok"]
+        assert stage.tamper["cell_id"] == first
+        assert stage.state()["tamper"]["cell_id"] == first
+        stage.advance()
+        assert stage.now["cell_id"] != first
+        assert stage.tamper is None
+        assert stage.state()["tamper"] is None
+    finally:
+        srv.server_close()
 
 
-def test_now_carries_why_so_the_tv_can_tell_a_press_from_autoplay(pack, tmp_path):
-    """電視要分得出「人按的」與「機器自己播的」：人按的要插隊，輪播不插隊。"""
-    out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
-                                dwell=10_000, quiet=True)
-    assert stage.advance()["now"]["why"] == "autoplay"
-    assert stage.press("held")["now"]["why"] == "phone"
-    assert stage.press("next")["now"]["why"] == "autoplay"   # next ⇒ 走排程
-    assert stage.state()["now"]["why"] in ("autoplay", "phone")
+def test_tamper_expires_on_its_own(recs, rpack, tmp_path):
+    srv, stage = mk(recs, tmp_path, pack=rpack)
+    try:
+        stage.advance()
+        stage.press("tamper")
+        assert stage.state()["tamper"] is not None
+        stage.tamper_mono -= S.TAMPER_TTL_S + 1
+        assert stage.state()["tamper"] is None
+    finally:
+        srv.server_close()
+
+
+def test_tamper_state_always_matches_the_cell_on_screen(recs, rpack, tmp_path):
+    """`/state` 給出去的 tamper，`cell_id` 必定等於 `now.cell_id`（或為 None）。"""
+    srv, stage = mk(recs, tmp_path, pack=rpack)
+    try:
+        for k in range(len(stage.flat)):
+            stage.advance()
+            if k % 3 == 0:
+                stage.press("tamper")
+            st = stage.state()
+            if st["tamper"]:
+                assert st["tamper"]["cell_id"] == st["now"]["cell_id"], k
+    finally:
+        srv.server_close()
+
+
+def test_now_carries_why_so_the_tv_can_tell_a_press_from_autoplay(recs, tmp_path):
+    srv, stage = mk(recs, tmp_path)
+    try:
+        assert stage.advance()["now"]["why"] == "autoplay"
+        assert stage.press("held")["now"]["why"] == "phone"
+        assert stage.press("next")["now"]["why"] == "autoplay"   # next ⇒ 走排程
+        assert stage.state()["now"]["why"] in ("autoplay", "phone")
+    finally:
+        srv.server_close()
 
 
 # ── QR 一定要指到手機連得到的地方 ───────────────────────────────
-def test_qr_encodes_the_runtime_phone_url(pack, tmp_path):
+def test_qr_encodes_the_runtime_phone_url(recs, tmp_path):
     """**展場當天最會壞的一格。**
 
     舊的 `world3/qr.png` 是 2026-08-30 的靜態佔位圖（比 `phone.html` 早三個星期），
@@ -417,7 +726,7 @@ def test_qr_encodes_the_runtime_phone_url(pack, tmp_path):
     _sys.path.insert(0, str(ROOT))
     from ops.exhibit.twin import qr as qrlib
     out = tmp_path / "ev.jsonl"
-    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out, dwell=10_000,
+    srv, stage = S.make_server(recs, bind="127.0.0.1", port=0, out=out, dwell=10_000,
                                quiet=True, base_url="http://192.168.1.23:8899")
     t = threading.Thread(target=srv.serve_forever, daemon=True)
     t.start()
@@ -448,7 +757,7 @@ def test_qr_encodes_the_runtime_phone_url(pack, tmp_path):
         srv.server_close()
 
 
-def test_沒有_visitor_url_時_QR_必須是執行期算的(pack, tmp_path):
+def test_沒有_visitor_url_時_QR_必須是執行期算的(recs, tmp_path):
     """**展場當天最會壞的一格**（原本那條測試守的東西，不能因為預設值改了就丟掉）。
 
     `vacant_hm/world3/qr.png` 是 2026-08-30 的靜態佔位圖，比 `phone.html` 早三個星期。
@@ -462,7 +771,7 @@ def test_沒有_visitor_url_時_QR_必須是執行期算的(pack, tmp_path):
     _sys.path.insert(0, str(ROOT))
     from ops.exhibit.twin import qr as qrlib
     out = tmp_path / "ev2.jsonl"
-    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out, dwell=10_000,
+    srv, stage = S.make_server(recs, bind="127.0.0.1", port=0, out=out, dwell=10_000,
                                quiet=True, base_url="http://192.168.1.23:8899",
                                visitor_url="")          # ← 明確關掉
     t = threading.Thread(target=srv.serve_forever, daemon=True)
@@ -480,10 +789,10 @@ def test_沒有_visitor_url_時_QR_必須是執行期算的(pack, tmp_path):
         srv.server_close()
 
 
-def test_receipt_urls_use_the_same_base_as_the_qr(pack, tmp_path):
+def test_receipt_urls_use_the_same_base_as_the_qr(recs, tmp_path):
     """收據網址與 QR 要指到同一台。兩邊各自組字串遲早會分岔。"""
     out = tmp_path / "ev.jsonl"
-    _srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out, dwell=10_000,
+    _srv, stage = S.make_server(recs, bind="127.0.0.1", port=0, out=out, dwell=10_000,
                                 quiet=True, base_url="http://10.0.0.7:8899")
     res = stage.advance()
     assert res["now"]["receipt_url"].startswith("http://10.0.0.7:8899/r/")
@@ -520,17 +829,17 @@ def test_an_explicit_token_wins_and_no_token_must_be_explicit():
     assert S.resolve_token("0.0.0.0", "abc", True) == ("abc", "given")
 
 
-def _tokened(pack, tmp_path, token="s3cr3t", base="http://192.168.1.23:8899"):
+def _tokened(recs, tmp_path, token="s3cr3t", base="http://192.168.1.23:8899"):
     out = tmp_path / "ev.jsonl"
-    srv, stage = S.make_server(pack, bind="127.0.0.1", port=0, out=out,
+    srv, stage = S.make_server(recs, bind="127.0.0.1", port=0, out=out,
                                dwell=10_000, quiet=True, token=token,
                                base_url=base)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return srv, stage, Client(f"http://127.0.0.1:{srv.server_address[1]}")
 
 
-def test_control_is_403_without_the_token_and_200_with_it(pack, tmp_path):
-    srv, _stage, c = _tokened(pack, tmp_path)
+def test_control_is_403_without_the_token_and_200_with_it(recs, tmp_path):
+    srv, _stage, c = _tokened(recs, tmp_path)
     try:
         code, res = c.post({"action": "next"})
         assert code == 403 and res["ok"] is False
@@ -542,9 +851,9 @@ def test_control_is_403_without_the_token_and_200_with_it(pack, tmp_path):
         srv.shutdown(); srv.server_close()
 
 
-def test_the_qr_carries_the_token_or_the_phone_cannot_press_anything(pack, tmp_path):
+def test_the_qr_carries_the_token_or_the_phone_cannot_press_anything(recs, tmp_path):
     """QR 是觀眾唯一的入口。token 沒編進去＝掃了進來一顆鍵都按不動。"""
-    srv, stage, c = _tokened(pack, tmp_path)
+    srv, stage, c = _tokened(recs, tmp_path)
     try:
         assert stage.phone_url() == "http://192.168.1.23:8899/phone.html?t=s3cr3t"
         st = c.get_json("/state")                     # 從 loopback 打（＝電視）
@@ -554,13 +863,13 @@ def test_the_qr_carries_the_token_or_the_phone_cannot_press_anything(pack, tmp_p
         srv.shutdown(); srv.server_close()
 
 
-def test_state_does_not_hand_the_token_to_the_rest_of_the_lan(pack, tmp_path):
+def test_state_does_not_hand_the_token_to_the_rest_of_the_lan(recs, tmp_path):
     """否則 token 只是**一個 GET 的距離**，等於沒有。
 
     這裡直接測那個純函數的分流（`with_token=False`）：整合層的判準是
     `venue_check.sh` 第七節，它從這台機器的區網位址真的打一次 `/state`。
     """
-    _srv, stage, _c = _tokened(pack, tmp_path)
+    _srv, stage, _c = _tokened(recs, tmp_path)
     try:
         assert "t=" not in stage.phone_url(with_token=False)
         assert "t=" not in stage.state(with_token=False)["phone_url"]
@@ -570,9 +879,9 @@ def test_state_does_not_hand_the_token_to_the_rest_of_the_lan(pack, tmp_path):
         _srv.shutdown(); _srv.server_close()
 
 
-def test_token_also_accepted_from_query_and_header(pack, tmp_path):
+def test_token_also_accepted_from_query_and_header(recs, tmp_path):
     """少一條，展場當天就是「怎麼按都沒反應」。"""
-    srv, _stage, c = _tokened(pack, tmp_path)
+    srv, _stage, c = _tokened(recs, tmp_path)
     try:
         req = urllib.request.Request(
             c.base + "/control?t=s3cr3t",
@@ -590,9 +899,9 @@ def test_token_also_accepted_from_query_and_header(pack, tmp_path):
         srv.shutdown(); srv.server_close()
 
 
-def test_read_only_endpoints_stay_open_because_the_tv_has_no_token(pack, tmp_path):
+def test_read_only_endpoints_stay_open_because_the_tv_has_no_token(recs, tmp_path):
     """電視、收據頁、事件流都不帶 token。把讀也擋住＝電視自己黑掉。"""
-    srv, _stage, c = _tokened(pack, tmp_path)
+    srv, _stage, c = _tokened(recs, tmp_path)
     try:
         for p in ("/state", "/live/events.jsonl", "/phone.html", "/viewer.html",
                   "/qr.png"):
@@ -694,3 +1003,179 @@ def test_interface_names_are_not_hardcoded_on_linux():
     assert "| cut -d/ -f1 | head -1 || true)" in src, (
         "`ip …` 那條管線少了 `|| true`：`ip` 對不存在的介面回 1，"
         "在 `set -o pipefail` 底下會讓整支腳本 exit 1 而且一個字都不印")
+
+
+# ── 配對收據：錄影那一批有自己的收據頁 ─────────────────────────────
+def _serve(stage_srv):
+    srv, stage = stage_srv
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, stage, Client(f"http://127.0.0.1:{srv.server_address[1]}")
+
+
+def test_paired_recording_gets_its_own_receipt_page(paired, tmp_path):
+    """播 fixture 錄影時 `/r/<cell>` 不再一律 404：轉到**這份錄影自己那一批**的收據頁。"""
+    srv, stage, c = _serve(mk([paired], tmp_path))
+    try:
+        assert stage.recordings[0]["receipts"]["accepted"] is True
+        stage.advance()
+        cid = stage.now["cell_id"]
+        assert stage.now["receipt_available"] is True
+        code, loc = c.location(f"/r/{cid}")
+        assert code == 302 and loc == f"/v/{paired.stem}.html#cell={cid}"
+        code, loc = c.location(f"/r/{cid}?tamper=1")
+        assert loc == f"/v/{paired.stem}.html#cell={cid}&tamper=1"
+        assert stage.press("tamper")["ok"] is True
+        # 那一頁＝同一份收據頁，只換內嵌資料：被驗的就是配對檔那一串
+        code, headers, body = c.get(f"/v/{paired.stem}.html")
+        assert code == 200 and "text/html" in headers["Content-Type"]
+        html = body.decode("utf-8")
+        pair_text = pairlib.pair_path(paired).read_text(encoding="utf-8").strip("\n")
+        assert build_viewer.extract_block(html, "twin-pack") == pair_text
+        base = S.VIEWER.read_text(encoding="utf-8")
+        assert build_viewer.extract_canon(html) == build_viewer.extract_canon(base)
+        assert build_viewer.extract_block(html, "twin-assets") == \
+            build_viewer.extract_block(base, "twin-assets")
+        # 那一頁裡這一格的鏈頭＝電視上演的那一跑
+        pack = json.loads(pair_text)
+        cell = next(x for x in pack["cells"] if x["cell_id"] == cid)
+        assert pairlib.chain_head(cell) == stage.now["verdict_hash"]
+        assert c.location("/v/nope.html")[0] == 404
+        st = c.get_json("/state")
+        assert {b["url"] for b in st["receipt_pages"]} == {f"/v/{paired.stem}.html"}
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_every_cell_of_a_paired_recording_has_a_receipt(paired, tmp_path):
+    srv, stage = mk([paired], tmp_path)
+    try:
+        st = stage.state()
+        assert st["cells"] and all(x["receipt_available"] for x in st["cells"])
+    finally:
+        srv.server_close()
+
+
+def _copy_pair(paired, tmp_path, name="swapped"):
+    rec = tmp_path / f"{name}.jsonl"
+    rec.write_bytes(paired.read_bytes())
+    pp = pairlib.pair_path(rec)
+    pp.write_bytes(pairlib.pair_path(paired).read_bytes())
+    return rec, pp
+
+
+def test_binding_rejects_a_recording_that_changed_under_its_receipts(paired, tmp_path):
+    """**負控制 1（sha256）**：錄影換了、收據沒換 ⇒ 整份收據不收，/r/ 照實 404。
+
+    換法刻意選「lifecycle 契約照樣合格、每一格鏈頭也都一樣」的那一種
+    （檔尾多一個空行）——只有 sha256 那一道抓得到。
+    """
+    rec, _pp = _copy_pair(paired, tmp_path)
+    with rec.open("a", encoding="utf-8") as fh:
+        fh.write("\n")
+    assert lifecycle.validate_stream(lifecycle.read(rec)) == []
+    bad = pairlib.check_pair(rec, json.loads(pairlib.pair_path(rec).read_text("utf-8")))
+    assert bad and all("sha256" in b for b in bad), bad
+    assert any("配對收據" in b for b in S.check_recording(rec))
+    srv, stage, c = _serve(mk([rec], tmp_path))
+    try:
+        rs = stage.recordings[0]["receipts"]
+        assert rs["accepted"] is False and "sha256" in rs["problems"][0]
+        stage.advance()
+        cid = stage.now["cell_id"]
+        code, _ = c.location(f"/r/{cid}")
+        assert code == 404
+        assert c.location(f"/v/{rec.stem}.html")[0] == 404
+    finally:
+        srv.shutdown(); srv.server_close()
+
+
+def test_binding_rejects_a_forged_sha_with_the_wrong_chains(paired, tmp_path):
+    """**負控制 2（逐格鏈頭）**：有人連 sha256 一起改——鏈頭對不上照樣不收。"""
+    rec, pp = _copy_pair(paired, tmp_path, "forged")
+    pack = json.loads(pp.read_text("utf-8"))
+    pack["cells"][0]["chain"] = pack["cells"][0]["chain"][:-1]     # 鏈頭換一個
+    pack["recording"]["sha256"] = pairlib.sha256_file(rec)         # sha256 照抄
+    pp.write_text(pairlib.dumps(pack), encoding="utf-8")
+    bad = pairlib.check_pair(rec, pack)
+    assert bad and any("鏈頭對不上" in b for b in bad), bad
+    assert not any("sha256" in b for b in bad), "這一次 sha256 是對的，只有鏈頭能抓"
+    # 另一批的資料包（54 格 L-real）配這份錄影：格子集合就不相等
+    if S.DEFAULT_PACK.exists():
+        other = json.loads(S.DEFAULT_PACK.read_text("utf-8"))
+        other["recording"] = {"sha256": pairlib.sha256_file(rec)}
+        bad = pairlib.check_pair(rec, other)
+        assert any("不是同一批" in b or "鏈頭對不上" in b for b in bad)
+
+
+def test_build_pair_refuses_runs_from_another_batch(paired, tmp_path):
+    """`pair_receipts` 不准拿別批的 run 目錄配這份錄影（沒有放寬的旗標）。"""
+    other = tmp_path / "other_batch"
+    assert run_twin.main(["--out", str(other), "--fixture", "--residents", "1",
+                          "--tasks", "s1_01_addmul", "--sandbox", "none"]) == 0
+    with pytest.raises(SystemExit):
+        pairlib.build_pair(paired, other)
+
+
+def _live_rig(tmp_path, *, live_runs):
+    live = tmp_path / "live" / "lifecycle.jsonl"
+    live.parent.mkdir()
+    root = tmp_path / "live" / "out"
+    srv, stage = mk([], tmp_path, live=live, live_runs=root if live_runs else None,
+                    live_idle_s=60)
+    rc = run_twin.main(["--out", str(root), "--fixture", "--residents", "1",
+                        "--tasks", "s1_01_addmul", "--sandbox", "none",
+                        "--events", str(live)])
+    assert rc == 0
+    return srv, stage
+
+
+def test_live_receipts_are_packed_as_soon_as_the_cell_is_written(tmp_path):
+    """`--live-runs`：真跑那一格跑完、`run_twin` 寫完 `twin_cell.json`，當場打包收據。"""
+    srv, stage = _live_rig(tmp_path, live_runs=True)
+    try:
+        stage.tick()
+        assert stage.mode() == tv.MODE_LIVE
+        cid = stage.now["cell_id"]
+        assert stage.now["mode"] == tv.MODE_LIVE
+        url, why = stage.receipt_target(cid)
+        assert why is None and url == f"/v/{S.LIVE_BOOK}.html#cell={cid}"
+        assert stage.now["receipt_available"] is True
+        html = stage.book_html(S.LIVE_BOOK).decode("utf-8")
+        pack = json.loads(build_viewer.extract_block(html, "twin-pack"))
+        assert sorted(c["cell_id"] for c in pack["cells"]) == sorted(stage.live_cells)
+        cell = next(c for c in pack["cells"] if c["cell_id"] == cid)
+        assert pairlib.chain_head(cell) == stage.live_heads[cid]
+        assert not [x for x in pairlib.PATH_LEAKS if x in json.dumps(pack)]
+        assert stage.state()["live"]["receipts_packed"] == sorted(stage.live_cells)
+    finally:
+        srv.server_close()
+
+
+def test_live_without_live_runs_says_why_there_is_no_receipt(tmp_path):
+    srv, stage = _live_rig(tmp_path, live_runs=False)
+    try:
+        stage.tick()
+        cid = stage.now["cell_id"]
+        url, why = stage.receipt_target(cid)
+        assert url is None and "--live-runs" in why
+        assert stage.now["receipt_available"] is False
+    finally:
+        srv.server_close()
+
+
+def test_a_stale_twin_cell_is_not_packed(tmp_path):
+    """run 目錄裡的 `twin_cell.json` 是這一跑開始**之前**寫的 ⇒ 不打包（可能是上一次的格子），
+    等到期限就照實記一筆錯。"""
+    srv, stage = _live_rig(tmp_path, live_runs=True)
+    try:
+        stage.poll_live()
+        cid = sorted(stage.live_pending)[0]
+        stage.live_pending[cid]["since_ms"] = S.now_ms() + 10 ** 9     # 「還沒寫完」
+        stage._try_pack_live()
+        assert cid in stage.live_pending and cid not in stage.live_cells
+        stage.live_pending[cid]["deadline"] = 0
+        stage._try_pack_live()
+        assert cid not in stage.live_pending and cid not in stage.live_cells
+        assert any("還沒寫完" in e for e in stage.live_errors)
+    finally:
+        srv.server_close()

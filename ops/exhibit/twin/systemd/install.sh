@@ -49,7 +49,11 @@ fi
 
 # ── 裝之前先確認這台機器真的撐得住 ───────────────────────────────
 [ -f "$HM/world3/index.html" ] || { echo "找不到 $HM/world3/index.html（--hm 指過去）" >&2; exit 2; }
-[ -f "$TWIN/twin_pack.json" ]  || { echo "找不到 $TWIN/twin_pack.json" >&2; exit 2; }
+# 電視事件的來源是 lifecycle 錄影（2026-09-24 起；twin_pack.json 只剩收據頁在用）。
+ls "$TWIN"/recordings/*.jsonl >/dev/null 2>&1 \
+  || { echo "找不到任何錄影 $TWIN/recordings/*.jsonl（先跑 record_fixture.sh）" >&2; exit 2; }
+[ -f "$TWIN/twin_pack.json" ] \
+  || echo "⚠ 沒有 $TWIN/twin_pack.json：收據頁（/r/<cell>）會一律 404 並講明" >&2
 
 if [ "$DRY" = "0" ]; then
   if ! fc-list :lang=zh 2>/dev/null | grep -q .; then
