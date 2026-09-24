@@ -93,3 +93,5 @@ trace＋adapters＋intake 測試全綠；ruff、CI 那組 mypy（94 檔）、che
 大專案效能、HTTP 收件口接上追緝）。
 
 **偏移檢查**：沒有碰真模型 API；沒有改凍結項；R536 沒發射（等簽字）；給 agent 的文字仍然沒有行動者、逐行過 KS-1。
+- 補記（2026-09-24T19:10Z 那一筆）：審查修正之後的全套測試失敗集合**等於基線**（`test_cert_*` 5 條＋
+  `test_exhibit_twin_wiring.py` 5 條 setup error，環境造成、與本工作無關，M1 時已對照過）。
