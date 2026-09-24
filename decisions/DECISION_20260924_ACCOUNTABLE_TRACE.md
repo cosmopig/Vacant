@@ -247,6 +247,18 @@ RS（重抽三次、無回饋）／RF（今天的泛用回饋）／RL（在地�
 **開始時沒看到的步驟**（背景還在看第一眼）結束時，上一次看到之後的改動一律記成缺口，而且它不擋別人記缺口；
 **讀不回來的狀態**（版本庫被改過或壞了）不再當成空的工作區：碰到它的追緝一律 UNOBSERVED，掛鉤裡則關掉逐步掃描。
 
+### 子 agent 的端到端（同日）
+
+假模型照對話開頭的 `ROLE:sub` 演子 agent，用各家自己的委派工具（Claude `Agent` 前景、OpenCode `task`、
+Codex `multi_agent_v1` 的 `spawn_agent`→`wait_agent`、pi 隨附範例擴充的 `subagent`）。情境 E：子 agent 算錯寫進
+`figure.txt`、主 agent 照抄進報告 ⇒ 四個 agent 都指到子 agent 寫錯的那一步（`lineage_internal`，帶子 agent 的 id），
+主 agent 收到的回饋是「從第 2 步抄來的；第 5 步寫進報告」（沒有行動者）。
+
+改了設計的一條：**pi 的子 agent 是另一個行程**，原本被當成另一個主 agent（自己的工作階段、回合結束跑驗收、
+結束時交件）。現在 Vacant 的 pi 擴充在每個工具呼叫期間把 `VACANT_PI_PARENT`（最上層的 session、呼叫 id、
+代理人名）放進環境；子行程讀到就回報成那個工作階段的子 agent，回合結束不跑驗收、結束送 `subagent_stop`。
+邊界：平行的工具呼叫下標記可能指到兄弟呼叫（工作階段仍然對）；不是從 pi 擴充啟動的 pi 行程不會被認成子 agent。
+
 ## 八、偏離與延後
 
 - 延後：每一步即時的「退步」提醒（Fable Q4-3）、引文逐字比對與懸空引用（第二層主動檢查）、

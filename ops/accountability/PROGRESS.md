@@ -144,3 +144,28 @@ trace（112）＋adapters＋intake 測試全綠；ruff、CI 那組 mypy（94 檔
 **下一步**：全套測試對基線；然後子 agent 的端到端。
 
 **偏移檢查**：沒有碰真模型 API；沒有改凍結項；所有修正都是往「不歸給任何人」那一邊收；給 agent 的文字沒變。
+
+## 2026-09-24T21:00Z — 子 agent 的端到端：四個 agent 都指到子 agent 那一步
+
+**做了什麼**
+- 假模型（`ops/intake/mock_model.py`）會演子 agent：對話開頭的使用者訊息帶 `ROLE:<角色>` 的照那一份劇本；委派步驟用
+  各家自己的工具（Claude `Agent` 前景、OpenCode `task`、Codex `multi_agent_v1` 的 `spawn_agent`→`wait_agent`、
+  pi 隨附範例擴充的 `subagent`）。`MOCK_BODIES` 可選地存下每一通請求（除錯用）。
+- `e2e_trace.py` 情境 E：子 agent 讀帳本、把 96 寫進 `figure.txt`；主 agent 讀它、寫進報告。
+- **pi 的真問題**（第一次跑就露出來）：pi 的子 agent 是另一個 pi 行程，Vacant 把它當成另一個主 agent——
+  歸因 UNKNOWN、而且子行程在自己的回合結束被要求交出父 agent 的報告（跑了三輪）。修：Vacant 的 pi 擴充在每個
+  工具呼叫期間把 `VACANT_PI_PARENT` 放進環境；子行程讀到就回報成那個工作階段的子 agent，回合結束不跑驗收、
+  結束送 `subagent_stop`（不收父 agent 的步驟、不交件）。
+- 測試：`tests/test_mock_model_roles.py`（角色只看開頭、四家的委派工具、Codex 的等待、子 agent 照自己的劇本）、
+  `tests/test_trace_capture.py` 兩條（pi 子行程＝子 agent、擴充的標記與不跑驗收）。
+
+**證據**：`evidence_20260924/e2e_trace_*`（重跑）——**20/20**：原本四個情境 16/16 不變，情境 E 4/4，指到的行動者
+Claude `general-purpose`／Codex `default`／pi `worker`／OpenCode `subagent`，都是寫 `figure.txt` 的那一步。
+回饋在 Claude／Codex／pi 進了模型的下一次請求（「從第 2 步抄來的；第 5 步寫進報告」），改好後 accept；
+回饋裡行動者識別 0/20；鏈 20/20 驗得過；掛鉤 p95 6.7–11.6 ms。
+
+**下一步**：全套測試（跑在 `ecc2ed6d` 上，還沒完）對基線；再下一個改進：更多埋錯情境（例如網頁來源錯、平行委派）
+或 HTTP 收件口接上追緝。
+
+**偏移檢查**：沒有碰真模型 API（假金鑰、假端點、隔離 HOME）；給 agent 的文字沒有行動者；E 是推論層，照規則不進信譽；
+pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。

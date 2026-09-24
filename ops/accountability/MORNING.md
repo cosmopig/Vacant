@@ -12,7 +12,7 @@
 
 ## 好消息
 
-1. **歸因 16/16**（四個 agent × 四種埋錯；對抗審查修正之後重跑仍是 16/16）——`ops/accountability/evidence_20260924/README.md`：
+1. **歸因 20/20**（四個 agent × 五種埋錯，含子 agent；每一輪審查修正之後都重跑）——`ops/accountability/evidence_20260924/README.md`：
 
    | 錯從哪裡來 | Vacant 的結論 |
    |---|---|
@@ -20,6 +20,7 @@
    | 給定的輸入本身就錯 | 指到那個輸入檔的那一行；**agent 不背** |
    | agent 寫的腳本算錯 | 指到**寫腳本**的那一步，不是寫報告的那一步 |
    | agent 走了之後有人在外面改檔（負控制） | 記成「沒被記錄的改動」，**不怪任何人** |
+   | **子 agent** 算錯、主 agent 照抄 | 指到**子 agent** 寫錯的那一步（帶子 agent 的 id），不是主 agent 抄的那一步 |
 
 2. **回饋真的到了模型手上**：Claude Code、Codex、pi 的下一次模型請求裡，看得到這樣一段（實錄）：
 
@@ -29,7 +30,7 @@
      this value first appeared at step 2 (Bash)
    ```
 
-   裡面沒有「是誰」（0/16）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
+   裡面沒有「是誰」（0/20）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
 
 3. **問題不會被淹沒**：輪數用完、或只剩 agent 改不動的（等審查、等證據），Claude Code 直接在畫面上顯示給你
    （`systemMessage`）；任何 agent 都可以 `vacant trace report` 看完整清單；OpenCode `run` 沒有回合邊界可以回饋，
@@ -57,7 +58,9 @@
    預註冊裡事先寫好了，不會事後加題。如果追緝過的回饋和泛用回饋一樣好，那也是結論：追緝的價值在給人的報告，
    不在讓 agent 改得更好。
 2. **OpenCode `run` 沒有交件前的回饋通道**（它在第一個 idle 就結束）。報告照樣有，但 agent 沒機會改。
-3. **子 agent 的端到端沒跑**（假模型不會演子 agent），只有單元測試＋四份可觀測面實測底稿。
+3. **子 agent 的端到端跑了（四個 agent 都對），但只跑了最簡單的一種**：一個前景子 agent。平行委派、Claude 的背景子 agent、
+   Codex 的 multi-agent v2 沒跑。pi 本身沒有子 agent（靠擴充另開 pi 行程）：原本那個子行程被當成另一個主 agent、
+   還在它自己的回合結束被要求交出你的報告——修了（Vacant 的 pi 擴充把標記傳給子行程）。
 4. **大專案：量了、修了，但有上限**。第一次量的時候 4 萬檔的專案第一次掃描要 33.8 秒（超過掛鉤的 30 秒上限）。
    修完：4 萬檔第一次 5.7–8.2 秒、之後每次掛鉤 p95 0.6 秒、回合結束的追緝 1.9 秒；每一步多存 0.9 KB（原本 4.9 MB）
    ——`ops/accountability/evidence_20260924/perf/`。超過 5 萬檔就不逐步掃描：agent 仍然收得到「哪個檔哪一行」
@@ -90,7 +93,7 @@
 ## 五分鐘看懂（建議順序）
 
 1. `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §一、§三、§四-5（等級與後果）、§七（審查改了什麼）
-2. `ops/accountability/evidence_20260924/README.md`（16/16 那張表＋模型真的收到的回饋）
+2. `ops/accountability/evidence_20260924/README.md`（20/20 那張表＋模型真的收到的回饋）
 3. `ops/accountability/review_m8/FINDINGS.md`（47 條）
 4. 在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`
 

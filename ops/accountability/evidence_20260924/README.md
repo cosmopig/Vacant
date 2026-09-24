@@ -5,7 +5,7 @@
 > 乾淨的埋錯下給出期望的答案。**不證明**真模型下產出會更接近需求——那是
 > `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md` 的事（草稿，待人類簽字）。
 
-## 1. 四個真 agent × 四個埋錯情境（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；對抗審查修正**之後**重跑）
+## 1. 四個真 agent × 五個埋錯情境（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；大專案審查修正與子 agent 情境**之後**重跑）
 
 重跑：
 
@@ -13,17 +13,18 @@
 
 | 量什麼 | 結果 |
 |---|---|
-| 歸因正確（狀態／類別／等級／指到的步驟／來源都對） | **16/16** |
+| 歸因正確（狀態／類別／等級／指到的步驟／來源都對） | **20/20** |
 | B（agent 憑空寫錯）⇒ `provable`，指到寫報告那一步；重跑前那個位置沒有這個值、之後不過且有 | 4/4 |
 | A（輸入本來就錯）⇒ `input`／`lineage_exact`，來源＝`inputs/summary.txt`；agent 沒被記過錯 | 4/4 |
 | C（腳本錯）⇒ `lineage_internal`，指到**寫腳本**的那一步（不是寫報告那一步） | 4/4 |
 | D（agent 走了之後有人在外面改檔；負控制）⇒ `UNOBSERVED`／`gap`；沒有任何行動者被記 | 4/4 |
-| 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C 各 3 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束） |
-| 給 agent 的回饋裡有行動者識別 | 0/16 |
-| 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C：9/9 |
-| 病歷簽章鏈驗得過 | 16/16 |
-| 每次掛鉤的額外時間 p95 | 7.1–16.4 ms（小工作區；大專案見第 3 節） |
-| 行動者帳本 | 每個 agent 一格（4 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`；D 記在該平台的整合覆蓋率 |
+| E（子 agent 算錯寫進 `figure.txt`、主 agent 照抄）⇒ `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步，行動者帶子 agent 的 id（Claude `general-purpose`、Codex `default`、pi `worker`、OpenCode `subagent`） | 4/4 |
+| 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C／E 各 3 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束） |
+| 給 agent 的回饋裡有行動者識別 | 0/20 |
+| 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E：12/12 |
+| 病歷簽章鏈驗得過 | 20/20 |
+| 每次掛鉤的額外時間 p95 | 6.7–11.6 ms（小工作區；大專案見第 3 節） |
+| 行動者帳本 | 每個 agent 一格（5 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`；D 記在該平台的整合覆蓋率；E 是推論層（`lineage_internal`），照規則不進信譽 |
 
 模型實際收到的回饋（Claude Code，情境 B，第 2 次請求）：
 
@@ -67,7 +68,9 @@ Run `vacant check` to re-check before finishing.
 
 ## 4. 沒有做到的（照實寫）
 
-- 子 agent 的端到端（假模型不演子 agent）：只有單元測試（`tests/test_trace_blame.py`）與
-  `ops/accountability/capture/` 的可觀測面實測。
+- 子 agent：平行委派（一次兩個子 agent）、Claude 的背景子 agent、Codex 的 multi-agent v2 沒有端到端跑
+  （背景子 agent 與 v2 有 `ops/accountability/capture/` 的可觀測面實測；平行只有單元測試）。
+- pi 的子 agent 靠 Vacant 的 pi 擴充在工具呼叫期間放進環境的標記認出來：平行的工具呼叫下，標記可能指到兄弟呼叫
+  （工作階段仍然對）；不是 pi 擴充啟動的 pi 行程（例如使用者自己在另一個終端機開的）不會被當成子 agent。
 - Claude Code 的掛鉤不帶模型 id ⇒ 信譽格的 substrate 是 `unknown`（逐字稿裡有自稱的模型，封存了，
   但沒拿來當鍵）。

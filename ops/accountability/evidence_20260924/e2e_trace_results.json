@@ -1,1043 +1,1288 @@
 {
- "schema": "vacant-e2e-trace/1",
- "evidence_level": "L-fake (scripted model)",
- "started": "2026-09-24T19:01:36+0000",
- "agents": {
-  "claude": {
-   "version": [
-    "2.1.281 (Claude Code)"
-   ],
-   "install_exit": 0,
-   "runs": {
-    "B_agent_fault": {
-     "scenario": "B_agent_fault",
-     "agent_rc": 0,
-     "wall_s": 3.0,
-     "agent_stderr_tail": "",
-     "steps_recorded": 3,
-     "step_tools": [
-      "Bash",
-      "Bash",
-      "Bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "provable",
-      "layer": "fact",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": null,
-      "note": "no recorded read contains this value",
-      "_step_writes": [
-       "report.md"
+  "schema": "vacant-e2e-trace/1",
+  "evidence_level": "L-fake (scripted model)",
+  "started": "2026-09-24T20:30:07+0000",
+  "agents": {
+    "claude": {
+      "version": [
+        "2.1.281 (Claude Code)"
       ],
-      "_step_tool": "Bash",
-      "step_n": 2,
-      "actor": {
-       "platform": "claude",
-       "session": "8c5d07ac-8ce8-4409-a1a1-88f438bd6d3a"
+      "install_exit": 0,
+      "runs": {
+        "B_agent_fault": {
+          "scenario": "B_agent_fault",
+          "agent_rc": 0,
+          "wall_s": 2.6,
+          "agent_stderr_tail": "",
+          "steps_recorded": 3,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "provable",
+            "layer": "fact",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "report.md"
+            ],
+            "_step_tool": "Bash",
+            "step_n": 2,
+            "actor": {
+              "platform": "claude",
+              "session": "271aadf4-c241-4e12-9900-eee3e2d9b2ed"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (Bash)\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\": \"text\", \"text\": \"\nYo",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.9,
+          "hook_ms_p95": 8.6,
+          "hook_calls": 10,
+          "model_requests": 5
+        },
+        "A_input_fault": {
+          "scenario": "A_input_fault",
+          "agent_rc": 0,
+          "wall_s": 2.9,
+          "agent_stderr_tail": "",
+          "steps_recorded": 4,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "input",
+            "confidence": "lineage_exact",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "75"
+            },
+            "value": "75",
+            "source": {
+              "kind": "input",
+              "line": 1,
+              "name": "summary",
+              "path": "inputs/summary.txt"
+            },
+            "note": "the pinned input already says this",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"75\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cac",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 13 entries",
+          "hook_ms_p50": 4.8,
+          "hook_ms_p95": 9.3,
+          "hook_calls": 12,
+          "model_requests": 6
+        },
+        "C_script_fault": {
+          "scenario": "C_script_fault",
+          "agent_rc": 0,
+          "wall_s": 3.1,
+          "agent_stderr_tail": "",
+          "steps_recorded": 4,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "306"
+            },
+            "value": "306",
+            "source": null,
+            "note": "calc.py (written at step 1) computed the value",
+            "_step_writes": [
+              "calc.py"
+            ],
+            "_step_tool": "Bash",
+            "step_n": 1,
+            "actor": {
+              "platform": "claude",
+              "session": "1d47a7d5-dd9f-42d3-bb08-626df73a419f"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"306\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (Bash); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\"",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.7,
+          "hook_ms_p95": 11.6,
+          "hook_calls": 12,
+          "model_requests": 6
+        },
+        "D_unrecorded_change": {
+          "scenario": "D_unrecorded_change",
+          "agent_rc": 0,
+          "wall_s": 1.6,
+          "agent_stderr_tail": "",
+          "steps_recorded": 1,
+          "step_tools": [
+            "Bash"
+          ],
+          "gaps": 1,
+          "finding": {
+            "state": "UNOBSERVED",
+            "fault_class": "unattributable",
+            "confidence": "gap",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": {
+              "observed_at": "check",
+              "paths": [
+                "report.md"
+              ],
+              "seq": 8
+            },
+            "note": "changed outside any recorded step",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 10 entries",
+          "hook_ms_p50": 6.4,
+          "hook_ms_p95": 10.1,
+          "hook_calls": 5,
+          "model_requests": 2
+        },
+        "E_subagent_fault": {
+          "scenario": "E_subagent_fault",
+          "agent_rc": 0,
+          "wall_s": 4.2,
+          "agent_stderr_tail": "",
+          "steps_recorded": 7,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Agent",
+            "Bash",
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "96"
+            },
+            "value": "96",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "figure.txt"
+            ],
+            "_step_tool": "Bash",
+            "step_n": 2,
+            "actor": {
+              "agent": "a8dbd03e8fd95f6d6",
+              "agent_type": "general-purpose",
+              "platform": "claude",
+              "session": "c24ba8ff-754b-466d-9a76-649567dabad7"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 2 (Bash); step 5 wrote it into report.md\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\":",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 16 entries",
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 7.1,
+          "hook_calls": 19,
+          "model_requests": 10
+        }
+      },
+      "actors": {
+        "cells": [
+          {
+            "key": [
+              "claude:main",
+              "claude",
+              "unknown",
+              "csv_total"
+            ],
+            "label": "claude main [unknown]",
+            "runs": 5,
+            "accepted": 5,
+            "provable_faults": 1,
+            "mean": 0.538337778716092,
+            "observations": 1.189668543543744
+          }
+        ],
+        "sources": {
+          "input:inputs/summary.txt": {
+            "count": 1,
+            "findings": [
+              "f_867d6f115e"
+            ]
+          }
+        },
+        "coverage_gaps": {
+          "claude": 1
+        },
+        "dismissed": []
       }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (Bash)\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\": \"text\", \"text\": \"\nYo",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 12 entries",
-     "hook_ms_p50": 6.1,
-     "hook_ms_p95": 16.4,
-     "hook_calls": 10,
-     "model_requests": 5
     },
-    "A_input_fault": {
-     "scenario": "A_input_fault",
-     "agent_rc": 0,
-     "wall_s": 3.3,
-     "agent_stderr_tail": "",
-     "steps_recorded": 4,
-     "step_tools": [
-      "Bash",
-      "Bash",
-      "Bash",
-      "Bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "input",
-      "confidence": "lineage_exact",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "75"
-      },
-      "value": "75",
-      "source": {
-       "kind": "input",
-       "line": 1,
-       "name": "summary",
-       "path": "inputs/summary.txt"
-      },
-      "note": "the pinned input already says this",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"75\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cac",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 13 entries",
-     "hook_ms_p50": 4.8,
-     "hook_ms_p95": 10.8,
-     "hook_calls": 12,
-     "model_requests": 6
-    },
-    "C_script_fault": {
-     "scenario": "C_script_fault",
-     "agent_rc": 0,
-     "wall_s": 3.2,
-     "agent_stderr_tail": "",
-     "steps_recorded": 4,
-     "step_tools": [
-      "Bash",
-      "Bash",
-      "Bash",
-      "Bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "lineage_internal",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "306"
-      },
-      "value": "306",
-      "source": null,
-      "note": "calc.py (written at step 1) computed the value",
-      "_step_writes": [
-       "calc.py"
+    "codex": {
+      "version": [
+        "codex-cli 0.156.1"
       ],
-      "_step_tool": "Bash",
-      "step_n": 1,
-      "actor": {
-       "platform": "claude",
-       "session": "9b01bacb-dadc-4ea6-866a-113280eb951f"
+      "install_exit": 0,
+      "runs": {
+        "B_agent_fault": {
+          "scenario": "B_agent_fault",
+          "agent_rc": 0,
+          "wall_s": 3.0,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/e2e_full5/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "steps_recorded": 3,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "provable",
+            "layer": "fact",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "report.md"
+            ],
+            "_step_tool": "Bash",
+            "step_n": 2,
+            "actor": {
+              "model": "mock-model",
+              "platform": "codex",
+              "session": "01a0d51c-fc9c-7f61-9369-87151ae6c667"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (Bash)\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to execute.\"}, \"justifica",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 9.2,
+          "hook_calls": 10,
+          "model_requests": 5
+        },
+        "A_input_fault": {
+          "scenario": "A_input_fault",
+          "agent_rc": 0,
+          "wall_s": 3.2,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/e2e_full5/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "steps_recorded": 4,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "input",
+            "confidence": "lineage_exact",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "75"
+            },
+            "value": "75",
+            "source": {
+              "kind": "input",
+              "line": 1,
+              "name": "summary",
+              "path": "inputs/summary.txt"
+            },
+            "note": "the pinned input already says this",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"75\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\":",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 13 entries",
+          "hook_ms_p50": 4.1,
+          "hook_ms_p95": 7.1,
+          "hook_calls": 12,
+          "model_requests": 6
+        },
+        "C_script_fault": {
+          "scenario": "C_script_fault",
+          "agent_rc": 0,
+          "wall_s": 3.2,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/e2e_full5/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "steps_recorded": 4,
+          "step_tools": [
+            "Bash",
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "306"
+            },
+            "value": "306",
+            "source": null,
+            "note": "calc.py (written at step 1) computed the value",
+            "_step_writes": [
+              "calc.py"
+            ],
+            "_step_tool": "Bash",
+            "step_n": 1,
+            "actor": {
+              "model": "mock-model",
+              "platform": "codex",
+              "session": "01a0d51d-3189-7370-b156-b9d76b80d12d"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"306\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (Bash); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to ",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.2,
+          "hook_ms_p95": 10.5,
+          "hook_calls": 12,
+          "model_requests": 6
+        },
+        "D_unrecorded_change": {
+          "scenario": "D_unrecorded_change",
+          "agent_rc": 0,
+          "wall_s": 1.7,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/e2e_full5/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "steps_recorded": 1,
+          "step_tools": [
+            "Bash"
+          ],
+          "gaps": 1,
+          "finding": {
+            "state": "UNOBSERVED",
+            "fault_class": "unattributable",
+            "confidence": "gap",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": {
+              "observed_at": "check",
+              "paths": [
+                "report.md"
+              ],
+              "seq": 8
+            },
+            "note": "changed outside any recorded step",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 10 entries",
+          "hook_ms_p50": 6.6,
+          "hook_ms_p95": 6.7,
+          "hook_calls": 5,
+          "model_requests": 2
+        },
+        "E_subagent_fault": {
+          "scenario": "E_subagent_fault",
+          "agent_rc": 0,
+          "wall_s": 5.1,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/e2e_full5/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "steps_recorded": 8,
+          "step_tools": [
+            "spawn_agent",
+            "Bash",
+            "Bash",
+            "multi_agent_v1wait_agent",
+            "Bash",
+            "Bash",
+            "Bash",
+            "Bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "96"
+            },
+            "value": "96",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "figure.txt"
+            ],
+            "_step_tool": "Bash",
+            "step_n": 3,
+            "actor": {
+              "agent": "01a0d51d-63d2-7060-9aef-8a6518fea702",
+              "agent_type": "default",
+              "model": "mock-model",
+              "platform": "codex",
+              "session": "01a0d51d-620d-7b03-8872-94d806d40f99"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 3 (Bash); step 6 wrote it into report.md\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to e",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 18 entries",
+          "hook_ms_p50": 4.5,
+          "hook_ms_p95": 7.6,
+          "hook_calls": 22,
+          "model_requests": 11
+        }
+      },
+      "actors": {
+        "cells": [
+          {
+            "key": [
+              "codex:main",
+              "codex",
+              "claimed:mock-model",
+              "csv_total"
+            ],
+            "label": "codex main [claimed:mock-model]",
+            "runs": 5,
+            "accepted": 5,
+            "provable_faults": 1,
+            "mean": 0.538337778716092,
+            "observations": 1.189668543543744
+          }
+        ],
+        "sources": {
+          "input:inputs/summary.txt": {
+            "count": 1,
+            "findings": [
+              "f_e1522bb833"
+            ]
+          }
+        },
+        "coverage_gaps": {
+          "codex": 1
+        },
+        "dismissed": []
       }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"306\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (Bash); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\"",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 12 entries",
-     "hook_ms_p50": 6.4,
-     "hook_ms_p95": 9.8,
-     "hook_calls": 12,
-     "model_requests": 6
     },
-    "D_unrecorded_change": {
-     "scenario": "D_unrecorded_change",
-     "agent_rc": 0,
-     "wall_s": 1.6,
-     "agent_stderr_tail": "",
-     "steps_recorded": 1,
-     "step_tools": [
-      "Bash"
-     ],
-     "gaps": 1,
-     "finding": {
-      "state": "UNOBSERVED",
-      "fault_class": "unattributable",
-      "confidence": "gap",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
+    "pi": {
+      "version": [
+        "0.87.1"
+      ],
+      "install_exit": 0,
+      "runs": {
+        "B_agent_fault": {
+          "scenario": "B_agent_fault",
+          "agent_rc": 0,
+          "wall_s": 2.2,
+          "agent_stderr_tail": "",
+          "steps_recorded": 3,
+          "step_tools": [
+            "bash",
+            "write",
+            "write"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "provable",
+            "layer": "fact",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "report.md"
+            ],
+            "_step_tool": "write",
+            "step_n": 2,
+            "actor": {
+              "model": "mock/mock-model",
+              "platform": "pi",
+              "session": "01a0d51d-86fb-73e8-8f20-8ee41616badc"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (write)\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text file",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 11 entries",
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 10.6,
+          "hook_calls": 10,
+          "model_requests": 5
+        },
+        "A_input_fault": {
+          "scenario": "A_input_fault",
+          "agent_rc": 0,
+          "wall_s": 2.2,
+          "agent_stderr_tail": "",
+          "steps_recorded": 4,
+          "step_tools": [
+            "bash",
+            "write",
+            "bash",
+            "write"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "input",
+            "confidence": "lineage_exact",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "75"
+            },
+            "value": "75",
+            "source": {
+              "kind": "input",
+              "line": 1,
+              "name": "summary",
+              "path": "inputs/summary.txt"
+            },
+            "note": "the pinned input already says this",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"75\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, pn",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 4.8,
+          "hook_ms_p95": 6.9,
+          "hook_calls": 12,
+          "model_requests": 6
+        },
+        "C_script_fault": {
+          "scenario": "C_script_fault",
+          "agent_rc": 0,
+          "wall_s": 2.4,
+          "agent_stderr_tail": "",
+          "steps_recorded": 4,
+          "step_tools": [
+            "write",
+            "bash",
+            "write",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "306"
+            },
+            "value": "306",
+            "source": null,
+            "note": "calc.py (written at step 1) computed the value",
+            "_step_writes": [
+              "calc.py"
+            ],
+            "_step_tool": "write",
+            "step_n": 1,
+            "actor": {
+              "model": "mock/mock-model",
+              "platform": "pi",
+              "session": "01a0d51d-b522-71dd-ad55-b18430de0da3"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"306\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (write); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as atta",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 11 entries",
+          "hook_ms_p50": 6.5,
+          "hook_ms_p95": 7.9,
+          "hook_calls": 12,
+          "model_requests": 6
+        },
+        "D_unrecorded_change": {
+          "scenario": "D_unrecorded_change",
+          "agent_rc": 0,
+          "wall_s": 1.2,
+          "agent_stderr_tail": "",
+          "steps_recorded": 1,
+          "step_tools": [
+            "write"
+          ],
+          "gaps": 1,
+          "finding": {
+            "state": "UNOBSERVED",
+            "fault_class": "unattributable",
+            "confidence": "gap",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": {
+              "observed_at": "check",
+              "paths": [
+                "report.md"
+              ],
+              "seq": 7
+            },
+            "note": "changed outside any recorded step",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 9 entries",
+          "hook_ms_p50": 6.8,
+          "hook_ms_p95": 7.1,
+          "hook_calls": 5,
+          "model_requests": 2
+        },
+        "E_subagent_fault": {
+          "scenario": "E_subagent_fault",
+          "agent_rc": 0,
+          "wall_s": 4.2,
+          "agent_stderr_tail": "",
+          "steps_recorded": 7,
+          "step_tools": [
+            "bash",
+            "write",
+            "subagent",
+            "bash",
+            "write",
+            "bash",
+            "write"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "96"
+            },
+            "value": "96",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "figure.txt"
+            ],
+            "_step_tool": "write",
+            "step_n": 2,
+            "actor": {
+              "agent": "01a0d51d-e316-76ac-9fbd-29841c9d6ccf",
+              "agent_type": "worker",
+              "model": "mock/mock-model",
+              "platform": "pi",
+              "session": "01a0d51d-e057-7315-9b47-75a5200d381c"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 2 (write); step 5 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attac",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 15 entries",
+          "hook_ms_p50": 3.3,
+          "hook_ms_p95": 8.6,
+          "hook_calls": 20,
+          "model_requests": 10
+        }
       },
-      "value": "999",
-      "source": {
-       "observed_at": "check",
-       "paths": [
-        "report.md"
-       ],
-       "seq": 8
+      "actors": {
+        "cells": [
+          {
+            "key": [
+              "pi:main",
+              "pi",
+              "claimed:mock/mock-model",
+              "csv_total"
+            ],
+            "label": "pi main [claimed:mock/mock-model]",
+            "runs": 5,
+            "accepted": 5,
+            "provable_faults": 1,
+            "mean": 0.538337778716092,
+            "observations": 1.189668543543744
+          }
+        ],
+        "sources": {
+          "input:inputs/summary.txt": {
+            "count": 1,
+            "findings": [
+              "f_6990242659"
+            ]
+          }
+        },
+        "coverage_gaps": {
+          "pi": 1
+        },
+        "dismissed": []
+      }
+    },
+    "opencode": {
+      "version": [
+        "1.18.32"
+      ],
+      "install_exit": 0,
+      "runs": {
+        "B_agent_fault": {
+          "scenario": "B_agent_fault",
+          "agent_rc": 0,
+          "wall_s": 16.6,
+          "agent_stderr_tail": "",
+          "steps_recorded": 2,
+          "step_tools": [
+            "bash",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "provable",
+            "layer": "fact",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "report.md"
+            ],
+            "_step_tool": "bash",
+            "step_n": 2,
+            "actor": {
+              "platform": "opencode",
+              "session": "ses_f2ae1cfa7ffeKQdJGPP11muHcq"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "reject",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 8 entries",
+          "hook_ms_p50": 5.3,
+          "hook_ms_p95": 6.9,
+          "hook_calls": 5,
+          "model_requests": 4
+        },
+        "A_input_fault": {
+          "scenario": "A_input_fault",
+          "agent_rc": 0,
+          "wall_s": 6.0,
+          "agent_stderr_tail": "",
+          "steps_recorded": 2,
+          "step_tools": [
+            "bash",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "input",
+            "confidence": "lineage_exact",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "75"
+            },
+            "value": "75",
+            "source": {
+              "kind": "input",
+              "line": 1,
+              "name": "summary",
+              "path": "inputs/summary.txt"
+            },
+            "note": "the pinned input already says this",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "reject",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 8 entries",
+          "hook_ms_p50": 5.1,
+          "hook_ms_p95": 7.6,
+          "hook_calls": 5,
+          "model_requests": 4
+        },
+        "C_script_fault": {
+          "scenario": "C_script_fault",
+          "agent_rc": 0,
+          "wall_s": 7.3,
+          "agent_stderr_tail": "",
+          "steps_recorded": 2,
+          "step_tools": [
+            "bash",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "306"
+            },
+            "value": "306",
+            "source": null,
+            "note": "calc.py (written at step 1) computed the value",
+            "_step_writes": [
+              "calc.py"
+            ],
+            "_step_tool": "bash",
+            "step_n": 1,
+            "actor": {
+              "platform": "opencode",
+              "session": "ses_f2ae18188ffedsXhplKNBVUWQj"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "reject",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 7 entries",
+          "hook_ms_p50": 6.7,
+          "hook_ms_p95": 6.9,
+          "hook_calls": 5,
+          "model_requests": 4
+        },
+        "D_unrecorded_change": {
+          "scenario": "D_unrecorded_change",
+          "agent_rc": 0,
+          "wall_s": 5.8,
+          "agent_stderr_tail": "",
+          "steps_recorded": 1,
+          "step_tools": [
+            "bash"
+          ],
+          "gaps": 1,
+          "finding": {
+            "state": "UNOBSERVED",
+            "fault_class": "unattributable",
+            "confidence": "gap",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": {
+              "observed_at": "check",
+              "paths": [
+                "report.md"
+              ],
+              "seq": 6
+            },
+            "note": "changed outside any recorded step",
+            "_step_writes": null,
+            "_step_tool": null,
+            "step_n": null,
+            "actor": null
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 8 entries",
+          "hook_ms_p50": 7.8,
+          "hook_ms_p95": 7.8,
+          "hook_calls": 3,
+          "model_requests": 3
+        },
+        "E_subagent_fault": {
+          "scenario": "E_subagent_fault",
+          "agent_rc": 0,
+          "wall_s": 7.5,
+          "agent_stderr_tail": "",
+          "steps_recorded": 5,
+          "step_tools": [
+            "bash",
+            "bash",
+            "task",
+            "bash",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "96"
+            },
+            "value": "96",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "figure.txt"
+            ],
+            "_step_tool": "bash",
+            "step_n": 2,
+            "actor": {
+              "agent": "ses_f2ae12837ffeGp7HeC3IGHpSk3",
+              "agent_type": "subagent",
+              "platform": "opencode",
+              "session": "ses_f2ae1312bffewU0zUHS20q4khq"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": false,
+          "feedback_text": null,
+          "feedback_has_location": false,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": false,
+          "final_decision": "reject",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 10 entries",
+          "hook_ms_p50": 4.5,
+          "hook_ms_p95": 6.7,
+          "hook_calls": 11,
+          "model_requests": 8
+        }
       },
-      "note": "changed outside any recorded step",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 10 entries",
-     "hook_ms_p50": 8.4,
-     "hook_ms_p95": 9.1,
-     "hook_calls": 5,
-     "model_requests": 2
+      "actors": {
+        "cells": [
+          {
+            "key": [
+              "opencode:main",
+              "opencode",
+              "unknown",
+              "csv_total"
+            ],
+            "label": "opencode main [unknown]",
+            "runs": 5,
+            "accepted": 1,
+            "provable_faults": 1,
+            "mean": 0.42437699333805173,
+            "observations": 1.189668543543744
+          }
+        ],
+        "sources": {
+          "input:inputs/summary.txt": {
+            "count": 1,
+            "findings": [
+              "f_fe4ae25ec1"
+            ]
+          }
+        },
+        "coverage_gaps": {
+          "opencode": 1
+        },
+        "dismissed": []
+      }
     }
-   },
-   "actors": {
-    "cells": [
-     {
-      "key": [
-       "claude:main",
-       "claude",
-       "unknown",
-       "csv_total"
-      ],
-      "label": "claude main [unknown]",
-      "runs": 4,
-      "accepted": 4,
-      "provable_faults": 1,
-      "mean": 0.5335252263557194,
-      "observations": 0.9931044238346939
-     }
-    ],
-    "sources": {
-     "input:inputs/summary.txt": {
-      "count": 1,
-      "findings": [
-       "f_55ce0730b2"
-      ]
-     }
-    },
-    "coverage_gaps": {
-     "claude": 1
-    },
-    "dismissed": []
-   }
   },
-  "codex": {
-   "version": [
-    "codex-cli 0.156.1"
-   ],
-   "install_exit": 0,
-   "runs": {
-    "B_agent_fault": {
-     "scenario": "B_agent_fault",
-     "agent_rc": 0,
-     "wall_s": 2.9,
-     "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_trace_run5/codex/home/.codex\"))\nReading additional input from stdin...\n",
-     "steps_recorded": 3,
-     "step_tools": [
-      "Bash",
-      "Bash",
-      "Bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "provable",
-      "layer": "fact",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": null,
-      "note": "no recorded read contains this value",
-      "_step_writes": [
-       "report.md"
-      ],
-      "_step_tool": "Bash",
-      "step_n": 2,
-      "actor": {
-       "model": "mock-model",
-       "platform": "codex",
-       "session": "01a0d4cb-d6cb-7e30-bb9f-13b559a99ed6"
-      }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (Bash)\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to execute.\"}, \"justifica",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 12 entries",
-     "hook_ms_p50": 4.5,
-     "hook_ms_p95": 9.9,
-     "hook_calls": 10,
-     "model_requests": 5
-    },
-    "A_input_fault": {
-     "scenario": "A_input_fault",
-     "agent_rc": 0,
-     "wall_s": 3.4,
-     "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_trace_run5/codex/home/.codex\"))\nReading additional input from stdin...\n",
-     "steps_recorded": 4,
-     "step_tools": [
-      "Bash",
-      "Bash",
-      "Bash",
-      "Bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "input",
-      "confidence": "lineage_exact",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "75"
-      },
-      "value": "75",
-      "source": {
-       "kind": "input",
-       "line": 1,
-       "name": "summary",
-       "path": "inputs/summary.txt"
-      },
-      "note": "the pinned input already says this",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"75\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\":",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 13 entries",
-     "hook_ms_p50": 4.4,
-     "hook_ms_p95": 9.8,
-     "hook_calls": 12,
-     "model_requests": 6
-    },
-    "C_script_fault": {
-     "scenario": "C_script_fault",
-     "agent_rc": 0,
-     "wall_s": 3.2,
-     "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_trace_run5/codex/home/.codex\"))\nReading additional input from stdin...\n",
-     "steps_recorded": 4,
-     "step_tools": [
-      "Bash",
-      "Bash",
-      "Bash",
-      "Bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "lineage_internal",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "306"
-      },
-      "value": "306",
-      "source": null,
-      "note": "calc.py (written at step 1) computed the value",
-      "_step_writes": [
-       "calc.py"
-      ],
-      "_step_tool": "Bash",
-      "step_n": 1,
-      "actor": {
-       "model": "mock-model",
-       "platform": "codex",
-       "session": "01a0d4cc-0c96-7612-8b77-7e0ea2f6f26c"
-      }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"306\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (Bash); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to ",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 12 entries",
-     "hook_ms_p50": 5.6,
-     "hook_ms_p95": 9.5,
-     "hook_calls": 12,
-     "model_requests": 6
-    },
-    "D_unrecorded_change": {
-     "scenario": "D_unrecorded_change",
-     "agent_rc": 0,
-     "wall_s": 1.7,
-     "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_trace_run5/codex/home/.codex\"))\nReading additional input from stdin...\n",
-     "steps_recorded": 1,
-     "step_tools": [
-      "Bash"
-     ],
-     "gaps": 1,
-     "finding": {
-      "state": "UNOBSERVED",
-      "fault_class": "unattributable",
-      "confidence": "gap",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": {
-       "observed_at": "check",
-       "paths": [
-        "report.md"
-       ],
-       "seq": 8
-      },
-      "note": "changed outside any recorded step",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 10 entries",
-     "hook_ms_p50": 8.2,
-     "hook_ms_p95": 10.5,
-     "hook_calls": 5,
-     "model_requests": 2
-    }
-   },
-   "actors": {
-    "cells": [
-     {
-      "key": [
-       "codex:main",
-       "codex",
-       "claimed:mock-model",
-       "csv_total"
-      ],
-      "label": "codex main [claimed:mock-model]",
-      "runs": 4,
-      "accepted": 4,
-      "provable_faults": 1,
-      "mean": 0.5335252263557194,
-      "observations": 0.9931044238346939
-     }
-    ],
-    "sources": {
-     "input:inputs/summary.txt": {
-      "count": 1,
-      "findings": [
-       "f_0bb403e43f"
-      ]
-     }
-    },
-    "coverage_gaps": {
-     "codex": 1
-    },
-    "dismissed": []
-   }
-  },
-  "pi": {
-   "version": [
-    "0.87.1"
-   ],
-   "install_exit": 0,
-   "runs": {
-    "B_agent_fault": {
-     "scenario": "B_agent_fault",
-     "agent_rc": 0,
-     "wall_s": 2.7,
-     "agent_stderr_tail": "",
-     "steps_recorded": 3,
-     "step_tools": [
-      "bash",
-      "write",
-      "write"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "provable",
-      "layer": "fact",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": null,
-      "note": "no recorded read contains this value",
-      "_step_writes": [
-       "report.md"
-      ],
-      "_step_tool": "write",
-      "step_n": 2,
-      "actor": {
-       "model": "mock/mock-model",
-       "platform": "pi",
-       "session": "01a0d4cc-4118-7171-b04e-c674cb10446d"
-      }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (write)\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text file",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 11 entries",
-     "hook_ms_p50": 5.2,
-     "hook_ms_p95": 8.3,
-     "hook_calls": 10,
-     "model_requests": 5
-    },
-    "A_input_fault": {
-     "scenario": "A_input_fault",
-     "agent_rc": 0,
-     "wall_s": 2.4,
-     "agent_stderr_tail": "",
-     "steps_recorded": 4,
-     "step_tools": [
-      "bash",
-      "write",
-      "bash",
-      "write"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "input",
-      "confidence": "lineage_exact",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "75"
-      },
-      "value": "75",
-      "source": {
-       "kind": "input",
-       "line": 1,
-       "name": "summary",
-       "path": "inputs/summary.txt"
-      },
-      "note": "the pinned input already says this",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"75\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, pn",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 12 entries",
-     "hook_ms_p50": 4.3,
-     "hook_ms_p95": 9.0,
-     "hook_calls": 12,
-     "model_requests": 6
-    },
-    "C_script_fault": {
-     "scenario": "C_script_fault",
-     "agent_rc": 0,
-     "wall_s": 2.4,
-     "agent_stderr_tail": "",
-     "steps_recorded": 4,
-     "step_tools": [
-      "write",
-      "bash",
-      "write",
-      "bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "lineage_internal",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "306"
-      },
-      "value": "306",
-      "source": null,
-      "note": "calc.py (written at step 1) computed the value",
-      "_step_writes": [
-       "calc.py"
-      ],
-      "_step_tool": "write",
-      "step_n": 1,
-      "actor": {
-       "model": "mock/mock-model",
-       "platform": "pi",
-       "session": "01a0d4cc-7282-73f0-82f0-efeea942fd0a"
-      }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": true,
-     "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"306\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (write); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as atta",
-     "feedback_has_location": true,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": true,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 11 entries",
-     "hook_ms_p50": 7.4,
-     "hook_ms_p95": 14.1,
-     "hook_calls": 12,
-     "model_requests": 6
-    },
-    "D_unrecorded_change": {
-     "scenario": "D_unrecorded_change",
-     "agent_rc": 0,
-     "wall_s": 1.2,
-     "agent_stderr_tail": "",
-     "steps_recorded": 1,
-     "step_tools": [
-      "write"
-     ],
-     "gaps": 1,
-     "finding": {
-      "state": "UNOBSERVED",
-      "fault_class": "unattributable",
-      "confidence": "gap",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": {
-       "observed_at": "check",
-       "paths": [
-        "report.md"
-       ],
-       "seq": 7
-      },
-      "note": "changed outside any recorded step",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 9 entries",
-     "hook_ms_p50": 7.2,
-     "hook_ms_p95": 7.4,
-     "hook_calls": 5,
-     "model_requests": 2
-    }
-   },
-   "actors": {
-    "cells": [
-     {
-      "key": [
-       "pi:main",
-       "pi",
-       "claimed:mock/mock-model",
-       "csv_total"
-      ],
-      "label": "pi main [claimed:mock/mock-model]",
-      "runs": 4,
-      "accepted": 4,
-      "provable_faults": 1,
-      "mean": 0.5335252263557194,
-      "observations": 0.9931044238346939
-     }
-    ],
-    "sources": {
-     "input:inputs/summary.txt": {
-      "count": 1,
-      "findings": [
-       "f_f4ca3bc8f9"
-      ]
-     }
-    },
-    "coverage_gaps": {
-     "pi": 1
-    },
-    "dismissed": []
-   }
-  },
-  "opencode": {
-   "version": [
-    "1.18.32"
-   ],
-   "install_exit": 0,
-   "runs": {
-    "B_agent_fault": {
-     "scenario": "B_agent_fault",
-     "agent_rc": 0,
-     "wall_s": 17.1,
-     "agent_stderr_tail": "",
-     "steps_recorded": 2,
-     "step_tools": [
-      "bash",
-      "bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "provable",
-      "layer": "fact",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": null,
-      "note": "no recorded read contains this value",
-      "_step_writes": [
-       "report.md"
-      ],
-      "_step_tool": "bash",
-      "step_n": 2,
-      "actor": {
-       "platform": "opencode",
-       "session": "ses_f2b333114ffev141t7UhIxEfpQ"
-      }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "reject",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 8 entries",
-     "hook_ms_p50": 8.3,
-     "hook_ms_p95": 12.4,
-     "hook_calls": 5,
-     "model_requests": 4
-    },
-    "A_input_fault": {
-     "scenario": "A_input_fault",
-     "agent_rc": 0,
-     "wall_s": 6.0,
-     "agent_stderr_tail": "",
-     "steps_recorded": 2,
-     "step_tools": [
-      "bash",
-      "bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "input",
-      "confidence": "lineage_exact",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "75"
-      },
-      "value": "75",
-      "source": {
-       "kind": "input",
-       "line": 1,
-       "name": "summary",
-       "path": "inputs/summary.txt"
-      },
-      "note": "the pinned input already says this",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "reject",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 8 entries",
-     "hook_ms_p50": 5.8,
-     "hook_ms_p95": 9.5,
-     "hook_calls": 5,
-     "model_requests": 4
-    },
-    "C_script_fault": {
-     "scenario": "C_script_fault",
-     "agent_rc": 0,
-     "wall_s": 6.6,
-     "agent_stderr_tail": "",
-     "steps_recorded": 2,
-     "step_tools": [
-      "bash",
-      "bash"
-     ],
-     "gaps": 0,
-     "finding": {
-      "state": "located",
-      "fault_class": "agent",
-      "confidence": "lineage_internal",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "306"
-      },
-      "value": "306",
-      "source": null,
-      "note": "calc.py (written at step 1) computed the value",
-      "_step_writes": [
-       "calc.py"
-      ],
-      "_step_tool": "bash",
-      "step_n": 1,
-      "actor": {
-       "platform": "opencode",
-       "session": "ses_f2b32e121ffeOD5iqQrAnlecT2"
-      }
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "reject",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 7 entries",
-     "hook_ms_p50": 9.4,
-     "hook_ms_p95": 14.0,
-     "hook_calls": 5,
-     "model_requests": 4
-    },
-    "D_unrecorded_change": {
-     "scenario": "D_unrecorded_change",
-     "agent_rc": 0,
-     "wall_s": 5.1,
-     "agent_stderr_tail": "",
-     "steps_recorded": 1,
-     "step_tools": [
-      "bash"
-     ],
-     "gaps": 1,
-     "finding": {
-      "state": "UNOBSERVED",
-      "fault_class": "unattributable",
-      "confidence": "gap",
-      "layer": "inference",
-      "location": {
-       "col": 8,
-       "kind": "offending",
-       "line": 3,
-       "note": "recomputed 69.0 from input:ledger",
-       "path": "report.md",
-       "value": "999"
-      },
-      "value": "999",
-      "source": {
-       "observed_at": "check",
-       "paths": [
-        "report.md"
-       ],
-       "seq": 6
-      },
-      "note": "changed outside any recorded step",
-      "_step_writes": null,
-      "_step_tool": null,
-      "step_n": null,
-      "actor": null
-     },
-     "judgement": {
-      "correct": true,
-      "mismatch": []
-     },
-     "feedback_reached_model": false,
-     "feedback_text": null,
-     "feedback_has_location": false,
-     "feedback_has_actor_id": false,
-     "resolved_after_feedback": false,
-     "final_decision": "accept",
-     "chain_verifies": true,
-     "chain_verify_out": "OK 8 entries",
-     "hook_ms_p50": 7.1,
-     "hook_ms_p95": 7.1,
-     "hook_calls": 3,
-     "model_requests": 3
-    }
-   },
-   "actors": {
-    "cells": [
-     {
-      "key": [
-       "opencode:main",
-       "opencode",
-       "unknown",
-       "csv_total"
-      ],
-      "label": "opencode main [unknown]",
-      "runs": 4,
-      "accepted": 1,
-      "provable_faults": 1,
-      "mean": 0.43387159837225103,
-      "observations": 0.9931044238346939
-     }
-    ],
-    "sources": {
-     "input:inputs/summary.txt": {
-      "count": 1,
-      "findings": [
-       "f_c141a9df67"
-      ]
-     }
-    },
-    "coverage_gaps": {
-     "opencode": 1
-    },
-    "dismissed": []
-   }
-  }
- },
- "finished": "2026-09-24T19:03:44+0000"
+  "finished": "2026-09-24T20:32:50+0000"
 }

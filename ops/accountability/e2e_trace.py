@@ -322,7 +322,7 @@ def main() -> int:
 
 
 def summary(r: dict) -> str:
-    lines = ["# e2e_trace — four real agents × four planted faults (L-fake)", "",
+    lines = ["# e2e_trace — four real agents × five planted-fault scenarios (L-fake)", "",
              f"started {r.get('started')} · finished {r.get('finished')}", "",
              "| agent | scenario | attribution | got (state / class / grade) | step | "
              "feedback reached model | located in feedback | actor id in feedback | "
