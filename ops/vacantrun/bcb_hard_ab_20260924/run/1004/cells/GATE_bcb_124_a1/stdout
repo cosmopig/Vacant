@@ -1,0 +1,12 @@
+<|channel>thought
+<channel|>The task is completed. I have implemented `task_func` in `solution.py` according to the requirements specified in `goal.md` and `contract.md`.
+
+Summary of implementation:
+1.  **Input Validation**: Added checks for `my_list` being a list (`TypeError`) and containing only numeric elements (`ValueError`).
+2.  **List Enhancement**: Appended 12 to `my_list`.
+3.  **Random Generation**: Used the provided `seed`, calculated the sum of `my_list`, and generated a list of random integers between 1 and 100, capped by the `size` parameter.
+4.  **Timing**: Measured the time taken for the generation process using `time.time()`.
+5.  **Plotting**: Created a histogram using `matplotlib.pyplot` with specified labels ('Number', 'Frequency') and bins covering the 1-100 range.
+6.  **Return Value**: Returned a tuple containing the elapsed time (float) and the matplotlib Axes object.
+
+I verified the implementation by running `run_tests.sh`, which passed all visible tests.

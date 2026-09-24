@@ -1,0 +1,3 @@
+The task is complete. I have implemented the `countPairs` function in `solution.py` as specified in `goal.md` and `contract.md`. The solution correctly identifies "almost equal" pairs by checking if two numbers are equal or if one can be transformed into the other by swapping any two digits within its string representation.
+
+I have verified the implementation with the provided tests, and all passed.

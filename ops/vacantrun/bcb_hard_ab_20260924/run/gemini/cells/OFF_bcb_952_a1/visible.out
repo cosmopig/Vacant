@@ -1,0 +1,5 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: FAIL test_case_1: AssertionError: False is not true
+pass test_visible.py::check_test_case_10
+pass test_visible.py::check_test_case_2
+pass test_visible.py::check_test_case_3
+1 check(s) failed

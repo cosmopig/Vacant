@@ -1,0 +1,60 @@
+The task was to read a JSON file containing a list of dictionaries (or potentially nested lists of dictionaries based on test data), calculate the mean and median for each numeric field, write these results to a CSV file with headers `key`, `mean`, and `median`, and return a dictionary of the statistics.
+
+I have implemented this in `solution.py` by:
+1. Reading the JSON input.
+2. Iterating through the data structure (handling both list of dictionaries and nested lists).
+3. Collecting numeric values for each key using a `defaultdict`.
+4. Calculating mean and median using `numpy`.
+5. Writing the results to a CSV file with the required headers.
+6. Returning the statistics dictionary.
+
+The tests passed successfully.
+
+```python
+import numpy as np
+from collections import defaultdict
+import json
+import csv
+# Constants
+def task_func(input_file, output_file):
+    with open(input_file, 'r') as f:
+        data = json.load(f)
+
+    key_values = defaultdict(list)
+    for entry in data:
+        if isinstance(entry, list):
+            for item in entry:
+                if isinstance(item, dict):
+                    for key, value in item.items():
+                        if isinstance(value, (int, float)) and not isinstance(value, bool):
+                            key_values[key].append(value)
+        elif isinstance(entry, dict):
+            for key, value in entry.items():
+                if isinstance(value, (int, float)) and not isinstance(value, bool):
+                    key_values[key].append(value)
+
+    stats = {}
+    # We need to maintain some order if possible, but dictionary is fine for return
+    # Let's sort keys alphabetically for the CSV output
+    sorted_keys = sorted(key_values.keys())
+
+    for key in sorted_keys:
+        values = key_values[key]
+        if values:
+            arr = np.array(values)
+            mean_val = float(np.mean(arr))
+            median_val = float(np.median(arr))
+            stats[key] = {
+                "mean": mean_val,
+                "median": median_val
+            }
+
+    with open(output_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["key", "mean", "median"])
+        for key in sorted_keys:
+            if key in stats:
+                writer.writerow([key, stats[key]["mean"], stats[key]["median"]])
+
+    return stats
+```

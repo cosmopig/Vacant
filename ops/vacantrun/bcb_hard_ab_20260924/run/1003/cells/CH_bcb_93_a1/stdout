@@ -1,0 +1,8 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function performs PCA, handles the `ValueError` for invalid `n_components`, returns the transformed data as a DataFrame, and generates a scatter plot.
+
+The tests passed successfully.
+```bash
+pass test_visible.py::check_test_invalid_n_components
+pass test_visible.py::check_test_invalid_n_components_type
+0 check(s) failed
+```

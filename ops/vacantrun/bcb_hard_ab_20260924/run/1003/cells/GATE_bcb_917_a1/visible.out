@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: FAIL test_case_1: AssertionError: 106.0 != 106.99999813460752 within 2 places (0.9999981346075231 difference)
+FAIL test_visible.py::check_test_case_2  AssertionError: FAIL test_case_2: AssertionError: 206.0 != 206.9999997816766 within 2 places (0.9999997816765926 difference)
+2 check(s) failed

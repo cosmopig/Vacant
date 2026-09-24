@@ -1,0 +1,38 @@
+import requests
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
+import csv
+def task_func(
+    url: str,
+    base_url: str = "https://www.example.com",
+    csv_file: str = "scraped_data.csv",
+) -> int:
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except Exception:
+        return 0
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    links = soup.find_all('a')
+    
+    unique_links = set()
+    for link in links:
+        href = link.get('href')
+        if href:
+            # urljoin handles both relative and absolute URLs correctly.
+            # If href is already an absolute URL, it remains unchanged.
+            absolute_url = urljoin(base_url, href)
+            
+            # We only want to count/save links that are actually web URLs (http/https).
+            # This filters out things like "mailto:", "tel:", "#", etc.
+            if absolute_url.startswith('http://') or absolute_url.startswith('https://'):
+                unique_links.add(absolute_url)
+
+    with open(csv_file, mode='w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        # Sort the links for consistent CSV output (optional but good practice)
+        for link in sorted(list(unique_links)):
+            writer.writerow([link])
+
+    return len(unique_links)

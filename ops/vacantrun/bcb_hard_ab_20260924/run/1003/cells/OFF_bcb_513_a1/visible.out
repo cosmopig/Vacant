@@ -1,0 +1,5 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: ERROR test_case_1: KeyError: "Column 'Steps' not found in data"
+pass test_visible.py::check_test_case_10
+FAIL test_visible.py::check_test_case_11  AssertionError: ERROR test_case_11: KeyError: "Column 'Steps' not found in data"
+FAIL test_visible.py::check_test_case_12  AssertionError: ERROR test_case_12: KeyError: "Column 'Distance Walked' not found in data"
+3 check(s) failed

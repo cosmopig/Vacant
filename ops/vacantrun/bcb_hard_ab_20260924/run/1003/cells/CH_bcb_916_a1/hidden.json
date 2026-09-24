@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_invalid_column: AssertionError: ERROR test_invalid_column: ValueError: Could not interpret value `closing_price` for `x`. An entry with this name does not appear in `data`."]}

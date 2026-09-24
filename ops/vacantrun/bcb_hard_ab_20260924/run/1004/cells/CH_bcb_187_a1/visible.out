@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_coordinate_ranges
+pass test_visible.py::check_test_custom_cities
+0 check(s) failed

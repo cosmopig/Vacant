@@ -1,0 +1,6 @@
+The task was to implement a function `minTimeToReach` that calculates the minimum time to reach the bottom-right corner of a grid where each room has a minimum start time for moving into it.
+
+I have implemented this using Dijkstra's algorithm in `solution.py`. The logic correctly accounts for waiting until the required `moveTime` is reached before proceeding to an adjacent room, which takes 1 second.
+
+The tests passed successfully.
+

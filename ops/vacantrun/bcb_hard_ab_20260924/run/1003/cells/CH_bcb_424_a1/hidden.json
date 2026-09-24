@@ -1,0 +1,1 @@
+{"passed": 3, "total": 5, "failures": ["check_test_normal_functionality: AssertionError: FAIL test_normal_functionality: AssertionError: False is not true : The arrays should be equal", "check_test_single_cluster_returns_original_image:         [247, 247, 244],..."]}

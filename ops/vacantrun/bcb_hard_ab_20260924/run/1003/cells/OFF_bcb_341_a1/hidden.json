@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_categorical_data: AssertionError: FAIL test_categorical_data: AssertionError: False is not true"]}

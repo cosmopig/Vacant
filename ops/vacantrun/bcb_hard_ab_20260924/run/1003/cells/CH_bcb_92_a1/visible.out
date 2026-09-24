@@ -1,0 +1,4 @@
+pass test_visible.py::check_test_cluster_centers
+pass test_visible.py::check_test_invalid_cluster_number
+pass test_visible.py::check_test_invalid_data_type
+0 check(s) failed

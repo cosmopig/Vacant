@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_case_1: AssertionError: ERROR test_case_1: subprocess.CalledProcessError: Command '['wget', '--ftp-user=dlpuser', '--ftp-password=rNrKYTX9g7z3RgJRmxWuGHbeu', \"ftp://ftp"]}

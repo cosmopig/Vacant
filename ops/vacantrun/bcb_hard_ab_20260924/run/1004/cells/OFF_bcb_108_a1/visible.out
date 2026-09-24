@@ -1,0 +1,5 @@
+pass test_visible.py::check_test_additive_model
+pass test_visible.py::check_test_component_shapes
+pass test_visible.py::check_test_components_existence
+pass test_visible.py::check_test_insufficient_data
+0 check(s) failed

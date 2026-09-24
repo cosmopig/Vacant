@@ -1,0 +1,35 @@
+<thought>All visible tests passed. I should check if there are any other constraints or edge cases.
+$n \le 500$
+$nums[i] \le 10^5$
+$k \le n$
+
+The current solution is $O(n)$ time and $O(n-k+1)$ space for the result, which is optimal.
+The $O(n)$ time complexity is well within the limits for $n=500$.
+
+I'm done.
+</thought>I have implemented the `resultsArray` function in `solution.py` following the requirements. The implementation uses an $O(n)$ sliding window approach to track consecutive elements, ensuring it efficiently finds the power of each subarray of size $k$.
+
+All visible tests passed successfully.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    consecutive_count = 1
+    
+    for i in range(n):
+        if i > 0:
+            if nums[i] == nums[i-1] + 1:
+                consecutive_count += 1
+            else:
+                consecutive_count = 1
+        
+        if i >= k - 1:
+            if consecutive_count >= k:
+                results.append(nums[i])
+            else:
+                results.append(-1)
+    return results
+```

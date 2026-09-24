@@ -1,0 +1,43 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+def task_func(data, target_column, test_size=0.2, random_state = 0) -> float:
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("If data is not a DataFrame.")
+    
+    if data.empty:
+        raise ValueError("If data is empty.")
+    
+    if target_column not in data.columns:
+        raise ValueError("If target_column ist not a column of data.")
+    
+    # Check if all values in the dataframe are numeric
+    for col in data.columns:
+        if not pd.api.types.is_numeric_dtype(data[col]):
+            # Try to convert to numeric, if it fails or contains NaNs (that weren't there), then it's not numeric
+            converted = pd.to_numeric(data[col], errors='coerce')
+            if converted.isna().any() and not data[col].isna().any():
+                raise ValueError("If data contains values that are not numeric.")
+            # If even after conversion it's still not all numeric (e.g. strings)
+            if not pd.api.types.is_numeric_dtype(converted):
+                 raise ValueError("If data contains values that are not numeric.")
+
+    if not isinstance(random_state, int):
+        raise ValueError("If random_state is not an integer.")
+    
+    if not (0 <= test_size <= 1):
+        raise ValueError("If test_size is not between 0 and 1.")
+
+    X = data.drop(columns=[target_column])
+    y = data[target_column]
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state
+    )
+    
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    
+    return float(model.score(X_test, y_test))

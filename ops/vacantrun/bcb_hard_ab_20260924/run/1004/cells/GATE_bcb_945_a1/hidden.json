@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_forecasted_values_increasing: AssertionError: FAIL test_forecasted_values_increasing: AssertionError: True is not false"]}

@@ -1,0 +1,5 @@
+FAIL test_visible.py::check_test_additive_model  AssertionError: ERROR test_additive_model: ValueError: Error during decomposition: You must specify a period or x must be a pandas object with a PeriodIndex or a DatetimeIndex with a freq not set to None
+FAIL test_visible.py::check_test_component_shapes  AssertionError: ERROR test_component_shapes: ValueError: Error during decomposition: You must specify a period or x must be a pandas object with a PeriodIndex or a DatetimeIndex with a freq not set to None
+FAIL test_visible.py::check_test_components_existence  AssertionError: ERROR test_components_existence: ValueError: Error during decomposition: You must specify a period or x must be a pandas object with a PeriodIndex or a DatetimeIndex with a freq not set to None
+pass test_visible.py::check_test_insufficient_data
+3 check(s) failed

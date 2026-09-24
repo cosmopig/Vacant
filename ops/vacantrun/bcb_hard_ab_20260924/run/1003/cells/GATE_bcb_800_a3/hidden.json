@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_case_5: AssertionError: FAIL test_case_5: AssertionError: Counter({'goals': 3, 'penalties': 1}) != Counter({'goals': 1, 'penalties': -1}) : Test Case 5 Failed"]}

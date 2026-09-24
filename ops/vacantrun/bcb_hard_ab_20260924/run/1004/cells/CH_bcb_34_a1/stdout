@@ -1,0 +1,30 @@
+<|channel>thought
+<channel|>The task is completed. I have created `solution.py` with the required functionality, and it passed all tests in `run_tests.sh`.
+
+```python
+import re
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+def task_func(text):
+    # Remove URLs using regex
+    url_pattern = r'https?://\S+|www\.\S+'
+    clean_text = re.sub(url_pattern, '', text)
+    
+    # Split into words and filter out non-alphanumeric/empty strings
+    words = [word for word in clean_text.split() if word.strip()]
+    
+    if not words:
+        raise ValueError("No words available to generate a word cloud after removing URLs.")
+    
+    # Generate WordCloud
+    wordcloud = WordCloud(width=800, height=400).generate(" ".join(words))
+    
+    # Plot the word cloud
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.show()
+    
+    return wordcloud
+```

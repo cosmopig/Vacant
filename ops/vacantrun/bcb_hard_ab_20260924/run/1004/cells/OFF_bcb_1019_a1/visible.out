@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_ocr_and_comment_extraction_fail
+pass test_visible.py::check_test_ocr_extraction_succeeds_no_encoding_needed
+0 check(s) failed

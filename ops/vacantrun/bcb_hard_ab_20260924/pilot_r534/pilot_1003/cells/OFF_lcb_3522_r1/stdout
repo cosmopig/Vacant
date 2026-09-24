@@ -1,0 +1,6 @@
+The tests passed successfully. I have implemented the `resultsArray` function in `solution.py` as requested by `goal.md` and `contract.md`.
+
+Summary of changes:
+- Created `solution.py` with the `resultsArray` function.
+- The function correctly identifies subarrays of size `k` that are consecutive and sorted in ascending order, returning their maximum element or -1 otherwise.
+- Verified the solution using `run_tests.sh`.

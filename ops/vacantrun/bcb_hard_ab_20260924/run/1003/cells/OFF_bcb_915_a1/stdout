@@ -1,0 +1,11 @@
+The task is completed successfully. The code in `solution.py` correctly identifies and plots outliers using the Z-Score method as specified in `goal.md`, and it passes all checks in `tests_visible/test_visible.py`.
+
+Summary of changes:
+1.  Created `solution.py` with a function `task_func(df, z_threshold=2)`.
+2.  The function calculates Z-scores for the 'closing_price' column using `scipy.stats.zscore`.
+3.  It adds a 'Z_score' column to the DataFrame (as required by the tests).
+4.  It filters the DataFrame to identify outliers where the absolute Z-score exceeds the threshold.
+5.  It creates a matplotlib plot showing all data points and highlighting outliers in red, with the correct labels and title.
+6.  The function returns the filtered outlier DataFrame and the axes object.
+
+All tests passed.

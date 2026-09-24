@@ -1,0 +1,66 @@
+from PIL import Image
+import codecs
+import pytesseract
+IMAGE_PATH = "image.png"
+
+def task_func(filename=IMAGE_PATH, from_encoding="cp1251", to_encoding="utf8"):
+    try:
+        img = Image.open(filename)
+        text = pytesseract.image_to_string(img)
+        if text:
+            # If the input is already a string and we are trying to "convert" it, 
+            # but from_encoding matches what it's already in (e.g. utf8 -> utf8),
+            # codecs.decode might fail if it expects bytes or something else.
+            # However, pytesseract returns a string.
+            
+            # If text is already correctly encoded as the target encoding, 
+            # and we try to decode it with from_encoding (which might be different), 
+            # it will raise UnicodeDecodeError.
+            try:
+                # Try decoding using the provided from_encoding
+                decoded = codecs.decode(text, from_encoding)
+                return decoded.encode(to_encoding).decode(to_encoding)
+            except (UnicodeDecodeError, LookupError):
+                # If it fails, maybe it's already in to_encoding?
+                try:
+                    # Try decoding using the target encoding
+                    decoded = codecs.decode(text, to_encoding)
+                    return decoded.encode(to_encoding).decode(to_encoding)
+                except (UnicodeDecodeError, LookupError):
+                    # If both fail, return original text
+                    return text
+    except Exception:
+        pass
+
+    try:
+        img = Image.open(filename)
+        comment = img.info.get("comment")
+        if comment:
+            # Handle if comment is bytes or str
+            if isinstance(comment, bytes):
+                try:
+                    decoded = comment.decode(from_encoding)
+                    return decoded.encode(to_encoding).decode(to_encoding)
+                except (UnicodeDecodeError, LookupError):
+                    try:
+                        return comment.decode(to_encoding)
+                    except (UnicodeDecodeError, LookupError):
+                        return comment.decode('utf-8', errors='replace')
+            else:
+                # If it's already a string and from_encoding is the same as its current encoding, 
+                # codecs.decode might fail if it expects bytes or something else.
+                try:
+                    decoded = codecs.decode(comment, from_encoding)
+                    return decoded.encode(to_encoding).decode(to_encoding)
+                except (UnicodeDecodeError, LookupError):
+                    try:
+                        # Try decoding using the target encoding
+                        decoded = codecs.decode(comment, to_encoding)
+                        return decoded.encode(to_encoding).decode(to_encoding)
+                    except (UnicodeDecodeError, LookupError):
+                        # If both fail, return original comment
+                        return comment
+    except Exception:
+        pass
+
+    return ""

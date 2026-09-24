@@ -1,0 +1,11 @@
+pass test_visible.py::check_test_custom_input
+FAIL test_visible.py::check_test_default_input  AssertionError: FAIL test_default_input: AssertionError: Tuples differ: (0, 0) != (10, 7)
+First differing element 0:
+0
+10
+- (0, 0)
+?     ^
++ (10, 7)
+?  +   ^
+ : The shape of the DataFrame with default inputs is not as expected.
+1 check(s) failed

@@ -29,6 +29,7 @@ fi
 [ -f "$ws/solution.py" ] && cp "$ws/solution.py" $L/delivered_solution.py
 # 計分（run 結束之後；隱藏測試永遠不進工作區）：可見與隱藏都只拿 solution.py 去量
 sc=$(mktemp -d); cp -r "$TPL/$safe/tests_visible" "$TPL/$safe/run_tests.sh" $sc/; [ -f "$ws/solution.py" ] && cp "$ws/solution.py" $sc/
-( cd $sc && ulimit -v 2097152 && timeout 300 sh run_tests.sh > $L/visible.out 2>&1; echo $? > $L/visible.rc ); rm -rf $sc
-$VENV/bin/python $T/bcb_score.py "$HIDDEN/$safe/test_hidden.py" "$ws/solution.py" > $L/hidden.json 2> $L/hidden.stderr
+# 計分也圍起來：有題目把路徑寫死成 /tmp/archive，同一題三組同時收尾會互撞 ⇒ 每次計分各自一塊私有 /tmp
+( ulimit -v 2097152 && timeout 300 $T/bw.sh $sc sh run_tests.sh > $L/visible.out 2>&1; echo $? > $L/visible.rc ); rm -rf $sc
+$T/bw.sh $L $VENV/bin/python $T/bcb_score.py "$HIDDEN/$safe/test_hidden.py" "$ws/solution.py" > $L/hidden.json 2> $L/hidden.stderr
 echo "=== $BACKEND $name rc=$rc wall=$(cat $L/wall_s)s visible_rc=$(cat $L/visible.rc) hidden=$(tr -d '\n ' < $L/hidden.json | head -c 50)"

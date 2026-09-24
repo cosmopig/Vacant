@@ -1,0 +1,38 @@
+The task was to implement a function `task_func` that takes a list of tuples (item, count, weight), normalizes the counts using z-score normalization, and the weights using min-max scaling, returning a pandas DataFrame with the results.
+
+I have implemented this in `solution.py`:
+1.  Converted the input data into a pandas DataFrame.
+2.  Used `scipy.stats.zscore` to normalize the 'Count' column. This correctly handles cases where all counts are identical by returning NaNs, as required by the tests.
+3.  Used `sklearn.preprocessing.MinMaxScaler` to normalize the 'Weight' column. This correctly handles constant weights by returning zeros (or similar), satisfying the test requirements.
+4.  Constructed and returned the final DataFrame with the specified columns: 'Item', 'Normalized Count', and 'Normalized Weight'.
+
+I verified the solution by running `run_tests.sh`, which passed all three test cases.
+
+```python
+import pandas as pd
+import numpy as np
+from scipy.stats import zscore
+from sklearn.preprocessing import MinMaxScaler
+
+def task_func(data):
+    # Create a DataFrame from the input list of tuples
+    df = pd.DataFrame(data, columns=['Item', 'Count', 'Weight'])
+    
+    # Normalize counts using z-score normalization
+    # scipy.stats.zscore returns an array with NaNs if standard deviation is zero
+    normalized_counts = zscore(df['Count'])
+    
+    # Normalize weights using min-max scaling
+    # MinMaxScaler expects a 2D array, so we use df[['Weight']]
+    scaler = MinMaxScaler()
+    normalized_weights = scaler.fit_transform(df[['Weight']])
+    
+    # Create the result DataFrame with specified column names
+    result = pd.DataFrame({
+        'Item': df['Item'],
+        'Normalized Count': normalized_counts,
+        'Normalized Weight': normalized_weights.flatten()
+    })
+    
+    return result
+```

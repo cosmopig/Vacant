@@ -1,0 +1,10 @@
+All tests passed. I have implemented the `task_func` in `solution.py` as required by the goal and contract.
+
+- Validated that `data` is a `pd.DataFrame`.
+- Validated that `n_clusters` is an integer greater than 1.
+- Performed K-means clustering using `sklearn.cluster.KMeans`.
+- Generated a scatter plot showing clusters (colored by label) and centroids (marked with 'X').
+- Handled cases where the input data might have more than 2 dimensions by plotting only the first two for visualization purposes.
+- Returned the cluster labels as a numpy array and the `plt.Axes` object.
+
+The solution is complete.

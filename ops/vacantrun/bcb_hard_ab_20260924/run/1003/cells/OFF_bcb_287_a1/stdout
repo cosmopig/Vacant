@@ -1,0 +1,43 @@
+The task was to count the number of words in `.txt` files within a specified directory, export the counts (word occurrences) to a JSON file, and return the total word count.
+
+I have implemented this in `solution.py`:
+1.  Iterate through all files in the given `directory`.
+2.  Identify files ending with `.txt`.
+3.  For each such file, read its content and split it into words using whitespace as a delimiter.
+4.  Use `collections.Counter` to count occurrences of each word across all `.txt` files.
+5.  Sum the total number of words encountered.
+6.  Write the dictionary of word counts (from `Counter`) to the specified `filename`.
+7.  Return the total word count as an integer.
+
+The tests in `tests_visible/test_visible.py` have been passed successfully.
+
+```python
+from collections import Counter
+import os
+import json
+
+def task_func(filename, directory):
+    word_counts = Counter()
+    total_words = 0
+    
+    if not os.path.isdir(directory):
+        return 0
+
+    for entry in os.listdir(directory):
+        if entry.endswith('.txt'):
+            file_path = os.path.join(directory, entry)
+            if os.path.isfile(file_path):
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        words = content.split()
+                        word_counts.update(words)
+                        total_words += len(words)
+                except Exception:
+                    pass
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(dict(word_counts), f)
+        
+    return total_words
+```

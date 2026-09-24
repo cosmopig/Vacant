@@ -1,0 +1,1 @@
+{"passed": 2, "total": 5, "failures": ["check_test_invalid_url: AssertionError: FAIL test_invalid_url: AssertionError: Exception not raised", "check_test_no_table: AssertionError: FAIL test_no_table: AssertionError: Exception not raised", "check_test_overwrite_existing_csv:   Actual: open('scraped_data.csv', 'w', newline='', encoding='utf-8')"]}

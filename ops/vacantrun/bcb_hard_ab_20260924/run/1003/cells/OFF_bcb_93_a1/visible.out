@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_invalid_n_components
+pass test_visible.py::check_test_invalid_n_components_type
+0 check(s) failed

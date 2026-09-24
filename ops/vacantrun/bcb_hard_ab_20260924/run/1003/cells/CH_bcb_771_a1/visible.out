@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_empty_directory
+FAIL test_visible.py::check_test_exception_handling  AssertionError: FAIL test_exception_handling: AssertionError: OSError not raised
+1 check(s) failed

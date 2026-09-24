@@ -1,0 +1,5 @@
+pass test_visible.py::check_visible_01
+pass test_visible.py::check_visible_02
+pass test_visible.py::check_visible_03
+pass test_visible.py::check_visible_04
+0 check(s) failed

@@ -1,0 +1,11 @@
+<|channel>thought
+<channel|>I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`.
+
+The implementation:
+1. Removes URLs from the input text using a regular expression.
+2. Checks if any words remain; if not, it raises a `ValueError` with the required message.
+3. Generates a `WordCloud` object from the remaining words.
+4. Plots the word cloud using `matplotlib`.
+5. Returns the `WordCloud` object.
+
+I verified the solution by running `run_tests.sh`, and all tests passed.

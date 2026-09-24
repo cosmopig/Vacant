@@ -1,0 +1,36 @@
+The task was to solve a problem where Bob needs to break $n$ locks with given strengths using a sword that gains energy over time and has an increasing factor $X$. The goal is to find the minimum time required to break all locks.
+
+I analyzed the rules:
+1. Initial energy = 0, initial factor $X = 1$.
+2. Every minute, energy increases by current $X$.
+3. To break a lock with strength $S$, energy must be $\ge S$.
+4. After breaking a lock, energy resets to 0 and $X$ increases by $K$.
+
+For a fixed permutation of locks $(s_1, s_2, \dots, s_n)$, the time taken for each lock $i$ is $t_i = \lceil s_i / X_i \rceil$, where $X_1 = 1$ and $X_{i+1} = X_i + K$. The total time is $\sum t_i$.
+
+Since $n \le 8$, I implemented a solution that iterates through all permutations of the `strength` array to find the minimum total time.
+
+The solution was written to `solution.py` and passed all tests in `tests_visible/`.
+
+```python
+from typing import List
+import itertools
+
+def findMinimumTime(strength: List[int], K: int) -> int:
+    n = len(strength)
+    min_time = float('inf')
+    
+    # Since n is small (up to 8), we can iterate through all permutations of the locks.
+    for p in itertools.permutations(strength):
+        current_x = 1
+        total_time = 0
+        for s in p:
+            # The time taken to break a lock with strength s and current factor x is ceil(s/x).
+            t = (s + current_x - 1) // current_x
+            total_time += t
+            current_x += K
+        if total_time < min_time:
+            min_time = total_time
+            
+    return int(min_time)
+```

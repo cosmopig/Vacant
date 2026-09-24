@@ -1,0 +1,236 @@
+{
+  "task_id": "possess_pi_1790244226_0a5f26",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/usr/bin/python3",
+    "-m",
+    "vacant_network.vrun.gateshim",
+    "--exec",
+    "pi",
+    "-p",
+    "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+  ],
+  "workspace": "/var/tmp/vacant_piext_20260924/bcb_run/gemini/ws/GATE_bcb_310_a1",
+  "proxy_url": "http://127.0.0.1:46591",
+  "env": {
+    "proxy_url": "http://127.0.0.1:46591",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [
+      "OPENAI_API_KEY"
+    ],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "e105f08464fc77fc11c1b5abadaa2b8b263f259d9c5e2b9b7b4eb25833bcfcb5",
+  "ws_end_sha256": "97c26655e02c51326d27c43f8757985a35646b6fb6adb4a3213db651bb35ec00",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 11,
+  "wire_by_protocol": {
+    "openai": 11
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "c5ae1ef461a7e2dc8980e4b4a8dcd335841216eeb3e64043d376bc6e51d7d6c4",
+  "verdict_hash": "b6109fda6a0cc7729d4e9f713b492e6077e3dd07199125feed7de1013907c547",
+  "retry": "none",
+  "max_attempts": 1,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "none",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "e105f08464fc77fc11c1b5abadaa2b8b263f259d9c5e2b9b7b4eb25833bcfcb5",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "vacant_network.vrun.gateshim",
+        "--exec",
+        "pi",
+        "-p",
+        "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+      ],
+      "argv_sha256": "54104e18fd6b3b4080bd325ec43d744568ad06a9f88e3a177932113a15167cfb",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 152.198,
+      "wire_quiesced": true,
+      "requests_seen": 11,
+      "requests_seen_cumulative": 11,
+      "wire_digest": "64c73f73b4a5873e7e4887fabeb6daa6876af0b2a807b61e47df387016671bbd",
+      "ws_end_sha256": "97c26655e02c51326d27c43f8757985a35646b6fb6adb4a3213db651bb35ec00",
+      "frozen_path": "/var/tmp/vacant_piext_20260924/pilot_gemini/home_on/.vacant-run/possess_pi_1790244226_0a5f26/_frozen_RUN-ON",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "c5ae1ef461a7e2dc8980e4b4a8dcd335841216eeb3e64043d376bc6e51d7d6c4",
+      "visible_path": "/var/tmp/vacant_piext_20260924/pilot_gemini/home_on/.vacant-run/possess_pi_1790244226_0a5f26/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "sandbox": {
+    "backend": "none",
+    "sandbox": "none",
+    "requested": "none",
+    "accept_path": "/var/tmp/vacant_piext_20260924/bcb/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "memory_bytes": 2147483648
+  },
+  "upstreams": {
+    "openai": {
+      "url": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "env:VACANT_RUN_UPSTREAM_ANTHROPIC",
+      "defaulted": false,
+      "fallback": null
+    }
+  },
+  "upstreams_defaulted": [],
+  "upstreams_sinked": [],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 1,
+  "wire_digest": "64c73f73b4a5873e7e4887fabeb6daa6876af0b2a807b61e47df387016671bbd",
+  "model_wire": {
+    "requests_indexed": 11,
+    "request_blobs_persisted": 11,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 152.646,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "possess_pi_1790244226_0a5f26",
+    "agent": "pi",
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1790244378.9924147,
+        "probed_by_pid": 2
+      }
+    },
+    "framework_hook": {
+      "agent": "pi",
+      "contract_version": "vacant-hook/1",
+      "canary_fired": true,
+      "events_n": 32,
+      "log": "/var/tmp/vacant_piext_20260924/pilot_gemini/home_on/.vacant-run/possess_pi_1790244226_0a5f26/hooks.jsonl",
+      "install_attempted": true,
+      "version_drift": false,
+      "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+    },
+    "reconciled": {
+      "relay_calls": 11,
+      "hook_events": 32,
+      "unexplained": 2,
+      "canary_calls": 1,
+      "refused_path": 0,
+      "unexplained_detail": [
+        {
+          "call_id": "6421046cbafc4cabbbc5d6ebe36f6bdf",
+          "path": "/v1/chat/completions",
+          "ts": 1790244328.5232708,
+          "status": 429
+        },
+        {
+          "call_id": "53020d52754e4050bb89e6e27923cedc",
+          "path": "/v1/chat/completions",
+          "ts": 1790244368.9472713,
+          "status": 200
+        }
+      ],
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "11 通中繼、9 個回合開端事件 ⇒ 2 通對不上"
+    },
+    "tier": "B'",
+    "attested": false,
+    "b_prime_kind": "channel_not_enclosed",
+    "tier_sentence": "工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。",
+    "tier_reasons": [
+      "掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790244378.993022
+  },
+  "agent_wall_s": 152.198,
+  "failures": ""
+}

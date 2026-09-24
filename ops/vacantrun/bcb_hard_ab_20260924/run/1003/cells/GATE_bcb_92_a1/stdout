@@ -1,0 +1,10 @@
+The task was to perform K-means clustering on a dataset and generate a scatter plot visualizing the clusters and their centroids, with specific error handling for input types and cluster counts.
+
+I implemented this in `solution.py`:
+1.  Checked if `data` is a `pd.DataFrame` and raised `ValueError` otherwise.
+2.  Checked if `n_clusters` is an integer greater than 1 and raised `ValueError` otherwise.
+3.  Used `sklearn.cluster.KMeans` to perform clustering.
+4.  Generated a scatter plot using `matplotlib.pyplot`, plotting the data points with their assigned cluster labels and marking the centroids with 'X' markers and the label 'Centroids'.
+5.  Returned the cluster labels and the `Axes` object.
+
+All tests passed successfully.
