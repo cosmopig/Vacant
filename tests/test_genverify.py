@@ -37,8 +37,8 @@ def test_deterministic_first_judge_only_for_residual():
     sp = Spec("t", [Criterion("w", "check", "word_count", {"relation": "at most", "n": 10}),
                     Criterion("tone", "judge", question="Is it polite?")])
     j, calls = _judge(ACCEPTED)
-    r = gv.evaluate(sp, "hello there", j)
-    assert calls == [["tone"]] and r["verdict"] == ACCEPTED and r["judge_tokens"] == 100
+    r = gv.evaluate(sp, "hello there", j, judge_policy="measure")
+    assert calls == [["tone"]] and r["verdict"] == ACCEPTED and r["receipt_class"] == "J" and r["judge_tokens"] == 100
 
 
 def test_short_circuit_spends_zero_tokens_after_deterministic_reject():
@@ -64,8 +64,8 @@ def test_require_quote_downgrades_unverifiable_judgement():
     assert gv.evaluate(sp, "Paris is the capital of Italy.", j,
                        require_quote=True)["verdict"] == UNKNOWN
     j, _ = _judge(REJECTED, quote="capital of Italy")
-    assert gv.evaluate(sp, "Paris is the capital of Italy.", j,
-                       require_quote=True)["verdict"] == REJECTED
+    assert gv.evaluate(sp, "Paris is the capital of Italy.", j, require_quote=True,
+                       judge_policy="measure")["verdict"] == REJECTED
 
 
 def test_no_judge_leaves_judge_criteria_unknown():
@@ -99,3 +99,26 @@ def test_screen_criterion_only_vetoes():
               sources={"s": "It cost 1500 dollars."})
     assert gv.evaluate(sp, "It cost 1500 dollars.")["verdict"] == ACCEPTED
     assert gv.evaluate(sp, "It cost 1700 dollars.")["verdict"] == REJECTED
+
+
+def test_judge_is_advisory_unless_allowlisted():
+    """產品預設：評審的票不算數（留理由），除非該準則事先被量過並列入白名單。"""
+    j, _ = _judge(ACCEPTED)
+    sp = Spec("t", [Criterion("tone", "judge", question="Polite?")])
+    r = gv.evaluate(sp, "hi", j)
+    assert r["verdict"] == UNKNOWN and "advisory" in r["criteria"][0]["evidence"]
+    sp2 = Spec("t", [Criterion("tone", "judge", question="Polite?", judge_may_decide=True)])
+    assert gv.evaluate(sp2, "hi", j)["verdict"] == ACCEPTED
+
+
+def test_failed_judge_call_is_infra_void_not_a_judgement():
+    j, _ = _judge("infra_void")
+    sp = Spec("t", [Criterion("tone", "judge", question="Polite?", judge_may_decide=True)])
+    r = gv.evaluate(sp, "hi", j)
+    assert r["verdict"] == UNKNOWN and r["infra_void"] is True and r["receipt_class"] == "U"
+
+
+def test_receipt_class_deterministic():
+    sp = Spec("t", [Criterion("w", "check", "word_count", {"relation": "at most", "n": 1})])
+    assert gv.evaluate(sp, "a b c")["receipt_class"] == "D"
+    assert gv.evaluate(sp, "a")["receipt_class"] == "D"

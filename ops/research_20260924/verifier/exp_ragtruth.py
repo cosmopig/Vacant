@@ -169,6 +169,8 @@ def make_judge_fn(J, it):
         d = parse_json(rec.get("text")) if rec and rec.get("ok") else None
         v = str((d or {}).get("verdict", "")).upper()
         verdict = {"SUPPORTED": ACCEPTED, "UNSUPPORTED": REJECTED}.get(v, UNKNOWN)
+        if not (rec and rec.get("ok")):
+            verdict = "infra_void"  # 呼叫失敗不是評審的判斷（2026-09-24 用量上限事故）
         jr = JudgeResult(verdict, (rec or {}).get("tokens_in", 0) + (rec or {}).get("tokens_out", 0),
                          quote=(d or {}).get("quote") or None, raw=(rec or {}).get("text"),
                          cost_usd=(rec or {}).get("cost_usd"))
@@ -195,10 +197,12 @@ def cmd_run(model, workers=6):
 
     def one(it):
         fnJ = make_judge_fn(J, it)
-        rJ = gv.evaluate(spec_for(it, cfg, det=False, judge=True), it["response"], fnJ)
+        rJ = gv.evaluate(spec_for(it, cfg, det=False, judge=True), it["response"], fnJ,
+                         judge_policy="measure")
         jr = fnJ.last
         fnC = make_judge_fn(J, it)
-        rC = gv.evaluate(spec_for(it, cfg, det=True, judge=True), it["response"], fnC)
+        rC = gv.evaluate(spec_for(it, cfg, det=True, judge=True), it["response"], fnC,
+                         judge_policy="measure")
         rD = gv.evaluate(spec_for(it, cfg, det=True, judge=False), it["response"], None)
         vJq = quote_check(rJ["verdict"], jr, it)
         # Cq：只有在 C 真的問了評審時，評審那一票才受引文檢查

@@ -60,6 +60,10 @@ class Criterion:
     `screen`：**反證型**檢查（只會出 rejected 或 unknown，例如 `numbers_supported`）。
       它的 unknown 意思是「沒有找到反證」，**不參與** accepted 的彙總——否則一條
       永遠給不出 accepted 的檢查會讓整份規格永遠是 unknown。它的 rejected 照樣一票否決。
+    `judge_may_decide`：評審對這一條的 accepted／rejected **算不算數**。預設 False
+      ＝評審只能留下理由、裁決仍是 unknown（交給人）。只有**事先量過、錯誤率低於凍結門檻**
+      的準則類別才准打開（Fable 判斷 #2 Q2：RAGTruth 上評審拒絕的 precision 只有 0.68、
+      IFEval 上評審讓接受者錯誤率從 2.5% 翻到 4.6%）。
     """
     id: str
     kind: str
@@ -68,11 +72,13 @@ class Criterion:
     question: str | None = None
     fallback_judge: bool = False
     screen: bool = False
+    judge_may_decide: bool = False
 
     def to_json(self) -> dict:
         return {"id": self.id, "kind": self.kind, "check": self.check,
                 "params": self.params, "question": self.question,
-                "fallback_judge": self.fallback_judge, "screen": self.screen}
+                "fallback_judge": self.fallback_judge, "screen": self.screen,
+                "judge_may_decide": self.judge_may_decide}
 
 
 @dataclass
@@ -291,12 +297,25 @@ def aggregate(verdicts: list[str]) -> str:
 
 
 def evaluate(spec: Spec, output: str, judge: JudgeFn | None = None, *,
-             require_quote: bool = False, short_circuit: bool = True) -> dict:
-    """跑一份規格。回 `{verdict, criteria:[…], judge_tokens, judge_calls, spec_sha256}`。
+             require_quote: bool = False, short_circuit: bool = True,
+             judge_policy: str = "allowlist") -> dict:
+    """跑一份規格。回 `{verdict, receipt_class, infra_void, criteria:[…], judge_tokens, …}`。
+
+    `judge_policy`：
+      "allowlist"（**產品預設**）——評審的裁決只在 `Criterion.judge_may_decide` 為真時算數；
+        其餘降成 unknown，但理由（`evidence`）留著。
+      "measure"——評審的裁決一律算數。**只給量測用**（ops/research_20260924 的 V2 用它量
+        「如果讓評審決定會怎樣」），不是產品行為。
+    `receipt_class`：D＝裁決只來自確定性檢查；J＝有評審的票被算進去；U＝裁決是 unknown。
+    `infra_void`：有評審呼叫**失敗**（後端回 `verdict="infra_void"`）。它不是評審的判斷，
+      也不是 unknown 的一種說法——呼叫端必須另外數（2026-09-24 用量上限事故）。
 
     `short_circuit`：確定性層已經 rejected ⇒ 不再花 token（整體已經不可能 accepted）。
     `require_quote`：評審的 rejected／accepted 要附引文，引文逐字核不到 ⇒ unknown。
     """
+    if judge_policy not in ("allowlist", "measure"):
+        raise ValueError(f"judge_policy {judge_policy!r}")
+    infra_void = False
     rows: list[dict] = []
     pending: list[Criterion] = []
     for c in spec.criteria:
@@ -335,8 +354,14 @@ def evaluate(spec: Spec, output: str, judge: JudgeFn | None = None, *,
             if jr is None:
                 row.update(layer="judge", verdict=UNKNOWN, evidence="judge gave no answer")
                 continue
+            if jr.verdict == "infra_void":
+                infra_void = True
+                row.update(layer="judge", verdict=UNKNOWN, evidence="judge call failed (infra_void)")
+                continue
             v = jr.verdict if jr.verdict in VERDICTS else UNKNOWN
             ev = f"judge:{jr.verdict}"
+            if v != UNKNOWN and judge_policy == "allowlist" and not c.judge_may_decide:
+                v, ev = UNKNOWN, f"judge:{jr.verdict} (advisory; criterion not allowlisted)"
             if require_quote and v != UNKNOWN:
                 pool = output if v == REJECTED else "\n".join(spec.sources.values()) or output
                 if not (jr.quote and quote_in(jr.quote, pool)):
@@ -344,9 +369,16 @@ def evaluate(spec: Spec, output: str, judge: JudgeFn | None = None, *,
             row.update(layer="judge", verdict=v, evidence=ev)
         tokens = sum(r.tokens for r in {id(x): x for x in res.values()}.values()) if res else 0
         cost = sum((r.cost_usd or 0.0) for r in {id(x): x for x in res.values()}.values()) if res else 0.0
-    counted = [r["verdict"] for r in rows
-               if not (r.get("screen") and r["verdict"] != REJECTED)]
-    return {"verdict": aggregate(counted), "criteria": rows,
+    counted = [r for r in rows if not (r.get("screen") and r["verdict"] != REJECTED)]
+    verdict = aggregate([r["verdict"] for r in counted])
+    if verdict == UNKNOWN:
+        rclass = "U"
+    elif verdict == REJECTED:
+        rclass = "D" if any(r["verdict"] == REJECTED and r["layer"] == "check" for r in counted) else "J"
+    else:
+        rclass = "J" if any(r["layer"] == "judge" for r in counted) else "D"
+    return {"verdict": verdict, "receipt_class": rclass, "infra_void": infra_void,
+            "criteria": rows,
             "judge_tokens": tokens, "judge_calls": calls, "judge_cost_usd": cost,
             "judge_skipped": skipped, "spec_sha256": spec.sha256()}
 
