@@ -58,7 +58,8 @@ if grep -q "$WORK" "$WORK/lifecycle.jsonl"; then
   echo "✗ 錄影裡有暫存目錄的絕對路徑，不收" >&2
   exit 1
 fi
-"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" --check --recording "$WORK/lifecycle.jsonl"
+# `--new`：剛錄的錄影每一格都要帶 task_kind（缺席只給 2026-09-24 之前的舊錄影）。
+"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" --check --new --recording "$WORK/lifecycle.jsonl"
 
 # ── 同一次執行的收據：錄影要有**自己那一批**的收據頁資料，觀眾才驗得到 ──────
 # 先在暫存目錄裡配好、驗過，兩個檔才一起搬進 recordings/（不留「有錄影沒收據」的半套）。

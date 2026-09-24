@@ -37,6 +37,19 @@
 | `run_ended` | ON | `verdict` ＋（有收據時）`receipt` |
 | `run_ended` | OFF | `verdict`（`accepted: null`） |
 
+### `task_kind`：反事實題庫格 vs 分身的自主任務（2026-09-24）
+
+電視上要分得出「這一格是反事實題庫（有閘門、有 OFF 臂）」還是「觀眾分身自己決定的
+實務任務（沒有客觀標準、只有 ON 一臂）」。來源是 `run_started.caller.task_kind`
+——**呼叫端的標籤**（`run_twin.py` 寫 `"code"`、`twinagent.py` 寫 `"practical"`），
+Vacant 本體（`vrun/*`）不為展場加欄位，`caller` 本來就是呼叫端的標籤。
+
+* `task_opened.task_kind` ＝ `caller.task_kind` **原樣**；caller 沒帶就**不寫這個欄位**
+  （不替舊錄影猜一個值）。電視與 `tv_contract` 把缺席讀成 `"code"`（相容舊錄影）。
+* `practical` 那一格的 `task_id` ＝ `twin_id`（`caller.cell_id`），電視用它對
+  twinlink 的 `people[].twin_id`（`screen_contract.join_live_events_on`）。
+  **事件流裡沒有他的決定與名字**——那些只在名冊上，撤回就讀不到。
+
 ## 誠實邊界（改碼時保留）
 
 1. **`working` 是「這一通經過了中介」，不是「它正在想什麼」。** 它只帶通數，
@@ -145,6 +158,8 @@ class Folder:
                 "prompt": caller.get("prompt") or "",
                 "stratum": caller.get("stratum"),
                 "declared_evidence": caller.get("declared_evidence") or "",
+                # 呼叫端的標籤，原樣轉出去；沒帶就是 None（不猜，見模組 docstring）。
+                "task_kind": caller.get("task_kind"),
                 "retry": ev.get("retry") or "none",
                 "feedback": {},          # attempt → (bytes, delivery)
             }
@@ -161,15 +176,19 @@ class Folder:
         on = st["arm"] == tv.ARM_ON
         if t == "run_started":
             if on:
+                kind = ({"task_kind": st["task_kind"]}
+                        if st["task_kind"] is not None else {})
                 emit("task_opened", prompt=st["prompt"],
                      prompt_sha256=_sha(st["prompt"]),
                      # 誠實邊界 4：開題那一刻量不到，寫 null 不寫宣告值。
                      evidence=None,
                      evidence_note="跑完才推得出來（要看這一跑實際經過中介幾通）",
-                     stratum=st["stratum"])
+                     stratum=st["stratum"], **kind)
                 emit("routed", worker=st["resident"], basis="random",
-                     basis_note="`vacant run` 沒有路由層：誰做這一格是人指定的，"
-                                "不是信譽決定的")
+                     basis_note=(tv.PRACTICAL_BASIS_NOTE
+                                 if st["task_kind"] == tv.KIND_PRACTICAL else
+                                 "`vacant run` 沒有路由層：誰做這一格是人指定的，"
+                                 "不是信譽決定的"))
         elif t == "model_call":
             n = self.calls.get(rid, 0) + 1
             self.calls[rid] = n
@@ -248,7 +267,11 @@ class Folder:
                  evidence=level)
             return
         accepted = ev.get("accepted")       # 三值，不做 bool()
-        emit("verdict", arm=tv.ARM_ON, accepted=accepted,
+        # 分身的自主任務：`accepted=null` 的意思是「這類任務沒有客觀標準、不判」，
+        # 不是「沒過」。那句話跟著事件走，電視不用自己猜（`tv_contract` 規則 9）。
+        pnote = ({"accepted_note": tv.PRACTICAL_ACCEPTED_NOTE}
+                 if st["task_kind"] == tv.KIND_PRACTICAL else {})
+        emit("verdict", arm=tv.ARM_ON, accepted=accepted, **pnote,
              # meets_demand 要隱藏測資才答得出來，而隱藏測資不進展件 ⇒ 恆 null
              meets_demand=None,
              blocked_by=tv.BLOCKED_BY.get(stop, "gate" if accepted is False else None),

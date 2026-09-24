@@ -72,6 +72,23 @@
 5. 開機時從 `--live` 檔的**檔尾**開始讀：檔案裡已經有的不是「正在發生」。
    開機那一刻正在跑的那一跑整跑不轉（`live_events.Tail` 的代價，寫在那邊）。
 
+### 分身那一格（`caller.task_kind="practical"`，2026-09-24）
+
+`twinlink loop` 的分身真跑跟 `run_twin.py` 寫**同一種** lifecycle，所以同一條 `--live`
+吃得下；差別是**只有 ON 一臂、沒有閘門、`accepted=null`（`ungated`）**。
+這一支對它做的事只有三件，其餘規則逐字相同：
+
+- 切換規則照舊（一跑開著就先播、閒下來回輪播）：只有一臂的格子 `run_ended` 一到就收尾，
+  `tv_contract.validate` 逐臂收尾本來就只看**開過的臂**。
+- `/state.now` 不套反事實那兩顆鍵的字（`side=null`、`side_label="數位分身"`）：
+  分身那一格沒有「告訴它名字／不告訴它名字」這回事。
+- 收據頁：分身的 run 目錄在 `twinlink` 的 `<庫名>.agentruns/runs/<sha256(sub_id)[:32]>/`，
+  **不在** `--live-runs`（那是 `run_twin.py --out`），而且撤回時整個刪掉。
+  這一支**不打包分身的收據**；`/r/<twin_id>` 照實講為什麼沒有頁可以帶去
+  （收據本身有簽、有 `verdict_hash`，只是展場這一頁沒有接）。
+- 現場那條路的電視事件用 `validate(require_task_kind=True)` 驗：新的東西一定要講明
+  是題庫格還是分身的自主任務。
+
 ## 端點（接口契約）
 
 | 端點 | 方法 | 回什麼 | 誰用 |
@@ -197,6 +214,13 @@ LIVE_BOOK = "live"
 #: 兩顆導播鍵 → 那一格是哪一邊的反事實。
 SIDES = ("held", "pc")
 
+#: 分身那一格在 `/state.now` 的說法。**不套反事實那兩顆鍵的字**。
+PRACTICAL_SIDE_LABEL = "數位分身"
+PRACTICAL_SIDE_TEXT = "觀眾的分身自己決定做一件實務小事：這類任務沒有客觀標準，Vacant 不判對錯"
+PRACTICAL_NO_RECEIPT_PAGE = (
+    "這是數位分身的一跑：收據有簽（每一通都經過中介、結束時簽章），但它的 run 目錄"
+    "跟著分身的檔案庫走、撤回時整個刪掉，展場這一頁沒有打包它——不帶你去看別的鏈")
+
 #: ⚠ **鍵名用觀眾的詞。** 「介面」「扣住」「位元」是我們的詞，不是走進展場那個人的詞。
 SIDE_LABEL = {
     "held": "不告訴它名字",
@@ -301,6 +325,7 @@ def load_recordings(paths) -> tuple[dict[str, dict], list[dict]]:
                         "task_id": caller.get("task_id") or e["task_id"],
                         "stratum": caller.get("stratum"),
                         "declared_evidence": caller.get("declared_evidence") or "",
+                        "task_kind": caller.get("task_kind"),
                     }
                 if e["arm"] in c["arms"]:
                     ignored.add(rid)
@@ -347,11 +372,13 @@ def default_recordings() -> list[pathlib.Path]:
 PATH_LEAKS = ("/Users/", "/home/", "/private/var/", "worktrees/agent-")
 
 
-def check_recording(path) -> list[str]:
+def check_recording(path, *, require_task_kind: bool = False) -> list[str]:
     """一份錄影能不能上展場：**lifecycle 契約 ＋ 轉出來的電視契約**，兩把都過。
 
     開機前（`exhibit_preflight.sh`）、錄完當下（`record_fixture.sh`）、測試都叫這一支。
     轉換走的是**同一個** `live_events.Folder`（mode 寫死 replay）——不另寫一份檢查用的轉法。
+    `require_task_kind=True`（`--check --new`，`record_fixture.sh` 用）：剛錄的錄影
+    每一格都要講明 `task_kind`；缺席只給 2026-09-24 之前的舊錄影。
     """
     path = pathlib.Path(path)
     try:
@@ -371,7 +398,8 @@ def check_recording(path) -> list[str]:
         return [f"lifecycle 版號不對：{e}"]
     if not tvevs:
         return ["轉不出任何電視事件"]
-    bad = ["電視契約：" + b for b in tv.validate(tvevs)]
+    bad = ["電視契約：" + b for b in tv.validate(
+        tvevs, require_task_kind=require_task_kind)]
     # 配對收據：**有就一定要對**（錄影換了、收據沒換要擋得下來）。沒有則不算錯，
     # 由 `--check` 另外講明「這份錄影的格子沒有收據頁」。
     pp = pairlib.pair_path(path)
@@ -520,6 +548,8 @@ class Stage:
         self.live_started_ms: dict[str, int] = {}          # run_id → run_started ts
         self.live_pending: dict[str, dict] = {}            # cell_id → 等打包的那一格
         self.live_cells: dict[str, dict] = {}              # cell_id → pack_cell()
+        #: cell_id → `caller.task_kind`（現場看到的；分身那一格不打包收據）。
+        self.live_kinds: dict[str, str] = {}
         self._was_live = False
         self.out.parent.mkdir(parents=True, exist_ok=True)
         self.out.write_text("", encoding="utf-8")
@@ -565,6 +595,8 @@ class Stage:
                      and cell_id not in self.pl.cells) or \
             ((self.now or {}).get("cell_id") == cell_id
              and (self.now or {}).get("mode") == tv.MODE_LIVE)
+        if self.live_kinds.get(cell_id) == tv.KIND_PRACTICAL and cell_id not in self.pl.cells:
+            return None, PRACTICAL_NO_RECEIPT_PAGE
         if head is None:
             if live_cell and cell_id in self.live_pending:
                 return None, "這一跑剛結束，收據還在打包（等 run_twin 寫完這一格）"
@@ -745,9 +777,13 @@ class Stage:
                 "cell_id": cell_id,
                 "resident": cell.get("resident"),
                 "task_id": cell.get("task_id"),
-                "side": cell["side"],
-                "side_text": SIDE_TEXT[cell["side"]],
-                "side_label": SIDE_LABEL[cell["side"]],
+                "task_kind": cell.get("task_kind") or tv.KIND_CODE,
+                # 錄下來的分身那一格（`task_kind=practical`）也不套反事實那兩顆鍵的字。
+                **({"side": None, "side_text": PRACTICAL_SIDE_TEXT,
+                    "side_label": PRACTICAL_SIDE_LABEL}
+                   if cell.get("task_kind") == tv.KIND_PRACTICAL else
+                   {"side": cell["side"], "side_text": SIDE_TEXT[cell["side"]],
+                    "side_label": SIDE_LABEL[cell["side"]]}),
                 "evidence": cell.get("evidence"),
                 "evidence_note": packlib.EVIDENCE_TEXT.get(cell.get("evidence") or "", ""),
                 "exit_code": cell.get("exit_code"),
@@ -837,6 +873,9 @@ class Stage:
                 if ev.get("type") == "run_started" and ev.get("arm") == packlib.ARM:
                     caller = ev.get("caller") or {}
                     cid = caller.get("cell_id") or ev["task_id"]
+                    kind = caller.get("task_kind") or tv.KIND_CODE
+                    self.live_kinds[cid] = kind
+                    practical = kind == tv.KIND_PRACTICAL
                     side = caller.get("stratum") if caller.get("stratum") in SIDES \
                         else "held"
                     self.n_emitted += 1
@@ -844,8 +883,12 @@ class Stage:
                     self.now = {
                         "cell_id": cid, "resident": caller.get("resident"),
                         "task_id": caller.get("task_id") or ev["task_id"],
-                        "side": side, "side_text": SIDE_TEXT[side],
-                        "side_label": SIDE_LABEL[side],
+                        "task_kind": kind,
+                        # 分身那一格沒有「告訴它名字／不告訴它名字」這回事。
+                        "side": None if practical else side,
+                        "side_text": PRACTICAL_SIDE_TEXT if practical else SIDE_TEXT[side],
+                        "side_label": (PRACTICAL_SIDE_LABEL if practical
+                                       else SIDE_LABEL[side]),
                         "evidence": None,
                         "evidence_note": "跑完才推得出來（要看這一跑實際經過中介幾通）",
                         "exit_code": None, "stop_reason": None, "attempts_used": None,
@@ -860,7 +903,9 @@ class Stage:
                     cid = run.get("cell_id")
                     if cid:
                         self.live_heads[cid] = ev.get("verdict_hash")
-                        if ev.get("verdict_hash") and self.live_runs is not None:
+                        # 分身那一格不在 --live-runs 底下（見模組 docstring），不等它。
+                        if ev.get("verdict_hash") and self.live_runs is not None \
+                                and self.live_kinds.get(cid) != tv.KIND_PRACTICAL:
                             self.live_pending[cid] = {
                                 "head": ev["verdict_hash"],
                                 "since_ms": self.live_started_ms.get(ev["run_id"], 0),
@@ -877,7 +922,8 @@ class Stage:
                         })
                         self.now["receipt_available"] = \
                             self.receipt_why_not(cid) is None
-            bad = tv.validate(new, require_settled=False)
+            # 現場的東西一定是新的 ⇒ task_kind 一定要帶（缺席只給舊錄影）。
+            bad = tv.validate(new, require_settled=False, require_task_kind=True)
             if bad:
                 # 違反契約的東西不准上電視；記下來，/state 看得到。
                 self.live_errors.extend(bad[:4])
@@ -1329,6 +1375,9 @@ def main(argv=None) -> int:
                          "傳空字串就退回舊行為（QR 指導播頁 phone.html）")
     ap.add_argument("--check", action="store_true",
                     help="只驗錄影（lifecycle 契約＋電視契約），不起伺服器。0＝全過")
+    ap.add_argument("--new", action="store_true",
+                    help="和 --check 一起用：剛錄的錄影，每一格都要帶 task_kind"
+                         "（缺席只給 2026-09-24 之前的舊錄影）")
     a = ap.parse_args(argv)
 
     recs = [pathlib.Path(p) for p in a.recording] if a.recording else default_recordings()
@@ -1338,7 +1387,7 @@ def main(argv=None) -> int:
             return 1
         n_bad = 0
         for p in recs:
-            bad = check_recording(p)
+            bad = check_recording(p, require_task_kind=a.new)
             n_bad += bool(bad)
             paired = pairlib.pair_path(p).exists()
             print(("✓ " if not bad else "✗ ") + _rel(p)

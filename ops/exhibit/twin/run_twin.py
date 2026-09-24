@@ -229,7 +229,9 @@ def run_arm(*, arm, resident, task_id, explicit, out_root, run_dir, argv,
                        "task_id": task_id,
                        "stratum": "pc" if explicit else "held",
                        "prompt": task_text,
-                       "declared_evidence": declared_evidence or ""},
+                       "declared_evidence": declared_evidence or "",
+                       # 電視分得出「反事實題庫格」與「分身的自主任務」（tv_contract）。
+                       "task_kind": "code"},
     )
 
 
