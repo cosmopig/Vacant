@@ -27,6 +27,10 @@ Group=@@USER@@
 WorkingDirectory=@@REPO@@
 Environment=PYTHONUNBUFFERED=1
 Environment=VACANT_HM=@@HM@@
+# 🔵 VM 跑法（2026-09-24）：**兩支 unit 讀同一份路徑檔**，庫、事件檔、run 產物的位置
+#    才不會在兩個行程之間漂（撤回刪得到、serve_twin --live tail 得到同一個檔）。
+#    沒有機密，可以 644。內容見 ops/exhibit/twin/START.md「VM 跑法」。
+EnvironmentFile=-/etc/vacant/twin-paths.env
 # 🔴 **token 不進版控。** 這一行的 `-` 代表檔案不在也不算失敗——
 #    不在的時候 twin_loop.sh 會 exit 78 並且**印出為什麼**，不是安靜不做事。
 #      sudo install -m 600 /dev/null /etc/vacant/twin.env

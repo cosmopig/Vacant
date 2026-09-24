@@ -26,6 +26,10 @@
 # ⚠ 誠實邊界（改碼請保留）：
 #   · 收住的是「模型叫得到的工具」，不是 pi 這個行程。pi（node）本身仍有完整的
 #     檔案系統與網路權限；沒有 OS 沙箱包住它（展場機 1003 是 Windows）。
+#     **例外（2026-09-24 VM 跑法）**：`VACANT_TWIN_ENCLOSE=on` 且在 vacant-dev 上時，
+#     這一支（連同 launcher）整個跑在 bwrap 圍牆裡（`twinenclose.py`），pi 行程只看得到
+#     最小 rootfs＋node＋repo（唯讀）＋自己的工作區與 run-dir、網路只有 Vacant 那扇門。
+#     證據：`evidence_vm_20260924/probe_twin_enclosure.json`（負控制先跑）。
 #   · `--tools` 白名單是 pi 0.85.1 的行為（vacant-dev 實測）。pi 改版要重跑
 #     `ops/exhibit/twin/probe_pi_tools.py`。
 #   · 這一支不保證被中介到。唯一算數的證據是 launcher 的 `requests_seen`。

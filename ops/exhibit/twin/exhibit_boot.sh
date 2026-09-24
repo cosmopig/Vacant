@@ -38,8 +38,17 @@
 #                                           --live-runs 讓那幾格跑完就有收據頁
 #   ./exhibit_boot.sh --lan --print-host    只印「區網 IP 抓到什麼」就結束
 #                                           （0＝抓到、2＝抓不到並說明；1 是 bug）
+#   ./exhibit_boot.sh --print-events        只印「分身真跑的 lifecycle 檔在哪」就結束
+#                                           （twinlink loop 寫、serve_twin --live tail 的同一個檔）
 #   ./exhibit_boot.sh --no-twin             不接數位分身（回到 09-21 之前的行為）
 #   ./exhibit_boot.sh --no-twin-loop        起唯讀端點但不起 loop（庫是唯讀的）
+#   ./exhibit_boot.sh --lan --bind-all --qr-host 192.168.1.20
+#                                           **VM 跑法**（2026-09-24）：這一支跑在 vacant-dev，
+#                                           電視的瀏覽器在 1003（Windows）上 ⇒ 8420／8901 也要
+#                                           綁 0.0.0.0、電視網址用 VM 的位址；手機走 1003 的
+#                                           區網 IP（1003 把 8899 轉進 VM）⇒ QR 編 --qr-host。
+#                                           環境變數版：VACANT_EXHIBIT_BIND_ALL=1、VACANT_QR_HOST
+#                                           （systemd 走 /etc/vacant/twin-paths.env）。見 START.md「VM 跑法」
 #
 # ⚠ `--lan` **一定會有 token**（2026-09-19 起）。沒給 `--token`／`VACANT_TWIN_TOKEN`
 #   就這一次開機自動生一把，編進 QR 的網址裡。要關得明講 `--no-token`。
@@ -66,9 +75,13 @@ KIOSK=0
 TOKEN="${VACANT_TWIN_TOKEN:-}"
 NO_TOKEN=0
 PRINT_HOST=0
+PRINT_EVENTS=0
 RECORDINGS=()
 LIVE_SRC=""
 LIVE_RUNS=""
+# VM 跑法（見上面用法）。預設都是舊行為：只綁本機、QR 編這一台自己的位址。
+BIND_ALL="${VACANT_EXHIBIT_BIND_ALL:-0}"
+QR_HOST="${VACANT_QR_HOST:-}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -83,6 +96,8 @@ while [ $# -gt 0 ]; do
     #   ⇒ 有了這一格，那一段就**量得到**了（`exhibit_preflight.sh --lan`
     #     與 `tests/test_serve_twin.py` 都在用它）。
     --print-host) PRINT_HOST=1 ;;
+    # 只印分身真跑那一個 lifecycle 檔的路徑就結束（兩邊指到同一個檔的可執行判準）。
+    --print-events) PRINT_EVENTS=1 ;;
     --hm)     HM="$2"; shift ;;
     --dwell)  DWELL="$2"; shift ;;
     --recording) RECORDINGS+=("$2"); shift ;;
@@ -95,6 +110,8 @@ while [ $# -gt 0 ]; do
     --twin-db)   TWIN_DB="$2"; shift ;;
     --no-twin)   NO_TWIN=1 ;;
     --no-twin-loop) NO_TWIN_LOOP=1 ;;
+    --bind-all) BIND_ALL=1 ;;
+    --qr-host)  QR_HOST="$2"; shift ;;
     --token)  TOKEN="$2"; shift ;;
     --no-token)  NO_TOKEN=1 ;;
     --kiosk)  KIOSK=1 ;;
@@ -102,6 +119,43 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+# ── 分身真跑的 lifecycle：**loop 寫、serve_twin --live tail，同一個檔** ────────
+#
+# 🔴 2026-09-24 以前這兩邊沒有接起來：`twinlink loop` 把分身的真跑寫進
+#    `<庫旁邊>/twin_lifecycle.jsonl`（`twinagent.default_events_path`），
+#    而開機腳本只有在人手動給 `--live` 的時候才叫 serve_twin 去 tail 一個檔
+#    ——預設一個都不 tail。於是分身在 vacant run 底下真的跑了、每一通都經過中介，
+#    **電視上那個人一拍都演不出來**。
+#    ⇒ 沒給 `--live` 又有接分身（沒有 `--no-twin`）的時候，`--live` 預設就是
+#      loop 寫的那一個；給了 `--live`（例如 run_twin.py 那一批），loop 也改寫進
+#      **同一個檔**（`VACANT_EVENTS`），serve_twin 只 tail 一個檔就看得到兩邊。
+#    路徑算法跟 `twinagent.default_events_path` 一致：`VACANT_EVENTS` 優先，
+#    否則「庫」那個檔旁邊的 `twin_lifecycle.jsonl`。庫的預設跟 `twin_loop.sh`、
+#    `twinstore.DEFAULT_DB` 同一個。
+TWIN_EVENTS=""
+# 人有沒有**明講** --live。底下「一份錄影都沒有」那一道門看的是這個，
+# 不是預設補上來的分身檔——分身一個都還沒跑的時候，電視仍然是空的。
+LIVE_GIVEN="$LIVE_SRC"
+if [ "$NO_TWIN" = "0" ]; then
+  if [ -n "$LIVE_SRC" ]; then
+    TWIN_EVENTS="$LIVE_SRC"
+  elif [ -n "${VACANT_EVENTS:-}" ]; then
+    TWIN_EVENTS="$VACANT_EVENTS"
+  else
+    DB_FOR_EVENTS="${TWIN_DB:-$REPO/ops/exhibit/twin/store/twinstore.sqlite3}"
+    TWIN_EVENTS="$(dirname "$DB_FOR_EVENTS")/twin_lifecycle.jsonl"
+  fi
+  LIVE_SRC="$TWIN_EVENTS"
+fi
+if [ "$PRINT_EVENTS" = "1" ]; then
+  if [ -z "$TWIN_EVENTS" ]; then
+    echo "（--no-twin：沒有分身那一條，也就沒有分身的 lifecycle 檔）" >&2
+    exit 2
+  fi
+  echo "$TWIN_EVENTS"
+  exit 0
+fi
 
 if [ "$PRINT_HOST" = "0" ] && [ ! -f "$HM/world3/index.html" ]; then
   echo "找不到電視那一頁：$HM/world3/index.html" >&2
@@ -111,7 +165,7 @@ fi
 # 電視要播的東西：lifecycle 錄影（重播）。一份都沒有又沒給 --live ⇒ 電視會是空的。
 # ⚠ `twin_pack.json` **不再是事件來源**，只剩收據頁（/r/<cell>）在用；沒有它
 #   展件照樣起得來，只是 /r/<cell> 會一律 404 並講明（不會帶人去看別的鏈）。
-if [ "$PRINT_HOST" = "0" ] && [ -z "$LIVE_SRC" ] && [ "${#RECORDINGS[@]}" -eq 0 ] \
+if [ "$PRINT_HOST" = "0" ] && [ -z "$LIVE_GIVEN" ] && [ "${#RECORDINGS[@]}" -eq 0 ] \
    && ! ls "$REPO"/ops/exhibit/twin/recordings/*.jsonl >/dev/null 2>&1; then
   echo "找不到任何 lifecycle 錄影：$REPO/ops/exhibit/twin/recordings/*.jsonl" >&2
   echo "先跑：bash $REPO/ops/exhibit/twin/record_fixture.sh（L-none 備援），" >&2
@@ -204,12 +258,23 @@ fi
 cleanup(){ kill ${TV_PID:-} ${TWIN_PID:-} ${STORE_PID:-} ${LOOP_PID:-} 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 
-( cd "$HM" && exec "$PY" -m http.server "$TV_PORT" --bind 127.0.0.1 >/dev/null 2>&1 ) &
+# VM 跑法：電視的瀏覽器在另一台（1003）⇒ 靜態站與唯讀端點也要綁得到外面，
+# 電視網址裡的位址改成這一台的區網位址（VM 在 VMnet8 上的那一個）。
+SERVE_BIND=127.0.0.1
+VIEW_HOST=127.0.0.1
+if [ "$BIND_ALL" = "1" ]; then
+  SERVE_BIND=0.0.0.0
+  VIEW_HOST="$HOST"
+fi
+# QR：手機連的是**展場那台的區網 IP**（1003 把 8899 轉進 VM），不是 VM 自己的位址。
+PUBLIC_HOST="${QR_HOST:-$HOST}"
+
+( cd "$HM" && exec "$PY" -m http.server "$TV_PORT" --bind "$SERVE_BIND" >/dev/null 2>&1 ) &
 TV_PID=$!
 
 # --base-url 就是 QR 會編進去的東西。**一定要傳**，預設值是 127.0.0.1。
 TWIN_ARGS=(--bind "$BIND" --port "$TWIN_PORT" --dwell "$DWELL"
-           --base-url "http://$HOST:$TWIN_PORT")
+           --base-url "http://$PUBLIC_HOST:$TWIN_PORT")
 for R in "${RECORDINGS[@]+"${RECORDINGS[@]}"}"; do TWIN_ARGS+=(--recording "$R"); done
 [ -n "$LIVE_SRC" ] && TWIN_ARGS+=(--live "$LIVE_SRC")
 [ -n "$LIVE_RUNS" ] && TWIN_ARGS+=(--live-runs "$LIVE_RUNS")
@@ -234,7 +299,10 @@ if [ "$NO_TWIN" = "0" ]; then
   [ -n "$TWIN_DB" ] && DBARGS=(--db "$TWIN_DB")
   # stderr 落盤再取 `$?`。`cmd | tee` 之後的 `$?` 是 tee 的，那個坑在這個 repo
   # 有名字（工作紀律：不要吞 stderr）。
-  ERRF="$(mktemp -t twinboot)"
+  # ⚠ `twinboot.XXXXXX` 不是風格：GNU mktemp（Linux／VM）的 `-t` 模板**一定要有 X**，
+  #   `mktemp -t twinboot` 在 vacant-dev 上是 `too few X's in template` ⇒ `set -e`
+  #   當場 exit 1（2026-09-24 VM 冒煙抓到；macOS 的 BSD mktemp 會自己補，所以 Mac 上從沒紅過）。
+  ERRF="$(mktemp -t twinboot.XXXXXX)"
   if ! "$PY" "$TL" "${DBARGS[@]+"${DBARGS[@]}"}" view >/dev/null 2>"$ERRF"; then
     echo "twinlink 開不了庫 ⇒ 數位分身那一條線起不來：" >&2
     tail -3 "$ERRF" >&2
@@ -243,9 +311,9 @@ if [ "$NO_TWIN" = "0" ]; then
     exit 2
   fi
   rm -f "$ERRF"
-  "$PY" "$TL" "${DBARGS[@]+"${DBARGS[@]}"}" serve --bind 127.0.0.1 --port "$STORE_PORT" &
+  "$PY" "$TL" "${DBARGS[@]+"${DBARGS[@]}"}" serve --bind "$SERVE_BIND" --port "$STORE_PORT" &
   STORE_PID=$!
-  STORE_URL="http://127.0.0.1:$STORE_PORT/visitors.json"
+  STORE_URL="http://$VIEW_HOST:$STORE_PORT/visitors.json"
 fi
 
 # ⚠ **不要只 sleep 一次再敲一次。** 2026-09-21 實測：機器忙的時候（另一個
@@ -276,12 +344,12 @@ echo "  ✓ http://$HOST:$TWIN_PORT 自己連得到（QR 指的就是這個）"
 # 🔴 **電視那一台以前完全沒有健檢。** `python3 -m http.server` 在埠被佔的時候
 #    當場死掉，而這支腳本照樣把「電視 http://…」印在漂亮橫幅裡——操作員
 #    由下往上讀，看到的是一切正常。橫幅印出來的每一個網址都要先敲過。
-if ! wait_for "http://127.0.0.1:$TV_PORT/world3/index.html"; then
-  echo "等了 ${BOOT_WAIT_S}s，電視那一頁還是敲不到：http://127.0.0.1:$TV_PORT/world3/index.html" >&2
+if ! wait_for "http://$VIEW_HOST:$TV_PORT/world3/index.html"; then
+  echo "等了 ${BOOT_WAIT_S}s，電視那一頁還是敲不到：http://$VIEW_HOST:$TV_PORT/world3/index.html" >&2
   echo "靜態站沒起來（埠 $TV_PORT 被佔？）⇒ 電視會是白畫面 ⇒ **不繼續**。" >&2
   exit 2
 fi
-echo "  ✓ http://127.0.0.1:$TV_PORT/world3/index.html 拿得到（電視不會是白的）"
+echo "  ✓ http://$VIEW_HOST:$TV_PORT/world3/index.html 拿得到（電視不會是白的）"
 
 # 唯讀端點也要敲，而且**要敲到欄位**不是只看 200：一個回 200 的空殼跟
 # 一個真的讀得到庫的端點，在 curl 眼裡長得一樣。
@@ -325,7 +393,11 @@ LOOP_WHY=off
 TWIN_OUT="${VACANT_TWIN_OUT:-$HM/world3/live/visitors.json}"
 if [ "$NO_TWIN" = "0" ] && [ "$NO_TWIN_LOOP" = "0" ]; then
   if [ -n "${VACANT_TWIN_CLOUD_TOKEN:-}" ]; then
-    VACANT_HM="$HM" "$REPO/ops/exhibit/twin/twin_loop.sh" &
+    # ⚠ `VACANT_EVENTS` 就是上面算出來、serve_twin --live 正在 tail 的那一個檔。
+    #   `VACANT_TWIN_DB` 也一起帶：`--twin-db` 以前只給了唯讀端點，loop 用的是它自己
+    #   的預設庫——兩邊讀寫不同的庫，事件檔的預設位置也就跟著分家。
+    VACANT_HM="$HM" VACANT_EVENTS="$TWIN_EVENTS" VACANT_TWIN_DB="${TWIN_DB:-}" \
+      "$REPO/ops/exhibit/twin/twin_loop.sh" &
     LOOP_PID=$!
     LOOP_WHY=on
   else
@@ -336,12 +408,12 @@ elif [ "$NO_TWIN_LOOP" = "1" ]; then
 fi
 
 LIVE="http://$HOST:$TWIN_PORT/live/events.jsonl"
-TV_URL="http://127.0.0.1:$TV_PORT/world3/index.html?live=$LIVE&poll=2000"
+TV_URL="http://$VIEW_HOST:$TV_PORT/world3/index.html?live=$LIVE&poll=2000"
 # 🔴 `&twin=` 就是電視去讀本機真相來源的那一段。少了它，電視只剩 snapshot
 #    那一層（而且是一個沒人在寫的檔）——`bridge.js` 的來源鏈是
 #    store → snapshot → cloud，第一層在網址裡，不在程式裡。
 [ -n "$STORE_URL" ] && TV_URL="$TV_URL&twin=$STORE_URL"
-PHONE_URL="http://$HOST:$TWIN_PORT/phone.html"
+PHONE_URL="http://$PUBLIC_HOST:$TWIN_PORT/phone.html"
 [ -n "$TOKEN" ] && PHONE_URL="$PHONE_URL?t=$TOKEN"
 
 echo
@@ -356,6 +428,10 @@ else
 fi
 if [ -n "$LIVE_SRC" ]; then
   echo " 真跑 　${LIVE_SRC}（mode=live：有真跑就先播，閒下來回到重播）"
+  if [ -n "$TWIN_EVENTS" ]; then
+    echo " 　　　 ↑ 同一個檔：twinlink loop 的分身真跑寫進這裡（VACANT_EVENTS），"
+    echo " 　　　   serve_twin --live tail 的也是這裡——電視用 task_id＝twin_id 對名冊上的人"
+  fi
   if [ -n "$LIVE_RUNS" ]; then
     echo " 　　　 收據：${LIVE_RUNS}（每一格跑完即時打包，/v/live.html）"
   else
@@ -363,6 +439,13 @@ if [ -n "$LIVE_SRC" ]; then
   fi
 fi
 echo " QR   　http://$HOST:$TWIN_PORT/qr.png（執行期畫的）"
+if [ "$PUBLIC_HOST" != "$HOST" ]; then
+  echo " ⚠ QR 編的是 ${PUBLIC_HOST}（--qr-host）：那一台要把 ${TWIN_PORT} 轉進這一台（${HOST}）。"
+  echo "   這一支**驗不到**那一段轉送（VM 從裡面敲不到 1003 的區網 IP）——布展時用手機掃一次。"
+fi
+if [ "$BIND_ALL" = "1" ]; then
+  echo " ⚠ --bind-all：8420／8901 綁 0.0.0.0（電視的瀏覽器在另一台）。電視網址用上面那一行。"
+fi
 if [ -n "$STORE_URL" ]; then
   echo " 分身 　${STORE_URL}（唯讀；電視的 &twin= 指這裡）"
 else

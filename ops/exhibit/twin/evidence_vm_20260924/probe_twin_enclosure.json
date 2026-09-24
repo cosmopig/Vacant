@@ -1,0 +1,343 @@
+{
+  "at": "2026-09-24T05:43:50Z",
+  "host_ip": "192.168.76.135",
+  "upstream": "http://192.168.76.135:38277/v1",
+  "enc_sh": "/var/tmp/vacant_twin_vm_smoke/repo/ops/vacantrun/enclosure_20260920/bin/enc.sh",
+  "cells": {
+    "negctl": {
+      "enclosed": false,
+      "bypass": false,
+      "wall_s": 0.27,
+      "probe": {
+        "tcp_upstream_direct": {
+          "reached": true,
+          "detail": "connected"
+        },
+        "tcp_internet": {
+          "reached": true,
+          "detail": "connected"
+        },
+        "dns": {
+          "reached": true,
+          "detail": "('104.20.23.154', 80)"
+        },
+        "tcp_host_loopback": {
+          "reached": true,
+          "detail": "connected"
+        },
+        "unix_host_path": {
+          "reached": true,
+          "detail": "connected"
+        },
+        "read_other_twin": {
+          "reached": true,
+          "detail": "read:CANARY"
+        },
+        "read_store": {
+          "reached": true,
+          "detail": "read:CANARY"
+        },
+        "read_home": {
+          "reached": true,
+          "detail": "read:3808B"
+        },
+        "write_outside": {
+          "reached": true,
+          "detail": "wrote"
+        },
+        "model_via_vacant": {
+          "reached": true,
+          "detail": "HTTP 200"
+        },
+        "write_own_ws": {
+          "reached": true,
+          "detail": "wrote"
+        },
+        "_ns": {
+          "net": "net:[4026531840]",
+          "mnt": "mnt:[4026531841]",
+          "interfaces": [
+            "lo",
+            "ens33",
+            "tailscale0"
+          ],
+          "pid": 330827
+        }
+      },
+      "requests_seen": 1,
+      "tier": "C",
+      "enclosure_applied": false,
+      "ns_differs_from_outer": null,
+      "twin_enclosure": null,
+      "receipt_verdicts": [
+        "OK"
+      ],
+      "escaped_file_exists": true
+    },
+    "enc": {
+      "enclosed": true,
+      "bypass": false,
+      "wall_s": 0.77,
+      "probe": {
+        "tcp_upstream_direct": {
+          "reached": false,
+          "detail": "OSError: [Errno 101] Network is unreachable"
+        },
+        "tcp_internet": {
+          "reached": false,
+          "detail": "OSError: [Errno 101] Network is unreachable"
+        },
+        "dns": {
+          "reached": false,
+          "detail": "gaierror: [Errno -3] Temporary failure in name resolution"
+        },
+        "tcp_host_loopback": {
+          "reached": false,
+          "detail": "ConnectionRefusedError: [Errno 111] Connection refused"
+        },
+        "unix_host_path": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory"
+        },
+        "read_other_twin": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/var/tmp/twin_encprobe_c81116fo/twinstore.agentruns/ws/00000000000000000000000000000000/TRAITS.md'"
+        },
+        "read_store": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/var/tmp/twin_encprobe_c81116fo/twinstore.sqlite3'"
+        },
+        "read_home": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/home/user1/.bashrc'"
+        },
+        "write_outside": {
+          "reached": true,
+          "detail": "wrote"
+        },
+        "model_via_vacant": {
+          "reached": true,
+          "detail": "HTTP 200"
+        },
+        "write_own_ws": {
+          "reached": true,
+          "detail": "wrote"
+        },
+        "_ns": {
+          "net": "net:[4026532736]",
+          "mnt": "mnt:[4026532731]",
+          "interfaces": [
+            "lo"
+          ],
+          "pid": 5
+        }
+      },
+      "requests_seen": 1,
+      "tier": "B",
+      "enclosure_applied": true,
+      "ns_differs_from_outer": true,
+      "twin_enclosure": {
+        "enc_rc": 0,
+        "outer_timed_out": false,
+        "wall_s": 0.767,
+        "door_calls": 1,
+        "door_refused_path": 0,
+        "door_blocked": 0,
+        "door_excess": 0,
+        "events_forwarded": 5,
+        "events_rejected": 0
+      },
+      "receipt_verdicts": [
+        "OK"
+      ],
+      "escaped_file_exists": false
+    },
+    "enc_bypass": {
+      "enclosed": true,
+      "bypass": true,
+      "wall_s": 0.77,
+      "probe": {
+        "tcp_upstream_direct": {
+          "reached": false,
+          "detail": "OSError: [Errno 101] Network is unreachable"
+        },
+        "tcp_internet": {
+          "reached": false,
+          "detail": "OSError: [Errno 101] Network is unreachable"
+        },
+        "dns": {
+          "reached": false,
+          "detail": "gaierror: [Errno -3] Temporary failure in name resolution"
+        },
+        "tcp_host_loopback": {
+          "reached": false,
+          "detail": "ConnectionRefusedError: [Errno 111] Connection refused"
+        },
+        "unix_host_path": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory"
+        },
+        "read_other_twin": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/var/tmp/twin_encprobe_c81116fo/twinstore.agentruns/ws/00000000000000000000000000000000/TRAITS.md'"
+        },
+        "read_store": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/var/tmp/twin_encprobe_c81116fo/twinstore.sqlite3'"
+        },
+        "read_home": {
+          "reached": false,
+          "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/home/user1/.bashrc'"
+        },
+        "write_outside": {
+          "reached": true,
+          "detail": "wrote"
+        },
+        "model_via_vacant": {
+          "reached": true,
+          "detail": "HTTP 200"
+        },
+        "write_own_ws": {
+          "reached": true,
+          "detail": "wrote"
+        },
+        "bypass_door_direct": {
+          "reached": true,
+          "detail": "HTTP/1.1 200 OK"
+        },
+        "_ns": {
+          "net": "net:[4026532736]",
+          "mnt": "mnt:[4026532731]",
+          "interfaces": [
+            "lo"
+          ],
+          "pid": 5
+        }
+      },
+      "requests_seen": 1,
+      "tier": "B",
+      "enclosure_applied": true,
+      "ns_differs_from_outer": true,
+      "twin_enclosure": {
+        "enc_rc": 0,
+        "outer_timed_out": false,
+        "wall_s": 0.766,
+        "door_calls": 2,
+        "door_refused_path": 0,
+        "door_blocked": 0,
+        "door_excess": 1,
+        "events_forwarded": 5,
+        "events_rejected": 0
+      },
+      "receipt_verdicts": [
+        "OK"
+      ],
+      "escaped_file_exists": false
+    }
+  },
+  "judgement": {
+    "targets": [
+      {
+        "target": "tcp_upstream_direct",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "tcp_internet",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "dns",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "tcp_host_loopback",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "unix_host_path",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "read_other_twin",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "read_store",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "read_home",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "write_outside",
+        "negctl": true,
+        "enc": false,
+        "want_negctl": true,
+        "want_enc": false,
+        "ok": true
+      },
+      {
+        "target": "model_via_vacant",
+        "negctl": true,
+        "enc": true,
+        "want_negctl": true,
+        "want_enc": true,
+        "ok": true
+      },
+      {
+        "target": "write_own_ws",
+        "negctl": true,
+        "enc": true,
+        "want_negctl": true,
+        "want_enc": true,
+        "ok": true
+      }
+    ],
+    "checks": {
+      "negctl_tier_C": true,
+      "enc_tier_B": true,
+      "enc_applied": true,
+      "enc_ns_differs": true,
+      "enc_door_excess_0": true,
+      "enc_receipt_OK": true,
+      "bypass_reached_door": true,
+      "bypass_door_excess_gt0": true,
+      "negctl_escaped_file": true,
+      "enc_no_escaped_file": true
+    },
+    "mismatched": 0
+  }
+}

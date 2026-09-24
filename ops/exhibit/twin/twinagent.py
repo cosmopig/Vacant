@@ -29,7 +29,10 @@
 ## 誠實邊界（改碼時保留）
 
 1. **`accepted=None` 不准被壓成 `False`，也不准畫成「通過」。**
-2. **收住的是「模型叫得到的工具」，不是 pi 這個行程**（裁決 §三）。
+2. **收住的是「模型叫得到的工具」，不是 pi 這個行程**（裁決 §三）——**除非**
+   `enclose` 開著而且這台起得來圍牆（VM，`twinenclose.py`）：那時整跑（launcher＋pi）
+   在 bwrap 的 netns＋mount ns 裡，收據簽的是量出來的 `enclosure.applied`，天花板 B。
+   圍牆起不來時 `enclose=auto` 會退回不圍、`enclose=on` 則不起 pi（誠實邊界 5）。
 3. **`twin_id` 是雜湊別名，不是匿名化**：拿得到 `sub_id` 的人算得出它。它擋的是反方向——
    從公開的事件流／收據推回撤回用的那把鑰匙（`sub_id` 是能力憑證）。
 4. **事件流與收據都不帶觀眾原文**：`caller.prompt` 是固定字串、`task_id` 是別名。
@@ -85,6 +88,15 @@ DEFAULT_AGENT_TIMEOUT = 300.0
 MAX_ARTIFACTS = 4
 MAX_ARTIFACT_CHARS = 4000
 MAX_PLAN_CHARS = 2000
+
+#: 磁碟水位（MB）。低於它就**停收新分身**（不起新的 run），畫面與 log 都講。
+#: 估算與理由：`ops/exhibit/twin/START.md`「VM 磁碟」一節。環境變數是單一真相來源：
+#: loop（決定要不要起新的 run）與 serve／export（畫面上的 `intake`）讀同一個值。
+ENV_MIN_FREE_MB = "VACANT_TWIN_MIN_FREE_MB"
+DEFAULT_MIN_FREE_MB = 2048
+
+#: 收據級別的高低（`require_tier` 用）。A > B > B' > C。
+TIER_RANK = {"A": 3, "B": 2, "B'": 1, "C": 0}
 
 #: 工作區裡**不是**成品的檔。
 NOT_ARTIFACTS = frozenset({"TRAITS.md", "PLAN.md", "VACANT_FEEDBACK.md"})
@@ -185,6 +197,13 @@ class AgentConfig:
     #: 這一台要有哪些可執行檔才算「跑得起來」。測試用的 fixture agent 給 `[]`。
     requires: list[str] = field(default_factory=lambda: [
         "bash", os.environ.get("VACANT_TWIN_PI") or "pi"])
+    #: 圍牆（`twinenclose.py`）：`off`＝不圍（Windows／macOS）、`auto`＝起得來就圍、
+    #: `on`＝**一定要圍**，起不來就不起 pi（`agent_available` 回 False 並講為什麼）。
+    enclose: str = "off"
+    #: 收據級別下限（例：`"B"`）。這一跑簽的 `tier` 低於它 ⇒ 不算分身做的
+    #: （`degrade_kind=tier_below_required`）。`None` ＝不設下限（舊行為）。
+    #: 這是 twin 這一層的 `VACANT_ATTEST=fail`：launcher 只記級別不拒發，擋門在這裡。
+    require_tier: str | None = None
 
 
 def agent_available(cfg: AgentConfig) -> tuple[bool, str]:
@@ -195,7 +214,61 @@ def agent_available(cfg: AgentConfig) -> tuple[bool, str]:
     for a in cfg.argv_prefix[1:2]:
         if a.endswith((".sh", ".py")) and not pathlib.Path(a).is_file():
             return False, f"找不到 agent 包裝 {a}"
+    if cfg.enclose == "on":
+        from ops.exhibit.twin import twinenclose
+        ok, why = twinenclose.available()
+        if not ok:
+            return False, f"enclose=on 但圍牆起不來：{why}"
     return True, "ok"
+
+
+def use_enclosure(cfg: AgentConfig) -> tuple[bool, str]:
+    """這一跑要不要進圍牆（`on`／`auto` 且這台起得來）。回（要不要, 為什麼）。"""
+    if cfg.enclose not in ("on", "auto"):
+        return False, "enclose=off"
+    from ops.exhibit.twin import twinenclose
+    ok, why = twinenclose.available()
+    return ok, why
+
+
+def meets_tier(tier: Any, required: str | None) -> bool:
+    """`tier` 有沒有達到 `required`。`required=None` ⇒ 一律 True；量不到（None）⇒ False。"""
+    if not required:
+        return True
+    return TIER_RANK.get(str(tier), -1) >= TIER_RANK.get(required, 99)
+
+
+def min_free_bytes() -> int:
+    """水位門檻（位元組）。`VACANT_TWIN_MIN_FREE_MB` 讀不懂 ⇒ 用預設值，不是 0。"""
+    try:
+        mb = int(float(os.environ.get(ENV_MIN_FREE_MB) or DEFAULT_MIN_FREE_MB))
+    except ValueError:
+        mb = DEFAULT_MIN_FREE_MB
+    return max(0, mb) * 1024 * 1024
+
+
+def intake_status(work_root: pathlib.Path | str) -> dict[str, Any]:
+    """磁碟水位 ⇒ 收不收新分身。**量不到不是「夠」**：`free_bytes=None` ⇒ `accepting=False`。
+
+    量的是 `work_root` 所在的檔案系統（它不存在就往上找存在的那一層）。
+    """
+    p = pathlib.Path(work_root)
+    while not p.exists() and p != p.parent:
+        p = p.parent
+    need = min_free_bytes()
+    try:
+        free = shutil.disk_usage(p).free
+    except OSError:
+        free = None
+    accepting = free is not None and free >= need
+    reason = None
+    if free is None:
+        reason = f"量不到 {p} 的剩餘空間 ⇒ 不收新分身（不是「空間夠」）"
+    elif not accepting:
+        reason = (f"磁碟只剩 {free // (1024 * 1024)} MB（門檻 {need // (1024 * 1024)} MB）"
+                  " ⇒ 暫停收新分身；已經在跑的會跑完，排隊的人留在佇列裡")
+    return {"accepting": accepting, "free_bytes": free, "min_free_bytes": need,
+            "path": str(p), "reason": reason}
 
 
 def upstream_reachable(endpoint: str, timeout: float = 3.0) -> bool:
@@ -328,16 +401,34 @@ def run_one(job: Job) -> dict[str, Any]:
         rd.mkdir(parents=True)
         (ws / "TRAITS.md").write_text(job.traits, encoding="utf-8")
         argv = list(job.cfg.argv_prefix) + [str(rd), SYSTEM_PROMPT, FIRST_MESSAGE]
-        summary = launcher.run(
-            argv, workspace=ws, run_dir=rd, suite_dir=None,
-            vacant_on=True, allow_no_suite=True,
-            task_id=f"twin:{tid}",
-            timeout_s=job.cfg.timeout_s,
-            capture_agent_stdout=True,
-            events_path=(str(job.cfg.events_path) if job.cfg.events_path else None),
-            events_caller={"cell_id": tid, "resident": resident_code(job.sub_id),
-                           "stratum": "twin", "prompt": CALLER_PROMPT,
-                           "declared_evidence": ""})
+        caller = {"cell_id": tid, "resident": resident_code(job.sub_id),
+                  "stratum": "twin", "prompt": CALLER_PROMPT,
+                  "declared_evidence": "",
+                  # 電視靠它分出「分身的自主任務」：沒有客觀標準、只有一臂、
+                  # 用 task_id(＝twin_id) 去對名冊（tv_contract 規則 11）。
+                  "task_kind": "practical"}
+        enclosed, enc_why = use_enclosure(job.cfg)
+        res["enclosed"] = enclosed
+        res["enclosure_why"] = enc_why
+        res["require_tier"] = job.cfg.require_tier
+        if enclosed:
+            from ops.exhibit.twin import twinenclose
+            summary = twinenclose.run_enclosed(
+                argv=argv, workspace=ws, run_dir=rd,
+                door_dir=twinenclose.door_dir_for(job.cfg.work_root, slug_for(job.sub_id)),
+                task_id=f"twin:{tid}", timeout_s=job.cfg.timeout_s,
+                events_path=job.cfg.events_path, events_caller=caller,
+                endpoint=job.cfg.endpoint, model=job.cfg.model,
+                pi_bin=os.environ.get("VACANT_TWIN_PI") or "pi")
+        else:
+            summary = launcher.run(
+                argv, workspace=ws, run_dir=rd, suite_dir=None,
+                vacant_on=True, allow_no_suite=True,
+                task_id=f"twin:{tid}",
+                timeout_s=job.cfg.timeout_s,
+                capture_agent_stdout=True,
+                events_path=(str(job.cfg.events_path) if job.cfg.events_path else None),
+                events_caller=caller)
         last = (summary.get("attempts") or [{}])[-1]
         frozen = last.get("frozen_path")
         res["summary"] = {
@@ -347,6 +438,19 @@ def run_one(job: Job) -> dict[str, Any]:
         res["summary"]["run_id"] = (summary.get("lifecycle") or {}).get("run_id")
         res["summary"]["count_semantics"] = (summary.get("model_wire") or {}).get(
             "count_semantics")
+        att = summary.get("attestation") or {}
+        res["summary"]["tier"] = att.get("tier")
+        res["summary"]["enclosure_applied"] = (att.get("enclosure") or {}).get("applied")
+        res["summary"]["twin_enclosure"] = summary.get("twin_enclosure")
+        if enclosed:
+            # 圍牆裡的 pi 寫得到 run-dir（twinenclose 誠實邊界 2）⇒ 主機側**當場驗章**，
+            # 不信圍牆裡寫出來的 summary。
+            from vacant_network.vrun import verify_receipts as vrr
+            try:
+                res["summary"]["receipt_verdicts"] = [
+                    r.get("verdict") for r in vrr.verify_run(rd)]
+            except Exception as e:                       # noqa: BLE001
+                res["summary"]["receipt_verdicts"] = [f"error:{type(e).__name__}"]
         res["outputs"] = read_outputs(pathlib.Path(frozen) if frozen else None)
     except (Exception, SystemExit) as exc:               # noqa: BLE001
         res["error"] = type(exc).__name__
@@ -373,7 +477,13 @@ def build_twin(res: dict[str, Any], *, model: str,
         "count_semantics": s.get("count_semantics"),
         "agent_rc": s.get("agent_rc"), "agent_timed_out": s.get("agent_timed_out"),
         "latency_ms": int(float(res.get("wall_s") or 0) * 1000),
+        # 收據上簽的級別（量出來的）＋這一跑有沒有進圍牆。只有枚舉與計數。
+        "tier": s.get("tier"),
+        "enclosed": res.get("enclosed"),
+        "enclosure_applied": s.get("enclosure_applied"),
+        "door_calls": (s.get("twin_enclosure") or {}).get("door_calls"),
     }
+    te = s.get("twin_enclosure") or {}
     why = None
     if res.get("error"):
         why = (res["error"], res.get("error_detail"))
@@ -383,6 +493,16 @@ def build_twin(res: dict[str, Any], *, model: str,
         why = ("no_model_call", "這一跑沒有任何一通模型呼叫經過中介")
     elif not o.get("has_plan"):
         why = ("agent_no_plan", "有模型呼叫，但工作區裡沒有 PLAN.md")
+    elif res.get("enclosed") and s.get("receipt_verdicts") != ["OK"]:
+        why = ("receipt_unverified",
+               f"圍牆裡那一跑的收據主機側驗不過：{s.get('receipt_verdicts')}")
+    elif res.get("enclosed") and te.get("door_excess") != 0:
+        why = ("door_unreconciled",
+               f"門看到 {te.get('door_calls')} 通、收據記 {s.get('requests_seen')} 通"
+               " ⇒ 有呼叫沒經過收據那一層（或對不上帳）")
+    elif not meets_tier(s.get("tier"), res.get("require_tier")):
+        why = ("tier_below_required",
+               f"收據級別 {s.get('tier')!r} 低於要求的 {res.get('require_tier')!r}")
 
     if why is not None:
         out = fallback(None)
@@ -512,6 +632,10 @@ def erase_run_artifacts(work_root: pathlib.Path, sub_id: str) -> dict[str, Any]:
 
     if ws.exists():
         _rm(ws, "workspace")
+    # 圍牆的門（twinenclose）：門的 journal 也是逐字落盤 ⇒ 有特質原文
+    door = pathlib.Path(work_root) / "doors" / slug_for(sub_id)
+    if door.exists():
+        _rm(door, "door_journal")
     if rd.exists():
         for child in sorted(rd.iterdir()):
             if child.name in KEEP_ON_ERASE and child.is_file():
@@ -528,7 +652,7 @@ def erase_run_artifacts(work_root: pathlib.Path, sub_id: str) -> dict[str, Any]:
 def run_artifacts_present(work_root: pathlib.Path, sub_id: str) -> bool:
     """這位分身在 run 那一側還有**非收據**的東西嗎（撤回後應為 False）。"""
     ws, rd = paths_for(pathlib.Path(work_root), sub_id)
-    if ws.exists():
+    if ws.exists() or (pathlib.Path(work_root) / "doors" / slug_for(sub_id)).exists():
         return True
     if rd.exists():
         return any(c.name not in KEEP_ON_ERASE for c in rd.iterdir())
@@ -547,6 +671,7 @@ def describe(cfg: AgentConfig) -> dict[str, Any]:
     return {"work_root": str(cfg.work_root),
             "events_path": str(cfg.events_path) if cfg.events_path else None,
             "parallel": cfg.parallel, "timeout_s": cfg.timeout_s,
+            "enclose": cfg.enclose, "require_tier": cfg.require_tier,
             "argv_prefix": [pathlib.Path(a).name for a in cfg.argv_prefix]}
 
 

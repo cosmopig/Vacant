@@ -26,6 +26,13 @@
 #   STAMP=20260924 ./record_fixture.sh   檔名的日期（預設今天）
 #
 # 產出：ops/exhibit/twin/recordings/fixture_<STAMP>.jsonl ＋ 同名 .pack.json（配對收據）
+#       ＋ 同名 .sidecar.jsonl（分身自己的旁註：OFF 臂的事後稽核，`sidecar.py`）
+#
+# ⚠ 旁註**不是** Vacant 的事件（2026-09-24 人類裁決「分身側自己記一份補回」）：
+#   run_twin 在 postaudit_off 完成當下寫進 lifecycle 旁邊的 `.sidecar.jsonl`。
+#   配對收據綁它的 sha256（pair_receipts.check_sidecar），改一個位元組就不收。
+#   這一支錄的 fixture 兩臂都跑 ⇒ 旁註**一定要有**，沒有就停（不准錄出一份沒有
+#   postaudit 的新錄影，然後讓人以為那是舊錄影）。
 # 錄完當場用 `serve_twin.py --check` 驗（lifecycle 契約＋電視契約＋路徑不外漏），
 # 過不了**不寫進 recordings/**。
 set -euo pipefail
@@ -58,7 +65,16 @@ if grep -q "$WORK" "$WORK/lifecycle.jsonl"; then
   echo "✗ 錄影裡有暫存目錄的絕對路徑，不收" >&2
   exit 1
 fi
-"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" --check --recording "$WORK/lifecycle.jsonl"
+if [ ! -s "$WORK/lifecycle.sidecar.jsonl" ]; then
+  echo "✗ 沒有旁註（OFF 臂的事後稽核）：run_twin 應該在 postaudit_off 完成時寫它，不收" >&2
+  exit 1
+fi
+if grep -q "$WORK" "$WORK/lifecycle.sidecar.jsonl"; then
+  echo "✗ 旁註裡有暫存目錄的絕對路徑，不收" >&2
+  exit 1
+fi
+# `--new`：剛錄的錄影每一格都要帶 task_kind（缺席只給 2026-09-24 之前的舊錄影）。
+"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" --check --new --recording "$WORK/lifecycle.jsonl"
 
 # ── 同一次執行的收據：錄影要有**自己那一批**的收據頁資料，觀眾才驗得到 ──────
 # 先在暫存目錄裡配好、驗過，兩個檔才一起搬進 recordings/（不留「有錄影沒收據」的半套）。
@@ -67,12 +83,18 @@ fi
 NAME="$(basename "$OUT")"
 cp "$WORK/lifecycle.jsonl" "$WORK/$NAME"
 PAIR_NAME="${NAME%.jsonl}.pack.json"
+SIDE_NAME="${NAME%.jsonl}.sidecar.jsonl"
+# 旁註要在 pair_receipts 之前就位：build_pair 才會把它的 sha256 綁進資料包。
+cp "$WORK/lifecycle.sidecar.jsonl" "$WORK/$SIDE_NAME"
 "$PY" "$REPO/ops/exhibit/twin/pair_receipts.py" --recording "$WORK/$NAME" \
   --runs "$WORK/batch" --out "$WORK/$PAIR_NAME"
 
 mkdir -p "$(dirname "$OUT")"
 cp "$WORK/$NAME" "$OUT"
+cp "$WORK/$SIDE_NAME" "$(dirname "$OUT")/$SIDE_NAME"
 cp "$WORK/$PAIR_NAME" "$(dirname "$OUT")/$PAIR_NAME"
+"$PY" "$REPO/ops/exhibit/twin/serve_twin.py" --check --recording "$OUT"
 "$PY" "$REPO/ops/exhibit/twin/pair_receipts.py" --check --recording "$OUT"
 echo "✓ 錄影 → ${OUT}（$(wc -l < "$OUT" | tr -d ' ') 行，L-none：交件是腳本寫的）"
 echo "✓ 配對收據 → $(dirname "$OUT")/${PAIR_NAME}"
+echo "✓ 旁註 → $(dirname "$OUT")/${SIDE_NAME}（$(wc -l < "$(dirname "$OUT")/$SIDE_NAME" | tr -d ' ') 筆事後稽核：分身補量的，不是 Vacant 的裁決）"

@@ -842,6 +842,17 @@ def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
             if s not in in_flight and not _gone(store, s)]
     if limit:
         todo = todo[:limit]
+    # 🔴 磁碟水位（VM 只有 38 G）。低於門檻 ⇒ **這一輪不收新分身**：排隊的人留在
+    #    `pending`（電視上是「正在抵達」、counts.waiting 算得到），已經在跑的照樣收成。
+    #    不是安靜地寫壞——每一輪在 stderr 講一次，`/visitors.json` 的 `intake` 也講。
+    intake = twinagent.intake_status(agent.work_root)
+    held = 0
+    if todo and not intake["accepting"]:
+        held = len(todo)
+        print(json.dumps({"twinlink_warning": "intake_paused", "held": held,
+                          "reason": intake["reason"]}, ensure_ascii=False),
+              file=sys.stderr, flush=True)
+        todo = []
     ok_agent, why_agent = twinagent.agent_available(agent)
     reachable = twinagent.upstream_reachable(endpoint) if todo else None
     done = degraded = failed = submitted = discarded = 0
@@ -929,6 +940,7 @@ def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
                           if (pool is not None and not own_pool) else 0),
             "agent_available": ok_agent,
             "agent_unavailable_reason": None if ok_agent else why_agent,
+            "intake": intake, "held_for_disk": held,
             "upstream_reachable": reachable,
             "agent": twinagent.describe(agent),
             "remaining": len(store.pending(KIND_GENERATED))}
@@ -1415,6 +1427,9 @@ def build_view(store: TwinStore, *,
             "gaps": store.count(KIND_INGEST_GAP),
             "errors": store.count(KIND_ERROR),
         },
+        # 磁碟水位（VM 只有 38 G）：`accepting=False` ⇒ loop 這一輪起不收新分身。
+        # 放在這裡是為了**畫面講得出來**，不是只有 journal 知道。
+        "intake": twinagent.intake_status(twinagent.default_work_root(store.path)),
         "day": {"start_utc_ms": day_start_ms, "tz_offset_minutes": tz_off_min,
                 "note": "用展場本機時區切日，不是 UTC（UTC 會在早上八點歸零）"},
         # 🔴 **庫裡所有人的 id，不受視窗影響。這一欄不是拿來演的。**
@@ -2054,6 +2069,16 @@ def _add_agent_args(q: argparse.ArgumentParser) -> None:
     q.add_argument("--events", default=None,
                    help=("lifecycle 事件檔（展場 live 檔）。預設 VACANT_EVENTS，"
                          "否則庫旁邊的 twin_lifecycle.jsonl"))
+    q.add_argument("--enclose", choices=("off", "auto", "on"),
+                   default=os.environ.get("VACANT_TWIN_ENCLOSE") or "off",
+                   help=("整跑（launcher＋pi）關進 bwrap 圍牆（twinenclose.py）。"
+                         "off＝不圍（Windows／macOS）；auto＝起得來就圍；"
+                         "on＝一定要圍，起不來就不起 pi。預設 VACANT_TWIN_ENCLOSE，否則 off"))
+    q.add_argument("--require-tier", choices=("A", "B", "B'", "C"),
+                   default=os.environ.get("VACANT_TWIN_REQUIRE_TIER") or None,
+                   dest="require_tier",
+                   help=("收據級別下限；低於它的那一跑不算分身做的"
+                         "（degrade_kind=tier_below_required）。預設 VACANT_TWIN_REQUIRE_TIER"))
 
 
 def _agent_cfg(a: argparse.Namespace) -> "twinagent.AgentConfig | None":
@@ -2064,7 +2089,8 @@ def _agent_cfg(a: argparse.Namespace) -> "twinagent.AgentConfig | None":
         events_path=(pathlib.Path(a.events) if a.events
                      else twinagent.default_events_path(a.db)),
         model=a.model, endpoint=a.endpoint,
-        parallel=a.parallel, timeout_s=a.agent_timeout)
+        parallel=a.parallel, timeout_s=a.agent_timeout,
+        enclose=a.enclose, require_tier=a.require_tier)
 
 
 def main(argv: Iterable[str] | None = None) -> int:

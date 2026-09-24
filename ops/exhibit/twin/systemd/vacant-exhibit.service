@@ -31,6 +31,10 @@ Environment=PYTHONUNBUFFERED=1
 # 埠被**上一次自己留下來的**行程佔著就砍掉重來。只砍 cmdline 對得上
 # serve_twin.py／http.server 的；對不上照樣失敗（preflight 裡寫死）。
 Environment=VACANT_EXHIBIT_KILL_STALE=1
+# 🔵 VM 跑法（2026-09-24）：**兩支 unit 讀同一份路徑檔**，庫、事件檔、run 產物的位置
+#    才不會在兩個行程之間漂（撤回刪得到、serve_twin --live tail 得到同一個檔）。
+#    沒有機密，可以 644。內容見 ops/exhibit/twin/START.md「VM 跑法」。
+EnvironmentFile=-/etc/vacant/twin-paths.env
 
 # ⚠ `--lan` 要跟下面 ExecStart 的 `--lan` **一致**：preflight 只有拿到它
 #   才會去量「區網 IP 抓不抓得到」，而那一段在 2026-09-19 之前
