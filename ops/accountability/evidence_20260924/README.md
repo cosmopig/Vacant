@@ -5,7 +5,7 @@
 > 乾淨的埋錯下給出期望的答案。**不證明**真模型下產出會更接近需求——那是
 > `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md` 的事（草稿，待人類簽字）。
 
-## 1. 四個真 agent × 六個埋錯情境（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；大專案審查修正與子 agent 情境**之後**重跑）
+## 1. 四個真 agent × 六個埋錯情境（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；子 agent／`curl` 的對抗審查修正**之後**重跑）
 
 重跑：
 
@@ -18,13 +18,13 @@
 | A（輸入本來就錯）⇒ `input`／`lineage_exact`，來源＝`inputs/summary.txt`；agent 沒被記過錯 | 4/4 |
 | C（腳本錯）⇒ `lineage_internal`，指到**寫腳本**的那一步（不是寫報告那一步） | 4/4 |
 | D（agent 走了之後有人在外面改檔；負控制）⇒ `UNOBSERVED`／`gap`；沒有任何行動者被記 | 4/4 |
-| F（網頁本身就錯：`curl` 抓回來的頁面寫著 58、照抄）⇒ `input`／`lineage_exact`，來源是那個網址；agent 不背；網址記進來源帳 | 4/4 |
+| F（網頁本身就錯：`curl http://portal.vacant-lab.test/…` 抓回來的頁面寫著 58、照抄；實驗環境用 `http_proxy` 把這個名字接到假模型）⇒ `input`／`lineage_exact`，來源是那個網址；agent 不背；網址記進來源帳 | 4/4 |
 | E（子 agent 算錯寫進 `figure.txt`、主 agent 照抄）⇒ `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步，行動者帶子 agent 的 id（Claude `general-purpose`、Codex `default`、pi `worker`、OpenCode `subagent`） | 4/4 |
 | 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C／E／F，15 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束） |
 | 給 agent 的回饋裡有行動者識別 | 0/24 |
 | 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F：15/15 |
 | 病歷簽章鏈驗得過 | 24/24 |
-| 每次掛鉤的額外時間 p95 | 7.3–13.8 ms（小工作區；大專案見第 3 節） |
+| 每次掛鉤的額外時間 p95 | 6.9–16.4 ms（小工作區；大專案見第 3 節） |
 | 行動者帳本 | 每個 agent 一格（6 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`、F 記在那個網址；D 記在該平台的整合覆蓋率；E 是推論層（`lineage_internal`），照規則不進信譽 |
 
 模型實際收到的回饋（Claude Code，情境 B，第 2 次請求）：

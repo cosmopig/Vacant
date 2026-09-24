@@ -26,6 +26,7 @@
 """
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import json
 import os
@@ -84,7 +85,8 @@ def prompt_source(agent: str, payload: dict[str, Any], text: str) -> tuple[str, 
     if t.startswith("<task-notification>"):
         m = _TASK_NOTE.search(t)
         return "subagent_result", (m.group(1).strip() if m else None)
-    if payload.get("agent_id") or payload.get("parent_session_id"):
+    parent = payload.get("parent_session_id")
+    if payload.get("agent_id") or (parent and parent != payload.get("session_id")):
         return "parent_agent", None
     return "user", None
 
@@ -102,11 +104,11 @@ def actor_of(agent: str, payload: dict[str, Any]) -> R.Actor:
                            agent=sid, agent_type=_s(payload.get("agent")) or "subagent",
                            model=_s(payload.get("model")))
         return R.Actor(agent, sid, model=_s(payload.get("model")))
-    if agent == "pi" and _s(payload.get("parent_session_id")):
-        # 另一個 pi 行程，在父 agent 的某一個工具呼叫期間啟動（Vacant 的 pi 擴充帶過來的標記）：
-        # 子 agent；工作階段鍵用最上層那個 session
-        return R.Actor(agent, str(payload["parent_session_id"]), agent=sid,
-                       agent_type=_s(payload.get("agent_type")) or "subagent",
+    parent = _s(payload.get("parent_session_id"))
+    if agent == "pi" and parent and parent != sid:
+        # 另一個 pi 行程，從父 agent 的行程開出來（Vacant 的 pi 擴充帶過來的標記）：子 agent；
+        # 工作階段鍵用最上層那個 session。代理人類型由 `link_child` 從叫它的那個呼叫補上
+        return R.Actor(agent, parent, agent=sid, agent_type="subagent",
                        model=_s(payload.get("model")))
     return R.Actor(agent, sid, model=_s(payload.get("model")))
 
@@ -160,6 +162,12 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
     rec = R.Recorder(ws)
     rec.scan_deadline_s = R.HOOK_SCAN_S      # 在掛鉤裡：掃描有時限（第一次看改到背景）
     actor = actor_of(agent, payload)
+    link: dict[str, Any] = {}
+    if agent == "pi" and actor.agent:
+        task = str(payload.get("prompt")) if action == "prompt" and payload.get("prompt") else None
+        link = rec.link_child(actor, _s(payload.get("parent_agent_id")), task)
+        if link.get("agent_type"):
+            actor = dataclasses.replace(actor, agent_type=str(link["agent_type"]))
     t0 = time.perf_counter()
     out: Any = None
     if action in ("pre", "post"):
@@ -176,7 +184,9 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
         text = payload.get("prompt")
         if text:
             src, tid = prompt_source(agent, payload, str(text))
-            out = rec.prompt(str(text), session=actor.session, source=src, tool_use_id=tid)
+            out = rec.prompt(str(text), session=actor.session, source=src, tool_use_id=tid,
+                             agent=actor.agent if src == "parent_agent" else None,
+                             spawned_by=link.get("spawned_by"))
     elif action == "stop":
         out = rec.settle(actor, "turn_end")      # 已經在裁決之前收過一次（hook.handle）；冪等
     elif action == "subagent_stop":

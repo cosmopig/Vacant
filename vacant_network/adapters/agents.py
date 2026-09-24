@@ -227,52 +227,95 @@ function text(content) {
 }
 
 // pi has no built-in sub-agents: extensions (like the shipped `subagent` example) start another
-// pi process. Every tool call of this process marks itself in the environment; a pi started while
-// it runs inherits the mark and reports itself as a sub-agent of this session (its turn end is not
-// the task's end, and its exit does not end this session). With parallel tool calls the mark can
-// name a sibling call; the session it names is always right.
+// pi process. This process leaves one fixed mark in its environment (its root session, its pid,
+// its project); a pi started from it accepts the mark only if that pid is still alive, is one of
+// its own ancestors, and works in the same project. Then it reports itself as a sub-agent of that
+// session: its turn end is not the task's end and its exit does not end the session. Which call
+// started it is worked out by Vacant from the task text, not from the mark.
+import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import * as nodePath from "node:path";
+
 const MARK = "VACANT_PI_PARENT";
-let PARENT = null;
-try { PARENT = process.env[MARK] ? JSON.parse(process.env[MARK]) : null; } catch (e) { PARENT = null; }
-delete process.env[MARK];   // our own children get our mark, not our parent's
+const SELF = "VACANT_PI_SELF";
+
+function parentOf(pid) {
+  try {   // Linux
+    const m = /\nPPid:\s*(\d+)/.exec(readFileSync(`/proc/${pid}/status`, "utf8"));
+    if (m) return Number(m[1]);
+  } catch (e) {}
+  try {   // macOS and others
+    return Number(execFileSync("ps", ["-o", "ppid=", "-p", String(pid)], { encoding: "utf8" }).trim());
+  } catch (e) { return 0; }
+}
+
+function isAncestor(pid) {
+  let p = process.ppid;
+  for (let i = 0; i < 64 && p > 1; i++) {
+    if (p === pid) return true;
+    p = parentOf(p);
+  }
+  return false;
+}
+
+function inside(child, parent) {
+  const c = nodePath.resolve(child), p = nodePath.resolve(parent);
+  return c === p || c.startsWith(p + nodePath.sep);
+}
+
+function loadParent() {
+  try {   // an extension reload in this same process keeps what it was
+    const s = JSON.parse(process.env[SELF] || "null");
+    if (s && s.pid === process.pid) return s.parent || null;
+  } catch (e) {}
+  let m = null;
+  try { m = JSON.parse(process.env[MARK] || "null"); } catch (e) { m = null; }
+  const ok = m && typeof m.pid === "number" && m.pid !== process.pid && m.session &&
+             isAncestor(m.pid) && m.cwd && inside(process.cwd(), m.cwd);
+  const parent = ok ? { session: m.session, parent_agent: m.agent } : null;
+  process.env[SELF] = JSON.stringify({ pid: process.pid, parent });
+  return parent;
+}
+
+const PARENT = loadParent();
+
+function mark(ctx) {   // what a pi started from this process will read
+  const me = sid(ctx);
+  if (!me) return;
+  process.env[MARK] = JSON.stringify({
+    session: PARENT ? PARENT.session : me, pid: process.pid, cwd: process.cwd(),
+    agent: PARENT ? me : undefined });
+}
 
 function who(ctx) {
   const base = { cwd: ctx.cwd, session_id: sid(ctx) };
-  if (!PARENT) return base;
-  return { ...base, parent_session_id: PARENT.session, parent_call_id: PARENT.call,
-           parent_agent_id: PARENT.parent_agent, agent_type: PARENT.agent_type };
+  if (!PARENT || PARENT.session === base.session_id) return base;
+  return { ...base, parent_session_id: PARENT.session, parent_agent_id: PARENT.parent_agent };
 }
 
 export default function (pi) {
   // Accountable trace: the task message (is a wrong value in the answer something the task gave?).
   pi.on("before_agent_start", async (event, ctx) => {
+    mark(ctx);
     await ask("prompt", { ...who(ctx), prompt: event && event.prompt });
     return undefined;
   });
   pi.on("tool_call", async (event, ctx) => {
+    mark(ctx);
     const d = await ask("pre_tool", { ...who(ctx), tool: event.toolName, input: event.input || {},
                                       call_id: event.toolCallId, model: mid(ctx) });
     if (d.action === "deny") return { block: true, reason: d.reason };
-    const input = event.input || {};
-    process.env[MARK] = JSON.stringify({
-      session: PARENT ? PARENT.session : sid(ctx), call: event.toolCallId,
-      parent_agent: PARENT ? sid(ctx) : undefined,
-      agent_type: typeof input.agent === "string" ? input.agent : undefined });
     return undefined;
   });
   // Accountable trace: what each step returned (the step's writes are Vacant's own diff).
   pi.on("tool_result", async (event, ctx) => {
-    try {
-      const m = JSON.parse(process.env[MARK] || "null");
-      if (m && m.call === event.toolCallId) delete process.env[MARK];
-    } catch (e) {}
     await ask("post_tool", { ...who(ctx), tool: event.toolName, input: event.input || {},
                              call_id: event.toolCallId, output: text(event.content),
                              is_error: !!event.isError, model: mid(ctx) });
     return undefined;
   });
   pi.on("agent_before_settle", async (event, ctx) => {
-    if (PARENT) return undefined;   // a sub-agent's turn end is not the task's end
+    if (who(ctx).parent_session_id) return undefined;   // a sub-agent's turn end is not the task's end
     const d = await ask("stop", who(ctx));
     if (d.action === "continue" && d.reason) {
       return { entries: [{ type: "custom_message", customType: "vacant-check",
@@ -282,8 +325,9 @@ export default function (pi) {
   });
   pi.on("session_shutdown", async (event, ctx) => {
     // reason: quit | reload | new | resume | fork — only `quit` ends the work
-    await ask(PARENT ? "subagent_stop" : "session_end",
-              { ...who(ctx), reason: (event && event.reason) || undefined });
+    const w = who(ctx);
+    await ask(w.parent_session_id ? "subagent_stop" : "session_end",
+              { ...w, reason: (event && event.reason) || undefined });
   });
 }
 """

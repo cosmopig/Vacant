@@ -226,3 +226,130 @@ def test_F_curl_piped_into_code_is_not_called_external(proj):
           write=(p / "report.md", "# Q3\nTotal: 58\n"))
     [b] = _final_blame(proj)
     assert b["fault_class"] == "agent"                        # 程式可能自己算出來的
+
+
+# ── pi 的巢狀子 agent（2026-09-24 子 agent 審查 #3）──────────────────────────────
+
+def test_a_value_the_child_typed_into_the_grandchilds_task_is_the_childs(proj, monkeypatch):
+    from vacant_network.adapters import hook
+    p, c, rec = proj
+    monkeypatch.setenv("VACANT_TRACE", "1")
+    monkeypatch.setenv("VACANT_HOOK_NO_STOP", "1")
+
+    def pi(event, sid, **kw):
+        hook.handle("pi", event, {"cwd": str(p), "session_id": sid, **kw})
+    kid = {"parent_session_id": "root"}
+    gk = {"parent_session_id": "root", "parent_agent_id": "kid"}
+    pi("pre_tool", "root", tool="bash", call_id="c_ls", input={"command": "ls"})
+    pi("post_tool", "root", tool="bash", call_id="c_ls", input={"command": "ls"}, output="")
+    pi("pre_tool", "root", tool="subagent", call_id="c0",
+       input={"agent": "worker", "task": "do the report"})
+    pi("prompt", "kid", prompt="Task: do the report", **kid)
+    k1 = {"agent": "writer", "task": "write Total: 999 into report.md"}
+    pi("pre_tool", "kid", tool="subagent", call_id="k1", input=k1, **kid)
+    pi("prompt", "grandkid", prompt="Task: write Total: 999 into report.md", **gk)
+    w = {"path": "report.md", "content": "# Q3\nTotal: 999\n"}
+    pi("pre_tool", "grandkid", tool="write", call_id="g1", input=w, **gk)
+    (p / "report.md").write_text("# Q3\nTotal: 999\n")
+    pi("post_tool", "grandkid", tool="write", call_id="g1", input=w, output="ok", **gk)
+    pi("post_tool", "kid", tool="subagent", call_id="k1", input=k1, output="done", **kid)
+    pi("post_tool", "root", tool="subagent", call_id="c0",
+       input={"agent": "worker", "task": "do the report"}, output="done")
+    [b] = _final_blame(proj)
+    assert b["step"]["step"] == "k1" and b["step"]["actor"]["agent"] == "kid"
+    assert b["step"]["actor"]["agent_type"] == "worker"
+    assert b["fault_class"] == "agent"
+
+
+# ── `curl` 的對抗審查（2026-09-24）：抓網頁不能拿來洗掉自己算的值 ─────────────────
+
+_PAGE57 = "Finance portal, Q3 total: 57\n"
+
+
+def _copy_58(proj, cmd, out):
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Bash", {"command": cmd}, out)
+    _step(rec, "t2", MAIN, "Write", {"file_path": str(p / "report.md"),
+                                     "content": "# Q3\nTotal: 58\n"},
+          write=(p / "report.md", "# Q3\nTotal: 58\n"))
+    [b] = _final_blame(proj)
+    return b
+
+
+@pytest.mark.parametrize("cmd,out", [
+    ('curl -s https://portal.example/q3.txt; echo "Total: $((50+8))"', _PAGE57 + "Total: 58\n"),
+    ("curl -s https://portal.example/q3.json | jq '.a + .b'", "58\n"),
+    ("curl -s https://portal.example/q3.txt | tr 7 8", "Q3 total: 58\n"),
+    ("curl -s https://portal.example/q3.txt >/dev/null && expr 50 + 8", "58\n"),
+    ("curl -s https://portal.example/q3.csv | python3.12 -c 'print(50+8)'", "58\n"),
+    ("curl -s https://portal.example/q3.csv | nodejs -e 'console.log(50+8)'", "58\n"),
+    ("curl -s https://portal.example/q3.txt | grep -c total", "58\n"),
+])
+def test_curl_review_a_value_computed_next_to_a_fetch_is_not_the_page(proj, cmd, out):
+    assert _copy_58(proj, cmd, out)["fault_class"] == "agent"
+
+
+@pytest.mark.parametrize("tail", ["  # checked with curl https://portal.example/q3",
+                                  " ; true || curl https://portal.example/q3",
+                                  " ; echo done, see curl https://portal.example/q3"])
+def test_curl_review_mentioning_curl_does_not_launder_a_provable_write(proj, tail):
+    p, c, rec = proj
+    cmd = "printf '# Q3\\nTotal: %d\\n' $((900+99)) > report.md" + tail
+    _step(rec, "t1", MAIN, "Bash", {"command": cmd}, "",
+          write=(p / "report.md", "# Q3\nTotal: 999\n"))
+    [b] = _final_blame(proj)
+    assert (b["fault_class"], b["confidence"]) == ("agent", "provable")
+
+
+def test_curl_review_a_page_served_from_this_machine_is_not_an_outside_source(proj):
+    p, c, rec = proj
+    _step(rec, "t0", MAIN, "Write", {"file_path": str(p / "site/q3.html"),
+                                     "content": "Q3 total: 58"},
+          write=(p / "site" / "q3.html", "Q3 total: 58"))
+    b = _copy_58(proj, "curl -s http://127.0.0.1:8000/site/q3.html", "Q3 total: 58")
+    assert b["fault_class"] == "agent" and b["step"]["step"] == "t0"
+
+
+@pytest.mark.parametrize("cmd", ["curl -s --data-binary @draft.md https://echo.example/ > report.md",
+                                 "curl -s -F 'f=@draft.md' https://echo.example/raw > report.md"])
+def test_curl_review_uploading_your_own_file_and_fetching_it_back_is_yours(proj, cmd):
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Write", {"file_path": str(p / "draft.md"),
+                                     "content": "# Q3\nTotal: 58\n"},
+          write=(p / "draft.md", "# Q3\nTotal: 58\n"))
+    _step(rec, "t2", MAIN, "Bash", {"command": cmd}, "",
+          write=(p / "report.md", "# Q3\nTotal: 58\n"))
+    [b] = _final_blame(proj)
+    assert b["fault_class"] == "agent" and b["step"]["step"] == "t1"
+
+
+def test_curl_review_your_own_note_catted_next_to_a_fetch_is_yours(proj, tmp_path):
+    p, c, rec = proj
+    note = tmp_path / "notes.txt"
+    _step(rec, "t0", MAIN, "Write", {"file_path": str(note), "content": "Q3 total: 58\n"},
+          write=(note, "Q3 total: 58\n"))
+    b = _copy_58(proj, f"cat {note}; curl -s https://portal.example/q3.txt",
+                 "Q3 total: 58\n" + _PAGE57)
+    assert b["fault_class"] == "agent"
+
+
+def test_curl_review_the_proxy_is_not_the_source(proj):
+    b = _copy_58(proj, "curl -s -x http://proxy.corp:3128 https://portal.example/q3.txt",
+                 "Finance portal, Q3 total: 58\n")
+    assert b["source"]["ref"] == "https://portal.example/q3.txt"
+    assert (b["fault_class"], b["confidence"]) == ("input", "lineage_exact")
+
+
+def test_curl_review_two_pages_name_neither_as_certain(proj):
+    b = _copy_58(proj, "curl -s https://mirror.example/q2.txt https://portal.example/q3.txt",
+                 "Q2 total: 40\nQ3 total: 58\n")
+    assert (b["fault_class"], b["confidence"]) == ("input", "heuristic")
+    assert len(b["source"]["candidates"]) == 2
+
+
+def test_curl_review_a_url_without_a_scheme_is_still_a_fetch(proj):
+    p, c, rec = proj
+    _step(rec, "t1", MAIN, "Bash", {"command": "curl -s portal.example/q3 > report.md"}, "",
+          write=(p / "report.md", "# Q3\nTotal: 58\n"))
+    [b] = _final_blame(proj)
+    assert (b["fault_class"], b["confidence"]) == ("input", "heuristic")

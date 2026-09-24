@@ -129,33 +129,99 @@ def test_broken_trace_never_breaks_the_hook(ws, monkeypatch):
     assert out == ("", "", 0)
 
 
+def _pi(ws, event, sid, **kw):
+    return hook.handle("pi", event, {"cwd": str(ws), "session_id": sid, **kw})
+
+
+def _child(parent="root-sid", **kw):
+    return {"parent_session_id": parent, **kw}
+
+
 def test_pi_subagent_process_is_a_subagent_of_the_parent_session(ws):
-    """pi 沒有內建子 agent：擴充另開的 pi 行程帶著父 agent 的標記（`VACANT_PI_PARENT`）。"""
-    child = {"cwd": str(ws), "session_id": "child-sid", "parent_session_id": "root-sid",
-             "parent_call_id": "call_7", "agent_type": "worker"}
-    hook.handle("pi", "prompt", {**child, "prompt": "ROLE:sub add up the ledger"})
-    p = {**child, "tool": "write", "input": {"path": "figure.txt"}, "call_id": "c1"}
-    hook.handle("pi", "pre_tool", p)
+    """pi 沒有內建子 agent：擴充另開的 pi 行程帶著父行程的標記；叫它出來的是哪一個呼叫，
+    Vacant 用任務文字去對父 agent 還在跑的呼叫（2026-09-24 子 agent 審查 #1／#4）。"""
+    _pi(ws, "pre_tool", "root-sid", tool="subagent", call_id="call_7",
+        input={"agent": "worker", "task": "add up the ledger"})
+    _pi(ws, "prompt", "child-sid", prompt="Task: add up the ledger", **_child())
+    p = {"tool": "write", "input": {"path": "figure.txt"}, "call_id": "c1", **_child()}
+    _pi(ws, "pre_tool", "child-sid", **p)
     (ws / "figure.txt").write_text("96\n")
-    hook.handle("pi", "post_tool", {**p, "output": "ok"})
+    _pi(ws, "post_tool", "child-sid", output="ok", **p)
     a = steps(ws)[-1]["actor"]
     assert (a["session"], a["agent"], a["agent_type"]) == ("root-sid", "child-sid", "worker")
     [pr] = [e for e in R.Recorder(ws).events() if e["type"] == "prompt"]
-    assert pr["source"] == "parent_agent"                      # 不是使用者說的
+    assert (pr["source"], pr["agent"], pr["spawned_by"]) == ("parent_agent", "child-sid", "call_7")
     # 子行程結束：不是這個工作階段結束（不收父 agent 還在跑的步驟、不交件）
-    hook.handle("pi", "pre_tool", {"cwd": str(ws), "session_id": "root-sid", "tool": "subagent",
-                                   "input": {"agent": "worker"}, "call_id": "call_7"})
-    out, _err, rc = hook.handle("pi", "subagent_stop", {**child, "reason": "quit"})
+    _out, _err, rc = _pi(ws, "subagent_stop", "child-sid", reason="quit", **_child())
     assert rc == 0
-    evs = R.Recorder(ws).events()
-    assert not [e for e in evs if e["type"] == "session_closed"]
+    assert not [e for e in R.Recorder(ws).events() if e["type"] == "session_closed"]
     assert "call_7" in json.loads(R.Recorder(ws).state_path.read_text())["pending"]
 
 
-def test_pi_extension_marks_children_and_keeps_them_off_the_task_check():
+def test_pi_two_parallel_subagents_each_get_their_own_call_and_type(ws):
+    _pi(ws, "pre_tool", "root", tool="subagent", call_id="cA",
+        input={"agent": "worker", "task": "compute the total"})
+    _pi(ws, "pre_tool", "root", tool="subagent", call_id="cB",
+        input={"agent": "reviewer", "task": "review the notes"})
+    _pi(ws, "prompt", "kid-w", prompt="Task: compute the total", **_child("root"))
+    _pi(ws, "prompt", "kid-r", prompt="Task: review the notes", **_child("root"))
+    for kid in ("kid-w", "kid-r"):
+        q = {"tool": "bash", "input": {"command": "ls"}, "call_id": f"{kid}-1", **_child("root")}
+        _pi(ws, "pre_tool", kid, **q)
+        _pi(ws, "post_tool", kid, output="", **q)
+    got = {s["actor"]["agent"]: s["actor"]["agent_type"] for s in steps(ws)}
+    assert got == {"kid-w": "worker", "kid-r": "reviewer"}
+    by = {e["agent"]: e["spawned_by"] for e in R.Recorder(ws).events() if e["type"] == "prompt"}
+    assert by == {"kid-w": "cA", "kid-r": "cB"}
+
+
+def test_pi_chain_step_with_previous_output_still_finds_its_call(ws):
+    _pi(ws, "pre_tool", "root", tool="subagent", call_id="cC",
+        input={"chain": [{"agent": "a", "task": "list the files"},
+                         {"agent": "b", "task": "summarise this: {previous}"}]})
+    _pi(ws, "prompt", "kid-2", prompt="Task: summarise this: data.csv notes.txt",
+        **_child("root"))
+    [pr] = [e for e in R.Recorder(ws).events() if e["type"] == "prompt"]
+    assert pr["spawned_by"] == "cC"
+
+
+def test_pi_nested_subagent_is_linked_to_the_child_that_called_it(ws):
+    _pi(ws, "pre_tool", "root", tool="subagent", call_id="c0",
+        input={"agent": "worker", "task": "do the report"})
+    _pi(ws, "prompt", "kid", prompt="Task: do the report", **_child("root"))
+    _pi(ws, "pre_tool", "kid", tool="subagent", call_id="k1",
+        input={"agent": "writer", "task": "write exactly the total"}, **_child("root"))
+    _pi(ws, "prompt", "grandkid", prompt="Task: write exactly the total",
+        **_child("root", parent_agent_id="kid"))
+    by = {e["agent"]: e["spawned_by"] for e in R.Recorder(ws).events() if e["type"] == "prompt"}
+    assert by == {"kid": "c0", "grandkid": "k1"}
+
+
+def test_pi_ambiguous_task_is_not_guessed(ws):
+    for cid in ("c1", "c2"):
+        _pi(ws, "pre_tool", "root", tool="subagent", call_id=cid,
+            input={"agent": "w", "task": "same words"})
+    _pi(ws, "prompt", "kid", prompt="Task: same words", **_child("root"))
+    [pr] = [e for e in R.Recorder(ws).events() if e["type"] == "prompt"]
+    assert "spawned_by" not in pr
+    st = json.loads(R.Recorder(ws).state_path.read_text())
+    assert st["children"]["pi:root:kid"]["candidates"] == ["c1", "c2"]
+
+
+def test_pi_a_mark_naming_its_own_session_is_not_a_parent(ws):
+    _pi(ws, "prompt", "me", prompt="Put Total: 999 in the report", parent_session_id="me")
+    [pr] = [e for e in R.Recorder(ws).events() if e["type"] == "prompt"]
+    assert pr["source"] == "user"
+
+
+def test_pi_extension_marks_children_safely():
+    """標記是固定的（不跟著哪一個呼叫走）；子行程只在父行程還活著、是自己的祖先、在同一個專案時接受它；
+    同一個行程重載擴充時沿用自己的身分（審查 #1／#2／#5／#6）。"""
     from vacant_network.adapters import agents
     src = agents.pi_extension_text()
-    assert 'const MARK = "VACANT_PI_PARENT"' in src
-    assert "delete process.env[MARK]" in src                  # 孫輩拿到的是自己的父標記
-    assert "if (PARENT) return undefined;" in src             # 子 agent 的回合結束不跑驗收
-    assert 'PARENT ? "subagent_stop" : "session_end"' in src  # 子行程結束不當工作階段結束
+    assert 'const MARK = "VACANT_PI_PARENT"' in src and 'const SELF = "VACANT_PI_SELF"' in src
+    assert "isAncestor(m.pid)" in src and "inside(process.cwd(), m.cwd)" in src
+    assert "m.pid !== process.pid" in src and "s.pid === process.pid" in src
+    assert "delete process.env[MARK]" not in src                # 不再有「誰結束就刪掉」的競賽
+    assert "if (who(ctx).parent_session_id) return undefined;" in src
+    assert '"subagent_stop" : "session_end"' in src

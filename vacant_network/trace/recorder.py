@@ -133,6 +133,48 @@ def _session_key(actor: dict[str, Any]) -> str:
     return f"{actor.get('platform')}:{actor.get('session')}"
 
 
+def _same_task(template: str, task: str) -> bool:
+    """委派呼叫裡寫的任務 vs 子 agent 收到的任務（pi 的範例會加上 `Task: `；串接模式的
+    `{previous}` 會被換成上一步的輸出）。"""
+    got = task.strip()
+    if got.startswith("Task:"):
+        got = got[len("Task:"):].strip()
+    want = template.strip()
+    if not want:
+        return False
+    if "{previous}" not in want:
+        return want == got
+    pos = 0
+    for part in want.split("{previous}"):
+        part = part.strip()
+        if not part:
+            continue
+        i = got.find(part, pos)
+        if i < 0:
+            return False
+        pos = i + len(part)
+    return True
+
+
+def _task_in(inp: Any, task: str) -> tuple[bool, str | None]:
+    """`(這個呼叫的輸入裡有沒有這個任務, 它指定的代理人)`。"""
+    if not isinstance(inp, dict):
+        return False, None
+    if isinstance(inp.get("task"), str) and _same_task(inp["task"], task):
+        return True, inp.get("agent") if isinstance(inp.get("agent"), str) else None
+    for k in ("tasks", "chain"):
+        for e in inp.get(k) or []:
+            if isinstance(e, dict) and isinstance(e.get("task"), str) \
+                    and _same_task(e["task"], task):
+                return True, e.get("agent") if isinstance(e.get("agent"), str) else None
+    body = task.strip()
+    body = body[len("Task:"):].strip() if body.startswith("Task:") else body
+    for v in inp.values():                     # 例如殼層指令 `pi -p '<任務>'`
+        if isinstance(v, str) and len(body) >= 16 and body in v:
+            return True, None
+    return False, None
+
+
 def _explains_own_writes(pend: dict[str, Any]) -> bool:
     """這個還在跑的步驟之後能不能用自己的前後差異解釋它寫了什麼：開始時有看到工作區、
     而且還沒被界住。開始時沒看到（背景還在看第一眼）的步驟永遠解釋不了——它不可以擋住缺口
@@ -607,7 +649,8 @@ class Recorder:
             return idx_sha or ""
 
     def prompt(self, text: str, *, session: str = "*", source: str = "user",
-               tool_use_id: str | None = None) -> dict[str, Any]:
+               tool_use_id: str | None = None, agent: str | None = None,
+               spawned_by: str | None = None) -> dict[str, Any]:
         """任務訊息（使用者的話、`vacant do` 送出的提示）：追緝判斷「這個值是不是任務自己給的」。
         內容只進本機版本庫，鏈上是 sha256。`session="*"`＝這個工作區裡的任何工作階段。
         `source`：`user`／`vacant do`＝任務給的；`subagent_result`＝平台把子 agent 的結果當成一則
@@ -616,8 +659,45 @@ class Recorder:
                                    "text_blob": self.blobs.put_bytes(text.encode())}
         if tool_use_id:
             payload["tool_use_id"] = tool_use_id
+        if agent:
+            payload["agent"] = agent                 # 這是哪一個子 agent 收到的任務說明
+        if spawned_by:
+            payload["spawned_by"] = spawned_by       # 叫它出來的那一步（父 agent 的工具呼叫）
         with self._lock():
             return self._append("prompt", payload)
+
+    def link_child(self, actor: Actor, parent_agent: str | None,
+                   task: str | None = None) -> dict[str, Any]:
+        """另開行程的子 agent（pi）是哪一個工具呼叫叫出來的：拿它收到的任務文字去對父 agent
+        **還在跑**的呼叫的輸入。對到恰好一個 ⇒ 那一步、以及它指定的代理人；對不到或對到好幾個 ⇒
+        不猜（2026-09-24 子 agent 審查 #3、#4）。結果記在狀態裡，同一個子 agent 之後的事件沿用。"""
+        with self._lock():
+            st = self._state()
+            links = st.setdefault("children", {})
+            key = f"{actor.platform}:{actor.session}:{actor.agent}"
+            if key in links or task is None:
+                return dict(links.get(key) or {})
+            root = f"{actor.platform}:{actor.session}"
+            hits: list[tuple[str, str | None]] = []
+            for step, pend in sorted(st["pending"].items()):
+                a = pend.get("actor") or {}
+                if _session_key(a) != root or str(a.get("agent") or "") != str(parent_agent or ""):
+                    continue
+                try:
+                    inp = json.loads(self.blobs.get(pend["input_blob"]))
+                except (OSError, ValueError):
+                    continue
+                ok, typ = _task_in(inp, task)
+                if ok:
+                    hits.append((step, typ))
+            info: dict[str, Any] = {"spawned_by": None, "agent_type": None}
+            if len(hits) == 1:
+                info = {"spawned_by": hits[0][0], "agent_type": hits[0][1]}
+            elif hits:
+                info["candidates"] = [h[0] for h in hits]
+            links[key] = info
+            self._save(st)
+            return dict(info)
 
     def append(self, etype: str, payload: dict[str, Any]) -> dict[str, Any]:
         """追緝結論、人的標記：同一條鏈、同一把鎖。"""

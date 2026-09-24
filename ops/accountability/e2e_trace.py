@@ -12,6 +12,10 @@
 | C 中間的腳本錯 | 寫 `calc.py`（加錯欄）→ 跑它輸出報告 | `agent`／`lineage_internal`，指到**寫腳本**那一步，不是寫報告那一步 |
 | D 沒被記錄的改動（負控制） | agent 寫對的報告；**之後**有人在外面改成 999 | `UNOBSERVED`／`gap`；沒有任何行動者被記 |
 | F 網頁本身就錯 | 用 `curl` 抓財務入口網站的頁面（寫著 58）→ 照抄 | `input`／`lineage_exact`，來源是那個網址；agent 不背 |
+
+情境 F 的「網站」是 `portal.vacant-lab.test`：實驗環境把 agent 的 `http_proxy` 指到假模型（像公司的代理），
+所以 agent 下的指令就是一般的 `curl http://portal.vacant-lab.test/…`。**本機的網址（localhost、這台機器的位址）
+不算外部來源**（agent 可能自己開了伺服器）；Vacant 看不到代理／DNS 把名字指到哪裡，這是誠實邊界。
 | E 子 agent 算錯、主 agent 照抄 | 主 agent 用自己的委派工具交給子 agent（`ROLE:sub`）→ 子 agent 讀帳本、把 96 寫進 `figure.txt` → 主 agent 讀它、寫進報告 | `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步（行動者帶子 agent 的 id） |
 
 每個 agent 一個隔離的「使用者」（`ops/intake/e2e_four_agents.Lab`：自己的 HOME、provider 指到
@@ -83,7 +87,7 @@ SCENARIOS: dict[str, dict] = {
         "steps": [{"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
         "final": "Done."},
     "F_web_source_fault": {
-        "steps": [{"run": "curl -s http://127.0.0.1:{{port}}/web/q3.txt"},
+        "steps": [{"run": "curl -s http://portal.vacant-lab.test/web/q3.txt"},
                   {"write": ["report.md", "# Quarter\n\nTotal: 58\n"]}],
         "final": "Done.",
         "web": {"q3.txt": "Finance portal (preliminary): Q3 total 58\n"},
@@ -219,8 +223,13 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     lab.web = scn.startswith("F_")
     lab.start_mock(SCENARIOS[scn])
     t0 = time.time()
+    env = lab.env()
+    if lab.web:
+        # 情境 F：假網站走代理（假模型兼代理）；模型請求本身直連本機，不經代理
+        env.update(http_proxy=f"http://127.0.0.1:{lab.port}",
+                   no_proxy="127.0.0.1,localhost", NO_PROXY="127.0.0.1,localhost")
     try:
-        cp = subprocess.run(lab.native_argv(PROMPT), cwd=lab.proj, env=lab.env(),
+        cp = subprocess.run(lab.native_argv(PROMPT), cwd=lab.proj, env=env,
                             capture_output=True, text=True, timeout=timeout,
                             stdin=subprocess.DEVNULL)
         rc, err_tail = cp.returncode, cp.stderr[-400:]

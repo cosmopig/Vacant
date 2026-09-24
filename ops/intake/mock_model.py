@@ -17,7 +17,8 @@
 劇本（`MOCK_SCENARIO` 指向的 JSON）：`{"files": {"path": "content", ...}, "final": "..."}`，
 或有序的 `{"steps": [{"run": "<指令>"} | {"write": ["<路徑>", "<內容>"]}, ...], "final": "..."}`
 （可究責追緝的埋錯情境，`ops/accountability/e2e_trace.py`）；`fix` 段是看到回饋之後的劇本。
-`GET /web/<名>` 回劇本 `"web"` 裡的那一頁（假的網頁；`run` 裡的 `{{port}}` 換成這個假模型的埠）。
+`GET /web/<名>` 回劇本 `"web"` 裡的那一頁（假的網頁；也可以當 `http_proxy` 用——那時請求是絕對網址；
+`run` 裡的 `{{port}}` 換成這個假模型的埠）。
 子 agent：步驟 `{"agent": {"prompt": "ROLE:<角色> …", "description": "…"}}` 用這個 agent 自己的委派工具
 （Claude Code `Agent`／`Task`、OpenCode `task`、pi 範例擴充的 `subagent`）交出去；`"roles": {"<角色>": {劇本}}`
 是子 agent 的劇本——對話**開頭的使用者訊息**裡有 `ROLE:<角色>` 的，照那一份演。
@@ -356,8 +357,12 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):  # noqa: N802
         log({"method": "GET", "path": self.path})
-        if self.path.startswith("/web/"):          # 劇本裡的「網頁」（情境 F：網頁本身就錯）
-            page = (scenario().get("web") or {}).get(self.path[len("/web/"):])
+        path = self.path
+        if path.startswith("http://"):             # 當代理用（`http_proxy`）：絕對網址
+            from urllib.parse import urlsplit
+            path = urlsplit(path).path
+        if path.startswith("/web/"):               # 劇本裡的「網頁」（情境 F：網頁本身就錯）
+            page = (scenario().get("web") or {}).get(path[len("/web/"):])
             if page is not None:
                 b = str(page).encode()
                 self.send_response(200)

@@ -62,7 +62,25 @@ _SCRIPT_EXT = {".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".bash", ".rb", ".pl"
 _REDIRECT = {">", ">>", "1>", "2>", "&>", "1>>", "2>>", "tee", "-o", "--output"}
 #: 從網路抓東西的指令：值若來自它們抓回來的內容，是外部來源，不是 agent 自己算出來的
 _NET_FETCH = {"curl", "wget", "http", "https", "xh", "aria2c", "httpie"}
-_URL_RE = re.compile(r"https?://[^\s'\"<>|;&()]+")
+#: 和抓網頁的指令接在一起也不會**造出**新值的過濾器（`grep -c`、`wc` 會算數，不在這裡）
+_PASSTHROUGH = {"head", "tail", "grep", "egrep", "fgrep", "cat", "tee"}
+#: 段首可以略過的前綴（環境變數設定另外處理）
+_PREFIX_CMDS = {"sudo", "command", "env", "time", "nohup", "exec"}
+#: 這些抓網頁的選項後面跟的是值，不是要抓的網址（代理、來源頁、標頭、上傳的內容…）
+_FETCH_OPT_ARGS = {
+    "-x", "--proxy", "-e", "--referer", "-H", "--header", "-A", "--user-agent", "-u", "--user",
+    "-b", "--cookie", "-c", "--cookie-jar", "-d", "--data", "--data-raw", "--data-binary",
+    "--data-urlencode", "--data-ascii", "--json", "-F", "--form", "--form-string", "-o",
+    "--output", "-T", "--upload-file", "-w", "--write-out", "--resolve", "--connect-to", "-K",
+    "--config", "-m", "--max-time", "--connect-timeout", "-X", "--request", "-r", "--range",
+    "--retry", "--cacert", "--cert", "--key", "-E", "--interface", "--dns-servers",
+    "--proxy-user", "-U", "--noproxy", "-O", "--output-document", "--output-file",
+    "--post-data", "--post-file", "--body-data", "--body-file", "--execute", "-P",
+    "--directory-prefix", "-t", "--tries", "--timeout", "--method", "--header-file",
+    "--user-agent", "--load-cookies", "--save-cookies"}
+_SEPARATORS = {";", "&&", "||", "|", "&", "|&", "(", ")"}
+_VERSIONED_INTERP = re.compile(r"^(python|pypy|node|nodejs|ruby|perl|php|lua|julia|g?awk|mawk|"
+                               r"nawk|deno|bun)[0-9.]*$")
 #: 每一次請求都送給模型的指令檔（批判 §0-8：CLAUDE.md 在 8/8 次請求裡）
 INSTRUCTION_FILES = ("CLAUDE.md", ".claude/CLAUDE.md", "CLAUDE.local.md", "AGENTS.md",
                      "GEMINI.md", ".cursorrules", ".github/copilot-instructions.md")
@@ -417,11 +435,18 @@ class Blamer:
                 out.append(("own_write", j, self.t.input_text(j), ref))
         if s.actor.get("agent"):
             # 子 agent 的任務說明＝父 agent 叫它的那個工具呼叫的輸入
-            for j in self.t.steps:
-                if j.seq >= (first_of_ctx or s.seq):
-                    break
-                if tool_kind(j.tool) == "agent" and j.ctx[:2] == s.ctx[:2] and not j.ctx[2]:
-                    out.append(("spawn_input", j, self.t.input_text(j), None))
+            exact = self._spawning_step(s) if any(
+                p.get("agent") == s.actor.get("agent") and "spawned_by" in p
+                for p in self.t.prompts) else None
+            if exact is not None:
+                out.append(("spawn_input", exact, self.t.input_text(exact), None))
+            elif not any(p.get("agent") == s.actor.get("agent") and "spawned_by" in p
+                         for p in self.t.prompts):
+                for j in self.t.steps:
+                    if j.seq >= (first_of_ctx or s.seq):
+                        break
+                    if tool_kind(j.tool) == "agent" and j.ctx[:2] == s.ctx[:2] and not j.ctx[2]:
+                        out.append(("spawn_input", j, self.t.input_text(j), None))
         for p in self.t.prompts:
             if int(p.get("seq", 0)) >= s.seq:
                 continue
@@ -430,6 +455,8 @@ class Blamer:
             src = str(p.get("source") or "user")
             if src == "parent_agent" and not s.actor.get("agent"):
                 continue
+            if src == "parent_agent" and p.get("agent") and p.get("agent") != s.actor.get("agent"):
+                continue                       # 另一個子 agent 收到的任務說明
             kind = {"subagent_result": "subagent_result",
                     "parent_agent": "spawn_prompt"}.get(src, "prompt")
             fake_seq = int(p.get("seq", 0))
@@ -472,7 +499,7 @@ class Blamer:
         after_interp = False
         for i, tok in enumerate(toks):
             base = pathlib.PurePosixPath(tok).name.lower()
-            if base in _INTERPRETERS:
+            if base in _INTERPRETERS or _VERSIONED_INTERP.match(base):
                 runs_code = True
                 after_interp = True
             if tok in ("&&", ";", "||", "|"):
@@ -485,7 +512,8 @@ class Blamer:
                 prev = tok
                 continue
             for piece in tok.replace("=", " ").split():
-                rel = self._rel(piece.strip("'\"<>|;&()"), cwd)
+                # `curl -d @draft.md`／`-F f=@draft.md`：上傳的是這個檔（審查 curl#4）
+                rel = self._rel(piece.strip("'\"<>|;&()").lstrip("@"), cwd)
                 if not rel or rel not in idx or rel in reads or rel in scripts:
                     continue
                 e = idx[rel]
@@ -504,16 +532,90 @@ class Blamer:
                 after_interp = False
         return reads, scripts, runs_code
 
-    def _fetched_urls(self, s: Step) -> list[str]:
-        """指令裡抓網路的網址（`curl`／`wget`…的引數）。沒有抓網路的指令 ⇒ 空。"""
+    def _fetch_of(self, s: Step) -> dict[str, Any] | None:
+        """這一步是不是**只是**抓網頁：每一段的指令字都是抓網頁的指令或不造新值的過濾器，而且至少有一段
+        是抓網頁的。回 `{"urls": [...], "local": bool, "outputs": [...]}`；不是 ⇒ None。
+        只看得到指令字串：代理、DNS、hosts 檔把名字指到哪裡看不到（誠實邊界）。"""
         cmd = _command(self.t.input_obj(s)) or ""
         try:
-            toks = shlex.split(cmd, posix=True)
+            lex = shlex.shlex(cmd.replace("\n", " ; "), posix=True, punctuation_chars=";&|()<>")
+            lex.whitespace_split = True
+            lex.commenters = "#"
+            toks = list(lex)
         except ValueError:
-            toks = cmd.split()
-        if not any(pathlib.PurePosixPath(x).name.lower() in _NET_FETCH for x in toks):
-            return []
-        return [u for tok in toks for u in _URL_RE.findall(tok)]
+            return None
+        segs: list[list[str]] = [[]]
+        for tok in toks:
+            if tok in _SEPARATORS:
+                segs.append([])
+            else:
+                segs[-1].append(tok)
+        urls: list[str] = []
+        outputs: list[str] = []
+        local = False
+        fetched = False
+        for seg in segs:
+            words = list(seg)
+            while words and (re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0])
+                             or words[0] in _PREFIX_CMDS):
+                words.pop(0)
+            if not words:
+                continue
+            head = pathlib.PurePosixPath(words[0]).name.lower()
+            rest = words[1:]
+            for i, w in enumerate(rest):                  # 重導向的目標
+                if w in (">", ">>") and i + 1 < len(rest):
+                    outputs.append(rest[i + 1])
+            if head in _PASSTHROUGH:
+                if head in ("grep", "egrep", "fgrep") and any(
+                        w.startswith("-") and not w.startswith("--") and "c" in w
+                        or w == "--count" for w in rest):
+                    return None                           # 數出來的是新值
+                # 過濾器自己讀了檔（`cat 筆記; curl …`）：輸出不全是抓回來的（審查 curl#1c）
+                plain = [w for w in rest if not w.startswith("-") and not w.isdigit()
+                         and w not in (">", ">>") and w not in outputs]
+                allowed = 1 if head in ("grep", "egrep", "fgrep") else 0
+                if head != "tee" and len(plain) > allowed:
+                    return None
+                continue
+            if head not in _NET_FETCH:
+                return None                               # 別的指令可能自己造出這個值
+            fetched = True
+            skip = False
+            for i, w in enumerate(rest):
+                if skip:
+                    skip = False
+                    continue
+                if w in (">", ">>", "<"):
+                    skip = True
+                    continue
+                if w in _FETCH_OPT_ARGS:
+                    if w in ("-o", "--output", "-O", "--output-document") and i + 1 < len(rest):
+                        outputs.append(rest[i + 1])
+                    if w in ("--resolve", "--connect-to"):
+                        local = True                      # 名字被指到別處：看不出是不是本機
+                    skip = True
+                    continue
+                if w.startswith("-"):
+                    if w.split("=", 1)[0] in ("--resolve", "--connect-to"):
+                        local = True
+                    continue
+                urls.append(w)
+        if not fetched or not urls:
+            return None
+        local = local or any(_is_local_url(u) for u in urls)
+        return {"urls": urls, "local": local, "outputs": outputs}
+
+    def _own_file_with(self, j: Step, value: str) -> str | None:
+        """這個行動者在第 j 步之前自己寫過、而且那時含有這個值的檔（有的話）。"""
+        for tr in reversed(self.t.transitions):
+            if tr.seq >= j.seq or tr.step is None or tr.step.ctx != j.ctx:
+                continue
+            for p in sorted(tr.paths):
+                txt = self.t.file_text(j.pre_index, p)
+                if txt is not None and L.contains(txt, value):
+                    return p
+        return None
 
     def _last_writer(self, path: str, before_seq: int) -> Transition | None:
         last = None
@@ -567,7 +669,7 @@ class Blamer:
         if s.ambiguous:
             return Origin("ambiguous", step=s, note="; ".join(s.ambiguous),
                           candidates=[s, *self._concurrent(s)])
-        return self.step_origin(s, value, chain, depth=depth)
+        return self.step_origin(s, value, chain, depth=depth, path=path)
 
     def _concurrent(self, s: Step) -> list[Step]:
         return [j for j in self.t.steps if j.id != s.id and (s.id in j.conc or j.id in s.conc)]
@@ -578,14 +680,14 @@ class Blamer:
         return {"line": occ[0][0]} if occ else {}
 
     def step_origin(self, s: Step, value: str, chain: list[dict[str, Any]], *,
-                    depth: int) -> Origin:
+                    depth: int, path: str | None = None) -> Origin:
         if depth > MAX_DEPTH:
             return Origin("unknown", note="lineage too deep")
         typed = L.contains(self.t.input_text(s), value)
         if tool_kind(s.tool) == "shell" and not typed:
             # 值不在指令字串裡：可能是指令算出來的，也可能只是編碼過（`base64 -d`）——
             # 後者和直接打字一樣，往下看行動者之前觀察到什麼
-            o = self._shell_origin(s, value, chain, depth, fallback=False)
+            o = self._shell_origin(s, value, chain, depth, fallback=False, into=path)
             if o is not None:
                 return o
         for kind, j, text, ref in self.sources(s):
@@ -716,8 +818,9 @@ class Blamer:
 
     def _shell_origin(self, j: Step, value: str, chain: list[dict[str, Any]],
                       depth: int, *, fallback: bool = True,
-                      in_output: bool = False) -> Origin | None:
-        """殼層指令產生的值從哪裡來。`in_output`＝這個值出現在這一步**有紀錄的輸出**裡。"""
+                      in_output: bool = False, into: str | None = None) -> Origin | None:
+        """殼層指令產生的值從哪裡來。`in_output`＝這個值出現在這一步**有紀錄的輸出**裡；
+        `into`＝正在追的那個檔（這一步寫了它，值不在指令字串裡）。"""
         reads, scripts, runs_code = self._referenced_files(j)
         for f in reads + scripts:
             txt = self.t.file_text(j.pre_index, f)
@@ -746,15 +849,40 @@ class Blamer:
                 chain.append({**j.brief(), "via": f"ran {f}, which no recorded step wrote"})
                 return Origin("pre_existing", source={"kind": "file", "path": f},
                               note=f"{f} was already there and computed the value")
-        urls = self._fetched_urls(j)
-        if urls and not runs_code:
-            # `curl <網址>`：值是抓回來的內容，不是 agent 算的（2026-09-24 情境 F）。
-            # 值就在有紀錄的輸出裡 ⇒ 和抓網頁的工具同級；輸出被導進檔案（沒紀錄）⇒ 只是推論
-            chain.append({**j.brief(), "via": f"fetched {urls[0]}"})
-            return Origin("external", source={"kind": "url", "ref": urls[0], "step": j.n,
-                                              "observed": in_output},
-                          note="the fetched content says this" if in_output else
-                          "the command fetched a page and nothing else in it holds the value")
+        fetch = None if runs_code else self._fetch_of(j)
+        if fetch is not None:
+            for kind, w, text, _ref in self.sources(j):
+                if kind == "own_write" and w is not None and L.contains(text, value):
+                    # 這個行動者自己之前打過這個值（寫到工作區外面也算）：不是網頁說的
+                    chain.append({**w.brief(), "via": "its own earlier write"})
+                    return self.step_origin(w, value, chain, depth=depth + 1)
+            own = self._own_file_with(j, value)
+            if own is not None:
+                # 抓回來的內容也在這個行動者自己之前寫過的檔裡（上傳再抓回來、貼到外面再抓回來）
+                chain.append({**j.brief(), "via": f"fetched it, and {own} (its own file) says it"})
+                return self.value_origin(own, value, chain, before_seq=j.seq, depth=depth + 1)
+            urls = fetch["urls"]
+            carried = in_output or (into is not None and into in fetch["outputs"])
+            if carried and fetch["local"]:
+                # 這台機器上的伺服器（可能就是 agent 自己開的）：不是外部來源，也說不出是誰算的
+                chain.append({**j.brief(), "via": f"fetched {urls[0]} from this machine"})
+                return Origin("unresolved", step=j,
+                              note="fetched from a server on this machine, which the agent may "
+                                   "run itself")
+            if carried:
+                # `curl <網址>`：值是抓回來的內容，不是 agent 算的（2026-09-24 情境 F）。
+                # 值就在有紀錄的輸出裡 ⇒ 和抓網頁的工具同級；輸出直接導進這個檔（沒紀錄）⇒ 只是推論；
+                # 抓了好幾個網址 ⇒ 說不出是哪一個，也只是推論
+                exact = in_output and len(urls) == 1
+                chain.append({**j.brief(), "via": f"fetched {urls[0]}"})
+                src: dict[str, Any] = {"kind": "url", "ref": urls[0], "step": j.n,
+                                       "observed": exact}
+                if len(urls) > 1:
+                    src["candidates"] = urls
+                return Origin("external", source=src,
+                              note="the fetched content says this" if exact else
+                              "the command only fetched pages; which one holds the value was "
+                              "not recorded")
         if runs_code:
             # 跑了程式卻認不出是哪一支：不可以歸成「指令自己產生的」事實層
             return Origin("unresolved", step=j,
@@ -792,6 +920,14 @@ class Blamer:
                            "from")
 
     def _spawning_step(self, s: Step) -> Step | None:
+        agent = s.actor.get("agent")
+        for p in self.t.prompts:               # 記下來的：叫它出來的那一步（可能在它之後才寫進鏈）
+            if agent and p.get("agent") == agent and p.get("spawned_by"):
+                hit = next((x for x in self.t.steps if x.id == p["spawned_by"]), None)
+                if hit is not None:
+                    return hit
+            if agent and p.get("agent") == agent and "spawned_by" in p:
+                return None                    # 對不到（或對到好幾個）：不猜
         first = next((x for x in self.t.steps if x.ctx == s.ctx), s)
         cands = [x for x in self.t.steps if x.seq < first.seq and tool_kind(x.tool) == "agent"
                  and x.ctx[:2] == s.ctx[:2] and not x.ctx[2]]
@@ -810,6 +946,51 @@ class Blamer:
 def _command(inp: Any) -> str | None:
     from ..adapters.hook import _command_from
     return _command_from(inp)
+
+
+def _local_addresses() -> set[str]:
+    """這台機器自己的位址（盡力而為：主機名稱解析出來的＋預設路由那張網卡的）。"""
+    import socket
+    out = {"127.0.0.1", "::1", "0.0.0.0", "::"}
+    try:
+        name = socket.gethostname()
+        out.add(name.lower())
+        for fam in (socket.AF_INET, socket.AF_INET6):
+            try:
+                out.update(str(a[4][0]) for a in socket.getaddrinfo(name, None, fam))
+            except OSError:
+                pass
+    except OSError:
+        pass
+    try:                                     # UDP connect 不送封包，只問核心會用哪一張網卡
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+            sk.connect(("192.0.2.1", 9))
+            out.add(sk.getsockname()[0])
+    except OSError:
+        pass
+    return out
+
+
+_LOCAL: set[str] | None = None
+
+
+def _is_local_url(url: str) -> bool:
+    """網址指到這台機器（agent 自己開的伺服器也在這裡）⇒ 不能當外部來源。"""
+    global _LOCAL
+    from urllib.parse import urlsplit
+    u = url if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*://", url) else "http://" + url
+    try:
+        parts = urlsplit(u)
+        host = (parts.hostname or "").lower()
+    except ValueError:
+        return True
+    if parts.scheme.lower() == "file" or not host:
+        return True
+    if host == "localhost" or host.endswith(".localhost") or host.startswith("127."):
+        return True
+    if _LOCAL is None:
+        _LOCAL = _local_addresses()
+    return host in _LOCAL
 
 
 # ── the verdict ──────────────────────────────────────────────────────
