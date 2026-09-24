@@ -1,0 +1,86 @@
+{
+ "judge_infra_void_calls_still_failed": 0,
+ "VALID": true,
+ "overhead_fixed_in_per_call": 458,
+ "generated": 60,
+ "generated_with_pairs": 60,
+ "gen_tokens_per_output": 3478.6,
+ "Jfull": {
+  "n": 120,
+  "accepted": 49,
+  "rejected": 70,
+  "unknown": 1,
+  "false_accept": 1,
+  "false_reject": 11,
+  "decided_accuracy": 0.8992,
+  "accuracy_unknown_as_wrong": 0.8917,
+  "tokens_per_item": 3825.8,
+  "net_tokens_per_item": 3367.8
+ },
+ "E": {
+  "n": 120,
+  "accepted": 0,
+  "rejected": 94,
+  "unknown": 26,
+  "false_accept": 0,
+  "false_reject": 45,
+  "decided_accuracy": 0.5213,
+  "accuracy_unknown_as_wrong": 0.4083,
+  "tokens_per_item": 0,
+  "net_tokens_per_item": 0
+ },
+ "Jclaim": {
+  "n": 120,
+  "accepted": 1,
+  "rejected": 117,
+  "unknown": 2,
+  "false_accept": 0,
+  "false_reject": 58,
+  "decided_accuracy": 0.5085,
+  "accuracy_unknown_as_wrong": 0.5,
+  "tokens_per_item": 2442.6,
+  "net_tokens_per_item": 1984.6
+ },
+ "EJ": {
+  "n": 120,
+  "accepted": 0,
+  "rejected": 120,
+  "unknown": 0,
+  "false_accept": 0,
+  "false_reject": 60,
+  "decided_accuracy": 0.5,
+  "accuracy_unknown_as_wrong": 0.5,
+  "tokens_per_item": 494.1,
+  "net_tokens_per_item": 394.8
+ },
+ "by_injection_kind": {
+  "number": {
+   "n": 20,
+   "E_rejects": 19,
+   "Jfull_rejects": 20,
+   "Jclaim_rejects": 20,
+   "EJ_rejects": 20
+  },
+  "entity": {
+   "n": 22,
+   "E_rejects": 22,
+   "Jfull_rejects": 22,
+   "Jclaim_rejects": 21,
+   "EJ_rejects": 22
+  },
+  "negation": {
+   "n": 18,
+   "E_rejects": 8,
+   "Jfull_rejects": 17,
+   "Jclaim_rejects": 18,
+   "EJ_rejects": 18
+  }
+ },
+ "clean_E_rejects_reasons": [
+  "name 'Summary' not in source",
+  "numbers not in source ['2016']",
+  "quote not found verbatim in source",
+  "text outside sentence+quote pairs"
+ ],
+ "clean_E_reject_rate": 0.75
+}

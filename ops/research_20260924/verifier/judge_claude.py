@@ -108,3 +108,19 @@ def overhead_probe(j: Judge, n: int = 3) -> dict:
     xs = [j.ask("x", f"x{i}", f"overhead_probe_{i}") for i in range(n)]
     ins = [r["tokens_in"] for r in xs if r and r.get("ok")]
     return {"model": j.model, "input_tokens": ins, "fixed_overhead_in": min(ins) if ins else None}
+
+
+def failed_keys(exp: str) -> set[str]:
+    """這個實驗裡**最後一次仍然失敗**的呼叫鍵（四次重試都失敗、之後也沒補成功）。
+
+    ⚠ 2026-09-24 的教訓：用量上限期間 `claude -p` 回 `Authentication error`，
+    那幾百通在報告裡被安靜地算成 unknown。unknown 不是通過，但它也**不是評審的判斷**——
+    是 infra_void（鐵律 3）。報告必須把它們數出來、而且在分母裡排除。
+    """
+    log = HERE / "results" / f"judge_calls_{exp}.jsonl"
+    last: dict[str, bool] = {}
+    if log.exists():
+        for ln in open(log, encoding="utf-8"):
+            r = json.loads(ln)
+            last[r["key"]] = last.get(r["key"], False) or bool(r.get("ok"))
+    return {k for k, ok in last.items() if not ok}

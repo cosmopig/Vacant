@@ -294,7 +294,14 @@ def cmd_report():
         tag = f.stem.split("_")[-1]
         nC = sum(r["calls_C"] for r in rows)
         caps = [0, 250, 500, 750, 1000, 1500, 2000, 3000, None]
+        from judge_claude import failed_keys, _key
+        model = {"haiku": "claude-haiku-4-5-20251001", "sonnet": "claude-sonnet-5"}[tag]
+        test = {x["id"]: x for x in load("test")}
+        bad = failed_keys(f"ragtruth_{tag}")
+        void = [r["id"] for r in rows if _key(model, SYS, judge_prompt(test[r["id"]])) in bad]
         out[tag] = {
+            "judge_infra_void_items": len(void),
+            "VALID": not void,
             "overhead_fixed_in_per_call": ov,
             "D": score(rows, "D", prev), "J": score(rows, "J", prev, "tok_J"),
             "Jq": score(rows, "Jq", prev, "tok_J"), "C": score(rows, "C", prev, "tok_C"),

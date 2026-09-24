@@ -1,5 +1,7 @@
 {
  "haiku": {
+  "judge_infra_void_items": 0,
+  "VALID": true,
   "overhead_fixed_in_per_call": 457,
   "D": {
    "all": {
@@ -652,5 +654,661 @@
    ]
   },
   "judge_unparsable": 2
+ },
+ "sonnet": {
+  "judge_infra_void_items": 0,
+  "VALID": true,
+  "overhead_fixed_in_per_call": 625,
+  "D": {
+   "all": {
+    "n": 300,
+    "accepted": 0,
+    "rejected": 0,
+    "unknown": 300,
+    "false_accept": 0,
+    "false_reject": 0,
+    "false_accept_rate_among_accepted": null,
+    "precision_of_reject": null,
+    "decided_accuracy": null,
+    "coverage": 0.0,
+    "tokens_per_item": 0
+   },
+   "QA": {
+    "n": 100,
+    "accepted": 0,
+    "rejected": 0,
+    "unknown": 100,
+    "false_accept": 0,
+    "false_reject": 0,
+    "false_accept_rate_among_accepted": null,
+    "precision_of_reject": null,
+    "decided_accuracy": null,
+    "coverage": 0.0,
+    "tokens_per_item": 0
+   },
+   "Summary": {
+    "n": 100,
+    "accepted": 0,
+    "rejected": 0,
+    "unknown": 100,
+    "false_accept": 0,
+    "false_reject": 0,
+    "false_accept_rate_among_accepted": null,
+    "precision_of_reject": null,
+    "decided_accuracy": null,
+    "coverage": 0.0,
+    "tokens_per_item": 0
+   },
+   "Data2txt": {
+    "n": 100,
+    "accepted": 0,
+    "rejected": 0,
+    "unknown": 100,
+    "false_accept": 0,
+    "false_reject": 0,
+    "false_accept_rate_among_accepted": null,
+    "precision_of_reject": null,
+    "decided_accuracy": null,
+    "coverage": 0.0,
+    "tokens_per_item": 0
+   },
+   "reweighted_to_test_prevalence": {
+    "QA": {
+     "prevalence": 0.1778,
+     "false_accept_rate_among_accepted_reweighted": null
+    },
+    "Summary": {
+     "prevalence": 0.2267,
+     "false_accept_rate_among_accepted_reweighted": null
+    },
+    "Data2txt": {
+     "prevalence": 0.6433,
+     "false_accept_rate_among_accepted_reweighted": null
+    }
+   }
+  },
+  "J": {
+   "all": {
+    "n": 300,
+    "accepted": 91,
+    "rejected": 206,
+    "unknown": 3,
+    "false_accept": 8,
+    "false_reject": 64,
+    "false_accept_rate_among_accepted": 0.0879,
+    "precision_of_reject": 0.6893,
+    "decided_accuracy": 0.7576,
+    "coverage": 0.99,
+    "tokens_per_item": 1978.4
+   },
+   "QA": {
+    "n": 100,
+    "accepted": 32,
+    "rejected": 68,
+    "unknown": 0,
+    "false_accept": 2,
+    "false_reject": 20,
+    "false_accept_rate_among_accepted": 0.0625,
+    "precision_of_reject": 0.7059,
+    "decided_accuracy": 0.78,
+    "coverage": 1.0,
+    "tokens_per_item": 1614.6
+   },
+   "Summary": {
+    "n": 100,
+    "accepted": 35,
+    "rejected": 64,
+    "unknown": 1,
+    "false_accept": 4,
+    "false_reject": 18,
+    "false_accept_rate_among_accepted": 0.1143,
+    "precision_of_reject": 0.7188,
+    "decided_accuracy": 0.7778,
+    "coverage": 0.99,
+    "tokens_per_item": 2082.4
+   },
+   "Data2txt": {
+    "n": 100,
+    "accepted": 24,
+    "rejected": 74,
+    "unknown": 2,
+    "false_accept": 2,
+    "false_reject": 26,
+    "false_accept_rate_among_accepted": 0.0833,
+    "precision_of_reject": 0.6486,
+    "decided_accuracy": 0.7143,
+    "coverage": 0.98,
+    "tokens_per_item": 2238.2
+   },
+   "reweighted_to_test_prevalence": {
+    "QA": {
+     "prevalence": 0.1778,
+     "false_accept_rate_among_accepted_reweighted": 0.0142
+    },
+    "Summary": {
+     "prevalence": 0.2267,
+     "false_accept_rate_among_accepted_reweighted": 0.0364
+    },
+    "Data2txt": {
+     "prevalence": 0.6433,
+     "false_accept_rate_among_accepted_reweighted": 0.1409
+    }
+   }
+  },
+  "Jq": {
+   "all": {
+    "n": 300,
+    "accepted": 91,
+    "rejected": 203,
+    "unknown": 6,
+    "false_accept": 8,
+    "false_reject": 63,
+    "false_accept_rate_among_accepted": 0.0879,
+    "precision_of_reject": 0.6897,
+    "decided_accuracy": 0.7585,
+    "coverage": 0.98,
+    "tokens_per_item": 1978.4
+   },
+   "QA": {
+    "n": 100,
+    "accepted": 32,
+    "rejected": 67,
+    "unknown": 1,
+    "false_accept": 2,
+    "false_reject": 19,
+    "false_accept_rate_among_accepted": 0.0625,
+    "precision_of_reject": 0.7164,
+    "decided_accuracy": 0.7879,
+    "coverage": 0.99,
+    "tokens_per_item": 1614.6
+   },
+   "Summary": {
+    "n": 100,
+    "accepted": 35,
+    "rejected": 64,
+    "unknown": 1,
+    "false_accept": 4,
+    "false_reject": 18,
+    "false_accept_rate_among_accepted": 0.1143,
+    "precision_of_reject": 0.7188,
+    "decided_accuracy": 0.7778,
+    "coverage": 0.99,
+    "tokens_per_item": 2082.4
+   },
+   "Data2txt": {
+    "n": 100,
+    "accepted": 24,
+    "rejected": 72,
+    "unknown": 4,
+    "false_accept": 2,
+    "false_reject": 26,
+    "false_accept_rate_among_accepted": 0.0833,
+    "precision_of_reject": 0.6389,
+    "decided_accuracy": 0.7083,
+    "coverage": 0.96,
+    "tokens_per_item": 2238.2
+   },
+   "reweighted_to_test_prevalence": {
+    "QA": {
+     "prevalence": 0.1778,
+     "false_accept_rate_among_accepted_reweighted": 0.0142
+    },
+    "Summary": {
+     "prevalence": 0.2267,
+     "false_accept_rate_among_accepted_reweighted": 0.0364
+    },
+    "Data2txt": {
+     "prevalence": 0.6433,
+     "false_accept_rate_among_accepted_reweighted": 0.1409
+    }
+   }
+  },
+  "C": {
+   "all": {
+    "n": 300,
+    "accepted": 91,
+    "rejected": 206,
+    "unknown": 3,
+    "false_accept": 8,
+    "false_reject": 64,
+    "false_accept_rate_among_accepted": 0.0879,
+    "precision_of_reject": 0.6893,
+    "decided_accuracy": 0.7576,
+    "coverage": 0.99,
+    "tokens_per_item": 1978.4
+   },
+   "QA": {
+    "n": 100,
+    "accepted": 32,
+    "rejected": 68,
+    "unknown": 0,
+    "false_accept": 2,
+    "false_reject": 20,
+    "false_accept_rate_among_accepted": 0.0625,
+    "precision_of_reject": 0.7059,
+    "decided_accuracy": 0.78,
+    "coverage": 1.0,
+    "tokens_per_item": 1614.6
+   },
+   "Summary": {
+    "n": 100,
+    "accepted": 35,
+    "rejected": 64,
+    "unknown": 1,
+    "false_accept": 4,
+    "false_reject": 18,
+    "false_accept_rate_among_accepted": 0.1143,
+    "precision_of_reject": 0.7188,
+    "decided_accuracy": 0.7778,
+    "coverage": 0.99,
+    "tokens_per_item": 2082.4
+   },
+   "Data2txt": {
+    "n": 100,
+    "accepted": 24,
+    "rejected": 74,
+    "unknown": 2,
+    "false_accept": 2,
+    "false_reject": 26,
+    "false_accept_rate_among_accepted": 0.0833,
+    "precision_of_reject": 0.6486,
+    "decided_accuracy": 0.7143,
+    "coverage": 0.98,
+    "tokens_per_item": 2238.2
+   },
+   "reweighted_to_test_prevalence": {
+    "QA": {
+     "prevalence": 0.1778,
+     "false_accept_rate_among_accepted_reweighted": 0.0142
+    },
+    "Summary": {
+     "prevalence": 0.2267,
+     "false_accept_rate_among_accepted_reweighted": 0.0364
+    },
+    "Data2txt": {
+     "prevalence": 0.6433,
+     "false_accept_rate_among_accepted_reweighted": 0.1409
+    }
+   }
+  },
+  "Cq": {
+   "all": {
+    "n": 300,
+    "accepted": 91,
+    "rejected": 203,
+    "unknown": 6,
+    "false_accept": 8,
+    "false_reject": 63,
+    "false_accept_rate_among_accepted": 0.0879,
+    "precision_of_reject": 0.6897,
+    "decided_accuracy": 0.7585,
+    "coverage": 0.98,
+    "tokens_per_item": 1978.4
+   },
+   "QA": {
+    "n": 100,
+    "accepted": 32,
+    "rejected": 67,
+    "unknown": 1,
+    "false_accept": 2,
+    "false_reject": 19,
+    "false_accept_rate_among_accepted": 0.0625,
+    "precision_of_reject": 0.7164,
+    "decided_accuracy": 0.7879,
+    "coverage": 0.99,
+    "tokens_per_item": 1614.6
+   },
+   "Summary": {
+    "n": 100,
+    "accepted": 35,
+    "rejected": 64,
+    "unknown": 1,
+    "false_accept": 4,
+    "false_reject": 18,
+    "false_accept_rate_among_accepted": 0.1143,
+    "precision_of_reject": 0.7188,
+    "decided_accuracy": 0.7778,
+    "coverage": 0.99,
+    "tokens_per_item": 2082.4
+   },
+   "Data2txt": {
+    "n": 100,
+    "accepted": 24,
+    "rejected": 72,
+    "unknown": 4,
+    "false_accept": 2,
+    "false_reject": 26,
+    "false_accept_rate_among_accepted": 0.0833,
+    "precision_of_reject": 0.6389,
+    "decided_accuracy": 0.7083,
+    "coverage": 0.96,
+    "tokens_per_item": 2238.2
+   },
+   "reweighted_to_test_prevalence": {
+    "QA": {
+     "prevalence": 0.1778,
+     "false_accept_rate_among_accepted_reweighted": 0.0142
+    },
+    "Summary": {
+     "prevalence": 0.2267,
+     "false_accept_rate_among_accepted_reweighted": 0.0364
+    },
+    "Data2txt": {
+     "prevalence": 0.6433,
+     "false_accept_rate_among_accepted_reweighted": 0.1409
+    }
+   }
+  },
+  "judge_calls_per_item": {
+   "J": 1.0,
+   "C": 1.0
+  },
+  "net_tokens_per_item": {
+   "J": 1353.4,
+   "C": 1353.4
+  },
+  "cost_usd_total": {
+   "J": 2.9894,
+   "C": 2.9894
+  },
+  "budget_curve": {
+   "J": [
+    {
+     "cap": 0,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 250,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 500,
+     "tokens_per_item": 78.2,
+     "coverage": 0.06,
+     "decided_accuracy": 0.7778,
+     "accuracy_unknown_as_wrong": 0.0467,
+     "false_accept_rate_among_accepted": 0.1538
+    },
+    {
+     "cap": 750,
+     "tokens_per_item": 487.7,
+     "coverage": 0.32,
+     "decided_accuracy": 0.7917,
+     "accuracy_unknown_as_wrong": 0.2533,
+     "false_accept_rate_among_accepted": 0.0769
+    },
+    {
+     "cap": 1000,
+     "tokens_per_item": 1269.7,
+     "coverage": 0.72,
+     "decided_accuracy": 0.7731,
+     "accuracy_unknown_as_wrong": 0.5567,
+     "false_accept_rate_among_accepted": 0.0563
+    },
+    {
+     "cap": 1500,
+     "tokens_per_item": 1697.4,
+     "coverage": 0.9,
+     "decided_accuracy": 0.7556,
+     "accuracy_unknown_as_wrong": 0.68,
+     "false_accept_rate_among_accepted": 0.0698
+    },
+    {
+     "cap": 2000,
+     "tokens_per_item": 1884.6,
+     "coverage": 0.9633,
+     "decided_accuracy": 0.7612,
+     "accuracy_unknown_as_wrong": 0.7333,
+     "false_accept_rate_among_accepted": 0.0682
+    },
+    {
+     "cap": 3000,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.99,
+     "decided_accuracy": 0.7576,
+     "accuracy_unknown_as_wrong": 0.75,
+     "false_accept_rate_among_accepted": 0.0879
+    },
+    {
+     "cap": null,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.99,
+     "decided_accuracy": 0.7576,
+     "accuracy_unknown_as_wrong": 0.75,
+     "false_accept_rate_among_accepted": 0.0879
+    }
+   ],
+   "Jq": [
+    {
+     "cap": 0,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 250,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 500,
+     "tokens_per_item": 78.2,
+     "coverage": 0.06,
+     "decided_accuracy": 0.7778,
+     "accuracy_unknown_as_wrong": 0.0467,
+     "false_accept_rate_among_accepted": 0.1538
+    },
+    {
+     "cap": 750,
+     "tokens_per_item": 487.7,
+     "coverage": 0.3167,
+     "decided_accuracy": 0.8,
+     "accuracy_unknown_as_wrong": 0.2533,
+     "false_accept_rate_among_accepted": 0.0769
+    },
+    {
+     "cap": 1000,
+     "tokens_per_item": 1269.7,
+     "coverage": 0.7133,
+     "decided_accuracy": 0.7757,
+     "accuracy_unknown_as_wrong": 0.5533,
+     "false_accept_rate_among_accepted": 0.0563
+    },
+    {
+     "cap": 1500,
+     "tokens_per_item": 1697.4,
+     "coverage": 0.8933,
+     "decided_accuracy": 0.7575,
+     "accuracy_unknown_as_wrong": 0.6767,
+     "false_accept_rate_among_accepted": 0.0698
+    },
+    {
+     "cap": 2000,
+     "tokens_per_item": 1884.6,
+     "coverage": 0.9533,
+     "decided_accuracy": 0.7622,
+     "accuracy_unknown_as_wrong": 0.7267,
+     "false_accept_rate_among_accepted": 0.0682
+    },
+    {
+     "cap": 3000,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.98,
+     "decided_accuracy": 0.7585,
+     "accuracy_unknown_as_wrong": 0.7433,
+     "false_accept_rate_among_accepted": 0.0879
+    },
+    {
+     "cap": null,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.98,
+     "decided_accuracy": 0.7585,
+     "accuracy_unknown_as_wrong": 0.7433,
+     "false_accept_rate_among_accepted": 0.0879
+    }
+   ],
+   "C": [
+    {
+     "cap": 0,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 250,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 500,
+     "tokens_per_item": 78.2,
+     "coverage": 0.06,
+     "decided_accuracy": 0.7778,
+     "accuracy_unknown_as_wrong": 0.0467,
+     "false_accept_rate_among_accepted": 0.1538
+    },
+    {
+     "cap": 750,
+     "tokens_per_item": 487.7,
+     "coverage": 0.32,
+     "decided_accuracy": 0.7917,
+     "accuracy_unknown_as_wrong": 0.2533,
+     "false_accept_rate_among_accepted": 0.0769
+    },
+    {
+     "cap": 1000,
+     "tokens_per_item": 1269.7,
+     "coverage": 0.72,
+     "decided_accuracy": 0.7731,
+     "accuracy_unknown_as_wrong": 0.5567,
+     "false_accept_rate_among_accepted": 0.0563
+    },
+    {
+     "cap": 1500,
+     "tokens_per_item": 1697.4,
+     "coverage": 0.9,
+     "decided_accuracy": 0.7556,
+     "accuracy_unknown_as_wrong": 0.68,
+     "false_accept_rate_among_accepted": 0.0698
+    },
+    {
+     "cap": 2000,
+     "tokens_per_item": 1884.6,
+     "coverage": 0.9633,
+     "decided_accuracy": 0.7612,
+     "accuracy_unknown_as_wrong": 0.7333,
+     "false_accept_rate_among_accepted": 0.0682
+    },
+    {
+     "cap": 3000,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.99,
+     "decided_accuracy": 0.7576,
+     "accuracy_unknown_as_wrong": 0.75,
+     "false_accept_rate_among_accepted": 0.0879
+    },
+    {
+     "cap": null,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.99,
+     "decided_accuracy": 0.7576,
+     "accuracy_unknown_as_wrong": 0.75,
+     "false_accept_rate_among_accepted": 0.0879
+    }
+   ],
+   "Cq": [
+    {
+     "cap": 0,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 250,
+     "tokens_per_item": 0.0,
+     "coverage": 0.0,
+     "decided_accuracy": null,
+     "accuracy_unknown_as_wrong": 0.0,
+     "false_accept_rate_among_accepted": null
+    },
+    {
+     "cap": 500,
+     "tokens_per_item": 78.2,
+     "coverage": 0.06,
+     "decided_accuracy": 0.7778,
+     "accuracy_unknown_as_wrong": 0.0467,
+     "false_accept_rate_among_accepted": 0.1538
+    },
+    {
+     "cap": 750,
+     "tokens_per_item": 487.7,
+     "coverage": 0.3167,
+     "decided_accuracy": 0.8,
+     "accuracy_unknown_as_wrong": 0.2533,
+     "false_accept_rate_among_accepted": 0.0769
+    },
+    {
+     "cap": 1000,
+     "tokens_per_item": 1269.7,
+     "coverage": 0.7133,
+     "decided_accuracy": 0.7757,
+     "accuracy_unknown_as_wrong": 0.5533,
+     "false_accept_rate_among_accepted": 0.0563
+    },
+    {
+     "cap": 1500,
+     "tokens_per_item": 1697.4,
+     "coverage": 0.8933,
+     "decided_accuracy": 0.7575,
+     "accuracy_unknown_as_wrong": 0.6767,
+     "false_accept_rate_among_accepted": 0.0698
+    },
+    {
+     "cap": 2000,
+     "tokens_per_item": 1884.6,
+     "coverage": 0.9533,
+     "decided_accuracy": 0.7622,
+     "accuracy_unknown_as_wrong": 0.7267,
+     "false_accept_rate_among_accepted": 0.0682
+    },
+    {
+     "cap": 3000,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.98,
+     "decided_accuracy": 0.7585,
+     "accuracy_unknown_as_wrong": 0.7433,
+     "false_accept_rate_among_accepted": 0.0879
+    },
+    {
+     "cap": null,
+     "tokens_per_item": 1978.4,
+     "coverage": 0.98,
+     "decided_accuracy": 0.7585,
+     "accuracy_unknown_as_wrong": 0.7433,
+     "false_accept_rate_among_accepted": 0.0879
+    }
+   ]
+  },
+  "judge_unparsable": 3
  }
 }

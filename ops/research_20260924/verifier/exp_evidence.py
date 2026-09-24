@@ -212,7 +212,10 @@ def cmd_report():
                       "Jclaim_rejects": sum(r["Jclaim"] == REJECTED for r in rs),
                       "EJ_rejects": sum(r["EJ"] == REJECTED for r in rs)}
     clean = [r for r in rows if not r["has_error"]]
-    out = {"overhead_fixed_in_per_call": ov,
+    from judge_claude import failed_keys
+    bad = failed_keys("evidence_judge")
+    out = {"judge_infra_void_calls_still_failed": len(bad), "VALID": not bad,
+           "overhead_fixed_in_per_call": ov,
            "generated": len(gen), "generated_with_pairs": sum(1 for g in gen if g["output"] and pairs_of(g["output"])),
            "gen_tokens_per_output": round(sum(g["gen_tokens"] for g in gen) / len(gen), 1),
            "Jfull": sc("Jfull", "tok_Jfull"), "E": sc("E"), "Jclaim": sc("Jclaim", "tok_Jclaim"),
