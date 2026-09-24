@@ -28,6 +28,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -600,7 +601,7 @@ def build_parser() -> argparse.ArgumentParser:
     # `demo` 的 `kind` 是**位置引數＋預設值**而不是巢狀子命令：`vacant demo`
     # （生態對照實驗）在外面被引用了好幾年，改成必給子命令會把它打斷。
     pd = sub.add_parser(
-        "demo", help="gate＝30 秒看到閘門擋下交付（預設 eco＝§11 C0/C1/C2/C3 對照實驗）")
+        "demo", help="gate＝30 秒看到閘門判拒交（預設 eco＝§11 C0/C1/C2/C3 對照實驗）")
     pd.add_argument("kind", nargs="?", choices=["eco", "gate"], default="eco",
                     help="gate：零設定零模型零網路，假 agent 走完整條 `vacant run` 路徑")
     pd.add_argument("--root", default=None, help="（gate）落點，每次執行會先清空")
@@ -622,7 +623,7 @@ def build_parser() -> argparse.ArgumentParser:
     #     所以把另一條路寫進 description，`vacant run --help` 一定看得到。
     prun = sub.add_parser(
         "run",
-        help="包住任意 CLI agent：先驗證交付才放行（用 `--` 分隔）；"
+        help="包住一個 CLI agent：行程結束時跑驗收、判交或拒交（用 `--` 分隔）；"
              "不給 `--` 則走舊的 eco 版",
         description=(
             "vacant run 有兩種模式，分水嶺是 argv 裡有沒有 `--`。\n"
@@ -632,7 +633,8 @@ def build_parser() -> argparse.ArgumentParser:
             "    vacant run --workspace ./ws --suite ./acceptance -- pi -p '做這件事'\n"
             "\n"
             "  它把 agent 包起來、中介模型通道、在行程結束那一刻跑驗收、簽收據、\n"
-            "  沒過就擋下交付（exit 20）。旗標有 --workspace/--suite/--run-dir/\n"
+            "  沒過就判拒交（exit 20；檔案仍在工作區——要讓目的端收不到，用\n"
+            "  `vacant submit` → `vacant release`）。旗標有 --workspace/--suite/--run-dir/\n"
             "  --retry/--max-attempts/--feedback-into/--sandbox/--json 等。\n"
             "  ⚠ **完整說明要用** `python -m vacant_network.vrun.launcher --help`\n"
             "     （argparse 在這裡看到 --help 就停了，印不出那一組）。\n"
@@ -1049,7 +1051,9 @@ def _agent_run_shim(argv: list[str]) -> int:
 #:
 #: ⚠ `status` 不在這裡：`vacant status` 已經是 trust 開關的狀態（另一件事）。
 #:    附身的狀態走 `vacant possess status`，不搶那個名字。
-_POSSESS_TOP: tuple[str, ...] = ("install", "uninstall")
+#: ⚠ 2026-09-24 起 `install`／`uninstall` 改進通用安裝器（`_ADAPTER_TOP`）；這裡只剩
+#:   `vacant possess …` 這一條路（`vacant uninstall` 會順便拆掉這個安裝）。
+_POSSESS_TOP: tuple[str, ...] = ()
 
 
 def _possess_shim(raw: list[str]) -> int:
@@ -1149,12 +1153,26 @@ def _on_shim(raw: list[str]) -> int:
     return _agent_run_shim(argv)
 
 
+#: 收件口（`vacant_network/intake/`，2026-09-24）。與 eco 的 `status`／`ledger`／`verify`
+#: 不共用名字——任務狀態在 `vacant task …` 底下。
+_INTAKE_TOP: tuple[str, ...] = ("contract", "check", "submit", "review", "reverify",
+                                "approve", "release", "withdraw", "task", "keys", "intake")
+#: 把收件口接到 agent 上（`vacant_network/adapters/`，2026-09-24）。
+#: ⚠ `install`／`uninstall` 以前進 `possess`（模型通道常駐安裝）；現在進通用安裝器，
+#:   舊行為在 `vacant possess install` 或 `vacant install --observe-model`。
+_ADAPTER_TOP: tuple[str, ...] = ("do", "hook", "adapters", "install", "uninstall")
+
+
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
+    if raw[:1] and raw[0] in _INTAKE_TOP:
+        from .intake.cli import main as intake_main
+        return intake_main(raw)
+    if raw[:1] and raw[0] in _ADAPTER_TOP:
+        from .adapters.cli import main as adapters_main
+        return adapters_main(raw)
     if raw[:1] == ["run"] and "--" in raw[1:]:
         return _agent_run_shim(raw[1:])
-    if raw[:1] and raw[0] in _POSSESS_TOP:
-        return _possess_shim(raw)
     if raw[:1] == ["possess"]:
         # `vacant possess <install|uninstall|status|detect>` —— 完整轉發。
         return _possess_shim(raw[1:] or ["status"])

@@ -324,6 +324,12 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                       mode=("act" if vacant_on else "tee"), port=port)
     proxy.start()
     child_env, env_meta = envmap.build_child_env(proxy.url, sentinel)
+    # ⚠ `PWD` 要跟著 `cwd` 走（2026-09-24）。`Popen(cwd=…)` 只換掉真的工作目錄，
+    # 繼承下來的 `PWD` 仍指著啟動 `vacant` 的那個目錄；OpenCode 的 `run` 以
+    # `process.env.PWD ?? process.cwd()` 決定專案根（v1.18.31 `run.ts:333`）⇒
+    # 產物寫到了啟動目錄而不是工作區（agentlane 36609614 抓到的洞）。
+    # 經過 bash 的舊路徑（wrap_agent.sh）會被 shell 自己修正，直接 exec 的不會。
+    child_env["PWD"] = str(pathlib.Path(workspace).resolve())
 
     ws_start = wshash.tree_hash(workspace)
     t0 = time.time()
@@ -834,10 +840,11 @@ def exit_code(summary: dict) -> int:
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="vacant run", description="把任意 agent 命令包起來：中介模型通道、"
-                                       "在行程結束那一刻跑驗收、簽收據、擋交付")
+                                       "在行程結束那一刻跑驗收、簽收據、判交或拒交（判決不是阻擋；"
+                                       "要讓目的端收不到，用 vacant release）")
     ap.add_argument("--workspace", default=".", help="交付所在的工作區（預設 .）")
     ap.add_argument("--run-dir", default=None,
-                    help="收據與 wire log 的落點（預設 <workspace>/.vacant-run/<ts>）")
+                    help="收據與 wire log 的落點（預設 ~/.vacant-run/<task_id>；放在工作區裡會被拒絕）")
     ap.add_argument("--suite", default=None,
                     help="可見驗收目錄（內含 test_*.py）。沒給且沒 --allow-no-suite ⇒ 拒交")
     ap.add_argument("--allow-no-suite", action="store_true",

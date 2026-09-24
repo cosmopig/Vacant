@@ -1,5 +1,75 @@
 # Changelog
 
+## Unreleased
+
+**The intake is real, and it plugs into pi, Claude Code, OpenCode and Codex without looking at
+model traffic.** Decision: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`.
+
+- New `vacant_network.intake`: versioned task contracts (`vacant contract init|lock|validate`),
+  content-addressed quarantine, per-claim verifiers with four outcomes (PASS / FAIL / UNKNOWN /
+  CONFLICT), a written decision policy (accept / reject / hold / escalate), signed human reviews,
+  bound single-use approvals, a recipient gate (`dir:` and `git:` destinations) that re-checks
+  everything and reads the destination back, a per-task signed ledger in which every event —
+  including infrastructure failures — stays in the denominator, and an HTTP intake whose
+  submitters cannot supply the verdict. Exit codes 40–45 (the `vacant run` / gateshim 20–26
+  meanings are unchanged).
+- New `vacant_network.adapters`: `vacant do <agent>` (isolated workspace + headless run + intake),
+  `vacant install` / `vacant uninstall` (hooks + an Agent Skill in each agent's own config,
+  key-level and reversible), `vacant hook <agent> <event>` (one policy, four native formats).
+- Per-run hooks never touch the user's files and never replace their settings: OpenCode's plugin is
+  merged into `OPENCODE_CONFIG_CONTENT` (not `OPENCODE_CONFIG_DIR`, which also hides the global
+  `AGENTS.md`; an unparseable user value means no injection rather than a replaced value), and
+  its end-of-session submission runs in the awaited `dispose()`. When the persistent install is
+  present, `vacant do` does not inject a second copy (pi, OpenCode and Codex hooks are additive,
+  so the stop check would otherwise run twice per turn).
+- **Adversarial review, same day** (five lenses, 60 findings, each reproduced or refuted against
+  the code; decision §十一). Fixed with a regression test each:
+  - *Recipient:* releases follow only an **owner-locked contract** (`vacant contract lock` now
+    signs the contract hash and release policy with a new `owner` key; a second contract with the
+    same task id and a weaker policy is refused); the already-published path re-checks the lock
+    and decision; approvals bind the *resolved* destination; spent nonces and withdrawals are
+    remembered in the signed ledger too; the recipient notices a truncated ledger it has seen;
+    git destinations find the task's last release (not just the branch tip) and read back with
+    `ls-tree -z`; hand-made quarantine manifests with `../` paths are refused before any write;
+    `/published` serves only what the signed ledger shows as released and not withdrawn, never
+    follows symlinks, and re-hashes every file.
+  - *Verifiers:* sandboxed checks run hermetically (no login-shell profile, no Python user site,
+    HOME outside the deliverable; `vrun`'s `bash -lc` behaviour is unchanged); `command` gets its
+    documented environment inside the sandbox; NaN/inf and decimal commas are unreadable instead of
+    matching anything; `Subtotal` is not `total`; citations checked only against the deliverable's
+    own files are not independent evidence; JSON NaN, `format` and draft-07 keywords are enforced;
+    malformed params are `UNKNOWN`, not the deliverable's fault; hidden claims stay hidden in every
+    output; reviews bind the contract hash; the scaffold forbids `.env` at any depth.
+  - *Adapters:* the shell rule compares path components and real write targets (it no longer
+    blocks `pytest tests` or every write under `~/.vacant-work`); Codex/OpenCode `apply_patch`
+    payloads are read in their real shapes; `/clear`, resume and reload do not submit; unfixable
+    holds are not pushed back to the agent; the session cannot run `vacant review|approve|release|
+    withdraw|keys|contract lock`; `CLAUDE_CONFIG_DIR` is honoured; Codex trust keys cover a
+    symlinked `~/.codex`; installs write through symlinks and keep file modes; re-installing keeps
+    the first backup; failed undo steps are kept for retry; a damaged end marker is refused
+    instead of deleting to end of file; `vacant do codex` no longer makes Codex append a
+    `[projects]` entry to the user's config on every run; pi/OpenCode hooks no longer block the
+    event loop; `vacant uninstall` also removes a 0.8.0 model-channel install.
+  - *Accounting:* interrupting `vacant do` kills the agent's process group and records
+    `infra_void`; escape detection covers `.git` config/hooks/refs, `__pycache__` and empty
+    directories; `vacant do` retries only on a required FAIL; a later rejected candidate no
+    longer hides a live release in `task status`/`report`; withdrawing a never-released task is
+    a no-op; an unreadable ledger is its own row in the report; release-stage failures are
+    `infra_void` (exit 43).
+- **Changed:** `vacant install` / `vacant uninstall` now install the universal hooks + skill. The
+  previous behaviour (resident model-channel proxy) is `vacant possess install` or
+  `vacant install --observe-model`.
+- **Fixed (P0):** acceptance counted results *received* instead of checks *declared*; a suite whose
+  second check killed the process (even with exit 0) was reported all-pass. The trusted parent now
+  derives the declared case list from the test file's syntax before any candidate code runs, the
+  driver prints an end marker, and missing / duplicate / unknown cases, non-zero exit or a missing
+  end marker all fail. `return False` and async checks no longer pass.
+- **Fixed:** `vacant on` crashed with `NameError: os`; agents spawned by `vacant run` inherited a
+  stale `PWD` (OpenCode wrote into the launch directory instead of the workspace).
+- **Wording:** `"tamper_proof": true` → `false` / `"tamper_evident": true`; "the gate stops the
+  delivery" → the gate decides refusal; `suitespec`'s "2+2=5" boundary now separates requirement
+  authority from factual authority.
+
 ## 0.8.0 — 2026-09-19
 
 **Breaking: the import package is renamed `vacant` → `vacant_network`. Every

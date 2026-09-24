@@ -15,9 +15,42 @@ R530 的交付是**一個目錄**（`solution.py` 或 `solution/` 套件、可�
      依**定義順序**執行（Python 的 module `__dict__` 保序，所以順序是確定的）。
   2. 一個 `main()` ⇒ 整個檔案算**一條** case（名字就叫 `main`）。
 
-判準：函式**正常回傳** ＝ 過；丟任何例外 ＝ 不過。
+判準：函式**回傳 `None`（或 `True`）** ＝ 過；丟任何例外 ＝ 不過。
 `AssertionError` 與其他例外分開記（`kind`），因為回饋要說得出是「答錯了」
 還是「爆掉了」——零資訊的「你的程式壞了」是 R460 §3.2 已經量過的壞回饋。
+
+⚠ **2026-09-24 改：回傳值不再一律當「過」**（外部質疑報告 §03 ＋附錄 B 第五列）。
+`return False` 在任何人讀起來都是「沒過」，舊版卻記成 `pass`；`async def check_*`
+回傳一個沒被執行的 coroutine，舊版也記成 `pass`。現在：`None`／`True` ＝過、
+`False` ＝不過（`kind="assert"`）、其他任何值（含 coroutine）＝不過（`kind="protocol"`）。
+全 repo 289 個驗收檔、1803 條 check 掃過（AST，排除巢狀函式）：只有一個凍結的
+候選檔 `return True`，**沒有任何一條會因此翻面**。
+
+## 完整性：分母由可信的父行程決定，不由回報決定（2026-09-24，報告 §03 P0）
+
+舊版的 `total` 是「收到幾筆結果」而不是「原本該跑幾條」⇒ 第一條過、第二條還沒跑
+行程就死了（退出碼 7 或甚至 0），彙總只看到一筆 PASS，判 `all_pass=True`。
+報告附錄 B 的 T1 重現了這件事；`tests/test_acceptance_completeness.py` 把那五列
+搬進 repo 並走真的 `run_suite`。
+
+修法是**對帳**，不是只加一個 `rc != 0`（退出碼 0 的提早結束一樣會漏）：
+
+1. **宣告清單**：父行程在跑任何候選碼之前，用 `ast` 讀測試檔頂層的
+   `def check_*`（或 `def main`），得到**預期的 case id 與順序**
+   （`declared_cases()`）。driver 只跑這份清單上的名字。
+2. **結束標記**：driver 跑完清單才印一行 `{"end": true}`。
+3. **對帳**（`_reconcile()`）：每個宣告的 id 恰好一筆結果；缺的補一筆
+   `kind="incomplete"`、重複或清單外的記 `kind="protocol"`；
+   沒有結束標記或 `rc != 0` ⇒ 檔案層級再加一筆 `incomplete`。
+   `all_pass` 另外要求**每個檔案都 `complete`**——雙重保險，不靠計數巧合。
+
+⚠ **這一層防的是「意外」，不是「惡意候選碼」**（兩種安全層級不准混成一個修補）：
+nonce 經由 argv 傳給 driver，而候選碼跟 driver 在**同一個直譯器**裡，
+讀得到 `sys.argv`、也能自己印一行偽造的結果再 `os._exit(0)`。
+對帳能抓到「偽造一行 PASS 之後真的結果又來了」（重複 ⇒ `protocol`），
+抓不到「偽造全部結果＋結束標記」。對惡意候選碼要把**執行候選的行程**與
+**決定評分的行程**分開（判準不在候選碼能碰到的地方），那是另一層，
+見 `vacant_network/suitespec.py`（資料化規約）與 `sandbox.py` 的威脅模型。
 
 ## 為什麼一個測試檔一個子行程
 
@@ -41,6 +74,7 @@ Fable 裁決「逾時 10 秒／每測試檔」。**逾時的單位就是隔離�
 """
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import pathlib
@@ -52,8 +86,14 @@ from .sandbox import DEFAULT_TEST_TIMEOUT_S, Sandbox, SandboxInfraError
 SUITES = ("visible", "hidden")
 
 #: case 的封閉結果集合。多一個就是規格變更——不准在別處臨時造字串。
+#: 2026-09-24 加兩個（報告 §03）：
+#:   `incomplete` ＝ 宣告了但沒回報（行程提早結束／沒有結束標記／rc≠0）；
+#:   `protocol`   ＝ 回報了不該有的東西（重複 id、清單外 id、非 None/True/False 的回傳值）。
 CASE_KINDS = frozenset({"pass", "assert", "exception", "import", "timeout",
-                        "nofile", "driver_error"})
+                        "nofile", "driver_error", "incomplete", "protocol"})
+
+#: 檔案層級（不屬於任何宣告 case）的紀錄用的 id。
+FILE_LEVEL_IDS = frozenset({"<module>", "<file>"})
 
 #: 回饋與落盤的截斷長度（完整原文另外以 sha256 落盤，形狀沿用
 #: `harness_arms.truncate_message` 的「頭尾都留」而不是純 tail）。
@@ -76,11 +116,16 @@ _NONCE_PREFIX = "R530CASE:"
 #: **它不讀工作區以外的東西，也不寫任何檔案**——它只 import 測試檔、
 #: 呼叫 `check_*`、把結果印在 stdout。
 DRIVER_SRC = r'''
-import contextlib, importlib.util, io, json, os, sys, traceback
+import contextlib, importlib.util, inspect, io, json, os, sys, traceback
 
 NONCE = sys.argv[3]
 WS = sys.argv[1]
 TESTFILE = sys.argv[2]
+# 第四個引數＝父行程用 AST 算好的宣告清單（JSON 檔）。沒給 ⇒ 舊行為（相容）。
+DECLARED = None
+if len(sys.argv) > 4:
+    with open(sys.argv[4], encoding="utf-8") as _f:
+        DECLARED = json.load(_f)
 REAL_STDOUT = sys.stdout
 
 def emit(rec):
@@ -110,24 +155,42 @@ except BaseException as e:
     emit({"case": "<module>", "ok": False, "kind": "import",
           "message": "%s: %s" % (type(e).__name__, e),
           "where": where_of(e, TESTFILE), "output": clip(buf.getvalue(), 1200)})
+    emit({"end": True, "ran": 0})
     raise SystemExit(0)
 
-checks = [(n, v) for n, v in vars(mod).items()
-          if n.startswith("check_") and callable(v)]
-if not checks:
-    main = getattr(mod, "main", None)
-    checks = [("main", main)] if callable(main) else []
+found = [(n, v) for n, v in vars(mod).items()
+         if n.startswith("check_") and callable(v)]
+if DECLARED is None:
+    checks = found
+    if not checks:
+        main = getattr(mod, "main", None)
+        checks = [("main", main)] if callable(main) else []
+else:
+    checks = [(n, vars(mod).get(n)) for n in DECLARED]
+    for n, _v in found:
+        if n not in DECLARED:
+            emit({"case": n, "ok": False, "kind": "protocol",
+                  "message": ("%s is callable in the test module but is not a top-level "
+                              "'def check_*' in this file (imported or generated); it was "
+                              "not run. Declare every check with def." % n),
+                  "where": None, "output": ""})
 if not checks:
     emit({"case": "<module>", "ok": False, "kind": "driver_error",
           "message": "test file defines neither check_*() nor main()",
           "where": None, "output": ""})
+    emit({"end": True, "ran": 0})
     raise SystemExit(0)
 
 for name, fn in checks:
     buf = io.StringIO()
+    if not callable(fn):
+        emit({"case": name, "ok": False, "kind": "driver_error",
+              "message": "declared check %s is not callable after import" % name,
+              "where": None, "output": ""})
+        continue
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-            fn()
+            ret = fn()
     except AssertionError as e:
         emit({"case": name, "ok": False, "kind": "assert",
               "message": clip(str(e) or "assertion failed", 800),
@@ -137,8 +200,23 @@ for name, fn in checks:
               "message": clip("%s: %s" % (type(e).__name__, e), 800),
               "where": where_of(e, TESTFILE), "output": clip(buf.getvalue(), 1200)})
     else:
-        emit({"case": name, "ok": True, "kind": "pass", "message": "",
-              "where": None, "output": clip(buf.getvalue(), 1200)})
+        if ret is None or ret is True:
+            emit({"case": name, "ok": True, "kind": "pass", "message": "",
+                  "where": None, "output": clip(buf.getvalue(), 1200)})
+        elif ret is False:
+            emit({"case": name, "ok": False, "kind": "assert",
+                  "message": "check returned False (a check fails by raising; "
+                             "returning False is treated as a failure)",
+                  "where": None, "output": clip(buf.getvalue(), 1200)})
+        else:
+            if inspect.iscoroutine(ret):
+                ret.close()
+            emit({"case": name, "ok": False, "kind": "protocol",
+                  "message": ("check returned %s; a check passes by returning None "
+                              "(or True) and fails by raising" % type(ret).__name__),
+                  "where": None, "output": clip(buf.getvalue(), 1200)})
+
+emit({"end": True, "ran": len(checks)})
 '''
 
 
@@ -153,6 +231,110 @@ def test_files(suite_dir: str | pathlib.Path) -> list[pathlib.Path]:
     if not d.is_dir():
         return []
     return sorted(p for p in d.glob("test_*.py") if p.is_file())
+
+
+def declared_cases(test_file: str | pathlib.Path) -> list[str]:
+    """父行程在跑任何候選碼**之前**決定「這個檔案該有幾條 case」。
+
+    只讀語法樹，不 import、不執行：頂層的 `def check_*`（依定義順序）；
+    一個都沒有才看頂層 `def main`。`async def check_*` 也列入——它會被執行、
+    回傳 coroutine、被判 `protocol`，而不是被安靜略過。
+    語法錯誤 ⇒ 回空清單（driver import 時會自己報 `import`）。
+
+    ⚠ 動態產生的 check（`globals()["check_x"] = …`、`from h import check_y`）
+    **不在清單上**，driver 會把它們報成 `protocol` 失敗而不是偷偷跑或偷偷漏。
+    """
+    return _declared_from_source(pathlib.Path(test_file).read_bytes())
+
+
+def _declared_from_source(source: bytes) -> list[str]:
+    try:
+        tree = ast.parse(source.decode("utf-8"))
+    except (SyntaxError, ValueError, UnicodeDecodeError):
+        return []
+    fns = [n for n in tree.body
+           if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+    names: list[str] = []
+    for n in fns:
+        if n.name.startswith("check_") and n.name not in names:
+            names.append(n.name)
+    if names:
+        return names
+    return ["main"] if any(n.name == "main" for n in fns) else []
+
+
+def _parse_records(stdout: str, nonce: str) -> tuple[list[dict], dict | None]:
+    """把 driver 的輸出分成 case 紀錄與結束標記。"""
+    cases: list[dict] = []
+    end: dict | None = None
+    for rec in _parse_cases(stdout, nonce):
+        if rec.get("end") is True and "case" not in rec:
+            end = rec
+        else:
+            cases.append(rec)
+    return cases, end
+
+
+def _reconcile(declared: list[str], records: list[dict], end: dict | None,
+               *, rc: int | None, timed_out: bool) -> tuple[list[dict], bool]:
+    """宣告清單 × 實際回報的對帳。回 `(cases, complete)`。
+
+    `complete` ＝ 每個宣告的 id 恰好一筆、有結束標記、rc 為 0、沒逾時、
+    沒有重複或清單外的 id。任何一條不成立 ⇒ 這個檔案**不可能**全過。
+    """
+    declared_set = set(declared)
+    out: list[dict] = []
+    seen: set[str] = set()
+    problems = False
+    module_failed = False
+    for r in records:
+        cid = r.get("case")
+        if cid in FILE_LEVEL_IDS:
+            out.append({**r, "ok": False})
+            module_failed = module_failed or r.get("kind") == "import"
+            problems = True
+            continue
+        if cid not in declared_set:
+            out.append({**r, "ok": False, "kind": "protocol",
+                        "message": r.get("message") if r.get("kind") == "protocol"
+                        else f"reported a result for {cid!r}, which is not a declared "
+                             f"check in this file"})
+            problems = True
+            continue
+        if cid in seen:
+            out.append({**r, "ok": False, "kind": "protocol",
+                        "message": f"{cid} reported more than one result"})
+            problems = True
+            continue
+        seen.add(cid)
+        out.append(r)
+    missing = [n for n in declared if n not in seen]
+    for n in missing:
+        # import 失敗／逾時：已經有一筆檔案層級紀錄說明原因 ⇒ 補的這幾筆標
+        # `synthesized`，`render_failures` 不重複貼（回饋文字維持舊形狀）。
+        # 其餘（行程無聲地提早結束）是**新資訊**——舊版在這裡判全過——要貼出來。
+        if module_failed:
+            out.append({"case": n, "ok": False, "kind": "import",
+                        "message": "not run: the test file failed to import",
+                        "where": None, "output": "", "synthesized": True})
+            continue
+        why = ("the test process timed out first" if timed_out else
+               f"the test process ended before reaching it (rc={rc})")
+        out.append({"case": n, "ok": False, "kind": "incomplete",
+                    "message": f"this check never reported a result: {why}",
+                    "where": None, "output": "", "synthesized": bool(timed_out)})
+    if missing:
+        problems = True
+    if not timed_out and (end is None or rc not in (0, None)):
+        out.append({"case": "<file>", "ok": False, "kind": "incomplete",
+                    "message": (f"the test process did not finish normally "
+                                f"(rc={rc}, end marker "
+                                f"{'missing' if end is None else 'present'})"),
+                    "where": None, "output": ""})
+        problems = True
+    complete = (not problems and not timed_out and end is not None
+                and rc in (0, None) and bool(declared))
+    return out, complete
 
 
 def _parse_cases(stdout: str, nonce: str) -> list[dict]:
@@ -191,54 +373,71 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
     src = pathlib.Path(suite_dir)
     vroot = pathlib.Path(verify_root).resolve()
     vroot.mkdir(parents=True, exist_ok=True)
-    vdir = vroot / f"_v_{suite}_{secrets.token_hex(8)}"
     files_rec: list[dict] = []
     nonce = f"{_NONCE_PREFIX}{secrets.token_hex(8)}:"
-    try:
-        vdir.mkdir(parents=True)
-        (vdir / "driver.py").write_text(DRIVER_SRC, encoding="utf-8")
-        if src.is_dir():
-            for p in sorted(src.iterdir()):
-                if p.is_file() and p.suffix == ".py":
-                    shutil.copy2(p, vdir / p.name)
-        tfs = test_files(vdir)
-        if not tfs:
-            return _empty_result(suite, task_id,
-                                 reason=f"驗收目錄沒有 test_*.py：{src}")
-        for tf in tfs:
-            rel = tf.name
+    # **先讀進記憶體、先算好每個檔案的宣告清單與雜湊，再跑任何候選碼。**
+    # 每個測試檔各拿一份從記憶體重寫的新目錄 ⇒ 前一個檔案裡跑的候選碼
+    # 改不到後一個檔案的測試碼（`none` 後端沒有唯讀掛載，這是實測過的洞）。
+    blobs: dict[str, bytes] = {}
+    if src.is_dir():
+        for p in sorted(src.iterdir()):
+            if p.is_file() and p.suffix == ".py":
+                blobs[p.name] = p.read_bytes()
+    names = sorted(n for n in blobs if n.startswith("test_"))
+    if not names:
+        return _empty_result(suite, task_id,
+                             reason=f"驗收目錄沒有 test_*.py：{src}")
+    suite_sha = suite_digest(blobs)
+    plan = {n: _declared_from_source(blobs[n]) for n in names}
+    for rel in names:
+        declared = plan[rel]
+        vdir = vroot / f"_v_{suite}_{secrets.token_hex(8)}"
+        try:
+            vdir.mkdir(parents=True)
+            (vdir / "driver.py").write_text(DRIVER_SRC, encoding="utf-8")
+            for n, b in blobs.items():
+                (vdir / n).write_bytes(b)
+            tf = vdir / rel
+            mf = vdir / f"_declared_{tf.stem}.json"
+            mf.write_text(json.dumps(declared), encoding="utf-8")
             cmd = (f"python3 {_q(vdir / 'driver.py')} {_q(ws)} {_q(tf)} "
-                   f"{_q(nonce)}")
-            try:
-                res = sandbox.run(cmd, workspace=ws, timeout_s=timeout_s,
-                                  ro_binds=(vdir,))
-            except SandboxInfraError:
-                raise
-            cases = _parse_cases(res.stdout, nonce)
-            if res.timed_out:
-                cases.append({"case": "<file>", "ok": False, "kind": "timeout",
-                              "message": (f"the checks in this file did not finish "
-                                          f"within {int(timeout_s)} seconds."),
-                              "where": None, "output": ""})
-            elif not cases:
-                cases.append({"case": "<file>", "ok": False, "kind": "driver_error",
-                              "message": _driver_error_message(res),
-                              "where": None,
-                              "output": (res.stderr or "")[-MAX_CASE_OUTPUT_CHARS:]})
-            files_rec.append({
-                "file": rel,
-                "rc": res.rc,
-                "timed_out": res.timed_out,
-                "wall_ms": res.wall_ms,
-                "cases": cases,
-                "passed": sum(1 for c in cases if c.get("ok")),
-                "total": len(cases),
-                "stderr_tail": (res.stderr or "")[-400:],
-            })
-    finally:
-        if vdir.exists() and not keep_verify_dir:
-            shutil.rmtree(vdir, ignore_errors=True)
-    return _finish(suite, task_id, files_rec)
+                   f"{_q(nonce)} {_q(mf)}")
+            res = sandbox.run(cmd, workspace=ws, timeout_s=timeout_s,
+                              ro_binds=(vdir,))
+        finally:
+            if vdir.exists() and not keep_verify_dir:
+                shutil.rmtree(vdir, ignore_errors=True)
+        records, end = _parse_records(res.stdout, nonce)
+        timeout_rec = []
+        if res.timed_out:
+            timeout_rec = [{"case": "<file>", "ok": False, "kind": "timeout",
+                            "message": (f"the checks in this file did not finish "
+                                        f"within {int(timeout_s)} seconds."),
+                            "where": None, "output": ""}]
+        elif not records:
+            records = [{"case": "<file>", "ok": False, "kind": "driver_error",
+                        "message": _driver_error_message(res),
+                        "where": None,
+                        "output": (res.stderr or "")[-MAX_CASE_OUTPUT_CHARS:]}]
+        cases, complete = _reconcile(declared, records, end,
+                                     rc=res.rc, timed_out=res.timed_out)
+        cases = cases + timeout_rec
+        files_rec.append({
+            "file": rel,
+            "sha256": hashlib.sha256(blobs[rel]).hexdigest(),
+            "rc": res.rc,
+            "timed_out": res.timed_out,
+            "wall_ms": res.wall_ms,
+            "declared": declared,
+            "end_marker": end is not None,
+            "complete": complete,
+            "cases": cases,
+            "passed": sum(1 for c in cases if c.get("ok")),
+            "total": len(cases),
+            "stderr_tail": (res.stderr or "")[-400:],
+        })
+    out = _finish(suite, task_id, files_rec, suite_sha256=suite_sha)
+    return out
 
 
 def _driver_error_message(res) -> str:
@@ -258,14 +457,30 @@ def _empty_result(suite: str, task_id: str, *, reason: str) -> dict:
     return rec
 
 
-def _finish(suite: str, task_id: str, files_rec: list[dict]) -> dict:
+def suite_digest(blobs: dict[str, bytes]) -> str:
+    """驗收目錄內容的雜湊（檔名＋每檔 sha256，排序固定）。
+
+    收據要說得出「跑的是**哪一份**驗收」——舊版只簽結果不簽測試本身。
+    """
+    rows = [[n, hashlib.sha256(b).hexdigest()] for n, b in sorted(blobs.items())]
+    return hashlib.sha256(json.dumps(rows, separators=(",", ":")).encode()).hexdigest()
+
+
+def _finish(suite: str, task_id: str, files_rec: list[dict], *,
+            suite_sha256: str | None = None) -> dict:
     passed = sum(f["passed"] for f in files_rec)
     total = sum(f["total"] for f in files_rec)
+    # 每個檔案都要對帳完整。沒有 `complete` 欄位的紀錄（舊呼叫端手造的）
+    # 視為不完整——fail-closed，不是預設為真。
+    complete = bool(files_rec) and all(f.get("complete") is True for f in files_rec)
     rec = {
         "suite": suite, "task_id": task_id, "files": files_rec,
         "passed": passed, "total": total,
         # `total == 0` ⇒ **不是通過**。量不到不是通過（`suitegauge` 的同一條）。
-        "all_pass": bool(total > 0 and passed == total),
+        # `complete` ⇒ 分母是宣告清單，不是回報筆數（報告 §03 P0）。
+        "all_pass": bool(total > 0 and passed == total and complete),
+        "complete": complete,
+        "suite_sha256": suite_sha256,
         "empty_reason": None,
     }
     rec["result_sha256"] = result_digest(rec)
@@ -279,15 +494,22 @@ def result_digest(result: dict) -> str:
     而收據的用途是「同一份工作區跑同一組驗收，結果不會被事後改掉」。
     `wall_ms` 每次都不同，把它算進去等於讓收據永遠對不上自己。
     """
-    reduced = [
-        {"file": f["file"],
-         "cases": [{"case": c.get("case"), "ok": bool(c.get("ok")),
-                    "kind": c.get("kind")} for c in f.get("cases", [])]}
-        for f in result.get("files", [])
-    ]
+    reduced = []
+    for f in result.get("files", []):
+        r = {"file": f["file"],
+             "cases": [{"case": c.get("case"), "ok": bool(c.get("ok")),
+                        "kind": c.get("kind")} for c in f.get("cases", [])]}
+        # 宣告清單是分母的來源 ⇒ 屬於判準欄位。舊紀錄沒有這一欄，雜湊形狀不變。
+        if "declared" in f:
+            r["declared"] = list(f["declared"])
+        reduced.append(r)
     payload = {"suite": result.get("suite"), "task_id": result.get("task_id"),
                "files": reduced, "passed": result.get("passed"),
                "total": result.get("total")}
+    if "complete" in result:
+        payload["complete"] = bool(result["complete"])
+    if result.get("suite_sha256"):
+        payload["suite_sha256"] = result["suite_sha256"]
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":"),
                    ensure_ascii=False).encode("utf-8")).hexdigest()
@@ -308,7 +530,7 @@ def render_failures(result: dict, *, max_cases: int = 6) -> str:
     只給**可見**驗收的結果（呼叫端負責，見 `openwork_arms.ARM_GATE`）。
     隱藏驗收的存在、條數、內容一律不進回饋（§二-5）。
     """
-    bad = failing_cases(result)
+    bad = [c for c in failing_cases(result) if not c.get("synthesized")]
     if not bad:
         return NO_FAILURE_LINE
     lines: list[str] = []

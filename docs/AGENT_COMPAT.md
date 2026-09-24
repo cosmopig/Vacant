@@ -1,5 +1,12 @@
 # 通用 agent 相容性矩陣（`vacant run` V0 實測，2026-09-18；**OpenCode／Claude Code／Codex(API key) 真模型 2026-09-19**；**§11 第二輪、§12 Hermes 2026-09-19**）
 
+> **2026-09-24 起的主線不在這份矩陣上。** 這份量的是「模型通道＋行程結束閘門」（`vacant run`）；
+> 新的通用收件口不看模型流量，四個 agent（pi 0.87.1／Claude Code 2.1.281／OpenCode 1.18.32／
+> Codex 0.156.1）的接法與端到端量測在 [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](../decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)
+> 與 [`ops/intake/evidence_20260924/SUMMARY.md`](../ops/intake/evidence_20260924/SUMMARY.md)（L-fake）。
+> 本檔以下內容仍是 `vacant run` 那一層的歷史量測，一個字都沒改。
+
+
 > 一句話：五個 agent，**五個都接通了、五個都有真模型證據**
 > （Claude Code／Codex／OpenCode／pi／**Hermes**，§8–§10 與 **§12**；pi 靠 R535）。
 > **矩陣裡不再有「完全沒量過」的 agent。**

@@ -23,6 +23,56 @@ in anything outward-facing).
 An existing pattern, not one we invented: supply-chain security does the same thing with
 **in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
 
+## Plugging into your agent: pi / Claude Code / OpenCode / Codex (from 2026-09-24)
+
+The 2026-09-24 external review was right on one point: **a refusal verdict is not a blocked
+delivery**, and the model channel is not what the four agents have in common. This release
+makes the intake real (`vacant_network/intake/`) and plugs it into the four agents
+(`vacant_network/adapters/`) **without looking at model traffic at all**. Decision record:
+[`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md).
+
+```bash
+vacant contract init --task report-001 --deliverable report.md --to dir:../published
+#   edit the claims in .vacant/contract.json (exists, sections, recomputed numbers,
+#   citations, your own command, human review, ...)
+vacant contract lock          # pin source data / acceptance suite by sha256 and sign the
+                              # contract with the owner key (release only follows a locked
+                              # contract; edit it ⇒ lock again)
+vacant install                # add hooks + a skill to pi / Claude Code / OpenCode / Codex (reversible)
+pi                            # use your agent as usual — no `vacant` on its command line
+vacant release                # the recipient re-checks everything, publishes, reads back
+vacant task report            # terminal state of every task ever opened (void and held included)
+```
+
+No hooks needed at all: `vacant do <agent> --prompt "..."` runs the agent's headless mode in an
+isolated workspace and submits the result; any CLI works with `vacant do --cmd '... {prompt} ...'`;
+closed-source services and human uploads go through `vacant intake serve` (HTTP; a submitter
+cannot supply the verdict).
+
+Four real agents + a scripted fake model (**L-fake**; Vacant never touches model traffic), one
+non-code task (report sections, a total recomputed from a pinned CSV, citations that must resolve
+with quotes found verbatim in snapshots the owner pinned) —
+[`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md):
+
+| | pi 0.87.1 | Claude Code 2.1.281 | OpenCode 1.18.32 | Codex 0.156.1 |
+|---|---|---|---|---|
+| wrong report (total 999) written to the destination by `vacant release`? | no | no | no | no |
+| right report accepted and read back at the destination? | yes | yes | yes | yes |
+| pre-delivery feedback reached the model (hooks)? | yes | yes | **no** (`opencode run` exits at the first idle) | yes |
+| contract-forbidden `git push` denied by the agent's own hook, no side effect? (persistent install and `vacant do` per-run injection, both measured) | yes | yes | yes | yes |
+| the Vacant skill's description appears in the requests the model received? | yes | yes | yes | yes |
+| user's original config byte-identical after uninstall and after a per-run-injection run? | yes | yes | yes | yes |
+
+⚠ **Do not read this table as**: "the agent cannot bypass Vacant" (agents can remove hooks and
+shell can evade string rules — the guarantee is at the recipient only), "Vacant makes agents
+better" (the fix after feedback is **scripted**, not model capability), or "holds with real
+models" (this round is L-fake), or "the destination has only this one write path" (a `dir:`
+destination is an ordinary directory under the same account; that takes deployment: another
+account, ACLs, branch protection). This round ran **after the adversarial review fixes** (five
+lenses, 60 findings each reproduced; fixed and not-fixed are listed in the decision's §十一).
+The old resident model-channel install still exists
+(`vacant possess install`, or `vacant install --observe-model`) but it no longer decides acceptance.
+
 ## ⚠ Read this before installing: `pip install vacant` does not install this project
 
 The `vacant` name on PyPI (measured 2026-09-19: version 0.4.15, a 7.5 MB
@@ -814,7 +864,8 @@ Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/
 
 These are true and have code behind them:
 
-- **The intake check cannot be routed around.** `vacant_network/receipt.py` plus
+- **The intake check re-verifies everything; getting past it takes the signing key** (by
+  default a plaintext file in the same OS account). `vacant_network/receipt.py` plus
   `controller.verify_delivery` **recompute five sha256 digests** (request, task, tests,
   answer, trust card), verify the Ed25519 signature, compare `chain_head` / `stream_id` /
   `branch_id` against the **chain as it stands right now**, confirm every review is bound to
@@ -831,7 +882,7 @@ These are true and have code behind them:
   see this test code"*. The candidate **structurally cannot read the tests** — it is not a
   blocklist.
 - **"Not measured is not passed" is written as code**:
-  `"all_pass": bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`);
+  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:481`);
   likewise the gauge requires `n_broken >= 1`, so an empty stub set cannot succeed vacuously.
 - **Refusal really happens**: in R532's 836 tasks the gated arm refused 25 deliveries and
   the loop arm 68 — and refusals are in the denominator of every rate.
@@ -912,8 +963,8 @@ machine-readable facts block, is [`AGENTS.md`](https://github.com/cosmopig/Vacan
 | **Harness owns the loop** | e.g. `ops/gain/r530/openwork_arms.py:642-696` | **Yes — the harness is the loop.** |
 
 **The right framing is "receiving desk", not "mandatory layer".** Enforcement happens at
-**acceptance time** — a delivery without a verifiable receipt is not accepted, and **that
-check cannot be routed around** (`vacant_network/receipt.py` + `controller.verify_delivery`
+**acceptance time** — a delivery without a verifiable receipt is not accepted, and **getting
+past that check takes the signing key** (`vacant_network/receipt.py` + `controller.verify_delivery`
 recompute five sha256 digests, verify Ed25519, compare `chain_head`, and `os.O_EXCL` makes a
 receipt consumable exactly once). Enforcement does **not** happen at execution time: making
 Vacant the single exit on a machine takes containers, ACLs or egress policy, which is the
@@ -979,7 +1030,7 @@ red line A4).
 - **I-3** Self-reported success is never taken on faith (`ecosystem.py:531`, then
   `controller.py:299-300` independently).
 - **I-4** "Not measured" is failure, in code:
-  `bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`); the gauge
+  `bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:481`); the gauge
   requires `n_broken >= 1`.
 - **I-5** The gauge is two-sided: the reference must pass **and** every known-bad stub must
   be rejected.
@@ -1048,8 +1099,8 @@ The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main
                   "not_recommended_for_integrators": "harness_owns_loop",
                   "enforced_at": "acceptance time", "not_enforced_at": "execution time",
                   "prior_art": ["in-toto", "SLSA", "Sigstore"],
-                  "reference_monitor_Saltzer_Schroeder_1975": {
-                    "tamper_proof": true, "small_enough_to_verify": true,
+                  "reference_monitor_properties_Anderson_1972": {
+                    "tamper_proof": false, "tamper_evident": true, "small_enough_to_verify": true,
                     "complete_mediation": false},
                   "library": "voluntary", "mcp_tool": "advisory",
                   "controller": "binding on its own spawned subprocess only",

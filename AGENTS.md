@@ -42,16 +42,41 @@ about Vacant, do not call it a trust layer.
 
 ---
 
+## 0a. If the project has a task contract (2026-09-24)
+
+If you (an agent) are working in a project that has `.vacant/contract.json` or
+`vacant.contract.json`, that file defines what counts as a finished deliverable:
+`deliverable.include` (which files), `claims` (each requirement and the verifier that checks it)
+and `release.destination` (where an accepted version is published — not by you).
+
+- Before you say the task is finished, run `vacant check` (or `python3 -m vacant_network check`).
+  One line per claim: `PASS`, `FAIL`, `UNKNOWN` (cannot be decided yet, e.g. awaiting human review)
+  or `CONFLICT`. Exit 0 means every required claim passed. `--json` for machine output. It records
+  and publishes nothing.
+- Do not edit `.vacant/`, the files under the contract's `inputs`, or `~/.vacant/`. Inputs are
+  pinned by sha256; a changed input makes its claim `UNKNOWN`, never `PASS`.
+- Publishing is a separate, re-checked step (`vacant release`) owned by whoever holds the release
+  decision. `vacant release` only writes a version whose signed decision, contract hash,
+  quarantine hashes and (if required) bound approval all check out.
+- The verdict never depends on model traffic, your exit code, or what you say you did.
+
+Design and evidence: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`,
+`ops/intake/evidence_20260924/SUMMARY.md` (pi, Claude Code, OpenCode and Codex, L-fake).
+
 ## 1. What is enforced, and what is only advice
 
 **Read this before claiming Vacant "wraps" anything.** Vacant is not automatically
 binding just because it is installed. Whether it can be bypassed depends entirely on
 which of four shapes you deploy.
 
-In reference-monitor terms (Saltzer & Schroeder 1975), Vacant satisfies **tamper-proof**
-and **small enough to be verified**, and does **not** satisfy **complete mediation**. That
-is the unavoidable consequence of being optional, not a defect — and it is why the honest
-word is *receiving desk*, not *mandatory layer*.
+In reference-monitor terms (the three properties trace to Anderson 1972; Saltzer & Schroeder
+1975 is only the *complete mediation* principle), Vacant is **small enough to be verified**,
+is **tamper-evident but not tamper-proof** (signing keys are plaintext files under the same OS
+account as the agent unless you move the recipient to another account or machine), and does
+**not** provide **complete mediation**. That is the unavoidable consequence of being optional,
+not a defect — and it is why the honest word is *receiving desk*, not *mandatory layer*.
+(Corrected 2026-09-24: this paragraph previously claimed "tamper-proof";
+see `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md` §六.)
 
 | Shape | Entry point | Binding on the agent? |
 |---|---|---|
@@ -70,7 +95,9 @@ be read as softening:
 > stop the same OS user from running the agent directly instead. A machine-wide single
 > exit requires containers, ACLs, or egress policy.)*
 
-**What *is* unconditional: the intake check itself cannot be routed around.**
+**What the intake check does, and its one condition:** it re-verifies every digest and
+signature, so getting past it takes the signing key — and by default that key is a plaintext
+file in the same OS account (move it to another account for a stronger boundary).
 `vacant_network/receipt.py` plus `controller.verify_delivery` **recompute five sha256 digests**
 (request, task, tests, answer, trust card), verify the Ed25519 signature, compare
 `chain_head` / `stream_id` / `branch_id` against the chain as it stands **right now**,
@@ -380,7 +407,7 @@ Each one is falsifiable; the check is given.
   independently, before any launch (`vacant_network/controller.py:299-300` →
   `GateRejected("local objective re-check rejected the delivered answer")`).
 - **I-4 — "Not measured" is not "passed", and it is written as code.**
-  `"all_pass": bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`) —
+  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:481`) —
   a suite that reported zero tests fails. Same shape in the library: `GaugeOutcome.ok`
   requires `n_broken >= 1`, so an empty set of known-bad stubs cannot satisfy
   `all_rejected` vacuously (that would be fail-open).
@@ -601,8 +628,9 @@ carries the file that produced it.
     "not_enforced_at": "execution time",
     "intake_check": "vacant_network/receipt.py + controller.verify_delivery: 5 sha256 recomputed, Ed25519 verified, chain_head/stream_id/branch_id compared against the live chain, os.O_EXCL makes a receipt consumable once",
     "prior_art": ["in-toto", "SLSA", "Sigstore"],
-    "reference_monitor_Saltzer_Schroeder_1975": {
-      "tamper_proof": true,
+    "reference_monitor_properties_Anderson_1972": {
+      "tamper_proof": false,
+      "tamper_evident": true,
       "small_enough_to_verify": true,
       "complete_mediation": false
     },

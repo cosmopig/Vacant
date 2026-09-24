@@ -86,12 +86,42 @@
 - `vacant_network/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
 - `vacant_network/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
 
+### `vacant_network/intake/` ＋ `adapters/` — **通用收件口與四個 agent 的接法**（2026-09-24）
+
+裁決：`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`（**部分取代** COMPLETE_MEDIATION：
+新產品路徑裡模型中介不再是收件的前提）。證據：`ops/intake/evidence_20260924/`（L-fake，四個真 agent）。
+
+- `intake/contract.py` — 任務契約（未知欄位一律拒絕；`inputs` 以 sha256 釘住；`authority` 四種）
+- `intake/artifact.py` — 內容定址隔離區（竄改可偵測，不是不可能）
+- `intake/verifiers.py` — 驗證原語，結果只有 PASS／FAIL／UNKNOWN／CONFLICT；**驗證器壞掉＝UNKNOWN**
+- `intake/policy.py` — 裁決規則寫死；事實主張只收獨立證據；分母是契約
+- `intake/keys.py`／`approval.py` — 長期金鑰（verifier／approver／reviewer／**owner**）＋**收件端自己的**
+  簽章者清單；綁定內容、一次性的批准；**契約鎖**（`vacant contract lock`＝owner 簽「這個任務＝這個契約
+  雜湊＋放行政策」，收件端只依被鎖過的契約放行）。清單裡已有別人的 owner／approver／reviewer 時本機金鑰不自動加入
+- `intake/recipients.py` — `vacant release` 的接受點：自己重驗一切（契約鎖、裁決、隔離區、綁**解析後**
+  目的端的批准、帳本沒被截短）、發布、讀回（`dir:`／`git:`）。⚠ 只管它自己寫的那個目的端
+- `intake/ledger.py` — 每個任務的終態（含 `infra_void`），分母＝開過的任務
+- `intake/server.py` — HTTP 收件口（提交者給不了裁決；沒 token 不啟動）
+- `adapters/agents.py` — pi／Claude Code／OpenCode／Codex 的翻譯表（headless、加法式掛鉤、常駐安裝、技能）
+- `adapters/hook.py`＋`hookpolicy.py` — `vacant hook`：四種原生格式 → 一份政策
+- `adapters/install.py` — 鍵層級可逆安裝（使用者沒改過就逐位元還原）
+- `adapters/run.py` — `vacant do`：隔離工作區（`~/.vacant-work`，**不可在 `$VACANT_HOME` 底下**）＋headless＋交件；
+  中斷殺行程群組並記 `infra_void`；只在有必要主張 FAIL 時重試
+- 收件口的驗證沙箱一律 **hermetic**（`vrun/sandbox.py` 的 `hermetic=True`：不讀成果裡的 shell 啟動檔、
+  不載 python user site、HOME 不在成果裡）；**vrun 的 `bash -lc` 舊行為不動**（歸檔 run 可比）
+- 對抗審查（裁決 §十一，60 條逐條重現）的回歸：`tests/test_{intake_gate,intake_verifier,adapters}_hardening.py`
+
+🔴 口徑：✅「不合格的版本沒有出現在收件端的目的地」（只對經過 `vacant release` 的那個目的端）；
+❌「agent 不會繞過」「Vacant 讓 agent 做得更好」（回饋後改對是劇本）；❌「OpenCode 有交件前回饋」
+（`opencode run` 在第一個 idle 就結束）。⚠ `vacant install` 現在是通用安裝器，舊的模型通道常駐安裝是
+`vacant possess install`；`vacant uninstall`（不帶 `--agents`）會一起拆掉它。
+
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 
 ⚠ **這 15 支在 2026-09-20 之前完全沒有出現在這張地圖上**，而它現在是「**Vacant 附身在
 任何 agent 上**」的全部實作。裁決在 `decisions/DECISION_20260920_*.md` 五份。
 
-- `possess.py` — **`vacant install`**：把 proxy 端點寫進五個 agent **自己的常駐設定檔**
+- `possess.py` — **`vacant possess install`**（0.8.0 時叫 `vacant install`）：把 proxy 端點寫進五個 agent **自己的常駐設定檔**
   ⇒ 通道層做得到**真正的預設**（關掉終端機、重開機、打完整路徑都還在）。
   `NEVER_TOUCH` 守住所有 `auth.json`。也釘 Codex 的 `sandbox_mode` 並把
   `agent_posture{sandbox_mode, approval_policy, flags[]}` 寫進收據

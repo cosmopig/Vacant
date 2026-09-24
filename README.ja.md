@@ -21,6 +21,16 @@ Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前�
 我々の発明ではなく既存のパターンである：サプライチェーン・セキュリティの
 **in-toto／SLSA／Sigstore** も同じ——正当な attestation を伴わない artifact は受入時に拒否される。
 
+
+## エージェントへの接続：pi／Claude Code／OpenCode／Codex（2026-09-24〜）
+
+判定は阻止ではない——2026-09-24 の外部レビューの指摘を受け、受領口（`vacant_network/intake/`）を実装し、
+4 つのエージェントに接続した（`vacant_network/adapters/`）。モデル通信は一切見ない。
+`vacant contract init` → `vacant contract lock`（入力を sha256 で固定し、owner 鍵で契約に署名）→ `vacant install` → エージェントを普段どおり使う → `vacant release`。
+4 エージェント × 非コードタスクの実測（L-fake：本物のエージェント＋台本どおりの偽モデル）は
+[`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md)、
+裁定は [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。
+
 ## ⚠ 入れる前にこれを読む：`pip install vacant` で入るのは本プロジェクトではない
 
 PyPI の `vacant`（2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylinux`
@@ -777,7 +787,7 @@ flowchart LR
 
 以下は本当であり、コードの裏付けがある。控えめに書く必要はない：
 
-- **受付のところは迂回できない。** `vacant_network/receipt.py` ＋ `controller.verify_delivery` が
+- **受付は全項目を再検証する。越えるには署名鍵が要る**（既定では同じ OS アカウント内の平文ファイル）。 `vacant_network/receipt.py` ＋ `controller.verify_delivery` が
   **5 つの sha256 を再計算**し（request／task／tests／answer／trust card）、Ed25519 署名を検証し、
   `chain_head`／`stream_id`／`branch_id` を**現に生きているチェーン**と突き合わせ、各査読が
   この納品そのものに束縛されていることを確認し、そのうえで初めて `policy.admit` する。
@@ -792,7 +802,7 @@ flowchart LR
   `ops/gain/gain_run.py:957` のコメント逐語：*"the candidate worker cannot see this test code"*。
   候補コードは**構造的にテストコードを見られない**——ブロックリストではない。
 - **「計測できていないことは通過ではない」がコードになっている**：
-  `"all_pass": bool(total > 0 and passed == total)`（`vacant_network/vrun/acceptance.py:268`）。
+  `"all_pass": bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:481`）。
   ゲージも同様に `n_broken >= 1` を要求し、空のスタブ集合では空虚に成立しない。
 - **拒否は実際に起きる**：R532 の 836 問でゲート腕は 25 件、ループ腕は 68 件を拒否し、
   拒否はすべての比率の分母に入っている。
@@ -868,7 +878,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 | **ハーネスがループを所有** | 例：`ops/gain/r530/openwork_arms.py:642-696` | **する——ハーネスがループそのもの。** |
 
 **正しい位置づけは「強制層」ではなく「受付窓口」である。** 強制点は**受入時**にある——
-検証可能な領収書を伴わない納品は受理されず、**その関門は迂回できない**
+検証可能な領収書を伴わない納品は受理されず、**その関門を越えるには署名鍵が要る**
 （`vacant_network/receipt.py` ＋ `controller.verify_delivery` が 5 つの sha256 を再計算し、Ed25519 を
 検証し、`chain_head` を突き合わせ、`os.O_EXCL` により領収書は一度しか消費できない）。
 強制点は**実行時にはない**：Vacant をマシン唯一の出口にするにはコンテナ／ACL／egress policy
@@ -929,7 +939,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   literal-only RPC（`vacant_network/checks.py:577-600`、`444-457`）。
 - **I-3** 自己申告は採用されない（`ecosystem.py:531`、さらに `controller.py:299-300` で独立に再実行）。
 - **I-4** 「計測できていない＝不通過」がコードになっている：
-  `bool(total > 0 and passed == total)`（`vacant_network/vrun/acceptance.py:268`）。ゲージは `n_broken >= 1` を要求。
+  `bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:481`）。ゲージは `n_broken >= 1` を要求。
 - **I-5** ゲージは両側：参照解が通ること**かつ**既知の壊れたスタブがすべて弾かれること。
 - **I-6** `suitespec.render(spec)` は決定的なので `render_sha256` はマシン横断で比較できる。
 - **I-7** 拒否は実際に起き、分母に数えられる：R532 836 問でゲート腕 25 件、ループ腕 68 件。
@@ -992,8 +1002,8 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
                   "not_recommended_for_integrators": "harness_owns_loop",
                   "enforced_at": "acceptance time", "not_enforced_at": "execution time",
                   "prior_art": ["in-toto", "SLSA", "Sigstore"],
-                  "reference_monitor_Saltzer_Schroeder_1975": {
-                    "tamper_proof": true, "small_enough_to_verify": true,
+                  "reference_monitor_properties_Anderson_1972": {
+                    "tamper_proof": false, "tamper_evident": true, "small_enough_to_verify": true,
                     "complete_mediation": false},
                   "library": "voluntary", "mcp_tool": "advisory",
                   "controller": "binding on its own spawned subprocess only",
