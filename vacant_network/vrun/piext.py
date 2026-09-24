@@ -179,6 +179,9 @@ const BORROWED = borrowKey();
 // ── 狀態：這個 session 有沒有開、開之前用的是哪個模型 ────────────────────────
 let enabled = true;
 let previous = null;   // {provider, id} —— /vacant off 切回去用
+// /vacant off 自己已經寫過一筆 vacant_off；它接著呼叫 pi.setModel(previous) 會觸發
+// model_select，那一筆不可以再寫第二次（不變式：每一次切離 vacant 恰好一筆痕跡）。
+let offInProgress = false;
 
 function pickVacantModel(ctx) {
   const reg = ctx && ctx.modelRegistry;
@@ -226,11 +229,26 @@ export default function (pi) {
     compat: { supportsDeveloperRole: false, supportsReasoningEffort: false },
     models: (BAKED_MODELS.length ? BAKED_MODELS : [DEFAULT_MODEL]).map(modelDef),
     // 上游目錄變了就重抓；這一通同時是一次會進 journal 的 canary。
+    // ⚠ **永遠不回空清單、也不 throw**：proxyd 起來了但上游是 sink／掛了時，
+    //   /v1/models 會回 502（常常不是 JSON）或 JSON 錯誤體。若照回 `[]`（或拋錯讓 pi
+    //   自己決定），pi 可能拿它蓋掉 provider 的模型清單 ⇒ 烤進去的模型消失、
+    //   pickVacantModel 找不到 ⇒ `/vacant on`／session_start 報「沒有模型」而**沒有切過去**，
+    //   使用者就安靜地停在原 provider 上。那不是 fail-closed，是 fail-open。
+    //   pi 0.87.0 對 refreshModels 拋錯時保留舊清單還是清空，NOTE_20260922 沒有讀到
+    //   ⇒ 不賭它：非 2xx／例外／空清單一律回烤進去的那份。模型仍指到 vacant，
+    //   上游壞掉就在連線那一刻失敗（誠實邊界 4），而不是在選模型那一刻繞開。
     async refreshModels({ signal }) {
-      const r = await fetch(BASE + "/models?vacant_canary=refresh-" + runId, { signal });
-      const body = await r.json();
-      const data = Array.isArray(body && body.data) ? body.data : [];
-      return data.filter((m) => m && typeof m.id === "string").map((m) => modelDef(m.id));
+      const baked = () => (BAKED_MODELS.length ? BAKED_MODELS : [DEFAULT_MODEL]).map(modelDef);
+      try {
+        const r = await fetch(BASE + "/models?vacant_canary=refresh-" + runId, { signal });
+        if (!r || !r.ok) return baked();
+        const body = await r.json();
+        const data = Array.isArray(body && body.data) ? body.data : [];
+        const out = data.filter((m) => m && typeof m.id === "string").map((m) => modelDef(m.id));
+        return out.length ? out : baked();
+      } catch (e) {
+        return baked();
+      }
     },
   });
 
@@ -260,7 +278,12 @@ export default function (pi) {
         if (to && ctx && ctx.modelRegistry) {
           let m = null;
           try { m = ctx.modelRegistry.find(to.provider, to.id); } catch (e) { m = null; }
-          if (m && await pi.setModel(m)) {
+          let switched = false;
+          if (m) {
+            offInProgress = true;
+            try { switched = await pi.setModel(m); } finally { offInProgress = false; }
+          }
+          if (switched) {
             notify(ctx, "Vacant 關：切回 " + to.provider + "/" + to.id + "。⚠ 這一段不經過 Vacant，掛鉤日誌記了一筆 vacant_off。", "warning");
             return;
           }
@@ -308,8 +331,9 @@ export default function (pi) {
   pi.on("before_provider_request", () => { fire("before_provider_request", {}); });
   pi.on("model_select", (event) => {
     // 使用者用 /model 切走 ＝ 這一段不經過 Vacant。**留痕，不擋。**
+    // /vacant off 切回去時那一筆已經由指令寫過 ⇒ 這裡跳過，不重複。
     const m = event && event.model;
-    if (m && m.provider !== PROVIDER) {
+    if (m && m.provider !== PROVIDER && !offInProgress) {
       fire("vacant_off", { from: PROVIDER, to: m.provider + "/" + m.id, source: (event && event.source) || "model_select" });
     }
   });
