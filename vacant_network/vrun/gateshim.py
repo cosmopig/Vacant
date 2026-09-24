@@ -570,8 +570,12 @@ def exec_inner(agent: str, argv: list[str]) -> int:
         (cfg / "models.json").write_text(json.dumps({"providers": {"vacant": {
             "baseUrl": f"{base}/v1", "api": "openai-completions",
             "apiKey": env.get("OPENAI_API_KEY", "sk-vacant-possess"),
+            # `supportsStore: False`（2026-09-24 接 Gemini 實測）：pi 預設送 `"store": false`，
+            #   Gemini 的 OpenAI 相容端點回 400「Unknown name "store"」。不送這個欄位等同
+            #   OpenAI 的預設值，LM Studio 本來就忽略它 ⇒ 對既有後端沒有影響。
             "compat": {"supportsDeveloperRole": False,
-                       "supportsReasoningEffort": False},
+                       "supportsReasoningEffort": False,
+                       "supportsStore": False},
             "models": [{"id": model or "gemma-4-12b-it-qat", "name": "m",
                         "contextWindow": 262144, "maxTokens": 16384}]}}},
             ensure_ascii=False), "utf-8")

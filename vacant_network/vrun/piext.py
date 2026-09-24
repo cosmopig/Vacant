@@ -66,11 +66,14 @@ pi 的 `isExtensionFile` 只認 `.ts`／`.js`（`chunk-4DKZACXI.js`，jiti 載�
    解析；本檔不自己跑 `!命令`）⇒ 上游要金鑰就一律 401（2026-09-24 實測），烤進來的清單
    是空的、`refreshModels` 也拿不到。所以 `vacant` provider 的模型次序是：
    **邊界 7 那個 provider 的 `models`**（只抄 id／name／contextWindow／maxTokens／
-   reasoning／input；`cost` 歸零、`headers`／`authHeader`／`compat` 不抄）→ 裝機時烤進來的
+   reasoning／input；`cost` 歸零、`headers`／`authHeader` 不抄；`compat` 見邊界 10）→ 裝機時烤進來的
    → `DEFAULT_MODEL`。落到最後那一格時清單是**猜的**：上游沒有那個 id 就每一通 404
    （fail-closed，不會繞開），`session_start` 會講。`/vacant on` 先找使用者**現在用的那個
    id**（＝同一個模型、經過 Vacant），找不到才依 `VACANT_AGENT_MODEL`→`DEFAULT_MODEL`→
-   第一個。⚠ 同 id 不保證同一個模型設定：借來的欄位以外（`compat`、自訂 headers）不一樣。
+   第一個。⚠ 同 id 不保證同一個模型設定：借來的欄位以外（model 層 compat、自訂 headers）不一樣。
+10. **compat（上游的方言）也借**：provider 層的 `compat` 物件蓋在預設值上。2026-09-24 接 Gemini
+   的 OpenAI 相容端點實測：它回 400「Unknown name "store"」，使用者要寫 `supportsStore:false`；
+   vacant provider 若不跟著寫，裝了 Vacant 就壞。model 層的 compat、`headers`、`authHeader` 仍不抄。
 """
 from __future__ import annotations
 
@@ -144,7 +147,7 @@ function notify(ctx, text, level) {
 
 // src ＝ 使用者 models.json 裡那個 provider 的 model 條目（借來的；可缺）。
 // 只抄 name／reasoning／input／contextWindow／maxTokens；cost 不抄（我們不替別人記帳）、
-// headers／authHeader／compat 不抄（誠實邊界 7、9）。
+// headers／authHeader 不抄（誠實邊界 7、9）；compat 另外在 provider 層借（邊界 10）。
 function modelDef(id, src) {
   const s = src && typeof src === "object" ? src : {};
   const pos = (v, d) => (typeof v === "number" && isFinite(v) && v > 0 ? v : d);
@@ -229,6 +232,19 @@ const BORROWED_MODELS = borrowModels();
 // ⚠ 要金鑰的上游對「不帶 Authorization 的探測」一律 401 ⇒ 裝機時 BAKED_MODELS 是空的、
 //   refreshModels 也拿不到 ⇒ 若只剩 DEFAULT_MODEL，那是**猜的**，上游多半沒有這個 id（每一通 404）。
 //   所以次序是：借來的清單 → 裝機時烤進來的 → DEFAULT_MODEL（誠實邊界 9）。
+// compat：**上游的方言**。vacant provider 轉去的是同一個上游，就得講同一種方言
+// （2026-09-24 接 Gemini 實測：它不認得 `store` 欄位，使用者自己要寫 `supportsStore:false`，
+//  vacant provider 不跟著寫就 400）。預設值不變，使用者那個 provider 寫了什麼就蓋過去。
+// 只抄 provider 層的 `compat`（物件）；model 層的 compat、headers、authHeader 仍不抄（誠實邊界 10）。
+function borrowCompat() {
+  const out = { supportsDeveloperRole: false, supportsReasoningEffort: false };
+  const first = BORROWED ? MATCHED.filter((x) => x.id === BORROWED.provider) : [];
+  for (const { p } of first.concat(MATCHED.filter((x) => !BORROWED || x.id !== BORROWED.provider))) {
+    const c = p && p.compat;
+    if (c && typeof c === "object" && !Array.isArray(c)) return Object.assign(out, c);
+  }
+  return out;
+}
 const MODEL_SOURCE = BORROWED_MODELS ? "borrowed" : (BAKED_MODELS.length ? "baked" : "default");
 function baseModels() {                // 每次回新物件（pi 可能改它拿到的陣列）
   if (BORROWED_MODELS) return modelDefsFrom(BORROWED_MODELS.raw);
@@ -307,7 +323,8 @@ export default function (pi) {
     // 使用者自己的金鑰設定字串（借來的）或佔位；proxyd sentinel="" ⇒ Authorization 原樣穿透
     apiKey: BORROWED ? BORROWED.apiKey : "sk-vacant-possess",
     api: "openai-completions",
-    compat: { supportsDeveloperRole: false, supportsReasoningEffort: false },
+    // 預設 ＋ 使用者那個 provider 自己的 compat（誠實邊界 10）
+    compat: borrowCompat(),
     // 借來的清單 → 裝機時烤進來的 → DEFAULT_MODEL（誠實邊界 9）
     models: baseModels(),
     // 上游目錄變了就重抓；這一通同時是一次會進 journal 的 canary。

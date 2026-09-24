@@ -94,6 +94,7 @@ if (scenario === "registered") {
   out.defs = providers.vacant.models;
   out.models = out.defs.map((m) => m.id);
   out.apiKey = providers.vacant.apiKey;
+  out.compat = providers.vacant.compat;
   out.provider_keys = Object.keys(providers.vacant).sort();
 } else if (scenario === "refresh_502_text") {
   globalThis.fetch = withCount(async () => new Response("<html>502 Bad Gateway</html>",
@@ -419,3 +420,22 @@ def test_empty_or_status_still_runs_status(tmp_path, arg):
     assert out["fetch_calls"] == 1
     assert len(out["notes"]) == 1 and out["notes"][0]["text"].startswith("Vacant status")
     assert "模型清單" in out["notes"][0]["text"]
+
+
+def test_compat_is_borrowed_from_the_users_provider(tmp_path):
+    """2026-09-24 接 Gemini 實測：它回 400「Unknown name "store"」，使用者自己要寫
+    `compat.supportsStore:false`。vacant provider 轉去同一個上游，**方言要跟著借**，
+    否則裝了 Vacant 就壞。預設值保留、使用者寫的蓋過去；別家 provider 的 compat 不借。"""
+    provs = _keyed_providers()
+    provs["openai"]["compat"] = {"supportsStore": False, "supportsDeveloperRole": True}
+    provs["elsewhere"]["compat"] = {"supportsStore": True, "maxTokensField": "max_tokens"}
+    out, _ = _run(tmp_path, "registered", models=[], upstream=UP,
+                  pi_agent_dir=_agent_dir(tmp_path, provs))
+    assert out["compat"] == {"supportsDeveloperRole": True, "supportsReasoningEffort": False,
+                             "supportsStore": False}
+
+
+def test_compat_defaults_when_user_provider_has_none(tmp_path):
+    out, _ = _run(tmp_path, "registered", models=[], upstream=UP,
+                  pi_agent_dir=_agent_dir(tmp_path, _keyed_providers()))
+    assert out["compat"] == {"supportsDeveloperRole": False, "supportsReasoningEffort": False}
