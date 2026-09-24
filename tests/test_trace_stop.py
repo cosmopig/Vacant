@@ -134,6 +134,8 @@ def test_human_flag_is_signed_traced_and_reaches_the_next_turn(proj, capsys):
     d = json.loads(o)
     assert d["decision"] == "block" and "marked these places" in d["reason"]
     assert 'report.md:2 says "Alicia"' in d["reason"] and "Alice, not Alicia" in d["reason"]
+    assert "the task owner says: the mayor is Alice" in d["reason"]      # 是人說的，不是某個檢查
+    assert "check says" not in d["reason"]
     rep = (R.Recorder(p).dir / "report.md").read_text()
     assert "the mayor is Alice, not Alicia" in rep
     # agent 改掉之後：標記解決、放行

@@ -16,6 +16,7 @@
 情境 F 的「網站」是 `portal.vacant-lab.test`：實驗環境把 agent 的 `http_proxy` 指到假模型（像公司的代理），
 所以 agent 下的指令就是一般的 `curl http://portal.vacant-lab.test/…`。**本機的網址（localhost、這台機器的位址）
 不算外部來源**（agent 可能自己開了伺服器）；Vacant 看不到代理／DNS 把名字指到哪裡，這是誠實邊界。
+| H 人標記了檢查抓不到的錯 | 第一跑：總數對、但「Region: South」錯（契約沒檢查地區）⇒ 收件 accept；人下 `vacant flag report.md:4 "…North…"`；第二跑：agent 什麼都沒做就要結束 | 回合結束時把標記回饋給 agent（契約過了也照樣），改好之後標記解決；追緝指到第一跑寫下那一行的那一步 |
 | G 背景子 agent（只有 Claude Code）| 同 E，但子 agent 在背景跑；主 agent 從 `<task-notification>` 照抄數字 | 同 E：指到子 agent；那則通知不可以被當成使用者說的話 |
 | E 子 agent 算錯、主 agent 照抄 | 主 agent 用自己的委派工具交給子 agent（`ROLE:sub`）→ 子 agent 讀帳本、把 96 寫進 `figure.txt` → 主 agent 讀它、寫進報告 | `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步（行動者帶子 agent 的 id） |
 
@@ -95,6 +96,16 @@ SCENARIOS: dict[str, dict] = {
         "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
                           {"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
                 "final": "The portal disagrees with the ledger; used the ledger."}},
+    "H_human_flag": {
+        "steps": [{"run": "cat inputs/ledger.csv"},
+                  {"write": ["report.md", "# Quarter\n\nTotal: 69\nRegion: South\n"]}],
+        "final": "Done.",
+        # 人在兩跑之間標記；第二跑的劇本：
+        "flag": ["report.md:4", "the region is North, not South"],
+        "second": {"steps": [], "final": "Nothing left to do.",
+                   "fix": {"steps": [{"write": ["report.md",
+                                                "# Quarter\n\nTotal: 69\nRegion: North\n"]}],
+                           "final": "Fixed the region."}}},
     "G_background_subagent_fault": {
         # Claude Code 預設把子 agent 放到背景：主 agent 先收到「已啟動」，結果之後以一則
         # `<task-notification>` 使用者訊息回來；主 agent 直接照抄通知裡的數字（沒有讀檔）
@@ -138,6 +149,8 @@ EXPECT = {
     "G_background_subagent_fault": {"state": "located", "fault_class": "agent",
                                     "confidence": "lineage_internal", "step_writes": "figure.txt",
                                     "subagent": True},
+    "H_human_flag": {"state": "located", "fault_class": "agent", "confidence": "heuristic",
+                     "step_writes": "report.md", "claim_prefix": "flag:"},
     "E_subagent_fault": {"state": "located", "fault_class": "agent",
                          "confidence": "lineage_internal", "step_writes": "figure.txt",
                          "subagent": True},
@@ -259,6 +272,22 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     wall = round(time.time() - t0, 1)
     lab.stop_mock()
     time.sleep(3)                                   # 背景的 submit／finalize
+    sc = SCENARIOS[scn]
+    if "second" in sc:
+        # 人在兩跑之間標記了一個契約檢查不到的錯；第二跑是新的工作階段
+        fl = lab.vacant("flag", sc["flag"][0], sc["flag"][1])
+        err_tail += f" | flag rc={fl.returncode}"
+        lab.mock_log.rename(lab.mock_log.with_suffix(".run1.jsonl"))
+        lab.start_mock(sc["second"])
+        try:
+            cp = subprocess.run(lab.native_argv(PROMPT), cwd=lab.proj, env=env,
+                                capture_output=True, text=True, timeout=timeout,
+                                stdin=subprocess.DEVNULL)
+            rc = cp.returncode
+        except subprocess.TimeoutExpired:
+            rc, err_tail = None, err_tail + " | second run timeout"
+        lab.stop_mock()
+        time.sleep(3)
     if scn == "D_unrecorded_change":
         # 負控制：agent 走了之後，有人在外面把報告改掉（沒有任何一步做這件事）
         (lab.proj / "report.md").write_text("# Quarter\n\nTotal: 999\n")
@@ -270,8 +299,10 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
             time.sleep(1)
     evs = lab.trace_events()
     steps = {e.get("n"): e for e in evs if e["type"] == "step"}
+    prefix = EXPECT[scn].get("claim_prefix")
     findings = [e for e in evs if e["type"] == "finding" and e.get("status") == "open"
-                and e.get("claim") == "total"]
+                and (str(e.get("claim", "")).startswith(prefix) if prefix
+                     else e.get("claim") == "total")]
     f = dict(findings[0]) if findings else None
     if f and f.get("step"):
         s = steps.get(f["step"].get("n")) or {}

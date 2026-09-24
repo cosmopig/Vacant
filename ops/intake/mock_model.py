@@ -132,13 +132,15 @@ def tool_args(kind: str, argmap: dict[str, str], path: str, content: str,
 
 #: Vacant 回饋的開頭（`adapters/hookpolicy.FEEDBACK_HEADER`）。看到它 ⇒ 改用劇本的 `fix` 段。
 FEEDBACK_MARK = "The task contract's checks do not pass yet"
+#: 契約過了、但人標記了錯處（`trace/feedback.FLAG_HEADER`）：一樣是回饋
+FLAG_MARK = "the task owner marked these places"
 
 
 def feedback_excerpt(blob: str) -> str | None:
     """模型**真的收到**的回饋文字（最後一則，最多 800 字）：量回饋有沒有到、內容是什麼。"""
     i = blob.rfind(FEEDBACK_MARK)
     if i < 0:
-        i = blob.rfind("the task owner marked these places")
+        i = blob.rfind(FLAG_MARK)
     if i < 0:
         return None
     return blob[i:i + 800].encode().decode("unicode_escape", "replace") \
@@ -149,7 +151,8 @@ def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     """回 `(看過回饋, 回饋之後的工具結果數)`；沒看過回饋 ⇒ 全部的工具結果數。"""
     last = -1
     for i, it in enumerate(items):
-        if FEEDBACK_MARK in text_of(it):
+        txt = text_of(it)
+        if FEEDBACK_MARK in txt or FLAG_MARK in txt:
             last = i
     after = items[last + 1:] if last >= 0 else items
     return last >= 0, sum(1 for it in after if is_result(it))

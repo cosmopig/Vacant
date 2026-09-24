@@ -105,7 +105,9 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
         e = exp[0]
         out.append(f"  expected {e['value']} ({_clip(e.get('note') or e.get('path'), 80)})")
     elif b.get("detail") and loc.get("kind") != "missing":
-        out.append(f"  check says: {_clip(b['detail'], 160)}")
+        # 人的標記：那是人說的，不是某個檢查說的
+        who = "the task owner says" if str(cid).startswith("flag:") else "check says"
+        out.append(f"  {who}: {_clip(b['detail'], 160)}")
     src = b.get("source") or {}
     shown = b.get("fault_class") == "input" and src.get("observed", True) \
         and not b.get("source_hidden")

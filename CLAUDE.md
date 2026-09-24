@@ -119,7 +119,7 @@
 ### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
 
 裁決：`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`（補在收件口之上，不取代）。
-`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，25/25，含前景／背景子 agent 與錯的網頁）。
+`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake，29/29，含前景／背景子 agent、錯的網頁、人的標記）。
 
 - `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
   沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）。掛鉤裡一次掃描最多

@@ -32,6 +32,10 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
 - While a background sub-agent is still working (Claude Code's default), the end-of-turn check waits:
   it used to push the main agent to redo the sub-agent's work. `SubagentStart` is now installed for
   Claude Code and Codex. End to end: 25/25, including Claude's background sub-agent.
+- A human flag (`vacant flag file:line "what is wrong"`) on something no check covers now has an
+  end-to-end run on all four agents: it reaches the agent at the next session's turn end even though
+  the contract passes, it points at the step that wrote the line, and it resolves once the line
+  changes. The note is shown as the owner's words, not as a check's. End to end: 29/29.
 - Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
   does not fit moves to the background and the steps before it are recorded as not observed;
   states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at

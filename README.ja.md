@@ -53,7 +53,7 @@ vacant flag report.md:2 "市長は Alice"   |   vacant trace actors
 
 実 agent 四種 × 埋め込んだ誤り六種（サブエージェントと誤った Web ページを含む、L-fake）：
 [`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) ——
-**帰属 25/25 正解**。裁定：[`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
+**帰属 29/29 正解**。裁定：[`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
 ⚠「すべての誤りを捕まえる」「追跡は常に正しい」「実モデルで成果が要求に近づく」とは読まないこと
 （最後の一つは [R536 事前登録](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md)の草案、署名待ち）。
 

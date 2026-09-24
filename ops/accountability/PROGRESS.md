@@ -243,3 +243,20 @@ pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
 **偏移檢查**：沒有碰真模型 API；改動是「驗收時機」不是「驗收內容」（等子 agent 回報後照常驗；漏事件一小時後照常驗）；
 給 agent 的文字沒有行動者。
 - 補記（2026-09-24T22:45Z 那一筆）：`53a6459f` 上的全套測試失敗集合**等於基線**。
+
+## 2026-09-24T23:10Z — 情境 H：人標記了契約檢查不到的錯（四個 agent）
+
+**做了什麼**
+- `e2e_trace.py` 情境 H：第一跑總數對、「Region: South」錯（契約沒檢查地區）⇒ 收件 accept；兩跑之間人下
+  `vacant flag report.md:4 "the region is North, not South"`；第二跑是新的工作階段，agent 什麼都沒做就要結束。
+  假模型認得標記的回饋開頭（`FLAG_MARK`）。
+- 回饋裡人的話原本標成「check says:」——那是人說的，不是某個檢查。改成「the task owner says:」（測試加斷言）。
+
+**證據**：H 在四個 agent 都 4/4：Claude／Codex／pi 在第二跑的回合結束收到
+「report.md:4 says "Region: South" / the task owner says: the region is North, not South / this value first appeared at step 2」，
+改好之後標記解決、收件 accept；OpenCode `run` 收不到（既有邊界），標記留在報告裡。全部重跑 **29/29**；
+有位置的回饋進了模型 19/19、改好後 accept 19/19、回饋裡行動者識別 0/29、鏈 29/29、掛鉤 p95 6.5–15.6 ms。
+
+**下一步**：全套測試對基線；之後：平行委派的端到端、或把早上報告整理成給人類決定的最短清單。
+
+**偏移檢查**：沒有碰真模型 API；標記仍然不擋收件（那是人類要決定的事，MORNING 第 2 項）；給 agent 的文字沒有行動者。

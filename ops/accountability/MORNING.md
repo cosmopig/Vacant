@@ -12,7 +12,7 @@
 
 ## 好消息
 
-1. **歸因 25/25**（四個 agent × 六種埋錯＋Claude 的背景子 agent，含錯的網頁；每一輪審查修正之後都重跑）——`ops/accountability/evidence_20260924/README.md`：
+1. **歸因 29/29**（四個 agent × 七種埋錯＋Claude 的背景子 agent，含錯的網頁與人的標記；每一輪審查修正之後都重跑）——`ops/accountability/evidence_20260924/README.md`：
 
    | 錯從哪裡來 | Vacant 的結論 |
    |---|---|
@@ -31,12 +31,13 @@
      this value first appeared at step 2 (Bash)
    ```
 
-   裡面沒有「是誰」（0/25）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
+   裡面沒有「是誰」（0/29）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
 
 3. **問題不會被淹沒**：輪數用完、或只剩 agent 改不動的（等審查、等證據），Claude Code 直接在畫面上顯示給你
    （`systemMessage`）；任何 agent 都可以 `vacant trace report` 看完整清單；OpenCode `run` 沒有回合邊界可以回饋，
-   但工作階段結束時會在背景把報告寫好。你也可以自己指出錯處：`vacant flag report.md:2 "市長是 Alice"`——
-   簽章、追緝、下一回合告訴 agent。
+   但工作階段結束時會在背景把報告寫好。你也可以自己指出**契約檢查不到**的錯處：`vacant flag report.md:4 "the region is North"`——
+   簽章、追緝（指到寫下那一行的那一步），下一次工作階段的回合結束告訴 agent（契約過了也照樣），改掉之後標記自己解決。
+   四個 agent 都實測過（Claude／Codex／pi 改好了；OpenCode `run` 收不到，標記留在報告裡）。
 
 4. **後果**：只有「可證明」的錯進 agent 的信譽（不用 slash，你撤銷一個結論會逐位元反轉）；輸入錯記在來源上；
    沒被記錄的改動記在那個平台的整合覆蓋率上。路由＝報告尾端給你的建議，或 `vacant do --agent auto`
@@ -95,7 +96,7 @@
 ## 五分鐘看懂（建議順序）
 
 1. `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §一、§三、§四-5（等級與後果）、§七（審查改了什麼）
-2. `ops/accountability/evidence_20260924/README.md`（25/25 那張表＋模型真的收到的回饋）
+2. `ops/accountability/evidence_20260924/README.md`（29/29 那張表＋模型真的收到的回饋）
 3. `ops/accountability/review_m8/FINDINGS.md`（47 條）
 4. 在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`
 
