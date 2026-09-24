@@ -12,7 +12,7 @@
 
 ## 好消息
 
-1. **歸因 29/29**：四個 agent × 七種埋錯，另加 Claude 的背景子 agent——`ops/accountability/evidence_20260924/README.md`。
+1. **歸因 33/33**：四個 agent × 八種埋錯，另加 Claude 的背景子 agent——`ops/accountability/evidence_20260924/README.md`。
 
    | 錯從哪裡來 | Vacant 的結論 |
    |---|---|
@@ -23,9 +23,10 @@
    | 抓回來的**網頁**本身就錯（`curl`） | 指到那個網址，agent 不背。反過來，agent 不能靠「順便 curl 一下」把自己算的值洗成網頁說的 |
    | **子 agent** 算錯、主 agent 照抄 | 指到子 agent 寫錯的那一步（帶子 agent 的 id 與類型），四個 agent 都對 |
    | Claude 的**背景**子 agent（它的預設） | 同上；而且子 agent 還在做時，回合結束的驗收先不跑（原本會催主 agent 把子 agent 的工作重做一遍） |
+   | **平行**委派兩個子 agent，其中一個錯 | 指到錯的那一個子 agent 的那一步，不怪另一個（跑的時候發現、修了：先收尾的委派會把兄弟的寫入掃進自己的差異） |
    | **你**指出一個契約檢查不到的錯（`vacant flag`） | 指到寫下那一行的那一步；下一次工作階段的回合結束告訴 agent（契約過了也照樣）；改掉之後自己解決 |
 
-2. **回饋真的到了模型手上**：Claude Code、Codex、pi 的下一次模型請求裡（19/19 格），看得到這樣一段（實錄）：
+2. **回饋真的到了模型手上**：Claude Code、Codex、pi 的下一次模型請求裡（22/22 格），看得到這樣一段（實錄）：
 
    ```
    - total: FAIL — report.md:3 says "96"
@@ -33,7 +34,7 @@
      it was copied from step 2 (Bash); step 5 wrote it into report.md
    ```
 
-   改好之後收件 accept（19/19）。裡面沒有「是誰」（0/29）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
+   改好之後收件 accept（22/22）。裡面沒有「是誰」（0/33）——那只寫在給你的報告裡（KS-1：後果不走文字通道）。
 
 3. **問題不會被淹沒**：輪數用完、或只剩 agent 改不動的（等審查、等證據），Claude Code 直接在畫面上顯示給你
    （`systemMessage`）；任何 agent 都可以 `vacant trace report` 看完整清單；OpenCode `run` 沒有回合邊界可以回饋，
@@ -67,8 +68,8 @@
    預註冊裡事先寫好了，不會事後加題。如果追緝過的回饋和泛用回饋一樣好，那也是結論：追緝的價值在給人的報告，
    不在讓 agent 改得更好。
 2. **OpenCode `run` 沒有交件前的回饋通道**（它在第一個 idle 就結束）。報告照樣有、你的標記也留著，但 agent 沒機會改。
-3. **沒跑的**：平行委派（一次兩個子 agent）、Codex 的 multi-agent v2 的端到端。平行執行的平台上兩步同時寫檔時，
-   只能說「是其中之一」（候選集合），不會硬選一個。
+3. **沒跑的**：Codex 的 multi-agent v2 的端到端。兩步（或兩個子 agent）同時寫**同一個**檔時，只能說「是其中之一」
+   （候選集合），不會硬選一個。
 4. **pi 的子 agent**（pi 本身沒有，靠擴充另開 pi 行程）：從這個 pi 開出來、在同一個專案裡的任何 pi 都算它的子 agent
    （包括你在 pi 裡用 `!` 開的）；叫它的是哪一個呼叫靠任務文字對，兩個平行的子 agent 拿到一模一樣的任務時說不出是哪一個。
 5. **網頁來源**：Vacant 只看得到指令字串——代理、DNS、hosts 檔把一個正常的名字指到本機，它看不出來。
@@ -99,7 +100,7 @@
 ## 五分鐘看懂（建議順序）
 
 1. `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §一、§三、§四-5（等級與後果）、§七（審查改了什麼）
-2. `ops/accountability/evidence_20260924/README.md`（29/29 那張表、模型真的收到的回饋、大專案的時間）
+2. `ops/accountability/evidence_20260924/README.md`（33/33 那張表、模型真的收到的回饋、大專案的時間）
 3. 三份審查：`ops/accountability/review_m8/`、`review_scale/`、`review_subagent_curl/` 的 `FINDINGS.md`
 4. 在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`、
    `vacant flag <檔>:<行> "哪裡錯"`

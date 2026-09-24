@@ -229,7 +229,46 @@ def _expand_agent_steps(steps: list[Any], tools: list[dict[str, Any]]) -> list[A
         out.append(st)
         if isinstance(st, dict) and "agent" in st:
             out.append({"codex_wait": True})
+        elif isinstance(st, dict) and st.get("parallel"):
+            # 一次叫了 k 個：`wait_agent` 在**第一個**做完時就回來，所以逐一等（最後 k 個 id）
+            k = sum(1 for x in st["parallel"] if isinstance(x, dict) and "agent" in x)
+            out.extend({"codex_wait": True, "of": k, "i": i} for i in range(k))
     return out
+
+
+def _width(st: Any) -> int:
+    """這一步會帶回幾個工具結果（平行的一批＝批裡的步數）。"""
+    return len(st["parallel"]) if isinstance(st, dict) and st.get("parallel") else 1
+
+
+def _step_call(st: dict[str, Any], tools: list[dict[str, Any]], cwd_hint: str | None,
+               agent_ids: list[str]) -> tuple[str, dict[str, Any]] | None:
+    """一步劇本 → `(工具名, 參數)`；這個 agent 沒有合適的工具 ⇒ None。"""
+    if st.get("codex_wait"):
+        if st.get("of"):
+            k, i = int(st["of"]), int(st["i"])
+            pick = agent_ids[len(agent_ids) - k + i] if len(agent_ids) >= k else ""
+            return "multi_agent_v1/wait_agent", {"targets": [pick], "timeout_ms": 120000}
+        return "multi_agent_v1/wait_agent", {"targets": (agent_ids or [""])[-1:],
+                                             "timeout_ms": 120000}
+    if "agent" in st:
+        return _agent_tool(tools, st["agent"])
+    if "run" in st:
+        sh = _shell_tool(tools)
+        if sh and sh[0] != "write":
+            return sh[1], tool_args(sh[0], sh[2], "", "", None,
+                                    raw_cmd=str(st["run"]).replace(
+                                        "{{port}}", os.environ.get("MOCK_PORT", "")))
+        return None
+    path, content = st["write"]
+    pk = pick_tool(tools)
+    if pk and pk[0] == "write" and pk[2]["path"] in ("file_path", "filePath") and not cwd_hint:
+        sh = pick_tool([t for t in tools if _tool_name(t) != pk[1]])
+        if sh and sh[0] != "write":
+            pk = sh
+    if pk:
+        return pk[1], tool_args(pk[0], pk[2], path, content, cwd_hint)
+    return None
 
 
 def _shell_tool(tools: list[dict[str, Any]]):
@@ -239,7 +278,7 @@ def _shell_tool(tools: list[dict[str, Any]]):
 
 def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
          fed_back: bool = False, role: str | None = None, last_agent_id: str | None = None,
-         notified: bool = False):
+         notified: bool = False, agent_ids: list[str] | None = None):
     sc = scenario()
     roles = sc.get("roles") or {}
     if role and isinstance(roles.get(role), dict):
@@ -265,33 +304,26 @@ def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
             else:
                 steps, n_results = [], 0
         # 有序的步驟（可究責追緝的埋錯情境要「先寫腳本、再跑它」）：
-        # {"run": "<shell 指令>"} 或 {"write": ["<路徑>", "<內容>"]}
-        if n_results < len(steps) and tools:
-            st = steps[n_results]
-            if st.get("codex_wait"):
-                return ("tool", "multi_agent_v1/wait_agent",
-                        {"targets": [last_agent_id or ""], "timeout_ms": 120000})
-            if "agent" in st:
-                at = _agent_tool(tools, st["agent"])
-                if at:
-                    return ("tool", at[0], at[1])
-                return ("text", "no delegation tool available", None)
-            if "run" in st:
-                sh = _shell_tool(tools)
-                if sh and sh[0] != "write":
-                    return ("tool", sh[1], tool_args(
-                        sh[0], sh[2], "", "", None,
-                        raw_cmd=str(st["run"]).replace("{{port}}", os.environ.get("MOCK_PORT", ""))))
-            else:
-                path, content = st["write"]
-                pk = pick_tool(tools)
-                if pk and pk[0] == "write" and pk[2]["path"] in ("file_path", "filePath") \
-                        and not cwd_hint:
-                    sh = pick_tool([t for t in tools if _tool_name(t) != pk[1]])
-                    if sh and sh[0] != "write":
-                        pk = sh
-                if pk:
-                    return ("tool", pk[1], tool_args(pk[0], pk[2], path, content, cwd_hint))
+        # {"run": "<shell 指令>"} 或 {"write": ["<路徑>", "<內容>"]}；{"parallel": [步驟, …]}＝同一則回覆裡的一批
+        ids = agent_ids if agent_ids else ([last_agent_id] if last_agent_id else [])
+        seen = 0
+        for st in steps:
+            if seen > n_results or not tools:
+                break
+            if seen == n_results:
+                if st.get("parallel"):
+                    calls = [c for c in (_step_call(x, tools, cwd_hint, ids)
+                                         for x in st["parallel"]) if c]
+                    if calls:
+                        return ("tools", calls, None)
+                    return ("text", "no tool for this batch", None)
+                call = _step_call(st, tools, cwd_hint, ids)
+                if call:
+                    return ("tool", call[0], call[1])
+                if "agent" in st:
+                    return ("text", "no delegation tool available", None)
+                break
+            seen += _width(st)
         return ("text", str(sc.get("final", "Done.")), None)
     files = list((sc.get("files") or {}).items())
     pre = list(sc.get("pre_commands") or [])
@@ -432,11 +464,13 @@ class H(BaseHTTPRequestHandler):
         log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
-             "tools": [t.get("name") for t in tools][:40], "tool": a if kind == "tool" else None})
+             "tools": [t.get("name") for t in tools][:40], "tool": a if kind == "tool" else ([c[0] for c in a] if kind == "tools" else None)})
         model = body.get("model", "mock")
+        calls = a if kind == "tools" else ([(a, b)] if kind == "tool" else [])
         if not body.get("stream"):
             content = ([{"type": "text", "text": a}] if kind == "text" else
-                       [{"type": "tool_use", "id": f"toolu_{n}", "name": a, "input": b}])
+                       [{"type": "tool_use", "id": f"toolu_{n}_{i}", "name": nm, "input": ar}
+                        for i, (nm, ar) in enumerate(calls)])
             return self._json(200, {"id": f"msg_{n}", "type": "message", "role": "assistant",
                                     "model": model, "content": content,
                                     "stop_reason": "end_turn" if kind == "text" else "tool_use",
@@ -456,15 +490,20 @@ class H(BaseHTTPRequestHandler):
                                                "delta": {"type": "text_delta", "text": a}})]
             stop = "end_turn"
         else:
-            out += [ev("content_block_start", {"type": "content_block_start", "index": 0,
-                                               "content_block": {"type": "tool_use",
-                                                                 "id": f"toolu_{n}", "name": a,
-                                                                 "input": {}}}),
-                    ev("content_block_delta", {"type": "content_block_delta", "index": 0,
-                                               "delta": {"type": "input_json_delta",
-                                                         "partial_json": json.dumps(b)}})]
+            for i, (nm, ar) in enumerate(calls):
+                out += [ev("content_block_start", {"type": "content_block_start", "index": i,
+                                                   "content_block": {"type": "tool_use",
+                                                                     "id": f"toolu_{n}_{i}",
+                                                                     "name": nm, "input": {}}}),
+                        ev("content_block_delta", {"type": "content_block_delta", "index": i,
+                                                   "delta": {"type": "input_json_delta",
+                                                             "partial_json": json.dumps(ar)}})]
+                if i < len(calls) - 1:
+                    out.append(ev("content_block_stop", {"type": "content_block_stop",
+                                                         "index": i}))
             stop = "tool_use"
-        out += [ev("content_block_stop", {"type": "content_block_stop", "index": 0}),
+        last = max(len(calls) - 1, 0) if kind != "text" else 0
+        out += [ev("content_block_stop", {"type": "content_block_stop", "index": last}),
                 ev("message_delta", {"type": "message_delta",
                                      "delta": {"stop_reason": stop, "stop_sequence": None},
                                      "usage": {"output_tokens": 7}}),
@@ -479,30 +518,36 @@ class H(BaseHTTPRequestHandler):
             lambda it: json.dumps(it))
         tools = [t for t in (body.get("tools") or []) if isinstance(t, dict)]
         role = role_of(opening_user_text(items))
-        last_id = None
+        ids: list[str] = []
         for it in items:                         # spawn_agent 的結果：{"agent_id": …}
             if it.get("type") == "function_call_output" and "agent_id" in str(it.get("output")):
                 try:
-                    last_id = json.loads(it["output"]).get("agent_id") or last_id
+                    aid = json.loads(it["output"]).get("agent_id")
                 except (ValueError, TypeError, AttributeError):
-                    pass
-        kind, a, b = plan(k, tools, None, fed, role, last_id)
+                    aid = None
+                if aid:
+                    ids.append(str(aid))
+        kind, a, b = plan(k, tools, None, fed, role, ids[-1] if ids else None, agent_ids=ids)
         log({"proto": "responses", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [t.get("name") or t.get("type") for t in tools][:40],
-             "tool": a if kind == "tool" else None})
+             "tool": a if kind == "tool" else ([c[0] for c in a] if kind == "tools" else None)})
         rid = f"resp_{n}"
+        items_out: list[dict[str, Any]] = []
         if kind == "text":
-            item = {"type": "message", "id": f"msg_{n}", "role": "assistant", "status": "completed",
-                    "content": [{"type": "output_text", "text": a, "annotations": []}]}
+            items_out.append({"type": "message", "id": f"msg_{n}", "role": "assistant",
+                              "status": "completed",
+                              "content": [{"type": "output_text", "text": a, "annotations": []}]})
         else:
-            item = {"type": "function_call", "id": f"fc_{n}", "call_id": f"call_{n}",
-                    "name": a, "arguments": json.dumps(b), "status": "completed"}
-            if "/" in a:                         # 命名空間工具（Codex 的 multi_agent_v1）
-                item["namespace"], item["name"] = a.split("/", 1)
+            for i, (nm, ar) in enumerate(a if kind == "tools" else [(a, b)]):
+                it = {"type": "function_call", "id": f"fc_{n}_{i}", "call_id": f"call_{n}_{i}",
+                      "name": nm, "arguments": json.dumps(ar), "status": "completed"}
+                if "/" in nm:                    # 命名空間工具（Codex 的 multi_agent_v1）
+                    it["namespace"], it["name"] = nm.split("/", 1)
+                items_out.append(it)
         resp = {"id": rid, "object": "response", "created_at": int(time.time()),
-                "status": "completed", "model": body.get("model", "mock"), "output": [item],
+                "status": "completed", "model": body.get("model", "mock"), "output": items_out,
                 "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15,
                           "input_tokens_details": {"cached_tokens": 0},
                           "output_tokens_details": {"reasoning_tokens": 0}}}
@@ -511,20 +556,23 @@ class H(BaseHTTPRequestHandler):
 
         def ev(data):
             return f"event: {data['type']}\ndata: {json.dumps(data)}\n\n".encode()
-        added = dict(item)
-        if kind == "tool":
-            added["arguments"] = ""
         out = [ev({"type": "response.created", "response": {**resp, "status": "in_progress",
-                                                           "output": []}}),
-               ev({"type": "response.output_item.added", "output_index": 0, "item": added})]
-        if kind == "text":
-            out.append(ev({"type": "response.output_text.delta", "output_index": 0,
-                           "content_index": 0, "item_id": item["id"], "delta": a}))
-        else:
-            out.append(ev({"type": "response.function_call_arguments.delta", "output_index": 0,
-                           "item_id": item["id"], "delta": item["arguments"]}))
-        out += [ev({"type": "response.output_item.done", "output_index": 0, "item": item}),
-                ev({"type": "response.completed", "response": resp})]
+                                                           "output": []}})]
+        for oi, it in enumerate(items_out):
+            added = dict(it)
+            if it["type"] == "function_call":
+                added["arguments"] = ""
+            out.append(ev({"type": "response.output_item.added", "output_index": oi,
+                           "item": added}))
+            if it["type"] == "message":
+                out.append(ev({"type": "response.output_text.delta", "output_index": oi,
+                               "content_index": 0, "item_id": it["id"], "delta": a}))
+            else:
+                out.append(ev({"type": "response.function_call_arguments.delta",
+                               "output_index": oi, "item_id": it["id"],
+                               "delta": it["arguments"]}))
+            out.append(ev({"type": "response.output_item.done", "output_index": oi, "item": it}))
+        out.append(ev({"type": "response.completed", "response": resp}))
         return self._sse(out)
 
     # OpenAI Chat Completions ----------------------------------------------
@@ -539,15 +587,16 @@ class H(BaseHTTPRequestHandler):
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [(t.get("function") or {}).get("name") for t in tools][:40],
-             "tool": a if kind == "tool" else None})
+             "tool": a if kind == "tool" else ([c[0] for c in a] if kind == "tools" else None)})
         cid, model = f"chatcmpl-{n}", body.get("model", "mock")
         if kind == "text":
             msg = {"role": "assistant", "content": a}
             finish = "stop"
         else:
             msg = {"role": "assistant", "content": None, "tool_calls": [
-                {"id": f"call_{n}", "type": "function",
-                 "function": {"name": a, "arguments": json.dumps(b)}}]}
+                {"id": f"call_{n}_{i}", "type": "function",
+                 "function": {"name": nm, "arguments": json.dumps(ar)}}
+                for i, (nm, ar) in enumerate(a if kind == "tools" else [(a, b)])]}
             finish = "tool_calls"
         usage = {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
         if not body.get("stream"):
@@ -566,12 +615,12 @@ class H(BaseHTTPRequestHandler):
         if kind == "text":
             out.append(chunk({"content": a}))
         else:
-            tc = msg["tool_calls"][0]
-            out.append(chunk({"tool_calls": [{"index": 0, "id": tc["id"], "type": "function",
-                                              "function": {"name": tc["function"]["name"],
-                                                           "arguments": ""}}]}))
-            out.append(chunk({"tool_calls": [{"index": 0, "function": {
-                "arguments": tc["function"]["arguments"]}}]}))
+            for i, tc in enumerate(msg["tool_calls"]):
+                out.append(chunk({"tool_calls": [{"index": i, "id": tc["id"], "type": "function",
+                                                  "function": {"name": tc["function"]["name"],
+                                                               "arguments": ""}}]}))
+                out.append(chunk({"tool_calls": [{"index": i, "function": {
+                    "arguments": tc["function"]["arguments"]}}]}))
         out.append(chunk({}, finish))
         out.append(f"data: {json.dumps({'id': cid, 'object': 'chat.completion.chunk', 'created': int(time.time()), 'model': model, 'choices': [], 'usage': usage})}\n\n".encode())
         out.append(b"data: [DONE]\n\n")

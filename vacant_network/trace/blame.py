@@ -242,6 +242,36 @@ class Trace:
                     self.initial = bl["index"]
             elif t == "session_closed" and self.initial is None and e.get("final_index"):
                 self.initial = e["final_index"]
+        self._credit_delegated_writes()
+
+    def _credit_delegated_writes(self) -> None:
+        """委派呼叫（Agent／task／spawn…）自己不寫檔。它的前後差異裡若有一個版本，是另一個**真正的步驟**
+        寫出來的同一個版本（平行的另一個子 agent 還在跑、比這個委派晚收尾），那個檔歸那一步，不歸委派呼叫
+        （2026-09-24 情境 I：平行委派時，先結束的那個委派把兄弟子 agent 的寫入掃進了自己的差異）。"""
+        written: dict[tuple[str, str], Step] = {}
+        for s in self.steps:
+            if tool_kind(s.tool) == "agent":
+                continue
+            for w in s.writes:
+                if w.get("after") and w.get("after") != w.get("before"):
+                    written.setdefault((str(w["path"]), str(w["after"])), s)
+        if not written:
+            return
+        for tr in self.transitions:
+            d = tr.step
+            if tr.kind != "step" or d is None or tool_kind(d.tool) != "agent":
+                continue
+            s = d
+            claimed = {str(w["path"]) for w in s.writes
+                       if (str(w["path"]), str(w.get("after"))) in written}
+            if not claimed:
+                continue
+            tr.paths -= claimed
+            s.writes = [w for w in s.writes if str(w["path"]) not in claimed]
+            if not s.writes:
+                s.ambiguous = [a for a in s.ambiguous
+                               if not a.startswith("files changed while a sub-agent ran")]
+        self.transitions = [tr for tr in self.transitions if tr.paths]
 
     # ── content access ───────────────────────────────────────────────
     def index(self, sha: str | None) -> W.Index:

@@ -5,7 +5,7 @@
 > 乾淨的埋錯下給出期望的答案。**不證明**真模型下產出會更接近需求——那是
 > `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md` 的事（草稿，待人類簽字）。
 
-## 1. 四個真 agent × 七個埋錯情境＋Claude 的背景子 agent（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；子 agent／`curl` 的對抗審查修正**之後**重跑）
+## 1. 四個真 agent × 八個埋錯情境＋Claude 的背景子 agent（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；子 agent／`curl` 的對抗審查修正**之後**重跑）
 
 重跑：
 
@@ -13,20 +13,21 @@
 
 | 量什麼 | 結果 |
 |---|---|
-| 歸因正確（狀態／類別／等級／指到的步驟／來源都對） | **29/29** |
+| 歸因正確（狀態／類別／等級／指到的步驟／來源都對） | **33/33** |
 | B（agent 憑空寫錯）⇒ `provable`，指到寫報告那一步；重跑前那個位置沒有這個值、之後不過且有 | 4/4 |
 | A（輸入本來就錯）⇒ `input`／`lineage_exact`，來源＝`inputs/summary.txt`；agent 沒被記過錯 | 4/4 |
 | C（腳本錯）⇒ `lineage_internal`，指到**寫腳本**的那一步（不是寫報告那一步） | 4/4 |
 | D（agent 走了之後有人在外面改檔；負控制）⇒ `UNOBSERVED`／`gap`；沒有任何行動者被記 | 4/4 |
 | F（網頁本身就錯：`curl http://portal.vacant-lab.test/…` 抓回來的頁面寫著 58、照抄；實驗環境用 `http_proxy` 把這個名字接到假模型）⇒ `input`／`lineage_exact`，來源是那個網址；agent 不背；網址記進來源帳 | 4/4 |
+| I（**平行委派**兩個子 agent：A 把列數寫進 `count.txt`、B 把 96 寫進 `figure.txt`；主 agent 兩個都讀、照抄）⇒ 指到 **B** 寫 `figure.txt` 的那一步（不怪 A）。跑的時候發現：先收尾的委派呼叫會把兄弟子 agent 還沒收尾的寫入掃進自己的差異——修了（委派呼叫自己不寫檔；同一個版本歸真正寫它的那一步） | 4/4 |
 | H（**人標記**了契約檢查不到的錯：第一跑總數對、「Region: South」錯 ⇒ 收件 accept；人下 `vacant flag report.md:4 "the region is North, not South"`；第二跑是新的工作階段）⇒ 回合結束時把標記回饋給 agent（契約過了也照樣）、追緝指到第一跑寫下那一行的那一步、改好之後標記解決 | 4/4 |
 | G（只有 Claude Code：子 agent 在**背景**跑——Claude 的預設；主 agent 從 `<task-notification>` 照抄）⇒ 同 E，指到子 agent；子 agent 還在做時回合結束的驗收**先不跑**（不催主 agent 重做） | 1/1 |
 | E（子 agent 算錯寫進 `figure.txt`、主 agent 照抄）⇒ `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步，行動者帶子 agent 的 id（Claude `general-purpose`、Codex `default`、pi `worker`、OpenCode `subagent`） | 4/4 |
-| 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C／E／F／H＋Claude 的 G，19 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束） |
-| 給 agent 的回饋裡有行動者識別 | 0/29 |
-| 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F／H＋Claude 的 G：19/19 |
-| 病歷簽章鏈驗得過 | 29/29 |
-| 每次掛鉤的額外時間 p95 | 6.5–15.6 ms（小工作區；大專案見第 3 節） |
+| 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C／E／F／H／I＋Claude 的 G，22 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束） |
+| 給 agent 的回饋裡有行動者識別 | 0/33 |
+| 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F／H／I＋Claude 的 G：22/22 |
+| 病歷簽章鏈驗得過 | 33/33 |
+| 每次掛鉤的額外時間 p95 | 7.2–16 ms（小工作區；大專案見第 3 節）；Codex 的 F、H 兩格各有一次 40–50 ms（那兩格只有 12–13 次掛鉤，p95 就是最慢那一次；p50 5–6 ms） |
 | 行動者帳本 | 每個 agent 一格（6 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`、F 記在那個網址；D 記在該平台的整合覆蓋率；E 是推論層（`lineage_internal`），照規則不進信譽 |
 
 模型實際收到的回饋（Claude Code，情境 B，第 2 次請求）：
@@ -71,8 +72,8 @@ Run `vacant check` to re-check before finishing.
 
 ## 4. 沒有做到的（照實寫）
 
-- 子 agent：平行委派（一次兩個子 agent）、Codex 的 multi-agent v2 沒有端到端跑
-  （v2 有 `ops/accountability/capture/` 的可觀測面實測；平行有單元測試，pi 的平行另有審查者的真 pi 重現）。
+- 子 agent：Codex 的 multi-agent v2 沒有端到端跑（有 `ops/accountability/capture/` 的可觀測面實測）。
+  平行委派（情境 I）是兩個子 agent 寫**不同**的檔；兩個子 agent 同時寫**同一個**檔時只能說「是其中之一」。
 - pi 的子 agent 靠 Vacant 的 pi 擴充在工具呼叫期間放進環境的標記認出來：平行的工具呼叫下，標記可能指到兄弟呼叫
   （工作階段仍然對）；不是 pi 擴充啟動的 pi 行程（例如使用者自己在另一個終端機開的）不會被當成子 agent。
 - Claude Code 的掛鉤不帶模型 id ⇒ 信譽格的 substrate 是 `unknown`（逐字稿裡有自稱的模型，封存了，

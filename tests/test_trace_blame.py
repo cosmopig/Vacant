@@ -353,3 +353,30 @@ def test_curl_review_a_url_without_a_scheme_is_still_a_fetch(proj):
           write=(p / "report.md", "# Q3\nTotal: 58\n"))
     [b] = _final_blame(proj)
     assert (b["fault_class"], b["confidence"]) == ("input", "heuristic")
+
+
+# ── 平行委派（2026-09-24 情境 I）──────────────────────────────────────────────────
+
+def test_a_delegation_that_finishes_first_does_not_take_its_siblings_write(proj):
+    """兩個子 agent 平行：先結束的那個委派呼叫，前後差異裡掃到了兄弟子 agent 還沒收尾的那一步寫的檔。
+    那個版本是兄弟那一步寫的——歸它，不歸委派呼叫（真的 Claude Code 跑出來的交錯順序）。"""
+    p, c, rec = proj
+    subA = R.Actor("claude", "s1", agent="aaa", agent_type="general-purpose")
+    subB = R.Actor("claude", "s1", agent="bbb", agent_type="general-purpose")
+    rec.pre("a1", MAIN, "Agent", {"prompt": "count the rows"})
+    rec.pre("a2", MAIN, "Agent", {"prompt": "add up the amounts"})
+    rec.pre("s1", subA, "Write", {"file_path": "count.txt", "content": "3\n"})
+    (p / "count.txt").write_text("3\n")
+    rec.post("s1", subA, "Write", {"file_path": "count.txt", "content": "3\n"}, "ok")
+    rec.pre("b2", subB, "Bash", {"command": "printf 96 > figure.txt"})
+    (p / "figure.txt").write_text("96\n")
+    rec.post("a1", MAIN, "Agent", {"prompt": "count the rows"}, "done")    # 先收尾，b2 還沒
+    rec.post("b2", subB, "Bash", {"command": "printf 96 > figure.txt"}, "")
+    rec.post("a2", MAIN, "Agent", {"prompt": "add up the amounts"}, "done")
+    _step(rec, "r1", MAIN, "Bash", {"command": "cat figure.txt"}, "96\n")
+    _step(rec, "w1", MAIN, "Write", {"file_path": str(p / "report.md"),
+                                     "content": "# Q3\nTotal: 96\n"},
+          write=(p / "report.md", "# Q3\nTotal: 96\n"))
+    [b] = _final_blame(proj)
+    assert b["step"]["step"] == "b2" and b["step"]["actor"]["agent"] == "bbb"
+    assert b["fault_class"] == "agent"

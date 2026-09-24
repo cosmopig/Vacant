@@ -261,6 +261,13 @@ Codex `multi_agent_v1` 的 `spawn_agent`→`wait_agent`、pi 隨附範例擴充�
 還在跑的呼叫的輸入——對到恰好一個才記。第一版（標記跟著每個呼叫走）被同日的對抗審查打穿六條（平行、被擋的呼叫、
 巢狀、兄弟的類型、tmux、別的專案），見 `ops/accountability/review_subagent_curl/FINDINGS.md`。
 
+### 平行委派（同日，情境 I）
+
+兩個子 agent 平行時，先收尾的那個委派呼叫（Agent／task／spawn…）的前後差異，會掃到兄弟子 agent 還沒收尾的那一步
+寫的檔——追緝就把那個值記成「子 agent 跑的時候、它的步驟以外改的」，指到委派呼叫（真的 Claude Code 與 pi 都跑出這個
+交錯）。規則：**委派呼叫自己不寫檔**；它的差異裡若有一個版本和另一個真正的步驟寫出來的版本一模一樣（同一個路徑、同一個
+內容雜湊），那個檔歸那一步（`Trace._credit_delegated_writes`）。四個 agent 端到端 4/4，都指到寫錯的那個子 agent。
+
 ### 背景子 agent（同日，情境 G，只有 Claude Code）
 
 Claude 預設把子 agent 放到背景：主 agent 的回合結束時子 agent 還在做，Stop 掛鉤的驗收會說「報告還沒有」、催主 agent

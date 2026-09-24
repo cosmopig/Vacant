@@ -68,7 +68,7 @@ and `release.destination` (where an accepted version is published — not by you
 Design and evidence: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`,
 `ops/intake/evidence_20260924/SUMMARY.md` (pi, Claude Code, OpenCode and Codex, L-fake);
 the trace: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`,
-`ops/accountability/evidence_20260924/README.md` (29/29 planted faults attributed incl. foreground and background sub-agents, a wrong web page and a human flag, L-fake).
+`ops/accountability/evidence_20260924/README.md` (33/33 planted faults attributed incl. foreground, background and parallel sub-agents, a wrong web page and a human flag, L-fake).
 
 ## 1. What is enforced, and what is only advice
 

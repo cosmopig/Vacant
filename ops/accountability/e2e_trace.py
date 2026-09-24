@@ -17,6 +17,7 @@
 所以 agent 下的指令就是一般的 `curl http://portal.vacant-lab.test/…`。**本機的網址（localhost、這台機器的位址）
 不算外部來源**（agent 可能自己開了伺服器）；Vacant 看不到代理／DNS 把名字指到哪裡，這是誠實邊界。
 | H 人標記了檢查抓不到的錯 | 第一跑：總數對、但「Region: South」錯（契約沒檢查地區）⇒ 收件 accept；人下 `vacant flag report.md:4 "…North…"`；第二跑：agent 什麼都沒做就要結束 | 回合結束時把標記回饋給 agent（契約過了也照樣），改好之後標記解決；追緝指到第一跑寫下那一行的那一步 |
+| I 平行委派兩個子 agent | 同一則回覆裡叫兩個子 agent：A 把列數 3 寫進 `count.txt`、B 把 96 寫進 `figure.txt`；主 agent 兩個都讀、寫進報告 | 指到 **B** 寫 `figure.txt` 的那一步；兩個子 agent 的寫入重疊時可以是候選集合，但 B 要在裡面、**不可以只怪 A** |
 | G 背景子 agent（只有 Claude Code）| 同 E，但子 agent 在背景跑；主 agent 從 `<task-notification>` 照抄數字 | 同 E：指到子 agent；那則通知不可以被當成使用者說的話 |
 | E 子 agent 算錯、主 agent 照抄 | 主 agent 用自己的委派工具交給子 agent（`ROLE:sub`）→ 子 agent 讀帳本、把 96 寫進 `figure.txt` → 主 agent 讀它、寫進報告 | `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步（行動者帶子 agent 的 id） |
 
@@ -96,6 +97,26 @@ SCENARIOS: dict[str, dict] = {
         "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
                           {"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
                 "final": "The portal disagrees with the ledger; used the ledger."}},
+    "I_parallel_subagents": {
+        "steps": [{"parallel": [
+                      {"agent": {"prompt": "ROLE:subA Count the data rows of inputs/ledger.csv and "
+                                           "write the count (digits only) to count.txt.",
+                                 "description": "Count the rows", "pi_agent": "worker"}},
+                      {"agent": {"prompt": "ROLE:subB Add up the amount column of "
+                                           "inputs/ledger.csv and write the total (digits only) "
+                                           "to figure.txt.",
+                                 "description": "Compute the total", "pi_agent": "worker"}}]},
+                  {"run": "cat figure.txt count.txt"},
+                  {"write": ["report.md", "# Quarter\n\nTotal: 96\nRows: 3\n"]}],
+        "final": "Done.",
+        "roles": {"subA": {"steps": [{"write": ["count.txt", "3\n"]}],
+                           "final": "Wrote 3 to count.txt."},
+                  "subB": {"steps": [{"run": "cat inputs/ledger.csv"},
+                                     {"write": ["figure.txt", "96\n"]}],
+                           "final": "Wrote 96 to figure.txt."}},
+        "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
+                          {"write": ["report.md", "# Quarter\n\nTotal: 69\nRows: 3\n"]}],
+                "final": "Recomputed from the ledger."}},
     "H_human_flag": {
         "steps": [{"run": "cat inputs/ledger.csv"},
                   {"write": ["report.md", "# Quarter\n\nTotal: 69\nRegion: South\n"]}],
@@ -149,6 +170,9 @@ EXPECT = {
     "G_background_subagent_fault": {"state": "located", "fault_class": "agent",
                                     "confidence": "lineage_internal", "step_writes": "figure.txt",
                                     "subagent": True},
+    "I_parallel_subagents": {"state": "located", "fault_class": "agent",
+                             "confidence": "lineage_internal", "step_writes": "figure.txt",
+                             "subagent": True, "or_candidates": True},
     "H_human_flag": {"state": "located", "fault_class": "agent", "confidence": "heuristic",
                      "step_writes": "report.md", "claim_prefix": "flag:"},
     "E_subagent_fault": {"state": "located", "fault_class": "agent",
@@ -232,6 +256,11 @@ def judge(scn: str, finding: dict | None) -> dict:
     exp = EXPECT[scn]
     if finding is None:
         return {"correct": False, "why": "no finding"}
+    if exp.get("or_candidates") and finding.get("state") == "candidate_set":
+        # 寫入重疊 ⇒ 說「是其中之一」是誠實的答案；但寫錯的那一步要在裡面
+        hit = any(exp["step_writes"] in (w or []) for w in finding.get("_cand_writes") or [])
+        return {"correct": hit, "mismatch": [] if hit else
+                [f"candidates {finding.get('_cand_writes')} miss {exp['step_writes']}"]}
     bad = [k for k in ("state", "fault_class", "confidence") if finding.get(k) != exp[k]]
     if "step_writes" in exp:
         # 指到的那一步要是寫 `step_writes` 的那一步（從 trace show 對回去）
@@ -253,7 +282,7 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     lab.proj = lab.root / f"proj-{scn.split('_')[0].lower()}"
     lab.reset_project(f"q-total-{scn.split('_')[0].lower()}")
     lab.mock_log.unlink(missing_ok=True)
-    lab.subagents = scn.startswith(("E_", "G_"))
+    lab.subagents = scn.startswith(("E_", "G_", "I_"))
     lab.web = scn.startswith("F_")
     lab.start_mock(SCENARIOS[scn])
     t0 = time.time()
@@ -308,6 +337,9 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
         s = steps.get(f["step"].get("n")) or {}
         f["_step_writes"] = [w["path"] for w in s.get("writes") or []]
         f["_step_tool"] = s.get("tool")
+    if f and f.get("candidates"):
+        f["_cand_writes"] = [[w["path"] for w in (steps.get(c.get("n")) or {}).get("writes") or []]
+                             for c in f["candidates"]]
     mock = [json.loads(x) for x in lab.mock_log.read_text().splitlines()] \
         if lab.mock_log.is_file() else []
     fb = [m.get("feedback") for m in mock if m.get("feedback")]
@@ -324,7 +356,7 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
         "gaps": sum(1 for e in evs if e["type"] == "unrecorded_change"),
         "finding": {k: f.get(k) for k in ("state", "fault_class", "confidence", "layer",
                                           "location", "value", "source", "note", "_step_writes",
-                                          "_step_tool")} | {
+                                          "_step_tool", "_cand_writes")} | {
             "step_n": (f.get("step") or {}).get("n"),
             "actor": (f.get("step") or {}).get("actor")} if f else None,
         "judgement": judge(scn, f),
