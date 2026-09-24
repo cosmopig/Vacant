@@ -38,6 +38,8 @@
 #                                           --live-runs 讓那幾格跑完就有收據頁
 #   ./exhibit_boot.sh --lan --print-host    只印「區網 IP 抓到什麼」就結束
 #                                           （0＝抓到、2＝抓不到並說明；1 是 bug）
+#   ./exhibit_boot.sh --print-events        只印「分身真跑的 lifecycle 檔在哪」就結束
+#                                           （twinlink loop 寫、serve_twin --live tail 的同一個檔）
 #   ./exhibit_boot.sh --no-twin             不接數位分身（回到 09-21 之前的行為）
 #   ./exhibit_boot.sh --no-twin-loop        起唯讀端點但不起 loop（庫是唯讀的）
 #
@@ -66,6 +68,7 @@ KIOSK=0
 TOKEN="${VACANT_TWIN_TOKEN:-}"
 NO_TOKEN=0
 PRINT_HOST=0
+PRINT_EVENTS=0
 RECORDINGS=()
 LIVE_SRC=""
 LIVE_RUNS=""
@@ -83,6 +86,8 @@ while [ $# -gt 0 ]; do
     #   ⇒ 有了這一格，那一段就**量得到**了（`exhibit_preflight.sh --lan`
     #     與 `tests/test_serve_twin.py` 都在用它）。
     --print-host) PRINT_HOST=1 ;;
+    # 只印分身真跑那一個 lifecycle 檔的路徑就結束（兩邊指到同一個檔的可執行判準）。
+    --print-events) PRINT_EVENTS=1 ;;
     --hm)     HM="$2"; shift ;;
     --dwell)  DWELL="$2"; shift ;;
     --recording) RECORDINGS+=("$2"); shift ;;
@@ -103,6 +108,43 @@ while [ $# -gt 0 ]; do
   shift
 done
 
+# ── 分身真跑的 lifecycle：**loop 寫、serve_twin --live tail，同一個檔** ────────
+#
+# 🔴 2026-09-24 以前這兩邊沒有接起來：`twinlink loop` 把分身的真跑寫進
+#    `<庫旁邊>/twin_lifecycle.jsonl`（`twinagent.default_events_path`），
+#    而開機腳本只有在人手動給 `--live` 的時候才叫 serve_twin 去 tail 一個檔
+#    ——預設一個都不 tail。於是分身在 vacant run 底下真的跑了、每一通都經過中介，
+#    **電視上那個人一拍都演不出來**。
+#    ⇒ 沒給 `--live` 又有接分身（沒有 `--no-twin`）的時候，`--live` 預設就是
+#      loop 寫的那一個；給了 `--live`（例如 run_twin.py 那一批），loop 也改寫進
+#      **同一個檔**（`VACANT_EVENTS`），serve_twin 只 tail 一個檔就看得到兩邊。
+#    路徑算法跟 `twinagent.default_events_path` 一致：`VACANT_EVENTS` 優先，
+#    否則「庫」那個檔旁邊的 `twin_lifecycle.jsonl`。庫的預設跟 `twin_loop.sh`、
+#    `twinstore.DEFAULT_DB` 同一個。
+TWIN_EVENTS=""
+# 人有沒有**明講** --live。底下「一份錄影都沒有」那一道門看的是這個，
+# 不是預設補上來的分身檔——分身一個都還沒跑的時候，電視仍然是空的。
+LIVE_GIVEN="$LIVE_SRC"
+if [ "$NO_TWIN" = "0" ]; then
+  if [ -n "$LIVE_SRC" ]; then
+    TWIN_EVENTS="$LIVE_SRC"
+  elif [ -n "${VACANT_EVENTS:-}" ]; then
+    TWIN_EVENTS="$VACANT_EVENTS"
+  else
+    DB_FOR_EVENTS="${TWIN_DB:-$REPO/ops/exhibit/twin/store/twinstore.sqlite3}"
+    TWIN_EVENTS="$(dirname "$DB_FOR_EVENTS")/twin_lifecycle.jsonl"
+  fi
+  LIVE_SRC="$TWIN_EVENTS"
+fi
+if [ "$PRINT_EVENTS" = "1" ]; then
+  if [ -z "$TWIN_EVENTS" ]; then
+    echo "（--no-twin：沒有分身那一條，也就沒有分身的 lifecycle 檔）" >&2
+    exit 2
+  fi
+  echo "$TWIN_EVENTS"
+  exit 0
+fi
+
 if [ "$PRINT_HOST" = "0" ] && [ ! -f "$HM/world3/index.html" ]; then
   echo "找不到電視那一頁：$HM/world3/index.html" >&2
   echo "用 --hm <路徑> 指過去，或設 VACANT_HM 環境變數。" >&2
@@ -111,7 +153,7 @@ fi
 # 電視要播的東西：lifecycle 錄影（重播）。一份都沒有又沒給 --live ⇒ 電視會是空的。
 # ⚠ `twin_pack.json` **不再是事件來源**，只剩收據頁（/r/<cell>）在用；沒有它
 #   展件照樣起得來，只是 /r/<cell> 會一律 404 並講明（不會帶人去看別的鏈）。
-if [ "$PRINT_HOST" = "0" ] && [ -z "$LIVE_SRC" ] && [ "${#RECORDINGS[@]}" -eq 0 ] \
+if [ "$PRINT_HOST" = "0" ] && [ -z "$LIVE_GIVEN" ] && [ "${#RECORDINGS[@]}" -eq 0 ] \
    && ! ls "$REPO"/ops/exhibit/twin/recordings/*.jsonl >/dev/null 2>&1; then
   echo "找不到任何 lifecycle 錄影：$REPO/ops/exhibit/twin/recordings/*.jsonl" >&2
   echo "先跑：bash $REPO/ops/exhibit/twin/record_fixture.sh（L-none 備援），" >&2
@@ -325,7 +367,11 @@ LOOP_WHY=off
 TWIN_OUT="${VACANT_TWIN_OUT:-$HM/world3/live/visitors.json}"
 if [ "$NO_TWIN" = "0" ] && [ "$NO_TWIN_LOOP" = "0" ]; then
   if [ -n "${VACANT_TWIN_CLOUD_TOKEN:-}" ]; then
-    VACANT_HM="$HM" "$REPO/ops/exhibit/twin/twin_loop.sh" &
+    # ⚠ `VACANT_EVENTS` 就是上面算出來、serve_twin --live 正在 tail 的那一個檔。
+    #   `VACANT_TWIN_DB` 也一起帶：`--twin-db` 以前只給了唯讀端點，loop 用的是它自己
+    #   的預設庫——兩邊讀寫不同的庫，事件檔的預設位置也就跟著分家。
+    VACANT_HM="$HM" VACANT_EVENTS="$TWIN_EVENTS" VACANT_TWIN_DB="${TWIN_DB:-}" \
+      "$REPO/ops/exhibit/twin/twin_loop.sh" &
     LOOP_PID=$!
     LOOP_WHY=on
   else
@@ -356,6 +402,10 @@ else
 fi
 if [ -n "$LIVE_SRC" ]; then
   echo " 真跑 　${LIVE_SRC}（mode=live：有真跑就先播，閒下來回到重播）"
+  if [ -n "$TWIN_EVENTS" ]; then
+    echo " 　　　 ↑ 同一個檔：twinlink loop 的分身真跑寫進這裡（VACANT_EVENTS），"
+    echo " 　　　   serve_twin --live tail 的也是這裡——電視用 task_id＝twin_id 對名冊上的人"
+  fi
   if [ -n "$LIVE_RUNS" ]; then
     echo " 　　　 收據：${LIVE_RUNS}（每一格跑完即時打包，/v/live.html）"
   else

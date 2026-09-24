@@ -337,7 +337,10 @@ def run_one(job: Job) -> dict[str, Any]:
             events_path=(str(job.cfg.events_path) if job.cfg.events_path else None),
             events_caller={"cell_id": tid, "resident": resident_code(job.sub_id),
                            "stratum": "twin", "prompt": CALLER_PROMPT,
-                           "declared_evidence": ""})
+                           "declared_evidence": "",
+                           # 電視靠它分出「分身的自主任務」：沒有客觀標準、只有一臂、
+                           # 用 task_id(＝twin_id) 去對名冊（tv_contract 規則 11）。
+                           "task_kind": "practical"})
         last = (summary.get("attempts") or [{}])[-1]
         frozen = last.get("frozen_path")
         res["summary"] = {

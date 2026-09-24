@@ -32,7 +32,7 @@ A 線維護）。**兩邊的欄位必須一字不差**；本支是生產端的�
 
 | type | 臂 | 何時 | 主要欄位 |
 |---|---|---|---|
-| `task_opened` | ON | 一格開始 | `prompt`、`prompt_sha256`、`evidence`（恆 `null`，要跑完才推得出）、`stratum` |
+| `task_opened` | ON | 一格開始 | `prompt`、`prompt_sha256`、`evidence`（恆 `null`，要跑完才推得出）、`stratum`、`task_kind`（見下） |
 | `routed` | ON | 一格開始 | `worker`、`basis`（恆 `"random"`）、`basis_note` |
 | `working` | ON／OFF | **每一通**經過中介的模型呼叫 | `worker`、`attempt`、`calls_so_far`（這一跑到目前為止的通數，正整數） |
 | `revised` | ON | 第 2 次以後的嘗試**真的開始了** | `reviser`（＝同一個 worker）、`transition`、`retry_arm`、`attempt` |
@@ -59,6 +59,19 @@ A 線維護）。**兩邊的欄位必須一字不差**；本支是生產端的�
   **沒量到的欄位不發**：`audited`（沒有抽樣稽核層）、`on_leaked`／`off_leaked`
   （要隱藏測資才答得出來）永遠不發（`COUNTERS_NEVER`）。
 
+### `task_kind`（2026-09-24）：這一格是哪一種任務
+
+| 值 | 意思 | 從哪來 |
+|---|---|---|
+| `"code"` | 反事實題庫格：有驗收套件（閘門）、同一題有 ON／OFF 兩臂 | `run_twin.py` 的 `caller.task_kind` |
+| `"practical"` | 觀眾分身**自己決定**的實務任務：沒有客觀標準、只有 ON 一臂、`accepted` 恆 `null` | `twinagent.py` 的 `caller.task_kind` |
+| （缺席） | 當 `"code"`：2026-09-24 之前的錄影沒有這個欄位 | — |
+
+⚠ **缺席只給舊錄影用。** 新的東西（現場 tail、新錄的錄影）一律要帶——
+`validate(require_task_kind=True)`；`serve_twin` 的 `--live` 那條路與
+`record_fixture.sh` 都開著它。`practical` 那一格的 `task_id` ＝ `twin_id`，
+電視拿它對 twinlink 的 `people[].twin_id`；**事件流裡沒有他的決定、沒有他的名字**。
+
 ## 誠實規則（`validate` 是它的可執行版本）
 
 1. **沒發生的步驟不發事件。** `vacant run` 沒有同儕評審、沒有抽樣稽核
@@ -76,6 +89,11 @@ A 線維護）。**兩邊的欄位必須一字不差**；本支是生產端的�
 9. **`postaudit` 永遠不長得像裁決**：`when="after_the_run"`、`is_verdict=false`、
    `signed=false` 三個旗標缺一不可，而且只准出現在 OFF 臂。
 10. **`counters` 不准有這條路上不存在的層**（`COUNTERS_NEVER`），數字欄位是非負整數。
+11. **分身的自主任務（`task_kind="practical"`）沒有客觀標準**：那一格不准有 OFF 臂、
+    不准有 `gate_ran`／`revised`（沒有驗收套件就沒有閘門、沒有重試）、`verdict.accepted`
+    恆為 `null`、`stop_reason` 只能是 `ungated`（或基建壞了的 `infra_void`）。
+    **不准發明評分**——Vacant 在這一格保證的只有「每一通模型呼叫都經過中介、
+    行程結束時簽了收據」。
 """
 from __future__ import annotations
 
@@ -108,6 +126,20 @@ COUNTERS_INT = ("total", "blocked", "delivered", "off_ran", "off_with_receipt",
 #: 事件的 `arm` 欄位。一格有兩串事件（有 Vacant／關掉 Vacant）。
 ARM_ON, ARM_OFF = "ON", "OFF"
 ARMS = (ARM_ON, ARM_OFF)
+
+#: `task_opened.task_kind` 的兩個值（見模組 docstring）。缺席＝舊錄影＝當 code。
+KIND_CODE, KIND_PRACTICAL = "code", "practical"
+TASK_KINDS = (KIND_CODE, KIND_PRACTICAL)
+
+#: 分身那一格的 `routed.basis_note`。**沒有派工**：這一格是觀眾自己的分身。
+PRACTICAL_BASIS_NOTE = ("這一格是觀眾自己的數位分身：沒有派工，"
+                        "做什麼是分身自己決定的")
+#: 分身那一格的 `verdict.accepted_note`。`null` 不是「沒過」。
+#: ⚠ 口徑：講「經過中介」「簽了收據」，**不講「信任」、不講「驗證了它做得好」**。
+PRACTICAL_ACCEPTED_NOTE = ("這類任務沒有客觀標準——Vacant 不判對錯；它保證的是"
+                           "每一通模型呼叫都經過中介、行程結束時簽了收據")
+#: 分身那一格 `verdict.stop_reason` 只准是這兩個。
+PRACTICAL_STOPS = ("ungated", "infra_void")
 
 #: **這條路上不存在的層**。發了就是把沒有的東西畫出來。
 NEVER = ("review_vote", "audited")
@@ -178,14 +210,26 @@ def _is_nat(v) -> bool:
     return isinstance(v, int) and not isinstance(v, bool) and v >= 0
 
 
-def validate(evs: list[dict], *, require_settled: bool = True) -> list[str]:
+def task_kinds(evs: list[dict]) -> dict[str, str]:
+    """`task_id` → `task_kind`（只看 `task_opened`；缺席的當 `code`）。"""
+    return {e.get("task_id"): (e.get("task_kind") or KIND_CODE)
+            for e in evs if e.get("type") == "task_opened"}
+
+
+def validate(evs: list[dict], *, require_settled: bool = True,
+             require_task_kind: bool = False) -> list[str]:
     """契約自檢。回傳問題清單（空＝合格）。
 
     `require_settled=False`：給**還在跑**的片段用（現場 tail 到一半）——
     那時「開了還沒 verdict」是正常的，其餘規則照樣咬。
+    `require_task_kind=True`：新的東西（現場、新錄影）的 `task_opened` 一定要帶
+    `task_kind`；缺席只給 2026-09-24 之前的舊錄影。
+    ⚠ 規則 11 只咬**同一批裡看得到 `task_opened`** 的格子：現場 tail 是一段一段驗的，
+      後面幾段看不到開頭，那幾段的把關靠生產端（`live_events.Folder`）本身不發。
     """
     bad = []
     last = ""
+    kinds = task_kinds(evs)
     for i, e in enumerate(evs):
         n = i + 1
         for k in REQUIRED:
@@ -218,6 +262,29 @@ def validate(evs: list[dict], *, require_settled: bool = True) -> list[str]:
                            "（要隱藏測資才答得出來，而隱藏測資不進展件）")
             if e.get("blocked_by") == "review":
                 bad.append(f"第 {n} 個事件：blocked_by=review——這條路上沒有評審層")
+        if t == "task_opened":
+            if "task_kind" in e and e.get("task_kind") not in TASK_KINDS:
+                bad.append(f"第 {n} 個事件：task_kind 是 {e.get('task_kind')!r}，"
+                           f"只能是 {'／'.join(TASK_KINDS)}")
+            elif require_task_kind and "task_kind" not in e:
+                bad.append(f"第 {n} 個事件：task_opened 沒有 task_kind——"
+                           "缺席只給舊錄影；新的東西要講明是題庫格還是分身的自主任務")
+        # ── 分身的自主任務（規則 11）：沒有客觀標準、沒有對照、沒有閘門 ──────
+        if kinds.get(e.get("task_id")) == KIND_PRACTICAL:
+            if e.get("arm") == ARM_OFF:
+                bad.append(f"第 {n} 個事件：分身的自主任務出現 OFF 臂——"
+                           "那一格沒有反事實對照，畫面上不准長出一個")
+            if t in ("gate_ran", "revised"):
+                bad.append(f"第 {n} 個事件：分身的自主任務發了 {t}——"
+                           "沒有驗收套件就沒有閘門、也沒有重試")
+            if t == "verdict":
+                if e.get("accepted") is not None:
+                    bad.append(f"第 {n} 個事件：分身的自主任務 accepted 不是 null——"
+                               "這類任務沒有客觀標準，Vacant 不判對錯")
+                if e.get("stop_reason") not in PRACTICAL_STOPS:
+                    bad.append(f"第 {n} 個事件：分身的自主任務 stop_reason 是 "
+                               f"{e.get('stop_reason')!r}，只能是 "
+                               f"{'／'.join(PRACTICAL_STOPS)}")
         if t == "routed" and e.get("basis") != "random":
             bad.append(f"第 {n} 個事件：basis 不是 random（`vacant run` 沒有路由層）")
         if t == "revised" and e.get("reviser") is None:
