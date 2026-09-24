@@ -17,6 +17,9 @@
 劇本（`MOCK_SCENARIO` 指向的 JSON）：`{"files": {"path": "content", ...}, "final": "..."}`，
 或有序的 `{"steps": [{"run": "<指令>"} | {"write": ["<路徑>", "<內容>"]}, ...], "final": "..."}`
 （可究責追緝的埋錯情境，`ops/accountability/e2e_trace.py`）；`fix` 段是看到回饋之後的劇本。
+子 agent：步驟 `{"agent": {"prompt": "ROLE:<角色> …", "description": "…"}}` 用這個 agent 自己的委派工具
+（Claude Code `Agent`／`Task`、OpenCode `task`、pi 範例擴充的 `subagent`）交出去；`"roles": {"<角色>": {劇本}}`
+是子 agent 的劇本——對話**開頭的使用者訊息**裡有 `ROLE:<角色>` 的，照那一份演。
 每一通請求：數對話裡已經有幾個工具結果 k；k < 檔案數 ⇒ 叫一個「寫檔」工具寫第 k 個檔；
 否則回最後那句話。工具從 agent **這一通送來的工具清單**裡挑：先找有「路徑＋內容」參數的
 寫檔工具，沒有就用 shell 工具（`printf <base64> | base64 -d > path`）。
@@ -34,6 +37,7 @@ import base64
 import itertools
 import json
 import os
+import re
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -149,22 +153,107 @@ def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     return last >= 0, sum(1 for it in after if is_result(it))
 
 
+ROLE_RE = re.compile(r"ROLE:([A-Za-z0-9_]+)")
+
+
+def role_of(opening: str) -> str | None:
+    """對話開頭的使用者訊息 → 角色（子 agent 的任務說明帶著 `ROLE:<角色>`）。只看開頭：主 agent 之後
+    收到的工具結果、子 agent 的回報都可能提到它，但那不會讓主 agent 變成子 agent。"""
+    m = ROLE_RE.search(opening or "")
+    return m.group(1) if m else None
+
+
+def _text_of(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "\n".join(str(c.get("text") or "") for c in content
+                         if isinstance(c, dict) and c.get("type") in ("text", "input_text"))
+    return ""
+
+
+def opening_user_text(msgs: list[dict[str, Any]]) -> str:
+    """第一則助理訊息／工具呼叫之前的所有使用者訊息（Codex 會先送環境與指令檔）。"""
+    out = []
+    for m in msgs:
+        if not isinstance(m, dict):
+            continue
+        role = m.get("role")
+        if role in ("system", "developer"):
+            continue
+        if role != "user":
+            break
+        out.append(_text_of(m.get("content")))
+    return "\n".join(out)
+
+
+def _agent_tool(tools: list[dict[str, Any]], spec: dict[str, Any]
+                ) -> tuple[str, dict[str, Any]] | None:
+    """這個 agent 自己的委派工具＋參數。"""
+    by = {_tool_name(t): t for t in tools}
+    prompt = str(spec.get("prompt") or "")
+    desc = str(spec.get("description") or "delegated task")
+    for name in ("Agent", "Task"):                       # Claude Code
+        if name in by:
+            sch = by[name].get("input_schema") or {}
+            args: dict[str, Any] = {"description": desc, "prompt": prompt,
+                                    "subagent_type": spec.get("type") or "general-purpose"}
+            if "run_in_background" in _props(sch):
+                args["run_in_background"] = False       # 前景：等它做完再往下（背景模式另有實測）
+            return name, args
+    if "task" in by:                                     # OpenCode
+        return "task", {"description": desc, "prompt": prompt,
+                        "subagent_type": spec.get("type") or "general"}
+    if "subagent" in by:                                 # pi 的範例擴充
+        return "subagent", {"agent": spec.get("pi_agent") or "worker", "task": prompt}
+    ns = by.get("multi_agent_v1") or {}                  # Codex：命名空間工具（v1，預設開）
+    if ns.get("type") == "namespace" and any(_tool_name(x) == "spawn_agent"
+                                             for x in ns.get("tools") or []):
+        return "multi_agent_v1/spawn_agent", {"message": prompt}
+    return None
+
+
+def _expand_agent_steps(steps: list[Any], tools: list[dict[str, Any]]) -> list[Any]:
+    """Codex 的委派是兩通：`spawn_agent` 之後 `wait_agent`（等它做完、拿回結果）。"""
+    by = {_tool_name(t): t for t in tools}
+    if (by.get("multi_agent_v1") or {}).get("type") != "namespace":
+        return steps
+    out: list[Any] = []
+    for st in steps:
+        out.append(st)
+        if isinstance(st, dict) and "agent" in st:
+            out.append({"codex_wait": True})
+    return out
+
+
 def _shell_tool(tools: list[dict[str, Any]]):
     return pick_tool([t for t in tools if _tool_name(t).lower() in (
         "bash", "shell", "exec_command", "local_shell", "run_shell_command")])
 
 
 def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
-         fed_back: bool = False):
+         fed_back: bool = False, role: str | None = None, last_agent_id: str | None = None):
     sc = scenario()
+    roles = sc.get("roles") or {}
+    if role and isinstance(roles.get(role), dict):
+        sc = roles[role]
     if fed_back and isinstance(sc.get("fix"), dict):
         sc = sc["fix"]
     steps = sc.get("steps")
     if isinstance(steps, list):
+        steps = _expand_agent_steps(steps, tools)
         # 有序的步驟（可究責追緝的埋錯情境要「先寫腳本、再跑它」）：
         # {"run": "<shell 指令>"} 或 {"write": ["<路徑>", "<內容>"]}
         if n_results < len(steps) and tools:
             st = steps[n_results]
+            if st.get("codex_wait"):
+                return ("tool", "multi_agent_v1/wait_agent",
+                        {"targets": [last_agent_id or ""], "timeout_ms": 120000})
+            if "agent" in st:
+                at = _agent_tool(tools, st["agent"])
+                if at:
+                    return ("tool", at[0], at[1])
+                return ("text", "no delegation tool available", None)
             if "run" in st:
                 sh = _shell_tool(tools)
                 if sh and sh[0] != "write":
@@ -273,6 +362,11 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):  # noqa: N802
         body = self._body()
         n = next(_ctr)
+        if os.environ.get("MOCK_BODIES"):          # 除錯：每一通請求的原文（不含標頭）
+            os.makedirs(os.environ["MOCK_BODIES"], exist_ok=True)
+            with open(os.path.join(os.environ["MOCK_BODIES"], f"{n:03d}.json"), "w",
+                      encoding="utf-8") as f:
+                json.dump(body, f, ensure_ascii=False)
         path = self.path.split("?")[0]
         if path.endswith("/messages/count_tokens"):
             return self._json(200, {"input_tokens": 100})
@@ -293,8 +387,9 @@ class H(BaseHTTPRequestHandler):
         fed, k = split_on_feedback(blocks, lambda b: b.get("type") == "tool_result",
                                    lambda b: json.dumps(b))
         tools = body.get("tools") or []
-        kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed)
-        log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind,
+        role = role_of(_text_of(msgs[0].get("content")) if msgs else "")
+        kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed, role)
+        log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [t.get("name") for t in tools][:40], "tool": a if kind == "tool" else None})
@@ -343,8 +438,16 @@ class H(BaseHTTPRequestHandler):
             "function_call_output", "custom_tool_call_output", "local_shell_call_output"),
             lambda it: json.dumps(it))
         tools = [t for t in (body.get("tools") or []) if isinstance(t, dict)]
-        kind, a, b = plan(k, tools, None, fed)
-        log({"proto": "responses", "n": n, "k": k, "fed_back": fed, "reply": kind,
+        role = role_of(opening_user_text(items))
+        last_id = None
+        for it in items:                         # spawn_agent 的結果：{"agent_id": …}
+            if it.get("type") == "function_call_output" and "agent_id" in str(it.get("output")):
+                try:
+                    last_id = json.loads(it["output"]).get("agent_id") or last_id
+                except (ValueError, TypeError, AttributeError):
+                    pass
+        kind, a, b = plan(k, tools, None, fed, role, last_id)
+        log({"proto": "responses", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [t.get("name") or t.get("type") for t in tools][:40],
@@ -356,6 +459,8 @@ class H(BaseHTTPRequestHandler):
         else:
             item = {"type": "function_call", "id": f"fc_{n}", "call_id": f"call_{n}",
                     "name": a, "arguments": json.dumps(b), "status": "completed"}
+            if "/" in a:                         # 命名空間工具（Codex 的 multi_agent_v1）
+                item["namespace"], item["name"] = a.split("/", 1)
         resp = {"id": rid, "object": "response", "created_at": int(time.time()),
                 "status": "completed", "model": body.get("model", "mock"), "output": [item],
                 "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15,
@@ -388,8 +493,9 @@ class H(BaseHTTPRequestHandler):
         fed, k = split_on_feedback(msgs, lambda m: m.get("role") == "tool",
                                    lambda m: json.dumps(m.get("content")))
         tools = body.get("tools") or []
-        kind, a, b = plan(k, tools, None, fed)
-        log({"proto": "chat", "n": n, "k": k, "fed_back": fed, "reply": kind,
+        role = role_of(opening_user_text(msgs))
+        kind, a, b = plan(k, tools, None, fed, role)
+        log({"proto": "chat", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
              "tools": [(t.get("function") or {}).get("name") for t in tools][:40],

@@ -11,6 +11,7 @@
 | A 輸入本來就錯 | 讀財務給的摘要（寫著 75）→ 照抄 | `input`／`lineage_exact`，指到 `inputs/summary.txt`；agent 不背 |
 | C 中間的腳本錯 | 寫 `calc.py`（加錯欄）→ 跑它輸出報告 | `agent`／`lineage_internal`，指到**寫腳本**那一步，不是寫報告那一步 |
 | D 沒被記錄的改動（負控制） | agent 寫對的報告；**之後**有人在外面改成 999 | `UNOBSERVED`／`gap`；沒有任何行動者被記 |
+| E 子 agent 算錯、主 agent 照抄 | 主 agent 用自己的委派工具交給子 agent（`ROLE:sub`）→ 子 agent 讀帳本、把 96 寫進 `figure.txt` → 主 agent 讀它、寫進報告 | `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步（行動者帶子 agent 的 id） |
 
 每個 agent 一個隔離的「使用者」（`ops/intake/e2e_four_agents.Lab`：自己的 HOME、provider 指到
 假模型、`vacant install` 寫進它自己的設定），**原生地**跑（命令列上沒有 `vacant`）。
@@ -25,8 +26,11 @@
    歸因規則在乾淨埋錯下給出期望的答案——**不是**真模型下產出會更接近需求（那是預註冊實驗的事）。
 2. 劇本決定錯在哪裡；錯的值都選成在別處找不到的數字（999、75、306），巧合相同的值會讓
    值比對誤認來源（`blame.py` 誠實邊界 2）。
-3. 子 agent 的端到端沒有在這裡跑（假模型不演子 agent）；子 agent 歸因只有單元測試與
-   `capture/` 的實測底稿。
+3. 子 agent（情境 E）：假模型照 `ROLE:sub` 演子 agent。Claude Code 用前景的 `Agent`（背景模式另有
+   `capture/` 的實測）；OpenCode 用 `task`；Codex 用預設開著的 `multi_agent_v1`（`spawn_agent`→`wait_agent`；
+   這個版本對自訂 provider 不藏在 `tool_search` 後面，v2 沒跑）；pi 沒有內建子 agent，用它**隨附的範例擴充**
+   `subagent`（另開一個 pi 行程，靠 Vacant 的 pi 擴充傳下去的 `VACANT_PI_PARENT` 認出是子 agent）。
+   平行委派（一次叫兩個子 agent）沒在這裡跑：pi 那條標記在平行時可能指到兄弟呼叫（工作階段仍然對）。
 """
 from __future__ import annotations
 
@@ -77,6 +81,19 @@ SCENARIOS: dict[str, dict] = {
     "D_unrecorded_change": {
         "steps": [{"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
         "final": "Done."},
+    "E_subagent_fault": {
+        "steps": [{"agent": {"prompt": "ROLE:sub Add up the amount column of inputs/ledger.csv "
+                                       "and write the total (digits only) to figure.txt.",
+                             "description": "Compute the quarter total", "pi_agent": "worker"}},
+                  {"run": "cat figure.txt"},
+                  {"write": ["report.md", "# Quarter\n\nTotal: 96\n"]}],
+        "final": "Done.",
+        "roles": {"sub": {"steps": [{"run": "cat inputs/ledger.csv"},
+                                    {"write": ["figure.txt", "96\n"]}],
+                          "final": "Wrote 96 to figure.txt."}},
+        "fix": {"steps": [{"run": "cat inputs/ledger.csv"},
+                          {"write": ["report.md", "# Quarter\n\nTotal: 69\n"]}],
+                "final": "Recomputed from the ledger."}},
 }
 EXPECT = {
     "B_agent_fault": {"state": "located", "fault_class": "agent", "confidence": "provable",
@@ -87,7 +104,14 @@ EXPECT = {
                        "confidence": "lineage_internal", "step_writes": "calc.py"},
     "D_unrecorded_change": {"state": "UNOBSERVED", "fault_class": "unattributable",
                             "confidence": "gap"},
+    "E_subagent_fault": {"state": "located", "fault_class": "agent",
+                         "confidence": "lineage_internal", "step_writes": "figure.txt",
+                         "subagent": True},
 }
+#: pi 沒有內建子 agent：情境 E 用它隨附的範例擴充（另開一個 pi 行程），代理人定義放在隔離的 agent 目錄
+PI_SUBAGENT_EXT = "@earendil-works/pi-coding-agent/examples/extensions/subagent/index.ts"
+PI_WORKER = ("---\nname: worker\ndescription: does one delegated task\n"
+             "tools: read, bash, write\n---\nYou do the delegated task and report what you wrote.\n")
 
 
 def contract(dest: pathlib.Path, task_id: str) -> dict:
@@ -120,6 +144,16 @@ class Lab(E.Lab):
         subprocess.run(["git", "init", "-q", str(self.proj)], check=True)
         r = self.vacant("contract", "lock")
         assert r.returncode == 0, r.stderr
+
+    def native_argv(self, prompt: str) -> list[str]:
+        argv = super().native_argv(prompt)
+        if self.agent == "pi" and getattr(self, "subagents", False):
+            ext = self.bindir.parent / PI_SUBAGENT_EXT
+            argv[1:1] = ["-e", str(ext)]
+            agents = self.home / ".pi" / "agent" / "agents"
+            agents.mkdir(parents=True, exist_ok=True)
+            (agents / "worker.md").write_text(PI_WORKER)
+        return argv
 
     def trace_dir(self) -> pathlib.Path | None:
         base = self.vhome / "trace" / "projects"
@@ -154,6 +188,8 @@ def judge(scn: str, finding: dict | None) -> dict:
                        f"{exp['step_writes']})")
     if "source_path" in exp and (finding.get("source") or {}).get("path") != exp["source_path"]:
         bad.append(f"source {finding.get('source')}")
+    if exp.get("subagent") and not ((finding.get("step") or {}).get("actor") or {}).get("agent"):
+        bad.append(f"actor is not a sub-agent ({(finding.get('step') or {}).get('actor')})")
     return {"correct": not bad, "mismatch": bad}
 
 
@@ -163,6 +199,7 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     lab.proj = lab.root / f"proj-{scn.split('_')[0].lower()}"
     lab.reset_project(f"q-total-{scn.split('_')[0].lower()}")
     lab.mock_log.unlink(missing_ok=True)
+    lab.subagents = scn.startswith("E_")
     lab.start_mock(SCENARIOS[scn])
     t0 = time.time()
     try:

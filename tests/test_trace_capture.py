@@ -127,3 +127,35 @@ def test_broken_trace_never_breaks_the_hook(ws, monkeypatch):
     out = hook.handle("claude", "PreToolUse", {"session_id": "s", "cwd": str(ws),
                                                "tool_name": "Read", "tool_input": {}})
     assert out == ("", "", 0)
+
+
+def test_pi_subagent_process_is_a_subagent_of_the_parent_session(ws):
+    """pi 沒有內建子 agent：擴充另開的 pi 行程帶著父 agent 的標記（`VACANT_PI_PARENT`）。"""
+    child = {"cwd": str(ws), "session_id": "child-sid", "parent_session_id": "root-sid",
+             "parent_call_id": "call_7", "agent_type": "worker"}
+    hook.handle("pi", "prompt", {**child, "prompt": "ROLE:sub add up the ledger"})
+    p = {**child, "tool": "write", "input": {"path": "figure.txt"}, "call_id": "c1"}
+    hook.handle("pi", "pre_tool", p)
+    (ws / "figure.txt").write_text("96\n")
+    hook.handle("pi", "post_tool", {**p, "output": "ok"})
+    a = steps(ws)[-1]["actor"]
+    assert (a["session"], a["agent"], a["agent_type"]) == ("root-sid", "child-sid", "worker")
+    [pr] = [e for e in R.Recorder(ws).events() if e["type"] == "prompt"]
+    assert pr["source"] == "parent_agent"                      # 不是使用者說的
+    # 子行程結束：不是這個工作階段結束（不收父 agent 還在跑的步驟、不交件）
+    hook.handle("pi", "pre_tool", {"cwd": str(ws), "session_id": "root-sid", "tool": "subagent",
+                                   "input": {"agent": "worker"}, "call_id": "call_7"})
+    out, _err, rc = hook.handle("pi", "subagent_stop", {**child, "reason": "quit"})
+    assert rc == 0
+    evs = R.Recorder(ws).events()
+    assert not [e for e in evs if e["type"] == "session_closed"]
+    assert "call_7" in json.loads(R.Recorder(ws).state_path.read_text())["pending"]
+
+
+def test_pi_extension_marks_children_and_keeps_them_off_the_task_check():
+    from vacant_network.adapters import agents
+    src = agents.pi_extension_text()
+    assert 'const MARK = "VACANT_PI_PARENT"' in src
+    assert "delete process.env[MARK]" in src                  # 孫輩拿到的是自己的父標記
+    assert "if (PARENT) return undefined;" in src             # 子 agent 的回合結束不跑驗收
+    assert 'PARENT ? "subagent_stop" : "session_end"' in src  # 子行程結束不當工作階段結束

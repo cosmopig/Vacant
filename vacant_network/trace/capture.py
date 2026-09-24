@@ -42,6 +42,7 @@ ACTIONS = {
     "PreToolUse": "pre", "PostToolUse": "post", "PostToolUseFailure": "post",
     "SubagentStop": "subagent_stop", "Stop": "stop", "SessionEnd": "session_end",
     "pre_tool": "pre", "post_tool": "post", "stop": "stop", "session_end": "session_end",
+    "subagent_stop": "subagent_stop",
 }
 MAX_TRANSCRIPT = 64 * 1024 * 1024
 
@@ -83,7 +84,7 @@ def prompt_source(agent: str, payload: dict[str, Any], text: str) -> tuple[str, 
     if t.startswith("<task-notification>"):
         m = _TASK_NOTE.search(t)
         return "subagent_result", (m.group(1).strip() if m else None)
-    if payload.get("agent_id"):
+    if payload.get("agent_id") or payload.get("parent_session_id"):
         return "parent_agent", None
     return "user", None
 
@@ -101,6 +102,12 @@ def actor_of(agent: str, payload: dict[str, Any]) -> R.Actor:
                            agent=sid, agent_type=_s(payload.get("agent")) or "subagent",
                            model=_s(payload.get("model")))
         return R.Actor(agent, sid, model=_s(payload.get("model")))
+    if agent == "pi" and _s(payload.get("parent_session_id")):
+        # 另一個 pi 行程，在父 agent 的某一個工具呼叫期間啟動（Vacant 的 pi 擴充帶過來的標記）：
+        # 子 agent；工作階段鍵用最上層那個 session
+        return R.Actor(agent, str(payload["parent_session_id"]), agent=sid,
+                       agent_type=_s(payload.get("agent_type")) or "subagent",
+                       model=_s(payload.get("model")))
     return R.Actor(agent, sid, model=_s(payload.get("model")))
 
 
