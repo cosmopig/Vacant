@@ -20,6 +20,8 @@
 
     POST /v1/tasks/<task_id>/submissions   Authorization: Bearer <token>
          {"source": "...", "files": {"report.md": "<base64>", ...}}
+         沒過 ⇒ 回應多 `feedback`（和 agent 回合結束收到的同一段：哪個檔哪一行、應該是多少）與 `issues`
+         （結構化）。交來的只有檔案：**不追到步驟、不記任何人**；隱藏主張只說沒過。
     GET  /v1/tasks/<task_id>                Authorization: Bearer <token>
     GET  /published/<task_id>/<path>        公開，只有已放行的版本
 
@@ -94,12 +96,13 @@ class IntakeApp:
         with self._lock:
             res = flow.submit_blobs(task, blobs, source=f"http:{str(body.get('source', ''))[:80]}",
                                     sandbox=self.sandbox)
+        located = _locate(task, res, blobs)
         res = {k: v for k, v in res.items() if k != "results"} | {
             "results": [{"claim_id": r["claim_id"], "status": r["status"],
                          "detail": r["detail"][:500]} for r in res.get("results", [])],
             "ignored_fields": ignored,
             "published": False,
-            "note": "the decision is made here; release is a separate, approved step"}
+            "note": "the decision is made here; release is a separate, approved step"} | located
         return 200, res
 
     def status(self, task_id: str) -> tuple[int, dict[str, Any]]:
@@ -168,6 +171,37 @@ class IntakeApp:
             return nf
         ctype = mimetypes.guess_type(p.name)[0] or "application/octet-stream"
         return 200, data, ctype
+
+
+def _locate(task: flow.Task, res: dict[str, Any], blobs: dict[str, bytes]) -> dict[str, Any]:
+    """交件沒過時：和 agent 在回合結束收到的同一段「哪個檔哪一行、應該是多少」（`trace.blame.locate_results`
+    ＋`feedback.render_agent`；KS-1 乾淨），外加一份結構化的清單。HTTP 交來的只有檔案、沒有任何一步 ⇒ **不追到步驟、
+    不記任何人**（誠實邊界 1：token 證明不了是哪一個 agent）。隱藏主張只說「沒過」。壞掉 ⇒ 不影響裁決，照樣回應。"""
+    if res.get("outcome") in (None, "accept") or not res.get("results"):
+        return {}
+    import tempfile
+    try:
+        from ..trace import blame as B
+        from ..trace import feedback as F
+        hidden = {c.id for c in task.contract.claims if c.hidden}
+        results = [dict(r, hidden=r.get("claim_id") in hidden) for r in res["results"]]
+        with tempfile.TemporaryDirectory(prefix="vacant-http-") as td:
+            root = pathlib.Path(td)
+            for rel, data in blobs.items():
+                dest = root / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(data)
+            found = B.locate_results(task.contract, results, root)
+        text, _state = F.render_agent(found, results, reasons=res.get("reasons"))
+        issues = [{"claim_id": b["claim"], "path": b["location"].get("path"),
+                   "line": b["location"].get("line"), "value": b.get("value"),
+                   "expected": next((e.get("value") for e in b.get("expected") or []
+                                     if e.get("value") is not None), None),
+                   "note": b["location"].get("note")}
+                  for b in found if not b.get("hidden")]
+        return {"feedback": text, "issues": issues}
+    except Exception as e:  # noqa: BLE001 — 定位壞掉不影響裁決
+        return {"feedback_error": f"{type(e).__name__}: {e}"[:300]}
 
 
 def _released_by_gate_impl(task: flow.Task, rcp: DirRecipient, art: str) -> bool:

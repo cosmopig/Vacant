@@ -56,6 +56,10 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   two totals on one report that could never both pass, `./report.md` or absolute paths that always
   rejected, and a crash on CSV rows wider than the header. Failures of a plain-text `--must` are
   shown as the text the person wrote, not as an escaped regex.
+- The HTTP intake's reply to a failed submission now carries the same located feedback an agent gets
+  at the end of a turn (file, line, the value found, the expected value) plus a structured `issues`
+  list. A submission is only files, so nothing is traced to a step or an actor; hidden claims say only
+  that they failed (`trace.blame.locate_results`).
 - Interactive use: the feedback-round cap now applies per request the person types, not per session.
   In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
   written after the next request then got no located feedback (reproduced as a negative control in

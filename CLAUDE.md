@@ -103,7 +103,8 @@
 - `intake/recipients.py` — `vacant release` 的接受點：自己重驗一切（契約鎖、裁決、隔離區、綁**解析後**
   目的端的批准、帳本沒被截短）、發布、讀回（`dir:`／`git:`）。⚠ 只管它自己寫的那個目的端
 - `intake/ledger.py` — 每個任務的終態（含 `infra_void`），分母＝開過的任務
-- `intake/server.py` — HTTP 收件口（提交者給不了裁決；沒 token 不啟動）
+- `intake/server.py` — HTTP 收件口（提交者給不了裁決；沒 token 不啟動）；沒過的交件回 `feedback`＋`issues`
+  （`trace.blame.locate_results`：只定位、沒有步驟與行動者）
 - `adapters/agents.py` — pi／Claude Code／OpenCode／Codex 的翻譯表（headless、加法式掛鉤、常駐安裝、技能）
 - `adapters/hook.py`＋`hookpolicy.py` — `vacant hook`：四種原生格式 → 一份政策
 - `adapters/install.py` — 鍵層級可逆安裝（使用者沒改過就逐位元還原）

@@ -1235,6 +1235,37 @@ def _fallback_locations(claim: Any, r: dict[str, Any], state_dir: pathlib.Path,
     return [L.Location(f, kind="missing", note=str(r.get("detail"))[:200]) for f in files[:5]]
 
 
+def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pathlib.Path,
+                   *, max_per_claim: int = 5) -> list[dict[str, Any]]:
+    """沒有病歷時（HTTP 收件口、人工上傳：交來的只有檔案，沒有任何一步）：只做定位——每一條**不過**的
+    主張在交來的檔案裡的位置、錯的值、應有的值。**沒有步驟、沒有行動者、沒有來源**；形狀和 `blame_results`
+    的結論相同（`feedback.render_agent` 直接吃），缺的欄位就是「不知道」。"""
+    from . import rerun
+    d = pathlib.Path(adir)
+    out = []
+    for r in results:
+        if r.get("status") != "FAIL":
+            continue
+        try:
+            claim = rerun.claim_by_id(contract, str(r["claim_id"]))
+        except KeyError:
+            continue
+        found = L.locate(claim, r, d)
+        locs = [x for x in found if x.kind != "source"] or \
+            _fallback_locations(claim, r, d, contract)
+        sources = [x.to_json() for x in found if x.kind == "source"]
+        for loc in locs[:max_per_claim]:
+            b: dict[str, Any] = {"claim": str(r["claim_id"]), "location": loc.to_json(),
+                                 "value": loc.value, "detail": r.get("detail"),
+                                 "hidden": bool(getattr(claim, "hidden", False)),
+                                 "required": bool(r.get("required", True)),
+                                 "state": "located" if loc.line else "file"}
+            if sources:
+                b["expected"] = sources
+            out.append(b)
+    return out
+
+
 def blame_results(rec: Recorder, contract: Any, results: list[dict[str, Any]],
                   state_dir: str | pathlib.Path, *, sandbox: str = "auto",
                   max_per_claim: int = 5) -> list[dict[str, Any]]:

@@ -171,3 +171,45 @@ def test_cli_bad_contract_is_exit_2(tmp_path, vhome, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     assert vcli.main(["check"]) == 2
     assert "contract problems" in capsys.readouterr().err
+
+
+def test_a_failed_submission_says_where_and_what_it_should_be(tmp_path, vhome):
+    """HTTP 交來的只有檔案：回應裡有和 agent 回合結束時同一段「哪個檔哪一行、應該是多少」，外加結構化清單；
+    沒有任何步驟、沒有行動者；隱藏主張只說沒過（2026-09-25：HTTP 收件口接上追緝的定位那一半）。"""
+    from vacant_network.intake import keys
+    from vacant_network.trace import feedback as F
+    keys.init_local()
+    proj = tmp_path / "proj2"
+    (proj / ".vacant").mkdir(parents=True)
+    (proj / "data").mkdir()
+    (proj / "data" / "sales.csv").write_text("id,amount\n1,10\n2,20\n3,39\n")
+    raw, _ = C.quick(proj, deliverable=["report.md"], inputs=["data/sales.csv"],
+                     must=["Recommendation"], totals=["amount"], task_id="http-q3")
+    raw["claims"].append({"id": "secret_rule", "verifier": "text", "hidden": True,
+                          "required": True, "authority": "requirement",
+                          "params": {"path": "report.md", "must_not_contain": ["North"]}})
+    cp = proj / ".vacant" / "contract.json"
+    cp.write_text(json.dumps(raw))
+    flow.lock(cp)
+    app = IntakeApp([cp], token="t", sandbox="none")
+    body = "# Q3\n\nTotal: 70\n\nNorth did best.\n"
+    code, res = app.submit("http-q3", {"source": "saas", "files": {
+        "report.md": base64.b64encode(body.encode()).decode()}})
+    assert code == 200 and res["outcome"] == "reject"
+    fb = res["feedback"]
+    assert fb.startswith(F.FEEDBACK_HEADER)
+    assert 'report.md:3 says "70"' in fb and "expected 69" in fb
+    assert 'does not contain "Recommendation"' in fb
+    assert "secret_rule: FAIL (details withheld" in fb and "North" not in fb
+    assert "step" not in fb                                   # 沒有步驟可說
+    iss = {(i["claim_id"], i.get("line")) for i in res["issues"]}
+    assert ("total_sales_amount", 3) in iss and not any(c == "secret_rule" for c, _ in iss)
+    tot = next(i for i in res["issues"] if i["claim_id"] == "total_sales_amount")
+    assert tot["value"] == "70" and float(tot["expected"]) == 69
+
+
+def test_an_accepted_submission_has_no_feedback(server):
+    base, _cp = server
+    code, res = _post(f"{base}/v1/tasks/card-7/submissions",
+                      {"files": _files({"title": "ok", "lines": ["a", "b"]})})
+    assert code == 200 and res["outcome"] == "accept" and "feedback" not in res
