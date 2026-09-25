@@ -17,6 +17,7 @@ def main() -> int:
     ap.add_argument("--jobs", required=True)
     ap.add_argument("--ledger", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--suffix", default="", help="run_one.sh 的 RUN_SUFFIX（重跑的標籤尾巴）")
     a = ap.parse_args()
     by_tag = json.loads((pathlib.Path(a.ledger) / "summary.json").read_text()).get("by_tag", {})
     rows = []
@@ -29,7 +30,7 @@ def main() -> int:
         vr = r.get("verifier_result") or {}
         reward = (vr.get("rewards") or {}).get("reward", vr.get("reward"))
         exc = (r.get("exception_info") or {}).get("exception_type")
-        tag = f"pilot-{m}-{think}-{arm}-{task}"
+        tag = f"pilot-{m}-{think}-{arm}-{task}" + (f"-{a.suffix}" if a.suffix else "")
         led = by_tag.get(tag) or {}
         chk = None
         p = trial / "agent" / "vacant_check.json"

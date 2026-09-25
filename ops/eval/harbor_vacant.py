@@ -13,8 +13,9 @@
 **不設任何 Vacant 環境變數。**
 
 `run()` 之後把 `~/.vacant` 整個複製到這一跑的紀錄目錄（`agent/vacant_home/`），再寫一份 `vacant_check.json`：
-`install.json` 有沒有 pi、病歷裡有幾個步驟、幾次交件前檢查（`review` 事件）。沒有步驟或沒有檢查＝**C 組失敗**
-（照算 C 的成績），不是安靜地變成 A 組。
+`install.json` 有沒有 pi、病歷裡有幾個步驟、幾次交件前檢查（`review` 事件）。沒裝上或沒有步驟＝**C 組失敗**
+（照算 C 的成績），不是安靜地變成 A 組。沒有交件前檢查（`stop_reached=false`）另外報：回合用完被 Harbor 中止時
+pi 不會進 Stop，那不是 Vacant 壞掉。
 """
 from __future__ import annotations
 
@@ -47,7 +48,9 @@ for c in h.glob("trace/projects/*/chain.ndjson"):
         elif e.get("type") == "review":
             out["reviews"] += 1
             out["review_actions"].append((e.get("payload") or {}).get("action"))
-out["c_arm_ok"] = out["pi_installed"] and out["steps"] > 0 and out["reviews"] > 0
+# 裝上了、病歷有步驟＝C 組有作用；有沒有走到交件前檢查另外記（回合用完被中止的跑，pi 不會進 Stop）
+out["c_arm_ok"] = out["pi_installed"] and out["steps"] > 0
+out["stop_reached"] = out["reviews"] > 0
 print(json.dumps(out))
 """
 
