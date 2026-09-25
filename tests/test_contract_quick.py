@@ -75,14 +75,15 @@ def test_total_by_input_name_or_path_and_tsv(proj):
     (proj / "data" / "costs.tsv").write_text("id\tamount\n1\t5\n2\t6\n")
     raw, _ = C.quick(proj, deliverable=["report.md"],
                      inputs=["data/sales.csv", "data/costs.tsv"],
-                     totals=["sales:amount", "data/costs.tsv:amount"])
+                     totals=["sales:amount=Sales", "data/costs.tsv:amount=Costs"])
     cl = _claims(raw)
     s = cl["total_sales_amount"]["params"]
     assert (s["csv"], s["column"], s["report"]) == ("input:sales", "amount", "report.md")
     assert cl["total_costs_amount"]["params"]["delimiter"] == "\t"
     assert cl["total_costs_amount"]["authority"] == "fact"
-    # 同一份報告兩個總數：各自用自己的標籤（預設是欄名），不再互相看成「兩個不同的 Total」
-    assert "amount" in s["pattern"] and "first number after 'amount'" in cl["total_sales_amount"][
+    # 同一份報告兩個總數：兩個欄都叫 amount，預設標籤會撞在一起（見下面的碰撞測試），
+    # 這裡各自給了明確的 =LABEL，不再互相看成「兩個不同的 Total」
+    assert "Sales" in s["pattern"] and "the number after 'Sales'" in cl["total_sales_amount"][
         "description"]
 
 
@@ -167,7 +168,7 @@ def test_two_totals_on_one_report_can_both_pass(proj):
 def test_a_label_lets_the_report_use_its_own_wording(proj):
     raw, summ = C.quick(proj, deliverable=["report.md"], inputs=["data/sales.csv"],
                         totals=["amount=合計"])
-    assert "first number after '合計'" in summ["checks"][-1]["what"]
+    assert "the number after '合計'" in summ["checks"][-1]["what"]
     out, res = _outcome(proj, raw, {"report.md": "# 第三季\n\n共 3 筆訂單。合計：69 元\n"})
     assert out == "accept", res
 
@@ -212,9 +213,6 @@ def test_a_totals_row_is_refused(proj):
     with pytest.raises(C.ContractError) as e:
         C.quick(proj, deliverable=["report.md"], inputs=["data/t.csv"], totals=["amount"])
     assert "totals row" in str(e.value) and "line 5" in str(e.value)
-    (proj / "data" / "u.csv").write_text("amount\n10\n20\n30\n")       # 最後一列＝前面的和
-    with pytest.raises(C.ContractError):
-        C.quick(proj, deliverable=["report.md"], inputs=["data/u.csv"], totals=["amount"])
 
 
 def test_bom_spaces_colons_and_encoding_in_headers(proj):
@@ -318,3 +316,183 @@ def test_missing_text_feedback_does_not_say_first_appeared(proj):
     d = json.loads(hook.handle("claude", "Stop", base)[0])
     assert 'does not contain "Recommendation"' in d["reason"]
     assert "first appeared" not in d["reason"]
+
+
+# ── 2026-09-25 對抗審查（`quick`）的回歸：#12／#14／#16／#17／C2／C3 ────────────────
+
+def test_1_derived_task_id_always_carries_the_project_hash_no_collision(tmp_path):
+    """#12：兩個不同專案，同樣的目錄名（`hw`）、同樣的 `--deliverable answer.md`，衍生出的
+    task_id 過去只在名字裡有換不過來的字元時才加雜湊——同目錄名就會撞成同一個 task_id，
+    共用同一本帳，course2 的 `vacant release` 就會發出 course1 已核可的成果。"""
+    course1 = tmp_path / "course1" / "hw"
+    course2 = tmp_path / "course2" / "hw"
+    for c in (course1, course2):
+        c.mkdir(parents=True)
+        (c / "answer.md").write_text("# Answer\n")
+    raw1, _ = C.quick(course1, deliverable=["answer.md"])
+    raw2, _ = C.quick(course2, deliverable=["answer.md"])
+    assert raw1["task_id"] != raw2["task_id"]
+    assert C._ID_RE.match(raw1["task_id"]) and C._ID_RE.match(raw2["task_id"])
+    # 雜湊確實是專案路徑，不是隨機的：同一個專案再跑一次，id 不變（可重現、不是每次亂數）
+    raw1b, _ = C.quick(course1, deliverable=["answer.md"])
+    assert raw1b["task_id"] == raw1["task_id"]
+
+
+def test_1_intake_serve_refuses_two_contracts_with_the_same_task_id(proj, tmp_path, monkeypatch):
+    """#12 defense-in-depth：`vacant intake serve` 給兩份 task_id 一樣的契約，過去
+    `contract_paths[c.task_id] = p` 會安靜地只留下最後一個，讓提交者互相看到彼此的任務。"""
+    from vacant_network.intake import cli as intake_cli
+
+    called: list[dict] = []
+    monkeypatch.setattr("vacant_network.intake.server.serve",
+                        lambda **kw: called.append(kw) or 0)
+    raw1, _ = C.quick(proj, deliverable=["report.md"], must=["x"], task_id="dup")
+    c1 = proj / "c1.json"
+    c1.write_text(json.dumps(raw1))
+    proj2 = tmp_path / "proj2"
+    proj2.mkdir()
+    raw2, _ = C.quick(proj2, deliverable=["report.md"], must=["x"], task_id="dup")
+    c2 = proj2 / "c2.json"
+    c2.write_text(json.dumps(raw2))
+    args = intake_cli.build_parser().parse_args(
+        ["intake", "serve", "--contract", str(c1), "--contract", str(c2),
+         "--insecure-no-token"])
+    rc = intake_cli.cmd_intake(args)
+    assert rc == 2 and not called
+
+
+@pytest.mark.parametrize("data_csv, totals, spec_that_collides", [
+    ("id,amount,amount_usd\n1,10,11\n2,20,22\n3,40,44\n", ["amount", "amount_usd"], "amount_usd"),
+    ('id,amount,"net amount"\n1,10,8\n2,20,16\n3,40,32\n', ["amount", "net amount"], "net amount"),
+    ("id,q1,q12\n1,5,50\n2,6,60\n", ["q1", "q12"], "q12"),
+])
+def test_2_colliding_total_labels_are_refused_at_write_time(proj, data_csv, totals,
+                                                             spec_that_collides):
+    """#14：兩個 `--total` 的預設標籤一個包含另一個（`amount`/`amount_usd`、`amount`/
+    `net amount`、`q1`/`q12`），寬鬆的文字比對分不清是哪一個——正確的報告被 HOLD、
+    錯的總數從來不會 FAIL。應該在寫契約的當下就炸，而不是留到 `vacant check`。"""
+    (proj / "data" / "d2.csv").write_text(data_csv)
+    with pytest.raises(C.ContractError) as e:
+        C.quick(proj, deliverable=["report.md"], inputs=["data/d2.csv"], totals=totals)
+    assert spec_that_collides in str(e.value) and "collide" in str(e.value)
+    assert "--total COLUMN=LABEL" in str(e.value)
+
+
+def test_2_explicit_labels_avoid_the_collision_and_a_wrong_total_fails_not_unknown(proj):
+    """給了不會互相包含的 `=LABEL`，兩個總數各自能被找到；錯的總數要 FAIL，不是 UNKNOWN。"""
+    (proj / "data" / "d2.csv").write_text(
+        "id,amount,amount_usd\n1,10,11\n2,20,22\n3,40,44\n")
+    raw, _ = C.quick(proj, deliverable=["report.md"], inputs=["data/d2.csv"],
+                     totals=["amount=Amount", "amount_usd=USD"])
+    out, res = _outcome(proj, raw, {"report.md": "Total Amount: 70\nTotal USD: 77\n"})
+    assert out == "accept", res
+    out, res = _outcome(proj, raw, {"report.md": "Total Amount: 999\nTotal USD: 77\n"})
+    ids = _claims(raw)
+    amount_id = next(i for i in ids if i.startswith("total_") and "amount_usd" not in i)
+    assert res[amount_id][0] == "FAIL", res
+
+
+def test_2_label_word_boundary_does_not_match_inside_a_longer_word(proj):
+    """`_label_pattern` 的邊界現在擋整個詞（字母／數字／底線），不是只擋字母。"""
+    pat = C._label_pattern("amount")
+    import re
+    assert not re.search(pat, "amount_usd: 77")
+    assert re.search(pat, "amount: 70")
+    pat_q1 = C._label_pattern("q1")
+    assert not re.search(pat_q1, "q12: 60")
+    assert re.search(pat_q1, "q1: 60")
+
+
+def test_3_replace_path_never_leaves_the_new_contract_shadowed(proj):
+    """#16：`--replace --path vacant.contract.json` 過去只是把新檔寫在旁邊——
+    `.vacant/contract.json` 還在，`C.find` 照樣先挑到舊的那份，check/do/hooks 全部繼續用
+    舊契約。新版本要嘛把舊的搬開讓新檔案生效，要嘛整個還原並回報，不留下這種「寫了但沒用」
+    的狀態。"""
+    (proj / "report.md").write_text("all fine here\n")
+    r1 = _cli(proj, "--deliverable", "report.md", "--must", "fine", "--lock")
+    assert r1.returncode == 0, r1.stderr
+    r2 = _cli(proj, "--replace", "--path", "vacant.contract.json", "--deliverable", "report.md",
+              "--must", "Conclusion", "--lock")
+    assert r2.returncode == 0, r2.stderr
+    found = C.find(proj)
+    assert found is not None
+    # 不管新版本選的策略是搬開舊檔還是拒絕整個寫入，find() 找到的一定不能是「寫了看不到效果」
+    # 的舊契約——用它真的驗一次 report.md，若它還要求 'fine' 而不是 'Conclusion' 就是舊契約
+    c = C.load(found)
+    wants_conclusion = any("Conclusion" in cl.description for cl in c.claims)
+    assert wants_conclusion, f"{found} still enforces the old claim, not the one just written"
+
+
+def test_4_sum_only_last_row_is_warned_not_refused(proj):
+    """#17：最後一列的值剛好等於前面幾列的和（例如 10/20/30），但**沒有**任何一格寫著
+    'Total'／'合計' 之類的標籤——這是很普通的資料（案例正好是這個 repo 自己另一些測試的
+    fixture），不該被拒絕；量具給的是警告，契約照樣寫得出來。"""
+    (proj / "data" / "u.csv").write_text("id,amount\n1,10\n2,20\n3,30\n")
+    raw, summ = C.quick(proj, deliverable=["report.md"], inputs=["data/u.csv"],
+                        totals=["amount"])
+    assert any("line 4" in w and "sum of the rows above" in w for w in summ["warnings"])
+    assert any(c["verifier"] == "csv_total" for c in raw["claims"])
+    # 真的有標籤的總計列還是要擋
+    (proj / "data" / "labelled.csv").write_text("id,amount\n1,10\n2,20\nTotal,30\n")
+    with pytest.raises(C.ContractError) as e:
+        C.quick(proj, deliverable=["report.md"], inputs=["data/labelled.csv"], totals=["amount"])
+    assert "totals row" in str(e.value)
+
+
+def test_4_cli_prints_the_sum_only_warning(proj):
+    (proj / "data" / "u.csv").write_text("id,amount\n1,10\n2,20\n3,30\n")
+    r = _cli(proj, "--deliverable", "report.md", "--input", "data/u.csv", "--total", "amount")
+    assert r.returncode == 0, r.stderr
+    assert "warning" in r.stdout and "line 4" in r.stdout
+
+
+def test_5_input_equal_to_deliverable_is_refused_at_write_time(proj):
+    """critic C2：`--input notes.md --deliverable notes.md` 寫得出一份 agent 永遠滿足不了的
+    契約——hook 把每個契約 input 都設成寫保護，check 卻要求同一個檔案改變。"""
+    (proj / "notes.md").write_text("draft\n")
+    with pytest.raises(C.ContractError) as e:
+        C.quick(proj, deliverable=["notes.md"], inputs=["notes.md"], must=["Summary"])
+    assert "notes.md" in str(e.value) and "also inside the deliverable" in str(e.value)
+
+
+def test_5_input_covered_by_a_deliverable_glob_is_also_refused(proj):
+    (proj / "out").mkdir()
+    (proj / "out" / "raw.csv").write_text("id,amount\n1,1\n")
+    with pytest.raises(C.ContractError) as e:
+        C.quick(proj, deliverable=["out/**"], inputs=["out/raw.csv"], must=["x"],
+                report="out/raw.csv")
+    assert "also inside the deliverable" in str(e.value)
+
+
+def test_6_directory_deliverable_with_an_existing_env_file_is_refused(proj):
+    """critic C3：`--deliverable .` 在一個已經有 `.env.example`／`.env` 的專案裡，會寫出一份
+    `no_secrets_shipped` 主張立刻就過不了的契約——第一次 `vacant check` 就 REJECT，而 hook
+    路徑會要 agent 刪掉別人的憑證檔。應該在寫契約的當下就講清楚，且不要自動排除。"""
+    (proj / "app.py").write_text("print(1)\n")
+    (proj / ".env.example").write_text("API_URL=\n")
+    with pytest.raises(C.ContractError) as e:
+        C.quick(proj, deliverable=["."], must=["print"], report="app.py")
+    assert ".env.example" in str(e.value) and "--exclude" in str(e.value)
+
+
+def test_6_exclude_lets_the_deliverable_pass_and_is_not_automatic(proj):
+    (proj / "app.py").write_text("print(1)\n")
+    (proj / ".env.example").write_text("API_URL=\n")
+    # 不給 --exclude：還是拒絕（不自動排除）
+    with pytest.raises(C.ContractError):
+        C.quick(proj, deliverable=["."], must=["print"], report="app.py")
+    raw, _ = C.quick(proj, deliverable=["."], must=["print"], report="app.py",
+                     exclude=["**/.env.example"])
+    assert "**/.env.example" in raw["deliverable"]["exclude"]
+    out, res = _outcome(proj, raw, {"app.py": "print(1)\n", ".env.example": "API_URL=\n"})
+    assert out == "accept", res
+
+
+def test_6_cli_exclude_flag_is_repeatable(proj):
+    (proj / "app.py").write_text("print(1)\n")
+    (proj / ".env.example").write_text("API_URL=\n")
+    r = _cli(proj, "--deliverable", ".", "--must", "print", "--report", "app.py",
+             "--exclude", "**/.env.example")
+    assert r.returncode == 0, r.stderr
+    raw = json.loads((proj / ".vacant" / "contract.json").read_text())
+    assert "**/.env.example" in raw["deliverable"]["exclude"]

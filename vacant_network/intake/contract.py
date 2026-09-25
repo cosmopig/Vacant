@@ -479,21 +479,44 @@ def _total_spec(spec: str, csv_inputs: dict[str, dict[str, Any]]) -> tuple[str, 
 
 
 def _label_pattern(label: str) -> str:
-    """「<標籤> … 數字」：標籤後面（同一行、80 字以內、中間沒有別的數字）的第一個數字。"""
-    lead = r"(?<![A-Za-z])" if label[:1].isalnum() else ""
-    tail = r"(?![A-Za-z])" if label[-1:].isalnum() else ""
+    """「<標籤> … 數字」：標籤後面（同一行、80 字以內、中間沒有別的數字）的第一個數字。
+
+    邊界擋的是**整個詞**（字母／數字／底線都算詞的一部分），不是只擋字母——否則
+    `amount` 會配到 `amount_usd`（`_` 不是字母）、`q1` 會配到 `q12`（數字不是字母）。
+    """
+    lead = r"(?<![A-Za-z0-9_])" if label[:1].isalnum() or label[:1] == "_" else ""
+    tail = r"(?![A-Za-z0-9_])" if label[-1:].isalnum() or label[-1:] == "_" else ""
     return (r"(?i)" + lead + re.escape(label) + tail
             + r"[^0-9\n-]{0,80}(-?[0-9][0-9,]*(?:\.[0-9]+)?)")
 
 
+def _labels_collide(a: str, b: str) -> bool:
+    """同一份報告裡，兩個 `--total` 標籤如果一個包含另一個（不分大小寫），驗證器的
+    寬鬆比對就分不清是哪一個——`amount` 也會配到 `net amount` 裡的那個數字。"""
+    a, b = a.lower(), b.lower()
+    return a in b or b in a
+
+
 _QUICK_EXCLUDE = [".git/**", ".vacant/**", "node_modules/**"]       # 和 `scaffold` 的 exclude 同一份
+#: `no_secrets_shipped` 擋的樣式（`scaffold` 與 `quick` 共用同一份，不要各寫一次分岔）
+_FORBID_PATTERNS = ["**/.env", "**/.env.*", "**/*.pem", "**/id_rsa*", "**/auth.json"]
+
+
+def _existing_forbidden(base: pathlib.Path, include: list[str], exclude: list[str]) -> list[str]:
+    """這份 deliverable（含 exclude）現在就會挑進去的檔案裡，哪些是 `no_secrets_shipped`
+    擋的。用的是跟 `vacant submit` 隔離區同一份 `artifact.collect`，不是自己重寫一套 glob——
+    這樣「寫契約時算出來的」和「之後真的驗的」永遠是同一個答案。"""
+    from . import artifact as _A
+    chosen, _skipped = _A.collect(base, include, exclude)
+    return sorted(rel for rel, _p in chosen if _A.matches(rel, _FORBID_PATTERNS))
 
 
 def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] | None = None,
           must: list[str] | None = None, must_not: list[str] | None = None,
           headings: list[str] | None = None, totals: list[str] | None = None,
           report: str | None = None, task_id: str | None = None, objective: str = "",
-          destination: str = "dir:.vacant/published", cwd: pathlib.Path | None = None
+          destination: str = "dir:.vacant/published", exclude: list[str] | None = None,
+          cwd: pathlib.Path | None = None
           ) -> tuple[dict[str, Any], dict[str, Any]]:
     """`vacant contract quick`：一般人真的會寫的那種契約——交什麼、給了什麼（會被釘住）、哪幾件事一定要對。
 
@@ -501,16 +524,20 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
     `ops/accountability/design_review_fable.md` Q5-3）：追緝只在有契約時才有東西可追，而 `scaffold` 只驗「檔案在、
     沒夾帶憑證」——那不是人在意的事。規則：**人寫的才是必要的主張**（另外只有兩條安全底線：繳付物在、沒夾帶憑證檔）；
     不替人猜（CSV 裡讀得成數字的欄只列成提示）；寫錯在寫契約的當下就炸——欄名、讀不動的欄、總計列、
-    讀不出文字的繳付物、在繳付物外面的報告。回傳 `(契約, 摘要)`；摘要的每一條都照驗證器**真的怎麼驗**說
+    讀不出文字的繳付物、在繳付物外面的報告、agent 永遠滿足不了的主張（輸入同時是繳付物、繳付物裡已經有
+    憑證檔）。回傳 `(契約, 摘要)`；摘要的每一條都照驗證器**真的怎麼驗**說
     （2026-09-25 對抗審查 32 條，`ops/accountability/review_contract_quick/FINDINGS.md`）。
 
-    誠實邊界：`--must` 是「有出現這段字」，不是「這段話是對的」；`--total` 只驗報告裡標籤後面的那一個數字等於
-    重算的欄總和（標籤預設是 `Total`，而且它得是報告裡唯一一個「Total 數字」）；只讀 `--report` 那一個檔。
+    誠實邊界：`--must` 是「有出現這段字」，不是「這段話是對的」；`--total` 驗的是報告裡標籤後面**每一個**符合的
+    數字都等於重算的欄總和（不只第一個；標籤預設是 `Total`，且同一份報告裡兩個標籤不能互相包含，否則寬鬆比對
+    分不清是哪一個）；只讀 `--report` 那一個檔；總計列偵測只擋**有標籤**的那一列，數字剛好等於總和但沒標籤的
+    只警告不擋。
     """
     from . import artifact as _A
     base = pathlib.Path(base_dir).resolve()
     here = pathlib.Path(cwd).resolve() if cwd else base
     probs: list[str] = []
+    warnings: list[str] = []
     dl: list[str] = []
     for d in deliverable or []:
         if not d or not d.strip():
@@ -525,6 +552,7 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
     for flag, vals in (("--must", must), ("--must-not", must_not), ("--heading", headings)):
         if any(not (v or "").strip() for v in vals or []):
             probs.append(f"{flag}: empty text checks nothing")
+    full_exclude = list(_QUICK_EXCLUDE) + [x for x in (exclude or []) if (x or "").strip()]
     ins: dict[str, dict[str, str]] = {}
     in_paths: dict[str, pathlib.Path] = {}
     for raw_path in inputs or []:
@@ -536,6 +564,12 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
         if not ap.is_file():
             probs.append(f"input {raw_path}: no such file ({ap})")
             continue
+        if dl and _A.matches(rel, dl) and not _A.matches(rel, full_exclude):
+            probs.append(f"input {raw_path}: is also inside the deliverable ({', '.join(dl)}); "
+                         f"the hook write-protects task inputs, so the agent could never change "
+                         f"{rel} to satisfy the contract (give the agent a copy under a different "
+                         f"name, or drop --input {raw_path} if it is meant to be edited)")
+            continue
         stem = re.sub(r"[^A-Za-z0-9_]", "_", ap.stem).strip("_") or "input"
         stem = stem if re.match(r"[A-Za-z0-9]", stem) else f"in_{stem}"
         name, k = stem[:60], 2
@@ -543,6 +577,13 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
             name, k = f"{stem[:60]}_{k}", k + 1
         ins[name] = {"path": rel}
         in_paths[name] = ap
+    if dl:
+        secret_hits = _existing_forbidden(base, dl, full_exclude)
+        if secret_hits:
+            probs.append("the deliverable already contains file(s) the default no_secrets_shipped "
+                         "check forbids: " + ", ".join(secret_hits) + " — add --exclude PATTERN "
+                         "(repeatable, e.g. --exclude '**/.env.example') to leave them out of the "
+                         "deliverable, or move/rename them first; quick never excludes them for you")
     literal = [d for d in dl if not any(ch in d for ch in "*?[")]
     target: str | None = None
     if report:
@@ -568,7 +609,7 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
          "required": True, "authority": "requirement",
          "description": "the deliverable files exist"},
         {"id": "no_secrets_shipped", "verifier": "forbid_paths",
-         "params": {"paths": ["**/.env", "**/.env.*", "**/*.pem", "**/id_rsa*", "**/auth.json"]},
+         "params": {"paths": list(_FORBID_PATTERNS)},
          "required": True, "authority": "requirement",
          "description": "no credential-looking files in the deliverable (.env, .env.*, *.pem, "
                         "id_rsa*, auth.json — .env.example counts too)"},
@@ -604,6 +645,7 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
         parsed.append((name, col, label, spec))
     same_report = len(parsed) > 1
     ids: set[str] = set()
+    used_labels: list[tuple[str, str]] = []      # (標籤, 它的 --total spec)，只用來查同報告碰撞
     for name, col, label, spec in parsed:
         try:
             header, rows, delim = _read_table(in_paths[name])
@@ -626,20 +668,34 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
             probs.append(f"--total {spec}: the check cannot read {bad[0][1]!r} in column "
                          f"{exact!r} (line {bad[0][0]} of {ins[name]['path']}) as a number")
             continue
-        totals_row = [n + 2 for n, r in enumerate(rows)
-                      if any(isinstance(v, str) and _TOTAL_ROW_RE.match(v)
-                             for k, v in r.items() if k != exact)]
-        nums = [x for x in (_number(c) for _ln, c in cells if c) if x is not None]
-        if not totals_row and len(nums) > 2 and \
-                abs(nums[-1] - math.fsum(nums[:-1])) < 1e-9 * max(1.0, abs(nums[-1])):
-            totals_row = [cells[-1][0]]
-        if totals_row:
-            probs.append(f"--total {spec}: line {totals_row[0]} of {ins[name]['path']} looks like "
-                         f"a totals row; the check adds every row, so it would count it twice — "
-                         f"remove that row from the input first")
+        # 有標籤的總計列（Total/合計/…）：加了就是雙算，一定擋。數字剛好等於前面總和但**沒有標籤**
+        # 的那種（10/20/30 這種正常資料常常撞到）只警告、照樣寫契約——見 #17。
+        labelled_totals_row = [n + 2 for n, r in enumerate(rows)
+                               if any(isinstance(v, str) and _TOTAL_ROW_RE.match(v)
+                                      for k, v in r.items() if k != exact)]
+        if labelled_totals_row:
+            probs.append(f"--total {spec}: line {labelled_totals_row[0]} of {ins[name]['path']} "
+                         f"looks like a totals row (its first column is labelled 'Total'/'合計'/…); "
+                         f"the check adds every row, so it would count it twice — remove that row "
+                         f"from the input first")
             continue
+        nums = [x for x in (_number(c) for _ln, c in cells if c) if x is not None]
+        if len(nums) > 2 and abs(nums[-1] - math.fsum(nums[:-1])) < 1e-9 * max(1.0, abs(nums[-1])):
+            warnings.append(f"{ins[name]['path']} line {cells[-1][0]} equals the sum of the rows "
+                            f"above it; if it is a totals row, remove it from the input (the check "
+                            f"would otherwise count it twice)")
         used.add(name)
         lab = label or (col.strip() if same_report else None)
+        if same_report and lab:
+            collide = next((ol for ol, _os in used_labels if _labels_collide(lab, ol)), None)
+            if collide is not None:
+                probs.append(f"--total {spec}: label {lab!r} and an earlier --total's label "
+                             f"{collide!r} would collide in the same report (one contains the "
+                             f"other, so the loose text match cannot tell them apart) — give each "
+                             f"an explicit --total COLUMN=LABEL")
+                used_labels.append((lab, spec))
+                continue
+            used_labels.append((lab, spec))
         cid = re.sub(r"[^A-Za-z0-9_.-]", "_", f"{QUICK_TOTAL_PREFIX}{name}_{col}")[:120]
         base_cid, k = cid, 2
         while cid in ids:
@@ -650,7 +706,7 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
             params_t["delimiter"] = delim
         if lab:
             params_t["pattern"] = _label_pattern(lab)
-        rule = (f"the first number after {lab!r} in {target}" if lab else
+        rule = (f"the number after {lab!r} in {target}" if lab else
                 f"the number after 'Total' in {target} (it must be the only 'Total <number>' "
                 f"there; add =LABEL to --total to use other wording)")
         claims.append({"id": cid, "verifier": "csv_total", "authority": "fact", "required": True,
@@ -663,13 +719,13 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
     if probs:
         raise ContractError(probs)
     if task_id is None:
+        # 兩個不同專案，deliverable 的檔名（甚至整份契約）都可能一模一樣（同一份作業模板）；
+        # task_id 是帳本的 key，一定要把專案路徑釘進去，不能只在換不過來的字元時才加——見 #12。
         want = f"{base.name}-{pathlib.Path(target or dl[0].replace('*', 'x')).stem}"
-        tid = re.sub(r"[^A-Za-z0-9._-]", "-", want).strip("-.")[:100]
-        if tid != want or not _ID_RE.match(tid or ""):
-            # 名字裡有換不過來的字：加一段專案路徑的雜湊，別的專案不會撞到同一本帳
-            tid = f"{tid or 'task'}-{hashlib.sha256(str(base).encode()).hexdigest()[:8]}"
-        task_id = tid
+        tid = re.sub(r"[^A-Za-z0-9._-]", "-", want).strip("-.")[:100] or "task"
+        task_id = f"{tid}-{hashlib.sha256(str(base).encode()).hexdigest()[:8]}"
     raw = scaffold(task_id, objective=objective, deliverable=dl, destination=destination)
+    raw["deliverable"]["exclude"] = full_exclude
     raw["inputs"] = ins
     raw["claims"] = claims
     parse(raw, path=base / ".vacant" / "contract.json")          # 寫之前先驗：不合法就不寫
@@ -684,7 +740,7 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
                "not_checked": "anything about whether the deliverable is right beyond these "
                               "checks — to add some, rerun with --replace and more --must/--total, "
                               "or `vacant flag FILE:LINE` a wrong place after the fact",
-               "hints": hints}
+               "hints": hints, "warnings": warnings}
     return raw, summary
 
 
@@ -706,8 +762,7 @@ def scaffold(task_id: str, *, objective: str = "", deliverable: list[str] | None
              "authority": "requirement",
              "description": "the deliverable files exist"},
             {"id": "no_secrets_shipped", "verifier": "forbid_paths",
-             "params": {"paths": ["**/.env", "**/.env.*", "**/*.pem", "**/id_rsa*",
-                                  "**/auth.json"]},
+             "params": {"paths": list(_FORBID_PATTERNS)},
              "required": True, "authority": "requirement",
              "description": "no credential files in the deliverable"},
         ],
