@@ -19,6 +19,15 @@
 標籤：網址前綴 `/t/<tag>/` 會被記成這一通的標籤（例如 `/t/tb2-pi-A-task17/api/v1/...`），
 用來把花費拆到每一格；沒有前綴就是 `untagged`。
 
+思考開關：標籤後面可以接 `think/on` 或 `think/off`（例如 `/t/<tag>/think/off/api/v1/...`）。
+這是實驗條件，不是 agent 的選擇，所以由代理強制：`on`＝`reasoning: {enabled: true, effort: medium}`、
+`off`＝`reasoning: {enabled: false}`，並拿掉 agent 自己送的 `reasoning_effort`。agent 原本送了什麼
+照樣記在 `io.jsonl` 的 `request_from_agent`；每一通的推理 token 記在帳本，關思考的條件事後可以逐通查
+「推理 token 是不是 0」。
+
+每一跑的上限：設定檔的 `tag_cap_usd` 是同一個標籤（＝同一跑）累計費用的上限，到了就回 402。
+它是所有條件都一樣的安全網，不是實驗設計的一部分；被它擋下的請求記在 `refusals.jsonl`。
+
 重試：上游 429／5xx／連線錯誤最多重試 4 次（2、4、8、16 秒退避），只在還沒送任何位元組
 給 agent 之前重試；每一次嘗試都各記一筆。
 
@@ -33,6 +42,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import socket
 import threading
 import time
 import urllib.error
@@ -43,6 +53,31 @@ from pathlib import Path
 UPSTREAM = "https://openrouter.ai"
 RETRY_WAITS = (2, 4, 8, 16)
 RETRY_STATUS = {429, 500, 502, 503, 504}
+THINK = {"on": {"enabled": True, "effort": "medium"}, "off": {"enabled": False}}
+
+
+def split_path(p: str) -> tuple[str, str | None, str]:
+    """`/t/<tag>/[think/<on|off>/]<rest>` → (tag, think, "/<rest>")；沒有前綴 → ("untagged", None, p)。"""
+    if not p.startswith("/t/"):
+        return "untagged", None, p
+    tag, _, tail = p[3:].partition("/")
+    think = None
+    if tail.startswith("think/"):
+        think, _, tail = tail[len("think/"):].partition("/")
+    return tag or "untagged", think, "/" + tail
+
+
+def prepare_request(body: dict, provider: dict, think: str | None) -> dict:
+    """agent 送來的本文 → 送給 OpenRouter 的本文：釘供應商、強制記帳、（有條件時）強制思考開關。"""
+    sent = dict(body)
+    sent["provider"] = provider
+    sent["usage"] = {"include": True}
+    if think is not None:
+        sent.pop("reasoning_effort", None)
+        sent["reasoning"] = dict(THINK[think])
+    if sent.get("stream"):
+        sent["stream_options"] = dict(sent.get("stream_options") or {}, include_usage=True)
+    return sent
 
 
 class Ledger:
@@ -85,6 +120,15 @@ class Ledger:
         with self._lock:
             return self.spent >= self.budget
 
+    def tag_spent(self, tag: str) -> float:
+        with self._lock:
+            return float(self.summary["by_tag"].get(tag, {}).get("cost_usd", 0.0))
+
+    def refuse(self, rec: dict) -> None:
+        with self._lock:
+            with (self.out / "refusals.jsonl").open("a") as f:
+                f.write(json.dumps(rec) + "\n")
+
     def write(self, io_rec: dict, led_rec: dict) -> None:
         with self._lock:
             with (self.out / "io.jsonl").open("a") as f:
@@ -112,6 +156,8 @@ def _usage_of(u: dict | None) -> dict:
 
 def make_handler(cfg: dict, ledger: Ledger, key: str):
     models = cfg["models"]  # {model_id: {"provider": {...}}}
+    tag_cap = cfg.get("tag_cap_usd")
+    host_id = cfg.get("host_id") or socket.gethostname()
 
     class H(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -127,16 +173,8 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
             self.end_headers()
             self.wfile.write(b)
 
-        def _split(self) -> tuple[str, str]:
-            p = self.path
-            if p.startswith("/t/"):
-                rest = p[3:]
-                tag, _, tail = rest.partition("/")
-                return tag or "untagged", "/" + tail
-            return "untagged", p
-
         def do_GET(self):  # /models 之類的唯讀查詢原樣轉送（不記帳）
-            tag, path = self._split()
+            tag, _think, path = split_path(self.path)
             if not path.startswith("/api/v1/models"):
                 return self._send_json(404, {"error": "not proxied"})
             req = urllib.request.Request(UPSTREAM + path, headers={"Authorization": f"Bearer {key}"})
@@ -152,8 +190,11 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
                 self._send_json(e.code, {"error": e.read().decode(errors="replace")[:500]})
 
         def do_POST(self):
-            tag, path = self._split()
+            tag, think, path = split_path(self.path)
+            self._think = think
             t0 = time.time()
+            if think is not None and think not in THINK:
+                return self._send_json(400, {"error": f"think must be on or off, got {think!r}"})
             if not path.rstrip("/").endswith("/chat/completions"):
                 return self._send_json(404, {"error": f"only chat/completions is proxied, got {path}"})
             raw = self.rfile.read(int(self.headers.get("Content-Length") or 0))
@@ -165,13 +206,13 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
             if model not in models:
                 return self._send_json(403, {"error": f"model {model!r} is not in this evaluation's allowlist"})
             if ledger.over_budget():
+                ledger.refuse({"ts": t0, "tag": tag, "model": model, "reason": "evaluation budget", "host": host_id})
                 return self._send_json(402, {"error": "evaluation budget exhausted"})
-            sent = dict(body)
-            sent["provider"] = models[model]["provider"]
-            sent["usage"] = {"include": True}
+            if tag_cap is not None and ledger.tag_spent(tag) >= float(tag_cap):
+                ledger.refuse({"ts": t0, "tag": tag, "model": model, "reason": "per-run cap", "host": host_id})
+                return self._send_json(402, {"error": f"per-run spending cap {tag_cap} USD reached for {tag}"})
+            sent = prepare_request(body, models[model]["provider"], think)
             stream = bool(sent.get("stream"))
-            if stream:
-                sent["stream_options"] = dict(sent.get("stream_options") or {}, include_usage=True)
             data = json.dumps(sent).encode()
             attempts = []
             for i in range(len(RETRY_WAITS) + 1):
@@ -244,7 +285,7 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
         def _finish(self, tag, model, body, sent, status, resp_text, parsed, attempts, t0, stream):
             u = _usage_of((parsed or {}).get("usage") if isinstance(parsed, dict) else None)
             cost = u.pop("cost")
-            led = {"ts": t0, "tag": tag, "model": model, "status": status, "stream": stream,
+            led = {"ts": t0, "tag": tag, "model": model, "think": getattr(self, "_think", None), "host": host_id, "status": status, "stream": stream,
                    "generation_id": (parsed or {}).get("id") if isinstance(parsed, dict) else None,
                    "provider": (parsed or {}).get("provider") if isinstance(parsed, dict) else None,
                    "usage": u, "cost": cost, "latency_s": round(time.time() - t0, 3),

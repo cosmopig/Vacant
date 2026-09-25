@@ -83,3 +83,47 @@ def test_usage_fields_are_read_from_openrouter_shape():
                      "completion_tokens_details": {"reasoning_tokens": 64}})
     assert u == {"prompt_tokens": 15, "completion_tokens": 64, "reasoning_tokens": 64,
                  "cached_tokens": 3, "cost": 9.52e-06}
+
+
+def test_path_carries_tag_and_thinking_condition():
+    assert P.split_path("/t/run1/think/off/api/v1/chat/completions") == ("run1", "off", "/api/v1/chat/completions")
+    assert P.split_path("/t/run1/api/v1/chat/completions") == ("run1", None, "/api/v1/chat/completions")
+    assert P.split_path("/api/v1/chat/completions") == ("untagged", None, "/api/v1/chat/completions")
+
+
+def test_thinking_condition_overrides_what_the_agent_sent():
+    body = {"model": "m", "messages": [], "reasoning_effort": "high", "reasoning": {"enabled": True}, "stream": True}
+    off = P.prepare_request(body, {"order": ["x/fp4"]}, "off")
+    assert off["reasoning"] == {"enabled": False} and "reasoning_effort" not in off
+    assert off["provider"] == {"order": ["x/fp4"]} and off["usage"] == {"include": True}
+    assert off["stream_options"]["include_usage"] is True
+    on = P.prepare_request(body, {}, "on")
+    assert on["reasoning"] == {"enabled": True, "effort": "medium"}
+    untouched = P.prepare_request(body, {}, None)
+    assert untouched["reasoning_effort"] == "high" and untouched["reasoning"] == {"enabled": True}
+    assert body["reasoning_effort"] == "high"  # 原本文不被改（io.jsonl 記的是 agent 送來的原樣）
+
+
+def test_unknown_thinking_value_is_refused(tmp_path):
+    srv, _ = _serve(tmp_path)
+    try:
+        code, body = _post(srv, "/t/a/think/maybe/api/v1/chat/completions", {"model": "small/model", "messages": []})
+        assert code == 400 and "think" in body["error"]
+    finally:
+        srv.shutdown()
+
+
+def test_per_run_cap_refuses_only_that_run_and_records_the_refusal(tmp_path):
+    cfg = {"budget_usd": 5.0, "tag_cap_usd": 0.01, "host_id": "h1",
+           "models": {"small/model": {"provider": {"order": ["x/fp4"]}}}}
+    led = P.Ledger(tmp_path / "led", 5.0, KEY)
+    led.write({}, {"tag": "run1", "model": "small/model", "status": 200, "usage": {}, "cost": 0.02})
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), P.make_handler(cfg, led, KEY))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        code, body = _post(srv, "/t/run1/api/v1/chat/completions", {"model": "small/model", "messages": []})
+        assert code == 402 and "per-run" in body["error"]
+        ref = [json.loads(x) for x in (tmp_path / "led" / "refusals.jsonl").read_text().splitlines()]
+        assert ref == [dict(ref[0], tag="run1", reason="per-run cap", host="h1")]
+    finally:
+        srv.shutdown()

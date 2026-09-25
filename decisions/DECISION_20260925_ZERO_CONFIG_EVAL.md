@@ -452,3 +452,19 @@ Vacant 今天只有寫了「契約」才會在 Stop 時檢查。零設定要補�
 
 token 總計：輸入 212,244、輸出 55,085（其中推理 47,318）。
 （研議證據：`ops/eval/evidence_20260925/`；第 1 版計畫：`ops/eval/evidence_20260925/notes/plan-v1.md`；審查意見：`study_result.json` 的 `critic`。）
+
+---
+
+## 人類裁決（2026-09-25，覆蓋上面第 4、5 節的對應部分）
+
+- **模型只用兩個家族**：Qwen3.8 與 Gemma 4。OpenRouter 上 8–27B 的 Qwen3.8 只有 27B，Gemma 4 沒有 12B。
+  定為 **qwen/qwen3.8-27b @ darkbloom/fp4** 與 **google/gemma-4-26b-a4b-it @ deepinfra/fp8**；代理白名單只剩這兩個。
+  gemma-3-12b-it（閘門 1：0/4，工具呼叫寫成文字）、qwen3.5-9b 不再使用。
+- **思考開與關都跑**；人類偏好「開思考」＝比較像平常的用法，所以開思考是主要比較、關思考是次要。
+  開關由記帳代理依條件強制（`/t/<tag>/think/on|off/`：on＝reasoning enabled、effort medium；off＝disabled），
+  實測：兩個模型關思考時每一通推理 token 都是 0（`ops/eval/evidence_20260925` 帳本的 thinkprobe-*、proxytest-* 標籤）。
+- **組別**：A（不裝）與 C（Vacant 零設定）。**B 先不做**，留給以後。條件＝2 模型 × 2 思考 × {A, C}＝8 種。
+- **回合上限 15**（pi 的 `max_turns=15`），所有條件一樣；官方沒有這個上限，這是寫明的偏離。
+  另外每一跑有 0.30 美元的安全上限（代理的 `tag_cap_usd`），所有條件一樣。
+- **平行**：同時 4 個容器；每一跑一個全新容器；題目與條件順序隨機交錯。
+- **錢**：這把金鑰不再加值（約 2026-10-25 失效）；剩約 4.70 美元，設計要放得進去。
