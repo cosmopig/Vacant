@@ -223,7 +223,8 @@ def test_4_end_to_end_forbidden_file_wording(vhome):
     results = rerun.run(c, p, sandbox="none")
     blames = B.blame_results(rec, c, results, p, sandbox="none")
     text, _ = F.render_agent(blames, results)
-    assert "the last recorded step that wrote .env: step 3 (Edit)" in text
+    # 不該存在的檔：報造出它的那一步（sources 組 #25），不是最後改它的那一步
+    assert "the step that created .env: step 2 (Write)" in text
     assert "this value first appeared" not in text
 
 

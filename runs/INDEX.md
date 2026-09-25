@@ -58,10 +58,10 @@
 | `g_r445_conform_mbpp_ext` | 2026-09-03 | MBPP+ v0.2.0 | CONFORM/OFF/OFF5 | 576／192 | 是 | 是 | 0 | R440X：r445 的獨立稽核——併庫區間排除 0 我複核成立；但真正紮實的發現是「五倍預算買不到東西」<br>[DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md](../decisions/DECISION_20260904_R440X_R445_INDEPENDENT_AUDIT.md) |
 | `g_r446_eq5_mbpp` | 2026-09-04 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R446 稽核：等預算臂 EQ5 的獨立重算——同意「閘門規則贏過多數決」，並把能講的話框死<br>[DECISION_20260904_R446_FABLE_AUDIT.md](../decisions/DECISION_20260904_R446_FABLE_AUDIT.md) |
 | `g_r447_conform_lcb2` | 2026-09-04 | lcb v2 | CONFORM/OFF/OFF5 | 360／120 | 是 | 是 | 0 | R459：`runs/g_r447_conform_lcb2` 收官裁決（Fable 5.1 稽核輪，round726）<br>[DECISION_20260904_R459_R447_SETTLEMENT.md](../decisions/DECISION_20260904_R459_R447_SETTLEMENT.md) |
-| `g_r448_eq5_mbpp_seed2` | 2026-09-06 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED<br>[DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md](../decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md) |
+| `g_r448_eq5_mbpp_seed2` | 2026-09-19 | MBPP+ v0.2.0 | EQ5 | 371／371 | 是 | 是 | 0 | R448 稽核：EQ5 在全新 seed 上的獨立複製——判定 REPLICATED<br>[DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md](../decisions/DECISION_20260906_R448_FABLE_AUDIT_REPLICATED.md) |
 | `g_r449_eq5_lcb2` | 2026-09-06 | lcb v2 | EQ5 | 120／120 | 是 | 是 | 0 | R449B 稽核：EQ5 在 LCB v2 難題上——判定 REPLICATED_ON_HARD<br>[DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md](../decisions/DECISION_20260906_R449B_FABLE_AUDIT_REPLICATED_ON_HARD.md) |
 | `g_r449c_eq5_lcb3` | 2026-09-06 | lcb v3 | EQ5 | 189／189 | 是 | 是 | 0 | R449C 稽核：EQ5 在 lcb3（189 題）——判定 UNRESOLVED：同號（+4.23pp、b/c=13/5）但下界 −0.66 沒過 0<br>[DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md](../decisions/DECISION_20260907_R449C_FABLE_AUDIT_UNRESOLVED.md) |
-| `g_r461_lcb3_three_arm` | 2026-09-06 | lcb v3 | CONFORM/OFF/OFF5 | 567／189 | 是 | 是 | 0 | R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算<br>[DECISION_20260906_R461_FABLE_AUDIT.md](../decisions/DECISION_20260906_R461_FABLE_AUDIT.md) |
+| `g_r461_lcb3_three_arm` | 2026-09-19 | lcb v3 | CONFORM/OFF/OFF5 | 567／189 | 是 | 是 | 0 | R461 稽核：CONFORM 在 LCB v3（189 題）三臂——獨立重算<br>[DECISION_20260906_R461_FABLE_AUDIT.md](../decisions/DECISION_20260906_R461_FABLE_AUDIT.md) |
 | `g_r461_off_gate_lcb3` | 2026-09-04 | lcb v3 | OFF | 189／189 | 是 | 是 | 0 | —<br>— |
 
 > `n（列／題）`＝`rows.jsonl` 的列數／去重後的 `task_id` 數。多臂 run 的列數是**各臂相加**，不是樣本數；配對檢定的 n 要看 `task_id`。逐臂列數在 `INDEX.json` 的 `n_rows_by_arm`。
@@ -158,8 +158,8 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 
 | run | kind | 日期 | 題庫 | n | 有 summary | 說明 |
 |---|---|---|---|---:|---|---|
-| `_probe_r210` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
-| `_probe_r212` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
+| `_probe_r210` | `smoke` | 2026-09-19 | — | 0 | 否 | probe_or_smoke |
+| `_probe_r212` | `smoke` | 2026-09-19 | — | 0 | 否 | probe_or_smoke |
 | `_smoke` | `smoke` | — | — | 0 | 否 | probe_or_smoke |
 | `_smoke_het_r210` | `smoke` | 2026-08-28 | — | 0 | 否 | probe_or_smoke |
 | `g_het2_r271_20260829` | `aborted` | 2026-08-29 | — | 0 | 是 | summary_without_rows |
@@ -175,7 +175,7 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_probe371_20260825` | `smoke` | 2026-08-25 | — | 0 | 否 | probe_or_smoke |
 | `g_probe_20260825_r123` | `smoke` | 2026-08-25 | — | 0 | 否 | probe_or_smoke |
 | `g_r441_gemma_only_mbpp` | `aborted` | 2026-09-02 | — | 0 | 否 | no_summary |
-| `g_r461_probe_lcb3` | `smoke` | 2026-09-04 | — | 0 | 否 | probe_or_smoke |
+| `g_r461_probe_lcb3` | `smoke` | 2026-09-19 | — | 0 | 否 | probe_or_smoke |
 | `g_smoke_20260820` | `smoke` | 2026-08-20 | MBPP+ v0.2.0 | 18 | 是 | probe_or_smoke |
 | `off_probe_n60_20260902` | `smoke` | 2026-09-02 | — | 0 | 否 | probe_or_smoke |
 | `off_probe_n60_20260902_test` | `smoke` | 2026-09-02 | — | 0 | 是 | probe_or_smoke |
@@ -295,11 +295,11 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `g_r532_mbpp_a7` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
 | `g_r532_mbpp_a8` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
 | `g_r532_mbpp_a9` | 2026-09-17 | MBPP+ v0.2.0 | CONFORM/HMIX/OFF | 60／20 | 是 | 是 | 0 | 1 | 0 |
-| `pbgate2_agents_lcb2_20260920` | 2026-09-20 | — | — | 0／0 | — | — | — | 2 | 0 |
+| `pbgate2_agents_lcb2_20260920` | 2026-09-20 | — | — | 0／0 | — | — | — | 3 | 0 |
 | `pbgate3_backend_lcb2_20260920` | 2026-09-20 | — | — | 0／0 | — | — | — | 1 | 0 |
-| `pbgate_lcb2_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 3 | 0 |
+| `pbgate_lcb2_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 4 | 0 |
 | `r535_retry_channel_20260918` | 2026-09-18 | other | PC/RF/RP/RS | 360／90 | 是 | 是 | 0 | 0 | 0 |
-| `twin_real_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 3 | 0 |
+| `twin_real_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 4 | 0 |
 | `v1_five_agent_matrix_20260919` | 2026-09-19 | — | — | 0／0 | — | — | — | 3 | 0 |
 
 > `其中屬裁決檔`＝檔名帶 AUDIT／WRAPUP／SETTLEMENT／VERDICT／KILL 的那些（PREREG／CRITERION 是**量測之前**寫的判準，不算裁決，已排除）。數字大於 0 只代表「有裁決檔提到它」，不代表那份裁決是在裁決它——`INDEX.json` 的 `verdict_decisions` 列出是哪幾份，自己打開看。

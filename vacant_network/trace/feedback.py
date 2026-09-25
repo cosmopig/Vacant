@@ -156,8 +156,9 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
     elif b.get("step") and wholefile:
         # 缺的東西、或整個檔就是問題：沒有「第一次出現」——只說得出最後寫這個檔的是哪一步（推論層）
         st = b["step"]
-        out.append(f"  the last recorded step that wrote {loc.get('path')}: step {st.get('n')} "
-                   f"({st.get('tool')})")
+        created = any(str(c.get("via") or "").startswith("created ") for c in b.get("chain") or [])
+        what = "the step that created" if created else "the last recorded step that wrote"
+        out.append(f"  {what} {loc.get('path')}: step {st.get('n')} ({st.get('tool')})")
     elif b.get("step") and b.get("fault_class") == "agent":
         st = b["step"]
         first = next((c for c in b.get("chain") or [] if c.get("step")), None)

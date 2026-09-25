@@ -1,0 +1,137 @@
+[
+ {
+  "id": "WP0",
+  "title": "Mode switch, contract-less tracing, rounds scope, minimal install/uninstall/--help",
+  "files": "vacant_network/adapters/mode.py (new); trace/capture.py (workspace_for, project_root); adapters/hookpolicy.py (_rounds_file/new_request take a scope); adapters/hook.py (call sites only, ≤20 lines); adapters/install.py (manifest schema 2); adapters/cli.py (install: no SKILL.md by default, --skill, ≤10 lines, prints data dir; uninstall: prints data dir + removal command, --purge; thin subparsers so `vacant --help` lists install/uninstall/do/contract/trace/flag/hook); adapters/agents.py (install fns: skill optional)",
+  "depends_on": "— (land after the xpath/* branches merge)",
+  "tests": "tests/test_zero_mode.py: env > manifest > default; VACANT_TRACE=0 wins; project_root stops at $HOME and /; N2b untraced (no trace/projects entry); rounds keyed by workspace scope; new_request without contract; install writes no SKILL.md, ≤10 lines, schema 2, idempotent; uninstall prints data dir, --purge removes $VACANT_HOME; `vacant --help` lists install",
+  "size": "~220 lines + 25 tests",
+  "model_suggestion": "sonnet, medium effort — well-specified plumbing and CLI mechanics"
+ },
+ {
+  "id": "WP1",
+  "title": "Review text constants/renderer, header recognition, mock feedback marks",
+  "files": "trace/review.py (new: HEADER/PERSONA/FOOTER asserted at import, per-kind templates, grouping, still-open/resolved marks, overflow, substitute line, KS-1 + second-person + path guards, persona-only render); trace/capture.py (prompt_source: HEADER prefix ⇒ vacant_feedback); ops/intake/mock_model.py (MOCK_FEEDBACK_MARKS + full review text in mock.jsonl)",
+  "depends_on": "— (coordinate the one-line prompt_source change with group sources)",
+  "tests": "tests/test_zero_review.py: constants pass assert_ks1_clean at import; each template on S1/S4a-c/S5/S3/S2/D1 sample findings yields the exact lines in AGENT_TEXTS.md; ≤14 lines total; substitute line on a dirty quote and on a node_modules/.git/$VACANT_HOME path; persona render byte-identical minus the block; prompt_source classifies HEADER-prefixed text as vacant_feedback and a person quoting it mid-message as user",
+  "size": "~260 lines + 24 tests",
+  "model_suggestion": "sonnet, high effort — exact strings and guards, fully specified"
+ },
+ {
+  "id": "WP2",
+  "title": "Final-text plumbing and note display in the four bridges",
+  "files": "trace/recorder.py (EVENT_TYPES += final_message; Recorder.final_message); trace/capture.py (observe stop: final_text); adapters/hook.py (pass last_assistant_message / final_text); adapters/agents.py (pi extension: event.context.llmMessages → final_text, ctx.ui.notify for the note; OpenCode plugin: client.session.messages → final_text, toast/log for the note; Codex: L-fake dump of a real Stop payload to settle last_assistant_message)",
+  "depends_on": "WP0",
+  "tests": "tests/test_zero_final_text.py (event recorded once per stop, blob sha, dedup); ops/accountability/e2e_trace.py --zero rows: final text present for Claude, pi -p, OpenCode TUI; Codex verified or documented absent; two consecutive pi agent_before_settle continues observed in one turn",
+  "size": "~40 JS + ~90 py + 12 tests",
+  "model_suggestion": "sonnet, high effort; opus if the pi/OpenCode API digging in types.d.ts / SDK turns out ambiguous"
+ },
+ {
+  "id": "WP3",
+  "title": "Evidence pass core: window, deliverables, materials, observed, unread_material, write_before_read, unsourced_value, evidence.json, rules data",
+  "files": "trace/evidence.py (new); trace/evidence_rules.json (new)",
+  "depends_on": "WP0 (Trace/Recorder only; can start on the base)",
+  "tests": "tests/test_zero_evidence.py on synthetic Recorder chains from the accept fixtures: S1 draft ⇒ 4 unread materials + 5 unsourced values (grouped, ids stable); S1 fix ⇒ 0; N1 ⇒ 0 (assumption/proposal labels exempt); N6 ⇒ $30,000 prompt-exempt, 365,950 sourced via command output; D1 ⇒ 0.61 + data/manual.md + data/fees.json; D2/D3 ⇒ 0; N8 ⇒ sub-agent reads count as observed, values sourced through the reply; N3b ⇒ README pre-existing values sourced, no skip-dir path ever named, numbers in code never checked; python -c open('…') counts as observed, ls output does not; UNOBSERVED/gap/candidate never flagged; caps produce 'not checked' not timeouts",
+  "size": "~700 lines + 45 tests",
+  "model_suggestion": "opus, high effort — the classification rule (blame `direct` ⇔ unsourced) and the exemption logic are subtle"
+ },
+ {
+  "id": "WP4",
+  "title": "Derived values",
+  "files": "trace/derive.py (new)",
+  "depends_on": "WP3 (interface: observed tables and numbers from evidence.py)",
+  "tests": "tests/test_zero_derive.py: sum/mean/count/min/max with thousands separators and $/EUR; group-by on a text column (S2 North 1,510 / South 1,312) and on year-month/quarter (S1 Q4 365,950); ratio 8.2% (N6); date normalisation Nov 15, 2026 = 2026-11-15; caps (20 tables / 50k cells / 5k numbers)",
+  "size": "~200 lines + 18 tests",
+  "model_suggestion": "sonnet, high effort — arithmetic rules, fully specified"
+ },
+ {
+  "id": "WP5a",
+  "title": "Test-claim and failed-step checks",
+  "files": "trace/evidence.py (+ rules: claim_patterns, test_runners, failure/success_patterns, probe_commands)",
+  "depends_on": "WP3, WP2 (final_message event)",
+  "tests": "S4a (claim, no runner ⇒ discovered `python3 -m unittest` in the line), S4b (FAILED excerpt ≤80 chars, step 4), S4c (core.py changed after the green run at step 3), N3a ⇒ 0, S5 (step 3 KeyError + unsourced 38/$2,145.50), N5 (ls/which/grep probes exempt; KeyError handled by rewrite + rerun), S3's 'verified' alone is not a claim, disclosure in the final message resolves",
+  "size": "~260 lines + 22 tests",
+  "model_suggestion": "opus, high effort — handled/probe semantics decide G1 on real transcripts"
+ },
+ {
+  "id": "WP5b",
+  "title": "Dropped values (+ stdlib xlsx reader) and date-outside-data",
+  "files": "trace/xlsxread.py (new); trace/evidence.py (+ rules)",
+  "depends_on": "WP3",
+  "tests": "S3 (5 of 9, column E, 4 missing named), N7 (count 5 in prompt ⇒ silent), later subset supersedes, prose never a list; S2 line 28 fires with the exact wording, N4 silent, multi-year table skipped, in-range date in the sentence exempts, heading/assumption lines exempt; xlsx reader on a stdlib-written workbook with sharedStrings and inline strings",
+  "size": "~300 lines + 20 tests",
+  "model_suggestion": "sonnet, high effort — well-specified parsers and rules"
+ },
+ {
+  "id": "WP6",
+  "title": "Project checks on materialized copies",
+  "files": "trace/projectchecks.py (new)",
+  "depends_on": "WP3 (window/index), vrun/sandbox.py",
+  "tests": "discovery table (pytest/unittest/npm/make/cargo/go); before/after on materialized copies of the S4 repo ⇒ regression ids test_median_even/odd, the 4 old tests not named; timeout ⇒ UNKNOWN; >20k files skipped; live workspace untouched (git status clean, no __pycache__); hermetic sandbox used when available, recorded otherwise; budget env respected",
+  "size": "~280 lines + 16 tests",
+  "model_suggestion": "sonnet, high effort"
+ },
+ {
+  "id": "WP7",
+  "title": "Stop decision, localize_evidence, zeroconfig watchdog subprocess, resolved-as-disclosed, chain events",
+  "files": "adapters/hookpolicy.py (decide_stop_zero, ZERO_MAX_ROUNDS=2); trace/stopcheck.py (localize_evidence twin, `zero` CLI entry, evidence_<n>.json, finding events, feedback_state, review recorded as vacant_feedback prompt last); adapters/zeroconfig.py (new: child process, 330 s watchdog, fail-open, errors.jsonl, note plumbing); adapters/hook.py (route)",
+  "depends_on": "WP1, WP3, WP5a, WP5b, WP6 (flag-gated), WP2",
+  "tests": "tests/test_zero_stop.py through hook.handle with pi payloads, no contract, VACANT_ZERO_INPROC=1: S1 exactly 1 pushback then allow; S8 exactly 2 then allow with note, ids stable across rounds, laundering (round-2 origin of 'October 1, 2026' still agent, never task message), turn-2 person prompt resets and 0 further pushbacks; material-only ≤1 round; N2a 0 lines; V1 raise ⇒ allow + errors.jsonl + 1 line; V2 truncated chain ⇒ allow, no pushback, note says broken, trace verify BROKEN; V3 read-only home ⇒ allow; V4 sleep with VACANT_STOP_WATCHDOG_S=2 ⇒ allow within 3 s and no orphan process; review recorded as vacant_feedback prompt exactly once (OpenCode re-report deduped); zero consequence events",
+  "size": "~420 lines + 30 tests",
+  "model_suggestion": "opus, high effort — round/reset/fail-open interplay and the laundering path"
+ },
+ {
+  "id": "WP8",
+  "title": "Delivery note, finalize --zero, display channels",
+  "files": "trace/delivery.py (new); trace/finalize.py (--zero); adapters/hook.py (session_end without contract spawns finalize); adapters/agents.py (note plumbing landed in WP2)",
+  "depends_on": "WP7",
+  "tests": "tests/test_zero_delivery.py: three headings always; screen text cases (0 lines / ≤2 on negatives / fixed / exhausted ≤6 lines & ≤600 chars / failure 1 line / broken record) ; never contains verified/correct/right; D3 note wording; finalize --zero on an opencode-run-shaped chain writes delivery.md; nothing written into the workspace; Claude render emits systemMessage",
+  "size": "~230 lines + 16 tests",
+  "model_suggestion": "sonnet, high effort"
+ },
+ {
+  "id": "WP9",
+  "title": "Contract coexistence v2 and optional `vacant do --zero`",
+  "files": "adapters/hookpolicy.py; trace/stopcheck.py; adapters/run.py",
+  "depends_on": "WP7, WP8 (optional for the product gates)",
+  "tests": "contract lines first, evidence lines appended within MAX_LINES, one shared round counter, outcome/ledger/reputation/release unchanged; `vacant do --zero` runs the redo loop for opencode run with the review text and records vacant_feedback",
+  "size": "~250 lines + 14 tests",
+  "model_suggestion": "sonnet, medium effort"
+ },
+ {
+  "id": "WP10",
+  "title": "Mock model extensions for the simulated user",
+  "files": "ops/intake/mock_model.py (x_fix_when needle-gated fix, x_fix_rounds, x_read native read steps with Codex cat fallback, full review text in mock.jsonl)",
+  "depends_on": "WP1 (header mark)",
+  "tests": "tests/test_mock_model.py: fix played only when the needle is in the received review, otherwise the draft repeats (S8 driver); rounds indexing; x_read on each protocol's tool list; full feedback recorded",
+  "size": "~150 lines + 10 tests",
+  "model_suggestion": "haiku for the mechanical parts, sonnet to wire x_fix_when — medium effort"
+ },
+ {
+  "id": "WP11",
+  "title": "Simulated-user harness (Docker, two commands, all surfaces, G1–G15)",
+  "files": "ops/usersim/run.py; ops/usersim/graders.py (plan_facts, launch_report, xlsx_range, unittest_green, summary_numbers, dabstep_scorer verbatim, rounds, none); accept/gen_fixtures.py --big (N3b/N3c repo, N8, V, I, U generators); ops/usersim/Dockerfile (vacant-usersim:<sha>, label vacant-usersim=1); results.json + SUMMARY.md writers",
+  "depends_on": "WP8, WP10",
+  "tests": "dry run of every fixture on pi -p in the container: arm A reproduces smoke/arm_a_pi*.json; arm C computes every gate; env/$HOME diff asserts the two-command setup; Docker hygiene by label only",
+  "size": "~450 lines + smoke",
+  "model_suggestion": "sonnet, high effort — reuse e2e_trace/e2e_tui/Lab, do not rewrite"
+ },
+ {
+  "id": "WP12",
+  "title": "Offline false-positive replay",
+  "files": "ops/zeroeval/replay_evidence.py",
+  "depends_on": "WP3, WP4, WP5a, WP5b",
+  "tests": "replays evidence_pass over every chain under the accept negatives, scratchpad/evalrun/try1 and the gate-1 traces; reports finding rate per kind with the reason strings from evidence.json; fails the gate when any negative fixture yields a pushable finding",
+  "size": "~100 lines",
+  "model_suggestion": "haiku, medium effort"
+ },
+ {
+  "id": "WP13",
+  "title": "Hardening and product-grade sign-off",
+  "files": "adversarial review of review.py texts (KS-1, actor ids, paths), laundering and round-reset paths, path hygiene under sub-agents; full L2 matrix 3×; README quickstart (two commands, PATH note, uninstall order, VACANT_MODE=off row), CLAUDE.md map entry, decisions/DECISION_2026xxxx_ZERO_CONFIG_PRODUCT.md",
+  "depends_on": "all previous",
+  "tests": "every G1–G15 cell green 3/3 on pi -p, pi TUI, Claude -p/TUI, Codex exec/TUI, OpenCode TUI; opencode run documented as no-pushback; known misses (D3; S2 if R4 absent) listed and never counted; ops/check_repo_links.py green",
+  "size": "review + docs + matrix runs",
+  "model_suggestion": "fable, high effort for the wording/honest-boundary judgment; opus for driving the matrix"
+ }
+]
