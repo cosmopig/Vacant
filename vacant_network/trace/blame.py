@@ -1362,6 +1362,16 @@ def _fallback_locations(claim: Any, r: dict[str, Any], state_dir: pathlib.Path,
 _TASK_SOURCES = frozenset({"user", "vacant do", "subagent_result", "parent_agent", "other_actor"})
 
 
+def _allowed_paths(contract: Any, d: pathlib.Path) -> frozenset[str] | None:
+    """餵給 `L.locate` 的 `allowed`：這條主張看得到的繳付物相對路徑集合（契約的
+    include／exclude，和收件口的隔離區同一套規則）。`contract` 沒給 ⇒ None（退回舊行為，
+    只在呼叫端自己保證 `d` 已經是繳付物範圍時安全）。"""
+    if contract is None:
+        return None
+    from . import rerun
+    return frozenset(f["path"] for f in rerun.manifest_of(contract, d)["files"])
+
+
 def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pathlib.Path,
                    *, max_per_claim: int = 5) -> list[dict[str, Any]]:
     """沒有病歷時（HTTP 收件口、人工上傳：交來的只有檔案，沒有任何一步）：只做定位——每一條**不過**的
@@ -1369,6 +1379,7 @@ def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pat
     的結論相同（`feedback.render_agent` 直接吃），缺的欄位就是「不知道」。"""
     from . import rerun
     d = pathlib.Path(adir)
+    allowed = _allowed_paths(contract, d)
     out = []
     for r in results:
         if r.get("status") != "FAIL":
@@ -1377,7 +1388,7 @@ def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pat
             claim = rerun.claim_by_id(contract, str(r["claim_id"]))
         except KeyError:
             continue
-        found = L.locate(claim, r, d)
+        found = L.locate(claim, r, d, allowed=allowed)
         locs = [x for x in found if x.kind != "source"] or \
             _fallback_locations(claim, r, d, contract)
         sources = [x.to_json() for x in found if x.kind == "source"]
@@ -1401,6 +1412,7 @@ def blame_results(rec: Recorder, contract: Any, results: list[dict[str, Any]],
     from . import rerun
     trace = Trace(rec)
     sd = pathlib.Path(state_dir)
+    allowed = _allowed_paths(contract, sd)
     out = []
     for r in results:
         if r.get("status") != "FAIL":
@@ -1409,7 +1421,7 @@ def blame_results(rec: Recorder, contract: Any, results: list[dict[str, Any]],
             claim = rerun.claim_by_id(contract, str(r["claim_id"]))
         except KeyError:
             continue
-        found = L.locate(claim, r, sd)
+        found = L.locate(claim, r, sd, allowed=allowed)
         locs = [x for x in found if x.kind != "source"]
         sources = [x.to_json() for x in found if x.kind == "source"]
         if not locs:

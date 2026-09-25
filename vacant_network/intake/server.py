@@ -21,7 +21,9 @@
     POST /v1/tasks/<task_id>/submissions   Authorization: Bearer <token>
          {"source": "...", "files": {"report.md": "<base64>", ...}}
          沒過 ⇒ 回應多 `feedback`（和 agent 回合結束收到的同一段：哪個檔哪一行、應該是多少）與 `issues`
-         （結構化）。交來的只有檔案：**不追到步驟、不記任何人**；隱藏主張只說沒過。
+         （結構化）與 `submitter_fixable`（開著的必要主張全部是 UNKNOWN／CONFLICT 時為 false：
+         提交者手上沒有能改的東西，`feedback` 的結尾也不會說「改了再交」）。交來的只有檔案：
+         **不追到步驟、不記任何人**；隱藏主張只說沒過。
     GET  /v1/tasks/<task_id>                Authorization: Bearer <token>
     GET  /published/<task_id>/<path>        公開，只有已放行的版本
 
@@ -199,25 +201,42 @@ def _locate(task: flow.Task, res: dict[str, Any], blobs: dict[str, bytes]) -> di
                                         f"{LOCATE_MAX_BYTES} (see results[].detail)"}
         hidden = {c.id for c in task.contract.claims if c.hidden}
         results = [dict(r, hidden=r.get("claim_id") in hidden) for r in res["results"]]
+        # 開著的必要主張**全部**是 UNKNOWN／CONFLICT（等人工審查、等獨立證據、意見分歧）
+        # ⇒ 提交者手上沒有能改的東西，把它改成「再交一次」是叫人重複做同一件事
+        # （和 hook 路徑 `hookpolicy.decide_stop` 的 `not_agent_fixable` 同一條判準；
+        # 2026-09-25 對抗審查 #19）
+        required_open = [r for r in results if r.get("required", True) and r.get("status") != "PASS"]
+        submitter_fixable = not (required_open and
+                                 all(r.get("status") in ("UNKNOWN", "CONFLICT") for r in required_open))
         with tempfile.TemporaryDirectory(prefix="vacant-http-") as td:
             root = task.store.materialize(manifest, pathlib.Path(td) / "a")
             found = B.locate_results(task.contract, results, root)
+        footer = ("Fix these and submit again; `results` has every check's own words."
+                  if submitter_fixable else
+                  "These are on hold or need independent evidence that only the task owner can "
+                  "supply; resubmitting the same content will not change the outcome.")
         text, _state = F.render_agent(
             found, results, reasons=res.get("reasons"),
             header=f"The intake's decision for this submission is {res.get('outcome')!r} "
                    f"(signed; the submitter cannot change it). The checks point here:",
-            footer="Fix these and submit again; `results` has every check's own words.",
+            footer=footer,
             more_hint="see `issues` and `results`")
 
         def clip(v: Any) -> Any:
             return v[:_CLIP] if isinstance(v, str) else v
+
+        def shown_value(b: dict[str, Any]) -> Any:
+            # `location.kind == "missing"` 的 `value`（跳脫過的正規式、JSON pointer……）是給比對用
+            # 的內部字串，不是「檔案裡寫著這個」——提交者不該被告知檔案裡有它沒有的字
+            # （2026-09-25 對抗審查 #18；`feedback._shown_value` 同一條規則）
+            return None if b["location"].get("kind") == "missing" else b.get("value")
         issues = [{"claim_id": b["claim"], "path": clip(b["location"].get("path")),
-                   "line": b["location"].get("line"), "value": clip(b.get("value")),
+                   "line": b["location"].get("line"), "value": clip(shown_value(b)),
                    "expected": clip(next((e.get("value") for e in b.get("expected") or []
                                           if e.get("value") is not None), None)),
                    "note": clip(b["location"].get("note"))}
                   for b in found if not b.get("hidden")][:50]
-        return {"feedback": text, "issues": issues}
+        return {"feedback": text, "issues": issues, "submitter_fixable": submitter_fixable}
     except Exception as e:  # noqa: BLE001 — 定位壞掉不影響裁決
         return {"feedback_error": type(e).__name__}
 

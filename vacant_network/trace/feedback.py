@@ -21,6 +21,8 @@ LOOP §二-3；人類 2026-09-24：「就算有問題最後也要提出問題，
 1. 「第一次出現在第幾步」是**工作區歷史的事實**，不是指控；那一步是誰做的只寫在給人的報告裡。
 2. 隱藏主張只說「沒過（細節由委託者保留）」——位置與值都不給，和收件口同一條規則。
 3. 回饋是否真的被模型讀到，要量（R535：寫檔 1/46）；OpenCode `run` 沒有回合邊界通道。
+4. `location.kind == "missing"` 的 `value`（跳脫過的正規式、JSON pointer……）是給比對用的內部
+   字串，不是「檔案裡寫著這個」；給人看的字一律走 `note`（`_shown_value`；2026-09-25 對抗審查 #18）。
 """
 from __future__ import annotations
 
@@ -42,12 +44,17 @@ FOOTER = "Run `vacant check` to re-check before finishing."
 
 def finding_id(b: dict[str, Any], scope: str = "") -> str:
     """結論的穩定 id。`scope`＝專案鍵：兩個專案裡「同一條主張、同一個值」是兩件事
-    （2026-09-24 審查 consequences#0：沒有 scope 時撤銷一個會撤到別的專案去）。"""
+    （2026-09-24 審查 consequences#0：沒有 scope 時撤銷一個會撤到別的專案去）。
+
+    身分優先用定位器自己給的 `location.key`（穩定，不隨每一輪的量測值變）；沒有才退回
+    `value`／`note`——多數定位器的 `note` 本來就是契約寫死的字（正規式、標題名字），但字數規則
+    這種 `note` 裡帶著當下量到的數字，逐字當身分會讓同一條沒解決的主張每輪都變成新的 id，
+    回饋錯報「已解決」（2026-09-25 對抗審查 #8、#22）。"""
     if b.get("finding_id"):
         return str(b["finding_id"])
     loc = b.get("location") or {}
     raw = json.dumps([scope, b.get("claim"), loc.get("path"), loc.get("line"),
-                      loc.get("value") or loc.get("note")], ensure_ascii=False)
+                      loc.get("key") or loc.get("value") or loc.get("note")], ensure_ascii=False)
     return "f_" + hashlib.sha256(raw.encode()).hexdigest()[:10]
 
 
@@ -90,12 +97,30 @@ def _where(loc: dict[str, Any]) -> str:
     return w
 
 
+def _shown_value(b: dict[str, Any]) -> Any:
+    """給人看的「值」——**`kind == missing` 沒有值可show**（2026-09-25 對抗審查 #18）：
+    `_loc_text` 對缺的 `must_contain` 把跳脫過的正規式（例如 `Q3\\ revenue\\ grew`）放進
+    `Location.value`，那是給 `rerun_flip`／`finding_id` 比對用的內部字串，不是「檔案裡寫著
+    這個」；`json_schema` 缺欄位時 `value` 是 JSON pointer，同樣不是內容。`note` 才是給人看的話
+    （已經用 `verifiers.show_rx` 轉成可讀格式），這裡一律不印 `value`。"""
+    loc = b.get("location") or {}
+    if loc.get("kind") == "missing":
+        return None
+    return b.get("value") or loc.get("value")
+
+
 def agent_lines(b: dict[str, Any]) -> list[str]:
     """一條追緝結論 → 給 agent 的一到三行（只有事實；沒有行動者）。隱藏主張不經過這裡。"""
     cid = b.get("claim") or "flag"
     loc = b.get("location") or {}
-    if loc.get("kind") == "missing" or (b.get("value") is None and loc.get("value") is None
-                                         and not loc.get("line")):
+    #: 沒有值可說的那種結論——缺了什麼、或整個檔就是問題（例如契約禁止的檔：有檔名但沒有
+    #: 「錯的值」也沒有行號）。這兩種都沒有「那個值第一次出現在哪」可說，只有「誰最後寫了這個檔」
+    #: （2026-09-25 對抗審查 #25：`kind` 不是 `missing` 但一樣沒值沒行的整檔位置，曾經被當成
+    #: 「有值」那條路徑處理，說出「這個值第一次出現在第 N 步」——沒有值，那句話是編的）。
+    wholefile = loc.get("kind") == "missing" or (b.get("value") is None
+                                                  and loc.get("value") is None
+                                                  and not loc.get("line"))
+    if wholefile:
         # 缺的東西、或整個檔就是問題（例如契約禁止的檔）：沒有「那裡寫著」可說
         head = f"- {cid}: FAIL — {loc.get('path')}: {_clip(loc.get('note') or b.get('detail'), 160)}"
     else:
@@ -116,7 +141,7 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
     if shown and src.get("kind") == "input":
         out.append(f"  the same value is in {src.get('path')}"
                    + (f" line {src['line']}" if src.get("line") else "")
-                   + " (the given input); if the input is wrong, say so in the answer")
+                   + " (the given input)")
     elif shown and src.get("kind") == "file":
         # 繳付物本來就寫著這個值（不是給定的輸入）：照實說，不叫 agent 去「說明輸入有錯」
         out.append(f"  this value was already in {src.get('path')}"
@@ -128,8 +153,8 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
         out.append("  the same value is in the task's own message")
     elif shown and src.get("kind") == "url":
         out.append(f"  the same value came from {src.get('ref')}")
-    elif b.get("step") and loc.get("kind") == "missing":
-        # 缺的東西沒有「第一次出現」：只說得出最後寫這個檔的是哪一步（推論層）
+    elif b.get("step") and wholefile:
+        # 缺的東西、或整個檔就是問題：沒有「第一次出現」——只說得出最後寫這個檔的是哪一步（推論層）
         st = b["step"]
         out.append(f"  the last recorded step that wrote {loc.get('path')}: step {st.get('n')} "
                    f"({st.get('tool')})")
@@ -260,8 +285,9 @@ def render_report(blames: list[dict[str, Any]], results: list[dict[str, Any]], *
     for i, b in enumerate(blames, 1):
         loc = b.get("location") or {}
         lines.append(f"## {i}. {b.get('claim') or 'flag'} — {_where(loc)}")
-        if b.get("value") or loc.get("value"):
-            lines.append(f"- value: `{_clip(b.get('value') or loc.get('value'), 200)}`")
+        shown = _shown_value(b)
+        if shown:
+            lines.append(f"- value: `{_clip(shown, 200)}`")
         for e in b.get("expected") or []:
             lines.append(f"- expected: `{e.get('value')}` ({e.get('note') or e.get('path')})")
         lines.append(f"- check: {_clip(b.get('detail') or '', 300)}")
@@ -312,9 +338,9 @@ def human_summary(blames: list[dict[str, Any]], results: list[dict[str, Any]],
     for b in blames[:3]:
         loc = b.get("location") or {}
         st = b.get("step") or {}
+        shown = _shown_value(b)
         parts.append(f"• {b.get('claim')}: {_where(loc)}"
-                     + (f" = {_clip(b.get('value') or loc.get('value'), 40)}"
-                        if (b.get('value') or loc.get('value')) else "")
+                     + (f" = {_clip(shown, 40)}" if shown else "")
                      + f" [{b.get('fault_class')}, {b.get('confidence')}"
                      + (f", step {st.get('n')}" if st else "") + "]")
     if report_path is not None:

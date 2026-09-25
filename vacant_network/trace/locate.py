@@ -21,6 +21,10 @@
 1. 「缺了什麼」沒有行號（`must_contain` 沒出現）；追緝對這種只能找「最後寫這個檔的人」＝推論層。
 2. JSON 路徑 → 行號是文字搜尋的近似；同名鍵多次出現時可能指錯行。
 3. 回溯行號只收**成果裡的**檔；錯在檢查腳本自己裡面的，這裡不歸給成果。
+4. `allowed` 由呼叫端算出（契約的 include／exclude）；`locate()` 自己不判斷什麼是繳付物，
+   給了就照單全收、不給就退回掃 `adir`（呼叫端自己保證範圍時才安全；2026-09-25 對抗審查
+   #3、#15、#20、#21）。「不是 UTF-8」只認驗證器 `evidence.problems` 判過的那些，這裡不自己
+   讀一次磁碟下這個結論（同一批審查）。
 """
 from __future__ import annotations
 
@@ -45,6 +49,11 @@ class Location:
     value: str | None = None         # 錯的值（逐字）
     kind: str = "offending"          # offending｜missing｜source
     note: str = ""
+    #: 這條結論的**身分**用什麼字算（`feedback.finding_id`）；空 ⇒ 退回用 `value` 或 `note`
+    #: （多數定位器的 `note` 本來就穩定：正規式、標題名字都是契約寫死的）。只有 `note` 會隨每一輪
+    #: 的量測值變的定位器（例如字數規則）才需要另外給一個穩定的 `key`，不然同一條沒解決的主張
+    #: 每輪都變成新的 finding id，回饋會錯報「已解決」（2026-09-25 對抗審查 #8、#22）。
+    key: str = ""
 
     def to_json(self) -> dict[str, Any]:
         return {k: v for k, v in dataclasses.asdict(self).items() if v not in (None, "")}
@@ -53,7 +62,7 @@ class Location:
     def from_json(cls, d: dict[str, Any]) -> "Location":
         return cls(path=str(d["path"]), line=d.get("line"), col=d.get("col"),
                    value=d.get("value"), kind=str(d.get("kind") or "offending"),
-                   note=str(d.get("note") or ""))
+                   note=str(d.get("note") or ""), key=str(d.get("key") or ""))
 
 
 def line_col(text: str, offset: int) -> tuple[int, int]:
@@ -136,8 +145,16 @@ def _read(adir: pathlib.Path, rel: str) -> str | None:
         return None
 
 
-def _files(adir: pathlib.Path, pattern: str) -> list[str]:
+def _files(adir: pathlib.Path, pattern: str,
+          allowed: frozenset[str] | None = None) -> list[str]:
+    """`pattern` 在 `adir` 裡的相對路徑。給了 `allowed`（呼叫端算出來的繳付物檔案集合）
+    ⇒ 只在那個集合裡比對，**不再掃磁碟**——工作區裡繳付物以外的東西（`node_modules`、
+    `.venv`、`__pycache__`、契約排除的路徑）一律看不見，不會擠掉真正的位置
+    （2026-09-25 對抗審查 #3、#15、#20、#21：Stop／`vacant do`／`finalize` 這三條路
+    給的是活的工作區，不是收件口那份已經套過 include／exclude 的隔離區）。"""
     rx = glob_to_regex(pattern)
+    if allowed is not None:
+        return sorted(rel for rel in allowed if rx.match(rel))
     out = []
     for p in sorted(adir.rglob("*")):
         if p.is_file():
@@ -147,8 +164,13 @@ def _files(adir: pathlib.Path, pattern: str) -> list[str]:
     return out
 
 
-def locate(claim: Any, result: dict[str, Any], adir: str | pathlib.Path) -> list[Location]:
-    """一個**不過**的主張在成果目錄 `adir` 裡的位置。過的主張回空清單。"""
+def locate(claim: Any, result: dict[str, Any], adir: str | pathlib.Path, *,
+          allowed: frozenset[str] | None = None) -> list[Location]:
+    """一個**不過**的主張在成果目錄 `adir` 裡的位置。過的主張回空清單。
+
+    `allowed`：這條主張看得到的繳付物相對路徑集合（例如 `rerun.manifest_of(contract, adir)`
+    算出來的那份）。給了 ⇒ 任何要列出「哪些檔」的定位器只在這個集合裡找；不給 ⇒ 退回掃
+    `adir`（呼叫端自己已經是 materialize 出來、只含繳付物的目錄時安全，例如收件口）。"""
     if result.get("status") != "FAIL":
         return []
     adir = pathlib.Path(adir)
@@ -157,21 +179,41 @@ def locate(claim: Any, result: dict[str, Any], adir: str | pathlib.Path) -> list
     ev = result.get("evidence") or {}
     fn = _LOCATORS.get(str(kind))
     try:
-        return fn(params, ev, result, adir) if fn else []
+        return fn(params, ev, result, adir, allowed) if fn else []
     except (re.error, ValueError, TypeError, KeyError):
         return []
 
 
+#: 一個檔案「不是 UTF-8」的位置**只認驗證器自己判過的那些**（§4.1 表格最後一列的延伸；
+#: 2026-09-25 對抗審查 #3）：驗證器的 `evidence.problems` 才是它真的看過、真的判定過的檔，
+#: 這裡自己再讀一次磁碟（尤其 `allowed` 沒給、退回掃整個工作區時）不可以自己認定「不是 UTF-8」。
+_NOT_UTF8_RE = re.compile(r"^(.*): not UTF-8 text$")
+
+
+def _not_utf8_files(ev: dict[str, Any]) -> set[str]:
+    out = set()
+    for p in ev.get("problems") or []:
+        m = _NOT_UTF8_RE.match(str(p))
+        if m:
+            out.add(m.group(1))
+    return out
+
+
 def _loc_text(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-              adir: pathlib.Path) -> list[Location]:
+              adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
     out: list[Location] = []
-    files = _files(adir, str(params.get("path") or ""))
+    files = _files(adir, str(params.get("path") or ""), allowed)
     if not files:
         return [Location(str(params.get("path")), kind="missing", note="no file matches")]
+    not_utf8 = _not_utf8_files(ev)
     for rel in files:
+        if rel in not_utf8:
+            out.append(Location(rel, kind="missing", note="not UTF-8 text"))
+            continue
         txt = _read(adir, rel)
         if txt is None:
-            out.append(Location(rel, kind="missing", note="not UTF-8 text"))
+            # 讀不到、但驗證器沒把它判成「不是 UTF-8」（例如根本不在它看過的檔裡）：
+            # 不可以替它下這個結論
             continue
         lines = _Lines(txt)
         for rx in params.get("must_not_contain") or []:
@@ -186,16 +228,26 @@ def _loc_text(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any]
                                     note=f"does not contain {V.show_rx(rx)}"))
         for h in params.get("required_headings") or []:
             if h.strip().lower() not in V._headings(txt):
-                out.append(Location(rel, kind="missing", value=h, note="missing heading"))
+                # 哪一個標題缺了要留在 `note`（給人看的字）：`value` 是給比對用的內部字串，
+                # `_shown_value`／HTTP `shown_value` 對 `kind == missing` 一律不印它
+                # （item 5、2026-09-25 對抗審查 #18），常數字串 "missing heading" 會讓
+                # `issues[]`／`render_report`／`human_summary` 三處都看不出缺的是哪一個標題
+                # （2026-09-25 獨立審查）。
+                out.append(Location(rel, kind="missing", value=h,
+                                    note=f"missing heading {h!r}"))
     if not out:
-        # 字數／大小：整個檔；原因用驗證器自己的話（不是一律「length rule」）
+        # 字數／大小：整個檔；顯示用驗證器自己的話（不是一律「length rule」），但**身分**要穩
+        # （2026-09-25 對抗審查 #8、#22）：字數每一輪都不同，note 逐字塞進 `finding_id` 會讓同一條
+        # 沒解決的主張每輪都變成新的 id——回饋錯報「已解決」。身分只認哪幾條長度規則被設了，不認數字。
         why = str(result.get("detail") or "length rule")[:200]
-        out = [Location(rel, kind="missing", note=why) for rel in files[:MAX_MATCHES]]
+        rule_key = "length:" + ",".join(sorted(
+            k for k in ("min_words", "max_words", "max_bytes") if params.get(k) is not None))
+        out = [Location(rel, kind="missing", note=why, key=rule_key) for rel in files[:MAX_MATCHES]]
     return out
 
 
 def _loc_csv_total(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-                   adir: pathlib.Path) -> list[Location]:
+                   adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
     report = str(params.get("report"))
     txt = _read(adir, report)
     if txt is None:
@@ -239,7 +291,7 @@ def _instance(doc: Any, ptr: str) -> tuple[bool, Any]:
 
 
 def _loc_json_schema(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-                     adir: pathlib.Path) -> list[Location]:
+                     adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
     """錯的**值**（那個 JSON 位置上的內容），不是路徑——追緝要追的是誰寫了 -5，不是誰寫了鍵名
     （2026-09-24 審查 blame#3）。缺欄位、根層級的錯 ⇒ 缺的東西。"""
     rel = str(params.get("path"))
@@ -273,7 +325,7 @@ def _loc_json_schema(params: dict[str, Any], ev: dict[str, Any], result: dict[st
 
 
 def _loc_citations(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-                   adir: pathlib.Path) -> list[Location]:
+                   adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
     rel = str(params.get("path"))
     txt = _read(adir, rel) or ""
     out = []
@@ -295,7 +347,7 @@ def _loc_citations(params: dict[str, Any], ev: dict[str, Any], result: dict[str,
 
 
 def _loc_traceback(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-                   adir: pathlib.Path) -> list[Location]:
+                   adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
     out: list[Location] = []
     seen = set()
     root = adir.resolve()
@@ -334,17 +386,54 @@ def _loc_traceback(params: dict[str, Any], ev: dict[str, Any], result: dict[str,
 
 
 def _loc_exists(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-                adir: pathlib.Path) -> list[Location]:
-    """缺的是**哪一個樣式**（不是隨便列出成果裡的前五個檔；2026-09-25 審查 http#6）。"""
-    return [Location(str(pat), kind="missing", note="nothing in the deliverable matches this")
-            for pat in params.get("paths") or [] if not _files(adir, str(pat))]
+                adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
+    """缺的是**哪一個樣式**（不是隨便列出成果裡的前五個檔；2026-09-25 審查 http#6）——**每一個**
+    數量不夠 `min_count` 的樣式都要報，不是只報完全零命中的那些，不然一個「要 3 個、只交 1 個」
+    的樣式會整條消失在回饋裡（2026-09-25 對抗審查 #24）。數字優先用驗證器自己 `evidence.counts`
+    算過的那份，讓 agent 看到的數字和裁決用的數字是同一份；沒有這份證據（防呆）才自己數。"""
+    n_min = int(params.get("min_count") or 1)
+    counts_ev = ev.get("counts")
+    counts: dict[str, Any] = counts_ev if isinstance(counts_ev, dict) else {}
+    out = []
+    for pat in params.get("paths") or []:
+        p = str(pat)
+        n = counts.get(p)
+        if not isinstance(n, int):
+            n = len(_files(adir, p, allowed))
+        if n < n_min:
+            # `key` 是身分，`note` 是給人看的數字——兩者分開：`n` 每一輪都可能變（agent 加了
+            # 檔案但還沒補到 `min_count`），note 逐字塞進 `finding_id` 會讓同一條沒解決的樣式
+            # 每輪都變成新的 id，回饋錯報「已解決」（2026-09-25 獨立審查：item 3 只堵住了長度
+            # 規則那條路，這條半滿足的 `exists` 是同一個洞）。
+            out.append(Location(p, kind="missing", note=f"found {n}, need {n_min}",
+                                key=f"exists:{p}"))
+    return out
 
 
 def _loc_forbid(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
-                adir: pathlib.Path) -> list[Location]:
+                adir: pathlib.Path, allowed: frozenset[str] | None = None) -> list[Location]:
+    """哪些檔是驗證器**自己**判定違反的，而不是重新掃一次目錄——`forbid_paths` 驗證器已經在
+    繳付物的 manifest 上比對過，`evidence.matched` 就是那份答案；這裡重掃 `adir` 曾經在 Stop／
+    `vacant do`／`finalize` 這三條路上把 `node_modules`、`.venv`、契約排除的路徑也掃進來，
+    5 個一批的視窗被無關的檔擠滿，真正的違規（例如 `deploy/id_rsa`）反而看不到
+    （2026-09-25 對抗審查 #3、#15、#20、#21）。"""
+    matched = ev.get("matched")
+    if isinstance(matched, list) and matched:
+        pats = [str(p) for p in params.get("paths") or []]
+        rxs = [(p, glob_to_regex(p)) for p in pats]
+        out = []
+        for rel in matched:
+            rel = str(rel)
+            pat = next((p for p, rx in rxs if rx.match(rel)), None)
+            note = f"a file the contract forbids ({pat})" if pat else "a file the contract forbids"
+            out.append(Location(rel, note=note))
+            if len(out) >= MAX_MATCHES:
+                break
+        return out
+    # 防呆：沒有這份證據（例如手接的 result dict）才退回掃描，而且只在 `allowed` 給的集合裡找
     out = []
     for pat in params.get("paths") or []:
-        for rel in _files(adir, str(pat))[:MAX_MATCHES]:
+        for rel in _files(adir, str(pat), allowed)[:MAX_MATCHES]:
             out.append(Location(rel, note=f"a file the contract forbids ({pat})"))
     return out[:MAX_MATCHES]
 
