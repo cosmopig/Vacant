@@ -32,6 +32,7 @@
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import json
 import os
 import pathlib
@@ -271,7 +272,7 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
 #: `vacant`、`vacant-network`（README 教被遮蔽時改用它）、`python -m vacant_network[.cli|.intake.cli]`
 _VACANT_CLI = r"(?:\bvacant(?:-network)?|-m\s+vacant_network(?:\.cli|\.intake\.cli)?)"
 _AUTHORITY_RE = re.compile(
-    _VACANT_CLI + r"\s+(?:(review|approve|release|withdraw|keys|reverify|flag)\b"
+    _VACANT_CLI + r"\s+(?:(review|approve|release|withdraw|keys|reverify|flag|hook)\b"
     r"|contract\s+(lock|init)\b|intake\s+serve\b)")
 
 
@@ -300,6 +301,13 @@ def decide_pre_tool(ev: HookEvent, contract) -> HookDecision:
                                         f"which is part of the task contract or Vacant's "
                                         f"records.", {"rule": "protect_write"})
         m = _AUTHORITY_RE.search(cmd)
+        if m and m.group(1) == "hook":
+            # 掛鉤是 agent 平台自己呼叫的；在工作的那一方自己呼叫一次＝偽造病歷裡的一個事件
+            # （例：一則「人打的」提示）。字串層：擋直接的寫法，擋不住繞路（誠實邊界 1）
+            return HookDecision("deny", "Vacant: `vacant hook` is called by the agent platform "
+                                        "itself, not from inside the session. Use `vacant check` "
+                                        "to see where the deliverable stands.",
+                                {"rule": "vacant_authority"})
         if m:
             what = m.group(1) or (f"contract {m.group(2)}" if m.group(2) else "intake serve")
             return HookDecision("deny", f"Vacant: `vacant {what}` belongs to the task's owner, "
@@ -330,13 +338,17 @@ def feedback_text(res: dict[str, Any], contract) -> str:
     return "\n".join(lines)
 
 
-def _rounds_file(session_id: str | None) -> pathlib.Path:
+def _rounds_file(session_id: str | None, contract=None) -> pathlib.Path:
+    """輪數檔的鍵＝工作階段＋**這一份契約**：別的目錄裡一個過了的驗收不可以把這個專案的輪數歸零
+    （2026-09-25 審查 loop#4：偽造一次別處的 Stop 就能重置）。"""
     sid = re.sub(r"[^A-Za-z0-9._-]", "_", session_id or "nosession")[:120]
-    return vacant_state_dir() / "intake" / "hooks" / f"rounds_{sid}.json"
+    where = str(getattr(contract, "path", "") or "")
+    tag = hashlib.sha256(where.encode()).hexdigest()[:12] if where else "nocontract"
+    return vacant_state_dir() / "intake" / "hooks" / f"rounds_{sid}_{tag}.json"
 
 
-def _bump_round(session_id: str | None) -> int:
-    p = _rounds_file(session_id)
+def _bump_round(session_id: str | None, contract=None) -> int:
+    p = _rounds_file(session_id, contract)
     n = 0
     try:
         n = int(json.loads(p.read_text()).get("n", 0))
@@ -348,12 +360,15 @@ def _bump_round(session_id: str | None) -> int:
     return n
 
 
-def new_request(session_id: str | None) -> None:
+def new_request(session_id: str | None, contract=None) -> None:
     """人打了一個新的要求 ⇒ 回饋輪數重新算。輪數上限防的是「一個要求之內」agent 被無限推回去；
     互動介面裡前面幾個回合（人只是問問題、還沒要它交件）用掉的輪數，不可以讓之後真的寫錯時
     agent 收不到位置（2026-09-25 互動 TUI 實測時發現）。只有人打的那一則算——呼叫端負責分辨
-    （`hook._person_prompt`）。"""
-    _rounds_file(session_id).unlink(missing_ok=True)
+    （`hook._person_prompt`）。
+    ⚠ 分辨靠的是掛鉤事件的內容：agent 在殼層裡自己呼叫一次 `vacant hook …` 偽造一則「人打的」，
+    同樣會重置（字串層的 `vacant hook` 擋得住直接的寫法、擋不住繞路，誠實邊界 1 那一類）。
+    重置的後果是 agent 被多推回去幾輪，不會讓任何東西被收下。"""
+    _rounds_file(session_id, contract).unlink(missing_ok=True)
 
 
 def decide_stop(ev: HookEvent, contract, *, check_fn, localize=None) -> HookDecision:
@@ -389,9 +404,9 @@ def decide_stop(ev: HookEvent, contract, *, check_fn, localize=None) -> HookDeci
         flags = [b for b in (t or {}).get("blames") or []
                  if str(b.get("claim", "")).startswith("flag:")]
         if not flags:
-            _rounds_file(ev.session_id).unlink(missing_ok=True)   # 過了 ⇒ 之後的問題有新的輪數
+            _rounds_file(ev.session_id, contract).unlink(missing_ok=True)   # 過了 ⇒ 新的輪數
             return HookDecision("allow", "", rec)
-        n = _bump_round(ev.session_id)
+        n = _bump_round(ev.session_id, contract)
         rec.update(round=n, flags_open=len(flags))
         if n > int(contract.hooks.get("max_feedback_rounds", 3)) or not (t or {}).get("text"):
             rec["rounds_exhausted"] = True
@@ -406,7 +421,7 @@ def decide_stop(ev: HookEvent, contract, *, check_fn, localize=None) -> HookDeci
         rec["not_agent_fixable"] = True
         traced("waiting on review or evidence the agent cannot supply")
         return HookDecision("allow", "", rec)
-    n = _bump_round(ev.session_id)
+    n = _bump_round(ev.session_id, contract)
     rec["round"] = n
     if n > int(contract.hooks.get("max_feedback_rounds", 3)):
         rec["rounds_exhausted"] = True

@@ -375,6 +375,10 @@ def collect(lab: Lab, scn: str, *, rc: int | None, wall: float, err_tail: str,
     mock = [json.loads(x) for x in lab.mock_log.read_text().splitlines()] \
         if lab.mock_log.is_file() else []
     fb = [m.get("feedback") for m in mock if m.get("feedback")]
+    # 這一格的結論那個值的回饋（多回合時，前面回合的泛用回饋不可以替它作證；2026-09-25 審查 harness#3）
+    want_v = str((f or {}).get("value") or "")
+    fb_loc = [x for x in fb if want_v and f'"{want_v}"' in x]
+    fb1 = fb_loc[0] if fb_loc else (fb[0] if fb else None)
     td = lab.trace_dir()
     perf = []
     if td and (td / "perf.jsonl").is_file():
@@ -394,12 +398,14 @@ def collect(lab: Lab, scn: str, *, rc: int | None, wall: float, err_tail: str,
             "actor": (f.get("step") or {}).get("actor")} if f else None,
         "judgement": judge(scn, f),
         "feedback_reached_model": bool(fb),
-        "feedback_text": fb[0][:600] if fb else None,
-        "feedback_has_location": bool(fb) and "report.md:" in fb[0],
-        "feedback_has_actor_id": bool(fb) and any(
-            str((((f or {}).get("step") or {}).get("actor") or {}).get(k) or "~~") in fb[0]
-            for k in ("agent", "agent_type")),
+        "feedback_text": fb1[:600] if fb1 else None,
+        "feedback_has_location": bool(fb1) and "report.md:" in str(fb1),
+        "feedback_has_actor_id": any(                    # 任何一次回饋裡都不可以有
+            str((((f or {}).get("step") or {}).get("actor") or {}).get(k) or "~~") in x
+            for x in fb for k in ("agent", "agent_type")),
+        # 被解決的是**這一個**結論（不是別的回合開過、後來解決的那一個）
         "resolved_after_feedback": any(e["type"] == "finding" and e.get("status") == "resolved"
+                                       and (f is None or e.get("finding_id") == f.get("finding_id"))
                                        for e in evs),
         "final_decision": decisions[-1].get("outcome") if decisions else None,
         "chain_verifies": ver.returncode == 0, "chain_verify_out": ver.stdout.strip()[:120],

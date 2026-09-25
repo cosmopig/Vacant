@@ -291,13 +291,23 @@ Claude 預設把子 agent 放到背景：主 agent 的回合結束時子 agent �
 驗收過了才歸零**。人先問一句（還不要它交件），回合結束時契約還沒過 ⇒ 回饋把輪數用完；之後人要它寫報告、它寫錯 ⇒
 agent 收不到位置（只有人看到「輪數用完」）。負控制在 Claude Code 的 TUI 裡重現：最後一回合沒有回饋、最後 reject。
 規則改成：**人打的一個新要求重新算輪數**（`hookpolicy.new_request`）。輪數上限防的是「一個要求之內」被無限推回去；
-不是人打的（背景子 agent 的結果、父 agent 給子 agent 的任務、Vacant 自己的回饋被當成使用者訊息送回來）不算，
-所以 agent 沒辦法靠自己重置輪數。OpenCode 的外掛不記提示 ⇒ 它的輪數仍然只在過了才歸零（誠實邊界）。
+不是人打的不算：背景子 agent 的結果、父 agent 給子 agent 的任務、Vacant 自己的回饋被當成使用者訊息送回來（只認
+**開頭**，人引一段回饋仍然是人說的）、**agent 自己排的提示**（Claude Code 的 CronCreate／ScheduleWakeup 觸發時送的
+UserPromptSubmit 和人打的一模一樣——真的 binary 實測；病歷裡對得上這個工作階段記過的排程文字 ⇒ 不算）、別的工作階段
+／隊友送來的信封、平台宣告的 `source` 不是 user／sdk。分辨只有一份（`capture.classify_prompt`），病歷記的來源也是它；
+不是人說的那幾種**也不當成值的來源**（當成「任務說的」就等於替 agent 洗掉錯）。輪數檔的鍵是工作階段＋這一份契約。
+⚠ 分辨靠掛鉤事件的內容：agent 在殼層裡自己呼叫 `vacant hook …` 偽造一則，同樣會重置——`vacant hook` 在工具前被擋
+（字串層，擋得住直接的寫法、擋不住繞路；誠實邊界 1 那一類）。重置的後果是 agent 被多推回去，不會讓任何東西被收下。
+
+同一輪的對抗審查（`ops/accountability/review_rounds_tui/FINDINGS.md`，15 條，12 條成立、全部修掉）另外補上：
+OpenCode 的外掛聽 `chat.message` 送提示（之前病歷裡沒有 OpenCode 的任務文字、重置在它上面也不生效）；pi 在 agent 還在跑的時候
+打的那一則（steer／follow-up）不經過 `before_agent_start` ⇒ 外掛多聽 `input`（真 pi 重現、修後重跑成立）；同一則被兩個入口
+各報一次只記一次。
 
 同一輪量到：OpenCode 的互動 TUI **有**交件前回饋（外掛在 idle 時用 SDK 把回饋送回；之前寫了但沒量過），
 `opencode run` 仍然沒有。Claude Code 把 Stop 掛鉤的回饋在畫面上標成「Stop hook error」（它自己的字樣；模型收到的是
-「Stop hook feedback」）。假模型從這一輪起只收實驗給的假金鑰（別的憑證 ⇒ 401，值不記）：一跑成功本身就證明
-沒有用到機器上別的憑證。
+「Stop hook feedback」）。假模型從這一輪起只收實驗給的假金鑰（別的憑證 ⇒ 401，值不記）：送到假模型的每一通模型請求都只帶假金鑰
+（只說得出這些請求；Claude Code 在隔離的 HOME 裡仍提示它看得到主機的另一種憑證，它拿那個做什麼這裡量不到）。
 
 ## 八、偏離與延後
 

@@ -488,6 +488,10 @@ class Blamer:
             if str(p.get("session")) not in ("*", str(s.actor.get("session"))):
                 continue
             src = str(p.get("source") or "user")
+            if src not in ("user", "subagent_result", "parent_agent"):
+                # Vacant 自己的回饋（引了錯值與應有的值）、agent 自己排的提示（它自己的話）、別的工作階段
+                # 送來的訊息：都不是「任務說的」——當成來源就等於替 agent 洗掉錯（2026-09-25）
+                continue
             if src == "parent_agent" and not s.actor.get("agent"):
                 continue
             if src == "parent_agent" and p.get("agent") and p.get("agent") != s.actor.get("agent"):

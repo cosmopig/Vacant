@@ -671,6 +671,14 @@ class Recorder:
         if spawned_by:
             payload["spawned_by"] = spawned_by       # 叫它出來的那一步（父 agent 的工具呼叫）
         with self._lock():
+            book = self._tail()
+            last = book.entries[-1] if book.entries else None
+            if last is not None and last.type == "prompt" and isinstance(last.payload, dict) \
+                    and all(last.payload.get(k) == payload.get(k)
+                            for k in ("session", "source", "text_blob", "agent")):
+                # 同一則訊息被兩個入口各報一次、中間什麼都沒發生（pi：跑著的時候打的那一則先經過
+                # `input`，run 剛好結束時又經過 `before_agent_start`；2026-09-25 真 pi 實測）：記一次
+                return dict(last.payload)
             return self._append("prompt", payload)
 
     def subagent_state(self, actor: Actor, *, running: bool) -> dict[str, Any]:

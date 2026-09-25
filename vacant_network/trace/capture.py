@@ -81,13 +81,30 @@ def _traceable(ws: pathlib.Path) -> bool:
 
 
 _TASK_NOTE = re.compile(r"<tool-use-id>([^<]+)</tool-use-id>")
+#: Codex 把掛鉤送回的文字包在 `<hook_prompt …>` 裡
+_HOOK_WRAPPER = re.compile(r"^\s*</?hook_prompt\b[^>]*>")
+#: 不是人打的使用者訊息（Claude Code 2.1.281 的 binary 裡的信封；2026-09-25 審查 loop#5）
+_MACHINE_ENVELOPES = ("<cross-session-message", "<teammate-message", "<event ", "<wake")
+#: agent 自己排的提示（到時候以一則使用者訊息回來，掛鉤的內容和人打的一模一樣）
+SCHEDULER_TOOLS = frozenset({"CronCreate", "ScheduleWakeup"})
+#: Claude Code 的 UserPromptSubmit `source`（binary 裡的欄位說明；目前還不送）——只有這兩種是人
+_PERSON_SOURCES = frozenset({"user", "sdk"})
 
 
 def prompt_source(agent: str, payload: dict[str, Any], text: str) -> tuple[str, str | None]:
     """這則「使用者訊息」其實是誰說的（2026-09-24 審查 blame#5、integration#0）：
     Claude 把背景子 agent 的結果以 `<task-notification>` 送回；Codex 子 agent 的
-    UserPromptSubmit 是父 agent 給它的任務說明。"""
-    t = text.lstrip()
+    UserPromptSubmit 是父 agent 給它的任務說明；Vacant 自己的回饋（2026-09-25）。
+    ⚠ 人打的訊息裡剛好貼了回饋的開頭，也會被當成 Vacant 的回饋（不當來源、不重新算輪數）。"""
+    t = _HOOK_WRAPPER.sub("", text).lstrip()
+    from .feedback import FEEDBACK_HEADER, FLAG_HEADER
+    if t.startswith((FEEDBACK_HEADER, FLAG_HEADER)):
+        # Vacant 自己的回饋被當成使用者訊息送回來（OpenCode 的外掛用 `session.prompt` 送）：不是人說的，
+        # 也不是任何值的來源（裡面引了繳付物的錯值與應有的值；當成「任務說的」就等於替 agent 洗掉錯）。
+        # 只認**開頭**：人打的一則裡引了一段回饋，仍然是人說的（2026-09-25 審查 loop#3）
+        return "vacant_feedback", None
+    if t.startswith(_MACHINE_ENVELOPES):
+        return "machine", None           # 別的工作階段／隊友／事件送進來的訊息，不是人打的
     if t.startswith("<task-notification>"):
         m = _TASK_NOTE.search(t)
         return "subagent_result", (m.group(1).strip() if m else None)
@@ -95,6 +112,37 @@ def prompt_source(agent: str, payload: dict[str, Any], text: str) -> tuple[str, 
     if payload.get("agent_id") or (parent and parent != payload.get("session_id")):
         return "parent_agent", None
     return "user", None
+
+
+def classify_prompt(agent: str, payload: dict[str, Any], text: str, cwd: str | None,
+                    contract: Any = None) -> tuple[str, str | None]:
+    """`prompt_source` 再加上要看病歷才分得出來的：agent 自己排的提示（CronCreate／ScheduleWakeup 在這個
+    工作階段裡記過同一段文字）、平台送的 `source` 說不是人。病歷記的來源與「人的新要求重新算輪數」都用這一份
+    （2026-09-25 審查 loop#5：真的 Claude Code 在排程觸發時送的 UserPromptSubmit 和人打的一模一樣）。"""
+    src, tid = prompt_source(agent, payload, text)
+    if src != "user":
+        return src, tid
+    declared = payload.get("source")
+    if isinstance(declared, str) and declared and declared not in _PERSON_SOURCES:
+        return "machine", None
+    ws = workspace_for(cwd, contract)
+    if ws is None:
+        return src, tid
+    sid = str(payload.get("session_id") or "")
+    body = text.strip()
+    for e in R.Recorder(ws).events():
+        if e.get("type") != "step" or e.get("tool") not in SCHEDULER_TOOLS:
+            continue
+        if sid and str((e.get("actor") or {}).get("session") or "") != sid:
+            continue
+        try:
+            inp = json.loads(R.Recorder(ws).blobs.get(e["input_blob"]).decode("utf-8", "replace"))
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        sched = str((inp or {}).get("prompt") or "").strip() if isinstance(inp, dict) else ""
+        if sched and (sched == body or sched in body):
+            return "scheduled_by_agent", str(e.get("step") or "") or None
+    return src, tid
 
 
 def actor_of(agent: str, payload: dict[str, Any]) -> R.Actor:
@@ -189,7 +237,7 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
     elif action == "prompt":
         text = payload.get("prompt")
         if text:
-            src, tid = prompt_source(agent, payload, str(text))
+            src, tid = classify_prompt(agent, payload, str(text), cwd, contract)
             out = rec.prompt(str(text), session=actor.session, source=src, tool_use_id=tid,
                              agent=actor.agent if src == "parent_agent" else None,
                              spawned_by=link.get("spawned_by"))

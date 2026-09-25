@@ -47,16 +47,22 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
 - Interactive use: the feedback-round cap now applies per request the person types, not per session.
   In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
   written after the next request then got no located feedback (reproduced as a negative control in
-  Claude Code's TUI). Messages the person did not type (a background sub-agent's result, a parent's
-  task for a sub-agent, Vacant's own feedback echoed back) do not reset it. OpenCode's plugin does not
-  see prompts, so there the cap still resets only on a pass.
+  Claude Code's TUI). Messages the person did not type do not reset it and are not treated as a
+  source of values: a background sub-agent's result, a parent's task for a sub-agent, Vacant's own
+  feedback echoed back (matched at the start only), a prompt the agent scheduled for itself with
+  CronCreate/ScheduleWakeup (Claude Code sends it exactly like a typed one), messages from other
+  sessions. The counter is keyed by session and contract. A forged `vacant hook` call from the
+  session can still reset it; `vacant hook` is now denied before a tool runs (string level).
+  OpenCode's plugin now forwards the person's messages (`chat.message`) and pi's extension also
+  listens to `input`, so a request typed while pi is still running counts too.
 - New `ops/accountability/e2e_tui.py`: the four agents' real TUIs driven in tmux like a person would
   (type, Enter, exit). 16/16 attributions, feedback reaching the model, feedback on the person's screen
   and acceptance after the fix, including a multi-turn case. OpenCode's interactive TUI does get
   pre-delivery feedback (written earlier, first measured now); `opencode run` still does not.
   `e2e_trace.py --via-do` runs the same faults through `vacant do`: 25/25, OpenCode included.
 - The scripted mock model accepts only the experiment's fake keys (anything else is refused with 401
-  and never logged), so a passing run shows no other credential on the machine was used; it also
+  and never logged), so every model request that reached the mock carried only the fake key (that says
+  nothing about what else an agent does with other credentials it can see); it also
   plays multi-turn scripts (`turns`).
 - Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
   does not fit moves to the background and the steps before it are recorded as not observed;

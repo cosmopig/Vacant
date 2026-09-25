@@ -57,13 +57,15 @@ EXIT = {"claude": [("l", "/exit"), ("k", "Enter")], "codex": [("l", "/quit"), ("
 SHOWN = "checks do not pass yet"
 EXITED = "__VACANT_TUI_EXITED__"
 DEFAULT_SCENARIOS = "B_agent_fault,A_input_fault,C_script_fault,M_multi_turn"
-MAX_ROUNDS = 2                        # `e2e_trace.contract` 的 `max_feedback_rounds`
 
 #: 只在互動介面有意義的情境。M：人先問一句（還不要它交件）——回合結束時契約還沒過，回饋把輪數用完；
 #: 之後人才要它寫報告、它寫錯。**新的要求要有新的輪數**，否則寫錯的那一次 agent 收不到位置
 #: （2026-09-25 做這支時發現、修了：`hookpolicy.new_request`）。
 TUI_SCENARIOS: dict[str, dict] = {
     "M_multi_turn": {
+        # 上限 1 輪：第一回合一定用完（OpenCode 的外掛等自己送回的回饋時不驗那段 idle，上限 2 時它第一回合只用 1 輪，
+        # 走不到重置——2026-09-25 第一次跑就是這樣），第二回合的回饋只可能來自「人的新要求重新算輪數」
+        "max_feedback_rounds": 1,
         "turns": [
             {"when": "How many data rows", "say": "How many data rows does inputs/ledger.csv have? "
                                                   "Just answer; don't write any file yet.",
@@ -160,6 +162,21 @@ def fixed(rows: list[dict]) -> bool:
     return any(r.get("fed_back") and r.get("reply") == "text" for r in rows)
 
 
+def stop_rounds(lab: T.Lab) -> list[int]:
+    """這個專案的回合結束驗收記到第幾輪（掛鉤的事件紀錄）。"""
+    p = lab.vhome / "intake" / "hooks" / "events.jsonl"
+    cp = str(lab.proj / ".vacant" / "contract.json")
+    out = []
+    for line in (p.read_text().splitlines() if p.is_file() else []):
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if d.get("kind") == "stop" and d.get("contract") == cp and d.get("round"):
+            out.append(int(d["round"]))
+    return out
+
+
 def settled(lab: T.Lab, since: int, quiet: float, timeout: float) -> list[dict]:
     """等這一回合安靜下來：`since` 之後有請求，而且 `quiet` 秒沒有新的（回合結束的驗收與回饋都跑完了）。"""
     t0 = time.time()
@@ -178,6 +195,15 @@ def run_tui(lab: T.Lab, scn: str, timeout: float) -> dict:
     tag = scn.split("_")[0].lower()
     lab.proj = lab.root / f"proj-{tag}"
     lab.reset_project(f"q-total-{tag}")
+    rounds = T.SCENARIOS[scn].get("max_feedback_rounds")
+    if rounds is not None:                             # 這個情境自己的輪數上限：改了契約就重新鎖
+        cp = lab.proj / ".vacant" / "contract.json"
+        raw = json.loads(cp.read_text())
+        raw.pop("lock", None)
+        raw["hooks"]["max_feedback_rounds"] = rounds
+        cp.write_text(json.dumps(raw, indent=2))
+        r = lab.vacant("contract", "lock")
+        assert r.returncode == 0, r.stderr
     lab.mock_log.unlink(missing_ok=True)
     lab.subagents = False
     lab.web = scn.startswith("F_")
@@ -205,6 +231,12 @@ def run_tui(lab: T.Lab, scn: str, timeout: float) -> dict:
             first = settled(lab, n0, 10, timeout)
             extra.setdefault("earlier_turns", []).append({
                 "requests": len(first), "fed_back": sum(1 for r in first if r.get("fed_back"))})
+        if len(says) > 1:
+            # 前面的回合真的把輪數用完了嗎？沒用完，最後一回合的回饋就證明不了「新要求重新算輪數」
+            # （2026-09-25 審查 harness#1：OpenCode 第一次跑就是沒用完、照樣算過）
+            cap = int(json.loads((lab.proj / ".vacant" / "contract.json").read_text())
+                      ["hooks"]["max_feedback_rounds"])
+            extra["earlier_turns_used_the_budget"] = max(stop_rounds(lab) or [0]) >= cap
         n_before = len(mock_rows(lab))
         pane.keys([("l", says[-1]), ("k", "Enter")])
         t1 = time.time()
@@ -216,7 +248,7 @@ def run_tui(lab: T.Lab, scn: str, timeout: float) -> dict:
         while time.time() - t0 < timeout and not fixed(mock_rows(lab)[n_before:]):
             time.sleep(1)
         last = mock_rows(lab)[n_before:]
-        extra["feedback_in_last_turn"] = any(r.get("feedback") for r in last)
+        extra["_last_feedback"] = [r.get("feedback") for r in last if r.get("feedback")]
         time.sleep(4)                                  # 改好之後的那次回合結束驗收
         screen = pane.text(history=400)
         pane.keys(EXIT[lab.agent])
@@ -233,9 +265,19 @@ def run_tui(lab: T.Lab, scn: str, timeout: float) -> dict:
     res = T.collect(lab, scn, rc=None, wall=wall, err_tail="")
     typed = {hashlib.sha256(x.encode()).hexdigest() for x in says}
     evs = lab.trace_events()
-    shown = SHOWN in screen
+    # 「有位置的回饋」＝指到這一格結論的那個值（`… says "999"`）；前面回合的泛用回饋、輪數用完時給人的摘要
+    # （`report.md:3 = 999`）都不算（2026-09-25 審查 harness#2、#5）
+    value = str((res.get("finding") or {}).get("value") or "")
+    located = f'says "{value}"' if value else SHOWN
+    extra["feedback_in_last_turn"] = any(located in str(x) for x in extra.pop("_last_feedback", []))
+    shown = located in screen
     (lab.root / f"{scn}.screen.txt").write_text(screen.replace(str(lab.root.parent), "<out>"))
     res.update(extra)
+    if res.get("earlier_turns_used_the_budget") is False:
+        # 前面的回合沒把輪數用完 ⇒ 最後一回合的回饋證明不了「新要求重新算輪數」：這一格不算過
+        res["judgement"] = {"correct": False, "mismatch": [
+            "earlier turns did not use the whole feedback budget, so this row does not test the "
+            "per-request reset"]}
     res.update({
         "tui_ready": ready, "prompt_resent": resent, "exited_cleanly": exited,
         "feedback_shown_to_person": shown,
@@ -307,15 +349,16 @@ def summary(r: dict) -> str:
              "| agent | scenario | attribution | got (state / class / grade) | "
              "feedback reached model (in the last turn) | shown to the person | "
              "actor id in feedback | resolved | "
-             "final | person's prompts in trace (not typed by the person) | prompt resent | chain |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+             "final | person's prompts in trace (not typed by the person) | prompt resent | chain | "
+             "earlier turns used the whole budget |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     n = ok = fb = shown = acc = 0
     for a, res in r["agents"].items():
         for scn, x in res["runs"].items():
             n += 1
             if x.get("harness_error"):
                 lines.append(f"| {a} | {scn} | ❌ harness error: {x['harness_error'][:80]} |"
-                             + " |" * 10)
+                             + " |" * 11)
                 continue
             f = x.get("finding") or {}
             ok += int(x["judgement"]["correct"])
@@ -330,13 +373,20 @@ def summary(r: dict) -> str:
                 f"| {x['feedback_has_actor_id']} | {x['resolved_after_feedback']} "
                 f"| {x['final_decision']} | {x['person_prompts_in_trace']} "
                 f"({x['untyped_person_prompts']}) "
-                f"| {x['prompt_resent']} | {x['chain_verifies']} |")
+                f"| {x['prompt_resent']} | {x['chain_verifies']} "
+                f"| {x.get('earlier_turns_used_the_budget', '—')} |")
     rej = sum(int(x.get("auth_rejected") or 0) for res in r["agents"].values()
               for x in res["runs"].values())
+    multi = [x for res in r["agents"].values() for x in res["runs"].values()
+             if "earlier_turns_used_the_budget" in x]
+    used = sum(1 for x in multi if x["earlier_turns_used_the_budget"])
     lines += ["", f"**attribution correct: {ok}/{n}** · feedback reached the model in the turn "
               f"that wrote the error: {fb}/{n} · "
               f"shown to the person: {shown}/{n} · accepted after the fix: {acc}/{n} · "
-              f"model requests with a credential other than the fake key: {rej}", ""]
+              f"model requests with a credential other than the fake key: {rej}"
+              + (f" · multi-turn rows whose earlier turns used the whole budget (so the last turn's "
+                 f"feedback can only come from the per-request reset): {used}/{len(multi)}"
+                 if multi else ""), ""]
     return "\n".join(lines) + "\n"
 
 

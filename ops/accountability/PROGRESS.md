@@ -335,7 +335,7 @@ pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
   它寫錯 ⇒ agent 收不到位置。修：人打的新要求重新算輪數（`hookpolicy.new_request`、`hook._person_prompt`）；
   背景子 agent 的結果、父 agent 給子 agent 的任務、Vacant 自己的回饋被送回來都不算。多回合情境 `M_multi_turn`。
 - 假模型只收實驗給的假金鑰（別的憑證 ⇒ 401，值不記）：Claude Code 在隔離的 HOME 裡仍提示它看得到主機的另一種憑證；
-  現在一跑成功本身就證明沒用到。結果多一欄 `auth_rejected`。
+  現在送到假模型的每一通請求都只帶假金鑰（只說得出這些請求；2026-09-25 審查更正了原本「一跑成功就證明沒用到」的說法）。結果多一欄 `auth_rejected`。
 - 假模型支援多回合劇本（`turns`：照人最近打的那一則演）；沒有 `turns` 的劇本行為不變。
 - PROGRESS 的標題時間按 commit 時間更正（原本是估的，多數比實際晚）。
 
@@ -359,3 +359,25 @@ pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
   第二回合靠重置拿到回饋」；**OpenCode 的 M 過了但沒走到重置**（它第一回合只用了 1 輪：外掛等自己送回的回饋時不驗那段
   idle），OpenCode 的外掛不記提示，重置在它上面不生效——照實寫進證據、MORNING 與裁決。存成
   `evidence_20260924/e2e_tui_*`、`tui_screens/`（含負控制的畫面）。
+
+## 2026-09-25T02:10Z — 重置輪數與 TUI 量測的對抗審查：15 條、12 條成立，全部修掉
+
+**做了什麼**
+- 對抗審查 workflow（18 個 agent，三個鏡頭；審查者用真的 Claude Code binary 與真的 pi 重現）：
+  `ops/accountability/review_rounds_tui/FINDINGS.md`。最嚴重的一條是**證據說了它沒證明的事**：OpenCode 的多回合那一格
+  過了，但前面的回合沒把輪數用完，根本沒測到重置。
+- 修：`capture.classify_prompt`——Claude Code 的排程提示（CronCreate／ScheduleWakeup 觸發時和人打的一模一樣）、別的工作階段
+  的信封、平台宣告的 `source`、Vacant 自己的回饋（只認開頭）都不是人說的：不重置輪數、**也不當成值的來源**（原本會被當成
+  「任務說的」，等於替 agent 洗掉錯；負控制重現）。OpenCode 外掛聽 `chat.message` 送提示（先用探針外掛在真 TUI 裡量到它對人打的
+  與外掛送回的都觸發）；pi 擴充多聽 `input`（跑著的時候打的那一則）；同一則被兩個入口各報一次只記一次（真 pi 的競態）。
+  輪數檔的鍵改成工作階段＋契約；`vacant hook` 在工具前被擋（字串層）；新要求的判斷包在 try/except 裡。
+- harness：多回合情境上限 1 輪、讀掛鉤紀錄確認前面的回合用完了輪數（沒用完那一格判不過）；「有位置的回饋」「人看得到」
+  「解決了」都綁在這一格結論的那個值／那一個 `finding_id` 上；憑證那句改成照實的說法。
+
+**證據**：`tests/test_trace_stop.py` 新增 11 條，每條拿掉修正都紅（逐條做過負控制）；審查者的真 pi 腳本修後重跑：回饋到了、
+報告改成 69；四個 agent 的多回合（上限 1）4/4，OpenCode 的負控制（拿掉重置）reject。
+
+**下一步**：全套測試對基線 ⇒ commit；在最後的程式碼上重跑三張證據表（掛鉤路徑、`vacant do`、TUI），更新證據說明與 MORNING。
+
+**偏移檢查**：沒有碰真模型 API；修正都往「不把不是人說的話當成任務、不讓 agent 洗掉自己的錯、證據不說它沒證明的事」收；
+給 agent 的文字沒有行動者。
