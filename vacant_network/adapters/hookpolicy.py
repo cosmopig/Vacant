@@ -25,11 +25,16 @@
    它擋的是「順手改掉判準」，不是決意的攻擊者。對後者的保護是別處的：輸入以雜湊釘住
    （改了 ⇒ UNKNOWN）、隔離區逐檔驗雜湊（改了 ⇒ 放行拒絕）、收件端的簽章者清單可以在
    另一個帳號。**行使別的權威那條規則（見下）同樣是字串層的**：它看的是命令位置的 vacant CLI／
-   `python -m <vacant_network 模組>`（含 `$(…)`、`bash -c`、`eval`、餵給 shell 的 heredoc／管線），
-   以及直譯器內聯碼（`-c`／`-e`、餵給直譯器的 heredoc／管線）裡同時引到模組與權威詞、或字串字面值
-   本身就是一行權威指令的情況——**抬高成本，不是擋死**（base64／變數組裝出來的指令、寫成外部
-   腳本再跑、`ssh host '…'`／`watch '…'` 這類把整串當一個引數交出去的啟動器，都繞得過）。
-   反過來它也會多擋：沒加引號的 `grep vacant hook` 會被當成在叫 `vacant hook`。
+   `python -m <vacant_network 模組>`（含 `$(…)`、`bash -c`、`eval`、餵給 shell 的 heredoc／管線／
+   here-string——shell 帶 `-s x`／`/dev/stdin` 或躲在 `timeout` 這類啟動器後面也算），
+   以及直譯器內聯碼（`-c`／`-e`、餵給直譯器的 heredoc／管線）裡同時引到模組與權威詞（字串字面值，
+   或碼後面傳進 `sys.argv`／`$@` 的引數）、或字串字面值本身就是一行權威指令的情況——
+   **抬高成本，不是擋死**（base64／變數組裝出來的指令、寫成外部腳本再跑、`ssh host '…'`／
+   `watch '…'` 這類把整串當一個引數交出去的啟動器、`xargs vacant` 這種子指令從標準輸入來的、
+   `bash -c 'source /dev/stdin'` 這種碼自己去讀標準輸入的、直接 import 函式庫呼叫
+   （`from vacant_network.intake import approval` 再呼叫它的函式），都繞得過）。
+   反過來它也會多擋：沒加引號的 `grep vacant hook` 會被當成在叫 `vacant hook`；餵給 shell 的
+   heredoc 不管 shell 後面帶什麼引數都當成程式碼；找不到結束定界符的 heredoc 內文也當成指令。
    真正的分權還是把 reviewer／approver／owner 金鑰放到另一個帳號——掛鉤擋下的指令，
    在掛鉤外面（同一個帳號、同一把 owner 金鑰）照樣跑得動。
 2. **掛鉤壞掉不可以弄死 agent**：任何例外都放行並落一筆錯誤。這一層是增效與觀測，
@@ -284,17 +289,23 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
 #: 「命令位置」包括：分隔符之後、wrapper／環境指派之後、**獨立的一個 argv 元素**（`timeout 5 vacant
 #: approve`、`find -exec vacant approve`、`uv run vacant approve`：啟動器把後面的 argv 當指令跑）、
 #: 命令替換 `$(…)`／反引號（在單引號外面就會被執行）、`bash -c`／`eval` 的字串、餵給 shell 的
-#: heredoc／here-string／管線。代價（誠實邊界 1）：沒加引號的 `grep vacant hook` 會被當成在叫
-#: `vacant hook`——字串層分不出「啟動器」與「普通指令的兩個引數」，這邊選擇寧可多擋。
+#: heredoc／here-string／管線（啟動器後面的 shell 也算：`echo … | timeout 5 bash`）。算術
+#: `$((1<<2))`／`(( x = 1 << 2 ))` 裡的 `<<` 是位移，不開 heredoc。
+#: 代價（誠實邊界 1）：沒加引號的 `grep vacant hook` 會被當成在叫 `vacant hook`——字串層分不出
+#: 「啟動器」與「普通指令的兩個引數」，這邊選擇寧可多擋。
 #: 頂層權威子指令（`contract` 除外，見下）：
 _AUTHORITY_SUB = frozenset({"review", "approve", "release", "withdraw", "keys", "reverify",
                             "flag", "hook", "intake"})
 #: `contract` 只有唯讀的兩個放行；其餘（`lock`／`init`／`quick`／將來任何會寫的子指令）一律拒絕，
 #: 這樣新增一個會改契約的子指令不會自動開一個洞（2026-09-25 審查：`contract quick --replace --lock` 重寫並簽了契約）。
 _CONTRACT_READONLY = frozenset({"show", "validate"})
-#: `vacant contract` 裡**不帶值**的選項（其餘選項都當成吃掉下一個 token）：找動作時用。
-#: 不認得的選項當成帶值 ⇒ 動作可能被跳過 ⇒ 找不到唯讀動作 ⇒ 拒絕（寧可多擋）。
+#: `vacant contract` 的選項（`intake/cli.py` 的 parser）：找動作時用。argparse 接受**唯一前綴**的縮寫
+#: （`--lo`＝`--lock`、`--js`＝`--json`），所以先照同樣的規則還原。還原不了的（不認得、或前綴有歧義）
+#: 兩種讀法都試（當旗標、當帶值），**兩種都讀到唯讀動作**才放行（寧可多擋）。
 _CONTRACT_FLAGS = frozenset({"--lock", "--replace", "--json", "-h", "--help"})
+_CONTRACT_VALUED = frozenset({"--task", "--objective", "--deliverable", "--input", "--must",
+                              "--must-not", "--heading", "--total", "--report", "--to", "--path",
+                              "--contract"})
 #: `python -m vacant_network.adapters.hook` 直接就是掛鉤（不需要子指令詞）；其他 `vacant_network[.…]`
 #: 模組（`vacant_network`、`.cli`、`.intake.cli`、`.trace.cli`、`.__main__`…）照子指令判斷。
 _HOOK_MODULE = "vacant_network.adapters.hook"
@@ -316,7 +327,15 @@ _CODE_CLI_RE = re.compile(r"""['"](?:[^'"\s]*/)?vacant(?:-network)?['"]|\bvacant
 _CODE_HOOK_RE = re.compile(
     r"vacant_network\.adapters\.hook\b"
     r"|vacant_network\.adapters\s+import\s+(?:\(\s*)?(?:[\w\s,]*,\s*)?hook\b")
-_CODE_TOKEN_RE = re.compile(r"""['"]([\w-]+)['"]|([A-Za-z_][\w-]*)""")
+_CODE_TOKEN_RE = re.compile(r"""['"]([\w-]+)['"]""")
+#: list 形式的 argv 被併成一行時（引號不見了）：空白隔開的獨立字。
+_CODE_BARE_RE = re.compile(r"(?<!\S)([A-Za-z][\w-]*)(?!\S)")
+#: shell 內聯碼裡提到 vacant CLI／模組（`bash -c 'vacant "$@"' _ approve` 用）。
+_SHELL_VACANT_RE = re.compile(r"\bvacant(?:-network)?\b|vacant_network")
+#: 表示「程式碼從標準輸入讀」的位置引數。
+_STDIN_ARGS = frozenset({"-", "/dev/stdin", "/dev/fd/0", "/proc/self/fd/0"})
+#: shell 的選項裡會吃掉下一個 token 的。
+_SHELL_VALUE_OPTS = frozenset({"-o", "+o", "-O", "+O", "--rcfile", "--init-file"})
 #: 程式碼裡的字串字面值（`os.system("vacant approve")`）：各自再當成一行 shell 判斷。
 _CODE_STR_RE = re.compile(r""""((?:[^"\\\n]|\\.)*)"|'((?:[^'\\\n]|\\.)*)'""")
 _HEREDOC_OP_RE = re.compile(r"<<(-?)[ \t]*([^\s;&|<>()]+)")
@@ -344,18 +363,40 @@ def _python_module(cmd: str, args: list[str]) -> tuple[str, list[str]] | None:
     return None
 
 
-def _contract_action(args: list[str]) -> str:
-    """`contract` 之後的引數 ⇒ argparse 會拿到的動作（第一個位置引數）；找不到 ⇒ ""。"""
-    i = 0
-    while i < len(args):
-        a = args[i]
-        if a == "--":
-            return args[i + 1] if i + 1 < len(args) else ""
-        if a.startswith("-"):
-            i += 1 if (a in _CONTRACT_FLAGS or "=" in a) else 2
-            continue
+def _contract_option(a: str) -> str | None:
+    """還原 argparse 的縮寫：`--js` ⇒ `--json`；不認得或有歧義 ⇒ None。"""
+    known = _CONTRACT_FLAGS | _CONTRACT_VALUED
+    if a in known:
         return a
-    return ""
+    hits = [o for o in known if o.startswith("--") and a.startswith("--") and o.startswith(a)]
+    return hits[0] if len(hits) == 1 else None
+
+
+def _contract_actions(args: list[str]) -> set[str]:
+    """`contract` 之後的引數 ⇒ argparse 可能拿到的動作（第一個位置引數）；找不到 ⇒ `{""}`。
+
+    不認得的選項當旗標讀一次、當帶值讀一次，回兩種讀法的聯集。"""
+    out: set[str] = set()
+    for unknown_takes_value in (False, True):
+        act = ""
+        i = 0
+        while i < len(args):
+            a = args[i]
+            if a == "--":
+                act = args[i + 1] if i + 1 < len(args) else ""
+                break
+            if a.startswith("-") and a != "-":
+                if "=" in a:
+                    i += 1
+                    continue
+                opt = _contract_option(a)
+                valued = opt in _CONTRACT_VALUED if opt else unknown_takes_value
+                i += 2 if valued else 1
+                continue
+            act = a
+            break
+        out.add(act)
+    return out
 
 
 def _authority_of_sub(sub: list[str]) -> tuple[str, str] | None:
@@ -370,11 +411,11 @@ def _authority_of_sub(sub: list[str]) -> tuple[str, str] | None:
         return ("hook", "hook")
     if head == "contract":
         rest = sub[sub.index("contract") + 1:]
-        act = _contract_action(rest)
-        if act in _CONTRACT_READONLY:
+        acts = _contract_actions(rest)
+        wants_help = any(_contract_option(a) in ("-h", "--help") for a in rest)
+        if all(a in _CONTRACT_READONLY or (not a and wants_help) for a in acts):
             return None
-        if not act and any(a in ("-h", "--help") for a in rest):
-            return None
+        act = next((a for a in sorted(acts) if a not in _CONTRACT_READONLY), "")
         return ("authority", f"contract {act}".strip())
     if head == "intake":
         return ("authority", "intake serve")
@@ -391,6 +432,8 @@ def _cli_hit(cmd: str, args: list[str]) -> tuple[str, str] | None:
     if mod is None:
         return None
     module, rest = mod
+    while module == "runpy" and rest:     # `python -m runpy vacant_network approve`
+        module, rest = rest[0], rest[1:]
     if module == _HOOK_MODULE or module.startswith(_HOOK_MODULE + "."):
         return ("hook", "hook")
     if module == "vacant_network" or module.startswith("vacant_network."):
@@ -429,21 +472,25 @@ def _close_paren(s: str, i: int) -> int:
     return len(s)
 
 
-def _shell_scan(command: str) -> tuple[str, list[tuple[str, bool, str]], list[str]]:
+def _shell_scan(command: str) -> tuple[str, list[tuple[str, bool, str, bool]], list[str]]:
     """照殼層的引號規則掃一趟字元，回傳 `(指令, heredoc 們, 命令替換們)`。
 
     - 指令：拿掉 heredoc 的**內文與結束定界符**、拿掉註解；heredoc 的開頭那一行留著
       （`cat > f <<EOF` 的命令位置還是 `cat`）——寫進檔案的內文就算有 `vacant release` 也不是指令。
-    - heredoc：`(內文, 定界符有沒有引號, 開頭那一行)`；定界符沒引號時內文裡的 `$(…)` 會被執行。
+    - heredoc：`(內文, 定界符有沒有引號, 開頭那一行, 有沒有找到結束定界符)`；定界符沒引號時
+      內文裡的 `$(…)` 會被執行。
     - 命令替換：單引號外面的 `$(…)` 與反引號的內文（雙引號裡照樣會被執行）。
-    `<<` 只在引號外面才算 heredoc：`echo "<<X"` 不會把後面的指令藏成「內文」。
-    結束定界符找不到 ⇒ 內文到指令結尾為止（bash 也是這樣讀，那些行不會被執行）。"""
+    `<<` 只在引號外面、而且**不在算術裡**（`$((1<<2))`、`(( x = 1 << 2 ))` 是位移）才算 heredoc：
+    `echo "<<X"` 與 `echo $((1<<2))` 都不會把後面的指令藏成「內文」。
+    結束定界符找不到 ⇒ 內文到指令結尾為止（bash 也是這樣讀，那些行不會被執行），但呼叫端
+    把這種內文**當成指令再判斷一次**：讀錯一個 `<<` 不可以變成藏指令的地方（寧可多擋）。"""
     out: list[str] = []
-    heredocs: list[tuple[str, bool, str]] = []
+    heredocs: list[tuple[str, bool, str, bool]] = []
     substs: list[str] = []
     pending: list[tuple[str, bool]] = []
     line_start = 0                        # 目前這一行在 `out` 裡的起點（以 list 長度計）
     in_dq = False
+    arith = 0                             # 算術 `$((…))`／`((…))` 裡的括號深度；>0 時 `<<` 是位移
     i, n = 0, len(command)
     while i < n:
         c = command[i]
@@ -459,6 +506,15 @@ def _shell_scan(command: str) -> tuple[str, list[tuple[str, bool, str]], list[st
             continue
         if c == '"':
             in_dq = not in_dq
+        elif not in_dq and not arith and (command.startswith("$((", i)
+                                           or command.startswith("((", i)):
+            k = 3 if c == "$" else 2
+            out.append(command[i:i + k])
+            arith = 2
+            i += k
+            continue
+        elif arith and c in "()":
+            arith += 1 if c == "(" else -1
         elif c == "$" and command.startswith("$(", i) and not command.startswith("$((", i):
             j = _close_paren(command, i + 2)
             substs.append(command[i + 2:j])
@@ -473,11 +529,12 @@ def _shell_scan(command: str) -> tuple[str, list[tuple[str, bool, str]], list[st
             out.append(command[i:j + 1])
             i = j + 1
             continue
-        elif not in_dq and c == "#" and (i == 0 or command[i - 1] in " \t\n;&|()"):
+        elif not in_dq and not arith and c == "#" and (i == 0 or command[i - 1] in " \t\n;&|()"):
             j = command.find("\n", i)     # 註解：到行尾為止都不是指令
             i = n if j < 0 else j
             continue
-        elif not in_dq and command.startswith("<<", i) and not command.startswith("<<<", i):
+        elif (not in_dq and not arith and command.startswith("<<", i)
+              and not command.startswith("<<<", i)):
             m = _HEREDOC_OP_RE.match(command, i)
             if m:
                 word = m.group(2)
@@ -491,15 +548,17 @@ def _shell_scan(command: str) -> tuple[str, list[tuple[str, bool, str]], list[st
             pos = i + 1
             for delim, quoted in pending:
                 body: list[str] = []
+                closed = False
                 while pos < n:
                     e = command.find("\n", pos)
                     e = n if e < 0 else e
                     ln = command[pos:e]
                     pos = e + 1
                     if ln.strip() == delim:
+                        closed = True
                         break
                     body.append(ln)
-                heredocs.append(("\n".join(body), quoted, line))
+                heredocs.append(("\n".join(body), quoted, line, closed))
             pending = []
             line_start = len(out)
             i = pos
@@ -511,40 +570,92 @@ def _shell_scan(command: str) -> tuple[str, list[tuple[str, bool, str]], list[st
     return "".join(out), heredocs, substs
 
 
-def _shell_inline(args: list[str]) -> str | None:
-    """`bash -c STR`／`bash -lc STR` ⇒ STR；沒有 `-c` ⇒ None。"""
+def _shell_inline(args: list[str]) -> tuple[str, list[str]] | None:
+    """`bash -c STR [argv0 argv…]`／`bash -lc STR` ⇒ `(STR, 後面的 argv)`；沒有 `-c` ⇒ None。"""
     seen_c = False
-    for a in args:
+    for j, a in enumerate(args):
         if not seen_c:
             if re.fullmatch(r"-[A-Za-z]*c[A-Za-z]*", a):
                 seen_c = True
             continue
         if not a.startswith("-"):
-            return a
+            return a, args[j + 1:]
     return None
 
 
-def _reads_stdin(args: list[str]) -> bool:
-    """直譯器沒有給腳本、也沒有 `-c`／`-m`：程式碼從標準輸入來（管線、heredoc、here-string）。"""
-    return not [a for a in args if not a.startswith("-") or a == "-m"] or args[-1:] == ["-"]
+def _reads_stdin(cmd: str, args: list[str]) -> bool:
+    """shell／直譯器的程式碼是不是從標準輸入來（管線、heredoc、here-string）。
+
+    是：沒有給腳本（也沒有 `-c`／`-e`／`-m`）；第一個位置引數是 `-`／`/dev/stdin`／`/dev/fd/0`
+    （`python3 - x`、`bash /dev/stdin`）；shell 帶 `-s`（`bash -s x`：後面的都是 `$@`）。
+    帶值的選項（`bash -o pipefail`、`python3 -X dev`）連值一起跳過。"""
+    shell = bool(_SHELL_RE.match(cmd))
+    value_opts = _SHELL_VALUE_OPTS if shell else _PY_VALUE_OPTS
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in _STDIN_ARGS:
+            return True
+        if a == "--":
+            return i + 1 >= len(args) or args[i + 1] in _STDIN_ARGS
+        if a in value_opts:
+            i += 2
+            continue
+        if a.startswith("-") or (shell and a.startswith("+")):
+            if shell and re.fullmatch(r"-[A-Za-z]*s[A-Za-z]*", a):
+                return True
+            if not shell and re.fullmatch(r"-[A-Za-z]*[cme]", a):
+                return False
+            i += 1
+            continue
+        return False                      # 第一個位置引數是腳本：標準輸入是它的資料
+    return True
 
 
-def _code_hit(code: str, depth: int) -> tuple[str, str] | None:
+def _launched(words: list[str], launchers: bool = True):
+    """一段簡單指令裡可能被執行的指令 ⇒ `(k, 指令名, 引數)`：命令位置那一個，以及（`launchers`）
+    被啟動器帶起來的每一個 argv 元素（`timeout 5 bash`、`uv run python3`、`find -exec vacant`）。"""
+    for k in range(len(words) if launchers else min(1, len(words))):
+        if k and not _maybe_command(words[k]):
+            continue                      # 只有看起來像被啟動的指令才重算（長引數串不變成平方時間）
+        # 被啟動的指令只看它後面的一小段 argv（子指令、`-c` 碼都在前面）
+        cmd, args = _command_word(words[k:k + 64] if k else words)
+        if cmd:
+            yield k, cmd, args
+
+
+def _argv_hit(rest: list[str]) -> tuple[str, str] | None:
+    """內聯碼後面的 argv（會變成 `sys.argv[1:]`／`process.argv`／`$@`）裡有沒有一串權威子指令。
+
+    `python3 -c 'from vacant_network.cli import main; main(sys.argv[1:])' release`：碼本身沒有權威詞，
+    權威詞是從 argv 傳進去的。碼可以挑任何一個位置（`$2`、`sys.argv[3:]`），所以每個起點都試。"""
+    rest = rest[:64]
+    for j in range(len(rest)):
+        hit = _authority_of_sub(rest[j:])
+        if hit is not None:
+            return hit
+    return None
+
+
+def _code_hit(code: str, depth: int, *, bare: bool = False) -> tuple[str, str] | None:
     """一段內聯碼（`-c`／`-e` 字串、餵給直譯器的 heredoc／管線）是否在行使權威。
 
     規則：引到 `vacant_network.adapters.hook`（或從 `vacant_network.adapters` import hook）⇒ 偽造掛鉤；
-    否則要同時引到 vacant_network 模組或 vacant CLI **且**有一個權威詞以獨立的字串字面值／識別字出現
+    否則要同時引到 vacant_network 模組或 vacant CLI **且**有一個權威詞以獨立的**字串字面值**出現
     （例：`subprocess.run([sys.executable,"-m","vacant_network.cli","hook",…])` 裡逗號隔開的
     `"vacant_network.cli"` 與 `"hook"`）；或者碼裡有一個字串字面值本身就是一行叫 Vacant 權威的
-    shell 指令（`os.system("vacant approve")`）。誠實邊界 1：這抬高成本，不是擋死。"""
+    shell 指令（`os.system("vacant approve")`）。識別字不算（`import vacant_network.intake.keys as k`
+    只是讀）。`bare=True`（list 形式的 argv 被併成一行、引號不見了）：空白隔開的獨立字也算，
+    因為原本的 argv 字串這時候沒有引號。誠實邊界 1：這抬高成本，不是擋死。"""
     if _CODE_HOOK_RE.search(code):
         return ("hook", "hook")
     if _CODE_MOD_RE.search(code) or _CODE_CLI_RE.search(code):
-        for m in _CODE_TOKEN_RE.finditer(code):
-            w = m.group(1) or m.group(2)
-            if w in _CODE_AUTHORITY:
-                return ("authority", "intake serve" if w in ("intake", "serve")
-                        else f"contract {w}" if w in ("lock", "init", "quick") else w)
+        for rx in ((_CODE_TOKEN_RE, _CODE_BARE_RE) if bare else (_CODE_TOKEN_RE,)):
+            for m in rx.finditer(code):
+                w = m.group(1)
+                if w in _CODE_AUTHORITY:
+                    return ("authority", "intake serve" if w in ("intake", "serve")
+                            else f"contract {w}" if w in ("lock", "init", "quick") else w)
     for m in _CODE_STR_RE.finditer(code):
         lit = m.group(1) if m.group(1) is not None else m.group(2)
         if lit and not lit.isidentifier():
@@ -569,73 +680,80 @@ def _authority_verdict(command: str, depth: int = 0, *,
             return hit
     toks = _tokens(stripped)
     shell_bodies: list[str] = []
-    code_bodies: list[str] = []
+    code_bodies: list[tuple[str, bool]] = []
     stdin_kinds: set[str] = set()
     for words, _redir in _segments(toks):
-        for k in range(len(words) if launchers else min(1, len(words))):
-            if k and not _maybe_command(words[k]):
-                continue                  # 只有看起來像被啟動的指令才重算（長引數串不變成平方時間）
-            # 被啟動的指令只看它後面的一小段 argv（子指令、`-c` 碼都在前面）
-            cmd, args = _command_word(words[k:k + 64] if k else words)
-            if not cmd:
-                continue
+        for _k, cmd, args in _launched(words, launchers):
             hit = _cli_hit(cmd, args)
             if hit is not None:
                 return hit
             if cmd == "eval":
                 shell_bodies.append(" ".join(args))
             elif _SHELL_RE.match(cmd):
-                code = _shell_inline(args)
-                if code is not None:
+                inline = _shell_inline(args)
+                if inline is not None:
+                    code, rest = inline
                     shell_bodies.append(code)
-                elif k == 0 and _reads_stdin(args):
+                    # `bash -c 'vacant "$@"' _ approve`：權威詞從 `$@` 傳進去
+                    if _SHELL_VACANT_RE.search(code):
+                        hit = _argv_hit(rest[1:])
+                        if hit is not None:
+                            return hit
+                elif _reads_stdin(cmd, args):
                     stdin_kinds.add("shell")
             elif _INTERP_RE.match(cmd):
-                codes = [args[j + 1] for j, a in enumerate(args[:-1])
-                         if _INLINE_FLAG_RE.fullmatch(a)]
-                for code in codes:
-                    code_bodies.append(code)
+                idx = [j for j, a in enumerate(args[:-1]) if _INLINE_FLAG_RE.fullmatch(a)]
+                for j in idx:
+                    code = args[j + 1]
+                    code_bodies.append((code, False))
+                    if _CODE_MOD_RE.search(code) or _CODE_CLI_RE.search(code):
+                        hit = _argv_hit(args[j + 2:])
+                        if hit is not None:
+                            return hit
                     # 沒加引號的內聯碼（例：list 形式的 argv 被併成一行）會被分隔符切開：
                     # 從碼的開頭到指令結尾整段當成程式碼。有引號時只看那一個引數。
                     if not re.search("['\"]" + re.escape(code[:24]), stripped):
                         at = stripped.find(code[:24])
-                        code_bodies.append(stripped[at:] if at >= 0 else stripped)
-                if not codes and k == 0 and _reads_stdin(args):
+                        code_bodies.append((stripped[at:] if at >= 0 else stripped, True))
+                if not idx and _reads_stdin(cmd, args):
                     stdin_kinds.add("code")
-    # heredoc：餵給 shell／直譯器的內文照樣判斷；寫進檔案的只看它會被展開的命令替換
-    for body, quoted, line in heredocs:
+    # heredoc：餵給 shell／直譯器的內文照樣判斷（不管後面帶什麼引數：`bash -s x`、`bash script`
+    # 都會讀到它）；寫進檔案的只看它會被展開的命令替換。找不到結束定界符的內文當成指令再判斷一次
+    for body, quoted, line, closed in heredocs:
         if not quoted:
             for s in _shell_scan(body)[2]:
                 hit = _authority_verdict(s, depth + 1)
                 if hit is not None:
                     return hit
+        if not closed:
+            shell_bodies.append(body)
         for words, _redir in _segments(_tokens(line)):
-            cmd, args = _command_word(words)
-            if _SHELL_RE.match(cmd) and _reads_stdin(args):
-                shell_bodies.append(body)
-            elif _INTERP_RE.match(cmd) and _reads_stdin(args):
-                code_bodies.append(body)
-    # here-string（`bash <<< "…"`）：字面值就是直譯器讀到的程式碼
+            for _k, cmd, _args in _launched(words, launchers):
+                if _SHELL_RE.match(cmd):
+                    shell_bodies.append(body)
+                elif _INTERP_RE.match(cmd):
+                    code_bodies.append((body, False))
+    # here-string（`bash <<< "…"`、`timeout 5 bash <<< "…"`）：字面值就是直譯器讀到的程式碼
     for j, t in enumerate(toks[:-1]):
         if t == "<<<":
             seg = _segments(toks[:j])
-            cmd = _command_word(seg[-1][0])[0] if seg else ""
-            if _SHELL_RE.match(cmd):
-                shell_bodies.append(toks[j + 1])
-            elif _INTERP_RE.match(cmd):
-                code_bodies.append(toks[j + 1])
+            for _k, cmd, _args in _launched(seg[-1][0] if seg else [], launchers):
+                if _SHELL_RE.match(cmd):
+                    shell_bodies.append(toks[j + 1])
+                elif _INTERP_RE.match(cmd):
+                    code_bodies.append((toks[j + 1], False))
     # 管線（`echo "…" | sh`、`printf '…' | python3`）：前面那些字面值就是直譯器讀到的程式碼
     if "shell" in stdin_kinds:
         shell_bodies.extend(t.replace("\\n", "\n") for t in toks
                             if t not in _SEPARATORS and any(ch.isspace() for ch in t))
     if "code" in stdin_kinds:
-        code_bodies.append(stripped)
+        code_bodies.append((stripped, False))
     for body in shell_bodies:
         hit = _authority_verdict(body, depth + 1)
         if hit is not None:
             return hit
-    for body in code_bodies:
-        hit = _code_hit(body, depth)
+    for body, bare in code_bodies:
+        hit = _code_hit(body, depth, bare=bare)
         if hit is not None:
             return hit
     return None

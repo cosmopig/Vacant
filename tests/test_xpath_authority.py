@@ -46,8 +46,11 @@ FIXED_DENY = [
     "python3 -m vacant_network contract quick --replace --lock",
     #    選項值藏動作：argparse 拿到的是 quick，不是 show
     "vacant contract --task show quick",
-    #    不認得的選項當成帶值 ⇒ 找不到唯讀動作 ⇒ 拒（寧可多擋）
-    "vacant contract --lo show",
+    #    argparse 接受唯一前綴縮寫：`--js`＝`--json`（旗標），動作是 quick
+    "vacant contract --js quick",
+    "vacant contract --js quick -- show",
+    #    不認得的選項：當旗標讀是 show、當帶值讀是 quick ⇒ 兩種讀法不都是唯讀 ⇒ 拒
+    "vacant contract --zz show quick",
     # 2. python -m <vacant_network 模組>：adapters.hook 直接偽造掛鉤；其餘走子指令
     "python3 -m vacant_network.adapters.hook claude UserPromptSubmit",
     "python -m vacant_network.adapters.hook codex Stop",
@@ -57,6 +60,8 @@ FIXED_DENY = [
     "python3 -mvacant_network.adapters.hook claude Stop",
     "timeout 9 python3 -m vacant_network.adapters.hook claude Stop",
     "/usr/bin/python3.11 -m vacant_network.adapters.hook pi pre_tool",
+    "python3 -m runpy vacant_network approve",
+    "python3 -m runpy vacant_network.adapters.hook claude Stop",
     # 3. 直譯器內聯碼：list 形式的引數、`-c`/`-e`、餵給直譯器的 heredoc／管線／here-string
     ('python3 -c \'import subprocess,sys; subprocess.run([sys.executable,"-m",'
      '"vacant_network.cli","hook","claude","UserPromptSubmit"], input="{}")\''),
@@ -72,6 +77,25 @@ FIXED_DENY = [
     "echo 'import vacant_network.adapters.hook as h; h.main([])' | python3",
     "python3 <<< 'import vacant_network.adapters.hook'",
     "bash -c 'python3 -c \"import vacant_network.adapters.hook\"'",
+    #    權威詞不在碼裡，而是從碼後面的 argv 傳進去（sys.argv／process.argv／`$@`）
+    ("python3 -c 'import runpy; runpy.run_module(\"vacant_network\", run_name=\"__main__\")' "
+     "hook claude UserPromptSubmit"),
+    "python3 -c 'import runpy; runpy.run_module(\"vacant_network\", run_name=\"__main__\")' approve",
+    "python3 -c 'import sys; from vacant_network.cli import main; main(sys.argv[1:])' release",
+    "python3 -c 'import sys; from vacant_network.cli import main; main(sys.argv[2:])' x contract quick",
+    ("node -e 'require(\"child_process\").execFileSync(\"vacant\", process.argv.slice(1))' "
+     "approve"),
+    "bash -c 'vacant \"$@\"' _ approve",
+    "sh -c 'python3 -m vacant_network \"$@\"' sh release",
+    #    餵給直譯器的 heredoc／管線：`-`／`/dev/stdin` 後面還有引數、或直譯器在啟動器後面
+    ("python3 - x <<'PY'\nfrom vacant_network.adapters.hook import main\n"
+     "main(['claude','Stop'])\nPY"),
+    ("python3 /dev/stdin <<'PY'\nfrom vacant_network.adapters.hook import main\n"
+     "main(['claude','Stop'])\nPY"),
+    ("timeout 9 python3 <<'PY'\nfrom vacant_network.adapters.hook import main\n"
+     "main(['claude','Stop'])\nPY"),
+    "echo 'import vacant_network.adapters.hook as h; h.main([])' | python3 - x",
+    "timeout 9 python3 <<< 'import vacant_network.adapters.hook'",
 ]
 
 FIXED_ALLOW = [
@@ -146,6 +170,23 @@ KEPT_DENY = [
     "cat <<X >/dev/null\nX\nvacant approve",
     "cat <<E\"OF\" >/dev/null\nEOF\nvacant approve",     # 定界符去引號之後是 EOF
     ": '<<Z'\nvacant approve\nZ",                          # 引號裡的 `<<` 不是 heredoc
+    # 算術裡的 `<<` 是位移，不是 heredoc：後面那一行照樣是指令
+    "echo $((1<<2))\nvacant approve",
+    "(( x = 1 << 2 ))\nvacant release",
+    "echo $(( $(echo 1) << 2 ))\nvacant withdraw",
+    # 找不到結束定界符：內文當成指令再判斷（bash 不會跑它；寧可多擋，讀錯的 `<<` 不能藏指令）
+    "cat <<NOPE >/dev/null\nvacant approve",
+    # 餵給 shell 的 heredoc／管線／here-string：shell 帶引數（`-s x`、`/dev/stdin`）或在啟動器後面
+    "bash -s x <<'EOF'\nvacant approve\nEOF",
+    "bash /dev/stdin <<'EOF'\nvacant approve\nEOF",
+    "bash -o pipefail <<'EOF'\nvacant approve\nEOF",
+    "printf 'vacant release\\n' | bash -s x",
+    "echo 'vacant approve' | bash -s -- a b",
+    "echo 'vacant approve' | timeout 5 bash",
+    "timeout 5 bash <<< 'vacant approve'",
+    "timeout 5 bash <<'EOF'\nvacant approve\nEOF",
+    "cat <<EOF | timeout 5 sh\nvacant withdraw\nEOF",
+    "stdbuf -oL bash <<'EOF'\nvacant approve\nEOF",
 ]
 
 KEPT_ALLOW = [
@@ -170,6 +211,18 @@ KEPT_ALLOW = [
     "sed -n '1,20p' vacant_network/adapters/hook.py",
     "echo '<<X'\nls",
     "pytest tests -q",
+    # argparse 把 `--lo` 讀成 `--lock`（旗標）⇒ 動作是唯讀的 show
+    "vacant contract --lo show",
+    "vacant contract --json show",
+    # 只讀 vacant_network 的模組：識別字不是權威詞（`keys` 是模組名，不是 `"keys"` 字串）
+    "python3 -c 'import vacant_network.intake.keys as k; print(k.__file__)'",
+    "python3 -c 'from vacant_network.intake import keys, approval; print(keys, approval)'",
+    # 算術本身、內聯碼後面的 argv 跟 Vacant 無關
+    "echo $((1<<2))",
+    "(( x = 1 << 2 )); echo $x",
+    "python3 -c 'import sys; print(sys.argv)' approve release",
+    "bash -c 'echo \"$@\"' _ approve",
+    "python3 analyze.py <<'EOF'\nsome data\nEOF",
 ]
 
 
