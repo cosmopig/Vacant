@@ -29,7 +29,9 @@
 ```bash
 vacant contract quick --deliverable report.md --input data/sales.csv \
     --must "Recommendation" --total amount --lock
-#   一行寫出人在意的事（只有你寫的才是必要的檢查；欄名寫錯當場就說；--lock＝釘住輸入、簽名）
+#   一行寫出人在意的事（除了「繳付物在、沒夾帶憑證檔」兩條底線，只有你寫的才是必要的檢查；--total 讀報告裡
+#   'Total' 後面的那個數字，要別的字樣就寫 --total amount=合計；寫錯的欄名、讀不動的欄、總計列當場就說；
+#   --lock＝釘住輸入、簽名）
 #   要更多種檢查：vacant contract init …，再編輯 .vacant/contract.json 的 claims
 #   （存在、段落、數字重算、引用、你自己的命令、人工審查…），然後
 vacant contract lock          # 釘住原始資料／驗收套件的 sha256，owner 金鑰簽下這份契約

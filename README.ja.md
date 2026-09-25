@@ -26,7 +26,7 @@ Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前�
 
 判定は阻止ではない——2026-09-24 の外部レビューの指摘を受け、受領口（`vacant_network/intake/`）を実装し、
 4 つのエージェントに接続した（`vacant_network/adapters/`）。モデル通信は一切見ない。
-`vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation" --total amount --lock`（一行で、気にすることだけを必須の検査にする。書いたものだけが必須、列名の誤りはその場で報告）または `vacant contract init` → `vacant contract lock`（入力を sha256 で固定し、owner 鍵で契約に署名）→ `vacant install` → エージェントを普段どおり使う → `vacant release`。
+`vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation" --total amount --lock`（一行で、気にすることだけを必須の検査にする。「成果物がある・認証情報ファイルがない」の二つの安全条件を除き、書いたものだけが必須。--total はレポートの 'Total' の後の数字を読む——別の表記なら --total amount=合計。列名の誤り・読めない列・合計行はその場で報告）または `vacant contract init` → `vacant contract lock`（入力を sha256 で固定し、owner 鍵で契約に署名）→ `vacant install` → エージェントを普段どおり使う → `vacant release`。
 4 エージェント × 非コードタスクの実測（L-fake：本物のエージェント＋台本どおりの偽モデル）は
 [`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md)、
 裁定は [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。

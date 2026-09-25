@@ -126,6 +126,11 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
         out.append("  the same value is in the task's own message")
     elif shown and src.get("kind") == "url":
         out.append(f"  the same value came from {src.get('ref')}")
+    elif b.get("step") and loc.get("kind") == "missing":
+        # 缺的東西沒有「第一次出現」：只說得出最後寫這個檔的是哪一步（推論層）
+        st = b["step"]
+        out.append(f"  the last recorded step that wrote {loc.get('path')}: step {st.get('n')} "
+                   f"({st.get('tool')})")
     elif b.get("step") and b.get("fault_class") == "agent":
         st = b["step"]
         first = next((c for c in b.get("chain") or [] if c.get("step")), None)

@@ -55,6 +55,7 @@ import json
 import math
 import pathlib
 import re
+import shlex
 import tomllib
 from typing import Any
 
@@ -390,163 +391,301 @@ def lock(path: str | pathlib.Path) -> dict[str, str]:
 
 #: `vacant contract quick` 產生的主張 id（改了會讓舊契約的報告對不上，別動）
 QUICK_TEXT_ID, QUICK_TOTAL_PREFIX = "says_what_you_asked", "total_"
+#: 讀不出文字的繳付物：`--must`／`--total` 放在它們上面，每一次都只會是 FAIL 或「不知道」
+_BINARY_EXT = frozenset({".docx", ".doc", ".pdf", ".xlsx", ".xls", ".pptx", ".ppt", ".odt",
+                         ".png", ".jpg", ".jpeg", ".gif", ".zip", ".gz", ".tar"})
+#: 看起來像「總計列」的第一格（匯出的 CSV 常在最後一列放總數；`csv_total` 會把它也加進去）
+_TOTAL_ROW_RE = re.compile(r"(?i)^\s*(grand\s*)?(sub)?totals?\b|^\s*sum\b|^\s*(合計|總計|总计|小計|小计)")
+
+
+def _read_table(p: pathlib.Path) -> tuple[list[str], list[dict[str, Any]], str]:
+    """(表頭, 列, 分隔符)——和 `csv_total` 同一種讀法（UTF-8、`csv.DictReader`）。讀不了 ⇒ ContractError。"""
+    import csv
+    import io
+    delim = "\t" if p.suffix.lower() == ".tsv" else ","
+    try:
+        text = p.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raise ContractError([f"{p.name} is not UTF-8 text (the check reads it as UTF-8; "
+                             f"save it as UTF-8 first)"]) from None
+    try:
+        rd = csv.DictReader(io.StringIO(text), delimiter=delim)
+        rows = list(rd)
+        header = list(rd.fieldnames or [])
+    except csv.Error as e:
+        raise ContractError([f"{p.name}: not a readable CSV ({e})"]) from None
+    return header, rows, delim
 
 
 def _numeric_columns(p: pathlib.Path) -> list[str]:
-    """CSV 裡每一格（非空）都讀得成數字的欄。只當提示用，**不會**變成主張。"""
-    import csv
-    import io
+    """`csv_total` 讀得動的欄（每一格非空的都讀得成數字，用的是驗證器自己的讀法）。只當提示，**不會**變成主張。"""
+    from .verifiers import _number
     try:
-        rows = list(csv.DictReader(io.StringIO(p.read_text(encoding="utf-8")),
-                                   delimiter="\t" if p.suffix.lower() == ".tsv" else ","))
-    except (OSError, UnicodeDecodeError, csv.Error):
-        return []
-    if not rows:
+        header, rows, _d = _read_table(p)
+    except ContractError:
         return []
     out = []
-    for col in rows[0].keys() or []:
-        vals = [(r.get(col) or "").strip() for r in rows]
+    for col in header:
+        vals = [str(r.get(col) or "").strip() for r in rows if isinstance(r.get(col), str)]
         vals = [v for v in vals if v]
-        try:
-            if vals and all(math.isfinite(float(v.replace(",", ""))) for v in vals):
-                out.append(col)
-        except ValueError:
-            continue
+        if vals and all(_number(v) is not None for v in vals):
+            out.append(col)
     return out
+
+
+def _rel_in(base: pathlib.Path, raw_path: str, cwd: pathlib.Path) -> str | None:
+    """人打的路徑（相對於他現在所在的目錄，或絕對）→ 專案裡的相對 POSIX 路徑；在專案外 ⇒ None。"""
+    ap = pathlib.Path(raw_path)
+    ap = (ap if ap.is_absolute() else cwd / ap).resolve()
+    try:
+        return ap.relative_to(base).as_posix()
+    except ValueError:
+        return None
+
+
+def _norm_deliverable(base: pathlib.Path, d: str, cwd: pathlib.Path) -> str | None:
+    """人打的繳付物（`./report.md`、絕對路徑、`out/`、`docs/*.md`）→ 契約裡的樣式（相對於專案的 POSIX；
+    目錄 ＝ 它底下的全部）。`exists`／隔離區比對的是這個字串，寫成 `./report.md` 會永遠對不上。"""
+    d = d.strip()
+    if not any(ch in d for ch in "*?[") and (d.endswith("/") or (cwd / d).is_dir()):
+        d = d.rstrip("/") + "/**"
+    parts = d.split("/")
+    k = next((n for n, x in enumerate(parts) if any(ch in x for ch in "*?[")), len(parts))
+    prefix = "/".join(parts[:k]) or "."
+    rel = _rel_in(base, prefix, cwd)
+    if rel is None:
+        return None
+    rest = "/".join(parts[k:])
+    if rel in ("", "."):
+        return rest or None
+    return rel + ("/" + rest if rest else "")
+
+
+def _total_spec(spec: str, csv_inputs: dict[str, dict[str, Any]]) -> tuple[str, str, str | None]:
+    """`[INPUT:]COLUMN[=LABEL]` → (輸入名, 欄, 標籤)。INPUT 是輸入名或它的路徑；欄名裡可以有 `:`。"""
+    body, eq, label = spec.partition("=")
+    label_s = label.strip() if eq else None
+    for name, info in csv_inputs.items():
+        for key in (name, info["path"], pathlib.Path(info["path"]).name):
+            if body.startswith(key + ":"):
+                return name, body[len(key) + 1:], label_s
+    if len(csv_inputs) == 1:
+        return next(iter(csv_inputs)), body, label_s
+    if ":" in body:
+        raise ContractError([f"--total {spec}: no CSV input named {body.split(':')[0]!r} "
+                             f"(CSV inputs: {', '.join(csv_inputs) or 'none'})"])
+    raise ContractError([f"--total {spec}: say which input (INPUT:COLUMN); CSV inputs: "
+                         f"{', '.join(csv_inputs) or 'none (add --input data.csv)'}"])
+
+
+def _label_pattern(label: str) -> str:
+    """「<標籤> … 數字」：標籤後面（同一行、80 字以內、中間沒有別的數字）的第一個數字。"""
+    lead = r"(?<![A-Za-z])" if label[:1].isalnum() else ""
+    tail = r"(?![A-Za-z])" if label[-1:].isalnum() else ""
+    return (r"(?i)" + lead + re.escape(label) + tail
+            + r"[^0-9\n-]{0,80}(-?[0-9][0-9,]*(?:\.[0-9]+)?)")
+
+
+_QUICK_EXCLUDE = [".git/**", ".vacant/**", "node_modules/**"]       # 和 `scaffold` 的 exclude 同一份
 
 
 def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] | None = None,
           must: list[str] | None = None, must_not: list[str] | None = None,
           headings: list[str] | None = None, totals: list[str] | None = None,
           report: str | None = None, task_id: str | None = None, objective: str = "",
-          destination: str = "dir:.vacant/published") -> tuple[dict[str, Any], dict[str, Any]]:
+          destination: str = "dir:.vacant/published", cwd: pathlib.Path | None = None
+          ) -> tuple[dict[str, Any], dict[str, Any]]:
     """`vacant contract quick`：一般人真的會寫的那種契約——交什麼、給了什麼（會被釘住）、哪幾件事一定要對。
 
     這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §八「延後」那一項；
     `ops/accountability/design_review_fable.md` Q5-3）：追緝只在有契約時才有東西可追，而 `scaffold` 只驗「檔案在、
-    沒夾帶憑證」——那不是人在意的事。規則：**只有人寫出來的才是必要的主張**；不替人猜（CSV 裡看起來像數字的欄
-    只列成提示，不會自己變成一條主張）；欄名在寫契約的當下就對過 CSV 的表頭（寫錯在這裡炸，不是在驗收時才變成
-    「不知道」）。回傳 `(契約, 摘要)`；摘要說清楚驗了什麼、**沒驗什麼**。
+    沒夾帶憑證」——那不是人在意的事。規則：**人寫的才是必要的主張**（另外只有兩條安全底線：繳付物在、沒夾帶憑證檔）；
+    不替人猜（CSV 裡讀得成數字的欄只列成提示）；寫錯在寫契約的當下就炸——欄名、讀不動的欄、總計列、
+    讀不出文字的繳付物、在繳付物外面的報告。回傳 `(契約, 摘要)`；摘要的每一條都照驗證器**真的怎麼驗**說
+    （2026-09-25 對抗審查 32 條，`ops/accountability/review_contract_quick/FINDINGS.md`）。
 
-    誠實邊界：`--must` 是「有出現這段字」，不是「這段話是對的」；`--total` 只驗報告裡寫的那一個總數等於重算的欄總和。
+    誠實邊界：`--must` 是「有出現這段字」，不是「這段話是對的」；`--total` 只驗報告裡標籤後面的那一個數字等於
+    重算的欄總和（標籤預設是 `Total`，而且它得是報告裡唯一一個「Total 數字」）；只讀 `--report` 那一個檔。
     """
+    from . import artifact as _A
     base = pathlib.Path(base_dir).resolve()
-    deliverable = [d.strip() for d in deliverable if d and d.strip()]
-    if not deliverable:
-        raise ContractError(["say what the deliverable is (--deliverable report.md)"])
+    here = pathlib.Path(cwd).resolve() if cwd else base
     probs: list[str] = []
+    dl: list[str] = []
+    for d in deliverable or []:
+        if not d or not d.strip():
+            continue
+        n = _norm_deliverable(base, d, here)
+        if n is None or n.startswith(".vacant"):
+            probs.append(f"deliverable {d}: must be inside the project ({base}) and not .vacant/")
+        else:
+            dl.append(n)
+    if not dl and not probs:
+        raise ContractError(["say what the deliverable is (--deliverable report.md)"])
+    for flag, vals in (("--must", must), ("--must-not", must_not), ("--heading", headings)):
+        if any(not (v or "").strip() for v in vals or []):
+            probs.append(f"{flag}: empty text checks nothing")
     ins: dict[str, dict[str, str]] = {}
     in_paths: dict[str, pathlib.Path] = {}
     for raw_path in inputs or []:
-        ap = (base / raw_path).resolve() if not pathlib.Path(raw_path).is_absolute() \
-            else pathlib.Path(raw_path).resolve()
-        try:
-            rel = ap.relative_to(base).as_posix()
-        except ValueError:
+        rel = _rel_in(base, raw_path, here)
+        if rel is None:
             probs.append(f"input {raw_path}: must be inside the project ({base})")
             continue
+        ap = base / rel
         if not ap.is_file():
-            probs.append(f"input {raw_path}: no such file")
+            probs.append(f"input {raw_path}: no such file ({ap})")
             continue
         stem = re.sub(r"[^A-Za-z0-9_]", "_", ap.stem).strip("_") or "input"
         stem = stem if re.match(r"[A-Za-z0-9]", stem) else f"in_{stem}"
-        name, k = stem, 2
+        name, k = stem[:60], 2
         while name in ins:
-            name, k = f"{stem}_{k}", k + 1
+            name, k = f"{stem[:60]}_{k}", k + 1
         ins[name] = {"path": rel}
         in_paths[name] = ap
-    literal = [d for d in deliverable if not any(ch in d for ch in "*?[")]
-    target = report or (literal[0] if len(literal) == 1 and len(deliverable) == 1 else None)
+    literal = [d for d in dl if not any(ch in d for ch in "*?[")]
+    target: str | None = None
+    if report:
+        target = _rel_in(base, report, here)
+        if target is None or any(ch in target for ch in "*?[") or (base / target).is_dir():
+            probs.append(f"--report {report}: must be one file inside the project")
+            target = None
+        elif not _A.matches(target, dl) or _A.matches(target, _QUICK_EXCLUDE):
+            probs.append(f"--report {report}: is not part of the deliverable "
+                         f"({', '.join(dl)}); the checks read the delivered files")
+            target = None
+    elif len(literal) == 1 and len(dl) == 1:
+        target = literal[0]
     wants_text = bool(must or must_not or headings)
-    if (wants_text or totals) and not target:
+    if (wants_text or totals) and not target and not any("--report" in x for x in probs):
         probs.append("say which file the checks read (--report PATH): the deliverable is not a "
                      "single file")
+    if target and (wants_text or totals) and pathlib.Path(target).suffix.lower() in _BINARY_EXT:
+        probs.append(f"{target}: the checks read text; a {pathlib.Path(target).suffix} file "
+                     f"cannot be checked this way (deliver a .md/.txt next to it)")
     claims: list[dict[str, Any]] = [
-        {"id": "deliverable_present", "verifier": "exists", "params": {"paths": deliverable},
+        {"id": "deliverable_present", "verifier": "exists", "params": {"paths": dl},
          "required": True, "authority": "requirement",
          "description": "the deliverable files exist"},
         {"id": "no_secrets_shipped", "verifier": "forbid_paths",
          "params": {"paths": ["**/.env", "**/.env.*", "**/*.pem", "**/id_rsa*", "**/auth.json"]},
          "required": True, "authority": "requirement",
-         "description": "no credential files in the deliverable"},
+         "description": "no credential-looking files in the deliverable (.env, .env.*, *.pem, "
+                        "id_rsa*, auth.json — .env.example counts too)"},
     ]
+    heads = [re.sub(r"^\s*#+\s*", "", h).strip() for h in headings or []]
     if wants_text and target:
         params: dict[str, Any] = {"path": target}
         if must:
             params["must_contain"] = [re.escape(x) for x in must]
         if must_not:
             params["must_not_contain"] = [re.escape(x) for x in must_not]
-        if headings:
-            params["required_headings"] = list(headings)
-        bits = [f"contains {x!r}" for x in must or []] + \
-            [f"does not contain {x!r}" for x in must_not or []] + \
-            [f"has a heading {x!r}" for x in headings or []]
+        if heads:
+            params["required_headings"] = heads
+        bits = [f"contains the text {x!r}" for x in must or []] + \
+            [f"does not contain the text {x!r}" for x in must_not or []] + \
+            [f"has a '#' heading {x!r}" for x in heads]
         claims.append({"id": QUICK_TEXT_ID, "verifier": "text", "params": params,
                        "required": True, "authority": "requirement",
-                       "description": f"{target} " + "; ".join(bits)})
+                       "description": f"{target} (only this file is read) " + "; ".join(bits)})
+    csv_inputs = {n: {"path": ins[n]["path"]} for n, p in in_paths.items()
+                  if p.suffix.lower() in (".csv", ".tsv")}
     used: set[str] = set()
+    parsed: list[tuple[str, str, str | None, str]] = []
     for spec in totals or []:
-        name, _, col = spec.rpartition(":")
-        csvs = [n for n, p in in_paths.items() if p.suffix.lower() in (".csv", ".tsv")]
-        if not name:
-            if len(csvs) != 1:
-                probs.append(f"--total {spec}: say which input (NAME:COLUMN); CSV inputs: "
-                             f"{', '.join(csvs) or 'none (add --input data.csv)'}")
-                continue
-            name = csvs[0]
-        elif name not in in_paths:
-            by_path = [n for n, p in in_paths.items()
-                       if ins[n]["path"] == name or p.name == name]
-            if len(by_path) != 1:
-                probs.append(f"--total {spec}: no input named {name!r} (inputs: "
-                             f"{', '.join(in_paths) or 'none'})")
-                continue
-            name = by_path[0]
-        tsv = in_paths[name].suffix.lower() == ".tsv"
-        header = _csv_header(in_paths[name], "\t" if tsv else ",")
-        if col not in header:
+        try:
+            name, col, label = _total_spec(spec, csv_inputs)
+        except ContractError as e:
+            probs += e.problems
+            continue
+        if label == "":
+            probs.append(f"--total {spec}: empty label")
+            continue
+        parsed.append((name, col, label, spec))
+    same_report = len(parsed) > 1
+    ids: set[str] = set()
+    for name, col, label, spec in parsed:
+        try:
+            header, rows, delim = _read_table(in_paths[name])
+        except ContractError as e:
+            probs += e.problems
+            continue
+        exact = col if col in header else None
+        if exact is None:
+            near = [h for h in header if h.replace("﻿", "").strip() == col.strip()]
+            exact = near[0] if len(near) == 1 else None      # 同一欄：表頭多了 BOM／空白
+        if exact is None:
             probs.append(f"--total {spec}: {ins[name]['path']} has no column {col!r} "
-                         f"(columns: {', '.join(header) or 'none'})")
+                         f"(columns: {', '.join(repr(h) for h in header) or 'none'})")
+            continue
+        from .verifiers import _number
+        cells = [(n + 2, str(r.get(exact) or "").strip()) for n, r in enumerate(rows)
+                 if isinstance(r.get(exact), str)]
+        bad = [(ln, c) for ln, c in cells if c and _number(c) is None]
+        if bad:
+            probs.append(f"--total {spec}: the check cannot read {bad[0][1]!r} in column "
+                         f"{exact!r} (line {bad[0][0]} of {ins[name]['path']}) as a number")
+            continue
+        totals_row = [n + 2 for n, r in enumerate(rows)
+                      if any(isinstance(v, str) and _TOTAL_ROW_RE.match(v)
+                             for k, v in r.items() if k != exact)]
+        nums = [x for x in (_number(c) for _ln, c in cells if c) if x is not None]
+        if not totals_row and len(nums) > 2 and \
+                abs(nums[-1] - math.fsum(nums[:-1])) < 1e-9 * max(1.0, abs(nums[-1])):
+            totals_row = [cells[-1][0]]
+        if totals_row:
+            probs.append(f"--total {spec}: line {totals_row[0]} of {ins[name]['path']} looks like "
+                         f"a totals row; the check adds every row, so it would count it twice — "
+                         f"remove that row from the input first")
             continue
         used.add(name)
-        cid = re.sub(r"[^A-Za-z0-9_.-]", "_", f"{QUICK_TOTAL_PREFIX}{name}_{col}")[:128]
+        lab = label or (col.strip() if same_report else None)
+        cid = re.sub(r"[^A-Za-z0-9_.-]", "_", f"{QUICK_TOTAL_PREFIX}{name}_{col}")[:120]
+        base_cid, k = cid, 2
+        while cid in ids:
+            cid, k = f"{base_cid}_{k}", k + 1
+        ids.add(cid)
+        params_t: dict[str, Any] = {"csv": f"input:{name}", "column": exact, "report": target}
+        if delim != ",":
+            params_t["delimiter"] = delim
+        if lab:
+            params_t["pattern"] = _label_pattern(lab)
+        rule = (f"the first number after {lab!r} in {target}" if lab else
+                f"the number after 'Total' in {target} (it must be the only 'Total <number>' "
+                f"there; add =LABEL to --total to use other wording)")
         claims.append({"id": cid, "verifier": "csv_total", "authority": "fact", "required": True,
-                       "params": {"csv": f"input:{name}", "column": col, "report": target,
-                                  **({"delimiter": "\t"} if tsv else {})},
-                       "description": f"the total stated in {target} equals the sum of column "
-                                      f"{col!r} of {ins[name]['path']}"})
+                       "params": params_t,
+                       "description": f"{rule} equals the sum of column {exact!r} of "
+                                      f"{ins[name]['path']}"})
+    if task_id is not None and not _ID_RE.match(task_id):
+        probs.append(f"--task {task_id!r}: use letters, digits, '.', '_' or '-' "
+                     f"(it names the task's ledger)")
     if probs:
         raise ContractError(probs)
-    tid = task_id or re.sub(r"[^A-Za-z0-9._-]", "-",
-                            f"{base.name}-{pathlib.Path(target or deliverable[0]).stem}").strip("-.")
-    tid = tid if _ID_RE.match(tid or "") else "task"
-    raw = scaffold(tid[:128], objective=objective, deliverable=deliverable,
-                   destination=destination)
+    if task_id is None:
+        want = f"{base.name}-{pathlib.Path(target or dl[0].replace('*', 'x')).stem}"
+        tid = re.sub(r"[^A-Za-z0-9._-]", "-", want).strip("-.")[:100]
+        if tid != want or not _ID_RE.match(tid or ""):
+            # 名字裡有換不過來的字：加一段專案路徑的雜湊，別的專案不會撞到同一本帳
+            tid = f"{tid or 'task'}-{hashlib.sha256(str(base).encode()).hexdigest()[:8]}"
+        task_id = tid
+    raw = scaffold(task_id, objective=objective, deliverable=dl, destination=destination)
     raw["inputs"] = ins
     raw["claims"] = claims
-    hints = [f"{ins[n]['path']} has numeric column(s) {', '.join(cols)} — add "
-             f"--total {n}:{cols[0]} if the deliverable states their total"
-             for n, p in in_paths.items() if n not in used
+    parse(raw, path=base / ".vacant" / "contract.json")          # 寫之前先驗：不合法就不寫
+    hints = [f"{ins[n]['path']} has column(s) the check can total: {', '.join(cols)} — e.g. "
+             f"--total {shlex.quote(n + ':' + cols[0])}"
+             for n, p in in_paths.items() if n not in used and n in csv_inputs
              for cols in [_numeric_columns(p)] if cols]
     summary = {"task_id": raw["task_id"], "report": target,
                "checks": [{"id": c["id"], "what": c["description"], "required": c["required"],
                            "authority": c["authority"]} for c in claims],
                "inputs": {n: v["path"] for n, v in ins.items()},
                "not_checked": "anything about whether the deliverable is right beyond these "
-                              "checks — add --must/--total, or `vacant flag FILE:LINE` a wrong "
-                              "place after the fact",
+                              "checks — to add some, rerun with --replace and more --must/--total, "
+                              "or `vacant flag FILE:LINE` a wrong place after the fact",
                "hints": hints}
     return raw, summary
-
-
-def _csv_header(p: pathlib.Path, delimiter: str = ",") -> list[str]:
-    import csv
-    import io
-    try:
-        first = p.read_text(encoding="utf-8").splitlines()[:1]
-        return next(csv.reader(io.StringIO(first[0]), delimiter=delimiter)) if first else []
-    except (OSError, UnicodeDecodeError, csv.Error, StopIteration):
-        return []
 
 
 def scaffold(task_id: str, *, objective: str = "", deliverable: list[str] | None = None,
@@ -559,7 +698,7 @@ def scaffold(task_id: str, *, objective: str = "", deliverable: list[str] | None
         "objective": objective,
         "owner": "",
         "deliverable": {"include": deliverable or ["**"],
-                        "exclude": [".git/**", ".vacant/**", "node_modules/**"]},
+                        "exclude": list(_QUICK_EXCLUDE)},
         "inputs": {},
         "claims": [
             {"id": "deliverable_present", "verifier": "exists",

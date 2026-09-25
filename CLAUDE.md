@@ -92,7 +92,8 @@
 新產品路徑裡模型中介不再是收件的前提）。證據：`ops/intake/evidence_20260924/`（L-fake，四個真 agent）。
 
 - `intake/contract.py` — 任務契約（未知欄位一律拒絕；`inputs` 以 sha256 釘住；`authority` 四種）；`quick`＝`vacant contract quick`
-  （一行寫出人在意的事：只有人寫的才是必要的主張、不替人猜、欄名寫錯當場炸；`tests/test_contract_quick.py`）
+  （一行寫出人在意的事：兩條安全底線之外只有人寫的才是必要的主張、不替人猜；寫錯的欄名、讀不動的欄、總計列、
+  讀不出文字的繳付物、在繳付物外面的報告都在寫契約時就炸；`tests/test_contract_quick.py`；審查 `ops/accountability/review_contract_quick/FINDINGS.md`）
 - `intake/artifact.py` — 內容定址隔離區（竄改可偵測，不是不可能）
 - `intake/verifiers.py` — 驗證原語，結果只有 PASS／FAIL／UNKNOWN／CONFLICT；**驗證器壞掉＝UNKNOWN**
 - `intake/policy.py` — 裁決規則寫死；事實主張只收獨立證據；分母是契約

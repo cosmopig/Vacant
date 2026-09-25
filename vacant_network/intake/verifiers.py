@@ -254,6 +254,12 @@ def _headings(txt: str) -> list[str]:
     return out
 
 
+def show_rx(rx: str) -> str:
+    """給人看的樣式：是一段純文字跳脫出來的（`vacant contract quick --must`）⇒ 引號裡的原文；否則 `/正規式/`。"""
+    plain = re.sub(r"\\(.)", r"\1", rx, flags=re.S)
+    return json.dumps(plain, ensure_ascii=False) if re.escape(plain) == rx else f"/{rx}/"
+
+
 @verifier("text", version="2",
           params=("path", "must_contain", "must_not_contain", "required_headings",
                   "min_words", "max_words", "max_bytes"),
@@ -280,11 +286,11 @@ def _text(ctx: VerifyContext, claim: Claim):
         per[rel] = {"bytes": len(raw), "words": words}
         for rx in must:
             if not re.search(rx, txt, re.M):
-                problems.append(f"{rel}: does not contain /{rx}/")
+                problems.append(f"{rel}: does not contain {show_rx(rx)}")
         for rx in must_not:
             m = re.search(rx, txt, re.M)
             if m:
-                problems.append(f"{rel}: contains forbidden /{rx}/ at offset {m.start()}")
+                problems.append(f"{rel}: contains forbidden {show_rx(rx)} at offset {m.start()}")
         heads = _headings(txt)
         for h in heads_req:
             if h.strip().lower() not in heads:

@@ -121,24 +121,40 @@ def cmd_contract(args) -> int:
 
 
 def _contract_quick(args) -> int:
-    """`vacant contract quick`：一行寫出一份會驗人在意的事的契約（`contract.quick`）；`--lock` 順便釘住輸入、簽名。"""
-    target = pathlib.Path(args.path or ".vacant/contract.json")
-    if target.exists():
-        raise SystemExit(f"vacant: {target} already exists (refusing to overwrite)")
+    """`vacant contract quick`：一行寫出一份會驗人在意的事的契約（`contract.quick`）；`--lock` 順便釘住輸入、簽名。
+    錯誤一律 exit 2、不留下寫到一半的檔（`--lock` 失敗就還原）。"""
+    def fail(msg: str) -> int:
+        print(f"vacant: {msg}", file=sys.stderr)
+        return 2
+    target = pathlib.Path(args.path or ".vacant/contract.json").resolve()
     base = (target.parent.parent if target.parent.name == ".vacant" else target.parent)
+    here = [base / n for n in C.CONTRACT_NAMES if (base / n).is_file()]
+    if here and not args.replace:
+        return fail(f"{here[0]} already exists (refusing to overwrite; --replace writes a new "
+                    f"contract, which is a new task definition)")
     try:
         raw, summary = C.quick(base, deliverable=args.deliverable or [], inputs=args.input,
                                must=args.must, must_not=args.must_not, headings=args.heading,
                                totals=args.total, report=args.report, task_id=args.task,
                                objective=args.objective or "",
-                               destination=args.to or "dir:.vacant/published")
+                               destination=args.to or "dir:.vacant/published",
+                               cwd=pathlib.Path.cwd())
     except C.ContractError as e:
-        raise SystemExit("vacant: " + "; ".join(e.problems)) from None
+        return fail("; ".join(e.problems))
+    old = target.read_bytes() if target.is_file() else None
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary["path"] = str(target)
+    parent = C.find(base.parent) if base.parent != base else None
     if args.lock:
-        res = flow.lock(target)
+        try:
+            res = flow.lock(target)
+        except Exception as e:  # noqa: BLE001 — 鎖不起來：不留下沒鎖的新檔
+            if old is None:
+                target.unlink(missing_ok=True)
+            else:
+                target.write_bytes(old)
+            return fail(f"lock failed, nothing written: {e}")
         summary["locked"] = {"contract_sha256": res["contract_sha256"], "pins": res["pins"]}
     req = [c for c in summary["checks"] if c["required"]]
     lines = [f"[vacant] wrote {target} (task {summary['task_id']}): {len(req)} required "
@@ -147,6 +163,8 @@ def _contract_quick(args) -> int:
               for c in summary["checks"]]
     lines.append(f"  not checked: {summary['not_checked']}")
     lines += [f"  hint: {h}" for h in summary["hints"]]
+    if parent is not None:
+        lines.append(f"  note: {parent} (an enclosing project) no longer applies to work in here")
     lines.append("  locked: inputs pinned and the contract signed with your owner key" if args.lock
                  else "  next: `vacant contract lock` (pins the inputs and signs the contract)")
     _emit(summary, args.json, "\n".join(lines))
@@ -315,11 +333,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--heading", action="append",
                    help="quick: a heading the deliverable must have (repeatable)")
     p.add_argument("--total", action="append",
-                   help="quick: [INPUT:]COLUMN — the total the deliverable states equals the sum "
-                        "of that column of a CSV input (repeatable)")
+                   help="quick: [INPUT:]COLUMN[=LABEL] — the number after LABEL (default: "
+                        "'Total') in the report equals the sum of that column of a CSV input "
+                        "(repeatable)")
     p.add_argument("--report", help="quick: the file --must/--total read (default: the "
                                     "deliverable, when it is one file)")
     p.add_argument("--lock", action="store_true", help="quick: lock right away")
+    p.add_argument("--replace", action="store_true",
+                   help="quick: overwrite an existing contract (a new task definition)")
     p.add_argument("--to", help="release destination, e.g. dir:published or git:repo#branch")
     p.add_argument("--path", help="where to write the new contract (init)")
     common(p)

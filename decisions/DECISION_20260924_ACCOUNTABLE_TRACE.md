@@ -312,7 +312,8 @@ OpenCode 的外掛聽 `chat.message` 送提示（之前病歷裡沒有 OpenCode 
 ## 八、偏離與延後
 
 - 延後：每一步即時的「退步」提醒（Fable Q4-3）、引文逐字比對與懸空引用（第二層主動檢查）、
-  ~~`vacant contract quick`~~（2026-09-25 做了：只有人寫的才是必要的主張；CSV 的數字欄只列成提示、不自己變成主張——
+  ~~`vacant contract quick`~~（2026-09-25 做了：兩條安全底線之外只有人寫的才是必要的主張；對抗審查 32 條全部成立、全部修掉，
+  `ops/accountability/review_contract_quick/FINDINGS.md`；CSV 的數字欄只列成提示、不自己變成主張——
   和 Fable Q5-3 的版本不同：它建議把猜的 `csv_total` 放成 advisory，這裡不放，猜錯的欄只會讓報告多一條看不懂的「不知道」）、
   proxy 升級 `observed`。
 - 不做：(i) 對 agent 的委派建議；任何模型裁判；slash。

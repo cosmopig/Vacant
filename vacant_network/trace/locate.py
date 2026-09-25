@@ -151,12 +151,13 @@ def _loc_text(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any]
         for rx in params.get("must_not_contain") or []:
             for m in re.finditer(rx, txt, re.M):
                 ln, c = line_col(txt, m.start())
-                out.append(Location(rel, ln, c, m.group(0), note=f"forbidden /{rx}/"))
+                out.append(Location(rel, ln, c, m.group(0), note=f"forbidden {V.show_rx(rx)}"))
                 if len(out) > 50:
                     return out
         for rx in params.get("must_contain") or []:
             if not re.search(rx, txt, re.M):
-                out.append(Location(rel, kind="missing", value=rx, note=f"does not contain /{rx}/"))
+                out.append(Location(rel, kind="missing", value=rx,
+                                    note=f"does not contain {V.show_rx(rx)}"))
         for h in params.get("required_headings") or []:
             if h.strip().lower() not in V._headings(txt):
                 out.append(Location(rel, kind="missing", value=h, note="missing heading"))

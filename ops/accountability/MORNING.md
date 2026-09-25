@@ -126,7 +126,7 @@
 2. `ops/accountability/evidence_20260924/README.md`（33/33 那張表、模型真的收到的回饋、大專案的時間）
 3. 四份審查：`ops/accountability/review_m8/`、`review_scale/`、`review_subagent_curl/`、`review_defer_credit/` 的 `FINDINGS.md`
 4. 一行寫契約：`vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation" --total amount --lock`
-   （只有你寫的才是必要的檢查；CSV 的數字欄只列成提示）。在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`、
+   （兩條安全底線之外只有你寫的才是必要的檢查；CSV 的數字欄只列成提示；`--total amount=合計` 讓報告用自己的字樣）。在任何有契約的專案裡：`vacant trace show`、`vacant trace report --check`、`vacant trace blame <檔>:<行>`、
    `vacant flag <檔>:<行> "哪裡錯"`
 
 ## 過程紀錄

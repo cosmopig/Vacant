@@ -46,9 +46,16 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   flags reach the agent only with a valid owner signature (a sub-agent could inject text as the owner).
 - `vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation"
   --total amount --lock`: a one-line contract for the things a person actually cares about. Only
-  what the person writes becomes a required check (plain text for `--must`, a recomputed column total
-  for `--total`); numeric CSV columns are listed as hints, never turned into checks on a guess; a
-  wrong column name fails when the contract is written, with the real column names.
+  what the person writes becomes a required check besides two safety checks (the deliverable exists,
+  no credential files): plain text for `--must`/`--must-not`/`--heading`, and for `--total` the number
+  after 'Total' (or after `=LABEL`) must equal the recomputed column total. Numeric CSV columns are
+  listed as hints, never turned into checks on a guess. What can never pass fails when the contract
+  is written: a wrong column, a column the check cannot read, a totals row that would be counted
+  twice, a report outside the deliverable, a non-text report, empty text. An adversarial review (32
+  findings, all real, all fixed: `ops/accountability/review_contract_quick/FINDINGS.md`) also fixed
+  two totals on one report that could never both pass, `./report.md` or absolute paths that always
+  rejected, and a crash on CSV rows wider than the header. Failures of a plain-text `--must` are
+  shown as the text the person wrote, not as an escaped regex.
 - Interactive use: the feedback-round cap now applies per request the person types, not per session.
   In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
   written after the next request then got no located feedback (reproduced as a negative control in

@@ -34,8 +34,10 @@ makes the intake real (`vacant_network/intake/`) and plugs it into the four agen
 ```bash
 vacant contract quick --deliverable report.md --input data/sales.csv \
     --must "Recommendation" --total amount --lock
-#   one line for the things you care about (only what you write is a required check; a wrong
-#   column name is reported right there; --lock pins the inputs and signs the contract)
+#   one line for the things you care about (besides two safety checks — the deliverable exists, no
+#   credential files — only what you write is a required check; --total reads the number after
+#   'Total' in the report, or after your own label: --total amount=Revenue; a wrong column, a column
+#   the check cannot read, or a totals row is reported right there; --lock pins inputs and signs)
 #   more kinds of checks: vacant contract init …, then edit the claims in
 #   .vacant/contract.json (exists, sections, recomputed numbers, citations, your own
 #   command, human review, ...), then
