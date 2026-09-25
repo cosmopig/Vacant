@@ -35,7 +35,8 @@ LOOP §二-2）：
    現在的內容；使用者訊息只在平台有給（`UserPromptSubmit`）或 `vacant do` 自己送出時才看得到。
    `vacant do` 的任務訊息只對那一跑開出來的工作階段算數（靠 `VACANT_DO_RUN` 認，`capture.py` 誠實邊界 4）；
    修之前的病歷裡記成「任何工作階段」（`*`）的 `vacant do` 任務訊息照舊對每個工作階段算數（分不出是哪一跑）。
-   Vacant 自己的回饋原文從任何提示裡逐字拿掉才當來源——被改寫過（換行、截斷）的回饋拿不掉。
+   Vacant 自己的回饋原文從任何提示裡逐字拿掉才當來源——被改寫過（換行、截斷）的回饋拿不掉；記成人說的一則若是
+   「`vacant do` 的任務原文＋空行＋以回饋開頭起頭的一段」，只留任務那一段（人自己這樣貼，後面那段也不算）。
    別的行動者的話（隊友、別的工作階段、外面的事件）算來源、記成別的行動者的：那一方是不是 agent 自己安排的、
    是不是只是轉述 agent 自己先前說過的值，這裡看不出來（那時 agent 自己的錯會被當成抄來的，不會是 `provable`）。
 6. 不該存在的檔（`forbid_paths`）報的是造出它的那一步：以記下來的版本裡「它在不在」判斷，缺口裡的
@@ -258,24 +259,44 @@ class Trace:
                 self.initial = e["final_index"]
         #: Vacant 自己的回饋原文（`vacant do` 接在重試提示後面的、以使用者訊息送回的）：從任何提示裡拿掉之後
         #: 才當來源（第二道防線：掛鉤沒認出 `vacant do` 的重試提示時，回饋引的錯值照樣不是「任務說的」）
-        self.feedback_texts: list[str] = sorted(
-            {t.strip() for t in (self.blob_text(p.get("text_blob"))
-                                 for p in self.prompts if p.get("source") == "vacant_feedback")
-             if t and t.strip()}, key=len, reverse=True)
+        self.feedback_texts: list[str] = self._texts_of("vacant_feedback")
+        #: `vacant do` 交給 agent 的任務原文（認「任務＋空行＋Vacant 的回饋」那種重試提示用）
+        self.do_tasks: list[str] = self._texts_of("vacant do")
         self._credit_delegated_writes()
+
+    def _texts_of(self, source: str) -> list[str]:
+        return sorted({t.strip() for t in (self.blob_text(p.get("text_blob"))
+                                           for p in self.prompts if p.get("source") == source)
+                       if t and t.strip()}, key=len, reverse=True)
 
     def prompt_text(self, p: dict[str, Any]) -> str:
         """一則提示當成來源時的文字：Vacant 自己的回饋原文（`feedback_texts`）逐字拿掉——也拿掉 `opencode run`
-        把 `"` 換成 `\\"` 之後的那個樣子（`capture.opencode_run_unquote`）。"""
-        key = str(p.get("text_blob"))
+        把 `"` 換成 `\\"` 之後的那個樣子（`capture.opencode_run_unquote`）。記成人說的一則若就是 `vacant do` 的
+        重試提示的形狀（記過的任務原文＋空行＋以 Vacant 回饋開頭起頭的一段；修之前的病歷沒有另外記回饋原文）⇒
+        只留任務那一段。"""
+        key = f"{p.get('source')}:{p.get('text_blob')}"
         if key not in self._prompt_texts:
             text = self.blob_text(p.get("text_blob")) or ""
+            if str(p.get("source") or "user") == "user":
+                text = self._retry_task(text) or text
             for fb in self.feedback_texts:
                 for form in (fb, fb.replace('"', '\\"')):
                     if form in text:
                         text = text.replace(form, "")
             self._prompt_texts[key] = text
         return self._prompt_texts[key]
+
+    def _retry_task(self, text: str) -> str | None:
+        from .capture import opencode_run_unquote
+        from .feedback import FEEDBACK_HEADER, FLAG_HEADER
+        body = text.strip()
+        for form in dict.fromkeys((body, opencode_run_unquote(body))):
+            for task in self.do_tasks:
+                rest = form[len(task):]
+                if form.startswith(task) and rest.startswith("\n") and \
+                        rest.strip().startswith((FEEDBACK_HEADER, FLAG_HEADER)):
+                    return task
+        return None
 
     def _credit_delegated_writes(self) -> None:
         """委派呼叫（Agent／task／spawn…）自己不寫檔。它的前後差異裡若有一個版本，是另一個**真正的步驟**

@@ -228,6 +228,33 @@ def test_recorded_feedback_is_cut_out_of_any_prompt_before_it_is_a_source(proj):
     _stop(p, "S2")
     f = _finding(p, "4321")
     assert f["fault_class"] == "input" and (f.get("source") or {}).get("kind") == "prompt"
+    # 記過的回饋原文不在任務後面（被接在別的字後面送回來）：照樣逐字拿掉
+    _prompt(p, "S3", "Re-sent by the runner:\n" + fb)
+    _tool(p, "S3", "rm3", "Bash", {"command": "rm report.md"}, remove="report.md")
+    _write(p, "S3", "w3", "Total: 999\n")
+    b = B.blame_location(B.Trace(R.Recorder(p)), L.Location("report.md", 1, value="999"),
+                         contract=C.load(p / ".vacant" / "contract.json"), claim_id="total",
+                         sandbox="none")
+    assert b["step"]["step"] == "w3"
+    assert (b["fault_class"], b["confidence"]) == ("agent", "provable"), b.get("note")
+
+
+@pytest.mark.parametrize("agent", ["claude", "opencode"])
+def test_a_retry_prompt_recorded_before_the_fix_is_still_not_the_tasks_word(proj, agent):
+    """修之前的病歷：任務記成 `session="*"`、重試提示整段記成人說的、回饋原文沒有另外記。形狀認得出來
+    （任務原文＋空行＋以回饋開頭起頭的一段）⇒ 只有任務那一段是來源。"""
+    p = proj
+    fb = (F.FEEDBACK_HEADER + "\n- total: FAIL — report.md:1 says \"999\"\n" + F.FOOTER)
+    R.Recorder(p).prompt(TASK, source="vacant do")                      # 舊的記法（`*`）
+    retry = TASK + "\n\n" + fb
+    if agent == "opencode":
+        retry = '"' + retry.replace('"', '\\"') + '"'
+    R.Recorder(p).prompt(retry, session="S1", source="user")            # 舊掛鉤記的整段
+    _write(p, "S1", "w1", "Total: 999\n")
+    b = B.blame_location(B.Trace(R.Recorder(p)), L.Location("report.md", 1, value="999"),
+                         contract=C.load(p / ".vacant" / "contract.json"), claim_id="total",
+                         sandbox="none")
+    assert (b["fault_class"], b["confidence"]) == ("agent", "provable"), b.get("note")
 
 
 # ── 2. 排程提示只認「相等」（#6）──────────────────────────────────────────────
