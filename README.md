@@ -19,6 +19,35 @@
 既有模式，不是我們發明的：供應鏈安全的 **in-toto／SLSA／Sigstore** 也是同一條
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
 
+## 裝了就用：零設定（2026-09-25 起）
+
+```bash
+pipx install vacant-network   # 沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
+vacant install                # 找到你機器上的 pi／Claude Code／OpenCode／Codex，各加一個掛鉤（可逆：`vacant uninstall`）
+```
+
+之後照常打開你的 agent。不用寫契約、設定檔、金鑰。agent 每一次說「做完了」，Vacant 看這一回合的紀錄，
+只在**幾乎一定是真的問題**時退回去請它重做（最多兩回合）：
+
+- 要求寫出的檔不存在
+- 失敗的步驟被略過、最後的訊息說「測試通過」但紀錄對不上
+- 文件裡的具體數值在這個任務讀過、跑過的東西裡都找不到（只在你有給資料時）
+- 你點名的檔從沒被打開
+
+其他的只寫進交件說明（`~/.vacant/trace/projects/<專案>/delivery.md`：查了什麼、交件前改了什麼、還沒驗證的），
+不送給模型、不寫進你的專案。沒有問題時模型收到的每一通請求和沒裝時**逐位元組相同**。
+設計：[`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`](decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md)。
+
+模擬使用者（乾淨的 Ubuntu 容器、只打上面兩個指令、照常用 pi，**L-fake**：模型照劇本回答）——
+[`ops/eval/evidence_20260925/simuser/SIMUSER.md`](ops/eval/evidence_20260925/simuser/SIMUSER.md)：
+沒讀資料就寫的數字被退回、重算成對的值；沒寫答案檔就說做完被退回、補寫；一開始就對的完全沒被動到。
+用 Gate 1 的**真實** pi 紀錄重播（[`ops/eval/evidence_20260925/replay/`](ops/eval/evidence_20260925/replay/)）：
+答對的 3 跑全部放行。
+
+⚠ **不能讀成**「Vacant 讓 agent 做得更好」：退回之後改對是劇本寫的；真模型會不會照做、公開題庫的成績有沒有變，
+是還沒跑的評測（[`decisions/DECISION_20260925_ZERO_CONFIG_EVAL.md`](decisions/DECISION_20260925_ZERO_CONFIG_EVAL.md)）要量的。
+退回只根據紀錄，不判斷答案對不對：推理錯了但每一步都有根據的答案，它看不出來。
+
 ## 接到你的 agent 上：pi／Claude Code／OpenCode／Codex（2026-09-24 起）
 
 2026-09-24 的外部質疑報告說對了一件事：**判了拒交不等於擋下交付**，而模型通道也不是四個 agent

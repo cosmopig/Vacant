@@ -1,0 +1,20 @@
+$ pipx install vacant-network
+creating virtual environment...
+creating shared libraries...
+upgrading shared libraries...
+installing vacant-network...
+⚠️  Note: '/home/user/.local/bin' is not on your PATH environment variable.
+    These apps will not be globally accessible until your PATH is updated. Run
+    `pipx ensurepath` to automatically add it, or manually modify your PATH in
+    your shell's config file (i.e. ~/.bashrc).
+done! ✨ 🌟 ✨
+  installed package vacant-network 0.8.0, installed using Python 3.12.3
+  These apps are now globally available
+    - vacant
+    - vacant-network
+[exit 0]
+$ vacant install
+  pi: global extension — /home/user/.pi/agent/extensions/vacant.ts
+  not found on this machine: claude, codex, opencode (skipped; `vacant install --force` writes their config anyway)
+[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/user/.vacant (remove everything with `vacant uninstall`).
+[exit 0]

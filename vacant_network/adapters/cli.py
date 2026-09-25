@@ -108,14 +108,15 @@ def cmd_install(args) -> int:
     home = _home()
     found = A.detect()
     rc = 0
+    skipped: list[str] = []
+    done: list[str] = []
     for n in names:
         if n not in A.AGENTS:
             print(f"  {n}: unknown agent", file=sys.stderr)
             rc = 2
             continue
         if not found.get(n) and not args.force:
-            print(f"  {n}: not installed on this machine — skipped (use --force to write its "
-                  f"config anyway)")
+            skipped.append(n)             # 一行講完（使用者只有一個 agent 時，不要三行雜訊）
             continue
         try:
             ops = A.AGENTS[n].install(m, home, skill=bool(getattr(args, "skill", False)))
@@ -124,6 +125,10 @@ def cmd_install(args) -> int:
             rc = 1
             continue
         print(f"  {n}: {A.AGENTS[n].hook_install_note} — {', '.join(op['path'] for op in ops)}")
+        done.append(n)
+    if skipped:
+        print(f"  not found on this machine: {', '.join(skipped)} (skipped; `vacant install "
+              f"--force` writes their config anyway)")
     # 零設定（產品原則）：裝了就有作用；人自己改過 mode 就不動它
     m.data.setdefault("mode", "evidence")
     m.data["schema"] = 2
@@ -132,6 +137,10 @@ def cmd_install(args) -> int:
         from ..vrun import possess
         print("  + observe-model: running `vacant possess install` (model-traffic proxy)")
         rc = rc or possess.main(["install"])
+    if not done and not rc:
+        print("[vacant install] no supported agent found (pi, Claude Code, OpenCode, Codex). "
+              "Install one, then run `vacant install` again.")
+        return 1
     print(f"[vacant install] done. Open your agent as usual; each task is checked against its own "
           f"recorded steps before it is handed back. Data: {INS.state_root().parent} "
           f"(remove everything with `vacant uninstall`).")

@@ -99,3 +99,16 @@ def test_install_keeps_a_mode_the_person_set_and_skill_is_opt_in(env):
     data = json.loads((INS.state_root() / "install.json").read_text())
     assert data["mode"] == "observe"
     assert list(pathlib.Path.home().rglob("SKILL.md"))
+
+
+def test_install_with_no_agent_found_says_so_and_skips_are_one_line(env, capsys, monkeypatch):
+    from vacant_network.adapters import agents as AG
+    monkeypatch.setattr(AG, "detect", lambda: {n: False for n in AG.AGENTS})
+    assert acli.main(["install"]) == 1
+    out = capsys.readouterr().out
+    assert "no supported agent found" in out and "Open your agent as usual" not in out
+    monkeypatch.setattr(AG, "detect", lambda: {n: n == "pi" for n in AG.AGENTS})
+    assert acli.main(["install"]) == 0
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert sum("not found on this machine" in ln for ln in lines) == 1
+    assert len(lines) <= 4

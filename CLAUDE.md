@@ -163,6 +163,24 @@
 🔴 口徑：✅「**在有紀錄的步驟裡**，這個檢查在第 k 步由過轉不過，而第 k 步是 X 做的；證據可重跑。」
 ❌「Vacant 抓出所有錯」「追緝一定正確」「真模型下產出更接近需求」（R536 預註冊草稿，**待人類簽字，沒有發射**）。
 
+### 零設定（C 組，2026-09-25）：沒有契約也在「說做完」時查一次
+
+裁決：`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`（第 2.1 版 §九）。證據：`ops/eval/evidence_20260925/`
+（`simuser/`＝模擬使用者 A/C，`replay/`＝Gate 1 真實 pi 紀錄重播）。
+
+- `adapters/mode.py` — `install.json` 的 `mode`（`vacant install` 寫 `evidence`；沒裝＝`off`；`VACANT_MODE` 只給測試）
+- `trace/evidence.py` — 只看紀錄的證據檢查；**只有五類退回**（要求寫出的檔不存在、失敗的步驟被略過、測試說法對不上、
+  沒出處的值〔要有點名資料〕、點名的檔沒打開），其餘只進交件說明。純函式，可在錄好的病歷上離線重播
+- `trace/review.py` — 退回的字句（KS-1、沒有行動者；過不了檢查的行換替代行並計數）
+- `trace/zerostop.py` — Stop：子行程＋330 秒時限、失敗一律放行；人的一個要求內最多 2 回合；解決看現況；
+  `delivery.{md,json}` 寫在病歷目錄（不進工作區、不送模型）
+- `ops/eval/replay_pi_session.py`＋`replay_gate.py` — 真實 pi 工作階段在題目容器裡經過真的 `vacant hook pi` 重播（量誤報）
+- `ops/eval/simuser/` — 模擬使用者：只照 README 裝、照常用 pi，A/C 對照
+
+🔴 口徑：✅「沒有問題時模型收到的每一通請求和沒裝時逐位元組相同」（simuser `correct`）；✅「答對的真實紀錄 3/3 放行」（replay）；
+❌「Vacant 讓 agent 做得更好」（退回後改對是劇本，真模型要評測量）；❌「Vacant 判斷答案對錯」（只看每一步有沒有根據）。
+⚠ Harbor 的 pi 用自訂端點時以 `PI_CODING_AGENT_DIR` 隔離設定，`~/.pi/agent` 的擴充不會載入——評測的 C 組要裝到那個目錄。
+
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 
 ⚠ **這 15 支在 2026-09-20 之前完全沒有出現在這張地圖上**，而它現在是「**Vacant 附身在
