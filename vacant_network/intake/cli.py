@@ -149,6 +149,14 @@ def _contract_quick(args) -> int:
     # 全部繼續用舊的）。`--replace` 就把它們搬開，寫完一律驗一次「找到的真的是它」，找不到
     # 就整個還原（#16）。
     is_standard = any((base / n).resolve() == target for n in C.CONTRACT_NAMES)
+    if target.suffix == ".toml":
+        return fail(f"{target}: `contract quick` writes JSON; use a .json path "
+                    f"(for example .vacant/contract.json)")
+    if args.replace and not is_standard and here:
+        # 標準位置已經有契約：check／do／掛鉤都會繼續用它，寫在別的檔名等於印出一份不會生效的檢查（#16）
+        return fail(f"{here[0]} is the contract this project uses, and check/do/hooks will keep "
+                    f"using it; `--replace --path {args.path}` would write a contract nothing "
+                    f"picks up. Drop --path to replace {here[0].name}, or remove it first")
     shadowing = [h for h in here if h.resolve() != target] if is_standard else []
     moved: list[tuple[pathlib.Path, pathlib.Path]] = []
     if args.replace:
@@ -169,6 +177,11 @@ def _contract_quick(args) -> int:
 
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        C.load(target)                           # 寫進去的要讀得回來（例如副檔名與格式不合）
+    except Exception as e:  # noqa: BLE001
+        _restore()
+        return fail(f"wrote {target} but it does not load back ({e}); nothing changed")
     if is_standard:
         found = C.find(base)
         if found is None or found.resolve() != target:

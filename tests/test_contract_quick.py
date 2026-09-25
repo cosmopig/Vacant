@@ -496,3 +496,50 @@ def test_6_cli_exclude_flag_is_repeatable(proj):
     assert r.returncode == 0, r.stderr
     raw = json.loads((proj / ".vacant" / "contract.json").read_text())
     assert "**/.env.example" in raw["deliverable"]["exclude"]
+
+
+def test_replace_with_a_custom_path_is_refused_when_a_standard_contract_is_in_use(tmp_path, monkeypatch, capsys):
+    """審查 quick major：`--replace --path my.contract.json` 旁邊有 .vacant/contract.json 時，新檔不會生效。"""
+    from vacant_network.intake import cli as icli
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    p = tmp_path / "proj"
+    p.mkdir()
+    (p / "a.md").write_text("hello\n")
+    monkeypatch.chdir(p)
+    assert icli.main(["contract", "quick", "--deliverable", "a.md", "--must", "hello"]) == 0
+    before = (p / ".vacant" / "contract.json").read_bytes()
+    rc = icli.main(["contract", "quick", "--replace", "--path", "my.contract.json",
+                    "--deliverable", "a.md", "--must", "NEWTHING"])
+    err = capsys.readouterr().err
+    assert rc == 2 and "nothing picks up" in err
+    assert not (p / "my.contract.json").exists()
+    assert (p / ".vacant" / "contract.json").read_bytes() == before
+
+
+def test_quick_refuses_a_toml_target(tmp_path, monkeypatch, capsys):
+    from vacant_network.intake import cli as icli
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    p = tmp_path / "proj"
+    p.mkdir()
+    (p / "a.md").write_text("hello\n")
+    monkeypatch.chdir(p)
+    assert icli.main(["contract", "quick", "--path", ".vacant/contract.toml",
+                      "--deliverable", "a.md", "--must", "hello"]) == 2
+    assert "writes JSON" in capsys.readouterr().err
+    assert not (p / ".vacant" / "contract.toml").exists()
+
+
+def test_input_inside_a_directory_deliverable_suggests_exclude_without_a_second_error(tmp_path):
+    from vacant_network.intake import contract as C
+    p = tmp_path / "proj"
+    p.mkdir()
+    (p / "data.csv").write_text("id,amount\n1,10\n2,20\n")
+    (p / "r.md").write_text("Total 30\n")
+    try:
+        C.quick(p, deliverable=["."], inputs=["data.csv"], totals=["amount"], report="r.md", cwd=p)
+    except C.ContractError as e:
+        msg = "; ".join(e.problems)
+    else:
+        raise AssertionError("expected a refusal")
+    assert "--exclude data.csv" in msg and "could never change" not in msg
+    assert "add --input" not in msg

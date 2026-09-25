@@ -565,11 +565,17 @@ def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] |
             probs.append(f"input {raw_path}: no such file ({ap})")
             continue
         if dl and _A.matches(rel, dl) and not _A.matches(rel, full_exclude):
-            probs.append(f"input {raw_path}: is also inside the deliverable ({', '.join(dl)}); "
-                         f"the hook write-protects task inputs, so the agent could never change "
-                         f"{rel} to satisfy the contract (give the agent a copy under a different "
-                         f"name, or drop --input {raw_path} if it is meant to be edited)")
-            continue
+            if rel in dl:   # 繳付物就是這個輸入檔：agent 要改它，掛鉤又不准改
+                probs.append(f"input {raw_path}: is also inside the deliverable (it is the deliverable "
+                             f"itself); the hook write-protects "
+                             f"task inputs, so the agent could never change {rel} to satisfy the "
+                             f"contract (give the agent a copy under a different name, or drop "
+                             f"--input {raw_path} if it is meant to be edited)")
+            else:           # 目錄／萬用字元的繳付物把輸入一起包進去：交件會連輸入一起送出
+                probs.append(f"input {raw_path}: is also inside the deliverable ({', '.join(dl)}), so "
+                             f"it would be shipped as part of the result; add --exclude {rel} to "
+                             f"leave it out of the deliverable")
+            # 不 `continue`：照樣登記這個輸入，免得後面 --total 又報一句「沒有給 --input」
         stem = re.sub(r"[^A-Za-z0-9_]", "_", ap.stem).strip("_") or "input"
         stem = stem if re.match(r"[A-Za-z0-9]", stem) else f"in_{stem}"
         name, k = stem[:60], 2
