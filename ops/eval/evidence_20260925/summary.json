@@ -1,0 +1,134 @@
+{
+ "by_tag": {
+  "smoke-proxy": {
+   "requests": 2,
+   "ok": 2,
+   "prompt_tokens": 30,
+   "completion_tokens": 128,
+   "reasoning_tokens": 128,
+   "cached_tokens": 0,
+   "cost_usd": 1.904e-05
+  },
+  "try1-pi-qwen9b": {
+   "requests": 4,
+   "ok": 4,
+   "prompt_tokens": 8327,
+   "completion_tokens": 980,
+   "reasoning_tokens": 441,
+   "cached_tokens": 0,
+   "cost_usd": 0.00079356
+  },
+  "live-lcb-lcb_3594": {
+   "requests": 2,
+   "ok": 2,
+   "prompt_tokens": 906,
+   "completion_tokens": 10000,
+   "reasoning_tokens": 10000,
+   "cached_tokens": 0,
+   "cost_usd": 0.00137248
+  },
+  "live-lcb-lcb_3607": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 365,
+   "completion_tokens": 8000,
+   "reasoning_tokens": 8000,
+   "cached_tokens": 0,
+   "cost_usd": 0.0010692
+  },
+  "live-tb2-regex-log": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 1717,
+   "completion_tokens": 16384,
+   "reasoning_tokens": 16384,
+   "cached_tokens": 0,
+   "cost_usd": 0.00226728
+  },
+  "live-test-ping": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 12,
+   "completion_tokens": 10,
+   "reasoning_tokens": 10,
+   "cached_tokens": 0,
+   "cost_usd": 2.26e-06
+  },
+  "live-aider-polyglot-python_robot-name": {
+   "requests": 2,
+   "ok": 2,
+   "prompt_tokens": 656,
+   "completion_tokens": 6679,
+   "reasoning_tokens": 6553,
+   "cached_tokens": 0,
+   "cost_usd": 0.00092075
+  },
+  "live-aider-polyglot-go_hexadecimal": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 253,
+   "completion_tokens": 2000,
+   "reasoning_tokens": 2000,
+   "cached_tokens": 0,
+   "cost_usd": 0.00028024
+  },
+  "live-sbv-10452": {
+   "requests": 7,
+   "ok": 7,
+   "prompt_tokens": 85116,
+   "completion_tokens": 4546,
+   "reasoning_tokens": 1807,
+   "cached_tokens": 0,
+   "cost_usd": 0.00740026
+  },
+  "live-dabstep-5": {
+   "requests": 4,
+   "ok": 4,
+   "prompt_tokens": 12934,
+   "completion_tokens": 1321,
+   "reasoning_tokens": 359,
+   "cached_tokens": 0,
+   "cost_usd": 0.00120645
+  },
+  "live-dabstep-70": {
+   "requests": 8,
+   "ok": 8,
+   "prompt_tokens": 78288,
+   "completion_tokens": 3645,
+   "reasoning_tokens": 1093,
+   "cached_tokens": 0,
+   "cost_usd": 0.00673689
+  },
+  "live-gdpval-83d10b06": {
+   "requests": 8,
+   "ok": 8,
+   "prompt_tokens": 23640,
+   "completion_tokens": 1392,
+   "reasoning_tokens": 543,
+   "cached_tokens": 0,
+   "cost_usd": 0.00207216
+  }
+ },
+ "by_model": {
+  "qwen/qwen3.5-9b": {
+   "requests": 41,
+   "ok": 41,
+   "prompt_tokens": 212244,
+   "completion_tokens": 55085,
+   "reasoning_tokens": 47318,
+   "cached_tokens": 0,
+   "cost_usd": 0.02414057
+  }
+ },
+ "total": {
+  "requests": 41,
+  "ok": 41,
+  "prompt_tokens": 212244,
+  "completion_tokens": 55085,
+  "reasoning_tokens": 47318,
+  "cached_tokens": 0,
+  "cost_usd": 0.02414057
+ },
+ "spent_usd": 0.02414057,
+ "budget_usd": 4.8
+}
