@@ -16,7 +16,7 @@ case $M in
   *) echo "unknown model $M"; exit 2 ;;
 esac
 AGENT=pi; [ "$ARM" = C ] && AGENT=harbor_vacant:PiWithVacant
-TAG="pilot-$M-$THINK-$ARM-$TASK${RUN_SUFFIX:+-$RUN_SUFFIX}"   # 重跑用 RUN_SUFFIX 分開記帳
+TAG="${TAG_PREFIX:-pilot}-$M-$THINK-$ARM-$TASK${RUN_SUFFIX:+-$RUN_SUFFIX}"   # 正式批次 TAG_PREFIX=formal；重跑用 RUN_SUFFIX 分開記帳
 [ -n "$BASE" ] || BASE="http://172.17.0.1:18900/t/$TAG/think/$THINK/api/v1"
 KEY=sk-dummy; case $BASE in *18900*) ;; *) KEY=sk-fake-gate ;; esac
 OUT="$JOBS/$M-$THINK-$ARM"
