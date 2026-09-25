@@ -27,7 +27,7 @@
 | 給 agent 的回饋裡有行動者識別 | 0/33 |
 | 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F／H／I＋Claude 的 G：22/22 |
 | 病歷簽章鏈驗得過 | 33/33 |
-| 每次掛鉤的額外時間 p95 | 6.4–12.6 ms（小工作區；大專案見第 3 節）；Codex 的 H 那一格有一次 59 ms（那一格只有 13 次掛鉤，p95 就是最慢那一次；p50 4.3 ms） |
+| 每次掛鉤的額外時間 p95 | 6.4–12.6 ms（小工作區；大專案見第 5 節）；Codex 的 H 那一格有一次 59 ms（那一格只有 13 次掛鉤，p95 就是最慢那一次；p50 4.3 ms） |
 | 行動者帳本 | 每個 agent 一格（6 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`、F 記在那個網址；D 記在該平台的整合覆蓋率；E 是推論層（`lineage_internal`），照規則不進信譽 |
 
 模型實際收到的回饋（Claude Code，情境 B，第 2 次請求）：
@@ -40,7 +40,29 @@ The task contract's checks do not pass yet (this is feedback from `vacant check`
 Run `vacant check` to re-check before finishing.
 ```
 
-## 2. R536 的管線冒煙（`r536_mock_smoke_*.json*`）
+## 2. 同樣的情境走 `vacant do`（R536 的路；`e2e_trace_via_do_SUMMARY.md`、`e2e_trace_via_do_results.json`）
+
+重跑：
+
+    python ops/accountability/e2e_trace.py --bin <pi/opencode/codex 所在目錄> --out <dir> --via-do
+
+`vacant do <agent> --attempts 2 --feedback-mode localized`：隔離的工作區、行程結束後驗收與追緝、回饋接在**下一次嘗試**
+的提示後面（預註冊 R536 的 RL 臂就是這條）。D、H 不跑（要在 agent 跑完之後去動原本的專案，`vacant do` 不在那裡跑）。
+
+| 量什麼 | 結果 |
+|---|---|
+| 歸因正確 | **25/25**（四個 agent × A／B／C／E／F／I＋Claude 的 G） |
+| 有位置的回饋出現在下一次嘗試的模型請求裡 | **25/25——OpenCode 也是**（`vacant do` 自己在行程結束後驗收、重開一次，不靠 `opencode run` 沒有的回合邊界） |
+| 改好之後病歷記「已解決」、收件 accept | 25/25 |
+| 給 agent 的回饋裡有行動者識別 | 0/25 |
+| 病歷簽章鏈驗得過 | 25/25 |
+
+這一跑（00:26–00:44 UTC）的中途改過兩個檔：`ops/intake/mock_model.py`（加了多回合；沒有 `turns` 的劇本行為不變）
+與 `adapters/hook.py`（人打的新要求重新算回饋輪數；這裡每個工作階段只有開頭一則人的提示，輪數檔本來就不存在）
+——兩個都碰不到這張表的格子。第一跑是 22/25：三格是 harness 沒把原生那條的 agent 參數帶進 `vacant do`
+（pi 的 subagent 擴充、Codex 的網路），修了（`6d5184a6`）之後那三格重跑 6/6，再整張重跑成這一份。
+
+## 4. R536 的管線冒煙（`r536_mock_smoke_*.json*`）
 
 2 題 × 3 臂，Claude Code 對假模型：RS（重抽、無回饋）3 次都錯；RF、RL 第 2 次改對。2026-09-25 在最後的程式碼上重跑
 （同樣的結果）時抓到一個回歸：`vacant do` 的工作區都在工作區根底下，而審查修正（recorder#11）把整個根當成狀態目錄不追
@@ -48,7 +70,7 @@ Run `vacant check` to re-check before finishing.
 四個 agent 的端到端走掛鉤，沒有經過 `vacant do`，所以沒抓到——這一份冒煙是 `vacant do` 那條路的檢查。
 **只證明管線接得起來**（假模型看到回饋開頭就照劇本改對），任何效果數字都不能從這裡來。
 
-## 3. 大專案的掛鉤時間（`perf/`）
+## 5. 大專案的掛鉤時間（`perf/`）
 
 重跑：
 
@@ -73,7 +95,7 @@ Run `vacant check` to re-check before finishing.
 8 秒的時限，換一台慢一點的機器就會改到背景（那段時間的步驟記成「沒觀察到」）。只量 Claude Code 格式的掛鉤
 （四個平台走同一個 `hook.handle`）。
 
-## 4. 沒有做到的（照實寫）
+## 6. 沒有做到的（照實寫）
 
 - 子 agent：Codex 的 multi-agent v2 沒有端到端跑（有 `ops/accountability/capture/` 的可觀測面實測）。
   平行委派（情境 I）是兩個子 agent 寫**不同**的檔；兩個子 agent 同時寫**同一個**檔時只能說「是其中之一」。

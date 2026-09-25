@@ -40,8 +40,8 @@ import sys
 import time
 from typing import Any
 
-from .hookpolicy import (NON_TERMINAL_END_REASONS, HookDecision, HookEvent, decide_pre_tool,
-                         decide_stop, vacant_state_dir)
+from .hookpolicy import (FEEDBACK_HEADER, NON_TERMINAL_END_REASONS, HookDecision, HookEvent,
+                         decide_pre_tool, decide_stop, new_request, vacant_state_dir)
 
 #: 原生事件名 → 正規化種類
 EVENT_MAP: dict[str, dict[str, str]] = {
@@ -212,6 +212,21 @@ def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contr
                               "error": f"trace: {type(e).__name__}: {e}"[:500]})
 
 
+def _person_prompt(agent: str, event: str, payload: dict[str, Any]) -> bool:
+    """這則使用者訊息是人打的（不是背景子 agent 的結果、不是父 agent 給子 agent 的任務、
+    也不是 Vacant 自己的回饋被當成使用者訊息送回來）。"""
+    from ..trace import capture
+    from ..trace.feedback import FLAG_HEADER
+    action = capture.ACTIONS.get(event) or capture.ACTIONS.get(
+        str(payload.get("hook_event_name") or ""))
+    text = str(payload.get("prompt") or "")
+    if action != "prompt" or not text.strip():
+        return False
+    if FEEDBACK_HEADER in text or FLAG_HEADER in text:
+        return False                     # 回饋被送回來：再給新輪數就是一個不會停的迴圈
+    return capture.prompt_source(agent, payload, text)[0] == "user"
+
+
 def _defer_for_subagents(contract: Any, ev: HookEvent) -> bool:
     try:
         from ..trace import capture, recorder, stopcheck
@@ -282,6 +297,8 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
     if ev.kind != "stop":
         _trace(agent, event, payload, ev, contract, d)
+    if contract is not None and _person_prompt(agent, event, payload):
+        new_request(ev.session_id)       # 人的一個新要求：回饋輪數重新算
     if ev.kind == "session_end" and contract is not None and ev.reason not in \
             NON_TERMINAL_END_REASONS and not os.environ.get("VACANT_HOOK_NO_SUBMIT"):
         # 工作階段結束的追緝報告：和自動交件無關（`submit_on_end=false` 也要有；integration#6）

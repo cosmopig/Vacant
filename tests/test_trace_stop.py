@@ -162,3 +162,46 @@ def test_outcome_and_fault_land_in_the_same_actor_cell(proj):
     assert len(cells) == 1, cells
     c = cells[0]
     assert c["key"][2] == "claimed:gpt-x" and c["runs"] == 1 and c["provable_faults"] == 1
+
+
+def _prompt(p, sid, text, **extra):
+    hook.handle("claude", "UserPromptSubmit", {"session_id": sid, "cwd": str(p), "prompt": text,
+                                               **extra})
+
+
+def _use_up_rounds(p, sid):
+    """互動介面：人先問了一句話，回合結束時契約還沒過 ⇒ 回饋一輪；再結束一次 ⇒ 輪數用完。"""
+    _prompt(p, sid, "what does the ledger look like?")
+    hook.handle("claude", "Stop", {"session_id": sid, "cwd": str(p)})
+    out, _e, _c = hook.handle("claude", "Stop", {"session_id": sid, "cwd": str(p),
+                                                 "stop_hook_active": True})
+    assert "decision" not in json.loads(out)                 # 用完了
+
+
+def test_a_new_request_from_the_person_gets_a_fresh_feedback_budget(proj):
+    """輪數上限是「人的一個要求」之內的上限，不是整個互動工作階段的：前面幾個回合把輪數用完，
+    之後人要 agent 做事、agent 寫錯，回合結束時照樣要把位置回饋給 agent（2026-09-25 互動 TUI 實測時發現）。"""
+    p = proj
+    _use_up_rounds(p, "T1")
+    _prompt(p, "T1", "now write report.md with the total")
+    _tool(p, "w1", "Write", {"file_path": str(p / "report.md"), "content": "Total: 999\n"},
+          {"type": "create"}, write=("report.md", "Total: 999\n"))
+    out, _e, _c = hook.handle("claude", "Stop", {"session_id": "T1", "cwd": str(p)})
+    d = json.loads(out)
+    assert d.get("decision") == "block" and 'report.md:1 says "999"' in d["reason"]
+
+
+@pytest.mark.parametrize("extra, text", [
+    ({}, "<task-notification>\n<tool-use-id>tA</tool-use-id>\n<status>completed</status>\n"
+         "<result>done</result>\n</task-notification>"),            # 背景子 agent 的結果
+    ({"agent_id": "a1", "agent_type": "worker"}, "compute the total"),   # 父 agent 給子 agent 的任務
+])
+def test_messages_the_person_did_not_type_do_not_refill_the_budget(proj, extra, text):
+    p = proj
+    _use_up_rounds(p, "T2")
+    _prompt(p, "T2", text, **extra)
+    _tool(p, "w1", "Write", {"file_path": str(p / "report.md"), "content": "Total: 999\n"},
+          {"type": "create"}, write=("report.md", "Total: 999\n"))
+    out, _e, _c = hook.handle("claude", "Stop", {"session_id": "T2", "cwd": str(p),
+                                                 "stop_hook_active": True})
+    assert "decision" not in json.loads(out)

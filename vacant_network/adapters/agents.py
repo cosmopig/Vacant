@@ -376,7 +376,9 @@ def pi_install(m: INS.Manifest, home: pathlib.Path) -> list[dict[str, Any]]:
 #:   `tool.execute.before/after`、`command.execute.before`、`experimental.chat.*.transform`、
 #:   `permission.ask`——後者在 1.18.32 宣告了但**從來不觸發**——與通知型的 `event`），
 #:   而 `opencode run` 在第一個 `session.idle` 就結束（v1.18.31 `run.ts:793-797`）。所以：
-#:   - 互動 TUI：idle 時沒過 ⇒ 用 SDK client 把回饋當下一則訊息送回（有輪數上限；**未量**）；
+#:   - 互動 TUI：idle 時沒過 ⇒ 用 SDK client 把回饋當下一則訊息送回（有輪數上限；2026-09-25 在真的 TUI 裡
+#:     量過：模型收到、改好、accept——`ops/accountability/e2e_tui.py`）。這則訊息在 OpenCode 的畫面上
+#:     是一則使用者訊息（模型也把它當使用者訊息收到）；病歷不記 OpenCode 的提示，所以不會被記成人說的；
 #:   - `opencode run`：**沒有交件前的回饋**（2026-09-24 端到端實測：模型沒看到回饋）；
 #:   - 工作階段結束：`event` 在 `run` 裡是 fire-and-forget（約 40 ms 後行程就結束），
 #:     **`dispose()` 會被 await** ⇒ 交件放在 `dispose`，用 `globalThis` 旗標防重入

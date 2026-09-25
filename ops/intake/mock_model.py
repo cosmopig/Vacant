@@ -22,6 +22,8 @@
 子 agent：步驟 `{"agent": {"prompt": "ROLE:<角色> …", "description": "…"}}` 用這個 agent 自己的委派工具
 （Claude Code `Agent`／`Task`、OpenCode `task`、pi 範例擴充的 `subagent`）交出去；`"roles": {"<角色>": {劇本}}`
 是子 agent 的劇本——對話**開頭的使用者訊息**裡有 `ROLE:<角色>` 的，照那一份演。
+多回合（互動介面：人先問一句、之後才要它做事）：`"turns": [{"when": "<人那一則裡的一段字>", 劇本}, …]`
+——照**人最近打的那一則**對到的那一段演，工具結果與回饋只數那一則之後的（`ops/accountability/e2e_tui.py`）。
 每一通請求：數對話裡已經有幾個工具結果 k；k < 檔案數 ⇒ 叫一個「寫檔」工具寫第 k 個檔；
 否則回最後那句話。工具從 agent **這一通送來的工具清單**裡挑：先找有「路徑＋內容」參數的
 寫檔工具，沒有就用 shell 工具（`printf <base64> | base64 -d > path`）。
@@ -32,6 +34,10 @@
    **不是**任何模型的能力，也不是真模型下的行為。
 2. 劇本決定寫什麼，所以「成果好不好」完全由劇本控制——用它量的是收件口有沒有把
    壞劇本擋在目的端外、好劇本放進去，不是 agent 做得好不好。
+3. **只收假金鑰**：模型請求帶的憑證（`x-api-key`、`Authorization: Bearer`）只要有一個不是 `sk-fake` 開頭，
+   就回 401、記一筆 `{"auth": "rejected", "header": <哪一個標頭>}`——**不記值、不存標頭**。這樣一跑成功
+   本身就證明 agent 用的是實驗給的假金鑰，不是機器上別的憑證（2026-09-25：Claude Code 在隔離的 HOME 裡
+   仍會提示它看得到主機的另一種憑證）。
 """
 from __future__ import annotations
 
@@ -158,7 +164,24 @@ def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     return last >= 0, sum(1 for it in after if is_result(it))
 
 
+def pick_turn(user_texts: list[tuple[int, str]]) -> tuple[dict[str, Any] | None, int]:
+    """劇本有 `turns`（互動介面的多回合：人問一句、再要它做事）：人**最近打的那一則**對到哪一段
+    （`when` 是那一則裡的一段字）；回 `(那一段, 那一則在對話裡的位置)`。回饋被送回來的那幾則不算人打的。"""
+    turns = scenario().get("turns")
+    if not isinstance(turns, list):
+        return None, -1
+    for pos, txt in reversed(user_texts):
+        if FEEDBACK_MARK in txt or FLAG_MARK in txt:
+            continue
+        for t in turns:
+            if isinstance(t, dict) and t.get("when") and str(t["when"]) in txt:
+                return t, pos
+    return None, -1
+
+
 ROLE_RE = re.compile(r"ROLE:([A-Za-z0-9_]+)")
+#: 實驗給 agent 的假金鑰都是這個開頭（`e2e_four_agents.Lab.env`／`user_config`、R536 的冒煙）
+FAKE_KEY_PREFIX = "sk-fake"
 
 
 def role_of(opening: str) -> str | None:
@@ -278,8 +301,9 @@ def _shell_tool(tools: list[dict[str, Any]]):
 
 def plan(n_results: int, tools: list[dict[str, Any]], cwd_hint: str | None,
          fed_back: bool = False, role: str | None = None, last_agent_id: str | None = None,
-         notified: bool = False, agent_ids: list[str] | None = None):
-    sc = scenario()
+         notified: bool = False, agent_ids: list[str] | None = None,
+         section: dict[str, Any] | None = None):
+    sc = section if section is not None else scenario()
     roles = sc.get("roles") or {}
     if role and isinstance(roles.get(role), dict):
         sc = roles[role]
@@ -428,9 +452,26 @@ class H(BaseHTTPRequestHandler):
                 {"id": "mock-model", "object": "model", "owned_by": "mock"}], "has_more": False})
         return self._json(404, {"error": {"message": "mock: not found"}})
 
+    def _foreign_credential(self) -> str | None:
+        """帶了不是實驗假金鑰的憑證 ⇒ 回那個標頭的名字（只比開頭，值不記、不存）。"""
+        auth = self.headers.get("authorization") or ""
+        creds = {"x-api-key": self.headers.get("x-api-key"),
+                 "authorization": auth[7:].strip() if auth.lower().startswith("bearer ") else
+                 (auth or None)}
+        for name, v in creds.items():
+            if v is not None and not str(v).startswith(FAKE_KEY_PREFIX):
+                return name
+        return None
+
     def do_POST(self):  # noqa: N802
         body = self._body()
         n = next(_ctr)
+        bad = self._foreign_credential()
+        if bad:
+            log({"method": "POST", "path": self.path.split("?")[0], "n": n, "auth": "rejected",
+                 "header": bad})
+            return self._json(401, {"error": {"type": "authentication_error",
+                                              "message": "mock: only the experiment's fake key"}})
         if os.environ.get("MOCK_BODIES"):          # 除錯：每一通請求的原文（不含標頭）
             os.makedirs(os.environ["MOCK_BODIES"], exist_ok=True)
             with open(os.path.join(os.environ["MOCK_BODIES"], f"{n:03d}.json"), "w",
@@ -451,8 +492,11 @@ class H(BaseHTTPRequestHandler):
     # Anthropic Messages ---------------------------------------------------
     def _anthropic(self, body, n):
         msgs = body.get("messages", [])
-        blocks = [b for m in msgs for b in (m.get("content") if isinstance(m.get("content"), list)
-                                            else [{"type": "text", "text": str(m.get("content"))}])]
+        sec, pos = pick_turn([(i, _text_of(m.get("content"))) for i, m in enumerate(msgs)
+                              if m.get("role") == "user"])
+        blocks = [b for m in msgs[pos + 1:]
+                  for b in (m.get("content") if isinstance(m.get("content"), list)
+                            else [{"type": "text", "text": str(m.get("content"))}])]
         fed, k = split_on_feedback(blocks, lambda b: b.get("type") == "tool_result",
                                    lambda b: json.dumps(b))
         tools = body.get("tools") or []
@@ -460,7 +504,7 @@ class H(BaseHTTPRequestHandler):
         notified = any(m.get("role") == "user" and "<task-notification>" in _text_of(m.get("content"))
                        for m in msgs)
         kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed, role,
-                          notified=notified)
+                          notified=notified, section=sec)
         log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
@@ -513,7 +557,9 @@ class H(BaseHTTPRequestHandler):
     # OpenAI Responses -----------------------------------------------------
     def _responses(self, body, n):
         items = [it for it in (body.get("input") or []) if isinstance(it, dict)]
-        fed, k = split_on_feedback(items, lambda it: it.get("type") in (
+        sec, pos = pick_turn([(i, _text_of(it.get("content"))) for i, it in enumerate(items)
+                              if it.get("type") == "message" and it.get("role") == "user"])
+        fed, k = split_on_feedback(items[pos + 1:], lambda it: it.get("type") in (
             "function_call_output", "custom_tool_call_output", "local_shell_call_output"),
             lambda it: json.dumps(it))
         tools = [t for t in (body.get("tools") or []) if isinstance(t, dict)]
@@ -527,7 +573,8 @@ class H(BaseHTTPRequestHandler):
                     aid = None
                 if aid:
                     ids.append(str(aid))
-        kind, a, b = plan(k, tools, None, fed, role, ids[-1] if ids else None, agent_ids=ids)
+        kind, a, b = plan(k, tools, None, fed, role, ids[-1] if ids else None, agent_ids=ids,
+                          section=sec)
         log({"proto": "responses", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),
@@ -578,11 +625,13 @@ class H(BaseHTTPRequestHandler):
     # OpenAI Chat Completions ----------------------------------------------
     def _chat(self, body, n):
         msgs = body.get("messages", [])
-        fed, k = split_on_feedback(msgs, lambda m: m.get("role") == "tool",
+        sec, pos = pick_turn([(i, _text_of(m.get("content"))) for i, m in enumerate(msgs)
+                              if m.get("role") == "user"])
+        fed, k = split_on_feedback(msgs[pos + 1:], lambda m: m.get("role") == "tool",
                                    lambda m: json.dumps(m.get("content")))
         tools = body.get("tools") or []
         role = role_of(opening_user_text(msgs))
-        kind, a, b = plan(k, tools, None, fed, role)
+        kind, a, b = plan(k, tools, None, fed, role, section=sec)
         log({"proto": "chat", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
              "skill_listed": SKILL_MARK in json.dumps(body),

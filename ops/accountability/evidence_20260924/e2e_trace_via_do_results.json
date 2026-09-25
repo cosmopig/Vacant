@@ -1,7 +1,7 @@
 {
   "schema": "vacant-e2e-trace/1",
   "evidence_level": "L-fake (scripted model)",
-  "started": "2026-09-24T23:19:34+0000",
+  "started": "2026-09-25T00:26:16+0000",
   "agents": {
     "claude": {
       "version": [
@@ -12,7 +12,7 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 2.6,
+          "wall_s": 2.7,
           "agent_stderr_tail": "",
           "steps_recorded": 3,
           "step_tools": [
@@ -45,7 +45,7 @@
             "step_n": 2,
             "actor": {
               "platform": "claude",
-              "session": "86812cb8-b29a-43fe-b3d7-86a1ac8783b3"
+              "session": "aa1182b1-4a21-486a-9764-eecb07abcfc6"
             }
           },
           "judgement": {
@@ -60,15 +60,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.6,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 4.0,
+          "hook_ms_p95": 7.6,
           "hook_calls": 10,
           "model_requests": 5
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 2.8,
+          "wall_s": 3.0,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -117,8 +117,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 3.9,
-          "hook_ms_p95": 10.2,
+          "hook_ms_p50": 4.1,
+          "hook_ms_p95": 6.9,
           "hook_calls": 12,
           "model_requests": 6
         },
@@ -159,7 +159,7 @@
             "step_n": 1,
             "actor": {
               "platform": "claude",
-              "session": "70b6297c-e2a1-486f-afbb-1096b41395d5"
+              "session": "69cc344c-f345-4a67-959c-ed89f4e181ac"
             }
           },
           "judgement": {
@@ -174,70 +174,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.2,
-          "hook_ms_p95": 11.0,
+          "hook_ms_p50": 3.8,
+          "hook_ms_p95": 7.7,
           "hook_calls": 12,
           "model_requests": 6
-        },
-        "D_unrecorded_change": {
-          "scenario": "D_unrecorded_change",
-          "agent_rc": 0,
-          "wall_s": 1.8,
-          "agent_stderr_tail": "",
-          "steps_recorded": 1,
-          "step_tools": [
-            "Bash"
-          ],
-          "gaps": 1,
-          "finding": {
-            "state": "UNOBSERVED",
-            "fault_class": "unattributable",
-            "confidence": "gap",
-            "layer": "inference",
-            "location": {
-              "col": 8,
-              "kind": "offending",
-              "line": 3,
-              "note": "recomputed 69.0 from input:ledger",
-              "path": "report.md",
-              "value": "999"
-            },
-            "value": "999",
-            "source": {
-              "observed_at": "check",
-              "paths": [
-                "report.md"
-              ],
-              "seq": 8
-            },
-            "note": "changed outside any recorded step",
-            "_step_writes": null,
-            "_step_tool": null,
-            "_cand_writes": null,
-            "step_n": null,
-            "actor": null
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "accept",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 7.2,
-          "hook_ms_p95": 12.6,
-          "hook_calls": 5,
-          "model_requests": 2
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 2.9,
+          "wall_s": 3.1,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -286,15 +231,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.5,
-          "hook_ms_p95": 7.2,
+          "hook_ms_p50": 3.8,
+          "hook_ms_p95": 6.8,
           "hook_calls": 12,
           "model_requests": 7
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 4.3,
+          "wall_s": 4.2,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
@@ -332,10 +277,10 @@
             "_cand_writes": null,
             "step_n": 4,
             "actor": {
-              "agent": "a4d2630fe8f2033ec",
+              "agent": "a7bf42c8579602fd5",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "aa1663ac-846e-4369-ad0c-4ddc5b2332ad"
+              "session": "5679f8bc-241d-4ad1-96ed-100a5ce08ba4"
             }
           },
           "judgement": {
@@ -350,70 +295,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 19 entries",
-          "hook_ms_p50": 4.5,
-          "hook_ms_p95": 11.0,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 8.5,
           "hook_calls": 26,
           "model_requests": 12
-        },
-        "H_human_flag": {
-          "scenario": "H_human_flag",
-          "agent_rc": 0,
-          "wall_s": 2.0,
-          "agent_stderr_tail": " | flag rc=0",
-          "steps_recorded": 3,
-          "step_tools": [
-            "Bash",
-            "Bash",
-            "Bash"
-          ],
-          "gaps": 0,
-          "finding": {
-            "state": "located",
-            "fault_class": "agent",
-            "confidence": "heuristic",
-            "layer": "inference",
-            "location": {
-              "kind": "offending",
-              "line": 4,
-              "note": "the region is North, not South",
-              "path": "report.md",
-              "value": "Region: South"
-            },
-            "value": "Region: South",
-            "source": null,
-            "note": "no recorded read contains this value",
-            "_step_writes": [
-              "report.md"
-            ],
-            "_step_tool": "Bash",
-            "_cand_writes": null,
-            "step_n": 2,
-            "actor": {
-              "platform": "claude",
-              "session": "3a47c4f4-35bf-4378-9c17-dc799c40a058"
-            }
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": true,
-          "feedback_text": "the task owner marked these places in the deliverable as wrong:\n- flag:h_331d09e192: FAIL — report.md:4 says \"Region: South\"\n  the task owner says: the region is North, not South\n  this value first appeared at step 2 (Bash)\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\": \"text\", \"text\": \"\nYou are",
-          "feedback_has_location": true,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": true,
-          "final_decision": "accept",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 17 entries",
-          "hook_ms_p50": 6.5,
-          "hook_ms_p95": 9.8,
-          "hook_calls": 13,
-          "model_requests": 3
         },
         "G_background_subagent_fault": {
           "scenario": "G_background_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 3.8,
+          "wall_s": 3.9,
           "agent_stderr_tail": "",
           "steps_recorded": 6,
           "step_tools": [
@@ -448,10 +338,10 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "aade6dca7a21a7392",
+              "agent": "a3c3c14e676ddb7e5",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "446feca8-6ccd-4666-9614-c3b04288efc1"
+              "session": "d78c617e-7f77-43a3-ab68-79493b3163a9"
             }
           },
           "judgement": {
@@ -466,15 +356,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 11.1,
+          "hook_ms_p50": 3.3,
+          "hook_ms_p95": 7.7,
           "hook_calls": 20,
           "model_requests": 10
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 4.0,
+          "wall_s": 4.5,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -510,10 +400,10 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "a3e0b31e8480141c7",
+              "agent": "a6ae532aa09fbb20e",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "02e7b2c7-f7d4-48b6-8821-65c64628b556"
+              "session": "624a0e02-b779-4f83-95cf-7e9098cf6f36"
             }
           },
           "judgement": {
@@ -528,8 +418,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 4.0,
-          "hook_ms_p95": 7.2,
+          "hook_ms_p50": 4.1,
+          "hook_ms_p95": 8.2,
           "hook_calls": 20,
           "model_requests": 10
         }
@@ -544,30 +434,28 @@
               "csv_total"
             ],
             "label": "claude main [unknown]",
-            "runs": 10,
-            "accepted": 10,
+            "runs": 7,
+            "accepted": 7,
             "provable_faults": 1,
-            "mean": 0.5505486235418219,
-            "observations": 2.162335173870813
+            "mean": 0.544801555527352,
+            "observations": 1.5807589552163743
           }
         ],
         "sources": {
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_ca50c571ed"
+              "f_dcee5c1542"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_31f9aa6a75"
+              "f_bb705f2ab4"
             ]
           }
         },
-        "coverage_gaps": {
-          "claude": 1
-        },
+        "coverage_gaps": {},
         "dismissed": []
       }
     },
@@ -580,8 +468,8 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 2.8,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 2.9,
+          "agent_stderr_tail": "",
           "steps_recorded": 3,
           "step_tools": [
             "Bash",
@@ -614,7 +502,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b8-9ec0-7402-8a0c-acaa748f4c87"
+              "session": "01a0d5f9-1a6b-7d81-9e91-6a3abeb3946b"
             }
           },
           "judgement": {
@@ -629,16 +517,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.4,
-          "hook_ms_p95": 9.4,
+          "hook_ms_p50": 3.7,
+          "hook_ms_p95": 7.7,
           "hook_calls": 10,
           "model_requests": 5
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 3.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 3.5,
+          "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
             "Bash",
@@ -686,16 +574,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 6.2,
-          "hook_ms_p95": 11.0,
+          "hook_ms_p50": 3.8,
+          "hook_ms_p95": 7.1,
           "hook_calls": 12,
           "model_requests": 6
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 3.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 3.4,
+          "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
             "Bash",
@@ -729,7 +617,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b8-d345-7c02-898f-76f762e3ab7d"
+              "session": "01a0d5fa-5ac1-7942-a4b8-fd0c6baa2423"
             }
           },
           "judgement": {
@@ -744,71 +632,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.1,
-          "hook_ms_p95": 8.5,
+          "hook_ms_p50": 3.4,
+          "hook_ms_p95": 6.8,
           "hook_calls": 12,
           "model_requests": 6
-        },
-        "D_unrecorded_change": {
-          "scenario": "D_unrecorded_change",
-          "agent_rc": 0,
-          "wall_s": 1.6,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
-          "steps_recorded": 1,
-          "step_tools": [
-            "Bash"
-          ],
-          "gaps": 1,
-          "finding": {
-            "state": "UNOBSERVED",
-            "fault_class": "unattributable",
-            "confidence": "gap",
-            "layer": "inference",
-            "location": {
-              "col": 8,
-              "kind": "offending",
-              "line": 3,
-              "note": "recomputed 69.0 from input:ledger",
-              "path": "report.md",
-              "value": "999"
-            },
-            "value": "999",
-            "source": {
-              "observed_at": "check",
-              "paths": [
-                "report.md"
-              ],
-              "seq": 8
-            },
-            "note": "changed outside any recorded step",
-            "_step_writes": null,
-            "_step_tool": null,
-            "_cand_writes": null,
-            "step_n": null,
-            "actor": null
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "accept",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 6.5,
-          "hook_ms_p95": 6.7,
-          "hook_calls": 5,
-          "model_requests": 2
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 3.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 3.1,
+          "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
             "Bash",
@@ -856,16 +689,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.2,
-          "hook_ms_p95": 8.7,
+          "hook_ms_p50": 3.7,
+          "hook_ms_p95": 6.8,
           "hook_calls": 12,
           "model_requests": 7
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 5.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 5.5,
+          "agent_stderr_tail": "",
           "steps_recorded": 11,
           "step_tools": [
             "spawn_agent",
@@ -904,11 +737,11 @@
             "_cand_writes": null,
             "step_n": 6,
             "actor": {
-              "agent": "01a0d5b9-2038-7ee3-9bdc-948125f2ad35",
+              "agent": "01a0d5fb-a11d-7150-8609-67e8f8445ff3",
               "agent_type": "default",
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b9-1d2e-7583-8412-442c621d1ac2"
+              "session": "01a0d5fb-9df6-73f1-9840-e3762c6bb48d"
             }
           },
           "judgement": {
@@ -923,72 +756,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 23 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 9.6,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 9.8,
           "hook_calls": 32,
           "model_requests": 14
-        },
-        "H_human_flag": {
-          "scenario": "H_human_flag",
-          "agent_rc": 0,
-          "wall_s": 2.0,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n | flag rc=0",
-          "steps_recorded": 3,
-          "step_tools": [
-            "Bash",
-            "Bash",
-            "Bash"
-          ],
-          "gaps": 0,
-          "finding": {
-            "state": "located",
-            "fault_class": "agent",
-            "confidence": "heuristic",
-            "layer": "inference",
-            "location": {
-              "kind": "offending",
-              "line": 4,
-              "note": "the region is North, not South",
-              "path": "report.md",
-              "value": "Region: South"
-            },
-            "value": "Region: South",
-            "source": null,
-            "note": "no recorded read contains this value",
-            "_step_writes": [
-              "report.md"
-            ],
-            "_step_tool": "Bash",
-            "_cand_writes": null,
-            "step_n": 2,
-            "actor": {
-              "model": "mock-model",
-              "platform": "codex",
-              "session": "01a0d5b9-3fe7-7e51-bb4c-a0679cf94450"
-            }
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": true,
-          "feedback_text": "the task owner marked these places in the deliverable as wrong:\n- flag:h_331d09e192: FAIL — report.md:4 says \"Region: South\"\n  the task owner says: the region is North, not South\n  this value first appeared at step 2 (Bash)\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to execute.\"}, \"justification\"",
-          "feedback_has_location": true,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": true,
-          "final_decision": "accept",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 17 entries",
-          "hook_ms_p50": 4.3,
-          "hook_ms_p95": 59.0,
-          "hook_calls": 13,
-          "model_requests": 3
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 4.6,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 5.1,
+          "agent_stderr_tail": "",
           "steps_recorded": 8,
           "step_tools": [
             "spawn_agent",
@@ -1024,11 +801,11 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "01a0d5b9-6b63-7373-b9c8-6e4bf52045fc",
+              "agent": "01a0d5fc-494b-7be2-bf82-7f1670778ee0",
               "agent_type": "default",
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b9-69b2-7243-8a78-a4cc8034690a"
+              "session": "01a0d5fc-4786-7df3-b881-3b9eba70b250"
             }
           },
           "judgement": {
@@ -1043,8 +820,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 18 entries",
-          "hook_ms_p50": 3.6,
-          "hook_ms_p95": 6.8,
+          "hook_ms_p50": 3.0,
+          "hook_ms_p95": 6.7,
           "hook_calls": 23,
           "model_requests": 11
         }
@@ -1059,30 +836,28 @@
               "csv_total"
             ],
             "label": "codex main [claimed:mock-model]",
-            "runs": 9,
-            "accepted": 9,
+            "runs": 6,
+            "accepted": 6,
             "provable_faults": 1,
-            "mean": 0.5489678201878305,
-            "observations": 1.9691479080858438
+            "mean": 0.5419646741179192,
+            "observations": 1.3855526030611294
           }
         ],
         "sources": {
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_ade0b0d5cd"
+              "f_a19436a0e7"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_323b960671"
+              "f_11bbbbc8a8"
             ]
           }
         },
-        "coverage_gaps": {
-          "codex": 1
-        },
+        "coverage_gaps": {},
         "dismissed": []
       }
     },
@@ -1095,7 +870,7 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 2.1,
+          "wall_s": 2.3,
           "agent_stderr_tail": "",
           "steps_recorded": 3,
           "step_tools": [
@@ -1129,7 +904,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5b9-8cad-75c3-90c8-076e8600d932"
+              "session": "01a0d5fc-f1c4-7783-abb2-f36a6a25b552"
             }
           },
           "judgement": {
@@ -1144,15 +919,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 4.4,
-          "hook_ms_p95": 7.7,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 6.3,
           "hook_calls": 10,
           "model_requests": 5
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 2.3,
+          "wall_s": 2.6,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1201,15 +976,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.9,
-          "hook_ms_p95": 7.3,
+          "hook_ms_p50": 3.7,
+          "hook_ms_p95": 6.8,
           "hook_calls": 12,
           "model_requests": 6
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 2.3,
+          "wall_s": 2.6,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1244,7 +1019,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5b9-ba50-7058-9830-b5528351a806"
+              "session": "01a0d5fe-2c5a-713e-86f9-b9ec1fa0c0a2"
             }
           },
           "judgement": {
@@ -1259,70 +1034,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 5.0,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 9.5,
           "hook_calls": 12,
           "model_requests": 6
-        },
-        "D_unrecorded_change": {
-          "scenario": "D_unrecorded_change",
-          "agent_rc": 0,
-          "wall_s": 1.2,
-          "agent_stderr_tail": "",
-          "steps_recorded": 1,
-          "step_tools": [
-            "write"
-          ],
-          "gaps": 1,
-          "finding": {
-            "state": "UNOBSERVED",
-            "fault_class": "unattributable",
-            "confidence": "gap",
-            "layer": "inference",
-            "location": {
-              "col": 8,
-              "kind": "offending",
-              "line": 3,
-              "note": "recomputed 69.0 from input:ledger",
-              "path": "report.md",
-              "value": "999"
-            },
-            "value": "999",
-            "source": {
-              "observed_at": "check",
-              "paths": [
-                "report.md"
-              ],
-              "seq": 7
-            },
-            "note": "changed outside any recorded step",
-            "_step_writes": null,
-            "_step_tool": null,
-            "_cand_writes": null,
-            "step_n": null,
-            "actor": null
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "accept",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 9 entries",
-          "hook_ms_p50": 7.0,
-          "hook_ms_p95": 7.1,
-          "hook_calls": 5,
-          "model_requests": 2
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 2.3,
+          "wall_s": 2.5,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1371,15 +1091,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 7.0,
+          "hook_ms_p50": 4.1,
+          "hook_ms_p95": 6.9,
           "hook_calls": 12,
           "model_requests": 7
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 3.8,
+          "wall_s": 4.2,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
@@ -1417,11 +1137,11 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "01a0d5b9-ff25-72f1-a8c2-cd2afe756279",
+              "agent": "01a0d5ff-6c29-7110-bcde-0079ff18f07a",
               "agent_type": "worker",
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5b9-fc03-727b-a0ab-6dfe1e27dab5"
+              "session": "01a0d5ff-6878-7133-aa71-bf80e823a564"
             }
           },
           "judgement": {
@@ -1436,71 +1156,15 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 18 entries",
-          "hook_ms_p50": 2.7,
-          "hook_ms_p95": 7.0,
+          "hook_ms_p50": 3.6,
+          "hook_ms_p95": 6.9,
           "hook_calls": 26,
           "model_requests": 12
-        },
-        "H_human_flag": {
-          "scenario": "H_human_flag",
-          "agent_rc": 0,
-          "wall_s": 1.5,
-          "agent_stderr_tail": " | flag rc=0",
-          "steps_recorded": 3,
-          "step_tools": [
-            "bash",
-            "write",
-            "write"
-          ],
-          "gaps": 0,
-          "finding": {
-            "state": "located",
-            "fault_class": "agent",
-            "confidence": "heuristic",
-            "layer": "inference",
-            "location": {
-              "kind": "offending",
-              "line": 4,
-              "note": "the region is North, not South",
-              "path": "report.md",
-              "value": "Region: South"
-            },
-            "value": "Region: South",
-            "source": null,
-            "note": "no recorded read contains this value",
-            "_step_writes": [
-              "report.md"
-            ],
-            "_step_tool": "write",
-            "_cand_writes": null,
-            "step_n": 2,
-            "actor": {
-              "model": "mock/mock-model",
-              "platform": "pi",
-              "session": "01a0d5ba-195d-70b5-8850-c0f73da09117"
-            }
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": true,
-          "feedback_text": "the task owner marked these places in the deliverable as wrong:\n- flag:h_331d09e192: FAIL — report.md:4 says \"Region: South\"\n  the task owner says: the region is North, not South\n  this value first appeared at step 2 (write)\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text files, ou",
-          "feedback_has_location": true,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": true,
-          "final_decision": "accept",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 4.7,
-          "hook_ms_p95": 7.1,
-          "hook_calls": 13,
-          "model_requests": 3
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 3.8,
+          "wall_s": 4.1,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -1536,11 +1200,11 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "01a0d5ba-4244-724c-b577-cf0703532453",
+              "agent": "01a0d600-1147-743c-901d-55b5b2eac998",
               "agent_type": "worker",
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5ba-3f59-7319-bec5-71adb6e57e93"
+              "session": "01a0d600-0e56-7093-8bf5-e590ae575d81"
             }
           },
           "judgement": {
@@ -1555,8 +1219,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 3.7,
-          "hook_ms_p95": 7.3,
+          "hook_ms_p50": 3.9,
+          "hook_ms_p95": 6.6,
           "hook_calls": 20,
           "model_requests": 10
         }
@@ -1571,30 +1235,28 @@
               "csv_total"
             ],
             "label": "pi main [claimed:mock/mock-model]",
-            "runs": 9,
-            "accepted": 9,
+            "runs": 6,
+            "accepted": 6,
             "provable_faults": 1,
-            "mean": 0.5489678201878305,
-            "observations": 1.9691479080858438
+            "mean": 0.5419646741179192,
+            "observations": 1.3855526030611294
           }
         ],
         "sources": {
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_cd28279383"
+              "f_777bcb2dbb"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_4701f5863f"
+              "f_27c3f841f4"
             ]
           }
         },
-        "coverage_gaps": {
-          "pi": 1
-        },
+        "coverage_gaps": {},
         "dismissed": []
       }
     },
@@ -1607,10 +1269,11 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 16.2,
+          "wall_s": 18.4,
           "agent_stderr_tail": "",
-          "steps_recorded": 2,
+          "steps_recorded": 3,
           "step_tools": [
+            "bash",
             "bash",
             "bash"
           ],
@@ -1639,33 +1302,35 @@
             "step_n": 2,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f2a457393ffeTtsklDnNZKaj3n"
+              "session": "ses_f29ff27b5ffeEX4L34R3nfRrik"
             }
           },
           "judgement": {
             "correct": true,
             "mismatch": []
           },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \\\"999\\\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (bash)\nRun `vacant check` to re-check before finishing.\"\"}], \"stream\": true, \"stream_options\": {\"include_usage\": true}}",
+          "feedback_has_location": true,
           "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "reject",
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 4.9,
-          "hook_ms_p95": 7.2,
-          "hook_calls": 5,
-          "model_requests": 4
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.1,
+          "hook_ms_p95": 6.9,
+          "hook_calls": 8,
+          "model_requests": 7
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 6.0,
+          "wall_s": 11.6,
           "agent_stderr_tail": "",
-          "steps_recorded": 2,
+          "steps_recorded": 4,
           "step_tools": [
+            "bash",
+            "bash",
             "bash",
             "bash"
           ],
@@ -1701,26 +1366,28 @@
             "correct": true,
             "mismatch": []
           },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \\\"75\\\"\n  expected 69 (column 'amount', 3 rows)\n  the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer\nRun `vacant check` to re-check before finishing.\"\"}], \"stream\": true, \"stream_options\": {\"include_usage\": true}}",
+          "feedback_has_location": true,
           "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "reject",
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 6.0,
-          "hook_ms_p95": 6.4,
-          "hook_calls": 5,
-          "model_requests": 4
+          "chain_verify_out": "OK 13 entries",
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 6.6,
+          "hook_calls": 10,
+          "model_requests": 8
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 5.9,
+          "wall_s": 11.8,
           "agent_stderr_tail": "",
-          "steps_recorded": 2,
+          "steps_recorded": 4,
           "step_tools": [
+            "bash",
+            "bash",
             "bash",
             "bash"
           ],
@@ -1749,88 +1416,35 @@
             "step_n": 1,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f2a45257dffeCf8Pa9tcd0O39W"
+              "session": "ses_f29fda763ffeAquSv6B4ANbjMW"
             }
           },
           "judgement": {
             "correct": true,
             "mismatch": []
           },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \\\"306\\\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 1 (bash); step 2 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"\"}], \"stream\": true, \"stream_options\": {\"include_usage\": true}}",
+          "feedback_has_location": true,
           "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "reject",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 7 entries",
-          "hook_ms_p50": 7.9,
-          "hook_ms_p95": 9.3,
-          "hook_calls": 5,
-          "model_requests": 4
-        },
-        "D_unrecorded_change": {
-          "scenario": "D_unrecorded_change",
-          "agent_rc": 0,
-          "wall_s": 5.2,
-          "agent_stderr_tail": "",
-          "steps_recorded": 1,
-          "step_tools": [
-            "bash"
-          ],
-          "gaps": 1,
-          "finding": {
-            "state": "UNOBSERVED",
-            "fault_class": "unattributable",
-            "confidence": "gap",
-            "layer": "inference",
-            "location": {
-              "col": 8,
-              "kind": "offending",
-              "line": 3,
-              "note": "recomputed 69.0 from input:ledger",
-              "path": "report.md",
-              "value": "999"
-            },
-            "value": "999",
-            "source": {
-              "observed_at": "check",
-              "paths": [
-                "report.md"
-              ],
-              "seq": 6
-            },
-            "note": "changed outside any recorded step",
-            "_step_writes": null,
-            "_step_tool": null,
-            "_cand_writes": null,
-            "step_n": null,
-            "actor": null
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
+          "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 6.8,
-          "hook_ms_p95": 6.8,
-          "hook_calls": 3,
-          "model_requests": 3
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.6,
+          "hook_ms_p95": 7.5,
+          "hook_calls": 10,
+          "model_requests": 8
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 5.8,
+          "wall_s": 12.5,
           "agent_stderr_tail": "",
-          "steps_recorded": 2,
+          "steps_recorded": 4,
           "step_tools": [
+            "bash",
+            "bash",
             "bash",
             "bash"
           ],
@@ -1866,31 +1480,95 @@
             "correct": true,
             "mismatch": []
           },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \\\"58\\\"\n  expected 69 (column 'amount', 3 rows)\n  the same value came from http://portal.vacant-lab.test/web/q3.txt\nRun `vacant check` to re-check before finishing.\"\"}], \"stream\": true, \"stream_options\": {\"include_usage\": true}}",
+          "feedback_has_location": true,
           "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "reject",
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 5.9,
-          "hook_ms_p95": 7.0,
-          "hook_calls": 5,
-          "model_requests": 5
+          "chain_verify_out": "OK 13 entries",
+          "hook_ms_p50": 4.9,
+          "hook_ms_p95": 12.3,
+          "hook_calls": 10,
+          "model_requests": 9
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 7.9,
+          "wall_s": 14.6,
+          "agent_stderr_tail": "",
+          "steps_recorded": 9,
+          "step_tools": [
+            "bash",
+            "bash",
+            "task",
+            "bash",
+            "task",
+            "bash",
+            "bash",
+            "bash",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "lineage_internal",
+            "layer": "inference",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "96"
+            },
+            "value": "96",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "figure.txt"
+            ],
+            "_step_tool": "bash",
+            "_cand_writes": null,
+            "step_n": 4,
+            "actor": {
+              "agent": "ses_f29fc1795ffecGaQYLAVsRSlNm",
+              "agent_type": "subagent",
+              "platform": "opencode",
+              "session": "ses_f29fc2092fferLEhHUoFRkKfWU"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \\\"96\\\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 4 (bash); step 7 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"\"}], \"stream\": true, \"stream_options\": {\"include_usage\": true}}",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "accept",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 17 entries",
+          "hook_ms_p50": 4.8,
+          "hook_ms_p95": 14.2,
+          "hook_calls": 20,
+          "model_requests": 14
+        },
+        "E_subagent_fault": {
+          "scenario": "E_subagent_fault",
+          "agent_rc": 0,
+          "wall_s": 13.2,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
             "bash",
             "bash",
+            "task",
             "bash",
-            "task",
-            "task",
+            "bash",
             "bash",
             "bash"
           ],
@@ -1916,144 +1594,30 @@
             ],
             "_step_tool": "bash",
             "_cand_writes": null,
-            "step_n": 3,
-            "actor": {
-              "agent": "ses_f2a44af6bffeuE1zntAhHM7ime",
-              "agent_type": "subagent",
-              "platform": "opencode",
-              "session": "ses_f2a44b852ffeRQiVHXKt0GrL1o"
-            }
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "reject",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.8,
-          "hook_ms_p95": 8.9,
-          "hook_calls": 15,
-          "model_requests": 10
-        },
-        "H_human_flag": {
-          "scenario": "H_human_flag",
-          "agent_rc": 0,
-          "wall_s": 5.8,
-          "agent_stderr_tail": " | flag rc=0",
-          "steps_recorded": 2,
-          "step_tools": [
-            "bash",
-            "bash"
-          ],
-          "gaps": 0,
-          "finding": {
-            "state": "located",
-            "fault_class": "agent",
-            "confidence": "heuristic",
-            "layer": "inference",
-            "location": {
-              "kind": "offending",
-              "line": 4,
-              "note": "the region is North, not South",
-              "path": "report.md",
-              "value": "Region: South"
-            },
-            "value": "Region: South",
-            "source": null,
-            "note": "no recorded read contains this value",
-            "_step_writes": [
-              "report.md"
-            ],
-            "_step_tool": "bash",
-            "_cand_writes": null,
             "step_n": 2,
             "actor": {
+              "agent": "ses_f29fb4cbaffe22l6bLu5o6uBv3",
+              "agent_type": "subagent",
               "platform": "opencode",
-              "session": "ses_f2a448acbffeJkU5AYu7BLHwkO"
+              "session": "ses_f29fb54b2ffepQyMaaEj9P5Ct8"
             }
           },
           "judgement": {
             "correct": true,
             "mismatch": []
           },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \\\"96\\\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 2 (bash); step 5 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"\"}], \"stream\": true, \"stream_options\": {\"include_usage\": true}}",
+          "feedback_has_location": true,
           "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
+          "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 5.0,
-          "hook_ms_p95": 6.9,
-          "hook_calls": 6,
-          "model_requests": 2
-        },
-        "E_subagent_fault": {
-          "scenario": "E_subagent_fault",
-          "agent_rc": 0,
-          "wall_s": 7.8,
-          "agent_stderr_tail": "",
-          "steps_recorded": 5,
-          "step_tools": [
-            "bash",
-            "bash",
-            "task",
-            "bash",
-            "bash"
-          ],
-          "gaps": 0,
-          "finding": {
-            "state": "located",
-            "fault_class": "agent",
-            "confidence": "lineage_internal",
-            "layer": "inference",
-            "location": {
-              "col": 8,
-              "kind": "offending",
-              "line": 3,
-              "note": "recomputed 69.0 from input:ledger",
-              "path": "report.md",
-              "value": "96"
-            },
-            "value": "96",
-            "source": null,
-            "note": "no recorded read contains this value",
-            "_step_writes": [
-              "figure.txt"
-            ],
-            "_step_tool": "bash",
-            "_cand_writes": null,
-            "step_n": 2,
-            "actor": {
-              "agent": "ses_f2a443f8effeugE9ieUKgJh0Bo",
-              "agent_type": "subagent",
-              "platform": "opencode",
-              "session": "ses_f2a444808ffenK8EbwM0i4Im6s"
-            }
-          },
-          "judgement": {
-            "correct": true,
-            "mismatch": []
-          },
-          "feedback_reached_model": false,
-          "feedback_text": null,
-          "feedback_has_location": false,
-          "feedback_has_actor_id": false,
-          "resolved_after_feedback": false,
-          "final_decision": "reject",
-          "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 4.7,
-          "hook_ms_p95": 6.9,
-          "hook_calls": 11,
-          "model_requests": 8
+          "chain_verify_out": "OK 15 entries",
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 11.2,
+          "hook_calls": 16,
+          "model_requests": 12
         }
       },
       "actors": {
@@ -2066,33 +1630,31 @@
               "csv_total"
             ],
             "label": "opencode main [unknown]",
-            "runs": 9,
-            "accepted": 3,
+            "runs": 6,
+            "accepted": 6,
             "provable_faults": 1,
-            "mean": 0.44040304920505624,
-            "observations": 1.9691479080858443
+            "mean": 0.5419646741179192,
+            "observations": 1.3855526030611294
           }
         ],
         "sources": {
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_a186d89c81"
+              "f_8359a53495"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_7872bd2e37"
+              "f_98626e33e9"
             ]
           }
         },
-        "coverage_gaps": {
-          "opencode": 1
-        },
+        "coverage_gaps": {},
         "dismissed": []
       }
     }
   },
-  "finished": "2026-09-24T23:24:14+0000"
+  "finished": "2026-09-25T00:44:34+0000"
 }

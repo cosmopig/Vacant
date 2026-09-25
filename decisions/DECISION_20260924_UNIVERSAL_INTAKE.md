@@ -141,6 +141,8 @@ Vacant 不碰模型流量）：`ops/intake/e2e_four_agents.py`，結果見
 - 「agent 不能作惡／不會被繞過」——掛鉤 agent 拆得掉、shell 能繞過字串規則；保證只在收件端。
 - 「Vacant 讓 agent 做得更好」——本輪的回饋效果是**劇本**寫的（假模型看到回饋就改），不是模型能力。
 - 「OpenCode 有交件前回饋」——`opencode run` 沒有；只有互動 TUI 有機會（未量）。
+  - 補記 2026-09-25：互動 TUI 量過了，**有**（L-fake，`ops/accountability/e2e_tui.py`）；`vacant do` 也有（下一次嘗試）。
+    可以講的是「OpenCode 的互動 TUI 與 `vacant do` 有交件前回饋，`opencode run` 沒有」——不帶條件的那句仍然不可以講。
 - 「四個 agent 真模型都成立」——本輪是 L-fake。
 
 ## 九、文獻落點（專案自己的文獻卡，研究筆記 04–07）

@@ -348,6 +348,14 @@ def _bump_round(session_id: str | None) -> int:
     return n
 
 
+def new_request(session_id: str | None) -> None:
+    """人打了一個新的要求 ⇒ 回饋輪數重新算。輪數上限防的是「一個要求之內」agent 被無限推回去；
+    互動介面裡前面幾個回合（人只是問問題、還沒要它交件）用掉的輪數，不可以讓之後真的寫錯時
+    agent 收不到位置（2026-09-25 互動 TUI 實測時發現）。只有人打的那一則算——呼叫端負責分辨
+    （`hook._person_prompt`）。"""
+    _rounds_file(session_id).unlink(missing_ok=True)
+
+
 def decide_stop(ev: HookEvent, contract, *, check_fn, localize=None) -> HookDecision:
     """`localize(res, why_open) -> {"text", "summary", "report", "blames"} | None`：可究責追緝
     （`trace/stopcheck.py`）。給了就用**有位置、有來源**的回饋取代泛用回饋；agent 不會再被要求

@@ -347,15 +347,23 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
             if any(e["type"] == "finding" for e in lab.trace_events()):
                 break
             time.sleep(1)
+    return collect(lab, scn, rc=rc, wall=wall, err_tail=err_tail, do_ws=do_ws)
+
+
+def collect(lab: Lab, scn: str, *, rc: int | None, wall: float, err_tail: str,
+            do_ws: str | None = None) -> dict:
+    """一格跑完之後：病歷裡的結論、模型真的收到的回饋、收件的裁決、鏈、掛鉤時間（`e2e_tui` 共用）。"""
     home_proj = lab.proj
     if do_ws:
         lab.proj = pathlib.Path(do_ws)             # 追緝記在 `vacant do` 的工作區那一條病歷上
     evs = lab.trace_events()
     steps = {e.get("n"): e for e in evs if e["type"] == "step"}
     prefix = EXPECT[scn].get("claim_prefix")
+    want = EXPECT[scn].get("value")          # 同一條主張在不同回合開過好幾次：指定是哪一個值的那一次
     findings = [e for e in evs if e["type"] == "finding" and e.get("status") == "open"
                 and (str(e.get("claim", "")).startswith(prefix) if prefix
-                     else e.get("claim") == "total")]
+                     else e.get("claim") == "total")
+                and (want is None or str(e.get("value")) == want)]
     f = dict(findings[0]) if findings else None
     if f and f.get("step"):
         s = steps.get(f["step"].get("n")) or {}
@@ -399,6 +407,8 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
         "hook_ms_p95": round(sorted(perf)[max(0, int(len(perf) * 0.95) - 1)], 1) if perf else None,
         "hook_calls": len(perf),
         "model_requests": len(mock),
+        # 假模型只收實驗給的假金鑰（`mock_model.FAKE_KEY_PREFIX`）：被拒的請求＝agent 帶了別的憑證
+        "auth_rejected": sum(1 for m in mock if m.get("auth") == "rejected"),
     }
 
 

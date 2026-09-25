@@ -112,8 +112,8 @@
 - 對抗審查（裁決 §十一，60 條逐條重現）的回歸：`tests/test_{intake_gate,intake_verifier,adapters}_hardening.py`
 
 🔴 口徑：✅「不合格的版本沒有出現在收件端的目的地」（只對經過 `vacant release` 的那個目的端）；
-❌「agent 不會繞過」「Vacant 讓 agent 做得更好」（回饋後改對是劇本）；❌「OpenCode 有交件前回饋」
-（`opencode run` 在第一個 idle 就結束）。⚠ `vacant install` 現在是通用安裝器，舊的模型通道常駐安裝是
+❌「agent 不會繞過」「Vacant 讓 agent 做得更好」（回饋後改對是劇本）；❌「OpenCode 有交件前回饋」不帶條件
+（`opencode run` 在第一個 idle 就結束；✅「OpenCode 的互動 TUI 與 `vacant do` 有」，L-fake，`ops/accountability/e2e_tui.py`）。⚠ `vacant install` 現在是通用安裝器，舊的模型通道常駐安裝是
 `vacant possess install`；`vacant uninstall`（不帶 `--agents`）會一起拆掉它。
 
 ### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
