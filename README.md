@@ -44,9 +44,14 @@ vacant install                # 找到你機器上的 pi／Claude Code／OpenCod
 用 Gate 1 的**真實** pi 紀錄重播（[`ops/eval/evidence_20260925/replay/`](ops/eval/evidence_20260925/replay/)）：
 答對的 3 跑全部放行。
 
-⚠ **不能讀成**「Vacant 讓 agent 做得更好」：退回之後改對是劇本寫的；真模型會不會照做、公開題庫的成績有沒有變，
-是還沒跑的評測（[`decisions/DECISION_20260925_ZERO_CONFIG_EVAL.md`](decisions/DECISION_20260925_ZERO_CONFIG_EVAL.md)）要量的。
-退回只根據紀錄，不判斷答案對不對：推理錯了但每一步都有根據的答案，它看不出來。
+**真模型、預註冊的正式批次（2026-09-25，DABstep 77 題，pi 0.87.1，15 回合上限）：沒有量到差別。**
+gemma-4-26b 開思考：沒裝 50／77、裝了 44／77（p＝0.21）；qwen3.8-27b 開思考：68／77 對 64／77（p＝0.29）。
+所有翻轉都發生在 Vacant 沒有退回的那幾跑（兩次獨立取樣的差異）；8 次退回裡 7 次退的是本來就對的答案（兩個誤報的錯，事後已修），
+修好之後用同一批紀錄重播，158 跑一次都不會退回——DABstep 上真實的失敗（推理錯、回合用完）不是這幾類檢查抓得到的。
+全文與原始紀錄：[`decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)。
+
+⚠ **不能讀成**「Vacant 讓 agent 做得更好」，也不能讀成「沒有用」：退回只根據紀錄，不判斷答案對不對；
+推理錯了但每一步都有根據的答案，它看不出來。
 
 ## 接到你的 agent 上：pi／Claude Code／OpenCode／Codex（2026-09-24 起）
 

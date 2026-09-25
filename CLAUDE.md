@@ -177,8 +177,11 @@
 - `ops/eval/replay_pi_session.py`＋`replay_gate.py` — 真實 pi 工作階段在題目容器裡經過真的 `vacant hook pi` 重播（量誤報）
 - `ops/eval/simuser/` — 模擬使用者：只照 README 裝、照常用 pi，A/C 對照
 
-🔴 口徑：✅「沒有問題時模型收到的每一通請求和沒裝時逐位元組相同」（simuser `correct`）；✅「答對的真實紀錄 3/3 放行」（replay）；
-❌「Vacant 讓 agent 做得更好」（退回後改對是劇本，真模型要評測量）；❌「Vacant 判斷答案對錯」（只看每一步有沒有根據）。
+🔴 口徑：✅「沒有問題時模型收到的每一通請求和沒裝時逐位元組相同」（simuser `correct`；正式批次 157 對的第一通請求、99 對的工具結果）；
+✅「DABstep 77 題、gemma／qwen 開思考：裝與沒裝**沒有量到差別**（p＝0.21／0.29）」（預註冊正式批次，
+`decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`）；
+❌「Vacant 讓 agent 做得更好」「Vacant 沒有用」「讓成績變差」；❌「Vacant 判斷答案對錯」（只看每一步有沒有根據）。
+⚠ 正式批次那一版有兩個誤報（跑自己寫的腳本被當成讀交付物、grep 沒找到當成失敗；8 次退回有 7 次退的是對的答案），事後已修，不改變結果。
 ⚠ Harbor 的 pi 用自訂端點時以 `PI_CODING_AGENT_DIR` 隔離設定，`~/.pi/agent` 的擴充不會載入——評測的 C 組要裝到那個目錄。
 
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）

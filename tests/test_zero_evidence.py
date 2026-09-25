@@ -363,3 +363,48 @@ def test_mentions_that_are_not_outputs_are_not_requested_outputs(env):
     r = a.evidence()
     assert r["requested_outputs"] == ["utils.py"]
     assert r["findings"] == []                    # utils.py 已經在了：不是「沒寫出來」
+
+
+def test_output_of_a_script_the_agent_wrote_and_ran_is_a_source(env):
+    """正式批次（gemma 第 25 題）：腳本印出 2429、答案寫 2429，卻被退回「找不到出處」——跑自己寫的腳本被當成
+    「回頭讀自己的交付物」而把輸出丟掉。答對的答案不可以被退回。"""
+    p = _app(env, {"data/payments.csv": "id,eur_amount\n1,10\n2,32\n"})
+    a = Agent(p)
+    a.ask("Answer by referencing files in `/app/data/`. When you have computed the final answer, "
+          "write ONLY the final answer to `/app/answer.txt`.")
+    a.bash("head -n 3 /app/data/payments.csv", "id,eur_amount\n1,10\n2,32\n")
+    a.write("analyze.py", "import pandas as pd\ndf = pd.read_csv('/app/data/payments.csv')\n"
+                          "print('Number of outliers:', 2429)\n")
+    a.bash("python3 /app/analyze.py", "Number of outliers: 2429\n")
+    a.write("answer.txt", "2429")
+    assert a.evidence()["findings"] == []
+
+
+def test_a_search_that_finds_nothing_is_not_a_failed_step(env):
+    """正式批次（gemma 第 62 題、qwen 第 40 題）：`grep` 沒找到（結束碼 1）被當成失敗的步驟退回。"""
+    p = _app(env, {"data/manual.md": "# Manual\nfees\n", "data/merchant_data.json": "[]\n"})
+    a = Agent(p)
+    a.ask("Answer by referencing files in `/app/data/`. Write ONLY the final answer to "
+          "`/app/answer.txt`.")
+    a.read("data/manual.md")
+    a.bash('grep -i "retry" /app/data/merchant_data.json', "", error=True)
+    a.bash('cat /app/data/manual.md | grep -n "90th"', "", error=True)
+    a.write("answer.txt", "Not Applicable")
+    assert [f for f in a.evidence()["findings"] if f["kind"] == "failed_step"] == []
+
+
+def test_a_search_that_errors_on_a_given_file_is_still_a_failed_step(env):
+    p = _app(env, {"data/manual.md": "# Manual\n"})
+    a = Agent(p)
+    a.ask("Answer by referencing files in `/app/data/`. Write ONLY the final answer to "
+          "`/app/answer.txt`.")
+    a.read("data/manual.md")
+    a.n += 1
+    pre = {"session_id": a.s, "cwd": str(a.p), "tool_name": "Bash", "tool_use_id": f"t{a.n}",
+           "tool_input": {"command": "grep -P 'fee(' /app/data/manual.md"}}
+    hook.handle("claude", "PreToolUse", pre)
+    hook.handle("claude", "PostToolUseFailure",           # Claude Code 失敗時把錯誤放在 `error`
+                {**pre, "error": "grep: missing closing parenthesis", "is_error": True})
+    a.write("answer.txt", "42")
+    kinds = [f["kind"] for f in a.evidence()["findings"]]
+    assert "failed_step" in kinds

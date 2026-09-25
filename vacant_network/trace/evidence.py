@@ -78,6 +78,13 @@ OUTPUT_PREP = re.compile(r"(?:\b(?:to|in|into|as|at)\b|到|至|成)\s*(`[^`\n]+`
 OUTPUT_LABEL = re.compile(r"output[ _-]?(?:path|file)\b[^\n]*\n(?:[ \t]*\n)*[ \t]*(`[^`\n]+`|[^\s]+)",
                           re.I)
 FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,6}$")
+#: 執行程式的指令開頭（輸出是計算結果，不是回頭讀檔）
+INTERPRETER = re.compile(r"^\s*(?:cd\s+\S+\s*&&\s*)?(python[0-9.]*|node|nodejs|deno|bun|bash|sh|zsh|ruby|"
+                         r"perl|Rscript|julia|php|go\s+run)\b")
+#: 找不到就回 1 的搜尋指令
+SEARCH_CMD = re.compile(r"^\s*(grep|egrep|fgrep|zgrep|rg|ag)\b")
+SEARCH_ERR = re.compile(r"No such file|Permission denied|Is a directory|(?:^|\n)\s*(grep|rg|ag): |"
+                        r"invalid|unrecognized option", re.I)
 #: 只換目錄或列出檔名的指令（連同它的參數）：不算讀了資料夾裡的內容
 _NOT_A_DIR_READ = re.compile(r"(?<![\w.-])(cd|pushd|ls|tree|du|stat)\b[^;&|\n]*")
 ONLY_ANSWER = re.compile(r"\b(only|just) (the )?(final )?answer\b|write only\b|\bONLY\b", re.I)
@@ -376,8 +383,11 @@ class Evidence:
                 continue
             inp = self.tr.input_text(s)
             refs = set(re.findall(r"[\w./-]+\.[A-Za-z0-9]{1,6}", inp))
-            if refs and all(any(r.endswith(d) or d.endswith(r) for d in deliverables)
-                            for r in refs):
+            # 跑自己寫的腳本是**計算**，不是回頭讀交付物（2026-09-25 正式批次：`python3 /app/analyze.py` 印出的
+            # 2429 被當成「讀自己的交付物」丟掉，答對的答案被退回——6 次誤報的根因）
+            runs_code = bool(INTERPRETER.match(inp)) or any(_ext(r) in CODE_HINT_EXT for r in refs)
+            if refs and not runs_code and all(any(r.endswith(d) or d.endswith(r)
+                                                   for d in deliverables) for r in refs):
                 continue                          # 只是回頭讀自己寫的交付物：不算出處
             parts.append(out)
         for f in observed_files:
@@ -607,6 +617,8 @@ class Evidence:
             outp = self.tr.output_text(s)
             failed = bool(s.error) or bool(re.search(r"Traceback \(most recent call last\)|"
                                                      r"\bError:|Exception:", outp))
+            if failed and _no_match_only(cmd, outp + "\n" + str(s.error or "")):
+                failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
             if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or \
                     RUNNERS.search(cmd):
                 continue
@@ -665,6 +677,15 @@ def _typed(raw: str, obj: Any, path: str, step_inputs: list[tuple[Step, str]]) -
         if any(f and f in text for f in forms):
             return True
     return False
+
+
+def _no_match_only(cmd: str, outp: str) -> bool:
+    """這一步的「失敗」只是搜尋沒找到：指令（或管線的最後一段）是 grep／rg 類，輸出裡沒有真的錯誤。"""
+    stages = [x for x in re.split(r"(?<!\|)\|(?!\|)", cmd or "") if x.strip()]
+    last = stages[-1] if stages else ""
+    if not (SEARCH_CMD.match(cmd or "") or SEARCH_CMD.match(last)):
+        return False
+    return not SEARCH_ERR.search(outp or "")
 
 
 def _changed_lines(old: str, new: str) -> list[int]:
