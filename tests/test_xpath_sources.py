@@ -25,6 +25,8 @@ from vacant_network.trace import recorder as R
 
 SALES = "id,amount\n1,10\n2,20\n3,30\n"
 TASK = "Write report.md with the total."
+#: `vacant do` 的任務本身帶著一個值：重試時它照樣是那個值的來源
+DO_TASK = "Last quarter's total was 4321. Write report.md with this quarter's total."
 
 
 def _contract(p, task_id="q3", rounds=1):
@@ -150,7 +152,8 @@ def step(cid, cmd, act):
 rp = ws / "report.md"
 if rp.exists():                     # 刪掉再重寫同一個錯值：這一次的寫入才是引入它的那一步
     step("rm%d" % n, "rm report.md", rp.unlink)
-step("w%d" % n, "echo 'Total: 999' > report.md", lambda: rp.write_text("Total: 999\n"))
+step("w%d" % n, "printf 'Total: 999\\nLast quarter: 4321\\n' > report.md",
+     lambda: rp.write_text("Total: 999\nLast quarter: 4321\n"))
 '''
 
 
@@ -172,14 +175,14 @@ def test_vacant_do_retry_feedback_does_not_launder_the_agents_own_value(do_task,
     res = RUN.do(task, agent="generic",
                  build=A.generic_build([sys.executable, str(tmp / "agent.py"), agent, str(logdir),
                                         "{prompt}"]),
-                 prompt=TASK, attempts=3, sandbox="none", feedback_mode=mode,
+                 prompt=DO_TASK, attempts=3, sandbox="none", feedback_mode=mode,
                  feedback=lambda r: "\n".join(
                      [F.FEEDBACK_HEADER] + [f"- {x['claim_id']}: FAIL — {x['detail']}"
                                             for x in r["results"] if x["status"] != "PASS"]))
     assert res["outcome"] == "reject" and len(res["attempts"]) == 3
     ws = pathlib.Path(res["workspace"])
     seen2 = (logdir / "prompt_2.txt").read_text()
-    assert seen2.startswith(TASK + "\n\n") and "999" in seen2      # 回饋真的接在任務後面
+    assert seen2.startswith(DO_TASK + "\n\n") and "999" in seen2   # 回饋真的接在任務後面
     # 第三次重寫同一個錯值：agent 自己的，重跑翻轉 ⇒ provable（不是「任務自己說的」）。
     # 結論以（主張、位置、值）去重，第一次的那一筆一直開著 ⇒ 在最後的病歷上重追一次
     b = B.blame_location(B.Trace(R.Recorder(ws)), L.Location("report.md", 1, value="999"),
@@ -190,7 +193,13 @@ def test_vacant_do_retry_feedback_does_not_launder_the_agents_own_value(do_task,
     # agent 的提示掛鉤送來的整段：只有任務那一段記成任務訊息（不是人的新要求）
     hooked = [(s, src, t) for s, src, t in _prompts(ws) if not str(s).startswith("do:")]
     assert [src for _s, src, _t in hooked] == ["vacant do"] * 3
-    assert all(t == TASK for _s, _src, t in hooked)
+    assert all(t == DO_TASK for _s, _src, t in hooked)
+    # 任務那一段照樣是來源：任務給的值（第 2 行）追到任務訊息，不是 agent 的錯
+    t = B.blame_location(B.Trace(R.Recorder(ws)), L.Location("report.md", 2, value="4321"),
+                         contract=C.load(ws / ".vacant" / "contract.json"), claim_id="total",
+                         sandbox="none")
+    assert t["fault_class"] == "input" and (t.get("source") or {}).get("kind") == "prompt", \
+        t.get("note")
     if mode == "localized":
         # 追緝過的回饋也不可以對 agent 說「同一個值就在任務自己的訊息裡」
         seen3 = (logdir / "prompt_3.txt").read_text()
