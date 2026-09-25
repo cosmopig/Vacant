@@ -228,7 +228,13 @@ def _loc_text(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any]
                                     note=f"does not contain {V.show_rx(rx)}"))
         for h in params.get("required_headings") or []:
             if h.strip().lower() not in V._headings(txt):
-                out.append(Location(rel, kind="missing", value=h, note="missing heading"))
+                # 哪一個標題缺了要留在 `note`（給人看的字）：`value` 是給比對用的內部字串，
+                # `_shown_value`／HTTP `shown_value` 對 `kind == missing` 一律不印它
+                # （item 5、2026-09-25 對抗審查 #18），常數字串 "missing heading" 會讓
+                # `issues[]`／`render_report`／`human_summary` 三處都看不出缺的是哪一個標題
+                # （2026-09-25 獨立審查）。
+                out.append(Location(rel, kind="missing", value=h,
+                                    note=f"missing heading {h!r}"))
     if not out:
         # 字數／大小：整個檔；顯示用驗證器自己的話（不是一律「length rule」），但**身分**要穩
         # （2026-09-25 對抗審查 #8、#22）：字數每一輪都不同，note 逐字塞進 `finding_id` 會讓同一條
@@ -395,7 +401,12 @@ def _loc_exists(params: dict[str, Any], ev: dict[str, Any], result: dict[str, An
         if not isinstance(n, int):
             n = len(_files(adir, p, allowed))
         if n < n_min:
-            out.append(Location(p, kind="missing", note=f"found {n}, need {n_min}"))
+            # `key` 是身分，`note` 是給人看的數字——兩者分開：`n` 每一輪都可能變（agent 加了
+            # 檔案但還沒補到 `min_count`），note 逐字塞進 `finding_id` 會讓同一條沒解決的樣式
+            # 每輪都變成新的 id，回饋錯報「已解決」（2026-09-25 獨立審查：item 3 只堵住了長度
+            # 規則那條路，這條半滿足的 `exists` 是同一個洞）。
+            out.append(Location(p, kind="missing", note=f"found {n}, need {n_min}",
+                                key=f"exists:{p}"))
     return out
 
 

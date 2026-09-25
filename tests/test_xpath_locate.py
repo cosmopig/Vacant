@@ -11,6 +11,10 @@
   6  HTTP 回饋：開著的必要主張全部卡在 UNKNOWN／CONFLICT 時，footer 與 `submitter_fixable`
      要照實說「這不是你能改的」，不要叫提交者重試
   7  RL 的來源說明不可以夾帶指令（「如果輸入錯了，在答案裡指出來」）
+  8  （獨立審查對 item 2/3 的回歸）`exists` 半滿足（數量不夠但不是 0）的 finding id
+     也不可以隨每一輪數到的數字變——item 3 只堵住了長度規則那條路，這是同一個洞
+  9  （獨立審查對 item 5 的回歸）缺的 `required_headings` 拿掉 `value` 之後，
+     `note` 也要說出是哪一個標題，不然三個讀者都看不出缺的是哪一個
 """
 from __future__ import annotations
 
@@ -293,3 +297,85 @@ def test_7_input_source_line_carries_no_instruction():
     assert "the same value is in inputs/notes.txt line 2 (the given input)" in text
     assert "if the input is wrong" not in text
     assert "say so in the answer" not in text
+
+
+# ── item 8: `exists` 半滿足時 finding id 也要穩（獨立審查對 item 2/3 的回歸） ─────
+# item 3 只把「身分」從「note」搬到「key」用在長度規則上；`_loc_exists` 的
+# min_count 位置一樣是 note 帶著會變的數字（`found N, need M`）、沒有 key，
+# 同一個洞在 exists 這條路上還在：agent 加了一個檔案、樣式還是不夠，note 的
+# N 變了、finding_id 就變了，回饋錯報一條「已解決」。
+
+def test_8_loc_exists_key_is_stable_across_a_growing_count(tmp_path):
+    (tmp_path / "notes").mkdir()
+    (tmp_path / "notes" / "n1.md").write_text("x\n")
+    params = {"paths": ["notes/*.md"], "min_count": 3}
+    [loc1] = L._loc_exists(params, {"counts": {"notes/*.md": 1}}, {}, tmp_path)
+    (tmp_path / "notes" / "n2.md").write_text("x\n")
+    [loc2] = L._loc_exists(params, {"counts": {"notes/*.md": 2}}, {}, tmp_path)
+    assert loc1.note != loc2.note                       # 顯示的字照實反映當下數到的數量
+    assert loc1.key and loc1.key == loc2.key             # 身分不隨數字變
+    b1 = {"claim": "outputs", "location": loc1.to_json()}
+    b2 = {"claim": "outputs", "location": loc2.to_json()}
+    assert F.finding_id(b1) == F.finding_id(b2)
+
+
+def test_8_end_to_end_stop_hook_does_not_report_a_false_resolved_for_exists(vhome):
+    p, c, rec = _proj(vhome, [{"id": "outputs", "verifier": "exists", "required": True,
+                               "authority": "requirement",
+                               "params": {"paths": ["notes/*.md", "figs/*.png"],
+                                         "min_count": 3}}],
+                      deliverable=("notes/**", "figs/**"))
+    prev = None
+    seen = []
+    for n in (1, 2):
+        _step(rec, f"t{n}", MAIN, "Write", {"file_path": f"notes/n{n}.md"},
+              write=(p / "notes" / f"n{n}.md", "x\n"))
+        results = rerun.run(c, p, sandbox="none")
+        blames = B.blame_results(rec, c, results, p, sandbox="none")
+        text, prev = F.render_agent(blames, results, previous=prev)
+        seen.append(text)
+    # round 2 仍然只交了 2 個 notes、0 個 figs——兩個樣式都還沒過，不該有任何 resolved
+    assert "Resolved since the last check" not in seen[1]
+
+
+# ── item 9: 缺的 heading 要說出是哪一個（獨立審查對 item 5 的回歸） ────────────
+# item 5 把 `kind == missing` 的 `value`（比對用的內部字串）從讀者看得到的地方
+# 拿掉是對的，但 `required_headings` 那個 `note` 本來就是常數字串
+# "missing heading"，沒有帶標題名字——拿掉 value 之後，issues[]／report／
+# summary 三處都看不出缺的是哪一個標題。
+
+def test_9_missing_heading_name_is_in_the_note(tmp_path):
+    (tmp_path / "report.md").write_text("# Summary\nok\n")
+    locs = L._loc_text({"path": "report.md",
+                        "required_headings": ["Summary", "Risks", "Budget"]}, {}, {}, tmp_path)
+    by_note = {loc.note for loc in locs}
+    assert by_note == {"missing heading 'Risks'", "missing heading 'Budget'"}
+
+
+def test_9_http_issue_note_names_the_missing_heading(vhome):
+    app = _http_app(vhome, [{"id": "has_headings", "verifier": "text", "required": True,
+                             "authority": "requirement",
+                             "params": {"path": "report.md",
+                                       "required_headings": ["Summary", "Risks", "Budget"]}}])
+    code, res = _submit(app, "h1", {"report.md": "# Summary\nok\n"})
+    assert code == 200
+    notes = {i["note"] for i in res["issues"]}
+    assert notes == {"missing heading 'Risks'", "missing heading 'Budget'"}
+    assert all(i["value"] is None for i in res["issues"])       # item 5 仍然成立：不印內部字串
+
+
+def test_9_render_report_shows_no_bare_value_line_but_names_the_heading(vhome):
+    p, c, rec = _proj(vhome, [{"id": "has_headings", "verifier": "text", "required": True,
+                               "authority": "requirement",
+                               "params": {"path": "report.md",
+                                         "required_headings": ["Summary", "Risks"]}}],
+                      deliverable=("report.md",))
+    _step(rec, "t1", MAIN, "Write", {"file_path": "report.md"},
+          write=(p / "report.md", "# Summary\nok\n"))
+    results = rerun.run(c, p, sandbox="none")
+    blames = B.blame_results(rec, c, results, p, sandbox="none")
+    [b] = [x for x in blames if x["claim"] == "has_headings"]
+    assert F._shown_value(b) is None                    # item 5: 不印跳脫過的內部值
+    report = F.render_report(blames, results, outcome="reject", coverage={})
+    assert "- value:" not in report
+    assert "Risks" in report                             # 但標題名字要看得到（在 note 裡）
