@@ -1,0 +1,57 @@
+{
+ "runs": 2,
+ "cost_usd": 0.084016,
+ "rows": [
+  {
+   "task": "1716",
+   "model": "g4",
+   "think": "on",
+   "arm": "A",
+   "reward": 0.0,
+   "exception": null,
+   "infra_void": false,
+   "requests": 15,
+   "prompt_tokens": 444472,
+   "completion_tokens": 16778,
+   "reasoning_tokens": 8207,
+   "cost_usd": 0.03681756,
+   "started": "2026-09-25T16:01:22.126897Z",
+   "finished": "2026-09-25T16:13:01.781509Z",
+   "vacant_check": null,
+   "trial_dir": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/pilot/jobs/g4-on-A/2026-09-25__16-01-21/dabstep-1716__eyQJ7PQ",
+   "verifier_tail": "=== DABstep Test Execution ===\nError: /app/answer.txt not found\n"
+  },
+  {
+   "task": "1716",
+   "model": "g4",
+   "think": "on",
+   "arm": "C",
+   "reward": 0.0,
+   "exception": null,
+   "infra_void": false,
+   "requests": 15,
+   "prompt_tokens": 624381,
+   "completion_tokens": 10271,
+   "reasoning_tokens": 3108,
+   "cost_usd": 0.04719881,
+   "started": "2026-09-25T16:01:22.241619Z",
+   "finished": "2026-09-25T16:11:10.420080Z",
+   "vacant_check": {
+    "install_json": {
+     "mode": "evidence",
+     "agents": [
+      "pi"
+     ]
+    },
+    "pi_installed": true,
+    "chains": 1,
+    "steps": 15,
+    "reviews": 0,
+    "review_actions": [],
+    "c_arm_ok": false
+   },
+   "trial_dir": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/pilot/jobs/g4-on-C/2026-09-25__16-01-21/dabstep-1716__AS39mX3",
+   "verifier_tail": "=== DABstep Test Execution ===\nError: /app/answer.txt not found\n"
+  }
+ ]
+}
