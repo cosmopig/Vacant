@@ -679,9 +679,10 @@ class H(BaseHTTPRequestHandler):
 
 def main() -> int:
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 0
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), H)
+    host = os.environ.get("MOCK_HOST", "127.0.0.1")   # 評測框架的容器要連進來時設成 docker 橋接位址
+    httpd = ThreadingHTTPServer((host, port), H)
     os.environ["MOCK_PORT"] = str(httpd.server_address[1])     # 劇本的 `{{port}}`
-    print(f"mock_model listening on 127.0.0.1:{httpd.server_address[1]}", flush=True)
+    print(f"mock_model listening on {host}:{httpd.server_address[1]}", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
