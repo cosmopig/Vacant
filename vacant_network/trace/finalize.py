@@ -5,7 +5,9 @@
 `opencode run` 在第一個 idle 就結束，沒有 Stop 檢查（既有邊界）；任何 agent 的工作階段也可能
 在最後一次 Stop 之後才又改了檔。工作階段結束時，掛鉤在**背景**啟動這支（掛鉤本身的時間預算
 Claude 1.5 秒、Codex 1–3 秒，跑不完追緝）：重驗一次契約 → 追緝 → 報告寫進病歷目錄 →
-這一跑的結果記進行動者帳本（同一個工作階段已經由 Stop 記過就不重記，冪等）。
+這一跑的結果記進行動者帳本並簽進病歷（同一個工作階段已經由 Stop 記過就不重記，冪等）。
+結果只在 `accept`／有必要主張 FAIL 的 `reject` 時算進 adoption；hold／escalate 照記一筆但不算
+（`actors.adoption_of`）——這裡的 `flow.check` 用暫存帳本，看不到人工審查。
 
     python -m vacant_network.trace.finalize <契約路徑> <平台> <工作階段> [<模型>]
 
@@ -40,12 +42,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     rec = Recorder(contract.base_dir)
     model = model or rec.session_info(platform, session).get("model")
-    if A.record_outcome(A.ActorBook(), session_key=f"{platform}:{session}",
-                        actor={"platform": platform, "session": session, "model": model},
-                        accepted=res.get("outcome") == "accept", contract=contract,
-                        workspace=rec.workspace):
-        rec.append("consequence", {"kind": "outcome", "accepted": res.get("outcome") == "accept",
-                                   "session": session, "at": "session_end"})
+    # hold／escalate（這裡的 `flow.check` 看不到人工審查）不記 adoption（`actors.adoption_of`）
+    A.record_run(rec, session_key=f"{platform}:{session}",
+                 actor={"platform": platform, "session": session, "model": model},
+                 outcome=res.get("outcome"), adoption=A.adoption_of(res), contract=contract,
+                 session=session, at="session_end")
     print(out.get("summary") or "nothing open")
     return 0
 

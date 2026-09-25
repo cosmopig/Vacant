@@ -65,6 +65,7 @@ EVENT_TYPES = frozenset({
     "infra_void",          # 基礎設施失敗：哪一段、錯誤
     "hook_event",          # agent 生命週期事件摘要（觀測，不是裁決）
     "trace_head",          # 可究責追緝的病歷鏈頭＋筆數（收件端會簽，截短看得出來；K3）
+    "trace_broken",        # 回合邊界發現病歷驗不過（截短／被換）：記下來，之後的驗證一直看得到
     "trace_error",         # 追緝壞了（不影響裁決）
 })
 

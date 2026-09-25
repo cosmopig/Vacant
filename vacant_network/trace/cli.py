@@ -3,7 +3,7 @@
 這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §4.1-2、§4.5「撤銷」）：
 
     vacant trace show [--json]              每一步：行動者、工具、寫了什麼；缺口
-    vacant trace verify                     病歷的簽章鏈驗不驗得過
+    vacant trace verify                     病歷的簽章鏈驗不驗得過（有任務帳本就對它簽過的鏈頭）
     vacant trace report [--check]           未解問題清單（`--check` 先重驗一次契約再追緝）
     vacant trace blame <檔>[:<行>] [--value V]   這個位置的值是哪一步、從哪裡來的
     vacant flag <檔>[:<行>] "<哪裡錯>" [--value V]   人指出錯處：簽章、追緝、進病歷
@@ -18,6 +18,8 @@
    要讓人的判斷擋收件，用契約裡的 `review` 主張（`vacant review`）。
 2. owner 金鑰和 agent 在同一台機器、同一個帳號 ⇒ agent 的 shell 也叫得到 `vacant flag`；
    報告照實寫出簽章者，不宣稱那一定是人按的。
+3. `vacant trace verify` 對任務帳本的錨點只看到最後一次錨點（回合邊界寫的）；在那之後的尾巴只有
+   沒簽章的 `head.json` 在看。沒有契約或帳本時輸出寫「not checked」，退出碼仍是 0。
 """
 from __future__ import annotations
 
@@ -103,8 +105,11 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
-    ws, _c = _workspace(args)
-    ok, why = Recorder(ws).verify()
+    """簽章鏈＋`head.json`＋任務帳本裡簽過的鏈頭錨點（`stopcheck.verify_anchored`）。
+    沒有契約或帳本 ⇒ 照樣驗前兩項，輸出寫明「沒有對帳本」；退出碼只有 0／1。"""
+    ws, c = _workspace(args)
+    from .stopcheck import verify_anchored
+    ok, why = verify_anchored(Recorder(ws), c)
     print(("OK " if ok else "BROKEN ") + why)
     return 0 if ok else 1
 
@@ -236,15 +241,16 @@ def cmd_actors(args: argparse.Namespace) -> int:
     if not st["cells"] and not st["sources"]:
         print("no consequences recorded yet")
         return 0
-    print(f"{'actor':<60} {'runs':>5} {'accepted':>8} {'provable':>8}  family")
+    print(f"{'actor':<60} {'runs':>5} {'accepted':>8} {'undecided':>9} {'provable':>8}  family")
     for c in st["cells"]:
         print(f"{c['label'][:60]:<60} {c['runs']:>5} {c['accepted']:>8} "
-              f"{c['provable_faults']:>8}  {c['key'][3]}")
+              f"{c.get('undecided', 0):>9} {c['provable_faults']:>8}  {c['key'][3]}")
     for src, v in sorted(st["sources"].items()):
         print(f"input  {src}: {v['count']} finding(s) traced to it")
     for plat, n in sorted(st["coverage_gaps"].items()):
         print(f"gaps   {plat}: {n} unrecorded change(s) behind findings (integration coverage)")
-    print(f"(counts, not scores; nothing is acted on below n={A.MIN_N})")
+    print(f"(counts, not scores; nothing is acted on below n={A.MIN_N}; 'undecided' runs ended "
+          f"on hold/escalate — waiting on review or evidence — and are not in 'runs')")
     return 0
 
 
