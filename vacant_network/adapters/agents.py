@@ -167,10 +167,11 @@ def claude_build(prompt: str, ws: pathlib.Path, *, hooks: bool = True,
                   env={"VACANT_HOOK_NO_SUBMIT": "1"}, note=note, cleanup=cleanup)
 
 
-def claude_install(m: INS.Manifest, home: pathlib.Path) -> list[dict[str, Any]]:
+def claude_install(m: INS.Manifest, home: pathlib.Path, *, skill: bool = False) -> list[dict[str, Any]]:
     d = claude_dir(home)
     ops = [INS.add_json_hooks(m, "claude", d / "settings.json", claude_hooks_doc())]
-    ops.append(INS.put_file(m, "claude", d / "skills" / "vacant" / "SKILL.md", skill_text()))
+    if skill:
+        ops.append(INS.put_file(m, "claude", d / "skills" / "vacant" / "SKILL.md", skill_text()))
     return ops
 
 
@@ -371,10 +372,12 @@ def pi_dir(home: pathlib.Path) -> pathlib.Path:
     return pathlib.Path(os.environ.get("PI_CODING_AGENT_DIR") or (home / ".pi" / "agent"))
 
 
-def pi_install(m: INS.Manifest, home: pathlib.Path) -> list[dict[str, Any]]:
+def pi_install(m: INS.Manifest, home: pathlib.Path, *, skill: bool = False) -> list[dict[str, Any]]:
     d = pi_dir(home)
-    return [INS.put_file(m, "pi", d / "extensions" / "vacant.ts", pi_extension_text()),
-            INS.put_file(m, "pi", d / "skills" / "vacant" / "SKILL.md", skill_text())]
+    ops = [INS.put_file(m, "pi", d / "extensions" / "vacant.ts", pi_extension_text())]
+    if skill:
+        ops.append(INS.put_file(m, "pi", d / "skills" / "vacant" / "SKILL.md", skill_text()))
+    return ops
 
 
 # ── OpenCode ──────────────────────────────────────────────────────────
@@ -571,10 +574,12 @@ def opencode_dir(home: pathlib.Path) -> pathlib.Path:
     return (pathlib.Path(x) if x else home / ".config") / "opencode"
 
 
-def opencode_install(m: INS.Manifest, home: pathlib.Path) -> list[dict[str, Any]]:
+def opencode_install(m: INS.Manifest, home: pathlib.Path, *, skill: bool = False) -> list[dict[str, Any]]:
     d = opencode_dir(home)
-    return [INS.put_file(m, "opencode", d / "plugin" / "vacant.js", opencode_plugin_text()),
-            INS.put_file(m, "opencode", d / "skill" / "vacant" / "SKILL.md", skill_text())]
+    ops = [INS.put_file(m, "opencode", d / "plugin" / "vacant.js", opencode_plugin_text())]
+    if skill:
+        ops.append(INS.put_file(m, "opencode", d / "skill" / "vacant" / "SKILL.md", skill_text()))
+    return ops
 
 
 # ── Codex ─────────────────────────────────────────────────────────────
@@ -697,14 +702,15 @@ def codex_config_block(cfg_path: pathlib.Path, existing: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def codex_install(m: INS.Manifest, home: pathlib.Path) -> list[dict[str, Any]]:
+def codex_install(m: INS.Manifest, home: pathlib.Path, *, skill: bool = False) -> list[dict[str, Any]]:
     import tomllib
     d = codex_home(home)
     cfg = d / "config.toml"
     cur = tomllib.loads(INS.strip_block(cfg.read_text(encoding="utf-8"))) if cfg.is_file() else {}
     ops = [INS.add_toml_block(m, "codex", cfg,
-                              codex_config_block(pathlib.Path(os.path.abspath(cfg)), cur)),
-           INS.put_file(m, "codex", d / "skills" / "vacant" / "SKILL.md", skill_text())]
+                              codex_config_block(pathlib.Path(os.path.abspath(cfg)), cur))]
+    if skill:
+        ops.append(INS.put_file(m, "codex", d / "skills" / "vacant" / "SKILL.md", skill_text()))
     return ops
 
 
@@ -715,18 +721,18 @@ class AgentSpec:
     name: str
     binaries: tuple[str, ...]
     build: Callable[..., Launch]
-    install: Callable[[INS.Manifest, pathlib.Path], list[dict[str, Any]]]
+    install: Callable[..., list[dict[str, Any]]]   # (manifest, home, *, skill=False)
     hook_install_note: str
 
 
 AGENTS: dict[str, AgentSpec] = {
     "claude": AgentSpec("claude", ("claude",), claude_build, claude_install,
-                        "hooks in ~/.claude/settings.json + skill"),
+                        "hooks in ~/.claude/settings.json"),
     "codex": AgentSpec("codex", ("codex",), codex_build, codex_install,
-                       "trusted hooks appended to config.toml + skill"),
+                       "trusted hooks appended to config.toml"),
     "opencode": AgentSpec("opencode", ("opencode",), opencode_build, opencode_install,
-                          "global plugin + skill"),
-    "pi": AgentSpec("pi", ("pi",), pi_build, pi_install, "global extension + skill"),
+                          "global plugin"),
+    "pi": AgentSpec("pi", ("pi",), pi_build, pi_install, "global extension"),
 }
 
 

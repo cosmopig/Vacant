@@ -5,7 +5,7 @@
     vacant do pi "寫一份比較報告"            # 隔離工作區裡跑 pi -p，結束後交進收件口
     vacant do claude --prompt-file task.md
     vacant do --cmd 'mytool --task {prompt}' --prompt "…"   # 任何 CLI
-    vacant install                           # 四個 agent 各裝一份掛鉤＋技能（可逆）
+    vacant install                           # 找得到的 agent 各裝一份掛鉤（可逆；技能要 --skill）
     vacant uninstall                         # 只移除我們那幾條，使用者自己的改動保留
     vacant adapters                          # 哪些 agent 在、裝了什麼、現在還在不在
 
@@ -118,22 +118,40 @@ def cmd_install(args) -> int:
                   f"config anyway)")
             continue
         try:
-            ops = A.AGENTS[n].install(m, home)
+            ops = A.AGENTS[n].install(m, home, skill=bool(getattr(args, "skill", False)))
         except (OSError, ValueError) as e:
             print(f"  {n}: FAILED — {e}", file=sys.stderr)
             rc = 1
             continue
-        print(f"  {n}: {A.AGENTS[n].hook_install_note}")
-        for op in ops:
-            print(f"      {op['op']:<10} {op['path']}")
+        print(f"  {n}: {A.AGENTS[n].hook_install_note} — {', '.join(op['path'] for op in ops)}")
+    # 零設定（產品原則）：裝了就有作用；人自己改過 mode 就不動它
+    m.data.setdefault("mode", "evidence")
+    m.data["schema"] = 2
     m.save()
     if args.observe_model:
         from ..vrun import possess
         print("  + observe-model: running `vacant possess install` (model-traffic proxy)")
         rc = rc or possess.main(["install"])
-    print("[vacant install] done. Hooks are configuration, not a guarantee: agents can remove "
-          "them. `vacant adapters` re-checks what is still in place.")
+    print(f"[vacant install] done. Open your agent as usual; each task is checked against its own "
+          f"recorded steps before it is handed back. Data: {INS.state_root().parent} "
+          f"(remove everything with `vacant uninstall`).")
+    hint = _path_hint()
+    if hint:
+        print(hint)
     return rc
+
+
+def _path_hint() -> str | None:
+    """`vacant` 這支指令所在的目錄不在 PATH 上（pip --user、pipx 還沒 ensurepath）⇒ 印出補救那一行。"""
+    import os
+    import shutil
+    here = pathlib.Path(sys.argv[0]).resolve().parent if sys.argv and sys.argv[0] else None
+    if here is None or not (here / "vacant").exists() or shutil.which("vacant"):
+        return None
+    if str(here) in os.environ.get("PATH", "").split(os.pathsep):
+        return None
+    return (f"[vacant] note: {here} is not on your PATH, so the `vacant` command may not be found "
+            f"in a new terminal. Add it with: export PATH=\"{here}:$PATH\"")
 
 
 def cmd_uninstall(args) -> int:
@@ -237,12 +255,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_do, extra=[])
 
-    p = sp.add_parser("install", help="add Vacant's hooks and skill to each agent's own config")
+    p = sp.add_parser("install", help="add Vacant's hooks to each agent's own config")
     p.add_argument("--agents", help="comma list (default: all four)")
     p.add_argument("--force", action="store_true", help="write config even if the binary is "
                                                          "not found")
     p.add_argument("--observe-model", action="store_true",
                    help="also install the optional model-traffic proxy (`vacant possess`)")
+    p.add_argument("--skill", action="store_true",
+                   help="also add Vacant's skill file (it becomes part of the agent's prompt)")
     p.set_defaults(func=cmd_install)
 
     p = sp.add_parser("uninstall", help="remove only what `vacant install` added")

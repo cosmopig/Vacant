@@ -59,16 +59,43 @@ MAX_TRANSCRIPT = 64 * 1024 * 1024
 
 
 def workspace_for(cwd: str | None, contract: Any = None) -> pathlib.Path | None:
+    """病歷記在哪個專案。有契約 ⇒ 契約的專案；`VACANT_TRACE=1` ⇒ cwd（舊行為）；
+    裝過 Vacant（零設定，`adapters.mode`）⇒ cwd 往上找到的專案根。都不是 ⇒ 不記。"""
     flag = os.environ.get("VACANT_TRACE", "").strip()
     if flag == "0":
         return None
     if contract is not None:
         ws = pathlib.Path(contract.base_dir).resolve()
-    elif flag != "1" or not cwd:
-        return None
-    else:
+    elif flag == "1" and cwd:
         ws = pathlib.Path(cwd).resolve()
+    elif cwd and zero_config_on():
+        ws = project_root(cwd)
+        if not _traceable(ws):      # 上層的 git（例如 /tmp 或整個家目錄的 dotfiles repo）太大：退回 cwd
+            ws = pathlib.Path(cwd).resolve()
+    else:
+        return None
     return ws if _traceable(ws) else None
+
+
+def zero_config_on() -> bool:
+    from ..adapters.mode import current_mode
+    return current_mode() != "off"
+
+
+def project_root(cwd: str) -> pathlib.Path:
+    """cwd 往上找最近的 git 根（`.git` 是目錄或檔都算）；不越過家目錄與 `/`；找不到就是 cwd 本身。
+    只做 stat，不開子行程。"""
+    start = pathlib.Path(cwd).resolve()
+    home = pathlib.Path.home().resolve()
+    p = start
+    while True:
+        if p == home or p == pathlib.Path(p.anchor):
+            return start
+        if (p / ".git").exists():
+            return p
+        if p.parent == p:
+            return start
+        p = p.parent
 
 
 def _traceable(ws: pathlib.Path) -> bool:

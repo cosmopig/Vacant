@@ -51,7 +51,7 @@ def test_install_all_four_then_uninstall_restores_every_user_byte(fakehome):
     before = _seed_user_config(fakehome)
     m = INS.Manifest()
     for name, spec in A.AGENTS.items():
-        spec.install(m, fakehome)
+        spec.install(m, fakehome, skill=True)
     m.save()
     # Claude: 使用者自己的 Stop hook 還在，我們的附加在後面
     cs = json.loads((fakehome / ".claude" / "settings.json").read_text())
@@ -241,3 +241,13 @@ def test_opencode_merges_into_user_content_and_never_replaces_unparseable_conten
     # `--dir` 永遠是絕對路徑（相對的會接在過期的 PWD 後面）
     rel = A.opencode_build("p", pathlib.Path("."))
     assert pathlib.Path(rel.argv[rel.argv.index("--dir") + 1]).is_absolute()
+
+
+def test_default_install_writes_no_skill_file(fakehome):
+    """技能會進模型的系統提示：預設安裝不能改到模型看到的東西（評測 C 組的第一個請求要和 A 組相同）。"""
+    m = INS.Manifest()
+    for name, spec in A.AGENTS.items():
+        spec.install(m, fakehome)
+    m.save()
+    assert not list(fakehome.rglob("SKILL.md"))
+    assert (fakehome / ".pi" / "agent" / "extensions" / "vacant.ts").is_file()
