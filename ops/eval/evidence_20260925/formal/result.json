@@ -1,0 +1,225 @@
+{
+ "prereg": "decisions/prereg/PREREG_20260925_ZERO_CONFIG_DABSTEP.md",
+ "g4-on": {
+  "primary": true,
+  "tasks_77": {
+   "pairs": 77,
+   "void_pairs": 0,
+   "A_correct": 50,
+   "C_correct": 44,
+   "C_only": 5,
+   "A_only": 11,
+   "both": 39,
+   "neither": 22,
+   "mcnemar_p": 0.210113525390625,
+   "flips": [
+    {
+     "task": "12",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "15",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "18",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "21",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "23",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "28",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "32",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "40",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "44",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "59",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "61",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "62",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "65",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "66",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "68",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "1871",
+     "A": 1,
+     "C": 0
+    }
+   ]
+  },
+  "tasks_5_70": {
+   "pairs": 2,
+   "void_pairs": 0,
+   "A_correct": 1,
+   "C_correct": 1,
+   "C_only": 0,
+   "A_only": 0,
+   "both": 1,
+   "neither": 1,
+   "mcnemar_p": 1.0,
+   "flips": []
+  },
+  "c_runs": 81,
+  "c_stop_reached": 41,
+  "c_arm_ok_false": [
+   "50",
+   "43"
+  ],
+  "c_sent_back": 7,
+  "sent_back_kinds": {
+   "unsourced": 6,
+   "failed_step": 1
+  },
+  "harm_first_right_then_wrong": [],
+  "pushback_first_wrong_then_right": [],
+  "cost_usd": {
+   "A": 0.917424,
+   "C": 1.006843
+  },
+  "requests": {
+   "A": 974,
+   "C": 1038
+  },
+  "provider_errors": {
+   "A": 0,
+   "C": 0
+  }
+ },
+ "q38-on": {
+  "primary": false,
+  "tasks_77": {
+   "pairs": 77,
+   "void_pairs": 0,
+   "A_correct": 68,
+   "C_correct": 64,
+   "C_only": 2,
+   "A_only": 6,
+   "both": 62,
+   "neither": 7,
+   "mcnemar_p": 0.2890625,
+   "flips": [
+    {
+     "task": "17",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "19",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "36",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "47",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "61",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "1464",
+     "A": 0,
+     "C": 1
+    },
+    {
+     "task": "1753",
+     "A": 1,
+     "C": 0
+    },
+    {
+     "task": "1871",
+     "A": 1,
+     "C": 0
+    }
+   ]
+  },
+  "tasks_5_70": {
+   "pairs": 2,
+   "void_pairs": 0,
+   "A_correct": 1,
+   "C_correct": 1,
+   "C_only": 0,
+   "A_only": 0,
+   "both": 1,
+   "neither": 1,
+   "mcnemar_p": 1.0,
+   "flips": []
+  },
+  "c_runs": 79,
+  "c_stop_reached": 78,
+  "c_arm_ok_false": [],
+  "c_sent_back": 1,
+  "sent_back_kinds": {
+   "failed_step": 1
+  },
+  "harm_first_right_then_wrong": [],
+  "pushback_first_wrong_then_right": [],
+  "cost_usd": {
+   "A": 0.61864,
+   "C": 0.657741
+  },
+  "requests": {
+   "A": 557,
+   "C": 547
+  },
+  "provider_errors": {
+   "A": 0,
+   "C": 0
+  }
+ }
+}
