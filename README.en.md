@@ -58,7 +58,7 @@ with quotes found verbatim in snapshots the owner pinned) —
 |---|---|---|---|---|
 | wrong report (total 999) written to the destination by `vacant release`? | no | no | no | no |
 | right report accepted and read back at the destination? | yes | yes | yes | yes |
-| pre-delivery feedback reached the model (hooks)? | yes | yes | **no** (`opencode run` exits at the first idle) | yes |
+| pre-delivery feedback reached the model (hooks)? | yes | yes | **no** (`opencode run` exits at the first idle; the interactive TUI and `vacant do` do, measured 2026-09-25, see the accountable-trace section) | yes |
 | contract-forbidden `git push` denied by the agent's own hook, no side effect? (persistent install and `vacant do` per-run injection, both measured) | yes | yes | yes | yes |
 | the Vacant skill's description appears in the requests the model received? | yes | yes | yes | yes |
 | user's original config byte-identical after uninstall and after a per-run-injection run? | yes | yes | yes | yes |
@@ -105,6 +105,9 @@ Four real agents × six planted faults, including a sub-agent and a wrong web pa
 [`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) —
 **33/33 attributions correct** (the sub-agent case points at the sub-agent's own step); the located feedback reached the model's next request on Claude Code,
 Codex and pi (not on `opencode run`, a known boundary); 0/33 feedback texts named an actor.
+The same scenarios through `vacant do`: 25/25 (OpenCode gets the feedback too). A person typing into the four agents'
+**interactive TUIs** (real TUIs in tmux, including a multi-turn case): attribution, feedback reaching the model, feedback
+shown on the person's screen and acceptance after the fix are all 16/16 — OpenCode's interactive TUI does get pre-delivery feedback.
 Decision: [`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md).
 
 ⚠ **Do not read this as**: "Vacant catches every error" (reads are a lower bound; only recorded steps),

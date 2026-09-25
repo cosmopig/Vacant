@@ -23,7 +23,7 @@
 | H（**人標記**了契約檢查不到的錯：第一跑總數對、「Region: South」錯 ⇒ 收件 accept；人下 `vacant flag report.md:4 "the region is North, not South"`；第二跑是新的工作階段）⇒ 回合結束時把標記回饋給 agent（契約過了也照樣）、追緝指到第一跑寫下那一行的那一步、改好之後標記解決 | 4/4 |
 | G（只有 Claude Code：子 agent 在**背景**跑——Claude 的預設；主 agent 從 `<task-notification>` 照抄）⇒ 同 E，指到子 agent；子 agent 還在做時回合結束的驗收**先不跑**（不催主 agent 重做） | 1/1 |
 | E（子 agent 算錯寫進 `figure.txt`、主 agent 照抄）⇒ `agent`／`lineage_internal`，指到**子 agent** 寫 `figure.txt` 的那一步，行動者帶子 agent 的 id（Claude `general-purpose`、Codex `default`、pi `worker`、OpenCode `subagent`） | 4/4 |
-| 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C／E／F／H／I＋Claude 的 G，22 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束） |
+| 有位置的回饋出現在下一次模型請求裡 | Claude Code、Codex、pi：**是**（A／B／C／E／F／H／I＋Claude 的 G，22 格）；OpenCode `run`：**否**（既有邊界：`run` 在第一個 idle 就結束；OpenCode 的互動 TUI 與 `vacant do` **有**，見第 3、2 節） |
 | 給 agent 的回饋裡有行動者識別 | 0/33 |
 | 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F／H／I＋Claude 的 G：22/22 |
 | 病歷簽章鏈驗得過 | 33/33 |
@@ -61,6 +61,38 @@ Run `vacant check` to re-check before finishing.
 與 `adapters/hook.py`（人打的新要求重新算回饋輪數；這裡每個工作階段只有開頭一則人的提示，輪數檔本來就不存在）
 ——兩個都碰不到這張表的格子。第一跑是 22/25：三格是 harness 沒把原生那條的 agent 參數帶進 `vacant do`
 （pi 的 subagent 擴充、Codex 的網路），修了（`6d5184a6`）之後那三格重跑 6/6，再整張重跑成這一份。
+
+## 3. 人直接開 agent 的互動介面（`e2e_tui_SUMMARY.md`、`e2e_tui_results.json`、`tui_screens/`）
+
+重跑（要 tmux）：
+
+    python ops/accountability/e2e_tui.py --bin <pi/opencode/codex 所在目錄> --out <dir>
+
+人類定的場景是「人直接用一個 agent」——多半就是開它的互動介面打字。這一節把埋錯放進四個 agent 的**真 TUI**
+（tmux 的偽終端機：等畫面出現就緒的字樣、打提示、按 Enter、做完之後下離開的指令 `/exit`／`/quit`／Ctrl-D），
+在 `f90da052` 上跑。`tui_screens/` 是每一格結束時畫面上的文字（tmux 抓的，不是截圖；OpenCode 是全螢幕介面，
+只抓得到最後一屏）。
+
+| 量什麼 | 結果 |
+|---|---|
+| 歸因正確（B／A／C＋多回合 M） | **16/16** |
+| 寫錯的那一回合，有位置的回饋出現在模型的下一次請求裡 | **16/16**——**OpenCode 的互動 TUI 也有**（外掛在 idle 時用 SDK 送回；之前寫了但沒量過）。`opencode run` 仍然沒有 |
+| 回饋出現在人的畫面上 | 16/16（Claude Code 標成「Stop hook error」——它自己的字樣，模型收到的是「Stop hook feedback」；Codex「Blocked by hook」；pi `[vacant-check]`；OpenCode 是一則使用者訊息） |
+| 改好之後收件 accept | 16/16 |
+| 給 agent 的回饋裡有行動者識別 | 0/16 |
+| 病歷裡「人說的」提示有不是人打的 | 0（Vacant 的回饋沒有被記成人說的話；OpenCode 的外掛不記提示，那一欄是 0／0） |
+| 假模型收到帶著**別的憑證**（不是實驗的假金鑰）的請求 | 0（假模型只收 `sk-fake…`，別的一律 401、值不記；一跑成功本身就證明沒用到機器上別的憑證） |
+| 病歷簽章鏈驗得過 | 16/16 |
+
+**多回合（M）與它抓到的問題。** 人先問「帳本有幾列？先不要寫檔」——agent 回答了，回合結束時契約還沒過（報告還沒有）
+⇒ 回饋；agent 回「好，等你說」⇒ 再回饋一次 ⇒ 輪數（`max_feedback_rounds`=2）用完，人看到「輪數用完」。之後人才說
+「現在寫報告」，agent 寫了 999。原本的規則是**輪數只在過了才歸零** ⇒ 這一回合 agent 收不到位置。
+負控制（把重置拿掉，Claude Code 的 TUI，`tui_screens/claude_M_multi_turn_NEGATIVE_CONTROL.txt`、
+`e2e_tui_negative_control_results.json`）：最後一回合沒有回饋、只有人看到「輪數用完…report.md:3 = 999」、最後 **reject**。
+修（`hookpolicy.new_request`）：**人打的新要求重新算輪數**；背景子 agent 的結果、父 agent 給子 agent 的任務、
+Vacant 自己的回饋被送回來都不算（agent 沒辦法靠自己重置）。修之後四個 agent 的 M 都 accept。
+⚠ **OpenCode 的 M 過了，但不是因為重置**：它的第一回合只用了 1 輪（外掛等自己送回的回饋那段時間裡的 idle 不驗），
+第二回合用第 2 輪。OpenCode 的外掛不記提示，所以前面的回合真的把輪數用完時，OpenCode 仍然會收不到（誠實邊界）。
 
 ## 4. R536 的管線冒煙（`r536_mock_smoke_*.json*`）
 

@@ -1,0 +1,50 @@
+  ┃  $ cat inputs/summary.txt
+  ┃                                                                                                                     Done.
+  ┃  Finance quarter summary (preliminary): Total: 75
+  ┃                                                                                                                     Context
+                                                                                                                        15 tokens
+  ┃                                                                                                                     0% used
+  ┃  $ printf '%s' IyBRdWFydGVyCgpUb3RhbDogNzUK | base64 -d > report.md                                                 $0.00 spent
+  ┃
+  ┃  (no output)                                                                                                        MCP
+  ┃                                                                                                                     • userdocs Disabled
+
+     Done.                                                                                                              LSP
+                                                                                                                        LSPs are disabled
+     ▣  Build · mock-model · 3.4s
+
+  ┃
+  ┃  The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):
+  ┃  - total: FAIL — report.md:3 says "75"
+  ┃    expected 69 (column 'amount', 3 rows)
+  ┃    the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer
+  ┃  Run `vacant check` to re-check before finishing.
+  ┃
+
+  ┃
+  ┃  $ cat inputs/ledger.csv
+  ┃
+  ┃  id,item,amount
+  ┃  101,alpha,12
+  ┃  102,beta,23
+  ┃  103,gamma,34
+  ┃
+
+  ┃
+  ┃  $ printf '%s' IyBRdWFydGVyCgpUb3RhbDogNjkK | base64 -d > report.md
+  ┃
+  ┃  (no output)
+  ┃
+
+     The finance summary disagrees with the ledger; used the ledger.
+
+     ▣  Build · mock-model · 1.5s
+
+  ┃
+  ┃                                                                                                                     <scratch:
+  ┃                                                                                                                     
+  ┃  Build · mock-model mock                                                                                            >/opencode/proj-a:
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    master
+   <out>/opencode/5 ctrl+p
+   proj-a                                                                                            commands           • OpenCode 1.18.32
+

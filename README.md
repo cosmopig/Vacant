@@ -49,7 +49,7 @@ vacant task report            # 每一個開過的任務的終態（含作廢、
 |---|---|---|---|---|
 | 錯的報告（總數 999）被 `vacant release` 寫進目的端？ | 沒有 | 沒有 | 沒有 | 沒有 |
 | 對的報告被收下、目的端讀回一致？ | 是 | 是 | 是 | 是 |
-| 交件前回饋送到模型手上（掛鉤）？ | 是 | 是 | **否**（`opencode run` 在第一個 idle 就結束） | 是 |
+| 交件前回饋送到模型手上（掛鉤）？ | 是 | 是 | **否**（`opencode run` 在第一個 idle 就結束；互動 TUI 與 `vacant do` 有，2026-09-25 量的，見可究責追緝那一節） | 是 |
 | 契約禁止的 `git push` 被 agent 自己的掛鉤擋下、效果沒發生？（常駐安裝、`vacant do` 每一跑注入，兩條都量） | 是 | 是 | 是 | 是 |
 | Vacant 技能的描述出現在模型收到的請求裡？ | 是 | 是 | 是 | 是 |
 | 解除安裝後、以及每一跑注入之後，使用者原本的設定逐位元不變？ | 是 | 是 | 是 | 是 |
@@ -86,7 +86,8 @@ vacant trace actors                    # 每個 agent 設定：跑了幾次、�
 [`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md)：
 **歸因 33/33**（agent 憑空寫錯 ⇒ 可證明；輸入本來就錯 ⇒ 指到輸入那一行；腳本算錯 ⇒ 指到寫腳本那一步；
 事後有人在外面改檔 ⇒ 缺口、不怪人；子 agent 算錯、主 agent 照抄 ⇒ 指到子 agent 那一步；抓回來的網頁本身就錯 ⇒ 指到網址、agent 不背）；有位置的回饋在 Claude Code／Codex／pi 進了模型的下一次請求
-（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/33。裁決：
+（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/33。同樣的情境走 `vacant do`：25/25（OpenCode 也收得到回饋）；
+人直接開四個 agent 的**互動介面**打字（tmux 裡的真 TUI，含多回合）：歸因、回饋到模型、人在畫面上看得到、改好後收下都是 16/16——OpenCode 的互動 TUI 也有交件前回饋。裁決：
 [`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
 
 ⚠ **不能讀成**：「Vacant 抓出所有錯」（讀取是下限、只有有紀錄的步驟）、「追緝一定正確」（值比對會被巧合騙；

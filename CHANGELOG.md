@@ -44,6 +44,20 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   earlier outcome; at most 3 consecutive deferrals; a turn end settles only the actor's own steps;
   delegated writes are credited only to a later step with the identical before/after change;
   flags reach the agent only with a valid owner signature (a sub-agent could inject text as the owner).
+- Interactive use: the feedback-round cap now applies per request the person types, not per session.
+  In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
+  written after the next request then got no located feedback (reproduced as a negative control in
+  Claude Code's TUI). Messages the person did not type (a background sub-agent's result, a parent's
+  task for a sub-agent, Vacant's own feedback echoed back) do not reset it. OpenCode's plugin does not
+  see prompts, so there the cap still resets only on a pass.
+- New `ops/accountability/e2e_tui.py`: the four agents' real TUIs driven in tmux like a person would
+  (type, Enter, exit). 16/16 attributions, feedback reaching the model, feedback on the person's screen
+  and acceptance after the fix, including a multi-turn case. OpenCode's interactive TUI does get
+  pre-delivery feedback (written earlier, first measured now); `opencode run` still does not.
+  `e2e_trace.py --via-do` runs the same faults through `vacant do`: 25/25, OpenCode included.
+- The scripted mock model accepts only the experiment's fake keys (anything else is refused with 401
+  and never logged), so a passing run shows no other credential on the machine was used; it also
+  plays multi-turn scripts (`turns`).
 - Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
   does not fit moves to the background and the steps before it are recorded as not observed;
   states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at

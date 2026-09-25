@@ -1,0 +1,74 @@
+
+ pi v0.87.1
+ escape interrupt · ctrl+c/ctrl+d clear/exit · / commands · ! bash · ctrl+o more
+ Press ctrl+o to show full startup help and loaded resources.
+
+ Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.
+
+[Skills]
+  vacant
+
+[Extensions]
+  vacant.ts
+
+
+ Warning: fd not found. Offline mode enabled, skipping download.
+
+
+ Write report.md with the quarter total described in the task contract.
+
+
+
+ $ cat inputs/summary.txt
+
+ Finance quarter summary (preliminary): Total: 75
+
+ Took 0.3s
+
+
+
+ write report.md
+
+ # Quarter
+
+ Total: 75
+
+
+ Done.
+
+
+ [vacant-check]
+
+ The task contract's checks do not pass yet (this is feedback from vacant check, not a final decision):
+ - total: FAIL — report.md:3 says "75"
+   expected 69 (column 'amount', 3 rows)
+   the same value is in inputs/summary.txt line 1 (the given input); if the input is wrong, say so in the answer
+   Run vacant check to re-check before finishing.
+
+
+
+ $ cat inputs/ledger.csv
+
+ id,item,amount
+ 101,alpha,12
+ 102,beta,23
+ 103,gamma,34
+
+ Took 0.3s
+
+
+
+ write report.md
+
+ # Quarter
+
+ Total: 69
+
+
+ The finance summary disagrees with the ledger; used the ledger.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+<out>/pi/proj-a (master)
+↑60 ↓30 0.0%/131k (auto)                                                                                                                              mock-model
