@@ -79,6 +79,11 @@ def runs(jobs: pathlib.Path, ledger: pathlib.Path, dataset: pathlib.Path) -> lis
     for r in led:
         if r.get("status") != 200 or r.get("stream_error"):
             errs[r["tag"]] = errs.get(r["tag"], 0) + 1
+    # 補跑（infra_void 之後）：`<jobs>/reruns.json` 列出補跑的 job 目錄與它的標籤尾巴（`RUN_SUFFIX`）
+    try:
+        reruns = json.loads((jobs / "reruns.json").read_text())
+    except (OSError, ValueError):
+        reruns = {}
     out = []
     for res in sorted(jobs.glob("*/*/dabstep-*__*/result.json")):
         trial = res.parent
@@ -88,10 +93,13 @@ def runs(jobs: pathlib.Path, ledger: pathlib.Path, dataset: pathlib.Path) -> lis
         vr = r.get("verifier_result") or {}
         reward = (vr.get("rewards") or {}).get("reward", vr.get("reward"))
         exc = (r.get("exception_info") or {}).get("exception_type")
-        tag = f"formal-{m}-{think}-{arm}-{task}"
+        job = f"{trial.parents[1].name}/{trial.parent.name}"
+        suffix = reruns.get(job)
+        tag = f"formal-{m}-{think}-{arm}-{task}" + (f"-{suffix}" if suffix else "")
         lg = by_tag.get(tag) or {}
         row: dict[str, Any] = {
             "task": task, "model": m, "think": think, "arm": arm, "trial": trial.name,
+            "job": job, "rerun": suffix,
             "reward": reward, "exception": exc, "requests": lg.get("requests"),
             "provider_errors": errs.get(tag, 0), "prompt_tokens": lg.get("prompt_tokens"),
             "completion_tokens": lg.get("completion_tokens"),
@@ -115,9 +123,9 @@ def runs(jobs: pathlib.Path, ledger: pathlib.Path, dataset: pathlib.Path) -> lis
 
 
 def pairs(rows: list[dict[str, Any]], m: str, think: str) -> dict[str, dict[str, dict]]:
-    """每一題一對；同一格有多跑（補跑）時用最後一跑。"""
+    """每一題一對；同一格有多跑（補跑）時用**時間上最後**的那一跑（job 目錄名是開跑時間）。"""
     by: dict[str, dict[str, dict]] = {}
-    for r in sorted(rows, key=lambda x: x["trial"]):
+    for r in sorted(rows, key=lambda x: x["job"]):
         if r["model"] == m and r["think"] == think:
             by.setdefault(r["task"], {})[r["arm"]] = r
     return by
