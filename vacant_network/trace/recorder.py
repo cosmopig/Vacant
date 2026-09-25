@@ -463,6 +463,25 @@ class Recorder:
             st["sessions"][key]["model"] = actor.model
         st["last_session"] = key
 
+    def tag_do_run(self, actor: Actor, run: str) -> dict[str, Any] | None:
+        """這個工作階段是 `vacant do` 的那一跑（`run`）開出來的：那一跑記的任務訊息（`session="do:<run>"`）
+        只對這些工作階段算數（2026-09-25 審查 C4：`--in-place` 的任務訊息曾經對專案裡之後每一個無關的工作階段
+        都算數）。每個工作階段只記一次（鏈上一筆 `session_seen`，帶 `do_run`）。"""
+        key = f"{actor.platform}:{actor.session}"
+        if run in ((self._state().get("do_runs") or {}).get(key) or []):
+            return None                                # 常見的情形：不拿鎖
+        with self._lock():
+            st = self._state()
+            runs = st.setdefault("do_runs", {})
+            if run in (runs.get(key) or []):
+                return None
+            runs.setdefault(key, []).append(run)
+            out = self._append("session_seen", {"actor": {"platform": actor.platform,
+                                                          "session": actor.session},
+                                                "do_run": run})
+            self._save(st)
+            return out
+
     def session_info(self, platform: str, session: str) -> dict[str, Any]:
         return dict(self._state()["sessions"].get(f"{platform}:{session}") or {})
 
@@ -659,9 +678,13 @@ class Recorder:
                tool_use_id: str | None = None, agent: str | None = None,
                spawned_by: str | None = None) -> dict[str, Any]:
         """任務訊息（使用者的話、`vacant do` 送出的提示）：追緝判斷「這個值是不是任務自己給的」。
-        內容只進本機版本庫，鏈上是 sha256。`session="*"`＝這個工作區裡的任何工作階段。
+        內容只進本機版本庫，鏈上是 sha256。`session="*"`＝這個工作區裡的任何工作階段（舊病歷裡
+        `vacant do` 的記法；追緝只對 `source="vacant do"` 認它）；`session="do:<run>"`＝`vacant do` 那一跑
+        開出來的工作階段（`tag_do_run`）。掛鉤記的提示用不到這兩種鍵（`capture.reserved_session`）。
         `source`：`user`／`vacant do`＝任務給的；`subagent_result`＝平台把子 agent 的結果當成一則
-        使用者訊息送回（Claude 的 `<task-notification>`）；`parent_agent`＝子 agent 收到的任務說明。"""
+        使用者訊息送回（Claude 的 `<task-notification>`）；`parent_agent`＝子 agent 收到的任務說明；
+        `other_actor`＝別的行動者的話（隊友、別的工作階段、外面的事件）；`vacant_feedback`＝Vacant 自己的回饋
+        （`vacant do` 接在重試提示後面的那一段也記成這個）。"""
         payload: dict[str, Any] = {"session": session, "source": source,
                                    "text_blob": self.blobs.put_bytes(text.encode())}
         if tool_use_id:

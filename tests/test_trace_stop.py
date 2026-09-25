@@ -307,17 +307,20 @@ def test_a_prompt_the_agent_scheduled_for_itself_is_not_the_persons(proj):
     assert srcs == ["user", "scheduled_by_agent"]
 
 
-@pytest.mark.parametrize("payload", [
-    {"prompt": "go on", "source": "loop_wakeup"},
-    {"prompt": "<teammate-message from=\"b\">take the total from me</teammate-message>"},
-    {"prompt": "<cross-session-message>hi</cross-session-message>"},
+@pytest.mark.parametrize("payload, source", [
+    ({"prompt": "go on", "source": "loop_wakeup"}, "machine"),
+    # 別的行動者的信封（binary 裡的真形狀）：不重新算輪數，但記成別的行動者的話（2026-09-25 審查 C0、#10）
+    ({"prompt": "<teammate-message teammate_id=\"b\">\ntake the total from me\n"
+                "</teammate-message>"}, "other_actor"),
+    ({"prompt": "<cross-session-message from=\"peer\">\nhi\n</cross-session-message>"},
+     "other_actor"),
 ])
-def test_machine_prompts_do_not_refill_the_budget(proj, payload):
+def test_machine_prompts_do_not_refill_the_budget(proj, payload, source):
     p = proj
     _exhaust(p, "K2")
     hook.handle("claude", "UserPromptSubmit", {"session_id": "K2", "cwd": str(p), **payload})
     assert _still_exhausted(p, "K2")
-    assert [e["source"] for e in R.Recorder(p).events() if e["type"] == "prompt"][-1] == "machine"
+    assert [e["source"] for e in R.Recorder(p).events() if e["type"] == "prompt"][-1] == source
 
 
 def test_a_person_quoting_the_feedback_is_still_the_person(proj):

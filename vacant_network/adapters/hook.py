@@ -29,7 +29,9 @@ OpenCode 與 pi 的外掛是我們自己寫的（`adapters/agents.py` 裡的原�
 1. **任何例外都放行**（exit 0、沒有輸出），並把錯誤落到 `$VACANT_HOME/intake/hooks/errors.jsonl`。
    掛鉤壞掉弄死 agent 的代價，比少擋一次的代價大；而保證本來就不在這一層
    （`hookpolicy.py` 誠實邊界 1、2）。
-2. 事件紀錄只落雜湊與工具名，不落指令原文或檔案內容（`vrun/hookcli.py` 誠實邊界 1 的同一條）。
+2. 事件紀錄只落雜湊與工具名，不落指令原文或檔案內容（`vrun/hookcli.py` 誠實邊界 1 的同一條）；
+   agent 用 CronCreate／ScheduleWakeup 排給自己的提示也只記雜湊（`intake/hooks/scheduled_*.json`，
+   沒開追緝時分辨「這一則是不是人打的」用）。
 """
 from __future__ import annotations
 
@@ -213,11 +215,27 @@ def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contr
                               "error": f"trace: {type(e).__name__}: {e}"[:500]})
 
 
+def _remember_scheduled(agent: str, event: str, payload: dict[str, Any], ev: HookEvent) -> None:
+    """agent 用 CronCreate／ScheduleWakeup 排給自己的提示：記在病歷之外（`capture.remember_scheduled`），
+    沒開追緝的專案裡照樣認得出它觸發時的那一則不是人打的（2026-09-25 審查 C5）。失敗的呼叫不記。"""
+    from ..trace import capture
+    if ev.tool not in capture.SCHEDULER_TOOLS or event == "PostToolUseFailure" \
+            or payload.get("is_error") or payload.get("error"):
+        return
+    try:
+        capture.remember_scheduled(agent, payload)
+    except Exception as e:  # noqa: BLE001 — 掛鉤不可以因為這個壞掉
+        _log("errors.jsonl", {"agent": agent, "event": event,
+                              "error": f"scheduled: {type(e).__name__}: {e}"[:500]})
+
+
 def _person_prompt(agent: str, event: str, payload: dict[str, Any], cwd: str | None,
                    contract: Any) -> bool:
     """這則使用者訊息是人打的（不是背景子 agent 的結果、不是父 agent 給子 agent 的任務、不是 agent
-    自己排的排程提示、也不是 Vacant 自己的回饋被當成使用者訊息送回來——那個再給新輪數就是一個不會停的迴圈）。
-    分辨規則只有一份：`capture.classify_prompt`（病歷記的來源也是它）。"""
+    自己排的排程提示、不是別的行動者的話、不是 `vacant do` 交給 agent 的任務（含接在後面的回饋），
+    也不是 Vacant 自己的回饋被當成使用者訊息送回來——那個再給新輪數就是一個不會停的迴圈）。
+    分辨規則只有一份：`capture.classify_prompt`（病歷記的來源也是它；agent 排過的提示在病歷沒開時看
+    `capture.scheduled_outside_trace`）。"""
     from ..trace import capture
     action = capture.ACTIONS.get(event) or capture.ACTIONS.get(
         str(payload.get("hook_event_name") or ""))
@@ -297,6 +315,8 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
     if ev.kind != "stop":
         _trace(agent, event, payload, ev, contract, d)
+    if contract is not None and ev.kind in ("pre_tool", "post_tool") and d.action != "deny":
+        _remember_scheduled(agent, event, payload, ev)
     if contract is not None and ev.kind == "other":
         try:
             if _person_prompt(agent, event, payload, ev.cwd, contract):
