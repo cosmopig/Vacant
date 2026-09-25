@@ -41,14 +41,14 @@ from ..atomic import atomic_write_text, file_lock
 from ..canonical import canonical_bytes
 from ..intake import keys as _keys
 from ..intake.statepaths import state_dir, state_dirs
-from ..logbook import MAX_PAYLOAD_BYTES, LogEntry, Logbook
+from ..logbook import MAX_PAYLOAD_BYTES, LogEntry, Logbook, _signed_bytes
 from . import workspace as W
 from .tools import tool_kind
 
 TRACE_SCHEMA = "vacant-trace/1"
 EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_change",
                          "transcript", "session_closed", "finding", "flag", "coverage",
-                         "consequence", "prompt"})
+                         "consequence", "prompt", "review"})
 MAX_OUTPUT_BLOB = 2 * 1024 * 1024
 #: 一個步驟開著超過這麼久還沒等到 `post`，就當它不會來了（和 Stop 掛鉤的上限同一個數量級）
 STALE_S = 900.0
@@ -880,6 +880,74 @@ class Recorder:
         if torn:
             return True, f"{len(book)} entries (+{torn} bytes of a torn last line, not counted)"
         return True, f"{len(book)} entries"
+
+    def verify_since(self, mark: dict[str, Any] | None, trust: _keys.Trust | None = None
+                     ) -> tuple[bool, str, dict[str, Any] | None]:
+        """零設定的回合結束用：只驗**上次驗過之後新增的那一段**＋接點（完整驗證仍是 `verify`／
+        `vacant trace verify`）。`mark`＝上次驗過的最後一筆 `{"seq", "hash"}`；沒有、或對不上
+        （那一筆不在了、雜湊變了）⇒ 整條驗。回 `(過了沒, 說明, 這次的記號)`。
+        ⚠ 記號存在病歷旁邊、沒有簽章：它只省時間，不是證據——能改病歷的也能改記號，
+        這一層防的是壞掉（寫到一半、磁碟、手動編輯），不是有心人（那一層是收件端的帳本錨點）。"""
+        from ..identity import PublicIdentity
+        if not self.chain_path.is_file():
+            return False, "no trace", None
+        book, torn = self._book()
+        es = book.entries
+        if not es:
+            return False, "trace chain is empty", None
+        last = es[-1]
+        new_mark = {"seq": last.seq, "hash": last.hash()}
+        i = -1
+        if mark:
+            try:
+                i = int(mark.get("seq") or 0) - 1
+            except (TypeError, ValueError):
+                i = -1
+            if not (0 <= i < len(es) and es[i].seq == i + 1 and es[i].hash() == mark.get("hash")):
+                i = -1
+        if i < 0:
+            ok, why = self.verify(trust)
+            return ok, why, (new_mark if ok else None)
+        signer = (es[0].payload or {}).get("signer")
+        t = trust or _keys.Trust.load()
+        name = t.name_of("verifier", str(signer))
+        if name is None:
+            return False, "trace signer is not on the accepted-signer list", None
+        who = PublicIdentity.from_hex(name, str(signer))
+        stream, branch, prev = es[0].hash(), es[0].branch_id, es[i].hash()
+        for k, e in enumerate(es[i + 1:], start=i + 2):
+            if e.seq != k or e.prev_hash != prev or e.stream_id != stream or e.branch_id != branch:
+                return False, f"trace chain breaks at entry {k}", None
+            if not who.verify(_signed_bytes(e.stream_id, e.branch_id, e.seq, e.prev_hash, e.ts_ms,
+                                            e.type, e.payload), bytes.fromhex(e.sig)):
+                return False, f"trace entry {k} does not verify", None
+            prev = e.hash()
+        try:
+            head = json.loads((self.dir / "head.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            head = None
+        if head and (int(head.get("seq", 0)) > last.seq or
+                     (int(head.get("seq", 0)) == last.seq and head.get("hash") != last.hash())):
+            return False, (f"trace chain ends at entry {last.seq} but its recorded head is entry "
+                           f"{head.get('seq')} (truncated or replaced)"), None
+        return True, f"{len(es) - i - 1} new entries since entry {i + 1}" + (
+            f" (+{torn} bytes of a torn last line, not counted)" if torn else ""), new_mark
+
+    def set_aside(self, why: str) -> str:
+        """病歷驗不過：把舊的鏈與鏈頭**改名留著**（不刪、不改內容），下一筆從新的創世開始。
+        回舊鏈的新檔名。零設定的回合結束用——沒有收件端帳本可記 `trace_broken`，
+        不能讓一條壞掉的鏈讓這個專案從此每一次都查不了。"""
+        with self._lock():
+            if not self.chain_path.is_file():
+                return ""
+            stamp = int(time.time() * 1000)
+            name = f"chain.set-aside.{stamp}.ndjson"
+            os.replace(self.chain_path, self.dir / name)
+            head = self.dir / "head.json"
+            if head.is_file():
+                os.replace(head, self.dir / f"head.set-aside.{stamp}.json")
+            atomic_write_text(self.dir / f"chain.set-aside.{stamp}.why.txt", str(why)[:2000] + "\n")
+        return name
 
 
 def main(argv: list[str] | None = None) -> int:

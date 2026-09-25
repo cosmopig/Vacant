@@ -1,0 +1,64 @@
+{
+ "runs": 3,
+ "correct": 1,
+ "sent_back": 1,
+ "false_positive_on_correct": [],
+ "rows": [
+  {
+   "trial": "10452__HsdF6hA",
+   "reward": 0.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/google/gemma-3-12b-it",
+   "steps": 1,
+   "action": "continue",
+   "stop_s": 0.37,
+   "sent_back": [
+    "missing_output"
+   ],
+   "findings": [
+    {
+     "asked": "/app/output/1_10452_output.xlsx",
+     "finding_id": "z_e2ad26eee1",
+     "kind": "missing_output",
+     "path": "output/1_10452_output.xlsx"
+    }
+   ],
+   "deliverables": [],
+   "reason": "Before delivery: a review of the recorded steps of this task found points to redo.\nTake the role of a careful reviewer who checks the draft against the materials given for the task. Redo only the parts listed below; leave everything else as it is.\n- The request asks for /app/output/1_10452_output.xlsx, but it does not exist. Finish the task and write it.\nThis review lists what the record shows; it does not say whether the answer is right.",
+   "note": null
+  },
+  {
+   "trial": "10452__rRjumd7",
+   "reward": 1.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/google/gemma-4-26b-a4b-it",
+   "steps": 10,
+   "action": "allow",
+   "stop_s": 0.447,
+   "sent_back": [],
+   "findings": [],
+   "deliverables": [
+    "solution.py"
+   ],
+   "reason": "",
+   "note": "Vacant checked this turn: 0 value(s), 1/1 given file(s) opened.\nNote: /root/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md"
+  },
+  {
+   "trial": "10452__YREpPCi",
+   "reward": 0.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/qwen/qwen3.5-9b",
+   "steps": 5,
+   "action": "allow",
+   "stop_s": 0.388,
+   "sent_back": [],
+   "findings": [],
+   "deliverables": [],
+   "reason": "",
+   "note": null
+  }
+ ]
+}

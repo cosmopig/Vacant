@@ -298,3 +298,68 @@ def test_rereading_its_own_draft_does_not_make_an_invented_value_sourced(env):
     a.bash("cat plan.md", "# Plan\n\n- Launch: October 1, 2026\n")
     vals = {f["value"] for f in a.evidence()["findings"] if f["kind"] == "unsourced"}
     assert "October 1, 2026" in vals
+
+
+def test_cd_into_the_folder_is_not_reading_every_file_in_it(env):
+    """真實紀錄重播（DABstep-5，qwen3.5-9b）：`cd data && cut … payments.csv | … | head` 只讀了那一個檔；
+    之前被算成整個資料夾都讀過，交件說明就會說錯話。"""
+    p = _proj(env, files={"data/payments.csv": "id,country\n1,NL\n2,NL\n3,IT\n",
+                          "data/manual.md": "# Manual\n", "data/fees.json": "[]\n"})
+    a = Agent(p)
+    a.ask("Answer by referencing files in the data directory: `data/`. Write the answer to "
+          "answer.txt.")
+    a.bash("ls -la data/", "payments.csv manual.md fees.json")
+    a.bash("cd data && cut -d',' -f2 payments.csv | sort | uniq -c | sort -rn | head -3",
+           "2 NL\n1 IT\n")
+    a.write("answer.txt", "NL\n")
+    r = a.evidence()
+    assert r["observed"] == ["data/payments.csv"]
+    assert sorted(r["unread_dir"]) == ["data/fees.json", "data/manual.md"]
+    assert not r["findings"]
+
+
+def _app(env, files=None):
+    p = env / "work" / "app"
+    p.mkdir(parents=True)
+    for rel, c in (files or {}).items():
+        (p / rel).parent.mkdir(parents=True, exist_ok=True)
+        (p / rel).write_text(c)
+    return p
+
+
+def test_a_requested_output_that_was_never_written_is_found(env):
+    """真實紀錄重播（Gate 1）：最常見、Vacant 又幫得上的失敗是「說做完了、要求的檔卻不存在」。"""
+    p = _app(env, {"data/payments.csv": "id,country\n1,NL\n"})
+    a = Agent(p)
+    a.ask("Answer by referencing files in `/app/data/`.\nWhen you have computed the final answer, "
+          "write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file "
+          "should contain just `42`).")
+    a.bash("head /app/data/payments.csv", "id,country\n1,NL\n")
+    r = a.evidence()
+    assert [(f["kind"], f["path"]) for f in r["findings"]] == [("missing_output", "answer.txt")]
+    a.write("answer.txt", "NL\n")
+    assert a.evidence()["findings"] == []
+
+
+def test_save_in_and_an_output_path_label_are_requested_outputs(env):
+    p = _app(env, {"spreadsheets/in.xlsx": "x", "access.log": "1.2.3.4 2026-01-02\n"})
+    a = Agent(p)
+    a.ask("Write a regex that matches dates in the format YYYY-MM-DD appearing in lines that "
+          "contain an IPv4 address in a log file.\nSave your regex in /app/regex.txt\n\n"
+          "### output_path\n/app/output/1_out.xlsx\n")
+    a.bash("head /app/access.log", "1.2.3.4 2026-01-02")
+    r = a.evidence()
+    assert sorted(r["requested_outputs"]) == ["output/1_out.xlsx", "regex.txt"]
+    assert sorted(f["path"] for f in r["findings"]) == ["output/1_out.xlsx", "regex.txt"]
+
+
+def test_mentions_that_are_not_outputs_are_not_requested_outputs(env):
+    p = _app(env, {"utils.py": "def f():\n    pass\n", "data.csv": "a\n1\n"})
+    a = Agent(p)
+    a.ask("Write a function in utils.py that parses data.csv. Write your answer in English, "
+          "export as CSV if needed, and print the result to stdout.")
+    a.read("data.csv")
+    a.read("utils.py")
+    r = a.evidence()
+    assert r["requested_outputs"] == ["utils.py"]
+    assert r["findings"] == []                    # utils.py 已經在了：不是「沒寫出來」

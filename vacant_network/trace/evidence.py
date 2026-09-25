@@ -71,6 +71,15 @@ FAIL_OUT = re.compile(r"(FAILED|failures=|errors=|Traceback \(most recent call l
 PASS_OUT = re.compile(r"(\bOK\b\s*$|\b\d+ passed\b|test result: ok|BUILD SUCCESS|\bPASS\b)", re.M)
 MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|did not run|"
                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
+#: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
+OUTPUT_VERB = re.compile(r"\b(write|writes|save|store|put|output|export|generate|create|produce|"
+                         r"place|dump|寫入|寫到|存到|存成|輸出到|產生)\b", re.I)
+OUTPUT_PREP = re.compile(r"(?:\b(?:to|in|into|as|at)\b|到|至|成)\s*(`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;()]+)")
+OUTPUT_LABEL = re.compile(r"output[ _-]?(?:path|file)\b[^\n]*\n(?:[ \t]*\n)*[ \t]*(`[^`\n]+`|[^\s]+)",
+                          re.I)
+FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,6}$")
+#: 只換目錄或列出檔名的指令（連同它的參數）：不算讀了資料夾裡的內容
+_NOT_A_DIR_READ = re.compile(r"(?<![\w.-])(cd|pushd|ls|tree|du|stat)\b[^;&|\n]*")
 ONLY_ANSWER = re.compile(r"\b(only|just) (the )?(final )?answer\b|write only\b|\bONLY\b", re.I)
 
 MONTHS = {m.lower(): i for i, m in enumerate(
@@ -272,6 +281,50 @@ class Evidence:
         named = sorted(dict.fromkeys(named))
         return named, sorted(set(in_dirs) - set(named))
 
+    def requested_outputs(self, prompt_texts: list[str]) -> list[tuple[str, str]]:
+        """人要求寫出的檔：(工作區裡的相對路徑, 人寫的樣子)。只收有副檔名的路徑；專案根以外、
+        對不到專案裡任何資料夾的絕對路徑不收（看不到它在不在）。"""
+        root = str(self.rec.workspace)
+        files = self.tr.index(self.tr.latest_index())
+        dirs = {f.rsplit("/", 1)[0] for f in files if "/" in f}
+        found: list[str] = []
+        for text in prompt_texts:
+            for m in OUTPUT_VERB.finditer(text):
+                window = text[m.end(): m.end() + 140].split("\n\n")[0]
+                for pm in OUTPUT_PREP.finditer(window):
+                    tok = pm.group(1).strip("`\"'").rstrip(".,;:!?")
+                    if FILE_LIKE.match(tok):
+                        found.append(tok)
+                        break
+            for m in OUTPUT_LABEL.finditer(text):
+                tok = m.group(1).strip("`\"'").rstrip(".,;:!?")
+                if FILE_LIKE.match(tok):
+                    found.append(tok)
+        out: list[tuple[str, str]] = []
+        for raw in dict.fromkeys(found):
+            t = raw.removeprefix("./")
+            if t.startswith("~"):
+                continue
+            if t.startswith(root + "/"):
+                rel: str | None = t[len(root) + 1:]
+            elif t.startswith("/"):
+                parts = t.lstrip("/").split("/")
+                rel = None
+                # 專案根以外的絕對路徑（評測容器裡的 /app/…）：資料夾對得上專案裡的資料夾、
+                # 或上一層就是專案根的名字，才換成相對路徑
+                for k in range(len(parts) - 1):
+                    cand = "/".join(parts[k:-1])
+                    if cand in dirs:
+                        rel = cand + "/" + parts[-1]
+                        break
+                if rel is None and self.rec.workspace.name in parts[:-1]:
+                    rel = "/".join(parts[parts.index(self.rec.workspace.name) + 1:])
+            else:
+                rel = t
+            if rel and not _skipped(rel):
+                out.append((rel, raw))
+        return out
+
     def observed(self, steps: list[Step], candidates: list[str], deliverables: set[str]) -> set[str]:
         root = str(self.rec.workspace)
         seen: set[str] = set()
@@ -301,9 +354,11 @@ class Evidence:
                     seen.add(f)
                     break
                 # 對整個資料夾做會讀內容的動作（`grep -r x data`、`cat data/*`、`os.listdir('data')`）：
-                # 資料夾名後面不接檔名才算——`head data/payments.csv` 只讀了那一個檔
-                if d and READ_VERBS.search(t) and re.search(
-                        r"(?<![\w.-])" + re.escape(d) + r"/?(\*[^\s\"'`]*)?(?=[\s\"'`),;\]]|$)", t):
+                # 資料夾名後面不接檔名才算——`head data/payments.csv` 只讀了那一個檔。
+                # `cd data && … payments.csv`、`ls data` 不是讀整個資料夾（2026-09-25 真實紀錄重播）
+                td = _NOT_A_DIR_READ.sub(" ", t)
+                if d and READ_VERBS.search(td) and re.search(
+                        r"(?<![\w.-])" + re.escape(d) + r"/?(\*[^\s\"'`]*)?(?=[\s\"'`),;\]]|$)", td):
                     seen.add(f)
                     break
         return seen
@@ -399,11 +454,17 @@ class Evidence:
             findings.append(v)
         findings += self._test_claim(steps, delivs)
         findings += self._failed_steps(steps, delivs, named + dir_members)
+        outs = self.requested_outputs(prompt_texts)
+        latest = self.tr.index(self.tr.latest_index())
+        for rel, raw in outs:
+            if rel not in latest and rel not in named + dir_members:
+                findings.append({"kind": "missing_output", "path": rel, "asked": raw})
         scope = self.rec.dir.name
         for fd in findings:
             fd["finding_id"] = finding_id(fd, scope)
         return {"window_start": start, "steps": len(steps), "deliverables": sorted(delivs),
                 "materials_named": named, "materials_in_dirs": dir_members,
+                "requested_outputs": [r for r, _ in outs],
                 "observed": sorted(observed), "unread_dir": unread_dir,
                 "values": value_notes, "findings": findings, "notes": self.notes,
                 "final_text_seen": bool(self.final_text)}
@@ -444,7 +505,8 @@ class Evidence:
             changed = _changed_lines(old, new)
             exempt_block = _exempt_lines(lines)
             nonempty = [ln for ln in lines if ln.strip()]
-            short = len(nonempty) <= 2
+            # 只有一行短短的答案（例如題目要的答案檔）：退回時請它只寫重算的值；多一個標題就是報告
+            short = len(nonempty) == 1 and len(nonempty[0].strip()) <= 40
             count = 0
             for ln_no in changed:
                 line = lines[ln_no - 1]
@@ -573,6 +635,7 @@ class Evidence:
 
 def finding_id(f: dict[str, Any], scope: str) -> str:
     key = {"unsourced": (f.get("path"), f.get("value")), "unread": (f.get("path"),),
+           "missing_output": (f.get("path"),),
            "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),)}
     raw = repr((scope, f["kind"], key.get(f["kind"], ())))
     return "z_" + hashlib.sha256(raw.encode()).hexdigest()[:10]

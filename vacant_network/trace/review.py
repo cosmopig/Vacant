@@ -29,8 +29,8 @@ INSPECT = "inspect them with head, or load them in code"
 for _t in (REVIEW_HEADER, PERSONA, FOOTER, WITHHELD):
     assert_ks1_clean(_t)
 
-#: 退回的先後：失敗的步驟與測試說法最先（最確定），值其次，點名沒讀最後
-ORDER = {"failed_step": 0, "test_claim": 1, "unsourced": 2, "unread": 3}
+#: 退回的先後：要求的檔不存在、失敗的步驟、測試說法最先（最確定），值其次，點名沒讀最後
+ORDER = {"missing_output": 0, "failed_step": 1, "test_claim": 2, "unsourced": 3, "unread": 4}
 
 
 def q(s: Any, n: int = 80) -> str:
@@ -54,6 +54,9 @@ def line_for(f: dict[str, Any]) -> str:
         return (f"- {f['path']} line {f['line']}: \"{q(f['value'])}\" was not found in anything "
                 f"this task read or computed. Recompute it from the given files ({INSPECT}), or "
                 f"mark it as an assumption on that line.{tail}")
+    if k == "missing_output":
+        return (f"- The request asks for {q(f.get('asked') or f['path'])}, but it does not exist. "
+                f"Finish the task and write it.")
     if k == "unread":
         return (f"- {f['path']} was named in the task but was not opened in the recorded steps. "
                 f"Inspect it (for example with head, or load it in code) and redo the parts that "

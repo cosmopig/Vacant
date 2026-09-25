@@ -274,6 +274,32 @@ def _localize(contract: Any, res: dict[str, Any], ev: HookEvent,
                               scan_deadline_s=recorder.HOOK_SCAN_S)
 
 
+def _zero_mode() -> str:
+    try:
+        from .mode import current_mode
+        return current_mode()
+    except Exception:  # noqa: BLE001 — 看不出來就當沒裝
+        return "off"
+
+
+def _zero_scope(cwd: str | None) -> Any:
+    from ..trace import capture, zerostop
+    ws = capture.workspace_for(cwd, None)
+    return zerostop.scope(ws) if ws is not None else None
+
+
+def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
+    """沒有契約的 Stop：證據檢查（`trace/zerostop.py`）。任何錯誤都放行（誠實邊界 1）。"""
+    from ..trace import zerostop
+    action, reason, record = zerostop.stop(agent, ev.session_id, ev.cwd,
+                                           zerostop.final_text_of(payload), mode=mode)
+    z = record.get("zero") or {}
+    if z.get("error"):
+        _log("errors.jsonl", {"agent": agent, "event": "stop",
+                              "error": f"zero-config check: {z['error']}"[:500]})
+    return HookDecision(action if action in ("allow", "continue") else "allow", reason, record)
+
+
 def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, int]:
     from ..intake import contract as C
 
@@ -287,16 +313,22 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
             _log("errors.jsonl", {"agent": agent, "event": event,
                                   "error": f"contract invalid: {e}"[:500]})
     d = HookDecision("allow")
+    # 零設定（沒有契約、人裝過 Vacant）：`adapters/mode.py`；有契約時一律走契約那條
+    zero = _zero_mode() if contract is None else "off"
     if ev.kind == "stop":
         # 追緝之前先收掉這個工作階段裡等不到 post 的步驟，否則這一回合看不到它們（integration#5）
         _trace(agent, event, payload, ev, contract, d)
     if ev.kind == "pre_tool":
         d = decide_pre_tool(ev, contract)
-    elif ev.kind == "stop" and contract is not None and _defer_for_subagents(contract, ev):
+    elif ev.kind == "stop" and (contract is not None or zero != "off") \
+            and _defer_for_subagents(contract, ev):
         # 背景的子 agent 還在做（Claude 預設把子 agent 放到背景）：主 agent 的回合結束不是交件的時候，
         # 這時驗收只會叫它把子 agent 正在做的事重做一遍。等子 agent 回報之後的那一次回合結束再驗
         # （連續延後有上限；這個工作階段上一次的驗收結果作廢——之後的工作階段結束以新的驗收為準）
         d = HookDecision("allow", "", {"stop_check_deferred": "a delegated task is still running"})
+    elif ev.kind == "stop" and contract is None and zero != "off" \
+            and not os.environ.get("VACANT_HOOK_NO_STOP"):
+        d = _zero_stop(agent, payload, ev, zero)
     elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP") \
             and os.environ.get("VACANT_FEEDBACK_MODE") != "none":
         from ..intake import flow
@@ -318,12 +350,15 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
     if ev.kind != "stop":
         _trace(agent, event, payload, ev, contract, d)
-    if contract is not None and ev.kind in ("pre_tool", "post_tool") and d.action != "deny":
+    if (contract is not None or zero != "off") and ev.kind in ("pre_tool", "post_tool") \
+            and d.action != "deny":
         _remember_scheduled(agent, event, payload, ev)
-    if contract is not None and ev.kind == "other":
+    if (contract is not None or zero != "off") and ev.kind == "other":
         try:
             if _person_prompt(agent, event, payload, ev.cwd, contract):
-                new_request(ev.session_id, contract)     # 人的一個新要求：回饋輪數重新算
+                # 人的一個新要求：回饋輪數重新算（零設定時的鍵＝專案根目錄）
+                new_request(ev.session_id, contract if contract is not None
+                            else _zero_scope(ev.cwd))
         except Exception as e:  # noqa: BLE001 — 掛鉤不可以因為這個壞掉
             _log("errors.jsonl", {"agent": agent, "event": event,
                                   "error": f"new_request: {type(e).__name__}: {e}"[:500]})

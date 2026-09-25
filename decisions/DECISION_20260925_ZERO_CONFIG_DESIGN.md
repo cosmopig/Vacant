@@ -25,6 +25,7 @@
 | 任務**單獨點名**的檔沒打開 | **退回**，最多 1 回合 | 人打的話裡寫了這個檔（檔名或路徑），這一回合沒有任何一步讀到它。只點名資料夾時，資料夾裡沒讀的檔**只進說明**；同一次若有「沒有出處的值」，就把它們附在那一行 |
 | 說測過但紀錄對不上 | **退回**，最多 2 回合 | 最後的訊息有「測試通過／build 成功」這類說法，且：沒跑過任何測試指令；或最後一次跑是失敗的；或最後一次通過之後程式碼又改過 |
 | 失敗的步驟被略過 | **退回**，最多 2 回合 | 失敗的是**跑 agent 自己寫的腳本**或**讀給定資料**的那一步；之後才寫出交付物；後來沒有再成功跑過同一件事、也沒有用別的方法成功產出同一個交付物；最後的訊息也沒提到它失敗。安裝套件、import 檢查、`--version`、網路抓取、`which`／`ls`／`grep` 這類探路一律不算 |
+| **要求寫出的檔不存在**（第 2.1 版加） | **退回**，最多 2 回合 | 人打的話裡要求寫出某個檔（「write/save/output … to/in PATH」，或 `output path` 這類標籤下一行的路徑；只收有副檔名的路徑），agent 說做完時它不在工作區裡（看紀錄裡最後的工作區狀態）。退回的那一行：`The request asks for {path}, but it does not exist. Finish the task and write it.` |
 | 其他（沒讀的資料夾成員、沒點名資料時沒出處的值、看不到的步驟…） | 只進說明 | — |
 
 回合的算法：人每打一個新要求重新算；Vacant 自己的退回文字、agent 自己排的提示、子 agent 的回覆都不算新要求（沿用 `capture.classify_prompt`）。
@@ -90,3 +91,27 @@ This review lists what the record shows; it does not say whether the answer is r
 8. 假模型擴充、模擬使用者（pi 先）、真實紀錄重播。
 9. Harbor 的 C 組包裝與閘門 2（假模型在容器裡證明會退回、會改檔）。
 每一步都有測試、lint、mypy，整套測試失敗集合等於基線才 commit。
+
+## 九、第 2.1 版：用真實紀錄重播之後的修正（2026-09-25）
+
+重播工具：`ops/eval/replay_pi_session.py`（容器裡把一次真的 pi 工作階段的每一步經過真的 `vacant hook pi` 重做一次）＋
+`ops/eval/replay_gate.py`（每一跑一個全新、不連網的題目容器，只用 wheel 安裝＋`vacant install --agents pi`）。
+結果落盤：`ops/eval/evidence_20260925/replay/`。
+
+- **誤報門檻過了**：Gate 1 的 9 個可重播的工作階段（DABstep 6、SpreadsheetBench 3；Terminal-Bench 的映像沒有 Python，
+  這一版沒重播），答對的 3 跑**全部放行**，交件前檢查 0.3–1.0 秒。
+- **但第 2 版的四類在這些真實失敗上一次都不會觸發**：失敗的樣子是「沒有真的呼叫工具（格式錯）」「15 回合用完」
+  「讀了資料但推理錯」「只寫了 9 個中的 5 個」。沒有一跑是編出沒出處的值或沒打開點名的檔。照第 2 版去花錢跑，
+  A／C 幾乎不會有差別——這件事要在花錢之前知道。
+- 因此加了第五類 **要求寫出的檔不存在**：真實失敗裡最常見、又確定是「還沒做完」的一種（對的答案一定有那個檔，退回不會弄壞對的東西）。
+  重播：沒寫出答案檔的 4 跑都被退回；答對的 3 跑照樣放行。⚠ 其中 DABstep-70（gemma-4）是 15 回合用完被 Harbor 的擴充中止——
+  真的跑的時候 pi 中止之後**不會**進 `agent_before_settle`（pi 0.87.1 `_runAgentPrompt`：中止就跳出迴圈），Vacant 也就不會多給回合；
+  重播裡會退回只是因為重播一定送 Stop。所以評測裡 C 組**不會**比 A 組多用回合上限。
+- 修正「讀到了沒」：`cd data && cut … payments.csv | … | head` 之前被算成整個資料夾都讀過（交件說明因此會說錯話）；
+  `cd`／`ls`／`tree`／`du`／`stat` 連同參數不再算讀資料夾（`tests/test_zero_evidence.py::test_cd_into_the_folder_is_not_reading_every_file_in_it`）。
+- 修正「只寫答案」的判斷：之前兩行以內就算（`# Sales` 加一行總數的報告會被叫「只寫重算的值」而丟掉標題）；
+  改成只有一行、40 字元以內。
+- **評測的安裝要注意**：Harbor 的 pi 用自訂端點時以 `PI_CODING_AGENT_DIR=/tmp/harbor-pi-agent` 跑 pi，裝在 `~/.pi/agent` 的擴充
+  **不會被載入**。C 組的包裝要在 Harbor 寫設定之前，用同一個 `PI_CODING_AGENT_DIR` 跑 `vacant install`（使用者的 pi 設定目錄在哪，
+  `vacant install` 就裝到哪；這是配合評測框架的隔離，記在評測紀錄的偏差欄）。Terminal-Bench 的映像沒有 Python：
+  C 組要用 `uv tool install`（自帶 Python）。
