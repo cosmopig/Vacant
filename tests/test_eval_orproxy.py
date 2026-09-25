@@ -127,3 +127,109 @@ def test_per_run_cap_refuses_only_that_run_and_records_the_refusal(tmp_path):
         assert ref == [dict(ref[0], tag="run1", reason="per-run cap", host="h1")]
     finally:
         srv.shutdown()
+
+
+# ── 串流裡的錯誤（2026-09-25 校準：Darkbloom 先回 200、再用 data 塊說 429）───────────
+from http.server import BaseHTTPRequestHandler  # noqa: E402
+
+RATE = (b": OPENROUTER PROCESSING\n\n: OPENROUTER PROCESSING\n\n"
+        b'data: {"id":"gen-x","choices":[],"error":{"code":429,"message":"Provider returned error",'
+        b'"metadata":{"error_type":"rate_limit_exceeded"}}}\n\n')
+GOOD = (b": OPENROUTER PROCESSING\n\n"
+        b'data: {"id":"gen-y","provider":"P","choices":[{"delta":{"content":"hi"}}]}\n\n'
+        b'data: {"id":"gen-y","choices":[],"usage":{"prompt_tokens":10,"completion_tokens":2,'
+        b'"cost":0.0001}}\n\ndata: [DONE]\n\n')
+LATE = (b'data: {"id":"gen-z","choices":[{"delta":{"content":"part"}}]}\n\n'
+        b'data: {"id":"gen-z","choices":[],"error":{"code":502,"message":"upstream died"}}\n\n')
+
+
+def _upstream(script):
+    """假的 OpenRouter：依序回 `script` 裡的串流本文（全部都是 HTTP 200）。"""
+    calls = []
+
+    class U(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def do_POST(self):
+            self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            body = script[min(len(calls), len(script) - 1)]
+            calls.append(1)
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            self.wfile.write(body)
+
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), U)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, calls
+
+
+def _serve_stream(tmp_path, monkeypatch, script):
+    up, calls = _upstream(script)
+    monkeypatch.setattr(P, "UPSTREAM", f"http://127.0.0.1:{up.server_port}")
+    cfg = {"budget_usd": 1.0, "retry_waits": [0, 0, 0, 0],
+           "models": {"small/model": {"provider": {"order": ["x/fp4"], "allow_fallbacks": False}}}}
+    led = P.Ledger(tmp_path / "led", 1.0, KEY)
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), P.make_handler(cfg, led, KEY))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, up, calls
+
+
+def _post_stream(srv):
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{srv.server_port}/t/s/api/v1/chat/completions",
+        data=json.dumps({"model": "small/model", "stream": True, "messages": []}).encode(),
+        headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status, r.read()
+    except urllib.error.HTTPError as e:
+        return e.code, e.read()
+
+
+def _ledger(tmp_path):
+    return [json.loads(x) for x in (tmp_path / "led" / "ledger.jsonl").read_text().splitlines()]
+
+
+def test_a_rate_limit_inside_a_200_stream_is_retried_not_passed_to_the_agent(tmp_path, monkeypatch):
+    srv, up, calls = _serve_stream(tmp_path, monkeypatch, [RATE, RATE, GOOD])
+    try:
+        code, body = _post_stream(srv)
+        assert code == 200 and b'"hi"' in body and b"rate_limit" not in body
+        assert len(calls) == 3
+        (rec,) = _ledger(tmp_path)
+        assert rec["status"] == 200 and rec["retried_stream_errors"] == 2 and not rec["stream_error"]
+        assert rec["usage"]["prompt_tokens"] == 10 and rec["cost"] == 0.0001
+    finally:
+        srv.shutdown()
+        up.shutdown()
+
+
+def test_a_stream_error_that_never_clears_becomes_a_real_http_error(tmp_path, monkeypatch):
+    srv, up, calls = _serve_stream(tmp_path, monkeypatch, [RATE])
+    try:
+        code, body = _post_stream(srv)
+        assert code == 429 and b"rate_limit_exceeded" in body
+        assert len(calls) == 5                                   # 第一次＋重試 4 次
+        (rec,) = _ledger(tmp_path)
+        assert rec["status"] == 429 and rec["stream_error"]["code"] == 429
+        s = json.loads((tmp_path / "led" / "summary.json").read_text())
+        assert s["by_tag"]["s"]["ok"] == 0
+    finally:
+        srv.shutdown()
+        up.shutdown()
+
+
+def test_an_error_after_content_started_is_recorded_and_not_counted_ok(tmp_path, monkeypatch):
+    srv, up, calls = _serve_stream(tmp_path, monkeypatch, [LATE])
+    try:
+        code, body = _post_stream(srv)
+        assert code == 200 and b"part" in body and b"upstream died" in body
+        (rec,) = _ledger(tmp_path)
+        assert rec["stream_error"]["code"] == 502
+        s = json.loads((tmp_path / "led" / "summary.json").read_text())
+        assert s["by_tag"]["s"]["ok"] == 0 and s["by_tag"]["s"]["requests"] == 1
+    finally:
+        srv.shutdown()
+        up.shutdown()

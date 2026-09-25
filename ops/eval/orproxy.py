@@ -28,8 +28,13 @@
 每一跑的上限：設定檔的 `tag_cap_usd` 是同一個標籤（＝同一跑）累計費用的上限，到了就回 402。
 它是所有條件都一樣的安全網，不是實驗設計的一部分；被它擋下的請求記在 `refusals.jsonl`。
 
-重試：上游 429／5xx／連線錯誤最多重試 4 次（2、4、8、16 秒退避），只在還沒送任何位元組
-給 agent 之前重試；每一次嘗試都各記一筆。
+重試：上游 429／5xx／連線錯誤最多重試 4 次（預設 2、4、8、16 秒退避，設定檔 `retry_waits` 可改），
+只在還沒送任何位元組給 agent 之前重試；每一次嘗試都各記一筆。
+**串流裡的錯誤**：OpenRouter 對串流請求常先回 HTTP 200、送幾行 `: OPENROUTER PROCESSING`，再用一個
+`data: {"error": {"code": 429, …}}` 表示供應商拒絕（2026-09-25 校準實測：Darkbloom 的 `rate_limit_exceeded`）。
+所以串流要先讀到**第一個 data 塊**才決定：是錯誤 ⇒ 照上面的規則重試、重試完還是錯就回 agent 一個**真的**
+HTTP 錯誤（不是假的 200）；帳本的 `status` 記成那個錯誤碼、`stream_error` 記內容。內容開始之後才出現的錯誤
+沒辦法重試，照樣轉給 agent，帳本記 `stream_error`、不算 `ok`。
 
 誠實邊界：
 - 費用以 OpenRouter 回應裡的 `usage.cost` 為準；`vacant eval` 結束時另外用 `/api/v1/key`
@@ -107,7 +112,7 @@ class Ledger:
                        self.summary["by_model"].setdefault(rec.get("model") or "?", _zero()),
                        self.summary["total"]):
             bucket["requests"] += 1
-            bucket["ok"] += int(rec.get("status") == 200)
+            bucket["ok"] += int(rec.get("status") == 200 and not rec.get("stream_error"))
             u = rec.get("usage") or {}
             for k in ("prompt_tokens", "completion_tokens", "reasoning_tokens", "cached_tokens"):
                 bucket[k] += int(u.get(k) or 0)
@@ -138,6 +143,43 @@ class Ledger:
             self._add(led_rec)
             s = dict(self.summary, spent_usd=round(self.spent, 8), budget_usd=self.budget)
             (self.out / "summary.json").write_text(json.dumps(s, indent=1))
+
+
+def _peek_stream(r) -> tuple[list[bytes], dict | None]:
+    """讀到第一個 `data:` 塊為止（前面的 `: OPENROUTER PROCESSING` 保活行照樣留著）。
+    回 (讀過的行, 錯誤物件或 None)。第一塊就是錯誤、而且沒有任何內容 ⇒ 那是供應商拒絕，不是回答。"""
+    head: list[bytes] = []
+    for line in r:
+        head.append(line)
+        s = line.strip()
+        if not s.startswith(b"data:"):
+            continue
+        payload = s[5:].strip()
+        if payload in (b"[DONE]", b""):
+            return head, None
+        try:
+            obj = json.loads(payload)
+        except ValueError:
+            return head, None
+        if isinstance(obj, dict) and obj.get("error") and not any(
+                (c.get("delta") or {}).get("content") or (c.get("delta") or {}).get("tool_calls")
+                for c in obj.get("choices") or [] if isinstance(c, dict)):
+            return head, obj["error"] if isinstance(obj["error"], dict) else {"message": str(obj["error"])}
+        return head, None
+    return head, None
+
+
+def _error_code(err: dict) -> int:
+    try:
+        code = int(err.get("code"))
+    except (TypeError, ValueError):
+        return 502
+    return code if 400 <= code <= 599 else 502
+
+
+def _chain(head, rest):
+    yield from head
+    yield from rest
 
 
 def _zero() -> dict:
@@ -215,7 +257,8 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
             stream = bool(sent.get("stream"))
             data = json.dumps(sent).encode()
             attempts = []
-            for i in range(len(RETRY_WAITS) + 1):
+            waits = tuple(cfg.get("retry_waits") or RETRY_WAITS)
+            for i in range(len(waits) + 1):
                 req = urllib.request.Request(UPSTREAM + "/api/v1/chat/completions", data=data, headers={
                     "Authorization": f"Bearer {key}", "Content-Type": "application/json",
                     "HTTP-Referer": "https://github.com/cosmopig/vacant", "X-Title": "vacant-eval"})
@@ -224,22 +267,36 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
                 except urllib.error.HTTPError as e:
                     err = e.read().decode(errors="replace")
                     attempts.append({"status": e.code, "error": err[:2000], "t": round(time.time() - t0, 2)})
-                    if e.code in RETRY_STATUS and i < len(RETRY_WAITS):
-                        time.sleep(RETRY_WAITS[i])
+                    if e.code in RETRY_STATUS and i < len(waits):
+                        time.sleep(waits[i])
                         continue
                     self._finish(tag, model, body, sent, e.code, err, None, attempts, t0, stream)
                     return self._send_json(e.code, {"error": err[:2000]})
                 except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
                     attempts.append({"status": None, "error": repr(e)[:500], "t": round(time.time() - t0, 2)})
-                    if i < len(RETRY_WAITS):
-                        time.sleep(RETRY_WAITS[i])
+                    if i < len(waits):
+                        time.sleep(waits[i])
                         continue
                     self._finish(tag, model, body, sent, 502, repr(e), None, attempts, t0, stream)
                     return self._send_json(502, {"error": "upstream unreachable"})
+                head: list[bytes] = []
+                if stream:
+                    head, err_obj = _peek_stream(r)
+                    if err_obj is not None:
+                        code = _error_code(err_obj)
+                        attempts.append({"status": r.status, "stream_error": err_obj,
+                                         "t": round(time.time() - t0, 2)})
+                        r.close()
+                        if code in RETRY_STATUS and i < len(waits):
+                            time.sleep(waits[i])
+                            continue
+                        self._finish(tag, model, body, sent, code, b"".join(head).decode(errors="replace"),
+                                     {"stream_error": err_obj}, attempts, t0, stream)
+                        return self._send_json(code, {"error": err_obj})
                 attempts.append({"status": r.status, "t": round(time.time() - t0, 2)})
-                return self._relay(r, tag, model, body, sent, attempts, t0, stream)
+                return self._relay(r, tag, model, body, sent, attempts, t0, stream, head)
 
-        def _relay(self, r, tag, model, body, sent, attempts, t0, stream):
+        def _relay(self, r, tag, model, body, sent, attempts, t0, stream, head=()):
             if not stream:
                 resp = r.read().decode(errors="replace")
                 self.send_response(r.status)
@@ -259,7 +316,7 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
             self.end_headers()
             chunks, last_obj, meta = [], None, {}
             client_gone = False
-            for line in r:
+            for line in _chain(head, r):
                 chunks.append(line.decode(errors="replace"))
                 if not client_gone:
                     try:
@@ -276,6 +333,8 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
                     for k in ("id", "provider", "model"):
                         if obj.get(k):
                             meta[k] = obj[k]
+                    if obj.get("error"):
+                        meta["stream_error"] = obj["error"]      # 內容開始之後才出現：沒辦法重試，照記
                     if obj.get("usage"):
                         last_obj = obj
             self.close_connection = True
@@ -289,7 +348,9 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
                    "generation_id": (parsed or {}).get("id") if isinstance(parsed, dict) else None,
                    "provider": (parsed or {}).get("provider") if isinstance(parsed, dict) else None,
                    "usage": u, "cost": cost, "latency_s": round(time.time() - t0, 3),
-                   "attempts": len(attempts)}
+                   "attempts": len(attempts),
+                   "stream_error": (parsed or {}).get("stream_error") if isinstance(parsed, dict) else None,
+                   "retried_stream_errors": sum(1 for a in attempts if a.get("stream_error"))}
             io = {"ts": t0, "tag": tag, "model": model, "request_from_agent": body,
                   "request_sent": {k: v for k, v in sent.items() if k != "messages"} | {"messages": "<same as request_from_agent>"},
                   "status": status, "attempts": attempts, "response": resp_text}
