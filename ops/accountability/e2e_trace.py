@@ -297,9 +297,15 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     try:
         if getattr(lab, "via_do", False):
             # `vacant do`：隔離的工作區、行程結束後驗收與追緝、回饋接在下一次嘗試的提示後面（R536 走這條）
+            extra: list[str] = []
+            if lab.agent == "pi" and lab.subagents:          # 同原生那條：隨附的 subagent 擴充
+                extra = lab.native_argv(PROMPT)[1:3]         # ["-e", <subagent ext>]（也寫好 worker.md）
+            if lab.agent == "codex" and lab.web:             # 同原生那條：`curl` 要連得到假網頁
+                extra = ["-c", "sandbox_workspace_write.network_access=true"]
             cp = subprocess.run([PY, "-m", "vacant_network", "do", lab.agent, "--prompt", PROMPT,
                                  "--attempts", "2", "--feedback-mode", "localized",
-                                 "--timeout", str(timeout), "--json"],
+                                 "--timeout", str(timeout), "--json",
+                                 *(["--", *extra] if extra else [])],
                                 cwd=lab.proj, env=env, capture_output=True, text=True,
                                 timeout=timeout * 2 + 120, stdin=subprocess.DEVNULL)
             try:
