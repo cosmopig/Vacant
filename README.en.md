@@ -32,9 +32,13 @@ makes the intake real (`vacant_network/intake/`) and plugs it into the four agen
 [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md).
 
 ```bash
-vacant contract init --task report-001 --deliverable report.md --to dir:../published
-#   edit the claims in .vacant/contract.json (exists, sections, recomputed numbers,
-#   citations, your own command, human review, ...)
+vacant contract quick --deliverable report.md --input data/sales.csv \
+    --must "Recommendation" --total amount --lock
+#   one line for the things you care about (only what you write is a required check; a wrong
+#   column name is reported right there; --lock pins the inputs and signs the contract)
+#   more kinds of checks: vacant contract init …, then edit the claims in
+#   .vacant/contract.json (exists, sections, recomputed numbers, citations, your own
+#   command, human review, ...), then
 vacant contract lock          # pin source data / acceptance suite by sha256 and sign the
                               # contract with the owner key (release only follows a locked
                               # contract; edit it ⇒ lock again)

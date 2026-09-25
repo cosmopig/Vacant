@@ -27,8 +27,11 @@
 [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。
 
 ```bash
-vacant contract init --task report-001 --deliverable report.md --to dir:../published
-#   編輯 .vacant/contract.json 的 claims（存在、段落、數字重算、引用、你自己的命令、人工審查…）
+vacant contract quick --deliverable report.md --input data/sales.csv \
+    --must "Recommendation" --total amount --lock
+#   一行寫出人在意的事（只有你寫的才是必要的檢查；欄名寫錯當場就說；--lock＝釘住輸入、簽名）
+#   要更多種檢查：vacant contract init …，再編輯 .vacant/contract.json 的 claims
+#   （存在、段落、數字重算、引用、你自己的命令、人工審查…），然後
 vacant contract lock          # 釘住原始資料／驗收套件的 sha256，owner 金鑰簽下這份契約
                               #（收件端只依被鎖過的契約放行；改了契約要重鎖）
 vacant install                # 在 pi／Claude Code／OpenCode／Codex 各自的設定裡加掛鉤＋技能（可逆）

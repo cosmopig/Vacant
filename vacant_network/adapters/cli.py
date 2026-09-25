@@ -35,7 +35,8 @@ def _home() -> pathlib.Path:
 def cmd_do(args) -> int:
     cpath = pathlib.Path(args.contract) if args.contract else C.find(pathlib.Path.cwd())
     if cpath is None:
-        print("vacant do: no task contract found (create one with `vacant contract init`)",
+        print("vacant do: no task contract found (create one with `vacant contract quick "
+              "--deliverable FILE --lock`, or `vacant contract init`)",
               file=sys.stderr)
         return 2
     task = flow.open_task(cpath)

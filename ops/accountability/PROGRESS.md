@@ -386,3 +386,21 @@ pi 的標記只加在 Vacant 自己的擴充裡，沒動使用者的設定。
   `vacant do` **25/25**（回饋 25/25、accept 25/25）、TUI **16/16**（回饋與人看得到 16/16、這一個結論被解決且 accept 16/16、
   多回合那幾格前面的回合都用完了輪數 4/4、OpenCode 的病歷也記得到人打的提示、不是人打的被記成人說的 0）；三張表合計
   假模型收到非假金鑰的請求 0。證據與兩個負控制（Claude Code、OpenCode）存進 `evidence_20260924/`，說明第 1–3 節改寫。
+
+## 2026-09-25T02:27Z — `vacant contract quick`：一行寫出人在意的事
+
+**做了什麼**
+- 證據三張表都收官之後，挑 LOOP 裡沒被擋住的、離「人直接用一個 agent」最近的一項：追緝只在有契約時才有東西可追，而
+  `contract init` 的骨架只驗「檔案在、沒夾帶憑證」。`vacant contract quick --deliverable report.md --input data/sales.csv
+  --must "Recommendation" --total amount --lock`（`intake/contract.quick`＋CLI）：**只有人寫的才是必要的主張**
+  （`--must` 是純文字不是正規式；`--total` 是事實主張：報告寫的總數＝重算的欄總和）；CSV 的數字欄只列成提示、不自己變成
+  主張（和 Fable Q5-3 不同，理由寫進裁決 §八）；欄名寫錯在寫契約時就炸、列出真的欄名；摘要說清楚沒驗什麼、怎麼補。
+  `vacant do` 找不到契約時的訊息指到它。README（三語）、CHANGELOG、CLAUDE.md、MORNING、LOOP 跟上。
+
+**證據**：`tests/test_contract_quick.py` 10 條（含：用 quick 寫出來的契約，回合結束時照樣回饋 `report.md:3 says "70"
+… expected 69`）；手動在臨時專案裡：錯的欄名當場報錯、對的一行寫出 4 條必要檢查並鎖好、`vacant check` 對 70 reject、對 69 accept。
+全套測試失敗集合**等於基線**；對抗審查 workflow 在跑（成立項下一個 commit 修）。
+
+**下一步**：審查成立項修掉 ⇒ 全套測試對基線 ⇒ commit＋push。
+
+**偏移檢查**：沒有碰真模型 API；讓「需求」能被人一行寫下來、之後的追緝與回饋才有依據（目標：產出越趨近於需求）；不替人猜需求。

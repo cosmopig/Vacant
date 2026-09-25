@@ -96,6 +96,8 @@ def cmd_contract(args) -> int:
         target.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"[vacant] wrote {target}. Edit its claims, then `vacant contract lock`.")
         return 0
+    if args.action == "quick":
+        return _contract_quick(args)
     path = _contract_path(args)
     if args.action == "lock":
         res = flow.lock(path)
@@ -115,6 +117,39 @@ def cmd_contract(args) -> int:
                         "authority": x.authority} for x in c.claims],
             "release": c.release}
     _emit(info, True, "")
+    return 0
+
+
+def _contract_quick(args) -> int:
+    """`vacant contract quick`：一行寫出一份會驗人在意的事的契約（`contract.quick`）；`--lock` 順便釘住輸入、簽名。"""
+    target = pathlib.Path(args.path or ".vacant/contract.json")
+    if target.exists():
+        raise SystemExit(f"vacant: {target} already exists (refusing to overwrite)")
+    base = (target.parent.parent if target.parent.name == ".vacant" else target.parent)
+    try:
+        raw, summary = C.quick(base, deliverable=args.deliverable or [], inputs=args.input,
+                               must=args.must, must_not=args.must_not, headings=args.heading,
+                               totals=args.total, report=args.report, task_id=args.task,
+                               objective=args.objective or "",
+                               destination=args.to or "dir:.vacant/published")
+    except C.ContractError as e:
+        raise SystemExit("vacant: " + "; ".join(e.problems)) from None
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    summary["path"] = str(target)
+    if args.lock:
+        res = flow.lock(target)
+        summary["locked"] = {"contract_sha256": res["contract_sha256"], "pins": res["pins"]}
+    req = [c for c in summary["checks"] if c["required"]]
+    lines = [f"[vacant] wrote {target} (task {summary['task_id']}): {len(req)} required "
+             f"check(s), {len(summary['checks']) - len(req)} advisory, 0 human review"]
+    lines += [f"  - {c['what']}" + ("" if c["required"] else " (advisory)")
+              for c in summary["checks"]]
+    lines.append(f"  not checked: {summary['not_checked']}")
+    lines += [f"  hint: {h}" for h in summary["hints"]]
+    lines.append("  locked: inputs pinned and the contract signed with your owner key" if args.lock
+                 else "  next: `vacant contract lock` (pins the inputs and signs the contract)")
+    _emit(summary, args.json, "\n".join(lines))
     return 0
 
 
@@ -266,10 +301,25 @@ def build_parser() -> argparse.ArgumentParser:
                            help="sandbox for executable checks (auto|bwrap|unshare|none)")
 
     p = sp.add_parser("contract", help="create / lock / validate / show the task contract")
-    p.add_argument("action", choices=["init", "lock", "validate", "show"])
-    p.add_argument("--task", help="task id (init)")
-    p.add_argument("--objective", help="objective text (init)")
-    p.add_argument("--deliverable", action="append", help="deliverable glob (init, repeatable)")
+    p.add_argument("action", choices=["init", "quick", "lock", "validate", "show"])
+    p.add_argument("--task", help="task id (init/quick)")
+    p.add_argument("--objective", help="objective text (init/quick)")
+    p.add_argument("--deliverable", action="append",
+                   help="deliverable file or glob (init/quick, repeatable)")
+    p.add_argument("--input", action="append",
+                   help="quick: a file the task is given; pinned by sha256 on lock (repeatable)")
+    p.add_argument("--must", action="append",
+                   help="quick: plain text the deliverable must contain (repeatable)")
+    p.add_argument("--must-not", action="append", dest="must_not",
+                   help="quick: plain text the deliverable must not contain (repeatable)")
+    p.add_argument("--heading", action="append",
+                   help="quick: a heading the deliverable must have (repeatable)")
+    p.add_argument("--total", action="append",
+                   help="quick: [INPUT:]COLUMN — the total the deliverable states equals the sum "
+                        "of that column of a CSV input (repeatable)")
+    p.add_argument("--report", help="quick: the file --must/--total read (default: the "
+                                    "deliverable, when it is one file)")
+    p.add_argument("--lock", action="store_true", help="quick: lock right away")
     p.add_argument("--to", help="release destination, e.g. dir:published or git:repo#branch")
     p.add_argument("--path", help="where to write the new contract (init)")
     common(p)

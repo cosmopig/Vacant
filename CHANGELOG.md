@@ -44,6 +44,11 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
   earlier outcome; at most 3 consecutive deferrals; a turn end settles only the actor's own steps;
   delegated writes are credited only to a later step with the identical before/after change;
   flags reach the agent only with a valid owner signature (a sub-agent could inject text as the owner).
+- `vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation"
+  --total amount --lock`: a one-line contract for the things a person actually cares about. Only
+  what the person writes becomes a required check (plain text for `--must`, a recomputed column total
+  for `--total`); numeric CSV columns are listed as hints, never turned into checks on a guess; a
+  wrong column name fails when the contract is written, with the real column names.
 - Interactive use: the feedback-round cap now applies per request the person types, not per session.
   In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
   written after the next request then got no located feedback (reproduced as a negative control in

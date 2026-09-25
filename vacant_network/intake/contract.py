@@ -52,6 +52,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import math
 import pathlib
 import re
 import tomllib
@@ -385,6 +386,167 @@ def lock(path: str | pathlib.Path) -> dict[str, str]:
         raise ContractError(probs)
     p.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return pins
+
+
+#: `vacant contract quick` 產生的主張 id（改了會讓舊契約的報告對不上，別動）
+QUICK_TEXT_ID, QUICK_TOTAL_PREFIX = "says_what_you_asked", "total_"
+
+
+def _numeric_columns(p: pathlib.Path) -> list[str]:
+    """CSV 裡每一格（非空）都讀得成數字的欄。只當提示用，**不會**變成主張。"""
+    import csv
+    import io
+    try:
+        rows = list(csv.DictReader(io.StringIO(p.read_text(encoding="utf-8")),
+                                   delimiter="\t" if p.suffix.lower() == ".tsv" else ","))
+    except (OSError, UnicodeDecodeError, csv.Error):
+        return []
+    if not rows:
+        return []
+    out = []
+    for col in rows[0].keys() or []:
+        vals = [(r.get(col) or "").strip() for r in rows]
+        vals = [v for v in vals if v]
+        try:
+            if vals and all(math.isfinite(float(v.replace(",", ""))) for v in vals):
+                out.append(col)
+        except ValueError:
+            continue
+    return out
+
+
+def quick(base_dir: pathlib.Path, *, deliverable: list[str], inputs: list[str] | None = None,
+          must: list[str] | None = None, must_not: list[str] | None = None,
+          headings: list[str] | None = None, totals: list[str] | None = None,
+          report: str | None = None, task_id: str | None = None, objective: str = "",
+          destination: str = "dir:.vacant/published") -> tuple[dict[str, Any], dict[str, Any]]:
+    """`vacant contract quick`：一般人真的會寫的那種契約——交什麼、給了什麼（會被釘住）、哪幾件事一定要對。
+
+    這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §八「延後」那一項；
+    `ops/accountability/design_review_fable.md` Q5-3）：追緝只在有契約時才有東西可追，而 `scaffold` 只驗「檔案在、
+    沒夾帶憑證」——那不是人在意的事。規則：**只有人寫出來的才是必要的主張**；不替人猜（CSV 裡看起來像數字的欄
+    只列成提示，不會自己變成一條主張）；欄名在寫契約的當下就對過 CSV 的表頭（寫錯在這裡炸，不是在驗收時才變成
+    「不知道」）。回傳 `(契約, 摘要)`；摘要說清楚驗了什麼、**沒驗什麼**。
+
+    誠實邊界：`--must` 是「有出現這段字」，不是「這段話是對的」；`--total` 只驗報告裡寫的那一個總數等於重算的欄總和。
+    """
+    base = pathlib.Path(base_dir).resolve()
+    deliverable = [d.strip() for d in deliverable if d and d.strip()]
+    if not deliverable:
+        raise ContractError(["say what the deliverable is (--deliverable report.md)"])
+    probs: list[str] = []
+    ins: dict[str, dict[str, str]] = {}
+    in_paths: dict[str, pathlib.Path] = {}
+    for raw_path in inputs or []:
+        ap = (base / raw_path).resolve() if not pathlib.Path(raw_path).is_absolute() \
+            else pathlib.Path(raw_path).resolve()
+        try:
+            rel = ap.relative_to(base).as_posix()
+        except ValueError:
+            probs.append(f"input {raw_path}: must be inside the project ({base})")
+            continue
+        if not ap.is_file():
+            probs.append(f"input {raw_path}: no such file")
+            continue
+        stem = re.sub(r"[^A-Za-z0-9_]", "_", ap.stem).strip("_") or "input"
+        stem = stem if re.match(r"[A-Za-z0-9]", stem) else f"in_{stem}"
+        name, k = stem, 2
+        while name in ins:
+            name, k = f"{stem}_{k}", k + 1
+        ins[name] = {"path": rel}
+        in_paths[name] = ap
+    literal = [d for d in deliverable if not any(ch in d for ch in "*?[")]
+    target = report or (literal[0] if len(literal) == 1 and len(deliverable) == 1 else None)
+    wants_text = bool(must or must_not or headings)
+    if (wants_text or totals) and not target:
+        probs.append("say which file the checks read (--report PATH): the deliverable is not a "
+                     "single file")
+    claims: list[dict[str, Any]] = [
+        {"id": "deliverable_present", "verifier": "exists", "params": {"paths": deliverable},
+         "required": True, "authority": "requirement",
+         "description": "the deliverable files exist"},
+        {"id": "no_secrets_shipped", "verifier": "forbid_paths",
+         "params": {"paths": ["**/.env", "**/.env.*", "**/*.pem", "**/id_rsa*", "**/auth.json"]},
+         "required": True, "authority": "requirement",
+         "description": "no credential files in the deliverable"},
+    ]
+    if wants_text and target:
+        params: dict[str, Any] = {"path": target}
+        if must:
+            params["must_contain"] = [re.escape(x) for x in must]
+        if must_not:
+            params["must_not_contain"] = [re.escape(x) for x in must_not]
+        if headings:
+            params["required_headings"] = list(headings)
+        bits = [f"contains {x!r}" for x in must or []] + \
+            [f"does not contain {x!r}" for x in must_not or []] + \
+            [f"has a heading {x!r}" for x in headings or []]
+        claims.append({"id": QUICK_TEXT_ID, "verifier": "text", "params": params,
+                       "required": True, "authority": "requirement",
+                       "description": f"{target} " + "; ".join(bits)})
+    used: set[str] = set()
+    for spec in totals or []:
+        name, _, col = spec.rpartition(":")
+        csvs = [n for n, p in in_paths.items() if p.suffix.lower() in (".csv", ".tsv")]
+        if not name:
+            if len(csvs) != 1:
+                probs.append(f"--total {spec}: say which input (NAME:COLUMN); CSV inputs: "
+                             f"{', '.join(csvs) or 'none (add --input data.csv)'}")
+                continue
+            name = csvs[0]
+        elif name not in in_paths:
+            by_path = [n for n, p in in_paths.items()
+                       if ins[n]["path"] == name or p.name == name]
+            if len(by_path) != 1:
+                probs.append(f"--total {spec}: no input named {name!r} (inputs: "
+                             f"{', '.join(in_paths) or 'none'})")
+                continue
+            name = by_path[0]
+        tsv = in_paths[name].suffix.lower() == ".tsv"
+        header = _csv_header(in_paths[name], "\t" if tsv else ",")
+        if col not in header:
+            probs.append(f"--total {spec}: {ins[name]['path']} has no column {col!r} "
+                         f"(columns: {', '.join(header) or 'none'})")
+            continue
+        used.add(name)
+        cid = re.sub(r"[^A-Za-z0-9_.-]", "_", f"{QUICK_TOTAL_PREFIX}{name}_{col}")[:128]
+        claims.append({"id": cid, "verifier": "csv_total", "authority": "fact", "required": True,
+                       "params": {"csv": f"input:{name}", "column": col, "report": target,
+                                  **({"delimiter": "\t"} if tsv else {})},
+                       "description": f"the total stated in {target} equals the sum of column "
+                                      f"{col!r} of {ins[name]['path']}"})
+    if probs:
+        raise ContractError(probs)
+    tid = task_id or re.sub(r"[^A-Za-z0-9._-]", "-",
+                            f"{base.name}-{pathlib.Path(target or deliverable[0]).stem}").strip("-.")
+    tid = tid if _ID_RE.match(tid or "") else "task"
+    raw = scaffold(tid[:128], objective=objective, deliverable=deliverable,
+                   destination=destination)
+    raw["inputs"] = ins
+    raw["claims"] = claims
+    hints = [f"{ins[n]['path']} has numeric column(s) {', '.join(cols)} — add "
+             f"--total {n}:{cols[0]} if the deliverable states their total"
+             for n, p in in_paths.items() if n not in used
+             for cols in [_numeric_columns(p)] if cols]
+    summary = {"task_id": raw["task_id"], "report": target,
+               "checks": [{"id": c["id"], "what": c["description"], "required": c["required"],
+                           "authority": c["authority"]} for c in claims],
+               "inputs": {n: v["path"] for n, v in ins.items()},
+               "not_checked": "anything about whether the deliverable is right beyond these "
+                              "checks — add --must/--total, or `vacant flag FILE:LINE` a wrong "
+                              "place after the fact",
+               "hints": hints}
+    return raw, summary
+
+
+def _csv_header(p: pathlib.Path, delimiter: str = ",") -> list[str]:
+    import csv
+    import io
+    try:
+        first = p.read_text(encoding="utf-8").splitlines()[:1]
+        return next(csv.reader(io.StringIO(first[0]), delimiter=delimiter)) if first else []
+    except (OSError, UnicodeDecodeError, csv.Error, StopIteration):
+        return []
 
 
 def scaffold(task_id: str, *, objective: str = "", deliverable: list[str] | None = None,
