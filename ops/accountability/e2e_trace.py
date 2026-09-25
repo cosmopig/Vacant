@@ -181,6 +181,8 @@ EXPECT = {
 }
 #: 只在某些平台有意義的情境
 ONLY = {"G_background_subagent_fault": {"claude"}}
+#: `--via-do` 不跑的情境（D：agent 走了之後改原本的專案；H：兩跑之間在原本的專案下標記）
+NOT_VIA_DO = {"D_unrecorded_change", "H_human_flag"}
 #: pi 沒有內建子 agent：情境 E 用它隨附的範例擴充（另開一個 pi 行程），代理人定義放在隔離的 agent 目錄
 PI_SUBAGENT_EXT = "@earendil-works/pi-coding-agent/examples/extensions/subagent/index.ts"
 PI_WORKER = ("---\nname: worker\ndescription: does one delegated task\n"
@@ -291,10 +293,23 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
         # 情境 F：假網站走代理（假模型兼代理）；模型請求本身直連本機，不經代理
         env.update(http_proxy=f"http://127.0.0.1:{lab.port}",
                    no_proxy="127.0.0.1,localhost", NO_PROXY="127.0.0.1,localhost")
+    do_ws = None
     try:
-        cp = subprocess.run(lab.native_argv(PROMPT), cwd=lab.proj, env=env,
-                            capture_output=True, text=True, timeout=timeout,
-                            stdin=subprocess.DEVNULL)
+        if getattr(lab, "via_do", False):
+            # `vacant do`：隔離的工作區、行程結束後驗收與追緝、回饋接在下一次嘗試的提示後面（R536 走這條）
+            cp = subprocess.run([PY, "-m", "vacant_network", "do", lab.agent, "--prompt", PROMPT,
+                                 "--attempts", "2", "--feedback-mode", "localized",
+                                 "--timeout", str(timeout), "--json"],
+                                cwd=lab.proj, env=env, capture_output=True, text=True,
+                                timeout=timeout * 2 + 120, stdin=subprocess.DEVNULL)
+            try:
+                do_ws = json.loads(cp.stdout).get("workspace")
+            except ValueError:
+                do_ws = None
+        else:
+            cp = subprocess.run(lab.native_argv(PROMPT), cwd=lab.proj, env=env,
+                                capture_output=True, text=True, timeout=timeout,
+                                stdin=subprocess.DEVNULL)
         rc, err_tail = cp.returncode, cp.stderr[-400:]
     except subprocess.TimeoutExpired:
         rc, err_tail = None, "timeout"
@@ -326,6 +341,9 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
             if any(e["type"] == "finding" for e in lab.trace_events()):
                 break
             time.sleep(1)
+    home_proj = lab.proj
+    if do_ws:
+        lab.proj = pathlib.Path(do_ws)             # 追緝記在 `vacant do` 的工作區那一條病歷上
     evs = lab.trace_events()
     steps = {e.get("n"): e for e in evs if e["type"] == "step"}
     prefix = EXPECT[scn].get("claim_prefix")
@@ -348,6 +366,7 @@ def run_one(lab: Lab, scn: str, timeout: float) -> dict:
     if td and (td / "perf.jsonl").is_file():
         perf = [json.loads(x)["ms"] for x in (td / "perf.jsonl").read_text().splitlines()]
     ver = lab.vacant("trace", "verify")
+    lab.proj = home_proj
     decisions = [e for e in lab.ledger() if e["type"] == "decision"]
     return {
         "scenario": scn, "agent_rc": rc, "wall_s": wall, "agent_stderr_tail": err_tail,
@@ -384,6 +403,9 @@ def main() -> int:
     ap.add_argument("--agents", default="claude,codex,pi,opencode")
     ap.add_argument("--scenarios", default=",".join(SCENARIOS))
     ap.add_argument("--timeout", type=float, default=240)
+    ap.add_argument("--via-do", action="store_true",
+                    help="run each scenario through `vacant do` (R536's path) instead of the "
+                         "agent's own CLI with installed hooks")
     args = ap.parse_args()
     out = pathlib.Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -395,6 +417,7 @@ def main() -> int:
             shutil.rmtree(root)
         root.mkdir(parents=True)
         lab = Lab(agent, root, pathlib.Path(args.bin).resolve())
+        lab.via_do = args.via_do
         lab.user_config()
         vers = subprocess.run(lab.native_argv("x")[:1] + ["--version"], env=lab.env(),
                               capture_output=True, text=True, timeout=60)
@@ -406,6 +429,8 @@ def main() -> int:
             for scn in args.scenarios.split(","):
                 if agent not in ONLY.get(scn, {agent}):
                     continue                    # 這個平台沒有這種東西（例：背景子 agent）
+                if args.via_do and scn in NOT_VIA_DO:
+                    continue                    # 要在 agent 跑完之後去動原本的專案：`vacant do` 不在那裡跑
                 try:
                     res["runs"][scn] = run_one(lab, scn, args.timeout)
                 except Exception as e:  # noqa: BLE001 — 一格壞了照記，不拖垮整張表
