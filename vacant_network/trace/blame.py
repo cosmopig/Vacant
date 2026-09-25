@@ -33,6 +33,13 @@ LOOP §二-2）：
 4. 殼層指令執行中讀了哪些檔看不到；這裡只看**指令字串裡點名的**檔。
 5. 模型上下文裡的其他東西（系統提示、記憶、之前的對話、工作區外的指令檔）看不到或只能事後讀
    現在的內容；使用者訊息只在平台有給（`UserPromptSubmit`）或 `vacant do` 自己送出時才看得到。
+   `vacant do` 的任務訊息只對那一跑開出來的工作階段算數（靠 `VACANT_DO_RUN` 認，`capture.py` 誠實邊界 4）；
+   修之前的病歷裡記成「任何工作階段」（`*`）的 `vacant do` 任務訊息照舊對每個工作階段算數（分不出是哪一跑）。
+   Vacant 自己的回饋原文從任何提示裡逐字拿掉才當來源——被改寫過（換行、截斷）的回饋拿不掉。
+   別的行動者的話（隊友、別的工作階段、外面的事件）算來源、記成別的行動者的：那一方是不是 agent 自己安排的、
+   是不是只是轉述 agent 自己先前說過的值，這裡看不出來（那時 agent 自己的錯會被當成抄來的，不會是 `provable`）。
+6. 不該存在的檔（`forbid_paths`）報的是造出它的那一步：以記下來的版本裡「它在不在」判斷，缺口裡的
+   刪除再重建看得到是缺口、看不到是誰。
 """
 from __future__ import annotations
 
@@ -162,6 +169,9 @@ class Trace:
         self.transitions: list[Transition] = []
         self.steps: list[Step] = []
         self.prompts: list[dict[str, Any]] = []
+        #: `vacant do` 的一跑 → 它開出來的工作階段（`平台:session`；`Recorder.tag_do_run`）
+        self.do_sessions: dict[str, set[str]] = {}
+        self._prompt_texts: dict[str, str] = {}
         self._idx: dict[str, W.Index] = {}
         self.initial: str | None = None
         self.scan_disabled: str | None = None
@@ -229,6 +239,10 @@ class Trace:
                          "paths": sorted({str(c["path"]) for c in changes})[:20]}))
             elif t == "prompt":
                 self.prompts.append(e)
+            elif t == "session_seen" and e.get("do_run"):
+                a = e.get("actor") or {}
+                self.do_sessions.setdefault(str(e["do_run"]), set()).add(
+                    f"{a.get('platform')}:{a.get('session')}")
             elif t == "coverage" and e.get("scan_disabled"):
                 self.scan_disabled = str(e["scan_disabled"])
             elif t == "coverage" and e.get("baseline_deferred"):
@@ -242,7 +256,26 @@ class Trace:
                     self.initial = bl["index"]
             elif t == "session_closed" and self.initial is None and e.get("final_index"):
                 self.initial = e["final_index"]
+        #: Vacant 自己的回饋原文（`vacant do` 接在重試提示後面的、以使用者訊息送回的）：從任何提示裡拿掉之後
+        #: 才當來源（第二道防線：掛鉤沒認出 `vacant do` 的重試提示時，回饋引的錯值照樣不是「任務說的」）
+        self.feedback_texts: list[str] = sorted(
+            {t.strip() for t in (self.blob_text(p.get("text_blob"))
+                                 for p in self.prompts if p.get("source") == "vacant_feedback")
+             if t and t.strip()}, key=len, reverse=True)
         self._credit_delegated_writes()
+
+    def prompt_text(self, p: dict[str, Any]) -> str:
+        """一則提示當成來源時的文字：Vacant 自己的回饋原文（`feedback_texts`）逐字拿掉——也拿掉 `opencode run`
+        把 `"` 換成 `\\"` 之後的那個樣子（`capture.opencode_run_unquote`）。"""
+        key = str(p.get("text_blob"))
+        if key not in self._prompt_texts:
+            text = self.blob_text(p.get("text_blob")) or ""
+            for fb in self.feedback_texts:
+                for form in (fb, fb.replace('"', '\\"')):
+                    if form in text:
+                        text = text.replace(form, "")
+            self._prompt_texts[key] = text
+        return self._prompt_texts[key]
 
     def _credit_delegated_writes(self) -> None:
         """委派呼叫（Agent／task／spawn…）自己不寫檔。它的前後差異裡若有一個版本，是另一個**真正的步驟**
@@ -482,24 +515,36 @@ class Blamer:
                         break
                     if tool_kind(j.tool) == "agent" and j.ctx[:2] == s.ctx[:2] and not j.ctx[2]:
                         out.append(("spawn_input", j, self.t.input_text(j), None))
+        me = f"{s.actor.get('platform')}:{s.actor.get('session')}"
         for p in self.t.prompts:
             if int(p.get("seq", 0)) >= s.seq:
                 continue
-            if str(p.get("session")) not in ("*", str(s.actor.get("session"))):
-                continue
             src = str(p.get("source") or "user")
             if src not in _TASK_SOURCES:
-                # Vacant 自己的回饋（引了錯值與應有的值）、agent 自己排的提示（它自己的話）、別的工作階段
-                # 送來的訊息：都不是「任務說的」——當成來源就等於替 agent 洗掉錯（2026-09-25）
+                # Vacant 自己的回饋（引了錯值與應有的值）、agent 自己排的提示（它自己的話）、平台自己說不是人的
+                # 訊息：都不是「任務說的」——當成來源就等於替 agent 洗掉錯（2026-09-25）
+                continue
+            psess = str(p.get("session"))
+            if psess == "*":
+                # 「任何工作階段」只有舊病歷裡 `vacant do` 自己記的任務訊息用過；掛鉤記的提示不可以是它
+                # （2026-09-25 審查 C1：偽造一則 `session_id="*"` 的「人打的」曾經成了每個工作階段的任務訊息）
+                if src != "vacant do":
+                    continue
+            elif psess.startswith("do:"):
+                # `vacant do` 那一跑的任務訊息：只對那一跑開出來的工作階段算數（審查 C4：`--in-place` 的任務
+                # 訊息曾經對專案裡之後每一個無關的工作階段都算數）
+                if me not in self.t.do_sessions.get(psess[3:], set()):
+                    continue
+            elif psess != str(s.actor.get("session")):
                 continue
             if src == "parent_agent" and not s.actor.get("agent"):
                 continue
             if src == "parent_agent" and p.get("agent") and p.get("agent") != s.actor.get("agent"):
                 continue                       # 另一個子 agent 收到的任務說明
-            kind = {"subagent_result": "subagent_result",
-                    "parent_agent": "spawn_prompt"}.get(src, "prompt")
+            kind = {"subagent_result": "subagent_result", "parent_agent": "spawn_prompt",
+                    "other_actor": "other_actor"}.get(src, "prompt")
             fake_seq = int(p.get("seq", 0))
-            out.append((kind, None, self.t.blob_text(p.get("text_blob")) or "",
+            out.append((kind, None, self.t.prompt_text(p),
                         {"seq": fake_seq, "tool_use_id": p.get("tool_use_id")}))
         out.sort(key=lambda x: -(x[1].seq if x[1] is not None else
                                  (x[3] or {}).get("seq", 0) if isinstance(x[3], dict) else 0))
@@ -665,6 +710,22 @@ class Blamer:
                 last = tr
         return last
 
+    def _creator(self, path: str) -> Transition | None:
+        """造出這個檔的那個轉變：最後一次記到它**不在**之後，第一個讓它在的（一步或一個缺口）。
+        第一次看的時候就在、之後沒被刪過 ⇒ None。"""
+        present = path in self.t.index(self.t.initial)
+        made: Transition | None = None
+        for tr in self.t.transitions:
+            if path not in tr.paths or not tr.after:
+                continue
+            now = path in self.t.index(tr.after)
+            if now and not present:
+                made = tr
+            elif not now:
+                made = None
+            present = now
+        return made
+
     def _pinned_ok(self, rel: str, index_sha: str | None) -> bool:
         """這個輸入在那個狀態下，是不是委託者釘住的那一版。"""
         if self.contract is None or rel not in self.inputs:
@@ -736,6 +797,13 @@ class Blamer:
                 chain.append({"via": "the task message"})
                 return Origin("input", source={"kind": "prompt"},
                               note="the value is in the task message")
+            if kind == "other_actor":
+                # 隊友、別的工作階段、外面的事件送進來的話：不是任務自己說的，也不是 agent 自己造的
+                chain.append({"via": "a message from another actor"})
+                return Origin("input", source={"kind": "message", "from": "another actor"},
+                              note="the value is in a message from another actor (a teammate, "
+                                   "another session or an outside event), not in the task's "
+                                   "own message")
             if kind == "subagent_result":
                 return self._from_subagent_result(ref, value, chain, depth)
             if kind == "spawn_prompt":
@@ -1124,6 +1192,17 @@ def blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
     return res
 
 
+def _existence_is_the_problem(contract: Any, claim_id: str | None) -> bool:
+    """這條主張不過是因為**有**某個檔（`forbid_paths`：契約禁止的檔），不是因為缺了什麼或內容錯。"""
+    if contract is None or not claim_id:
+        return False
+    from . import rerun
+    try:
+        return rerun.claim_by_id(contract, claim_id).verifier == "forbid_paths"
+    except (KeyError, AttributeError):
+        return False
+
+
 def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
                     claim_id: str | None = None, sandbox: str = "auto",
                     expected: str | None = None) -> dict[str, Any]:
@@ -1149,13 +1228,23 @@ def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
                         "running in the background)")
         return res
     if not value or loc.kind == "missing":
-        # 缺的東西沒有值可追：最後寫這個檔的是誰（推論層）
-        last = b._last_writer(loc.path, 1 << 62)
+        # 缺的東西沒有值可追：最後寫這個檔的是誰（推論層）。**不該存在的檔**（契約禁止的）問題是它在：
+        # 報的是造出它的那一步（最後一次看到它不在之後第一個寫它的），不是最後改它的那一步（2026-09-25 審查 #25）
+        creates = loc.kind != "missing" and _existence_is_the_problem(contract, claim_id)
+        last = b._creator(loc.path) if creates else b._last_writer(loc.path, 1 << 62)
         if last is None and trace.unobserved_start:
             res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
                        layer="inference", step=None, chain=[],
                        note="no observed step wrote this file, and steps ran before the first "
                             "full view of the workspace")
+        elif last is None and creates and loc.path in trace.index(trace.initial):
+            # 第一次看的時候就在了，之後也沒有哪一步把它刪掉再造出來：不是這個工作階段造的
+            res.update(state="located", fault_class="input", confidence="heuristic",
+                       layer="inference", step=None,
+                       chain=[{"via": f"{loc.path} was already there when Vacant first looked"}],
+                       source={"kind": "file", "path": loc.path, "observed": False},
+                       note="this file should not be there; it was already there before the "
+                            "first recorded step")
         elif last is None:
             res.update(state="UNKNOWN", fault_class="unattributable", confidence="heuristic",
                        layer="inference", step=None, chain=[],
@@ -1163,13 +1252,22 @@ def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
         elif last.kind == "gap":
             res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
                        layer="inference", step=None, chain=[{"gap": last.gap}],
-                       note="the last change to this file was not recorded")
+                       note="the change that created this file was not recorded" if creates
+                       else "the last change to this file was not recorded")
+        elif creates:
+            assert last.step is not None
+            res.update(state="located", fault_class="agent", confidence="heuristic",
+                       layer="inference", step=last.step.brief(),
+                       chain=[{**last.step.brief(), "via": f"created {loc.path}"}],
+                       note="this file should not be there; this step created it (the first "
+                            "recorded write after it was last absent)")
         else:
             assert last.step is not None
             res.update(state="located", fault_class="agent", confidence="heuristic",
                        layer="inference", step=last.step.brief(),
                        chain=[{**last.step.brief(), "via": f"last wrote {loc.path}"}],
-                       note="something required is missing; this step wrote the file last")
+                       note="something required is missing; this step wrote the file last"
+                       if loc.kind == "missing" else "this step wrote the file last")
         return res
     origin = b.value_origin(loc.path, value, chain, line=loc.line)
     direct = origin.kind == "agent" and origin.step is not None and bool(chain) and \
@@ -1236,9 +1334,11 @@ def _fallback_locations(claim: Any, r: dict[str, Any], state_dir: pathlib.Path,
 
 
 #: 病歷裡可以當成值的來源的提示：人打的、`vacant do` 交給 agent 的任務（`Recorder.prompt` 的 docstring：
-#: 「`user`／`vacant do`＝任務給的」）、子 agent 的結果、父 agent 給子 agent 的任務。其餘（Vacant 自己的回饋、
-#: agent 自己排的提示、別的工作階段的信封）一律不是
-_TASK_SOURCES = frozenset({"user", "vacant do", "subagent_result", "parent_agent"})
+#: 「`user`／`vacant do`＝任務給的」）、子 agent 的結果、父 agent 給子 agent 的任務、別的行動者的話
+#: （`other_actor`：隊友、別的工作階段、外面的事件——agent 抄了它給的數字不是 agent 自己的錯；報告裡寫成
+#: 「別的行動者的訊息」，不是「任務說的」；2026-09-25 審查 C0）。其餘（Vacant 自己的回饋、agent 自己排的提示、
+#: 平台自己說不是人的 `source`）一律不是
+_TASK_SOURCES = frozenset({"user", "vacant do", "subagent_result", "parent_agent", "other_actor"})
 
 
 def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pathlib.Path,

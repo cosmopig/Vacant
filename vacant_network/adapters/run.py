@@ -46,6 +46,8 @@ from .hookpolicy import vacant_state_dir
 
 COPY_SKIP = frozenset({".git", "node_modules", "__pycache__", ".venv", ".pytest_cache"})
 FEEDBACK_MODES = ("localized", "generic", "none")
+#: 這一跑的 id 經這個環境變數交給 agent 的掛鉤（＝`trace.capture.DO_RUN_ENV`；這裡不在載入時依賴追緝）
+DO_RUN_ENV = "VACANT_DO_RUN"
 #: `.git` 裡**會影響下一次 git 指令行為**的部分（objects 是內容定址的，多了不改變行為）。
 _GIT_WATCH = ("config", "HEAD", "index", "packed-refs", "hooks", "refs", "info")
 
@@ -217,7 +219,9 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
     `feedback_mode`（下一次嘗試的提示裡放什麼；預註冊實驗的三臂只差這一個）：
     `localized`＝追緝過的回饋（位置、應有的值、第一次出現的步驟）；`generic`＝原本的泛用回饋；
     `none`＝**重抽**：每一次都從乾淨的工作區、原提示重來（`in_place` 時無法重抽 ⇒ 拒絕）。
-    同一個值也經環境變數傳給 agent 的回合邊界掛鉤，讓工作階段裡的回饋走同一種。"""
+    同一個值也經環境變數傳給 agent 的回合邊界掛鉤，讓工作階段裡的回饋走同一種。
+    `VACANT_DO_RUN`＝這一跑的 id，也經環境變數傳給掛鉤：它開出來的工作階段才把這一跑的任務訊息當來源，
+    重試提示裡接在任務後面的回饋（記成 `vacant_feedback`）不是來源、也不是人的新要求。"""
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
     if feedback_mode == "none" and in_place and (attempts or task.contract.max_attempts) > 1:
@@ -235,7 +239,7 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                 "attempts": [], "workspace": None, "run_dir": str(base), "agent": agent}
     n_max = attempts or task.contract.max_attempts
     skip = _skip_dirs(task.contract)
-    traced = _trace_start(task, ws, prompt, in_place=in_place)
+    traced = _trace_start(task, ws, prompt, in_place=in_place, run_id=run_id)
     history: list[dict[str, Any]] = []
     cur_prompt = prompt
     res: dict[str, Any] = {}
@@ -249,9 +253,11 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                 if feedback_mode == "none" and i > 1:
                     # 重抽：乾淨的工作區、原提示（上一次的痕跡不留給這一次）
                     ws = prepare_workspace(task.contract, base / f"ws{i}")
-                    traced = _trace_start(task, ws, prompt, in_place=False)
+                    traced = _trace_start(task, ws, prompt, in_place=False, run_id=run_id)
                 launch = build(cur_prompt, ws)
-                launch.env = {**launch.env, "VACANT_FEEDBACK_MODE": feedback_mode}
+                # 這一跑的 id 給 agent 的掛鉤：它開出來的工作階段才算這一跑的（任務訊息只對它們算數）
+                launch.env = {**launch.env, "VACANT_FEEDBACK_MODE": feedback_mode,
+                              DO_RUN_ENV: run_id}
             except Exception as e:  # noqa: BLE001 — 跑之前就壞了：也要上帳本，不是丟 traceback
                 task.ledger.append("infra_void", {"stage": "before_attempt", "attempt": i,
                                                   "error": f"{type(e).__name__}: {e}"[:500]})
@@ -316,13 +322,19 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
                                   "evidence, disagreement) is not something another attempt "
                                   "can fix")
                 break
+            fb = None
             if feedback_mode == "none":
                 cur_prompt = prompt
             elif feedback_mode == "localized" and tr and tr.get("text"):
                 # 追緝過的回饋：哪個檔哪一行、應該是多少、第一次出現在第幾步（沒有行動者）
-                cur_prompt = prompt + "\n\n" + str(tr["text"])
+                fb = str(tr["text"])
             elif feedback is not None:
-                cur_prompt = prompt + "\n\n" + feedback(res)
+                fb = feedback(res)
+            if fb is not None:
+                cur_prompt = prompt + "\n\n" + fb
+                # 接在後面的那一段是 Vacant 自己的話：記下原文，agent 的提示掛鉤把整段送回來時只有任務那一段
+                # 算任務訊息（2026-09-25 審查 #0/#1/#5/#13/#23：回饋引的錯值曾經被追成「任務自己說的」）
+                _trace_feedback(traced, res, fb, run_id)
     finally:
         _restore_signal_handlers(old_handlers)
     _trace_outcome(traced, res, agent=agent, run_id=run_id)
@@ -334,8 +346,11 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
 # 追緝壞掉只記錯，不影響交件與裁決（和掛鉤同一條：誠實邊界不在這一層）。
 
 def _trace_start(task: flow.Task, ws: pathlib.Path, prompt: str, *,
-                 in_place: bool) -> dict[str, Any] | None:
-    """工作區的起點（之後每一步的差異都以它為準）＋任務訊息（追緝判斷「是不是任務給的值」）。"""
+                 in_place: bool, run_id: str) -> dict[str, Any] | None:
+    """工作區的起點（之後每一步的差異都以它為準）＋任務訊息（追緝判斷「是不是任務給的值」）。
+    任務訊息只對**這一跑**開出來的工作階段算數（`session="do:<run>"`；掛鉤以 `VACANT_DO_RUN` 認）：
+    `--in-place` 時病歷就是專案自己的，記成「任何工作階段」曾經讓它對之後每一個無關的工作階段都算數
+    （2026-09-25 審查 C4）。"""
     try:
         from ..intake import contract as C
         from ..trace.recorder import Recorder
@@ -345,11 +360,22 @@ def _trace_start(task: flow.Task, ws: pathlib.Path, prompt: str, *,
             contract = C.load(ws / rel)          # 隔離工作區裡那一份：輸入從工作區讀
         rec = Recorder(ws)
         rec.checkpoint("task_start")
-        rec.prompt(prompt, source="vacant do")
+        rec.prompt(prompt, session=f"do:{run_id}", source="vacant do")
         return {"rec": rec, "contract": contract, "ws": ws}
     except Exception as e:  # noqa: BLE001
         task.ledger.append("trace_error", {"stage": "start", "error": str(e)[:300]})
         return None
+
+
+def _trace_feedback(traced: dict[str, Any] | None, res: dict[str, Any], text: str,
+                    run_id: str) -> None:
+    """下一次嘗試的提示裡接在任務後面的回饋：記成 `vacant_feedback`（不是任何值的來源、不是人的新要求）。"""
+    if traced is None:
+        return
+    try:
+        traced["rec"].prompt(text, session=f"do:{run_id}", source="vacant_feedback")
+    except Exception as e:  # noqa: BLE001 — 追緝壞掉不影響重試
+        res.setdefault("trace_error", f"{type(e).__name__}: {e}"[:300])
 
 
 def _trace_attempt(traced: dict[str, Any] | None, res: dict[str, Any],
