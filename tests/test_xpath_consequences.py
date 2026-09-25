@@ -292,3 +292,18 @@ def test_actor_tokens_include_the_subagent_definition_hash_but_not_platform_name
     toks = stopcheck._actor_tokens(rec)
     assert sha in toks and {"a7f3c9d2", "stats-helper"} <= toks
     assert not toks & {"claude", "codex", "opencode", "pi"}
+
+
+def test_a_truncation_stays_visible_after_the_next_ordinary_turn(env, capsys):
+    """2026-09-25 審查 blocker：截短之後的下一個普通回合不可以重新錨定、把截短「合法化」。"""
+    p, rec, head = _anchored_project(env)
+    _truncate(rec, keep=int(head["seq"]) - 1)
+    code, out = _verify(p, capsys)
+    assert code == 1, out
+    hook.handle("claude", "Stop", {"session_id": "S", "cwd": str(p), "stop_hook_active": True})
+    for i in range(3):                                     # 再多幾個回合、鏈又長回去
+        rec.append("coverage", {"note": f"later {i}"})
+        hook.handle("claude", "Stop", {"session_id": "S", "cwd": str(p), "stop_hook_active": True})
+    code, out = _verify(p, capsys)
+    assert code == 1 and "stopped verifying" in out, out
+

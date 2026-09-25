@@ -17,6 +17,8 @@
 3. 截短偵測（`verify_anchored`）只到**最後一次錨點**為止：錨點在回合邊界寫進任務帳本，之後才加的
    病歷尾巴被截掉，只剩沒簽章的 `head.json` 對得出來。任務帳本自己也可能整條被換掉——那一層靠收件端
    保存的帳本鏈頭（`intake/ledger.py` 誠實邊界 1）。沒有契約／帳本 ⇒ 說「沒有對」，不當成對過了。
+   回合邊界發現病歷驗不過時**不再錨定**，改在帳本簽一筆 `trace_broken`；之後 `vacant trace verify`
+   一直回報壞掉（不會因為下一個回合又多寫幾步就「好了」）。要重新開始只能換一個乾淨的病歷目錄。
 """
 from __future__ import annotations
 
@@ -152,7 +154,12 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
     state["adoptions"] = adoptions
     state["outcome"] = res.get("outcome")
     st_path.write_text(json.dumps(state), encoding="utf-8")
-    _anchor(rec, contract)
+    # 只有驗得過才更新錨點。驗不過還照樣錨定＝下一個普通回合就把截短「合法化」
+    # （2026-09-25 審查 consequences blocker）：改成在帳本裡簽一筆「病歷壞了」，之後每次驗證都看得到。
+    if verified:
+        _anchor(rec, contract)
+    else:
+        _record_break(rec, contract, why_not)
     report = F.render_report(blames, results, outcome=res.get("outcome"),
                              coverage=_coverage(rec), why_open=why_open,
                              contract_task=getattr(contract, "task_id", None))
@@ -185,6 +192,26 @@ def _anchor(rec: Recorder, contract: Any) -> None:
         pass
 
 
+def _record_break(rec: Recorder, contract: Any, why: str) -> None:
+    """病歷驗不過：在收件端簽過的帳本裡記一筆 `trace_broken`（同一個鏈頭只記一次）。
+    之後 `ledger_anchor` 看到它就一直回報壞掉——截短不會因為之後又多寫了幾步而消失。"""
+    if contract is None or not getattr(contract, "task_id", None):
+        return
+    try:
+        head = json.loads((rec.dir / "head.json").read_text(encoding="utf-8"))
+        from ..intake.ledger import Ledger
+        led = Ledger(contract.task_id)
+        if led.path.is_file() and any(
+                e.get("type") == "trace_broken" and e.get("project") == rec.dir.name
+                and e.get("seq") == head.get("seq") and e.get("hash") == head.get("hash")
+                for e in led.events()):
+            return
+        led.append("trace_broken", {"project": rec.dir.name, "seq": head.get("seq"),
+                                    "hash": head.get("hash"), "why": str(why)[:500]})
+    except Exception:  # noqa: BLE001 — 記不下來不影響追緝；報告照寫
+        pass
+
+
 def ledger_anchor(rec: Recorder, contract: Any,
                   trust: Any = None) -> tuple[dict[str, Any] | None, str | None, str]:
     """讀回 `_anchor` 寫進去的東西：這個專案在任務帳本裡**最後一個** `trace_head`。
@@ -208,6 +235,12 @@ def ledger_anchor(rec: Recorder, contract: Any,
                  if e.get("type") == "trace_head" and e.get("project") == rec.dir.name]
     except (LedgerError, OSError, ValueError) as e:
         return None, f"the task ledger that anchors this trace is unreadable ({e})", ""
+    breaks = [e for e in led.events()
+              if e.get("type") == "trace_broken" and e.get("project") == rec.dir.name]
+    if breaks:
+        b = breaks[0]
+        return None, (f"the task ledger recorded that this trace stopped verifying at entry "
+                      f"{b.get('seq')} ({b.get('why')})"), ""
     if not heads:
         return None, None, ("not checked against a task ledger (it has no trace head for this "
                             "project yet)")
