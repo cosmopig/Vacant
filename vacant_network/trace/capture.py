@@ -204,8 +204,8 @@ def prompt_source(agent: str, payload: dict[str, Any], text: str) -> tuple[str, 
     人貼上一段形狀完全一樣的信封（有那個屬性、有結束標籤），也會被當成別的行動者的話。
     ⚠ `<wake>` 裡由人觸發的那一則（綁定的討論串裡人的話）也記成別的行動者的話：是來源，但不重新算輪數。"""
     t = _HOOK_WRAPPER.sub("", text).lstrip()
-    from .feedback import FEEDBACK_HEADER, FLAG_HEADER
-    if t.startswith((FEEDBACK_HEADER, FLAG_HEADER)):
+    from .feedback import VACANT_HEADERS
+    if t.startswith(VACANT_HEADERS):
         # Vacant 自己的回饋被當成使用者訊息送回來（OpenCode 的外掛用 `session.prompt` 送）：不是人說的，
         # 也不是任何值的來源（裡面引了繳付物的錯值與應有的值；當成「任務說的」就等於替 agent 洗掉錯）。
         # 只認**開頭**：人打的一則裡引了一段回饋，仍然是人說的（2026-09-25 審查 loop#3）
@@ -329,7 +329,7 @@ def _vacant_do_task(rec: R.Recorder, events: list[dict[str, Any]],
             tasks.append(txt)
         elif e.get("source") == "vacant_feedback":
             fbs.add(txt.strip())
-    from .feedback import FEEDBACK_HEADER, FLAG_HEADER
+    from .feedback import VACANT_HEADERS
     for body in bodies:
         for task in tasks:
             p = task.strip()
@@ -341,7 +341,7 @@ def _vacant_do_task(rec: R.Recorder, events: list[dict[str, Any]],
             if not rest.startswith("\n"):
                 continue
             rest = rest.strip()
-            if rest in fbs or rest.startswith((FEEDBACK_HEADER, FLAG_HEADER)):
+            if rest in fbs or rest.startswith(VACANT_HEADERS):
                 return task
     return None
 

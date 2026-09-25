@@ -223,6 +223,20 @@ function mid(ctx) {   // the model pi says it is using (a claim, not an observat
   try { return ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : undefined; } catch (e) { return undefined; }
 }
 
+// The agent's last message of this turn (Vacant checks claims such as "tests pass" against the record).
+function finalText(event) {
+  try {
+    const ms = (event && event.context && event.context.llmMessages) || [];
+    for (let i = ms.length - 1; i >= 0; i--) {
+      const m = ms[i];
+      if (!m || m.role !== "assistant") continue;
+      const t = typeof m.content === "string" ? m.content : text(m.content);
+      if (t && t.trim()) return t.slice(0, 20000);
+    }
+  } catch (e) {}
+  return undefined;
+}
+
 function text(content) {
   try { return (content || []).filter((c) => c && c.type === "text").map((c) => c.text).join("\n"); }
   catch (e) { return undefined; }
@@ -326,11 +340,14 @@ export default function (pi) {
   });
   pi.on("agent_before_settle", async (event, ctx) => {
     if (who(ctx).parent_session_id) return undefined;   // a sub-agent's turn end is not the task's end
-    const d = await ask("stop", who(ctx));
+    const d = await ask("stop", { ...who(ctx), final_text: finalText(event) });
     if (d.action === "continue" && d.reason) {
       return { entries: [{ type: "custom_message", customType: "vacant-check",
                            content: d.reason, display: true }], continue: true };
     }
+    // The delivery note is for the person, never for the model; print mode (-p) has no UI and
+    // gets nothing on screen (scripts read pi's output), the note stays in Vacant's data folder.
+    try { if (d.note && ctx.hasUI && ctx.ui) ctx.ui.notify(d.note, "info"); } catch (e) {}
     return undefined;
   });
   pi.on("session_shutdown", async (event, ctx) => {

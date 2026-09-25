@@ -288,13 +288,13 @@ class Trace:
 
     def _retry_task(self, text: str) -> str | None:
         from .capture import opencode_run_unquote
-        from .feedback import FEEDBACK_HEADER, FLAG_HEADER
+        from .feedback import VACANT_HEADERS
         body = text.strip()
         for form in dict.fromkeys((body, opencode_run_unquote(body))):
             for task in self.do_tasks:
                 rest = form[len(task):]
                 if form.startswith(task) and rest.startswith("\n") and \
-                        rest.strip().startswith((FEEDBACK_HEADER, FLAG_HEADER)):
+                        rest.strip().startswith(VACANT_HEADERS):
                     return task
         return None
 

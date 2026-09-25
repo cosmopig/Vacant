@@ -29,6 +29,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import re
 import time
 from typing import Any
 
@@ -40,6 +41,10 @@ FEEDBACK_HEADER = ("The task contract's checks do not pass yet "
 FLAG_HEADER = ("The task contract's checks pass, but the task owner marked these places in "
                "the deliverable as wrong:")
 FOOTER = "Run `vacant check` to re-check before finishing."
+#: 零設定（沒有契約）時交件前的檢視（`trace/review.py`）。三個開頭都是 Vacant 自己的話：
+#: 不是人的新要求、不是任何值的來源（`capture.prompt_source`、`blame` 只認開頭）。
+REVIEW_HEADER = "Before delivery: a review of the recorded steps of this task found points to redo."
+VACANT_HEADERS = (FEEDBACK_HEADER, FLAG_HEADER, REVIEW_HEADER)
 
 
 def finding_id(b: dict[str, Any], scope: str = "") -> str:
@@ -68,7 +73,12 @@ def feedback_ks1_clean(text: str, actor_tokens: set[str]) -> str:
     assert_ks1_clean(text)
     low = text.lower()
     for tok in actor_tokens:
-        if tok and len(tok) >= 4 and tok.lower() in low:
+        # 整個字比對：子 agent 類型常是一般的字（Plan、Explore、general），子字串比對會讓
+        # `plan.md` 這種正當要引用的檔名整行被擋（2026-09-25 零設定設計審查 minor）
+        # 只有字母的（agent 類型）再嚴一點：後面接 `.`／`/`／`_`／`-` 的是檔名或路徑（`plan.md`），不算
+        tail = r"(?![a-z0-9])" if re.search(r"\d", tok) else r"(?![a-z0-9._/-])"
+        if tok and len(tok) >= 4 and re.search(
+                r"(?<![a-z0-9._/-])" + re.escape(tok.lower()) + tail, low):
             raise KS1FeedbackError(f"actor identifier {tok!r} in agent-facing text")
     return text
 

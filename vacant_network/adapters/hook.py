@@ -150,7 +150,10 @@ def render(agent: str, ev: HookEvent, d: HookDecision) -> tuple[str, str, int]:
         if ev.kind == "stop" and d.action == "continue":
             return json.dumps({"decision": "block", "reason": d.reason}), "", 0
         return "", "", 0
-    return json.dumps({"action": d.action, "reason": d.reason}), "", 0
+    out = {"action": d.action, "reason": d.reason}
+    if ev.kind == "stop" and d.action != "continue" and d.record.get("user_message"):
+        out["note"] = d.record["user_message"]   # pi／OpenCode 的橋接自己決定要不要顯示（有介面才顯示）
+    return json.dumps(out), "", 0
 
 
 def _log(name: str, rec: dict[str, Any]) -> None:

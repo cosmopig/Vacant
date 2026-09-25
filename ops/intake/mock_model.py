@@ -141,13 +141,13 @@ def tool_args(kind: str, argmap: dict[str, str], path: str, content: str,
 FEEDBACK_MARK = "The task contract's checks do not pass yet"
 #: 契約過了、但人標記了錯處（`trace/feedback.FLAG_HEADER`）：一樣是回饋
 FLAG_MARK = "the task owner marked these places"
+#: 零設定的交件前檢視（`trace/feedback.REVIEW_HEADER`）
+REVIEW_MARK = "Before delivery: a review of the recorded steps of this task"
 
 
 def feedback_excerpt(blob: str) -> str | None:
     """模型**真的收到**的回饋文字（最後一則，最多 800 字）：量回饋有沒有到、內容是什麼。"""
-    i = blob.rfind(FEEDBACK_MARK)
-    if i < 0:
-        i = blob.rfind(FLAG_MARK)
+    i = max(blob.rfind(FEEDBACK_MARK), blob.rfind(FLAG_MARK), blob.rfind(REVIEW_MARK))
     if i < 0:
         return None
     return blob[i:i + 800].encode().decode("unicode_escape", "replace") \
@@ -159,7 +159,7 @@ def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     last = -1
     for i, it in enumerate(items):
         txt = text_of(it)
-        if FEEDBACK_MARK in txt or FLAG_MARK in txt:
+        if FEEDBACK_MARK in txt or FLAG_MARK in txt or REVIEW_MARK in txt:
             last = i
     after = items[last + 1:] if last >= 0 else items
     return last >= 0, sum(1 for it in after if is_result(it))
@@ -172,7 +172,7 @@ def pick_turn(user_texts: list[tuple[int, str]]) -> tuple[dict[str, Any] | None,
     if not isinstance(turns, list):
         return None, -1
     for pos, txt in reversed(user_texts):
-        if FEEDBACK_MARK in txt or FLAG_MARK in txt:
+        if FEEDBACK_MARK in txt or FLAG_MARK in txt or REVIEW_MARK in txt:
             continue
         for t in turns:
             if isinstance(t, dict) and t.get("when") and str(t["when"]) in txt:
