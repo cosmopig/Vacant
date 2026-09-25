@@ -122,7 +122,7 @@ def cmd_contract(args) -> int:
 
 def _contract_quick(args) -> int:
     """`vacant contract quick`：一行寫出一份會驗人在意的事的契約（`contract.quick`）；`--lock` 順便釘住輸入、簽名。
-    錯誤一律 exit 2、不留下寫到一半的檔（`--lock` 失敗就還原）。"""
+    錯誤一律 exit 2、不留下寫到一半的檔（`--lock` 失敗、或寫完後契約被別的契約檔擋住＝shadow，都會還原）。"""
     def fail(msg: str) -> int:
         print(f"vacant: {msg}", file=sys.stderr)
         return 2
@@ -138,22 +138,65 @@ def _contract_quick(args) -> int:
                                totals=args.total, report=args.report, task_id=args.task,
                                objective=args.objective or "",
                                destination=args.to or "dir:.vacant/published",
-                               cwd=pathlib.Path.cwd())
+                               exclude=args.exclude, cwd=pathlib.Path.cwd())
     except C.ContractError as e:
         return fail("; ".join(e.problems))
     old = target.read_bytes() if target.is_file() else None
+    # target 是四個標準名字之一（`.vacant/contract.json` 那一類）才會被 `C.find` 自動找到，
+    # 才談得上被「別的契約檔」擋住；`--path` 指了個標準名字以外的檔名，本來就要靠 `--contract`
+    # 明講，不受這一段管。`here` 是除了 target 自己以外、base 底下現有的標準契約檔：`C.find`
+    # 由近到遠找，只要其中一個排在 target 前面，這份新契約就會被永遠找不到（check／do／hooks
+    # 全部繼續用舊的）。`--replace` 就把它們搬開，寫完一律驗一次「找到的真的是它」，找不到
+    # 就整個還原（#16）。
+    is_standard = any((base / n).resolve() == target for n in C.CONTRACT_NAMES)
+    if target.suffix == ".toml":
+        return fail(f"{target}: `contract quick` writes JSON; use a .json path "
+                    f"(for example .vacant/contract.json)")
+    if args.replace and not is_standard and here:
+        # 標準位置已經有契約：check／do／掛鉤都會繼續用它，寫在別的檔名等於印出一份不會生效的檢查（#16）
+        return fail(f"{here[0]} is the contract this project uses, and check/do/hooks will keep "
+                    f"using it; `--replace --path {args.path}` would write a contract nothing "
+                    f"picks up. Drop --path to replace {here[0].name}, or remove it first")
+    shadowing = [h for h in here if h.resolve() != target] if is_standard else []
+    moved: list[tuple[pathlib.Path, pathlib.Path]] = []
+    if args.replace:
+        for h in shadowing:
+            aside, k = h.with_name(h.name + ".replaced"), 2
+            while aside.exists():
+                aside, k = h.with_name(f"{h.name}.replaced.{k}"), k + 1
+            h.rename(aside)
+            moved.append((h, aside))
+
+    def _restore() -> None:
+        if old is None:
+            target.unlink(missing_ok=True)
+        else:
+            target.write_bytes(old)
+        for orig, aside in moved:
+            aside.rename(orig)
+
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        C.load(target)                           # 寫進去的要讀得回來（例如副檔名與格式不合）
+    except Exception as e:  # noqa: BLE001
+        _restore()
+        return fail(f"wrote {target} but it does not load back ({e}); nothing changed")
+    if is_standard:
+        found = C.find(base)
+        if found is None or found.resolve() != target:
+            _restore()
+            shadow = ", ".join(str(h) for h in shadowing) or str(found)
+            return fail(f"wrote {target}, but the contract this project would actually use is "
+                        f"{found or 'nothing'} — refusing to leave a shadowed contract behind "
+                        f"(other contract file(s) here: {shadow}); remove or rename them first")
     summary["path"] = str(target)
     parent = C.find(base.parent) if base.parent != base else None
     if args.lock:
         try:
             res = flow.lock(target)
         except Exception as e:  # noqa: BLE001 — 鎖不起來：不留下沒鎖的新檔
-            if old is None:
-                target.unlink(missing_ok=True)
-            else:
-                target.write_bytes(old)
+            _restore()
             return fail(f"lock failed, nothing written: {e}")
         summary["locked"] = {"contract_sha256": res["contract_sha256"], "pins": res["pins"]}
     req = [c for c in summary["checks"] if c["required"]]
@@ -163,6 +206,9 @@ def _contract_quick(args) -> int:
               for c in summary["checks"]]
     lines.append(f"  not checked: {summary['not_checked']}")
     lines += [f"  hint: {h}" for h in summary["hints"]]
+    lines += [f"  warning: {w}" for w in summary.get("warnings") or []]
+    if moved:
+        lines += [f"  moved aside (shadowed the new contract): {o} -> {a}" for o, a in moved]
     if parent is not None:
         lines.append(f"  note: {parent} (an enclosing project) no longer applies to work in here")
     lines.append("  locked: inputs pinned and the contract signed with your owner key" if args.lock
@@ -298,8 +344,26 @@ def cmd_keys(args) -> int:
 
 def cmd_intake(args) -> int:
     from .server import serve
-    return serve(contracts=[pathlib.Path(c) for c in args.contract], host=args.host,
-                 port=args.port, token_file=args.token_file,
+    paths = [pathlib.Path(c) for c in args.contract]
+    # `IntakeApp.__init__` keys its routing table by task_id and silently keeps the last
+    # contract given the same one (`contract_paths[c.task_id] = p` just overwrites) — two
+    # projects that happen to share a task_id would then serve one submitter's evidence
+    # under the other's task. Load them here (cli.py, not server.py) and refuse before the
+    # server ever starts (#12's defense in depth for `vacant intake serve`).
+    by_task: dict[str, pathlib.Path] = {}
+    dupes: list[str] = []
+    for p in paths:
+        c = C.load(p)
+        prior = by_task.get(c.task_id)
+        if prior is not None and prior.resolve() != p.resolve():
+            dupes.append(f"task_id {c.task_id!r}: {prior} and {p}")
+        else:
+            by_task[c.task_id] = p
+    if dupes:
+        print("vacant: refusing to serve: these contracts share a task_id and would silently "
+              "shadow each other:\n" + "\n".join(f"  - {d}" for d in dupes), file=sys.stderr)
+        return 2
+    return serve(contracts=paths, host=args.host, port=args.port, token_file=args.token_file,
                  insecure_no_token=args.insecure_no_token, sandbox=args.sandbox)
 
 
@@ -338,6 +402,10 @@ def build_parser() -> argparse.ArgumentParser:
                         "(repeatable)")
     p.add_argument("--report", help="quick: the file --must/--total read (default: the "
                                     "deliverable, when it is one file)")
+    p.add_argument("--exclude", action="append",
+                   help="quick: glob to leave out of the deliverable (repeatable, appended to "
+                        "deliverable.exclude) — e.g. to skip a credential-looking file the "
+                        "no_secrets_shipped check would otherwise refuse at write time")
     p.add_argument("--lock", action="store_true", help="quick: lock right away")
     p.add_argument("--replace", action="store_true",
                    help="quick: overwrite an existing contract (a new task definition)")
