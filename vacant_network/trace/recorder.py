@@ -813,7 +813,11 @@ class Recorder:
         return [{"seq": e.seq, "type": e.type, "ts_ms": e.ts_ms, "hash": e.hash(),
                  **(e.payload or {})} for e in self._book()[0].entries]
 
-    def verify(self, trust: _keys.Trust | None = None) -> tuple[bool, str]:
+    def verify(self, trust: _keys.Trust | None = None,
+               anchor: dict[str, Any] | None = None) -> tuple[bool, str]:
+        """簽章鏈＋未簽章的 `head.json`＋（有給的話）**收件端簽過的帳本**裡的鏈頭錨點
+        （`{"seq", "hash"}`，由 `stopcheck.ledger_anchor` 讀出）。`head.json` 和鏈在同一個目錄、
+        沒有簽章，連它一起截掉就對不出來；錨點在另一條簽章鏈上，截短或換掉病歷都對得出來（K3）。"""
         from ..identity import PublicIdentity
         if not self.chain_path.is_file():
             return False, "no trace"
@@ -836,6 +840,20 @@ class Recorder:
                      (int(head.get("seq", 0)) == last.seq and head.get("hash") != last.hash())):
             return False, (f"trace chain ends at entry {last.seq} but its recorded head is entry "
                            f"{head.get('seq')} (truncated or replaced)")
+        if anchor is not None:
+            try:
+                aseq = int(anchor.get("seq") or -1)
+            except (TypeError, ValueError):
+                aseq = -1
+            if aseq < 1:
+                return False, "the task ledger's trace head for this project is malformed"
+            if aseq > last.seq:
+                return False, (f"trace chain ends at entry {last.seq} but the task ledger anchored "
+                               f"entry {aseq} (truncated or replaced)")
+            at = next((x for x in book.entries if x.seq == aseq), None)
+            if at is None or at.hash() != anchor.get("hash"):
+                return False, (f"trace entry {aseq} does not match the hash the task ledger "
+                               f"anchored (replaced)")
         if torn:
             return True, f"{len(book)} entries (+{torn} bytes of a torn last line, not counted)"
         return True, f"{len(book)} entries"

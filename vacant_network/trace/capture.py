@@ -264,7 +264,11 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
 
 def _outcome(rec: R.Recorder, actor: R.Actor, contract: Any) -> None:
     """工作階段結束：最後一次回合邊界的檢查結果記成主 agent 這一跑的結果（信譽 adoption 維）。
-    這個工作階段沒有檢查過（沒有契約、沒有 Stop）⇒ 不記。"""
+    這個工作階段沒有檢查過（沒有契約、沒有 Stop）⇒ 不記。
+
+    回合邊界的檢查是 `flow.check`（暫存帳本、空的簽章者清單）：**看不到人工審查**。所以只有
+    `accept`／有必要主張 FAIL 的 `reject` 進 adoption；hold／escalate 照記一筆（帶 `outcome`）
+    但不算（`actors.adoption_of`；架構文件 §10 第 16 列）。"""
     if contract is None or os.environ.get("VACANT_HOOK_NO_SUBMIT"):
         # `vacant do` 自己在行程結束後記這一跑（只記一次；2026-09-24 審查 consequences#1）
         return
@@ -273,18 +277,18 @@ def _outcome(rec: R.Recorder, actor: R.Actor, contract: Any) -> None:
     except (OSError, ValueError):
         return
     # 只用**這個**工作階段自己的檢查結果；沒檢查過的工作階段不記（審查 consequences#2）
-    mine = (st.get("outcomes") or {}).get(f"{actor.platform}:{actor.session}")
+    skey = f"{actor.platform}:{actor.session}"
+    mine = (st.get("outcomes") or {}).get(skey)
     if not mine:
         return
-    st = {"outcome": mine}
     from . import actors as A
+    ads = st.get("adoptions") or {}
+    # 舊版狀態檔沒有 `adoptions`：只憑裁決字串判（hold／escalate ⇒ 不記）
+    adoption = ads[skey] if skey in ads else A.adoption_of({"outcome": mine})
     model = actor.model or rec.session_info(actor.platform, actor.session).get("model")
     main = {"platform": actor.platform, "session": actor.session, "model": model}
-    if A.record_outcome(A.ActorBook(), session_key=f"{actor.platform}:{actor.session}",
-                        actor=main, accepted=st["outcome"] == "accept", contract=contract,
-                        workspace=rec.workspace):
-        rec.append("consequence", {"kind": "outcome", "accepted": st["outcome"] == "accept",
-                                   "session": actor.session})
+    A.record_run(rec, session_key=skey, actor=main, outcome=mine, adoption=adoption,
+                 contract=contract, session=actor.session)
 
 
 def _perf(rec: R.Recorder, agent: str, event: str, secs: float) -> None:

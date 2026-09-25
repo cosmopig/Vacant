@@ -367,6 +367,8 @@ def _trace_attempt(traced: dict[str, Any] | None, res: dict[str, Any],
 
 def _trace_outcome(traced: dict[str, Any] | None, res: dict[str, Any], *, agent: str,
                    run_id: str) -> None:
+    """這一跑的結果：和工作階段結束走同一條規則（`actors.adoption_of`：hold／escalate 不算進
+    adoption），**同時簽進這一跑的病歷**（`consequence`）——`actors.ndjson` 只是衍生檢視。"""
     if traced is None or res.get("outcome") is None:
         return
     try:
@@ -376,10 +378,9 @@ def _trace_outcome(traced: dict[str, Any] | None, res: dict[str, Any], *, agent:
         st = rec._state()
         model = next((v.get("model") for k, v in (st.get("sessions") or {}).items()
                       if k.startswith(f"{agent}:") and v.get("model")), None)
-        A.record_outcome(A.ActorBook(), session_key=f"do:{run_id}",
-                         actor={"platform": agent, "model": model},
-                         accepted=res.get("outcome") == "accept", contract=traced["contract"],
-                         workspace=traced["ws"])
+        A.record_run(rec, session_key=f"do:{run_id}", actor={"platform": agent, "model": model},
+                     outcome=res.get("outcome"), adoption=A.adoption_of(res),
+                     contract=traced["contract"], run_id=run_id, at="vacant_do")
     except Exception as e:  # noqa: BLE001
         res.setdefault("trace_error", f"{type(e).__name__}: {e}"[:300])
 

@@ -2,10 +2,11 @@
 
 這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §4.5–4.7；K9、K12、K14、K15）：
 
-**後果是事件，信譽是重播出來的**。每一筆後果（`consequence`）追加進帳本
-（`$VACANT_HOME/trace/actors.ndjson`，同時簽進那個專案的病歷）；信譽由重播「沒有被撤銷的
-後果」得到——所以人撤銷一個結論（`vacant flag --dismiss`）會**逐位元**反轉它的效果，
-帳本兩筆都留。
+**後果是事件，信譽是重播出來的**。每一筆後果（`consequence`）簽進那個專案的病歷
+（`consequence` 事件，**簽章的真相來源**），同時追加一份到 `$VACANT_HOME/trace/actors.ndjson`
+——後者是**沒有簽章的衍生檢視**（全機一本、方便重播與路由），不是證據；兩者對不上時以病歷為準。
+信譽由重播「沒有被撤銷的後果」得到——所以人撤銷一個結論（`vacant flag --dismiss`）會
+**逐位元**反轉它的效果，帳本兩筆都留。
 
 | 追緝結論 | 後果 |
 |---|---|
@@ -13,7 +14,15 @@
 | `lineage_exact`（輸入錯） | 行動者不動；**來源**記一筆計數（檔案／網址／使用者訊息） |
 | `lineage_internal`／`heuristic` | 不動任何信譽；只進報告 |
 | `gap` | 不動任何人；**整合覆蓋率**記一筆（那個平台的掛鉤沒看到） |
-| 工作階段結束時契約過／不過 | 主 agent 的 adoption 維 1／0（這一跑的結果，不是對 agent 的定論） |
+| 這一跑的裁決 `accept`／`reject`（有必要主張 FAIL，或成果收不進隔離區） | 主 agent 的 adoption 維 1／0（這一跑的結果，不是對 agent 的定論） |
+| `hold`／`escalate`，或只因 UNKNOWN／CONFLICT 被政策改判的 `reject` | **不記 adoption**：事件照記（帶 `outcome`，報告看得到），不進 runs／accepted、不進信譽重播 |
+
+為什麼 hold／escalate 不算：它們在等的是人工審查、獨立證據、沒釘住的輸入、契約參數——
+那些不是 agent 的工作說了什麼。尤其工作階段結束那一刻的檢查（`flow.check`）用暫存帳本、
+空的簽章者清單，**看不到人工審查**：契約裡有必要的 `review` 主張時，它對每一跑都是 hold；
+以前把 hold 記成 0，這類契約的每一跑都被記成「沒被採用」，路由的採用率就歪了（架構文件 §10 第 16 列）。
+三條路（工作階段結束 `capture._outcome`、`finalize.py`、`vacant do` 的 `run._trace_outcome`）
+都用同一個 `adoption_of`。
 
 信譽鍵（§4.6）：
     stream    ＝ 行動者**定義**的雜湊（子 agent 的定義檔）；主 agent ＝ `main`；內建子 agent ＝ `builtin:<類型>`
@@ -30,7 +39,11 @@
    （`--agent auto` 在那之前只做輪流探索）。
 2. 自稱的模型 id 當鍵時標 `claimed:`，報告照實寫出。
 3. 「這一跑過了」是這一跑、這個契約、這個觀測等級下的事實，不是對 agent 的定論（K18）。
-4. 單一使用者、同一台機器：帳本和病歷一樣是本機金鑰、同一帳號 ⇒ 竄改可察覺，不是不可能。
+4. 單一使用者、同一台機器：病歷是本機金鑰簽的、同一帳號 ⇒ 竄改可察覺，不是不可能。
+   `actors.ndjson` **本身沒有簽章**（衍生檢視）：改它察覺不到，要對照病歷裡的 `consequence`
+   事件（`vacant trace show --json`）；路由的數字只是從這份檢視算出來的建議。
+5. adoption 只記有說到 agent 工作的裁決（見上表）；等人的那幾種不記 ⇒ 分母是「有結論的跑」，
+   不是「所有的跑」。報告另外列出沒記的次數（`undecided`），不讓它安靜消失。
 """
 from __future__ import annotations
 
@@ -170,6 +183,7 @@ class ActorBook:
         dismissed = {str(e.get("finding_id")) for e in evs if e.get("kind") == "dismiss"}
         rep = Reputation()
         runs: dict[tuple[str, ...], list[int]] = {}
+        undecided: dict[tuple[str, ...], int] = {}
         faults: dict[tuple[str, ...], int] = {}
         sources: dict[str, dict[str, Any]] = {}
         coverage: dict[str, int] = {}
@@ -179,6 +193,10 @@ class ActorBook:
                 continue
             key = tuple(e.get("key") or ())
             if k == "outcome" and len(key) == 4:
+                if e.get("accepted") is None:
+                    # hold／escalate：這一跑沒有說到 agent 的工作 ⇒ 不進 adoption、不進 runs
+                    undecided[key] = undecided.get(key, 0) + 1
+                    continue
                 ok = 1.0 if e.get("accepted") else 0.0
                 rep.record_review(key[0], key[1], key[2], {"adoption": ok}, weight=1.0,
                                   family=key[3])
@@ -194,11 +212,12 @@ class ActorBook:
             elif k == "gap":
                 coverage[str(e.get("platform"))] = coverage.get(str(e.get("platform")), 0) + 1
         cells = []
-        for key in sorted(set(runs) | set(faults)):
+        for key in sorted(set(runs) | set(faults) | set(undecided)):
             r = runs.get(key, [])
             st, br, su, fam = key[0], key[1], key[2], key[3]
             cells.append({"key": list(key), "label": label([st, br, su, fam]), "runs": len(r),
-                          "accepted": sum(r), "provable_faults": faults.get(key, 0),
+                          "accepted": sum(r), "undecided": undecided.get(key, 0),
+                          "provable_faults": faults.get(key, 0),
                           "mean": rep.score(st, br, su, fam),
                           "observations": rep.observations(st, br, su, fam)})
         return {"cells": cells, "sources": sources, "coverage_gaps": coverage,
@@ -255,11 +274,59 @@ def _platform_hint(b: dict[str, Any]) -> str:
     return "unknown"
 
 
+def adoption_of(res: dict[str, Any] | None) -> bool | None:
+    """這一跑的裁決對 adoption 維的意思：`True`（接受）／`False`（沒被採用）／`None`（不記）。
+
+    - `accept` ⇒ True
+    - `reject` 而且有必要主張 FAIL，或成果根本收不進隔離區（沒有逐項結果）⇒ False
+    - `reject` 但必要主張只有 UNKNOWN／CONFLICT（`unknown_policy`／`conflict_policy` 設成
+      `reject` 時的改判）⇒ None：和 hold／escalate 一樣在等審查、獨立證據、契約參數，
+      不是 agent 的工作說了什麼（`vacant do` 不重試的也正是這一種）
+    - `hold`／`escalate`／沒有裁決 ⇒ None
+    """
+    res = res or {}
+    out = res.get("outcome")
+    if out == "accept":
+        return True
+    if out != "reject":
+        return None
+    results = [r for r in res.get("results") or [] if isinstance(r, dict)]
+    if not results:
+        fails = (res.get("coverage") or {}).get("fail")
+        return False if fails is None or int(fails) > 0 else None
+    if any(r.get("status") == "FAIL" and r.get("required", True) for r in results):
+        return False
+    return None
+
+
 def record_outcome(book: ActorBook, *, session_key: str, actor: dict[str, Any],
-                   accepted: bool, contract: Any, workspace: pathlib.Path) -> bool:
-    return book.record({"id": f"out:{session_key}", "kind": "outcome", "accepted": bool(accepted),
-                        "key": list(key_of(actor, contract, workspace)),
-                        "workspace": str(workspace)})
+                   accepted: bool | None, contract: Any, workspace: pathlib.Path,
+                   outcome: str | None = None) -> bool:
+    """這一跑的結果。`accepted=None`（見 `adoption_of`）照記一筆、帶 `outcome` 讓報告看得到，
+    但重播時不進 runs／accepted、不進信譽。冪等（同一個 `session_key` 只記一次）。"""
+    ev: dict[str, Any] = {"id": f"out:{session_key}", "kind": "outcome",
+                          "accepted": None if accepted is None else bool(accepted),
+                          "key": list(key_of(actor, contract, workspace)),
+                          "workspace": str(workspace)}
+    if outcome is not None:
+        ev["outcome"] = outcome
+    return book.record(ev)
+
+
+def record_run(rec: Any, *, session_key: str, actor: dict[str, Any], outcome: str | None,
+               adoption: bool | None, contract: Any, book: ActorBook | None = None,
+               **extra: Any) -> dict[str, Any] | None:
+    """三條路（工作階段結束、`finalize`、`vacant do`）共用：`adoption` 一律來自 `adoption_of`，
+    記進衍生檢視（`actors.ndjson`），**同時**簽進病歷（`consequence`，簽章的真相來源）。
+    已經記過（同一個 `session_key`）⇒ 兩邊都不再記，回 None。"""
+    book = book or ActorBook()
+    if not record_outcome(book, session_key=session_key, actor=actor, accepted=adoption,
+                          contract=contract, workspace=rec.workspace, outcome=outcome):
+        return None
+    ev = {"kind": "outcome", "id": f"out:{session_key}", "outcome": outcome,
+          "accepted": adoption, "key": list(key_of(actor, contract, rec.workspace)), **extra}
+    rec.append("consequence", ev)
+    return ev
 
 
 def dismiss(book: ActorBook, finding_id: str, reason: str) -> bool:
@@ -288,6 +355,8 @@ def recommendation_line(book: ActorBook, family: str) -> str | None:
         return None
     parts = [f"{r['label']} {r['accepted']}/{r['runs']} accepted"
              + (f", {r['provable_faults']} provable fault(s)" if r["provable_faults"] else "")
+             + (f", {r['undecided']} waiting on review/evidence (not counted)"
+                if r.get("undecided") else "")
              for r in rows[:4]]
     small = "" if any(r["actionable"] for r in rows) else f" (n < {MIN_N}: too few to act on)"
     return f"For `{family}` tasks so far: " + "; ".join(parts) + small

@@ -14,6 +14,9 @@
    主張可能要幾秒一次。追緝本身壞掉 ⇒ 回 None（泛用回饋照樣送），錯誤記在掛鉤的錯誤紀錄。
 2. 報告寫在 `$VACANT_HOME/trace/projects/<專案>/`，**不寫進工作區**（寫進去會變成繳付物的一部分，
    也會被下一步記成改動）。
+3. 截短偵測（`verify_anchored`）只到**最後一次錨點**為止：錨點在回合邊界寫進任務帳本，之後才加的
+   病歷尾巴被截掉，只剩沒簽章的 `head.json` 對得出來。任務帳本自己也可能整條被換掉——那一層靠收件端
+   保存的帳本鏈頭（`intake/ledger.py` 誠實邊界 1）。沒有契約／帳本 ⇒ 說「沒有對」，不當成對過了。
 """
 from __future__ import annotations
 
@@ -71,8 +74,14 @@ def forget_outcome(rec: Recorder, session: str) -> None:
     except (OSError, ValueError):
         return
     outs = dict(state.get("outcomes") or {})
-    if outs.pop(session, None) is not None:
+    ads = dict(state.get("adoptions") or {})
+    popped = outs.pop(session, None) is not None
+    if session in ads:
+        ads.pop(session)
+        popped = True
+    if popped:
         state["outcomes"] = outs
+        state["adoptions"] = ads
         p.write_text(json.dumps(state), encoding="utf-8")
 
 
@@ -89,7 +98,7 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
     if not rec.chain_path.is_file():
         return None
     rec.checkpoint("check")
-    verified, why_not = rec.verify()
+    verified, why_not = verify_anchored(rec, contract)
     results = res.get("results") or []
     hidden = {c.id for c in contract.claims if c.hidden}
     for r in results:
@@ -134,9 +143,13 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
                                  platform=rec.last_platform()):
             rec.append("consequence", ev)
     outcomes = dict(previous.get("outcomes") or {})
+    adoptions = dict(previous.get("adoptions") or {})
     if session:
         outcomes[session] = res.get("outcome")
+        # 工作階段結束時記 adoption 用（`capture._outcome`）：hold／escalate ⇒ None＝不記
+        adoptions[session] = A.adoption_of(res)
     state["outcomes"] = outcomes
+    state["adoptions"] = adoptions
     state["outcome"] = res.get("outcome")
     st_path.write_text(json.dumps(state), encoding="utf-8")
     _anchor(rec, contract)
@@ -160,7 +173,8 @@ def localize(contract: Any, res: dict[str, Any], *, cwd: str | None,
 
 
 def _anchor(rec: Recorder, contract: Any) -> None:
-    """病歷的鏈頭＋筆數寫進收件端**簽過的**帳本：之後從尾巴截短病歷，對得出來（K3）。"""
+    """病歷的鏈頭＋筆數寫進收件端**簽過的**帳本：之後從尾巴截短病歷，對得出來（K3）。
+    讀回來對的是 `ledger_anchor`／`verify_anchored`（`vacant trace verify`、下一次回合邊界）。"""
     try:
         head = json.loads((rec.dir / "head.json").read_text(encoding="utf-8"))
         from ..intake.ledger import Ledger
@@ -169,6 +183,47 @@ def _anchor(rec: Recorder, contract: Any) -> None:
                                                        "hash": head.get("hash")})
     except Exception:  # noqa: BLE001 — 錨定失敗不影響追緝；報告照寫
         pass
+
+
+def ledger_anchor(rec: Recorder, contract: Any,
+                  trust: Any = None) -> tuple[dict[str, Any] | None, str | None, str]:
+    """讀回 `_anchor` 寫進去的東西：這個專案在任務帳本裡**最後一個** `trace_head`。
+
+    回 `(錨點, 壞掉的理由, 說明)`：
+    - 沒有契約／沒有帳本檔／帳本裡沒有這個專案的錨點 ⇒ `(None, None, "沒有對")`——**沒對過，不是對過了**
+    - 帳本自己驗不過（被改、簽章者不在清單上）⇒ `(None, 理由, …)`：拿不出可信的錨點，照壞掉算
+    """
+    if contract is None or not getattr(contract, "task_id", None):
+        return None, None, "not checked against a task ledger (no task contract)"
+    try:
+        from ..intake import keys as _keys
+        from ..intake.ledger import Ledger, LedgerError
+        led = Ledger(contract.task_id)
+        if not led.path.is_file():
+            return None, None, "not checked against a task ledger (the task has no ledger yet)"
+        ok, why = led.verify(trust or _keys.Trust.load())
+        if not ok:
+            return None, f"the task ledger that anchors this trace does not verify ({why})", ""
+        heads = [e for e in led.events()
+                 if e.get("type") == "trace_head" and e.get("project") == rec.dir.name]
+    except (LedgerError, OSError, ValueError) as e:
+        return None, f"the task ledger that anchors this trace is unreadable ({e})", ""
+    if not heads:
+        return None, None, ("not checked against a task ledger (it has no trace head for this "
+                            "project yet)")
+    h = heads[-1]
+    return ({"seq": h.get("seq"), "hash": h.get("hash")}, None,
+            f"matches the task ledger's anchor at entry {h.get('seq')}")
+
+
+def verify_anchored(rec: Recorder, contract: Any, trust: Any = None) -> tuple[bool, str]:
+    """`Recorder.verify` ＋ 收件端帳本的錨點（`vacant trace verify` 與回合邊界都用這一支）。
+    沒有帳本可對 ⇒ 照 `Recorder.verify` 的結果，說明裡寫出「沒有對」；不當成失敗。"""
+    anchor, broken, note = ledger_anchor(rec, contract, trust)
+    if broken:
+        return False, broken
+    ok, why = rec.verify(trust, anchor=anchor)
+    return ok, (f"{why}; {note}" if ok and note else why)
 
 
 def _hidden_source(contract: Any, b: dict[str, Any]) -> bool:
@@ -183,14 +238,32 @@ def _hidden_source(contract: Any, b: dict[str, Any]) -> bool:
 
 
 def _actor_tokens(rec: Recorder) -> set[str]:
-    """病歷裡**所有**行動者的識別（不只這一次結論裡的；agent_text#4）。"""
+    """病歷裡**所有**行動者的識別（不只這一次結論裡的；agent_text#4）：子 agent id、agent 類型、
+    模型 id，以及子 agent **定義檔的雜湊**（信譽 stream `<平台>:def:<名字>:<sha>` 裡那個 sha；
+    設計文件 §10 第 10 列）——它和 agent 類型一樣指得出「是哪一個行動者」。
+
+    **刻意不收平台名**（`claude`／`codex`／`opencode`／`pi`）：`feedback_ks1_clean` 是子字串比對，
+    平台名會撞到回饋正當要引用的檔名與路徑（`CLAUDE.md`、`.codex/config.toml`、`.opencode/…`），
+    收了之後指向這些檔的回饋整行被換成「細節略去」（`feedback._clean_lines`），agent 就看不到位置。平台名本身也不指向某一個行動者（同一平台上每個 agent 都是它）。"""
     out: set[str] = set()
+    defs: dict[tuple[str, str], str] = {}
     for e in rec.events():
         st = e.get("step")
         a = e.get("actor") or (st.get("actor") if isinstance(st, dict) else None) or {}
-        if not isinstance(a, dict):
-            continue
-        for k in ("agent", "agent_type", "model"):
-            if a.get(k):
-                out.add(str(a[k]))
+        if isinstance(a, dict):
+            for k in ("agent", "agent_type", "model"):
+                if a.get(k):
+                    out.add(str(a[k]))
+            if a.get("agent_type"):
+                dk = (str(a.get("platform") or "?"), str(a["agent_type"]))
+                if dk not in defs:
+                    defs[dk] = A.definition_of(dict(a), rec.workspace)
+        # 已經記下的後果帶著信譽鍵：定義檔之後被改了，舊的雜湊也照樣算識別
+        key = e.get("key") if e.get("type") == "consequence" else None
+        if isinstance(key, list) and key:
+            defs.setdefault(("key", str(key[0])), str(key[0]))
+    for stream in defs.values():
+        parts = stream.split(":")
+        if len(parts) >= 4 and parts[1] == "def" and parts[-1] != "None":
+            out.add(parts[-1])
     return out
