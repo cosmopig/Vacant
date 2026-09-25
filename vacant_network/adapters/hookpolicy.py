@@ -24,7 +24,10 @@
 1. **規則 1 是字串層的**：`bash -c "$(echo cm0gLXJmIC52YWNhbnQ= | base64 -d)"` 這種寫法看不出來。
    它擋的是「順手改掉判準」，不是決意的攻擊者。對後者的保護是別處的：輸入以雜湊釘住
    （改了 ⇒ UNKNOWN）、隔離區逐檔驗雜湊（改了 ⇒ 放行拒絕）、收件端的簽章者清單可以在
-   另一個帳號。
+   另一個帳號。**行使別的權威那條規則（見下）同樣是字串層的**：它看的是命令位置的 vacant CLI／
+   `python -m <vacant_network 模組>`，以及直譯器內聯碼（`-c`／`-e`、餵給直譯器的 heredoc）裡
+   同時引到模組與權威詞的情況——**抬高成本，不是擋死**（base64／變數組裝出來的指令、寫成外部
+   腳本再跑，都繞得過）。真正的分權還是把 reviewer／approver 金鑰放到另一個帳號。
 2. **掛鉤壞掉不可以弄死 agent**：任何例外都放行並落一筆錯誤。這一層是增效與觀測，
    不是保證（`adapters/__init__.py`）。
 3. 回饋文字遵守 KS-1：只陳述哪一條主張沒過與原因，不寫「你有責任／會被懲罰」。
@@ -265,15 +268,160 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
 
 
 #: agent 的工作階段裡可以 `vacant check`／`submit`，不能行使**別的權威**：
-#: 人工審查、批准、放行、撤回、金鑰、重驗、改契約。本機單人模式下那些金鑰就在
-#: 同一個帳號裡，agent 一行 `vacant review quality pass` 就能替自己蓋「人工審查」的章
-#: （2026-09-24 對抗審查重現）。這條規則跟其他掛鉤規則一樣是**工具層**的（字串比對，
-#: 換個寫法就過得去）——真正的分權是把 reviewer／approver 金鑰放到另一個帳號。
-#: `vacant`、`vacant-network`（README 教被遮蔽時改用它）、`python -m vacant_network[.cli|.intake.cli]`
-_VACANT_CLI = r"(?:\bvacant(?:-network)?|-m\s+vacant_network(?:\.cli|\.intake\.cli)?)"
-_AUTHORITY_RE = re.compile(
-    _VACANT_CLI + r"\s+(?:(review|approve|release|withdraw|keys|reverify|flag|hook)\b"
-    r"|contract\s+(lock|init)\b|intake\s+serve\b)")
+#: 人工審查、批准、放行、撤回、金鑰、重驗、標記、掛鉤、寫契約、開收件口。本機單人模式下
+#: 那些金鑰就在同一個帳號裡，agent 一行 `vacant review quality pass` 就能替自己蓋「人工審查」的章
+#: （2026-09-24 對抗審查重現）。這條規則跟其他掛鉤規則一樣是**工具層**的（見誠實邊界 1）
+#: ——真正的分權是把 reviewer／approver 金鑰放到另一個帳號。
+#:
+#: 判斷靠的是「vacant CLI／`python -m <vacant_network 模組>` 出現在一段簡單指令的**命令位置**」
+#: （用 `_segments`／`_command_word`，跟殼層寫入規則同一組切詞器），不是「這些字出現在指令裡的任何地方」。
+#: 所以 `grep "vacant hook" docs/`、`git commit -m "… vacant hook …"`、heredoc 寫進檔案的內文都放行——
+#: 那些字只是別的指令的引數／樣式／檔案內容，不是在叫 Vacant。
+#: 頂層權威子指令（`contract` 除外，見下）：
+_AUTHORITY_SUB = frozenset({"review", "approve", "release", "withdraw", "keys", "reverify",
+                            "flag", "hook", "intake"})
+#: `contract` 只有唯讀的兩個放行；其餘（`lock`／`init`／`quick`／將來任何會寫的子指令）一律拒絕，
+#: 這樣新增一個會改契約的子指令不會自動開一個洞（2026-09-25 審查：`contract quick --replace --lock` 重寫並簽了契約）。
+_CONTRACT_READONLY = frozenset({"show", "validate"})
+#: `python -m <這些>` 會派送上面的權威子指令；`vacant_network.adapters.hook` 直接就是掛鉤（不需要子指令詞）。
+_DISPATCH_MODULES = frozenset({"vacant_network", "vacant_network.cli",
+                               "vacant_network.intake.cli", "vacant_network.trace.cli"})
+_HOOK_MODULE = "vacant_network.adapters.hook"
+_VACANT_CLI_NAMES = frozenset({"vacant", "vacant-network"})
+_PY_RE = re.compile(r"python[0-9.]*$")
+#: 直譯器：`-c`／`-e` 的內聯碼、以及餵給它的 heredoc，都當成「一段程式碼」再掃一次。
+_INTERP_RE = re.compile(r"(?:python[0-9.]*|node|nodejs|deno|bun|ruby|perl|bash|sh|zsh|dash)$")
+_HEREDOC_RE = re.compile(r"<<-?\s*([\"']?)([A-Za-z_][A-Za-z0-9_]*)\1")
+#: 內聯碼裡當成「權威詞」的字串字面值／裸識別字（唯讀的 show／validate 不算）。
+_CODE_AUTHORITY = frozenset({"review", "approve", "release", "withdraw", "keys", "reverify",
+                             "flag", "hook", "intake", "serve", "lock", "init", "quick"})
+_CODE_MOD_RE = re.compile(r"\bvacant_network\b")
+_CODE_CLI_RE = re.compile(r"""['"]vacant(?:-network)?['"]|\bvacant-network\b""")
+#: 引到掛鉤模組：`vacant_network.adapters.hook`（點路徑／屬性）或 `from vacant_network.adapters import … hook …`。
+_CODE_HOOK_RE = re.compile(
+    r"vacant_network\.adapters\.hook\b"
+    r"|vacant_network\.adapters\s+import\s+(?:\([^)]*)?\bhook\b")
+_CODE_TOKEN_RE = re.compile(r"""['"]([\w-]+)['"]|([A-Za-z_][\w-]*)""")
+_INLINE_FLAGS = frozenset({"-c", "-e"})
+
+
+def _python_module(cmd: str, args: list[str]) -> tuple[str, list[str]] | None:
+    """`python[3] -m <模組> <其餘…>` ⇒ `(模組, 其餘)`；不是 `-m` 形式（跑腳本／`-c`）⇒ None。"""
+    if not _PY_RE.match(cmd):
+        return None
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "-m":
+            return (args[i + 1], args[i + 2:]) if i + 1 < len(args) else None
+        if a.startswith("-m") and len(a) > 2:
+            return (a[2:], args[i + 1:])
+        if a.startswith("-"):
+            i += 1
+            continue
+        return None                       # 第一個非選項不是 `-m`：在跑一支腳本
+    return None
+
+
+def _authority_of_sub(sub: list[str]) -> tuple[str, str] | None:
+    """一串子指令引數 ⇒ `(rule, what)`：`("hook", …)` 偽造掛鉤事件、`("authority", 名字)` 別的權威；否則 None。
+
+    只看**位置引數**（跳過選項），所以 `--reason` 之類不會被誤當子指令。"""
+    words = [a for a in sub if not a.startswith("-")]
+    if not words:
+        return None
+    head = words[0]
+    if head == "hook":
+        return ("hook", "hook")
+    if head == "contract":
+        act = words[1] if len(words) > 1 else ""
+        if act in _CONTRACT_READONLY:
+            return None
+        return ("authority", f"contract {act}".strip())
+    if head == "intake":
+        return ("authority", "intake serve")
+    if head in _AUTHORITY_SUB:
+        return ("authority", head)
+    return None
+
+
+def _inline_code_forges_authority(code: str) -> bool:
+    """一段內聯碼（`-c`／`-e` 字串、餵給直譯器的 heredoc）是否在行使權威。
+
+    規則：引到 `vacant_network.adapters.hook`（或呼叫它的 main）⇒ 是；否則要同時
+    引到 vacant_network 模組或 vacant CLI **且**有一個權威詞以獨立的字串字面值／識別字出現
+    （例：`subprocess.run([sys.executable,"-m","vacant_network.cli","hook",…])` 裡逗號隔開的
+    `"vacant_network.cli"` 與 `"hook"`）。誠實邊界 1：這抬高成本，不是擋死。"""
+    if _CODE_HOOK_RE.search(code):
+        return True
+    if not (_CODE_MOD_RE.search(code) or _CODE_CLI_RE.search(code)):
+        return False
+    for m in _CODE_TOKEN_RE.finditer(code):
+        if (m.group(1) or m.group(2)) in _CODE_AUTHORITY:
+            return True
+    return False
+
+
+def _split_heredocs(command: str) -> tuple[str, list[str]]:
+    """把 heredoc 內文從指令裡拿掉，另外回傳「餵給直譯器的」那些內文。
+
+    留下 heredoc 的**開頭那一行**（`cat > f <<EOF` 的命令位置還是 `cat`，照樣走命令位置判斷），
+    丟掉內文與結束定界符——這樣寫進檔案的 heredoc 內文（就算裡面有 `vacant release`）不會被當成指令。"""
+    lines = command.split("\n")
+    kept: list[str] = []
+    interp_bodies: list[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        kept.append(line)
+        m = _HEREDOC_RE.search(line)
+        if not m:
+            i += 1
+            continue
+        delim = m.group(2)
+        interp = any(_INTERP_RE.match(_command_word(w)[0])
+                     for w, _r in _segments(_tokens(line)))
+        j = i + 1
+        body: list[str] = []
+        while j < len(lines) and lines[j].strip() != delim:
+            body.append(lines[j])
+            j += 1
+        if interp:
+            interp_bodies.append("\n".join(body))
+        i = j + 1                          # 跳過內文與定界符行
+    return "\n".join(kept), interp_bodies
+
+
+def _authority_verdict(command: str) -> tuple[str, str] | None:
+    """指令是否在行使別的權威 ⇒ `(rule, what)`；否則 None。字串層（誠實邊界 1）。"""
+    stripped, interp_bodies = _split_heredocs(command)
+    has_interp_inline = False
+    for words, _redir in _segments(_tokens(stripped)):
+        cmd, args = _command_word(words)
+        if cmd in _VACANT_CLI_NAMES:
+            hit = _authority_of_sub(args)
+            if hit is not None:
+                return hit
+        mod = _python_module(cmd, args)
+        if mod is not None:
+            module, rest = mod
+            if module == _HOOK_MODULE or module.startswith(_HOOK_MODULE + "."):
+                return ("hook", "hook")
+            if module in _DISPATCH_MODULES:
+                hit = _authority_of_sub(rest)
+                if hit is not None:
+                    return hit
+        if _INTERP_RE.match(cmd) and any(a in _INLINE_FLAGS for a in args):
+            has_interp_inline = True
+    # 直譯器內聯碼：`-c`／`-e` 的碼字串（分隔符會把 `_segments` 切開，而且 list 形式的 argv
+    # 併成一行後會失去引號邊界）——所以整段指令再當成程式碼掃一次；heredoc 內文同理。
+    bodies = list(interp_bodies)
+    if has_interp_inline:
+        bodies.append(stripped)
+    for body in bodies:
+        if _inline_code_forges_authority(body):
+            return ("hook" if _CODE_HOOK_RE.search(body) else "authority", "inline code")
+    return None
 
 
 def decide_pre_tool(ev: HookEvent, contract) -> HookDecision:
@@ -300,16 +448,16 @@ def decide_pre_tool(ev: HookEvent, contract) -> HookDecision:
             return HookDecision("deny", f"Vacant: this command appears to modify {verdict[1]}, "
                                         f"which is part of the task contract or Vacant's "
                                         f"records.", {"rule": "protect_write"})
-        m = _AUTHORITY_RE.search(cmd)
-        if m and m.group(1) == "hook":
+        verd = _authority_verdict(cmd)
+        if verd is not None and verd[0] == "hook":
             # 掛鉤是 agent 平台自己呼叫的；在工作的那一方自己呼叫一次＝偽造病歷裡的一個事件
             # （例：一則「人打的」提示）。字串層：擋直接的寫法，擋不住繞路（誠實邊界 1）
             return HookDecision("deny", "Vacant: `vacant hook` is called by the agent platform "
                                         "itself, not from inside the session. Use `vacant check` "
                                         "to see where the deliverable stands.",
                                 {"rule": "vacant_authority"})
-        if m:
-            what = m.group(1) or (f"contract {m.group(2)}" if m.group(2) else "intake serve")
+        if verd is not None:
+            what = verd[1]
             return HookDecision("deny", f"Vacant: `vacant {what}` belongs to the task's owner, "
                                         f"reviewer or approver, not to the session doing the "
                                         f"work. Use `vacant check` to see where the "
