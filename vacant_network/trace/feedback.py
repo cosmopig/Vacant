@@ -94,7 +94,9 @@ def agent_lines(b: dict[str, Any]) -> list[str]:
     """一條追緝結論 → 給 agent 的一到三行（只有事實；沒有行動者）。隱藏主張不經過這裡。"""
     cid = b.get("claim") or "flag"
     loc = b.get("location") or {}
-    if loc.get("kind") == "missing":
+    if loc.get("kind") == "missing" or (b.get("value") is None and loc.get("value") is None
+                                         and not loc.get("line")):
+        # 缺的東西、或整個檔就是問題（例如契約禁止的檔）：沒有「那裡寫著」可說
         head = f"- {cid}: FAIL — {loc.get('path')}: {_clip(loc.get('note') or b.get('detail'), 160)}"
     else:
         val = b.get("value") or loc.get("value")
@@ -158,7 +160,9 @@ def _clean_lines(lines: list[str], tokens: set[str], cid: str) -> list[str]:
 def render_agent(blames: list[dict[str, Any]], results: list[dict[str, Any]],
                  *, previous: dict[str, Any] | None = None,
                  reasons: list[str] | None = None,
-                 extra_tokens: set[str] | None = None) -> tuple[str, dict[str, Any]]:
+                 extra_tokens: set[str] | None = None,
+                 header: str | None = None, footer: str | None = None,
+                 more_hint: str = "run `vacant check`") -> tuple[str, dict[str, Any]]:
     """回 `(文字, 狀態)`；狀態存起來當下一次的 `previous`（「這次新增／已解決」）。
 
     隱藏主張：**一條主張一行**「沒過（細節由委託者保留）」，不論它有幾個位置；不標「還沒解決」、
@@ -200,13 +204,13 @@ def render_agent(blames: list[dict[str, Any]], results: list[dict[str, Any]],
                       if str(prev_open.get(k)) not in hidden_claims)
     if len(body) > MAX_LINES - 3:
         more = len(body) - (MAX_LINES - 4)
-        body = body[:MAX_LINES - 4] + [f"- … and {more} more line(s): run `vacant check`"]
+        body = body[:MAX_LINES - 4] + [f"- … and {more} more line(s): {more_hint}"]
     only_flags = bool(ids_now) and all(str(c).startswith("flag:") for c in ids_now.values()) \
         and not any(r.get("status") != "PASS" and r.get("required", True) for r in results)
-    lines = [FLAG_HEADER if only_flags else FEEDBACK_HEADER, *body]
+    lines = [header or (FLAG_HEADER if only_flags else FEEDBACK_HEADER), *body]
     if resolved:
         lines.append(f"Resolved since the last check: {len(resolved)}.")
-    lines.append(FOOTER)
+    lines.append(FOOTER if footer is None else footer)
     return "\n".join(lines), {"open": ids_now, "t": time.time()}
 
 

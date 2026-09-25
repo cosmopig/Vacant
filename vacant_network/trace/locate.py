@@ -62,14 +62,34 @@ def line_col(text: str, offset: int) -> tuple[int, int]:
     return line, col
 
 
+#: 一個主張最多回幾個位置／一段文字最多數幾次出現（HTTP 收件口遠端就叫得到：不設上限 ⇒ 一份 2 MB 的報告讓
+#: 定位花 100 秒；2026-09-25 審查 http#1）
+MAX_MATCHES = 50
+
+
+class _Lines:
+    """整段文字的行首位置，查一次 O(log n)（每一個命中都從頭數換行是 O(命中數 × 長度)）。"""
+
+    def __init__(self, text: str):
+        import bisect
+        self._bisect = bisect.bisect_right
+        self._nl = [i for i, ch in enumerate(text) if ch == "\n"]
+
+    def at(self, offset: int) -> tuple[int, int]:
+        k = self._bisect(self._nl, offset - 1)
+        start = self._nl[k - 1] + 1 if k else 0
+        return k + 1, offset - start + 1
+
+
 def number_of(tok: str) -> float | None:
     return V._number(tok)
 
 
-def occurrences(text: str, value: str) -> list[tuple[int, int, str]]:
-    """`value` 在 `text` 裡出現的位置 `(行, 欄, 逐字)`。數字依數值比對（`3,072`＝`3072`，
+def occurrences(text: str, value: str, limit: int = 200) -> list[tuple[int, int, str]]:
+    """`value` 在 `text` 裡出現的位置 `(行, 欄, 逐字)`，最多 `limit` 個。數字依數值比對（`3,072`＝`3072`，
     但 `30720` 不含 `3072`——數字要整個 token 相等）；其餘逐字比對（空白正規化）。"""
     out: list[tuple[int, int, str]] = []
+    lines: _Lines | None = None
     num = number_of(value.strip()) if value else None
     if num is not None:
         for m in _NUM_RE.finditer(text):
@@ -81,8 +101,11 @@ def occurrences(text: str, value: str) -> list[tuple[int, int, str]]:
                 continue
             v = number_of(m.group(0))
             if v is not None and v == num:
-                ln, c = line_col(text, a)
+                lines = lines or _Lines(text)
+                ln, c = lines.at(a)
                 out.append((ln, c, m.group(0)))
+                if len(out) >= limit:
+                    break
         return out
     needle = value.strip()
     if len(needle) < 2:
@@ -90,16 +113,17 @@ def occurrences(text: str, value: str) -> list[tuple[int, int, str]]:
     start = 0
     while True:
         i = text.find(needle, start)
-        if i < 0:
+        if i < 0 or len(out) >= limit:
             break
-        ln, c = line_col(text, i)
+        lines = lines or _Lines(text)
+        ln, c = lines.at(i)
         out.append((ln, c, needle))
         start = i + max(1, len(needle))
     return out
 
 
 def contains(text: str, value: str) -> bool:
-    return bool(occurrences(text, value))
+    return bool(occurrences(text, value, limit=1))
 
 
 def _read(adir: pathlib.Path, rel: str) -> str | None:
@@ -147,12 +171,14 @@ def _loc_text(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any]
     for rel in files:
         txt = _read(adir, rel)
         if txt is None:
+            out.append(Location(rel, kind="missing", note="not UTF-8 text"))
             continue
+        lines = _Lines(txt)
         for rx in params.get("must_not_contain") or []:
             for m in re.finditer(rx, txt, re.M):
-                ln, c = line_col(txt, m.start())
+                ln, c = lines.at(m.start())
                 out.append(Location(rel, ln, c, m.group(0), note=f"forbidden {V.show_rx(rx)}"))
-                if len(out) > 50:
+                if len(out) >= MAX_MATCHES:
                     return out
         for rx in params.get("must_contain") or []:
             if not re.search(rx, txt, re.M):
@@ -162,8 +188,9 @@ def _loc_text(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any]
             if h.strip().lower() not in V._headings(txt):
                 out.append(Location(rel, kind="missing", value=h, note="missing heading"))
     if not out:
-        # 字數／大小：整個檔
-        out = [Location(rel, kind="missing", note="length rule") for rel in files]
+        # 字數／大小：整個檔；原因用驗證器自己的話（不是一律「length rule」）
+        why = str(result.get("detail") or "length rule")[:200]
+        out = [Location(rel, kind="missing", note=why) for rel in files[:MAX_MATCHES]]
     return out
 
 
@@ -175,10 +202,13 @@ def _loc_csv_total(params: dict[str, Any], ev: dict[str, Any], result: dict[str,
         return [Location(report, kind="missing", note="report not in the deliverable")]
     pattern = params.get("pattern") or V._DEFAULT_TOTAL_RE
     out = []
+    lines = _Lines(txt)
     for m in re.finditer(pattern, txt):
-        ln, c = line_col(txt, m.start(1))
+        ln, c = lines.at(m.start(1))
         out.append(Location(report, ln, c, m.group(1),
                             note=f"recomputed {ev.get('recomputed')!r} from {ev.get('source')}"))
+        if len(out) >= MAX_MATCHES:
+            break
     if not out:
         return [Location(report, kind="missing", value="total", note="no total stated")]
     src = str(params.get("csv") or "")
@@ -269,23 +299,33 @@ def _loc_traceback(params: dict[str, Any], ev: dict[str, Any], result: dict[str,
     out: list[Location] = []
     seen = set()
     root = adir.resolve()
+
+    def inside(cand: pathlib.Path) -> str | None:
+        # 只認成果目錄**裡面**的檔：絕對路徑、`..` 一律不碰檔案系統（否則交件的一方能問出主機上哪些檔存在，
+        # 驗收者自己的檢查程式與標準庫也會被當成交件的問題；2026-09-25 審查 http#2）
+        if cand.is_absolute() or ".." in cand.parts or not cand.parts:
+            return None
+        q = (root / cand).resolve()
+        if root not in q.parents or not q.is_file():
+            return None
+        return q.relative_to(root).as_posix()
+
     for m in _TB_RE.finditer(str(result.get("detail") or "")):
         f, ln = m.group(1), int(m.group(2))
         p = pathlib.Path(f)
-        rel = None
-        if not p.is_absolute() and (root / p).is_file():
-            rel = p.as_posix()
-        else:
-            # 在拷貝裡跑的：路徑的尾巴對得到成果裡的檔就算
-            parts = p.parts
+        rel = inside(p)
+        if rel is None:
+            # 在拷貝裡跑的：路徑的尾巴對得到成果裡的檔就算（絕對路徑從錨點之後算起）
+            parts = p.parts[1:] if p.is_absolute() else p.parts
             for i in range(len(parts)):
-                cand = pathlib.Path(*parts[i:])
-                if (root / cand).is_file():
-                    rel = cand.as_posix()
+                rel = inside(pathlib.Path(*parts[i:]))
+                if rel is not None:
                     break
         if rel is None or (rel, ln) in seen:
             continue
         seen.add((rel, ln))
+        if len(out) >= MAX_MATCHES:
+            break
         txt = _read(adir, rel) or ""
         lines = txt.splitlines()
         val = lines[ln - 1].strip() if 0 < ln <= len(lines) else None
@@ -293,6 +333,22 @@ def _loc_traceback(params: dict[str, Any], ev: dict[str, Any], result: dict[str,
     return out
 
 
+def _loc_exists(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
+                adir: pathlib.Path) -> list[Location]:
+    """缺的是**哪一個樣式**（不是隨便列出成果裡的前五個檔；2026-09-25 審查 http#6）。"""
+    return [Location(str(pat), kind="missing", note="nothing in the deliverable matches this")
+            for pat in params.get("paths") or [] if not _files(adir, str(pat))]
+
+
+def _loc_forbid(params: dict[str, Any], ev: dict[str, Any], result: dict[str, Any],
+                adir: pathlib.Path) -> list[Location]:
+    out = []
+    for pat in params.get("paths") or []:
+        for rel in _files(adir, str(pat))[:MAX_MATCHES]:
+            out.append(Location(rel, note=f"a file the contract forbids ({pat})"))
+    return out[:MAX_MATCHES]
+
+
 _LOCATORS = {"text": _loc_text, "csv_total": _loc_csv_total, "json_schema": _loc_json_schema,
              "citations_resolve": _loc_citations, "python_checks": _loc_traceback,
-             "command": _loc_traceback}
+             "command": _loc_traceback, "exists": _loc_exists, "forbid_paths": _loc_forbid}

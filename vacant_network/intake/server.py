@@ -173,35 +173,53 @@ class IntakeApp:
         return 200, data, ctype
 
 
+#: 交件超過這個大小就不定位（只回裁決與各主張的細節）：定位是給人看的方便，不可以讓遠端一次交件佔住一個核心
+LOCATE_MAX_BYTES = 5 * 1024 * 1024
+_CLIP = 200
+
+
 def _locate(task: flow.Task, res: dict[str, Any], blobs: dict[str, bytes]) -> dict[str, Any]:
     """交件沒過時：和 agent 在回合結束收到的同一段「哪個檔哪一行、應該是多少」（`trace.blame.locate_results`
     ＋`feedback.render_agent`；KS-1 乾淨），外加一份結構化的清單。HTTP 交來的只有檔案、沒有任何一步 ⇒ **不追到步驟、
-    不記任何人**（誠實邊界 1：token 證明不了是哪一個 agent）。隱藏主張只說「沒過」。壞掉 ⇒ 不影響裁決，照樣回應。"""
-    if res.get("outcome") in (None, "accept") or not res.get("results"):
+    不記任何人**（誠實邊界 1：token 證明不了是哪一個 agent）。隱藏主張只說「沒過」。壞掉 ⇒ 不影響裁決，照樣回應。
+
+    定位看的是**收件口凍結、驗過的那一份**（隔離區的 manifest 攤開），不是交來的原始位元組：不在繳付物裡的檔、
+    路徑寫法不同的檔都不會被拿來說事（2026-09-25 審查 http#3、#4、#5）。"""
+    art = res.get("artifact_sha256")
+    if res.get("outcome") in (None, "accept") or not res.get("results") or not art:
         return {}
     import tempfile
     try:
         from ..trace import blame as B
         from ..trace import feedback as F
+        manifest = task.store.load_manifest(str(art))
+        size = sum(int(f.get("size") or 0) for f in manifest.get("files") or [])
+        if size > LOCATE_MAX_BYTES:
+            return {"feedback_skipped": f"the submission is {size} bytes; locating stops at "
+                                        f"{LOCATE_MAX_BYTES} (see results[].detail)"}
         hidden = {c.id for c in task.contract.claims if c.hidden}
         results = [dict(r, hidden=r.get("claim_id") in hidden) for r in res["results"]]
         with tempfile.TemporaryDirectory(prefix="vacant-http-") as td:
-            root = pathlib.Path(td)
-            for rel, data in blobs.items():
-                dest = root / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_bytes(data)
+            root = task.store.materialize(manifest, pathlib.Path(td) / "a")
             found = B.locate_results(task.contract, results, root)
-        text, _state = F.render_agent(found, results, reasons=res.get("reasons"))
-        issues = [{"claim_id": b["claim"], "path": b["location"].get("path"),
-                   "line": b["location"].get("line"), "value": b.get("value"),
-                   "expected": next((e.get("value") for e in b.get("expected") or []
-                                     if e.get("value") is not None), None),
-                   "note": b["location"].get("note")}
-                  for b in found if not b.get("hidden")]
+        text, _state = F.render_agent(
+            found, results, reasons=res.get("reasons"),
+            header=f"The intake's decision for this submission is {res.get('outcome')!r} "
+                   f"(signed; the submitter cannot change it). The checks point here:",
+            footer="Fix these and submit again; `results` has every check's own words.",
+            more_hint="see `issues` and `results`")
+
+        def clip(v: Any) -> Any:
+            return v[:_CLIP] if isinstance(v, str) else v
+        issues = [{"claim_id": b["claim"], "path": clip(b["location"].get("path")),
+                   "line": b["location"].get("line"), "value": clip(b.get("value")),
+                   "expected": clip(next((e.get("value") for e in b.get("expected") or []
+                                          if e.get("value") is not None), None)),
+                   "note": clip(b["location"].get("note"))}
+                  for b in found if not b.get("hidden")][:50]
         return {"feedback": text, "issues": issues}
     except Exception as e:  # noqa: BLE001 — 定位壞掉不影響裁決
-        return {"feedback_error": f"{type(e).__name__}: {e}"[:300]}
+        return {"feedback_error": type(e).__name__}
 
 
 def _released_by_gate_impl(task: flow.Task, rcp: DirRecipient, art: str) -> bool:

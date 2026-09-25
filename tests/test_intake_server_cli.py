@@ -197,7 +197,8 @@ def test_a_failed_submission_says_where_and_what_it_should_be(tmp_path, vhome):
         "report.md": base64.b64encode(body.encode()).decode()}})
     assert code == 200 and res["outcome"] == "reject"
     fb = res["feedback"]
-    assert fb.startswith(F.FEEDBACK_HEADER)
+    assert fb.startswith("The intake's decision for this submission is 'reject'")   # 這就是裁決
+    assert "vacant check" not in fb and F.FEEDBACK_HEADER not in fb
     assert 'report.md:3 says "70"' in fb and "expected 69" in fb
     assert 'does not contain "Recommendation"' in fb
     assert "secret_rule: FAIL (details withheld" in fb and "North" not in fb
@@ -213,3 +214,83 @@ def test_an_accepted_submission_has_no_feedback(server):
     code, res = _post(f"{base}/v1/tasks/card-7/submissions",
                       {"files": _files({"title": "ok", "lines": ["a", "b"]})})
     assert code == 200 and res["outcome"] == "accept" and "feedback" not in res
+
+
+
+# ── 2026-09-25 審查（HTTP 回應裡的定位）的回歸 ─────────────────────────────────────────────
+
+def _app(tmp_path, claims, *, inputs=None, files=None, deliverable=("report.md",)):
+    from vacant_network.intake import keys
+    keys.init_local()
+    proj = tmp_path / "p"
+    (proj / ".vacant").mkdir(parents=True, exist_ok=True)
+    for rel, text in (files or {}).items():
+        (proj / rel).parent.mkdir(parents=True, exist_ok=True)
+        (proj / rel).write_text(text)
+    raw = C.scaffold("h1", deliverable=list(deliverable), destination="dir:published")
+    raw["inputs"] = inputs or {}
+    raw["claims"] = claims
+    cp = proj / ".vacant" / "contract.json"
+    cp.write_text(json.dumps(raw))
+    flow.lock(cp)
+    return IntakeApp([cp], token="t", sandbox="none")
+
+
+def _sub(app, files):
+    return app.submit("h1", {"files": {k: base64.b64encode(v.encode() if isinstance(v, str)
+                                                            else v).decode()
+                                       for k, v in files.items()}})
+
+
+def test_locating_a_huge_report_is_bounded(tmp_path, vhome):
+    import time
+    app = _app(tmp_path, [{"id": "t", "verifier": "csv_total", "authority": "fact",
+                           "params": {"csv": "input:s", "column": "a", "report": "report.md"}}],
+               inputs={"s": {"path": "s.csv"}}, files={"s.csv": "a\n69\n"})
+    t0 = time.time()
+    code, res = _sub(app, {"report.md": "Total: 70\n" * 100_000})      # 1 MB，每一行都是同一個錯值
+    assert code == 200 and res["outcome"] == "reject"
+    assert time.time() - t0 < 20                                           # 修之前約 26 秒
+    assert len(res["issues"]) <= 50
+
+
+def test_traceback_paths_outside_the_submission_are_never_touched(tmp_path):
+    from vacant_network.trace import locate as L
+    (tmp_path / "main.py").write_text("x = 1\n")
+    detail = ('File "/etc/passwd", line 1\nFile "../../etc/hosts", line 1\n'
+              f'File "{tmp_path}/../x.py", line 2\nFile "/tmp/run/main.py", line 1\n')
+    locs = L._loc_traceback({}, {}, {"detail": detail}, tmp_path)
+    assert [(x.path, x.line) for x in locs] == [("main.py", 1)]           # 只有交來的那一個
+
+
+def test_files_outside_the_deliverable_are_not_cited(tmp_path, vhome):
+    app = _app(tmp_path, [{"id": "no_todo", "verifier": "text", "authority": "requirement",
+                           "params": {"path": "**/*.md", "must_not_contain": ["TODO"]}}],
+               deliverable=("docs/**",))
+    code, res = _sub(app, {"docs/a.md": "TODO here\n", "node_modules/x/README.md": "TODO\n"})
+    assert code == 200 and res["outcome"] == "reject"
+    assert {i["path"] for i in res["issues"]} == {"docs/a.md"}
+
+
+def test_exists_and_forbid_paths_point_at_the_real_place(tmp_path, vhome):
+    app = _app(tmp_path, [
+        {"id": "has_data", "verifier": "exists", "authority": "requirement",
+         "params": {"paths": ["data/*.csv"]}},
+        {"id": "no_env", "verifier": "forbid_paths", "authority": "requirement",
+         "params": {"paths": ["**/.env"]}},
+        {"id": "utf8", "verifier": "text", "authority": "requirement",
+         "params": {"path": "notes.txt", "must_contain": ["x"]}}], deliverable=("**",))
+    code, res = _sub(app, {"report.md": "ok\n", "config/.env": "K=v\n",
+                           "notes.txt": b"\xff\xfe bad"})
+    by = {i["claim_id"]: i for i in res["issues"]}
+    assert by["has_data"]["path"] == "data/*.csv"
+    assert by["no_env"]["path"] == "config/.env"
+    assert by["utf8"]["note"] == "not UTF-8 text"
+    assert "report.md" not in {i["path"] for i in res["issues"]}
+
+
+def test_issue_fields_are_clipped(tmp_path, vhome):
+    app = _app(tmp_path, [{"id": "no_x", "verifier": "text", "authority": "requirement",
+                           "params": {"path": "report.md", "must_not_contain": ["X+"]}}])
+    code, res = _sub(app, {"report.md": "X" * 50_000 + "\n"})
+    assert all(len(str(i.get("value") or "")) <= 200 for i in res["issues"])

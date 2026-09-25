@@ -59,7 +59,10 @@ instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.m
 - The HTTP intake's reply to a failed submission now carries the same located feedback an agent gets
   at the end of a turn (file, line, the value found, the expected value) plus a structured `issues`
   list. A submission is only files, so nothing is traced to a step or an actor; hidden claims say only
-  that they failed (`trace.blame.locate_results`).
+  that they failed (`trace.blame.locate_results`). An adversarial review (9 findings, all fixed:
+  `ops/accountability/review_http_feedback/FINDINGS.md`) made locating bounded (it was quadratic: a
+  1 MB report took 26 s), kept traceback paths inside the submission (a sandboxed submission could
+  learn which files exist on the host), and located on the frozen, verified artifact only.
 - Interactive use: the feedback-round cap now applies per request the person types, not per session.
   In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
   written after the next request then got no located feedback (reproduced as a negative control in
