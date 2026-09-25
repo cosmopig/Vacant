@@ -25,7 +25,7 @@
 
 ● The finance summary disagrees with the ledger; used the ledger.
 
-✻ Cooked for 2s · done 1:02 AM
+✻ Baked for 2s · done 1:41 AM
 
 
 

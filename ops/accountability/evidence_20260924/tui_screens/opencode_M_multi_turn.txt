@@ -10,7 +10,7 @@
                                                                                                                         • userdocs Disabled
      Done.
                                                                                                                         LSP
-     ▣  Build · mock-model · 742ms                                                                                      LSPs are disabled
+     ▣  Build · mock-model · 1.1s                                                                                       LSPs are disabled
 
   ┃
   ┃  The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):
@@ -38,13 +38,13 @@
 
      Fixed.
 
-     ▣  Build · mock-model · 1.5s
+     ▣  Build · mock-model · 1.7s
 
   ┃
   ┃                                                                                                                     <scratch:
   ┃                                                                                                                     
-  ┃  Build · mock-model mock                                                                                            >/opencode/proj-m:
-  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    master
-   <out>/opencode/5 ctrl+p
-   proj-m                                                                                            commands           • OpenCode 1.18.32
+  ┃  Build · mock-model mock                                                                                            >/opencode/proj-
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    m:master
+   <out>/   15 ctrl+p
+   opencode/proj-m                                                                                    commands          • OpenCode 1.18.32
 

@@ -119,7 +119,7 @@
 ### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
 
 裁決：`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`（補在收件口之上，不取代）。
-`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake：掛鉤路徑 33/33，含前景／背景／平行子 agent、錯的網頁、人的標記；`vacant do` 25/25；四個 agent 的真 TUI 16/16，`ops/accountability/e2e_tui.py`）。回饋輪數＝**人的一個要求之內**的上限（`hookpolicy.new_request`：人打的新要求重新算；不是人打的不算；OpenCode 的外掛不記提示，所以它仍然只在過了才歸零）。
+`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake：掛鉤路徑 33/33，含前景／背景／平行子 agent、錯的網頁、人的標記；`vacant do` 25/25；四個 agent 的真 TUI 16/16，`ops/accountability/e2e_tui.py`）。回饋輪數＝**人的一個要求之內**的上限（`hookpolicy.new_request`：人打的新要求重新算；不是人打的——子 agent 的結果、Vacant 自己的回饋、agent 自己排的提示、別的工作階段的信封——不算、也不當成值的來源，分辨只有一份 `capture.classify_prompt`；審查 `ops/accountability/review_rounds_tui/FINDINGS.md`）。
 
 - `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
   沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）。掛鉤裡一次掃描最多

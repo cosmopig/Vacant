@@ -11,7 +11,7 @@
 
      Done.                                                                                                              LSP
                                                                                                                         LSPs are disabled
-     ▣  Build · mock-model · 3.4s
+     ▣  Build · mock-model · 4.0s
 
   ┃
   ┃  The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):
@@ -38,13 +38,13 @@
 
      The finance summary disagrees with the ledger; used the ledger.
 
-     ▣  Build · mock-model · 1.5s
+     ▣  Build · mock-model · 1.7s
 
   ┃
   ┃                                                                                                                     <scratch:
   ┃                                                                                                                     
-  ┃  Build · mock-model mock                                                                                            >/opencode/proj-a:
-  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    master
-   <out>/opencode/5 ctrl+p
-   proj-a                                                                                            commands           • OpenCode 1.18.32
+  ┃  Build · mock-model mock                                                                                            >/opencode/proj-
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    a:master
+   <out>/   15 ctrl+p
+   opencode/proj-a                                                                                    commands          • OpenCode 1.18.32
 

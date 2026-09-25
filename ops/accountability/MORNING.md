@@ -12,7 +12,8 @@
 
 ## 好消息
 
-1. **歸因 33/33**：四個 agent × 八種埋錯，另加 Claude 的背景子 agent——`ops/accountability/evidence_20260924/README.md`。
+1. **歸因 33/33**：四個 agent × 八種埋錯，另加 Claude 的背景子 agent——`ops/accountability/evidence_20260924/README.md`
+   （2026-09-25 在最後的程式碼 `b23046a5` 上重跑，和 `vacant do`、TUI 兩張表一起）。
 
    | 錯從哪裡來 | Vacant 的結論 |
    |---|---|
@@ -44,7 +45,7 @@
    沒被記錄的改動記在那個平台的整合覆蓋率上。路由＝報告尾端給你的建議，或 `vacant do --agent auto`
    （每個 agent 在這類任務上不到 5 次就先輪流，不拿小樣本做決定）。
 
-5. **四輪對抗審查，75 條，全部重現、成立的全部修掉，每條一個會紅的回歸測試**：
+5. **五輪對抗審查，90 條，全部重現、成立的全部修掉，每條一個會紅的回歸測試**：
    - 核心（47 條，`ops/accountability/review_m8/FINDINGS.md`）：同一個值出現在好幾行時曾經錯怪人；`python3 -u x.py`、
      `cd dir &&` 曾經讓「跑腳本的人」背了「寫腳本的人」的錯；Claude 背景子 agent 的結果曾經被當成**你**說的話。
    - 大專案（8 條，`ops/accountability/review_scale/FINDINGS.md`）：背景還在看第一眼時就開始的步驟，曾經讓**後來只改了
@@ -54,6 +55,9 @@
    - 延後驗收與委派的寫入（8 條，`ops/accountability/review_defer_credit/FINDINGS.md`）：沒回報的子 agent 會讓
      `--resume` 之後一小時不驗；「同一個版本」只比後版本時，無辜的後來者會背「可證明」；子 agent 能偽造一個「你的」標記
      （提示注入）——都修了（標記現在要有你的 owner 簽章）。
+   - 重置輪數與互動介面的量測（15 條、12 條成立，`ops/accountability/review_rounds_tui/FINDINGS.md`）：Claude Code 的排程提示
+     和你打的一模一樣——會被當成「任務說的」替 agent 洗掉錯；OpenCode、pi（跑著的時候打的）記不到你打的；而且**我第一次存的
+     TUI 證據有一格說了它沒證明的事**（OpenCode 的多回合沒用完輪數、根本沒測到重置）。都修了，三張證據表在修正後的程式碼上重跑。
 
 6. **大專案也在掛鉤的 30 秒上限內**：4 萬檔的專案第一次 5.7–8.2 秒、之後每次掛鉤 p95 0.6 秒、回合結束的追緝 1.9 秒，
    每一步多存 0.9 KB（修之前第一次要 33.8 秒、每一步 4.9 MB）——`ops/accountability/evidence_20260924/perf/`。
@@ -64,8 +68,8 @@
    （審查修正把工作區根整個排除了）——這會讓 R536 的「追緝過的回饋」少了追緝，簽之前修好了。
 
 8. **你直接開 agent 的介面打字，也成立**（2026-09-25 早上加的）：四個 agent 的**真 TUI**（tmux 裡像人一樣打字、按 Enter、
-   離開），B／A／C＋多回合：歸因 16/16、回饋到模型 16/16、**你在畫面上也看得到** 16/16、改好後 accept 16/16
-   （`evidence_20260924/README.md` 第 3 節、`tui_screens/` 是畫面原文）。**OpenCode 的互動 TUI 有交件前回饋**
+   離開），B／A／C＋多回合：歸因 16/16、回饋到模型 16/16、**你在畫面上也看得到** 16/16、改好後 accept 16/16、多回合那幾格
+   前面的回合都真的用完了輪數 4/4（`evidence_20260924/README.md` 第 3 節、`tui_screens/` 是畫面原文）。**OpenCode 的互動 TUI 有交件前回饋**
    ——之前寫了但沒量過，現在量到了（`opencode run` 仍然沒有）。走 `vacant do`（R536 的路）也是 25/25，OpenCode 也收得到
    （`vacant do` 自己重開一次）。
    做 TUI 時抓到一個只在多回合出現的問題：**回饋輪數只在過了才歸零**——你先問一句、還不要它交件，回合結束的驗收就把

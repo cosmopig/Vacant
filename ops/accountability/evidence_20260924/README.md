@@ -5,7 +5,9 @@
 > 乾淨的埋錯下給出期望的答案。**不證明**真模型下產出會更接近需求——那是
 > `decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md` 的事（草稿，待人類簽字）。
 
-## 1. 四個真 agent × 八個埋錯情境＋Claude 的背景子 agent（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`；最後一輪對抗審查修正**之後**重跑）
+## 1. 四個真 agent × 八個埋錯情境＋Claude 的背景子 agent（`e2e_trace_SUMMARY.md`、`e2e_trace_results.json`）
+
+> 第 1–3 節的三張表都在 `b23046a5`（最後一輪對抗審查——重置輪數與 TUI 量測——修正之後）上重跑，2026-09-25 01:40–02:09 UTC、依序跑、中間沒有改碼。假模型收到帶著非假金鑰的請求：三張表合計 0。
 
 重跑：
 
@@ -27,7 +29,7 @@
 | 給 agent 的回饋裡有行動者識別 | 0/33 |
 | 改好之後，病歷記「已解決」、收件 accept | Claude／Codex／pi 的 A／B／C／E／F／H／I＋Claude 的 G：22/22 |
 | 病歷簽章鏈驗得過 | 33/33 |
-| 每次掛鉤的額外時間 p95 | 6.4–12.6 ms（小工作區；大專案見第 5 節）；Codex 的 H 那一格有一次 59 ms（那一格只有 13 次掛鉤，p95 就是最慢那一次；p50 4.3 ms） |
+| 每次掛鉤的額外時間 p95 | 6.3–13.3 ms（小工作區；大專案見第 5 節）。之前的一跑裡 Codex 的 H 那一格有一次 59 ms（那一格只有 13 次掛鉤，p95 就是最慢那一次） |
 | 行動者帳本 | 每個 agent 一格（6 跑）；B 記 1 筆可證明的錯；A 記在來源 `inputs/summary.txt`、F 記在那個網址；D 記在該平台的整合覆蓋率；E 是推論層（`lineage_internal`），照規則不進信譽 |
 
 模型實際收到的回饋（Claude Code，情境 B，第 2 次請求）：
@@ -57,10 +59,8 @@ Run `vacant check` to re-check before finishing.
 | 給 agent 的回饋裡有行動者識別 | 0/25 |
 | 病歷簽章鏈驗得過 | 25/25 |
 
-這一跑（00:26–00:44 UTC）的中途改過兩個檔：`ops/intake/mock_model.py`（加了多回合；沒有 `turns` 的劇本行為不變）
-與 `adapters/hook.py`（人打的新要求重新算回饋輪數；這裡每個工作階段只有開頭一則人的提示，輪數檔本來就不存在）
-——兩個都碰不到這張表的格子。第一跑是 22/25：三格是 harness 沒把原生那條的 agent 參數帶進 `vacant do`
-（pi 的 subagent 擴充、Codex 的網路），修了（`6d5184a6`）之後那三格重跑 6/6，再整張重跑成這一份。
+第一跑（00:26 UTC，`6d5184a6`）是 22/25：三格是 harness 沒把原生那條的 agent 參數帶進 `vacant do`（pi 的 subagent 擴充、
+Codex 的網路），修了之後整張重跑 25/25；這一份是在 `b23046a5` 上再重跑的。
 
 ## 3. 人直接開 agent 的互動介面（`e2e_tui_SUMMARY.md`、`e2e_tui_results.json`、`tui_screens/`）
 
@@ -69,30 +69,34 @@ Run `vacant check` to re-check before finishing.
     python ops/accountability/e2e_tui.py --bin <pi/opencode/codex 所在目錄> --out <dir>
 
 人類定的場景是「人直接用一個 agent」——多半就是開它的互動介面打字。這一節把埋錯放進四個 agent 的**真 TUI**
-（tmux 的偽終端機：等畫面出現就緒的字樣、打提示、按 Enter、做完之後下離開的指令 `/exit`／`/quit`／Ctrl-D），
-在 `f90da052` 上跑。`tui_screens/` 是每一格結束時畫面上的文字（tmux 抓的，不是截圖；OpenCode 是全螢幕介面，
-只抓得到最後一屏）。
+（tmux 的偽終端機：等畫面出現就緒的字樣、打提示、按 Enter、做完之後下離開的指令 `/exit`／`/quit`／Ctrl-D）。
+`tui_screens/` 是每一格結束時畫面上的文字（tmux 抓的，不是截圖；OpenCode 是全螢幕介面，只抓得到最後一屏）。
 
 | 量什麼 | 結果 |
 |---|---|
 | 歸因正確（B／A／C＋多回合 M） | **16/16** |
-| 寫錯的那一回合，有位置的回饋出現在模型的下一次請求裡 | **16/16**——**OpenCode 的互動 TUI 也有**（外掛在 idle 時用 SDK 送回；之前寫了但沒量過）。`opencode run` 仍然沒有 |
-| 回饋出現在人的畫面上 | 16/16（Claude Code 標成「Stop hook error」——它自己的字樣，模型收到的是「Stop hook feedback」；Codex「Blocked by hook」；pi `[vacant-check]`；OpenCode 是一則使用者訊息） |
-| 改好之後收件 accept | 16/16 |
-| 給 agent 的回饋裡有行動者識別 | 0/16 |
-| 病歷裡「人說的」提示有不是人打的 | 0（Vacant 的回饋沒有被記成人說的話；OpenCode 的外掛不記提示，那一欄是 0／0） |
-| 假模型收到帶著**別的憑證**（不是實驗的假金鑰）的請求 | 0（假模型只收 `sk-fake…`，別的一律 401、值不記）——證明的是**送到假模型的模型請求**都只帶假金鑰；Claude Code 在隔離的 HOME 裡仍提示它看得到主機的另一種憑證，它拿那個做什麼這裡量不到 |
+| 寫錯的那一回合，指到**這一格結論那個值**的回饋（`… says "999"`）出現在模型的下一次請求裡 | **16/16**——**OpenCode 的互動 TUI 也有**（外掛在 idle 時用 SDK 送回；之前寫了但沒量過）。`opencode run` 仍然沒有 |
+| 同一段回饋出現在人的畫面上 | 16/16（Claude Code 標成「Stop hook error」——它自己的字樣，模型收到的是「Stop hook feedback」；Codex「Blocked by hook」；pi `[vacant-check]`；OpenCode 是一則使用者訊息） |
+| **這一個**結論（`finding_id`）被解決、收件 accept | 16/16 |
+| 給 agent 的回饋裡有行動者識別（任何一則） | 0/16 |
+| 病歷裡的「人說的」提示 | 單回合 1 則、多回合 2 則，四個 agent 都是（OpenCode 從這一輪起也記得到：外掛聽 `chat.message`）；不是人打的被記成人說的：0 |
+| 多回合那幾格，前面的回合**真的用完了**輪數（否則最後一回合的回饋證明不了重置） | 4/4（harness 讀掛鉤紀錄確認；沒用完那一格判不過） |
+| 假模型收到帶著非假金鑰的請求 | 0——只說得出送到假模型的模型請求；Claude Code 在隔離的 HOME 裡仍提示它看得到主機的另一種憑證，它拿那個做什麼這裡量不到 |
 | 病歷簽章鏈驗得過 | 16/16 |
+| 每次掛鉤的額外時間 p95 | 6.7–12.6 ms；OpenCode 的 A 那一格有一次 59 ms（12 次掛鉤，p95 就是最慢那一次；p50 4.7 ms） |
 
 **多回合（M）與它抓到的問題。** 人先問「帳本有幾列？先不要寫檔」——agent 回答了，回合結束時契約還沒過（報告還沒有）
-⇒ 回饋；agent 回「好，等你說」⇒ 再回饋一次 ⇒ 輪數（`max_feedback_rounds`=2）用完，人看到「輪數用完」。之後人才說
-「現在寫報告」，agent 寫了 999。原本的規則是**輪數只在過了才歸零** ⇒ 這一回合 agent 收不到位置。
-負控制（把重置拿掉，Claude Code 的 TUI，`tui_screens/claude_M_multi_turn_NEGATIVE_CONTROL.txt`、
-`e2e_tui_negative_control_results.json`）：最後一回合沒有回饋、只有人看到「輪數用完…report.md:3 = 999」、最後 **reject**。
-修（`hookpolicy.new_request`）：**人打的新要求重新算輪數**；背景子 agent 的結果、父 agent 給子 agent 的任務、
-Vacant 自己的回饋被送回來都不算（agent 沒辦法靠自己重置）。修之後四個 agent 的 M 都 accept。
-⚠ **OpenCode 的 M 過了，但不是因為重置**：它的第一回合只用了 1 輪（外掛等自己送回的回饋那段時間裡的 idle 不驗），
-第二回合用第 2 輪。OpenCode 的外掛不記提示，所以前面的回合真的把輪數用完時，OpenCode 仍然會收不到（誠實邊界）。
+⇒ 回饋；agent 回「好，等你說」⇒ 輪數（這個情境的上限是 1 輪）用完，人看到「輪數用完」。之後人才說「現在寫報告」，
+agent 寫了 999。原本的規則是**輪數只在過了才歸零** ⇒ 這一回合 agent 收不到位置。
+負控制（把重置拿掉）：Claude Code（`f90da052`、上限 2 輪；`tui_screens/claude_M_multi_turn_NEGATIVE_CONTROL.txt`、
+`e2e_tui_negative_control_claude_results.json`）與 OpenCode（`b23046a5` 的工作樹、上限 1 輪；
+`tui_screens/opencode_M_multi_turn_NEGATIVE_CONTROL.txt`、`e2e_tui_negative_control_opencode_results.json`）都是：
+最後一回合沒有回饋、只有人看到「輪數用完…report.md:3 = 999」、最後 **reject**。
+修（`hookpolicy.new_request`）：**人打的新要求重新算輪數**。不是人打的不算，也不當成值的來源——背景子 agent 的結果、
+父 agent 給子 agent 的任務、Vacant 自己的回饋被送回來（只認開頭）、agent 自己排的提示（Claude Code 的 CronCreate／
+ScheduleWakeup）、別的工作階段的信封（`capture.classify_prompt`；審查 `ops/accountability/review_rounds_tui/FINDINGS.md`）。
+第一次存的這份證據（`9ceeb052`）有一格說了它沒證明的事：OpenCode 的 M 過了，但前面的回合沒用完輪數、根本沒測到重置——
+審查抓到，現在上限 1 輪並由 harness 檢查。
 
 ## 4. R536 的管線冒煙（`r536_mock_smoke_*.json*`）
 

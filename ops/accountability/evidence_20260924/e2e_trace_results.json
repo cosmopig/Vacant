@@ -1,7 +1,7 @@
 {
   "schema": "vacant-e2e-trace/1",
   "evidence_level": "L-fake (scripted model)",
-  "started": "2026-09-24T23:19:34+0000",
+  "started": "2026-09-25T01:46:20+0000",
   "agents": {
     "claude": {
       "version": [
@@ -12,7 +12,7 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 2.6,
+          "wall_s": 2.5,
           "agent_stderr_tail": "",
           "steps_recorded": 3,
           "step_tools": [
@@ -45,7 +45,7 @@
             "step_n": 2,
             "actor": {
               "platform": "claude",
-              "session": "86812cb8-b29a-43fe-b3d7-86a1ac8783b3"
+              "session": "f1ad2c14-ae66-4b95-8f11-22f2c5d9809a"
             }
           },
           "judgement": {
@@ -60,15 +60,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.6,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 5.4,
+          "hook_ms_p95": 13.3,
           "hook_calls": 10,
-          "model_requests": 5
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 2.8,
+          "wall_s": 2.9,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -117,15 +118,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 3.9,
-          "hook_ms_p95": 10.2,
+          "hook_ms_p50": 4.9,
+          "hook_ms_p95": 8.6,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 3.0,
+          "wall_s": 2.9,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -159,7 +161,7 @@
             "step_n": 1,
             "actor": {
               "platform": "claude",
-              "session": "70b6297c-e2a1-486f-afbb-1096b41395d5"
+              "session": "084c7800-b36b-4ef1-b7bc-14cda7679d03"
             }
           },
           "judgement": {
@@ -174,15 +176,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.2,
-          "hook_ms_p95": 11.0,
+          "hook_ms_p50": 6.8,
+          "hook_ms_p95": 7.9,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "D_unrecorded_change": {
           "scenario": "D_unrecorded_change",
           "agent_rc": 0,
-          "wall_s": 1.8,
+          "wall_s": 1.6,
           "agent_stderr_tail": "",
           "steps_recorded": 1,
           "step_tools": [
@@ -229,15 +232,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 7.2,
-          "hook_ms_p95": 12.6,
+          "hook_ms_p50": 6.8,
+          "hook_ms_p95": 6.9,
           "hook_calls": 5,
-          "model_requests": 2
+          "model_requests": 2,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 2.9,
+          "wall_s": 2.8,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -286,22 +290,23 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.5,
-          "hook_ms_p95": 7.2,
+          "hook_ms_p50": 4.9,
+          "hook_ms_p95": 7.6,
           "hook_calls": 12,
-          "model_requests": 7
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 4.3,
+          "wall_s": 4.2,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
             "Bash",
             "Bash",
-            "Agent",
             "Bash",
+            "Agent",
             "Agent",
             "Bash",
             "Bash",
@@ -330,12 +335,12 @@
             ],
             "_step_tool": "Bash",
             "_cand_writes": null,
-            "step_n": 4,
+            "step_n": 3,
             "actor": {
-              "agent": "a4d2630fe8f2033ec",
+              "agent": "ab179548a213b54cc",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "aa1663ac-846e-4369-ad0c-4ddc5b2332ad"
+              "session": "3d8601d1-482c-4e9c-a51b-1dc22690d4c2"
             }
           },
           "judgement": {
@@ -343,17 +348,18 @@
             "mismatch": []
           },
           "feedback_reached_model": true,
-          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 4 (Bash); step 7 wrote it into report.md\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\":",
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 3 (Bash); step 7 wrote it into report.md\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.963; cc_entrypoint=sdk-cli;\"}, {\"type\": \"text\", \"text\": \"You are a Claude agent, built on Anthropic's Claude Agent SDK.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\":",
           "feedback_has_location": true,
           "feedback_has_actor_id": false,
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 19 entries",
-          "hook_ms_p50": 4.5,
-          "hook_ms_p95": 11.0,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 9.0,
           "hook_calls": 26,
-          "model_requests": 12
+          "model_requests": 12,
+          "auth_rejected": 0
         },
         "H_human_flag": {
           "scenario": "H_human_flag",
@@ -390,7 +396,7 @@
             "step_n": 2,
             "actor": {
               "platform": "claude",
-              "session": "3a47c4f4-35bf-4378-9c17-dc799c40a058"
+              "session": "d6f973a2-e025-4acc-b982-4977e005c83e"
             }
           },
           "judgement": {
@@ -405,15 +411,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 17 entries",
-          "hook_ms_p50": 6.5,
-          "hook_ms_p95": 9.8,
+          "hook_ms_p50": 5.8,
+          "hook_ms_p95": 11.3,
           "hook_calls": 13,
-          "model_requests": 3
+          "model_requests": 3,
+          "auth_rejected": 0
         },
         "G_background_subagent_fault": {
           "scenario": "G_background_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 3.8,
+          "wall_s": 3.9,
           "agent_stderr_tail": "",
           "steps_recorded": 6,
           "step_tools": [
@@ -448,10 +455,10 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "aade6dca7a21a7392",
+              "agent": "a17963cb40845cfa1",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "446feca8-6ccd-4666-9614-c3b04288efc1"
+              "session": "1f8097f4-1c92-405e-b83e-de1e47fbb7ec"
             }
           },
           "judgement": {
@@ -466,15 +473,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 11.1,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 7.2,
           "hook_calls": 20,
-          "model_requests": 10
+          "model_requests": 10,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 4.0,
+          "wall_s": 4.3,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -510,10 +518,10 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "a3e0b31e8480141c7",
+              "agent": "a80f2ead40c431382",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "02e7b2c7-f7d4-48b6-8821-65c64628b556"
+              "session": "8a5b37d4-e8a3-40d2-bf40-7d1f3b6dcab6"
             }
           },
           "judgement": {
@@ -528,10 +536,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 4.0,
-          "hook_ms_p95": 7.2,
+          "hook_ms_p50": 4.8,
+          "hook_ms_p95": 8.7,
           "hook_calls": 20,
-          "model_requests": 10
+          "model_requests": 10,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -555,13 +564,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_ca50c571ed"
+              "f_716d076b19"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_31f9aa6a75"
+              "f_223f1e214b"
             ]
           }
         },
@@ -581,7 +590,7 @@
           "scenario": "B_agent_fault",
           "agent_rc": 0,
           "wall_s": 2.8,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 3,
           "step_tools": [
             "Bash",
@@ -614,7 +623,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b8-9ec0-7402-8a0c-acaa748f4c87"
+              "session": "01a0d63e-fc2f-7490-aaff-ca4551b30d04"
             }
           },
           "judgement": {
@@ -629,16 +638,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.4,
-          "hook_ms_p95": 9.4,
+          "hook_ms_p50": 5.0,
+          "hook_ms_p95": 7.8,
           "hook_calls": 10,
-          "model_requests": 5
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 3.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 3.1,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 4,
           "step_tools": [
             "Bash",
@@ -686,16 +696,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 6.2,
-          "hook_ms_p95": 11.0,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 7.8,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 3.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 2.9,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 4,
           "step_tools": [
             "Bash",
@@ -729,7 +740,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b8-d345-7c02-898f-76f762e3ab7d"
+              "session": "01a0d63f-2fc0-7cb1-900f-2f81f6e78383"
             }
           },
           "judgement": {
@@ -744,16 +755,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.1,
-          "hook_ms_p95": 8.5,
+          "hook_ms_p50": 6.1,
+          "hook_ms_p95": 7.1,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "D_unrecorded_change": {
           "scenario": "D_unrecorded_change",
           "agent_rc": 0,
-          "wall_s": 1.6,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 1.5,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 1,
           "step_tools": [
             "Bash"
@@ -799,16 +811,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 6.5,
-          "hook_ms_p95": 6.7,
+          "hook_ms_p50": 6.0,
+          "hook_ms_p95": 6.9,
           "hook_calls": 5,
-          "model_requests": 2
+          "model_requests": 2,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 3.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 3.0,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 4,
           "step_tools": [
             "Bash",
@@ -856,16 +869,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.2,
-          "hook_ms_p95": 8.7,
+          "hook_ms_p50": 4.6,
+          "hook_ms_p95": 8.1,
           "hook_calls": 12,
-          "model_requests": 7
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 5.2,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "wall_s": 5.0,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 11,
           "step_tools": [
             "spawn_agent",
@@ -904,11 +918,11 @@
             "_cand_writes": null,
             "step_n": 6,
             "actor": {
-              "agent": "01a0d5b9-2038-7ee3-9bdc-948125f2ad35",
+              "agent": "01a0d63f-7a5e-76e1-be31-7a3b35779383",
               "agent_type": "default",
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b9-1d2e-7583-8412-442c621d1ac2"
+              "session": "01a0d63f-776e-7811-9c59-786e8caea492"
             }
           },
           "judgement": {
@@ -923,16 +937,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 23 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 9.6,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 7.7,
           "hook_calls": 32,
-          "model_requests": 14
+          "model_requests": 14,
+          "auth_rejected": 0
         },
         "H_human_flag": {
           "scenario": "H_human_flag",
           "agent_rc": 0,
-          "wall_s": 2.0,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n | flag rc=0",
+          "wall_s": 1.9,
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n | flag rc=0",
           "steps_recorded": 3,
           "step_tools": [
             "Bash",
@@ -964,7 +979,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b9-3fe7-7e51-bb4c-a0679cf94450"
+              "session": "01a0d63f-9947-7d50-83cd-40d1d3cae046"
             }
           },
           "judgement": {
@@ -979,16 +994,17 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 17 entries",
-          "hook_ms_p50": 4.3,
-          "hook_ms_p95": 59.0,
+          "hook_ms_p50": 5.6,
+          "hook_ms_p95": 8.0,
           "hook_calls": 13,
-          "model_requests": 3
+          "model_requests": 3,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
           "wall_s": 4.6,
-          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/e2e_full11/codex/home/.codex\"))\nReading additional input from stdin...\n",
+          "agent_stderr_tail": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"<scratch>/ev_final/hook/codex/home/.codex\"))\nReading additional input from stdin...\n",
           "steps_recorded": 8,
           "step_tools": [
             "spawn_agent",
@@ -1024,11 +1040,11 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "01a0d5b9-6b63-7373-b9c8-6e4bf52045fc",
+              "agent": "01a0d63f-c428-72c0-af6c-04503644a3e9",
               "agent_type": "default",
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5b9-69b2-7243-8a78-a4cc8034690a"
+              "session": "01a0d63f-c27a-7143-815c-fe27222da342"
             }
           },
           "judgement": {
@@ -1043,10 +1059,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 18 entries",
-          "hook_ms_p50": 3.6,
-          "hook_ms_p95": 6.8,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 7.5,
           "hook_calls": 23,
-          "model_requests": 11
+          "model_requests": 11,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -1070,13 +1087,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_ade0b0d5cd"
+              "f_f12f3b47e8"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_323b960671"
+              "f_29d36fc7d6"
             ]
           }
         },
@@ -1129,7 +1146,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5b9-8cad-75c3-90c8-076e8600d932"
+              "session": "01a0d63f-e59c-7724-aa85-0556fe4042f0"
             }
           },
           "judgement": {
@@ -1144,10 +1161,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 4.4,
-          "hook_ms_p95": 7.7,
+          "hook_ms_p50": 4.9,
+          "hook_ms_p95": 7.8,
           "hook_calls": 10,
-          "model_requests": 5
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
@@ -1201,10 +1219,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.9,
-          "hook_ms_p95": 7.3,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 6.7,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
@@ -1244,7 +1263,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5b9-ba50-7058-9830-b5528351a806"
+              "session": "01a0d640-136b-7046-a103-bb3e99ae7c51"
             }
           },
           "judgement": {
@@ -1259,15 +1278,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 5.0,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 6.1,
+          "hook_ms_p95": 7.4,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "D_unrecorded_change": {
           "scenario": "D_unrecorded_change",
           "agent_rc": 0,
-          "wall_s": 1.2,
+          "wall_s": 1.1,
           "agent_stderr_tail": "",
           "steps_recorded": 1,
           "step_tools": [
@@ -1314,15 +1334,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 9 entries",
-          "hook_ms_p50": 7.0,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 6.7,
+          "hook_ms_p95": 6.9,
           "hook_calls": 5,
-          "model_requests": 2
+          "model_requests": 2,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 2.3,
+          "wall_s": 2.2,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1371,22 +1392,23 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 7.0,
+          "hook_ms_p50": 6.2,
+          "hook_ms_p95": 6.9,
           "hook_calls": 12,
-          "model_requests": 7
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 3.8,
+          "wall_s": 4.1,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
+            "write",
             "bash",
-            "write",
-            "write",
             "subagent",
+            "write",
             "subagent",
             "bash",
             "write",
@@ -1415,13 +1437,13 @@
             ],
             "_step_tool": "write",
             "_cand_writes": null,
-            "step_n": 3,
+            "step_n": 4,
             "actor": {
-              "agent": "01a0d5b9-ff25-72f1-a8c2-cd2afe756279",
+              "agent": "01a0d640-583a-7382-b24c-60868b97adf3",
               "agent_type": "worker",
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5b9-fc03-727b-a0ab-6dfe1e27dab5"
+              "session": "01a0d640-54e3-7092-b602-b63d7a301df3"
             }
           },
           "judgement": {
@@ -1429,22 +1451,23 @@
             "mismatch": []
           },
           "feedback_reached_model": true,
-          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 3 (write); step 7 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attac",
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"96\"\n  expected 69 (column 'amount', 3 rows)\n  it was copied from step 4 (write); step 7 wrote it into report.md\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attac",
           "feedback_has_location": true,
           "feedback_has_actor_id": false,
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 18 entries",
-          "hook_ms_p50": 2.7,
-          "hook_ms_p95": 7.0,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 7.2,
           "hook_calls": 26,
-          "model_requests": 12
+          "model_requests": 12,
+          "auth_rejected": 0
         },
         "H_human_flag": {
           "scenario": "H_human_flag",
           "agent_rc": 0,
-          "wall_s": 1.5,
+          "wall_s": 1.4,
           "agent_stderr_tail": " | flag rc=0",
           "steps_recorded": 3,
           "step_tools": [
@@ -1477,7 +1500,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5ba-195d-70b5-8850-c0f73da09117"
+              "session": "01a0d640-72dd-70f6-ac5e-d90c74ae3911"
             }
           },
           "judgement": {
@@ -1492,15 +1515,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 4.7,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 5.7,
+          "hook_ms_p95": 8.2,
           "hook_calls": 13,
-          "model_requests": 3
+          "model_requests": 3,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 3.8,
+          "wall_s": 3.7,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -1536,11 +1560,11 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "01a0d5ba-4244-724c-b577-cf0703532453",
+              "agent": "01a0d640-9b85-76e3-b6a8-97c655e4d406",
               "agent_type": "worker",
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5ba-3f59-7319-bec5-71adb6e57e93"
+              "session": "01a0d640-98f2-727b-9d1c-fa172415b182"
             }
           },
           "judgement": {
@@ -1555,10 +1579,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 3.7,
-          "hook_ms_p95": 7.3,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 6.9,
           "hook_calls": 20,
-          "model_requests": 10
+          "model_requests": 10,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -1582,13 +1607,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_cd28279383"
+              "f_07c9e0f35b"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_4701f5863f"
+              "f_cdf9d5cfb1"
             ]
           }
         },
@@ -1607,7 +1632,7 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 16.2,
+          "wall_s": 13.2,
           "agent_stderr_tail": "",
           "steps_recorded": 2,
           "step_tools": [
@@ -1639,7 +1664,7 @@
             "step_n": 2,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f2a457393ffeTtsklDnNZKaj3n"
+              "session": "ses_f29bf2279ffeWDVco92JGutizc"
             }
           },
           "judgement": {
@@ -1653,16 +1678,17 @@
           "resolved_after_feedback": false,
           "final_decision": "reject",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 4.9,
-          "hook_ms_p95": 7.2,
-          "hook_calls": 5,
-          "model_requests": 4
+          "chain_verify_out": "OK 9 entries",
+          "hook_ms_p50": 5.4,
+          "hook_ms_p95": 6.7,
+          "hook_calls": 6,
+          "model_requests": 4,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 6.0,
+          "wall_s": 5.2,
           "agent_stderr_tail": "",
           "steps_recorded": 2,
           "step_tools": [
@@ -1708,16 +1734,17 @@
           "resolved_after_feedback": false,
           "final_decision": "reject",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 6.0,
-          "hook_ms_p95": 6.4,
-          "hook_calls": 5,
-          "model_requests": 4
+          "chain_verify_out": "OK 9 entries",
+          "hook_ms_p50": 5.7,
+          "hook_ms_p95": 6.8,
+          "hook_calls": 6,
+          "model_requests": 4,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 5.9,
+          "wall_s": 5.8,
           "agent_stderr_tail": "",
           "steps_recorded": 2,
           "step_tools": [
@@ -1749,7 +1776,7 @@
             "step_n": 1,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f2a45257dffeCf8Pa9tcd0O39W"
+              "session": "ses_f29bedbe1ffeZae2zumICQe2JL"
             }
           },
           "judgement": {
@@ -1763,16 +1790,17 @@
           "resolved_after_feedback": false,
           "final_decision": "reject",
           "chain_verifies": true,
-          "chain_verify_out": "OK 7 entries",
-          "hook_ms_p50": 7.9,
-          "hook_ms_p95": 9.3,
-          "hook_calls": 5,
-          "model_requests": 4
+          "chain_verify_out": "OK 8 entries",
+          "hook_ms_p50": 7.2,
+          "hook_ms_p95": 8.5,
+          "hook_calls": 6,
+          "model_requests": 4,
+          "auth_rejected": 0
         },
         "D_unrecorded_change": {
           "scenario": "D_unrecorded_change",
           "agent_rc": 0,
-          "wall_s": 5.2,
+          "wall_s": 5.3,
           "agent_stderr_tail": "",
           "steps_recorded": 1,
           "step_tools": [
@@ -1798,7 +1826,7 @@
               "paths": [
                 "report.md"
               ],
-              "seq": 6
+              "seq": 7
             },
             "note": "changed outside any recorded step",
             "_step_writes": null,
@@ -1818,16 +1846,17 @@
           "resolved_after_feedback": false,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 6.8,
-          "hook_ms_p95": 6.8,
-          "hook_calls": 3,
-          "model_requests": 3
+          "chain_verify_out": "OK 9 entries",
+          "hook_ms_p50": 5.9,
+          "hook_ms_p95": 6.3,
+          "hook_calls": 4,
+          "model_requests": 3,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 5.8,
+          "wall_s": 5.1,
           "agent_stderr_tail": "",
           "steps_recorded": 2,
           "step_tools": [
@@ -1873,23 +1902,24 @@
           "resolved_after_feedback": false,
           "final_decision": "reject",
           "chain_verifies": true,
-          "chain_verify_out": "OK 8 entries",
-          "hook_ms_p50": 5.9,
-          "hook_ms_p95": 7.0,
-          "hook_calls": 5,
-          "model_requests": 5
+          "chain_verify_out": "OK 9 entries",
+          "hook_ms_p50": 5.5,
+          "hook_ms_p95": 6.6,
+          "hook_calls": 6,
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 7.9,
+          "wall_s": 8.4,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
             "bash",
             "bash",
-            "bash",
             "task",
+            "bash",
             "task",
             "bash",
             "bash"
@@ -1916,12 +1946,12 @@
             ],
             "_step_tool": "bash",
             "_cand_writes": null,
-            "step_n": 3,
+            "step_n": 4,
             "actor": {
-              "agent": "ses_f2a44af6bffeuE1zntAhHM7ime",
+              "agent": "ses_f29be67c7ffeGbUS1h70BVta8F",
               "agent_type": "subagent",
               "platform": "opencode",
-              "session": "ses_f2a44b852ffeRQiVHXKt0GrL1o"
+              "session": "ses_f29be7101ffeZOArjqNj6sN5bC"
             }
           },
           "judgement": {
@@ -1935,16 +1965,17 @@
           "resolved_after_feedback": false,
           "final_decision": "reject",
           "chain_verifies": true,
-          "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.8,
-          "hook_ms_p95": 8.9,
-          "hook_calls": 15,
-          "model_requests": 10
+          "chain_verify_out": "OK 15 entries",
+          "hook_ms_p50": 5.2,
+          "hook_ms_p95": 8.1,
+          "hook_calls": 18,
+          "model_requests": 10,
+          "auth_rejected": 0
         },
         "H_human_flag": {
           "scenario": "H_human_flag",
           "agent_rc": 0,
-          "wall_s": 5.8,
+          "wall_s": 5.7,
           "agent_stderr_tail": " | flag rc=0",
           "steps_recorded": 2,
           "step_tools": [
@@ -1975,7 +2006,7 @@
             "step_n": 2,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f2a448acbffeJkU5AYu7BLHwkO"
+              "session": "ses_f29be4225ffeJ9pl1d6NHWxffV"
             }
           },
           "judgement": {
@@ -1989,16 +2020,17 @@
           "resolved_after_feedback": false,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 5.0,
-          "hook_ms_p95": 6.9,
-          "hook_calls": 6,
-          "model_requests": 2
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.6,
+          "hook_ms_p95": 6.7,
+          "hook_calls": 8,
+          "model_requests": 2,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 7.8,
+          "wall_s": 7.9,
           "agent_stderr_tail": "",
           "steps_recorded": 5,
           "step_tools": [
@@ -2032,10 +2064,10 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "ses_f2a443f8effeugE9ieUKgJh0Bo",
+              "agent": "ses_f29bdf69fffe2WZZDfJShiF3Gb",
               "agent_type": "subagent",
               "platform": "opencode",
-              "session": "ses_f2a444808ffenK8EbwM0i4Im6s"
+              "session": "ses_f29bdff5fffeIv90CFNNRMfuFG"
             }
           },
           "judgement": {
@@ -2049,11 +2081,12 @@
           "resolved_after_feedback": false,
           "final_decision": "reject",
           "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 4.7,
-          "hook_ms_p95": 6.9,
-          "hook_calls": 11,
-          "model_requests": 8
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 4.6,
+          "hook_ms_p95": 9.2,
+          "hook_calls": 13,
+          "model_requests": 8,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -2077,13 +2110,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_a186d89c81"
+              "f_bb0eb48919"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_7872bd2e37"
+              "f_4f5850f2da"
             ]
           }
         },
@@ -2094,5 +2127,5 @@
       }
     }
   },
-  "finished": "2026-09-24T23:24:14+0000"
+  "finished": "2026-09-25T01:50:54+0000"
 }

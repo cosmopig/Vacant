@@ -1,7 +1,7 @@
 {
   "schema": "vacant-e2e-trace/1",
   "evidence_level": "L-fake (scripted model)",
-  "started": "2026-09-25T00:26:16+0000",
+  "started": "2026-09-25T01:50:54+0000",
   "agents": {
     "claude": {
       "version": [
@@ -45,7 +45,7 @@
             "step_n": 2,
             "actor": {
               "platform": "claude",
-              "session": "aa1182b1-4a21-486a-9764-eecb07abcfc6"
+              "session": "5a334663-1e67-4d45-8431-d6f7cd704cf0"
             }
           },
           "judgement": {
@@ -60,10 +60,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.0,
-          "hook_ms_p95": 7.6,
+          "hook_ms_p50": 5.1,
+          "hook_ms_p95": 7.7,
           "hook_calls": 10,
-          "model_requests": 5
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
@@ -117,15 +118,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.1,
-          "hook_ms_p95": 6.9,
+          "hook_ms_p50": 4.6,
+          "hook_ms_p95": 6.8,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 3.0,
+          "wall_s": 3.1,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -159,7 +161,7 @@
             "step_n": 1,
             "actor": {
               "platform": "claude",
-              "session": "69cc344c-f345-4a67-959c-ed89f4e181ac"
+              "session": "03ea3b88-4d2b-4667-b575-eb272f3304f2"
             }
           },
           "judgement": {
@@ -174,15 +176,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 7.7,
+          "hook_ms_p50": 4.9,
+          "hook_ms_p95": 7.2,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 3.1,
+          "wall_s": 3.0,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -231,15 +234,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 6.8,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 7.4,
           "hook_calls": 12,
-          "model_requests": 7
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 4.2,
+          "wall_s": 4.3,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
@@ -277,10 +281,10 @@
             "_cand_writes": null,
             "step_n": 4,
             "actor": {
-              "agent": "a7bf42c8579602fd5",
+              "agent": "ae34d949c17dad372",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "5679f8bc-241d-4ad1-96ed-100a5ce08ba4"
+              "session": "abde2b0e-f957-4ef0-8eca-276b57c3b4a6"
             }
           },
           "judgement": {
@@ -295,15 +299,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 19 entries",
-          "hook_ms_p50": 4.2,
-          "hook_ms_p95": 8.5,
+          "hook_ms_p50": 4.8,
+          "hook_ms_p95": 8.3,
           "hook_calls": 26,
-          "model_requests": 12
+          "model_requests": 12,
+          "auth_rejected": 0
         },
         "G_background_subagent_fault": {
           "scenario": "G_background_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 3.9,
+          "wall_s": 4.0,
           "agent_stderr_tail": "",
           "steps_recorded": 6,
           "step_tools": [
@@ -338,10 +343,10 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "a3c3c14e676ddb7e5",
+              "agent": "a178447c4cee870b0",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "d78c617e-7f77-43a3-ab68-79493b3163a9"
+              "session": "a45bff7d-ba86-44a3-bd52-6eef78deaa7e"
             }
           },
           "judgement": {
@@ -356,15 +361,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 3.3,
-          "hook_ms_p95": 7.7,
+          "hook_ms_p50": 4.6,
+          "hook_ms_p95": 6.5,
           "hook_calls": 20,
-          "model_requests": 10
+          "model_requests": 10,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 4.5,
+          "wall_s": 4.1,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -400,10 +406,10 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "a6ae532aa09fbb20e",
+              "agent": "adab20dd836e112d9",
               "agent_type": "general-purpose",
               "platform": "claude",
-              "session": "624a0e02-b779-4f83-95cf-7e9098cf6f36"
+              "session": "63db0c7e-ceaf-4afb-b0a9-f5be9b783b61"
             }
           },
           "judgement": {
@@ -418,10 +424,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 4.1,
-          "hook_ms_p95": 8.2,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 6.6,
           "hook_calls": 20,
-          "model_requests": 10
+          "model_requests": 10,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -445,13 +452,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_dcee5c1542"
+              "f_8905bc0ed6"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_bb705f2ab4"
+              "f_afc2629782"
             ]
           }
         },
@@ -468,7 +475,7 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": 0,
-          "wall_s": 2.9,
+          "wall_s": 2.7,
           "agent_stderr_tail": "",
           "steps_recorded": 3,
           "step_tools": [
@@ -502,7 +509,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5f9-1a6b-7d81-9e91-6a3abeb3946b"
+              "session": "01a0d646-935e-75c2-bdb2-b5c7c1f4eb5b"
             }
           },
           "judgement": {
@@ -517,15 +524,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.7,
-          "hook_ms_p95": 7.7,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 6.3,
           "hook_calls": 10,
-          "model_requests": 5
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 3.5,
+          "wall_s": 3.1,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -574,15 +582,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 3.8,
-          "hook_ms_p95": 7.1,
+          "hook_ms_p50": 4.1,
+          "hook_ms_p95": 6.2,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 3.4,
+          "wall_s": 3.3,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -617,7 +626,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5fa-5ac1-7942-a4b8-fd0c6baa2423"
+              "session": "01a0d647-d047-7701-9fc6-1d2b2ac9a092"
             }
           },
           "judgement": {
@@ -632,15 +641,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.4,
-          "hook_ms_p95": 6.8,
+          "hook_ms_p50": 5.1,
+          "hook_ms_p95": 7.4,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 3.1,
+          "wall_s": 3.2,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -689,10 +699,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 3.7,
-          "hook_ms_p95": 6.8,
+          "hook_ms_p50": 4.5,
+          "hook_ms_p95": 6.5,
           "hook_calls": 12,
-          "model_requests": 7
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
@@ -704,8 +715,8 @@
             "spawn_agent",
             "spawn_agent",
             "Bash",
-            "Bash",
             "multi_agent_v1wait_agent",
+            "Bash",
             "Bash",
             "multi_agent_v1wait_agent",
             "Bash",
@@ -737,11 +748,11 @@
             "_cand_writes": null,
             "step_n": 6,
             "actor": {
-              "agent": "01a0d5fb-a11d-7150-8609-67e8f8445ff3",
+              "agent": "01a0d649-13a8-7253-8956-71adbfe10cc6",
               "agent_type": "default",
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5fb-9df6-73f1-9840-e3762c6bb48d"
+              "session": "01a0d649-10a0-7c12-b111-3b4978bc8a3d"
             }
           },
           "judgement": {
@@ -756,15 +767,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 23 entries",
-          "hook_ms_p50": 4.3,
-          "hook_ms_p95": 9.8,
+          "hook_ms_p50": 4.0,
+          "hook_ms_p95": 7.4,
           "hook_calls": 32,
-          "model_requests": 14
+          "model_requests": 14,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 5.1,
+          "wall_s": 5.0,
           "agent_stderr_tail": "",
           "steps_recorded": 8,
           "step_tools": [
@@ -801,11 +813,11 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "01a0d5fc-494b-7be2-bf82-7f1670778ee0",
+              "agent": "01a0d649-bb5b-7aa0-9f6a-8731d045fdae",
               "agent_type": "default",
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d5fc-4786-7df3-b881-3b9eba70b250"
+              "session": "01a0d649-b976-7a82-856f-06e532677884"
             }
           },
           "judgement": {
@@ -820,10 +832,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 18 entries",
-          "hook_ms_p50": 3.0,
-          "hook_ms_p95": 6.7,
+          "hook_ms_p50": 4.7,
+          "hook_ms_p95": 6.9,
           "hook_calls": 23,
-          "model_requests": 11
+          "model_requests": 11,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -847,13 +860,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_a19436a0e7"
+              "f_01f0861230"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_11bbbbc8a8"
+              "f_1b20e64c8a"
             ]
           }
         },
@@ -904,7 +917,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5fc-f1c4-7783-abb2-f36a6a25b552"
+              "session": "01a0d64a-6361-72c1-a4bb-7fa4bf901b89"
             }
           },
           "judgement": {
@@ -919,15 +932,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 4.2,
-          "hook_ms_p95": 6.3,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 6.9,
           "hook_calls": 10,
-          "model_requests": 5
+          "model_requests": 5,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 2.6,
+          "wall_s": 2.4,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -976,15 +990,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 3.7,
-          "hook_ms_p95": 6.8,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 6.5,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 2.6,
+          "wall_s": 2.5,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1019,7 +1034,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5fe-2c5a-713e-86f9-b9ec1fa0c0a2"
+              "session": "01a0d64b-9c1b-75ab-a180-a07147a7dbc0"
             }
           },
           "judgement": {
@@ -1034,15 +1049,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 4.2,
-          "hook_ms_p95": 9.5,
+          "hook_ms_p50": 4.7,
+          "hook_ms_p95": 7.2,
           "hook_calls": 12,
-          "model_requests": 6
+          "model_requests": 6,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 2.5,
+          "wall_s": 2.4,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1091,15 +1107,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.1,
-          "hook_ms_p95": 6.9,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 6.7,
           "hook_calls": 12,
-          "model_requests": 7
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 4.2,
+          "wall_s": 4.1,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
@@ -1137,11 +1154,11 @@
             "_cand_writes": null,
             "step_n": 3,
             "actor": {
-              "agent": "01a0d5ff-6c29-7110-bcde-0079ff18f07a",
+              "agent": "01a0d64c-d880-71fa-8c93-ca664171d3ed",
               "agent_type": "worker",
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d5ff-6878-7133-aa71-bf80e823a564"
+              "session": "01a0d64c-d55f-74fe-b783-bc51e6fbb44d"
             }
           },
           "judgement": {
@@ -1156,15 +1173,16 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 18 entries",
-          "hook_ms_p50": 3.6,
-          "hook_ms_p95": 6.9,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 7.0,
           "hook_calls": 26,
-          "model_requests": 12
+          "model_requests": 12,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 4.1,
+          "wall_s": 4.0,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -1200,11 +1218,11 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "01a0d600-1147-743c-901d-55b5b2eac998",
+              "agent": "01a0d64d-7b01-731e-9de7-4a6588eff716",
               "agent_type": "worker",
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d600-0e56-7093-8bf5-e590ae575d81"
+              "session": "01a0d64d-786b-760a-9ab6-1e916356809f"
             }
           },
           "judgement": {
@@ -1219,10 +1237,11 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 3.9,
-          "hook_ms_p95": 6.6,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 7.1,
           "hook_calls": 20,
-          "model_requests": 10
+          "model_requests": 10,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -1246,13 +1265,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_777bcb2dbb"
+              "f_a4bfd6265d"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_27c3f841f4"
+              "f_4ff9f743d8"
             ]
           }
         },
@@ -1302,7 +1321,7 @@
             "step_n": 2,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f29ff27b5ffeEX4L34R3nfRrik"
+              "session": "ses_f29b1bdc2ffeKGoySC4w7qJGpf"
             }
           },
           "judgement": {
@@ -1316,16 +1335,17 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.1,
-          "hook_ms_p95": 6.9,
-          "hook_calls": 8,
-          "model_requests": 7
+          "chain_verify_out": "OK 14 entries",
+          "hook_ms_p50": 5.4,
+          "hook_ms_p95": 7.4,
+          "hook_calls": 10,
+          "model_requests": 7,
+          "auth_rejected": 0
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": 0,
-          "wall_s": 11.6,
+          "wall_s": 10.7,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1373,16 +1393,17 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.3,
-          "hook_ms_p95": 6.6,
-          "hook_calls": 10,
-          "model_requests": 8
+          "chain_verify_out": "OK 15 entries",
+          "hook_ms_p50": 4.9,
+          "hook_ms_p95": 6.7,
+          "hook_calls": 12,
+          "model_requests": 8,
+          "auth_rejected": 0
         },
         "C_script_fault": {
           "scenario": "C_script_fault",
           "agent_rc": 0,
-          "wall_s": 11.8,
+          "wall_s": 11.7,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1416,7 +1437,7 @@
             "step_n": 1,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f29fda763ffeAquSv6B4ANbjMW"
+              "session": "ses_f29b0415affeoz3L1PnFLuM4cn"
             }
           },
           "judgement": {
@@ -1430,16 +1451,17 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.6,
-          "hook_ms_p95": 7.5,
-          "hook_calls": 10,
-          "model_requests": 8
+          "chain_verify_out": "OK 14 entries",
+          "hook_ms_p50": 5.7,
+          "hook_ms_p95": 7.8,
+          "hook_calls": 12,
+          "model_requests": 8,
+          "auth_rejected": 0
         },
         "F_web_source_fault": {
           "scenario": "F_web_source_fault",
           "agent_rc": 0,
-          "wall_s": 12.5,
+          "wall_s": 10.7,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1487,16 +1509,17 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.9,
-          "hook_ms_p95": 12.3,
-          "hook_calls": 10,
-          "model_requests": 9
+          "chain_verify_out": "OK 15 entries",
+          "hook_ms_p50": 5.4,
+          "hook_ms_p95": 6.8,
+          "hook_calls": 12,
+          "model_requests": 9,
+          "auth_rejected": 0
         },
         "I_parallel_subagents": {
           "scenario": "I_parallel_subagents",
           "agent_rc": 0,
-          "wall_s": 14.6,
+          "wall_s": 12.9,
           "agent_stderr_tail": "",
           "steps_recorded": 9,
           "step_tools": [
@@ -1534,10 +1557,10 @@
             "_cand_writes": null,
             "step_n": 4,
             "actor": {
-              "agent": "ses_f29fc1795ffecGaQYLAVsRSlNm",
+              "agent": "ses_f29aebaf3ffeLUawYBdNikRfIN",
               "agent_type": "subagent",
               "platform": "opencode",
-              "session": "ses_f29fc2092fferLEhHUoFRkKfWU"
+              "session": "ses_f29aec358ffeV718yrFJZSCoHH"
             }
           },
           "judgement": {
@@ -1551,16 +1574,17 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 17 entries",
-          "hook_ms_p50": 4.8,
-          "hook_ms_p95": 14.2,
-          "hook_calls": 20,
-          "model_requests": 14
+          "chain_verify_out": "OK 21 entries",
+          "hook_ms_p50": 4.5,
+          "hook_ms_p95": 6.7,
+          "hook_calls": 24,
+          "model_requests": 14,
+          "auth_rejected": 0
         },
         "E_subagent_fault": {
           "scenario": "E_subagent_fault",
           "agent_rc": 0,
-          "wall_s": 13.2,
+          "wall_s": 13.1,
           "agent_stderr_tail": "",
           "steps_recorded": 7,
           "step_tools": [
@@ -1596,10 +1620,10 @@
             "_cand_writes": null,
             "step_n": 2,
             "actor": {
-              "agent": "ses_f29fb4cbaffe22l6bLu5o6uBv3",
+              "agent": "ses_f29adf5d2ffeX2U1FrS5vJXoZ2",
               "agent_type": "subagent",
               "platform": "opencode",
-              "session": "ses_f29fb54b2ffepQyMaaEj9P5Ct8"
+              "session": "ses_f29adfde7ffeNQx0nP0UScHBCP"
             }
           },
           "judgement": {
@@ -1613,11 +1637,12 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 4.4,
-          "hook_ms_p95": 11.2,
-          "hook_calls": 16,
-          "model_requests": 12
+          "chain_verify_out": "OK 18 entries",
+          "hook_ms_p50": 4.5,
+          "hook_ms_p95": 7.0,
+          "hook_calls": 19,
+          "model_requests": 12,
+          "auth_rejected": 0
         }
       },
       "actors": {
@@ -1641,13 +1666,13 @@
           "input:inputs/summary.txt": {
             "count": 1,
             "findings": [
-              "f_8359a53495"
+              "f_3b91757976"
             ]
           },
           "url:http://portal.vacant-lab.test/web/q3.txt": {
             "count": 1,
             "findings": [
-              "f_98626e33e9"
+              "f_e8be8c6239"
             ]
           }
         },
@@ -1656,5 +1681,5 @@
       }
     }
   },
-  "finished": "2026-09-25T00:44:34+0000"
+  "finished": "2026-09-25T02:09:02+0000"
 }

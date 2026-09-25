@@ -1,10 +1,10 @@
 WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "/tmp" (codex_home: AbsolutePathBuf("<out>/codex/home/.codex"))
-╭────────────────────────────────────────────────╮
-│ >_ OpenAI Codex (v0.156.1)                     │
-│                                                │
-│ model:     mock-model   /model to change       │
-│ directory: <scratch>/…/tui_ev/codex/proj-m │
-╰────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────╮
+│ >_ OpenAI Codex (v0.156.1)                           │
+│                                                      │
+│ model:     mock-model   /model to change             │
+│ directory: <scratch>/…/ev_final/tui/codex/proj-m │
+╰──────────────────────────────────────────────────────╯
 
   Tip: New Build faster with Codex.
 
@@ -24,14 +24,7 @@ WARNING: proceeding, even though we could not create PATH aliases: Refusing to c
 
 • Noted. I'll write the report when you ask.
 
-• Blocked by hook
-  └ The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):
-    - total: FAIL — report.md: report not in the deliverable  (still open)
-    Run `vacant check` to re-check before finishing.
-
-• Noted. I'll write the report when you ask.
-
-  01:04
+  01:42
 
 
 › Now write report.md with the quarter total described in the task contract.
@@ -58,9 +51,9 @@ WARNING: proceeding, even though we could not create PATH aliases: Refusing to c
 
 • Fixed.
 
-  01:04
+  01:43
 
 
 › Ask Codex to do anything
 
-  mock-model default · <out>/codex/proj-m            ⚠ 2 warnings · f2 to view
+  mock-model default · <out>/codex/proj-m      ⚠ 2 warnings · f2 to view

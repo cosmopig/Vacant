@@ -2,7 +2,7 @@
   "schema": "vacant-e2e-tui/1",
   "evidence_level": "L-fake (scripted model)",
   "surface": "interactive TUI in a tmux pseudo-terminal",
-  "started": "2026-09-25T01:02:33+0000",
+  "started": "2026-09-25T01:40:56+0000",
   "agents": {
     "claude": {
       "version": [
@@ -46,7 +46,7 @@
             "step_n": 2,
             "actor": {
               "platform": "claude",
-              "session": "2c19de2c-5209-4f58-a9d6-6bc17ca2ef29"
+              "session": "918b2247-afac-400b-a060-8921b18bae55"
             }
           },
           "judgement": {
@@ -61,8 +61,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.5,
-          "hook_ms_p95": 9.7,
+          "hook_ms_p50": 6.3,
+          "hook_ms_p95": 10.1,
           "hook_calls": 10,
           "model_requests": 6,
           "auth_rejected": 0,
@@ -127,8 +127,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.1,
-          "hook_ms_p95": 7.5,
+          "hook_ms_p50": 4.4,
+          "hook_ms_p95": 6.7,
           "hook_calls": 12,
           "model_requests": 7,
           "auth_rejected": 0,
@@ -178,7 +178,7 @@
             "step_n": 1,
             "actor": {
               "platform": "claude",
-              "session": "d02b8547-f03f-4ead-a9c4-2f1dfe28e8bd"
+              "session": "53235c65-a8fa-4225-9a45-c79df98b3421"
             }
           },
           "judgement": {
@@ -193,8 +193,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 6.8,
-          "hook_ms_p95": 10.5,
+          "hook_ms_p50": 6.7,
+          "hook_ms_p95": 10.6,
           "hook_calls": 12,
           "model_requests": 7,
           "auth_rejected": 0,
@@ -210,7 +210,7 @@
         "M_multi_turn": {
           "scenario": "M_multi_turn",
           "agent_rc": null,
-          "wall_s": 22.8,
+          "wall_s": 22.3,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -244,7 +244,7 @@
             "step_n": 2,
             "actor": {
               "platform": "claude",
-              "session": "ce9e16d8-6756-4833-8c46-3630e9d2207a"
+              "session": "0dbe8d6d-7826-4e8a-9078-1a5a1e6a0381"
             }
           },
           "judgement": {
@@ -252,24 +252,25 @@
             "mismatch": []
           },
           "feedback_reached_model": true,
-          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md: report not in the deliverable\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.2ba; cc_entrypoint=cli;\"}, {\"type\": \"text\", \"text\": \"You are Claude Code, Anthropic's official CLI for Claude.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"type\": \"text\", \"text\": \"\nYou are an interactive agent that helps users with software engineering tasks.",
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (Bash)\nResolved since the last check: 1.\nRun `vacant check` to re-check before finishing.\", \"cache_control\": {\"type\": \"ephemeral\"}}]}], \"system\": [{\"type\": \"text\", \"text\": \"x-anthropic-billing-header: cc_version=2.1.281.2ba; cc_entrypoint=cli;\"}, {\"type\": \"text\", \"text\": \"You are Claude Code, Anthropic's official CLI for Claude.\", \"cache_control\": {\"type\": \"ephemeral\"}}, {\"ty",
           "feedback_has_location": true,
           "feedback_has_actor_id": false,
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 3.0,
-          "hook_ms_p95": 7.2,
-          "hook_calls": 16,
-          "model_requests": 11,
+          "hook_ms_p50": 4.3,
+          "hook_ms_p95": 8.4,
+          "hook_calls": 15,
+          "model_requests": 10,
           "auth_rejected": 0,
           "earlier_turns": [
             {
-              "requests": 5,
-              "fed_back": 2
+              "requests": 4,
+              "fed_back": 1
             }
           ],
+          "earlier_turns_used_the_budget": true,
           "feedback_in_last_turn": true,
           "tui_ready": true,
           "prompt_resent": false,
@@ -324,7 +325,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d617-0087-7ba0-80f6-45e26d3bcc2f"
+              "session": "01a0d63a-24ac-7461-a4c8-94b74218d4ed"
             }
           },
           "judgement": {
@@ -339,8 +340,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.9,
-          "hook_ms_p95": 8.7,
+          "hook_ms_p50": 5.3,
+          "hook_ms_p95": 7.8,
           "hook_calls": 10,
           "model_requests": 6,
           "auth_rejected": 0,
@@ -405,8 +406,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.6,
-          "hook_ms_p95": 8.7,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 7.0,
           "hook_calls": 12,
           "model_requests": 7,
           "auth_rejected": 0,
@@ -457,7 +458,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d617-76e9-73b0-b6f4-b8eeaff92d6f"
+              "session": "01a0d63a-9ac7-7690-bcc5-517bbb44574f"
             }
           },
           "judgement": {
@@ -472,8 +473,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 5.1,
-          "hook_ms_p95": 7.7,
+          "hook_ms_p50": 5.8,
+          "hook_ms_p95": 6.8,
           "hook_calls": 12,
           "model_requests": 7,
           "auth_rejected": 0,
@@ -524,7 +525,7 @@
             "actor": {
               "model": "mock-model",
               "platform": "codex",
-              "session": "01a0d617-b23e-7510-acd2-5ecbb1b475ad"
+              "session": "01a0d63a-d689-76e1-881b-bb482d23effc"
             }
           },
           "judgement": {
@@ -532,24 +533,25 @@
             "mismatch": []
           },
           "feedback_reached_model": true,
-          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md: report not in the deliverable\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell command to execute.\"}, \"justification\": {\"type\": \"string\", \"description\": \"User-facing approval ques",
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (Bash)\nResolved since the last check: 1.\nRun `vacant check` to re-check before finishing.</hook_prompt>\"}]}], \"tools\": [{\"type\": \"function\", \"name\": \"exec_command\", \"description\": \"Runs a command in a PTY, returning output or a session ID for ongoing interaction.\", \"strict\": false, \"parameters\": {\"type\": \"object\", \"properties\": {\"cmd\": {\"type\": \"string\", \"description\": \"Shell",
           "feedback_has_location": true,
           "feedback_has_actor_id": false,
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 16 entries",
-          "hook_ms_p50": 2.5,
-          "hook_ms_p95": 7.3,
-          "hook_calls": 16,
-          "model_requests": 11,
+          "hook_ms_p50": 4.2,
+          "hook_ms_p95": 6.9,
+          "hook_calls": 15,
+          "model_requests": 10,
           "auth_rejected": 0,
           "earlier_turns": [
             {
-              "requests": 5,
-              "fed_back": 2
+              "requests": 4,
+              "fed_back": 1
             }
           ],
+          "earlier_turns_used_the_budget": true,
           "feedback_in_last_turn": true,
           "tui_ready": true,
           "prompt_resent": false,
@@ -604,7 +606,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d618-190c-7325-a995-203424d38c94"
+              "session": "01a0d63b-3cf4-76dd-a28a-0f98c8f405c4"
             }
           },
           "judgement": {
@@ -619,8 +621,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 4.7,
-          "hook_ms_p95": 8.2,
+          "hook_ms_p50": 5.3,
+          "hook_ms_p95": 7.0,
           "hook_calls": 10,
           "model_requests": 5,
           "auth_rejected": 0,
@@ -636,7 +638,7 @@
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": null,
-          "wall_s": 10.7,
+          "wall_s": 9.7,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -685,7 +687,7 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 12 entries",
-          "hook_ms_p50": 4.7,
+          "hook_ms_p50": 3.9,
           "hook_ms_p95": 7.3,
           "hook_calls": 12,
           "model_requests": 6,
@@ -737,7 +739,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d618-88ba-7412-aa38-2e832ab32c7c"
+              "session": "01a0d63b-a81d-71ee-853c-feb22eec5fce"
             }
           },
           "judgement": {
@@ -752,8 +754,8 @@
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 7.1,
-          "hook_ms_p95": 8.5,
+          "hook_ms_p50": 5.9,
+          "hook_ms_p95": 6.7,
           "hook_calls": 12,
           "model_requests": 6,
           "auth_rejected": 0,
@@ -804,7 +806,7 @@
             "actor": {
               "model": "mock/mock-model",
               "platform": "pi",
-              "session": "01a0d618-bd4d-75c6-a61d-1228529da9db"
+              "session": "01a0d63b-dd2a-70ff-a593-d0a0d2790b7c"
             }
           },
           "judgement": {
@@ -812,24 +814,25 @@
             "mismatch": []
           },
           "feedback_reached_model": true,
-          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md: report not in the deliverable\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first",
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (write)\nResolved since the last check: 1.\nRun `vacant check` to re-check before finishing.\"}]}], \"stream\": true, \"stream_options\": {\"include_usage\": true}, \"store\": false, \"max_completion_tokens\": 8192, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"read\", \"description\": \"Read the contents of a file. Supports text files and images (jpg, png, gif, webp, bmp). Images are ",
           "feedback_has_location": true,
           "feedback_has_actor_id": false,
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
           "chain_verify_out": "OK 15 entries",
-          "hook_ms_p50": 2.7,
-          "hook_ms_p95": 7.4,
-          "hook_calls": 16,
-          "model_requests": 9,
+          "hook_ms_p50": 5.0,
+          "hook_ms_p95": 7.0,
+          "hook_calls": 15,
+          "model_requests": 8,
           "auth_rejected": 0,
           "earlier_turns": [
             {
-              "requests": 4,
-              "fed_back": 2
+              "requests": 3,
+              "fed_back": 1
             }
           ],
+          "earlier_turns_used_the_budget": true,
           "feedback_in_last_turn": true,
           "tui_ready": true,
           "prompt_resent": false,
@@ -850,7 +853,7 @@
         "B_agent_fault": {
           "scenario": "B_agent_fault",
           "agent_rc": null,
-          "wall_s": 26.0,
+          "wall_s": 26.5,
           "agent_stderr_tail": "",
           "steps_recorded": 3,
           "step_tools": [
@@ -883,7 +886,7 @@
             "step_n": 2,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f29e69f5dffeHW0INqadsw24O9"
+              "session": "ses_f29c380ceffemibOk8j1vwsIV4"
             }
           },
           "judgement": {
@@ -897,10 +900,10 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 5.7,
-          "hook_ms_p95": 7.3,
-          "hook_calls": 8,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 5.5,
+          "hook_ms_p95": 7.0,
+          "hook_calls": 10,
           "model_requests": 6,
           "auth_rejected": 0,
           "feedback_in_last_turn": true,
@@ -908,14 +911,14 @@
           "prompt_resent": false,
           "exited_cleanly": true,
           "feedback_shown_to_person": true,
-          "person_prompts_in_trace": 0,
+          "person_prompts_in_trace": 1,
           "untyped_person_prompts": 0,
           "screen_file": "opencode/B_agent_fault.screen.txt"
         },
         "A_input_fault": {
           "scenario": "A_input_fault",
           "agent_rc": null,
-          "wall_s": 18.9,
+          "wall_s": 19.9,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -963,10 +966,10 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 11 entries",
-          "hook_ms_p50": 6.1,
-          "hook_ms_p95": 16.2,
-          "hook_calls": 10,
+          "chain_verify_out": "OK 13 entries",
+          "hook_ms_p50": 4.7,
+          "hook_ms_p95": 58.8,
+          "hook_calls": 12,
           "model_requests": 7,
           "auth_rejected": 0,
           "feedback_in_last_turn": true,
@@ -974,7 +977,7 @@
           "prompt_resent": false,
           "exited_cleanly": true,
           "feedback_shown_to_person": true,
-          "person_prompts_in_trace": 0,
+          "person_prompts_in_trace": 1,
           "untyped_person_prompts": 0,
           "screen_file": "opencode/A_input_fault.screen.txt"
         },
@@ -1015,7 +1018,7 @@
             "step_n": 1,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f29e5f163ffeAU6jG6M8nSpiYz"
+              "session": "ses_f29c2cb46ffeuIkW2d1QiiQA40"
             }
           },
           "judgement": {
@@ -1029,10 +1032,10 @@
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 10 entries",
-          "hook_ms_p50": 7.3,
-          "hook_ms_p95": 8.3,
-          "hook_calls": 10,
+          "chain_verify_out": "OK 12 entries",
+          "hook_ms_p50": 6.9,
+          "hook_ms_p95": 12.6,
+          "hook_calls": 12,
           "model_requests": 7,
           "auth_rejected": 0,
           "feedback_in_last_turn": true,
@@ -1040,14 +1043,14 @@
           "prompt_resent": false,
           "exited_cleanly": true,
           "feedback_shown_to_person": true,
-          "person_prompts_in_trace": 0,
+          "person_prompts_in_trace": 1,
           "untyped_person_prompts": 0,
           "screen_file": "opencode/C_script_fault.screen.txt"
         },
         "M_multi_turn": {
           "scenario": "M_multi_turn",
           "agent_rc": null,
-          "wall_s": 30.4,
+          "wall_s": 31.4,
           "agent_stderr_tail": "",
           "steps_recorded": 4,
           "step_tools": [
@@ -1081,7 +1084,7 @@
             "step_n": 2,
             "actor": {
               "platform": "opencode",
-              "session": "ses_f29e598acffe66bdTU4MhZdXqe"
+              "session": "ses_f29c271f0ffe8WH6MwlQ7JXZYQ"
             }
           },
           "judgement": {
@@ -1089,16 +1092,16 @@
             "mismatch": []
           },
           "feedback_reached_model": true,
-          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md: report not in the deliverable\nRun `vacant check` to re-check before finishing.\"}], \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"bash\", \"description\": \"Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.\n\nBe aware: OS: linux, Shell: bash\n\nAll commands run in the current working directory by default. Use the `workdir` parameter if you need to run a command in a different directory",
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md:3 says \"999\"\n  expected 69 (column 'amount', 3 rows)\n  this value first appeared at step 2 (bash)\nResolved since the last check: 1.\nRun `vacant check` to re-check before finishing.\"}], \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"bash\", \"description\": \"Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.\n\nBe aware: OS: linux, Shell: bash\n\nAll commands run in the current working di",
           "feedback_has_location": true,
           "feedback_has_actor_id": false,
           "resolved_after_feedback": true,
           "final_decision": "accept",
           "chain_verifies": true,
-          "chain_verify_out": "OK 13 entries",
-          "hook_ms_p50": 4.6,
-          "hook_ms_p95": 9.2,
-          "hook_calls": 11,
+          "chain_verify_out": "OK 17 entries",
+          "hook_ms_p50": 5.4,
+          "hook_ms_p95": 9.9,
+          "hook_calls": 15,
           "model_requests": 9,
           "auth_rejected": 0,
           "earlier_turns": [
@@ -1107,17 +1110,18 @@
               "fed_back": 1
             }
           ],
+          "earlier_turns_used_the_budget": true,
           "feedback_in_last_turn": true,
           "tui_ready": true,
           "prompt_resent": false,
           "exited_cleanly": true,
           "feedback_shown_to_person": true,
-          "person_prompts_in_trace": 0,
+          "person_prompts_in_trace": 2,
           "untyped_person_prompts": 0,
           "screen_file": "opencode/M_multi_turn.screen.txt"
         }
       }
     }
   },
-  "finished": "2026-09-25T01:07:55+0000"
+  "finished": "2026-09-25T01:46:20+0000"
 }

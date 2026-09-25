@@ -1,10 +1,10 @@
 WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "/tmp" (codex_home: AbsolutePathBuf("<out>/codex/home/.codex"))
-╭────────────────────────────────────────────────╮
-│ >_ OpenAI Codex (v0.156.1)                     │
-│                                                │
-│ model:     mock-model   /model to change       │
-│ directory: <scratch>/…/tui_ev/codex/proj-b │
-╰────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────╮
+│ >_ OpenAI Codex (v0.156.1)                           │
+│                                                      │
+│ model:     mock-model   /model to change             │
+│ directory: <scratch>/…/ev_final/tui/codex/proj-b │
+╰──────────────────────────────────────────────────────╯
 
   Tip: New Build faster with Codex.
 
@@ -32,12 +32,12 @@ WARNING: proceeding, even though we could not create PATH aliases: Refusing to c
 
 • Fixed.
 
-  01:03
+  01:42
 
 
 › Ask Codex to do anything
 
-  mock-model default · <out>/codex/proj-b            ⚠ 2 warnings · f2 to view
+  mock-model default · <out>/codex/proj-b      ⚠ 2 warnings · f2 to view
 
 
 

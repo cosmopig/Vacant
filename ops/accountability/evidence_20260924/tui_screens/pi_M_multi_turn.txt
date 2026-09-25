@@ -42,16 +42,6 @@
  Noted. I'll write the report when you ask.
 
 
- [vacant-check]
-
- The task contract's checks do not pass yet (this is feedback from vacant check, not a final decision):
- - total: FAIL — report.md: report not in the deliverable  (still open)
-   Run vacant check to re-check before finishing.
-
-
- Noted. I'll write the report when you ask.
-
-
  Now write report.md with the quarter total described in the task contract.
 
 
@@ -101,4 +91,4 @@
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 <out>/pi/proj-m (master)
-↑90 ↓45 0.0%/131k (auto)                                                                                                                              mock-model
+↑80 ↓40 0.0%/131k (auto)                                                                                                                              mock-model
