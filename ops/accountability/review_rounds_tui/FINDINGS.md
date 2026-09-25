@@ -31,3 +31,8 @@
 仍然成立的邊界：分辨「是不是人打的」靠掛鉤事件的內容。agent 繞過字串層的擋（例如用別的方式叫同一個模組）仍然偽造得了
 一則「人打的」；後果是它被多推回去，不會讓任何東西被收下（誠實邊界 1 那一類）。人打的一則剛好**以**回饋的開頭開始，
 會被當成 Vacant 的回饋（OpenCode 外掛送回的回饋和人打的一則，在外掛看來也只差在文字開頭）。
+
+補記（2026-09-25，R536 冒煙重跑時對出來的）：第 6 條的修正把「不是人說的」提示排除在值的來源之外時，用的是白名單
+（`user`、`subagent_result`、`parent_agent`），漏了 `vacant do` 記任務訊息用的 `source="vacant do"` ⇒ 經 `vacant do` 交給 agent
+的任務裡的值，被追成 agent 自己寫錯（`provable` 的那一種也會）。審查沒抓到（審查範圍只有掛鉤那一條路）。修：白名單加上
+`vacant do`（`blame._TASK_SOURCES`）；回歸測試 `test_the_task_message_vacant_do_gives_is_still_a_source`。

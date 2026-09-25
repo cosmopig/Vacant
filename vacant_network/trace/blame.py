@@ -488,7 +488,7 @@ class Blamer:
             if str(p.get("session")) not in ("*", str(s.actor.get("session"))):
                 continue
             src = str(p.get("source") or "user")
-            if src not in ("user", "subagent_result", "parent_agent"):
+            if src not in _TASK_SOURCES:
                 # Vacant 自己的回饋（引了錯值與應有的值）、agent 自己排的提示（它自己的話）、別的工作階段
                 # 送來的訊息：都不是「任務說的」——當成來源就等於替 agent 洗掉錯（2026-09-25）
                 continue
@@ -1233,6 +1233,12 @@ def _fallback_locations(claim: Any, r: dict[str, Any], state_dir: pathlib.Path,
     if isinstance(named, str) and not any(ch in named for ch in "*?["):
         return [L.Location(named, kind="missing", note=str(r.get("detail"))[:200])]
     return [L.Location(f, kind="missing", note=str(r.get("detail"))[:200]) for f in files[:5]]
+
+
+#: 病歷裡可以當成值的來源的提示：人打的、`vacant do` 交給 agent 的任務（`Recorder.prompt` 的 docstring：
+#: 「`user`／`vacant do`＝任務給的」）、子 agent 的結果、父 agent 給子 agent 的任務。其餘（Vacant 自己的回饋、
+#: agent 自己排的提示、別的工作階段的信封）一律不是
+_TASK_SOURCES = frozenset({"user", "vacant do", "subagent_result", "parent_agent"})
 
 
 def locate_results(contract: Any, results: list[dict[str, Any]], adir: str | pathlib.Path,

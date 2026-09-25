@@ -381,3 +381,16 @@ def test_the_same_message_reported_twice_in_a_row_is_recorded_once(proj):
     hook.handle("pi", "prompt", {**base, "prompt": "and a second, different request"})
     hook.handle("pi", "prompt", {**base, "prompt": "now write report.md"})     # 之後又打一次：照記
     assert len([e for e in R.Recorder(p).events() if e["type"] == "prompt"]) == 3
+
+
+def test_the_task_message_vacant_do_gives_is_still_a_source(proj):
+    """`vacant do` 把任務訊息記成 `source="vacant do"`：那是人給的任務，裡面的值照樣算「任務說的」
+    （2026-09-25：把「不是人說的」排除在來源之外時，一度把它也排掉了——R536 冒煙重跑時對出來的）。"""
+    p = proj
+    R.Recorder(p).prompt("The finance team already computed it: the total is 4321.",
+                         source="vacant do")
+    _tool(p, "t1", "Write", {"file_path": str(p / "report.md"), "content": "Total: 4321\n"},
+          {"type": "create"}, write=("report.md", "Total: 4321\n"))
+    hook.handle("claude", "Stop", {"session_id": "S", "cwd": str(p)})
+    f = [e for e in R.Recorder(p).events() if e["type"] == "finding" and e.get("value") == "4321"]
+    assert f and f[-1]["fault_class"] == "input" and (f[-1].get("source") or {}).get("kind") == "prompt"

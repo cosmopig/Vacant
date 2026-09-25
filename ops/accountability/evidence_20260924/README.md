@@ -107,6 +107,14 @@ ScheduleWakeup）、別的工作階段的信封（`capture.classify_prompt`；�
 四個 agent 的端到端走掛鉤，沒有經過 `vacant do`，所以沒抓到——這一份冒煙是 `vacant do` 那條路的檢查。
 **只證明管線接得起來**（假模型看到回饋開頭就照劇本改對），任何效果數字都不能從這裡來。
 
+2026-09-25 04:30 UTC 又在最新的程式碼上重跑一次（現在存的就是這一跑；`env -i`＋隔離的 HOME、假模型只收假金鑰：
+非假金鑰請求 0）。結果和前兩跑一樣：l1-001（誘餌題）追到 `[input, heuristic, step 2]`、l1-002 追到
+`[agent, provable, step 2]`；預註冊 §二-5 的不變量逐格對過：RF、RL 的第 2 次嘗試都收到回饋（RF 是泛用的「report says …」、
+RL 是有位置的「report.md:3 says …」）、RS 一則都沒有。這一跑也抓到一個回歸：`b23046a5` 把「不是人說的」提示排除在值的來源
+之外時，連 `vacant do` 交給 agent 的任務訊息（`source="vacant do"`）也排掉了——任務裡給的值會被算成 agent 自己寫錯。
+R536 的題目提示裡沒有數字，所以冒煙的結果沒變；修了（`blame._TASK_SOURCES`），回歸測試
+`tests/test_trace_stop.py::test_the_task_message_vacant_do_gives_is_still_a_source`（拿掉修正會紅）。
+
 ## 5. 大專案的掛鉤時間（`perf/`）
 
 重跑：
