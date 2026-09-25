@@ -107,28 +107,199 @@
    "reasoning_tokens": 543,
    "cached_tokens": 0,
    "cost_usd": 0.00207216
+  },
+  "toolprobe-google-gemma-3-12b-it": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 272,
+   "completion_tokens": 14,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 1.57e-05
+  },
+  "toolprobe-google-gemma-4-26b-a4b-it": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 74,
+   "completion_tokens": 19,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 1.164e-05
+  },
+  "toolprobe-qwen-qwen3-5-9b": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 265,
+   "completion_tokens": 71,
+   "reasoning_tokens": 41,
+   "cached_tokens": 0,
+   "cost_usd": 3.043e-05
+  },
+  "toolprobe-openai-gpt-oss-20b": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 132,
+   "completion_tokens": 35,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 6.14e-06
+  },
+  "gate1-gemma3-12b-sbv-10452": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 2372,
+   "completion_tokens": 764,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.0002332
+  },
+  "gate1-gemma4-26b-sbv-10452": {
+   "requests": 10,
+   "ok": 10,
+   "prompt_tokens": 63625,
+   "completion_tokens": 8404,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.00731111
+  },
+  "gate1-qwen35-9b-sbv-10452": {
+   "requests": 5,
+   "ok": 5,
+   "prompt_tokens": 54537,
+   "completion_tokens": 20029,
+   "reasoning_tokens": 18595,
+   "cached_tokens": 0,
+   "cost_usd": 0.00696673
+  },
+  "gate1-gemma3-12b-tb2-regex-log": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 2130,
+   "completion_tokens": 507,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.00018255
+  },
+  "gate1-gemma4-26b-tb2-regex-log": {
+   "requests": 15,
+   "ok": 15,
+   "prompt_tokens": 61845,
+   "completion_tokens": 1757,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.00492653
+  },
+  "gate1-qwen35-9b-tb2-regex-log": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 1717,
+   "completion_tokens": 16384,
+   "reasoning_tokens": 16384,
+   "cached_tokens": 0,
+   "cost_usd": 0.00226728
+  },
+  "gate1-gemma3-12b-dabstep-5": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 2044,
+   "completion_tokens": 376,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.0001586
+  },
+  "gate1-gemma4-26b-dabstep-5": {
+   "requests": 7,
+   "ok": 7,
+   "prompt_tokens": 38127,
+   "completion_tokens": 324,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.00277905
+  },
+  "gate1-qwen35-9b-dabstep-5": {
+   "requests": 7,
+   "ok": 7,
+   "prompt_tokens": 41539,
+   "completion_tokens": 879,
+   "reasoning_tokens": 457,
+   "cached_tokens": 0,
+   "cost_usd": 0.00343739
+  },
+  "gate1-gemma3-12b-dabstep-70": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 2055,
+   "completion_tokens": 65,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.0001125
+  },
+  "gate1-gemma4-26b-dabstep-70": {
+   "requests": 15,
+   "ok": 15,
+   "prompt_tokens": 538494,
+   "completion_tokens": 2170,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.03843238
+  },
+  "gate1-qwen35-9b-dabstep-70": {
+   "requests": 11,
+   "ok": 11,
+   "prompt_tokens": 108061,
+   "completion_tokens": 4001,
+   "reasoning_tokens": 2423,
+   "cached_tokens": 0,
+   "cost_usd": 0.00916501
   }
  },
  "by_model": {
   "qwen/qwen3.5-9b": {
-   "requests": 41,
-   "ok": 41,
-   "prompt_tokens": 212244,
-   "completion_tokens": 55085,
-   "reasoning_tokens": 47318,
+   "requests": 66,
+   "ok": 66,
+   "prompt_tokens": 418363,
+   "completion_tokens": 96449,
+   "reasoning_tokens": 85218,
    "cached_tokens": 0,
-   "cost_usd": 0.02414057
+   "cost_usd": 0.04600741
+  },
+  "google/gemma-3-12b-it": {
+   "requests": 5,
+   "ok": 5,
+   "prompt_tokens": 8873,
+   "completion_tokens": 1726,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.00070255
+  },
+  "google/gemma-4-26b-a4b-it": {
+   "requests": 48,
+   "ok": 48,
+   "prompt_tokens": 702165,
+   "completion_tokens": 12674,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 0.05346071
+  },
+  "openai/gpt-oss-20b": {
+   "requests": 1,
+   "ok": 1,
+   "prompt_tokens": 132,
+   "completion_tokens": 35,
+   "reasoning_tokens": 0,
+   "cached_tokens": 0,
+   "cost_usd": 6.14e-06
   }
  },
  "total": {
-  "requests": 41,
-  "ok": 41,
-  "prompt_tokens": 212244,
-  "completion_tokens": 55085,
-  "reasoning_tokens": 47318,
+  "requests": 120,
+  "ok": 120,
+  "prompt_tokens": 1129533,
+  "completion_tokens": 110884,
+  "reasoning_tokens": 85218,
   "cached_tokens": 0,
-  "cost_usd": 0.02414057
+  "cost_usd": 0.10017681
  },
- "spent_usd": 0.02414057,
+ "spent_usd": 0.10017681,
  "budget_usd": 4.8
 }

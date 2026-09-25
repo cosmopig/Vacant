@@ -2,6 +2,8 @@
   "budget_usd": 4.80,
   "models": {
     "qwen/qwen3.5-9b": {"provider": {"order": ["darkbloom/fp4"], "allow_fallbacks": false, "require_parameters": true}},
-    "google/gemma-3-12b-it": {"provider": {"order": ["deepinfra/bf16"], "allow_fallbacks": false, "require_parameters": true}}
+    "google/gemma-3-12b-it": {"provider": {"order": ["deepinfra/bf16"], "allow_fallbacks": false, "require_parameters": true}},
+    "google/gemma-4-26b-a4b-it": {"provider": {"order": ["deepinfra/fp8"], "allow_fallbacks": false, "require_parameters": true}},
+    "openai/gpt-oss-20b": {"provider": {"order": ["akashml/fp4"], "allow_fallbacks": false, "require_parameters": true}}
   }
 }
