@@ -310,7 +310,8 @@ def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) ->
     turn, budget = _budget_of(payload)
     action, reason, record = zerostop.stop(agent, ev.session_id, ev.cwd,
                                            zerostop.final_text_of(payload), mode=mode,
-                                           turns_left=_turns_left(turn, budget), budget=budget)
+                                           turns_left=_turns_left(turn, budget), budget=budget,
+                                           error_stop=payload.get("last_stop") == "error")
     z = record.get("zero") or {}
     if z.get("error"):
         _log("errors.jsonl", {"agent": agent, "event": "stop",

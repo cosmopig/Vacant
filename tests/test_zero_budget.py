@@ -234,9 +234,13 @@ def test_a_run_cut_off_before_the_stop_check_still_gets_a_note_for_the_person(pr
     d = a.ev("session_end", reason="quit", turn=16, budget=15, aborted=True)
     assert d == {"action": "allow", "reason": ""}                # 什麼都不送給模型
     note = (Recorder(proj).dir / "delivery.md").read_text()
-    assert "Ended before the agent said it was done, after the stated 15 model turns; no delivery check ran." in note
-    assert "/app/answer.txt: does not exist. Budget reminders were sent after turns 13, 14." in note
-    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 1
+    # v3.3：被切斷的那一跑也事後補跑同一個檢查，照一般交件說明寫給人
+    assert ("Ended before the agent said it was done, after the stated 15 model turns; no delivery check "
+            "ran before that. The check ran afterwards, for you only") in note
+    assert "Found after the run ended (not sent back): answer.txt (asked for in the request) did not exist" in note
+    assert "Budget reminders were sent after turns 13, 14 (a requested file did not exist yet). Nothing was written after them." in note
+    ended = [e for e in Recorder(proj).events() if e["type"] == "ended"]
+    assert len(ended) == 1 and ended[0]["checked"] is True and ended[0]["final_answer"] is False
 
 
 def test_no_cut_off_note_unless_the_run_was_aborted(proj):
@@ -374,3 +378,111 @@ await h.session_shutdown[0]({ reason: "quit" }, ctx);
     assert ended is True
     # 第 13、14 回合有工具呼叫：提醒的詢問照舊；第 15 回合（最終答案）不問
     assert [c["payload"]["turn"] for c in calls if c["event"] == "turn_check"] == [13, 14]
+
+
+# ── v3.3: the person's note says what the reminder led to; error stops are named ──
+
+def test_a_file_written_after_the_reminder_is_marked_in_the_cut_off_note(proj):
+    """提醒逼出的答案（研究：「Not Applicable」「yes」）：說明標出它是提醒之後寫的、裡面沒有能對照紀錄的值（v3.3）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.turn(13)
+    a.bash("echo 'Not Applicable' > /app/answer.txt", "", write={"answer.txt": "Not Applicable\n"})
+    a.turn(14)
+    a.ev("session_end", reason="quit", turn=16, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "A budget reminder was sent after turn 13 (a requested file did not exist yet)." in note
+    assert re.search(r"- answer\.txt: written at step \d+, after the budget reminder sent after turn 13\. "
+                     r"The reminder asked for the current best answer; this note does not say whether it is right\. "
+                     r"Vacant checked no value in it against the record\.", note)
+    data = json.loads((Recorder(proj).dir / "delivery.json").read_text())
+    assert [w["path"] for w in data["written_after_reminder"]] == ["answer.txt"]
+
+
+def test_a_file_written_before_the_reminder_is_not_marked(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.n += 1
+    rm = {"command": "rm /app/answer.txt"}
+    a.ev("pre_tool", tool="bash", call_id=f"c{a.n}", input=rm)
+    (proj / "answer.txt").unlink()                              # 刪檔在這一步裡（紀錄看得到）
+    a.ev("post_tool", tool="bash", call_id=f"c{a.n}", input=rm, output="")
+    a.turn(13)
+    a.bash("cat data/sales.csv", SALES)
+    a.ev("session_end", reason="quit", turn=16, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "A budget reminder was sent after turn 13" in note
+    assert "Nothing was written after it." in note and "written at step" not in note
+
+
+def test_the_stop_note_marks_a_file_written_after_the_reminder(proj):
+    """提醒 → 寫檔 → 第 14 回合說做完、放行：一般的交件說明也標出來。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("cat data/sales.csv", SALES)
+    a.bash("python3 -c 'print(sum([1200.25, 845.5]))'", "2045.75")
+    a.turn(13)
+    a.bash("echo 2045.75 > /app/answer.txt", "", write={"answer.txt": "2045.75\n"})
+    assert a.ev("stop", final_text="The total is 2045.75.", turn=14, budget=15)["action"] == "allow"
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "after the budget reminder sent after turn 13" in note
+    assert "Vacant checked no value in it" not in note           # 2045.75 對得上紀錄
+
+
+def test_a_stop_after_a_model_error_is_named_in_the_note_and_the_model_text_is_unchanged(proj):
+    """pi 的迴圈在模型錯誤時也會停、交件前檢查照跑（研究：第 70 題）。說明寫明是錯誤之後跑的；
+    送給模型的退回字句和沒有錯誤時逐位元組相同（v3.3）。"""
+    a = Pi(proj, sid="E")
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    d_err = a.ev("stop", final_text="", last_stop="error")
+    b = Pi(proj, sid="F")
+    b.ask()
+    b.bash("ls data", "sales.csv")
+    d_ok = b.ev("stop", final_text="")
+    assert d_err["action"] == d_ok["action"] == "continue" and d_err["reason"] == d_ok["reason"]
+    rev = [e for e in Recorder(proj).events() if e["type"] == "review"]
+    assert [e.get("last_turn_error") for e in rev] == [True, None]
+    # 說明（最後寫的是 F 的；E 再跑一次看它的說明）
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.ev("stop", final_text="Done.", last_stop="error")
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert zerostop.ERROR_STOP_LINE in note
+
+
+@pytest.mark.skipif(not pathlib.Path("/opt/node22/bin/node").exists() and not __import__("shutil").which("node"),
+                    reason="node not installed")
+def test_the_extension_reports_an_error_ended_turn_to_the_stop_check(tmp_path):
+    import shutil
+    import subprocess
+    node = shutil.which("node") or "/opt/node22/bin/node"
+    log = tmp_path / "calls.jsonl"
+    stub = tmp_path / "stub.sh"
+    stub.write_text(f'#!/bin/sh\nprintf \'{{"event":"%s","payload":%s}}\\n\' "$1" "$(cat)" >> {log}\n'
+                    'echo \'{"action":"allow"}\'\n')
+    stub.chmod(0o755)
+    (tmp_path / "ext.mjs").write_text(AG.PI_EXTENSION % {
+        "argv": json.dumps([str(stub)]), "timeout_ms": 5000,
+        "budget_re": "/" + AG.BUDGET_RE_SRC.replace("/", r"\/") + "/i"})
+    (tmp_path / "drive.mjs").write_text(r"""
+import ext from "./ext.mjs";
+const h = {};
+ext({ on: (n, f) => { (h[n] = h[n] || []).push(f); } });
+const ctx = { cwd: "/app", hasUI: false, signal: new AbortController().signal,
+              sessionManager: { getSessionId: () => "S1" }, getSystemPrompt: () => "" };
+await h.before_agent_start[0]({ prompt: "q", systemPrompt: "" }, ctx);
+await h.turn_end[0]({ message: { stopReason: "toolUse", content: [] }, toolResults: [{}], entries: [] }, ctx);
+await h.turn_end[0]({ message: { stopReason: "error", errorMessage: "failed to decode", content: [] },
+                      toolResults: [], entries: [] }, ctx);
+await h.agent_before_settle[0]({ context: { llmMessages: [] }, entries: [] }, ctx);
+await h.turn_end[0]({ message: { stopReason: "stop", content: [{ type: "text", text: "ok" }] },
+                      toolResults: [], entries: [] }, ctx);
+await h.agent_before_settle[0]({ context: { llmMessages: [] }, entries: [] }, ctx);
+""")
+    out = subprocess.run([node, str(tmp_path / "drive.mjs")], capture_output=True, text=True, timeout=60,
+                         cwd=tmp_path)
+    assert out.returncode == 0, out.stderr
+    stops = [json.loads(x)["payload"] for x in log.read_text().splitlines() if '"event":"stop"' in x]
+    assert [s.get("last_stop") for s in stops] == ["error", "stop"]

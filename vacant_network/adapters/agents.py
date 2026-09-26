@@ -207,6 +207,7 @@ let TURNS = 0;
 let ABORTED = false;
 let LAST_FINAL = false;
 let LAST_TEXT = "";
+let LAST_STOP = null;   // how the last real turn ended (pi's stopReason): "error" ⇒ the check runs after a model error
 
 function readBudget(text) {
   try {
@@ -344,6 +345,7 @@ export default function (pi) {
     ABORTED = false;
     LAST_FINAL = false;
     LAST_TEXT = "";
+    LAST_STOP = null;
     if (BUDGET === null) BUDGET = readBudget(event && event.systemPrompt);
     await ask("prompt", { ...who(ctx), prompt: event && event.prompt });
     return undefined;
@@ -378,6 +380,7 @@ export default function (pi) {
     if (!synthetic) {
       TURNS += 1;
       const m = (event && event.message) || {};
+      LAST_STOP = m.stopReason || null;
       LAST_FINAL = !((event && event.toolResults) || []).length && m.stopReason === "stop";
       LAST_TEXT = LAST_FINAL ? String((typeof m.content === "string" ? m.content : text(m.content)) || "")
                                .slice(0, 20000) : "";
@@ -400,7 +403,8 @@ export default function (pi) {
   });
   pi.on("agent_before_settle", async (event, ctx) => {
     if (who(ctx).parent_session_id) return undefined;   // a sub-agent's turn end is not the task's end
-    const d = await ask("stop", { ...who(ctx), final_text: finalText(event), turn: TURNS, budget: BUDGET });
+    const d = await ask("stop", { ...who(ctx), final_text: finalText(event), turn: TURNS, budget: BUDGET,
+                                  last_stop: LAST_STOP || undefined });
     if (d.action === "continue" && d.reason) {
       return { entries: [...((event && event.entries) || []),
                          { type: "custom_message", customType: "vacant-check", content: d.reason, display: true }],
