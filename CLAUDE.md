@@ -182,7 +182,7 @@
 `decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`）；
 ❌「Vacant 讓 agent 做得更好」「Vacant 沒有用」「讓成績變差」；❌「Vacant 判斷答案對錯」（只看每一步有沒有根據）。
 ⚠ 正式批次那一版有兩個誤報（跑自己寫的腳本被當成讀交付物、grep 沒找到當成失敗；**8 次退回全是誤報**，7 次退的是對的答案），事後已修，不改變結果。
-**為什麼沒有差別、和過去比、要不要做成 agent**：`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`（總報告）＋`ops/eval/evidence_20260925/INDEX.md`（每個檔的 sha256；`ops/eval/build_evidence_index.py --check`）。一句話：**時機錯**（82 個失敗裡 55 個是被 15 回合上限切斷、Vacant 輪不到檢查，其中 15–19 跑答案已經算出來沒寫）、**看的東西錯**（其餘的錯每一步都有根據、錯在決定）、**動作弱**（只能在同一個工作階段裡講，過去量到最弱的就是這種）。過去有增益的都是 Vacant 握著生成（可執行驗收＋重抽＋拒交）；最像 agent 的 G 實驗反而沒有增益 ⇒ 缺的是「真的訊號＋對的時機＋重來的權力」，不是 agent。✅「用這一輪兩跑事後估：沒交就重開一跑 gemma 50→55（**探索性**，`ops/eval/formal/explore_two_runs.py`）」；❌ 把這個估計講成效果。
+**為什麼沒有差別、和過去比、要不要做成 agent**：`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`（總報告）＋`ops/eval/evidence_20260925/INDEX.md`（每個檔的 sha256；`ops/eval/build_evidence_index.py --check`）。一句話：**時機錯**（82 個失敗裡 55 個是沒交——54 個被這一輪設的 15 回合上限切斷〔官方基線是 10 步〕、Vacant 輪不到檢查，其中 15–19 跑答案已經算出來沒寫）、**看的東西錯**（其餘的錯每一步都有根據、錯在決定）、**動作弱**（只能在同一個工作階段裡講；在重抽之上，過去量到最弱的就是這種）。過去有增益的都是 Vacant 握著生成（可執行驗收＋重抽＋拒交）；最像 agent 的 G 實驗沒有量到正確交付的增益 ⇒ 缺的是「真的訊號＋對的時機＋重來的權力」，不是 agent（推論，沒在 DABstep 上測過）。✅「用這一輪兩跑事後估：沒交就重開一跑 gemma 50→55（**探索性**、不是檢定，`ops/eval/formal/explore_two_runs.py`）」；❌ 把這個估計講成效果；❌「越像 agent 越沒用」「和過去完全一致」。
 ⚠ Harbor 的 pi 用自訂端點時以 `PI_CODING_AGENT_DIR` 隔離設定，`~/.pi/agent` 的擴充不會載入——評測的 C 組要裝到那個目錄。
 
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）

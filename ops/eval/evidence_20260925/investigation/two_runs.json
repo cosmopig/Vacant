@@ -17,7 +17,7 @@
     "lost_tasks": [],
     "cost_single_usd": 0.8914,
     "cost_extra_usd": 0.519,
-    "mcnemar_p_exploratory": 0.0625
+    "note": "按構造不會少題（第一跑有答案就用第一跑），不是檢定、不報 p 值"
    },
    "either_run_correct": 55,
    "both_answered": 41,
@@ -890,7 +890,7 @@
     "lost_tasks": [],
     "cost_single_usd": 0.5999,
     "cost_extra_usd": 0.0591,
-    "mcnemar_p_exploratory": 1.0
+    "note": "按構造不會少題（第一跑有答案就用第一跑），不是檢定、不報 p 值"
    },
    "either_run_correct": 70,
    "both_answered": 76,
@@ -1753,5 +1753,6 @@
     }
    ]
   }
- }
+ },
+ "second_run_after_pushback": "gemma 第 62、1753 題的 C 跑被退回過、又被當成第二跑；兩跑退回前後答案不變"
 }

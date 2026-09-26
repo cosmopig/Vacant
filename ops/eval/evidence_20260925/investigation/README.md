@@ -12,6 +12,7 @@
 | `why-zero-config-null`（`wf_65a4afe4-f8e`） | `past-results` | 過去（09-25 之前）量過「Vacant 有沒有讓交付變好」的每一個實驗：誰握著生成、裁判是什麼、效果多大、原檔准許的說法 | `past_results.{json,md}` |
 | 同上 | `failure-taxonomy` | 正式批次 77 題主要分析裡每一個失敗的跑（82 跑）分類；錯答案 27 跑逐一讀逐字稿；零設定檢查的上限 | `failure_taxonomy.{json,md}`；它用的唯讀抽取腳本在 `helpers/` |
 | 同上 | `literature` | 只用 `docs/LITERATURE_GAP_2026-09-18.md` 已查證的條目，回答文獻怎麼預測這個結果 | `literature.{json,md}` |
+| （單一 agent，總報告寫完之後） | 查核 | 把總報告第一版（`386d37d4`）的每一個數字與歸屬對回原始檔 | `factcheck_report.md`（全部採納，總報告第十五節） |
 
 兩個 workflow 的腳本原樣存在 `workflow_*.js`（腳本裡的路徑是當時這台雲端機器的暫存區）。
 `*.md` 是同名 `*.json` 的可讀版（內容相同、只換排版）。

@@ -12,7 +12,7 @@
 
 | 檔案 | 大小 | sha256（前 16 碼） |
 |---|---:|---|
-| [`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](../../../docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md) | 38.5 KB | `9c7fa23ff889bb8a` |
+| [`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](../../../docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md) | 46.5 KB | `b3b068956334abd4` |
 
 ## 裁決、預註冊、結論
 
@@ -67,7 +67,7 @@
 | [`ops/eval/pilot/tasks.json`](../../../ops/eval/pilot/tasks.json) | 1.2 KB | `3d30a1c25920422a` |
 | [`ops/eval/formal/run_formal.py`](../../../ops/eval/formal/run_formal.py) | 4.6 KB | `9b1bf696df0a0105` |
 | [`ops/eval/formal/analyze.py`](../../../ops/eval/formal/analyze.py) | 10.3 KB | `60267f90f85f53ca` |
-| [`ops/eval/formal/explore_two_runs.py`](../../../ops/eval/formal/explore_two_runs.py) | 5.7 KB | `2a22400d72bef93f` |
+| [`ops/eval/formal/explore_two_runs.py`](../../../ops/eval/formal/explore_two_runs.py) | 6.1 KB | `3685bc0490128bf3` |
 | [`ops/eval/replay_pi_session.py`](../../../ops/eval/replay_pi_session.py) | 6.5 KB | `df3ab1373202aa4c` |
 | [`ops/eval/replay_gate.py`](../../../ops/eval/replay_gate.py) | 4.6 KB | `1aaf70bc72b97c93` |
 | [`ops/eval/simuser/inside.sh`](../../../ops/eval/simuser/inside.sh) | 2.3 KB | `00ba532c3f29d419` |
@@ -244,14 +244,15 @@ Harbor 裡 A=0.0、C=1.0（沒寫答案檔被退回、補寫）
 
 | 檔案 | 大小 | sha256（前 16 碼） |
 |---|---:|---|
-| [`ops/eval/evidence_20260925/investigation/README.md`](../../../ops/eval/evidence_20260925/investigation/README.md) | 3.1 KB | `3127f6cd2e6dbeda` |
+| [`ops/eval/evidence_20260925/investigation/README.md`](../../../ops/eval/evidence_20260925/investigation/README.md) | 3.3 KB | `899131d0b7d78e4c` |
+| [`ops/eval/evidence_20260925/investigation/factcheck_report.md`](../../../ops/eval/evidence_20260925/investigation/factcheck_report.md) | 9.1 KB | `bf6badd2d9bf31f4` |
 | [`ops/eval/evidence_20260925/investigation/failure_taxonomy.json`](../../../ops/eval/evidence_20260925/investigation/failure_taxonomy.json) | 28.9 KB | `731fbdfd4cdc8f5d` |
 | [`ops/eval/evidence_20260925/investigation/failure_taxonomy.md`](../../../ops/eval/evidence_20260925/investigation/failure_taxonomy.md) | 22.6 KB | `e3ac9c179e7aace4` |
 | [`ops/eval/evidence_20260925/investigation/literature.json`](../../../ops/eval/evidence_20260925/investigation/literature.json) | 28.3 KB | `9afeb3fb66dc5709` |
 | [`ops/eval/evidence_20260925/investigation/literature.md`](../../../ops/eval/evidence_20260925/investigation/literature.md) | 24.1 KB | `e0eddc1dad8afa05` |
 | [`ops/eval/evidence_20260925/investigation/past_results.json`](../../../ops/eval/evidence_20260925/investigation/past_results.json) | 31.0 KB | `50fdd55d7e0c31af` |
 | [`ops/eval/evidence_20260925/investigation/past_results.md`](../../../ops/eval/evidence_20260925/investigation/past_results.md) | 26.7 KB | `33ecede8815e6a11` |
-| [`ops/eval/evidence_20260925/investigation/two_runs.json`](../../../ops/eval/evidence_20260925/investigation/two_runs.json) | 36.6 KB | `e8cc9657bf7c2a5b` |
+| [`ops/eval/evidence_20260925/investigation/two_runs.json`](../../../ops/eval/evidence_20260925/investigation/two_runs.json) | 36.9 KB | `cc1c7dbe869a0314` |
 | [`ops/eval/evidence_20260925/investigation/verify_dabstep_results.json`](../../../ops/eval/evidence_20260925/investigation/verify_dabstep_results.json) | 43.2 KB | `022944035b440b3d` |
 | [`ops/eval/evidence_20260925/investigation/workflow_verify-dabstep-results.js`](../../../ops/eval/evidence_20260925/investigation/workflow_verify-dabstep-results.js) | 6.8 KB | `b6a66eb1d7ec69de` |
 | [`ops/eval/evidence_20260925/investigation/workflow_why-zero-config-null.js`](../../../ops/eval/evidence_20260925/investigation/workflow_why-zero-config-null.js) | 6.9 KB | `944ded130e81b293` |
@@ -296,6 +297,7 @@ Harbor 裡 A=0.0、C=1.0（沒寫答案檔被退回、補寫）
 | `3c0ad49f` | 2026-09-25 21:37 | eval: 正式批次的原始紀錄（全部請求／回應本文、318 跑的 Harbor 目錄）與分析輸出 |
 | `efda0d1f` | 2026-09-25 21:41 | 結論：零設定 Vacant 在 DABstep 正式批次沒有量到差別；修正正式批次暴露的兩個誤報 |
 | `faa452cb` | 2026-09-26 00:40 | 結論更正：獨立重算（三個 agent＋批評者）之後的更正與補充 |
+| `386d37d4` | 2026-09-26 01:11 | 調查：零設定 Vacant 在 DABstep 為什麼沒有量到差別——總報告＋證據索引 |
 
 ## 不在 git 裡的東西
 

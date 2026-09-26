@@ -2,7 +2,10 @@
 估兩件事——
 
 1. **沒寫答案就重開一跑**：第一跑結束時沒有答案檔，就再開一個全新的一跑、用它的答案。
-   用 C 組那一跑當第二跑（Vacant 在 C 組只改了 8 跑的輸入，而且那 8 跑都有答案檔，不會被當成第二跑用到）。
+   用 C 組那一跑當第二跑。Vacant 在 C 組改了 8 跑的輸入（退回）；其中第 62、1753 題（gemma）A 沒有答案檔，
+   所以這兩跑被當成第二跑用到——兩跑退回前後答案都沒變（`runs.json` 的 `first_stop.first_score` 等於最後的評分），
+   不影響結果，但它們不是「完全沒被 Vacant 動過」的第二跑。
+   ⚠ 這個規則按構造不會少掉任何一題（第一跑有答案就用第一跑），所以「多了幾題、少了 0 題」不是檢定，不報 p 值。
 2. **兩跑答案對不對得上**：兩跑都有答案時，用 DABstep 自己的評分程式互比（雙向都過才算一致）；
    一致時有多準、不一致的題裡藏了幾個錯的答案。
 
@@ -23,11 +26,6 @@ import re
 import subprocess
 import sys
 from typing import Any
-
-REPO = pathlib.Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(REPO))
-
-from vacant_network.research import mcnemar_exact  # noqa: E402
 
 EXCLUDED = {"5", "70"}
 
@@ -60,7 +58,8 @@ def main() -> int:
     by: dict[tuple[str, str, str], dict[str, Any]] = {}
     for r in sorted(rows, key=lambda x: x["job"]):          # 同 analyze.py：補跑取時間上最後一跑
         by[(r["model"], r["arm"], r["task"])] = r
-    result: dict[str, Any] = {"note": "探索性；同一批題、事後分析、不是預註冊的檢定", "models": {}}
+    result: dict[str, Any] = {"note": "探索性；同一批題、事後分析、不是預註冊的檢定", "models": {},
+                              "second_run_after_pushback": "gemma 第 62、1753 題的 C 跑被退回過、又被當成第二跑；兩跑退回前後答案不變"}
     for m in ("g4", "q38"):
         tasks = sorted({t for (mm, _, t) in by if mm == m and t not in EXCLUDED}, key=int)
         pairs: list[dict[str, Any]] = []
@@ -86,7 +85,7 @@ def main() -> int:
                 "correct": sum(p["A_ok"] if p["A"] is not None else p["C_ok"] for p in pairs),
                 "extra_runs": len(missing), "gained_tasks": gained, "lost_tasks": [],
                 "cost_single_usd": round(cost_a, 4), "cost_extra_usd": round(cost_extra, 4),
-                "mcnemar_p_exploratory": mcnemar_exact(len(gained), 0)},
+                "note": "按構造不會少題（第一跑有答案就用第一跑），不是檢定、不報 p 值"},
             "either_run_correct": sum(1 for p in pairs if p["A_ok"] or p["C_ok"]),
             "both_answered": len(both),
             "agree": len(agree), "agree_both_correct": sum(1 for p in agree if p["A_ok"] and p["C_ok"]),
