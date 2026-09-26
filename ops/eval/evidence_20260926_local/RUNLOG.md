@@ -63,3 +63,11 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
 - 為了確認那一條在真實資料裡的量，跑了 `ops/eval/local/split_ended.py`（只讀 C2 已完成的 27 跑的 pi 事件流與 `vacant_check.json`）：
   11 份說明裡 4 份是「最後一回合交了答案」（其中 3 跑答對）、7 份是真的被切斷——**這個拆法是事後的描述**，
   它順帶顯示了這 11 跑的評分；停止規則只看時間，這一眼不改變任何跑的方式。
+
+## 9. 研究 → v3.3（05:40–06:45 UTC；正式批次照跑凍結的 v3）
+
+- 06:00 研究 workflow 的兩個評審因為工作階段額度中斷，06:07 從快取接回、跑完（`research_12b/`）。
+- 磁碟一度只剩 3.1 GB：刪了前幾天的暫存副本（`audit_x`、`xpath`、`e2e_full12`、`perf/vh*`、`/tmp/claude-0/review_v3`；證據早就在 repo 裡），回到 7.2 GB。
+- C2 第 70 題「第 13 回合後說剩 2 回合、第 14 回合就結束」：是 Harbor 的 1800 秒牆鐘時限（`AgentTimeoutError`，兩次請求逾時＋pi 自動壓縮），
+  不是回合數算錯。第 70 題本來就不進主要分析；牆鐘逾時每組各幾跑會在最後的描述裡列。
+- v3.3（commit `a2b4b0ee`，只改給人的說明；裁決 §八、閘門 5 `gate5_v33/`）。
