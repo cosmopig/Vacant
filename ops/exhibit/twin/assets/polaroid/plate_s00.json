@@ -1,0 +1,12 @@
+{
+ "file": "polaroid/plate_s00.jpg",
+ "size": [
+  1672,
+  941
+ ],
+ "sha256": "b39e0074b472ed30bc882c9bec26c81e363c19a4ecd16427a73ef3936fc7a053",
+ "source": "vacant_hm world3/plates/s00.jpg（逐 byte 相同；vacant_hm commit 7c6392c 起的板）",
+ "why": "空舞台＋頂光，沒有文字、沒有 QR、沒有烤進去的生物（generated_20260921.json 的慣例）；與電視待機畫面同一個世界、同一個光色",
+ "spot_x_px": 812,
+ "spot_x_note": "頂光那一束的中心欄（上三分之一的逐欄平均亮度 argmax）；相片窗從這裡置中裁切"
+}

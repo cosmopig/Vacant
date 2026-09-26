@@ -1,0 +1,278 @@
+{
+ "_說明": "拍立得相片窗裡的分身姿勢圖（舉著寫好的紙給人看）。逐 byte 抄自素材線 vacant_hm-assets-20260926/poses/cNN_show.png（該處 manifest 的 sha256 相同）；產法見那份 QA.md §2（Codex 姿勢表切格去背，參考圖＝該位 cast40）。2026-09-26 晚上架 34 位（cast40 扣掉班底 6 位 c01/c03/c13/c20/c22/c37）；c09／c10／c31 用素材線 QA.md §7.12–7.13 eyefix 輪之後的新版（原本的 10 位 first-batch 舊版已被取代，sha256 跟著換）。polaroid.figure_for 只認 <cast_id>_show.png，沒有就退回 cast40/<cast_id>.png——絕不拿別位的姿勢頂替。",
+ "source": "vacant_hm-assets-20260926/poses/manifest.json",
+ "items": {
+  "c02_show": {
+   "file": "c02_show.png",
+   "size": [
+    234,
+    359
+   ],
+   "sha256": "f6f6f44777736c270640afb082ed581de4f5760b962a0eb7b68e171f61d1eb48"
+  },
+  "c04_show": {
+   "file": "c04_show.png",
+   "size": [
+    260,
+    425
+   ],
+   "sha256": "38e33e40d5ed0b25554318ea7ebc573011f27cfad11784ed35630a8fe51276a7"
+  },
+  "c05_show": {
+   "file": "c05_show.png",
+   "size": [
+    257,
+    405
+   ],
+   "sha256": "d1b9f96be750ca20e0f9dda72c3e0b943a384650ddb6b24c90169d89a6a98fa1"
+  },
+  "c06_show": {
+   "file": "c06_show.png",
+   "size": [
+    243,
+    411
+   ],
+   "sha256": "087fc741bd05cbc3ec24e5d7adabdf518522c0dd377e9bfad1cd2aab7baa1ae2"
+  },
+  "c07_show": {
+   "file": "c07_show.png",
+   "size": [
+    280,
+    415
+   ],
+   "sha256": "639ecc8488d028770d6dbe58b17bed45ad5e300e3f10865d14354b6293fb203c"
+  },
+  "c08_show": {
+   "file": "c08_show.png",
+   "size": [
+    283,
+    421
+   ],
+   "sha256": "742b081921b908813da28abcb9e3b5fcc66202468f3d530be1c950a50312a798"
+  },
+  "c09_show": {
+   "file": "c09_show.png",
+   "size": [
+    122,
+    429
+   ],
+   "sha256": "7838a50392be9bbd86124baf1c74b6f8698dace27447664826bd8901e19ed3db"
+  },
+  "c10_show": {
+   "file": "c10_show.png",
+   "size": [
+    125,
+    431
+   ],
+   "sha256": "d962a57142b5e0922107178ad518c4c4039542e65735434a45412d6f60dce43c"
+  },
+  "c11_show": {
+   "file": "c11_show.png",
+   "size": [
+    152,
+    424
+   ],
+   "sha256": "1f886b4b7c5021329af416f54d408fb4cf6368ec8534e600bbbc61ec70ea1278"
+  },
+  "c12_show": {
+   "file": "c12_show.png",
+   "size": [
+    148,
+    428
+   ],
+   "sha256": "6b7e1887b92875bf419bf2ba5a277c9cf9e624e92d137284b5aca5fe6d068999"
+  },
+  "c14_show": {
+   "file": "c14_show.png",
+   "size": [
+    107,
+    418
+   ],
+   "sha256": "80ff24e82d88c1297a98bf888f0f2cae8fb06730779e194d04066ccc59cd1902"
+  },
+  "c15_show": {
+   "file": "c15_show.png",
+   "size": [
+    186,
+    424
+   ],
+   "sha256": "f858b1af09b219514457df3038477c0b2aede444064cddcfc1f09dd2fec91ca7"
+  },
+  "c16_show": {
+   "file": "c16_show.png",
+   "size": [
+    144,
+    423
+   ],
+   "sha256": "ea9e77e2a3ccd0544f5baef729b2e092edfb65cd14bf78e7f9a7a435695eeadd"
+  },
+  "c17_show": {
+   "file": "c17_show.png",
+   "size": [
+    217,
+    341
+   ],
+   "sha256": "f3b64a46a170e4af8fc85eefd2a2036a1cfb19b1793b66b58c082d3ba2b0d177"
+  },
+  "c18_show": {
+   "file": "c18_show.png",
+   "size": [
+    355,
+    387
+   ],
+   "sha256": "f2b8a3424702a0561685a8f972d3c63f46dac97d8ba71f7764a6891ee8129614"
+  },
+  "c19_show": {
+   "file": "c19_show.png",
+   "size": [
+    419,
+    337
+   ],
+   "sha256": "cf5309ae5e8a7d9800f5ae637a768a55655f18ca1f752b3b8620ba4259409089"
+  },
+  "c21_show": {
+   "file": "c21_show.png",
+   "size": [
+    258,
+    427
+   ],
+   "sha256": "49f225a7f4a3f8d048a2db767eb92f2bc755fcf582300934e755b212c1e9aa42"
+  },
+  "c23_show": {
+   "file": "c23_show.png",
+   "size": [
+    277,
+    387
+   ],
+   "sha256": "a2cfbc0ece84e63d9657c4a8263603119263f80d69ea848b88a5b169cf64714a"
+  },
+  "c24_show": {
+   "file": "c24_show.png",
+   "size": [
+    298,
+    421
+   ],
+   "sha256": "def4ee23211beba2cce1178a65c77af86e5cf82788bef35996d1538a5406b96d"
+  },
+  "c25_show": {
+   "file": "c25_show.png",
+   "size": [
+    243,
+    301
+   ],
+   "sha256": "d1f4c3973addb0a12f1f1b99bdc4e58064aaf5af3c9d53fe1f9ddbef60744c57"
+  },
+  "c26_show": {
+   "file": "c26_show.png",
+   "size": [
+    235,
+    417
+   ],
+   "sha256": "791120e9fea8f9cacd6292824b7b8e7b6c28e3a8d97ee662b3c98d01285daa21"
+  },
+  "c27_show": {
+   "file": "c27_show.png",
+   "size": [
+    262,
+    379
+   ],
+   "sha256": "b74045ccf900ee9097d4d8dc262dfe7ab74b7c7f366845ad4dc507a72d2ac16c"
+  },
+  "c28_show": {
+   "file": "c28_show.png",
+   "size": [
+    215,
+    352
+   ],
+   "sha256": "e68444acf8dcb17bc1ca2cdfbc1241f42c258425f96d31bde79156bc593eb5ae"
+  },
+  "c29_show": {
+   "file": "c29_show.png",
+   "size": [
+    287,
+    421
+   ],
+   "sha256": "0867c9596443ba97c6592b9cfe6cbde3b241b6cf3f04558474f8e6a8a69d722f"
+  },
+  "c30_show": {
+   "file": "c30_show.png",
+   "size": [
+    217,
+    424
+   ],
+   "sha256": "d96b432f6fddefdb9fc8925fbfde437f17ff9741e2a50f9b2602197410614832"
+  },
+  "c31_show": {
+   "file": "c31_show.png",
+   "size": [
+    350,
+    401
+   ],
+   "sha256": "cca61e8f4a3dbc204457a70d1d927c336e7c6736e7a06bb2646175089aa94665"
+  },
+  "c32_show": {
+   "file": "c32_show.png",
+   "size": [
+    329,
+    392
+   ],
+   "sha256": "deec746dd5b9d7ccea3ad4dfb636ec1a575025f19d379c6dde919feb15b3b217"
+  },
+  "c33_show": {
+   "file": "c33_show.png",
+   "size": [
+    234,
+    383
+   ],
+   "sha256": "f5888262fafee539e57f5429cdd41b4685300643543cf3539dbca89e7c97418f"
+  },
+  "c34_show": {
+   "file": "c34_show.png",
+   "size": [
+    248,
+    426
+   ],
+   "sha256": "3c07490130598817d8b7007823ab1cdd9085c2543796abc11f6389fe08387ab1"
+  },
+  "c35_show": {
+   "file": "c35_show.png",
+   "size": [
+    215,
+    407
+   ],
+   "sha256": "ea219535929f0658dcc6f628166a3e7070f4cc2414f35d864938fd3576f7386c"
+  },
+  "c36_show": {
+   "file": "c36_show.png",
+   "size": [
+    225,
+    424
+   ],
+   "sha256": "08d73137b5ca9bad7b10cef75c152e15a5d48aea958da930c251de2a7d55aa17"
+  },
+  "c38_show": {
+   "file": "c38_show.png",
+   "size": [
+    214,
+    433
+   ],
+   "sha256": "67450b7a084e655414c512e229f97b3a61927367392f3c9b146f4236c0f3bfac"
+  },
+  "c39_show": {
+   "file": "c39_show.png",
+   "size": [
+    239,
+    418
+   ],
+   "sha256": "2957cd3f2d1623457b6a50e96e41b80ad363c9c9f73b50609e43da9c3b884427"
+  },
+  "c40_show": {
+   "file": "c40_show.png",
+   "size": [
+    233,
+    385
+   ],
+   "sha256": "4f600ad81cf8ca4e4aa3f760fadd6ea5b5446713a076690e6c07be2ea9770126"
+  }
+ }
+}

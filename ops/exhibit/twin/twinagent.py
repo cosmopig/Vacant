@@ -49,6 +49,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import sys
 import threading
@@ -111,6 +112,11 @@ KEEP_ON_ERASE = ("receipts_RUN-ON.ndjson", "receipts_RUN-ON.pub.json", "rows.jso
 # 固定文字（全場逐字相同；argv 裡沒有觀眾原文）
 # ---------------------------------------------------------------------------
 
+#: ⚠ 2026-09-26 人類：「那個字是不是應該要讓他是 AI agent 生成的，不要隨便刻板」。
+#:   舊版第 1 步寫著「例如一封信、一份計畫、一張清單」——那一串例子會把每個分身都帶去
+#:   寫信／列清單（拍立得上那一句就變成人寫的罐頭）。**這裡不准再放例子**，只留約束：
+#:   一件寫進自己房間的一個檔案就能完成的事、不寫程式、PLAN.md 第一行是決定。
+#:   `tests/test_twin_agent_run.py::test_system_prompt_gives_no_examples` 守這一條。
 SYSTEM_PROMPT = (
     "你是「Vacant 世界」裡的一位居民，也是一位真人觀眾的數位分身。"
     "TRAITS.md 是那位觀眾交給我們的特質描述；你的個性、在意的事、說話的方式都從那裡來。\n\n"
@@ -118,8 +124,8 @@ SYSTEM_PROMPT = (
     "你只有三個工具：ws_list（看你房間裡有什麼）、ws_read（讀檔）、ws_write（寫檔）。"
     "它們只碰得到你自己的房間（目前的資料夾）。你沒有終端機，也沒有網路。\n\n"
     "步驟：\n"
-    "1. 決定一件你想在這個世界完成的實務小事——寫在檔案裡就能完成的事，"
-    "例如一封信、一份計畫、一張清單。不要寫程式。\n"
+    "1. 決定一件你想在這個世界完成的實務小事——寫進你房間裡的一個檔案就能完成。"
+    "不要寫程式。\n"
     "2. 用 ws_write 寫 PLAN.md：第一行用一句話說你決定做什麼；"
     "接著用兩三句說你為什麼選它（從 TRAITS.md 的特質出發）。\n"
     "3. 動手做：用 ws_write 把成品寫成一個檔（檔名你自己取，副檔名用 .md 或 .txt）。\n"
@@ -657,6 +663,129 @@ def run_artifacts_present(work_root: pathlib.Path, sub_id: str) -> bool:
     if rd.exists():
         return any(c.name not in KEEP_ON_ERASE for c in rd.iterdir())
     return False
+
+
+# ---------------------------------------------------------------------------
+# 收據帶走（2026-09-26，`decisions/DECISION_20260926_TWIN_POLAROID.md` §五）
+# ---------------------------------------------------------------------------
+
+#: 收據鏈一筆的頂層欄位（`logbook.LogEntry.to_json`）。多一個少一個都不發。
+RECEIPT_ENTRY_KEYS = frozenset({"stream_id", "branch_id", "seq", "prev_hash", "ts_ms",
+                                "type", "payload", "sig"})
+RECEIPT_TYPES = frozenset({"ws_attempt", "ws_verdict"})
+#: payload 准出現的鍵（`receipts.ATTEMPT_FIELDS`／`VERDICT_FIELDS`＋launcher 簽進去的 extra）。
+#: **白名單不是黑名單**：launcher 哪天多簽一個欄位，這裡不認得就整份不發（fail-closed），
+#: 要人看過那個欄位是不是只有雜湊與計數再加進來。
+RECEIPT_PAYLOAD_KEYS = frozenset({
+    "task_id", "arm", "attempt", "gate_round", "ws_sha256", "verdict_sha256",
+    "conversation_sha256", "run", "conversation_digest_kind", "requests_seen", "retry",
+    "max_attempts", "accepted", "ws_start_sha256", "agent_rc", "stop_reason",
+    "argv_sha256", "feedback_delivery", "accepted_is_null", "attempts_used",
+    "attestation_sha256", "attested", "canary_fired", "enclosure_applied", "tier",
+    "unexplained", "wire_count_semantics", "wire_quiesced", "ws_end_sha256",
+})
+_RECEIPT_HEX_KEYS = frozenset({
+    "ws_sha256", "verdict_sha256", "conversation_sha256", "ws_start_sha256",
+    "ws_end_sha256", "argv_sha256", "attestation_sha256"})
+_HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
+_HEX128_RE = re.compile(r"^[0-9a-f]{128}$")
+_ENUM_RE = re.compile(r"^[A-Za-z0-9_.:'\-]{0,40}$")
+_TASK_RE = re.compile(r"^twin:tw-[0-9a-f]{12}$")
+_B58_RE = re.compile(r"^z[1-9A-HJ-NP-Za-km-z]{20,80}$")
+#: 一條分身收據應該只有兩筆（一筆 ws_attempt、一筆 ws_verdict）。給一點餘裕，但不收一本書。
+RECEIPT_MAX_ENTRIES = 8
+
+
+class ReceiptShapeError(ValueError):
+    """收據長得不像「只有雜湊與計數」——整份不發。"""
+
+
+def _check_receipt_value(key: str, v: Any) -> None:
+    if key in _RECEIPT_HEX_KEYS:
+        if v is not None and not (isinstance(v, str) and _HEX64_RE.match(v)):
+            raise ReceiptShapeError(f"{key} 不是 64 位十六進位")
+        return
+    if key == "task_id":
+        if not (isinstance(v, str) and _TASK_RE.match(v)):
+            raise ReceiptShapeError("task_id 不是 twin:tw-<12 hex> 別名")
+        return
+    if v is None or isinstance(v, bool):
+        return
+    if isinstance(v, int):
+        if abs(v) > 2 ** 53:
+            raise ReceiptShapeError(f"{key} 的整數超出瀏覽器安全範圍")
+        return
+    if isinstance(v, str) and _ENUM_RE.match(v):
+        return
+    raise ReceiptShapeError(f"{key} 的值不是雜湊／計數／短枚舉")
+
+
+def check_receipt_shape(entries: list[dict[str, Any]], pub: dict[str, Any]) -> None:
+    """**只有雜湊與計數**的可執行判準。過不了就 `ReceiptShapeError`。"""
+    if not entries or len(entries) > RECEIPT_MAX_ENTRIES:
+        raise ReceiptShapeError(f"收據筆數 {len(entries)} 不在 1..{RECEIPT_MAX_ENTRIES}")
+    if set(pub) != {"vacant_id", "pub_hex"} or not _HEX64_RE.match(str(pub.get("pub_hex"))) \
+            or not _B58_RE.match(str(pub.get("vacant_id"))):
+        raise ReceiptShapeError("公鑰檔形狀不對")
+    for e in entries:
+        if set(e) != RECEIPT_ENTRY_KEYS:
+            raise ReceiptShapeError(f"收據一筆的欄位不對：{sorted(set(e) ^ RECEIPT_ENTRY_KEYS)}")
+        if e["type"] not in RECEIPT_TYPES:
+            raise ReceiptShapeError(f"收據事件別 {e['type']!r} 不在白名單")
+        for k in ("stream_id", "prev_hash"):
+            if not _HEX64_RE.match(str(e[k])):
+                raise ReceiptShapeError(f"{k} 不是 64 位十六進位")
+        if not _HEX128_RE.match(str(e["sig"])):
+            raise ReceiptShapeError("sig 不是 128 位十六進位")
+        if not isinstance(e["branch_id"], str) or not _ENUM_RE.match(e["branch_id"]):
+            raise ReceiptShapeError("branch_id 形狀不對")
+        for k in ("seq", "ts_ms"):
+            if not isinstance(e[k], int) or isinstance(e[k], bool) or not 0 <= e[k] <= 2 ** 53:
+                raise ReceiptShapeError(f"{k} 不是安全整數")
+        p = e["payload"]
+        if not isinstance(p, dict):
+            raise ReceiptShapeError("payload 不是物件")
+        extra = set(p) - RECEIPT_PAYLOAD_KEYS
+        if extra:
+            raise ReceiptShapeError(f"payload 有不認得的鍵：{sorted(extra)}")
+        for k, v in p.items():
+            _check_receipt_value(k, v)
+
+
+def receipt_bundle(work_root: pathlib.Path, sub_id: str,
+                   expect_head: str | None = None) -> dict[str, Any]:
+    """這位分身那一跑的收據，打包成可以交給觀眾帶走的一份（**只有雜湊與計數**）。
+
+    回 `{"ok": True, "bundle": {...}}` 或 `{"ok": False, "why": "<類別>"}`（理由只有類別，
+    不含任何收據內容——這個回傳值會進 twinlink 的回報）。
+
+    `expect_head` 給了 ⇒ 鏈頭（最後一筆的 hash）必須等於它（拍立得上的收據短碼
+    就是它的前 8 碼；對不上就不發，免得觀眾拿到一份跟拍立得不是同一跑的收據）。
+    """
+    from vacant_network.logbook import LogEntry
+    _ws, rd = paths_for(pathlib.Path(work_root), sub_id)
+    chain_p = rd / "receipts_RUN-ON.ndjson"
+    pub_p = rd / "receipts_RUN-ON.pub.json"
+    if not chain_p.is_file() or not pub_p.is_file():
+        return {"ok": False, "why": "no_receipt_file"}
+    try:
+        entries = [json.loads(ln) for ln in chain_p.read_text(encoding="utf-8").splitlines()
+                   if ln.strip()]
+        pub = json.loads(pub_p.read_text(encoding="utf-8"))
+        check_receipt_shape(entries, pub)
+        head = LogEntry.from_json(entries[-1]).hash()
+    except ReceiptShapeError as exc:
+        return {"ok": False, "why": "shape_rejected", "detail": str(exc)[:160]}
+    except (OSError, ValueError, KeyError, TypeError):
+        return {"ok": False, "why": "unreadable"}
+    if expect_head is not None and head != expect_head:
+        return {"ok": False, "why": "head_mismatch"}
+    return {"ok": True, "bundle": {
+        "v": 1, "kind": "vacant.twin.receipt/1",
+        "task_id": entries[-1]["payload"].get("task_id"),
+        "head": head, "n": len(entries), "pub": pub, "entries": entries,
+        "honesty": ("這份收據只有雜湊、計數與固定枚舉，沒有你的原文。"
+                    "它證明這一跑的紀錄事後沒有被改過，不證明分身做得好。")}}
 
 
 def job_for(sub_id: str, card: Any, card_text: Any, cfg: AgentConfig) -> Job | None:

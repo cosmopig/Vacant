@@ -1,0 +1,21 @@
+jf-openhuninn-2.0.ttf（jf 粉圓體 2.0）
+
+來源：justfont 開源字型 jf open huninn（https://github.com/justfont/open-huninn-font）
+本機取得：~/Library/Fonts/jf-openhuninn-2.0.ttf（2026-09-26 複製，sha256 見 polaroid.py 的 FONT_SHA256）
+
+授權：SIL Open Font License, Version 1.1（https://openfontlicense.org/ ；字型 name table
+nameID 13／14 逐字：「This Font Software is licensed under the SIL Open Font License,
+Version 1.1. ... See the SIL Open Font License for the specific language, permissions and
+limitations governing your use of this Font Software.」／ http://scripts.sil.org/OFL）
+
+著作權（字型 name table nameID 0 逐字節錄）：
+  [Kosugi Maru]   Copyright (c) 2010 MOTOYA CO.,LTD.
+  [Varela Round]  Copyright (x) 2011-2016 The Varela Round Project Authors
+                  (https://github.com/alefalefalef/Varela-Round-Hebrew/), with Reserved Font
+                  Names 'Varela' and 'Varela Round'.
+  [jf open huninn] Copyright (c) 2020-2023 The jf open huninn font is redistributed by
+                  justfont CO.,LTD, with Reserved Font Names 'open huninn' ...
+  完整著作權聲明與授權條款也寫在字型檔自己的 metadata 裡（OFL 第 2 條允許的放法）。
+
+用途：拍立得（ops/exhibit/twin/polaroid.py）白邊上那一行「分身決定做的事」與小字。
+字型檔**原樣**附上、未修改、未改名；OFL 不准單獨販售字型本身，這裡是隨軟體附帶。

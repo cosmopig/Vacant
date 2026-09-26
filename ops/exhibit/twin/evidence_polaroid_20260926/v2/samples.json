@@ -1,0 +1,857 @@
+{
+  "note": "合成特質（不是真人）；那一句＝分身真跑一次自己寫的 PLAN.md 第一行（decision_by_agent），不是人寫的。沒有真跑成功的不產範例，列在 skipped。",
+  "composed_with": "polaroid.compose（與 twinlink.make_polaroid 同一組輸入）",
+  "samples": [
+    {
+      "file": "polaroid_p1_c09_pose.png",
+      "synthetic": true,
+      "persona": "p1",
+      "card": {
+        "shape": "修長",
+        "color": "灰藍",
+        "texture": "光滑",
+        "vibe": "說話很直、不太會客套、週末會一個人去爬郊山",
+        "first_line": "先講結論。"
+      },
+      "decision_by_agent": "我決定整理一份「週末登山清單」。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "5930fbe90bf64425bfc350d9ac04cab8",
+      "verdict_hash": "facee37cc36d19ed07c867fd46e672e7239ef37bf27ce2b5b06cdca0fa61dadb",
+      "receipt_short": "facee37c",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:06:59Z",
+      "cast_id": "c09",
+      "sha256": "5e30581e50c778bc848c821473600d21d2f04aceffc5bee9f24450700f0a0e93",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c09",
+        "figure": "pose",
+        "figure_file": "c09_show.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          213,
+          1034,
+          565,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 15,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          541,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1271236
+      }
+    },
+    {
+      "file": "polaroid_p2_c33_pose.png",
+      "synthetic": true,
+      "persona": "p2",
+      "card": {
+        "shape": "粗獷",
+        "color": "暖土",
+        "texture": "指紋",
+        "vibe": "安靜、喜歡觀察人、對聲音很敏感",
+        "first_line": "嗯……讓我想一下。"
+      },
+      "decision_by_agent": "我決定在房間裡記錄一份關於木材質感的觀察筆記。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "42fae8d548a64cdd927348ab20fb234f",
+      "verdict_hash": "50f330de858b6d3336744398a99a5677930a1393c1e0494c6387f61f26e803ec",
+      "receipt_short": "50f330de",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:07:20Z",
+      "cast_id": "c33",
+      "sha256": "7ffd3d42de5f9aece8017d745cbbb5c5a88c944eb7a109c38b44eb3989288ff4",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c33",
+        "figure": "pose",
+        "figure_file": "c33_show.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          147,
+          1034,
+          631,
+          1135
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 22,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          551,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1353683
+      }
+    },
+    {
+      "file": "polaroid_p3_c28_pose.png",
+      "synthetic": true,
+      "persona": "p3",
+      "card": {
+        "shape": "小巧",
+        "color": "苔綠",
+        "texture": "斑駁",
+        "vibe": "急性子、笑點很低、很會跟陌生人聊天",
+        "first_line": "欸你知道嗎！"
+      },
+      "decision_by_agent": "我決定寫一份「日文單字記憶小撇步」。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "ec3b251fe8d34636bd9884ac243f27aa",
+      "verdict_hash": "520be42653fb53dee2170e35a1203c560081f8afd5234d2a152bcc00777954b6",
+      "receipt_short": "520be426",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:07:25Z",
+      "cast_id": "c28",
+      "sha256": "e319a3b70d5a3b2e81d6ab3596b35b8bdda004a75f2e42c6087a2ffe4484141a",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c28",
+        "figure": "pose",
+        "figure_file": "c28_show.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          147,
+          1034,
+          631,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 17,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          556,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1284315
+      }
+    },
+    {
+      "file": "polaroid_p4_c19_pose.png",
+      "synthetic": true,
+      "persona": "p4",
+      "card": {
+        "shape": "厚實",
+        "color": "奶油",
+        "texture": "光滑",
+        "vibe": "慢條斯理、有點固執、記性很好",
+        "first_line": "坐，不急。"
+      },
+      "decision_by_agent": "我打算在房間裡建立一份「公園路線導覽」。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "809c9b193e4a4d0d82ea292352becae7",
+      "verdict_hash": "7b4c49b509bbc00009e9b81b319be730f8cc963d1a85ab3f1ae9b73c172c9a30",
+      "receipt_short": "7b4c49b5",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:07:32Z",
+      "cast_id": "c19",
+      "sha256": "90b66d232515d23d57727470a391e1eb02d57bfd1cdc69774881900196881b22",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c19",
+        "figure": "pose",
+        "figure_file": "c19_show.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          169,
+          1034,
+          609,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 19,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          555,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1342838
+      }
+    },
+    {
+      "file": "polaroid_p5_c08_cast40.png",
+      "synthetic": true,
+      "persona": "p5",
+      "card": {
+        "shape": "圓潤",
+        "color": "暖土",
+        "texture": "絨面",
+        "vibe": "容易緊張但很認真、半夜才有精神",
+        "first_line": "我可以問一個可能很笨的問題嗎？"
+      },
+      "decision_by_agent": "我決定為自己寫一份「深夜護理師的放鬆清單」。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "01ec51cbb1a74f2d8befd5eab11218a4",
+      "verdict_hash": "6c4eb9b02ba19e37fb81f84cd7ccc16e5dff2ee702ae61cfcba5878b876461ae",
+      "receipt_short": "6c4eb9b0",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:07:37Z",
+      "cast_id": "c08",
+      "sha256": "3f532a7508d986df150546ebae3f42134386bd6be61578c27cb188fec416f3f8",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c08",
+        "figure": "cast40",
+        "figure_file": "c08.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          125,
+          1034,
+          653,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 21,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          553,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1311709
+      }
+    },
+    {
+      "file": "polaroid_p6_c38_cast40.png",
+      "synthetic": true,
+      "persona": "p6",
+      "card": {
+        "shape": "粗獷",
+        "color": "奶油",
+        "texture": "絨面",
+        "vibe": "好奇、想法跳來跳去、什麼都想拆開看看",
+        "first_line": "這個可以拆開嗎？"
+      },
+      "decision_by_agent": "我決定在房間裡寫一個關於「如果恐龍有外星科技」的奇幻構想。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "024497d777894d7ca9d07076b046ab9f",
+      "verdict_hash": "4c145ad883580b26f2e91614eeaa8f6aa09533925c1a41b1f69aa8873b228125",
+      "receipt_short": "4c145ad8",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:07:44Z",
+      "cast_id": "c38",
+      "sha256": "2b2381cef4bbe8a6c65ae07c5c457231e8f4d20a5c3075311184b8174b64de17",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c38",
+        "figure": "cast40",
+        "figure_file": "c38.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          81,
+          1034,
+          697,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 28,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          553,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1299956
+      }
+    },
+    {
+      "file": "polaroid_p7_c01_cast40.png",
+      "synthetic": true,
+      "persona": "p7",
+      "card": {},
+      "decision_by_agent": "我決定建立一份「借貸與心意清單」。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "a8d7ad948aec433e95ba9ac0626d1bb3",
+      "verdict_hash": "b3374afa958e56ec13fa9e824ce6ed7de532c629a8b1267bda8edb2c701f7b23",
+      "receipt_short": "b3374afa",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:31:15Z",
+      "cast_id": "c01",
+      "sha256": "4fae7dd75282141688bc066eadbb6ccd09b1a09505b8861f407ea101eb8bf8fb",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c01",
+        "figure": "cast40",
+        "figure_file": "c01.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          191,
+          1034,
+          587,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 16,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          549,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1294182
+      }
+    },
+    {
+      "file": "polaroid_p8_c20_cast40.png",
+      "synthetic": true,
+      "persona": "p8",
+      "card": {
+        "shape": "方正",
+        "color": "灰藍",
+        "texture": "絨面",
+        "vibe": "話很多、一講就停不下來、喜歡把事情講得很完整",
+        "first_line": "好我跟你說喔，這件事要從頭講起。"
+      },
+      "decision_by_agent": "我決定為這個房間編寫一份「導遊故事集」。",
+      "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+      "model": "gemma-4-12b-it-qat",
+      "run_id": "b3f725da5c1c481b89c01cb6e88c3fa2",
+      "verdict_hash": "3c031c6f6f3893d1ffbde1232feb9e1b573b9481aa908a2945e42e6171ba6caa",
+      "receipt_short": "3c031c6f",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "run_at": "2026-09-26T01:31:23Z",
+      "cast_id": "c20",
+      "sha256": "52f9ccfea3217b9cde2cf1d2e24dd13793211001bd19c79b0da38892c0d394a2",
+      "meta": {
+        "v": 2,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c20",
+        "figure": "cast40",
+        "figure_file": "c20.png",
+        "plate": "plate_s00",
+        "window": [
+          62,
+          75,
+          1021,
+          976
+        ],
+        "caption_box": [
+          74,
+          1022,
+          704,
+          1146
+        ],
+        "caption_drawn": [
+          169,
+          1034,
+          609,
+          1136
+        ],
+        "caption_blank": false,
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 19,
+        "caption_lines": 2,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          74,
+          1266,
+          704,
+          1302
+        ],
+        "footer_drawn": [
+          74,
+          1272,
+          547,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 9,
+        "qr_box": [
+          760,
+          1041,
+          1021,
+          1302
+        ],
+        "qr_quiet_box": [
+          724,
+          1005,
+          1057,
+          1338
+        ],
+        "qr_quiet_min_l": 218,
+        "qr_quiet_painted": false,
+        "frame": "file:b2faf31d6747",
+        "frame_note": null,
+        "frame_fit": {
+          "scale": 1.3139,
+          "extend_px": 137
+        },
+        "bytes_n": 1290907
+      }
+    }
+  ],
+  "skipped": []
+}

@@ -1,0 +1,297 @@
+{
+  "note": "合成特質、合成決定、合成收據短碼；沒有任何一筆來自真人",
+  "samples": [
+    {
+      "file": "polaroid_1_short.png",
+      "synthetic": true,
+      "card": {
+        "shape": "圓潤",
+        "color": "暖土",
+        "texture": "光滑"
+      },
+      "decision_in": "寫一封謝卡給國小導師",
+      "cast_id": "c08",
+      "receipt_short": "dae67da4",
+      "sha256": "08a3b60b297e7aae94531241e19bd119ca86a76ecfc1c968651f89a516852ff6",
+      "meta": {
+        "v": 1,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c08",
+        "window": [
+          60,
+          60,
+          1020,
+          1020
+        ],
+        "caption_box": [
+          72,
+          1059,
+          736,
+          1123
+        ],
+        "caption_drawn": [
+          164,
+          1070,
+          644,
+          1114
+        ],
+        "caption_truncated": false,
+        "caption_redacted": false,
+        "caption_chars": 10,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          72,
+          1266,
+          736,
+          1302
+        ],
+        "footer_drawn": [
+          72,
+          1272,
+          550,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 8,
+        "qr_box": [
+          788,
+          1070,
+          1020,
+          1302
+        ],
+        "qr_quiet_box": [
+          756,
+          1038,
+          1052,
+          1334
+        ],
+        "frame": "placeholder",
+        "frame_note": "no_frame_file",
+        "bytes_n": 324302
+      }
+    },
+    {
+      "file": "polaroid_2_long_truncated.png",
+      "synthetic": true,
+      "card": {
+        "shape": "修長",
+        "color": "苔綠",
+        "texture": "斑駁"
+      },
+      "decision_in": "為下週末安排一份慢節奏的散步路線，途中經過三家老書店、一間賣手沖咖啡的小店，最後在河堤看夕陽",
+      "cast_id": "c11",
+      "receipt_short": "8a83d94d",
+      "sha256": "14e326487211d6980e5d64848137491217139856f196ad7b74800125cf905eed",
+      "meta": {
+        "v": 1,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c11",
+        "window": [
+          60,
+          60,
+          1020,
+          1020
+        ],
+        "caption_box": [
+          72,
+          1059,
+          736,
+          1123
+        ],
+        "caption_drawn": [
+          92,
+          1070,
+          715,
+          1114
+        ],
+        "caption_truncated": true,
+        "caption_redacted": false,
+        "caption_chars": 13,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          72,
+          1266,
+          736,
+          1302
+        ],
+        "footer_drawn": [
+          72,
+          1272,
+          554,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 8,
+        "qr_box": [
+          788,
+          1070,
+          1020,
+          1302
+        ],
+        "qr_quiet_box": [
+          756,
+          1038,
+          1052,
+          1334
+        ],
+        "frame": "placeholder",
+        "frame_note": "no_frame_file",
+        "bytes_n": 248417
+      }
+    },
+    {
+      "file": "polaroid_3_mixed_emoji.png",
+      "synthetic": true,
+      "card": {
+        "shape": "方正",
+        "color": "赭紅",
+        "texture": "指紋"
+      },
+      "decision_in": "## 列一張「搬家 checklist」✅ 給室友 📦",
+      "cast_id": "c17",
+      "receipt_short": "aa2f4fa7",
+      "sha256": "416c0f1327f17491f3c9ef3eaaef93924c6bcffdf5f9052b888601e589f5c527",
+      "meta": {
+        "v": 1,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c17",
+        "window": [
+          60,
+          60,
+          1020,
+          1020
+        ],
+        "caption_box": [
+          72,
+          1059,
+          736,
+          1123
+        ],
+        "caption_drawn": [
+          77,
+          1069,
+          730,
+          1115
+        ],
+        "caption_truncated": true,
+        "caption_redacted": false,
+        "caption_chars": 20,
+        "dropped_glyphs": 2,
+        "footer_box": [
+          72,
+          1266,
+          736,
+          1302
+        ],
+        "footer_drawn": [
+          72,
+          1272,
+          540,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 8,
+        "qr_box": [
+          788,
+          1070,
+          1020,
+          1302
+        ],
+        "qr_quiet_box": [
+          756,
+          1038,
+          1052,
+          1334
+        ],
+        "frame": "placeholder",
+        "frame_note": "no_frame_file",
+        "bytes_n": 306513
+      }
+    },
+    {
+      "file": "polaroid_4_no_traits.png",
+      "synthetic": true,
+      "card": {},
+      "decision_in": "整理一份給自己的睡前閱讀清單",
+      "cast_id": "c01",
+      "receipt_short": "4cfd63ec",
+      "sha256": "95ab9ce5b93d4b1503fb23f926ea7c5e3230d92dfc5f98b0cc0807a182538f9d",
+      "meta": {
+        "v": 1,
+        "size": [
+          1080,
+          1350
+        ],
+        "cast_id": "c01",
+        "window": [
+          60,
+          60,
+          1020,
+          1020
+        ],
+        "caption_box": [
+          72,
+          1059,
+          736,
+          1123
+        ],
+        "caption_drawn": [
+          92,
+          1070,
+          715,
+          1114
+        ],
+        "caption_truncated": true,
+        "caption_redacted": false,
+        "caption_chars": 13,
+        "dropped_glyphs": 0,
+        "footer_box": [
+          72,
+          1266,
+          736,
+          1302
+        ],
+        "footer_drawn": [
+          72,
+          1272,
+          543,
+          1297
+        ],
+        "qr_text": "https://vacant.cosmopig.com",
+        "qr_version": 3,
+        "qr_modules": 29,
+        "qr_module_px": 8,
+        "qr_box": [
+          788,
+          1070,
+          1020,
+          1302
+        ],
+        "qr_quiet_box": [
+          756,
+          1038,
+          1052,
+          1334
+        ],
+        "frame": "placeholder",
+        "frame_note": "no_frame_file",
+        "bytes_n": 321195
+      }
+    }
+  ]
+}
