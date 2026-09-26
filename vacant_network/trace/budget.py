@@ -41,9 +41,18 @@ def missing_outputs(rec: Recorder, platform: str, session: str) -> tuple[int, li
     start_idx = steps[0].pre_index if steps and steps[0].pre_index else ev.tr.initial
     named, in_dirs = ev.materials(texts, start_idx)
     given = set(named) | set(in_dirs)
+    latest = set(ev.tr.index(ev.tr.latest_index()))
     missing = [(rel, raw) for rel, raw in outs
-               if rel not in given and not os.path.exists(rec.workspace / rel)]
+               if rel not in given and not exists(rec, rel, latest)]
     return start, missing
+
+
+def exists(rec: Recorder, rel: str, latest: set[str]) -> bool:
+    """要求的檔在不在：專案根底下那個路徑，或（相對路徑）agent 在子資料夾裡寫了同一個相對路徑
+    （專案根＝git 根、agent 在子資料夾裡工作；v3.1）。寧可當成在（不提醒），不要把在的說成不在。"""
+    if os.path.exists(rec.workspace / rel) or rel in latest:
+        return True
+    return any(f.endswith("/" + rel) for f in latest)
 
 
 def turn_check(agent: str, session_id: str | None, cwd: str | None, turn: Any, budget: Any, *,

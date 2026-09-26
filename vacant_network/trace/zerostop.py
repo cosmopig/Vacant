@@ -408,8 +408,9 @@ def _write(md: pathlib.Path, text: str, data: dict[str, Any]) -> None:
 # ── ended before the agent said it was done (v3) ────────────────────
 def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
           turn: Any = None, budget: Any = None) -> dict[str, Any]:
-    """工作階段結束、這個要求裡交件前檢查一次都沒跑（回合上限、Esc、關掉）：寫交件說明給人。
-    不送任何東西給模型；回 record（`user_message` 只在有介面時會被顯示）。任何錯誤都不擋。"""
+    """這一跑被中止（pi 回報：回合上限或人按 Esc）、而且這個要求最後沒有一次放行的交件前檢查：
+    寫交件說明給人（只寫檔：工作階段結束時已經沒有畫面可以顯示）。不送任何東西給模型。任何錯誤都不擋。
+    最後一次檢查是「退回」（只剩一回合時退回缺檔、接著被上限切斷）也寫（v3.1）。"""
     from .budget import missing_outputs
     from .evidence import Evidence
     ws = capture.workspace_for(cwd, None)
@@ -420,15 +421,15 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
         return {}
     session = str(session_id or "unknown")
     key = f"{agent}:{session}"
-    start, _texts, steps = Evidence(rec, platform=agent, session=session).window()
+    ev = Evidence(rec, platform=agent, session=session)
+    start, texts, steps = ev.window()
     if not steps:
         return {"ended": {"why": "no steps in this request"}}
     evs = [e for e in rec.events() if e.get("session") == key and int(e.get("seq") or 0) > start]
-    if any(e.get("type") in ("review", "ended") for e in evs):
-        return {"ended": {"why": "the delivery check ran (or the note exists)"}}
+    reviews = [e for e in evs if e.get("type") == "review"]
+    if any(e.get("type") == "ended" for e in evs) or (reviews and reviews[-1].get("action") != "continue"):
+        return {"ended": {"why": "the delivery check let it through (or the note exists)"}}
     nudges = [e for e in evs if e.get("type") == "nudge"]
-    ev = Evidence(rec, platform=agent, session=session)
-    _s, texts, _st = ev.window()
     asked = ev.requested_outputs(texts)
     _s2, missing = missing_outputs(rec, agent, session)
     miss = {rel for rel, _ in missing}
@@ -439,8 +440,8 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
         turn_i = budget_i = None  # type: ignore[assignment]
         at_cap = False
     head = ("Ended before the agent said it was done" +
-            (f", after {turn_i} of the stated {budget_i} model turns" if at_cap else "") +
-            "; no delivery check ran.")
+            (f", after the stated {budget_i} model turns" if at_cap else "") +
+            ("; the last delivery check had sent it back." if reviews else "; no delivery check ran."))
     lines = [head]
     turns = [str(e.get("turn")) for e in nudges]
     reminded = ("" if not turns else f" A budget reminder was sent after turn {turns[0]}." if len(turns) == 1

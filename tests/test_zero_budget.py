@@ -74,9 +74,29 @@ def _nudges(p):
 def test_budget_pattern_reads_a_stated_turn_budget_and_nothing_else():
     R = re.compile(AG.BUDGET_RE_SRC, re.I)
     assert R.search("You have a hard budget of 15 model turns. Complete the task").group(1) == "15"
-    assert R.search("Use at most 20 steps.").group(1) == "20"
+    assert R.search("Use at most 20 turns.").group(1) == "20"
     assert R.search("Read up to 5 files.") is None
     assert R.search("Summarize in 3 bullet points.") is None
+    # v3.1：專案說明裡的計畫步數、重試次數不是回合上限（pi 也把 AGENTS.md 放進系統提示）
+    assert R.search("Break large changes into at most 6 steps.") is None
+    assert R.search("Retry flaky tests up to 5 iterations.") is None
+
+
+@pytest.mark.skipif(not pathlib.Path("/opt/node22/bin/node").exists() and not __import__("shutil").which("node"),
+                    reason="node not installed")
+def test_the_extension_reads_the_last_stated_budget(tmp_path):
+    """harness 把上限接在專案說明後面：取最後一句（v3.1）。在真的 node 裡跑擴充的 readBudget。"""
+    import shutil
+    import subprocess
+    node = shutil.which("node") or "/opt/node22/bin/node"
+    js = AG.pi_extension_text()
+    src = re.search(r"const BUDGET_RE = (/.*/i);", js).group(1)
+    fn = re.search(r"function readBudget[\s\S]*?\n\}", js).group(0)
+    prog = (f"const BUDGET_RE = {src};\n{fn}\nconsole.log(JSON.stringify(["
+            "readBudget('Project rule: at most 8 turns per sub-task.\\n\\nYou have a hard budget of 15 model turns.'),"
+            "readBudget('no budget here'), readBudget('max 3 turns')]));")
+    out = subprocess.run([node, "-e", prog], capture_output=True, text=True, timeout=30)
+    assert json.loads(out.stdout) == [15, None, None]
 
 
 def test_the_extension_carries_the_same_pattern_and_appends_to_other_drafts():
@@ -138,12 +158,30 @@ def test_at_most_two_reminders_per_request_and_a_new_request_starts_over(proj):
     assert a.turn(18, budget=20)["action"] == "continue"
 
 
-def test_a_given_input_is_never_reported_as_missing_output(proj):
+def test_a_file_written_under_the_agents_subfolder_counts_as_there(tmp_path, monkeypatch, proj):
+    """專案根＝git 根、agent 在子資料夾裡工作：相對路徑的要求檔寫在子資料夾裡也算在（v3.1）。"""
+    import subprocess
+    subprocess.run(["git", "init", "-q", str(proj)], check=True)
+    sub = proj / "analysis"
+    sub.mkdir()
+    a = Pi(sub)
+    a.ask("Read ../data/sales.csv and write the total to out.txt as a single number.")
+    a.bash("echo 2045 > out.txt", "", write={"out.txt": "2045\n"})
+    (proj / "out.txt").unlink(missing_ok=True)
+    (sub / "out.txt").write_text("2045\n")
+    assert a.turn(13)["action"] == "allow"
+    d = a.ev("stop", final_text="The total is in out.txt.")
+    assert "does not exist" not in (d.get("reason") or "")
+
+
+def test_beyond_the_stated_budget_the_budget_is_ignored(proj):
+    """用超過寫明的上限（沒有人在執行它）：不再當成最後一回合（v3.1）。"""
     a = Pi(proj)
-    a.ask("Read data/sales.csv and write the total to data/sales.csv's summary in /app/total.md.")
-    a.bash("head data/sales.csv", SALES)
-    d = a.turn(13)
-    assert d["action"] == "continue" and "sales.csv" not in d["reason"].splitlines()[1].split(",")[0]
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    d = a.ev("stop", final_text="Done.", turn=20, budget=15)
+    assert d["action"] == "continue" and "turns left" not in d["reason"]
+    assert a.turn(20, budget=15)["action"] == "allow"
 
 
 def test_no_budget_means_the_stop_check_is_unchanged(proj):
@@ -157,12 +195,30 @@ def test_no_budget_means_the_stop_check_is_unchanged(proj):
 
 # ── last turn: only the missing file is sent back ────────────────────
 
-def test_with_one_turn_left_only_the_missing_file_is_sent_back(proj):
-    a = Pi(proj)
+def _two_findings(a):
+    """一個真的「失敗的步驟」（自己寫的腳本跑失敗、之後才寫出交付物）＋要求的檔不存在。"""
     a.ask()
-    a.bash("python3 bad.py", "Traceback (most recent call last):\nValueError: bad")   # 失敗的步驟
-    d = a.ev("stop", final_text="Done.", turn=14, budget=15)
-    assert d["action"] == "continue"
+    a.n += 1
+    w = {"path": "analyze.py", "content": "import pandas\n"}
+    a.ev("pre_tool", tool="write", call_id=f"c{a.n}", input=w)
+    (a.p / "analyze.py").write_text("import pandas\n")
+    a.ev("post_tool", tool="write", call_id=f"c{a.n}", input=w, output="ok")
+    a.n += 1
+    run = {"command": "python3 analyze.py"}
+    a.ev("pre_tool", tool="bash", call_id=f"c{a.n}", input=run)
+    a.ev("post_tool", tool="bash", call_id=f"c{a.n}", input=run,
+         output="Traceback (most recent call last):\nValueError: bad", is_error=True)
+    a.bash("echo draft > notes.md", "", write={"notes.md": "draft\n"})
+
+
+def test_with_one_turn_left_only_the_missing_file_is_sent_back(proj, tmp_path):
+    a = Pi(proj)
+    _two_findings(a)
+    full = [ln for ln in a.ev("stop", final_text="Done.")["reason"].splitlines() if ln.startswith("- ")]
+    assert len(full) == 2                                         # 沒有上限：兩條都退回
+    b = Pi(proj, sid="T")
+    _two_findings(b)
+    d = b.ev("stop", final_text="Done.", turn=14, budget=15)
     body = [ln for ln in d["reason"].splitlines() if ln.startswith("- ")]
     assert len(body) == 1 and "/app/answer.txt" in body[0] and "1 of 15" in body[0]
 
@@ -175,12 +231,31 @@ def test_a_run_cut_off_before_the_stop_check_still_gets_a_note_for_the_person(pr
     a.bash("ls data", "sales.csv")
     a.turn(13)
     a.turn(14)
-    d = a.ev("session_end", reason="quit", turn=15, budget=15)
+    d = a.ev("session_end", reason="quit", turn=16, budget=15, aborted=True)
     assert d == {"action": "allow", "reason": ""}                # 什麼都不送給模型
     note = (Recorder(proj).dir / "delivery.md").read_text()
-    assert "Ended before the agent said it was done, after 15 of the stated 15 model turns" in note
+    assert "Ended before the agent said it was done, after the stated 15 model turns; no delivery check ran." in note
     assert "/app/answer.txt: does not exist. Budget reminders were sent after turns 13, 14." in note
     assert [e["type"] for e in Recorder(proj).events()].count("ended") == 1
+
+
+def test_no_cut_off_note_unless_the_run_was_aborted(proj):
+    """`opencode run`（不跑交件前檢查）、檢查出錯、延後：都不是「還沒說做完」（v3.1）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=5, budget=15)
+    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+
+
+def test_a_run_sent_back_on_its_last_turn_and_then_cut_off_gets_a_note(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    assert a.ev("stop", final_text="Done.", turn=14, budget=15)["action"] == "continue"
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "the last delivery check had sent it back" in note
 
 
 def test_no_cut_off_note_when_the_stop_check_ran(proj):
@@ -188,5 +263,5 @@ def test_no_cut_off_note_when_the_stop_check_ran(proj):
     a.ask()
     a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
     a.ev("stop", final_text="The answer is in /app/answer.txt.")
-    a.ev("session_end", reason="quit")
+    a.ev("session_end", reason="quit", aborted=True)
     assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0

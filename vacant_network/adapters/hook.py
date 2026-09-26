@@ -297,15 +297,20 @@ def _budget_of(payload: dict[str, Any]) -> tuple[int | None, int | None]:
     return (turn, budget) if budget > 0 and turn >= 0 else (None, None)
 
 
+def _turns_left(turn: int | None, budget: int | None) -> int | None:
+    """還剩幾回合；已經用超過寫明的上限 ⇒ 那個上限沒有人在執行（v3.1），當成沒有上限。"""
+    if turn is None or not budget or budget - turn < 1:
+        return None
+    return budget - turn
+
+
 def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
     """沒有契約的 Stop：證據檢查（`trace/zerostop.py`）。任何錯誤都放行（誠實邊界 1）。"""
     from ..trace import zerostop
     turn, budget = _budget_of(payload)
     action, reason, record = zerostop.stop(agent, ev.session_id, ev.cwd,
                                            zerostop.final_text_of(payload), mode=mode,
-                                           turns_left=(budget - turn) if budget and turn is not None
-                                           else None,
-                                           budget=budget)
+                                           turns_left=_turns_left(turn, budget), budget=budget)
     z = record.get("zero") or {}
     if z.get("error"):
         _log("errors.jsonl", {"agent": agent, "event": "stop",
@@ -391,7 +396,9 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         pid = _spawn_submit(contract.path, agent)
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
     elif ev.kind == "session_end" and contract is None and zero != "off" \
-            and ev.reason not in NON_TERMINAL_END_REASONS:
+            and ev.reason not in NON_TERMINAL_END_REASONS and payload.get("aborted") is True:
+        # 只有 agent 自己說「這一跑被中止了」（pi：上限或 Esc）才寫；沒走到交件前檢查的其他原因
+        # （檢查出錯、延後、`opencode run` 不檢查）不是「還沒說做完」（v3.1，2026-09-26 審查）
         d = _zero_ended(agent, payload, ev, zero)
     if ev.kind not in ("stop", "turn_check"):       # 提醒的詢問不是一個步驟，不進病歷的步驟
         _trace(agent, event, payload, ev, contract, d)

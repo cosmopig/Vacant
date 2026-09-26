@@ -467,7 +467,9 @@ class Evidence:
         outs = self.requested_outputs(prompt_texts)
         latest = self.tr.index(self.tr.latest_index())
         for rel, raw in outs:
-            if rel not in latest and rel not in named + dir_members:
+            # 相對路徑：agent 在專案的子資料夾裡寫了同一個相對路徑也算在（專案根＝git 根；v3.1）
+            if rel not in latest and rel not in named + dir_members \
+                    and not any(f.endswith("/" + rel) for f in latest):
                 findings.append({"kind": "missing_output", "path": rel, "asked": raw})
         scope = self.rec.dir.name
         for fd in findings:
