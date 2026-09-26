@@ -58,6 +58,12 @@ def cells(jobs: pathlib.Path, ledger: pathlib.Path, dataset: pathlib.Path, prefi
             "requests": lg.get("requests"), "provider_errors": errs.get(tag, 0),
             "prompt_tokens": lg.get("prompt_tokens"), "completion_tokens": lg.get("completion_tokens"),
             "upstream": ups.get(tag)}
+        try:
+            vout = (trial / "verifier" / "test-stdout.txt").read_text()
+        except OSError:
+            vout = ""
+        row["answer_file"] = (False if "answer.txt not found" in vout else
+                              True if "\nGot:" in "\n" + vout else None)
         row["infra_void"] = reward is None or (bool(lg.get("requests")) and
                                                errs.get(tag, 0) >= int(lg.get("requests") or 0))
         if arm != "A":
@@ -95,8 +101,9 @@ def summarize(rows: list[dict[str, Any]], primary: tuple[str, str] | None) -> di
             out["per_arm_sample"][f"{arm}-s{s}"] = {
                 "runs": sum(1 for r in rs if r), "correct": sum(ok(r) for r in rs),
                 "infra_void": sum(1 for r in rs if r and r["infra_void"]),
-                "no_answer": sum(1 for r in rs if r and not r["infra_void"] and not r["reward"]
-                                 and (r.get("first_stop") or {}).get("first_answer_exists") is not True)}
+                "no_answer_file": sum(1 for r in rs if r and not r["infra_void"] and r.get("answer_file") is False),
+                "wrong_answer": sum(1 for r in rs if r and not r["infra_void"] and not r["reward"]
+                                    and r.get("answer_file") is True)}
         for s1, s2 in combinations(samples, 2):
             b = c = n = 0
             for t in tasks:
