@@ -55,3 +55,11 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   --upstreams w401:3 1003:1 --deadline 2026-09-27T04:00:00Z --prefix v3local
 ```
 711 跑排入（79 題 × 3 組 × 3 次）。驅動不讀評分。
+
+## 8. 正式批次進行中：審查剩下的一條 → v3.2（05:05–05:40 UTC）
+
+- 審查 workflow（`review_v3/`）14 條都重現；13 條在 v3.1 修掉，剩下一條（最後一回合交答案被寫成「還沒說做完」）在 v3.2 修掉
+  （commit `33634f62`；裁決 §七；閘門 4 `gate4_final_on_cap/`）。**正式批次照跑凍結的 v3，沒有停、沒有換。**
+- 為了確認那一條在真實資料裡的量，跑了 `ops/eval/local/split_ended.py`（只讀 C2 已完成的 27 跑的 pi 事件流與 `vacant_check.json`）：
+  11 份說明裡 4 份是「最後一回合交了答案」（其中 3 跑答對）、7 份是真的被切斷——**這個拆法是事後的描述**，
+  它順帶顯示了這 11 跑的評分；停止規則只看時間，這一眼不改變任何跑的方式。
