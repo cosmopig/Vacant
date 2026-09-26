@@ -142,7 +142,8 @@ CONTRACT = ("# Contract\n\n## Library\n\n    solution.csv_to_jsonl(text: str) ->
 
 
 def test_v35_named_file_whose_text_is_in_the_request_is_not_pushed_back(env):
-    # R530 的題目：goal.md、contract.md 的全文貼在請求裡，又列出工作區有這些檔（2026-09-26 重播 58/59 格被退回）
+    # R530 的題目：goal.md、contract.md 的全文貼在請求裡，又列出工作區有這些檔（2026-09-26 重播 58/59 格被退回）；
+    # 貼上去的換行位置不同也算
     a = Agent(_proj(env, files={"goal.md": GOAL, "contract.md": CONTRACT, "run_tests.sh": "python3 -m pytest -q\n"}))
     a.ask(GOAL + "\n" + CONTRACT.replace("one JSON object per data row.", "one JSON object\nper data row.") +
           "\nYour working directory already contains these files:\n\n  contract.md\n  goal.md\n  run_tests.sh\n")
@@ -164,16 +165,60 @@ def test_v35_partly_quoted_file_is_still_pushed_back(env):
     assert ev["given_in_request"] == []
 
 
-def test_v35_given_file_listed_in_the_delivery_note(env):
-    from vacant_network.trace import zerostop
+PASTED_CFG = ("db_host: db.internal\npool_size: 10\ntimeout_s: 30\nretries: 10\nport: 8080\n"
+              "log_level: info\ncache_ttl_s: 600\n")
+
+
+@pytest.mark.parametrize("on_disk", [
+    # 審查 1：數字是貼上的值的前綴（逐行子字串會全部對上）
+    PASTED_CFG.replace("pool_size: 10", "pool_size: 1").replace("timeout_s: 30", "timeout_s: 3")
+    .replace("port: 8080", "port: 808"),
+    # 審查 2／5：一行不同的另一個版本（按字數算 90% 會算成「給了」）
+    PASTED_CFG.replace("cache_ttl_s: 600", "cache_ttl_s: 60000"),
+    # 審查 2：檔裡多一行貼上的沒有
+    PASTED_CFG + "keys_lower_case: true\n",
+    # 整個檔是貼上的那段的前綴（最後一個值 6 對 600）：字的邊界擋住
+    PASTED_CFG.replace("cache_ttl_s: 600", "cache_ttl_s: 6"),
+])
+def test_v35_a_different_version_pasted_is_not_the_file(env, on_disk):
+    a = Agent(_proj(env, files={"config/prod.yaml": on_disk}))
+    a.ask("Staging works with this config:\n\n" + PASTED_CFG +
+          "\nProduction fails. Compare with config/prod.yaml and list every difference in diff.md.")
+    a.write("diff.md", "None: the two configs are identical.\n")
+    ev = a.evidence("Done.")
+    assert ev["given_in_request"] == [] and "unread" in kinds(ev), ev
+
+
+def test_v35_short_file_matched_by_coincidence_is_not_given(env):
+    # 審查 3：很短的檔（一個狀態字）剛好出現在請求裡 ≠ 給了全文
+    a = Agent(_proj(env, files={"status.txt": "FAILED\n"}))
+    a.ask("The job status in status.txt is either OK or FAILED and nothing else; write what to do next in "
+          "next.md, and keep it short because the on-call person reads it on a phone.")
+    a.write("next.md", "Nothing to do.\n")
+    ev = a.evidence("Done.")
+    assert ev["given_in_request"] == [] and "unread" in kinds(ev), ev
+
+
+def test_v35_chinese_text_wrapped_differently_still_counts(env):
+    # 審查 8：中文換行不代表有空格——貼上的斷行位置不同也要對得上
+    spec = ("# 規格\n\n每一列輸出一個 JSON 物件，欄位一律是字串，空欄位輸出成空字串。"
+            "表頭重複時以最後一個為準，檔案結尾有沒有換行都一樣。\n")
+    a = Agent(_proj(env, files={"spec.md": spec}))
+    a.ask("請照 spec.md 實作 solution.py。內容如下：\n\n# 規格\n\n每一列輸出一個 JSON 物件，欄位一律是字串，"
+          "空欄位輸出成\n空字串。表頭重複時以最後一個為準，\n檔案結尾有沒有換行都一樣。\n")
+    a.write("solution.py", "def f():\n    return 1\n")
+    ev = a.evidence("完成。")
+    assert ev["given_in_request"] == ["spec.md"] and kinds(ev) == [], ev
+
+
+def test_v35_given_file_listed_separately_from_opened(env):
     a = Agent(_proj(env, files={"goal.md": GOAL, "notes.md": "Deadline: 2026-10-30\n"}))
     a.ask(GOAL + "\nSee goal.md and notes.md. Write summary.md.")
     a.read("notes.md")
     a.write("summary.md", "A summary.\n")
     ev = a.evidence("Done.")
     assert kinds(ev) == [] and ev["given_in_request"] == ["goal.md"], ev
-    assert "goal.md" not in ev["unread_dir"]
-    del zerostop  # 說明的字句由 test_zero_stop 以真的 Stop 驗
+    assert "notes.md" in ev["observed"] and "notes.md" not in ev["given_in_request"]
 
 
 def test_test_claim_without_a_run(env):

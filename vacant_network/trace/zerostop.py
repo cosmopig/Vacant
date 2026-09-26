@@ -334,9 +334,11 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
                    (f"; not opened: {', '.join(not_opened)}" if not_opened else ""))
     in_dirs = res.get("materials_in_dirs") or []
     dir_opened = [x for x in in_dirs if x in observed and x not in in_request]
+    dir_given = [x for x in in_dirs if x in in_request]
     if in_dirs:
         out.append(f"- Files in the folders named in the request: {len(in_dirs)} — opened: "
-                   f"{', '.join(dir_opened[:20]) or 'none'}")
+                   f"{', '.join(dir_opened[:20]) or 'none'}" +
+                   (f"; content already in the request: {', '.join(dir_given[:20])}" if dir_given else ""))
     out.append("- Final message: " + ("checked for test and build claims"
                                       if res.get("final_text_seen") else "not available"))
     fixed: list[str] = []
@@ -412,7 +414,8 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
     out += ["", NOTE_FOOTER, ""]
     data.update(written_after_reminder=[{"path": p_, "step": k, "after_turn": t} for p_, k, t in reminded])
     data.update(checked=v, deliverables=delivs, named=named, opened=opened,
-                not_opened=not_opened, in_dirs=in_dirs, dir_opened=dir_opened,
+                given_in_request=given_named, not_opened=not_opened, in_dirs=in_dirs,
+                dir_opened=dir_opened, dir_given_in_request=dir_given,
                 fixed=fixed, unverified=unverified,
                 findings=res.get("findings") or [])
     _write(md, "\n".join(out), data)
@@ -421,8 +424,10 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
     if in_progress:
         return ""
     given, given_opened = len(named) + len(in_dirs), len(opened) + len(dir_opened)
+    pasted = len(given_named) + len(dir_given)
     screen.append(f"Vacant checked this turn: {checked} value(s)" +
-                  (f", {given_opened}/{given} given file(s) opened" if given else "") + ".")
+                  (f", {given_opened}/{given} given file(s) opened" if given else "") +
+                  (f", {pasted} already in the request" if pasted else "") + ".")
     if fixed:
         screen.append(f"Redone before delivery: {len(fixed)} point(s).")
     if reminded:

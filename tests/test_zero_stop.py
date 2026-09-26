@@ -305,3 +305,31 @@ def test_verify_since_checks_only_the_new_part_and_falls_back_to_the_whole_chain
     assert ok2 and "new entries since entry" in why2 and mark2["seq"] > mark["seq"]
     ok3, why3, _ = rec.verify_since({"seq": mark["seq"], "hash": "0" * 64})
     assert ok3 and "new entries" not in why3            # 記號對不上 ⇒ 整條驗
+
+
+GOAL35 = ("# Goal\n\nA client keeps a pile of CSV files that people edit by hand. They want to feed\n"
+          "that data into another tool that only speaks JSON Lines.\n")
+
+
+def test_v35_content_in_the_request_is_told_as_such_in_the_note_json_and_screen(env, inproc):
+    """v3.5：貼了全文的檔不退回；說明、delivery.json、畫面上的一行都分開寫「已經在請求裡」（審查 5／6／9）。"""
+    _install()
+    p = _proj(env)
+    (p / "goal.md").write_text(GOAL35)
+    (p / "brief").mkdir()
+    (p / "brief" / "scope.md").write_text(GOAL35.replace("# Goal", "# Scope"))
+    (p / "brief" / "extra.md").write_text("Extra notes that were never pasted anywhere.\n")
+    a = Agent(p)
+    a.ask(GOAL35 + "\n" + GOAL35.replace("# Goal", "# Scope") +
+          "\nSee goal.md, data/sales.csv and the `brief` folder. Write plan.md.")
+    a.read("data/sales.csv")
+    a.write("plan.md", "A plan.\n")
+    d = a.stop()
+    assert "decision" not in d, d
+    note = _note(p)
+    assert "opened: data/sales.csv; content already in the request: goal.md" in note, note
+    assert "content already in the request: brief/scope.md" in note, note
+    data = json.loads((Recorder(p).dir / "delivery.json").read_text())
+    assert data["given_in_request"] == ["goal.md"] and data["dir_given_in_request"] == ["brief/scope.md"]
+    assert set(data["named"]) == set(data["opened"]) | set(data["given_in_request"]) | set(data["not_opened"])
+    assert "1/4 given file(s) opened, 2 already in the request" in d["systemMessage"], d

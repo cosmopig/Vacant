@@ -6,7 +6,7 @@
 | 發現 | 條件 |
 |---|---|
 | `unsourced` 沒有出處的具體值 | 任務有點名資料；值在這一回合新增或改過的行；文件類交付物；值是 agent 自己打出來的；這個任務看過的東西（步驟輸出、讀到的資料、人打的話）裡找不到它——比對時千分位、幣別、四捨五入／截斷、浮點雜訊、科學記號、×100 的百分比、K／M／B、日期的各種寫法都算同一個值；也不是由看過的表格簡單算得出來的；不在豁免裡 |
-| `unread` 點名的檔沒打開 | 人打的話裡**單獨**寫了這個檔，這一回合沒有任何一步讀到它，而且人打的話裡沒有貼它的全文（v3.5） |
+| `unread` 點名的檔沒打開 | 人打的話裡**單獨**寫了這個檔，這一回合沒有任何一步讀到它，而且人打的話裡沒有**整段**貼著它的全文（v3.5） |
 | `test_claim` 說測過但紀錄對不上 | 最後的訊息說測試通過／build 成功，但沒跑過、最後一次失敗、或通過之後程式碼又改過 |
 | `failed_step` 失敗的步驟被略過 | 跑 agent 自己寫的腳本或讀給定資料的那一步失敗；之後才寫出交付物；後來沒有再成功跑同一件事；最後的訊息也沒提 |
 
@@ -46,7 +46,32 @@ MAX_DIR_MATERIALS = 30
 MAX_VALUES_PER_FILE = 60
 MAX_CORPUS_NUMBERS = 5000
 GIVEN_INLINE_MAX = 64 * 1024     # 貼在請求裡的檔：只看這麼大以內的（見 Evidence.given_inline）
-GIVEN_INLINE_FRAC = 0.9          # 檔的文字至少這個比例出現在人打的話裡＝內容已經給了
+GIVEN_INLINE_MIN = 80            # 壓過空白之後至少這麼多位元組（UTF-8；中文一字 3）才算得上「貼了全文」（R530 最小的一份 297）
+_CJK = r"[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]"
+_CJK_GAP = re.compile(rf"(?<={_CJK})\s+(?={_CJK})")
+
+
+def _collapse(text: str) -> str:
+    """把所有空白壓成一個空格；兩個中日韓字之間的換行／空白直接拿掉（中文換行不代表有空格）。"""
+    return " ".join(_CJK_GAP.sub("", text).split())
+
+
+def _edge(a: str, b: str) -> bool:
+    """a|b 之間是不是一個字的邊界：空白，或兩邊都是中日韓字（`_collapse` 拿掉了它們之間的換行）。"""
+    return a == " " or b == " " or bool(re.match(_CJK, a) and re.match(_CJK, b))
+
+
+def _contains_whole(haystack: str, needle: str) -> bool:
+    """needle 整段出現在 haystack 裡、前後是字的邊界或頭尾（兩邊都已經 `_collapse` 過）。"""
+    i = haystack.find(needle)
+    while i >= 0:
+        j = i + len(needle)
+        if (i == 0 or _edge(haystack[i - 1], needle[0])) and \
+                (j == len(haystack) or _edge(needle[-1], haystack[j])):
+            return True
+        i = haystack.find(needle, i + 1)
+    return False
+
 
 ASSUMPTION_WORDS = re.compile(
     r"\b(assum\w*|estimat\w*|approx\w*|placeholder|tbd|tbc|e\.g\.|for example|example|sample|"
@@ -377,28 +402,28 @@ class Evidence:
         """人打的話裡已經貼了全文的檔：內容已經給了＝已經讀到（v3.5，2026-09-26）。
 
         R530 的題目把 `goal.md`、`contract.md` 整段貼在請求裡，又列出「工作區裡有這幾個檔」；agent 不必再打開，
-        舊版卻退回「點名的檔沒打開」——R530 SOLO 的紀錄重播 59 格裡 58 格被退回，大部分是這種
-        （`ops/eval/evidence_20260926_local/candidate2/`）。判準：這一回合開始時檔的內容，非空白的行逐行把連續空白
-        壓成一個，按字數算至少 `GIVEN_INLINE_FRAC` 出現在人打的話裡（人打的話也把所有空白壓成一個，所以換行位置
-        不同也對得上）。只看 ≤ `GIVEN_INLINE_MAX` 位元組、讀得出文字的檔；空檔不算。只會讓退回變少，不會變多。"""
-        joined = " ".join(" ".join(prompt_texts).split())
-        if not joined:
+        v3.4 卻退回「點名的檔沒打開」——R530 SOLO 的紀錄重播 59 格裡 58 格被退回，大部分是這種
+        （`ops/eval/evidence_20260926_local/v35_given_inline/`）。
+
+        判準（對抗審查之後收緊，`ops/eval/evidence_20260926_local/v35_given_inline/review/`）：這一回合開始時檔的**全文**，壓過空白之後**整段、連續地**出現在
+        人打的話裡（也壓過空白，前後是空白或頭尾）。貼的是舊版、差一行、數字是前綴（`pool_size: 1` 對貼上的
+        `pool_size: 10`）、只貼了一部分——都**不算**，照樣退回。至少 `GIVEN_INLINE_MIN` 位元組（太短的檔會被巧合對上）；
+        只看 ≤ `GIVEN_INLINE_MAX` 位元組、讀得出文字的檔。換行位置不同也對得上（空白都壓成一個；中日韓字之間的換行拿掉）。
+        只會讓退回變少，不會變多。"""
+        joined = _collapse("\n".join(prompt_texts))
+        if len(joined.encode()) < GIVEN_INLINE_MIN:
             return set()
         out: set[str] = set()
+        idx = self.tr.index(start_idx)
         for f in candidates:
-            e = self.tr.index(start_idx).get(f)
+            e = idx.get(f)
             if e is None or e.size > GIVEN_INLINE_MAX:
                 continue
             text = self.tr.file_text(start_idx, f)
             if not text or "\x00" in text:
                 continue
-            lines = [" ".join(ln.split()) for ln in text.splitlines()]
-            lines = [ln for ln in lines if ln]
-            total = sum(len(ln) for ln in lines)
-            if not total:
-                continue
-            hit = sum(len(ln) for ln in lines if ln in joined)
-            if hit >= GIVEN_INLINE_FRAC * total:
+            whole = _collapse(text)
+            if len(whole.encode()) >= GIVEN_INLINE_MIN and _contains_whole(joined, whole):
                 out.add(f)
         return out
 
