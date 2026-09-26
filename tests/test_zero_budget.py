@@ -265,3 +265,112 @@ def test_no_cut_off_note_when_the_stop_check_ran(proj):
     a.ev("stop", final_text="The answer is in /app/answer.txt.")
     a.ev("session_end", reason="quit", aborted=True)
     assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+
+
+# ── said done on the capped turn: checked afterwards, for the person (v3.2) ──
+
+def test_a_final_answer_on_the_capped_turn_is_checked_afterwards_for_the_person(proj):
+    """Harbor 的上限在自己的回合結束處理器裡中止：最後一回合是最終答案時 pi 也不進交件前檢查。
+    那不是「還沒說做完」——補跑同一個檢查，結果只寫給人（2026-09-26 審查；正式批次 C2 有 2 份）。"""
+    a = Pi(proj)
+    _two_findings(a)
+    d = a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True, final_answer=True,
+             final_text="The total amount is 2045.")
+    assert d == {"action": "allow", "reason": ""}                # 什麼都不送給模型
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "Ended before the agent said it was done" not in note
+    assert "The agent said it was done on the last of the stated 15 model turns" in note
+    assert "The check ran afterwards, for you only" in note
+    assert "Found after the run ended (not sent back): answer.txt (asked for in the request) did not exist" in note
+    assert "Found after the run ended (not sent back): step" in note and "python3 analyze.py" in note
+    ended = [e for e in Recorder(proj).events() if e["type"] == "ended"]
+    assert len(ended) == 1 and ended[0]["final_answer"] is True and ended[0]["checked"] is True
+    assert {f["kind"] for f in ended[0]["findings"]} == {"missing_output", "failed_step"}
+    assert not [e for e in Recorder(proj).events() if e["type"] == "review"]   # 不是一次交件前檢查
+
+
+def test_a_final_answer_at_the_cap_without_the_abort_flag_is_checked_too(proj):
+    """處理器的順序：Vacant 的回合結束先跑、上限的後跑 ⇒ Vacant 看不到中止；用完寫明的上限也算（v3.2）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=False, final_answer=True,
+         final_text="Done.")
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "The agent said it was done on the last of the stated 15 model turns" in note
+    assert "Found after the run ended" not in note
+
+
+def test_a_final_answer_before_the_cap_without_an_abort_gets_no_note(proj):
+    """最後一回合是最終答案、沒被中止、上限還沒到：交件前檢查本來就會跑（這裡沒跑＝出錯或延後），不補。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=5, budget=15, aborted=False, final_answer=True)
+    a.ev("session_end", reason="quit", aborted=False, final_answer=True)     # 沒有寫明上限
+    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+
+
+def test_the_check_after_the_end_failing_still_says_the_agent_said_done(proj, monkeypatch):
+    def boom(req):
+        raise RuntimeError("check crashed")
+    monkeypatch.setattr(zerostop, "_run_child", boom)
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True, final_answer=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "The agent said it was done, but the delivery check did not run." in note
+    assert "Ended before the agent said it was done" not in note
+
+
+@pytest.mark.skipif(not pathlib.Path("/opt/node22/bin/node").exists() and not __import__("shutil").which("node"),
+                    reason="node not installed")
+@pytest.mark.parametrize("vacant_first", [True, False])
+def test_the_extension_reports_a_final_answer_on_the_capped_turn(tmp_path, vacant_first):
+    """在真的 node 裡載入整個擴充、用假的 pi 送事件：15 回合、最後一回合是最終答案、上限的處理器中止。
+    兩種處理器順序都要把 `final_answer`、`final_text` 交給工作階段結束（v3.2）。"""
+    import shutil
+    import subprocess
+    node = shutil.which("node") or "/opt/node22/bin/node"
+    log = tmp_path / "calls.jsonl"
+    stub = tmp_path / "stub.sh"
+    stub.write_text(f'#!/bin/sh\nprintf \'{{"event":"%s","payload":%s}}\\n\' "$1" "$(cat)" >> {log}\n'
+                    'echo \'{"action":"allow"}\'\n')
+    stub.chmod(0o755)
+    ext = tmp_path / "ext.mjs"
+    ext.write_text(AG.PI_EXTENSION % {"argv": json.dumps([str(stub)]), "timeout_ms": 5000,
+                                      "budget_re": "/" + AG.BUDGET_RE_SRC.replace("/", r"\/") + "/i"})
+    drive = tmp_path / "drive.mjs"
+    drive.write_text(r"""
+import ext from "./ext.mjs";
+const h = {};
+ext({ on: (n, f) => { (h[n] = h[n] || []).push(f); } });
+const ctl = new AbortController();
+const ctx = { cwd: "/app", hasUI: false, signal: ctl.signal,
+              sessionManager: { getSessionId: () => "S1" }, getSystemPrompt: () => SP };
+const SP = "Be brief.\n\nYou have a hard budget of 15 model turns.";
+const VACANT_FIRST = %s;
+await h.before_agent_start[0]({ prompt: "q", systemPrompt: SP }, ctx);
+for (let t = 1; t <= 15; t++) {
+  const fin = t === 15;
+  const ev = { message: { stopReason: fin ? "stop" : "toolUse",
+                          content: [{ type: "text", text: fin ? "The answer is 42." : "" }] },
+               toolResults: fin ? [] : [{ toolCallId: "c" + t }], entries: [] };
+  if (fin && !VACANT_FIRST) ctl.abort();
+  await h.turn_end[0](ev, ctx);
+  if (fin && VACANT_FIRST) ctl.abort();
+}
+await h.session_shutdown[0]({ reason: "quit" }, ctx);
+""" % ("true" if vacant_first else "false"))
+    out = subprocess.run([node, str(drive)], capture_output=True, text=True, timeout=120, cwd=tmp_path)
+    assert out.returncode == 0, out.stderr
+    calls = [json.loads(x) for x in log.read_text().splitlines()]
+    end = [c for c in calls if c["event"] == "session_end"][0]["payload"]
+    assert end["turn"] == 15 and end["budget"] == 15 and end["final_answer"] is True
+    assert end["final_text"] == "The answer is 42."
+    assert end["aborted"] is (not vacant_first)
+    ended = hook._said_done_unchecked(end)
+    assert ended is True
+    # 第 13、14 回合有工具呼叫：提醒的詢問照舊；第 15 回合（最終答案）不問
+    assert [c["payload"]["turn"] for c in calls if c["event"] == "turn_check"] == [13, 14]

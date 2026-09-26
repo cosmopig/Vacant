@@ -331,12 +331,25 @@ def _zero_turn_check(agent: str, payload: dict[str, Any], ev: HookEvent, mode: s
     return HookDecision(action if action == "continue" else "allow", reason, record)
 
 
+def _said_done_unchecked(payload: dict[str, Any]) -> bool:
+    """pi 最後一回合是最終答案（沒有工具呼叫），接著被中止或剛好用完寫明的上限：agent 說了做完，
+    但交件前檢查沒跑到（上限在自己的回合結束處理器裡中止時，pi 不進 `agent_before_settle`；v3.2）。"""
+    if payload.get("final_answer") is not True:
+        return False
+    turn, budget = _budget_of(payload)
+    return payload.get("aborted") is True or (budget is not None and turn is not None and turn >= budget)
+
+
 def _zero_ended(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
-    """零設定 v3：還沒說做完就結束的那一跑也寫交件說明給人（`zerostop.ended`）。不擋任何東西。"""
+    """零設定 v3：還沒說做完就結束的那一跑也寫交件說明給人（`zerostop.ended`）。不擋任何東西。
+    v3.2：說了做完、檢查沒跑到的那一跑，在這裡補跑一次檢查，結果只寫給人。"""
     from ..trace import zerostop
     turn, budget = _budget_of(payload)
+    late = _said_done_unchecked(payload)
     try:
-        record = zerostop.ended(agent, ev.session_id, ev.cwd, mode=mode, turn=turn, budget=budget)
+        record = zerostop.ended(agent, ev.session_id, ev.cwd, mode=mode, turn=turn, budget=budget,
+                                final_answer=late,
+                                final_text=zerostop.final_text_of(payload) if late else None)
     except Exception as e:  # noqa: BLE001
         _log("errors.jsonl", {"agent": agent, "event": "session_end",
                               "error": f"zero-config ended note: {type(e).__name__}: {e}"[:500]})
@@ -396,9 +409,11 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         pid = _spawn_submit(contract.path, agent)
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
     elif ev.kind == "session_end" and contract is None and zero != "off" \
-            and ev.reason not in NON_TERMINAL_END_REASONS and payload.get("aborted") is True:
+            and ev.reason not in NON_TERMINAL_END_REASONS \
+            and (payload.get("aborted") is True or _said_done_unchecked(payload)):
         # 只有 agent 自己說「這一跑被中止了」（pi：上限或 Esc）才寫；沒走到交件前檢查的其他原因
-        # （檢查出錯、延後、`opencode run` 不檢查）不是「還沒說做完」（v3.1，2026-09-26 審查）
+        # （檢查出錯、延後、`opencode run` 不檢查）不是「還沒說做完」（v3.1，2026-09-26 審查）。
+        # 最後一回合交了答案、接著被上限停掉：說了做完，補跑檢查（v3.2）
         d = _zero_ended(agent, payload, ev, zero)
     if ev.kind not in ("stop", "turn_check"):       # 提醒的詢問不是一個步驟，不進病歷的步驟
         _trace(agent, event, payload, ev, contract, d)

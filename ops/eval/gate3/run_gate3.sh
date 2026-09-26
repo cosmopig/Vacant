@@ -7,7 +7,10 @@ set -uo pipefail
 HARBOR_DIR=$1; JOBS=$2; DATA=$3; W1=$4; W2=$5; MAXT=${6:-15}
 CA=/root/.ccr/ca-bundle.crt
 REPO=$(cd "$(dirname "$0")/../../.." && pwd)
-SCN=$REPO/ops/eval/gate3/scenario_capped.json
+SCN=${SCENARIO:-$REPO/ops/eval/gate3/scenario_capped.json}
+NAME=${GATE_NAME:-gate3}
+# ARMS（可選）："<標籤>=<wheel 或 ->" 以空白分開；沒給＝A、C1＝$W1、C2＝$W2（閘門 3 原本的三組）
+ARMS=${ARMS:-"A=- C1=$W1 C2=$W2"}
 PORT=18082
 mkdir -p "$JOBS"
 MOCK_HOST=172.17.0.1 MOCK_SCENARIO=$SCN MOCK_LOG=$JOBS/mock.jsonl \
@@ -15,12 +18,12 @@ MOCK_HOST=172.17.0.1 MOCK_SCENARIO=$SCN MOCK_LOG=$JOBS/mock.jsonl \
 MOCK=$!
 trap 'kill $MOCK 2>/dev/null' EXIT
 sleep 1
-for ARM in A C1 C2; do
-  AGENT=pi; W=-; [ "$ARM" = C1 ] && { AGENT=harbor_vacant:PiWithVacant; W=$W1; }
-  [ "$ARM" = C2 ] && { AGENT=harbor_vacant:PiWithVacant; W=$W2; }
+for PAIR in $ARMS; do
+  ARM=${PAIR%%=*}; W=${PAIR#*=}
+  AGENT=pi; [ "$W" != - ] && AGENT=harbor_vacant:PiWithVacant
   mkdir -p "$JOBS/$ARM"
   ( cd "$HARBOR_DIR" && PYTHONPATH="$REPO/ops/eval" VACANT_WHEEL="$W" uv run --no-dev harbor run \
-    --path "$DATA" -i dabstep-5 --job-name "gate3-$ARM" \
+    --path "$DATA" -i dabstep-5 --job-name "$NAME-$ARM" \
     --agent "$AGENT" --model "openrouter/mock-model" \
     --env docker -n 1 -q \
     --mounts "[{\"type\":\"bind\",\"source\":\"$CA\",\"target\":\"/usr/local/share/ccr-ca-bundle.crt\",\"read_only\":true}]" \
@@ -33,5 +36,5 @@ for ARM in A C1 C2; do
     --ve CURL_CA_BUNDLE=/usr/local/share/ccr-ca-bundle.crt \
     --ak max_turns=$MAXT --ak model_api=openai-completions --ak version=0.87.1 \
     --jobs-dir "$JOBS/$ARM" ) > "$JOBS/$ARM.log" 2>&1
-  echo "$ARM exit=$? reward=$(cat $JOBS/$ARM/gate3-$ARM/*/verifier/reward.txt 2>/dev/null)"
+  echo "$ARM exit=$? reward=$(cat $JOBS/$ARM/$NAME-$ARM/*/verifier/reward.txt 2>/dev/null)"
 done

@@ -194,31 +194,22 @@ const TIMEOUT = { prompt: 30000, pre_tool: 30000, post_tool: 30000, stop: %(time
 
 // Zero-config v3: a turn budget the agent was told about (e.g. "a hard budget of 15 model turns" in its
 // system prompt). Only the system prompt counts: a budget nobody enforces is not read from the person's
-// words. The LAST such sentence wins: a harness appends its cap after the project's own instructions
-// (AGENTS.md and the like, which pi also puts into the system prompt). TURNS counts every model turn in
-// this process, the same way a turn cap counts them — except the synthetic turn pi runs right after an
-// abort (it sends nothing to the model). ABORTED: this request was cut off (a cap, or the person's Esc).
-// LAST_FINAL: the last model turn was a final answer (no tool calls). A cap that aborts in its own
-// turn_end handler stops pi before agent_before_settle even then, so the agent said it was done and
-// the delivery check never ran; the session end runs it afterwards, for the person only (v3.2).
+// words. TURNS counts every model turn in this process, the same way a turn cap counts them.
 const BUDGET_RE = %(budget_re)s;
 let BUDGET = null;
 let TURNS = 0;
-let ABORTED = false;
-let LAST_FINAL = false;
-let LAST_TEXT = "";
 
 function readBudget(text) {
   try {
-    let n = NaN;
-    for (const m of String(text || "").matchAll(new RegExp(BUDGET_RE.source, "gi"))) n = Number(m[1]);
+    const m = BUDGET_RE.exec(String(text || ""));
+    const n = m ? Number(m[1]) : NaN;
     return Number.isFinite(n) && n >= 4 ? n : null;
   } catch (e) { return null; }
 }
 
 // Asynchronous on purpose: a stop check can take minutes, and spawnSync would freeze
 // pi's TUI and streaming for that long. Every handler below is awaited by pi.
-function ask(event, payload, ms) {
+function ask(event, payload) {
   return new Promise((resolve) => {
     let out = "";
     let done = false;
@@ -226,7 +217,7 @@ function ask(event, payload, ms) {
     try {
       const child = spawn(ARGV[0], [...ARGV.slice(1), event], { stdio: ["pipe", "pipe", "ignore"] });
       const timer = setTimeout(() => { try { child.kill("SIGKILL"); } catch (e) {} finish({ action: "allow" }); },
-                               ms || TIMEOUT[event] || 30000);
+                               TIMEOUT[event] || 30000);
       child.stdout.on("data", (b) => { out += b; });
       child.on("error", () => { clearTimeout(timer); finish({ action: "allow" }); });
       child.on("close", () => {
@@ -341,9 +332,6 @@ export default function (pi) {
   // Accountable trace: the task message (is a wrong value in the answer something the task gave?).
   pi.on("before_agent_start", async (event, ctx) => {
     mark(ctx);
-    ABORTED = false;
-    LAST_FINAL = false;
-    LAST_TEXT = "";
     if (BUDGET === null) BUDGET = readBudget(event && event.systemPrompt);
     await ask("prompt", { ...who(ctx), prompt: event && event.prompt });
     return undefined;
@@ -374,15 +362,7 @@ export default function (pi) {
   // yet, one short reminder rides the request that goes out next anyway (no extra model request; never on
   // the capped turn itself, which is already aborted). Without a stated budget nothing is sent here.
   pi.on("turn_end", async (event, ctx) => {
-    const synthetic = ABORTED && event && event.message && event.message.stopReason === "error";
-    if (!synthetic) {
-      TURNS += 1;
-      const m = (event && event.message) || {};
-      LAST_FINAL = !((event && event.toolResults) || []).length && m.stopReason === "stop";
-      LAST_TEXT = LAST_FINAL ? String((typeof m.content === "string" ? m.content : text(m.content)) || "")
-                               .slice(0, 20000) : "";
-    }
-    if (ctx.signal && ctx.signal.aborted) ABORTED = true;
+    TURNS += 1;
     try {
       if (BUDGET === null && ctx.getSystemPrompt) BUDGET = readBudget(ctx.getSystemPrompt());
     } catch (e) {}
@@ -414,22 +394,16 @@ export default function (pi) {
   pi.on("session_shutdown", async (event, ctx) => {
     // reason: quit | reload | new | resume | fork — only `quit` ends the work
     const w = who(ctx);
-    // said done, then stopped (a cap's abort, or its turn ran out) before the check could run
-    const late = !w.parent_session_id && LAST_FINAL && (ABORTED || (BUDGET !== null && TURNS >= BUDGET));
     await ask(w.parent_session_id ? "subagent_stop" : "session_end",
-              { ...w, reason: (event && event.reason) || undefined, turn: TURNS, budget: BUDGET,
-                aborted: ABORTED, final_answer: LAST_FINAL,
-                final_text: late ? LAST_TEXT || undefined : undefined },
-              late ? TIMEOUT.stop : undefined);
+              { ...w, reason: (event && event.reason) || undefined, turn: TURNS, budget: BUDGET });
   });
 }
 """
 
-#: 回合預算的樣子（JS 的 `BUDGET_RE` 由這一份產生；`trace/budget.py` 用同一份）。只認「上限／預算……數字＋（模型的）回合」，
-#: 例：「You have a hard budget of 15 model turns」「at most 20 turns」；「at most 6 steps」「up to 5 iterations」不算
-#: （v3.1：專案說明裡常有「計畫最多 6 步」這種話，pi 也會把它放進系統提示——2026-09-26 審查）。取**最後一個**。
+#: 回合預算的樣子（JS 的 `BUDGET_RE` 由這一份產生；`trace/budget.py` 用同一份）。只認「上限／預算……數字＋回合／步驟」，
+#: 例：「You have a hard budget of 15 model turns」「Use at most 20 steps」；「up to 5 files」不算。
 BUDGET_RE_SRC = (r"\b(?:budget|limit|maximum|max|at most|no more than|up to)\b[^.\n]{0,40}?\b(\d{1,4})\s+"
-                 r"(?:model\s+|agent\s+|llm\s+)?turns\b")
+                 r"(?:model\s+|agent\s+|llm\s+)?(?:turns|steps|iterations)\b")
 
 
 def pi_extension_text(timeout_ms: int = 600_000) -> str:
@@ -495,7 +469,7 @@ import { spawn } from "node:child_process";
 const ARGV = %(argv)s;
 const TIMEOUT = { prompt: 30000, pre_tool: 30000, post_tool: 30000, stop: %(timeout_ms)d, session_end: 30000 };
 
-function ask(event, payload, ms) {
+function ask(event, payload) {
   return new Promise((resolve) => {
     let out = "";
     let done = false;
@@ -503,7 +477,7 @@ function ask(event, payload, ms) {
     try {
       const child = spawn(ARGV[0], [...ARGV.slice(1), event], { stdio: ["pipe", "pipe", "ignore"] });
       const timer = setTimeout(() => { try { child.kill("SIGKILL"); } catch (e) {} finish({ action: "allow" }); },
-                               ms || TIMEOUT[event] || 30000);
+                               TIMEOUT[event] || 30000);
       child.stdout.on("data", (b) => { out += b; });
       child.on("error", () => { clearTimeout(timer); finish({ action: "allow" }); });
       child.on("close", () => {

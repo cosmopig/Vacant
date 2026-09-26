@@ -1,0 +1,50 @@
+{
+ "steps": [
+  {
+   "run": "cut -d, -f11 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f3 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f4 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f5 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f6 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f7 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f8 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f9 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f10 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f12 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f13 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "write": [
+    "/app/answer.txt",
+    "NL"
+   ]
+  },
+  {
+   "run": "cut -d, -f14 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f15 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  }
+ ],
+ "final": "The issuing country with the most transactions is NL; the answer is in /app/answer.txt."
+}

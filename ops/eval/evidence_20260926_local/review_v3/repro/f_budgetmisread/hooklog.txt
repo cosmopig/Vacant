@@ -1,0 +1,8 @@
+prompt {"cwd":"/home/u/proj","session_id":"S1","prompt":"Refactor utils.py"}
+stop {"cwd":"/home/u/proj","session_id":"S1","turn":7,"budget":10}
+prompt {"cwd":"/home/u/proj","session_id":"S1","prompt":"Now write a summary of the changes to NOTES.md"}
+turn_check {"cwd":"/home/u/proj","session_id":"S1","turn":8,"budget":10}
+turn_check {"cwd":"/home/u/proj","session_id":"S1","turn":9,"budget":10}
+stop {"cwd":"/home/u/proj","session_id":"S1","turn":13,"budget":10}
+prompt {"cwd":"/home/u/proj","session_id":"S1","prompt":"Fix the failing test in tests/test_utils.py"}
+stop {"cwd":"/home/u/proj","session_id":"S1","turn":24,"budget":10}
