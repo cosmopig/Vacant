@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -282,7 +283,8 @@ def _say(f: dict[str, Any]) -> str:
 def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[str, Any],
                 mode: str, *, in_progress: bool = False, left_open: list[dict[str, Any]] | None = None,
                 rounds_used: int = 0, broken: dict[str, Any] | None = None,
-                after_end: str | None = None, context: list[str] | None = None) -> str:
+                after_end: str | None = None, context: list[str] | None = None,
+                extra_unverified: list[str] | None = None) -> str:
     """寫 delivery.md／.json；回畫面上的短訊息（最多 `NOTE_MAX_LINES` 行）。
     `after_end`：這一跑已經結束、檢查是事後補跑的（v3.2）——那一句放在最前面，還在的發現寫成「事後查到、沒有退回」。"""
     md = rec.dir / "delivery.md"
@@ -358,7 +360,7 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
             fixed.append(f"round {r['round']}: {_say(f)}; {how}")
     if fixed:
         out += ["", "## Redone before delivery", ""] + [f"- {x}" for x in fixed]
-    nudge_turns, reminded = _reminded_writes(rec, key, res.get("window_start"))
+    nudge_turns, reminded, writes_unknown = _reminded_writes(rec, key, res.get("window_start"))
     if nudge_turns:
         one = len(delivs) == 1 and not checked
         ts = [str(t) for t in nudge_turns]
@@ -366,7 +368,10 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
                 "- " + (f"A budget reminder was sent after turn {ts[0]}" if len(ts) == 1 else
                         f"Budget reminders were sent after turns {', '.join(ts)}") +
                 " (a requested file did not exist yet)." +
-                ("" if reminded else " Nothing was written after " + ("it." if len(ts) == 1 else "them."))]
+                ("" if reminded or writes_unknown else
+                 " Nothing was written after " + ("it." if len(ts) == 1 else "them.")) +
+                (" What was written after " + ("it" if len(ts) == 1 else "them") + " is not fully known "
+                 "(the workspace was not fully observed)." if writes_unknown else "")]
         for path, k, t in reminded:
             out.append(f"- {path}: written at step {k}, after the budget reminder sent after turn {t}. "
                        "The reminder asked for the current best answer; this note does not say whether "
@@ -379,9 +384,18 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
     if unread_dir:
         unverified.append("Given files never opened: " + ", ".join(unread_dir[:20]))
     unverified += disclosed
+    unverified += list(extra_unverified or [])
+    # 事後的檢查：這個要求裡已經退回過的那一條，寫「第幾輪退回過、結束時還在」，不寫「沒有退回」（v3.4）
+    sent_round = {f["finding_id"]: r["round"] for r in sess.get("rounds") or []
+                  for f in r.get("findings") or [] if f.get("finding_id")}
     for f in left_open or []:
-        unverified.append(f"Found after the run ended (not sent back): {_say(f)}" if after_end
-                          else f"Still open after {rounds_used} round(s): {_say(f)}")
+        if after_end and f.get("finding_id") in sent_round:
+            unverified.append(f"Sent back in round {sent_round[f['finding_id']]}; still there when the "
+                              f"run ended: {_say(f)}")
+        elif after_end:
+            unverified.append(f"Found after the run ended (not sent back): {_say(f)}")
+        else:
+            unverified.append(f"Still open after {rounds_used} round(s): {_say(f)}")
     if mode == "observe":
         for f in res.get("findings") or []:
             unverified.append(f"Observed (not sent back, observe mode): {_say(f)}")
@@ -419,7 +433,7 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
             parts.append(f"{len(unread_dir)} given file(s) not opened")
         screen.append("Not verified: " + "; ".join(parts) + ".")
     if left_open:
-        screen.append(f"Found after the run ended: {len(left_open)} point(s)." if after_end
+        screen.append(f"Open when the run ended: {len(left_open)} point(s)." if after_end
                       else f"Still open after {rounds_used} round(s): {len(left_open)} point(s).")
     screen.append(f"Note: {md}")
     return "\n".join(screen[:NOTE_MAX_LINES])
@@ -430,7 +444,7 @@ ERROR_STOP_LINE = ("The agent's last turn ended on a model error, not on a claim
 
 
 def _reminded_writes(rec: Recorder, key: str, window_start: Any
-                     ) -> tuple[list[Any], list[tuple[str, int, Any]]]:
+                     ) -> tuple[list[Any], list[tuple[str, int, Any]], bool]:
     """這個要求裡的回合預算提醒：(提醒是在第幾回合之後的清單, 提醒之後才寫的檔)。檔＝(路徑, 第幾步〔病歷的步驟編號，
     和其他說明行同一套〕, 前一個提醒是在第幾回合之後)。一個檔寫過好幾次只算最後一次；最後一次在第一個提醒之前 ⇒ 不算（v3.3）。"""
     try:
@@ -441,20 +455,28 @@ def _reminded_writes(rec: Recorder, key: str, window_start: Any
     evs = [e for e in rec.events() if int(e.get("seq") or 0) > start]
     nudges = [e for e in evs if e.get("type") == "nudge" and e.get("session") == key]
     if not nudges:
-        return [], []
+        return [], [], False
     steps = [e for e in evs if e.get("type") == "step" and
              str((e.get("actor") or {}).get("session")) == sid]
+    first = int(nudges[0].get("seq") or 0)
+    unknown = any(e.get("writes_unknown") for e in steps if int(e.get("seq") or 0) > first) or \
+        any(e.get("type") == "unrecorded_change" for e in evs if int(e.get("seq") or 0) > first)
     last: dict[str, tuple[int, int]] = {}
     for k, e in enumerate(steps, 1):
         for w in e.get("writes") or []:
             p = str(w.get("path") if isinstance(w, dict) else w)
+            if isinstance(w, dict) and w.get("after") is None and "after" in w:
+                last.pop(p, None)          # 刪掉的不是「寫了」；之前寫過又刪掉＝現在沒有（v3.4）
+                continue
+            if isinstance(w, dict) and "after" in w and w.get("before") == w.get("after"):
+                continue                   # 內容沒變（只改權限）
             last[p] = (int(e.get("n") or k), int(e.get("seq") or 0))
     out = []
     for p, (k, seq) in sorted(last.items(), key=lambda x: x[1][0]):
         before = [n for n in nudges if int(n.get("seq") or 0) < seq]
         if before:
             out.append((p, k, before[-1].get("turn")))
-    return [n.get("turn") for n in nudges], out
+    return [n.get("turn") for n in nudges], out, unknown
 
 
 def _write(md: pathlib.Path, text: str, data: dict[str, Any]) -> None:
@@ -468,7 +490,7 @@ def _write(md: pathlib.Path, text: str, data: dict[str, Any]) -> None:
 # ── ended before the agent said it was done (v3) ────────────────────
 def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
           turn: Any = None, budget: Any = None, final_answer: bool = False,
-          final_text: str | None = None, runner: Any = None) -> dict[str, Any]:
+          final_text: str | None = None, runner: Any = None, aborted: bool = False) -> dict[str, Any]:
     """這一跑被中止（pi 回報：回合上限或人按 Esc）、而且這個要求最後沒有一次放行的交件前檢查：
     寫交件說明給人（只寫檔：工作階段結束時已經沒有畫面可以顯示）。不送任何東西給模型。任何錯誤都不擋。
     最後一次檢查是「退回」（只剩一回合時退回缺檔、接著被上限切斷）也寫（v3.1）。
@@ -498,12 +520,18 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
     miss = {rel for rel, _ in missing}
     try:
         turn_i, budget_i = int(turn), int(budget)
-        at_cap = turn_i >= budget_i
+        # 剛好用完寫明的上限才說「在上限處停掉」；用超過＝沒有人在執行那個上限（v3.1 的規則；v3.4）
+        at_cap = turn_i == budget_i
     except (TypeError, ValueError):
         turn_i = budget_i = None  # type: ignore[assignment]
         at_cap = False
     # v3.3：被切斷的那一跑也事後補跑同一個檢查（只寫給人）；v3.2 只補「最後一回合說了做完」的那一種
-    if final_answer:
+    sent_back = bool(reviews)          # 這個要求裡最後一次檢查是退回（放行的已經在上面 return 了）
+    if final_answer and sent_back:
+        said = ("The delivery check had sent it back; the agent then said it was done again" +
+                (f" on the last of the stated {budget_i} model turns" if at_cap and budget_i else "") +
+                ", and the run stopped before the check could look again.")
+    elif final_answer:
         said = ("The agent said it was done on the last of the stated "
                 f"{budget_i} model turns; the run stopped there, before the delivery check could send "
                 "anything back." if at_cap and budget_i else
@@ -515,9 +543,9 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
                 ("; the last delivery check had sent it back." if reviews else
                  "; no delivery check ran before that."))
     said += " The check ran afterwards, for you only (nothing was sent to the agent)."
-    done = _check_after_end(rec, agent, session_id, key, start, mode, final_text, turn_i,
-                            budget_i, nudges, sorted(miss), runner, said=said,
-                            final_answer=final_answer)
+    done, error = _check_after_end(rec, agent, session_id, key, start, mode, final_text, turn_i,
+                                   budget_i, nudges, sorted(miss), runner, said=said,
+                                   final_answer=final_answer)
     if done is not None:
         return done
     head = ("The agent said it was done, but the delivery check did not run."
@@ -542,9 +570,11 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
             "requested": [r for r, _ in asked], "missing": sorted(miss),
             "nudged_turns": [e.get("turn") for e in nudges]}
     _write(md, "\n".join(out), data)
+    # 一跑只記一筆 ended（事後檢查失敗的原因也在這一筆裡；v3.4：原本會記兩筆、評測的份數算成兩倍）
     rec.append("ended", {"session": key, "window_start": start, "turn": turn_i, "budget": budget_i,
                          "missing": sorted(miss), "nudges": len(nudges),
-                         "final_answer": final_answer, "checked": False})
+                         "final_answer": final_answer, "checked": False,
+                         **({"error": error} if error else {})})
     screen = [head] + lines[1:3] + [f"Note: {md}"]
     return {"ended": {"missing": len(miss), "nudges": len(nudges)},
             "user_message": "\n".join(screen[:NOTE_MAX_LINES])}
@@ -553,35 +583,42 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
 def _check_after_end(rec: Recorder, agent: str, session_id: str | None, key: str,
                      start: int, mode: str, final_text: str | None, turn: int | None,
                      budget: int | None, nudges: list[dict[str, Any]], missing: list[str],
-                     runner: Any, *, said: str, final_answer: bool) -> dict[str, Any] | None:
+                     runner: Any, *, said: str, final_answer: bool
+                     ) -> tuple[dict[str, Any] | None, str | None]:
     """這一跑已經結束（說了做完但檢查沒跑到〔v3.2〕，或被切斷〔v3.3〕）：補跑交件前檢查
-    （同一個檢查、同一個子行程與時限），只寫給人。檢查跑不起來 ⇒ None（呼叫端寫短說明）。"""
+    （同一個檢查、同一個子行程與時限），只寫給人。回 (結果, 錯誤)；檢查跑不起來 ⇒ (None, 原因或 None)，
+    由呼叫端寫短說明與**唯一的**一筆 ended。"""
     session = key.split(":", 1)[1] if ":" in key else key
     req = {"ws": str(rec.workspace), "platform": agent, "session": session,
            "final_text": (final_text or "")[:20000] or None}
     try:
         out = (runner or _run_child)(req)
     except Exception as e:  # noqa: BLE001 — 失敗一律不擋
-        rec.append("ended", {"session": key, "window_start": start, "turn": turn, "budget": budget,
-                             "final_answer": final_answer, "checked": False, "missing": missing,
-                             "nudges": len(nudges), "error": f"{type(e).__name__}: {e}"[:300]})
-        return None
+        return None, f"{type(e).__name__}: {e}"[:300]
     if not out.get("ran"):
-        return None
-    res = out["result"]
+        return None, str(out.get("broken") or out.get("why") or "")[:300] or None
+    res = dict(out["result"])
+    # 紀錄沒看到被寫、磁碟上卻在的要求的檔（等不到 post 的步驟、看不全的工作區）：不說「不存在」（v3.4）
+    on_disk = [f for f in res.get("findings") or [] if f.get("kind") == "missing_output"
+               and os.path.exists(rec.workspace / str(f.get("path")))]
+    if on_disk:
+        res["findings"] = [f for f in res["findings"] if f not in on_disk]
     st = _load_state(rec)
     sess = dict((st.get("sessions") or {}).get(key) or {})
     if sess.get("request") != res.get("window_start"):
         sess = {"request": res.get("window_start"), "rounds": [], "open": []}
     findings = res.get("findings") or []
+    extra = [f"{f.get('path')} exists on disk, but no recorded step wrote it; its content was not checked"
+             for f in on_disk]
     note = _write_note(rec, key, res, sess, mode, left_open=findings if mode == "evidence" else [],
-                       rounds_used=_rounds_used(session_id, scope(rec.workspace)), after_end=said)
+                       rounds_used=_rounds_used(session_id, scope(rec.workspace)), after_end=said,
+                       extra_unverified=extra)
     rec.append("ended", {"session": key, "window_start": start, "turn": turn, "budget": budget,
                          "missing": missing, "nudges": len(nudges), "final_answer": final_answer,
                          "checked": True, "findings": [_compact(f) for f in findings][:30]})
     return {"ended": {"final_answer": final_answer, "checked": True, "findings": len(findings),
                       "nudges": len(nudges)},
-            "user_message": note}
+            "user_message": note}, None
 
 
 def final_text_of(payload: dict[str, Any]) -> str | None:

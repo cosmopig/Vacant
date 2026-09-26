@@ -418,13 +418,15 @@ export default function (pi) {
   pi.on("session_shutdown", async (event, ctx) => {
     // reason: quit | reload | new | resume | fork — only `quit` ends the work
     const w = who(ctx);
-    // said done, then stopped (a cap's abort, or its turn ran out) before the check could run
-    const late = !w.parent_session_id && LAST_FINAL && (ABORTED || (BUDGET !== null && TURNS >= BUDGET));
+    // said done, then stopped (a cap's abort, or exactly the stated budget used up) before the check
+    // could run. Over the stated budget means nobody enforces it (v3.1), so only TURNS === BUDGET counts.
+    const late = !w.parent_session_id && LAST_FINAL && (ABORTED || (BUDGET !== null && TURNS === BUDGET));
+    // the check after the end (v3.2/v3.3) gets the same time limit as the Stop check, not session_end's 30 s
     await ask(w.parent_session_id ? "subagent_stop" : "session_end",
               { ...w, reason: (event && event.reason) || undefined, turn: TURNS, budget: BUDGET,
                 aborted: ABORTED, final_answer: LAST_FINAL,
                 final_text: late ? LAST_TEXT || undefined : undefined },
-              late ? TIMEOUT.stop : undefined);
+              !w.parent_session_id && (late || ABORTED) ? TIMEOUT.stop : undefined);
   });
 }
 """

@@ -338,7 +338,8 @@ def _said_done_unchecked(payload: dict[str, Any]) -> bool:
     if payload.get("final_answer") is not True:
         return False
     turn, budget = _budget_of(payload)
-    return payload.get("aborted") is True or (budget is not None and turn is not None and turn >= budget)
+    # 用超過寫明的上限＝沒有人在執行它（v3.1）：只有剛好用完才算（v3.4，2026-09-26 審查）
+    return payload.get("aborted") is True or (budget is not None and turn is not None and turn == budget)
 
 
 def _zero_ended(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
@@ -349,7 +350,7 @@ def _zero_ended(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -
     late = _said_done_unchecked(payload)
     try:
         record = zerostop.ended(agent, ev.session_id, ev.cwd, mode=mode, turn=turn, budget=budget,
-                                final_answer=late,
+                                final_answer=late, aborted=payload.get("aborted") is True,
                                 final_text=zerostop.final_text_of(payload) if late else None)
     except Exception as e:  # noqa: BLE001
         _log("errors.jsonl", {"agent": agent, "event": "session_end",
@@ -371,6 +372,7 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
             _log("errors.jsonl", {"agent": agent, "event": event,
                                   "error": f"contract invalid: {e}"[:500]})
     d = HookDecision("allow")
+    traced = False
     # 零設定（沒有契約、人裝過 Vacant）：`adapters/mode.py`；有契約時一律走契約那條
     zero = _zero_mode() if contract is None else "off"
     if ev.kind == "stop":
@@ -414,9 +416,13 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
             and (payload.get("aborted") is True or _said_done_unchecked(payload)):
         # 只有 agent 自己說「這一跑被中止了」（pi：上限或 Esc）才寫；沒走到交件前檢查的其他原因
         # （檢查出錯、延後、`opencode run` 不檢查）不是「還沒說做完」（v3.1，2026-09-26 審查）。
-        # 最後一回合交了答案、接著被上限停掉：說了做完，補跑檢查（v3.2）
+        # 最後一回合交了答案、接著被上限停掉：說了做完，補跑檢查（v3.2）。
+        # 先把工作階段收掉（等不到 post 的步驟歸位、session_closed 落盤），再跑事後的檢查——
+        # 和 Stop 一樣的順序；檢查被砍掉也不會少掉工作階段的結束（v3.4，2026-09-26 審查）
+        _trace(agent, event, payload, ev, contract, d)
+        traced = True
         d = _zero_ended(agent, payload, ev, zero)
-    if ev.kind not in ("stop", "turn_check"):       # 提醒的詢問不是一個步驟，不進病歷的步驟
+    if ev.kind not in ("stop", "turn_check") and not traced:   # 提醒的詢問不是一個步驟，不進病歷的步驟
         _trace(agent, event, payload, ev, contract, d)
     if (contract is not None or zero != "off") and ev.kind in ("pre_tool", "post_tool") \
             and d.action != "deny":
