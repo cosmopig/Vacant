@@ -103,6 +103,8 @@ def main() -> int:
     ap.add_argument("--model", help="runs.json 裡的 model 欄（例 g4）")
     ap.add_argument("--stop-at-usd", type=float, help="代理 summary.json 的 spent_usd 到這個數就停")
     ap.add_argument("--summary", type=pathlib.Path, help="代理的 summary.json（配 --stop-at-usd）")
+    ap.add_argument("--resume", type=pathlib.Path, help="之前的結果（jsonl 或這支印出的紀錄）：已經有的 (跑, 條件, 第幾次) 不再送")
+    ap.add_argument("--workers", type=int, default=1, help="同時送幾通（只改牆鐘時間，不改設計）")
     a = ap.parse_args()
     runs = requests_by_run(a.io, a.prefix)
     keep = None
@@ -123,6 +125,14 @@ def main() -> int:
             return 0.0
     k = a.budget - 2                     # 第 k 回合結束之後送出的是第 k+1 通
     rows = []
+    done: set[tuple[str, str, int]] = set()
+    if a.resume and a.resume.is_file():
+        for ln in a.resume.read_text().splitlines():
+            if ln.startswith('{"run"'):
+                r = json.loads(ln)
+                rows.append(r)
+                done.add((r["run"], r["condition"], int(r["draw"])))
+    jobs = []
     for tag, rs in sorted(runs.items()):
         if len(rs) < k + 1:
             continue
@@ -138,26 +148,41 @@ def main() -> int:
         nudged = dict(body, messages=msgs + [{"role": "user", "content": text}])
         for cond, b in (("control", body), ("reminder", nudged)):
             for i in range(a.draws):
-                if a.stop_at_usd is not None and spent() >= a.stop_at_usd:
-                    print(json.dumps({"stopped": "budget", "spent_usd": spent()}), flush=True)
-                    a.out.parent.mkdir(parents=True, exist_ok=True)
-                    a.out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
-                    return 3
-                try:
-                    resp = send(a.proxy, f"probe-{cond}-{tag}-d{i}", a.upstream, b, a.think)
-                    wrote, val = written_value(resp)
-                    ok = score(a.dataset, task, val) if wrote and val is not None else None
-                    err = None
-                except Exception as e:  # noqa: BLE001 — 記下來，不猜
-                    wrote, val, ok, err = False, None, None, f"{type(e).__name__}: {e}"[:300]
-                row = {"run": tag, "task": task, "condition": cond, "draw": i, "wrote": wrote,
-                       "value": val, "correct": ok, "error": err,
-                       "request_sha256": hashlib.sha256(json.dumps(b, sort_keys=True).encode()).hexdigest()}
-                rows.append(row)
-                print(json.dumps(row, ensure_ascii=False), flush=True)
+                if (tag, cond, i) not in done:
+                    jobs.append((tag, task, cond, i, b))
+
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    lock = threading.Lock()
+    stop = threading.Event()
+
+    def one(job: tuple[str, str, str, int, dict[str, Any]]) -> None:
+        tag, task, cond, i, b = job
+        if stop.is_set():
+            return
+        if a.stop_at_usd is not None and spent() >= a.stop_at_usd:
+            stop.set()
+            print(json.dumps({"stopped": "budget", "spent_usd": spent()}), flush=True)
+            return
+        try:
+            resp = send(a.proxy, f"probe-{cond}-{tag}-d{i}", a.upstream, b, a.think)
+            wrote, val = written_value(resp)
+            ok = score(a.dataset, task, val) if wrote and val is not None else None
+            err = None
+        except Exception as e:  # noqa: BLE001 — 記下來，不猜
+            wrote, val, ok, err = False, None, None, f"{type(e).__name__}: {e}"[:300]
+        row = {"run": tag, "task": task, "condition": cond, "draw": i, "wrote": wrote,
+               "value": val, "correct": ok, "error": err,
+               "request_sha256": hashlib.sha256(json.dumps(b, sort_keys=True).encode()).hexdigest()}
+        with lock:
+            rows.append(row)
+            print(json.dumps(row, ensure_ascii=False), flush=True)
+
+    with ThreadPoolExecutor(max(1, a.workers)) as pool:
+        list(pool.map(one, jobs))
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
-    return 0
+    return 3 if stop.is_set() else 0
 
 
 if __name__ == "__main__":
