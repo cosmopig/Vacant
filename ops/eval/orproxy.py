@@ -36,6 +36,12 @@
 HTTP 錯誤（不是假的 200）；帳本的 `status` 記成那個錯誤碼、`stream_error` 記內容。內容開始之後才出現的錯誤
 沒辦法重試，照樣轉給 agent，帳本記 `stream_error`、不算 `ok`。
 
+本機算力（2026-09-26 加）：設定檔有 `upstreams`（`{名字: 基底網址}`，例如兩台跑 LM Studio 的機器）時，
+網址要帶 `/t/<tag>/up/<名字>/…`，請求轉到那一台的 `/v1/chat/completions`，不帶金鑰、不加 OpenRouter 專用欄位
+（`provider`、`usage.include`、`reasoning` 物件）；思考開關改用 `reasoning_effort`（`off`＝`none`、`on`＝`medium`）。
+同一題的 A、C 由呼叫端指定同一台（兩台的設定不一定一樣：2026-09-26 實測 1003 會照 `reasoning_effort` 開關思考，
+w401c-15 永遠不思考）。本機沒有費用：帳本的 `cost` 是 `null`，預算閘不作用；其餘（全文紀錄、逐通帳、重試）照舊。
+
 誠實邊界：
 - 費用以 OpenRouter 回應裡的 `usage.cost` 為準；`vacant eval` 結束時另外用 `/api/v1/key`
   對一次總帳。回應沒帶 cost（例如上游中斷）時那一通記成 `cost: null`，不猜。
@@ -61,25 +67,44 @@ RETRY_STATUS = {429, 500, 502, 503, 504}
 THINK = {"on": {"enabled": True, "effort": "medium"}, "off": {"enabled": False}}
 
 
-def split_path(p: str) -> tuple[str, str | None, str]:
-    """`/t/<tag>/[think/<on|off>/]<rest>` → (tag, think, "/<rest>")；沒有前綴 → ("untagged", None, p)。"""
+LOCAL_THINK = {"on": "medium", "off": "none"}
+
+
+def split_route(p: str) -> tuple[str, str | None, str | None, str]:
+    """`/t/<tag>/[up/<名字>/][think/<on|off>/]<rest>` → (tag, upstream, think, "/<rest>")。"""
     if not p.startswith("/t/"):
-        return "untagged", None, p
+        return "untagged", None, None, p
     tag, _, tail = p[3:].partition("/")
-    think = None
+    up = think = None
+    if tail.startswith("up/"):
+        up, _, tail = tail[len("up/"):].partition("/")
     if tail.startswith("think/"):
         think, _, tail = tail[len("think/"):].partition("/")
-    return tag or "untagged", think, "/" + tail
+    return tag or "untagged", up, think, "/" + tail
 
 
-def prepare_request(body: dict, provider: dict, think: str | None) -> dict:
-    """agent 送來的本文 → 送給 OpenRouter 的本文：釘供應商、強制記帳、（有條件時）強制思考開關。"""
+def split_path(p: str) -> tuple[str, str | None, str]:
+    """`/t/<tag>/[think/<on|off>/]<rest>` → (tag, think, "/<rest>")；沒有前綴 → ("untagged", None, p)。"""
+    tag, _up, think, rest = split_route(p)
+    return tag, think, rest
+
+
+def prepare_request(body: dict, provider: dict, think: str | None, *, local: bool = False) -> dict:
+    """agent 送來的本文 → 送給上游的本文。OpenRouter：釘供應商、強制記帳、（有條件時）強制思考開關；
+    本機（`local`）：只強制思考開關（`reasoning_effort`），不加 OpenRouter 專用欄位。"""
     sent = dict(body)
-    sent["provider"] = provider
-    sent["usage"] = {"include": True}
-    if think is not None:
-        sent.pop("reasoning_effort", None)
-        sent["reasoning"] = dict(THINK[think])
+    if local:
+        sent.pop("provider", None)
+        sent.pop("usage", None)
+        sent.pop("reasoning", None)
+        if think is not None:
+            sent["reasoning_effort"] = LOCAL_THINK[think]
+    else:
+        sent["provider"] = provider
+        sent["usage"] = {"include": True}
+        if think is not None:
+            sent.pop("reasoning_effort", None)
+            sent["reasoning"] = dict(THINK[think])
     if sent.get("stream"):
         sent["stream_options"] = dict(sent.get("stream_options") or {}, include_usage=True)
     return sent
@@ -198,6 +223,7 @@ def _usage_of(u: dict | None) -> dict:
 
 def make_handler(cfg: dict, ledger: Ledger, key: str):
     models = cfg["models"]  # {model_id: {"provider": {...}}}
+    upstreams = cfg.get("upstreams") or {}  # 本機算力：{名字: 基底網址}
     tag_cap = cfg.get("tag_cap_usd")
     host_id = cfg.get("host_id") or socket.gethostname()
 
@@ -215,11 +241,25 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
             self.end_headers()
             self.wfile.write(b)
 
+        def _target(self, up: str | None, path: str) -> str | None:
+            """上游網址：本機模式 → 那一台的 `/v1/…`；OpenRouter → `UPSTREAM + path`。名字不對 → None。"""
+            if not upstreams:
+                return UPSTREAM + path
+            if up not in upstreams:
+                return None
+            return upstreams[up].rstrip("/") + path.removeprefix("/api")
+
+        def _auth(self) -> dict:
+            return {} if upstreams else {"Authorization": f"Bearer {key}"}
+
         def do_GET(self):  # /models 之類的唯讀查詢原樣轉送（不記帳）
-            tag, _think, path = split_path(self.path)
+            tag, up, _think, path = split_route(self.path)
             if not path.startswith("/api/v1/models"):
                 return self._send_json(404, {"error": "not proxied"})
-            req = urllib.request.Request(UPSTREAM + path, headers={"Authorization": f"Bearer {key}"})
+            url = self._target(up, path)
+            if url is None:
+                return self._send_json(400, {"error": f"unknown upstream {up!r}"})
+            req = urllib.request.Request(url, headers=self._auth())
             try:
                 with urllib.request.urlopen(req, timeout=60) as r:
                     body = r.read()
@@ -232,9 +272,12 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
                 self._send_json(e.code, {"error": e.read().decode(errors="replace")[:500]})
 
         def do_POST(self):
-            tag, think, path = split_path(self.path)
+            tag, up, think, path = split_route(self.path)
             self._think = think
+            self._up = up
             t0 = time.time()
+            if upstreams and up not in upstreams:
+                return self._send_json(400, {"error": f"unknown upstream {up!r}; use /t/<tag>/up/<name>/…"})
             if think is not None and think not in THINK:
                 return self._send_json(400, {"error": f"think must be on or off, got {think!r}"})
             if not path.rstrip("/").endswith("/chat/completions"):
@@ -253,17 +296,18 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
             if tag_cap is not None and ledger.tag_spent(tag) >= float(tag_cap):
                 ledger.refuse({"ts": t0, "tag": tag, "model": model, "reason": "per-run cap", "host": host_id})
                 return self._send_json(402, {"error": f"per-run spending cap {tag_cap} USD reached for {tag}"})
-            sent = prepare_request(body, models[model]["provider"], think)
+            sent = prepare_request(body, models[model].get("provider") or {}, think, local=bool(upstreams))
+            url = self._target(up, "/api/v1/chat/completions")
             stream = bool(sent.get("stream"))
             data = json.dumps(sent).encode()
             attempts = []
             waits = tuple(cfg.get("retry_waits") or RETRY_WAITS)
             for i in range(len(waits) + 1):
-                req = urllib.request.Request(UPSTREAM + "/api/v1/chat/completions", data=data, headers={
-                    "Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                req = urllib.request.Request(url, data=data, headers={
+                    **self._auth(), "Content-Type": "application/json",
                     "HTTP-Referer": "https://github.com/cosmopig/vacant", "X-Title": "vacant-eval"})
                 try:
-                    r = urllib.request.urlopen(req, timeout=600)
+                    r = urllib.request.urlopen(req, timeout=float(cfg.get("timeout_s") or 600))
                 except urllib.error.HTTPError as e:
                     err = e.read().decode(errors="replace")
                     attempts.append({"status": e.code, "error": err[:2000], "t": round(time.time() - t0, 2)})
@@ -344,7 +388,8 @@ def make_handler(cfg: dict, ledger: Ledger, key: str):
         def _finish(self, tag, model, body, sent, status, resp_text, parsed, attempts, t0, stream):
             u = _usage_of((parsed or {}).get("usage") if isinstance(parsed, dict) else None)
             cost = u.pop("cost")
-            led = {"ts": t0, "tag": tag, "model": model, "think": getattr(self, "_think", None), "host": host_id, "status": status, "stream": stream,
+            led = {"ts": t0, "tag": tag, "model": model, "think": getattr(self, "_think", None), "host": host_id,
+                   "upstream": getattr(self, "_up", None), "status": status, "stream": stream,
                    "generation_id": (parsed or {}).get("id") if isinstance(parsed, dict) else None,
                    "provider": (parsed or {}).get("provider") if isinstance(parsed, dict) else None,
                    "usage": u, "cost": cost, "latency_s": round(time.time() - t0, 3),
@@ -363,15 +408,16 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--config", required=True, help="JSON: {models: {id: {provider: {...}}}, budget_usd}")
     ap.add_argument("--out", required=True, help="紀錄目錄（io.jsonl、ledger.jsonl、summary.json）")
-    ap.add_argument("--key-file", default=os.path.expanduser("~/.config/vacant-eval/openrouter.key"))
+    ap.add_argument("--key-file", default=os.path.expanduser("~/.config/vacant-eval/openrouter.key"),
+                    help="OpenRouter 金鑰；設定檔有 upstreams（本機算力）時不讀")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=18900)
     a = ap.parse_args(argv)
     cfg = json.loads(Path(a.config).read_text())
-    key = Path(a.key_file).read_text().strip()
+    key = "" if cfg.get("upstreams") else Path(a.key_file).read_text().strip()
     ledger = Ledger(Path(a.out), float(cfg["budget_usd"]), key)
     srv = ThreadingHTTPServer((a.host, a.port), make_handler(cfg, ledger, key))
-    print(f"orproxy on http://{a.host}:{a.port} -> {UPSTREAM}; out={a.out}; "
+    print(f"orproxy on http://{a.host}:{a.port} -> {sorted(cfg.get('upstreams') or {}) or UPSTREAM}; out={a.out}; "
           f"spent so far ${ledger.spent:.6f} of ${ledger.budget}", flush=True)
     srv.serve_forever()
     return 0

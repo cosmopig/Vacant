@@ -233,3 +233,71 @@ def test_an_error_after_content_started_is_recorded_and_not_counted_ok(tmp_path,
     finally:
         srv.shutdown()
         up.shutdown()
+
+
+# ── 本機算力（2026-09-26）：兩台 LM Studio，同一題的 A、C 指定同一台 ─────────────────────────────
+
+def test_route_carries_tag_upstream_and_thinking():
+    assert P.split_route("/t/g-A-7/up/w401/think/off/api/v1/chat/completions") == \
+        ("g-A-7", "w401", "off", "/api/v1/chat/completions")
+    assert P.split_route("/t/x/think/on/api/v1/models") == ("x", None, "on", "/api/v1/models")
+    assert P.split_path("/t/g/up/1003/think/off/api/v1/x") == ("g", "off", "/api/v1/x")
+
+
+def test_local_request_forces_reasoning_effort_and_drops_openrouter_fields():
+    body = {"model": "m", "messages": [], "reasoning": {"enabled": True}, "reasoning_effort": "high",
+            "provider": {"order": ["x"]}, "stream": True}
+    sent = P.prepare_request(body, {"order": ["y"]}, "off", local=True)
+    assert sent["reasoning_effort"] == "none"
+    assert "provider" not in sent and "usage" not in sent and "reasoning" not in sent
+    assert sent["stream_options"] == {"include_usage": True}
+    assert P.prepare_request(body, {}, "on", local=True)["reasoning_effort"] == "medium"
+    assert body["reasoning_effort"] == "high"          # 原本送來的照樣記在 request_from_agent
+
+
+def test_local_mode_routes_to_the_named_machine_without_a_key(tmp_path):
+    from http.server import BaseHTTPRequestHandler
+    seen = []
+
+    class Up(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def do_POST(self):
+            seen.append((self.path, self.headers.get("Authorization"),
+                         json.loads(self.rfile.read(int(self.headers["Content-Length"])))))
+            b = json.dumps({"id": "c1", "choices": [{"message": {"role": "assistant", "content": "ok"}}],
+                            "usage": {"prompt_tokens": 3, "completion_tokens": 1}}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+
+    up = ThreadingHTTPServer(("127.0.0.1", 0), Up)
+    threading.Thread(target=up.serve_forever, daemon=True).start()
+    cfg = {"budget_usd": 1e9, "models": {"gemma-4-12b-it-qat": {}},
+           "upstreams": {"a": f"http://127.0.0.1:{up.server_port}", "b": "http://127.0.0.1:9"}}
+    led = P.Ledger(tmp_path / "led", 1e9, "")
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), P.make_handler(cfg, led, ""))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        code, body = _post(srv, "/t/run1/up/a/think/off/api/v1/chat/completions",
+                           {"model": "gemma-4-12b-it-qat", "messages": [{"role": "user", "content": "hi"}]})
+        assert code == 200 and body["choices"][0]["message"]["content"] == "ok"
+        path, auth, sent = seen[0]
+        assert path == "/v1/chat/completions" and auth is None and sent["reasoning_effort"] == "none"
+        led_file = tmp_path / "led" / "ledger.jsonl"
+        for _ in range(100):                                 # 帳在回應送出之後才寫
+            if led_file.exists():
+                break
+            __import__("time").sleep(0.02)
+        rec = json.loads(led_file.read_text().splitlines()[0])
+        assert rec["upstream"] == "a" and rec["cost"] is None and rec["usage"]["prompt_tokens"] == 3
+        code, body = _post(srv, "/t/run1/up/zzz/api/v1/chat/completions", {"model": "gemma-4-12b-it-qat"})
+        assert code == 400 and "upstream" in body["error"]
+        code, body = _post(srv, "/t/run1/api/v1/chat/completions", {"model": "gemma-4-12b-it-qat"})
+        assert code == 400                                   # 本機模式一定要指定哪一台
+    finally:
+        srv.shutdown()
+        up.shutdown()
