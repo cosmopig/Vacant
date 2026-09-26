@@ -177,7 +177,9 @@
 - `trace/budget.py`（**v3**，`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`）— **回合預算提醒**：agent 的系統提示寫了回合上限
   （`adapters/agents.BUDGET_RE_SRC`，JS 與 Python 共用）、只剩最後 2 或 1 回合、這一回合有執行工具、要求的檔還不存在 ⇒ 提醒搭下一通本來就要送出的請求
   （pi `turn_end`；不多一通呼叫、不引用任何值、一個要求最多 2 次）。只剩 1 回合時交件前檢查只退回缺檔；還沒說做完就結束的那一跑也寫交件說明
-  （`zerostop.ended`）。⚠ **只在寫明上限時作用**——一般互動使用（pi 預設沒有上限）幾乎不會觸發；只有 pi 有 `turn_end`。
+  （`zerostop.ended`；v3.1 起只在 pi 回報中止時寫）。**v3.2**：最後一回合是最終答案、接著被上限停掉（Harbor 在自己的回合結束處理器裡中止，
+  pi 就不進交件前檢查）＝說了做完——工作階段結束時**補跑同一個檢查、只寫給人**，不寫成「還沒說做完」（裁決 §七；閘門 4）。
+  ⚠ **只在寫明上限時作用**——一般互動使用（pi 預設沒有上限）幾乎不會觸發；只有 pi 有 `turn_end`。⚠ 本機正式批次的 C2 是**凍結的 v3**。
   pi 的邊界處理器把 Vacant 的草稿**接在** `event.entries` 後面（pi 取最後一個處理器的回傳，只回自己的會蓋掉別的擴充）
 - `ops/eval/replay_pi_session.py`＋`replay_gate.py` — 真實 pi 工作階段在題目容器裡經過真的 `vacant hook pi` 重播（量誤報）
 - `ops/eval/simuser/` — 模擬使用者：只照 README 裝、照常用 pi，A/C 對照
