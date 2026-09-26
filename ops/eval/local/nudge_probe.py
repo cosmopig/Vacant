@@ -10,6 +10,10 @@
     python3 ops/eval/local/nudge_probe.py --io <代理 io.jsonl> --prefix pilot2 --dataset <釘死的題目目錄> \
         --proxy http://127.0.0.1:18900 --upstream w401 --draws 3 --out <輸出 jsonl>
 
+付費（OpenRouter）的紀錄（2026-09-26 加；`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §四 第 0 階）：
+`--upstream ''`（付費路徑沒有 `up/`）、`--think on`、`--only-no-file <runs.json>:<jobs 根目錄>`（只取最後沒有答案檔的跑）、
+`--stop-at-usd <金額>`（每一通之前讀代理的 summary.json，花到就停）。
+
 誠實邊界：只看**下一通**的回覆，不看之後的回合（模型可能下一通先查、再下一通才寫）；「寫了」是從工具呼叫的文字抽出來的。
 """
 from __future__ import annotations
@@ -74,10 +78,11 @@ def written_value(resp: dict[str, Any]) -> tuple[bool, str | None]:
     return False, None
 
 
-def send(proxy: str, tag: str, upstream: str, body: dict[str, Any]) -> dict[str, Any]:
+def send(proxy: str, tag: str, upstream: str, body: dict[str, Any], think: str = "off") -> dict[str, Any]:
     b = dict(body, stream=False)
     b.pop("stream_options", None)
-    req = urllib.request.Request(f"{proxy}/t/{tag}/up/{upstream}/think/off/api/v1/chat/completions",
+    up = f"up/{upstream}/" if upstream else ""
+    req = urllib.request.Request(f"{proxy}/t/{tag}/{up}think/{think}/api/v1/chat/completions",
                                  json.dumps(b).encode(), {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=900) as r:
         return json.load(r)
@@ -93,8 +98,29 @@ def main() -> int:
     ap.add_argument("--draws", type=int, default=3)
     ap.add_argument("--budget", type=int, default=15)
     ap.add_argument("--out", required=True, type=pathlib.Path)
+    ap.add_argument("--think", default="off", choices=["on", "off"])
+    ap.add_argument("--only-no-file", help="<runs.json>:<jobs 根目錄>：只取評分器說答案檔不存在的跑")
+    ap.add_argument("--model", help="runs.json 裡的 model 欄（例 g4）")
+    ap.add_argument("--stop-at-usd", type=float, help="代理 summary.json 的 spent_usd 到這個數就停")
+    ap.add_argument("--summary", type=pathlib.Path, help="代理的 summary.json（配 --stop-at-usd）")
     a = ap.parse_args()
     runs = requests_by_run(a.io, a.prefix)
+    keep = None
+    if a.only_no_file:
+        rj, jobs = a.only_no_file.split(":", 1)
+        keep = set()
+        for r in json.loads(pathlib.Path(rj).read_text()):
+            if a.model and r.get("model") != a.model:
+                continue
+            v = pathlib.Path(jobs) / r["job"] / r["trial"] / "verifier" / "test-stdout.txt"
+            if v.is_file() and "answer.txt not found" in v.read_text(errors="replace"):
+                keep.add((r["arm"], str(r["task"])))
+
+    def spent() -> float:
+        try:
+            return float(json.loads(a.summary.read_text()).get("spent_usd") or 0.0)
+        except (OSError, ValueError, AttributeError):
+            return 0.0
     k = a.budget - 2                     # 第 k 回合結束之後送出的是第 k+1 通
     rows = []
     for tag, rs in sorted(runs.items()):
@@ -105,12 +131,20 @@ def main() -> int:
         if not msgs or msgs[-1].get("role") != "tool" or wrote_answer_before(msgs):
             continue                      # 第 k 回合沒有執行工具、或答案檔已經寫過：v3 不會提醒
         task = tag.rsplit("-s", 1)[0].rsplit("-", 1)[1]
+        arm = tag[len(a.prefix) + 1:].split("-", 1)[0] if tag.startswith(a.prefix + "-") else "?"
+        if keep is not None and (arm, task) not in keep and ("A", task) not in keep:
+            continue
         text, _ = render_nudge(["/app/answer.txt"], turns_left=2, budget=a.budget)
         nudged = dict(body, messages=msgs + [{"role": "user", "content": text}])
         for cond, b in (("control", body), ("reminder", nudged)):
             for i in range(a.draws):
+                if a.stop_at_usd is not None and spent() >= a.stop_at_usd:
+                    print(json.dumps({"stopped": "budget", "spent_usd": spent()}), flush=True)
+                    a.out.parent.mkdir(parents=True, exist_ok=True)
+                    a.out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+                    return 3
                 try:
-                    resp = send(a.proxy, f"probe-{cond}-{tag}-d{i}", a.upstream, b)
+                    resp = send(a.proxy, f"probe-{cond}-{tag}-d{i}", a.upstream, b, a.think)
                     wrote, val = written_value(resp)
                     ok = score(a.dataset, task, val) if wrote and val is not None else None
                     err = None
