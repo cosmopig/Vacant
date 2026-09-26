@@ -61,7 +61,7 @@ EVENT_MAP: dict[str, dict[str, str]] = {
                  "prompt": "other"},
     "pi": {"pre_tool": "pre_tool", "post_tool": "post_tool", "stop": "stop",
            "session_end": "session_end", "session_start": "session_start",
-           "subagent_stop": "other", "prompt": "other"},
+           "subagent_stop": "other", "prompt": "other", "turn_check": "turn_check"},
 }
 AGENTS = tuple(EVENT_MAP)
 
@@ -288,16 +288,55 @@ def _zero_scope(cwd: str | None) -> Any:
     return zerostop.scope(ws) if ws is not None else None
 
 
+def _budget_of(payload: dict[str, Any]) -> tuple[int | None, int | None]:
+    """pi 擴充送來的 (已用的回合數, 系統提示寫明的回合上限)；沒有寫明上限 ⇒ (None, None)。"""
+    try:
+        turn, budget = int(payload["turn"]), int(payload["budget"])
+    except (KeyError, TypeError, ValueError):
+        return None, None
+    return (turn, budget) if budget > 0 and turn >= 0 else (None, None)
+
+
 def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
     """沒有契約的 Stop：證據檢查（`trace/zerostop.py`）。任何錯誤都放行（誠實邊界 1）。"""
     from ..trace import zerostop
+    turn, budget = _budget_of(payload)
     action, reason, record = zerostop.stop(agent, ev.session_id, ev.cwd,
-                                           zerostop.final_text_of(payload), mode=mode)
+                                           zerostop.final_text_of(payload), mode=mode,
+                                           turns_left=(budget - turn) if budget and turn is not None
+                                           else None,
+                                           budget=budget)
     z = record.get("zero") or {}
     if z.get("error"):
         _log("errors.jsonl", {"agent": agent, "event": "stop",
                               "error": f"zero-config check: {z['error']}"[:500]})
     return HookDecision(action if action in ("allow", "continue") else "allow", reason, record)
+
+
+def _zero_turn_check(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
+    """零設定 v3：回合預算快用完、要求的檔還不存在 ⇒ 提醒（`trace/budget.py`）。任何錯誤都不送。"""
+    from ..trace import budget as B
+    turn, budget = _budget_of(payload)
+    try:
+        action, reason, record = B.turn_check(agent, ev.session_id, ev.cwd, turn, budget, mode=mode)
+    except Exception as e:  # noqa: BLE001 — 失敗一律什麼都不送
+        _log("errors.jsonl", {"agent": agent, "event": "turn_check",
+                              "error": f"{type(e).__name__}: {e}"[:500]})
+        return HookDecision("allow")
+    return HookDecision(action if action == "continue" else "allow", reason, record)
+
+
+def _zero_ended(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) -> HookDecision:
+    """零設定 v3：還沒說做完就結束的那一跑也寫交件說明給人（`zerostop.ended`）。不擋任何東西。"""
+    from ..trace import zerostop
+    turn, budget = _budget_of(payload)
+    try:
+        record = zerostop.ended(agent, ev.session_id, ev.cwd, mode=mode, turn=turn, budget=budget)
+    except Exception as e:  # noqa: BLE001
+        _log("errors.jsonl", {"agent": agent, "event": "session_end",
+                              "error": f"zero-config ended note: {type(e).__name__}: {e}"[:500]})
+        record = {}
+    return HookDecision("allow", "", record)
 
 
 def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, int]:
@@ -329,6 +368,9 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
     elif ev.kind == "stop" and contract is None and zero != "off" \
             and not os.environ.get("VACANT_HOOK_NO_STOP"):
         d = _zero_stop(agent, payload, ev, zero)
+    elif ev.kind == "turn_check" and contract is None and zero != "off" \
+            and not os.environ.get("VACANT_HOOK_NO_STOP"):
+        d = _zero_turn_check(agent, payload, ev, zero)
     elif ev.kind == "stop" and contract is not None and not os.environ.get("VACANT_HOOK_NO_STOP") \
             and os.environ.get("VACANT_FEEDBACK_MODE") != "none":
         from ..intake import flow
@@ -348,7 +390,10 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
         #   改成分離的背景行程，掛鉤立刻返回；交件結果（含失敗）照樣進帳本。
         pid = _spawn_submit(contract.path, agent)
         d = HookDecision("allow", "", {"submit_scheduled": pid is not None, "pid": pid})
-    if ev.kind != "stop":
+    elif ev.kind == "session_end" and contract is None and zero != "off" \
+            and ev.reason not in NON_TERMINAL_END_REASONS:
+        d = _zero_ended(agent, payload, ev, zero)
+    if ev.kind not in ("stop", "turn_check"):       # 提醒的詢問不是一個步驟，不進病歷的步驟
         _trace(agent, event, payload, ev, contract, d)
     if (contract is not None or zero != "off") and ev.kind in ("pre_tool", "post_tool") \
             and d.action != "deny":

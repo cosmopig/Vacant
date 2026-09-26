@@ -1,0 +1,194 @@
+== exp1_abort_inject exit=0
+  {"ev": "factory", "mark": null, "ppid": 24066}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "inject", "at": 2, "cont": false}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "inject", "at": 3, "cont": true}
+  {"ev": "turn_start", "turnIndex": 3}
+  {"ev": "turn_end", "n": 4, "turnIndex": 3, "outcome": "error", "stopReason": "error", "contentTypes": [], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 9, "lastStop": "error", "signalAborted": true, "idle": false}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo t1'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'echo t2'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#2 step={'tool': 'bash', 'args': {'command': 'echo t3'}} nmsgs=7 tail=['tool', 'assistant', 'tool', "user['VACANT-INJECT-AT-TURN2']"] budget_in_sys=True has_turn3_inject=False
+== exp1b_abort_plain exit=0
+  {"ev": "factory", "mark": null, "ppid": 24127}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 3}
+  {"ev": "turn_end", "n": 4, "turnIndex": 3, "outcome": "error", "stopReason": "error", "contentTypes": [], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 9, "lastStop": "error", "signalAborted": true, "idle": false}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo t1'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'echo t2'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#2 step={'tool': 'bash', 'args': {'command': 'echo t3'}} nmsgs=6 tail=['assistant', 'tool', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+== exp2_settled_followup exit=0
+  {"ev": "factory", "mark": null, "ppid": 24161}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "inject", "at": 3, "cont": true}
+  {"ev": "turn_start", "turnIndex": 3}
+  {"ev": "turn_end", "n": 4, "turnIndex": 3, "outcome": "error", "stopReason": "error", "contentTypes": [], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 9, "lastStop": "error", "signalAborted": true, "idle": false}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "followup_sent"}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "VACANT-FOLLOWUP: write your current answer to answer.txt now", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 5, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 6, "turnIndex": 1, "outcome": "error", "stopReason": "error", "contentTypes": [], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 4, "lastStop": "error", "signalAborted": true, "idle": false}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo t1'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'echo t2'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#2 step={'tool': 'bash', 'args': {'command': 'echo t3'}} nmsgs=6 tail=['assistant', 'tool', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#3 step={'tool': 'bash', 'args': {'command': 'echo 42 > answer.txt'}} nmsgs=10 tail=['assistant', 'tool', "user['VACANT-INJECT-AT-TURN3']", "user['VACANT-FOLLOWUP']"] budget_in_sys=True has_turn3_inject=True
+  answer.txt = 42
+== exp3_final_at_cap exit=0
+  {"ev": "factory", "mark": null, "ppid": 24204}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 7, "lastStop": "stop", "signalAborted": true, "idle": false}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo 42 > answer.txt'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'cat answer.txt'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#2 step={'text': 'The answer is 42.'} nmsgs=6 tail=['assistant', 'tool', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  answer.txt = 42
+== exp3b_final_nocap exit=0
+  {"ev": "factory", "mark": null, "ppid": 24242}
+  {"ev": "before_agent_start", "budgetInEvent": null, "budgetInCtx": null, "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 7, "lastStop": "stop", "signalAborted": false, "idle": false}
+  {"ev": "agent_before_settle", "outcome": "completed"}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo 42 > answer.txt'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=False has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'cat answer.txt'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=False has_turn3_inject=False
+  req#2 step={'text': 'The answer is 42.'} nmsgs=6 tail=['assistant', 'tool', 'assistant', 'tool'] budget_in_sys=False has_turn3_inject=False
+  answer.txt = 42
+== exp4_text_inject_continue exit=0
+  {"ev": "factory", "mark": null, "ppid": 24280}
+  {"ev": "before_agent_start", "budgetInEvent": null, "budgetInCtx": null, "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "inject", "at": 1, "cont": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 4, "lastStop": "stop", "signalAborted": false, "idle": false}
+  {"ev": "agent_before_settle", "outcome": "completed"}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'text': 'The answer is 41.'} nmsgs=2 tail=['system', 'user'] budget_in_sys=False has_turn3_inject=False
+  req#1 step={'text': 'Corrected: 42.'} nmsgs=4 tail=['system', 'user', 'assistant', "user['VACANT-INJECT-AT-TURN1']"] budget_in_sys=False has_turn3_inject=False
+== exp5_slow_settle exit=0
+  {"ev": "factory", "mark": null, "ppid": 24315}
+  {"ev": "before_agent_start", "budgetInEvent": null, "budgetInCtx": null, "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 3, "lastStop": "stop", "signalAborted": false, "idle": false}
+  {"ev": "agent_before_settle", "outcome": "completed"}
+  {"ev": "slow_done", "ms": 75054}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'text': 'The answer is 42.'} nmsgs=2 tail=['system', 'user'] budget_in_sys=False has_turn3_inject=False
+== exp6_child_pi exit=0
+  {"ev": "factory", "mark": null, "ppid": 25017}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 3, "lastStop": "stop", "signalAborted": false, "idle": false}
+  {"ev": "agent_before_settle", "outcome": "completed"}
+  {"ev": "child_spawn", "execPath": "/opt/node22/bin/node", "argv1": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/agents/node_modules/.bin/pi", "provider": "harbor-endpoint", "model": "mock-model"}
+  CHILD {"ev": "factory", "mark": "{\"session\":\"01a0db7c-778d-74a2-b84b-c9de03f1fa83\",\"pid\":25018,\"cwd\":\"/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/design/piexp/runs/exp6_child_pi/proj\"}", "ppid": 25018}
+  CHILD {"ev": "before_agent_start", "budgetInEvent": null, "budgetInCtx": null, "prompt": "CHILD-TASK", "mode": "json"}
+  CHILD {"ev": "turn_start", "turnIndex": 0}
+  CHILD {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "stop", "contentTypes": ["text"], "toolResults": 0, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": null, "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  CHILD {"ev": "agent_end", "n": 3, "lastStop": "stop", "signalAborted": false, "idle": false}
+  CHILD {"ev": "agent_before_settle", "outcome": "completed"}
+  CHILD {"ev": "agent_settled", "keys": ["type"]}
+  CHILD {"ev": "session_shutdown", "reason": "quit"}
+  {"ev": "child_out_tail", "tail": "\"input\":10,\"output\":5,\"cacheRead\":0,\"cacheWrite\":0,\"reasoning\":0,\"totalTokens\":15,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"stop\",\"timestamp\":1790388763201,\"responseId\":\"chatcmpl-e62fcff9\",\"rawStopReason\":\"stop\"}],\"willRetry\":false}\n{\"type\":\"agent_settled\"}\n"}
+  {"ev": "child_exit", "code": 0}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'text': 'done'} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'text': 'done'} nmsgs=2 tail=['system', "user['CHILD-TASK']"] budget_in_sys=False has_turn3_inject=False
+  session file: sessions/2026-09-26T02-12-42-509Z_01a0db7c-778d-74a2-b84b-c9de03f1fa83.jsonl
+  session file: agent/sessions/--tmp-claude-0--home-user-Vacant-95e2b6b6-418f-504c-a59e-fd594ef13041-scratchpad-design-piexp-runs-exp6_child_pi-proj--/2026-09-26T02-12-43-095Z_01a0db7c-79d7-7010-8e43-13a174faad34.jsonl
+== exp7_agentend_followup exit=0
+  {"ev": "factory", "mark": null, "ppid": 25064}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 3}
+  {"ev": "turn_end", "n": 4, "turnIndex": 3, "outcome": "error", "stopReason": "error", "contentTypes": [], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 9, "lastStop": "error", "signalAborted": true, "idle": false}
+  {"ev": "endfollow_sent"}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo t1'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'echo t2'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#2 step={'tool': 'bash', 'args': {'command': 'echo t3'}} nmsgs=6 tail=['assistant', 'tool', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  queue_update lines with queued followUp: 1
+== exp7b_agentend_plain exit=0
+  {"ev": "factory", "mark": null, "ppid": 25100}
+  {"ev": "before_agent_start", "budgetInEvent": "3", "budgetInCtx": "3", "prompt": "TASK", "mode": "json"}
+  {"ev": "turn_start", "turnIndex": 0}
+  {"ev": "turn_end", "n": 1, "turnIndex": 0, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 1}
+  {"ev": "turn_end", "n": 2, "turnIndex": 1, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": false, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 2}
+  {"ev": "turn_end", "n": 3, "turnIndex": 2, "outcome": "completed", "stopReason": "toolUse", "contentTypes": ["toolCall"], "toolResults": 1, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": true}
+  {"ev": "turn_start", "turnIndex": 3}
+  {"ev": "turn_end", "n": 4, "turnIndex": 3, "outcome": "error", "stopReason": "error", "contentTypes": [], "toolResults": 0, "signalAborted": true, "entriesIn": 0, "continueIn": false, "budgetInCtx": "3", "sysMsgsInLlm": 1, "budgetInLlmSys": null, "canContinue": false}
+  {"ev": "agent_end", "n": 9, "lastStop": "error", "signalAborted": true, "idle": false}
+  {"ev": "endplain_sent"}
+  {"ev": "agent_settled", "keys": ["type"]}
+  {"ev": "session_shutdown", "reason": "quit"}
+ -- model requests (mock.jsonl) --
+  req#0 step={'tool': 'bash', 'args': {'command': 'echo t1'}} nmsgs=2 tail=['system', 'user'] budget_in_sys=True has_turn3_inject=False
+  req#1 step={'tool': 'bash', 'args': {'command': 'echo t2'}} nmsgs=4 tail=['system', 'user', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  req#2 step={'tool': 'bash', 'args': {'command': 'echo t3'}} nmsgs=6 tail=['assistant', 'tool', 'assistant', 'tool'] budget_in_sys=True has_turn3_inject=False
+  stderr: Extension error (<runtime>): Agent is already processing. Specify streamingBehavior ('steer' or 'followUp') to queue the message.

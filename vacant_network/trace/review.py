@@ -18,7 +18,7 @@ import json
 from typing import Any
 
 from ..memory import KS1Violation, assert_ks1_clean
-from .feedback import MAX_LINES, REVIEW_HEADER, KS1FeedbackError, feedback_ks1_clean
+from .feedback import MAX_LINES, NUDGE_HEADER, REVIEW_HEADER, KS1FeedbackError, feedback_ks1_clean
 
 PERSONA = ("Take the role of a careful reviewer who checks the draft against the materials given "
            "for the task. Redo only the parts listed below; leave everything else as it is.")
@@ -26,7 +26,11 @@ FOOTER = "This review lists what the record shows; it does not say whether the a
 WITHHELD = "- a point was withheld (wording check)"
 INSPECT = "inspect them with head, or load them in code"
 
-for _t in (REVIEW_HEADER, PERSONA, FOOTER, WITHHELD):
+#: 零設定 v3：回合預算快用完、要求的檔還不存在時的提醒（`trace/budget.py`）。只說檔在不在、還剩幾回合；
+#: 不說答案對不對，也不引用任何值（Vacant 不替 agent 選答案）。
+NUDGE_FOOTER = "This reminder is only about the file; it does not say whether any answer is right."
+
+for _t in (REVIEW_HEADER, PERSONA, FOOTER, WITHHELD, NUDGE_HEADER, NUDGE_FOOTER):
     assert_ks1_clean(_t)
 
 #: 退回的先後：要求的檔不存在、失敗的步驟、測試說法最先（最確定），值其次，點名沒讀最後
@@ -41,7 +45,12 @@ def q(s: Any, n: int = 80) -> str:
     return json.dumps(t, ensure_ascii=False)[1:-1]
 
 
-def line_for(f: dict[str, Any]) -> str:
+def turns_left_note(turns_left: int | None, budget: int | None) -> str:
+    return (f" Model turns left in the stated budget: {turns_left} of {budget}."
+            if turns_left is not None and budget else "")
+
+
+def line_for(f: dict[str, Any], budget_note: str = "") -> str:
     k = f["kind"]
     if k == "unsourced":
         tail = ""
@@ -56,7 +65,7 @@ def line_for(f: dict[str, Any]) -> str:
                 f"mark it as an assumption on that line.{tail}")
     if k == "missing_output":
         return (f"- The request asks for {q(f.get('asked') or f['path'])}, but it does not exist. "
-                f"Finish the task and write it.")
+                f"Finish the task and write it.{budget_note}")
     if k == "unread":
         return (f"- {f['path']} was named in the task but was not opened in the recorded steps. "
                 f"Inspect it (for example with head, or load it in code) and redo the parts that "
@@ -81,7 +90,7 @@ def line_for(f: dict[str, Any]) -> str:
 
 
 def render(findings: list[dict[str, Any]], *, actor_tokens: set[str] | None = None,
-           previous_open: set[str] | None = None) -> tuple[str, int]:
+           previous_open: set[str] | None = None, budget_note: str = "") -> tuple[str, int]:
     """發現 → 送回 agent 的整段文字；回 `(文字, 被換成替代行的行數)`。
     `previous_open`：上一回合還開著的 finding_id——這一次仍在的標 `(still open)`。"""
     toks = actor_tokens or set()
@@ -91,7 +100,7 @@ def render(findings: list[dict[str, Any]], *, actor_tokens: set[str] | None = No
     room = MAX_LINES - 3
     body, withheld = [], 0
     for f in fs[:room] if len(fs) <= room else fs[:room - 1]:
-        ln = line_for(f)
+        ln = line_for(f, budget_note)
         if f.get("finding_id") in prev:
             ln += "  (still open)"
         try:
@@ -102,3 +111,21 @@ def render(findings: list[dict[str, Any]], *, actor_tokens: set[str] | None = No
     if len(fs) > room:
         body.append(f"- … and {len(fs) - (room - 1)} more points of the same kinds.")
     return "\n".join([REVIEW_HEADER, PERSONA, *body, FOOTER]), withheld
+
+
+def render_nudge(asked: list[str], *, turns_left: int, budget: int,
+                 actor_tokens: set[str] | None = None) -> tuple[str, int]:
+    """回合預算提醒的整段文字：每一個還不存在的要求輸出一行。回 `(文字, 被換成替代行的行數)`。"""
+    toks = actor_tokens or set()
+    body, withheld = [], 0
+    for a in asked[: MAX_LINES - 2]:
+        ln = (f"- The request asks for {q(a)}, and it does not exist yet. Model turns left in the "
+              f"stated budget: {turns_left} of {budget}. Write your current best answer to {q(a)} "
+              f"now, in the format the request asks for; you can keep checking afterwards and "
+              f"overwrite it if the answer changes.")
+        try:
+            feedback_ks1_clean(ln, toks)
+        except (KS1FeedbackError, ValueError, KS1Violation):
+            ln, withheld = WITHHELD, withheld + 1
+        body.append(ln)
+    return "\n".join([NUDGE_HEADER, *body, NUDGE_FOOTER]), withheld

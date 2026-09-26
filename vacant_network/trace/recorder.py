@@ -48,7 +48,7 @@ from .tools import tool_kind
 TRACE_SCHEMA = "vacant-trace/1"
 EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_change",
                          "transcript", "session_closed", "finding", "flag", "coverage",
-                         "consequence", "prompt", "review"})
+                         "consequence", "prompt", "review", "nudge", "ended"})
 MAX_OUTPUT_BLOB = 2 * 1024 * 1024
 #: 一個步驟開著超過這麼久還沒等到 `post`，就當它不會來了（和 Stop 掛鉤的上限同一個數量級）
 STALE_S = 900.0

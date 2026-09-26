@@ -44,7 +44,9 @@ FOOTER = "Run `vacant check` to re-check before finishing."
 #: 零設定（沒有契約）時交件前的檢視（`trace/review.py`）。三個開頭都是 Vacant 自己的話：
 #: 不是人的新要求、不是任何值的來源（`capture.prompt_source`、`blame` 只認開頭）。
 REVIEW_HEADER = "Before delivery: a review of the recorded steps of this task found points to redo."
-VACANT_HEADERS = (FEEDBACK_HEADER, FLAG_HEADER, REVIEW_HEADER)
+#: 零設定 v3 的回合預算提醒（`trace/budget.py`）：同樣是 Vacant 自己的話
+NUDGE_HEADER = "Before the turn budget runs out: a requested output does not exist yet."
+VACANT_HEADERS = (FEEDBACK_HEADER, FLAG_HEADER, REVIEW_HEADER, NUDGE_HEADER)
 
 
 def finding_id(b: dict[str, Any], scope: str = "") -> str:

@@ -31,7 +31,7 @@ _CHECK = r"""
 import json, pathlib
 h = pathlib.Path.home() / ".vacant"
 out = {"install_json": None, "pi_installed": False, "chains": 0, "steps": 0, "reviews": 0,
-       "review_actions": []}
+       "review_actions": [], "nudges": 0, "nudge_turns": [], "ended_notes": 0}
 p = h / "adapters" / "install.json"
 if p.is_file():
     d = json.loads(p.read_text())
@@ -48,6 +48,11 @@ for c in h.glob("trace/projects/*/chain.ndjson"):
         elif e.get("type") == "review":
             out["reviews"] += 1
             out["review_actions"].append((e.get("payload") or {}).get("action"))
+        elif e.get("type") == "nudge":            # 零設定 v3：回合預算提醒
+            out["nudges"] += 1
+            out["nudge_turns"].append((e.get("payload") or {}).get("turn"))
+        elif e.get("type") == "ended":            # 零設定 v3：還沒說做完就結束的交件說明
+            out["ended_notes"] += 1
 # 裝上了、病歷有步驟＝C 組有作用；有沒有走到交件前檢查另外記（回合用完被中止的跑，pi 不會進 Stop）
 out["c_arm_ok"] = out["pi_installed"] and out["steps"] > 0
 out["stop_reached"] = out["reviews"] > 0

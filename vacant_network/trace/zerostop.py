@@ -13,7 +13,11 @@
    掛鉤沒收到人的提示時，看到回合起點變了也重新算。
 4. **解決看現況**：每一次都在現在的工作區與紀錄上重跑，發現不在了就是解決了。值還在原位、那一行標了
    假設 ⇒ 記成「揭露了、沒修」，不算修好。
-5. **交件說明**寫在 `$VACANT_HOME/trace/projects/<專案>/delivery.{md,json}`：不寫進工作區、不送給模型。
+5. **只剩最後一回合**（v3，agent 的系統提示寫了回合上限、擴充數到只剩 1 回合）：只退回「要求的檔不存在」——
+   一回合裡只來得及把檔寫出來；其他發現照樣寫進交件說明。沒有寫明上限時行為和字句都和之前一樣。
+6. **還沒說做完就結束**（v3，`ended`）：回合上限、Esc、關掉——交件前檢查沒跑到的那一跑也寫一份交件說明給人
+   （哪個要求的檔不在、提醒過幾次），不送任何東西給模型。
+7. **交件說明**寫在 `$VACANT_HOME/trace/projects/<專案>/delivery.{md,json}`：不寫進工作區、不送給模型。
    畫面上最多 6 行（Claude `systemMessage`、pi 有介面時的 `ui.notify`）；這一回合沒有寫出任何檔 ⇒ 不顯示。
 
 誠實邊界：
@@ -117,7 +121,8 @@ def _compact(f: dict[str, Any]) -> dict[str, Any]:
 
 
 def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | None, *,
-         mode: str, runner: Any = None) -> tuple[str, str, dict[str, Any]]:
+         mode: str, runner: Any = None, turns_left: int | None = None,
+         budget: int | None = None) -> tuple[str, str, dict[str, Any]]:
     """回 `(action, reason, record)`；`action` 只會是 `allow` 或 `continue`。
     任何錯誤 ⇒ `allow`（失敗一律放行），`record["user_message"]` 最多一行。"""
     ws = capture.workspace_for(cwd, None)
@@ -138,14 +143,16 @@ def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | 
         return "allow", "", {"zero": {"ran": False, "error": f"{type(e).__name__}: {e}"[:400]},
                              "user_message": DID_NOT_RUN}
     try:
-        return _decide(rec, agent, session_id, session, out, mode)
+        return _decide(rec, agent, session_id, session, out, mode, turns_left=turns_left,
+                       budget=budget)
     except Exception as e:  # noqa: BLE001
         return "allow", "", {"zero": {"ran": False, "error": f"{type(e).__name__}: {e}"[:400]},
                              "user_message": DID_NOT_RUN}
 
 
 def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
-            out: dict[str, Any], mode: str) -> tuple[str, str, dict[str, Any]]:
+            out: dict[str, Any], mode: str, *, turns_left: int | None = None,
+            budget: int | None = None) -> tuple[str, str, dict[str, Any]]:
     from ..adapters.hookpolicy import _bump_round, _rounds_file
     from . import review
     from .stopcheck import _actor_tokens
@@ -169,6 +176,9 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
     used = _rounds_used(session_id, zc)
     findings = res.get("findings") or []
     pushable = [f for f in findings if f["kind"] != "unread" or used < UNREAD_MAX_ROUNDS]
+    last_turn = turns_left is not None and turns_left <= 1
+    if last_turn:   # 只剩一回合：只來得及把要求的檔寫出來（其他的照樣進說明）
+        pushable = [f for f in pushable if f["kind"] == "missing_output"]
     now_ids = {f["finding_id"] for f in findings}
     was_open = [f for r in sess.get("rounds") or [] for f in r.get("findings") or []]
     resolved = sorted({f["finding_id"] for f in was_open} - now_ids)
@@ -179,13 +189,16 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
     if mode == "evidence" and pushable and used < ZERO_MAX_ROUNDS:
         n = _bump_round(session_id, zc)
         text, withheld = review.render(pushable, actor_tokens=_actor_tokens(rec),
-                                       previous_open=set(sess.get("open") or []))
+                                       previous_open=set(sess.get("open") or []),
+                                       budget_note=review.turns_left_note(turns_left, budget)
+                                       if last_turn else "")
         sess.setdefault("rounds", []).append({"round": n, "findings":
                                               [_compact(f) for f in pushable]})
         sess["open"] = sorted(f["finding_id"] for f in pushable)
         _put_session(rec, key, sess)
         event.update(action="continue", round=n, sent=[f["finding_id"] for f in pushable],
-                     withheld=withheld)
+                     withheld=withheld, **({"turns_left": turns_left, "budget": budget}
+                                           if last_turn else {}))
         rec.append("review", event)
         _write_note(rec, key, res, sess, mode, in_progress=True)
         return "continue", text, {"zero": {"ran": True, "round": n, "sent": len(pushable),
@@ -390,6 +403,66 @@ def _write(md: pathlib.Path, text: str, data: dict[str, Any]) -> None:
     atomic_write_text(md, text)
     atomic_write_text(md.with_suffix(".json"), json.dumps(data, ensure_ascii=False, indent=1,
                                                           default=str))
+
+
+# ── ended before the agent said it was done (v3) ────────────────────
+def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
+          turn: Any = None, budget: Any = None) -> dict[str, Any]:
+    """工作階段結束、這個要求裡交件前檢查一次都沒跑（回合上限、Esc、關掉）：寫交件說明給人。
+    不送任何東西給模型；回 record（`user_message` 只在有介面時會被顯示）。任何錯誤都不擋。"""
+    from .budget import missing_outputs
+    from .evidence import Evidence
+    ws = capture.workspace_for(cwd, None)
+    if ws is None:
+        return {}
+    rec = Recorder(ws)
+    if not rec.chain_path.is_file():
+        return {}
+    session = str(session_id or "unknown")
+    key = f"{agent}:{session}"
+    start, _texts, steps = Evidence(rec, platform=agent, session=session).window()
+    if not steps:
+        return {"ended": {"why": "no steps in this request"}}
+    evs = [e for e in rec.events() if e.get("session") == key and int(e.get("seq") or 0) > start]
+    if any(e.get("type") in ("review", "ended") for e in evs):
+        return {"ended": {"why": "the delivery check ran (or the note exists)"}}
+    nudges = [e for e in evs if e.get("type") == "nudge"]
+    ev = Evidence(rec, platform=agent, session=session)
+    _s, texts, _st = ev.window()
+    asked = ev.requested_outputs(texts)
+    _s2, missing = missing_outputs(rec, agent, session)
+    miss = {rel for rel, _ in missing}
+    try:
+        turn_i, budget_i = int(turn), int(budget)
+        at_cap = turn_i >= budget_i
+    except (TypeError, ValueError):
+        turn_i = budget_i = None  # type: ignore[assignment]
+        at_cap = False
+    head = ("Ended before the agent said it was done" +
+            (f", after {turn_i} of the stated {budget_i} model turns" if at_cap else "") +
+            "; no delivery check ran.")
+    lines = [head]
+    turns = [str(e.get("turn")) for e in nudges]
+    reminded = ("" if not turns else f" A budget reminder was sent after turn {turns[0]}." if len(turns) == 1
+                else f" Budget reminders were sent after turns {', '.join(turns)}.")
+    for rel, raw in asked:
+        lines.append(f"{raw}: " + ("does not exist." if rel in miss else
+                                   "exists; its content was not checked.") + reminded)
+    stamp = _dt.datetime.now().astimezone().isoformat(timespec="seconds")
+    md = rec.dir / "delivery.md"
+    out = ["# Vacant delivery note", "", f"Project: {rec.workspace}", f"Session: {key}",
+           f"Ended: {stamp}", "", "## Stopped before delivery", "", *[f"- {x}" for x in lines],
+           "", NOTE_FOOTER, ""]
+    data = {"project": str(rec.workspace), "session": key, "at": stamp, "mode": mode,
+            "ended_before_delivery": True, "turn": turn_i, "budget": budget_i,
+            "requested": [r for r, _ in asked], "missing": sorted(miss),
+            "nudged_turns": [e.get("turn") for e in nudges]}
+    _write(md, "\n".join(out), data)
+    rec.append("ended", {"session": key, "window_start": start, "turn": turn_i, "budget": budget_i,
+                         "missing": sorted(miss), "nudges": len(nudges)})
+    screen = [head] + lines[1:3] + [f"Note: {md}"]
+    return {"ended": {"missing": len(miss), "nudges": len(nudges)},
+            "user_message": "\n".join(screen[:NOTE_MAX_LINES])}
 
 
 def final_text_of(payload: dict[str, Any]) -> str | None:

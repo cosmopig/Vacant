@@ -53,7 +53,7 @@ import shlex
 import time
 from typing import Any
 
-KINDS = ("session_start", "pre_tool", "post_tool", "stop", "session_end", "other")
+KINDS = ("session_start", "pre_tool", "post_tool", "stop", "session_end", "turn_check", "other")
 ACTIONS = ("allow", "deny", "continue")
 
 #: 寫入型工具（跨 agent 的名字）。shell 類另外處理。

@@ -143,11 +143,14 @@ FEEDBACK_MARK = "The task contract's checks do not pass yet"
 FLAG_MARK = "the task owner marked these places"
 #: 零設定的交件前檢視（`trace/feedback.REVIEW_HEADER`）
 REVIEW_MARK = "Before delivery: a review of the recorded steps of this task"
+#: 零設定 v3 的回合預算提醒（`trace/feedback.NUDGE_HEADER`）
+NUDGE_MARK = "Before the turn budget runs out: a requested output"
+MARKS = (FEEDBACK_MARK, FLAG_MARK, REVIEW_MARK, NUDGE_MARK)
 
 
 def feedback_excerpt(blob: str) -> str | None:
     """模型**真的收到**的回饋文字（最後一則，最多 800 字）：量回饋有沒有到、內容是什麼。"""
-    i = max(blob.rfind(FEEDBACK_MARK), blob.rfind(FLAG_MARK), blob.rfind(REVIEW_MARK))
+    i = max(blob.rfind(m) for m in MARKS)
     if i < 0:
         return None
     return blob[i:i + 800].encode().decode("unicode_escape", "replace") \
@@ -159,7 +162,7 @@ def split_on_feedback(items: list[Any], is_result, text_of) -> tuple[bool, int]:
     last = -1
     for i, it in enumerate(items):
         txt = text_of(it)
-        if FEEDBACK_MARK in txt or FLAG_MARK in txt or REVIEW_MARK in txt:
+        if any(m in txt for m in MARKS):
             last = i
     after = items[last + 1:] if last >= 0 else items
     return last >= 0, sum(1 for it in after if is_result(it))
@@ -172,7 +175,7 @@ def pick_turn(user_texts: list[tuple[int, str]]) -> tuple[dict[str, Any] | None,
     if not isinstance(turns, list):
         return None, -1
     for pos, txt in reversed(user_texts):
-        if FEEDBACK_MARK in txt or FLAG_MARK in txt or REVIEW_MARK in txt:
+        if any(m in txt for m in MARKS):
             continue
         for t in turns:
             if isinstance(t, dict) and t.get("when") and str(t["when"]) in txt:
