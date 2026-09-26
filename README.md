@@ -46,9 +46,10 @@ vacant install                # 找到你機器上的 pi／Claude Code／OpenCod
 
 **真模型、預註冊的正式批次（2026-09-25，DABstep 77 題，pi 0.87.1，15 回合上限）：沒有量到差別。**
 gemma-4-26b 開思考：沒裝 50／77、裝了 44／77（p＝0.21）；qwen3.8-27b 開思考：68／77 對 64／77（p＝0.29）。
-所有翻轉都發生在 Vacant 沒有退回的那幾跑（兩次獨立取樣的差異）；8 次退回裡 7 次退的是本來就對的答案（兩個誤報的錯，事後已修），
+所有翻轉都發生在 Vacant 沒有退回的那幾跑（兩次獨立取樣的差異）；8 次退回全是誤報、7 次退的是本來就對的答案（兩個程式錯，事後已修），
 修好之後用同一批紀錄重播，158 跑一次都不會退回——DABstep 上真實的失敗（推理錯、回合用完）不是這幾類檢查抓得到的。
 全文與原始紀錄：[`decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)。
+為什麼是這個結果、和過去的實驗比、Vacant 要不要做成 agent：[`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md)（證據索引 [`ops/eval/evidence_20260925/INDEX.md`](ops/eval/evidence_20260925/INDEX.md)）。
 
 ⚠ **不能讀成**「Vacant 讓 agent 做得更好」，也不能讀成「沒有用」：退回只根據紀錄，不判斷答案對不對；
 推理錯了但每一步都有根據的答案，它看不出來。

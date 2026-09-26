@@ -1,0 +1,876 @@
+{
+ "workflow": "verify-dabstep-results",
+ "run": "wf_ddd550e2-42a",
+ "agents": [
+  {
+   "agentId": "a133cd5382ad13b75",
+   "result": {
+    "summary": "我用 /usr/bin/python3 直接從 /home/user/Vacant/ops/eval/evidence_20260925/formal/ledger_formal.jsonl 重算了成本和 token（全程唯讀；沒開 formal/result.json、runs.json 或任何 CONCLUSION 檔）。ledger 共 3116 行，每行解析都成功，317 個 tag 全部符合 formal-(g4|q38)-on-(A|C)-<task>[-r2]。四個組合（模型×A/C）各 79 題，每個 trial 至少有 6 次請求（qwen 最少 4 次）。\n\n主分析（77 題，排除 5 和 70；gemma C 的 43、50 只算 r2 那次）：\n- gemma-4-26b：A 951 次請求、$0.8914；C 1001 次、$0.9675。C 多花 8.54%，prompt tokens 多 10.1%，completion tokens 少 1.9%。\n- qwen3.8-27b：A 541 次、$0.5999；C 535 次、$0.6474。C 多花 7.92%。\n- 兩個模型合計：A $1.4913，C $1.6149，C 多花 8.29%。\n\n只算正式跑的每一行（3116 行，含 gemma C-43 被中斷那次）：\n- gemma：A $0.9174，C $1.0068（+9.75%）。\n- qwen：A $0.6186，C $0.6577（+6.32%）。\n- 正式跑總計 $3.2006482，和 summary.json 裡 formal-* 各 tag 的加總逐位相同（3116 次請求、317 個 tag）。整場評測 spent_usd 是 $3.40260577，正式跑佔 94.06%；另外 208 次非正式請求（pilot、gate1、live 等）共 $0.20196。預算 $4.80，還剩 $1.397。\n\n非 200 或有 stream_error 的行：每一格都是 0；retried_stream_errors 加總也是 0。\n\n多出來的錢從哪來：\n- 兩組每題第一次請求的 prompt token 數完全一樣（兩個模型各 79/79）。所以安裝 Vacant 沒有讓送給模型的提示變長，C 多出來的成本來自 agent 自己跑的步數和路線不同。\n- gemma 每題最多只能請求 15 次，撞到上限的：A 36/79 題、C 45/79 題。C 組有 38 題在撞上限前一直沒說做完，所以 Vacant 的 Stop 檢查一次都沒跑。\n- 被 Vacant 退回（continue）的 7 題：全部一路跑到 15 次上限，後來都沒放行。這 7 題 C 比 A 多花 49.6%。\n- 只被放行（allow）的 33 題：C 仍多花 18.0%，這部分跟 Vacant 的檢查動作無關，是兩次跑本身的差異。\n- 沒被檢查的 37 題：C 少花 0.7%。\n- qwen：75 題直接放行（多花 6.7%），1 題被退回（多花 67.9%），1 題撞上限沒被檢查。\n- 逐題配對：gemma 有 42 題 C 較貴、35 題 A 較貴；qwen 是 40 對 37。每題中位數差：gemma +$0.000334，qwen +$0.000039。",
+    "numbers": {
+     "source_rows": {
+      "ledger_rows": 3116,
+      "parse_errors": 0,
+      "distinct_tags": 317,
+      "tasks_per_model_arm": 79,
+      "rows_g4": 2012,
+      "rows_q38": 1104
+     },
+     "primary_77_tasks_counted_trials": {
+      "g4_A": {
+       "requests": 951,
+       "prompt_tokens": 11066699,
+       "completion_tokens": 343406,
+       "reasoning_tokens": 187131,
+       "cached_tokens": 0,
+       "cost_usd": 0.89142697,
+       "non200_or_stream_error": 0
+      },
+      "g4_C": {
+       "requests": 1001,
+       "prompt_tokens": 12185484,
+       "completion_tokens": 336899,
+       "reasoning_tokens": 198671,
+       "cached_tokens": 0,
+       "cost_usd": 0.96752954,
+       "non200_or_stream_error": 0
+      },
+      "q38_A": {
+       "requests": 541,
+       "prompt_tokens": 3076140,
+       "completion_tokens": 117263,
+       "reasoning_tokens": 55766,
+       "cached_tokens": 2086224,
+       "cost_usd": 0.59986964,
+       "non200_or_stream_error": 0
+      },
+      "q38_C": {
+       "requests": 535,
+       "prompt_tokens": 3317968,
+       "completion_tokens": 121132,
+       "reasoning_tokens": 60742,
+       "cached_tokens": 2186576,
+       "cost_usd": 0.64735328,
+       "non200_or_stream_error": 0
+      },
+      "g4_C_over_A_pct": {
+       "cost": 8.54,
+       "requests": 5.26,
+       "prompt_tokens": 10.11,
+       "completion_tokens": -1.89,
+       "reasoning_tokens": 6.17
+      },
+      "q38_C_over_A_pct": {
+       "cost": 7.92,
+       "requests": -1.11,
+       "prompt_tokens": 7.86,
+       "completion_tokens": 3.3,
+       "reasoning_tokens": 8.92
+      },
+      "both_models_A_usd": 1.49129661,
+      "both_models_C_usd": 1.61488282,
+      "both_models_C_over_A_pct": 8.29,
+      "mean_cost_per_trial_usd": {
+       "g4_A": 0.011577,
+       "g4_C": 0.012565,
+       "q38_A": 0.007791,
+       "q38_C": 0.008407
+      }
+     },
+     "all_formal_rows_by_model_arm": {
+      "g4_A": {
+       "requests": 974,
+       "prompt_tokens": 11391371,
+       "completion_tokens": 353023,
+       "reasoning_tokens": 192471,
+       "cost_usd": 0.91742379,
+       "non200_or_stream_error": 0
+      },
+      "g4_C": {
+       "requests": 1038,
+       "prompt_tokens": 12680077,
+       "completion_tokens": 350699,
+       "reasoning_tokens": 208964,
+       "cost_usd": 1.00684305,
+       "non200_or_stream_error": 0,
+       "note": "includes 13 rows of the superseded interrupted g4-C-43 run"
+      },
+      "q38_A": {
+       "requests": 557,
+       "prompt_tokens": 3197383,
+       "completion_tokens": 120152,
+       "reasoning_tokens": 56976,
+       "cached_tokens": 2174032,
+       "cost_usd": 0.61864024,
+       "non200_or_stream_error": 0
+      },
+      "q38_C": {
+       "requests": 547,
+       "prompt_tokens": 3388695,
+       "completion_tokens": 122810,
+       "reasoning_tokens": 61297,
+       "cached_tokens": 2240672,
+       "cost_usd": 0.65774112,
+       "non200_or_stream_error": 0
+      },
+      "g4_C_over_A_cost_pct": 9.75,
+      "q38_C_over_A_cost_pct": 6.32,
+      "both_C_over_A_cost_pct": 8.37
+     },
+     "counted_trials_all_79_tasks": {
+      "g4_A_usd": 0.91742379,
+      "g4_C_usd": 0.99726444,
+      "g4_C_requests": 1025,
+      "q38_A_usd": 0.61864024,
+      "q38_C_usd": 0.65774112,
+      "g4_C_over_A_cost_pct": 8.7,
+      "q38_C_over_A_cost_pct": 6.32,
+      "both_C_over_A_cost_pct": 7.74
+     },
+     "tasks_5_and_70_separately": {
+      "g4_A": {
+       "task5_usd": 0.00371918,
+       "task5_req": 8,
+       "task70_usd": 0.02227764,
+       "task70_req": 15
+      },
+      "g4_C": {
+       "task5_usd": 0.00447311,
+       "task5_req": 9,
+       "task70_usd": 0.02526179,
+       "task70_req": 15
+      },
+      "q38_A": {
+       "task5_usd": 0.00318372,
+       "task5_req": 6,
+       "task70_usd": 0.01558688,
+       "task70_req": 10
+      },
+      "q38_C": {
+       "task5_usd": 0.00260244,
+       "task5_req": 5,
+       "task70_usd": 0.0077854,
+       "task70_req": 7
+      },
+      "g4_C_over_A_pct_5plus70": 14.38,
+      "q38_C_over_A_pct_5plus70": -44.66
+     },
+     "reruns": {
+      "superseded_g4_C_43_original": {
+       "requests": 13,
+       "cost_usd": 0.00957861,
+       "null_cost_rows": 2
+      },
+      "g4_C_43_r2": {
+       "requests": 15,
+       "cost_usd": 0.01003601
+      },
+      "g4_C_50_original_requests": 0,
+      "g4_C_50_r2": {
+       "requests": 10,
+       "cost_usd": 0.00350562
+      }
+     },
+     "grand_total_formal": {
+      "requests": 3116,
+      "prompt_tokens": 30657526,
+      "completion_tokens": 946684,
+      "reasoning_tokens": 519708,
+      "cached_tokens": 4414704,
+      "cost_usd": 3.2006482,
+      "non200": 0,
+      "stream_error": 0,
+      "retried_stream_errors_sum": 0,
+      "rows_attempts_gt1": 1,
+      "rows_null_usage_and_cost": 4
+     },
+     "whole_evaluation": {
+      "spent_usd": 3.40260577,
+      "budget_usd": 4.8,
+      "remaining_usd": 1.39739423,
+      "formal_share_pct": 94.06,
+      "nonformal_usd": 0.20195757,
+      "nonformal_requests": 208,
+      "total_requests_all_tags": 3324,
+      "summary_json_formal_tags_match_ledger": true
+     },
+     "cost_by_vacant_review_primary77": {
+      "g4": {
+       "allow_only": {
+        "n": 33,
+        "A_usd": 0.206,
+        "C_usd": 0.242986,
+        "extra_pct": 17.95
+       },
+       "rejected_continue": {
+        "n": 7,
+        "A_usd": 0.087829,
+        "C_usd": 0.131354,
+        "extra_pct": 49.56,
+        "C_requests": 105
+       },
+       "no_review_never_reached_stop": {
+        "n": 37,
+        "A_usd": 0.597599,
+        "C_usd": 0.59319,
+        "extra_pct": -0.74
+       }
+      },
+      "q38": {
+       "allow_only": {
+        "n": 75,
+        "A_usd": 0.544306,
+        "C_usd": 0.581003,
+        "extra_pct": 6.74
+       },
+       "rejected_then_allow": {
+        "n": 1,
+        "A_usd": 0.004325,
+        "C_usd": 0.007262,
+        "extra_pct": 67.92
+       },
+       "no_review": {
+        "n": 1,
+        "A_usd": 0.051239,
+        "C_usd": 0.059088,
+        "extra_pct": 15.32
+       }
+      }
+     },
+     "per_task_paired_primary77": {
+      "g4_tasks_C_costlier": 42,
+      "g4_tasks_A_costlier": 35,
+      "g4_median_diff_usd": 0.000334,
+      "q38_tasks_C_costlier": 40,
+      "q38_tasks_A_costlier": 37,
+      "q38_median_diff_usd": 3.9e-05
+     },
+     "request_cap": {
+      "max_requests_per_trial": 15,
+      "g4_A_trials_at_cap": 36,
+      "g4_C_trials_at_cap": 45,
+      "q38_A_trials_at_cap": 1,
+      "q38_C_trials_at_cap": 1,
+      "g4_C_stop_reached_false": 38,
+      "q38_C_stop_reached_false": 1
+     },
+     "first_request_prompt_tokens_identical_A_vs_C": {
+      "g4": "79/79",
+      "q38": "79/79"
+     }
+    },
+    "anomalies": [
+     "There are no non-200 or stream_error rows in any cell of the formal ledger, and retried_stream_errors adds up to 0. The 12 failed requests that summary.json counts (gemma-4-26b ok 2093/2094, qwen3.8 ok 1143/1154) all have non-formal tags: 1 in thinkprobe-gemma-4-26b-a4b-it-default and 11 in pilot-q38-on-{A,C}-1716-r2.",
+     "4 rows have status 200 but usage and cost are both null, so their cost is missing from the totals (a small undercount of unknown size): formal-g4-on-A-72, formal-g4-on-C-2697, and 2 rows of the superseded formal-g4-on-C-43 run. One of the C-43 rows also has provider=None and generation_id=None. Those 2 C-43 rows are the last requests before that run was killed by SIGTERM/KeyboardInterrupt (logs/43-g4-on-C.log).",
+     "One row (formal-q38-on-A-38) has attempts=2, meaning an HTTP-level retry. Its cost is recorded ($0.00081344).",
+     "The superseded original g4-C-43 run spent $0.00957861 across 13 requests (about 1% of the gemma C cost). It stays in the all-rows totals but is left out of the counted-trial totals. The original g4-C-50 run failed with AgentSetupTimeoutError and made 0 model requests. The first 43 rerun attempt (log 43-g4-on-C-r2.log) died with FileExistsError on the job directory and made no requests; the r2b attempt is the one in job dir 20-10-15 (reruns.json labels both dirs 'r2', and the ledger tag is -r2).",
+     "There is a hard cap of 15 requests per trial. For gemma it bites hard: 36/79 A trials and 45/79 C trials hit it, and 38/79 C trials never reached Stop, so Vacant never ran its check on them. The gemma cost difference is therefore squeezed by the cap and does not show how much C would cost with no cap.",
+     "All 7 gemma trials that Vacant sent back (review_actions=['continue']) ran on to the 15-request cap without ever getting an allow. The extra cost of those 7 (+49.6%) is spend after being sent back that ended without a pass.",
+     "Gemma trials where Vacant only said allow still cost 18.0% more in C than in A (33 tasks). An allow adds no requests, and the first request's prompt is the same size in A and C on all 79 tasks. So this gap is run-to-run variance in the agent's path, not overhead from Vacant. The overall C-over-A percentage mixes that variance with any real effect, and it swings with the basis: gemma is +8.54% on 77 tasks, +8.70% on 79 counted trials, and +9.75% on all rows.",
+     "Tasks 5 and 70 behave the opposite way from the main set for qwen: C costs 44.7% less than A. For gemma C costs 14.4% more. These rest on tiny samples (2 tasks each).",
+     "reasoning_tokens looks like a subset of completion_tokens (for example completion 124 with reasoning 110), so the two should not be added together. Only qwen has cached_tokens (prompt cache hits); gemma's is 0 everywhere."
+    ]
+   },
+   "label": "recompute:costs"
+  },
+  {
+   "agentId": "a8b45ddffb830fa75",
+   "result": {
+    "summary": "我從原始的 Harbor trial 目錄獨立重算了一次（/usr/bin/python3，唯讀；沒有讀 formal/result.json、runs.json，也沒讀任何 CONCLUSION 檔）。結論：兩個模型都是「有 Vacant（C）答對的題數比沒裝（A）少」，但差距在統計上都不顯著。\n\n**主分析（77 題，排除 5 和 70；每個 模型／組別／題目 取時間最新的那一跑）**\n\n| 模型 | A 答對 | C 答對 | 兩組都對 | 兩組都錯 | 只有 A 對 | 只有 C 對 | McNemar 精確 p |\n|---|---|---|---|---|---|---|---|\n| g4（gemma-4-26b） | 50（64.9%） | 44（57.1%） | 39 | 22 | 11 | 5 | 0.2101 |\n| q38（qwen3.8-27b） | 68（88.3%） | 64（83.1%） | 62 | 7 | 6 | 2 | 0.2891 |\n\n兩個 p 值都 >0.2，以這個樣本量不能說 Vacant 讓成績變差，也不能說變好。\n\n**哪些題翻轉了**\n- g4 只有 A 對：12, 21, 23, 28, 32, 40, 44, 59, 61, 68, 1871\n- g4 只有 C 對：15, 18, 62, 65, 66\n- q38 只有 A 對：17, 36, 47, 61, 1753, 1871\n- q38 只有 C 對：19, 1464\n\n**題 5 和題 70（另外列）**\n- 題 5：四跑全對（答案 NL）。\n- 題 70：四跑全錯（標準答案 Not Applicable）。g4-A 沒寫出答案；g4-C、q38-A、q38-C 都答 'yes'。\n\n**跑了幾跑、哪些跑作廢**\n- trial 目錄：g4-A 79、g4-C 81、q38-A 79、q38-C 79，共 318。每組都涵蓋同樣 79 題，沒有缺題。\n- 作廢 2 跑，都在 g4-C，也都重跑過；用最新那一跑後，主分析裡沒有任何作廢的跑：\n  - 題 50（17-31-18）：agent 安裝逾時（AgentSetupTimeoutError，360 秒）。重跑（20-07-41）答對。\n  - 題 43（19-59-00）：沒有分數也沒有例外紀錄，驗分根本沒跑；當時 docker 行程不見了，工作被中斷。重跑（20-10-15）答錯（247.300）。\n- 這兩題重跑後都不是翻轉題（43 兩組都錯、50 兩組都對），所以 McNemar 的結果不受重跑方式影響，只有 C 的總答對數會受影響。\n\n**差距主要從哪裡來**\n- g4 的差距幾乎都是「沒交出答案」，不是「答錯」。C 有 28 題沒寫出答案檔，A 是 25 題。\n- g4 只有 A 對的 11 題裡，有 10 題在 C 用滿 15 回合上限後被中斷；C 的交件前檢查一次都沒跑，退回 0 次。\n- q38 的翻轉則是真的答錯：C 答錯的每一題，交件前檢查都判了放行（allow）。",
+    "numbers": {
+     "trial_dirs_total": 318,
+     "g4_trial_dirs_A": 79,
+     "g4_trial_dirs_C": 81,
+     "q38_trial_dirs_A": 79,
+     "q38_trial_dirs_C": 79,
+     "tasks_per_model_arm": 79,
+     "void_runs_count": 2,
+     "void_runs": [
+      "g4-C task 50 job 2026-09-25__17-31-18: AgentSetupTimeoutError (360s), no reward -> superseded by 2026-09-25__20-07-41 (reward 1.0)",
+      "g4-C task 43 job 2026-09-25__19-59-00: verifier_result=null, exception_info=null (docker daemon socket vanished at teardown; harbor KeyboardInterrupt) -> superseded by 2026-09-25__20-10-15 (reward 0.0, got 247.300)"
+     ],
+     "void_runs_in_primary_after_latest_rule": 0,
+     "q38_void_runs": 0,
+     "primary_n": 77,
+     "g4_A_correct": 50,
+     "g4_C_correct": 44,
+     "g4_A_rate": 0.6494,
+     "g4_C_rate": 0.5714,
+     "g4_both": 39,
+     "g4_neither": 22,
+     "g4_onlyA": 11,
+     "g4_onlyC": 5,
+     "g4_p": 0.2101135,
+     "g4_flips_onlyA": [
+      12,
+      21,
+      23,
+      28,
+      32,
+      40,
+      44,
+      59,
+      61,
+      68,
+      1871
+     ],
+     "g4_flips_onlyC": [
+      15,
+      18,
+      62,
+      65,
+      66
+     ],
+     "q38_A_correct": 68,
+     "q38_C_correct": 64,
+     "q38_A_rate": 0.8831,
+     "q38_C_rate": 0.8312,
+     "q38_both": 62,
+     "q38_neither": 7,
+     "q38_onlyA": 6,
+     "q38_onlyC": 2,
+     "q38_p": 0.2890625,
+     "q38_flips_onlyA": [
+      17,
+      36,
+      47,
+      61,
+      1753,
+      1871
+     ],
+     "q38_flips_onlyC": [
+      19,
+      1464
+     ],
+     "task5_g4_A": 1,
+     "task5_g4_C": 1,
+     "task5_q38_A": 1,
+     "task5_q38_C": 1,
+     "task70_g4_A": 0,
+     "task70_g4_C": 0,
+     "task70_q38_A": 0,
+     "task70_q38_C": 0,
+     "task70_detail": "expected 'Not Applicable'; g4-A no answer.txt; g4-C/q38-A/q38-C answered 'yes'",
+     "g4_A_no_answer_primary": 25,
+     "g4_C_no_answer_primary": 28,
+     "g4_A_wrong_answer_primary": 2,
+     "g4_C_wrong_answer_primary": 5,
+     "q38_A_no_answer_primary": 1,
+     "q38_C_no_answer_primary": 1,
+     "q38_A_wrong_answer_primary": 8,
+     "q38_C_wrong_answer_primary": 12,
+     "g4_A_hit_15_llm_calls_primary": 35,
+     "g4_C_hit_15_llm_calls_primary": 44,
+     "q38_A_hit_15_llm_calls_primary": 1,
+     "q38_C_hit_15_llm_calls_primary": 1,
+     "g4_C_stop_not_reached_primary": 37,
+     "q38_C_stop_not_reached_primary": 1,
+     "g4_C_review_continue_primary_tasks": [
+      6,
+      11,
+      25,
+      33,
+      38,
+      62,
+      1753
+     ],
+     "q38_C_review_continue_primary_tasks": [
+      40
+     ]
+    },
+    "anomalies": [
+     "g4 的 C 組比較差，主要是沒交出答案（C 沒寫 answer.txt 28 題、A 25 題），不是答錯（C 5 題、A 2 題）。g4 只有 A 對的 11 題裡，有 10 題（12, 21, 23, 28, 32, 40, 44, 59, 61, 1871）在 C 用滿 15 次模型呼叫（max_turns=15），pi 被中斷（stopReason=error、'This operation was aborted'），Vacant 的交件前檢查從沒跑到（reviews=0）。第 11 題（68）是 C 自己寫錯（多寫 'monthly_fraud_level, is_credit'，Vacant 判 allow）。",
+     "g4 用滿 15 次呼叫的題數：C 44/77、A 35/77。在 g4 上，C 比較常用光回合數，而且可能每回合的步數也多一點（平均呼叫 13.0 對 12.35）。q38 沒有這個現象（1 對 1）。",
+     "g4 的 C 組有 37/77 跑沒走到 Stop 檢查（stop_reached=false），所以對 g4 來說，Vacant 的交件前檢查大約一半的跑根本沒機會發揮。",
+     "q38 的翻轉都是真的答錯，而且 Vacant 全部放行：17（7.683 對 8.91）、36、47、61、1871（-8.01）都判 allow；1753 的 C 答案是空字串 ''，Vacant 仍然 allow。",
+     "有退回（review action 'continue'）的：g4 C 7 題（6, 11, 25, 33, 38, 62, 1753），後來 6 題答對；只有 62 從『A 沒答案』變成『C 答對』，1753 退回後還是錯的。q38 只有 1 題（40），而且 A 本來就對。trajectory.json 裡每一跑都只有 1 則 user 訊息，退回的文字不是用 user 回合送進去的。",
+     "題 43 原本那一跑作廢：agent 跑完了，但 docker daemon 不見，驗分沒跑（verifier_result=null）。exception_info 也是 null，所以只看 exception 的檢查會漏掉它，要看 reward 有沒有值。第一次重跑（logs/43-g4-on-C-r2.log）撞到題 50 重跑用的 20-07-41 目錄（FileExistsError），真正生效的是 r2b（20-10-15）。reruns.json 兩筆都標 'r2'。",
+     "progress.jsonl 只有 157 筆：g4 78 筆，缺題 43（被中斷）；每筆的 rc 都是 0，所以它不能用來看哪些跑作廢。",
+     "g4 A 的題 50 答案 'yes'，判對。",
+     "q38 題 2697 兩組都沒寫出答案（都是 15 次呼叫）。g4 題 2697 兩組也都沒答案。",
+     "C 組 79/79 × 2 個模型的 vacant_check 都是 pi_installed=true、c_arm_ok=true。A 組都沒有 vacant_check.json，agent 名稱是 'pi'。四組設定一致：同一個模型字串、max_turns 15、pi 0.87.1、think=on、timeout_multiplier 1.0。",
+     "兩個模型的 McNemar p 都 >0.2，方向都是 A ≥ C。以這個樣本量，不能說『Vacant 讓成績變差』，也不能說『變好』。"
+    ]
+   },
+   "label": "recompute:scores"
+  },
+  {
+   "agentId": "a4c2f6d432de7c070",
+   "result": {
+    "summary": "我直接從 Harbor 的原始 trial 目錄和 ledger 重算了一遍，沒有讀 result.json、runs.json 或任何 CONCLUSION 檔。同一題跑過兩次的取時間最晚的那一次（gemma C 組第 43、50 題取重跑）。主分析 77 題，排除第 5、70 題。\n\n**結論：Vacant 在 C 組基本上沒有起作用。** 兩個模型的分數差別都不是它造成的。退回 8 次，沒有一次讓答案改變；翻轉的題目裡，也沒有一題是退回造成的。\n\n**gemma-4-26b（g4）**\n- 分數：A 組 50/77，C 組 44/77。只有 A 對 11 題、只有 C 對 5 題，McNemar p=0.2101。\n- 走到交件前檢查的只有 40/77 跑。另外 37 跑都用滿 15 次請求（agent 的回合上限），檢查根本沒有執行。其中 28 跑沒寫出 answer.txt，9 跑有答案（7 對、2 錯）。\n- 退回 7 次：6 次是「值找不到出處」（unsourced），1 次是「失敗的步驟」（failed_step）。\n- 這 7 跑的首次交件答案（從病歷裡的寫檔內容還原）6 對 1 錯（第 1753 題）。退回後都沒有重寫 answer.txt，最終答案和退回前一字不差：6 對 1 錯，前後相同。\n- 退回時這幾跑只剩 1–6 次請求（合計 21 次）。7 跑都在 15 次時停下（6 跑是 agent 還沒做完就被中止，第 62 題則是在第 15 次請求給出最後回覆），所以沒有一跑走到第二次檢查。\n\n**qwen3.8-27b（q38）**\n- 分數：A 組 68/77，C 組 64/77。只有 A 對 6 題、只有 C 對 2 題，p=0.2891。\n- 走到檢查的有 76/77 跑，唯一沒走到的是第 2697 題（撞 15 次上限）。\n- 只退回 1 次：第 40 題，原因是 failed_step（grep 找不到東西回傳 1）。退回前後答案都是 9.999566（標準答案 10），都算對。多用了 3 次請求，第二次檢查放行。\n- 有 12 跑放行了但答案是錯的，包括第 1753 題的 answer.txt 是空的也被放行。\n\n**翻轉的題目有沒有被退回過**\n- g4 有 16 題翻轉，只有第 62 題的 C 組被退回過。這題是只有 C 對，但 C 在退回前就已經寫好正確的 \"Not Applicable\"，A 組則是撞上限沒寫出答案。所以這題贏不是退回造成的。\n- g4 另外 11 題只有 A 對，其中 10 題的 C 組都撞 15 次上限、沒走到檢查，9 題連答案都沒寫。\n- q38 有 8 題翻轉，C 組都沒被退回。\n\n**撞 15 次請求上限的次數（依 ledger 的 tag 計）**\n- 主分析 77 題：g4 A 35、C 44；q38 A 1、C 1。沒有任何一跑超過 15。\n- g4 C 組比 A 組多撞的 9 次裡，只有 3 次（第 6、11、25 題）跟退回有關。\n- 第 5、70 題（另外報）：兩個模型的 A、C 結果都一樣（第 5 題對、第 70 題錯）。只有 g4 第 70 題在兩組都撞上限；C 組沒被退回。\n\n**8 次退回全部是誤報：**\n- 6 次 unsourced 裡，5 次被標的值其實一字不差出現在 Vacant 自己病歷裡較早的 bash 輸出中（第 11、25、33、38、1753 題）。第 6 題的 73.150 是輸出裡 73.1495413640441 四捨五入後的值。\n- 2 次 failed_step 都只是 grep 沒找到東西回傳 1。\n\n工作腳本和輸出在 /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/vacant_did/（analyze.py、out.json），只讀原始資料。",
+    "numbers": {
+     "g4_primary": {
+      "n": 77,
+      "A_correct": 50,
+      "C_correct": 44,
+      "A_only": 11,
+      "C_only": 5,
+      "mcnemar_p": 0.2101135,
+      "C_stop_reached": 40,
+      "C_stop_not_reached": 37,
+      "C_stop_not_reached_all_at_15_requests": true,
+      "C_stop_not_reached_with_answer_file": 9,
+      "C_stop_not_reached_correct": 7,
+      "C_allowed_first_review": 33,
+      "C_sent_back_runs": 7,
+      "C_sent_back_tasks": [
+       "6",
+       "11",
+       "25",
+       "33",
+       "38",
+       "62",
+       "1753"
+      ],
+      "sent_back_finding_kinds": {
+       "unsourced": 6,
+       "failed_step": 1
+      },
+      "sent_back_correct_before": 6,
+      "sent_back_correct_after": 6,
+      "sent_back_answer_changed": 0,
+      "sent_back_second_review_reached": 0,
+      "requests_left_at_sendback": {
+       "6": 3,
+       "11": 6,
+       "25": 3,
+       "33": 4,
+       "38": 2,
+       "62": 2,
+       "1753": 1
+      },
+      "extra_requests_after_sendback_total": 21,
+      "C_final_allow_but_wrong": 2,
+      "A_hit_15_requests": 35,
+      "C_hit_15_requests": 44,
+      "hit15_both": 30,
+      "hit15_C_only": [
+       "6",
+       "11",
+       "12",
+       "21",
+       "25",
+       "28",
+       "32",
+       "35",
+       "40",
+       "44",
+       "45",
+       "53",
+       "61",
+       "66"
+      ],
+      "hit15_A_only": [
+       "15",
+       "18",
+       "26",
+       "29",
+       "49"
+      ],
+      "answer_file_missing_A": 25,
+      "answer_file_missing_C": 28,
+      "flips_total": 16,
+      "flips_C_sent_back": [
+       "62"
+      ],
+      "total_requests_A": 951,
+      "total_requests_C": 1001
+     },
+     "g4_sent_back_detail": [
+      {
+       "task": "6",
+       "kind": "unsourced",
+       "value": "73.150",
+       "pre_answer": "73.150",
+       "pre_correct": true,
+       "final_got": "73.150",
+       "expected": "73.15",
+       "final_correct": true,
+       "A_correct": true
+      },
+      {
+       "task": "11",
+       "kind": "unsourced",
+       "value": "4811.76",
+       "pre_answer": "4811.76",
+       "pre_correct": true,
+       "final_got": "4811.76",
+       "expected": "4811.76",
+       "final_correct": true,
+       "A_correct": true
+      },
+      {
+       "task": "25",
+       "kind": "unsourced",
+       "value": "2429",
+       "pre_answer": "2429",
+       "pre_correct": true,
+       "final_got": "2429",
+       "expected": "2429",
+       "final_correct": true,
+       "A_correct": true
+      },
+      {
+       "task": "33",
+       "kind": "unsourced",
+       "value": "46284",
+       "pre_answer": "46284",
+       "pre_correct": true,
+       "final_got": "46284",
+       "expected": "46284",
+       "final_correct": true,
+       "A_correct": true
+      },
+      {
+       "task": "38",
+       "kind": "unsourced",
+       "value": "59.960502",
+       "pre_answer": "59.960502",
+       "pre_correct": true,
+       "final_got": "59.960502",
+       "expected": "60",
+       "final_correct": true,
+       "A_correct": true
+      },
+      {
+       "task": "62",
+       "kind": "failed_step",
+       "cmd": "grep -i \"retry\" /app/data/merchant_data.json (exit 1, no match)",
+       "pre_answer": "Not Applicable",
+       "pre_correct": true,
+       "final_got": "Not Applicable",
+       "expected": "Not Applicable",
+       "final_correct": true,
+       "A_correct": false,
+       "A_note": "A hit 15 requests with no answer.txt"
+      },
+      {
+       "task": "1753",
+       "kind": "unsourced",
+       "value": "868",
+       "pre_answer": "36, 51, 53, ... 868, 960 (33 ids)",
+       "pre_correct": false,
+       "final_got": "same 33-id list",
+       "expected": "34-id list (includes 939)",
+       "final_correct": false,
+       "A_correct": false
+      }
+     ],
+     "g4_flips": [
+      {
+       "task": "12",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 8,
+       "C_answer": null
+      },
+      {
+       "task": "15",
+       "dir": "C_only",
+       "C_sent_back": false,
+       "C_stop": true,
+       "C_req": 14,
+       "A_req": 15,
+       "A_answer": null
+      },
+      {
+       "task": "18",
+       "dir": "C_only",
+       "C_sent_back": false,
+       "C_stop": true,
+       "C_req": 14,
+       "A_req": 15,
+       "A_answer": null
+      },
+      {
+       "task": "21",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 13,
+       "C_answer": null
+      },
+      {
+       "task": "23",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 15,
+       "C_answer": null
+      },
+      {
+       "task": "28",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 12,
+       "C_answer": null
+      },
+      {
+       "task": "32",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 11,
+       "C_answer": null
+      },
+      {
+       "task": "40",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 14,
+       "C_answer": null
+      },
+      {
+       "task": "44",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 13,
+       "C_answer": null
+      },
+      {
+       "task": "59",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 15,
+       "C_answer": null
+      },
+      {
+       "task": "61",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 12,
+       "C_answer": null
+      },
+      {
+       "task": "62",
+       "dir": "C_only",
+       "C_sent_back": true,
+       "C_stop": true,
+       "C_req": 15,
+       "A_req": 15,
+       "A_answer": null,
+       "note": "C answer correct before send-back, unchanged"
+      },
+      {
+       "task": "65",
+       "dir": "C_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 15,
+       "A_answer": null
+      },
+      {
+       "task": "66",
+       "dir": "C_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 7,
+       "A_answer": null
+      },
+      {
+       "task": "68",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": true,
+       "C_req": 7,
+       "A_req": 7,
+       "C_answer": "monthly_fraud_level, is_credit",
+       "note": "C allowed, wrong"
+      },
+      {
+       "task": "1871",
+       "dir": "A_only",
+       "C_sent_back": false,
+       "C_stop": false,
+       "C_req": 15,
+       "A_req": 15,
+       "C_answer": null
+      }
+     ],
+     "q38_primary": {
+      "n": 77,
+      "A_correct": 68,
+      "C_correct": 64,
+      "A_only": 6,
+      "C_only": 2,
+      "mcnemar_p": 0.2890625,
+      "C_stop_reached": 76,
+      "C_stop_not_reached": [
+       "2697"
+      ],
+      "C_sent_back_runs": 1,
+      "C_sent_back_tasks": [
+       "40"
+      ],
+      "sent_back_finding_kinds": {
+       "failed_step": 1
+      },
+      "sent_back_correct_before": 1,
+      "sent_back_correct_after": 1,
+      "sent_back_answer_changed": 0,
+      "sent_back_second_review": "allow (finding resolved)",
+      "extra_requests_after_sendback_total": 3,
+      "C_final_allow_but_wrong": 12,
+      "C_final_allow_but_wrong_tasks": [
+       "17",
+       "18",
+       "36",
+       "43",
+       "47",
+       "49",
+       "60",
+       "61",
+       "71",
+       "1273",
+       "1753",
+       "1871"
+      ],
+      "A_hit_15_requests": 1,
+      "C_hit_15_requests": 1,
+      "hit15_tasks": [
+       "2697"
+      ],
+      "flips_total": 8,
+      "flips": {
+       "A_only": [
+        "17",
+        "36",
+        "47",
+        "61",
+        "1753",
+        "1871"
+       ],
+       "C_only": [
+        "19",
+        "1464"
+       ]
+      },
+      "flips_C_sent_back": [],
+      "total_requests_A": 541,
+      "total_requests_C": 535
+     },
+     "q38_sent_back_detail": [
+      {
+       "task": "40",
+       "kind": "failed_step",
+       "cmd": "grep -n -i \"high-value|high value|90th|percentile\" /app/data/manual.md (exit 1, no match)",
+       "pre_answer": "9.999566",
+       "pre_correct": true,
+       "final_got": "9.999566",
+       "expected": "10",
+       "final_correct": true,
+       "A_correct": true,
+       "requests_before_sendback": 7,
+       "requests_after": 3
+      }
+     ],
+     "tasks_5_70_separate": {
+      "g4": {
+       "5": {
+        "A": 1,
+        "C": 1,
+        "C_reviews": [
+         "allow"
+        ],
+        "A_req": 8,
+        "C_req": 9
+       },
+       "70": {
+        "A": 0,
+        "C": 0,
+        "C_reviews": [],
+        "A_req": 15,
+        "C_req": 15
+       }
+      },
+      "q38": {
+       "5": {
+        "A": 1,
+        "C": 1,
+        "C_reviews": [
+         "allow"
+        ],
+        "A_req": 6,
+        "C_req": 5
+       },
+       "70": {
+        "A": 0,
+        "C": 0,
+        "C_reviews": [
+         "allow"
+        ],
+        "A_req": 10,
+        "C_req": 7
+       }
+      }
+     },
+     "hit15_all_79_tasks": {
+      "g4_A": 36,
+      "g4_C": 45,
+      "q38_A": 1,
+      "q38_C": 1
+     },
+     "sendbacks_total_both_models": 8,
+     "sendbacks_on_already_correct_answers": 7,
+     "sendbacks_that_changed_answer": 0,
+     "sendbacks_false_positive_by_raw_record": 8
+    },
+    "anomalies": [
+     "Vacant 的交件前檢查在撞到回合上限時完全不會執行。g4 C 組有 37/77 跑、q38 有 1/77 跑沒有 'stop' 掛鉤事件，也沒有 review。這 38 跑全部是 ledger 裡剛好 15 次請求的。其中 5 跑（g4 第 34、35、43、69、70 題）第 15 次回覆的 stopReason 就是 'stop'（模型自己結束），檢查仍然沒跑；其餘是 pi 以 'This operation was aborted' 中止。所以 g4 C 組將近一半的跑，Vacant 的檢查根本沒有參與。",
+     "g4 被退回的 7 跑都停在 15 次請求，沒有一跑走到第二次檢查：6 跑是 agent 還沒做完就被中止，第 62 題則是在第 15 次請求給出最後回覆。退回訊息要求重算，但剩下的請求用完了、答案從沒改過，所以這些退回只消耗回合（合計 21 次請求），沒有產生修正。",
+     "8 次退回都能從原始病歷證明是誤報：5 次 unsourced 被標的值一字不差出現在 Vacant 自己鏈上較早的 bash 步驟輸出裡（第 11 題 4811.76、第 25 題 2429、第 33 題 46284、第 38 題 59.960502、第 1753 題 868）；第 6 題的 73.150 是第 5 步輸出 73.1495413640441 四捨五入的值；2 次 failed_step（g4 第 62 題、q38 第 40 題）只是 grep 沒找到東西回傳 1。7/8 退回的是本來就對的答案。",
+     "漏網：q38 第 1753 題的 answer.txt 是空的（bash 步驟寫入空字串），Vacant 仍然放行、沒有任何發現；q38 另有 11 跑放行但答錯，g4 有 2 跑（第 67、68 題）放行但答錯。",
+     "g4 C 組撞 15 次上限（主分析 44 次）明顯比 A 組（35 次）多，但只有 3 次多撞（第 6、11、25 題）跟退回有關。首次請求的 prompt_tokens 兩組完全相同（兩個模型皆 0 差異，符合「沒有退回時請求與未安裝相同」），因此其餘差異看起來是抽樣變異而不是 Vacant 注入內容；只從 ledger 無法進一步確認。",
+     "g4 的分數差主要來自沒寫出 answer.txt：主分析 A 組 25 跑、C 組 28 跑缺檔（都是撞上限）。g4 只有 A 對的 11 題裡，有 10 題的 C 組撞 15 次上限、沒走到檢查，其中 9 題沒寫答案（第 68 題的 C 組有走到檢查、被放行但答錯）。",
+     "重跑的 tag：g4 C 第 43 題取工作目錄 2026-09-25__20-10-15（tag formal-g4-on-C-43-r2，15 次請求）；第一次嘗試 r2（20-07-41 那個目錄）因 FileExistsError 立刻失敗、沒有請求。最早那一跑（19-59-00，tag formal-g4-on-C-43）有 13 次請求，已依規則捨棄。g4 C 第 50 題原本那一跑在 ledger 裡是 0 次請求（沒有 tag 列），重跑 formal-g4-on-C-50-r2 有 10 次請求。ledger 共 317 個 tag＝316 個 trial＋2 個 r2－1 個缺席的第 50 題原跑。",
+     "揭露：我為了看退回原因去讀 vacant_network/trace/evidence.py 時，看到 commit efda0d1f 的提交訊息，裡面有這批的結論摘要。上面所有數字都是在那之前、從原始檔獨立算出的；那則提交訊息寫的是 8 次退回在修正後都不會發生，這點我沒有另外驗證。"
+    ]
+   },
+   "label": "recompute:vacant-behaviour"
+  },
+  {
+   "agentId": "a276f6c5c8663d116",
+   "result": {
+    "mismatches": [
+     "Cost is counted on a different basis from the scores. The reported figures (gemma A $0.9174/974 req, C $1.0068/1038 req, +9.7%; qwen A $0.6186/557, C $0.6577/547, +6.3%) match R2 exactly, but only on its 'all formal ledger rows' basis. That basis covers all 79 tasks, including 5 and 70, and it also includes the discarded gemma C-43 run (13 requests, $0.0096). The scores use 77 tasks. On the same 77 tasks (R2): gemma A $0.8914 (951 req) vs C $0.9675 (1001 req), +8.5%; qwen A $0.5999 (541 req) vs C $0.6474 (535 req), +7.9%. So the reported basis overstates gemma's extra cost and understates qwen's; on the 77 tasks, qwen's C costs more than the reported +6.3%.",
+     "'gemma C reached stop check 41/81 runs' puts the 2 discarded runs in the denominator: 43 was killed after 13 requests and 50 made 0 requests. The qwen figure (78/79) does not. On the same basis the gemma figure is 41/79 over the 79 scored runs, or 40/77 on the 77-task set (R3: 40 reached, 37 not). The qwen equivalent on 77 tasks is 76/77. The numerator 41 is correct: I checked, and neither discarded run has a review.",
+     "'re-run once' is not quite accurate for task 43. It was re-run twice. The first attempt (dir 20-07-41, log 43-g4-on-C-r2.log) failed at once with FileExistsError because it collided with task 50's re-run directory, and it made 0 requests. The second attempt (dir 20-10-15) is the one that counted. reruns.json labels both 'r2'. The prereg (section 3) says 'if the re-run also breaks, drop the pair'. Read strictly, that drops pair 43 and makes n=76. The McNemar result would not change, because 43 is wrong in both arms (A and C), but the denominators would.",
+     "'Provider errors 0' holds for formal rows (non-200 and stream_error are 0). But 4 status-200 rows have null usage and null cost, so the cost totals are slightly low: g4-A-72, g4-C-2697, and 2 rows of the discarded g4-C-43 run. One row (q38-A-38) was retried once at the HTTP level (attempts=2). The 12 failed requests in summary.json are all in non-formal tags."
+    ],
+    "unsupported": [
+     "'All qwen flips and 15/16 gemma flips were C runs never sent back' is literally true but misleading. For 10 of the 11 gemma only-A flips (12, 21, 23, 28, 32, 40, 44, 59, 61, 1871), the C run hit the 15-request cap and never reached the stop check. I checked the verifier output: all 10 say '/app/answer.txt not found'. Vacant never looked at these runs. It did not look and approve them. Only 68 was reviewed, allowed, and wrong.",
+     "'7 of 8 push-backs were on answers already correct' understates the problem. R3 shows from the raw records that all 8 push-backs were false positives. 5 'unsourced' values (tasks 11, 25, 33, 38, 1753) appear word for word in earlier bash output in Vacant's own chain. 73.150 (task 6) is 73.1495… rounded. Both failed_step cases (gemma 62, qwen 40) were grep returning exit 1 because it found nothing. The one push-back on a wrong answer (gemma 1753) flagged the wrong thing: 868 is sourced, and the actual error is the missing id 939.",
+     "'harm = 0' is true only under the prereg's narrow definition (correct at the first stop, wrong after push-back). It says nothing about the push-backs using up turns. On gemma, the 7 sent-back runs had 1–6 requests left, all 7 ran to the 15 cap, and none reached a second check. 3 of the 9 extra cap hits in C (tasks 6, 11, 25) are on sent-back runs. Their answers were already written, so they still scored correct."
+    ],
+    "missing_for_decision": [
+     "The check was changed after the results were seen, and the summary does not say so. Commit efda0d1f changed trace/evidence.py after the formal batch: program output now counts as a source, and grep/rg finding nothing no longer counts as a failed step. Its regression tests are taken from formal tasks 25, 62 and 40. The commit says that, replayed on the recorded runs, none of the 8 push-backs would fire. Nobody has checked that independently. If it is true, the current code would have allowed every stop in this batch without a single push-back, so on this benchmark it would have had no effect at all. The version that was evaluated (prereg commit 8b22c7cc) is not the current code. Because the fix was tuned on these same 79 tasks, re-running them would not be an independent test.",
+     "Vacant caught zero wrong answers. 14 wrong answers were allowed: qwen 12 (17, 18, 36, 43, 47, 49, 60, 61, 71, 1273, 1753, 1871) and gemma 2 (67, 68). They include qwen 1753, where answer.txt was an empty string. The 'required file does not exist' check does not catch an empty file.",
+     "Structural limit: the check only runs when the agent says it is done, and push-backs count toward the 15-request cap. That cap is binding for gemma in both arms (A 35/77, C 44/77 hit it). So nearly half the gemma C runs (37/77) were never checked, and any push-back had almost no requests left to fix anything. With this setup, gemma mostly measures running out of turns, not Vacant's check.",
+     "Where the gemma gap comes from: C wrote no answer.txt in 28 runs vs 25 in A, and gave a wrong answer in 5 vs 2. Why C hits the cap more often (+9 runs, only 3 linked to push-back) is unexplained. The first request's prompt tokens are identical in A and C on all 79 tasks, so nothing was injected. That points to run-to-run variance, but with one run per task per arm, variance cannot be separated from an effect. Cost shows the same noise: gemma tasks where Vacant only allowed still cost 18% more in C, with no Vacant action. So the extra-cost percentages mix variance with any real overhead.",
+     "Sample size: there are only 16 (gemma) and 8 (qwen) flipped tasks. p=0.21 and 0.29, both leaning A ≥ C. The prereg fixes the wording in advance: 'this round measured no difference', not 'no effect' and not 'harm'. The prereg's only primary comparison is gemma. qwen is secondary and descriptive, but the summary presents the two side by side as equals.",
+     "The prereg (section 4) requires reporting wall-clock time per task for both arms. That is missing from the summary and from all three recomputations. It also requires a prompt/completion/reasoning token breakdown. R2 has it, but the summary reports only dollars and request counts.",
+     "Tasks 5 and 70: 'A 1/2, C 1/2' hides that task 5 was correct in all four runs and task 70 was wrong in all four (expected 'Not Applicable'; three runs answered 'yes', gemma A wrote no answer).",
+     "Problems in the recomputations themselves. (a) R3 says that among the 10 cap-hit only-A gemma flips, '9 wrote no answer', but its own flip table shows no C answer for all 10, and the verifier output confirms 10/10 had answer.txt not found. R3's '9' is wrong. (b) R1 says the original task-43 agent 'finished'. R2 says it was killed by SIGTERM after 13 requests, with the last 2 rows missing cost. R2 is more specific, and either way discarding the run is justified. (c) R3 saw the conclusion in a commit message partway through its work (it disclosed this). It says its numbers were computed before that point."
+    ],
+    "verdict": "Every number in the report reproduces exactly on some basis. The score, flip, McNemar, cap-hit, push-back-count, harm, and budget figures agree across all three recomputations. There are no outright numeric errors. There are four accuracy problems: (1) Cost uses all ledger rows (79 tasks plus the discarded run), while scores use 77 tasks. On 77 tasks the extra cost is gemma +8.5% and qwen +7.9%, not +9.7% and +6.3%. (2) The gemma stop-check rate 41/81 puts discarded runs in the denominator; the comparable figures are 41/79 or 40/77. (3) Task 43 was re-run twice, not once; the first attempt crashed with FileExistsError. Under a strict reading of the prereg rule the pair would be dropped, which changes denominators but not p. (4) 'Never sent back' hides that 10 of 11 gemma A-only flips were never checked at all: they hit the cap and wrote no answer. Several things that matter for the decision are left out: all 8 push-backs were false positives, and 0 of 14 wrong answers were caught (one was an empty answer file). The check was changed after the results were seen, using this same eval set, so the current code would reportedly have done nothing on this batch. The 15-request cap left about half the gemma C runs unchecked, and gave any push-back almost no room to fix anything. One run per task cannot separate variance from effect. Wall-clock time, which the prereg requires, is not reported."
+   },
+   "label": "critic"
+  }
+ ]
+}
