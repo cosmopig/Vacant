@@ -109,3 +109,7 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
 - 程式題組（`ops/eval/codesuite/`，`lcb_visible` 40 題；`docker-verify` 40／40 沒有問題，`PIN_BASE.json`）的 **A 組冒煙 10 題**
   排在 1003 做完留出批次那一份之後（`run_code_batch.py --wait-free 1003:<留出 progress>:100`）：只用 1003、1 跑同時，不碰 w401。
   它量的是：一跑多久、多常被回合上限切斷、**多常「最後一次自己跑的測試失敗、之後沒改、卻說做完」**（候選 2 有沒有東西可以作用）。
+- **21:53 冒煙的前兩跑在裝 agent 時就失敗**（`NonZeroAgentExitCodeError`：容器裡 `git clone` nvm 不信任這台沙箱攔截 TLS 的那張憑證）。
+  DABstep 的釘死映像有同一個修正（`dabstep_pin.py`：把憑證放進系統的信任清單），程式題組的基底映像當初照官方做、少了這一步。
+  兩跑都沒有送出任何模型請求（代理帳本裡沒有 `codesmoke` 標籤）⇒ 移到 `smoke_A_void_ca/`，驅動停下。
+  修法：`make_lcb_suite.py build --ca-bundle`（同一個偏差，寫進基底的 Dockerfile 與 MANIFEST），基底映像換成 `vacant-eval/lcb-visible-base:2`，重新 `docker-verify`。

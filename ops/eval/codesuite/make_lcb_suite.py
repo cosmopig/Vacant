@@ -527,10 +527,24 @@ def edit_instruction(text: str, task_id: str) -> str:
     return text
 
 
-def base_dockerfile(official: str) -> str:
+CA_BLOCK = """# Vacant eval: this sandbox intercepts outbound TLS; trust its proxy CA so the agent install (nvm/npm) works.
+# Not part of the official setup (the same fix as ops/eval/dabstep_pin.py); recorded as a deviation.
+COPY ca-bundle.crt /usr/local/share/ca-certificates/sandbox-proxy.crt
+RUN update-ca-certificates
+ENV PIP_CERT=/etc/ssl/certs/ca-certificates.crt REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \\
+    CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+"""
+
+
+def base_dockerfile(official: str, ca: bool = False) -> str:
     if official.count(OFFICIAL_COPY_BLOCK) != 1:
         raise SystemExit("refusing: official Dockerfile does not have the expected COPY block")
-    return official.replace(OFFICIAL_COPY_BLOCK + "\n", "")
+    out = official.replace(OFFICIAL_COPY_BLOCK + "\n", "")
+    if ca:
+        lines = out.split("\n")
+        i = next(k for k, ln in enumerate(lines) if ln.startswith("FROM "))
+        out = "\n".join(lines[: i + 1] + ["", CA_BLOCK.rstrip("\n")] + lines[i + 1:])
+    return out
 
 
 def variant_dockerfile(official: str, base_image: str | None) -> str:
@@ -581,7 +595,9 @@ def cmd_build(a) -> int:
     tasks_root.mkdir(parents=True)
     official = (export / names[0] / "environment" / "Dockerfile").read_text()
     (out / "base").mkdir(parents=True, exist_ok=True)
-    (out / "base" / "Dockerfile").write_text(base_dockerfile(official))
+    (out / "base" / "Dockerfile").write_text(base_dockerfile(official, ca=bool(a.ca_bundle)))
+    if a.ca_bundle:
+        shutil.copy2(a.ca_bundle, out / "base" / "ca-bundle.crt")
     per_task, src_hash = {}, {}
     for n in names:
         build_task(export / n, tasks_root / n, base_image)
@@ -601,6 +617,7 @@ def cmd_build(a) -> int:
         "base_image": base_image,
         "base_image_id": "see PIN_BASE.json (written by `docker-verify`, which builds the base image)",
         "base_dockerfile_sha256": sha256_file(out / "base" / "Dockerfile"),
+        "base_ca_bundle_sha256": sha256_file(out / "base" / "ca-bundle.crt") if a.ca_bundle else None,
         "test_command": TEST_CMD,
         "changes": [
             "instruction.md: the two lines naming check_solution.py now name the unittest command (text above)",
@@ -798,6 +815,7 @@ def main() -> int:
     p.add_argument("--out", required=True)
     p.add_argument("--base-image", default=DEFAULT_BASE_IMAGE)
     p.add_argument("--official-layout", action="store_true")
+    p.add_argument("--ca-bundle", help="trust this proxy CA in the base image (sandbox TLS interception; a recorded deviation)")
     p.add_argument("--all", action="store_true", help="build all tasks, not only screen + smoke")
     p = sub.add_parser("check")
     p.add_argument("--out", required=True)
