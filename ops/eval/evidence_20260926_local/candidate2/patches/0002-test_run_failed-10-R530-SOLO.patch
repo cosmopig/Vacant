@@ -1,0 +1,1496 @@
+From c7368062bdbfb1a821e06d32a56372205075e265 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 26 Sep 2026 20:48:18 +0000
+Subject: [PATCH 2/2] =?UTF-8?q?=E9=9B=B6=E8=A8=AD=E5=AE=9A=20test=5Frun=5F?=
+ =?UTF-8?q?failed=EF=BC=9A=E4=BF=AE=E6=8E=89=E5=B0=8D=E6=8A=97=E5=AF=A9?=
+ =?UTF-8?q?=E6=9F=A5=E9=87=8D=E7=8F=BE=E7=9A=84=2010=20=E6=A2=9D=EF=BC=88?=
+ =?UTF-8?q?=E8=AA=A4=E9=80=80=E3=80=81=E8=AA=AA=E6=98=8E=E8=AA=AA=E9=8C=AF?=
+ =?UTF-8?q?=EF=BC=89=EF=BC=8BR530=20SOLO=20=E9=9B=A2=E7=B7=9A=E9=87=8D?=
+ =?UTF-8?q?=E6=92=AD?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+對抗審查（ops/eval/evidence_20260926_local/candidate2/）重現的 10 條，每條都有修之前會紅的回歸測試
+（tests/test_zero_testrun.py 的 test_f1…test_f9c）：
+1. 指令切法看引號、跳脫、heredoc、註解、重導向（evidence._shell_tokens／_drop_heredocs）；剖析不了＝不算；
+   grep／rg／sed／cat／echo／git／pip… 開頭的段落、裝套件、python -c 永遠不是在跑測試。
+2. 逾時（124、工具自己的逾時訊息）、被訊號砍掉（≥128）、中斷／aborted／沒有結束碼、pytest／unittest 的 5
+   ＝結束碼不知道 ⇒ 只寫給人。pi 讀輸出最後的狀態行（Command exited with code N…）。
+3. 這一類的「說明了失敗」放寬（沒過／未通過／紅、doesn't pass、pre-existing、unrelated、\w*Error…）；
+   MENTIONS_FAILURE 對其他類不變（test_f3b）。
+4. 人要的是會失敗的測試、或只要跑一跑回報、不要改檔 ⇒ 只寫給人；退回的字句改成先請它說明、
+   是這次改動造成的才修（KS-1 乾淨、沒有行動者、不引用輸出）。
+5／10. 接在管線、後面還有指令、條件或否定、丟到背景的測試：結束碼不是它的 ⇒ 不知道；不退回，
+   也不算「後來跑過、沒失敗」（set -o pipefail 例外）。說明只寫「沒有記到失敗」；「重做了」只在
+   之後同一個測試指令以可靠的結束碼沒失敗時才寫。
+6. 失敗之後改了任何檔（SKIP_DIRS 以外）⇒ 只寫給人。
+7. 什麼算測試＝RUNNERS.search（uv run --frozen、poetry run -q、uvx、python3.11 -m、bash -c、if !…），
+   嚴的開頭過濾只用來排除「只是提到」。
+8. test_claim 退回了「最後一次失敗」（不管哪一步）就不再加 test_run_failed。
+9. finding_id 看是哪一個測試指令（runner_key）：換指令是新的一條，同一個再失敗仍是 (still open)；
+   「之前退回過」只對同一個指令說。
+
+有意改變的既有測試：LINE／交件說明的字句（a、j2、k、l、d、d3）、d2（之後寫任何檔都只寫給人）、
+g2（改用 runner_run，多了幾種包法）。
+
+R530 SOLO 離線重播（ops/eval/replay_r530_testrun.py，真的掛鉤路徑＋真的子行程，59 格有結果）：
+test_run_failed 退回 0 次（最後一次測試可靠地失敗的 7 格全是只寫給人：之後改了檔 3、說明了 4）；
+問人的回合 2 格、0 次退回。0 次退回 ⇒ 精確度無法計算，裁決 §六-1 的「≥ 0.8」在這批紀錄上**沒有被證明**。
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01MubgqryqvfE5urfHU21Pvd
+---
+ ops/eval/replay_r530_testrun.py  | 285 ++++++++++++++++++++
+ tests/test_zero_testrun.py       | 392 +++++++++++++++++++++++++--
+ vacant_network/trace/evidence.py | 439 ++++++++++++++++++++++++++-----
+ vacant_network/trace/review.py   |  11 +-
+ vacant_network/trace/zerostop.py |  56 +++-
+ 5 files changed, 1081 insertions(+), 102 deletions(-)
+ create mode 100644 ops/eval/replay_r530_testrun.py
+
+diff --git a/ops/eval/replay_r530_testrun.py b/ops/eval/replay_r530_testrun.py
+new file mode 100644
+index 00000000..ef46669e
+--- /dev/null
++++ b/ops/eval/replay_r530_testrun.py
+@@ -0,0 +1,285 @@
++#!/usr/bin/env python3
++"""R530 的 SOLO 紀錄離線重播零設定的 `test_run_failed`（沒有模型、沒有 docker）。
++
++這支在架構裡承重什麼：`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §六-1 的擋門——候選 2
++（「最後一次自己跑的測試失敗卻說做完」）要先在**錄好的、有跑測試的紀錄**上量準確度（≥ 0.8）、在問人的回合
++0 次誤退，才算過。R530（`decisions/DECISION_20260913_R530_OPEN_GOAL_WITH_WITHOUT_VACANT_PREREG.md`）的 SOLO 臂＝
++agent 自己做、說做完就收，每一格有它的殼層步驟（指令、結束碼、輸出）、最後的訊息、隱藏測試的結果。
++
++做法（每一格）：
++1. 工作區從 `ops/gain/r530/templates/<題>` 照 `openwork_arms.prepare_workspace` 的方式重建（`cp -a`＋空 git 起點），
++   起始樹雜湊對 `rows.jsonl` 的 `ws_start_sha256`。
++2. 新的 `VACANT_HOME`／`HOME`，`install.json` 的 `mode=evidence`（就是 `vacant install` 之後的樣子）。
++3. 經過**真的掛鉤路徑** `hook.handle("claude", …)`：`UserPromptSubmit`（題目原文）→ 每一個殼層步驟
++   `PreToolUse` → 在 bwrap 沙箱裡**重新執行那個指令**（只為了讓工作區的檔案照原樣變化；網路隔離、只有工作區可寫）
++   → `PostToolUse`（結束碼 0）或 `PostToolUseFailure`（`Exit code N` ＋原本的輸出；逾時寫成 Claude 的逾時訊息）。
++   送給掛鉤的輸出與結束碼一律是**紀錄裡的**，不是重跑的。
++4. 最後一次 `Stop`（`last_assistant_message`＝最後一則回覆，去掉 gemma 的思考標記），交件前檢查跑在真的子行程裡。
++   之後用同一個純函式（`evidence_for`）再算一次，拿到 `notes`（最後一次測試的狀態、只寫給人的原因）。
++5. 重跑的忠實度：結束時的樹雜湊對 `ws_end_sha256`、重跑的結束碼與紀錄不同的步數，逐格記下。
++
++輸出：`<out>/cells.jsonl`（每格一行）、`<out>/summary.json`。精確度＝`test_run_failed` 退回的格裡、隱藏測試沒有全過的
++比例（退回一個全對的格＝誤退）；召回＝隱藏測試沒有全過的格裡、被它退回的比例。
++
++誠實邊界：
++1. 重跑是在這台機器上（python 版本可能與當時不同），不是當時的沙箱；檔案變化以樹雜湊驗，驗不過的格照樣列出、另外標記。
++2. SOLO 的模型從來沒收到退回：這裡量的是「在那一刻會不會退回、退回得對不對」，不是「退回之後會不會做得更好」。
++3. 最後那一刻以外的「說做完」（工作區沒變被推一下的那幾次）不送 `Stop`：那會多用掉一輪、也不是人會做的事。
++4. `--counterfactual-run-tests` 把題目自己的 `run_tests.sh` 也當成測試指令（**不是產品行為**，只在這個行程裡換
++   `RUNNERS`、交件前檢查在同一個行程裡跑），用來看同一套防呆在樣本多一點時的樣子。
++"""
++from __future__ import annotations
++
++import argparse
++import collections
++import json
++import os
++import pathlib
++import re
++import shutil
++import subprocess
++import sys
++from typing import Any
++
++HERE = pathlib.Path(__file__).resolve()
++DEFAULT_REPO = next((p for p in HERE.parents if (p / "vacant_network").is_dir()),
++                    pathlib.Path("/home/user/Vacant/.claude/worktrees/wf_47b337c8-2fc-1"))
++RUNS = [f"g_r530_s{s}_{m}_{k}" for s in (1, 2, 3) for m in (1003, 1004) for k in (1, 2)]
++SID = "r530-solo"
++GIT_IDENTITY = ("-c", "user.name=r530", "-c", "user.email=r530@vacant_network.local")
++THOUGHT = re.compile(r"<\|channel>.*?<channel\|>", re.S)
++
++
++def _setup(repo: pathlib.Path) -> None:
++    os.environ["PYTHONPATH"] = str(repo) + (os.pathsep + os.environ["PYTHONPATH"]
++                                            if os.environ.get("PYTHONPATH") else "")
++    sys.path.insert(0, str(repo))
++
++
++def cells(repo: pathlib.Path, runs: list[str]):
++    for run in runs:
++        rd = repo / "runs" / run
++        rows = {(r["task_id"], r["arm"]): r for r in map(json.loads, open(rd / "rows.jsonl"))}
++        seq: dict[str, list[tuple[str, dict[str, Any]]]] = collections.defaultdict(list)
++        for line in open(rd / "calls.jsonl"):
++            c = json.loads(line)
++            meta = c.get("meta") or {}
++            if meta.get("arm") == "A-SOLO" and "messages" in c:
++                seq[meta["task_id"]].append(("model", c))
++            elif c.get("kind") == "tool" and c.get("arm") == "A-SOLO":
++                seq[c["task_id"]].append(("tool", c))
++        for task in sorted(seq):
++            yield run, task, rows.get((task, "A-SOLO")), seq[task]
++
++
++def prepare(repo: pathlib.Path, task: str, ws: pathlib.Path) -> str:
++    from ops.gain.r530 import wshash
++    tpl = repo / "ops" / "gain" / "r530" / "templates" / task
++    ws.parent.mkdir(parents=True, exist_ok=True)
++    subprocess.run(["cp", "-a", f"{tpl}/.", str(ws)], check=True)
++    subprocess.run(["git", "init", "-q", str(ws)], check=True)
++    subprocess.run(["git", "-C", str(ws), *GIT_IDENTITY, "add", "-A"], check=True, capture_output=True)
++    subprocess.run(["git", "-C", str(ws), *GIT_IDENTITY, "commit", "-q", "-m", "template"],
++                   check=True, capture_output=True)
++    return str(wshash.tree_manifest(ws)["ws_sha256"])
++
++
++#: 與 R530 當時的沙箱同一個記憶體上限（`summary.json` 的 `backend_meta.memory_bytes`）：失控的程式不拖垮這台機器
++MEMORY_BYTES = 512 * 1024 * 1024
++
++
++def _limits() -> None:
++    import resource
++    resource.setrlimit(resource.RLIMIT_AS, (MEMORY_BYTES, MEMORY_BYTES))
++
++
++def run_sandboxed(ws: pathlib.Path, cmd: str, timeout_s: float) -> int | None:
++    """在 bwrap 裡重跑一個指令（只有工作區可寫、沒有網路、記憶體 512 MB）；回結束碼，逾時回 None。"""
++    argv = ["bwrap", "--ro-bind", "/", "/", "--dev", "/dev", "--proc", "/proc", "--tmpfs", "/tmp",
++            "--bind", str(ws), str(ws), "--chdir", str(ws), "--unshare-all", "--die-with-parent",
++            "--clearenv", "--setenv", "PATH", "/usr/local/bin:/usr/bin:/bin", "--setenv", "HOME", "/tmp",
++            "--setenv", "LANG", "C.UTF-8", "--", "bash", "-c", cmd]
++    try:
++        return subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, timeout=timeout_s,
++                              start_new_session=True, preexec_fn=_limits).returncode
++    except subprocess.TimeoutExpired:
++        return None
++
++
++def replay(repo: pathlib.Path, out: pathlib.Path, run: str, task: str, row: dict[str, Any] | None,
++           seq: list[tuple[str, dict[str, Any]]], *, inproc: bool, step_timeout: float) -> dict[str, Any]:
++    from ops.gain.r530 import wshash
++    from vacant_network.adapters import hook
++    from vacant_network.adapters import install as INS
++    from vacant_network.trace import evidence as EV
++    from vacant_network.trace import zerostop
++    from vacant_network.trace.recorder import Recorder
++
++    cell = out / "cells" / f"{run}__{task}"
++    shutil.rmtree(cell, ignore_errors=True)
++    ws, home, vh = cell / "ws", cell / "home", cell / "vh"
++    home.mkdir(parents=True)
++    os.environ["HOME"], os.environ["VACANT_HOME"] = str(home), str(vh)
++    for k in ("VACANT_TRACE", "VACANT_MODE", "VACANT_HOOK_NO_STOP", "VACANT_FEEDBACK_MODE"):
++        os.environ.pop(k, None)
++    start = prepare(repo, task, ws)
++    st = INS.state_root() / "install.json"
++    st.parent.mkdir(parents=True, exist_ok=True)
++    st.write_text(json.dumps({"agents": {}, "mode": "evidence"}))
++    zerostop._run_child = zerostop.check if inproc else _REAL_CHILD      # type: ignore[attr-defined]
++
++    base = {"session_id": SID, "cwd": str(ws)}
++
++    def H(event: str, payload: dict[str, Any]) -> str:
++        o, e, code = hook.handle("claude", event, payload)
++        assert code == 0, (event, e)
++        return o
++
++    models = [c for k, c in seq if k == "model"]
++    task_text = models[0]["messages"][0]["content"]
++    H("UserPromptSubmit", {**base, "prompt": task_text})
++    steps: list[dict[str, Any]] = []
++    rc_mismatch = skipped = 0
++    for kind, c in seq:
++        if kind != "tool":
++            continue
++        cmd = c.get("command")
++        if cmd is None or c.get("blocked"):
++            skipped += 1
++            continue
++        n = len(steps) + 1
++        pre = {**base, "tool_name": "Bash", "tool_use_id": f"t{n}", "tool_input": {"command": cmd}}
++        H("PreToolUse", pre)
++        rerun = run_sandboxed(ws, cmd, step_timeout)
++        rc = c.get("rc")
++        if c.get("timed_out"):
++            H("PostToolUseFailure", {**pre, "error": f"Command timed out after {c.get('timeout_s')}s"})
++        elif rc not in (0, None):
++            H("PostToolUseFailure", {**pre, "error": f"Exit code {rc}\n{c.get('stdout') or ''}{c.get('stderr') or ''}"})
++        else:
++            H("PostToolUse", {**pre, "tool_response": {"stdout": c.get("stdout") or "",
++                                                        "stderr": c.get("stderr") or "",
++                                                        "interrupted": False, "isImage": False}})
++        if not c.get("timed_out") and rerun != rc:
++            rc_mismatch += 1
++        rr = EV.runner_run(cmd)
++        steps.append({"n": n, "rc": rc, "timed_out": bool(c.get("timed_out")), "rerun_rc": rerun,
++                      **({"runner": rr.key, "reliable": rr.reliable} if rr else {}),
++                      **({"cmd": cmd[:160]} if rr else {})})
++    last_model = models[-1]
++    final = THOUGHT.sub("", last_model.get("response") or "").strip()
++    declared = not last_model.get("response_tool_calls")
++    o = H("Stop", {**base, "hook_event_name": "Stop", "stop_hook_active": False,
++                   "last_assistant_message": final})
++    d = json.loads(o) if o else {}
++    rec = Recorder(ws)
++    reviews = [e for e in rec.events() if e.get("type") == "review"]
++    res = EV.evidence_for(rec, platform="claude", session=SID, final_text=final)
++    notes = res.get("notes") or {}
++    kinds = [f["kind"] for f in (reviews[-1].get("findings") or [])] if reviews else []
++    sent = reviews[-1].get("action") == "continue" if reviews else False
++    end = str(wshash.tree_manifest(ws)["ws_sha256"])
++    q = bool(EV.QUESTION_END.search(final)) or "?" in (final.split("\n\n")[-1] if final else "")
++    rec_out = {
++        "run": run, "task": task, "stop_reason": (row or {}).get("stop_reason"), "declared_done": declared,
++        "hidden_passed": (row or {}).get("hidden_passed"), "hidden_total": (row or {}).get("hidden_total"),
++        "has_outcome": row is not None,
++        "fully_correct": (row or {}).get("hidden_frac") == 1.0 if row is not None else None,
++        "visible_all_pass": (row or {}).get("visible_all_pass"),
++        "steps": len(steps), "skipped_steps": skipped,
++        "runner_steps": [s for s in steps if "runner" in s],
++        "stop_decision": "block" if d.get("decision") == "block" else "allow",
++        "sent_kinds": kinds if sent else [],
++        "test_run_failed_sent": sent and "test_run_failed" in kinds,
++        "test_run_note": notes.get("test_run"),
++        "test_runs": {k: v for k, v in (notes.get("test_runs") or {}).items() if k != "runs"} or None,
++        "final_is_question": q, "final_head": final[:160],
++        "fidelity": {"start_ok": start == (row or {}).get("ws_start_sha256"),
++                     "end_ok": end == (row or {}).get("ws_end_sha256"), "rc_mismatch_steps": rc_mismatch},
++    }
++    shutil.rmtree(cell, ignore_errors=True)
++    return rec_out
++
++
++_REAL_CHILD: Any = None
++
++
++def summarize(all_rows: list[dict[str, Any]]) -> dict[str, Any]:
++    rows = [r for r in all_rows if r["has_outcome"]]           # `rows.jsonl` 沒有這一格的結果：不進分子分母
++    wrong = [r for r in rows if not r["fully_correct"]]
++    fired = [r for r in rows if r["test_run_failed_sent"]]
++    tp = [r for r in fired if not r["fully_correct"]]
++    noted = [r for r in rows if r["test_run_note"]]
++    last_failed = [r for r in rows if (r["test_runs"] or {}).get("last") == "failed"]
++    q = [r for r in rows if r["final_is_question"]]
++    return {
++        "cells": len(rows), "cells_without_outcome": [f"{r['run']}/{r['task']}" for r in all_rows
++                                                      if not r["has_outcome"]],
++        "declared_done": sum(r["declared_done"] for r in rows),
++        "not_fully_correct": len(wrong),
++        "cells_with_a_test_run": sum(bool(r["test_runs"]) for r in rows),
++        "last_test_run_status": dict(collections.Counter((r["test_runs"] or {}).get("last", "none") for r in rows)),
++        "last_unknown_why": dict(collections.Counter((r["test_runs"] or {}).get("unknown") for r in rows
++                                                     if (r["test_runs"] or {}).get("last") == "unknown")),
++        "last_failed_reliably": len(last_failed),
++        "test_run_failed_sent": len(fired),
++        "test_run_failed_sent_on_fully_correct": len(fired) - len(tp),
++        "note_only": len(noted), "note_only_why": dict(collections.Counter(r["test_run_note"]["why"] for r in noted)),
++        "precision": (len(tp) / len(fired)) if fired else None,
++        "recall": len(tp) / len(wrong) if wrong else None,
++        "recall_among_last_failed": (len([r for r in last_failed if r["test_run_failed_sent"]
++                                          and not r["fully_correct"]]) /
++                                     len([r for r in last_failed if not r["fully_correct"]])
++                                     if [r for r in last_failed if not r["fully_correct"]] else None),
++        "question_turns": len(q), "sent_on_question_turns": sum(r["test_run_failed_sent"] for r in q),
++        "any_send_back": sum(r["stop_decision"] == "block" for r in rows),
++        "any_send_back_kinds": dict(collections.Counter(k for r in rows for k in r["sent_kinds"])),
++        "fidelity": {"start_ok": sum(r["fidelity"]["start_ok"] for r in rows),
++                     "end_ok": sum(r["fidelity"]["end_ok"] for r in rows),
++                     "cells_with_rc_mismatch": sum(r["fidelity"]["rc_mismatch_steps"] > 0 for r in rows)},
++        "fired_cells": [f"{r['run']}/{r['task']} hidden {r['hidden_passed']}/{r['hidden_total']}" for r in fired],
++    }
++
++
++def main() -> int:
++    global _REAL_CHILD
++    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
++    ap.add_argument("--repo", type=pathlib.Path, default=DEFAULT_REPO)
++    ap.add_argument("--out", type=pathlib.Path, required=True)
++    ap.add_argument("--runs", nargs="*", default=RUNS)
++    ap.add_argument("--inproc", action="store_true", help="交件前檢查在同一個行程裡跑（快；預設是真的子行程）")
++    ap.add_argument("--counterfactual-run-tests", action="store_true",
++                    help="把題目自己的 run_tests.sh 也當成測試指令（不是產品行為；隱含 --inproc）")
++    ap.add_argument("--step-timeout", type=float, default=30.0)
++    a = ap.parse_args()
++    repo = a.repo.resolve()
++    _setup(repo)
++    import vacant_network
++    from vacant_network.trace import evidence as EV
++    from vacant_network.trace import zerostop
++    assert pathlib.Path(vacant_network.__file__).resolve().is_relative_to(repo), vacant_network.__file__
++    _REAL_CHILD = zerostop._run_child
++    if a.counterfactual_run_tests:
++        EV.RUNNERS = re.compile(EV.RUNNERS.pattern[:-3] + r"|run_tests\.sh)\b")   # type: ignore[misc]
++        a.inproc = True
++    a.out.mkdir(parents=True, exist_ok=True)
++    rows = []
++    with open(a.out / "cells.jsonl", "w") as fh:
++        for run, task, row, seq in cells(repo, a.runs):
++            r = replay(repo, a.out, run, task, row, seq, inproc=a.inproc, step_timeout=a.step_timeout)
++            rows.append(r)
++            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
++            fh.flush()
++            print(f"{run}/{task}: {r['stop_decision']} sent={r['sent_kinds']} "
++                  f"last={(r['test_runs'] or {}).get('last')} note={(r['test_run_note'] or {}).get('why')} "
++                  f"hidden={r['hidden_passed']}/{r['hidden_total']} end_ok={r['fidelity']['end_ok']}", flush=True)
++    s = summarize(rows)
++    s.update(repo=str(repo), vacant_network=vacant_network.__file__,
++             counterfactual_run_tests=a.counterfactual_run_tests, inproc=a.inproc)
++    (a.out / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=1))
++    print(json.dumps(s, ensure_ascii=False, indent=1))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/tests/test_zero_testrun.py b/tests/test_zero_testrun.py
+index 6a143d4d..573d9372 100644
+--- a/tests/test_zero_testrun.py
++++ b/tests/test_zero_testrun.py
+@@ -26,9 +26,12 @@ FAIL_OUT = ("F.\n=================================== FAILURES ==================
+ PASS_OUT = "..\n2 passed in 0.01s"
+ RUN = "python -m pytest -q"
+ LINE = ("- Step 2 ran `python -m pytest -q` and it ended with a failure (exit status non-zero); no later "
+-        "run of it passed, and the final message does not mention it. Fix what fails and run it again — "
+-        "or, if the failure was already there before this request or is expected, say so in the final "
+-        "message.")
++        "run of it passed, and the final message does not say whether this was expected. Say in the final "
++        "message whether this failure is expected, was already there before this request, or is outside what "
++        "was asked; if it comes from this request's changes, fix it and run it again.")
++#: 交件說明裡那一條的樣子（`zerostop._say`）
++SAY = ("the last test or build run, step {n} (python -m pytest -q), had failed (non-zero exit status) and the "
++       "final message did not say whether that was expected")
+ 
+ 
+ def _install(mode="evidence"):
+@@ -74,6 +77,7 @@ class Pi:
+         self.n += 1
+         inp = {"path": str(self.p / rel), "content": content}
+         self.ev("pre_tool", tool="write", call_id=f"c{self.n}", input=inp)
++        (self.p / rel).parent.mkdir(parents=True, exist_ok=True)
+         (self.p / rel).write_text(content)
+         self.ev("post_tool", tool="write", call_id=f"c{self.n}", input=inp, output="ok")
+ 
+@@ -123,10 +127,9 @@ def test_a_last_failing_run_is_sent_back_and_redone(proj):
+     assert d2["action"] == "allow" and d2["reason"] == ""
+     assert "Redone before delivery: 1 point(s)." in d2["note"]
+     note = _note(proj)
+-    assert ("round 1: the last test or build run, step 2 (python -m pytest -q), had failed (non-zero exit "
+-            "status) and the final message did not mention it; a later test or build run (step 4) did not "
+-            "fail") in note
+-    assert "- Test or build runs in this turn: 2; the last one (step 4) did not fail" in note
++    # 沒有失敗的紀錄只寫「沒有記到失敗」，不寫「通過」（對抗審查 #5；2026-09-26 起的字句）
++    assert "round 1: " + SAY.format(n=2) + "; a later run of it (step 4) recorded no failure" in note
++    assert "- Test or build runs in this turn: 2; the last one (step 4): no failure was recorded" in note
+     assert "## Not verified" not in note
+     assert [e.get("action") for e in Recorder(proj).events() if e["type"] == "review"] == \
+         ["continue", "allow"]
+@@ -190,8 +193,8 @@ def test_d_code_changed_after_the_failing_run_is_noted_as_not_re_run(proj):
+     a.write("calc.py", "def parse(s):\n    return float(s)\n")
+     d = a.stop("Done.")
+     assert d["action"] == "allow" and d["reason"] == ""
+-    assert ("- The last test or build run, step 2 (python -m pytest -q), failed (non-zero exit status); the "
+-            "code changed afterwards (step 3: calc.py), and the tests were not re-run after the last change "
++    assert ("- The last test or build run, step 2 (python -m pytest -q), failed (non-zero exit status); files "
++            "changed afterwards (step 3: calc.py), and the tests were not re-run after the last change "
+             "(not sent back).") in _note(proj)
+     assert "Not verified: tests not re-run after the last change." in d["note"]
+ 
+@@ -208,16 +211,25 @@ def test_d3_changes_after_the_failing_run_that_were_not_seen_are_note_only(proj,
+     a.bash("sed -i 's/int(float(s))/float(s)/' calc.py", "")
+     d = a.stop("Done.")
+     assert d["action"] == "allow" and d["reason"] == ""
+-    assert ("the workspace was not fully observed after it, so whether the code changed afterwards is not "
++    assert ("the workspace was not fully observed after it, so whether files changed afterwards is not "
+             "known (not sent back).") in _note(proj)
+ 
+ 
+-def test_d2_a_data_file_written_afterwards_is_not_a_code_change(proj):
++def test_d2_any_file_written_afterwards_is_note_only(proj):
++    """行為改了（對抗審查 #6）：之後寫了任何檔（不只程式碼：修的可能在 .tsx、設定、測試資料）⇒ 只寫給人。"""
+     a = Pi(proj)
+     _failing(a)
+     a.write("notes.md", "Tried int(float(s)).\n")
+     a.write("fixtures.json", "{}\n")
+-    assert _body(a.stop("Done.")) == [LINE]
++    d = a.stop("Done.")
++    assert d["action"] == "allow" and d["reason"] == ""
++    assert _data(proj)["test_run"]["why"] == "changed_after" and _data(proj)["test_run"]["path"] == "fixtures.json"
++    # build 產物、快取資料夾裡的變動不算（`evidence.SKIP_DIRS`）
++    b = Pi(proj, sid="T")
++    b.n = 100
++    _failing(b)
++    b.write("dist/bundle.js", "x")
++    assert _body(b.stop("Done.")) == [LINE.replace("Step 2", "Step 6")]      # 步驟編號是整個專案的
+ 
+ 
+ # ── (e) a failing run followed by a passing run ⇒ nothing ──
+@@ -258,7 +270,8 @@ def test_f_error_text_in_a_passing_run_is_not_a_failure(proj):
+ 
+ @pytest.mark.parametrize("cmd", ["grep -rn pytest .", "pip install pytest", "which pytest",
+                                  "cat pytest.ini", "python -c \"import unittest; import missing\"",
+-                                 "python tests/check.py"])
++                                 "python tests/check.py", "python -m pip install pytest",
++                                 "bash -c 'grep -rn pytest .'"])
+ def test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run(proj, cmd):
+     a = Pi(proj)
+     a.ask()
+@@ -271,9 +284,16 @@ def test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run(proj,
+ 
+ @pytest.mark.parametrize("cmd", ["cd /app && python -m pytest -x -q", ".venv/bin/python -m pytest",
+                                  "PYTHONPATH=. timeout 120 pytest -q", "uv run pytest", "npx jest",
+-                                 "npm test", "go test ./...", "make test", "(cd app && pytest)"])
++                                 "npm test", "go test ./...", "make test", "(cd app && pytest)",
++                                 # 對抗審查 #7：`RUNNERS` 找得到的常見包法
++                                 "uv run --frozen pytest -q", "poetry run -q pytest", "uvx pytest",
++                                 "python3.11 -m pytest", "/usr/bin/python3.12 -m pytest", "yarn jest",
++                                 "bash -c 'pytest -q'", "uv run --with pytest pytest", "time -p pytest",
++                                 "coverage run -m pytest", "sudo -u ci pytest -q", "{ pytest; }",
++                                 "ls tests/*.py | xargs -n 1 pytest -q"])
+ def test_g2_standard_runners_in_their_usual_forms_are_test_runs(cmd):
+-    assert EV._runs_runner(cmd)
++    rr = EV.runner_run(cmd)
++    assert rr is not None and rr.reliable, rr
+ 
+ 
+ def test_g3_a_failed_own_script_is_still_the_failed_step_kind(proj):
+@@ -390,8 +410,7 @@ def test_j2_a_claim_after_the_send_back_is_not_called_redone(proj):
+     d = a.stop("All tests pass.")
+     assert d["action"] == "continue" and "The final message says" in d["reason"]
+     note = _note(proj)
+-    assert ("round 1: the last test or build run, step 2 (python -m pytest -q), had failed (non-zero exit "
+-            "status) and the final message did not mention it; no later run is recorded as passing") in note
++    assert "round 1: " + SAY.format(n=2) + "; no later run of it is recorded without a failure" in note
+     assert "## Redone before delivery" not in note
+ 
+ 
+@@ -404,8 +423,7 @@ def test_k_it_counts_in_the_two_rounds_and_is_then_left_for_the_person(proj):
+     assert d2["action"] == "continue" and "(still open)" in d2["reason"] and "Step 3 ran" in d2["reason"]
+     d3 = a.stop("Done.")
+     assert d3["action"] == "allow" and "Still open after 2 round(s): 1 point(s)." in d3["note"]
+-    assert ("Still open after 2 round(s): the last test or build run, step 3 (python -m pytest -q), had "
+-            "failed (non-zero exit status) and the final message did not mention it") in _note(proj)
++    assert "Still open after 2 round(s): " + SAY.format(n=3) in _note(proj)
+ 
+ 
+ def test_l_an_unknown_exit_status_is_not_sent_back(proj):
+@@ -417,8 +435,8 @@ def test_l_an_unknown_exit_status_is_not_sent_back(proj):
+     d = a.stop("Done.")
+     assert d["action"] == "allow" and "ended with a failure" not in d["reason"]
+     # 給人的說明不說「沒有失敗」：那一次沒有結束的紀錄
+-    assert "- Test or build runs in this turn: 2; the last one (step 3) has no recorded exit status" \
+-        in _note(proj)
++    assert ("- Test or build runs in this turn: 2; the last one (step 3): exit status not known — no end of "
++            "that step was recorded") in _note(proj)
+ 
+ 
+ def test_l2_an_interrupted_run_is_not_a_failure(proj):
+@@ -462,3 +480,335 @@ def test_with_one_turn_left_it_is_not_sent_back(proj):
+     d = a.stop("Done.", turn=14, budget=15)
+     assert d["action"] == "allow"
+     assert "Still open after 0 round(s): the last test or build run, step 2" in _note(proj)
++
++
++# ══ 對抗審查（2026-09-26，10 條重現）的回歸：每一條在修之前都會失敗 ══════════════════════════
++
++class Claude:
++    """Claude Code 的掛鉤格式：失敗的殼層指令走 `PostToolUseFailure`，`error` 的第一行是 `Exit code N`。"""
++
++    def __init__(self, p: pathlib.Path, sid: str = "C"):
++        self.p, self.sid, self.n = p, sid, 0
++
++    def _base(self):
++        return {"session_id": self.sid, "cwd": str(self.p)}
++
++    def ask(self, text=ASK):
++        hook.handle("claude", "UserPromptSubmit", {**self._base(), "prompt": text})
++
++    def write(self, rel, content):
++        self.n += 1
++        pre = {**self._base(), "tool_name": "Write", "tool_use_id": f"w{self.n}",
++               "tool_input": {"file_path": str(self.p / rel), "content": content}}
++        hook.handle("claude", "PreToolUse", pre)
++        (self.p / rel).parent.mkdir(parents=True, exist_ok=True)
++        (self.p / rel).write_text(content)
++        hook.handle("claude", "PostToolUse", {**pre, "tool_response": {}})
++
++    def bash(self, cmd, stdout="", *, error=None):
++        self.n += 1
++        pre = {**self._base(), "tool_name": "Bash", "tool_use_id": f"b{self.n}", "tool_input": {"command": cmd}}
++        hook.handle("claude", "PreToolUse", pre)
++        if error is not None:
++            hook.handle("claude", "PostToolUseFailure", {**pre, "error": error})
++        else:
++            hook.handle("claude", "PostToolUse", {**pre, "tool_response": {"stdout": stdout, "stderr": ""}})
++
++    def stop(self, final="Done."):
++        out, err, code = hook.handle("claude", "Stop", {**self._base(), "hook_event_name": "Stop",
++                                                         "stop_hook_active": False,
++                                                         "last_assistant_message": final})
++        assert code == 0 and err == ""
++        return json.loads(out) if out else {}
++
++
++def _blocked(d) -> bool:
++    return d.get("decision") == "block"
++
++
++# ── #1 引號、heredoc、只是提到測試指令的那一段 ──
++
++@pytest.mark.parametrize("cmd", [
++    'grep -E "jest|vitest|mocha" package.json',
++    'grep -rn "pytest\\|unittest" tests/',
++    'rg "pytest|tox" pyproject.toml',
++    'sed -i "s|pytest|python -m pytest|" Makefile',
++    "cat > README.md <<'EOF'\n# Usage\n\nRun the tests:\n\n    pytest -q\nEOF",
++    'git commit -m "Fix parsing\n\nmake test now passes"',
++    'git commit -m "Fix parsing\n\npytest -q passes now"',
++    'echo "run pytest | tee log"',
++    "printf 'pytest -q\\n' >> notes.txt",
++    "npm install -D jest",
++    "find . -name '*.cfg' | xargs grep -l pytest",
++])
++def test_f1_a_failing_command_that_only_mentions_a_runner_is_not_sent_back(proj, cmd):
++    """grep 找不到（結束碼 1）、sed、heredoc、commit 訊息裡的 `pytest`／`make test` 不是在跑測試。"""
++    c = Claude(proj)
++    c.ask("Which test runner does this project use? Tell me.")
++    c.bash(cmd, error="Exit code 1")
++    d = c.stop("This project has no JavaScript test runner configured.")
++    assert not _blocked(d), d
++    assert "Test or build runs" not in _note(proj) and "test_run" not in _data(proj)
++
++
++@pytest.mark.parametrize("mention", ['grep -c "pytest|tox" setup.cfg', "sed -n 's|pytest|x|p' tox.ini",
++                                     "git log --oneline -1 --grep 'make test'"])
++def test_f1b_a_mention_after_the_failing_run_does_not_hide_it(proj, mention):
++    """之前：`tox" setup.cfg` 被切成一段、當成「後來跑過、沒失敗」，蓋掉真的失敗，說明還寫「最後一次沒失敗」。"""
++    a = Pi(proj)
++    _failing(a)
++    a.bash(mention, "1")
++    d = a.stop("Done.")
++    assert _body(d) == [LINE]
++    assert "- Test or build runs in this turn: 1; the last one (step 2): failed (non-zero exit status)" in _note(proj)
++
++
++def test_f1c_unparseable_quotes_are_not_a_test_run():
++    assert EV.runner_run('pytest -k "unbalanced') is None
++    assert EV.runner_run("pytest -k 'unbalanced") is None
++    assert EV.runner_run("python -m pytest -q  # re-run pytest | tail") == EV.RunnerRun("pytest", True, True)
++    # 重導向不是切段的運算子；`bash -c` 看引號裡面
++    for c in ("pytest -q > log.txt 2>&1", "pytest -q &> log.txt", "pytest -q 2>/dev/null", "pytest -q >&2"):
++        assert EV.runner_run(c) == EV.RunnerRun("pytest", True, True), c
++    assert EV.runner_run("sh -c 'pytest -q | tail -3'").reliable is False
++
++
++# ── #2 不是「跑完了、失敗」的結束 ⇒ 不知道 ⇒ 只寫給人 ──
++
++@pytest.mark.parametrize("cmd,error,why", [
++    ("timeout 60 pytest -q", "Exit code 124", "it timed out"),
++    ("pytest -q", "Command timed out after 2m 0.0s", "it timed out"),
++    ("pytest -q", "Exit code 137\nKilled", "it was stopped by a signal"),
++    ("pytest -q", "Exit code 143", "it was stopped by a signal"),
++    ("pytest -q -k slugify", "Exit code 5\nno tests ran in 0.01s", "no tests were collected"),
++    ("python3 -m unittest tests/test_calc.py", "Exit code 5\nNO TESTS RAN", "no tests were collected"),
++    ("pytest -q", "[Request interrupted by user for tool use]", "it was interrupted"),
++])
++def test_f2_timeouts_signals_and_no_tests_are_not_failures(proj, cmd, error, why):
++    c = Claude(proj)
++    c.ask()
++    c.write("calc.py", "def parse(s):\n    return float(s)\n")
++    c.bash(cmd, error=error)
++    d = c.stop("Done.")
++    assert not _blocked(d), d
++    assert f"the last one (step 2): exit status not known — {why}" in _note(proj)
++    assert "test_run" not in _data(proj)
++
++
++@pytest.mark.parametrize("status,why", [("Command timed out after 60 seconds", "it timed out"),
++                                        ("Command aborted", "it was interrupted"),
++                                        ("Command terminated without an exit code", "it was interrupted")])
++def test_f2b_pi_reads_its_own_status_line(proj, status, why):
++    """pi 的掛鉤只給 `isError`；逾時、中斷、沒有結束碼都寫在輸出最後一行（`bash.js`）。"""
++    a = Pi(proj)
++    a.ask()
++    a.bash(RUN, "..F\n" + status, fail=True)
++    assert a.stop("Done.")["action"] == "allow"
++    assert f"exit status not known — {why}" in _note(proj)
++
++
++def test_f2c_pi_names_the_exit_code_from_its_status_line(proj):
++    a = Pi(proj)
++    a.ask()
++    a.bash(RUN, FAIL_OUT + "\n\nCommand exited with code 2", fail=True)
++    d = a.stop("Done.")
++    assert _body(d) == [LINE.replace("Step 2", "Step 1").replace("exit status non-zero", "exit status 2")]
++
++
++def test_f2d_exit_code_5_of_another_runner_is_a_failure(proj):
++    """5＝沒有收集到測試只對 pytest／unittest 成立；別的測試指令的 5 是失敗。"""
++    c = Claude(proj)
++    c.ask()
++    c.bash("make test", error="Exit code 5")
++    d = c.stop("Done.")
++    assert _blocked(d) and "(exit status 5)" in d["reason"]
++
++
++# ── #3 最後的訊息說明了失敗（中文、英文的其他說法、`ValueError`）⇒ 只寫給人 ──
++
++@pytest.mark.parametrize("final", [
++    "完成。parse() 已修改；tests/test_calc.py 的 test_float 還是沒過，是這次修改之前就有的問題，我沒有動它。",
++    "完成。test_float 未通過。", "完成。test_float 不通過。", "完成。test_float 沒有通過。",
++    "完成，但 test_float 還是失敗。", "完成，test_float 還是紅的。",
++    "Note: test_float doesn't pass yet — that is pre-existing and unrelated to this change.",
++    "These two don't pass on this machine.", "test_float is not passing; it was like that before.",
++    "test_float is pre-existing.", "test_float was already failing.", "The suite is already broken on main.",
++    "The failure is unrelated to parse().", "test_float is still red.", "The suite is red on main as well.",
++    "parse('x') raises ValueError now, as the issue asks.", "test_float hits an AssertionError on 3.5.",
++])
++def test_f3_a_disclosed_failure_is_only_noted(proj, final):
++    a = Pi(proj)
++    _failing(a)
++    d = a.stop(final)
++    assert d["action"] == "allow" and d["reason"] == "", final
++    assert _data(proj)["test_run"]["why"] == "mentioned"
++
++
++def test_f3b_the_broader_disclosure_words_do_not_change_the_other_kinds():
++    """`MENTIONS_FAILURE`（`failed_step` 用的）照舊：寬的那一組只用在這一類。"""
++    for t in ("test_float doesn't pass yet", "還是沒過", "it raises ValueError", "pre-existing"):
++        assert EV.MENTIONS_FAILURE.search(t) is None and EV.DISCLOSES_FAILURE.search(t)
++
++
++# ── #4 人要的就是會失敗的測試，或只要跑一跑、回報 ⇒ 只寫給人；退回的字句先請它說明 ──
++
++@pytest.mark.parametrize("ask,cmd", [
++    ("Write a regression test for issue #12 (parse('') should raise). Don't fix the bug yet; I want to see "
++     "it red first.", "python -m pytest -q tests/test_empty.py"),
++    ("Add a failing test that reproduces the bug in parse().", RUN),
++    ("Just run the linter and tell me what it reports. Don't change any files.", "npm run lint"),
++    ("Run the tests and tell me what fails; don't modify anything.", RUN),
++    ("先寫一個會失敗的測試，先不要修。", RUN),
++    ("只要跑測試、告訴我結果就好，不要改檔。", RUN),
++])
++def test_f4_a_red_test_or_a_report_the_person_asked_for_is_not_sent_back(proj, ask, cmd):
++    a = Pi(proj)
++    a.ask(ask)
++    a.bash(cmd, "1 failed", fail=True)
++    d = a.stop("It reproduces issue #12: parse('') currently returns without raising.")
++    assert d["action"] == "allow" and d["reason"] == "", ask
++    assert _data(proj)["test_run"]["why"] == "request"
++    assert "the request asks for a failing test, or only to run it and report (not sent back)." in _note(proj)
++
++
++def test_f4b_the_send_back_asks_to_say_first_and_to_fix_only_what_this_request_broke(proj):
++    a = Pi(proj)
++    _failing(a)
++    ln = _body(a.stop("Done."))[0]
++    say, fix = ln.index("Say in the final message whether"), ln.index("fix it and run it again")
++    assert say < fix and "if it comes from this request's changes" in ln
++    assert "does not mention it" not in ln and "Fix what fails" not in ln
++
++
++# ── #5／#10 接在管線、後面還有指令的：結束碼不是它的 ⇒ 不退回，也不算「後來跑過、沒失敗」 ──
++
++def test_f5_a_piped_re_run_is_not_called_redone(proj):
++    a = Pi(proj)
++    _failing(a)
++    assert a.stop("Done.")["action"] == "continue"
++    a.bash(RUN + " 2>&1 | tail -3", "FAILED tests/test_calc.py::test_float\n1 failed, 1 passed")   # tail 的 0
++    d = a.stop("Done.")
++    assert d["action"] == "allow" and "Redone before delivery" not in d["note"]
++    note = _note(proj)
++    assert "## Redone before delivery" not in note and "did not fail" not in note
++    assert ("- Test or build runs in this turn: 2; the last one (step 3): exit status not known — it was piped "
++            "into or followed by another command, so the exit status is not its own") in note
++    assert "round 1: " + SAY.format(n=2) + "; no later run of it is recorded without a failure" in note
++
++
++@pytest.mark.parametrize("cmd", [RUN + "; echo done", RUN + " || true", RUN + " && echo ok",
++                                 "if ! " + RUN + "; then echo bad; fi", RUN + " &"])
++def test_f5b_a_listed_or_negated_runner_has_no_status_of_its_own(proj, cmd):
++    assert not EV.runner_run(cmd).reliable
++    c = Claude(proj)
++    c.ask()
++    c.bash(cmd, error="Exit code 1")
++    assert not _blocked(c.stop("Done."))
++
++
++@pytest.mark.parametrize("cmd", ["! pytest -q", "while pytest -q; do sleep 1; done", "until ! pytest -q; do :; done"])
++def test_f5d_a_negated_or_looping_runner_is_not_its_own_status(proj, cmd):
++    """`! pytest` 的結束碼 1 是「pytest 通過了」：不是失敗。"""
++    assert EV.runner_run(cmd).reliable is False
++    c = Claude(proj)
++    c.ask()
++    c.bash(cmd, error="Exit code 1")
++    assert not _blocked(c.stop("Done."))
++
++
++def test_f5c_pipefail_makes_a_piped_runner_count(proj):
++    c = Claude(proj)
++    c.ask()
++    c.bash("set -o pipefail; pytest -q | tail -3", error="Exit code 1")
++    d = c.stop("Done.")
++    assert _blocked(d) and "(exit status 1)" in d["reason"]
++
++
++# ── #6 之後改了任何檔（.tsx、.vue…）⇒ 只寫給人 ──
++
++@pytest.mark.parametrize("ext", ["tsx", "jsx", "vue", "css"])
++def test_f6_a_fix_in_any_file_after_the_failing_run_is_note_only(proj, ext):
++    c = Claude(proj)
++    c.ask("Make the header show the title prop.")
++    c.bash("npm test", error="Exit code 1\nFAIL src/Header.test.tsx")
++    c.write(f"src/Header.{ext}", "export const Header = ({title}) => title;\n")
++    d = c.stop("Header now renders the title prop.")
++    assert not _blocked(d), d
++    assert _data(proj)["test_run"]["why"] == "changed_after"
++
++
++# ── #7 `RUNNERS` 找得到的包法：後來那一次通過就不退回 ──
++
++@pytest.mark.parametrize("later", ["uv run --frozen pytest -q", "poetry run -q pytest", "uvx pytest -q",
++                                   "python3.11 -m pytest -q", "/usr/bin/python3.12 -m pytest",
++                                   "bash -c 'pytest -q'", "uv run --with pytest pytest"])
++def test_f7_a_later_pass_in_another_form_is_seen(proj, later):
++    a = Pi(proj)
++    a.ask()
++    a.write("calc.py", "def parse(s):\n    v = float(s)\n    return int(v) if v.is_integer() else v\n")
++    a.bash("pytest -q", "ModuleNotFoundError: No module named 'calc'", fail=True)
++    a.bash(later, PASS_OUT)
++    d = a.stop("Done. All tests pass.")
++    assert d["action"] == "allow" and d["reason"] == "", later
++    assert "- Test or build runs in this turn: 2; the last one (step 3): no failure was recorded" in _note(proj)
++    assert "Not verified" not in d.get("note", "")
++
++
++# ── #8 `test_claim` 已經退回「最後一次失敗」⇒ 不再多一條 ──
++
++def test_f8_no_second_line_when_the_claim_check_already_sent_back_a_failure(proj):
++    a = Pi(proj)
++    _failing(a)
++    a.bash("pip install pytest-cov", "ERROR: network", fail=True)
++    d = a.stop("Done. All tests pass.")
++    assert d["action"] == "continue" and len(_body(d)) == 1
++    assert "The final message says" in _body(d)[0] and "ended with a failure" not in d["reason"]
++
++
++# ── #9 finding_id 看是哪一個測試指令 ──
++
++def test_f9_a_different_failing_command_is_a_new_point_and_the_fixed_one_is_redone(proj):
++    a = Pi(proj)
++    _failing(a)
++    assert a.stop("Done.")["action"] == "continue"
++    a.write("calc.py", "def parse(s):\n    v = float(s)\n    return int(v) if v.is_integer() else v\n")
++    a.bash(RUN, PASS_OUT)
++    a.bash("npm run build", "ERR! build failed", fail=True)
++    d2 = a.stop("Done.")
++    assert d2["action"] == "continue" and "Step 5 ran `npm run build`" in d2["reason"]
++    assert "(still open)" not in d2["reason"]
++    ev = [e for e in Recorder(proj).events() if e["type"] == "review"]
++    assert ev[-1]["resolved"] == ev[0]["sent"] and ev[-1]["sent"] != ev[0]["sent"]
++    assert a.stop("Done.")["action"] == "allow"
++    assert "round 1: " + SAY.format(n=2) + "; a later run of it (step 4) recorded no failure" in _note(proj)
++    # 同一個指令、不同的旗標是同一條
++    assert EV.finding_id({"kind": "test_run_failed", "cmd": "python -m pytest -q"}, "x") == \
++        EV.finding_id({"kind": "test_run_failed", "cmd": "pytest -x tests/"}, "x")
++
++
++def test_f9b_sent_back_earlier_is_said_only_for_the_same_command(proj):
++    a = Pi(proj)
++    _failing(a)
++    assert a.stop("Done.")["action"] == "continue"
++    a.bash("npm run build", "ERR!", fail=True)
++    d = a.stop("The build fails because node is missing; please install it.")
++    assert d["action"] == "allow"
++    note = _note(proj)
++    assert ("- The last test or build run, step 3 (npm run build), failed (non-zero exit status); the final "
++            "message mentions a failure (not sent back).") in note
++    assert "sent back in round 1 earlier" not in note
++    assert "round 1: " + SAY.format(n=2) + "; no later run of it is recorded without a failure" in note
++
++
++def test_f9c_redone_needs_a_later_reliable_pass_of_the_same_command(proj):
++    """之前通過的那一次（在失敗之前）、別的測試指令通過，都不算「退回之後重跑、沒失敗」。"""
++    a = Pi(proj)
++    a.ask()
++    a.bash(RUN, PASS_OUT)
++    a.write("calc.py", "def parse(s):\n    return int(float(s))\n")
++    a.bash(RUN, FAIL_OUT, fail=True)
++    assert a.stop("Done.")["action"] == "continue"
++    a.bash("npm run lint", "0 problems")
++    d = a.stop("Done.")
++    assert d["action"] == "allow" and "Redone before delivery" not in d["note"]
++    assert "round 1: " + SAY.format(n=3) + "; no later run of it is recorded without a failure" in _note(proj)
+diff --git a/vacant_network/trace/evidence.py b/vacant_network/trace/evidence.py
+index 42c55eae..682f7294 100644
+--- a/vacant_network/trace/evidence.py
++++ b/vacant_network/trace/evidence.py
+@@ -9,10 +9,11 @@
+ | `unread` 點名的檔沒打開 | 人打的話裡**單獨**寫了這個檔，這一回合沒有任何一步讀到它 |
+ | `test_claim` 說測過但紀錄對不上 | 最後的訊息說測試通過／build 成功，但沒跑過、最後一次失敗、或通過之後程式碼又改過 |
+ | `failed_step` 失敗的步驟被略過 | 跑 agent 自己寫的腳本或讀給定資料的那一步失敗；之後才寫出交付物；後來沒有再成功跑同一件事；最後的訊息也沒提 |
+-| `test_run_failed` 最後一次測試／build 失敗 | 這一回合最後一次**標準**測試／build 指令（`RUNNERS`，而且是那一段指令本身，不是 `pip install pytest`、`grep pytest`）以**結束碼**失敗（看 `error`，不看輸出文字）；之後沒有任何程式碼檔被改過；最後的訊息拿得到、沒提失敗、不是以問句結束；`test_claim` 沒有為同一步退回過 |
++| `test_run_failed` 最後一次測試／build 失敗 | 這一回合最後一次測試／build 指令（`RUNNERS` 找得到，而且那一段真的在**執行**它：引號、heredoc 的內文、`grep`／`sed`／`cat`／`echo`／`git`／`pip` 這類只是提到它的指令不算）以**可靠的結束碼**失敗（看 `error` 與 pi 附在輸出最後的狀態行，不看輸出文字；接在管線或後面還有指令的、逾時、被訊號砍掉、中斷、pytest／unittest 的 5〔沒有收集到測試〕都是「不知道」）；之後沒有任何檔被改過；人的要求不是要一個會失敗的測試、也不是只要跑一跑回報；最後的訊息拿得到、沒說明失敗、不是以問句結束；`test_claim` 沒有退回過「最後一次失敗」 |
+ 
+-其他（沒讀的資料夾成員、沒點名資料時沒出處的值；最後一次測試失敗但之後改過程式碼、最後的訊息提了失敗或在問人、
+-拿不到最後的訊息——`notes["test_run"]`）只進交件說明（`notes`）。
++其他（沒讀的資料夾成員、沒點名資料時沒出處的值；最後一次測試失敗但之後改過檔、人要的就是失敗或只要回報、
++最後的訊息說明了失敗或在問人、拿不到最後的訊息——`notes["test_run"]`；最後一次測試的結束碼不知道——
++`notes["test_runs"]`）只進交件說明（`notes`）。
+ 純函式：只讀病歷，所以可以在任何錄好的病歷上離線重播（量誤報）。
+ 
+ 誠實邊界：
+@@ -21,10 +22,15 @@
+ 2. 「找不到出處」＝在**有紀錄的東西**裡找不到；模型從系統提示知道的事（例如今天日期）紀錄裡沒有，
+    所以今天與工作階段的日期一律豁免，沒點名資料的任務裡的值只進說明。
+ 3. 比對規則寬（四捨五入、縮寫、簡單推算都算同一個值）：寧可放過編出來但剛好湊得上的值，也不把對的退回。
+-4. `test_run_failed` 只看**結束碼**，而結束碼只有 Claude Code（`PostToolUseFailure`）與 pi（`isError`）的掛鉤回報；
+-   Codex、OpenCode 的掛鉤不回報 ⇒ 結束碼不知道 ⇒ 永遠不退回。`pytest | tail`、`pytest; echo done` 的結束碼是最後那一段的
+-   ⇒ 失敗看不到（寧可漏，不看輸出文字猜）。退回的字句只有步驟編號、指令與結束碼，不引用任何輸出。
+-   「失敗在這個要求之前就在」分不出來：退回時請 agent 修好重跑，**或**在最後的訊息裡說明。
++4. `test_run_failed` 只看**結束碼**，而結束碼只有 Claude Code（`PostToolUseFailure`）與 pi（`isError`＋輸出最後的狀態行）
++   的掛鉤回報；Codex、OpenCode 的掛鉤不回報 ⇒ 結束碼不知道 ⇒ 永遠不退回。`pytest | tail`、`pytest; echo done`、
++   `pytest || true` 的結束碼不是測試的 ⇒ 「不知道」：不退回，**也不算「後來跑過、沒失敗」**（寧可漏，不看輸出文字猜）。
++   退回的字句只有步驟編號、指令與結束碼，不引用任何輸出。「失敗在這個要求之前就在」分不出來：退回時先請 agent
++   在最後的訊息裡說明這個失敗是不是預期的、之前就在、或在這個要求之外；是這次的改動造成的才修好重跑。
++5. 指令的切法是**近似**的殼層剖析（引號、跳脫、heredoc、註解、`bash -c`），不是完整的 bash 文法；剖析不了
++   （引號沒配對）＝不算測試指令。一段指令算不算「在執行測試」＝`RUNNERS` 在那一段找得到，而且那一段的指令
++   不在「只是提到它」的那幾種裡（`MENTION_CMDS`、裝套件、`python -c`）：清單以外的指令、參數裡剛好有 `pytest`
++   這個字，也會被當成跑了測試（只會在它以可靠的結束碼失敗、其他條件都成立時退回一次，字句先請它說明）。
+ """
+ from __future__ import annotations
+ 
+@@ -36,7 +42,7 @@ import io
+ import math
+ import os
+ import re
+-from typing import Any
++from typing import Any, NamedTuple
+ 
+ from .blame import Step, Trace
+ from .recorder import Recorder
+@@ -77,27 +83,66 @@ FAIL_OUT = re.compile(r"(FAILED|failures=|errors=|Traceback \(most recent call l
+ PASS_OUT = re.compile(r"(\bOK\b\s*$|\b\d+ passed\b|test result: ok|BUILD SUCCESS|\bPASS\b)", re.M)
+ MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|did not run|"
+                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
+-#: `test_run_failed`：程式碼檔（`_test_claim` 的 `stale` 用同一組：去掉資料／設定檔）
+-CODE_EXT = CODE_HINT_EXT - {".json", ".yaml", ".yml", ".toml"}
+ #: 掛鉤會回報工具失敗的 agent（Claude Code 的 `PostToolUseFailure`、pi 的 `isError`；`capture._output_and_error`）。
+ #: Codex、OpenCode 的掛鉤不回報 ⇒ 殼層指令的結束碼不知道
+ EXIT_REPORTED = frozenset({"claude", "pi"})
+-#: 殼層指令的一段（`&&`、`||`、`;`、`|`、換行分開；`2>&1` 的 `&` 不分）
+-_SEGMENT = re.compile(r"&&|\|\||[;|\n]")
+-#: 一段指令開頭可以先有的東西：子殼層的括號、環境變數、`sudo`／`env`／`time`／`nice`／`timeout N`、
+-#: 「在某個環境裡跑」的包裝（`uv run`、`poetry run`…）、`npx`；之後才是指令本身
+-_LEAD = re.compile(r"^\s*\(?\s*(?:[A-Za-z_]\w*=(?:\"[^\"]*\"|'[^']*'|\S*)\s+|(?:sudo|env|time|nice|nohup)\s+|"
+-                   r"timeout\s+(?:-\S+\s+)*\d\S*\s+|(?:uv|poetry|pipenv|pdm|hatch|rye)\s+run\s+|"
+-                   r"(?:npx|bunx|pnpx)\s+(?:-\S+\s+)*|(?:pnpm|yarn)\s+exec\s+)*")
+-#: 指令本身前面的路徑（`.venv/bin/python`、`./node_modules/.bin/jest`）
+-_CMD_PATH = re.compile(r"^[^\s/]*/(?:[^\s/]*/)*(?=\S)")
+-#: 錯誤訊息裡的結束碼（Claude Code：`Exit code 1`）；pi 只記「tool reported an error」⇒ 不知道是幾
++#: 錯誤訊息裡的結束碼（Claude Code：`Exit code 1`；pi：輸出最後的 `Command exited with code 1`）
+ EXIT_CODE = re.compile(r"\b(?:exit(?:ed)?(?:\s+with)?\s+(?:code|status)|exit_code|return\s*code|returncode)"
+                        r"\b\s*[:=]?\s*(-?\d+)", re.I)
+-#: 被人中斷的不是「跑完了、失敗」
+-NOT_A_RUN = re.compile(r"interrupt|cancel+ed|abort", re.I)
++#: pi 的 bash 工具失敗時附在輸出最後的狀態行（`dist/core/tools/bash.js`：結束碼、逾時、中斷、沒有結束碼）
++PI_STATUS = re.compile(r"^Command (?:exited with code -?\d+|timed out\b|aborted\b|terminated without an exit code\b)")
++#: 沒有跑完的（逾時、被中斷、被砍掉、沒有結束碼）不是「跑完了、失敗」
++TIMED_OUT = re.compile(r"\btimed?[\s-]*out\b", re.I)
++NOT_A_RUN = re.compile(r"interrupt|cancel+ed|abort|terminated without an exit code|\bkilled\b", re.I)
++#: 結束碼不是測試結果的：`timeout` 的 124、被訊號砍掉的（≥128、負數）；pytest／unittest 的 5＝沒有收集到任何測試
++EXIT_TIMEOUT = 124
++EXIT_NO_TESTS = 5
+ #: 最後一句是問句（去掉結尾的空白與格式符號之後以問號結束）
+ QUESTION_END = re.compile(r"[?？][\s*_`\"'”’»)\]」』）]*$")
++#: `test_run_failed`：最後的訊息說明了失敗（比 `MENTIONS_FAILURE` 寬：只用在這一類，只會讓它改成只寫給人）
++DISCLOSES_FAILURE = re.compile(
++    MENTIONS_FAILURE.pattern +
++    r"|\b(?:doesn[’']?t|don[’']?t|didn[’']?t|won[’']?t|does not|do not|did not|will not|not yet|never)\s+"
++    r"(?:yet\s+|all\s+|fully\s+)?pass(?:es|ed|ing)?\b|\bnot\s+(?:yet\s+)?passing\b|\bpre-?existing\b|"
++    r"\balready\s+(?:fail\w*|broken|red)\b|\bunrelated\b|\b(?:still|is|are|was|were|stays?|remains?|turns?)\s+red\b|"
++    r"\w*Error\b|沒過|未通過|不通過|沒有通過|還是失敗|紅", re.I)
++#: `test_run_failed`：人要的就是一個會失敗的測試，或只要跑一跑、回報、不要改檔 ⇒ 只寫給人
++ASKS_FAILING_OR_REPORT = re.compile(
++    r"\bred first\b|\bsee (?:it|them) (?:fail|go red|red)\b|"
++    r"\breproduc\w*\s+(?:the\s+|this\s+|that\s+|a\s+)?(?:bug|issue|failure|problem|error|crash)\b|"
++    r"\bfailing tests?\b|\btests? that fails?\b|\b(?:don[’']?t|do not) fix\b|"
++    r"\b(?:just|only) run\b|\b(?:don[’']?t|do not) (?:change|modify|edit|touch)\b|"
++    r"先不要修|不要修|寫一個會失敗的測試|會失敗的測試|不要改|別改|只要跑|只跑", re.I)
++#: 一段指令的開頭是這些 ⇒ 只是提到測試指令（搜尋、看檔、印字、版本控制、裝套件、列檔），不是在執行它
++MENTION_CMDS = frozenset({
++    "grep", "egrep", "fgrep", "zgrep", "rg", "ag", "ack", "sed", "awk", "gawk", "cat", "tac", "less", "more",
++    "head", "tail", "echo", "printf", "git", "pip", "pip3", "which", "type", "whereis", "ls", "find", "tree",
++    "wc", "man", "tee", "touch", "cp", "mv", "rm", "mkdir", "diff", "jq", "vi", "vim", "nano", "stat", "file",
++    "curl", "wget", "sort", "uniq", "cut", "tr", "apt", "apt-get", "brew", "export", "alias", "unset"})
++#: 裝套件的指令：後面接這些動詞的只是在裝／查（`npm install jest`、`uv add pytest`、`poetry show pytest`）
++PKG_CMDS = frozenset({"npm", "pnpm", "yarn", "bun", "uv", "poetry", "pipenv", "pdm", "conda", "mamba", "micromamba",
++                      "gem", "go", "cargo", "dotnet", "hatch", "rye", "pixi"})
++PKG_VERBS = frozenset({"install", "i", "add", "ci", "uninstall", "remove", "rm", "show", "info", "view", "list",
++                       "ls", "init", "freeze", "download", "search", "get", "why", "outdated", "update",
++                       "upgrade", "pip", "tool", "sync", "lock", "venv", "create"})
++#: 「在某個環境裡跑」的包裝：`uv run [選項] X`、`conda run -n env X`…
++_ENV_RUN = frozenset({"uv", "poetry", "pipenv", "pdm", "hatch", "rye", "conda", "mamba", "micromamba", "pixi"})
++_X_RUN = frozenset({"uvx", "npx", "bunx", "pnpx"})
++#: 包裝後面這些選項帶一個值（`uv run --with pytest pytest`、`conda run -n env pytest`、`timeout -s KILL 60 pytest`）
++_OPT_ARG = frozenset({"--with", "-w", "--python", "-p", "--project", "--directory", "--package", "--group",
++                      "--extra", "--env-file", "-n", "--name", "--prefix", "--cwd", "--from", "--index", "-e",
++                      "--environment", "-s", "--signal", "-k", "--kill-after", "-u", "-g", "-C", "-U",
++                      "--adjustment", "-I", "-P", "-L", "-d", "-E", "-a"})
++#: 條件、否定：`if pytest; then …`、`! pytest`——整個指令的結束碼不是它的
++_COND = frozenset({"if", "elif", "while", "until", "!"})
++_PREFIX = frozenset({"then", "else", "do", "{", "time", "exec", "command", "builtin", "nohup", "sudo", "doas",
++                     "nice", "env", "timeout", "stdbuf", "xargs"})
++#: 只收尾、不執行東西的段落：`{ pytest; }` 的 `}`
++_CLOSERS = frozenset({"}", "fi", "done", "esac"})
++_SHELLS = frozenset({"bash", "sh", "zsh", "dash", "ksh"})
++_PIPEFAIL = re.compile(r"\bset\b[^;&|\n]*\bpipefail\b")
++_HEREDOC = re.compile(r"(?<!<)<<(?!<)(-?)[ \t]*\\?(['\"]?)([A-Za-z_][\w.-]*)\2")
++_REDIR = re.compile(r"&>>?|[<>]&(?:\d+-?|-)|[<>]&|<<<|<<-?|<>|>>|>\||[<>]")
+ #: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
+ OUTPUT_VERB = re.compile(r"\b(write|writes|save|store|put|output|export|generate|create|produce|"
+                          r"place|dump|寫入|寫到|存到|存成|輸出到|產生)\b", re.I)
+@@ -491,7 +536,7 @@ class Evidence:
+             findings.append(v)
+         claims = self._test_claim(steps, delivs)
+         findings += claims
+-        findings += self._test_run(steps, claims)
++        findings += self._test_run(steps, claims, prompt_texts)
+         findings += self._failed_steps(steps, delivs, named + dir_members)
+         outs = self.requested_outputs(prompt_texts)
+         latest = self.tr.index(self.tr.latest_index())
+@@ -636,48 +681,81 @@ class Evidence:
+                      "last_pass": last.n, "path": p}]
+         return []
+ 
+-    def _run_status(self, s: Step) -> tuple[str, int | None]:
++    def _run_status(self, s: Step, rr: RunnerRun) -> tuple[str, int | None, str | None]:
+         """一次測試／build 的結果，**只看結束碼**（不看輸出文字：通過的 pytest 也會印出 `Error:`）：
+-        `("failed", 碼或 None)`／`("ok", None)`／`("unknown", None)`——這個 agent 的掛鉤不回報失敗、
+-        這一步沒有結束的紀錄、或是被中斷的。"""
+-        if self.platform not in EXIT_REPORTED or \
+-                any(a.startswith("no post-tool event") for a in s.ambiguous):
+-            return "unknown", None
++        `("failed", 碼或 None, None)`／`("ok", None, None)`／`("unknown", None, 為什麼)`。不知道的：這個 agent 的掛鉤
++        不回報失敗、這一步沒有結束的紀錄、結束碼不是它的（管線、後面還有指令、條件）、逾時、被中斷或砍掉、
++        pytest／unittest 沒有收集到任何測試。"""
++        if self.platform not in EXIT_REPORTED:
++            return "unknown", None, "not_reported"
++        if any(a.startswith("no post-tool event") for a in s.ambiguous):
++            return "unknown", None, "no_end"
++        if not rr.reliable:
++            return "unknown", None, "hidden"
+         if not s.error:
+-            return "ok", None
+-        # 只看錯誤訊息的第一行（Claude Code：`Exit code 1`，之後接的是指令的輸出——輸出裡的字不算）
+-        head = next((ln for ln in s.error.splitlines() if ln.strip()), "")
++            return "ok", None, None
++        # pi：輸出最後的狀態行（`Command exited with code 1`）；Claude Code：錯誤訊息的第一行（`Exit code 1`，
++        # 之後接的是指令的輸出——輸出裡的字不算）
++        head = ""
++        if self.platform == "pi":
++            head = next((ln.strip() for ln in reversed(self.tr.output_text(s).splitlines()) if ln.strip()), "")
++            if not PI_STATUS.match(head):
++                head = ""
++        if not head:
++            head = next((ln.strip() for ln in s.error.splitlines() if ln.strip()), "")
++        if TIMED_OUT.search(head):
++            return "unknown", None, "timed_out"
+         if NOT_A_RUN.search(head):
+-            return "unknown", None
++            return "unknown", None, "interrupted"
+         m = EXIT_CODE.search(head)
+         code = int(m.group(1)) if m else None
+-        return ("ok", None) if code == 0 else ("failed", code)
+-
+-    def _test_run(self, steps: list[Step], claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
+-        """`test_run_failed`：這一回合最後一次標準測試／build 以結束碼失敗、之後沒改過程式碼、最後的訊息沒提也不是在問人。
+-        條件差一點的（之後改過程式碼、提了失敗、在問人、拿不到最後的訊息、之後的改動看不到）只寫進
+-        `notes["test_run"]`（交件說明的「沒驗證」），不退回。"""
+-        runs = [(s, cmd) for s in steps if tool_kind(s.tool) == "shell"
+-                and _runs_runner(cmd := _command_of(self.tr, s))]
++        if code == 0:
++            return "ok", None, None
++        if code == EXIT_TIMEOUT:
++            return "unknown", None, "timed_out"
++        if code is not None and (code < 0 or code >= 128):
++            return "unknown", None, "signal"
++        if code == EXIT_NO_TESTS and rr.py:
++            return "unknown", None, "no_tests"
++        return "failed", code, None
++
++    def _test_run(self, steps: list[Step], claims: list[dict[str, Any]],
++                  prompt_texts: list[str]) -> list[dict[str, Any]]:
++        """`test_run_failed`：這一回合最後一次測試／build 以可靠的結束碼失敗、之後沒改過任何檔、人不是要它失敗、
++        最後的訊息沒說明也不是在問人 ⇒ 退回。條件差一點的（之後改過檔、人要的就是失敗或只要回報、說明了、在問人、
++        拿不到最後的訊息、之後的改動看不到）只寫進 `notes["test_run"]`（交件說明的「沒驗證」），不退回。
++        每一次測試的結果（`notes["test_runs"]["runs"]`）給交件說明判斷「退回之後有沒有再跑、沒失敗」。"""
++        runs: list[tuple[Step, str, RunnerRun, str, int | None, str | None]] = []
++        for s in steps:
++            if tool_kind(s.tool) != "shell":
++                continue
++            cmd = _command_of(self.tr, s)
++            rr = runner_run(cmd)
++            if rr is not None:
++                runs.append((s, cmd, rr, *self._run_status(s, rr)))
+         if not runs:
+             return []
+-        last, cmd = runs[-1]
+-        status, code = self._run_status(last)
+-        self.notes["test_runs"] = {"count": len(runs), "last_step": last.n, "last": status}
++        last, cmd, rr, status, code, unknown = runs[-1]
++        self.notes["test_runs"] = {
++            "count": len(runs), "last_step": last.n, "last": status,
++            **({"exit": code} if code is not None else {}), **({"unknown": unknown} if unknown else {}),
++            "runs": [{"step": s.n, "key": r.key, "status": st} for s, _c, r, st, _x, _u in runs][-30:]}
+         if status != "failed":
+             return []
+-        if any(f.get("kind") == "test_claim" and f.get("sub") == "failed" and f.get("step") == last.n
+-               for f in claims):
+-            return []                             # 「說測過」那一條已經為同一步退回
++        if any(f.get("kind") == "test_claim" and f.get("sub") == "failed" for f in claims):
++            return []                             # 「說測過、最後一次失敗」那一條已經退回（不同步也一樣）
+         base: dict[str, Any] = {"step": last.n, "cmd": cmd, "exit": code}
++        # 之後改過任何檔（不只程式碼：修的可能在 .tsx、設定檔、測試資料）⇒ 不知道現在還失敗不失敗
+         changed = [(t, p) for t in self.tr.transitions if t.seq > last.seq
+-                   for p in sorted(t.paths) if _ext(p) in CODE_EXT]
+-        # 之後的改動看不到（工作區太大沒在看、第一次看還沒看完、某一步前後沒看到）：不知道有沒有改過程式碼
++                   for p in sorted(t.paths) if not _skipped(p)]
++        # 之後的改動看不到（工作區太大沒在看、第一次看還沒看完、某一步前後沒看到）：不知道有沒有改過
+         unseen = bool(self.tr.scan_disabled or self.tr.first_look_pending) or any(
+             not (t.pre_index and t.post_index) for t in self.tr.steps if t.seq > last.seq)
+         final = self.final_text.strip()
+         why = None
+-        if changed:
++        if any(ASKS_FAILING_OR_REPORT.search(t) for t in prompt_texts):
++            why = "request"
++        elif changed:
+             t, p = changed[-1]
+             why = "changed_after"
+             base.update(changed_step=t.step.n if t.step else None, path=p)
+@@ -685,13 +763,13 @@ class Evidence:
+             why = "changes_unseen"
+         elif not final:
+             why = "no_final_text"
+-        elif MENTIONS_FAILURE.search(final):
++        elif DISCLOSES_FAILURE.search(final):
+             why = "mentioned"
+         elif QUESTION_END.search(final):
+             why = "question"
+         if why:
+             self.notes["test_run"] = {**base, "why": why,
+-                                      "finding_id": finding_id({"kind": "test_run_failed"},
++                                      "finding_id": finding_id({"kind": "test_run_failed", "cmd": cmd},
+                                                                self.rec.dir.name)}
+             return []
+         return [{"kind": "test_run_failed", **base}]
+@@ -740,12 +818,19 @@ def finding_id(f: dict[str, Any], scope: str) -> str:
+     key = {"unsourced": (f.get("path"), f.get("value")), "unread": (f.get("path"),),
+            "missing_output": (f.get("path"),),
+            "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),),
+-           # 一個要求裡最多一條（只看最後一次執行）：再跑一次、又失敗在別的步驟，仍是同一條（`(still open)`）
+-           "test_run_failed": ()}
++           # 哪一個測試指令（`pytest -q` 與 `pytest -x` 是同一個）：同一個再失敗仍是同一條（`(still open)`），
++           # 換一個指令失敗是新的一條
++           "test_run_failed": (runner_key(f.get("cmd") or ""),)}
+     raw = repr((scope, f["kind"], key.get(f["kind"], ())))
+     return "z_" + hashlib.sha256(raw.encode()).hexdigest()[:10]
+ 
+ 
++def runner_key(cmd: str) -> str:
++    """一個測試指令的「是哪一個」：`python -m pytest -q` 與 `pytest tests/` 都是 `pytest`；認不出來的用 `_norm_cmd`。"""
++    rr = runner_run(cmd)
++    return rr.key if rr else _norm_cmd(cmd)
++
++
+ def _num_match(n: Num, observed: float) -> bool:
+     if observed is None or (isinstance(observed, float) and math.isnan(observed)):
+         return False
+@@ -781,15 +866,243 @@ def _no_match_only(cmd: str, outp: str) -> bool:
+     return not SEARCH_ERR.search(outp or "")
+ 
+ 
+-def _runs_runner(cmd: str) -> bool:
+-    """這個殼層指令**執行**了一個標準測試／build 指令（`RUNNERS`）：某一段指令去掉開頭的環境變數、包裝與路徑之後
+-    就是它。`pip install pytest`、`which pytest`、`grep -r pytest .`、`cat pytest.ini` 只是提到它，不算。"""
+-    for seg in _SEGMENT.split(cmd or ""):
+-        for _ in range(3):                        # `env X=1 .venv/bin/pytest`：包裝、路徑可以交錯出現
+-            seg = _CMD_PATH.sub("", _LEAD.sub("", seg, count=1), count=1)
+-        if RUNNERS.match(seg):
+-            return True
+-    return False
++class RunnerRun(NamedTuple):
++    """一個殼層指令裡執行的測試／build（`runner_run`）。"""
++    key: str            # 哪一個測試指令：`pytest`、`unittest`、`npm test`、`npm build`（`finding_id` 用）
++    reliable: bool      # 整個指令的結束碼就是它的（不在管線中間、後面沒有別的指令、不是條件）
++    py: bool            # pytest／unittest：結束碼 5＝沒有收集到任何測試
++
++
++def runner_run(cmd: str) -> RunnerRun | None:
++    """這個殼層指令**執行**了一個標準測試／build 指令嗎？回 `None`＝沒有。
++
++    一段指令（引號外的 `;`、`&&`、`||`、`|`、`&`、換行、括號切開；heredoc 的內文先拿掉）去掉開頭的環境變數、
++    `sudo`／`env`／`timeout N`、`uv run [選項]`、`npx`…、`python -m` 之後，`RUNNERS` 在那一段找得到、而且那一段的
++    指令不是只提到它的（`MENTION_CMDS`、`pip install pytest`、`npm install jest`、`python -c "import unittest"`）
++    才算。`bash -c '…'` 看引號裡面。引號沒配對＝剖析不了＝不算（寧可漏）。"""
++    return _runner_in(cmd or "", 0)
++
++
++def _runner_in(cmd: str, depth: int) -> RunnerRun | None:
++    toks = _shell_tokens(_drop_heredocs(cmd))
++    if toks is None:
++        return None
++    segs: list[tuple[list[str], str]] = []
++    cur: list[str] = []
++    for kind, t in toks:
++        if kind == "w":
++            cur.append(t)
++        else:
++            segs.append((cur, t))
++            cur = []
++    segs.append((cur, ""))
++    found = [(i, r) for i, (words, _op) in enumerate(segs) if words
++             for r in [_segment_runner(words, depth)] if r is not None]
++    if not found:
++        return None
++    pipefail = bool(_PIPEFAIL.search(cmd))
++    reliable = all(r.reliable and _status_is_its_own(segs, i, pipefail) for i, r in found)
++    last = found[-1][1]
++    return RunnerRun(last.key, reliable, last.py)
++
++
++def _status_is_its_own(segs: list[tuple[list[str], str]], i: int, pipefail: bool) -> bool:
++    """第 i 段的結束碼就是整個指令的結束碼：它後面只接管線（而且有 `set -o pipefail`）或什麼都沒有，
++    也沒有被 `&` 丟到背景。括號與 `}`／`fi`／`done` 這種只收尾的段落不算。"""
++    later = [k for k in range(i + 1, len(segs))
++             if segs[k][0] and not (len(segs[k][0]) == 1 and segs[k][0][0] in _CLOSERS)]
++    end = later[-1] if later else len(segs)
++    between = [segs[k][1] for k in range(i, end) if segs[k][1] not in ("(", ")")]
++    trailing = [segs[k][1] for k in range(end, len(segs))]
++    if "&" in trailing or (not later and "&" in between):
++        return False
++    if later:
++        return pipefail and all(op in ("|", "|&") for op in between)
++    return True
++
++
++def _segment_runner(words: list[str], depth: int) -> RunnerRun | None:
++    w, cond = _unwrap(words)
++    if not w:
++        return None
++    base = w[0].rsplit("/", 1)[-1]
++    if base in _SHELLS:
++        for j in range(1, len(w)):
++            if re.fullmatch(r"-[A-Za-z]*c[A-Za-z]*", w[j]):
++                if depth >= 2 or j + 1 >= len(w):
++                    return None
++                inner = _runner_in(w[j + 1], depth + 1)
++                return inner._replace(reliable=inner.reliable and not cond) if inner else None
++            if not w[j].startswith("-"):
++                break
++    if base in MENTION_CMDS:
++        return None
++    rest = w[1:]
++    if re.fullmatch(r"(?:python|pypy)[\d.]*|py", base):
++        j = 0
++        while j < len(rest) and rest[j].startswith("-"):
++            opt = rest[j]
++            if opt == "-c":
++                return None                       # 一段程式碼（`python -c "import unittest"`），不是測試指令
++            if opt == "-m" or (opt.startswith("-m") and len(opt) > 2):
++                mod = opt[2:] if len(opt) > 2 else (rest[j + 1] if j + 1 < len(rest) else "")
++                rest = rest[j + (1 if len(opt) > 2 else 2):]
++                base = mod
++                break
++            j += 2 if opt in ("-X", "-W") else 1
++    if base in PKG_CMDS or base in ("pip", "pip3"):
++        verb = next((x for x in rest if not x.startswith("-")), "")
++        if verb in PKG_VERBS:
++            return None
++    m = RUNNERS.search(" ".join([base, *rest]))
++    if not m:
++        return None
++    key = re.sub(r"\s+run(?=\s)", "", m.group(0))
++    key = re.sub(r"^python3? -m ", "", key)
++    return RunnerRun(key, not cond, key in ("pytest", "unittest"))
++
++
++def _unwrap(words: list[str]) -> tuple[list[str], bool]:
++    """去掉一段指令開頭不是指令本身的東西：環境變數、條件關鍵字、`sudo`／`env`／`timeout N`／`nice`、
++    `uv run [選項]`、`npx`、`pnpm exec`。回 `(剩下的字, 有沒有條件或否定)`。"""
++    w, cond = list(words), False
++    for _ in range(12):
++        if not w:
++            break
++        h = w[0]
++        base = h.rsplit("/", 1)[-1]
++        if h in _COND:
++            cond, w = True, w[1:]
++            continue
++        if re.match(r"^[A-Za-z_]\w*=", h):
++            w = w[1:]
++            continue
++        if h in _PREFIX:
++            # 帶值的選項只有 `sudo -u`、`env -u`、`nice -n`、`timeout -s`、`xargs -I` 這幾個有；`time -p pytest` 的 -p 不帶值
++            w = _skip_opts(w[1:], with_args=h in ("sudo", "doas", "env", "nice", "timeout", "stdbuf", "xargs"))
++            if h == "timeout" and w:
++                w = w[1:]                         # 時限
++            continue
++        if base in _ENV_RUN and len(w) > 1 and w[1] == "run":
++            w = _skip_opts(w[2:])
++            continue
++        if base in _X_RUN:
++            w = _skip_opts(w[1:])
++            continue
++        if base in ("npm", "pnpm", "yarn", "bun") and len(w) > 1 and w[1] in ("exec", "dlx", "x"):
++            w = _skip_opts(w[2:])
++            continue
++        break
++    return w, cond
++
++
++def _skip_opts(w: list[str], *, with_args: bool = True) -> list[str]:
++    """包裝後面的選項（帶值的選項連值一起）與環境變數。"""
++    j = 0
++    while j < len(w):
++        t = w[j]
++        if t == "--":
++            return w[j + 1:]
++        if re.match(r"^[A-Za-z_]\w*=", t):
++            j += 1
++        elif t.startswith("-") and len(t) > 1:
++            j += 2 if with_args and t in _OPT_ARG else 1
++        else:
++            break
++    return w[j:]
++
++
++def _drop_heredocs(cmd: str) -> str:
++    """拿掉 heredoc 的內文（`cat > f <<'EOF'` 之後到 `EOF` 那一行）：內文是資料，不是要執行的指令。
++    `<<<` 不是 heredoc。結束行沒找到：之後全部當內文。"""
++    out: list[str] = []
++    pending: list[str] = []
++    for ln in cmd.split("\n"):
++        if pending:
++            if ln.strip() == pending[0]:
++                pending.pop(0)
++            continue
++        out.append(ln)
++        pending += [m.group(3) for m in _HEREDOC.finditer(ln)]
++    return "\n".join(out)
++
++
++def _shell_tokens(cmd: str) -> list[tuple[str, str]] | None:
++    """引號與跳脫都看的殼層斷詞：`("w", 字)`／`("op", 運算子)`。重導向（`2>&1`、`> out.txt`、`<<EOF`）連同它的目標
++    一起拿掉；引號外、字開頭的 `#` 到行尾是註解。引號沒配對回 `None`。"""
++    out: list[tuple[str, str]] = []
++    buf: list[str] = []
++    started = drop = False
++    i, n = 0, len(cmd)
++
++    def flush() -> None:
++        nonlocal buf, started, drop
++        if started:
++            if drop:
++                drop = False
++            else:
++                out.append(("w", "".join(buf)))
++        buf, started = [], False
++
++    while i < n:
++        c = cmd[i]
++        if c == "\\":
++            if cmd[i + 1:i + 2] not in ("", "\n"):
++                buf.append(cmd[i + 1])
++                started = True
++            i += 2
++            continue
++        if c == "'":
++            j = cmd.find("'", i + 1)
++            if j < 0:
++                return None
++            buf.append(cmd[i + 1:j])
++            started, i = True, j + 1
++            continue
++        if c == '"':
++            j, part = i + 1, []
++            while j < n and cmd[j] != '"':
++                if cmd[j] == "\\" and j + 1 < n and cmd[j + 1] in '"\\$`\n':
++                    if cmd[j + 1] != "\n":
++                        part.append(cmd[j + 1])
++                    j += 2
++                    continue
++                part.append(cmd[j])
++                j += 1
++            if j >= n:
++                return None
++            buf.append("".join(part))
++            started, i = True, j + 1
++            continue
++        if c in " \t\r":
++            flush()
++            i += 1
++            continue
++        if c == "#" and not started:
++            j = cmd.find("\n", i)
++            i = n if j < 0 else j
++            continue
++        if c in "<>" or cmd.startswith("&>", i):
++            if started and "".join(buf).isdigit():
++                buf, started = [], False          # `2>&1` 的 2
++            flush()
++            m = _REDIR.match(cmd, i)
++            assert m is not None
++            i = m.end()
++            drop = not re.fullmatch(r"[<>]&(?:\d+-?|-)", m.group(0))
++            continue
++        if c in ";&|()\n":
++            flush()
++            drop = False
++            op = cmd[i:i + 2] if cmd[i:i + 2] in ("&&", "||", "|&", ";;") else c
++            out.append(("op", op))
++            i += len(op)
++            continue
++        buf.append(c)
++        started = True
++        i += 1
++    flush()
++    return out
+ 
+ 
+ def _changed_lines(old: str, new: str) -> list[int]:
+diff --git a/vacant_network/trace/review.py b/vacant_network/trace/review.py
+index 0f1485a3..2aa28eb5 100644
+--- a/vacant_network/trace/review.py
++++ b/vacant_network/trace/review.py
+@@ -34,7 +34,7 @@ for _t in (REVIEW_HEADER, PERSONA, FOOTER, WITHHELD, NUDGE_HEADER, NUDGE_FOOTER)
+     assert_ks1_clean(_t)
+ 
+ #: 退回的先後：要求的檔不存在、失敗的步驟、測試說法與最後一次測試失敗最先（最確定），值其次，點名沒讀最後。
+-#: `test_claim`（失敗那一種）與 `test_run_failed` 不會為同一步同時出現（`evidence._test_run`）
++#: `test_claim` 退回了「最後一次失敗」就不會再有 `test_run_failed`（`evidence._test_run`）
+ ORDER = {"missing_output": 0, "failed_step": 1, "test_claim": 2, "test_run_failed": 2, "unsourced": 3,
+          "unread": 4}
+ 
+@@ -85,13 +85,14 @@ def line_for(f: dict[str, Any], budget_note: str = "") -> str:
+         return (f"- The final message says \"{q(f['quote'])}\", but no test or build command ran in "
+                 f"the recorded steps. Run it and report the actual result.")
+     if k == "test_run_failed":
+-        # 只有步驟編號、指令與結束碼：不引用輸出、不引用任何值（2026-09-26 評審對候選 2 的補丁）
++        # 只有步驟編號、指令與結束碼：不引用輸出、不引用任何值（2026-09-26 評審對候選 2 的補丁）。
++        # 先請它說明、再請它修（對抗審查 #4：「先修」會把人要的紅燈測試、只要回報的要求推向改檔）
+         code = f.get("exit")
+         return (f"- Step {f['step']} ran `{q(f['cmd'], 60)}` and it ended with a failure (exit status "
+                 f"{code if isinstance(code, int) else 'non-zero'}); no later run of it passed, and the "
+-                f"final message does not mention it. Fix what fails and run it again — or, if the "
+-                f"failure was already there before this request or is expected, say so in the final "
+-                f"message.")
++                f"final message does not say whether this was expected. Say in the final message whether "
++                f"this failure is expected, was already there before this request, or is outside what was "
++                f"asked; if it comes from this request's changes, fix it and run it again.")
+     if k == "failed_step":
+         return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\". The "
+                 f"deliverable was written after it without that output. Fix and re-run it, or say "
+diff --git a/vacant_network/trace/zerostop.py b/vacant_network/trace/zerostop.py
+index 6526fda5..983bc427 100644
+--- a/vacant_network/trace/zerostop.py
++++ b/vacant_network/trace/zerostop.py
+@@ -279,7 +279,7 @@ def _say(f: dict[str, Any]) -> str:
+         return f"step {f.get('step')} ({f.get('cmd')}) had failed"
+     if k == "test_run_failed":
+         return (f"the last test or build run, step {f.get('step')} ({f.get('cmd')}), had failed "
+-                f"({_exit_status(f)}) and the final message did not mention it")
++                f"({_exit_status(f)}) and the final message did not say whether that was expected")
+     return str(k)
+ 
+ 
+@@ -290,14 +290,45 @@ def _exit_status(f: dict[str, Any]) -> str:
+ 
+ #: 最後一次測試失敗、但只寫給人的原因（`evidence._test_run` 的 `notes["test_run"]["why"]`）
+ TEST_RUN_WHY = {
+-    "changed_after": "the code changed afterwards{at}, and the tests were not re-run after the last change",
+-    "changes_unseen": "the workspace was not fully observed after it, so whether the code changed afterwards "
++    "request": "the request asks for a failing test, or only to run it and report",
++    "changed_after": "files changed afterwards{at}, and the tests were not re-run after the last change",
++    "changes_unseen": "the workspace was not fully observed after it, so whether files changed afterwards "
+                       "is not known",
+     "no_final_text": "the final message was not available",
+     "mentioned": "the final message mentions a failure",
+     "question": "the final message ends with a question",
+ }
+ 
++#: 最後一次測試的結束碼不知道的原因（`evidence._run_status`）：只寫給人，不退回、也不算「後來跑過、沒失敗」
++TEST_RUN_UNKNOWN = {
++    "not_reported": "this agent's hooks do not report exit status",
++    "no_end": "no end of that step was recorded",
++    "hidden": "it was piped into or followed by another command, so the exit status is not its own",
++    "timed_out": "it timed out",
++    "interrupted": "it was interrupted",
++    "signal": "it was stopped by a signal",
++    "no_tests": "no tests were collected",
++}
++
++
++def _runs_line(runs: dict[str, Any]) -> str:
++    """「這一回合跑了幾次測試、最後一次怎樣」。沒有失敗的紀錄只寫「沒有記到失敗」，不寫「通過」。"""
++    last = str(runs.get("last"))
++    how = ("failed (" + _exit_status(runs) + ")" if last == "failed" else
++           "no failure was recorded" if last == "ok" else
++           "exit status not known — " + TEST_RUN_UNKNOWN.get(str(runs.get("unknown")), "not recorded"))
++    return f"- Test or build runs in this turn: {runs.get('count')}; the last one (step {runs.get('last_step')}): {how}"
++
++
++def _rerun_ok(runs: dict[str, Any], f: dict[str, Any]) -> int | None:
++    """退回過的 `test_run_failed` 之後，**同一個**測試指令有沒有以可靠的結束碼跑過、沒失敗：回那一步。
++    管線、逾時這類結束碼不知道的不算（對抗審查 #5）。"""
++    from .evidence import runner_key
++    key = runner_key(str(f.get("cmd") or ""))
++    ok = [r.get("step") for r in runs.get("runs") or []
++          if r.get("key") == key and r.get("status") == "ok" and int(r.get("step") or 0) > int(f.get("step") or 0)]
++    return ok[-1] if ok else None
++
+ 
+ def _test_run_line(tr: dict[str, Any], sent_round: dict[str, Any]) -> str:
+     """最後一次測試失敗、沒有退回（或退回過、現在只寫給人）的那一行。"""
+@@ -366,10 +397,9 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
+                    f"{', '.join(dir_opened[:20]) or 'none'}")
+     notes = res.get("notes") or {}
+     runs = notes.get("test_runs") or {}
++    test_run = notes.get("test_run") or {}
+     if runs:
+-        out.append(f"- Test or build runs in this turn: {runs.get('count')}; the last one (step "
+-                   f"{runs.get('last_step')}) " + {"failed": "failed", "ok": "did not fail"}.get(
+-                       str(runs.get("last")), "has no recorded exit status"))
++        out.append(_runs_line(runs))
+     out.append("- Final message: " + ("checked for test and build claims"
+                                       if res.get("final_text_seen") else "not available"))
+     fixed: list[str] = []
+@@ -393,13 +423,14 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
+             elif f.get("kind") == "missing_output":
+                 how = "it was written afterwards"
+             elif f.get("kind") == "test_run_failed":
+-                if runs.get("last") == "ok" and runs.get("last_step") != f.get("step"):
+-                    how = f"a later test or build run (step {runs.get('last_step')}) did not fail"
+-                elif notes.get("test_run"):
+-                    continue                      # 最後一次失敗現在只寫給人：在「沒驗證」那一節
++                k = _rerun_ok(runs, f)
++                if k is not None:
++                    how = f"a later run of it (step {k}) recorded no failure"
++                elif test_run.get("finding_id") == f["finding_id"]:
++                    continue                      # 同一個指令的失敗現在只寫給人：在「沒驗證」那一節
+                 else:
+-                    unverified_extra.append(f"round {r['round']}: {_say(f)}; no later run is recorded "
+-                                            f"as passing")
++                    unverified_extra.append(f"round {r['round']}: {_say(f)}; no later run of it is recorded "
++                                            f"without a failure")
+                     continue
+             else:
+                 how = "the record now matches"
+@@ -435,7 +466,6 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
+     # 事後的檢查：這個要求裡已經退回過的那一條，寫「第幾輪退回過、結束時還在」，不寫「沒有退回」（v3.4）
+     sent_round = {f["finding_id"]: r["round"] for r in sess.get("rounds") or []
+                   for f in r.get("findings") or [] if f.get("finding_id")}
+-    test_run = notes.get("test_run") or {}
+     if test_run:
+         unverified.append(_test_run_line(test_run, sent_round))
+     for f in left_open or []:
+-- 
+2.43.0
+

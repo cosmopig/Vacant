@@ -135,6 +135,47 @@ def test_named_file_not_opened_is_pushed_back(env):
     assert kinds(a.evidence()) == ["unread"]
 
 
+GOAL = ("# Goal\n\nA client keeps a pile of CSV files that people edit by hand. They want to feed\n"
+        "that data into another tool that only speaks JSON Lines.\n")
+CONTRACT = ("# Contract\n\n## Library\n\n    solution.csv_to_jsonl(text: str) -> str\n\n"
+            "- Returns JSON Lines: one JSON object per data row.\n- A field that is empty becomes `\"\"`.\n")
+
+
+def test_v35_named_file_whose_text_is_in_the_request_is_not_pushed_back(env):
+    # R530 的題目：goal.md、contract.md 的全文貼在請求裡，又列出工作區有這些檔（2026-09-26 重播 58/59 格被退回）
+    a = Agent(_proj(env, files={"goal.md": GOAL, "contract.md": CONTRACT, "run_tests.sh": "python3 -m pytest -q\n"}))
+    a.ask(GOAL + "\n" + CONTRACT.replace("one JSON object per data row.", "one JSON object\nper data row.") +
+          "\nYour working directory already contains these files:\n\n  contract.md\n  goal.md\n  run_tests.sh\n")
+    a.write("solution.py", "def csv_to_jsonl(text):\n    return ''\n")
+    a.bash("sh run_tests.sh", "1 passed\n")
+    ev = a.evidence("Done. solution.py implements the contract.")
+    assert kinds(ev) == [], ev
+    assert ev["given_in_request"] == ["contract.md", "goal.md"]
+
+
+def test_v35_partly_quoted_file_is_still_pushed_back(env):
+    # 只貼了表頭（或一段）≠ 給了全文：沒打開照樣退回
+    body = "date,region,amount\n" + "".join(f"2026-07-{d:02d},north,{d * 100}\n" for d in range(1, 29))
+    a = Agent(_proj(env, files={"data/sales.csv": body}))
+    a.ask("data/sales.csv has columns date,region,amount. Write the total to total.txt.")
+    a.write("total.txt", "40600\n")
+    ev = a.evidence("Done.")
+    assert "unread" in kinds(ev), ev
+    assert ev["given_in_request"] == []
+
+
+def test_v35_given_file_listed_in_the_delivery_note(env):
+    from vacant_network.trace import zerostop
+    a = Agent(_proj(env, files={"goal.md": GOAL, "notes.md": "Deadline: 2026-10-30\n"}))
+    a.ask(GOAL + "\nSee goal.md and notes.md. Write summary.md.")
+    a.read("notes.md")
+    a.write("summary.md", "A summary.\n")
+    ev = a.evidence("Done.")
+    assert kinds(ev) == [] and ev["given_in_request"] == ["goal.md"], ev
+    assert "goal.md" not in ev["unread_dir"]
+    del zerostop  # 說明的字句由 test_zero_stop 以真的 Stop 驗
+
+
 def test_test_claim_without_a_run(env):
     a = Agent(_proj(env, files={"app.py": "def f():\n    return 1\n"}))
     a.ask("Fix f in app.py and make sure the tests pass.")

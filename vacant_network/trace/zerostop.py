@@ -314,7 +314,9 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
     delivs = res.get("deliverables") or []
     named = res.get("materials_named") or []
     observed = set(res.get("observed") or [])
-    opened = [x for x in named if x in observed]
+    in_request = set(res.get("given_in_request") or [])
+    opened = [x for x in named if x in observed and x not in in_request]
+    given_named = [x for x in named if x in in_request]
     not_opened = [x for x in named if x not in observed]
     out += ["## What was checked", ""]
     out.append("- Files written in this turn: " + (", ".join(delivs[:20]) if delivs else "none"))
@@ -328,9 +330,10 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
     if named:
         out.append(f"- Files named in the request: {len(named)} — opened: "
                    f"{', '.join(opened) or 'none'}" +
+                   (f"; content already in the request: {', '.join(given_named)}" if given_named else "") +
                    (f"; not opened: {', '.join(not_opened)}" if not_opened else ""))
     in_dirs = res.get("materials_in_dirs") or []
-    dir_opened = [x for x in in_dirs if x in observed]
+    dir_opened = [x for x in in_dirs if x in observed and x not in in_request]
     if in_dirs:
         out.append(f"- Files in the folders named in the request: {len(in_dirs)} — opened: "
                    f"{', '.join(dir_opened[:20]) or 'none'}")
