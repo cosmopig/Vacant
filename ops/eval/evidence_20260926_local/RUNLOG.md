@@ -45,3 +45,13 @@ A、C1 × 79 題 × 2 次，同一題同一次的兩組放同一台、兩台輪�
 - 產品等級：閘門 3（凍結的 wheel）A 0、C1 0、C2 1，三跑各 15 通；模擬使用者 `correct` A/C 逐位元組相同；整套測試的失敗集合和改之前相同
   （10 條既有的憑證／展件測試失敗，和這一輪無關）。
 - **照不照做探針**（03:40–03:54，w401）：16 跑 × 3 次 × 2 條件（`probe/`）：原樣 48 次寫檔 1 次；加提醒 48 次寫檔 28 次、對 10 次、錯 18 次。
+
+## 7. 正式批次（預註冊 `decisions/prereg/PREREG_20260926_ZERO_CONFIG_V3_LOCAL.md`，凍結於 `769022a3`）
+
+約 04:00 UTC 開跑：
+```
+python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/formal_v3 --dataset <釘死的題目> \
+  --arms A=- C1=<C1 wheel a722a234…> C2=<C2 wheel 0dcd5d68…> --samples 1 2 3 \
+  --upstreams w401:3 1003:1 --deadline 2026-09-27T04:00:00Z --prefix v3local
+```
+711 跑排入（79 題 × 3 組 × 3 次）。驅動不讀評分。
