@@ -30,7 +30,7 @@
 | 環境映像與題目 | 同上一輪：`vacant-eval/dabstep-env:1`（ID `sha256:0e2cbfab…2728`）；正式 79 題 `ops/eval/evidence_20260925/pilot/FORMAL_MANIFEST.json`（sha256 `ddf4a962…7319`） |
 | 模型 | `gemma-4-12b-it-qat`，兩台 LM Studio：`w401c-15.taild870c4.ts.net`、`1003.taild870c4.ts.net`；記帳代理本機模式強制 `reasoning_effort=none`（`ops/eval/orproxy.py`，commit `cd61f35c` 起） |
 | C1 wheel | `vacant_network-0.8.0-py3-none-any.whl` sha256 `a722a234e8efe44fcd656458aabcaaaa48c64e21f020b57bc7873a83677a392c`（`vacant_network/` 同 `7f7ec52f`） |
-| C2 wheel | `vacant_network-0.8.0-py3-none-any.whl` sha256 **`<C2_WHEEL_SHA256>`**（`vacant_network/` 同 **`<C2_COMMIT>`**） |
+| C2 wheel | `vacant_network-0.8.0-py3-none-any.whl` sha256 `0dcd5d6890eb18139e488dd5a5deb19baf18f63bc529babd87269756e8ff42a2`（`vacant_network/` 同 `11f91f878db3f8900c9dc3c70f5096f31bd9c554`） |
 | 驅動 | `ops/eval/local/run_batch.py`、`ops/eval/local/run_local.sh`（本 commit 的版本） |
 
 ## 四、跑的方式與停止規則
