@@ -71,3 +71,11 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
 - C2 第 70 題「第 13 回合後說剩 2 回合、第 14 回合就結束」：是 Harbor 的 1800 秒牆鐘時限（`AgentTimeoutError`，兩次請求逾時＋pi 自動壓縮），
   不是回合數算錯。第 70 題本來就不進主要分析；牆鐘逾時每組各幾跑會在最後的描述裡列。
 - v3.3（commit `a2b4b0ee`，只改給人的說明；裁決 §八、閘門 5 `gate5_v33/`）。
+
+## 10. v3.4 與留出批次的預註冊（06:45–07:45 UTC；正式批次照跑凍結的 v3）
+
+- v3.2／v3.3 的對抗審查（`review_v33/`）：14 條都重現、沒有一條影響模型收到的東西；歸成 6 件在 v3.4（commit `1685e664`）修掉。
+  閘門 6（`gate6_v34/`）、模擬使用者（`simuser_v34/`：`correct` 的請求 A／C 逐位元組相同，也和 v3 那一輪相同）。
+- **留出批次的預註冊凍結**（`decisions/prereg/PREREG_20260926_ZERO_CONFIG_V34_HELDOUT.md`）：100 題沒被任何一輪用過的 DABstep hard 題，
+  A vs C3（v3.4 wheel `81a761de…`），每組 2 次；在正式批次的結果出來之前凍結。正式批次跑完（含它的 infra_void 補跑）之後由
+  `ops/eval/local/after_formal.sh` 自動接著跑。凍結時正式批次約 200／711 跑。
