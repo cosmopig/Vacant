@@ -56,7 +56,11 @@
 2. **雲端郵箱（`vacant-world-cloud`）那一份原文，這支刪不到。** 那邊
    `app.delete` 零路由（2026-09-21 盤點）。所以 `withdraw()` 回傳的
    `cloud_copy` 永遠是 `"not_attempted_no_endpoint"`——**不是 `false`、
-   更不是省略**。有了端點再改這裡。
+   更不是省略**。
+   ⚠ 2026-09-26：雲端**有**端點了（`POST /api/withdraw`，工作人員路徑 `{id, token}`）。
+   但這一支仍然不連網（它是鏈外檔案庫，不該知道雲端在哪）：雲端那一份由
+   `twinlink.sync_cloud_erasure`（會場撤回）或雲端自己（手機上撤回，`ingest` 帶回
+   `cloud_copy.by=cloud`）處理，結果記在 twinstore。這裡回的 `cloud_copy` 語意不變。
 3. **舊鏈裡的原文拿不掉。** 2026-09-21 之前寫進 `twinstore` 的
    `submitted`／`generated` payload 帶著原文，而那條鏈是 append-only。
    `migrate()` 能做的只有「把原文**另外**抄一份進檔案庫、讓之後的讀取走檔案庫」，
@@ -154,6 +158,10 @@ TWIN_OFF_CHAIN_KEYS: tuple[str, ...] = (
     "arrival", "working", "handover", "degrade_reason",
     "decision", "reason", "artifacts",
 )
+
+#: 撤回時**真的刪**的鏈外檔（依序；nonce 第一個——它是 hiding 的全部，誠實邊界 4）。
+#: 2026-09-26 起多一個 `polaroid.png`（拍立得：畫著分身的決定，衍生物，撤回要一起刪）。
+ERASABLE_NAMES: tuple[str, ...] = ("nonce.hex", "card.json", "twin.json", "polaroid.png")
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _REF = re.compile(r"^plain/[0-9a-f]{32}/[a-z0-9_]+\.[a-z]+$")
@@ -594,6 +602,22 @@ class TwinVault:
     def open_card(self, sub_id: str) -> dict[str, Any] | None:
         return self._read(self._sub_dir(sub_id) / "card.json")
 
+    def seal_polaroid(self, sub_id: str, png: bytes) -> str:
+        """拍立得（2026-09-26）住在同一個主體目錄：它畫著分身的決定＝觀眾特質的衍生物，
+        **照鏈外原文的規格處理**——撤回時跟 card.json／twin.json 一起 `unlink()`，
+        被刪位元組的 sha256 簽進 `PERSONA_ERASED`。回 ref（`plain/<slug>/polaroid.png`）。"""
+        if not isinstance(png, (bytes, bytearray)) or not bytes(png).startswith(b"\x89PNG\r\n\x1a\n"):
+            raise VaultError("拍立得不是 PNG")
+        atomic_write_bytes(self._sub_dir(sub_id) / "polaroid.png", bytes(png))
+        return self.ref(sub_id, "polaroid.png")
+
+    def open_polaroid(self, sub_id: str) -> bytes | None:
+        p = self._sub_dir(sub_id) / "polaroid.png"
+        try:
+            return p.read_bytes() if p.is_file() else None
+        except OSError:
+            return None
+
     def open_twin(self, sub_id: str) -> dict[str, Any] | None:
         return self._read(self._sub_dir(sub_id) / "twin.json")
 
@@ -688,7 +712,7 @@ class TwinVault:
 
             # 2) **真的刪**。nonce 先刪：它是 hiding 的全部（誠實邊界 4）。
             erased: list[dict[str, Any]] = []
-            for name in ("nonce.hex", "card.json", "twin.json"):
+            for name in ERASABLE_NAMES:
                 p = self._sub_dir(sub_id) / name
                 if not p.exists():
                     continue

@@ -101,6 +101,8 @@
     python3 ops/exhibit/twin/twinlink.py serve    --port 8901      # 唯讀
     python3 ops/exhibit/twin/twinlink.py serve    --port 8901 --allow-withdraw
     python3 ops/exhibit/twin/twinlink.py withdraw --id <sub_id>   # 紙本撤回走這條
+    python3 ops/exhibit/twin/twinlink.py polaroid                 # 拍立得（loop 每輪自己會做）
+    python3 ops/exhibit/twin/twinlink.py cloud-erase --token T    # 會場撤回的人：刪雲端那一份
     python3 ops/exhibit/twin/twinlink.py loop     --cloud URL --token T --endpoint ...
 
 ## 螢幕上該有誰（`--recent`／退役，2026-09-21）
@@ -122,9 +124,11 @@ roster 沒有上限，而 `bridge.js` 的 `seenIds` 在記憶體裡、每次載�
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import pathlib
+import re
 import sys
 import time
 import urllib.error
@@ -137,6 +141,7 @@ HERE = pathlib.Path(__file__).resolve()
 TWIN = HERE.parent
 sys.path.insert(0, str(TWIN.parents[2]))
 
+from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import twinagent, twinvault  # noqa: E402
 from ops.exhibit.twin.twinstore import (  # noqa: E402
     DEFAULT_DB, KIND_ERASED, KIND_ERROR, KIND_GENERATED, KIND_INGEST_GAP,
@@ -384,6 +389,10 @@ def ingest(store: TwinStore, cloud: str, token: str,
 
     known = set(store.sub_ids())
     new, rejected, propagated = 0, 0, 0
+    # 雲端自己刪了什麼（`withdrawals[].erased`：ref ＋ bytes_n，沒有內容）。
+    # 本機抹除證明要列得出「雲端那一份（含拍立得、收據副本）也刪了」（2026-09-26）。
+    cloud_wd = {w.get("id"): w for w in ((body or {}).get("withdrawals") or [])
+                if isinstance(w, dict) and isinstance(w.get("id"), str)}
     for it in items:
         if not isinstance(it, dict):
             continue
@@ -406,8 +415,13 @@ def ingest(store: TwinStore, cloud: str, token: str,
         cstat = it.get("status")
         if cstat in ("withdrawn", "erased"):
             if sid in known:
+                w = cloud_wd.get(sid) or {}
                 r = withdraw(store, sid, reason=f"cloud:{cstat}",
-                             source=f"cloud:{cloud}")
+                             source=f"cloud:{cloud}",
+                             cloud_copy=_cloud_copy_record(
+                                 sid, by="cloud", status=cstat, http=None,
+                                 erased=w.get("erased"),
+                                 chain_plaintext_remains=w.get("chain_plaintext_remains")))
                 if r.get("ok") and not r.get("already"):
                     propagated += 1
             # 從沒抄過又已經撤回 ⇒ **根本不要抄進來**。
@@ -947,6 +961,236 @@ def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
 
 
 # ---------------------------------------------------------------------------
+# 2b. 拍立得 —— 分身那一跑做完 ⇒ 一張給觀眾帶走的相片卡（2026-09-26）
+# ---------------------------------------------------------------------------
+#
+# 裁決：`decisions/DECISION_20260926_TWIN_POLAROID.md`。合成在 `polaroid.py`。
+#
+# * **只發給「做成了」的那一跑**（`run_outcome == "made"`：在 vacant run 底下真跑、
+#   打到模型、寫了 PLAN.md、有收據）。退化的、基建壞的、沒收據的 ⇒ 不發，
+#   記一列 `polaroid_skipped`，手機上照實說「這一次沒有做成」。
+# * 圖住在 twinvault（鏈外，撤回時 `unlink()`）；鏈上只記**做了一張**
+#   （ref、cast_id、位元組數、版面旗標），**不記那句話**。
+# * 這台沒有 Pillow ⇒ **不寫鏈**（裝好之後下一輪補做），回報裡照實講 `unavailable`。
+
+POLAROID_MADE = "polaroid_made"
+POLAROID_SKIPPED = "polaroid_skipped"
+LATE_POLAROID_DISCARDED = "late_polaroid_discarded"
+CLOUD_ERASED = "cloud_erased"
+
+_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def run_outcome(twin: dict[str, Any] | None) -> str | None:
+    """`made` ＝ 分身在 vacant run 底下真的做完一件事、有收據；`not_made` ＝ 其餘；
+    `None` ＝ 還沒生成。**`accepted=None` 不影響這裡**：沒有客觀標準、不判，
+    但「做完了、有收據」是另一件量得到的事。"""
+    if not twin:
+        return None
+    if (str(twin.get("engine") or "").startswith(twinagent.ENGINE_PREFIX + ":")
+            and twin.get("decision")
+            and _HEX64.match(str(twin.get("verdict_hash") or ""))):
+        return "made"
+    return "not_made"
+
+
+def _cast_id_for(card: Any) -> str | None:
+    """`pick_cast_for` 的安全版：素材壞了回 `None`（電視那一側就退回自己算），
+    **不准讓 build_view 因為一張精靈圖的 manifest 而整個炸掉**。"""
+    try:
+        return polaroidlib.pick_cast_for(card if isinstance(card, dict) else {})
+    except Exception:                                    # noqa: BLE001
+        return None
+
+
+def polaroid_state(store: TwinStore, sid: str) -> dict[str, Any] | None:
+    """這個人的拍立得狀態（最後一列 `polaroid_made`／`polaroid_skipped` note），沒有 ⇒ None。"""
+    last = None
+    for e in store.events(sub_id=sid, kind=KIND_NOTE):
+        p = e.get("payload") or {}
+        if p.get("twinlink_event") in (POLAROID_MADE, POLAROID_SKIPPED):
+            last = p
+    return last
+
+
+def _generated_ms(store: TwinStore, sid: str) -> int | None:
+    ms = None
+    for e in store.events(sub_id=sid, kind=KIND_GENERATED):
+        ms = e.get("ts_unix_ms")
+    return ms
+
+
+def _local_date(ms: int | None) -> str:
+    """展場本機時區的日期（跟 `counts.today` 同一個切法）。"""
+    t = (ms or int(time.time() * 1000)) / 1000
+    return datetime.fromtimestamp(t).astimezone().strftime("%Y.%m.%d")
+
+
+def make_polaroid(store: TwinStore, sid: str, *,
+                  frame_dir: pathlib.Path | None = None) -> dict[str, Any]:
+    """做（或確認已經做過）這個人的拍立得。**冪等。** 回 `{"state": …}`：
+
+    `made`／`already`／`skipped`（沒做成，不發）／`unavailable`（這台做不出來，不寫鏈）／
+    `error`（做的時候壞了，記一列 skipped 免得每輪重試）／`gone`（撤回了）／`not_generated`。
+    """
+    cur = store.current(sid)
+    if not cur or not cur.get("generated_seq"):
+        return {"state": "not_generated"}
+    if cur.get("status") in ("withdrawn", "erased"):
+        return {"state": "gone"}
+    st = polaroid_state(store, sid)
+    if st is not None:
+        return {"state": "already", "event": st.get("twinlink_event")}
+    twin = cur.get("twin") or {}
+    if run_outcome(twin) != "made":
+        store.append(KIND_NOTE, sid, {
+            "twinlink_event": POLAROID_SKIPPED, "reason": "not_made",
+            "engine_kind": ("vacant_run" if str(twin.get("engine") or "").startswith(
+                twinagent.ENGINE_PREFIX) else str(twin.get("engine") or "none").split(":")[0]),
+            "degrade_kind": (str(twin.get("degrade_kind"))[:120]
+                             if twin.get("degrade_kind") else None),
+            "at": _now()}, source="local:polaroid")
+        return {"state": "skipped"}
+    ok, why = polaroidlib.available()
+    if not ok:
+        return {"state": "unavailable", "why": why}
+    try:
+        png, meta = polaroidlib.compose(
+            decision=twin["decision"],
+            cast_id=_cast_id_for(cur.get("card")) or "c01",
+            date_str=_local_date(_generated_ms(store, sid)),
+            receipt_short=str(twin["verdict_hash"])[:8],
+            originals=polaroidlib.originals_of(cur.get("card"), cur.get("card_text")),
+            frame_dir=frame_dir)
+        ref = store.vault.seal_polaroid(sid, png)
+    except (polaroidlib.PolaroidError, twinvault.VaultError, OSError, *CARD_LEVEL_ERRORS) as e:
+        # 做不出來的原因多半是永久的（版面、素材）。記一列 skipped，**不要每輪重試**；
+        # 理由只記例外類名——訊息可能夾帶那句話。
+        store.append(KIND_NOTE, sid, {
+            "twinlink_event": POLAROID_SKIPPED, "reason": "compose_failed",
+            "error": type(e).__name__, "at": _now()}, source="local:polaroid")
+        return {"state": "error", "error": type(e).__name__}
+    if _gone(store, sid):
+        # 🔴 做到一半被撤回（serve 那個行程在我們畫圖的那一秒刪了檔案庫）：
+        #    剛寫下去的這張圖**不准留下來**。再刪一次，記一列只有類別的 note。
+        p = store.vault.plain_dir / twinvault.slug_for(sid) / "polaroid.png"
+        try:
+            p.unlink()
+        except FileNotFoundError:
+            pass
+        store.append(KIND_NOTE, sid, {"twinlink_event": LATE_POLAROID_DISCARDED,
+                                      "removed": not p.exists(), "at": _now()},
+                     source="local:polaroid")
+        return {"state": "gone"}
+    ev = {
+        "twinlink_event": POLAROID_MADE, "polaroid_ref": ref,
+        "cast_id": meta["cast_id"], "bytes_n": meta["bytes_n"], "size": meta["size"],
+        "frame": meta["frame"], "caption_truncated": meta["caption_truncated"],
+        "caption_redacted": meta["caption_redacted"],
+        "dropped_glyphs": meta["dropped_glyphs"], "qr_text": meta["qr_text"],
+        "at": _now(),
+    }
+    # 鏈上這一列也過原文那把尺（它不該有任何一個觀眾的字，這一道是第二層）。
+    twinvault.assert_payload_clean(ev, _subject_secrets(store, sid), kind=KIND_NOTE)
+    store.append(KIND_NOTE, sid, ev, source="local:polaroid")
+    return {"state": "made", "ref": ref, "bytes_n": meta["bytes_n"]}
+
+
+def polaroids(store: TwinStore, *, limit: int = 0,
+              frame_dir: pathlib.Path | None = None) -> dict[str, Any]:
+    """這一輪該做拍立得的人（已生成、沒撤回、還沒有拍立得狀態）全部做一遍。"""
+    done_or_skipped = set()
+    for e in store.events(kind=KIND_NOTE):
+        if (e.get("payload") or {}).get("twinlink_event") in (POLAROID_MADE, POLAROID_SKIPPED):
+            done_or_skipped.add(e["sub_id"])
+    todo = [s for s in dict.fromkeys(e["sub_id"] for e in store.events(kind=KIND_GENERATED))
+            if s not in done_or_skipped and not _gone(store, s)]
+    if limit:
+        todo = todo[:limit]
+    counts: dict[str, int] = {}
+    why = None
+    for sid in todo:
+        r = make_polaroid(store, sid, frame_dir=frame_dir)
+        counts[r["state"]] = counts.get(r["state"], 0) + 1
+        if r["state"] == "unavailable":
+            why = r.get("why")
+    if why:
+        print(json.dumps({"twinlink_warning": "polaroid_unavailable", "why": why,
+                          "waiting": counts.get("unavailable", 0)}, ensure_ascii=False),
+              file=sys.stderr, flush=True)
+    return {"ok": True, "todo": len(todo), **counts,
+            "available": polaroidlib.available()[0], "unavailable_why": why}
+
+
+_CLOUD_ID_IN_REF = re.compile(r"[0-9a-fA-F-]{36}")
+
+
+def _cloud_copy_record(sid: str, *, by: str, status: Any, http: int | None,
+                       erased: Any, chain_plaintext_remains: Any) -> dict[str, Any]:
+    """雲端那一份刪了什麼（**只有 ref 類別與位元組數**）。ref 裡的 id 換成 `<id>`：
+    帳本上本來就以 sub_id 為鍵，但抹除證明的內容不需要再抄一次那把撤回的鑰匙。"""
+    items = []
+    for e in (erased or []):
+        if isinstance(e, dict) and isinstance(e.get("ref"), str):
+            ref = _CLOUD_ID_IN_REF.sub("<id>", e["ref"].replace(sid, "<id>"))[:80]
+            n = e.get("bytes_n")
+            items.append({"ref": ref, "bytes_n": n if isinstance(n, int) else None})
+    return {"by": by, "status": (str(status)[:32] if status is not None else None),
+            "http": http, "erased": items,
+            "chain_plaintext_remains": (bool(chain_plaintext_remains)
+                                        if chain_plaintext_remains is not None else None)}
+
+
+def sync_cloud_erasure(store: TwinStore, cloud: str, token: str,
+                       timeout: float = 30.0) -> dict[str, Any]:
+    """**在本機撤回的人（紙本／`serve --allow-withdraw`），把雲端那一份也刪掉。**
+
+    在這之前雲端郵箱那一份（原文、卡圖、拍立得、收據副本）刪不到（twinvault 誠實邊界 2）。
+    雲端現在有工作人員路徑（`POST /api/withdraw {id, token}`），這一步每輪把
+    「本機已抹除、雲端還沒確認」的人送過去，**結果記一列 `cloud_erased` note**
+    ——抹除證明因此列得出雲端那一份刪了什麼。
+
+    ⚠ 在手機上撤回的人不走這裡：那是雲端先刪、`ingest` 帶回來（`erased.cloud_copy.by=cloud`）。
+    ⚠ 連不上 ⇒ **不寫鏈**、下一輪再試；雲端說 404（重佈署歸零）⇒ 記一列、不再試。
+    """
+    cloud = cloud.rstrip("/")
+    confirmed = {e["sub_id"] for e in store.events(kind=KIND_NOTE)
+                 if (e.get("payload") or {}).get("twinlink_event") == CLOUD_ERASED}
+    todo = []
+    for e in store.events(kind=KIND_ERASED):
+        sid = e["sub_id"]
+        cc = (e.get("payload") or {}).get("cloud_copy")
+        if sid in confirmed or (isinstance(cc, dict) and cc.get("by") == "cloud"):
+            continue
+        todo.append(sid)
+    ok = fail = gone = 0
+    for sid in dict.fromkeys(todo):
+        try:
+            status, body = _http_json(f"{cloud}/api/withdraw", {"id": sid, "token": token},
+                                      timeout=timeout)
+            b = body if isinstance(body, dict) else {}
+            rec = _cloud_copy_record(sid, by="venue_sync", status="withdrawn", http=status,
+                                     erased=b.get("erased"),
+                                     chain_plaintext_remains=b.get("chain_plaintext_remains"))
+            rec["already"] = bool(b.get("already"))
+            ok += 1
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                fail += 1
+                continue
+            rec = _cloud_copy_record(sid, by="venue_sync", status="not_found", http=404,
+                                     erased=[], chain_plaintext_remains=None)
+            gone += 1
+        except Exception:                                # noqa: BLE001
+            fail += 1
+            continue
+        store.append(KIND_NOTE, sid, {"twinlink_event": CLOUD_ERASED, **rec, "at": _now()},
+                     source=f"cloud:{cloud}")
+    return {"ok": fail == 0, "confirmed": ok, "not_found": gone, "failed": fail,
+            "pending": fail}
+
+
+# ---------------------------------------------------------------------------
 # 3. publish —— 真相來源 → 回寫雲端（盡力而為）
 # ---------------------------------------------------------------------------
 
@@ -959,28 +1203,56 @@ def publish(store: TwinStore, cloud: str, token: str,
     """
     cloud = cloud.rstrip("/")
     todo = store.pending(KIND_PUBLISHED)
-    # 撤回過的不回寫。雲端那一份我們刪不到（沒有 delete 路由，`twinvault`
-    # 誠實邊界 2），但至少不要在人家說了「刪掉我」之後又送一份新的過去。
+    # 撤回過的不回寫：不要在人家說了「刪掉我」之後又送一份新的過去。
+    # （雲端那一份怎麼刪：手機上撤回＝雲端自己刪；會場撤回＝`sync_cloud_erasure`。）
     todo = [s for s in todo
             if (store.current(s) or {}).get("generated_seq")
             and (store.current(s) or {}).get("status") not in ("withdrawn", "erased")]
     if limit:
         todo = todo[:limit]
     ok, fail = 0, 0
+    work_root = twinagent.default_work_root(store.path)
     for sid in todo:
         cur = store.current(sid) or {}
         twin = cur.get("twin") or {}
         verdict = twin.get("handover") or twin.get("arrival") or "（分身已抵達）"
+        # ── 2026-09-26 拍立得：做成了 ⇒ 圖＋收據副本；沒做成 ⇒ 手機照實說 ──
+        outcome = run_outcome(twin)
+        payload: dict[str, Any] = {
+            "token": token, "id": sid,
+            "verdict": str(verdict)[:120],
+            "matched": str(twin.get("working") or "")[:120],
+            "outcome": outcome,
+        }
+        sent_polaroid, receipt_state = False, None
+        if outcome == "made":
+            make_polaroid(store, sid)            # 冪等；loop 那一步漏了這裡補
+            png = store.vault.open_polaroid(sid)
+            if png:
+                payload["polaroid_png"] = ("data:image/png;base64,"
+                                           + base64.b64encode(png).decode("ascii"))
+                sent_polaroid = True
+            rb = twinagent.receipt_bundle(work_root, sid,
+                                          expect_head=twin.get("verdict_hash"))
+            if rb.get("ok"):
+                try:
+                    # 收據本來就只有雜湊與計數；這一道是第二層（萬一哪天白名單被放寬）。
+                    twinvault.assert_payload_clean(rb["bundle"], _subject_secrets(store, sid),
+                                                   kind=KIND_PUBLISHED)
+                    payload["receipt"] = rb["bundle"]
+                    receipt_state = "sent"
+                except twinvault.GUARD_ERRORS:
+                    receipt_state = "guard_rejected"
+            else:
+                receipt_state = str(rb.get("why"))[:40]
         try:
-            status, body = _http_json(f"{cloud}/api/result", {
-                "token": token, "id": sid,
-                "verdict": str(verdict)[:120],
-                "matched": str(twin.get("working") or "")[:120],
-            }, timeout=timeout)
+            status, body = _http_json(f"{cloud}/api/result", payload, timeout=timeout)
             if status != 200:
                 raise RuntimeError(f"HTTP {status}: {body!r:.160}")
             store.append(KIND_PUBLISHED, sid,
-                         {"cloud": cloud, "http": status, "at": _now()},
+                         {"cloud": cloud, "http": status, "at": _now(),
+                          "outcome": outcome, "polaroid": sent_polaroid,
+                          "receipt": receipt_state},
                          source=f"cloud:{cloud}")
             ok += 1
         except Exception as e:  # noqa: BLE001
@@ -1340,6 +1612,11 @@ def build_view(store: TwinStore, *,
             # `task_id` 用的是它，**不是** `id`（`id` 是撤回的能力憑證）。
             # 電視要把 B 線的 `--live` 事件接到畫面上的人，就用這一欄。
             "twin_id": twinagent.public_twin_id(c["sub_id"]),
+            # 分身長什麼樣（cast40 的 `cNN`）。**單一來源**（2026-09-26）：電視、拍立得、
+            # 手機三處都用這一欄，所以一定是同一張臉。算法是電視 `pickCastFor` 的逐字移植
+            # （`polaroid.pick_cast_for`，node 對照測試逐一相等）。撤回的人 None。
+            # 素材壞了也是 None（電視那一側就退回自己算）——不准讓整份 view 因此炸掉。
+            "cast_id": None if gone else _cast_id_for(c.get("card")),
             # 🔴 撤回過的人，畫面上什麼都不留。原文已經 `unlink()` 了，
             #    這裡再把它當成「剛好讀不到」而留個空位也不對——狀態要講出來。
             "card": None if gone else c.get("card"),
@@ -1494,6 +1771,8 @@ def build_view(store: TwinStore, *,
             "never_play_tier": ["withdrawn"],
             # 事件流（lifecycle）的 caller.cell_id ＝ people[].twin_id（不是 id）
             "join_live_events_on": "twin_id",
+            # 2026-09-26：有 cast_id 就用它（拍立得與手機用的是同一張）；null 才自己 pickCastFor。
+            "cast_from": "people[].cast_id",
             "cold_start": ("重整／斷電之後把整個 people 快轉補齊（不要每人等 30 秒），"
                            "之後才回到一次一位的節奏"),
             "play_exit_for": "retirement.retiring[]（演完才算交代過，不要靜靜移除）",
@@ -1514,7 +1793,8 @@ def build_view(store: TwinStore, *,
             "原文與 nonce 住在鏈外的檔案庫，撤回時真的 unlink()，"
             "刪除證明（被刪位元組的 sha256）簽上鏈。"
             "鏈記的是「我們記下我們刪了」，不是「世上沒有副本」；"
-            "雲端郵箱那一份目前刪不到（沒有 delete 路由）。"
+            "雲端郵箱那一份：手機上撤回的由雲端自己刪（原文、卡圖、拍立得、收據副本），"
+            "會場撤回的由 loop 下一輪送工作人員撤回（記一列 cloud_erased；連不上就等）。"
             "plaintext_on_chain=true 的那幾位是 2026-09-21 之前進來的，"
             "他們的原文在 append-only 鏈上，拿不掉。"),
     }
@@ -1525,7 +1805,8 @@ def build_view(store: TwinStore, *,
 # ---------------------------------------------------------------------------
 
 def withdraw(store: TwinStore, sub_id: str, *, reason: str = "subject_request",
-             source: str = "local:withdraw") -> dict[str, Any]:
+             source: str = "local:withdraw",
+             cloud_copy: dict[str, Any] | None = None) -> dict[str, Any]:
     """觀眾撤回同意。**帳本永不刪除，原文真的刪掉。**
 
     三件事按這個順序（順序本身是規格）：
@@ -1562,7 +1843,10 @@ def withdraw(store: TwinStore, sub_id: str, *, reason: str = "subject_request",
         "withdraw_hash": rec.get("withdraw_hash"),
         "erase_hash": rec.get("erase_hash"),
         "erased": rec["erased"],
-        "cloud_copy": rec["cloud_copy"],
+        # 雲端那一份：手機上撤回的（雲端先刪、ingest 帶回來）⇒ 這裡就列得出雲端刪了哪幾樣
+        # （原文、卡圖、拍立得、收據副本；只有 ref 與位元組數）。本機撤回的 ⇒ 仍是
+        # `not_attempted_no_endpoint`，由 `sync_cloud_erasure` 下一輪補一列 `cloud_erased`。
+        "cloud_copy": cloud_copy if cloud_copy is not None else rec["cloud_copy"],
         # ⚠ 舊鏈的原文拿不掉。**這幾個 seq 要跟著刪除證明一起留下來**，
         #   不然「已刪除」這三個字在那幾位身上就是假的。
         "residual_plaintext_seqs": residual,
@@ -1623,7 +1907,8 @@ WITHDRAW_PAGE = """<!doctype html>
 <li>刪掉的位元組 sha256 簽上鏈，成為<strong>刪除證明</strong>。</li>
 </ol>
 <p class="note">誠實邊界：鏈記的是「我們記下我們刪了」，不是「世上沒有副本」。
-雲端收件那一份目前刪不到。你手機上的截圖我們也管不到。</p>
+雲端收件那一份（原文、拍立得）在展場連得上雲端時的下一輪刪掉。
+你手機上的截圖、你分享出去的拍立得，我們管不到。</p>
 <form method="POST" action="__ACTION__"><button type="submit">確定撤回</button></form>
 <p class="note">這一頁不會自己動手：撤回是 POST，光是打開這一頁什麼都沒發生。</p>
 </body></html>"""
@@ -2137,6 +2422,12 @@ def main(argv: Iterable[str] | None = None) -> int:
                         "理由寫在 serve() 的 docstring")
     _add_window_args(v, can_retire=False)   # 唯讀：沒有 --no-retire，因為它從不記
 
+    pl = s.add_parser("polaroid", help="做拍立得（已生成、做成了的那幾位）")
+    pl.add_argument("--limit", type=int, default=0)
+    ce = s.add_parser("cloud-erase", help="會場撤回的人：把雲端那一份也刪掉（工作人員路徑）")
+    ce.add_argument("--cloud", default=DEFAULT_CLOUD)
+    ce.add_argument("--token", required=True)
+
     wd = s.add_parser("withdraw", help="撤回 → 上鏈 → unlink → PERSONA_ERASED")
     wd.add_argument("--id", required=True)
     wd.add_argument("--reason", default="subject_request")
@@ -2188,6 +2479,12 @@ def main(argv: Iterable[str] | None = None) -> int:
                     allow_fallback=not a.no_fallback, agent=_agent_cfg(a))); return 0
     if a.cmd == "publish":
         _p(publish(st, a.cloud, a.token, a.limit, a.timeout)); return 0
+    if a.cmd == "polaroid":
+        _p(polaroids(st, limit=a.limit)); return 0
+    if a.cmd == "cloud-erase":
+        out = sync_cloud_erasure(st, a.cloud, a.token)
+        _p(out)
+        return 0 if out.get("ok") else 1
     if a.cmd == "export":
         _p(export(st, pathlib.Path(a.out), recent=a.recent,
                   fresh_window_s=a.fresh_window,
@@ -2214,8 +2511,12 @@ def main(argv: Iterable[str] | None = None) -> int:
                 n += 1
                 r = {"round": n, "at": _now()}
                 r["ingest"] = ingest(st, a.cloud, a.token)
+                # 會場撤回的人 ⇒ 雲端那一份（原文、拍立得、收據副本）也刪（2026-09-26）
+                r["cloud_erase"] = sync_cloud_erasure(st, a.cloud, a.token)
                 r["generate"] = generate(st, a.endpoint, a.model,
                                          agent=acfg, pool=pool)
+                # 拍立得在 publish **之前**：同一輪收成的人，同一輪就把圖送到他手機上
+                r["polaroid"] = polaroids(st)
                 r["publish"] = publish(st, a.cloud, a.token)
                 r["export"] = export(st, pathlib.Path(a.out), recent=a.recent,
                                      fresh_window_s=a.fresh_window,
@@ -2228,6 +2529,8 @@ def main(argv: Iterable[str] | None = None) -> int:
                         r2 = {"round": "drain", "at": _now(),
                               "generate": generate(st, a.endpoint, a.model,
                                                    agent=acfg, pool=pool),
+                              "polaroid": polaroids(st),
+                              "publish": publish(st, a.cloud, a.token),
                               "export": export(st, pathlib.Path(a.out),
                                                recent=a.recent,
                                                fresh_window_s=a.fresh_window,
