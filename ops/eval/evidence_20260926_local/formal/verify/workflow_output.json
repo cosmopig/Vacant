@@ -1,0 +1,312 @@
+{
+  "summary": "Adversarially verify the preregistered local formal result (C2 v3 vs A, p=0.019) before it is reported",
+  "agentCount": 3,
+  "logs": [],
+  "result": {
+    "verdicts": [
+      {
+        "survives": true,
+        "checks": [
+          {
+            "check": "Cell completeness, duplicates, latest-run-per-cell logic",
+            "method": "Globbed formal_v3/g12-off-*-s*/*/dabstep-*__*/result.json (script /tmp/claude-0/verify_formal/collect.py, check1.py); counted job/trial dirs per arm-sample; compared with cells.json keys",
+            "finding": "711 result.json = 79 tasks x 3 arms x 3 samples. There are no duplicate cells, every job dir holds exactly 1 trial, and there are no orphan job dirs. The 3 interrupted originals sit only in _void_first/ (moved.json lists exactly 69-C2-s3, 1273-A-s3 and 1273-C2-s3, all reward_missing=true, verifier/ empty, verifier_result null), so the analysis glob never sees them. cells.json uses the 17:13:11 re-run trials for those 3 cells and nothing else was re-run. progress.jsonl has 711 rows, no duplicates, all rc=0 and has_result=true. The split before 14:36 (s1 237, s2 237, s3 107) and after (130 = 127 + 3) matches RUNLOG section 11.",
+            "problem": false
+          },
+          {
+            "check": "Same upstream machine for each (task, sample) triple, and close in time",
+            "method": "Took the upstream from each job's config.json OPENROUTER_BASE_URL (/t/<tag>/up/<m>/think/off) and cross-checked it against the 'upstream' field of every v3local-* row in ledger.jsonl (7508 rows). Compared with the seeded plan recomputed from the frozen run_batch.plan. Measured the spread of started_at within each triple.",
+            "finding": "All 237 triples ran on one machine each. Every ledger row agrees with the config, no tag has more than one upstream, and the plan's machine assignment matches exactly. Start spread within a triple has a median of 120 s and exceeds 600 s in only 5 triples: 69-s3 (10440 s) and 1273-s3 (9392 s) because of the infra_void re-runs, plus 3 sequential triples on 1003 (646-844 s). The only other proxy traffic during 03:55-17:25 was 2 'restart-probe' requests; the held-out batch started at 17:25:14, after the last re-run. The effect appears on both machines: 1003 A 27/57 vs C2 35/57, w401 A 93/174 vs C2 102/174.",
+            "problem": false
+          },
+          {
+            "check": "C1 runs installed the C1 wheel, C2 runs installed the frozen C2 wheel, and A runs had no Vacant",
+            "method": "sha256 of wheel files (wheel_c1 a722a234..., wheel_c2 0dcd5d68..., mtimes 01:55 and 03:33, i.e. before the batch). Unzipped every wheel into /tmp/claude-0/verify_formal and recomputed adapters.agents.pi_extension_text() with sys.executable=/root/.local/share/pipx/venvs/vacant-network/bin/python, then compared with the vacant.ts sha256 recorded in each run's vacant_home/adapters/install.json. Used a code-text fingerprint to tell frozen C2 apart from c2_dev: delivery.md says 'A budget reminder was sent after turn N.' only in the frozen C2 code. Checked job.log for pipx/vacant install, the agent class in config.json, and the presence of vacant_home.",
+            "finding": "All 237 C1 runs have extension hash a2d351fa..., which only the C1 wheel produces. All 237 C2 runs have 7782d652..., which C2 and c2_dev produce but v3.2/v3.3/v3.4 do not (4b8ff0db / 7a7ad8d4 / c874d4a1). The frozen-C2 wording appears in 58 C2 runs spread over s1, s2, s3 and after the restart (including re-run 1273-C2-s3); the c2_dev wording appears 0 times. C1 has 0 nudges and 0 ended notes (C1 has no budget code); 84 C2 runs have nudges. c_arm_ok=true in 237/237 runs of each C arm. All 237 A runs use agent 'pi', with no pipx or vacant install in job.log and no vacant_home. No Vacant user message ever reaches A: 0 A requests contain more than one user message, versus 42 in C1 and 214 in C2. No VACANT_* env var was passed to any container.",
+            "problem": false
+          },
+          {
+            "check": "Frozen code, pins and reproduction of the analysis",
+            "method": "git diff 769022a3 on run_batch.py, run_local.sh, analyze_local.py, formal/analyze.py, research.py, harbor_vacant.py and orproxy.py. Recomputed cells() and summarize() read-only with PYTHONDONTWRITEBYTECODE=1 and compared the result to summary.json and cells.json. Checked the task tests tree_sha against FORMAL_MANIFEST (sha ddf4a962...7319), task_checksum across runs, the Harbor checkout HEAD, and the pi version in job.log. Compared the prereg commit time with the first trial start.",
+            "finding": "None of the pinned files changed since the freeze. The recomputed per_arm_sample, primary, secondary, pooled, noise and paired sections are identical to summary.json, and cells.json core fields are identical. All 79 tests trees match the manifest (ignoring __pycache__), and each task has a single task_checksum across all 9 runs. Harbor HEAD = 6cb9ff31 and is clean. All 711 runs installed pi-coding-agent@0.87.1 with max_turns=15, model_api=openai-completions, model gemma-4-12b-it-qat. Prereg committed 03:55:17; first trial started 03:55:28.",
+            "problem": false
+          },
+          {
+            "check": "Rewards in cells.json match verifier/reward.txt; tasks 5 and 70 excluded",
+            "method": "Compared reward.txt, result.json verifier_result and cells.json for all 711 cells, and recounted per arm and sample on 77 tasks.",
+            "finding": "0 mismatches. Rewards: 389 are 1.0, 322 are 0.0, none null, no infra_void. The analysis uses 77 tasks with 5 and 70 excluded. Counts reproduce the report: A 41/38/41, C2 45/47/45. No-answer: A 27/30/26 vs C2 8/4/6. Wrong: A 9/9/10 vs C2 24/26/26.",
+            "problem": false
+          },
+          {
+            "check": "Thinking off for every request",
+            "method": "Streamed io.jsonl (0.6 GB) for v3local-* tags. Checked request_sent.reasoning_effort, whether the agent request carried any reasoning field, reasoning_content/reasoning deltas in the SSE responses, and the text between gemma's '<|channel>thought' and '<channel|>'. Also checked ledger think/reasoning_tokens.",
+            "finding": "All 7508 requests (A 2489, C1 2479, C2 2540) were sent with reasoning_effort='none'. No agent request set a reasoning field. 0 responses have non-empty reasoning fields. Thought-channel markers appear in 1646 / 1628 / 1590 responses, all with empty thought text. The ledger shows think='off' and reasoning_tokens=0 everywhere, and all rows have status 200.",
+            "problem": false
+          },
+          {
+            "check": "Order and stopping rule",
+            "method": "Recomputed run_batch.plan(formal_79, seed 20260926, w401:3 1003:1) and compared it with the actual start order per machine. Checked per-machine sample boundaries, the deadline, and whether the driver reads reward.",
+            "finding": "The start order matches the seeded plan (max displacement 1 on w401, 0 on 1003). The driver never reads reward. The last run finished 17:25:14, well before the 2026-09-27T04:00Z deadline, so the stopping rule never fired. Deviation: the prereg text says sample 1 must finish before sample 2 starts, but the frozen driver uses separate FIFO pools per machine. 1003 started s2 at 06:06 and s3 at 08:34 while w401 was still running s1 (until 08:47). This has no effect on the analysed set, because all 3 samples finished and the stopping rule never fired.",
+            "problem": true
+          },
+          {
+            "check": "Invariant: no more than 15 requests per run",
+            "method": "Counted requests per tag from io.jsonl and separated out tool-less requests. Split the 3 re-run tags in time using the trial started_at.",
+            "finding": "The invariant as written fails for 29 tags (listed in summary.json invariants). 26 are non-void runs with exactly 1 extra tool-less request, which is pi's auto-compaction summarisation call ('You are a context summarization assistant'). This happens in every arm: 6 A, 12 C1 and 8 C2 runs, one of them C2-70-s1 in excluded task 70 with 3 compaction calls. The other 3 tags reuse a tag for original plus re-run: 4+15, 8+15, 8+15. With compaction calls removed and re-runs split, every run has at most 15 agent-turn requests. First requests are byte-identical across arms in 237/237 triples.",
+            "problem": true
+          },
+          {
+            "check": "Sensitivity to the infra_void re-runs",
+            "method": "Recomputed the primary result with (69,s3) and (1273,s3) dropped for all arms.",
+            "finding": "All 6 arm-cells of those two task-samples are 0, so the re-runs cannot change the result. p=0.0207 with or without them, using midranks.",
+            "problem": false
+          },
+          {
+            "check": "Frozen Wilcoxon float-tie artifact, including the secondaries",
+            "method": "Independent exact signed-rank with Fraction diffs and midranks (/tmp/claude-0/verify_formal/wil.py). Also fed the frozen function float(Fraction) diffs.",
+            "finding": "Primary: W+ 193.5, n 22, p=0.0207, versus the frozen 0.0189; the frozen function also gives 0.0207 once ties are represented consistently, so the gap is purely float representation (1/3 vs 0.33333333333333337). The same artifact moves the secondaries: C1 vs A 0.464 becomes 0.745; C2 vs C1 0.118 becomes 0.083 (Holm 0.237 becomes 0.166). No conclusion changes.",
+            "problem": true
+          },
+          {
+            "check": "Protocol: outcomes peeked mid-batch (RUNLOG section 8)",
+            "method": "Looked for any change to wheel, driver or arguments after 05:05 (extension hashes and fingerprints across samples, plan order, driver args after the resume).",
+            "finding": "split_ended.py exposed the rewards of 27 C2 runs during the batch. No outcome-dependent change is detectable: same wheels (fingerprints in s1, s2, s3, before and after the restart), same seeded order, same machine split, and the stopping rule never fired.",
+            "problem": false
+          },
+          {
+            "check": "Fragility (outside my angle, post hoc)",
+            "method": "Listed the cells where C2 was correct and A was not, then dropped tasks with trivially guessable expected answers.",
+            "finding": "There are 31 cells where C2 is correct and A is not. Task 23 (expected '0') and task 62 (expected 'Not Applicable') are 3/3 for C2 and 0/3 for A; A never wrote an answer there. Dropping just those two tasks gives p=0.071; also dropping task 30 ('yes') gives p=0.095. This is not a valid refutation because the exclusion is post hoc, but significance rests on a few tasks where C2 wrote an answer, often after a budget nudge, and A wrote none.",
+            "problem": false
+          }
+        ],
+        "caveats_to_report": "From the data-integrity and protocol angle, the primary result holds: C2 vs A p=0.0189 with the frozen function, p=0.0207 with correct midranks. The caveats that must go with it:\n\n(1) The prereg's rule that one sample finishes before the next starts was not followed. The per-machine pools let 1003 start sample 2 at 06:06 and sample 3 at 08:34 while w401 was still on sample 1 (until 08:47). This does not matter here, because all 3 samples finished and the stopping rule never fired.\n\n(2) The '≤15 requests per run' invariant fails as written for 29 tags. The cause is pi's context-compaction summary call (A 6, C1 12, C2 8 runs, one C2 in excluded task 70) and 3 re-run tags that share a tag with their original. Counting agent-turn requests only, and splitting the re-runs, every run is at most 15. First requests are byte-identical in 237/237 triples.\n\n(3) The float-tie artifact in the frozen Wilcoxon also affects the secondaries: C1 vs A 0.464 becomes 0.745; C2 vs C1 0.118 becomes 0.083 (Holm 0.166 instead of 0.237). Nothing crosses 0.05 either way.\n\n(4) Wheel identity is shown indirectly, not by hashing what pipx installed in the containers. The installed pi extension sha256 matches only the C1 wheel for C1 (a2d351fa…) and only C2 or c2_dev for C2 (7782d652…). A frozen-C2-only wording in delivery.md rules out c2_dev in 58 C2 runs spread over all samples and the post-restart re-runs. The container image ID was not checked, because docker was off-limits.\n\n(5) Post hoc, and outside my angle: significance leans on tasks 23 (expected '0') and 62 (expected 'Not Applicable'), where C2 is 3/3 and A is 0/3 because A never wrote an answer. Without them p=0.071.\n\n(6) C2 rewards for 27 runs were looked at mid-batch (RUNLOG section 8). I found no outcome-dependent change to wheel, driver, order or stopping.\n\n(7) The prereg is agent-frozen and not signed by the human, as it states itself.\n\nAll of my scripts are in /tmp/claude-0/verify_formal/. Nothing under the repo or scratchpad/local was modified."
+      },
+      {
+        "survives": true,
+        "checks": [
+          {
+            "check": "Were my parsed Vacant actions the same as the recorded ones, and did anything else from Vacant reach the model?",
+            "method": "/tmp/claude-0/verify_formal/attr/parse.py reads every run's agent/pi.txt: turns, writes to /app/answer.txt, vacant-budget and vacant-check entries. io_scan.py and io_check.py stream ledger/io.jsonl request by request and look for the two Vacant marker strings and for any other occurrence of 'vacant' in request messages. They also compare non-message request parameters across arms.",
+            "finding": "The nudge turns parsed from pi.txt match vacant_check.json nudge_turns in all 237 C2 runs (0 mismatches). On the wire: 84 C2 runs (79 tasks) carry the budget reminder, 19 carry the stop check, and 136 carry neither. Across all 711 runs, 0 requests mention 'vacant' anywhere else, and sampling parameters are identical across arms. So in C2 runs with no nudge and no check, the model saw exactly what an A run with the same trajectory would have seen.",
+            "problem": false
+          },
+          {
+            "check": "Could the machine, the time of day or scheduling explain the gain?",
+            "method": "cells.json upstream and start times for A/C2 pairs with the same task and sample; net C2-A per machine, per sample and per 4-hour band.",
+            "finding": "All 237 of 237 A/C2 pairs ran on the same machine. The median start gap was 72 s; the only large gap (10440 s) is the infra_void rerun of 69-C2-s3, and that rerun came back without an answer (hurts C2). The net gain appears on both machines (1003 +8 of 57 pairs, w401 +9 of 174) and in every sample (+4, +9, +4). By UTC band: +4, +11, +4, and -2 in the last band, which has only 21 pairs.",
+            "problem": false
+          },
+          {
+            "check": "Does installing Vacant change behaviour before the reminder can fire? (C1 is the install-only plus stop-check control.)",
+            "method": "Eligible stratum = the run reaches turn 14 with no answer file, which is exactly when the v3 reminder fires. Counted per arm, from each run's own trajectory (elig.py).",
+            "finding": "Eligible runs: A 79, C1 78, C2 82. Pre-reminder behaviour is unchanged. On the tasks with the biggest gains, C1 matches A exactly (23: NF NF NF in both, 35: NF NF WR, 69: NF NF NF, 7: NF NF NF), while C2 wins there through the reminder. Installing alone produces no gain.",
+            "problem": false
+          },
+          {
+            "check": "Where does the net +17 correct (137 vs 120) come from?",
+            "method": "strata.py compares arms within strata (run-level Fisher test and per-task exact Wilcoxon on each stratum), using exact rational midranks.",
+            "finding": "Eligible stratum: A 4/79 correct, C1 3/78, C2 26/82 (Fisher p=1.1e-5). That is +22 runs; per-task Wilcoxon p=0.0012, 16 tasks up and 3 down. Non-eligible stratum: A 116/152 (76.3%), C2 111/149 (74.5%). That is -5 runs; Wilcoxon p=0.42, 10 up and 13 down; Fisher p=0.79. More than all of the net gain sits in the runs where the reminder fires. The noise channel is slightly negative, so it does not inflate the result.",
+            "problem": false
+          },
+          {
+            "check": "Did the reminder itself cause the writes (timing), or were they coincidental?",
+            "method": "Compared the turn of the first answer.txt write with the nudge turns in pi.txt. Also looked for A/C2 pairs whose tool-call sequences are identical up to the nudge turn.",
+            "finding": "63 nudged runs wrote a file, and every one wrote on the very next turn: 57 right after the first reminder (2 turns left), 6 right after the second (1 turn left). 25 were correct, 38 wrong, and 19 never wrote. Without a reminder, eligible A runs wrote in 5 of 79 cases. Only 4 A/C2 pairs share an identical trajectory up to the nudge, but one is a clean natural experiment: task 26 s3 is identical in A and C2 through turn 13; A ended with no file, C2 got the reminder, wrote at turn 14 and was correct. In 68-s2 the reminder led to a wrong write; in 2697-s1/s2 it was ignored. All 25 reminder-driven correct runs used exactly 15 requests, so there was no extra model budget. Every run with more than 15 requests scored 0 in both arms.",
+            "problem": false
+          },
+          {
+            "check": "Were the reminder-driven correct answers grounded in the run's own work, or guesses?",
+            "method": "Checked whether the written value appears in tool results or assistant text before the nudge turn (nudgecorrect.py), and read the 4 cases where it did not (show.py).",
+            "finding": "In 21 of 25 the value was already on screen before the reminder. The other 4 were derived from work in the run: 30-s2 and 30-s3 wrote 'yes' after computing both fraud rates; 37-s2 computed the ratio at turn 14; 62-s3 wrote 'Not Applicable' after reading the docs. The reminder harvests answers the agent had already worked out. Among eligible A runs, the correct value was visible by turn 13 in up to 47 runs (a loose upper bound), and 42 of those ended with no answer file.",
+            "problem": false
+          },
+          {
+            "check": "Per task: the 15 better and 7 worse tasks (C2 vs A), counting correct runs that followed a nudge (N), a stop check (K), or no action (0)",
+            "method": "decomp.py",
+            "finding": "Of the +24 runs in the better tasks, about 18 are explained by a Vacant action (15 reminder, 3 stop check) and 6 by no-action runs. Explained by action: 3, 7, 11 (via stop check), 23 (+3, all reminder), 26, 30, 53, 62 (+3: 1 reminder, 2 stop-check pushbacks for a missing file; C1 gets the same 2 via its check) and 69. Partly noise: 1, 35 and 44. Noise only: 33, 51 and 65 (all extra correct runs are no-action runs). All 7 worse tasks (6, 12, 32, 45, 47, 59, 66) lose through noise or trajectory differences, not through Vacant. In the reminded losing runs, C2 was slower than A's run and wrote a wrong value where it would otherwise have had no file: 6-s3 wrote 0.731 for 73.15, 32-s1 wrote 0.014 for 1.43, 45-s1, 66-s1 and 66-s2. In 59-s3 the pushback was for a missing file. I found no case where Vacant turned a correct answer into a wrong one.",
+            "problem": false
+          },
+          {
+            "check": "Is the gain bigger than A's own between-sample noise?",
+            "method": "Discordant pairs within each sample (C2 vs A), split by C2 mechanism, compared with A-vs-A flips between samples.",
+            "finding": "Discordant pairs within a sample: 18, 15 and 12. A-vs-A flips between samples: 13, 8 and 15 (split 18:18 in total, net -3, 0, +3). So the amount of discordance is similar, but the direction is lopsided: 31 C2-only vs 14 A-only. Of the 31 C2-only pairs, 17 are reminder writes where A ran out of turns, 4 are stop checks and 10 are no-action. Of the 14 A-only pairs, 7 are no-action or check and 7 are runs where C2 was slow enough to get reminded. Among no-action pairs the split is 10:6, which is in the range of noise.",
+            "problem": false
+          },
+          {
+            "check": "How robust is the primary test to a few tasks and to noise-only tasks?",
+            "method": "Exact Wilcoxon with rational midranks: leave-one-task-out, and dropping selected tasks.",
+            "finding": "My recomputation gives p=0.0207 (W+=193.5), not the reported 0.0189 (W+=197.5); the frozen function mis-ties float thirds. Leave-one-out: largest p is 0.038. Dropping the three +3 tasks (23, 35, 62): p=0.13. Dropping only the three noise-only better tasks (33, 51, 65): p=0.052. Dropping those plus the noise-only worse tasks (12, 47): p=0.022. The result is modest in size and leans on 3 tasks, but those 3 are exactly where the mechanism acted (8 of 9 correct runs follow a reminder or stop check).",
+            "problem": true
+          },
+          {
+            "check": "Did the last-turn narrowing and the stop check contribute?",
+            "method": "Timing and type of vacant-check entries in C2; comparison with C1.",
+            "finding": "No stop check fired at turn 14 or later in any C2 run, so the narrowing never triggered and contributed nothing observable. The C2 stop check sent 17 runs back (77 tasks); 4 of those runs ended correct (4 correct runs where the write came after the pushback). The same check family is in C1, which shows no significant gain (+3 runs, p=0.46). The v3-specific driver is the budget reminder.",
+            "problem": false
+          },
+          {
+            "check": "Sensitivity to grader tolerance (not preregistered)",
+            "method": "Looked at tests/scorer.py (math.isclose, rel_tol=1e-4). Re-graded both arms counting integer answers that are off by 1-2 as wrong, and '>5m' vs '5m' as wrong.",
+            "finding": "The official scorer accepts 5 correct C2 runs on the better tasks 35 and 69 only through tolerance (28630 for 28629; '>5m' for '5m'), and A has no such cases on those tasks. Under that stricter rule applied to both arms: C2 124 vs A 113, mean diff +0.048, p=0.095. The preregistered scorer is the official one, so this does not refute the result, but it shows the significance is thin.",
+            "problem": true
+          }
+        ],
+        "caveats_to_report": "From the attribution angle the result holds: the gain comes from what v3 does, specifically the budget reminder. It is not explained by machine, time of day, install side effects or a hidden change in prompts.\n\nEvidence:\n- **Where the gain sits.** Everything happens in runs that reach turn 14 without an answer file.\n  - Correct in that stratum: A 4/79, C1 3/78, C2 26/82.\n  - That is +22 runs, against -5 for C2 in the other stratum (111/149 vs 116/152, p=0.79). Noise works slightly against C2.\n- **Timing.** All 63 reminder-triggered writes happen on the very next turn.\n- **Natural experiment.** In task 26 s3, A and C2 are identical through turn 13; only C2 got the reminder and only C2 answered correctly.\n- **C1 as control.** Installing alone (C1) does nothing on the big-gain tasks.\n- **What the reminder does.** It mostly gets answers the agent had already computed written to the file (21 of 25 values were on screen before the reminder).\n- **Stop check and last-turn narrowing.** The stop check (shared with C1) adds about 3-4 correct runs. The last-turn narrowing never fired.\n\nCaveats to state alongside the result:\n1. The effect is conversion of \"no answer file\" runs. Of the 63 reminder writes, 25 were correct and 38 wrong. It applies only when the agent is told a turn cap and runs out of turns, as the preregistration already says.\n2. Significance is thin and concentrated in a few tasks.\n   - The exact rational-rank p is 0.0207, not 0.0189. Leave-one-out still gives p ≤ 0.038.\n   - Dropping the three +3 tasks (23, 35, 62) gives p=0.13.\n   - Three of the 15 better tasks (33, 51, 65) are better only through runs where Vacant did nothing. Dropping only those gives p=0.052.\n   - Of the net +17, about +18 comes from runs where Vacant acted: roughly 15 from the reminder and 3 from the stop check. Noise nets out at about -1; the 7 worse tasks are all noise or trajectory differences, and no loss was caused by Vacant.\n3. Five correct C2 runs on tasks 35 and 69 pass only through the official scorer's tolerance (28630 for 28629; '>5m' for '5m').\n   - A stricter integer and string rule applied to both arms (not preregistered) gives p=0.095.\n4. A and C2 trajectories diverge early in most pairs; only 4 of 82 reminded runs match their A run through the nudge turn. So attribution per run is stratified and statistical, except for the one natural experiment.\n\nMy scripts are in /tmp/claude-0/verify_formal/attr/: parse.py, elig.py, decomp.py, strata.py, nudgecorrect.py, latent.py, io_scan.py, io_check.py, same2.py and show.py. Per-run data is in runs.json and io_scan.json."
+      },
+      {
+        "survives": true,
+        "checks": [
+          {
+            "check": "Raw data integrity (result.json vs cells.json)",
+            "method": "Loaded all formal_v3/g12-off-*-s*/*/dabstep-*__*/result.json files directly (script /tmp/claude-0/verify_formal/load.py). Checked that each job name matches its arm, task and sample, that the proxy tag in OPENROUTER_BASE_URL matches the job, that verifier_result agrees with verifier/reward.txt, and that the three arms of each task and sample ran on the same machine.",
+            "finding": "711 cells (79 tasks x 3 arms x 3 samples), no duplicates, no missing rewards, reward.txt matches every time, and no task/sample was split across machines. Per-arm counts from the raw files match summary.json exactly: A correct 41/38/41, C2 45/47/45; no answer file A 27/30/26 vs C2 8/4/6; wrong answer A 9/9/10 vs C2 24/26/26. There were 4 AgentTimeoutError runs (three on task 70, one on 66-C2-s3). In the ledger all 711 tags are present, no run got zero model answers, and there were 0 provider errors in A and C1 and 1 in C2 (77 tasks).",
+            "problem": false
+          },
+          {
+            "check": "Primary exact Wilcoxon with correct tie handling",
+            "method": "Per-task means as exact Fractions over samples 1-3, 77 tasks, zeros dropped. Midranks, then the exact conditional null distribution by DP (stats.py). Also reran the frozen vacant_network.research.wilcoxon_signed_rank_exact on the pipeline's float diffs.",
+            "finding": "Distribution of per-task diffs (C2-A): +1 x3, +2/3 x3, +1/3 x9, 0 x55, -1/3 x7. Exact p=0.02074 (W+=193.5, n=22). The frozen function reproduces 0.01890 (W+=197.5) only because float diffs split tie groups: 0.3333333333333333 vs 0.33333333333333337, and 0.6666666666666666 vs 0.6666666666666667. The primary verdict does not change.",
+            "problem": false
+          },
+          {
+            "check": "Secondary comparisons under the same float-tie bug",
+            "method": "Exact recomputation compared with the frozen function on the pipeline's float diffs.",
+            "finding": "The reported secondary p-values are float-tie artifacts. C1 vs A: reported p=0.464 (W+=176), correct exact p=0.745 (W+=164). C2 vs C1: reported p=0.118 (W+=205), correct exact p=0.083 (W+=210); Holm 0.166, not 0.237. Neither conclusion flips (both stay non-significant), but the numbers in summary.json and in the report are wrong.",
+            "problem": true
+          },
+          {
+            "check": "Alternative paired tests on the same 77 per-task diffs",
+            "method": "Sign test; Wilcoxon with Pratt zero handling; exact sign-flip permutation on the mean; paired t with df 76; percentile bootstrap over tasks (20000 resamples); CMH stratified by task; pooled cell-level McNemar.",
+            "finding": "Tests that use the size of each difference agree with Wilcoxon: permutation on the mean p=0.028; paired t p=0.021 (t=2.36, CI 0.012 to 0.136); bootstrap 95% CI for the mean diff 0.017 to 0.139; CMH p=0.0096 (not preregistered). Tests that use direction only, or close to it, do not: sign test 15 vs 7, p=0.134; Pratt (ranks the 55 zeros) p=0.058. Pooled cells 31 only-C2 vs 14 only-A gives McNemar p=0.016, but that ignores clustering by task. The disagreement exists because all 6 large differences (|d|>=2/3) are positive and all 7 negative tasks are -1/3.",
+            "problem": true
+          },
+          {
+            "check": "Per-sample McNemar",
+            "method": "Recomputed within each sample from the raw files.",
+            "finding": "s1: 11 vs 7, p=0.48. s2: 12 vs 3, p=0.035. s3: 8 vs 4, p=0.39. C2 is ahead in all three samples, but only sample 2 is significant on its own.",
+            "problem": false
+          },
+          {
+            "check": "Sensitivity: include tasks 5 and 70",
+            "method": "Same test, 79 tasks.",
+            "finding": "p=0.0207 is unchanged, because both tasks have a diff of 0.",
+            "problem": false
+          },
+          {
+            "check": "Sensitivity: sample subsets",
+            "method": "Per-task means over each pair of samples, and each sample alone.",
+            "finding": "Samples 1-2: p=0.022 (13 vs 5). Samples 2-3: p=0.019. Samples 1-3: p=0.245 (13 vs 7, bootstrap CI -0.026 to 0.130). Sample 2, where A was lowest at 38, contributes a lot of the effect.",
+            "problem": true
+          },
+          {
+            "check": "Sensitivity: drop the 3 re-run cells",
+            "method": "Dropped task/sample 1273-s3 and 69-s3 for every arm. Also dropped tasks 1273 and 69 entirely. Checked the ledger split for the re-run tags.",
+            "finding": "Dropping the cells: p=0.0207 (mean 0.078). Dropping the tasks: p=0.038. The re-run C2 on 69-s3 actually scored no-answer. Each re-run tag splits cleanly into an interrupted segment and a re-run segment (4+15, 8+15, 8+15 requests, about 2.7 h gap). Nothing hinges on the re-runs.",
+            "problem": false
+          },
+          {
+            "check": "Sensitivity: per machine",
+            "method": "Kept only cells on one machine; per-task means over the samples available.",
+            "finding": "w401: p=0.112 (11 vs 5, mean 0.054, per-run 19 only-C2 vs 10 only-A). 1003: p=0.077 (12 vs 4, mean 0.140, per-run 12 vs 4). Neither machine is significant alone, but both point the same way. The per-run effect is larger on 1003, which is 25% of the runs.",
+            "problem": false
+          },
+          {
+            "check": "Sensitivity: drop task/samples with AgentTimeoutError",
+            "method": "Filtered out those task/samples for all arms.",
+            "finding": "p=0.035",
+            "problem": false
+          },
+          {
+            "check": "Leave-one-out and leave-k-out on the tasks (does it hinge on a handful?)",
+            "method": "Exact Wilcoxon after removing each nonzero task, and all pairs and triples of nonzero tasks (loo.py, frag.py).",
+            "finding": "Leave one out: the largest p is 0.038 (removing any one of the 6 large-gain tasks 23, 35, 62, 1, 44, 69), so every single-task removal stays below 0.05. Removing any 2 of those 6: 15/15 pairs give p>=0.05 (largest 0.079). Removing 1 large-gain task plus one +1/3 task: 54/54 give p>=0.05. Removing two +1/3 tasks: 0/36. Removing all 6 large-gain tasks: mean diff 0.009, p=0.80. The whole effect sits in 6 of 77 tasks. In all 6, A's failures are mostly 'no answer file' (for example 23: A ---, C2 111), which fits the budget-reminder mechanism rather than looking random.",
+            "problem": true
+          },
+          {
+            "check": "Fragility (fewest run-outcome changes that break significance)",
+            "method": "Greedily flipped single cell outcomes and recomputed the exact p after each flip.",
+            "finding": "2 flips are enough. Either A 66-s1 and A 32-s2 from wrong to correct, or C2 6-s1 and C2 12-s2 from correct to wrong: p goes 0.021, then 0.042, then 0.070.",
+            "problem": true
+          }
+        ],
+        "caveats_to_report": "The primary result holds as the preregistered test: exact Wilcoxon p=0.0207 with correct tie handling, 0.0189 from the frozen function, both below 0.05. It is marginal and fragile, though, and should be worded that way.\n\n1. The frozen wilcoxon_signed_rank_exact treats per-task means built from floats (for example 2/3-1/3 = 0.33333333333333337 vs 1/3 = 0.3333333333333333) as different values, so it breaks tie groups. The reported secondary p-values are wrong because of this. C1 vs A should be 0.745, not 0.464. C2 vs C1 should be 0.083 (Holm 0.166), not 0.118 (Holm 0.237). Both remain non-significant. Fix the reported numbers, and report the primary as 0.021 (frozen implementation 0.019).\n\n2. The effect comes from the size of the per-task differences, not from how many tasks moved. By task count it is 15 better vs 7 worse, sign test p=0.134. Ranking the 55 zero-difference tasks as well (Pratt) gives p=0.058. Tests that use the size of the difference agree with Wilcoxon: permutation on the mean p=0.028, paired t p=0.021, bootstrap 95% CI for the mean diff 0.017 to 0.139.\n\n3. The gain is concentrated in 6 of 77 tasks (23, 35, 62, 1, 44, 69), where A mostly ended with no answer file. Removing any 2 of them pushes p above 0.05. Two run-outcome flips also push it above 0.05. Removing all 6 leaves a mean diff of 0.009, p=0.80.\n\n4. Only sample 2 is significant on its own (McNemar p=0.035; s1 p=0.48, s3 p=0.39). Samples 1+3 together give p=0.245. Neither machine is significant alone (w401 p=0.11, 1003 p=0.077), though both point the same way.\n\n5. Including tasks 5 and 70, using only samples 1-2 (p=0.022), or dropping the re-run cells (p=0.021) does not change the result.\n\nSuggested wording: \"In the preregistered primary test, the arm with v3 installed had a higher per-task accuracy than no Vacant (exact Wilcoxon, p=0.021; mean +0.074, 95% bootstrap CI 0.017 to 0.139). The difference is concentrated in 6 of 77 tasks where the agent without Vacant repeatedly used up its 15 turns without writing an answer. By task count, 15 tasks improved and 7 got worse (sign test p=0.13). The significance is fragile: two run outcomes, or dropping two of the six high-gain tasks, moves p above 0.05.\" This should always come with the preregistered caveat that the turn-budget reminder only acts when the agent is told a turn limit, and with no extrapolation beyond this model, this task set and the 15-turn cap.\n\nMinor, outside the statistics angle: 29 runs have more than 15 successful requests in the ledger, most with 16. They are spread across arms (A 7, C1 12, C2 10, counting the combined re-run tags). The analysis tool already lists them as invariant violations. Scripts are in /tmp/claude-0/verify_formal/ (load.py, stats.py, main.py, sens.py, loo.py, frag.py, ledger.py, tt.py)."
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Refute"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "refute:integrity",
+      "phaseIndex": 1,
+      "phaseTitle": "Refute",
+      "agentId": "a8bebee17fe2c33e2",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790443722768,
+      "queuedAt": 1790443722723,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "From the data-integrity and protocol angle, the primary res…",
+      "promptPreview": "Read-only verification. Do NOT modify anything under /home/user/Vacant or /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do not touch docker, the proxy on port 18900, or the running held-out batch (/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local/heldout_v34). Do not read credential files. Use scratch space under /tmp/cla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790444462419,
+      "tokens": 194021,
+      "toolCalls": 67,
+      "durationMs": 739635,
+      "resultPreview": "{\"survives\":true,\"checks\":[{\"check\":\"Cell completeness, duplicates, latest-run-per-cell logic\",\"method\":\"Globbed formal_v3/g12-off-*-s*/*/dabstep-*__*/result.json (script /tmp/claude-0/verify_formal/collect.py, check1.py); counted job/trial dirs per arm-sample; compared with cells.json keys\",\"finding\":\"711 result.json = 79 tasks x 3 arms x 3 samples. There are no duplicate cells, every job dir hol…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "refute:attribution",
+      "phaseIndex": 1,
+      "phaseTitle": "Refute",
+      "agentId": "a5b77306fe094074a",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790443722782,
+      "queuedAt": 1790443722723,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "From the attribution angle the result holds: the gain comes…",
+      "promptPreview": "Read-only verification. Do NOT modify anything under /home/user/Vacant or /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do not touch docker, the proxy on port 18900, or the running held-out batch (/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local/heldout_v34). Do not read credential files. Use scratch space under /tmp/cla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790444358420,
+      "tokens": 179428,
+      "toolCalls": 47,
+      "durationMs": 634418,
+      "resultPreview": "{\"survives\":true,\"checks\":[{\"check\":\"Were my parsed Vacant actions the same as the recorded ones, and did anything else from Vacant reach the model?\",\"method\":\"/tmp/claude-0/verify_formal/attr/parse.py reads every run's agent/pi.txt: turns, writes to /app/answer.txt, vacant-budget and vacant-check entries. io_scan.py and io_check.py stream ledger/io.jsonl request by request and look for the two Va…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "refute:stats",
+      "phaseIndex": 1,
+      "phaseTitle": "Refute",
+      "agentId": "a6e0979acd1d2d244",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790444363320,
+      "queuedAt": 1790443722723,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "The primary result holds as the preregistered test: exact W…",
+      "promptPreview": "Read-only verification. Do NOT modify anything under /home/user/Vacant or /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do not touch docker, the proxy on port 18900, or the running held-out batch (/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local/heldout_v34). Do not read credential files. Use scratch space under /tmp/cla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790444687425,
+      "tokens": 122633,
+      "toolCalls": 19,
+      "durationMs": 324104,
+      "resultPreview": "{\"survives\":true,\"checks\":[{\"check\":\"Raw data integrity (result.json vs cells.json)\",\"method\":\"Loaded all formal_v3/g12-off-*-s*/*/dabstep-*__*/result.json files directly (script /tmp/claude-0/verify_formal/load.py). Checked that each job name matches its arm, task and sample, that the proxy tag in OPENROUTER_BASE_URL matches the job, that verifier_result agrees with verifier/reward.txt, and that …"
+    }
+  ],
+  "totalTokens": 496082,
+  "totalToolCalls": 133
+}

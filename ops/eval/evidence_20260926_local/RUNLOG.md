@@ -90,3 +90,10 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
 - 14:36 接回：dockerd（同一個 data-root；清掉 3 個死掉的容器）、代理（同一個輸出目錄——它從 `ledger.jsonl` 重建累計、之後都是附加；
   兩台機器各用一通「restart-probe」標籤的請求確認連得上）、正式批次的驅動（**同一組參數**，它只跑還沒有評分檔的 127 跑）、串接腳本、監看。
   **沒有看任何評分**；驅動與停止規則都沒變。
+
+## 12. 正式批次跑完、分析、對抗驗證（17:25–18:30 UTC）
+
+- 17:12 驅動跑完（708 跑）；17:13 `rerun_void.py` 移開 3 格 infra_void、同一組參數補跑，17:25 補跑都有評分 ⇒ 711 格、0 infra_void。17:25 留出批次自動開始。
+- 分析：`ops/eval/local/analyze_all.sh formal`（`analyze_local.py` 與凍結版本逐位元組相同）→ `formal/`。主要檢定 p＝0.0189（凍結函式）／0.0207（同分正確處理）。
+- 對抗驗證（`formal/verify/`）三個角度都判定成立；限制與兩個流程偏差（樣本順序是每台機器各自排、不變式照字面不成立的原因）寫進結論
+  `decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`。次要檢定的 p 值也受浮點同分影響：C1:A 0.46→0.75、C2:C1 0.118→0.083。

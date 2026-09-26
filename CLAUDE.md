@@ -200,6 +200,13 @@
 經過記帳代理的本機模式（`orproxy.py` 的 `upstreams`，`/t/<tag>/up/<名字>/…`）；`ops/eval/local/`（`run_batch.py` 每台機器自己的同時跑數——
 同時太多段對話會擠掉 LM Studio 的提示快取、吞吐反而不升）。紀錄：`ops/eval/evidence_20260926_local/RUNLOG.md`；預註冊（A／C1 現版／C2 v3）：
 `decisions/prereg/PREREG_20260926_ZERO_CONFIG_V3_LOCAL.md`（agent 凍結、人類授權但沒逐條簽）。
+**結果**（`decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`，三個角度的對抗驗證都判定成立）：
+✅「在這 77 題、本機 gemma-4-12b 關思考、pi 0.87.1、15 回合上限下，裝了零設定 v3 的答對率較高（51.9%→59.3%，Wilcoxon 精確 p＝0.021）」
+**＋一定要同時說**：提醒只在被告知回合上限時作用；差集中在 6 題（沒裝的一再用完回合沒寫答案）、以題數 15 對 7（符號檢定 p＝0.13）、
+兩跑翻過來就不顯著；來源是**把已經算出來卻沒寫的答案收成**（提醒後寫的 63 跑裡 25 對、38 錯——多交出來的大部分是錯的）；
+Vacant 把對的改成錯：0 次。C1（現版、沒有 v3）對沒裝：沒有量到差別（p＝0.75）。
+❌「Vacant 讓 agent 做得更好」不帶條件；❌「效果穩」；❌ 外推到沒有上限的互動使用。v3 是看過同一批題設計的 ⇒ 留出批次在跑。
+⚠ `research.wilcoxon_signed_rank_exact` 用浮點 `==` 判同分（三次平均的差會被拆開）：凍結的報告數字 0.019／0.46／0.118 要讀成 0.021／0.75／0.083；留出批次分析完之後修。
 
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 

@@ -61,7 +61,10 @@ gemma-4-26b 開思考：沒裝 50／77、裝了 44／77（p＝0.21）；qwen3.8-
 檢查來不及跑的那一跑（v3.2），結束時補跑同一個檢查，結果只寫給你；被切斷的那一跑也補查，而且說明會標出哪個檔是提醒之後才寫的
 （提醒會逼出沒有根據的「最好的猜測」，你應該知道；v3.3）。
 裁決：[`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`](decisions/DECISION_20260926_ZERO_CONFIG_V3.md)；
-本機算力（人類自己的 gemma-4-12b）上的預註冊比較進行中：[`ops/eval/evidence_20260926_local/RUNLOG.md`](ops/eval/evidence_20260926_local/RUNLOG.md)。
+本機算力（人類自己的 gemma-4-12b，關思考，pi 0.87.1，15 回合上限）上的預註冊比較：77 題 × 3 次，**裝了 v3 答對率 51.9%→59.3%（Wilcoxon 精確 p＝0.021）**，
+差集中在 6 題、以題數 15 對 7，顯著性很薄；來源是快被切斷時提醒先交、把已經算出來的答案收成（多交出來的大部分是錯的），Vacant 把對的改成錯 0 次；
+沒有 v3 的現版沒有量到差別。只適用於有回合上限的使用。結論：[`decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`](decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md)；
+沒被用過的 100 題上的留出批次在跑。
 
 ## 接到你的 agent 上：pi／Claude Code／OpenCode／Codex（2026-09-24 起）
 
