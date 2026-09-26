@@ -1,0 +1,35 @@
+[
+ {
+  "task": "69",
+  "arm": "C2",
+  "sample": 3,
+  "job": "v3local-g12-off-C2-69-s3",
+  "exception": null,
+  "requests": 8,
+  "provider_errors": 0,
+  "reward_missing": true,
+  "moved": true
+ },
+ {
+  "task": "1273",
+  "arm": "A",
+  "sample": 3,
+  "job": "v3local-g12-off-A-1273-s3",
+  "exception": null,
+  "requests": 4,
+  "provider_errors": 0,
+  "reward_missing": true,
+  "moved": true
+ },
+ {
+  "task": "1273",
+  "arm": "C2",
+  "sample": 3,
+  "job": "v3local-g12-off-C2-1273-s3",
+  "exception": null,
+  "requests": 8,
+  "provider_errors": 0,
+  "reward_missing": true,
+  "moved": true
+ }
+]
