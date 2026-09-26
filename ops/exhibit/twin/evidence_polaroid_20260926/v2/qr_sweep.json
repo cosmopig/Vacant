@@ -1,0 +1,327 @@
+{
+  "decoder": "opencv 5.0.0 QRCodeDetector",
+  "expect": "https://vacant.cosmopig.com",
+  "honesty": "phone_photo* 是模擬（物理模型＋旋轉＋透視＋模糊＋對比漂移＋雜訊＋JPEG），不是兩支真手機對拍；OpenCV 比手機內建相機弱，是偏保守的代理量。那一格要在展場實測。",
+  "rows": [
+    {
+      "module_px": 5,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 3.92,
+      "decoded": 7,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 2.61,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 1.96,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 1.57,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 3.92,
+      "decoded": 6,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 2.61,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 1.96,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 5,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 1.57,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 4.7,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 3.14,
+      "decoded": 4,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 2.35,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 1.88,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 4.7,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 3.14,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 2.35,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 6,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 1.88,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 5.49,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 3.66,
+      "decoded": 6,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 2.74,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 2.2,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 5.49,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 3.66,
+      "decoded": 6,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 2.74,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 7,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 2.2,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 6.27,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 4.18,
+      "decoded": 7,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 3.14,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 2.51,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 6.27,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 4.18,
+      "decoded": 7,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 3.14,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 8,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 2.51,
+      "decoded": 0,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 7.06,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 4.7,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 3.53,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p1_c09_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 2.82,
+      "decoded": 2,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 10,
+      "camera_px_per_module": 7.06,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 15,
+      "camera_px_per_module": 4.7,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 20,
+      "camera_px_per_module": 3.53,
+      "decoded": 8,
+      "of": 8
+    },
+    {
+      "module_px": 9,
+      "sample": "polaroid_p2_c33_pose.png",
+      "distance_cm": 25,
+      "camera_px_per_module": 2.82,
+      "decoded": 1,
+      "of": 8
+    }
+  ]
+}

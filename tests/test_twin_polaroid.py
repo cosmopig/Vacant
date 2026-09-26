@@ -34,10 +34,12 @@ from test_twin_agent_run import (  # noqa: E402,F401
 PIL = pytest.importorskip("PIL", reason="沒有 Pillow ⇒ 拍立得合成**沒有被驗過**（不是驗過了）")
 from PIL import Image  # noqa: E402
 
-EVID = ROOT / "ops" / "exhibit" / "twin" / "evidence_polaroid_20260926"
+EVID = ROOT / "ops" / "exhibit" / "twin" / "evidence_polaroid_20260926" / "v2"
+#: 測試輸入用分身真跑寫過的一句（`EVID/runs.json` p1），不用人寫的罐頭句。
+AGENT_LINE = "我決定整理一份「週末登山清單」。"
 
 
-def _compose(decision: str = "寫一封謝卡給國小導師", **kw):
+def _compose(decision: str = AGENT_LINE, **kw):
     kw.setdefault("cast_id", "c08")
     kw.setdefault("date_str", "2026.09.26")
     kw.setdefault("receipt_short", "0123abcd")
@@ -90,21 +92,56 @@ def test_png_carries_no_metadata_chunks() -> None:
 
 
 def test_long_decision_is_truncated_and_fits() -> None:
-    long = "為下週末安排一份慢節奏的散步路線，途中經過三家老書店、一間賣手沖咖啡的小店，最後在河堤看夕陽"
+    # 截斷的機制測試（字串是測試輸入，不是範例；真跑的八句都沒有長到要截，見 samples.json）
+    long = "我決定在房間裡寫一份很長很長的東西，長到兩行都放不下，所以最後一定會被截掉一截才對"
     _png, meta = _compose(long)
-    assert meta["caption_truncated"] is True
+    assert meta["caption_truncated"] is True and meta["caption_lines"] == 2
     box = meta["caption_box"]
-    assert meta["caption_drawn"][2] - meta["caption_drawn"][0] <= box[2] - box[0]
+    d = meta["caption_drawn"]
+    assert box[0] <= d[0] and d[2] <= box[2] and box[1] <= d[1] and d[3] <= box[3]
     f = polaroid._font(polaroid.CAPTION_PX)
-    text, cut = polaroid.fit_text(f, long, box[2] - box[0])
-    assert cut and text.endswith("…") and not text[:-1].endswith(("，", "、", " "))
-    # 負控制：不截的話那一行**真的放不下**（這條判準量得到出界）
-    assert f.getlength(long) > box[2] - box[0]
+    lines, cut = polaroid.wrap_caption(f, long, box[2] - box[0])
+    assert cut and len(lines) == 2 and lines[-1].endswith("…")
+    assert not lines[-1][:-1].endswith(("，", "、", " "))
+    assert all(f.getlength(ln) <= box[2] - box[0] for ln in lines)
+    # 負控制：不截的話**真的放不下**兩行（這條判準量得到出界）
+    assert f.getlength(long) > 2 * (box[2] - box[0])
+
+
+def test_two_line_wrap_is_balanced_and_respects_quotes() -> None:
+    """真跑寫出來的句子多半 16–28 字：要兩行時找最平衡的斷點，不留一個字孤零零在第二行，
+    句讀不放行首、開引號不放行尾、能不斷在引號裡就不斷。"""
+    f = polaroid._font(polaroid.CAPTION_PX)
+    w = polaroid.layout_for()["caption"]
+    w = w[2] - w[0]
+    lines, cut = polaroid.wrap_caption(f, "我決定寫一份「日文單字記憶小撇步」", w)
+    assert not cut and lines == ["我決定寫一份", "「日文單字記憶小撇步」"]
+    for text in ("我打算在房間裡建立一份「公園路線導覽」", "我決定為自己寫一份「深夜護理師的放鬆清單」"):
+        lines, _ = polaroid.wrap_caption(f, text, w)
+        assert len(lines) == 2 and "".join(lines) == text
+        assert lines[1][0] not in polaroid._NO_LINE_START and lines[0][-1] not in polaroid._NO_LINE_END
+        assert min(len(x) for x in lines) >= 4                     # 沒有孤字
+    # 負控制：貪心塞滿第一行的做法**真的會**留下孤字（這把尺量得到）
+    text = "我決定寫一份「日文單字記憶小撇步」"
+    n = 1
+    while n < len(text) and f.getlength(text[:n + 1]) <= w:
+        n += 1
+    balanced, _ = polaroid.wrap_caption(f, text, w)
+    assert len(text) - n <= 3 < min(len(x) for x in balanced)     # 貪心剩 ≤3 字；平衡版每行都比它多
 
 
 def test_short_decision_is_not_truncated() -> None:
-    _png, meta = _compose("寫一封謝卡")
-    assert meta["caption_truncated"] is False and meta["caption_chars"] == 5
+    _png, meta = _compose("我決定寫一份筆記")
+    assert meta["caption_truncated"] is False and meta["caption_chars"] == 8
+    assert meta["caption_lines"] == 1
+
+
+def test_nothing_left_to_say_means_a_blank_line_not_a_canned_one() -> None:
+    """空的決定、只有 emoji 的決定 ⇒ 留空（拍立得照發）。不補任何人寫的字。"""
+    for d in ("", "📦✅", "## 「」"):
+        png, meta = _compose(d)
+        assert meta["caption_blank"] is True and meta["caption_chars"] == 0, d
+        assert _ink_in(png, meta["caption_box"]) == 0, d
 
 
 def test_glyphs_the_font_cannot_draw_are_dropped_not_tofu() -> None:
@@ -119,17 +156,31 @@ def test_glyphs_the_font_cannot_draw_are_dropped_not_tofu() -> None:
 def test_markdown_and_quotes_are_cleaned() -> None:
     assert polaroid.clean_caption("## 「寫一封信」。\n理由") == "寫一封信"
     assert polaroid.clean_caption(None) == ""
+    # 句中那一對引號是分身自己打的，不准剝掉半個（v2 修掉的 bug：「週末登山清單 少了 」）
+    assert polaroid.clean_caption(AGENT_LINE) == "我決定整理一份「週末登山清單」"
+    assert polaroid.clean_caption("「只有開引號") == "只有開引號"
 
 
-def test_verbatim_copy_of_the_viewer_text_is_replaced() -> None:
-    """拍立得上不准出現可識別本人的原文：分身的句子逐字抄了觀眾 8 個字以上 ⇒ 中性句。"""
+def _ink_in(png: bytes, box) -> int:
+    """那一格裡有幾個「墨色」像素（紙色亮度 > 200、墨色 < 120）。"""
+    im = Image.open(io.BytesIO(png)).convert("L").crop(tuple(box))
+    return sum(im.histogram()[:120])
+
+
+def test_verbatim_copy_of_the_viewer_text_leaves_the_line_blank() -> None:
+    """拍立得上不准出現可識別本人的原文：分身的句子逐字抄了觀眾 8 個字以上 ⇒ **那一行留空**。
+    2026-09-26 人類：字要是 agent 生成的 ⇒ 不准換成任何人寫的句子（舊版的中性句已拿掉）。"""
     originals = polaroid.originals_of({"need": NEED}, TRAITS_TEXT)
     leak = "最近一直想寫信給國小導師"                    # TRAITS_TEXT 的連續 12 個字
-    _png, meta = _compose(leak, originals=originals)
-    assert meta["caption_redacted"] is True
-    # 負控制：只共用「國小導師」四個字的正常決定**不會**被誤殺
-    _png, meta2 = _compose(DECISION, originals=originals)
-    assert meta2["caption_redacted"] is False
+    png, meta = _compose(leak, originals=originals)
+    assert meta["caption_redacted"] is True and meta["caption_blank"] is True
+    assert meta["caption_chars"] == 0 and meta["caption_drawn"] is None
+    assert _ink_in(png, meta["caption_box"]) == 0                # 那一格真的沒有字
+    assert not hasattr(polaroid, "NEUTRAL_CAPTION")
+    # 負控制：只共用「國小導師」四個字的正常決定**不會**被誤殺，而且那一格量得到墨色
+    png2, meta2 = _compose(DECISION, originals=originals)
+    assert meta2["caption_redacted"] is False and meta2["caption_blank"] is False
+    assert _ink_in(png2, meta2["caption_box"]) > 500
     assert polaroid.caption_leaks_original(leak, originals)
     assert not polaroid.caption_leaks_original(DECISION, originals)
 
@@ -163,7 +214,7 @@ def test_qr_drawn_in_the_png_is_the_site_matrix() -> None:
 
 def test_qr_decodes_with_an_external_decoder() -> None:
     cv2 = pytest.importorskip("cv2", reason="沒有 OpenCV ⇒ 外部解碼這一格沒有被驗過"
-                                            "（證據檔 evidence_polaroid_20260926/qr_decode.json 是開發機跑的）")
+                                            "（證據檔 evidence_polaroid_20260926/v2/qr_decode.json 是開發機跑的）")
     import numpy as np
     png, _ = _compose()
     arr = cv2.cvtColor(np.array(Image.open(io.BytesIO(png)).convert("RGB")), cv2.COLOR_RGB2BGR)
@@ -176,16 +227,150 @@ def test_evidence_decode_report_says_what_it_says() -> None:
     assert d["expect"] == polaroid.SITE_URL and d["all_ok"] is True
     samples = json.loads((EVID / "samples.json").read_text(encoding="utf-8"))
     by_file = {s["file"]: s for s in samples["samples"]}
+    assert set(by_file) == {r["file"] for r in d["results"]}
     for r in d["results"]:
         c = r["cases"]
         assert c["original"]["decoded"] == polaroid.SITE_URL
-        assert c["phone_photo_15cm"]["ok"] is True
+        assert c["share_thumb"]["decoded"] == polaroid.SITE_URL
+        assert c["phone_photo_10cm"]["ok"] is True and c["phone_photo_15cm"]["ok"] is True
         assert c["neg_blanked"]["decoded"] is None               # 負控制：塗掉就解不出
         assert c["neg_other_url"]["not_site"] is True            # 負控制：別的網址解成別的網址
         # 報告講的是**現在這幾張檔**（雜湊對得上），不是別的版本
         p = EVID / r["file"]
         assert hashlib.sha256(p.read_bytes()).hexdigest() == r["sha256"] == by_file[r["file"]]["sha256"]
     assert all(s["synthetic"] for s in samples["samples"])
+    # QR 模組大小的依據：採用值在 15 cm 全過、下一級（8 px）在這個相框上不是全過
+    sw = json.loads((EVID / "qr_sweep.json").read_text(encoding="utf-8"))["rows"]
+
+    def rate(m, dcm):
+        rows = [x for x in sw if x["module_px"] == m and x["distance_cm"] == dcm]
+        return sum(x["decoded"] for x in rows), sum(x["of"] for x in rows)
+    ok, n = rate(polaroid.QR_MODULE_PX, 15)
+    assert n > 0 and ok == n
+    ok8, n8 = rate(polaroid.QR_MODULE_PX - 1, 15)
+    assert ok8 < n8
+
+
+def test_samples_are_real_agent_runs_not_hand_written() -> None:
+    """範例上那一句＝分身真跑一次自己寫的 PLAN.md 第一行（人類 2026-09-26）。
+    逐張對回 `runs.json`：engine 是 `vacant_run:pi:*`、有 run_id 與收據鏈頭、收據驗過。"""
+    runs = {r["name"]: r for r in json.loads((EVID / "runs.json").read_text(encoding="utf-8"))["runs"]}
+    samples = json.loads((EVID / "samples.json").read_text(encoding="utf-8"))
+    assert len(samples["samples"]) >= 4
+    for s in samples["samples"]:
+        r = runs[s["persona"]]
+        tw = r["twin"]
+        assert r["made"] is True and r["synthetic"] is True and "不是真人" in r["card_text"]
+        assert s["decision_by_agent"] == tw["decision"]
+        assert tw["decision"] == twinagent.parse_plan(r["plan_md"])[0]   # 就是它寫的第一行
+        assert s["engine"] == tw["engine"] and tw["engine"].startswith("vacant_run:pi:")
+        assert s["run_id"] == tw["run_id"] and len(tw["run_id"]) == 32
+        assert s["verdict_hash"] == tw["verdict_hash"] and s["receipt_short"] == tw["verdict_hash"][:8]
+        assert [x["verdict"] for x in r["receipts"]] == ["OK"] and r["receipts"][0]["chain_ok"]
+        assert r["wire"]["requests"] >= 1 and tw["requests_seen"] == r["wire"]["requests"]
+        assert s["cast_id"] == polaroid.pick_cast_for(r["card"])
+        assert s["meta"]["figure"] == polaroid.figure_for(s["cast_id"])[1]
+    figs = {s["meta"]["figure"] for s in samples["samples"]}
+    assert figs == {"pose", "cast40"}, figs                        # 兩種都涵蓋
+    # 人寫的範例句不准回來
+    assert not hasattr(polaroid, "SAMPLES")
+    for s in samples["samples"]:
+        assert s["decision_by_agent"] not in ("寫一封謝卡給國小導師", "整理一份給自己的睡前閱讀清單")
+
+
+# ---------------------------------------------------------------------------
+# 一之二、素材：真相框、黏土世界背景、姿勢圖（只認自己的檔名）
+# ---------------------------------------------------------------------------
+
+ASSET_SRC = pathlib.Path("/Users/cosmopig/Documents/GitHub/vacant_hm-assets-20260926")
+
+
+def test_real_frame_is_used_and_fits_the_4_5_card() -> None:
+    png, meta = _compose()
+    assert meta["frame"].startswith("file:b2faf31d6747") and meta["frame_note"] is None
+    assert Image.open(io.BytesIO(png)).size == (1080, 1350)
+    assert meta["frame_fit"]["extend_px"] > 0                   # 下緣白邊往下延長，不是壓扁
+    fj = json.loads((polaroid.DEFAULT_FRAME_DIR / "polaroid_frame.json").read_text(encoding="utf-8"))
+    assert hashlib.sha256((polaroid.DEFAULT_FRAME_DIR / "polaroid_frame.png").read_bytes()
+                          ).hexdigest() == fj["sha256"]
+    # 相片窗仍是素材那個比例（730:686），沒有被拉歪
+    w = meta["window"]
+    assert abs((w[2] - w[0]) / (w[3] - w[1]) - 730 / 686) < 0.01
+    # 窗格四周是相框的紙（亮），窗格裡是相片（暗）：墊圖真的墊在窗格底下
+    im = Image.open(io.BytesIO(png)).convert("L")
+    assert im.getpixel((w[0] - 6, (w[1] + w[3]) // 2)) > 200
+    assert im.getpixel((w[0] + 12, w[1] + 12)) < 120
+    if (ASSET_SRC / "polaroid").is_dir():
+        for n in ("polaroid_frame.png", "polaroid_frame.json"):
+            assert (polaroid.DEFAULT_FRAME_DIR / n).read_bytes() == (ASSET_SRC / "polaroid" / n).read_bytes()
+
+
+def test_frame_that_does_not_fit_falls_back_to_placeholder_with_a_reason(tmp_path) -> None:
+    """負控制：相框 json 沒有窗、或窗大到下緣沒有白邊 ⇒ 退回佔位相框，frame_note 講為什麼。"""
+    src = polaroid.DEFAULT_FRAME_DIR
+    (tmp_path / "polaroid_frame.png").write_bytes((src / "polaroid_frame.png").read_bytes())
+    (tmp_path / "polaroid_frame.json").write_text('{"note": "no window"}', encoding="utf-8")
+    _png, meta = _compose(frame_dir=tmp_path)
+    assert meta["frame"] == "placeholder" and meta["frame_note"].startswith("frame_rejected")
+    (tmp_path / "polaroid_frame.json").write_text(
+        '{"window_px": {"x": 50, "y": 60, "w": 730, "h": 860}}', encoding="utf-8")
+    _png, meta = _compose(frame_dir=tmp_path)
+    assert meta["frame"] == "placeholder" and "frame_rejected" in meta["frame_note"]
+
+
+def test_plate_is_pinned_and_has_no_text_or_qr_baked_in() -> None:
+    assert hashlib.sha256(polaroid.PLATE_PATH.read_bytes()).hexdigest() == polaroid.PLATE_SHA256
+    pj = json.loads(polaroid.PLATE_PATH.with_suffix(".json").read_text(encoding="utf-8"))
+    assert pj["sha256"] == polaroid.PLATE_SHA256 and pj["spot_x_px"] == polaroid.PLATE_SPOT_X
+
+
+POSE_IDS = ("c02", "c09", "c10", "c17", "c19", "c25", "c28", "c31", "c33", "c40")
+
+
+def test_poses_are_used_for_the_ten_that_have_them_and_nobody_else() -> None:
+    have = sorted(p.name[:3] for p in polaroid.DEFAULT_POSES_DIR.glob("c*_show.png"))
+    assert tuple(have) == POSE_IDS
+    man = json.loads((polaroid.DEFAULT_POSES_DIR / "manifest.json").read_text(encoding="utf-8"))
+    for cid in (f"c{i:02d}" for i in range(1, 41)):
+        path, kind = polaroid.figure_for(cid)
+        if cid in POSE_IDS:
+            assert kind == "pose" and path.name == f"{cid}_show.png"
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == man["items"][f"{cid}_show"]["sha256"]
+        else:
+            assert kind == "cast40" and path == polaroid.CAST_DIR / f"{cid}.png"   # 同一位的原圖
+        assert path.name.startswith(cid)                         # 永遠是自己的臉
+
+
+def test_missing_pose_never_borrows_someone_elses_face(tmp_path) -> None:
+    """負控制：姿勢資料夾裡只有 c02 的圖，c03 要的時候**不准**拿 c02 頂替，
+    連「c03_show.png 其實是指向 c02_show.png 的連結」也不認。"""
+    import os as _os
+    shutil.copyfile(polaroid.DEFAULT_POSES_DIR / "c02_show.png", tmp_path / "c02_show.png")
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    p, kind = polaroid.figure_for("c03", tmp_path)
+    assert kind == "cast40" and p.name == "c03.png"
+    a, _ = polaroid.render_scene("c03", (400, 380), poses_dir=tmp_path)
+    b, _ = polaroid.render_scene("c03", (400, 380), poses_dir=empty)
+    assert a.tobytes() == b.tobytes()                            # c02 的圖在不在，c03 的相片都一樣
+    c, info = polaroid.render_scene("c02", (400, 380), poses_dir=tmp_path)
+    assert info["figure"] == "pose" and c.tobytes() != b.tobytes()   # 量具分得出「用了姿勢圖」
+    _os.symlink(tmp_path / "c02_show.png", tmp_path / "c03_show.png")
+    p, kind = polaroid.figure_for("c03", tmp_path)
+    assert kind == "cast40" and p.name == "c03.png"
+    with pytest.raises(polaroid.PolaroidError):
+        polaroid.figure_for("../c02", tmp_path)
+
+
+def test_detached_specks_in_cast40_are_not_pasted_onto_the_stage() -> None:
+    """cast40 的 c20 左緣有一塊脫離本體的碎屑（365 px）；貼到深色舞台上會變一條白線。"""
+    from PIL import Image as _I
+    spr = _I.open(polaroid.CAST_DIR / "c20.png").convert("RGBA")
+    assert spr.getchannel("A").crop((0, 110, 11, 154)).getextrema()[1] > 32      # 碎屑真的在
+    clean = polaroid._drop_specks(spr)
+    assert clean.getchannel("A").crop((0, 110, 11, 154)).getextrema()[1] <= 32
+    # 本體不受影響
+    assert clean.getchannel("A").getbbox()[2] >= spr.width - 12
 
 
 # ---------------------------------------------------------------------------

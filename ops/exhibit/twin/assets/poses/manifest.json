@@ -1,0 +1,86 @@
+{
+ "_說明": "拍立得相片窗裡的分身姿勢圖（舉著寫好的紙給人看）。逐 byte 抄自素材線 vacant_hm-assets-20260926/poses/cNN_show.png（該處 manifest 的 sha256 相同）；產法見那份 QA.md §2（Codex 姿勢表切格去背，參考圖＝該位 cast40）。只有 10 位有；其餘由另一條線續做、檔名同規則（cNN_show.png）。polaroid.figure_for 只認 <cast_id>_show.png，沒有就退回 cast40/<cast_id>.png——絕不拿別位的姿勢頂替。",
+ "source": "vacant_hm-assets-20260926/poses/manifest.json",
+ "items": {
+  "c02_show": {
+   "file": "c02_show.png",
+   "size": [
+    234,
+    359
+   ],
+   "sha256": "f6f6f44777736c270640afb082ed581de4f5760b962a0eb7b68e171f61d1eb48"
+  },
+  "c09_show": {
+   "file": "c09_show.png",
+   "size": [
+    127,
+    435
+   ],
+   "sha256": "f7ef4352f92533b7c7a88c07a9501d2494ca81dd3f9186b177d295230fb6ee2d"
+  },
+  "c10_show": {
+   "file": "c10_show.png",
+   "size": [
+    136,
+    428
+   ],
+   "sha256": "cc3c0b818569b1d08fb0e28b10115f9291d7f557306761f153cdc5f0a58d3528"
+  },
+  "c17_show": {
+   "file": "c17_show.png",
+   "size": [
+    217,
+    341
+   ],
+   "sha256": "f3b64a46a170e4af8fc85eefd2a2036a1cfb19b1793b66b58c082d3ba2b0d177"
+  },
+  "c19_show": {
+   "file": "c19_show.png",
+   "size": [
+    419,
+    337
+   ],
+   "sha256": "cf5309ae5e8a7d9800f5ae637a768a55655f18ca1f752b3b8620ba4259409089"
+  },
+  "c25_show": {
+   "file": "c25_show.png",
+   "size": [
+    243,
+    301
+   ],
+   "sha256": "d1f4c3973addb0a12f1f1b99bdc4e58064aaf5af3c9d53fe1f9ddbef60744c57"
+  },
+  "c28_show": {
+   "file": "c28_show.png",
+   "size": [
+    215,
+    352
+   ],
+   "sha256": "e68444acf8dcb17bc1ca2cdfbc1241f42c258425f96d31bde79156bc593eb5ae"
+  },
+  "c31_show": {
+   "file": "c31_show.png",
+   "size": [
+    258,
+    276
+   ],
+   "sha256": "226910f1e19568b8161d29fe2f2c8eaaf599bb175500b3f4e677a853f8a4b086"
+  },
+  "c33_show": {
+   "file": "c33_show.png",
+   "size": [
+    234,
+    383
+   ],
+   "sha256": "f5888262fafee539e57f5429cdd41b4685300643543cf3539dbca89e7c97418f"
+  },
+  "c40_show": {
+   "file": "c40_show.png",
+   "size": [
+    233,
+    385
+   ],
+   "sha256": "4f600ad81cf8ca4e4aa3f760fadd6ea5b5446713a076690e6c07be2ea9770126"
+  }
+ }
+}

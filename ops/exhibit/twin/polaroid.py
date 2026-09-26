@@ -8,8 +8,11 @@
 
 一張直式白邊相片卡，上面**只有四樣東西**：
 
-1. 他的分身（黏土小人，`cast_id` → `assets/cast40/cNN.png`）在做事的樣子；
-2. 白邊下緣一行手寫感的字：**他的分身決定做的那件事**（短句，過長截斷）；
+1. 他的分身站在黏土世界的舞台上（`cast_id` → 有 `assets/poses/cNN_show.png`
+   就用「舉著寫好的紙給人看」那一張，沒有就用 `assets/cast40/cNN.png`；背景是電視那一套的
+   `s00` 空舞台板）；
+2. 白邊下緣最多兩行手寫感的字：**他的分身自己寫在 PLAN.md 第一行的決定**（過長截斷；
+   逐字抄了觀眾原文 ⇒ **那一行留空**，不換成任何人寫的句子）；
 3. 一行小字：日期 · 展名 · 收據短碼（收據鏈頭 `verdict_hash` 前 8 碼）；
 4. 右下角一個 QR：**官網網址本身**（`SITE_URL`），不帶任何參數。
 
@@ -45,14 +48,20 @@
    所以它照鏈外原文的規格處理：住在 twinvault（`plain/<slug>/polaroid.png`），
    撤回時一起 `unlink()`，被刪位元組的 sha256 簽進 `PERSONA_ERASED`。
 2. **「不出現可識別本人的原文」是一把尺不是一道牆。** `caption_leaks_original`
-   擋的是**逐字**抄錄（連續 `LEAK_WINDOW` 個字元以上與觀眾原文相同 ⇒ 改用中性句）；
+   擋的是**逐字**抄錄（連續 `LEAK_WINDOW` 個字元以上與觀眾原文相同 ⇒ **那一行留空**，
+   拍立得照發、只少那一句；2026-09-26 人類：字要是 agent 生成的，不准拿人寫的罐頭句頂替）；
    它擋不住改寫、擋不住模型自己編的名字。分身的系統提示詞已經要求不逐字抄 TRAITS.md，
    這一把是第二層，不是保證。
 3. **掃得到是量出來的，不是「應該掃得到」。** 範例圖本身拿外部解碼器解過
-   （`evidence_polaroid_20260926/qr_decode.json`），手機拍螢幕那一格是**模擬**
+   （`evidence_polaroid_20260926/v2/qr_decode.json`），手機拍螢幕那一格是**模擬**
    （縮到手機顯示尺寸＋模糊＋JPEG），不是真的拿兩支手機對拍——那一格要現場實測。
 4. **分享出去的圖，我們收不回來。** 撤回刪得掉的是會場 VM 與雲端上的那一份；
    觀眾自己存下來、傳出去的那幾份不在射程內。所以圖上從一開始就不放可識別本人的東西。
+5. **姿勢圖只認自己的檔名。** `figure_for` 只找 `<cast_id>_show.png`，沒有就退回
+   **同一位**的 cast40 原圖——絕不拿別位的姿勢頂替（那是別人的臉）。它擋的是程式選錯檔，
+   擋不住素材線把圖存錯名字（那一層靠 `assets/poses/manifest.json` 的來源紀錄與人眼）。
+6. **相框不是照原比例用的。** 素材相框 829×930（0.89），卡面 1080×1350（4:5）：
+   按寬度縮放後，**下緣白邊往下延長**（取白邊中段、上下鏡射接續），版面理由見裁決檔。
 """
 from __future__ import annotations
 
@@ -82,10 +91,30 @@ FONT_SHA256 = "eec8b0b68c34b9166ae37bed839b6126116b225d97f21a5954bb542b9fd1e68c"
 #: 與 `vacant_hm/world2/sprites/cast40/manifest.json` 逐 byte 相同（node 對照會驗）。
 MANIFEST_SHA256 = "d0b1aecee81b40760e1b693d8ce48f1be455f0fea75832111dbb3ff491c10fdb"
 
-#: A 線（Flow 生的拍立得相框）交件的地方。有 `polaroid_frame.png`＋`.json` 就用它，
+#: A 線（素材線）交件的拍立得相框：`polaroid_frame.png`＋`.json`（2026-09-26 交件，
+#: 829×930、中央窗格透明；逐 byte 抄自 `vacant_hm-assets-20260926/polaroid/`）。
 #: 沒有就用程式畫的佔位相框。環境變數優先（素材暫存區在 repo 外）。
 FRAME_ENV = "VACANT_POLAROID_FRAME_DIR"
 DEFAULT_FRAME_DIR = ASSETS / "polaroid"
+#: 相框素材說「圖從窗格底下墊進去、四邊各多墊 4 px 以免露縫」（素材原生像素）。
+FRAME_UNDERLAY_PX = 4
+
+#: 分身姿勢圖（舉著寫好的紙給人看）。**只認 `<cast_id>_show.png`**，沒有就退回同一位的
+#: cast40 原圖（誠實邊界 5）。環境變數給另一條線交件前的暫存區用。
+POSES_ENV = "VACANT_POLAROID_POSES_DIR"
+DEFAULT_POSES_DIR = ASSETS / "poses"
+POSE_SUFFIX = "_show"
+
+#: 相片窗的背景：電視那一套的 `s00` 空舞台（無文字、無 QR、沒有烤進去的生物）。
+#: sha256 釘死（對不上＝不可用，與字型同一條規則）。`PLATE_SPOT_X` 是頂光中心欄（原圖 px），
+#: 相片窗從那裡置中裁切。
+PLATE_PATH = ASSETS / "polaroid" / "plate_s00.jpg"
+PLATE_SHA256 = "b39e0074b472ed30bc882c9bec26c81e363c19a4ecd16427a73ef3936fc7a053"
+PLATE_SPOT_X = 812
+#: 分身在相片窗裡的大小與站位（相片窗高／寬的比例）。寬的（c19 大碗）由寬度上限收住。
+FIG_H_FRAC = 0.50
+FIG_W_MAX_FRAC = 0.52
+FEET_Y_FRAC = 0.86
 
 #: QR 的內容：**官網網址本身**。不帶 sub_id、記號、utm 或任何可追蹤參數——
 #: 分享出去的圖任何人都看得到（人類 2026-09-26）。改這個值要重跑 QR 解碼驗收。
@@ -97,20 +126,27 @@ EXHIBIT_NAME = "VACANT"
 #: 經典拍立得是 88×107 mm（0.82）；取 1080×1350（4:5，0.80）——差一點點，
 #: 換來的是社群直式貼文的原生比例（分享出去不被裁），而且下緣白邊夠放 v3 的 QR。
 CANVAS = (1080, 1350)
-#: 相片窗（左、上、右、下）。下緣白邊比較厚，字與 QR 住那裡。
-WINDOW = (60, 60, 1020, 1020)
+#: 佔位相框的相片窗（左、上、右、下）。下緣白邊比較厚，字與 QR 住那裡。
+#: v2 下緣 1020 → 980：QR 改 9 px 之後靜區上緣在 1005，窗要讓出來（素材相框的窗下緣在 976）。
+WINDOW = (60, 60, 1020, 980)
 #: 那一行字的字級與框高（框的位置由 `_derive_layout` 從相片窗與 QR 推出來；
 #: 「字不出界」的判準就是那個框）。
-CAPTION_PX = 48
-CAPTION_BOX_H = 64
+#: 2026-09-26 v2：分身自己寫的句子實測 16–30 字（`evidence_polaroid_20260926/v2/runs.json`），
+#: 單行 48 px 只放得下 13 字 ⇒ 六張範例全被截。改成**最多兩行、44 px**（一行約 15 字）。
+CAPTION_PX = 44
+CAPTION_LINES = 2
+CAPTION_LINE_H = 60
+CAPTION_BOX_H = CAPTION_LINES * CAPTION_LINE_H + 4
 #: 小字。**右端停在 QR 靜區左邊**。
 FOOTER_PX = 26
 FOOTER_BOX_H = 36
-#: QR：官網網址 27 bytes ⇒ v3-M ＝ 29 模組。每模組 8 px ⇒ 232 px，靜區 4 模組（規格要求）。
-#: 右緣對齊相片窗、下緣離紙邊 48 px。**8 不是拍腦袋**：6 px 時模擬「手機拍螢幕」
-#: 在 15 cm 距離只解得開約一半（裁決檔 §四的掃描表），8 px 全過。低於 6 的相框素材一律退回。
-QR_MODULE_PX = 8
-QR_MIN_MODULE_PX = 6
+#: QR：官網網址 27 bytes ⇒ v3-M ＝ 29 模組。每模組 9 px ⇒ 261 px，靜區 4 模組（規格要求）。
+#: 右緣對齊相片窗、下緣離紙邊 48 px。**9 不是拍腦袋**（`evidence_polaroid_20260926/v2/qr_sweep.json`）：
+#: v1 佔位相框上 8 px 在模擬「手機拍 15 cm」16/16；換上素材相框（紙色較深、有紙紋）後
+#: 8 px 掉到 14/16（另一組 80 次：素材相框 70/80、佔位相框 80/80），9 px 回到 16/16、
+#: 連 20 cm 也 16/16。低於 `QR_MIN_MODULE_PX` 的相框素材一律退回。
+QR_MODULE_PX = 9
+QR_MIN_MODULE_PX = 8
 QR_QUIET_MODULES = 4
 QR_EDGE_BOTTOM = 48
 
@@ -120,9 +156,13 @@ INK_SOFT = (122, 112, 102)
 PAPER = (248, 245, 239)
 QR_DARK = (24, 21, 19)
 
-#: 「逐字抄錄」的判準：分身的句子裡有**連續這麼多個字元**與觀眾原文相同 ⇒ 換成中性句。
+#: 「逐字抄錄」的判準：分身的句子裡有**連續這麼多個字元**與觀眾原文相同 ⇒ 那一行留空。
+#: ⚠ 2026-09-26 以前這裡會換成一句人寫的中性句；人類：「那個字是不是應該要讓他是 AI agent
+#:   生成的，不要隨便刻板」⇒ 拿掉。**不准再加任何罐頭句**（測試守著：留空時圖上那一格沒有字）。
 LEAK_WINDOW = 8
-NEUTRAL_CAPTION = "他在這裡完成了一件事"
+#: 白邊下緣的 QR 靜區**不塗色**（保留相框的紙紋）；但要先確認那一塊夠亮，
+#: 不夠亮（例如佔位相框的窗緣陰影）才塗紙色。
+QR_QUIET_MIN_L = 200
 
 #: 電視那一支的顏色錨點（`vacant_hm/world3/index.html` `COLOR_ANCHOR`，逐字）。
 COLOR_ANCHOR: dict[str, tuple[int, int, int]] = {
@@ -242,6 +282,8 @@ def available() -> tuple[bool, str]:
         return False, f"font_mismatch：{FONT_PATH.name} 不在或 sha256 對不上"
     if _sha256_file(CAST_DIR / "manifest.json") != MANIFEST_SHA256:
         return False, "manifest_mismatch：cast40/manifest.json 不在或 sha256 對不上"
+    if _sha256_file(PLATE_PATH) != PLATE_SHA256:
+        return False, f"plate_mismatch：{PLATE_PATH.name} 不在或 sha256 對不上"
     return True, "ok"
 
 
@@ -251,6 +293,8 @@ def available() -> tuple[bool, str]:
 
 _MD_NOISE = re.compile(r"[#*_`>~|\[\]]")
 _QUOTES = "「」『』“”\"'‘’《》〈〉"
+_QUOTE_PAIRS = {"「": "」", "『": "』", "“": "”", "‘": "’", "《": "》", "〈": "〉",
+                '"': '"', "'": "'"}
 
 
 def clean_caption(decision: Any) -> str:
@@ -259,9 +303,15 @@ def clean_caption(decision: Any) -> str:
     s = s.splitlines()[0] if s.strip() else ""
     s = " ".join(_MD_NOISE.sub("", s).split())
     prev = None
-    while s != prev:                     # 「寫一封信」。 ⇒ 句號與引號交替剝，剝到不動為止
+    while s != prev:                     # 「寫一封信」。 ⇒ 句號與成對的外引號交替剝，剝到不動為止
         prev = s
-        s = s.strip().strip(_QUOTES).strip().rstrip("。．.！!；;，,、：:").rstrip()
+        s = s.strip().rstrip("。．.！!；;，,、：:").rstrip()
+        if len(s) >= 2 and _QUOTE_PAIRS.get(s[0]) == s[-1] and s[0] not in s[1:-1]:
+            s = s[1:-1]                  # 整句被一對引號包住才剝（「週末登山清單」在句中不動）
+        elif s and s[0] in _QUOTES and not any(c in s[1:] for c in _QUOTES):
+            s = s[1:]                    # 落單的開引號
+        elif s and s[-1] in _QUOTES and not any(c in s[:-1] for c in _QUOTES):
+            s = s[:-1]                   # 落單的閉引號
     return s
 
 
@@ -360,6 +410,63 @@ def _drop_missing(font: Any, text: str) -> tuple[str, int]:
     return " ".join("".join(kept).split()), dropped
 
 
+#: 不放在行首的字（句讀、閉引號）與不放在行尾的字（開引號）。
+_NO_LINE_START = "，。、；：！？）」』》〉,.;:!?)…"
+_NO_LINE_END = "（「『《〈("
+
+
+def _quote_depth(text: str) -> list[int]:
+    """每個字元位置前面還有幾層沒關的引號（`「」『』（）《》`）。"""
+    pairs = {"「": "」", "『": "』", "（": "）", "《": "》", "(": ")"}
+    closers = set(pairs.values())
+    out, depth = [], 0
+    for ch in text:
+        out.append(depth)
+        if ch in pairs:
+            depth += 1
+        elif ch in closers and depth:
+            depth -= 1
+    out.append(depth)
+    return out
+
+
+def wrap_caption(font: Any, text: str, max_w: int,
+                 max_lines: int = CAPTION_LINES) -> tuple[list[str], bool]:
+    """那一句 → 最多 `max_lines` 行（逐字斷行，中文不靠空白）。放不下的尾巴截掉補「…」。
+
+    一行放得下就一行。要兩行時**找最平衡的斷點**（兩行寬度差最小），不是貪心塞滿第一行
+    ——貪心會留一個字孤零零在第二行。斷點規則：句讀／閉引號不放行首、開引號不放行尾、
+    盡量不斷在引號裡面（斷在引號裡加一大筆成本，真的沒別處可斷才用）。
+    兩行都放不下 ⇒ 第一行塞滿、第二行截斷補「…」。回（行, 有沒有截）。
+    """
+    if font.getlength(text) <= max_w or max_lines <= 1:
+        last, cut = fit_text(font, text, max_w)
+        return [last], cut
+    depth = _quote_depth(text)
+    best: tuple[float, int] | None = None
+    for n in range(1, len(text)):
+        a, b = text[:n], text[n:].lstrip()
+        if not b or b[0] in _NO_LINE_START or a[-1] in _NO_LINE_END:
+            continue
+        wa, wb = font.getlength(a), font.getlength(b)
+        if wa > max_w or wb > max_w:
+            continue
+        cost = abs(wa - wb) + (max_w if depth[n] else 0)
+        if best is None or cost < best[0]:
+            best = (cost, n)
+    if best is not None:
+        n = best[1]
+        return [text[:n], text[n:].lstrip()], False
+    # 兩行放不下：第一行貪心塞滿（守避頭尾），剩下的交給 fit_text 截斷
+    n = 1
+    while n < len(text) and font.getlength(text[:n + 1]) <= max_w:
+        n += 1
+    while 1 < n < len(text) and (text[n] in _NO_LINE_START or text[n - 1] in _NO_LINE_END):
+        n -= 1
+    last, cut = fit_text(font, text[n:].lstrip(), max_w)
+    return [text[:n], last], cut
+
+
 def fit_text(font: Any, text: str, max_w: int) -> tuple[str, bool]:
     """放得進 `max_w` 就原樣；放不進就從尾巴截、補「…」。回（字, 有沒有截）。"""
     if font.getlength(text) <= max_w:
@@ -378,104 +485,123 @@ def fit_text(font: Any, text: str, max_w: int) -> tuple[str, bool]:
     return cut(lo), True
 
 
-def _vgrad(size: tuple[int, int], top: tuple[int, int, int], bottom: tuple[int, int, int]):
-    from PIL import Image
-    w, h = size
+def figure_for(cast_id: str, poses_dir: pathlib.Path | None = None
+               ) -> tuple[pathlib.Path, str]:
+    """這一位分身在相片裡用哪一張圖。回（路徑, "pose" | "cast40"）。
+
+    **只認自己的檔名**：`<poses>/<cast_id>_show.png`；沒有 ⇒ `cast40/<cast_id>.png`。
+    不找最像的、不找同形狀的、不拿別位頂替——那是別人的臉（誠實邊界 5）。
+    姿勢檔若是指向**別的檔名**的連結（例如 c05_show.png → c02_show.png）也不認。
+    """
+    if not re.fullmatch(r"c\d{2}", cast_id or ""):
+        raise PolaroidError(f"cast_id 不合法：{cast_id!r}")
+    d = poses_dir
+    if d is None:
+        env = os.environ.get(POSES_ENV, "").strip()
+        d = pathlib.Path(env) if env else DEFAULT_POSES_DIR
+    want = f"{cast_id}{POSE_SUFFIX}.png"
+    p = d / want
+    if p.is_file() and p.resolve().name == want:
+        return p, "pose"
+    q = CAST_DIR / f"{cast_id}.png"
+    if q.is_file():
+        return q, "cast40"
+    raise PolaroidError(f"cast_id 的精靈圖不在：{cast_id!r}")
+
+
+def _drop_specks(spr: Any, thresh: int = 32, keep_frac: float = 0.02) -> Any:
+    """去背圖邊上脫離本體的碎屑（cast40 裡 c01／c02／c20／c21／c34 各有一小塊，
+    貼到深色舞台上會變成一條白線）。alpha 連通塊面積 < 最大塊的 `keep_frac` ⇒ 清掉。"""
+    a = spr.getchannel("A")
+    w, h = a.size
+    px = a.load()
+    seen = bytearray(w * h)
+    blobs: list[list[int]] = []
+    for y in range(h):
+        for x in range(w):
+            i = y * w + x
+            if seen[i] or px[x, y] <= thresh:
+                continue
+            seen[i] = 1
+            stack, members = [i], []
+            while stack:
+                j = stack.pop()
+                members.append(j)
+                jx, jy = j % w, j // w
+                for nx, ny in ((jx + 1, jy), (jx - 1, jy), (jx, jy + 1), (jx, jy - 1)):
+                    if 0 <= nx < w and 0 <= ny < h:
+                        k = ny * w + nx
+                        if not seen[k] and px[nx, ny] > thresh:
+                            seen[k] = 1
+                            stack.append(k)
+            blobs.append(members)
+    if len(blobs) <= 1:
+        return spr
+    big = max(len(b) for b in blobs)
+    out = spr.copy()
+    oa = out.getchannel("A")
+    opx = oa.load()
+    for b in blobs:
+        if len(b) < big * keep_frac:
+            for j in b:
+                opx[j % w, j // w] = 0
+    out.putalpha(oa)
+    return out
+
+
+def _grade(spr: Any) -> Any:
+    """精靈圖是中性白光下拍的；舞台是頂上一盞暖燈。乘一層「上亮下暗、偏暖」的漸層，
+    讓他站進那一束光裡而不是貼在上面。只動 RGB，alpha 原樣。"""
+    from PIL import Image, ImageChops
+    w, h = spr.size
     col = Image.new("RGB", (1, h))
     px = col.load()
     for y in range(h):
-        t = y / max(1, h - 1)
-        px[0, y] = tuple(int(round(top[i] + (bottom[i] - top[i]) * t)) for i in range(3))
-    return col.resize((w, h))
+        k = 1.0 - 0.20 * (y / max(1, h - 1))           # 頭頂 1.00 → 腳底 0.80
+        px[0, y] = (int(255 * k), int(255 * k * 0.95), int(255 * k * 0.85))
+    rgb = ImageChops.multiply(spr.convert("RGB"), col.resize((w, h)))
+    rgb.putalpha(spr.getchannel("A"))
+    return rgb
 
 
-def render_scene(cast_id: str, size: tuple[int, int]):
-    """相片窗裡那一格：**他的分身在做事**——站在一張小桌旁，桌上是他寫的那張紙。
+def render_scene(cast_id: str, size: tuple[int, int], *,
+                 poses_dir: pathlib.Path | None = None) -> tuple[Any, dict[str, Any]]:
+    """相片窗裡那一格：**他的分身站在黏土世界的舞台上**（有姿勢圖＝舉著寫好的紙）。
 
-    佔位畫法（程式畫的）。A 線的素材到了之後，換的是相框，不是這一格。
+    背景＝`s00` 空舞台板，從頂光中心欄置中裁成相片窗的比例；分身腳踩在光圈裡，
+    底下一圈柔和的接觸陰影。回（RGB 圖, 用了哪些素材）。
     """
     from PIL import Image, ImageDraw, ImageFilter
     ww, wh = size
-    img = _vgrad(size, (236, 223, 202), (214, 192, 160)).convert("RGBA")
-    d = ImageDraw.Draw(img)
-    floor_y = int(wh * 0.80)
-    # 地板：略深、從牆腳往下漸層
-    floor = _vgrad((ww, wh - floor_y), (200, 172, 134), (184, 154, 116)).convert("RGBA")
-    img.alpha_composite(floor, (0, floor_y))
-    d.line([(0, floor_y), (ww, floor_y)], fill=(176, 146, 110, 255), width=3)
-    # 窗光（左上一塊亮）
-    glow = Image.new("RGBA", size, (0, 0, 0, 0))
-    ImageDraw.Draw(glow).ellipse([-ww * 0.2, -wh * 0.35, ww * 0.55, wh * 0.45],
-                                 fill=(255, 246, 228, 90))
-    img.alpha_composite(glow.filter(ImageFilter.GaussianBlur(ww * 0.06)))
+    plate = Image.open(PLATE_PATH).convert("RGB")
+    pw, ph = plate.size
+    ch = ph
+    cw = int(round(ph * ww / wh))
+    if cw > pw:                                         # 相片窗比板還寬：改裁高度
+        cw, ch = pw, int(round(pw * wh / ww))
+    x0 = max(0, min(pw - cw, PLATE_SPOT_X - cw // 2))
+    y0 = ph - ch
+    img = plate.crop((x0, y0, x0 + cw, y0 + ch)).resize(size, Image.LANCZOS).convert("RGBA")
 
-    # 桌子（右邊）
-    tx0, tx1 = int(ww * 0.56), int(ww * 0.93)
-    ty = int(wh * 0.585)
-    th = int(wh * 0.035)
-    shadow = Image.new("RGBA", size, (0, 0, 0, 0))
-    sd = ImageDraw.Draw(shadow)
-    sd.ellipse([tx0 - 10, floor_y - 14, tx1 + 10, floor_y + 22], fill=(60, 40, 20, 70))
-    fig_cx = int(ww * 0.34)
-    sd.ellipse([fig_cx - ww * 0.17, floor_y - 16, fig_cx + ww * 0.17, floor_y + 26],
-               fill=(60, 40, 20, 90))
-    img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(12)))
-    d = ImageDraw.Draw(img)
-    leg_w = max(10, int(ww * 0.018))
-    for lx in (tx0 + int(ww * 0.03), tx1 - int(ww * 0.03) - leg_w):
-        d.rounded_rectangle([lx, ty + th - 4, lx + leg_w, floor_y + 6], radius=5,
-                            fill=(150, 104, 70, 255))
-    d.rounded_rectangle([tx0, ty, tx1, ty + th], radius=10, fill=(178, 128, 88, 255))
-    d.rounded_rectangle([tx0 + 4, ty + 3, tx1 - 4, ty + th * 0.45], radius=8,
-                        fill=(196, 148, 106, 255))
-
-    # 桌上那張紙（他寫的東西），略斜
-    pw, ph = int(ww * 0.20), int(wh * 0.12)
-    paper = Image.new("RGBA", (pw, ph), (0, 0, 0, 0))
-    pd = ImageDraw.Draw(paper)
-    pd.rounded_rectangle([0, 0, pw - 1, ph - 1], radius=6, fill=(252, 249, 242, 255),
-                         outline=(214, 204, 188, 255), width=2)
-    for i in range(5):
-        y = int(ph * (0.2 + i * 0.15))
-        x1 = int(pw * (0.85 if i < 4 else 0.55))
-        pd.line([(int(pw * 0.12), y), (x1, y)], fill=(150, 140, 128, 255), width=3)
-    paper = paper.rotate(-8, resample=Image.BICUBIC, expand=True)
-    # 紙平放在桌面上：只露出上緣一截的透視感用壓扁表現
-    paper = paper.resize((paper.width, max(1, int(paper.height * 0.42))), Image.LANCZOS)
-    img.alpha_composite(paper, (int(ww * 0.62), ty - paper.height + int(th * 0.35)))
-    # 鉛筆
-    pen = Image.new("RGBA", (int(ww * 0.13), 14), (0, 0, 0, 0))
-    pn = ImageDraw.Draw(pen)
-    pn.rectangle([0, 2, pen.width - 22, 11], fill=(232, 182, 60, 255))
-    pn.polygon([(pen.width - 22, 2), (pen.width - 1, 7), (pen.width - 22, 11)],
-               fill=(222, 196, 150, 255))
-    pn.polygon([(pen.width - 7, 5), (pen.width - 1, 7), (pen.width - 7, 9)],
-               fill=(60, 52, 46, 255))
-    pen = pen.rotate(14, resample=Image.BICUBIC, expand=True)
-    img.alpha_composite(pen, (int(ww * 0.585), ty - pen.height + 6))
-
-    # 分身本人
-    sprite_p = CAST_DIR / f"{cast_id}.png"
-    if not re.fullmatch(r"c\d{2}", cast_id or "") or not sprite_p.is_file():
-        raise PolaroidError(f"cast_id 不合法或精靈圖不在：{cast_id!r}")
-    spr = Image.open(sprite_p).convert("RGBA")
-    bbox = spr.getbbox() or (0, 0, spr.width, spr.height)
-    spr = spr.crop(bbox)
-    # 精靈圖是去背出來的，邊上有一圈淺色毛邊；alpha 往內收 1 px 再縮放。
+    fig_p, kind = figure_for(cast_id, poses_dir)
+    spr = _drop_specks(Image.open(fig_p).convert("RGBA"))
+    bbox = spr.getchannel("A").point(lambda v: 255 if v > 32 else 0).getbbox()
+    spr = spr.crop(bbox or (0, 0, spr.width, spr.height))
+    # 去背圖邊上有一圈淺色毛邊；alpha 往內收 1 px 再縮放。
     spr.putalpha(spr.getchannel("A").filter(ImageFilter.MinFilter(3)))
-    target_h = int(wh * 0.56)
-    scale = target_h / spr.height
-    spr = spr.resize((max(1, int(spr.width * scale)), target_h), Image.LANCZOS)
-    img.alpha_composite(spr, (fig_cx - spr.width // 2, floor_y + 8 - spr.height))
-
-    # 輕微暗角
-    vig = Image.new("L", size, 0)
-    ImageDraw.Draw(vig).rectangle([0, 0, ww, wh], outline=255, width=int(ww * 0.05))
-    vig = vig.filter(ImageFilter.GaussianBlur(ww * 0.06))
-    dark = Image.new("RGBA", size, (70, 50, 30, 0))
-    dark.putalpha(vig.point(lambda v: int(v * 0.35)))
-    img.alpha_composite(dark)
-    return img.convert("RGB")
+    scale = min(wh * FIG_H_FRAC / spr.height, ww * FIG_W_MAX_FRAC / spr.width)
+    spr = spr.resize((max(1, int(spr.width * scale)), max(1, int(spr.height * scale))),
+                     Image.LANCZOS)
+    spr = _grade(spr)
+    cx, feet = ww // 2, int(wh * FEET_Y_FRAC)
+    shadow = Image.new("RGBA", size, (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).ellipse(
+        [cx - spr.width * 0.55, feet - wh * 0.02, cx + spr.width * 0.55, feet + wh * 0.018],
+        fill=(20, 10, 0, 150))
+    img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(max(2, wh * 0.016))))
+    img.alpha_composite(spr, (cx - spr.width // 2, feet - spr.height))
+    return img.convert("RGB"), {"figure": kind, "figure_file": fig_p.name,
+                                "plate": PLATE_PATH.stem}
 
 
 def _box(v: Any) -> tuple[int, int, int, int] | None:
@@ -554,16 +680,68 @@ def _layout_problems(lay: dict[str, Any]) -> list[str]:
     return problems
 
 
+def _frame_fit(opaque: tuple[int, int, int, int], win_native: tuple[int, int, int, int],
+               canvas: tuple[int, int] = CANVAS) -> dict[str, Any]:
+    """素材相框 → 卡面的幾何。**按寬度縮放，下緣白邊往下延長**（不壓扁、不裁掉紙）。
+
+    * 先裁到不透明外框（素材外圍有幾 px 透明邊）；
+    * 寬度縮到卡面寬 ⇒ 高度 `h0`；比卡面高就不收（退回佔位相框）；
+    * 缺的 `extra` 高度由下緣白邊的**中段**（白邊上下各留 1/4 不動：窗緣陰影與圓角）
+      上下鏡射接續補滿——紙紋是細雜訊，鏡射接縫看不出來，也不會把紙紋拉長變形。
+    """
+    ox0, oy0, ox1, oy1 = opaque
+    s = canvas[0] / (ox1 - ox0)
+    h0 = int(round((oy1 - oy0) * s))
+    if h0 > canvas[1]:
+        raise ValueError(f"相框按寬度縮放後高 {h0} px，比卡面 {canvas[1]} 高")
+    win = (int(round((win_native[0] - ox0) * s)), int(round((win_native[1] - oy0) * s)),
+           int(round((win_native[2] - ox0) * s)), int(round((win_native[3] - oy0) * s)))
+    band = h0 - win[3]
+    if band <= 8:
+        raise ValueError("相框下緣沒有白邊可以延長")
+    cut = (win[3] + band // 4, h0 - band // 4)
+    return {"crop": opaque, "scale": s, "h0": h0, "window": win,
+            "extend_px": canvas[1] - h0, "cut": cut,
+            "underlay_px": max(1, int(round(FRAME_UNDERLAY_PX * s)))}
+
+
+def _build_frame(png: pathlib.Path, fit: dict[str, Any], canvas: tuple[int, int] = CANVAS):
+    """照 `_frame_fit` 的幾何做出卡面大小的相框（RGBA）＋紙色（白邊中段的中位數）。"""
+    from PIL import Image, ImageStat
+    w = canvas[0]
+    im = Image.open(png).convert("RGBA").crop(fit["crop"]).resize((w, fit["h0"]), Image.LANCZOS)
+    c0, c1 = fit["cut"]
+    mid = im.crop((0, c0, w, c1))
+    paper = tuple(int(v) for v in ImageStat.Stat(
+        mid.convert("RGB").crop((w // 8, 0, w - w // 8, mid.height))).median)
+    if fit["extend_px"] <= 0:
+        return im, paper
+    need = mid.height + fit["extend_px"]
+    strip = Image.new("RGBA", (w, need))
+    y, flip = 0, False
+    while y < need:
+        strip.paste(mid.transpose(Image.FLIP_TOP_BOTTOM) if flip else mid, (0, y))
+        y += mid.height
+        flip = not flip
+    out = Image.new("RGBA", canvas, (0, 0, 0, 0))
+    out.paste(im.crop((0, 0, w, c0)), (0, 0))
+    out.paste(strip, (0, c0))
+    out.paste(im.crop((0, c1, w, fit["h0"])), (0, c0 + need))
+    return out, paper
+
+
 def layout_for(frame_dir: pathlib.Path | None = None, *,
                module: int = QR_MODULE_PX) -> dict[str, Any]:
     """用哪一個相框、版面長怎樣。**不合格的相框退回佔位相框，並且講為什麼。**
 
-    A 線交件的 json 至少要有 `window`（`[x0,y0,x1,y1]` 或 `{x,y,w,h}`）；可選 `caption`、
-    `footer`、`qr`（同格式；`qr` 是碼本身的外框，模組大小＝寬度 ÷ 模組數）。
+    素材 json 至少要有 `window`（或素材線的 `window_px`；`[x0,y0,x1,y1]` 或 `{x,y,w,h}`，
+    **素材原生座標**）。相框一律照 `_frame_fit` 放進卡面 `CANVAS`（不是照素材原尺寸輸出：
+    素材比例 0.89 的下緣白邊放不下 8 px 模組的 QR＋字，理由見裁決檔）。可選 `caption`、
+    `footer`、`qr`（**卡面座標**；`qr` 是碼本身的外框，模組大小＝寬度 ÷ 模組數）。
     缺的就用 `_derive_layout` 從相片窗推。放不下（字框太小、靜區出紙、互相重疊、
-    模組太小）⇒ 退回佔位相框，`frame_note` 寫理由。
+    模組太小、相框縮放後比卡面高）⇒ 退回佔位相框，`frame_note` 寫理由。
     """
-    base = {**_derive_layout(CANVAS, WINDOW, module), "frame_png": None,
+    base = {**_derive_layout(CANVAS, WINDOW, module), "frame_png": None, "frame_fit": None,
             "frame": "placeholder", "frame_note": None}
     d = frame_dir
     if d is None:
@@ -577,11 +755,16 @@ def layout_for(frame_dir: pathlib.Path | None = None, *,
         from PIL import Image
         spec = json.loads(js.read_text(encoding="utf-8"))
         with Image.open(png) as im:
-            canvas = im.size
-        win = _box(spec.get("window"))
-        if win is None:
-            raise ValueError("json 沒有合法的 window")
-        lay = _derive_layout(canvas, win, module)
+            size = im.size
+            alpha = im.convert("RGBA").getchannel("A")
+        opaque = alpha.point(lambda v: 255 if v >= 128 else 0).getbbox() or (0, 0, *size)
+        win_n = _box(spec.get("window")) or _box(spec.get("window_px"))
+        if win_n is None:
+            raise ValueError("json 沒有合法的 window／window_px")
+        if not _inside(win_n, opaque):
+            raise ValueError("window 不在相框的紙裡")
+        fit = _frame_fit(opaque, win_n, CANVAS)
+        lay = _derive_layout(CANVAS, fit["window"], module)
         lay["caption"] = _box(spec.get("caption")) or lay["caption"]
         lay["footer"] = _box(spec.get("footer")) or lay["footer"]
         qspec = _box(spec.get("qr"))
@@ -594,8 +777,8 @@ def layout_for(frame_dir: pathlib.Path | None = None, *,
     except Exception as exc:                              # noqa: BLE001
         base["frame_note"] = f"frame_rejected：{type(exc).__name__}: {exc}"[:300]
         return base
-    return {**lay, "frame_png": png, "frame": "file:" + (_sha256_file(png) or "?")[:12],
-            "frame_note": None}
+    return {**lay, "frame_png": png, "frame_fit": fit,
+            "frame": "file:" + (_sha256_file(png) or "?")[:12], "frame_note": None}
 
 
 def _placeholder_frame(canvas: tuple[int, int], window: tuple[int, int, int, int]):
@@ -616,10 +799,14 @@ def _placeholder_frame(canvas: tuple[int, int], window: tuple[int, int, int, int
 
 def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
             originals: Iterable[Any] = (), frame_dir: pathlib.Path | None = None,
+            poses_dir: pathlib.Path | None = None,
             qr_module_px: int = QR_MODULE_PX, _sweep_only: bool = False
             ) -> tuple[bytes, dict[str, Any]]:
     """做一張拍立得。回（PNG bytes, meta）。meta 只有版面與旗標，**不含那句話本身**。
 
+    `decision` ＝ 分身自己寫的 PLAN.md 第一行（`twinagent.parse_plan`）。這裡只清掉
+    markdown／引號、畫不出的字、放不下的尾巴；**不改寫、不補字**。清完是空的、或逐字抄了
+    觀眾原文 ⇒ 那一行留空（`caption_blank`），拍立得照發。
     `originals` ＝ 觀眾原文的自由文字格（`originals_of`）：拿來擋逐字抄錄，不會被畫出來。
     `qr_module_px`／`_sweep_only` 只給掃描實驗用（量最小模組尺寸，`_sweep_only` 讓
     低於下限的模組也畫得出來以便量到懸崖在哪）。產品路徑一律用預設值。
@@ -639,27 +826,46 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
     cap_box, foot_box, g = lay["caption"], lay["footer"], lay["qr"]
 
     if lay["frame_png"] is not None:
-        img = Image.open(lay["frame_png"]).convert("RGB")
+        # 素材相框：紙色墊底 → 相片從窗格底下墊進去（四邊多墊一點）→ 相框蓋上去
+        fit = lay["frame_fit"]
+        frame, paper = _build_frame(lay["frame_png"], fit, canvas)
+        u = fit["underlay_px"]
+        scene, fig = render_scene(cast_id, (win[2] - win[0] + 2 * u, win[3] - win[1] + 2 * u),
+                                  poses_dir=poses_dir)
+        img = Image.new("RGBA", canvas, paper + (255,))
+        img.paste(scene, (win[0] - u, win[1] - u))
+        img.alpha_composite(frame)
+        img = img.convert("RGB")
     else:
+        paper = PAPER
         img = _placeholder_frame(canvas, win)
-    scene = render_scene(cast_id, (win[2] - win[0], win[3] - win[1]))
-    img.paste(scene, (win[0], win[1]))
+        scene, fig = render_scene(cast_id, (win[2] - win[0], win[3] - win[1]),
+                                  poses_dir=poses_dir)
+        img.paste(scene, (win[0], win[1]))
     d = ImageDraw.Draw(img)
 
-    # ── 那一行字 ──
+    # ── 那一行字：分身自己寫的，不補字 ──
     f_cap = _font(CAPTION_PX)
     caption = clean_caption(decision)
     redacted = False
     if caption and caption_leaks_original(caption, originals):
-        caption, redacted = NEUTRAL_CAPTION, True
+        caption, redacted = "", True             # 留空。不換成任何人寫的句子。
     caption, dropped = _drop_missing(f_cap, caption)
-    if not caption:
-        caption = NEUTRAL_CAPTION
-    caption, truncated = fit_text(f_cap, caption, cap_box[2] - cap_box[0])
-    cx = (cap_box[0] + cap_box[2]) // 2
-    cy = (cap_box[1] + cap_box[3]) // 2
-    d.text((cx, cy), caption, font=f_cap, fill=INK, anchor="mm")
-    cap_drawn = d.textbbox((cx, cy), caption, font=f_cap, anchor="mm")
+    truncated = False
+    cap_drawn = None
+    lines: list[str] = []
+    if caption:
+        lines, truncated = wrap_caption(f_cap, caption, cap_box[2] - cap_box[0])
+        caption = "".join(lines)
+        cx = (cap_box[0] + cap_box[2]) // 2
+        y = (cap_box[1] + cap_box[3]) // 2 - (len(lines) - 1) * CAPTION_LINE_H // 2
+        boxes = []
+        for ln in lines:
+            d.text((cx, y), ln, font=f_cap, fill=INK, anchor="mm")
+            boxes.append(d.textbbox((cx, y), ln, font=f_cap, anchor="mm"))
+            y += CAPTION_LINE_H
+        cap_drawn = (min(b[0] for b in boxes), min(b[1] for b in boxes),
+                     max(b[2] for b in boxes), max(b[3] for b in boxes))
 
     # ── 小字 ──
     f_foot = _font(FOOTER_PX)
@@ -671,9 +877,12 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
 
     # ── QR（官網本身）──
     qb, qq, mod = g["box"], g["quiet_box"], g["module"]
-    # 靜區塗紙色（不是純白）：紙色夠亮（亮度 ≈ 245），解碼器認得；
-    # 塗純白會在紙上浮出一塊「貼紙」，而版面要的是只有那個碼。
-    d.rectangle(qq, fill=PAPER)
+    # 靜區保留相框的紙紋（塗一塊平的色會在紙上浮出一張「貼紙」）；
+    # 但先量：那一塊有任何一點不夠亮（< QR_QUIET_MIN_L）就塗紙色，解碼器要的是亮的靜區。
+    quiet_min_l = min(img.crop(qq).convert("L").getextrema())
+    quiet_painted = quiet_min_l < QR_QUIET_MIN_L
+    if quiet_painted:
+        d.rectangle(qq, fill=paper)
     for r, row in enumerate(g["matrix"]):
         for c, v in enumerate(row):
             if v:
@@ -682,13 +891,13 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
 
     full = (0, 0, canvas[0], canvas[1])
     problems = []
-    if not _inside(cap_drawn, cap_box):
+    if cap_drawn is not None and not _inside(cap_drawn, cap_box):
         problems.append("caption 出框")
     if not _inside(foot_drawn, foot_box):
         problems.append("footer 出框")
     if not _inside(qq, full):
         problems.append("QR 靜區出紙")
-    if _overlap(cap_drawn, qq) or _overlap(foot_drawn, qq):
+    if (cap_drawn is not None and _overlap(cap_drawn, qq)) or _overlap(foot_drawn, qq):
         problems.append("字壓到 QR 靜區")
     if problems:
         raise PolaroidError("版面放不下：" + "；".join(problems))
@@ -696,58 +905,36 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
     buf = io.BytesIO()
     img.save(buf, "PNG", optimize=True)
     png = buf.getvalue()
+    fit = lay.get("frame_fit")
     meta = {
-        "v": 1, "size": list(canvas), "cast_id": cast_id,
+        "v": 2, "size": list(canvas), "cast_id": cast_id,
+        "figure": fig["figure"], "figure_file": fig["figure_file"], "plate": fig["plate"],
         "window": list(win),
-        "caption_box": list(cap_box), "caption_drawn": list(cap_drawn),
+        "caption_box": list(cap_box),
+        "caption_drawn": list(cap_drawn) if cap_drawn is not None else None,
+        "caption_blank": not caption,
         "caption_truncated": truncated, "caption_redacted": redacted,
-        "caption_chars": len(caption), "dropped_glyphs": dropped,
+        "caption_chars": len(caption), "caption_lines": len(lines),
+        "dropped_glyphs": dropped,
         "footer_box": list(foot_box), "footer_drawn": list(foot_drawn),
         "qr_text": SITE_URL, "qr_version": (g["n"] - 17) // 4, "qr_modules": g["n"],
         "qr_module_px": mod, "qr_box": list(qb), "qr_quiet_box": list(qq),
+        "qr_quiet_min_l": quiet_min_l, "qr_quiet_painted": quiet_painted,
         "frame": lay["frame"], "frame_note": lay["frame_note"],
+        "frame_fit": ({"scale": round(fit["scale"], 4), "extend_px": fit["extend_px"]}
+                      if fit else None),
         "bytes_n": len(png),
     }
     return png, meta
 
 
 # ---------------------------------------------------------------------------
-# 自檢用的合成範例（**合成特質**，不是真人）
+# 範例
 # ---------------------------------------------------------------------------
-
-#: 範例：合成特質 → 合成的分身決定。**沒有一筆來自真人**。
-SAMPLES: tuple[dict[str, Any], ...] = (
-    {"name": "short", "card": {"shape": "圓潤", "color": "暖土", "texture": "光滑"},
-     "decision": "寫一封謝卡給國小導師"},
-    {"name": "long_truncated", "card": {"shape": "修長", "color": "苔綠", "texture": "斑駁"},
-     "decision": "為下週末安排一份慢節奏的散步路線，途中經過三家老書店、一間賣手沖咖啡的小店，最後在河堤看夕陽"},
-    {"name": "mixed_emoji", "card": {"shape": "方正", "color": "赭紅", "texture": "指紋"},
-     "decision": "## 列一張「搬家 checklist」✅ 給室友 📦"},
-    {"name": "no_traits", "card": {},
-     "decision": "整理一份給自己的睡前閱讀清單"},
-)
-
-
-def _cli_sample(out: pathlib.Path) -> int:
-    out.mkdir(parents=True, exist_ok=True)
-    index = []
-    for i, s in enumerate(SAMPLES):
-        cid = pick_cast_for(s["card"])
-        rshort = hashlib.sha256(f"synthetic-{i}".encode()).hexdigest()[:8]
-        png, meta = compose(decision=s["decision"], cast_id=cid, date_str="2026.09.26",
-                            receipt_short=rshort, originals=())
-        p = out / f"polaroid_{i + 1}_{s['name']}.png"
-        p.write_bytes(png)
-        index.append({"file": p.name, "synthetic": True, "card": s["card"],
-                      "decision_in": s["decision"], "cast_id": cid,
-                      "receipt_short": rshort, "sha256": hashlib.sha256(png).hexdigest(),
-                      "meta": meta})
-    (out / "samples.json").write_text(
-        json.dumps({"note": "合成特質、合成決定、合成收據短碼；沒有任何一筆來自真人",
-                    "samples": index}, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8")
-    print(json.dumps({"ok": True, "out": str(out), "n": len(index)}, ensure_ascii=False))
-    return 0
+# ⚠ 2026-09-26 以前這裡有一組**人寫死的分身決定**（`SAMPLES`，「寫一封謝卡給國小導師」…）。
+#   人類：「那個字是不是應該要讓他是 AI agent 生成的，不要隨便刻板」⇒ 拿掉。
+#   範例改由 `polaroid_realrun.py`（合成特質 → 分身真跑 → 它自己寫的 PLAN.md 第一行）產生，
+#   每一張都記 engine／model／run_id／收據鏈頭。**不要在這裡再放任何寫死的決定句。**
 
 
 def parity_cards() -> list[dict[str, Any]]:
@@ -781,8 +968,6 @@ def main(argv: Iterable[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="twin/polaroid — 拍立得")
     s = ap.add_subparsers(dest="cmd", required=True)
     s.add_parser("check")
-    sp = s.add_parser("sample", help="用合成特質產範例拍立得")
-    sp.add_argument("--out", required=True)
     pp = s.add_parser("parity-table", help="cast_id 對照表（給 node 對照前端 pickCastFor）")
     pp.add_argument("--out", required=True)
     pp.add_argument("--manifest", default=None)
@@ -793,8 +978,6 @@ def main(argv: Iterable[str] | None = None) -> int:
         ok, why = available()
         print(json.dumps({"available": ok, "why": why}, ensure_ascii=False))
         return 0 if ok else 1
-    if a.cmd == "sample":
-        return _cli_sample(pathlib.Path(a.out))
     if a.cmd == "parity-table":
         return _cli_parity(pathlib.Path(a.out),
                            pathlib.Path(a.manifest) if a.manifest else None, a.tie)

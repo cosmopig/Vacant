@@ -1,0 +1,37 @@
+{
+ "file": "polaroid/polaroid_frame.png",
+ "size": [
+  829,
+  930
+ ],
+ "sha256": "b2faf31d6747b0cf5c84da705073b8b0c37e6aa203fad2c62db176b669f3b85d",
+ "window_px": {
+  "x": 50,
+  "y": 60,
+  "w": 730,
+  "h": 686
+ },
+ "window_note": "中央透明窗格（原圖純黑區）的外接矩形；圖要從窗格底下墊進去（窗格四邊各多墊 4px 以免露縫）。窗格略橫長，不是正方形",
+ "window_norm": {
+  "x": 0.0603,
+  "y": 0.0645,
+  "w": 0.8806,
+  "h": 0.7376
+ },
+ "alpha": "外圍透明、窗格透明、白邊不透明（邊緣 0.7px 高斯軟化）；沒有烘進陰影，手機端自己加",
+ "source": {
+  "generator": "codex exec（內建生圖）",
+  "raw": "work/polaroid/frame.png",
+  "raw_size": [
+   1086,
+   1448
+  ],
+  "prompt_file": "work/polaroid/prompts.json",
+  "prompt_key": "frame",
+  "reference_images": [
+   "vacant_hm world3/plates/m_gate_v1.jpg（只借光色）"
+  ],
+  "flow_job_id": null
+ },
+ "generated_at": "2026-09-26"
+}

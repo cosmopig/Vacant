@@ -22,7 +22,7 @@
 * `neg_other_url` —— 在同一個位置畫一個別的網址 ⇒ 解出來**必須等於那個別的網址**、
   **不等於**官網（證明比對真的在比內容，不是「解得出東西就算過」）。
 
-`--sweep` 另外量「最小模組尺寸」：每模組 5／6／7／8 px × 距離 10／15／20／25 cm × 8 個亂數種子。
+`--sweep` 另外量「最小模組尺寸」：每模組 5／6／7／8／9 px × 距離 10／15／20／25 cm × 8 個亂數種子 × 兩張範例。
 
 ⚠ 誠實邊界：`phone_photo*` 是**模擬**，不是兩支真手機對拍。OpenCV 的解碼器比手機內建
 相機（iOS Vision／Google ML Kit）弱，所以這是偏保守的代理量——但它仍然是代理量。
@@ -30,7 +30,7 @@
 
 用法：
     python3 ops/exhibit/twin/polaroid_qr_check.py <png…> --samples samples.json [--out qr_decode.json]
-    python3 ops/exhibit/twin/polaroid_qr_check.py --sweep [--out qr_sweep.json]
+    python3 ops/exhibit/twin/polaroid_qr_check.py --sweep [--samples samples.json] [--out qr_sweep.json]
 （要有 `opencv-python-headless`、`numpy`、Pillow；開發機上裝在拋棄式 venv 裡即可）
 """
 from __future__ import annotations
@@ -201,14 +201,24 @@ def physical(meta: dict[str, Any]) -> dict[str, Any]:
                                      for d in (10, 15, 20, 25)}}
 
 
-def sweep(det: Any, seeds: int = 8) -> dict[str, Any]:
-    """最小模組尺寸：每模組 m px × 距離 × 種子 ⇒ 解得回官網的比例。"""
+def sweep(det: Any, seeds: int = 8,
+          samples: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    """最小模組尺寸：每模組 m px × 距離 × 種子 ⇒ 解得回官網的比例。
+
+    用哪兩張：`samples`（`samples.json` 的前兩筆：分身真跑寫的那一句＋它的 cast）；
+    沒給就用兩張沒有字的卡（一位有姿勢圖 c09、一位沒有 c08）——QR 在白邊右下角，
+    那一句寫什麼不影響它，但照片與相框會。
+    """
     from PIL import Image
+    picks = [{"name": s["file"], "decision": s["decision_by_agent"], "cast_id": s["cast_id"]}
+             for s in (samples or [])[:2]] or [
+        {"name": "blank_c09", "decision": "", "cast_id": "c09"},
+        {"name": "blank_c08", "decision": "", "cast_id": "c08"}]
     rows = []
-    for m in (5, 6, 7, 8):
-        for si, s in enumerate(polaroid.SAMPLES[:2]):
+    for m in (5, 6, 7, 8, 9):
+        for si, s in enumerate(picks):
             png, meta = polaroid.compose(
-                decision=s["decision"], cast_id=polaroid.pick_cast_for(s["card"]),
+                decision=s["decision"], cast_id=s["cast_id"],
                 date_str="2026.09.26", receipt_short="0123abcd", qr_module_px=m,
                 _sweep_only=True)
             img = Image.open(io.BytesIO(png))
@@ -237,7 +247,9 @@ def main(argv: list[str] | None = None) -> int:
                                        "＋雜訊＋JPEG），不是兩支真手機對拍；OpenCV 比手機內建相機弱，"
                                        "是偏保守的代理量。那一格要在展場實測。")}
     if a.sweep:
-        out.update(sweep(det))
+        samp = (json.loads(pathlib.Path(a.samples).read_text(encoding="utf-8"))["samples"]
+                if a.samples else None)
+        out.update(sweep(det, samples=samp))
         ok = True
     else:
         metas = {}

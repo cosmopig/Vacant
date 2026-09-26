@@ -1,0 +1,783 @@
+{
+  "note": "合成特質；分身真跑（產品路徑）；每一句都是它自己寫的",
+  "runs": [
+    {
+      "name": "p1",
+      "synthetic": true,
+      "card": {
+        "shape": "修長",
+        "color": "灰藍",
+        "texture": "光滑",
+        "vibe": "說話很直、不太會客套、週末會一個人去爬郊山",
+        "first_line": "先講結論。"
+      },
+      "card_text": "（合成的特質，不是真人）在物流倉庫排班，數字記得很牢，常常忘記吃午餐。朋友說我看起來很兇，其實只是在想事情。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:06:59Z",
+      "generate_rc": 0,
+      "wall_s": 6.8,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7021228032,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_dqsjfyqr",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_dqsjfyqr/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_dqsjfyqr/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定整理一份「週末登山清單」。",
+        "reason": "因為我喜歡獨自去郊山，且性格直爽不愛客套，所以需要一個清晰、直接的準備檢查表。這能幫助我在忙碌的工作中（尤其是容易忘記吃飯的時候）保持條理。",
+        "run_id": "5930fbe90bf64425bfc350d9ac04cab8",
+        "verdict_hash": "facee37cc36d19ed07c867fd46e672e7239ef37bf27ce2b5b06cdca0fa61dadb",
+        "accepted": null,
+        "requests_seen": 4,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 6788,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-98f6ca79e347"
+      },
+      "artifacts": [
+        "Hiking_Checklist.md"
+      ],
+      "plan_md": "我決定整理一份「週末登山清單」。\n\n因為我喜歡獨自去郊山，且性格直爽不愛客套，所以需要一個清晰、直接的準備檢查表。這能幫助我在忙碌的工作中（尤其是容易忘記吃飯的時候）保持條理。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 4,
+        "responses": 4,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 8,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p2",
+      "synthetic": true,
+      "card": {
+        "shape": "粗獷",
+        "color": "暖土",
+        "texture": "指紋",
+        "vibe": "安靜、喜歡觀察人、對聲音很敏感",
+        "first_line": "嗯……讓我想一下。"
+      },
+      "card_text": "（合成的特質，不是真人）大學念化學，後來轉去做木工，手上常有小傷口。晚上會聽廣播，不太看手機。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:07:20Z",
+      "generate_rc": 0,
+      "wall_s": 5.8,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020941312,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid__okbgm73",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid__okbgm73/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid__okbgm73/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定在房間裡記錄一份關於木材質感的觀察筆記。",
+        "reason": "因為我的特質中提到我喜歡木工且對質感敏感，這些細節與我對聲音的敏銳度相呼應。我想透過文字捕捉那些指尖觸碰到粗糙表面時的真實感受。",
+        "run_id": "42fae8d548a64cdd927348ab20fb234f",
+        "verdict_hash": "50f330de858b6d3336744398a99a5677930a1393c1e0494c6387f61f26e803ec",
+        "accepted": null,
+        "requests_seen": 3,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 5721,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-af23e8b4a55d"
+      },
+      "artifacts": [
+        "wood_texture_notes.md"
+      ],
+      "plan_md": "我決定在房間裡記錄一份關於木材質感的觀察筆記。\n\n因為我的特質中提到我喜歡木工且對質感敏感，這些細節與我對聲音的敏銳度相呼應。我想透過文字捕捉那些指尖觸碰到粗糙表面時的真實感受。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 3,
+        "responses": 3,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 7,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p3",
+      "synthetic": true,
+      "card": {
+        "shape": "小巧",
+        "color": "苔綠",
+        "texture": "斑駁",
+        "vibe": "急性子、笑點很低、很會跟陌生人聊天",
+        "first_line": "欸你知道嗎！"
+      },
+      "card_text": "（合成的特質，不是真人）在夜市幫家裡顧攤十幾年，最近開始自學日文，背單字背得很痛苦。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:07:25Z",
+      "generate_rc": 0,
+      "wall_s": 6.2,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020838912,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_q70st9d1",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_q70st9d1/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_q70st9d1/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定寫一份「日文單字記憶小撇步」。",
+        "reason": "因為我最近在背單字背到快崩潰，覺得壓力好大。我想把這些痛苦轉化成一點點動力，讓自己更有信心繼續學下去！",
+        "run_id": "ec3b251fe8d34636bd9884ac243f27aa",
+        "verdict_hash": "520be42653fb53dee2170e35a1203c560081f8afd5234d2a152bcc00777954b6",
+        "accepted": null,
+        "requests_seen": 4,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 6101,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-e53392dfec2c"
+      },
+      "artifacts": [
+        "日文學習筆記.md"
+      ],
+      "plan_md": "我決定寫一份「日文單字記憶小撇步」。\n\n因為我最近在背單字背到快崩潰，覺得壓力好大。我想把這些痛苦轉化成一點點動力，讓自己更有信心繼續學下去！",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 4,
+        "responses": 4,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 8,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p4",
+      "synthetic": true,
+      "card": {
+        "shape": "厚實",
+        "color": "奶油",
+        "texture": "光滑",
+        "vibe": "慢條斯理、有點固執、記性很好",
+        "first_line": "坐，不急。"
+      },
+      "card_text": "（合成的特質，不是真人）退休的公車司機，每天早上去公園走一圈，還記得跑過的每一條路線上每一站的名字。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:07:32Z",
+      "generate_rc": 0,
+      "wall_s": 5.6,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020830720,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_tab4sdwp",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_tab4sdwp/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_tab4sdwp/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我打算在房間裡建立一份「公園路線導覽」。",
+        "reason": "因為我記得每一條路線上的站點名稱，這份清單能讓我把這些記憶整理出來。作為一個慢條斯理的人，我喜歡把細節記錄下來，確保不會遺漏任何一個角落。",
+        "run_id": "809c9b193e4a4d0d82ea292352becae7",
+        "verdict_hash": "7b4c49b509bbc00009e9b81b319be730f8cc963d1a85ab3f1ae9b73c172c9a30",
+        "accepted": null,
+        "requests_seen": 4,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 5503,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-ece9e2f363c0"
+      },
+      "artifacts": [
+        "Park_Routes.md"
+      ],
+      "plan_md": "我打算在房間裡建立一份「公園路線導覽」。\n\n因為我記得每一條路線上的站點名稱，這份清單能讓我把這些記憶整理出來。作為一個慢條斯理的人，我喜歡把細節記錄下來，確保不會遺漏任何一個角落。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 4,
+        "responses": 4,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 8,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p5",
+      "synthetic": true,
+      "card": {
+        "shape": "圓潤",
+        "color": "暖土",
+        "texture": "絨面",
+        "vibe": "容易緊張但很認真、半夜才有精神",
+        "first_line": "我可以問一個可能很笨的問題嗎？"
+      },
+      "card_text": "（合成的特質，不是真人）剛出社會的護理師，輪三班。想養貓，但宿舍不能養。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:07:37Z",
+      "generate_rc": 0,
+      "wall_s": 7.0,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020822528,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_h_1q78hz",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_h_1q78hz/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_h_1q78hz/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定為自己寫一份「深夜護理師的放鬆清單」。",
+        "reason": "因為我是一個容易緊張且在半夜才有精神的人，這份清單能幫助我在辛苦的輪班後，用溫和的方式讓心靈平靜下來。作為一名想養貓但目前受限的護理師，這些內容也能帶給我一點點虛擬的陪伴感。",
+        "run_id": "01ec51cbb1a74f2d8befd5eab11218a4",
+        "verdict_hash": "6c4eb9b02ba19e37fb81f84cd7ccc16e5dff2ee702ae61cfcba5878b876461ae",
+        "accepted": null,
+        "requests_seen": 3,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 6944,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-e492d713de7d"
+      },
+      "artifacts": [
+        "Relaxation_List.md"
+      ],
+      "plan_md": "我決定為自己寫一份「深夜護理師的放鬆清單」。\n\n因為我是一個容易緊張且在半夜才有精神的人，這份清單能幫助我在辛苦的輪班後，用溫和的方式讓心靈平靜下來。作為一名想養貓但目前受限的護理師，這些內容也能帶給我一點點虛擬的陪伴感。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 3,
+        "responses": 3,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 7,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p6",
+      "synthetic": true,
+      "card": {
+        "shape": "粗獷",
+        "color": "奶油",
+        "texture": "絨面",
+        "vibe": "好奇、想法跳來跳去、什麼都想拆開看看",
+        "first_line": "這個可以拆開嗎？"
+      },
+      "card_text": "（合成的特質，不是真人）國中生，喜歡恐龍和天文，最近在學做模型，數學不太好。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:07:44Z",
+      "generate_rc": 0,
+      "wall_s": 8.2,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020822528,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_3995kql2",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_3995kql2/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_3995kql2/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定在房間裡寫一個關於「如果恐龍有外星科技」的奇幻構想。",
+        "reason": "因為我對恐龍和天文都非常著迷，而且我喜歡把事物拆開來思考它們可能的構造。我想看看如果把這兩個領域結合在一起會產生什麼有趣的火花。",
+        "run_id": "024497d777894d7ca9d07076b046ab9f",
+        "verdict_hash": "4c145ad883580b26f2e91614eeaa8f6aa09533925c1a41b1f69aa8873b228125",
+        "accepted": null,
+        "requests_seen": 4,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 8114,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-e49714872c12"
+      },
+      "artifacts": [
+        "Dinosaur_Tech_Concept.md"
+      ],
+      "plan_md": "我決定在房間裡寫一個關於「如果恐龍有外星科技」的奇幻構想。\n\n因為我對恐龍和天文都非常著迷，而且我喜歡把事物拆開來思考它們可能的構造。我想看看如果把這兩個領域結合在一起會產生什麼有趣的火花。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 4,
+        "responses": 4,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 8,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p7",
+      "synthetic": true,
+      "card": {},
+      "card_text": "（合成的特質，不是真人）我在南部長大，現在在台北做會計，每年只回家兩次。不太會表達，但很會記帳，也記得每個人借過我什麼。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:31:15Z",
+      "generate_rc": 0,
+      "wall_s": 7.9,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020924928,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_vcdsn12_",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_vcdsn12_/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_vcdsn12_/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定建立一份「借貸與心意清單」。",
+        "reason": "因為我是個細心且重視人際關係的人，雖然我不擅長用言語表達情感，但我習慣透過精確的記帳來記錄與他人的連結。這份清單能讓我清楚地知道誰曾對我好，以及我該如何回報。",
+        "run_id": "a8d7ad948aec433e95ba9ac0626d1bb3",
+        "verdict_hash": "b3374afa958e56ec13fa9e824ce6ed7de532c629a8b1267bda8edb2c701f7b23",
+        "accepted": null,
+        "requests_seen": 4,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 7636,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-a1593b6b0990"
+      },
+      "artifacts": [
+        "Debt_and_Kindness_Log.md"
+      ],
+      "plan_md": "我決定建立一份「借貸與心意清單」。\n\n因為我是個細心且重視人際關係的人，雖然我不擅長用言語表達情感，但我習慣透過精確的記帳來記錄與他人的連結。這份清單能讓我清楚地知道誰曾對我好，以及我該如何回報。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 4,
+        "responses": 4,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 8,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    },
+    {
+      "name": "p8",
+      "synthetic": true,
+      "card": {
+        "shape": "方正",
+        "color": "灰藍",
+        "texture": "絨面",
+        "vibe": "話很多、一講就停不下來、喜歡把事情講得很完整",
+        "first_line": "好我跟你說喔，這件事要從頭講起。"
+      },
+      "card_text": "（合成的特質，不是真人）做了二十年的婚禮主持，現在轉行當導遊，對每個地方都有一段故事可以講。",
+      "endpoint": "http://100.86.226.21:1234/v1",
+      "model_requested": "gemma-4-12b-it-qat",
+      "at": "2026-09-26T01:31:23Z",
+      "generate_rc": 0,
+      "wall_s": 7.0,
+      "generate": {
+        "ok": true,
+        "mode": "agent",
+        "generated": 1,
+        "degraded": 0,
+        "failed": 0,
+        "submitted": 1,
+        "discarded": 0,
+        "in_flight": 0,
+        "agent_available": true,
+        "agent_unavailable_reason": null,
+        "intake": {
+          "accepting": true,
+          "free_bytes": 7020822528,
+          "min_free_bytes": 2147483648,
+          "path": "/tmp/twin_polaroid_js0quzp8",
+          "reason": null
+        },
+        "held_for_disk": 0,
+        "upstream_reachable": true,
+        "agent": {
+          "work_root": "/tmp/twin_polaroid_js0quzp8/twinstore.agentruns",
+          "events_path": "/tmp/twin_polaroid_js0quzp8/lifecycle.jsonl",
+          "parallel": 1,
+          "timeout_s": 300.0,
+          "enclose": "off",
+          "require_tier": null,
+          "argv_prefix": [
+            "bash",
+            "twin_agent.sh"
+          ]
+        },
+        "remaining": 0
+      },
+      "twin": {
+        "engine": "vacant_run:pi:gemma-4-12b-it-qat",
+        "degrade_kind": null,
+        "decision": "我決定為這個房間編寫一份「導遊故事集」。",
+        "reason": "因為我有二十年的婚禮主持經驗，習慣把事情講得很完整且充滿細節。作為一名轉行的導遊，我喜歡分享每個角落背後的故事，這是我最擅長的表達方式。",
+        "run_id": "b3f725da5c1c481b89c01cb6e88c3fa2",
+        "verdict_hash": "3c031c6f6f3893d1ffbde1232feb9e1b573b9481aa908a2945e42e6171ba6caa",
+        "accepted": null,
+        "requests_seen": 3,
+        "agent_rc": 0,
+        "agent_timed_out": false,
+        "latency_ms": 6858,
+        "tier": "C",
+        "enclosed": false,
+        "twin_id": "tw-c29f362b6f69"
+      },
+      "artifacts": [
+        "Guide_Stories.md"
+      ],
+      "plan_md": "我決定為這個房間編寫一份「導遊故事集」。\n因為我有二十年的婚禮主持經驗，習慣把事情講得很完整且充滿細節。作為一名轉行的導遊，我喜歡分享每個角落背後的故事，這是我最擅長的表達方式。",
+      "receipts": [
+        {
+          "verdict": "OK",
+          "chain_ok": true,
+          "mediated": true,
+          "tier": "C",
+          "type_counts": {
+            "ws_attempt": 1,
+            "ws_verdict": 1
+          },
+          "failures": []
+        }
+      ],
+      "wire": {
+        "requests": 3,
+        "responses": 3,
+        "responses_with_reasoning_content": 0
+      },
+      "lifecycle": {
+        "n": 7,
+        "validate_stream": []
+      },
+      "outcome": "made",
+      "local_date": "2026.09.26",
+      "withdrawn": true,
+      "made": true,
+      "made_why": "made"
+    }
+  ]
+}

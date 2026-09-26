@@ -399,6 +399,27 @@ def test_fixed_texts_are_ks1_clean_and_the_guard_bites() -> None:
     assert "不要寫程式" in twinagent.SYSTEM_PROMPT, "人類定義：實務任務，不是寫程式"
 
 
+#: 2026-09-26 以前那一版第 1 步（逐字）。只給負控制用：證明下面那把尺量得到「有例子」。
+_OLD_STEP1_WITH_EXAMPLES = ("1. 決定一件你想在這個世界完成的實務小事——寫在檔案裡就能完成的事，"
+                            "例如一封信、一份計畫、一張清單。不要寫程式。\n")
+
+
+def _prompt_examples(prompt: str) -> list[str]:
+    bad = ("例如", "比如", "譬如", "像是", "一封信", "一份計畫", "一張清單", "謝卡")
+    return [w for w in bad if w in prompt]
+
+
+def test_system_prompt_gives_no_examples() -> None:
+    """人類 2026-09-26：分身做什麼要是它自己生成的，prompt 不准舉例帶風向（例子＝刻板）。
+    約束還在：寫進自己房間的一個檔案、不寫程式、PLAN.md 第一行是決定。"""
+    p = twinagent.SYSTEM_PROMPT
+    assert _prompt_examples(p) == [], _prompt_examples(p)
+    assert "寫進你房間裡的一個檔案就能完成" in p and "不要寫程式" in p
+    assert "PLAN.md：第一行用一句話說你決定做什麼" in p
+    # 負控制：舊版那一步量得到例子（這把尺不是恆綠）
+    assert _prompt_examples(_OLD_STEP1_WITH_EXAMPLES) != []
+
+
 def test_twin_id_is_not_the_sub_id() -> None:
     sid = "abc-123"
     tid = twinagent.public_twin_id(sid)

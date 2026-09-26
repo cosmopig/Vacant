@@ -1085,8 +1085,9 @@ def make_polaroid(store: TwinStore, sid: str, *,
     ev = {
         "twinlink_event": POLAROID_MADE, "polaroid_ref": ref,
         "cast_id": meta["cast_id"], "bytes_n": meta["bytes_n"], "size": meta["size"],
-        "frame": meta["frame"], "caption_truncated": meta["caption_truncated"],
-        "caption_redacted": meta["caption_redacted"],
+        "frame": meta["frame"], "figure": meta["figure"],
+        "caption_truncated": meta["caption_truncated"],
+        "caption_redacted": meta["caption_redacted"], "caption_blank": meta["caption_blank"],
         "dropped_glyphs": meta["dropped_glyphs"], "qr_text": meta["qr_text"],
         "at": _now(),
     }
