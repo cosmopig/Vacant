@@ -174,6 +174,11 @@
 - `trace/review.py` — 退回的字句（KS-1、沒有行動者；過不了檢查的行換替代行並計數）
 - `trace/zerostop.py` — Stop：子行程＋330 秒時限、失敗一律放行；人的一個要求內最多 2 回合；解決看現況；
   `delivery.{md,json}` 寫在病歷目錄（不進工作區、不送模型）
+- `trace/budget.py`（**v3**，`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`）— **回合預算提醒**：agent 的系統提示寫了回合上限
+  （`adapters/agents.BUDGET_RE_SRC`，JS 與 Python 共用）、只剩最後 2 或 1 回合、這一回合有執行工具、要求的檔還不存在 ⇒ 提醒搭下一通本來就要送出的請求
+  （pi `turn_end`；不多一通呼叫、不引用任何值、一個要求最多 2 次）。只剩 1 回合時交件前檢查只退回缺檔；還沒說做完就結束的那一跑也寫交件說明
+  （`zerostop.ended`）。⚠ **只在寫明上限時作用**——一般互動使用（pi 預設沒有上限）幾乎不會觸發；只有 pi 有 `turn_end`。
+  pi 的邊界處理器把 Vacant 的草稿**接在** `event.entries` 後面（pi 取最後一個處理器的回傳，只回自己的會蓋掉別的擴充）
 - `ops/eval/replay_pi_session.py`＋`replay_gate.py` — 真實 pi 工作階段在題目容器裡經過真的 `vacant hook pi` 重播（量誤報）
 - `ops/eval/simuser/` — 模擬使用者：只照 README 裝、照常用 pi，A/C 對照
 
@@ -184,6 +189,10 @@
 ⚠ 正式批次那一版有兩個誤報（跑自己寫的腳本被當成讀交付物、grep 沒找到當成失敗；**8 次退回全是誤報**，7 次退的是對的答案），事後已修，不改變結果。
 **為什麼沒有差別、和過去比、要不要做成 agent**：`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`（總報告）＋`ops/eval/evidence_20260925/INDEX.md`（每個檔的 sha256；`ops/eval/build_evidence_index.py --check`）。一句話：**時機錯**（82 個失敗裡 55 個是沒交——54 個被這一輪設的 15 回合上限切斷〔官方基線是 10 步〕、Vacant 輪不到檢查，其中 15–19 跑答案已經算出來沒寫）、**看的東西錯**（其餘的錯每一步都有根據、錯在決定）、**動作弱**（只能在同一個工作階段裡講；在重抽之上，過去量到最弱的就是這種）。過去有增益的都是 Vacant 握著生成（可執行驗收＋重抽＋拒交）；最像 agent 的 G 實驗沒有量到正確交付的增益 ⇒ 缺的是「真的訊號＋對的時機＋重來的權力」，不是 agent（推論，沒在 DABstep 上測過）。✅「用這一輪兩跑事後估：沒交就重開一跑 gemma 50→55（**探索性**、不是檢定，`ops/eval/formal/explore_two_runs.py`）」；❌ 把這個估計講成效果；❌「越像 agent 越沒用」「和過去完全一致」。
 ⚠ Harbor 的 pi 用自訂端點時以 `PI_CODING_AGENT_DIR` 隔離設定，`~/.pi/agent` 的擴充不會載入——評測的 C 組要裝到那個目錄。
+**本機算力評估（2026-09-26 起）**：人類的兩台 LM Studio（gemma-4-12b-it-qat；`w401c-15` 永遠不思考、`1003` 照 `reasoning_effort` 開關、讀長提示慢）
+經過記帳代理的本機模式（`orproxy.py` 的 `upstreams`，`/t/<tag>/up/<名字>/…`）；`ops/eval/local/`（`run_batch.py` 每台機器自己的同時跑數——
+同時太多段對話會擠掉 LM Studio 的提示快取、吞吐反而不升）。紀錄：`ops/eval/evidence_20260926_local/RUNLOG.md`；預註冊（A／C1 現版／C2 v3）：
+`decisions/prereg/PREREG_20260926_ZERO_CONFIG_V3_LOCAL.md`（agent 凍結、人類授權但沒逐條簽）。
 
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 
