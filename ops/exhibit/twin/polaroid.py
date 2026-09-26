@@ -414,6 +414,12 @@ def _drop_missing(font: Any, text: str) -> tuple[str, int]:
 _NO_LINE_START = "，。、；：！？）」』》〉,.;:!?)…"
 _NO_LINE_END = "（「『《〈("
 
+#: 換行不切詞（2026-09-26）：優先斷在這些字之後——標點（斷完自然是下一個詞的開頭）、
+#: 閉引號（一段話說完了）、或「的／在／和／與」這類常見連接字之後（後面接的通常是新詞的
+#: 開頭，不會把「如果」「因為」這種兩字常見詞從中間切開）。這是簡單規則，不是斷詞器；
+#: 找不到這種斷點時 `wrap_caption` 會退回原本只看平衡、不管字義的那條路。
+_PREFER_BREAK_AFTER = "，。、；：！？」』）》〉,.;:!?)" + "的在和與"
+
 
 def _quote_depth(text: str) -> list[int]:
     """每個字元位置前面還有幾層沒關的引號（`「」『』（）《》`）。"""
@@ -434,26 +440,37 @@ def wrap_caption(font: Any, text: str, max_w: int,
                  max_lines: int = CAPTION_LINES) -> tuple[list[str], bool]:
     """那一句 → 最多 `max_lines` 行（逐字斷行，中文不靠空白）。放不下的尾巴截掉補「…」。
 
-    一行放得下就一行。要兩行時**找最平衡的斷點**（兩行寬度差最小），不是貪心塞滿第一行
-    ——貪心會留一個字孤零零在第二行。斷點規則：句讀／閉引號不放行首、開引號不放行尾、
-    盡量不斷在引號裡面（斷在引號裡加一大筆成本，真的沒別處可斷才用）。
+    一行放得下就一行。要兩行時**先找「換行不切詞」的斷點**（2026-09-26）：斷在標點之後、
+    或斷在「的／在／和／與」這類常見連接字之後、且不在引號裡（`_PREFER_BREAK_AFTER`），
+    這幾種位置後面接的多半是下一個詞的開頭，不會把「如果」「因為」這種兩字常見詞從中間切開。
+    這一層裡一樣**找最平衡的斷點**（兩行寬度差最小）。**找不到**符合這一層的斷點，才退回
+    原本「不管切在哪個字中間、只看最平衡」那一條路（歷史行為不變）。
+    其餘既有規則照舊：句讀／閉引號不放行首、開引號不放行尾、盡量不斷在引號裡面
+    （斷在引號裡加一大筆成本，真的沒別處可斷才用）。
     兩行都放不下 ⇒ 第一行塞滿、第二行截斷補「…」。回（行, 有沒有截）。
     """
     if font.getlength(text) <= max_w or max_lines <= 1:
         last, cut = fit_text(font, text, max_w)
         return [last], cut
     depth = _quote_depth(text)
-    best: tuple[float, int] | None = None
-    for n in range(1, len(text)):
-        a, b = text[:n], text[n:].lstrip()
-        if not b or b[0] in _NO_LINE_START or a[-1] in _NO_LINE_END:
-            continue
-        wa, wb = font.getlength(a), font.getlength(b)
-        if wa > max_w or wb > max_w:
-            continue
-        cost = abs(wa - wb) + (max_w if depth[n] else 0)
-        if best is None or cost < best[0]:
-            best = (cost, n)
+
+    def scan(require_word_boundary: bool) -> tuple[float, int] | None:
+        best: tuple[float, int] | None = None
+        for n in range(1, len(text)):
+            a, b = text[:n], text[n:].lstrip()
+            if not b or b[0] in _NO_LINE_START or a[-1] in _NO_LINE_END:
+                continue
+            if require_word_boundary and (depth[n] or a[-1] not in _PREFER_BREAK_AFTER):
+                continue
+            wa, wb = font.getlength(a), font.getlength(b)
+            if wa > max_w or wb > max_w:
+                continue
+            cost = abs(wa - wb) + (max_w if depth[n] else 0)
+            if best is None or cost < best[0]:
+                best = (cost, n)
+        return best
+
+    best = scan(True) or scan(False)
     if best is not None:
         n = best[1]
         return [text[:n], text[n:].lstrip()], False

@@ -38,6 +38,11 @@ EVID = ROOT / "ops" / "exhibit" / "twin" / "evidence_polaroid_20260926" / "v2"
 #: 測試輸入用分身真跑寫過的一句（`EVID/runs.json` p1），不用人寫的罐頭句。
 AGENT_LINE = "我決定整理一份「週末登山清單」。"
 
+#: v2 那 8 張範例合成的當下（2026-09-26 稍早），只有這 10 位有姿勢圖；`samples.json`
+#: 裡的 `meta.figure` 記的是那個時間點的事實，跟後來（其餘 24 位上架後）現在的
+#: `polaroid.figure_for()` 不是同一件事，不能互相比對。
+_V2_POSE_IDS_AT_GENERATION = ("c02", "c09", "c10", "c17", "c19", "c25", "c28", "c31", "c33", "c40")
+
 
 def _compose(decision: str = AGENT_LINE, **kw):
     kw.setdefault("cast_id", "c08")
@@ -128,6 +133,75 @@ def test_two_line_wrap_is_balanced_and_respects_quotes() -> None:
         n += 1
     balanced, _ = polaroid.wrap_caption(f, text, w)
     assert len(text) - n <= 3 < min(len(x) for x in balanced)     # 貪心剩 ≤3 字；平衡版每行都比它多
+
+
+def test_word_boundary_is_preferred_over_a_slightly_more_balanced_midword_split() -> None:
+    """2026-09-26：換行不切詞。原本「只看兩行寬度差最小」的版本會把常見兩字詞從中間切開
+    （真跑範例 p6：「…關於「如／果恐龍…」，見下一條）。改法：**先**找「斷在標點之後、或
+    斷在「的／在／和／與」這類連接字之後、且不在引號裡」的斷點，這一層裡一樣挑最平衡的；
+    這種斷點存在時優先用，即使它比「不管切在哪個字中間」的最佳平衡點還不平衡一點。
+
+    這裡用構造出來的句子（不是真跑範例，範例不能為了湊案例去挑或改）：「如果」剛好卡在
+    兩行寬度差最小（=0）的那個切點正中間，但往後兩個字有一個「的」，切在它後面兩行還是
+    放得下（9 字／7 字），只是差距（88）比切在「如／果」中間（差距 0）大一點。"""
+    f = polaroid._font(polaroid.CAPTION_PX)
+    w = polaroid.layout_for()["caption"]
+    w = w[2] - w[0]
+    text = "房間桌椅牆壁窗如果的桌椅牆壁窗戶"
+    assert len(text) == 16
+
+    # 負控制：不分詞界、只看平衡的舊算法，這句話**真的會**切在「如｜果」中間。
+    def _old_balance_only(text: str, max_w: int) -> tuple[str, str] | None:
+        depth = polaroid._quote_depth(text)
+        best = None
+        for n in range(1, len(text)):
+            a, b = text[:n], text[n:].lstrip()
+            if not b or b[0] in polaroid._NO_LINE_START or a[-1] in polaroid._NO_LINE_END:
+                continue
+            wa, wb = f.getlength(a), f.getlength(b)
+            if wa > max_w or wb > max_w:
+                continue
+            cost = abs(wa - wb) + (max_w if depth[n] else 0)
+            if best is None or cost < best[0]:
+                best = (cost, n)
+        return (text[:best[1]], text[best[1]:]) if best else None
+
+    old_a, old_b = _old_balance_only(text, w)
+    assert old_a.endswith("如") and old_b.startswith("果"), (old_a, old_b)   # 量得到「舊算法會切詞」
+
+    # 新算法：同一句話，斷點改到「的」後面，不切「如果」。
+    lines, cut = polaroid.wrap_caption(f, text, w)
+    assert not cut and "".join(lines) == text
+    assert not (lines[0].endswith("如") and lines[1].startswith("果"))
+    assert lines == ["房間桌椅牆壁窗如果的", "桌椅牆壁窗戶"]
+    assert all(f.getlength(ln) <= w for ln in lines)
+
+
+def test_p6_dinosaur_sentence_the_only_fitting_break_lands_inside_a_word() -> None:
+    """誠實記錄一個換行不切詞修不掉的邊界案例：p6 那句在**目前版面寬度**下窮舉找過，
+    兩行都放得下的切法只有一種（14 字／14 字），而那個位置剛好卡在「如｜果」中間——
+    這不是這次改的斷點邏輯沒生效，是這句話（剛好 28 字、卡面窄到一行只放得下 14 字）
+    搭配目前版寬本來就只有這一種切法可選，換哪一種「找斷點」演算法結果都一樣。
+    這裡窮舉驗證這個事實（不是憑印象講「修不好」），並確認 wrap_caption 對這句話仍然
+    正確退回這唯一的合法切法（不是漏切、不是當機）。"""
+    f = polaroid._font(polaroid.CAPTION_PX)
+    w = polaroid.layout_for()["caption"]
+    w = w[2] - w[0]
+    raw = "我決定在房間裡寫一個關於「如果恐龍有外星科技」的奇幻構想。"     # runs.json p6 原句
+    text = polaroid.clean_caption(raw)
+    assert len(text) == 28 and w // polaroid.CAPTION_PX == 14        # 卡面一行最多 14 字
+
+    fitting = []
+    for n in range(1, len(text)):
+        a, b = text[:n], text[n:]
+        if f.getlength(a) <= w and f.getlength(b) <= w:
+            fitting.append(n)
+    assert fitting == [14]                                          # 窮舉：唯一一種兩行都放得下的切法
+
+    lines, cut = polaroid.wrap_caption(f, text, w)
+    assert not cut and "".join(lines) == text
+    assert lines == [text[:14], text[14:]]
+    assert lines[0].endswith("如") and lines[1].startswith("果")     # 照實記：這句無解，換不掉
 
 
 def test_short_decision_is_not_truncated() -> None:
@@ -269,7 +343,10 @@ def test_samples_are_real_agent_runs_not_hand_written() -> None:
         assert [x["verdict"] for x in r["receipts"]] == ["OK"] and r["receipts"][0]["chain_ok"]
         assert r["wire"]["requests"] >= 1 and tw["requests_seen"] == r["wire"]["requests"]
         assert s["cast_id"] == polaroid.pick_cast_for(r["card"])
-        assert s["meta"]["figure"] == polaroid.figure_for(s["cast_id"])[1]
+        # v2 是 2026-09-26 稍早（只有 10 位有姿勢圖時）合成的；比對「那時候記下來的 figure」
+        # 對不對，不能拿**現在**（其餘 24 位上架後）的 figure_for() 活函數比——c08／c38 這兩位
+        # 就是這一輪才多了姿勢圖，historical meta 說 cast40 是對的，不是漂了。
+        assert s["meta"]["figure"] == ("pose" if s["cast_id"] in _V2_POSE_IDS_AT_GENERATION else "cast40")
     figs = {s["meta"]["figure"] for s in samples["samples"]}
     assert figs == {"pose", "cast40"}, figs                        # 兩種都涵蓋
     # 人寫的範例句不准回來
@@ -324,10 +401,13 @@ def test_plate_is_pinned_and_has_no_text_or_qr_baked_in() -> None:
     assert pj["sha256"] == polaroid.PLATE_SHA256 and pj["spot_x_px"] == polaroid.PLATE_SPOT_X
 
 
-POSE_IDS = ("c02", "c09", "c10", "c17", "c19", "c25", "c28", "c31", "c33", "c40")
+# 2026-09-26 晚：素材線把其餘 24 位（cast40 扣掉班底 6 位 c01/c03/c13/c20/c22/c37）也上架了；
+# c09／c10／c31 是 eyefix 輪之後的新版（sha256 已經換過，見 assets/poses/manifest.json）。
+POSE_IDS = tuple(f"c{i:02d}" for i in range(1, 41)
+                 if f"c{i:02d}" not in {"c01", "c03", "c13", "c20", "c22", "c37"})
 
 
-def test_poses_are_used_for_the_ten_that_have_them_and_nobody_else() -> None:
+def test_poses_are_used_for_the_thirty_four_that_have_them_and_nobody_else() -> None:
     have = sorted(p.name[:3] for p in polaroid.DEFAULT_POSES_DIR.glob("c*_show.png"))
     assert tuple(have) == POSE_IDS
     man = json.loads((polaroid.DEFAULT_POSES_DIR / "manifest.json").read_text(encoding="utf-8"))

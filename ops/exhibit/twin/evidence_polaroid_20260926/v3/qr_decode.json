@@ -1,0 +1,676 @@
+{
+  "decoder": "opencv 5.0.0 QRCodeDetector",
+  "expect": "https://vacant.cosmopig.com",
+  "honesty": "phone_photo* 是模擬（物理模型＋旋轉＋透視＋模糊＋對比漂移＋雜訊＋JPEG），不是兩支真手機對拍；OpenCV 比手機內建相機弱，是偏保守的代理量。那一格要在展場實測。",
+  "results": [
+    {
+      "file": "polaroid_p1_c09_pose.png",
+      "sha256": "6a1029fbb2746d4f3529d76a729b97f6924668ba0140352d50d41e89aa92cda6",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p2_c33_pose.png",
+      "sha256": "7ffd3d42de5f9aece8017d745cbbb5c5a88c944eb7a109c38b44eb3989288ff4",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p3_c28_pose.png",
+      "sha256": "e319a3b70d5a3b2e81d6ab3596b35b8bdda004a75f2e42c6087a2ffe4484141a",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p4_c19_pose.png",
+      "sha256": "90b66d232515d23d57727470a391e1eb02d57bfd1cdc69774881900196881b22",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p5_c08_pose.png",
+      "sha256": "fc940e320f404bddf56c37e9100e6687b4a0771fa3a688fdcee4b63ec45006b5",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p6_c38_pose.png",
+      "sha256": "ffe3e7727af4bc8d1ee043c9894a1093adc2aff557a5a0dc8fb1ca8bef36fc5c",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p7_c01_cast40.png",
+      "sha256": "4fae7dd75282141688bc066eadbb6ccd09b1a09505b8861f407ea101eb8bf8fb",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    },
+    {
+      "file": "polaroid_p8_c20_cast40.png",
+      "sha256": "52f9ccfea3217b9cde2cf1d2e24dd13793211001bd19c79b0da38892c0d394a2",
+      "cases": {
+        "original": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "share_thumb": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            540,
+            675
+          ]
+        },
+        "phone_photo_10cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            1269,
+            1481
+          ],
+          "camera_px_per_module": 7.06
+        },
+        "phone_photo_15cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": true,
+          "size": [
+            846,
+            986
+          ],
+          "camera_px_per_module": 4.7
+        },
+        "phone_photo_20cm": {
+          "decoded": "https://vacant.cosmopig.com",
+          "expect": "https://vacant.cosmopig.com",
+          "ok": true,
+          "required": false,
+          "size": [
+            634,
+            740
+          ],
+          "camera_px_per_module": 3.53
+        },
+        "neg_blanked": {
+          "decoded": null,
+          "expect": null,
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ]
+        },
+        "neg_other_url": {
+          "decoded": "https://example.org/not-vacant",
+          "expect": "https://example.org/not-vacant",
+          "ok": true,
+          "required": true,
+          "size": [
+            1080,
+            1350
+          ],
+          "not_site": true
+        }
+      },
+      "all_ok": true
+    }
+  ],
+  "physical": {
+    "assume": {
+      "screen_css_w": 390,
+      "screen_mm_w": 65.9,
+      "polaroid_css_w": 358.8,
+      "preview_px_w": 1920,
+      "hfov_deg": 69.0
+    },
+    "module_px_in_png": 9,
+    "qr_modules": 29,
+    "qr_version": 3,
+    "module_mm_on_screen": 0.505,
+    "code_mm_on_screen": 14.7,
+    "camera_px_per_module": {
+      "10cm": 7.06,
+      "15cm": 4.7,
+      "20cm": 3.53,
+      "25cm": 2.82
+    }
+  },
+  "all_ok": true
+}
