@@ -158,3 +158,6 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
 - C361 wheel 從 `c27641c6` 重建兩次，同一個 sha256 `4ec156d6…`；`vacant_network/` 114 個檔與 HEAD 相同。
 - 驅動改成共用一條佇列（`run_pairs.py`；`tests/test_eval_run_pairs.py` 6 條）：S36-nocap 的固定分配讓 w401 閒了一個小時。
 - 開跑前兩台各一通 `u274-preflight`：w401 200（8.0 秒）、1003 200（10.9 秒）。
+- 10:50:44 UTC 開跑（`w401:4 1003:4`）。**11:00 監測報磁碟 < 2.5 GB**：8 個容器同時在跑，每個容器的可寫層約 0.45–0.6 GB（pi 與 Vacant 裝在容器裡），
+  比 4 個並行多出一倍。刪掉可重建的暫存（重建 wheel 時解開的整個原始碼樹、已歸檔進 repo 的正式批次還原副本、pip 快取）⇒ 5.2 GB；
+  wheel 本身沒動（sha256 照舊 `4ec156d6…`）。驅動沒有停、沒有一跑受影響。之後在別的算力上跑 8 並行，**每個並行位置留 ≥ 0.7 GB**。
