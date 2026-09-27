@@ -1,4 +1,3 @@
-144 runs to go, per machine {'w401': 3, '1003': 1}
 {"task": "15", "arm": "C36", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 188.5, "has_result": true, "at": "2026-09-27T06:14:32Z"}
 {"task": "26", "arm": "A", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 218.7, "has_result": true, "at": "2026-09-27T06:15:02Z"}
 {"task": "26", "arm": "C36", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 225.5, "has_result": true, "at": "2026-09-27T06:15:09Z"}
