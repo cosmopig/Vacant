@@ -16,6 +16,11 @@
 
 誠實邊界：讀不到 `install.json`（權限、壞掉的 JSON）⇒ 當成 `evidence`，因為檔案存在代表人裝過；
 這一次的檢查若因此出錯，由掛鉤的「失敗一律放行」接住。
+
+**回合預算提醒（v3）預設關**（v3.6，人類 2026-09-27 決定；`decisions/DECISION_20260926_ZERO_CONFIG_V3.md` §十）：
+`install.json` 的 `budget_reminder` 是 `true` 才開（`vacant install --budget-reminder`）。沒有這個欄位、讀不到、
+不是 `true` ⇒ 關。理由：它只在寫明回合上限時作用，而且在評測裡多交出來的答案錯的多於對的——對一個不看評分的人，
+多一個沒有根據的答案不是改善。
 """
 from __future__ import annotations
 
@@ -40,3 +45,13 @@ def current_mode() -> str:
     except (OSError, ValueError, AttributeError):
         return "evidence"
     return m if m in MODES else "evidence"
+
+
+def budget_reminder_on() -> bool:
+    """回合預算提醒開了沒（預設關；只有 `install.json` 的 `budget_reminder` 是 `true` 才開）。"""
+    from .install import state_root
+    p = state_root() / "install.json"
+    try:
+        return json.loads(p.read_text(encoding="utf-8")).get("budget_reminder") is True
+    except (OSError, ValueError, AttributeError):
+        return False

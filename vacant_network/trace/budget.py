@@ -1,4 +1,5 @@
-"""零設定 v3：回合預算快用完時，提醒 agent 先把要求的檔寫出來。
+"""零設定 v3：回合預算快用完時，提醒 agent 先把要求的檔寫出來。**v3.6 起預設關**（`install.json` 的
+`budget_reminder: true`＝`vacant install --budget-reminder` 才開；`adapters/mode.budget_reminder_on`）。
 
 這支在架構裡承重什麼：`decisions/DECISION_20260926_ZERO_CONFIG_V3.md` §二（v3-2）。付費批次（2026-09-25）
 82 個失敗裡 55 個是「沒交」——agent 被回合上限切斷時還沒寫答案檔，Vacant 的交件前檢查只在 agent 自己說
@@ -65,6 +66,9 @@ def turn_check(agent: str, session_id: str | None, cwd: str | None, turn: Any, b
     left = budget_i - turn_i
     if mode != "evidence" or left not in NUDGE_TURNS_LEFT:
         return "allow", "", {"nudge": {"why": f"mode={mode}, turns left={left}"}}
+    from ..adapters.mode import budget_reminder_on
+    if not budget_reminder_on():                     # v3.6：預設關，`vacant install --budget-reminder` 才開
+        return "allow", "", {"nudge": {"why": "budget reminder off (default)"}}
     ws = capture.workspace_for(cwd, None)
     if ws is None:
         return "allow", "", {}

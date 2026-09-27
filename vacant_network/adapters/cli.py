@@ -131,6 +131,9 @@ def cmd_install(args) -> int:
               f"--force` writes their config anyway)")
     # 零設定（產品原則）：裝了就有作用；人自己改過 mode 就不動它
     m.data.setdefault("mode", "evidence")
+    # 回合預算提醒預設關（v3.6）；人明確說要才開、說不要才關，沒說就不動上一次的選擇
+    if getattr(args, "budget_reminder", None) is not None:
+        m.data["budget_reminder"] = bool(args.budget_reminder)
     m.data["schema"] = 2
     m.save()
     if args.observe_model:
@@ -272,6 +275,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="also install the optional model-traffic proxy (`vacant possess`)")
     p.add_argument("--skill", action="store_true",
                    help="also add Vacant's skill file (it becomes part of the agent's prompt)")
+    p.add_argument("--budget-reminder", action=argparse.BooleanOptionalAction, default=None,
+                   help="remind the agent to write the requested file when its stated turn budget is "
+                        "nearly used up (off by default: in evaluations it added more wrong answers than "
+                        "right ones)")
     p.set_defaults(func=cmd_install)
 
     p = sp.add_parser("uninstall", help="remove only what `vacant install` added")

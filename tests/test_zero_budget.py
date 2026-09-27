@@ -19,10 +19,14 @@ ASK = ("Answer the question using the files in data/. Question: what is the tota
 SALES = "date,amount\n2026-07-01,1200\n2026-07-02,845\n"
 
 
-def _install(mode="evidence"):
+def _install(mode="evidence", budget_reminder=True):
+    # v3.6 起提醒預設關；這一檔大部分的測試量的是**開了之後**的行為（`vacant install --budget-reminder`）
     p = INS.state_root() / "install.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps({"agents": {}, "mode": mode}))
+    d = {"agents": {}, "mode": mode}
+    if budget_reminder is not None:
+        d["budget_reminder"] = budget_reminder
+    p.write_text(json.dumps(d))
 
 
 @pytest.fixture
@@ -595,3 +599,36 @@ def test_the_extension_gives_a_cut_off_run_the_stop_time_limit():
     js = AG.pi_extension_text()
     assert "(late || ABORTED) ? TIMEOUT.stop : undefined" in js
     assert "TURNS === BUDGET" in js and "TURNS >= BUDGET" not in js
+
+
+# ── v3.6：提醒預設關（人類 2026-09-27） ─────────────────────────────────────
+
+@pytest.mark.parametrize("setting", [None, False, "yes", 1])
+def test_v36_reminder_is_off_unless_install_json_says_true(proj, setting):
+    _install(budget_reminder=setting)                    # 沒有這個欄位、false、不是 true 的值 ⇒ 關
+    pi = Pi(proj)
+    pi.ask()
+    pi.bash("head -3 data/sales.csv", "date,region,amount\n")
+    for t in (13, 14):
+        assert pi.turn(t) == {"action": "allow", "reason": ""}   # 什麼都不送：請求和沒裝時一樣
+    assert _nudges(proj) == []
+
+
+def test_v36_malformed_install_json_means_off(proj):
+    (INS.state_root() / "install.json").write_text("{not json")
+    from vacant_network.adapters.mode import budget_reminder_on
+    assert budget_reminder_on() is False
+
+
+def test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choice(proj):
+    from vacant_network.adapters import cli as ACLI
+    from vacant_network.adapters.mode import budget_reminder_on
+    (INS.state_root() / "install.json").unlink()
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert budget_reminder_on() is False                  # 預設關
+    assert ACLI.main(["install", "--agents", "pi", "--force", "--budget-reminder"]) == 0
+    assert budget_reminder_on() is True
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert budget_reminder_on() is True                   # 沒說就不動上一次的選擇
+    assert ACLI.main(["install", "--agents", "pi", "--force", "--no-budget-reminder"]) == 0
+    assert budget_reminder_on() is False

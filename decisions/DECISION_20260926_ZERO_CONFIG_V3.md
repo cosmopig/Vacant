@@ -135,3 +135,15 @@ This reminder is only about the file; it does not say whether any answer is righ
 
 測試：`tests/test_zero_budget.py` 多 6 條；8 個變異各至少讓一條失敗。閘門 6（`gate6_v34/`）、模擬使用者（`simuser_v34/`：`correct` 的請求 A／C 逐位元組相同、
 而且和 v3 那一輪相同）。**留出批次（`decisions/prereg/PREREG_20260926_ZERO_CONFIG_V34_HELDOUT.md`）的 C3 用 v3.4 的 wheel。**
+
+## 十、v3.6：回合預算提醒**預設關**（人類 2026-09-27 決定）
+
+- 人類原話：「提醒預設關掉，測不設上限的缺檔退回」。
+- 理由（`decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`、`DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §十）：
+  提醒只在 agent 被告知回合上限時作用（評測、headless 批次），一般互動使用幾乎不觸發；在正式批次它讓答對率 51.9%→59.3%，
+  但多交出來的答案錯的多於對的（交出去的答案裡對的比例約 82%→65%）——對一個不看評分的人，多一個沒有根據的答案不是改善。
+- 做法：`install.json` 的 `budget_reminder` 是 `true` 才開（`vacant install --budget-reminder`；`--no-budget-reminder` 關；
+  沒說就不動上一次的選擇；舊的安裝沒有這個欄位 ⇒ 關）。`budget.turn_check` 在關的時候直接放行，**模型收到的請求和沒裝時逐位元組相同**。
+  其餘不變：交件前檢查（五類退回）、只剩最後一回合時只退回缺檔、被切斷或事後補查的交件說明。
+- 測試：`tests/test_zero_budget.py` 的 `test_v36_*`（沒有欄位／false／不是 true 的值都關；壞掉的 install.json 關；安裝旗標開、關、沒說不動）；
+  原本量提醒行為的測試改成明確開啟；拿掉開關的變異會被抓到。

@@ -184,6 +184,7 @@
   研究的結論：三個新的退回候選都被對抗評審否決，**不加新的退回**。**v3.4**：v3.2／v3.3 的對抗審查 14 條全部重現、全在給人的那一側，
   修掉（已退回過的不說「沒退回」、刪檔不算寫、看不全不說「沒有」、事後檢查照 Stop 的時限且先收工作階段、用超過上限＝沒人執行、一跑一筆 ended；
   裁決 §九、`review_v33/`、閘門 6、`simuser_v34/`）。留出題預註冊（100 題沒用過的 hard 題，A vs v3.4）：`decisions/prereg/PREREG_20260926_ZERO_CONFIG_V34_HELDOUT.md`。
+  ⚠ **v3.6 起預設關**（人類 2026-09-27：多交的答案錯的多於對的；`install.json` 的 `budget_reminder: true`＝`vacant install --budget-reminder` 才開；裁決 V3 §十）。
   ⚠ **只在寫明上限時作用**——一般互動使用（pi 預設沒有上限）幾乎不會觸發；只有 pi 有 `turn_end`。⚠ 本機正式批次的 C2 是**凍結的 v3**。
   pi 的邊界處理器把 Vacant 的草稿**接在** `event.entries` 後面（pi 取最後一個處理器的回傳，只回自己的會蓋掉別的擴充）
 - `ops/eval/replay_pi_session.py`＋`replay_gate.py` — 真實 pi 工作階段在題目容器裡經過真的 `vacant hook pi` 重播（量誤報）
