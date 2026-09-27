@@ -1,0 +1,4727 @@
+{
+  "summary": {
+    "dabench": {
+      "n_tasks": 30,
+      "positive_control": "30/30",
+      "negative_control": "120/120",
+      "n_failures": 0
+    },
+    "databench": {
+      "n_tasks": 30,
+      "positive_control": "30/30",
+      "negative_control": "120/120",
+      "n_failures": 0
+    },
+    "polyglot_py": {
+      "n_tasks": 34,
+      "positive_control": "34/34",
+      "negative_control": "136/136",
+      "n_failures": 0
+    }
+  },
+  "n_rows": 470,
+  "n_failures": 0,
+  "failures": [],
+  "rows": [
+    {
+      "bank": "dabench",
+      "id": "dab_035",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_035",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_035",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_035",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_035",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_039",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_039",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_039",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_039",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_039",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_055",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_055",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_055",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_055",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_055",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_057",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_057",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_057",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_057",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_057",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_105",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_105",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_105",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_105",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_105",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_129",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_129",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_129",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_129",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_129",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_144",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_144",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/4",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_144",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/4",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_144",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/4",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_144",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/4",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_176",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_176",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_176",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_176",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_176",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_216",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_216",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_216",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_216",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_216",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_218",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_218",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_218",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_218",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_218",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_249",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_249",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_249",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_249",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_249",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_250",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_250",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_250",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_250",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_250",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_378",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_378",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/8",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_378",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/8",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_378",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/8",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_378",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/8",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_426",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_426",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_426",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_426",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_426",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_427",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_427",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_427",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_427",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_427",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_507",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_507",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_507",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_507",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_507",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_514",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_514",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_514",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_514",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_514",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_517",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_517",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_517",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_517",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_517",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_587",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_587",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_587",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_587",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_587",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_588",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_588",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_588",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_588",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_588",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_657",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_657",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/3",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_657",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/3",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_657",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/3",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_657",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/3",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_665",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_665",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/6",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_665",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/6",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_665",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/6",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_665",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/6",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_666",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_666",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_666",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_666",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_666",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_669",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_669",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_669",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_669",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_669",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_688",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_688",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_688",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_688",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_688",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_721",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_721",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_721",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_721",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_721",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_723",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_723",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_723",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_723",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_723",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_724",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_724",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_724",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_724",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_724",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_725",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_725",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/2",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_725",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/2",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_725",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/2",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_725",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/2",
+      "status": "no_items"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_732",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_732",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; n_correct=0/1",
+      "status": "missing"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_732",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; n_correct=0/1",
+      "status": "empty"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_732",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; n_correct=0/1",
+      "status": "ok"
+    },
+    {
+      "bank": "dabench",
+      "id": "dab_732",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=no_items; n_correct=0/1",
+      "status": "no_items"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_04",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_04",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=boolean",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_04",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=boolean",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_04",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='False'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_04",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_10",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_10",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=category",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_10",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=category",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_10",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='zzz_not_a_value'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_10",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_34",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_34",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[category]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_34",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[category]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_34",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted=\"['zzz_not_a_value', 'Other', 'Medical', 'Marketing', 'Technical Degree', 'Human Resources']\"; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_34",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_37",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_37",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[number]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_37",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[number]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_37",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='[1001.5, 2, 3, 4]'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_066_37",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_08",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_08",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=category",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_08",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=category",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_08",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='zzz_not_a_value'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_08",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_29",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_29",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[category]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_29",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[category]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_29",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted=\"['zzz_not_a_value', 'Automotive']\"; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_069_29",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_02",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_02",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=boolean",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_02",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=boolean",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_02",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='False'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_02",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_12",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_12",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=category",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_12",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=category",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_12",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='zzz_not_a_value'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_12",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_15",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_15",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=number",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_15",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=number",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_15",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='152.64999999999998'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_15",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_19",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_19",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=number",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_19",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=number",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_19",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='127.30000000000001'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_071_19",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_02",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_02",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=boolean",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_02",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=boolean",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_02",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='False'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_02",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_26",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_26",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=number",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_26",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=number",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_26",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='64.0'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_26",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_30",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_30",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[number]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_30",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[number]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_30",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='[1005.5, 5.0, 5.0, 5.0, 5.0]'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_30",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_33",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_33",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[number]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_33",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[number]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_33",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='[1007.71, 7.28]'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_33",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_38",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_38",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[number]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_38",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[number]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_38",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='[1002.5, 2.0, 3.0, 4.0, 2.0]'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_072_38",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_10",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_10",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=category",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_10",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=category",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_10",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='zzz_not_a_value'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_10",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_31",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_31",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[category]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_31",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[category]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_31",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted=\"['zzz_not_a_value', 'southeast', 'southeast']\"; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_073_31",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_11",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_11",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=category",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_11",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=category",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_11",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='zzz_not_a_value'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_11",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_13",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_13",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=number",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_13",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=number",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_13",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='16.0'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_13",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_27",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_27",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[number]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_27",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[number]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_27",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='[1100.5, 100]'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_074_27",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_075_28",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_075_28",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[category]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_075_28",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[category]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_075_28",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted=\"['zzz_not_a_value', 'Rural']\"; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_075_28",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_00",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_00",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=boolean",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_00",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=boolean",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_00",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='False'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_00",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_06",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_06",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=boolean",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_06",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=boolean",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_06",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='False'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_06",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_31",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_31",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[category]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_31",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[category]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_31",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted=\"['zzz_not_a_value', 'LAC', 'BOS', 'MIL', 'MIA']\"; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_076_31",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_077_18",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_077_18",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=number",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_077_18",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=number",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_077_18",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='46.0'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_077_18",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_11",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_11",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=category",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_11",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=category",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_11",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='zzz_not_a_value'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_11",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=category",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_28",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_28",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[number]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_28",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[number]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_28",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='[1015.5, 15, 17, 18]'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_28",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[number]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_36",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_36",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=list[category]",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_36",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=list[category]",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_36",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted=\"['zzz_not_a_value', 'August']\"; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_078_36",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=list[category]",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_04",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_04",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=boolean",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_04",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=boolean",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_04",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='True'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_04",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=boolean",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_23",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_23",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=missing; predicted=None; expected_type=number",
+      "status": "missing"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_23",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=empty; predicted=None; expected_type=number",
+      "status": "empty"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_23",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='4.0'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "databench",
+      "id": "db_080_23",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=ok; predicted='I could not determine the answer from the data provided.'; expected_type=number",
+      "status": "ok"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_affine_cipher",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_affine_cipher",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no affine_cipher.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_affine_cipher",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=16 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_affine_cipher",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=16 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_affine_cipher",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=16 want=16 bad=16",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_beer_song",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_beer_song",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no beer_song.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_beer_song",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=8 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_beer_song",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=8 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_beer_song",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=8 want=8 bad=8",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_book_store",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_book_store",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no book_store.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_book_store",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=20 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_book_store",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=20 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_book_store",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=20 want=20 bad=20",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bottle_song",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bottle_song",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no bottle_song.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bottle_song",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=7 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bottle_song",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=7 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bottle_song",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=7 want=7 bad=7",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bowling",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bowling",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no bowling.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bowling",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=31 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bowling",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=31 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_bowling",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=31 want=31 bad=31",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_connect",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_connect",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no connect.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_connect",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=10 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_connect",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=10 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_connect",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=10 want=10 bad=10",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dominoes",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dominoes",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no dominoes.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dominoes",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=13 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dominoes",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=13 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dominoes",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=13 want=13 bad=7",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dot_dsl",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dot_dsl",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no dot_dsl.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dot_dsl",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=12 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dot_dsl",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=12 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_dot_dsl",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=12 want=12 bad=12",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_food_chain",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_food_chain",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no food_chain.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_food_chain",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=10 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_food_chain",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=10 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_food_chain",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=10 want=10 bad=10",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_forth",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_forth",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no forth.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_forth",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=54 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_forth",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=54 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_forth",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=54 want=54 bad=54",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_go_counting",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_go_counting",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no go_counting.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_go_counting",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=11 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_go_counting",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=11 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_go_counting",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=11 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grade_school",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grade_school",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no grade_school.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grade_school",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=20 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grade_school",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=20 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grade_school",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=20 want=20 bad=20",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grep",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grep",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no grep.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grep",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=25 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grep",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=25 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_grep",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=25 want=25 bad=25",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_hangman",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_hangman",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no hangman.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_hangman",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=7 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_hangman",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=7 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_hangman",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=7 want=7 bad=7",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_list_ops",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_list_ops",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no list_ops.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_list_ops",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=24 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_list_ops",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=24 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_list_ops",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=24 want=24 bad=24",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_paasio",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_paasio",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no paasio.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_paasio",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=25 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_paasio",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=25 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_paasio",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=25 want=25 bad=25",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_phone_number",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_phone_number",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no phone_number.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_phone_number",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=21 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_phone_number",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=21 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_phone_number",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=21 want=21 bad=21",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pig_latin",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pig_latin",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no pig_latin.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pig_latin",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=22 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pig_latin",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=22 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pig_latin",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=22 want=22 bad=22",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_poker",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_poker",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no poker.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_poker",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=37 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_poker",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=37 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_poker",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=37 want=37 bad=37",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pov",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pov",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no pov.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pov",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=15 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pov",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=15 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_pov",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=15 want=15 bad=15",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_proverb",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_proverb",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no proverb.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_proverb",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=8 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_proverb",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=8 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_proverb",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=8 want=8 bad=8",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_react",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_react",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no react.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_react",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=14 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_react",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=14 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_react",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=14 want=14 bad=12",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_rest_api",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_rest_api",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no rest_api.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_rest_api",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=9 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_rest_api",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=9 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_rest_api",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=9 want=9 bad=9",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_robot_name",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_robot_name",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no robot_name.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_robot_name",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=4 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_robot_name",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=4 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_robot_name",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=4 want=4 bad=4",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_scale_generator",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_scale_generator",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no scale_generator.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_scale_generator",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=17 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_scale_generator",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=17 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_scale_generator",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=17 want=17 bad=17",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_sgf_parsing",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_sgf_parsing",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no sgf_parsing.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_sgf_parsing",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=23 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_sgf_parsing",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=23 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_sgf_parsing",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=23 want=23 bad=23",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_simple_linked_list",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_simple_linked_list",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no simple_linked_list.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_simple_linked_list",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=20 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_simple_linked_list",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=20 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_simple_linked_list",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=20 want=20 bad=20",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_transpose",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_transpose",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no transpose.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_transpose",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=12 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_transpose",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=12 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_transpose",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=12 want=12 bad=12",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_tree_building",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_tree_building",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no tree_building.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_tree_building",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=13 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_tree_building",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=13 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_tree_building",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=13 want=13 bad=6",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_two_bucket",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_two_bucket",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no two_bucket.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_two_bucket",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=9 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_two_bucket",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=9 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_two_bucket",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=9 want=9 bad=9",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_variable_length_quantity",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_variable_length_quantity",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no variable_length_quantity.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_variable_length_quantity",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=26 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_variable_length_quantity",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=26 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_variable_length_quantity",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=26 want=26 bad=26",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_wordy",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_wordy",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no wordy.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_wordy",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=25 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_wordy",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=25 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_wordy",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=25 want=25 bad=25",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zebra_puzzle",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zebra_puzzle",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no zebra_puzzle.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zebra_puzzle",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=2 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zebra_puzzle",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=2 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zebra_puzzle",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=2 want=2 bad=2",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zipper",
+      "case": "reference",
+      "expect_pass": true,
+      "got_pass": true,
+      "ok": true,
+      "note": null,
+      "status": "pass"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zipper",
+      "case": "missing",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "no zipper.py in workspace",
+      "status": "missing"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zipper",
+      "case": "empty",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=14 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zipper",
+      "case": "wrong",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=1 want=14 bad=1",
+      "status": "fail"
+    },
+    {
+      "bank": "polyglot_py",
+      "id": "pg_zipper",
+      "case": "stub",
+      "expect_pass": false,
+      "got_pass": false,
+      "ok": true,
+      "note": "status=fail; run=14 want=14 bad=14",
+      "status": "fail"
+    }
+  ]
+}
