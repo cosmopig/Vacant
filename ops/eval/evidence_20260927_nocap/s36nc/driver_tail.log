@@ -3,3 +3,11 @@
 {"task": "11", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 179.9, "has_result": true, "at": "2026-09-27T10:03:57Z"}
 {"task": "30", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 180.4, "has_result": true, "at": "2026-09-27T10:03:57Z"}
 {"task": "44", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 432.0, "has_result": true, "at": "2026-09-27T10:11:09Z"}
+{"task": "44", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 484.0, "has_result": true, "at": "2026-09-27T10:19:13Z"}
+{"task": "30", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 1883.0, "has_result": true, "at": "2026-09-27T10:32:20Z"}
+{"task": "1", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 844.9, "has_result": true, "at": "2026-09-27T10:33:18Z"}
+{"task": "7", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 1877.6, "has_result": true, "at": "2026-09-27T10:34:35Z"}
+{"task": "7", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 1852.5, "has_result": true, "at": "2026-09-27T10:34:49Z"}
+{"task": "1", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 206.9, "has_result": true, "at": "2026-09-27T10:35:47Z"}
+{"task": "35", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 166.5, "has_result": true, "at": "2026-09-27T10:36:05Z"}
+{"task": "35", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 140.3, "has_result": true, "at": "2026-09-27T10:36:56Z"}
