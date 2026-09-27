@@ -11,7 +11,7 @@ VLLM_USE_FLASHINFER_SAMPLER=0 nohup /content/venv-vllm/bin/vllm serve $M --serve
   --max-model-len 262144 --gpu-memory-utilization 0.90 --enable-prefix-caching \
   --enable-auto-tool-choice --tool-call-parser gemma4 --reasoning-parser gemma4 \
   --chat-template /content/tool_chat_template_gemma4.jinja --limit-mm-per-prompt '{"image": 0, "audio": 0}' \
-  --async-scheduling --host 0.0.0.0 --port 18000 > /content/vllm_server.log 2>&1 &
+  --async-scheduling --enable-prompt-tokens-details --host 127.0.0.1 --port 18000 > /content/vllm_server.log 2>&1 &
 for i in $(seq 1 240); do curl -s localhost:18000/health >/dev/null && break; sleep 5; done
 curl -s localhost:18000/v1/models | head -c 200; echo
 grep -iE "maximum concurrency|KV cache|GPU KV" /content/vllm_server.log | tail -4

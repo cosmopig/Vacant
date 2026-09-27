@@ -20,6 +20,11 @@ if ! command -v bwrap >/dev/null || ! command -v pipx >/dev/null || ! command -v
   apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq bubblewrap pipx xz-utils zstd >/dev/null
 fi
 bwrap --version; pipx --version
+# Colab 把 /usr/bin/python3 換成 3.13、卻沒有它的 ensurepip ⇒ pipx 建不了 venv（2026-09-27 冒煙：C 組 install_rc=1）。
+# 一台正常的 Ubuntu 裝了 pipx 就有對應的 -venv；這裡補上**系統那一版** python 的 -venv——修機器，不改使用者的安裝指令。
+PYV=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')
+python3 -c 'import ensurepip' 2>/dev/null || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python$PYV-venv >/dev/null
+python3 -c 'import ensurepip; print("ensurepip OK for", __import__("sys").version.split()[0])'
 
 # 2) node 22（Harbor 用 nvm 裝「22 的最新版」；這裡釘死一個版本裝到 /opt/eval/node，所有格子共用、唯讀）
 NODE_V=${NODE_V:-v22.23.2}

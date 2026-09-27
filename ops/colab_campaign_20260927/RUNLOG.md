@@ -78,3 +78,14 @@ Colab 的 VM 本身就是一個容器，開不了 dockerd；而且人類說「�
 ## 六、時間線（接續）
 
 - 13:51 G4 佈署完成（`deploy_vm.sh`）：wheel 雜湊相符、pi 0.87.1、圍牆自我檢查通過、記帳代理起來（只聽 127.0.0.1）。
+- 13:54 冒煙 1（R534 `lcb_3522`，A＋C361 各一格）：管線通；**C 組 `pipx install` 失敗**（`install_rc=1`）——Colab 把 `/usr/bin/python3` 換成 3.13、卻沒有 3.13 的 ensurepip，pipx 建不了 venv。
+  修法：補裝 `python3.13-venv`（修機器、不改使用者的安裝指令；一台正常的 Ubuntu 裝 pipx 就會帶對應的 -venv），寫進 `vm_setup.sh`。
+- 13:55 思考檢查：帳本每通 `reasoning_tokens=2`，但 `io.jsonl` 的回應裡**沒有任何推理文字**（串流 delta 沒有 `reasoning`／`reasoning_content`），代理送出的都是 `reasoning_effort:"none"` ⇒ 判讀為空的思考標記，思考實際上是關的。記下，不當成偏差。
+- 13:55 計分器負控制：同一題放 `return None` 的樁 ⇒ 隱藏 0/27、可見 0/3；放「全回 -1」的錯解 ⇒ 5/27 ⇒ 都判不過 ✅（冒煙 1 的兩格正解都是 27/27）。
+- 13:57 冒煙 2（同一題）：C 組 `install_rc=0`、`vacant install` 認到 pi（`/tmp/harbor-pi-agent/extensions/vacant.ts`）、病歷 6 步、交件前檢查 2 次（`continue` 退回一次 → `allow`）⇒ **「裝 pi → 裝 Vacant → 它就被應用」在 Colab 上成立**。A 組 3.3 秒、C 組 7.7 秒。
+- 13:58 vLLM 重開，加 `--enable-prompt-tokens-details`（帳本才記得到 `cached_tokens`；實測第二通 3,008 token 命中）、改只聽 127.0.0.1。
+  ⚠ 第一次用 `pkill -f "vllm serve"` 把下指令的那個 shell 也殺了（它的命令列也含那個字串），改分兩步重開。
+- 14:00 **吞吐校準**（不是預註冊批次）：R534 全部 20 題 × A／C361，40 格同時開。只看牆鐘、逾時、錯誤碼、GPU；**不看分數**。
+  （R534 是 LCB 衍生的 20 題，可能和 LCB 題庫重疊；所以不看它的分數。）
+- 14:00 打包（`packer.py`，每 10 分鐘）與本機同步（Mac `~/Vacant_colab_raw/sync_from_colab.sh`，每 10 分鐘）開始；14:02 第一個 chunk 已拉回本機、sha256 相符。
+- 14:01 Google Drive 掛載要人類在瀏覽器授權（`colab drivemount` 印出授權網址、等 Enter）⇒ 待人類操作。
