@@ -184,3 +184,5 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   那 27 題在 `progress.jsonl` 裡算「開始過」：它們本來就是種子順序裡接下來的 27 題，過了時間上限也會補跑——照實記在這裡。
   新增保險絲 `ops/eval/local/guard.sh`：每 5 秒看 dockerd 與代理，連續兩次不在就依序停啟動檔與驅動（`setsid` 起，會撐過下一次重啟）。沒有看任何評分
   （`rerun_void.py` 只讀「有沒有評分」與例外類型）。
+- 18:59 UTC 例行檢查：18:53 那一輪歸檔的 commit（`86231719`，u274 原始資料）**沒有推上去**——`archive_loop.sh` 的 4 次重試都失敗、照樣印 "archived and pushed"（交接文件 8.3 講過的坑）。
+  手動 push 成功。之後每次例行檢查都用 `git ls-remote` 對遠端，不信歸檔迴圈的那一行。18:21:56 接續之後跑完的 10 跑都有結果；保險絲沒有觸發。
