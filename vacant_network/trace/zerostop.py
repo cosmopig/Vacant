@@ -192,10 +192,12 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
     how = [ERROR_STOP_LINE] if error_stop else None
     if mode == "evidence" and pushable and used < ZERO_MAX_ROUNDS:
         n = _bump_round(session_id, zc)
+        # 「還剩幾回合」這一句屬於回合預算提醒（v3.6.1：提醒預設關時不送；只剩一回合只退回缺檔的收窄照舊）
+        from ..adapters.mode import budget_reminder_on
         text, withheld = review.render(pushable, actor_tokens=_actor_tokens(rec),
                                        previous_open=set(sess.get("open") or []),
                                        budget_note=review.turns_left_note(turns_left, budget)
-                                       if last_turn else "")
+                                       if last_turn and budget_reminder_on() else "")
         sess.setdefault("rounds", []).append({"round": n, "findings":
                                               [_compact(f) for f in pushable]})
         sess["open"] = sorted(f["finding_id"] for f in pushable)

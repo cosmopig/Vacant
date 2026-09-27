@@ -143,7 +143,7 @@ This reminder is only about the file; it does not say whether any answer is righ
   提醒只在 agent 被告知回合上限時作用（評測、headless 批次），一般互動使用幾乎不觸發；在正式批次它讓答對率 51.9%→59.3%，
   但多交出來的答案錯的多於對的（交出去的答案裡對的比例約 82%→65%）——對一個不看評分的人，多一個沒有根據的答案不是改善。
 - 做法：`install.json` 的 `budget_reminder` 是 `true` 才開（`vacant install --budget-reminder`；`--no-budget-reminder` 關；
-  沒說就不動上一次的選擇；舊的安裝沒有這個欄位 ⇒ 關）。`budget.turn_check` 在關的時候直接放行，**模型收到的請求和沒裝時逐位元組相同**。
+  沒說就不動上一次的選擇；舊的安裝沒有這個欄位 ⇒ 關）。`budget.turn_check` 在關的時候直接放行、**什麼都不加進請求**（沒有要退回的東西時，模型收到的請求和沒裝時逐位元組相同；有退回時照樣送退回的字句）。**v3.6.1**（對抗審查 `ops/eval/evidence_20260927_nocap/review_v36/`）：只剩一回合時的退回不再附「還剩幾回合」那一句（它屬於提醒；只退回缺檔的收窄照舊）；整個 `vacant uninstall` 會清掉之前的選擇；安裝時保留之前的「開」會印一行。
   其餘不變：交件前檢查（五類退回）、只剩最後一回合時只退回缺檔、被切斷或事後補查的交件說明。
 - 測試：`tests/test_zero_budget.py` 的 `test_v36_*`（沒有欄位／false／不是 true 的值都關；壞掉的 install.json 關；安裝旗標開、關、沒說不動）；
   原本量提醒行為的測試改成明確開啟；拿掉開關的變異會被抓到。

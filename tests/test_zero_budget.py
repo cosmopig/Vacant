@@ -632,3 +632,29 @@ def test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choi
     assert budget_reminder_on() is True                   # 沒說就不動上一次的選擇
     assert ACLI.main(["install", "--agents", "pi", "--force", "--no-budget-reminder"]) == 0
     assert budget_reminder_on() is False
+
+
+# ── v3.6.1：對抗審查（ops/eval/evidence_20260927_nocap/review_v36/） ─────────
+
+def test_v361_last_turn_send_back_has_no_turns_left_sentence_when_the_reminder_is_off(proj):
+    _install(budget_reminder=None)                        # 預設：關
+    b = Pi(proj, sid="T")
+    _two_findings(b)
+    d = b.ev("stop", final_text="Done.", turn=14, budget=15)
+    body = [ln for ln in d["reason"].splitlines() if ln.startswith("- ")]
+    assert len(body) == 1 and "/app/answer.txt" in body[0]  # 只退回缺檔的收窄照舊
+    assert "of 15" not in d["reason"] and "turns left" not in d["reason"].lower()
+
+
+def test_v361_full_uninstall_drops_the_opt_in_and_install_says_when_it_keeps_one(proj, capsys):
+    from vacant_network.adapters import cli as ACLI
+    from vacant_network.adapters.mode import budget_reminder_on
+    (INS.state_root() / "install.json").unlink()
+    assert ACLI.main(["install", "--agents", "pi", "--force", "--budget-reminder"]) == 0
+    capsys.readouterr()
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert "budget reminder: on (kept from a previous install" in capsys.readouterr().out
+    assert ACLI.main(["uninstall"]) == 0
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert budget_reminder_on() is False                  # 整個拆掉＝回到預設
+    assert "budget reminder" not in capsys.readouterr().out

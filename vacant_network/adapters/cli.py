@@ -134,6 +134,9 @@ def cmd_install(args) -> int:
     # 回合預算提醒預設關（v3.6）；人明確說要才開、說不要才關，沒說就不動上一次的選擇
     if getattr(args, "budget_reminder", None) is not None:
         m.data["budget_reminder"] = bool(args.budget_reminder)
+    elif m.data.get("budget_reminder") is True:
+        print("  budget reminder: on (kept from a previous install; `vacant install --no-budget-reminder` "
+              "turns it off)")
     m.data["schema"] = 2
     m.save()
     if args.observe_model:
@@ -174,6 +177,9 @@ def cmd_uninstall(args) -> int:
         for r in INS.uninstall(m, n):
             errors += r["result"].startswith("error:")
             print(f"  {n}: {r['op']:<10} {r['path']}: {r['result']}")
+    if not args.agents and not m.data.get("agents"):
+        # 整個拆掉＝回到預設：之前 `--budget-reminder` 的選擇不留給下一次安裝（v3.6.1，對抗審查）
+        m.data.pop("budget_reminder", None)
     m.save()
     rc = 0
     # 0.8.0 的 `vacant install`（以及 `--observe-model`）裝的是模型通道常駐代理；
@@ -277,8 +283,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="also add Vacant's skill file (it becomes part of the agent's prompt)")
     p.add_argument("--budget-reminder", action=argparse.BooleanOptionalAction, default=None,
                    help="remind the agent to write the requested file when its stated turn budget is "
-                        "nearly used up (off by default: in evaluations it added more wrong answers than "
-                        "right ones)")
+                        "nearly used up (off by default: in the preregistered local batch, more of the "
+                        "extra answers it produced were wrong than right)")
     p.set_defaults(func=cmd_install)
 
     p = sp.add_parser("uninstall", help="remove only what `vacant install` added")
