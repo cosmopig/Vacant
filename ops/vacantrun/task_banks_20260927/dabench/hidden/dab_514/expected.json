@@ -1,0 +1,16 @@
+{
+  "task_id": "dab_514",
+  "source_id": 514,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "lower_city_count",
+      "4"
+    ],
+    [
+      "higher_city_count",
+      "0"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

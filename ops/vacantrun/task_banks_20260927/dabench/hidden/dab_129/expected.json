@@ -1,0 +1,12 @@
+{
+  "task_id": "dab_129",
+  "source_id": 129,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "std_dev_fare",
+      "49.67"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

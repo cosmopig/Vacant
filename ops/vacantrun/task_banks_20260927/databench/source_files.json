@@ -1,0 +1,128 @@
+{
+ "repo": "cardiffnlp/databench",
+ "revision": "e75d53add267d2f9cfa32efd65ad77f0807adfad",
+ "split": "semeval test（README 的 config semeval / split test：data/066–080）",
+ "note": "sha256＝HF LFS oid；2026-09-27 由 HF tree API 取得、下載後逐檔驗過",
+ "files": {
+  "data/066_IBM_HR/all.parquet": {
+   "size": 71491,
+   "sha256": "bb78e50bba8119f4aef2c22cdb1aeab4ac19caa0e44e9c775e12ca36f6ef63f5"
+  },
+  "data/066_IBM_HR/qa.parquet": {
+   "size": 6893,
+   "sha256": "cf1c4a00388159e3741641bbd10a27f3333cdf43efc99326bd57a56adf3fd574"
+  },
+  "data/067_TripAdvisor/all.parquet": {
+   "size": 12504117,
+   "sha256": "3987c0035c5a15b079824aa47b7fc199b000017f0bea81c8cfaac112011030ec"
+  },
+  "data/067_TripAdvisor/qa.parquet": {
+   "size": 6144,
+   "sha256": "5ff49c6a1bebc1a0166b1854a33ec92c4e0837e834126e546d79cfd7f264468f"
+  },
+  "data/068_WorldBank_Awards/all.parquet": {
+   "size": 24159887,
+   "sha256": "8ebcdf8b03600bf470b0d4957c8cd528a464f03cca15d7b45bd797919f9e84fd"
+  },
+  "data/068_WorldBank_Awards/qa.parquet": {
+   "size": 7797,
+   "sha256": "436e3b299c14cf39412084254761bdeeb34d108c48610a5e5ca4069d5975caaa"
+  },
+  "data/069_Taxonomy/all.parquet": {
+   "size": 31670,
+   "sha256": "54ba23879e9ac21e4afcc69f24af5f43358351d18c1273519976c9ed87ed9df3"
+  },
+  "data/069_Taxonomy/qa.parquet": {
+   "size": 6390,
+   "sha256": "485ff35ac5e6396000214ada57858f4fbe45eb7987e4ec8f3a45e7ba67c54466"
+  },
+  "data/070_OpenFoodFacts/all.parquet": {
+   "size": 595367,
+   "sha256": "985c62e49c039389aee4085c1cfe8cce87d54df8c622c7c53282c18a0517a608"
+  },
+  "data/070_OpenFoodFacts/qa.parquet": {
+   "size": 6213,
+   "sha256": "6ea9c4ac2c6d421be638fd6fdef344b1d7728c8e0247667096de269226b73d79"
+  },
+  "data/071_COL/all.parquet": {
+   "size": 12542,
+   "sha256": "ac682c8bfad5cc25ef1c4fbb9c3810ef91ad833aa5020844ddde378693f26dcd"
+  },
+  "data/071_COL/qa.parquet": {
+   "size": 7132,
+   "sha256": "620e3bfa773a835752450c76d38d547500b7afed1092e61fc5eef4c6efec49d2"
+  },
+  "data/072_Admissions/all.parquet": {
+   "size": 13070,
+   "sha256": "a32cef359f7265d6994af0909a54065ed9f38b97b927b851a2f6f55239ab2386"
+  },
+  "data/072_Admissions/qa.parquet": {
+   "size": 6772,
+   "sha256": "2c68748c6d4dd35c7e5d3f6965db3e52a3e4b0f7ed2abe40a49071a349c1ffe2"
+  },
+  "data/073_Med_Cost/all.parquet": {
+   "size": 24777,
+   "sha256": "d59b1f7f885de649b63317aecbaedd35bfca70d6e3bd36c8567884c1011984b6"
+  },
+  "data/073_Med_Cost/qa.parquet": {
+   "size": 6031,
+   "sha256": "b38dbfbe33507a7c00ef4d34d7ca4a39482be90214c22dc7b9a0f6a2e3d8454c"
+  },
+  "data/074_Lift/all.parquet": {
+   "size": 15601,
+   "sha256": "c5f682127fc9d732acc98f6892007b087e0fff2f6702aa36b28f258e47fb3fe7"
+  },
+  "data/074_Lift/qa.parquet": {
+   "size": 6556,
+   "sha256": "6688e7a274b94d389fe77962cbb0a6e08ae4aebc339377d7a94bd2db90c20aad"
+  },
+  "data/075_Mortality/all.parquet": {
+   "size": 10313,
+   "sha256": "85766b91f1a19bdc1243c84ad1ddf6d2e809b2400ff639af8e6e40ee6dcdaea1"
+  },
+  "data/075_Mortality/qa.parquet": {
+   "size": 6462,
+   "sha256": "d9c1f3bba0f714f22cc34ec8075af5c5f9ce594019a56442f3e5d51d95d4d579"
+  },
+  "data/076_NBA/all.parquet": {
+   "size": 389217,
+   "sha256": "326c148a50d90a37b4518c96161f8b069c1a0b52f578fe1f7f085cbd92e31055"
+  },
+  "data/076_NBA/qa.parquet": {
+   "size": 6950,
+   "sha256": "cdb8a8f6e2b17f41612c8d8513a8209e9768b425f116214b0c08e2f0e3d0bc4f"
+  },
+  "data/077_Gestational/all.parquet": {
+   "size": 10321,
+   "sha256": "d94071dddf5e2afade2bd94f7b33ef795ca520d8759735eaa64db030b312cb38"
+  },
+  "data/077_Gestational/qa.parquet": {
+   "size": 6388,
+   "sha256": "4bcd38b024c41df741b57501f38712b40004cd8187e86d6beb1be136a804e339"
+  },
+  "data/078_Fires/all.parquet": {
+   "size": 20521,
+   "sha256": "982840e761aa46c8d2b5f652e3b6bc683e9ae94ecb67f5991a0a5caae53dba63"
+  },
+  "data/078_Fires/qa.parquet": {
+   "size": 7108,
+   "sha256": "1d194120f89641ecea8f52b23ce046a979d72aeb318b97b63af9442f290efe98"
+  },
+  "data/079_Coffee/all.parquet": {
+   "size": 1741476,
+   "sha256": "d6fe74633c143ef54804c29fa54a21fe639e08658c05b9f3f964002b9f3713c7"
+  },
+  "data/079_Coffee/qa.parquet": {
+   "size": 6946,
+   "sha256": "147e1ddcee40d16f37045b25b8915cacc0f191a88e9ebd60b06c5f84f9c71a52"
+  },
+  "data/080_Books/all.parquet": {
+   "size": 14513,
+   "sha256": "c19a1f36126e483209716373874cd918dd31d4ee429bec2b2563d3b2efb01a3d"
+  },
+  "data/080_Books/qa.parquet": {
+   "size": 8066,
+   "sha256": "976ad92b59e0b36e87faa248ffe3a5c799e5117b1c36c247fa7981c8972e986b"
+  }
+ }
+}

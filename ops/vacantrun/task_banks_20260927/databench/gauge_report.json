@@ -1,0 +1,413 @@
+{
+  "summary": {
+    "n_tasks": 30,
+    "by_type": {
+      "boolean": 6,
+      "category": 6,
+      "number": 6,
+      "list[category]": 6,
+      "list[number]": 6
+    },
+    "reference_full_marks": 30,
+    "label_verbatim_full_marks": 30,
+    "with_prose_after_full_marks": 30,
+    "missing_zero": 30,
+    "empty_zero": 30,
+    "wrong_zero": 30,
+    "subdir_only_zero": 30,
+    "default_compare_ast_equals_official": true,
+    "verdict": "OK"
+  },
+  "rows": [
+    {
+      "task_id": "db_071_02",
+      "type": "boolean",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_080_04",
+      "type": "boolean",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_076_00",
+      "type": "boolean",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_066_04",
+      "type": "boolean",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_076_06",
+      "type": "boolean",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_072_02",
+      "type": "boolean",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_071_12",
+      "type": "category",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_066_10",
+      "type": "category",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_069_08",
+      "type": "category",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_074_11",
+      "type": "category",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_073_10",
+      "type": "category",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_078_11",
+      "type": "category",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_072_26",
+      "type": "number",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_071_15",
+      "type": "number",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_071_19",
+      "type": "number",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_080_23",
+      "type": "number",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_077_18",
+      "type": "number",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_074_13",
+      "type": "number",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_066_34",
+      "type": "list[category]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_069_29",
+      "type": "list[category]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_075_28",
+      "type": "list[category]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_073_31",
+      "type": "list[category]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_076_31",
+      "type": "list[category]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_078_36",
+      "type": "list[category]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_072_30",
+      "type": "list[number]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_074_27",
+      "type": "list[number]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_066_37",
+      "type": "list[number]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_072_33",
+      "type": "list[number]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_072_38",
+      "type": "list[number]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    },
+    {
+      "task_id": "db_078_28",
+      "type": "list[number]",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose_after": 1,
+        "missing": 0,
+        "empty": 0,
+        "wrong": 0,
+        "subdir_only": 0
+      }
+    }
+  ]
+}

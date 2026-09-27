@@ -1,0 +1,4116 @@
+{
+  "summary": {
+    "bank": "dabench",
+    "n_tasks": 30,
+    "vacant_network_version": "0.8.0",
+    "vacant_src": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/0ea239a6-ec82-4ca5-89a9-d4a11558d16e/scratchpad/tb/vn",
+    "prompt_template": "r534 TASK_MESSAGE",
+    "by_scenario": {
+      "clean": {
+        "n": 30,
+        "ok": 30,
+        "kinds": {}
+      },
+      "missing": {
+        "n": 30,
+        "ok": 30,
+        "kinds": {
+          "missing_output": 30
+        }
+      },
+      "no_read": {
+        "n": 30,
+        "ok": 30,
+        "kinds": {
+          "unread": 30,
+          "unsourced": 30
+        }
+      },
+      "failed_script": {
+        "n": 30,
+        "ok": 30,
+        "kinds": {
+          "failed_step": 30,
+          "unsourced": 12
+        }
+      }
+    },
+    "verdict": "OK"
+  },
+  "rows": [
+    {
+      "task_id": "dab_035",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_035",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_035",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/imp.score.ldlr.metabolome.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.31",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/imp.score.ldlr.metabolome.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_035",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_039",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_039",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_039",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/imp.score.ldlr.metabolome.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.31",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/imp.score.ldlr.metabolome.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_039",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/imp.score.ldlr.metabolome.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_055",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_055",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_055",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/estimated_numbers.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "2852333.61",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/estimated_numbers.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_055",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "2852333.61",
+          "_short": true,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_057",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_057",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_057",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/estimated_numbers.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.64",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/estimated_numbers.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_057",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/estimated_numbers.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_105",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/test_Y3wMUE5_7gLdaTN.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_105",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/test_Y3wMUE5_7gLdaTN.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_105",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/test_Y3wMUE5_7gLdaTN.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/test_Y3wMUE5_7gLdaTN.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.98",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/test_Y3wMUE5_7gLdaTN.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_105",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/test_Y3wMUE5_7gLdaTN.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_129",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_129",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_129",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/titanic.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "75.36",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/titanic.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_129",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "75.36",
+          "_short": true,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_144",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/election2016.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_144",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/election2016.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_144",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/election2016.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/election2016.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.520",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/election2016.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "7.75",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/election2016.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "7.524",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/election2016.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 4,
+          "value": "8.19",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/election2016.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_144",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/election2016.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.520",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "7.524",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_176",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_176",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_176",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/titanic.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "50.47",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/titanic.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_176",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_216",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_216",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_216",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "9.37",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "13.63",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_216",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_218",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_218",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_218",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.42",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_218",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_249",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_249",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_249",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/baseball_data.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.10",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/baseball_data.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_249",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_250",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_250",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_250",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/baseball_data.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.21",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/baseball_data.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "7.35",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/baseball_data.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_250",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/baseball_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.21",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_378",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/2014_q4.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_378",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/2014_q4.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_378",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/2014_q4.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/2014_q4.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.52",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/2014_q4.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "28974.70",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/2014_q4.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "5.76",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/2014_q4.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 4,
+          "value": "13556.51",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/2014_q4.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 5,
+          "value": "7.52",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/2014_q4.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_378",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/2014_q4.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "28974.70",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 4,
+          "value": "13556.51",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 7,
+          "value": "28974.70",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 8,
+          "value": "13556.51",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_426",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_426",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_426",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/cost_data_with_errors.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "221.61",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/cost_data_with_errors.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_426",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "221.61",
+          "_short": true,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_427",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_427",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_427",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/cost_data_with_errors.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "145.68",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/cost_data_with_errors.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_427",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/cost_data_with_errors.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "145.68",
+          "_short": true,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_507",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_507",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_507",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/hotel_data.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "70.33",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/hotel_data.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_507",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_514",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_514",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_514",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/hotel_data.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "12.79",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/hotel_data.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "7.31",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/hotel_data.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_514",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/hotel_data.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_517",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_517",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_517",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/titanic.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "6.56",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/titanic.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_517",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/titanic.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_587",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_587",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_587",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/20170413_000000_group_statistics.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.185",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/20170413_000000_group_statistics.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_587",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.185",
+          "_short": true,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_588",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_588",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_588",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/20170413_000000_group_statistics.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/20170413_000000_group_statistics.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_588",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/20170413_000000_group_statistics.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "_short": true,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_657",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_657",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_657",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/YAHOO-BTC_USD_D.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "4938.99",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "5642.82",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "5965.81",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_657",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "4938.99",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "5642.82",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "5965.81",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_665",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_665",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_665",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/YAHOO-BTC_USD_D.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "752.59",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "7.65",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "752.59",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 5,
+          "value": "1497.87",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 6,
+          "value": "7.65",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/YAHOO-BTC_USD_D.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_665",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/YAHOO-BTC_USD_D.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "752.59",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 3,
+          "value": "752.59",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 5,
+          "value": "1497.87",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_666",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_666",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_666",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/my_test_01.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.9828",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/my_test_01.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "10.2180",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/my_test_01.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_666",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_669",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_669",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_669",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/my_test_01.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "9.42",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/my_test_01.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "12.42",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/my_test_01.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_669",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/my_test_01.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_688",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ravenna_250715.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_688",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ravenna_250715.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_688",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ravenna_250715.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/ravenna_250715.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "15.53",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/ravenna_250715.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "15.53",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/ravenna_250715.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_688",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/ravenna_250715.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_721",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_721",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_721",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/auto-mpg.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "6.17",
+          "_short": true,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_721",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_723",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_723",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_723",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/auto-mpg.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.35",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "7.32",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_723",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_724",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_724",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_724",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/auto-mpg.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.98",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "28.53",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_724",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "28.53",
+          "_short": false,
+          "single_answer": true
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_725",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_725",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_725",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/auto-mpg.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "45.67",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 2,
+          "value": "46.67",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/auto-mpg.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_725",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/auto-mpg.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_732",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/gapminder_cleaned.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "dab_732",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/gapminder_cleaned.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "answer.txt",
+          "asked": "answer.txt"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_732",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/gapminder_cleaned.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "data/gapminder_cleaned.csv"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "7.31",
+          "_short": false,
+          "single_answer": true,
+          "unread_attach": [
+            "data/gapminder_cleaned.csv"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "dab_732",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "answer.txt"
+      ],
+      "materials_named": [
+        "contract.md",
+        "data/gapminder_cleaned.csv",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    }
+  ]
+}

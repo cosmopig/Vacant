@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_variable_length_quantity",
+  "slug": "variable-length-quantity",
+  "solution_file": "variable_length_quantity.py",
+  "test_files": [
+    "variable_length_quantity_test.py"
+  ],
+  "test_main": "variable_length_quantity_test.py",
+  "n_tests": 26,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/variable-length-quantity/"
+}

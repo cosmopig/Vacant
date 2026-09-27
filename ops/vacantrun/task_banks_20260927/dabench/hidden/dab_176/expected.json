@@ -1,0 +1,12 @@
+{
+  "task_id": "dab_176",
+  "source_id": 176,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "median_age",
+      "31.5"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

@@ -1,0 +1,1518 @@
+{
+  "summary": {
+    "n_tasks": 34,
+    "reference_pass": 34,
+    "stub_zero": 34,
+    "missing_zero": 34,
+    "empty_zero": 34,
+    "syntax_error_zero": 34,
+    "tampered_tests_zero": 34,
+    "reference_tampered_pass": 34,
+    "pytest_agrees": 34,
+    "stub_partial_credit_tasks": [
+      "pg_dominoes",
+      "pg_react",
+      "pg_tree_building"
+    ],
+    "python": "3.12.10",
+    "verdict": "OK"
+  },
+  "rows": [
+    {
+      "task_id": "pg_affine_cipher",
+      "n_tests": 16,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 16
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 16
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_beer_song",
+      "n_tests": 8,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 8
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 8
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_book_store",
+      "n_tests": 20,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 20
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 20
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "n_tests": 7,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 7
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 7
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_bowling",
+      "n_tests": 31,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 31
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 31
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_connect",
+      "n_tests": 10,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 10
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 10
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_dominoes",
+      "n_tests": 13,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 13
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 6
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 6
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 13
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 6
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "n_tests": 12,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 12
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 12
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_food_chain",
+      "n_tests": 10,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 10
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 10
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_forth",
+      "n_tests": 54,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 54
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 54
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_go_counting",
+      "n_tests": 11,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 11
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 11
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_grade_school",
+      "n_tests": 20,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 20
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 20
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_grep",
+      "n_tests": 25,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 25
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 25
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_hangman",
+      "n_tests": 7,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 7
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 7
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_list_ops",
+      "n_tests": 24,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 24
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 24
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_paasio",
+      "n_tests": 25,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 25
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 25
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_phone_number",
+      "n_tests": 21,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 21
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 21
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "n_tests": 22,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 22
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 22
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_poker",
+      "n_tests": 37,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 37
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 37
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_pov",
+      "n_tests": 15,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 15
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 15
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_proverb",
+      "n_tests": 8,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 8
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 8
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_react",
+      "n_tests": 14,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 14
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 2
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 2
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 14
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 2
+    },
+    {
+      "task_id": "pg_rest_api",
+      "n_tests": 9,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 9
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 9
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_robot_name",
+      "n_tests": 4,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 4
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 4
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "n_tests": 17,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 17
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 17
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "n_tests": 23,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 23
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 23
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "n_tests": 20,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 20
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 20
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_transpose",
+      "n_tests": 12,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 12
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 12
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_tree_building",
+      "n_tests": 13,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 13
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 7
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 7
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 13
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 7
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "n_tests": 9,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 9
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 9
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "n_tests": 26,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 26
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 26
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_wordy",
+      "n_tests": 25,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 25
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 25
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "n_tests": 2,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 2
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 2
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    },
+    {
+      "task_id": "pg_zipper",
+      "n_tests": 14,
+      "cases": {
+        "reference": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 14
+        },
+        "stub": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "missing": {
+          "pass": 0,
+          "status": "missing",
+          "tests_passed": 0
+        },
+        "empty": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "syntax_error": {
+          "pass": 0,
+          "status": "load_error",
+          "tests_passed": 0
+        },
+        "tampered_tests": {
+          "pass": 0,
+          "status": "fail",
+          "tests_passed": 0
+        },
+        "reference_tampered": {
+          "pass": 1,
+          "status": "pass",
+          "tests_passed": 14
+        }
+      },
+      "pytest_reference_pass": true,
+      "pytest_stub_pass": false,
+      "stub_tests_passed": 0
+    }
+  ]
+}

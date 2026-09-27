@@ -1,0 +1,8 @@
+{
+  "task_id": "db_075_28",
+  "source": "075_Mortality#28",
+  "answer": "['Urban', 'Rural']",
+  "type": "list[category]",
+  "answer_file": "answer.txt",
+  "scorer": "score.py（databench_eval 4.0.1 的 Evaluator.default_compare 逐字）"
+}

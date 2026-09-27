@@ -1,0 +1,12 @@
+{
+  "task_id": "dab_588",
+  "source_id": 588,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "num_of_outliers",
+      "2"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

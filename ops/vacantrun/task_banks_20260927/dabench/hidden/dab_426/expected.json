@@ -1,0 +1,12 @@
+{
+  "task_id": "dab_426",
+  "source_id": 426,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "max_wind_speed",
+      "156.42"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

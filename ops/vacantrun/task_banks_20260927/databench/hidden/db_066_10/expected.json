@@ -1,0 +1,8 @@
+{
+  "task_id": "db_066_10",
+  "source": "066_IBM_HR#10",
+  "answer": "Sales",
+  "type": "category",
+  "answer_file": "answer.txt",
+  "scorer": "score.py（databench_eval 4.0.1 的 Evaluator.default_compare 逐字）"
+}

@@ -1,0 +1,8 @@
+{
+  "task_id": "db_076_31",
+  "source": "076_NBA#31",
+  "answer": "['GSW', 'LAC', 'BOS', 'MIL', 'MIA']",
+  "type": "list[category]",
+  "answer_file": "answer.txt",
+  "scorer": "score.py（databench_eval 4.0.1 的 Evaluator.default_compare 逐字）"
+}

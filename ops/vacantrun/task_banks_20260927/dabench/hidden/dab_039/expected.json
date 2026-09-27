@@ -1,0 +1,12 @@
+{
+  "task_id": "dab_039",
+  "source_id": 39,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "is_normal",
+      "0.0"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

@@ -1,0 +1,899 @@
+{
+  "bank": "polyglot_py_pilot_20260927",
+  "source": {
+    "repo": "Aider-AI/polyglot-benchmark",
+    "commit": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f",
+    "subset": "python/exercises/practice/",
+    "license": "題目版權屬 Exercism（polyglot repo README）；Exercism Python track 為 MIT",
+    "source_tree_sha256": "3fd26fe1914ec58415a716ee4371ef1eb50bfb1a6736e76e6ea0ee8f5974d339"
+  },
+  "selection_rule": "Aider-AI/polyglot-benchmark@7e0611e7 的 python/exercises/practice/ 底下**全部** 34 題，不抽樣、不排除。排序＝slug 字典序。",
+  "n_tasks": 34,
+  "deliverable": "工作區根目錄的解答檔（例：bowling.py），一開始不存在",
+  "scoring": {
+    "primary": "pass：原件測試檔在乾淨目錄裡對解答檔全部通過＝1，否則 0（Aider 的判準：測試指令結束碼 0）",
+    "secondary": "tests_passed／tests_total",
+    "runner": "標準函式庫 unittest（score.py 的 _RUNNER）；gauge 另用 pytest 交叉驗證參考解與 stub",
+    "timeout_s": 180,
+    "deviations_from_official": [
+      "stub 不放進工作區、改貼在 contract.md（讓「要求的檔不存在」可以被量到）",
+      "測試檔在工作區裡看得到、跑得到；沒有 Aider 的兩次嘗試規則 ⇒ 不可與 Aider 排行榜的 pass_rate_1／2 互引",
+      "只取解答檔配原件測試檔計分；agent 的 conftest.py／改過的測試檔／輔助模組不參與",
+      "Aider 用 pytest 跑；這裡用 unittest（測試檔都是 unittest.TestCase，gauge 交叉驗證兩者對參考解與 stub 判定一致）"
+    ]
+  },
+  "tasks": [
+    {
+      "task_id": "pg_affine_cipher",
+      "slug": "affine-cipher",
+      "solution_file": "affine_cipher.py",
+      "test_files": [
+        "affine_cipher_test.py"
+      ],
+      "n_tests": 16,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Create an implementation of the Affine cipher, an ancient encryption algorithm from the Middle East.",
+      "template_sha256": {
+        "affine_cipher_test.py": "4d9dac99b726068707a37e36145d73f74a52704145fb95bb4acaccdd7cd3ef54",
+        "contract.md": "145a9b82c350d5ecffeca2516c0db084ea9e15275fb6687e7e4049d99fc062e4",
+        "goal.md": "d3b5e5736a60fffd4a2375f07d976d35a948376532635ce2866ef165f6bb1e50"
+      },
+      "hidden_sha256": {
+        "expected.json": "99eca5e709f64e4f8b4d7353fb72baa8398bf5afb4b85ba4353f2416746e06da",
+        "tests/affine_cipher_test.py": "4d9dac99b726068707a37e36145d73f74a52704145fb95bb4acaccdd7cd3ef54"
+      },
+      "reference_sha256": "6952153be60d7690e0bfad52c89c4647e9edb4bd068c77f1c15735e00d9216ba",
+      "stub_sha256": "0749b5b3fae45c8c7f8db28a932fb886c1605590933ad3678e7710fc9cefbace",
+      "template_bytes": 7579
+    },
+    {
+      "task_id": "pg_beer_song",
+      "slug": "beer-song",
+      "solution_file": "beer_song.py",
+      "test_files": [
+        "beer_song_test.py"
+      ],
+      "n_tests": 8,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Produce the lyrics to that beloved classic, that field-trip favorite: 99 Bottles of Beer on the Wall.",
+      "template_sha256": {
+        "beer_song_test.py": "91c87daae769e12821ba3526858ca3fd45c3501033669edb6101e486d74eff1f",
+        "contract.md": "ed3e2282fefbb9810078a6122d56ea1ef58e5d4fb5761a1ec12480a1aae4c50d",
+        "goal.md": "74f85047feabcf41b1846d5c58ad0133a51e0963567d0afbc5e21541beb37e4f"
+      },
+      "hidden_sha256": {
+        "expected.json": "bc9541d45d1c2256d4edc6f2038627cc3e298864f7dc0c8cfd344a4f3d1349f1",
+        "tests/beer_song_test.py": "91c87daae769e12821ba3526858ca3fd45c3501033669edb6101e486d74eff1f"
+      },
+      "reference_sha256": "b799738d63ff7e375f9bedfb76552eeee9b328ee8c3581f6f48a05ff71690fef",
+      "stub_sha256": "69116615d18792e85030113a122a72bc2770bb8bd962b9103e9374d56371d37f",
+      "template_bytes": 31963
+    },
+    {
+      "task_id": "pg_book_store",
+      "slug": "book-store",
+      "solution_file": "book_store.py",
+      "test_files": [
+        "book_store_test.py"
+      ],
+      "n_tests": 20,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "To try and encourage more sales of different books from a popular 5 book series, a bookshop has decided to offer discounts of multiple-book purchases.",
+      "template_sha256": {
+        "book_store_test.py": "fa4109f3378cceaff8bdc389b333bc23c65f8b1345bc907be5c09593be0ee1eb",
+        "contract.md": "7ce5d1e7dbfd91134dcd42b54ce5c0b860e3920ebaaa461a50fb1a3e98eefcd6",
+        "goal.md": "025999b58db674568be4d2239fc577b749ec40e98593fc3638e21e72915ad4c5"
+      },
+      "hidden_sha256": {
+        "expected.json": "fbbac93e4d0d8ffeb79630b0d8ed6d24eb5652f7b02267e19a54320d34f512ad",
+        "tests/book_store_test.py": "fa4109f3378cceaff8bdc389b333bc23c65f8b1345bc907be5c09593be0ee1eb"
+      },
+      "reference_sha256": "728655581209a08f392aa2d6a5060bca855f53ea3e96f66a86db738dbf23d751",
+      "stub_sha256": "49a75bacbeb712a5c9568ea6665f5d90ea59316ce1b442621a91214f2bf25cc1",
+      "template_bytes": 5929
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "slug": "bottle-song",
+      "solution_file": "bottle_song.py",
+      "test_files": [
+        "bottle_song_test.py"
+      ],
+      "n_tests": 7,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Produce the lyrics to the popular children's repetitive song: Ten Green Bottles.",
+      "template_sha256": {
+        "bottle_song_test.py": "c27aadffe3a14df3f04dfa65de1798d1ab7b4bf07126f8978808fbd25302b700",
+        "contract.md": "7a1cec31cf82c36ac706ee244d836979d3be9072890d6eb6e26848bc167b3fd0",
+        "goal.md": "0e4fd6e0e83949fe62ef118036e7b28fb597666ed19a478eca3d3d9018614b11"
+      },
+      "hidden_sha256": {
+        "expected.json": "cd1e6a3d80e7ee5b7be83274d1aacf12758c1c3268343a4f47b0d9a3e31b9fb7",
+        "tests/bottle_song_test.py": "c27aadffe3a14df3f04dfa65de1798d1ab7b4bf07126f8978808fbd25302b700"
+      },
+      "reference_sha256": "202fffe8d02d30f4e4f62c0786e20dfa1f54969890bb01ee39cee874048f4e06",
+      "stub_sha256": "69116615d18792e85030113a122a72bc2770bb8bd962b9103e9374d56371d37f",
+      "template_bytes": 8625
+    },
+    {
+      "task_id": "pg_bowling",
+      "slug": "bowling",
+      "solution_file": "bowling.py",
+      "test_files": [
+        "bowling_test.py"
+      ],
+      "n_tests": 31,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Score a bowling game.",
+      "template_sha256": {
+        "bowling_test.py": "6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20",
+        "contract.md": "764718a5c4d9fd2df4c8bb63f29009c6a126703635811bff176d0e838cfe3a38",
+        "goal.md": "e87a65f2ad7a76c2a00c4b772eafb8d40dcfb085c36e214a68d8b88066d0350c"
+      },
+      "hidden_sha256": {
+        "expected.json": "d387d45d581fa735632dea2f65240eb985cb44fa6c12bce9afea53ca2ad4db38",
+        "tests/bowling_test.py": "6b9a80b6835828f575ce0aba66876850f75c59f764014ac509fe1df7e3a9ee20"
+      },
+      "reference_sha256": "7f634589daeb5c2974d3600d8eaf60a8fa157c0ceb37fe7341e47ea0b2e9ca8f",
+      "stub_sha256": "68f65d2b0b377c23f0ef9fce6785d5f9e41aaeedce2445097c12febf5a92f442",
+      "template_bytes": 12733
+    },
+    {
+      "task_id": "pg_connect",
+      "slug": "connect",
+      "solution_file": "connect.py",
+      "test_files": [
+        "connect_test.py"
+      ],
+      "n_tests": 10,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Compute the result for a game of Hex / Polygon.",
+      "template_sha256": {
+        "connect_test.py": "4de5c414b9a5023754ebdbb9a192b72ad19fdf402179a3020d87727e9946ce2b",
+        "contract.md": "6a0eba63e43dc235befaecb9e1f549d2617b1340c6f6aeda82ef5ed6a744c604",
+        "goal.md": "3c717817dc88865be3fd9ad5b084d0244602e8bd416a59eca9c3cbea546b70aa"
+      },
+      "hidden_sha256": {
+        "expected.json": "47571ffdd3a07f88225ff60be2fe20e6395214240b3d24ace53a86d86e2b11cb",
+        "tests/connect_test.py": "4de5c414b9a5023754ebdbb9a192b72ad19fdf402179a3020d87727e9946ce2b"
+      },
+      "reference_sha256": "8664d19c48528035ebd15fc7917d19c40f7c43ad9b95c5f488d2633e01520705",
+      "stub_sha256": "818df9be2eb56d5de18586ed0a208ee0afe24f2ddec1259f8308416789c6e965",
+      "template_bytes": 5069
+    },
+    {
+      "task_id": "pg_dominoes",
+      "slug": "dominoes",
+      "solution_file": "dominoes.py",
+      "test_files": [
+        "dominoes_test.py"
+      ],
+      "n_tests": 13,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Make a chain of dominoes.",
+      "template_sha256": {
+        "contract.md": "e0d722d27a0463345d7404c18af1ddaffc8d53121f4c83bc29e417c238fc7901",
+        "dominoes_test.py": "9645efc873738b9247ced09ccdce782fe2124646d24588d52c23df59e23ab140",
+        "goal.md": "4d0e12e178b83a18ea3e4cdc2b108e0a2ae01ae7e66625887d2895672db7fece"
+      },
+      "hidden_sha256": {
+        "expected.json": "115e352c27ce44e91398454158a19a5c0ff2309cfd4e08bb4fbd70b6ca91ea86",
+        "tests/dominoes_test.py": "9645efc873738b9247ced09ccdce782fe2124646d24588d52c23df59e23ab140"
+      },
+      "reference_sha256": "4a51af33d2fed21b11146fb6ef03179771481f27f4c59d53fe442218fc9e2d6a",
+      "stub_sha256": "f2e7131be8c2252d7c728be6458599671dcf2e607e0a56f12b8dee0a94032066",
+      "template_bytes": 6616
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "slug": "dot-dsl",
+      "solution_file": "dot_dsl.py",
+      "test_files": [
+        "dot_dsl_test.py"
+      ],
+      "n_tests": 12,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Write a Domain Specific Language similar to the Graphviz dot language.",
+      "template_sha256": {
+        "contract.md": "c95a6c8ef453e7046653599d33c230d8d00c2fd13c20b4e0d49bda0ba9eee49b",
+        "dot_dsl_test.py": "02f801ecff9b041978af4ea77b127bb74dc419edd0e0e420c912bb421db92627",
+        "goal.md": "415fd7d4e71cb6133b164906039fb6e577c57817001db6e324c0f4a5d0bd9725"
+      },
+      "hidden_sha256": {
+        "expected.json": "c4f420de3c220bdaf8545639f174091f6a73aa9479a3989b547724ed1842ef71",
+        "tests/dot_dsl_test.py": "02f801ecff9b041978af4ea77b127bb74dc419edd0e0e420c912bb421db92627"
+      },
+      "reference_sha256": "7acd5e4ba093036c9b7be98628bf235489910b6996b9928b99fadaaf0f4c858d",
+      "stub_sha256": "9bd72533062ae7f01caeff8e49d312490e1af806f4f3f5cc68ce726a7d9dd698",
+      "template_bytes": 8355
+    },
+    {
+      "task_id": "pg_food_chain",
+      "slug": "food-chain",
+      "solution_file": "food_chain.py",
+      "test_files": [
+        "food_chain_test.py"
+      ],
+      "n_tests": 10,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Generate the lyrics of the song 'I Know an Old Lady Who Swallowed a Fly'.",
+      "template_sha256": {
+        "contract.md": "aaa19c42437fd46bb72b36f7b5aacabdef9be33444cc0013cc5a52a90a46e0e1",
+        "food_chain_test.py": "8ff5c6c45bbcdee64f0e3c9d879d2a08e97c90594d00d15ee0f228b4e7eac548",
+        "goal.md": "282ba689e0653e74892e2104962c2ed4ef79fd307a182c343cd72ae807e466f3"
+      },
+      "hidden_sha256": {
+        "expected.json": "a9107819539f7b9d0e92dd5bd372f591bccfadc218144e9928a20616bc3a6c74",
+        "tests/food_chain_test.py": "8ff5c6c45bbcdee64f0e3c9d879d2a08e97c90594d00d15ee0f228b4e7eac548"
+      },
+      "reference_sha256": "8eea5c1f75e15326ac221952e38c9289cacdabdd9dc1dcc4a5b52b4fb0682640",
+      "stub_sha256": "c72b4260bf02f1e886428bf91d2fe79dd04ca7e2461915b334dabf6423ab3862",
+      "template_bytes": 11519
+    },
+    {
+      "task_id": "pg_forth",
+      "slug": "forth",
+      "solution_file": "forth.py",
+      "test_files": [
+        "forth_test.py"
+      ],
+      "n_tests": 54,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Implement an evaluator for a very simple subset of Forth.",
+      "template_sha256": {
+        "contract.md": "42c3662e43b7b2aff8761ecf9a0bf0d47e0c7fbf98232df73a12d3c3b94ee1ab",
+        "forth_test.py": "05f78a51ce5b3e18439088442925c7cea5b1fb1703bc10832dd048c057b7639c",
+        "goal.md": "c27c2130e7f6d6010237a9b45aad41accc3deba3a6229257f241f973be77c49c"
+      },
+      "hidden_sha256": {
+        "expected.json": "a68e19ab788dde0aedce9b99c94f762e2a468003d75e3f7d679f1fd4b8902292",
+        "tests/forth_test.py": "05f78a51ce5b3e18439088442925c7cea5b1fb1703bc10832dd048c057b7639c"
+      },
+      "reference_sha256": "a90f6134d4f24b5abee77880c8eb4f8adf7a88d925c0cd3d9bbfcfba895a320b",
+      "stub_sha256": "0d23c94d7c645ba1b005ae0bf2064377efa6f2137b0fc2a2ef082cc090c5f197",
+      "template_bytes": 15147
+    },
+    {
+      "task_id": "pg_go_counting",
+      "slug": "go-counting",
+      "solution_file": "go_counting.py",
+      "test_files": [
+        "go_counting_test.py"
+      ],
+      "n_tests": 11,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Count the scored points on a Go board.",
+      "template_sha256": {
+        "contract.md": "ce6cc791f7882e1ba0eb6ca22599b88b8e6e262fac41f34511cb1b731c25f6dd",
+        "go_counting_test.py": "66b355989d67c4120e49bf5e7e1d224f0af21dd1eeb30b884c204640e73fe358",
+        "goal.md": "71cc21cd56dda6fc2887f6947c71965c334653d411d2959e0c1e029220302b23"
+      },
+      "hidden_sha256": {
+        "expected.json": "8093a9a067e1321e20c518a50e59ed0c53b4814be589e505fd483045c32e04c6",
+        "tests/go_counting_test.py": "66b355989d67c4120e49bf5e7e1d224f0af21dd1eeb30b884c204640e73fe358"
+      },
+      "reference_sha256": "78f9812eec1107283a9b09362eec1b46150f00ecf651ff6b19b581c6e9dbb91d",
+      "stub_sha256": "45951d1b4724859667826f41a94c142963fe1d18c1c884fdc543f3cb428b3264",
+      "template_bytes": 7785
+    },
+    {
+      "task_id": "pg_grade_school",
+      "slug": "grade-school",
+      "solution_file": "grade_school.py",
+      "test_files": [
+        "grade_school_test.py"
+      ],
+      "n_tests": 20,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Given students' names along with the grade that they are in, create a roster for the school.",
+      "template_sha256": {
+        "contract.md": "94583dc26f69d085015bf247bb0c99eb35f59f205ae8df07ef9f6907de4ab883",
+        "goal.md": "bc144d6ca5be28cc369e3a9b540a373c3b45683e8598895c32ee39c4d79ed822",
+        "grade_school_test.py": "72827c03772b6cf4256fd2f378ae6ddff2703ccacb6053ba647e973b415e27b9"
+      },
+      "hidden_sha256": {
+        "expected.json": "5dcaaea916ee73acdab648599c8e656cde09e1e83bdd8a0b8bb90b44e774759a",
+        "tests/grade_school_test.py": "72827c03772b6cf4256fd2f378ae6ddff2703ccacb6053ba647e973b415e27b9"
+      },
+      "reference_sha256": "f6a52a73ebe023737547952d2b27231a0eaa086f2b9804aac4c137b9fd687473",
+      "stub_sha256": "d763f9f78564c6d495928ed8f3ea522e7f14e2142b7db989587b16d2665a1811",
+      "template_bytes": 9241
+    },
+    {
+      "task_id": "pg_grep",
+      "slug": "grep",
+      "solution_file": "grep.py",
+      "test_files": [
+        "grep_test.py"
+      ],
+      "n_tests": 25,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Search a file for lines matching a regular expression pattern. Return the line number and contents of each matching line.",
+      "template_sha256": {
+        "contract.md": "7b48967c4b53e464e713e3164e76b52d46071873596893bc4bdb2b137f7250a6",
+        "goal.md": "c68254de5f7f8eb68527d638595ce53dedfec499cd52cca0ad5bff8b3065e980",
+        "grep_test.py": "30721903a1dea840b7ab33374bb08cb0db84f63f4c80fc0a5515cff3071c0506"
+      },
+      "hidden_sha256": {
+        "expected.json": "1b12be42d6fc725b40f06914a22e303ddc4a0f3a818806784657307f9cbcf91b",
+        "tests/grep_test.py": "30721903a1dea840b7ab33374bb08cb0db84f63f4c80fc0a5515cff3071c0506"
+      },
+      "reference_sha256": "cac7f6c5ee08c8700bad86e30f00e1cb334e85cb6884d072c2577b3eb1a90cf8",
+      "stub_sha256": "2bcb3cafb647fb33b73a2d2ed1284a6c2994fda7adc9fc95345d91a3b331fa2d",
+      "template_bytes": 14671
+    },
+    {
+      "task_id": "pg_hangman",
+      "slug": "hangman",
+      "solution_file": "hangman.py",
+      "test_files": [
+        "hangman_test.py"
+      ],
+      "n_tests": 7,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Implement the logic of the hangman game using functional reactive programming.",
+      "template_sha256": {
+        "contract.md": "0edfe7f9d8ecd1e1dd76b425b9fd0b1265597ea1032b7de1f9b1b6ee7708378a",
+        "goal.md": "0b01926707e634fd352774d64e490773d918563d79a496fc123b64a0bf0e50b7",
+        "hangman_test.py": "0eece50307284a914eca79d25ea623d023029f1b173bfbc60293578d3570a11a"
+      },
+      "hidden_sha256": {
+        "expected.json": "7e6d14e1f0ac22059eb7443c7fc05da26085e0367175cf590aba836ca356da63",
+        "tests/hangman_test.py": "0eece50307284a914eca79d25ea623d023029f1b173bfbc60293578d3570a11a"
+      },
+      "reference_sha256": "fde813e1c2871eb8b522dd687b47781c2196375e7c8c37e2ab40ddd7e108e300",
+      "stub_sha256": "c20fc931bb77699634e6ba6d00ca42e9921d3eec1c0410f4faa2b77d5e6f53a7",
+      "template_bytes": 6680
+    },
+    {
+      "task_id": "pg_list_ops",
+      "slug": "list-ops",
+      "solution_file": "list_ops.py",
+      "test_files": [
+        "list_ops_test.py"
+      ],
+      "n_tests": 24,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Implement basic list operations.",
+      "template_sha256": {
+        "contract.md": "cd82fc0b9da595a4d2abf49455f7ca2a5107157cb0177800a5ec6ad71eeee119",
+        "goal.md": "99b119333c4f19ab2563d6205781813f165bcef909c227a206305543d739e74b",
+        "list_ops_test.py": "373082dc316d8c4cb1f1c40d9b238e7312d41dcd507aa0d745880670089cde9a"
+      },
+      "hidden_sha256": {
+        "expected.json": "fc839a3bd94a256384e509ec3824cc0538522e701d41b1ee2a56c9853a0e83ca",
+        "tests/list_ops_test.py": "373082dc316d8c4cb1f1c40d9b238e7312d41dcd507aa0d745880670089cde9a"
+      },
+      "reference_sha256": "fb206c755414929f90770f4e086f1ab11236a458be1b8edaa2bb0bd974dc8a93",
+      "stub_sha256": "d4c2d55a1ca45668e7071e2884827a6303c9cec566fd8dd598dabf837ce4f2a5",
+      "template_bytes": 5798
+    },
+    {
+      "task_id": "pg_paasio",
+      "slug": "paasio",
+      "solution_file": "paasio.py",
+      "test_files": [
+        "paasio_test.py",
+        "test_utils.py"
+      ],
+      "n_tests": 25,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Report network IO statistics.",
+      "template_sha256": {
+        "contract.md": "df8eac6e466acd84f2b65b8cca7b0ccaccf91c898b26e4d8c20207c03542d1f9",
+        "goal.md": "4f389a21f0b352607babb959e45bb449ab5d9b9970d1e3aaf5c2423b2ffc0c33",
+        "paasio_test.py": "4c9aa14b0fdfea01221d5bdff32b9a5569bbfaf412e0985d82502776c41eb569",
+        "test_utils.py": "9c890fda159fa05e00ee30903d9beb226e0e76eb583d505cd46783bc63546194"
+      },
+      "hidden_sha256": {
+        "expected.json": "1e19e1bf9d0293bd324fd6ff2d0db39d101e3c0f10ecbc9a0d0b575101c30d12",
+        "tests/paasio_test.py": "4c9aa14b0fdfea01221d5bdff32b9a5569bbfaf412e0985d82502776c41eb569",
+        "tests/test_utils.py": "9c890fda159fa05e00ee30903d9beb226e0e76eb583d505cd46783bc63546194"
+      },
+      "reference_sha256": "592790e76ac7e4905cd12fbad3449ad5e4a9257c191f994f5155430892544159",
+      "stub_sha256": "40bf1dc08aa92e6d07e3d2a399d542d7d83db12352114677f6191d3938e6b8ee",
+      "template_bytes": 26709
+    },
+    {
+      "task_id": "pg_phone_number",
+      "slug": "phone-number",
+      "solution_file": "phone_number.py",
+      "test_files": [
+        "phone_number_test.py"
+      ],
+      "n_tests": 21,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Clean up user-entered phone numbers so that they can be sent SMS messages.",
+      "template_sha256": {
+        "contract.md": "8450ee95ca195d5799f693da472f6d80a3911ac005d65651bff8596ea98c473a",
+        "goal.md": "2df958694b4f42fbee9f081172cece8834b02102947c9c9431477d35ad388df0",
+        "phone_number_test.py": "68c6fc5c281f12eb0a0d5f4e9c963e33b5f1a69576cccce2c712bec9788b6c8e"
+      },
+      "hidden_sha256": {
+        "expected.json": "817d89fc5bbafa7febfb4daf99e4ecfb808539e8713ae9618841345fef2cf48d",
+        "tests/phone_number_test.py": "68c6fc5c281f12eb0a0d5f4e9c963e33b5f1a69576cccce2c712bec9788b6c8e"
+      },
+      "reference_sha256": "4724acfb7b22518b9a0b4b3ea031cb614cda2a58225f4aaf1a52416b3225a846",
+      "stub_sha256": "67438b743aa7095f4f37ef5d8785e6e54a7326720df6a1150eb24f145cce9512",
+      "template_bytes": 9671
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "slug": "pig-latin",
+      "solution_file": "pig_latin.py",
+      "test_files": [
+        "pig_latin_test.py"
+      ],
+      "n_tests": 22,
+      "goal_parts": [
+        ".docs/introduction.md",
+        ".docs/instructions.md"
+      ],
+      "blurb": "Implement a program that translates from English to Pig Latin.",
+      "template_sha256": {
+        "contract.md": "d6b6db257631c4097e1e042be092358d7958fba755b609ac06c19334acccc68a",
+        "goal.md": "1818d260387b3797b5a8398c75320313d299841c5f32853c04cacf1ec8f55226",
+        "pig_latin_test.py": "2a2bec06a0389dad5636c83cc604a418e6f0ed79fbf8768f620c7d1101ec65c2"
+      },
+      "hidden_sha256": {
+        "expected.json": "e13f3f1e2dc5ede93b81a62c8012f6791fd0ca8cdff0d9280b1a3935533d41a2",
+        "tests/pig_latin_test.py": "2a2bec06a0389dad5636c83cc604a418e6f0ed79fbf8768f620c7d1101ec65c2"
+      },
+      "reference_sha256": "52a698b0db8c23e113b4346b1c41df69b56bbc7d9422dcab9cde942d06721019",
+      "stub_sha256": "b747ffe13337f9e3259493bcf902ddb32007fcd5fad0caebbc82b18891d0fe55",
+      "template_bytes": 5667
+    },
+    {
+      "task_id": "pg_poker",
+      "slug": "poker",
+      "solution_file": "poker.py",
+      "test_files": [
+        "poker_test.py"
+      ],
+      "n_tests": 37,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Pick the best hand(s) from a list of poker hands.",
+      "template_sha256": {
+        "contract.md": "5025d89a70f71aa6eae53b8c4590d94efa7040b34d5437ad25e784547c4dafdb",
+        "goal.md": "62427ba25c07f8c57519f93cbfc293dd3eb9e8b74a33aae3645281433b8941ea",
+        "poker_test.py": "b39f023208318973e18a341449aa076f7595ff98f07174082a2a1b05c84ad8fd"
+      },
+      "hidden_sha256": {
+        "expected.json": "1f1b56a794c7e132600a8afafaed13c5a9293a11efe5f010478a99711d82acc7",
+        "tests/poker_test.py": "b39f023208318973e18a341449aa076f7595ff98f07174082a2a1b05c84ad8fd"
+      },
+      "reference_sha256": "9627361e2566290218239ed64ea4edf610f826e94ae7044d9eef9316d241ec43",
+      "stub_sha256": "36177b077d0976b72b605227e569c9a79445bf90969be349e79e0d48586cae3f",
+      "template_bytes": 8565
+    },
+    {
+      "task_id": "pg_pov",
+      "slug": "pov",
+      "solution_file": "pov.py",
+      "test_files": [
+        "pov_test.py"
+      ],
+      "n_tests": 15,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Reparent a graph on a selected node.",
+      "template_sha256": {
+        "contract.md": "a164775efaf60e5950e858a8d5ec13fcaa611b929b492b7e43990bf8957aad54",
+        "goal.md": "1c6879127ad99154adf30113eb88f88cd855b17d9e7f883bc1e58c1f3e42e564",
+        "pov_test.py": "a5127ac17db6ad1563a08ba8ee2bbfc25ed8ab81ee56b92a355eb4a4dc2559fe"
+      },
+      "hidden_sha256": {
+        "expected.json": "741dc3d6618cb6b20b2211f4d9005e77216960dd521af58a504abcf84751f3a0",
+        "tests/pov_test.py": "a5127ac17db6ad1563a08ba8ee2bbfc25ed8ab81ee56b92a355eb4a4dc2559fe"
+      },
+      "reference_sha256": "7057cfff3546e55a89e34b20555d4a530a7b0890c6a9de6241645998b3961f7e",
+      "stub_sha256": "6dae8ed0cc1639e0f6089fca5c7da0e97bb9fd1f97d2102fc498b787a42146cc",
+      "template_bytes": 10182
+    },
+    {
+      "task_id": "pg_proverb",
+      "slug": "proverb",
+      "solution_file": "proverb.py",
+      "test_files": [
+        "proverb_test.py"
+      ],
+      "n_tests": 8,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "For want of a horseshoe nail, a kingdom was lost, or so the saying goes. Output the full text of this proverbial rhyme.",
+      "template_sha256": {
+        "contract.md": "172c711a6d2ec16b83206304ea4a678e5fe2ca70efaa22dfc1aec6b3acea1545",
+        "goal.md": "311dde5fe5ba95b1e4f5839b894c6deaa442713ccf0d9aa22db82eda589e1aca",
+        "proverb_test.py": "6792db661176bc5dfd4447b8f68209d441797631a3896b880421ceba98895682"
+      },
+      "hidden_sha256": {
+        "expected.json": "7f3984ee931b74b2815850c06a85da3eb6a684ae4e7c7bb54a8a6c56c9e79185",
+        "tests/proverb_test.py": "6792db661176bc5dfd4447b8f68209d441797631a3896b880421ceba98895682"
+      },
+      "reference_sha256": "21defe08a5cbfe2c9c25eed0b70c2b8d1367e575ea5a2c25165eb56208bd0a4e",
+      "stub_sha256": "f7eb58a1782d738f5608d272bfd6d032e331f1315b16a5bcf3537c0f9ecaec23",
+      "template_bytes": 5605
+    },
+    {
+      "task_id": "pg_react",
+      "slug": "react",
+      "solution_file": "react.py",
+      "test_files": [
+        "react_test.py"
+      ],
+      "n_tests": 14,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Implement a basic reactive system.",
+      "template_sha256": {
+        "contract.md": "d375dfa4851232acb776483dec787acf3dde40660e0e874909bce666f0bb7f59",
+        "goal.md": "2d227f7e0b99585c441704993f1ed93009b946ec1ab46c3e9cde89e4dbee500b",
+        "react_test.py": "3017017c1f0830d96ddedac16fb6945a6e7769c62fdc89d8b251082cf9d495aa"
+      },
+      "hidden_sha256": {
+        "expected.json": "4d63d3a0a5ecccb8055f26545f5f9a4efbf5973cc4c6bd43caf9523a7980c7f0",
+        "tests/react_test.py": "3017017c1f0830d96ddedac16fb6945a6e7769c62fdc89d8b251082cf9d495aa"
+      },
+      "reference_sha256": "a1198a835f44b3826e6bb2d6c2d0df81ede7e7541f9f85853aff08f1487039ff",
+      "stub_sha256": "49f06798292a5ae593375b8b080f4bee839b85a19827b06dd4c6c25583e5f5ce",
+      "template_bytes": 9645
+    },
+    {
+      "task_id": "pg_rest_api",
+      "slug": "rest-api",
+      "solution_file": "rest_api.py",
+      "test_files": [
+        "rest_api_test.py"
+      ],
+      "n_tests": 9,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Implement a RESTful API for tracking IOUs.",
+      "template_sha256": {
+        "contract.md": "0ce259c6e6d390de0db35c5c2766bc29b515ae9da450180d39bfcb2f37cb0ce2",
+        "goal.md": "bcbbaeccabfca6fa8e8958c623f2ac972205c94e69e7b6c61310201a9fd131b2",
+        "rest_api_test.py": "3fae966db6e7935a9338a72f017f764d36c6cbff6c6f9c812d4fe6d9b49af47e"
+      },
+      "hidden_sha256": {
+        "expected.json": "7d01df2ab7720d8678438e9b86c000d03b11ff4185344d715e63dbd868e44a08",
+        "tests/rest_api_test.py": "3fae966db6e7935a9338a72f017f764d36c6cbff6c6f9c812d4fe6d9b49af47e"
+      },
+      "reference_sha256": "394374b0b87ac6e2bfa2cf135f101369dea35c3ee01f02fe55b1cbde0df538a6",
+      "stub_sha256": "bc1bc51ea7c630ec9ce373786337f30de3d16a8073eabb7d6c9556d5703bd816",
+      "template_bytes": 9473
+    },
+    {
+      "task_id": "pg_robot_name",
+      "slug": "robot-name",
+      "solution_file": "robot_name.py",
+      "test_files": [
+        "robot_name_test.py"
+      ],
+      "n_tests": 4,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Manage robot factory settings.",
+      "template_sha256": {
+        "contract.md": "7a40a872d2e1a117064c7526d991402948b864aaccc00967e6c284dcbebecaf7",
+        "goal.md": "bbb01d54e892de555eb900b3b93fd3645ad7fcfd09eace353fb6b81e768c4310",
+        "robot_name_test.py": "c9d7b8ad737fe2d13d3053fe8859ac7d8a4493689b26e788ca99374438b91f9a"
+      },
+      "hidden_sha256": {
+        "expected.json": "f0ea1d2c15ef41b1d8804ef491de0fae34d48b87b931f693f954b06fc0960737",
+        "tests/robot_name_test.py": "c9d7b8ad737fe2d13d3053fe8859ac7d8a4493689b26e788ca99374438b91f9a"
+      },
+      "reference_sha256": "d5c2eecdf7738305ce15bf6f6e5b410835179ca0125450baf43643263e2b7c1c",
+      "stub_sha256": "156abaecbbd5ac5f08409ce9c00d08a3bb406cf39ec515997517e340834ec9c1",
+      "template_bytes": 2592
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "slug": "scale-generator",
+      "solution_file": "scale_generator.py",
+      "test_files": [
+        "scale_generator_test.py"
+      ],
+      "n_tests": 17,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Generate musical scales, given a starting note and a set of intervals.",
+      "template_sha256": {
+        "contract.md": "32a2e71317ec2bb056e39512e7feb5bb41aa2e939b877aa72253a44b28054aa0",
+        "goal.md": "4101835869d2d6376accf0644e51bb216fa0bd252ba93b7102827e43b6342859",
+        "scale_generator_test.py": "a3252f32d07001e695db35466ec00d8e713063aed8b9da8e20103c9681b90a41"
+      },
+      "hidden_sha256": {
+        "expected.json": "c7d680c760b7ba8207245e913ad806d1ddf4589cb084ab8a90cd7aae494e8760",
+        "tests/scale_generator_test.py": "a3252f32d07001e695db35466ec00d8e713063aed8b9da8e20103c9681b90a41"
+      },
+      "reference_sha256": "46e23bb615c77f5bebe5beffc3a561ff2df57c36146571e89699935acf8f7cf4",
+      "stub_sha256": "e5f303244a79c736137c03733c07719e98c4a1990d9c07bb5a47a46fefb7f162",
+      "template_bytes": 7910
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "slug": "sgf-parsing",
+      "solution_file": "sgf_parsing.py",
+      "test_files": [
+        "sgf_parsing_test.py"
+      ],
+      "n_tests": 23,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Parsing a Smart Game Format string.",
+      "template_sha256": {
+        "contract.md": "f7e5f74e6603c8d5afaf8e62fa8e2c7612a54b79e542e6c848dfcfd959468eb1",
+        "goal.md": "19c7d5dd35dd230a0ea5b0f67846c1be3af4f46320c09a0289808feea5798cd9",
+        "sgf_parsing_test.py": "c8274cd12d6432b18d5f4fd6b15e64bdba6745007ae6c0d275a4fe048d4dba6e"
+      },
+      "hidden_sha256": {
+        "expected.json": "7a7d6707b6fcd8673d0d20365f0bbb4918e2e8a1b77423b86fe3cc1854046a2f",
+        "tests/sgf_parsing_test.py": "c8274cd12d6432b18d5f4fd6b15e64bdba6745007ae6c0d275a4fe048d4dba6e"
+      },
+      "reference_sha256": "2382065cc01d03b7348eb42cfd7db9899565eccd85fcc6cf8199eb2627b5a226",
+      "stub_sha256": "cda1c155797f3e59f826b623375c5c6c48e59cf3a837ea640c22ee65252d6b9d",
+      "template_bytes": 12777
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "slug": "simple-linked-list",
+      "solution_file": "simple_linked_list.py",
+      "test_files": [
+        "simple_linked_list_test.py"
+      ],
+      "n_tests": 20,
+      "goal_parts": [
+        ".docs/introduction.md",
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Write a simple linked list implementation that uses Elements and a List.",
+      "template_sha256": {
+        "contract.md": "7b0279495f450445db99dc9b0aec8dcd8d49e106021a5a7e976f92bb550fa42f",
+        "goal.md": "8d2129522b25e3e7347d328fc579ef65e844d86547b5052d7bb689ab8c1cf6a6",
+        "simple_linked_list_test.py": "2ac2c242c2348058a7ce1319b2d8dd653a33f1cc39a7df4d1a6552bdff3b4229"
+      },
+      "hidden_sha256": {
+        "expected.json": "d5c4e2d9e2ae41377c6f6a5dcecf312f7832687686d3f84993f1223a81afb57d",
+        "tests/simple_linked_list_test.py": "2ac2c242c2348058a7ce1319b2d8dd653a33f1cc39a7df4d1a6552bdff3b4229"
+      },
+      "reference_sha256": "a93a409f17f9904467da3924d47e2c93211038604a41ae27cba4afdc020ce12a",
+      "stub_sha256": "bf3f8dcd9e45eacfb11cb569d98b772df6ed47314ffe676322a0e15137f028e9",
+      "template_bytes": 13495
+    },
+    {
+      "task_id": "pg_transpose",
+      "slug": "transpose",
+      "solution_file": "transpose.py",
+      "test_files": [
+        "transpose_test.py"
+      ],
+      "n_tests": 12,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Take input text and output it transposed.",
+      "template_sha256": {
+        "contract.md": "b80b56232af34eda94489006c1115ba49ebeef62756015ecb09314e071297ae1",
+        "goal.md": "4107fc3ed25cb2106df05774f9e6328663bf96777712df14ab5c3090438c6c66",
+        "transpose_test.py": "7ac879485ac2de3e925a39b0ebe65788543491625b0931bd08b450293e1f681b"
+      },
+      "hidden_sha256": {
+        "expected.json": "01ffa084e9ef6985886aa444a1165d5303855667346915a1447a9732e3ea3c56",
+        "tests/transpose_test.py": "7ac879485ac2de3e925a39b0ebe65788543491625b0931bd08b450293e1f681b"
+      },
+      "reference_sha256": "33b60c3de3f36df81ab7443a9b51e788364746914e3cb3bbe67952bca5a7e877",
+      "stub_sha256": "e10786165b72ac1642a4752c843042bb07e93fbe061771f440e8f394882ee90b",
+      "template_bytes": 4130
+    },
+    {
+      "task_id": "pg_tree_building",
+      "slug": "tree-building",
+      "solution_file": "tree_building.py",
+      "test_files": [
+        "tree_building_test.py"
+      ],
+      "n_tests": 13,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Refactor a tree building algorithm.",
+      "template_sha256": {
+        "contract.md": "fc53e1ad2088b5bc6c85f14e23acf327af22f4d2c189530bb5591400068647ed",
+        "goal.md": "168f9aa410054cf96e04656f559289aa5f8768bba82d619f9b5f677ad965cd2e",
+        "tree_building_test.py": "074179d36fb946588411674c0441328c123c2107737ff419ff3aca8c230744b7"
+      },
+      "hidden_sha256": {
+        "expected.json": "9e8068ebd7850b787d79e327ffd985d4e3fa63979bd6976bfcd937a8915ef757",
+        "tests/tree_building_test.py": "074179d36fb946588411674c0441328c123c2107737ff419ff3aca8c230744b7"
+      },
+      "reference_sha256": "773b1d5388d0518220cbf069410bf7e7a3cb491df30c4dae446c4ceed88adbd9",
+      "stub_sha256": "e18edcca50eb42eb7ad7ccd620ea1d8ada7090d9385cef87a23b590691a53935",
+      "template_bytes": 10788
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "slug": "two-bucket",
+      "solution_file": "two_bucket.py",
+      "test_files": [
+        "two_bucket_test.py"
+      ],
+      "n_tests": 9,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Given two buckets of different size, demonstrate how to measure an exact number of liters.",
+      "template_sha256": {
+        "contract.md": "2e296a7407bf44093e0c67a03979ac686081bffd725f347adb2169dfa152cc37",
+        "goal.md": "9b92952e57a16a9ad50783f6be4879a75ab06f9c6e2dc3283848076062d36af9",
+        "two_bucket_test.py": "3dedaa5c25ff1b94112807ee25a488c66fc5f7241e1fd86c19a8be07c7597466"
+      },
+      "hidden_sha256": {
+        "expected.json": "7b4a3c30d22f6f905fd72dec796414ace809b16ed3887a9cf6eed178f3583531",
+        "tests/two_bucket_test.py": "3dedaa5c25ff1b94112807ee25a488c66fc5f7241e1fd86c19a8be07c7597466"
+      },
+      "reference_sha256": "bbf49eb2dc84d6a161e07e11d5bee11f224ad3b93a1c9afcf8a1083c405aa269",
+      "stub_sha256": "fe923dd74e18df79c23a9926fe5c6d6fa36cb3fbb3c78c577b2b51e9342642cc",
+      "template_bytes": 6162
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "slug": "variable-length-quantity",
+      "solution_file": "variable_length_quantity.py",
+      "test_files": [
+        "variable_length_quantity_test.py"
+      ],
+      "n_tests": 26,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Implement variable length quantity encoding and decoding.",
+      "template_sha256": {
+        "contract.md": "353633d2bfe69f2f3ffc8190245763418e3e1110993659ec348bd96b976d3f32",
+        "goal.md": "1bca0f4f0a356de4a32107951d34bc00159e1f5faa1fe88cf97b90218d428d34",
+        "variable_length_quantity_test.py": "e9ecd83a153958e4ef268faa83df2441ef7deb509e01040dc042af53b7aaf7ef"
+      },
+      "hidden_sha256": {
+        "expected.json": "8e42f8e02f255f564a2d34b5c709122ac49dd9edc00bf2e52662a21b8d48ecdb",
+        "tests/variable_length_quantity_test.py": "e9ecd83a153958e4ef268faa83df2441ef7deb509e01040dc042af53b7aaf7ef"
+      },
+      "reference_sha256": "a516b77e06bb9961d956494e5953708510efd37a65ba6996d453ca932f07319d",
+      "stub_sha256": "1ee2133325403ec3ae562a02d3c1750123f3affb00cc7d5ebf9fcbacf68efd96",
+      "template_bytes": 7641
+    },
+    {
+      "task_id": "pg_wordy",
+      "slug": "wordy",
+      "solution_file": "wordy.py",
+      "test_files": [
+        "wordy_test.py"
+      ],
+      "n_tests": 25,
+      "goal_parts": [
+        ".docs/instructions.md",
+        ".docs/instructions.append.md"
+      ],
+      "blurb": "Parse and evaluate simple math word problems returning the answer as an integer.",
+      "template_sha256": {
+        "contract.md": "a9ed49a15ee4c2cf348318bfd59c51923df6a0cba09774fc05493a91555b9734",
+        "goal.md": "67a94892169f419d0ddae1054cedc0b293e72805c78d8216d810e62cb4cc4972",
+        "wordy_test.py": "3c8bf5b17e14c8f8953107c0ae9600be0c0d96e578cf442526dbedf0c57889da"
+      },
+      "hidden_sha256": {
+        "expected.json": "b1be7a81d03f00e209c787a636c8cad3a85b901605adc04740ed765d60fb711a",
+        "tests/wordy_test.py": "3c8bf5b17e14c8f8953107c0ae9600be0c0d96e578cf442526dbedf0c57889da"
+      },
+      "reference_sha256": "ae46b493f1782fffa932a26b279041c5d2d8083b0858b2289107bacc6161c796",
+      "stub_sha256": "a591c12094e3eb0813a2c6997cec1e2441e7e33d5cd73a730322baab2a7d7c50",
+      "template_bytes": 8851
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "slug": "zebra-puzzle",
+      "solution_file": "zebra_puzzle.py",
+      "test_files": [
+        "zebra_puzzle_test.py"
+      ],
+      "n_tests": 2,
+      "goal_parts": [
+        ".docs/introduction.md",
+        ".docs/instructions.md"
+      ],
+      "blurb": "Solve the zebra puzzle.",
+      "template_sha256": {
+        "contract.md": "31aaeb4bf9afd91c2b08e627d93035392a1be46752b1d59a82f9d5e07b157d0c",
+        "goal.md": "0e213e5634467be22e28b5ba8f4aa379c52f945aed5a1263d97957c3342b2cff",
+        "zebra_puzzle_test.py": "079d65e614c911f7e21ef19a1aa5d0d4bb2c69fba1bd86cb84e0f1f4e39efb90"
+      },
+      "hidden_sha256": {
+        "expected.json": "2fd9a2b421d21f7e64645ece593ca8c6f1006e65acc78e1fdbb3f316060fb538",
+        "tests/zebra_puzzle_test.py": "079d65e614c911f7e21ef19a1aa5d0d4bb2c69fba1bd86cb84e0f1f4e39efb90"
+      },
+      "reference_sha256": "74be8f26867df7ef1946dcfc1c07ce851758dbbf3d2ab795abba19c2213eba7a",
+      "stub_sha256": "14e96854103f5347c9f1a7dc3117700f65773e69cb3a425c0a989df6ffd8250a",
+      "template_bytes": 3374
+    },
+    {
+      "task_id": "pg_zipper",
+      "slug": "zipper",
+      "solution_file": "zipper.py",
+      "test_files": [
+        "zipper_test.py"
+      ],
+      "n_tests": 14,
+      "goal_parts": [
+        ".docs/instructions.md"
+      ],
+      "blurb": "Creating a zipper for a binary tree.",
+      "template_sha256": {
+        "contract.md": "5a5b3b9a23df59b158a7bb0ad8c6a0d6797f0beeb23f495b44ba3e0a5a653031",
+        "goal.md": "30c3fa8f9de3afdd691f3ff72e0407581da6676426ad7f175ef1553504df6066",
+        "zipper_test.py": "a3cf6e5ebcf6b2171bcc80fa0ce81b425af23b522f222e841fa2abd3119e95b2"
+      },
+      "hidden_sha256": {
+        "expected.json": "9c58abd0e0ee315f6bcb2f9106c1eadc316801ffea0dd60de79311a75acca4cf",
+        "tests/zipper_test.py": "a3cf6e5ebcf6b2171bcc80fa0ce81b425af23b522f222e841fa2abd3119e95b2"
+      },
+      "reference_sha256": "c1eff987dcc104ad0721087a18b96735f5630d4eb3828532e09adf434f6a06df",
+      "stub_sha256": "81b6324378fa4a922181ff74c77361eab8a2c65f499303370a3701d94bf3b6fa",
+      "template_bytes": 12046
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "task_id": "db_074_11",
+  "source": "074_Lift#11",
+  "answer": "Bench Press",
+  "type": "category",
+  "answer_file": "answer.txt",
+  "scorer": "score.py（databench_eval 4.0.1 的 Evaluator.default_compare 逐字）"
+}

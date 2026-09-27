@@ -1,0 +1,32 @@
+{
+  "task_id": "dab_665",
+  "source_id": 665,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "high_count",
+      "544"
+    ],
+    [
+      "low_proportion",
+      "0.25"
+    ],
+    [
+      "low_count",
+      "544"
+    ],
+    [
+      "medium_proportion",
+      "0.50"
+    ],
+    [
+      "medium_count",
+      "1088"
+    ],
+    [
+      "high_proportion",
+      "0.25"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

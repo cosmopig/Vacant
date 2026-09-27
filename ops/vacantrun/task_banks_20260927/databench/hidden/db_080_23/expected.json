@@ -1,0 +1,8 @@
+{
+  "task_id": "db_080_23",
+  "source": "080_Books#23",
+  "answer": "2",
+  "type": "number",
+  "answer_file": "answer.txt",
+  "scorer": "score.py（databench_eval 4.0.1 的 Evaluator.default_compare 逐字）"
+}

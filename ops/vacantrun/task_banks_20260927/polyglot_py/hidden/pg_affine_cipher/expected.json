@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_affine_cipher",
+  "slug": "affine-cipher",
+  "solution_file": "affine_cipher.py",
+  "test_files": [
+    "affine_cipher_test.py"
+  ],
+  "test_main": "affine_cipher_test.py",
+  "n_tests": 16,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/affine-cipher/"
+}
