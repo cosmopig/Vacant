@@ -1,0 +1,318 @@
+{
+  "generated_by": "gauge_bank.py --reproduce",
+  "results": {
+    "105": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.49]\n",
+      "reproduced": true
+    },
+    "129": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_fare[32.20]\n@std_dev_fare[49.67]\n",
+      "reproduced": true
+    },
+    "144": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_dem[0.32]\n@mean_gop[0.64]\n@std_dev_dem[0.153]\n@std_dev_gop[0.156]\n@dist_dem[Not Normal]\n@dist_gop[Not Normal]\n",
+      "reproduced": true
+    },
+    "176": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@median_age[31.50]\n",
+      "reproduced": true
+    },
+    "216": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean[4.61]\n@std_dev[1.50]\n",
+      "reproduced": true
+    },
+    "218": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.08]\n",
+      "reproduced": true
+    },
+    "249": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.58]\n@p_value[0.0000]\n",
+      "reproduced": true
+    },
+    "250": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean[-0.07]\n@std_dev[0.03]\n",
+      "reproduced": true
+    },
+    "26": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.07]\n",
+      "reproduced": true
+    },
+    "32": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@importance_score_mean[0.00]\n@importance_score_std[0.01]\n",
+      "reproduced": true
+    },
+    "35": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@removed_outliers_count[0]\n",
+      "reproduced": true
+    },
+    "378": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@pre_mean[21144.08]\n@pre_median[19711.00]\n@pre_sd[9889.93]\n@pre_skewness[0.15]\n@pre_kurtosis[-1.13]\n@post_mean[21144.08]\n@post_median[19711.00]\n@post_sd[9889.93]\n@post_skewness[0.15]\n@post_kurtosis[-1.13]\n",
+      "reproduced": true
+    },
+    "39": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@is_normal[0.0000]\n@transformed_importance_score_mean[-inf]\n@transformed_importance_score_std[nan]\n",
+      "reproduced": true
+    },
+    "426": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@max_wind_speed[156.42]\n",
+      "reproduced": true
+    },
+    "427": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@null_entries_count[101]\n",
+      "reproduced": true
+    },
+    "453": {
+      "error": null,
+      "level": "hard",
+      "note": "參考解與標準答案不符：mean_wind_post: ref='5.86' label='5.85'",
+      "psaq": 0.75,
+      "reference_output": "@mean_wind_pre[5.98]\n@mean_atmos_temp_pre[52.47]\n@mean_wind_post[5.86]\n@mean_atmos_temp_post[52.47]\n",
+      "reproduced": false
+    },
+    "5": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.21]\n",
+      "reproduced": true
+    },
+    "507": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@total_hotels[46]\n",
+      "reproduced": true
+    },
+    "514": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@higher_city_count[0]\n@lower_city_count[4]\n",
+      "reproduced": true
+    },
+    "517": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_pclass_fare[-0.55]\n",
+      "reproduced": true
+    },
+    "520": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.02]\n",
+      "reproduced": true
+    },
+    "521": {
+      "error": null,
+      "level": "hard",
+      "note": "參考解與標準答案不符：classifier_accuracy: ref='0.76' label='0.78'",
+      "psaq": 0.0,
+      "reference_output": "@classifier_accuracy[0.76]\n",
+      "reproduced": false
+    },
+    "55": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_cases[2081990]\n",
+      "reproduced": true
+    },
+    "553": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@outliers_count[3131]\n",
+      "reproduced": true
+    },
+    "57": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.97]\n",
+      "reproduced": true
+    },
+    "587": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[0.639]\n",
+      "reproduced": true
+    },
+    "588": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@num_of_outliers[2]\n",
+      "reproduced": true
+    },
+    "619": {
+      "error": null,
+      "level": "hard",
+      "note": "參考解與標準答案不符：std_dev_new: ref='2513.69' label='2514.65'",
+      "psaq": 0.5,
+      "reference_output": "@mean_new[1253.61]\n@std_dev_new[2513.69]\n",
+      "reproduced": false
+    },
+    "657": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_close[4349.27]\n@median_close[3599.77]\n@std_close[4113.51]\n",
+      "reproduced": true
+    },
+    "665": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@high_count[544]\n@high_proportion[0.25]\n@medium_count[1088]\n@medium_proportion[0.50]\n@low_count[544]\n@low_proportion[0.25]\n",
+      "reproduced": true
+    },
+    "666": {
+      "error": null,
+      "level": "easy",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_value[2.1226]\n@std_dev[1.2210]\n",
+      "reproduced": true
+    },
+    "669": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean[3.73]\n@standard_deviation[1.54]\n",
+      "reproduced": true
+    },
+    "688": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@morning[6]\n@afternoon[6]\n@evening[6]\n@night[6]\n",
+      "reproduced": true
+    },
+    "721": {
+      "error": null,
+      "level": "medium",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@correlation_coefficient[-0.83]\n",
+      "reproduced": true
+    },
+    "723": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_ratio[0.03]\n@std_ratio[0.01]\n",
+      "reproduced": true
+    },
+    "724": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean_acceleration[15.49]\n@std_acceleration[2.68]\n",
+      "reproduced": true
+    },
+    "725": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@mean1[28.73]\n@median1[28.00]\n@mean2[15.03]\n@median2[13.50]\n@mean3[15.21]\n@median3[15.00]\n",
+      "reproduced": true
+    },
+    "732": {
+      "error": null,
+      "level": "hard",
+      "note": null,
+      "psaq": 1.0,
+      "reference_output": "@number_of_missing_values_in_lifeexp_before[0]\n@number_of_missing_values_in_lifeexp_after[0]\n",
+      "reproduced": true
+    },
+    "8": {
+      "error": null,
+      "level": "medium",
+      "note": "參考解與標準答案不符：std_dev_fare_class1: ref='80.64' label='80.86', std_dev_fare_class2: ref='13.15' label='13.19', std_dev_fare_class3: ref='10.03' label='10.04'",
+      "psaq": 0.625,
+      "reference_output": "@mean_fare_class1[87.96]\n@median_fare_class1[69.30]\n@std_dev_fare_class1[80.64]\n@mean_fare_class2[21.47]\n@median_fare_class2[15.05]\n@std_dev_fare_class2[13.15]\n@mean_fare_class3[13.23]\n@median_fare_class3[8.05]\n@std_dev_fare_class3[10.03]\n",
+      "reproduced": false
+    }
+  },
+  "solutions_sha256": "f673d9b658741443bca3532f644586f147103e6382b1344babe9255150ed49bf"
+}

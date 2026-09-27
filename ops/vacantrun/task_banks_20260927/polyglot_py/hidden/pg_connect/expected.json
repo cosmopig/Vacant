@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_connect",
+  "slug": "connect",
+  "solution_file": "connect.py",
+  "test_files": [
+    "connect_test.py"
+  ],
+  "test_main": "connect_test.py",
+  "n_tests": 10,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/connect/"
+}

@@ -1,0 +1,6029 @@
+{
+  "summary": {
+    "bank": "polyglot_py",
+    "n_tasks": 34,
+    "vacant_network_version": "0.8.0",
+    "vacant_src": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/0ea239a6-ec82-4ca5-89a9-d4a11558d16e/scratchpad/tb/vn",
+    "prompt_template": "r534 TASK_MESSAGE",
+    "by_scenario": {
+      "clean": {
+        "n": 34,
+        "ok": 34,
+        "kinds": {}
+      },
+      "missing": {
+        "n": 34,
+        "ok": 34,
+        "kinds": {
+          "missing_output": 34
+        }
+      },
+      "claim_no_run": {
+        "n": 34,
+        "ok": 34,
+        "kinds": {
+          "test_claim": 34,
+          "unread": 34
+        }
+      },
+      "claim_failed": {
+        "n": 34,
+        "ok": 34,
+        "kinds": {
+          "test_claim": 34,
+          "unread": 1
+        }
+      },
+      "failed_script": {
+        "n": 34,
+        "ok": 34,
+        "kinds": {
+          "failed_step": 34,
+          "unread": 34
+        }
+      },
+      "tests_unnamed": {
+        "n": 34,
+        "ok": 34,
+        "kinds": {
+          "unread": 34
+        }
+      }
+    },
+    "verdict": "OK"
+  },
+  "rows": [
+    {
+      "task_id": "pg_affine_cipher",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "affine_cipher.py"
+      ],
+      "materials_named": [
+        "affine_cipher_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_affine_cipher",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "affine_cipher.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "affine_cipher.py",
+          "asked": "affine_cipher.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_affine_cipher",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "affine_cipher.py"
+      ],
+      "materials_named": [
+        "affine_cipher_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "affine_cipher_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_affine_cipher",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "affine_cipher.py"
+      ],
+      "materials_named": [
+        "affine_cipher_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest affine_cipher_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_affine_cipher",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "affine_cipher.py"
+      ],
+      "materials_named": [
+        "affine_cipher_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "affine_cipher_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_affine_cipher",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "affine_cipher.py"
+      ],
+      "materials_named": [
+        "affine_cipher_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "affine_cipher_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_beer_song",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "beer_song.py"
+      ],
+      "materials_named": [
+        "beer_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_beer_song",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "beer_song.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "beer_song.py",
+          "asked": "beer_song.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_beer_song",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "beer_song.py"
+      ],
+      "materials_named": [
+        "beer_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "beer_song_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_beer_song",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "beer_song.py"
+      ],
+      "materials_named": [
+        "beer_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest beer_song_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_beer_song",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "beer_song.py"
+      ],
+      "materials_named": [
+        "beer_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "beer_song_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_beer_song",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "beer_song.py"
+      ],
+      "materials_named": [
+        "beer_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "beer_song_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_book_store",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "book_store.py"
+      ],
+      "materials_named": [
+        "book_store_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_book_store",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "book_store.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "book_store.py",
+          "asked": "book_store.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_book_store",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "book_store.py"
+      ],
+      "materials_named": [
+        "book_store_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "book_store_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_book_store",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "book_store.py"
+      ],
+      "materials_named": [
+        "book_store_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest book_store_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_book_store",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "book_store.py"
+      ],
+      "materials_named": [
+        "book_store_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "book_store_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_book_store",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "book_store.py"
+      ],
+      "materials_named": [
+        "book_store_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "book_store_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "bottle_song.py"
+      ],
+      "materials_named": [
+        "bottle_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bottle_song.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "bottle_song.py",
+          "asked": "bottle_song.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bottle_song.py"
+      ],
+      "materials_named": [
+        "bottle_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "bottle_song_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bottle_song.py"
+      ],
+      "materials_named": [
+        "bottle_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest bottle_song_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bottle_song.py"
+      ],
+      "materials_named": [
+        "bottle_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "bottle_song_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bottle_song",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bottle_song.py"
+      ],
+      "materials_named": [
+        "bottle_song_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "bottle_song_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bowling",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "bowling.py"
+      ],
+      "materials_named": [
+        "bowling_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_bowling",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bowling.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "bowling.py",
+          "asked": "bowling.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bowling",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bowling.py"
+      ],
+      "materials_named": [
+        "bowling_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "bowling_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bowling",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bowling.py"
+      ],
+      "materials_named": [
+        "bowling_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest bowling_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bowling",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bowling.py"
+      ],
+      "materials_named": [
+        "bowling_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "bowling_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_bowling",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "bowling.py"
+      ],
+      "materials_named": [
+        "bowling_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "bowling_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_connect",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "connect.py"
+      ],
+      "materials_named": [
+        "connect_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_connect",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "connect.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "connect.py",
+          "asked": "connect.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_connect",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "connect.py"
+      ],
+      "materials_named": [
+        "connect_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "connect_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_connect",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "connect.py"
+      ],
+      "materials_named": [
+        "connect_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest connect_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_connect",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "connect.py"
+      ],
+      "materials_named": [
+        "connect_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "connect_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_connect",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "connect.py"
+      ],
+      "materials_named": [
+        "connect_test.py",
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "connect_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dominoes",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "dominoes.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dominoes_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_dominoes",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dominoes.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "dominoes.py",
+          "asked": "dominoes.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dominoes",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dominoes.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dominoes_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "dominoes_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dominoes",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dominoes.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dominoes_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest dominoes_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dominoes",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dominoes.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dominoes_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "dominoes_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dominoes",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dominoes.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dominoes_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "dominoes_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "dot_dsl.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dot_dsl_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dot_dsl.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "dot_dsl.py",
+          "asked": "dot_dsl.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dot_dsl.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dot_dsl_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "dot_dsl_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dot_dsl.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dot_dsl_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest dot_dsl_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dot_dsl.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dot_dsl_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "dot_dsl_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_dot_dsl",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "dot_dsl.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "dot_dsl_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "dot_dsl_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_food_chain",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "food_chain.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "food_chain_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_food_chain",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "food_chain.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "food_chain.py",
+          "asked": "food_chain.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_food_chain",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "food_chain.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "food_chain_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "food_chain_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_food_chain",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "food_chain.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "food_chain_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest food_chain_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_food_chain",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "food_chain.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "food_chain_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "food_chain_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_food_chain",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "food_chain.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "food_chain_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "food_chain_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_forth",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "forth.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "forth_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_forth",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "forth.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "forth.py",
+          "asked": "forth.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_forth",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "forth.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "forth_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "forth_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_forth",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "forth.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "forth_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest forth_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_forth",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "forth.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "forth_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "forth_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_forth",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "forth.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "forth_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "forth_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_go_counting",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "go_counting.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "go_counting_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_go_counting",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "go_counting.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "go_counting.py",
+          "asked": "go_counting.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_go_counting",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "go_counting.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "go_counting_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "go_counting_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_go_counting",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "go_counting.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "go_counting_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest go_counting_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_go_counting",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "go_counting.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "go_counting_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "go_counting_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_go_counting",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "go_counting.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "go_counting_test.py",
+        "goal.md"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "go_counting_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grade_school",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "grade_school.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grade_school_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_grade_school",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grade_school.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "grade_school.py",
+          "asked": "grade_school.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grade_school",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grade_school.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grade_school_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "grade_school_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grade_school",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grade_school.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grade_school_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest grade_school_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grade_school",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grade_school.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grade_school_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "grade_school_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grade_school",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grade_school.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grade_school_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "grade_school_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grep",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "grep.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grep_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_grep",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grep.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "grep.py",
+          "asked": "grep.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grep",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grep.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grep_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "grep_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grep",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grep.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grep_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest grep_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grep",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grep.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grep_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "grep_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_grep",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "grep.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "grep_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "grep_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_hangman",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "hangman.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "hangman_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_hangman",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "hangman.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "hangman.py",
+          "asked": "hangman.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_hangman",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "hangman.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "hangman_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "hangman_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_hangman",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "hangman.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "hangman_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest hangman_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_hangman",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "hangman.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "hangman_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "hangman_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_hangman",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "hangman.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "hangman_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "hangman_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_list_ops",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "list_ops.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "list_ops_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_list_ops",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "list_ops.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "list_ops.py",
+          "asked": "list_ops.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_list_ops",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "list_ops.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "list_ops_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "list_ops_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_list_ops",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "list_ops.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "list_ops_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest list_ops_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_list_ops",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "list_ops.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "list_ops_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "list_ops_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_list_ops",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "list_ops.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "list_ops_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "list_ops_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_paasio",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "paasio.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "paasio_test.py",
+        "test_utils.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_paasio",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "paasio.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "paasio.py",
+          "asked": "paasio.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_paasio",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "paasio.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "paasio_test.py",
+        "test_utils.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "paasio_test.py"
+        },
+        {
+          "kind": "unread",
+          "path": "test_utils.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_paasio",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "paasio.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "paasio_test.py",
+        "test_utils.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "test_utils.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest paasio_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_paasio",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "paasio.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "paasio_test.py",
+        "test_utils.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "paasio_test.py"
+        },
+        {
+          "kind": "unread",
+          "path": "test_utils.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_paasio",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "paasio.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "paasio_test.py",
+        "test_utils.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "paasio_test.py"
+        },
+        {
+          "kind": "unread",
+          "path": "test_utils.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_phone_number",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "phone_number.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "phone_number_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_phone_number",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "phone_number.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "phone_number.py",
+          "asked": "phone_number.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_phone_number",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "phone_number.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "phone_number_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "phone_number_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_phone_number",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "phone_number.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "phone_number_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest phone_number_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_phone_number",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "phone_number.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "phone_number_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "phone_number_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_phone_number",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "phone_number.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "phone_number_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "phone_number_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "pig_latin.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pig_latin_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pig_latin.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "pig_latin.py",
+          "asked": "pig_latin.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pig_latin.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pig_latin_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "pig_latin_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pig_latin.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pig_latin_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest pig_latin_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pig_latin.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pig_latin_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "pig_latin_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pig_latin",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pig_latin.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pig_latin_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "pig_latin_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_poker",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "poker.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "poker_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_poker",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "poker.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "poker.py",
+          "asked": "poker.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_poker",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "poker.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "poker_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "poker_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_poker",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "poker.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "poker_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest poker_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_poker",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "poker.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "poker_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "poker_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_poker",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "poker.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "poker_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "poker_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pov",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "pov.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pov_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_pov",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pov.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "pov.py",
+          "asked": "pov.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pov",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pov.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pov_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "pov_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pov",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pov.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pov_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest pov_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pov",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pov.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pov_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "pov_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_pov",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "pov.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "pov_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "pov_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_proverb",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "proverb.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "proverb_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_proverb",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "proverb.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "proverb.py",
+          "asked": "proverb.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_proverb",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "proverb.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "proverb_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "proverb_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_proverb",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "proverb.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "proverb_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest proverb_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_proverb",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "proverb.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "proverb_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "proverb_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_proverb",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "proverb.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "proverb_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "proverb_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_react",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "react.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "react_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_react",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "react.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "react.py",
+          "asked": "react.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_react",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "react.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "react_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "react_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_react",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "react.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "react_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest react_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_react",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "react.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "react_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "react_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_react",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "react.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "react_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "react_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_rest_api",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "rest_api.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "rest_api_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_rest_api",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "rest_api.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "rest_api.py",
+          "asked": "rest_api.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_rest_api",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "rest_api.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "rest_api_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "rest_api_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_rest_api",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "rest_api.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "rest_api_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest rest_api_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_rest_api",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "rest_api.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "rest_api_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "rest_api_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_rest_api",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "rest_api.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "rest_api_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "rest_api_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_robot_name",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "robot_name.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "robot_name_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_robot_name",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "robot_name.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "robot_name.py",
+          "asked": "robot_name.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_robot_name",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "robot_name.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "robot_name_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "robot_name_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_robot_name",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "robot_name.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "robot_name_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest robot_name_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_robot_name",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "robot_name.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "robot_name_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "robot_name_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_robot_name",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "robot_name.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "robot_name_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "robot_name_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "scale_generator.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "scale_generator_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "scale_generator.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "scale_generator.py",
+          "asked": "scale_generator.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "scale_generator.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "scale_generator_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "scale_generator_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "scale_generator.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "scale_generator_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest scale_generator_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "scale_generator.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "scale_generator_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "scale_generator_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_scale_generator",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "scale_generator.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "scale_generator_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "scale_generator_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "sgf_parsing.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "sgf_parsing_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "sgf_parsing.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "sgf_parsing.py",
+          "asked": "sgf_parsing.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "sgf_parsing.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "sgf_parsing_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "sgf_parsing_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "sgf_parsing.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "sgf_parsing_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest sgf_parsing_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "sgf_parsing.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "sgf_parsing_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "sgf_parsing_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_sgf_parsing",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "sgf_parsing.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "sgf_parsing_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "sgf_parsing_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "simple_linked_list.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "simple_linked_list_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "simple_linked_list.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "simple_linked_list.py",
+          "asked": "simple_linked_list.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "simple_linked_list.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "simple_linked_list_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "simple_linked_list_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "simple_linked_list.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "simple_linked_list_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest simple_linked_list_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "simple_linked_list.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "simple_linked_list_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "simple_linked_list_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_simple_linked_list",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "simple_linked_list.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "simple_linked_list_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "simple_linked_list_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_transpose",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "transpose.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "transpose_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_transpose",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "transpose.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "transpose.py",
+          "asked": "transpose.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_transpose",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "transpose.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "transpose_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "transpose_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_transpose",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "transpose.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "transpose_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest transpose_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_transpose",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "transpose.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "transpose_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "transpose_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_transpose",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "transpose.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "transpose_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "transpose_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_tree_building",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "tree_building.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "tree_building_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_tree_building",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "tree_building.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "tree_building.py",
+          "asked": "tree_building.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_tree_building",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "tree_building.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "tree_building_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "tree_building_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_tree_building",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "tree_building.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "tree_building_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest tree_building_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_tree_building",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "tree_building.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "tree_building_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "tree_building_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_tree_building",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "tree_building.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "tree_building_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "tree_building_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "two_bucket.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "two_bucket_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "two_bucket.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "two_bucket.py",
+          "asked": "two_bucket.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "two_bucket.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "two_bucket_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "two_bucket_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "two_bucket.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "two_bucket_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest two_bucket_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "two_bucket.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "two_bucket_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "two_bucket_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_two_bucket",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "two_bucket.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "two_bucket_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "two_bucket_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "variable_length_quantity.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "variable_length_quantity_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "variable_length_quantity.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "variable_length_quantity.py",
+          "asked": "variable_length_quantity.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "variable_length_quantity.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "variable_length_quantity_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "variable_length_quantity_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "variable_length_quantity.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "variable_length_quantity_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest variable_length_quantity_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "variable_length_quantity.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "variable_length_quantity_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "variable_length_quantity_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_variable_length_quantity",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "variable_length_quantity.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "variable_length_quantity_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "variable_length_quantity_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_wordy",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "wordy.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "wordy_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_wordy",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "wordy.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "wordy.py",
+          "asked": "wordy.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_wordy",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "wordy.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "wordy_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "wordy_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_wordy",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "wordy.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "wordy_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest wordy_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_wordy",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "wordy.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "wordy_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "wordy_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_wordy",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "wordy.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "wordy_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "wordy_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "zebra_puzzle.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zebra_puzzle_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zebra_puzzle.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "zebra_puzzle.py",
+          "asked": "zebra_puzzle.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zebra_puzzle.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zebra_puzzle_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "zebra_puzzle_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zebra_puzzle.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zebra_puzzle_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest zebra_puzzle_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zebra_puzzle.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zebra_puzzle_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "zebra_puzzle_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zebra_puzzle",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zebra_puzzle.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zebra_puzzle_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "zebra_puzzle_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zipper",
+      "scenario": "clean",
+      "expect": [],
+      "got": [],
+      "ok": true,
+      "requested_outputs": [
+        "zipper.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zipper_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": []
+    },
+    {
+      "task_id": "pg_zipper",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "missing_output"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zipper.py"
+      ],
+      "materials_named": [],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "missing_output",
+          "path": "zipper.py",
+          "asked": "zipper.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zipper",
+      "scenario": "claim_no_run",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zipper.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zipper_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "zipper_test.py"
+        },
+        {
+          "kind": "test_claim",
+          "sub": "none",
+          "quote": "All tests pass"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zipper",
+      "scenario": "claim_failed",
+      "expect": [
+        "test_claim"
+      ],
+      "got": [
+        "test_claim"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zipper.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zipper_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "test_claim",
+          "sub": "failed",
+          "quote": "All tests pass",
+          "step": 2,
+          "cmd": "python3 -m unittest zipper_test.py"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zipper",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zipper.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zipper_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "zipper_test.py"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 try_it.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "pg_zipper",
+      "scenario": "tests_unnamed",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [
+        "zipper.py"
+      ],
+      "materials_named": [
+        "contract.md",
+        "goal.md",
+        "zipper_test.py"
+      ],
+      "given_in_request": [
+        "contract.md",
+        "goal.md"
+      ],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "zipper_test.py"
+        }
+      ]
+    }
+  ]
+}

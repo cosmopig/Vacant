@@ -1,0 +1,8 @@
+{
+  "task_id": "db_073_10",
+  "source": "073_Med_Cost#10",
+  "answer": "male",
+  "type": "category",
+  "answer_file": "answer.txt",
+  "scorer": "score.py（databench_eval 4.0.1 的 Evaluator.default_compare 逐字）"
+}

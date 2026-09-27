@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_robot_name",
+  "slug": "robot-name",
+  "solution_file": "robot_name.py",
+  "test_files": [
+    "robot_name_test.py"
+  ],
+  "test_main": "robot_name_test.py",
+  "n_tests": 4,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/robot-name/"
+}

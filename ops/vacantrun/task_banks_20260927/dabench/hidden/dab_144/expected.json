@@ -1,0 +1,24 @@
+{
+  "task_id": "dab_144",
+  "source_id": 144,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "std_dev_dem",
+      "0.153"
+    ],
+    [
+      "mean_dem",
+      "0.32"
+    ],
+    [
+      "std_dev_gop",
+      "0.156"
+    ],
+    [
+      "mean_gop",
+      "0.64"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

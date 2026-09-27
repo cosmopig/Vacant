@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_zebra_puzzle",
+  "slug": "zebra-puzzle",
+  "solution_file": "zebra_puzzle.py",
+  "test_files": [
+    "zebra_puzzle_test.py"
+  ],
+  "test_main": "zebra_puzzle_test.py",
+  "n_tests": 2,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/zebra-puzzle/"
+}

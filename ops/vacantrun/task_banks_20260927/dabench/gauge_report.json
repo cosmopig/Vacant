@@ -1,0 +1,420 @@
+{
+  "summary": {
+    "n_tasks": 30,
+    "reference_full_marks": 30,
+    "label_full_marks": 30,
+    "missing_zero": 30,
+    "empty_zero": 30,
+    "all_wrong_zero": 30,
+    "subdir_only_zero": 30,
+    "first_only_zero": 13,
+    "first_only_applicable": 13,
+    "tasks_with_label_literal_in_template": [],
+    "verdict": "OK"
+  },
+  "rows": [
+    {
+      "task_id": "dab_427",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_057",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_507",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_218",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_657",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_517",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_129",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_055",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_216",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_666",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_426",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_105",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_721",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_588",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_035",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_176",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_688",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_514",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_250",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_587",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_144",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_725",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_723",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_378",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_732",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_039",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_665",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_249",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_724",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    },
+    {
+      "task_id": "dab_669",
+      "cases": {
+        "reference": 1,
+        "label_verbatim": 1,
+        "with_prose": 1,
+        "missing": 0,
+        "empty": 0,
+        "all_wrong": 0,
+        "subdir_only": 0,
+        "first_only": 0
+      },
+      "label_literal_in_template": []
+    }
+  ]
+}

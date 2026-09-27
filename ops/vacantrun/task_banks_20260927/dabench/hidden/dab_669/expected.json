@@ -1,0 +1,16 @@
+{
+  "task_id": "dab_669",
+  "source_id": 669,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "standard_deviation",
+      "1.54"
+    ],
+    [
+      "mean",
+      "3.73"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

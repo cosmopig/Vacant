@@ -1,0 +1,16 @@
+{
+  "task_id": "dab_724",
+  "source_id": 724,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "std_acceleration",
+      "2.68"
+    ],
+    [
+      "mean_acceleration",
+      "15.49"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

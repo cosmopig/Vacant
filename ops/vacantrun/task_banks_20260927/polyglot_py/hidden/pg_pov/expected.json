@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_pov",
+  "slug": "pov",
+  "solution_file": "pov.py",
+  "test_files": [
+    "pov_test.py"
+  ],
+  "test_main": "pov_test.py",
+  "n_tests": 15,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/pov/"
+}

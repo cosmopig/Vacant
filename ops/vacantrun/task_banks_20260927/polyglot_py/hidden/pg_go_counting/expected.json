@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_go_counting",
+  "slug": "go-counting",
+  "solution_file": "go_counting.py",
+  "test_files": [
+    "go_counting_test.py"
+  ],
+  "test_main": "go_counting_test.py",
+  "n_tests": 11,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/go-counting/"
+}

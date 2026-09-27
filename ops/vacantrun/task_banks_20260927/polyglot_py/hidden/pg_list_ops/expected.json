@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_list_ops",
+  "slug": "list-ops",
+  "solution_file": "list_ops.py",
+  "test_files": [
+    "list_ops_test.py"
+  ],
+  "test_main": "list_ops_test.py",
+  "n_tests": 24,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/list-ops/"
+}

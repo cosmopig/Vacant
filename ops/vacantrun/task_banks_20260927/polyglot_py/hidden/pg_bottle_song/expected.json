@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_bottle_song",
+  "slug": "bottle-song",
+  "solution_file": "bottle_song.py",
+  "test_files": [
+    "bottle_song_test.py"
+  ],
+  "test_main": "bottle_song_test.py",
+  "n_tests": 7,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/bottle-song/"
+}

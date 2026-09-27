@@ -1,0 +1,12 @@
+{
+  "task_id": "pg_grep",
+  "slug": "grep",
+  "solution_file": "grep.py",
+  "test_files": [
+    "grep_test.py"
+  ],
+  "test_main": "grep_test.py",
+  "n_tests": 25,
+  "timeout_s": 180,
+  "source": "Aider-AI/polyglot-benchmark@7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f:python/exercises/practice/grep/"
+}

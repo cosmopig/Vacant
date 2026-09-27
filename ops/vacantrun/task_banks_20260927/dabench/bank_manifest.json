@@ -1,0 +1,1034 @@
+{
+  "bank": "dabench_pilot_20260927",
+  "source": {
+    "repo": "InfiAgent/InfiAgent",
+    "commit": "3d6c4a70198e0a41fadf539f5b43c88b8c1a2d9c",
+    "dir": "examples/DA-Agent/data",
+    "license": "程式碼 Apache-2.0、資料 CC BY-NC 4.0（上游 README 的兩個徽章）；CSV 由上游從 GitHub 蒐集，各檔原始授權未逐一查證。本題庫為非商業用途，轉載須附出處",
+    "questions_sha256": "49ae783b20ecb60449ce1443c524e89f8ca8353a04e05e4d14a055b7a6f06126",
+    "labels_sha256": "83b8fb8133c1794fcb6b42435e9cce124d22f68b71e2eedb37c973e40b5a18c2",
+    "n_questions": 257
+  },
+  "selection_rule": "R0 母體：InfiAgent-DABench closed-form validation 集（da-dev-questions.jsonl＋da-dev-labels.jsonl，\n   InfiAgent/InfiAgent@3d6c4a70，257 題），兩個檔的 sha256 釘死。\nR1 資格：(a) 每一個子答案（common_answers 的每個 value）都能被 float() 解析；\n   (b) 每個子答案名稱符合 \\w+、值裡沒有 '[' 或 ']'（官方正規式 @(\\w+)\\[(.*?)\\] 才抽得回來）；\n   (c) 資料檔名不含空白（零設定 Vacant 的點名判準以空白切詞，檔名有空白就點名不到）；\n   (d) 資料檔 ≤ 1,000,000 位元組；\n   (e) 每個標準答案的項目名都出現在題目 format 欄的 @name[ 裡（否則 agent 無從知道要用哪個名字）。\n   題目 format 要求、但標準答案沒有的項目（例如字串項）照樣寫進 contract，只是不計分。\nR2 分層：依官方 level 欄位分 easy／medium／hard 三層。\nR3 候選順序：每層把合格題 id 升冪排好，用 random.Random(f\"{SEED}-{level}\").shuffle 打亂，得到該層的候選順序。\nR4 取題：每層依候選順序，取前 10 個「參考解重現得了標準答案」的題（reference/reproduction.json\n   的 reproduced=true，判等用官方 eval_closed_form.py 的 is_equal）。依序檢查過但重現不了的題具名記在\n   manifest 的 excluded_not_reproduced，不刪。\nR5 報告：三層可以合併報（同一把尺、同一種題），也要分層列；這是 pilot，不做檢定。\n",
+  "selection_rule_sha256": "05f297e5cdbe3e0bb78f82846c9d38a2ddb4c4158e5edc7c2018fe4b53b1a593",
+  "seed": "task-banks-20260927-dabench",
+  "eligibility_counts": {
+    "R1a 非數值子答案": 90,
+    "R1b 官方正規式抽不回來": 1,
+    "R1c 檔名含空白": 6,
+    "R1d 資料檔 2295032 位元組 > 1000000": 1,
+    "eligible": 159
+  },
+  "candidate_order": {
+    "easy": [
+      427,
+      57,
+      507,
+      218,
+      657,
+      517,
+      129,
+      55,
+      216,
+      666,
+      553,
+      32,
+      26,
+      490,
+      320,
+      526,
+      217,
+      71,
+      643,
+      372,
+      472,
+      506,
+      9,
+      0,
+      737,
+      542,
+      446,
+      24,
+      351,
+      649,
+      349,
+      321,
+      715,
+      683,
+      659,
+      474,
+      208,
+      710,
+      354,
+      409,
+      554,
+      586,
+      234,
+      555,
+      243,
+      516,
+      18,
+      719,
+      255,
+      58,
+      174,
+      73,
+      755,
+      650,
+      425,
+      551,
+      578
+    ],
+    "medium": [
+      426,
+      105,
+      721,
+      588,
+      8,
+      35,
+      176,
+      688,
+      514,
+      250,
+      587,
+      5,
+      520,
+      757,
+      180,
+      655,
+      27,
+      108,
+      412,
+      716,
+      175,
+      179,
+      361,
+      740,
+      411,
+      136,
+      508,
+      651,
+      14,
+      663,
+      513,
+      247,
+      447,
+      75,
+      6,
+      468,
+      418,
+      132,
+      272,
+      62,
+      209,
+      739,
+      414,
+      421,
+      527,
+      618,
+      518,
+      375,
+      589,
+      756,
+      730
+    ],
+    "hard": [
+      144,
+      725,
+      723,
+      378,
+      521,
+      732,
+      39,
+      665,
+      249,
+      619,
+      724,
+      669,
+      453,
+      28,
+      222,
+      759,
+      308,
+      376,
+      662,
+      210,
+      522,
+      111,
+      674,
+      310,
+      271,
+      496,
+      363,
+      656,
+      7,
+      574,
+      137,
+      30,
+      224,
+      495,
+      671,
+      690,
+      275,
+      673,
+      604,
+      309,
+      214,
+      726,
+      549,
+      432,
+      727,
+      133,
+      523,
+      480,
+      590,
+      23,
+      722
+    ]
+  },
+  "layers": {
+    "easy": [
+      "dab_427",
+      "dab_057",
+      "dab_507",
+      "dab_218",
+      "dab_657",
+      "dab_517",
+      "dab_129",
+      "dab_055",
+      "dab_216",
+      "dab_666"
+    ],
+    "medium": [
+      "dab_426",
+      "dab_105",
+      "dab_721",
+      "dab_588",
+      "dab_035",
+      "dab_176",
+      "dab_688",
+      "dab_514",
+      "dab_250",
+      "dab_587"
+    ],
+    "hard": [
+      "dab_144",
+      "dab_725",
+      "dab_723",
+      "dab_378",
+      "dab_732",
+      "dab_039",
+      "dab_665",
+      "dab_249",
+      "dab_724",
+      "dab_669"
+    ]
+  },
+  "excluded_not_reproduced": {
+    "easy": [],
+    "medium": [
+      {
+        "source_id": 8,
+        "why": "參考解與標準答案不符：std_dev_fare_class1: ref='80.64' label='80.86', std_dev_fare_class2: ref='13.15' label='13.19', std_dev_fare_class3: ref='10.03' label='10.04'"
+      }
+    ],
+    "hard": [
+      {
+        "source_id": 521,
+        "why": "參考解與標準答案不符：classifier_accuracy: ref='0.76' label='0.78'"
+      },
+      {
+        "source_id": 619,
+        "why": "參考解與標準答案不符：std_dev_new: ref='2513.69' label='2514.65'"
+      }
+    ]
+  },
+  "reproduction_sha256": "2ba7aeb26b73303c1cc1318a37ab63e7f959f51a16ee91b0b6ecccf4450c8fdb",
+  "n_tasks": 30,
+  "deliverable": "answer.txt（工作區根目錄），每行 @name[value]",
+  "scoring": {
+    "primary": "ABQ：這一題每個子答案都判對＝1，否則 0（官方 Accuracy by Question）",
+    "secondary": "PSAQ：判對的子答案比例（官方 Accuracy Proportional by Sub-Question）",
+    "comparator": "官方 eval_closed_form.py：extract_format（@(\\w+)\\[(.*?)\\]）＋is_equal（字串相等，或兩邊 float 差 < 1e-6）",
+    "deviations_from_official": [
+      "沒有 GPT-3.5 reformat 步驟：agent 必須自己照格式寫",
+      "answer.txt 不存在／空檔／抽不到任何項目 ⇒ 0 分且留在分母（官方把沒有回應的題拿出分母）",
+      "官方 agent prompt 是 'Question: {question}\\n{constraints}'，format 只給 reformat；這裡 format 放進 goal.md"
+    ]
+  },
+  "tasks": [
+    {
+      "task_id": "dab_427",
+      "source_id": 427,
+      "level": "easy",
+      "concepts": [
+        "Comprehensive Data Preprocessing"
+      ],
+      "file_name": "cost_data_with_errors.csv",
+      "n_items": 1,
+      "answer_names": [
+        "null_entries_count"
+      ],
+      "scored_names": [
+        "null_entries_count"
+      ],
+      "template_sha256": {
+        "contract.md": "12203b2b65c9e9ac197f69abe6b187727732e64c020407d312f399f2a1061fb4",
+        "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0",
+        "goal.md": "e4ec2828a34b8e9f4bf1172525c7b162244bdb66f08725340780e6c413f1f0eb"
+      },
+      "template_bytes": 83586,
+      "hidden_sha256": "37750a4cb20a100cfe1fbea579f33874ae2dbc97ac2f636178496e58a81845d0"
+    },
+    {
+      "task_id": "dab_057",
+      "source_id": 57,
+      "level": "easy",
+      "concepts": [
+        "Correlation Analysis"
+      ],
+      "file_name": "estimated_numbers.csv",
+      "n_items": 1,
+      "answer_names": [
+        "correlation_coefficient"
+      ],
+      "scored_names": [
+        "correlation_coefficient"
+      ],
+      "template_sha256": {
+        "contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c",
+        "goal.md": "03869da8bb88355270469cdb2e252cbddc18f4fbd8d3afd90ee5701d18fb9c29"
+      },
+      "template_bytes": 67849,
+      "hidden_sha256": "3a36573bfeeeca1f1826518a6463bddbc6422c29a066c5e8fa73ab767ae80b6f"
+    },
+    {
+      "task_id": "dab_507",
+      "source_id": 507,
+      "level": "easy",
+      "concepts": [
+        "Distribution Analysis"
+      ],
+      "file_name": "hotel_data.csv",
+      "n_items": 1,
+      "answer_names": [
+        "total_hotels"
+      ],
+      "scored_names": [
+        "total_hotels"
+      ],
+      "template_sha256": {
+        "contract.md": "9a197bd1b56fa93337389c520d17ba10e733e8b9dbc4a7f5013e7182eefe363e",
+        "data/hotel_data.csv": "581144a1a813e187abc75c3db8f71c25cbec27afe7956e9be9de369acde1c0f7",
+        "goal.md": "05092e7ce837a682f9e6624bc60ac4a588cec8a390f079b01a8223ea15b9eb96"
+      },
+      "template_bytes": 85008,
+      "hidden_sha256": "976296b4e9940572af95e96b7e867c87c8ee6f44b1eca0662945b8f95dfe2613"
+    },
+    {
+      "task_id": "dab_218",
+      "source_id": 218,
+      "level": "easy",
+      "concepts": [
+        "Correlation Analysis"
+      ],
+      "file_name": "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+      "n_items": 1,
+      "answer_names": [
+        "correlation_coefficient"
+      ],
+      "scored_names": [
+        "correlation_coefficient"
+      ],
+      "template_sha256": {
+        "contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv": "c9e411ff75df8d966f6e5de9270a4a7276289c478a6b7aa216ce667eac66f540",
+        "goal.md": "71f059a69e9a50dd256b5a332473eb02121a3b5896d867a12b7296d6f66ba3db"
+      },
+      "template_bytes": 58334,
+      "hidden_sha256": "f71aefbe9a384ac10a9312ba4d247453d6d97d036edd953cb89937979dc7f2ee"
+    },
+    {
+      "task_id": "dab_657",
+      "source_id": 657,
+      "level": "easy",
+      "concepts": [
+        "Summary Statistics"
+      ],
+      "file_name": "YAHOO-BTC_USD_D.csv",
+      "n_items": 3,
+      "answer_names": [
+        "mean_close",
+        "median_close",
+        "std_close"
+      ],
+      "scored_names": [
+        "median_close",
+        "std_close",
+        "mean_close"
+      ],
+      "template_sha256": {
+        "contract.md": "f549700ab0be633b75740eb2ed19f6d09350e23cff6a20ba37f693f31a9e0a6e",
+        "data/YAHOO-BTC_USD_D.csv": "ddbd797b7db4999bbb7e836ad928aba56bea7a5dbeb516afb7d63fd42662a328",
+        "goal.md": "f419633a43fa9202192b87dac1f48a575d8a62c429a4a72a1c4d910a369b1e83"
+      },
+      "template_bytes": 175051,
+      "hidden_sha256": "c8067aa8637f09eaedea9fa63b5f6f7cef74222e7cfa6745ede653c8cf76ae3d"
+    },
+    {
+      "task_id": "dab_517",
+      "source_id": 517,
+      "level": "easy",
+      "concepts": [
+        "Correlation Analysis"
+      ],
+      "file_name": "titanic.csv",
+      "n_items": 1,
+      "answer_names": [
+        "correlation_pclass_fare"
+      ],
+      "scored_names": [
+        "correlation_pclass_fare"
+      ],
+      "template_sha256": {
+        "contract.md": "7c5b87c071d5235dfb0419be336c886e8dd48b1fe10f9c2da03a53d7748921c9",
+        "data/titanic.csv": "7d118fef8b6ccf7f81111877bc388536f7b1e498a655e3d649d19aaa010e9f6f",
+        "goal.md": "f70034514f56ba0f365801472d1d48429ac3051f3cd2c2246ca32d0e2a346c69"
+      },
+      "template_bytes": 62335,
+      "hidden_sha256": "6ca8c59eddc668cb35cef0125a0ea78443c6213c2cd22ae73f8452a67d96e12c"
+    },
+    {
+      "task_id": "dab_129",
+      "source_id": 129,
+      "level": "easy",
+      "concepts": [
+        "Summary Statistics"
+      ],
+      "file_name": "titanic.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean_fare",
+        "std_dev_fare"
+      ],
+      "scored_names": [
+        "std_dev_fare"
+      ],
+      "template_sha256": {
+        "contract.md": "1420bea4982ae047af6957f137e9db39109d633d4f87acc8cc13cf5100dd58be",
+        "data/titanic.csv": "7d118fef8b6ccf7f81111877bc388536f7b1e498a655e3d649d19aaa010e9f6f",
+        "goal.md": "85e5b14de0ab98cde93fa92e6906c9b584a90ca0bcb89eb3e4317e5521601032"
+      },
+      "template_bytes": 62441,
+      "hidden_sha256": "ebe5bc17046d71f238fc7e51469fab48c565bb08af893e510b807dcf53f32edd"
+    },
+    {
+      "task_id": "dab_055",
+      "source_id": 55,
+      "level": "easy",
+      "concepts": [
+        "Summary Statistics"
+      ],
+      "file_name": "estimated_numbers.csv",
+      "n_items": 1,
+      "answer_names": [
+        "mean_cases"
+      ],
+      "scored_names": [
+        "mean_cases"
+      ],
+      "template_sha256": {
+        "contract.md": "fc9b32bf919c8d219cfa1d4b735063e5f0bea1ab528c76bbea17b95c9caf0faa",
+        "data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c",
+        "goal.md": "89762c8d2e867eba309d53e7c651ee9bdfe5dc7242786dc69bf728a6b7661695"
+      },
+      "template_bytes": 67656,
+      "hidden_sha256": "4fac2dae20723002f3168da2a700c254c33dbae2e96069e86709d6ab57dc4615"
+    },
+    {
+      "task_id": "dab_216",
+      "source_id": 216,
+      "level": "easy",
+      "concepts": [
+        "Summary Statistics"
+      ],
+      "file_name": "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean",
+        "std_dev"
+      ],
+      "scored_names": [
+        "std_dev",
+        "mean"
+      ],
+      "template_sha256": {
+        "contract.md": "bdd413757b92f7b1d9504a13771694096d2d04ede3e8b1c174678f269e97a319",
+        "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv": "c9e411ff75df8d966f6e5de9270a4a7276289c478a6b7aa216ce667eac66f540",
+        "goal.md": "884ec49927a5a04031204da720ee256179c88af02d86b744829ce2787ae0c970"
+      },
+      "template_bytes": 58343,
+      "hidden_sha256": "0e1a484aa1a3a471907ede74d336341994581b0f82b4b02a7b68b5df01ef05c8"
+    },
+    {
+      "task_id": "dab_666",
+      "source_id": 666,
+      "level": "easy",
+      "concepts": [
+        "Summary Statistics"
+      ],
+      "file_name": "my_test_01.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean_value",
+        "std_dev"
+      ],
+      "scored_names": [
+        "std_dev",
+        "mean_value"
+      ],
+      "template_sha256": {
+        "contract.md": "35f87daa7b3229f7c91accf60c29dd3876f9d33dc7b3f8e0e21847bb2daa4175",
+        "data/my_test_01.csv": "3134c6c7260510da5aaa33441743d7aaa52efd88fc4d443e7c7a98f80d734c25",
+        "goal.md": "06d222e2287dded523cc634e13023ea119fccf75493f1b77f1547cf242a1475e"
+      },
+      "template_bytes": 24752,
+      "hidden_sha256": "592f7e3a67e47f1700e0ecfbd10d30758a3a90f7ee805f897e0567e743ddc26c"
+    },
+    {
+      "task_id": "dab_426",
+      "source_id": 426,
+      "level": "medium",
+      "concepts": [
+        "Summary Statistics",
+        "Correlation Analysis"
+      ],
+      "file_name": "cost_data_with_errors.csv",
+      "n_items": 1,
+      "answer_names": [
+        "max_wind_speed"
+      ],
+      "scored_names": [
+        "max_wind_speed"
+      ],
+      "template_sha256": {
+        "contract.md": "37cbf972efd27fe85ebd870eea6ce6f2a6cbb40dab3d9a35ad26bd97ee5f53b0",
+        "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0",
+        "goal.md": "11aac002949b7b2288fa826631124c2abd47757b7145bdc8541bb8122672b930"
+      },
+      "template_bytes": 83812,
+      "hidden_sha256": "5ea6b1e97db2f3b8dfbf17af1a69b30be89c38b758b6573060275a22481b6f63"
+    },
+    {
+      "task_id": "dab_105",
+      "source_id": 105,
+      "level": "medium",
+      "concepts": [
+        "Correlation Analysis"
+      ],
+      "file_name": "test_Y3wMUE5_7gLdaTN.csv",
+      "n_items": 1,
+      "answer_names": [
+        "correlation_coefficient"
+      ],
+      "scored_names": [
+        "correlation_coefficient"
+      ],
+      "template_sha256": {
+        "contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "data/test_Y3wMUE5_7gLdaTN.csv": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8",
+        "goal.md": "4969ccbadbf17dcc8625ebcb1f0ae21fb598e9d752f74493c13555e3cfbc251c"
+      },
+      "template_bytes": 22855,
+      "hidden_sha256": "0620d00816aadd22a3b3526fa6e93e1aab8a57633e6382c9a615b1e284a3c1cb"
+    },
+    {
+      "task_id": "dab_721",
+      "source_id": 721,
+      "level": "medium",
+      "concepts": [
+        "Correlation Analysis"
+      ],
+      "file_name": "auto-mpg.csv",
+      "n_items": 1,
+      "answer_names": [
+        "correlation_coefficient"
+      ],
+      "scored_names": [
+        "correlation_coefficient"
+      ],
+      "template_sha256": {
+        "contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "data/auto-mpg.csv": "555a2b668da52d7431215df842fb073d1ad220c56d4ac6ec359c0ae9b1beea6b",
+        "goal.md": "d77c340573194cb7b6e366005e907770b1385b329060013c4dcb24fd06b6d604"
+      },
+      "template_bytes": 15234,
+      "hidden_sha256": "3139a8d23fa38f8c0217f6bfdee06fe6d34f7b66c6c56f16e5f5adab899fa6c9"
+    },
+    {
+      "task_id": "dab_588",
+      "source_id": 588,
+      "level": "medium",
+      "concepts": [
+        "Outlier Detection"
+      ],
+      "file_name": "20170413_000000_group_statistics.csv",
+      "n_items": 1,
+      "answer_names": [
+        "num_of_outliers"
+      ],
+      "scored_names": [
+        "num_of_outliers"
+      ],
+      "template_sha256": {
+        "contract.md": "2893353fb63dcadef64dc739ec3107258c3a2e9125de48aa343748f2c1fd36f7",
+        "data/20170413_000000_group_statistics.csv": "17da5edda18a5a5c2168f5f06a0a90604efef810cac0d17492723ddad2685753",
+        "goal.md": "01544b50b02dae3b67c72d8cd18eb648bb02ad9cc6b8002cf64c3254e93bb1ce"
+      },
+      "template_bytes": 6839,
+      "hidden_sha256": "514bb39cf77d99185cdd85a97ff39e314c6533aaf8ab62a6bbb9871e11992a84"
+    },
+    {
+      "task_id": "dab_035",
+      "source_id": 35,
+      "level": "medium",
+      "concepts": [
+        "Outlier Detection",
+        "Comprehensive Data Preprocessing"
+      ],
+      "file_name": "imp.score.ldlr.metabolome.csv",
+      "n_items": 1,
+      "answer_names": [
+        "removed_outliers_count"
+      ],
+      "scored_names": [
+        "removed_outliers_count"
+      ],
+      "template_sha256": {
+        "contract.md": "3cd61ac5be274b7d4b31ca69847ff9a50bbe83279ed67e3e6bed853671256ae6",
+        "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553",
+        "goal.md": "d7f36d41901ec35d2f38f7cc7870418b1df761ae6491d662650554711193c1fe"
+      },
+      "template_bytes": 56556,
+      "hidden_sha256": "162e320548f8d3c7e7c932c443ea3cb07e8232c8a67167f5ec9e777b54964bf1"
+    },
+    {
+      "task_id": "dab_176",
+      "source_id": 176,
+      "level": "medium",
+      "concepts": [
+        "Summary Statistics",
+        "Correlation Analysis"
+      ],
+      "file_name": "titanic.csv",
+      "n_items": 1,
+      "answer_names": [
+        "median_age"
+      ],
+      "scored_names": [
+        "median_age"
+      ],
+      "template_sha256": {
+        "contract.md": "eb40caa7c7e08502bbe5b65036568490a4293e48f3e835a02349069068cac92b",
+        "data/titanic.csv": "7d118fef8b6ccf7f81111877bc388536f7b1e498a655e3d649d19aaa010e9f6f",
+        "goal.md": "8f27b7dc7ef8ddbb2bb7685fec33e26bad09c9064245ac79673c2ab4190eb7d4"
+      },
+      "template_bytes": 62353,
+      "hidden_sha256": "7a026a442fbc21bf87f7f5a520f3e2be345662f470791682a4b1b815109de6dc"
+    },
+    {
+      "task_id": "dab_688",
+      "source_id": 688,
+      "level": "medium",
+      "concepts": [
+        "Feature Engineering"
+      ],
+      "file_name": "ravenna_250715.csv",
+      "n_items": 4,
+      "answer_names": [
+        "morning",
+        "afternoon",
+        "evening",
+        "night"
+      ],
+      "scored_names": [
+        "morning",
+        "afternoon"
+      ],
+      "template_sha256": {
+        "contract.md": "e795736deabe600e8b77c472aeaa122620b34c4d871b77c54908720e417db880",
+        "data/ravenna_250715.csv": "323831969f08919961b36bb8f6b06f06493b25b01a5cf4fb649f7b39224df7de",
+        "goal.md": "0991182a916d8543db571bd4b696a2783b14ef6dbf92797d600cd7af82e7cfb9"
+      },
+      "template_bytes": 3691,
+      "hidden_sha256": "b412b15f36dbfbee713b96d78d5d71a900a9f718bad684fe40e1826235a45339"
+    },
+    {
+      "task_id": "dab_514",
+      "source_id": 514,
+      "level": "medium",
+      "concepts": [
+        "Summary Statistics",
+        "Distribution Analysis"
+      ],
+      "file_name": "hotel_data.csv",
+      "n_items": 2,
+      "answer_names": [
+        "higher_city_count",
+        "lower_city_count"
+      ],
+      "scored_names": [
+        "lower_city_count",
+        "higher_city_count"
+      ],
+      "template_sha256": {
+        "contract.md": "49d8a9f45cb72fcba5a8a694774956324fe1176977178cb30738a84b468e366e",
+        "data/hotel_data.csv": "581144a1a813e187abc75c3db8f71c25cbec27afe7956e9be9de369acde1c0f7",
+        "goal.md": "a16e562e65d0d35a4dcd27f36a49db410e74fe71bc1dd5765b6b005f0d548061"
+      },
+      "template_bytes": 85329,
+      "hidden_sha256": "b60e1a2876c985044d7c32b2621b0b1a6d1f1b34db4329bf94c4a855a86bb668"
+    },
+    {
+      "task_id": "dab_250",
+      "source_id": 250,
+      "level": "medium",
+      "concepts": [
+        "Feature Engineering",
+        "Summary Statistics"
+      ],
+      "file_name": "baseball_data.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean",
+        "std_dev"
+      ],
+      "scored_names": [
+        "mean",
+        "std_dev"
+      ],
+      "template_sha256": {
+        "contract.md": "bdd413757b92f7b1d9504a13771694096d2d04ede3e8b1c174678f269e97a319",
+        "data/baseball_data.csv": "ffcf9e1931e1fa882782df55c638d8f698a0487c7048126bfcefe088f22e4cf7",
+        "goal.md": "9b7f771698a172515079e5eb642b60e28bd3bb3954ad31bf1f546d7086361fe2"
+      },
+      "template_bytes": 23060,
+      "hidden_sha256": "cb1b99a52b234e4499ca66b858bd8d270bec0bd692b17a2e8b142aa8134d7680"
+    },
+    {
+      "task_id": "dab_587",
+      "source_id": 587,
+      "level": "medium",
+      "concepts": [
+        "Correlation Analysis"
+      ],
+      "file_name": "20170413_000000_group_statistics.csv",
+      "n_items": 1,
+      "answer_names": [
+        "correlation_coefficient"
+      ],
+      "scored_names": [
+        "correlation_coefficient"
+      ],
+      "template_sha256": {
+        "contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "data/20170413_000000_group_statistics.csv": "17da5edda18a5a5c2168f5f06a0a90604efef810cac0d17492723ddad2685753",
+        "goal.md": "7a03ec2359e8ba5ddb32f1324fba43ea2d6231cc5e7a08a8722e35a1994f337b"
+      },
+      "template_bytes": 7075,
+      "hidden_sha256": "1878cdd223e3d8663bdefd41f3040e60f1438f8c6f02a8b936552edbbebd6a45"
+    },
+    {
+      "task_id": "dab_144",
+      "source_id": 144,
+      "level": "hard",
+      "concepts": [
+        "Summary Statistics",
+        "Distribution Analysis"
+      ],
+      "file_name": "election2016.csv",
+      "n_items": 6,
+      "answer_names": [
+        "mean_dem",
+        "mean_gop",
+        "std_dev_dem",
+        "std_dev_gop",
+        "dist_dem",
+        "dist_gop"
+      ],
+      "scored_names": [
+        "std_dev_dem",
+        "mean_dem",
+        "std_dev_gop",
+        "mean_gop"
+      ],
+      "template_sha256": {
+        "contract.md": "79bbbff007b2f420f2d3f8137dade2434d81457d9c289ebf2fadb95a896cdea2",
+        "data/election2016.csv": "b2d37e2153fa661b710170db1c9b2d62cef2baf2910535bd5600c32892f48a45",
+        "goal.md": "55a89fb9f42ed871254af906731fde8c889fd4829bcf2fcd65c5159ca2feff70"
+      },
+      "template_bytes": 293581,
+      "hidden_sha256": "0decec87a58a67cbf405c74329ad39f246d12e501dec57eaf83cd3eaebec310f"
+    },
+    {
+      "task_id": "dab_725",
+      "source_id": 725,
+      "level": "hard",
+      "concepts": [
+        "Distribution Analysis",
+        "Correlation Analysis"
+      ],
+      "file_name": "auto-mpg.csv",
+      "n_items": 6,
+      "answer_names": [
+        "mean1",
+        "median1",
+        "mean2",
+        "median2",
+        "mean3",
+        "median3"
+      ],
+      "scored_names": [
+        "median1",
+        "mean1"
+      ],
+      "template_sha256": {
+        "contract.md": "d45d8d39ef41e9873977c05716f3a52fd6c926ad8e595348486c488b18d65732",
+        "data/auto-mpg.csv": "555a2b668da52d7431215df842fb073d1ad220c56d4ac6ec359c0ae9b1beea6b",
+        "goal.md": "fdaeab445f23e4919ad1a58757af30744abfc4ac50e8e918d6bd4b0379233c68"
+      },
+      "template_bytes": 15847,
+      "hidden_sha256": "f82cc6cb7f105eb8f3b1dfeebfe3fd6dc4d88d65903870bc6a9fbe08ad4e2bc9"
+    },
+    {
+      "task_id": "dab_723",
+      "source_id": 723,
+      "level": "hard",
+      "concepts": [
+        "Feature Engineering",
+        "Summary Statistics"
+      ],
+      "file_name": "auto-mpg.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean_ratio",
+        "std_ratio"
+      ],
+      "scored_names": [
+        "mean_ratio",
+        "std_ratio"
+      ],
+      "template_sha256": {
+        "contract.md": "5fa48e99161b6680a56e121d222e5aeb0ae0fa861b93665bd03deebf8af25cdc",
+        "data/auto-mpg.csv": "555a2b668da52d7431215df842fb073d1ad220c56d4ac6ec359c0ae9b1beea6b",
+        "goal.md": "bfdbd2a8e4f037c5fd848457a7fe2ae3ab307b7b836cb84728fd51d4a38cf65a"
+      },
+      "template_bytes": 15617,
+      "hidden_sha256": "4e5232a73c803b2409c36a2ae89404db906936070103641aa18fa25e119b5d48"
+    },
+    {
+      "task_id": "dab_378",
+      "source_id": 378,
+      "level": "hard",
+      "concepts": [
+        "Comprehensive Data Preprocessing",
+        "Distribution Analysis"
+      ],
+      "file_name": "2014_q4.csv",
+      "n_items": 10,
+      "answer_names": [
+        "pre_mean",
+        "pre_median",
+        "pre_sd",
+        "pre_skewness",
+        "pre_kurtosis",
+        "post_mean",
+        "post_median",
+        "post_sd",
+        "post_skewness",
+        "post_kurtosis"
+      ],
+      "scored_names": [
+        "post_skewness",
+        "pre_mean",
+        "pre_kurtosis",
+        "post_sd",
+        "pre_skewness",
+        "post_kurtosis",
+        "post_mean",
+        "pre_sd"
+      ],
+      "template_sha256": {
+        "contract.md": "a5f2dac625affe2930772d159f6314c895a6bf46db6cdc9bc108548e9011f9d3",
+        "data/2014_q4.csv": "f1ec88490c4cf2fde96a2783f2962743a126e66e59b16d83378192941b5dbd82",
+        "goal.md": "71103d0aa33ed824dc15e80cee1ae218c3f42734b9a8bb86e5055f34314c8fb5"
+      },
+      "template_bytes": 7770,
+      "hidden_sha256": "2848e57c4cc6b67402333aa985778cace63f943a1b167b6833722e48fafe0c14"
+    },
+    {
+      "task_id": "dab_732",
+      "source_id": 732,
+      "level": "hard",
+      "concepts": [
+        "Comprehensive Data Preprocessing"
+      ],
+      "file_name": "gapminder_cleaned.csv",
+      "n_items": 2,
+      "answer_names": [
+        "number_of_missing_values_in_lifeexp_before",
+        "number_of_missing_values_in_lifeexp_after"
+      ],
+      "scored_names": [
+        "number_of_missing_values_in_lifeexp_after"
+      ],
+      "template_sha256": {
+        "contract.md": "61a5385d0a07e450bc1a1cfee3b4cc664accc800ab8919a1964a118d57aefc1d",
+        "data/gapminder_cleaned.csv": "9e6f0a924da3b91a0c7ba24260f773f8648deb2475ca4bbd5d16f1366a0b45a7",
+        "goal.md": "141a270636f6d5adda21a8af3dd834be8836b9e8c9a9016525b615d0f4f4f5c7"
+      },
+      "template_bytes": 83518,
+      "hidden_sha256": "5c72fa9e96cf18f36711b1732fdbaf6a761b2cce4a8027dada4ab419fa9762f7"
+    },
+    {
+      "task_id": "dab_039",
+      "source_id": 39,
+      "level": "hard",
+      "concepts": [
+        "Distribution Analysis",
+        "Feature Engineering"
+      ],
+      "file_name": "imp.score.ldlr.metabolome.csv",
+      "n_items": 3,
+      "answer_names": [
+        "is_normal",
+        "transformed_importance_score_mean",
+        "transformed_importance_score_std"
+      ],
+      "scored_names": [
+        "is_normal"
+      ],
+      "template_sha256": {
+        "contract.md": "58d50d18feba09ce413949aded32eabf78375f4b784e7384b27607bd43b62592",
+        "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553",
+        "goal.md": "5a345ad82d7de791a931fa1f8c792740ae48944d25f1ff97098d1005f9c66088"
+      },
+      "template_bytes": 57279,
+      "hidden_sha256": "c632587ff98976aad48b7aed23610f24d89ff6293a20d3a9d0cd6dff961daeac"
+    },
+    {
+      "task_id": "dab_665",
+      "source_id": 665,
+      "level": "hard",
+      "concepts": [
+        "Comprehensive Data Preprocessing",
+        "Feature Engineering",
+        "Summary Statistics"
+      ],
+      "file_name": "YAHOO-BTC_USD_D.csv",
+      "n_items": 6,
+      "answer_names": [
+        "high_count",
+        "high_proportion",
+        "medium_count",
+        "medium_proportion",
+        "low_count",
+        "low_proportion"
+      ],
+      "scored_names": [
+        "high_count",
+        "low_proportion",
+        "low_count",
+        "medium_proportion",
+        "medium_count",
+        "high_proportion"
+      ],
+      "template_sha256": {
+        "contract.md": "4f3e36cbcdddb168354fa4578b34e5d4acec9e03129b17b74d8f3d666ab1d42a",
+        "data/YAHOO-BTC_USD_D.csv": "ddbd797b7db4999bbb7e836ad928aba56bea7a5dbeb516afb7d63fd42662a328",
+        "goal.md": "e9b9956c931e4a1d9b3f7f0613d34292b08bb81854be7be132f5f4f1576be38a"
+      },
+      "template_bytes": 175948,
+      "hidden_sha256": "78f2bf6f1b1e7cce71bfe6f149a32dbb1a19b522e72539b0217f53a9229a6da2"
+    },
+    {
+      "task_id": "dab_249",
+      "source_id": 249,
+      "level": "hard",
+      "concepts": [
+        "Correlation Analysis",
+        "Summary Statistics"
+      ],
+      "file_name": "baseball_data.csv",
+      "n_items": 2,
+      "answer_names": [
+        "correlation_coefficient",
+        "p_value"
+      ],
+      "scored_names": [
+        "correlation_coefficient"
+      ],
+      "template_sha256": {
+        "contract.md": "5742a5de0e426281fb8a3cb55ffb8ae283741929fcd7637cf984e951ac8d623d",
+        "data/baseball_data.csv": "ffcf9e1931e1fa882782df55c638d8f698a0487c7048126bfcefe088f22e4cf7",
+        "goal.md": "b770d3dfb0a0f5a920dd6c606e06f26434f2d7723af5a6e7014c3aa40414a784"
+      },
+      "template_bytes": 23235,
+      "hidden_sha256": "fb0db890b248cab5d0fd18ddb752fb1f6686d372224bbcd76460f7edb35410cb"
+    },
+    {
+      "task_id": "dab_724",
+      "source_id": 724,
+      "level": "hard",
+      "concepts": [
+        "Outlier Detection",
+        "Summary Statistics",
+        "Comprehensive Data Preprocessing"
+      ],
+      "file_name": "auto-mpg.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean_acceleration",
+        "std_acceleration"
+      ],
+      "scored_names": [
+        "std_acceleration",
+        "mean_acceleration"
+      ],
+      "template_sha256": {
+        "contract.md": "e6f3a78c54ff0aee54b335533808fd5258d988b840217beb3bb8292d08a15d5b",
+        "data/auto-mpg.csv": "555a2b668da52d7431215df842fb073d1ad220c56d4ac6ec359c0ae9b1beea6b",
+        "goal.md": "672605c9c5bb5798e0625bc7ffa1bff0500196ee95f8c0fc179561252b4e218f"
+      },
+      "template_bytes": 15660,
+      "hidden_sha256": "e103746f0b2a6498c61ab3dcafcabdc908cac444b2b50e5316ae86596225ed59"
+    },
+    {
+      "task_id": "dab_669",
+      "source_id": 669,
+      "level": "hard",
+      "concepts": [
+        "Outlier Detection",
+        "Summary Statistics"
+      ],
+      "file_name": "my_test_01.csv",
+      "n_items": 2,
+      "answer_names": [
+        "mean",
+        "standard_deviation"
+      ],
+      "scored_names": [
+        "standard_deviation",
+        "mean"
+      ],
+      "template_sha256": {
+        "contract.md": "18f6a0b3fec70029d4506d48c744272a321cfe6f907a3bbfae52da7975e84df1",
+        "data/my_test_01.csv": "3134c6c7260510da5aaa33441743d7aaa52efd88fc4d443e7c7a98f80d734c25",
+        "goal.md": "c16a2e22fffe04f911a0c600535b6269046b1d5a6774fff70dd4e77e77e4d094"
+      },
+      "template_bytes": 25085,
+      "hidden_sha256": "1f640f0bb6a8b0b508b94b0a69fb652c4498673308d4858d7c8b71ed48d0b772"
+    }
+  ]
+}

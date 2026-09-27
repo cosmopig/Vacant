@@ -1,0 +1,40 @@
+{
+  "task_id": "dab_378",
+  "source_id": 378,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "post_skewness",
+      "0.15"
+    ],
+    [
+      "pre_mean",
+      "21144.08"
+    ],
+    [
+      "pre_kurtosis",
+      "-1.13"
+    ],
+    [
+      "post_sd",
+      "9889.93"
+    ],
+    [
+      "pre_skewness",
+      "0.15"
+    ],
+    [
+      "post_kurtosis",
+      "-1.13"
+    ],
+    [
+      "post_mean",
+      "21144.08"
+    ],
+    [
+      "pre_sd",
+      "9889.93"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}

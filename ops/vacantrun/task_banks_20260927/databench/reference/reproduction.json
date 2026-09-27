@@ -1,0 +1,356 @@
+{
+  "generated_by": "gauge_bank.py --reproduce",
+  "results": {
+    "066_IBM_HR#10": {
+      "error": null,
+      "note": null,
+      "reference_output": "Sales",
+      "reproduced": true,
+      "type": "category"
+    },
+    "066_IBM_HR#14": {
+      "error": null,
+      "note": null,
+      "reference_output": "Male",
+      "reproduced": true,
+      "type": "category"
+    },
+    "066_IBM_HR#16": {
+      "error": null,
+      "note": null,
+      "reference_output": "Human Resources",
+      "reproduced": true,
+      "type": "category"
+    },
+    "066_IBM_HR#18": {
+      "error": null,
+      "note": null,
+      "reference_output": "9",
+      "reproduced": true,
+      "type": "number"
+    },
+    "066_IBM_HR#34": {
+      "error": null,
+      "note": null,
+      "reference_output": "['Life Sciences', 'Other', 'Medical', 'Marketing', 'Technical Degree', 'Human Resources']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "066_IBM_HR#37": {
+      "error": null,
+      "note": null,
+      "reference_output": "[1, 2, 3, 4]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "066_IBM_HR#4": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "069_Taxonomy#13": {
+      "error": null,
+      "note": null,
+      "reference_output": "Commercial Trucks",
+      "reproduced": true,
+      "type": "category"
+    },
+    "069_Taxonomy#29": {
+      "error": null,
+      "note": null,
+      "reference_output": "['Attractions', 'Automotive']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "069_Taxonomy#30": {
+      "error": null,
+      "note": "參考解 \"['Amusement and Theme Parks', 'Bars & Restaurants', 'Casinos & Gambling', 'Historic Site and Landmark Tours']\" ≠ 官方答案 \"['Amusement and Theme Parks', 'Bars & Restaurants', 'Casinos', 'Parks']\"",
+      "reference_output": "['Amusement and Theme Parks', 'Bars & Restaurants', 'Casinos & Gambling', 'Historic Site and Landmark Tours']",
+      "reproduced": false,
+      "type": "list[category]"
+    },
+    "069_Taxonomy#7": {
+      "error": null,
+      "note": null,
+      "reference_output": "False",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "069_Taxonomy#8": {
+      "error": null,
+      "note": null,
+      "reference_output": "Business and Finance",
+      "reproduced": true,
+      "type": "category"
+    },
+    "071_COL#12": {
+      "error": null,
+      "note": null,
+      "reference_output": "Hong Kong (China)",
+      "reproduced": true,
+      "type": "category"
+    },
+    "071_COL#14": {
+      "error": null,
+      "note": null,
+      "reference_output": "Barbados",
+      "reproduced": true,
+      "type": "category"
+    },
+    "071_COL#15": {
+      "error": null,
+      "note": null,
+      "reference_output": "101.1",
+      "reproduced": true,
+      "type": "number"
+    },
+    "071_COL#19": {
+      "error": null,
+      "note": null,
+      "reference_output": "84.2",
+      "reproduced": true,
+      "type": "number"
+    },
+    "071_COL#2": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "071_COL#26": {
+      "error": null,
+      "note": null,
+      "reference_output": "[109.1, 88.4, 84.6]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "072_Admissions#2": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "072_Admissions#26": {
+      "error": null,
+      "note": null,
+      "reference_output": "42",
+      "reproduced": true,
+      "type": "number"
+    },
+    "072_Admissions#30": {
+      "error": null,
+      "note": null,
+      "reference_output": "[5.0, 5.0, 5.0, 5.0, 5.0]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "072_Admissions#33": {
+      "error": null,
+      "note": null,
+      "reference_output": "[7.21, 7.28]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "072_Admissions#38": {
+      "error": null,
+      "note": null,
+      "reference_output": "[2.0, 2.0, 3.0, 4.0, 2.0]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "073_Med_Cost#10": {
+      "error": null,
+      "note": null,
+      "reference_output": "male",
+      "reproduced": true,
+      "type": "category"
+    },
+    "073_Med_Cost#31": {
+      "error": null,
+      "note": null,
+      "reference_output": "['southeast', 'southeast', 'southeast']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "074_Lift#11": {
+      "error": null,
+      "note": null,
+      "reference_output": "Bench Press",
+      "reproduced": true,
+      "type": "category"
+    },
+    "074_Lift#13": {
+      "error": null,
+      "note": null,
+      "reference_output": "10",
+      "reproduced": true,
+      "type": "number"
+    },
+    "074_Lift#26": {
+      "error": null,
+      "note": null,
+      "reference_output": "[46, 46, 46]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "074_Lift#27": {
+      "error": null,
+      "note": null,
+      "reference_output": "[100, 100]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "075_Mortality#28": {
+      "error": null,
+      "note": null,
+      "reference_output": "['Urban', 'Rural']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "076_NBA#0": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "076_NBA#22": {
+      "error": null,
+      "note": null,
+      "reference_output": "0",
+      "reproduced": true,
+      "type": "number"
+    },
+    "076_NBA#29": {
+      "error": null,
+      "note": "參考解 \"['Quentin Richardson', 'Andrew Goudelock', 'Darko Milicic', 'Matt Carroll', 'Vladimir Radmanovic']\" ≠ 官方答案 \"['Harrison Barnes', 'DeMar DeRozan', 'Jeff Green', 'P.J. Tucker', 'Andre Drummond']\"",
+      "reference_output": "['Quentin Richardson', 'Andrew Goudelock', 'Darko Milicic', 'Matt Carroll', 'Vladimir Radmanovic']",
+      "reproduced": false,
+      "type": "list[category]"
+    },
+    "076_NBA#31": {
+      "error": null,
+      "note": null,
+      "reference_output": "['GSW', 'LAC', 'BOS', 'MIL', 'MIA']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "076_NBA#6": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "077_Gestational#1": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "077_Gestational#18": {
+      "error": null,
+      "note": null,
+      "reference_output": "30.0",
+      "reproduced": true,
+      "type": "number"
+    },
+    "077_Gestational#2": {
+      "error": null,
+      "note": null,
+      "reference_output": "False",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "077_Gestational#22": {
+      "error": null,
+      "note": null,
+      "reference_output": "[196, 186, 180]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "077_Gestational#27": {
+      "error": null,
+      "note": null,
+      "reference_output": "[0, 1]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "077_Gestational#7": {
+      "error": null,
+      "note": null,
+      "reference_output": "42",
+      "reproduced": true,
+      "type": "number"
+    },
+    "077_Gestational#8": {
+      "error": null,
+      "note": null,
+      "reference_output": "True",
+      "reproduced": true,
+      "type": "boolean"
+    },
+    "078_Fires#11": {
+      "error": null,
+      "note": null,
+      "reference_output": "December",
+      "reproduced": true,
+      "type": "category"
+    },
+    "078_Fires#17": {
+      "error": null,
+      "note": null,
+      "reference_output": "33.3",
+      "reproduced": true,
+      "type": "number"
+    },
+    "078_Fires#28": {
+      "error": null,
+      "note": null,
+      "reference_output": "[15, 15, 17, 18]",
+      "reproduced": true,
+      "type": "list[number]"
+    },
+    "078_Fires#36": {
+      "error": null,
+      "note": null,
+      "reference_output": "['December', 'August']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "080_Books#23": {
+      "error": null,
+      "note": null,
+      "reference_output": "2",
+      "reproduced": true,
+      "type": "number"
+    },
+    "080_Books#36": {
+      "error": null,
+      "note": null,
+      "reference_output": "['Madinah Arabic Reader 1', 'How Harsh Mariwala ?Groomed? Marico', 'Train to Pakistan', 'The Old Man and The Sea', 'Metamorphosis', 'Animal Farm', 'The Alchemist', 'Who Moved My Cheese?', 'The Art of War']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "080_Books#37": {
+      "error": null,
+      "note": null,
+      "reference_output": "['History and Tradition', ' Business, Investment and Economics', 'Novel', 'Novel', 'Novel', 'Novel', 'Novel', 'Novel', 'Self-help and meditation', 'Self-help and meditation', 'Self-help and meditation', 'Self-help and meditation', 'Self-help and meditation', 'Self-help and meditation', ' Mystery, Detective, Thriller and Adventure']",
+      "reproduced": true,
+      "type": "list[category]"
+    },
+    "080_Books#4": {
+      "error": null,
+      "note": null,
+      "reference_output": "False",
+      "reproduced": true,
+      "type": "boolean"
+    }
+  },
+  "solutions_sha256": "7ca6c0b2de52fc9e822c1aa69937ffdf729e25c9d5b8e4118caa2301861c9d1b"
+}

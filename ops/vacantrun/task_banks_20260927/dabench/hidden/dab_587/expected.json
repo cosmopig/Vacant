@@ -1,0 +1,12 @@
+{
+  "task_id": "dab_587",
+  "source_id": 587,
+  "answer_file": "answer.txt",
+  "common_answers": [
+    [
+      "correlation_coefficient",
+      "0.639"
+    ]
+  ],
+  "scorer": "score.py（官方 eval_closed_form.py 的 extract_format＋is_equal 逐字）"
+}
