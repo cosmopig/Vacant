@@ -14,6 +14,10 @@ AGENT=pi; [ "$ARM" != A ] && AGENT=harbor_vacant:PiWithVacant
 TAG="${TAG_PREFIX:-local}-g12-off-$ARM-$TASK-s$SAMPLE"
 BASE="http://172.17.0.1:18900/t/$TAG/up/$UP/think/off/api/v1"
 OUT="$JOBS/g12-off-$ARM-s$SAMPLE"
+# 回合上限（2026-09-27 加）：預設 15（之前所有批次的設定，不變）；`MAX_TURNS=none`＝不設上限（系統提示裡沒有預算那一行，
+# 只剩題目自己的 agent 時限——一般互動使用的樣子）。
+MAX_TURNS=${MAX_TURNS:-15}
+TURNS_ARG="--ak max_turns=$MAX_TURNS"; [ "$MAX_TURNS" = none ] && TURNS_ARG=""
 mkdir -p "$OUT"
 echo "=== $TAG $UP $(date -u +%FT%TZ) ==="
 cd "$HARBOR_DIR" || exit 1
@@ -29,6 +33,6 @@ PYTHONPATH="$REPO/ops/eval" VACANT_WHEEL="$WHEEL" uv run --no-dev harbor run \
   --ae NODE_EXTRA_CA_CERTS=/usr/local/share/ccr-ca-bundle.crt \
   --ve SSL_CERT_FILE=/usr/local/share/ccr-ca-bundle.crt \
   --ve CURL_CA_BUNDLE=/usr/local/share/ccr-ca-bundle.crt \
-  --ak max_turns=15 --ak model_api=openai-completions --ak version=0.87.1 \
+  $TURNS_ARG --ak model_api=openai-completions --ak version=0.87.1 \
   --jobs-dir "$OUT"
 echo "=== exit $? $(date -u +%FT%TZ) ==="
