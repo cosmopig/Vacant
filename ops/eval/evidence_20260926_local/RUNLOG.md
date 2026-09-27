@@ -149,3 +149,12 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   停掉舊的驅動（在跑的第 19 題 C36 第 2 次讓它自己跑完、不重開），其餘 12 格用 `1003:4` 的新驅動跑（同一題兩組仍同一台；`run_s36nc_tail.sh`）。
   人類 2026-09-27 告知兩台 LM Studio 都是 `Max Concurrent Predictions 4`——之後的批次一律 `4＋4`。
   第 19 題那一跑沒有 `progress.jsonl` 的行（舊驅動已停）；分析讀的是每一跑的 `result.json`／評分，不受影響。
+- **10:37 UTC 全部跑完**（144／144 有評分，沒有 infra_void；最後一包原始資料 `chunk_006` 已推上去）。分析 10:50 UTC：**GO**（裁決 BIGGER_EFFECT §十三）。
+  分析腳本第一版的傷害檢查找錯了事件（pi 把擴充的訊息記成 `entry_appended`），寫結果之前發現、修掉；修正前後 GO 的四個條件數字相同，傷害從「沒查到」變成「查過、0 次」。
+
+## 17. 沒用過的 274 題的預註冊批次（`decisions/prereg/PREREG_20260927_NOCAP_UNSEEN.md`；2026-09-27）
+
+- 題目清單 `ops/eval/evidence_20260927_nocap/unseen/UNSEEN_MANIFEST.json`（`make_unseen.py`；先驗留出清單的 100 個題目目錄雜湊：100／100 相同）。
+- C361 wheel 從 `c27641c6` 重建兩次，同一個 sha256 `4ec156d6…`；`vacant_network/` 114 個檔與 HEAD 相同。
+- 驅動改成共用一條佇列（`run_pairs.py`；`tests/test_eval_run_pairs.py` 6 條）：S36-nocap 的固定分配讓 w401 閒了一個小時。
+- 開跑前兩台各一通 `u274-preflight`：w401 200（8.0 秒）、1003 200（10.9 秒）。
