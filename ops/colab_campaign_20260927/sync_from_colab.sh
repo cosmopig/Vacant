@@ -3,20 +3,16 @@
 # 用法：sync_from_colab.sh <colab session 名> <本機目錄> [間隔秒數，預設 600]
 # - 只拉 chunk 與 MANIFEST，不解壓、不讀內容（批次跑完之前不看分數）。
 # - sha256 對不上就刪掉重拉（下一輪）；對上了寫進本機的 VERIFIED.tsv。
-# - Mac 睡著時這支停住，VM 照跑；醒來後從缺的那個 chunk 接著拉。VM 那邊的第二份在 Google Drive（packer --mirror）。
+# - 全部走 `colab download`（Jupyter 的檔案介面），**不走 `colab exec`**：2026-09-27 實測 kernel 的 exec 會隨機卡住好幾分鐘。
+# - Mac 睡著時這支停住，VM 照跑；醒來後從缺的那個 chunk 接著拉。
 set -u
 S=$1; D=$2; INT=${3:-600}
 COLAB=${COLAB:-$HOME/.local/bin/colab}
 mkdir -p "$D"
-PY=$(mktemp -t syncpy); trap 'rm -f "$PY"' EXIT
-printf '%s\n' 'import pathlib' 'p = pathlib.Path("/srv/eval/archive/MANIFEST.tsv")' 'print("MANIFEST_BEGIN"); print(p.read_text() if p.exists() else "", end=""); print("MANIFEST_END")' \
-  'print("DONE_FLAG", pathlib.Path("/srv/eval/DRIVER_DONE").exists(), pathlib.Path("/srv/eval/archive").joinpath("PACKER_DONE").exists())' > "$PY"
 while true; do
-  out=$("$COLAB" exec -s "$S" --timeout 120 -f "$PY" 2>&1)
-  if ! grep -q MANIFEST_END <<<"$out"; then
-    echo "$(date -u +%FT%TZ) 連不上 $S（VM 可能已停）：$(tail -1 <<<"$out")"; sleep "$INT"; continue
+  if ! "$COLAB" download -s "$S" /srv/eval/archive/MANIFEST.tsv "$D/MANIFEST.remote.tsv" </dev/null >/dev/null 2>&1; then
+    echo "$(date -u +%FT%TZ) 拉不到 MANIFEST（VM 可能已停，或還沒有第一個 chunk）"; sleep "$INT"; continue
   fi
-  sed -n '/MANIFEST_BEGIN/,/MANIFEST_END/p' <<<"$out" | sed '1d;$d' > "$D/MANIFEST.remote.tsv"
   new=0
   while IFS=$'\t' read -r name digest bytes ncells stamp; do
     [ -n "$name" ] || continue
@@ -30,8 +26,9 @@ while true; do
       echo "$(date -u +%FT%TZ) $name sha256 不符（$got），刪掉下一輪重拉"; rm -f "$D/$name"
     fi
   done < "$D/MANIFEST.remote.tsv"
-  echo "$(date -u +%FT%TZ) 本輪新拉 $new 個；本機已驗證 $(wc -l < "$D/VERIFIED.tsv" 2>/dev/null || echo 0) / 遠端 $(grep -c . "$D/MANIFEST.remote.tsv")"
-  if grep -q "DONE_FLAG True True" <<<"$out" && [ "$(wc -l < "$D/VERIFIED.tsv" 2>/dev/null || echo 0)" -ge "$(grep -c . "$D/MANIFEST.remote.tsv")" ]; then
+  nv=$(grep -c . "$D/VERIFIED.tsv" 2>/dev/null || echo 0); nr=$(grep -c . "$D/MANIFEST.remote.tsv")
+  echo "$(date -u +%FT%TZ) 本輪新拉 $new 個；本機已驗證 $nv / 遠端 $nr"
+  if "$COLAB" download -s "$S" /srv/eval/archive/PACKER_DONE "$D/PACKER_DONE" </dev/null >/dev/null 2>&1 && [ "$nv" -ge "$nr" ]; then
     echo "$(date -u +%FT%TZ) SYNC_ALL_DONE"; exit 0
   fi
   sleep "$INT"
