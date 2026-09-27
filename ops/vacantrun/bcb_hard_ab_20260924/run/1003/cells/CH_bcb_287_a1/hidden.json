@@ -1,0 +1,1 @@
+{"passed": 0, "total": 5, "failures": ["check_test_empty_files: + {}", "check_test_files_with_special_characters: + {'hello-world': 1, 'hello_python': 1}", "check_test_multiple_files: + {'coding': 1, 'hello': 2, 'python': 2, 'world': 2}", "check_test_nested_directories: + {'hello': 2, 'world': 1}", "check_test_single_file_few_words: + {'hello': 2, 'world': 1}"]}

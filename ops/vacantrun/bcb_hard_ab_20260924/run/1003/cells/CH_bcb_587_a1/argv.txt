@@ -1,0 +1,4 @@
+arm=CH task=bcb_587 attempt=1 backend=1003 model=gemma-4-12b-it-qat
+prompt=Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+containment=bwrap(ro /, rw ws+HOME, tmpfs /tmp, unshare-pid, net shared)
+2026-09-24T11:52:22Z

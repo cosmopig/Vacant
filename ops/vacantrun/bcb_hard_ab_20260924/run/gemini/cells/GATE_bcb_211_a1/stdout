@@ -1,0 +1,37 @@
+<thought>Looks perfect. I'll do one more check. Does `zip_ref.namelist()` return the list of filenames as expected?
+The test says:
+`zip_contents = ['file1.txt', 'file2.csv', 'file3.td']`
+`self.assertEqual(zip_contents, mock_zip_instance.namelist())`
+
+Yes, it does.
+
+I'm done.I have implemented the `task_func` in `solution.py` as requested. The function downloads a zip file from a given URL, saves it to the destination directory, extracts its contents, and returns the list of extracted filenames. I have also ensured that it uses the default header `{'accept': 'application/octet-stream'}` if no headers are provided, to comply with the test requirements.
+
+```python
+import requests
+import os
+import zipfile
+
+def task_func(url, destination_directory, headers=None):
+    if headers is None:
+        headers = {'accept': 'application/octet-stream'}
+    
+    try:
+        if not os.path.exists(destination_directory):
+            os.makedirs(destination_directory)
+    except OSError:
+        pass
+
+    zip_filename = os.path.basename(url)
+    zip_path = os.path.join(destination_directory, zip_filename)
+    
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    
+    with open(zip_path, 'wb') as f:
+        f.write(response.content)
+            
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(destination_directory)
+        return zip_ref.namelist()
+```

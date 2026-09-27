@@ -1,0 +1,14 @@
+pass test_visible.py::check_test_custom_delimiter
+FAIL test_visible.py::check_test_difference_report  AssertionError: FAIL test_difference_report: AssertionError: Lists differ: ['1, ,name,age\n', '3, ,Bob,25\n'] != ["1, ,('name', 'age')", "2,-,('Alice', '30[43 chars]5')"]
+First differing element 0:
+'1, ,name,age\n'
+"1, ,('name', 'age')"
+Second list contains 2 additional elements.
+First extra element 2:
+"3,+,('Alice', '31')"
+- ['1, ,name,age\n', '3, ,Bob,25\n']
++ ["1, ,('name', 'age')",
++  "2,-,('Alice', '30')",
++  "3,+,('Alice', '31')",
++  "4, ,('Bob', '25')"]
+1 check(s) failed

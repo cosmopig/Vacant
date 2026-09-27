@@ -1,0 +1,31 @@
+The task is completed successfully. I have created `solution.py` with the required `task_func`, which generates normally distributed random numbers and plots their histogram (using `bins='auto'` as expected by the tests) and PDF using `matplotlib` and `scipy`. The tests passed.
+
+```python
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+
+def task_func(size=1000):
+    # Generate normally distributed random numbers
+    data = np.random.normal(loc=0, scale=1, size=size)
+
+    # Create a figure and axis
+    fig, ax = plt.subplots()
+
+    # Plot the histogram using bins='auto' as expected by tests
+    ax.hist(data, bins='auto', density=True, alpha=0.6, color='g', label='Histogram')
+
+    # Calculate PDF for plotting
+    x = np.linspace(min(data), max(data), 100)
+    pdf = stats.norm.pdf(x, loc=np.mean(data), scale=np.std(data))
+
+    # Plot the PDF
+    ax.plot(x, pdf, 'r-', lw=2, label='PDF')
+
+    ax.set_title('Histogram and PDF of Normally Distributed Random Numbers')
+    ax.set_xlabel('Value')
+    ax.set_ylabel('Density')
+    ax.legend()
+
+    return fig
+```

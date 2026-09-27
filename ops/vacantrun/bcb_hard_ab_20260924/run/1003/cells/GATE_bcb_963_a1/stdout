@@ -1,0 +1,11 @@
+The task was completed successfully. I read `goal.md` and `contract.md`, implemented the required functionality in `solution.py`, and verified it with the provided test suite.
+
+Summary of changes:
+- Created `solution.py` with a function `task_func(source_directory, target_directory, zip_name)`.
+- The function checks if the source directory exists and raises an `OSError` if not.
+- It identifies files with extensions `.txt`, `.docx`, `.xlsx`, and `.csv` recursively within the source directory.
+- It creates a zip file in the target directory (creating it if necessary).
+- It adds the identified files to the zip file, preserving their relative paths from the source directory.
+- It returns the absolute path of the created zip file.
+
+The tests passed successfully.

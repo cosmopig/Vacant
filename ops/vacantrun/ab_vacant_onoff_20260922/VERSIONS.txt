@@ -1,0 +1,4 @@
+pi 0.87.0 / gemma-4-12b-it-qat / 上游 https://1003.taild870c4.ts.net/v1（公開 Funnel）
+task lcb_3584（R534）
+OFF 07:03:08-07:07:08Z  V0 07:07:08-07:11:10Z  V1 07:11:10-07:13:20Z
+git 983fc002

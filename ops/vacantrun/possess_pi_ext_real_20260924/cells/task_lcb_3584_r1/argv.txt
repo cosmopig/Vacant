@@ -1,0 +1,6 @@
+task=lcb_3584 rep=1
+route=常駐 extension（pi 完整路徑，不經 shim）
+pi=0.87.0
+prompt=Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+workspace_files=./contract.md ./goal.md ./run_tests.sh ./tests_visible/test_visible.py
+argv=cd <ws> && /var/tmp/vacant_piext_20260924/pi/node_modules/.bin/pi -p '<PROMPT>'

@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: FAIL test_case_1: AssertionError: 'ZipFile' does not contain all of (call('/fake/test_zip_dir/sample-123.zip', 'r'), call('/fake/test_zip_dir/test_data-456.zip', 'r'), call('/fake/test_zip_dir/data_test-789.zip', 'r')) in its call list, found [] instead
+FAIL test_visible.py::check_test_case_2  AssertionError: FAIL test_case_2: AssertionError: Expected 'makedirs' to be called once. Called 0 times.
+2 check(s) failed

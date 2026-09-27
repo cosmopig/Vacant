@@ -1,0 +1,6 @@
+{
+  "error": "vacant_run_unspecified_upstream",
+  "wire": "openai",
+  "path": "/v1/code/agent-proxy/ca-cert",
+  "message": "`vacant run` 沒有收到 openai 這條路由的上游位址，所以這一通被擋在本機——一個 byte 都沒有出去。要指定上游：VACANT_RUN_UPSTREAM_OPENAI／OPENAI_BASE_URL／OPENAI_API_BASE／OPENAI_BASE。真的要走公開 API（https://api.openai.com/v1）就明講 `--allow-public-upstream` 或 VACANT_RUN_ALLOW_PUBLIC_UPSTREAM=1。"
+}

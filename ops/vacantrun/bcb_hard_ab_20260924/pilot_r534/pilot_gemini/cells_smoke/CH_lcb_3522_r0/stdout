@@ -1,0 +1,29 @@
+<thought
+The tests are exactly the examples from `goal.md`.
+I have completed the task.
+I'll just make sure `solution.py` is exactly what's needed.
+The `goal.md` asked for a top-level function and only standard libraries. I have done that.
+I'll provide the final answer.I have implemented the `resultsArray` function in `solution.py` according to the requirements. The function calculates the power of all subarrays of size `k` in $O(n)$ time.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    res = [-1] * (n - k + 1)
+    
+    count = 1
+    for i in range(n):
+        if i > 0:
+            if nums[i] == nums[i-1] + 1:
+                count += 1
+            else:
+                count = 1
+        
+        if i >= k - 1:
+            if count >= k:
+                res[i - k + 1] = nums[i]
+    return res
+```
+
+I have verified the implementation against the provided test cases using `sh run_tests.sh`, and all tests passed.

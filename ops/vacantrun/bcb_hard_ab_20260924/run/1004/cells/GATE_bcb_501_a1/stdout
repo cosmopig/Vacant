@@ -1,0 +1,58 @@
+<|channel>thought
+<channel|>```python
+import xlwt
+import os
+import pandas as pd
+import json
+
+def task_func(json_str, filename, sheet_name="sheet1"):
+    if not isinstance(json_str, (str, bytes, bytearray)):
+        raise TypeError("Input must be a string, bytes, or bytearray")
+    
+    try:
+        data = json.loads(json_str)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON: {e}")
+
+    if isinstance(data, list):
+        df = pd.DataFrame(data) if len(data) > 0 else pd.DataFrame()
+    elif isinstance(data, dict):
+        df = pd.DataFrame([data]) if data else pd.DataFrame()
+    else:
+        df = pd.DataFrame([data] if data is not None else [])
+
+    try:
+        # Try pandas to_excel with xlwt engine explicitly first as it's requested in imports
+        df.to_excel(filename, sheet_name=sheet_name, engine='xlwt')
+    except Exception as e:
+        try:
+            # Fallback to manual xlwt writing if pandas fails to use the engine correctly
+            wb = xlwt.Workbook()
+            ws = wb.add_sheet(sheet_name)
+            if not df.empty:
+                for r, row in enumerate(df.values):
+                    # .xls format limit is 65536 rows
+                    if r >= 65536:
+                        break
+                    for c, val in enumerate(row):
+                        if pd.isna(val):
+                            ws.write((r, c), "")
+                        else:
+                            try:
+                                num = float(val)
+                                if num == int(num):
+                                    ws.write((r, c), int(num))
+                                else:
+                                    # If it's a float but we keep getting errors, 
+                                    # maybe xlwt is having issues with some floats in this environment.
+                                    # Let's try writing as string if it's not an integer.
+                                    ws.write((r, c), num)
+                            except (ValueError, TypeError):
+                                ws.write((r, c), str(val))
+            wb.save(filename)
+        except Exception as e2:
+            # If both fail, raise the original exception or a new one
+            raise Exception(f"Error writing to file: {e}")
+
+    return os.path.abspath(filename)
+```

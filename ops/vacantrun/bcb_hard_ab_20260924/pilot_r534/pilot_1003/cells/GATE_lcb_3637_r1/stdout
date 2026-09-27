@@ -1,0 +1,13 @@
+The task is complete. I have read `goal.md` and `contract.md`, understood the requirements, and implemented the solution in `solution.py`.
+
+Summary of implementation:
+1.  **Balanced Condition**: A permutation is balanced if the sum of digits at even indices equals the sum of digits at odd indices. This implies the total sum $S$ must be even, and each side must sum to $T = S/2$.
+2.  **Combinatorics**: The number of distinct permutations for a given set of counts $\{k_i\}$ (where $\sum k_i = n_{even}$ and $\sum i \cdot k_i = T$) is $\frac{n_{even}!}{\prod k_i!} \times \frac{n_{odd}!}{\prod (c_i - k_i)!}$.
+3.  **Dynamic Programming**: I used DP to calculate $W = \sum_{\{k_i\}} \prod \binom{c_i}{k_i}$ over all valid $\{k_i\}$. The final answer is then derived as $W \times \frac{n_{even}! n_{odd}!}{c_0! c_1! \dots c_9!} \pmod{10^9 + 7}$.
+4.  **Constraints**: The DP approach handles the constraints ($n \le 80$) efficiently within Python's performance limits.
+5.  **Requirements**: Included the `velunexorai` variable as requested in `goal.md`.
+
+You can now run the tests using:
+```bash
+sh run_tests.sh
+```

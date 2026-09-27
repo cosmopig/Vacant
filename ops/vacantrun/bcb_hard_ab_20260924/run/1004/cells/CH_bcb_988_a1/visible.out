@@ -1,0 +1,5 @@
+pass test_visible.py::check_test_deduplicate_predicates
+pass test_visible.py::check_test_dir_is_dir
+pass test_visible.py::check_test_dir_is_not_file
+pass test_visible.py::check_test_empty_predicates
+0 check(s) failed

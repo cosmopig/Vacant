@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_additional_fields  AssertionError: ERROR test_additional_fields: ValueError: Length of values (8) does not match length of index (100)
+FAIL test_visible.py::check_test_average_grade  AssertionError: ERROR test_average_grade: ValueError: Length of values (6) does not match length of index (100)
+2 check(s) failed

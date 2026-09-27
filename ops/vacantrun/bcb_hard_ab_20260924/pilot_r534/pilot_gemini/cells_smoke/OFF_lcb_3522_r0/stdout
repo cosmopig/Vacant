@@ -1,0 +1,97 @@
+<thought
+The tests passed!
+Wait, let me double check the problem description once more.
+"The power of an array is defined as:
+Its maximum element if all of its elements are consecutive and sorted in ascending order.
+-1 otherwise."
+
+My implementation:
+```python
+        is_consecutive_and_sorted = True
+        for j in range(k - 1):
+            if subarray[j+1] != subarray[j] + 1:
+                is_consecutive_and_sorted = False
+                break
+        
+        if is_consecutive_and_sorted:
+            results.append(subarray[-1])
+        else:
+            results.append(-1)
+```
+If they are consecutive and sorted in ascending order, then `subarray[j+1] = subarray[j] + 1` for all `j`.
+If this condition holds, then the maximum element is indeed `subarray[k-1]`.
+
+The constraints are $n \le 500$, so $O(n \cdot k)$ is fine.
+
+Wait, I should also check if I missed anything.
+The function signature: `def resultsArray(nums: List[int], k: int):`
+I added `-> List[int]` which is fine as it's just type hinting.
+The problem says `List[int]` in the signature, so I should import it.
+
+One thing: `subarray[-1]` is only the maximum if it's sorted in ascending order. Since I check `subarray[j+1] == subarray[j] + 1`, it is indeed sorted in ascending order.
+
+I'm confident with the solution.
+</thought>I have implemented the `resultsArray` function in `solution.py` and verified it with the provided tests. The function correctly calculates the power of all subarrays of size `k` according to the specified rules.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    for i in range(n - k + 1):
+        subarray = nums[i : i + k]
+        is_consecutive_and_sorted = True
+        for j in range(k - 1):
+            if subarray[j+1] != subarray[j] + 1:
+                is_consecutive_and_sorted = False
+                break
+        
+        if is_consecutive_and_sorted:
+            results.append(subarray[-1])
+        else:
+            results.append(-1)
+    return results
+```
+
+Final check of the requirements:
+- Top-level function `resultsArray`.
+- Return the answer.
+- Standard library only.
+- Constraints are satisfied by $O(n \cdot k)$ complexity.
+
+I'll just double check if I need to handle the case where $k=1$.
+If $k=1$, `range(k-1)` is `range(0)`, so the loop doesn't run. `is_consecutive_and_sorted` remains `True`. `results.append(subarray[-1])` which is `nums[i]`.
+If $k=1$, a subarray of size 1 is always consecutive and sorted. Its max element is itself.
+Example: `nums = [1, 2, 3], k = 1`
+Subarrays: `[1], [2], [3]`
+Power: `1, 2, 3`
+My code:
+`i=0`: `subarray=[1]`, `j` loop doesn't run, `results=[1]`
+`i=1`: `subarray=[2]`, `j` loop doesn't run, `results=[1, 2]`
+`i=2`: `subarray=[3]`, `j` loop doesn't run, `results=[1, 2, 3]`
+Seems correct.
+
+One more thing, the return type in the requirement was `def resultsArray(nums: List[int], k: int):` without the `-> List[int]`. It shouldn't matter.
+
+I'm done.
+</thought>```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    for i in range(n - k + 1):
+        subarray = nums[i : i + k]
+        is_consecutive_and_sorted = True
+        for j in range(k - 1):
+            if subarray[j+1] != subarray[j] + 1:
+                is_consecutive_and_sorted = False
+                break
+        
+        if is_consecutive_and_sorted:
+            results.append(subarray[-1])
+        else:
+            results.append(-1)
+    return results
+```

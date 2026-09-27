@@ -1,0 +1,84 @@
+<thought>The tests passed. I have fulfilled the requirements.
+I'll double check the problem statement to ensure I didn't miss anything.
+
+"You need to find the power of all subarrays of nums of size k.
+Return an integer array results of size n - k + 1, where results[i] is the power of nums[i..(i + k - 1)]."
+
+My code:
+`res = [-1] * (n - k + 1)`
+`res[i - k + 1] = nums[i]` when `consecutive >= k` at index `i`.
+If `consecutive` reaches `k` at index `i`, it means the subarray `nums[i-k+1 ... i]` is consecutive and sorted.
+The start index is `i-k+1`.
+The length is `i - (i-k+1) + 1 = k`.
+So `res[i-k+1]` is the correct position.
+
+Wait, let's re-verify this.
+If `k=3`, and `consecutive` becomes 3 at `i=2`.
+`res[2-3+1] = res[0] = nums[2]`.
+Subarray is `nums[0], nums[1], nums[2]`.
+Size is 3. Correct.
+
+If `consecutive` becomes 4 at `i=3`.
+`res[3-3+1] = res[1] = nums[3]`.
+Subarray is `nums[1], nums[2], nums[3]`.
+Size is 3. Correct.
+
+The logic seems solid.
+
+The constraints are:
+`1 <= n == nums.length <= 500`
+`1 <= nums[i] <= 10^5`
+`1 <= k <= n`
+
+My solution is $O(n)$ time and $O(n)$ space (for the result array).
+This is well within the limits.
+
+Final check on the code.
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    res = [-1] * (n - k + 1)
+    if k == 1:
+        return nums
+    
+    consecutive = 1
+    for i in range(1, n):
+        if nums[i] == nums[i-1] + 1:
+            consecutive += 1
+        else:
+            consecutive = 1
+        
+        if consecutive >= k:
+            res[i - k + 1] = nums[i]
+            
+    return res
+```
+Looks good.I have completed the task. I read `goal.md` and `contract.md`, understood the problem requirements, and implemented the `resultsArray` function in `solution.py`.
+
+The function calculates the power of all subarrays of size `k`. A subarray's power is its maximum element if its elements are consecutive and sorted in ascending order, and -1 otherwise. I implemented an $O(n)$ time complexity solution using a single pass to count consecutive elements.
+
+The solution was verified against the provided test cases in `tests_visible/test_visible.py` and all passed successfully.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    res = [-1] * (n - k + 1)
+    if k == 1:
+        return nums
+    
+    consecutive = 1
+    for i in range(1, n):
+        if nums[i] == nums[i-1] + 1:
+            consecutive += 1
+        else:
+            consecutive = 1
+        
+        if consecutive >= k:
+            res[i - k + 1] = nums[i]
+            
+    return res
+```

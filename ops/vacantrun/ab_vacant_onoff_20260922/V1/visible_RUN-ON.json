@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "ab_lcb_3584_V1",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 150,
+      "cases": [
+        {
+          "case": "<module>",
+          "ok": false,
+          "kind": "import",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:8: import solution",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 1,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "59034df58fcec73f6d2eaeb8d5bf5411b620bd200ded8d76963ec499338b67e3"
+}

@@ -1,0 +1,11 @@
+=== OFF_lcb_3522_r1 rc=0 wall=183.0s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3522_r1 rc=0 wall=253.8s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3522_r1 rc=0 wall=176.2s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3534_r1 rc=0 wall=352.6s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3534_r1 rc=0 wall=294.5s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3534_r1 rc=0 wall=130.7s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3548_r1 rc=0 wall=469.1s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3548_r1 rc=0 wall=671.5s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3548_r1 rc=0 wall=611.8s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3583_r1 rc=0 wall=650.0s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+ALLDONE（2026-09-24T09:55:41Z BCB 發射，pilot 提前停止）

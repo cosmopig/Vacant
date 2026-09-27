@@ -1,0 +1,5 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: ERROR test_case_1: KeyError: 'Steps'
+pass test_visible.py::check_test_case_10
+FAIL test_visible.py::check_test_case_11  AssertionError: ERROR test_case_11: KeyError: 'Steps'
+FAIL test_visible.py::check_test_case_12  AssertionError: ERROR test_case_12: KeyError: 'Distance Walked'
+3 check(s) failed

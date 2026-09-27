@@ -1,0 +1,17 @@
+<|channel>thought
+<channel|>The task was to scrape the first table from a web page and extract its data into a Pandas DataFrame, following specific requirements for error handling and output format.
+
+I have implemented this in `solution.py`:
+1.  **Imports**: Included `requests`, `BeautifulSoup` (from `bs4`), and `pandas`.
+2.  **Function Signature**: Defined `task_func(url='http://example.com')` as required.
+3.  **Error Handling**: 
+    -   Catches `requests.exceptions.ConnectionError` and raises a standard `ConnectionError`.
+    -   Catches `requests.exceptions.HTTPError` and raises it with a descriptive message.
+    -   Raises `ValueError` if no table is found or if the page content cannot be parsed into data.
+4.  **Data Extraction**:
+    -   Identifies the first `<table>` element.
+    -   Extracts headers from `<th>` elements in the first row, if present.
+    -   Collects data from subsequent rows (or all rows if no headers are found).
+    -   Constructs and returns a `pd.DataFrame`.
+
+The solution has been verified against the provided tests using `run_tests.sh`, which passed successfully.

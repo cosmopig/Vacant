@@ -1,0 +1,6 @@
+task=lcb_3789 rep=1
+route=PATH shim（vacant install 的 extension 路徑）
+prompt=Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+suite=/home/user/Vacant/ops/gain/r534/templates/lcb_3789/tests_visible
+upstream=（見 install state）公開 Funnel
+workspace_files=./contract.md ./goal.md ./run_tests.sh ./tests_visible/test_visible.py

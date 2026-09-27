@@ -1,0 +1,19 @@
+<|channel>thought
+<channel|>The task was to generate and visualize a Pandas DataFrame of football match results for multiple teams, including random goals and penalty costs converted into fines. I have implemented the `task_func` in `solution.py` as specified by the requirements in `goal.md` and `contract.md`.
+
+The implementation:
+1.  Uses the provided constants `TEAMS` and `PENALTY_COST`.
+2.  Takes `goals` and `penalties` (maximum values) as inputs.
+3.  Generates random goals and penalties for each team within those limits.
+4.  Calculates the fine based on the penalty count and cost.
+5.  Creates a Pandas DataFrame with columns 'Team', 'Goals', and 'Penalty Cost'.
+6.  Visualizes the results using `seaborn` bar plots in two subplots (one for goals, one for penalty costs).
+7.  Returns both the DataFrame and the list of Axes objects.
+
+The solution has been verified by running the provided tests:
+```bash
+sh run_tests.sh
+pass test_visible.py::check_test_case_1
+pass test_visible.py::check_test_case_2
+0 check(s) failed
+```

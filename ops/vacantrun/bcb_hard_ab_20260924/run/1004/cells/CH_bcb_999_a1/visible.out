@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_count_categories_data1  AssertionError: ERROR test_count_categories_data1: ValueError: unknown url type: 'mock_url'
+FAIL test_visible.py::check_test_count_categories_data3  AssertionError: ERROR test_count_categories_data3: ValueError: unknown url type: 'mock_url'
+2 check(s) failed

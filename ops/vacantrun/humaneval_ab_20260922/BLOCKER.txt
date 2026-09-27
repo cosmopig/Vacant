@@ -1,0 +1,19 @@
+# 出網 DNS 不穩的實測（2026-09-22T07:2x–07:36Z）
+
+直連（繞過 HTTPS_PROXY）https://1003.taild870c4.ts.net/v1/models：
+  -4 強制 IPv4 : 200 503 200 000 200 503 200 000        -> 4/8
+  -6 強制 IPv6 : 000 ×8                                  -> 0/8
+  間隔 3 秒 ×12: 200 000 000 503 200 000 000 000 200 200 200 000 -> 5/12
+
+錯誤內容：
+  HTTP/2 403  x-deny-reason: resolve_no_records
+              Host resolves to a private/reserved IP: resolve_no_records
+  HTTP/2 503  DNS resolution failure
+
+對照組（同一時間、同一條 curl）：
+  https://pypi.org/simple/  200 ×6  -> 6/6   （pypi.org 在容器 NO_PROXY 名單裡 ⇒ 直連不過濾器）
+  https://api.github.com    403 ×6  -> 0/6   （不在名單 ⇒ 過濾器擋，政策內）
+  本機 getent ahostsv4 該名字 -> 5/6  （我這端的 DNS 沒問題）
+
+⇒ 不穩的是**容器出網過濾器自己的 DNS**，不是 LM Studio、不是 Vacant、不是 pi。
+⇒ 容器的 NO_PROXY 已含 100.64.0.0/10 ⇒ **tailnet 位址本來就繞過過濾器**，那是設計上穩定的路。

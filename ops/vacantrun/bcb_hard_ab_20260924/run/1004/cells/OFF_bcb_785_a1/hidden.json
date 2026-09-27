@@ -1,0 +1,1 @@
+{"passed": 3, "total": 5, "failures": ["check_test_archiving_in_nonexistent_directory: TypeError: stat: path should be string, bytes, os.PathLike or integer, not NoneType", "check_test_no_matching_files: AssertionError: FAIL test_no_matching_files: AssertionError: None != 'No files found matching the pattern.'"]}

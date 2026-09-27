@@ -106,7 +106,11 @@ import time
 from typing import Any
 
 #: 記憶體上限（Fable 裁決：512 MiB）。
-DEFAULT_MEMORY_BYTES = 512 * 1024 * 1024
+#: ⚠ 2026-09-24（BigCodeBench-Hard 建庫實測）：512 MiB 的 RLIMIT_AS 之下 `import matplotlib`／`PIL`
+#:   就 "failed to map segment from shared object"，`statsmodels` 設了 OPENBLAS_NUM_THREADS=1 照樣炸
+#:   ⇒ 用到這類函式庫的驗收**連參考解都過不了**。所以跑閘門的人可以用 `VACANT_ACCEPT_MEMORY_MB`
+#:   **明講**調高；沒設＝512 MiB，一個位元組都不變。實際用了多少會落進 `describe()["memory_bytes"]`。
+DEFAULT_MEMORY_BYTES = int(os.environ.get("VACANT_ACCEPT_MEMORY_MB") or 512) * 1024 * 1024
 #: 每個測試檔的逾時（Fable 裁決：10 秒）。
 DEFAULT_TEST_TIMEOUT_S = 10
 #: worker 自己的指令預設逾時（可由模型指定 1–300，見 `openwork_arms`）。
@@ -162,6 +166,23 @@ def _rlimits(cpu_seconds: int, memory_bytes: int):  # pragma: no cover - 子行�
     return _apply
 
 
+_BASE_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+
+def accept_path() -> str:
+    """驗收環境的 PATH。預設寫死（驗收不吃 agent 或使用者 shell 的 PATH）。
+
+    ⚠ 2026-09-24（BigCodeBench-Hard 建庫實測）：題目要的函式庫（pandas、numpy…）裝在一個 venv 裡，
+      寫死的 PATH 只找得到 `/usr/bin/python3` ⇒ **每一題連參考解都 import 失敗、被判拒交**——
+      那會讓「閘門擋下了所有假完成」看起來成立，其實它擋下的是一切。所以跑閘門的人可以用
+      `VACANT_ACCEPT_PATH_PREPEND`（`os.pathsep` 分隔）**明講**把目錄排到最前面；沒設＝原本那一串。
+    ⚠ 誠實邊界：這個變數由**起閘門的那個行程**讀；agent 是它的子行程，改不到父行程的環境。
+      它決定的是「驗收用哪個直譯器」，所以實際值會落進 `describe()["accept_path"]`、跟著收據走。
+    """
+    extra = [p for p in (os.environ.get("VACANT_ACCEPT_PATH_PREPEND") or "").split(os.pathsep) if p]
+    return os.pathsep.join(extra + [_BASE_PATH]) if extra else _BASE_PATH
+
+
 def _clean_env(workspace: pathlib.Path) -> dict[str, str]:
     """乾淨環境。`HOME` ＝ 工作區，`TMPDIR` ＝ `/tmp`。
 
@@ -172,7 +193,7 @@ def _clean_env(workspace: pathlib.Path) -> dict[str, str]:
       `bwrap` 後端之下 `/tmp` 是一塊 `--tmpfs`，逐格獨立、跑完就沒了。
     """
     return {
-        "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "PATH": accept_path(),
         "HOME": str(workspace),
         "TMPDIR": "/tmp",
         "LANG": "C.UTF-8",
@@ -293,6 +314,7 @@ class Sandbox:
             "unavailable_reason": why or None,
             "platform": platform.platform(),
             "memory_bytes": self.memory_bytes,
+            "accept_path": accept_path(),
             "network_isolated": None,
             "write_confined": None,
             "probe_detail": {},

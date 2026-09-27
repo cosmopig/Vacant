@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_ocr_succeeds_encoding_fails: AssertionError: FAIL test_ocr_succeeds_encoding_fails: AssertionError: ValueError not raised"]}

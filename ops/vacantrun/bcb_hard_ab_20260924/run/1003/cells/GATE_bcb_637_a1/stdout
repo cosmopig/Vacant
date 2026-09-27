@@ -1,0 +1,46 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function generates a DataFrame of student grades, calculates course averages and passing counts, and creates a bar plot with the required title. All tests passed successfully.
+
+```python
+from random import sample
+from typing import Tuple
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+def task_func(num_students):
+    courses = ['Math', 'Science', 'History', 'Art']
+    data = []
+    
+    for i in range(num_students):
+        student_id = f"Student_{i+1}"
+        grades = {course: np.random.randint(40, 100) for course in courses}
+        data.append({'Student_ID': student_id, **grades})
+    
+    df = pd.DataFrame(data)
+    
+    # Calculate average grade and passing count for each course
+    stats = []
+    for course in courses:
+        avg_grade = df[course].mean()
+        passing_count = (df[course] >= 60).sum()
+        stats.append({'Course': course, 'Average Grade': avg_grade, 'Passing Count': passing_count})
+    
+    stats_df = pd.DataFrame(stats)
+    
+    # Visualization
+    fig, ax1 = plt.subplots()
+    
+    # Plot Average Grades as bars
+    ax1.bar(stats_df['Course'], stats_df['Average Grade'], color='skyblue', label='Avg Grade')
+    ax1.set_ylabel('Average Grade')
+    
+    # Create a second y-axis for Passing Count
+    ax2 = ax1.twinx()
+    ax2.bar(stats_df['Course'], stats_df['Passing Count'], color='orange', alpha=0.6, label='Passing Count')
+    ax2.set_ylabel('Passing Count')
+    
+    ax1.set_title('Course-wise Average and Passing Grade Counts')
+    fig.tight_layout()
+    
+    return df, ax1
+```

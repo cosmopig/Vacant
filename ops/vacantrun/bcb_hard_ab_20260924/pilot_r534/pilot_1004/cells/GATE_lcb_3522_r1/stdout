@@ -1,0 +1,39 @@
+<|channel>thought
+<channel|>The task was to implement a function `resultsArray` that finds the "power" of all subarrays of size $k$ in an array `nums`. The power is defined as the maximum element if the subarray elements are consecutive and sorted in ascending order, otherwise -1.
+
+I have implemented this in `solution.py`:
+- It iterates through all possible subarrays of length $k$.
+- For each subarray, it checks if the elements are strictly increasing by 1 (consecutive and sorted).
+- If they are, it appends the maximum element (which is the last element of the consecutive sequence) to the results.
+- Otherwise, it appends -1.
+
+The solution passed all visible tests.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    
+    for i in range(n - k + 1):
+        subarray = nums[i : i + k]
+        
+        # Check if consecutive and sorted in ascending order
+        is_consecutive_sorted = True
+        max_val = subarray[0]
+        
+        for j in range(k):
+            if subarray[j] != subarray[0] + j:
+                is_consecutive_sorted = False
+                break
+            if subarray[j] > max_val:
+                max_val = subarray[j]
+        
+        if is_consecutive_sorted:
+            results.append(max_val)
+        else:
+            results.append(-1)
+            
+    return results
+```

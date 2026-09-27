@@ -1,0 +1,57 @@
+{
+  "cmd": [
+    "pi",
+    "--provider",
+    "vacantproxy",
+    "--model",
+    "m"
+  ],
+  "text": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write solution.py.",
+  "idle_s": 75.0,
+  "min_run_s": 30.0,
+  "cap_s": 1500.0,
+  "boot_s": 10.0,
+  "events": [
+    {
+      "t": 10.19,
+      "kind": "sent",
+      "what": "task_text"
+    },
+    {
+      "t": 11.22,
+      "kind": "sent",
+      "what": "esc_dismiss_autocomplete"
+    },
+    {
+      "t": 11.63,
+      "kind": "sent",
+      "what": "enter"
+    },
+    {
+      "t": 294.32,
+      "kind": "idle_done",
+      "quiet_s": 75.1
+    },
+    {
+      "t": 294.32,
+      "kind": "sent",
+      "what": "quit_cmd"
+    },
+    {
+      "t": 294.95,
+      "kind": "sent",
+      "what": "esc"
+    },
+    {
+      "t": 295.37,
+      "kind": "sent",
+      "what": "enter"
+    }
+  ],
+  "typed": true,
+  "done_by": "idle",
+  "exit_status": 0,
+  "wall_s": 295.5,
+  "transcript_bytes": 1643343,
+  "tui_seen": true
+}

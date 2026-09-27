@@ -1,0 +1,38 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`.
+
+- The function generates a pandas DataFrame with random values using `np.random.rand`.
+- It uses list `a` for row indices and determines the number of columns from the length of list `b`.
+- It selects column names from the predefined `COLUMNS` list, repeating them if `len(b)` exceeds 5 to ensure the DataFrame shape matches the requested dimensions.
+- It plots the resulting DataFrame as a bar chart using matplotlib and returns the Axes object.
+- I have verified that it passes all visible tests, including cases with empty lists.
+
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+# Constants
+COLUMNS = ['A', 'B', 'C', 'D', 'E']
+def task_func(a, b):
+    num_rows = len(a)
+    num_cols = len(b)
+    
+    # Select the columns based on the length of list 'b'
+    if num_cols <= len(COLUMNS):
+        selected_columns = COLUMNS[:num_cols]
+    else:
+        selected_columns = (COLUMNS * (num_cols // len(COLUMNS) + 1))[:num_cols]
+    
+    # Generate random data for the DataFrame
+    # The shape should be (num_rows, num_cols)
+    data = np.random.rand(num_rows, num_cols)
+    
+    # Create the DataFrame
+    df = pd.DataFrame(data, index=a, columns=selected_columns)
+    
+    # Plot as a bar chart
+    fig, ax = plt.subplots()
+    if not df.empty and len(df.columns) > 0:
+        df.plot(kind='bar', ax=ax)
+    
+    return ax
+```

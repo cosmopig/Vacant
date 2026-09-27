@@ -1,0 +1,12 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified by `goal.md` and `contract.md`. The tests passed successfully.
+
+Summary of actions:
+1. Read `goal.md` to understand the requirements (download text, count word frequency, plot top 10 words).
+2. Read `contract.md` to understand the constraints (file name, imports, signature, etc.).
+3. Wrote `solution.py` with the required implementation.
+4. Verified the solution by running `run_tests.sh`.
+
+The tests passed:
+- `check_test_empty_file`: Passed
+- `check_test_large_input`: Passed
+Total 0 failures.

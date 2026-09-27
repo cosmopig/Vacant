@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_phone_numbers_page_1  AssertionError: FAIL test_phone_numbers_page_1: AssertionError: {'list': ['+1234567890']} != ['+1234567890']
+FAIL test_visible.py::check_test_phone_numbers_page_2  AssertionError: FAIL test_phone_numbers_page_2: AssertionError: {'list': ['+9876543210', '+1122334455']} != ['+9876543210', '+1122334455']
+2 check(s) failed

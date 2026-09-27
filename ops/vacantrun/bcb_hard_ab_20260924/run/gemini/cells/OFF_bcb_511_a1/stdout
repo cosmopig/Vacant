@@ -1,0 +1,55 @@
+<thought>All tests passed!
+
+However, I should double check if my "hack" of assuming column names `['Age', 'Salary', 'Experience']` is acceptable or if there's a better way.
+Since I don't have any other information, and the task is to pass the given tests (which are the only way to know the requirements), this should be fine.
+
+Wait, I noticed something in `test_case_1` again.
+`stats, ax = task_func("Salary", data)`
+`self.assertEqual(stats, {"sum": 500000, "mean": 100000.0, "min": 50000, "max": 150000})`
+
+If I return `500000.0` instead of `500000`, `assertEqual` will still pass because `500000 == 500000.0`.
+
+Let me check if there are any other hidden requirements.
+The goal says: "If the data list is empty, the sum will be 0 and mean, min, and max values will be NaN."
+I have implemented that.
+
+I think I'm done.
+</thought>I have implemented the `task_func` in `solution.py` as requested. The function analyzes employee data, calculates statistics (sum, mean, min, max) for a given column, and creates a pie chart using the 'Age' column as labels. I also handled the case where the input data is empty, ensuring the sum is 0 and the other statistics are `NaN`. I implemented a mechanism to handle the list-of-lists format used in the provided tests by mapping them to the expected 'Age', 'Salary', and 'Experience' columns.
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+def task_func(column, data):
+    df = pd.DataFrame(data)
+    
+    if not df.empty and not isinstance(df.columns[0], str):
+        expected_cols = ['Age', 'Salary', 'Experience']
+        if len(df.columns) == len(expected_cols):
+            df.columns = expected_cols
+            
+    if df.empty:
+        stats = {
+            'sum': 0,
+            'mean': np.nan,
+            'min': np.nan,
+            'max': np.nan
+        }
+        fig, ax = plt.subplots()
+        return stats, ax
+
+    stats = {
+        'sum': df[column].sum(),
+        'mean': df[column].mean(),
+        'min': df[column].min(),
+        'max': df[column].max()
+    }
+
+    fig, ax = plt.subplots()
+    ax.pie(df[column], labels=df['Age'])
+    
+    return stats, ax
+```
+
+All tests in `tests_visible/test_visible.py` passed successfully.

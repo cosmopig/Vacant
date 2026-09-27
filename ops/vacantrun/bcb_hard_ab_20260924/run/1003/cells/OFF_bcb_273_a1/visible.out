@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_class_properties
+pass test_visible.py::check_test_invalid_content_type
+0 check(s) failed

@@ -1,0 +1,78 @@
+<thought>The tests passed! The `OptimizeWarning` is acceptable as it doesn't fail the test.
+
+Wait, the warning says `Covariance of the parameters could not be estimated`. This is because we only have 3 points and 3 parameters, so there's zero degrees of freedom.
+
+The task is completed. I have implemented `task_func` in `solution.py` which fits an exponential decay function to the indices in the array where the first column matches the target value, and it returns the optimized parameters and the matplotlib Axes object. I also handled the case with not enough points and provided a robust initial guess to ensure the fitting works even for increasing data (which is technically exponential growth, but fits the given function form).
+
+Wait, I should double check if I need to do anything else.
+`goal.md`: "Fit an exponential decay function... output with tuple: Containing the optimized parameters... and the matplotlib Axes object. You should write self-contained code starting with: ..."
+`contract.md`: "Write your answer in solution.py... Define a top-level function named task_func... Keep the imports and the signature exactly as the task gives them."
+
+My code:
+```python
+import matplotlib.pyplot as plt
+import scipy.optimize as optimize
+import numpy as np
+
+def task_func(array, target_value):
+    ...
+```
+The imports and signature match. The return type is `(popt, ax)`.
+
+I'm done.</thought>I have successfully implemented the requested functionality.
+
+I first analyzed the `goal.md` and `contract.md` files, which specified that a function `task_func(array, target_value)` should be implemented in `solution.py`. This function is required to find the indices in the input `array` where the first column matches `target_value`, and then fit an exponential decay function of the form $y = a \cdot e^{-bx} + c$ to these indices (as $x$ values) and the corresponding values from the second column of the array (as $y$ values). The function should return a tuple containing the optimized parameters (`popt`) and the matplotlib `Axes` object.
+
+During development, I discovered that the test case provided increasing values, which requires the fitting function to handle cases where the exponent might result in growth (i.e., $b$ being negative). To ensure the `scipy.optimize.curve_fit` function converges reliably, I implemented a robust initial guess calculation using the first three data points. This mathematical approach avoids the `RuntimeError` encountered with a naive initial guess and allows the function to work even with a minimal number of points.
+
+The final implementation in `solution.py` is:
+```python
+import matplotlib.pyplot as plt
+import scipy.optimize as optimize
+import numpy as np
+
+def task_func(array, target_value):
+    array = np.array(array)
+    mask = (array[:, 0] == target_value)
+    indices = np.where(mask)[0]
+    
+    if len(indices) < 3:
+        raise ValueError("Not enough points for fitting.")
+        
+    x_data = indices.astype(float)
+    y_data = array[indices, 1].astype(float)
+    
+    def func(x, a, b, c):
+        return a * np.exp(-b * x) + c
+        
+    # Initial guess
+    p0 = [1.0, 0.1, 1.0]
+    if len(x_data) >= 3:
+        y0, y1, y2 = y_data[0], y_data[1], y_data[2]
+        x0, x1, x2 = x_data[0], x_data[1], x_data[2]
+        dx = x1 - x0
+        if abs((x2 - x1) - dx) < 1e-6 and dx > 0:
+            if abs(y0 - y1) > 1e-9:
+                E = (y1 - y2) / (y0 - y1)
+                if E > 0 and abs(E - 1) > 1e-9:
+                    b_guess = -np.log(E) / dx
+                    A_guess = (y0 - y1) / (1 - E)
+                    a_guess = A_guess * np.exp(b_guess * x0)
+                    c_guess = y0 - A_guess
+                    p0 = [a_guess, b_guess, c_guess]
+
+    popt, _ = optimize.curve_fit(func, x_data, y_data, p0=p0, maxfev=10000)
+    
+    fig, ax = plt.subplots()
+    ax.scatter(x_data, y_data, label='Data')
+    x_fit = np.linspace(min(x_data), max(x_data), 100)
+    y_fit = func(x_fit, *popt)
+    ax.plot(x_fit, y_fit, label='Fit', color='red')
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Value')
+    ax.legend()
+    
+    return popt, ax
+```
+
+I have verified the solution by running the provided tests using `sh run_tests.sh`, and all tests passed.

@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_categorical_data
+pass test_visible.py::check_test_empty_dataframe
+0 check(s) failed

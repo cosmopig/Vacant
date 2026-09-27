@@ -1,0 +1,4 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: ERROR test_case_1: ValueError: JSON data must be a non-empty list.
+pass test_visible.py::check_test_case_2
+pass test_visible.py::check_test_case_3
+1 check(s) failed

@@ -1,0 +1,15 @@
+The tests passed successfully. I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`.
+
+Summary of changes:
+- Created `solution.py` with the specified imports and function signature.
+- Implemented `task_func` to read a CSV file, normalize text to ASCII using `unicodedata`, count word frequencies, and return a matplotlib bar plot along with the 10 most common words as a list of tuples.
+- Added error handling for `FileNotFoundError` and `IOError`.
+- Verified the solution by running `run_tests.sh`.
+
+The tests passed:
+```
+pass test_visible.py::check_test_file_not_found_error
+pass test_visible.py::check_test_io_error
+0 check(s) failed
+```
+

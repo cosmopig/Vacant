@@ -1,0 +1,7 @@
+FAIL test_visible.py::check_test_email_sending_exception  AssertionError: FAIL test_email_sending_exception: AssertionError: expected call not found.
+Expected: mock(535)
+  Actual: not called.
+FAIL test_visible.py::check_test_empty_json_data  AssertionError: FAIL test_empty_json_data: AssertionError: expected call not found.
+Expected: mock(400)
+  Actual: not called.
+2 check(s) failed

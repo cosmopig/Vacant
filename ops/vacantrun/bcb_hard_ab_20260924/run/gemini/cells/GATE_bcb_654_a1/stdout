@@ -1,0 +1,86 @@
+<thought
+Great! The tests passed.
+The `OptimizeWarning: Covariance of the parameters could not be estimated` is just a warning, it doesn't fail the test. This often happens when the fit is quite good but the covariance matrix is singular or not well-defined, which can happen with only 3 points and 3 parameters.
+
+The task is complete.
+Final check of the requirements:
+- `task_func` is a top-level function. Yes.
+- Signature is exactly as requested. Yes.
+- Returns a tuple `(popt, ax)`. Yes.
+- `popt` contains optimized parameters. Yes.
+- `ax` is a matplotlib Axes object. Yes.
+- `solution.py` starts with the required imports and signature. Yes.
+- Handled the `ValueError` for not enough points. Yes.
+
+Wait, I should check if I should handle other potential errors. The test `test_not_enough_points` expects `ValueError`. I have that.
+
+One thing: I'm using `plt.subplots()` which creates a new figure every time. This is generally fine.
+
+I am done.The task was to write a function `task_func(array, target_value)` that fits an exponential decay function $y = a \cdot e^{-bx} + c$ to the values in the second column of a 2D array at the indices where the first column matches the `target_value`. The function should return the optimized parameters and a matplotlib Axes object.
+
+I implemented the solution in `solution.py` with the following steps:
+1. Identified the indices where the first column of the input `array` matches `target_value`.
+2. Checked if there are at least 3 such indices; if not, a `ValueError` is raised.
+3. Extracted the corresponding values from the second column and converted them to floats.
+4. Defined the exponential decay function $f(x) = a \cdot e^{-bx} + c$.
+5. Provided a heuristic initial guess for the parameters $(a, b, c)$ to improve convergence.
+6. Used `scipy.optimize.curve_fit` to find the optimal parameters, with an increased `maxfev` to ensure convergence.
+7. Created a matplotlib plot showing the original data points and the fitted curve.
+8. Returned the optimized parameters and the axes object.
+
+The implementation passed the provided tests.
+
+```python
+import matplotlib.pyplot as plt
+import scipy.optimize as optimize
+import numpy as np
+
+def task_func(array, target_value):
+    # Convert target_value to string to ensure comparison works if array contains strings
+    target_val_str = str(target_value)
+    
+    # Find indices where the first column matches target_value
+    mask = (array[:, 0] == target_val_str)
+    indices = np.where(mask)[0]
+    
+    if len(indices) < 3:
+        raise ValueError("Not enough points to fit an exponential decay function with 3 parameters.")
+    
+    # Extract y values from the second column (index 1)
+    try:
+        y = array[indices, 1].astype(float)
+    except (ValueError, IndexError) as e:
+        raise ValueError(f"Failed to extract y values: {e}")
+    
+    x = indices.astype(float)
+    
+    # Define the exponential decay function: y = a * exp(-b * x) + c
+    def func(x, a, b, c):
+        return a * np.exp(-b * x) + c
+    
+    # Initial guess for the parameters (a, b, c)
+    # a: amplitude, b: decay rate, c: offset
+    a_guess = y[0] - y[-1]
+    b_guess = 0.1
+    c_guess = y[-1]
+    p0 = [a_guess, b_guess, c_guess]
+    
+    try:
+        popt, pcov = optimize.curve_fit(func, x, y, p0=p0, maxfev=5000)
+    except Exception as e:
+        raise ValueError(f"Optimization failed: {e}")
+        
+    # Prepare the plot
+    fig, ax = plt.subplots()
+    ax.scatter(x, y, color='blue', label='Data points')
+    
+    # Generate points for the fitted curve
+    x_fit = np.linspace(np.min(x), np.max(x), 100)
+    y_fit = func(x_fit, *popt)
+    ax.plot(x_fit, y_fit, color='red', label='Fitted curve')
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Value')
+    ax.legend()
+    
+    return popt, ax
+```

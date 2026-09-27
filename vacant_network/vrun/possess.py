@@ -16,7 +16,7 @@
 
 | 層 | 機制 | 能說的話 |
 |---|---|---|
-| **通道** | 寫進 agent **自己的常駐設定檔**（`~/.claude/settings.json` 的 `env`、`~/.codex/config.toml`、`~/.config/opencode/opencode.json`、`~/.pi/agent/models.json`、`~/.hermes/config.yaml`） | 關終端機、重開機、開新視窗、**打完整路徑**都照樣指向 proxy。**只有把那幾行刪掉才會失效。** |
+| **通道** | 寫進 agent **自己的常駐設定檔**（`~/.claude/settings.json` 的 `env`、`~/.codex/config.toml`、`~/.config/opencode/opencode.json`、`~/.pi/agent/extensions/vacant.ts`（2026-09-22 起；不再碰 `models.json`）、`~/.hermes/config.yaml`） | 關終端機、重開機、開新視窗、**打完整路徑**都照樣指向 proxy。**只有把那幾行刪掉才會失效。** |
 | **閘門** | `PATH` shim（`~/.vacant/possess/bin/` 排在 `PATH` 前面） | **預設會跑，但打完整路徑就跳過了。** |
 
 ⚠ **本檔任何一處都不准寫「不會被繞過」。** 閘門層做不到；通道層做得到的是
@@ -91,14 +91,19 @@ round-trip，**過了才寫任何一個設定檔**，所以不會因為設定錯
 
 ## 誠實邊界（改碼請保留）
 
-1. **「我寫了設定檔」不是「被中介了」。** 唯一算數的證據是 proxy 的
-   `requests_seen`（`envmap` 誠實邊界 1）。`install-status` 因此把每個 agent
-   的通道分成 `wired`（檔案寫了）與 `proven`（真的看過 `requests_seen > 0`）
-   兩欄，**永遠不把前者說成後者**。
+1. **「我寫了設定檔」不是「被中介了」。** 唯一算數的證據是 proxy 那一側的紀錄
+   （`envmap` 誠實邊界 1）。`install-status` 因此把每個 agent
+   的通道分成 `wired`（檔案寫了）與 `proven`（proxy 真的看過流量）
+   兩欄，**永遠不把前者說成後者**。`proven` 有兩條路（2026-09-24 起），**各自標路**：
+   `shim`＝PATH shim 那一跑的 `requests_seen > 0`；`extension`＝常駐 extension 的掛鉤日誌
+   對得上**常駐** proxyd journal 的 2xx 模型呼叫（`extension_proof`，只證通道、不證閘門）。
 2. **五個 agent 的接線不是同一級的證據。** `CONFIG_ROUTE` 的 `measured` 欄
    記的是「`vacant run` 那條路」量過的日期；**常駐設定檔那條路是另一條路**，
    本模組逐個 agent 另外記（`CHANNEL_MEASURED`）。沒量過的格子在
    `install-status` 上會標 `unverified`，不准讀成可用。
+   **PATH shim 那條又是第三條路**（`SHIM_MEASURED`）：shim 在這一跑自己的設定目錄裡
+   起 agent，常駐設定檔不在路上，所以 shim 的真模型成績**不准拿來點亮**
+   `CHANNEL_MEASURED`（2026-09-22 pi 那格就犯過一次，已撤回）。
 3. **憑證一律不讀不寫。** `~/.codex/auth.json`、`~/.pi/agent/auth.json`、
    keychain、`~/.claude/.credentials.json` 都在 `NEVER_TOUCH` 裡，
    而且常駐 proxy 是**原樣轉送 Authorization header**（不換鑰、不存鑰）——
@@ -113,6 +118,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import ipaddress
 import json
 import os
 import pathlib
@@ -123,11 +129,17 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.parse
 from typing import Any, Callable, Iterable
 
 from . import envmap
 
 # ── 常數 ────────────────────────────────────────────────────────────────
+
+#: 裸 `vacant` 引導安裝會提議的 agent。**只放走 extension、不改寫使用者既有 provider
+#: 的那幾格**（今天只有 pi）；其他 agent 的接線會改寫使用者的常駐設定，要人明講
+#: `vacant install --agent <x>`。
+INSTALL_GUIDED_AGENTS: tuple[str, ...] = ("pi",)
 
 #: 預設的常駐 proxy 埠。被佔用時 `install` 會往上找，**實際用的埠記進 state**。
 DEFAULT_PORT = 8787
@@ -181,13 +193,63 @@ CHANNEL_MEASURED: dict[str, str] = {
     # ⚠ Linux 那一格是在**隔離 HOME** 上量的（那台有人類的長壽 session 在跑
     #   Claude Code，不准動真的 settings.json），而且測試時另外補了
     #   `ANTHROPIC_API_KEY`——`wire_claude` 自己**不寫任何金鑰欄位**。
+    # ⚠ 2026-09-22 第三格是在 **Claude Code 遠端容器裡、由 Claude Code 自己**量的
+    #   （`ops/vacantrun/possess_claude_20260922/`，Haiku 4.5，真上游 api.anthropic.com）：
+    #   `settings.json` 的 `env.ANTHROPIC_BASE_URL` 在
+    #   **`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 的環境下被忽略**（三格 E／D 零通、C 拆掉
+    #   那個變數就 2 通）；環境變數那條照樣通。shim 那條拒交 20／交付 0 各 `requests_seen=10`。
     "claude": "2026-09-19（macOS，Claude Code 2.1.278，2 通）"
               "／2026-09-20（vacant-dev Ubuntu 24.04，Claude Code 2.1.259，3 通，"
-              "**隔離 HOME**）",
-    # ⚠ 這兩格**沒量**：那台機器上沒有 pi／hermes 的可執行檔（pi 只有設定目錄）。
+              "**隔離 HOME**）"
+              "／2026-09-22（Claude Code 遠端容器，2.1.278，Haiku 4.5，settings 路 2 通，"
+              "**但 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 時 settings.json 被忽略**）",
+    # ⚠ hermes 這格**沒量**（2026-09-19 那台機器上沒有 pi／hermes 的可執行檔；pi 之後另外量了，見下）。
     #   寫進設定檔的碼跑過了，但**沒有任何 `requests_seen` 證實它有效**。
-    "pi": "",
+    # ✅ pi 這一格記的是 `wire_pi` 寫的那支**常駐 extension**（`~/.pi/agent/extensions/vacant.ts`
+    #   → 常駐 proxyd）這條路，**2026-09-24 才有真模型證據**
+    #   （`ops/vacantrun/possess_pi_ext_real_20260924/`）：vacant-dev（Ubuntu 24.04）、隔離 HOME、
+    #   pi **0.87.0**、`gemma-4-12b-it-qat` @ 1004、上游是一個**要金鑰的中繼**（量金鑰有沒有真的送到）。
+    #   `vacant install` 沒給 `--upstream`，上游自己從 pi 的 `models.json` 找到；pi 用**完整路徑**叫
+    #   （不經 shim ⇒ 載入的是常駐那支）。R534 五題 76 通 ＋ 互動 TUI，**每一通都在常駐 journal 裡、
+    #   都帶著從 `models.json` 借來的金鑰**（字面值／`$VAR`／`!cmd` 三種形式都量過，錯的金鑰 401 當負控制）。
+    #   ⚠ **這條路沒有閘門、沒有收據**：五題裡兩題 agent 退出碼 0 卻沒寫 `solution.py`，沒有任何東西擋它。
+    #     本格只證「通道」，不證裁決（裁決在 `SHIM_MEASURED` 那條）。
+    #   ⚠ 1004 是 non-thinking；上游是我們自己放的中繼，真實世界的上游（OpenAI 等）還沒接過；n=5 無 rep。
+    #   ⚠ 歷史：本格在 2026-09-22 一度用 `possess_pi_real_20260922/` 填過——那批五格**全部走 PATH shim**
+    #     （`gateshim.exec_inner` 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，常駐 extension 沒被載入，
+    #     `cells/*/hook_install.json` 的 `target` 是 `/tmp/vacant-possess/run-pi-*/extensions/vacant.ts`），
+    #     code review 抓到後撤回、改記 `SHIM_MEASURED["pi"]`。**兩條路的證據仍然不可互相背書。**
+    #   ⚠ `status()` 在某台機器上推出 `proven_via="extension"`（`extension_proof`）**不會**改寫本格：
+    #     那是那台機器那個使用者的執行期狀態，不是歸檔、寫明機器與版本的 repo 級實測紀錄，
+    #     而且 2xx 分不出上游是不是真模型。本格是上面那個歸檔目錄填的。
+    "pi": "2026-09-24（vacant-dev Ubuntu 24.04，pi 0.87.0，gemma-4-12b-it-qat @ 1004 經要金鑰的中繼，"
+          "**常駐 extension 路（pi 完整路徑、不經 shim）**：R534 五題＋互動 TUI，76 通全經常駐 proxyd、"
+          "金鑰借自 models.json；**這條路沒有閘門／收據**）",
     "hermes": "",
+}
+
+
+#: `vacant install` 裝的 **PATH shim（閘門那一側）**這條路，逐個 agent 的**真模型**實測。
+#:
+#: ⚠ 跟 `CHANNEL_MEASURED` **是兩條路、兩份證據，不可互相背書**：
+#:   shim 這條由 `gateshim.exec_inner` 在**這一跑自己的**設定目錄裡起 agent
+#:   （pi 是 `PI_CODING_AGENT_DIR`＝暫存目錄），常駐設定檔／常駐 extension **不在路上**。
+#:   所以這裡有日期**不代表**常駐通道被證實，`install()` 的 `verified` 只看 `CHANNEL_MEASURED`。
+#: ⚠ 反過來也一樣：shim **打完整路徑就繞過**、對 `bash -c` 收不到（`gateshim` 誠實邊界），
+#:   這裡的成績**不涵蓋**那些叫法。
+#: ⚠ 只收 **L-real**（真 agent、真模型、真流量）；L-fake 不進本表。
+#:   本表沒有的 agent ＝**本表沒記**，不是「量過而且失敗」。
+SHIM_MEASURED: dict[str, str] = {
+    # ✅ `ops/vacantrun/possess_pi_real_20260922/`：Claude Code 遠端容器、pi **0.87.0**、
+    #   模型 `gemma-4-12b-it-qat`、上游是人類 LM Studio 的**公開 Tailscale Funnel**
+    #   （不是 LAN 直連 1003）。R534 那五題各一格、走 **PATH shim**（命令列零個 vacant，
+    #   `pi -p`）：3 交付 exit 0 ／ 2 拒交 exit 20，模型通數 4–13，
+    #   五條收據鏈 `--selftest` 先過再驗全 OK，`proven` 由 `requests_seen=7` 點亮。
+    #   ⚠ 掛鉤是 shim 當場裝的 **per-run extension** 燒的，不是常駐那支。
+    #   ⚠ 沒有 bwrap ⇒ 五格全是 **B′**；互動／長任務／並行**沒量**；n=5 無 rep。
+    "pi": "2026-09-22（Claude Code 遠端容器，pi 0.87.0，gemma-4-12b-it-qat，"
+          "**上游＝公開 Funnel 非 LAN**，R534 五題走 shim：3 交付／2 拒交，"
+          "模型通數 4–13，鏈全 OK，級別 B′；**常駐 extension 不在路上**）",
 }
 
 
@@ -273,7 +335,8 @@ AGENTS: dict[str, AgentSpec] = {
     "pi": AgentSpec(
         name="pi",
         config_dirs=(".pi/agent", ".pi"),
-        config_file=".pi/agent/models.json",
+        # 2026-09-22 起寫的是 extension，不是 models.json（見 wire_pi）
+        config_file=".pi/agent/extensions/vacant.ts",
         binaries=("pi",),
         bin_hints=(".local/bin/pi", ".bun/bin/pi", ".npm-global/bin/pi",
                    "/opt/homebrew/bin/pi", "/usr/local/bin/pi"),
@@ -731,40 +794,41 @@ def wire_codex(home: pathlib.Path, port: int, backups: pathlib.Path,
 
 
 def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
+            python: str | None = None, models: list[str] | None = None,
+            upstreams: dict[str, dict] | None = None,
             **_: Any) -> list[FileChange]:
-    """`~/.pi/agent/models.json`。
+    """`~/.pi/agent/extensions/vacant.ts`——**一支 extension，不碰 `models.json`**。
 
-    ⚠ **這一格沒有在任何機器上被 `requests_seen` 證實過**（`CHANNEL_MEASURED`
-      是空字串）。而且 `~/.pi/agent/` 底下同時有 `models-store.json`，
-      **哪一份才是 pi 0.85.1 真正讀的那一份，本模組沒有量過**——
-      `ops/vacantrun/wrap_agent.sh` 量到的是 `PI_CODING_AGENT_DIR/models.json`，
-      那是 relocate 那條路，不保證常駐那條路同名。
-      `install-status` 會把這一格標成 `unverified`。
+    2026-09-22 之前這裡改寫 `models.json`（每個 provider 的 `baseUrl` 全部改道＋加一個
+    `vacant` provider）。那一格從來沒有被 `requests_seen` 證實過，而且從 pi 0.87.0 原始碼
+    讀到 `models-store.json` 只是目錄快取、`models.json` 才是設定之後，發現根本不必寫它：
+    extension 在 runtime `pi.registerProvider()`、`pi.setModel()`、`pi.registerCommand("vacant")`
+    就把通道、預設開、`/vacant on|off|status`、掛鉤七事件全部做完（`piext.py` 的 docstring）。
+
+    ⚠ 使用者自己的 provider **一個都不改道**：`/vacant off` 或 `/model` 切走就是不經過
+      Vacant，extension 會留一筆 `vacant_off`，收據不替它說謊（`piext` 誠實邊界 3）。
+    ⚠ **這支檔的真模型證據是 `ops/vacantrun/possess_pi_ext_real_20260924/`**（`CHANNEL_MEASURED["pi"]`）：
+      pi 完整路徑、命令列零個 vacant、載入的是**這支**、76 通全在常駐 journal。
+      2026-09-22 的真模型那批（`possess_pi_real_20260922/`）五格全走 PATH shim——shim 把
+      `PI_CODING_AGENT_DIR` 搬到這一跑自己的暫存目錄，**本函式寫的這支檔在那裡不會被載入**——
+      所以那批只記進 `SHIM_MEASURED["pi"]`，兩條路的證據不可互相背書。
+    ⚠ 這條路**只有通道，沒有閘門**：互動或直叫 pi 時沒有驗收、沒有收據（`piext` 誠實邊界 5）。
+    ⚠ agent 刪得掉這支檔（實測）。刪掉 ⇒ 下一跑 canary 不燒 ⇒ 收據降級，不是保證。
     """
+    from . import piext
     p = home / AGENTS["pi"].config_file
-    doc = json.loads(p.read_text("utf-8")) if p.is_file() else {}
-    if not isinstance(doc, dict):
-        doc = {}
-    model = os.environ.get("VACANT_AGENT_MODEL", "gemma-4-12b-it-qat")
-    providers = dict(doc.get("providers") or {})
-    for pid, pv in list(providers.items()):
-        if isinstance(pv, dict) and "baseUrl" in pv:
-            pv = dict(pv)
-            pv["baseUrl"] = _base_for("openai", port)
-            providers[pid] = pv
-    providers[PROVIDER_ID] = {
-        "baseUrl": _base_for("openai", port),
-        "api": "openai-completions",
-        "apiKey": "sk-vacant-possess",
-        "compat": {"supportsDeveloperRole": False,
-                   "supportsReasoningEffort": False},
-        "models": [{"id": model, "name": model,
-                    "contextWindow": 262144, "maxTokens": 16384}],
-    }
-    doc["providers"] = providers
-    data = (json.dumps(doc, ensure_ascii=False, indent=2) + "\n").encode()
-    return [write_tracked(home, p, data, backups,
-                          note=f"providers.*.baseUrl + providers.{PROVIDER_ID}")]
+    # 上游與「金鑰向誰借」：只烤 url 與 provider id，**金鑰本身永遠不進這支檔**
+    #（`piext` 誠實邊界 7）。`upstreams` 沒給（舊呼叫者）＝不知道 ⇒ 空字串，
+    # extension 在 runtime 也只會用 baseUrl 比對，不會亂借。
+    up = ((upstreams or {}).get(AGENTS["pi"].wire) or {}).get("url") or ""
+    body = piext.render(port=port, state_dir=str(state_home(home)),
+                        python=python or sys.executable,
+                        package_path=package_path(), models=models or [],
+                        upstream=up, upstream_is_sink=bool(up) and envmap.is_sink(up),
+                        key_from=pi_key_carrier(home, up, proxy_port=port) or "",
+                        pi_agent_dir=str(_pi_agent_dir(home)))
+    return [write_tracked(home, p, body.encode("utf-8"), backups,
+                          note="pi extension：registerProvider(vacant) + /vacant + 掛鉤")]
 
 
 def wire_hermes(home: pathlib.Path, port: int, backups: pathlib.Path,
@@ -838,12 +902,23 @@ WIRERS: dict[str, Callable[..., list[FileChange]]] = {
 # ── 上游來源（裝之前先記下來使用者本來指到哪） ──────────────────────────
 
 def discover_install_upstreams(home: pathlib.Path,
-                               overrides: dict[str, str] | None = None
+                               overrides: dict[str, str] | None = None,
+                               prefer: Iterable[str] = (),
+                               proxy_port: int | None = None,
                                ) -> dict[str, dict]:
     """常駐 proxy 要轉去哪。**先讀使用者現在的設定，再讀環境變數。**
 
     找不到 ⇒ `envmap.SINK_UPSTREAM`（fail-closed：開連線之前就 502），
     **不是**公開 API。理由同 `envmap.SINK_UPSTREAM` 的 docstring。
+
+    `prefer`＝這一次要裝的 agent：它們自己的設定檔先掃（`_scan_configs_for_upstream`）。
+    ⚠ 為什麼要分先後：pi 的 extension 借的是「baseUrl 等於上游」那個 provider 的金鑰
+      （`piext` 誠實邊界 7）。只裝 pi、卻讓 opencode 的 baseURL 當上游 ⇒ 兩邊對不上，
+      extension 借不到金鑰、送佔位 ⇒ 401。
+
+    `proxy_port`＝這一次要裝的埠（`install()` 傳它**要求的**那個埠；`pick_port` 之後的實際埠
+    落在 `range(proxy_port, proxy_port + _PORT_SCAN_SPAN)` 裡）。掃設定檔時只跳過
+    **我們自己的 proxy**（`_is_own_proxy_url`），**不再跳過所有本機位址**。
     """
     found: dict[str, dict] = {}
     ov = overrides or {}
@@ -861,18 +936,215 @@ def discover_install_upstreams(home: pathlib.Path,
                     url, src = v, f"env:{n}"
                     break
         if url is None:
-            url, src = _scan_configs_for_upstream(home, wire)
+            url, src = _scan_configs_for_upstream(home, wire, prefer=prefer,
+                                                  proxy_port=proxy_port)
         if url is None:
             url, src = envmap.SINK_UPSTREAM, "sink（沒有人指定）"
         found[wire] = {"url": url, "source": src}
     return found
 
 
-def _scan_configs_for_upstream(home: pathlib.Path,
-                               wire: str) -> tuple[str | None, str | None]:
+#: `pick_port(preferred)` 往上掃幾個埠。`_is_own_proxy_url` 認「我們自己的 proxy」也用
+#: **同一個數字**——兩邊各寫一個 40 遲早會漂。
+_PORT_SCAN_SPAN = 40
+
+
+def _is_loopback_host(host: str | None) -> bool:
+    """`localhost`（含 `*.localhost`）、127.0.0.0/8、`::1`、`0.0.0.0`／`::`、IPv4-mapped 的迴路。"""
+    if not host:
+        return False
+    h = host.strip().lower().rstrip(".")
+    if h == "localhost" or h.endswith(".localhost"):
+        return True
+    try:
+        ip = ipaddress.ip_address(h.split("%", 1)[0])       # 去掉 IPv6 zone id
+    except ValueError:
+        return False
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    return ip.is_loopback or ip.is_unspecified
+
+
+def _is_own_proxy_url(url: str, proxy_port: int | None = None) -> bool:
+    """這個 url 是不是**我們自己的常駐 proxy**——是的話不可以拿來當上游（proxyd 會轉回自己）。
+
+    判準＝**迴路主機** 且 **埠落在我們會用的範圍**：
+    `range(DEFAULT_PORT, DEFAULT_PORT + _PORT_SCAN_SPAN)`，以及（有給的話）
+    `range(proxy_port, proxy_port + _PORT_SCAN_SPAN)`——後者是這一次要裝的埠
+    （`pick_port` 從它往上掃，所以實際用的埠一定在裡面）。
+
+    ## 為什麼不是舊的「只要是本機位址就跳過」（2026-09-24 vacant-dev 實測）
+
+    舊判準是字串 `"127.0.0.1" in url or "localhost" in url`。它擋得住「舊版 install 把 agent
+    設定改寫成 `http://127.0.0.1:<port>/v1`，重裝時把自己當上游」，但也把**使用者真的在用的
+    本機模型服務**整個丟掉：pi provider `http://127.0.0.1:1234/v1`（LM Studio）或
+    `http://localhost:11434/v1`（Ollama）⇒ `discover_install_upstreams` 落到 sink、
+    `pi_key_carrier` 回 None。**展場機器（1003，離線）跑的正是 127.0.0.1:1234 的 LM Studio**，
+    那等於展場上 Vacant 一裝就叫不到模型。
+
+    ⚠ **解析，不比對子字串**：`http://127.0.0.1:12345` 的埠是 12345，不是 1234 也不是 8787。
+      沒有 scheme 的寫法（`localhost:8787/v1`）補 `http://` 再解析一次。
+    ⚠ 誠實邊界（改碼請保留）：
+      1. 使用者自己的服務**剛好**開在 `8787..8826`（或這次要裝的埠往上 40 個）的迴路位址上
+         ⇒ 會被當成我們自己而跳過 ⇒ 多半落到 sink，`_install_warnings` 會大聲講
+         （fail-closed 的方向，不是安靜直連）。
+      2. 舊版用**別的** `--port` 裝過、又沒 `vacant uninstall` 乾淨的殘留設定（例如
+         `http://127.0.0.1:9000/v1`）**認不出來**，會被當成使用者的本機上游。正常路徑下不會
+         發生：`install` 在 state 還在時拒絕重裝，`uninstall` 逐位元還原設定檔。
+      3. 迴路主機而埠寫壞（解析不出埠）⇒ 當成我們的（跳過）：那不可能是一個能用的上游，
+         而且舊判準對它也是跳過。非迴路主機一律不是我們的，照舊交給上游判斷。
+    """
+    s = str(url or "").strip()
+    try:
+        u = urllib.parse.urlsplit(s)
+        if not u.netloc and s:
+            u = urllib.parse.urlsplit("http://" + s)
+        host = u.hostname
+    except ValueError:
+        return False
+    if not _is_loopback_host(host):
+        return False
+    try:
+        port = u.port
+    except ValueError:
+        return True
+    if port is None:
+        port = 443 if u.scheme == "https" else 80
+    spans = [range(DEFAULT_PORT, DEFAULT_PORT + _PORT_SCAN_SPAN)]
+    if proxy_port:
+        spans.append(range(int(proxy_port), int(proxy_port) + _PORT_SCAN_SPAN))
+    return any(port in r for r in spans)
+
+
+#: pi `models.json` 的 `api` 欄 → 我們的 wire。**認不得的就跳過，不猜**
+#: （`google-generative-ai` 之類 proxyd 沒有對應 wire 的，轉過去只會壞）。
+_PI_API_WIRE: dict[str, str] = {
+    "openai-completions": "openai",
+    "openai-responses": "openai",
+    "anthropic-messages": "anthropic",
+}
+
+#: 我們自己（或舊版 `vacant run`）註冊的 provider id——**永遠不能拿來當上游**，
+#: 否則 proxyd 會轉回自己。
+_PI_OWN_PROVIDERS: frozenset[str] = frozenset({"vacant", "vacantproxy"})
+
+
+def _pi_agent_dir(home: pathlib.Path) -> pathlib.Path:
+    return home / ".pi" / "agent"
+
+
+def pi_upstream_providers(home: pathlib.Path, wire: str,
+                          proxy_port: int | None = None) -> list[tuple[str, str]]:
+    """pi `~/.pi/agent/models.json` 裡可以當上游的 provider：`[(pid, baseUrl), …]`。
+
+    排序：`settings.json` 的 `defaultProvider` 排第一（那是使用者平常真的在用的），
+    其餘照檔內順序。跳過我們自己的 provider（`_PI_OWN_PROVIDERS`）、**我們自己的 proxy
+    位址**（`_is_own_proxy_url`；2026-09-24 之前是「所有本機位址」，把 LM Studio／Ollama
+    也丟掉了）、`api` 認不得或跟 `wire` 不合的。
+
+    ⚠ **只讀 `models.json` 與 `settings.json`，不讀 `auth.json`**（`NEVER_TOUCH`）。
+      回傳值**只有 id 與 url，不含 `apiKey`**——金鑰由 extension 在 pi 行程裡借
+      （`piext` 誠實邊界 7），Python 這一側與 proxyd 永遠不經手。
+    ⚠ 金鑰放在 `auth.json` 的內建 provider（`/login`、`pi auth`）**不會出現在這裡**：
+      它們通常不在 `models.json`，就算在也沒有 `apiKey`。那種使用者會落到 sink
+      ——這是刻意的，讀 `auth.json` 的代價比 fail-closed 高。
+    """
+    d = _pi_agent_dir(home)
+    try:
+        doc = json.loads((d / "models.json").read_text("utf-8"))
+    except (OSError, ValueError):
+        return []
+    provs = doc.get("providers") if isinstance(doc, dict) else None
+    if not isinstance(provs, dict):
+        return []
+    default = None
+    try:
+        sd = json.loads((d / "settings.json").read_text("utf-8"))
+        if isinstance(sd, dict) and isinstance(sd.get("defaultProvider"), str):
+            default = sd["defaultProvider"]
+    except (OSError, ValueError):
+        pass
+    out: list[tuple[str, str]] = []
+    for pid, pv in provs.items():
+        if pid in _PI_OWN_PROVIDERS or not isinstance(pv, dict):
+            continue
+        url = pv.get("baseUrl")
+        if not isinstance(url, str) or not url or _is_own_proxy_url(url, proxy_port):
+            continue
+        api = pv.get("api")
+        if not isinstance(api, str):
+            # provider 層沒寫 ⇒ 看模型層；各模型不一致就不猜
+            apis = {m.get("api") for m in (pv.get("models") or [])
+                    if isinstance(m, dict)}
+            api = apis.pop() if len(apis) == 1 else None
+        if _PI_API_WIRE.get(api or "") != wire:
+            continue
+        out.append((str(pid), url))
+    out.sort(key=lambda t: t[0] != default)          # 穩定排序：default 浮到最前
+    return out
+
+
+def _norm_url(u: str) -> str:
+    return (u or "").strip().rstrip("/")
+
+
+def pi_key_carrier(home: pathlib.Path, upstream_url: str,
+                   proxy_port: int | None = None) -> str | None:
+    """pi `models.json` 裡 **baseUrl 等於 proxyd 上游**的那個 provider id（沒有 ⇒ `None`）。
+
+    extension 會借這個 provider 的 `apiKey` 設定字串當 `vacant` provider 的 apiKey，
+    讓 Authorization 帶的是**使用者自己的金鑰**、proxyd 原樣穿透（`sentinel=""`）。
+    ⚠ **比對條件是 baseUrl 相等，不是「隨便一個 provider」**：金鑰只能送回它本來
+      就要去的那個主機。借錯 ＝ 把 A 家的金鑰送去 B 家，比 401 糟得多。
+    ⚠ 只回 id，**不回金鑰**；本函式也不看 `apiKey` 欄位的內容。
+    ⚠ `proxy_port` 跟 `discover_install_upstreams` 傳同一個，兩邊對「哪個是我們自己」
+      的判斷才一致（本機上游 `127.0.0.1:1234` 的 provider 要找得到）。
+    """
+    if not upstream_url or envmap.is_sink(upstream_url):
+        return None
+    want = _norm_url(upstream_url)
+    for wire in ("openai", "anthropic"):
+        for pid, url in pi_upstream_providers(home, wire, proxy_port):
+            if _norm_url(url) == want:
+                return pid
+    return None
+
+
+def _scan_configs_for_upstream(home: pathlib.Path, wire: str,
+                               prefer: Iterable[str] = (),
+                               proxy_port: int | None = None,
+                               ) -> tuple[str | None, str | None]:
     """從使用者**現有**的 agent 設定裡挖出他本來指到哪。
 
     ⚠ 只讀設定檔，**不讀任何 auth/憑證檔**。
+    ⚠ `prefer` 裡的 agent 先掃（見 `discover_install_upstreams`）；沒指定時 pi 排最後，
+      舊順序（opencode → codex／claude）不變。
+    ⚠ 每一家都用同一條「是不是我們自己的 proxy」判準（`_is_own_proxy_url`）。
+    """
+    if "pi" in set(prefer):
+        got = pi_upstream_providers(home, wire, proxy_port)
+        if got:
+            return got[0][1], f"pi:providers.{got[0][0]}"
+    url, src = _scan_legacy_configs(home, wire, proxy_port=proxy_port)
+    if url is None and "pi" not in set(prefer):
+        got = pi_upstream_providers(home, wire, proxy_port)
+        if got:
+            return got[0][1], f"pi:providers.{got[0][0]}"
+    return url, src
+
+
+def _scan_legacy_configs(home: pathlib.Path, wire: str,
+                         proxy_port: int | None = None,
+                         ) -> tuple[str | None, str | None]:
+    """opencode／codex／claude 三家（2026-09-22 之前就有的那一段）。
+
+    讀哪幾個檔、掃的順序、回傳的 `source` 字串都跟 2026-09-22 之前一樣；
+    **只有一處改了**（2026-09-24）：「這個 url 不能當上游」的判準從子字串
+    `"127.0.0.1"／"localhost" in url`（claude 那一格只看 `127.0.0.1`）換成
+    `_is_own_proxy_url`——跳過的是**我們自己的 proxy**，不再是所有本機位址。
+    所以使用者 opencode／codex 裡指到 `http://127.0.0.1:1234/v1`（LM Studio）或
+    `http://localhost:11434/v1`（Ollama）的 provider，現在會被當成上游；
+    指到 `http://127.0.0.1:8787/v1`（舊版 install 改寫的樣子）的照舊跳過。
     """
     if wire == "openai":
         p = home / AGENTS["opencode"].config_file
@@ -881,7 +1153,7 @@ def _scan_configs_for_upstream(home: pathlib.Path,
                 doc = json.loads(p.read_text("utf-8"))
                 for pid, pv in (doc.get("provider") or {}).items():
                     url = ((pv or {}).get("options") or {}).get("baseURL")
-                    if url and "127.0.0.1" not in url and "localhost" not in url:
+                    if url and not _is_own_proxy_url(url, proxy_port):
                         return str(url), f"opencode:provider.{pid}"
             except (OSError, ValueError):
                 pass
@@ -892,7 +1164,7 @@ def _scan_configs_for_upstream(home: pathlib.Path,
                 doc = tomllib.loads(p.read_text("utf-8"))
                 for pid, pv in (doc.get("model_providers") or {}).items():
                     url = (pv or {}).get("base_url")
-                    if url and "127.0.0.1" not in url and "localhost" not in url:
+                    if url and not _is_own_proxy_url(url, proxy_port):
                         return str(url), f"codex:model_providers.{pid}"
             except (OSError, ValueError, Exception):
                 pass
@@ -902,7 +1174,7 @@ def _scan_configs_for_upstream(home: pathlib.Path,
             try:
                 doc = json.loads(p.read_text("utf-8"))
                 url = (doc.get("env") or {}).get("ANTHROPIC_BASE_URL")
-                if url and "127.0.0.1" not in url:
+                if url and not _is_own_proxy_url(url, proxy_port):
                     return str(url), "claude:env.ANTHROPIC_BASE_URL"
             except (OSError, ValueError):
                 pass
@@ -1777,10 +2049,11 @@ def port_is_open(port: int, timeout: float = 0.5) -> bool:
 
 
 def pick_port(preferred: int) -> int:
-    for p in range(preferred, preferred + 40):
+    # ⚠ 掃描寬度跟 `_is_own_proxy_url` 認「我們自己的 proxy」共用 `_PORT_SCAN_SPAN`
+    for p in range(preferred, preferred + _PORT_SCAN_SPAN):
         if not port_is_open(p):
             return p
-    raise RuntimeError(f"{preferred}..{preferred + 39} 都被佔用了")
+    raise RuntimeError(f"{preferred}..{preferred + _PORT_SCAN_SPAN - 1} 都被佔用了")
 
 
 def preflight(port: int, wait_s: float = 25.0) -> dict:
@@ -1835,7 +2108,10 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     det = detect(h, probe_shell=probe_shell)
     wanted = list(agents) if agents else [a for a, d in det.items() if d.present]
     missing = [a for a in wanted if not det[a].present]
-    ups = discover_install_upstreams(h, upstream_overrides)
+    # ⚠ `proxy_port=port`：這裡還是**要求的**埠（`pick_port` 在下面）；實際埠一定落在
+    #   `range(port, port + _PORT_SCAN_SPAN)`，`_is_own_proxy_url` 認的就是這一段。
+    ups = discover_install_upstreams(h, upstream_overrides, prefer=wanted,
+                                     proxy_port=port)
 
     plan = {
         "home": str(h), "state": str(state), "python": py,
@@ -1896,13 +2172,21 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     # ── 2. 過了才寫設定檔 ────────────────────────────────────────────
     changes: list[FileChange] = [FileChange(**c) for c in svc.get("changes", [])]
     wired: dict[str, dict] = {}
+    # pi 的 extension 要把裝機當下看得到的模型清單烤進去（拿不到＝空，不是錯）
+    probed_models: list[str] = []
+    if not skip_service and "pi" in wanted:
+        from . import piext
+        probed_models = piext.probe_models(port)
     for a in wanted:
         try:
-            cs = WIRERS[a](h, port, backups)
+            cs = WIRERS[a](h, port, backups, python=py, models=probed_models,
+                           upstreams=ups)
             changes += cs
             wired[a] = {"ok": True, "files": [c.to_json() for c in cs],
                         "measured": CHANNEL_MEASURED.get(a, ""),
-                        "verified": bool(CHANNEL_MEASURED.get(a))}
+                        "verified": bool(CHANNEL_MEASURED.get(a)),
+                        # shim 那條路的真模型證據**另一欄**，不餵 `verified`
+                        "shim_measured": SHIM_MEASURED.get(a, "")}
         except Exception as e:
             wired[a] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
@@ -1949,7 +2233,8 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
         "service": svc, "preflight": pf, "systemd_path_env": sysenv,
         "gate_reach": reach, "agent_posture": posture,
         "codex_sandbox_requested": codex_sandbox_choice(),
-        "warnings": _install_warnings(wired, reach, svc, posture),
+        "warnings": _install_warnings(wired, reach, svc, posture,
+                                      upstreams=ups, home=h, proxy_port=port),
         "files": [c.to_json() for c in changes],
     }
     (state / "state.json").write_text(
@@ -1957,15 +2242,51 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     return st
 
 
+#: sink 警告的開頭——`cli._guided_install` 用它認出「裝好了但沒有真上游」。
+SINK_WARNING_HEAD = "🔴 常駐 proxy 沒有真上游"
+
+
 def _install_warnings(wired: dict, reach: dict, svc: dict,
-                      posture: dict | None = None) -> list[str]:
+                      posture: dict | None = None,
+                      upstreams: dict | None = None,
+                      home: pathlib.Path | None = None,
+                      proxy_port: int | None = None) -> list[str]:
     """`install` 一裝完就要**大聲講**的事。
 
     ⚠ 這一支存在的唯一理由：**不准安靜地只覆蓋一半**。裝好之後回一句
       「✓ 已寫入」而 agent 其實起不來（洞 1）、或閘門只對互動 shell 生效
       （洞 2），就是這個專案在抓的那種病——一份說成功的狀態報告，而東西是壞的。
+    ⚠ 上游解析到 `SINK_UPSTREAM` ＝ 每一通都在開連線之前被擋（fail-closed，對的），
+      但對使用者來說就是「裝好之後 agent 叫不到任何模型」。**這一格一定要講**，
+      而且要講怎麼修（2026-09-24 code review：裸 `vacant` 引導裝 pi 會安靜落到這裡）。
     """
     w: list[str] = []
+    for wire, v in (upstreams or {}).items():
+        users = [a for a, wv in (wired or {}).items()
+                 if wv.get("ok") and AGENTS[a].wire == wire]
+        if users and envmap.is_sink((v or {}).get("url", "")):
+            # 顯示一般人會設的那個（`OPENAI_BASE_URL`），不是我們內部的 `VACANT_RUN_*`
+            var = next((ns[1] if len(ns) > 1 else ns[0]
+                        for ww, ns in envmap.UPSTREAM_VARS if ww == wire and ns), "")
+            w.append(
+                f"{SINK_WARNING_HEAD}（{wire}）：{'、'.join(users)} 的每一通模型呼叫都會被"
+                f"擋下（502，fail-closed，**不會**偷偷直連公開 API）。"
+                f"在你的設定裡沒找到上游，環境變數也沒有"
+                f"（本機位址只跳過 Vacant 自己的 proxy 埠 {DEFAULT_PORT}–"
+                f"{DEFAULT_PORT + _PORT_SCAN_SPAN - 1} 與這次要裝的埠往上 {_PORT_SCAN_SPAN} 個；"
+                f"你的模型服務剛好開在那一段就會被當成 Vacant 自己）。修法：先 `vacant uninstall`，"
+                f"再 `vacant install --agent {users[0]} --upstream {wire}=<你的端點>`"
+                + (f"，或先設好 `{var}` 再裝" if var else "") + "。")
+    pi_w = (wired or {}).get("pi") or {}
+    pi_up = ((upstreams or {}).get(AGENTS["pi"].wire) or {}).get("url", "")
+    if pi_w.get("ok") and pi_up and not envmap.is_sink(pi_up) and home is not None \
+            and pi_key_carrier(home, pi_up, proxy_port=proxy_port) is None:
+        w.append(
+            f"⚠ pi：`~/.pi/agent/models.json` 裡沒有 baseUrl 等於上游 {pi_up} 的 provider "
+            f"⇒ extension 借不到金鑰，送出的是佔位 `sk-vacant-possess`。上游不要金鑰"
+            f"（本機 LM Studio 之類）沒事；要金鑰的會回 401。金鑰放在 `auth.json` 的"
+            f"內建 provider **我們不讀**（NEVER_TOUCH）——在 models.json 加一個同 baseUrl、"
+            f"`apiKey` 填環境變數名的 provider 即可。")
     bad = [a for a, v in (wired or {}).items() if v.get("startable") is False]
     if bad:
         for a in bad:
@@ -2106,14 +2427,20 @@ def status(*, home: pathlib.Path | None = None, reprobe: bool = False,
     |---|---|---|
     | `wired` | **設定檔寫了嗎** | 檔案 sha256（`files[*]`） |
     | `startable` | **那個 agent 真的起得來嗎** | `probe_startable()` 真跑一次，**不打模型** |
-    | `proven` | **通道真的被中介了嗎** | `requests_seen > 0`（唯一算數的那個） |
+    | `proven` | **通道真的被中介了嗎** | proxy 那一側的紀錄（見下），**附上是哪一條路** |
 
     ⚠ **三欄不可以互相冒充。** 2026-09-20 量到的病理正是
       `wired = True` 而 agent 完全用不了（codex 缺 `OPENAI_API_KEY`），
       而舊版 `status` 只會印「✓ 已寫入」——**一份說成功的狀態報告，
       而東西是壞的**。
-    ⚠ `proven` 的語意**一個字都沒動**：只有 `gateshim` 在一次 run 之後看到
-      `requests_seen > 0` 才點得亮（`mark_proven`）。
+    ⚠ `proven` 有**兩條路**點得亮（2026-09-24 起；之前只有第一條），**各自標路**
+      （`proven_via`／`proven_routes`），狀態列永遠寫出是哪一條：
+        · `shim`：`gateshim` 在一次 run 之後看到 `requests_seen > 0`（`mark_proven`，
+          這條的語意一個字都沒動）。
+        · `extension`：本函式從落盤證據推（`extension_proof`：常駐 extension 的掛鉤日誌
+          ＋常駐 proxyd journal），推到了就用 `mark_proven(via="extension")` 記下來。
+          **只證通道，不證閘門**——互動 session 沒有收據。
+      兩條路證明的東西不同（`extension_proof` 的表），**不准合成一個沒標路的 ✓**。
     ⚠ 三欄都可能是 `None`＝**沒量到**，那不是 `False`（鐵律 3）。
 
     `reprobe=True` ⇒ 當場重量 `startable` 與 `gate_reach`（會真的把 agent
@@ -2146,8 +2473,26 @@ def status(*, home: pathlib.Path | None = None, reprobe: bool = False,
             "uninstall_will": ("刪掉這個檔" if c["action"] == "create"
                                else f"用備份覆寫回 {c['before_sha256'][:12]}…"),
         })
+    # ── extension 路：只讀落盤證據（不跑 agent、不打網路），所以每次都做，不用 --reprobe ──
+    #   已經由 extension 路證實過的就不再掃（證據檔可能早被清掉；記下來的那一筆有檔名與 call_id）。
+    ext_scan: dict[str, dict] = {}
+    for a, v in (st.get("channel") or {}).items():
+        if a in EXTENSION_ROUTE_AGENTS and v.get("ok") and \
+                "extension" not in _proven_routes(v):
+            pr = extension_proof(h, agent=a, since=_num(st.get("installed_at")))
+            ext_scan[a] = pr
+            if pr.get("proven"):
+                mark_proven(a, int(pr.get("matched_calls") or 0), home=h,
+                            via="extension", note=pr.get("note"))
     channel = {}
     for a, v in (st.get("channel") or {}).items():
+        routes = _proven_routes(v)
+        ext = ext_scan.get(a)
+        if ext and ext.get("proven"):
+            # 寫回 state 失敗（mark_proven 吞 OSError）也照樣顯示——證據在磁碟上，這一格是推出來的
+            routes.setdefault("extension", str(ext.get("note", "")))
+        via = (v.get("proven_via") or ("shim" if v.get("proven") else None)
+               or next(iter(routes), None))
         startable = v.get("startable")
         s_reason = v.get("startable_reason", "")
         if reprobe and v.get("ok"):
@@ -2162,11 +2507,18 @@ def status(*, home: pathlib.Path | None = None, reprobe: bool = False,
             "env_key": spec.env_key if spec else None,
             "env_key_present": (bool(os.environ.get(spec.env_key))
                                 if spec and spec.env_key else None),
-            "proven": bool(v.get("proven")),   # 只有實測過才會是 True
+            "proven": bool(routes),            # 只有 proxy 那一側有紀錄才會是 True
+            # ⚠ **哪一條路**證實的：`proven_via`＝第一條（shim 證實過的永遠讀得出 shim），
+            #   `proven_routes`＝每一條各自的證據。兩條證明的東西不同，不准合講。
+            "proven_via": via if routes else None,
+            "proven_routes": {r: routes[r] for r in PROVEN_ROUTES if r in routes},
+            # extension 路這一次掃描的結果（含沒點亮的理由）；沒掃（不適用／已證實）＝None
+            "extension_proof": ext,
             "measured": v.get("measured", ""),
-            "note": ("未實測：寫了設定不等於被中介，"
-                     "唯一算數的是 requests_seen"
-                     if not v.get("proven") else v.get("proven_note", "")),
+            "note": ("未實測：寫了設定不等於被中介，唯一算數的是 proxy 那一側的紀錄"
+                     "（shim 路的 requests_seen／extension 路的常駐 journal）"
+                     if not routes else
+                     "；".join(f"{r}：{routes[r]}" for r in PROVEN_ROUTES if r in routes)),
             "error": v.get("error"),
         }
     # 常駐 proxy 的 journal 總量。**這是機器層級的證據，不是 per-agent 的**：
@@ -2226,10 +2578,58 @@ def status(*, home: pathlib.Path | None = None, reprobe: bool = False,
     }
 
 
+# ── 中介證據：兩條路，**各自標路**（2026-09-24） ─────────────────────────
+
+#: `proven` 點得亮的路。**狀態列永遠寫出是哪一條**，不准出現一個沒標路的 ✓——
+#: 兩條路證明的東西不一樣（見 `extension_proof` 的表），混成一個 ✓ 就是讓一種證據
+#: 冒充另一種。
+PROVEN_ROUTES: tuple[str, ...] = ("shim", "extension")
+
+#: 有**常駐** extension、會把掛鉤日誌落在 `<state>/hooks/<agent>_<run_id>.jsonl` 的 agent。
+#: 今天只有 pi（`piext`）。其他 agent 的常駐接線沒有掛鉤 ⇒ extension 路點不亮它們。
+EXTENSION_ROUTE_AGENTS: tuple[str, ...] = ("pi",)
+
+#: `before_provider_request` 那一筆之後幾秒內落進 journal 的模型呼叫，才算「那一次的那一通」。
+#: 實際間隔遠小於此：extension 用 `spawnSync` 燒掛鉤 ⇒ hookcli 寫完、退出之前 pi 送不出請求。
+EXT_PROOF_WINDOW_S = 15.0
+
+#: 算「模型呼叫」的 path（只比 path，query 拿掉）。`GET /v1/models`（canary、refreshModels）
+#: 不算——那一通在 `vacant_on` 失敗時也照樣會打。
+_MODEL_CALL_PATHS: frozenset[str] = frozenset({
+    "/v1/chat/completions", "/v1/completions", "/v1/responses", "/v1/messages"})
+
+
+def _proven_routes(ch: dict) -> dict[str, str]:
+    """state 裡一個 agent 已經被哪幾條路證實：`{route: note}`。
+
+    ⚠ 舊版 state（2026-09-24 之前）只有 `proven`＋`proven_note`、沒有 `proven_via`
+      ⇒ **讀成 shim 路**。這不是猜：那之前 `mark_proven` 唯一的呼叫者是 `gateshim`
+      （`ops/vacantrun/possess_*_20260922/resident/state.json` 那幾份都是）。
+    """
+    routes = {k: str(v) for k, v in (ch.get("proven_routes") or {}).items()
+              if k in PROVEN_ROUTES}
+    if ch.get("proven") and not routes:
+        routes[ch.get("proven_via") or "shim"] = str(ch.get("proven_note", ""))
+    return routes
+
+
 def mark_proven(agent: str, requests_seen: int, *,
-                home: pathlib.Path | None = None) -> None:
-    """把「這個 agent 真的被中介到了」寫進 state。**只有 `requests_seen > 0`
-    才算**，由 `gateshim` 在一次 run 結束後呼叫。"""
+                home: pathlib.Path | None = None, via: str = "shim",
+                note: str | None = None) -> None:
+    """把「這個 agent 真的被中介到了」寫進 state，**連同是哪一條路**。只有
+    `requests_seen > 0` 才算。
+
+    · `via="shim"`（預設）：`gateshim` 在一次 run 結束後呼叫，**呼叫方式一個字都沒改**；
+      `requests_seen` 是那一跑自己的 ephemeral proxy 看到的通數。
+    · `via="extension"`：`status()` 從落盤證據推出來的（`extension_proof`），
+      `requests_seen` 是對得上的模型呼叫通數。
+
+    state 欄位：`proven`（任一條路）、`proven_via`（**第一個**證實它的路，之後不被別條路
+    蓋掉 ⇒ shim 證實過的格子永遠讀得出是 shim）、`proven_note`（`proven_via` 那條路最新一筆）、
+    `proven_routes`（每一條路各自的最新一筆）。
+    """
+    if via not in PROVEN_ROUTES:
+        raise ValueError(f"via 只能是 {PROVEN_ROUTES}，收到 {via!r}")
     h = (home or pathlib.Path.home()).expanduser()
     sp = state_home(h) / "state.json"
     if requests_seen <= 0 or not sp.is_file():
@@ -2237,16 +2637,223 @@ def mark_proven(agent: str, requests_seen: int, *,
     try:
         st = json.loads(sp.read_text("utf-8"))
         ch = st.setdefault("channel", {}).setdefault(agent, {})
+        routes = _proven_routes(ch)
+        first = ch.get("proven_via") or ("shim" if ch.get("proven") else via)
+        n = note or (f"requests_seen={requests_seen} @ "
+                     f"{time.strftime('%Y-%m-%dT%H:%M:%S%z')}")
+        routes[via] = n
         ch["proven"] = True
-        ch["proven_note"] = (f"requests_seen={requests_seen} @ "
-                             f"{time.strftime('%Y-%m-%dT%H:%M:%S%z')}")
+        ch["proven_via"] = first
+        ch["proven_routes"] = routes
+        if via == first:
+            ch["proven_note"] = n
         sp.write_text(json.dumps(st, ensure_ascii=False, indent=2),
                       encoding="utf-8")
     except (OSError, ValueError):
         pass
 
 
+def _read_jsonl(p: pathlib.Path) -> list[dict]:
+    try:
+        text = p.read_text("utf-8", errors="replace")
+    except OSError:
+        return []
+    out = []
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        try:
+            r = json.loads(line)
+        except ValueError:
+            continue                    # 寫到一半被砍的那一行：跳過，不讓整份作廢
+        if isinstance(r, dict):
+            out.append(r)
+    return out
+
+
+def _num(x: Any) -> float | None:
+    # ⚠ `bool` 先踢掉：`isinstance(True, int)` 為真（`attest` 的同一條防呆）
+    if isinstance(x, bool) or not isinstance(x, (int, float)):
+        return None
+    return float(x)
+
+
+def extension_proof(home: pathlib.Path | None = None, *, agent: str = "pi",
+                    window_s: float = EXT_PROOF_WINDOW_S,
+                    since: float | None = None) -> dict:
+    """**常駐 extension 那條路**有沒有被中介過——只讀落盤證據，不跑 agent、不打網路。
+
+    ## 為什麼要有這條（2026-09-24 vacant-dev 實測）
+
+    `mark_proven` 原本只有 `gateshim`（PATH shim 那一跑）會呼叫。實測 133 通經過常駐 proxyd、
+    全部來自裝好的 pi extension，`vacant possess status`（連 `--reprobe`）照樣印
+    `中介 **未證實**` ⇒ **只用互動 pi 的人永遠看到「未證實」**，而證據明明在磁碟上。
+
+    ## 兩條路證明的東西不一樣（⚠ 不可以混成一個 ✓）
+
+    | 路 | 證據 | 證明了 | **沒有**證明 |
+    |---|---|---|---|
+    | `shim` | 那一跑自己的 ephemeral proxy 的 `requests_seen` | PATH shim 那一跑的模型呼叫經過 Vacant，那一跑有收據（找得到驗收才有裁決；找不到＝`ungated`、退出碼 21） | 常駐設定檔／常駐 extension 那條路 |
+    | `extension` | 本函式：掛鉤日誌 ＋ **常駐** proxyd journal | 常駐 extension 切到 `vacant` 之後，模型呼叫真的經過**常駐** proxyd 而且上游回 2xx | **任何閘門／裁決**：互動 session 不出收據（`piext` 誠實邊界 5） |
+
+    ## 判準（0–3 全中才算；任一條不中 ⇒ `proven=False`，`reason` 講是哪一條）
+
+    證據位置：`<state>/hooks/<agent>_<run_id>.jsonl`（常駐 extension 經 `hookcli` 寫的；
+    shim 那條的掛鉤日誌在 per-run 目錄的 `hooks.jsonl`，**不在這裡** ⇒ shim 的證據不會被
+    本函式讀成 extension 路）、`<state>/proxyd/wire/index.jsonl`（常駐 proxyd 一通一列）。
+
+      0. **證據要晚於這一次 install**（`since`；`status()` 傳 `state.installed_at`）：
+         `uninstall` 刻意留下 journal，掛鉤日誌也在同一個 state 目錄裡 ⇒ 重裝之後，上一輪的
+         證據不准點亮這一輪（新的埠、新的上游、新的 extension）。shim 路的 `proven` 也只記在
+         這一次 install 的 state 裡，同一個口徑。早於 `since` 的掛鉤事件與 journal 列一律不看。
+      1. **這份掛鉤日誌屬於這一支 proxyd**：journal 裡有一通 path 帶
+         `vacant_canary=…<run_id>` 的請求（`hookcli` 在 `session_start` 打的那一通、或
+         extension 的 `refresh-<run_id>`／`status-<run_id>`；狀態碼不拘）。
+         理由：journal **沒有 per-agent 標記**，時間相近不等於同一個來源；`run_id` 是
+         extension 每次載入時產生的隨機 UUID，磁碟上**唯一**能把「這份掛鉤日誌」綁到
+         「這一支 proxyd」的東西。沒有它，同一時間 codex 打常駐 proxyd 就會點亮 pi。
+         檔名裡的 run_id 與行內的 `run_id` 也要一致。
+      2. **切過去了、而且之後真的要叫模型**：日誌裡有 `vacant_on`，之後（`vacant_off`／
+         `session_end` 之前）有 `before_provider_request`。`vacant_on` 是 extension 在
+         `pi.setModel(vacant)` **回 true 之後**才寫的；切走（`/vacant off`、`/model`）會寫
+         `vacant_off`，那之後的 `before_provider_request` 不算。
+      3. **那一通真的到了常駐 proxyd，而且通了**：journal 有一通 `POST` 到模型呼叫 path
+         （`_MODEL_CALL_PATHS`）、狀態 2xx，`ts` 落在
+         `[before_provider_request.ts, min(before_provider_request.ts + window_s, 那一段的結束)]`。
+         下界是硬的：extension 用 `spawnSync` 燒掛鉤，hookcli 寫完那一行之前 pi 送不出請求，
+         而 journal 的 `ts` 是 proxyd 收到請求那一刻（同一台機器、同一個時鐘）。
+
+    ⚠ 誠實邊界（改碼請保留）：
+      1. **只證明通道，不證明閘門。** 點亮的是「中介 ✓（extension 路）」，不是收據、不是裁決。
+      2. **2xx 只證明上游回了 2xx，不證明上游是真模型**：L-fake 的假上游也回 2xx。
+         本函式是「這台機器上這個使用者的這一條路通了」，**不是** `CHANNEL_MEASURED["pi"]`
+         那種要歸檔、要寫機器與版本的 repo 級實測紀錄——那一格不因本函式而被填上。
+      3. 條件 3 是**時間相關，不是逐通簽章**：條件 1 把整份日誌綁到這支 proxyd，但窗內的某一通
+         POST 仍可能是別的 agent 同時打的（常駐 proxyd 是機器層級的）。只裝 pi 的機器上沒有
+         別的來源；裝了多個 agent 又同時在跑的機器上，這一條有誤配的可能。
+      4. **比 shim 路嚴格**：shim 路 `requests_seen > 0` 連 502／401 都算；這裡要 2xx。
+         理由：互動使用者看到 ✓ 會以為「可以用了」，而 sink 的 502、借不到金鑰的 401
+         正是「裝好了但叫不到模型」——不准印成 ✓（2026-09-20 `wired=True` 而 agent 用不了的
+         同一種病）。
+      5. **偏向漏判，不偏向誤判**：`vacant_on` 只在「這一次真的切換」時才寫；session 一開始
+         模型就已經是 `vacant`（extension 不寫 `vacant_on`）的那一跑，本判準點不亮它。
+         時鐘被往回撥、掛鉤日誌被刪、journal 被清也一樣點不亮。量不到就是量不到（鐵律 3）。
+    """
+    h = (home or pathlib.Path.home()).expanduser()
+    state = state_home(h)
+    out: dict[str, Any] = {"route": "extension", "agent": agent, "proven": False,
+                           "reason": "", "matched_calls": 0}
+    if agent not in EXTENSION_ROUTE_AGENTS:
+        out["reason"] = (f"{agent} 沒有常駐 extension 掛鉤"
+                         f"（extension 路只適用 {'、'.join(EXTENSION_ROUTE_AGENTS)}）")
+        return out
+    hdir = state / "hooks"
+    try:
+        hooks = sorted(hdir.glob(f"{agent}_*.jsonl"),
+                       key=lambda p: p.stat().st_mtime, reverse=True)
+    except OSError:
+        hooks = []
+    if not hooks:
+        out["reason"] = f"沒有常駐 extension 的掛鉤日誌（{hdir}/{agent}_*.jsonl）"
+        return out
+    from .attest import CANARY_QUERY_KEY
+    jpath = state / "proxyd" / "wire" / "index.jsonl"
+    canary: set[str] = set()
+    calls: list[tuple[float, dict]] = []
+    for r in _read_jsonl(jpath):
+        ts, path = _num(r.get("ts")), r.get("path")
+        if ts is None or not isinstance(path, str):
+            continue
+        if since is not None and ts < since:
+            continue                    # 上一次 install 那一輪的流量（判準 0）
+        u = urllib.parse.urlsplit(path)
+        canary.update(urllib.parse.parse_qs(u.query).get(CANARY_QUERY_KEY, []))
+        code = _num(r.get("status"))
+        if (str(r.get("method") or "").upper() == "POST"
+                and u.path in _MODEL_CALL_PATHS
+                and code is not None and 200 <= code < 300):
+            calls.append((ts, r))
+    if not canary and not calls:
+        out["reason"] = (f"常駐 proxyd 的 journal 是空的或不存在（{jpath}）"
+                         + ("，或只有這次安裝之前的紀錄" if since is not None else ""))
+        return out
+    calls.sort(key=lambda t: t[0])
+    call_ts = [t for t, _ in calls]
+    import bisect
+    reasons: list[str] = []
+    for hp in hooks:
+        rid = hp.stem[len(agent) + 1:]
+        evs = [e for e in _read_jsonl(hp)
+               if e.get("agent") == agent and e.get("run_id") == rid
+               and _num(e.get("ts")) is not None]
+        if not evs:
+            reasons.append(f"{hp.name}：沒有 run_id={rid} 的 {agent} 事件")
+            continue
+        if since is not None:
+            evs = [e for e in evs if float(e["ts"]) >= since]
+            if not evs:
+                reasons.append(f"{hp.name}：事件全部早於這次安裝（判準 0）")
+                continue
+        if not any(e.get("event") == "vacant_on" for e in evs):
+            reasons.append(f"{hp.name}：沒有 vacant_on（這一跑沒有切到 vacant）")
+            continue
+        if not any(c == rid or c.endswith("-" + rid) for c in canary):
+            reasons.append(f"{hp.name}：journal 裡沒有這一跑的 canary"
+                           f"（{CANARY_QUERY_KEY}=…{rid}）⇒ 綁不到這一支 proxyd")
+            continue
+        evs.sort(key=lambda e: float(e["ts"]))
+        on = False
+        windows: list[tuple[float, float]] = []
+        for i, e in enumerate(evs):
+            ev, t = e.get("event"), float(e["ts"])
+            if ev == "vacant_on":
+                on = True
+            elif ev in ("vacant_off", "session_end"):
+                on = False
+            elif ev == "before_provider_request" and on:
+                end = next((float(x["ts"]) for x in evs[i + 1:]
+                            if x.get("event") in ("vacant_off", "session_end")),
+                           float("inf"))
+                windows.append((t, min(t + window_s, end)))
+        if not windows:
+            reasons.append(f"{hp.name}：vacant_on 之後沒有 before_provider_request")
+            continue
+        used: set[int] = set()
+        matched: list[tuple[float, dict]] = []
+        for lo, hi in windows:
+            k = bisect.bisect_left(call_ts, lo)
+            while k < len(calls) and call_ts[k] <= hi:
+                if k not in used:
+                    used.add(k)
+                    matched.append(calls[k])
+                    break
+                k += 1
+        if not matched:
+            reasons.append(f"{hp.name}：vacant_on→before_provider_request 之後 {window_s:g}s 內"
+                           f"常駐 journal 沒有 2xx 的模型呼叫（401／502 不算）")
+            continue
+        _, first = matched[0]
+        out.update(
+            proven=True, reason="", hook_log=str(hp), run_id=rid,
+            call_id=first.get("call_id"), call_path=first.get("path"),
+            call_status=first.get("status"), call_ts=first.get("ts"),
+            matched_calls=len(matched),
+            note=(f"{hp.name} 的 vacant_on→before_provider_request ＋ "
+                  f"常駐 journal call_id={first.get('call_id')} "
+                  f"POST {first.get('path')} → {first.get('status')}"
+                  f"（這一跑對得上 {len(matched)} 通；只證通道，不含閘門／裁決）@ "
+                  f"{time.strftime('%Y-%m-%dT%H:%M:%S%z')}"))
+        return out
+    out["reason"] = "；".join(reasons[:3]) + (f"（另 {len(reasons) - 3} 份也沒點亮）"
+                                             if len(reasons) > 3 else "")
+    return out
+
+
 # ── CLI ────────────────────────────────────────────────────────────────
+
+#: 狀態列上每一條路的名字（`PROVEN_ROUTES` 每一條都要有；少一條 `_fmt_status` 會 KeyError，那是對的）
+_ROUTE_LABEL: dict[str, str] = {"shim": "shim 路", "extension": "extension 路"}
+
 
 def _fmt_status(s: dict) -> str:
     if not s.get("installed"):
@@ -2254,8 +2861,11 @@ def _fmt_status(s: dict) -> str:
     L = [f"端點      {s['endpoint']}   在聽：{'是' if s['proxy_listening'] else '**否**'}",
          f"監督      {s['service'].get('backend')}   "
          f"開機自起：{s['service'].get('boot_persistent')}",
-         f"上游      " + "  ".join(f"{w}={v['url']}（{v['source']}）"
-                                   for w, v in (s.get("upstreams") or {}).items()),
+         f"上游      " + "  ".join(
+             f"{w}={v['url']}（{v['source']}）"
+             + ("  🔴 sink：沒有真上游，每一通都會被擋" if envmap.is_sink(v.get("url", ""))
+                else "")
+             for w, v in (s.get("upstreams") or {}).items()),
          f"shim 目錄 {s['shim_dir']}",
          "",
          "通道層（三欄：設定寫了／起得來／被中介過。**不可互相冒充**）："]
@@ -2263,8 +2873,18 @@ def _fmt_status(s: dict) -> str:
         flag = "✓ 已寫入" if v["wired"] else f"✗ {v.get('error')}"
         st3 = {True: "✓ 起得來", False: "**✗ 起不來**",
                None: "－ 沒量到"}[v.get("startable")]
-        proven = "✓ 已由 requests_seen 證實" if v["proven"] else "**未證實**"
+        # ⚠ **永遠寫出是哪一條路**：一個沒標路的 ✓ 會被讀成「閘門那條也通了」
+        routes = v.get("proven_routes") or {}
+        proven = ("✓（" + "＋".join(_ROUTE_LABEL[r] for r in PROVEN_ROUTES
+                                   if r in routes) + "）") if routes else "**未證實**"
         L.append(f"  {a:<9} 設定 {flag}　啟動 {st3}　中介 {proven}")
+        if "shim" in routes:
+            L.append(f"      shim 路（PATH shim 那一跑；有沒有跑驗收看那一跑的收據）：{routes['shim']}")
+        if "extension" in routes:
+            L.append(f"      extension 路（常駐 extension→常駐 proxyd）：{routes['extension']}")
+            L.append("      ⚠ extension 路**只證通道**：互動 session 沒有閘門、沒有裁決收據")
+        elif (v.get("extension_proof") or {}).get("reason"):
+            L.append(f"      extension 路還沒證實：{v['extension_proof']['reason']}")
         if v.get("startable") is not True and v.get("startable_reason"):
             L.append(f"      {v['startable_reason']}")
         if v.get("env_key") and v.get("env_key_present") is False:

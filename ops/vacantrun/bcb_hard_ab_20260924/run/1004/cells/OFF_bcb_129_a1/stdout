@@ -1,0 +1,13 @@
+<|channel>thought
+<channel|>The task was to scrape the first table from a web page and extract its data into a Pandas DataFrame, with columns named after `<th>` elements if present. I have implemented this in `solution.py`.
+
+Key features of the implementation:
+1.  **Request Handling**: Uses `requests.get()` and handles `ConnectionError` (re-raised as `ConnectionError`) and `HTTPError` as specified.
+2.  **Parsing**: Uses `BeautifulSoup` to find the first `<table>` element.
+3.  **Data Extraction**: 
+    *   Identifies headers by looking for `<th>` elements in the first row (`<tr>`).
+    *   If headers are found, it uses them as column names and skips the header row when collecting data.
+    *   If no `<th>` elements are present in the first row, it treats all rows (including the first) as data rows with unnamed columns.
+4.  **Error Handling**: Raises `ValueError` if no table is found or if no data can be extracted from the table.
+
+The solution has been verified against the provided tests using `run_tests.sh`.

@@ -1,0 +1,2 @@
+<|channel>thought
+<channel|>The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function archives files matching a given pattern into `/tmp/archive`, deletes the originals, and returns the archive path. Tests passed successfully.

@@ -1,0 +1,12 @@
+The tests passed successfully. The implementation of `task_func` correctly generates a time series with a normal distribution and a linear trend, plots it using matplotlib, sets the correct labels for the axes, and returns the `Axes` object as required by the goal and contract.
+
+I have:
+1. Read `goal.md` to understand the requirements (generate time series, plot it, return `ax`).
+2. Read `contract.md` to follow the constraints (function signature, imports, file name).
+3. Implemented `solution.py` with the correct logic using `pandas`, `numpy`, and `matplotlib`.
+4. Verified the solution by running `run_tests.sh`.
+
+The task is complete.
+```bash
+# No further actions needed as tests passed.
+```

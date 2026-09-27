@@ -1,0 +1,146 @@
+{
+  "possess_agent": "claude",
+  "suite_source": "dir:tests_visible",
+  "suite_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/cellc/tests_visible",
+  "gate": "ran",
+  "requests_seen": 10,
+  "stop_reason": "visible_fail",
+  "accepted": false,
+  "shim_exit": 20,
+  "argv": [
+    "-p",
+    "Create a file solution.py containing only a function mul(a, b) that returns a*b. Do not create any other function.",
+    "--model",
+    "claude-haiku-4-5-20251001",
+    "--permission-mode",
+    "acceptEdits"
+  ],
+  "real_binary": "/opt/node22/bin/claude",
+  "cwd": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/cellc/ws_refuse",
+  "cfg_sweep": {
+    "parent": "/tmp/vacant-possess",
+    "max_age_s": 21600.0,
+    "removed": [],
+    "kept_alive": [],
+    "kept_young": [],
+    "skipped_not_ours": [],
+    "failed": [],
+    "bytes_removed": null
+  },
+  "cfg_cleanup": {
+    "path": "/tmp/vacant-possess/run-claude-12da7044",
+    "bytes": 4133363,
+    "ok": true,
+    "owned": true
+  },
+  "agent_posture": {
+    "layer": "gate（per-run relocate 設定）",
+    "sandbox_mode": null,
+    "approval_policy": null,
+    "flags": [],
+    "note": "這個 agent 的 per-run 設定沒有沙箱欄位 ⇒ 沒量到（不是「沒有沙箱」）"
+  },
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "possess_claude_1790056460_acc66a",
+    "agent": "claude",
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531833]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "eth0",
+          "ifb0",
+          "ifb1",
+          "lo"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['eth0', 'ifb0', 'ifb1'] ⇒ 有別的路",
+        "probed_at": 1790056467.180728,
+        "probed_by_pid": 30047
+      }
+    },
+    "framework_hook": {
+      "agent": "claude",
+      "contract_version": "vacant-hook/1",
+      "canary_fired": true,
+      "events_n": 8,
+      "log": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.vacant-run/possess_claude_1790056460_acc66a/hooks.jsonl",
+      "install_attempted": true,
+      "version_drift": false,
+      "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+    },
+    "reconciled": {
+      "relay_calls": 10,
+      "hook_events": 8,
+      "unexplained": 7,
+      "canary_calls": 1,
+      "refused_path": 0,
+      "unexplained_detail": [
+        {
+          "call_id": "a47f5c26109f4ea8af8a8fd114338494",
+          "path": "/v1/code/agent-proxy/ca-cert",
+          "ts": 1790056460.8706229,
+          "status": 502
+        },
+        {
+          "call_id": "c5dfecd2f0354a458d4278dd3c6315e7",
+          "path": "/v1/code/agent-proxy/ca-cert",
+          "ts": 1790056460.8735237,
+          "status": 502
+        },
+        {
+          "call_id": "b98b10e745b04defbe529903c97311dd",
+          "path": "/v1/code/agent-proxy/ca-cert",
+          "ts": 1790056460.8746984,
+          "status": 502
+        },
+        {
+          "call_id": "a78107f88fcd40209c0929a948e8034f",
+          "path": "/v1/messages?beta=true",
+          "ts": 1790056461.1705258,
+          "status": 200
+        },
+        {
+          "call_id": "22f6a1fb8ebf4fb7853a309d099435c4",
+          "path": "/v1/code/agent-proxy/ca-cert",
+          "ts": 1790056461.4243634,
+          "status": 502
+        },
+        {
+          "call_id": "e28a811dfb55435ba241a8c6822b1043",
+          "path": "/v1/code/agent-proxy/ca-cert",
+          "ts": 1790056462.4581914,
+          "status": 502
+        },
+        {
+          "call_id": "df709a00508d4c8993f1c6799485864f",
+          "path": "/v1/code/agent-proxy/ca-cert",
+          "ts": 1790056464.6098518,
+          "status": 502
+        }
+      ],
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "10 通中繼、3 個回合開端事件 ⇒ 7 通對不上"
+    },
+    "tier": "B'",
+    "attested": false,
+    "b_prime_kind": "channel_not_enclosed",
+    "tier_sentence": "工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。",
+    "tier_reasons": [
+      "掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790056467.1811354
+  },
+  "attest_mode": "warn",
+  "tier": "B'",
+  "attested": false
+}

@@ -1,0 +1,15 @@
+/tmp/tmp.FqO8Jh62VY/solution.py:36: UserWarning: Could not transfer file file1.txt: 
+  warnings.warn(f"Could not transfer file {filename}: {e}")
+FAIL test_visible.py::check_test_all_extensions  AssertionError: FAIL test_all_extensions: AssertionError: Lists differ: ['invalid file name.jpg', 'file4.jpg', 'file3.xlsx', 'file2.csv'] != ['file1.txt', 'file2.csv', 'file3.xlsx', 'file4.jpg']
+First differing element 0:
+'invalid file name.jpg'
+'file1.txt'
+- ['invalid file name.jpg', 'file4.jpg', 'file3.xlsx', 'file2.csv']
++ ['file1.txt', 'file2.csv', 'file3.xlsx', 'file4.jpg']
+FAIL test_visible.py::check_test_empty_source_directory  AssertionError: FAIL test_empty_source_directory: AssertionError: Lists differ: ['file2.csv', 'file1.txt'] != []
+First list contains 2 additional elements.
+First extra element 0:
+'file2.csv'
+- ['file2.csv', 'file1.txt']
++ []
+2 check(s) failed

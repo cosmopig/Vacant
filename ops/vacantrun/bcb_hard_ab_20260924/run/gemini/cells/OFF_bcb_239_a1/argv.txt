@@ -1,0 +1,4 @@
+arm=OFF task=bcb_239 attempt=1 backend=gemini model=gemma-4-26b-a4b-it
+prompt=Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+containment=bwrap(ro /, rw ws+HOME, tmpfs /tmp, unshare-pid, net shared)
+2026-09-24T12:41:24Z

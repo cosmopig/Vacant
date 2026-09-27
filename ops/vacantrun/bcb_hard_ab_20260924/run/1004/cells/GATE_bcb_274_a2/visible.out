@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_email_sending_exception  AssertionError: ERROR test_email_sending_exception: NameError: name 'smtp_server' is not defined
+FAIL test_visible.py::check_test_empty_json_data  AssertionError: ERROR test_empty_json_data: NameError: name 'smtp_server' is not defined
+2 check(s) failed

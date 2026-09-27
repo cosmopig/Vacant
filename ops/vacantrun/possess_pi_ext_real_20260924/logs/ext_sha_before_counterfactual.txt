@@ -1,0 +1,1 @@
+48ae40442325f5565ac8b4b880357e8d06be09d39572d85593e5f199618427ca  /var/tmp/vacant_piext_20260924/home/.pi/agent/extensions/vacant.ts

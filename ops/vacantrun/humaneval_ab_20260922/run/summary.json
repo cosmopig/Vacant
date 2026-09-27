@@ -1,0 +1,440 @@
+{
+  "n": 20,
+  "void": [],
+  "rows": {
+    "ON": [
+      {
+        "task": "HumanEval_0",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 107,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_8",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 100,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 6,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_16",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 106,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_24",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 107,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_40",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 128,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_48",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 95,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_56",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 106,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_64",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 116,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_72",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 104,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_80",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 107,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 9,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_88",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 110,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 6,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_96",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 129,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_104",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 119,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_112",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 155,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_120",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 140,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_128",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 112,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_136",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 147,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_144",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 108,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_152",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 113,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 7,
+        "visible": "2/2",
+        "ws_same": false
+      },
+      {
+        "task": "HumanEval_160",
+        "arm": "ON",
+        "hidden": true,
+        "wall_s": 195,
+        "delivered_file": true,
+        "env_error": false,
+        "accepted": true,
+        "stop_reason": "visible_pass",
+        "requests_seen": 8,
+        "visible": "2/2",
+        "ws_same": false
+      }
+    ],
+    "OFF": [
+      {
+        "task": "HumanEval_0",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 106,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_8",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 105,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_16",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 89,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_24",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 108,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_40",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 143,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_48",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 99,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_56",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 102,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_64",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 107,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_72",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 106,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_80",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 106,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_88",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 112,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_96",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 186,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_104",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 109,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_112",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 108,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_120",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 110,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_128",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 112,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_136",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 105,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_144",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 112,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_152",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 119,
+        "delivered_file": true,
+        "env_error": false
+      },
+      {
+        "task": "HumanEval_160",
+        "arm": "OFF",
+        "hidden": true,
+        "wall_s": 177,
+        "delivered_file": true,
+        "env_error": false
+      }
+    ]
+  },
+  "off": {
+    "delivered": 20,
+    "correct": 20
+  },
+  "on": {
+    "accepted": 20,
+    "refused": 0,
+    "correct": 20,
+    "false_delivery": 0
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "possess_pi_1790058576_8e70c2",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 161,
+      "cases": [
+        {
+          "case": "<module>",
+          "ok": false,
+          "kind": "import",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:8: import solution",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 1,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "1cc35754eea2fd7990e52a5c33245106cee135343e5fc59cafaada953110808e"
+}

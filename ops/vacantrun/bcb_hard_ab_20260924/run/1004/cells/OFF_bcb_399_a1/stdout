@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>The task was to create a function `task_func` that generates a plot of sine and cosine waves with a given frequency and sample size, while handling specific error conditions for negative frequencies or non-positive sample sizes.
+
+I have implemented this in `solution.py`:
+1.  Added input validation for `frequency` (must be $\ge 0$) and `sample_size` (must be $> 0$).
+2.  Generated the sine and cosine waves using `numpy`.
+3.  Created a matplotlib figure with both plots, labeled as 'sin' and 'cos'.
+4.  Returned the figure and axes objects as required.
+
+The solution passed all tests in `tests_visible/test_visible.py`.

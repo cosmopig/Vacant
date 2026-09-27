@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>The task was to implement a function `task_func` that preprocesses text data (removing stopwords, numbers, and punctuation) and then vectorizes it into a DataFrame of word counts.
+
+I have implemented this in `solution.py` by:
+1.  Defining the required imports and constants.
+2.  Creating a preprocessing step using regex to strip non-alphabetic characters and filtering out words from the provided `STOPWORDS` list.
+3.  Using `sklearn.feature_extraction.text.CountVectorizer` to perform the vectorization.
+4.  Returning a DataFrame where columns are unique words and rows are counts.
+
+The tests passed successfully.

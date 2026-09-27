@@ -1,0 +1,5 @@
+Axes(0.125,0.11;0.775x0.77)
+pass test_visible.py::check_test_display_plot
+empty vocabulary; perhaps the documents only contain stop words
+pass test_visible.py::check_test_empty_file
+0 check(s) failed

@@ -1,0 +1,9 @@
+<|channel>thought
+<channel|>The task is completed. I have implemented the `resultsArray` function in `solution.py` according to the requirements in `goal.md` and `contract.md`.
+
+I verified the solution with the examples provided:
+- Example 1: `[1,2,3,4,3,2,5], k=3` -> `[3,4,-1,-1,-1]` (Correct)
+- Example 2: `[2,2,2,2,2], k=4` -> `[-1,-1]` (Correct)
+- Example 3: `[3,2,3,2,3,2], k=2` -> `[-1,3,-1,3,-1]` (Correct)
+
+I also ran the provided test script `run_tests.sh`, and all tests passed.

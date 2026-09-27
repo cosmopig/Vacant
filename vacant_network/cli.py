@@ -28,6 +28,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -1057,6 +1058,63 @@ def _possess_shim(raw: list[str]) -> int:
     return _possess.main(raw)
 
 
+def _guided_install(_possess) -> int | None:
+    """沒裝過 ⇒ 偵測本機 agent、問一句、跑 `possess.install`。回 `None` ＝已經裝過，往下走。
+
+    ⚠ 引導只涵蓋 `possess.INSTALL_GUIDED_AGENTS`（今天只有 pi：那是唯一走 extension、
+      不改寫使用者既有 provider 的一格）。其他 agent 仍走 `vacant install --agent <x>`。
+    ⚠ 裝完印的是 `possess.status()`，它的 `wired`／`proven` 兩欄分開——
+      **裝好不等於被中介**，唯一算數的是之後 proxyd journal 的 `requests_seen`。
+    """
+    import pathlib as _pl
+    if (_possess.state_home(_pl.Path.home()) / "state.json").is_file():
+        return None
+    det = _possess.detect(_pl.Path.home(), probe_shell=True)
+    cands = [a for a in _possess.INSTALL_GUIDED_AGENTS if det[a].present]
+    if not cands:
+        sys.stderr.write(
+            "Vacant 還沒裝進任何 agent，而且本機沒偵測到可引導的 agent"
+            f"（可引導：{', '.join(_possess.INSTALL_GUIDED_AGENTS)}）。\n"
+            "  其他 agent：vacant install --agent <codex|opencode|claude|hermes>\n")
+        return 2
+    print("Vacant 還沒裝進 agent。本機偵測到：")
+    for a in cands:
+        d = det[a]
+        print(f"  {a:<9} {d.binary or '（設定目錄在，PATH 上沒有可執行檔）'}"
+              f"  {d.version or ''}")
+    print("\n裝進去之後：打開 agent 就預設經過 Vacant，輸入框 /vacant on|off|status；"
+          "\n`vacant uninstall` 逐位元還原。**裝好 ≠ 被中介**，之後看 `vacant possess status`。")
+    try:
+        ans = input(f"把 Vacant 裝進 {', '.join(cands)}？[y/N] ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return 130
+    if ans not in ("y", "yes"):
+        print("沒動任何檔案。要手動裝：vacant install --agent pi")
+        return 0
+    try:
+        r = _possess.install(agents=cands)
+    except Exception as e:                                  # noqa: BLE001
+        sys.stderr.write(f"🔴 安裝失敗（一個設定檔都沒動，preflight 擋下）：{e}\n")
+        return 1
+    print(_possess._fmt_status(_possess.status()))
+    ws = r.get("warnings") or []
+    for w in ws:
+        print(w, file=sys.stderr)
+    # 🔴 上游是 sink ⇒ 裝好了但每一通都會被擋。**不准以一個乾淨的成功收尾**
+    #   （2026-09-24 code review：只裝 pi、沒設 OPENAI_BASE_URL 的人會安靜落到這裡）。
+    if any(w.startswith(_possess.SINK_WARNING_HEAD) for w in ws):
+        print("\n🔴 裝好了，但**還不能用**：常駐 proxy 沒有真上游，agent 的每一通模型呼叫"
+              "都會被擋（fail-closed，不會偷偷直連公開 API）。\n"
+              "   修法：vacant uninstall，然後\n"
+              "         vacant install --agent " + cands[0] + " --upstream openai=<你的端點>\n"
+              "   （或先 export OPENAI_BASE_URL=<你的端點> 再裝；"
+              "pi 的話也可以在 ~/.pi/agent/models.json 設一個 provider 的 baseUrl）\n"
+              "   在那之前要用原模型：pi 裡打 /vacant off。")
+        return 1
+    return 0 if not r.get("error") else 1
+
+
 def _on_shim(raw: list[str]) -> int:
     """`vacant` / `vacant on [agent]` —— 選一個本機有的 CLI agent，在 Vacant 底下開。
 
@@ -1078,6 +1136,14 @@ def _on_shim(raw: list[str]) -> int:
 
     want = raw[0] if raw and not raw[0].startswith("-") else None
     passthru = raw[1:] if want else raw
+
+    # ── 裸 `vacant`、還沒裝過 ⇒ 引導安裝（2026-09-22 人類要的「打開就引導綁定」）──
+    #   只在互動終端機問；非 tty **不問也不裝**（安裝會動使用者的檔案與常駐服務，
+    #   不可以在腳本裡安靜發生）。裝過了就直接走下面的選單／`vacant on`。
+    if not raw and sys.stdin.isatty() and sys.stdout.isatty():
+        rc = _guided_install(_possess)
+        if rc is not None:
+            return rc
 
     # 偵測：**不要只看 PATH**。「設定目錄在、PATH 上沒有」是實測過的形狀，
     # possess 為此誤判過兩次，所以借它那一套（含 login shell 探測與

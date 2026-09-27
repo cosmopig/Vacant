@@ -1,0 +1,60 @@
+The task was to implement a function `minArraySum` that calculates the minimum possible sum of an array after applying two types of operations (division by 2 and subtraction of $k$) under certain constraints.
+
+I have implemented the solution using dynamic programming:
+- For each element in the input array, there are four possibilities: no operation, only Operation 1, only Operation 2, or both operations.
+- I calculated the resulting value for each possibility at each index.
+- I used a 2D DP table `dp[i][j]` where $i$ is the number of times Operation 1 has been used and $j$ is the number of times Operation 2 has been used.
+- The state transition considers all four choices for each element, updating the minimum sum for each possible count of operations used.
+
+The solution was verified against the provided test cases in `tests_visible/` using `run_tests.sh`, and all tests passed.
+
+```python
+from typing import List
+
+def minArraySum(nums: List[int], k: int, op1: int, op2: int) -> int:
+    n = len(nums)
+    # dp[i][j] is the minimum sum using i of Op1 and j of Op2
+    # Initialize with a very large value
+    dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]
+    dp[0][0] = 0
+
+    for x in nums:
+        v0 = x
+        v1 = (x + 1) // 2
+        v2 = x - k if x >= k else x
+        
+        # Both operations applied to the same index
+        # Option A: Op1 then Op2
+        res_a = v1 - k if v1 >= k else v1
+        # Option B: Op2 then Op1
+        res_b = (x - k + 1) // 2 if x >= k else x
+        v12 = min(res_a, res_b)
+
+        new_dp = [[float('inf')] * (op2 + 1) for _ in range(op1 + 1)]
+        for i in range(op1 + 1):
+            for j in range(op2 + 1):
+                if dp[i][j] == float('inf'):
+                    continue
+                
+                # Choice 0: No operations
+                new_dp[i][j] = min(new_dp[i][j], dp[i][j] + v0)
+                
+                # Choice 1: Only Op1
+                if i + 1 <= op1:
+                    new_dp[i+1][j] = min(new_dp[i+1][j], dp[i][j] + v1)
+                
+                # Choice 2: Only Op2
+                if j + 1 <= op2:
+                    new_dp[i][j+1] = min(new_dp[i][j+1], dp[i][j] + v2)
+                
+                # Choice 3: Both Op1 and Op2
+                if i + 1 <= op1 and j + 1 <= op2:
+                    new_dp[i+1][j+1] = min(new_dp[i+1][j+1], dp[i][j] + v12)
+        dp = new_dp
+
+    ans = float('inf')
+    for i in range(op1 + 1):
+        for j in range(op2 + 1):
+            ans = min(ans, dp[i][j])
+    return int(ans)
+```

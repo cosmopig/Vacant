@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "auth": "ok", "req_bytes": 5791, "model_requested": "lab-gemma", "status": 200, "resp_bytes": 849, "t": 1790220255.5413737, "bind": "100.124.254.83:18897"}

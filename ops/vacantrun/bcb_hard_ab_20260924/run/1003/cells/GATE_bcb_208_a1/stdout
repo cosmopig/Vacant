@@ -1,0 +1,45 @@
+The task was completed by implementing the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`.
+
+1.  **Validation**: Added a check to ensure `elements` is a positive integer, raising `ValueError` otherwise.
+2.  **Random Walk Generation**: Used `numpy.random.seed(seed)` for reproducibility and generated a random walk of -1s and 1s using `np.random.choice`.
+3.  **Statistics Calculation**: Calculated the required descriptive statistics (count, mean, std, min, 5%, 25%, 50%, 75%, 95%, max) using `pandas` quantile and other methods. I adjusted the keys to match those expected by the test suite (`std`, `min`, `5%`, etc.).
+4.  **Plotting**: Used `matplotlib.pyplot` to plot the random walk and return the Axes object.
+5.  **Verification**: Ran the provided tests using `sh run_tests.sh`, which passed successfully.
+
+The final code in `solution.py` is:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+def task_func(elements, seed=0):
+    if not isinstance(elements, int) or elements <= 0:
+        raise ValueError("elements must be a positive integer")
+
+    np.random.seed(seed)
+    steps = np.random.choice([-1, 1], size=elements)
+    walk = np.cumsum(steps)
+    
+    df = pd.DataFrame(walk, columns=['value'])
+    stats = {
+        "count": int(df['value'].count()),
+        "mean": float(df['value'].mean()),
+        "std": float(df['value'].std()),
+        "min": float(df['value'].min()),
+        "5%": float(df['value'].quantile(0.05)),
+        "25%": float(df['value'].quantile(0.25)),
+        "50%": float(df['value'].median()),
+        "75%": float(df['value'].quantile(0.75)),
+        "95%": float(df['value'].quantile(0.95)),
+        "max": float(df['value'].max())
+    }
+
+    fig, ax = plt.subplots()
+    ax.plot(walk)
+    ax.set_title("Random Walk")
+    ax.set_xlabel("Step")
+    ax.set_ylabel("Value")
+
+    return stats, ax
+```

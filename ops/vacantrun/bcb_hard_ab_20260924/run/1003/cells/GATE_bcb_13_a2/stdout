@@ -1,0 +1,8 @@
+The task was completed by implementing `task_func` in `solution.py`. The function connects to an FTP server, authenticates, changes to the specified directory, lists all files (excluding `.` and `..`), and then attempts to download each file using `wget` via a subprocess. It handles specific exceptions for connection, login, and directory change as required by the goal.
+
+The tests passed successfully.
+```bash
+pass test_visible.py::check_test_case_1
+pass test_visible.py::check_test_case_2
+0 check(s) failed
+```

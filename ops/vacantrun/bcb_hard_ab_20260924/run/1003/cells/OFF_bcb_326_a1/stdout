@@ -1,0 +1,4 @@
+The task was to find and run all `.bat` files in a given directory, returning their file names and exit codes (or `None` if they couldn't be executed). I have implemented this in `solution.py` using `subprocess.Popen` as it is the method mocked by the test suite.
+
+I have verified that the solution passes all tests provided in `tests_visible/`.
+</thought>

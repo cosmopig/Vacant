@@ -1,0 +1,7 @@
+FAIL test_visible.py::check_test_empty_files  AssertionError: FAIL test_empty_files: AssertionError: {'empty_file.txt': 0} != {}
+- {'empty_file.txt': 0}
++ {}
+FAIL test_visible.py::check_test_files_with_special_characters  AssertionError: FAIL test_files_with_special_characters: AssertionError: {'special_chars.txt': 2} != {'hello-world': 1, 'hello_python': 1}
+- {'special_chars.txt': 2}
++ {'hello-world': 1, 'hello_python': 1}
+2 check(s) failed

@@ -1,0 +1,9 @@
+pi 0.87.0
+model gemma-4-12b-it-qat
+upstream https://1003.taild870c4.ts.net/v1 （公開 Tailscale Funnel）
+route PATH shim（vacant install 的 extension 路徑）
+python Python 3.11.15
+vacant_network 0.8.0
+kernel 6.18.44-fc-v37
+git 82cf7c9f
+date 2026-09-22T06:38:28Z

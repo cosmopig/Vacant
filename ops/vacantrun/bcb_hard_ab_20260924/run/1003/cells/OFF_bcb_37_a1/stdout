@@ -1,0 +1,8 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function trains a `RandomForestClassifier`, plots the feature importances using `seaborn` and `matplotlib`, and returns both the trained model and the axes object.
+
+The tests passed successfully.
+```bash
+pass test_visible.py::check_test_case_1
+pass test_visible.py::check_test_case_2
+0 check(s) failed
+```

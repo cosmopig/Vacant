@@ -1,0 +1,47 @@
+The goal was to write a function `task_func` that reads a CSV file, normalizes its text content to ASCII, counts the word frequencies, and returns both a matplotlib bar plot (as an Axes object) of the 10 most common words and a list of tuples containing those words and their frequencies.
+
+I have implemented this in `solution.py`. The implementation includes:
+- Proper handling of `FileNotFoundError` and `IOError` as specified.
+- Text normalization using `unicodedata`.
+- Word counting using `collections.Counter`.
+- Plotting the results using `matplotlib.pyplot`.
+- Adherence to the required imports and function signature.
+
+The solution has been verified against the visible tests provided in the workspace.
+
+```python
+import unicodedata
+import csv
+from collections import Counter
+import matplotlib.pyplot as plt
+
+def task_func(csv_file):
+    try:
+        with open(csv_file, mode='r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            words = []
+            for row in reader:
+                for cell in row:
+                    # Normalize to ASCII
+                    normalized = unicodedata.normalize('NFKD', cell).encode('ascii', 'ignore').decode('ascii')
+                    # Split into words and filter out empty strings
+                    words.extend(normalized.split())
+    except FileNotFoundError:
+        raise FileNotFoundError(f"The CSV file cannot be found at the specified path: {csv_file}")
+    except IOError as e:
+        raise IOError(f"There is an error in reading the file: {e}")
+
+    counts = Counter(words)
+    most_common = counts.most_common(10)
+
+    fig, ax = plt.subplots()
+    if most_common:
+        # Extract words and their frequencies for plotting
+        plot_words = [item[0] for item in most_common]
+        plot_counts = [item[1] for item in most_common]
+        ax.bar(plot_words, plot_counts)
+    else:
+        ax.set_title("No words found")
+
+    return ax, most_common
+```

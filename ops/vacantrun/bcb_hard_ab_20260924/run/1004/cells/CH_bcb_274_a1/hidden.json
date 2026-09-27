@@ -1,0 +1,1 @@
+{"passed": 0, "total": 6, "failures": ["check_test_email_sending_exception: 逾時 120s", "check_test_empty_json_data: 逾時 120s", "check_test_invalid_content_type: 逾時 120s", "check_test_invalid_json_format: 逾時 120s", "check_test_missing_key_in_json_data: 逾時 120s", "check_test_valid_json_request: 逾時 120s"]}

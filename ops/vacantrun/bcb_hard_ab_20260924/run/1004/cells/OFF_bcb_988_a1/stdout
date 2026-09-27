@@ -1,0 +1,14 @@
+<|channel>thought
+<channel|>The task was to implement a function `task_func` that evaluates items in a directory against specified predicates. I have implemented this in `solution.py`.
+
+Key features of the implementation:
+1.  **Input Validation**: It checks if the provided `dir_path` exists and is a directory, raising `FileNotFoundError` otherwise. It also ensures `predicates` is not empty, raising `ValueError` if it is.
+2.  **Predicate Deduplication**: Predicates are deduplicated while preserving their original order.
+3.  **Evaluation Logic**:
+    *   It iterates through all items in the directory using `os.listdir`.
+    *   For each item, it evaluates every unique predicate.
+    *   If a predicate is callable, it's executed directly with the item name.
+    *   If a predicate is a string (like "is_dir"), it maps to internal helper functions (`is_file`, `is_dir`, etc.) or checks the global scope for matching callables.
+4.  **Output**: It returns a dictionary where keys are directory items and values are dictionaries mapping each unique predicate to its boolean result.
+
+All tests in `tests_visible/` passed successfully.

@@ -1,0 +1,4 @@
+UnrecognizedClientException: The security token included in the request is invalid.
+[vacant] ⚠ 未認證（tier B'）：工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。
+[vacant]   · 掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant
+[vacant] pi　**沒有閘門（只中介）**　驗收來源 none　wire 1 通　級別 B'　收據 /tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.vacant-run/possess_pi_1790054734_aa2eeb

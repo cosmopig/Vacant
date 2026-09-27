@@ -1,0 +1,53 @@
+{
+  "cmd": [
+    "pi"
+  ],
+  "text": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write solution.py.",
+  "idle_s": 60.0,
+  "min_run_s": 30.0,
+  "cap_s": 1200.0,
+  "boot_s": 10.0,
+  "events": [
+    {
+      "t": 10.15,
+      "kind": "sent",
+      "what": "task_text"
+    },
+    {
+      "t": 11.17,
+      "kind": "sent",
+      "what": "esc_dismiss_autocomplete"
+    },
+    {
+      "t": 11.59,
+      "kind": "sent",
+      "what": "enter"
+    },
+    {
+      "t": 184.42,
+      "kind": "idle_done",
+      "quiet_s": 60.5
+    },
+    {
+      "t": 184.42,
+      "kind": "sent",
+      "what": "quit_cmd"
+    },
+    {
+      "t": 185.04,
+      "kind": "sent",
+      "what": "esc"
+    },
+    {
+      "t": 185.46,
+      "kind": "sent",
+      "what": "enter"
+    }
+  ],
+  "typed": true,
+  "done_by": "idle",
+  "exit_status": 0,
+  "wall_s": 185.5,
+  "transcript_bytes": 839974,
+  "tui_seen": true
+}

@@ -1,0 +1,8 @@
+All tests passed successfully. I have created the `solution.py` file with the required functionality, including data generation, DataFrame creation, and visualization as specified in `goal.md` and `contract.md`.
+
+Summary of changes:
+1.  Created `solution.py` with the requested imports, constants, and function signature.
+2.  Implemented `task_func` to generate synthetic sales data for multiple categories over a period of time.
+3.  Generated a DataFrame containing 'Date', 'Category', and 'Sales'.
+4.  Visualized the data using Matplotlib, ensuring the plot title matches the expected value ('Category-wise Sales Trends').
+5.  Verified the solution by running `run_tests.sh`.

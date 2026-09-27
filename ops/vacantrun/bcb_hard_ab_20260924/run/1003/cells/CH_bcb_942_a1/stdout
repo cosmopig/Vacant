@@ -1,0 +1,8 @@
+All tests passed! I have implemented the `task_func` in `solution.py`, which generates a sales report DataFrame and visualizes it as requested, with the correct title for the plot.
+
+Summary of changes:
+1. Created `solution.py` with the required imports, constants, and `task_func`.
+2. Implemented data generation using `pd.date_range` and random values with a trend.
+3. Visualized the data using Matplotlib as a line plot for each category.
+4. Adjusted the plot title to 'Category-wise Sales Trends' based on test feedback.
+5. Verified that all tests pass.

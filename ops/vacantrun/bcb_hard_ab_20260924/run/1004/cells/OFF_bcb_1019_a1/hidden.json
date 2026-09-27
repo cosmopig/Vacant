@@ -1,0 +1,1 @@
+{"passed": 4, "total": 5, "failures": ["check_test_ocr_fails_comment_extraction_succeeds: + Mocked Comment in cp1251"]}

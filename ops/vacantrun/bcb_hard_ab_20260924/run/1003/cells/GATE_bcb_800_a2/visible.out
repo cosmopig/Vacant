@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_case_1  AssertionError: ERROR test_case_1: TypeError: int() argument must be a string, a bytes-like object or a real number, not 'dict'
+FAIL test_visible.py::check_test_case_2  AssertionError: ERROR test_case_2: TypeError: int() argument must be a string, a bytes-like object or a real number, not 'dict'
+2 check(s) failed

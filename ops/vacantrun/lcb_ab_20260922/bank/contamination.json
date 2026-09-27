@@ -1,0 +1,190 @@
+{
+  "base": "http://127.0.0.1:19000/v1",
+  "model": "gemma-4-12b-it-qat",
+  "positive_controls": [
+    {
+      "title": "Two Sum",
+      "verdict": "RECALLED",
+      "answer": "Given an array of integers and a target value, find the indices of the two numbers that add up to that target."
+    },
+    {
+      "title": "Merge Two Sorted Lists",
+      "verdict": "RECALLED",
+      "answer": "Given the heads of two sorted linked lists, merge the two lists into one sorted list and return the head of the merged list."
+    },
+    {
+      "title": "Valid Parentheses",
+      "verdict": "RECALLED",
+      "answer": "Determine if a given string containing various types of brackets is valid by ensuring that every opening bracket is closed by its corresponding closing bracket in the correct order."
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "lcbv6_3722",
+      "title": "sum-of-k-subarrays-with-length-at-least-m",
+      "contest_date": "2025-03-01",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3748",
+      "title": "sort-matrix-by-diagonals",
+      "contest_date": "2025-02-08",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3754",
+      "title": "maximum-manhattan-distance-after-k-changes",
+      "contest_date": "2025-02-01",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3760",
+      "title": "assign-elements-to-groups-with-constraints",
+      "contest_date": "2025-02-08",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3764",
+      "title": "maximum-sum-with-at-most-k-elements",
+      "contest_date": "2025-02-22",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3776",
+      "title": "find-minimum-cost-to-remove-array-elements",
+      "contest_date": "2025-03-01",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3785",
+      "title": "find-the-number-of-copy-arrays",
+      "contest_date": "2025-03-01",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3791",
+      "title": "fruits-into-baskets-iii",
+      "contest_date": "2025-03-08",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3794",
+      "title": "find-the-minimum-amount-of-time-to-brew-potions",
+      "contest_date": "2025-03-22",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3805",
+      "title": "maximize-active-section-with-trade-i",
+      "contest_date": "2025-03-29",
+      "difficulty": "medium",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3692",
+      "title": "shortest-matching-substring",
+      "contest_date": "2025-02-15",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3696",
+      "title": "count-substrings-divisible-by-last-digit",
+      "contest_date": "2025-02-08",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3697",
+      "title": "minimum-increments-for-target-multiples-in-an-array",
+      "contest_date": "2025-02-01",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3701",
+      "title": "minimum-cost-good-caption",
+      "contest_date": "2025-02-01",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3717",
+      "title": "minimum-operations-to-make-elements-within-k-subarrays-equal",
+      "contest_date": "2025-03-29",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3733",
+      "title": "length-of-longest-v-shaped-diagonal-segment",
+      "contest_date": "2025-02-15",
+      "difficulty": "hard",
+      "verdict": "RECALLED",
+      "answer": "Given a 2D grid of integers, find the length of the longest V-shaped diagonal segment where the values are strictly increasing and there is exactly one 90-degree turn."
+    },
+    {
+      "task_id": "lcbv6_3744",
+      "title": "minimum-operations-to-make-array-elements-zero",
+      "contest_date": "2025-03-22",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3762",
+      "title": "maximize-the-minimum-game-score",
+      "contest_date": "2025-02-08",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3765",
+      "title": "minimum-cost-to-divide-array-into-subarrays",
+      "contest_date": "2025-03-29",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    },
+    {
+      "task_id": "lcbv6_3770",
+      "title": "lexicographically-smallest-generated-string",
+      "contest_date": "2025-03-01",
+      "difficulty": "hard",
+      "verdict": "UNKNOWN",
+      "answer": "UNKNOWN"
+    }
+  ],
+  "positive_controls_recalled": "3/3",
+  "summary": {
+    "n": 20,
+    "recalled": 1,
+    "unknown": 19,
+    "empty": 0
+  }
+}

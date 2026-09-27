@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "installed_at": 1790056383.3133488,
+  "installed_at_iso": "2026-09-22T05:53:03+0000",
+  "home": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude",
+  "python": "/home/user/Vacant/.venv/bin/python3",
+  "port": 18788,
+  "upstreams": {
+    "openai": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "sink（沒有人指定）"
+    },
+    "anthropic": {
+      "url": "https://api.anthropic.com",
+      "source": "--upstream"
+    }
+  },
+  "agents": [
+    "claude"
+  ],
+  "not_detected": [],
+  "detected": {
+    "claude": {
+      "agent": "claude",
+      "config_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.claude",
+      "config_file_exists": false,
+      "binary": "/opt/node22/bin/claude",
+      "binary_via": "path",
+      "version": "2.1.278 (Claude Code)",
+      "present": true
+    },
+    "codex": {
+      "agent": "codex",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    },
+    "opencode": {
+      "agent": "opencode",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    },
+    "pi": {
+      "agent": "pi",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    },
+    "hermes": {
+      "agent": "hermes",
+      "config_dir": null,
+      "config_file_exists": false,
+      "binary": null,
+      "binary_via": "none",
+      "version": null,
+      "present": false
+    }
+  },
+  "channel": {
+    "claude": {
+      "ok": true,
+      "files": [
+        {
+          "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.claude/settings.json",
+          "action": "create",
+          "before_sha256": null,
+          "after_sha256": "66ac1e5ce4702bcea3ac15b2ebc064f426fc778408864ba94fd9dd496b7ca42b",
+          "backup": null,
+          "note": "env.ANTHROPIC_BASE_URL"
+        }
+      ],
+      "measured": "2026-09-19（macOS，Claude Code 2.1.278，2 通）／2026-09-20（vacant-dev Ubuntu 24.04，Claude Code 2.1.259，3 通，**隔離 HOME**）",
+      "verified": true,
+      "startable": null,
+      "startable_reason": "⚠ 沒量（--no-startable-probe）",
+      "proven": true,
+      "proven_note": "requests_seen=10 @ 2026-09-22T05:54:34+0000"
+    }
+  },
+  "shim_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.vacant/possess/bin",
+  "shims": [
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.vacant/possess/bin/claude"
+  ],
+  "service": {
+    "backend": "bare",
+    "pid": 29668,
+    "supervised": false,
+    "boot_persistent": false,
+    "rc": 0,
+    "changes": []
+  },
+  "preflight": {
+    "listening": true,
+    "roundtrip": 502,
+    "detail": "proxy 活著；上游回非 2xx（sink ⇒ 502 是預期的）"
+  },
+  "systemd_path_env": {
+    "file": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.config/environment.d/50-vacant-possess.conf",
+    "applied_now": false,
+    "changes": [
+      {
+        "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.config/environment.d/50-vacant-possess.conf",
+        "action": "create",
+        "before_sha256": null,
+        "after_sha256": "23e679ec0222809b36a7fbac1a5d31f317875a72d551bd201cc6f80c280d0f80",
+        "backup": null,
+        "note": "systemd --user 的 PATH（environment.d）"
+      }
+    ]
+  },
+  "gate_reach": {
+    "shim_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.vacant/possess/bin",
+    "forms": {
+      "bash -lic": {
+        "why": "人類開終端機",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -lc": {
+        "why": "登入非互動",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -c '. ~/.bashrc'": {
+        "why": "ssh 主機 '指令' 的等價路徑（非真 ssh）",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "bash -c": {
+        "why": "腳本／cron／ExecStart=",
+        "available": true,
+        "on_path": false,
+        "count": 0,
+        "rc": 0
+      },
+      "systemd-run --user": {
+        "why": "展場無人值守迴圈",
+        "available": false,
+        "on_path": null,
+        "note": "⚠ 沒量到，不是量到 False",
+        "error": "Failed to connect to bus: No medium found\n"
+      }
+    },
+    "covered": [],
+    "not_covered": [
+      "bash -lic",
+      "bash -lc",
+      "bash -c '. ~/.bashrc'",
+      "bash -c"
+    ],
+    "unmeasured": [
+      "systemd-run --user"
+    ],
+    "duplicated": {},
+    "interactive_only": false,
+    "headline": "⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）",
+    "measured": true
+  },
+  "agent_posture": {
+    "claude": {
+      "agent": "claude",
+      "sandbox_mode": null,
+      "approval_policy": null,
+      "flags": null,
+      "source": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.claude/settings.json",
+      "measured": true,
+      "note": "⚠ Claude Code 沒有 codex 那種 `sandbox_mode` 欄位；這裡量的是 `permissions.defaultMode`，`--dangerously-skip-permissions` 是**命令列**旗標，要看 `flags`（那一格由 shim 逐跑記）"
+    }
+  },
+  "codex_sandbox_requested": "workspace-write",
+  "warnings": [
+    "⚠ 這幾個 agent 的 `startable` **沒量到**（不是起不來）：claude",
+    "⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）",
+    "⚠ `bare` 後端＝自己 fork，**撐不過重開機**，不准說成「常駐」。"
+  ],
+  "files": [
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.claude/settings.json",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "66ac1e5ce4702bcea3ac15b2ebc064f426fc778408864ba94fd9dd496b7ca42b",
+      "backup": null,
+      "note": "env.ANTHROPIC_BASE_URL"
+    },
+    {
+      "path": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.config/environment.d/50-vacant-possess.conf",
+      "action": "create",
+      "before_sha256": null,
+      "after_sha256": "23e679ec0222809b36a7fbac1a5d31f317875a72d551bd201cc6f80c280d0f80",
+      "backup": null,
+      "note": "systemd --user 的 PATH（environment.d）"
+    }
+  ]
+}

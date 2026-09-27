@@ -1,0 +1,212 @@
+{
+  "source": "https://huggingface.co/datasets/livecodebench/code_generation_lite (test6.jsonl)",
+  "platform": "leetcode only（atcoder 是 stdin/stdout 型，排除）",
+  "per_difficulty": 10,
+  "min_contest_date": "2025-02-01",
+  "picked_n": 20,
+  "picked": [
+    {
+      "task_id": "lcbv6_3722",
+      "qid": "3722",
+      "entry_point": "maxSum",
+      "difficulty": "medium",
+      "title": "sum-of-k-subarrays-with-length-at-least-m",
+      "contest_date": "2025-03-01",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3748",
+      "qid": "3748",
+      "entry_point": "sortMatrix",
+      "difficulty": "medium",
+      "title": "sort-matrix-by-diagonals",
+      "contest_date": "2025-02-08",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3754",
+      "qid": "3754",
+      "entry_point": "maxDistance",
+      "difficulty": "medium",
+      "title": "maximum-manhattan-distance-after-k-changes",
+      "contest_date": "2025-02-01",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3760",
+      "qid": "3760",
+      "entry_point": "assignElements",
+      "difficulty": "medium",
+      "title": "assign-elements-to-groups-with-constraints",
+      "contest_date": "2025-02-08",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3764",
+      "qid": "3764",
+      "entry_point": "maxSum",
+      "difficulty": "medium",
+      "title": "maximum-sum-with-at-most-k-elements",
+      "contest_date": "2025-02-22",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3776",
+      "qid": "3776",
+      "entry_point": "minCost",
+      "difficulty": "medium",
+      "title": "find-minimum-cost-to-remove-array-elements",
+      "contest_date": "2025-03-01",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3785",
+      "qid": "3785",
+      "entry_point": "countArrays",
+      "difficulty": "medium",
+      "title": "find-the-number-of-copy-arrays",
+      "contest_date": "2025-03-01",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3791",
+      "qid": "3791",
+      "entry_point": "numOfUnplacedFruits",
+      "difficulty": "medium",
+      "title": "fruits-into-baskets-iii",
+      "contest_date": "2025-03-08",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3794",
+      "qid": "3794",
+      "entry_point": "minTime",
+      "difficulty": "medium",
+      "title": "find-the-minimum-amount-of-time-to-brew-potions",
+      "contest_date": "2025-03-22",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3805",
+      "qid": "3805",
+      "entry_point": "maxActiveSectionsAfterTrade",
+      "difficulty": "medium",
+      "title": "maximize-active-section-with-trade-i",
+      "contest_date": "2025-03-29",
+      "visible_n": 4,
+      "hidden_n": 44
+    },
+    {
+      "task_id": "lcbv6_3692",
+      "qid": "3692",
+      "entry_point": "shortestMatchingSubstring",
+      "difficulty": "hard",
+      "title": "shortest-matching-substring",
+      "contest_date": "2025-02-15",
+      "visible_n": 4,
+      "hidden_n": 44
+    },
+    {
+      "task_id": "lcbv6_3696",
+      "qid": "3696",
+      "entry_point": "countSubstrings",
+      "difficulty": "hard",
+      "title": "count-substrings-divisible-by-last-digit",
+      "contest_date": "2025-02-08",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3697",
+      "qid": "3697",
+      "entry_point": "minimumIncrements",
+      "difficulty": "hard",
+      "title": "minimum-increments-for-target-multiples-in-an-array",
+      "contest_date": "2025-02-01",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3701",
+      "qid": "3701",
+      "entry_point": "minCostGoodCaption",
+      "difficulty": "hard",
+      "title": "minimum-cost-good-caption",
+      "contest_date": "2025-02-01",
+      "visible_n": 3,
+      "hidden_n": 43
+    },
+    {
+      "task_id": "lcbv6_3717",
+      "qid": "3717",
+      "entry_point": "minOperations",
+      "difficulty": "hard",
+      "title": "minimum-operations-to-make-elements-within-k-subarrays-equal",
+      "contest_date": "2025-03-29",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3733",
+      "qid": "3733",
+      "entry_point": "lenOfVDiagonal",
+      "difficulty": "hard",
+      "title": "length-of-longest-v-shaped-diagonal-segment",
+      "contest_date": "2025-02-15",
+      "visible_n": 4,
+      "hidden_n": 44
+    },
+    {
+      "task_id": "lcbv6_3744",
+      "qid": "3744",
+      "entry_point": "minOperations",
+      "difficulty": "hard",
+      "title": "minimum-operations-to-make-array-elements-zero",
+      "contest_date": "2025-03-22",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3762",
+      "qid": "3762",
+      "entry_point": "maxScore",
+      "difficulty": "hard",
+      "title": "maximize-the-minimum-game-score",
+      "contest_date": "2025-02-08",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3765",
+      "qid": "3765",
+      "entry_point": "minimumCost",
+      "difficulty": "hard",
+      "title": "minimum-cost-to-divide-array-into-subarrays",
+      "contest_date": "2025-03-29",
+      "visible_n": 2,
+      "hidden_n": 42
+    },
+    {
+      "task_id": "lcbv6_3770",
+      "qid": "3770",
+      "entry_point": "generateString",
+      "difficulty": "hard",
+      "title": "lexicographically-smallest-generated-string",
+      "contest_date": "2025-03-01",
+      "visible_n": 3,
+      "hidden_n": 43
+    }
+  ],
+  "skipped": [],
+  "source_file_sha256": "bb4c364f71921c4495a6ad15abe1a927350b720009f4933e2e71f8af0f6fd1f5",
+  "note_hidden_not_shipped": "隱藏測資（private_test_cases，58 MB）**不入庫**：題庫是公開的，照 repo 慣例只釘 sha256 ＋ 產生器。用 tools/build.py 對同一份 test6.jsonl 重跑即可逐位元重建。"
+}

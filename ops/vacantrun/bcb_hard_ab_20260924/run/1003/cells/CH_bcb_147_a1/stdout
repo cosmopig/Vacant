@@ -1,0 +1,43 @@
+The task was to implement a function `task_func` that scans a specified IP address range and checks if a given port is open on each IP, returning a dictionary of results. I have implemented this in `solution.py` using the `socket`, `ipaddress`, and `threading` modules as required.
+
+The implementation:
+1. Parses the `ip_range` into an `IPv4Network` object.
+2. Iterates through all IP addresses in the network.
+3. Uses threads to concurrently check each IP address for the specified port.
+4. For each IP, it attempts a socket connection with a timeout of 1 second.
+5. If the connection is successful, the status is set to `True`; otherwise, it's set to `False`.
+6. Returns a dictionary mapping each IP string to its boolean status.
+
+I have verified that the solution passes all provided tests in `tests_visible/test_visible.py`.
+
+```python
+import socket
+from ipaddress import IPv4Network
+from threading import Thread
+
+def task_func(ip_range, port):
+    network = IPv4Network(ip_range)
+    results = {}
+
+    def check_ip(ip):
+        ip_str = str(ip)
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1.0)
+            s.connect((ip_str, port))
+            results[ip_str] = True
+            s.close()
+        except (socket.timeout, ConnectionRefusedError, OSError):
+            results[ip_str] = False
+
+    threads = []
+    for ip in network:
+        t = Thread(target=check_ip, args=(ip,))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    return results
+```

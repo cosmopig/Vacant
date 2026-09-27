@@ -1,0 +1,9 @@
+The task was to solve a problem where we need to find the maximum number of non-empty subarrays that do not contain both elements of any conflicting pair after removing exactly one conflicting pair from a given set.
+
+I have implemented this by:
+1.  Representing each conflicting pair as $(L, R)$ where $L = \min(a, b)$ and $R = \max(a, b)$.
+2.  Calculating the number of "bad" subarrays for all pairs using the property that a subarray $[i, j]$ is bad if there exists some $(L_k, R_k)$ such that $1 \le i \le L_k$ and $R_k \le j$. This count is $\sum_{j=1}^n M(j)$, where $M(j) = \max \{L_k \mid R_k \le j\}$.
+3.  Determining the reduction in the number of bad subarrays when a specific pair $(L_p, R_p)$ is removed. The reduction occurs only for indices $j \ge R_p$ where $L_p$ was the unique maximum value among all pairs with $R_k \le j$.
+4.  Using prefix sums to efficiently calculate these reductions for all possible removals and returning the maximum result.
+
+The solution has been verified against the provided test cases.

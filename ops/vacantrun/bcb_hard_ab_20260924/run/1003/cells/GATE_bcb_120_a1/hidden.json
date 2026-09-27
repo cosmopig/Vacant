@@ -1,0 +1,1 @@
+{"passed": 4, "total": 6, "failures": ["check_test_reproducibility_with_seed: Diff is 6275 characters long. Set self.maxDiff to None to see it. : DataFrame contents should match the expected output", "check_test_series_length: AssertionError: FAIL test_series_length: AssertionError: 10 != 9"]}

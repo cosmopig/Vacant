@@ -1,0 +1,1 @@
+{"passed": 1, "total": 5, "failures": ["check_test_all_extensions: + ['file1.txt', 'file2.csv', 'file3.xlsx', 'file4.jpg']", "check_test_empty_source_directory: + []", "check_test_exception_handling: AssertionError: FAIL test_exception_handling: AssertionError: False is not true", "check_test_successful_transfer: + ['file1.txt', 'file2.csv']"]}

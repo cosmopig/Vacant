@@ -1,0 +1,66 @@
+<|channel>thought
+<channel|>```python
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+def task_func(df, freq='D', decomposition_model='multiplicative'):
+    # Validation checks
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("df must be a pandas DataFrame")
+    
+    if 'value' not in df.columns:
+        raise ValueError("DataFrame must contain a 'value' column")
+    
+    if not pd.api.types.is_numeric_dtype(df['value']):
+        raise ValueError("'value' column must contain numeric data types")
+
+    valid_models = ['additive', 'multiplicative']
+    if decomposition_model not in valid_models:
+        raise ValueError("decomposition_model must be either 'additive' or 'multiplicative'")
+
+    if not isinstance(freq, str):
+        raise ValueError("freq must be a string")
+
+    # Ensure the dataframe has a proper index for seasonal_decompose.
+    df_work = df.copy()
+    
+    if 'date' in df_work.columns:
+        df_work['date'] = pd.to_datetime(df_work['date'])
+        df_work = df_work.set_index('date')
+    elif not isinstance(df_work.index, pd.DatetimeIndex):
+        # If no 'date' column and index is not datetime, we might need to handle it.
+        pass
+
+    if df_work.index.freq is None:
+        try:
+            df_work = df_work.asfreq(freq)
+        except Exception as e:
+            raise ValueError(f"Invalid frequency string or index for freq '{freq}': {e}")
+
+    # Check if we have enough data points (seasonal_decompose requires at least 2 periods)
+    if len(df_work) < 2:
+        raise ValueError("Insufficient data for decomposition")
+
+    try:
+        result = seasonal_decompose(df_work['value'], model=decomposition_model)
+    except Exception as e:
+        if "not enough observations" in str(e).lower() or "frequency" in str(e).lower():
+            raise ValueError(f"Insufficient data for decomposition: {e}")
+        else:
+            raise ValueError(f"An error occurred during decomposition: {e}")
+
+    # The goal says output with a tuple containing the result and the matplotlib Axes object.
+    fig, ax = plt.subplots()
+    try:
+        result.plot(ax=ax)
+    except TypeError:
+        # Fallback for versions where .plot() doesn't accept 'ax'
+        # We plot components manually on the axes to ensure we return a valid Axes object.
+        ax1 = ax.twinx()
+        result.trend.plot(ax=ax, label='Trend')
+        result.seasonal.plot(ax=ax1, label='Seasonal')
+        result.resid.plot(ax=ax, label='Residual')
+
+    return result, ax
+```

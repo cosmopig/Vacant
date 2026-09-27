@@ -1,0 +1,10 @@
+All tests passed successfully. I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`. The function generates synthetic sales data for different categories over a period of time, creates a DataFrame with the specified columns, and visualizes it using Matplotlib with the correct title.
+
+Summary of changes:
+- Created `solution.py` with the requested imports, constants, and `task_func`.
+- Implemented date generation using `pd.date_range`.
+- Generated synthetic sales data for each category.
+- Created a DataFrame containing 'Date', 'Category', and 'Sales'.
+- Visualized the data in a line plot with appropriate labels, title ('Category-wise Sales Trends'), and legend.
+- Returned both the DataFrame and the Matplotlib Axes object.
+- Verified that all tests pass.

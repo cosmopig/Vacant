@@ -1,0 +1,41 @@
+<thought
+Everything is perfect.
+I have completed the task. I read `goal.md` and `contract.md`, implemented the `countPairs` function in `solution.py` following the requirements, and verified the solution by running the provided tests.
+
+The `countPairs` function works by iterating through all pairs $(i, j)$ with $i < j$ and checking if they are "almost equal". Two numbers are considered almost equal if they are identical or if one can be transformed into the other by swapping two digits. To handle cases where numbers have different numbers of digits (e.g., 3 and 30), I pad the shorter number with leading zeros so that they have the same length, which correctly reflects the "leading zeros" rule mentioned in the problem.
+
+```python
+from typing import List
+
+def countPairs(nums: List[int]):
+    def is_almost_equal(x: int, y: int) -> bool:
+        s1 = str(x)
+        s2 = str(y)
+        L = max(len(s1), len(s2))
+        s1 = s1.zfill(L)
+        s2 = s2.zfill(L)
+        
+        if s1 == s2:
+            return True
+        
+        diffs = []
+        for i in range(L):
+            if s1[i] != s2[i]:
+                diffs.append(i)
+        
+        if len(diffs) == 2:
+            idx1, idx2 = diffs
+            return s1[idx1] == s2[idx2] and s1[idx2] == s2[idx1]
+        
+        return False
+
+    count = 0
+    n = len(nums)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if is_almost_equal(nums[i], nums[j]):
+                count += 1
+    return count
+```
+
+The tests in `tests_visible/test_visible.py` passed successfully.

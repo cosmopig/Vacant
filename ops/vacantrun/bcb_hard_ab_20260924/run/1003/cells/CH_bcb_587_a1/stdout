@@ -1,0 +1,11 @@
+The task is completed successfully. I have implemented the `task_func` in `solution.py` which:
+1. Reads the content of a given file.
+2. Generates RSA public and private keys using the `rsa` library.
+3. Generates a random 32-byte AES key and a 16-byte IV.
+4. Encrypts the file content using AES-CBC with PKCS7 padding from the `cryptography` library.
+5. Prepends the IV to the encrypted data.
+6. Encrypts the AES key using the RSA public key via `rsa.encrypt`.
+7. Saves the encrypted data and the encrypted AES key into separate files (`encrypted_data.bin` and `encrypted_key.bin`).
+8. Returns the RSA public key, the filename of the encrypted file, and the filename of the encrypted AES key.
+
+The tests passed successfully.

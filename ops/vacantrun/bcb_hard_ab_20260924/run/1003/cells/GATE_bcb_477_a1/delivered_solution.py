@@ -1,0 +1,41 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+def task_func(N=100, CATEGORIES=["A", "B", "C", "D", "E"], seed=42):
+    np.random.seed(seed)
+
+    # Generate random x and y values
+    x = np.random.rand(N)
+    y = np.random.rand(N)
+
+    # Handle categories
+    num_categories = len(CATEGORIES)
+    if N >= num_categories:
+        # Ensure each category appears at least once
+        final_categories = list(CATEGORIES)
+        remaining_count = N - num_categories
+        # Randomly choose the remaining categories from CATEGORIES (with replacement)
+        extra_categories = np.random.choice(CATEGORIES, size=remaining_count, replace=True).tolist()
+        final_categories.extend(extra_categories)
+        np.random.shuffle(final_categories)
+    else:
+        # Sample without replacement if N < num_categories
+        final_categories = np.random.choice(CATEGORIES, size=N, replace=False).tolist()
+
+    df = pd.DataFrame({
+        "x": x,
+        "y": y,
+        "category": final_categories
+    })
+
+    # Plotting
+    fig, ax = plt.subplots()
+    for cat in CATEGORIES:
+        subset = df[df["category"] == cat]
+        ax.scatter(subset["x"], subset["y"], label=cat)
+
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.legend()
+
+    return df, ax

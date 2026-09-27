@@ -1,0 +1,46 @@
+<thought>The tests passed! I'm done. I'll just double check everything one last time.
+`goal.md`:
+- Create a noisy sine wave of a specified length: `x = np.linspace(0, 2 * np.pi, array_length)`, `y_noisy = np.sin(x) + noise_level * np.random.randn(array_length)`. Done.
+- Adjusts a curve using `curve_fit` from `scipy.optimize` to the data: `popt, pcov = curve_fit(sine_func, x, y_noisy, p0=[1, 1, 0])`. Done.
+- Output with: Axes object: A plot showing the noisy sine wave and its adjusted curve. Done.
+- Signature: `def task_func(array_length=100, noise_level=0.2):`. Done.
+- Imports: `from scipy.optimize import curve_fit`, `import matplotlib.pyplot as plt`, `import numpy as np`. Done.
+
+`contract.md`:
+- File name: `solution.py`. Done.
+- Top-level function `task_func`. Done.
+- Signature matches exactly. Done.
+
+The tests passed, so the implementation is correct according to the requirements.
+</thought>I have implemented the `task_func` in `solution.py` as requested. The function creates a noisy sine wave, fits a sine wave to it using `scipy.optimize.curve_fit`, and returns a `matplotlib.Axes` object containing the plot of both the noisy data and the fitted curve.
+
+```python
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+import numpy as np
+
+def sine_func(x, a, b, c):
+    return a * np.sin(b * x + c)
+
+def task_func(array_length=100, noise_level=0.2):
+    x = np.linspace(0, 2 * np.pi, array_length)
+    y_true = np.sin(x)
+    noise = noise_level * np.random.randn(array_length)
+    y_noisy = y_true + noise
+
+    # Fit the sine function to the noisy data
+    # We need some initial guesses for curve_fit
+    popt, pcov = curve_fit(sine_func, x, y_noisy, p0=[1, 1, 0])
+
+    # Plotting
+    fig, ax = plt.subplots()
+    ax.plot(x, y_noisy, label='noisy sine wave')
+    ax.plot(x, sine_func(x, *popt), label='fitted curve')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+
+    return ax
+```
+
+The solution has been verified with the provided tests.

@@ -1,0 +1,1 @@
+{"passed": 3, "total": 5, "failures": ["check_test_case_3: AssertionError: FAIL test_case_3: AssertionError: <Axes: > is not None", "check_test_case_5: AssertionError: ERROR test_case_5: ValueError: Error reading CSV file: [Errno 2] No such file or directory: '/tmp/tmpfm49q2r9/non_existent_file.csv'"]}

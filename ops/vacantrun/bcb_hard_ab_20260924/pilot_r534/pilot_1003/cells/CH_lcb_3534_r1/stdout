@@ -1,0 +1,20 @@
+The solution has been implemented in `solution.py`. I have verified that it passes all visible tests by running `sh run_tests.sh`.
+
+Summary of implementation:
+1.  For each number $n$ in the input list, I generate a set $V(n)$ containing $n$ itself and all integers reachable from $n$ by performing at most one swap of digits in its string representation.
+2.  I then iterate through all pairs $(i, j)$ with $i < j$ and check if `nums[i]` is in $V(nums[j])$ or `nums[j]` is in $V(nums[i])$.
+3.  The count of such pairs is returned as the final answer.
+
+This correctly handles:
+-   Numbers that are already equal (0 swaps).
+-   Numbers that can be made equal by swapping digits in either one of them.
+-   Leading zeros after a swap (e.g., `30` becomes `03`, which is integer `3`).
+-   Constraints on the size of `nums` and the value of its elements.
+
+The tests passed successfully.
+```bash
+pass test_visible.py::check_visible_01
+pass test_visible.py::check_visible_02
+pass test_visible.py::check_visible_03
+0 check(s) failed
+```

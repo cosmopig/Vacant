@@ -1,0 +1,12 @@
+The task was to identify duplicate rows from a CSV file, convert them into a pandas DataFrame, and plot them using matplotlib. I have implemented this in `solution.py` as requested by the `goal.md` and `contract.md` files.
+
+Specifically:
+1.  I checked if the input file has a `.csv` extension, raising a `ValueError` otherwise.
+2.  I used the `csv` library to read all rows from the file.
+3.  I used `collections.Counter` to count occurrences of each row (as a tuple).
+4.  I identified duplicates (rows with counts > 1) and stored them in a dictionary.
+5.  I created a pandas DataFrame containing these duplicate rows and their respective counts.
+6.  I plotted the data as a bar chart using `matplotlib`, including the required title "Duplicate Entries" and y-label "Count".
+7.  The function returns both the duplicates dictionary and the matplotlib Axes object.
+
+All tests passed successfully.

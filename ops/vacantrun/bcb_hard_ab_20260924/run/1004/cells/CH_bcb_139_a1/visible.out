@@ -1,0 +1,4 @@
+pass test_visible.py::check_test_correctness_of_histogram_lines
+pass test_visible.py::check_test_histograms_count
+pass test_visible.py::check_test_invalid_input_empty_dataframe
+0 check(s) failed

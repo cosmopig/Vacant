@@ -1,0 +1,26 @@
+The task is completed. I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`. The function creates a Pandas DataFrame with random integers, counts non-zero values per column, and visualizes them using a bar plot. It also handles the case where `rows=0` correctly by ensuring no bars are plotted when there is no data, satisfying the test requirements.
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+# Constants
+COLUMNS = ['Column1', 'Column2', 'Column3', 'Column4', 'Column5']
+def task_func(rows):
+    # Create a DataFrame with random integer values between 0 and 9
+    data = np.random.randint(0, 10, size=(rows, len(COLUMNS)))
+    df = pd.DataFrame(data, columns=COLUMNS)
+
+    # Count the non-zero values in each column
+    non_zero_counts = (df != 0).sum()
+
+    # Visualize this information using a bar plot
+    fig, ax = plt.subplots()
+    if rows > 0:
+        non_zero_counts.plot(kind='bar', ax=ax)
+        ax.set_title('Non-Zero Values Count')
+        ax.set_xlabel('Columns')
+        ax.set_ylabel('Count')
+
+    return df, ax
+```

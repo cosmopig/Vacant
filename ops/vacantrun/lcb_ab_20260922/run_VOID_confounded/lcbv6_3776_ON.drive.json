@@ -1,0 +1,70 @@
+{
+  "cmd": [
+    "/home/user/Vacant/.venv/bin/vacant",
+    "on",
+    "pi",
+    "--workspace",
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/lcb/run/ws_lcbv6_3776_ON",
+    "--run-dir",
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/lcb/run/rd_lcbv6_3776_ON",
+    "--suite",
+    "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/lcb/tasks/lcbv6_3776/tests_visible",
+    "--task-id",
+    "he_lcbv6_3776_ON",
+    "--sandbox",
+    "none",
+    "--test-timeout",
+    "120",
+    "--retry",
+    "none",
+    "--allow-public-upstream"
+  ],
+  "text": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write solution.py.",
+  "idle_s": 75.0,
+  "min_run_s": 30.0,
+  "cap_s": 1500.0,
+  "boot_s": 10.0,
+  "events": [
+    {
+      "t": 10.17,
+      "kind": "sent",
+      "what": "task_text"
+    },
+    {
+      "t": 11.19,
+      "kind": "sent",
+      "what": "esc_dismiss_autocomplete"
+    },
+    {
+      "t": 11.61,
+      "kind": "sent",
+      "what": "enter"
+    },
+    {
+      "t": 328.79,
+      "kind": "idle_done",
+      "quiet_s": 75.7
+    },
+    {
+      "t": 328.79,
+      "kind": "sent",
+      "what": "quit_cmd"
+    },
+    {
+      "t": 329.42,
+      "kind": "sent",
+      "what": "esc"
+    },
+    {
+      "t": 329.83,
+      "kind": "sent",
+      "what": "enter"
+    }
+  ],
+  "typed": true,
+  "done_by": "idle",
+  "exit_status": 5120,
+  "wall_s": 330.8,
+  "transcript_bytes": 1815379,
+  "tui_seen": true
+}

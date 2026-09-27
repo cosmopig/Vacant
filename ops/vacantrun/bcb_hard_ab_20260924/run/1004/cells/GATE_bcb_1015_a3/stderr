@@ -1,0 +1,3 @@
+[vacant] ⚠ 未認證（tier B'）：工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。
+[vacant]   · 掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant
+[vacant] pi　拒交　驗收來源 env:VACANT_SUITE　wire 21 通　級別 B'　收據 /var/tmp/vacant_piext_20260924/pilot_1004/home_on/.vacant-run/possess_pi_1790254801_adf90e

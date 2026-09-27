@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_data_range
+pass test_visible.py::check_test_plot_attributes
+0 check(s) failed

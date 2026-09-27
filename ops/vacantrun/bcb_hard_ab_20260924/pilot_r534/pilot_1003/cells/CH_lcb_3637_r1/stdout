@@ -1,0 +1,67 @@
+The problem asks for the number of distinct permutations of a string of digits such that the sum of digits at even indices equals the sum of digits at odd indices, modulo $10^9 + 7$.
+
+I have implemented this using dynamic programming. The key observations are:
+1. Let $n$ be the length of the input string `num`.
+2. Let $S$ be the total sum of all digits in `num`. For a balanced permutation to exist, $S$ must be even because $S_{even} = S_{odd}$ implies $S = 2 \cdot S_{even}$.
+3. The number of even indices is $n_e = \lceil n/2 \rceil$ and the number of odd indices is $n_o = \lfloor n/2 \rfloor$.
+4. We need to choose $n_e$ digits from the available counts $\{c_0, c_1, \dots, c_9\}$ such that their sum is $S/2$. Let $k_i$ be the count of digit $i$ chosen for even positions ($0 \le k_i \le c_i$).
+5. The number of ways to arrange these digits in even and odd positions respectively is:
+   $$\sum_{\{k_i\}} \left( \frac{n_e!}{\prod_{i=0}^9 k_i!} \cdot \frac{n_o!}{\prod_{i=0}^9 (c_i - k_i)!} \right) = n_e! n_o! \sum_{\{k_i\}} \prod_{i=0}^9 \frac{1}{k_i! (c_i - k_i)!}$$
+6. The DP state `dp[j][s]` stores the sum of $\prod \frac{1}{k_m! (c_m - k_m)!}$ for digits processed so far, where $j$ is the total number of digits chosen and $s$ is their sum.
+
+The implementation in `solution.py` correctly follows this logic and passes all tests.
+
+```python
+import math
+
+def countBalancedPermutations(num: str):
+    MOD = 10**9 + 7
+    n = len(num)
+    total_sum = sum(int(d) for d in num)
+    
+    if total_sum % 2 != 0:
+        return 0
+    
+    target_sum = total_sum // 2
+    counts = [0] * 10
+    for d in num:
+        counts[int(d)] += 1
+        
+    n_e = (n + 1) // 2
+    n_o = n // 2
+    
+    # Precompute factorials and their modular inverses
+    max_val = max(n, 10)
+    fact = [1] * (max_val + 1)
+    inv_fact = [1] * (max_val + 1)
+    for i in range(2, max_val + 1):
+        fact[i] = (fact[i-1] * i) % MOD
+        
+    inv_fact[max_val] = pow(fact[max_val], MOD - 2, MOD)
+    for i in range(max_val - 1, -1, -1):
+        inv_fact[i] = (inv_fact[i+1] * (i + 1)) % MOD
+
+    # dp[j][s] is the sum of products of 1 / (k_i! * (c_i - k_i)!)
+    # for digits processed so far, where j is total count and s is total sum.
+    dp = [[0] * (target_sum + 1) for _ in range(n_e + 1)]
+    dp[0][0] = 1
+    
+    for d in range(10):
+        new_dp = [[0] * (target_sum + 1) for _ in range(n_e + 1)]
+        c_d = counts[d]
+        for j in range(n_e + 1):
+            for s in range(target_sum + 1):
+                if dp[j][s] == 0:
+                    continue
+                # How many of digit d to put in even positions
+                for k in range(min(c_d, n_e - j) + 1):
+                    new_s = s + d * k
+                    if new_s <= target_sum:
+                        term = (inv_fact[k] * inv_fact[c_d - k]) % MOD
+                        new_dp[j+k][new_s] = (new_dp[j+k][new_s] + dp[j][s] * term) % MOD
+        dp = new_dp
+
+    ans = (dp[n_e][target_sum] * fact[n_e]) % MOD
+    ans = (ans * fact[n_o]) % MOD
+    return ans
+```

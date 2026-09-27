@@ -1,0 +1,2 @@
+7ce61198f21014380fa0b5bc54aea0f64cf07ed15e6a2398550adb495ad2039a  /var/tmp/vacant_piext_20260924/home/.pi/agent/models.json
+71973015f4bec4c255b8d7e969f833186c39068f49235856c5e29ea5faed61d5  /var/tmp/vacant_piext_20260924/home/.pi/agent/settings.json

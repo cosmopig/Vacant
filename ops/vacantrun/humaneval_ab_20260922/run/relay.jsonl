@@ -1,0 +1,416 @@
+{"t": 1790066498.752787, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066500.394365, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066501.4727585, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066502.4882736, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066503.4703722, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066505.369281, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066506.6647322, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066508.0593677, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066508.981788, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066511.146891, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066511.4591773, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066512.7084906, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066513.803578, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066514.9880152, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066515.5314314, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066517.374895, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066518.571064, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066519.5838597, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066519.888675, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066521.171583, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066522.4929528, "path": "/v1/models", "attempt": 1, "status": 200, "env_fail": false, "bytes": 149}
+{"t": 1790066550.6700964, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17302}
+{"t": 1790066552.2354908, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790066554.1565123, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790066555.196249, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790066561.7871172, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 54221}
+{"t": 1790066566.6915634, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1916}
+{"t": 1790066568.6099262, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7231}
+{"t": 1790066568.9527426, "path": "/v1/chat/completions", "attempt": 1, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790066570.496518, "path": "/v1/chat/completions", "attempt": 2, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790066578.9762204, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 22386}
+{"t": 1790066667.8828106, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7503}
+{"t": 1790066670.251498, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790066675.631697, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 25819}
+{"t": 1790066677.4522955, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1308}
+{"t": 1790066679.8727698, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7510}
+{"t": 1790066681.5147948, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1310}
+{"t": 1790066685.9755685, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 60973}
+{"t": 1790066794.3597598, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7530}
+{"t": 1790066795.9871798, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790066801.657156, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 38834}
+{"t": 1790066804.7373638, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1318}
+{"t": 1790066808.2531657, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 27274}
+{"t": 1790066812.9682717, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 56584}
+{"t": 1790066892.658391, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17305}
+{"t": 1790066894.3595338, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790066894.4471996, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790066898.2815206, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790066900.2455406, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1315}
+{"t": 1790066900.32459, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790066908.6623192, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 56853}
+{"t": 1790066912.739749, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1904}
+{"t": 1790066915.155314, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8338}
+{"t": 1790066919.395546, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 573}
+{"t": 1790066997.8071892, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15613}
+{"t": 1790066999.7022321, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067002.537669, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17324}
+{"t": 1790067002.6269298, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790067008.1822894, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067012.8035028, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 23888}
+{"t": 1790067017.0149887, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1318}
+{"t": 1790067017.0923066, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790067018.6216192, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790067024.7796202, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 29455}
+{"t": 1790067104.263058, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7503}
+{"t": 1790067106.106801, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067109.6547475, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 20994}
+{"t": 1790067111.3107328, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1318}
+{"t": 1790067114.2502549, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 30363}
+{"t": 1790067192.255504, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 16221}
+{"t": 1790067193.736373, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790067195.5542512, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790067197.2247643, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790067209.0235448, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 182025}
+{"t": 1790067212.7349205, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1674}
+{"t": 1790067214.8930826, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7552}
+{"t": 1790067220.958893, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 21889}
+{"t": 1790067301.5007634, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15613}
+{"t": 1790067303.2295904, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790067305.1366506, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790067307.0915303, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067320.3576527, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 215516}
+{"t": 1790067323.6571789, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1630}
+{"t": 1790067325.8394725, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7554}
+{"t": 1790067330.3154414, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 31766}
+{"t": 1790067408.451086, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17038}
+{"t": 1790067409.965082, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067412.0610874, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8606}
+{"t": 1790067414.1224592, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790067434.1455452, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 289529}
+{"t": 1790067441.1804156, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2325}
+{"t": 1790067449.051692, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7795}
+{"t": 1790067457.9506063, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 102099}
+{"t": 1790067537.4823112, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15613}
+{"t": 1790067538.3492334, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067539.9048584, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790067581.8184319, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 728174}
+{"t": 1790067590.574809, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2286}
+{"t": 1790067592.1311922, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7281}
+{"t": 1790067594.2349327, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1318}
+{"t": 1790067600.9897773, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 100724}
+{"t": 1790067679.6687877, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15944}
+{"t": 1790067681.1971042, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067683.1787937, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 11836}
+{"t": 1790067684.1469939, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067688.6059408, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 38054}
+{"t": 1790067691.3875945, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1642}
+{"t": 1790067693.4103065, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4833}
+{"t": 1790067696.576451, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 35424}
+{"t": 1790067770.8076851, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790067777.0746999, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 16973}
+{"t": 1790067778.5644429, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790067780.4484847, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790067781.966291, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790067786.3486164, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 36840}
+{"t": 1790067789.2551463, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1638}
+{"t": 1790067791.2354589, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8603}
+{"t": 1790067791.380758, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790067796.02401, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 31238}
+{"t": 1790067874.4600806, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 16976}
+{"t": 1790067876.005495, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067877.8002656, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790067879.380944, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067890.323866, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 155204}
+{"t": 1790067894.2085538, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2001}
+{"t": 1790067896.0155165, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4303}
+{"t": 1790067900.7855685, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 23376}
+{"t": 1790067979.4988315, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 14260}
+{"t": 1790067980.935709, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790067982.8236232, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790067984.3606312, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790067990.5014627, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 57299}
+{"t": 1790067994.2516272, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1997}
+{"t": 1790067996.1900492, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7279}
+{"t": 1790067996.312186, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790068003.3257668, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 77885}
+{"t": 1790068081.9731052, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17035}
+{"t": 1790068083.5898697, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790068085.4825864, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8319}
+{"t": 1790068087.0804052, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068108.6958144, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 357687}
+{"t": 1790068113.6828055, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2011}
+{"t": 1790068115.5916564, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6200}
+{"t": 1790068119.1662385, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 41076}
+{"t": 1790068198.7369893, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17239}
+{"t": 1790068200.240678, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1299}
+{"t": 1790068202.0855083, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8884}
+{"t": 1790068203.614241, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790068214.4464345, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 131866}
+{"t": 1790068219.298489, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2007}
+{"t": 1790068221.2556345, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6202}
+{"t": 1790068226.2481208, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 68544}
+{"t": 1790068304.8297606, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15670}
+{"t": 1790068306.3580852, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068308.2100656, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8606}
+{"t": 1790068309.6960807, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068316.437262, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 31803}
+{"t": 1790068321.9160242, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2197}
+{"t": 1790068323.715924, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4273}
+{"t": 1790068329.7011795, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 88276}
+{"t": 1790068408.8599124, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 16973}
+{"t": 1790068410.47717, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068412.297936, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790068413.7891324, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790068422.2951796, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 66675}
+{"t": 1790068428.246882, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2201}
+{"t": 1790068430.6685128, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4303}
+{"t": 1790068437.1765294, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 97955}
+{"t": 1790068515.16284, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15670}
+{"t": 1790068516.7065504, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068518.52943, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8606}
+{"t": 1790068520.1867766, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068530.6615567, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 133098}
+{"t": 1790068535.1295965, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1973}
+{"t": 1790068537.0748734, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6463}
+{"t": 1790068538.78479, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1322}
+{"t": 1790068542.3986862, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 55521}
+{"t": 1790068621.950388, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15670}
+{"t": 1790068623.4978776, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068625.298263, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8575}
+{"t": 1790068626.916182, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068637.217896, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 125858}
+{"t": 1790068641.6438851, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1963}
+{"t": 1790068643.5060914, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4288}
+{"t": 1790068649.3298578, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 83907}
+{"t": 1790068727.3625283, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7503}
+{"t": 1790068728.8650315, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068743.3794458, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 178400}
+{"t": 1790068749.8876524, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2396}
+{"t": 1790068751.8102412, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6200}
+{"t": 1790068759.4026592, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 31707}
+{"t": 1790068838.011558, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 14312}
+{"t": 1790068839.5301292, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790068841.3513556, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790068855.2349827, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 159714}
+{"t": 1790068861.6966531, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2404}
+{"t": 1790068863.625073, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4288}
+{"t": 1790068871.2910933, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 117131}
+{"t": 1790068945.1994205, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790068946.7279801, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790068954.501011, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 16911}
+{"t": 1790068954.639343, "path": "/v1/chat/completions", "attempt": 1, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790068957.6565728, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068957.7001376, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790068961.2512105, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790068961.335803, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790068962.865543, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790068967.7029335, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790068985.2703285, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 254068}
+{"t": 1790068991.0839531, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2088}
+{"t": 1790068991.1319196, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790068994.8656273, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 7281}
+{"t": 1790068995.012172, "path": "/v1/chat/completions", "attempt": 1, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790069000.1510124, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 23331}
+{"t": 1790069074.3761258, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069076.0152068, "path": "/v1/chat/completions", "attempt": 2, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790069079.0919352, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069088.272256, "path": "/v1/chat/completions", "attempt": 4, "status": 200, "env_fail": false, "bytes": 17038}
+{"t": 1790069088.3427205, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069091.4052448, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790069091.4484563, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069093.0036826, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069096.0337865, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069100.5765207, "path": "/v1/chat/completions", "attempt": 4, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069108.634847, "path": "/v1/chat/completions", "attempt": 5, "status": 200, "env_fail": false, "bytes": 8606}
+{"t": 1790069108.7195725, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069110.2737243, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069113.3034992, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069135.3942943, "path": "/v1/chat/completions", "attempt": 4, "status": 200, "env_fail": false, "bytes": 244135}
+{"t": 1790069135.5122392, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069137.0407143, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069140.0735514, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069150.619798, "path": "/v1/chat/completions", "attempt": 4, "status": 200, "env_fail": false, "bytes": 2085}
+{"t": 1790069150.7058969, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069152.2357807, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069155.3096445, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069161.94619, "path": "/v1/chat/completions", "attempt": 4, "status": 200, "env_fail": false, "bytes": 5110}
+{"t": 1790069162.0833335, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069186.529227, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 414950}
+{"t": 1790069264.7476676, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15889}
+{"t": 1790069264.9125402, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069268.107402, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790069269.9445496, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8903}
+{"t": 1790069271.4422913, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790069271.5358107, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069283.0942543, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 118729}
+{"t": 1790069288.0251353, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2072}
+{"t": 1790069288.159538, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069289.7006414, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069292.743892, "path": "/v1/chat/completions", "attempt": 3, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069299.4176846, "path": "/v1/chat/completions", "attempt": 4, "status": 200, "env_fail": false, "bytes": 7525}
+{"t": 1790069305.202426, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 21667}
+{"t": 1790069384.6224496, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 14312}
+{"t": 1790069384.7422264, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069387.8428757, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790069389.522381, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7010}
+{"t": 1790069398.6727924, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 101875}
+{"t": 1790069398.8006773, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069400.341575, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069408.1111724, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 2064}
+{"t": 1790069409.9467196, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6442}
+{"t": 1790069415.9681218, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 31553}
+{"t": 1790069489.2895784, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069490.826006, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069493.8881114, "path": "/v1/chat/completions", "attempt": 3, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069498.4314587, "path": "/v1/chat/completions", "attempt": 4, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069508.9796093, "path": "/v1/chat/completions", "attempt": 5, "status": 200, "env_fail": false, "bytes": 14312}
+{"t": 1790069509.1046798, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069510.6892123, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069515.4618347, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790069515.5793066, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069517.1197195, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069522.0150292, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 6985}
+{"t": 1790069530.0376828, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 62672}
+{"t": 1790069534.7405305, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2201}
+{"t": 1790069534.8321157, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069536.3702254, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069539.4316707, "path": "/v1/chat/completions", "attempt": 3, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069544.182524, "path": "/v1/chat/completions", "attempt": 4, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069550.2200997, "path": "/v1/chat/completions", "attempt": 5, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069559.7507997, "path": "/v1/chat/completions", "attempt": 6, "status": 200, "env_fail": false, "bytes": 4288}
+{"t": 1790069561.4225202, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1318}
+{"t": 1790069561.5197163, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790069569.768093, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 102319}
+{"t": 1790069648.9695473, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 14208}
+{"t": 1790069650.4587598, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790069651.9876826, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790069660.051481, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 76260}
+{"t": 1790069664.9025793, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2195}
+{"t": 1790069666.6476307, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4288}
+{"t": 1790069668.3548222, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1318}
+{"t": 1790069671.8646584, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 39338}
+{"t": 1790069677.9915445, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 88682}
+{"t": 1790069751.9469829, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069758.5208578, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 14312}
+{"t": 1790069758.6025672, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069760.1425593, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069763.1827984, "path": "/v1/chat/completions", "attempt": 3, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069769.2316697, "path": "/v1/chat/completions", "attempt": 4, "status": 200, "env_fail": false, "bytes": 1299}
+{"t": 1790069769.2886624, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069770.8532743, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069775.6662874, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790069775.7518115, "path": "/v1/chat/completions", "attempt": 1, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069777.2880814, "path": "/v1/chat/completions", "attempt": 2, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069780.3275537, "path": "/v1/chat/completions", "attempt": 3, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069784.8876152, "path": "/v1/chat/completions", "attempt": 4, "status": 403, "env_fail": true, "bytes": 58}
+{"t": 1790069803.97588, "path": "/v1/chat/completions", "attempt": 5, "status": 200, "env_fail": false, "bytes": 166010}
+{"t": 1790069809.3793938, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2110}
+{"t": 1790069811.1868193, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4318}
+{"t": 1790069818.0349667, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 26085}
+{"t": 1790069897.3687558, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17039}
+{"t": 1790069898.8456135, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790069900.5814753, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 5882}
+{"t": 1790069901.5093994, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790069915.9283705, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 195248}
+{"t": 1790069921.458666, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2107}
+{"t": 1790069923.3075635, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 3212}
+{"t": 1790069929.0064447, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 73101}
+{"t": 1790070006.1491134, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7530}
+{"t": 1790070007.6510153, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790070022.968691, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 225780}
+{"t": 1790070027.922762, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2129}
+{"t": 1790070029.9570034, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6178}
+{"t": 1790070035.781913, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 82383}
+{"t": 1790070040.530086, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 60503}
+{"t": 1790070119.345075, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17522}
+{"t": 1790070120.77953, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070122.582436, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790070124.1141222, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790070139.1809213, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 218833}
+{"t": 1790070145.5839493, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2125}
+{"t": 1790070147.5582154, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7494}
+{"t": 1790070152.4164314, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 65195}
+{"t": 1790070225.910626, "path": "/v1/chat/completions", "attempt": 1, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790070232.2073636, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 15675}
+{"t": 1790070233.6891599, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070233.732114, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070235.3163009, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070238.3710685, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070242.9238203, "path": "/v1/chat/completions", "attempt": 4, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070248.9530945, "path": "/v1/chat/completions", "attempt": 5, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070258.6353312, "path": "/v1/chat/completions", "attempt": 6, "status": 200, "env_fail": false, "bytes": 8606}
+{"t": 1790070260.1765778, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070266.396576, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 41587}
+{"t": 1790070270.9344192, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2028}
+{"t": 1790070271.0877686, "path": "/v1/chat/completions", "attempt": 1, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790070272.640718, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070275.6728327, "path": "/v1/chat/completions", "attempt": 3, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070280.201967, "path": "/v1/chat/completions", "attempt": 4, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070286.2341728, "path": "/v1/chat/completions", "attempt": 5, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070295.8541727, "path": "/v1/chat/completions", "attempt": 6, "status": 200, "env_fail": false, "bytes": 3190}
+{"t": 1790070298.5242221, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 25769}
+{"t": 1790070377.218745, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7530}
+{"t": 1790070378.7066102, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070378.8368444, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070387.1564496, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 52971}
+{"t": 1790070387.2823658, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070393.3605478, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 2028}
+{"t": 1790070395.1357236, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6198}
+{"t": 1790070395.3012228, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070396.8304985, "path": "/v1/chat/completions", "attempt": 2, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070404.4820426, "path": "/v1/chat/completions", "attempt": 3, "status": 200, "env_fail": false, "bytes": 64630}
+{"t": 1790070483.0637453, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 14055}
+{"t": 1790070484.5434341, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790070486.0827367, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070500.4509368, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 202715}
+{"t": 1790070505.563913, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2203}
+{"t": 1790070507.3756392, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4303}
+{"t": 1790070512.2021155, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 571}
+{"t": 1790070590.984612, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17302}
+{"t": 1790070592.4483275, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790070594.3258333, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8637}
+{"t": 1790070595.9096751, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790070611.0117548, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 217143}
+{"t": 1790070616.2654474, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2175}
+{"t": 1790070618.2391245, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7552}
+{"t": 1790070624.5996156, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 93576}
+{"t": 1790070702.2916179, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 6938}
+{"t": 1790070703.8206644, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070705.3516867, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1311}
+{"t": 1790070705.4856958, "path": "/v1/chat/completions", "attempt": 1, "status": null, "env_fail": true, "error": "OSError: [Errno 97] Address family not supported by protocol"}
+{"t": 1790070724.431479, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 254287}
+{"t": 1790070729.9919083, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2227}
+{"t": 1790070731.1678317, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4335}
+{"t": 1790070737.3348465, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 89886}
+{"t": 1790070816.2495365, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 15947}
+{"t": 1790070817.6981533, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070819.5140314, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8903}
+{"t": 1790070821.0880566, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790070839.7656713, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 281338}
+{"t": 1790070840.089066, "path": "/v1/chat/completions", "attempt": 1, "status": 503, "env_fail": true, "bytes": 22}
+{"t": 1790070847.3833842, "path": "/v1/chat/completions", "attempt": 2, "status": 200, "env_fail": false, "bytes": 2239}
+{"t": 1790070849.2378767, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 4835}
+{"t": 1790070857.033928, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 89959}
+{"t": 1790070934.652387, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7503}
+{"t": 1790070936.176201, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1303}
+{"t": 1790070997.4450173, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1032827}
+{"t": 1790071019.8766966, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 5684}
+{"t": 1790071033.685289, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 55397}
+{"t": 1790071036.4948447, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 16118}
+{"t": 1790071038.2719758, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1316}
+{"t": 1790071050.8566592, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 205547}
+{"t": 1790071129.9739134, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 17100}
+{"t": 1790071131.4017024, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1299}
+{"t": 1790071133.2416074, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 8632}
+{"t": 1790071134.7506073, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1307}
+{"t": 1790071154.9957695, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 307471}
+{"t": 1790071161.5267148, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 2599}
+{"t": 1790071163.5428684, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 7555}
+{"t": 1790071165.2756362, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1323}
+{"t": 1790071167.380601, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 9644}
+{"t": 1790071171.546585, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1348}
+{"t": 1790071181.5309567, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 24135}
+{"t": 1790071191.9281461, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 1310}
+{"t": 1790071221.2809749, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 430692}
+{"t": 1790071229.5231562, "path": "/v1/chat/completions", "attempt": 1, "status": 200, "env_fail": false, "bytes": 91899}

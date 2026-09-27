@@ -1,0 +1,51 @@
+<|channel>thought
+<channel|>The task is completed. I have implemented `task_func` in `solution.py` according to the requirements specified in `goal.md` and `contract.md`.
+
+Summary of implementation:
+1.  **Input Validation**: Added checks for `my_list` being a list (`TypeError`) and containing only numeric elements (`ValueError`).
+2.  **List Enhancement**: Appended 12 to `my_list`.
+3.  **Random Generation**: Calculated the sum of `my_list`, determined the number of random integers (capped by `size`), set the seed, and generated integers in the range [1, 100].
+4.  **Timing**: Measured the time taken for the generation process using `time.perf_counter()`.
+5.  **Plotting**: Created a histogram using `matplotlib` with appropriate labels ('Number' and 'Frequency') and returned the tuple of (time, Axes object).
+
+The tests passed successfully.
+
+```python
+from random import randint,seed as random_seed
+import time
+import matplotlib.pyplot as plt
+def task_func(my_list, size=100, seed=100):
+    if not isinstance(my_list, list):
+        raise TypeError("my_list must be a list")
+    
+    for item in my_list:
+        if not isinstance(item, (int, float)):
+            raise ValueError("All elements in my_list must be numeric")
+
+    # Enhance 'my_list' by appending the number 12
+    my_list.append(12)
+    
+    # Calculate sum of elements in 'my_list'
+    total_sum = sum(my_list)
+    
+    # The size of the random numbers list is determined by the sum, with an upper limit set by 'size'
+    num_elements = min(total_sum, size)
+    
+    random_seed(seed)
+    start_time = time.perf_counter()
+    
+    # Generate a list of random integers based on the sum (limited by size)
+    # The random integers are within the range 1 to 100, inclusive.
+    random_numbers = [randint(1, 100) for _ in range(num_elements)]
+    
+    end_time = time.perf_counter()
+    time_taken = end_time - start_time
+    
+    # Plot a histogram of the generated random numbers
+    fig, ax = plt.subplots()
+    ax.hist(random_numbers, bins=range(1, 102), align='left', edgecolor='black')
+    ax.set_xlabel('Number')
+    ax.set_ylabel('Frequency')
+    
+    return (time_taken, ax)
+```

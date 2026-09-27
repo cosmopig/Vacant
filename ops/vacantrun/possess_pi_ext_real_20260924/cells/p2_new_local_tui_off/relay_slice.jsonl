@@ -1,0 +1,8 @@
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222394.7501483, "bind": "127.0.0.1:18898"}
+{"method": "GET", "path": "/v1/models?vacant_canary=17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222394.9177258, "bind": "127.0.0.1:18898"}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222394.9299347, "bind": "127.0.0.1:18898"}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222395.032347, "bind": "127.0.0.1:18898"}
+{"method": "GET", "path": "/v1/models?vacant_canary=refresh-17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222395.0348916, "bind": "127.0.0.1:18898"}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222400.1358364, "bind": "127.0.0.1:18898"}
+{"method": "POST", "path": "/v1/chat/completions", "auth": "ok", "req_bytes": 5791, "model_requested": "lab-gemma", "status": 200, "resp_bytes": 849, "t": 1790222406.4738393, "bind": "127.0.0.1:18898"}
+{"method": "GET", "path": "/v1/models?vacant_canary=status-17997ccc-418e-4094-932a-fcf359417ac1", "auth": "missing", "req_bytes": 0, "status": 401, "t": 1790222480.1016011, "bind": "127.0.0.1:18898"}

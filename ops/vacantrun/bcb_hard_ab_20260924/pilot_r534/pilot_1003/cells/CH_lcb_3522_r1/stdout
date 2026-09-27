@@ -1,0 +1,32 @@
+The tests passed successfully. I have implemented the `resultsArray` function in `solution.py` as required by the goal and contract.
+
+Summary of implementation:
+- The function iterates through all subarrays of size $k$.
+- For each subarray, it checks if every element is exactly 1 greater than the previous one (which satisfies both "consecutive" and "sorted in ascending order").
+- If the condition holds, it appends the last element (the maximum) to the results.
+- Otherwise, it appends -1.
+- The time complexity is $O(n \cdot k)$, which is efficient enough for $n=500$.
+
+I'm done.
+The task is completed. I have implemented the `resultsArray` function in `solution.py`, which correctly identifies the "power" of all subarrays of size $k$ based on whether they are consecutive and sorted in ascending order. The solution was verified against the provided test suite using `sh run_tests.sh`.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    results = []
+    for i in range(n - k + 1):
+        subarray = nums[i : i + k]
+        is_consecutive_sorted = True
+        for j in range(k - 1):
+            if subarray[j+1] != subarray[j] + 1:
+                is_consecutive_sorted = False
+                break
+        
+        if is_consecutive_sorted:
+            results.append(subarray[-1])
+        else:
+            results.append(-1)
+    return results
+```

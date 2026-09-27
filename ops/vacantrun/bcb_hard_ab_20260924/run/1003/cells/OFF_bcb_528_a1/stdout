@@ -1,0 +1,11 @@
+All tests passed. I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`.
+
+The implementation:
+1. Checks if the file has a `.csv` extension, raising `ValueError` otherwise.
+2. Reads rows from the CSV using the `csv` library and counts occurrences using `collections.Counter`.
+3. Identifies duplicate rows (count > 1).
+4. Converts duplicates to a pandas DataFrame.
+5. Plots a bar chart of the duplicate entries using matplotlib, with the title "Duplicate Entries" as required by the tests.
+6. Returns the dictionary of duplicates and the Axes object.
+
+I'm done.

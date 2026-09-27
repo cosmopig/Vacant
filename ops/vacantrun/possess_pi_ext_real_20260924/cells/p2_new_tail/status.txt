@@ -1,0 +1,34 @@
+端點      http://127.0.0.1:18797   在聽：是
+監督      bare   開機自起：False
+上游      openai=http://100.124.254.83:18897/v1（pi:providers.homelab）  anthropic=http://unspecified-upstream.vacant.invalid（sink（沒有人指定））  🔴 sink：沒有真上游，每一通都會被擋
+shim 目錄 /var/tmp/vacant_piext_20260924/home_p2_new_tail/.vacant/possess/bin
+
+通道層（三欄：設定寫了／起得來／被中介過。**不可互相冒充**）：
+  pi        設定 ✓ 已寫入　啟動 ✓ 起得來　中介 ✓（extension 路）
+      extension 路（常駐 extension→常駐 proxyd）：pi_b215a73a-ee43-40c5-a201-20b831f6ffea.jsonl 的 vacant_on→before_provider_request ＋ 常駐 journal call_id=12051ab3a0184e4883560d95161bbb3e POST /v1/chat/completions → 200（這一跑對得上 1 通；只證通道，不含閘門／裁決）@ 2026-09-24T03:58:43+0000
+      ⚠ extension 路**只證通道**：互動 session 沒有閘門、沒有裁決收據
+
+閘門到得了哪幾種 shell（**這台機器上當場量的**）：
+  bash -lic                  ❌　人類開終端機
+  bash -lc                   ❌　登入非互動
+  bash -c '. ~/.bashrc'      ❌　ssh 主機 '指令' 的等價路徑（非真 ssh）
+  bash -c                    ❌　腳本／cron／ExecStart=
+  systemd-run --user         ❌　展場無人值守迴圈
+  ⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c、systemd-run --user。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）
+
+agent 自己的防護（沙箱／approval，**現在讀到的**）：
+  pi        sandbox=－ 沒量到　approval=－ 沒量到
+
+⚠ 裝好當時就記下來的警告：
+  ⚠ **閘門只覆蓋了一部分叫起 agent 的方式**，這幾種收不到：bash -lic、bash -lc、bash -c '. ~/.bashrc'、bash -c、systemd-run --user。（通道層仍在：那幾條路的模型呼叫照樣進 journal。）
+  ⚠ `bare` 後端＝自己 fork，**撐不過重開機**，不准說成「常駐」。
+
+改過的檔（uninstall 會做什麼）：
+  /var/tmp/vacant_piext_20260924/home_p2_new_tail/.pi/agent/extensions/vacant.ts
+      create　pi extension：registerProvider(vacant) + /vacant + 掛鉤
+      還原：刪掉這個檔
+  /var/tmp/vacant_piext_20260924/home_p2_new_tail/.config/environment.d/50-vacant-possess.conf
+      create　systemd --user 的 PATH（environment.d）
+      還原：刪掉這個檔
+
+閘門層：打完整路徑就跳過 shim ⇒ 閘門不跑（通道仍在）

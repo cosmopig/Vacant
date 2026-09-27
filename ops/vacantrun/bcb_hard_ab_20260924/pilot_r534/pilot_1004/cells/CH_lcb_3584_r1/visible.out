@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<stdin>", line 12, in <module>
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/tmp/tmp.tVijb5vPcK/tests_visible/test_visible.py", line 8, in <module>
+    import solution
+ModuleNotFoundError: No module named 'solution'
+test_visible.py: could not be imported
+1 check(s) failed

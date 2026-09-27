@@ -1,0 +1,8 @@
+<|channel>thought
+<channel|>The task was to implement a function `task_func` that moves files with a specific extension from a source directory to a destination directory, while handling cases where the file already exists in the destination and raising `FileNotFoundError` if directories are missing.
+
+I have implemented this in `solution.py`. I also added a check for an empty extension string as required by the test suite.
+
+The tests passed successfully:
+- `check_test_empty_extension`: Passed (returns empty list when extension is empty).
+- `check_test_exception_raised_when_dirs_do_not_exist`: Passed (raises `FileNotFoundError` if directories are missing).

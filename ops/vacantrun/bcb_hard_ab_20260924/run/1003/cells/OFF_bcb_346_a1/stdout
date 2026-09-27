@@ -1,0 +1,9 @@
+I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`.
+
+The function:
+1. Checks if the script exists, raising a `ValueError` otherwise.
+2. Constructs the command using `sys.executable` to ensure the correct Python interpreter is used.
+3. If `wait=True`, it uses `subprocess.run(..., check=True)` which will raise `subprocess.CalledProcessError` on non-zero exit codes and return the return code on success.
+4. If `wait=False`, it uses `subprocess.Popen` to start the process in the background and returns `None`.
+
+I have also ensured that the imports and function signature match the requirements exactly.

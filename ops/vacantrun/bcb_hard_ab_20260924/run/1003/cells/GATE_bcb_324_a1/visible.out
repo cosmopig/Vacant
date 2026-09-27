@@ -1,0 +1,10 @@
+pass test_visible.py::check_test_empty_file_list
+FAIL test_visible.py::check_test_multiple_processes_with_different_exit_codes  AssertionError: FAIL test_multiple_processes_with_different_exit_codes: AssertionError: Lists differ: [<MagicMock name='Popen().returncode' id='[133 chars]52'>] != [0, 1, None]
+First differing element 0:
+<MagicMock name='Popen().returncode' id='123523395773952'>
+0
++ [0, 1, None]
+- [<MagicMock name='Popen().returncode' id='123523395773952'>,
+-  <MagicMock name='Popen().returncode' id='123523395773952'>,
+-  <MagicMock name='Popen().returncode' id='123523395773952'>]
+1 check(s) failed

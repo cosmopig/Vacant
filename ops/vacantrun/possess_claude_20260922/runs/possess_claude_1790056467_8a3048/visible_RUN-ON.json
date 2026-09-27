@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "possess_claude_1790056467_8a3048",
+  "files": [
+    {
+      "file": "test_add.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 135,
+      "cases": [
+        {
+          "case": "check_add",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 1,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 1,
+  "total": 1,
+  "all_pass": true,
+  "empty_reason": null,
+  "result_sha256": "0e658b0194585e815e363ef87985ccc62816ef28cc4b2598e41cea847e5807aa"
+}

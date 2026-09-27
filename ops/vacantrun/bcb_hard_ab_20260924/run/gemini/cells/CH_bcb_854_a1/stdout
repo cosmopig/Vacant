@@ -1,0 +1,115 @@
+<thought>The tests passed. I should also manually check the example provided in `goal.md`.
+`task_func([0, 4])`
+Permutations: `(0, 4), (4, 0)`
+Factorials: `0! = 1`, `4! = 24`
+Sum for `(0, 4)`: `1 + 24 = 25`
+Sum for `(4, 0)`: `24 + 1 = 25`
+`fac = [25, 25]`
+`perm = [(0, 4), (4, 0)]`
+Matches.
+
+What about empty list?
+`task_func([])` -> `[], []`. Matches.
+
+What about negative numbers?
+`task_func([-1])` -> `ValueError`. Matches.
+
+What about non-integers?
+`task_func([1, 'a'])` -> `TypeError`. Matches.
+`task_func("abc")` -> `TypeError`. Matches.
+
+I'm confident. I'll just do one more check on the requirements.
+"The function should raise the exception for: TypeError: If numbers is not a list of integers. ValueError: If input numbers are negative."
+
+My code:
+```python
+    if not isinstance(numbers, list):
+        raise TypeError("numbers must be a list")
+    for n in numbers:
+        if not isinstance(n, int):
+            raise TypeError("numbers must be a list of integers")
+        if n < 0:
+            raise ValueError("numbers must be non-negative")
+```
+
+One small thing: if `numbers` is `[1, 2.0]`, `isinstance(2.0, int)` is `False`. So it raises `TypeError`. Correct.
+
+If `numbers` is `[1, True]`, `isinstance(True, int)` is `True` in Python!
+Wait, let me check this.
+```python
+>>> isinstance(True, int)
+True
+```
+Yes, it is. Should I worry about this? Usually in these coding tasks, `bool` is treated as `int`. But the prompt says "list of integers".
+
+If I want to be very strict: `type(n) is int`.
+However, `isinstance(n, int)` is generally what is meant by "is an integer" in Python unless specified otherwise.
+
+Let's see if I should change it.
+The prompt says: `TypeError: If numbers is not a list of integers.`
+
+If I use `type(n) is not int`, it would reject `True`.
+But `True` is an integer in Python.
+
+Let's see if I can use `math.factorial` on `True`.
+```python
+>>> import math
+>>> math.factorial(True)
+1
+```
+Yes.
+
+Given the standard behavior of Python, `isinstance(n, int)` is probably what's expected.
+
+One more thing: the prompt says:
+`fac, perm = task_func([0, 4])`
+`print(fac) [25, 25]`
+`print(perm) [(0, 4), (4, 0)]`
+
+My code returns `([25, 25], [(0, 4), (4, 0)])`.
+When unpacking: `fac = [25, 25]`, `perm = [(0, 4), (4, 0)]`.
+Matches.
+
+Wait, let's look at the imports again.
+```python
+from functools import reduce
+from itertools import permutations
+import math
+```
+I included them.
+
+I'm done.I have implemented the `task_func` function in `solution.py` as requested. The function generates all permutations of a given list of integers and calculates the sum of the factorials for each permutation. It also handles the required error conditions and edge cases.
+
+```python
+from functools import reduce
+from itertools import permutations
+import math
+
+def task_func(numbers):
+    if not isinstance(numbers, list):
+        raise TypeError("numbers must be a list")
+    for n in numbers:
+        if not isinstance(n, int):
+            raise TypeError("numbers must be a list of integers")
+        if n < 0:
+            raise ValueError("numbers must be non-negative")
+    
+    if not numbers:
+        return [], []
+    
+    perms = list(permutations(numbers))
+    fac_sums = [sum(math.factorial(x) for x in p) for p in perms]
+    return fac_sums, perms
+```
+
+I have verified the implementation against the provided test cases, and they all passed.
+
+```bash
+sh run_tests.sh
+```
+Output:
+```
+pass test_visible.py::check_test_case_1
+pass test_visible.py::check_test_case_2
+0 check(s) failed
+```

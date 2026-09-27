@@ -1,0 +1,15 @@
+The task was to generate a pandas DataFrame with random values based on two lists, `a` (row indices) and `b` (determining the number of columns from a predefined list), and plot it as a bar chart.
+
+I have implemented this in `solution.py`:
+1.  Imported necessary libraries: `numpy`, `pandas`, and `matplotlib.pyplot`.
+2.  Defined the constant `COLUMNS = ['A', 'B', 'C', 'D', 'E']`.
+3.  Implemented `task_func(a, b)` which:
+    *   Determines the number of rows from `len(a)`.
+    *   Determines the number of columns from `len(b)`.
+    *   Selects the appropriate column names from `COLUMNS`.
+    *   Generates random data using `np.random.rand`.
+    *   Creates a pandas DataFrame with the generated data, indices from `a`, and selected columns.
+    *   Handles empty DataFrames by returning a new Axes object to avoid plotting errors.
+    *   Plots the bar chart and returns the resulting `Axes` object.
+
+The solution has been verified against the provided tests.

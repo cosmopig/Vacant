@@ -1,0 +1,5 @@
+/var/tmp/vacant_piext_20260924/bcb/venv/lib/python3.12/site-packages/scipy/optimize/_minpack_py.py:1010: OptimizeWarning: Covariance of the parameters could not be estimated
+  warnings.warn('Covariance of the parameters could not be estimated',
+pass test_visible.py::check_test_functionality
+pass test_visible.py::check_test_not_enough_points
+0 check(s) failed

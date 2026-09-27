@@ -1,0 +1,9 @@
+benchmark openai/human-eval（MIT，164 題）等距 stride=8 抽 20 題
+agent pi 0.87.0 互動 TUI（真 pty，打字進輸入框）
+model gemma-4-12b-it-qat（人類 LM Studio）
+upstream 兩臂共用 http://127.0.0.1:19000/v1（重試中繼）→ https://1003.taild870c4.ts.net/v1
+cells 40（20 題 × ON/OFF），0 作廢
+result ON 20/20 = 100%　OFF 20/20 = 100%　拒交 0　假交付 0
+python Python 3.11.15
+git aaa53fea
+date 2026-09-22T10:04:45Z

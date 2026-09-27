@@ -1,0 +1,2 @@
+All tests passed! I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`. The function correctly handles both list of dictionaries and dictionary structures with a "Countries" key, rounds down populations to integers, and raises the appropriate exceptions for malformed or empty data. It also ensures that the output CSV is written correctly and returns the expected file path and DataFrame.
+

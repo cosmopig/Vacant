@@ -1,0 +1,1 @@
+{"passed": 6, "total": 7, "failures": ["check_test_invalid_input_type: AssertionError: ERROR test_invalid_input_type: AttributeError: 'str' object has no attribute 'empty'"]}

@@ -1,0 +1,83 @@
+<thought>The tests passed. I'll double check the implementation one more time.
+The problem says:
+`results[i]` is the power of `nums[i..(i + k - 1)]`.
+My loop `for i in range(k - 1, n):`:
+When `i = k - 1`, it's the first subarray, `nums[0..k-1]`.
+The power is `nums[i]` if `count[i] >= k`.
+In my code, `results[0]` will correspond to `i = k-1`.
+`nums[0..k-1]` has length `k`. It is consecutive and sorted if `count[k-1] >= k`.
+If it is, the max element is `nums[k-1]`.
+
+The result array should have size `n - k + 1`.
+The loop runs for `i` from `k-1` to `n-1`.
+The number of iterations is `(n-1) - (k-1) + 1 = n - k + 1`.
+Correct.
+
+One more check on the $O(n)$ logic.
+If `count[i] >= k`, it means `nums[i], nums[i-1], ..., nums[i-k+1]` are consecutive and sorted.
+Wait, `nums[i-k+1]` is the start of the subarray.
+`nums[i]` is the end of the subarray.
+Since they are consecutive and sorted, `nums[i]` is the maximum.
+Yes, it seems correct.
+
+I'll check Example 1 again.
+`nums = [1,2,3,4,3,2,5], k = 3`
+`n = 7`
+`count = [1, 2, 3, 4, 1, 1, 1]`
+`range(2, 7)`: `i = 2, 3, 4, 5, 6`
+`i=2`: `count[2]=3 >= 3`, `results.append(nums[2])` -> `results.append(3)`
+`i=3`: `count[3]=4 >= 3`, `results.append(nums[3])` -> `results.append(4)`
+`i=4`: `count[4]=1 < 3`, `results.append(-1)`
+`i=5`: `count[5]=1 < 3`, `results.append(-1)`
+`i=6`: `count[6]=1 < 3`, `results.append(-1)`
+Result: `[3, 4, -1, -1, -1]`.
+Matches example 1.
+
+One edge case: `k=1`.
+`nums = [1, 2, 3]`
+`n = 3`
+`count = [1, 2, 3]`
+`range(0, 3)`: `i = 0, 1, 2`
+`i=0`: `count[0]=1 >= 1`, `results.append(1)`
+`i=1`: `count[1]=2 >= 1`, `results.append(2)`
+`i=2`: `count[2]=3 >= 1`, `results.append(3)`
+Result: `[1, 2, 3]`.
+If `k=1`, any subarray of size 1 is consecutive and sorted. Max element is the element itself. Correct.
+
+Wait, the problem says: "Its maximum element if all of its elements are consecutive and sorted in ascending order. -1 otherwise."
+For `k=1`, a single element is always "consecutive and sorted in ascending order".
+
+Final check on the requirements:
+- `resultsArray(nums: List[int], k: int)`: Yes.
+- Top-level function: Yes.
+- Return the answer: Yes.
+- Standard library only: Yes.
+- `solution.py` at the root: Yes.
+
+I'm confident.
+</thought>I have completed the task. I implemented the `resultsArray` function in `solution.py` using an $O(n)$ approach that counts consecutive elements. The function correctly identifies subarrays of size `k` that are consecutive and sorted in ascending order and returns their maximum element, or -1 otherwise. All tests passed.
+
+```python
+from typing import List
+
+def resultsArray(nums: List[int], k: int) -> List[int]:
+    n = len(nums)
+    if n == 0:
+        return []
+    
+    count = [1] * n
+    for i in range(1, n):
+        if nums[i] == nums[i-1] + 1:
+            count[i] = count[i-1] + 1
+        else:
+            count[i] = 1
+            
+    results = []
+    for i in range(k - 1, n):
+        if count[i] >= k:
+            results.append(nums[i])
+        else:
+            results.append(-1)
+            
+    return results
+```

@@ -1,0 +1,6 @@
+FAIL test_visible.py::check_test_process_found_restarts_process  AssertionError: FAIL test_process_found_restarts_process: AssertionError: 'Process not found. Starting notepad.' != 'Process found. Restarting notepad.'
+- Process not found. Starting notepad.
+?         ----       ^
++ Process found. Restarting notepad.
+?                ^^^
+1 check(s) failed

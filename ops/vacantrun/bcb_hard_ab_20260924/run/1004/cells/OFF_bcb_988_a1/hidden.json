@@ -1,0 +1,1 @@
+{"passed": 10, "total": 12, "failures": ["check_test_has_no_special_char: AssertionError: FAIL test_has_no_special_char: AssertionError: True is not false", "check_test_invalid_predicates: AssertionError: FAIL test_invalid_predicates: AssertionError: ValueError not raised"]}

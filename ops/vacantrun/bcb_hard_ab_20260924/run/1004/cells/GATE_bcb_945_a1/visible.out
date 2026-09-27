@@ -1,0 +1,3 @@
+FAIL test_visible.py::check_test_forecasted_values_increasing  AssertionError: FAIL test_forecasted_values_increasing: AssertionError: True is not false
+pass test_visible.py::check_test_with_custom_parameters
+1 check(s) failed

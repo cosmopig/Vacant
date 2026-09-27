@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_empty_extension
+pass test_visible.py::check_test_exception_raised_when_dirs_do_not_exist
+0 check(s) failed

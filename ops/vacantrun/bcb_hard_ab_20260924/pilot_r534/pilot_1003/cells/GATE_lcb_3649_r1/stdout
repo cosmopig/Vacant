@@ -1,0 +1,35 @@
+The task was to solve a problem where Bob needs to break $n$ locks in a dungeon with minimum time. Each lock requires a certain amount of energy, and the sword's energy increases by a factor $X$ every minute. After breaking a lock, the energy resets to 0 and $X$ increases by $K$.
+
+I have implemented the solution in `solution.py` using an approach that explores all permutations of the locks. For each permutation, I greedily break each lock as soon as its required strength is met. Since $n \le 8$, there are at most $8! = 40320$ permutations, making this approach efficient enough to pass within the time limits.
+
+The tests passed successfully.
+
+```python
+from typing import List
+import itertools
+
+def findMinimumTime(strength: List[int], K: int) -> int:
+    n = len(strength)
+    min_time = float('inf')
+    
+    # Try all permutations of the locks to break.
+    # Since n is small (up to 8), n! is at most 40320.
+    for p in itertools.permutations(range(n)):
+        current_X = 1
+        total_time = 0
+        for idx in p:
+            target = strength[idx]
+            # The energy starts at 0 after each lock is broken (or initially).
+            # Every minute, the energy of the sword increases by current_X.
+            # We need to find the minimum minutes m >= 1 such that m * current_X >= target.
+            # Since target >= 1 and current_X >= 1, m = ceil(target / current_X).
+            m = (target + current_X - 1) // current_X
+            total_time += m
+            # After breaking a lock, the energy of the sword resets to 0 and X increases by K.
+            current_X += K
+        
+        if total_time < min_time:
+            min_time = total_time
+            
+    return int(min_time)
+```

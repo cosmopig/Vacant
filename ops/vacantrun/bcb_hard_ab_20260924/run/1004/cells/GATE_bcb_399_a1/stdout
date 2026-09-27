@@ -1,0 +1,10 @@
+<|channel>thought
+<channel|>I have implemented the `task_func` in `solution.py` as specified in `goal.md` and `contract.md`.
+
+The function:
+1. Validates that `frequency` is non-negative and `sample_size` is positive, raising `ValueError` otherwise.
+2. Generates sine and cosine waves using `numpy` and `math`.
+3. Plots both waves on a `matplotlib` figure with appropriate labels ('sin' and 'cos') to satisfy the test requirements.
+4. Returns the `fig` and `ax` objects.
+
+I verified the solution by running `run_tests.sh`, which passed all tests.

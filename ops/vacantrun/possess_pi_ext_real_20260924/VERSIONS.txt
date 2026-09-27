@@ -1,0 +1,10 @@
+pi 0.87.0（npm @earendil-works/pi-coding-agent@0.87.0，隔離 prefix；該機常駐的是 0.85.1，本批沒用）
+node v22.23.2
+python Python 3.12.3
+cryptography 41.0.7
+host vacant-dev（Ubuntu 24.04.4 LTS，kernel 6.8.0-137-generic，tailscale 100.124.254.83）
+model gemma-4-12b-it-qat @ 1004（w401c-15 100.86.226.21:1234，LM Studio 0.4.17（依 2026-09-13 紀錄，本批沒重量）；non-thinking 本批當場量：17 隻羊探針 reasoning_content 無）
+upstream 要金鑰的中繼 tools/relay.py @ 100.124.254.83:18899 → 1004
+route 常駐 extension（pi 完整路徑，不經 PATH shim）
+vacant_network git 1ca6683c5c360398a3486f4fea0b59b8ac2e9cfb（fix/pi-integration-review）
+date 2026-09-24T03:20:56Z

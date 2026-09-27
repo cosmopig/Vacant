@@ -1,0 +1,4 @@
+pass test_visible.py::check_test_all_zeros
+pass test_visible.py::check_test_empty_dataframe
+pass test_visible.py::check_test_incremental_values
+0 check(s) failed

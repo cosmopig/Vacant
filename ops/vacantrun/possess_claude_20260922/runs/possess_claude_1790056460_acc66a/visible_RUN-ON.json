@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "possess_claude_1790056460_acc66a",
+  "files": [
+    {
+      "file": "test_add.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 144,
+      "cases": [
+        {
+          "case": "check_add",
+          "ok": false,
+          "kind": "exception",
+          "message": "ImportError: cannot import name 'add' from 'solution' (/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home_claude/.vacant-run/possess_claude_1790056460_acc66a/_frozen_RUN-ON/solution.py)",
+          "where": "test_add.py:2: from solution import add",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 1,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "e13e93f4c3e8bfb3feb118445e4b18ec7c0f39e3b55fe0496fac9642ead2660a"
+}

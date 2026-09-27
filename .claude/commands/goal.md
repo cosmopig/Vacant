@@ -191,6 +191,40 @@ pid 有值、**埠沒人在聽、log 兩個都是 0 byte**；堆疊卡在
 
 ---
 
+## 〇-2、🔴 2026-09-22 人類的要求（凌駕本檔其他段落的「下一步」）
+
+人類原話：
+
+> **維持現有的 vacant 的效果，讓他可以在任何的現有 agent 上運作，去執行做好為止，
+> 且自行安裝確認。** 優先以 pi；OpenCode 做不到 `/vacant on` 的話先不管。
+
+三句話的版本：
+
+1. **既有效果一個都不准掉**：通道（proxyd）、閘門（PATH shim、退出碼 `0/20/21/22/23/24/25/26`
+   語意不動）、收據（`ws_verdict`、四欄認證）、`vacant on`（B 路）、四個 agent 的接線。
+2. **pi 的形狀**：`pip install vacant-network` → `vacant`（裸打會引導）或 `vacant install --agent pi`
+   → 照舊打 `pi`，狀態列顯示 `(vacant) <model>`，輸入框 `/vacant on|off|status`。
+   接法＝**一支 extension**（`vacant_network/vrun/piext.py` 渲染、`possess.wire_pi` 寫進
+   `~/.pi/agent/extensions/vacant.ts`），**不再改寫使用者的 `models.json`**。
+   研究與施工順序：`decisions/notes/NOTE_20260922_PI_OPENCODE_SLASH_VACANT_PLAN.md`。
+3. **做到好的定義**＝自己裝一次、自己驗：`requests_seen > 0`（proxyd journal）、掛鉤日誌有
+   canary、`/vacant status` 回得出來、shim 那條 `pi -p` 退出碼照舊。
+   ⚠ 沒有真模型的機器只到 **L-fake**（假上游），要明講；L-real 仍要在 vacant-dev 補。
+   ✅ 2026-09-22 落地：pi extension（`piext.py`，自裝 **L-fake**，`ops/vacantrun/possess_pi_20260922/`）；
+   Claude Code 由 Claude Code 自己在遠端容器裡驗（**L-real**，Haiku 4.5，`ops/vacantrun/possess_claude_20260922/`）
+   ——抓到 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1` 會讓 `settings.json` 的 base URL 被忽略，環境變數那條不受影響。
+   ✅ 2026-09-22 稍晚：**pi 的 PATH shim 那條路拿到 L-real**（`ops/vacantrun/possess_pi_real_20260922/`）——
+   R534 五題、真模型 `gemma-4-12b-it-qat`、走 PATH shim、**3 交付 exit 0／2 拒交 exit 20**、五條鏈全 OK。
+   其中 `lcb_3584` 是 **`agent_rc=0` 卻只 read 沒 write 就宣告完成**，閘門在行程結束那一刻擋下來
+   ——那句跨框架的話在 pi ＋ 真模型 ＋ shim 路徑上又出現一次。
+   🔴 **不是常駐附身的 L-real**：shim 把 `PI_CODING_AGENT_DIR` 搬到暫存目錄，常駐 extension
+   （`~/.pi/agent/extensions/vacant.ts`）那五格沒被載入 ⇒ 記在 `possess.SHIM_MEASURED["pi"]`，
+   `CHANNEL_MEASURED["pi"]` 當時仍空。
+   ✅ 2026-09-24：**常駐 extension 那條也拿到 L-real**（`ops/vacantrun/possess_pi_ext_real_20260924/`，
+   vacant-dev、pi 完整路徑不經 shim、要金鑰的中繼）——76 通全在常駐 journal、金鑰借自 `models.json`。
+   ⚠ 那條路**沒有閘門**：兩題 agent 退出碼 0 沒交件也沒被擋。互動模式的閘門（`agent_before_settle`）仍是下一步。
+   ⚠ 級別全 B′（沒 bwrap）；上游是公開 Funnel 不是 LAN；互動／長任務／並行沒量。
+
 ## 一、閘門的可量測定義（仍然有效）
 
 「閘門會動」是**兩格都成立**，而且**用真模型**：

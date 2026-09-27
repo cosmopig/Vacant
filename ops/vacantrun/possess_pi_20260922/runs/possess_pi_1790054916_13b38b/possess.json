@@ -1,0 +1,99 @@
+{
+  "possess_agent": "pi",
+  "suite_source": "dir:tests_visible",
+  "suite_dir": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/cell/tests_visible",
+  "gate": "ran",
+  "requests_seen": 2,
+  "stop_reason": "visible_fail",
+  "accepted": false,
+  "shim_exit": 20,
+  "argv": [
+    "-p",
+    "reply with the single word OK"
+  ],
+  "real_binary": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/pi/node_modules/.bin/pi",
+  "cwd": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/cell/ws_refuse",
+  "cfg_sweep": {
+    "parent": "/tmp/vacant-possess",
+    "max_age_s": 21600.0,
+    "removed": [],
+    "kept_alive": [],
+    "kept_young": [],
+    "skipped_not_ours": [],
+    "failed": [],
+    "bytes_removed": null
+  },
+  "cfg_cleanup": {
+    "path": "/tmp/vacant-possess/run-pi-19e4833a",
+    "bytes": 11580,
+    "ok": true,
+    "owned": true
+  },
+  "agent_posture": {
+    "layer": "gate（per-run relocate 設定）",
+    "sandbox_mode": null,
+    "approval_policy": null,
+    "flags": [],
+    "note": "這個 agent 的 per-run 設定沒有沙箱欄位 ⇒ 沒量到（不是「沒有沙箱」）"
+  },
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "possess_pi_1790054916_13b38b",
+    "agent": "pi",
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531833]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "eth0",
+          "ifb0",
+          "ifb1",
+          "lo"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['eth0', 'ifb0', 'ifb1'] ⇒ 有別的路",
+        "probed_at": 1790054918.997749,
+        "probed_by_pid": 16345
+      }
+    },
+    "framework_hook": {
+      "agent": "pi",
+      "contract_version": "vacant-hook/1",
+      "canary_fired": true,
+      "events_n": 7,
+      "log": "/tmp/claude-0/-home-user-Vacant/95031510-877c-5775-9ca5-176a6cda6673/scratchpad/home/.vacant-run/possess_pi_1790054916_13b38b/hooks.jsonl",
+      "install_attempted": true,
+      "version_drift": false,
+      "reason": "掛鉤日誌裡有 1 筆 canary ⇒ 掛鉤真的燒了"
+    },
+    "reconciled": {
+      "relay_calls": 2,
+      "hook_events": 7,
+      "unexplained": 0,
+      "canary_calls": 1,
+      "refused_path": 0,
+      "unexplained_detail": [],
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "2 通中繼、2 個回合開端事件 ⇒ 0 通對不上"
+    },
+    "tier": "B'",
+    "attested": false,
+    "b_prime_kind": "channel_not_enclosed",
+    "tier_sentence": "工具層每一次都有紀錄；**模型通道 Vacant 沒有（完整）看到**。",
+    "tier_reasons": [
+      "掛鉤燒了但**圍牆不成立**（enclosure.applied=False）⇒ 模型通道在網路上，但不保證每一通都經過 Vacant"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1790054918.998124
+  },
+  "attest_mode": "warn",
+  "tier": "B'",
+  "attested": false
+}

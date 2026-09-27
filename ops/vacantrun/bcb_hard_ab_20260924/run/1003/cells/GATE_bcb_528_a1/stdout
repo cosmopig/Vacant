@@ -1,0 +1,9 @@
+The task is completed successfully. I have implemented the `task_func` in `solution.py` which:
+1. Validates that the input file has a `.csv` extension and raises a `ValueError` otherwise.
+2. Reads the CSV file using the `csv` library and counts occurrences of each row using `collections.Counter`.
+3. Identifies duplicate rows (those with count > 1) and returns them as a dictionary.
+4. Converts the duplicates into a pandas DataFrame.
+5. Plots a bar chart of the duplicate entries using matplotlib, including the required title "Duplicate Entries" and y-label "Count".
+6. Returns both the dictionary of duplicates and the matplotlib Axes object.
+
+The tests passed successfully.

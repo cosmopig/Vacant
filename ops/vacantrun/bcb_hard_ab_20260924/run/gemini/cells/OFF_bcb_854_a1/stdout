@@ -1,0 +1,28 @@
+<thought>All done. I've implemented the function as requested, verified it with the provided tests and my own additional tests covering edge cases, and ensured it follows the contract.</thought>I have implemented the `task_func` in `solution.py` as requested. The function generates all permutations of a list of integers, calculates the sum of the factorials of the elements in each permutation, and returns both the sums and the permutations. It also includes the necessary error handling for non-list inputs, non-integer elements, and negative integers, as well as handling for the empty list case.
+
+```python
+from functools import reduce
+from itertools import permutations
+import math
+
+def task_func(numbers):
+    if not isinstance(numbers, list):
+        raise TypeError("numbers must be a list")
+    
+    for x in numbers:
+        if not isinstance(x, int):
+            raise TypeError("numbers must be a list of integers")
+        if x < 0:
+            raise ValueError("numbers must be non-negative")
+
+    if not numbers:
+        return [], []
+
+    perms = list(permutations(numbers))
+    fac_sums = []
+    for p in perms:
+        s = sum(math.factorial(x) for x in p)
+        fac_sums.append(s)
+    
+    return fac_sums, perms
+```

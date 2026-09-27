@@ -1,0 +1,16 @@
+=== CH_lcb_3522_r1 rc=0 wall=262.5s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3522_r1 rc=0 wall=299.3s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3522_r1 rc=0 wall=308.0s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3534_r1 rc=0 wall=179.5s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3534_r1 rc=0 wall=470.1s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3534_r1 rc=0 wall=479.1s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3548_r1 rc=0 wall=467.2s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3548_r1 rc=0 wall=489.7s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3548_r1 rc=0 wall=543.3s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3583_r1 rc=0 wall=381.2s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== OFF_lcb_3583_r1 rc=0 wall=548.4s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3583_r1 rc=124 wall=1500.3s visible_rc=1 hidden={"passed":0,"total":null,"note":"凍結工作區裡沒有sol
+=== OFF_lcb_3584_r1 rc=0 wall=870.8s visible_rc=0 hidden={"passed":28,"total":28,"failures":[]}
+=== CH_lcb_3584_r1 rc=124 wall=1500.2s visible_rc=1 hidden={"passed":0,"total":null,"note":"凍結工作區裡沒有sol
+=== GATE_lcb_3584_r1 rc=124 wall=1510.7s visible_rc=1 hidden={"passed":0,"total":null,"note":"凍結工作區裡沒有sol
+ALLDONE（2026-09-24T10:04:28Z BCB 發射，pilot 提前停止）

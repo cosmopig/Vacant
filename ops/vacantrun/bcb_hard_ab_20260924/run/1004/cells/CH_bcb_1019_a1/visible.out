@@ -1,0 +1,4 @@
+pass test_visible.py::check_test_ocr_and_comment_extraction_fail
+FAIL test_visible.py::check_test_ocr_extraction_succeeds_no_encoding_needed  AssertionError: FAIL test_ocr_extraction_succeeds_no_encoding_needed: AssertionError: '' != 'Extracted Text already in utf8'
++ Extracted Text already in utf8
+1 check(s) failed

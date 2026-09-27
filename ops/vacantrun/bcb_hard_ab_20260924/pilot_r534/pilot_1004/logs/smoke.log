@@ -1,0 +1,3 @@
+=== OFF_lcb_3522_r0 rc=0 wall=333.6s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== CH_lcb_3522_r0 rc=0 wall=385.6s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}
+=== GATE_lcb_3522_r0 rc=0 wall=406.3s visible_rc=0 hidden={"passed":27,"total":27,"failures":[]}

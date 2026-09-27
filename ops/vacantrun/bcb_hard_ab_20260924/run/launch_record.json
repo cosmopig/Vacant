@@ -1,0 +1,60 @@
+{
+ "launched_utc": "2026-09-24T09:53:40Z",
+ "deadline_epoch": 1790266411,
+ "prereg": "/var/tmp/vacant_piext_20260924/bcb_tools/PREREG_20260924_BCB_HARD_VACANT_AB.md",
+ "prereg_sha256": "db4ecd51433301805b7bcbb18a206e0cd9b2c1354aa4f658c5cfd2cc6ab10ce3",
+ "bank_manifest_sha256": "eb145430e7b29f496bc25326380bec09029336f8dcb6ee9ebd6bc230acbe1a6b",
+ "n_tasks": 139,
+ "queue_sha256": "2fd00ae2df9ed2c00b17c13810eac8b09269de42d9cf8be1ad831c3b39a3b0ca",
+ "seed": 20260924,
+ "code": {
+  "1004": "c929e239966b26549108e45863b668e5c3deab4d",
+  "1003": "c929e239966b26549108e45863b668e5c3deab4d",
+  "gemini": "c929e239966b26549108e45863b668e5c3deab4d"
+ },
+ "pi_settings_sha256": {
+  "1004/home_off": {
+   "models.json": "9708a45cf1c43d9cd5bcc4cdfc1505f036a53417700ffc272cc99790d4dd08df",
+   "settings.json": "c1be6e85b3e029d02bfc26c69e57b81389c966a8b0ac57d622155207b965dcaa"
+  },
+  "1004/home_on": {
+   "models.json": "9708a45cf1c43d9cd5bcc4cdfc1505f036a53417700ffc272cc99790d4dd08df",
+   "settings.json": "c1be6e85b3e029d02bfc26c69e57b81389c966a8b0ac57d622155207b965dcaa"
+  },
+  "1003/home_off": {
+   "models.json": "e07382b63c6e4e54f55b35c39ffa2976cfc32399a45daf0f73558f7fa8b8f9ea",
+   "settings.json": "162a0b6ab6c6774eeb358097218f4e6c565685b01ce2091fff03e8ac31f3da11"
+  },
+  "1003/home_on": {
+   "models.json": "e07382b63c6e4e54f55b35c39ffa2976cfc32399a45daf0f73558f7fa8b8f9ea",
+   "settings.json": "162a0b6ab6c6774eeb358097218f4e6c565685b01ce2091fff03e8ac31f3da11"
+  },
+  "gemini/home_off": {
+   "models.json": "46b0500e29211a295952358db636015a655efc8d08bb5419d868772e0706168d",
+   "settings.json": "fd80f5670e6be27d148bea62d3d8bb50b66d375ab3e21894d2aa671f2ff1972a"
+  },
+  "gemini/home_on": {
+   "models.json": "46b0500e29211a295952358db636015a655efc8d08bb5419d868772e0706168d",
+   "settings.json": "fd80f5670e6be27d148bea62d3d8bb50b66d375ab3e21894d2aa671f2ff1972a"
+  }
+ },
+ "prereg_addendum_A1": "/var/tmp/vacant_piext_20260924/bcb_tools/PREREG_20260924_BCB_HARD_VACANT_AB_ADDENDUM_A1.md",
+ "prereg_addendum_A1_sha256": "ada3f6df6b227433e34eb5dd16f9ab9a12084304e84acca981cbc134a46da9f6",
+ "containment": "bw.sh: bwrap --ro-bind / / --tmpfs /tmp, rw ws+HOME, --unshare-pid, net shared",
+ "gate_env": {
+  "VACANT_TEST_TIMEOUT": 120,
+  "VACANT_ACCEPT_PATH_PREPEND": "/var/tmp/vacant_piext_20260924/bcb/venv/bin",
+  "VACANT_ACCEPT_MEMORY_MB": 2048
+ },
+ "tools_sha256": {
+  "bcb_analyze.py": "2a49ca24c92ff72c030c3b774d5152cf57436d57b49cd5762a43be45e7dbc94a",
+  "bcb_cell.sh": "6e4fd6c4a620b5e8b06c6d1e879b73c373faa854a730b18395f4dba23e0402df",
+  "bcb_common.sh": "34b0b567cbae984617f175c395a811e55541d73d065c3d082bb67c5e426079df",
+  "bcb_launch.sh": "197d806d00e01704f460bba51d51ddd4ebe7de5bceb6338492977130e2ca489b",
+  "bcb_score.py": "942d964abc0626ea0d61a576664c151bc57de1d9aa7e3e546f6ae0431c4935ba",
+  "bcb_status.sh": "3178343fb4a27355a8b986f57b029a796265b5c45b78991ab402aea70d627dbf",
+  "bcb_task.sh": "7f7748d2606ef9af954b24601e18053e82d9138272ee25105c01f785f87ea64c",
+  "bcb_worker.sh": "2c3f01e9a5751386e961dde511253f8e5735ce2f6af8ebf87ba1c34568da441b",
+  "bw.sh": "70fb24407f4621a3f70273ebe2b5b34d9aefd32bf3b1c23ff49ba98e1e75d21b"
+ }
+}

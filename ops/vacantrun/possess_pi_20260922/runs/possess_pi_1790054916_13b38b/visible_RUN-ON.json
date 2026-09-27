@@ -1,0 +1,30 @@
+{
+  "suite": "visible",
+  "task_id": "possess_pi_1790054916_13b38b",
+  "files": [
+    {
+      "file": "test_add.py",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 139,
+      "cases": [
+        {
+          "case": "check_add",
+          "ok": false,
+          "kind": "exception",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_add.py:2: from solution import add",
+          "output": ""
+        }
+      ],
+      "passed": 0,
+      "total": 1,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 1,
+  "all_pass": false,
+  "empty_reason": null,
+  "result_sha256": "3b6195fdedb37537533a2ee3c84280aadb1aee1e3b4a5ef8e927a876220ab971"
+}

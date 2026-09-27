@@ -1,0 +1,1 @@
+{"passed": 5, "total": 6, "failures": ["check_test_return_type_with_complex_data: AssertionError: FAIL test_return_type_with_complex_data: AssertionError: 4 != 3 : DataFrame should have 3 rows corresponding to the table rows"]}

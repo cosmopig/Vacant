@@ -1,0 +1,33 @@
+The tests passed successfully. I have implemented the `task_func` in `solution.py` as required by `goal.md` and `contract.md`.
+
+Summary of changes:
+- Created `solution.py` with the `task_func` implementation.
+- Used `glob.glob` to find all `.bat` files in the specified directory.
+- Used `subprocess.Popen` to execute each batch file, capturing its return code.
+- Handled exceptions by returning `None` for the exit code if execution fails.
+- Verified the solution with the provided tests using `run_tests.sh`.
+
+The final implementation of `solution.py`:
+```python
+import subprocess
+import os
+import sys
+import glob
+
+def task_func(directory_path):
+    results = []
+    # Get all .bat files in the directory
+    batch_files = glob.glob(os.path.join(directory_path, "*.bat"))
+    
+    for batch_file in batch_files:
+        try:
+            # Run the batch file and get its return code
+            process = subprocess.Popen(batch_file, shell=True)
+            returncode = process.wait()
+            results.append((os.path.basename(batch_file), returncode))
+        except Exception:
+            # If for some reason it couldn't be executed (e.g., permission denied or file not found)
+            results.append((os.path.basename(batch_file), None))
+            
+    return results
+```

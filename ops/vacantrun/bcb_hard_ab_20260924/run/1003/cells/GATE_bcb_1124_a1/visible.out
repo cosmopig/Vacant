@@ -1,0 +1,3 @@
+pass test_visible.py::check_test_malformed_url
+pass test_visible.py::check_test_multiple_urls_in_string
+0 check(s) failed
