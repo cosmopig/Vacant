@@ -8,7 +8,7 @@
 - `instruction.txt`：給 pi 的那一句（與 2026-09-24 BCB 批次相同：只叫它讀 goal.md 與 contract.md）
 - `workspace/`：樣板整份（goal.md、contract.md、tests_visible/、run_tests.sh）——agent 看到的就是這些
 - `hidden/test_hidden.py` ＋ `hidden/tests_visible/`（**原本的**可見測試，計分用；agent 改工作區裡的那份不影響計分）
-- `scorer.py`：scorers/code_checks.py
+- `scorer.py`：scorers/code_suite.py（量具同一套判準）
 並印出 plan.json 要的 tasks 陣列（JSON）。有 `--manifest` 時只收 manifest 裡沒被排除的題。
 """
 from __future__ import annotations
@@ -50,7 +50,7 @@ def main() -> int:
         (d / "hidden").mkdir(parents=True)
         shutil.copy2(hid, d / "hidden" / "test_hidden.py")
         shutil.copytree(src / "tests_visible", d / "hidden" / "tests_visible")
-        shutil.copy2(HERE / "scorers" / "code_checks.py", d / "scorer.py")
+        shutil.copy2(HERE / "scorers" / "code_suite.py", d / "scorer.py")
         (d / "instruction.txt").write_text(PROMPT + "\n")
         tasks.append({"bank": a.bank, "id": tid, "dir": f"{a.vm_root}/{a.bank}/{tid}"})
     print(json.dumps(tasks, ensure_ascii=False))

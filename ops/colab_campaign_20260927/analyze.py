@@ -44,6 +44,22 @@ def load_cells(cells: pathlib.Path, prefix: str) -> dict[str, dict]:
             r["check"] = json.loads((d / "vacant_check.json").read_text().strip().splitlines()[-1])
         except (OSError, ValueError, IndexError):
             r["check"] = None
+        # C361 的病歷：每次退回（action != allow）的 findings 類別；有沒有跑過 run_tests.sh（v3.6.1 不認它是測試，見預註冊第八節）
+        sb, ran_rt = [], False
+        for ch in d.glob("vacant_home/trace/projects/*/chain.ndjson"):
+            for ln in ch.read_text().splitlines():
+                try:
+                    e = json.loads(ln)
+                except ValueError:
+                    continue
+                if e.get("type") == "step" and (e.get("payload") or {}).get("tool") == "bash":
+                    ib = (e["payload"].get("input_blob") or "")          # 指令本文在 ~/.vacant/trace/objects/<前兩字>/<雜湊>
+                    ob = d / "vacant_home" / "trace" / "objects" / ib[:2] / ib
+                    if ib and ob.is_file() and b"run_tests.sh" in ob.read_bytes():
+                        ran_rt = True
+                if e.get("type") == "review" and (e.get("payload") or {}).get("action") != "allow":
+                    sb += [f"{f.get('kind')}/{f.get('sub') or '-'}" for f in (e["payload"].get("findings") or [])]
+        r["sendback_kinds"], r["ran_run_tests_sh"] = sb, ran_rt
         out[d.name] = r
     return out
 
@@ -89,6 +105,7 @@ def main() -> int:
                      "no_solution": str((r["score"] or {}).get("note", "")).startswith("no "),
                      "timeout": bool(meta.get("timeout")), "wall_s": meta.get("wall_s"), "install_rc": meta.get("install_rc"),
                      "c_arm_ok": chk.get("c_arm_ok"), "reviews": chk.get("reviews"), "review_actions": chk.get("review_actions"),
+                     "sendback_kinds": r.get("sendback_kinds") or [], "ran_run_tests_sh": r.get("ran_run_tests_sh"),
                      "calls": len(calls), "prompt_tokens": sum((x.get("usage") or {}).get("prompt_tokens") or 0 for x in calls),
                      "completion_tokens": sum((x.get("usage") or {}).get("completion_tokens") or 0 for x in calls)})
     by_unit = collections.defaultdict(dict)
@@ -122,7 +139,13 @@ def main() -> int:
     acts = collections.Counter(a for x in cs for a in (x["review_actions"] or []))
     desc["C361_vacant"] = {"c_arm_ok": sum(1 for x in cs if x["c_arm_ok"]), "install_fail": sum(1 for x in cs if x["install_rc"] not in (0, None)),
                            "cells_with_review": sum(1 for x in cs if (x["reviews"] or 0) > 0), "review_actions": dict(acts),
-                           "cells_sent_back": sum(1 for x in cs if any(v != "allow" for v in (x["review_actions"] or [])))}
+                           "cells_sent_back": sum(1 for x in cs if any(v != "allow" for v in (x["review_actions"] or []))),
+                           "sendback_kinds": dict(collections.Counter(k for x in cs for k in x["sendback_kinds"])),
+                           "test_claim_none_after_running_run_tests_sh": sum(1 for x in cs if x["ran_run_tests_sh"]
+                                                                            and "test_claim/none" in x["sendback_kinds"])}
+    # 可能的傷害：只有 A 過的配對，逐一列出（含 C 的退回類別）
+    res["A_only_pairs"] = [{"unit": u[0], "C_sendbacks": y["sendback_kinds"], "C_timeout": y["timeout"], "C_no_solution": y["no_solution"]}
+                           for u, x, y in pairs if x["pass"] and not y["pass"]]
     res["descriptive"] = desc
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "report.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))

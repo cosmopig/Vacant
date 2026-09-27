@@ -1,4 +1,4 @@
-<!-- 狀態：**草稿**（題庫 manifest 的 sha256 填進第四節、發射前 commit 即凍結；凍結之後這一份與它釘住的東西不准再改，要改＝另一份預註冊）。 -->
+<!-- 狀態：**凍結**（2026-09-27，發射前 commit）。凍結之後這一份與它釘住的東西不准再改；要改＝另一份預註冊。 -->
 
 # 預註冊：五組程式題庫 × pi 0.87.1，沒裝 vs 零設定 Vacant v3.6.1（Colab G4、gemma-4-12b QAT）
 
@@ -39,15 +39,16 @@ redesign 分支正在 1003／1004 上跑 DABstep 的 274 題（u274）。人類 
 | C361 wheel | `vacant_network-0.8.0-py3-none-any.whl` sha256 `4ec156d6648d214baa9bc5be4093f8b8731112f16a6ee61b6118d70b41def0b4`（在 G4 的 Linux 上從 `c27641c6` 重建，與交接檔一字不差；114 檔逐位元組相同） |
 | 記帳代理 | redesign 分支 `ops/eval/orproxy.py` 逐字複製（sha256 `bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525`），本機模式、上游代號 `g4` |
 | 隔離 | 每格一個新的 Linux 使用者＋bwrap（`sandbox.sh`）；計分另一個新使用者；見 RUNLOG 第二節 |
-| 題庫 | 五組，manifest sha256 **〔凍結前填〕**：LCB v1（89）、LCB v2（118）、LCB v3（189）、MBPP+（371）、HumanEval+（156）＝**923 題** |
+| 題庫 | 五組，由題庫轉換（`ops/vacantrun/colab_banks_20260927/`；MBPP+／HE+ 的題目檔在 `.vacant-private/`，不進 repo）後 staged；staged 樹的 sha256（檔名＋每檔 sha256 依序串起來）：LCB v1 `c1ff347f…`（89 題）、LCB v2 `f5294430…`（118）、LCB v3 `73004ec4…`（189）、MBPP+ `a45f1f45…`（371 取 369）、HumanEval+ `aef3d619…`（156 取 155）＝**920 題**；全長雜湊在 `launch_record_c5.json`。plan `plan_code5.json` sha256 `dadc283f427aed840c9e31523fea6b2f1f919e420b175226389591747dc1803d` |
+| 排除 | 3 題：`HumanEval/32`、`Mbpp/590`、`Mbpp/623`——參考解在這台的計分環境（Linux、Python 3.13.15）隱藏沒全過（多項式求根收斂到另一根、複數、負次方的浮點差），計分器在這幾題判不準。其餘：參考解 524／524 全過（MBPP+、HE+；LCB 沒有參考解）、退化樁 920／920 不過（可見與隱藏都不過） |
 | 給 pi 的那一句 | `Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.`（同 2026-09-24 BCB 批次） |
-| 計分 | `scorers/code_checks.py`：每個 `check_*` 另開行程、120 秒、RLIMIT_AS 2 GB；`pass`＝隱藏（可見 ∪ 隱藏）全過；可見用題目**原本**那一份 |
+| 計分 | `scorers/code_suite.py`（sha256 `298396bc…`）＝題庫量具用的判準（`acceptance.run_suite`：一個測試檔所有 `check_*` 同一個行程、DRIVER_SRC 逐字）；整檔時限 60 秒（量具 30 秒的 2 倍，VM 較忙）、RLIMIT_AS 2 GB；`pass`＝隱藏（可見 ∪ 隱藏）全過；可見用題目**原本**那一份 |
 | 驅動與分析 | `driver.py`、`cell.sh`、`sandbox.sh`、`packer.py`、`analyze.py`、`vacant_check.py`（本 commit 的版本，sha256 見 `launch_record.json`） |
 
 ## 五、跑的方式與停止規則
 
 ```
-python3 /opt/eval/bin/driver.py --plan /srv/eval/plan_code5.json --slots 48 --prefix c5 --deadline <發射時間＋12 小時>
+bash /opt/eval/bin/launch_batch.sh c5 /srv/eval/plan_code5.json 48 <發射時間＋12 小時> PREREG_20260927_COLAB_CODE5_A_VS_C361.md
 ```
 - 每題 1 次；`random.Random(20260928)` 打亂題目順序；**同一題的兩組同時開始**（一起佔位置）；48 格同時（＝24 題）。
   48 是看校準（R534 20 題 × 2 組 40 格一起開：0 逾時、KV 只用 10%）定的，校準**沒有看分數**。
@@ -66,7 +67,8 @@ python3 /opt/eval/bin/driver.py --plan /srv/eval/plan_code5.json --slots 48 --pr
 - **完整配對**：同一題 A 與 C361 都不是 void。
 - **主要檢定（只有一個）**：五組合併，`pass` 的不一致對 b（只有 C361 過）對 c（只有 A 過），**McNemar 精確檢定，雙尾 α＝0.05**。
 - 同時要報的（描述，不檢定）：五組分開的配對表；每組可見全過、**假完成**（可見全過但隱藏沒全過）、沒交 solution.py、1800 秒時限次數、牆鐘、token；
-  C361 的退回（有沒有走到交件前檢查、退回幾次、類別）；**「只有 A 過」的格子逐一列出**（可能的傷害）。
+  C361 的退回（有沒有走到交件前檢查、退回幾次、每次的 finding 類別）；**「跑過 `run_tests.sh` 之後仍被判 `test_claim/none`」的格數**（誤退，見第八節 9）；
+  **「只有 A 過」的格子逐一列出**，附 C 的退回類別、逾時、有沒有交檔（可能的傷害）。
 
 ## 七、事先寫死的說法
 
@@ -87,6 +89,11 @@ python3 /opt/eval/bin/driver.py --plan /srv/eval/plan_code5.json --slots 48 --pr
 6. 校準用的 R534 20 題是 LCB 衍生的，可能和 LCB 題庫重疊；校準只看了牆鐘、逾時、token，**沒有看分數**。
 7. 長輸出打轉：校準 465 通裡 33 通 ≥ 8,000 輸出 token（pi 對自訂模型的預設上限 16,384）；兩組都有，牆鐘因此拉長；不改 pi 設定。
 8. 寫這一份的人看過這些題庫在**別的設定**（G 實驗、R529、R532）的結果；這個設定（pi＋v3.6.1＋Colab）在這些題上**一跑都沒有**（校準的 R534 除外）。
+9. **已知的產品缺陷（寫這一份之前就知道）**：v3.6.1 只把 pytest／`python -m unittest` 之類的指令認成「跑測試」，**不認 `sh run_tests.sh`**；
+   而這五組的 contract.md 叫 agent 用 `sh run_tests.sh`。⇒ agent 跑過測試、說測試過了，C361 仍會退回 `test_claim/none`（還可能附一條「tests_visible 沒打開」）。
+   證據：任務題庫 agent 的 L-fake 探針（`task_banks_20260927/common/runtests_sh_probe_report.json`）與本批校準（R534：C 的 12 次退回裡 11 次是 `test_claim/none`，
+   6 格都跑過 `run_tests.sh`；只看了病歷、沒看分數）。**不改題目去配合產品**：這一批量的就是 v3.6.1 原樣在這種題目上的淨效果（真的退回＋誤退）。
+10. 計分器在校準之後、凍結之前改過一次（每條另開行程 → 量具同一套、整檔一個行程），原因是 HumanEval+ 每題約 1,000 條檢查；校準的分數沒有被看過。
 
 ## 授權
 

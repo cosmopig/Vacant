@@ -98,3 +98,13 @@ Colab 的 VM 本身就是一個容器，開不了 dockerd；而且人類說「�
   - 輸入 token 中位數 7,057、p90 48,942、最大 117,675；**快取命中 87%**。
   - 14:06 的 vLLM 指標（當時 13 條在跑）：生成 2,289 token/秒、prompt 7,583 token/秒、KV 只用 10% ⇒ 還有很多空間，正式批次可以開更多格。
   - 看的只有牆鐘、逾時、錯誤碼、token；**沒有打開任何 score.json**。
+- 14:40 題庫 agent 確認五組題目檔是最終版；staged 到 VM（923 題；工作區只有 goal.md／contract.md／run_tests.sh／test_visible.py，掃過沒有參考解與隱藏測試）。
+- 14:45 **計分器改成量具同一套判準**（`scorers/code_suite.py`）：原本每條 `check_*` 另開行程，HumanEval+ 每題約 1,000 條會拖到逾時被判 void；
+  改成 `acceptance.run_suite` 的做法（整檔一個行程、DRIVER_SRC 逐字），整檔 60 秒（量具 30 秒的 2 倍）。
+- 14:50 **計分器驗證**（VM 上 1,450 次，40 並行，每次中位數 0.2 秒）：退化樁 923／923 不過；參考解 524／527 過。
+  沒過的 3 題（HumanEval/32、Mbpp/590、Mbpp/623）是浮點平台差（求根收斂到另一根、複數、負次方），Mac 上量具是過的 ⇒ **具名排除**，剩 920 題。
+- 14:52 任務導向題庫 agent 交件（InfiAgent-DABench 30、DataBench／SemEval-2025 30、Aider Polyglot Python 34；計分器全部驗過），
+  並回報 **v3.6.1 不認 `sh run_tests.sh` 是跑測試** ⇒ 跑過測試還是會被退回 `test_claim/none`。
+  校準的病歷（不看分數）印證：C 的 12 次退回裡 11 次是 `test_claim/none`，6 格都跑過 `run_tests.sh`（指令本文在 `~/.vacant/trace/objects/`）。
+  決定：**不改題目去配合產品**，照原樣量淨效果，誤退的格數列成描述數字（預註冊第八節 9）。
+- 15:0x 預註冊凍結（`decisions/prereg/PREREG_20260927_COLAB_CODE5_A_VS_C361.md`）。
