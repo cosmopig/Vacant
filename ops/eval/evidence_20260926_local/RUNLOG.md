@@ -171,3 +171,7 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   3＋3 的請求延遲中位數 w401 24 秒、1003 85 秒（p90 135／225 秒），提示中位數 44k／34k token；代理串流錯誤 w401 5 通（`failed to decode, ret = 1`）、1003 3 通（`Engine protocol predict stream returned an error`）。
   兩台都活著（12:13 各一通 `u274liveness`：8.5／21.8 秒、200）。**揭露**：為了算時限比例，我讀了這 16 跑 `result.json` 的 `exception_info.exception_type`（每一跑一行、看得到組別）；
   沒有讀 `verifier_result`、`reward.txt`、`test-stdout.txt`，沒有跑分析。預註冊只寫了一次降並行，沒有寫「大多數碰到時限」怎麼辦 ⇒ **照跑、不改設計**，把要不要停交給人類決定（交接文件 §6.6）。
+- **人類 12:25 UTC 決定：「就繼續，但有超時等的最後要一並記錄」** ⇒ u274 照預註冊跑到時間上限，不改設計。
+  新增 `ops/eval/local/ops_report.py`（運作紀錄，**不讀評分**：每一跑的機器、並行時期〔4＋4＝10:50:44Z 起、3＋3＝11:28:25Z 起〕、牆鐘、1800 秒時限、
+  請求數與串流錯誤、驅動有沒有記到；組別 × 時期 × 機器的時限次數；沒開始的題），批次結束後和主要分析一起跑、一起交。
+  這是**事後加的描述**，不是預註冊的一部分；在批次結束之前寫好、commit，寫的時候只在已分析完的 S36-nocap 上試跑過。

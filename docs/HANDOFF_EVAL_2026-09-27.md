@@ -546,6 +546,14 @@ PYTHONDONTWRITEBYTECODE=1 .venv/bin/python ops/eval/local/s36nc_analyze.py --job
   --out ops/eval/evidence_<YYYYMMDD>_<算力名>/<P>/analysis/s36nc_view.json
 ```
 
+運作紀錄（不含評分；人類 2026-09-27 要求「超時等最後一併記錄」）：
+```bash
+python3 ops/eval/local/ops_report.py --jobs <JOBS> --ledger <LEDGER> --prefix <P> \
+  --manifest ops/eval/evidence_20260927_nocap/unseen/UNSEEN_MANIFEST.json \
+  --period <並行時期名>=<開始時間 UTC> [--period …] --out ops/eval/evidence_<YYYYMMDD>_<算力名>/<P>/ops
+```
+每一跑的機器、並行時期、牆鐘、時限、請求數與串流錯誤、驅動有沒有記到；組別 × 時期 × 機器的時限次數；沒開始的題。和主要分析一起交。
+
 `unseen_analyze.py` 的 `summary.json` 怎麼讀（`ops/eval/local/unseen_analyze.py:67-83`）：
 
 | 欄位 | 意思 |
