@@ -1,0 +1,27 @@
+{
+ "suite": "local",
+ "a": "A",
+ "c": "C35",
+ "sample": 2,
+ "U": {
+  "pairs": 24,
+  "C_only": 10,
+  "A_only": 2,
+  "net": 8,
+  "missing": []
+ },
+ "K": {
+  "pairs": 12,
+  "C_only": 1,
+  "A_only": 0,
+  "net": 1,
+  "missing": []
+ },
+ "wrong_answers": {
+  "A": 4,
+  "C": 8
+ },
+ "extra_wrong": 4,
+ "net_right": 9,
+ "decision": "GO"
+}
