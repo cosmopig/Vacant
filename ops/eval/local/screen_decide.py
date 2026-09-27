@@ -25,11 +25,12 @@ SUITES = {
 }
 
 
-def cells(jobs: pathlib.Path, arm: str) -> dict[str, dict[str, Any]]:
-    """task → {reward, answer, exception}（本機的 g12-off-<組>-s1、付費的 g4-on-<組> 兩種擺法都讀）。"""
+def cells(jobs: pathlib.Path, arm: str, sample: int = 1) -> dict[str, dict[str, Any]]:
+    """task → {reward, answer, exception}（本機的 g12-off-<組>-s<次>、付費的 g4-on-<組> 兩種擺法都讀；本機只讀第 `sample` 次）。"""
     out: dict[str, dict[str, Any]] = {}
     for trial in sorted(jobs.glob(f"*-{arm}*/*/dabstep-*__*")):
-        if not re.search(rf"(?:^|-){re.escape(arm)}(?:-s\d+)?$", trial.parent.parent.name):
+        m_arm = re.search(rf"(?:^|-){re.escape(arm)}(?:-s(\d+))?$", trial.parent.parent.name)
+        if not m_arm or (m_arm.group(1) is not None and int(m_arm.group(1)) != sample):
             continue
         m = re.match(r"dabstep-(\d+)__", trial.name)
         if not m or not (trial / "result.json").is_file():
@@ -51,10 +52,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--jobs", required=True, type=pathlib.Path)
     ap.add_argument("--a", default="A")
     ap.add_argument("--c", required=True)
+    ap.add_argument("--sample", type=int, default=1, help="本機擺法的第幾次（g12-off-<組>-s<次>）")
     ap.add_argument("--out", type=pathlib.Path)
     a = ap.parse_args(argv)
-    A, C = cells(a.jobs, a.a), cells(a.jobs, a.c)
-    res: dict[str, Any] = {"suite": a.suite, "a": a.a, "c": a.c}
+    A, C = cells(a.jobs, a.a, a.sample), cells(a.jobs, a.c, a.sample)
+    res: dict[str, Any] = {"suite": a.suite, "a": a.a, "c": a.c, "sample": a.sample}
     net_right = 0
     for name, tasks in SUITES[a.suite].items():
         c_only = a_only = n = 0
