@@ -517,6 +517,7 @@ EOF
 
 - infra_void＝沒有評分，或那個標籤的每一通代理請求都失敗（`ops/eval/local/analyze_local.py:67-68`）。啟動檔結束時自動 `rerun_void.py` 移到 `<JOBS>/_void_first/`（不刪）再補跑一次；過了時間上限也只補開始過的單位（`ops/eval/local/run_pairs.py:9-11`）。補跑也壞 ⇒ 分析時拿掉並列出。
 - `archive_raw.py` 不會收 `rerun_void.log` 與 `_void_first/moved.json`（`ops/eval/local/archive_raw.py:134-138`）⇒ `DONE` 之後手動複製進證據目錄。
+- **開跑時就起保險絲** `nohup setsid bash ops/eval/local/guard.sh <JOBS> &`：dockerd 或代理連續兩次（10 秒）不在就依序停啟動檔與驅動。u274 在 18:18 UTC 的重啟裡，dockerd 與代理停了、驅動還活著，28 秒內把 27 題、54 格都秒敗（RUNLOG §17）。dockerd 與代理也用 `setsid` 起。
 - 背景行程可能整批被砍（dockerd、代理、驅動、監測；上一輪兩次，`ops/eval/evidence_20260926_local/RUNLOG.md:83-92,117-126`）：重開 dockerd（同一個 data-root、清掉死容器）→ 代理（**同一個 `--out`**）→ 每台一通 `<P>restartprobe`（第 7 節 (b) 的 curl）→ 同一組參數重開啟動檔與 monitor（照 8.5 第 3 步：`TZ=UTC`、更新 `launch.pid`）。
 - 容器可能回到**舊快照**，沒 push 的東西全丟（留出批次就這樣整批遺失，`ops/eval/evidence_20260926_local/RUNLOG.md:129-135`）⇒ 歸檔迴圈從第一分鐘就開；不要把原始資料只放在暫存區。
 
