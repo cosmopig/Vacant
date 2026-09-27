@@ -1,0 +1,5 @@
+12 runs to go, per machine {'1003': 4}
+{"task": "11", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 140.8, "has_result": true, "at": "2026-09-27T10:03:18Z"}
+{"task": "11", "arm": "C36", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 179.9, "has_result": true, "at": "2026-09-27T10:03:57Z"}
+{"task": "30", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 180.4, "has_result": true, "at": "2026-09-27T10:03:57Z"}
+{"task": "44", "arm": "A", "sample": 2, "upstream": "1003", "rc": 0, "seconds": 432.0, "has_result": true, "at": "2026-09-27T10:11:09Z"}
