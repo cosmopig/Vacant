@@ -113,3 +113,15 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   DABstep 的釘死映像有同一個修正（`dabstep_pin.py`：把憑證放進系統的信任清單），程式題組的基底映像當初照官方做、少了這一步。
   兩跑都沒有送出任何模型請求（代理帳本裡沒有 `codesmoke` 標籤）⇒ 移到 `smoke_A_void_ca/`，驅動停下。
   修法：`make_lcb_suite.py build --ca-bundle`（同一個偏差，寫進基底的 Dockerfile 與 MANIFEST），基底映像換成 `vacant-eval/lcb-visible-base:2`，重新 `docker-verify`。
+
+## 14. 第二次工作階段重啟（約 03:30 UTC）→ 接回（03:33 UTC）；留出批次的 infra_void 提前補跑
+
+- 約 03:30 UTC 所有背景行程又被砍掉（dockerd、兩個記帳代理、串接腳本、監看）。那時留出批次 268 跑有結果（第 1 次：1003 的 50 題兩組都完成，
+  w401 的 150 格還差 1 格有評分）；w401 上在跑的 3 跑被中斷。
+- 接回：dockerd（同一個 data-root，清掉死掉的容器）、本機代理（同一個輸出目錄；兩台各一通 `restart-probe-2` 確認）。
+- **infra_void（沒有評分）共 4 格**：第 1 次的 2404 C3（重啟之前就沒有評分）、第 2 次的 1734 C3、2554 A（重啟中斷、有 `result.json` 沒評分）、
+  2481 A（重啟中斷、連 `result.json` 都沒有——手動移到同一個 `_void_first/`，`moved_manual.json`）。
+- **偏差（順序）**：預註冊第五節是「批次最後補跑一次、同一組參數」，而停止規則是「04:00 之後不開新的一跑」。批次會在 04:00 之後才結束，
+  照字面等到最後就永遠不會補跑。所以 **03:32 先用 `rerun_void.py` 把 3 格移開、再用同一組參數重開驅動**（`rearm_heldout.sh`），
+  讓補跑照種子順序排在最前面、在 04:00 之前開始。沒有看任何評分的值；規則、參數、wheel 都沒變。
+- 04:00 之後驅動收尾；那之後才出現的 infra_void 照停止規則不補跑，分析時兩組一起拿掉並列出（預註冊第五節）。
