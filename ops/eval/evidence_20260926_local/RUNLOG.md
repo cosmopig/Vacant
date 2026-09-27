@@ -139,3 +139,13 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   `budget_usd` 設一個用不到的大數，本機沒有費用）、兩台各一通 `restart-probe-3` 確認。
   **v3.4 wheel 從凍結的 commit `1685e664` 重建**：zip 本身的 sha256 和預註冊釘的 `81a761de…` 不同（建置時間戳），
   但 `vacant_network/` 的 **114 個檔與 `1685e664` 逐位元組相同**（重建的 wheel sha256 `3eb513cc6966de7033e5618745107dd9c065d6c1b6afff1a9d0518067d209330`，`SOURCE_DATE_EPOCH`＝commit 時間）。
+
+## 16. S36-nocap（2026-09-27；裁決 BIGGER_EFFECT §十一）
+
+- 06:11 UTC 開始：36 題 × A／C36（v3.6，wheel `9a5cb08f…`）× 2 次、不設回合上限（`MAX_TURNS=none`，請求裡 0 通有預算那一行）、`w401:3 1003:1`。
+  原始資料每 2 小時歸檔進 `ops/eval/evidence_20260927_nocap/s36nc/raw/`；每分鐘監測；每 3 小時繁中報告（例行觸發）。
+- 08:45–09:45 1003 多出來的 3 個位置跑缺檔退回探針（§十二；那段時間 1003 上的 S36-nocap 跑多了負載，兩組一樣）。
+- **10:05 收尾換並行**：驅動是每台機器一條固定的佇列，w401 那一份在 ~09:50 跑完就閒著，剩下 13 格都在 1003（1 個位置）。
+  停掉舊的驅動（在跑的第 19 題 C36 第 2 次讓它自己跑完、不重開），其餘 12 格用 `1003:4` 的新驅動跑（同一題兩組仍同一台；`run_s36nc_tail.sh`）。
+  人類 2026-09-27 告知兩台 LM Studio 都是 `Max Concurrent Predictions 4`——之後的批次一律 `4＋4`。
+  第 19 題那一跑沒有 `progress.jsonl` 的行（舊驅動已停）；分析讀的是每一跑的 `result.json`／評分，不受影響。
