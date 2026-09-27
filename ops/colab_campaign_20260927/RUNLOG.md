@@ -108,3 +108,11 @@ Colab 的 VM 本身就是一個容器，開不了 dockerd；而且人類說「�
   校準的病歷（不看分數）印證：C 的 12 次退回裡 11 次是 `test_claim/none`，6 格都跑過 `run_tests.sh`（指令本文在 `~/.vacant/trace/objects/`）。
   決定：**不改題目去配合產品**，照原樣量淨效果，誤退的格數列成描述數字（預註冊第八節 9）。
 - 15:0x 預註冊凍結（`decisions/prereg/PREREG_20260927_COLAB_CODE5_A_VS_C361.md`）。
+- 14:58 發射前核對：VM 上 11 支工具的 sha256 與凍結 commit `45564cb5` 逐支相同；plan 920 題 sha256 `dadc283f…`；抽 6 題 staged 的 scorer.py 與 code_suite.py 相同；vLLM 200、代理在線。
+- 14:59 人類完成 Google Drive 授權（`colab drivemount`）⇒ VM 上 `/content/drive/MyDrive` 可寫（agent 的圍牆把 `/content` 整個蓋掉，看不到 Drive）。鏡像目錄 `MyDrive/vacant_colab_20260927/`。
+- **15:00:0x 發射 `c5`**（`launch_batch.sh c5 … 48 2026-09-28T02:59:50Z`）；`launch_record_c5.json` 在 VM 的 `/srv/eval/`（會隨 chunk 歸檔）。
+- 15:02 **可行性規則判定：通過**（最先 40 格：逾時 0、代理非 200 0／280 通、C 裝不上 0）。
+- 15:04 打包程式換成帶 `--mirror` 的版本（先前那支一啟動就看到校準的完成旗標、收完尾自己結束；launch_batch 起的那支沒帶鏡像）。
+  ⚠ 又一次 `pkill -f <字串>` 殺到自己的殼（命令列含同一字串）⇒ 之後一律用 Popen 的清單參數啟動、不在同一條殼指令裡 pkill＋啟動。
+- 15:05 本機同步重開（14:41 它看到校準的 PACKER_DONE 就結束了）；運算單位護欄開（< 25 CU 放停止檔）；監看每 5 分鐘（不讀分數）。
+- 15:05 狀態：64 格完成、0 逾時、C 30／30 生效、每格牆鐘中位數 35 秒。
