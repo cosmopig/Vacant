@@ -79,7 +79,9 @@ ls ops/eval/evidence_20260927_nocap/u274/raw/ 2>/dev/null   # 有 chunk_*.tar.xz
 # 產品＝v3.6.1＝commit c27641c6 的 vacant_network/；之後的 commit 只動評測工具與證據
 git diff --quiet c27641c6 HEAD -- vacant_network pyproject.toml && echo "product == v3.6.1"
 # 評測工具＝u274 凍結的版本（6ab08c91）；結果寫進你的預註冊
-git diff --quiet 6ab08c91 HEAD -- ops/eval/local ops/eval/harbor_vacant.py ops/eval/orproxy.py ops/eval/dabstep_pin.py ops/eval/formal/analyze.py && echo "tooling == u274"
+git diff --quiet 6ab08c91 HEAD -- ops/eval/local/{run_pairs.py,run_local.sh,rerun_void.py,analyze_local.py,unseen_analyze.py,s36nc_analyze.py,make_unseen.py,archive_raw.py,archive_loop.sh,monitor.sh,launch_u274.sh} \
+  ops/eval/harbor_vacant.py ops/eval/orproxy.py ops/eval/dabstep_pin.py ops/eval/formal/analyze.py && echo "tooling == u274"
+# （之後新增的 ops/eval/local/ops_report.py 是運作紀錄，不在 u274 凍結的清單裡，第 9 節）
 uv venv -p 3.11 .venv && uv pip install -p .venv/bin/python -e '.[dev]'   # 要 Python ≥ 3.11（pyproject.toml:9）；系統 python3 太舊時 uv 會自己抓
 # git 身分與 push 權限（凍結與歸檔都要 commit＋push）
 git config user.name '<名字>'; git config user.email '<信箱>'
