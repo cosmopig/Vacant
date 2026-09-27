@@ -1,7 +1,5 @@
-{"units": 274, "runs_to_go": 548, "machines": {"w401": 4, "1003": 4}, "deadline": "2026-09-28T00:00:00Z"}
 {"task": "1519", "arm": "A", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 275.4, "has_result": true, "at": "2026-09-27T10:55:20Z"}
 {"task": "1274", "arm": "A", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 402.5, "has_result": true, "at": "2026-09-27T10:57:27Z"}
-{"units": 274, "runs_to_go": 538, "machines": {"w401": 3, "1003": 3}, "deadline": "2026-09-28T00:00:00Z"}
 {"task": "1461", "arm": "C361", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 1283.1, "has_result": true, "at": "2026-09-27T11:49:48Z"}
 {"task": "1461", "arm": "A", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 1862.4, "has_result": true, "at": "2026-09-27T11:59:28Z"}
 {"task": "2522", "arm": "A", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 1867.7, "has_result": true, "at": "2026-09-27T11:59:33Z"}
