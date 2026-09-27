@@ -166,3 +166,8 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   ⇒ 照規則兩台降成 3 個位置。停掉驅動（`launch_u274.sh`／`run_pairs.py`，用 PID），**在跑的 8 跑讓它們自己跑完**，全部結束才用
   `UPSTREAMS="w401:3 1003:3"` 同一組參數接續（`<暫存>/local/resume_u274.sh`；等待期間不開新跑，避免同一格重複）。
   已接下一半的題由 `run_pairs.py` 排回原來那台。這個決定只看代理與機器，沒有看任何評分。
+- 11:28:25 UTC 在跑的 8 跑都結束，以 `w401:3 1003:3` 接續。
+- **12:15 UTC：大多數跑碰到 1800 秒時限**。有 `result.json` 的 16 跑裡 12 跑是 `AgentTimeoutError`；3＋3 開始之後跑完的 6 跑裡 5 跑（`progress.jsonl` 的秒數 1860–1900）。
+  3＋3 的請求延遲中位數 w401 24 秒、1003 85 秒（p90 135／225 秒），提示中位數 44k／34k token；代理串流錯誤 w401 5 通（`failed to decode, ret = 1`）、1003 3 通（`Engine protocol predict stream returned an error`）。
+  兩台都活著（12:13 各一通 `u274liveness`：8.5／21.8 秒、200）。**揭露**：為了算時限比例，我讀了這 16 跑 `result.json` 的 `exception_info.exception_type`（每一跑一行、看得到組別）；
+  沒有讀 `verifier_result`、`reward.txt`、`test-stdout.txt`，沒有跑分析。預註冊只寫了一次降並行，沒有寫「大多數碰到時限」怎麼辦 ⇒ **照跑、不改設計**，把要不要停交給人類決定（交接文件 §6.6）。
