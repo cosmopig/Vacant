@@ -125,3 +125,17 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
   照字面等到最後就永遠不會補跑。所以 **03:32 先用 `rerun_void.py` 把 3 格移開、再用同一組參數重開驅動**（`rearm_heldout.sh`），
   讓補跑照種子順序排在最前面、在 04:00 之前開始。沒有看任何評分的值；規則、參數、wheel 都沒變。
 - 04:00 之後驅動收尾；那之後才出現的 infra_void 照停止規則不補跑，分析時兩組一起拿掉並列出（預註冊第五節）。
+
+## 15. 容器回到舊的快照（約 05:20 UTC 發現）：留出批次的原始資料遺失
+
+- 第二次重啟之後，這個容器是從**約 2026-09-26 01:05 UTC 的快照**回來的：暫存區回到那時候（`local/`、`codesuite/` 整個不見），
+  本機 checkout 回到 `7f7ec52f`。**推上遠端的東西都在**（已 fast-forward 到 `2d96c4fb`）。
+- **遺失**：留出批次（PREREG_20260926_ZERO_CONFIG_V34_HELDOUT）的全部原始資料——約 270 跑（第 1 次幾乎完整、第 2 次一部分）、
+  本機代理的全文紀錄與帳、wheel、映像。**原始資料從來沒有歸檔進 repo**（正式批次、S36、程式題組冒煙都有歸檔，留出批次沒有）⇒ 預註冊的分析**做不了**。
+  評分我沒有看（只有 RUNLOG §13 那一次非預期的中途計數）。教訓：長批次每 2 小時把原始資料歸檔進 repo。
+- **付費帳本也回到舊的快照**（`evalrun/ledger`）：第 0 階的花費（約 $0.29）不在裡面。要再用付費代理之前，先把
+  `api_tier0/ledger_probe.jsonl` 補回帳本，否則 $4.80 的硬上限會少算。
+- **準備重跑（等人決定）**：dockerd（`vacant-eval/dabstep-env:1` 還在）、本機代理（設定重建：`upstreams` 兩台的基底網址不帶 `/v1`、
+  `budget_usd` 設一個用不到的大數，本機沒有費用）、兩台各一通 `restart-probe-3` 確認。
+  **v3.4 wheel 從凍結的 commit `1685e664` 重建**：zip 本身的 sha256 和預註冊釘的 `81a761de…` 不同（建置時間戳），
+  但 `vacant_network/` 的 **114 個檔與 `1685e664` 逐位元組相同**（重建的 wheel sha256 `3eb513cc6966de7033e5618745107dd9c065d6c1b6afff1a9d0518067d209330`，`SOURCE_DATE_EPOCH`＝commit 時間）。
