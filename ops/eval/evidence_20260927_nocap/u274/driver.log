@@ -244,3 +244,11 @@
 {"task": "1676", "arm": "A", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 208.3, "has_result": true, "at": "2026-09-27T23:51:47Z"}
 {"task": "1684", "arm": "C361", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 1847.8, "has_result": true, "at": "2026-09-27T23:52:15Z"}
 {"task": "1676", "arm": "C361", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 821.1, "has_result": true, "at": "2026-09-27T23:58:15Z"}
+{"task": "1684", "arm": "A", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 1819.3, "has_result": true, "at": "2026-09-28T00:01:30Z"}
+{"task": "1688", "arm": "C361", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 1879.8, "has_result": true, "at": "2026-09-28T00:15:57Z"}
+{"task": "1717", "arm": "A", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 1842.9, "has_result": true, "at": "2026-09-28T00:22:30Z"}
+{"task": "1717", "arm": "C361", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 1875.0, "has_result": true, "at": "2026-09-28T00:22:40Z"}
+{"task": "2675", "arm": "C361", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 1873.6, "has_result": true, "at": "2026-09-28T00:23:29Z"}
+{"task": "1784", "arm": "C361", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 1873.4, "has_result": true, "at": "2026-09-28T00:29:29Z"}
+{"task": "2675", "arm": "A", "sample": 1, "upstream": "w401", "rc": 0, "seconds": 1783.1, "has_result": true, "at": "2026-09-28T00:31:13Z"}
+{"task": "1784", "arm": "A", "sample": 1, "upstream": "1003", "rc": 0, "seconds": 1842.2, "has_result": true, "at": "2026-09-28T00:53:12Z"}
