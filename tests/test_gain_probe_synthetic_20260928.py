@@ -26,7 +26,7 @@ class _SyntheticAgent:
         self.model = f"synthetic/{mode}"
 
     def generate(self, prompt: str, **_kwargs) -> str:
-        m = re.search(r"K=(\\d+)", prompt)
+        m = re.search(r"K=(\d+)", prompt)
         assert m is not None
         k = int(m.group(1))
         if self.mode == "good":
