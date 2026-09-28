@@ -7,8 +7,10 @@
 
 做法（每一跑、每一個 `review` 事件）：
 - 把病歷（`vacant_home/trace`）複製到暫存；`chain.ndjson` 截到那個 `review` 之前（`Trace` 只讀事件、不驗簽章）。
-- 那一刻 agent 說的最後一段話：pi 自己的工作階段檔（`…/pi/sessions/*.jsonl`，比 `pi.txt` 完整——被切斷時 `pi.txt` 會掉尾巴）裡，
-  第 k 個「沒有工具呼叫的助理訊息」（pi 在它之後進交件前檢查）；紀錄裡有引文（`quote`）的就拿來對，對不上記下來。
+- 那一刻 agent 說的最後一段話：pi 自己的工作階段檔（`…/pi/sessions/*.jsonl`，比 `pi.txt` 完整——被切斷時 `pi.txt` 會掉尾巴），
+  依 `review` 的工作階段與時間對齊，照 `vacant.ts` 的 `finalText`：那一刻之前最後一則有文字的助理訊息、截到 20000 字
+  （審查之前的版本用「第 k 個沒有工具呼叫的訊息」，遇到 pi 自動重試與帶了半個工具呼叫的解碼錯誤會錯位，u274 81 次裡 19 次）。
+  對齊的檢查：那一刻之前最後一則助理訊息是不是錯誤結束，要和紀錄的 `last_turn_error` 一致（`aligned`）；有引文（`quote`）的也對。
 - `Evidence(...).run()` 用 `--code` 指到的那一份 `vacant_network`；退不退回用那一份的 `zerostop.pushable_for`（有的話；v3.6.1 沒有 ⇒ 用當時 `_decide` 的規則）。
 
 **只看第一次檢查的差別才是乾淨的**：新版在第一次就放行的話，後面錄到的回合在新版裡不會發生；之後的檢查只在兩版都退回時才比。
@@ -31,8 +33,9 @@ import tempfile
 from typing import Any
 
 
-def session_finals(sess_file: pathlib.Path) -> list[dict[str, Any]]:
-    """pi 工作階段檔裡，每一個「沒有工具呼叫的助理訊息」（交件前檢查的時刻）：文字與 stopReason。"""
+def session_messages(sess_file: pathlib.Path) -> list[dict[str, Any]]:
+    """pi 工作階段檔裡每一則助理訊息：時間（ms）、文字（文字段落以換行接起來）、stopReason。"""
+    import datetime as dt
     out = []
     for ln in sess_file.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
@@ -42,13 +45,23 @@ def session_finals(sess_file: pathlib.Path) -> list[dict[str, Any]]:
         m = e.get("message") or {}
         if e.get("type") != "message" or m.get("role") != "assistant":
             continue
+        try:
+            ts = dt.datetime.fromisoformat(str(e.get("timestamp")).replace("Z", "+00:00")).timestamp() * 1000
+        except ValueError:
+            continue
         c = m.get("content")
         parts = c if isinstance(c, list) else [{"type": "text", "text": c or ""}]
-        if any(isinstance(x, dict) and x.get("type") == "toolCall" for x in parts):
-            continue
         text = "\n".join(str(x.get("text") or "") for x in parts if isinstance(x, dict) and x.get("type") == "text")
-        out.append({"text": text, "stop": m.get("stopReason")})
+        out.append({"ts": ts, "text": text, "stop": m.get("stopReason")})
     return out
+
+
+def final_at(msgs: list[dict[str, Any]], ts_ms: float) -> dict[str, Any]:
+    """交件前檢查那一刻 pi 擴充送給 Vacant 的 `final_text`：和 `vacant.ts` 的 `finalText` 同一個規則——
+    那一刻之前最後一則**有文字**的助理訊息，截到 20000 字；`stop`＝那一刻之前最後一則助理訊息的 stopReason。"""
+    before = [m for m in msgs if m["ts"] <= ts_ms]
+    text = next((m["text"] for m in reversed(before) if m["text"].strip()), "")
+    return {"text": text[:20000], "stop": before[-1]["stop"] if before else None}
 
 
 def paths(cell: pathlib.Path, layout: str) -> tuple[pathlib.Path, list[pathlib.Path]]:
@@ -65,7 +78,7 @@ def replay_cell(cell: pathlib.Path, layout: str, mods: dict[str, Any]) -> list[d
     chain = projs[0]
     lines = chain.read_text(encoding="utf-8").splitlines()
     events = [json.loads(x) for x in lines if x.strip()]
-    finals = session_finals(sess_files[-1])
+    by_session = {f.stem.rsplit("_", 1)[-1]: session_messages(f) for f in sess_files}
     rows: list[dict[str, Any]] = []
     k = 0
     used = 0
@@ -82,7 +95,7 @@ def replay_cell(cell: pathlib.Path, layout: str, mods: dict[str, Any]) -> list[d
             p = ev.get("payload") or {}
             session = str(p.get("session") or "").split(":", 1)[-1]
             (pdir / "chain.ndjson").write_text("\n".join(lines[:i]) + "\n", encoding="utf-8")
-            final = finals[k] if k < len(finals) else {"text": "", "stop": None}
+            final = final_at(by_session.get(session) or [], float(ev.get("ts_ms") or 0))
             k += 1
             quotes = [f.get("quote") for f in p.get("findings") or [] if f.get("quote")]
             quote_ok = all(q.replace("…", "")[:40] in final["text"] for q in quotes) if quotes else None
@@ -95,11 +108,12 @@ def replay_cell(cell: pathlib.Path, layout: str, mods: dict[str, Any]) -> list[d
             if p.get("window_start") != prev_request:
                 used, prev_request = 0, p.get("window_start")
             error_stop = bool(p.get("last_turn_error"))
+            aligned = (final["stop"] == "error") == error_stop
             push = mods["pushable"](res.get("findings") or [], used, error_stop)
             action = "continue" if push and used < mods["max_rounds"] else "allow"
             rows.append({
                 "cell": cell.name, "review": k, "window_start": p.get("window_start"), "error_stop": error_stop,
-                "final_stop": final["stop"], "quote_match": quote_ok, "error": err,
+                "final_stop": final["stop"], "aligned": aligned, "quote_match": quote_ok, "error": err,
                 "rec_action": p.get("action"), "rec_kinds": sorted({f.get("kind") + ("/" + f["sub"] if f.get("sub") else "")
                                                                     for f in p.get("findings") or []}),
                 "rec_sent": len(p.get("sent") or []),
@@ -144,6 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     same = sum(1 for r in rv if r["rec_action"] == r["new_action"] and
                sorted(k.split("/")[0] for k in r["rec_kinds"]) == sorted(k.split("/")[0] for k in r["new_kinds"]))
     print(json.dumps({"cells": len({r["cell"] for r in rows}), "reviews": len(rv), "same_action_and_kinds": same,
+                      "not_aligned": sum(1 for r in rv if not r["aligned"]),
                       "quote_mismatch": sum(1 for r in rv if r["quote_match"] is False),
                       "errors": sum(1 for r in rv if r["error"])}))
     return 0

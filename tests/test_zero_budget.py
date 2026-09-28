@@ -454,6 +454,11 @@ def test_a_stop_after_a_model_error_is_checked_and_named_in_the_note_but_not_sen
     rev = [e for e in Recorder(proj).events() if e["type"] == "review"]
     assert [(e.get("last_turn_error"), e.get("action")) for e in rev] == [(True, "allow"), (None, "continue")]
     assert [f["kind"] for f in rev[0]["findings"]] == ["missing_output"]      # 查到了，只寫給人
+    rd = Recorder(proj)
+    b.bash("echo 1 > /app/answer.txt", "", write={"answer.txt": "1\n"})      # 讓說明檔輪到 E 重寫
+    a.ev("stop", final_text="", last_stop="error")
+    note = (rd.dir / "delivery.md").read_text()
+    assert "Found after the model error (not sent back)" in note or "sent nothing back" in note
     # 說明（最後寫的是 F 的；E 再跑一次看它的說明）
     a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
     a.ev("stop", final_text="Done.", last_stop="error")

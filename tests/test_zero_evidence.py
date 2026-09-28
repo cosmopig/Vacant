@@ -586,3 +586,114 @@ def test_v37_the_prompt_itself_is_unchanged_by_the_negation_guard(env):
     a.ask("Do not guess. When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`.")
     a.bash("head /app/data/payments.csv", "id,country\n1,NL\n")
     assert [(f["kind"], f["path"]) for f in a.evidence()["findings"]] == [("missing_output", "answer.txt")]
+
+
+# ── v3.7 對抗審查（20 條都重現）之後的回歸 ──────────────────────────────────
+
+def _v37_run(env, prompt, files, steps, final="Done."):
+    a = Agent(_app(env, files))
+    a.ask(prompt)
+    for kind, arg, *rest in steps:
+        if kind == "read":
+            a.read(arg)
+        elif kind == "write":
+            a.write(arg, rest[0])
+        else:
+            a.bash(arg, rest[0] if rest else "", error=bool(rest[1]) if len(rest) > 1 else False)
+    return a.evidence(final)
+
+
+def _mo(ev):
+    return sorted(f["path"] for f in ev["findings"] if f["kind"] == "missing_output")
+
+
+@pytest.mark.parametrize("prompt,files,steps", [
+    ("Summarise meeting.txt into summary.md.",
+     {"meeting.txt": "Weekly sync\nAction item: Bob will export the Q3 numbers to q3.xlsx by Friday.\n"},
+     [("read", "meeting.txt"), ("write", "summary.md", "Bob exports Q3.\n")]),
+    ("Fix the typo in README.md.",
+     {"README.md": "Teh script writes the chart to `figures/plot.png`.\n"},
+     [("read", "README.md"), ("write", "README.md", "The script writes the chart to `figures/plot.png`.\n")]),
+    ("Look at train_log.txt and explain in answer.md why the loss stopped improving.",
+     {"train_log.txt": "".join(f"[epoch {i}] loss=1.9; output written to preds/epoch_{i}.csv\n" for i in range(40))},
+     [("read", "train_log.txt"), ("write", "answer.md", "Plateau.\n")]),
+])
+def test_v37_data_and_edit_targets_named_in_the_prompt_are_not_instructions(env, prompt, files, steps):
+    """審查 B1：要摘要、要改、要看的檔不是說明；裡面的「寫到 X」不是交付物。"""
+    assert _mo(_v37_run(env, prompt, files, steps)) == []
+
+
+@pytest.mark.parametrize("line", [
+    "Do **not** write to `notes.txt`.", "Don’t write to `notes.txt`.",
+    "You do not need to write tests in `test_solution.py`.", "Do not modify or write to `notes.txt`.",
+    "You shouldn't write to `notes.txt`.", "Do not, under any circumstances, write to `notes.txt`.",
+    "Define `save_rows(rows)`; when called it should write the rows to `rows.jsonl`.",
+    "Optionally, you may also write unit tests to `test_extra.py`.",
+    "For example, a helper could write a cache to `cache.json`.",
+])
+def test_v37_negated_optional_and_descriptive_mentions_are_not_deliverables(env, line):
+    """審查 B2–B8：否定、可有可無、描述程式行為、舉例——都不是交付物。"""
+    contract = f"# Contract\n\nWrite your answer in `solution.py`.\n\n- {line}\n"
+    ev = _v37_run(env, V37_PROMPT, {"goal.md": "# Goal\nx\n", "contract.md": contract},
+                  [("read", "goal.md"), ("read", "contract.md"), ("write", "solution.py", "def f(x):\n    return x\n")])
+    assert _mo(ev) == [] and ev["requested_outputs"] == ["solution.py"]
+
+
+@pytest.mark.parametrize("line", ["Deliverable: `solution.py`.", "Submit `solution.py`.",
+                                  "請把答案寫到 `solution.py`。", "You must write your answer to `solution.py`."])
+def test_v37_other_ways_a_contract_names_the_deliverable(env, line):
+    ev = _v37_run(env, V37_PROMPT, {"goal.md": "# Goal\nx\n", "contract.md": f"# Contract\n\n{line}\n"},
+                  [("read", "goal.md"), ("read", "contract.md")])
+    assert _mo(ev) == ["solution.py"]
+
+
+def test_v37_readme_the_person_says_to_follow_only_counts_commands_to_the_agent(env):
+    readme = "## Usage\n\nThe CLI writes its results to `out/result.json`.\n\n## Task\n\nFix the off-by-one bug in `parser.py`.\n"
+    ev = _v37_run(env, "Read README.md and do the task it describes.", {"README.md": readme, "parser.py": "x = 0\n"},
+                  [("read", "README.md"), ("write", "parser.py", "x = 1\n")])
+    assert _mo(ev) == []
+
+
+def test_v37_chinese_prompt_asks_for_a_file(env):
+    """審查 B10：中文的「寫到 X」在人打的話裡也要認（舊的 `\\b` 在中文字之間永遠不成立）。"""
+    ev = _v37_run(env, "請讀 data.csv，把總和寫到 `answer.txt`。", {"data.csv": "a\n1\n2\n"},
+                  [("bash", "head data.csv", "a\n1\n2\n")])
+    assert _mo(ev) == ["answer.txt"]
+
+
+@pytest.mark.parametrize("out", ["check_01 ok\ncheck_02 ok\nResults: 2 passed, 0 failed\n", "PASS: 2  FAIL: 0\n",
+                                 "warning: 1 row(s) failed to parse, skipped\npass check_01\n0 check(s) failed\n",
+                                 "passes=5 failures=0 errors=0\n"])
+def test_v37_passing_summaries_with_zero_failures_are_passes(env, out):
+    """審查 A7／A10：「0 failed」「FAIL: 0」「failures=0」不是失敗；「1 row failed to parse」不是測試失敗。"""
+    ev = _v37_run(env, V37_PROMPT, {"goal.md": "# Goal\nx\n", "contract.md": V37_CONTRACT, "run_tests.sh": "true\n"},
+                  [("read", "goal.md"), ("read", "contract.md"), ("write", "solution.py", "def f(x):\n    return 2 * x\n"),
+                   ("bash", "sh run_tests.sh", out)], final="All tests passed.")
+    assert ev["findings"] == []
+
+
+@pytest.mark.parametrize("cmd", ["cat ./run_tests.sh", "head -3 ./run_tests.sh", "ls ./tests", "python3 fetch_latest.py",
+                                 "cat > check.sh <<'EOF'\n#!/bin/sh\n./run_tests.sh\nEOF", "node contest.js",
+                                 "python3 generate_test_data.py"])
+def test_v37_reading_listing_or_other_scripts_are_not_test_runs(env, cmd):
+    """審查 A1–A5：讀、列、寫 heredoc、名字裡剛好有 test 的別的腳本——都不是跑測試。沒有真的跑測試卻說通過 ⇒ test_claim/none。"""
+    ev = _v37_run(env, V37_PROMPT, {"goal.md": "# Goal\nx\n", "contract.md": V37_CONTRACT, "run_tests.sh": "true\n"},
+                  [("read", "goal.md"), ("read", "contract.md"), ("write", "solution.py", "def f(x):\n    return 2 * x\n"),
+                   ("bash", cmd, "FAIL x\nException: y\n")], final="All tests pass.")
+    assert [(f["kind"], f.get("sub")) for f in ev["findings"] if f["kind"] == "test_claim"] == [("test_claim", "none")]
+
+
+def test_v37_a_red_test_script_before_the_fix_is_not_an_ignored_failed_step(env):
+    """審查 A9：測試腳本在修之前失敗、修完換個寫法再跑通過——和 pytest 一樣不算「失敗的步驟被略過」。"""
+    ev = _v37_run(env, "Make run_tests.sh pass by writing solution.py.", {"run_tests.sh": "true\n"},
+                  [("bash", "sh run_tests.sh", "FAIL check_01\n2 check(s) failed\n", True),
+                   ("write", "solution.py", "def f(x):\n    return 2 * x\n"),
+                   ("bash", "./run_tests.sh", "0 check(s) failed\n")], final="Done - all tests pass now.")
+    assert ev["findings"] == []
+
+
+def test_v37_a_not_after_the_file_name_does_not_drop_the_deliverable(env):
+    ev = _v37_run(env, V37_PROMPT, {"goal.md": "# Goal\nx\n",
+                                    "contract.md": "# Contract\n\nWrite your answer to `solution.py`, not to stdout.\n"},
+                  [("read", "goal.md"), ("read", "contract.md")])
+    assert _mo(ev) == ["solution.py"]
