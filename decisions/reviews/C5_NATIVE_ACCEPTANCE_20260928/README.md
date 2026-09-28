@@ -1,5 +1,9 @@
 # C5 / Pi 原生平台整合審查：Evidence ≠ Acceptance
 
+> 後續 bridge 安全修正與 R534 封存重算見 [BRIDGE_AUDIT_FIX_R534_REPLAY.md](BRIDGE_AUDIT_FIX_R534_REPLAY.md)。
+> 本頁第 5 節的舊 CLI 範例屬 PR #82 審查前版本；實際接線請用後續文件的
+> `--receiver-home`、`--artifact` 和隔離目的地規則。
+
 日期：2026-09-28  
 來源分支：`claude/vacant-verification-redesign-jv7eou`  
 本審查基準：`122a424c3e29e190871ce13a41b049e08900dc4e`  

@@ -93,17 +93,50 @@ CLAIMS = re.compile(r"((all )?tests? (now )?(pass|passed|passing|are green|succe
                     r"(passes|is green)|(build|lint|typecheck)s? (pass\w*|clean|succeed\w*)|"
                     r"tested and (works|passes)|測試(全部)?通過|測試都過)", re.I)
 #: v3.7：任意的測試腳本（`sh run_tests.sh`、`bash test.sh`、`./run_tests.sh`、`python tests/test_x.py`、`node test.js`）也是跑測試——
-#: 檔名裡有 test、而且是被執行（直譯器或 `./`），不是被讀（`cat run_tests.sh`）。Colab 程式題 920 題：455／472 次退回是不認這種指令的誤退
-SCRIPT_RUNNER = re.compile(r"(?:^|[;&|(]\s*|\s)(?:(?:(?:ba|z|da)?sh|python3?(?:\.\d+)?|node|bun|deno)\s+(?:-\S+\s+)*"
-                           r"(?:\./)?[\w./-]*test[\w.-]*\.(?:sh|bash|py|js|mjs|cjs|ts)|"
-                           r"\./[\w./-]*test[\w.-]*)(?=\s|$|[;&|)])", re.I)
-FAIL_OUT = re.compile(r"(FAILED|failures=|errors=|Traceback \(most recent call last\)|\bFAIL\b|"
-                      r"\b\d+ failed\b|npm ERR!|error\[E\d+|test result: FAILED|BUILD FAILED|"
-                      r"Tests:.*failed|\bError:|Exception:|command not found|No such file)")
+#: 腳本的檔名以 test 開頭或結尾、是一個字（run_tests.sh、test_x.py、x_test.js、tests.sh；不是 latest、contest、generate_test_data），而且在**指令的位置**被執行
+#: （直譯器或 `./`、`/…`），不是被讀、被列、被寫（`cat ./run_tests.sh`、`ls ./tests`、heredoc 裡的字）。見 `is_test_script_run`。
+#: Colab 程式題 920 題：455／472 次退回是不認這種指令的誤退
+TEST_BASENAME = re.compile(r"^(?:(?:run|all)[_-]?)?tests?(?:[_.-][\w.-]+)?$|^[\w.-]+[_.-]tests?$", re.I)
+SCRIPT_INTERP = re.compile(r"^(?:(?:ba|z|da)?sh|python3?(?:\.\d+)?|node|nodejs|bun|deno|ruby|perl)$")
+SCRIPT_EXT = {".sh", ".bash", ".py", ".js", ".mjs", ".cjs", ".ts", ".rb", ".pl"}
+_HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?\n\s*\2\b", re.S)
+_SEGMENT = re.compile(r"&&|\|\||;|\||\n|\$\(|`|\(")
+_PREFIX = re.compile(r"^(?:(?:cd\s+\S+|timeout\s+\S+|time|sudo|nice|env|command|exec|\w+=\S*)\s+)*")
+#: 測試的總結行：失敗要有**非零**的數字（「0 failed」「FAIL: 0」「failures=0」不是失敗）；名詞只收測試的（不收「1 row failed to parse」）
+FAIL_OUT = re.compile(r"(FAILED|failures=[1-9]|errors=[1-9]|Traceback \(most recent call last\)|\bFAIL\b(?!:?\s*0\b)|"
+                      r"\b[1-9]\d* failed\b|npm ERR!|error\[E\d+|test result: FAILED|BUILD FAILED|"
+                      r"Tests:.*\b[1-9]\d* failed|\bError:|Exception:|command not found|No such file)")
 PASS_OUT = re.compile(r"(\bOK\b\s*$|\b\d+ passed\b|test result: ok|BUILD SUCCESS|\bPASS\b)", re.M)
-#: v3.7：測試腳本常見的總結行——「0 check(s) failed」「All tests passed」算通過；「3 check(s) failed」算失敗
-PASS_OUT_2 = re.compile(r"(\b0 \w+(?:\(s\))? failed\b|\ball (?:\d+ )?(?:tests?|checks?) (?:have )?passed\b)", re.I)
-FAIL_OUT_2 = re.compile(r"\b[1-9]\d* \w+(?:\(s\))? failed\b", re.I)
+_TEST_NOUN = r"(?:tests?|checks?|cases?|specs?|assertions?|examples?)(?:\(s\))?"
+PASS_OUT_2 = re.compile(r"(\b0 " + _TEST_NOUN + r" failed\b|\ball (?:\d+ )?" + _TEST_NOUN + r" (?:have )?passed\b|"
+                        r"\bfail(?:ed|ures?)?:?\s*0\b)", re.I)
+FAIL_OUT_2 = re.compile(r"\b[1-9]\d* " + _TEST_NOUN + r" failed\b", re.I)
+
+
+def is_test_script_run(cmd: str) -> bool:
+    """v3.7：這個殼層指令有沒有**執行**一支測試腳本（見 `TEST_BASENAME`）。heredoc 的內容不算指令；
+    每一段（`&&`、`;`、`|`、換行、`$(`）去掉 `cd X`／`timeout N`／`env`／`VAR=…` 之後，開頭要是直譯器＋腳本、或 `./`、`/` 開頭的可執行檔。"""
+    body = _HEREDOC.sub(" ", cmd or "")
+    for seg in _SEGMENT.split(body):
+        seg = _PREFIX.sub("", seg.strip())
+        words = seg.split()
+        if not words:
+            continue
+        target = None
+        if SCRIPT_INTERP.match(words[0]):
+            rest = [w for w in words[1:] if not w.startswith("-")]
+            if rest and _ext(rest[0].strip("'\"")) in SCRIPT_EXT:
+                target = rest[0]
+        elif words[0].startswith(("./", "/")):
+            target = words[0]
+        if target:
+            base = target.strip("'\"").rsplit("/", 1)[-1]
+            stem = base.rsplit(".", 1)[0] if _ext(base) in SCRIPT_EXT else base
+            if TEST_BASENAME.match(stem):
+                return True
+    return False
+
+
 MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|did not run|"
                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
 #: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
@@ -112,9 +145,27 @@ OUTPUT_VERB = re.compile(r"\b(write|writes|save|store|put|output|export|generate
 OUTPUT_PREP = re.compile(r"(?:\b(?:to|in|into|as|at)\b|到|至|成)\s*(`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;()]+)")
 OUTPUT_LABEL = re.compile(r"output[ _-]?(?:path|file)\b[^\n]*\n(?:[ \t]*\n)*[ \t]*(`[^`\n]+`|[^\s]+)",
                           re.I)
-#: v3.7：說明檔裡的交付物（`asked_outputs`）
+#: v3.7：說明檔裡的交付物（`asked_outputs`）。只讀人**要 agent 照著做**的說明檔：檔名本身是說明（contract、spec、task…），
+#: 或人的那一句話裡有「照著做／依照／as described in」這類字；要摘要、要修改、要看的檔不讀（那是資料或要改的東西）
 INSTRUCTION_EXT = {".md", ".txt", ".rst"}
-NEGATED = re.compile(r"(\bdo(?:es)? not|\bdon'?t|\bnever|\bnot|\bno need to|\bavoid|不要|不用|勿|別)\s*$", re.I)
+INSTRUCTION_STEM = re.compile(r"^(?:contract|spec|specification|task|tasks|instructions?|requirements?|goal|assignment|"
+                              r"brief|todo|deliverables?)$", re.I)
+INSTRUCTION_CUE = re.compile(r"(\bfollow\w*|\bdo what\b|\bwhat (?:it|they) says?\b|\bas (?:described|specified|instructed|stated|written) in\b|"
+                             r"\baccording to\b|\bper\b|\binstructions?\b|\bthe task (?:it|they|that it|described)\b|"
+                             r"\bcomplete the task\b|\bcarry out\b|照著?做|照上面|依照|按照|依說明)", re.I)
+INSTRUCTION_MAX_BYTES = 64 * 1024
+INSTRUCTION_MAX_OUTPUTS = 3                  # 一份說明檔寫出超過這麼多個「寫到 X」＝它是資料（紀錄、日誌），全部不算
+#: 說明檔裡的一句話要是**對 agent 的命令**：動詞在句首／項目開頭，或是「you must／should／need to …」；
+#: 否定、可有可無、舉例的都不算（「Do not write to X」「Optionally write tests to X」「e.g. write to X」）
+DOC_IMPERATIVE_PRE = re.compile(r"^(?:[-*+]|\d+[.)])?\s*(?:please\s+)?(?:(?:you|u)\s+(?:must|should|need to|have to|are to|will)\s+"
+                                r"(?:also\s+)?|make sure (?:to|you)\s+|be sure to\s+|remember to\s+)?$", re.I)
+DOC_NOT_REQUIRED = re.compile(r"(\bnot\b|n't\b|\bnever\b|\bavoid\b|\boptional\w*|\bmay\b|\bmight\b|\bcan\b|\bcould\b|"
+                              r"\bif you (?:like|want|wish)\b|\be\.g\.|\bfor example\b|\bexample\b|\bsuch as\b|"
+                              r"不要|不用|不必|勿|別|可以|例如|比如)", re.I)
+DOC_LABEL = re.compile(r"(?:^|\n)[ \t]*(?:[-*+][ \t]*)?(?:\*\*)?(?:deliverables?|submission|submit|answer file|output file)(?:\*\*)?"
+                       r"[ \t]*[:：]?[ \t]*(`[^`\n]+`|\"[^\"\n]+\"|[^\s,;()]+)", re.I)
+#: 中文的「寫到／存成／放在 X」：動詞本身已經帶了介系詞，路徑緊接在後（v3.7；舊的 `\b` 在中文字之間永遠不成立）
+CJK_OUTPUT = re.compile(r"(?:寫入|寫到|寫在|存到|存成|存在|輸出到|輸出成|放到|放在)\s*(`[^`\n]+`|「[^」\n]+」|\"[^\"\n]+\"|[^\s,;()，。；、]+)")
 FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,6}$")
 #: 執行程式的指令開頭（輸出是計算結果，不是回頭讀檔）
 INTERPRETER = re.compile(r"^\s*(?:cd\s+\S+\s*&&\s*)?(python[0-9.]*|node|nodejs|deno|bun|bash|sh|zsh|ruby|"
@@ -327,34 +378,87 @@ class Evidence:
         return named, sorted(set(in_dirs) - set(named))
 
     def asked_outputs(self, prompt_texts: list[str], start_idx: str | None) -> list[tuple[str, str]]:
-        """人要求寫出的檔（v3.7）：人打的話裡寫的，加上人**點名要 agent 去讀、照著做**的說明檔（`.md`／`.txt`／`.rst`，
-        例如「讀 goal.md、contract.md，照上面做」）裡寫的。說明檔用這一回合開始時的內容；否定句（「不要寫到…」）不算；
-        說明檔自己不算。Colab 程式題：交付物只寫在 `contract.md`，v3.6.1 一次都沒認出來（沒交檔 34 格、缺檔退回 0 次）。"""
+        """人要求寫出的檔（v3.7）：人打的話裡寫的，加上人**要 agent 照著做**的說明檔（`.md`／`.txt`／`.rst`）裡對 agent 下的命令。
+        說明檔＝人點名、而且檔名是說明（contract.md、TASK.md…）或那一句話裡有「照著做／依照」；這一回合 agent 自己改過的、
+        大於 64 KB 的不讀；一份說明檔裡超過 3 個就全部不算（那是資料）。說明檔用這一回合開始時的內容。
+        Colab 程式題：交付物只寫在 `contract.md`，v3.6.1 一次都沒認出來（沒交檔 34 格、缺檔退回 0 次）。"""
         outs = self.requested_outputs(prompt_texts)
         named, _dirs = self.materials(prompt_texts, start_idx)
-        docs = [f for f in named if _ext(f) in INSTRUCTION_EXT]
-        texts = [t for t in (self.tr.file_text(start_idx, f) for f in docs) if t and "\x00" not in t]
-        if not texts:
+        docs = [f for f in named if _ext(f) in INSTRUCTION_EXT and self._is_instruction(f, prompt_texts)]
+        if not docs:
             return outs
+        latest = self.tr.latest_index()
         have = {r for r, _ in outs}
-        extra = [(r, raw) for r, raw in self.requested_outputs(texts, guard_negation=True)
-                 if r not in have and r not in docs]
+        extra: list[tuple[str, str]] = []
+        used: list[str] = []
+        for f in docs:
+            e = self.tr.index(start_idx).get(f)
+            if e is None or getattr(e, "size", 0) > INSTRUCTION_MAX_BYTES:
+                continue
+            text = self.tr.file_text(start_idx, f)
+            if not text or "\x00" in text or (self.tr.file_text(latest, f) or "") != text:
+                continue                              # 這一回合改過它＝它是要改的東西，不是說明
+            got = [(r, raw) for r, raw in self._resolve(self._doc_output_tokens(text))
+                   if r not in have and r not in docs]
+            if len(got) > INSTRUCTION_MAX_OUTPUTS:
+                continue
+            used.append(f)
+            for r, raw in got:
+                if r not in {x for x, _ in extra}:
+                    extra.append((r, raw))
         if extra:
-            self.notes["outputs_from_instructions"] = {"files": docs, "outputs": [r for r, _ in extra]}
+            self.notes["outputs_from_instructions"] = {"files": used, "outputs": [r for r, _ in extra]}
         return outs + extra
 
-    def requested_outputs(self, prompt_texts: list[str], *, guard_negation: bool = False) -> list[tuple[str, str]]:
+    @staticmethod
+    def _is_instruction(path: str, prompt_texts: list[str]) -> bool:
+        base = path.rsplit("/", 1)[-1]
+        if INSTRUCTION_STEM.match(os.path.splitext(base)[0]):
+            return True
+        for text in prompt_texts:
+            for sent in re.split(r"(?<=[.!?。！？])\s+|\n", text):
+                if base in sent and INSTRUCTION_CUE.search(sent):
+                    return True
+        return False
+
+    @staticmethod
+    def _doc_output_tokens(text: str) -> list[str]:
+        """說明檔裡對 agent 下的「寫到 X」命令（見 `DOC_IMPERATIVE_PRE`／`DOC_NOT_REQUIRED`）＋「Deliverable: X」這類標籤。"""
+        found: list[str] = []
+        norm = text.replace("\u2019", "'").replace("\u2018", "'")
+        for m in OUTPUT_VERB.finditer(norm):
+            cut = max(norm.rfind(c, 0, m.start()) for c in (".", "\n", ";", ":", "!", "?"))
+            pre = re.sub(r"[*_~`]+", "", norm[cut + 1: m.start()]).strip()
+            if not DOC_IMPERATIVE_PRE.match(pre + (" " if pre else "")):
+                continue
+            window = norm[m.end(): m.end() + 140].split("\n\n")[0]
+            for pm in OUTPUT_PREP.finditer(window):
+                tok = pm.group(1).strip("`\"'").rstrip(".,;:!?")
+                if FILE_LIKE.match(tok):
+                    # 否定／可有可無／舉例只看句首到這個檔名（「寫到 solution.py，不要印出來」的 not 管的是後面）
+                    if not DOC_NOT_REQUIRED.search(re.sub(r"[*_~]+", "", norm[cut + 1: m.end() + pm.end()])):
+                        found.append(tok)
+                    break
+        for rx in (DOC_LABEL, CJK_OUTPUT):
+            for m in rx.finditer(norm):
+                cut = max(norm.rfind(c, 0, m.start()) for c in ("。", "\n", "；"))
+                if DOC_NOT_REQUIRED.search(norm[cut + 1: m.end()]):
+                    continue
+                tok = m.group(1).strip("`\"'「」").rstrip(".,;:!?。")
+                if FILE_LIKE.match(tok):
+                    found.append(tok)
+        return found
+
+    def requested_outputs(self, prompt_texts: list[str]) -> list[tuple[str, str]]:
         """人要求寫出的檔：(工作區裡的相對路徑, 人寫的樣子)。只收有副檔名的路徑；專案根以外、
-        對不到專案裡任何資料夾的絕對路徑不收（看不到它在不在）。`guard_negation`：動詞前面緊接著否定（don't／do not／never／不要）
-        的不算——只用在說明檔（v3.7；人打的話照 v3.6.1 不變）。"""
-        root = str(self.rec.workspace)
-        files = self.tr.index(self.tr.latest_index())
-        dirs = {f.rsplit("/", 1)[0] for f in files if "/" in f}
+        對不到專案裡任何資料夾的絕對路徑不收（看不到它在不在）。v3.7：中文的「寫到／存成 X」也認（舊的 `\b` 在中文字之間永遠不成立）。"""
         found: list[str] = []
         for text in prompt_texts:
+            for m in CJK_OUTPUT.finditer(text):
+                tok = m.group(1).strip("`\"'「」").rstrip(".,;:!?。")
+                if FILE_LIKE.match(tok):
+                    found.append(tok)
             for m in OUTPUT_VERB.finditer(text):
-                if guard_negation and NEGATED.search(text[max(0, m.start() - 24): m.start()]):
-                    continue
                 window = text[m.end(): m.end() + 140].split("\n\n")[0]
                 for pm in OUTPUT_PREP.finditer(window):
                     tok = pm.group(1).strip("`\"'").rstrip(".,;:!?")
@@ -365,6 +469,13 @@ class Evidence:
                 tok = m.group(1).strip("`\"'").rstrip(".,;:!?")
                 if FILE_LIKE.match(tok):
                     found.append(tok)
+        return self._resolve(found)
+
+    def _resolve(self, found: list[str]) -> list[tuple[str, str]]:
+        """人寫的路徑 → 工作區裡的相對路徑（專案根以外、對不到專案資料夾的絕對路徑不收）。"""
+        root = str(self.rec.workspace)
+        files = self.tr.index(self.tr.latest_index())
+        dirs = {f.rsplit("/", 1)[0] for f in files if "/" in f}
         out: list[tuple[str, str]] = []
         for raw in dict.fromkeys(found):
             t = raw.removeprefix("./")
@@ -668,7 +779,7 @@ class Evidence:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
-            if not (RUNNERS.search(cmd) or SCRIPT_RUNNER.search(cmd)):
+            if not (RUNNERS.search(cmd) or is_test_script_run(cmd)):
                 continue
             out = self.tr.output_text(s)
             if s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out):
@@ -711,8 +822,15 @@ class Evidence:
                                                      r"\bError:|Exception:", outp))
             if failed and _no_match_only(cmd, outp + "\n" + str(s.error or "")):
                 failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
-            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or \
-                    RUNNERS.search(cmd):
+            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or RUNNERS.search(cmd):
+                continue
+            # v3.7：測試腳本紅了、之後又有一次跑測試是綠的＝修好了，不算略過（換個寫法跑也算：`sh run_tests.sh` → `./run_tests.sh`）；
+            # 之後一直沒有綠的，照舊當成失敗的步驟（R530：全部豁免會少掉 7 格真的有問題的退回）
+            if is_test_script_run(cmd) and any(
+                    tool_kind(t.tool) == "shell" and (RUNNERS.search(_command_of(self.tr, t)) or
+                                                      is_test_script_run(_command_of(self.tr, t)))
+                    and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
+                    and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in steps[i + 1:]):
                 continue
             runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
                            for b in written_scripts)

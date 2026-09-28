@@ -12,23 +12,20 @@ the authoritative synchronous `submit` / `release`.
 Recommended C5 layout:
 
 - /app/tests_visible: agent-readable copy used by run_tests.sh;
-- /srv/eval/receiver/<task>/tests_visible: evaluator-owned verifier copy passed
-  via --suite and not writable by the agent;
-- --receiver-home: evaluator-owned Vacant state/signing home, separate from the
-  agent's VACANT_HOME.
+- --receiver-home: a fresh evaluator-owned home per run, outside /app, held by
+  a separate OS account. The bridge pins a readable suite beside this home.
 
 Repair arm:
 
     python ops/eval/native_acceptance_bridge.py prepare \
       --workspace /app --task-id "$TASK" --mode repair \
-      --suite "/srv/eval/receiver/$TASK/tests_visible" \
       --receiver-home "/srv/eval/receiver/$TASK/vacant"
     # run the normal native agent in /app
     python ops/eval/native_acceptance_bridge.py judge \
       --workspace /app --attempt 1 \
       --receiver-home "/srv/eval/receiver/$TASK/vacant"
     python ops/eval/native_acceptance_bridge.py release \
-      --workspace /app \
+      --workspace /app --artifact "<sha from accepting judge>" \
       --receiver-home "/srv/eval/receiver/$TASK/vacant"
 
 For CONFORM, prepare with --mode conform. The *outer harness* must start a
@@ -38,14 +35,21 @@ fresh full native-agent session after every non-accepting judge result, passing
 from __future__ import annotations
 
 import argparse
+import contextlib
+import fcntl
 import json
+import os
 import pathlib
 import re
+import shutil
 import sys
-from typing import Any
+import uuid
+from typing import Any, Iterator
 
 from vacant_network.intake import contract as C
 from vacant_network.intake import flow
+from vacant_network.intake import approval
+from vacant_network.vrun.acceptance import declared_cases, test_files
 
 EXIT = {"accept": 0, "reject": 40, "hold": 41, "escalate": 42, "void": 43,
         "release_refused": 44}
@@ -64,8 +68,93 @@ def _task_id(raw: str) -> str:
 
 
 def _receiver_root(receiver_home: pathlib.Path | None) -> pathlib.Path | None:
-    """CLI accepts a VACANT_HOME-like root; flow accepts its intake/ child."""
-    return None if receiver_home is None else receiver_home.resolve() / "intake"
+    """The receiver's signing home is mandatory, never Vacant's ambient home."""
+    if receiver_home is None:
+        raise ValueError("--receiver-home is required for every bridge operation")
+    return receiver_home.resolve() / "intake"
+
+
+@contextlib.contextmanager
+def _serialized(receiver_home: pathlib.Path | None) -> Iterator[None]:
+    if receiver_home is None:
+        raise ValueError("--receiver-home is required")
+    with (receiver_home.resolve() / "bridge.lock").open("a+b") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+def _inside(path: pathlib.Path, directory: pathlib.Path) -> bool:
+    return path.resolve().is_relative_to(directory.resolve())
+
+
+def _boundary(workspace: pathlib.Path, receiver_home: pathlib.Path,
+              *, insecure_same_account: bool = False) -> None:
+    if _inside(receiver_home, workspace) or _inside(workspace, receiver_home):
+        raise ValueError("receiver home and agent workspace must be separate")
+    # The receiver must be a different OS account. Workspace ownership is the
+    # default agent identity; an evaluator can opt into a non-adversarial run.
+    if (workspace.stat().st_uid == os.geteuid() and not insecure_same_account):
+        raise ValueError("same-account bridge requires --insecure-same-account; "
+                         "run the receiver as a separate OS account for enforcement")
+
+
+def _destination(value: str | None, workspace: pathlib.Path,
+                 receiver_home: pathlib.Path) -> str:
+    value = value or f"dir:{receiver_home / 'released'}"
+    if not value.startswith("dir:"):
+        raise ValueError("bridge destination must be an evaluator-owned dir:")
+    path = pathlib.Path(value[4:]).expanduser()
+    path = (path if path.is_absolute() else workspace / path).resolve()
+    if not _inside(path, receiver_home) or _inside(receiver_home, path):
+        raise ValueError("release destination must be inside receiver home")
+    return f"dir:{path}"
+
+
+def _suite_files(suite: pathlib.Path) -> list[pathlib.Path]:
+    files = test_files(suite)
+    nested = [p for p in suite.rglob("test_*.py") if p.is_file() and p.parent != suite]
+    if nested:
+        raise ValueError(f"nested test files would not run: {nested[0]}")
+    if not files:
+        raise ValueError(f"visible suite has no top-level test_*.py files: {suite}")
+    for p in files:
+        if not declared_cases(p):
+            raise ValueError(f"test file needs top-level check_* or main: {p}")
+    return files
+
+
+def _snapshot_suite(suite: pathlib.Path, receiver_home: pathlib.Path) -> pathlib.Path:
+    """Copy before pinning; publish a read-only agent-readable suite beside home."""
+    source_hash = C.path_sha256(suite)
+    if any(p.is_symlink() for p in suite.rglob("*")):
+        raise ValueError("suite symlinks are not allowed")
+    target = receiver_home.with_name(receiver_home.name + "-suite")
+    if target.exists():
+        raise ValueError(f"receiver suite already exists: {target}; use a fresh receiver home")
+    temp = target.with_name(target.name + f".tmp-{uuid.uuid4().hex}")
+    try:
+        shutil.copytree(suite, temp, symlinks=False)
+        if C.path_sha256(temp) != source_hash or C.path_sha256(suite) != source_hash:
+            raise ValueError("suite changed while being snapshotted")
+        _suite_files(temp)
+        for p in temp.rglob("*"):
+            p.chmod(0o555 if p.is_dir() else 0o444)
+        temp.chmod(0o555)
+        temp.rename(target)
+    finally:
+        if temp.exists():
+            shutil.rmtree(temp)
+    return target
+
+
+def _readable_by_agent(suite: pathlib.Path) -> bool:
+    """Conservative check for the repair hook running under another UID."""
+    if any(not p.stat().st_mode & 0o004 for p in suite.rglob("*") if p.is_file()):
+        return False
+    return all(p.stat().st_mode & 0o001 for p in (suite, *suite.parents))
 
 
 def _input_path(workspace: pathlib.Path, suite: pathlib.Path) -> str:
@@ -91,9 +180,7 @@ def build_contract(*, workspace: pathlib.Path, task_id: str,
         raise ValueError(f"workspace does not exist: {workspace}")
     if not suite.is_dir():
         raise ValueError(f"visible suite does not exist: {suite}")
-    if not any(p.is_file() and p.name.startswith("test_") and p.suffix == ".py"
-               for p in suite.rglob("*.py")):
-        raise ValueError(f"visible suite has no test_*.py files: {suite}")
+    _suite_files(suite)
     dpath = pathlib.PurePosixPath(deliverable)
     if not deliverable or dpath.is_absolute() or ".." in dpath.parts:
         raise ValueError("deliverable must be a safe workspace-relative path/glob")
@@ -108,6 +195,7 @@ def build_contract(*, workspace: pathlib.Path, task_id: str,
 
     raw = C.scaffold(_task_id(task_id), deliverable=[deliverable],
                      destination=destination)
+    raw["deliverable"]["exclude"].extend(["**/identity.key", "**/intake/keys/**"])
     raw["objective"] = "Produce the requested coding deliverable and pass the pinned visible suite."
     raw["inputs"] = {
         "visible_suite": {
@@ -141,8 +229,9 @@ def build_contract(*, workspace: pathlib.Path, task_id: str,
         "native_acceptance_mode": mode,
         "bridge": "ops/eval/native_acceptance_bridge.py",
         "trust_boundary": (
-            "Pin before the agent starts. For adversarial work, keep the verifier suite and "
-            "receiver signing state under a different account/process; hooks are not a sandbox."
+            "The receiver's account and destination must be inaccessible to the agent. "
+            "python_checks shares a process with candidate code and is not an adversarial "
+            "verifier; use a separate-process verifier or SuiteSpec for hostile code."
         ),
     }
     C.parse(raw, base_dir=workspace)
@@ -151,28 +240,57 @@ def build_contract(*, workspace: pathlib.Path, task_id: str,
 
 def prepare(*, workspace: pathlib.Path, task_id: str, suite: pathlib.Path | None,
             deliverable: str, mode: str, attempts: int | None, feedback_rounds: int,
-            suite_timeout_s: float, destination: str,
+            suite_timeout_s: float, destination: str | None,
             receiver_home: pathlib.Path | None = None,
-            replace: bool = False) -> dict[str, Any]:
+            replace: bool = False, insecure_same_account: bool = False) -> dict[str, Any]:
     workspace = workspace.resolve()
+    if receiver_home is None:
+        raise ValueError("--receiver-home is required")
+    receiver_home = receiver_home.resolve()
+    _boundary(workspace, receiver_home, insecure_same_account=insecure_same_account)
+    if replace:
+        raise ValueError("a run cannot be replaced; use a fresh receiver home")
     contract_path = workspace / ".vacant" / "contract.json"
-    if contract_path.exists() and not replace:
-        raise ValueError(f"{contract_path} already exists; use --replace intentionally")
-    raw = build_contract(workspace=workspace, task_id=task_id, suite=suite,
+    trusted_path = receiver_home / "contract.json"
+    if contract_path.exists() or trusted_path.exists():
+        raise ValueError("contract already exists; use a fresh workspace and receiver home")
+    source_suite = (suite or workspace / "tests_visible").resolve()
+    if not source_suite.is_dir():
+        raise ValueError(f"visible suite does not exist: {source_suite}")
+    _suite_files(source_suite)
+    receiver_home.mkdir(mode=0o700, parents=True, exist_ok=True)
+    receiver_home.chmod(0o700)
+    parent = receiver_home.parent.stat()
+    if not insecure_same_account and (parent.st_uid != os.geteuid() or parent.st_mode & 0o022):
+        raise ValueError("receiver parent must be evaluator-owned and not writable by agent")
+    pinned_suite = _snapshot_suite(source_suite, receiver_home)
+    if mode == "repair" and not insecure_same_account and not _readable_by_agent(pinned_suite):
+        raise ValueError("repair suite must be readable by the agent account")
+    raw = build_contract(workspace=workspace, task_id=task_id, suite=pinned_suite,
                          deliverable=deliverable, mode=mode, attempts=attempts,
                          feedback_rounds=feedback_rounds,
-                         suite_timeout_s=suite_timeout_s, destination=destination)
+                         suite_timeout_s=suite_timeout_s,
+                         destination=_destination(destination, workspace, receiver_home))
+    raw["notes"]["bridge_run_id"] = uuid.uuid4().hex
+    raw["notes"]["bridge_workspace"] = str(workspace)
+    raw["notes"]["insecure_same_account"] = insecure_same_account
+    raw["notes"]["agent_visible_suite_sha256"] = C.path_sha256(source_suite)
     contract_path.parent.mkdir(parents=True, exist_ok=True)
-    contract_path.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n",
-                             encoding="utf-8")
+    payload = json.dumps(raw, ensure_ascii=False, indent=2) + "\n"
+    trusted_path.write_text(payload, encoding="utf-8")
+    contract_path.write_text(payload, encoding="utf-8")
     root = _receiver_root(receiver_home)
     # Pins the suite and signs the contract lock before the agent gets its first prompt.
-    locked = flow.lock(contract_path, root=root)
-    c = C.load(contract_path)
+    locked = flow.lock(trusted_path, root=root)
+    contract_path.write_bytes(trusted_path.read_bytes())
+    c = C.load(trusted_path)
     return {
         "prepared": True,
         "mode": mode,
         "contract": str(contract_path),
+        "receiver_contract": str(trusted_path),
+        "run_id": raw["notes"]["bridge_run_id"],
+        "insecure_same_account": insecure_same_account,
         "contract_sha256": c.sha256,
         "task_id": c.task_id,
         "suite": str(c.input_path("visible_suite")),
@@ -186,33 +304,100 @@ def prepare(*, workspace: pathlib.Path, task_id: str, suite: pathlib.Path | None
 
 
 def _task(workspace: pathlib.Path, receiver_home: pathlib.Path | None):
-    cp = C.find(workspace.resolve())
-    if cp is None:
-        raise ValueError(f"no machine contract found under {workspace}")
-    return flow.open_task(cp, root=_receiver_root(receiver_home))
+    if receiver_home is None:
+        raise ValueError("--receiver-home is required")
+    cp = receiver_home.resolve() / "contract.json"
+    if not cp.is_file():
+        raise ValueError(f"no receiver contract: {cp}")
+    task = flow.open_task(cp, root=_receiver_root(receiver_home))
+    if workspace.resolve() != pathlib.Path(task.contract.raw["notes"]["bridge_workspace"]).resolve():
+        raise ValueError("workspace differs from prepared run")
+    _boundary(workspace.resolve(), receiver_home.resolve(),
+              insecure_same_account=bool(task.contract.raw["notes"].get("insecure_same_account")))
+    lock = flow._lock_for(task)
+    if approval.check_lock(lock, task_id=task.task_id,
+                           contract_sha256=task.contract.sha256, trust=task.trust):
+        raise ValueError("receiver contract lock invalid")
+    return task
+
+
+def _workspace_contract_drift(workspace: pathlib.Path, task: flow.Task) -> bool:
+    try:
+        return C.load(workspace / ".vacant" / "contract.json").sha256 != task.contract.sha256
+    except (OSError, C.ContractError):
+        return True
 
 
 def judge(*, workspace: pathlib.Path, sandbox: str = "auto",
           attempt: int | None = None, source: str = "native-eval",
           receiver_home: pathlib.Path | None = None) -> dict[str, Any]:
     workspace = workspace.resolve()
+    with _serialized(receiver_home):
+        return _judge_locked(workspace=workspace, sandbox=sandbox, attempt=attempt,
+                             source=source, receiver_home=receiver_home)
+
+
+def _judge_locked(*, workspace: pathlib.Path, sandbox: str,
+                  attempt: int | None, source: str,
+                  receiver_home: pathlib.Path | None) -> dict[str, Any]:
     task = _task(workspace, receiver_home)
     mode = str((task.contract.raw.get("notes") or {}).get("native_acceptance_mode") or "")
     if mode == "conform" and attempt is None:
         raise ValueError("conform mode requires --attempt so the outer harness cannot lose retries")
-    if attempt is not None and not 1 <= attempt <= task.contract.max_attempts:
-        raise ValueError(f"attempt {attempt} outside 1..{task.contract.max_attempts}")
-    return flow.submit(task, workspace, source=source, sandbox=sandbox, attempt=attempt)
+    events = task.ledger.events()
+    started = [e for e in events if e["type"] == "attempt_started"
+               and e.get("contract_sha256") == task.contract.sha256]
+    expected = len(started) + 1
+    attempt = expected if attempt is None else attempt
+    if attempt != expected or attempt > task.contract.max_attempts:
+        raise ValueError(f"attempt must be {expected} within 1..{task.contract.max_attempts}")
+    if any(e["type"] == "decision" and e.get("contract_sha256") == task.contract.sha256
+           and e.get("outcome") == "accept" for e in events):
+        raise ValueError("run already accepted; use a fresh receiver home")
+    task.ledger.append("attempt_started", {"contract_sha256": task.contract.sha256,
+                                           "attempt": attempt})
+    if _workspace_contract_drift(workspace, task):
+        task.ledger.append("infra_void", {"contract_sha256": task.contract.sha256,
+                                          "stage": "contract_drift", "attempt": attempt})
+        return {"outcome": "hold", "artifact_sha256": None, "void": False,
+                "reasons": ["workspace contract differs from signed receiver contract"]}
+    result = flow.submit(task, workspace, source=source, sandbox=sandbox, attempt=attempt)
+    result["run_id"] = task.contract.raw["notes"]["bridge_run_id"]
+    result["attempt"] = attempt
+    return result
 
 
-def release(*, workspace: pathlib.Path, destination: str | None = None,
+def release(*, workspace: pathlib.Path, artifact_sha256: str,
+            destination: str | None = None,
             receiver_home: pathlib.Path | None = None) -> dict[str, Any]:
-    return flow.release(_task(workspace, receiver_home), destination=destination)
+    with _serialized(receiver_home):
+        return _release_locked(workspace=workspace, artifact_sha256=artifact_sha256,
+                               destination=destination, receiver_home=receiver_home)
+
+
+def _release_locked(*, workspace: pathlib.Path, artifact_sha256: str,
+                    destination: str | None,
+                    receiver_home: pathlib.Path | None) -> dict[str, Any]:
+    task = _task(workspace, receiver_home)
+    if _workspace_contract_drift(workspace, task):
+        return {"released": False, "reasons": ["workspace contract differs from signed receiver contract"]}
+    decisions = [e for e in task.ledger.events() if e["type"] == "decision"
+                 and e.get("contract_sha256") == task.contract.sha256]
+    if not decisions or decisions[-1].get("outcome") != "accept" or \
+            decisions[-1].get("artifact_sha256") != artifact_sha256:
+        return {"released": False, "reasons": ["artifact is not the latest accepted judge result"]}
+    dest = _destination(destination or str(task.contract.release.get("destination")),
+                        workspace.resolve(), receiver_home.resolve())
+    return flow.release(task, artifact_sha256=artifact_sha256, destination=dest)
 
 
 def status(*, workspace: pathlib.Path,
            receiver_home: pathlib.Path | None = None) -> dict[str, Any]:
-    return flow.status(_task(workspace, receiver_home))
+    task = _task(workspace, receiver_home)
+    out = flow.status(task)
+    out["run_id"] = task.contract.raw["notes"]["bridge_run_id"]
+    out["workspace_contract_matches_receiver"] = not _workspace_contract_drift(workspace, task)
+    return out
 
 
 def _emit(obj: dict[str, Any]) -> None:
@@ -240,8 +425,10 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--attempts", type=int)
     p.add_argument("--feedback-rounds", type=int, default=3)
     p.add_argument("--suite-timeout-s", type=float, default=60.0)
-    p.add_argument("--destination", default="dir:.vacant/native-release")
+    p.add_argument("--destination", help="evaluator-owned dir: path outside workspace")
     p.add_argument("--replace", action="store_true")
+    p.add_argument("--insecure-same-account", action="store_true",
+                   help="non-adversarial evaluation only; recorded in signed contract")
     _add_receiver_home(p)
 
     p = sp.add_parser("judge")
@@ -253,6 +440,7 @@ def _parser() -> argparse.ArgumentParser:
 
     p = sp.add_parser("release")
     p.add_argument("--workspace", type=pathlib.Path, default=pathlib.Path.cwd())
+    p.add_argument("--artifact", required=True, help="artifact_sha256 from accepting judge")
     p.add_argument("--destination")
     _add_receiver_home(p)
 
@@ -271,7 +459,8 @@ def main(argv: list[str] | None = None) -> int:
                           feedback_rounds=a.feedback_rounds,
                           suite_timeout_s=a.suite_timeout_s,
                           destination=a.destination, receiver_home=a.receiver_home,
-                          replace=a.replace)
+                          replace=a.replace,
+                          insecure_same_account=a.insecure_same_account)
             _emit(out)
             return 0
         if a.cmd == "judge":
@@ -283,7 +472,8 @@ def main(argv: list[str] | None = None) -> int:
                 return EXIT["void"]
             return EXIT.get(str(out.get("outcome")), 2)
         if a.cmd == "release":
-            out = release(workspace=a.workspace, destination=a.destination,
+            out = release(workspace=a.workspace, artifact_sha256=a.artifact,
+                          destination=a.destination,
                           receiver_home=a.receiver_home)
             _emit(out)
             return 0 if out.get("released") else EXIT["release_refused"]

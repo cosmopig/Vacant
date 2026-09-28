@@ -411,6 +411,8 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
                               f"run ended: {_say(f)}")
         elif after_end:
             unverified.append(f"Found after the run ended (not sent back): {_say(f)}")
+        elif context and ERROR_STOP_LINE in context:
+            unverified.append(f"Found after the model error (not sent back): {_say(f)}")
         else:
             unverified.append(f"Still open after {rounds_used} round(s): {_say(f)}")
     if mode == "observe":
@@ -454,13 +456,15 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
         screen.append("Not verified: " + "; ".join(parts) + ".")
     if left_open:
         screen.append(f"Open when the run ended: {len(left_open)} point(s)." if after_end
+                      else f"Found after the model error (not sent back): {len(left_open)} point(s)."
+                      if context and ERROR_STOP_LINE in context
                       else f"Still open after {rounds_used} round(s): {len(left_open)} point(s).")
     screen.append(f"Note: {md}")
     return "\n".join(screen[:NOTE_MAX_LINES])
 
 
 ERROR_STOP_LINE = ("The agent's last turn ended on a model error, not on a claim of being done; "
-                   "the delivery check ran at that point.")
+                   "the delivery check ran at that point and sent nothing back to the agent (v3.7).")
 
 
 def _reminded_writes(rec: Recorder, key: str, window_start: Any

@@ -20,10 +20,10 @@
  "recall_among_last_failed": null,
  "question_turns": 2,
  "sent_on_question_turns": 0,
- "any_send_back": 33,
+ "any_send_back": 32,
  "any_send_back_kinds": {
   "unread": 20,
-  "failed_step": 69
+  "failed_step": 53
  },
  "fidelity": {
   "start_ok": 59,
