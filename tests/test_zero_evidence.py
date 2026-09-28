@@ -697,3 +697,11 @@ def test_v37_a_not_after_the_file_name_does_not_drop_the_deliverable(env):
                                     "contract.md": "# Contract\n\nWrite your answer to `solution.py`, not to stdout.\n"},
                   [("read", "goal.md"), ("read", "contract.md")])
     assert _mo(ev) == ["solution.py"]
+
+
+def test_v37_a_red_test_script_never_followed_by_a_green_run_is_still_a_failed_step(env):
+    """全部豁免會少掉真的有問題的退回（R530 重播：7 格）；之後沒有一次綠的，照舊是「失敗的步驟被略過」。"""
+    ev = _v37_run(env, "Make run_tests.sh pass by writing solution.py.", {"run_tests.sh": "true\n"},
+                  [("bash", "sh run_tests.sh", "FAIL check_01\n2 check(s) failed\n", True),
+                   ("write", "solution.py", "def f(x):\n    return 2 * x\n")], final="Done.")
+    assert [f["kind"] for f in ev["findings"]] == ["failed_step"]

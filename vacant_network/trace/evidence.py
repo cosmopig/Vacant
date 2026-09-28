@@ -822,8 +822,15 @@ class Evidence:
                                                      r"\bError:|Exception:", outp))
             if failed and _no_match_only(cmd, outp + "\n" + str(s.error or "")):
                 failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
-            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or \
-                    RUNNERS.search(cmd) or is_test_script_run(cmd):      # 測試的失敗歸 test_claim（v3.7：測試腳本也是）
+            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or RUNNERS.search(cmd):
+                continue
+            # v3.7：測試腳本紅了、之後又有一次跑測試是綠的＝修好了，不算略過（換個寫法跑也算：`sh run_tests.sh` → `./run_tests.sh`）；
+            # 之後一直沒有綠的，照舊當成失敗的步驟（R530：全部豁免會少掉 7 格真的有問題的退回）
+            if is_test_script_run(cmd) and any(
+                    tool_kind(t.tool) == "shell" and (RUNNERS.search(_command_of(self.tr, t)) or
+                                                      is_test_script_run(_command_of(self.tr, t)))
+                    and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
+                    and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in steps[i + 1:]):
                 continue
             runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
                            for b in written_scripts)
