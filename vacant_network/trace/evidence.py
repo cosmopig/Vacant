@@ -92,10 +92,18 @@ RUNNERS = re.compile(r"\b(pytest|python3? -m (unittest|pytest)|unittest|tox|nox|
 CLAIMS = re.compile(r"((all )?tests? (now )?(pass|passed|passing|are green|succeed\w*)|test suite "
                     r"(passes|is green)|(build|lint|typecheck)s? (pass\w*|clean|succeed\w*)|"
                     r"tested and (works|passes)|測試(全部)?通過|測試都過)", re.I)
+#: v3.7：任意的測試腳本（`sh run_tests.sh`、`bash test.sh`、`./run_tests.sh`、`python tests/test_x.py`、`node test.js`）也是跑測試——
+#: 檔名裡有 test、而且是被執行（直譯器或 `./`），不是被讀（`cat run_tests.sh`）。Colab 程式題 920 題：455／472 次退回是不認這種指令的誤退
+SCRIPT_RUNNER = re.compile(r"(?:^|[;&|(]\s*|\s)(?:(?:(?:ba|z|da)?sh|python3?(?:\.\d+)?|node|bun|deno)\s+(?:-\S+\s+)*"
+                           r"(?:\./)?[\w./-]*test[\w.-]*\.(?:sh|bash|py|js|mjs|cjs|ts)|"
+                           r"\./[\w./-]*test[\w.-]*)(?=\s|$|[;&|)])", re.I)
 FAIL_OUT = re.compile(r"(FAILED|failures=|errors=|Traceback \(most recent call last\)|\bFAIL\b|"
                       r"\b\d+ failed\b|npm ERR!|error\[E\d+|test result: FAILED|BUILD FAILED|"
                       r"Tests:.*failed|\bError:|Exception:|command not found|No such file)")
 PASS_OUT = re.compile(r"(\bOK\b\s*$|\b\d+ passed\b|test result: ok|BUILD SUCCESS|\bPASS\b)", re.M)
+#: v3.7：測試腳本常見的總結行——「0 check(s) failed」「All tests passed」算通過；「3 check(s) failed」算失敗
+PASS_OUT_2 = re.compile(r"(\b0 \w+(?:\(s\))? failed\b|\ball (?:\d+ )?(?:tests?|checks?) (?:have )?passed\b)", re.I)
+FAIL_OUT_2 = re.compile(r"\b[1-9]\d* \w+(?:\(s\))? failed\b", re.I)
 MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|did not run|"
                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
 #: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
@@ -104,6 +112,9 @@ OUTPUT_VERB = re.compile(r"\b(write|writes|save|store|put|output|export|generate
 OUTPUT_PREP = re.compile(r"(?:\b(?:to|in|into|as|at)\b|到|至|成)\s*(`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;()]+)")
 OUTPUT_LABEL = re.compile(r"output[ _-]?(?:path|file)\b[^\n]*\n(?:[ \t]*\n)*[ \t]*(`[^`\n]+`|[^\s]+)",
                           re.I)
+#: v3.7：說明檔裡的交付物（`asked_outputs`）
+INSTRUCTION_EXT = {".md", ".txt", ".rst"}
+NEGATED = re.compile(r"(\bdo(?:es)? not|\bdon'?t|\bnever|\bnot|\bno need to|\bavoid|不要|不用|勿|別)\s*$", re.I)
 FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,6}$")
 #: 執行程式的指令開頭（輸出是計算結果，不是回頭讀檔）
 INTERPRETER = re.compile(r"^\s*(?:cd\s+\S+\s*&&\s*)?(python[0-9.]*|node|nodejs|deno|bun|bash|sh|zsh|ruby|"
@@ -315,15 +326,35 @@ class Evidence:
         named = sorted(dict.fromkeys(named))
         return named, sorted(set(in_dirs) - set(named))
 
-    def requested_outputs(self, prompt_texts: list[str]) -> list[tuple[str, str]]:
+    def asked_outputs(self, prompt_texts: list[str], start_idx: str | None) -> list[tuple[str, str]]:
+        """人要求寫出的檔（v3.7）：人打的話裡寫的，加上人**點名要 agent 去讀、照著做**的說明檔（`.md`／`.txt`／`.rst`，
+        例如「讀 goal.md、contract.md，照上面做」）裡寫的。說明檔用這一回合開始時的內容；否定句（「不要寫到…」）不算；
+        說明檔自己不算。Colab 程式題：交付物只寫在 `contract.md`，v3.6.1 一次都沒認出來（沒交檔 34 格、缺檔退回 0 次）。"""
+        outs = self.requested_outputs(prompt_texts)
+        named, _dirs = self.materials(prompt_texts, start_idx)
+        docs = [f for f in named if _ext(f) in INSTRUCTION_EXT]
+        texts = [t for t in (self.tr.file_text(start_idx, f) for f in docs) if t and "\x00" not in t]
+        if not texts:
+            return outs
+        have = {r for r, _ in outs}
+        extra = [(r, raw) for r, raw in self.requested_outputs(texts, guard_negation=True)
+                 if r not in have and r not in docs]
+        if extra:
+            self.notes["outputs_from_instructions"] = {"files": docs, "outputs": [r for r, _ in extra]}
+        return outs + extra
+
+    def requested_outputs(self, prompt_texts: list[str], *, guard_negation: bool = False) -> list[tuple[str, str]]:
         """人要求寫出的檔：(工作區裡的相對路徑, 人寫的樣子)。只收有副檔名的路徑；專案根以外、
-        對不到專案裡任何資料夾的絕對路徑不收（看不到它在不在）。"""
+        對不到專案裡任何資料夾的絕對路徑不收（看不到它在不在）。`guard_negation`：動詞前面緊接著否定（don't／do not／never／不要）
+        的不算——只用在說明檔（v3.7；人打的話照 v3.6.1 不變）。"""
         root = str(self.rec.workspace)
         files = self.tr.index(self.tr.latest_index())
         dirs = {f.rsplit("/", 1)[0] for f in files if "/" in f}
         found: list[str] = []
         for text in prompt_texts:
             for m in OUTPUT_VERB.finditer(text):
+                if guard_negation and NEGATED.search(text[max(0, m.start() - 24): m.start()]):
+                    continue
                 window = text[m.end(): m.end() + 140].split("\n\n")[0]
                 for pm in OUTPUT_PREP.finditer(window):
                     tok = pm.group(1).strip("`\"'").rstrip(".,;:!?")
@@ -523,7 +554,7 @@ class Evidence:
             findings.append(v)
         findings += self._test_claim(steps, delivs)
         findings += self._failed_steps(steps, delivs, named + dir_members)
-        outs = self.requested_outputs(prompt_texts)
+        outs = self.asked_outputs(prompt_texts, start_idx)
         latest = self.tr.index(self.tr.latest_index())
         for rel, raw in outs:
             # 相對路徑：agent 在專案的子資料夾裡寫了同一個相對路徑也算在（專案根＝git 根；v3.1）
@@ -637,12 +668,12 @@ class Evidence:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
-            if not RUNNERS.search(cmd):
+            if not (RUNNERS.search(cmd) or SCRIPT_RUNNER.search(cmd)):
                 continue
             out = self.tr.output_text(s)
-            if s.error or FAIL_OUT.search(out):
+            if s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out):
                 runs.append((s, "failed", cmd))
-            elif PASS_OUT.search(out):
+            elif PASS_OUT.search(out) or PASS_OUT_2.search(out):
                 runs.append((s, "passed", cmd))
             else:
                 runs.append((s, "unreadable", cmd))

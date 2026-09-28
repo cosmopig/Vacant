@@ -36,10 +36,10 @@ def missing_outputs(rec: Recorder, platform: str, session: str) -> tuple[int, li
     from .evidence import Evidence
     ev = Evidence(rec, platform=platform, session=session)
     start, texts, steps = ev.window()
-    outs = ev.requested_outputs(texts)
+    start_idx = steps[0].pre_index if steps and steps[0].pre_index else ev.tr.initial
+    outs = ev.asked_outputs(texts, start_idx)           # v3.7：含人點名的說明檔裡寫的交付物
     if not outs:
         return start, []
-    start_idx = steps[0].pre_index if steps and steps[0].pre_index else ev.tr.initial
     named, in_dirs = ev.materials(texts, start_idx)
     given = set(named) | set(in_dirs)
     latest = set(ev.tr.index(ev.tr.latest_index()))

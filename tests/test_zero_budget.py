@@ -438,9 +438,9 @@ def test_the_stop_note_marks_a_file_written_after_the_reminder(proj):
     assert "Vacant checked no value in it" not in note           # 2045.75 對得上紀錄
 
 
-def test_a_stop_after_a_model_error_is_named_in_the_note_and_the_model_text_is_unchanged(proj):
-    """pi 的迴圈在模型錯誤時也會停、交件前檢查照跑（研究：第 70 題）。說明寫明是錯誤之後跑的；
-    送給模型的退回字句和沒有錯誤時逐位元組相同（v3.3）。"""
+def test_a_stop_after_a_model_error_is_checked_and_named_in_the_note_but_not_sent_back(proj):
+    """pi 的迴圈在模型錯誤時也會停、交件前檢查照跑（研究：第 70 題）。說明寫明是錯誤之後跑的（v3.3）；
+    **v3.7：不退回**——那不是 agent 說做完（u274：這樣觸發的缺檔退回 16 跑，之後 0 對、13 跑撞時限）。沒有錯誤的同一個情形照樣退回。"""
     a = Pi(proj, sid="E")
     a.ask()
     a.bash("ls data", "sales.csv")
@@ -449,9 +449,11 @@ def test_a_stop_after_a_model_error_is_named_in_the_note_and_the_model_text_is_u
     b.ask()
     b.bash("ls data", "sales.csv")
     d_ok = b.ev("stop", final_text="")
-    assert d_err["action"] == d_ok["action"] == "continue" and d_err["reason"] == d_ok["reason"]
+    assert d_err["action"] == "allow" and not d_err.get("reason")
+    assert d_ok["action"] == "continue" and "answer.txt" in d_ok["reason"]
     rev = [e for e in Recorder(proj).events() if e["type"] == "review"]
-    assert [e.get("last_turn_error") for e in rev] == [True, None]
+    assert [(e.get("last_turn_error"), e.get("action")) for e in rev] == [(True, "allow"), (None, "continue")]
+    assert [f["kind"] for f in rev[0]["findings"]] == ["missing_output"]      # 查到了，只寫給人
     # 說明（最後寫的是 F 的；E 再跑一次看它的說明）
     a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
     a.ev("stop", final_text="Done.", last_stop="error")

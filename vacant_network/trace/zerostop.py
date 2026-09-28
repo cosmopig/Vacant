@@ -127,7 +127,7 @@ def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | 
     """回 `(action, reason, record)`；`action` 只會是 `allow` 或 `continue`。
     任何錯誤 ⇒ `allow`（失敗一律放行），`record["user_message"]` 最多一行。
     `error_stop`：這一回合是模型錯誤結束的（pi 的迴圈在錯誤時也會停），不是 agent 說做完——檢查照跑，
-    說明裡寫明（v3.3；2026-09-26 研究：第 70 題解碼錯誤之後被退回缺檔、接著寫了沒有根據的答案）。"""
+    說明裡寫明（v3.3；2026-09-26 研究：第 70 題解碼錯誤之後被退回缺檔、接著寫了沒有根據的答案）；**v3.7 起不退回**（`pushable_for`）。"""
     ws = capture.workspace_for(cwd, None)
     if ws is None:
         return "allow", "", {}
@@ -151,6 +151,16 @@ def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | 
     except Exception as e:  # noqa: BLE001
         return "allow", "", {"zero": {"ran": False, "error": f"{type(e).__name__}: {e}"[:400]},
                              "user_message": DID_NOT_RUN}
+
+
+def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) -> list[dict[str, Any]]:
+    """這一次檢查要退回給 agent 的發現（其餘只進交件說明）。純函式：離線重播（`ops/eval/colab_replay/`）用同一份。
+    - 「點名的檔沒打開」只退一回合（`UNREAD_MAX_ROUNDS`）。
+    - **v3.7：模型錯誤結束的回合一律不退回**（只寫給人）。那不是 agent 說做完，是模型那一側壞掉；u274 的缺檔退回 31 跑裡
+      16 跑是這樣觸發的，之後 0 對、13 跑撞時限沒交、3 跑交錯（`decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`）。"""
+    if error_stop:
+        return []
+    return [f for f in findings if f["kind"] != "unread" or used < UNREAD_MAX_ROUNDS]
 
 
 def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
@@ -178,7 +188,7 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
         _rounds_file(session_id, zc).unlink(missing_ok=True)
     used = _rounds_used(session_id, zc)
     findings = res.get("findings") or []
-    pushable = [f for f in findings if f["kind"] != "unread" or used < UNREAD_MAX_ROUNDS]
+    pushable = pushable_for(findings, used, error_stop)
     last_turn = turns_left is not None and turns_left <= 1
     if last_turn:   # 只剩一回合：只來得及把要求的檔寫出來（其他的照樣進說明）
         pushable = [f for f in pushable if f["kind"] == "missing_output"]
@@ -525,7 +535,7 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
     if any(e.get("type") == "ended" for e in evs) or (reviews and reviews[-1].get("action") != "continue"):
         return {"ended": {"why": "the delivery check let it through (or the note exists)"}}
     nudges = [e for e in evs if e.get("type") == "nudge"]
-    asked = ev.requested_outputs(texts)
+    asked = ev.asked_outputs(texts, steps[0].pre_index or ev.tr.initial)   # v3.7：含說明檔裡寫的交付物
     _s2, missing = missing_outputs(rec, agent, session)
     miss = {rel for rel, _ in missing}
     try:

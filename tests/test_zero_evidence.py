@@ -494,3 +494,95 @@ def test_a_search_that_errors_on_a_given_file_is_still_a_failed_step(env):
     a.write("answer.txt", "42")
     kinds = [f["kind"] for f in a.evidence()["findings"]]
     assert "failed_step" in kinds
+
+
+# ── v3.7（Colab 程式題 920 題、u274 找到的缺陷）────────────────────────────
+
+V37_CONTRACT = ("# Contract\n\nWrite your answer in `solution.py` at the root of this workspace.\n\n"
+            "- Define a top-level function named `f`.\n- Do not write to `notes.txt`.\n")
+V37_PROMPT = "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file."
+
+
+def _task(env):
+    return _app(env, {"goal.md": "# Goal\nReturn twice the input.\n", "contract.md": V37_CONTRACT,
+                      "run_tests.sh": "python3 -m tests_visible\n", "tests_visible/t.py": "assert 1\n"})
+
+
+def test_v37_a_test_script_run_counts_as_running_the_tests(env):
+    """`sh run_tests.sh` 是跑測試（v3.6.1 只認 pytest 之類 ⇒ Colab 455／472 次退回是這個誤退）。"""
+    a = Agent(_task(env))
+    a.ask(V37_PROMPT)
+    a.read("goal.md")
+    a.read("contract.md")
+    a.write("solution.py", "def f(x):\n    return 2 * x\n")
+    a.bash("sh run_tests.sh", "pass t.py::check_01\npass t.py::check_02\n0 check(s) failed\n")
+    assert a.evidence("I wrote solution.py and all tests passed.")["findings"] == []
+
+
+def test_v37_a_failing_test_script_and_an_edit_after_it_are_still_caught(env):
+    a = Agent(_task(env))
+    a.ask(V37_PROMPT)
+    a.read("goal.md")
+    a.read("contract.md")
+    a.write("solution.py", "def f(x):\n    return x\n")
+    a.bash("bash ./run_tests.sh", "fail t.py::check_01\n1 check(s) failed\n", error=True)
+    ev = a.evidence("All tests passed.")
+    assert [(f["kind"], f["sub"]) for f in ev["findings"] if f["kind"] == "test_claim"] == [("test_claim", "failed")]
+    a.bash("sh run_tests.sh", "pass t.py::check_01\n0 check(s) failed\n")
+    assert a.evidence("All tests passed.")["findings"] == []
+    a.write("solution.py", "def f(x):\n    return 2 * x  # tweak\n")
+    ev = a.evidence("All tests passed.")
+    assert [(f["kind"], f["sub"]) for f in ev["findings"]] == [("test_claim", "stale")]
+
+
+def test_v37_reading_a_test_script_is_not_running_it(env):
+    a = Agent(_task(env))
+    a.ask(V37_PROMPT)
+    a.read("goal.md")
+    a.read("contract.md")
+    a.write("solution.py", "def f(x):\n    return 2 * x\n")
+    a.bash("cat run_tests.sh", "python3 -m tests_visible\n")
+    ev = a.evidence("All tests passed.")
+    assert [(f["kind"], f["sub"]) for f in ev["findings"]] == [("test_claim", "none")]
+
+
+def test_v37_the_deliverable_named_in_the_contract_the_person_pointed_to_is_required(env):
+    """人說「讀 goal.md、contract.md，照上面做」，交付物只寫在 contract.md（Colab：缺檔退回 0 次）。"""
+    a = Agent(_task(env))
+    a.ask(V37_PROMPT)
+    a.read("goal.md")
+    a.read("contract.md")
+    ev = a.evidence("Done.")
+    assert [(f["kind"], f["path"]) for f in ev["findings"]] == [("missing_output", "solution.py")]
+    assert ev["requested_outputs"] == ["solution.py"]
+    assert ev["notes"]["outputs_from_instructions"] == {"files": ["contract.md", "goal.md"],
+                                                        "outputs": ["solution.py"]}
+    a.write("solution.py", "def f(x):\n    return 2 * x\n")
+    assert a.evidence("Done.")["findings"] == []
+
+
+def test_v37_a_negated_file_in_the_contract_is_not_a_deliverable(env):
+    a = Agent(_task(env))
+    a.ask(V37_PROMPT)
+    a.read("goal.md")
+    a.read("contract.md")
+    a.write("solution.py", "def f(x):\n    return 2 * x\n")
+    ev = a.evidence("Done.")
+    assert "notes.txt" not in ev["requested_outputs"] and ev["findings"] == []
+
+
+def test_v37_an_instruction_file_the_person_did_not_point_to_is_not_read_for_deliverables(env):
+    a = Agent(_task(env))
+    a.ask("Make f in solution.py return twice its input.")
+    a.write("solution.py", "def f(x):\n    return 2 * x\n")
+    ev = a.evidence("Done.")
+    assert ev["requested_outputs"] == [] and "outputs_from_instructions" not in ev["notes"]
+
+
+def test_v37_the_prompt_itself_is_unchanged_by_the_negation_guard(env):
+    """否定句的保護只用在說明檔；人打的話照 v3.6.1（第 4xx 行的 DABstep 情形不變）。"""
+    p = _app(env, {"data/payments.csv": "id,country\n1,NL\n"})
+    a = Agent(p)
+    a.ask("Do not guess. When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`.")
+    a.bash("head /app/data/payments.csv", "id,country\n1,NL\n")
+    assert [(f["kind"], f["path"]) for f in a.evidence()["findings"]] == [("missing_output", "answer.txt")]
