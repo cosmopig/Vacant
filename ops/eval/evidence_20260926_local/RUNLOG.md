@@ -189,3 +189,6 @@ python3 ops/eval/local/run_batch.py --harbor <harbor> --jobs <scratch>/local/for
 - 21:59 UTC 例行檢查：20:54 那一輪歸檔又沒推上去（同 18:53）。原因判斷：歸檔迴圈是容器重啟**之前**起的行程，重啟後它的 git 推送一直失敗（手動從新的殼層推都成功）。
   手動補推 `87d7caf1`，再把歸檔迴圈停掉、從新的殼層用 `setsid` 重起：第一輪立刻歸檔、推送成功（`d8278d1d`，遠端一致）。
   **給以後**：容器重啟之後，重啟前起的背景行程裡會連網的（歸檔迴圈的 git push）都要重起，不要只看它們還活著。
+- **00:53 UTC 全部結束**：00:00 時間上限之後不再拿新題，已接下的跑完；啟動檔的 infra_void 補跑 0 格（`rerun_void.log`）；`DONE`；最後一輪歸檔已推上去（`2be29064`，遠端一致）。
+  結果 200 跑、100 題兩組都完整、沒開始 174 題。分析在 `DONE` 之後才跑（`u274/analysis/`、`u274/ops/`）；結論 `decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`。
+  運作的幾個檔一起複製進 `ops/eval/evidence_20260927_nocap/u274/`：`rerun_void.log`、`rerun_void_restart1.log`、`moved.json`、`FROZEN_COMMIT`（`guard.log` 不存在＝保險絲沒有觸發過）。
