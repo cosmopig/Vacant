@@ -1,0 +1,535 @@
+[
+  {
+    "task": "lcb_3686",
+    "arms": {
+      "native": {
+        "first": {
+          "exit": 0,
+          "seconds": 48.11,
+          "usage": {
+            "input": 14032,
+            "output": 1534,
+            "cacheRead": 1792
+          },
+          "errors": [],
+          "turns": 7,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "delivered": true,
+        "score": {
+          "passed": true,
+          "detail": "PASS 26\n"
+        }
+      },
+      "vacant": {
+        "first": {
+          "exit": 0,
+          "seconds": 66.87,
+          "usage": {
+            "input": 22687,
+            "output": 2315,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 8,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "write",
+            "bash",
+            "edit",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "judge1": {
+          "outcome": "accept",
+          "reasons": [
+            "all 1 required claim(s) PASS"
+          ],
+          "results": [
+            {
+              "claim_id": "visible_acceptance",
+              "status": "PASS",
+              "detail": "2/2 checks passed",
+              "evidence": {
+                "passed": 2,
+                "total": 2,
+                "complete": true,
+                "result_sha256": "20c5834f483095ea3eba081a0e1996585de93d068f8664b644b78b894a1179ef",
+                "suite_sha256": "318e4266f48f3bb7956afb7e68ac0db478276c0c78e7043570d5c05109cad107",
+                "sandbox": "none",
+                "independent": true
+              },
+              "verifier": "python_checks",
+              "verifier_version": "3",
+              "required": true,
+              "authority": "requirement"
+            }
+          ]
+        },
+        "release": {
+          "released": true,
+          "readback_ok": true,
+          "artifact_sha256": "cddccdae9a43836fb01ede263f35a7dd1f8b906f841d782a91fb1ebc05816bad"
+        },
+        "score": {
+          "passed": true,
+          "detail": "PASS 26\n"
+        }
+      }
+    }
+  },
+  {
+    "task": "lcb_3715",
+    "arms": {
+      "native": {
+        "first": {
+          "exit": 0,
+          "seconds": 31.78,
+          "usage": {
+            "input": 14508,
+            "output": 1174,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 6,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "delivered": true,
+        "score": {
+          "passed": true,
+          "detail": "PASS 26\n"
+        }
+      },
+      "vacant": {
+        "first": {
+          "exit": 0,
+          "seconds": 64.1,
+          "usage": {
+            "input": 19411,
+            "output": 1690,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 7,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "write",
+            "bash",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "judge1": {
+          "outcome": "accept",
+          "reasons": [
+            "all 1 required claim(s) PASS"
+          ],
+          "results": [
+            {
+              "claim_id": "visible_acceptance",
+              "status": "PASS",
+              "detail": "2/2 checks passed",
+              "evidence": {
+                "passed": 2,
+                "total": 2,
+                "complete": true,
+                "result_sha256": "8fc4ad69dc00533dde340cd8a4c0f2c0fe807c28a270a04cbc396d55f0b9c81f",
+                "suite_sha256": "27007d999db49a911f83df578ce7218a0e4259e07041a555c579cd0ffd674548",
+                "sandbox": "none",
+                "independent": true
+              },
+              "verifier": "python_checks",
+              "verifier_version": "3",
+              "required": true,
+              "authority": "requirement"
+            }
+          ]
+        },
+        "release": {
+          "released": true,
+          "readback_ok": true,
+          "artifact_sha256": "1c215b6c31ae8790ac4302ed0325b49a75b4acc28f3e12088f4c3931e4fb19a2"
+        },
+        "score": {
+          "passed": true,
+          "detail": "PASS 26\n"
+        }
+      }
+    }
+  },
+  {
+    "task": "lcb_3548",
+    "arms": {
+      "native": {
+        "first": {
+          "exit": 0,
+          "seconds": 29.27,
+          "usage": {
+            "input": 11158,
+            "output": 999,
+            "cacheRead": 1792
+          },
+          "errors": [],
+          "turns": 5,
+          "tools": [
+            "bash",
+            "bash",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "delivered": true,
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      },
+      "vacant": {
+        "first": {
+          "exit": 0,
+          "seconds": 30.93,
+          "usage": {
+            "input": 13818,
+            "output": 842,
+            "cacheRead": 1792
+          },
+          "errors": [],
+          "turns": 7,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "judge1": {
+          "outcome": "accept",
+          "reasons": [
+            "all 1 required claim(s) PASS"
+          ],
+          "results": [
+            {
+              "claim_id": "visible_acceptance",
+              "status": "PASS",
+              "detail": "3/3 checks passed",
+              "evidence": {
+                "passed": 3,
+                "total": 3,
+                "complete": true,
+                "result_sha256": "e1de5d070d5f7928740171265150d3f920be8840bfe88e24309625b66db9ab92",
+                "suite_sha256": "703c729dd43c97381741f1acb924b33b6b601cfb6040dd42a4aecedcd6581989",
+                "sandbox": "none",
+                "independent": true
+              },
+              "verifier": "python_checks",
+              "verifier_version": "3",
+              "required": true,
+              "authority": "requirement"
+            }
+          ]
+        },
+        "release": {
+          "released": true,
+          "readback_ok": true,
+          "artifact_sha256": "4f722009eb9f6ca379f2a549a1eed6948f435aafa3efc492e50596516131a168"
+        },
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      }
+    }
+  },
+  {
+    "task": "lcb_3522",
+    "arms": {
+      "native": {
+        "first": {
+          "exit": 0,
+          "seconds": 21.44,
+          "usage": {
+            "input": 13399,
+            "output": 454,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 6,
+          "tools": [
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "delivered": true,
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      },
+      "vacant": {
+        "first": {
+          "exit": 0,
+          "seconds": 22.76,
+          "usage": {
+            "input": 15145,
+            "output": 445,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 7,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "judge1": {
+          "outcome": "accept",
+          "reasons": [
+            "all 1 required claim(s) PASS"
+          ],
+          "results": [
+            {
+              "claim_id": "visible_acceptance",
+              "status": "PASS",
+              "detail": "3/3 checks passed",
+              "evidence": {
+                "passed": 3,
+                "total": 3,
+                "complete": true,
+                "result_sha256": "ca2a1e0209740bdd8adad86d7b0c9fd22521da5159827248c28648cc0bad85ff",
+                "suite_sha256": "6fe63d83046bde1bc7a3fef36dfce9bd60d9dc8cf310864bd94c79f443d0517a",
+                "sandbox": "none",
+                "independent": true
+              },
+              "verifier": "python_checks",
+              "verifier_version": "3",
+              "required": true,
+              "authority": "requirement"
+            }
+          ]
+        },
+        "release": {
+          "released": true,
+          "readback_ok": true,
+          "artifact_sha256": "cb7ccd7cb942c1c4ce6f7a564fa0b5ce5460280b205195a84760b32b834ddbf4"
+        },
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      }
+    }
+  },
+  {
+    "task": "lcb_3794",
+    "arms": {
+      "native": {
+        "first": {
+          "exit": 0,
+          "seconds": 58.32,
+          "usage": {
+            "input": 33781,
+            "output": 1941,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 10,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash",
+            "bash",
+            "edit",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "delivered": true,
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      },
+      "vacant": {
+        "first": {
+          "exit": 0,
+          "seconds": 32.71,
+          "usage": {
+            "input": 19992,
+            "output": 962,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 7,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "judge1": {
+          "outcome": "accept",
+          "reasons": [
+            "all 1 required claim(s) PASS"
+          ],
+          "results": [
+            {
+              "claim_id": "visible_acceptance",
+              "status": "PASS",
+              "detail": "3/3 checks passed",
+              "evidence": {
+                "passed": 3,
+                "total": 3,
+                "complete": true,
+                "result_sha256": "b426a7fdaee5de15a0354218315e1b29a39f3de15fd047dea7b256e195fb6090",
+                "suite_sha256": "beb24eea51f83d877d9fa4dd6fe0e1e5e6431bb32a857cedcc2f655050d0467d",
+                "sandbox": "none",
+                "independent": true
+              },
+              "verifier": "python_checks",
+              "verifier_version": "3",
+              "required": true,
+              "authority": "requirement"
+            }
+          ]
+        },
+        "release": {
+          "released": true,
+          "readback_ok": true,
+          "artifact_sha256": "4638abb8e22edf6467db5016a552fdf82839cbdfed3ba92afd0acb17c550ce05"
+        },
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      }
+    }
+  },
+  {
+    "task": "lcb_3657",
+    "arms": {
+      "native": {
+        "first": {
+          "exit": 0,
+          "seconds": 27.17,
+          "usage": {
+            "input": 15097,
+            "output": 713,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "turns": 6,
+          "tools": [
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "delivered": true,
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      },
+      "vacant": {
+        "first": {
+          "exit": 0,
+          "seconds": 32.69,
+          "usage": {
+            "input": 15232,
+            "output": 822,
+            "cacheRead": 1792
+          },
+          "errors": [],
+          "turns": 7,
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ],
+          "stderr_tail": ""
+        },
+        "judge1": {
+          "outcome": "accept",
+          "reasons": [
+            "all 1 required claim(s) PASS"
+          ],
+          "results": [
+            {
+              "claim_id": "visible_acceptance",
+              "status": "PASS",
+              "detail": "3/3 checks passed",
+              "evidence": {
+                "passed": 3,
+                "total": 3,
+                "complete": true,
+                "result_sha256": "2997c3f110439b736616088e1a4019bcc3da949b580997e962bbf440cd25ce82",
+                "suite_sha256": "227ef92f76928b3b9979490ef77a8e2c472b0fbeb3f79a1aa4040dff8ab64eb9",
+                "sandbox": "none",
+                "independent": true
+              },
+              "verifier": "python_checks",
+              "verifier_version": "3",
+              "required": true,
+              "authority": "requirement"
+            }
+          ]
+        },
+        "release": {
+          "released": true,
+          "readback_ok": true,
+          "artifact_sha256": "eeafa7334429d86bb4d68ed759f1eb1ee00323cb0b6a53a469af61c1b7101c27"
+        },
+        "score": {
+          "passed": true,
+          "detail": "PASS 27\n"
+        }
+      }
+    }
+  }
+]
