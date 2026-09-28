@@ -30,18 +30,18 @@ class _SyntheticAgent:
         assert m is not None
         k = int(m.group(1))
         if self.mode == "good":
-            return f"def solve(n):\\n    return (n + {k} - 1) // {k}\\n"
+            return f"def solve(n):\n    return (n + {k} - 1) // {k}\n"
         if self.mode == "common_bug":
             # Common correlated error: floor division instead of ceil division.
-            return f"def solve(n):\\n    return n // {k}\\n"
+            return f"def solve(n):\n    return n // {k}\n"
         if self.mode == "hidden_bug":
             # Passes every public/visible probe, but fails one hidden boundary.
             bad_n = 2 * k + 1
             return (
-                "def solve(n):\\n"
-                f"    if n == {bad_n}:\\n"
-                f"        return n // {k}\\n"
-                f"    return (n + {k} - 1) // {k}\\n"
+                "def solve(n):\n"
+                f"    if n == {bad_n}:\n"
+                f"        return n // {k}\n"
+                f"    return (n + {k} - 1) // {k}\n"
             )
         raise AssertionError(self.mode)
 
@@ -60,20 +60,20 @@ def _task(i: int, *, blindspot: bool) -> dict:
         "visible_check": {
             "type": "run_python",
             "code": (
-                "assert solve(0) == 0\\n"
-                "assert solve(1) == 1\\n"
-                f"assert solve({k}) == 1\\n"
-                f"assert solve({k + 1}) == 2\\n"
+                "assert solve(0) == 0\n"
+                "assert solve(1) == 1\n"
+                f"assert solve({k}) == 1\n"
+                f"assert solve({k + 1}) == 2\n"
             ),
         },
         "hidden_check": {
             "type": "run_python",
             "code": (
-                "assert solve(0) == 0\\n"
-                f"assert solve({2 * k - 1}) == 2\\n"
-                f"assert solve({2 * k}) == 2\\n"
-                f"assert solve({hidden_edge}) == 3\\n"
-                f"assert solve(97) == {expected_97}\\n"
+                "assert solve(0) == 0\n"
+                f"assert solve({2 * k - 1}) == 2\n"
+                f"assert solve({2 * k}) == 2\n"
+                f"assert solve({hidden_edge}) == 3\n"
+                f"assert solve(97) == {expected_97}\n"
             ),
         },
         # Public inputs only; no expected outputs and no hidden-only boundary.
