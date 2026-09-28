@@ -147,3 +147,38 @@ This reminder is only about the file; it does not say whether any answer is righ
   其餘不變：交件前檢查（五類退回）、只剩最後一回合時只退回缺檔、被切斷或事後補查的交件說明。
 - 測試：`tests/test_zero_budget.py` 的 `test_v36_*`（沒有欄位／false／不是 true 的值都關；壞掉的 install.json 關；安裝旗標開、關、沒說不動）；
   原本量提醒行為的測試改成明確開啟；拿掉開關的變異會被抓到。
+
+## 十一、v3.7（2026-09-28）：三個缺陷修掉；**只改退回的時機與範圍，退回的字句不變**
+
+**來源**：人類在 Colab 跑的程式題 920 題（`decisions/conclusions/CONCLUSION_20260928_COLAB_C5_PI_VACANT361.md`，分支 `feat/colab-campaign-20260927`）
+與 u274（`decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`）。三個預註冊批次都沒有量到差別（付費正式、Colab、u274）。
+
+1. **`test_claim` 認任意的測試腳本**（`evidence.is_test_script_run`）：`sh run_tests.sh`、`./run_tests.sh`、`python tests/test_x.py`……——
+   檔名以 test 開頭或結尾、在**指令的位置**被執行；讀、列、heredoc、`generate_test_data.py` 不算。測試總結行：「0 failed」「FAIL: 0」「failures=0」不是失敗，
+   失敗要有非零的數字、名詞是測試的。Colab：455／472 次退回是不認 `sh run_tests.sh` 的誤退。
+   測試腳本紅了、之後又有一次跑測試是綠的＝修好了，不算「失敗的步驟被略過」；一直沒綠的照舊退回。
+2. **交付物也從人要 agent 照著做的說明檔找**（`Evidence.asked_outputs`）：檔名是說明（contract／spec／task／goal…）或人那一句話有「照著做／follow／依照」；
+   只收對 agent 的命令（句首或 you must…），否定、可有可無、舉例、描述程式行為的不算；這一回合改過的、> 64 KB 的不讀；一份裡超過 3 個＝資料，全部不算。
+   中文的「寫到／存成 X」在人打的話裡也認（舊的 `\b` 在中文字之間永遠不成立）。Colab：交付物只寫在 `contract.md`，缺檔退回 0 次。
+3. **模型錯誤結束的回合一律不退回**（`zerostop.pushable_for`；只寫給人，說明寫「查到了、沒有退回」）。u274：這樣觸發的缺檔退回 16 跑，之後 0 對、13 跑撞時限。
+
+**對抗審查**（`review-v37`，run `wf_4507d191-b93`）：20 條都重現；會在日常使用誤退的全部修掉（最重要：第一版把提示裡點名的所有 .md／.txt 都當成說明檔，
+「摘要 meeting.txt」「修 README 的錯字」都會被要求交出檔案裡提到的檔），回歸測試 31 條（`tests/test_zero_evidence.py` 的 `test_v37_*`）。
+不修的（寫明）：`bash -c "sh run_tests.sh"` 這類包起來的指令不認（少退，不是誤退）；重播工具的幾個限制（不套 `_decide` 的最後一回合收窄、`today` 沒固定）。
+
+**離線驗證**（`ops/eval/colab_replay/replay_reviews.py`；證據 `ops/eval/evidence_20260928_v37/`）：在錄好的 C 組病歷上、每一次交件前檢查的那一刻重算。
+- **保真**：v3.6.1 重算 Colab 1327／1327、u274 81／81、S36-nocap 80／80 次檢查，動作與類別和紀錄相同、全部對齊（依工作階段與時間，照 `vacant.ts` 的 `finalText`）。
+- **v3.7，每一跑的第一次檢查**（之後的回合在新版裡不一定會發生，只比第一次）：
+
+| | v3.6.1 第一次就退回 | v3.7 第一次就退回 | 變化 |
+|---|---|---|---|
+| Colab 程式題（858 跑有檢查） | 309 跑 | **29 跑** | 誤退 288 跑放行；失敗步驟 2 跑放行（兩跑最後都對）；新增缺檔 10 跑（沒撞時限、沒交 `solution.py`；沒裝那一組同題 5 對） |
+| u274（51 跑） | 36 跑 | 20 跑 | 模型錯誤之後的 16 跑改成只寫給人 |
+| S36-nocap（65 跑） | 12 跑 | 12 跑 | 不變 |
+| R530 SOLO（59 格，真的掛鉤重播） | 35 格（全對的 6 格） | 32 格（全對的 4 格） | 退回裡真的有問題的比例 0.83 → 0.875 |
+
+**預期（寫明，不是檢定）**：v3.7 主要是去掉誤退與多花的呼叫、不在模型壞掉時硬把 agent 叫回來；對答對率的上限很小——
+Colab 新增的 10 跑缺檔退回就算全部救回也是 920 題裡 +10 題。零設定「在同一個工作階段裡講一次」這條路，三個批次都沒有量到差別；
+過去有增益的都是 Vacant 握著生成（可執行的驗收＋重抽＋拒交）。人類另外在 PR #82（`ops/eval/native_acceptance_bridge.py`）把這個機制接到原生 agent 上，要先冒煙再做新的四臂實驗。
+
+**不變的**：退回的字句（`trace/review.py`，KS-1）；沒有退回時模型收到的請求和沒裝時逐位元組相同；提醒預設關（v3.6）；一個要求最多 2 回合。
