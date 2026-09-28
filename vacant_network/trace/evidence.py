@@ -96,6 +96,9 @@ FAIL_OUT = re.compile(r"(FAILED|failures=|errors=|Traceback \(most recent call l
                       r"\b\d+ failed\b|npm ERR!|error\[E\d+|test result: FAILED|BUILD FAILED|"
                       r"Tests:.*failed|\bError:|Exception:|command not found|No such file)")
 PASS_OUT = re.compile(r"(\bOK\b\s*$|\b\d+ passed\b|test result: ok|BUILD SUCCESS|\bPASS\b)", re.M)
+DIRECT_TEST_WRAPPER = re.compile(r"^\s*(?:sh|bash)\s+(?:\./)?run_tests\.sh\s*$")
+CHECK_SUMMARY = re.compile(r"^(\d+)\s+check\(s\)\s+failed$", re.I)
+CHECK_CASE_PASS = re.compile(r"^pass\s+\S+\.py::\S+$", re.I)
 MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|did not run|"
                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
 #: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
@@ -137,6 +140,36 @@ TIME_RE = re.compile(r"\b\d{1,2}:\d{2}(:\d{2})?\b")
 
 
 # ── small helpers ───────────────────────────────────────────────────────
+
+def _direct_test_wrapper_outcome(cmd: str, output: str, error: object = None) -> str | None:
+    """Interpret the direct C5 `sh run_tests.sh` wrapper conservatively.
+
+    This only says what the recorded runner output says. It is not a trusted
+    acceptance oracle: an agent-controlled wrapper or stdout can still lie.
+    """
+    if not DIRECT_TEST_WRAPPER.fullmatch(cmd or ""):
+        return None
+    if error:
+        return "failed"
+    lines = [line.strip() for line in (output or "").splitlines() if line.strip()]
+    if not lines:
+        return "unreadable"
+    summaries = [CHECK_SUMMARY.fullmatch(line) for line in lines]
+    summaries = [m for m in summaries if m is not None]
+    if any(int(m.group(1)) > 0 for m in summaries) or FAIL_OUT.search(output or ""):
+        return "failed"
+    # A successful C5 wrapper has named checks followed by one zero-failure
+    # summary. Empty suites, duplicate summaries, and unknown lines stay
+    # unreadable rather than being promoted to a pass.
+    if len(summaries) != 1 or int(summaries[0].group(1)) != 0:
+        return "unreadable"
+    if CHECK_SUMMARY.fullmatch(lines[-1]) is None:
+        return "unreadable"
+    cases = lines[:-1]
+    if not cases or not all(CHECK_CASE_PASS.fullmatch(line) for line in cases):
+        return "unreadable"
+    return "passed"
+
 
 def _ext(path: str) -> str:
     return os.path.splitext(path)[1].lower()
@@ -637,9 +670,13 @@ class Evidence:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
+            out = self.tr.output_text(s)
+            wrapped = _direct_test_wrapper_outcome(cmd, out, s.error)
+            if wrapped is not None:
+                runs.append((s, wrapped, cmd))
+                continue
             if not RUNNERS.search(cmd):
                 continue
-            out = self.tr.output_text(s)
             if s.error or FAIL_OUT.search(out):
                 runs.append((s, "failed", cmd))
             elif PASS_OUT.search(out):
