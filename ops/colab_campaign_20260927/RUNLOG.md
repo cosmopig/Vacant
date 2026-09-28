@@ -123,3 +123,6 @@ Colab 的 VM 本身就是一個容器，開不了 dockerd；而且人類說「�
 - 21:05 infra_void 檢查（只印 void 清單）：**0 格** ⇒ 不需補跑。
 - 21:06 **第一次打開分數**，跑凍結的 analyze.py：A 748／920、C361 758／920；b＝59、c＝49；McNemar 精確雙尾 p＝0.387 ⇒ **不顯著**。
   退回 472 次：`test_claim/none` 455（293 格跑過 run_tests.sh 仍被判沒跑＝誤退）、`failed_step` 21、`unsourced` 1、`missing_output` 0。結果與事後拆解見 `results_c5/README.md`。
+- 21:13 本機同步收齊 43／43 chunk（sha256 全對）、SYNC_ALL_DONE。
+- 🔴 21:02–約 22:10 **G4 空轉約 1 小時、浪費約 10 運算單位**：沒有設「批次收完自動關機」（只有低餘額護欄）。22:10 左右 session 已不在（不是我下的 stop）。人類質問後補上教訓：之後同步完成即 `colab stop`。
+- 報告：`decisions/conclusions/CONCLUSION_20260928_COLAB_C5_PI_VACANT361.md`（另存一份在 Mac 備份目錄 `REPORT.md`）。
