@@ -1,0 +1,120 @@
+[
+  {
+    "task": "lcb_3686",
+    "arms": {
+      "native": {
+        "run": {
+          "seconds": 64.47,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 24289,
+            "output": 2063,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "tools": [
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash",
+            "edit",
+            "bash"
+          ]
+        },
+        "released": true,
+        "hidden_pass": true
+      },
+      "plugin": {
+        "run": {
+          "seconds": 139.25,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 19966,
+            "output": 1863,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "tools": [
+            "read",
+            "bash",
+            "read",
+            "read",
+            "write",
+            "bash"
+          ]
+        },
+        "stops": [
+          {
+            "outcome": "accept",
+            "action": "allow"
+          }
+        ],
+        "judge": "accept",
+        "released": true,
+        "hidden_pass": true
+      }
+    }
+  },
+  {
+    "task": "lcb_3700",
+    "arms": {
+      "native": {
+        "run": {
+          "seconds": 120.54,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 32153,
+            "output": 4892,
+            "cacheRead": 4864
+          },
+          "errors": [],
+          "tools": [
+            "read",
+            "write",
+            "edit",
+            "bash",
+            "read",
+            "edit",
+            "bash"
+          ]
+        },
+        "released": true,
+        "hidden_pass": false
+      },
+      "plugin": {
+        "run": {
+          "seconds": 93.54,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 18759,
+            "output": 2692,
+            "cacheRead": 3840
+          },
+          "errors": [],
+          "tools": [
+            "bash",
+            "read",
+            "write",
+            "bash",
+            "edit",
+            "bash"
+          ]
+        },
+        "stops": [
+          {
+            "outcome": "accept",
+            "action": "allow"
+          }
+        ],
+        "judge": "accept",
+        "released": true,
+        "hidden_pass": true
+      }
+    }
+  }
+]
