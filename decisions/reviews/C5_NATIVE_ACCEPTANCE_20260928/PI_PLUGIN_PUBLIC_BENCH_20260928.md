@@ -11,15 +11,16 @@ An executor recovery rolled back the scratch directory after the 20-task R534 ex
 | Candidate | Fit for an acceptance plugin | Decision |
 | --- | --- | --- |
 | R534 LiveCodeBench fixture already pinned in this repository | Same visible acceptance and independent hidden checks; directly exercises Pi file handoff | Paired 20-task run, 10 approximately random IDs and 10 selected from historically divergent cases. |
-| DABStep public dev-hard | Data analysis beyond code; public reference answers and data files | Three completed pairs, exploratory. Gold stayed in evaluator memory; visible checker returned pass/fail only. |
-| Terminal-Bench | Real terminal tasks and verifiers | Better eventual stress test, but requires Harbor and container environment. |
-| τ-bench | Tool calls and policy adherence | Requires a user simulator and adaptation of its action protocol to Pi/Vacant. |
+| [DABStep public dev-hard](https://huggingface.co/datasets/adyen/DABstep) | Data analysis beyond code; public reference answers and data files | Three original pairs and a fresh saved three-pair numeric repeat. Gold stayed in evaluator memory; visible checker returned pass/fail only. |
+| [Terminal-Bench](https://github.com/harbor-framework/terminal-bench) | Real terminal tasks and verifiers | Better eventual stress test, but requires Harbor and container environment. |
+| [τ-bench](https://github.com/sierra-research/tau-bench) | Tool calls and policy adherence | Requires a user simulator and adaptation of its action protocol to Pi/Vacant. |
 
 ## Paired run protocol
 
 - Both arms used Pi, `gpt-5.6-luna` through a local `codex2api`, low thinking, the same files and initial prompt, and independent stochastic sessions. Per-agent wall limit: 150 seconds for R534, 180 seconds for DABStep. Native scores the saved file; extension scores only the receiver's released, hash-checked file. Timeout means no delivery.
 - R534 plugin arm: receiver `prepare` pins the visible suite before Pi runs; `agent_before_settle` invokes Vacant `flow.check`, which may continue Pi with feedback. Receiver `judge` and `release` independently check and publish the artifact. The hidden `check_*` tests score a copy of the actual handed-off file in a separate directory and never enter the agent workspace.
 - DABStep plugin arm: answer in `answer.txt`; a pinned visible checker calls a local reference service returning only a boolean. It is an **oracle accessible to the agent**, not a sealed hidden grader, and the public dev answers may be known to the model. Score uses the public reference answer. It measures this configured acceptance mechanism, not zero-configuration Vacant.
+- DABStep source for the saved repeat: official `data/tasks/dev.jsonl`, SHA-256 `c1da755a6fe9cb538fc84719f51e1db0bff0190a1d6905767ac18c755e66a07b`, and official `data/context/payments.csv`, SHA-256 `5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25`, plus the six accompanying context files. Only the seven `hard` dev IDs have gold in this tiny public dev subset; this is not the hidden leaderboard.
 - One OS account and `sandbox=none` were used with the bridge's explicit `insecure_same_account=True` test option. Results cannot assert adversarial isolation. Receiver tests supplied by an evaluator are also not the product's zero-configuration setting.
 
 ## Observed results before scratch rollback
@@ -49,6 +50,17 @@ Pi 0.87.1, the same R534 fixture and extension, fresh independent sessions, 150-
 | lcb_3700 | FAIL | accept / accept / yes | PASS | 120.54 / 93.54 |
 
 Both arms saw the same visible suite. In this repeat, the extension's `agent_before_settle` decision was logged and the receiver accepted and released the exact file. The reversal of the first run's discordant cases shows why one stochastic generation per arm cannot establish causal correctness gains. Machine-readable, secret-free records are in `PI_PLUGIN_REPEAT_20260928.json`.
+
+The saved DABStep numeric repeat, with the same 180-second wall limit and Pi 0.87.1, yielded:
+
+| Dev-hard ID | Native | Extension | Extension stop/receiver |
+| --- | --- | --- | --- |
+| 1273 | wrong | wrong/no release | reject → continue; timeout/reject |
+| 1305 | timeout | right/released | accept/accept |
+| 1871 | wrong | wrong/no release | reject → continue; timeout/reject |
+| **Total** | **0/3** | **1/3** | One correct answer came at first acceptance, not after a successful repair. |
+
+The full new record is `DABSTEP_NUMERIC_REPEAT_20260928.json`; the old 1/3 versus 2/3 was a *different* set of stochastic generations and lacks recoverable raw logs. Neither tiny result isolates Vacant's effect from model variability and timeout noise.
 
 ## Bypass and trust boundary
 

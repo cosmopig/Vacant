@@ -24,6 +24,15 @@ with tempfile.TemporaryDirectory(prefix='vacant-shared-uid-') as d:
     (suite/'test_visible.py').write_text('from solution import add\ndef check_add():\n assert add(2, 3) == 5\n')
     (app/'solution.py').write_text('def add(a,b): return 0\n')
     receiver = tmp/'receiver'
+    try:
+        bridge.prepare(workspace=app, task_id='script-bypass', suite=suite,
+                       deliverable='solution.py', mode='repair', attempts=1,
+                       feedback_rounds=1, suite_timeout_s=10, destination=None,
+                       receiver_home=receiver)
+    except ValueError:
+        pass  # Secure default refuses a receiver controlled by the agent UID.
+    else:
+        raise AssertionError('same-account receiver unexpectedly allowed by default')
     bridge.prepare(workspace=app, task_id='script-bypass', suite=suite,
                    deliverable='solution.py', mode='repair', attempts=1,
                    feedback_rounds=1, suite_timeout_s=10, destination=None,
