@@ -115,6 +115,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
 
+      # C5 審查：局部 E2E 先於歷史 runs/INDEX，避免既有索引漂移遮住本次結果。
+      - name: C5 native acceptance focused regression
+        run: |
+          python -m pytest -q tests/test_native_acceptance_bridge.py
+          python -m pytest -q tests/test_zero_evidence.py -k 'test_test_claim'
+
       # 索引的產生器與 `--check` 是 CLAUDE.md 明文要求「引用任何 run／題庫／log
       # 之前先讀」那份東西的執行力所在：產生器壞了、索引漂了，都要在這裡看得見。
       # （2026-09-19 之前這裡還要求「放在 pytest 之前」，因為測試會把
