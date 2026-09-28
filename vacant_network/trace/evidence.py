@@ -154,8 +154,7 @@ def _direct_test_wrapper_outcome(cmd: str, output: str, error: object = None) ->
     lines = [line.strip() for line in (output or "").splitlines() if line.strip()]
     if not lines:
         return "unreadable"
-    summaries = [CHECK_SUMMARY.fullmatch(line) for line in lines]
-    summaries = [m for m in summaries if m is not None]
+    summaries = [m for line in lines if (m := CHECK_SUMMARY.fullmatch(line)) is not None]
     if any(int(m.group(1)) > 0 for m in summaries) or FAIL_OUT.search(output or ""):
         return "failed"
     # A successful C5 wrapper has named checks followed by one zero-failure
