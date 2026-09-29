@@ -1168,6 +1168,10 @@ _TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "actors")
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
+    if raw[:1] == ["loop"]:
+        # 父行程迴圈（2026-09-29）：不碰 wire、不掛鉤，任何可 spawn 的 CLI 都適用。
+        from .loop_cli import main as loop_main
+        return loop_main(raw[1:])
     if raw[:1] and raw[0] in _INTAKE_TOP:
         from .intake.cli import main as intake_main
         return intake_main(raw)

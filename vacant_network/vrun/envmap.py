@@ -185,11 +185,51 @@ REDIRECT_VARS: tuple[tuple[str, str], ...] = (
     ("VACANT_ENDPOINT", ""),
 )
 
+#: **OpenAI 相容的供應商**。每一列是 `(base-url 變數, 金鑰變數)`。
+#:
+#: 為什麼要有這張表：`wireproxy.route()`（`wireproxy.py:120-125`）把**每一條**
+#: 非 Anthropic 的路徑都判給 `openai` 那一條 wire，所以 proxy 手上只有**一把**
+#: openai 的金鑰。可是 `REDIRECT_VARS` 早就把九個供應商的 base-url 變數指向 proxy，
+#: `UPSTREAM_VARS`／`KEY_VARS` 卻只列了 `OPENAI_*`。**兩張表不一致的那一格，就是
+#: 走不到中介、而且沒有任何錯誤訊息的那一格。**
+#:
+#: ⚠ **量到的後果**（2026-09-28，opencode 1.18.33 ＋ `OPENROUTER_API_KEY`）：
+#: `build_child_env` 把 `OPENROUTER_API_KEY` 刪掉之後**沒有給 sentinel**
+#: （只給 `OPENAI_API_KEY`／`ANTHROPIC_API_KEY`），而 `discover_keys()` 的 openai
+#: 那一列也沒有 `OPENROUTER_API_KEY` ⇒ SDK 在**本機**就拒絕送出請求：
+#: `agent_rc=1`、`agent_wall_s=1.196`、`requests_seen=0`。修好之後 `requests_seen`
+#: 會變成非 0。
+#:
+#: ⚠ **這兩列不是同義的**（`envmap.py:485-489` 的原註解逐字）：一個是"從父行程讀真
+#: 上游"、一個是"真鑰在哪"。它們必須**成對**出現在 `OPENAI_COMPATIBLE` 裡，這樣
+#: 一張表漏一格就不會再發生。
+OPENAI_COMPATIBLE: tuple[tuple[str, str], ...] = (
+    ("OPENAI_BASE_URL", "OPENAI_API_KEY"),
+    ("DEEPSEEK_BASE_URL", "DEEPSEEK_API_KEY"),
+    ("GROQ_BASE_URL", "GROQ_API_KEY"),
+    ("MISTRAL_BASE_URL", "MISTRAL_API_KEY"),
+    ("TOGETHER_BASE_URL", "TOGETHER_API_KEY"),
+    ("XAI_BASE_URL", "XAI_API_KEY"),
+    ("FIREWORKS_BASE_URL", "FIREWORKS_API_KEY"),
+    ("CEREBRAS_BASE_URL", "CEREBRAS_API_KEY"),
+    ("OPENROUTER_BASE_URL", "OPENROUTER_API_KEY"),
+)
+
+#: `OPENAI_COMPATIBLE` 裡**沒有**被 `REDIRECT_VARS` 指向 proxy 的 base-url 變數。
+#: 空的才是對的。非空 ⇒ 那一列的 base url 沒被中介，代理會打到**本地**而那個
+#: 供應商根本不在本機——`tests/test_vrun_openai_compatible_wiring.py` 會紅。
+UNREDIRECTED_PROVIDERS: tuple[str, ...] = tuple(
+    url_var for url_var, _ in OPENAI_COMPATIBLE
+    if url_var not in {n for n, _ in REDIRECT_VARS}
+    and url_var not in {"OPENAI_API_BASE", "OPENAI_BASE"}
+)
+
 #: 從父行程讀真上游用的變數，依**偏好順序**。`(wire, names)`。
 #: wire ∈ {"openai", "anthropic"} ＝ `wireproxy.route()` 的兩條路由。
 UPSTREAM_VARS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("openai", ("VACANT_RUN_UPSTREAM_OPENAI", "OPENAI_BASE_URL",
-                "OPENAI_API_BASE", "OPENAI_BASE")),
+                "OPENAI_API_BASE", "OPENAI_BASE")
+     + tuple(u for u, _ in OPENAI_COMPATIBLE if u != "OPENAI_BASE_URL")),
     ("anthropic", ("VACANT_RUN_UPSTREAM_ANTHROPIC", "ANTHROPIC_BASE_URL",
                    "ANTHROPIC_API_URL")),
 )
@@ -289,9 +329,15 @@ AUTH_HEADERS: dict[str, tuple[str, str]] = {
     "anthropic": ("x-api-key", "{key}"),
 }
 
-#: 真鑰所在的環境變數，依路由。
+#: 真鑰所在的環境變數，依路由。`route()` 只有兩條 wire，所以這裡也只有兩列。
+#:
+#: ⚠ **openai 那一列是九個供應商共用一把鑰。** `discover_keys()` 依「使用者實際
+#: 指定了哪一個 base url」排序（見該函式），所以同時設了多個也不會挑錯；但只設了
+#: 一個時，那一把就是全部 OpenAI 相容請求用的鑰。**這是 proxy 只有兩條 wire 的結構
+#: 結果，不是可以修的 bug** —— 要真的分開，`route()` 得先把供應商認出來。
 KEY_VARS: dict[str, tuple[str, ...]] = {
-    "openai": ("OPENAI_API_KEY", "VACANT_MCP_API_KEY", "VACANT_API_KEY"),
+    "openai": tuple(k for _, k in OPENAI_COMPATIBLE)
+              + ("VACANT_MCP_API_KEY", "VACANT_API_KEY"),
     "anthropic": ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"),
 }
 
@@ -483,10 +529,46 @@ def describe_upstreams(env: dict[str, str] | None = None, *,
 
 
 def discover_keys(env: dict[str, str] | None = None) -> dict[str, str]:
-    """兩條路由各自的真鑰（拿不到就空字串——proxy 照樣轉送，由上游拒絕）。"""
+    """兩條路由各自的真鑰（拿不到就空字串——proxy 照樣轉送，由上游拒絕）。
+
+    ⚠ **順序有意義**（2026-09-28 修）。`route()` 把九個 OpenAI 相容供應商判給同一條
+    wire，所以這裡只能回一把鑰。**先回「使用者實際指定了 base url 的那一把」**：
+    同時設了 `OPENAI_API_KEY` 與 `OPENROUTER_API_KEY` 而 agent 走 OpenRouter 時，
+    舊的固定順序會注入 OpenAI 的鑰 ⇒ 401，而且沒有任何訊息說是選錯了鑰。
+    使用者明講了目的地，就用目的地那把。
+    """
     e = dict(os.environ if env is None else env)
-    return {wire: next((e[n] for n in names if e.get(n)), "")
-            for wire, names in KEY_VARS.items()}
+    out: dict[str, str] = {}
+    for wire, names in KEY_VARS.items():
+        if wire != "openai":
+            out[wire] = next((e[n] for n in names if e.get(n)), "")
+            continue
+        specified = {u for u, k in OPENAI_COMPATIBLE if e.get(u, "").strip()}
+        # 指定了哪個 base url，那個供應商的金鑰就排最前；其餘保持原順序在後面。
+        ordered = tuple(k for u, k in OPENAI_COMPATIBLE if u in specified) + names
+        out[wire] = next((e[n] for n in ordered if e.get(n)), "")
+    return out
+
+
+def _sentinel_vars() -> tuple[str, ...]:
+    """agent 拿到 sentinel（不是真鑰）的變數名單。
+
+    為什麼是「算出來」而不是手寫兩個名字：手寫的那兩個（`OPENAI_API_KEY`／
+    `ANTHROPIC_API_KEY`）是 2026-09-28 之前全部的內容，於是**任何**讀別的金鑰變數
+    的 SDK 都在本機失敗——量到的是 opencode ＋ `OPENROUTER_API_KEY`：
+    `agent_rc=1`、`requests_seen=0`。規則改成「凡是被剝掉的金鑰形狀變數都給
+    sentinel」之後，新增一個供應商不需要再記得改這裡。
+
+    這不放寬任何東西：agent 拿到的仍然是 sentinel，真鑰仍在 proxy 手上
+    （`SECRET_VARS` 的整條意圖不變）。
+    """
+    names: set[str] = set()
+    for vs in KEY_VARS.values():
+        names.update(vs)
+    names.update(n for n in SECRET_VARS
+                 if n.endswith("_API_KEY") or n.endswith("_AUTH_TOKEN")
+                 or n in ("HF_TOKEN",))
+    return tuple(sorted(names))
 
 
 def build_child_env(proxy_url: str, sentinel: str, *,
@@ -516,7 +598,9 @@ def build_child_env(proxy_url: str, sentinel: str, *,
             stripped_upstream.append(name)
     # 每條路由給一個 sentinel 金鑰：agent 手上沒有真鑰，但 SDK 仍然願意送出請求
     # （多數 SDK 缺 key 會在本機就 raise，那樣連 wire 都到不了）。
-    for name in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY"):
+    # ⚠ 這一列的名字必須涵蓋**所有**被剝掉的金鑰，否則讀別的變數的 SDK 連 wire 都
+    # 到不了（`_sentinel_vars` 的註解寫了那次量測）。
+    for name in _sentinel_vars():
         child[name] = sentinel
     child["VACANT_RUN_PROXY"] = proxy_url
     child["VACANT_RUN_SENTINEL"] = sentinel
@@ -529,7 +613,7 @@ def build_child_env(proxy_url: str, sentinel: str, *,
         # **分開記**：金鑰與上游位址是兩種不同的洩漏，混成一欄事後查不出
         # 「那一跑到底有沒有把真後端交給 agent」。
         "stripped_upstream": sorted(stripped_upstream),
-        "sentinel_vars": ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"],
+        "sentinel_vars": list(_sentinel_vars()),
         "note": ("環境變數名單擋不到用設定檔的框架（pi 的 models.json、"
                  "內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"),
     }

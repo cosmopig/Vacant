@@ -526,9 +526,30 @@ function ask(event, payload, ms) {
   });
 }
 
-// `opencode run` ends at the first idle: feedback could never be delivered there, so the
-// stop check would only add latency. The session-end submission (dispose) still runs.
-const NONINTERACTIVE = process.argv.includes("run");
+// ⚠ 2026-09-29 移除：`opencode run` 裡**不再跳過**回合結束檢查。
+//
+// 原本這裡是 `const NONINTERACTIVE = process.argv.includes("run")`，註解宣稱
+// 「`opencode run` 在第一個 idle 就結束，回饋送不進去，所以只會多加延遲」。
+// **A/B 量到的後果**（opencode 1.18.33，stub 模型，其餘逐項相同，只差這一行）：
+//
+//   出貨狀態（gate on） : perf {prompt:2, session_end:1}
+//                        chain {trace_genesis, prompt, session_closed}
+//                        delivery.md / delivery.json：無
+//   移除閘門（gate off）: perf {prompt:2, **stop:1**, session_end:1}
+//                        chain {…, **review:1**}
+//                        **delivery.md / delivery.json：有**
+//
+// 所以那個註解講錯了一件事：`opencode run` 裡檢查**根本不會跑**。而
+// `opencode run` 正是 `vacant do`、每一個 headless harness、還有我自己的三臂批次
+// 驅動 agent 的方式——等於「零設定」在使用者最常見的驅動方式上是關的。
+//
+// ⚠ **誠實邊界：回饋送不送得到，仍未驗證。** 上���那一對 run 的 stub 被打到 429
+// 上限、agent 沒說完話（delivery note 寫「Final message: not available」、
+// 「Files written in this turn: none」），所以沒有東西可以退回；兩邊 prompt 數
+// 相同、stub 收到的是同一批請求。**量到的是「檢查會跑」，不是「回饋送得到」。**
+// 所以這一條改成「寧可多產出一份交件說明，也不要什麼都沒有」：即使退回送不到，
+// 人拿到的資訊比從前多，而 `dispose` 的 session_end 提交本來就沒受影響。
+const IS_RUN_MODE = process.argv.includes("run");
 
 const g = globalThis;
 g.__vacantChildSessions = g.__vacantChildSessions || new Map();   // child session id -> parent id
@@ -587,12 +608,15 @@ export const VacantPlugin = async ({ client, directory }) => {
       } else if (event.type === "session.created" && props.info && !g.__vacantMainSession) {
         g.__vacantMainSession = props.info.id;
       }
-      if (event.type === "session.idle" && !NONINTERACTIVE) {
+      if (event.type === "session.idle") {
         const id = props.sessionID;
         if (g.__vacantChildSessions.has(id) || g.__vacantStopBusy.has(id)) return;
         g.__vacantStopBusy.add(id);
         try {
-          const d = await ask("stop", { cwd: directory, session_id: id });
+          // `run` 模式一併標上，讓 Python 端把「這次的退回通道是非互動的」寫進
+          // 交件說明，而不是讓人從缺��的項目裡自己猜。
+          const d = await ask("stop", { cwd: directory, session_id: id,
+                                        noninteractive: IS_RUN_MODE || undefined });
           if (d.action === "continue" && d.reason && id && client && client.session) {
             try {
               await client.session.prompt({ path: { id }, body: { parts: [{ type: "text", text: d.reason }] } });

@@ -316,6 +316,12 @@ def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) ->
     if z.get("error"):
         _log("errors.jsonl", {"agent": agent, "event": "stop",
                               "error": f"zero-config check: {z['error']}"[:500]})
+    # 這次的回合結束通知來自非互動的驅動（`opencode run`，也就是 `vacant do` 與每一個
+    # headless harness）。plugin 在 payload 裡標上來的，記進病歷，讓人讀交件說明時
+    # 知道「這一格的退回通道不是互動式的」——⚠ 而回饋送不送得到**仍未驗證**
+    # （DECISION_20260929 的 §一）。不寫進去就會從缺漏的項目裡自己猜。
+    if payload.get("noninteractive"):
+        z["noninteractive_run"] = True
     return HookDecision(action if action in ("allow", "continue") else "allow", reason, record)
 
 
