@@ -16,7 +16,7 @@
 
 | 層 | 機制 | 能說的話 |
 |---|---|---|
-| **通道** | 寫進 agent **自己的常駐設定檔**（`~/.claude/settings.json` 的 `env`、`~/.codex/config.toml`、`~/.config/opencode/opencode.json`、`~/.pi/agent/models.json`、`~/.hermes/config.yaml`） | 關終端機、重開機、開新視窗、**打完整路徑**都照樣指向 proxy。**只有把那幾行刪掉才會失效。** |
+| **通道** | 寫進 agent **自己的常駐設定檔**（`~/.claude/settings.json` 的 `env`、`~/.codex/config.toml`、`~/.config/opencode/opencode.json`、`~/.pi/agent/extensions/vacant.ts`、`~/.hermes/config.yaml`） | 關終端機、重開機、開新視窗、**打完整路徑**都照樣指向 proxy。**只有把那幾行刪掉才會失效。** |
 | **閘門** | `PATH` shim（`~/.vacant/possess/bin/` 排在 `PATH` 前面） | **預設會跑，但打完整路徑就跳過了。** |
 
 ⚠ **本檔任何一處都不准寫「不會被繞過」。** 閘門層做不到；通道層做得到的是
@@ -113,6 +113,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import ipaddress
 import json
 import os
 import pathlib
@@ -121,11 +122,28 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.parse
 import tempfile
 import time
 from typing import Any, Callable, Iterable
 
 from . import envmap
+
+def _is_loopback_host(host: str | None) -> bool:
+    """`localhost`（含 `*.localhost`）、127.0.0.0/8、`::1`、`0.0.0.0`／`::`、IPv4-mapped 的迴路。"""
+    if not host:
+        return False
+    h = host.strip().lower().rstrip(".")
+    if h == "localhost" or h.endswith(".localhost"):
+        return True
+    try:
+        ip = ipaddress.ip_address(h.split("%", 1)[0])       # 去掉 IPv6 zone id
+    except ValueError:
+        return False
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    return ip.is_loopback or ip.is_unspecified
+
 
 # ── 常數 ────────────────────────────────────────────────────────────────
 
@@ -273,7 +291,7 @@ AGENTS: dict[str, AgentSpec] = {
     "pi": AgentSpec(
         name="pi",
         config_dirs=(".pi/agent", ".pi"),
-        config_file=".pi/agent/models.json",
+        config_file=".pi/agent/extensions/vacant.ts",
         binaries=("pi",),
         bin_hints=(".local/bin/pi", ".bun/bin/pi", ".npm-global/bin/pi",
                    "/opt/homebrew/bin/pi", "/usr/local/bin/pi"),
@@ -731,42 +749,192 @@ def wire_codex(home: pathlib.Path, port: int, backups: pathlib.Path,
     return [write_tracked(home, p, data, backups, note=note)]
 
 
-def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
-            **_: Any) -> list[FileChange]:
-    """`~/.pi/agent/models.json`。
+_PI_OWN_PROVIDERS: frozenset[str] = frozenset({"vacant", "vacantproxy"})
 
-    ⚠ **這一格沒有在任何機器上被 `requests_seen` 證實過**（`CHANNEL_MEASURED`
-      是空字串）。而且 `~/.pi/agent/` 底下同時有 `models-store.json`，
-      **哪一份才是 pi 0.85.1 真正讀的那一份，本模組沒有量過**——
-      `ops/vacantrun/wrap_agent.sh` 量到的是 `PI_CODING_AGENT_DIR/models.json`，
-      那是 relocate 那條路，不保證常駐那條路同名。
-      `install-status` 會把這一格標成 `unverified`。
+_PORT_SCAN_SPAN = 40
+
+
+def _is_own_proxy_url(url: str, proxy_port: int | None = None) -> bool:
+    """這個 url 是不是**我們自己的常駐 proxy**——是的話不可以拿來當上游（proxyd 會轉回自己）。
+
+    判準＝**迴路主機** 且 **埠落在我們會用的範圍**：
+    `range(DEFAULT_PORT, DEFAULT_PORT + _PORT_SCAN_SPAN)`，以及（有給的話）
+    `range(proxy_port, proxy_port + _PORT_SCAN_SPAN)`——後者是這一次要裝的埠
+    （`pick_port` 從它往上掃，所以實際用的埠一定在裡面）。
+
+    ## 為什麼不是舊的「只要是本機位址就跳過」（2026-09-24 vacant-dev 實測）
+
+    舊判準是字串 `"127.0.0.1" in url or "localhost" in url`。它擋得住「舊版 install 把 agent
+    設定改寫成 `http://127.0.0.1:<port>/v1`，重裝時把自己當上游」，但也把**使用者真的在用的
+    本機模型服務**整個丟掉：pi provider `http://127.0.0.1:1234/v1`（LM Studio）或
+    `http://localhost:11434/v1`（Ollama）⇒ `discover_install_upstreams` 落到 sink、
+    `pi_key_carrier` 回 None。**展場機器（1003，離線）跑的正是 127.0.0.1:1234 的 LM Studio**，
+    那等於展場上 Vacant 一裝就叫不到模型。
+
+    ⚠ **解析，不比對子字串**：`http://127.0.0.1:12345` 的埠是 12345，不是 1234 也不是 8787。
+      沒有 scheme 的寫法（`localhost:8787/v1`）補 `http://` 再解析一次。
+    ⚠ 誠實邊界（改碼請保留）：
+      1. 使用者自己的服務**剛好**開在 `8787..8826`（或這次要裝的埠往上 40 個）的迴路位址上
+         ⇒ 會被當成我們自己而跳過 ⇒ 多半落到 sink，`_install_warnings` 會大聲講
+         （fail-closed 的方向，不是安靜直連）。
+      2. 舊版用**別的** `--port` 裝過、又沒 `vacant uninstall` 乾淨的殘留設定（例如
+         `http://127.0.0.1:9000/v1`）**認不出來**，會被當成使用者的本機上游。正常路徑下不會
+         發生：`install` 在 state 還在時拒絕重裝，`uninstall` 逐位元還原設定檔。
+      3. 迴路主機而埠寫壞（解析不出埠）⇒ 當成我們的（跳過）：那不可能是一個能用的上游，
+         而且舊判準對它也是跳過。非迴路主機一律不是我們的，照舊交給上游判斷。
     """
-    p = home / AGENTS["pi"].config_file
-    doc = json.loads(p.read_text("utf-8")) if p.is_file() else {}
-    if not isinstance(doc, dict):
-        doc = {}
-    model = os.environ.get("VACANT_AGENT_MODEL", "gemma-4-12b-it-qat")
-    providers = dict(doc.get("providers") or {})
-    for pid, pv in list(providers.items()):
-        if isinstance(pv, dict) and "baseUrl" in pv:
-            pv = dict(pv)
-            pv["baseUrl"] = _base_for("openai", port)
-            providers[pid] = pv
-    providers[PROVIDER_ID] = {
-        "baseUrl": _base_for("openai", port),
-        "api": "openai-completions",
-        "apiKey": "sk-vacant-possess",
-        "compat": {"supportsDeveloperRole": False,
-                   "supportsReasoningEffort": False},
-        "models": [{"id": model, "name": model,
-                    "contextWindow": 262144, "maxTokens": 16384}],
-    }
-    doc["providers"] = providers
-    data = (json.dumps(doc, ensure_ascii=False, indent=2) + "\n").encode()
-    return [write_tracked(home, p, data, backups,
-                          note=f"providers.*.baseUrl + providers.{PROVIDER_ID}")]
+    s = str(url or "").strip()
+    try:
+        u = urllib.parse.urlsplit(s)
+        if not u.netloc and s:
+            u = urllib.parse.urlsplit("http://" + s)
+        host = u.hostname
+    except ValueError:
+        return False
+    if not _is_loopback_host(host):
+        return False
+    try:
+        port = u.port
+    except ValueError:
+        return True
+    if port is None:
+        port = 443 if u.scheme == "https" else 80
+    spans = [range(DEFAULT_PORT, DEFAULT_PORT + _PORT_SCAN_SPAN)]
+    if proxy_port:
+        spans.append(range(int(proxy_port), int(proxy_port) + _PORT_SCAN_SPAN))
+    return any(port in r for r in spans)
 
+
+#: pi `models.json` 的 `api` 欄 → 我們的 wire。**認不得的就跳過，不猜**
+#: （`google-generative-ai` 之類 proxyd 沒有對應 wire 的，轉過去只會壞）。
+_PI_API_WIRE: dict[str, str] = {
+    "openai-completions": "openai",
+    "openai-responses": "openai",
+    "anthropic-messages": "anthropic",
+}
+
+#: 我們自己（或舊版 `vacant run`）註冊的 provider id——**永遠不能拿來當上游**，
+#: 否則 proxyd 會轉回自己。
+_PI_OWN_PROVIDERS: frozenset[str] = frozenset({"vacant", "vacantproxy"})
+
+
+def _norm_url(u: str) -> str:
+    return (u or "").strip().rstrip("/")
+
+
+
+def _pi_agent_dir(home: pathlib.Path) -> pathlib.Path:
+    return home / ".pi" / "agent"
+
+def pi_upstream_providers(home: pathlib.Path, wire: str,
+                          proxy_port: int | None = None) -> list[tuple[str, str]]:
+    """pi `~/.pi/agent/extensions/vacant.ts` 裡可以當上游的 provider：`[(pid, baseUrl), …]`。
+
+    排序：`settings.json` 的 `defaultProvider` 排第一（那是使用者平常真的在用的），
+    其餘照檔內順序。跳過我們自己的 provider（`_PI_OWN_PROVIDERS`）、**我們自己的 proxy
+    位址**（`_is_own_proxy_url`；2026-09-24 之前是「所有本機位址」，把 LM Studio／Ollama
+    也丟掉了）、`api` 認不得或跟 `wire` 不合的。
+
+    ⚠ **只讀 `models.json` 與 `settings.json`，不讀 `auth.json`**（`NEVER_TOUCH`）。
+      回傳值**只有 id 與 url，不含 `apiKey`**——金鑰由 extension 在 pi 行程裡借
+      （`piext` 誠實邊界 7），Python 這一側與 proxyd 永遠不經手。
+    ⚠ 金鑰放在 `auth.json` 的內建 provider（`/login`、`pi auth`）**不會出現在這裡**：
+      它們通常不在 `models.json`，就算在也沒有 `apiKey`。那種使用者會落到 sink
+      ——這是刻意的，讀 `auth.json` 的代價比 fail-closed 高。
+    """
+    d = _pi_agent_dir(home)
+    try:
+        doc = json.loads((d / "models.json").read_text("utf-8"))
+    except (OSError, ValueError):
+        return []
+    provs = doc.get("providers") if isinstance(doc, dict) else None
+    if not isinstance(provs, dict):
+        return []
+    default = None
+    try:
+        sd = json.loads((d / "settings.json").read_text("utf-8"))
+        if isinstance(sd, dict) and isinstance(sd.get("defaultProvider"), str):
+            default = sd["defaultProvider"]
+    except (OSError, ValueError):
+        pass
+    out: list[tuple[str, str]] = []
+    for pid, pv in provs.items():
+        if pid in _PI_OWN_PROVIDERS or not isinstance(pv, dict):
+            continue
+        url = pv.get("baseUrl")
+        if not isinstance(url, str) or not url or _is_own_proxy_url(url, proxy_port):
+            continue
+        api = pv.get("api")
+        if not isinstance(api, str):
+            # provider 層沒寫 ⇒ 看模型層；各模型不一致就不猜
+            apis = {m.get("api") for m in (pv.get("models") or [])
+                    if isinstance(m, dict)}
+            api = apis.pop() if len(apis) == 1 else None
+        if _PI_API_WIRE.get(api or "") != wire:
+            continue
+        out.append((str(pid), url))
+    out.sort(key=lambda t: t[0] != default)          # 穩定排序：default 浮到最前
+    return out
+
+def pi_key_carrier(home: pathlib.Path, upstream_url: str,
+                   proxy_port: int | None = None) -> str | None:
+    """pi `models.json` 裡 **baseUrl 等於 proxyd 上游**的那個 provider id（沒有 ⇒ `None`）。
+
+    extension 會借這個 provider 的 `apiKey` 設定字串當 `vacant` provider 的 apiKey，
+    讓 Authorization 帶的是**使用者自己的金鑰**、proxyd 原樣穿透（`sentinel=""`）。
+    ⚠ **比對條件是 baseUrl 相等，不是「隨便一個 provider」**：金鑰只能送回它本來
+      就要去的那個主機。借錯 ＝ 把 A 家的金鑰送去 B 家，比 401 糟得多。
+    ⚠ 只回 id，**不回金鑰**；本函式也不看 `apiKey` 欄位的內容。
+    ⚠ `proxy_port` 跟 `discover_install_upstreams` 傳同一個，兩邊對「哪個是我們自己」
+      的判斷才一致（本機上游 `127.0.0.1:1234` 的 provider 要找得到）。
+    """
+    if not upstream_url or envmap.is_sink(upstream_url):
+        return None
+    want = _norm_url(upstream_url)
+    for wire in ("openai", "anthropic"):
+        for pid, url in pi_upstream_providers(home, wire, proxy_port):
+            if _norm_url(url) == want:
+                return pid
+    return None
+
+INSTALL_GUIDED_AGENTS: tuple[str, ...] = ("pi",)
+
+def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
+            python: str | None = None, models: list[str] | None = None,
+            upstreams: dict[str, dict] | None = None,
+            **_: Any) -> list[FileChange]:
+    """`~/.pi/agent/extensions/vacant.ts`——**一支 extension，不碰 `models.json`**。
+
+    2026-09-22 之前這裡改寫 `models.json`（每個 provider 的 `baseUrl` 全部改道＋加一個
+    `vacant` provider）。那一格從來沒有被 `requests_seen` 證實過，而且從 pi 0.87.0 原始碼
+    讀到 `models-store.json` 只是目錄快取、`models.json` 才是設定之後，發現根本不必寫它：
+    extension 在 runtime `pi.registerProvider()`、`pi.setModel()`、`pi.registerCommand("vacant")`
+    就把通道、預設開、`/vacant on|off|status`、掛鉤七事件全部做完（`piext.py` 的 docstring）。
+
+    ⚠ 使用者自己的 provider **一個都不改道**：`/vacant off` 或 `/model` 切走就是不經過
+      Vacant，extension 會留一筆 `vacant_off`，收據不替它說謊（`piext` 誠實邊界 3）。
+    ⚠ **這支檔的真模型證據是 `ops/vacantrun/possess_pi_ext_real_20260924/`**（`CHANNEL_MEASURED["pi"]`）：
+      pi 完整路徑、命令列零個 vacant、載入的是**這支**、76 通全在常駐 journal。
+      2026-09-22 的真模型那批（`possess_pi_real_20260922/`）五格全走 PATH shim——shim 把
+      `PI_CODING_AGENT_DIR` 搬到這一跑自己的暫存目錄，**本函式寫的這支檔在那裡不會被載入**——
+      所以那批只記進 `SHIM_MEASURED["pi"]`，兩條路的證據不可互相背書。
+    ⚠ 這條路**只有通道，沒有閘門**：互動或直叫 pi 時沒有驗收、沒有收據（`piext` 誠實邊界 5）。
+    ⚠ agent 刪得掉這支檔（實測）。刪掉 ⇒ 下一跑 canary 不燒 ⇒ 收據降級，不是保證。
+    """
+    from . import piext
+    p = home / AGENTS["pi"].config_file
+    # 上游與「金鑰向誰借」：只烤 url 與 provider id，**金鑰本身永遠不進這支檔**
+    #（`piext` 誠實邊界 7）。`upstreams` 沒給（舊呼叫者）＝不知道 ⇒ 空字串，
+    # extension 在 runtime 也只會用 baseUrl 比對，不會亂借。
+    up = ((upstreams or {}).get(AGENTS["pi"].wire) or {}).get("url") or ""
+    body = piext.render(port=port, state_dir=str(state_home(home)),
+                        python=python or sys.executable,
+                        package_path=package_path(), models=models or [],
+                        upstream=up, upstream_is_sink=bool(up) and envmap.is_sink(up),
+                        key_from=pi_key_carrier(home, up, proxy_port=port) or "",
+                        pi_agent_dir=str(_pi_agent_dir(home)))
+    return [write_tracked(home, p, body.encode("utf-8"), backups,
+                          note="pi extension：registerProvider(vacant) + /vacant + 掛鉤")]
 
 def wire_hermes(home: pathlib.Path, port: int, backups: pathlib.Path,
                 **_: Any) -> list[FileChange]:
@@ -2257,7 +2425,7 @@ def _fmt_status(s: dict) -> str:
     L = [f"端點      {s['endpoint']}   在聽：{'是' if s['proxy_listening'] else '**否**'}",
          f"監督      {s['service'].get('backend')}   "
          f"開機自起：{s['service'].get('boot_persistent')}",
-         f"上游      " + "  ".join(f"{w}={v['url']}（{v['source']}）"
+         "上游      " + "  ".join(f"{w}={v['url']}（{v['source']}）"
                                    for w, v in (s.get("upstreams") or {}).items()),
          f"shim 目錄 {s['shim_dir']}",
          "",

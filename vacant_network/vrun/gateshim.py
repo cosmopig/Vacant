@@ -575,6 +575,15 @@ def exec_inner(agent: str, argv: list[str]) -> int:
             "models": [{"id": model or "gemma-4-12b-it-qat", "name": "m",
                         "contextWindow": 262144, "maxTokens": 16384}]}}},
             ensure_ascii=False), "utf-8")
+        # ⚠ 2026-09-22 自裝驗證抓到的洞：只寫 `models.json` 不會讓 pi **選**那個
+        #   provider——沒帶 `--provider` 時它用自己的預設（實測落到別家 provider，
+        #   那一通根本沒經過這一跑的 proxy，收據誠實地判 B'）。`settings.json` 的
+        #   `defaultProvider`／`defaultModel` 是 pi 文件寫明的啟動預設（settings.md）。
+        #   使用者明打 `--provider x` 仍然蓋得過——那是他的選擇，收據會照實記。
+        (cfg / "settings.json").write_text(json.dumps({
+            "defaultProvider": "vacant",
+            "defaultModel": model or "gemma-4-12b-it-qat"}, ensure_ascii=False),
+            "utf-8")
     elif agent == "opencode":
         env["OPENCODE_CONFIG_DIR"] = str(cfg)
         env["OPENCODE_DISABLE_PROJECT_CONFIG"] = "1"
