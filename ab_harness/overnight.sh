@@ -3,9 +3,15 @@
 #
 # Design decisions that matter for the numbers, not just for scheduling:
 #
-# * TRIAD ORDER. One task's three arms run back to back before moving on. If the
-#   daily free quota runs out mid-batch, what exists is complete triads rather
+# * QUAD ORDER. One task's four arms run back to back before moving on. If the
+#   daily free quota runs out mid-batch, what exists is complete quads rather
 #   than a lopsided pile of one arm -- which is what a paired test needs.
+#
+# * FOUR arms, not three. RPN (RETRY-NOSUITE) is the budget-matched control the
+#   C5 review demanded: same attempt ceiling, same fresh-session shape, same
+#   timeout, and NO acceptance signal at all. Without it, RPL - RP0 confounds
+#   "the feedback helped" with "it simply got 1.79 tries instead of 1" -- the
+#   RPL/RP0 design is nested, so the first attempt IS the RP0 run.
 # * RESUMABLE. A cell with rec.json is skipped, so the runner can be killed and
 #   restarted without losing or double-counting anything.
 # * QUOTA-AWARE. On a 429 it sleeps and retries the SAME task later. It never
@@ -60,7 +66,7 @@ for d in sorted(bank.iterdir()):
     if stratum and not d.name.startswith(stratum.lower() + "_"):
         continue
     if not all((out / f"{d.name}__{a}" / "rec.json").exists()
-               for a in ("PC", "RP0", "RPL")):
+               for a in ("PC", "RP0", "RPL", "RPN")):
         left.append(d.name)
 print(len(left))
 print("\n".join(left))
@@ -81,7 +87,7 @@ PY
   fi
 
   task=$(echo "$todo" | sed -n '2p')
-  for ARM in PC RP0 RPL; do
+  for ARM in PC RP0 RPL RPN; do
     if [ -f "$ROOT/runs2/${task}__${ARM}/rec.json" ]; then
       log "  $task $ARM already done, skip"
       continue

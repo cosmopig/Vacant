@@ -218,6 +218,53 @@ def arm_rp0(tid, timeout):
     return rec
 
 
+def arm_rpn(tid, timeout, max_attempts):
+    """RETRY-NOSUITE：RPL 的預算對照，**沒有任何可見套件**。
+
+    為什麼非有不可（`decisions/reviews/C5_NATIVE_ACCEPTANCE_20260928/README.md`
+    §7 與 FINDINGS §「實驗設計」逐字）：RPL 的第 1 次嘗試就是 RP0 的那一跑，
+    而 RPL 平均用了 1.79 次。於是 RPL 對 RP0 的差距裡，同時混著兩件事——
+    「回饋讓 agent 修對了東西」與「它只是多跑了 0.79 次」。這個設計是**巢狀**的，
+    所以直接拿 RPL 對 RP0 做 McNemar 會把嘗試次數一起算進去。
+
+    這一臂把嘗試次數與 session 形狀對齊，只拿掉回饋：
+
+      * 同樣的上限、同樣「每次全新原生 session」、同樣的時限；
+      * 沒有可見套件、沒有閘門、沒有裁決、沒有 release；
+      * 失敗時下一個提示詞只說「再做一次」，不含任何驗收內容。
+
+    RPL − RPN 才是「回饋的邊際貢獻」；RPN − RP0 是「只是多跑幾次」的貢獻。
+    兩者分開報，不合加成一個數字。
+    """
+    cell = OUT / f"{tid}__RPN"
+    shutil.rmtree(cell, ignore_errors=True)
+    cell.mkdir(parents=True)
+    ws = cell / "workspace"
+    stage(ws, tid, "TASK.md")
+    env = dict(os.environ)
+    env["OPENROUTER_API_KEY"] = (ROOT / ".openrouter_key").read_text().strip()
+    attempts_used, total_wall = 0, 0.0
+    rc, timed_out = None, False
+    for n in range(1, max_attempts + 1):
+        rc, timed_out, wall = run_attempt(ws, BASE_PROMPT, cell / f"a{n}", timeout)
+        total_wall += wall
+        attempts_used = n
+        sol = ws / "solution.py"
+        # A file exists, but RPN deliberately never checks it: the whole point is
+        # that this arm has no acceptance signal at all.
+        if sol.is_file() and sol.stat().st_size > 0:
+            break
+    g = grade(tid, cell)
+    rec = {"task": tid, "arm": "RPN", "attempts": attempts_used,
+           "wall_s": round(total_wall, 1), "agent_rc": rc, "timed_out": timed_out,
+           "judge_outcome": None, "refusal_reason": None,
+           "gate_verdict": "none (budget-matched control, no suite at all)",
+           "delivered": g["has_solution"], **g}
+    rec["correct"] = bool(rec["delivered"] and rec.get("hidden_pass"))
+    (cell / "rec.json").write_text(json.dumps(rec, indent=2, ensure_ascii=False))
+    return rec
+
+
 def arm_rpl(tid, timeout, max_attempts):
     """Gate + fresh-session retry, with the visible suite's feedback in-prompt."""
     cell = OUT / f"{tid}__RPL"
@@ -289,7 +336,7 @@ def arm_rpl(tid, timeout, max_attempts):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--arm", required=True, choices=["PC", "RP0", "RPL"])
+    ap.add_argument("--arm", required=True, choices=["PC", "RP0", "RPL", "RPN"])
     ap.add_argument("--task", default=None)
     ap.add_argument("--stratum", default=None, choices=["S1", "S2", None])
     ap.add_argument("--limit", type=int, default=None)
@@ -303,6 +350,8 @@ def main():
                 r = arm_pc(tid, a.timeout)
             elif a.arm == "RP0":
                 r = arm_rp0(tid, a.timeout)
+            elif a.arm == "RPN":
+                r = arm_rpn(tid, a.timeout, a.max_attempts)
             else:
                 r = arm_rpl(tid, a.timeout, a.max_attempts)
             print(json.dumps({k: r.get(k) for k in

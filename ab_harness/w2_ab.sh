@@ -33,6 +33,7 @@ make_cfg () {   # make_cfg <dir> <gate: on|off>
   d=$1; gate=$2
   rm -rf "$d"; mkdir -p "$d/plugin"
   if [ "$gate" = on ]; then
+    # the SHIPPED plugin, exactly as `vacant install` left it
     cp /home/user1/.config/opencode/plugin/vacant.js "$d/plugin/vacant.js"
   else
     sed 's|^const NONINTERACTIVE = process.argv.includes("run");|const NONINTERACTIVE = false;|' \
