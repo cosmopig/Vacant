@@ -123,6 +123,7 @@ import shutil
 import subprocess
 import sys
 import urllib.parse
+import warnings
 import tempfile
 import time
 from typing import Any, Callable, Iterable
@@ -823,6 +824,10 @@ def _norm_url(u: str) -> str:
 
 
 
+def _log_warn(msg: str) -> None:
+    warnings.warn(msg, RuntimeWarning, stacklevel=2)
+
+
 def _pi_agent_dir(home: pathlib.Path) -> pathlib.Path:
     return home / ".pi" / "agent"
 
@@ -927,12 +932,18 @@ def wire_pi(home: pathlib.Path, port: int, backups: pathlib.Path,
     #（`piext` 誠實邊界 7）。`upstreams` 沒給（舊呼叫者）＝不知道 ⇒ 空字串，
     # extension 在 runtime 也只會用 baseUrl 比對，不會亂借。
     up = ((upstreams or {}).get(AGENTS["pi"].wire) or {}).get("url") or ""
+    # ⚠ `default_model` 之前**沒有傳**，所以烤進 extension 的一直是 piext 裡那個
+    #   預設（`gemma-4-12b-it-qat`）。量到的後果：上游是別的模型時
+    #   `VACANT_AGENT_MODEL` 與使用者設定都沒給，extension 會去切一個上游沒有的 id
+    #   ⇒ 每一通 404，而且畫面上的模型名與實際送出的對不上。誠實邊界 9 講的
+    #   「清單是猜的」本來就該反映在這一行上。
     body = piext.render(port=port, state_dir=str(state_home(home)),
                         python=python or sys.executable,
                         package_path=package_path(), models=models or [],
                         upstream=up, upstream_is_sink=bool(up) and envmap.is_sink(up),
                         key_from=pi_key_carrier(home, up, proxy_port=port) or "",
-                        pi_agent_dir=str(_pi_agent_dir(home)))
+                        pi_agent_dir=str(_pi_agent_dir(home)),
+                        default_model=os.environ.get("VACANT_AGENT_MODEL") or None)
     return [write_tracked(home, p, body.encode("utf-8"), backups,
                           note="pi extension：registerProvider(vacant) + /vacant + 掛鉤")]
 
@@ -2067,9 +2078,23 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     # ── 2. 過了才寫設定檔 ────────────────────────────────────────────
     changes: list[FileChange] = [FileChange(**c) for c in svc.get("changes", [])]
     wired: dict[str, dict] = {}
+    # pi 的 extension 要烤進三樣東西：python 路徑、**裝機當下真的有的模型清單**，
+    # 以及常駐 proxy 的上游。少了 `upstreams`／`models` 就會渲染出
+    # `KEY_FROM = ""` 與 `UPSTREAM = ""` —— extension 沒有金鑰可借、也不知道
+    # proxyd 轉去哪（量到的：安裝成功但 `requests_seen` 永遠 0，而且沒有任何錯誤）。
+    # ⚠ 其他 wirer 的簽章是 `(home, port, backups, **kw)`，多傳 kw 給它們是無害的。
+    probed_models: list[str] = []
+    if not skip_service and "pi" in wanted:
+        from . import piext
+        try:
+            probed_models = piext.probe_models(port)
+        except Exception as e:                       # noqa: BLE001
+            probed_models = []
+            _log_warn(f"pi 模型清單探不到（extension 只會有預設模型）：{e}")
     for a in wanted:
         try:
-            cs = WIRERS[a](h, port, backups)
+            cs = WIRERS[a](h, port, backups, python=py, models=probed_models,
+                           upstreams=ups)
             changes += cs
             wired[a] = {"ok": True, "files": [c.to_json() for c in cs],
                         "measured": CHANNEL_MEASURED.get(a, ""),
