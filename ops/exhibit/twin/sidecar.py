@@ -224,6 +224,8 @@ def classify_path_kind(tool: Any, path: Any) -> str:
         return "traits"
     if name == "PLAN.md":
         return "plan"
+    if name == "WORLD.md":          # 世界設定：不是成品、也不是觀眾特質；契約白名單不加新值
+        return "other"
     return "artifact"
 
 
