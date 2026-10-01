@@ -2,11 +2,18 @@
 
 This is an actual agent run, distinct from the R534 score-only replay. The result is **6/6 versus 6/6, no measured correctness gain**. Its small, easy sample has a ceiling and does not estimate the 920-task effect.
 
+> **Correction (2026-10-01, review W4): the "Vacant" arm below is gate-equivalent, not `repair`.** The protocol bullet that says
+> "Mode `repair` … one feedback round planned on rejection" names the bridge's *contract mode*, but this run used the external
+> `prepare → judge → release` harness and **no Pi extension or Stop hook was loaded** (`PI_PLUGIN_PUBLIC_BENCH_20260928.md` says the same, and
+> records that Pi 0.73.1, the version used here, lacked a stop-hook event). Nothing could deliver feedback, so the arm was one judge followed by release
+> or refusal. The saved results JSON has no hook, feedback or mode field. The numbers and the sentence "no task exercised repair" below were already
+> correct; only the mode label was misleading. This run says nothing about the REPAIR arm and must not be pooled with the real-extension runs.
+
 ## Protocol
 
 - Source: the already pinned R534 task templates and separate scoring checks in `ops/gain/r534/`. Select the four shortest `goal.md` files by character length and, after observing 4/4 in each arm, add the two longest by that same rule. IDs below are in run order. The latter addition is exploratory.
 - Both arms: independent Pi 0.73.1 sessions, `gpt-5.6-luna` through a local codex2api, low thinking, identical initial prompt: `Read goal.md. Implement solution.py with the requested top-level function. You may use the visible tests and run_tests.sh. Finish with the file saved.` Both see the same R534 template files. No hidden check enters either agent workspace or feedback.
-- Native: score the saved `solution.py` directly. Vacant: `prepare` before starting Pi, receiver-pin `tests_visible`, judge the saved file, and score only the released `solution.py`. Mode `repair`, two maximum attempts, one feedback round planned on rejection. All six first judges accepted, so no feedback or second attempt happened.
+- Native: score the saved `solution.py` directly. Vacant: `prepare` before starting Pi, receiver-pin `tests_visible`, judge the saved file, and score only the released `solution.py`. Contract mode label `repair` (but no hook was loaded; see the correction above, the arm was gate-equivalent), two maximum attempts, one feedback round "planned" on rejection that no component could have delivered. All six first judges accepted, so no second attempt happened.
 - Grader: run all `check_*` functions in each task's `hidden/lcb_*/test_hidden.py` in a separate grading directory containing a copy of the actual handed-off solution. The check is a conjunction, not a count of passed cases. The Vacant release reported `readback_ok: true` in each row.
 - Local limitations: one OS account (`insecure_same_account=True`) and `sandbox=none`. This does not test isolation or hostile agent bypass. Sessions are independent stochastic runs, not matched deterministic seeds.
 - Proxy compatibility: codex2api client version advertised as `0.158.0` so this account exposes `gpt-5.6-luna`; the local proxy was adapted to omit `max_output_tokens`, which the Codex subscription backend rejects. That adaptation is in the temporary proxy checkout, not in Vacant.
