@@ -176,6 +176,42 @@ def delete_user(cfg: Cfg, user: str) -> None:
         run("userdel", user)
 
 
+CELL_USER_RE = re.compile(r"^[as]\d{6}$")
+
+
+def list_cell_users() -> list[str]:
+    """這個工具建立的 Linux 使用者（`a<序號>` 跑 agent、`s<序號>` 計分）。名字格式只有 `create_user` 會產生。"""
+    out = []
+    for ln in Path("/etc/passwd").read_text().splitlines():
+        name = ln.split(":", 1)[0]
+        if CELL_USER_RE.match(name):
+            out.append(name)
+    return out
+
+
+def sweep_orphans(cfg: "Cfg") -> dict:
+    """driver 啟動時（續跑）先把上一個 driver 留下的殘骸清乾淨：tmux server、cell 使用者的行程與帳號、/srv/runs 底下的格子目錄。
+
+    為什麼要有：driver 被 SIGKILL（OOM、人手誤殺）時，它的 tmux server 與 pi 不會跟著死；重啟後新 driver 會用**同一個格子名稱**
+    重跑那一格，而殘骸 pi 仍在用同一個代理標籤打模型——帳本被兩個對話混在一起（通數、非 200 全錯）、模型端的腳本計數被吃掉，
+    而且舊使用者與 /srv/runs 的舊目錄一直佔著（2026-10-01 本機端到端：kill -9 後 12 個殘骸行程）。
+    一台 VM 只准一個 driver（`driver.lock`），所以這裡刪的一定是前一個 driver 的東西。回傳清掉了什麼（寫進日誌）。"""
+    res: dict[str, Any] = {"tmux_killed": 0, "users_deleted": [], "runs_dirs_removed": []}
+    pat = rf"^tmux -u -L i[0-9]+ -f {re.escape(str(cfg.cells))}/"
+    for pid in run("pgrep", "-f", pat).stdout.split():
+        run("kill", "-KILL", pid)
+        res["tmux_killed"] += 1
+    for u in list_cell_users():
+        delete_user(cfg, u)
+        res["users_deleted"].append(u)
+    if cfg.runs_root.is_dir():
+        for d in sorted(cfg.runs_root.iterdir()):
+            if d.is_dir() and not d.name.startswith("."):
+                force_rmtree(d)
+                res["runs_dirs_removed"].append(d.name)
+    return res
+
+
 @dataclasses.dataclass
 class Box:
     """一個隔離的機器狀態：一個新 Linux 使用者＋它的 <runs>/<名字>/{home,tmp,app,agentlog}。"""
@@ -383,7 +419,7 @@ def run_session(cfg: Cfg, box: Box, lcell: str, L: Path, ledger: LedgerTail, *, 
             # 送出確認：Working 出現（或 session 檔／帳本有動靜）。10 秒內都沒有 ⇒ 再按一次 Enter
             #（編輯器是空的時候 Enter 什麼都不做，所以多按一次不會重複送出）
             while time.time() - t_enter < 10:
-                if "Working" in pane.text() or tail.poll() or ledger.stats(tag)["calls"]:
+                if "Working" in pane.text() or tail.poll() or ledger.stats(tag, t0)["calls"]:
                     break
                 time.sleep(0.25)
             else:
@@ -399,7 +435,7 @@ def run_session(cfg: Cfg, box: Box, lcell: str, L: Path, ledger: LedgerTail, *, 
                     rec["done_reason"] = "timeout"
                     break
                 tail.poll()
-                st = ledger.stats(tag)
+                st = ledger.stats(tag, t0)
                 hooks = pgrep_hook_count(run("pgrep", "-u", box.user, "-f", "vacant_network hook").stdout) if box.vacant else 0
                 try:
                     ev = os.stat(ev_path).st_size if box.vacant else 0
@@ -466,7 +502,7 @@ def run_session(cfg: Cfg, box: Box, lcell: str, L: Path, ledger: LedgerTail, *, 
     tail.poll()
     ents = jsonl_entries(sdir)
     la = last_assistant(ents) or {}
-    led = ledger.final_stats(tag)
+    led = ledger.final_stats(tag, t0)
     rec["ended"] = now()
     rec["wall_s"] = round(time.time() - t0, 1)
     rec["rc"] = 124 if rec["timeout"] else (rec["exit_rc"] if rec["exit_rc"] is not None else rec["pane_exit_early_rc"])
@@ -572,12 +608,39 @@ def score_workspace(cfg: Cfg, task_dir: Path, src_app: Path, L: Path, label: str
 
 
 def parse_score(p: Path) -> dict | None:
+    """計分器的最後一行 JSON；沒有／讀不懂／**`scorer_error`** 都回 None（⇒ 該格 void，不算任何一組的失敗）。
+    ⚠ 第二批的計分器（`scorers/dabench|databench|polyglot_py.py`，逐字重用）把**任何例外**——包括 pandas／dateutil 在圍牆裡匯入失敗——
+    都收成 `{"pass": false, "note": "scorer_error: …"}`；照單全收就會把「計分環境壞了」記成「agent 答錯」（2026-10-01 本機端到端：
+    系統 python 的 pandas 要的 dateutil 只裝在 root 的 user site，圍牆裡看不到 ⇒ databench 全判 0）。這裡把它擋成基礎設施問題。"""
     try:
         lines = [x for x in p.read_text().strip().splitlines() if x.strip()]
         d = json.loads(lines[-1])
-        return d if isinstance(d, dict) and "pass" in d else None
     except (OSError, ValueError, IndexError):
         return None
+    if not isinstance(d, dict) or "pass" not in d:
+        return None
+    if str(d.get("note") or "").startswith("scorer_error"):
+        return None
+    return d
+
+
+def no_score_reason(L: Path) -> str:
+    """parse_score 回 None 時的 void 原因：計分器自己報 scorer_error ⇒ 帶上它的訊息；否則 no_score_json。"""
+    try:
+        lines = [x for x in (L / "score.json").read_text().strip().splitlines() if x.strip()]
+        d = json.loads(lines[-1])
+        if isinstance(d, dict) and str(d.get("note") or "").startswith("scorer_error"):
+            return f"scorer_error: {str(d['note']).split(':', 1)[1].strip()[:200]}"
+    except (OSError, ValueError, IndexError):
+        pass
+    return "no_score_json"
+
+
+def copy_vacant_home(src: Path, dst: Path) -> None:
+    """C 組的 ~/.vacant（病歷、掛鉤事件、交件說明）複製進紀錄；**私鑰（*.key）不複製**（RECORD_SPEC §7：identity.key 排除；
+    這些鑰匙是那個一次性使用者的，但紀錄會進 Drive 與本機備份——不留私鑰是這個專案對所有打包的規矩）。公鑰與 vacant_id 留著。"""
+    shutil.copytree(src, dst, symlinks=True, dirs_exist_ok=True,
+                    ignore=lambda d, names: [n for n in names if n.endswith(".key")])
 
 
 def vacant_collect(cfg: Cfg, box: Box, L: Path) -> dict:
@@ -590,7 +653,7 @@ def vacant_collect(cfg: Cfg, box: Box, L: Path) -> dict:
     (L / "vacant_check.json").write_text(r.stdout + r.stderr)
     kill_user(box.user)
     if (box.home / ".vacant").is_dir():
-        run("cp", "-a", str(box.home / ".vacant"), str(L / "vacant_home"))
+        copy_vacant_home(box.home / ".vacant", L / "vacant_home")
     try:
         return json.loads((r.stdout.strip().splitlines() or ["{}"])[-1])
     except ValueError:
@@ -747,7 +810,7 @@ def run_c_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
         score = score_workspace(cfg, tdir, box.app, L, name)
         finish_meta(meta, sessions, score=score, score_rc=_rc(L), workspace=box.app, deliverable=task["deliverable"])
         if score is None:
-            meta["void"], meta["void_reason"] = True, "no_score_json"
+            meta["void"], meta["void_reason"] = True, no_score_reason(L)
         write_cell(L, meta)
         return meta
     except Exception as e:  # noqa: BLE001 -- 工具錯誤不是 agent 的表現：記成 void
@@ -853,7 +916,7 @@ def run_a_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
                       "k_prepare_rc": k_prepare.get("rc"), "nested": list(nested), "k_on": k_on})
         finish_meta(metaA, sA, score=scoreA, score_rc=_rc(LA), workspace=snap, deliverable=deliverable)
         if scoreA is None:
-            return void_all("no_score_json", sA)
+            return void_all(no_score_reason(LA), sA)
         out["A"] = metaA
         # (R, K) 兩條巢狀分支：R 在複本上、K 就地；彼此獨立，同時跑
         res: dict[str, Any] = {}
@@ -941,7 +1004,7 @@ def _run_r(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, nR: str, LR
         finish_meta(meta, sessions, score=score, score_rc=_rc(LR), workspace=box.app, deliverable=deliverable)
         meta["retry_needed"] = True
         if score is None:
-            meta["void"], meta["void_reason"] = True, "no_score_json"
+            meta["void"], meta["void_reason"] = True, no_score_reason(LR)
         return meta
     except Exception as e:  # noqa: BLE001
         (LR / "exception.txt").write_text(traceback.format_exc())
@@ -1030,7 +1093,7 @@ def _run_k(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, nK: str, LK
         meta["delivered"] = bool(kinfo["released"])
         save_app_final(boxA.app, LK.parent / metaA["cell"] / "workspace_before.sha256", LK)
         if score is None:
-            meta["void"], meta["void_reason"] = True, "no_score_json"
+            meta["void"], meta["void_reason"] = True, no_score_reason(LK)
         return meta
     except Exception as e:  # noqa: BLE001
         (LK / "exception.txt").write_text(traceback.format_exc())

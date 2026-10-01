@@ -225,6 +225,65 @@ def test_deliverables_and_retry_condition(tmp_path):
     assert tl.needs_retry({"timeout": False}, ws, "solution.py") == (True, "no_deliverable")
 
 
+def test_scorer_error_is_infra_not_an_agent_failure(tmp_path):
+    """重用的計分器把任何例外（含圍牆裡 pandas／dateutil 匯入失敗）收成 pass:false＋note=scorer_error；
+    parse_score 必須把它擋成 None（⇒ 該格 void），否則「計分環境壞了」會被記成「agent 答錯」。"""
+    f = tmp_path / "score.json"
+    f.write_text(json.dumps({"pass": False, "note": "scorer_error: ImportError: Unable to import required dependency dateutil"}) + "\n")
+    assert tui_cell.parse_score(f) is None
+    assert tui_cell.no_score_reason(tmp_path).startswith("scorer_error: ImportError")
+    f.write_text(json.dumps({"pass": False, "note": "status=ok; predicted='x'; expected_type=boolean"}) + "\n")
+    assert tui_cell.parse_score(f) == {"pass": False, "note": "status=ok; predicted='x'; expected_type=boolean"}   # 真的答錯照算
+    f.write_text(json.dumps({"pass": True, "note": None}) + "\n")
+    assert tui_cell.parse_score(f)["pass"] is True
+    f.write_text("not json\n")
+    assert tui_cell.parse_score(f) is None and tui_cell.no_score_reason(tmp_path) == "no_score_json"
+    f.unlink()
+    assert tui_cell.parse_score(f) is None and tui_cell.no_score_reason(tmp_path) == "no_score_json"
+
+
+def test_sweep_orphans_cleans_stray_run_dirs_and_only_matches_our_user_names(tmp_path, monkeypatch):
+    """續跑前的清殘骸：只動這個工具建的使用者（a／s ＋ 6 位數）與 runs 根底下的格子目錄。"""
+    assert tui_cell.CELL_USER_RE.match("a000123") and tui_cell.CELL_USER_RE.match("s000007")
+    for bad in ("root", "ubuntu", "a12345", "a0001234", "b000123", "xa000123"):
+        assert not tui_cell.CELL_USER_RE.match(bad)
+    monkeypatch.setattr(tui_cell, "list_cell_users", lambda: [])
+    cfg = tui_cell.Cfg(eval_root=tmp_path / "ev", runs_root=tmp_path / "runs")
+    (cfg.runs_root / "t1-A-x-y-s1" / "app").mkdir(parents=True)
+    (cfg.runs_root / "t1-A-x-y-s1" / "app" / "f").write_text("x")
+    (cfg.runs_root / "t1-A-x-y-s1_snap").mkdir()
+    res = tui_cell.sweep_orphans(cfg)
+    assert sorted(res["runs_dirs_removed"]) == ["t1-A-x-y-s1", "t1-A-x-y-s1_snap"] and res["users_deleted"] == []
+    assert list(cfg.runs_root.iterdir()) == []
+    assert tui_cell.sweep_orphans(cfg) == {"tmux_killed": 0, "users_deleted": [], "runs_dirs_removed": []}
+
+
+def test_driver_refuses_a_second_instance_on_the_same_eval_root(tmp_path):
+    import fcntl
+    ev = tmp_path / "ev"
+    ev.mkdir()
+    held = open(ev / "driver.lock", "a+")
+    fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    argv = ["--phase", "main", "--plan", str(tmp_path / "nope.json"), "--prefix", "t", "--eval-root", str(ev),
+            "--runs-root", str(tmp_path / "runs"), "--staged", str(tmp_path)]
+    assert driver_i1001.main(argv) == 4
+    held.close()
+
+
+def test_vacant_home_copy_drops_private_keys_but_keeps_the_rest(tmp_path):
+    src = tmp_path / "v" / ".vacant"
+    (src / "intake" / "keys" / "owner").mkdir(parents=True)
+    (src / "intake" / "keys" / "owner" / "identity.key").write_text("SECRET")
+    (src / "intake" / "keys" / "owner" / "identity.pub").write_text("pub")
+    (src / "intake" / "hooks").mkdir(parents=True)
+    (src / "intake" / "hooks" / "events.jsonl").write_text("{}\n")
+    dst = tmp_path / "out" / "vacant_home"
+    tui_cell.copy_vacant_home(src, dst)
+    assert not list(dst.rglob("*.key"))
+    assert (dst / "intake" / "keys" / "owner" / "identity.pub").read_text() == "pub"
+    assert (dst / "intake" / "hooks" / "events.jsonl").is_file()
+
+
 def test_trust_triggers(tmp_path):
     ws = tmp_path / "app"
     ws.mkdir()
@@ -453,6 +512,23 @@ def _cell(root, name, *, void=False, passed=None, attempt=1, done=True, extra=No
         (d / "score.json").write_text("noise\n" + json.dumps({"pass": passed}) + "\n")
     if done:
         (d / "DONE").write_text("x")
+
+
+def test_ledger_since_ignores_an_earlier_incarnation_of_the_same_tag(tmp_path):
+    """driver 被殺後重啟，同一格用同一個標籤重跑：上一次（被殺的那次）的 5xx 與通數不能算進這一次。"""
+    p = tmp_path / "ledger.jsonl"
+    rows = [{"tag": "c.n1", "ts": 100.0, "status": 500, "latency_s": 1.0, "usage": {"prompt_tokens": 5}},
+            {"tag": "c.n1", "ts": 101.5, "status": 200, "latency_s": 1.0},
+            {"tag": "c.n1", "ts": 500.0, "status": 200, "latency_s": 1.0, "usage": {"prompt_tokens": 7}},
+            {"tag": "c.n1", "ts": 501.0, "status": 200, "latency_s": 1.0, "stream_error": None}]
+    p.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    lt = tl.LedgerTail(p, min_interval_s=0)
+    old = lt.final_stats("c.n1")
+    assert old["calls"] == 4 and old["non200"] == 1                      # 不過濾＝兩次加在一起（舊行為）
+    new = lt.final_stats("c.n1", since=400.0)
+    assert new["calls"] == 2 and new["non200"] == 0 and new["prompt_tokens"] == 7
+    assert lt.final_stats("c.n1", since=9999.0)["calls"] == 0
+    assert lt.final_stats("nope", since=1.0)["calls"] == 0
 
 
 def test_screen_outcomes_latest_attempt_wins(tmp_path):

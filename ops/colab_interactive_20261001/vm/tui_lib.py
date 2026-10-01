@@ -255,12 +255,17 @@ def error_is_infra(message: str | None) -> bool:
 
 class LedgerTail:
     """`/srv/eval/proxy/ledger.jsonl` 的增量讀（所有格子共用；一個執行緒更新、多個格子查）。
-    `stats(tag)`：{calls, non200, stream_errors, prompt_tokens, completion_tokens, last_ts, last_end_ts}。"""
+    `stats(tag, since)`：{calls, non200, stream_errors, prompt_tokens, completion_tokens, last_ts, last_end_ts}。
+
+    `since`（epoch 秒）：只算請求時間 ≥ since 的列。為什麼要有：driver 被殺後重啟，被中斷的那一格會用**同一個格子名稱＝同一個代理標籤**
+    重跑；帳本裡還留著上一次（被殺的那一次）的列，不過濾的話通數、非 200 全會把兩次加在一起（上一次的 5xx 會讓重跑那次被判 void；
+    通數翻倍）。呼叫端用該段 session 的起跑時間當 since。"""
 
     def __init__(self, path: str | os.PathLike, min_interval_s: float = 1.0):
         self.path = str(path)
         self.pos = 0
         self.rows: dict[str, dict] = {}
+        self.raw: dict[str, list[dict]] = {}
         self.lock = threading.Lock()
         self.min_interval_s = min_interval_s
         self._last = 0.0
@@ -276,7 +281,7 @@ class LedgerTail:
             except OSError:
                 return
             if size < self.pos:                       # 被輪替／截短：從頭
-                self.pos, self.rows = 0, {}
+                self.pos, self.rows, self.raw = 0, {}, {}
             if size == self.pos:
                 return
             with open(self.path, "rb") as fh:
@@ -293,11 +298,13 @@ class LedgerTail:
                     continue
                 self._add(x)
 
-    def _add(self, x: dict) -> None:
-        tag = x.get("tag") or "untagged"
-        r = self.rows.setdefault(tag, {"calls": 0, "non200": 0, "stream_errors": 0, "prompt_tokens": 0,
-                                       "completion_tokens": 0, "cached_tokens": 0, "last_ts": 0.0, "last_end_ts": 0.0,
-                                       "statuses": {}})
+    @staticmethod
+    def _zero() -> dict:
+        return {"calls": 0, "non200": 0, "stream_errors": 0, "prompt_tokens": 0, "completion_tokens": 0, "cached_tokens": 0,
+                "last_ts": 0.0, "last_end_ts": 0.0, "statuses": {}}
+
+    @staticmethod
+    def _acc(r: dict, x: dict) -> None:
         r["calls"] += 1
         st = x.get("status")
         r["statuses"][str(st)] = r["statuses"].get(str(st), 0) + 1
@@ -313,16 +320,25 @@ class LedgerTail:
         r["last_ts"] = max(r["last_ts"], ts)
         r["last_end_ts"] = max(r["last_end_ts"], ts + float(x.get("latency_s") or 0.0))
 
-    def stats(self, tag: str) -> dict:
+    def _add(self, x: dict) -> None:
+        tag = x.get("tag") or "untagged"
+        self._acc(self.rows.setdefault(tag, self._zero()), x)
+        self.raw.setdefault(tag, []).append(x)
+
+    def stats(self, tag: str, since: float = 0.0) -> dict:
         self.refresh()
         with self.lock:
-            return dict(self.rows.get(tag) or {"calls": 0, "non200": 0, "stream_errors": 0, "prompt_tokens": 0,
-                                               "completion_tokens": 0, "cached_tokens": 0, "last_ts": 0.0,
-                                               "last_end_ts": 0.0, "statuses": {}})
+            if not since:
+                return dict(self.rows.get(tag) or self._zero())
+            r = self._zero()
+            for x in self.raw.get(tag, ()):
+                if float(x.get("ts") or 0.0) >= since:
+                    self._acc(r, x)
+            return r
 
-    def final_stats(self, tag: str) -> dict:
+    def final_stats(self, tag: str, since: float = 0.0) -> dict:
         self.refresh(force=True)
-        return self.stats(tag)
+        return self.stats(tag, since)
 
 
 # ── 畫面（pane）判讀 ─────────────────────────────────────────────────────────────────────────────

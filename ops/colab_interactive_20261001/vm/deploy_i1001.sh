@@ -29,10 +29,13 @@ python3 -m venv /opt/eval/bridgevenv
 mkdir -p /opt/eval/bridge/ops/eval && cp bridge/ops/eval/native_acceptance_bridge.py /opt/eval/bridge/ops/eval/
 chmod -R a+rX /opt/eval/bridge /opt/eval/bridgevenv
 /opt/eval/bridgevenv/bin/python -c "import vacant_network, cryptography; print('bridge venv ok:', vacant_network.__file__)"
-# 題庫端（任務題庫的計分器用 pandas／numpy；agent 端也要）
-python3 -c "import pandas, numpy; print('pandas', pandas.__version__, 'numpy', numpy.__version__)" \
-  || echo "WARN: 系統 python3 沒有 pandas／numpy：databench 計分會全 void（pip3 install pandas numpy scipy）"
-python3 -c "import scipy; print('scipy', scipy.__version__)" || echo "WARN: 沒有 scipy（dabench／databench 的 agent 端可能要）"
+# 題庫端（任務題庫的計分器用 pandas／numpy；agent 端也要）。⚠ 要用「沒有特權、乾淨環境的使用者」檢查（計分與 agent 都是這樣跑）：
+# root 的 user site（~/.local）在圍牆裡看不到，用 root 檢查會漏掉「依賴只裝在 root 的 user site」（2026-10-01 本機：dateutil 缺 ⇒ databench 全判 0）
+CHK="runuser -u nobody -- env -i HOME=/nonexistent PATH=/usr/local/bin:/usr/bin:/bin"
+$CHK python3 -c "import pandas, numpy; print('pandas', pandas.__version__, 'numpy', numpy.__version__, '(as nobody, clean env)')" \
+  || { echo "ERROR: 圍牆裡的使用者 import 不了 pandas／numpy（常見：依賴裝在 root 的 user site）；databench 計分會全 void——pip3 install --ignore-installed pandas numpy python-dateutil（裝到系統 site）" >&2; exit 5; }
+$CHK python3 -c "import scipy; print('scipy', scipy.__version__)" \
+  || echo "WARN: 沒有 scipy（dabench／databench 的 agent 端可能要；計分器不需要）"
 # 記帳代理（本機模式、只聽 127.0.0.1；上游用代號）——同 deploy_vm.sh
 cat > /srv/eval/proxy.json <<EOF2
 {"models": {"gemma-4-12b-it-qat": {}}, "upstreams": {"$UP": "$UPURL"}, "host_id": "colab-$UP",

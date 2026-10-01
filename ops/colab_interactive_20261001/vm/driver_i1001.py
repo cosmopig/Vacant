@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import shutil
 import sys
@@ -235,12 +236,34 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--logfile", type=Path, help="這個 driver 的 stdout 日誌（結束時複製進紀錄）")
     ap.add_argument("--final", action="store_true", help="phase=screen|main 單跑時也在結束寫 DRIVER_DONE")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--no-sweep", action="store_true", help="啟動時不清上一個 driver 的殘骸（預設會清；只有除錯用）")
     add_cfg_args(ap)
     a = ap.parse_args(argv)
     cfg = cfg_from_args(a)
     cfg.cells.mkdir(parents=True, exist_ok=True)
     cfg.receivers.mkdir(parents=True, exist_ok=True)
     cfg.receivers.chmod(0o700)
+    if a.dry_run:
+        return _run(a, cfg)
+    # 一個 eval 根只准一個 driver（排它鎖，行程結束自動放）；拿到鎖之後才清殘骸（續跑：上一個被 SIGKILL 的 driver 留下的 tmux／pi／使用者）
+    lock = open(cfg.eval_root / "driver.lock", "a+")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print(f"another driver already holds {cfg.eval_root}/driver.lock; refusing to start a second one", file=sys.stderr)
+        return 4
+    try:
+        if not a.no_sweep:
+            swept = tui_cell.sweep_orphans(cfg)
+            log("startup sweep: " + json.dumps(swept))
+            if any(swept.values()):
+                append_event(cfg, {"event": "startup_sweep", **swept})
+        return _run(a, cfg)
+    finally:
+        lock.close()
+
+
+def _run(a: argparse.Namespace, cfg: Cfg) -> int:
     drv = Driver(cfg, a.slots, a.prefix, a.stop_file, parse_deadline(a.deadline), a.max_units)
     scr_prefix = f"{a.prefix}s"
     index, manifest = plan_builder.load_inputs(a.staged)
