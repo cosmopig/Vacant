@@ -179,9 +179,16 @@ def twin_stack(tmp_path):
     import urllib.error
     import urllib.request
 
+    # 不走系統 proxy：macOS 上 `urlopen` 的 `getproxies()` 會去查 SystemConfiguration，
+    # 一次可以卡上數十秒到幾分鐘（`ops/exhibit/twin/probe_proxy_stall.py` 的實測），
+    # 30 秒的等待因此在 serve 早就起來的情況下照樣逾時（2026-10-01 macOS CI：兩支伺服器
+    # 都活著、serve 印了它在聽的位址，`_up` 卻全是 False）。這裡只連 127.0.0.1，
+    # 用一個空的 ProxyHandler 讓量具本身不參與測量（venue_check.sh 走 curl，不受影響）。
+    _opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
     def _up(url: str) -> bool:
         try:
-            with urllib.request.urlopen(url, timeout=2) as r:
+            with _opener.open(url, timeout=2) as r:
                 return r.status == 200
         except (urllib.error.URLError, OSError):
             return False

@@ -17,7 +17,7 @@ Script (JSON; `--script file` or env STUB_SCRIPT):
    "chunk_delay_s": 0.0}      # delay between SSE chunks
 Turn index = number of `user` messages in the request (-1); step index = number of `tool`
 messages after the last `user` message.  Past the last turn the stub repeats the last turn's
-final text step, or says "ok".  A step may carry "delay_s".  A step may be {"error": 500, "times": 2}
+final text step, or says "ok".  A step may carry "delay_s"; a text step may carry "finish": "length".  A step may be {"error": 500, "times": 2}
 to answer that HTTP status the first 2 requests that reach it (infra-void / retry drills).
 Default script (no file): turn 0 = write `solution.py`, then "Done."; later turns = "ok".
 
@@ -165,7 +165,7 @@ class H(BaseHTTPRequestHandler):
         name = None
         if kind == "text":
             msg = {"role": "assistant", "content": st["text"]}
-            fin = "stop"
+            fin = st.get("finish", "stop")          # "length" drills a max-tokens cut-off
         else:
             name, props = _tool(tools, kind)
             if name is None:                         # the agent has no such tool: say so in text
