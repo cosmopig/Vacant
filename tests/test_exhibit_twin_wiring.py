@@ -193,8 +193,19 @@ def twin_stack(tmp_path):
             break
         time.sleep(0.5)
     else:
+        # 起不來的時候把**兩邊各自的狀態**一起交出來：哪一個沒起來、serve 自己印了什麼
+        # （2026-10-01 macOS CI 第一次跑到這裡就紅，訊息裡沒有任何線索可以查）。
+        serve_up = _up(f"http://127.0.0.1:{sp}/visitors.json")
+        tv_up = _up(f"http://127.0.0.1:{tp}/")
         serve.terminate(); tv.terminate()
-        pytest.fail(f"30 秒內 twinlink serve（{sp}）或靜態站（{tp}）沒起來")
+        try:
+            serve_out = (serve.communicate(timeout=10)[0] or b"").decode("utf-8", "replace")
+        except subprocess.TimeoutExpired:
+            serve.kill()
+            serve_out = "(serve 沒有在 10 秒內結束)"
+        pytest.fail(f"30 秒內 twinlink serve（{sp}，up={serve_up}，rc={serve.returncode}）"
+                    f"或靜態站（{tp}，up={tv_up}，rc={tv.poll()}）沒起來；"
+                    f"serve 的輸出末段：\n{serve_out[-3000:]}")
 
     try:
         yield {"store_port": sp, "tv_port": tp, "serve": serve,
