@@ -16,7 +16,7 @@
    "conflict": 0,
    "optional": 0
   },
-  "contract_sha256": "a1dc432e35005f954fd0646c00071f11434dc846ec90f16fca0d0d51ee2b247f",
+  "contract_sha256": "df3be56d095103fd47dc465b9dfd0ad3d61b042a5992bc1b3001bb5204edb987",
   "artifact_sha256": "602e35a92eec4bc0a2ec6ae113f07bfc6933322fb69fe8dee416e5a67217e2a2",
   "results": [
    {
@@ -70,7 +70,7 @@
   "n_files": 0,
   "skipped": [],
   "void": false,
-  "run_id": "c89e8457ba4e42ac83a14615741a460f",
+  "run_id": "5f245c98f8b64e7ab224e540179fa397",
   "attempt": 1,
   "workspace_contract_matches_receiver": true,
   "agent_visible_suite_matches_pinned": true,

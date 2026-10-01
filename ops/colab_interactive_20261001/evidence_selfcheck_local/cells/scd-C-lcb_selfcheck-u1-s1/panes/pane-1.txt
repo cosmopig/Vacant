@@ -48,13 +48,13 @@
 
  Vacant checked this turn: 0 value(s), 0/2 given file(s) opened.                                                                                                
  Still open after 1 round(s): 2 point(s).                                                                                                                       
- Note: /home/a000094/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md                                                                                        
+ Note: /home/a000017/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md                                                                                        
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                                                                                 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 /app
 ↑40 ↓20 0.0%/128k (auto)                                                                                                    (harbor-endpoint) gemma-4-12b-it-qat
-To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f832-9bf9-74d0-ac63-45e9a51ff7ae
+To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f849-1e9e-74ed-b2d8-b2026aa9be0f
 __PANE_EXIT_0__
 

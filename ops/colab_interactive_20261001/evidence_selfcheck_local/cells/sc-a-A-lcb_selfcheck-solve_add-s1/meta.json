@@ -14,7 +14,7 @@
  "tag": "sc-a-A-lcb_selfcheck-solve_add-s1",
  "model": "gemma-4-12b-it-qat",
  "upstream": "g4",
- "user": "a000078",
+ "user": "a000001",
  "interactive": true,
  "ui": "pi TUI in tmux 160x50",
  "idle_s": 4.0,
@@ -22,7 +22,7 @@
  "pi_version": "0.87.1",
  "wheel": null,
  "deliverable": "solution.py",
- "started": "2026-10-01T15:58:36Z",
+ "started": "2026-10-01T16:23:12Z",
  "void": false,
  "void_reason": null,
  "install_rc": null,
@@ -30,7 +30,7 @@
  "k_prepare_rc": null,
  "nested": [],
  "k_on": false,
- "ended": "2026-10-01T15:58:44Z",
+ "ended": "2026-10-01T16:23:20Z",
  "sessions": [
   {
    "n": 1,
@@ -40,7 +40,7 @@
    "typing_mode": "line",
    "text_chars": 102,
    "text_sha256": "6afedeac36c8e57807c5469ebbcfaf26b1cdf336483a1a251774ebb483f107c6",
-   "started": "2026-10-01T15:58:36Z",
+   "started": "2026-10-01T16:23:12Z",
    "trust_triggers": [],
    "trust_dialog": null,
    "ready": true,
@@ -55,11 +55,11 @@
    "late_write_after_done": false,
    "exit_clean": true,
    "exit_rc": 0,
-   "exit_s": 0.23,
+   "exit_s": 0.22,
    "pane_exit_early_rc": null,
    "leftover_procs": 0,
-   "ended": "2026-10-01T15:58:43Z",
-   "wall_s": 7.5,
+   "ended": "2026-10-01T16:23:20Z",
+   "wall_s": 7.8,
    "rc": 0,
    "final_state": "final",
    "entries": 8,
@@ -70,14 +70,14 @@
    "max_gap_after_final_s": null,
    "typed_ok": true,
    "ledger": {
-    "calls": 6,
+    "calls": 2,
     "non200": 0,
     "stream_errors": 0,
-    "prompt_tokens": 60,
-    "completion_tokens": 30,
+    "prompt_tokens": 20,
+    "completion_tokens": 10,
     "cached_tokens": 0,
     "statuses": {
-     "200": 6
+     "200": 2
     }
    },
    "void": false,
@@ -87,11 +87,11 @@
  "n_sessions": 1,
  "rc": 0,
  "timeout": false,
- "wall_s": 7.5,
+ "wall_s": 7.8,
  "done_reason": "idle_final",
  "score_rc": 0,
  "leftover_procs": 0,
  "delivered": true,
  "scored": true,
- "score_user": "s000079"
+ "score_user": "s000002"
 }

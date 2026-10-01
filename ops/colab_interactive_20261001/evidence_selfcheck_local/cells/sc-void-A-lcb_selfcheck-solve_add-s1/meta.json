@@ -22,7 +22,7 @@
  "pi_version": "0.87.1",
  "wheel": null,
  "deliverable": "solution.py",
- "started": "2026-10-01T16:00:33Z",
+ "started": "2026-10-01T16:25:10Z",
  "void": true,
  "void_reason": "model_error_final: 500 \"{\\\"error\\\": {\\\"message\\\": \\\"stub: scripted error\\\"}}\"",
  "sessions": [
@@ -34,11 +34,11 @@
    "typing_mode": "line",
    "text_chars": 102,
    "text_sha256": "6afedeac36c8e57807c5469ebbcfaf26b1cdf336483a1a251774ebb483f107c6",
-   "started": "2026-10-01T16:00:00Z",
+   "started": "2026-10-01T16:24:37Z",
    "trust_triggers": [],
    "trust_dialog": null,
    "ready": true,
-   "ready_s": 0.83,
+   "ready_s": 0.84,
    "idle_s": 4.0,
    "agent_timeout_s": 1800,
    "timeout": false,
@@ -52,8 +52,8 @@
    "exit_s": 0.23,
    "pane_exit_early_rc": null,
    "leftover_procs": 0,
-   "ended": "2026-10-01T16:00:33Z",
-   "wall_s": 33.4,
+   "ended": "2026-10-01T16:25:10Z",
+   "wall_s": 32.7,
    "rc": 0,
    "final_state": "error_final",
    "entries": 12,
@@ -64,14 +64,14 @@
    "max_gap_after_final_s": null,
    "typed_ok": true,
    "ledger": {
-    "calls": 12,
-    "non200": 12,
+    "calls": 4,
+    "non200": 4,
     "stream_errors": 0,
     "prompt_tokens": 0,
     "completion_tokens": 0,
     "cached_tokens": 0,
     "statuses": {
-     "500": 12
+     "500": 4
     }
    },
    "void": true,
@@ -79,8 +79,8 @@
   }
  ],
  "n_sessions": 1,
- "ended": "2026-10-01T16:00:33Z",
- "wall_s": 33.4,
+ "ended": "2026-10-01T16:25:10Z",
+ "wall_s": 32.7,
  "k_on": false,
  "nested": [],
  "score_user": null
