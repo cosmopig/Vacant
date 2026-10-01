@@ -481,7 +481,7 @@ def test_describe_labels_carry_no_audience_content():
     _, lab3 = gg.describe("check_w3_agree", False,
                           "成品第3行的『片 426 的印紋』，這一跑讀過的『地上/帳本鏈/x』與『地上/長桌廣場/y』說法不同，成品沒有指出")
     assert lab3 == "兩個出處對不上（成品第 3 行）" and "426" not in lab3 and "地上" not in lab3
-    _, lab1 = gg.describe("check_w1_read", False, "計畫第5行點名的『地上/帳本鏈/x.txt』，這一跑沒有成功打開過")
+    _, lab1 = gg.describe("check_w1_read", False, "計畫第5行點名的『地上/帳本鏈/x.txt』，地上有，這一跑沒有成功打開過")
     assert lab1 == "點名的東西沒打開（計畫第 5 行）" and "帳本鏈" not in lab1
     _, labn = gg.describe("check_w2_source", False,
                           "成品第3行的『1』，找不到；成品第9行的『2』，找不到；成品第12行的『3』，找不到")
@@ -1410,3 +1410,20 @@ def test_p8_e2e_run_budget_caps_each_attempt_and_stops_opening_new_ones(tmp_path
         run_budget_s=400.0, min_attempt_s=6.0)
     twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg2))
     assert [json.loads(l)["stage"] for l in log.read_text().splitlines()].count(2) == 3
+
+
+def test_w1_two_failure_kinds_have_two_messages_and_labels_same_id(tmp_path):
+    plan = "x\n\n它牽動到：\n- 地上/帳本鏈/不存在的檔.txt\n- 地上/紙卡地/格狀圖.txt\n步驟：\n1. y\n"
+    res = run_gate(tmp_path, plan, {}, ledger([CHAIN], ground_files=GF))
+    msgs = dict((l, m) for l, m in only(res, "w1"))
+    assert msgs[4].endswith("地上沒有這個檔") and "地上有" not in msgs[4]
+    assert "地上有，這一跑沒有成功打開過" in msgs[5]
+    assert gg.describe("check_w1_read", False, msgs[4]) == ("G1", "點名的東西地上沒有（計畫第 4 行）")
+    assert gg.describe("check_w1_read", False, msgs[5]) == ("G1", "點名的東西沒打開（計畫第 5 行）")
+    # 負控制：地上有的檔讀過就過；地上沒有的檔怎麼讀都不會過
+    assert run_gate(tmp_path, plan.replace("- 地上/帳本鏈/不存在的檔.txt\n", ""), {}, ledger([GRID], ground_files=GF))["w1"]["ok"]
+    led = ledger([GRID], ground_files=GF)
+    led["read"].append("地上/帳本鏈/不存在的檔.txt")          # 步驟紀錄說「讀過」也沒用：地上沒有這個檔
+    assert not run_gate(tmp_path, plan, {}, led)["w1"]["ok"]
+    for m in msgs.values():
+        assert_ks1_clean(m)

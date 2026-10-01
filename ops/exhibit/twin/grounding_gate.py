@@ -104,6 +104,8 @@ PASS_LABEL = {"G1": "讀過了", "G2": "找得到出處", "G3": "兩個出處對
 #: 沒過時的 label 前綴（後面接「（成品第 7 行）」）。不含任何觀眾內容。
 FAIL_LABEL = {"G1": "點名的東西沒打開", "G2": "找不到出處", "G3": "兩個出處對不上",
               "G4": "收據不是閘門給的"}
+#: G1 的第二種失敗：計畫點名的東西地上根本沒有（id 仍是 G1）。
+FAIL_LABEL_G1_ABSENT = "點名的東西地上沒有"
 #: 沒有紀錄可對照（`_ledger.py` 沒備好）。量不到不是通過。
 NO_LEDGER_MSG = "這一跑的步驟紀錄沒有備好，這一格沒辦法對照"
 
@@ -133,6 +135,8 @@ def describe(case: str, ok: bool, message: str = "") -> tuple[str, str]:
     if (message or "").strip() == NO_LEDGER_MSG:
         return cid, "沒有紀錄可對照"
     label = FAIL_LABEL[cid]
+    if cid == "G1" and "地上沒有這個檔" in (message or ""):
+        label = FAIL_LABEL_G1_ABSENT
     where = locate(message)
     if where:
         place = "成品" if where["file"] == "artifact" else "計畫"
@@ -279,9 +283,12 @@ def check_read(plan_text: str | None, read: set[str], ground_files: list[str]) -
             if not any(r.startswith(p + "/") for r in read):
                 issues.append({"file": "plan", "line": n["line"],
                                "msg": f"計畫第{n['line']}行點名的資料夾『{p}』，這一跑沒有打開過裡面任何一件"})
+        elif n["kind"] == "missing":
+            issues.append({"file": "plan", "line": n["line"],
+                           "msg": f"計畫第{n['line']}行點名的『{p}』，地上沒有這個檔"})
         elif p not in read:
             issues.append({"file": "plan", "line": n["line"],
-                           "msg": f"計畫第{n['line']}行點名的『{p}』，這一跑沒有成功打開過"})
+                           "msg": f"計畫第{n['line']}行點名的『{p}』，地上有，這一跑沒有成功打開過"})
     return issues
 
 
