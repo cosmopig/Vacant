@@ -9,7 +9,8 @@
     本身會讓同一批 A 的結果偏低，重用它會把選擇偏誤灌進 C 對 A 的比較）；
   - LCB 池（C5 的 A 失敗題 93 ＋ 種子抽的 A 成功對照 40）不篩選：它們本來就是「A 失敗過」與「A 成功過」的已知題。
 void 的篩選格先重跑一次（driver 負責）；仍然 void 的格**不算答對**（保守：題庫只在「看到答對」時才被丟）。
-篩選沒跑完的題庫（停止檔、時限）＝ undecided ⇒ 保留。
+篩選沒跑完的題庫（停止檔、時限）：已看到的答對數 ≥ 9 就已經決定了（沒跑的格子只會讓數字不變或變大）⇒ 丟；
+還有可能到 9（答對數＋沒跑的格數 ≥ 9）⇒ undecided、保留；到不了 9 ⇒ 保留。
 
 誠實邊界：這條規則看的是「A 在 10 題上的答對數」，不是統計檢定；9/10 的門檻是規格定的，不是估出來的。
 """
@@ -105,8 +106,9 @@ def ceiling_decision(outcomes: dict[str, list[dict]], expected: dict[str, int] |
         dropped = passes >= thr
         if dropped:
             reason = f"A passed {passes}/{n_exp} screened tasks (>= {thr}): the plain agent leaves (almost) nothing unsolved here; bank dropped"
-        elif missing:
-            reason = f"screening incomplete ({len(missing)} task(s) not run): undecided, bank kept"
+        elif missing and passes + len(missing) >= thr:
+            reason = (f"screening incomplete ({len(missing)} task(s) not run) and the bank could still reach {thr}/{n_exp}: "
+                      f"undecided, bank kept")
         else:
             reason = (f"A passed {passes}/{n_exp} (< {thr}): {len(unsolved)} unsolved task(s) seen without Vacant; bank kept"
                       + (f"; {len(voids)} void cell(s) counted as not-pass" if voids else ""))

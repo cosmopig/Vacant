@@ -626,6 +626,19 @@ def bridge_release(cfg: Cfg, box: Box, rh: Path, artifact: str) -> tuple[int, di
     return bridge(cfg, "release", "--workspace", str(box.app), "--artifact", artifact, "--receiver-home", str(rh))
 
 
+def force_rmtree(p: Path) -> None:
+    """bridge 把釘住的可見驗收套件設成唯讀（555／444）：刪之前先放寬權限。"""
+    if not p.exists():
+        return
+    for q in (p, *p.rglob("*")):
+        if not q.is_symlink():
+            try:
+                q.chmod(0o700)
+            except OSError:
+                pass
+    shutil.rmtree(p, ignore_errors=True)
+
+
 def copy_receiver_records(rh: Path, dst: Path) -> None:
     """收件端的紀錄（契約、帳本、裁決文件、放行的成品）；**私鑰一律不複製**（RECORD_SPEC §7：identity.key 排除）。"""
     def ignore(d: str, names: list[str]) -> list[str]:
@@ -640,7 +653,7 @@ def copy_receiver_records(rh: Path, dst: Path) -> None:
 
 def base_meta(cfg: Cfg, task: dict, name: str, arm: str, *, prefix: str, sample: int, attempt: int, box: Box | None) -> dict:
     return {"cell": name, "unit": f"{task['bank']}/{task['id']}", "bank": task["bank"], "task": task["id"], "role": task.get("role"),
-            "screened": task.get("screened"), "sample": sample, "attempt": attempt, "arm": arm, "prefix": prefix,
+            "screened": task.get("screened"), "phase": task.get("phase"), "sample": sample, "attempt": attempt, "arm": arm, "prefix": prefix,
             "task_dir": task["dir"], "tag": name, "model": cfg.model, "upstream": cfg.upstream,
             "user": box.user if box else None, "interactive": True, "ui": f"pi TUI in tmux {cfg.cols}x{cfg.rows}",
             "idle_s": cfg.idle_s, "agent_timeout_s": cfg.agent_timeout, "pi_version": PI_VERSION,
@@ -651,6 +664,8 @@ def base_meta(cfg: Cfg, task: dict, name: str, arm: str, *, prefix: str, sample:
 def finish_meta(meta: dict, sessions: list[dict], *, score: dict | None, score_rc: int | None,
                 workspace: Path | None, deliverable: str) -> dict:
     last = sessions[-1] if sessions else {}
+    if sessions and sessions[0].get("started"):
+        meta["started"] = sessions[0]["started"]
     meta.update({"ended": now(), "sessions": sessions, "n_sessions": len(sessions),
                  "rc": last.get("rc"), "timeout": bool(last.get("timeout")),
                  "wall_s": round(sum(s.get("wall_s") or 0 for s in sessions), 1),
@@ -761,6 +776,8 @@ def run_a_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
     for d in (LA, LR, LK):
         shutil.rmtree(d, ignore_errors=True)
     LA.mkdir(parents=True)
+    for stale in (cfg.receivers / nA, cfg.receivers / f"{nA}-suite"):          # 中斷後重跑同一個名字：收件端的狀態也要乾淨
+        force_rmtree(stale)
     tdir = Path(task["dir"])
     deliverable = task["deliverable"]
     instr = (tdir / "instruction.txt").read_text().rstrip("\n")
@@ -773,7 +790,6 @@ def run_a_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
     held = first_slot_held
     sA: list[dict] = []
     out: dict[str, Any] = {"A": None, "R": None, "K": None, "void": False}
-    written: dict[str, dict] = {}
 
     def void_all(why: str, sessions: list[dict]) -> dict:
         for arm, L, nm in (("A", LA, nA), ("R", LR, nR), ("K", LK, nK)):
@@ -797,9 +813,16 @@ def run_a_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
             (LK / "bridge").mkdir(exist_ok=True)
             (LK / "bridge" / "prepare.json").write_text(json.dumps(k_prepare, ensure_ascii=False, indent=1) + "\n")
             if rc != 0:
-                log(f"[{nA}] bridge prepare failed rc={rc}: {err[:200]} -> K unavailable for this unit")
+                why = f"bridge_prepare_failed rc={rc}: {err[:200]}"
+                log(f"[{nA}] {why}")
+                if attempt < 2:
+                    # 還沒花任何 session 就知道 K 起不來：整條線 void（零成本重跑一次）
+                    return void_all(why, [])
+                # 第 2 次還是起不來：A、R 照跑（它們有效）；K 記成 void（systematic：分析會列出）
                 k_on = False
                 k_prepare["unavailable"] = True
+                out["K"] = void_cell(cfg, task, nK, "K", LK, prefix=prefix, sample=sample, attempt=attempt, why=why,
+                                     extra={"k_on": False, "nested": list(nested), "k_prepare": k_prepare})
         (LA / "workspace_before.sha256").write_text(tree_sha_lines(boxA.app))
         has_contract = (boxA.app / ".vacant" / "contract.json").is_file()
         if not held:
@@ -823,10 +846,6 @@ def run_a_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
                       "k_prepare_rc": k_prepare.get("rc"), "nested": list(nested), "k_on": k_on})
         finish_meta(metaA, sA, score=scoreA, score_rc=_rc(LA), workspace=snap, deliverable=deliverable)
         if scoreA is None:
-            metaA["void"], metaA["void_reason"] = True, "no_score_json"
-            out["A"] = metaA
-            out["void"] = True
-            written["A"] = metaA
             return void_all("no_score_json", sA)
         out["A"] = metaA
         # (R, K) 兩條巢狀分支：R 在複本上、K 就地；彼此獨立，同時跑
@@ -846,16 +865,17 @@ def run_a_group(cfg: Cfg, ledger: LedgerTail, pool: SlotPool, task: dict, *, pre
             t.start()
         for t in threads:
             t.join()
-        out["R"], out["K"] = res.get("R"), res.get("K")
+        for a in ("R", "K"):
+            if a in res:
+                out[a] = res[a]
         branch_void = [a for a in ("R", "K") if res.get(a) and res[a].get("void")]
         if branch_void:
+            # A 自己的資料有效（第 1 段沒 void）：不改 A 的 void，另記「整條線 void」讓 driver 重跑一次
             out["void"] = True
-            why = "; ".join(f"{a}: {res[a].get('void_reason')}" for a in branch_void)
-            metaA["void"], metaA["void_reason"] = True, f"group void: {why}"
+            metaA["group_void"] = True
+            metaA["group_void_reason"] = "; ".join(f"{a}: {res[a].get('void_reason')}" for a in branch_void)
         if k_on:
             copy_receiver_records(rh, LK / "receiver")
-        if not r_on and "R" in nested:
-            pass
         write_cell(LA, metaA)
         for a in ("R", "K"):
             if out[a] is not None:

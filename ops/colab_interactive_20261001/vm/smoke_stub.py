@@ -10,6 +10,8 @@ R 的複本重試、逾時、void 重跑、C 的送回）都要在花 GPU 之前
   - 否則是「普通的一段」：第 n 個普通對話（開頭＝沒有任何 assistant 訊息的請求）用 `plain[n-1]`（用完就重複最後一個）。
     模式：right（寫對的解、說做完）、wrong（寫錯的解、說做完）、none（什麼都不寫、說做完）、
     claim（讀兩個檔、說「已寫好」但沒寫——給 Vacant 送回用）、slow（先讀檔、第二步延遲很久 ⇒ 撞逾時）、error（一律 500）。
+  另有 `fail_window_s`：第一通請求起算這麼多秒內，**所有**請求（不分對話）一律 500（驅動 void 重跑用；單看一個「錯誤模式」不夠，
+  因為代理的重試會把同一個請求再送一次、被當成新對話的開頭）。
 腳本 JSON：{"plain": ["wrong","right"], "fix": "right", "solutions": {"right": "...", "wrong": "..."}, "slow_s": 120}
 普通對話之間不重疊（A 先、R 後），所以「最近一個普通對話的模式」就是它的後續請求要用的模式。
 """
@@ -20,6 +22,7 @@ import json
 import os
 import sys
 import threading
+import time
 from http.server import ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +30,7 @@ sys.path.insert(0, os.path.dirname(HERE))      # repo 佈局：../stub_model.py
 sys.path.insert(0, HERE)                       # VM 佈局：/opt/eval/bin/stub_model.py（build_bundle 放進去）
 import stub_model as sm  # noqa: E402
 
-STATE = {"plain_starts": 0, "mode": "right", "lock": threading.Lock()}
+STATE = {"plain_starts": 0, "mode": "right", "lock": threading.Lock(), "window_start": None}
 CFG: dict = {}
 
 
@@ -55,6 +58,13 @@ def choose(msgs: list[dict], tools: list[dict]):
     tool_n = sum(1 for m in msgs[last_user + 1:] if m.get("role") == "tool")
     has_assistant = any(m.get("role") == "assistant" for m in msgs)
     with STATE["lock"]:
+        win = float(CFG.get("fail_window_s", 0) or 0)
+        if win:
+            now = time.time()
+            if STATE["window_start"] is None:
+                STATE["window_start"] = now
+            if now - STATE["window_start"] < win:
+                return len(users) - 1, tool_n, {"error": 500}, last        # 時間窗內一律 500（各對話同時受害）
         if "Before delivery" in last:
             mode = "right"
         elif "visible checks" in last:

@@ -90,7 +90,7 @@ def group_status(cfg: Cfg, plan: dict, task: dict, group: str, prefix: str, samp
         if missing:
             _archive_partial(cfg, existing)
             return "todo", attempt
-        if not meta.get("void"):
+        if not (meta.get("void") or meta.get("group_void")):
             return "done", attempt
     return "done", 2
 
@@ -127,7 +127,7 @@ class Driver:
                 log(f"done {m['cell']} void={m.get('void')} timeout={m.get('timeout')} wall={m.get('wall_s')}s sessions={m.get('n_sessions')}"
                     + (f" reason={m.get('void_reason')}" if m.get("void") else ""))
 
-    def run_group(self, plan: dict, task: dict, group: str, attempt: int, sample: int) -> None:
+    def run_group(self, plan: dict, task: dict, group: str, attempt: int, sample: int, prefix: str) -> None:
         """一條線的執行緒：已經拿著第一段的位置；void 且 attempt==1 ⇒ 拿一個接續位置、整條線重跑一次。"""
         held = True
         try:
@@ -137,12 +137,12 @@ class Driver:
                     held = True
                 try:
                     if group == "C":
-                        meta = tui_cell.run_c_group(self.cfg, self.ledger, self.pool, task, prefix=self.prefix, sample=sample,
+                        meta = tui_cell.run_c_group(self.cfg, self.ledger, self.pool, task, prefix=prefix, sample=sample,
                                                     attempt=attempt, first_slot_held=True)
                         metas = [meta]
                         void = bool(meta.get("void"))
                     else:
-                        out = tui_cell.run_a_group(self.cfg, self.ledger, self.pool, task, prefix=self.prefix,
+                        out = tui_cell.run_a_group(self.cfg, self.ledger, self.pool, task, prefix=prefix,
                                                    nested=tuple(plan.get("nested", [])), sample=sample, attempt=attempt,
                                                    first_slot_held=True)
                         metas = [out.get("A"), out.get("R"), out.get("K")]
@@ -164,8 +164,10 @@ class Driver:
             if held:
                 self.pool.release(1)
 
-    def run_plan(self, plan: dict) -> dict:
-        log(f"plan kind={plan['kind']} units={len(plan['tasks'])} arms={plan['arms']} nested={plan.get('nested')} slots={self.pool.n}")
+    def run_plan(self, plan: dict, prefix: str) -> dict:
+        """prefix：這個階段的格子名前綴。篩選階段用 `<前綴>s`、主跑用 `<前綴>`——同一題在兩個階段各自重跑 A
+        （篩選用的 A 結果決定題庫去留，主跑的 A 不能重用它：重用會把「因為 A 在這些題上表現差而選了這個題庫」的選擇偏誤帶進 C 對 A 的比較）。"""
+        log(f"plan kind={plan['kind']} prefix={prefix} units={len(plan['tasks'])} arms={plan['arms']} nested={plan.get('nested')} slots={self.pool.n}")
         sample = int(plan.get("samples", [1])[0])
         skipped = launched = 0
         for task in plan["tasks"]:
@@ -174,9 +176,10 @@ class Driver:
             if self.stopping():
                 log("stop file / deadline: no new units")
                 break
+            task = dict(task, phase=plan["kind"])
             todo = []
             for group in (["A"] if "A" in plan["arms"] else []) + (["C"] if "C" in plan["arms"] else []):
-                st, attempt = group_status(self.cfg, plan, task, group, self.prefix, sample)
+                st, attempt = group_status(self.cfg, plan, task, group, prefix, sample)
                 if st == "todo":
                     todo.append((group, attempt))
             if not todo:
@@ -189,7 +192,7 @@ class Driver:
                 break
             launched += 1
             for group, attempt in todo:
-                th = threading.Thread(target=self.run_group, args=(plan, task, group, attempt, sample), daemon=False,
+                th = threading.Thread(target=self.run_group, args=(plan, task, group, attempt, sample, prefix), daemon=False,
                                       name=f"{task['bank']}/{task['id']}:{group}")
                 th.start()
                 self.threads.append(th)
@@ -229,6 +232,7 @@ def main(argv: list[str] | None = None) -> int:
     cfg.receivers.mkdir(parents=True, exist_ok=True)
     cfg.receivers.chmod(0o700)
     drv = Driver(cfg, a.slots, a.prefix, a.stop_file, parse_deadline(a.deadline), a.max_units)
+    scr_prefix = f"{a.prefix}s"
     index, manifest = plan_builder.load_inputs(a.staged)
     nested = tuple(x for x in a.nested.split(",") if x)
     phases: dict = {}
@@ -249,10 +253,10 @@ def main(argv: list[str] | None = None) -> int:
         if a.dry_run:
             print(json.dumps({"screen": splan["estimate"]}))
         else:
-            drv.run_plan(splan)
+            drv.run_plan(splan, scr_prefix)
     decision = None
     if a.phase == "auto":
-        outcomes = plan_builder.screen_outcomes(cfg.cells, a.prefix, phases["screen"])
+        outcomes = plan_builder.screen_outcomes(cfg.cells, scr_prefix, phases["screen"])
         expected = {b: len(ids) for b, ids in (manifest.get("screen_sample") or {}).items()}
         decision = plan_builder.ceiling_decision(outcomes, expected)
         (cfg.eval_root / "ceiling_decision.json").write_text(json.dumps(decision, ensure_ascii=False, indent=1) + "\n")
@@ -269,7 +273,7 @@ def main(argv: list[str] | None = None) -> int:
         if a.dry_run:
             print(json.dumps({"main": mplan["estimate"], "dropped_banks": mplan.get("dropped_banks")}))
         else:
-            drv.run_plan(mplan)
+            drv.run_plan(mplan, a.prefix)
     if a.dry_run:
         return 0
     # 這一批的整體紀錄 → 一個「_run_」格子（有 DONE ⇒ 被 packer 打包）
