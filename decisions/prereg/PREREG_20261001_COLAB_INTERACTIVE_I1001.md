@@ -71,7 +71,7 @@ K 用的是 PR #82 的 native acceptance bridge（`conform` 模式）：它需�
 | 隔離 | 每格一個新的 Linux 使用者＋bwrap（`sandbox.sh`，與 C5 逐字相同）；計分另開新使用者；沒有 PID 空間、網路是通的（同 C5） |
 | 並行 | **`--slots 32`**＝同時在跑的 pi 對話數，整批固定（長對話在 16–32 條吃滿 vLLM；C5 用 48 條）。位置數會影響逾時率——報告要寫 |
 | 隨機種子 | `20261001`：LCB 對照的抽樣、任務題庫篩選的抽樣、主跑的題目順序（`random.Random(f"{seed}-main")`） |
-| Vacant | **v3.7**：wheel 由 repo HEAD 建一次、凍結、整批共用（C 組與 bridge 的 venv 都裝它）。來源 commit `〔凍結時填〕`；wheel 內 `vacant_network/` 與該 commit 逐檔相同（`freeze_i1001.py --wheel-vs-git`）；wheel 檔本身的 sha256 在下面工具表的 `wheel` 列 |
+| Vacant | **v3.7**：wheel 由 repo HEAD 建一次、凍結、整批共用（C 組與 bridge 的 venv 都裝它）。來源 commit `a5abd7597364f5222f99aeedd6a1a5d6a550f008`；wheel 內 `vacant_network/` 與該 commit 逐檔相同（`freeze_i1001.py --wheel-vs-git`）；wheel 檔本身的 sha256 在下面工具表的 `wheel` 列 |
 | 計分器 | `scorers/{code_suite,dabench,databench,polyglot_py}.py`＋`code_checks.py`（第一批逐字複本，`MANIFEST_REUSED.json`）；LCB 整檔時限 60 秒、RLIMIT_AS 2 GB；任務題庫的計分器把例外收成 `scorer_error` ⇒ 這批的 `tui_cell.parse_score` 一律當 infra_void（不算 agent 答錯）；量具結果見 `STAGING.md` 第四節 |
 | 驅動與分析 | `vm/driver_i1001.py`、`vm/tui_cell.py`、`vm/tui_lib.py`、`vm/plan_builder.py`、`analyze_i1001.py`、`vm/feasibility_i1001.py`（本 commit 的版本；下面的表） |
 | 發射紀錄 | 發射時 `launch_record_i1.json` 另記 VM 上量到的：tmux／bwrap／python／kernel 版本、vLLM 版本與完整指令列、GPU、pi、node、模型 sha256、每個 `/opt/eval/bin` 檔的 sha256、selfcheck 摘要（含 bridge 的 `/proc` 墊片有沒有用）、傳給 driver 的全部參數 |
@@ -85,14 +85,14 @@ LCB 三題庫的隱藏測試與樣板取自 `origin/feat/colab-campaign-20260927
 <!-- STAGED_SHA256_BEGIN -->
 | 名稱（題庫＝目錄樹雜湊；其餘＝檔案） | sha256 |
 |---|---|
-| `MANIFEST.json` | `〔凍結時填〕` |
-| `dabench` | `〔凍結時填〕` |
-| `databench` | `〔凍結時填〕` |
-| `lcb_v1` | `〔凍結時填〕` |
-| `lcb_v2` | `〔凍結時填〕` |
-| `lcb_v3` | `〔凍結時填〕` |
-| `polyglot_py` | `〔凍結時填〕` |
-| `tasks_index.json` | `〔凍結時填〕` |
+| `MANIFEST.json` | `f6e46b93f4f8624cfbf58bc7a7691fe8acd6683140acc56744207b74597ddd46` |
+| `dabench` | `da5bad0417f1b2d625eb48476bf260fdc6aa17e7a8f7fb87a16ad9f55d497fed` |
+| `databench` | `e2343f4febd62baf23eae7d922777035f4567f931701b3a662cdbb54bb51bb8b` |
+| `lcb_v1` | `b6b26fb7f8fbf2aa72618eec67fb1565603cc2f6b2f749727688e7c340a27e61` |
+| `lcb_v2` | `6c9b8e556bbc3483fcdb3f49a33d3bd850c4dbb54ed1b80723daae9901a49502` |
+| `lcb_v3` | `c47db5cc7e163cdc1789d193cd8f771d20d2a41f92b4645b7e60ef0392794f31` |
+| `polyglot_py` | `fa1929c198d7218fd1529247f0d6a8e21529ef7fc3b095acfff72f80f2394a0a` |
+| `tasks_index.json` | `d7f41a23de1855426d3c9855caf5b138c325ad7ec012f4ee21f48236c02e6410` |
 <!-- STAGED_SHA256_END -->
 
 ### 工具與 wheel 的 sha256（凍結時填）
@@ -103,41 +103,41 @@ LCB 三題庫的隱藏測試與樣板取自 `origin/feat/colab-campaign-20260927
 <!-- TOOLS_SHA256_BEGIN -->
 | 檔案（相對於 `ops/colab_interactive_20261001/`） | sha256 |
 |---|---|
-| `MANIFEST_REUSED.json` | `〔凍結時填〕` |
-| `analyze_i1001.py` | `〔凍結時填〕` |
-| `autostop_i1001.sh` | `〔凍結時填〕` |
-| `bridge/native_acceptance_bridge.py` | `〔凍結時填〕` |
-| `build_bundle.sh` | `〔凍結時填〕` |
-| `build_manifest.py` | `〔凍結時填〕` |
-| `cu_cap_i1001.sh` | `〔凍結時填〕` |
-| `scorers/code_checks.py` | `〔凍結時填〕` |
-| `scorers/code_suite.py` | `〔凍結時填〕` |
-| `scorers/dabench.py` | `〔凍結時填〕` |
-| `scorers/databench.py` | `〔凍結時填〕` |
-| `scorers/polyglot_py.py` | `〔凍結時填〕` |
-| `stub_model.py` | `〔凍結時填〕` |
-| `sync_i1001.sh` | `〔凍結時填〕` |
-| `vm/cu_guard.sh` | `〔凍結時填〕` |
-| `vm/deploy_i1001.sh` | `〔凍結時填〕` |
-| `vm/driver_i1001.py` | `〔凍結時填〕` |
-| `vm/feasibility_i1001.py` | `〔凍結時填〕` |
-| `vm/finalize_vm.py` | `〔凍結時填〕` |
-| `vm/launch_i1001.sh` | `〔凍結時填〕` |
-| `vm/launch_record.py` | `〔凍結時填〕` |
-| `vm/orproxy.py` | `〔凍結時填〕` |
-| `vm/packer.py` | `〔凍結時填〕` |
-| `vm/packer_i1001.py` | `〔凍結時填〕` |
-| `vm/plan_builder.py` | `〔凍結時填〕` |
-| `vm/sandbox.sh` | `〔凍結時填〕` |
-| `vm/smoke_stub.py` | `〔凍結時填〕` |
-| `vm/tui_cell.py` | `〔凍結時填〕` |
-| `vm/tui_lib.py` | `〔凍結時填〕` |
-| `vm/vacant_check.py` | `〔凍結時填〕` |
-| `vm/vllm_up_i1001.sh` | `〔凍結時填〕` |
-| `vm/vm_selfcheck.py` | `〔凍結時填〕` |
-| `vm/vm_setup.sh` | `〔凍結時填〕` |
-| `vmsh_i1001.sh` | `〔凍結時填〕` |
-| `wheel` | `〔凍結時填〕` |
+| `MANIFEST_REUSED.json` | `6960486195625733a28c09e0119a7ef77f37a4d60c29f4fe6a14de707a3297e8` |
+| `analyze_i1001.py` | `e3b7271fd6d4f9b618a99ffe39754df61653de31f88cf4e94fa8c574ce4c8bed` |
+| `autostop_i1001.sh` | `3c820a998946a6cf457fb203782b81fa6fdfe94223dad9cfa30672bc4d19c062` |
+| `bridge/native_acceptance_bridge.py` | `5104ae0035c86609a43a679e49820371384ed0e5640cd558d66698857c9eeeec` |
+| `build_bundle.sh` | `5e5ca0caadc80af5c34833b04a71062151ed1d1386b54233650614c84cf28d92` |
+| `build_manifest.py` | `d613718d472d6f1113b66a61b939397587aa31a5d502c6a983a3d5a72fa077fa` |
+| `cu_cap_i1001.sh` | `c82285225799bb688e867f44617565e03fc2bf2a19e1273429e0811b4f43794a` |
+| `scorers/code_checks.py` | `d6b145b74621092de73605dbfd38758d02bd21dcdf5f46861833048abceecd36` |
+| `scorers/code_suite.py` | `298396bcc6cabe68d9129870ef1be0d7f94b153cc8cd4219504931759714649d` |
+| `scorers/dabench.py` | `a541dceda5d091da9ff5fa323dd14220c5c8302935ac85d6f043d79f356435b1` |
+| `scorers/databench.py` | `ac5bd5be233e01ba1060ec1e698cd8eb4a73b8a4a023836587d3f415bb057b38` |
+| `scorers/polyglot_py.py` | `25ed44f4643200c006f9b8780783366050c2637660ae7873e7f2010a5366f182` |
+| `stub_model.py` | `c2e74615f2fc2cb133aec2c828788582c479a087f8b961cf89824620b711e863` |
+| `sync_i1001.sh` | `9a123ccd1c595ae6e144a83d36d74566f33429423a2a48f6d8bd9951553fc72d` |
+| `vm/cu_guard.sh` | `452a95185339fd79aefe2f5b2a50e308f10b04e32dc37d99e99cc30cedba6122` |
+| `vm/deploy_i1001.sh` | `46c7436906ac355840b458ef4826198ef99a6010d636c352e82a50c408b1217a` |
+| `vm/driver_i1001.py` | `0caaaaf5ae63327f407a7c5758acc75690f32b9418af775e938ddba838881b42` |
+| `vm/feasibility_i1001.py` | `a21768f3d6edd09ca40a5c995fc6cbdd0c18d90fb0eaddc1779ff129656a4d01` |
+| `vm/finalize_vm.py` | `e9995a1a891e355f6a962fda5e4c332224088ac92e582365a382ccfddc7921fd` |
+| `vm/launch_i1001.sh` | `32ff7f08227673d2918fe84a7f3966110f3e1699722464ed58e30da590acc289` |
+| `vm/launch_record.py` | `584694fd133798d64dde5a309283dc13133192f41eaac314030d62019d712db9` |
+| `vm/orproxy.py` | `bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525` |
+| `vm/packer.py` | `d206cf001276c7c9ff480c0c35f02d149a23f4dcafae85a2e02cd85dcdfe709d` |
+| `vm/packer_i1001.py` | `f28c99e02e9f66cc42e472a2b28207942694f3ff52e829581d183e0f9df6aa99` |
+| `vm/plan_builder.py` | `26e05555f3fbe25f9c4e120a3af07350c8e8ff3e56c0a396cb5546585f75948f` |
+| `vm/sandbox.sh` | `4855e8e4d0a56a06d24fa7d54e28c09e291d738d3646d5095ab8a0c0997a6af3` |
+| `vm/smoke_stub.py` | `11757ab9afc42cddc0f80236be6048f5a6ac3378f7c9f55fe6cf197d17ac12ac` |
+| `vm/tui_cell.py` | `782273ced78fef3f6151eb3fbcde1076f2dc1faec0341e8360ee54d2c34d27e4` |
+| `vm/tui_lib.py` | `8934bc6622e816f495db6914f7d2915252c7fbc4315c14f28eb78474a79f74b5` |
+| `vm/vacant_check.py` | `07afff4f22ee23115e507f94c4c8f7276317793bf5ff3a83f7141349295e8661` |
+| `vm/vllm_up_i1001.sh` | `f8b96141ff0f5d4cb4e6fd5ad34b5e1ff71a7894df1c9ef39cb7c7e1f662038e` |
+| `vm/vm_selfcheck.py` | `06438728ffe4bba451a3e451c7568dc9d097ea278260439d855efa3105950ab1` |
+| `vm/vm_setup.sh` | `57348920af55032c7c8015278856f3ef794222a72de4242eaa4957e8ca1cf179` |
+| `vmsh_i1001.sh` | `9c6d9a26d9a3968ac40d9e9dc149362fd7957671ffdeeb9be7e68c72b1292d53` |
+| `wheel` | `e367d520ad3f80db03bfff7b51c81f95be896941e8a1a90eee6b3810b5a0c818` |
 <!-- TOOLS_SHA256_END -->
 
 **凍結程序**：（1）`python3 build_manifest.py --check` 與 `pytest tests/test_colab_interactive_20261001.py tests/test_colab_i1001_ops.py` 全綠；
