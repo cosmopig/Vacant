@@ -1,0 +1,86 @@
+[
+ {
+  "name": "h01",
+  "persona": "d3",
+  "sub_id": "SYN-gate2-20261001-t01-0",
+  "note": "target=抄鏈尾; groups=['抄鏈尾', '放大鏡']"
+ },
+ {
+  "name": "h02",
+  "persona": "d4",
+  "sub_id": "SYN-gate2-20261001-t02-3",
+  "note": "target=土堆小陶印; groups=['土堆小陶印', '點數單']"
+ },
+ {
+  "name": "h03",
+  "persona": "d5",
+  "sub_id": "SYN-gate2-20261001-t03-3",
+  "note": "target=點數單; groups=['抄鏈尾', '點數單']"
+ },
+ {
+  "name": "h04",
+  "persona": "d6",
+  "sub_id": "SYN-gate2-20261001-t04-8",
+  "note": "target=蕨葉431; groups=['筆芯', '蕨葉431']"
+ },
+ {
+  "name": "h05",
+  "persona": "d1",
+  "sub_id": "SYN-gate2-20261001-t05-1",
+  "note": "target=抄鏈尾; groups=['土量', '抄鏈尾']"
+ },
+ {
+  "name": "h06",
+  "persona": "d2",
+  "sub_id": "SYN-gate2-20261001-t06-5",
+  "note": "target=土堆小陶印; groups=['放大鏡', '土堆小陶印']"
+ },
+ {
+  "name": "h07",
+  "persona": "d3",
+  "sub_id": "SYN-gate2-20261001-t07-2",
+  "note": "target=點數單; groups=['點數單', '背面有字']"
+ },
+ {
+  "name": "h08",
+  "persona": "d4",
+  "sub_id": "SYN-gate2-20261001-t08-1",
+  "note": "target=蕨葉431; groups=['蕨葉431', '筆芯']"
+ },
+ {
+  "name": "h09",
+  "persona": "d5",
+  "sub_id": "SYN-gate2-20261001-t09-0",
+  "note": "target=窗格; groups=['窗格', '螺旋']"
+ },
+ {
+  "name": "h10",
+  "persona": "d6",
+  "sub_id": "SYN-gate2-20261001-t10-0",
+  "note": "target=背面有字; groups=['背面有字', '投遞口信號']"
+ },
+ {
+  "name": "h11",
+  "persona": "d1",
+  "sub_id": "SYN-gate2-20261001-t11-19",
+  "note": "target=放大鏡; groups=['放大鏡', '土堆小陶印']"
+ },
+ {
+  "name": "h12",
+  "persona": "d2",
+  "sub_id": "SYN-gate2-20261001-t12-3",
+  "note": "target=螺旋; groups=['蕨葉431', '螺旋']"
+ },
+ {
+  "name": "b7",
+  "persona": "d1",
+  "sub_id": "SYN-gate2-20261001-b7",
+  "note": "B7：--timeout 12 秒"
+ },
+ {
+  "name": "b8",
+  "persona": "d2",
+  "sub_id": "SYN-gate2-20261001-b8",
+  "note": "B8：VACANT_TWIN_PI 指到不存在的檔"
+ }
+]

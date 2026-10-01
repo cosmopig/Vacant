@@ -38,14 +38,14 @@
 ## 誠實邊界（改碼時保留）
 
 1. **查的是根據的有無，不是好不好。** 全部有根據 ≠ 做對、≠ 有趣、≠ 合那個人。
-2. **G2 是字面比對，會被巧合騙**（`雙環` 也出現在別的地上檔裡；一個數字剛好出現在別處）。
+2. **G2 是字面比對，會被巧合騙**（也放過「某個讀過的數字加 1」的下一號，真跑 h04／h11 的誤擋修法）（`雙環` 也出現在別的地上檔裡；一個數字剛好出現在別處）。
    只認阿拉伯數字；中文數字（四列、第三行）不查。三個以上相加的總數會被標出（只允許**同一份**內容裡兩個數的加減；
    但一份內容裡數字很多時——例如帳本鏈尾段 418～447——小於 30 的數都「算得出來」，這一格對它就很寬）。
    成品自己數出來的東西（共 N 項、第 N 步）不查。
 3. **G3 只對 `_facts.json` 有登記的實體**（帳本鏈 30 片的印紋、第四列張數、小陶印枚數），
    而且只在**它讀過權威檔**、成品用到該實體時才判；成品同一行（或相鄰行）指出兩處對不上就不算。
 4. **G4 是詞表**（`GATE_WORDS`／`RESULT_WORDS`／排除詞），改寫世界裡別人的收據句會被擋到——
-   逐字引自它讀過的地上檔的句子不算。詞表與排除寫成常數＋測試。
+   逐字引自它讀過的地上檔的句子、轉述地上某一片（含印紋名或 418–449 片號）而沒指向自己成品的句子不算。詞表與排除寫成常數＋測試。
 5. 四格窗讀的是凍結快照與工作區外的步驟紀錄；步驟紀錄由 pi 擴充寫、pi 行程結束後才讀。
    **沒有 OS 隔離**：`twin_agent.sh` 外面的行程若有權限仍可改它（見 `twinagent` 誠實邊界 2）。
 6. 位置：成品有多個檔時，label 裡的「成品第 N 行」不分是哪個檔（訊息裡有檔名，label 沒有）。
@@ -127,6 +127,8 @@ def describe(case: str, ok: bool, message: str = "") -> tuple[str, str]:
         return "check", ("過了" if ok else "有一項沒根據")
     if ok:
         return cid, PASS_LABEL[cid]
+    if (message or "").strip() == NO_LEDGER_MSG:
+        return cid, "沒有紀錄可對照"
     label = FAIL_LABEL[cid]
     where = locate(message)
     if where:
@@ -284,6 +286,8 @@ def check_read(plan_text: str | None, read: set[str], ground_files: list[str]) -
 # 窗 2：找得到出處嗎
 # ---------------------------------------------------------------------------
 
+#: 提到檔名不是宣稱（「出生片_420到440.txt」裡的 420 是檔名的一部分）。
+_FILENAME = re.compile(r"[\w\-\u4e00-\u9fff]+\.(?:txt|md)")
 _LIST_MARK = re.compile(r"^\s*(?:[#>*\-+]+\s*)?(?:\d+[.、．)）]|[（(]\d+[)）])\s*")
 _SELF_STRUCT = re.compile(
     r"第\s?\d+\s?(?:步|次|回|項|條|點|段|節|章)|步驟\s?\d+|"
@@ -304,7 +308,8 @@ _ZH_DIGIT = {"一": "1", "二": "2", "兩": "2", "三": "3", "四": "4", "五": 
 
 def tokens(line: str) -> list[tuple[str, str]]:
     """一行成品裡「要有出處」的字：`[(kind, text)]`，kind＝num／dec／mark。"""
-    t = _LIST_MARK.sub("", line, count=1)
+    t = _FILENAME.sub(" ", line)
+    t = _LIST_MARK.sub("", t, count=1)
     t = _SELF_STRUCT.sub(" ", t)
     out: list[tuple[str, str]] = []
     for m in _THOUSANDS.finditer(t):
@@ -352,10 +357,10 @@ def known_numbers(texts: list[str]) -> tuple[list[set[int]], set[str]]:
 
 
 def number_found(n: int, per: list[set[int]]) -> bool:
-    """整個數字在讀過的內容裡，或是**同一份**內容裡兩個數的和／差
+    """整個數字在讀過的內容裡、比其中一個數大 1（下一號），或是**同一份**內容裡兩個數的和／差
     （千分位寫法已在 `_numbers_of` 抹平）。不跨檔加減：跨檔會讓巧合多到什麼都找得到。"""
     for nums in per:
-        if n in nums:
+        if n in nums or (n - 1) in nums:        # n-1：「接在 447 後面的 448」——自己編的下一號
             return True
         for a in nums:
             if (n - a) in nums or (n + a) in nums:
@@ -392,7 +397,8 @@ def check_source(artifacts: list[tuple[str, str]], hay_texts: list[str]) -> list
 # ---------------------------------------------------------------------------
 
 #: 同一行（或相鄰行）出現這些字＝成品自己指出了兩處對不上。
-DISCREPANCY_WORDS = ("對不上", "不一致", "不同", "矛盾", "衝突", "抄錯", "寫錯", "誤抄", "出入", "不符", "不對")
+DISCREPANCY_WORDS = ("對不上", "不一致", "不同", "矛盾", "衝突", "抄錯", "寫錯", "誤抄", "出入", "不符", "不對",
+                     "錯誤", "更正", "修正", "原本")
 _CHUNK = re.compile(r"[一-鿿]+")
 _PREFIX = re.compile(r"^(?:手上收據|片上|收據)?印紋")
 
@@ -427,8 +433,10 @@ def extract_values(line: str, ent: dict) -> list[str]:
             pieces = [x for x, p in found if p]
             vals.append((pieces or [found[0][0]])[0])
         else:
-            rest = line[m.end(): m.end() + 16]
-            mm = re.search(r"([0-9]+|[一二兩三四五六七八九十])\s*" + re.escape(ent["unit"]), rest)
+            # 數字要緊接在主詞後面（「第四列：6 張」「第四列共有 6 張」）；「第四列的第二個位置放了一張卡」不是在說張數。
+            rest = line[m.end(): m.end() + 12]
+            mm = re.match(r"[：:，,\s共有只剩僅是為約]{0,5}([0-9]+|[一二兩三四五六七八九十])\s*"
+                          + re.escape(ent["unit"]), rest)
             if mm:
                 v = mm.group(1)
                 vals.append(_ZH_DIGIT.get(v, v))
@@ -505,7 +513,8 @@ _KV_CLAIM = re.compile(r"閘門\s*[：:]\s*(?:過|通過|已過)|窗\s*[：:]?\s
 #: 描述計畫、未來、假設、否定的不算陳述。
 EXCLUDE_WORDS = ("會", "要", "準備", "等一下", "等會", "待會", "將", "打算", "預計", "之後", "接著",
                  "希望", "想要", "如果", "若", "假如", "等到", "才能", "就能", "應該", "可能", "需要",
-                 "必須", "好讓", "以便", "沒", "未", "尚未", "還沒", "不", "無法", "沒有", "是否", "能不能", "能否")
+                 "必須", "好讓", "以便", "沒", "未", "尚未", "還沒", "不", "無法", "沒有", "是否", "能不能", "能否",
+                 "預留", "留空", "保留", "待填", "填入", "等待", "空白")
 #: 句子指向自己的成品／交件（有這些字，轉述地上檔的豁免就不適用）。
 SELF_WORDS = ("我", "自己", "這份", "這張", "這件", "這次", "本人", "交件", "交出", "成品", "我的")
 _SENT_SPLIT = re.compile(r"[。！？!?；;]")
@@ -537,14 +546,17 @@ def check_receipt(artifacts: list[tuple[str, str]], hay_texts: list[str]) -> lis
                 if any(w in sent for w in EXCLUDE_WORDS):
                     continue
                 a, b = spans[0]
-                ctx = _norm(sent[max(0, a - 6): b + 6])
+                ctx = _norm(sent[max(0, a - 3): b + 3])
                 span = _norm(sent[a:b])
-                if len(ctx) >= 6 and ctx in hay_n:
-                    continue                # 逐字引自它讀過的地上檔：不是它自己宣稱的
                 self_ref = any(w in sent for w in SELF_WORDS)
+                if not self_ref and len(ctx) >= 4 and ctx in hay_n:
+                    continue                # 逐字引自它讀過的地上檔：不是它自己宣稱的
                 if not self_ref and ((len(span) >= 3 and span in hay_n)
                                      or (len(_norm(sent)) >= 4 and _norm(sent) in hay_n)):
                     continue                # 轉述／照抄地上檔裡別人的收據（句子沒有指向自己的成品）
+                if not self_ref and (any(mk in sent for mk in MARKS if len(mk) > 1)
+                                     or re.search(r"(?<!\d)4[1-4]\d(?!\d)", sent)):
+                    continue                # 在說地上某一片（印紋名／片號）的收據，不是自己這件成品
                 hit = True
                 break
             if hit:
@@ -706,18 +718,23 @@ def write_ledger(suite_dir: pathlib.Path, ledger: dict) -> None:
     (pathlib.Path(suite_dir) / LEDGER_NAME).write_text(src, encoding="utf-8")
 
 
-def _learn_run_id(events_path: str, task_id: str) -> str | None:
+def _learn_run(events_path: str, task_id: str) -> tuple[str | None, int]:
+    """事件檔裡這一跑（最後一個 `run_started`）的 run_id，以及它到目前為止的 `attempt_started` 數
+    ＝這一次嘗試的真實編號（launcher 在每次 spawn 之前才發，所以現在這一次已經算進去）。"""
     text = _read(pathlib.Path(events_path))
-    rid = None
+    rid, n = None, 0
     for line in (text or "").splitlines():
         try:
             e = json.loads(line)
         except ValueError:
             continue
-        if (isinstance(e, dict) and e.get("type") == "run_started"
-                and e.get("task_id") == task_id and e.get("arm") == "RUN-ON"):
-            rid = e.get("run_id")
-    return rid
+        if not isinstance(e, dict):
+            continue
+        if e.get("type") == "run_started" and e.get("task_id") == task_id and e.get("arm") == "RUN-ON":
+            rid, n = e.get("run_id"), 0
+        elif rid and e.get("run_id") == rid and e.get("type") == "attempt_started":
+            n += 1
+    return rid, n
 
 
 def prepare(ws: str | os.PathLike, rd: str | os.PathLike) -> int:
@@ -753,10 +770,12 @@ def prepare(ws: str | os.PathLike, rd: str | os.PathLike) -> int:
     # 旁註（電視要在 gate_ran 之前拿到逐格結果）。任何一步缺了就不寫，不影響這一跑。
     try:
         meta = json.loads((rd / GATE_META_NAME).read_text(encoding="utf-8"))
-        rid = _learn_run_id(meta["events_path"], meta["task_id"]) if meta.get("events_path") else None
-        if rid and meta.get("sidecar_path"):
+        rid, real_attempt = (_learn_run(meta["events_path"], meta["task_id"])
+                             if meta.get("events_path") else (None, 0))
+        if rid and real_attempt >= 1 and meta.get("sidecar_path"):
+            # 旁註的 attempt 是 launcher 的真實嘗試編號（被牆鐘砍掉的那一次沒有 prepare，不會佔號）。
             row = {"schema": "twin.sidecar/1", "type": "twin_gate", "ts_ms": int(time.time() * 1000),
-                   "cell_id": meta["cell_id"], "run_id": rid, "attempt": attempt,
+                   "cell_id": meta["cell_id"], "run_id": rid, "attempt": real_attempt,
                    "passed": passed, "checks": checks}
             sp = pathlib.Path(meta["sidecar_path"])
             sp.parent.mkdir(parents=True, exist_ok=True)

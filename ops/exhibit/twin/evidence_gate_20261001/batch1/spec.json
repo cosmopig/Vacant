@@ -1,0 +1,182 @@
+[
+ {
+  "name": "g01",
+  "persona": "d1",
+  "sub_id": "SYN-gate-20261001-t01-1",
+  "note": "target=抄鏈尾; groups=['背面有字', '抄鏈尾']"
+ },
+ {
+  "name": "g02",
+  "persona": "d2",
+  "sub_id": "SYN-gate-20261001-t02-4",
+  "note": "target=土堆小陶印; groups=['土堆小陶印', '背面有字']"
+ },
+ {
+  "name": "g03",
+  "persona": "d3",
+  "sub_id": "SYN-gate-20261001-t03-16",
+  "note": "target=點數單; groups=['背面有字', '點數單']"
+ },
+ {
+  "name": "g04",
+  "persona": "d4",
+  "sub_id": "SYN-gate-20261001-t04-7",
+  "note": "target=蕨葉431; groups=['第四列疊字', '蕨葉431']"
+ },
+ {
+  "name": "g05",
+  "persona": "d5",
+  "sub_id": "SYN-gate-20261001-t05-5",
+  "note": "target=抄鏈尾; groups=['背面有字', '抄鏈尾']"
+ },
+ {
+  "name": "g06",
+  "persona": "d6",
+  "sub_id": "SYN-gate-20261001-t06-3",
+  "note": "target=土堆小陶印; groups=['土堆小陶印', '蕨葉431']"
+ },
+ {
+  "name": "g07",
+  "persona": "d1",
+  "sub_id": "SYN-gate-20261001-t07-0",
+  "note": "target=點數單; groups=['點數單', '投遞口信號']"
+ },
+ {
+  "name": "g08",
+  "persona": "d2",
+  "sub_id": "SYN-gate-20261001-t08-10",
+  "note": "target=蕨葉431; groups=['蕨葉431', '第四列疊字']"
+ },
+ {
+  "name": "g09",
+  "persona": "d3",
+  "sub_id": "SYN-gate-20261001-t09-0",
+  "note": "target=窗格; groups=['窗格', '蕨葉431']"
+ },
+ {
+  "name": "g10",
+  "persona": "d4",
+  "sub_id": "SYN-gate-20261001-t10-2",
+  "note": "target=放大鏡; groups=['第四列疊字', '放大鏡']"
+ },
+ {
+  "name": "g11",
+  "persona": "d5",
+  "sub_id": "SYN-gate-20261001-t11-7",
+  "note": "target=螺旋; groups=['土堆小陶印', '螺旋']"
+ },
+ {
+  "name": "g12",
+  "persona": "d6",
+  "sub_id": "SYN-gate-20261001-t12-4",
+  "note": "target=背面有字; groups=['背面有字', '筆芯']"
+ },
+ {
+  "name": "g13",
+  "persona": "d1",
+  "sub_id": "SYN-gate-20261001-t13-6",
+  "note": "target=第四列疊字; groups=['第四列疊字', '螺旋']"
+ },
+ {
+  "name": "g14",
+  "persona": "d2",
+  "sub_id": "SYN-gate-20261001-t14-3",
+  "note": "target=站位; groups=['放大鏡', '站位']"
+ },
+ {
+  "name": "g15",
+  "persona": "d3",
+  "sub_id": "SYN-gate-20261001-t15-2",
+  "note": "target=筆芯; groups=['筆芯', '螺旋']"
+ },
+ {
+  "name": "g16",
+  "persona": "d4",
+  "sub_id": "SYN-gate-20261001-t16-15",
+  "note": "target=土量; groups=['土量', '投遞口信號']"
+ },
+ {
+  "name": "g17",
+  "persona": "d5",
+  "sub_id": "SYN-gate-20261001-t17-2",
+  "note": "target=抄鏈尾; groups=['抄鏈尾', '放大鏡']"
+ },
+ {
+  "name": "g18",
+  "persona": "d6",
+  "sub_id": "SYN-gate-20261001-t18-0",
+  "note": "target=土堆小陶印; groups=['筆芯', '土堆小陶印']"
+ },
+ {
+  "name": "g19",
+  "persona": "d1",
+  "sub_id": "SYN-gate-20261001-t19-1",
+  "note": "target=點數單; groups=['投遞口信號', '點數單']"
+ },
+ {
+  "name": "g20",
+  "persona": "d2",
+  "sub_id": "SYN-gate-20261001-t20-7",
+  "note": "target=蕨葉431; groups=['放大鏡', '蕨葉431']"
+ },
+ {
+  "name": "g21",
+  "persona": "d3",
+  "sub_id": "SYN-gate-20261001-t21-3",
+  "note": "target=抄鏈尾; groups=['抄鏈尾', '蕨葉431']"
+ },
+ {
+  "name": "g22",
+  "persona": "d4",
+  "sub_id": "SYN-gate-20261001-t22-4",
+  "note": "target=土堆小陶印; groups=['土堆小陶印', '放大鏡']"
+ },
+ {
+  "name": "g23",
+  "persona": "d5",
+  "sub_id": "SYN-gate-20261001-t23-5",
+  "note": "target=點數單; groups=['土量', '點數單']"
+ },
+ {
+  "name": "g24",
+  "persona": "d6",
+  "sub_id": "SYN-gate-20261001-t24-1",
+  "note": "target=蕨葉431; groups=['蕨葉431', '背面有字']"
+ },
+ {
+  "name": "g25",
+  "persona": "d1",
+  "sub_id": "SYN-gate-20261001-t25-2",
+  "note": "target=窗格; groups=['窗格', '土堆小陶印']"
+ },
+ {
+  "name": "g26",
+  "persona": "d2",
+  "sub_id": "SYN-gate-20261001-t26-2",
+  "note": "target=放大鏡; groups=['土量', '放大鏡']"
+ },
+ {
+  "name": "g27",
+  "persona": "d3",
+  "sub_id": "SYN-gate-20261001-t27-0",
+  "note": "target=螺旋; groups=['土量', '螺旋']"
+ },
+ {
+  "name": "g28",
+  "persona": "d4",
+  "sub_id": "SYN-gate-20261001-t28-1",
+  "note": "target=投遞口信號; groups=['土堆小陶印', '投遞口信號']"
+ },
+ {
+  "name": "g29",
+  "persona": "d5",
+  "sub_id": "SYN-gate-20261001-t29-11",
+  "note": "target=抄鏈尾; groups=['螺旋', '抄鏈尾']"
+ },
+ {
+  "name": "g30",
+  "persona": "d6",
+  "sub_id": "SYN-gate-20261001-t30-29",
+  "note": "target=點數單; groups=['土堆小陶印', '點數單']"
+ }
+]

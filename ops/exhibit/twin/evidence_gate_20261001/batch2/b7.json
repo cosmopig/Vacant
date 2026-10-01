@@ -1,0 +1,389 @@
+{
+ "name": "b7",
+ "persona": "d1",
+ "sub_id_hash": "5c49b1e0d5a7",
+ "synthetic": true,
+ "endpoint": "http://100.119.113.56:5500/v1",
+ "model_requested": "gemma-4-12b-it-qat",
+ "timeout_s": 12.0,
+ "spec_note": "B7：--timeout 12 秒",
+ "at": "2026-10-01T16:06:05Z",
+ "generate_rc": 0,
+ "wall_s": 56.4,
+ "twin": {
+  "engine": "fallback_deterministic",
+  "degrade_kind": "agent_no_plan",
+  "decision": null,
+  "run_id": "b645583f71814bafb9ba46132c06b439",
+  "verdict_hash": "7edda0b9b75933bc0b3e0366a689f2c168230d8c872a8d04172146da1097d413",
+  "accepted": false,
+  "stop_reason": "attempts_exhausted",
+  "requests_seen": 16,
+  "agent_rc": -9,
+  "agent_timed_out": true,
+  "latency_ms": 56126,
+  "tier": "C",
+  "twin_id": "tw-e37fd0dc553d"
+ },
+ "outcome": "not_made",
+ "ground_groups": [
+  "抄鏈尾",
+  "點數單"
+ ],
+ "ground_files": [
+  "地上/帳本鏈/尾段_418到447片.txt",
+  "地上/帳本鏈/放大鏡輪用順序.txt",
+  "地上/帳本鏈/腳步量過.txt",
+  "地上/帳本鏈/鬆環那幾片.txt",
+  "地上/投遞口/托盤_信1208.txt",
+  "地上/投遞口/收據卡_蕨葉.txt",
+  "地上/捏土處/圍觀站位.txt",
+  "地上/捏土處/土量刻痕.txt",
+  "地上/捏土處/捏好的手印.txt",
+  "地上/捏土處/補塊紀錄.txt",
+  "地上/畫架與長椅/抽屜_舊貼紙.txt",
+  "地上/畫架與長椅/畫架_現貼.txt",
+  "地上/畫架與長椅/長椅_坐過的痕跡.txt",
+  "地上/畫架與長椅/長椅_紙捲.txt",
+  "地上/石頭閘門/窗格亮滅.txt",
+  "地上/石頭閘門/退回紙_第四列.txt",
+  "地上/紙卡地/格狀圖.txt",
+  "地上/紙卡地/空位的灰.txt",
+  "地上/紙卡地/頭頂的線.txt",
+  "地上/草稿角/紙團_丙.txt",
+  "地上/草稿角/紙團_甲.txt",
+  "地上/長桌廣場/桌三_壓著筆的紙.txt",
+  "地上/長桌廣場/桌五_壓著筆的紙.txt"
+ ],
+ "ground_read": [
+  "地上/投遞口/托盤_信1208.txt",
+  "地上/紙卡地/格狀圖.txt",
+  "地上/長桌廣場/桌三_壓著筆的紙.txt"
+ ],
+ "steps_n": 12,
+ "ground_write_blocked": [],
+ "step_failures": [],
+ "attempts": [
+  {
+   "attempt": 1,
+   "agent_rc": -9,
+   "timed_out": true,
+   "agent_wall_s": 12.001,
+   "requests_seen": 4,
+   "accepted": false,
+   "stop_reason": "visible_fail",
+   "feedback_in_prompt_bytes": 0,
+   "feedback_text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 1 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_grounding.py::check_w1_read — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:23: _gg.assert_window(_res(), \"w1\")]\ntest_grounding.py::check_w2_source — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:27: _gg.assert_window(_res(), \"w2\")]\ntest_grounding.py::check_w3_agree — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:31: _gg.assert_window(_res(), \"w3\")]\ntest_grounding.py::check_w4_receipt — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:35: _gg.assert_window(_res(), \"w4\")]\n\nFix the working directory. The checks run again when this process exits.\n",
+   "windows": [
+    {
+     "id": "G1",
+     "case": "check_w1_read",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "named_exists_on_ground": {}
+      }
+     ]
+    },
+    {
+     "id": "G2",
+     "case": "check_w2_source",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "ground_origin": {}
+      }
+     ]
+    },
+    {
+     "id": "G3",
+     "case": "check_w3_agree",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照"
+      }
+     ]
+    },
+    {
+     "id": "G4",
+     "case": "check_w4_receipt",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "ground_lines_with_gate_words": [
+        "地上/帳本鏈/尾段_418到447片.txt:4: 418  收據片（過）  印紋：魚骨  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:5: 419  收據片（過）  印紋：魚骨  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:7: 421  收據片（退回）  印紋：梯  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:8: 422  接片（改過再走閘門）  印紋：梯  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:9: 423  收據片（過）  印紋：星  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:10: 424  收據片（過）  印紋：半月  鐵環：微鬆"
+       ]
+      }
+     ]
+    }
+   ],
+   "artifacts": [],
+   "plan": null
+  },
+  {
+   "attempt": 2,
+   "agent_rc": -9,
+   "timed_out": true,
+   "agent_wall_s": 12.002,
+   "requests_seen": 6,
+   "accepted": false,
+   "stop_reason": "visible_fail",
+   "feedback_in_prompt_bytes": 1013,
+   "feedback_text": "<!-- Written by `vacant run` between attempts.\n     This is machine output, not a person. It is not part of the deliverable. -->\n\n# Acceptance feedback (attempt 2 of 3)\n\nThe checks that ship with this task were run against your\nworking directory. They did not all pass.\n\ntest_grounding.py::check_w1_read — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:23: _gg.assert_window(_res(), \"w1\")]\ntest_grounding.py::check_w2_source — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:27: _gg.assert_window(_res(), \"w2\")]\ntest_grounding.py::check_w3_agree — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:31: _gg.assert_window(_res(), \"w3\")]\ntest_grounding.py::check_w4_receipt — assert: 這一跑的步驟紀錄沒有備好，這一格沒辦法對照 [test_grounding.py:35: _gg.assert_window(_res(), \"w4\")]\n\nFix the working directory. The checks run again when this process exits.\n",
+   "windows": [
+    {
+     "id": "G1",
+     "case": "check_w1_read",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "named_exists_on_ground": {}
+      }
+     ]
+    },
+    {
+     "id": "G2",
+     "case": "check_w2_source",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "ground_origin": {}
+      }
+     ]
+    },
+    {
+     "id": "G3",
+     "case": "check_w3_agree",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照"
+      }
+     ]
+    },
+    {
+     "id": "G4",
+     "case": "check_w4_receipt",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "ground_lines_with_gate_words": [
+        "地上/帳本鏈/尾段_418到447片.txt:4: 418  收據片（過）  印紋：魚骨  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:5: 419  收據片（過）  印紋：魚骨  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:7: 421  收據片（退回）  印紋：梯  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:8: 422  接片（改過再走閘門）  印紋：梯  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:9: 423  收據片（過）  印紋：星  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:10: 424  收據片（過）  印紋：半月  鐵環：微鬆"
+       ]
+      }
+     ]
+    }
+   ],
+   "artifacts": [],
+   "plan": null
+  },
+  {
+   "attempt": 3,
+   "agent_rc": -9,
+   "timed_out": true,
+   "agent_wall_s": 12.002,
+   "requests_seen": 6,
+   "accepted": false,
+   "stop_reason": "visible_fail",
+   "feedback_in_prompt_bytes": 1013,
+   "feedback_text": null,
+   "windows": [
+    {
+     "id": "G1",
+     "case": "check_w1_read",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "named_exists_on_ground": {}
+      }
+     ]
+    },
+    {
+     "id": "G2",
+     "case": "check_w2_source",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "ground_origin": {}
+      }
+     ]
+    },
+    {
+     "id": "G3",
+     "case": "check_w3_agree",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照"
+      }
+     ]
+    },
+    {
+     "id": "G4",
+     "case": "check_w4_receipt",
+     "ok": false,
+     "label": "沒有紀錄可對照",
+     "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+     "evidence": [
+      {
+       "message": "這一跑的步驟紀錄沒有備好，這一格沒辦法對照",
+       "ground_lines_with_gate_words": [
+        "地上/帳本鏈/尾段_418到447片.txt:4: 418  收據片（過）  印紋：魚骨  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:5: 419  收據片（過）  印紋：魚骨  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:7: 421  收據片（退回）  印紋：梯  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:8: 422  接片（改過再走閘門）  印紋：梯  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:9: 423  收據片（過）  印紋：星  鐵環：穩",
+        "地上/帳本鏈/尾段_418到447片.txt:10: 424  收據片（過）  印紋：半月  鐵環：微鬆"
+       ]
+      }
+     ]
+    }
+   ],
+   "artifacts": [],
+   "plan": null
+  }
+ ],
+ "attempts_used": 3,
+ "stop_reason": "attempts_exhausted",
+ "accepted": false,
+ "review_labels": [
+  {
+   "id": "G1",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 0
+  },
+  {
+   "id": "G2",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 0
+  },
+  {
+   "id": "G3",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 0
+  },
+  {
+   "id": "G4",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 0
+  },
+  {
+   "id": "G1",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 1
+  },
+  {
+   "id": "G2",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 1
+  },
+  {
+   "id": "G3",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 1
+  },
+  {
+   "id": "G4",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 1
+  },
+  {
+   "id": "G1",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 2
+  },
+  {
+   "id": "G2",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 2
+  },
+  {
+   "id": "G3",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 2
+  },
+  {
+   "id": "G4",
+   "ok": false,
+   "label": "沒有紀錄可對照",
+   "attempt": 2
+  }
+ ],
+ "letter_present": true,
+ "event_types": [
+  "attempt_started",
+  "agent_exited",
+  "gate_ran",
+  "feedback_ready",
+  "attempt_started",
+  "agent_exited",
+  "gate_ran",
+  "feedback_ready",
+  "attempt_started",
+  "agent_exited",
+  "gate_ran",
+  "run_ended"
+ ],
+ "branches": {
+  "B2a": true,
+  "B2b": true,
+  "B2c": true,
+  "B2d": true,
+  "B3": true,
+  "B5": true
+ },
+ "withdrawn": true,
+ "erased_left": false
+}

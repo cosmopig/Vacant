@@ -506,7 +506,7 @@ def test_checks_rows_have_only_the_contract_keys():
     assert rows[0] == {"id": "G1", "ok": True, "label": "讀過了"}
     assert rows[1] == {"id": "G2", "ok": False, "label": "找不到出處（成品第 7 行）",
                        "file": "artifact", "line": 7}
-    assert rows[2] == {"id": "G4", "ok": False, "label": "收據不是閘門給的"}      # 沒有位置就不編一個
+    assert rows[2] == {"id": "G4", "ok": False, "label": "沒有紀錄可對照"}      # 沒有位置就不編一個
     for r in rows:
         assert set(r) <= set(tv.GATE_CHECK_KEYS)
 
@@ -608,8 +608,10 @@ def test_prepare_writes_the_ledger_and_the_twin_gate_sidecar_and_failure_deletes
     ws.mkdir()
     (ws / "PLAN.md").write_text("它牽動到：\n- 地上/帳本鏈/不存在.txt\n", encoding="utf-8")
     ev = tmp_path / "live.jsonl"
-    ev.write_text(json.dumps({"schema": lifecycle.SCHEMA, "type": "run_started", "run_id": "R1",
-                              "task_id": "twin:tw-1", "arm": "RUN-ON"}) + "\n", encoding="utf-8")
+    def _ev(t, **kw):
+        return json.dumps({"schema": lifecycle.SCHEMA, "type": t, "run_id": "R1", "task_id": "twin:tw-1",
+                           "arm": "RUN-ON", **kw}) + "\n"
+    ev.write_text(_ev("run_started") + _ev("attempt_started", attempt=1), encoding="utf-8")
     (rd / gg.GATE_META_NAME).write_text(json.dumps({
         "events_path": str(ev), "sidecar_path": str(sidecarlib.sidecar_path(ev)),
         "task_id": "twin:tw-1", "cell_id": "tw-1"}), encoding="utf-8")
@@ -621,6 +623,8 @@ def test_prepare_writes_the_ledger_and_the_twin_gate_sidecar_and_failure_deletes
     assert rows[0]["run_id"] == "R1" and rows[0]["passed"] is False
     assert [c["id"] for c in rows[0]["checks"]] == ["G1", "G2", "G3", "G4"]
     assert sidecarlib.validate(rows) == []
+    # 第 2 次嘗試開始（第 1 次的 pi 被砍了、沒有 prepare 的情形見 e2e 的逾時測試）
+    ev.write_text(ev.read_text(encoding="utf-8") + _ev("attempt_started", attempt=2), encoding="utf-8")
     assert gg.prepare(ws, rd) == 0
     assert [r["attempt"] for r in sidecarlib.read(sidecarlib.sidecar_path(ev))] == [1, 2]
     # prepare 出錯 ⇒ 刪掉 _ledger.py（不用舊紀錄）
@@ -1184,3 +1188,87 @@ def test_serve_twin_live_feeds_gate_ran_with_checks_when_everything_arrives_in_o
             assert secret not in blob
     finally:
         srv.server_close()
+
+
+# ---------------------------------------------------------------------------
+# 十一、真跑（舊 VM，ops/exhibit/twin/evidence_gate_20261001/）看出來的誤擋：每一條回歸＋負控制
+# ---------------------------------------------------------------------------
+
+def test_regression_a_filename_with_a_number_is_not_a_claim(tmp_path):
+    """g23：「印紋：[與出生片_420到440.txt 中的印紋一致]」——420 在檔名裡。"""
+    art = "印紋：[與出生片_420到440.txt 中的印紋一致]\n"
+    assert run_gate(tmp_path, PLAN_OK, {"成品.md": art}, ledger([GRID]))["w2"]["ok"]
+    # 負控制：不是檔名的 420 照擋
+    assert not run_gate(tmp_path, PLAN_OK, {"成品.md": "印紋 420 的那片\n"}, ledger([GRID]))["w2"]["ok"]
+
+
+def test_regression_one_card_placed_in_row_four_is_not_a_row_four_count(tmp_path):
+    """g14：「在第四列的第二個位置放了一張卡片」——「一張」不是第四列的張數。"""
+    art = "我在第四列的第二個位置放了一張卡片。\n接著在第四列的第六個位置也放了一張卡片。\n"
+    assert run_gate(tmp_path, PLAN_OK, {"成品.md": art}, ledger(READ3))["w3"]["ok"]
+    # 負控制：真的在說張數
+    for line in ("第四列：6 張\n", "第四列共有 6 張\n", "第四列有六張\n"):
+        assert not run_gate(tmp_path, PLAN_OK, {"成品.md": line}, ledger(READ3))["w3"]["ok"], line
+
+
+def test_regression_saying_the_old_value_was_an_error_is_pointing_it_out(tmp_path):
+    """g23：「修正了原本第四列僅有6張的錯誤」。"""
+    art = "這張點數單修正了原本第四列僅有6張的錯誤。\n"
+    assert run_gate(tmp_path, PLAN_OK, {"成品.md": art}, ledger(READ3))["w3"]["ok"]
+    assert not run_gate(tmp_path, PLAN_OK, {"成品.md": "第四列僅有 6 張。\n"}, ledger(READ3))["w3"]["ok"]
+
+
+def test_regression_paraphrasing_a_world_receipt_is_not_the_twins_own_claim(tmp_path):
+    """g29：「窗格亮燈數：6 格全亮」「蕨葉…最終成功通過了所有 6 格窗格」是在說地上蕨葉那張收據。"""
+    led = ledger([RECEIPT_CARD])
+    for line in ("窗格亮燈數：6 格全亮\n", "「蕨葉」雖然鐵環較鬆，但最終成功通過了所有 6 格窗格。\n",
+                 "片 431 的收據通過了閘門。\n"):
+        assert run_gate(tmp_path, PLAN_OK, {"成品.md": line}, led)["w4"]["ok"], line
+    # 負控制：指向自己的成品、或沒有任何地上出處的宣稱照擋（真跑 g01／g04／g14／g17／g23 的原句）
+    for line in ("閘門亮燈：綠光。\n", "閘門狀態：亮齊綠光。\n", "這是一張通過石頭閘門檢查的收據。\n",
+                 "狀態：已過關（綠光）。\n", "窗裡的光一格一格亮起，最後頂上亮起了一條綠光。\n",
+                 "我的這張收據：窗格亮燈數：6 格全亮\n"):
+        assert not run_gate(tmp_path, PLAN_OK, {"成品.md": line}, led)["w4"]["ok"], line
+
+
+def test_regression_no_ledger_label_is_not_a_fake_location():
+    assert gg.describe("check_w2_source", False, gg.NO_LEDGER_MSG) == ("G2", "沒有紀錄可對照")
+
+
+def test_regression_the_next_number_after_the_last_one_is_not_an_invented_source(tmp_path):
+    """真跑 h04：「編號：448（接續於 447 片之後）」。"""
+    led = ledger([CHAIN])
+    assert run_gate(tmp_path, PLAN_OK, {"成品.md": "編號：448（接續於 447 片之後）\n"}, led)["w2"]["ok"]
+    # 負控制：再往後的號碼、或比讀過的數字小 1 的，照擋
+    assert not run_gate(tmp_path, PLAN_OK, {"成品.md": "編號：450\n"}, led)["w2"]["ok"]
+    assert not run_gate(tmp_path, PLAN_OK, {"成品.md": "在位 23 張\n"}, ledger([GRID]))["w2"]["ok"]
+
+
+def test_e2e_sidecar_attempt_numbers_are_the_launchers_even_when_an_earlier_attempt_was_killed(tmp_path, monkeypatch):
+    """真跑 g02／g06／g08／h07 看出來的 bug：第 1 次被牆鐘砍掉（沒有 prepare）時，第 2 次的旁註不能自稱第 1 次。"""
+    script, *_ = _scenario(tmp_path)
+    script["attempts"][0]["sleep"] = 30
+    _install_fake_pi(tmp_path, monkeypatch, script)
+    cfg = twinagent.AgentConfig(
+        work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=8.0, requires=[])
+    res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
+    evs = _evs(cfg)
+    assert [e["timed_out"] for e in evs if e["type"] == "agent_exited"][:2] == [True, False]
+    side = [r for r in sidecarlib.read(sidecarlib.sidecar_path(cfg.events_path)) if r["type"] == "twin_gate"]
+    assert [r["attempt"] for r in side] == [2]
+    out = le.fold(sidecarlib.merge(evs, sidecarlib.read(sidecarlib.sidecar_path(cfg.events_path))),
+                  verify_url="/r/{cell}")
+    g = {e["attempt"]: e for e in out if e["type"] == "gate_ran"}
+    assert "checks" not in g[1], "被砍掉的那一次不能借用別次的逐格結果"
+    assert "checks" in g[2]
+
+
+def test_regression_a_reserved_blank_for_the_gates_receipt_is_not_a_claim(tmp_path):
+    """真跑 rg08：「（此處預留閘門生成的綠光收據編號）」。"""
+    led = ledger([CHAIN])
+    assert run_gate(tmp_path, PLAN_OK, {"成品.md": "（此處預留閘門生成的綠光收據編號）\n"}, led)["w4"]["ok"]
+    # 負控制：真跑 rh07／rg06 自編收據的原句照擋
+    for line in ("（這張紙從石頭閘門的出紙口垂下，上面有一條細長的綠光印記）\n", "閘門反應：綠光亮起，收據垂下。\n",
+                 "閘門結果：亮齊綠光，通過。\n"):
+        assert not run_gate(tmp_path, PLAN_OK, {"成品.md": line}, led)["w4"]["ok"], line
