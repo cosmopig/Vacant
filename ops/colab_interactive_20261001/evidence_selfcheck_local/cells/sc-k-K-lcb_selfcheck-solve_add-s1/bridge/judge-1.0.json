@@ -1,0 +1,78 @@
+{
+ "rc": 40,
+ "stderr": "",
+ "result": {
+  "outcome": "reject",
+  "reasons": [
+   "visible_acceptance: FAIL — test_visible.py::check_visible_01 — assert: args=(2, 3) got=-1 want=5 [test_visible.py:6: assert got == 5, \"args=%r got=%r want=%r\" % ((2, 3), got, 5)]"
+  ],
+  "coverage": {
+   "required": 3,
+   "decidable": 3,
+   "pass": 2,
+   "fail": 1,
+   "unknown": 0,
+   "conflict": 0,
+   "optional": 0
+  },
+  "contract_sha256": "373de0a0e9bbba91392ba88b054c67e9a090d52f08a8cb991a15c4628db6c7a2",
+  "artifact_sha256": "1a540cd14ebf6186b6c5fd1f40f95e9da124859c77d3883c6886298c0b6f760e",
+  "results": [
+   {
+    "claim_id": "deliverable_present",
+    "status": "PASS",
+    "detail": "all 1 pattern(s) present",
+    "evidence": {
+     "counts": {
+      "solution.py": 1
+     },
+     "independent": true
+    },
+    "verifier": "exists",
+    "verifier_version": "2",
+    "required": true,
+    "authority": "requirement"
+   },
+   {
+    "claim_id": "no_secrets_shipped",
+    "status": "PASS",
+    "detail": "no forbidden files",
+    "evidence": {
+     "matched": [],
+     "independent": true
+    },
+    "verifier": "forbid_paths",
+    "verifier_version": "2",
+    "required": true,
+    "authority": "requirement"
+   },
+   {
+    "claim_id": "visible_acceptance",
+    "status": "FAIL",
+    "detail": "test_visible.py::check_visible_01 — assert: args=(2, 3) got=-1 want=5 [test_visible.py:6: assert got == 5, \"args=%r got=%r want=%r\" % ((2, 3), got, 5)]",
+    "evidence": {
+     "passed": 0,
+     "total": 1,
+     "complete": true,
+     "result_sha256": "dd86acfc136fb82ad8d8a5b9e9abcb40af9f02ef0916cc9d018988e75d18fb20",
+     "suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
+     "sandbox": "bwrap",
+     "independent": true
+    },
+    "verifier": "python_checks",
+    "verifier_version": "3",
+    "required": true,
+    "authority": "requirement"
+   }
+  ],
+  "results_sha256": "80949d3deae539b561584ac287a2af7561c0246ea9940a91be471c7061d8e270",
+  "n_files": 1,
+  "skipped": [],
+  "void": false,
+  "run_id": "e0aa7e1acb374404a24cbdfb7ef18109",
+  "attempt": 1,
+  "workspace_contract_matches_receiver": true,
+  "agent_visible_suite_matches_pinned": true,
+  "sandbox_backend": "bwrap"
+ }
+}

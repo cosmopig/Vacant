@@ -225,7 +225,7 @@ def main() -> int:
     ap.add_argument("--agent-timeout", type=int, default=25, help="只用在 timeout 情境")
     ap.add_argument("--bridge-py", default="/opt/eval/bridgevenv/bin/python")
     ap.add_argument("--bridge-script", default="/opt/eval/bridge/ops/eval/native_acceptance_bridge.py")
-    ap.add_argument("--install-env", default="")
+    ap.add_argument("--install-env", default=os.environ.get("I1001_INSTALL_ENV", ""))
     ap.add_argument("--wheel", default="")
     ap.add_argument("--shim-dir", type=Path, default=None)
     ap.add_argument("--no-c-in-driver", action="store_true", help="driver 情境不跑 C 線（預設有 wheel 就跑，要 pipx）")
@@ -395,7 +395,9 @@ def run_driver_scenario(cfg: Cfg, task: dict, servers: Servers, a: argparse.Name
     t0 = time.time()
     rc = driver_i1001.main(argv)
     secs = round(time.time() - t0, 1)
-    rows = [json.loads(x) for x in (out / "progress.jsonl").read_text().splitlines() if x.strip()]
+    allrows = [json.loads(x) for x in (out / "progress.jsonl").read_text().splitlines() if x.strip()]
+    rows = [r for r in allrows if "event" not in r]
+    events = [r for r in allrows if "event" in r]
     metas = {d.name: load(d / "meta.json") for d in cfg.cells.glob("scd-*")}
     done = {d.name: (d / "DONE").exists() for d in cfg.cells.glob("scd-*")}
     voids = [r for r in rows if r["void"]]
@@ -418,8 +420,10 @@ def run_driver_scenario(cfg: Cfg, task: dict, servers: Servers, a: argparse.Name
                                                  for arm in (["A", "R", "K"] + (["C"] if with_c else []))))
     expect("DRIVER_DONE written", (out / "DRIVER_DONE").exists())
     expect("run record cell", (cfg.cells / "_run_scd" / "DONE").exists())
-    expect("no score in progress.jsonl", not any("pass" in r or "score" in r for r in rows))
-    n_rows = len(rows)
+    expect("no score in progress.jsonl", not any("pass" in r or "score" in r for r in allrows))
+    expect("one rerun event per void group", sum(1 for e in events if e["event"] == "infra_void_rerun")
+           == len({(r["unit"], "C" if r["arm"] == "C" else "A") for r in voids}))
+    n_rows = len(allrows)
     (out / "DRIVER_DONE").unlink()
     rc2 = driver_i1001.main(argv)
     rows2 = [json.loads(x) for x in (out / "progress.jsonl").read_text().splitlines() if x.strip()]

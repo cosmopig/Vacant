@@ -20,11 +20,14 @@ if [ -f $E/progress.jsonl ] || [ -f $E/DRIVER_DONE ] || [ -f $E/STOP ]; then
 fi
 python3 /opt/eval/bin/launch_record.py "$P" "$SLOTS" "$DL" "$MIRROR" | head -3
 cd $E
-pgrep -f "opt/eval/bin/packer.py" >/dev/null || setsid nohup python3 /opt/eval/bin/packer.py --interval 600 --mirror "$MIRROR" >> $E/packer.log 2>&1 < /dev/null &
+# packer_i1001.py＝packer.py 的外殼（driver 一寫 DRIVER_DONE 就收尾，不多睡最多 10 分鐘）；`if` 包起來，免得 `||` 清單的子殼抓著輸出管線不放
+if ! pgrep -f "opt/eval/bin/packer_i1001.py" >/dev/null; then
+  setsid nohup python3 /opt/eval/bin/packer_i1001.py --interval 600 --mirror "$MIRROR" >> $E/packer.log 2>&1 < /dev/null &
+fi
 setsid nohup python3 /opt/eval/bin/feasibility_i1001.py --prefix "$P" >> $E/feasibility_$P.log 2>&1 < /dev/null &
 setsid nohup python3 /opt/eval/bin/finalize_vm.py --mirror "$MIRROR" >> $E/finalize_$P.log 2>&1 < /dev/null &
 SHIMARG=(); [ -n "$SHIM" ] && SHIMARG=(--shim-dir "$SHIM")
 setsid nohup python3 /opt/eval/bin/driver_i1001.py --phase auto --slots "$SLOTS" --prefix "$P" --deadline "$DL" \
   --logfile $E/driver_$P.log "${SHIMARG[@]}" "$@" >> $E/driver_$P.log 2>&1 < /dev/null &
-sleep 3; pgrep -af "opt/eval/bin/(packer|feasibility_i1001|finalize_vm|driver_i1001)" | cut -c1-140
+sleep 3; pgrep -af "opt/eval/bin/(packer_i1001|feasibility_i1001|finalize_vm|driver_i1001)" | cut -c1-140
 echo LAUNCHED $P

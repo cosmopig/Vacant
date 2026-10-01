@@ -1,8 +1,10 @@
-{"t": 1.444, "kind": "ready", "ready": true, "ready_s": 1.44}
-{"t": 2.166, "kind": "enter"}
-{"t": 2.697, "kind": "change", "state": "empty", "session_bytes": 0, "entries": 0, "calls": 0, "hook_procs": 0}
-{"t": 3.228, "kind": "change", "state": "running", "session_bytes": 7144, "entries": 6, "calls": 1, "hook_procs": 0}
-{"t": 3.741, "kind": "change", "state": "final", "session_bytes": 7962, "entries": 8, "calls": 1, "hook_procs": 1}
-{"t": 4.258, "kind": "change", "state": "running", "session_bytes": 9426, "entries": 10, "calls": 2, "hook_procs": 1}
-{"t": 4.773, "kind": "change", "state": "running", "session_bytes": 9711, "entries": 11, "calls": 2, "hook_procs": 0}
-{"t": 5.284, "kind": "change", "state": "final", "session_bytes": 10244, "entries": 12, "calls": 4, "hook_procs": 0}
+{"t": 1.275, "kind": "ready", "ready": true, "ready_s": 1.28}
+{"t": 2.003, "kind": "enter"}
+{"t": 2.021, "kind": "change", "state": "empty", "session_bytes": 0, "entries": 0, "calls": 8, "hook_procs": 1}
+{"t": 2.54, "kind": "change", "state": "empty", "session_bytes": 0, "entries": 0, "calls": 8, "hook_procs": 0}
+{"t": 3.052, "kind": "change", "state": "running", "session_bytes": 7144, "entries": 6, "calls": 8, "hook_procs": 1}
+{"t": 3.564, "kind": "change", "state": "final", "session_bytes": 7962, "entries": 8, "calls": 9, "hook_procs": 1}
+{"t": 4.077, "kind": "change", "state": "running", "session_bytes": 8796, "entries": 9, "calls": 9, "hook_procs": 0}
+{"t": 4.589, "kind": "change", "state": "running", "session_bytes": 9711, "entries": 11, "calls": 11, "hook_procs": 0}
+{"t": 5.111, "kind": "change", "state": "final", "session_bytes": 10244, "entries": 12, "calls": 12, "hook_procs": 1}
+{"t": 5.637, "kind": "change", "state": "final", "session_bytes": 10244, "entries": 12, "calls": 12, "hook_procs": 0}

@@ -52,15 +52,17 @@ tmux 160x50／`TERM=xterm-256color`／history-limit 50000、`PI_OFFLINE=1`（所
 | `vm/driver_i1001.py` | 排程、續跑、void 重跑一次、`--phase auto`（篩選→天花板→主跑）、`progress.jsonl`（不含分數）、`DRIVER_DONE` |
 | `vm/plan_builder.py` | 篩選計畫、主計畫、天花板規則、成本上限估算 |
 | `vm/feasibility_i1001.py` | 護欄：void 率／非 200 率／C 安裝失敗 ⇒ 放 `STOP`（**不看逾時**——題池本來就會撞） |
+| `vm/packer_i1001.py` | `packer.py` 的外殼（**呼叫它的原函式，packer.py 本身逐字不動**）：driver 一寫 `DRIVER_DONE` 就收尾，不多睡最多 10 分鐘（G4 每小時 8.9 CU）；實測 DRIVER_DONE 後約 40 秒 PACKER_DONE |
 | `vm/finalize_vm.py` | packer 收尾後核對 Drive 鏡像每個 chunk 的 sha256 ⇒ `MIRROR_OK`／`MIRROR_BAD`、`ALL_DONE` |
 | `vm/vm_selfcheck.py`、`vm/smoke_stub.py` | **花 GPU 之前**的整條管線冒煙（機制替身模型）；會量 bridge 的 bwrap 在這台機器起不起得來，起不來自動換 /proc 綁定墊片 |
 | `vm/deploy_i1001.sh`、`vm/launch_i1001.sh`、`vm/launch_record.py`、`build_bundle.sh` | 打包、佈署、發射、發射紀錄 |
 | `sync_i1001.sh`、`autostop_i1001.sh`、`vm/cu_guard.sh` | **本機**：同步（`colab download`）、自動關機、運算單位護欄 |
 | `analyze_i1001.py` | 分析 |
-| `vm/{sandbox.sh,orproxy.py,packer.py,cu_guard.sh,vacant_check.py,vm_setup.sh}`、`scorers/`、`stage_*.py`、`bridge/native_acceptance_bridge.py` | **重用**第一批（逐字複本；`MANIFEST_REUSED.json` 記 sha256，`build_manifest.py --check` 驗；沒重用的檔與原因也列在裡面）。bridge 是 PR #82 的檔（本分支 HEAD 還沒有），合進來後改指 `ops/eval/` |
+| `vm/{sandbox.sh,orproxy.py,packer.py,cu_guard.sh,vacant_check.py,vm_setup.sh}`、`scorers/`、`stage_*.py`、`bridge/native_acceptance_bridge.py` | **重用**第一批（逐字複本；`MANIFEST_REUSED.json` 記 sha256，`build_manifest.py --check` 驗；沒重用的檔與原因也列在裡面）。bridge 是 PR #82 的檔（本分支 HEAD 還沒有），合進來後改指 `ops/eval/`。⚠ `vm/cu_guard.sh` 有一處複製後別人改的差異（`$TH）`→`${TH}）`，只影響一行訊息文字），已登記在 manifest 的 `modification` |
 | `STAGING.md`、`stage_pool.py`、`build_pool_lcb.py`、`verify_*.py`、`gauge_task3.py` | 題池與計分器量具（資料側） |
 | `stub_model.py`、`pi_tui_probe.py`、`run_probe_suite.sh`、`evidence_pi_tui/` | pi TUI 的機制探針（7 情境） |
-| `evidence_selfcheck_local/` | 這個容器上 `vm_selfcheck.py` 的結果（機制替身；**不是**真模型的證據） |
+| `evidence_selfcheck_local/` | 這個容器上 `vm_selfcheck.py` 七個情境的結果與各情境的格子紀錄（機制替身；**不是**真模型的證據） |
+| `evidence_launch_rehearsal_local/` | 本機**全套排練**：bundle→deploy→selfcheck→`launch_i1001.sh`（`--max-units 2`，替身模型當上游）→ driver／packer／finalize／analyze 一路走完的紀錄（見第九節） |
 | `tests/test_colab_interactive_20261001.py` | 純函式測試（計畫、完成偵測在錄好的 session 檔上、分析、排程、同步／關機腳本、bundle） |
 
 ## 五、操作順序
@@ -73,6 +75,7 @@ cd ops/colab_interactive_20261001
 python3 build_manifest.py --check                    # 重用檔沒被改過
 .venv/bin/python -m pytest tests/test_colab_interactive_20261001.py -q
 # wheel：從目前 HEAD 建（C 組與 bridge 的 venv 都裝它）；題目 staged 樹在 scratchpad（不進 repo）
+.venv/bin/python -m pip wheel --no-deps -w <wheel 目錄> .         # 在 repo 根目錄；記下 sha256（launch_record 會再記一次）
 bash build_bundle.sh <staged 目錄> <vacant_network-*.whl> /tmp/deploy_i1001.tgz
 ```
 
@@ -115,7 +118,7 @@ void 一直出現＝先看 `void_reason`（`footer_timeout`＝TUI 沒起來、`p
 
 ### 6. 收完
 1. `autostop` 自動關機；沒關就手動 `colab stop -s i1001`，**不要空著**。
-2. `python3 analyze_i1001.py --chunks ~/Vacant_colab_raw/i1001 --out <目錄>` → `report.md`／`report.json`／`cells.jsonl`。先看 `void_final`、`audit`（`late_write_after_done` 非 0 ⇒ IDLE_S 太短，結果要保留這句）。
+2. `python3 analyze_i1001.py --chunks ~/Vacant_colab_raw/i1001 --out <目錄> --prefix i1` → `report.md`／`report.json`／`cells.jsonl`。先看 `void_final`、`audit`（`late_write_after_done` 非 0 ⇒ IDLE_S 太短，結果要保留這句）。
 3. 結果與報告進 repo；原始紀錄**不進 repo**（含題目內容與模型輸出）。
 
 ## 六、為什麼這樣設計（會影響技術決策的幾條）
@@ -143,8 +146,10 @@ void 一直出現＝先看 `void_reason`（`footer_timeout`＝TUI 沒起來、`p
 4. **信任對話框的按鍵**（Down×4＋Enter）：筆記裡量過選單文字，沒有在真 pi 上按過。
 5. **Vacant 在「零工具呼叫就說做完」時看不到東西**（筆記 §4 的 n=1 觀察）：C 組對這種跑沒有作用，不是這批的 bug。
 6. **替身模型不解題**：`vm_selfcheck.py` 驗的是管線與紀錄，不是 agent 的表現。
-7. **成本**：未預測。`plan.json` 的 `estimate` 只給**上限**（每段都撞 1800 秒）；A 失敗題近六成會撞時限、R／K 的接續段又是 1800 秒，
-   主跑量級粗估在「數十 CU」——**先用 `--max-units 8` 小跑量真實的每單位分鐘數再決定位置數與時限**。位置數建議從 32 起（vLLM 長對話 32 條飽和；程式題對話較短）。
+7. **成本**：未預測。`plan_builder` 對真的 staged 樹算出的**上限**（每段都撞 1800 秒，不是預測）：篩選 30 單位＝30 段、900 session‑分鐘；
+   主跑（沒有題庫被丟）227 單位＝最多 1,174 段（A、C 各 227 ＋ R 最多 454 ＋ K 最多 266）、35,220 session‑分鐘 ≈ 587 session‑小時；位置數 32 時 ≈ 18 小時 ≈ **163 CU（G4 8.9 CU/h）**。
+   真實用量遠低於上限，但 A 失敗題近六成會撞時限、R／K 的接續段又是 1800 秒，量級粗估在「數十 CU」——**先用 `--max-units 8` 小跑量真實的每單位分鐘數，
+   再決定位置數與時限**（`--deadline` 過了不開新單位、已開始的跑完）。位置數建議從 32 起（vLLM 長對話 32 條飽和；程式題對話較短）。
 8. **重用的 packer／orproxy／sandbox.sh 沒有改**；packer 只打包 `cells/*/DONE`，所以 A 線的 DONE 在整條線結束時才寫（見上）。
 
 ## 八、口徑（寫報告時）
@@ -152,3 +157,21 @@ void 一直出現＝先看 `void_reason`（`footer_timeout`＝TUI 沒起來、`p
 - ✅「在這個題池、本機 gemma-4-12b（vLLM、關思考）、互動式 pi 0.87.1、1800 秒／段、不設回合上限下，**C 對 A**（或 **K 對 R**）的隱藏測試通過數配對比較為 …（Holm 校正後 p＝…）」。
 - ✅「沒有量到差別」＝這一批沒有檢出；不是「沒有差別」。
 - ❌「Vacant 讓 agent 做得更好」不帶條件；❌ 把分項當檢定；❌ 外推到真人互動使用；❌ 把 `vm_selfcheck.py` 的結果說成 agent 的表現；❌ 和 C5 的 `--print` 數字直接比。
+
+## 九、本機全套排練（我做過的；Colab 上做之前可以先在任何有 root＋tmux＋bwrap＋pi 的機器上再做一次）
+
+不花 GPU、不花模型呼叫：用 `smoke_stub.py` 當「上游」（它對任何題目都回「寫一個 solve_add 到 solution.py」，所以題目本身都會判沒過——
+這裡驗的是管線，不是 agent 的表現）。
+```bash
+bash build_bundle.sh <staged> <wheel> /tmp/deploy_i1001.tgz
+mkdir -p /root/deploy && tar -xzf /tmp/deploy_i1001.tgz -C /root/deploy && bash /root/deploy/bin/deploy_i1001.sh g4 http://127.0.0.1:18000
+export I1001_INSTALL_ENV='HTTPS_PROXY=… PIP_CERT=… SSL_CERT_FILE=… NO_PROXY=127.0.0.1,localhost'   # 只有這台機器要 proxy 才需要；不會出現在 ps
+python3 /opt/eval/bin/smoke_stub.py --port 18000 --script <腳本.json> &       # 腳本：{"plain":["right"],"solutions":{"right":"…","wrong":"…"}}
+python3 /opt/eval/bin/vm_selfcheck.py                                           # 七個情境
+bash /opt/eval/bin/launch_i1001.sh t2 4 <時限> <鏡像目錄> --max-units 2
+```
+結果（`evidence_launch_rehearsal_local/`）：篩選 2 單位（只跑 A）→ 天花板決定（任務題庫 `undecided`、保留）→ 主跑 2 個 LCB 單位（A、C、R＝A、K 3 段都沒被放行）→ `DRIVER_DONE` 後約 40 秒 `PACKER_DONE`、`MIRROR_OK`、`ALL_DONE`
+→ `analyze_i1001.py` 出報告。踩到並修掉的：`launch_i1001.sh` 用 `A || B &` 會讓子殼抓著輸出管線（改成 `if`）、packer 睡滿 10 分鐘才收尾（改用 `packer_i1001.py`）、
+selfcheck 的 driver 情境會刪掉別的情境的紀錄、`progress.jsonl` 的事件列沒被 selfcheck／feasibility 略過。
+**排練不代表 Colab 上一定過**：沒有 GPU、沒有真 vLLM、tmux 3.4 不等於 Colab 的版本、bridge 的 bwrap /proc 只在本機用「會拒絕 `--proc` 的假 bwrap」模擬過（墊片路徑通）。
+

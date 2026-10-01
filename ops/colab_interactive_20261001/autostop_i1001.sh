@@ -46,7 +46,7 @@ while true; do
       done < "$W/MANIFEST.final.tsv"
       last=$(tail -1 "$W/MANIFEST.final.tsv" | cut -f1)
       if [ "$missing" = 0 ]; then
-        echo "$(date -u +%FT%TZ) DRIVER_DONE＋PACKER_DONE＋最後一個 chunk（$last）本機 sha256 已驗 ⇒ 關機"
+        echo "$(date -u +%FT%TZ) DRIVER_DONE＋PACKER_DONE＋最後一個 chunk（${last}）本機 sha256 已驗 ⇒ 關機"
         if [ $DRY = 1 ]; then echo "DRY-RUN: colab stop -s $S"; exit 0; fi
         for k in 1 2 3; do "$COLAB" stop -s "$S" </dev/null && { echo "$(date -u +%FT%TZ) STOPPED $S"; exit 0; }; sleep 10; done
         echo "$(date -u +%FT%TZ) colab stop 連續失敗——手動關掉！" >&2; exit 5
@@ -62,7 +62,7 @@ while true; do
       echo "$(date -u +%FT%TZ) 拉不到最終 MANIFEST，下一輪再試"
     fi
   else
-    echo "$(date -u +%FT%TZ) driver_done=$drv packer_done=$pk（還在跑）"
+    echo "$(date -u +%FT%TZ) driver_done=$drv packer_done=${pk}（還在跑）"
   fi
   [ "$MAXL" != 0 ] && [ "$loops" -ge "$MAXL" ] && exit 0
   sleep "$INT"

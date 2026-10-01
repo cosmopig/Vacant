@@ -388,17 +388,19 @@ def typed_matches(first_user_text: str | None, typed: str) -> bool | None:
 # ── 交付物與重試條件 ──────────────────────────────────────────────────────────────────────────────
 
 
-def deliverable_name(bank: str, task_dir: str | os.PathLike | None = None) -> str:
-    """這一題要 agent 交的那個檔：LCB＝solution.py、dabench／databench＝answer.txt、polyglot＝hidden/expected.json 的 solution_file。"""
+def deliverable_name(bank: str, task_dir: str | os.PathLike | None = None, *, strict: bool = False) -> str:
+    """這一題要 agent 交的那個檔：LCB＝solution.py、dabench／databench＝answer.txt、polyglot＝hidden/expected.json 的 solution_file。
+    strict＝polyglot 讀不到 expected.json 就丟例外（建計畫時用：寧可停下來，也不要把錯的交付物名字寫進計畫）。"""
     if bank.startswith("lcb"):
         return "solution.py"
     if bank in ("dabench", "databench"):
         return "answer.txt"
-    if bank == "polyglot_py" and task_dir is not None:
+    if bank == "polyglot_py":
         try:
             return json.loads((Path(task_dir) / "hidden" / "expected.json").read_text())["solution_file"]
-        except (OSError, ValueError, KeyError):
-            pass
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            if strict:
+                raise FileNotFoundError(f"cannot determine the polyglot deliverable: {task_dir}/hidden/expected.json unreadable ({e})") from e
     return "solution.py"
 
 

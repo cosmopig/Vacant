@@ -1,0 +1,79 @@
+{
+ "rc": 40,
+ "stderr": "",
+ "result": {
+  "outcome": "reject",
+  "reasons": [
+   "deliverable_present: FAIL — missing from the deliverable: solution.py (found 0, need 1)",
+   "visible_acceptance: FAIL — test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:1: import solution]"
+  ],
+  "coverage": {
+   "required": 3,
+   "decidable": 3,
+   "pass": 1,
+   "fail": 2,
+   "unknown": 0,
+   "conflict": 0,
+   "optional": 0
+  },
+  "contract_sha256": "a1dc432e35005f954fd0646c00071f11434dc846ec90f16fca0d0d51ee2b247f",
+  "artifact_sha256": "602e35a92eec4bc0a2ec6ae113f07bfc6933322fb69fe8dee416e5a67217e2a2",
+  "results": [
+   {
+    "claim_id": "deliverable_present",
+    "status": "FAIL",
+    "detail": "missing from the deliverable: solution.py (found 0, need 1)",
+    "evidence": {
+     "counts": {
+      "solution.py": 0
+     },
+     "independent": true
+    },
+    "verifier": "exists",
+    "verifier_version": "2",
+    "required": true,
+    "authority": "requirement"
+   },
+   {
+    "claim_id": "no_secrets_shipped",
+    "status": "PASS",
+    "detail": "no forbidden files",
+    "evidence": {
+     "matched": [],
+     "independent": true
+    },
+    "verifier": "forbid_paths",
+    "verifier_version": "2",
+    "required": true,
+    "authority": "requirement"
+   },
+   {
+    "claim_id": "visible_acceptance",
+    "status": "FAIL",
+    "detail": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:1: import solution]",
+    "evidence": {
+     "passed": 0,
+     "total": 2,
+     "complete": false,
+     "result_sha256": "2e194b7a21b1a559fb6d61202f10b661021fcdd1fc41aa08180a953b90026eb1",
+     "suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
+     "sandbox": "bwrap",
+     "independent": true
+    },
+    "verifier": "python_checks",
+    "verifier_version": "3",
+    "required": true,
+    "authority": "requirement"
+   }
+  ],
+  "results_sha256": "6c7f2e0b3f55e672295fc7d7bfa003ba1c0c0e62b6069046de3109049e1534ca",
+  "n_files": 0,
+  "skipped": [],
+  "void": false,
+  "run_id": "c89e8457ba4e42ac83a14615741a460f",
+  "attempt": 1,
+  "workspace_contract_matches_receiver": true,
+  "agent_visible_suite_matches_pinned": true,
+  "sandbox_backend": "bwrap"
+ }
+}

@@ -45,6 +45,12 @@ REUSED: list[tuple[str, str, str]] = [
     ("bridge/native_acceptance_bridge.py", "ops/eval/native_acceptance_bridge.py", PR82_REF),
 ]
 
+#: 複本與來源**刻意不同**的檔案（改了什麼、為什麼）。沒有登記在這裡的差異一律算「重用檔被改過」而擋下。
+MODIFIED: dict[str, str] = {
+    "vm/cu_guard.sh": "第 14 行 `$TH）` → `${TH}）`：全形括號緊接變數名時，bash 在 UTF-8 locale 下可能把它當成識別字的一部分而印出空值"
+                      "（只影響「STOP 已放」那行訊息的文字，不影響門檻判斷）。複製之後由別人改的（16:19），這裡只是登記。",
+}
+
 REPLACED: list[dict[str, str]] = [
     {"campaign_file": "cell.sh", "replaced_by": "vm/tui_cell.py",
      "why": "互動式 TUI（tmux）而非 `pi --print`；同樣的隔離（新使用者＋bwrap）、同樣的紀錄欄位，另加完成偵測／pane 紀錄／sessions"},
@@ -73,6 +79,8 @@ def build(source_root: pathlib.Path | None, pr82_root: pathlib.Path | None) -> d
     for copy, src, ref in REUSED:
         row = {"copy": copy, "copy_sha256": sha256(HERE / copy), "source": src, "source_ref": ref,
                "verbatim": True, "source_sha256": None, "source_checked": False}
+        if copy in MODIFIED:
+            row["modification"] = MODIFIED[copy]
         root = pr82_root if src.startswith("ops/eval/") else source_root
         if root is not None and (root / src).is_file():
             row["source_sha256"] = sha256(root / src)
@@ -94,8 +102,8 @@ def check(manifest: dict) -> list[str]:
         elif sha256(p) != recorded[copy]:
             bad.append(f"{copy}: sha256 differs from MANIFEST_REUSED.json (a reused file was edited)")
     for r in manifest["rows"]:
-        if r.get("source_checked") and not r.get("verbatim"):
-            bad.append(f"{r['copy']}: copy differs from its source at copy time")
+        if r.get("source_checked") and not r.get("verbatim") and r["copy"] not in MODIFIED:
+            bad.append(f"{r['copy']}: copy differs from its source and the difference is not declared in MODIFIED")
     return bad
 
 

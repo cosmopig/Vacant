@@ -41,7 +41,7 @@ def sha256_file(p: pathlib.Path) -> str:
 def _task_entry(t: dict, *, k_banks: tuple[str, ...], screened: bool, with_k: bool) -> dict:
     bank = t["bank"]
     return {"bank": bank, "id": t["id"], "dir": t["dir"], "role": t.get("role"),
-            "deliverable": deliverable_name(bank, t["dir"]),
+            "deliverable": deliverable_name(bank, t.get("read_dir") or t["dir"], strict=True),
             "k": bool(with_k and bank in k_banks), "screened": screened}
 
 
@@ -152,8 +152,12 @@ def estimate(tasks: list[dict], arms: list[str], nested: list[str], timeout_s: i
 
 
 def load_inputs(staged: pathlib.Path) -> tuple[list[dict], dict]:
-    return (json.loads((staged / "tasks_index.json").read_text()),
-            json.loads((staged / "MANIFEST.json").read_text()))
+    """tasks_index 的 `dir` 是 VM 上的路徑（/srv/eval/staged/…）；在別的機器上預覽計畫時讀不到，
+    所以另給每題 `read_dir`＝<這個 staged 目錄>/<題庫>/<題>（只用來讀 hidden/expected.json，不寫進計畫）。"""
+    index = json.loads((staged / "tasks_index.json").read_text())
+    for t in index:
+        t["read_dir"] = str(staged / t["bank"] / t["id"])
+    return index, json.loads((staged / "MANIFEST.json").read_text())
 
 
 def main(argv: list[str] | None = None) -> int:
