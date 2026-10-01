@@ -225,7 +225,7 @@ def main() -> int:
     ap.add_argument("--agent-timeout", type=int, default=25, help="只用在 timeout 情境")
     ap.add_argument("--bridge-py", default="/opt/eval/bridgevenv/bin/python")
     ap.add_argument("--bridge-script", default="/opt/eval/bridge/ops/eval/native_acceptance_bridge.py")
-    ap.add_argument("--install-env", default="")
+    ap.add_argument("--install-env", default=os.environ.get("I1001_INSTALL_ENV", ""))
     ap.add_argument("--wheel", default="")
     ap.add_argument("--shim-dir", type=Path, default=None)
     ap.add_argument("--no-c-in-driver", action="store_true", help="driver 情境不跑 C 線（預設有 wheel 就跑，要 pipx）")

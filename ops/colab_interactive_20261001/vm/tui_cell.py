@@ -1060,7 +1060,7 @@ def cfg_from_args(a: argparse.Namespace) -> Cfg:
             setattr(c, f, int(v))
     if getattr(a, "idle_s", None):
         c.idle_s = float(a.idle_s)
-    c.install_env = shlex.split(getattr(a, "install_env", "") or "")
+    c.install_env = shlex.split(getattr(a, "install_env", "") or os.environ.get("I1001_INSTALL_ENV", ""))
     if getattr(a, "shim_dir", None):
         c.bridge_env = {"PATH": a.shim_dir}
     return c
@@ -1081,7 +1081,8 @@ def add_cfg_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--agent-timeout")
     ap.add_argument("--score-timeout")
     ap.add_argument("--idle-s")
-    ap.add_argument("--install-env", default="", help="只給安裝那一步的環境 'K=V K=V'（本機測試的 proxy／CA）")
+    ap.add_argument("--install-env", default="", help="只給安裝那一步的環境 'K=V K=V'（本機測試的 proxy／CA）；"
+                                                      "也可用環境變數 I1001_INSTALL_ENV（不會出現在 ps 的指令列上）")
 
 
 def main(argv: list[str] | None = None) -> int:
