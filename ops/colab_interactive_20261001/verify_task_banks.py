@@ -5,7 +5,8 @@
 
 和 `gauge_task3.py`（第二批的量具，逐字複製）同一組案例，但**跑的是 staged 樹裡的 `scorer.py` 與 `hidden/`**——
 就是 cell.sh 會用的那一份，不是題庫原始目錄：
-- reference：資料題＝`hidden/<id>/expected.json` 的標準答案寫成答案檔；polyglot＝官方參考解（`--reference-root` 才有；
+- reference：資料題＝`hidden/<id>/expected.json` 的標準答案寫成答案檔；另有 `reference_solver_output`＝題庫參考解實際算出來的輸出
+  （`reference/reproduction.json` 的 `reference_output`，只收 `reproduced:true` 的；要 `--reference-root`）；polyglot＝官方參考解（`--reference-root` 才有；
   沒給就略過 polyglot 的正控制並在輸出記下 `positive_skipped`）；必須 pass:true。
 - missing／empty／wrong／stub：必須 pass:false 且 scorer 有輸出 JSON（沒輸出＝那一格會被判 infra_void）。
 - polyglot 另加 `ref_tampered_test`：參考解＋工作區測試檔被改壞 ⇒ 仍 pass:true（計分只用原件）。
@@ -71,7 +72,18 @@ def cases_for(bank: str, tdir: pathlib.Path, ref_root: pathlib.Path | None):
     else:
         ref = exp["answer"] + "\n"
         wrong = G.wrong_answer_databench(exp["answer"], exp["type"]) + "\n"
-    return "answer.txt", {"reference": (ref, None), "missing": (None, None), "empty": ("", None), "wrong": (wrong, None),
+    extra_pos = {}
+    if ref_root is not None and (ref_root / bank / "reference" / "reproduction.json").is_file():
+        res = json.loads((ref_root / bank / "reference" / "reproduction.json").read_text())["results"]
+        for key, v in res.items():
+            if bank == "dabench":
+                name = f"dab_{int(key):03d}"
+            else:
+                ds, row = key.split("#")
+                name = f"db_{ds[:3]}_{int(row):02d}"
+            if name == tdir.name and v.get("reproduced"):
+                extra_pos["reference_solver_output"] = (v["reference_output"], None)
+    return "answer.txt", {**extra_pos, "reference": (ref, None), "missing": (None, None), "empty": ("", None), "wrong": (wrong, None),
                           "stub": ("I could not determine the answer from the data provided.\n", None)}
 
 
@@ -83,7 +95,7 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out", required=True, type=pathlib.Path)
     a = ap.parse_args()
-    expect_pass = {"reference": True, "ref_tampered_test": True}
+    expect_pass = {"reference": True, "ref_tampered_test": True, "reference_solver_output": True}
     jobs = []
     for bank in a.banks:
         for tdir in sorted(p for p in (a.staged / bank).iterdir() if p.is_dir()):

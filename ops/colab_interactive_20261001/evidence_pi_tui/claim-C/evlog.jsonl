@@ -1,0 +1,31 @@
+{"t": 1790866535.909, "event": "agent_start"}
+{"t": 1790866535.911, "event": "turn_start"}
+{"t": 1790866535.911, "event": "message_end", "role": "system"}
+{"t": 1790866535.913, "event": "message_end", "role": "user"}
+{"t": 1790866536.201, "event": "message_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866536.574, "event": "tool_execution_end"}
+{"t": 1790866536.575, "event": "message_end", "role": "toolResult"}
+{"t": 1790866536.577, "event": "turn_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866536.58, "event": "turn_start"}
+{"t": 1790866536.802, "event": "message_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866537.174, "event": "tool_execution_end"}
+{"t": 1790866537.175, "event": "message_end", "role": "toolResult"}
+{"t": 1790866537.175, "event": "turn_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866537.176, "event": "turn_start"}
+{"t": 1790866537.394, "event": "message_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866537.395, "event": "turn_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866537.395, "event": "agent_end"}
+{"t": 1790866537.396, "event": "agent_before_settle"}
+{"t": 1790866537.83, "event": "agent_start"}
+{"t": 1790866537.831, "event": "turn_start"}
+{"t": 1790866538.057, "event": "message_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866538.509, "event": "tool_execution_end"}
+{"t": 1790866538.51, "event": "message_end", "role": "toolResult"}
+{"t": 1790866538.51, "event": "turn_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866538.511, "event": "turn_start"}
+{"t": 1790866538.739, "event": "message_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866538.739, "event": "turn_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866538.74, "event": "agent_end"}
+{"t": 1790866538.745, "event": "agent_before_settle"}
+{"t": 1790866539.215, "event": "agent_settled"}
+{"t": 1790866554.514, "event": "session_shutdown"}

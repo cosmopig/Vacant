@@ -17,7 +17,7 @@ Script (JSON; `--script file` or env STUB_SCRIPT):
    "chunk_delay_s": 0.0}      # delay between SSE chunks
 Turn index = number of `user` messages in the request (-1); step index = number of `tool`
 messages after the last `user` message.  Past the last turn the stub repeats the last turn's
-final text step, or says "ok".  A step may carry "delay_s"; a text step may carry "finish": "length".  A step may be {"error": 500, "times": 2}
+final text step, or says "ok".  A step may carry "delay_s"; a text step may carry "finish": "length"; any step may carry "usage_prompt_tokens": N.  A step may be {"error": 500, "times": 2}
 to answer that HTTP status the first 2 requests that reach it (infra-void / retry drills).
 Default script (no file): turn 0 = write `solution.py`, then "Done."; later turns = "ok".
 
@@ -175,7 +175,8 @@ class H(BaseHTTPRequestHandler):
                     "id": f"call_{k}_0", "type": "function",
                     "function": {"name": name, "arguments": json.dumps(_args(kind, props, st[kind]))}}]}
                 fin = "tool_calls"
-        usage = {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
+        pt = int(st.get("usage_prompt_tokens", 10))        # a big value drills pi's auto-compaction
+        usage = {"prompt_tokens": pt, "completion_tokens": 5, "total_tokens": pt + 5}
         cid, model = f"chatcmpl-{k}", body.get("model", "stub-model")
         if not body.get("stream"):
             return self._json(200, {"id": cid, "object": "chat.completion", "created": int(time.time()),

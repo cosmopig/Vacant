@@ -110,6 +110,8 @@ def main() -> int:
     ap.add_argument("--screen-n", type=int, default=10)
     ap.add_argument("--vm-root", default="/srv/eval/staged")
     ap.add_argument("--source-ref", default="", help="題庫取自哪個 git ref／sha（寫進 MANIFEST）")
+    ap.add_argument("--verify", nargs="*", default=[], type=pathlib.Path,
+                    help="量具輸出（verify_lcb_scorer.py／verify_task_banks.py 的 JSON）：把 sha256 與摘要寫進 MANIFEST")
     a = ap.parse_args()
 
     pool = json.loads(a.pool.read_text())
@@ -168,13 +170,22 @@ def main() -> int:
         if br:
             banks[b] = {"n_tasks": len(br), "bytes": sum(r["bytes"] for r in br), "subset_tree_sha256": tree(a.out / b),
                         "roles": {k: sum(1 for r in br if r["role"] == k) for k in sorted({r["role"] for r in br})}}
+    verification = {}
+    for vp in a.verify:
+        v = json.loads(vp.read_text())
+        brief = {k: (val if not isinstance(val, dict) else {kk: vv for kk, vv in val.items() if kk not in ("rows", "violations", "mismatches")})
+                 for k, val in v.items() if k not in ("rows", "failures")}
+        if "rescore_c5" in v:
+            brief["rescore_c5"]["n_mismatch"] = len(v["rescore_c5"]["mismatches"])
+            brief["rescore_c5"]["mismatch_cells"] = [f'{m["task"]}:{m["arm"]}' for m in v["rescore_c5"]["mismatches"]]
+        verification[vp.name] = {"sha256": sha(vp), "summary": brief}
     tools = {p.name: sha(p) for p in sorted([*HERE.glob("*.py"), *(HERE / "scorers").glob("*.py")])
              if p.name not in ("stage_pool.py",)}
     out = {"schema": "i1001.staged_manifest/1", "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
            "seed": a.seed, "screen_n": a.screen_n, "vm_root": a.vm_root, "source_ref": a.source_ref,
            "instruction_sentence": (a.out / rows[0]["bank"] / rows[0]["id"] / "instruction.txt").read_text().strip(),
            "pool_lcb_sha256": sha(a.pool), "stage_pool_py_sha256": sha(pathlib.Path(__file__)),
-           "stage_tools_sha256": tools, "c5_tree_parity": parity, "leak_scan_violations": leaks,
+           "stage_tools_sha256": tools, "c5_tree_parity": parity, "leak_scan_violations": leaks, "verification": verification,
            "screen_sample": screen, "banks": banks,
            "totals": {"n_tasks": len(rows), "bytes": sum(r["bytes"] for r in rows), "n_files": sum(r["n_files"] for r in rows)},
            "tasks": rows}

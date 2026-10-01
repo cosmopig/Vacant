@@ -1,0 +1,5 @@
+{"t": 1.835, "kind": "enter"}
+{"t": 1.836, "kind": "change", "session_n": 0, "state": "empty", "requests": 0, "hook_procs": 0}
+{"t": 2.036, "kind": "change", "session_n": 0, "state": "empty", "requests": 1, "hook_procs": 0}
+{"t": 4.852, "kind": "key", "key": "Escape"}
+{"t": 5.054, "kind": "change", "session_n": 6, "state": "final", "requests": 1, "hook_procs": 0}

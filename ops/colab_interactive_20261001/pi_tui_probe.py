@@ -50,6 +50,25 @@ SCENARIOS = {
 }
 
 
+EVLOG_TS = """// passive observer for the probe: logs pi lifecycle events with a wall-clock timestamp (changes nothing)
+import { appendFileSync } from "node:fs";
+const LOG = "/tmp/evlog.jsonl";
+const EVENTS = ["agent_start", "turn_start", "turn_end", "agent_end", "agent_before_settle", "agent_settled",
+                "message_end", "tool_execution_end", "session_shutdown"];
+export default function (pi) {
+  for (const name of EVENTS) {
+    pi.on(name, async (event) => {
+      try {
+        const m = (event && event.message) || {};
+        appendFileSync(LOG, JSON.stringify({ t: Date.now() / 1000, event: name, role: m.role, stop: m.stopReason }) + "\\n");
+      } catch (e) {}
+      return undefined;
+    });
+  }
+}
+"""
+
+
 def run(*a, **k):
     return subprocess.run(a, capture_output=True, text=True, **k)
 
@@ -145,6 +164,7 @@ def main() -> int:
     ap.add_argument("--sandbox", default="/opt/eval/bin/sandbox.sh")
     ap.add_argument("--runs-root", default="/srv/runs")
     ap.add_argument("--install-env", default="", help="env for the arm-C install step (proxy/CA), 'K=V K=V'")
+    ap.add_argument("--evlog", action="store_true", help="also load a passive pi extension that logs agent_end / agent_settled times")
     ap.add_argument("--keep", action="store_true", help="keep the cell dir and user")
     a = ap.parse_args()
     cell = a.cell or f"probe-{a.scenario}-{a.arm}".lower()
@@ -182,6 +202,12 @@ def main() -> int:
         open(os.path.join(out, "install.log"), "w").write(r.stdout + r.stderr)
         res["install_rc"] = r.returncode
         assert r.returncode == 0, "vacant install failed: see install.log"
+
+    if a.evlog:
+        ed = os.path.join(C, "tmp", "harbor-pi-agent", "extensions")
+        os.makedirs(ed, exist_ok=True)
+        open(os.path.join(ed, "evlog.ts"), "w").write(EVLOG_TS)
+        run("chown", "-R", f"{user}:{user}", os.path.join(C, "tmp", "harbor-pi-agent"))
 
     script = os.path.join(out, "stub_script.json")
     json.dump(SCENARIOS[a.scenario], open(script, "w"))
@@ -281,6 +307,17 @@ def main() -> int:
             if prev:
                 res["sendbacks"].append({"customType": ents[i].get("customType"),
                                          "after_final_assistant_s": round(iso(ents[i]["timestamp"]) - iso(prev[-1]["timestamp"]), 3)})
+        evp = os.path.join(C, "tmp", "evlog.jsonl")
+        if a.evlog and os.path.exists(evp):
+            evs = [json.loads(x) for x in open(evp)]
+            open(os.path.join(out, "evlog.jsonl"), "w").write("".join(json.dumps(e) + "\n" for e in evs))
+            res["evlog_events"] = [(round(e["t"] - evs[0]["t"], 3), e["event"], e.get("role"), e.get("stop")) for e in evs]
+            ae = [e["t"] for e in evs if e["event"] == "agent_end"]
+            st_ = [e["t"] for e in evs if e["event"] == "agent_settled"]
+            res["agent_end_to_sendback_s"] = [round(iso(ents[i]["timestamp"]) - max(x for x in ae if x <= iso(ents[i]["timestamp"])), 3)
+                                              for i in cm if any(x <= iso(ents[i]["timestamp"]) for x in ae)]
+            res["last_agent_settled_to_exit_s"] = round(t_x - st_[-1], 2) if st_ else None
+            res["agent_settled_count"] = len(st_)
         rows = [json.loads(x) for x in open(slog)] if os.path.exists(slog) else []
         res["requests"] = len(rows)
         sb = next((r for r in rows if r["user_msgs"] >= 2), None)       # first request after a send-back
