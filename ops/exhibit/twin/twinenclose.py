@@ -251,7 +251,8 @@ class EventForwarder(threading.Thread):
 def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.Path,
                  door_dir: pathlib.Path, task_id: str, timeout_s: float,
                  events_path: pathlib.Path | None, events_caller: dict,
-                 endpoint: str, model: str, pi_bin: str | None = None) -> dict:
+                 endpoint: str, model: str, pi_bin: str | None = None,
+                 gate: dict | None = None) -> dict:
     """跑一位分身，**整跑在圍牆裡**。回 launcher 的 summary（多一塊 `twin_enclosure`）。
 
     起不來（門起不來、bwrap 失敗、summary 沒落盤）⇒ `SystemExit`／`RuntimeError`，
@@ -290,8 +291,10 @@ def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.P
     part = run_dir / EVENTS_PART
     fwd = EventForwarder(part, events_path, task_id=task_id, caller=events_caller)
     fwd.start()
+    # `gate`＝根據閘門（`grounding_gate`）的 launcher 參數；None ＝ 舊行為（allow_no_suite）。
+    #   ⚠ 圍牆裡的閘門驗收沙箱是巢狀的（bwrap 裡面再跑 `make_sandbox`），**這一條路沒有真跑驗證過**。
     params = {"argv": argv, "workspace": str(workspace), "run_dir": str(run_dir),
-              "task_id": task_id, "timeout_s": timeout_s,
+              "task_id": task_id, "timeout_s": timeout_s, "gate": gate,
               "events_path": str(part), "events_caller": events_caller}
     (run_dir / PARAMS_NAME).write_text(json.dumps(params, ensure_ascii=False),
                                        encoding="utf-8")
@@ -320,7 +323,8 @@ def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.P
                                     stdout=errf, stderr=errf,
                                     start_new_session=True)
             try:
-                enc_rc = proc.wait(timeout=float(timeout_s) + 120.0)
+                n_att = int((gate or {}).get("max_attempts") or 1)
+                enc_rc = proc.wait(timeout=float(timeout_s) * n_att + 120.0)
             except subprocess.TimeoutExpired:
                 timed_out = True
                 try:
@@ -407,11 +411,16 @@ def inner_main(params_path: str) -> int:    # pragma: no cover - 只在圍牆裡
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     os.environ["VACANT_RUN_UPSTREAM_OPENAI"] = f"http://127.0.0.1:{srv.server_address[1]}/v1"
     from vacant_network.vrun import launcher
+    g = p.get("gate")
+    gate_kw = ({"suite_dir": pathlib.Path(g["suite_dir"]), "allow_no_suite": False,
+                "retry_arm": g["retry_arm"], "max_attempts": g["max_attempts"],
+                "feedback_into": g["feedback_into"]}
+               if g else {"suite_dir": None, "allow_no_suite": True})
     launcher.run(p["argv"], workspace=pathlib.Path(p["workspace"]),
-                 run_dir=pathlib.Path(p["run_dir"]), suite_dir=None,
-                 vacant_on=True, allow_no_suite=True, task_id=p["task_id"],
+                 run_dir=pathlib.Path(p["run_dir"]),
+                 vacant_on=True, task_id=p["task_id"],
                  timeout_s=p["timeout_s"], capture_agent_stdout=True,
-                 events_path=p["events_path"], events_caller=p["events_caller"])
+                 events_path=p["events_path"], events_caller=p["events_caller"], **gate_kw)
     srv.shutdown()
     return 0
 

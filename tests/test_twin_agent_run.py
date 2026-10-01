@@ -129,7 +129,8 @@ def env(tmp_path, upstream, monkeypatch):
         work_root=twinagent.default_work_root(st.path),
         events_path=tmp_path / "live.jsonl", model="m", endpoint=upstream,
         parallel=2, timeout_s=60.0,
-        argv_prefix=[sys.executable, str(fx)], requires=[])
+        argv_prefix=[sys.executable, str(fx)], requires=[],
+        gate=False)   # 舊路徑（allow_no_suite）：這個 fixture 不跑世界，沒有根據閘門可過
     yield {"store": st, "cfg": cfg, "upstream": upstream, "tmp": tmp_path}
     st.close()
 

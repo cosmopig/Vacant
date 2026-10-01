@@ -1,0 +1,333 @@
+{
+ "claims": {
+  "帳本鏈/出生片_420到440.txt": {
+   "chain.420.mark": "水滴",
+   "chain.425.mark": "波",
+   "chain.433.mark": "十字",
+   "chain.440.mark": "螺旋"
+  },
+  "帳本鏈/尾段_418到447片.txt": {
+   "chain.418.mark": "魚骨",
+   "chain.419.mark": "魚骨",
+   "chain.420.mark": "水滴",
+   "chain.421.mark": "梯",
+   "chain.422.mark": "梯",
+   "chain.423.mark": "星",
+   "chain.424.mark": "半月",
+   "chain.425.mark": "波",
+   "chain.426.mark": "三點",
+   "chain.427.mark": "鎖扣",
+   "chain.428.mark": "鎖扣",
+   "chain.429.mark": "鎖扣",
+   "chain.430.mark": "雙環",
+   "chain.431.mark": "蕨葉",
+   "chain.432.mark": "螺旋",
+   "chain.433.mark": "十字",
+   "chain.434.mark": "十字",
+   "chain.435.mark": "星",
+   "chain.436.mark": "星",
+   "chain.437.mark": "水滴",
+   "chain.438.mark": "半月",
+   "chain.439.mark": "魚骨",
+   "chain.440.mark": "螺旋",
+   "chain.441.mark": "梯",
+   "chain.442.mark": "蕨葉",
+   "chain.443.mark": "水滴",
+   "chain.444.mark": "水滴",
+   "chain.445.mark": "三點",
+   "chain.446.mark": "雙環",
+   "chain.447.mark": "魚骨"
+  },
+  "帳本鏈/放大鏡輪用順序.txt": {
+   "chain.424.mark": "半月",
+   "chain.429.mark": "鎖扣",
+   "chain.431.mark": "蕨葉",
+   "chain.438.mark": "半月",
+   "chain.440.mark": "螺旋",
+   "chain.447.mark": "魚骨"
+  },
+  "帳本鏈/鬆環那幾片.txt": {
+   "chain.424.mark": "半月",
+   "chain.431.mark": "蕨葉",
+   "chain.435.mark": "星",
+   "chain.438.mark": "半月",
+   "chain.444.mark": "水滴"
+  },
+  "石頭閘門/退回紙_另一張.txt": {
+   "seals.mound.count": "3"
+  },
+  "石頭閘門/退回紙_第四列.txt": {
+   "cards.row4.count": "6"
+  },
+  "紙卡地/格狀圖.txt": {
+   "cards.row4.count": "5"
+  },
+  "草稿角/紙團_丙.txt": {
+   "chain.418.mark": "魚骨",
+   "chain.419.mark": "魚骨",
+   "chain.420.mark": "水滴",
+   "chain.421.mark": "梯",
+   "chain.422.mark": "梯",
+   "chain.423.mark": "星",
+   "chain.424.mark": "半月",
+   "chain.425.mark": "波",
+   "chain.426.mark": "三點",
+   "chain.427.mark": "鎖扣"
+  },
+  "草稿角/紙團_甲.txt": {
+   "cards.row4.count": "5"
+  },
+  "長桌廣場/土堆/小陶印.txt": {
+   "seals.mound.count": "2"
+  },
+  "長桌廣場/土堆/清單_乙.txt": {
+   "seals.mound.count": "3"
+  },
+  "長桌廣場/土堆/清單_甲.txt": {
+   "seals.mound.count": "2"
+  },
+  "長桌廣場/桌五_壓著筆的紙.txt": {
+   "chain.418.mark": "魚骨",
+   "chain.419.mark": "魚骨",
+   "chain.420.mark": "水滴",
+   "chain.421.mark": "梯",
+   "chain.422.mark": "梯",
+   "chain.423.mark": "星",
+   "chain.424.mark": "半月",
+   "chain.425.mark": "波",
+   "chain.426.mark": "雙環",
+   "chain.427.mark": "鎖扣",
+   "chain.428.mark": "鎖扣"
+  }
+ },
+ "entities": {
+  "cards.row4.count": {
+   "authority_file": "紙卡地/格狀圖.txt",
+   "authority_value": "5",
+   "kind": "count",
+   "label": "第四列的張數",
+   "subject": "第\\s?[四4]\\s?列",
+   "unit": "張"
+  },
+  "chain.418.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "魚骨",
+   "kind": "mark",
+   "label": "片 418 的印紋",
+   "subject": "(?<![0-9])418(?![0-9])"
+  },
+  "chain.419.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "魚骨",
+   "kind": "mark",
+   "label": "片 419 的印紋",
+   "subject": "(?<![0-9])419(?![0-9])"
+  },
+  "chain.420.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "水滴",
+   "kind": "mark",
+   "label": "片 420 的印紋",
+   "subject": "(?<![0-9])420(?![0-9])"
+  },
+  "chain.421.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "梯",
+   "kind": "mark",
+   "label": "片 421 的印紋",
+   "subject": "(?<![0-9])421(?![0-9])"
+  },
+  "chain.422.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "梯",
+   "kind": "mark",
+   "label": "片 422 的印紋",
+   "subject": "(?<![0-9])422(?![0-9])"
+  },
+  "chain.423.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "星",
+   "kind": "mark",
+   "label": "片 423 的印紋",
+   "subject": "(?<![0-9])423(?![0-9])"
+  },
+  "chain.424.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "半月",
+   "kind": "mark",
+   "label": "片 424 的印紋",
+   "subject": "(?<![0-9])424(?![0-9])"
+  },
+  "chain.425.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "波",
+   "kind": "mark",
+   "label": "片 425 的印紋",
+   "subject": "(?<![0-9])425(?![0-9])"
+  },
+  "chain.426.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "三點",
+   "kind": "mark",
+   "label": "片 426 的印紋",
+   "subject": "(?<![0-9])426(?![0-9])"
+  },
+  "chain.427.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "鎖扣",
+   "kind": "mark",
+   "label": "片 427 的印紋",
+   "subject": "(?<![0-9])427(?![0-9])"
+  },
+  "chain.428.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "鎖扣",
+   "kind": "mark",
+   "label": "片 428 的印紋",
+   "subject": "(?<![0-9])428(?![0-9])"
+  },
+  "chain.429.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "鎖扣",
+   "kind": "mark",
+   "label": "片 429 的印紋",
+   "subject": "(?<![0-9])429(?![0-9])"
+  },
+  "chain.430.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "雙環",
+   "kind": "mark",
+   "label": "片 430 的印紋",
+   "subject": "(?<![0-9])430(?![0-9])"
+  },
+  "chain.431.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "蕨葉",
+   "kind": "mark",
+   "label": "片 431 的印紋",
+   "subject": "(?<![0-9])431(?![0-9])"
+  },
+  "chain.432.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "螺旋",
+   "kind": "mark",
+   "label": "片 432 的印紋",
+   "subject": "(?<![0-9])432(?![0-9])"
+  },
+  "chain.433.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "十字",
+   "kind": "mark",
+   "label": "片 433 的印紋",
+   "subject": "(?<![0-9])433(?![0-9])"
+  },
+  "chain.434.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "十字",
+   "kind": "mark",
+   "label": "片 434 的印紋",
+   "subject": "(?<![0-9])434(?![0-9])"
+  },
+  "chain.435.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "星",
+   "kind": "mark",
+   "label": "片 435 的印紋",
+   "subject": "(?<![0-9])435(?![0-9])"
+  },
+  "chain.436.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "星",
+   "kind": "mark",
+   "label": "片 436 的印紋",
+   "subject": "(?<![0-9])436(?![0-9])"
+  },
+  "chain.437.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "水滴",
+   "kind": "mark",
+   "label": "片 437 的印紋",
+   "subject": "(?<![0-9])437(?![0-9])"
+  },
+  "chain.438.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "半月",
+   "kind": "mark",
+   "label": "片 438 的印紋",
+   "subject": "(?<![0-9])438(?![0-9])"
+  },
+  "chain.439.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "魚骨",
+   "kind": "mark",
+   "label": "片 439 的印紋",
+   "subject": "(?<![0-9])439(?![0-9])"
+  },
+  "chain.440.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "螺旋",
+   "kind": "mark",
+   "label": "片 440 的印紋",
+   "subject": "(?<![0-9])440(?![0-9])"
+  },
+  "chain.441.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "梯",
+   "kind": "mark",
+   "label": "片 441 的印紋",
+   "subject": "(?<![0-9])441(?![0-9])"
+  },
+  "chain.442.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "蕨葉",
+   "kind": "mark",
+   "label": "片 442 的印紋",
+   "subject": "(?<![0-9])442(?![0-9])"
+  },
+  "chain.443.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "水滴",
+   "kind": "mark",
+   "label": "片 443 的印紋",
+   "subject": "(?<![0-9])443(?![0-9])"
+  },
+  "chain.444.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "水滴",
+   "kind": "mark",
+   "label": "片 444 的印紋",
+   "subject": "(?<![0-9])444(?![0-9])"
+  },
+  "chain.445.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "三點",
+   "kind": "mark",
+   "label": "片 445 的印紋",
+   "subject": "(?<![0-9])445(?![0-9])"
+  },
+  "chain.446.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "雙環",
+   "kind": "mark",
+   "label": "片 446 的印紋",
+   "subject": "(?<![0-9])446(?![0-9])"
+  },
+  "chain.447.mark": {
+   "authority_file": "帳本鏈/尾段_418到447片.txt",
+   "authority_value": "魚骨",
+   "kind": "mark",
+   "label": "片 447 的印紋",
+   "subject": "(?<![0-9])447(?![0-9])"
+  },
+  "seals.mound.count": {
+   "authority_file": "長桌廣場/土堆/小陶印.txt",
+   "authority_value": "2",
+   "kind": "count",
+   "label": "土堆小陶印的枚數",
+   "subject": "小陶印",
+   "unit": "枚"
+  }
+ },
+ "note": "作者側的事實表：每件材料對哪些實體說了什麼值（由 build_facts.py 從材料抽出，不手寫）；authority_file 是這個世界對該實體的權威（帳本鏈與數出來的實物）。不進分身的工作區；窗 3 的 prepare 把它抄進每一跑的 _ledger.py。",
+ "schema": "twin.facts/1"
+}

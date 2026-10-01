@@ -20,15 +20,22 @@
 **這一支不碰 sqlite**：`TwinStore` 的連線不跨執行緒。worker 只跑 launcher 與讀檔；
 封印與寫鏈由 `twinlink` 在主執行緒做。
 
-## 「做對」這件事（人類 2026-09-24）
+## 「做對」這件事（人類 2026-09-24；2026-10-01 改版）
 
 「**這個問題是 vacant 問題，不是數位分身的問題**」⇒ 這一支**不發明評分**、不找模型當裁判。
-跑法是 `allow_no_suite=True`：`stop_reason="ungated"`、`accepted=None`＝**沒有客觀標準、
-不判**（不是 `False`）。
+
+* 2026-09-24～10-01：`allow_no_suite=True`，`stop_reason="ungated"`、`accepted=None`＝沒有客觀標準、不判。
+  結果整條路上沒有任何會退回、會重來的邏輯。
+* **2026-10-01 起（預設）**：交件前過「**有沒有根據**」的閘門（`grounding_gate.py`，裁決
+  `decisions/DECISION_20261001_TWIN_GROUNDING_GATE.md`）——所有分身同一套、確定性、只查根據的有無
+  （讀過了嗎／找得到出處嗎／兩個出處對得上嗎／收據是閘門給的嗎），不查好不好。用的是 `vacant run`
+  本來就有的 `suite_dir`＋`retry_arm="revise"`＋`feedback_into="both"`，最多 3 次；最後還沒過：
+  **照常交件、拍立得照發、收據照簽（`accepted=False` 是真的）**。`AgentConfig.gate=False` 回舊行為。
 
 ## 誠實邊界（改碼時保留）
 
-1. **`accepted=None` 不准被壓成 `False`，也不准畫成「通過」。**
+1. **`accepted=None` 不准被壓成 `False`，也不准畫成「通過」。**（閘門開著時 `accepted` 是 `True`／`False`，
+   說的只是「有沒有根據」；`gate=False` 的舊路徑仍恆為 `None`。）
 2. **收住的是「模型叫得到的工具」，不是 pi 這個行程**（裁決 §三）——**除非**
    `enclose` 開著而且這台起得來圍牆（VM，`twinenclose.py`）：那時整跑（launcher＋pi）
    在 bwrap 的 netns＋mount ns 裡，收據簽的是量出來的 `enclosure.applied`，天花板 B。
@@ -65,12 +72,14 @@ REPO = TWIN.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
+from ops.exhibit.twin import grounding_gate as gatelib  # noqa: E402
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
 from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
 from ops.exhibit.twin import twinground  # noqa: E402
 from vacant_network.memory import assert_ks1_clean  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
+from vacant_network.vrun import retry as retrypolicy  # noqa: E402
 # ⚠ `launcher` 在 `run_one` 裡才 import：它拉進 wireproxy／attest／sandbox，
 #   而 twinlink（展場 loop）一 import 這一支就會拉它——這台跑不起 pi 時
 #   （例如 1003 Windows 本機）不該因為一個用不到的模組而連 loop 都起不來。
@@ -87,6 +96,9 @@ DEFAULT_PARALLEL = 2
 
 #: 單跑牆鐘上限（launcher 的 `timeout_s`）。真模型一跑實測約 1–2 分鐘。
 DEFAULT_AGENT_TIMEOUT = 300.0
+
+#: 根據閘門（`grounding_gate.py`）的嘗試上限：第 1 次＋重改 2 次（對齊零設定「一個要求最多 2 回合」）。
+GATE_MAX_ATTEMPTS = 3
 
 #: 讀回的成品上限（每位分身）。
 MAX_ARTIFACTS = 4
@@ -288,6 +300,9 @@ class AgentConfig:
     #: （`degrade_kind=tier_below_required`）。`None` ＝不設下限（舊行為）。
     #: 這是 twin 這一層的 `VACANT_ATTEST=fail`：launcher 只記級別不拒發，擋門在這裡。
     require_tier: str | None = None
+    #: 交件前過「有沒有根據」閘門（`grounding_gate.py`，2026-10-01）。`False` ＝ 舊行為
+    #: （`allow_no_suite`、`accepted=null`），只給不跑世界的 fixture agent 的舊測試用；展場一律 True。
+    gate: bool = True
 
 
 def agent_available(cfg: AgentConfig) -> tuple[bool, str]:
@@ -787,6 +802,13 @@ class SayForwarder(StepForwarder):
                                    ts_ms=raw["ts_ms"])]
 
 
+def read_review(rd: pathlib.Path) -> list[dict[str, Any]]:
+    """每一次嘗試的四格結果：`[{id, ok, label, attempt}]`（label 不含觀眾內容）。
+    權威來源是 launcher 落的 `visible_RUN-ON*.json`（`twinprogress.read_review` 同一份讀法）。"""
+    from ops.exhibit.twin import twinprogress      # 延後 import：它 import 這一支
+    return twinprogress.read_review(rd)
+
+
 def run_one(job: Job) -> dict[str, Any]:
     """一位分身跑一次。回一份**只有資料**的結果（封印由主執行緒做）。"""
     t0 = time.time()
@@ -813,8 +835,23 @@ def run_one(job: Job) -> dict[str, Any]:
         (rd / "ground_manifest.json").write_text(
             json.dumps(ground, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         # argv：<段 1 指令> <段 1 第一句> 之後接 launcher 慣用的 <run_dir> <段 2 指令> <段 2 第一句>
+        # 閘門開著 ⇒ 第 5 個參數尾端接 `{VACANT_FEEDBACK}`：launcher 第 1 次換成空字串
+        # （渲染後的 argv 與沒有閘門時逐位元相同），重改才接上可見驗收的失敗原文。
+        first_msg = FIRST_MESSAGE + (retrypolicy.FEEDBACK_PLACEHOLDER if job.cfg.gate else "")
         argv = (list(job.cfg.argv_prefix)
-                + [LETTER_SYSTEM_PROMPT, LETTER_FIRST_MESSAGE, str(rd), SYSTEM_PROMPT, FIRST_MESSAGE])
+                + [LETTER_SYSTEM_PROMPT, LETTER_FIRST_MESSAGE, str(rd), SYSTEM_PROMPT, first_msg])
+        suite_dir = None
+        if job.cfg.gate:
+            suite_dir = gatelib.write_suite(rd)           # run-dir/tests_visible/（工作區外）
+            sidecar_p = (sidecarlib.sidecar_path(job.cfg.events_path)
+                         if job.cfg.events_path else None)
+            (rd / gatelib.GATE_META_NAME).write_text(json.dumps({
+                "events_path": str(job.cfg.events_path) if job.cfg.events_path else None,
+                "sidecar_path": str(sidecar_p) if sidecar_p else None,
+                "task_id": f"twin:{tid}", "cell_id": tid}), encoding="utf-8")
+        gate_kw = ({"suite_dir": suite_dir, "allow_no_suite": False, "retry_arm": "revise",
+                    "max_attempts": GATE_MAX_ATTEMPTS, "feedback_into": "both"}
+                   if job.cfg.gate else {"suite_dir": None, "allow_no_suite": True})
         caller = {"cell_id": tid, "resident": resident_code(job.sub_id),
                   "stratum": "twin", "prompt": CALLER_PROMPT,
                   "declared_evidence": "",
@@ -842,19 +879,21 @@ def run_one(job: Job) -> dict[str, Any]:
                 summary = twinenclose.run_enclosed(
                     argv=argv, workspace=ws, run_dir=rd,
                     door_dir=twinenclose.door_dir_for(job.cfg.work_root, slug_for(job.sub_id)),
+                    gate=(None if not job.cfg.gate else {
+                        **{k: (str(v) if k == "suite_dir" else v) for k, v in gate_kw.items()}}),
                     task_id=f"twin:{tid}", timeout_s=job.cfg.timeout_s,
                     events_path=job.cfg.events_path, events_caller=caller,
                     endpoint=job.cfg.endpoint, model=job.cfg.model,
                     pi_bin=os.environ.get("VACANT_TWIN_PI") or "pi")
             else:
                 summary = launcher.run(
-                    argv, workspace=ws, run_dir=rd, suite_dir=None,
-                    vacant_on=True, allow_no_suite=True,
+                    argv, workspace=ws, run_dir=rd,
+                    vacant_on=True,
                     task_id=f"twin:{tid}",
                     timeout_s=job.cfg.timeout_s,
                     capture_agent_stdout=True,
                     events_path=(str(job.cfg.events_path) if job.cfg.events_path else None),
-                    events_caller=caller)
+                    events_caller=caller, **gate_kw)
         finally:
             forwarder.finish()
             say_fwd.finish()
@@ -889,6 +928,8 @@ def run_one(job: Job) -> dict[str, Any]:
             except Exception as e:                       # noqa: BLE001
                 res["summary"]["receipt_verdicts"] = [f"error:{type(e).__name__}"]
         res["outputs"] = read_outputs(pathlib.Path(frozen) if frozen else None)
+        if job.cfg.gate:
+            res["review"] = read_review(rd)
     except (Exception, SystemExit) as exc:               # noqa: BLE001
         res["error"] = type(exc).__name__
         res["error_detail"] = str(exc)[:300]

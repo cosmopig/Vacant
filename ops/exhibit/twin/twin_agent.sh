@@ -27,6 +27,11 @@
 #   3. **stderr 導進 run-dir**：不然它會流進 loop 的 journal，而 journal 刪不到。
 #   4. `--no-session`：不留 session 檔（那裡面會有 TRAITS.md 的全文）。
 #
+# ⚠ **根據閘門（2026-10-01，`grounding_gate.py`）**：twinagent 改用
+#   `launcher.run(suite_dir=<run>/tests_visible, retry_arm="revise", max_attempts=3, feedback_into="both")`。
+#   第 5 個參數（段 2 第一句）的尾端是 `{VACANT_FEEDBACK}`，launcher 第 1 次換成空字串（argv 與沒有閘門時
+#   逐位元相同）、之後換成可見驗收的失敗原文。重改時只跑段 2（見 RETRY）。
+#
 # ⚠ **步驟紀錄（2026-09-28，契約 `plans/CONTRACT_PROCESS_20260928.md` §A）**：
 #   `VACANT_TWIN_STEP_LOG` 從這一支自己拿到的 `$RUN_DIR`（工作區外）算出來，
 #   不是從呼叫端的環境變數轉傳——Python 那一側是 ThreadPoolExecutor 平行跑
@@ -75,10 +80,21 @@ PI_BIN="${VACANT_TWIN_PI:-pi}"
 BASE="${VACANT_RUN_PROXY%/}"
 MODEL="${VACANT_AGENT_MODEL:-gemma-4-12b-it-qat}"
 
+# ── 第 1 次 spawn：工作區裡有 TRAITS.md ⇒ 兩段都跑。
+# ── 第 2、3 次（根據閘門把回饋帶回來重改，`vacant run` 的 revise 臂）：TRAITS.md 早被關卡移走、
+#    信已經寫好 ⇒ **只跑段 2**（信不重寫、特質不回來）。回饋由 launcher 接在第 5 個參數的尾端。
+RETRY=0
 if [ ! -f TRAITS.md ]; then
-    echo "工作區裡沒有 TRAITS.md（cwd=$(pwd)）。停。" >&2
-    exit 3
+    if [ -f 信.md ] && [ -f "$RUN_DIR/letter_guard.json" ] && [ -d 地上 ]; then
+        RETRY=1
+    else
+        echo "工作區裡沒有 TRAITS.md，也不是重改（cwd=$(pwd)）。停。" >&2
+        exit 3
+    fi
 fi
+# 上一次的驗收紀錄絕不沿用：這一次 pi 結束後 `grounding_gate prepare` 會重寫；
+# 它沒跑成，四格窗就見不到紀錄（一律不亮），不是用舊的。
+rm -f "$RUN_DIR/tests_visible/_ledger.py"
 if [ ! -f "$EXT" ]; then
     echo "找不到工具擴充 $EXT。停（不准退回內建工具）。" >&2
     exit 3
@@ -108,18 +124,27 @@ COMMON=(-p --mode json --provider vacantproxy --model m
     --no-extensions --no-skills --no-context-files --no-prompt-templates
     --no-themes --no-approve --offline --no-session)
 
-# ── 段 1：讀 TRAITS.md、寫 信.md ──
-# ⚠ `< /dev/null`：`pi -p` 不給會永久卡住（2026-09-18 實測，V0 已知）。
-"$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS1" @TRAITS.md "$MSG1" < /dev/null
-RC1=$?
+if [ "$RETRY" -eq 0 ]; then
+    # ── 段 1：讀 TRAITS.md、寫 信.md ──
+    # ⚠ `< /dev/null`：`pi -p` 不給會永久卡住（2026-09-18 實測，V0 已知）。
+    "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS1" @TRAITS.md "$MSG1" < /dev/null
+    RC1=$?
 
-# ── 關卡：TRAITS.md 一定在這裡被移走（不管段 1 成不成功） ──
-"$PY" "$HERE/twin_letter_guard.py" "$(pwd)" "$RUN_DIR"
-GRC=$?
-if [ "$GRC" -ne 0 ]; then
-    echo "信沒有寫出來（段 1 rc=$RC1，關卡 rc=$GRC）。不進段 2。" >&2
-    exit 4
+    # ── 關卡：TRAITS.md 一定在這裡被移走（不管段 1 成不成功） ──
+    "$PY" "$HERE/twin_letter_guard.py" "$(pwd)" "$RUN_DIR"
+    GRC=$?
+    if [ "$GRC" -ne 0 ]; then
+        echo "信沒有寫出來（段 1 rc=$RC1，關卡 rc=$GRC）。不進段 2。" >&2
+        exit 4
+    fi
 fi
 
 # ── 段 2：房間裡只有 信.md、WORLD.md、地上/ ──
-exec "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG" < /dev/null
+"$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG" < /dev/null
+RC2=$?
+
+# ── 根據閘門的紀錄：pi 已經結束（分身改不到），凍結與驗收還沒開始 ──
+# 重寫 tests_visible/_ledger.py，並把這一次的四格結果預先寫成旁註（先於 gate_ran）。
+# 失敗不改變這一跑的結束碼；沒有 _ledger.py 時四格窗一律不亮。
+"$PY" "$HERE/grounding_gate.py" prepare "$(pwd)" "$RUN_DIR" || true
+exit "$RC2"

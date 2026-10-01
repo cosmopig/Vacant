@@ -32,12 +32,13 @@
 | `model_call` | ON／OFF | `working`（`calls_so_far`＝這一跑到目前為止的通數） |
 | `attempt_started`（第 2 次以後） | ON | `revised` |
 | `agent_exited` | ON／OFF | `draft_done` |
-| `gate_ran` | ON | `gate_ran`（OFF 的一律丟掉，第二道網） |
+| `gate_ran` | ON | `gate_ran`（OFF 的一律丟掉，第二道網；分身的自主任務格另帶 `checks[]`＝同一次嘗試的旁註 `twin_gate`） |
 | `feedback_ready` | — | 不轉（它的位元組數在下一個 `attempt_started` 上，隨 `draft_done` 帶出） |
 | `run_ended` | ON | `verdict` ＋（有收據時）`receipt` |
 | `run_ended` | OFF | `verdict`（`accepted: null`） |
 | 旁註 `postaudit`（`twin.sidecar/1`，**不是** lifecycle） | OFF | `postaudit`（三旗標；只在綁得上那一跑時） |
 | 旁註 `twin_step`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_step`（**不帶檔名**；契約 `plans/CONTRACT_PROCESS_20260928.md` §A） |
+| 旁註 `twin_gate`（`twin.sidecar/1`，**不是** lifecycle；`grounding_gate.prepare` 在 pi 結束後、凍結前寫） | ON（僅 `practical` 格） | 不單獨發事件：暫存，併進同一次嘗試的 `gate_ran.checks[]` |
 | 旁註 `twin_say`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_say`（agent 自己生成、≤80 字、已過逐字抄錄防呆；契約補充 `plans/CONTRACT_PROCESS_20261001_ADDENDUM.md` §E） |
 
 `counters` 不在這張表上：它不是任何一筆輸入轉出來的，是 `Tally` 依**已經寫出去的**
@@ -181,6 +182,7 @@ class Folder:
                 "task_kind": caller.get("task_kind"),
                 "retry": ev.get("retry") or "none",
                 "feedback": {},          # attempt → (bytes, delivery)
+                "gate_checks": {},       # attempt → checks[]（旁註 twin_gate，先於 gate_ran 到）
             }
         st = self.runs.get(rid)
         if st is None:
@@ -253,9 +255,19 @@ class Folder:
         elif t == "gate_ran":
             # lifecycle 的 validate 已經擋掉 OFF 的 gate_ran；這裡再擋一次（兩道網）。
             if on:
+                extra: dict = {}
+                # 分身的自主任務：逐格結果來自旁註 `twin_gate`（先於這一筆到）。
+                # 對不上（passed 與逐條 AND 不一致）或沒有 ⇒ 不帶 `checks`（電視讀成 null，不猜）。
+                ck = st["gate_checks"].get(ev["attempt"])
+                if st["task_kind"] == tv.KIND_PRACTICAL and ck:
+                    if bool(ev.get("passed")) == all(c["ok"] for c in ck):
+                        extra["checks"] = ck
+                    else:
+                        self.dropped.append(
+                            f"twin_gate 的逐格結果與 gate_ran.passed 對不上（attempt {ev['attempt']}），不帶 checks")
                 emit("gate_ran", arm=tv.ARM_ON, passed=bool(ev.get("passed")),
                      n_tests=ev.get("n_tests"), failed_case=ev.get("failed_case"),
-                     attempt=ev["attempt"], of=None)
+                     attempt=ev["attempt"], of=None, **extra)
         elif t == "run_ended":
             st.update(ended=True, ws_end=ev.get("ws_end_sha256"),
                       infra_void=ev.get("infra_void"))
@@ -269,6 +281,8 @@ class Folder:
             return self._sidecar_postaudit(ev)
         if t in ("twin_step", "twin_say"):
             return self._sidecar_twin_step(ev)
+        if t == "twin_gate":
+            return self._sidecar_twin_gate(ev)
         self.dropped.append(f"不認得的旁註 type {t!r}")
         return []
 
@@ -305,6 +319,39 @@ class Folder:
                  "failed_case": ev.get("failed_case"),
                  "ruler": ev.get("ruler"), "note": ev.get("note"),
                  "ws_end_sha256": ev.get("ws_end_sha256")}]
+
+    def _sidecar_twin_gate(self, ev: dict) -> list[dict]:
+        """分身根據閘門的逐格結果旁註 → 暫存，等同一次嘗試的 `gate_ran` 來時一起帶出去。
+
+        **不單獨發事件**：電視要的是「同一筆 `gate_ran` 裡的 `checks`」。只在分身的自主任務那一格
+        收（題庫格沒有這一欄）；綁不上（沒看過 run_started、不是 ON、cell 不同、形狀不對）就丟，
+        理由記在 `dropped`（不猜）。`gate_ran` 先到、旁註後到 ⇒ 這一次嘗試沒有 `checks`。
+        """
+        rid = ev.get("run_id")
+        st = self.runs.get(rid)
+        why = None
+        if st is None:
+            why = f"twin_gate 綁的那一跑 {rid} 這一支沒看過 run_started"
+        elif st["arm"] != tv.ARM_ON or st.get("task_kind") != tv.KIND_PRACTICAL:
+            why = f"twin_gate 綁的那一跑 {rid} 不是分身的自主任務格（ON／practical）"
+        elif ev.get("cell_id") != st["cell_id"]:
+            why = f"twin_gate 的 cell_id 與那一跑 {rid} 的格子不同"
+        else:
+            ck = ev.get("checks")
+            att = ev.get("attempt")
+            if not (isinstance(att, int) and not isinstance(att, bool) and att >= 1
+                    and isinstance(ck, list) and ck
+                    and all(isinstance(c, dict) and not (set(c) - set(tv.GATE_CHECK_KEYS))
+                            and isinstance(c.get("id"), str) and c["id"]
+                            and isinstance(c.get("ok"), bool)
+                            and isinstance(c.get("label"), str) and c["label"].strip()
+                            for c in ck)):
+                why = "twin_gate 的 attempt／checks 形狀不對"
+        if why:
+            self.dropped.append(why)
+            return []
+        st["gate_checks"][ev["attempt"]] = [dict(c) for c in ev["checks"]]
+        return []
 
     def _sidecar_twin_step(self, ev: dict) -> list[dict]:
         """分身工作區三個工具被呼叫的旁註 → 電視的 `twin_step`（**不帶檔名**）。
@@ -374,12 +421,17 @@ class Folder:
         accepted = ev.get("accepted")       # 三值，不做 bool()
         # 分身的自主任務：`accepted=null` 的意思是「這類任務沒有客觀標準、不判」，
         # 不是「沒過」。那句話跟著事件走，電視不用自己猜（`tv_contract` 規則 11）。
-        pnote = ({"accepted_note": tv.PRACTICAL_ACCEPTED_NOTE}
-                 if st["task_kind"] == tv.KIND_PRACTICAL else {})
+        practical = st["task_kind"] == tv.KIND_PRACTICAL
+        pnote = ({"task_kind": tv.KIND_PRACTICAL,
+                  "accepted_note": (tv.PRACTICAL_GROUNDING_NOTE if accepted is not None
+                                    else tv.PRACTICAL_ACCEPTED_NOTE)}
+                 if practical else {})
         emit("verdict", arm=tv.ARM_ON, accepted=accepted, **pnote,
              # meets_demand 要隱藏測資才答得出來，而隱藏測資不進展件 ⇒ 恆 null
              meets_demand=None,
-             blocked_by=tv.BLOCKED_BY.get(stop, "gate" if accepted is False else None),
+             # 分身那一格沒過閘門照常交件（拍立得照發）⇒ 沒有東西被擋下。
+             blocked_by=(None if practical else
+                         tv.BLOCKED_BY.get(stop, "gate" if accepted is False else None)),
              stop_reason=stop, attempts_used=ev.get("attempts_used"),
              retry=st["retry"], evidence=level,
              evidence_note=packlib.EVIDENCE_TEXT.get(level, ""))
@@ -442,8 +494,12 @@ class Tally:
         """回 `True`＝數字變了（呼叫端該發一筆 `counters`）。"""
         t, cid, arm = e.get("type"), e.get("task_id"), e.get("arm")
         if t == "verdict" and arm == tv.ARM_ON:
+            # 分身的自主任務：`accepted` 說的是「有沒有根據」、沒過照常交件，不是題庫格的
+            # 「擋下／收下」⇒ 不算進 blocked／delivered（仍算進 total）。
             self.cells.setdefault(cid, {})["on"] = {
-                "accepted": e.get("accepted"), "evidence": e.get("evidence")}
+                "accepted": (None if e.get("task_kind") == tv.KIND_PRACTICAL
+                             else e.get("accepted")),
+                "evidence": e.get("evidence")}
             return True
         if t == "verdict" and arm == tv.ARM_OFF:
             slot = self.cells.setdefault(cid, {})

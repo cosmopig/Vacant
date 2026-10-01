@@ -155,7 +155,8 @@ def main(argv=None) -> int:
     lc = twinagent.default_events_path(db)            # loop 會寫的那一個（＝開機腳本算的那一個）
     cfg = twinagent.AgentConfig(work_root=twinagent.default_work_root(db), events_path=lc,
                                 model="m", endpoint=up + "/v1", parallel=1, timeout_s=120.0,
-                                argv_prefix=[sys.executable, str(agent)], requires=[])
+                                argv_prefix=[sys.executable, str(agent)], requires=[],
+                                gate=False)   # 假 agent 不跑世界：舊路徑（allow_no_suite）
     # serve_twin --live：開機時 lifecycle 還不存在（Tail 從檔尾讀）
     srv, stage = S.make_server(S.default_recordings(), bind="127.0.0.1", port=0,
                                out=work / "events.jsonl", dwell=30, quiet=True, live=lc,

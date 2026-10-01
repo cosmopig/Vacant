@@ -1025,7 +1025,9 @@ def _judgment_of(twin: dict[str, Any]) -> dict[str, Any]:
         "count_semantics": twin.get("count_semantics"),
         "ws_end_sha256_prefix": (ws_end[:8] if isinstance(ws_end, str) and ws_end else None),
         "chain_head_prefix": (head[:8] if isinstance(head, str) and head else None),
-        "accepted_note": tv.PRACTICAL_ACCEPTED_NOTE,
+        # accepted 是布林＝閘門量過（說的只是「有沒有根據」）；None＝沒有閘門（舊路徑）。
+        "accepted_note": (tv.PRACTICAL_GROUNDING_NOTE if isinstance(twin.get("accepted"), bool)
+                          else tv.PRACTICAL_ACCEPTED_NOTE),
     }
 
 
@@ -1279,6 +1281,10 @@ def publish(store: TwinStore, cloud: str, token: str,
             payload["steps"] = twinagent.read_step_log(rd)
             payload["says"] = twinagent.read_says(rd, _subject_secrets(store, sid))   # 2026-10-01
             payload["judgment"] = _judgment_of(twin)
+            # 2026-10-01：根據閘門每一次嘗試的逐格結果（手機照實顯示；label 不含觀眾內容）。
+            _rv = twinagent.read_review(rd)
+            if _rv:
+                payload["review"] = _rv
             rb = twinagent.receipt_bundle(work_root, sid,
                                           expect_head=twin.get("verdict_hash"))
             if rb.get("ok"):

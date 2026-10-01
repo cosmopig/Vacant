@@ -11,6 +11,8 @@
 4. 把 `<run_dir>/stage2_in/` 裡預先備好的 WORLD.md 與 地上/ 搬進工作區（唯讀）。
    段 1 的分身看不到它們。
 
+另存一份 `<run_dir>/letter_final.md`（工作區外；`grounding_gate` 窗 2 的出處，分身之後改不到它）。
+
 信.md 空了／不存在 ⇒ 結束碼 4（第二回合不起）。`<run_dir>/letter_guard.json` 只記計數，不記內容。
 ⚠ 信是觀眾資料（由特質寫出來的）：撤回時由 `twinagent.erase_run_artifacts` 一起刪、列進抹除清單。
 """
@@ -104,6 +106,9 @@ def run(ws: pathlib.Path, rd: pathlib.Path) -> int:
             info["ok"] = False
             return 4
         letter_p.write_text(text + "\n", encoding="utf-8")
+        # 段 1 結束時的信，另存一份在 run-dir（工作區外）：根據閘門的窗 2 要用「它讀到的信」
+        # 當出處，而段 2 的分身改得動工作區裡的 信.md。撤回時跟 run-dir 一起刪。
+        (rd / "letter_final.md").write_text(text + "\n", encoding="utf-8")
         # 4. 世界與地上進房間（唯讀）
         src = rd / "stage2_in"
         if (src / "WORLD.md").is_file():

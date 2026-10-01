@@ -122,14 +122,26 @@ def _describe_default(case: str, ok: bool, message: str) -> tuple[str, str]:
 
 
 def _describer() -> Callable[[str, bool, str], tuple[str, str]]:
+    fallback: Callable[[str, bool, str], tuple[str, str]] = _describe_default
     try:
         from ops.exhibit.twin import review_suite  # type: ignore
         fn = getattr(review_suite, "describe", None)
         if callable(fn):
-            return fn
+            fallback = fn
     except Exception:  # noqa: BLE001 —— 審查那一側還沒合進來／壞了 ⇒ 退通用寫法
         pass
-    return _describe_default
+    # 分身的「有沒有根據」四格窗（2026-10-01）：它自己的 case 名由 `grounding_gate.describe`
+    # 決定 id／label（label 不含觀眾內容）；別的 case 名照舊走上面那條。
+    try:
+        from ops.exhibit.twin import grounding_gate
+    except Exception:  # noqa: BLE001
+        return fallback
+
+    def describe(case: str, ok: bool, message: str) -> tuple[str, str]:
+        if case in grounding_gate.CASE_ID:
+            return grounding_gate.describe(case, ok, message)
+        return fallback(case, ok, message)
+    return describe
 
 
 def read_review(rd: pathlib.Path) -> list[dict[str, Any]]:

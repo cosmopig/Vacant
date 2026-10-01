@@ -37,7 +37,7 @@ A 線維護）。**兩邊的欄位必須一字不差**；本支是生產端的�
 | `working` | ON／OFF | **每一通**經過中介的模型呼叫 | `worker`、`attempt`、`calls_so_far`（這一跑到目前為止的通數，正整數） |
 | `revised` | ON | 第 2 次以後的嘗試**真的開始了** | `reviser`（＝同一個 worker）、`transition`、`retry_arm`、`attempt` |
 | `draft_done` | ON／OFF | agent 行程結束 | `calls_used`、`attempt`、`feedback_bytes`、`feedback_delivery`、`timed_out` |
-| `gate_ran` | **只有 ON** | 閘門跑完 | `passed`、`n_tests`、`failed_case`、`attempt` |
+| `gate_ran` | **只有 ON** | 閘門跑完 | `passed`、`n_tests`、`failed_case`、`attempt`；分身的自主任務另帶 `checks[{id,ok,label,file?,line?}]`（規則 11） |
 | `verdict` | ON／OFF | 一跑結束 | `accepted`（三值）、`meets_demand`（恆 `null`）、`blocked_by`、`stop_reason`、`evidence` |
 | `receipt` | **只有 ON** | 簽了收據 | `sha256`＝`chain_head`、`verify_url`、`prompt_sha256` |
 | `postaudit` | **只有 OFF** | 分身事後補量 OFF 的交付 | `when`＝`"after_the_run"`、`is_verdict`＝`false`、`signed`＝`false`、`all_pass`、`passed`、`n_tests`、`failed_case`、`ruler`、`note` |
@@ -89,11 +89,17 @@ A 線維護）。**兩邊的欄位必須一字不差**；本支是生產端的�
 9. **`postaudit` 永遠不長得像裁決**：`when="after_the_run"`、`is_verdict=false`、
    `signed=false` 三個旗標缺一不可，而且只准出現在 OFF 臂。
 10. **`counters` 不准有這條路上不存在的層**（`COUNTERS_NEVER`），數字欄位是非負整數。
-11. **分身的自主任務（`task_kind="practical"`）沒有客觀標準**：那一格不准有 OFF 臂、
-    不准有 `gate_ran`／`revised`（沒有驗收套件就沒有閘門、沒有重試）、`verdict.accepted`
-    恆為 `null`、`stop_reason` 只能是 `ungated`（或基建壞了的 `infra_void`）。
-    **不准發明評分**——Vacant 在這一格保證的只有「每一通模型呼叫都經過中介、
-    行程結束時簽了收據」。
+11. **分身的自主任務（`task_kind="practical"`）沒有「對錯」的客觀標準，但交件前有「有沒有根據」的閘門**
+    （第 2 版，2026-10-01，裁決 `DECISION_20261001_TWIN_GROUNDING_GATE.md`；第 1 版——practical 格
+    不准有 `gate_ran`／`revised`、`accepted` 恆 `null`——只活在 2026-09-24～10-01 的錄影裡，
+    舊錄影照驗：沒有 `gate_ran` 就是 `ungated`／`null`）：
+    那一格不准有 OFF 臂；`gate_ran`／`revised` 允許（閘門就是 `vacant run` 的閘門，重改就是它的
+    `revise` 臂）；`gate_ran.checks[]` 每條只准 `id`／`ok`／`label`／`file`／`line`
+    （`file`＝`artifact`｜`plan`、`line`＝正整數；**不帶檔名、不帶內容**），`passed`＝所有 `ok` 的 AND；
+    `verdict.accepted` 與 `stop_reason` 對得上：`visible_pass`⇒`true`、`attempts_exhausted`⇒`false`
+    （照常交件、照實標出）、`ungated`／`infra_void`⇒`null`。
+    **不准發明評分**——閘門只問「根據有沒有」，不問好不好；Vacant 在這一格保證的是
+    「每一通模型呼叫都經過中介、行程結束時簽了收據、`accepted` 說的只是有沒有根據」。
 """
 from __future__ import annotations
 
@@ -139,8 +145,22 @@ PRACTICAL_BASIS_NOTE = ("這一格是觀眾自己的數位分身：沒有派工�
 #: ⚠ 口徑：講「經過中介」「簽了收據」，**不講「信任」、不講「驗證了它做得好」**。
 PRACTICAL_ACCEPTED_NOTE = ("這類任務沒有客觀標準——Vacant 不判對錯；它保證的是"
                            "每一通模型呼叫都經過中介、行程結束時簽了收據")
-#: 分身那一格 `verdict.stop_reason` 只准是這兩個。
-PRACTICAL_STOPS = ("ungated", "infra_void")
+#: 分身那一格 `verdict.accepted` 是布林時的那一句：`true`／`false` 只說「每一步有沒有根據」。
+#: ⚠ 口徑：不講「信任」、不講「做得好」；`false` 照常交件（拍立得照發）、照實標出沒有根據的位置。
+PRACTICAL_GROUNDING_NOTE = ("Vacant 不判對錯；這一格查的是每一步有沒有根據，"
+                            "accepted 說的只是這個——沒過的照常交件、照實標出位置")
+#: 規則 11 的版號：1＝2026-09-24（practical 格沒有閘門、`accepted` 恆 null）；
+#: 2＝2026-10-01（有「根據」閘門與重改，`accepted` 三值）。電視端文件 `LIVE_INTERFACE.md` §十／§十一
+#: 的 v8／v9 就是第 2 版的消費端。
+RULE11_VERSION = 2
+#: 分身那一格 `verdict.stop_reason` 只准是這幾個，以及各自對應的 `accepted`。
+PRACTICAL_STOPS = ("ungated", "infra_void", "visible_pass", "attempts_exhausted")
+PRACTICAL_ACCEPTED_FOR = {"ungated": None, "infra_void": None,
+                          "visible_pass": True, "attempts_exhausted": False}
+#: `gate_ran.checks[]` 每條准出現的欄位（兩份契約逐字相同：`LIVE_INTERFACE.md` §十、§十一）。
+GATE_CHECK_KEYS = ("id", "ok", "label", "file", "line")
+GATE_CHECK_FILES = ("artifact", "plan")
+GATE_CHECK_LABEL_MAX = 80
 
 #: `twin_step.step` 的白名單（`sidecar.STEP_KINDS` 同值，兩邊測試釘住）。
 TWIN_STEPS = ("read", "write", "list")
@@ -285,22 +305,57 @@ def validate(evs: list[dict], *, require_settled: bool = True,
             elif require_task_kind and "task_kind" not in e:
                 bad.append(f"第 {n} 個事件：task_opened 沒有 task_kind——"
                            "缺席只給舊錄影；新的東西要講明是題庫格還是分身的自主任務")
-        # ── 分身的自主任務（規則 11）：沒有客觀標準、沒有對照、沒有閘門 ──────
+        # ── 分身的自主任務（規則 11，第 2 版）：沒有對照、有「根據」閘門 ─────
         if kinds.get(e.get("task_id")) == KIND_PRACTICAL:
             if e.get("arm") == ARM_OFF:
                 bad.append(f"第 {n} 個事件：分身的自主任務出現 OFF 臂——"
                            "那一格沒有反事實對照，畫面上不准長出一個")
-            if t in ("gate_ran", "revised"):
-                bad.append(f"第 {n} 個事件：分身的自主任務發了 {t}——"
-                           "沒有驗收套件就沒有閘門、也沒有重試")
             if t == "verdict":
-                if e.get("accepted") is not None:
-                    bad.append(f"第 {n} 個事件：分身的自主任務 accepted 不是 null——"
-                               "這類任務沒有客觀標準，Vacant 不判對錯")
-                if e.get("stop_reason") not in PRACTICAL_STOPS:
+                sr = e.get("stop_reason")
+                if sr not in PRACTICAL_STOPS:
                     bad.append(f"第 {n} 個事件：分身的自主任務 stop_reason 是 "
-                               f"{e.get('stop_reason')!r}，只能是 "
-                               f"{'／'.join(PRACTICAL_STOPS)}")
+                               f"{sr!r}，只能是 {'／'.join(PRACTICAL_STOPS)}")
+                elif e.get("accepted") is not PRACTICAL_ACCEPTED_FOR[sr]:
+                    bad.append(f"第 {n} 個事件：分身的自主任務 stop_reason={sr!r} 時 "
+                               f"accepted 只能是 {PRACTICAL_ACCEPTED_FOR[sr]!r}，"
+                               f"拿到 {e.get('accepted')!r}")
+        if t == "gate_ran" and "checks" in e:
+            if kinds.get(e.get("task_id")) != KIND_PRACTICAL:
+                bad.append(f"第 {n} 個事件：只有分身的自主任務的 gate_ran 才帶 checks"
+                           "（題庫格的閘門沒有逐格窗）")
+            ck = e.get("checks")
+            if not isinstance(ck, list) or not ck:
+                bad.append(f"第 {n} 個事件：gate_ran.checks 要是非空清單（沒有就不要帶這個欄位）")
+            else:
+                for j, c in enumerate(ck, 1):
+                    if not isinstance(c, dict):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條不是物件")
+                        continue
+                    extra = sorted(set(c) - set(GATE_CHECK_KEYS))
+                    if extra:
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條帶了不准的欄位 {extra}")
+                    if not (isinstance(c.get("id"), str) and c["id"]):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 id 要是非空字串")
+                    if not isinstance(c.get("ok"), bool):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 ok 要是布林")
+                    lb = c.get("label")
+                    if not (isinstance(lb, str) and lb.strip()
+                            and len(lb) <= GATE_CHECK_LABEL_MAX):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 label 要是非空短句"
+                                   f"（≤ {GATE_CHECK_LABEL_MAX} 字）")
+                    if "file" in c and c["file"] not in GATE_CHECK_FILES:
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 file 只能是 "
+                                   f"{'／'.join(GATE_CHECK_FILES)}")
+                    if "line" in c and not _is_pos_int(c["line"]):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 line 要是正整數")
+                    if ("line" in c) != ("file" in c):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 file 與 line 要一起出現")
+                    if c.get("ok") is True and ("line" in c or "file" in c):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條通過了卻帶位置")
+                if all(isinstance(c, dict) and isinstance(c.get("ok"), bool) for c in ck) \
+                        and isinstance(e.get("passed"), bool) \
+                        and e["passed"] != all(c["ok"] for c in ck):
+                    bad.append(f"第 {n} 個事件：gate_ran.passed 與 checks 的逐條結果對不上")
         if t == "routed" and e.get("basis") != "random":
             bad.append(f"第 {n} 個事件：basis 不是 random（`vacant run` 沒有路由層）")
         if t == "revised" and e.get("reviser") is None:

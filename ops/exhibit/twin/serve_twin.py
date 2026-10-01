@@ -949,7 +949,15 @@ class Stage:
         with self.lock:
             # 先 lifecycle 後旁註：同一輪裡 OFF 的 run_ended 要先進 Folder，
             # 它的 postaudit 才綁得上。
-            lines = self.live_tail.poll() + self.live_side_tail.poll()
+            lc, sc = self.live_tail.poll(), self.live_side_tail.poll()
+            # 根據閘門的逐格結果旁註（`twin_gate`）要比同一次嘗試的 `gate_ran` 先進 Folder
+            # （Folder 在 gate_ran 那一刻把它併成 `checks`）：照 `sidecar.merge` 的規則插進
+            # lifecycle 裡；其餘旁註維持接在後面（行為逐字不變）。
+            gate_rows = [r for r in sc if r.get("type") == "twin_gate"]
+            if gate_rows:
+                lc = sidecarlib.merge(lc, gate_rows)
+                sc = [r for r in sc if r.get("type") != "twin_gate"]
+            lines = lc + sc
             if not lines:
                 return 0
             # 規則 1：先把正在重播的那一格快轉寫完，再接真跑。

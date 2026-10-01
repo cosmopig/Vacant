@@ -133,7 +133,7 @@ SUFFIX = ".sidecar.jsonl"
 #: 分身的 pi 以 `--mode json` 跑，`agent_stdout.log` 裡每一回合 assistant 的**文字**
 #: （不含思考區塊、不含工具呼叫的參數）→ 一筆旁註。來源同樣是分身側自己的記錄
 #: （pi 的 stdout），不是 Vacant 當場觀察到的事，理由與上面兩種同一條。
-TYPES = ("postaudit", "twin_step", "twin_say")
+TYPES = ("postaudit", "twin_step", "twin_say", "twin_gate")
 
 COMMON = ("schema", "type", "ts_ms", "cell_id", "run_id")
 
@@ -142,7 +142,13 @@ FIELDS: dict[str, tuple[str, ...]] = {
                   "all_pass", "passed", "total", "failed_case", "ruler", "note"),
     "twin_step": ("seq", "step", "path_kind", "bytes", "ok"),
     "twin_say": ("seq", "turn", "text", "truncated"),
+    # 根據閘門（`grounding_gate.prepare`，2026-10-01）：這一次嘗試的四格窗逐格結果。
+    # 寫在 `gate_ran` 之前（pi 結束、凍結之前），電視才拿得到逐格結果；權威的結果仍是
+    # launcher 落的 `visible_*.json`（測試比對兩者相等）。
+    "twin_gate": ("attempt", "passed", "checks"),
 }
+#: `twin_gate.checks[]` 每條准出現的欄位（與 `tv_contract.GATE_CHECK_KEYS` 同值，測試釘住）。
+GATE_CHECK_KEYS = ("id", "ok", "label", "file", "line")
 
 #: `twin_say.text` 的字數上限（契約補充 §E）。超過就截斷並 `truncated: true`。
 SAY_MAX = 80
@@ -462,6 +468,39 @@ def validate(rows: Iterable[dict], *,
                     and r["ts_ms"] < run["ended_ms"]:
                 bad.append(f"旁註第 {i} 筆：ts_ms 早於那一跑的 run_ended——"
                            "「事後」在資料上不成立")
+        elif t == "twin_gate":
+            if not (_is_nat(r.get("attempt")) and r["attempt"] >= 1):
+                bad.append(f"旁註第 {i} 筆：twin_gate 的 attempt 要是 ≥ 1 的整數")
+            if not isinstance(r.get("passed"), bool):
+                bad.append(f"旁註第 {i} 筆：twin_gate 的 passed 只能是 true／false")
+            ck = r.get("checks")
+            if not isinstance(ck, list) or not ck:
+                bad.append(f"旁註第 {i} 筆：twin_gate 的 checks 要是非空清單")
+            else:
+                for j, c in enumerate(ck, 1):
+                    if not isinstance(c, dict) or set(c) - set(GATE_CHECK_KEYS):
+                        bad.append(f"旁註第 {i} 筆：twin_gate.checks 第 {j} 條有不准的欄位")
+                        continue
+                    if not (isinstance(c.get("id"), str) and c["id"]
+                            and isinstance(c.get("ok"), bool)
+                            and isinstance(c.get("label"), str) and c["label"].strip()):
+                        bad.append(f"旁註第 {i} 筆：twin_gate.checks 第 {j} 條的 id／ok／label 形狀不對")
+                if (all(isinstance(c, dict) and isinstance(c.get("ok"), bool) for c in ck)
+                        and isinstance(r.get("passed"), bool)
+                        and r["passed"] != all(c["ok"] for c in ck)):
+                    bad.append(f"旁註第 {i} 筆：twin_gate.passed 與 checks 的逐條結果對不上")
+            if runs is None:
+                continue
+            run = runs.get(r.get("run_id"))
+            if run is None:
+                bad.append(f"旁註第 {i} 筆：run_id {r.get('run_id')!r} 不在這份錄影裡")
+                continue
+            if run["arm"] != LC_ARM_ON:
+                bad.append(f"旁註第 {i} 筆：run_id {r.get('run_id')} 是 {run['arm']}，"
+                           "不是 ON 臂——分身的閘門只在 ON 臂")
+            if r.get("cell_id") != run["cell_id"]:
+                bad.append(f"旁註第 {i} 筆：cell_id {r.get('cell_id')!r} 與那一跑的格子"
+                           f" {run['cell_id']!r} 不同")
         elif t in ("twin_step", "twin_say"):
             if t == "twin_step":
                 # ── 分身工作區三個工具被呼叫的旁註：形狀＋白名單 ─────────────
@@ -532,7 +571,7 @@ def merge(lifecycle_events: list[dict], rows: list[dict]) -> list[dict]:
     after_end: dict[str, list[dict]] = {}
     live: dict[str, list[dict]] = {}
     for r in rows:
-        bucket = live if r.get("type") in ("twin_step", "twin_say") else after_end
+        bucket = live if r.get("type") in ("twin_step", "twin_say", "twin_gate") else after_end
         bucket.setdefault(r.get("run_id"), []).append(r)
     for lst in live.values():
         lst.sort(key=lambda r: r.get("ts_ms", 0))

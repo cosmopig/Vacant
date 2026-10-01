@@ -5,8 +5,9 @@
 1. **`task_kind` 契約**：`run_twin.py` 的格子是 `code`、`twinagent.py` 的格子是
    `practical`，由 `caller` 帶進 lifecycle、`live_events.Folder` 原樣轉到 `task_opened`；
    caller 沒帶（舊錄影）就**不寫**這個欄位（不替舊資料猜）。
-2. **`tv_contract` 規則 11**：分身的自主任務沒有 OFF 臂、沒有閘門、`accepted` 恆 `null`。
-   每一條都配負控制（壞掉的事件流真的會被抓到）。
+2. **`tv_contract` 規則 11**：分身的自主任務沒有 OFF 臂；第 1 版（沒有閘門、`accepted` 恆 `null`）
+   適用於沒有 `gate_ran` 的舊紀錄與 `gate=False` 路徑；2026-10-01 起第 2 版允許根據閘門與重改
+   （`accepted` 要與 `stop_reason` 對得上）。每一條都配負控制（壞掉的事件流真的會被抓到）。
 3. **`serve_twin --live` 吃得下只有 ON 一臂、ungated 的格子**：逐臂收尾、切換規則、
    `/state.now` 不套反事實那兩顆鍵的字、收據頁照實說為什麼沒有。
 4. **`exhibit_boot.sh` 把 loop 寫的檔與 serve_twin tail 的檔指到同一個**。
@@ -217,13 +218,14 @@ def test_a_well_formed_practical_cell_passes():
 
 
 @pytest.mark.parametrize("mutate,needle", [
-    (lambda evs: evs[:4] + [{**evs[3], "type": "gate_ran", "ts": evs[3]["ts"] + "z",
-                              "passed": False}] + evs[4:], "gate_ran"),
     (lambda evs: evs + [{**evs[4], "arm": "OFF", "ts": evs[5]["ts"] + "z"}], "OFF 臂"),
+    # 規則 11 第 2 版（2026-10-01）：accepted 要和 stop_reason 對得上
+    (lambda evs: [dict(e, accepted=False, stop_reason="ungated") if e["type"] == "verdict"
+                  else e for e in evs], "accepted 只能是"),
     (lambda evs: [dict(e, accepted=False, stop_reason="visible_fail") if e["type"] == "verdict"
-                  else e for e in evs], "accepted 不是 null"),
+                  else e for e in evs], "stop_reason"),
     (lambda evs: [dict(e, stop_reason="visible_pass") if e["type"] == "verdict" else e
-                  for e in evs], "stop_reason"),
+                  for e in evs], "accepted 只能是"),
     (lambda evs: [dict(e, task_kind="PRACTICAL") if e["type"] == "task_opened" else e
                   for e in evs], "task_kind 是"),
 ])
@@ -233,14 +235,16 @@ def test_rule_9_bites(mutate, needle):
 
 
 def test_rule_9_is_driven_by_task_kind_negative_control():
-    """負控制：同一串有 gate_ran 的事件，**拿掉 task_kind**（當 code）就不觸發規則 11
-    ——證明是 task_kind 在決定，不是規則 11 對每一格都亂咬。"""
+    """負控制：同一串事件，practical 格的 gate_ran 帶 checks 合格；**拿掉 task_kind**（當 code）
+    就被擋——證明是 task_kind 在決定，不是規則 11 對每一格都亂咬。"""
     evs = _practical_cell()
-    evs = evs[:4] + [{**evs[3], "type": "gate_ran", "ts": evs[3]["ts"] + "z",
-                      "passed": True, "n_tests": 1, "failed_case": None}] + evs[4:]
+    gate = {**evs[3], "type": "gate_ran", "ts": evs[3]["ts"] + "z", "passed": True,
+            "n_tests": 1, "failed_case": None, "attempt": 1,
+            "checks": [{"id": "G1", "ok": True, "label": "讀過了"}]}
+    evs = evs[:4] + [gate] + evs[4:]
+    assert tv.validate(evs, require_task_kind=True) == []
     coded = [{k: v for k, v in e.items() if k != "task_kind"} for e in evs]
-    assert not [b for b in tv.validate(coded) if "分身的自主任務" in b]
-    assert [b for b in tv.validate(evs) if "分身的自主任務" in b]
+    assert [b for b in tv.validate(coded) if "只有分身的自主任務" in b]
 
 
 def test_folder_writes_practical_notes_only_for_practical():
