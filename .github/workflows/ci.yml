@@ -150,7 +150,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install "bandit==1.9.4" "pip-audit==2.10.0"
 
-      # (a) 原始碼：HIGH 嚴重度一個都不准新增；現存三個逐項具名＋寫明理由。
+      # (a) 原始碼：HIGH 嚴重度一個都不准新增；現存的逐項具名＋寫明理由（名單在腳本的 KNOWN）。
       #     判準與名單在腳本裡，本機可用同一支重跑（`--selftest` 驗它自己的牙齒）。
       - name: bandit 判準自己的牙齒
         run: python .github/scripts/security_scan.py --selftest
