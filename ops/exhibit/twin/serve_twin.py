@@ -1244,6 +1244,27 @@ INDEX_HTML = """<!doctype html>
 """
 
 
+#: 客戶端中途斷線（手機掃完就走、電視頁重載、Wi-Fi 掉）時 socket 會丟這幾種例外。
+#: 它們是常態不是故障——展場無人值守，journal 不該被整串 traceback 淹掉。
+CLIENT_GONE = (BrokenPipeError, ConnectionResetError, ConnectionAbortedError)
+
+
+class QuietThreadingHTTPServer(ThreadingHTTPServer):
+    """客戶端斷線只記一行計數，其他例外照舊印 traceback（不吞真的錯）。"""
+    daemon_threads = True
+    client_gone = 0
+
+    def handle_error(self, request, client_address):  # noqa: D401
+        exc = sys.exc_info()[1]
+        if isinstance(exc, CLIENT_GONE):
+            self.client_gone += 1
+            if not Handler.quiet:
+                sys.stderr.write("[serve_twin] 客戶端中途斷線（%s）累計 %d 次，略過\n"
+                                 % (type(exc).__name__, self.client_gone))
+            return
+        super().handle_error(request, client_address)
+
+
 class Handler(BaseHTTPRequestHandler):
     stage: Stage = None       # type: ignore[assignment]
     quiet: bool = False
@@ -1406,7 +1427,7 @@ def make_server(recordings, *, bind: str, port: int, out: pathlib.Path,
         r["receipts"] = rstatus.get(r["path"])
     if pack:
         books.append(book("", pack, label="--pack（/viewer.html）"))
-    srv = ThreadingHTTPServer((bind, port), Handler)
+    srv = QuietThreadingHTTPServer((bind, port), Handler)
     host = bind if bind not in ("0.0.0.0", "") else "127.0.0.1"
     stage = Stage(cells, out=out, dwell=dwell, token=token,
                   base_url=base_url or f"http://{host}:{srv.server_address[1]}",
