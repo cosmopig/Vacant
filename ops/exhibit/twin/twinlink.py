@@ -143,7 +143,7 @@ sys.path.insert(0, str(TWIN.parents[2]))
 
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import tv_contract as tv  # noqa: E402
-from ops.exhibit.twin import twinagent, twinvault  # noqa: E402
+from ops.exhibit.twin import twinagent, twinprogress, twinvault  # noqa: E402
 from ops.exhibit.twin.twinstore import (  # noqa: E402
     DEFAULT_DB, KIND_ERASED, KIND_ERROR, KIND_GENERATED, KIND_INGEST_GAP,
     KIND_NOTE, KIND_PUBLISHED, KIND_SUBMITTED, KIND_WITHDRAWN, TwinStore,
@@ -780,7 +780,8 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
              timeout: float = DEFAULT_GEN_TIMEOUT,
              allow_fallback: bool = True, *,
              agent: "twinagent.AgentConfig | None" = None,
-             pool: "twinagent.AgentPool | None" = None) -> dict[str, Any]:
+             pool: "twinagent.AgentPool | None" = None,
+             progress: "twinprogress.ProgressReporter | None" = None) -> dict[str, Any]:
     """生成分身。
 
     `agent` 給了 ⇒ **主路徑（2026-09-24）**：分身在 `vacant run` 底下用 pi 真跑
@@ -790,7 +791,7 @@ def generate(store: TwinStore, endpoint: str = DEFAULT_ENDPOINT,
     """
     if agent is not None:
         return _generate_agent(store, endpoint, model, limit, timeout,
-                               allow_fallback, agent=agent, pool=pool)
+                               allow_fallback, agent=agent, pool=pool, progress=progress)
     todo = store.pending(KIND_GENERATED)
     # 撤回過的人不再生成。**不是過濾掉「看起來不想要的資料」**——
     # 是那個人已經說了「刪掉我」，再拿他的卡去打模型就是沒在聽。
@@ -838,7 +839,8 @@ def _gone(store: TwinStore, sid: str) -> bool:
 def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
                     timeout: float, allow_fallback: bool, *,
                     agent: "twinagent.AgentConfig",
-                    pool: "twinagent.AgentPool | None") -> dict[str, Any]:
+                    pool: "twinagent.AgentPool | None",
+                    progress: "twinprogress.ProgressReporter | None" = None) -> dict[str, Any]:
     """真跑主路徑：提交 → 收成 → 封印。**sqlite 只在這個（主）執行緒碰。**
 
     `pool=None` ⇒ 開一個臨時佇列、**等全部跑完**（`generate` 子命令）。
@@ -853,6 +855,11 @@ def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
     * 其餘（沒打到模型、沒寫 PLAN.md、infra_void、例外）由 `twinagent.build_twin` 決定。
     """
     in_flight = pool.in_flight() if pool is not None else set()
+    # 即時進度（2026-10-01）：被撤回的人先退場（呈報者只讀檔案，不碰 sqlite，所以這件事在主執行緒做）。
+    if progress is not None:
+        for _sid in list(progress.tracked()):
+            if _gone(store, _sid):
+                progress.untrack(_sid)
     todo = [s for s in store.pending(KIND_GENERATED)
             if s not in in_flight and not _gone(store, s)]
     if limit:
@@ -924,8 +931,14 @@ def _generate_agent(store: TwinStore, endpoint: str, model: str, limit: int,
                 continue
             if pool.submit(job):
                 submitted += 1
+                if progress is not None and not own_pool:
+                    # 登記之後呈報者幾秒內就會把「已經開始」推上雲端（手機不再停在排隊）。
+                    progress.track(sid, _subject_secrets(
+                        store, sid, card=cur.get("card"), card_text=cur.get("card_text")))
 
     results = pool.harvest(block=own_pool) if pool is not None else []
+    if progress is not None and pool is not None and not own_pool:
+        progress.sync(pool.in_flight())
     if own_pool and pool is not None:
         pool.shutdown(wait=True)
     for res in results:
@@ -2665,6 +2678,8 @@ def main(argv: Iterable[str] | None = None) -> int:
     lp.add_argument("--model", default=DEFAULT_MODEL)
     lp.add_argument("--interval", type=float, default=10.0)
     lp.add_argument("--rounds", type=int, default=0, help="0＝永遠（展場無人值守）")
+    lp.add_argument("--no-progress", action="store_true",
+                    help="不把在跑的人的進度推上雲端（預設推；失敗不影響現場）")
     lp.add_argument("--out", default=str(TWIN / "store" / "visitors.json"))
     _add_window_args(lp, can_retire=True)
     _add_agent_args(lp)
@@ -2738,6 +2753,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         # 真跑的佇列**跨輪存在**：每一輪只提交新的、收成跑完的，不阻塞 export
         # （還在跑的人這一輪是 arriving，電視照樣演「正在抵達」）。
         pool = twinagent.AgentPool(acfg.parallel) if acfg is not None else None
+        # 即時進度（2026-10-01）：背景執行緒把在跑的人的進度推上雲端，手機才不會
+        # 從頭到尾停在「下一個就是你」。失敗不影響現場；`--no-progress` 關掉。
+        reporter = (twinprogress.ProgressReporter(a.cloud, a.token, acfg.work_root).start()
+                    if (acfg is not None and not getattr(a, "no_progress", False)) else None)
         try:
             while True:
                 n += 1
@@ -2746,7 +2765,9 @@ def main(argv: Iterable[str] | None = None) -> int:
                 # 會場撤回的人 ⇒ 雲端那一份（原文、拍立得、收據副本）也刪（2026-09-26）
                 r["cloud_erase"] = sync_cloud_erasure(st, a.cloud, a.token)
                 r["generate"] = generate(st, a.endpoint, a.model,
-                                         agent=acfg, pool=pool)
+                                         agent=acfg, pool=pool, progress=reporter)
+                if reporter is not None:
+                    r["progress"] = dict(reporter.stats, tracked=len(reporter.tracked()))
                 # 拍立得在 publish **之前**：同一輪收成的人，同一輪就把圖送到他手機上
                 r["polaroid"] = polaroids(st)
                 r["publish"] = publish(st, a.cloud, a.token)
@@ -2763,7 +2784,7 @@ def main(argv: Iterable[str] | None = None) -> int:
                         pool.wait_idle()
                         r2 = {"round": "drain", "at": _now(),
                               "generate": generate(st, a.endpoint, a.model,
-                                                   agent=acfg, pool=pool),
+                                                   agent=acfg, pool=pool, progress=reporter),
                               "polaroid": polaroids(st),
                               "publish": publish(st, a.cloud, a.token),
                               "export": export(st, pathlib.Path(a.out),
@@ -2774,6 +2795,8 @@ def main(argv: Iterable[str] | None = None) -> int:
                     return 0
                 time.sleep(a.interval)
         finally:
+            if reporter is not None:
+                reporter.stop()
             if pool is not None:
                 pool.shutdown(wait=False)
     return 2

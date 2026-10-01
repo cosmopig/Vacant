@@ -1,0 +1,114 @@
+[
+  {
+    "shot": "0_before_fix_queued_position1.png",
+    "status": "queued",
+    "stage": null,
+    "queue_position": 1,
+    "title": "你的分身在排隊",
+    "qpos": "下一個就是你",
+    "procWaitTitle": "它想做的事：—",
+    "lines": []
+  },
+  {
+    "shot": "1_claimed.png",
+    "status": "claimed",
+    "stage": "claimed",
+    "queue_position": null,
+    "title": "你的分身正在成形",
+    "qpos": "輪到你了",
+    "procWaitTitle": "它想做的事：—",
+    "lines": []
+  },
+  {
+    "shot": "2_forming.png",
+    "status": "claimed",
+    "stage": "forming",
+    "queue_position": null,
+    "title": "你的分身正在成形",
+    "qpos": "輪到你了",
+    "procWaitTitle": "它想做的事：—",
+    "lines": []
+  },
+  {
+    "shot": "3_working_says.png",
+    "status": "claimed",
+    "stage": "working",
+    "queue_position": null,
+    "title": "它動手了",
+    "qpos": "它在做事",
+    "procWaitTitle": "它說的話",
+    "lines": [
+      "SYNTH：我想先看看自己房間裡有什麼。",
+      "SYNTH：先讀一下你的特質，再決定做什麼。"
+    ]
+  },
+  {
+    "shot": "3b_working_steps_folded.png",
+    "status": "claimed",
+    "stage": "working",
+    "queue_position": null,
+    "title": "它動手了",
+    "qpos": "它在做事",
+    "procWaitTitle": "它動手的步驟",
+    "lines": [
+      "看了自己房間裡有什麼 ×2",
+      "讀了你的特質"
+    ]
+  },
+  {
+    "shot": "4_reviewing_attempt1_fail.png",
+    "status": "claimed",
+    "stage": "reviewing",
+    "queue_position": null,
+    "title": "Vacant 在檢查每一步有沒有根據",
+    "qpos": "Vacant 檢查中",
+    "procWaitTitle": "檢查結果",
+    "lines": [
+      "✓ r1_plan",
+      "✓ r2_grounded",
+      "✗ SYNTH：成品跟決定對不上"
+    ]
+  },
+  {
+    "shot": "5_revising_back_to_working.png",
+    "status": "claimed",
+    "stage": "working",
+    "queue_position": null,
+    "title": "它動手了",
+    "qpos": "它在做事",
+    "procWaitTitle": "它說的話",
+    "lines": [
+      "SYNTH：我想先看看自己房間裡有什麼。",
+      "SYNTH：先讀一下你的特質，再決定做什麼。",
+      "SYNTH：被退回了，我把成品改成跟決定對得上。"
+    ]
+  },
+  {
+    "shot": "6_reviewing_attempt2_pass.png",
+    "status": "claimed",
+    "stage": "reviewing",
+    "queue_position": null,
+    "title": "Vacant 在檢查每一步有沒有根據",
+    "qpos": "Vacant 檢查中",
+    "procWaitTitle": "檢查結果（第 2 次）",
+    "lines": [
+      "✓ r1_plan",
+      "✓ r2_grounded",
+      "✓ r4_matches"
+    ]
+  },
+  {
+    "shot": "7_done_wrapping_up.png",
+    "status": "claimed",
+    "stage": "done",
+    "queue_position": null,
+    "title": "做完了，正在收尾",
+    "qpos": "快好了",
+    "procWaitTitle": "檢查結果（第 2 次）",
+    "lines": [
+      "✓ r1_plan",
+      "✓ r2_grounded",
+      "✓ r4_matches"
+    ]
+  }
+]
