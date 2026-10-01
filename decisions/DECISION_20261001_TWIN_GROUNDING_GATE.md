@@ -131,6 +131,6 @@ batch1／batch2 那 4 條旁註在存檔時依規則改正（見 `evidence_gate_
 3. **B8**：把端點指到關閉的埠後，production 的探測（`upstream_reachable`）直接退化成 `upstream_unreachable`、不起 pi（`b8_probe_blocked.json`）。略過探測讓 pi 起得來：
    pi 打了 4 通到中介，**每一通 `model_call.error=true`、`requests_seen=4`（中介把失敗的呼叫也算進去）**，沒有信 ⇒ stage 1 失敗、`agent_no_plan` 退化；
    所以 **`requests_seen=0`／`infra_void` 這條在這條路上造不出來**。能從事件流辨認「模型打不到」的訊號是：該跑所有 `model_call.error=true`、沒有 `gate_ran.checks`、twin 退化 `agent_no_plan`。
-4. **最終版 12 跑**（`evidence_gate_20261002/`）：accepted true 7／false 5；B1 3、B2a 8、B2b 3、B2c 1、B2d 5、B3 9、B4 4、B5 4、B6 6、B7 1。逐條 ✗ 的原文與出處見回報與各跑 json。
+4. **最終版 12 跑**（`evidence_gate_20261002/`）：accepted true 8／false 4；B1 4、B2a 7、B2b 3、B2c 1、B2d 4、B3 8、B4 4、B5 4、B6 5、B7 1。逐條 ✗ 的原文與出處見回報與各跑 json。
    判斷：沒有確定的誤擋；兩處待主線判——f03 的「第三列：16-19 號在位」等自訂卡片編號（G2，三次嘗試都擋，是分身自訂的編號、地上沒有這些數字），
    f06 a1 的 `地上/捏土處/出生片 433 的資訊`（G1，路徑後面接了說明，地上沒有「出生片」這個檔）。
