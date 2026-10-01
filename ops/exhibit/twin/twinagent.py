@@ -374,6 +374,66 @@ def read_outputs(root: pathlib.Path | None) -> dict[str, Any]:
     return out
 
 
+def read_says(rd: pathlib.Path, originals: list[str] | None = None, *,
+              max_items: int = 200, max_chars: int = 200) -> list[dict[str, Any]]:
+    """這一跑 agent 說過的每一句話（**手機私人看，含檔名也送**；契約補充 §E／計畫 PROC3 第 3 項）。
+
+    讀 `agent_stdout.log`（pi `--mode json`），每個 assistant `message_end` 的 `text` 區塊
+    一筆。只擋 LEAK：清過標記後與觀眾原文（`originals`）連續 ≥ `polaroid.LEAK_WINDOW` 字
+    相同的整句不送（不改寫）。思考區塊、工具參數一律不碰。
+
+    `seq` ＝「這句話之後的第一個工具呼叫是第幾個」（1 起算，跟步驟紀錄的 `seq` 對得上，
+    手機才排得出「先說、再做」）；`turn` ＝ `turn_start` 計數；`ts` ＝訊息自帶時間戳（毫秒）。
+    讀不到檔／壞行 ⇒ 回已讀到的（不猜）。
+    """
+    p = rd / AGENT_STDOUT_NAME
+    if not p.is_file():
+        return []
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    origs = [o for o in (originals or []) if isinstance(o, str) and o]
+    out: list[dict[str, Any]] = []
+    turn = 0
+    tools_seen = 0
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(row, dict):
+            continue
+        t = row.get("type")
+        if t == "turn_start":
+            turn += 1
+            continue
+        if t != "message_end":
+            continue
+        msg = row.get("message")
+        if not isinstance(msg, dict) or msg.get("role") != "assistant":
+            continue
+        content = [c for c in (msg.get("content") or []) if isinstance(c, dict)]
+        ts = msg.get("timestamp")
+        ts = int(ts) if isinstance(ts, (int, float)) and ts >= 0 else int(time.time() * 1000)
+        for c in content:
+            if c.get("type") != "text" or not isinstance(c.get("text"), str):
+                continue
+            cleaned = sidecarlib.clean_say(c["text"])
+            if not cleaned:
+                continue
+            if polaroidlib.caption_leaks_original(cleaned, origs):
+                continue
+            if len(out) < max_items:
+                out.append({"seq": tools_seen + 1, "turn": max(turn, 1),
+                            "text": "".join(list(cleaned)[:max_chars]), "ts": ts})
+        tools_seen += sum(1 for c in content if c.get("type") == "toolCall")
+    return out
+
+
 def read_step_log(rd: pathlib.Path, *, max_lines: int = 500) -> list[dict[str, Any]]:
     """讀這一跑的原始步驟紀錄（**含檔名**）。只給手機用（契約 §C）——
     電視那一側走 `sidecar.twin_step_row`（不帶檔名，見 `StepForwarder`）。

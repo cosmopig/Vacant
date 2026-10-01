@@ -1259,6 +1259,7 @@ def publish(store: TwinStore, cloud: str, token: str,
             #    與判定摘要一起送——雲端只回給他自己的 `/api/status/:id`。
             _ws, rd = twinagent.paths_for(work_root, sid)
             payload["steps"] = twinagent.read_step_log(rd)
+            payload["says"] = twinagent.read_says(rd, _subject_secrets(store, sid))   # 2026-10-01
             payload["judgment"] = _judgment_of(twin)
             rb = twinagent.receipt_bundle(work_root, sid,
                                           expect_head=twin.get("verdict_hash"))
@@ -1406,6 +1407,7 @@ def resend_missing(store: TwinStore, cloud: str, token: str, *,
             sent_polaroid = True
         _ws, rd = twinagent.paths_for(work_root, sid)
         payload["steps"] = twinagent.read_step_log(rd)
+        payload["says"] = twinagent.read_says(rd, _subject_secrets(store, sid))   # 2026-10-01
         payload["judgment"] = _judgment_of(twin)
         rb = twinagent.receipt_bundle(work_root, sid, expect_head=twin.get("verdict_hash"))
         receipt_state = None

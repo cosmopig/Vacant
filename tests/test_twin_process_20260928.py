@@ -518,6 +518,7 @@ def test_publish_sends_judgment_and_an_empty_step_list_when_none_was_recorded(
     assert out["published"] == 1, out
     body = sent[0]["payload"]
     assert body["steps"] == [], "fixture agent 不是 pi，沒有原始記錄檔 ⇒ 空清單不是缺欄位"
+    assert body["says"] == [], "沒有 agent_stdout.log ⇒ 空清單，欄位在"
     j = body["judgment"]
     tw = st.current(sid)["twin"]
     assert j["chain_head_prefix"] == tw["verdict_hash"][:8]
@@ -840,3 +841,39 @@ def test_real_pi_with_say_prompt_gives_at_least_three_chinese_says(tmp_path, log
     for r in rows:
         assert any("一" <= ch <= "鿿" for ch in r["text"]), r["text"]
         assert not sc.looks_like_filename(r["text"])
+
+
+# ── 2026-10-01：手機看得到它說的每一句（payload.says；含檔名也送、只擋 LEAK）──
+def _say_log(path, texts_and_tools):
+    rows = [{"type": "turn_start"}]
+    for k, (text, ntools) in enumerate(texts_and_tools):
+        content = ([{"type": "text", "text": text}] if text else []) \
+            + [{"type": "toolCall", "arguments": {"path": "x.md"}}] * ntools
+        rows.append({"type": "message_end", "message": {"role": "assistant", "content": content,
+                                                         "timestamp": 1790000000000 + k}})
+        rows.append({"type": "turn_start"})
+    path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+
+
+def test_read_says_keeps_filenames_drops_only_leaks_and_aligns_seq_with_steps(tmp_path) -> None:
+    orig = "我最近很喜歡整理書架而且說話慢條斯理"
+    _say_log(tmp_path / twinagent.AGENT_STDOUT_NAME, [
+        ("我先把清單寫進 list.md。", 1),         # 含檔名：手機私人 ⇒ 送
+        (orig + "所以我想寫東西", 1),            # 抄了觀眾原文 ⇒ 不送
+        ("", 2),                                  # 純工具呼叫 ⇒ 不發
+        ("我做完了。", 0),
+    ])
+    says = twinagent.read_says(tmp_path, [orig])
+    assert [x["text"] for x in says] == ["我先把清單寫進 list.md。", "我做完了。"]
+    assert [x["seq"] for x in says] == [1, 5], "seq＝這句之後第一個工具呼叫的序號（跟步驟 seq 對得上）"
+    assert all(isinstance(x["turn"], int) and isinstance(x["ts"], int) for x in says)
+    assert twinagent.read_says(tmp_path / "nope") == []
+
+
+@pytest.mark.parametrize("log", PROMPT_LOGS, ids=lambda p: p.name)
+def test_read_says_on_real_pi_output_is_valid_for_the_cloud_shape(tmp_path, log) -> None:
+    (tmp_path / twinagent.AGENT_STDOUT_NAME).write_text(log.read_text(encoding="utf-8"), encoding="utf-8")
+    says = twinagent.read_says(tmp_path, [])
+    assert len(says) >= 3
+    for x in says:
+        assert set(x) == {"seq", "turn", "text", "ts"} and 0 < len(x["text"]) <= 200
