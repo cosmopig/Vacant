@@ -1247,6 +1247,11 @@ def publish(store: TwinStore, cloud: str, token: str,
             "matched": str(twin.get("working") or "")[:120],
             "outcome": outcome,
         }
+        # 手機上的「記號」一旦分身出現就換成那隻黏土小人（cast40 `cNN`，單一來源
+        # `pick_cast_for`）。算不出來就**不送**，不補假的 c01——手機端沒有就維持幾何形狀。
+        _cid = _cast_id_for(cur.get("card"))
+        if _cid:
+            payload["cast_id"] = _cid
         sent_polaroid, receipt_state = False, None
         if outcome == "made":
             make_polaroid(store, sid)            # 冪等；loop 那一步漏了這裡補

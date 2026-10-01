@@ -579,6 +579,24 @@ def test_publish_sends_polaroid_and_hash_only_receipt(env, monkeypatch) -> None:
     assert pub["polaroid"] is True and pub["receipt"] == "sent" and pub["outcome"] == "made"
 
 
+def test_publish_carries_cast_id_same_as_roster(env, monkeypatch) -> None:
+    """手機的記號換成分身小人：publish 帶的 cast_id ＝ 名冊（build_view）那一個。"""
+    st, _cfg, sid = _made(env, monkeypatch)
+    sent = _capture_publish(monkeypatch)
+    twinlink.publish(st, "http://cloud.invalid", "t")
+    cid = sent[0]["payload"]["cast_id"]
+    assert cid == twinlink.build_view(st)["people"][0]["cast_id"] \
+        == polaroid.pick_cast_for(st.current(sid)["card"])
+
+
+def test_publish_sends_no_fake_cast_id_when_unknown(env, monkeypatch) -> None:
+    st, _cfg, _sid = _made(env, monkeypatch)
+    monkeypatch.setattr(twinlink, "_cast_id_for", lambda card: None)
+    sent = _capture_publish(monkeypatch)
+    twinlink.publish(st, "http://cloud.invalid", "t")
+    assert "cast_id" not in sent[0]["payload"]
+
+
 def test_receipt_with_an_unknown_field_is_not_sent(env, monkeypatch) -> None:
     """白名單不是黑名單：收據裡多一個不認得的欄位（例如有人把原文塞進去）⇒ 整份不發。"""
     st, cfg, sid = _made(env, monkeypatch)
