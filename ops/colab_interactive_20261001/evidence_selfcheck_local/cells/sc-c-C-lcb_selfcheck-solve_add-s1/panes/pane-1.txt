@@ -46,13 +46,13 @@
 
  Vacant checked this turn: 0 value(s), 2/2 given file(s) opened.                                                                                                
  Redone before delivery: 1 point(s).                                                                                                                            
- Note: /home/a000031/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md                                                                                        
+ Note: /home/a000108/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md                                                                                        
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                                                                                 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 /app
 ↑50 ↓25 0.0%/128k (auto)                                                                                                    (harbor-endpoint) gemma-4-12b-it-qat
-To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f81e-70b9-776e-9e60-8138ed25940e
+To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f833-7c15-7266-9eff-d440cb968a57
 __PANE_EXIT_0__
 

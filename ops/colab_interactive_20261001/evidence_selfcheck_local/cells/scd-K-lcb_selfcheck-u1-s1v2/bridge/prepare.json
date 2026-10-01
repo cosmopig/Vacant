@@ -6,11 +6,11 @@
   "mode": "conform",
   "contract": "/srv/runs/scd-A-lcb_selfcheck-u1-s1v2/app/.vacant/contract.json",
   "receiver_contract": "/srv/eval/_selfcheck/eval/receivers/scd-A-lcb_selfcheck-u1-s1v2/contract.json",
-  "run_id": "6006330800114630bf82abdd658bd03f",
+  "run_id": "c25d47e732d744ccb9a28e691542f13c",
   "insecure_same_account": false,
   "evaluator_euid": 0,
   "sandbox_backend": "bwrap",
-  "contract_sha256": "9bd41c43c52b19047d05539996ed56f73e768988e05e790dc7b4f8296841ff91",
+  "contract_sha256": "72053df2f794fd7dd72cebdec70ebb65782b1b70e7cc547f92537396184aee04",
   "task_id": "scd-A-lcb_selfcheck-u1-s1v2",
   "suite": "/srv/eval/_selfcheck/eval/receivers/scd-A-lcb_selfcheck-u1-s1v2-suite",
   "suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
@@ -21,6 +21,6 @@
   "stop_check": false,
   "submit_on_end": false,
   "receiver_intake_root": "/srv/eval/_selfcheck/eval/receivers/scd-A-lcb_selfcheck-u1-s1v2/intake",
-  "lock_signer": "85aab79dd9a72ec9caf2a50fecddb582b255288f58bf31ddde445d61963e8115"
+  "lock_signer": "1b6de836200abb996d6c0825a8f638a8f3cd49f79312163cafb474a6bda081ab"
  }
 }

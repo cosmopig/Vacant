@@ -297,7 +297,7 @@ def test_slot_pool_never_exceeds_capacity():
             time.sleep(0.01)
             with lock:
                 live[0] -= k
-    ths = [threading.Thread(target=work, args=(1 + (i % 2), i % 3 == 0)) for i in range(24)]
+    ths = [threading.Thread(target=work, args=(1 + (i % 2), i % 3 == 0), daemon=True) for i in range(24)]
     [t.start() for t in ths]
     [t.join() for t in ths]
     assert peak[0] <= 3 and pool.used == 0 and pool.peak <= 3
@@ -315,10 +315,10 @@ def test_slot_pool_continuation_beats_new_admission():
     def continuation():
         pool.acquire(1, priority=True)
         order.append("continuation")
-    a = threading.Thread(target=admission)
+    a = threading.Thread(target=admission, daemon=True)
     a.start()
     time.sleep(0.2)                                                          # 新單位先在排隊
-    c = threading.Thread(target=continuation)
+    c = threading.Thread(target=continuation, daemon=True)
     c.start()
     time.sleep(0.2)
     pool.release(1)                                                          # 只釋出一個位置：接續段優先
@@ -387,6 +387,14 @@ def test_screening_plan_is_a_only_and_uses_manifest_sample(tmp_path):
         pb.screening_plan(idx, man_bad, 1)
     pg = next(t for t in plan["tasks"] if t["bank"] == "polyglot_py")
     assert pg["deliverable"].endswith(".py") and pg["deliverable"] != "solution.py"   # 從 expected.json 讀
+    assert "read_dir" not in pg
+    # 讀不到 polyglot 的 expected.json 時寧可停下來（不要把 solution.py 寫進計畫）
+    broken = [dict(t, dir=str(tmp_path / "nowhere" / t["id"])) if t["bank"] == "polyglot_py" else t for t in idx]
+    with pytest.raises(FileNotFoundError):
+        pb.screening_plan(broken, man, 1)
+    # 預覽：dir 讀不到（VM 路徑）但 read_dir 在本機 ⇒ 可以
+    preview = [dict(t, dir="/srv/eval/staged/x/" + t["id"], read_dir=t["dir"]) if t["bank"] == "polyglot_py" else t for t in idx]
+    assert pb.screening_plan(preview, man, 1)["tasks"][0]["id"]
 
 
 def test_ceiling_rule_drops_at_9_of_10_and_records_everything():
@@ -566,7 +574,7 @@ def test_packer_wrapper_finishes_right_after_driver_done(tmp_path, monkeypatch):
     monkeypatch.setattr(packer, "ARC", ev / "archive")
     monkeypatch.setattr(packer, "PROXY", ev / "proxy")
     mir = tmp_path / "mirror"
-    th = threading.Thread(target=packer_i1001.run, kwargs={"interval": 600, "mirror": mir, "poll_s": 0.1, "final_sleep": 0.2})
+    th = threading.Thread(target=packer_i1001.run, kwargs={"interval": 600, "mirror": mir, "poll_s": 0.1, "final_sleep": 0.2}, daemon=True)
     th.start()
     time.sleep(1.0)                                         # 第一包（c1）已經打好、現在在睡 600 秒的 interval 裡
     assert (ev / "archive" / "chunk_0001.tar.xz").exists() and not (ev / "archive" / "PACKER_DONE").exists()
@@ -769,6 +777,21 @@ def test_load_from_dir_and_chunks_roundtrip(tmp_path):
     assert res["primary"]["C_vs_A"]["pairs"] == 1 and res["primary"]["C_vs_A"]["b_y_only"] == 1
 
 
+def test_prefix_filter_separates_runs_on_the_same_vm():
+    a = raw("A", "t1", passed=False)
+    c = raw("C", "t1", passed=True)
+    a["meta"]["prefix"], c["meta"]["prefix"] = "i1", "i1"
+    a2, c2 = raw("A", "t1", passed=True), raw("C", "t1", passed=False)
+    a2["cell"] = a2["meta"]["cell"] = "t9-A-lcb_v1-t1-s1"
+    c2["cell"] = c2["meta"]["cell"] = "t9-C-lcb_v1-t1-s1"
+    a2["meta"]["prefix"], c2["meta"]["prefix"] = "t9", "t9"
+    allraw = {r["cell"]: r for r in (a, c, a2, c2)}
+    only_i1 = an.analyze(allraw, None, "i1")["primary"]["C_vs_A"]
+    assert (only_i1["pairs"], only_i1["b_y_only"], only_i1["c_x_only"]) == (1, 1, 0)
+    only_t9 = an.analyze(allraw, None, "t9")["primary"]["C_vs_A"]
+    assert (only_t9["pairs"], only_t9["b_y_only"], only_t9["c_x_only"]) == (1, 0, 1)
+
+
 def test_cell_without_done_is_not_analyzed(tmp_path):
     r = raw("A", "t")
     r["done"] = False
@@ -811,7 +834,21 @@ def fake_vm(tmp_path, *, chunks=2, done=True, corrupt=None, mirror_ok=False):
 
 def run_sh(script, args, vm, colab, timeout=60):
     env = {**os.environ, "COLAB": str(colab), "FAKE_VM": str(vm)}
-    return subprocess.run(["bash", str(CI / script), *args], capture_output=True, text=True, env=env, timeout=timeout)
+    # errors="replace"：腳本的錯誤訊息若含被截斷的多位元組字，測試要看到訊息本身，不是解碼例外。
+    return subprocess.run(["bash", str(CI / script), *args], capture_output=True, text=True,
+                          errors="replace", env=env, timeout=timeout)
+
+
+def test_shell_scripts_brace_variables_before_non_ascii():
+    # macOS 的 /bin/bash 是 3.2：`$pk（` 會把全形括號的第一個位元組吃進變數名，
+    # `set -u` 之下當場 `pk\xef: unbound variable`（2026-10-01 macOS CI）。一律寫成 `${pk}（`。
+    import re
+    bad = []
+    for f in sorted(CI.rglob("*.sh")):
+        for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+            if re.search(r"\$[A-Za-z_][A-Za-z0-9_]*[^\x00-\x7F]", line):
+                bad.append(f"{f.relative_to(CI)}:{i}: {line.strip()}")
+    assert not bad, "\n".join(bad)
 
 
 def test_sync_pulls_verifies_and_reports_done(tmp_path):
@@ -885,7 +922,13 @@ def test_autostop_drive_grace_only_with_mirror_ok(tmp_path):
 def test_reused_files_match_manifest_and_a_tampered_copy_is_caught():
     m = json.loads((CI / "MANIFEST_REUSED.json").read_text())
     assert build_manifest.check(m) == []
-    assert len(m["rows"]) == len(build_manifest.REUSED) and all(r["verbatim"] for r in m["rows"] if r["source_checked"])
+    assert len(m["rows"]) == len(build_manifest.REUSED)
+    # 逐字複本；唯一登記過的差異是 MODIFIED 裡的（改了什麼、為什麼都寫在 manifest 的 `modification`）
+    assert all(r["verbatim"] for r in m["rows"] if r["source_checked"] and r["copy"] not in build_manifest.MODIFIED)
+    assert {r["copy"] for r in m["rows"] if r.get("modification")} == set(build_manifest.MODIFIED)
+    undeclared = json.loads(json.dumps(m))
+    undeclared["rows"][0]["source_checked"], undeclared["rows"][0]["verbatim"] = True, False         # 負控制：沒登記的差異要被擋
+    assert any("not declared" in x for x in build_manifest.check(undeclared))
     bad = json.loads(json.dumps(m))
     bad["rows"][0]["copy_sha256"] = "0" * 64
     assert any("sha256 differs" in x for x in build_manifest.check(bad))

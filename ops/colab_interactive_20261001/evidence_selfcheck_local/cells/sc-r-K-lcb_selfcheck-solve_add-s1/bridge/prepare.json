@@ -1,0 +1,26 @@
+{
+ "rc": 0,
+ "stderr": "",
+ "result": {
+  "prepared": true,
+  "mode": "conform",
+  "contract": "/srv/runs/sc-r-A-lcb_selfcheck-solve_add-s1/app/.vacant/contract.json",
+  "receiver_contract": "/srv/eval/_selfcheck/eval/receivers/sc-r-A-lcb_selfcheck-solve_add-s1/contract.json",
+  "run_id": "48302cb7cff842db82bd8d3e7fff14d8",
+  "insecure_same_account": false,
+  "evaluator_euid": 0,
+  "sandbox_backend": "bwrap",
+  "contract_sha256": "7d74413c73d3e2b40a5bb8fd40f425b7f14e7487d70237720863c4c1a047be39",
+  "task_id": "sc-r-A-lcb_selfcheck-solve_add-s1",
+  "suite": "/srv/eval/_selfcheck/eval/receivers/sc-r-A-lcb_selfcheck-solve_add-s1-suite",
+  "suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
+  "agent_visible_suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
+  "pinned_suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
+  "agent_visible_suite_matches_pinned": true,
+  "attempts": 3,
+  "stop_check": false,
+  "submit_on_end": false,
+  "receiver_intake_root": "/srv/eval/_selfcheck/eval/receivers/sc-r-A-lcb_selfcheck-solve_add-s1/intake",
+  "lock_signer": "346b9c911f4e1d8817b7d2d3620f2d4ce4ec52775ccda5b6a4fefcd109348738"
+ }
+}

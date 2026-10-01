@@ -1,0 +1,72 @@
+{
+ "schema": "i1001.ceiling_decision/1",
+ "rule": {
+  "n": 10,
+  "pass_ge": 9
+ },
+ "banks": {
+  "dabench": {
+   "dropped": false,
+   "passes": 0,
+   "n": 10,
+   "voids": [],
+   "missing": [
+    "dab_724",
+    "dab_507",
+    "dab_721",
+    "dab_732",
+    "dab_035",
+    "dab_688",
+    "dab_055",
+    "dab_666",
+    "dab_249"
+   ],
+   "unsolved": [
+    "dab_039"
+   ],
+   "reason": "screening incomplete (9 task(s) not run) and the bank could still reach 9/10: undecided, bank kept"
+  },
+  "databench": {
+   "dropped": false,
+   "passes": 0,
+   "n": 10,
+   "voids": [],
+   "missing": [
+    "db_066_04",
+    "db_078_36",
+    "db_074_27",
+    "db_078_11",
+    "db_072_33",
+    "db_075_28",
+    "db_076_06",
+    "db_074_13",
+    "db_069_29",
+    "db_080_23"
+   ],
+   "unsolved": [],
+   "reason": "screening incomplete (10 task(s) not run) and the bank could still reach 9/10: undecided, bank kept"
+  },
+  "polyglot_py": {
+   "dropped": false,
+   "passes": 0,
+   "n": 10,
+   "voids": [],
+   "missing": [
+    "pg_affine_cipher",
+    "pg_food_chain",
+    "pg_react",
+    "pg_pov",
+    "pg_sgf_parsing",
+    "pg_dot_dsl",
+    "pg_connect",
+    "pg_beer_song",
+    "pg_wordy"
+   ],
+   "unsolved": [
+    "pg_phone_number"
+   ],
+   "reason": "screening incomplete (9 task(s) not run) and the bank could still reach 9/10: undecided, bank kept"
+  }
+ },
+ "dropped_banks": []
+}

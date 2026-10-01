@@ -30,12 +30,13 @@
   },
   {
    "copy": "vm/cu_guard.sh",
-   "copy_sha256": "18af28996c006ab943a1f001e6ac88caf4fc6a7eed33136a86cd2f412ea9ef26",
+   "copy_sha256": "452a95185339fd79aefe2f5b2a50e308f10b04e32dc37d99e99cc30cedba6122",
    "source": "ops/colab_campaign_20260927/cu_guard.sh",
    "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
-   "verbatim": true,
+   "verbatim": false,
    "source_sha256": "18af28996c006ab943a1f001e6ac88caf4fc6a7eed33136a86cd2f412ea9ef26",
-   "source_checked": true
+   "source_checked": true,
+   "modification": "第 14 行 `$TH）` → `${TH}）`：全形括號緊接變數名時，bash 在 UTF-8 locale 下可能把它當成識別字的一部分而印出空值（只影響「STOP 已放」那行訊息的文字，不影響門檻判斷）。複製之後由別人改的（16:19），這裡只是登記。"
   },
   {
    "copy": "vm/vacant_check.py",

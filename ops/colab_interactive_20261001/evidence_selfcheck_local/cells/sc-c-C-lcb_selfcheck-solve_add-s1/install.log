@@ -1,12 +1,12 @@
-=== install attempt 1 2026-10-01T15:38:34Z
+=== install attempt 1 2026-10-01T16:01:33Z
   installed package vacant-network 0.8.0, installed using Python 3.11.15
   These apps are now available
     - vacant
     - vacant-network
-  claude: hooks in ~/.claude/settings.json — /home/a000031/.claude/settings.json
+  claude: hooks in ~/.claude/settings.json — /home/a000108/.claude/settings.json
   pi: global extension — /tmp/harbor-pi-agent/extensions/vacant.ts
   not found on this machine: codex, opencode (skipped; `vacant install --force` writes their config anyway)
-[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/a000031/.vacant (remove everything with `vacant uninstall`).
+[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/a000108/.vacant (remove everything with `vacant uninstall`).
 creating virtual environment...
 creating shared libraries...
 upgrading shared libraries...

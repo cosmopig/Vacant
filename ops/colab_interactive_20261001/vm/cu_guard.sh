@@ -11,7 +11,7 @@ while true; do
   if [ -n "$bal" ] && python3 -c "import sys; sys.exit(0 if float('$bal') < float('$TH') else 1)"; then
     printf 'echo "CU guard: balance %s < %s at $(date -u +%%FT%%TZ)" > /srv/eval/STOP\nexit\n' "$bal" "$TH" | "$COLAB" console -s "$S" >/dev/null 2>&1 &
     p=$!; sleep 40; kill $p 2>/dev/null
-    echo "$(date -u +%FT%TZ) STOP 已放（餘額 $bal < $TH）"; exit 0
+    echo "$(date -u +%FT%TZ) STOP 已放（餘額 $bal < ${TH}）"; exit 0
   fi
   sleep "$INT"
 done

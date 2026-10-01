@@ -1,0 +1,11 @@
+{"t": 0.832, "kind": "ready", "ready": true, "ready_s": 0.83}
+{"t": 1.545, "kind": "enter"}
+{"t": 1.551, "kind": "change", "state": "empty", "session_bytes": 0, "entries": 0, "calls": 8, "hook_procs": 0}
+{"t": 5.067, "kind": "change", "state": "retrying", "session_bytes": 7163, "entries": 7, "calls": 8, "hook_procs": 0}
+{"t": 5.568, "kind": "change", "state": "retrying", "session_bytes": 7163, "entries": 7, "calls": 9, "hook_procs": 0}
+{"t": 10.08, "kind": "change", "state": "retrying", "session_bytes": 7812, "entries": 9, "calls": 9, "hook_procs": 0}
+{"t": 10.58, "kind": "change", "state": "retrying", "session_bytes": 7812, "entries": 9, "calls": 10, "hook_procs": 0}
+{"t": 17.117, "kind": "change", "state": "retrying", "session_bytes": 8461, "entries": 11, "calls": 10, "hook_procs": 0}
+{"t": 17.618, "kind": "change", "state": "retrying", "session_bytes": 8461, "entries": 11, "calls": 11, "hook_procs": 0}
+{"t": 28.15, "kind": "change", "state": "error_final", "session_bytes": 8968, "entries": 12, "calls": 11, "hook_procs": 0}
+{"t": 28.652, "kind": "change", "state": "error_final", "session_bytes": 8968, "entries": 12, "calls": 12, "hook_procs": 0}

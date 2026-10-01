@@ -1,8 +1,8 @@
 {
- "started": "2026-10-01T15:35:35Z",
+ "started": "2026-10-01T15:58:34Z",
  "scenarios": {
   "a": {
-   "seconds": 8.1,
+   "seconds": 8.0,
    "metas": {
     "A": {
      "cell": "sc-a-A-lcb_selfcheck-solve_add-s1",
@@ -17,7 +17,7 @@
    "ok": true
   },
   "k": {
-   "seconds": 19.0,
+   "seconds": 18.3,
    "metas": {
     "A": {
      "cell": "sc-k-A-lcb_selfcheck-solve_add-s1",
@@ -40,7 +40,7 @@
    "ok": true
   },
   "r": {
-   "seconds": 18.6,
+   "seconds": 18.5,
    "metas": {
     "A": {
      "cell": "sc-r-A-lcb_selfcheck-solve_add-s1",
@@ -86,7 +86,7 @@
    "ok": true
   },
   "void": {
-   "seconds": 32.7,
+   "seconds": 33.6,
    "metas": {
     "A": {
      "cell": "sc-void-A-lcb_selfcheck-solve_add-s1",
@@ -101,7 +101,7 @@
    "ok": true
   },
   "driver": {
-   "seconds": 58.3,
+   "seconds": 58.8,
    "ok": true,
    "failed_expectations": [],
    "rows": 18,
@@ -109,7 +109,7 @@
    "metas": {
     "scd-A-lcb_selfcheck-u2-s1": {
      "void": true,
-     "void_reason": "proxy_non200: 1 call(s), 0 stream error(s)",
+     "void_reason": "proxy_non200: 4 call(s), 0 stream error(s)",
      "n_sessions": 1
     },
     "scd-C-lcb_selfcheck-u1-s1": {
@@ -144,17 +144,17 @@
     },
     "scd-R-lcb_selfcheck-u1-s1": {
      "void": true,
-     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "void_reason": "group void: proxy_non200: 4 call(s), 0 stream error(s)",
      "n_sessions": 0
     },
     "scd-K-lcb_selfcheck-u2-s1": {
      "void": true,
-     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "void_reason": "group void: proxy_non200: 4 call(s), 0 stream error(s)",
      "n_sessions": 0
     },
     "scd-R-lcb_selfcheck-u2-s1": {
      "void": true,
-     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "void_reason": "group void: proxy_non200: 4 call(s), 0 stream error(s)",
      "n_sessions": 0
     },
     "scd-A-lcb_selfcheck-u3-s1": {
@@ -179,7 +179,7 @@
     },
     "scd-K-lcb_selfcheck-u1-s1": {
      "void": true,
-     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "void_reason": "group void: proxy_non200: 4 call(s), 0 stream error(s)",
      "n_sessions": 0
     },
     "scd-A-lcb_selfcheck-u1-s1v2": {
@@ -189,7 +189,7 @@
     },
     "scd-A-lcb_selfcheck-u1-s1": {
      "void": true,
-     "void_reason": "proxy_non200: 1 call(s), 0 stream error(s)",
+     "void_reason": "proxy_non200: 4 call(s), 0 stream error(s)",
      "n_sessions": 1
     },
     "scd-C-lcb_selfcheck-u2-s1": {
@@ -200,7 +200,7 @@
    }
   },
   "c": {
-   "seconds": 36.5,
+   "seconds": 36.3,
    "metas": {
     "C": {
      "cell": "sc-c-C-lcb_selfcheck-solve_add-s1",
@@ -227,5 +227,5 @@
  },
  "bridge_shim": false,
  "ok": true,
- "ended": "2026-10-01T15:39:10Z"
+ "ended": "2026-10-01T16:02:09Z"
 }

@@ -2,7 +2,7 @@
 """analyze_i1001 — i1001 的分析：兩個主要檢定（K 對 R、C 對 A；精確 McNemar、Holm）＋描述。
 
     python3 analyze_i1001.py --chunks <本機 chunk 目錄> --out <輸出目錄>
-    python3 analyze_i1001.py --cells  <解開的 cells 目錄>  --out <輸出目錄>
+    python3 analyze_i1001.py --cells  <解開的 cells 目錄>  --out <輸出目錄>      [--prefix i1]
 
 這支在架構裡承重什麼：這一批要回答的問題只有兩個，而且都是「同一題配對」的問題——
   1. K（CONFORM：用可見驗收把關、不過就帶著回報就地再來、最多 3 段、只放行過的）對 R（RETRY-NOSUITE：逾時或沒交件才在複本上
@@ -226,7 +226,12 @@ def audit_sessions(rows: list[dict]) -> dict:
             "compactions": sum(int(s.get("compactions") or 0) for s in ss)}
 
 
-def analyze(raw: dict[str, dict], run_records: dict | None = None) -> dict:
+def analyze(raw: dict[str, dict], run_records: dict | None = None, prefix: str | None = None) -> dict:
+    """prefix：只分析這個發射前綴的格子（主跑 `<前綴>`、篩選 `<前綴>s`）；同一台 VM 上跑過別的前綴（試跑、排練）時用。"""
+    if prefix:
+        raw = {k: v for k, v in raw.items() if (v.get("meta") or {}).get("prefix") in (prefix, f"{prefix}s")}
+        if run_records:
+            run_records = {k: v for k, v in run_records.items() if k == f"_run_{prefix}"}
     rows, superseded = final_rows(raw)
     kbank_units = {r["bank"] for r in rows if r["arm"] == "K"}
     ca = paired(rows, "A", "C")
@@ -359,6 +364,7 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--chunks", type=pathlib.Path)
     g.add_argument("--cells", type=pathlib.Path)
     ap.add_argument("--out", required=True, type=pathlib.Path)
+    ap.add_argument("--prefix", help="只分析這個發射前綴（例如 i1）的格子；預設全部")
     a = ap.parse_args(argv)
     if a.chunks:
         raw, runrec = load_from_chunks(a.chunks)
@@ -368,7 +374,7 @@ def main(argv: list[str] | None = None) -> int:
             cd = d / "ceiling_decision.json"
             if cd.is_file():
                 runrec[d.name] = {"ceiling_decision.json": _parse(cd.read_text(), False)}
-    res = analyze(raw, runrec)
+    res = analyze(raw, runrec, a.prefix)
     rows = res.pop("_rows")
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "report.json").write_text(json.dumps(res, ensure_ascii=False, indent=1) + "\n")
