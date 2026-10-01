@@ -1,0 +1,173 @@
+[
+  {
+    "task_id": "1273",
+    "level": "hard",
+    "arms": {
+      "native": {
+        "run": {
+          "seconds": 56.14,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 44730,
+            "output": 1076,
+            "cacheRead": 0
+          },
+          "errors": [],
+          "tools": [
+            "bash",
+            "read",
+            "read",
+            "read",
+            "read",
+            "bash",
+            "bash",
+            "read",
+            "bash",
+            "write"
+          ]
+        },
+        "released": true,
+        "score": false,
+        "answer_sha256": "80cf9ffaf9ec42dd230bc5053fb8cc3656dc6578719955c54e781ac746b5b702",
+        "oracle_calls": 0
+      },
+      "plugin": {
+        "run": {
+          "seconds": 180,
+          "timeout": true,
+          "exit": 124,
+          "usage": null,
+          "errors": [
+            "timeout"
+          ]
+        },
+        "stops": [
+          {
+            "outcome": "reject",
+            "action": "continue"
+          }
+        ],
+        "judge": "reject",
+        "released": false,
+        "score": false,
+        "answer_sha256": null,
+        "oracle_calls": 2
+      }
+    }
+  },
+  {
+    "task_id": "1305",
+    "level": "hard",
+    "arms": {
+      "native": {
+        "run": {
+          "seconds": 180,
+          "timeout": true,
+          "exit": 124,
+          "usage": null,
+          "errors": [
+            "timeout"
+          ]
+        },
+        "released": false,
+        "score": false,
+        "answer_sha256": null,
+        "oracle_calls": 0
+      },
+      "plugin": {
+        "run": {
+          "seconds": 95.71,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 70450,
+            "output": 1128,
+            "cacheRead": 6912
+          },
+          "errors": [],
+          "tools": [
+            "bash",
+            "read",
+            "read",
+            "read",
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "write"
+          ]
+        },
+        "stops": [
+          {
+            "outcome": "accept",
+            "action": "allow"
+          }
+        ],
+        "judge": "accept",
+        "released": true,
+        "score": true,
+        "answer_sha256": "b94364be61a68b1f05c37214ee04e2ca17ef765b94501897260fb08171504b80",
+        "oracle_calls": 2
+      }
+    }
+  },
+  {
+    "task_id": "1871",
+    "level": "hard",
+    "arms": {
+      "native": {
+        "run": {
+          "seconds": 55.64,
+          "timeout": false,
+          "exit": 0,
+          "usage": {
+            "input": 50416,
+            "output": 1332,
+            "cacheRead": 19712
+          },
+          "errors": [],
+          "tools": [
+            "bash",
+            "read",
+            "read",
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "read",
+            "write"
+          ]
+        },
+        "released": true,
+        "score": false,
+        "answer_sha256": "ee9e15161346f4e507ead5824f52740631677e59e11ed0b89e0d50332edb3666",
+        "oracle_calls": 1
+      },
+      "plugin": {
+        "run": {
+          "seconds": 180,
+          "timeout": true,
+          "exit": 124,
+          "usage": null,
+          "errors": [
+            "timeout"
+          ]
+        },
+        "stops": [
+          {
+            "outcome": "reject",
+            "action": "continue"
+          }
+        ],
+        "judge": "reject",
+        "released": false,
+        "score": false,
+        "answer_sha256": null,
+        "oracle_calls": 20
+      }
+    }
+  }
+]

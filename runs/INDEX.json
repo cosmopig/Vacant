@@ -10892,9 +10892,12 @@
       },
       "decision_refs": [
         "decisions/DECISION_20260904_R738_R446_TEST_TEETH_PREREG.md",
-        "decisions/DECISION_20260926_ZERO_CONFIG_V3.md"
+        "decisions/DECISION_20260926_ZERO_CONFIG_V3.md",
+        "decisions/conclusions/FINDINGS_20260930_PR82_FIXBRANCH_REVIEW.md"
       ],
-      "verdict_decisions": [],
+      "verdict_decisions": [
+        "decisions/conclusions/FINDINGS_20260930_PR82_FIXBRANCH_REVIEW.md"
+      ],
       "related_settlements": [],
       "headline": null,
       "headline_from": null,
