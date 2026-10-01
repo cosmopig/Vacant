@@ -30,6 +30,7 @@ from ops.exhibit.twin import twinagent, twinlink  # noqa: E402
 from ops.exhibit.twin.twinstore import (  # noqa: E402
     KIND_ERASED, KIND_GENERATED, KIND_NOTE, TwinStore, canonical_json,
 )
+from vacant_network.memory import assert_ks1_clean  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
 from vacant_network.vrun import verify_receipts as vrr  # noqa: E402
 
@@ -418,6 +419,28 @@ def test_system_prompt_gives_no_examples() -> None:
     assert "PLAN.md：第一行用一句話說你決定做什麼" in p
     # 負控制：舊版那一步量得到例子（這把尺不是恆綠）
     assert _prompt_examples(_OLD_STEP1_WITH_EXAMPLES) != []
+
+
+#: 這些詞出現在 prompt 裡＝在替分身指一個任務方向（人類 2026-10-01：做「定義自己」那一類
+#: 後設的事不是在世界裡做事）。**負向約束**：只量「不准出現」，不給正向例子。
+_META_TASK_WORDS = ("身份", "身分", "自我定義", "自我介紹", "宣言", "分身本身", "自己是分身",
+                    "占卜", "算命", "運勢")
+
+
+def test_system_prompt_divination_structure_and_no_meta_guidance() -> None:
+    """2026-10-01 占卜指令：讀沒說出口的在意／渴望／拉扯、第二人稱寫「為什麼是你」、
+    PLAN.md 三段；而且 prompt 不替分身指任何後設任務方向（身份／自我定義／分身本身）。"""
+    p = twinagent.SYSTEM_PROMPT
+    for must in ("沒有說出口", "渴望", "拉扯", "第二人稱", "因為你", "為什麼是你",
+                 "第一行用一句話說你決定做什麼", "每一次動手"):
+        assert must in p, must
+    assert [w for w in _META_TASK_WORDS if w in p] == [], [w for w in _META_TASK_WORDS if w in p]
+    assert _prompt_examples(p) == []
+    # 負控制：這把尺量得到後設任務詞
+    assert [w for w in _META_TASK_WORDS if w in "請寫一份自我定義宣言"] != []
+    # 三段固定文字仍過 KS-1、argv 裡沒有觀眾原文的性質不變
+    for t in (twinagent.SYSTEM_PROMPT, twinagent.FIRST_MESSAGE, twinagent.CALLER_PROMPT):
+        assert_ks1_clean(t)
 
 
 def test_twin_id_is_not_the_sub_id() -> None:
