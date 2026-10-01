@@ -2,6 +2,7 @@
  * 這支在架構裡承重什麼：數位分身（pi）**唯一**拿得到的三個工具。
  *
  * 裁決：decisions/DECISION_20260924_TWIN_AGENT_RUN.md §三。
+ * 契約：plans/CONTRACT_PROCESS_20260928.md §A（步驟事件，2026-09-28）。
  *
  * 特質文字（TRAITS.md）來自觀眾——那是**觀眾可控的輸入**，也就是提示注入的入口。
  * 所以 pi 以 `--no-builtin-tools --tools ws_list,ws_read,ws_write` 啟動：
@@ -15,6 +16,21 @@
  *   · 沿途任何一段是 symlink 就拒絕（不讓一條連結把「房間裡」接到房間外）；
  *   · 讀／寫單檔上限 64 KiB。
  * 沒有任何一個工具會開網路連線。
+ *
+ * ## 步驟紀錄（`logStep`，2026-09-28）
+ *
+ * 每次三個工具**被呼叫**（不管成功或被 `confine()` 擋下）就往
+ * `$VACANT_TWIN_STEP_LOG` 指到的檔追加一行 `{ts_ms,seq,tool,path,bytes,ok}`。
+ * 那個路徑由 `twin_agent.sh` 從它自己的 `$RUN_DIR`（工作區外）算出來再 export
+ * 給這個行程——**單一行程、沒有跨執行緒的環境變數競態**（Python 那一側是
+ * ThreadPoolExecutor 平行跑好幾位分身，`os.environ` 不安全；bash 腳本一支一個
+ * 行程沒有這個問題）。這一行**含檔名**：檔名只活在這個記錄檔（run-dir 裡，
+ * 撤回時整個刪掉），電視那一側的事件流不帶檔名（`sidecar.py` 轉出
+ * `twin_step` 時只留 `path_kind` 三類＋`ws_list` 的 `other`）。
+ * `VACANT_TWIN_STEP_LOG` 沒設 ⇒ `logStep` 是空操作（舊行為不變，測試與
+ * 沒接上這條線的呼叫端都不受影響）。
+ * ⚠ 記步驟失敗（例如檔案系統滿了）**不准**改變工具本身的回傳值——這是旁註，
+ *   不是驗收的一部分（同 `sidecar.py` 誠實邊界 2 的精神）。
  *
  * ⚠ 誠實邊界（改碼請保留）：
  *   1. 這是**我們寫的 TypeScript 判準**，不是作業系統的權限。pi（node）行程本身
@@ -36,6 +52,26 @@ const MAX_BYTES = 64 * 1024;
 
 /** 工作區根。**啟動時就定下來**，之後 cwd 被誰改掉都不影響。 */
 const ROOT = realpathSync(process.cwd());
+
+/** 步驟記錄檔（工作區外）。沒設就是空字串 ⇒ `logStep` 全部是空操作。 */
+const STEP_LOG = process.env.VACANT_TWIN_STEP_LOG || "";
+let STEP_SEQ = 0;
+
+/**
+ * 記一步（每次工具被呼叫，不管成功或被擋）。**不丟例外**：記步驟這件事
+ * 本身失敗不准影響工具的回傳值（誠實邊界，見檔頭）。
+ */
+function logStep(tool: string, path: string | null, bytes: number | null, ok: boolean): void {
+  if (!STEP_LOG) return;
+  STEP_SEQ += 1;
+  const row = { ts_ms: Date.now(), seq: STEP_SEQ, tool, path, bytes, ok };
+  try {
+    mkdirSync(dirname(STEP_LOG), { recursive: true });
+    writeFileSync(STEP_LOG, JSON.stringify(row) + "\n", { encoding: "utf8", flag: "a" });
+  } catch {
+    // 見檔頭誠實邊界：記不到步驟不影響工具本身。
+  }
+}
 
 function confine(p: unknown): string {
   if (typeof p !== "string" || p.trim() === "") {
@@ -67,20 +103,26 @@ export default function (pi: ExtensionAPI) {
     description: "List the files in your room (the current folder). Only your room is visible.",
     parameters: Type.Object({}),
     async execute() {
-      const out: string[] = [];
-      const walk = (dir: string, depth: number) => {
-        if (depth > 3) return;
-        for (const name of readdirSync(dir).sort()) {
-          const full = resolve(dir, name);
-          const st = lstatSync(full);
-          const rel = relative(ROOT, full);
-          if (st.isSymbolicLink()) continue;
-          if (st.isDirectory()) { out.push(rel + "/"); walk(full, depth + 1); }
-          else out.push(`${rel} (${st.size} bytes)`);
-        }
-      };
-      walk(ROOT, 0);
-      return { content: [{ type: "text", text: out.join("\n") || "(empty)" }] };
+      try {
+        const out: string[] = [];
+        const walk = (dir: string, depth: number) => {
+          if (depth > 3) return;
+          for (const name of readdirSync(dir).sort()) {
+            const full = resolve(dir, name);
+            const st = lstatSync(full);
+            const rel = relative(ROOT, full);
+            if (st.isSymbolicLink()) continue;
+            if (st.isDirectory()) { out.push(rel + "/"); walk(full, depth + 1); }
+            else out.push(`${rel} (${st.size} bytes)`);
+          }
+        };
+        walk(ROOT, 0);
+        logStep("ws_list", null, null, true);
+        return { content: [{ type: "text", text: out.join("\n") || "(empty)" }] };
+      } catch (e) {
+        logStep("ws_list", null, null, false);
+        throw e;
+      }
     },
   } as any);
 
@@ -92,11 +134,19 @@ export default function (pi: ExtensionAPI) {
       path: Type.String({ description: "Relative path inside your room, e.g. TRAITS.md" }),
     }),
     async execute(_id: string, params: any) {
-      const abs = confine(params?.path);
-      const st = statSync(abs);
-      if (!st.isFile()) throw new Error("那不是一個檔案");
-      if (st.size > MAX_BYTES) throw new Error(`檔案太大（上限 ${MAX_BYTES} bytes）`);
-      return { content: [{ type: "text", text: readFileSync(abs, "utf8") }] };
+      const rawPath = typeof params?.path === "string" ? params.path : null;
+      try {
+        const abs = confine(params?.path);
+        const st = statSync(abs);
+        if (!st.isFile()) throw new Error("那不是一個檔案");
+        if (st.size > MAX_BYTES) throw new Error(`檔案太大（上限 ${MAX_BYTES} bytes）`);
+        const text = readFileSync(abs, "utf8");
+        logStep("ws_read", relative(ROOT, abs), Buffer.byteLength(text, "utf8"), true);
+        return { content: [{ type: "text", text }] };
+      } catch (e) {
+        logStep("ws_read", rawPath, null, false);
+        throw e;
+      }
     },
   } as any);
 
@@ -110,17 +160,24 @@ export default function (pi: ExtensionAPI) {
       content: Type.String({ description: "The full text content of the file" }),
     }),
     async execute(_id: string, params: any) {
-      const abs = confine(params?.path);
-      const text = String(params?.content ?? "");
-      if (Buffer.byteLength(text, "utf8") > MAX_BYTES) {
-        throw new Error(`內容太大（上限 ${MAX_BYTES} bytes）`);
+      const rawPath = typeof params?.path === "string" ? params.path : null;
+      try {
+        const abs = confine(params?.path);
+        const text = String(params?.content ?? "");
+        if (Buffer.byteLength(text, "utf8") > MAX_BYTES) {
+          throw new Error(`內容太大（上限 ${MAX_BYTES} bytes）`);
+        }
+        const parent = dirname(abs);
+        mkdirSync(parent, { recursive: true });
+        // mkdir 之後再檢一次：父目錄沿途不可以被換成 symlink。
+        confine(relative(ROOT, abs));
+        writeFileSync(abs, text, "utf8");
+        logStep("ws_write", relative(ROOT, abs), Buffer.byteLength(text, "utf8"), true);
+        return { content: [{ type: "text", text: `wrote ${relative(ROOT, abs)}` }] };
+      } catch (e) {
+        logStep("ws_write", rawPath, null, false);
+        throw e;
       }
-      const parent = dirname(abs);
-      mkdirSync(parent, { recursive: true });
-      // mkdir 之後再檢一次：父目錄沿途不可以被換成 symlink。
-      confine(relative(ROOT, abs));
-      writeFileSync(abs, text, "utf8");
-      return { content: [{ type: "text", text: `wrote ${relative(ROOT, abs)}` }] };
     },
   } as any);
 }

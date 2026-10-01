@@ -109,8 +109,9 @@ MODES = (MODE_LIVE, MODE_REPLAY)
 #: 生產端發得出來的 type。沒列在這裡的一律不發（誠實規則：沒發生就不發）。
 #: `postaudit`／`counters` 在 2026-09-24 拿掉又加回來：來源換成分身自己的旁註
 #: （`sidecar.py`）與 `serve_twin` 的當場累計，**不是** lifecycle、**不是**事後推導。
+#: `twin_step`（2026-09-28）同一條路：來源是分身的旁註，不是 lifecycle。
 EMITTED = ("task_opened", "routed", "working", "draft_done", "gate_ran",
-           "revised", "verdict", "receipt", "postaudit", "counters")
+           "revised", "verdict", "receipt", "postaudit", "counters", "twin_step")
 
 #: `postaudit.when` 唯一合法的值（與 `sidecar.WHEN_AFTER` 同值，測試釘住）。
 WHEN_AFTER = "after_the_run"
@@ -140,6 +141,14 @@ PRACTICAL_ACCEPTED_NOTE = ("這類任務沒有客觀標準——Vacant 不判對
                            "每一通模型呼叫都經過中介、行程結束時簽了收據")
 #: 分身那一格 `verdict.stop_reason` 只准是這兩個。
 PRACTICAL_STOPS = ("ungated", "infra_void")
+
+#: `twin_step.step` 的白名單（`sidecar.STEP_KINDS` 同值，兩邊測試釘住）。
+TWIN_STEPS = ("read", "write", "list")
+#: `twin_step.path_kind` 的白名單（`sidecar.PATH_KINDS` 同值）。
+TWIN_PATH_KINDS = ("traits", "plan", "artifact", "other")
+#: `twin_step` 不准帶的欄位——它是**不帶檔名**那一份，跟 `sidecar.CONTENT_KEYS`
+#: 同一條規則，這裡是電視事件那一層的第二道網。
+TWIN_STEP_FORBIDDEN = ("path", "name", "file", "text", "content")
 
 #: **這條路上不存在的層**。發了就是把沒有的東西畫出來。
 NEVER = ("review_vote", "audited")
@@ -296,6 +305,28 @@ def validate(evs: list[dict], *, require_settled: bool = True,
             if not _is_pos_int(e.get("calls_so_far")):
                 bad.append(f"第 {n} 個事件：working.calls_so_far 要是正整數，"
                            f"拿到 {e.get('calls_so_far')!r}")
+        # ── 分身的步驟事件：不帶檔名、白名單、只在 ON／practical 那一格 ──
+        if t == "twin_step":
+            if e.get("arm") != ARM_ON:
+                bad.append(f"第 {n} 個事件：twin_step 的 arm 不是 ON"
+                           "（分身的步驟只在 ON 臂發生）")
+            tk = kinds.get(e.get("task_id"))
+            if tk is not None and tk != KIND_PRACTICAL:
+                bad.append(f"第 {n} 個事件：twin_step 出現在非分身自主任務的格子"
+                           "（反事實題庫格沒有這一欄）")
+            if e.get("step") not in TWIN_STEPS:
+                bad.append(f"第 {n} 個事件：twin_step.step 不在白名單："
+                           f"{e.get('step')!r}")
+            if e.get("path_kind") not in TWIN_PATH_KINDS:
+                bad.append(f"第 {n} 個事件：twin_step.path_kind 不在白名單："
+                           f"{e.get('path_kind')!r}")
+            bv = e.get("bytes")
+            if bv is not None and not _is_nat(bv):
+                bad.append(f"第 {n} 個事件：twin_step.bytes 要是非負整數或 null")
+            for k in TWIN_STEP_FORBIDDEN:
+                if k in e:
+                    bad.append(f"第 {n} 個事件：twin_step 帶了 {k!r}——"
+                               "這一份事件流不帶檔名")
         # ── 事後稽核不准長得像裁決（規則 9）：三個旗標缺一不可 ────────
         if t == "postaudit":
             if e.get("is_verdict") is not False or e.get("signed") is not False:

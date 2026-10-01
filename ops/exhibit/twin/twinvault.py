@@ -150,6 +150,9 @@ TWIN_ON_CHAIN_KEYS: tuple[str, ...] = (
     #   收據上簽的級別（`A`／`B`／`B'`／`C`）、這一跑有沒有進圍牆、圍牆探針量到什麼、
     #   門看到幾通。全部是枚舉、布林與計數。
     "tier", "enclosed", "enclosure_applied", "door_calls",
+    # ── 2026-09-28（契約 `plans/CONTRACT_PROCESS_20260928.md` §B）──
+    #   名冊 `run.ws_end_sha256`：凍結快照的樹雜湊，一個 64 hex 字串，不是內容。
+    "ws_end_sha256",
 )
 #: 生成結果裡搬進檔案庫的欄位（觀眾看得到的句子＋可能夾帶原文的除錯字串）。
 #: 2026-09-24 起多三個：分身**自己決定**的那件事（`decision`／`reason`）與它做出來的

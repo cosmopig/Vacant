@@ -37,6 +37,7 @@
 | `run_ended` | ON | `verdict` ＋（有收據時）`receipt` |
 | `run_ended` | OFF | `verdict`（`accepted: null`） |
 | 旁註 `postaudit`（`twin.sidecar/1`，**不是** lifecycle） | OFF | `postaudit`（三旗標；只在綁得上那一跑時） |
+| 旁註 `twin_step`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_step`（**不帶檔名**；契約 `plans/CONTRACT_PROCESS_20260928.md` §A） |
 
 `counters` 不在這張表上：它不是任何一筆輸入轉出來的，是 `Tally` 依**已經寫出去的**
 電視事件數的（`serve_twin._write` 在每一筆 `verdict`／`postaudit` 之後插一筆）。
@@ -261,14 +262,20 @@ class Folder:
         return out
 
     def _sidecar(self, ev: dict) -> list[dict]:
-        """分身的旁註 → 電視的 `postaudit`。**綁不上就不發**（誠實邊界 3）。"""
+        """分身的旁註 → 電視事件。**綁不上就不發**（誠實邊界 3）。"""
         t = ev.get("type")
+        if t == "postaudit":
+            return self._sidecar_postaudit(ev)
+        if t == "twin_step":
+            return self._sidecar_twin_step(ev)
+        self.dropped.append(f"不認得的旁註 type {t!r}")
+        return []
+
+    def _sidecar_postaudit(self, ev: dict) -> list[dict]:
         rid = ev.get("run_id")
         why = None
         st = self.runs.get(rid)
-        if t != "postaudit":
-            why = f"不認得的旁註 type {t!r}"
-        elif (ev.get("when"), ev.get("is_verdict"), ev.get("signed")) != \
+        if (ev.get("when"), ev.get("is_verdict"), ev.get("signed")) != \
                 (tv.WHEN_AFTER, False, False):
             # 自稱裁決（或沒說自己是事後）的旁註**不轉**——不是替它改正旗標再播。
             why = "postaudit 的三個旗標不對（when／is_verdict／signed），不當成事後稽核播"
@@ -297,6 +304,36 @@ class Folder:
                  "failed_case": ev.get("failed_case"),
                  "ruler": ev.get("ruler"), "note": ev.get("note"),
                  "ws_end_sha256": ev.get("ws_end_sha256")}]
+
+    def _sidecar_twin_step(self, ev: dict) -> list[dict]:
+        """分身工作區三個工具被呼叫的旁註 → 電視的 `twin_step`（**不帶檔名**）。
+
+        只在「分身自己決定的自主任務」那一格轉（`task_kind == practical`）：
+        反事實題庫格（`code`）沒有這一欄，發了就是把不存在的一層演出來
+        （契約 §A：「反事實題庫格不出這一欄」）。
+        """
+        rid = ev.get("run_id")
+        why = None
+        st = self.runs.get(rid)
+        if st is None:
+            why = f"twin_step 綁的那一跑 {rid} 這一支沒看過 run_started"
+        elif st["arm"] != tv.ARM_ON:
+            why = f"twin_step 綁的那一跑 {rid} 不是 ON 臂——分身的步驟只在 ON 臂發生"
+        elif st.get("task_kind") != tv.KIND_PRACTICAL:
+            why = f"twin_step 綁的那一跑 {rid} 不是分身的自主任務格（task_kind 不是 practical）"
+        elif ev.get("cell_id") != st["cell_id"]:
+            why = f"twin_step 的 cell_id 與那一跑 {rid} 的格子不同"
+        elif ev.get("step") not in tv.TWIN_STEPS:
+            why = f"twin_step 的 step 不在白名單：{ev.get('step')!r}"
+        elif ev.get("path_kind") not in tv.TWIN_PATH_KINDS:
+            why = f"twin_step 的 path_kind 不在白名單：{ev.get('path_kind')!r}"
+        if why:
+            self.dropped.append(why)
+            return []
+        return [{"type": "twin_step", "ts": self._ts(ev["ts_ms"]),
+                 "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
+                 "step": ev.get("step"), "path_kind": ev.get("path_kind"),
+                 "bytes": ev.get("bytes"), "seq": ev.get("seq")}]
 
     def _ended(self, st: dict, ev: dict, emit) -> None:
         on = st["arm"] == tv.ARM_ON

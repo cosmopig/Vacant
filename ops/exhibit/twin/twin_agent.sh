@@ -23,6 +23,12 @@
 #   3. **stderr 導進 run-dir**：不然它會流進 loop 的 journal，而 journal 刪不到。
 #   4. `--no-session`：不留 session 檔（那裡面會有 TRAITS.md 的全文）。
 #
+# ⚠ **步驟紀錄（2026-09-28，契約 `plans/CONTRACT_PROCESS_20260928.md` §A）**：
+#   `VACANT_TWIN_STEP_LOG` 從這一支自己拿到的 `$RUN_DIR`（工作區外）算出來，
+#   不是從呼叫端的環境變數轉傳——Python 那一側是 ThreadPoolExecutor 平行跑
+#   好幾位分身，`os.environ` 在執行緒之間不安全；這一支一支腳本一個行程，
+#   自己算出來的路徑不會跟別的分身撞。檔名要跟 `twinagent.STEP_LOG_NAME` 同步。
+#
 # ⚠ 誠實邊界（改碼請保留）：
 #   · 收住的是「模型叫得到的工具」，不是 pi 這個行程。pi（node）本身仍有完整的
 #     檔案系統與網路權限；沒有 OS 沙箱包住它（展場機 1003 是 Windows）。
@@ -63,6 +69,9 @@ if [ ! -f "$EXT" ]; then
     echo "找不到工具擴充 $EXT。停（不准退回內建工具）。" >&2
     exit 3
 fi
+
+# ⚠ 檔名 twin_steps.ndjson 與 twinagent.STEP_LOG_NAME 是同一個字面值，改一邊要改兩邊。
+export VACANT_TWIN_STEP_LOG="$RUN_DIR/twin_steps.ndjson"
 
 CFG="$RUN_DIR/pi_cfg"
 rm -rf "$CFG"

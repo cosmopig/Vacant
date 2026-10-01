@@ -142,6 +142,7 @@ TWIN = HERE.parent
 sys.path.insert(0, str(TWIN.parents[2]))
 
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
+from ops.exhibit.twin import tv_contract as tv  # noqa: E402
 from ops.exhibit.twin import twinagent, twinvault  # noqa: E402
 from ops.exhibit.twin.twinstore import (  # noqa: E402
     DEFAULT_DB, KIND_ERASED, KIND_ERROR, KIND_GENERATED, KIND_INGEST_GAP,
@@ -994,6 +995,27 @@ def run_outcome(twin: dict[str, Any] | None) -> str | None:
     return "not_made"
 
 
+def _judgment_of(twin: dict[str, Any]) -> dict[str, Any]:
+    """契約 §C 的判定摘要：只有雜湊前綴、短枚舉與計數（**不含內容**）。
+
+    給手機用（`/api/status/:id`，摺疊區塊的那一份），跟電視事件流的
+    `twin_step`（`sidecar.py`）是兩份不同的資料，但講的是同一份真相來源
+    （這一跑的 `twin` 快照）。`accepted_note` 逐字沿用電視那一句
+    （`tv_contract.PRACTICAL_ACCEPTED_NOTE`）——展場口徑只有一份，
+    不要在手機上另外造一句意思一樣的話。
+    """
+    ws_end = twin.get("ws_end_sha256")
+    head = twin.get("verdict_hash")
+    return {
+        "tier": twin.get("tier"),
+        "requests_seen": twin.get("requests_seen"),
+        "count_semantics": twin.get("count_semantics"),
+        "ws_end_sha256_prefix": (ws_end[:8] if isinstance(ws_end, str) and ws_end else None),
+        "chain_head_prefix": (head[:8] if isinstance(head, str) and head else None),
+        "accepted_note": tv.PRACTICAL_ACCEPTED_NOTE,
+    }
+
+
 def _cast_id_for(card: Any) -> str | None:
     """`pick_cast_for` 的安全版：素材壞了回 `None`（電視那一側就退回自己算），
     **不准讓 build_view 因為一張精靈圖的 manifest 而整個炸掉**。"""
@@ -1233,6 +1255,11 @@ def publish(store: TwinStore, cloud: str, token: str,
                 payload["polaroid_png"] = ("data:image/png;base64,"
                                            + base64.b64encode(png).decode("ascii"))
                 sent_polaroid = True
+            # ── 2026-09-28（契約 §C）：步驟紀錄（含檔名，這是他自己的東西）
+            #    與判定摘要一起送——雲端只回給他自己的 `/api/status/:id`。
+            _ws, rd = twinagent.paths_for(work_root, sid)
+            payload["steps"] = twinagent.read_step_log(rd)
+            payload["judgment"] = _judgment_of(twin)
             rb = twinagent.receipt_bundle(work_root, sid,
                                           expect_head=twin.get("verdict_hash"))
             if rb.get("ok"):
@@ -1267,6 +1294,156 @@ def publish(store: TwinStore, cloud: str, token: str,
             fail += 1
     return {"ok": fail == 0, "published": ok, "failed": fail,
             "note": "publish 失敗不影響現場：螢幕讀的是本機真相來源"}
+
+
+#: 每人補送次數上限。不是「量到的事實」，是**擋迴圈狂打雲端**的策展參數
+#: ——雲端掛掉的那段時間，每一輪 `loop` 都會發現同一批人缺件，沒有上限
+#: 就會無限重送。3 次還是缺，代表雲端那一份大概率是別的原因壞了（不是
+#: 「還沒送到」），留給人看，不要自動繼續打。
+DEFAULT_MAX_RESENDS = 3
+
+
+def _resend_count(store: TwinStore, sid: str) -> int:
+    """這位過去被標成 `resend: true` 的 `published` 事件有幾筆（鏈上算的，
+    不是記憶體變數——**重開 loop 也不會把計數歸零**）。"""
+    return sum(1 for e in store.events(sub_id=sid, kind=KIND_PUBLISHED)
+              if isinstance(e.get("payload"), dict) and e["payload"].get("resend") is True)
+
+
+def _resolve_sub_id(store: TwinStore, ref: str) -> str | None:
+    """CLI 的 `--resend` 吃 `twin_id`（公開別名）或 `sub_id`（含前綴）。
+
+    `twin_id` 是單向雜湊，算不回去——只能**正著算**每一個 `sub_id` 的
+    `twin_id` 跟輸入比對。展場規模（幾百人）逐一算得起。
+    """
+    ref = (ref or "").strip()
+    if not ref:
+        return None
+    for sid in store.sub_ids():
+        if sid == ref or sid.startswith(ref) or twinagent.public_twin_id(sid) == ref:
+            return sid
+    return None
+
+
+def resend_missing(store: TwinStore, cloud: str, token: str, *,
+                   only: list[str] | None = None,
+                   limit: int = 0, max_resends: int = DEFAULT_MAX_RESENDS,
+                   timeout: float = 30.0) -> dict[str, Any]:
+    """已經 published、但雲端那一份拍立得／收據掉了的人，補送一次。
+
+    **設計缺口（2026-09-28 主線指出）**：`publish()` 只挑
+    `store.pending(KIND_PUBLISHED)`——已經有一筆 `published` 事件的人**永遠
+    不會再被選到**，即使雲端那一份是被舊版伺服器（那時候還沒接拍立得／收據
+    欄位）丟掉的。這一支補這個洞：對「本機判定 `outcome=made`、狀態不是
+    撤回／抹除、已經 published 過」的人，先問雲端 `/api/status/:id` 有沒有
+    `polaroid_url`／`receipt_url`；**缺了才送**，不是每輪都無條件重送。
+
+    **只追加不改**：每一次補送（不管成不成功）都是一筆**新的** `published`
+    事件（`resend: True`），不覆寫、不刪掉舊的那一筆——鏈是 append-only，
+    「這位被補送過幾次」本身要查得到。**撤回過的人絕不補送**
+    （跟 `publish()` 同一條規矩：狀態一旦是 `withdrawn`／`erased` 就跳過）。
+    每人補送次數上限 `max_resends`（鏈上數，不是記憶體計數器），超過就跳過
+    並記在回報裡，不是又送一次把雲端當靶打。
+
+    `only` 給了 ⇒ 只考慮這幾個 `sub_id`（CLI 的 `--resend <一位>` 用）。
+    """
+    cloud = cloud.rstrip("/")
+    work_root = twinagent.default_work_root(store.path)
+    candidates: list[str] = []
+    not_eligible: list[str] = []
+    for sid in (only if only is not None else store.sub_ids()):
+        cur = store.current(sid)
+        if not cur or cur.get("status") not in ("published",) \
+                or run_outcome(cur.get("twin") or {}) != "made":
+            not_eligible.append(sid)
+            continue
+        candidates.append(sid)
+    if limit:
+        candidates = candidates[:limit]
+
+    checked = resent = skipped_complete = skipped_cap = fail = 0
+    # `only` 給了（CLI 手動補一位）才把「這位根本不夠格被補送」列進細節——
+    # 自動那條路（`only=None`）掃的是全庫，把每一位不合格的人都列出來
+    # 會讓每一輪的 `loop` 輸出線性長大，沒有意義。
+    details: list[dict[str, Any]] = (
+        [{"id": sid[:8], "skipped": "not_published_or_not_made"} for sid in not_eligible]
+        if only is not None else [])
+    for sid in candidates:
+        if _resend_count(store, sid) >= max_resends:
+            skipped_cap += 1
+            details.append({"id": sid[:8], "skipped": "resend_cap"})
+            continue
+        try:
+            status, body = _http_json(f"{cloud}/api/status/{sid}", timeout=timeout)
+        except Exception as e:                                    # noqa: BLE001
+            fail += 1
+            details.append({"id": sid[:8], "error": f"status_check:{type(e).__name__}"})
+            continue
+        if status != 200 or not isinstance(body, dict):
+            fail += 1
+            details.append({"id": sid[:8], "error": f"status_http_{status}"})
+            continue
+        checked += 1
+        missing_polaroid = not body.get("polaroid_url")
+        missing_receipt = not body.get("receipt_url")
+        if not missing_polaroid and not missing_receipt:
+            skipped_complete += 1
+            details.append({"id": sid[:8], "skipped": "already_complete"})
+            continue
+
+        cur = store.current(sid) or {}
+        twin = cur.get("twin") or {}
+        verdict = twin.get("handover") or twin.get("arrival") or "（分身已抵達）"
+        payload: dict[str, Any] = {
+            "token": token, "id": sid, "verdict": str(verdict)[:120],
+            "matched": str(twin.get("working") or "")[:120], "outcome": "made"}
+        make_polaroid(store, sid)          # 冪等
+        png = store.vault.open_polaroid(sid)
+        sent_polaroid = False
+        if png:
+            payload["polaroid_png"] = ("data:image/png;base64,"
+                                       + base64.b64encode(png).decode("ascii"))
+            sent_polaroid = True
+        _ws, rd = twinagent.paths_for(work_root, sid)
+        payload["steps"] = twinagent.read_step_log(rd)
+        payload["judgment"] = _judgment_of(twin)
+        rb = twinagent.receipt_bundle(work_root, sid, expect_head=twin.get("verdict_hash"))
+        receipt_state = None
+        if rb.get("ok"):
+            try:
+                twinvault.assert_payload_clean(rb["bundle"], _subject_secrets(store, sid),
+                                               kind=KIND_PUBLISHED)
+                payload["receipt"] = rb["bundle"]
+                receipt_state = "sent"
+            except twinvault.GUARD_ERRORS:
+                receipt_state = "guard_rejected"
+        else:
+            receipt_state = str(rb.get("why"))[:40]
+
+        rstatus: int | None
+        try:
+            rstatus, rbody = _http_json(f"{cloud}/api/result", payload, timeout=timeout)
+            ok_send = rstatus == 200
+        except Exception as e:                                    # noqa: BLE001
+            rstatus, rbody, ok_send = None, f"{type(e).__name__}: {_safe_text(e)}", False
+        store.append(KIND_PUBLISHED, sid, {
+            "cloud": cloud, "http": rstatus, "at": _now(),
+            "outcome": "made", "polaroid": sent_polaroid, "receipt": receipt_state,
+            "resend": True,
+            "reason": f"missing_polaroid={missing_polaroid},missing_receipt={missing_receipt}",
+        }, source=f"cloud:{cloud}")
+        if ok_send:
+            resent += 1
+            details.append({"id": sid[:8], "resent": True})
+        else:
+            fail += 1
+            details.append({"id": sid[:8], "error": f"resend_http_{rstatus}:{str(rbody)[:80]}"})
+    return {"ok": fail == 0, "candidates": len(candidates), "checked": checked,
+            "resent": resent, "skipped_complete": skipped_complete,
+            "skipped_cap": skipped_cap, "failed": fail, "details": details,
+            "note": ("補送只挑已 published、本機 outcome=made、狀態不是撤回／抹除的人；"
+                     "每人補送次數上限鏈上算，重開 loop 不歸零；每一次補送都是新的一筆"
+                     "「published」事件（resend=true），不覆寫舊的那一筆")}
 
 
 # ---------------------------------------------------------------------------
@@ -1600,6 +1777,9 @@ def build_view(store: TwinStore, *,
                          ts_unix_ms=now_ms)
             retired[x["sid"]] = {"at_ms": now_ms, "seq": None, **rec}
 
+    # 契約 §B：跑的當下就從（還沒凍結的）工作區讀 `decision`，不必等跑完。
+    work_root = twinagent.default_work_root(store.path)
+
     people = []
     for x in shown:
         c = x["cur"]
@@ -1607,6 +1787,14 @@ def build_view(store: TwinStore, *,
         gone = c.get("status") in ("withdrawn", "erased")
         if gone:
             withdrawn += 1
+        decision = None if gone else twin.get("decision")
+        # 還沒有凍結快照的 decision（沒跑完，或這一輪還沒收成）⇒ 試著即時讀
+        # 工作區的 `PLAN.md` 第一行。**跑完就不再讀這裡**（`twin.get("run_id")`
+        # 有值＝已經收成過一次，即使那一次沒有 decision 也不要回頭猜工作區——
+        # 工作區下一輪可能已經被下一個人的 job 蓋掉）。
+        if decision is None and not gone and not twin.get("run_id"):
+            ws, _rd = twinagent.paths_for(work_root, c["sub_id"])
+            decision = twinagent.live_decision(ws, c.get("card"), c.get("card_text"))
         people.append({
             "id": c["sub_id"],
             # 公開別名：事件流（`vacant.lifecycle/1` 的 `caller.cell_id`）與收據的
@@ -1626,7 +1814,8 @@ def build_view(store: TwinStore, *,
             "handover": None if gone else twin.get("handover"),
             # ── 真跑（2026-09-24）：分身**自己決定**的那件事與它做出來的檔 ──
             # 舊路徑（直打模型）與退化路徑這三欄是 None——不准拿台詞去補。
-            "decision": None if gone else twin.get("decision"),
+            # `decision` 可能來自凍結快照（跑完）或即時讀工作區（還在跑，見上）。
+            "decision": decision,
             "reason": None if gone else twin.get("reason"),
             "artifacts": None if gone or not twin.get("artifacts") else [
                 {"name": a.get("name"), "text": a.get("text"),
@@ -1634,11 +1823,17 @@ def build_view(store: TwinStore, *,
                 for a in twin["artifacts"] if isinstance(a, dict)],
             # 這一跑的收據指標（別名、雜湊、計數；**不含內容**）。
             # `accepted=None` ＝沒有客觀標準、不判——**不是沒過**。
+            # `tier`／`enclosed`／`count_semantics`／`ws_end_sha256`（契約 §B）：
+            # 沒量到寫 null，不寫 false／空字串——`twin.get(...)` 本來就這樣做。
             "run": ({"run_id": twin.get("run_id"),
                      "verdict_hash": twin.get("verdict_hash"),
                      "stop_reason": twin.get("stop_reason"),
                      "accepted": twin.get("accepted"),
-                     "requests_seen": twin.get("requests_seen")}
+                     "requests_seen": twin.get("requests_seen"),
+                     "tier": twin.get("tier"),
+                     "enclosed": twin.get("enclosed"),
+                     "count_semantics": twin.get("count_semantics"),
+                     "ws_end_sha256": twin.get("ws_end_sha256")}
                     if twin.get("run_id") or twin.get("verdict_hash") else None),
             # 🔴 engine 一定要出到畫面層：真模型跟退化查表不可以長得一樣
             "engine": twin.get("engine"),
@@ -1707,7 +1902,7 @@ def build_view(store: TwinStore, *,
         },
         # 磁碟水位（VM 只有 38 G）：`accepting=False` ⇒ loop 這一輪起不收新分身。
         # 放在這裡是為了**畫面講得出來**，不是只有 journal 知道。
-        "intake": twinagent.intake_status(twinagent.default_work_root(store.path)),
+        "intake": twinagent.intake_status(work_root),
         "day": {"start_utc_ms": day_start_ms, "tz_offset_minutes": tz_off_min,
                 "note": "用展場本機時區切日，不是 UTC（UTC 會在早上八點歸零）"},
         # 🔴 **庫裡所有人的 id，不受視窗影響。這一欄不是拿來演的。**
@@ -2395,6 +2590,11 @@ def main(argv: Iterable[str] | None = None) -> int:
         q.add_argument("--timeout", type=float, default=30.0)
         if name == "publish":
             q.add_argument("--limit", type=int, default=0)
+            q.add_argument("--resend", default=None,
+                          help=("補送單一位已 published 但雲端缺拍立得／收據的人。"
+                               "吃 twin_id（公開別名）或 sub_id（可只打前幾碼）。"
+                               "撤回過的人一律拒絕（跟自動補送同一條規矩）"))
+            q.add_argument("--resend-max", type=int, default=DEFAULT_MAX_RESENDS)
 
     g = s.add_parser("generate")
     # 預設 None ⇒ 由 `resolve_endpoint()` 探測。
@@ -2479,6 +2679,15 @@ def main(argv: Iterable[str] | None = None) -> int:
         _p(generate(st, a.endpoint, a.model, a.limit, a.timeout,
                     allow_fallback=not a.no_fallback, agent=_agent_cfg(a))); return 0
     if a.cmd == "publish":
+        if a.resend:
+            sid = _resolve_sub_id(st, a.resend)
+            if sid is None:
+                _p({"ok": False, "error": f"找不到符合 {a.resend!r} 的人"})
+                return 1
+            out = resend_missing(st, a.cloud, a.token, only=[sid],
+                                 max_resends=a.resend_max, timeout=a.timeout)
+            _p(out)
+            return 0 if out.get("ok") else 1
         _p(publish(st, a.cloud, a.token, a.limit, a.timeout)); return 0
     if a.cmd == "polaroid":
         _p(polaroids(st, limit=a.limit)); return 0
@@ -2519,6 +2728,9 @@ def main(argv: Iterable[str] | None = None) -> int:
                 # 拍立得在 publish **之前**：同一輪收成的人，同一輪就把圖送到他手機上
                 r["polaroid"] = polaroids(st)
                 r["publish"] = publish(st, a.cloud, a.token)
+                # 已 published 但雲端缺拍立得／收據的人：每人有上限（鏈上算），
+                # 所以「每輪都檢查」不等於「每輪都重送」——2026-09-28 缺口補丁。
+                r["resend"] = resend_missing(st, a.cloud, a.token)
                 r["export"] = export(st, pathlib.Path(a.out), recent=a.recent,
                                      fresh_window_s=a.fresh_window,
                                      record_retire=not a.no_retire)

@@ -69,6 +69,22 @@
 | `failed_case` | 第一個沒過的案例**名字**（不帶訊息全文），全過＝`null` |
 | `ruler`／`note` | 用哪一把尺、以及「這不是裁決」那一句 |
 
+`twin_step`（2026-09-28，契約 `plans/CONTRACT_PROCESS_20260928.md` §A）：
+
+| 欄位 | 意思 |
+|---|---|
+| `cell_id` | 哪一格（＝ `twin_id`） |
+| `run_id` | 這一跑（**ON** 臂，分身只有一臂）的 lifecycle `run_id` |
+| `seq` | 原始記錄檔裡的序號（同一跑內單調遞增，從 1 開始） |
+| `step` | `read`／`write`／`list`（`ws_read`／`ws_write`／`ws_list` 的動詞形） |
+| `path_kind` | `traits`／`plan`／`artifact`／`other`（`ws_list` 恆 `other`） |
+| `bytes` | 讀到或寫入的位元組數；`ws_list` 恆 `null` |
+| `ok` | 這次呼叫有沒有被 `confine()` 擋下 |
+
+**不帶檔名。** 原始記錄檔（`twinagent.STEP_LOG_NAME`，住在 run-dir，工作區外）
+才有檔名，那一份只給手機用（見 `twinagent.read_step_log`），撤回時跟 run-dir
+一起刪。
+
 ## 綁定（`validate(rows, lifecycle_events=…)`）
 
 每一筆 `postaudit` 都要綁得上**同一份錄影裡**的一跑：`run_id` 存在、是 `RUN-OFF`、
@@ -76,6 +92,11 @@
 `ts_ms` 不早於那一跑的 `run_ended`（「事後」要在資料上成立）、一跑最多一筆。
 綁不上 ⇒ 整份旁註不收（**不是**整份錄影不收：lifecycle 是 Vacant 的紀錄，
 它本身沒壞；壞的是分身的註，那就不演分身的註）。
+
+每一筆 `twin_step` 要綁得上**同一份錄影裡**的一跑：`run_id` 存在、是 `RUN-ON`、
+`cell_id` 相等、`ts_ms` 不早於那一跑的 `run_started`（一跑可以有很多筆，
+不像 `postaudit` 一跑最多一筆）。**不要求 `run_ended` 已經出現**——這一種
+旁註本來就發生在那一跑**進行中**。
 
 ## 誠實邊界（改碼時保留）
 
@@ -101,23 +122,40 @@ SCHEMA = "twin.sidecar/1"
 #: 檔名後綴：`X.jsonl` 的旁註是 `X.sidecar.jsonl`。
 SUFFIX = ".sidecar.jsonl"
 
-TYPES = ("postaudit",)
+#: `twin_step`：分身工作區三個工具（`ws_list`／`ws_read`／`ws_write`）被呼叫的旁註
+#: （契約 `plans/CONTRACT_PROCESS_20260928.md` §A，2026-09-28）。**不是** Vacant
+#: 當場觀察到的事——它來自分身側自己寫的原始記錄檔（`twinagent.STEP_LOG_NAME`），
+#: 由分身迴圈（`twinagent.StepForwarder`）轉寫成這裡的一行，理由與 `postaudit`
+#: 同一條（見模組 docstring）：不准進 lifecycle 契約，`vacant_network/vrun/*` 不動。
+TYPES = ("postaudit", "twin_step")
 
 COMMON = ("schema", "type", "ts_ms", "cell_id", "run_id")
 
 FIELDS: dict[str, tuple[str, ...]] = {
     "postaudit": ("arm", "ws_end_sha256", "when", "is_verdict", "signed",
                   "all_pass", "passed", "total", "failed_case", "ruler", "note"),
+    "twin_step": ("seq", "step", "path_kind", "bytes", "ok"),
 }
 
 WHEN_AFTER = "after_the_run"
 
-#: 旁註裡不准出現的內容欄位（誠實邊界 3）。
+#: 旁註裡不准出現的內容欄位（誠實邊界 3）。`path`／`name`／`file`／`text` 是
+#: `twin_step` 那一份加的：原始記錄檔（給手機用）含檔名，但轉進這裡的這一份
+#: **不帶檔名**（電視事件流的規則，契約 §A）。
 CONTENT_KEYS = ("cases", "message", "body", "request", "response", "messages",
-                "prompt", "code", "source")
+                "prompt", "code", "source", "path", "name", "file", "text")
 
-#: lifecycle 那一側 OFF 臂的名字（launcher 的 `arm`）。
+#: lifecycle 那一側 OFF／ON 臂的名字（launcher 的 `arm`）。
 LC_ARM_OFF = "RUN-OFF"
+LC_ARM_ON = "RUN-ON"
+
+#: `twin_step.step` 的白名單（`ws_read`／`ws_write`／`ws_list` 的動詞形）。
+STEP_KINDS = ("read", "write", "list")
+#: 原始記錄檔的 `tool` → `twin_step.step`。
+_TOOL_TO_STEP = {"ws_read": "read", "ws_write": "write", "ws_list": "list"}
+
+#: `twin_step.path_kind` 的白名單（契約 §A）。
+PATH_KINDS = ("traits", "plan", "artifact", "other")
 
 
 def sidecar_path(lifecycle_path: str | os.PathLike) -> pathlib.Path:
@@ -161,6 +199,56 @@ def postaudit_row(pa: dict, *, cell_id: str, run_id: str,
     }
 
 
+def classify_path_kind(tool: Any, path: Any) -> str:
+    """原始記錄的 `(tool, path)` → `twin_step.path_kind`（契約 §A 的三類＋`other`）。
+
+    `ws_list` 沒有單一檔案可指 ⇒ 恆 `other`；`TRAITS.md`／`PLAN.md` 認**檔名**
+    （不管在哪一層目錄——分身的工作區目前是扁平的，但這裡不假設它永遠扁平）。
+    """
+    if tool != "ws_read" and tool != "ws_write":
+        return "other"
+    if not isinstance(path, str) or not path:
+        return "other"
+    name = path.replace("\\", "/").rsplit("/", 1)[-1]
+    if name == "TRAITS.md":
+        return "traits"
+    if name == "PLAN.md":
+        return "plan"
+    return "artifact"
+
+
+def twin_step_row(raw: dict, *, cell_id: str, run_id: str) -> dict | None:
+    """原始記錄檔（`twinagent.STEP_LOG_NAME`）一行 → 一筆 `twin_step` 旁註。
+
+    形狀不對（不是我們自己寫的那個格式）回 `None`，呼叫端只計數不轉發
+    ——這一份會進電視事件流，寧可少轉一行也不要轉一行形狀不對的。
+    **不帶檔名**：`raw["path"]` 只用來分類 `path_kind`，不放進回傳值
+    （契約 §A：「這一份會進電視事件流」的那一份不帶檔名）。
+    """
+    if not isinstance(raw, dict):
+        return None
+    step = _TOOL_TO_STEP.get(raw.get("tool"))
+    if step is None:
+        return None
+    seq = raw.get("seq")
+    ok = raw.get("ok")
+    if not _is_nat(seq) or not isinstance(ok, bool):
+        return None
+    b = raw.get("bytes")
+    if b is not None and not _is_nat(b):
+        return None
+    ts_ms = raw.get("ts_ms")
+    if not _is_nat(ts_ms):
+        ts_ms = int(time.time() * 1000)
+    return {
+        "schema": SCHEMA, "type": "twin_step", "ts_ms": ts_ms,
+        "cell_id": cell_id, "run_id": run_id,
+        "seq": seq, "step": step,
+        "path_kind": classify_path_kind(raw.get("tool"), raw.get("path")),
+        "bytes": b, "ok": ok,
+    }
+
+
 def append(path: str | os.PathLike, row: dict) -> str | None:
     """追加一行。回 `None`＝寫進去了；否則回錯誤字串（**不丟例外**，誠實邊界 2）。"""
     try:
@@ -201,6 +289,7 @@ def _runs(lifecycle_events: Iterable[dict]) -> dict[str, dict[str, Any]]:
         if e.get("type") == "run_started":
             caller = e.get("caller") or {}
             runs[rid] = {"arm": e.get("arm"), "ended": False,
+                         "started_ms": e.get("ts_ms"),
                          "cell_id": caller.get("cell_id") or e.get("task_id")}
         elif e.get("type") == "run_ended" and rid in runs:
             runs[rid].update(ended=True, ended_ms=e.get("ts_ms"),
@@ -279,24 +368,78 @@ def validate(rows: Iterable[dict], *,
                     and r["ts_ms"] < run["ended_ms"]:
                 bad.append(f"旁註第 {i} 筆：ts_ms 早於那一跑的 run_ended——"
                            "「事後」在資料上不成立")
+        elif t == "twin_step":
+            # ── 分身工作區三個工具被呼叫的旁註：形狀＋白名單 ─────────────
+            if r.get("step") not in STEP_KINDS:
+                bad.append(f"旁註第 {i} 筆：twin_step 的 step 不在白名單："
+                           f"{r.get('step')!r}")
+            if r.get("path_kind") not in PATH_KINDS:
+                bad.append(f"旁註第 {i} 筆：twin_step 的 path_kind 不在白名單："
+                           f"{r.get('path_kind')!r}")
+            if not isinstance(r.get("ok"), bool):
+                bad.append(f"旁註第 {i} 筆：twin_step 的 ok 只能是 true／false")
+            if not _is_nat(r.get("seq")):
+                bad.append(f"旁註第 {i} 筆：twin_step 的 seq 要是非負整數")
+            bv = r.get("bytes")
+            if bv is not None and not _is_nat(bv):
+                bad.append(f"旁註第 {i} 筆：twin_step 的 bytes 要是非負整數或 null")
+            if runs is None:
+                continue
+            # ── 綁定：這一步是這一跑（ON 臂）做的 ─────────────────────
+            run = runs.get(r.get("run_id"))
+            if run is None:
+                bad.append(f"旁註第 {i} 筆：run_id {r.get('run_id')!r} 不在這份錄影裡")
+                continue
+            if run["arm"] != LC_ARM_ON:
+                bad.append(f"旁註第 {i} 筆：run_id {r.get('run_id')} 是 {run['arm']}，"
+                           "不是 ON 臂——分身的步驟只在 ON 臂發生")
+            if r.get("cell_id") != run["cell_id"]:
+                bad.append(f"旁註第 {i} 筆：cell_id {r.get('cell_id')!r} 與那一跑的格子"
+                           f" {run['cell_id']!r} 不同")
+            if _is_nat(r.get("ts_ms")) and _is_nat(run.get("started_ms")) \
+                    and r["ts_ms"] < run["started_ms"]:
+                bad.append(f"旁註第 {i} 筆：ts_ms 早於那一跑的 run_started——"
+                           "這一步不可能發生在那一跑開始之前")
     return bad
 
 
 def merge(lifecycle_events: list[dict], rows: list[dict]) -> list[dict]:
     """lifecycle ＋ 旁註 → 一條給 `Folder` 吃的串流。
 
-    每一筆旁註插在**它綁的那一跑的 `run_ended` 之後**（不是照 `ts_ms` 重排：
-    重排可能動到 lifecycle 自己的順序）。綁不上的旁註接在最後——`Folder` 會因為
-    找不到那一跑而不發事件（不猜）。呼叫端應該先 `validate`。
+    兩種旁註兩種插法（**只加不改**：`postaudit` 的插法逐位元組不動）：
+
+    · `postaudit` 插在**它綁的那一跑的 `run_ended` 之後**（不是照 `ts_ms` 重排：
+      重排可能動到 lifecycle 自己的順序；`postaudit` 的 `ts_ms` 本來就恆晚於
+      `run_ended`，見 `validate` 的綁定規則）。
+    · `twin_step` 發生在那一跑**進行中**（`ts_ms` 介於 `run_started`／`run_ended`
+      之間），所以插在同一跑**依 `ts_ms` 排序後、第一個 `ts_ms` 不早於它的
+      lifecycle 事件之前**——這樣重播時「讀了特質」「寫了計畫」會出現在
+      `working`／`verdict` 之間，不是像 `postaudit` 那樣全部堆在收尾之後。
+      理論上這一跑最晚也會在 `run_ended` 那一步之前把剩下的全部沖掉（同一跑
+      的 lifecycle 事件用完了）。
+
+    綁不上的旁註接在最後——`Folder` 會因為找不到那一跑而不發事件（不猜）。
+    呼叫端應該先 `validate`。
     """
-    by_run: dict[str, list[dict]] = {}
+    after_end: dict[str, list[dict]] = {}
+    live: dict[str, list[dict]] = {}
     for r in rows:
-        by_run.setdefault(r.get("run_id"), []).append(r)
+        bucket = live if r.get("type") == "twin_step" else after_end
+        bucket.setdefault(r.get("run_id"), []).append(r)
+    for lst in live.values():
+        lst.sort(key=lambda r: r.get("ts_ms", 0))
     out: list[dict] = []
     for e in lifecycle_events:
+        rid = e.get("run_id")
+        pending = live.get(rid)
+        if pending:
+            ets = e.get("ts_ms", 0)
+            while pending and pending[0].get("ts_ms", 0) <= ets:
+                out.append(pending.pop(0))
         out.append(e)
         if e.get("type") == "run_ended":
-            out.extend(by_run.pop(e.get("run_id"), []))
-    for rest in by_run.values():
+            out.extend(live.pop(rid, []))          # 保底：理論上不會剩東西
+            out.extend(after_end.pop(rid, []))      # 舊行為：postaudit 接在後面
+    for rest in list(live.values()) + list(after_end.values()):
         out.extend(rest)
     return out

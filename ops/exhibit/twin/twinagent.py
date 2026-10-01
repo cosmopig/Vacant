@@ -65,7 +65,9 @@ REPO = TWIN.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
+from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
+from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
 from vacant_network.memory import assert_ks1_clean  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
 # ⚠ `launcher` 在 `run_one` 裡才 import：它拉進 wireproxy／attest／sandbox，
@@ -107,6 +109,13 @@ NOT_ARTIFACTS = frozenset({"TRAITS.md", "PLAN.md", "VACANT_FEEDBACK.md"})
 #: 「每題一筆 verdict」，少了它收據就驗不過——留收據卻驗不了等於沒留。
 #: 它的欄位是別名、雜湊、計數與固定枚舉（`launcher._persist` 的 `row`）。
 KEEP_ON_ERASE = ("receipts_RUN-ON.ndjson", "receipts_RUN-ON.pub.json", "rows.jsonl")
+
+#: 分身工作區三個工具被呼叫的原始紀錄檔（run-dir 裡，工作區外；契約
+#: `plans/CONTRACT_PROCESS_20260928.md` §A）。**這個字面值與 `twin_agent.sh`
+#: 匯出的 `VACANT_TWIN_STEP_LOG` 同步**——那一支自己從 `$RUN_DIR` 算出同一個
+#: 路徑，兩邊改一個要改另一個。它**不在** `KEEP_ON_ERASE`：撤回時跟 run-dir
+#: 其餘檔案一起刪（含檔名，屬於誠實邊界 6 要清掉的那一半）。
+STEP_LOG_NAME = "twin_steps.ndjson"
 
 # ---------------------------------------------------------------------------
 # 固定文字（全場逐字相同；argv 裡沒有觀眾原文）
@@ -363,6 +372,63 @@ def read_outputs(root: pathlib.Path | None) -> dict[str, Any]:
     return out
 
 
+def read_step_log(rd: pathlib.Path, *, max_lines: int = 500) -> list[dict[str, Any]]:
+    """讀這一跑的原始步驟紀錄（**含檔名**）。只給手機用（契約 §C）——
+    電視那一側走 `sidecar.twin_step_row`（不帶檔名，見 `StepForwarder`）。
+
+    壞掉的行（不是我們自己寫的 JSON）就停在那裡，跟 `sidecar.read` 同一條規則：
+    寫到一半的最後一行不算。
+    """
+    p = rd / STEP_LOG_NAME
+    if not p.is_file():
+        return []
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    out: list[dict[str, Any]] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            break
+        if not isinstance(row, dict):
+            continue
+        out.append({"seq": row.get("seq"), "tool": row.get("tool"),
+                    "path": row.get("path"), "bytes": row.get("bytes"),
+                    "ok": row.get("ok")})
+        if len(out) >= max_lines:
+            break
+    return out
+
+
+def live_decision(ws: pathlib.Path, card: Any, card_text: Any) -> str | None:
+    """跑的當下（**還沒凍結**）從工作區讀 `PLAN.md` 第一行給名冊即時顯示（契約 §B）。
+
+    逐字抄錄防呆與 `polaroid.py` 同一把尺（`clean_caption`＋`originals_of`＋
+    `caption_leaks_original`）：分身抄了觀眾原文 ⇒ 這裡回 `None`，
+    **不是**顯示被剪過的那一半——名冊那一格就維持「還沒有決定」。
+    """
+    p = ws / "PLAN.md"
+    if not p.is_file():
+        return None
+    try:
+        txt = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    decision, _reason = parse_plan(txt)
+    if not decision:
+        return None
+    caption = polaroidlib.clean_caption(decision)
+    originals = polaroidlib.originals_of(card, card_text)
+    if not caption or polaroidlib.caption_leaks_original(caption, originals):
+        return None
+    return caption
+
+
 def derive_lines(decision: str | None, reason: str | None,
                  artifacts: list[dict]) -> dict[str, str]:
     """螢幕的三句台詞**從產出衍生**（不再是另一個模型憑空寫的）。"""
@@ -391,6 +457,121 @@ class Job:
     cfg: AgentConfig
 
 
+class StepForwarder(threading.Thread):
+    """「分身迴圈 tail 這個檔」（契約 §A）的實作。
+
+    Tail `<run-dir>/twin_steps.ndjson`（`twin_agent.sh` 匯出 `VACANT_TWIN_STEP_LOG`
+    指到的那個檔，`pi_ext/twin_ws_tools.ts` 每次工具被呼叫就追加一行），轉成
+    `twin.sidecar/1` 的 `twin_step`（**不帶檔名**，見 `sidecar.twin_step_row`），
+    append 進共用的旁註檔（`sidecar.sidecar_path(events_path)`）。
+
+    形狀與 `twinenclose.EventForwarder` 同一種（背景執行緒、輪詢、寫不進去只計數）
+    ——**這是旁註，不准改變那一跑本身的任何結果**（`sidecar.py` 誠實邊界 2）。
+
+    `run_id` 要從共用的事件流（`events_path`）裡那一跑自己的 `run_started` 學：
+    launcher 的 `Emitter`（或圍牆的 `EventForwarder`）把它寫進去的時間點
+    **早於**分身第一次呼叫 `ws_read`／`ws_write`（那一刻連 pi 都還沒 spawn），
+    所以正常情況下第一批步驟送達前就學得到；學不到就先攢著（`_pending`），
+    run_id 出現後一次補送。
+    """
+
+    def __init__(self, step_log: pathlib.Path, events_path: pathlib.Path | str | None,
+                 *, task_id: str, cell_id: str, poll_s: float = 0.2) -> None:
+        super().__init__(daemon=True, name="twin-step-forward")
+        self.step_log = pathlib.Path(step_log)
+        self.events_path = pathlib.Path(events_path) if events_path else None
+        self.sidecar_path = (sidecarlib.sidecar_path(self.events_path)
+                             if self.events_path is not None else None)
+        self.task_id, self.cell_id = task_id, cell_id
+        self.poll_s = poll_s
+        self.run_id: str | None = None
+        self.forwarded = 0
+        self.rejected = 0
+        self._pending: list[dict] = []
+        self._pos = 0
+        self._buf = b""
+        self._events_pos = 0
+        self._halt = threading.Event()
+
+    def _learn_run_id(self) -> None:
+        if self.run_id is not None or self.events_path is None \
+                or not self.events_path.exists():
+            return
+        try:
+            with self.events_path.open("rb") as f:
+                f.seek(self._events_pos)
+                chunk = f.read()
+                self._events_pos = f.tell()
+        except OSError:
+            return
+        for raw in chunk.split(b"\n"):
+            if not raw.strip():
+                continue
+            try:
+                e = json.loads(raw.decode("utf-8", "replace"))
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(e, dict):
+                continue
+            if (e.get("schema") == lifecycle.SCHEMA and e.get("type") == "run_started"
+                    and e.get("task_id") == self.task_id):
+                self.run_id = e.get("run_id")
+                return
+
+    def _read_new_raw_lines(self) -> None:
+        if not self.step_log.is_file():
+            return
+        try:
+            with self.step_log.open("rb") as f:
+                f.seek(self._pos)
+                chunk = f.read()
+                self._pos = f.tell()
+        except OSError:
+            return
+        self._buf += chunk
+        while b"\n" in self._buf:
+            raw, self._buf = self._buf.split(b"\n", 1)
+            if not raw.strip():
+                continue
+            try:
+                row = json.loads(raw.decode("utf-8", "replace"))
+            except (ValueError, TypeError):
+                self.rejected += 1
+                continue
+            self._pending.append(row)
+
+    def _flush_pending(self) -> None:
+        if self.run_id is None or self.sidecar_path is None or not self._pending:
+            return
+        pending, self._pending = self._pending, []
+        for raw in pending:
+            row = sidecarlib.twin_step_row(raw, cell_id=self.cell_id, run_id=self.run_id)
+            if row is None:
+                self.rejected += 1
+                continue
+            err = sidecarlib.append(self.sidecar_path, row)
+            if err is None:
+                self.forwarded += 1
+            else:
+                self.rejected += 1
+
+    def _pump(self) -> None:
+        self._learn_run_id()
+        self._read_new_raw_lines()
+        self._flush_pending()
+
+    def run(self) -> None:
+        while not self._halt.is_set():
+            self._pump()
+            self._halt.wait(self.poll_s)
+        self._pump()
+
+    def finish(self) -> None:
+        self._halt.set()
+        self.join(timeout=10)
+        self._pump()          # 收尾再抽一次：thread 停了之後主執行緒還在讀的那幾行
+
+
 def run_one(job: Job) -> dict[str, Any]:
     """一位分身跑一次。回一份**只有資料**的結果（封印由主執行緒做）。"""
     t0 = time.time()
@@ -417,30 +598,43 @@ def run_one(job: Job) -> dict[str, Any]:
         res["enclosed"] = enclosed
         res["enclosure_why"] = enc_why
         res["require_tier"] = job.cfg.require_tier
-        if enclosed:
-            from ops.exhibit.twin import twinenclose
-            summary = twinenclose.run_enclosed(
-                argv=argv, workspace=ws, run_dir=rd,
-                door_dir=twinenclose.door_dir_for(job.cfg.work_root, slug_for(job.sub_id)),
-                task_id=f"twin:{tid}", timeout_s=job.cfg.timeout_s,
-                events_path=job.cfg.events_path, events_caller=caller,
-                endpoint=job.cfg.endpoint, model=job.cfg.model,
-                pi_bin=os.environ.get("VACANT_TWIN_PI") or "pi")
-        else:
-            summary = launcher.run(
-                argv, workspace=ws, run_dir=rd, suite_dir=None,
-                vacant_on=True, allow_no_suite=True,
-                task_id=f"twin:{tid}",
-                timeout_s=job.cfg.timeout_s,
-                capture_agent_stdout=True,
-                events_path=(str(job.cfg.events_path) if job.cfg.events_path else None),
-                events_caller=caller)
+        # ── 契約 §A：分身迴圈 tail 步驟原始紀錄檔，轉成不帶檔名的 twin_step ──
+        # 要在 spawn 之前起（工作區裡連 TRAITS.md 都寫完了，pi 隨時可能開始叫
+        # ws_read），不然第一批步驟會漏接。
+        forwarder = StepForwarder(rd / STEP_LOG_NAME, job.cfg.events_path,
+                                  task_id=f"twin:{tid}", cell_id=tid)
+        forwarder.start()
+        try:
+            if enclosed:
+                from ops.exhibit.twin import twinenclose
+                summary = twinenclose.run_enclosed(
+                    argv=argv, workspace=ws, run_dir=rd,
+                    door_dir=twinenclose.door_dir_for(job.cfg.work_root, slug_for(job.sub_id)),
+                    task_id=f"twin:{tid}", timeout_s=job.cfg.timeout_s,
+                    events_path=job.cfg.events_path, events_caller=caller,
+                    endpoint=job.cfg.endpoint, model=job.cfg.model,
+                    pi_bin=os.environ.get("VACANT_TWIN_PI") or "pi")
+            else:
+                summary = launcher.run(
+                    argv, workspace=ws, run_dir=rd, suite_dir=None,
+                    vacant_on=True, allow_no_suite=True,
+                    task_id=f"twin:{tid}",
+                    timeout_s=job.cfg.timeout_s,
+                    capture_agent_stdout=True,
+                    events_path=(str(job.cfg.events_path) if job.cfg.events_path else None),
+                    events_caller=caller)
+        finally:
+            forwarder.finish()
+        res["step_forward"] = {"forwarded": forwarder.forwarded,
+                               "rejected": forwarder.rejected,
+                               "run_id_learned": forwarder.run_id is not None}
         last = (summary.get("attempts") or [{}])[-1]
         frozen = last.get("frozen_path")
         res["summary"] = {
             k: summary.get(k) for k in (
                 "stop_reason", "accepted", "refused", "infra_void", "requests_seen",
-                "agent_rc", "agent_timed_out", "verdict_hash", "attempts_used")}
+                "agent_rc", "agent_timed_out", "verdict_hash", "attempts_used",
+                "ws_end_sha256")}
         res["summary"]["run_id"] = (summary.get("lifecycle") or {}).get("run_id")
         res["summary"]["count_semantics"] = (summary.get("model_wire") or {}).get(
             "count_semantics")
@@ -481,6 +675,7 @@ def build_twin(res: dict[str, Any], *, model: str,
         "accepted": s.get("accepted"),
         "requests_seen": s.get("requests_seen"),
         "count_semantics": s.get("count_semantics"),
+        "ws_end_sha256": s.get("ws_end_sha256"),
         "agent_rc": s.get("agent_rc"), "agent_timed_out": s.get("agent_timed_out"),
         "latency_ms": int(float(res.get("wall_s") or 0) * 1000),
         # 收據上簽的級別（量出來的）＋這一跑有沒有進圍牆。只有枚舉與計數。
