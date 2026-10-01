@@ -1,0 +1,56 @@
+[
+ {
+  "name": "d1",
+  "artifact_found": 0,
+  "artifact_missing": 0,
+  "artifact_missing_tokens": [],
+  "plan_found": 0,
+  "plan_missing": 0,
+  "plan_missing_tokens": []
+ },
+ {
+  "name": "d2",
+  "artifact_found": 0,
+  "artifact_missing": 0,
+  "artifact_missing_tokens": [],
+  "plan_found": 5,
+  "plan_missing": 0,
+  "plan_missing_tokens": []
+ },
+ {
+  "name": "d3",
+  "artifact_found": 0,
+  "artifact_missing": 0,
+  "artifact_missing_tokens": [],
+  "plan_found": 5,
+  "plan_missing": 0,
+  "plan_missing_tokens": []
+ },
+ {
+  "name": "d4",
+  "artifact_found": 0,
+  "artifact_missing": 0,
+  "artifact_missing_tokens": [],
+  "plan_found": 1,
+  "plan_missing": 0,
+  "plan_missing_tokens": []
+ },
+ {
+  "name": "d5",
+  "artifact_found": 11,
+  "artifact_missing": 0,
+  "artifact_missing_tokens": [],
+  "plan_found": 6,
+  "plan_missing": 0,
+  "plan_missing_tokens": []
+ },
+ {
+  "name": "d6",
+  "artifact_found": 0,
+  "artifact_missing": 0,
+  "artifact_missing_tokens": [],
+  "plan_found": 3,
+  "plan_missing": 0,
+  "plan_missing_tokens": []
+ }
+]

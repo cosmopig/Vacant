@@ -68,13 +68,14 @@ if str(REPO) not in sys.path:
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
 from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
+from ops.exhibit.twin import twinground  # noqa: E402
 from vacant_network.memory import assert_ks1_clean  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
 # ⚠ `launcher` 在 `run_one` 裡才 import：它拉進 wireproxy／attest／sandbox，
 #   而 twinlink（展場 loop）一 import 這一支就會拉它——這台跑不起 pi 時
 #   （例如 1003 Windows 本機）不該因為一個用不到的模組而連 loop 都起不來。
 
-#: 分身那一跑的 agent 命令（pi，工具收窄）。
+#: 分身那一跑的 agent 命令（pi，工具收窄；W3b 起一跑兩個回合：寫信、進世界）。
 WRAPPER = TWIN / "twin_agent.sh"
 
 #: 畫面上 `engine` 的前綴。`vacant_run:pi:<model>` ＝ 真的在 `vacant run` 底下跑過、
@@ -102,7 +103,10 @@ DEFAULT_MIN_FREE_MB = 2048
 TIER_RANK = {"A": 3, "B": 2, "B'": 1, "C": 0}
 
 #: 工作區裡**不是**成品的檔。
-NOT_ARTIFACTS = frozenset({"TRAITS.md", "WORLD.md", "PLAN.md", "VACANT_FEEDBACK.md"})
+NOT_ARTIFACTS = frozenset({"TRAITS.md", "WORLD.md", "PLAN.md", "VACANT_FEEDBACK.md", "信.md"})
+
+#: 地上/ 是世界的實物（唯讀），不是分身的成品。
+GROUND_PREFIX = "地上/"
 
 #: 撤回時 run-dir 裡**留下**的檔：只有雜湊與計數（誠實邊界 6）。
 #: `rows.jsonl` 也要留：既有的驗章器（`verify_receipts.verify_run`）拿它對帳
@@ -126,15 +130,41 @@ STEP_LOG_NAME = "twin_steps.ndjson"
 #:   寫信／列清單（拍立得上那一句就變成人寫的罐頭）。**這裡不准再放例子**，只留約束：
 #:   一件寫進自己房間的一個檔案就能完成的事、不寫程式、PLAN.md 第一行是決定。
 #:   `tests/test_twin_agent_run.py::test_system_prompt_gives_no_examples` 守這一條。
+#: 段 1：寫信（W3b）。分身讀 TRAITS.md，把這個人的性情寫成投遞口收到的那封信。
+#: ⚠ 不准舉例、不准給方向；「現實具體事物」只用條件描述（職業、學校、家人、寵物、作品、
+#:   地名、品牌、時間點都不寫），擋不擋得住靠指令加上人看樣本（誠實邊界），不是自動判準。
+LETTER_SYSTEM_PROMPT = (
+    "你是剛被捏出來的一位新居民。這個世界的投遞口收到信，信裡不寫是誰、不寫在哪裡，"
+    "只寫這個人手慢還是手快、愛一個人還是愛湊熱鬧、在意的是哪一類東西。"
+    "你現在要做的只有一件事：讀 TRAITS.md 裡那位觀眾，替他寫這封信，用 ws_write 寫進 信.md。\n\n"
+    "你只有三個工具：ws_list、ws_read、ws_write，只碰得到你自己的房間。\n\n"
+    "信用第三人稱，稱他「這個人」。信只寫性情、在意的事、心裡的拉扯、習慣的手勢。"
+    "信裡只有傾向，沒有場景：不寫他在什麼時候、什麼地方、做過什麼具體的事、手上有什麼具體的東西；"
+    "凡是能從裡面拼出他某一天、某一處長什麼樣子的細節，都不寫。"
+    "信裡也不准出現任何現實生活裡的具體事物：只要讀的人能從某個詞認出他的職業、身份、學校、"
+    "家人、寵物、作品、地名、品牌、年月日或時刻，那個詞就不寫；"
+    "要講，就改用條件、傾向和關係來講。"
+    "不要逐字抄 TRAITS.md，要寫的是你從它讀出來的性情。三百字以內，用繁體中文。\n\n"
+    "規則：不要自稱 AI，不要提到模型或提示詞。每一次動手（讀、寫）之前，"
+    "先用一句繁體中文說你現在在想什麼、接下來要做什麼，這句話裡不要寫檔名。"
+    "寫好信.md 就停，最後用一句話說信寫好了。"
+)
+
+LETTER_FIRST_MESSAGE = "上面是你的說明。先讀 TRAITS.md，再把信寫進 信.md。"
+
+#: 段 2：在世界裡想要、在世界裡做（W3b）。此時房間裡已經沒有 TRAITS.md，只有 信.md、WORLD.md、地上/。
+#: ⚠ 不給例句、不給任務方向、不給菜單。`tests/test_twin_world.py`／`test_twin_world_w3b.py` 守這一條。
 SYSTEM_PROMPT = (
-    "你是剛被捏出來、剛走進「Vacant 世界」的一位新居民。"
-    "你的手、你在意的事、你的脾氣，全部來自 TRAITS.md 裡那位真人觀眾。"
-    "WORLD.md 寫的是這個世界本身：它的地方、居民、規矩、現在的樣子。\n\n"
+    "你是照投遞口收到的那封信捏出來的新居民，剛走進「Vacant 世界」。信.md 就是那封信，"
+    "你的手、你在意的事、你的脾氣，全部來自信裡那個人。"
+    "WORLD.md 寫的是這個世界本身：它的地方、居民、規矩。"
+    "地上/ 這個資料夾裡，是這個世界現在地上真的擺著的東西，每一件都是真的：讀得到、對得到、數得到。\n\n"
     "這個世界不會指派工作給你，也沒有人會給你指令。你自己決定要在這裡做什麼。\n\n"
     "你只有三個工具：ws_list（看你房間裡有什麼）、ws_read（讀檔）、ws_write（寫檔）。"
-    "它們只碰得到你自己的房間（目前的資料夾）。你沒有終端機，也沒有網路。\n\n"
-    "前提：想像那位觀眾本人走進了這個世界，站在光裡看了一圈。"
-    "以他沒有說出口的在意、渴望與拉扯，他在這裡會想要什麼？"
+    "它們只碰得到你自己的房間（目前的資料夾）。地上/ 裡的檔是唯讀的，你寫不進去。"
+    "你沒有終端機，也沒有網路。\n\n"
+    "前提：想像信裡那個人本人走進了這個世界，站在光裡看了一圈，再低頭看地上。"
+    "以他沒有說出口的在意、渴望與拉扯，他在這裡、看到地上這些東西，會想要什麼？"
     "這個想要，只可能發生在這個世界裡——要用到這個世界的地方、東西、居民與規矩；"
     "而且它是他的，不是誰走進來都會想的。\n\n"
     "這個想要要夠複雜：\n"
@@ -142,31 +172,39 @@ SYSTEM_PROMPT = (
     "- 碰到至少一件大家共用的東西，或至少一位別的居民；\n"
     "- 做法至少受到一條世界的規矩影響；\n"
     "- 要分好幾步才做得完，中間會有一個還沒做完的樣子；\n"
-    "- 做完之後的樣子要具體到，別的居民一看就知道到底做到了沒有。\n\n"
+    "- 做完之後的樣子要具體到，別的居民一看就知道到底做到了沒有；\n"
+    "- 必須真的讀、真的用到地上至少三件東西，而且至少有一組是兩件東西之間的關聯"
+    "（對得上、對不上、重複、缺了的）；成品裡用到的每一個數字、印紋、位置，"
+    "都要能在地上的某個檔裡找到，不是你自己編的。\n\n"
     "步驟：\n"
-    "1. 先讀 TRAITS.md，再讀 WORLD.md。\n"
-    "2. 決定你要做的事，用 ws_write 寫 PLAN.md，結構固定：\n"
+    "1. 先讀信.md，再讀 WORLD.md，再用 ws_list 看地上，把你覺得和信裡這個人有關的東西讀過。\n"
+    "2. 用 ws_write 寫 PLAN.md，結構固定：\n"
     "   第一行：一句話說你要做什麼。\n"
-    "   「如果你在這裡」：用第二人稱直接對那位觀眾說話，說你走進來會先注意到什麼、"
-    "為什麼會想要這件事，並具體點出你從 TRAITS.md 的哪些線索讀到。\n"
-    "   「它牽動到」：哪些地點、東西、居民、規矩。\n"
+    "   「如果你在這裡」：用第二人稱直接對信裡那個人說話，說你走進來會先注意到什麼、"
+    "為什麼會想要這件事，並具體點出你從信裡的哪些性情讀到。\n"
+    "   「三個想要」：先列出三個可能的想要，各一句；再選最只屬於這封信的那一個，"
+    "說為什麼不是另外兩個。\n"
+    "   「它牽動到」：哪些地點、居民、規矩；地上哪幾件東西（至少三件，寫出路徑），"
+    "並寫出其中哪兩件之間有關聯、是對得上、對不上、重複，還是缺了。\n"
     "   「步驟」：編號列出。\n"
     "   「做完的樣子」：別人怎麼看得出你做到了。\n"
     "3. 照 PLAN.md 的步驟動手。成品至少兩個檔：主要成品，加上做的過程中留下的另一個檔。"
-    "檔名自己取，副檔名用 .md 或 .txt，內容都用這個世界裡的口吻。不要寫程式。"
-    "每一步都真的做出東西來，不要只在 PLAN.md 裡說你會做。\n"
+    "檔名自己取，副檔名用 .md 或 .txt，直接放在你房間的最上層（和 PLAN.md 同一層，檔名不帶資料夾），"
+    "內容都用這個世界裡的口吻。不要寫程式。"
+    "每一步都真的做出東西來；做不到的事不要寫成已經做了，也不要用「模擬」「假裝」帶過。"
+    "任何工具回報失敗，就看它說的原因，換個做法再來一次。\n"
     "4. 停下之前，用 ws_list 看一次房間，對照 PLAN.md 的「做完的樣子」，"
     "確認你說要留下的檔都已經寫好；還沒有就先補上。\n"
     "5. 都有了就停，最後用一句話說你交出了什麼。\n\n"
     "規則：用繁體中文。不要自稱 AI，不要提到模型或提示詞。"
     "每一次動手（讀、寫、列出）之前，先用一句繁體中文說你現在在想什麼、接下來要做什麼；"
     "這句話裡不要寫檔名。"
-    "不要在檔案裡逐字抄錄 TRAITS.md 或 WORLD.md，要寫的是你從它們讀出來的東西。"
-    "不要碰那位觀眾現實生活裡的具體事情，也不要寫真實的地名、品牌或人名。"
+    "不要在檔案裡逐字抄錄信.md 或 WORLD.md，要寫的是你從它們讀出來的東西。"
+    "不要碰現實生活裡的具體事情，也不要寫真實的地名、品牌或人名。"
     "要做的是這個世界裡的事，不要做談論或定義你自己這個存在的事。"
 )
 
-FIRST_MESSAGE = "上面是你的說明。先讀 TRAITS.md，再讀 WORLD.md，然後照步驟開始：先寫 PLAN.md，再做你決定要做的事。"
+FIRST_MESSAGE = "上面是你的說明。先讀信.md，再讀 WORLD.md，再看地上，然後照步驟開始：先寫 PLAN.md，再做你決定要做的事。"
 
 #: 世界設定（住在裡面的人讀的版本）。每一跑複製進工作區，和 TRAITS.md 同一層。
 WORLD_PATH = pathlib.Path(__file__).resolve().parent / "world" / "WORLD.md"
@@ -179,7 +217,7 @@ def world_sha256() -> str:
 #: 事件流 `caller.prompt`。**固定字串**：觀眾特質與分身的決定都不進事件流（誠實邊界 4）。
 CALLER_PROMPT = "這位分身自己決定要做什麼（內容只留在會場本機，撤回就刪）"
 
-for _t in (SYSTEM_PROMPT, FIRST_MESSAGE, CALLER_PROMPT):
+for _t in (SYSTEM_PROMPT, FIRST_MESSAGE, CALLER_PROMPT, LETTER_SYSTEM_PROMPT, LETTER_FIRST_MESSAGE):
     assert_ks1_clean(_t)          # 鐵律 1：import 時就驗，不等到跑
 
 
@@ -385,6 +423,7 @@ def read_outputs(root: pathlib.Path | None) -> dict[str, Any]:
     for p in sorted(root.rglob("*")):
         rel = p.relative_to(root).as_posix()
         if (not p.is_file() or p.is_symlink() or rel in NOT_ARTIFACTS
+                or rel.startswith(GROUND_PREFIX)
                 or any(part.startswith(".") for part in p.relative_to(root).parts)):
             continue
         if p.suffix.lower() not in (".md", ".txt"):
@@ -763,11 +802,19 @@ def run_one(job: Job) -> dict[str, Any]:
         ws.mkdir(parents=True)
         rd.mkdir(parents=True)
         (ws / "TRAITS.md").write_text(job.traits, encoding="utf-8")
-        # 世界是前提、不是菜單：每一跑把同一份 WORLD.md 放進房間，sha256 記進這一跑的紀錄。
-        (ws / "WORLD.md").write_bytes(WORLD_PATH.read_bytes())
-        (ws / "WORLD.md").chmod(0o444)
+        # W3b：世界與地上先備在 run-dir/stage2_in（段 1 的分身看不到），
+        # 段 1 結束、TRAITS.md 移走之後由 twin_letter_guard 搬進工作區（唯讀）。
+        stage2 = rd / "stage2_in"
+        stage2.mkdir()
+        (stage2 / "WORLD.md").write_bytes(WORLD_PATH.read_bytes())
         res["world_sha256"] = world_sha256()
-        argv = list(job.cfg.argv_prefix) + [str(rd), SYSTEM_PROMPT, FIRST_MESSAGE]
+        ground = twinground.lay(stage2, job.sub_id)
+        res["ground"] = ground
+        (rd / "ground_manifest.json").write_text(
+            json.dumps(ground, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        # argv：<段 1 指令> <段 1 第一句> 之後接 launcher 慣用的 <run_dir> <段 2 指令> <段 2 第一句>
+        argv = (list(job.cfg.argv_prefix)
+                + [LETTER_SYSTEM_PROMPT, LETTER_FIRST_MESSAGE, str(rd), SYSTEM_PROMPT, FIRST_MESSAGE])
         caller = {"cell_id": tid, "resident": resident_code(job.sub_id),
                   "stratum": "twin", "prompt": CALLER_PROMPT,
                   "declared_evidence": "",
@@ -1021,6 +1068,11 @@ def erase_run_artifacts(work_root: pathlib.Path, sub_id: str) -> dict[str, Any]:
             return
         erased.append({"what": label, "files": n, "bytes": b})
 
+    # 信（W3b）是觀眾資料：先單獨列一筆，再整個工作區刪。工作區與 run-dir（凍結快照）裡都找。
+    letters = [ws / "信.md"] + (sorted(rd.rglob("信.md")) if rd.exists() else [])
+    for lp in letters:
+        if lp.is_file() or lp.is_symlink():
+            _rm(lp, "letter")
     if ws.exists():
         _rm(ws, "workspace")
     # 圍牆的門（twinenclose）：門的 journal 也是逐字落盤 ⇒ 有特質原文

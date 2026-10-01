@@ -14,7 +14,8 @@
  *   · 只收**相對路徑**（絕對路徑直接拒絕）；
  *   · 解析後必須落在工作區（啟動時的 cwd，也就是 launcher 給的拋棄式工作區）之內；
  *   · 沿途任何一段是 symlink 就拒絕（不讓一條連結把「房間裡」接到房間外）；
- *   · 讀／寫單檔上限 64 KiB。
+ *   · 讀／寫單檔上限 64 KiB；
+ *   · 寫入不准落在 `地上/` 底下（W3b：世界的實物，唯讀）。
  * 沒有任何一個工具會開網路連線。
  *
  * ## 步驟紀錄（`logStep`，2026-09-28）
@@ -163,6 +164,11 @@ export default function (pi: ExtensionAPI) {
       const rawPath = typeof params?.path === "string" ? params.path : null;
       try {
         const abs = confine(params?.path);
+        // W3b：地上/ 是世界的實物（唯讀）。檔案權限只擋得住既有的檔、擋不住新建，所以在這裡擋整個資料夾。
+        const relw = relative(ROOT, abs);
+        if (relw === "地上" || relw.startsWith("地上" + sep)) {
+          throw new Error("地上的東西是唯讀的：你寫不進地上/");
+        }
         const text = String(params?.content ?? "");
         if (Buffer.byteLength(text, "utf8") > MAX_BYTES) {
           throw new Error(`內容太大（上限 ${MAX_BYTES} bytes）`);

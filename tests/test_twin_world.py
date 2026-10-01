@@ -29,7 +29,7 @@ def test_world_has_no_outside_words_no_menu_no_time() -> None:
     assert [w for w in _OUTSIDE if w in t] == []
     assert [w for w in _MENU if w in t] == []
     assert [w for w in _TIME if w in t] == []
-    assert not re.search(r"(可以|能夠|應該|必須).{0,6}(做|去|幫|替)", t.split("# 這個世界現在的樣子")[1])
+    assert not re.search(r"(可以|能夠|應該|必須).{0,6}(做|去|幫|替)", t)
     assert_ks1_clean(t)
     # 負控制：這把尺量得到
     assert [w for w in _MENU if w in "這裡需要有人把鏈量一量"] != []
@@ -37,25 +37,26 @@ def test_world_has_no_outside_words_no_menu_no_time() -> None:
         assert_ks1_clean(t + "你有責任把它做完")
 
 
-def test_world_has_eight_places_and_at_least_ten_frictions() -> None:
+def test_world_has_eight_places_and_no_friction_menu_section() -> None:
+    """W3b：「這個世界現在的樣子」那 14 條被當成菜單，整節刪掉；摩擦改由地上的實物自己呈現。"""
     t = WORLD.read_text(encoding="utf-8")
     for place in ("投遞口", "捏土處", "長桌廣場", "石頭閘門", "帳本鏈", "草稿角", "紙卡地", "畫架與長椅"):
         assert place in t, place
     assert "# 規矩和習俗" in t and "# 新來的人" in t and "# 住在這裡的人" in t
-    tail = t.split("# 這個世界現在的樣子")[1]
-    assert len([ln for ln in tail.splitlines() if ln.startswith("- ")]) >= 10
+    assert "這個世界現在的樣子" not in t
+    assert not [ln for ln in t.splitlines() if ln.startswith("- ")], "WORLD.md 不放條列摩擦"
 
 
 def test_world_is_not_the_v2_chore_list() -> None:
     """v2 那 22 件小事不准放進 WORLD.md（放了＝菜單）：沒有編號清單形式的小事。"""
     t = WORLD.read_text(encoding="utf-8")
     assert "小事清單" not in t and "22 件" not in t
-    tail = t.split("# 這個世界現在的樣子")[1]
-    assert not re.search(r"^\d+\.", tail, re.M)
+    assert "這個世界現在的樣子" not in t
 
 
 def test_system_prompt_has_no_task_direction() -> None:
-    p = twinagent.SYSTEM_PROMPT + twinagent.FIRST_MESSAGE
+    p = (twinagent.SYSTEM_PROMPT + twinagent.FIRST_MESSAGE
+         + twinagent.LETTER_SYSTEM_PROMPT + twinagent.LETTER_FIRST_MESSAGE)
     assert [w for w in _CHORE_WORDS if w in p] == []
     for bad in ("例如", "比如", "譬如", "像是", "一封信", "一份計畫", "一張清單", "謝卡"):
         assert bad not in p
@@ -65,11 +66,13 @@ def test_system_prompt_has_no_task_direction() -> None:
 
 def test_system_prompt_world_premise_and_complexity_conditions() -> None:
     p = twinagent.SYSTEM_PROMPT
-    for must in ("TRAITS.md", "WORLD.md", "走進了這個世界", "只可能發生在這個世界裡", "不是誰走進來都會想的",
+    for must in ("信.md", "WORLD.md", "地上/", "走進了這個世界", "只可能發生在這個世界裡", "不是誰走進來都會想的",
+                 "三個想要", "兩件東西之間的關聯", "至少三件東西",
                  "至少兩個地點", "共用的東西", "別的居民", "一條世界的規矩", "好幾步", "還沒做完",
                  "如果你在這裡", "它牽動到", "步驟", "做完的樣子", "成品至少兩個檔", "ws_list 看一次房間", "不要自稱 AI",
                  "每一次動手", "不要寫程式", "現實生活"):
         assert must in p, must
+    assert "TRAITS.md" not in p, "段 2 的房間裡沒有 TRAITS.md，指令不提它"
     for t in (twinagent.SYSTEM_PROMPT, twinagent.FIRST_MESSAGE, twinagent.CALLER_PROMPT):
         assert_ks1_clean(t)
 

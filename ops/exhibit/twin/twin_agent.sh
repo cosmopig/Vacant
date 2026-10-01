@@ -5,7 +5,11 @@
 # 呼叫端：ops/exhibit/twin/twinagent.py（`launcher.run` 的 argv 就是這一支）。
 #
 # 用法（由 launcher 起，不要手打）：
-#   twin_agent.sh <run_dir> <system_prompt> <first_message>
+#   twin_agent.sh <段1指令> <段1第一句> <run_dir> <段2指令> <段2第一句>
+#
+#   ⚠ W3b（2026-10-01）一跑兩個 pi 回合：段 1 讀 TRAITS.md、寫 信.md；
+#     然後 `twin_letter_guard.py` 做確定性關卡（TRAITS.md 移走、信防呆、世界與地上搬進房間）；
+#     段 2 的房間裡沒有 TRAITS.md，只有 信.md、WORLD.md、地上/。兩個回合各自 `--no-session`。
 #
 #   · cwd ＝ 這位分身的拋棄式工作區（launcher 設的），裡面只有 TRAITS.md；
 #   · `<run_dir>` ＝ 這位分身的 run-dir（工作區外）。pi 的設定目錄與 stderr 放這裡
@@ -49,11 +53,13 @@
 #   · 這一支不保證被中介到。唯一算數的證據是 launcher 的 `requests_seen`。
 set -uo pipefail
 
-RUN_DIR="${1:-}"
-SYS="${2:-}"
-MSG="${3:-}"
-if [ -z "$RUN_DIR" ] || [ -z "$SYS" ] || [ -z "$MSG" ]; then
-    echo "用法：twin_agent.sh <run_dir> <system_prompt> <first_message>" >&2
+SYS1="${1:-}"
+MSG1="${2:-}"
+RUN_DIR="${3:-}"
+SYS="${4:-}"
+MSG="${5:-}"
+if [ -z "$SYS1" ] || [ -z "$MSG1" ] || [ -z "$RUN_DIR" ] || [ -z "$SYS" ] || [ -z "$MSG" ]; then
+    echo "用法：twin_agent.sh <段1指令> <段1第一句> <run_dir> <段2指令> <段2第一句>" >&2
     exit 2
 fi
 if [ -z "${VACANT_RUN_PROXY:-}" ]; then
@@ -95,11 +101,25 @@ cat > "$CFG/models.json" <<EOF
   "models":[{"id":"$MODEL","name":"m","contextWindow":262144,"maxTokens":16384}]}}}
 EOF
 
+PY="${VACANT_TWIN_PY:-python3}"
+COMMON=(-p --mode json --provider vacantproxy --model m
+    --no-builtin-tools --tools ws_list,ws_read,ws_write
+    -e "$EXT"
+    --no-extensions --no-skills --no-context-files --no-prompt-templates
+    --no-themes --no-approve --offline --no-session)
+
+# ── 段 1：讀 TRAITS.md、寫 信.md ──
 # ⚠ `< /dev/null`：`pi -p` 不給會永久卡住（2026-09-18 實測，V0 已知）。
-exec "$PI_BIN" -p --mode json --provider vacantproxy --model m \
-    --no-builtin-tools --tools ws_list,ws_read,ws_write \
-    -e "$EXT" \
-    --no-extensions --no-skills --no-context-files --no-prompt-templates \
-    --no-themes --no-approve --offline --no-session \
-    --system-prompt "$SYS" \
-    @TRAITS.md "$MSG" < /dev/null
+"$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS1" @TRAITS.md "$MSG1" < /dev/null
+RC1=$?
+
+# ── 關卡：TRAITS.md 一定在這裡被移走（不管段 1 成不成功） ──
+"$PY" "$HERE/twin_letter_guard.py" "$(pwd)" "$RUN_DIR"
+GRC=$?
+if [ "$GRC" -ne 0 ]; then
+    echo "信沒有寫出來（段 1 rc=$RC1，關卡 rc=$GRC）。不進段 2。" >&2
+    exit 4
+fi
+
+# ── 段 2：房間裡只有 信.md、WORLD.md、地上/ ──
+exec "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG" < /dev/null
