@@ -38,6 +38,7 @@
 | `run_ended` | OFF | `verdict`（`accepted: null`） |
 | 旁註 `postaudit`（`twin.sidecar/1`，**不是** lifecycle） | OFF | `postaudit`（三旗標；只在綁得上那一跑時） |
 | 旁註 `twin_step`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_step`（**不帶檔名**；契約 `plans/CONTRACT_PROCESS_20260928.md` §A） |
+| 旁註 `twin_say`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_say`（agent 自己生成、≤80 字、已過逐字抄錄防呆；契約補充 `plans/CONTRACT_PROCESS_20261001_ADDENDUM.md` §E） |
 
 `counters` 不在這張表上：它不是任何一筆輸入轉出來的，是 `Tally` 依**已經寫出去的**
 電視事件數的（`serve_twin._write` 在每一筆 `verdict`／`postaudit` 之後插一筆）。
@@ -266,7 +267,7 @@ class Folder:
         t = ev.get("type")
         if t == "postaudit":
             return self._sidecar_postaudit(ev)
-        if t == "twin_step":
+        if t in ("twin_step", "twin_say"):
             return self._sidecar_twin_step(ev)
         self.dropped.append(f"不認得的旁註 type {t!r}")
         return []
@@ -323,13 +324,23 @@ class Folder:
             why = f"twin_step 綁的那一跑 {rid} 不是分身的自主任務格（task_kind 不是 practical）"
         elif ev.get("cell_id") != st["cell_id"]:
             why = f"twin_step 的 cell_id 與那一跑 {rid} 的格子不同"
-        elif ev.get("step") not in tv.TWIN_STEPS:
+        elif ev.get("type") == "twin_step" and ev.get("step") not in tv.TWIN_STEPS:
             why = f"twin_step 的 step 不在白名單：{ev.get('step')!r}"
-        elif ev.get("path_kind") not in tv.TWIN_PATH_KINDS:
+        elif ev.get("type") == "twin_step" and ev.get("path_kind") not in tv.TWIN_PATH_KINDS:
             why = f"twin_step 的 path_kind 不在白名單：{ev.get('path_kind')!r}"
+        elif ev.get("type") == "twin_say" and not (
+                isinstance(ev.get("text"), str) and ev["text"].strip()
+                and len(ev["text"]) <= tv.TWIN_SAY_MAX
+                and isinstance(ev.get("truncated"), bool)):
+            why = "twin_say 的 text／truncated 形狀不對（非空、≤80 字、truncated 要是布林）"
         if why:
             self.dropped.append(why)
             return []
+        if ev.get("type") == "twin_say":
+            return [{"type": "twin_say", "ts": self._ts(ev["ts_ms"]),
+                     "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
+                     "seq": ev.get("seq"), "turn": ev.get("turn"),
+                     "text": ev["text"], "truncated": ev["truncated"]}]
         return [{"type": "twin_step", "ts": self._ts(ev["ts_ms"]),
                  "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
                  "step": ev.get("step"), "path_kind": ev.get("path_kind"),

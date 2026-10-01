@@ -332,6 +332,11 @@ with urllib.request.urlopen(req, timeout=30) as r:
 plan = "__DECISION__\n理由一句話。\n"
 pathlib.Path("PLAN.md").write_text(plan, encoding="utf-8")
 log(3, "ws_write", "PLAN.md", len(plan.encode("utf-8")))
+# pi --mode json 的 stdout 形狀（真 pi 0.85.1 量到的，見 tests/fixtures/pi_json/）：
+# 假 agent 也印兩行，端到端驗 launcher 落盤 → SayForwarder tail → 旁註 → 電視事件。
+print(json.dumps({"type": "turn_start"}))
+print(json.dumps({"type": "message_end", "message": {"role": "assistant", "content": [
+    {"type": "text", "text": "SYNTH：我先把想做的事寫成一份計畫。"}]}}, ensure_ascii=False))
 print("done")
 '''.replace("__DECISION__", DECISION)
 
@@ -378,6 +383,12 @@ def test_end_to_end_run_produces_a_filename_free_twin_step_sidecar(step_env, mon
     for e in tv_steps:
         for k in ("path", "name", "text"):
             assert k not in e
+
+    # E：agent_stdout.log（launcher 落盤）→ twin_say → 電視事件
+    says = [r for r in rows if r["type"] == "twin_say" and r["run_id"] == run_id]
+    assert [r["text"] for r in says] == ["SYNTH：我先把想做的事寫成一份計畫。"], rows
+    assert [e["text"] for e in evs if e["type"] == "twin_say"] == [says[0]["text"]]
+    assert tw.get("run_id") == run_id
 
     # 手機那一份（含檔名）：只在 run-dir 的原始記錄檔裡才看得到檔名
     _ws, rd = twinagent.paths_for(cfg.work_root, sid)
@@ -529,3 +540,287 @@ def test_publish_forwards_the_real_step_log_with_filenames(step_env, monkeypatch
     body = sent[0]["payload"]
     assert [s["path"] for s in body["steps"]] == [None, "TRAITS.md", "PLAN.md"]
     assert [s["tool"] for s in body["steps"]] == ["ws_list", "ws_read", "ws_write"]
+
+
+# ---------------------------------------------------------------------------
+# 補送：已 published 但雲端缺拍立得／收據的人（2026-10-01 補測試）
+# ---------------------------------------------------------------------------
+
+def _published_one(env, monkeypatch) -> str:
+    st, cfg = env["store"], env["cfg"]
+    sid = _ingest(st, monkeypatch)
+    r = twinlink.generate(st, env["upstream"], "m", agent=cfg)
+    assert r["generated"] == 1, r
+    twinlink.polaroids(st)
+    _capture_publish(monkeypatch)
+    assert twinlink.publish(st, "http://cloud.invalid", "t")["published"] == 1
+    return sid
+
+
+def _fake_cloud(monkeypatch, status_body: dict) -> list[dict]:
+    calls: list[dict] = []
+
+    def fake(url, payload=None, timeout=30.0, headers=None):  # noqa: ANN001
+        calls.append({"url": url, "payload": payload})
+        if "/api/status/" in url:
+            return 200, status_body
+        return 200, {"ok": True}
+    monkeypatch.setattr(twinlink, "_http_json", fake)
+    return calls
+
+
+def test_resend_missing_polaroid_appends_a_resend_event_and_posts_again(env, monkeypatch) -> None:
+    st = env["store"]
+    sid = _published_one(env, monkeypatch)
+    n_before = len(list(st.events(sub_id=sid, kind=twinlink.KIND_PUBLISHED)))
+    calls = _fake_cloud(monkeypatch, {"status": "published"})       # 沒有 polaroid_url／receipt_url
+    out = twinlink.resend_missing(st, "http://cloud.invalid", "t")
+    assert out["resent"] == 1, out
+    posts = [c for c in calls if c["url"].endswith("/api/result")]
+    assert len(posts) == 1 and posts[0]["payload"]["id"] == sid
+    evs = list(st.events(sub_id=sid, kind=twinlink.KIND_PUBLISHED))
+    assert len(evs) == n_before + 1, "追加，不覆寫"
+    assert evs[-1]["payload"]["resend"] is True
+
+
+def test_resend_skips_when_cloud_already_complete(env, monkeypatch) -> None:
+    """負控制：雲端兩樣都有 ⇒ 不送。"""
+    st = env["store"]
+    _published_one(env, monkeypatch)
+    calls = _fake_cloud(monkeypatch, {"polaroid_url": "/api/polaroid/x", "receipt_url": "/api/receipt/x"})
+    out = twinlink.resend_missing(st, "http://cloud.invalid", "t")
+    assert out["resent"] == 0 and out["skipped_complete"] == 1
+    assert not [c for c in calls if c["url"].endswith("/api/result")]
+
+
+def test_resend_is_capped_per_person_on_the_chain(env, monkeypatch) -> None:
+    st = env["store"]
+    _published_one(env, monkeypatch)
+    _fake_cloud(monkeypatch, {"status": "published"})
+    for _ in range(twinlink.DEFAULT_MAX_RESENDS):
+        assert twinlink.resend_missing(st, "http://cloud.invalid", "t")["resent"] == 1
+    out = twinlink.resend_missing(st, "http://cloud.invalid", "t")
+    assert out["resent"] == 0 and out["skipped_cap"] == 1
+
+
+def test_resend_never_touches_a_withdrawn_person(env, monkeypatch) -> None:
+    st = env["store"]
+    sid = _published_one(env, monkeypatch)
+    twinlink.withdraw(st, sid, reason="test")
+    calls = _fake_cloud(monkeypatch, {"status": "published"})
+    out = twinlink.resend_missing(st, "http://cloud.invalid", "t")
+    assert out["candidates"] == 0 and out["resent"] == 0
+    assert not calls
+
+
+def test_resolve_sub_id_accepts_twin_id_and_prefix(env, monkeypatch) -> None:
+    st = env["store"]
+    sid = _published_one(env, monkeypatch)
+    assert twinlink._resolve_sub_id(st, sid[:6]) == sid                      # noqa: SLF001
+    assert twinlink._resolve_sub_id(st, twinagent.public_twin_id(sid)) == sid  # noqa: SLF001
+    assert twinlink._resolve_sub_id(st, "zzzzzzzz-nope") is None             # noqa: SLF001
+
+
+# ---------------------------------------------------------------------------
+# E：twin_say（契約補充 2026-10-01）——真 pi 0.85.1 --mode json 的事件形狀
+# ---------------------------------------------------------------------------
+
+FIXDIR = ROOT / "tests" / "fixtures" / "pi_json"
+REAL_LOGS = sorted(FIXDIR.glob("real_pi_0.85.1_synth*.jsonl"))
+
+
+def _drive_say(tmp_path, lines, originals=None, events_run=True):
+    """把一份 agent_stdout.log 內容餵給 SayForwarder，回 (forwarder, 旁註清單)。"""
+    ev = tmp_path / "live.jsonl"
+    ev.write_text(json.dumps({"schema": lifecycle.SCHEMA, "type": "run_started",
+                              "task_id": "twin:tw-x", "run_id": "R1"}) + "\n", encoding="utf-8")
+    log = tmp_path / "agent_stdout.log"
+    log.write_text("".join(l if isinstance(l, str) else json.dumps(l, ensure_ascii=False) + "\n"
+                           for l in lines), encoding="utf-8")
+    f = twinagent.SayForwarder(log, ev, task_id="twin:tw-x", cell_id="tw-x",
+                               originals=originals)
+    f._pump()                                              # noqa: SLF001
+    return f, sc.read(sc.sidecar_path(ev))
+
+
+def _turn(text_blocks, role="assistant"):
+    return [{"type": "turn_start"},
+            {"type": "message_end", "message": {"role": role, "content": text_blocks}}]
+
+
+def test_real_pi_fixtures_exist_and_have_the_shape_we_parse() -> None:
+    assert len(REAL_LOGS) == 3, REAL_LOGS
+    for p in REAL_LOGS:
+        types = {json.loads(l)["type"] for l in p.read_text(encoding="utf-8").splitlines() if l}
+        assert {"turn_start", "message_end", "turn_end", "agent_end"} <= types, p
+
+
+@pytest.mark.parametrize("log", REAL_LOGS, ids=lambda p: p.name)
+def test_say_forwarder_on_real_pi_output_emits_only_clean_assistant_text(tmp_path, log) -> None:
+    lines = log.read_text(encoding="utf-8").splitlines(keepends=True)
+    f, rows = _drive_say(tmp_path, lines)
+    # 真 pi 的最後一回合一定有一句收尾的話；它常講出檔名（電視不帶檔名 ⇒ 整句不發、有計數）
+    assert rows or f.dropped_filename, "收尾那句不是被發出去，就是因為檔名被擋並計數"
+    assert sc.validate(rows) == []
+    assert not any(sc.looks_like_filename(r["text"]) for r in rows)
+    for r in rows:
+        assert r["type"] == "twin_say" and 0 < len(r["text"]) <= sc.SAY_MAX
+        assert "<|" not in r["text"] and "|>" not in r["text"], r["text"]
+        assert "channel" not in r["text"] and not r["text"].startswith("thought")
+    # 思考區塊與工具參數（寫進檔案的內容）絕不出現
+    raw = log.read_text(encoding="utf-8")
+    for l in raw.splitlines():
+        o = json.loads(l)
+        if o.get("type") == "message_end" and o["message"]["role"] == "assistant":
+            for c in o["message"]["content"]:
+                if c["type"] == "thinking" and c["thinking"].strip():
+                    assert all(c["thinking"][:30] not in r["text"] for r in rows)
+                if c["type"] == "toolCall":
+                    body = str(c["arguments"].get("content", ""))[:20]
+                    if body:                       # ws_list 沒有 content
+                        assert all(body not in r["text"] for r in rows)
+    assert [r["seq"] for r in rows] == list(range(1, len(rows) + 1))
+
+
+def test_say_forwarder_strips_the_channel_marker_seen_in_real_pi_output(tmp_path) -> None:
+    lines = _turn([{"type": "text", "text": "<|channel>thought\n<channel|>"}]) + \
+            _turn([{"type": "text", "text": "<|channel>thought\n<channel|>我交出了星空筆記。"}])
+    _f, rows = _drive_say(tmp_path, lines)
+    assert [r["text"] for r in rows] == ["我交出了星空筆記。"], "純標記那一句不發；有字的那句清完照發"
+    assert rows[0]["turn"] == 2
+
+
+def test_say_over_80_chars_is_cut_and_flagged(tmp_path) -> None:
+    long = "我" * 200
+    _f, rows = _drive_say(tmp_path, _turn([{"type": "text", "text": long}]))
+    assert len(rows) == 1 and len(rows[0]["text"]) == 80 and rows[0]["truncated"] is True
+    # 負控制：剛好 80 字不算截斷
+    _f, rows = _drive_say(tmp_path / "x", []) if False else (None, None)
+    r = sc.say_row("好" * 80, turn=1, seq=1, cell_id="c", run_id="r")
+    assert r["truncated"] is False and len(r["text"]) == 80
+
+
+def test_say_that_copies_the_audience_original_is_dropped_not_rewritten(tmp_path) -> None:
+    original = "我最近一直很想寫信給國小導師謝謝她"
+    lines = _turn([{"type": "text", "text": f"我想：{original}。"}]) + \
+            _turn([{"type": "text", "text": "我先去整理書架。"}])
+    f, rows = _drive_say(tmp_path, lines, originals=[original])
+    assert [r["text"] for r in rows] == ["我先去整理書架。"]
+    assert f.dropped == 1
+
+
+def test_say_with_a_filename_is_not_sent_to_the_tv(tmp_path) -> None:
+    """電視不帶檔名：真 pi 收尾那句「我交出了 X.md」整句不發；沒檔名的照發（正控制）。"""
+    lines = _turn([{"type": "toolCall", "id": "1", "name": "ws_write",
+                    "arguments": {"path": "星空筆記本.md", "content": "…"}}]) + \
+            _turn([{"type": "text", "text": "我交出了星空筆記本。"}]) + \
+            _turn([{"type": "text", "text": "我交出了 star_notes.md。"}]) + \
+            _turn([{"type": "text", "text": "我先去整理書架。"}])
+    f, rows = _drive_say(tmp_path, lines)
+    assert [r["text"] for r in rows] == ["我先去整理書架。"]
+    assert f.dropped_filename == 2
+
+
+def test_clean_say_keeps_underscores_inside_words() -> None:
+    assert sc.clean_say("我寫了 star_notes 然後 _強調_ 一下") == "我寫了 star_notes 然後 強調 一下"
+
+
+def test_say_ignores_thinking_toolcalls_user_and_toolresult_messages(tmp_path) -> None:
+    lines = [{"type": "turn_start"},
+             {"type": "message_end", "message": {"role": "user", "content": [
+                 {"type": "text", "text": "這是 TRAITS 全文 不准出現"}]}},
+             {"type": "message_end", "message": {"role": "assistant", "content": [
+                 {"type": "thinking", "thinking": "內心獨白不准出現"},
+                 {"type": "toolCall", "id": "x", "name": "ws_write",
+                  "arguments": {"path": "a.md", "content": "檔案內容不准出現"}}]}},
+             {"type": "message_end", "message": {"role": "toolResult", "content": [
+                 {"type": "text", "text": "wrote a.md"}]}},
+             "not json at all\n",
+             {"type": "message_update", "assistantMessageEvent": {"type": "text_delta", "delta": "半句"}}]
+    f, rows = _drive_say(tmp_path, lines)
+    assert rows == [] and f.rejected == 0, "非 JSON 行（假 agent 的輸出）不算形狀錯誤"
+
+
+def test_say_strips_markdown_and_drops_pure_code_blocks(tmp_path) -> None:
+    lines = _turn([{"type": "text", "text": "```python\nprint('x')\n```"}]) + \
+            _turn([{"type": "text", "text": "## 計畫\n- **先**整理 `書架`\n- 再看[天氣](http://x)"}])
+    _f, rows = _drive_say(tmp_path, lines)
+    assert [r["text"] for r in rows] == ["計畫 先整理 書架 再看天氣"]
+
+
+def test_say_without_events_path_is_a_noop(tmp_path) -> None:
+    log = tmp_path / "agent_stdout.log"
+    log.write_text(json.dumps({"type": "turn_start"}) + "\n", encoding="utf-8")
+    f = twinagent.SayForwarder(log, None, task_id="twin:tw-x", cell_id="tw-x")
+    f._pump()                                              # noqa: SLF001
+    assert f.forwarded == 0 and f.sidecar_path is None
+
+
+def _say(**kw):
+    r = sc.say_row("我先整理書架。", turn=1, seq=1, cell_id="tw-x", run_id="R1")
+    r.update(kw)
+    return r
+
+
+@pytest.mark.parametrize("field,value", [
+    ("text", ""), ("text", "字" * 81), ("text", 5), ("truncated", "no"),
+    ("turn", -1), ("seq", "1"), ("path", "a.md"), ("code", "x=1"),
+])
+def test_sidecar_validate_twin_say_has_teeth(field, value) -> None:
+    assert sc.validate([_say()]) == [], "正控制"
+    assert sc.validate([_say(**{field: value})]), (field, value)
+
+
+def _lc(task_kind="practical", arm="RUN-ON"):
+    return [{"schema": lifecycle.SCHEMA, "type": "run_started", "ts_ms": 1000, "run_id": "R1",
+             "task_id": "twin:tw-x", "arm": arm, "attempt_limit": 1,
+             "caller": {"cell_id": "tw-x", "resident": "x", "stratum": "twin",
+                        "task_kind": task_kind}}]
+
+
+def test_folder_turns_twin_say_into_a_tv_event_and_tv_contract_accepts_it() -> None:
+    row = _say(); row["ts_ms"] = 2000
+    fold = le.Folder(verify_url=None, mode=tv.MODE_LIVE)
+    out = []
+    for ev in _lc() + [row]:
+        out += fold.feed(ev)
+    says = [e for e in out if e["type"] == "twin_say"]
+    assert len(says) == 1, (out, fold.dropped)
+    e = says[0]
+    assert (e["arm"], e["task_id"], e["text"], e["truncated"]) == ("ON", "tw-x", "我先整理書架。", False)
+    assert not [b for b in tv.validate(out, require_settled=False) if "twin_say" in b], \
+        tv.validate(out, require_settled=False)
+
+
+def test_folder_drops_twin_say_for_a_code_cell_and_for_an_off_arm() -> None:
+    for lc in (_lc(task_kind="code"), _lc(arm="RUN-OFF")):
+        fold = le.Folder(verify_url=None, mode=tv.MODE_LIVE)
+        out = []
+        for ev in lc + [_say()]:
+            out += fold.feed(ev)
+        assert not [e for e in out if e["type"] == "twin_say"]
+        assert fold.dropped
+
+
+@pytest.mark.parametrize("field,value", [
+    ("text", ""), ("text", "字" * 81), ("truncated", None), ("arm", "OFF"),
+    ("path", "a.md"), ("content", "x"),
+])
+def test_tv_contract_twin_say_has_teeth(field, value) -> None:
+    base = {"type": "twin_say", "ts": "2026-10-01T00:00:00Z", "task_id": "tw-x", "mode": "live",
+            "arm": "ON", "seq": 1, "turn": 1, "text": "我先整理書架。", "truncated": False}
+    assert not [b for b in tv.validate([base], require_settled=False) if "twin_say" in b]
+    bad = dict(base, **{field: value})
+    assert [b for b in tv.validate([bad], require_settled=False) if "twin_say" in b], (field, value)
+
+
+def test_sidecar_merge_puts_say_inside_the_run_not_after_run_ended() -> None:
+    lc = _lc() + [{"schema": lifecycle.SCHEMA, "type": "run_ended", "ts_ms": 9000, "run_id": "R1"}]
+    r = _say(); r["ts_ms"] = 5000
+    merged = sc.merge(lc, [r])
+    assert [e["type"] for e in merged] == ["run_started", "twin_say", "run_ended"]
+
+
+def test_twin_agent_sh_runs_pi_in_json_mode() -> None:
+    sh = (ROOT / "ops/exhibit/twin/twin_agent.sh").read_text(encoding="utf-8")
+    assert '-p --mode json' in sh

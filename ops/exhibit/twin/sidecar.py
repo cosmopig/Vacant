@@ -114,6 +114,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import re
 import time
 from typing import Any, Iterable
 
@@ -127,7 +128,12 @@ SUFFIX = ".sidecar.jsonl"
 #: 當場觀察到的事——它來自分身側自己寫的原始記錄檔（`twinagent.STEP_LOG_NAME`），
 #: 由分身迴圈（`twinagent.StepForwarder`）轉寫成這裡的一行，理由與 `postaudit`
 #: 同一條（見模組 docstring）：不准進 lifecycle 契約，`vacant_network/vrun/*` 不動。
-TYPES = ("postaudit", "twin_step")
+#:
+#: `twin_say`（契約補充 `plans/CONTRACT_PROCESS_20261001_ADDENDUM.md` §E，2026-10-01）：
+#: 分身的 pi 以 `--mode json` 跑，`agent_stdout.log` 裡每一回合 assistant 的**文字**
+#: （不含思考區塊、不含工具呼叫的參數）→ 一筆旁註。來源同樣是分身側自己的記錄
+#: （pi 的 stdout），不是 Vacant 當場觀察到的事，理由與上面兩種同一條。
+TYPES = ("postaudit", "twin_step", "twin_say")
 
 COMMON = ("schema", "type", "ts_ms", "cell_id", "run_id")
 
@@ -135,7 +141,11 @@ FIELDS: dict[str, tuple[str, ...]] = {
     "postaudit": ("arm", "ws_end_sha256", "when", "is_verdict", "signed",
                   "all_pass", "passed", "total", "failed_case", "ruler", "note"),
     "twin_step": ("seq", "step", "path_kind", "bytes", "ok"),
+    "twin_say": ("seq", "turn", "text", "truncated"),
 }
+
+#: `twin_say.text` 的字數上限（契約補充 §E）。超過就截斷並 `truncated: true`。
+SAY_MAX = 80
 
 WHEN_AFTER = "after_the_run"
 
@@ -249,6 +259,73 @@ def twin_step_row(raw: dict, *, cell_id: str, run_id: str) -> dict | None:
     }
 
 
+#: gemma 的思考通道記號：`<|channel>thought … <channel|>`（真 pi 實測會漏進 text 區塊）。
+#: 通道裡面是**思考**，整段丟（沒關上就丟到結尾）；契約補充：思考不發。
+_THOUGHT_CHANNEL_RE = re.compile(r"<\|channel>.*?(?:<channel\|>|$)", re.S)
+_SPECIAL_TOKEN_RE = re.compile(r"<\|[^>\n]{0,40}>|<[^<>\n]{0,40}\|>")
+_MD_LINK_RE = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
+_MD_FENCE_RE = re.compile(r"```.*?```", re.S)
+_MD_LEAD_RE = re.compile(r"(?m)^\s*(?:#{1,6}\s+|>\s+|[-*+]\s+|\d+[.)]\s+)")
+
+
+def clean_say(text: Any) -> str:
+    """pi 的 assistant 文字 → 旁註的 `text`：去 markdown 標記、去模型殘留的特殊記號
+    （真 pi 實測：`<|channel>thought\n<channel|>` 會漏進 text 區塊）、合併空白。
+
+    **不改寫**：只刪標記與空白，字都是 agent 自己生的。程式碼區塊整段丟掉
+    （契約補充：code 格不出，也不把程式碼當成「它在想」）。
+    """
+    if not isinstance(text, str):
+        return ""
+    t = _MD_FENCE_RE.sub(" ", text)
+    t = _THOUGHT_CHANNEL_RE.sub(" ", t)
+    t = _SPECIAL_TOKEN_RE.sub(" ", t)
+    t = _MD_LINK_RE.sub(r"\1", t)
+    t = _MD_LEAD_RE.sub("", t)
+    t = re.sub(r"[`*~#>]+|(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", t)   # 檔名裡的 _ 不動
+    return re.sub(r"\s+", " ", t).strip()
+
+
+#: 看起來像檔名的字串（電視不顯示檔名，契約 §D 的公開／私人界線）。
+_FILENAME_RE = re.compile(r"[\w\-\u4e00-\u9fff]+\.(?:md|txt|json|csv|html?|py|js|ts|pdf|png|jpe?g|docx?|xlsx?)\b",
+                          re.I)
+
+
+def looks_like_filename(text: str, known_names: Iterable[str] = ()) -> bool:
+    """這句話裡有沒有檔名：副檔名樣式，或這一跑 agent 自己寫過的檔（全名、或主檔名 ≥4 字）。
+
+    電視事件流不帶檔名（契約 §A／§D），而 agent 的話（尤其收尾那句「我交出了 X.md」）
+    常會自己講出檔名——**整句不發**（不改寫、不補罐頭句，與 LEAK 規則同一條紀律）。
+    """
+    if _FILENAME_RE.search(text):
+        return True
+    for n in known_names:
+        if not isinstance(n, str) or not n:
+            continue
+        stem = n.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+        if n in text or (len(stem) >= 4 and stem in text):
+            return True
+    return False
+
+
+def say_row(text: str, *, turn: int, seq: int, cell_id: str, run_id: str,
+            ts_ms: int | None = None) -> dict | None:
+    """一句已過防呆的話 → 一筆 `twin_say`。`text` 先 `clean_say`；清完空了回 `None`
+    （空白、純標記、純程式碼區塊不發）。超過 `SAY_MAX` 截斷並 `truncated: true`。"""
+    t = clean_say(text)
+    if not t:
+        return None
+    trunc = len(t) > SAY_MAX
+    if trunc:
+        t = t[:SAY_MAX]
+    return {
+        "schema": SCHEMA, "type": "twin_say",
+        "ts_ms": int(ts_ms if ts_ms is not None else time.time() * 1000),
+        "cell_id": cell_id, "run_id": run_id, "seq": int(seq), "turn": int(turn),
+        "text": t, "truncated": trunc,
+    }
+
+
 def append(path: str | os.PathLike, row: dict) -> str | None:
     """追加一行。回 `None`＝寫進去了；否則回錯誤字串（**不丟例外**，誠實邊界 2）。"""
     try:
@@ -318,7 +395,9 @@ def validate(rows: Iterable[dict], *,
             if k not in r:
                 bad.append(f"旁註第 {i} 筆（{t}）缺欄位 {k}")
         for k in CONTENT_KEYS:
-            if k in r:
+            # `twin_say` 的 `text` 是**agent 自己生成、已過逐字抄錄防呆**的那句話
+            # （契約補充 §E）——這一個欄位是它的本體，其餘內容欄位照擋。
+            if k in r and not (t == "twin_say" and k == "text"):
                 bad.append(f"旁註第 {i} 筆夾帶了內容欄位 {k}")
         if not _is_nat(r.get("ts_ms")):
             bad.append(f"旁註第 {i} 筆 ts_ms 不是非負整數")
@@ -368,21 +447,35 @@ def validate(rows: Iterable[dict], *,
                     and r["ts_ms"] < run["ended_ms"]:
                 bad.append(f"旁註第 {i} 筆：ts_ms 早於那一跑的 run_ended——"
                            "「事後」在資料上不成立")
-        elif t == "twin_step":
-            # ── 分身工作區三個工具被呼叫的旁註：形狀＋白名單 ─────────────
-            if r.get("step") not in STEP_KINDS:
-                bad.append(f"旁註第 {i} 筆：twin_step 的 step 不在白名單："
-                           f"{r.get('step')!r}")
-            if r.get("path_kind") not in PATH_KINDS:
-                bad.append(f"旁註第 {i} 筆：twin_step 的 path_kind 不在白名單："
-                           f"{r.get('path_kind')!r}")
-            if not isinstance(r.get("ok"), bool):
-                bad.append(f"旁註第 {i} 筆：twin_step 的 ok 只能是 true／false")
+        elif t in ("twin_step", "twin_say"):
+            if t == "twin_step":
+                # ── 分身工作區三個工具被呼叫的旁註：形狀＋白名單 ─────────────
+                if r.get("step") not in STEP_KINDS:
+                    bad.append(f"旁註第 {i} 筆：twin_step 的 step 不在白名單："
+                               f"{r.get('step')!r}")
+                if r.get("path_kind") not in PATH_KINDS:
+                    bad.append(f"旁註第 {i} 筆：twin_step 的 path_kind 不在白名單："
+                               f"{r.get('path_kind')!r}")
+                if not isinstance(r.get("ok"), bool):
+                    bad.append(f"旁註第 {i} 筆：twin_step 的 ok 只能是 true／false")
+                bv = r.get("bytes")
+                if bv is not None and not _is_nat(bv):
+                    bad.append(f"旁註第 {i} 筆：twin_step 的 bytes 要是非負整數或 null")
+            else:
+                # ── 分身自己說的話：80 字上限、截斷旗標要誠實 ────────────────
+                tx = r.get("text")
+                if not isinstance(tx, str) or not tx.strip():
+                    bad.append(f"旁註第 {i} 筆：twin_say 的 text 要是非空字串")
+                elif len(tx) > SAY_MAX:
+                    bad.append(f"旁註第 {i} 筆：twin_say 的 text 超過 {SAY_MAX} 字")
+                if not isinstance(r.get("truncated"), bool):
+                    bad.append(f"旁註第 {i} 筆：twin_say 的 truncated 只能是 true／false")
+                elif r["truncated"] and isinstance(tx, str) and len(tx) != SAY_MAX:
+                    bad.append(f"旁註第 {i} 筆：twin_say 說被截斷了，長度卻不是 {SAY_MAX}")
+                if not _is_nat(r.get("turn")):
+                    bad.append(f"旁註第 {i} 筆：twin_say 的 turn 要是非負整數")
             if not _is_nat(r.get("seq")):
-                bad.append(f"旁註第 {i} 筆：twin_step 的 seq 要是非負整數")
-            bv = r.get("bytes")
-            if bv is not None and not _is_nat(bv):
-                bad.append(f"旁註第 {i} 筆：twin_step 的 bytes 要是非負整數或 null")
+                bad.append(f"旁註第 {i} 筆：{t} 的 seq 要是非負整數")
             if runs is None:
                 continue
             # ── 綁定：這一步是這一跑（ON 臂）做的 ─────────────────────
@@ -424,7 +517,7 @@ def merge(lifecycle_events: list[dict], rows: list[dict]) -> list[dict]:
     after_end: dict[str, list[dict]] = {}
     live: dict[str, list[dict]] = {}
     for r in rows:
-        bucket = live if r.get("type") == "twin_step" else after_end
+        bucket = live if r.get("type") in ("twin_step", "twin_say") else after_end
         bucket.setdefault(r.get("run_id"), []).append(r)
     for lst in live.values():
         lst.sort(key=lambda r: r.get("ts_ms", 0))

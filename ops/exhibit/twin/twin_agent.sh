@@ -29,6 +29,14 @@
 #   好幾位分身，`os.environ` 在執行緒之間不安全；這一支一支腳本一個行程，
 #   自己算出來的路徑不會跟別的分身撞。檔名要跟 `twinagent.STEP_LOG_NAME` 同步。
 #
+# ⚠ **`--mode json`（2026-10-01，契約補充 `CONTRACT_PROCESS_20261001_ADDENDUM.md` §E）**：
+#   pi 的 stdout 改成一行一個事件的 JSON（launcher 已把它整份落盤到
+#   `<run_dir>/agent_stdout.log`），分身迴圈 tail 它轉成 `twin_say`。
+#   形狀是在真 pi 0.85.1 上量的（`tests/fixtures/pi_json/`）。PLAN.md／產出走
+#   工作區、收據走 launcher，都不讀 stdout，所以不受影響。
+#   ⚠ 這個檔裡有 TRAITS.md 全文與工具參數（含分身寫的內容）——跟之前一樣只活在 run-dir，
+#     撤回時整個刪；電視事件流只拿得到清過、≤80 字、過了 LEAK 防呆的 text。
+#
 # ⚠ 誠實邊界（改碼請保留）：
 #   · 收住的是「模型叫得到的工具」，不是 pi 這個行程。pi（node）本身仍有完整的
 #     檔案系統與網路權限；沒有 OS 沙箱包住它（展場機 1003 是 Windows）。
@@ -88,7 +96,7 @@ cat > "$CFG/models.json" <<EOF
 EOF
 
 # ⚠ `< /dev/null`：`pi -p` 不給會永久卡住（2026-09-18 實測，V0 已知）。
-exec "$PI_BIN" -p --provider vacantproxy --model m \
+exec "$PI_BIN" -p --mode json --provider vacantproxy --model m \
     --no-builtin-tools --tools ws_list,ws_read,ws_write \
     -e "$EXT" \
     --no-extensions --no-skills --no-context-files --no-prompt-templates \

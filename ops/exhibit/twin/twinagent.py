@@ -536,24 +536,35 @@ class StepForwarder(threading.Thread):
             try:
                 row = json.loads(raw.decode("utf-8", "replace"))
             except (ValueError, TypeError):
-                self.rejected += 1
+                if self.count_bad_lines:
+                    self.rejected += 1
                 continue
-            self._pending.append(row)
+            self._ingest(row)
+
+    #: 讀到不是 JSON 的行算不算「形狀不對」。步驟紀錄是我們自己寫的格式，壞行要計；
+    #: agent 的 stdout 本來就可能夾雜非 JSON（假 agent、pi 之外的行程），不計。
+    count_bad_lines = True
+
+    def _ingest(self, row: Any) -> None:
+        self._pending.append(row)
+
+    def _to_rows(self, raw: Any) -> list[dict | None]:
+        return [sidecarlib.twin_step_row(raw, cell_id=self.cell_id, run_id=self.run_id)]
 
     def _flush_pending(self) -> None:
         if self.run_id is None or self.sidecar_path is None or not self._pending:
             return
         pending, self._pending = self._pending, []
         for raw in pending:
-            row = sidecarlib.twin_step_row(raw, cell_id=self.cell_id, run_id=self.run_id)
-            if row is None:
-                self.rejected += 1
-                continue
-            err = sidecarlib.append(self.sidecar_path, row)
-            if err is None:
-                self.forwarded += 1
-            else:
-                self.rejected += 1
+            for row in self._to_rows(raw):
+                if row is None:
+                    self.rejected += 1
+                    continue
+                err = sidecarlib.append(self.sidecar_path, row)
+                if err is None:
+                    self.forwarded += 1
+                else:
+                    self.rejected += 1
 
     def _pump(self) -> None:
         self._learn_run_id()
@@ -570,6 +581,80 @@ class StepForwarder(threading.Thread):
         self._halt.set()
         self.join(timeout=10)
         self._pump()          # 收尾再抽一次：thread 停了之後主執行緒還在讀的那幾行
+
+
+#: pi `--mode json` 的 stdout 檔名（`launcher` 的 `capture_agent_stdout` 寫在 run-dir）。
+AGENT_STDOUT_NAME = "agent_stdout.log"
+
+
+class SayForwarder(StepForwarder):
+    """「它在想什麼」（契約補充 `CONTRACT_PROCESS_20261001_ADDENDUM.md` §E）。
+
+    Tail `<run-dir>/agent_stdout.log`（pi `--mode json`，真 pi 0.85.1 實測的事件形狀
+    見 `tests/fixtures/pi_json/`）。每個 `message_end`（`message.role == "assistant"`）
+    的 `content` 裡 **`type == "text"`** 的區塊 → 一筆 `twin_say`。`thinking`（思考）
+    與 `toolCall`（參數裡有它寫進檔案的內容）**一律不碰**。`turn` ＝到那一刻為止
+    看過的 `turn_start` 數（1 起算）。
+
+    ⚠ **逐字抄錄防呆**（沿用 polaroid 的 LEAK 規則）：清過標記後的句子與觀眾原文
+    （`originals`）連續 ≥ `polaroid.LEAK_WINDOW` 字相同 ⇒ **整句不發**（不補罐頭句、
+    不改寫），`dropped` 計一筆。
+    ⚠ **電視不帶檔名**（契約 §D 的公開／私人界線）：句子裡有檔名（副檔名樣式，或這一跑
+    agent 自己寫過的檔）⇒ 整句不發，`dropped_filename` 計一筆。真 pi 實測收尾那句常是
+    「我交出了 X.md」，所以這條會擋掉不少收尾句——寧可少一句，也不讓檔名上電視。
+    ⚠ 旁註不准改變那一跑的任何東西（同 `StepForwarder`）：agent_stdout.log 只讀。
+    """
+    count_bad_lines = False
+
+    def __init__(self, stdout_log: pathlib.Path, events_path: pathlib.Path | str | None,
+                 *, task_id: str, cell_id: str, originals: list[str] | None = None,
+                 poll_s: float = 0.2) -> None:
+        super().__init__(stdout_log, events_path, task_id=task_id, cell_id=cell_id,
+                         poll_s=poll_s)
+        self.name = "twin-say-forward"
+        self.originals = [o for o in (originals or []) if isinstance(o, str) and o]
+        self.dropped = 0               # 抄了觀眾原文
+        self.dropped_filename = 0      # 講出檔名（電視不帶檔名）
+        self._names: set[str] = set()  # 這一跑 agent 自己寫過／讀過的檔名
+        self._turn = 0
+        self._seq = 0
+
+    def _ingest(self, row: Any) -> None:
+        if not isinstance(row, dict):
+            return
+        t = row.get("type")
+        if t == "turn_start":
+            self._turn += 1
+            return
+        if t != "message_end":
+            return
+        msg = row.get("message")
+        if not isinstance(msg, dict) or msg.get("role") != "assistant":
+            return
+        for c in msg.get("content") or []:
+            if isinstance(c, dict) and c.get("type") == "toolCall":
+                a = c.get("arguments")
+                if isinstance(a, dict) and isinstance(a.get("path"), str) and a["path"]:
+                    self._names.add(a["path"])
+        for c in msg.get("content") or []:
+            if isinstance(c, dict) and c.get("type") == "text" and isinstance(c.get("text"), str):
+                self._pending.append({"text": c["text"], "turn": max(self._turn, 1),
+                                      "ts_ms": int(time.time() * 1000)})
+
+    def _to_rows(self, raw: Any) -> list[dict | None]:
+        cleaned = sidecarlib.clean_say(raw.get("text"))
+        if not cleaned:
+            return []                          # 空白／純標記／純程式碼區塊：不發、不計
+        if polaroidlib.caption_leaks_original(cleaned, self.originals):
+            self.dropped += 1                  # 抄了觀眾原文：整句不發
+            return []
+        if sidecarlib.looks_like_filename(cleaned, self._names):
+            self.dropped_filename += 1         # 電視不帶檔名：整句不發
+            return []
+        self._seq += 1
+        return [sidecarlib.say_row(cleaned, turn=raw["turn"], seq=self._seq,
+                                   cell_id=self.cell_id, run_id=self.run_id,
+                                   ts_ms=raw["ts_ms"])]
 
 
 def run_one(job: Job) -> dict[str, Any]:
@@ -604,6 +689,11 @@ def run_one(job: Job) -> dict[str, Any]:
         forwarder = StepForwarder(rd / STEP_LOG_NAME, job.cfg.events_path,
                                   task_id=f"twin:{tid}", cell_id=tid)
         forwarder.start()
+        # ── 契約補充 §E：tail pi `--mode json` 的 stdout，轉成 twin_say ──
+        say_fwd = SayForwarder(rd / AGENT_STDOUT_NAME, job.cfg.events_path,
+                               task_id=f"twin:{tid}", cell_id=tid,
+                               originals=[job.traits])
+        say_fwd.start()
         try:
             if enclosed:
                 from ops.exhibit.twin import twinenclose
@@ -625,9 +715,14 @@ def run_one(job: Job) -> dict[str, Any]:
                     events_caller=caller)
         finally:
             forwarder.finish()
+            say_fwd.finish()
         res["step_forward"] = {"forwarded": forwarder.forwarded,
                                "rejected": forwarder.rejected,
                                "run_id_learned": forwarder.run_id is not None}
+        res["say_forward"] = {"forwarded": say_fwd.forwarded, "dropped": say_fwd.dropped,
+                              "dropped_filename": say_fwd.dropped_filename,
+                              "rejected": say_fwd.rejected,
+                              "run_id_learned": say_fwd.run_id is not None}
         last = (summary.get("attempts") or [{}])[-1]
         frozen = last.get("frozen_path")
         res["summary"] = {

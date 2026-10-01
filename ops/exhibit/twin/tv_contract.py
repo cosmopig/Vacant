@@ -111,7 +111,7 @@ MODES = (MODE_LIVE, MODE_REPLAY)
 #: （`sidecar.py`）與 `serve_twin` 的當場累計，**不是** lifecycle、**不是**事後推導。
 #: `twin_step`（2026-09-28）同一條路：來源是分身的旁註，不是 lifecycle。
 EMITTED = ("task_opened", "routed", "working", "draft_done", "gate_ran",
-           "revised", "verdict", "receipt", "postaudit", "counters", "twin_step")
+           "revised", "verdict", "receipt", "postaudit", "counters", "twin_step", "twin_say")
 
 #: `postaudit.when` 唯一合法的值（與 `sidecar.WHEN_AFTER` 同值，測試釘住）。
 WHEN_AFTER = "after_the_run"
@@ -146,6 +146,11 @@ PRACTICAL_STOPS = ("ungated", "infra_void")
 TWIN_STEPS = ("read", "write", "list")
 #: `twin_step.path_kind` 的白名單（`sidecar.PATH_KINDS` 同值）。
 TWIN_PATH_KINDS = ("traits", "plan", "artifact", "other")
+#: `twin_say.text` 的字數上限（`sidecar.SAY_MAX` 同值，測試釘住；契約補充 §E）。
+TWIN_SAY_MAX = 80
+#: `twin_say` 不准帶的欄位（它的本體就是 `text`，其餘內容欄位照擋）。
+TWIN_SAY_FORBIDDEN = ("path", "name", "file", "content", "code", "args", "arguments")
+
 #: `twin_step` 不准帶的欄位——它是**不帶檔名**那一份，跟 `sidecar.CONTENT_KEYS`
 #: 同一條規則，這裡是電視事件那一層的第二道網。
 TWIN_STEP_FORBIDDEN = ("path", "name", "file", "text", "content")
@@ -327,6 +332,27 @@ def validate(evs: list[dict], *, require_settled: bool = True,
                 if k in e:
                     bad.append(f"第 {n} 個事件：twin_step 帶了 {k!r}——"
                                "這一份事件流不帶檔名")
+        # ── 分身自己說的話：只在 ON／practical、≤80 字、不帶檔名／程式碼欄位 ──
+        if t == "twin_say":
+            if e.get("arm") != ARM_ON:
+                bad.append(f"第 {n} 個事件：twin_say 的 arm 不是 ON")
+            tk = kinds.get(e.get("task_id"))
+            if tk is not None and tk != KIND_PRACTICAL:
+                bad.append(f"第 {n} 個事件：twin_say 出現在非分身自主任務的格子"
+                           "（反事實題庫格沒有這一欄）")
+            tx = e.get("text")
+            if not isinstance(tx, str) or not tx.strip():
+                bad.append(f"第 {n} 個事件：twin_say.text 要是非空字串")
+            elif len(tx) > TWIN_SAY_MAX:
+                bad.append(f"第 {n} 個事件：twin_say.text 超過 {TWIN_SAY_MAX} 字")
+            if not isinstance(e.get("truncated"), bool):
+                bad.append(f"第 {n} 個事件：twin_say.truncated 只能是 true／false")
+            for k in ("seq", "turn"):
+                if not _is_nat(e.get(k)):
+                    bad.append(f"第 {n} 個事件：twin_say.{k} 要是非負整數")
+            for k in TWIN_SAY_FORBIDDEN:
+                if k in e:
+                    bad.append(f"第 {n} 個事件：twin_say 帶了 {k!r}")
         # ── 事後稽核不准長得像裁決（規則 9）：三個旗標缺一不可 ────────
         if t == "postaudit":
             if e.get("is_verdict") is not False or e.get("signed") is not False:
