@@ -165,7 +165,14 @@ STEP_KINDS = ("read", "write", "list")
 _TOOL_TO_STEP = {"ws_read": "read", "ws_write": "write", "ws_list": "list"}
 
 #: `twin_step.path_kind` 的白名單（契約 §A）。
-PATH_KINDS = ("traits", "plan", "artifact", "other")
+#: 地上的八個地點（`world/materials/<地點>/`）→ 固定代號。**列舉**：路徑裡的地點名
+#: 只用來查這張表，查不到就歸 `other`；代號以外的東西（檔名、內容）不外流。
+GROUND_PLACES = {
+    "投遞口": "drop", "捏土處": "clay", "長桌廣場": "longtable", "石頭閘門": "gate",
+    "帳本鏈": "chain", "草稿角": "draft", "紙卡地": "cards", "畫架與長椅": "easel",
+}
+GROUND_KINDS = tuple("ground:" + c for c in GROUND_PLACES.values())
+PATH_KINDS = ("traits", "plan", "artifact", "other") + GROUND_KINDS
 
 
 def sidecar_path(lifecycle_path: str | os.PathLike) -> pathlib.Path:
@@ -219,7 +226,13 @@ def classify_path_kind(tool: Any, path: Any) -> str:
         return "other"
     if not isinstance(path, str) or not path:
         return "other"
-    name = path.replace("\\", "/").rsplit("/", 1)[-1]
+    parts = [x for x in path.replace("\\", "/").split("/") if x not in ("", ".")]
+    if ".." in parts:                # 路徑穿越：不認、不猜
+        return "other"
+    if parts and parts[0] == "地上":      # 地上/<地點>/<檔>：只取地點代號
+        code = GROUND_PLACES.get(parts[1]) if len(parts) >= 2 else None
+        return "ground:" + code if code else "other"
+    name = parts[-1] if parts else ""
     if name == "TRAITS.md":
         return "traits"
     if name == "PLAN.md":

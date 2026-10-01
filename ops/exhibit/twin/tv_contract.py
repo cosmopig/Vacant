@@ -145,7 +145,9 @@ PRACTICAL_STOPS = ("ungated", "infra_void")
 #: `twin_step.step` 的白名單（`sidecar.STEP_KINDS` 同值，兩邊測試釘住）。
 TWIN_STEPS = ("read", "write", "list")
 #: `twin_step.path_kind` 的白名單（`sidecar.PATH_KINDS` 同值）。
-TWIN_PATH_KINDS = ("traits", "plan", "artifact", "other")
+TWIN_GROUND_KINDS = tuple("ground:" + c for c in (
+    "drop", "clay", "longtable", "gate", "chain", "draft", "cards", "easel"))
+TWIN_PATH_KINDS = ("traits", "plan", "artifact", "other") + TWIN_GROUND_KINDS
 #: `twin_say.text` 的字數上限（`sidecar.SAY_MAX` 同值，測試釘住；契約補充 §E）。
 TWIN_SAY_MAX = 80
 #: `twin_say` 不准帶的欄位（它的本體就是 `text`，其餘內容欄位照擋）。
