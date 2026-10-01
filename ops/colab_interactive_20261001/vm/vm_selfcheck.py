@@ -395,7 +395,9 @@ def run_driver_scenario(cfg: Cfg, task: dict, servers: Servers, a: argparse.Name
     t0 = time.time()
     rc = driver_i1001.main(argv)
     secs = round(time.time() - t0, 1)
-    rows = [json.loads(x) for x in (out / "progress.jsonl").read_text().splitlines() if x.strip()]
+    allrows = [json.loads(x) for x in (out / "progress.jsonl").read_text().splitlines() if x.strip()]
+    rows = [r for r in allrows if "event" not in r]
+    events = [r for r in allrows if "event" in r]
     metas = {d.name: load(d / "meta.json") for d in cfg.cells.glob("scd-*")}
     done = {d.name: (d / "DONE").exists() for d in cfg.cells.glob("scd-*")}
     voids = [r for r in rows if r["void"]]
@@ -418,8 +420,9 @@ def run_driver_scenario(cfg: Cfg, task: dict, servers: Servers, a: argparse.Name
                                                  for arm in (["A", "R", "K"] + (["C"] if with_c else []))))
     expect("DRIVER_DONE written", (out / "DRIVER_DONE").exists())
     expect("run record cell", (cfg.cells / "_run_scd" / "DONE").exists())
-    expect("no score in progress.jsonl", not any("pass" in r or "score" in r for r in rows))
-    n_rows = len(rows)
+    expect("no score in progress.jsonl", not any("pass" in r or "score" in r for r in allrows))
+    expect("rerun events were logged", sum(1 for e in events if e["event"] == "infra_void_rerun") == len(voids))
+    n_rows = len(allrows)
     (out / "DRIVER_DONE").unlink()
     rc2 = driver_i1001.main(argv)
     rows2 = [json.loads(x) for x in (out / "progress.jsonl").read_text().splitlines() if x.strip()]
