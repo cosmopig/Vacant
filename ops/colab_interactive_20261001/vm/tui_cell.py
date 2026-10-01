@@ -245,15 +245,15 @@ def install_vacant(cfg: Cfg, box: Box, L: Path) -> int | None:
             f.write(f"=== install attempt {k} {now()}\n")
         r = run(*sandbox_cmd(cfg, box, list(cfg.install_env),
                              ["bash", "-c", f"set -euo pipefail; pipx install '{wheel}' && mkdir -p /tmp/harbor-pi-agent && "
-                                            f"PI_CODING_AGENT_DIR=/tmp/harbor-pi-agent vacant install"]))
+                                            f"PI_CODING_AGENT_DIR=/tmp/harbor-pi-agent vacant install"]), timeout=900)
         with open(L / "install.log", "a") as f:
             f.write(r.stdout + r.stderr)
         rc = r.returncode
         if rc == 0:
             break
-        run(*sandbox_cmd(cfg, box, list(cfg.install_env), ["bash", "-c", "pipx uninstall vacant-network >/dev/null 2>&1; true"]))
+        run(*sandbox_cmd(cfg, box, list(cfg.install_env), ["bash", "-c", "pipx uninstall vacant-network >/dev/null 2>&1; true"]), timeout=300)
         time.sleep(k * 10)
-    r = run(*sandbox_cmd(cfg, box, [], ["bash", "-c", "pipx runpip vacant-network freeze"]))
+    r = run(*sandbox_cmd(cfg, box, [], ["bash", "-c", "pipx runpip vacant-network freeze"]), timeout=300)
     (L / "vacant_pip_freeze.txt").write_text(r.stdout + r.stderr)
     return rc
 
@@ -268,6 +268,7 @@ class Pane:
         self.env.update({"LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"})
 
     def tm(self, *a: str, **k):
+        k.setdefault("timeout", 20)                    # tmux 卡住不能卡住整條線
         return run("tmux", "-u", "-L", self.sock, *a, env=self.env, **k)
 
     def start(self, cmd: str) -> float:
@@ -365,7 +366,7 @@ def run_session(cfg: Cfg, box: Box, lcell: str, L: Path, ledger: LedgerTail, *, 
                 tlog("trust_dialog_handled")
             if pane_exit_rc(txt) is not None:
                 break
-            time.sleep(0.1)
+            time.sleep(0.2)
         rec["ready_s"] = round(time.time() - t0, 2)
         tlog("ready", ready=rec["ready"], ready_s=rec["ready_s"])
         if rec["ready"]:
@@ -545,6 +546,7 @@ def save_app_final(app: Path, before_sha: Path, L: Path) -> None:
 def score_workspace(cfg: Cfg, task_dir: Path, src_app: Path, L: Path, label: str) -> dict | None:
     """另開一個新使用者、在圍牆裡跑既有計分器（隱藏測試只在這一步出現）。寫 L/score.json、L/score.stderr。"""
     S, _seq = create_user(cfg, "s")
+    (L / "score_user.txt").write_text(S + "\n")
     SC = cfg.runs_root / f"{label}_score"
     shutil.rmtree(SC, ignore_errors=True)
     try:
@@ -583,7 +585,8 @@ def vacant_collect(cfg: Cfg, box: Box, L: Path) -> dict:
     shutil.copy2(cfg.bin_dir / "vacant_check.py", box.tmp / "_vacant_check.py")
     run("chown", f"{box.user}:{box.user}", str(box.tmp / "_vacant_check.py"))
     r = run(*sandbox_cmd(cfg, box, [], ["bash", "-c",
-            'py=$(ls -d "$HOME"/.local/share/pipx/venvs/vacant-network/bin/python 2>/dev/null); "${py:-python3}" /tmp/_vacant_check.py']))
+            'py=$(ls -d "$HOME"/.local/share/pipx/venvs/vacant-network/bin/python 2>/dev/null); "${py:-python3}" /tmp/_vacant_check.py']),
+            timeout=300)
     (L / "vacant_check.json").write_text(r.stdout + r.stderr)
     kill_user(box.user)
     if (box.home / ".vacant").is_dir():
@@ -678,6 +681,10 @@ def finish_meta(meta: dict, sessions: list[dict], *, score: dict | None, score_r
 
 
 def write_cell(L: Path, meta: dict) -> None:
+    try:
+        meta.setdefault("score_user", (L / "score_user.txt").read_text().strip() or None)
+    except OSError:
+        meta.setdefault("score_user", None)
     (L / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n")
     (L / "DONE").write_text(now() + "\n")
 
