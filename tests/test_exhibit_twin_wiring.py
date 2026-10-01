@@ -148,6 +148,9 @@ def _write_snapshot(path: pathlib.Path, when: datetime | None) -> None:
         {"generated_at": g, "counts": {"visitors": 0}, "people": []}), encoding="utf-8")
 
 
+# venue_check.sh 每一次 curl 都是 `--max-time 8`；測試的量具用同一個耐心。
+_VENUE_MAX_TIME = 8
+
 _INPROC_REPORTED = False
 
 
@@ -182,11 +185,11 @@ def _report_inprocess_http(url: str) -> None:
             return False
 
     def _urllib():
-        with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(url, timeout=5) as r:
+        with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(url, timeout=_VENUE_MAX_TIME) as r:
             return r.status
 
     def _httpclient():
-        h = http.client.HTTPConnection(host, port, timeout=5)
+        h = http.client.HTTPConnection(host, port, timeout=_VENUE_MAX_TIME)
         try:
             h.request("GET", path)
             return h.getresponse().status
@@ -194,15 +197,16 @@ def _report_inprocess_http(url: str) -> None:
             h.close()
 
     def _raw():
-        with socket.create_connection((host, port), timeout=5) as so:
+        with socket.create_connection((host, port), timeout=_VENUE_MAX_TIME) as so:
             so.sendall(f"GET {path} HTTP/1.0\r\nHost: {host}\r\n\r\n".encode())
             return so.recv(32).split(b"\r\n", 1)[0].decode("latin-1")
 
     def _fresh():
         code = ("import urllib.request,sys;"
                 "o=urllib.request.build_opener(urllib.request.ProxyHandler({}));"
-                "print(o.open(sys.argv[1],timeout=5).status)")
-        r = subprocess.run([sys.executable, "-c", code, url], capture_output=True, text=True, timeout=20)
+                "print(o.open(sys.argv[1],timeout=float(sys.argv[2])).status)")
+        r = subprocess.run([sys.executable, "-c", code, url, str(_VENUE_MAX_TIME)],
+                           capture_output=True, text=True, timeout=_VENUE_MAX_TIME + 20)
         if r.returncode != 0:
             raise RuntimeError(((r.stdout + r.stderr).strip().splitlines() or ["(no output)"])[-1][:200])
         return r.stdout.strip()
@@ -211,6 +215,8 @@ def _report_inprocess_http(url: str) -> None:
           _timed("raw_socket", _raw), _timed("fresh_python_urllib", _fresh)]
     if not all(ok):
         warnings.warn(f"行程內 HTTP 連 {url} 有失敗（curl 已量到 200）：{out}", stacklevel=2)
+    elif any(float(v.rsplit(" in ", 1)[1].rstrip("s")) > 1.0 for v in out.values()):
+        warnings.warn(f"本機連線慢（全部連得上，但有超過 1 秒的）：{out}", stacklevel=2)
 
 
 @pytest.fixture()
@@ -241,17 +247,21 @@ def twin_stack(tmp_path):
     #   跑整套測試，兩支 python 兩秒之內起不來 ⇒ 正控制那條假紅。
     #   （同一個坑也在 `exhibit_boot.sh` 裡，那邊改成 `wait_for` 輪詢。）
     #   起不來就 `pytest.fail`，**不是 skip**——「沒量到」要看得見。
-    # 量具跟測試本體同一支：venue_check.sh 用 curl 敲這兩個埠，這裡也用 curl 判「起來了沒」。
-    # 2026-10-01 macOS CI：兩支伺服器都在聽、curl 回 200、同一個行程的裸 TCP 也連得上，
-    # 只有**這個 pytest 行程裡**的 urllib 一律 `URLError(TimeoutError)`（連 proxy 都拿掉了照樣）。
-    # 前置條件不該由一個跟被測物無關、而且在那台機器上壞掉的量具決定；
-    # 行程內 HTTP 的狀況改由 `_report_inprocess_http` 量、以 warning 印在 CI 輸出裡（看得見，不是吞掉）。
+    # 量具跟測試本體同一支、同一個耐心：venue_check.sh 用 curl、每次 `--max-time 8`。
+    # 2026-10-01 macOS CI 量到的：對剛起來的 python3 子行程伺服器開一條新的 127.0.0.1 連線
+    # 要 2–5 秒——`curl --max-time 2` 在連線階段就逾時（`(28) Connection timed out after
+    # 2119 milliseconds`），同一刻 `--max-time 5` 拿到 200；之前用 urllib `timeout=2` 也是同一件事。
+    # 每次只給 2 秒 ⇒ 伺服器早就起來了，前置照樣永遠等不到。這裡的耐心跟被測的 venue_check.sh 對齊，
+    # 不比它寬（寬了會把 venue_check.sh 本身等不到的情況藏起來）。
+    # 為什麼 macOS runner 上本機連線這麼慢還沒定案：`_report_inprocess_http` 每個 session 量一次、
+    # 各種連法都計時，以 warning 印在 CI 輸出裡（綠燈也印）。
     last_err: dict[str, str] = {}
 
     def _up(url: str) -> bool:
         try:
             c = subprocess.run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}",
-                                "--max-time", "2", url], capture_output=True, text=True, timeout=10)
+                                "--max-time", str(_VENUE_MAX_TIME), url], capture_output=True, text=True,
+                               timeout=_VENUE_MAX_TIME + 10)
         except (OSError, subprocess.SubprocessError) as e:
             last_err[url] = repr(e)[:300]
             return False
@@ -260,7 +270,7 @@ def twin_stack(tmp_path):
         last_err[url] = (c.stdout + c.stderr).strip()[:300]
         return False
 
-    deadline = time.time() + 30
+    deadline = time.time() + 60
     while time.time() < deadline:
         if (_up(f"http://127.0.0.1:{sp}/visitors.json")
                 and _up(f"http://127.0.0.1:{tp}/")):
@@ -276,7 +286,7 @@ def twin_stack(tmp_path):
         probes: dict[str, str] = {}
         for name, port in (("serve", sp), ("tv", tp)):
             try:
-                socket.create_connection(("127.0.0.1", port), timeout=2).close()
+                socket.create_connection(("127.0.0.1", port), timeout=_VENUE_MAX_TIME).close()
                 probes[f"{name}_tcp"] = "ok"
             except OSError as e:
                 probes[f"{name}_tcp"] = repr(e)[:200]
@@ -284,8 +294,8 @@ def twin_stack(tmp_path):
                           ("tv", f"http://127.0.0.1:{tp}/")):
             try:
                 c = subprocess.run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}",
-                                    "--max-time", "5", url], capture_output=True, text=True,
-                                   timeout=10)
+                                    "--max-time", str(_VENUE_MAX_TIME), url], capture_output=True,
+                                   text=True, timeout=_VENUE_MAX_TIME + 10)
                 probes[f"{name}_curl"] = (c.stdout + c.stderr).strip()[:200]
             except (OSError, subprocess.SubprocessError) as e:
                 probes[f"{name}_curl"] = repr(e)[:200]
@@ -302,7 +312,7 @@ def twin_stack(tmp_path):
         except subprocess.TimeoutExpired:
             serve.kill()
             serve_out = "(serve 沒有在 10 秒內結束)"
-        pytest.fail(f"30 秒內 twinlink serve（{sp}，up={serve_up}，rc={serve.returncode}）"
+        pytest.fail(f"60 秒內 twinlink serve（{sp}，up={serve_up}，rc={serve.returncode}）"
                     f"或靜態站（{tp}，up={tv_up}，rc={tv.poll()}）沒起來；"
                     f"最後的錯誤：{last_err}；換量具：{probes}；"
                     f"serve 的輸出末段：\n{serve_out[-3000:]}")
@@ -318,6 +328,17 @@ def twin_stack(tmp_path):
                 p.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 p.kill()
+
+
+def test_fixture_patience_matches_venue_check():
+    """量具的耐心跟被測的 venue_check.sh 一致：它每一次 curl 都是 `--max-time 8`。
+
+    比它短 ⇒ macOS runner 上本機連線要 2–5 秒，伺服器起來了前置照樣等不到（2026-10-01）；
+    比它長 ⇒ venue_check.sh 自己等不到的情況會在前置被藏起來。
+    """
+    venue = (TWIN / "venue_check.sh").read_text(encoding="utf-8")
+    budgets = set(re.findall(r"--max-time (\d+)", venue))
+    assert budgets == {str(_VENUE_MAX_TIME)}, budgets
 
 
 def _venue(stack, *extra) -> subprocess.CompletedProcess:
