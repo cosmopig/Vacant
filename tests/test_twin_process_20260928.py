@@ -824,3 +824,19 @@ def test_sidecar_merge_puts_say_inside_the_run_not_after_run_ended() -> None:
 def test_twin_agent_sh_runs_pi_in_json_mode() -> None:
     sh = (ROOT / "ops/exhibit/twin/twin_agent.sh").read_text(encoding="utf-8")
     assert '-p --mode json' in sh
+
+
+# ── 2026-10-01：系統提示加了「每次動手前先說一句」之後，真 pi 的樣本 ──
+PROMPT_LOGS = sorted(FIXDIR.glob("real_pi_0.85.1_say_prompt_*.jsonl"))
+
+
+@pytest.mark.parametrize("log", PROMPT_LOGS, ids=lambda p: p.name)
+def test_real_pi_with_say_prompt_gives_at_least_three_chinese_says(tmp_path, log) -> None:
+    assert len(PROMPT_LOGS) == 3
+    lines = log.read_text(encoding="utf-8").splitlines(keepends=True)
+    f, rows = _drive_say(tmp_path, lines, originals=["SYNTH: 合成特質。喜歡整理書架，說話慢條斯理，在意把東西放回原位，對天氣的變化很敏感。"])
+    assert sc.validate(rows) == []
+    assert len(rows) >= 3, [r["text"] for r in rows]
+    for r in rows:
+        assert any("一" <= ch <= "鿿" for ch in r["text"]), r["text"]
+        assert not sc.looks_like_filename(r["text"])
