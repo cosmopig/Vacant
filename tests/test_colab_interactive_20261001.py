@@ -195,6 +195,7 @@ def test_typing_plan_and_match():
     assert tl.typing_plan("Read goal.md.") == ("line", "Read goal.md.")
     mode, t = tl.typing_plan("a\n\tb\r\nc")
     assert mode == "paste" and "\t" not in t and t == "a\n    b\nc"
+    assert tl.typing_plan("a\x1b[201~b\x00c\x7f") == ("line", "a[201~bc")                  # 控制字元（含 ESC）去掉
     with pytest.raises(ValueError):
         tl.typing_plan("/quit")
     with pytest.raises(ValueError):
@@ -485,6 +486,8 @@ def test_group_status_resume_and_rerun_rules(tmp_path):
     _cell(cfg.cells, N("R"), done=False)
     assert driver_i1001.group_status(cfg, plan, task, "A", "i1", 1) == ("todo", 1)
     assert not (cfg.cells / N("A")).exists() and len(list((cfg.eval_root / "cells_aborted").iterdir())) == 2
+    ev = [json.loads(x) for x in (cfg.eval_root / "progress.jsonl").read_text().splitlines()]
+    assert [e["event"] for e in ev] == ["aborted_partial_moved"] * 2 and "pass" not in json.dumps(ev)
     # 完整、非 void ⇒ done
     for arm in ("A", "R", "K"):
         _cell(cfg.cells, N(arm), passed=True, extra={"k_on": True})
@@ -537,7 +540,7 @@ def test_feasibility_ignores_timeouts_but_catches_infra(tmp_path):
     led = tl.LedgerTail(tmp_path / "ledger.jsonl", min_interval_s=0)
     rows = [{"cell": f"c{i}", "arm": "A", "timeout": True, "void": False, "at": f"2026-10-01T00:00:{i:02d}Z"} for i in range(30)]
     (tmp_path / "ledger.jsonl").write_text("".join(json.dumps({"tag": f"c{i}.n1", "status": 200, "ts": 1.0}) + "\n" for i in range(30)))
-    res = feasibility_i1001.evaluate(rows, led, 30)
+    res = feasibility_i1001.evaluate(rows + [{"event": "infra_void_rerun", "unit": "b/t"}], led, 30)     # 事件列被略過
     assert res["timeouts"] == 30 and not res["triggered"]                  # 逾時率 100% 也不觸發（題池本來就會撞）
     rows2 = [dict(r, void=(i % 2 == 0)) for i, r in enumerate(rows)]
     assert feasibility_i1001.evaluate(rows2, led, 30)["triggered"]         # void 率 50%

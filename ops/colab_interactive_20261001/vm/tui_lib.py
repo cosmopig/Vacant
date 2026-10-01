@@ -362,11 +362,15 @@ def pane_exit_rc(pane_text: str) -> int | None:
 # ── 打字 ─────────────────────────────────────────────────────────────────────────────────────────
 
 
+_CTRL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
+
 def typing_plan(text: str) -> tuple[str, str]:
     """(模式, 實際要送的字)：單行、沒有 tab ⇒ `send-keys -l`；否則 `paste-buffer -p`（括號貼上），tab 換成 4 個空白
     （send-keys 會把 tab 吃掉當補全鍵；貼上時 pi 把 tab 轉成 4 個空白——兩邊一致）。
     第一個字元不可以是 `/` 或 `!`（會被當成指令）。"""
     t = text.replace("\r\n", "\n").replace("\r", "\n")
+    t = _CTRL_RE.sub("", t)                    # ESC 等控制字元（驗證器輸出可能帶；`ESC[201~` 會提早結束括號貼上）一律去掉，留 \n 與 \t
     if t[:1] in ("/", "!"):
         raise ValueError("typed text must not start with / or ! (pi treats it as a command)")
     t = t.replace("\t", "    ")

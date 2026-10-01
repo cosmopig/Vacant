@@ -66,11 +66,19 @@ def _group_dirs(cfg: Cfg, prefix: str, task: dict, group: str, sample: int, atte
     return out
 
 
+def append_event(cfg: Cfg, row: dict) -> None:
+    """progress.jsonl 是 append-only：除了每格的完成列，也記「搬走殘骸」「重跑」這類事件（有 `event` 欄；沒有分數）。"""
+    cfg.eval_root.mkdir(parents=True, exist_ok=True)
+    with (cfg.eval_root / "progress.jsonl").open("a") as f:
+        f.write(json.dumps({**row, "at": now()}, ensure_ascii=False) + "\n")
+
+
 def _archive_partial(cfg: Cfg, dirs: list[Path]) -> None:
     for p in dirs:
         dst = cfg.eval_root / "cells_aborted" / f"{p.name}.{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(p), str(dst))
+        append_event(cfg, {"event": "aborted_partial_moved", "cell": p.name, "to": f"cells_aborted/{dst.name}"})
         log(f"moved incomplete cell {p.name} -> cells_aborted/{dst.name}")
 
 
@@ -157,6 +165,8 @@ class Driver:
                 self.record([m for m in metas if m])
                 if void and attempt < 2:
                     attempt += 1
+                    append_event(self.cfg, {"event": "infra_void_rerun", "unit": f"{task['bank']}/{task['id']}", "group": group,
+                                            "attempt": attempt})
                     log(f"infra_void -> rerun once: {task['bank']}/{task['id']} group {group} (attempt {attempt})")
                     continue
                 return

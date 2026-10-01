@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -27,8 +28,23 @@ def tree(d: pathlib.Path) -> str:
     return m.hexdigest()
 
 
-def sh(c: str) -> str:
-    return subprocess.run(c, shell=True, capture_output=True, text=True).stdout.strip()
+def run(argv: list[str], env: dict[str, str] | None = None, last_line: bool = False) -> str:
+    """固定的指令、不經 shell（版本字串都是寫死的指令，不吃外部輸入）；跑不起來回空字串。"""
+    try:
+        r = subprocess.run(argv, capture_output=True, text=True, timeout=60,
+                           env={**os.environ, **env} if env else None)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    out = (r.stdout + (r.stderr if last_line else "")).strip()
+    return out.splitlines()[-1] if (last_line and out) else out
+
+
+def vllm_cmdline() -> str:
+    lines = [ln for ln in run(["pgrep", "-af", "vllm serve"]).splitlines() if "pgrep" not in ln]
+    return lines[0].split(" ", 1)[1] if lines and " " in lines[0] else ""
+
+
+MODEL = pathlib.Path("/content/gemma-4-12B-it-qat-w4a16-ct/model.safetensors")
 
 
 def main() -> int:
@@ -47,13 +63,16 @@ def main() -> int:
         "tasks_index_sha256": h(st / "tasks_index.json") if (st / "tasks_index.json").exists() else None,
         "staged_manifest_sha256": h(st / "MANIFEST.json") if (st / "MANIFEST.json").exists() else None,
         "selfcheck": json.loads(sc.read_text()) if sc.exists() else None,
-        "model_safetensors_sha256": sh("sha256sum /content/gemma-4-12B-it-qat-w4a16-ct/model.safetensors 2>/dev/null | cut -d' ' -f1"),
-        "vllm": sh("/content/venv-vllm/bin/python -c 'import vllm; print(vllm.__version__)' 2>/dev/null"),
-        "pi": sh("PATH=/opt/eval/node/bin:$PATH /opt/eval/pi/bin/pi --version 2>&1 | tail -1"),
-        "node": sh("/opt/eval/node/bin/node -v"), "tmux": sh("tmux -V"), "bwrap": sh("bwrap --version"),
-        "python3": sh("python3 --version"), "kernel": sh("uname -r"),
-        "gpu": sh("nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader"),
-        "vllm_cmdline": sh("pgrep -af 'vllm serve' | grep -v pgrep | head -1 | cut -d' ' -f2-"),
+        "model_safetensors_sha256": (h(MODEL) if MODEL.is_file() else ""),
+        "vllm": run(["/content/venv-vllm/bin/python", "-c", "import vllm; print(vllm.__version__)"]),
+        "pi": run(["/opt/eval/pi/bin/pi", "--version"],
+                  env={"PATH": "/opt/eval/node/bin:" + os.environ.get("PATH", "")}, last_line=True),
+        "node": run(["/opt/eval/node/bin/node", "-v"]), "tmux": run(["tmux", "-V"]),
+        "bwrap": run(["bwrap", "--version"]),
+        "python3": run(["python3", "--version"]), "kernel": run(["uname", "-r"]),
+        "gpu": run(["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
+                    "--format=csv,noheader"]),
+        "vllm_cmdline": vllm_cmdline(),
         "fixed_variables": {"model": "gemma-4-12b-it-qat (vLLM served-model-name)", "thinking": "off (proxy think/off)",
                             "instruction": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.",
                             "agent_timeout_s": 1800, "turn_cap": None, "terminal": "tmux 160x50, TERM=xterm-256color, history-limit 50000",

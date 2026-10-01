@@ -171,7 +171,9 @@ def bridge_probe(cfg: Cfg, out: Path, shim_dir: Path) -> dict:
         ws = work / f"ws_{label}"
         shutil.copytree(work / "ws", ws)
         (ws / "solution.py").write_text(RIGHT)
-        subprocess.run(["chown", "-R", "nobody:nogroup", str(ws)], capture_output=True)
+        ch = subprocess.run(["chown", "-R", "nobody:nogroup", str(ws)], capture_output=True, text=True)
+        if ch.returncode != 0:
+            res.setdefault("notes", []).append(f"chown to nobody failed ({ch.stderr.strip()[:100]}): bridge will refuse a same-account workspace")
         rh = c.eval_root / "receivers" / f"probe_{label}"
         rh.parent.mkdir(parents=True, exist_ok=True)
         rh.parent.chmod(0o700)
@@ -213,7 +215,7 @@ def score_of(cfg: Cfg, cell: str) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", type=Path, default=Path("/srv/eval/_selfcheck"))
-    ap.add_argument("--scenarios", default="a,k,r,timeout,void")
+    ap.add_argument("--scenarios", default="a,k,r,timeout,void,driver,c")
     ap.add_argument("--bin-dir", type=Path, default=HERE)
     ap.add_argument("--runs-root", type=Path, default=Path("/srv/runs"))
     ap.add_argument("--scorers", type=Path, default=None, help="含 code_suite.py 的目錄（預設 <bin>/scorers 或 ../scorers）")
@@ -226,7 +228,7 @@ def main() -> int:
     ap.add_argument("--install-env", default="")
     ap.add_argument("--wheel", default="")
     ap.add_argument("--shim-dir", type=Path, default=None)
-    ap.add_argument("--with-c", action="store_true", help="driver 情境也跑 C 線（要 wheel 與 pipx）")
+    ap.add_argument("--no-c-in-driver", action="store_true", help="driver 情境不跑 C 線（預設有 wheel 就跑，要 pipx）")
     a = ap.parse_args()
     out: Path = a.out
     out.mkdir(parents=True, exist_ok=True)
@@ -364,7 +366,8 @@ def run_driver_scenario(cfg: Cfg, task: dict, servers: Servers, a: argparse.Name
     out = cfg.eval_root
     st = out / "staged"
     shutil.rmtree(st, ignore_errors=True)
-    shutil.rmtree(cfg.cells, ignore_errors=True)
+    for stale in list(cfg.cells.glob("scd-*")) + [cfg.cells / "_run_scd"]:           # 只清這個情境自己的格子，別的情境的證據留著
+        shutil.rmtree(stale, ignore_errors=True)
     for f in ("progress.jsonl", "DRIVER_DONE", "STOP"):
         (out / f).unlink(missing_ok=True)
     tasks = []
@@ -375,7 +378,7 @@ def run_driver_scenario(cfg: Cfg, task: dict, servers: Servers, a: argparse.Name
                       "k": True, "screened": False})
     (st / "tasks_index.json").write_text(json.dumps([{k: t[k] for k in ("bank", "id", "dir", "role")} for t in tasks]))
     (st / "MANIFEST.json").write_text(json.dumps({"screen_sample": {}}))
-    with_c = bool(a.with_c)
+    with_c = bool(cfg.wheel_path()) and not a.no_c_in_driver
     arms = ["A", "C"] if with_c else ["A"]
     plan = {"schema": "i1001.plan/1", "kind": "main", "seed": 1, "arms": arms, "nested": ["R", "K"], "samples": [1],
             "k_banks": ["lcb_selfcheck"], "tasks": tasks, "estimate": {"units": 3}}

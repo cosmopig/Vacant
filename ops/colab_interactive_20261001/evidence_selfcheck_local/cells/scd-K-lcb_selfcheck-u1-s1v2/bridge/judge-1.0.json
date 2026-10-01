@@ -1,0 +1,78 @@
+{
+ "rc": 0,
+ "stderr": "",
+ "result": {
+  "outcome": "accept",
+  "reasons": [
+   "all 3 required claim(s) PASS"
+  ],
+  "coverage": {
+   "required": 3,
+   "decidable": 3,
+   "pass": 3,
+   "fail": 0,
+   "unknown": 0,
+   "conflict": 0,
+   "optional": 0
+  },
+  "contract_sha256": "9bd41c43c52b19047d05539996ed56f73e768988e05e790dc7b4f8296841ff91",
+  "artifact_sha256": "37f0357015ae5a29e22ced646ccd32a804e071a71f24fcec5cd168c299e301c7",
+  "results": [
+   {
+    "claim_id": "deliverable_present",
+    "status": "PASS",
+    "detail": "all 1 pattern(s) present",
+    "evidence": {
+     "counts": {
+      "solution.py": 1
+     },
+     "independent": true
+    },
+    "verifier": "exists",
+    "verifier_version": "2",
+    "required": true,
+    "authority": "requirement"
+   },
+   {
+    "claim_id": "no_secrets_shipped",
+    "status": "PASS",
+    "detail": "no forbidden files",
+    "evidence": {
+     "matched": [],
+     "independent": true
+    },
+    "verifier": "forbid_paths",
+    "verifier_version": "2",
+    "required": true,
+    "authority": "requirement"
+   },
+   {
+    "claim_id": "visible_acceptance",
+    "status": "PASS",
+    "detail": "1/1 checks passed",
+    "evidence": {
+     "passed": 1,
+     "total": 1,
+     "complete": true,
+     "result_sha256": "c9a9c317f5cfb68090e47f57a547010cd7150ea2b5bd9cec725fd4639fb56796",
+     "suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
+     "sandbox": "bwrap",
+     "independent": true
+    },
+    "verifier": "python_checks",
+    "verifier_version": "3",
+    "required": true,
+    "authority": "requirement"
+   }
+  ],
+  "results_sha256": "1363b2e63fa70409d026673e56c8aba7608510cd374369eb782f32a88f4ee7b2",
+  "n_files": 1,
+  "skipped": [],
+  "void": false,
+  "run_id": "6006330800114630bf82abdd658bd03f",
+  "attempt": 1,
+  "workspace_contract_matches_receiver": true,
+  "agent_visible_suite_matches_pinned": true,
+  "sandbox_backend": "bwrap"
+ }
+}

@@ -29,6 +29,8 @@ EVAL = pathlib.Path("/srv/eval")
 def evaluate(rows: list[dict], ledger: LedgerTail, window: int) -> dict:
     seen: dict[str, dict] = {}
     for r in rows:
+        if "event" in r or "cell" not in r:             # 事件列（搬走殘骸、重跑）不是格子
+            continue
         seen[r["cell"]] = r
     lines = [r for r in seen.values() if r.get("arm") in ("A", "C")]
     lines.sort(key=lambda r: r.get("at", ""))
