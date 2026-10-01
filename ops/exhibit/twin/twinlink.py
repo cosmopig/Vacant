@@ -2064,7 +2064,22 @@ def serve(store_path: pathlib.Path, port: int, bind: str = "127.0.0.1", *,
 
         def log_message(self, *a): pass  # noqa: D102, ANN002
 
-    srv = ThreadingHTTPServer((bind, port), H)
+    class _QuietSrv(ThreadingHTTPServer):
+        """客戶端中途斷線（電視重載、Wi-Fi 掉）是常態：記一行計數，不印 traceback。"""
+        daemon_threads = True
+        client_gone = 0
+
+        def handle_error(self, request, client_address):  # noqa: D102
+            exc = sys.exc_info()[1]
+            if isinstance(exc, (BrokenPipeError, ConnectionResetError,
+                                ConnectionAbortedError)):
+                self.client_gone += 1
+                sys.stderr.write("[twinlink serve] 客戶端中途斷線（%s）累計 %d 次，略過\n"
+                                 % (type(exc).__name__, self.client_gone))
+                return
+            super().handle_error(request, client_address)
+
+    srv = _QuietSrv((bind, port), H)
     print(f"twinlink serve（唯讀）http://{bind}:{port}/visitors.json  db={store_path}"
           f"  withdraw={'開' if allow_withdraw else '關'}"
           f"{'（需 token）' if withdraw_token else ''}", flush=True)

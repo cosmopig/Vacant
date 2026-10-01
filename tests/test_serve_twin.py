@@ -1198,3 +1198,45 @@ def test_a_stale_twin_cell_is_not_packed(tmp_path):
         assert any("還沒寫完" in e for e in stage.live_errors)
     finally:
         srv.server_close()
+
+
+# ── 長跑穩定性：客戶端斷線不淹 journal ───────────────────────────
+def test_client_disconnect_is_a_counted_line_not_a_traceback(server, capsys):
+    """手機掃完就走／電視頁重載 ⇒ BrokenPipe／ConnectionReset 是常態。
+    只准記一行計數；其他例外（真的錯）照舊印 traceback。"""
+    import socket
+    client, stage, _ = server
+    host, port = client.base[len("http://"):].split(":")
+    S.Handler.quiet = False
+    try:
+        # 送出請求後立刻 RST 關掉：伺服器寫回應時就會撞 BrokenPipe／ConnectionReset
+        for _ in range(20):
+            s = socket.create_connection((host, int(port)))
+            s.sendall(b"GET /live/events.jsonl HTTP/1.1\r\nHost: x\r\n\r\n")
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, b"\x01\x00\x00\x00\x00\x00\x00\x00")
+            s.close()
+        time.sleep(0.5)
+    finally:
+        S.Handler.quiet = True
+    err = capsys.readouterr().err
+    assert "Traceback" not in err
+    # 伺服器仍然活著
+    assert client.get_json("/state")["v"] == 2
+
+
+def test_handle_error_swallows_only_client_gone(capsys):
+    srv = S.QuietThreadingHTTPServer.__new__(S.QuietThreadingHTTPServer)
+    srv.client_gone = 0
+    for exc in (BrokenPipeError(), ConnectionResetError(), ConnectionAbortedError()):
+        try:
+            raise exc
+        except OSError:
+            srv.handle_error(None, ("127.0.0.1", 1))
+    assert srv.client_gone == 3
+    assert "Traceback" not in capsys.readouterr().err
+    try:
+        raise ValueError("真的錯")
+    except ValueError:
+        srv.handle_error(None, ("127.0.0.1", 1))
+    assert srv.client_gone == 3                      # 真的錯不計入
+    assert "ValueError" in capsys.readouterr().err   # 且照舊印 traceback
