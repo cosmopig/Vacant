@@ -1071,3 +1071,97 @@ def test_tui_cell_helpers(tmp_path):
     assert tui_cell.parse_score(tmp_path / "s.json") == {"pass": True}
     (tmp_path / "s2.json").write_text("{\"nopass\": 1}\n")
     assert tui_cell.parse_score(tmp_path / "s2.json") is None
+
+
+# ── 本機端到端的零件（local_e2e/）：按格子編劇的替身與 tag_front ─────────────────────────────────────
+
+def _e2e():
+    d = str(CI / "local_e2e")
+    if d not in sys.path:
+        sys.path.insert(0, d)
+    import e2e_stub
+    import tag_front
+    return e2e_stub, tag_front
+
+
+def test_e2e_stub_tag_parsing_and_rule_selection():
+    es, _tf = _e2e()
+    m = es.TAG_RE.match("t2-K-lcb_v3-lcb_2808-s1v2.n3")
+    assert (m["prefix"], m["arm"], m["bank"], m["task"], m["att"], m["n"]) == ("t2", "K", "lcb_v3", "lcb_2808", "2", "3")
+    m = es.TAG_RE.match("t2s-A-polyglot_py-pg_affine_cipher-s1.n1")
+    assert (m["prefix"], m["bank"], m["task"], m["att"]) == ("t2s", "polyglot_py", "pg_affine_cipher", None)
+    assert es.TAG_RE.match("garbage") is None
+    info = {"file": "solution.py", "right": "R\n", "wrong": "W\n"}
+    assert [list(x)[0] for x in es.steps_for("right", info, 9)] == ["read", "read", "write", "text"]
+    assert es.steps_for("wrong", info, 9)[2]["write"] == ["solution.py", "W\n"]
+    assert [list(x)[0] for x in es.steps_for("claim", info, 9)] == ["read", "read", "text"]      # 說做完卻沒寫
+    assert es.steps_for("hang", info, 9)[1]["delay_s"] == 9
+    assert es.steps_for("claim", info, 9, sendback=True)[0]["write"] == ["solution.py", "R\n"]  # Vacant 送回之後寫對的
+
+
+def test_e2e_stub_choose_uses_the_tag_and_counts_injected_errors(tmp_path):
+    es, _tf = _e2e()
+    es.CFG.clear()
+    es.SEEN.clear()
+    es.CFG.update({"log": str(tmp_path / "log.jsonl"), "hang_s": 5, "default_mode": "right",
+                   "tasks": {"lcb_v1/lcb_1": {"file": "solution.py", "right": "R", "wrong": "W"}},
+                   "rules": [{"tag": r"^t-A-lcb_v1-lcb_1-s1\.n1$", "mode": "claim", "fail_first": 2, "status": 500, "note": "x"}]})
+    msgs = [{"role": "system", "content": "s"}, {"role": "user", "content": "go"}]
+    es.TL.tag = "t-A-lcb_v1-lcb_1-s1.n1"
+    assert es.choose(msgs, [])[2] == {"error": 500} and es.choose(msgs, [])[2] == {"error": 500}      # 前 2 通注入 500
+    assert "read" in es.choose(msgs, [])[2]                                                           # 第 3 通起照劇本（claim：先讀檔）
+    es.TL.tag = "t-C-lcb_v1-lcb_1-s1.n1"                                                              # 沒有規則 ⇒ 預設 right
+    assert "read" in es.choose(msgs, [])[2]
+    tool = msgs + [{"role": "assistant", "content": "x"}, {"role": "tool", "content": "a"}, {"role": "tool", "content": "b"}]
+    assert "write" in es.choose(tool, [])[2]                                                          # right：第 3 步寫檔
+    es.TL.tag = "t-A-lcb_v1-lcb_1-s1.n1"
+    assert es.choose(tool, [])[2].get("text", "").startswith("I have written")                      # claim：第 3 步只說已寫好
+    es.TL.tag = "unparseable"
+    assert es.choose(msgs, [])[2] == {"text": "Done."}
+    rows = [json.loads(x) for x in (tmp_path / "log.jsonl").read_text().splitlines()]
+    assert rows[0]["step"] == "error" and rows[0]["req_in_tag"] == 1 and rows[2]["tag"] == "t-A-lcb_v1-lcb_1-s1.n1"
+
+
+def test_tag_front_writes_the_route_tag_into_the_request_body_and_passes_everything_else_through():
+    import http.client
+    import http.server
+    _es, tf = _e2e()
+    seen = {}
+
+    class Up(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def do_POST(self):  # noqa: N802
+            n = int(self.headers["Content-Length"])
+            seen["path"], seen["body"] = self.path, json.loads(self.rfile.read(n))
+            out = b"data: {}\n\ndata: [DONE]\n\n"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            self.wfile.write(out)
+
+    up = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Up)
+    threading.Thread(target=up.serve_forever, daemon=True).start()
+    tf.TARGET = ("127.0.0.1", up.server_address[1])
+    fr = http.server.ThreadingHTTPServer(("127.0.0.1", 0), tf.H)
+    threading.Thread(target=fr.serve_forever, daemon=True).start()
+    try:
+        c = http.client.HTTPConnection("127.0.0.1", fr.server_address[1], timeout=10)
+        c.request("POST", "/t/t2-A-lcb_v1-lcb_1-s1.n1/up/g4/think/off/api/v1/chat/completions", body=json.dumps({"model": "m", "stream": True}),
+                  headers={"Content-Type": "application/json"})
+        r = c.getresponse()
+        assert r.status == 200 and b"[DONE]" in r.read()
+    finally:
+        fr.shutdown()
+        up.shutdown()
+    assert seen["path"] == "/t/t2-A-lcb_v1-lcb_1-s1.n1/up/g4/think/off/api/v1/chat/completions"        # 路徑原樣（帳本標籤不變）
+    assert seen["body"] == {"model": "m", "stream": True, "user": "t2-A-lcb_v1-lcb_1-s1.n1"}
+
+
+def test_launch_record_fixed_variables_come_from_the_driver_args_not_from_a_constant():
+    import launch_record
+    d = launch_record.fixed_variables([])
+    assert d["agent_timeout_s"] == 1800 and d["idle_s"] == 15.0 and d["max_units"] is None
+    d = launch_record.fixed_variables(["--agent-timeout", "60", "--idle-s=4", "--max-units", "8", "--proxy", "http://x"])
+    assert d["agent_timeout_s"] == 60 and d["idle_s"] == 4.0 and d["max_units"] == 8

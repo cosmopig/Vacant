@@ -94,6 +94,13 @@ def make_task(root: Path, scorers: Path) -> dict:
             "k": True, "screened": False}
 
 
+def port_in_use(port: int) -> bool:
+    import socket
+    with socket.socket() as s:
+        s.settimeout(0.3)
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
 def wait_port(port: int, secs: float = 10.0) -> bool:
     import socket
     t0 = time.time()
@@ -114,6 +121,9 @@ class Servers:
 
     def start_stub(self, script: dict) -> None:
         self.stop_stub()
+        # 埠被別人佔著（例如上一個被殺掉的 selfcheck 留下的替身）時，新的替身綁不上去、而 wait_port 會因為舊的在聽而成功——
+        # 結果是整個情境在跟「舊腳本的舊替身」講話（2026-10-01 本機：k 情境的 A 寫對了），所以先確認埠是空的
+        assert not port_in_use(self.stub_port), f"stub port {self.stub_port} is already in use (stale stub from a killed selfcheck?)"
         (self.out / "stub_script.json").write_text(json.dumps(script))
         env = {**os.environ, "NO_PROXY": "127.0.0.1,localhost", "no_proxy": "127.0.0.1,localhost"}
         self.stub = subprocess.Popen([sys.executable, str(self.bin_dir / "smoke_stub.py"), "--port", str(self.stub_port),
@@ -132,6 +142,7 @@ class Servers:
 
     def start_proxy(self) -> None:
         pdir = self.proxy_dir
+        assert not port_in_use(self.proxy_port), f"proxy port {self.proxy_port} is already in use (stale proxy from a killed selfcheck?)"
         pdir.mkdir(parents=True, exist_ok=True)
         (self.out / "proxy.json").write_text(json.dumps({
             "models": {"gemma-4-12b-it-qat": {}}, "upstreams": {"g4": f"http://127.0.0.1:{self.stub_port}"},

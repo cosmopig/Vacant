@@ -63,6 +63,7 @@ tmux 160x50／`TERM=xterm-256color`／history-limit 50000、`PI_OFFLINE=1`（所
 | `stub_model.py`、`pi_tui_probe.py`、`run_probe_suite.sh`、`evidence_pi_tui/` | pi TUI 的機制探針（7 情境） |
 | `evidence_selfcheck_local/` | 這個容器上 `vm_selfcheck.py` 七個情境的結果與各情境的格子紀錄（機制替身；**不是**真模型的證據） |
 | `evidence_launch_rehearsal_local/` | 本機**全套排練**：bundle→deploy→selfcheck→`launch_i1001.sh`（`--max-units 2`，替身模型當上游）→ driver／packer／finalize／analyze 一路走完的紀錄（見第九節） |
+| `local_e2e/` | **本機端到端**（真題目、真計分器、真 bridge、真 pipx 裝的 Vacant wheel、真 pi TUI；只有模型是按格子編劇的替身）：`e2e_stub.py`（按標籤編劇的替身）、`tag_front.py`（把代理標籤寫進請求本文給替身讀）、`build_e2e_inputs.py`（子集 staged 樹＋劇本＋預期，**含參考答案，只落在 scratchpad**）、`e2e_services.sh`、`kill_resume.py`、`verify_e2e.py`（逐項核對）、`fake_colab.sh`（假的 colab，驗 sync／autostop）。結果見第十節與 `LOCAL_E2E.md`、`evidence_local_e2e/` |
 | `tests/test_colab_interactive_20261001.py` | 純函式測試（計畫、完成偵測在錄好的 session 檔上、分析、排程、同步／關機腳本、bundle） |
 
 ## 五、操作順序
@@ -121,6 +122,19 @@ void 一直出現＝先看 `void_reason`（`footer_timeout`＝TUI 沒起來、`p
 2. `python3 analyze_i1001.py --chunks ~/Vacant_colab_raw/i1001 --out <目錄> --prefix i1` → `report.md`／`report.json`／`cells.jsonl`。先看 `void_final`、`audit`（`late_write_after_done` 非 0 ⇒ IDLE_S 太短，結果要保留這句）。
 3. 結果與報告進 repo；原始紀錄**不進 repo**（含題目內容與模型輸出）。
 
+### 7. driver 被殺了（OOM、誤殺）怎麼辦——重啟，不要重發射
+`launch_i1001.sh` 把 driver 的指令存成 `/srv/eval/driver_cmd_<前綴>.sh`。driver 死了、VM 還活著時：
+```bash
+setsid nohup bash /srv/eval/driver_cmd_i1.sh >> /srv/eval/driver_i1.log 2>&1 < /dev/null &
+```
+（**不要**再跑 `launch_i1001.sh`：它會把進度檔搬走、再多起一組 packer／feasibility／finalize。packer／feasibility／finalize 本來就還在跑。）
+重啟時 driver 自己做的事：拿 `driver.lock`（同一個 eval 根只准一個 driver，第二個直接結束、退出碼 4）→ **清上一個 driver 的殘骸**
+（它的 tmux server 與 pi 不會跟著死；不清的話它們會用**同一個代理標籤**繼續打模型，把帳本與模型端的計數混在一起；日誌有 `startup sweep: {...}`，
+`progress.jsonl` 有 `startup_sweep` 事件）→ 已經 DONE 的單位一格都不重跑 → 沒寫完的單位整條線（A／R／K 或 C）搬到 `cells_aborted/`、從頭重跑
+（同一個格子名稱；帳本只算「這一段 session 起跑之後」的列，所以上一次被殺的那次的 5xx 與通數不會算進來）。
+⚠ `cells_aborted/` **不在 packer 的打包範圍**（packer 只收 `cells/*/DONE`）：被殺的那幾格的殘骸只留在 VM 上，要的話收工前手動備份。
+⚠ **整台 VM 重開／被回收**（Colab 閒置或運算單位用完）＝ `/srv/eval` 全沒了，這個重啟程序不適用；只剩 Drive 鏡像裡已打包的 chunk。
+
 ## 六、為什麼這樣設計（會影響技術決策的幾條）
 
 - **完成偵測**（互動式沒有「行程結束」）：`DoneDetector`＝session jsonl 的結尾是最終（assistant `stop`／`length`／`aborted`，或重試用完的 `error`）
@@ -130,6 +144,7 @@ void 一直出現＝先看 `void_reason`（`footer_timeout`＝TUI 沒起來、`p
 - **頁腳才打字**：`(harbor-endpoint) <模型>` 出現前送的鍵會被丟掉（pi 進 raw mode 時清 stdin）。打字後 10 秒內沒看到 `Working`（或 session／帳本動靜）會再按一次 Enter
   （空編輯器上 Enter 什麼都不做）；`submit_unconfirmed` 記進 meta。第一則 user 訊息必須逐字等於打進去的字，否則該段 void（`input_mismatch`）。
 - **信任對話框**：工作區有 `.pi/settings.json`、`.pi/extensions` 等會讓互動 pi 停在「Trust project folder?」。出現就選「這次不信任」（Down×4＋Enter，與 `--print` 靜默略過等價），記 `trust_dialog`。
+- **計分器壞了≠agent 答錯**：重用的任務題庫計分器把任何例外（含圍牆裡 pandas／dateutil 匯入失敗）收成 `pass:false, note:scorer_error…`；`tui_cell.parse_score` 把它擋成 void（原因 `scorer_error: …`），不算任何一組的失敗。`deploy_i1001.sh` 另外用「沒有特權、乾淨環境的使用者」檢查 pandas／numpy（root 的 user site 在圍牆裡看不到）。
 - **infra_void**：footer 逾時／打字不符／最終 assistant 條目是 5xx／429／408／402／串流中斷／代理帳本任何一通非 200 或 stream_error／沒有任何模型呼叫／pi 在第一通請求前就死了／
   逾時但沒有任何一通完成／C 安裝失敗／bridge prepare 或 release 失敗／工具例外。**不算任何一組的失敗**；整條線以 `v2` 重跑一次，第二次仍 void 就留著 void。
   `length`（被 max tokens 切斷）與其他 4xx（例如 400 上下文太長）是這一跑自己的結果，不是 void。
@@ -143,7 +158,7 @@ void 一直出現＝先看 `void_reason`（`footer_timeout`＝TUI 沒起來、`p
 1. **bridge 的 bwrap 在 Colab 上**：`--unshare-all --proc /proc` 可能不被允許；`vm_selfcheck.py` 會量，墊片是我在本機用「會拒絕 `--proc` 的假 bwrap」模擬驗過的，**沒有在真的 Colab 核心上跑過**。
 2. **tmux／pi 在 Colab 的版本與行為**：本機是 tmux 3.4；Colab 的 apt 可能給別的版本。`vm_selfcheck.py` 的 `a` 情境就是這個檢查。
 3. **真 vLLM 下的延遲分布**：IDLE_S＝15 秒來自替身模型；真模型下「最終 stop → 下一個條目」的間隔分布沒有量過。自動壓縮（compaction）在最終 stop 之後會不會出現沒量過。
-4. **信任對話框的按鍵**（Down×4＋Enter）：筆記裡量過選單文字，沒有在真 pi 上按過。
+4. **信任對話框的按鍵**（Down×4＋Enter）：筆記裡量過選單文字，沒有在真 pi 上按過；這個題池（含 bridge 寫的 `.vacant/`）在本機端到端的 31 段 TUI 裡一次都沒觸發過，所以按鍵沒驗、也不會用到。
 5. **Vacant 在「零工具呼叫就說做完」時看不到東西**（筆記 §4 的 n=1 觀察）：C 組對這種跑沒有作用，不是這批的 bug。
 6. **替身模型不解題**：`vm_selfcheck.py` 驗的是管線與紀錄，不是 agent 的表現。
 7. **成本**：未預測。`plan_builder` 對真的 staged 樹算出的**上限**（每段都撞 1800 秒，不是預測）：篩選 30 單位＝30 段、900 session‑分鐘；
@@ -175,3 +190,10 @@ bash /opt/eval/bin/launch_i1001.sh t2 4 <時限> <鏡像目錄> --max-units 2
 selfcheck 的 driver 情境會刪掉別的情境的紀錄、`progress.jsonl` 的事件列沒被 selfcheck／feasibility 略過。
 **排練不代表 Colab 上一定過**：沒有 GPU、沒有真 vLLM、tmux 3.4 不等於 Colab 的版本、bridge 的 bwrap /proc 只在本機用「會拒絕 `--proc` 的假 bwrap」模擬過（墊片路徑通）。
 
+## 十、本機端到端（2026-10-01；**真題目、真計分器、真 bridge、真 Vacant wheel、真 pi TUI**，只有模型是按格子編劇的替身）
+
+完整指令、劇本、逐格觀察與缺陷清單在 `LOCAL_E2E.md`（證據：`evidence_local_e2e/`）。一句話：`build_bundle → deploy → vm_selfcheck → launch_i1001.sh --phase auto`
+整條走完（篩選 12 段 → dabench 9/10 被天花板規則丟掉 → 主跑 5 單位＝3 LCB＋databench＋polyglot_py，含 infra_void 重跑、driver 被 SIGKILL 後重啟、時限已過的發射），
+`verify_e2e.py` 210／210（對紀錄做 9 種破壞全被抓到）；第 1 次跑找到的 8 個缺陷已修（計分器 `scorer_error` 被當成 agent 答錯、driver 殘骸與同標籤帳本混算、C 組紀錄裡的私鑰、
+發射紀錄寫死 1800 秒、重啟程序沒寫、selfcheck 對著殘留替身講話…）。⚠ 這驗的是管線，不是 agent 的表現；真 vLLM 的延遲分布、Colab 上的 bwrap／tmux／Drive 都沒驗（`LOCAL_E2E.md` 第七節）。
+**發射前請在 Colab 上再跑一次 `deploy_i1001.sh`（它現在會用乾淨環境的使用者檢查 pandas／numpy）與 `vm_selfcheck.py`。**

@@ -111,7 +111,8 @@ def ceiling_decision(outcomes: dict[str, list[dict]], expected: dict[str, int] |
                       f"undecided, bank kept")
         else:
             reason = (f"A passed {passes}/{n_exp} (< {thr}): {len(unsolved)} unsolved task(s) seen without Vacant; bank kept"
-                      + (f"; {len(voids)} void cell(s) counted as not-pass" if voids else ""))
+                      + (f"; {len(voids)} void cell(s) counted as not-pass" if voids else "")
+                      + (f"; {len(missing)} screened task(s) were not run (stop/deadline) and cannot reach {thr}" if missing else ""))
         banks[bank] = {"dropped": dropped, "passes": passes, "n": n_exp, "voids": voids, "missing": missing,
                        "unsolved": unsolved, "reason": reason}
     return {"schema": "i1001.ceiling_decision/1", "rule": {"n": CEILING_N, "pass_ge": thr}, "banks": banks,

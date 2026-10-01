@@ -39,6 +39,23 @@ def run(argv: list[str], env: dict[str, str] | None = None, last_line: bool = Fa
     return out.splitlines()[-1] if (last_line and out) else out
 
 
+def fixed_variables(extra: list[str]) -> dict:
+    """發射紀錄裡的「固定變數」。⚠ 牆鐘上限與 IDLE_S 取自**實際傳給 driver 的參數**（沒傳＝預設 1800／15），不是寫死的字串：
+    2026-10-01 本機端到端用 `--agent-timeout 60` 跑，舊版紀錄仍寫 1800——紀錄說謊比沒有紀錄更糟。"""
+    def opt(name: str, default):
+        for i, a in enumerate(extra):
+            if a == name and i + 1 < len(extra):
+                return type(default)(extra[i + 1])
+            if a.startswith(name + "="):
+                return type(default)(a.split("=", 1)[1])
+        return default
+    return {"model": "gemma-4-12b-it-qat (vLLM served-model-name)", "thinking": "off (proxy think/off)",
+            "instruction": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.",
+            "agent_timeout_s": opt("--agent-timeout", 1800), "idle_s": opt("--idle-s", 15.0), "max_units": opt("--max-units", 0) or None,
+            "turn_cap": None, "terminal": "tmux 160x50, TERM=xterm-256color, history-limit 50000",
+            "pi_env": "PI_OFFLINE=1 (all arms)", "isolation": "fresh Linux user + bwrap per cell (sandbox.sh)"}
+
+
 def vllm_cmdline() -> str:
     lines = [ln for ln in run(["pgrep", "-af", "vllm serve"]).splitlines() if "pgrep" not in ln]
     return lines[0].split(" ", 1)[1] if lines and " " in lines[0] else ""
@@ -49,6 +66,7 @@ MODEL = pathlib.Path("/content/gemma-4-12B-it-qat-w4a16-ct/model.safetensors")
 
 def main() -> int:
     prefix, slots, deadline, mirror = sys.argv[1:5]
+    extra = sys.argv[5:]
     E = pathlib.Path("/srv/eval")
     st = E / "staged"
     sc = E / "_selfcheck" / "selfcheck.json"
@@ -73,10 +91,8 @@ def main() -> int:
         "gpu": run(["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
                     "--format=csv,noheader"]),
         "vllm_cmdline": vllm_cmdline(),
-        "fixed_variables": {"model": "gemma-4-12b-it-qat (vLLM served-model-name)", "thinking": "off (proxy think/off)",
-                            "instruction": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.",
-                            "agent_timeout_s": 1800, "turn_cap": None, "terminal": "tmux 160x50, TERM=xterm-256color, history-limit 50000",
-                            "pi_env": "PI_OFFLINE=1 (all arms)", "isolation": "fresh Linux user + bwrap per cell (sandbox.sh)"}}
+        "driver_extra_args": extra,
+        "fixed_variables": fixed_variables(extra)}
     (E / "env_manifest.json").write_text(json.dumps(rec, indent=1) + "\n")
     (E / f"launch_record_{prefix}.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps({k: rec[k] for k in ("prefix", "launched", "slots", "deadline", "pi", "tmux", "vllm")}))

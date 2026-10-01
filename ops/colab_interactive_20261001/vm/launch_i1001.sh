@@ -18,7 +18,7 @@ if [ -f $E/progress.jsonl ] || [ -f $E/DRIVER_DONE ] || [ -f $E/STOP ]; then
   mkdir -p $E/prev/$TS && for f in progress.jsonl DRIVER_DONE STOP ALL_DONE feasibility_i1001.json; do [ -e $E/$f ] && mv $E/$f $E/prev/$TS/ || true; done
   for f in PACKER_DONE MIRROR_OK MIRROR_BAD; do [ -e $E/archive/$f ] && mv $E/archive/$f $E/prev/$TS/ || true; done
 fi
-python3 /opt/eval/bin/launch_record.py "$P" "$SLOTS" "$DL" "$MIRROR" | head -3
+python3 /opt/eval/bin/launch_record.py "$P" "$SLOTS" "$DL" "$MIRROR" "$@" | head -3
 cd $E
 # packer_i1001.py＝packer.py 的外殼（driver 一寫 DRIVER_DONE 就收尾，不多睡最多 10 分鐘）；`if` 包起來，免得 `||` 清單的子殼抓著輸出管線不放
 if ! pgrep -f "opt/eval/bin/packer_i1001.py" >/dev/null; then
@@ -27,7 +27,12 @@ fi
 setsid nohup python3 /opt/eval/bin/feasibility_i1001.py --prefix "$P" >> $E/feasibility_$P.log 2>&1 < /dev/null &
 setsid nohup python3 /opt/eval/bin/finalize_vm.py --mirror "$MIRROR" >> $E/finalize_$P.log 2>&1 < /dev/null &
 SHIMARG=(); [ -n "$SHIM" ] && SHIMARG=(--shim-dir "$SHIM")
-setsid nohup python3 /opt/eval/bin/driver_i1001.py --phase auto --slots "$SLOTS" --prefix "$P" --deadline "$DL" \
-  --logfile $E/driver_$P.log "${SHIMARG[@]}" "$@" >> $E/driver_$P.log 2>&1 < /dev/null &
+# driver 的指令存成檔：driver 被殺（OOM、誤殺）後的重啟就是 `setsid nohup bash $E/driver_cmd_$P.sh >> $E/driver_$P.log 2>&1 < /dev/null &`
+# ——同一條指令、同一個前綴；driver 啟動時自己會先清掉上一個 driver 的殘骸（tmux／pi／cell 使用者），已完成的格子不會重跑（RUNBOOK 第五節-7）
+CMDF=$E/driver_cmd_$P.sh
+{ echo '#!/usr/bin/env bash'
+  printf 'exec python3 /opt/eval/bin/driver_i1001.py --phase auto --slots %q --prefix %q --deadline %q --logfile %q' "$SLOTS" "$P" "$DL" "$E/driver_$P.log"
+  EXTRA=("${SHIMARG[@]}" "$@"); if [ ${#EXTRA[@]} -gt 0 ]; then printf ' %q' "${EXTRA[@]}"; fi; echo; } > "$CMDF"
+setsid nohup bash "$CMDF" >> $E/driver_$P.log 2>&1 < /dev/null &
 sleep 3; pgrep -af "opt/eval/bin/(packer_i1001|feasibility_i1001|finalize_vm|driver_i1001)" | cut -c1-140
 echo LAUNCHED $P
