@@ -20,7 +20,7 @@
 /app
 ↑10 ↓5 0.0%/128k (auto)                                                                                                     (harbor-endpoint) gemma-4-12b-it-qat
 
-To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f830-d1f7-72e8-b5e1-46d954708b76
+To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f847-5b5d-731d-a570-00b7f04be7c5
 __PANE_EXIT_0__
 
 

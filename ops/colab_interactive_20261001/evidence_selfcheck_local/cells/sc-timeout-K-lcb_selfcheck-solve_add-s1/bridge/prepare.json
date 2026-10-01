@@ -6,11 +6,11 @@
   "mode": "conform",
   "contract": "/srv/runs/sc-timeout-A-lcb_selfcheck-solve_add-s1/app/.vacant/contract.json",
   "receiver_contract": "/srv/eval/_selfcheck/eval/receivers/sc-timeout-A-lcb_selfcheck-solve_add-s1/contract.json",
-  "run_id": "c89e8457ba4e42ac83a14615741a460f",
+  "run_id": "5f245c98f8b64e7ab224e540179fa397",
   "insecure_same_account": false,
   "evaluator_euid": 0,
   "sandbox_backend": "bwrap",
-  "contract_sha256": "a1dc432e35005f954fd0646c00071f11434dc846ec90f16fca0d0d51ee2b247f",
+  "contract_sha256": "df3be56d095103fd47dc465b9dfd0ad3d61b042a5992bc1b3001bb5204edb987",
   "task_id": "sc-timeout-A-lcb_selfcheck-solve_add-s1",
   "suite": "/srv/eval/_selfcheck/eval/receivers/sc-timeout-A-lcb_selfcheck-solve_add-s1-suite",
   "suite_sha256": "457db068f840ff17a90fc9fc4b39d25be33ca3748c29f3852fc362e425ec3042",
@@ -21,6 +21,6 @@
   "stop_check": false,
   "submit_on_end": false,
   "receiver_intake_root": "/srv/eval/_selfcheck/eval/receivers/sc-timeout-A-lcb_selfcheck-solve_add-s1/intake",
-  "lock_signer": "5de24b70034d0549e3cefbaa7ba2cdb4995a0f342b9da204467006601cbaa35a"
+  "lock_signer": "04297cd733f7448f814b74e2c9d0a0dfc88e5dc37beab1d81051143edffe9781"
  }
 }

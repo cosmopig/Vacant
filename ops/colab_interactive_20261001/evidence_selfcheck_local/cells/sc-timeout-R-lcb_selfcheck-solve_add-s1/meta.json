@@ -14,7 +14,7 @@
  "tag": "sc-timeout-R-lcb_selfcheck-solve_add-s1",
  "model": "gemma-4-12b-it-qat",
  "upstream": "g4",
- "user": "a000090",
+ "user": "a000013",
  "interactive": true,
  "ui": "pi TUI in tmux 160x50",
  "idle_s": 4.0,
@@ -22,14 +22,14 @@
  "pi_version": "0.87.1",
  "wheel": null,
  "deliverable": "solution.py",
- "started": "2026-10-01T15:59:22Z",
+ "started": "2026-10-01T16:23:59Z",
  "void": false,
  "void_reason": null,
  "shared_session1_with": "sc-timeout-A-lcb_selfcheck-solve_add-s1",
  "retry_reasons": [
   "timeout"
  ],
- "ended": "2026-10-01T15:59:57Z",
+ "ended": "2026-10-01T16:24:35Z",
  "sessions": [
   {
    "n": 1,
@@ -39,11 +39,11 @@
    "typing_mode": "line",
    "text_chars": 102,
    "text_sha256": "6afedeac36c8e57807c5469ebbcfaf26b1cdf336483a1a251774ebb483f107c6",
-   "started": "2026-10-01T15:59:22Z",
+   "started": "2026-10-01T16:23:59Z",
    "trust_triggers": [],
    "trust_dialog": null,
    "ready": true,
-   "ready_s": 0.84,
+   "ready_s": 0.85,
    "idle_s": 4.0,
    "agent_timeout_s": 25,
    "timeout": true,
@@ -57,8 +57,8 @@
    "exit_s": null,
    "pane_exit_early_rc": null,
    "leftover_procs": 0,
-   "ended": "2026-10-01T15:59:49Z",
-   "wall_s": 27.2,
+   "ended": "2026-10-01T16:24:26Z",
+   "wall_s": 27.5,
    "rc": 124,
    "final_state": "running",
    "entries": 7,
@@ -69,14 +69,14 @@
    "max_gap_after_final_s": null,
    "typed_ok": true,
    "ledger": {
-    "calls": 5,
+    "calls": 1,
     "non200": 0,
     "stream_errors": 0,
-    "prompt_tokens": 50,
-    "completion_tokens": 25,
+    "prompt_tokens": 10,
+    "completion_tokens": 5,
     "cached_tokens": 0,
     "statuses": {
-     "200": 5
+     "200": 1
     }
    },
    "void": false,
@@ -91,11 +91,11 @@
    "typing_mode": "line",
    "text_chars": 102,
    "text_sha256": "6afedeac36c8e57807c5469ebbcfaf26b1cdf336483a1a251774ebb483f107c6",
-   "started": "2026-10-01T15:59:49Z",
+   "started": "2026-10-01T16:24:27Z",
    "trust_triggers": [],
    "trust_dialog": null,
    "ready": true,
-   "ready_s": 1.04,
+   "ready_s": 0.84,
    "idle_s": 4.0,
    "agent_timeout_s": 25,
    "timeout": false,
@@ -106,10 +106,10 @@
    "late_write_after_done": false,
    "exit_clean": true,
    "exit_rc": 0,
-   "exit_s": 0.24,
+   "exit_s": 0.23,
    "pane_exit_early_rc": null,
    "leftover_procs": 0,
-   "ended": "2026-10-01T15:59:57Z",
+   "ended": "2026-10-01T16:24:34Z",
    "wall_s": 7.6,
    "rc": 0,
    "final_state": "final",
@@ -121,14 +121,14 @@
    "max_gap_after_final_s": null,
    "typed_ok": true,
    "ledger": {
-    "calls": 6,
+    "calls": 2,
     "non200": 0,
     "stream_errors": 0,
-    "prompt_tokens": 60,
-    "completion_tokens": 30,
+    "prompt_tokens": 20,
+    "completion_tokens": 10,
     "cached_tokens": 0,
     "statuses": {
-     "200": 6
+     "200": 2
     }
    },
    "void": false,
@@ -138,12 +138,12 @@
  "n_sessions": 2,
  "rc": 0,
  "timeout": false,
- "wall_s": 34.8,
+ "wall_s": 35.1,
  "done_reason": "idle_final",
  "score_rc": 0,
  "leftover_procs": 0,
  "delivered": true,
  "scored": true,
  "retry_needed": true,
- "score_user": "s000091"
+ "score_user": "s000014"
 }
