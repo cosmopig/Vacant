@@ -551,6 +551,39 @@ def test_feasibility_ignores_timeouts_but_catches_infra(tmp_path):
     assert feasibility_i1001.evaluate(c_rows, tl.LedgerTail(tmp_path / "none.jsonl", 0), 30)["triggered"]   # C 安裝失敗 ≥ 3
 
 
+def test_packer_wrapper_finishes_right_after_driver_done(tmp_path, monkeypatch):
+    """packer_i1001：driver 一寫 DRIVER_DONE 就收尾（packer.py 自己的迴圈會多睡最多一個 interval）；打包內容仍是 packer.py 的原函式。"""
+    import packer
+    import packer_i1001
+    ev = tmp_path / "eval"
+    (ev / "cells" / "c1").mkdir(parents=True)
+    (ev / "cells" / "c1" / "meta.json").write_text("{}")
+    (ev / "cells" / "c1" / "DONE").write_text("x")
+    (ev / "cells" / "c2").mkdir()                          # 沒有 DONE：不打包
+    (ev / "cells" / "c2" / "meta.json").write_text("{}")
+    (ev / "progress.jsonl").write_text("{}\n")
+    monkeypatch.setattr(packer, "EVAL", ev)
+    monkeypatch.setattr(packer, "ARC", ev / "archive")
+    monkeypatch.setattr(packer, "PROXY", ev / "proxy")
+    mir = tmp_path / "mirror"
+    th = threading.Thread(target=packer_i1001.run, kwargs={"interval": 600, "mirror": mir, "poll_s": 0.1, "final_sleep": 0.2})
+    th.start()
+    time.sleep(1.0)                                         # 第一包（c1）已經打好、現在在睡 600 秒的 interval 裡
+    assert (ev / "archive" / "chunk_0001.tar.xz").exists() and not (ev / "archive" / "PACKER_DONE").exists()
+    t0 = time.time()
+    (ev / "DRIVER_DONE").write_text("x")
+    th.join(20)
+    assert not th.is_alive() and time.time() - t0 < 10     # 不是等 600 秒
+    assert (ev / "archive" / "PACKER_DONE").exists()
+    rows = (ev / "archive" / "MANIFEST.tsv").read_text().splitlines()
+    assert rows[0].startswith("chunk_0001.tar.xz\t") and len(rows) == 2
+    with tarfile.open(ev / "archive" / "chunk_0001.tar.xz") as t:
+        names = t.getnames()
+    assert "cells/c1/DONE" in names and not any(n.startswith("cells/c2") for n in names) and "progress.jsonl" in names
+    assert (mir / "chunk_0001.tar.xz").exists() and (mir / "MANIFEST.tsv").exists()            # Drive 鏡像
+    assert finalize_vm.verify_mirror(ev / "archive" / "MANIFEST.tsv", mir)["bad"] == []
+
+
 def test_finalize_verify_mirror(tmp_path):
     arc, mir = tmp_path / "arc", tmp_path / "mir"
     arc.mkdir()
