@@ -186,11 +186,17 @@ def twin_stack(tmp_path):
     # 用一個空的 ProxyHandler 讓量具本身不參與測量（venue_check.sh 走 curl，不受影響）。
     _opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
+    last_err: dict[str, str] = {}
+
     def _up(url: str) -> bool:
         try:
             with _opener.open(url, timeout=2) as r:
-                return r.status == 200
-        except (urllib.error.URLError, OSError):
+                if r.status == 200:
+                    return True
+                last_err[url] = f"status {r.status}"
+                return False
+        except (urllib.error.URLError, OSError) as e:
+            last_err[url] = repr(e)[:300]
             return False
 
     deadline = time.time() + 30
@@ -204,6 +210,31 @@ def twin_stack(tmp_path):
         # （2026-10-01 macOS CI 第一次跑到這裡就紅，訊息裡沒有任何線索可以查）。
         serve_up = _up(f"http://127.0.0.1:{sp}/visitors.json")
         tv_up = _up(f"http://127.0.0.1:{tp}/")
+        # 換量具再量一次（伺服器還活著的時候）：裸 TCP、curl、listen 的埠。
+        # 分得出「沒在聽」「聽在別的位址」「HTTP 層出錯」「只有這個行程的 urllib 連不上」。
+        probes: dict[str, str] = {}
+        for name, port in (("serve", sp), ("tv", tp)):
+            try:
+                socket.create_connection(("127.0.0.1", port), timeout=2).close()
+                probes[f"{name}_tcp"] = "ok"
+            except OSError as e:
+                probes[f"{name}_tcp"] = repr(e)[:200]
+        for name, url in (("serve", f"http://127.0.0.1:{sp}/visitors.json"),
+                          ("tv", f"http://127.0.0.1:{tp}/")):
+            try:
+                c = subprocess.run(["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}",
+                                    "--max-time", "5", url], capture_output=True, text=True,
+                                   timeout=10)
+                probes[f"{name}_curl"] = (c.stdout + c.stderr).strip()[:200]
+            except (OSError, subprocess.SubprocessError) as e:
+                probes[f"{name}_curl"] = repr(e)[:200]
+        for name, proc in (("serve", serve), ("tv", tv)):
+            try:
+                ls = subprocess.run(["lsof", "-nP", "-a", "-p", str(proc.pid), "-iTCP",
+                                     "-sTCP:LISTEN"], capture_output=True, text=True, timeout=10)
+                probes[f"{name}_listen"] = ls.stdout.strip()[-300:] or ls.stderr.strip()[-200:]
+            except (OSError, subprocess.SubprocessError) as e:
+                probes[f"{name}_listen"] = repr(e)[:200]
         serve.terminate(); tv.terminate()
         try:
             serve_out = (serve.communicate(timeout=10)[0] or b"").decode("utf-8", "replace")
@@ -212,6 +243,7 @@ def twin_stack(tmp_path):
             serve_out = "(serve 沒有在 10 秒內結束)"
         pytest.fail(f"30 秒內 twinlink serve（{sp}，up={serve_up}，rc={serve.returncode}）"
                     f"或靜態站（{tp}，up={tv_up}，rc={tv.poll()}）沒起來；"
+                    f"最後的錯誤：{last_err}；換量具：{probes}；"
                     f"serve 的輸出末段：\n{serve_out[-3000:]}")
 
     try:
