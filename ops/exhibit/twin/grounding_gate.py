@@ -69,6 +69,9 @@ LEDGER_NAME = "_ledger.py"
 TEST_NAME = "test_grounding.py"
 GG_NAME = "_gg.py"
 FACTS_PATH = HERE / "world" / "materials" / "_facts.json"
+CUT_NAME = "gate_cut.json"               # 被時限切掉的嘗試編號（牆鐘或整跑預算）
+#: 被切掉的那一次：四格都是「未判」（ok:null），不是四個錯。與 `tv_contract.GATE_CHECK_TIMEOUT_LABEL` 同值（測試釘住）。
+TIMEOUT_LABEL = "時間到，這一次沒有交件"
 GATE_META_NAME = "gate_meta.json"        # twinagent 寫在 run-dir：旁註與事件檔的位置
 PRECHECK_NAME = "gate_precheck.ndjson"   # prepare 每次追加一行（run-dir，撤回時整個刪）
 LETTER_COPY_NAME = "letter_final.md"     # twin_letter_guard 存的、段 1 結束時的信（分身之後改不到）
@@ -737,6 +740,57 @@ def _learn_run(events_path: str, task_id: str) -> tuple[str | None, int]:
     return rid, n
 
 
+def timeout_checks() -> list[dict]:
+    """被切掉的嘗試的逐格結果：四格都是未判。電視看 `timed_out` 演 B7，不演成四個錯。"""
+    return [{"id": CASE_ID[c], "ok": None, "label": TIMEOUT_LABEL} for c in CASES]
+
+
+def cut_attempts(rd: str | os.PathLike) -> set[int]:
+    """這一跑被時限切掉的嘗試編號（1 起算）：launcher 的牆鐘逾時（run_RUN-ON.json）＋整跑預算（gate_cut.json）。"""
+    rd = pathlib.Path(rd)
+    out: set[int] = set()
+    try:
+        run = json.loads((rd / "run_RUN-ON.json").read_text(encoding="utf-8"))
+        out |= {int(a["attempt"]) for a in run.get("attempts", []) if a.get("agent_timed_out")}
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    try:
+        out |= {int(x) for x in json.loads((rd / CUT_NAME).read_text(encoding="utf-8"))}
+    except (OSError, ValueError, TypeError):
+        pass
+    return out
+
+
+def attempt_limit(rd: str | os.PathLike, retry: bool) -> str:
+    """這一次嘗試 pi 能跑幾秒：min(單次上限, 整跑剩下的預算)；重改時剩不到 `min_attempt_s` ⇒ "SKIP"。
+    `gate_meta.json` 沒有預算欄位 ⇒ 不限（回 "0"）。"""
+    try:
+        meta = json.loads((pathlib.Path(rd) / GATE_META_NAME).read_text(encoding="utf-8"))
+        left = float(meta["deadline_ts"]) - time.time()
+        cap, floor = float(meta["attempt_cap_s"]), float(meta["min_attempt_s"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return "0"
+    if retry and left < floor:
+        return "SKIP"
+    return str(max(1, int(min(cap, left))))
+
+
+def run_limited(secs: float, cmd: list[str]) -> int:
+    """跑 `cmd`（stdin 接 /dev/null、stdout／stderr 繼承），超過 `secs` 秒就殺整個行程群組、回 124。"""
+    import signal
+    import subprocess
+    proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, start_new_session=True)
+    try:
+        return proc.wait(timeout=secs if secs > 0 else None)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except OSError:
+            pass
+        proc.wait()
+        return 124
+
+
 def prepare(ws: str | os.PathLike, rd: str | os.PathLike) -> int:
     """pi 結束之後、凍結之前呼叫（`twin_agent.sh`）：重寫 `_ledger.py`，並把這一次的四格結果
     預先寫成一筆旁註 `twin_gate`（先於 `gate_ran`）。出錯 ⇒ 刪掉 `_ledger.py`（不用舊紀錄）。"""
@@ -759,6 +813,7 @@ def prepare(ws: str | os.PathLike, rd: str | os.PathLike) -> int:
         for c in CASES]}]}
     checks = checks_from_result(result)
     passed = all(c["ok"] for c in checks)
+    cut = os.environ.get("GATE_CUT") == "1"
     pre = rd / PRECHECK_NAME
     attempt = len((_read(pre) or "").splitlines()) + 1
     try:
@@ -772,11 +827,19 @@ def prepare(ws: str | os.PathLike, rd: str | os.PathLike) -> int:
         meta = json.loads((rd / GATE_META_NAME).read_text(encoding="utf-8"))
         rid, real_attempt = (_learn_run(meta["events_path"], meta["task_id"])
                              if meta.get("events_path") else (None, 0))
+        if cut and real_attempt >= 1:
+            try:
+                prev = json.loads((rd / CUT_NAME).read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                prev = []
+            (rd / CUT_NAME).write_text(json.dumps(sorted({*prev, real_attempt})), encoding="utf-8")
         if rid and real_attempt >= 1 and meta.get("sidecar_path"):
             # 旁註的 attempt 是 launcher 的真實嘗試編號（被牆鐘砍掉的那一次沒有 prepare，不會佔號）。
             row = {"schema": "twin.sidecar/1", "type": "twin_gate", "ts_ms": int(time.time() * 1000),
                    "cell_id": meta["cell_id"], "run_id": rid, "attempt": real_attempt,
                    "passed": passed, "checks": checks}
+            if cut:
+                row["cut"] = True            # 被時限切掉：Folder 改帶四個 ok:null
             sp = pathlib.Path(meta["sidecar_path"])
             sp.parent.mkdir(parents=True, exist_ok=True)
             with sp.open("a", encoding="utf-8") as fh:
@@ -790,7 +853,12 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if len(argv) == 3 and argv[0] == "prepare":
         return prepare(argv[1], argv[2])
-    print("用法：grounding_gate.py prepare <工作區> <run_dir>", file=sys.stderr)
+    if len(argv) == 3 and argv[0] == "limit":
+        print(attempt_limit(argv[1], argv[2] == "1"))
+        return 0
+    if len(argv) >= 4 and argv[0] == "runlimited" and argv[2] == "--":
+        return run_limited(float(argv[1]), argv[3:])
+    print("用法：grounding_gate.py prepare|limit <工作區|run_dir> …｜runlimited <秒> -- <命令…>", file=sys.stderr)
     return 2
 
 

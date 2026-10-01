@@ -99,6 +99,10 @@ DEFAULT_AGENT_TIMEOUT = 300.0
 
 #: 根據閘門（`grounding_gate.py`）的嘗試上限：第 1 次＋重改 2 次（對齊零設定「一個要求最多 2 回合」）。
 GATE_MAX_ATTEMPTS = 3
+#: 整跑時間預算（秒）：每次嘗試的時限＝min(單次上限, 剩下的預算)；重改時剩不到 `MIN_ATTEMPT_S` 就不再開 pi，
+#: 照 `attempts_exhausted` 收尾（P7 真跑最慢 495 秒＝3×300 的上限；展場等不起）。
+RUN_BUDGET_S = 420.0
+MIN_ATTEMPT_S = 60.0
 
 #: 讀回的成品上限（每位分身）。
 MAX_ARTIFACTS = 4
@@ -303,6 +307,9 @@ class AgentConfig:
     #: 交件前過「有沒有根據」閘門（`grounding_gate.py`，2026-10-01）。`False` ＝ 舊行為
     #: （`allow_no_suite`、`accepted=null`），只給不跑世界的 fixture agent 的舊測試用；展場一律 True。
     gate: bool = True
+    #: 整跑預算與重改下限（只在 `gate=True` 時用；見 `RUN_BUDGET_S`）。單次上限＝`timeout_s`。
+    run_budget_s: float = RUN_BUDGET_S
+    min_attempt_s: float = MIN_ATTEMPT_S
 
 
 def agent_available(cfg: AgentConfig) -> tuple[bool, str]:
@@ -806,7 +813,12 @@ def read_review(rd: pathlib.Path) -> list[dict[str, Any]]:
     """每一次嘗試的四格結果：`[{id, ok, label, attempt}]`（label 不含觀眾內容）。
     權威來源是 launcher 落的 `visible_RUN-ON*.json`（`twinprogress.read_review` 同一份讀法）。"""
     from ops.exhibit.twin import twinprogress      # 延後 import：它 import 這一支
-    return twinprogress.read_review(rd)
+    rows = twinprogress.read_review(rd)
+    cut = gatelib.cut_attempts(rd)                  # 被時限切掉的嘗試：未判，不是四個錯
+    for r in rows:
+        if r["attempt"] + 1 in cut:
+            r["ok"], r["label"] = None, gatelib.TIMEOUT_LABEL
+    return rows
 
 
 def run_one(job: Job) -> dict[str, Any]:
@@ -848,7 +860,10 @@ def run_one(job: Job) -> dict[str, Any]:
             (rd / gatelib.GATE_META_NAME).write_text(json.dumps({
                 "events_path": str(job.cfg.events_path) if job.cfg.events_path else None,
                 "sidecar_path": str(sidecar_p) if sidecar_p else None,
-                "task_id": f"twin:{tid}", "cell_id": tid}), encoding="utf-8")
+                "task_id": f"twin:{tid}", "cell_id": tid,
+                "deadline_ts": time.time() + float(job.cfg.run_budget_s),
+                "attempt_cap_s": float(job.cfg.timeout_s),
+                "min_attempt_s": float(job.cfg.min_attempt_s)}), encoding="utf-8")
         gate_kw = ({"suite_dir": suite_dir, "allow_no_suite": False, "retry_arm": "revise",
                     "max_attempts": GATE_MAX_ATTEMPTS, "feedback_into": "both"}
                    if job.cfg.gate else {"suite_dir": None, "allow_no_suite": True})

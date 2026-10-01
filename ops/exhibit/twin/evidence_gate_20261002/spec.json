@@ -1,0 +1,80 @@
+[
+ {
+  "name": "f01",
+  "persona": "d1",
+  "sub_id": "SYN-gate3-20261002-t01-11",
+  "note": "target=抄鏈尾; groups=['投遞口信號', '抄鏈尾']"
+ },
+ {
+  "name": "f02",
+  "persona": "d2",
+  "sub_id": "SYN-gate3-20261002-t02-6",
+  "note": "target=點數單; groups=['土量', '點數單']"
+ },
+ {
+  "name": "f03",
+  "persona": "d3",
+  "sub_id": "SYN-gate3-20261002-t03-1",
+  "note": "target=土堆小陶印; groups=['背面有字', '土堆小陶印']"
+ },
+ {
+  "name": "f04",
+  "persona": "d4",
+  "sub_id": "SYN-gate3-20261002-t04-8",
+  "note": "target=蕨葉431; groups=['蕨葉431', '站位']"
+ },
+ {
+  "name": "f05",
+  "persona": "d5",
+  "sub_id": "SYN-gate3-20261002-t05-5",
+  "note": "target=窗格; groups=['筆芯', '窗格']"
+ },
+ {
+  "name": "f06",
+  "persona": "d6",
+  "sub_id": "SYN-gate3-20261002-t06-16",
+  "note": "target=放大鏡; groups=['放大鏡', '第四列疊字']"
+ },
+ {
+  "name": "f07",
+  "persona": "d1",
+  "sub_id": "SYN-gate3-20261002-t07-7",
+  "note": "target=螺旋; groups=['螺旋', '蕨葉431']"
+ },
+ {
+  "name": "f08",
+  "persona": "d2",
+  "sub_id": "SYN-gate3-20261002-t08-9",
+  "note": "target=背面有字; groups=['筆芯', '背面有字']"
+ },
+ {
+  "name": "f09",
+  "persona": "d3",
+  "sub_id": "SYN-gate3-20261002-t09-2",
+  "note": "target=抄鏈尾; groups=['抄鏈尾', '窗格']"
+ },
+ {
+  "name": "f10",
+  "persona": "d4",
+  "sub_id": "SYN-gate3-20261002-t10-4",
+  "note": "target=點數單; groups=['點數單', '土堆小陶印']"
+ },
+ {
+  "name": "f11",
+  "persona": "d5",
+  "sub_id": "SYN-gate3-20261002-t11-21",
+  "note": "target=土堆小陶印; groups=['土堆小陶印', '蕨葉431']"
+ },
+ {
+  "name": "f12",
+  "persona": "d6",
+  "sub_id": "SYN-gate3-20261002-t12-1",
+  "note": "target=第四列疊字; groups=['第四列疊字', '筆芯']"
+ },
+ {
+  "name": "b8",
+  "persona": "d2",
+  "sub_id": "SYN-gate3-20261002-b8",
+  "note": "B8：模型端點指到關閉的埠 127.0.0.1:9"
+ }
+]

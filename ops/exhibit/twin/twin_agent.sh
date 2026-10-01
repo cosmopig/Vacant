@@ -139,12 +139,23 @@ if [ "$RETRY" -eq 0 ]; then
     fi
 fi
 
-# ── 段 2：房間裡只有 信.md、WORLD.md、地上/ ──
-"$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG" < /dev/null
-RC2=$?
+# ── 整跑時間預算（`twinagent.RUN_BUDGET_S`，預設 420 秒）：這一次 pi 最多跑 min(單次上限, 剩下的預算) 秒；
+#    重改時剩不到 `min_attempt_s`（預設 60 秒）⇒ 不再開 pi（SKIP）。被切掉的那一次照樣 prepare，但標 GATE_CUT=1
+#    （電視演「時間到」，不演成四個錯）。沒有預算設定（舊呼叫）⇒ 不限。
+CUT=0
+LIM=$("$PY" "$HERE/grounding_gate.py" limit "$RUN_DIR" "$RETRY" 2>/dev/null || echo 0)
+if [ "$LIM" = "SKIP" ]; then
+    echo "整跑預算剩不到下限，這一次不開 pi。" >&2
+    RC2=124; CUT=1
+else
+    # ── 段 2：房間裡只有 信.md、WORLD.md、地上/ ──
+    "$PY" "$HERE/grounding_gate.py" runlimited "${LIM:-0}" -- "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG"
+    RC2=$?
+    [ "$RC2" -eq 124 ] && CUT=1
+fi
 
 # ── 根據閘門的紀錄：pi 已經結束（分身改不到），凍結與驗收還沒開始 ──
 # 重寫 tests_visible/_ledger.py，並把這一次的四格結果預先寫成旁註（先於 gate_ran）。
 # 失敗不改變這一跑的結束碼；沒有 _ledger.py 時四格窗一律不亮。
-"$PY" "$HERE/grounding_gate.py" prepare "$(pwd)" "$RUN_DIR" || true
+GATE_CUT="$CUT" "$PY" "$HERE/grounding_gate.py" prepare "$(pwd)" "$RUN_DIR" || true
 exit "$RC2"

@@ -688,7 +688,7 @@ def test_rule_11_v2_accepts_gate_revise_and_boolean_accepted_for_practical_cells
 
 @pytest.mark.parametrize("mut,needle", [
     (dict(gate_checks=[{"id": "G1", "ok": True, "label": "讀過了", "path": "地上/x"}]), "不准的欄位"),
-    (dict(gate_checks=[{"id": "G1", "ok": None, "label": "讀過了"}]), "ok 要是布林"),
+    (dict(gate_checks=[{"id": "G1", "ok": None, "label": "讀過了"}]), "只准用於時間到"),
     (dict(gate_checks=[{"id": "G1", "ok": False, "label": "x", "file": "artifact"}], passed=False), "file 與 line"),
     (dict(gate_checks=[{"id": "G1", "ok": False, "label": "x", "file": "world", "line": 3}], passed=False), "file 只能是"),
     (dict(gate_checks=[{"id": "G1", "ok": False, "label": "x", "file": "plan", "line": 0}], passed=False), "line 要是正整數"),
@@ -1260,8 +1260,8 @@ def test_e2e_sidecar_attempt_numbers_are_the_launchers_even_when_an_earlier_atte
     out = le.fold(sidecarlib.merge(evs, sidecarlib.read(sidecarlib.sidecar_path(cfg.events_path))),
                   verify_url="/r/{cell}")
     g = {e["attempt"]: e for e in out if e["type"] == "gate_ran"}
-    assert "checks" not in g[1], "被砍掉的那一次不能借用別次的逐格結果"
-    assert "checks" in g[2]
+    assert [c["ok"] for c in g[1]["checks"]] == [None] * 4, "被砍掉的那一次不能借用別次的逐格結果，是未判"
+    assert any(c["ok"] is not None for c in g[2]["checks"])
 
 
 def test_regression_a_reserved_blank_for_the_gates_receipt_is_not_a_claim(tmp_path):
@@ -1272,3 +1272,141 @@ def test_regression_a_reserved_blank_for_the_gates_receipt_is_not_a_claim(tmp_pa
     for line in ("（這張紙從石頭閘門的出紙口垂下，上面有一條細長的綠光印記）\n", "閘門反應：綠光亮起，收據垂下。\n",
                  "閘門結果：亮齊綠光，通過。\n"):
         assert not run_gate(tmp_path, PLAN_OK, {"成品.md": line}, led)["w4"]["ok"], line
+
+
+# ---------------------------------------------------------------------------
+# 十二、P8：被時限切掉的那一次是「未判」，不是四個錯；整跑預算
+# ---------------------------------------------------------------------------
+
+def test_p8_timeout_label_is_pinned_to_the_contract():
+    assert gg.TIMEOUT_LABEL == tv.GATE_CHECK_TIMEOUT_LABEL
+    assert [c["ok"] for c in gg.timeout_checks()] == [None] * 4
+    assert twinagent.RUN_BUDGET_S == 420.0 and twinagent.MIN_ATTEMPT_S == 60.0
+
+
+def test_p8_contract_accepts_null_checks_only_for_the_timeout_label():
+    nul = [{"id": f"G{i}", "ok": None, "label": tv.GATE_CHECK_TIMEOUT_LABEL} for i in (1, 2, 3, 4)]
+    ok = _tv_cell(gate_checks=nul, passed=False, accepted=False, stop="attempts_exhausted")
+    assert tv.validate(ok, require_task_kind=True) == []
+    bad_label = [dict(nul[0], label="沒過")] + nul[1:]
+    assert any("只准用於時間到" in b for b in tv.validate(
+        _tv_cell(gate_checks=bad_label, passed=False, accepted=False, stop="attempts_exhausted"),
+        require_task_kind=True))
+    with_line = [dict(nul[0], file="plan", line=3)] + nul[1:]
+    assert any("只准用於時間到" in b for b in tv.validate(
+        _tv_cell(gate_checks=with_line, passed=False, accepted=False, stop="attempts_exhausted"),
+        require_task_kind=True))
+    # passed 必須是 false（null 不算通過）
+    assert any("passed 與 checks" in b for b in tv.validate(
+        _tv_cell(gate_checks=nul, passed=True), require_task_kind=True))
+
+
+def test_p8_folder_turns_a_timed_out_attempt_into_null_checks_and_leaves_others_alone():
+    lc = _lifecycle_two_attempts()
+    for e in lc:
+        if e["type"] == "agent_exited" and e["attempt"] == 1:
+            e["timed_out"] = True
+    ok = [{"id": "G1", "ok": True, "label": "讀過了"}, {"id": "G2", "ok": True, "label": "找得到出處"}]
+    # 第 1 次被砍：沒有旁註；第 2 次有
+    out = le.fold(sidecarlib.merge(lc, [_gate_row(2, ok, ts=11)]), verify_url="/r/{cell}")
+    g = {e["attempt"]: e for e in out if e["type"] == "gate_ran"}
+    assert [c["ok"] for c in g[1]["checks"]] == [None] * 4
+    assert {c["label"] for c in g[1]["checks"]} == {tv.GATE_CHECK_TIMEOUT_LABEL}
+    assert g[2]["checks"] == ok                      # 負控制：沒逾時的照常判
+    assert tv.validate(out, require_task_kind=True) == []
+    # 沒逾時時第 1 次沒有旁註 ⇒ 不帶 checks（不猜），不會變成 null
+    out2 = le.fold(_lifecycle_two_attempts(), verify_url="/r/{cell}")
+    assert all("checks" not in e for e in out2 if e["type"] == "gate_ran")
+
+
+def test_p8_folder_cut_flag_on_the_sidecar_row_also_means_unjudged():
+    row = dict(_gate_row(1, [{"id": "G1", "ok": False, "label": "x"}]), cut=True)
+    assert sidecarlib.validate([row]) == []
+    assert sidecarlib.validate([dict(row, cut=False)])
+    out = le.fold(sidecarlib.merge(_lifecycle_two_attempts(), [row]), verify_url="/r/{cell}")
+    g1 = next(e for e in out if e["type"] == "gate_ran")
+    assert [c["ok"] for c in g1["checks"]] == [None]
+
+
+def test_p8_e2e_killed_attempt_is_unjudged_in_events_and_phone_review(tmp_path, monkeypatch):
+    script, *_ = _scenario(tmp_path)
+    script["attempts"][1]["sleep"] = 30
+    _install_fake_pi(tmp_path, monkeypatch, script)
+    cfg = twinagent.AgentConfig(
+        work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=6.0, requires=[])
+    res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
+    evs = _evs(cfg)
+    assert [e["timed_out"] for e in evs if e["type"] == "agent_exited"][:2] == [False, True]
+    out = le.fold(sidecarlib.merge(evs, sidecarlib.read(sidecarlib.sidecar_path(cfg.events_path))),
+                  verify_url="/r/{cell}")
+    g = {e["attempt"]: e for e in out if e["type"] == "gate_ran"}
+    assert [c["ok"] for c in g[1]["checks"]] == [False, False, True, False]           # 沒逾時：照判
+    assert [c["ok"] for c in g[2]["checks"]] == [None] * 4                             # 逾時：未判
+    assert tv.validate(out, require_task_kind=True) == []
+    rv = res["review"]
+    assert [r["ok"] for r in rv if r["attempt"] == 1] == [None] * 4
+    assert {r["label"] for r in rv if r["attempt"] == 1} == {gg.TIMEOUT_LABEL}
+    assert [r["ok"] for r in rv if r["attempt"] == 0] == [False, False, True, False]
+
+
+def test_p8_attempt_limit_is_min_of_cap_and_what_is_left(tmp_path):
+    rd = tmp_path
+    import time as _t
+    (rd / gg.GATE_META_NAME).write_text(json.dumps({
+        "deadline_ts": _t.time() + 200, "attempt_cap_s": 300, "min_attempt_s": 60}), encoding="utf-8")
+    assert 195 <= int(gg.attempt_limit(rd, False)) <= 200          # 剩 200 < 單次上限 300
+    (rd / gg.GATE_META_NAME).write_text(json.dumps({
+        "deadline_ts": _t.time() + 1000, "attempt_cap_s": 300, "min_attempt_s": 60}), encoding="utf-8")
+    assert gg.attempt_limit(rd, True) == "300"                    # 預算夠：單次上限
+    (rd / gg.GATE_META_NAME).write_text(json.dumps({
+        "deadline_ts": _t.time() + 30, "attempt_cap_s": 300, "min_attempt_s": 60}), encoding="utf-8")
+    assert gg.attempt_limit(rd, True) == "SKIP"                    # 重改、剩不到 60 秒
+    assert gg.attempt_limit(rd, False) != "SKIP"                   # 第 1 次一定跑
+    (rd / gg.GATE_META_NAME).unlink()
+    assert gg.attempt_limit(rd, True) == "0"                       # 沒設預算＝不限（舊呼叫）
+
+
+def test_p8_run_limited_kills_the_whole_group_and_returns_124():
+    import time as _t
+    t0 = _t.time()
+    assert gg.run_limited(1, [sys.executable, "-c", "import time; time.sleep(30)"]) == 124
+    assert _t.time() - t0 < 10
+    assert gg.run_limited(5, [sys.executable, "-c", "import sys; sys.exit(3)"]) == 3
+
+
+def test_p8_e2e_run_budget_caps_each_attempt_and_stops_opening_new_ones(tmp_path, monkeypatch):
+    """預算 12 秒、重改下限 6 秒：第 1 次睡 9 秒做完（沒過）；剩 ~2 秒 < 6 ⇒ 第 2、3 次不開 pi，照 attempts_exhausted 收尾。"""
+    script, *_ = _scenario(tmp_path)
+    script["attempts"] = [dict(script["attempts"][0], sleep=9)]
+    log = _install_fake_pi(tmp_path, monkeypatch, script)
+    cfg = twinagent.AgentConfig(
+        work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=60.0, requires=[],
+        run_budget_s=12.0, min_attempt_s=6.0)
+    res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
+    sm = res["summary"]
+    assert sm["stop_reason"] == "attempts_exhausted" and sm["accepted"] is False
+    pl = [json.loads(l) for l in log.read_text().splitlines()]
+    assert [p["stage"] for p in pl] == [1, 2], "第 2、3 次不該再開 pi"
+    evs = _evs(cfg)
+    assert [e["type"] for e in evs if e["type"] == "agent_exited"] and \
+        [e["timed_out"] for e in evs if e["type"] == "agent_exited"] == [False, False, False]
+    ws, rd = twinagent.paths_for(cfg.work_root, SUB)
+    assert json.loads((rd / gg.CUT_NAME).read_text()) == [2, 3]
+    rv = res["review"]
+    assert [r["ok"] for r in rv if r["attempt"] == 0] == [False, False, True, False]
+    assert all(r["ok"] is None for r in rv if r["attempt"] in (1, 2))
+    out = le.fold(sidecarlib.merge(evs, sidecarlib.read(sidecarlib.sidecar_path(cfg.events_path))),
+                  verify_url="/r/{cell}")
+    g = {e["attempt"]: e for e in out if e["type"] == "gate_ran"}
+    assert all(c["ok"] is None for a in (2, 3) for c in g[a]["checks"])
+    assert tv.validate(out, require_task_kind=True) == []
+    # 負控制：預算夠大時同一份腳本照樣開第 2 次
+    log.unlink()
+    cfg2 = twinagent.AgentConfig(
+        work_root=tmp_path / "work2", events_path=tmp_path / "live2.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=60.0, requires=[],
+        run_budget_s=400.0, min_attempt_s=6.0)
+    twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg2))
+    assert [json.loads(l)["stage"] for l in log.read_text().splitlines()].count(2) == 3

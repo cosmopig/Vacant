@@ -115,3 +115,22 @@ batch1／batch2 那 4 條旁註在存檔時依規則改正（見 `evidence_gate_
 7. 手機端：`/api/result` 帶 `review:[{id,ok,label,attempt}]`——雲端 server.js（vacant-world-cloud P4-A）的 `reviewProblem` 形狀相容（id≤24 字元、label≤120、attempt≤9），**只讀了程式沒有對雲端真送**。
    電視端 `LIVE_INTERFACE.md` 在另一個 repo，本次沒改；它已是 `checks[].line`／`file` 的形狀。
 8. 沒演到的：B8 的 `infra_void`（見上）、`requests_seen=0`（不可歸因）。
+
+
+## 七、P8 線 V（2026-10-02）：逾時＝未判、整跑預算、B8、最終版再驗誤擋
+
+1. **被時限切掉的那一次不是「四個錯」**：`agent_exited.timed_out`（launcher 牆鐘）或整跑預算切掉（`gate_cut.json`／旁註 `twin_gate.cut=true`）的嘗試，
+   `gate_ran.checks` 四格 `ok:null`、label「時間到，這一次沒有交件」（`tv_contract.GATE_CHECK_TIMEOUT_LABEL`，`ok:null` 只准配這句、不帶位置，`passed` 必為 false）；
+   手機 `review` 同樣 `ok:null`。電視看 `draft_done.timed_out` 演 B7。沒逾時的照常判（負控制測試）。
+   ⚠ 這一條只涵蓋「被時限切掉」；`pi` 自己崩潰／沒寫出信（`twin_agent.sh` exit 3／4，沒有 prepare）不算，那種嘗試在 visible 結果裡仍是四個「沒有紀錄可對照」，
+   Folder 不帶 `checks`（電視不會演成四個錯，但手機 review 的 label 是「沒有紀錄可對照」）。
+2. **整跑預算**：`twinagent.RUN_BUDGET_S=420`、`MIN_ATTEMPT_S=60`（`AgentConfig.run_budget_s／min_attempt_s`）。`twin_agent.sh` 用 `grounding_gate.py limit` 算這一次 pi 的時限
+   ＝min(單次上限 300, 剩下的預算)，用 `runlimited` 殺整個行程群組；重改時剩不到 60 秒就不開 pi（SKIP）。⚠ 沒動 `vrun/*`：launcher 的嘗試數固定 3，
+   所以被 SKIP 的嘗試仍會有 `attempt_started`／`gate_ran`（四格 `ok:null`）事件，只是沒有 pi；整跑照 `attempts_exhausted` 收尾（拍立得照發）。
+   最終版 12 跑牆鐘中位 179 秒、最慢 363.6 秒（f08：第 1 次 300 秒被牆鐘砍、第 2 次 33 秒過）；**沒有任何一跑真的撞到 420 秒預算**，預算切斷只有測試證明（假 pi：預算 12 秒、下限 6 秒 ⇒ 只開 1 次 pi）。
+3. **B8**：把端點指到關閉的埠後，production 的探測（`upstream_reachable`）直接退化成 `upstream_unreachable`、不起 pi（`b8_probe_blocked.json`）。略過探測讓 pi 起得來：
+   pi 打了 4 通到中介，**每一通 `model_call.error=true`、`requests_seen=4`（中介把失敗的呼叫也算進去）**，沒有信 ⇒ stage 1 失敗、`agent_no_plan` 退化；
+   所以 **`requests_seen=0`／`infra_void` 這條在這條路上造不出來**。能從事件流辨認「模型打不到」的訊號是：該跑所有 `model_call.error=true`、沒有 `gate_ran.checks`、twin 退化 `agent_no_plan`。
+4. **最終版 12 跑**（`evidence_gate_20261002/`）：accepted true 7／false 5；B1 3、B2a 8、B2b 3、B2c 1、B2d 5、B3 9、B4 4、B5 4、B6 6、B7 1。逐條 ✗ 的原文與出處見回報與各跑 json。
+   判斷：沒有確定的誤擋；兩處待主線判——f03 的「第三列：16-19 號在位」等自訂卡片編號（G2，三次嘗試都擋，是分身自訂的編號、地上沒有這些數字），
+   f06 a1 的 `地上/捏土處/出生片 433 的資訊`（G1，路徑後面接了說明，地上沒有「出生片」這個檔）。

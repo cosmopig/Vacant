@@ -183,6 +183,7 @@ class Folder:
                 "retry": ev.get("retry") or "none",
                 "feedback": {},          # attempt → (bytes, delivery)
                 "gate_checks": {},       # attempt → checks[]（旁註 twin_gate，先於 gate_ran 到）
+                "cut": set(),            # 被時限切掉的嘗試（agent_exited.timed_out 或旁註 cut）
             }
         st = self.runs.get(rid)
         if st is None:
@@ -230,6 +231,8 @@ class Folder:
         elif t == "agent_exited":
             n = ev["attempt"]
             timed_out = bool(ev.get("timed_out"))
+            if timed_out:
+                st["cut"].add(n)
             if on:
                 fb_bytes, fb_via = st["feedback"].get(n, (None, None))
                 emit("draft_done", arm=tv.ARM_ON, worker=st["resident"],
@@ -259,7 +262,11 @@ class Folder:
                 # 分身的自主任務：逐格結果來自旁註 `twin_gate`（先於這一筆到）。
                 # 對不上（passed 與逐條 AND 不一致）或沒有 ⇒ 不帶 `checks`（電視讀成 null，不猜）。
                 ck = st["gate_checks"].get(ev["attempt"])
-                if st["task_kind"] == tv.KIND_PRACTICAL and ck:
+                if st["task_kind"] == tv.KIND_PRACTICAL and ev["attempt"] in st["cut"]:
+                    # 被時限切掉的那一次：四格未判（ok:null），不是四個錯；電視看 timed_out 演「時間到」。
+                    extra["checks"] = [{"id": c["id"], "ok": None, "label": tv.GATE_CHECK_TIMEOUT_LABEL}
+                                       for c in (ck or [{"id": i} for i in ("G1", "G2", "G3", "G4")])]
+                elif st["task_kind"] == tv.KIND_PRACTICAL and ck:
                     if bool(ev.get("passed")) == all(c["ok"] for c in ck):
                         extra["checks"] = ck
                     else:
@@ -351,6 +358,8 @@ class Folder:
             self.dropped.append(why)
             return []
         st["gate_checks"][ev["attempt"]] = [dict(c) for c in ev["checks"]]
+        if ev.get("cut") is True:
+            st["cut"].add(ev["attempt"])
         return []
 
     def _sidecar_twin_step(self, ev: dict) -> list[dict]:

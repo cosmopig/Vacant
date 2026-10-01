@@ -33,7 +33,7 @@ REPO = HERE.parents[3]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-BRANCHES = ("B1", "B2a", "B2b", "B2c", "B2d", "B3", "B4", "B5", "B6")
+BRANCHES = ("B1", "B2a", "B2b", "B2c", "B2d", "B3", "B4", "B5", "B6", "B7", "B8")
 WINDOW_BRANCH = {"G1": "B2a", "G2": "B2b", "G3": "B2c", "G4": "B2d"}
 _SEG_LOC = re.compile(r"(成品|計畫)(?:『([^』]*)』)?第\s?(\d+)\s?行")
 
@@ -191,6 +191,8 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
         rec["attempts_used"] = len(attempts)
         rec["stop_reason"], rec["accepted"] = runj.get("stop_reason"), runj.get("accepted")
         rec["review_labels"] = twinagent.read_review(rd)
+        rec["cut_attempts"] = sorted(gg.cut_attempts(rd))
+        rec["run_budget_s"] = twinagent.RUN_BUDGET_S
         rec["letter_present"] = (ws / "信.md").is_file()
 
         # 事件流（lifecycle＋旁註）原封不動存下來——之後要餵電視
@@ -218,6 +220,9 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
             hit["B4"] = len(attempts) >= 2 and rec["accepted"] is True
             hit["B5"] = rec.get("stop_reason") == "attempts_exhausted"
         hit["B6"] = bool(rec["ground_write_blocked"])
+        hit["B7"] = bool(rec["cut_attempts"])
+        # B8：pi 起得來但打不到模型 ⇒ requests_seen=0、退化 no_model_call
+        hit["B8"] = rec["twin"].get("requests_seen") == 0 or rec["twin"].get("degrade_kind") == "no_model_call"
         rec["branches"] = {b: v for b, v in hit.items() if v}
 
         w = twinlink.withdraw(st, sid, reason="gate_samples:cleanup")
@@ -232,6 +237,11 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
 
 
 def cmd_run(a: argparse.Namespace) -> int:
+    if a.dead_endpoint:
+        # 測試環境造 B8：模型端點是關閉的埠，但**略過 twinlink 的探測**（production 的探測會直接退化、不起 pi），
+        # 讓 pi 起得來、打不到模型。只在這個行程改，production 程式不動。
+        from ops.exhibit.twin import twinagent
+        twinagent.upstream_reachable = lambda *args, **kw: True
     spec = json.loads(pathlib.Path(a.spec).read_text(encoding="utf-8"))
     out = pathlib.Path(a.out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -275,6 +285,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--timeout", type=float, default=300.0)
     r.add_argument("--only", default=None)
     r.add_argument("--redo", action="store_true")
+    r.add_argument("--dead-endpoint", action="store_true", help="B8：略過端點探測，讓 pi 起來打一個關閉的埠")
     r.set_defaults(fn=cmd_run)
     p = sub.add_parser("report")
     p.add_argument("--out-dir", required=True)

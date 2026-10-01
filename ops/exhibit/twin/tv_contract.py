@@ -161,6 +161,9 @@ PRACTICAL_ACCEPTED_FOR = {"ungated": None, "infra_void": None,
 GATE_CHECK_KEYS = ("id", "ok", "label", "file", "line")
 GATE_CHECK_FILES = ("artifact", "plan")
 GATE_CHECK_LABEL_MAX = 80
+#: 被時限切掉的嘗試：四格 `ok` 都是 `null`（未判），label 固定這一句（與 `grounding_gate.TIMEOUT_LABEL` 同值，
+#: 測試釘住）。電視看 `draft_done.timed_out` 演「時間到」，不演成四個錯。
+GATE_CHECK_TIMEOUT_LABEL = "時間到，這一次沒有交件"
 
 #: `twin_step.step` 的白名單（`sidecar.STEP_KINDS` 同值，兩邊測試釘住）。
 TWIN_STEPS = ("read", "write", "list")
@@ -336,8 +339,12 @@ def validate(evs: list[dict], *, require_settled: bool = True,
                         bad.append(f"第 {n} 個事件：checks 第 {j} 條帶了不准的欄位 {extra}")
                     if not (isinstance(c.get("id"), str) and c["id"]):
                         bad.append(f"第 {n} 個事件：checks 第 {j} 條的 id 要是非空字串")
-                    if not isinstance(c.get("ok"), bool):
-                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 ok 要是布林")
+                    if c.get("ok") is None:
+                        if c.get("label") != GATE_CHECK_TIMEOUT_LABEL or "line" in c or "file" in c:
+                            bad.append(f"第 {n} 個事件：checks 第 {j} 條 ok:null（未判）只准用於時間到，"
+                                       f"label 要是「{GATE_CHECK_TIMEOUT_LABEL}」且不帶位置")
+                    elif not isinstance(c.get("ok"), bool):
+                        bad.append(f"第 {n} 個事件：checks 第 {j} 條的 ok 要是布林（或時間到的 null）")
                     lb = c.get("label")
                     if not (isinstance(lb, str) and lb.strip()
                             and len(lb) <= GATE_CHECK_LABEL_MAX):
@@ -352,9 +359,9 @@ def validate(evs: list[dict], *, require_settled: bool = True,
                         bad.append(f"第 {n} 個事件：checks 第 {j} 條的 file 與 line 要一起出現")
                     if c.get("ok") is True and ("line" in c or "file" in c):
                         bad.append(f"第 {n} 個事件：checks 第 {j} 條通過了卻帶位置")
-                if all(isinstance(c, dict) and isinstance(c.get("ok"), bool) for c in ck) \
+                if all(isinstance(c, dict) and c.get("ok") in (True, False, None) for c in ck) \
                         and isinstance(e.get("passed"), bool) \
-                        and e["passed"] != all(c["ok"] for c in ck):
+                        and e["passed"] != all(c["ok"] is True for c in ck):
                     bad.append(f"第 {n} 個事件：gate_ran.passed 與 checks 的逐條結果對不上")
         if t == "routed" and e.get("basis") != "random":
             bad.append(f"第 {n} 個事件：basis 不是 random（`vacant run` 沒有路由層）")

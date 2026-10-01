@@ -473,6 +473,8 @@ def validate(rows: Iterable[dict], *,
                 bad.append(f"旁註第 {i} 筆：twin_gate 的 attempt 要是 ≥ 1 的整數")
             if not isinstance(r.get("passed"), bool):
                 bad.append(f"旁註第 {i} 筆：twin_gate 的 passed 只能是 true／false")
+            if "cut" in r and r["cut"] is not True:
+                bad.append(f"旁註第 {i} 筆：twin_gate 的 cut 只能是 true（沒被切掉就不要帶）")
             ck = r.get("checks")
             if not isinstance(ck, list) or not ck:
                 bad.append(f"旁註第 {i} 筆：twin_gate 的 checks 要是非空清單")
