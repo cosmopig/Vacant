@@ -1100,6 +1100,9 @@ def make_polaroid(store: TwinStore, sid: str, *,
             originals=polaroidlib.originals_of(cur.get("card"), cur.get("card_text")),
             frame_dir=frame_dir,
             # P10 命盤：拍立得印命盤那一行＋命盤卡第一句（沒有命盤＝空字串＝不畫）
+            # P11 每個人不一樣：sub_id 只當挑款種子（不印、不進 meta）；其餘全是枚舉
+            sub_id=sid, hints=twin.get("polaroid_hints"),
+            fortune={k: (twin.get("fortune") or {}).get(k) for k in ("mbti", "zodiac", "blood")},
             fortune_line=str((twin.get("fortune") or {}).get("first_line") or ""),
             fortune_sentence=twinagent.fortunelib.polaroid_sentence(
                 str(next(iter((twin.get("fortune") or {}).get("lines") or []), ""))))
@@ -1130,6 +1133,9 @@ def make_polaroid(store: TwinStore, sid: str, *,
         "caption_truncated": meta["caption_truncated"],
         "caption_redacted": meta["caption_redacted"], "caption_blank": meta["caption_blank"],
         "fortune_drawn": meta.get("fortune_drawn", False),
+        # P11：只記數字（有變化的層數、退回數），不記素材名——事後能看出「這張有沒有退回單一相框版」
+        "variety_stickers": len((meta.get("variety") or {}).get("stickers") or []),
+        "variety_fallbacks": len((meta.get("variety") or {}).get("fallbacks") or []),
         "dropped_glyphs": meta["dropped_glyphs"], "qr_text": meta["qr_text"],
         "at": _now(),
     }

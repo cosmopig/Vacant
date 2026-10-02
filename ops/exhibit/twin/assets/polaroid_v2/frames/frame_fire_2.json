@@ -1,0 +1,24 @@
+{
+ "file": "frame_fire_2.png",
+ "size": [
+  829,
+  930
+ ],
+ "sha256": "f187228afd21c2661ddc0ba9aeb5792c7d13bfeaa6f8a93952875653a5d6942f",
+ "window_px": {
+  "x": 50,
+  "y": 60,
+  "w": 730,
+  "h": 686
+ },
+ "window_note": "與 polaroid_frame.json 相同的相片窗（程式量過原圖黑窗、對齊後以參考窗為準）",
+ "source": {
+  "generator": "codex exec（內建生圖）",
+  "raw": "raw/frame_fire_2.png",
+  "raw_sha256": "865c14b3df3198044f8799ecf2fd5e231465227026a7e9f5226fce4d16c69177",
+  "prompt": "The attached image is the exact layout reference: a blank instant-camera photo print (white border, wider at the bottom, a large picture window). Generate a studio product photo of ONE such blank print, shot perfectly straight-on from directly above, same proportions and same border widths and the same window position and size as the reference, perfectly flat and square to the camera, no tilt, no perspective, centred and filling about 80% of the frame height. The border is warm off-white matte hand-made paper with visible paper fibre texture and hand-made clay-craft feel, corners slightly rounded. The picture window is completely flat solid pure black (#000000), no image, no reflection. Behind the print: a perfectly flat uniform pure green background (#00FF00), nothing else, no shadow. Decoration made of hand-made clay: tiny clay flames and charcoal smudges on the top-left and top-right corners and top edge, small, sitting only on the thin top and side borders (they may slightly overlap the paper edge but must not cover the picture window). The wide white bottom border must stay completely clean, plain paper with nothing on it. STRICT: ABSOLUTELY NO text, letters, numbers, digits, symbols, runes, writing, labels or scribbles anywhere; all paper, cards and boards are completely blank. No people, no hands. Variation 2: slightly different arrangement and sizes of the decoration. Portrait orientation 3:4.",
+  "reference_images": [
+   "polaroid_frame.png"
+  ]
+ }
+}
