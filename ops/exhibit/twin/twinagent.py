@@ -137,6 +137,10 @@ KEEP_ON_ERASE = ("receipts_RUN-ON.ndjson", "receipts_RUN-ON.pub.json", "rows.jso
 #: 其餘檔案一起刪（含檔名，屬於誠實邊界 6 要清掉的那一半）。
 STEP_LOG_NAME = "twin_steps.ndjson"
 
+#: 三個工具的必填參數 `thought` 的紀錄檔（`pi_ext/twin_ws_tools.ts` 寫、`twin_agent.sh` 匯出路徑；
+#: 同樣在 run-dir、撤回時整個刪）。`SayForwarder` 讀它、過防呆後轉成 `twin_say`。
+THOUGHT_LOG_NAME = "twin_thoughts.ndjson"
+
 # ---------------------------------------------------------------------------
 # 固定文字（全場逐字相同；argv 裡沒有觀眾原文）
 # ---------------------------------------------------------------------------
@@ -769,10 +773,17 @@ class SayForwarder(StepForwarder):
 
     def __init__(self, stdout_log: pathlib.Path, events_path: pathlib.Path | str | None,
                  *, task_id: str, cell_id: str, originals: list[str] | None = None,
-                 poll_s: float = 0.2) -> None:
+                 poll_s: float = 0.2, thought_log: pathlib.Path | None = None) -> None:
         super().__init__(stdout_log, events_path, task_id=task_id, cell_id=cell_id,
                          poll_s=poll_s)
         self.name = "twin-say-forward"
+        # 三個工具的 `thought` 參數（2026-10-02）：同一套防呆，另計數（句數與被丟掉的句數）。
+        self.thought_log = pathlib.Path(thought_log) if thought_log else None
+        self.thoughts_in = 0           # 讀到的 thought（非空）
+        self.thoughts_sent = 0         # 過防呆、發出去的
+        self.thoughts_dropped = 0      # 抄觀眾原文／含檔名／清完是空的
+        self._tpos = 0
+        self._tbuf = b""
         self.originals = [o for o in (originals or []) if isinstance(o, str) and o]
         self.dropped = 0               # 抄了觀眾原文
         self.dropped_filename = 0      # 講出檔名（電視不帶檔名）
@@ -802,16 +813,56 @@ class SayForwarder(StepForwarder):
                 self._pending.append({"text": c["text"], "turn": max(self._turn, 1),
                                       "ts_ms": int(time.time() * 1000)})
 
+    def _read_new_raw_lines(self) -> None:
+        super()._read_new_raw_lines()
+        self._read_thoughts()
+
+    def _read_thoughts(self) -> None:
+        """tail `twin_thoughts.ndjson`：每一行 `{ts_ms,seq,thought}` → 一句待過濾的話。
+        檔名過濾與 `message_end` 的 say 同一套（副檔名樣式，或這一跑工具呼叫過的路徑）。"""
+        p = self.thought_log
+        if p is None or not p.is_file():
+            return
+        try:
+            with p.open("rb") as f:
+                f.seek(self._tpos)
+                chunk = f.read()
+                self._tpos = f.tell()
+        except OSError:
+            return
+        self._tbuf += chunk
+        while b"\n" in self._tbuf:
+            raw, self._tbuf = self._tbuf.split(b"\n", 1)
+            try:
+                row = json.loads(raw.decode("utf-8", "replace"))
+            except (ValueError, TypeError):
+                continue
+            t = row.get("thought") if isinstance(row, dict) else None
+            if not isinstance(t, str) or not t.strip():
+                continue                        # 空的／缺的：不產生 twin_say
+            self.thoughts_in += 1
+            self._pending.append({"text": t, "turn": max(self._turn, 1),
+                                  "ts_ms": int(time.time() * 1000), "thought": True})
+
     def _to_rows(self, raw: Any) -> list[dict | None]:
+        is_thought = bool(raw.get("thought"))
         cleaned = sidecarlib.clean_say(raw.get("text"))
         if not cleaned:
+            if is_thought:
+                self.thoughts_dropped += 1
             return []                          # 空白／純標記／純程式碼區塊：不發、不計
         if polaroidlib.caption_leaks_original(cleaned, self.originals):
             self.dropped += 1                  # 抄了觀眾原文：整句不發
+            if is_thought:
+                self.thoughts_dropped += 1
             return []
         if sidecarlib.looks_like_filename(cleaned, self._names):
             self.dropped_filename += 1         # 電視不帶檔名：整句不發
+            if is_thought:
+                self.thoughts_dropped += 1
             return []
+        if is_thought:
+            self.thoughts_sent += 1
         self._seq += 1
         return [sidecarlib.say_row(cleaned, turn=raw["turn"], seq=self._seq,
                                    cell_id=self.cell_id, run_id=self.run_id,
@@ -904,7 +955,7 @@ def run_one(job: Job) -> dict[str, Any]:
         # ── 契約補充 §E：tail pi `--mode json` 的 stdout，轉成 twin_say ──
         say_fwd = SayForwarder(rd / AGENT_STDOUT_NAME, job.cfg.events_path,
                                task_id=f"twin:{tid}", cell_id=tid,
-                               originals=[job.traits])
+                               originals=[job.traits], thought_log=rd / THOUGHT_LOG_NAME)
         say_fwd.start()
         try:
             if enclosed:
@@ -933,10 +984,16 @@ def run_one(job: Job) -> dict[str, Any]:
         res["step_forward"] = {"forwarded": forwarder.forwarded,
                                "rejected": forwarder.rejected,
                                "run_id_learned": forwarder.run_id is not None}
-        res["say_forward"] = {"forwarded": say_fwd.forwarded, "dropped": say_fwd.dropped,
+        res["say_forward"] = {"thoughts_in": say_fwd.thoughts_in, "thoughts_sent": say_fwd.thoughts_sent,
+                              "thoughts_dropped": say_fwd.thoughts_dropped,
+                              "forwarded": say_fwd.forwarded, "dropped": say_fwd.dropped,
                               "dropped_filename": say_fwd.dropped_filename,
                               "rejected": say_fwd.rejected,
                               "run_id_learned": say_fwd.run_id is not None}
+        try:        # 只有計數（撤回時跟 run-dir 一起刪）：量測「它在想」被防呆丟掉幾句
+            (rd / "say_forward.json").write_text(json.dumps(res["say_forward"]), encoding="utf-8")
+        except OSError:
+            pass
         last = (summary.get("attempts") or [{}])[-1]
         frozen = last.get("frozen_path")
         res["summary"] = {

@@ -113,6 +113,7 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
             out_dir: pathlib.Path, enclose: str = "off", require_tier: str | None = None) -> dict[str, Any]:
     from ops.exhibit.twin import grounding_gate as gg
     from ops.exhibit.twin import sidecar as sidecarlib
+    from ops.exhibit.twin import sidecar as sidecarlib
     from ops.exhibit.twin import twinagent, twinground, twinlink, twinvault, w3b_samples
     from ops.exhibit.twin.twinstore import KIND_SUBMITTED, TwinStore
     from vacant_network.vrun import lifecycle
@@ -160,6 +161,19 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
                 and (s.get("path") or "").startswith("地上/")}
         rec["ground_read"] = sorted(read)
         rec["steps_n"] = len(steps)
+        # 「它在想」：段 2 ＝ 第一次讀 信.md 之後；全文逐句列出（含 thought 被防呆丟掉的計數）
+        t2 = next((s_.get("ts_ms") for s_ in json.loads("[" + ",".join(
+            l for l in (rd / "twin_steps.ndjson").read_text(encoding="utf-8").splitlines() if l.strip()) + "]")
+            if s_.get("tool") == "ws_read" and s_.get("path") == "信.md"), None) \
+            if (rd / "twin_steps.ndjson").is_file() else None
+        says = [r_ for r_ in sidecarlib.read(sidecarlib.sidecar_path(events)) if r_.get("type") == "twin_say"]
+        rec["twin_say_all"] = [{"turn": r_["turn"], "text": r_["text"], "stage2": bool(t2 and r_["ts_ms"] >= t2)}
+                               for r_ in says]
+        rec["twin_say_stage2_n"] = sum(1 for x in rec["twin_say_all"] if x["stage2"])
+        sfp = rd / "say_forward.json"
+        rec["say_forward"] = json.loads(sfp.read_text(encoding="utf-8")) if sfp.is_file() else None
+        tl = rd / "twin_thoughts.ndjson"
+        rec["thought_lines"] = len([l for l in tl.read_text(encoding="utf-8").splitlines() if l.strip()]) if tl.is_file() else 0
         rec["ground_write_blocked"] = [s.get("path") for s in steps
                                        if s.get("tool") == "ws_write" and s.get("ok") is False
                                        and (s.get("path") or "").startswith("地上")]

@@ -102,6 +102,9 @@ fi
 
 # ⚠ 檔名 twin_steps.ndjson 與 twinagent.STEP_LOG_NAME 是同一個字面值，改一邊要改兩邊。
 export VACANT_TWIN_STEP_LOG="$RUN_DIR/twin_steps.ndjson"
+# ⚠ 檔名 twin_thoughts.ndjson 與 twinagent.THOUGHT_LOG_NAME 同值。三個工具的必填參數 `thought`
+#   （電視上「它在想」的來源）由擴充追加到這裡，主機側 SayForwarder 過防呆後轉成 twin_say。
+export VACANT_TWIN_THOUGHT_LOG="$RUN_DIR/twin_thoughts.ndjson"
 
 CFG="$RUN_DIR/pi_cfg"
 rm -rf "$CFG"

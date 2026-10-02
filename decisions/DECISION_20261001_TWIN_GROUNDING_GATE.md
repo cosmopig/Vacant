@@ -145,3 +145,11 @@ batch1／batch2 那 4 條旁註在存檔時依規則改正（見 `evidence_gate_
 - 預算在圍牆裡生效：e7 以 `VACANT_TWIN_RUN_BUDGET_S=40` 跑，牆鐘 40.6 秒、第 1 次嘗試被預算切斷、閘門仍判過。
 - 環境坑：門的 `AF_UNIX` 路徑超過 108 字元會 `OSError`（`<TMPDIR>/…agentruns/doors/<32 字>/relay.sock`）；展場的資料庫路徑要夠短。
 - 圍牆內 e1 有一次 300 秒牆鐘逾時（四格 `ok:null`）。
+
+## 九、工具必填參數 `thought`（2026-10-02）：讓「它在想」看得到
+
+gemma 在段 2 幾乎只呼叫工具、不說話（提示裡「動手前先說一句」它不照做），電視上 `twin_say` 只有 0–3 句。三個工具（`ws_list`／`ws_read`／`ws_write`）各加**必填**參數
+`thought`（一句繁體中文、不寫檔名、40 字內，說明過 KS-1）。擴充只把它追加到 `$VACANT_TWIN_THOUGHT_LOG`（`twin_thoughts.ndjson`，run-dir）；**主機側** `twinagent.SayForwarder`
+讀它，過既有的 LEAK 防呆、檔名過濾、≤80 字後才轉成 `twin_say`（違規就丟那一句、工具照執行）；`thought` **不進** `twin_step`。空的或缺的 thought：不記、不失敗。
+真跑 6 跑（enclose=on、級別 B）每跑段 2 有 14–38 句 `twin_say`（原本 0–3）；被防呆丟掉的 thought：0／0／0／0／2／3 句。四格結果沒有可歸因的變化（單次抽樣，見證據 README）。
+⚠ 段 1（寫信）的 thought 也會進 `twin_say`，防呆同一套（抄觀眾原文 ≥8 字就丟）。⚠ 手機 `read_says` 目前只讀 stdout 的 say，沒有併入 thought。

@@ -33,6 +33,15 @@
  * ⚠ 記步驟失敗（例如檔案系統滿了）**不准**改變工具本身的回傳值——這是旁註，
  *   不是驗收的一部分（同 `sidecar.py` 誠實邊界 2 的精神）。
  *
+ * ## `thought`（2026-10-02）：電視上「它在想」的來源
+ *
+ * gemma 在段 2 幾乎只呼叫工具、不說話（提示裡的「動手前先說一句」它不照做），電視就看不到它在想什麼。
+ * 所以三個工具各多一個**必填**參數 `thought`（一句繁體中文、不寫檔名、40 字內）。每次呼叫時
+ * 追加一行 `{ts_ms,seq,thought}` 到 `$VACANT_TWIN_THOUGHT_LOG`（run-dir）；**主機側**
+ * （`twinagent.SayForwarder`）讀它，過既有的 LEAK 防呆、檔名過濾、≤80 字之後才轉成 `twin_say`
+ * ——過濾在 Python 那一側做，這裡不判。空的或缺的 `thought`：工具照執行、不記、不失敗。
+ * `thought` **不寫進** `$VACANT_TWIN_STEP_LOG`（步驟紀錄仍不帶內容）。
+ *
  * ⚠ 誠實邊界（改碼請保留）：
  *   1. 這是**我們寫的 TypeScript 判準**，不是作業系統的權限。pi（node）行程本身
  *      仍然有完整的檔案系統與網路權限；收住的是「模型能請 pi 做什麼」。
@@ -74,6 +83,33 @@ function logStep(tool: string, path: string | null, bytes: number | null, ok: bo
   }
 }
 
+/** thought 紀錄檔（工作區外）。沒設 ⇒ `logThought` 是空操作。 */
+const THOUGHT_LOG = process.env.VACANT_TWIN_THOUGHT_LOG || "";
+
+/** `thought` 參數的說明（過 KS-1；`tests/test_twin_thought_20261002.py` 逐字抽出來驗）。 */
+const THOUGHT_DESC =
+  "一句繁體中文：你現在在想什麼、為什麼要做這一步。不要寫檔名，40 字內。";
+
+/**
+ * 記下這一步的 `thought`（若有）。空的、缺的、不是字串 ⇒ 什麼都不記；任何錯誤都吞掉
+ * ——它是旁註，不准讓工具失敗或改變工具的回傳值。內容的過濾（LEAK、檔名、長度）在主機側。
+ */
+function logThought(params: any): void {
+  if (!THOUGHT_LOG) return;
+  const t = typeof params?.thought === "string" ? params.thought.trim() : "";
+  if (!t) return;
+  try {
+    mkdirSync(dirname(THOUGHT_LOG), { recursive: true });
+    writeFileSync(
+      THOUGHT_LOG,
+      JSON.stringify({ ts_ms: Date.now(), seq: STEP_SEQ + 1, thought: t.slice(0, 400) }) + "\n",
+      { encoding: "utf8", flag: "a" },
+    );
+  } catch {
+    // 旁註失敗不影響工具。
+  }
+}
+
 function confine(p: unknown): string {
   if (typeof p !== "string" || p.trim() === "") {
     throw new Error("path 必須是非空字串（相對於你的房間）");
@@ -102,8 +138,11 @@ export default function (pi: ExtensionAPI) {
     name: "ws_list",
     label: "ws_list",
     description: "List the files in your room (the current folder). Only your room is visible.",
-    parameters: Type.Object({}),
-    async execute() {
+    parameters: Type.Object({
+      thought: Type.String({ description: THOUGHT_DESC }),
+    }),
+    async execute(_id: string, params: any) {
+      logThought(params);
       try {
         const out: string[] = [];
         const walk = (dir: string, depth: number) => {
@@ -133,8 +172,10 @@ export default function (pi: ExtensionAPI) {
     description: "Read a text file in your room. `path` is relative to your room.",
     parameters: Type.Object({
       path: Type.String({ description: "Relative path inside your room, e.g. TRAITS.md" }),
+      thought: Type.String({ description: THOUGHT_DESC }),
     }),
     async execute(_id: string, params: any) {
+      logThought(params);
       const rawPath = typeof params?.path === "string" ? params.path : null;
       try {
         const abs = confine(params?.path);
@@ -159,8 +200,10 @@ export default function (pi: ExtensionAPI) {
     parameters: Type.Object({
       path: Type.String({ description: "Relative path inside your room, e.g. PLAN.md" }),
       content: Type.String({ description: "The full text content of the file" }),
+      thought: Type.String({ description: THOUGHT_DESC }),
     }),
     async execute(_id: string, params: any) {
+      logThought(params);
       const rawPath = typeof params?.path === "string" ? params.path : null;
       try {
         const abs = confine(params?.path);
