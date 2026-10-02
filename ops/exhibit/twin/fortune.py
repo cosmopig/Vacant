@@ -17,17 +17,17 @@
 3. **做事的方式**（`way_text`）：命盤 → 拼進段 2 系統提示的「你做事的方式」一段。**確定性的對照表**（`fortune_text.py`
    的常數＋這裡的組合規則），措辭由 opencode 起草、領班審；**不給任何任務例子**。命盤只改過程（先去哪、讀的順序、怎麼收尾、
    被退回時怎麼重來），不改題目。
-4. **命盤卡**（`build_card`）：分身寫 `命盤卡.md`（≤ 6 行）；第一行命盤由這裡決定性寫出（`INFP · 雙魚（水）· O 型`），
-   接著至多 3 句「你是 X，所以我 Y」。**Y 必須是這一跑真的發生過的步驟**：每一句提到的地點／動作都要在步驟紀錄裡找得到，
-   找不到就從卡上拿掉那一句（這就是 Vacant 的「每一步有沒有根據」用在命盤卡上）；一句都沒有可檢查的字也拿掉
-   （量不到不是通過）。
+4. **命盤卡**（`build_card`，第二版：**確定性生成，不經模型，段 2 不再要求分身寫任何命盤卡**）：命盤一行（`INFP · 雙魚（水）· O 型`）；
+   一句解讀（從信的命盤段挑，優先 J/P、T/F，已過現實詞／LEAK 過濾）；它走過的路（由步驟紀錄生成：去過的地點依序、
+   最後寫成品時待的地點、成品標題、被退回幾次）；它做的事（主要成品的標題）。第一版「你是 X，所以我 Y」那套要模型寫、再逐句檢查的做法
+   把模型逼成同一套句子，已移除（git 歷史裡有）。
 
 ## 誠實邊界（改碼請保留）
 
-* 命盤卡的檢查是**字面的步驟紀錄比對**：句子說「我先去了草稿角」，檢查的是紀錄裡有沒有成功讀過／列過 `地上/草稿角/…`；
-  不判斷那一步做得好不好，也不判斷「你是 X」那半句對不對（那是占卜）。
-* 動作詞表（`ACTIONS`）是窄名單：句子裡沒有任何表內的字（地點或動作）＝ 無法檢查 ＝ 拿掉。
-* 星座與血型沒給就不猜、不寫、不進命盤卡的任何一句（`mentions_ungiven` 擋）。
+* 「它走過的路」每一個字都有步驟紀錄：地點＝成功的 `ws_read`／`ws_list`；「交出」的地點＝最後寫成品之前最近碰到的地點；
+  被退回次數＝嘗試數 − 1。它不判斷那一步做得好不好。
+* 「解讀」是模型在信裡寫的占卜句，這裡只挑、不改寫（≤40 字截到句讀）；它**不是**步驟根據，是占卜。
+* 星座與血型沒給就不猜、不寫、不進命盤卡的解讀與標題（`mentions_ungiven` 擋）。
 * 命盤與命盤卡是觀眾資料的衍生物：撤回時跟 run-dir 一起刪（`fortune_in.json`／`fortune_final.json`／`fortune_card.json`），
   進檔案庫的 `twin.fortune` 跟 `decision` 同一條規矩（`twinvault.TWIN_OFF_CHAIN_KEYS`）；鏈上沒有。
 """
@@ -280,17 +280,6 @@ def render_section(f: dict[str, Any], sec: dict[str, str], traits: str) -> tuple
 # 3. 做事的方式（拼進段 2 的系統提示）
 # ---------------------------------------------------------------------------
 
-CARD_RULES = (
-    "停下之前，一定要先寫好「命盤卡.md」（直接放在你房間最上層）；沒有這個檔，就還沒有做完。"
-    "請把「命盤卡.md 已經寫好」也寫進 PLAN.md 的「做完的樣子」。"
-    "裡面只寫三句，每句一行，格式固定是「你是X，所以我Y」。"
-    "X 只能是他的命盤本身：他的某個字母、他星座的元素，或他的血型，不要改寫成別的形容。"
-    "Y 要是這一跑你真的做過的事：要點名你真的去過的一個地點，和你真的打開讀過的地上一件東西（用它在世界裡的名字，不是檔名），"
-    "並說你對那件東西做了什麼；有先後的話，照你真的做的先後寫成「先…才…」。"
-    "沒做過的、沒打開過的，一個字都不要寫。"
-)
-
-
 def way_lines(f: dict[str, Any]) -> list[str]:
     """命盤 → 「做事的方式」的條目（確定性）。沒有任何命盤 ⇒ 空 list（段 2 的系統提示與沒有命盤時逐位元相同）。"""
     out: list[str] = []
@@ -310,21 +299,17 @@ def way_lines(f: dict[str, Any]) -> list[str]:
     return out
 
 
-#: 接在段 2 第一句（user 訊息）後面的提醒：系統提示裡的「停下之前要有命盤卡」gemma 常忘，user 訊息最後一句它比較聽。
-CARD_REMINDER = "另外，停下之前要先把命盤卡.md 寫好（三句，格式照說明）。"
-
-
 def reminder(f: dict[str, Any]) -> str:
-    """沒有命盤 ⇒ ''（段 2 第一句與沒有這個功能時逐位元相同）。"""
-    return ("\n" + CARD_REMINDER) if way_lines(f) else ""
+    """（第二版起命盤卡由程式生成，段 2 不再有任何關於命盤卡的要求。）恆為空字串；保留給舊呼叫端。"""
+    return ""
 
 
 def way_text(f: dict[str, Any]) -> str:
-    """接在段 2 系統提示後面的整段（含命盤卡的規則）。沒有命盤 ⇒ ''。"""
+    """接在段 2 系統提示後面的整段。沒有命盤 ⇒ ''。"""
     ls = way_lines(f)
     if not ls:
         return ""
-    return "\n\n" + T.WAY_INTRO + "\n" + "\n".join(f"- {x}" for x in ls) + "\n\n" + CARD_RULES
+    return "\n\n" + T.WAY_INTRO + "\n" + "\n".join(f"- {x}" for x in ls)
 
 
 # ---------------------------------------------------------------------------
@@ -466,168 +451,19 @@ class Evidence:
         return getattr(self, "a_" + token)()
 
 
-#: 命盤卡句子裡的字 → 檢查名。窄名單（誠實邊界）；順序＝長的字在前，避免「先寫計畫」被「計畫」吃掉。
-ACTIONS: tuple[tuple[str, str], ...] = (
-    ("先寫了計畫", "plan_first"), ("先寫計畫", "plan_first"), ("先寫好計畫", "plan_first"),
-    ("先走過地上", "browse_first"), ("先逛了地上", "browse_first"), ("先逛過地上", "browse_first"),
-    ("先看過地上", "browse_first"), ("先逛", "browse_first"), ("先走了一圈", "browse_first"),
-    ("改了主意", "changed_mind"), ("改主意", "changed_mind"),
-    ("兩個版本", "two_versions"), ("兩版", "two_versions"),
-    ("再看了一次房間", "recheck"), ("再看一次房間", "recheck"), ("再檢查了一次", "recheck"),
-    ("再檢查一次", "recheck"), ("檢查了一遍", "recheck"), ("再讀了一遍", "recheck"),
-    ("留給了", "left_for"), ("留給", "left_for"),
-    ("收好了", "kept"), ("收在", "kept"), ("收好", "kept"), ("自己保管", "kept"),
-    ("寫了計畫", "plan"), ("寫了 PLAN", "plan"),
-)
-_PLACE_TOKENS = tuple(sorted(list(PLACES) + list(PLACE_ALIASES), key=len, reverse=True))
-#: 命盤卡不准自己說閘門給了什麼結果（收據只有閘門給；與 `grounding_gate` 窗 4 同一條精神）。
+#: 命盤卡的標題不准自己說閘門給了什麼結果（收據只有閘門給；與 `grounding_gate` 窗 4 同一條精神）。
 RECEIPT_CLAIM = re.compile(
     r"(?:獲得|拿到|領到|換到|收到|取得)了?(?:一張)?收據|通過了?(?:閘門|檢查|驗收)|過了閘門|過閘|閘門(?:通過|放行|亮)|亮燈|綠光")
 #: ⚠ 「收據」本身是世界裡的東西（帳本鏈上有收據片、投遞口有收據卡），提到它不算；只擋「說閘門給了我結果」的句型。
-_SHAPE = re.compile(r"^你.{1,30}?[，,]\s*所以我.{2,}$")
 
 
-#: 材料名裡太籠統、不能當「點名東西」的字。
-_GENERIC_PARTS = frozenset({"另一張", "現貼", "第四列", "完成", "進度", "紀錄"})
+NO_NAME_TITLE = "一件沒有名字的小事"
+READING_ORDER = ("JP", "TF", "EI", "SN")        # 解讀優先挑 J/P、T/F 那一行；沒有就挑第一個存在的行
 
 
-def object_names(rel: str) -> list[str]:
-    """`地上/帳本鏈/尾段_418到447片.txt` → 世界裡的名字：檔名去副檔名（整個）＋以「_」切開、沒有數字、≥2 字的各段。不是檔名本身。"""
-    stem = pathlib.PurePosixPath(rel).stem
-    names = {stem}
-    for part in stem.split("_"):
-        if len(part) >= 2 and not re.search(r"\d", part) and part not in _GENERIC_PARTS:
-            names.add(part)
-    return sorted(names, key=len, reverse=True)
-
-
-def objects_in(sentence: str, ground_files: list[str]) -> list[tuple[str, str]]:
-    """句子點名了哪些地上的東西 → [(字面, 名字所屬的檔們用 '|' 連起來)]。長名字先配、配過就挖掉。"""
-    table: dict[str, list[str]] = {}
-    for rel in ground_files:
-        for n in object_names(rel):
-            table.setdefault(n, []).append(rel)
-    out: list[tuple[str, str]] = []
-    s = sentence
-    for n in sorted(table, key=len, reverse=True):
-        if n in s:
-            out.append((n, "|".join(table[n])))
-            s = s.replace(n, "〇" * len(n))
-    return out
-
-
-def tokens_in(sentence: str) -> list[tuple[str, str, str]]:
-    """句子裡可檢查的**動作詞**（只當額外的順序／動作判準，不能單獨讓一句過關）。"""
-    out: list[tuple[str, str, str]] = []
-    s = sentence
-    for w, kind in ACTIONS:
-        if w in s:
-            out.append(("action", w, kind))
-            s = s.replace(w, "〇" * len(w))
-    return out
-
-
-def places_in(sentence: str) -> list[tuple[str, str]]:
-    out: list[tuple[str, str]] = []
-    s = sentence
-    for p in _PLACE_TOKENS:
-        if p in s:
-            out.append((p, PLACE_ALIASES.get(p, p)))
-            s = s.replace(p, "〇" * len(p))
-    return out
-
-
-_X_PIECE_SPLIT = re.compile(r"[、,，和及＋+/／的\s]|又|也|而且")
-
-
-def x_valid(x: str, f: dict[str, Any]) -> bool:
-    """X 半句必須是命盤本身：他的字母（單個或四個）、星座的元素（或星座名）、血型。每一段都要是，且是「給了的」那些。"""
-    for w in ("的人", "星座", "元素", "血型", "型", "座", "血", "象"):       # 「雙子星座」「B型血」「水象元素」都是命盤本身的說法
-        x = x.replace(w, "")
-    pieces = [p for p in _X_PIECE_SPLIT.split(x.strip()) if p]
-    if not pieces:
-        return False
-    m = f.get("mbti") or ""
-    for p in pieces:
-        p2 = p.strip()
-        ok = False
-        if m and (p2.upper() == m or (len(p2) == 1 and p2.upper() in m)):
-            ok = True
-        elif p2.upper() in ("E", "I", "S", "N", "T", "F", "J", "P") and not m:
-            ok = False
-        elif f.get("zodiac") and (p2.rstrip("象") == element(f["zodiac"]) or p2 == f["zodiac"]):
-            ok = True
-        elif f.get("blood") and p2.upper() == f["blood"]:
-            ok = True
-        if not ok:
-            return False
-    return True
-
-
-_ORDER = re.compile(r"先(.+?)(?:才|再|然後|之後才|後才)(.+)")
-_SHAPE2 = re.compile(r"^你是(.{1,24}?)[，,]\s*所以我(.+)$")
-
-
-def check_sentence(sentence: str, ev: Evidence, f: dict[str, Any], traits: str = "") -> tuple[bool, str]:
-    """一句命盤卡「你是X，所以我Y」→ （保留嗎, 理由）。
-
-    X 必須是命盤本身（`x_valid`）。Y 至少點名一個地點或一件地上的東西，點名的地點要有成功讀取／列出、東西要這一跑真的被 ws_read 過；
-    「先…才…」的先後要與步驟紀錄一致。另擋：自稱收據／通過、逐字抄觀眾原文、提到沒給的星座血型、現實關係詞、時段詞。
-    理由：ok／shape／filename／x_not_chart／too_long／time／ungiven／reality／receipt_claim／leak／no_checkable／ungrounded:<字>／order_mismatch。
-    """
-    s = " ".join(str(sentence or "").replace("*", "").split())
-    s = re.sub(r"^[\-\d.、\s]+", "", s)
-    m = _SHAPE2.match(s)
-    if not m:
-        return False, "shape"
-    if len(s) > MAX_CARD_LINE_CHARS:
-        return False, "too_long"
-    if any(w in s for w in TIME_WORDS):
-        return False, "time"
-    if mentions_ungiven(s.replace(f.get("mbti") or "~~", ""), f):
-        return False, "ungiven"
-    if re.search(r"\.(?:md|txt)\b|[A-Za-z0-9]_|_[A-Za-z0-9\u4e00-\u9fff]|/", s):
-        return False, "filename"                      # 世界內的名字，不是檔名
-    if mentions_reality(s):
-        return False, "reality"
-    if RECEIPT_CLAIM.search(s):
-        return False, "receipt_claim"
-    if traits and shares_window(s, traits):
-        return False, "leak"
-    if not x_valid(m.group(1), f):
-        return False, "x_not_chart"
-    y = m.group(2)
-    objs, plcs = objects_in(y, ev.ground_files), places_in(y)
-    if not objs and not plcs:
-        return False, "no_checkable"
-    for lit, name in plcs:
-        if name not in ev.place_first:
-            return False, f"ungrounded:{lit}"
-    for lit, files in objs:
-        if not any(fl in ev.file_first for fl in files.split("|")):
-            return False, f"ungrounded:{lit}"
-    for kind, lit, name in tokens_in(y):
-        if not ev.has(kind, name):
-            return False, f"ungrounded:{lit}"
-
-    def first_of(part: str) -> int | None:
-        idx = [ev.place_first[n] for _l, n in places_in(part) if n in ev.place_first]
-        for _l, files in objects_in(part, ev.ground_files):
-            idx += [ev.file_first[fl] for fl in files.split("|") if fl in ev.file_first]
-        return min(idx) if idx else None
-
-    om = _ORDER.search(y)
-    if om:
-        a, b = first_of(om.group(1)), first_of(om.group(2))
-        if a is not None and b is not None and a >= b:
-            return False, "order_mismatch"
-    return True, "ok"
-
-
-def main_title(ws: pathlib.Path | None, f: dict[str, Any], traits: str = "") -> str | None:
-    """這一跑主要成品（最長的那個頂層 .md／.txt）的標題＝第一個非空行，≤20 字；像檔名、抄觀眾原文、提沒給的東西、現實詞、時段詞 ⇒ None。"""
-    files = _top_files(ws) if ws else {}
-    for text in sorted(files.values(), key=len, reverse=True):          # 最長的成品先試；標題不合格就試下一個
+def title_of(files: dict[str, str], f: dict[str, Any], traits: str = "") -> str | None:
+    """這一跑主要成品（最長的頂層 .md／.txt）的標題＝第一個非空行，≤20 字；像檔名、抄觀眾原文、提沒給的東西、現實詞、時段詞 ⇒ 試下一個，都不行 ⇒ None。"""
+    for text in sorted(files.values(), key=len, reverse=True):
         first = next((ln for ln in text.splitlines() if ln.strip()), "")
         t = re.sub(r"^[\s#>*\-_\d.、：:【\[（(]+", "", first).strip()
         t = t.strip("「」『』\"'*】]）)").rstrip("。.！!：:，,").strip()
@@ -642,61 +478,117 @@ def main_title(ws: pathlib.Path | None, f: dict[str, Any], traits: str = "") -> 
     return None
 
 
-def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any],
-               traits: str = "") -> dict[str, Any]:
-    """讀工作區的 `命盤卡.md`、逐句對步驟紀錄 → `{first_line, lines, kept, dropped[{text,why}], present}`。
+def main_title(ws: pathlib.Path | None, f: dict[str, Any], traits: str = "") -> str | None:
+    return title_of(_top_files(ws) if ws else {}, f, traits)
 
-    第一行（命盤）永遠由 `first_line(f)` 決定性寫出，不信分身寫的那一行。沒有任何命盤 ⇒ 不出卡（`present:False`）。
-    `lines` 是通過檢查的「你是 X，所以我 Y」（至多 `MAX_CARD_LINES`）。
-    """
-    res: dict[str, Any] = {"first_line": first_line(f), "lines": [], "dropped": [], "present": False,
-                           "card_file": False}
+
+def reading_of(letter_text: str, f: dict[str, Any], traits: str = "") -> str | None:
+    """一句解讀：從信的命盤段挑一句（優先 J/P、T/F，其次 E/I、S/N；都沒有就挑第一個存在的行）。
+    重新過一次現實詞／LEAK／時段詞／沒給的東西（`clean_sentence`，≤40 字截到句讀）。**不經模型**。"""
+    _body, sec = parse_letter(letter_text or "")
+    keys = [k for k in READING_ORDER if sec.get(k)] + [k for k in sec if k not in READING_ORDER and k not in ("mbti", "basis", "zodiac", "blood") and sec.get(k)]
+    for k in keys:
+        sent, _why = clean_sentence(sec[k], traits, f)
+        if sent:
+            return sent
+    return None
+
+
+def route_of(places: list[str], last_place: str | None, title: str, retries: int) -> str:
+    """它走過的路（確定性，每一個字都有紀錄）：它先去了A，再到B……，在C交出《標題》；被退回過就加「中途被退回 N 次，改了 N 次」。
+    地點取成功讀取／列出的地上地點、依首次出現順序、去重、最多 4 個；整句 ≤ `MAX_CARD_LINE_CHARS`（太長先少一個地點、再截標題）。"""
+    ps = list(dict.fromkeys(places))[:4]
+    tail = f"；中途被退回 {retries} 次，改了 {retries} 次" if retries > 0 else ""
+
+    def make(pp: list[str], t: str) -> str:
+        if not pp:
+            head = "它"
+        elif len(pp) == 1:
+            head = f"它去了{pp[0]}"
+        else:
+            head = f"它先去了{pp[0]}" + "".join(f"，再到{x}" for x in pp[1:])
+        where = f"在{last_place}" if last_place else ""
+        return f"{head}，{where}交出《{t}》{tail}" if pp else f"{head}{where}交出《{t}》{tail}"
+
+    t = title
+    while len(make(ps, t)) > MAX_CARD_LINE_CHARS and len(ps) > 1:
+        ps = ps[:-1]
+    while len(make(ps, t)) > MAX_CARD_LINE_CHARS and len(t) > 4:
+        t = t[:-2] + "…" if not t.endswith("…") else t[:-2] + "…"
+    return make(ps, t)
+
+
+def last_place_before_delivery(rows: list[dict[str, Any]]) -> str | None:
+    """交件前最後寫成品時待的地點：最後一次寫頂層成品（不是 PLAN／信／TRAITS）之前，最近一次成功碰到的地上地點。"""
+    rows = stage2_rows(rows)
+    lw = None
+    for i, r in enumerate(rows):
+        if (r.get("tool") == "ws_write" and r.get("ok") is True and not _place_of(r.get("path"))
+                and r.get("path") not in (PLAN_FILE, LETTER_FILE, CARD_FILE)):
+            lw = i
+    if lw is None:
+        return None
+    for r in reversed(rows[:lw]):
+        if r.get("ok") is True and r.get("tool") in ("ws_read", "ws_list") and _place_of(r.get("path")):
+            return _place_of(r.get("path"))
+    return None
+
+
+def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, Any]], files: dict[str, str],
+                 retries: int, traits: str = "") -> dict[str, Any]:
+    """命盤卡第二版（確定性，不經模型）：命盤一行＋一句解讀＋它走過的路＋它做的事。`lines`＝[解讀, 路線]（缺解讀就只有路線）。"""
+    res: dict[str, Any] = {"first_line": first_line(f), "lines": [], "dropped": [], "present": False, "card_file": False}
     if not has_any(f):
         return res
-    gdir = pathlib.Path(rd) / "stage2_in" / "地上"
-    gfiles = ([GROUND_PREFIX + p.relative_to(gdir).as_posix() for p in sorted(gdir.rglob("*")) if p.is_file()]
-              if gdir.is_dir() else [])
-    ev = Evidence(read_steps(rd), pathlib.Path(ws) if ws else None, gfiles)
-    res["title"] = main_title(pathlib.Path(ws) if ws else None, f, traits)
-    raw = ""
-    if ws and (pathlib.Path(ws) / CARD_FILE).is_file():
-        try:
-            raw = (pathlib.Path(ws) / CARD_FILE).read_text(encoding="utf-8", errors="replace")
-            res["card_file"] = True
-        except OSError:
-            raw = ""
-    cand = [ln.strip() for ln in raw.splitlines() if ln.strip()]
-    for ln in cand:
-        if "所以我" not in ln:
-            continue                             # 第一行（命盤）與別的雜行不是句子
-        ok, why = check_sentence(ln, ev, f, traits)
-        if ok and len(res["lines"]) < MAX_CARD_LINES:
-            res["lines"].append(" ".join(ln.replace("*", "").split()))
-        elif ok:
-            res["dropped"].append({"text": ln, "why": "over_limit"})
-        else:
-            res["dropped"].append({"text": ln, "why": why})
+    title = title_of(files, f, traits)
+    res["title"] = title
+    reading = reading_of(letter_text, f, traits)
+    places = visited_places(rows)
+    last = last_place_before_delivery(rows)
+    res["places"] = places
+    res["reading"] = reading
+    if places:
+        res["route"] = route_of(places, last, title or NO_NAME_TITLE, retries)
+    res["lines"] = [x for x in (reading, res.get("route")) if x]
     res["present"] = bool(res["lines"])
-    res["places"] = visited_places(ev.all)
+    return res
+
+
+def attempts_retries(rd: pathlib.Path) -> int:
+    """這一跑被閘門退回、重改過幾次＝嘗試數 − 1（`run_RUN-ON.json`）。讀不到 ⇒ 0。"""
     try:
-        (pathlib.Path(rd) / CARD_JSON_NAME).write_text(json.dumps(res, ensure_ascii=False) + "\n", encoding="utf-8")
+        runj = json.loads((pathlib.Path(rd) / "run_RUN-ON.json").read_text(encoding="utf-8"))
+        return max(0, len(runj.get("attempts", [])) - 1)
+    except (OSError, ValueError, TypeError):
+        return 0
+
+
+def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], traits: str = "") -> dict[str, Any]:
+    """從 run-dir（步驟紀錄、`letter_final.md`、`run_RUN-ON.json`）與最後的工作區（成品標題）生成命盤卡。**不讀分身寫的任何命盤卡。**"""
+    rd = pathlib.Path(rd)
+    try:
+        letter = (rd / "letter_final.md").read_text(encoding="utf-8", errors="replace")
     except OSError:
-        pass
+        letter = ""
+    res = compose_card(f, letter_text=letter, rows=read_steps(rd), files=_top_files(pathlib.Path(ws)) if ws else {},
+                       retries=attempts_retries(rd), traits=traits)
+    if has_any(f):
+        try:
+            (rd / CARD_JSON_NAME).write_text(json.dumps(res, ensure_ascii=False) + "\n", encoding="utf-8")
+        except OSError:
+            pass
     return res
 
 
 def polaroid_sentence(line: str) -> str:
-    """命盤卡一句「你是X，所以我Y」→ 拍立得那一行用的短句「我Y」（窄帶放不下整句）。不是那個形狀就原樣回。"""
-    s = str(line or "")
-    return ("我" + s.split("所以我", 1)[1]).rstrip("。") if "所以我" in s else s
+    """拍立得那一行用的短句＝命盤卡的「解讀」那一句（`lines[0]`）；拿掉句尾標點。"""
+    return str(line or "").rstrip("。.！!")
 
 
 def card_md(card: dict[str, Any]) -> str:
-    """通過檢查的命盤卡全文（≤ 6 行）。"""
-    ls = [card.get("first_line") or ""]
-    if card.get("title"):
-        ls.append("它做的事：" + card["title"])
-    ls += list(card.get("lines") or [])
+    """命盤卡全文：命盤一行、解讀、它走過的路、它做的事（≤ 6 行）。"""
+    ls = [card.get("first_line") or ""] + list(card.get("lines") or [])
+    ls.append("它做的事：" + (card.get("title") or NO_NAME_TITLE))
     return "\n".join(x for x in ls if x) + "\n"
 
 

@@ -147,7 +147,6 @@ fi
 #    SYS 與沒有命盤時逐位元相同。重改（RETRY）時同一份檔還在，所以重來照命盤重來。
 WAY="$("$PY" "$HERE/fortune.py" way "$RUN_DIR" 2>/dev/null || true)"
 SYS="$SYS$WAY"
-MSG="$MSG$("$PY" "$HERE/fortune.py" msg "$RUN_DIR" 2>/dev/null || true)"
 # 電視的「它照著你的命盤……」那一拍（旁註 `twin_fortune` phase=way；只在第一次、沒有命盤就不發）。
 [ "$RETRY" -eq 0 ] && { "$PY" "$HERE/fortune.py" announce "$RUN_DIR" 2>/dev/null || true; }
 

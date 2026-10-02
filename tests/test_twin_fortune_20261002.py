@@ -214,7 +214,7 @@ def _all_texts() -> list[tuple[str, str]]:
     out = [("WAY_INTRO", T.WAY_INTRO)]
     for name in ("WAY_EI", "WAY_SN", "WAY_TF", "WAY_JP", "WAY_ELEMENT", "WAY_BLOOD", "RETRY_JP", "FIRST_STOPS"):
         out += [(f"{name}[{k}]", v) for k, v in getattr(T, name).items()]
-    out.append(("CARD_RULES", fz.CARD_RULES))
+    
     return out
 
 
@@ -233,8 +233,7 @@ def test_every_way_text_is_clean_short_and_in_the_world() -> None:
         assert not [w for w in _TIME if w in t], (name, [w for w in _TIME if w in t])
         assert not [w for w in _MENU if w in t], (name, "任務例子／菜單", [w for w in _MENU if w in t])
         assert_ks1_clean(t)
-        if name != "CARD_RULES":
-            assert len(t) <= 160, (name, len(t))
+        assert len(t) <= 160, (name, len(t))
         assert not re.search(r"[\U0001F300-\U0001FAFF☀-➿]", t), name
 
 
@@ -253,7 +252,7 @@ def test_way_text_for_all_combinations_is_deterministic_and_nonempty() -> None:
     for m, z, b in itertools.product(fz.MBTI_TYPES, (None, "牡羊", "金牛", "雙子", "雙魚"), (None, "A", "B", "O", "AB")):
         f = {"mbti": m, "zodiac": z, "blood": b}
         a, a2 = fz.way_text(f), fz.way_text(dict(f))
-        assert a == a2 and a.startswith("\n\n") and fz.CARD_RULES in a
+        assert a == a2 and a.startswith("\n\n") and "命盤卡" not in a
         n += 1
     assert n == 16 * 5 * 5
     # 只有星座、只有血型也有（不靠 MBTI）
@@ -263,7 +262,7 @@ def test_way_text_for_all_combinations_is_deterministic_and_nonempty() -> None:
 
 def test_no_fortune_means_empty_way_and_identical_stage2_argv() -> None:
     assert fz.way_text({"mbti": None, "zodiac": None, "blood": None}) == ""
-    assert fz.reminder({"mbti": None, "zodiac": None, "blood": None}) == "" and fz.reminder({"blood": "O"}) != ""
+    assert fz.reminder({"blood": "O"}) == ""                       # 第二版：段 2 不再有任何命盤卡的要求
     assert fz.way_lines({}) == []
 
 
@@ -323,7 +322,7 @@ def test_wrapper_stage2_argv_gets_the_way_through_a_real_shell_run(tmp_path) -> 
         msg2 = (rd / "msg2.txt").read_text(encoding="utf-8")
         if want_way:
             assert sys2.startswith("BASE-SYS\n\n" + T.WAY_INTRO) and (T.WAY_JP["J"] in sys2 or T.WAY_JP["P"] in sys2)
-            assert fz.CARD_RULES in sys2 and msg2 == "MSG\n" + fz.CARD_REMINDER
+            assert "命盤卡" not in sys2 and msg2 == "MSG"
         else:
             # 沒給任何命盤，但分身猜了 MBTI（信裡寫了 INFP）⇒ 也有做事的方式（猜的也算）
             assert sys2.startswith("BASE-SYS") and msg2.startswith("MSG")
@@ -402,99 +401,83 @@ def test_visited_places_in_order_only_stage2_and_only_ok_reads() -> None:
     assert fz.visited_places(PLAN_THEN_BROWSE) == ["紙卡地"]
 
 
-def _card(tmp, rows, card, f=None, files=None, traits=""):
+LETTER_FINAL = ("這個人手慢。\n\n命盤\nMBTI：你是 INFP（你自己選的）\nE/I：話不多，待在角落看人。\nS/N：愛想像還沒成形的東西。\n"
+                "T/F：先想到的是別人的心情。\nJ/P：在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道。\n星座：雙魚（水象）。像水。\n")
+
+
+def _card(tmp, rows, letter=LETTER_FINAL, f=None, files=None, traits="", attempts=1):
     pathlib.Path(tmp).mkdir(parents=True, exist_ok=True)
-    rd, ws = _world(pathlib.Path(tmp), rows, card=card, files=files)
+    rd, ws = _world(pathlib.Path(tmp), rows, card=None, files=files)
+    (rd / "letter_final.md").write_text(letter, encoding="utf-8")
+    (rd / "run_RUN-ON.json").write_text(json.dumps({"attempts": [{}] * attempts}), encoding="utf-8")
     return fz.build_card(rd, ws, f or fz.resolve(FULL, {}), traits), rd, ws
 
 
-def test_card_x_must_be_the_chart_itself_and_y_must_name_a_read_place_and_thing(tmp_path) -> None:
-    card = ("你是 P，所以我在草稿角先翻了紙團才寫計畫。\n"           # ✓ 字母；地點與東西都讀過；先後對
-            "你是水象，所以我讀了帳本鏈的尾段。\n"                   # ✓ 元素
-            "你是 O 型，所以我去了投遞口。\n"                       # ✗ 沒去過
-            "你是內斂的人，所以我先去了草稿角。\n"                   # ✗ X 不是命盤
-            "你是 I，所以我寫了計畫。\n")                            # ✗ 沒有地點或東西
-    res, rd, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, card)
-    assert res["lines"] == ["你是 P，所以我在草稿角先翻了紙團才寫計畫。", "你是水象，所以我讀了帳本鏈的尾段。"]
-    assert [d["why"] for d in res["dropped"]] == ["ungrounded:投遞口", "x_not_chart", "no_checkable"]
-    assert json.loads((rd / fz.CARD_JSON_NAME).read_text(encoding="utf-8"))["dropped"]
-
-
-def test_card_negative_control_a_thing_is_only_named_if_it_was_really_opened(tmp_path) -> None:
-    sent = "你是 P，所以我讀了格狀圖。"
-    res, _, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, sent)                    # 這一跑沒開過格狀圖
-    assert res["lines"] == [] and res["dropped"][0]["why"] == "ungrounded:格狀圖"
-    res2, _, _ = _card(tmp_path / "b", PLAN_THEN_BROWSE, sent)                   # 開過
-    assert res2["lines"] == [sent]
-    res3, _, _ = _card(tmp_path / "c", BROWSE_THEN_PLAN, "你是 P，所以我讀了背面有字的卡。")   # 地上有、沒打開過
-    assert res3["lines"] == [] and res3["dropped"][0]["why"] == "ungrounded:背面有字的卡"
-
-
-def test_card_order_claims_follow_the_step_log(tmp_path) -> None:
-    ok = "你是 P，所以我先讀了紙團才讀尾段。"       # 紙團（草稿角，步驟 6）先於尾段（帳本鏈，步驟 7）
-    bad = "你是 P，所以我先讀了尾段才讀紙團。"
-    res, _, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, ok + "\n" + bad)
-    assert res["lines"] == [ok] and res["dropped"] == [{"text": bad, "why": "order_mismatch"}]
-
-
-def test_card_action_words_are_extra_checks_not_enough_alone(tmp_path) -> None:
-    res, _, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, "你是 P，所以我寫了計畫。\n你是 P，所以我在草稿角先走過地上才寫計畫。")
-    assert [d["why"] for d in res["dropped"]] == ["no_checkable"]       # 光有動作詞不過關
-    assert len(res["lines"]) == 1
-    res2, _, _ = _card(tmp_path / "b", PLAN_THEN_BROWSE, "你是 P，所以我在紙卡地先走過地上才寫計畫。")
-    assert res2["lines"] == [] and res2["dropped"][0]["why"] == "ungrounded:先走過地上"   # 動作與紀錄不符
-
-
-def test_card_ungiven_reality_receipt_time_leak_shape_and_length(tmp_path) -> None:
-    f = fz.resolve({"mbti": "INFP", "mbti_source": "ai", "zodiac": None, "blood": None}, {})
-    rows = BROWSE_THEN_PLAN + [_row(11, "ws_read", "地上/石頭閘門/窗格亮滅.txt")]
-    card = ("你是 P，所以我去了草稿角\n"                                   # shape（缺句尾沒關係，這句是 shape 對的）
-            "我是 P，所以我去了草稿角。\n"                                 # shape
-            "你是雙魚座，所以我去了草稿角。\n"                             # ungiven（沒給星座；X 也不是）
-            "你是 A 型，所以我去了草稿角。\n"                              # ungiven
-            "你是 P，所以我每天早上去了草稿角。\n"                          # time
-            "你是 P，所以我替你的伴侶去了草稿角。\n"                         # reality
-            "你是 P，所以我在石頭閘門拿到了收據。\n"                         # receipt_claim
-            "你是 P，所以我去了草稿角" + "，也很用心地做了很多事" * 6 + "。\n")   # too_long
-    res, _, _ = _card(tmp_path, rows, card, f=f)
-    assert res["lines"] == ["你是 P，所以我去了草稿角"]          # 第一句（沒有句號）形狀對、全有根據，保留；其餘各有各的理由
-    assert [d["why"] for d in res["dropped"]] == ["shape", "ungiven", "ungiven", "time", "reality", "receipt_claim", "too_long"]
-
-
-def test_card_never_shows_file_names_and_title_has_no_trailing_colon(tmp_path) -> None:
-    card = "你是 P，所以我去草稿角讀了紙團_乙.txt。\n你是 P，所以我讀了尾段_418到447片。\n你是 P，所以我在草稿角讀了尾段。"
-    res, _, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, card)
-    assert [d["why"] for d in res["dropped"]] == ["filename", "filename"] and len(res["lines"]) == 1
-    d = tmp_path / "t"
-    d.mkdir()
-    (d / "成品.md").write_text("給守口人的小卡：\n內文", encoding="utf-8")
-    assert fz.main_title(d, fz.resolve(FULL, {})) == "給守口人的小卡"
-
-
-def test_card_leak_is_against_the_viewers_original_not_against_the_letter(tmp_path) -> None:
-    sent = "你是 P，所以我把東西放回原處才安心地讀了紙團。"
-    (tmp_path / "a").mkdir(), (tmp_path / "b").mkdir()
-    rd, ws = _world(tmp_path / "a", BROWSE_THEN_PLAN, card=sent)
-    (rd / "letter_final.md").write_text("他把東西放回原處才安心的人。", encoding="utf-8")
-    assert fz.traits_hint(rd) == ""
-    assert fz.build_card(rd, ws, fz.resolve(FULL, {}), fz.traits_hint(rd))["lines"] == [sent]      # 抄信不算
-    (rd / "traits_ref.txt").write_text("- 氣質：把東西放回原處才安心，慢", encoding="utf-8")
-    res = fz.build_card(rd, ws, fz.resolve(FULL, {}), fz.traits_hint(rd))
-    assert res["lines"] == [] and res["dropped"][0]["why"] == "leak"
-
-
-def test_card_max_three_lines_title_and_first_line_are_deterministic(tmp_path) -> None:
-    ls = "\n".join("你是 P，所以我先讀了紙團才讀尾段。" for _ in range(5))
-    res, _, _ = _card(tmp_path, BROWSE_THEN_PLAN, "我自己亂寫的第一行\n" + ls, files={"成品.md": "# 鬆環對照冊\n內容"})
-    assert len(res["lines"]) == 3 and [d["why"] for d in res["dropped"]] == ["over_limit"] * 2
+def test_card_v2_is_four_parts_built_without_the_model(tmp_path) -> None:
+    rows = BROWSE_THEN_PLAN                      # 草稿角→帳本鏈；PLAN；成品.md；ws_list(.)
+    res, rd, ws = _card(tmp_path, rows, files={"成品.md": "# 鬆環對照冊\n內文"})
+    assert res["first_line"] == "INFP · 雙魚（水）· O 型"
+    assert len(res["reading"]) <= fz.MAX_SENTENCE
+    assert res["lines"][0].startswith("在計畫的框架中掙扎")                      # 優先挑 J/P
+    assert res["route"] == "它先去了草稿角，再到帳本鏈，在帳本鏈交出《鬆環對照冊》"
+    assert res["lines"] == [res["reading"], res["route"]] and res["title"] == "鬆環對照冊"
     md = fz.card_md(res).splitlines()
-    assert md[0] == "INFP · 雙魚（水）· O 型" and md[1] == "它做的事：鬆環對照冊"
-    assert "亂寫" not in fz.card_md(res) and len(md) <= 6
+    assert md == ["INFP · 雙魚（水）· O 型", res["reading"], res["route"], "它做的事：鬆環對照冊"]
+    assert (rd / fz.CARD_JSON_NAME).is_file()
+    assert all(len(x) <= fz.MAX_CARD_LINE_CHARS for x in res["lines"])
 
 
-def test_card_title_is_in_world_words_and_filtered(tmp_path) -> None:
+def test_card_v2_reading_priority_and_filters() -> None:
+    f = fz.resolve(FULL, {})
+    assert fz.reading_of(LETTER_FINAL, f).startswith("在計畫的框架中掙扎")
+    no_jp = LETTER_FINAL.replace("J/P：在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道。\n", "")
+    assert fz.reading_of(no_jp, f) == "先想到的是別人的心情。"                      # 其次 T/F
+    only_ei = "x\n\n命盤\nMBTI：你是 INFP（你自己選的）\nE/I：話不多。\n"
+    assert fz.reading_of(only_ei, f) == "話不多。"                                   # 第一個存在的行
+    bad = LETTER_FINAL.replace("在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道。", "更傾向於與特定的伴侶建立連結。")
+    assert fz.reading_of(bad, f) == "先想到的是別人的心情。"                         # 現實詞整句換下一個
+    assert fz.reading_of("沒有命盤段的信", f) is None
+    long_ = LETTER_FINAL.replace("在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道。", "在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道，而且每一次都假裝什麼也沒發生過似的繼續往前走。")
+    assert len(fz.reading_of(long_, f)) <= fz.MAX_SENTENCE
+    assert fz.reading_of(LETTER_FINAL, f, traits="在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道") == "先想到的是別人的心情。"   # LEAK
+
+
+def test_card_v2_route_comes_only_from_the_step_log(tmp_path) -> None:
+    rows = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/投遞口/a.txt"), _row(5, "ws_list", "地上/捏土處"),
+                     _row(6, "ws_read", "地上/投遞口/b.txt"), _row(7, "ws_read", "地上/紙卡地/c.txt", ok=False),
+                     _row(8, "ws_read", "地上/帳本鏈/d.txt"), _row(9, "ws_read", "地上/草稿角/e.txt"),
+                     _row(10, "ws_read", "地上/畫架與長椅/f.txt"), _row(11, "ws_write", "PLAN.md"),
+                     _row(12, "ws_read", "地上/石頭閘門/g.txt"), _row(13, "ws_write", "成品.md"), _row(14, "ws_read", "地上/紙卡地/h.txt")]
+    res, _, _ = _card(tmp_path, rows, files={"成品.md": "# 小事\n內"}, attempts=3)
+    # 去重、依首次出現、失敗的讀取不算、最多 4 個；交出的地點＝最後寫成品之前最近碰到的地點（石頭閘門）；被退回 2 次
+    assert res["route"] == "它先去了投遞口，再到捏土處，再到帳本鏈，再到草稿角，在石頭閘門交出《小事》；中途被退回 2 次，改了 2 次"
+
+
+def test_card_v2_route_fits_the_line_limit_and_handles_no_title_no_place(tmp_path) -> None:
+    long_title = "一個很長很長的世界裡的標題名字啊"
+    r = fz.route_of(["投遞口", "長桌廣場", "畫架與長椅", "石頭閘門"], "石頭閘門", long_title, 2)
+    assert len(r) <= fz.MAX_CARD_LINE_CHARS and r.startswith("它先去了投遞口")
+    res, _, _ = _card(tmp_path / "a", STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")])
+    assert res["lines"] == [res["reading"]] and "route" not in res                   # 沒碰過任何地點：不編路線
+    md = fz.card_md(res).splitlines()
+    assert md[-1] == "它做的事：" + fz.NO_NAME_TITLE
+    res2, _, _ = _card(tmp_path / "b", BROWSE_THEN_PLAN)                              # 沒有成品檔：標題用「一件沒有名字的小事」
+    assert res2["title"] is None and "《" + fz.NO_NAME_TITLE + "》" in res2["route"]
+
+
+def test_card_v2_never_reads_what_the_twin_wrote_and_no_fortune_means_no_card(tmp_path) -> None:
+    rd, ws = _world(tmp_path / "x", BROWSE_THEN_PLAN, card="你是 P，所以我去了投遞口（亂寫的卡）")
+    (rd / "letter_final.md").write_text(LETTER_FINAL, encoding="utf-8")
+    res = fz.build_card(rd, ws, fz.resolve(FULL, {}))
+    assert "亂寫" not in fz.card_md(res) and "投遞口" not in res["route"]
+    none = fz.build_card(rd, ws, fz.resolve(fz.normalize(None), {}))
+    assert none["present"] is False and none["lines"] == []
+
+
+def test_card_v2_title_has_no_filename_and_is_filtered(tmp_path) -> None:
     f = fz.resolve(FULL, {})
     for i, (text, want) in enumerate((("# 鬆環對照冊\n內文", "鬆環對照冊"), ("【帳本鏈修復對照表】\n內文", "帳本鏈修復對照表"), ("版本一\n內文", None), ("補全紀錄.md\n內文", None),
+                                      ("給守口人的小卡：\n內文", "給守口人的小卡"),
                                       ("一個非常非常非常非常非常長的標題超過二十個字了\n內文", None),
                                       ("替伴侶補的清單\n內文", None), ("每天早上的清單\n內文", None),
                                       ("雙魚座的清單\n內文", "雙魚座的清單"))):
@@ -502,6 +485,9 @@ def test_card_title_is_in_world_words_and_filtered(tmp_path) -> None:
         d.mkdir()
         (d / "成品.md").write_text(text, encoding="utf-8")
         assert fz.main_title(d, f) == want, text
+
+
+def test_card_v2_title_respects_what_was_not_given_and_the_viewers_words(tmp_path) -> None:
     f2 = fz.resolve(fz.normalize({"mbti": "INFP"}), {})
     d = tmp_path / "z"
     d.mkdir()
@@ -509,36 +495,6 @@ def test_card_title_is_in_world_words_and_filtered(tmp_path) -> None:
     assert fz.main_title(d, f2) is None                                     # 沒給星座不准出現
     (d / "成品.md").write_text("把心情放回原處才覺得安心\n", encoding="utf-8")
     assert fz.main_title(d, f2, traits="他總把心情放回原處才覺得安心") is None   # 逐字抄觀眾原文
-
-
-def test_x_valid_accepts_only_the_given_chart(tmp_path) -> None:
-    f = fz.resolve(FULL, {})
-    for ok in ("P", "p", "INFP", "水象", "水", "雙魚座", "O 型", "O型", "I、P", "I 和 N", "雙魚座的水象", "B型血".replace("B","O"), "水象元素"):
-        assert fz.x_valid(ok, f), ok
-    for bad in ("J", "火象", "A 型", "內斂的人", "ISTJ", "", "P 的浪漫", "牡羊星座", "雙魚的火"):
-        assert not fz.x_valid(bad, f), bad
-    assert not fz.x_valid("水象", fz.resolve(fz.normalize({"mbti": "INFP"}), {}))      # 沒給星座
-
-
-def test_card_no_fortune_no_card_and_missing_card_file_is_not_a_crash(tmp_path) -> None:
-    rd, ws = _world(tmp_path / "x", BROWSE_THEN_PLAN, card="你是 P，所以我先去了草稿角。")
-    assert fz.build_card(rd, ws, fz.resolve(fz.normalize(None), {}))["present"] is False
-    rd2, ws2 = _world(tmp_path / "n", BROWSE_THEN_PLAN, card=None)
-    r = fz.build_card(rd2, ws2, fz.resolve(FULL, {}))
-    assert r["present"] is False and r["card_file"] is False and r["first_line"]
-
-
-def test_place_aliases_resolve_to_the_real_place(tmp_path) -> None:
-    rows = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/長桌廣場/土堆/小陶印.txt"),
-                     _row(5, "ws_write", "PLAN.md")]
-    res, _, _ = _card(tmp_path, rows, "你是 P，所以我翻了土堆。\n你是 P，所以我去了長桌。\n你是 P，所以我去了閘門。")
-    assert len(res["lines"]) == 2 and res["dropped"][0]["why"] == "ungrounded:閘門"
-
-
-def test_object_names_are_world_names_not_file_names() -> None:
-    assert "尾段" in fz.object_names("地上/帳本鏈/尾段_418到447片.txt")
-    assert "蕨葉" in fz.object_names("地上/投遞口/收據卡_蕨葉.txt") and "收據卡" in fz.object_names("地上/投遞口/收據卡_蕨葉.txt")
-    assert "第四列" not in fz.object_names("地上/石頭閘門/退回紙_第四列.txt")
 
 
 def test_reality_words_are_dropped_from_the_letter_section() -> None:
@@ -688,7 +644,8 @@ def test_emit_writes_enumerations_only_through_gate_meta_and_event_file(tmp_path
 
 
 def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
-    rd, ws = _world(tmp_path, BROWSE_THEN_PLAN, card="你是 P，所以我先去了草稿角。\n你是 P，所以我去了投遞口。")
+    rd, ws = _world(tmp_path, BROWSE_THEN_PLAN, card=None, files={"成品.md": "# 鬆環對照冊\n內文"})
+    (rd / "letter_final.md").write_text(LETTER_FINAL, encoding="utf-8")
     (rd / fz.FINAL_NAME).write_text(json.dumps(fz.resolve(FULL, {})), encoding="utf-8")
     events, side = tmp_path / "lc.jsonl", tmp_path / "lc.sidecar.jsonl"
     events.write_text(json.dumps({"type": "run_started", "task_id": "twin:tw-x", "arm": "RUN-ON", "run_id": "R9"}) + "\n"
@@ -698,18 +655,18 @@ def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
     r = subprocess.run([sys.executable, str(TWIN / "fortune.py"), "card", str(ws), str(rd)], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     rows = sc.read(side)
-    assert [x["phase"] for x in rows] == ["card"] and rows[0]["lines"] == ["你是 P，所以我先去了草稿角。"]
+    assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) == 2
+    assert rows[0]["lines"][1].startswith("它先去了草稿角") and sc.validate(rows) == []
     assert (rd / fz.CARD_JSON_NAME).is_file()
+
+
+def test_polaroid_prints_the_reading_sentence() -> None:
+    assert fz.polaroid_sentence("在計畫的框架中掙扎，卻被帶離軌道。") == "在計畫的框架中掙扎，卻被帶離軌道"
 
 
 # ---------------------------------------------------------------------------
 # 拍立得：印命盤那一行＋命盤卡一句
 # ---------------------------------------------------------------------------
-
-def test_polaroid_sentence_keeps_only_the_what_i_did_part() -> None:
-    assert fz.polaroid_sentence("你偏安靜，所以我先去了草稿角。") == "我先去了草稿角"
-    assert fz.polaroid_sentence("沒有那個形狀") == "沒有那個形狀"
-
 
 def test_polaroid_draws_the_fortune_line_and_leaves_it_out_when_not_given() -> None:
     from ops.exhibit.twin import polaroid as pl
