@@ -121,6 +121,9 @@ jobs:
       #  `ops/gain/data/r480_cert_gate_probe.json` 覆寫掉。那個寫入已經改成真的
       #  暫存檔、檔案本身也刪了 ⇒ **順序不再是正確性的一部分**，
       #  `tests/test_no_repo_pollution.py` 是它的擋門。）
+      - name: isolated Vacant EQ5 gain probe
+        run: python -m pytest -q -s tests/test_gain_probe_synthetic_20260928.py
+
       - name: runs/ 索引沒有漂
         run: python ops/gain/build_runs_index.py --check
 
