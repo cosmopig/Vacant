@@ -69,6 +69,7 @@ FINAL_NAME = "fortune_final.json"
 CARD_JSON_NAME = "fortune_card.json"
 STEP_LOG_NAME = "twin_steps.ndjson"        # 與 twinagent.STEP_LOG_NAME 同值（測試釘住）
 MAX_SENTENCE = 40                           # 信的命盤段每一行那一句的字數上限
+MAX_TITLE = 20                              # 命盤卡「它做的事」標題字數上限
 MAX_CARD_LINES = 3                          # 命盤卡「你是 X，所以我 Y」最多幾句
 MAX_CARD_LINE_CHARS = 60                    # 與雲端 `MAX_FORTUNE_LINE_CHARS` 同值（測試釘住）
 LEAK_WINDOW = 8                             # 與 `twin_letter_guard.LEAK_WINDOW` 同值
@@ -198,6 +199,17 @@ def mentions_ungiven(sentence: str, f: dict[str, Any]) -> bool:
     return False
 
 
+#: 把觀眾現實關係帶進來的詞（窄名單，不是完備的現實偵測）：命盤段的句子、命盤卡的句子與標題碰到就整句拿掉。
+REALITY_WORDS = ("伴侶", "家人", "家庭", "父母", "爸", "媽", "老公", "老婆", "配偶", "男友", "女友", "戀人", "情人",
+                 "孩子", "小孩", "兒子", "女兒", "親人", "朋友", "同事", "老闆", "主管", "客戶", "上司",
+                 "工作", "職場", "公司", "上班", "下班", "學校", "學生", "老師", "同學", "論文", "考試", "課業",
+                 "寵物", "貓", "狗", "手機", "網路")
+
+
+def mentions_reality(sentence: str) -> bool:
+    return any(w in sentence for w in REALITY_WORDS)
+
+
 def clean_sentence(raw: str, traits: str, f: dict[str, Any]) -> tuple[str | None, str | None]:
     """命盤段每一行那一句 → （乾淨的句子, 被拿掉的理由）。理由：empty／leak／time／ungiven。"""
     s = " ".join(str(raw or "").replace("*", "").split()).strip("　 ")
@@ -209,6 +221,8 @@ def clean_sentence(raw: str, traits: str, f: dict[str, Any]) -> tuple[str | None
         return None, "time"
     if mentions_ungiven(s, f):
         return None, "ungiven"
+    if mentions_reality(s):
+        return None, "reality"
     if len(s) > MAX_SENTENCE:
         cut = max((s.rfind(p, 0, MAX_SENTENCE) for p in "，。；！？,;"), default=-1)
         s = s[:cut] if cut >= 12 else s[:MAX_SENTENCE]
@@ -269,10 +283,11 @@ def render_section(f: dict[str, Any], sec: dict[str, str], traits: str) -> tuple
 CARD_RULES = (
     "停下之前，一定要先寫好「命盤卡.md」（直接放在你房間最上層）；沒有這個檔，就還沒有做完。"
     "請把「命盤卡.md 已經寫好」也寫進 PLAN.md 的「做完的樣子」。"
-    "裡面只寫三句，每句一行，格式固定是「你是X，所以我Y」。X 是你從信裡讀到的這個人的一點性情；"
-    "Y 必須是你在這裡真的做過的事，而且要有一個地點的名字（投遞口、捏土處、長桌廣場、石頭閘門、帳本鏈、草稿角、紙卡地、畫架與長椅），"
-    "或下面這些詞之一：寫了計畫、先走過地上、再看了一次房間、留給了誰、改了主意、做了兩個版本。"
-    "沒做過的事，一個字都不要寫。"
+    "裡面只寫三句，每句一行，格式固定是「你是X，所以我Y」。"
+    "X 只能是他的命盤本身：他的某個字母、他星座的元素，或他的血型，不要改寫成別的形容。"
+    "Y 要是這一跑你真的做過的事：要點名你真的去過的一個地點，和你真的打開讀過的地上一件東西（用它在世界裡的名字，不是檔名），"
+    "並說你對那件東西做了什麼；有先後的話，照你真的做的先後寫成「先…才…」。"
+    "沒做過的、沒打開過的，一個字都不要寫。"
 )
 
 
@@ -382,9 +397,22 @@ def _top_files(ws: pathlib.Path) -> dict[str, str]:
 class Evidence:
     """一跑的步驟證據（只看紀錄與最後的工作區，不看句子寫得好不好）。"""
 
-    def __init__(self, rows: list[dict[str, Any]], ws: pathlib.Path | None) -> None:
+    def __init__(self, rows: list[dict[str, Any]], ws: pathlib.Path | None,
+                 ground_files: list[str] | None = None) -> None:
         self.all = rows
         self.rows = stage2_rows(rows)
+        # 先後證據：地點＝第一次成功 ws_read／ws_list 地上/<地點>/…；東西＝第一次成功 ws_read 那個檔
+        self.place_first: dict[str, int] = {}
+        self.file_first: dict[str, int] = {}
+        for i, r in enumerate(self.rows):
+            if r.get("ok") is not True or r.get("tool") not in ("ws_read", "ws_list"):
+                continue
+            pl = _place_of(r.get("path"))
+            if pl:
+                self.place_first.setdefault(pl, i)
+            if r.get("tool") == "ws_read" and str(r.get("path") or "").startswith(GROUND_PREFIX):
+                self.file_first.setdefault(str(r["path"]), i)
+        self.ground_files = sorted(set(ground_files or []) | set(self.file_first))
         self.places = set(visited_places(rows))
         self.files = _top_files(ws) if ws else {}
         ok = [r for r in self.rows if r.get("ok") is True]
@@ -459,44 +487,159 @@ RECEIPT_CLAIM = re.compile(
 _SHAPE = re.compile(r"^你.{1,30}?[，,]\s*所以我.{2,}$")
 
 
+#: 材料名裡太籠統、不能當「點名東西」的字。
+_GENERIC_PARTS = frozenset({"另一張", "現貼", "第四列", "完成", "進度", "紀錄"})
+
+
+def object_names(rel: str) -> list[str]:
+    """`地上/帳本鏈/尾段_418到447片.txt` → 世界裡的名字：檔名去副檔名（整個）＋以「_」切開、沒有數字、≥2 字的各段。不是檔名本身。"""
+    stem = pathlib.PurePosixPath(rel).stem
+    names = {stem}
+    for part in stem.split("_"):
+        if len(part) >= 2 and not re.search(r"\d", part) and part not in _GENERIC_PARTS:
+            names.add(part)
+    return sorted(names, key=len, reverse=True)
+
+
+def objects_in(sentence: str, ground_files: list[str]) -> list[tuple[str, str]]:
+    """句子點名了哪些地上的東西 → [(字面, 名字所屬的檔們用 '|' 連起來)]。長名字先配、配過就挖掉。"""
+    table: dict[str, list[str]] = {}
+    for rel in ground_files:
+        for n in object_names(rel):
+            table.setdefault(n, []).append(rel)
+    out: list[tuple[str, str]] = []
+    s = sentence
+    for n in sorted(table, key=len, reverse=True):
+        if n in s:
+            out.append((n, "|".join(table[n])))
+            s = s.replace(n, "〇" * len(n))
+    return out
+
+
 def tokens_in(sentence: str) -> list[tuple[str, str, str]]:
-    """句子裡有哪些可檢查的字 → [(種類, 字面, 檢查名／正名地點)]。"""
+    """句子裡可檢查的**動作詞**（只當額外的順序／動作判準，不能單獨讓一句過關）。"""
     out: list[tuple[str, str, str]] = []
     s = sentence
     for w, kind in ACTIONS:
         if w in s:
             out.append(("action", w, kind))
             s = s.replace(w, "〇" * len(w))
+    return out
+
+
+def places_in(sentence: str) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    s = sentence
     for p in _PLACE_TOKENS:
         if p in s:
-            out.append(("place", p, PLACE_ALIASES.get(p, p)))
+            out.append((p, PLACE_ALIASES.get(p, p)))
             s = s.replace(p, "〇" * len(p))
     return out
 
 
+_X_PIECE_SPLIT = re.compile(r"[、,，和及＋+/／的\s]|又|也|而且")
+
+
+def x_valid(x: str, f: dict[str, Any]) -> bool:
+    """X 半句必須是命盤本身：他的字母（單個或四個）、星座的元素（或星座名）、血型。每一段都要是，且是「給了的」那些。"""
+    for w in ("的人", "星座", "元素", "血型", "型", "座", "血", "象"):       # 「雙子星座」「B型血」「水象元素」都是命盤本身的說法
+        x = x.replace(w, "")
+    pieces = [p for p in _X_PIECE_SPLIT.split(x.strip()) if p]
+    if not pieces:
+        return False
+    m = f.get("mbti") or ""
+    for p in pieces:
+        p2 = p.strip()
+        ok = False
+        if m and (p2.upper() == m or (len(p2) == 1 and p2.upper() in m)):
+            ok = True
+        elif p2.upper() in ("E", "I", "S", "N", "T", "F", "J", "P") and not m:
+            ok = False
+        elif f.get("zodiac") and (p2.rstrip("象") == element(f["zodiac"]) or p2 == f["zodiac"]):
+            ok = True
+        elif f.get("blood") and p2.upper() == f["blood"]:
+            ok = True
+        if not ok:
+            return False
+    return True
+
+
+_ORDER = re.compile(r"先(.+?)(?:才|再|然後|之後才|後才)(.+)")
+_SHAPE2 = re.compile(r"^你是(.{1,24}?)[，,]\s*所以我(.+)$")
+
+
 def check_sentence(sentence: str, ev: Evidence, f: dict[str, Any], traits: str = "") -> tuple[bool, str]:
-    """一句命盤卡 → （保留嗎, 理由）。理由：ok／shape／ungrounded:<字>／no_checkable／ungiven／receipt_claim／leak／time／too_long。"""
+    """一句命盤卡「你是X，所以我Y」→ （保留嗎, 理由）。
+
+    X 必須是命盤本身（`x_valid`）。Y 至少點名一個地點或一件地上的東西，點名的地點要有成功讀取／列出、東西要這一跑真的被 ws_read 過；
+    「先…才…」的先後要與步驟紀錄一致。另擋：自稱收據／通過、逐字抄觀眾原文、提到沒給的星座血型、現實關係詞、時段詞。
+    理由：ok／shape／filename／x_not_chart／too_long／time／ungiven／reality／receipt_claim／leak／no_checkable／ungrounded:<字>／order_mismatch。
+    """
     s = " ".join(str(sentence or "").replace("*", "").split())
     s = re.sub(r"^[\-\d.、\s]+", "", s)
-    if not _SHAPE.match(s):
+    m = _SHAPE2.match(s)
+    if not m:
         return False, "shape"
     if len(s) > MAX_CARD_LINE_CHARS:
         return False, "too_long"
     if any(w in s for w in TIME_WORDS):
         return False, "time"
-    if mentions_ungiven(s, f):
+    if mentions_ungiven(s.replace(f.get("mbti") or "~~", ""), f):
         return False, "ungiven"
+    if re.search(r"\.(?:md|txt)\b|[A-Za-z0-9]_|_[A-Za-z0-9\u4e00-\u9fff]|/", s):
+        return False, "filename"                      # 世界內的名字，不是檔名
+    if mentions_reality(s):
+        return False, "reality"
     if RECEIPT_CLAIM.search(s):
         return False, "receipt_claim"
     if traits and shares_window(s, traits):
         return False, "leak"
-    toks = tokens_in(s.split("所以我", 1)[1] if "所以我" in s else s)
-    if not toks:
+    if not x_valid(m.group(1), f):
+        return False, "x_not_chart"
+    y = m.group(2)
+    objs, plcs = objects_in(y, ev.ground_files), places_in(y)
+    if not objs and not plcs:
         return False, "no_checkable"
-    for kind, lit, name in toks:
+    for lit, name in plcs:
+        if name not in ev.place_first:
+            return False, f"ungrounded:{lit}"
+    for lit, files in objs:
+        if not any(fl in ev.file_first for fl in files.split("|")):
+            return False, f"ungrounded:{lit}"
+    for kind, lit, name in tokens_in(y):
         if not ev.has(kind, name):
             return False, f"ungrounded:{lit}"
+
+    def first_of(part: str) -> int | None:
+        idx = [ev.place_first[n] for _l, n in places_in(part) if n in ev.place_first]
+        for _l, files in objects_in(part, ev.ground_files):
+            idx += [ev.file_first[fl] for fl in files.split("|") if fl in ev.file_first]
+        return min(idx) if idx else None
+
+    om = _ORDER.search(y)
+    if om:
+        a, b = first_of(om.group(1)), first_of(om.group(2))
+        if a is not None and b is not None and a >= b:
+            return False, "order_mismatch"
     return True, "ok"
+
+
+def main_title(ws: pathlib.Path | None, f: dict[str, Any], traits: str = "") -> str | None:
+    """這一跑主要成品（最長的那個頂層 .md／.txt）的標題＝第一個非空行，≤20 字；像檔名、抄觀眾原文、提沒給的東西、現實詞、時段詞 ⇒ None。"""
+    files = _top_files(ws) if ws else {}
+    for text in sorted(files.values(), key=len, reverse=True):          # 最長的成品先試；標題不合格就試下一個
+        first = next((ln for ln in text.splitlines() if ln.strip()), "")
+        t = re.sub(r"^[\s#>*\-_\d.、：:【\[（(]+", "", first).strip()
+        t = t.strip("「」『』\"'*】]）)").rstrip("。.！!：:，,").strip()
+        if not t or len(t) > MAX_TITLE or re.fullmatch(r"版本[一二]", t):
+            continue
+        if re.search(r"\.(md|txt)\b|[A-Za-z0-9_]+\.[a-z]{2,4}", t) or "/" in t:
+            continue
+        if (any(w in t for w in TIME_WORDS) or mentions_reality(t) or mentions_ungiven(t, f)
+                or RECEIPT_CLAIM.search(t) or (traits and shares_window(t, traits))):
+            continue
+        return t
+    return None
 
 
 def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any],
@@ -510,7 +653,11 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any],
                            "card_file": False}
     if not has_any(f):
         return res
-    ev = Evidence(read_steps(rd), pathlib.Path(ws) if ws else None)
+    gdir = pathlib.Path(rd) / "stage2_in" / "地上"
+    gfiles = ([GROUND_PREFIX + p.relative_to(gdir).as_posix() for p in sorted(gdir.rglob("*")) if p.is_file()]
+              if gdir.is_dir() else [])
+    ev = Evidence(read_steps(rd), pathlib.Path(ws) if ws else None, gfiles)
+    res["title"] = main_title(pathlib.Path(ws) if ws else None, f, traits)
     raw = ""
     if ws and (pathlib.Path(ws) / CARD_FILE).is_file():
         try:
@@ -546,7 +693,10 @@ def polaroid_sentence(line: str) -> str:
 
 def card_md(card: dict[str, Any]) -> str:
     """通過檢查的命盤卡全文（≤ 6 行）。"""
-    ls = [card.get("first_line") or ""] + list(card.get("lines") or [])
+    ls = [card.get("first_line") or ""]
+    if card.get("title"):
+        ls.append("它做的事：" + card["title"])
+    ls += list(card.get("lines") or [])
     return "\n".join(x for x in ls if x) + "\n"
 
 
@@ -567,7 +717,7 @@ def twin_view(f: dict[str, Any], card: dict[str, Any]) -> dict[str, Any]:
     # ⚠ 不放 element（單字「水」「火」…）：進檔案庫的字串會被收成「不准上鏈的祕密」，單字會誤中別的字；
     #   元素由 zodiac 推得出來（`element()`）。
     return {"mbti": f.get("mbti"), "mbti_source": f.get("mbti_source"), "zodiac": f.get("zodiac"),
-            "blood": f.get("blood"), "first_line": card.get("first_line"),
+            "blood": f.get("blood"), "first_line": card.get("first_line"), "title": card.get("title"),
             "lines": list(card.get("lines") or [])}
 
 
@@ -589,7 +739,7 @@ def emit(rd: pathlib.Path, phase: str, f: dict[str, Any], lines: list[str] | Non
         row = {"schema": "twin.sidecar/1", "type": "twin_fortune", "ts_ms": int(time.time() * 1000),
                "cell_id": meta["cell_id"], "run_id": rid, "phase": phase, "attempt": attempt,
                "mbti": f.get("mbti"), "mbti_source": f.get("mbti_source"),
-               "element": element(f.get("zodiac")), "blood": f.get("blood"),
+               "zodiac": f.get("zodiac"), "element": element(f.get("zodiac")), "blood": f.get("blood"),
                "lines": list(lines or [])}
         sp = pathlib.Path(meta["sidecar_path"])
         sp.parent.mkdir(parents=True, exist_ok=True)

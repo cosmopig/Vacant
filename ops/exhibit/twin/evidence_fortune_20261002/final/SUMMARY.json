@@ -2,11 +2,11 @@
  "runs": 8,
  "errors": [],
  "distinct_place_orders": 8,
- "distinct_gate_sequences": 3,
+ "distinct_gate_sequences": 4,
  "distinct_first_places": 4,
- "first_fail_then_pass_n": 0,
- "wall_median_s": 43.2,
- "wall_max_s": 111.1,
+ "first_fail_then_pass_n": 1,
+ "wall_median_s": 54.6,
+ "wall_max_s": 104.5,
  "per_run": [
   {
    "name": "f1",
@@ -23,9 +23,7 @@
     "blood": "A"
    },
    "places": [
-    "投遞口",
-    "帳本鏈",
-    "長桌廣場"
+    "帳本鏈"
    ],
    "plan_first": true,
    "browse_first": false,
@@ -33,7 +31,7 @@
     "✓✓✓✓"
    ],
    "accepted": true,
-   "wall_s": 43.2,
+   "wall_s": 41.8,
    "card_kept": 2,
    "card_dropped": 1
   },
@@ -53,18 +51,22 @@
    },
    "places": [
     "草稿角",
+    "畫架與長椅",
+    "長桌廣場",
     "紙卡地",
-    "長桌廣場"
+    "帳本鏈"
    ],
    "plan_first": false,
    "browse_first": true,
    "gates": [
-    "✓✓✓✓"
+    "✓✓✗✓",
+    "✓✓✗✓",
+    "✓✓✗✓"
    ],
-   "accepted": true,
-   "wall_s": 41.9,
-   "card_kept": 2,
-   "card_dropped": 1
+   "accepted": false,
+   "wall_s": 100.9,
+   "card_kept": 1,
+   "card_dropped": 2
   },
   {
    "name": "f3",
@@ -84,20 +86,17 @@
     "投遞口",
     "長桌廣場",
     "紙卡地",
-    "石頭閘門",
-    "草稿角"
+    "帳本鏈"
    ],
    "plan_first": false,
    "browse_first": true,
    "gates": [
-    "✗✓✗✓",
-    "✓✓✗✗",
-    "✓✓✗✗"
+    "✓✓✓✓"
    ],
-   "accepted": false,
-   "wall_s": 111.1,
-   "card_kept": 3,
-   "card_dropped": 0
+   "accepted": true,
+   "wall_s": 44.3,
+   "card_kept": 0,
+   "card_dropped": 1
   },
   {
    "name": "f4",
@@ -114,9 +113,9 @@
     "blood": "AB"
    },
    "places": [
+    "帳本鏈",
     "投遞口",
-    "捏土處",
-    "帳本鏈"
+    "長桌廣場"
    ],
    "plan_first": true,
    "browse_first": false,
@@ -124,9 +123,9 @@
     "✓✓✓✓"
    ],
    "accepted": true,
-   "wall_s": 44.9,
-   "card_kept": 1,
-   "card_dropped": 2
+   "wall_s": 41.9,
+   "card_kept": 2,
+   "card_dropped": 1
   },
   {
    "name": "f5",
@@ -143,25 +142,19 @@
     "blood": "B"
    },
    "places": [
-    "帳本鏈",
-    "長桌廣場",
-    "紙卡地",
-    "投遞口",
     "草稿角",
-    "石頭閘門",
-    "畫架與長椅"
+    "帳本鏈",
+    "長桌廣場"
    ],
    "plan_first": false,
    "browse_first": true,
    "gates": [
-    "✗✓✓✗",
-    "✓✓✗✗",
-    "✓✓✗✗"
+    "✓✓✓✓"
    ],
-   "accepted": false,
-   "wall_s": 102.3,
-   "card_kept": 3,
-   "card_dropped": 0
+   "accepted": true,
+   "wall_s": 54.6,
+   "card_kept": 1,
+   "card_dropped": 2
   },
   {
    "name": "f6",
@@ -172,25 +165,28 @@
     "blood": "A"
    },
    "final": {
-    "mbti": "ISFJ",
+    "mbti": "INFJ",
     "mbti_source": "twin",
     "zodiac": "水瓶",
     "blood": "A"
    },
    "places": [
     "長桌廣場",
-    "帳本鏈",
-    "投遞口"
+    "草稿角",
+    "石頭閘門",
+    "紙卡地"
    ],
    "plan_first": true,
    "browse_first": false,
    "gates": [
-    "✓✓✓✓"
+    "✓✓✓✗",
+    "✓✓✓✗",
+    "✓✓✓✗"
    ],
-   "accepted": true,
-   "wall_s": 37.9,
-   "card_kept": 1,
-   "card_dropped": 2
+   "accepted": false,
+   "wall_s": 104.5,
+   "card_kept": 2,
+   "card_dropped": 1
   },
   {
    "name": "f7",
@@ -210,17 +206,19 @@
     "投遞口",
     "長桌廣場",
     "紙卡地",
-    "草稿角"
+    "畫架與長椅",
+    "石頭閘門"
    ],
    "plan_first": false,
    "browse_first": true,
    "gates": [
+    "✗✓✓✓",
     "✓✓✓✓"
    ],
    "accepted": true,
-   "wall_s": 34.7,
-   "card_kept": 2,
-   "card_dropped": 1
+   "wall_s": 65.8,
+   "card_kept": 0,
+   "card_dropped": 3
   },
   {
    "name": "f8",
@@ -238,7 +236,8 @@
    },
    "places": [
     "帳本鏈",
-    "長桌廣場"
+    "石頭閘門",
+    "草稿角"
    ],
    "plan_first": true,
    "browse_first": false,
@@ -246,9 +245,9 @@
     "✓✓✓✓"
    ],
    "accepted": true,
-   "wall_s": 39.3,
-   "card_kept": 1,
-   "card_dropped": 2
+   "wall_s": 35.5,
+   "card_kept": 3,
+   "card_dropped": 0
   }
  ]
 }

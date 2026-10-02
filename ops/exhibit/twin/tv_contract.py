@@ -178,12 +178,17 @@ FORTUNE_PHASES = ("way", "card")
 FORTUNE_MBTI = ("INFP", "INFJ", "INTP", "INTJ", "ISFP", "ISFJ", "ISTP", "ISTJ",
                 "ENFP", "ENFJ", "ENTP", "ENTJ", "ESFP", "ESFJ", "ESTP", "ESTJ")
 FORTUNE_SOURCES = ("ai", "self", "twin")
+FORTUNE_ZODIACS = ("牡羊", "金牛", "雙子", "巨蟹", "獅子", "處女", "天秤", "天蠍", "射手", "摩羯", "水瓶", "雙魚")
 FORTUNE_ELEMENTS = ("火", "土", "風", "水")
 FORTUNE_BLOODS = ("A", "B", "O", "AB")
 FORTUNE_MAX_LINES = 3
 FORTUNE_LINE_MAX = 60
 #: `twin_fortune` 不准帶的欄位（本體是上面那幾個枚舉與 `lines`）。
-FORTUNE_FORBIDDEN = ("path", "name", "file", "content", "text", "zodiac", "card_text")
+FORTUNE_FORBIDDEN = ("path", "name", "file", "content", "text", "card_text")
+
+
+_ELEMENT_OF_ZODIAC = {"牡羊": "火", "獅子": "火", "射手": "火", "金牛": "土", "處女": "土", "摩羯": "土",
+                      "雙子": "風", "天秤": "風", "水瓶": "風", "巨蟹": "水", "天蠍": "水", "雙魚": "水"}
 
 
 def fortune_event_problems(e: dict, n: int) -> list[str]:
@@ -193,11 +198,15 @@ def fortune_event_problems(e: dict, n: int) -> list[str]:
         bad.append(f"第 {n} 個事件：twin_fortune.phase 不在白名單：{e.get('phase')!r}")
     if not (isinstance(e.get("attempt"), int) and not isinstance(e.get("attempt"), bool) and e["attempt"] >= 1):
         bad.append(f"第 {n} 個事件：twin_fortune.attempt 要是 ≥ 1 的整數")
-    for key, allowed in (("mbti", FORTUNE_MBTI), ("mbti_source", FORTUNE_SOURCES),
+    for key, allowed in (("mbti", FORTUNE_MBTI), ("mbti_source", FORTUNE_SOURCES), ("zodiac", FORTUNE_ZODIACS),
                          ("element", FORTUNE_ELEMENTS), ("blood", FORTUNE_BLOODS)):
         v = e.get(key)
         if v is not None and v not in allowed:
             bad.append(f"第 {n} 個事件：twin_fortune.{key} 不在白名單：{v!r}")
+    if (e.get("zodiac") is None) != (e.get("element") is None):
+        bad.append(f"第 {n} 個事件：twin_fortune 的 zodiac 與 element 要同時有或同時沒有")
+    if e.get("zodiac") in FORTUNE_ZODIACS and e.get("element") is not None and e["element"] != _ELEMENT_OF_ZODIAC.get(e["zodiac"]):
+        bad.append(f"第 {n} 個事件：twin_fortune 的 element 與 zodiac 對不上")
     if (e.get("mbti") is None) != (e.get("mbti_source") is None):
         bad.append(f"第 {n} 個事件：twin_fortune 的 mbti 與 mbti_source 要同時有或同時沒有")
     ls = e.get("lines")

@@ -178,7 +178,7 @@ LETTER_SYSTEM_PROMPT = (
     "這幾句各不相同，不要用「這個人在這一組上」「看起來是」這類句頭，也不要重複信本文的字；"
     "要具體到只有他才會這樣。"
     "沒給的星座與血型，整行不要寫，也不要猜。命盤這一段和信的本文一樣：只寫傾向，"
-    "不寫現實生活裡的具體事物，不逐字抄 TRAITS.md。這是占卜遊戲，只寫「看起來像」，不寫成事實。\n\n"
+    "不寫現實生活裡的具體事物，也不寫伴侶、家人、工作、學校、論文、寵物、朋友這類現實關係，不逐字抄 TRAITS.md。這是占卜遊戲，只寫「看起來像」，不寫成事實。\n\n"
     "規則：不要自稱 AI，不要提到模型或提示詞。每一次動手（讀、寫）之前，"
     "先用一句繁體中文說你現在在想什麼、接下來要做什麼，這句話裡不要寫檔名。"
     "寫好信.md 就停，最後用一句話說信寫好了。"
@@ -1164,7 +1164,7 @@ def build_twin(res: dict[str, Any], *, model: str,
     _fz = res.get("fortune")
     return {
         **({"fortune": {k: _fz.get(k) for k in ("mbti", "mbti_source", "zodiac", "blood",
-                                                 "first_line", "lines")}} if _fz else {}),
+                                                 "first_line", "title", "lines")}} if _fz else {}),
         **lines,
         "decision": o.get("decision"), "reason": o.get("reason"),
         "artifacts": o.get("artifacts") or [],

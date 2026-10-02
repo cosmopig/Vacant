@@ -151,13 +151,14 @@ FIELDS: dict[str, tuple[str, ...]] = {
     # 寫在 `gate_ran` 之前（pi 結束、凍結之前），電視才拿得到逐格結果；權威的結果仍是
     # launcher 落的 `visible_*.json`（測試比對兩者相等）。
     "twin_gate": ("attempt", "passed", "checks"),
-    "twin_fortune": ("phase", "attempt", "mbti", "mbti_source", "element", "blood", "lines"),
+    "twin_fortune": ("phase", "attempt", "mbti", "mbti_source", "zodiac", "element", "blood", "lines"),
 }
 #: `twin_fortune` 的枚舉（與 `tv_contract.FORTUNE_*` 同值，測試釘住；`fortune.py` 是來源）。
 FORTUNE_PHASES = ("way", "card")
 FORTUNE_MBTI = ("INFP", "INFJ", "INTP", "INTJ", "ISFP", "ISFJ", "ISTP", "ISTJ",
                 "ENFP", "ENFJ", "ENTP", "ENTJ", "ESFP", "ESFJ", "ESTP", "ESTJ")
 FORTUNE_SOURCES = ("ai", "self", "twin")
+FORTUNE_ZODIACS = ("牡羊", "金牛", "雙子", "巨蟹", "獅子", "處女", "天秤", "天蠍", "射手", "摩羯", "水瓶", "雙魚")
 FORTUNE_ELEMENTS = ("火", "土", "風", "水")
 FORTUNE_BLOODS = ("A", "B", "O", "AB")
 FORTUNE_MAX_LINES = 3
@@ -418,11 +419,13 @@ def _fortune_problems(r: dict, i: int) -> list[str]:
         bad.append(f"旁註第 {i} 筆：twin_fortune 的 phase 不在白名單：{r.get('phase')!r}")
     if not (_is_nat(r.get("attempt")) and r["attempt"] >= 1):
         bad.append(f"旁註第 {i} 筆：twin_fortune 的 attempt 要是 ≥ 1 的整數")
-    for key, allowed in (("mbti", FORTUNE_MBTI), ("mbti_source", FORTUNE_SOURCES),
+    for key, allowed in (("mbti", FORTUNE_MBTI), ("mbti_source", FORTUNE_SOURCES), ("zodiac", FORTUNE_ZODIACS),
                          ("element", FORTUNE_ELEMENTS), ("blood", FORTUNE_BLOODS)):
         v = r.get(key)
         if v is not None and v not in allowed:
             bad.append(f"旁註第 {i} 筆：twin_fortune 的 {key} 不在白名單：{v!r}")
+    if (r.get("zodiac") is None) != (r.get("element") is None):
+        bad.append(f"旁註第 {i} 筆：twin_fortune 的 zodiac 與 element 要同時有或同時沒有")
     if (r.get("mbti") is None) != (r.get("mbti_source") is None):
         bad.append(f"旁註第 {i} 筆：twin_fortune 的 mbti 與 mbti_source 要同時有或同時沒有")
     ls = r.get("lines")

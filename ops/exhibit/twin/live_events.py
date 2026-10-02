@@ -39,7 +39,7 @@
 | 旁註 `postaudit`（`twin.sidecar/1`，**不是** lifecycle） | OFF | `postaudit`（三旗標；只在綁得上那一跑時） |
 | 旁註 `twin_step`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_step`（**不帶檔名**；契約 `plans/CONTRACT_PROCESS_20260928.md` §A） |
 | 旁註 `twin_gate`（`twin.sidecar/1`，**不是** lifecycle；`grounding_gate.prepare` 在 pi 結束後、凍結前寫） | ON（僅 `practical` 格） | 不單獨發事件：暫存，併進同一次嘗試的 `gate_ran.checks[]` |
-| 旁註 `twin_fortune`（`twin.sidecar/1`，**不是** lifecycle；P10 命盤，`fortune.py` 在段 1 結束與每次嘗試結束時寫） | ON（僅 `practical` 格） | `twin_fortune`（全是枚舉：`mbti`／`mbti_source`／`element`／`blood`；`phase` 為 `way` 或 `card`；`card` 拍帶 ≤3 句 `lines`，已逐句對過步驟紀錄） |
+| 旁註 `twin_fortune`（`twin.sidecar/1`，**不是** lifecycle；P10 命盤，`fortune.py` 在段 1 結束與每次嘗試結束時寫） | ON（僅 `practical` 格） | `twin_fortune`（全是枚舉：`mbti`／`mbti_source`／`zodiac`／`element`／`blood`；`phase` 為 `way` 或 `card`；`card` 拍帶 ≤3 句 `lines`，已逐句對過步驟紀錄） |
 | 旁註 `twin_say`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_say`（agent 自己生成、≤80 字、已過逐字抄錄防呆；契約補充 `plans/CONTRACT_PROCESS_20261001_ADDENDUM.md` §E） |
 
 `counters` 不在這張表上：它不是任何一筆輸入轉出來的，是 `Tally` 依**已經寫出去的**
@@ -391,7 +391,7 @@ class Folder:
                  "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
                  "phase": ev["phase"], "attempt": ev["attempt"],
                  "mbti": ev.get("mbti"), "mbti_source": ev.get("mbti_source"),
-                 "element": ev.get("element"), "blood": ev.get("blood"),
+                 "zodiac": ev.get("zodiac"), "element": ev.get("element"), "blood": ev.get("blood"),
                  "lines": list(ev.get("lines") or [])}]
 
     def _sidecar_twin_step(self, ev: dict) -> list[dict]:

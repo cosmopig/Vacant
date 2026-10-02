@@ -116,7 +116,7 @@ G3 的事實表（32 個實體）由 `world/build_facts.py` 重建，`--check` �
 **8 組合成人格**（`fortune_samples.py`；特質沿用 W3b 的 d1–d6＋2 組，命盤另給）：E／I、S／N、T／F、J／P 各兩邊；四種元素（牡羊火／雙魚水／雙子風／處女土／摩羯土／水瓶風）、
 四種血型（A×2、B×2、O×1、AB×1）；**2 組不給 MBTI（f5、f6，分身要猜）、2 組不給星座與血型（f7、f8）**。每組 1 跑，`enclose=on`、`timeout=300`、整跑預算 420 秒，
 跑完撤回（8 組 `erased_left` 全 false）。原始紀錄（含每一跑的信全文、命盤卡原稿與被拿掉的句子、步驟順序、四格窗逐次結果、旁註與 lifecycle）在
-`ops/exhibit/twin/evidence_fortune_20261002/final/`；開發過程另外 5 輪的紀錄在 `iterations/`。
+`ops/exhibit/twin/evidence_fortune_20261002/iterations/r6/`（命盤卡第一版；第二版見第十一節，在 `final/`）；開發過程其他輪次在 `iterations/`。
 
 **最後一輪（`final/`）的結果**
 
@@ -202,3 +202,31 @@ G3 的事實表（32 個實體）由 `world/build_facts.py` 重建，`--check` �
 `twinground.py`、`twinlink.py`、`twinvault.py`、`polaroid.py`、`sidecar.py`、`live_events.py`、`tv_contract.py`、`grounding_gate.py`（`NOT_ARTIFACTS` 加命盤卡）、`gate_samples.py`（`collect` 回呼）、
 `world/materials/`（24 件＋`_links.json`／`_lure.json`／`_facts.json`）；`tests/test_twin_fortune_20261002.py`（新）、`tests/test_twin_world_w3b.py`、`tests/test_twin_grounding_gate_20261001.py`；
 `ops/exhibit/twin/evidence_fortune_20261002/`（真跑原始紀錄）。
+
+## 十一、命盤卡第二版（主線讀完 8 跑原文後的回饋，同日）
+
+**問題**：第一版 8 張卡幾乎都是「你是〔特質改寫〕，所以我寫了計畫／先走過地上／改了主意／留給…」，常不成因果。原因是檢查只認固定動作詞，把模型逼成同一套句子。
+
+**改了什麼**（`fortune.py`；測試 `test_card_*`、`test_x_valid_*`、`test_reality_*`）
+1. **X 必須是命盤本身**：他的字母（單個或四個）、星座元素（或星座名）、血型；每一段都要是「給了的」那些，否則 `x_not_chart`。指令只用條件說，沒有例句。
+2. **Y 要點名這一跑碰過的東西**：至少一個地點或一件地上的東西（世界內名稱，由材料檔名切出，如「尾段」「蕨葉」「紙團」，不是檔名）；點名的地點要有成功讀取／列出、東西要這一跑真的被 `ws_read` 過（地上有但沒打開過 ⇒ `ungrounded`）；
+   「先…才…」要與步驟紀錄先後一致（`order_mismatch`）。**固定動作詞表降成額外判準**：不能單獨讓一句過關，且若寫了就要對得上紀錄。檔名（`.txt`、`_`）一律拿掉（`filename`）。
+3. 其餘照舊：不准自稱收據／通過、不准抄觀眾原文、不准提沒給的星座血型、時段詞。
+4. **卡多一行「它做的事：<標題>」**：這一跑最長成品的第一行，≤20 字，過檔名／LEAK／沒給的東西／現實詞／時段詞。卡最多 5 行（命盤、它做的事、至多 3 句）。
+5. **現實關係詞**（`REALITY_WORDS`：伴侶、家人、父母、朋友、同事、工作、學校、論文、寵物、貓、狗…）：信的命盤段句子、命盤卡句子與標題碰到就整句拿掉（`reality`）；信的指令也明講不寫。窄名單，不是完備的現實偵測。
+6. **`twin_fortune` 事件多帶 `zodiac`**（12 枚舉之一或 null，沒給就 null），與 `element` 同時有或同時沒有且要對得上（`sidecar`／`tv_contract` 都驗；亂星座名、不一致都被擋，有負控制）。電視大標可寫成「INFP · 雙魚（水）· O 型」，與手機、拍立得一致。
+
+**同 8 組人格在舊 VM 重跑**（enclose=on，`final/`；對照第一版最後一輪 `iterations/r6/`）
+
+| | 第一版（r6） | 第二版 |
+|---|---|---|
+| 命盤卡通過的句子／被拿掉 | 15／9 | 11／11 |
+| 通過的句子裡點名了地上一件東西 | （當時不要求） | 6／11（其餘只點名地點） |
+| 有「它做的事」標題 | — | 7／8 |
+| 地點順序種數／閘門序列種數 | 8／3 | 8／4 |
+| 中位／最慢秒 | 42.6／111.1 | 49.5／104.5 |
+| 電視 `twin_fortune` 事件 | 20 筆 | 21 筆，全過契約，帶 zodiac |
+
+第二版原文（8 張卡全文、分身原寫、被拿掉的句子與理由）在 `final/f1.json`–`f8.json` 的 `card_md_final`／`card_md_raw_by_twin`／`card`。
+**誠實**：通過句數下降是因為要求變嚴（X 要是命盤、Y 要點名東西）；被拿掉的以 `x_not_chart`（模型又寫成特質或元素以外的 X，如「你是苔綠細長」）、`ungrounded`（說去了沒去的地點）、`shape`（寫成「我是…」）為主。
+通過的句子現在多半長得像「你是 A 型，所以我仔細讀取了鬆環那幾片的每一處…」：X 是命盤、Y 有具體東西，但**因果仍是占卜式的拼接，不是推理**——「所以」只是格式。這輪沒有、也不聲稱解決「像因果」。
