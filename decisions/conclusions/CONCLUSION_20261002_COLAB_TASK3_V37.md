@@ -22,7 +22,7 @@
 
 ## 三、機制（描述）
 
-- C37 第 1、2 次被退回 10 格（`missing_output` 6、`unsourced` 3、`unread`＋`missing_output` 2、`test_claim/stale` 1），之後 9 格答對。
+- C37 第 1、2 次被退回 10 格（只有 `missing_output` 4、`unread`＋`missing_output` 2、`unsourced` 3、`test_claim/stale` 1），之後 9 格答對。
 - **傷害 0**：唯一最後沒過的（dab_507 第 2 次）退回時沒有答案檔（本來就 0 分）；`unsourced` 退回的 3 格答案本來就對、agent 沒改。
 - 和 DABstep 批次同一個機制、但少見得多：A 組「說做完卻沒寫答案檔」只有 **5／120**（DABench 2、DataBench 3），C37 **0**；DABstep 那批是 42／231。
 - Polyglot 的失敗大半是撞 1200 秒時限（A 30／68、C37 32／68）——行程被殺，pi 進不了交件前檢查，Vacant 輪不到。
