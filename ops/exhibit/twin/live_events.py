@@ -264,8 +264,10 @@ class Folder:
                 # 分身的自主任務：逐格結果來自旁註 `twin_gate`（先於這一筆到）。
                 # 對不上（passed 與逐條 AND 不一致）或沒有 ⇒ 不帶 `checks`（電視讀成 null，不猜）。
                 ck = st["gate_checks"].get(ev["attempt"])
-                if st["task_kind"] == tv.KIND_PRACTICAL and ev["attempt"] in st["cut"]:
+                if (st["task_kind"] == tv.KIND_PRACTICAL and ev["attempt"] in st["cut"]
+                        and not ev.get("passed")):
                     # 被時限切掉的那一次：四格未判（ok:null），不是四個錯；電視看 timed_out 演「時間到」。
+                    # （被切掉但閘門仍判過了 ⇒ 照實用逐格結果：交出來的東西有根據就是有根據。）
                     extra["checks"] = [{"id": c["id"], "ok": None, "label": tv.GATE_CHECK_TIMEOUT_LABEL}
                                        for c in (ck or [{"id": i} for i in ("G1", "G2", "G3", "G4")])]
                 elif st["task_kind"] == tv.KIND_PRACTICAL and ck:

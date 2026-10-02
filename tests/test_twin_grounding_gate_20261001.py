@@ -1376,14 +1376,14 @@ def test_p8_run_limited_kills_the_whole_group_and_returns_124():
 
 
 def test_p8_e2e_run_budget_caps_each_attempt_and_stops_opening_new_ones(tmp_path, monkeypatch):
-    """預算 12 秒、重改下限 6 秒：第 1 次睡 9 秒做完（沒過）；剩 ~2 秒 < 6 ⇒ 第 2、3 次不開 pi，照 attempts_exhausted 收尾。"""
+    """預算 20 秒、重改下限 8 秒：第 1 次睡 14 秒做完（沒過）；剩 ~5 秒 < 8 ⇒ 第 2、3 次不開 pi，照 attempts_exhausted 收尾。"""
     script, *_ = _scenario(tmp_path)
-    script["attempts"] = [dict(script["attempts"][0], sleep=9)]
+    script["attempts"] = [dict(script["attempts"][0], sleep=14)]
     log = _install_fake_pi(tmp_path, monkeypatch, script)
     cfg = twinagent.AgentConfig(
         work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
         endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=60.0, requires=[],
-        run_budget_s=12.0, min_attempt_s=6.0)
+        run_budget_s=20.0, min_attempt_s=8.0)
     res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
     sm = res["summary"]
     assert sm["stop_reason"] == "attempts_exhausted" and sm["accepted"] is False
@@ -1427,3 +1427,81 @@ def test_w1_two_failure_kinds_have_two_messages_and_labels_same_id(tmp_path):
     assert not run_gate(tmp_path, plan, {}, led)["w1"]["ok"]
     for m in msgs.values():
         assert_ks1_clean(m)
+
+
+# ---------------------------------------------------------------------------
+# 十三、P9：圍牆裡的閘門旁註（圍牆裡只寫得到 run-dir，主機側 EventForwarder 轉出來）
+# ---------------------------------------------------------------------------
+
+def test_p9_enclosed_gate_rows_are_forwarded_before_the_lifecycle_lines(tmp_path):
+    from ops.exhibit.twin import twinenclose
+    caller = {"cell_id": "tw-1", "resident": "X", "task_kind": "practical"}
+    part, gpart = tmp_path / "part.jsonl", tmp_path / "gpart.jsonl"
+    dst = tmp_path / "live.jsonl"
+    base = {"schema": lifecycle.SCHEMA, "run_id": "R", "task_id": "twin:tw-1", "arm": "RUN-ON"}
+    part.write_text(json.dumps({**base, "type": "gate_ran", "seq": 1, "ts_ms": 5, "attempt": 1, "passed": False,
+                                "n_passed": 3, "n_tests": 4, "failed_case": "x", "verdict_sha256": "v"}) + "\n",
+                    encoding="utf-8")
+    good = _gate_row(1, [{"id": "G1", "ok": True, "label": "讀過了"}], rid="R")
+    wrong_cell = dict(good, cell_id="tw-9")
+    wrong_type = dict(good, type="twin_say")
+    gpart.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in (good, wrong_cell, wrong_type)),
+                     encoding="utf-8")
+    f = twinenclose.EventForwarder(part, dst, task_id="twin:tw-1", caller=caller, gate_src=gpart,
+                                   gate_dst=sidecarlib.sidecar_path(dst))
+    f._pump()
+    rows = sidecarlib.read(sidecarlib.sidecar_path(dst))
+    assert [r["type"] for r in rows] == ["twin_gate"] and rows[0]["cell_id"] == "tw-1"   # 負控制：別格、別型別不轉
+    assert f.gate_forwarded == 1 and f.forwarded == 1
+    # 沒設 gate_src 的舊呼叫：不轉旁註
+    dst2 = tmp_path / "live2.jsonl"
+    f2 = twinenclose.EventForwarder(part, dst2, task_id="twin:tw-1", caller=caller)
+    f2._pump()
+    assert not sidecarlib.sidecar_path(dst2).exists()
+
+
+def test_p9_enclosed_run_points_the_gate_meta_at_run_dir_files(tmp_path, monkeypatch):
+    from ops.exhibit.twin import twinenclose
+    script, *_ = _scenario(tmp_path)
+    _install_fake_pi(tmp_path, monkeypatch, script)
+    monkeypatch.setattr(twinagent, "use_enclosure", lambda cfg: (True, "ok"))
+    seen = {}
+
+    def fake(**kw):
+        seen.update(kw)
+        raise RuntimeError("stop")
+    monkeypatch.setattr(twinenclose, "run_enclosed", fake)
+    cfg = twinagent.AgentConfig(
+        work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=60.0, requires=[], enclose="on")
+    twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
+    ws, rd = twinagent.paths_for(cfg.work_root, SUB)
+    meta = json.loads((rd / gg.GATE_META_NAME).read_text(encoding="utf-8"))
+    assert meta["events_path"] == str(rd / twinenclose.EVENTS_PART)
+    assert meta["sidecar_path"] == str(rd / twinenclose.GATE_SIDECAR_PART)
+    assert meta["deadline_ts"] > 0 and meta["attempt_cap_s"] == 60.0 and meta["min_attempt_s"] == 60.0
+    assert seen["gate"]["retry_arm"] == "revise" and seen["gate"]["suite_dir"] == str(rd / gg.TESTS_DIRNAME)
+
+
+def test_p9_budget_env_overrides_and_garbage_falls_back(monkeypatch):
+    kw = dict(work_root=pathlib.Path("/x"), events_path=None, model="m", endpoint="e")
+    monkeypatch.setenv("VACANT_TWIN_RUN_BUDGET_S", "33")
+    monkeypatch.setenv("VACANT_TWIN_MIN_ATTEMPT_S", "7")
+    c = twinagent.AgentConfig(**kw)
+    assert (c.run_budget_s, c.min_attempt_s) == (33.0, 7.0)
+    monkeypatch.setenv("VACANT_TWIN_RUN_BUDGET_S", "abc")
+    monkeypatch.setenv("VACANT_TWIN_MIN_ATTEMPT_S", "-1")
+    c = twinagent.AgentConfig(**kw)
+    assert (c.run_budget_s, c.min_attempt_s) == (twinagent.RUN_BUDGET_S, twinagent.MIN_ATTEMPT_S)
+
+
+def test_p9_a_cut_attempt_that_still_passed_keeps_its_real_checks():
+    lc = _lifecycle_two_attempts()
+    for e in lc:
+        if e["type"] == "agent_exited" and e["attempt"] == 2:
+            e["timed_out"] = True                       # 第 2 次被砍，但閘門判過了（gate_ran.passed=true）
+    ok = [{"id": "G1", "ok": True, "label": "讀過了"}, {"id": "G2", "ok": True, "label": "找得到出處"}]
+    out = le.fold(sidecarlib.merge(lc, [_gate_row(2, ok, ts=11)]), verify_url="/r/{cell}")
+    g2 = next(e for e in out if e["type"] == "gate_ran" and e["attempt"] == 2)
+    assert g2["passed"] is True and g2["checks"] == ok
+    assert tv.validate(out, require_task_kind=True) == []

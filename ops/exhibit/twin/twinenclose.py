@@ -90,6 +90,8 @@ if str(REPO) not in sys.path:
 ENC_SH = REPO / "ops" / "vacantrun" / "enclosure_20260920" / "bin" / "enc.sh"
 #: 圍牆裡看到的門（`enc.sh` 把門的目錄 `--ro-bind` 到 `/run/vacant`）。
 INNER_DOOR_SOCK = "/run/vacant/relay.sock"
+#: 圍牆裡的 `grounding_gate.prepare` 寫旁註 `twin_gate` 的地方（run-dir；主機側 `EventForwarder` 轉到真的旁註檔）。
+GATE_SIDECAR_PART = "gate_sidecar_part.jsonl"
 #: launcher 在圍牆裡寫的事件檔（主機側轉送進展場 live 檔）。
 EVENTS_PART = "lifecycle_part.jsonl"
 #: inner 模式的參數檔。
@@ -186,9 +188,17 @@ class EventForwarder(threading.Thread):
     """tail `<run-dir>/lifecycle_part.jsonl` → 驗過才 append 進展場 live 檔。"""
 
     def __init__(self, src: pathlib.Path, dst: pathlib.Path | None, *,
-                 task_id: str, caller: dict, poll_s: float = 0.25) -> None:
+                 task_id: str, caller: dict, poll_s: float = 0.25,
+                 gate_src: pathlib.Path | None = None,
+                 gate_dst: pathlib.Path | None = None) -> None:
         super().__init__(daemon=True, name="twin-enc-events")
         self.src, self.dst = src, dst
+        # 根據閘門的旁註 `twin_gate`：圍牆裡的 `prepare` 只寫得到 run-dir，所以寫在 `gate_src`，
+        # 這裡**先於**同一輪的 lifecycle 轉到主機的旁註檔（旁註要比 gate_ran 先到 Folder）。
+        self.gate_src, self.gate_dst = gate_src, gate_dst
+        self.gate_forwarded = 0
+        self._gpos = 0
+        self._gbuf = b""
         self.task_id, self.caller = task_id, caller
         self.poll_s = poll_s
         self.forwarded = 0
@@ -197,7 +207,40 @@ class EventForwarder(threading.Thread):
         self._buf = b""
         self._halt = threading.Event()
 
+    def _pump_gate(self) -> None:
+        if self.gate_src is None or self.gate_dst is None or not self.gate_src.is_file():
+            return
+        try:
+            with self.gate_src.open("rb") as f:
+                f.seek(self._gpos)
+                chunk = f.read()
+                self._gpos = f.tell()
+        except OSError:
+            return
+        self._gbuf += chunk
+        while b"\n" in self._gbuf:
+            raw, self._gbuf = self._gbuf.split(b"\n", 1)
+            try:
+                row = json.loads(raw.decode("utf-8", "replace"))
+            except ValueError:
+                continue
+            if not (isinstance(row, dict) and row.get("schema") == "twin.sidecar/1"
+                    and row.get("type") == "twin_gate"
+                    and row.get("cell_id") == self.caller.get("cell_id")):
+                continue
+            try:
+                self.gate_dst.parent.mkdir(parents=True, exist_ok=True)
+                fd = os.open(self.gate_dst, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+                try:
+                    os.write(fd, (json.dumps(row, ensure_ascii=False) + "\n").encode("utf-8"))
+                finally:
+                    os.close(fd)
+                self.gate_forwarded += 1
+            except OSError:
+                pass
+
     def _pump(self) -> None:
+        self._pump_gate()
         if not self.src.is_file():
             return
         try:
@@ -289,7 +332,11 @@ def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.P
                      unix_path=str(door_dir / "relay.sock"), path_policy="model")
     door.start()
     part = run_dir / EVENTS_PART
-    fwd = EventForwarder(part, events_path, task_id=task_id, caller=events_caller)
+    from ops.exhibit.twin import sidecar as _sidecar
+    fwd = EventForwarder(part, events_path, task_id=task_id, caller=events_caller,
+                         gate_src=(run_dir / GATE_SIDECAR_PART) if gate else None,
+                         gate_dst=(_sidecar.sidecar_path(events_path)
+                                   if (gate and events_path) else None))
     fwd.start()
     # `gate`＝根據閘門（`grounding_gate`）的 launcher 參數；None ＝ 舊行為（allow_no_suite）。
     #   ⚠ 圍牆裡的閘門驗收沙箱是巢狀的（bwrap 裡面再跑 `make_sandbox`），**這一條路沒有真跑驗證過**。

@@ -284,6 +284,14 @@ def paths_for(work_root: pathlib.Path, sub_id: str) -> tuple[pathlib.Path, pathl
 # 設定與前置檢查
 # ---------------------------------------------------------------------------
 
+def _env_float(name: str, default: float) -> float:
+    try:
+        v = float(os.environ.get(name) or default)
+        return v if v > 0 else default
+    except ValueError:
+        return default
+
+
 @dataclass
 class AgentConfig:
     work_root: pathlib.Path
@@ -308,8 +316,9 @@ class AgentConfig:
     #: （`allow_no_suite`、`accepted=null`），只給不跑世界的 fixture agent 的舊測試用；展場一律 True。
     gate: bool = True
     #: 整跑預算與重改下限（只在 `gate=True` 時用；見 `RUN_BUDGET_S`）。單次上限＝`timeout_s`。
-    run_budget_s: float = RUN_BUDGET_S
-    min_attempt_s: float = MIN_ATTEMPT_S
+    #: 環境變數 `VACANT_TWIN_RUN_BUDGET_S`／`VACANT_TWIN_MIN_ATTEMPT_S` 可覆寫預設（測試環境用；讀不懂就用常數）。
+    run_budget_s: float = field(default_factory=lambda: _env_float("VACANT_TWIN_RUN_BUDGET_S", RUN_BUDGET_S))
+    min_attempt_s: float = field(default_factory=lambda: _env_float("VACANT_TWIN_MIN_ATTEMPT_S", MIN_ATTEMPT_S))
 
 
 def agent_available(cfg: AgentConfig) -> tuple[bool, str]:
@@ -815,9 +824,11 @@ def read_review(rd: pathlib.Path) -> list[dict[str, Any]]:
     from ops.exhibit.twin import twinprogress      # 延後 import：它 import 這一支
     rows = twinprogress.read_review(rd)
     cut = gatelib.cut_attempts(rd)                  # 被時限切掉的嘗試：未判，不是四個錯
-    for r in rows:
-        if r["attempt"] + 1 in cut:
-            r["ok"], r["label"] = None, gatelib.TIMEOUT_LABEL
+    for a in cut:
+        mine = [r for r in rows if r["attempt"] == a - 1]
+        if mine and not all(r["ok"] for r in mine):       # 被切掉但閘門仍全過 ⇒ 照實
+            for r in mine:
+                r["ok"], r["label"] = None, gatelib.TIMEOUT_LABEL
     return rows
 
 
@@ -857,8 +868,15 @@ def run_one(job: Job) -> dict[str, Any]:
             suite_dir = gatelib.write_suite(rd)           # run-dir/tests_visible/（工作區外）
             sidecar_p = (sidecarlib.sidecar_path(job.cfg.events_path)
                          if job.cfg.events_path else None)
+            ev_p = job.cfg.events_path
+            if use_enclosure(job.cfg)[0]:
+                # 圍牆裡只寫得到 run-dir：事件從 launcher 在圍牆裡寫的 part 檔讀、旁註寫 run-dir，
+                # 由主機側 `twinenclose.EventForwarder` 轉到真的旁註檔（先於 gate_ran）。
+                from ops.exhibit.twin import twinenclose
+                ev_p = rd / twinenclose.EVENTS_PART
+                sidecar_p = rd / twinenclose.GATE_SIDECAR_PART
             (rd / gatelib.GATE_META_NAME).write_text(json.dumps({
-                "events_path": str(job.cfg.events_path) if job.cfg.events_path else None,
+                "events_path": str(ev_p) if ev_p else None,
                 "sidecar_path": str(sidecar_p) if sidecar_p else None,
                 "task_id": f"twin:{tid}", "cell_id": tid,
                 "deadline_ts": time.time() + float(job.cfg.run_budget_s),

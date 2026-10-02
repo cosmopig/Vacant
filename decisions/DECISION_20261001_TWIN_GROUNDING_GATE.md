@@ -134,3 +134,14 @@ batch1／batch2 那 4 條旁註在存檔時依規則改正（見 `evidence_gate_
 4. **最終版 12 跑**（`evidence_gate_20261002/`）：accepted true 8／false 4；B1 4、B2a 7、B2b 3、B2c 1、B2d 4、B3 8、B4 4、B5 4、B6 5、B7 1。逐條 ✗ 的原文與出處見回報與各跑 json。
    判斷：沒有確定的誤擋；兩處待主線判——f03 的「第三列：16-19 號在位」等自訂卡片編號（G2，三次嘗試都擋，是分身自訂的編號、地上沒有這些數字），
    f06 a1 的 `地上/捏土處/出生片 433 的資訊`（G1，路徑後面接了說明，地上沒有「出生片」這個檔）。
+
+## 八、P9 線 V（2026-10-02）：圍牆（`enclose=on`、`require_tier=B`）裡的閘門
+
+舊 VM 真跑 6 跑＋1 個預算探針（`evidence_gate_20261002/enclose/`）：驗收沙箱在 bwrap 圍牆裡起得來、四格窗照跑、收據級別 **B**（`enclosure_applied=true`，6 跑全是 B）、
+門的呼叫數＝收據的 `requests_seen`。踩到並修掉兩件事：
+1. 第一次跑 `gate_ran` 沒有 `checks`：圍牆裡的 `prepare` 寫不到圍牆外的旁註檔與事件檔。修：`gate_meta` 在圍牆模式指向 run-dir 的 `lifecycle_part.jsonl`／`gate_sidecar_part.jsonl`，
+   主機側 `twinenclose.EventForwarder` 先轉旁註、再轉 lifecycle（旁註先於 `gate_ran`）。修後 6 跑的每一筆 `gate_ran` 都帶 `checks`。
+2. 被時限切掉但閘門仍全過的嘗試（e7）：Folder／手機 review 照實用逐格結果，不標 `ok:null`（`passed` 必須等於逐條 AND）。
+- 預算在圍牆裡生效：e7 以 `VACANT_TWIN_RUN_BUDGET_S=40` 跑，牆鐘 40.6 秒、第 1 次嘗試被預算切斷、閘門仍判過。
+- 環境坑：門的 `AF_UNIX` 路徑超過 108 字元會 `OSError`（`<TMPDIR>/…agentruns/doors/<32 字>/relay.sock`）；展場的資料庫路徑要夠短。
+- 圍牆內 e1 有一次 300 秒牆鐘逾時（四格 `ok:null`）。

@@ -110,7 +110,7 @@ def evidence_for(case: str, message: str, frozen: pathlib.Path, ground: dict[str
 
 
 def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
-            out_dir: pathlib.Path) -> dict[str, Any]:
+            out_dir: pathlib.Path, enclose: str = "off", require_tier: str | None = None) -> dict[str, Any]:
     from ops.exhibit.twin import grounding_gate as gg
     from ops.exhibit.twin import sidecar as sidecarlib
     from ops.exhibit.twin import twinagent, twinground, twinlink, twinvault, w3b_samples
@@ -136,14 +136,17 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
         with contextlib.redirect_stdout(buf):
             rc = twinlink.main(["--db", str(db), "generate", "--endpoint", endpoint, "--model", model,
                                 "--engine", "agent", "--parallel", "1", "--agent-timeout", str(timeout),
-                                "--events", str(events), "--enclose", "off"])
+                                "--events", str(events), "--enclose", enclose]
+                               + (["--require-tier", require_tier] if require_tier else []))
         rec["generate_rc"], rec["wall_s"] = rc, round(time.time() - t0, 1)
         st = TwinStore(db)
         tw = (st.current(sid) or {}).get("twin") or {}
         rec["twin"] = {k: tw.get(k) for k in (
             "engine", "degrade_kind", "decision", "run_id", "verdict_hash", "accepted", "stop_reason",
-            "requests_seen", "agent_rc", "agent_timed_out", "latency_ms", "tier", "twin_id")}
+            "requests_seen", "agent_rc", "agent_timed_out", "latency_ms", "tier", "twin_id", "degrade_reason")}
         rec["outcome"] = twinlink.run_outcome(tw)
+        rec["enclosed"], rec["enclosure_applied"] = tw.get("enclosed"), tw.get("enclosure_applied")
+        rec["door_calls"] = tw.get("door_calls")
         ws, rd = twinagent.paths_for(twinagent.default_work_root(db), sid)
 
         man = json.loads((rd / "ground_manifest.json").read_text(encoding="utf-8")) \
@@ -251,7 +254,7 @@ def cmd_run(a: argparse.Namespace) -> int:
         f = out / f"{s['name']}.json"
         if f.exists() and not a.redo:
             continue
-        rec = run_one(s, a.endpoint, a.model, a.timeout, out)
+        rec = run_one(s, a.endpoint, a.model, a.timeout, out, a.enclose, a.require_tier)
         f.write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print(json.dumps({"name": s["name"], "wall_s": rec.get("wall_s"), "accepted": rec.get("accepted"),
                           "attempts": rec.get("attempts_used"), "branches": list((rec.get("branches") or {})),
@@ -285,6 +288,8 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--timeout", type=float, default=300.0)
     r.add_argument("--only", default=None)
     r.add_argument("--redo", action="store_true")
+    r.add_argument("--enclose", default="off", choices=["off", "auto", "on"])
+    r.add_argument("--require-tier", default=None)
     r.add_argument("--dead-endpoint", action="store_true", help="B8：略過端點探測，讓 pi 起來打一個關閉的埠")
     r.set_defaults(fn=cmd_run)
     p = sub.add_parser("report")
