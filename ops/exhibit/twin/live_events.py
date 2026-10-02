@@ -215,8 +215,10 @@ class Folder:
             n = self.calls.get(rid, 0) + 1
             self.calls[rid] = n
             # 誠實邊界 1：只帶「又一通經過了中介」與通數，不帶內容。
+            # `error`（布林）照原樣帶出：「這一跑每一通都打不到模型」要看得到（P8；不帶內容）。
+            extra = {"error": ev["error"]} if isinstance(ev.get("error"), bool) else {}
             emit("working", arm=st["arm"], worker=st["resident"],
-                 attempt=ev.get("attempt"), calls_so_far=n)
+                 attempt=ev.get("attempt"), calls_so_far=n, **extra)
         elif t == "attempt_started":
             n = ev["attempt"]
             st["feedback"][n] = (ev.get("feedback_in_prompt_bytes"),
@@ -400,7 +402,9 @@ class Folder:
         return [{"type": "twin_step", "ts": self._ts(ev["ts_ms"]),
                  "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
                  "step": ev.get("step"), "path_kind": ev.get("path_kind"),
-                 "bytes": ev.get("bytes"), "seq": ev.get("seq")}]
+                 "bytes": ev.get("bytes"), "seq": ev.get("seq"),
+                 # `ok`（布林）照原樣帶出：工具被擋（例如寫進 地上/）電視要演得出來（P8）。
+                 **({"ok": ev["ok"]} if isinstance(ev.get("ok"), bool) else {})}]
 
     def _ended(self, st: dict, ev: dict, emit) -> None:
         on = st["arm"] == tv.ARM_ON

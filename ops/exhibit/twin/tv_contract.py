@@ -374,6 +374,8 @@ def validate(evs: list[dict], *, require_settled: bool = True,
             if not _is_pos_int(e.get("calls_so_far")):
                 bad.append(f"第 {n} 個事件：working.calls_so_far 要是正整數，"
                            f"拿到 {e.get('calls_so_far')!r}")
+            if "error" in e and not isinstance(e["error"], bool):
+                bad.append(f"第 {n} 個事件：working.error 要是布林，拿到 {e['error']!r}")
         # ── 分身的步驟事件：不帶檔名、白名單、只在 ON／practical 那一格 ──
         if t == "twin_step":
             if e.get("arm") != ARM_ON:
@@ -392,6 +394,8 @@ def validate(evs: list[dict], *, require_settled: bool = True,
             bv = e.get("bytes")
             if bv is not None and not _is_nat(bv):
                 bad.append(f"第 {n} 個事件：twin_step.bytes 要是非負整數或 null")
+            if "ok" in e and not isinstance(e["ok"], bool):
+                bad.append(f"第 {n} 個事件：twin_step.ok 要是布林，拿到 {e['ok']!r}")
             for k in TWIN_STEP_FORBIDDEN:
                 if k in e:
                     bad.append(f"第 {n} 個事件：twin_step 帶了 {k!r}——"
