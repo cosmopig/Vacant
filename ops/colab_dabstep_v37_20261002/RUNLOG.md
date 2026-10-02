@@ -17,3 +17,12 @@
 | 03:35 | **預註冊凍結**（本 commit）：工具、計畫（`plan_d37.json`：79 題×3 組×最多 3 次、種子 20261002） |
 | 03:30 | **發射 `d37`**：`MAX_TURNS=15 launch_batch.sh d37 plan_d37.json 45 2026-10-02T06:29:54Z PREREG_20261002_COLAB_DABSTEP_V37`；VM 上 plan／cell.sh／dabstep_score.py 的 sha256 與凍結 commit `384fa838` 相同 |
 | 03:31 | 本機常駐：`sync_from_colab.sh d37`（每 10 分鐘拉 chunk、驗 sha256，到 `~/Vacant_colab_raw/dabstep_v37_20261002/`）、`cu_guard.sh d37 45`（餘額 < 45 放停止檔）、`autostop_d37.sh`（DRIVER_DONE ⇒ 打包 → 下載 → sha256 → `colab stop`）、07:45 一律停機的保險。監看只看 rc、牆鐘、逾時、安裝，不看分數 |
+| 03:30–05:42 | 711／711 格完成（05:42:13 DRIVER_DONE）；逾時 A 11、C37 3、C37R 14；安裝失敗 0；監看沒讀分數 |
+| 05:52 | 本機同步 `SYNC_ALL_DONE`：14 個 chunk 全部拉回、sha256 逐個驗過 |
+| 05:45–07:33 | ⚠ **GPU 空轉約 1 小時 52 分（約 16.6 CU）**：`autostop_d37.sh` 用 `vmrun.sh`（`colab console`）查 DRIVER_DONE，05:45 起 console 一直回空白 ⇒ 永遠看不到完成；同步走檔案介面早已完成，卻沒接到停機。等待通知的背景指令兩次到 2 小時上限被停，07:33 人工查才發現 |
+| 07:33 | 改走 `colab download` 確認 DRIVER_DONE 與 progress.jsonl（711 行）；補下載發射紀錄、driver／feasibility log、代理帳本與摘要（代理全文在 chunk 裡）；**07:34 `colab stop`**；本機常駐全部停掉 |
+| 07:35 | void 檢查（`analyze_dabstep.py --void-only`，不讀分數）：**0 格**；plan sha256 與凍結版相同 ⇒ 不補跑 |
+| 07:36 | **第一次讀分數**，跑凍結的分析：C37 − A p＝0.0028（主要）、C37R − A p＝3.1e-5、C37R − C37 p＝0.011。結論：`decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md` |
+| 07:45 | 事後拆解（描述）：A 有 42 格「說做完卻沒寫答案檔」、C37 0 格（`missing_output` 退回 38 格）；Vacant 把對的改成錯 0 次（唯一可疑的 C37R 61-s2 退回前的答案本來就錯）；和 09-26 本機批次比，有 Vacant 那組幾乎相同、差在 A 變差 |
+
+**修法（下一批照做）**：收尾判斷只走檔案介面——`colab download /srv/eval/DRIVER_DONE` 成功、且同步回報 `SYNC_ALL_DONE` ⇒ 立刻 `colab stop`；console 只當備援。等待通知的背景指令有 2 小時上限，不能當成唯一的監測。
