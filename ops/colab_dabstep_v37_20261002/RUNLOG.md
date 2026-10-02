@@ -15,3 +15,5 @@
 | 03:27 | 計分器量具第一次：正解 0／79 過——**量具自己的錯**（`test.sh` 讀 `/app/answer.txt`，量具把答案放在暫存目錄）。`dabstep_score.py` 改成也把 `/app/answer.txt` 換成 `<app>/answer.txt`（格子裡 `<app>` 就是 `/app`，行為不變）。重量：**正解 79／79 過、不交 79／79 不過** |
 | 03:28 | 冒煙（題 1 × A／C37／C37R，`MAX_TURNS=15`，不看分數、不進分析）：三組的每一通模型請求都帶「hard budget of 15 model turns」（15／7／6 通）；A 剛好 15 通後被 `ctx.abort()` 中止；C37、C37R 裝上、走到交件前檢查；C37R 的 install.json `budget_reminder: true`、C37 沒有這個欄位 |
 | 03:35 | **預註冊凍結**（本 commit）：工具、計畫（`plan_d37.json`：79 題×3 組×最多 3 次、種子 20261002） |
+| 03:30 | **發射 `d37`**：`MAX_TURNS=15 launch_batch.sh d37 plan_d37.json 45 2026-10-02T06:29:54Z PREREG_20261002_COLAB_DABSTEP_V37`；VM 上 plan／cell.sh／dabstep_score.py 的 sha256 與凍結 commit `384fa838` 相同 |
+| 03:31 | 本機常駐：`sync_from_colab.sh d37`（每 10 分鐘拉 chunk、驗 sha256，到 `~/Vacant_colab_raw/dabstep_v37_20261002/`）、`cu_guard.sh d37 45`（餘額 < 45 放停止檔）、`autostop_d37.sh`（DRIVER_DONE ⇒ 打包 → 下載 → sha256 → `colab stop`）、07:45 一律停機的保險。監看只看 rc、牆鐘、逾時、安裝，不看分數 |
