@@ -19,7 +19,19 @@ MODEL=${MODEL:-gemma-4-12b-it-qat}
 PROXY=${PROXY:-http://127.0.0.1:18900}
 UP=${UP:-g4}
 # vacant-dev 複製批次（2026-10-02）：UP=auto ⇒ 依題目路徑的 cksum 固定分到 g1003／g1004（同一題的各組、各次都在同一台，台的差不進組別的差）
-if [ "$UP" = auto ]; then _h=$(printf %s "$T" | cksum | cut -d' ' -f1); if [ $((_h % 2)) = 0 ]; then UP=g1003; else UP=g1004; fi; fi
+# 2026-10-02 12:55 起（偏離，記在 RUNLOG）：改成「每個單位開跑時分給進行中格數較少的那台」（平手給 g1003），同一單位（同題同次）的各組照樣在同一台。
+# 第一個開跑的那一組在鎖裡決定、寫進 /srv/eval/unit_up/<題目雜湊>-s<次>，其餘組讀同一個檔。進行中＝有 upstream 檔、還沒有 DONE 的格子。
+if [ "$UP" = auto ]; then
+  _uk=$(printf %s "$T" | sha1sum | cut -c1-16)-s${CELL##*-s}; mkdir -p /srv/eval/unit_up
+  UP=$(flock /srv/eval/unit_up.lock bash -c '
+    f=/srv/eval/unit_up/'"$_uk"'
+    if [ -f "$f" ]; then cat "$f"; exit 0; fi
+    n3=0; n4=0
+    for u in /srv/eval/cells/*/upstream; do d=${u%/upstream}; [ -f "$d/DONE" ] && continue
+      case $(cat "$u") in g1003) n3=$((n3+1));; g1004) n4=$((n4+1));; esac; done
+    if [ $n3 -le $n4 ]; then up=g1003; else up=g1004; fi
+    echo $up > "$f"; echo $up')
+fi
 AGENT_TIMEOUT=${AGENT_TIMEOUT:-1800}
 # DABstep × v3.7（2026-10-02）：回合上限＝Harbor 6cb9ff31 pi.py 的 max-turns 擴充逐字；空字串＝不設
 MAX_TURNS=${MAX_TURNS:-}
@@ -32,6 +44,7 @@ C=/srv/runs/$CELL
 SC=/srv/runs/${CELL}_score
 WHEEL=$(ls /opt/eval/wheel/*.whl | head -1)
 rm -rf "$L" "$C" "$SC"; mkdir -p "$L"
+echo "$UP" > "$L/upstream"
 now() { date -u +%FT%TZ; }
 jq_str() { python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1"; }
 
