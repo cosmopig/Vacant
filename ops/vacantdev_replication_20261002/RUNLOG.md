@@ -13,3 +13,4 @@
 | 10:00:58 | **發射佇列**：`run_queue.sh`（t3L：`UP=auto AGENT_TIMEOUT=1800`、8 位置、不設時限；跑完且打包完 ⇒ d37L：`MAX_TURNS=15`）；`cleanup_packed.sh` 常駐 |
 | 10:17 | 前 6 格（dabench）：rc 0、沒逾時、C 裝上且走到交件前檢查；代理 169 通全 200（g1003 77、g1004 92）；load 低、記憶體可用 6 GB、磁碟 2.7 GB |
 | 10:18 | Mac 端 `sync_vd.sh`：每 20 分鐘 rsync `/srv/eval/archive` 到 `~/Vacant_colab_raw/vacantdev_replication_20261002/`、逐個驗 sha256；這次沒有 GPU 計費（人類自己的機器），不需要自動關機 |
+| 11:53 | 64 格完成（第 1 次；A 32／C37 32）、逾時 A 9／C37 6、安裝失敗 0；每格牆鐘中位 304 秒。代理 2,050 通全 200（g1003 745、g1004 1,305）。**吞吐低**：最近 30 分鐘兩台各只約 33 生成 tok/s（單條中位 g1003 37、g1004 12 tok/s；g1004 延遲中位 45 秒，請求在 LM Studio 排隊）⇒ 約 0.57 格／分，兩批合計估 35–40 小時。不動 LM Studio 設定（人類的機器）。Mac 同步迴圈睡太久（Mac 休眠），重開後 12／12 chunk 驗過 |
