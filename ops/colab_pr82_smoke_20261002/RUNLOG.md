@@ -34,3 +34,7 @@
   ⇒ `vacant_network-0.8.0-py3-none-any.whl` sha256 `92ddc44d7bb545b9f3c81d923286a952d3fa23b9d2f3b81d6f530fe9aedfbc1f`；114／114 檔與 git 原檔相同。圍牆負控制 OK、ensurepip OK、代理在 127.0.0.1:18900。
 - 01:59:08 發射 `p82`（`launch_batch.sh p82 plan_pr82smoke.json 30 2026-10-02T03:00:00Z SMOKE_NOT_PREREGISTERED`）；plan sha256 `ab49935b…`（VM 上）。AGENT_TIMEOUT 1800 秒同第一批。
 - 02:00 前 3 格完成：C 裝上且有作用、都走到交件前檢查（`stop_reached`）。
+- 02:01 18／30 格完成，逾時 0、C 全部裝上且走到交件前檢查。
+- 02:03 中途讀病歷（`smoke_report.py`，**不讀 score.json**）：20 格已完成——misreject20 的 16 格都跑過 `run_tests.sh`、交件前檢查全部 `allow`、`test_claim/none` 0 格；
+  forced 的 `lcb_3675` 第一次檢查退回 `missing_output`（solution.py 不在）、agent 補寫後第二次 `allow`；另 2 格 forced 的 agent 照樣寫了檔、沒有退回。
+- 02:06 23／30 完成。本機起 `autostop.sh`：VM 出現 DRIVER_DONE ⇒ 打包 `p82_raw.tar.xz`（格子、代理、發射紀錄、wheel 雜湊、部署 log）→ 下載到 `~/Vacant_colab_raw/pr82_smoke_20261002/` → sha256 對上才 `colab stop`。原始紀錄含 EvalPlus 內容，**不進 repo**。
