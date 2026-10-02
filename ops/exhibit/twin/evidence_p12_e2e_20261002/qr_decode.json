@@ -1,0 +1,8 @@
+{
+ "decoded": {
+  "A": "https://vacant.cosmopig.com",
+  "B": "https://vacant.cosmopig.com"
+ },
+ "expect": "https://vacant.cosmopig.com",
+ "ok": true
+}

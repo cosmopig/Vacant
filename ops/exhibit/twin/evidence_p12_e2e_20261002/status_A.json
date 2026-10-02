@@ -1,0 +1,261 @@
+{
+ "status": "done",
+ "origin": "audience",
+ "submitted_at": 1790934136678,
+ "claimed_at": 1790934137273,
+ "done_at": 1790934180841,
+ "server_now": 1790934279703,
+ "queue": {
+  "position": null,
+  "ahead": null,
+  "ahead_waiting": null,
+  "ahead_generating": null,
+  "waiting_total": 0,
+  "generating_now": 0,
+  "stale_claimed": 0
+ },
+ "verdict": "做好了，放在「完成的信件.txt」。",
+ "matched": "如果你在這裡： 你走進來時，一定會先注意到那個在托盤裡發軟的紙邊，那是你對秩序…",
+ "outcome": "made",
+ "cast_id": "c01",
+ "polaroid_url": "/api/polaroid/034df8df-63fd-40b6-8f09-1c662c719025",
+ "receipt_url": "/api/receipt/034df8df-63fd-40b6-8f09-1c662c719025",
+ "steps": [
+  {
+   "seq": 1,
+   "tool": "ws_read",
+   "path": "TRAITS.md",
+   "bytes": 381,
+   "ok": true
+  },
+  {
+   "seq": 2,
+   "tool": "ws_write",
+   "path": "信.md",
+   "bytes": 877,
+   "ok": true
+  },
+  {
+   "seq": 1,
+   "tool": "ws_read",
+   "path": "信.md",
+   "bytes": 875,
+   "ok": true
+  },
+  {
+   "seq": 2,
+   "tool": "ws_read",
+   "path": "WORLD.md",
+   "bytes": 5838,
+   "ok": true
+  },
+  {
+   "seq": 3,
+   "tool": "ws_list",
+   "path": null,
+   "bytes": null,
+   "ok": true
+  },
+  {
+   "seq": 4,
+   "tool": "ws_read",
+   "path": "地上/投遞口/托盤_半封信.txt",
+   "bytes": 740,
+   "ok": true
+  },
+  {
+   "seq": 5,
+   "tool": "ws_read",
+   "path": "地上/長桌廣場/土堆/小陶印.txt",
+   "bytes": 763,
+   "ok": true
+  },
+  {
+   "seq": 6,
+   "tool": "ws_read",
+   "path": "地上/長桌廣場/桌三_壓著筆的紙.txt",
+   "bytes": 357,
+   "ok": true
+  },
+  {
+   "seq": 7,
+   "tool": "ws_read",
+   "path": "地上/紙卡地/格狀圖.txt",
+   "bytes": 256,
+   "ok": true
+  },
+  {
+   "seq": 8,
+   "tool": "ws_write",
+   "path": "PLAN.md",
+   "bytes": 2364,
+   "ok": true
+  },
+  {
+   "seq": 9,
+   "tool": "ws_write",
+   "path": "地上/長桌廣場/桌三_補全點數單.txt",
+   "bytes": null,
+   "ok": false
+  },
+  {
+   "seq": 10,
+   "tool": "ws_list",
+   "path": null,
+   "bytes": null,
+   "ok": true
+  },
+  {
+   "seq": 11,
+   "tool": "ws_write",
+   "path": "補全的點數單.txt",
+   "bytes": 364,
+   "ok": true
+  },
+  {
+   "seq": 12,
+   "tool": "ws_write",
+   "path": "完成的信件.txt",
+   "bytes": 911,
+   "ok": true
+  }
+ ],
+ "judgment": {
+  "tier": "B",
+  "requests_seen": 16,
+  "count_semantics": "exact",
+  "ws_end_sha256_prefix": "bb204e98",
+  "chain_head_prefix": "61539b4d",
+  "accepted_note": "Vacant 不判對錯；這一格查的是每一步有沒有根據，accepted 說的只是這個——沒過的照常交件、照實標出位置"
+ },
+ "says": [
+  {
+   "seq": 1,
+   "turn": 1,
+   "text": "我需要閱讀這份文件來了解這個人的特質。",
+   "ts": 1790934139626
+  },
+  {
+   "seq": 2,
+   "turn": 1,
+   "text": "我已經理解了他的特質，現在要將這些內容轉化為要求的格式並寫入文件。",
+   "ts": 1790934143832
+  },
+  {
+   "seq": 3,
+   "turn": 3,
+   "text": "信寫好了。",
+   "ts": 1790934143833
+  },
+  {
+   "seq": 1,
+   "turn": 1,
+   "text": "我正試著進入這個人的內心世界，去感受他的細膩與對秩序的渴求。",
+   "ts": 1790934146644
+  },
+  {
+   "seq": 2,
+   "turn": 1,
+   "text": "我需要了解這個世界的結構，看看有哪些地方和規矩可以讓這個人找到安穩。",
+   "ts": 1790934147581
+  },
+  {
+   "seq": 3,
+   "turn": 1,
+   "text": "我現在要看看房間裡有哪些東西可以讓我開始探索這個世界。",
+   "ts": 1790934148868
+  },
+  {
+   "seq": 4,
+   "turn": 1,
+   "text": "我想看看這封信到底在說什麼，它可能與我的身份或這個人的渴望有關。",
+   "ts": 1790934150083
+  },
+  {
+   "seq": 5,
+   "turn": 1,
+   "text": "我想確認一下這個陶印是不是跟托盤上的有關。",
+   "ts": 1790934151096
+  },
+  {
+   "seq": 6,
+   "turn": 1,
+   "text": "我想看看這張沒做完的紙，它可能跟那封信提到的「寫到這裡停住」有關。",
+   "ts": 1790934152330
+  },
+  {
+   "seq": 7,
+   "turn": 1,
+   "text": "我想確認一下紙卡地的實際結構，看看是不是跟點數單說的一樣。",
+   "ts": 1790934153349
+  },
+  {
+   "seq": 8,
+   "turn": 1,
+   "text": "我已經讀完了所有相關資訊，現在準備寫出計畫。我要幫那個細膩的人把斷掉的念頭接上。",
+   "ts": 1790934164124
+  },
+  {
+   "seq": 9,
+   "turn": 1,
+   "text": "我先去處理那個沒做完的點數單。根據格狀圖，第四列應該是○×○○○×○。",
+   "ts": 1790934167199
+  },
+  {
+   "seq": 12,
+   "turn": 1,
+   "text": "現在我要寫出那封補全後的信件。我會把那個沒寫完的「口」字接上，並用小陶印裡的乙印作為結尾。",
+   "ts": 1790934176535
+  },
+  {
+   "seq": 15,
+   "turn": 16,
+   "text": "我已經完成了計畫中的所有動作，並在房間裡留下了補全後的點數單與完成的信件。",
+   "ts": 1790934176536
+  }
+ ],
+ "stage": "done",
+ "review": [
+  {
+   "id": "G1",
+   "ok": true,
+   "label": "讀過了",
+   "attempt": 0
+  },
+  {
+   "id": "G2",
+   "ok": true,
+   "label": "找得到出處",
+   "attempt": 0
+  },
+  {
+   "id": "G3",
+   "ok": true,
+   "label": "兩個出處對得上",
+   "attempt": 0
+  },
+  {
+   "id": "G4",
+   "ok": true,
+   "label": "收據是閘門給的",
+   "attempt": 0
+  }
+ ],
+ "progress_at": 1790934177458,
+ "fortune": {
+  "mbti": "INFP",
+  "mbti_source": "ai",
+  "zodiac": "雙魚",
+  "blood": "O"
+ },
+ "fortune_result": {
+  "mbti": "INFP",
+  "mbti_source": "ai",
+  "zodiac": "雙魚",
+  "blood": "O",
+  "lines": [
+   "追求秩序的同時，內心仍有著隨性的流動。",
+   "它先去了投遞口，再到長桌廣場，再到紙卡地，在紙卡地交出《一件沒有名字的小事》"
+  ]
+ }
+}

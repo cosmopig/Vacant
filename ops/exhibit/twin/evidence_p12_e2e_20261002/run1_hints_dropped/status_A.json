@@ -1,0 +1,299 @@
+{
+ "status": "done",
+ "origin": "audience",
+ "submitted_at": 1790933770225,
+ "claimed_at": 1790933770732,
+ "done_at": 1790933811211,
+ "server_now": 1790933858052,
+ "queue": {
+  "position": null,
+  "ahead": null,
+  "ahead_waiting": null,
+  "ahead_generating": null,
+  "waiting_total": 0,
+  "generating_now": 0,
+  "stale_claimed": 0
+ },
+ "verdict": "做好了，放在「點數單_完成版.txt」。",
+ "matched": "如果你在這裡：你一定也跟我一樣，看到那些沒做完的紙時會先愣住",
+ "outcome": "made",
+ "cast_id": "c01",
+ "polaroid_url": "/api/polaroid/93c4156b-04f4-4e91-9cef-6e224245d503",
+ "receipt_url": "/api/receipt/93c4156b-04f4-4e91-9cef-6e224245d503",
+ "steps": [
+  {
+   "seq": 1,
+   "tool": "ws_read",
+   "path": "TRAITS.md",
+   "bytes": 381,
+   "ok": true
+  },
+  {
+   "seq": 2,
+   "tool": "ws_write",
+   "path": "信.md",
+   "bytes": 715,
+   "ok": true
+  },
+  {
+   "seq": 1,
+   "tool": "ws_read",
+   "path": "信.md",
+   "bytes": 713,
+   "ok": true
+  },
+  {
+   "seq": 2,
+   "tool": "ws_read",
+   "path": "WORLD.md",
+   "bytes": 5838,
+   "ok": true
+  },
+  {
+   "seq": 3,
+   "tool": "ws_list",
+   "path": null,
+   "bytes": null,
+   "ok": true
+  },
+  {
+   "seq": 4,
+   "tool": "ws_read",
+   "path": "地上/草稿角/接片紀錄.txt",
+   "bytes": 266,
+   "ok": true
+  },
+  {
+   "seq": 5,
+   "tool": "ws_read",
+   "path": "地上/草稿角/紙團_乙.txt",
+   "bytes": 319,
+   "ok": true
+  },
+  {
+   "seq": 6,
+   "tool": "ws_read",
+   "path": "地上/草稿角/鉛筆.txt",
+   "bytes": 200,
+   "ok": true
+  },
+  {
+   "seq": 7,
+   "tool": "ws_read",
+   "path": "地上/紙卡地/格狀圖.txt",
+   "bytes": 256,
+   "ok": true
+  },
+  {
+   "seq": 8,
+   "tool": "ws_read",
+   "path": "地上/紙卡地/背面有字的卡.txt",
+   "bytes": 252,
+   "ok": true
+  },
+  {
+   "seq": 9,
+   "tool": "ws_read",
+   "path": "地上/長桌廣場/桌三_壓著筆的紙.txt",
+   "bytes": 357,
+   "ok": true
+  },
+  {
+   "seq": 10,
+   "tool": "ws_read",
+   "path": "地上/長桌廣場/桌五_壓著筆的紙.txt",
+   "bytes": 384,
+   "ok": true
+  },
+  {
+   "seq": 11,
+   "tool": "ws_read",
+   "path": "地上/帳本鏈/尾段_418到447片.txt",
+   "bytes": 1954,
+   "ok": true
+  },
+  {
+   "seq": 12,
+   "tool": "ws_write",
+   "path": "PLAN.md",
+   "bytes": 2135,
+   "ok": true
+  },
+  {
+   "seq": 13,
+   "tool": "ws_read",
+   "path": "地上/紙卡地/格狀圖.txt",
+   "bytes": 256,
+   "ok": true
+  },
+  {
+   "seq": 14,
+   "tool": "ws_write",
+   "path": "點數單_完成版.txt",
+   "bytes": 282,
+   "ok": true
+  }
+ ],
+ "judgment": {
+  "tier": "B",
+  "requests_seen": 18,
+  "count_semantics": "exact",
+  "ws_end_sha256_prefix": "0a97b7ff",
+  "chain_head_prefix": "fd6aa5a5",
+  "accepted_note": "Vacant 不判對錯；這一格查的是每一步有沒有根據，accepted 說的只是這個——沒過的照常交件、照實標出位置"
+ },
+ "says": [
+  {
+   "seq": 1,
+   "turn": 1,
+   "text": "我需要閱讀這份文件來了解這個人的特質，以便撰寫信件。",
+   "ts": 1790933774540
+  },
+  {
+   "seq": 2,
+   "turn": 1,
+   "text": "我已經掌握了所有特質，現在要根據要求撰寫這封信並包含命盤。",
+   "ts": 1790933778208
+  },
+  {
+   "seq": 3,
+   "turn": 3,
+   "text": "信寫好了。",
+   "ts": 1790933778209
+  },
+  {
+   "seq": 1,
+   "turn": 1,
+   "text": "我正試著進入這個人的內心世界，去感受他的細膩與對秩序的渴望。",
+   "ts": 1790933781531
+  },
+  {
+   "seq": 2,
+   "turn": 1,
+   "text": "我需要了解這個世界的結構、規矩以及這裡的居民是誰。",
+   "ts": 1790933782406
+  },
+  {
+   "seq": 3,
+   "turn": 1,
+   "text": "我現在要看看我的房間裡有哪些東西可以利用。",
+   "ts": 1790933783644
+  },
+  {
+   "seq": 4,
+   "turn": 1,
+   "text": "我正在尋找與信中人性格相關的線索，從草稿角開始看。",
+   "ts": 1790933784802
+  },
+  {
+   "seq": 5,
+   "turn": 1,
+   "text": "繼續在草稿角查看，看看有沒有關於修改過程的細節。",
+   "ts": 1790933785828
+  },
+  {
+   "seq": 6,
+   "turn": 1,
+   "text": "讀取鉛筆的描述，看看它是否與信中人的細膩動作有關。",
+   "ts": 1790933786816
+  },
+  {
+   "seq": 7,
+   "turn": 1,
+   "text": "我移動到紙卡地，看看這裡的規律是否與信中人追求秩序的性格相符。",
+   "ts": 1790933787876
+  },
+  {
+   "seq": 8,
+   "turn": 1,
+   "text": "讀取這幾張卡片上的內容，看看有沒有與信中人內心渴望被認可的特質相關的東西。",
+   "ts": 1790933789007
+  },
+  {
+   "seq": 9,
+   "turn": 1,
+   "text": "我移動到長桌廣場，看看那些沒做完的東西，這與信中人「讓思緒停頓」的性格很像。",
+   "ts": 1790933790285
+  },
+  {
+   "seq": 10,
+   "turn": 1,
+   "text": "繼續看另一張沒做完的紙。",
+   "ts": 1790933791266
+  },
+  {
+   "seq": 11,
+   "turn": 1,
+   "text": "我需要對照一下長桌廣場上的抄錄內容與實際的帳本鏈。",
+   "ts": 1790933793350
+  },
+  {
+   "seq": 12,
+   "turn": 1,
+   "text": "我已經讀完了所有的相關資料，現在我要把我的計畫寫下來。",
+   "ts": 1790933803207
+  },
+  {
+   "seq": 13,
+   "turn": 1,
+   "text": "我正在重新確認紙卡地的數量，這是完成點數單的基礎。",
+   "ts": 1790933804888
+  },
+  {
+   "seq": 14,
+   "turn": 1,
+   "text": "我現在要寫出那個已經補全的點數單，這是我的主要成品。",
+   "ts": 1790933807906
+  },
+  {
+   "seq": 17,
+   "turn": 18,
+   "text": "我完成了計畫中的任務。",
+   "ts": 1790933807908
+  }
+ ],
+ "stage": "done",
+ "review": [
+  {
+   "id": "G1",
+   "ok": true,
+   "label": "讀過了",
+   "attempt": 0
+  },
+  {
+   "id": "G2",
+   "ok": true,
+   "label": "找得到出處",
+   "attempt": 0
+  },
+  {
+   "id": "G3",
+   "ok": true,
+   "label": "兩個出處對得上",
+   "attempt": 0
+  },
+  {
+   "id": "G4",
+   "ok": true,
+   "label": "收據是閘門給的",
+   "attempt": 0
+  }
+ ],
+ "progress_at": 1790933808689,
+ "fortune": {
+  "mbti": "INFP",
+  "mbti_source": "ai",
+  "zodiac": "雙魚",
+  "blood": "O"
+ },
+ "fortune_result": {
+  "mbti": "INFP",
+  "mbti_source": "ai",
+  "zodiac": "雙魚",
+  "blood": "O",
+  "lines": [
+   "在追求秩序的同時，保留著對變化的猶豫與觀察。",
+   "它先去了草稿角，再到紙卡地，再到長桌廣場，再到帳本鏈，在紙卡地交出《點數單》"
+  ]
+ }
+}

@@ -461,13 +461,30 @@ NO_NAME_TITLE = "一件沒有名字的小事"
 READING_ORDER = ("JP", "TF", "EI", "SN")        # 解讀優先挑 J/P、T/F 那一行；沒有就挑第一個存在的行
 
 
-def title_of(files: dict[str, str], f: dict[str, Any], traits: str = "") -> str | None:
+MIN_TITLE = 3
+#: 居民的外形名（世界裡居民互相這樣叫：顏色＋形狀，如「苔綠細長」「赭紅方」「奶油圓」）。
+_RESIDENT_NAME = re.compile(r"^(?:暖土|赭紅|沙金|苔綠|奶油|灰藍)色?(?:圓|方|小|細長|厚實|粗獷|大)?(?:的?居民|的?人)?$")
+_ADDRESS = re.compile(r"^[ \t]*([^\s：:，,。#>*\-]{2,8})[：:]", re.M)
+_NOT_ADDRESS = {"命盤", "MBTI", "星座", "血型", "開頭", "E/I", "S/N", "T/F", "J/P", "依據"}
+
+
+def is_resident_name(t: str, letter_text: str = "") -> bool:
+    """標題是不是居民的稱呼：外形名（顏色＋形狀）、或信裡拿來稱呼對方的那個詞（行首「X：」）。"""
+    t = (t or "").strip()
+    if _RESIDENT_NAME.match(t):
+        return True
+    return bool(t) and t in {m for m in _ADDRESS.findall(letter_text or "")} - _NOT_ADDRESS
+
+
+def title_of(files: dict[str, str], f: dict[str, Any], traits: str = "", letter_text: str = "") -> str | None:
     """這一跑主要成品（最長的頂層 .md／.txt）的標題＝第一個非空行，≤20 字；像檔名、抄觀眾原文、提沒給的東西、現實詞、時段詞 ⇒ 試下一個，都不行 ⇒ None。"""
     for text in sorted(files.values(), key=len, reverse=True):
         first = next((ln for ln in text.splitlines() if ln.strip()), "")
         t = re.sub(r"^[\s#>*\-_\d.、：:【\[（(]+", "", first).strip()
         t = t.strip("「」『』\"'*】]）)").rstrip("。.！!：:，,").strip()
         if not t or len(t) > MAX_TITLE or re.fullmatch(r"版本[一二]", t):
+            continue
+        if len(t) < MIN_TITLE or is_resident_name(t, letter_text):     # P12：太短、或只是居民的稱呼 ⇒ 不當標題（換「一件沒有名字的小事」）
             continue
         if re.search(r"\.(md|txt)\b|[A-Za-z0-9_]+\.[a-z]{2,4}", t) or "/" in t:
             continue
@@ -503,6 +520,8 @@ def route_of(places: list[str], last_place: str | None, title: str, retries: int
     def make(pp: list[str], t: str) -> str:
         if not pp:
             head = "它"
+        elif len(pp) == 1 and last_place in (None, pp[0]):
+            return f"它在{pp[0]}交出《{t}》{tail}"          # 只去過一個地方：「它在X交出」，不說「去了X，在X交出」
         elif len(pp) == 1:
             head = f"它去了{pp[0]}"
         else:
@@ -540,7 +559,7 @@ def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, An
     res: dict[str, Any] = {"first_line": first_line(f), "lines": [], "dropped": [], "present": False, "card_file": False}
     if not has_any(f):
         return res
-    title = title_of(files, f, traits)
+    title = title_of(files, f, traits, letter_text)
     res["title"] = title
     reading = reading_of(letter_text, f, traits)
     places = visited_places(rows)

@@ -1,0 +1,609 @@
+{
+ "started": "2026-10-02T09:36:09Z",
+ "port": 3391,
+ "ids_hash": {
+  "A": "93c4156b",
+  "B": "218e407b",
+  "C": "55a92d40"
+ },
+ "withdraw_C": {
+  "http": 200,
+  "at_s": 49.2
+ },
+ "timeline": {
+  "A": [
+   {
+    "t": 0.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 5.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 1,
+    "steps": 1,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 10.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 4,
+    "steps": 3,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 16.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 9,
+    "steps": 8,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 21.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 13,
+    "steps": 12,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 26.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 14,
+    "steps": 13,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 32.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 15,
+    "steps": 14,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 37.1,
+    "status": "claimed",
+    "stage": "reviewing",
+    "says": 18,
+    "steps": 16,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 40.1,
+    "status": "done",
+    "stage": "done",
+    "says": 18,
+    "steps": 16,
+    "review": 4,
+    "polaroid": true,
+    "receipt": true
+   }
+  ],
+  "B": [
+   {
+    "t": 0.0,
+    "status": "queued",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 2.0,
+    "status": "claimed",
+    "stage": "forming",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 3.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 8.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 1,
+    "steps": 1,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 13.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 3,
+    "steps": 2,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 23.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 4,
+    "steps": 3,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 28.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 8,
+    "steps": 7,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 34.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 11,
+    "steps": 10,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 39.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 12,
+    "steps": 11,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 49.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 13,
+    "steps": 12,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 54.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 14,
+    "steps": 13,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 59.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 15,
+    "steps": 14,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 68.3,
+    "status": "claimed",
+    "stage": "working",
+    "says": 16,
+    "steps": 15,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 77.3,
+    "status": "claimed",
+    "stage": "working",
+    "says": 17,
+    "steps": 16,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 82.3,
+    "status": "claimed",
+    "stage": "reviewing",
+    "says": 20,
+    "steps": 18,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 86.3,
+    "status": "done",
+    "stage": "done",
+    "says": 18,
+    "steps": 18,
+    "review": 4,
+    "polaroid": true,
+    "receipt": true
+   }
+  ],
+  "C": [
+   {
+    "t": 0.0,
+    "status": "queued",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 2.0,
+    "status": "claimed",
+    "stage": "claimed",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 38.1,
+    "status": "claimed",
+    "stage": "forming",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 39.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 44.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 1,
+    "steps": 1,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 49.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 6,
+    "steps": 5,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 50.2,
+    "status": "withdrawn",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   }
+  ]
+ },
+ "A": {
+  "says_n": 18,
+  "review": [
+   {
+    "id": "G1",
+    "ok": true,
+    "label": "讀過了",
+    "attempt": 0
+   },
+   {
+    "id": "G2",
+    "ok": true,
+    "label": "找得到出處",
+    "attempt": 0
+   },
+   {
+    "id": "G3",
+    "ok": true,
+    "label": "兩個出處對得上",
+    "attempt": 0
+   },
+   {
+    "id": "G4",
+    "ok": true,
+    "label": "收據是閘門給的",
+    "attempt": 0
+   }
+  ],
+  "outcome": "made",
+  "judgment": {
+   "tier": "B",
+   "requests_seen": 18,
+   "count_semantics": "exact",
+   "ws_end_sha256_prefix": "0a97b7ff",
+   "chain_head_prefix": "fd6aa5a5",
+   "accepted_note": "Vacant 不判對錯；這一格查的是每一步有沒有根據，accepted 說的只是這個——沒過的照常交件、照實標出位置"
+  },
+  "fortune_result": {
+   "mbti": "INFP",
+   "mbti_source": "ai",
+   "zodiac": "雙魚",
+   "blood": "O",
+   "lines": [
+    "在追求秩序的同時，保留著對變化的猶豫與觀察。",
+    "它先去了草稿角，再到紙卡地，再到長桌廣場，再到帳本鏈，在紙卡地交出《點數單》"
+   ]
+  },
+  "expect": {
+   "mbti": "INFP",
+   "zodiac": "雙魚",
+   "blood": "O"
+  },
+  "status_keys": [
+   "cast_id",
+   "claimed_at",
+   "done_at",
+   "fortune",
+   "fortune_result",
+   "judgment",
+   "matched",
+   "origin",
+   "outcome",
+   "polaroid_url",
+   "progress_at",
+   "queue",
+   "receipt_url",
+   "review",
+   "says",
+   "server_now",
+   "stage",
+   "status",
+   "steps",
+   "submitted_at",
+   "verdict"
+  ],
+  "polaroid_http": 200,
+  "polaroid_bytes": 1787340
+ },
+ "B": {
+  "says_n": 18,
+  "review": [
+   {
+    "id": "G1",
+    "ok": true,
+    "label": "讀過了",
+    "attempt": 0
+   },
+   {
+    "id": "G2",
+    "ok": true,
+    "label": "找得到出處",
+    "attempt": 0
+   },
+   {
+    "id": "G3",
+    "ok": true,
+    "label": "兩個出處對得上",
+    "attempt": 0
+   },
+   {
+    "id": "G4",
+    "ok": true,
+    "label": "收據是閘門給的",
+    "attempt": 0
+   }
+  ],
+  "outcome": "made",
+  "judgment": {
+   "tier": "B",
+   "requests_seen": 20,
+   "count_semantics": "exact",
+   "ws_end_sha256_prefix": "ecc9dee0",
+   "chain_head_prefix": "6224f7de",
+   "accepted_note": "Vacant 不判對錯；這一格查的是每一步有沒有根據，accepted 說的只是這個——沒過的照常交件、照實標出位置"
+  },
+  "fortune_result": {
+   "mbti": "ENFP",
+   "mbti_source": "twin",
+   "zodiac": "天秤",
+   "blood": null,
+   "lines": [
+    "行動節奏極快且隨性，但在心理層面上卻有著複雜的內耗。",
+    "它先去了投遞口，再到長桌廣場，再到紙卡地，在長桌廣場交出《一件沒有名字的小事》"
+   ]
+  },
+  "expect": {
+   "mbti": null,
+   "zodiac": "天秤",
+   "blood": null
+  },
+  "status_keys": [
+   "cast_id",
+   "claimed_at",
+   "done_at",
+   "fortune",
+   "fortune_result",
+   "judgment",
+   "matched",
+   "origin",
+   "outcome",
+   "polaroid_url",
+   "progress_at",
+   "queue",
+   "receipt_url",
+   "review",
+   "says",
+   "server_now",
+   "stage",
+   "status",
+   "steps",
+   "submitted_at",
+   "verdict"
+  ],
+  "polaroid_http": 200,
+  "polaroid_bytes": 1769162
+ },
+ "C_cloud": {
+  "status": "withdrawn",
+  "has_says": false,
+  "has_steps": false,
+  "has_review": false,
+  "has_polaroid": false,
+  "has_fortune_result": false,
+  "polaroid_http": 404,
+  "receipt_http": 404,
+  "card_http": 404
+ },
+ "local": {
+  "A": {
+   "status": "published",
+   "card_available": true,
+   "run_artifacts_present": true
+  },
+  "B": {
+   "status": "published",
+   "card_available": true,
+   "run_artifacts_present": true
+  },
+  "C": {
+   "status": "erased",
+   "card_available": false,
+   "run_artifacts_present": false
+  }
+ },
+ "polaroid_meta": {
+  "A": {
+   "caption_source": "fortune_sentence",
+   "caption_blank": false,
+   "fortune_drawn": true,
+   "frame": "file:55b40af2d602",
+   "variety_spec": {
+    "place": "drop",
+    "element": "water",
+    "background": "bg_drop_3.jpg",
+    "frame": "frame_water_3.png",
+    "mbti_stickers": [
+     "sheet_mbti_NTNF_5.png"
+    ],
+    "zodiac_sticker": "sheet_zodiac_2_r1_5.png",
+    "blood_stamp": "sheet_stamps_2.png",
+    "prop": null
+   },
+   "variety_fallbacks": [],
+   "stickers": [
+    "zodiac",
+    "mbti0",
+    "stamp"
+   ],
+   "qr_text": "https://vacant.cosmopig.com",
+   "twin_fortune_local": {
+    "mbti": "INFP",
+    "mbti_source": "ai",
+    "zodiac": "雙魚",
+    "blood": "O"
+   },
+   "n_lines": 2,
+   "places": null,
+   "hints": null
+  },
+  "B": {
+   "caption_source": "fortune_sentence",
+   "caption_blank": false,
+   "fortune_drawn": true,
+   "frame": "file:e353c9b88fd9",
+   "variety_spec": {
+    "place": "drop",
+    "element": "air",
+    "background": "bg_drop_1.jpg",
+    "frame": "frame_air_2_r1.png",
+    "mbti_stickers": [
+     "sheet_mbti_NTNF_5.png"
+    ],
+    "zodiac_sticker": "sheet_zodiac_2_r1_0.png",
+    "blood_stamp": null,
+    "prop": null
+   },
+   "variety_fallbacks": [],
+   "stickers": [
+    "zodiac",
+    "mbti0"
+   ],
+   "qr_text": "https://vacant.cosmopig.com",
+   "twin_fortune_local": {
+    "mbti": "ENFP",
+    "mbti_source": "twin",
+    "zodiac": "天秤",
+    "blood": null
+   },
+   "n_lines": 2,
+   "places": null,
+   "hints": null
+  }
+ },
+ "residue_local": {
+  "A": true,
+  "B": true,
+  "C": false
+ },
+ "residue_cloud_data": {
+  "A": true,
+  "B": true,
+  "C": false
+ },
+ "residue_event_streams": {
+  "A": false,
+  "B": false,
+  "C": false
+ }
+}

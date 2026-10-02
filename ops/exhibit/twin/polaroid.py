@@ -1080,7 +1080,14 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
 
     # ── 那一行字：分身自己寫的，不補字 ──
     f_cap = _font(CAPTION_PX)
+    # P12：有命盤（有命盤那一行）且命盤卡的「一句解讀」過得了原文那把尺 ⇒ 那一行字印解讀句（命盤卡第三版 lines[0]）；
+    #      沒有命盤、或解讀句空／逐字抄了原文 ⇒ 照舊印分身的決定句。
+    caption_source = "decision"
     caption = clean_caption(decision)
+    if fortune_line:
+        _s = clean_caption(fortune_sentence)
+        if _s and not caption_leaks_original(_s, originals):
+            caption, caption_source = _s, "fortune_sentence"
     redacted = False
     if caption and caption_leaks_original(caption, originals):
         caption, redacted = "", True             # 留空。不換成任何人寫的句子。
@@ -1111,12 +1118,9 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
     band = (cap_box[0], win[3] + 4, cap_box[2], cap_box[1] - 2)
     if fortune_line and band[3] - band[1] >= FORTUNE_BAND_MIN_H:
         cand = clean_caption(fortune_line)
-        sent = clean_caption(fortune_sentence)
-        if sent and caption_leaks_original(sent, originals):
-            sent = ""
         if caption_leaks_original(cand, originals):
             cand = ""
-        fort_text = cand + (("｜" + sent) if cand and sent else "")
+        fort_text = cand          # 解讀句已經是上面那一行主字（P12），這裡只留命盤那一行
         fort_text, _fd = _drop_missing(f_foot, fort_text)
         if fort_text:
             fort_text, _ = fit_text(f_foot, fort_text, band[2] - band[0])
@@ -1171,6 +1175,7 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
         "window": list(win),
         "caption_box": list(cap_box),
         "caption_drawn": list(cap_drawn) if cap_drawn is not None else None,
+        "caption_source": caption_source,
         "caption_blank": not caption,
         "caption_truncated": truncated, "caption_redacted": redacted,
         "caption_chars": len(caption), "caption_lines": len(lines),

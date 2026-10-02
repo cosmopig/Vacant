@@ -162,6 +162,9 @@ TWIN_OFF_CHAIN_KEYS: tuple[str, ...] = (
     "decision", "reason", "artifacts",
     # P10（2026-10-02）命盤：這一跑用的命盤（枚舉）＋命盤卡三句。命盤卡句子是觀眾特質的衍生物，同一條規矩。
     "fortune",
+    # P12（2026-10-02）拍立得變化款挑層用的兩個枚舉（`polaroid_hints`：地點代碼＋物件類別）。P11 起 twinagent 就有輸出，
+    # 但這份白名單沒收它 ⇒ 封存時被丟掉、拍立得永遠拿到 None（端到端才量到）。行為衍生物，撤回跟 twin.json 一起刪。
+    "polaroid_hints",
 )
 
 #: 撤回時**真的刪**的鏈外檔（依序；nonce 第一個——它是 hiding 的全部，誠實邊界 4）。

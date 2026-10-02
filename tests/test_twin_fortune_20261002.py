@@ -448,9 +448,9 @@ def test_card_v2_route_comes_only_from_the_step_log(tmp_path) -> None:
                      _row(8, "ws_read", "地上/帳本鏈/d.txt"), _row(9, "ws_read", "地上/草稿角/e.txt"),
                      _row(10, "ws_read", "地上/畫架與長椅/f.txt"), _row(11, "ws_write", "PLAN.md"),
                      _row(12, "ws_read", "地上/石頭閘門/g.txt"), _row(13, "ws_write", "成品.md"), _row(14, "ws_read", "地上/紙卡地/h.txt")]
-    res, _, _ = _card(tmp_path, rows, files={"成品.md": "# 小事\n內"}, attempts=3)
+    res, _, _ = _card(tmp_path, rows, files={"成品.md": "# 一件小事\n內"}, attempts=3)
     # 去重、依首次出現、失敗的讀取不算、最多 4 個；交出的地點＝最後寫成品之前最近碰到的地點（石頭閘門）；被退回 2 次
-    assert res["route"] == "它先去了投遞口，再到捏土處，再到帳本鏈，再到草稿角，在石頭閘門交出《小事》；中途被退回 2 次，改了 2 次"
+    assert res["route"] == "它先去了投遞口，再到捏土處，再到帳本鏈，再到草稿角，在石頭閘門交出《一件小事》；中途被退回 2 次，改了 2 次"
 
 
 def test_card_v2_route_fits_the_line_limit_and_handles_no_title_no_place(tmp_path) -> None:
@@ -522,6 +522,11 @@ def test_not_artifacts_include_the_card_in_both_modules_and_job_carries_fortune(
 
 def test_fortune_is_off_chain_in_the_vault_and_gone_after_erasure() -> None:
     assert "fortune" in twinvault.TWIN_OFF_CHAIN_KEYS and "fortune" not in twinvault.TWIN_ON_CHAIN_KEYS
+
+
+def test_polaroid_hints_survive_the_vault_seal_p12_regression() -> None:
+    """P12 端到端量到：twinagent 輸出 polaroid_hints，但白名單沒收 ⇒ 封存時被丟、拍立得永遠沒有地點／物件的提示。"""
+    assert "polaroid_hints" in twinvault.TWIN_OFF_CHAIN_KEYS and "polaroid_hints" not in twinvault.TWIN_ON_CHAIN_KEYS
 
 
 def test_build_twin_carries_fortune_only_for_the_real_run_path() -> None:
@@ -677,11 +682,13 @@ def test_polaroid_draws_the_fortune_line_and_leaves_it_out_when_not_given() -> N
     png0, m0 = pl.compose(**base)
     png1, m1 = pl.compose(**base, fortune_line=fz.first_line(FULL), fortune_sentence="我先去了草稿角")
     assert m0["fortune_drawn"] is False and m1["fortune_drawn"] is True and png0 != png1
-    assert m1["fortune_chars"] > len(fz.first_line(FULL))          # 命盤那一行＋一句
+    assert m1["fortune_chars"] == len(fz.first_line(FULL))         # P12：命盤那一行只留命盤；解讀句改印在主字那一行
+    assert m1["caption_source"] == "fortune_sentence" and m0["caption_source"] == "decision"
     # 逐字抄了觀眾原文的那一句不畫（命盤那一行照畫）
     leak = "我先去了草稿角把散在桌上的收據排好"
     _p, m2 = pl.compose(**{**base, "originals": [leak]}, fortune_line=fz.first_line(FULL), fortune_sentence=leak)
     assert m2["fortune_drawn"] is True and m2["fortune_chars"] == len(fz.first_line(FULL))
+    assert m2["caption_source"] == "decision"                           # 解讀句逐字抄了原文 ⇒ 退回決定句
     # 版面放不下（命盤那一行長到出框）時被截成「…」而不是壓到別的字：compose 沒有丟 PolaroidError
     _p, m3 = pl.compose(**base, fortune_line=fz.first_line(FULL), fortune_sentence="我" + "很用心地做了很多事" * 10)
     assert m3["fortune_drawn"] is True
@@ -721,3 +728,15 @@ def test_twin_fortune_zodiac_must_be_one_of_twelve_and_match_its_element() -> No
     assert tv.fortune_event_problems({**_fort_row(zodiac=None, element="水"), "type": "twin_fortune"}, 1)
     assert not tv.fortune_event_problems({**_fort_row(zodiac=None, element=None), "type": "twin_fortune"}, 1)   # 沒給＝null
     assert not tv.fortune_event_problems({**_fort_row(), "type": "twin_fortune"}, 1)
+
+
+def test_p12_single_place_route_and_short_or_resident_titles(tmp_path) -> None:
+    assert fz.route_of(["草稿角"], "草稿角", "寫給誰的信", 0) == "它在草稿角交出《寫給誰的信》"
+    assert fz.route_of(["草稿角"], None, "寫給誰的信", 1) == "它在草稿角交出《寫給誰的信》；中途被退回 1 次，改了 1 次"
+    assert fz.route_of(["草稿角", "畫架與長椅"], "畫架與長椅", "寫給誰的信", 0).startswith("它先去了草稿角，再到畫架與長椅")
+    f = fz.resolve(FULL, {})
+    assert fz.title_of({"a.md": "# 小事\n內"}, f) is None                     # < 3 字
+    assert fz.title_of({"a.md": "# 苔綠細長\n內"}, f) is None                 # 居民外形名
+    assert fz.title_of({"a.md": "# 灰藍小\n內"}, f) is None
+    assert fz.title_of({"a.md": "# 阿水\n內"}, f, letter_text="阿水：\n你好") is None      # 信裡的稱呼
+    assert fz.title_of({"a.md": "# 帳本鏈維護記錄\n內"}, f) == "帳本鏈維護記錄"
