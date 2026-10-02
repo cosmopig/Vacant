@@ -215,14 +215,13 @@ def test_reporter_sends_claimed_immediately_then_throttles_to_5s(run) -> None:
     url, pl = posts[0]
     assert url == "http://cloud.test/api/progress"
     assert pl["id"] == SID and pl["token"] == "TOK" and pl["stage"] == "claimed"
-    # 5 秒內不再送（就算內容變了）
-    rd.mkdir(parents=True)
+    # 同一個階段內 5 秒內不再送；**階段一變就立刻推**（2026-10-02 裁決，不受 5 秒節流）
     clk.t += 2
-    assert rep.tick_once() == []
+    assert rep.tick_once() == []                        # run-dir 還不存在＝仍是 claimed、內容沒變
     assert len(posts) == 1
-    # 超過 5 秒、內容（階段）變了 ⇒ 送
-    clk.t += 4
-    assert rep.tick_once() == [SID]
+    rd.mkdir(parents=True)
+    clk.t += 1
+    assert rep.tick_once() == [SID]                     # claimed → forming：3 秒就推
     assert posts[1][1]["stage"] == "forming"
 
 
@@ -447,3 +446,135 @@ def test_end_to_end_real_cloud_status_follows_the_run(real_cloud, run) -> None:
     assert st["stage"] == "reviewing"
     assert [(r["id"], r["ok"]) for r in st["review"]] == [("R1", True), ("R4", False)]
     assert rep.stats["failed"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-02：階段一變就推；reviewing 至少維持 REVIEW_HOLD_S 秒
+# ---------------------------------------------------------------------------
+
+def _reporter_with_script(monkeypatch, script):
+    """script：`{時間: snapshot}`；時鐘由測試推進。回 (reporter, posts, clock)。"""
+    posts, clock = [], {"t": 100.0}
+    cur = {"snap": {"stage": "claimed"}}
+    monkeypatch.setattr(twinprogress, "snapshot", lambda *a, **k: dict(cur["snap"]))
+    rep = twinprogress.ProgressReporter(
+        "http://x", "tok", pathlib.Path("/nonexistent"), min_interval_s=5.0, keepalive_s=60.0,
+        post=lambda url, payload, timeout=0: (posts.append(payload) or (200, {"ok": True})),
+        clock=lambda: clock["t"])
+    rep.track("sid-1")
+    return rep, posts, clock, cur
+
+
+def test_stage_change_is_pushed_immediately_but_content_updates_within_a_stage_stay_throttled(monkeypatch):
+    rep, posts, clock, cur = _reporter_with_script(monkeypatch, None)
+    cur["snap"] = {"stage": "working", "says": [{"seq": 1, "turn": 1, "text": "a", "ts": 1}]}
+    assert rep.tick_once() == ["sid-1"]
+    clock["t"] += 1.0
+    cur["snap"] = {"stage": "working", "says": [{"seq": 1, "turn": 1, "text": "a", "ts": 1},
+                                                 {"seq": 2, "turn": 1, "text": "b", "ts": 2}]}
+    assert rep.tick_once() == []                         # 負控制：同一階段內的內容更新照舊節流
+    assert rep.stats["skipped_throttle"] == 1
+    clock["t"] += 1.0
+    cur["snap"] = {"stage": "reviewing", "review": []}
+    assert rep.tick_once() == ["sid-1"]                  # 階段變了：2 秒就推，不等 5 秒
+    assert [p["stage"] for p in posts] == ["working", "reviewing"]
+
+
+def test_reviewing_is_held_for_at_least_four_seconds_and_the_next_push_carries_new_review(monkeypatch):
+    rep, posts, clock, cur = _reporter_with_script(monkeypatch, None)
+    cur["snap"] = {"stage": "working"}
+    rep.tick_once()
+    clock["t"] += 1.0
+    cur["snap"] = {"stage": "reviewing", "review": [{"id": "G1", "ok": False, "label": "x", "attempt": 0}]}
+    rep.tick_once()
+    for dt in (1.0, 1.0, 1.0):                           # 審查中之後 1、2、3 秒：下一階段（working／done）都被擋住
+        clock["t"] += dt
+        cur["snap"] = {"stage": "working",
+                       "review": [{"id": "G1", "ok": False, "label": "x", "attempt": 0},
+                                  {"id": "G1", "ok": True, "label": "讀過了", "attempt": 1}]}
+        assert rep.tick_once() == []
+    assert rep.stats["skipped_hold"] == 3
+    clock["t"] += 1.5                                    # 滿 4 秒
+    assert rep.tick_once() == ["sid-1"]
+    assert posts[-1]["stage"] == "working" and len(posts[-1]["review"]) == 2   # 期間新的審查結果一起帶上
+    assert [p["stage"] for p in posts] == ["working", "reviewing", "working"]
+
+
+def test_hold_applies_only_to_reviewing_and_forming_is_not_extended(monkeypatch):
+    rep, posts, clock, cur = _reporter_with_script(monkeypatch, None)
+    cur["snap"] = {"stage": "forming"}
+    rep.tick_once()
+    clock["t"] += 1.0
+    cur["snap"] = {"stage": "working", "says": []}
+    assert rep.tick_once() == ["sid-1"]                  # forming 不另外延長
+    assert rep.stats["skipped_hold"] == 0
+
+
+def test_a_failed_stage_push_is_retried_on_the_throttle_cycle_not_every_tick(monkeypatch):
+    posts, clock = [], {"t": 100.0}
+    ok = {"v": True}
+    monkeypatch.setattr(twinprogress, "snapshot", lambda *a, **k: {"stage": "working" if clock["t"] < 101 else "reviewing"})
+
+    def post(url, payload, timeout=0):
+        posts.append(payload["stage"])
+        return (200, {}) if ok["v"] else (500, {})
+    rep = twinprogress.ProgressReporter("http://x", "t", pathlib.Path("/n"), min_interval_s=5.0, post=post,
+                                        clock=lambda: clock["t"])
+    rep.track("s")
+    rep.tick_once()
+    clock["t"] = 101.5
+    ok["v"] = False
+    rep.tick_once()                                       # 階段變了、送失敗
+    clock["t"] = 102.5
+    rep.tick_once()                                       # 失敗之後仍受節流：不連環打
+    assert posts == ["working", "reviewing"]
+
+
+def test_infer_stage_reviewing_starts_when_prepare_has_written_the_precheck_before_the_gate_result(tmp_path):
+    rd = tmp_path / "rd"
+    rd.mkdir()
+    (rd / twinagent.STEP_LOG_NAME).write_text('{"seq":1}\n', encoding="utf-8")
+    assert twinprogress.infer_stage(rd) == "working"
+    (rd / "gate_precheck.ndjson").write_text('{"attempt":1}\n', encoding="utf-8")
+    assert twinprogress.infer_stage(rd) == "reviewing"            # pi 結束、閘門結果還沒落
+    (rd / "visible_RUN-ON.json").write_text('{"files":[]}', encoding="utf-8")
+    assert twinprogress.infer_stage(rd) == "working"              # 結果落了、下一次嘗試還沒開始之前 ⇒ 沒有凍結目錄的判準時回 working
+    (rd / "run_RUN-ON.json").write_text("{}", encoding="utf-8")
+    assert twinprogress.infer_stage(rd) == "done"
+
+
+def test_a_gate_that_ran_between_two_scans_still_gets_a_reviewing_push_then_the_hold(tmp_path, monkeypatch):
+    """閘門只花 0.2–1 秒，掃描常常剛好錯過：有新的 visible_*.json 而沒送過 reviewing ⇒ 補送一筆（帶審查結果）。"""
+    sid = "sub-gate"
+    ws, rd = twinagent.paths_for(tmp_path, sid)
+    rd.mkdir(parents=True)
+    posts, clock = [], {"t": 100.0}
+    cur = {"snap": {"stage": "working", "says": []}}
+    monkeypatch.setattr(twinprogress, "snapshot", lambda *a, **k: dict(cur["snap"]))
+    rep = twinprogress.ProgressReporter("http://x", "t", tmp_path, min_interval_s=5.0, keepalive_s=60.0,
+                                        post=lambda u, p, timeout=0: (posts.append(p) or (200, {})),
+                                        clock=lambda: clock["t"])
+    rep.track(sid)
+    rep.tick_once()                                       # working
+    # 閘門在兩次掃描之間跑完：visible 結果落了、整跑已經 done
+    (rd / "visible_RUN-ON.json").write_text(json.dumps({"files": [{"cases": [
+        {"case": "check_w1_read", "ok": True, "message": ""}]}]}), encoding="utf-8")
+    cur["snap"] = {"stage": "done", "says": [], "review": [{"id": "G1", "ok": True, "label": "讀過了", "attempt": 0}]}
+    clock["t"] += 0.5
+    assert rep.tick_once() == [sid]
+    assert [p["stage"] for p in posts] == ["working", "reviewing"]
+    assert posts[1]["review"] == [{"id": "G1", "ok": True, "label": "讀過了", "attempt": 0}]
+    clock["t"] += 2.0
+    assert rep.tick_once() == []                          # 維持中，done 被擋
+    clock["t"] += 2.0
+    assert rep.tick_once() == [sid] and posts[-1]["stage"] == "done"
+    # 負控制：沒有新的閘門結果檔 ⇒ 不補送（working→done 直接走）
+    sid2 = "sub-nogate"
+    rep.track(sid2)
+    cur["snap"] = {"stage": "working"}
+    clock["t"] += 10
+    rep.tick_once()
+    cur["snap"] = {"stage": "done"}
+    clock["t"] += 10
+    rep.tick_once()
+    assert [p["stage"] for p in posts if p["id"] == sid2] == ["working", "done"]

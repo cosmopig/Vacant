@@ -1,0 +1,245 @@
+{
+ "started": "2026-10-02T03:07:59Z",
+ "port": 3377,
+ "ids_hash": {
+  "A": "21ef2e63"
+ },
+ "timeline": {
+  "A": [
+   {
+    "t": 0.0,
+    "status": "queued",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 1.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 6.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 2,
+    "steps": 2,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 11.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 6,
+    "steps": 5,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 17.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 8,
+    "steps": 7,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 25.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 9,
+    "steps": 8,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 30.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 12,
+    "steps": 11,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 34.1,
+    "status": "claimed",
+    "stage": "reviewing",
+    "says": 14,
+    "steps": 12,
+    "review": 4,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 38.1,
+    "status": "done",
+    "stage": "done",
+    "says": 14,
+    "steps": 12,
+    "review": 4,
+    "polaroid": true,
+    "receipt": true
+   }
+  ]
+ },
+ "A": {
+  "says": [
+   {
+    "seq": 1,
+    "turn": 1,
+    "text": "我需要先閱讀這份文件來了解這個人的特質。",
+    "ts": 1790910483740
+   },
+   {
+    "seq": 2,
+    "turn": 1,
+    "text": "我已經理解了他的性情，現在要將這些特質轉化為要求的格式並寫入文件。",
+    "ts": 1790910486012
+   },
+   {
+    "seq": 3,
+    "turn": 3,
+    "text": "信寫好了。",
+    "ts": 1790910486013
+   },
+   {
+    "seq": 1,
+    "turn": 1,
+    "text": "我正在閱讀這封信，試圖理解這個人的性格與內在的渴望。",
+    "ts": 1790910488942
+   },
+   {
+    "seq": 2,
+    "turn": 1,
+    "text": "我正在閱讀這個世界的規則與地圖，了解我的行動範圍。",
+    "ts": 1790910489736
+   },
+   {
+    "seq": 3,
+    "turn": 1,
+    "text": "我正在查看我的房間裡有哪些東西可以利用。",
+    "ts": 1790910490933
+   },
+   {
+    "seq": 4,
+    "turn": 1,
+    "text": "我正在讀取帳本鏈的末端內容，看看目前的印紋與記錄。",
+    "ts": 1790910492180
+   },
+   {
+    "seq": 5,
+    "turn": 1,
+    "text": "我正在讀取這封信的內容，看看它對這個人的描述。",
+    "ts": 1790910493439
+   },
+   {
+    "seq": 6,
+    "turn": 1,
+    "text": "我正在根據信件內容和世界規則制定我的行動計劃。",
+    "ts": 1790910504759
+   },
+   {
+    "seq": 7,
+    "turn": 1,
+    "text": "我正在確認工作空間的現狀，準備開始整理。",
+    "ts": 1790910505984
+   },
+   {
+    "seq": 8,
+    "turn": 1,
+    "text": "我正在讀取這封信的內容，作為對比的基礎。",
+    "ts": 1790910507027
+   },
+   {
+    "seq": 9,
+    "turn": 1,
+    "text": "我正在讀取帳本鏈的印紋清單，尋找與信件內容相符的特質。",
+    "ts": 1790910508233
+   },
+   {
+    "seq": 10,
+    "turn": 1,
+    "text": "我正在將讀取到的內容與帳本鏈的印紋進行關聯並寫入新的文件。",
+    "ts": 1790910512988
+   },
+   {
+    "seq": 13,
+    "turn": 14,
+    "text": "我已經完成了計畫中的所有步驟，現在我將停下動作。",
+    "ts": 1790910512989
+   }
+  ],
+  "review": [
+   {
+    "id": "G1",
+    "ok": true,
+    "label": "讀過了",
+    "attempt": 0
+   },
+   {
+    "id": "G2",
+    "ok": true,
+    "label": "找得到出處",
+    "attempt": 0
+   },
+   {
+    "id": "G3",
+    "ok": true,
+    "label": "兩個出處對得上",
+    "attempt": 0
+   },
+   {
+    "id": "G4",
+    "ok": true,
+    "label": "收據是閘門給的",
+    "attempt": 0
+   }
+  ],
+  "outcome": "made",
+  "judgment": {
+   "tier": "B",
+   "requests_seen": 14,
+   "count_semantics": "exact",
+   "ws_end_sha256_prefix": "75737cc5",
+   "chain_head_prefix": "f714f0fb",
+   "accepted_note": "Vacant 不判對錯；這一格查的是每一步有沒有根據，accepted 說的只是這個——沒過的照常交件、照實標出位置"
+  },
+  "polaroid_http": 200,
+  "polaroid_bytes": 1304505
+ },
+ "local": {
+  "A": {
+   "status": "published",
+   "card_available": true,
+   "run_artifacts_present": true
+  }
+ },
+ "residue_local": {
+  "A": true,
+  "B": true
+ },
+ "residue_cloud_data": {
+  "A": true,
+  "B": false
+ },
+ "residue_event_streams": {
+  "A": false,
+  "B": false
+ }
+}

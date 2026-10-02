@@ -61,6 +61,7 @@ def main(argv=None) -> int:
     ap.add_argument("--port", type=int, default=3377)
     ap.add_argument("--work", default="/tmp/vs")
     ap.add_argument("--node", default="node")
+    ap.add_argument("--cards", default="A,B", help="A＝正常跑完；B＝中途撤回（只驗階段時間軸可只給 A）")
     a = ap.parse_args(argv)
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -93,7 +94,7 @@ def main(argv=None) -> int:
         procs.append(loop)
 
         ids, codes = {}, {}
-        for k in ("A", "B"):
+        for k in a.cards.split(","):
             st, r = http("POST", base + "/api/submit", {"card_text": SYNTH[k], "self_attested": True, "age_gate": True})
             assert st == 200, (st, r)
             ids[k], codes[k] = r["id"], r["withdraw_code"]
@@ -125,7 +126,7 @@ def main(argv=None) -> int:
                     rep["withdraw_B"] = {"http": st2, "at_s": withdrawn_at}
                 if k == "B" and snap[0] == "withdrawn":
                     final["B"] = s
-            if "A" in final and "B" in final and time.time() - t0 > (withdrawn_at or 0) + 20:
+            if all(k in final for k in ids) and time.time() - t0 > (withdrawn_at or 0) + 20:
                 break
             time.sleep(1)
         rep["timeline"] = timeline
@@ -138,13 +139,14 @@ def main(argv=None) -> int:
                 rep["A"]["polaroid_http"], rep["A"]["polaroid_bytes"] = r.status, len(r.read())
         # 撤回後雲端那一份：沒有內容、拍立得／收據 404
         B = final.get("B") or {}
-        rep["B_cloud"] = {"status": B.get("status"), "has_says": "says" in B, "has_steps": "steps" in B,
-                          "has_review": "review" in B, "has_polaroid": "polaroid_url" in B}
-        for kind in ("polaroid", "receipt", "card"):
-            try:
-                rep["B_cloud"][kind + "_http"] = http("GET", f"{base}/api/{kind}/{ids['B']}")[0]
-            except Exception as e:                              # noqa: BLE001
-                rep["B_cloud"][kind + "_http"] = repr(e)[:60]
+        if "B" in ids:
+            rep["B_cloud"] = {"status": B.get("status"), "has_says": "says" in B, "has_steps": "steps" in B,
+                              "has_review": "review" in B, "has_polaroid": "polaroid_url" in B}
+            for kind in ("polaroid", "receipt", "card"):
+                try:
+                    rep["B_cloud"][kind + "_http"] = http("GET", f"{base}/api/{kind}/{ids['B']}")[0]
+                except Exception as e:                          # noqa: BLE001
+                    rep["B_cloud"][kind + "_http"] = repr(e)[:60]
         time.sleep(8)     # 讓 loop 再走一輪（本機收到撤回、做抹除）
     finally:
         for p in reversed(procs):

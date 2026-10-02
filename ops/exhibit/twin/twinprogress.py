@@ -74,10 +74,14 @@ MIN_INTERVAL_S = 5.0
 #: （`STALE_CLAIM_MS`＝15 分鐘），心跳要遠小於它。
 KEEPALIVE_S = 60.0
 #: 執行緒醒來的間隔。比 MIN_INTERVAL_S 小，才能讓節流真的是 5 秒而不是 5–10 秒。
-TICK_S = 1.0
+TICK_S = 0.4      # 審查中只有 1–3 秒：1 秒一次的掃描常常一次都掃不到（2026-10-02 冒煙）
 POST_TIMEOUT_S = 8.0
 
 STAGES = ("claimed", "forming", "working", "reviewing", "done")
+#: 「審查中」這個階段從被觀察到起至少維持幾秒才允許往下一個階段推（它的真實長度只有 1–3 秒，
+#: 不維持的話手機／雲端一次都看不到：2026-10-02 本機冒煙實測）。期間若已有新的審查結果，
+#: 在維持結束時的那一筆一起帶上。`forming` 不另外延長。
+REVIEW_HOLD_S = 4.0
 SUITE_DIRNAME = "tests_visible"
 
 _VISIBLE_RE = re.compile(r"^visible_(?P<arm>.+?)(?:_a(?P<n>\d+))?\.json$")
@@ -187,6 +191,14 @@ def infer_stage(rd: pathlib.Path) -> str:
             (steps.is_file() and steps.stat().st_size > 0)
     if not acted:
         return "forming"
+    # pi 結束、閘門還沒給結果：`prepare` 已經寫了這一次的預檢（gate_precheck.ndjson），visible_*.json 還沒有。
+    try:
+        pre = (rd / "gate_precheck.ndjson")
+        n_pre = len([l for l in pre.read_text(encoding="utf-8").splitlines() if l.strip()]) if pre.is_file() else 0
+    except OSError:
+        n_pre = 0
+    if n_pre > len(_visible_files(rd)):
+        return "reviewing"
     if (rd / SUITE_DIRNAME).is_dir():
         frozen = [p for p in rd.iterdir() if p.is_dir() and p.name.startswith("_frozen_")]
         if frozen and max(_mtime(p) for p in frozen) >= activity:
@@ -237,10 +249,12 @@ class ProgressReporter:
         self._lock = threading.Lock()
         self._tracked: dict[str, list[str]] = {}
         self._last: dict[str, tuple[float, str]] = {}      # sid → (上次送的時間, 內容摘要)
+        self._stage: dict[str, tuple[str, float]] = {}     # sid → (上次送出的階段, 那一筆的時間)
+        self._nvis: dict[str, int] = {}                    # sid → 上次送出時閘門結果檔（visible_*.json）的數量
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self.stats = {"sent": 0, "failed": 0, "skipped_throttle": 0, "skipped_same": 0,
-                      "ignored_by_cloud": 0}
+                      "skipped_hold": 0, "stage_pushes": 0, "ignored_by_cloud": 0}
 
     # ---- 主執行緒呼叫 ----
     def track(self, sub_id: str, secrets: list[str] | None = None) -> None:
@@ -251,6 +265,8 @@ class ProgressReporter:
         with self._lock:
             self._tracked.pop(sub_id, None)
             self._last.pop(sub_id, None)
+            self._stage.pop(sub_id, None)
+            self._nvis.pop(sub_id, None)
 
     def tracked(self) -> set[str]:
         with self._lock:
@@ -269,13 +285,33 @@ class ProgressReporter:
         for sid, secrets in items:
             now = self._clock()
             last = self._last.get(sid)
-            if last is not None and now - last[0] < self.min_interval_s:
-                self.stats["skipped_throttle"] += 1
-                continue
+            throttled = last is not None and now - last[0] < self.min_interval_s
             try:
                 snap = snapshot(self.work_root, sid, secrets)
             except Exception:  # noqa: BLE001 —— 讀檔失敗不影響現場
                 self.stats["failed"] += 1
+                continue
+            stage = snap.get("stage")
+            pushed_stage, pushed_at = self._stage.get(sid, (None, 0.0))
+            # 閘門真的跑過了（有新的 visible_*.json），而我們還沒送過「審查中」：閘門只花 0.2–1 秒，
+            # 一次掃描常常剛好掃到它已經過去。審查確實發生過，所以先補送一筆 reviewing（帶這一次的審查結果），
+            # 再照 REVIEW_HOLD_S 維持，之後才送真實階段（2026-10-02 冒煙：沒有這一筆手機一次都看不到）。
+            _ws, _rd = twinagent.paths_for(self.work_root, sid)
+            nvis = len(_visible_files(_rd))
+            if stage != "reviewing" and pushed_stage != "reviewing" and nvis > self._nvis.get(sid, 0) \
+                    and pushed_stage is not None:
+                snap = dict(snap)
+                snap["stage"] = stage = "reviewing"
+                rv = read_review(_rd)
+                if rv:
+                    snap["review"] = rv
+            # 階段一變就立刻推（不受節流；上一筆送失敗的除外——失敗的等下一個節流週期，不連環打）。
+            changed = pushed_stage is not None and stage != pushed_stage and (last is None or last[1] != "")
+            if (changed and pushed_stage == "reviewing" and now - pushed_at < REVIEW_HOLD_S):
+                self.stats["skipped_hold"] += 1       # 審查中至少維持 REVIEW_HOLD_S 秒才往下一階段推
+                continue
+            if throttled and not changed:
+                self.stats["skipped_throttle"] += 1    # 同一個階段內的內容更新照舊節流
                 continue
             dg = _digest(snap)
             if last is not None and last[1] == dg and now - last[0] < self.keepalive_s:
@@ -283,6 +319,10 @@ class ProgressReporter:
                 continue
             if self._send(sid, snap):
                 self._last[sid] = (now, dg)
+                self._nvis[sid] = nvis
+                if stage != pushed_stage:
+                    self._stage[sid] = (stage, now)
+                    self.stats["stage_pushes"] += 1
                 sent.append(sid)
             else:
                 # 失敗也記時間：等下一個節流週期再試，不連環打。
