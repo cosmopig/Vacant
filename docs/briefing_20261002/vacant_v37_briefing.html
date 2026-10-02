@@ -135,6 +135,7 @@ th{background:var(--soft)}
     <tr><td>u274（09-27/28）</td><td>100 題沒用過的 hard 題，不設上限，A vs v3.6.1</td><td>9 vs 10，p=1.0（不一致僅 7 對）</td><td>沒量到差別；缺檔退回 31 跑後 0 對</td></tr>
     <tr><td>Colab C5（09-27/28）</td><td>920 題程式題，A vs v3.6.1</td><td>748（81.3%）vs 758（82.4%），p=0.387</td><td>退回 96% 是誤退；缺檔退回 0 次</td></tr>
     <tr><td>DABstep × v3.7（10-02，Colab）</td><td>77 題×3 次，gemma-4-12B QAT（vLLM），15 回合上限；A／C37／C37R</td><td>42.0% → 53.2%（p=0.0028）／60.2%（p=3.1e-5）</td><td>差來自缺檔退回；傷害 0；沒裝那組比 09-26 差；選過的題組</td></tr>
+    <tr><td>任務導向 94 題 × v3.7（10-02，Colab）</td><td>DABench／DataBench／Polyglot，不設回合上限，A／C37 各 2 次</td><td>72.3% vs 75.0%，p=0.36</td><td>沒量到差別；傷害 0；「說做完沒寫檔」只有 5／120</td></tr>
     <tr><td>PR #82 冒煙（10-02）</td><td>30 格，只跑 C（v3.7），每題 1 次</td><td>誤退 0／23、missing_output 3／3、新誤退 0</td><td>冒煙，不是檢定；bridge 沒測到</td></tr>
     <tr><td>BCB-Hard（09-24）</td><td>116 題，OFF／CH／GATE／GATE+R</td><td>假完成放行 47%→30%（p=8.8e-5）、擋錯 0；H2、H3 不成立</td><td>閘門只擋得住測得到的錯；不能說「只裝不影響」</td></tr>
   </table>
@@ -281,6 +282,31 @@ th{background:var(--soft)}
   <div class="src">出處：CONCLUSION_20261002_COLAB_DABSTEP_V37.md §三、§五；results/cell_breakdown.json；pr82/decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md §二。</div>
 </section>
 
+<!-- 14c -->
+<section class="slide">
+  <h2>任務導向 94 題 × v3.7（兩小時批次）：沒有量到差別</h2>
+  <p>預註冊批次。DABench 30、DataBench 30、Polyglot Python 34；<b>不設回合上限</b>、<code>pi --print</code>、每格 1200 秒；A／C37 各 2 次完整（188 格），infra_void 0、安裝失敗 0。</p>
+  <table>
+    <tr><th></th><th>A（沒裝）</th><th>C37（照常安裝）</th><th>題數 C37 好／A 好</th></tr>
+    <tr><td><b>全部</b></td><td>72.3%</td><td>75.0%</td><td>17／12（+2.7 pp，<b>p=0.36</b>）</td></tr>
+    <tr><td>DABench</td><td>85.0%</td><td>88.3%</td><td>6／4</td></tr>
+    <tr><td>DataBench</td><td>80.0%</td><td>86.7%</td><td>7／3</td></tr>
+    <tr><td>Polyglot Python</td><td>54.4%</td><td>52.9%</td><td>4／5</td></tr>
+  </table>
+  <div class="grid g2">
+    <div class="card"><h3 class="ok">同一個機制，只是少見</h3><ul>
+      <li>A「說做完卻沒寫答案檔」：<b>5／120</b>（DABstep 那批 42／231）；C37：0。</li>
+      <li>退回 10 格、之後答對 9 格；<b>傷害 0</b>。</li>
+    </ul></div>
+    <div class="card"><h3 class="warn">零設定看不到的</h3><ul>
+      <li>Polyglot 失敗大半是撞時限（A 30／68、C37 32／68）：行程被殺，走不到交件前檢查。</li>
+      <li>錯在決定的答案：每一步都有根據，零設定不退。</li>
+    </ul></div>
+  </div>
+  <p class="mute">讀法：「說做完卻沒寫要求的檔」多 ⇒ 量得到差（DABstep p=0.0028）；少 ⇒ 量不到（這裡 p=0.36）。</p>
+  <div class="src">出處：colab/decisions/conclusions/CONCLUSION_20261002_COLAB_TASK3_V37.md；colab/ops/colab_task3_v37_20261002/results/report_t3.json；預註冊 PREREG_20261002_COLAB_TASK3_V37.md（凍結 40e1cef4）。</div>
+</section>
+
 <!-- 15 -->
 <section class="slide">
   <h2>口徑：能說／不能說</h2>
@@ -290,6 +316,7 @@ th{background:var(--soft)}
       <li>DABstep 付費正式、u274、Colab 920 題這三批都「沒有量到差別」（p=0.21／1.0／0.39）；今天的 DABstep × v3.7 量到了（見第 14 頁），兩件事要一起講。</li>
       <li>v3.7 在冒煙 30 格上：跑過測試腳本後誤退 0／23、缺檔退回會觸發、新誤退 0（機制，非頻率）。</li>
       <li>BCB-Hard：閘門把假完成放行 47%→30%、擋錯 0（綁在 pi＋該後端）。</li>
+      <li>任務導向 94 題（不設上限）：沒有量到差別（p=0.36）；兩批合起來的讀法是「補的是說做完卻沒寫檔」。</li>
       <li>DABstep 77 題、Colab gemma-4-12B、15 回合上限：照常安裝 v3.7 答對率 42.0%→53.2%（p=0.0028），差來自「說做完卻沒寫要求的檔」被退回補寫；Vacant 把對的改成錯 0 次。並同時說：沒裝那組比 09-26 那批差、題組是選過的、交出答案的正確比例下降。</li>
       <li>在 15 回合上限、本機 gemma-4-12b、77 題下，v3 答對率 51.9%→59.3%（p=0.021），並同時說：只在被告知上限時作用、差集中 6 題、多交的多是錯的。</li>
     </ul></div>
