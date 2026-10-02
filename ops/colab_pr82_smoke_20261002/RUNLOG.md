@@ -38,3 +38,8 @@
 - 02:03 中途讀病歷（`smoke_report.py`，**不讀 score.json**）：20 格已完成——misreject20 的 16 格都跑過 `run_tests.sh`、交件前檢查全部 `allow`、`test_claim/none` 0 格；
   forced 的 `lcb_3675` 第一次檢查退回 `missing_output`（solution.py 不在）、agent 補寫後第二次 `allow`；另 2 格 forced 的 agent 照樣寫了檔、沒有退回。
 - 02:06 23／30 完成。本機起 `autostop.sh`：VM 出現 DRIVER_DONE ⇒ 打包 `p82_raw.tar.xz`（格子、代理、發射紀錄、wheel 雜湊、部署 log）→ 下載到 `~/Vacant_colab_raw/pr82_smoke_20261002/` → sha256 對上才 `colab stop`。原始紀錄含 EvalPlus 內容，**不進 repo**。
+- （更正時間：上面兩條「02:03／02:06」實際是 02:03／02:04。）
+- 02:22:25 DRIVER_DONE；打包 `p82_raw.tar.xz` sha256 `389569c3…`，下載、本機驗過（`VERIFIED.tsv`）⇒ **02:22:30 `colab stop`**（G4 用了約 30 分鐘，約 4.5 CU）。本機 03:25 的保險迴圈撤掉。
+- 02:23 **第一次讀分數**（30／30 完成、逾時 0、安裝失敗 0、void 0）。`smoke_report.py --scores` ⇒ `smoke_summary.json`。
+- 02:25 逐格核對退回：3 次 `missing_output` 退回時 solution.py 確實還沒寫過；1 次 `failed_step` 是 agent 用壞掉的巢狀 heredoc 覆寫了 `run_tests.sh`（真的失敗）⇒ 4 次退回全部成立、新的誤退 0。
+- 02:27 發現 **1 格漏退**：`lcb_v1-lcb_3674`（提示同第一批）三次 `sh run_tests.sh` 都紅、之後沒再改、說做完 ⇒ `allow`、沒有 finding。原因：`evidence.py` 的 `_failed_steps` 只算「跑自己寫的腳本」或「讀人在提示裡點名的材料」的失敗，而且要之後又寫過交付物（`:836-842`）；題目附的 `run_tests.sh` 兩個都不是。v3.6.1 也一樣，**不是 v3.7 新造成的**。報告：`REPORT.md`。
