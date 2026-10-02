@@ -75,3 +75,20 @@
 - G4 03:20–07:34Z，約 4.2 小時、約 37 CU（餘額 91.43→約 54）。
 - ⚠ **空轉約 1 小時 52 分（約 16.6 CU）**：05:42 跑完，但本機的收尾迴圈用 `colab console` 查 VM，05:45 起 console 一直回空白，迴圈永遠看不到 DRIVER_DONE；
   同一時間走檔案介面的同步在 05:52 已經回報 `SYNC_ALL_DONE`，卻沒有接到停機。07:33 人工查、07:34 停機。修法寫在 RUNLOG：收尾判斷改走 `colab download`（檔案介面），同步完成即停機。
+
+## 七、「裝了就不用設定、直接在 agent 上」——這批實際驗到什麼、還沒驗到什麼
+
+**驗到的（C37 每一格的 `install.log`、`vacant_home/adapters/install.json`、`pi_agent_dir/`）**：
+- 使用者做的只有兩行：`pipx install <wheel>` ＋ `vacant install`。沒有契約、沒有設定檔、沒有金鑰、沒有任何 Vacant 環境變數、沒有代理或模型中介。
+- `vacant install` 在 pi **自己的設定目錄**放了**一個檔**：`extensions/vacant.ts`（pi 的全域擴充；`install.json` 記 `mode: evidence`、`created: true`，`vacant uninstall` 可逆）。
+  機器上沒有的 agent（claude、codex、opencode）自動跳過。之後照常打開 pi，擴充在 pi 行程裡掛 `before_agent_start`／`tool_call`／`tool_result`／`turn_end`／`agent_before_settle`／`session_shutdown`，
+  在 agent 說做完時查紀錄、必要時退回——**不換 agent、不包模型端點**。
+- 評測裡的 `PI_CODING_AGENT_DIR=/tmp/harbor-pi-agent` 只是因為 Harbor 把 pi 的設定目錄隔離到那裡；一般使用者的 pi 設定在 `~/.pi/agent`，`vacant install` 自己找得到（偏差欄，不是設定步驟）。
+- 462 格 C 組：安裝失敗 0、全部有病歷、154／153 格走到交件前檢查（其餘是被回合上限或時限切斷，pi 不進交件前檢查）。
+
+**還沒驗到的（不能混講）**：
+1. **互動介面**：這批是 `pi --print --mode json`（Harbor 的跑法），不是人坐在 pi 的 TUI 前面。擴充本身支援互動模式（`ctx.hasUI` 時把交件說明顯示給人；`input` 事件記人的新要求），
+   TUI 的管線在 2026-09-24（L-fake，`ops/accountability/e2e_tui.py`）與 i1001 本機端到端（替身模型，210／210）驗過；**真模型在 TUI 下的效果還沒量**（i1001 就是要量這個，主跑沒完成）。
+2. **PyPI**：`vacant-network` 在 PyPI 上最新是 **0.7.0**（2026-10-02 查），README 的 `pipx install vacant-network` 今天裝到的**不是**這批測的 v3.7；
+   這批用的是 PR #82 分支 `e4da5ebc` 建的 wheel（sha256 `92ddc44d…`）。而且 v3 到 v3.7 的 `__version__` 都是 0.8.0，版本號分不出行為差很多的幾版。要讓「裝一次就好」對外成立，要先發新版（人類決定）。
+3. 只量了 pi；Claude Code／Codex／OpenCode 的掛鉤裝得上（同一個 `vacant install`），效果沒量。
