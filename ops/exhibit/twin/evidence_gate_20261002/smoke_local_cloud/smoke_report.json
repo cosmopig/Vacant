@@ -1,0 +1,435 @@
+{
+ "started": "2026-10-02T02:38:01Z",
+ "port": 3377,
+ "ids_hash": {
+  "A": "97f392ac",
+  "B": "c9c08eb1"
+ },
+ "withdraw_B": {
+  "http": 200,
+  "at_s": 24.7
+ },
+ "timeline": {
+  "A": [
+   {
+    "t": 0.1,
+    "status": "queued",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 1.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 6.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 3,
+    "steps": 2,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 11.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 6,
+    "steps": 5,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 16.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 8,
+    "steps": 7,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 25.7,
+    "status": "claimed",
+    "stage": "working",
+    "says": 9,
+    "steps": 8,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 29.8,
+    "status": "claimed",
+    "stage": "working",
+    "says": 10,
+    "steps": 9,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 34.9,
+    "status": "claimed",
+    "stage": "working",
+    "says": 11,
+    "steps": 10,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 39.9,
+    "status": "claimed",
+    "stage": "working",
+    "says": 14,
+    "steps": 12,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 45.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 19,
+    "steps": 17,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 56.0,
+    "status": "claimed",
+    "stage": "working",
+    "says": 20,
+    "steps": 18,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 61.2,
+    "status": "claimed",
+    "stage": "working",
+    "says": 21,
+    "steps": 19,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 68.3,
+    "status": "done",
+    "stage": "done",
+    "says": 23,
+    "steps": 20,
+    "review": 8,
+    "polaroid": true,
+    "receipt": true
+   }
+  ],
+  "B": [
+   {
+    "t": 0.1,
+    "status": "queued",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 4.1,
+    "status": "claimed",
+    "stage": "working",
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 19.6,
+    "status": "claimed",
+    "stage": "working",
+    "says": 1,
+    "steps": 1,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 24.7,
+    "status": "claimed",
+    "stage": "working",
+    "says": 4,
+    "steps": 3,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   },
+   {
+    "t": 25.7,
+    "status": "withdrawn",
+    "stage": null,
+    "says": 0,
+    "steps": 0,
+    "review": 0,
+    "polaroid": false,
+    "receipt": false
+   }
+  ]
+ },
+ "A": {
+  "says": [
+   {
+    "seq": 1,
+    "turn": 1,
+    "text": "我需要先閱讀這份文件來了解這個人的特質。",
+    "ts": 1790908684479
+   },
+   {
+    "seq": 2,
+    "turn": 1,
+    "text": "我已經理解了他的性格特質，現在要根據要求寫入信件。",
+    "ts": 1790908687035
+   },
+   {
+    "seq": 3,
+    "turn": 3,
+    "text": "信寫好了。",
+    "ts": 1790908687037
+   },
+   {
+    "seq": 1,
+    "turn": 1,
+    "text": "我正試著進入這個人的內心世界，去感受他對秩序與細節的執著。",
+    "ts": 1790908689886
+   },
+   {
+    "seq": 2,
+    "turn": 1,
+    "text": "我需要了解這個世界的結構與規則，看看有哪些空間可以被重新梳理。",
+    "ts": 1790908690734
+   },
+   {
+    "seq": 3,
+    "turn": 1,
+    "text": "我現在要看看我的房間裡有哪些東西可以讓我開始行動。",
+    "ts": 1790908691972
+   },
+   {
+    "seq": 4,
+    "turn": 1,
+    "text": "我要看看這封信具體內容，確認它與我的身份是否匹配。",
+    "ts": 1790908693230
+   },
+   {
+    "seq": 5,
+    "turn": 1,
+    "text": "我要看看這張沒做完的紙內容，或許是前任留下的任務。",
+    "ts": 1790908694713
+   },
+   {
+    "seq": 6,
+    "turn": 1,
+    "text": "我現在要寫下我的計畫，這是我進入這個世界後的第一次正式行動。",
+    "ts": 1790908706434
+   },
+   {
+    "seq": 7,
+    "turn": 1,
+    "text": "我要確認紙卡地的結構，確保我接下來的動作符合空間規矩。",
+    "ts": 1790908711208
+   },
+   {
+    "seq": 8,
+    "turn": 1,
+    "text": "我現在要完成點數單的內容，並將它寫成一個新的檔案來代表我在桌三上的動作。",
+    "ts": 1790908715741
+   },
+   {
+    "seq": 9,
+    "turn": 1,
+    "text": "因為我無法直接修改地上的檔案，我必須在我的房間裡建立這個「完成後的產物」。這代表我在長桌廣場桌三上完成了動作。",
+    "ts": 1790908718198
+   },
+   {
+    "seq": 10,
+    "turn": 1,
+    "text": "我現在要確認我的房間裡已經有了計畫要求的檔案，並準備進行最後的檢查。",
+    "ts": 1790908719017
+   },
+   {
+    "seq": 13,
+    "turn": 14,
+    "text": "我交出了計畫、完成後的點數單以及對這個世界秩序的初步梳理。",
+    "ts": 1790908719019
+   },
+   {
+    "seq": 1,
+    "turn": 1,
+    "text": "我需要先了解這個人的性格，以便決定他在這個世界裡會做什麼。",
+    "ts": 1790908723017
+   },
+   {
+    "seq": 2,
+    "turn": 1,
+    "text": "我需要了解這個世界的規則與地理位置，來規劃接下來的行動。",
+    "ts": 1790908723977
+   },
+   {
+    "seq": 3,
+    "turn": 1,
+    "text": "我現在要看看我的房間裡有哪些東西可以利用。",
+    "ts": 1790908725206
+   },
+   {
+    "seq": 4,
+    "turn": 1,
+    "text": "我要讀取這張小卡片的內容，看看它寫了什麼。",
+    "ts": 1790908726391
+   },
+   {
+    "seq": 5,
+    "turn": 1,
+    "text": "我要讀取這份格狀圖的內容，看看它描述了什麼樣的排列。",
+    "ts": 1790908727478
+   },
+   {
+    "seq": 6,
+    "turn": 1,
+    "text": "我現在要寫出我的計畫，說明我要做的事情以及為什麼要做這件事。",
+    "ts": 1790908738447
+   },
+   {
+    "seq": 7,
+    "turn": 1,
+    "text": "我現在要確認一下桌七上的工具狀況。",
+    "ts": 1790908739783
+   },
+   {
+    "seq": 8,
+    "turn": 1,
+    "text": "我現在要寫出這份新的佈局記錄，並將它放在桌三上。",
+    "ts": 1790908744751
+   },
+   {
+    "seq": 21,
+    "turn": 23,
+    "text": "我已經完成了計畫中的所有步驟。",
+    "ts": 1790908744752
+   }
+  ],
+  "review": [
+   {
+    "id": "G1",
+    "ok": false,
+    "label": "點名的東西沒打開（計畫第 20 行）",
+    "attempt": 0
+   },
+   {
+    "id": "G2",
+    "ok": true,
+    "label": "找得到出處",
+    "attempt": 0
+   },
+   {
+    "id": "G3",
+    "ok": false,
+    "label": "兩個出處對不上（成品第 7 行）",
+    "attempt": 0
+   },
+   {
+    "id": "G4",
+    "ok": true,
+    "label": "收據是閘門給的",
+    "attempt": 0
+   },
+   {
+    "id": "G1",
+    "ok": true,
+    "label": "讀過了",
+    "attempt": 1
+   },
+   {
+    "id": "G2",
+    "ok": true,
+    "label": "找得到出處",
+    "attempt": 1
+   },
+   {
+    "id": "G3",
+    "ok": true,
+    "label": "兩個出處對得上",
+    "attempt": 1
+   },
+   {
+    "id": "G4",
+    "ok": true,
+    "label": "收據是閘門給的",
+    "attempt": 1
+   }
+  ],
+  "outcome": "made",
+  "judgment": {
+   "tier": "B",
+   "requests_seen": 23,
+   "count_semantics": "exact",
+   "ws_end_sha256_prefix": "d2d9d0df",
+   "chain_head_prefix": "12804dbe",
+   "accepted_note": "Vacant 不判對錯；這一格查的是每一步有沒有根據，accepted 說的只是這個——沒過的照常交件、照實標出位置"
+  },
+  "polaroid_http": 200,
+  "polaroid_bytes": 1302197
+ },
+ "B_cloud": {
+  "status": "withdrawn",
+  "has_says": false,
+  "has_steps": false,
+  "has_review": false,
+  "has_polaroid": false,
+  "polaroid_http": 404,
+  "receipt_http": 404,
+  "card_http": 404
+ },
+ "local": {
+  "A": {
+   "status": "published",
+   "card_available": true,
+   "run_artifacts_present": true
+  },
+  "B": {
+   "status": "erased",
+   "card_available": false,
+   "run_artifacts_present": false
+  }
+ },
+ "residue_local": {
+  "A": true,
+  "B": false
+ },
+ "residue_cloud_data": {
+  "A": true,
+  "B": false
+ },
+ "residue_event_streams": {
+  "A": false,
+  "B": false
+ }
+}
