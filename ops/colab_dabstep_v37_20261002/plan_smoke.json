@@ -1,0 +1,20 @@
+{
+ "seed": 20261002,
+ "arms": [
+  "A",
+  "C37",
+  "C37R"
+ ],
+ "samples": [
+  1
+ ],
+ "tasks": [
+  {
+   "bank": "dabstep",
+   "id": "1",
+   "dir": "/srv/eval/staged/dabstep/1",
+   "source": "harbor-450"
+  }
+ ],
+ "note": "smoke, not analysed"
+}
