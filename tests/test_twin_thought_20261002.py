@@ -115,3 +115,79 @@ def test_the_thought_log_is_erased_with_the_run_dir(tmp_path):
     out = twinagent.erase_run_artifacts(tmp_path, "sub-x")
     assert out["problems"] == [] and not twinagent.run_artifacts_present(tmp_path, "sub-x")
     assert twinagent.THOUGHT_LOG_NAME in {e["what"] for e in out["erased"]}
+
+
+# ---------------------------------------------------------------------------
+# 手機（read_says／progress／publish）看到同一份過濾後的 thought
+# ---------------------------------------------------------------------------
+
+def _rd_with(tmp_path, thoughts, steps=()):
+    (tmp_path / twinagent.THOUGHT_LOG_NAME).write_text(
+        "".join(json.dumps(t, ensure_ascii=False) + "\n" for t in thoughts), encoding="utf-8")
+    if steps:
+        (tmp_path / twinagent.STEP_LOG_NAME).write_text(
+            "".join(json.dumps(s, ensure_ascii=False) + "\n" for s in steps), encoding="utf-8")
+    return tmp_path
+
+
+def test_phone_says_include_thoughts_filtered_by_the_same_rules_as_the_tv(tmp_path):
+    rd = _rd_with(tmp_path, [
+        {"ts_ms": 10, "seq": 1, "thought": "我想先看看這個世界有什麼。"},
+        {"ts_ms": 20, "seq": 2, "thought": "我要去讀 尾段_418到447片.txt 看看。"},       # 檔名：丟
+        {"ts_ms": 30, "seq": 3, "thought": "他說：我很怕麻煩，但對老朋友很念舊，所以我這樣做。"},  # 抄觀眾原文：丟
+        {"ts_ms": 40, "seq": 4, "thought": ""}, {"ts_ms": 50, "seq": 5},                  # 空／缺：沒有
+        {"ts_ms": 60, "seq": 6, "thought": "我再想想要放在哪裡。"},
+    ], steps=[{"seq": 3, "tool": "ws_read", "path": "地上/帳本鏈/尾段_418到447片.txt", "ok": True}])
+    says = twinagent.read_says(rd, [TRAITS])
+    assert [s["text"] for s in says] == ["我想先看看這個世界有什麼。", "我再想想要放在哪裡。"]
+    assert [s["seq"] for s in says] == [1, 6] and all(s["turn"] >= 1 for s in says)
+    assert set(says[0]) == {"seq", "turn", "text", "ts"}            # 雲端 saysProblem 只收這四個鍵
+    # 與電視同一份：SayForwarder 對同一批輸入發出的句子一樣
+    (tmp_path / "tv").mkdir()
+    _f, rows = _setup(tmp_path / "tv", [{"ts_ms": t["ts_ms"], "seq": t["seq"], "thought": t.get("thought")}
+                                         for t in read_all(tmp_path)])
+    assert [r["text"] for r in rows] == [s_["text"] for s_ in says]
+
+
+def read_all(rd):
+    return [json.loads(l) for l in (rd / twinagent.THOUGHT_LOG_NAME).read_text(encoding="utf-8").splitlines()]
+
+
+def test_phone_negative_control_without_the_thought_log_says_are_unchanged(tmp_path):
+    assert twinagent.read_says(tmp_path, [TRAITS]) == []
+    assert twinagent.read_thought_rows(tmp_path) == []
+
+
+def test_phone_thoughts_are_merged_with_stdout_says_in_time_order(tmp_path):
+    msg = {"type": "message_end", "message": {"role": "assistant", "timestamp": 25,
+                                              "content": [{"type": "text", "text": "我交出去了。"}]}}
+    (tmp_path / twinagent.AGENT_STDOUT_NAME).write_text(json.dumps(msg) + "\n", encoding="utf-8")
+    rd = _rd_with(tmp_path, [{"ts_ms": 10, "seq": 1, "thought": "先看看。"}, {"ts_ms": 40, "seq": 2, "thought": "再看看。"}])
+    assert [s["text"] for s in twinagent.read_says(rd, [])] == ["先看看。", "我交出去了。", "再看看。"]
+
+
+def test_progress_snapshot_carries_the_thoughts_to_the_cloud_shape(tmp_path):
+    from ops.exhibit.twin import twinprogress
+    ws, rd = twinagent.paths_for(tmp_path, "sub-p")
+    rd.mkdir(parents=True)
+    ws.mkdir(parents=True)
+    (rd / twinagent.STEP_LOG_NAME).write_text(json.dumps({"seq": 1, "tool": "ws_list", "path": None, "ok": True}) + "\n",
+                                              encoding="utf-8")
+    _rd_with(rd, [{"ts_ms": 10, "seq": 1, "thought": "我想先看看房間。"}], steps=[{"seq": 1, "tool": "ws_list", "path": None, "ok": True}])
+    snap = twinprogress.snapshot(tmp_path, "sub-p", [TRAITS])
+    assert [s["text"] for s in snap["says"]] == ["我想先看看房間。"]
+
+
+def test_socket_path_for_the_102_settings_is_short_enough_and_the_guard_bites():
+    from ops.exhibit.twin import twinenclose
+    work_root = pathlib.Path("/var/lib/vacant-twin/twinstore.agentruns")       # .102 的 VACANT_TWIN_AGENTRUNS
+    slug = "a" * 32
+    p = twinenclose.socket_path_for(twinenclose.door_dir_for(work_root, slug))
+    assert p == "/var/lib/vacant-twin/twinstore.agentruns/doors/" + slug + "/relay.sock" and len(p) == 90
+    assert len(p) < twinenclose.SOCKET_PATH_MAX == 104
+    twinenclose.check_socket_path(twinenclose.door_dir_for(work_root, slug))              # 不丟
+    # 負控制：本機測試目錄那種長路徑會被講清楚地擋下
+    import pytest
+    long_root = pathlib.Path("/var/tmp/vacant_enc_20261002/tmp/twin_gate_abcdefgh/twinstore.agentruns")
+    with pytest.raises(RuntimeError, match="AF_UNIX"):
+        twinenclose.check_socket_path(twinenclose.door_dir_for(long_root, slug))

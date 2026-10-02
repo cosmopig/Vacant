@@ -48,7 +48,8 @@
    不會多講（`reviewing` 還要求套件存在）。
 2. **撤回的空窗**：本機撤回到下一輪 `untrack` 之間（≤ 一個迴圈間隔）執行緒可能再送一次；
    雲端對 `withdrawn` 一律忽略（`ignored`），且撤回時會把 says／steps／review 一起刪。
-3. says 只擋逐字抄觀眾原文（`read_says` 的 LEAK 規則）；手機是本人私人看，含檔名也送。
+3. says：stdout 的話只擋逐字抄觀眾原文（`read_says` 的 LEAK 規則；手機是本人私人看，含檔名也送）；
+   工具的 `thought`（2026-10-02）與電視共用同一套防呆（`twinagent.say_filter`：LEAK＋檔名），不准繞過。
 """
 from __future__ import annotations
 

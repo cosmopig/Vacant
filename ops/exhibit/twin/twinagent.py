@@ -477,6 +477,36 @@ def read_outputs(root: pathlib.Path | None) -> dict[str, Any]:
     return out
 
 
+def say_filter(cleaned: str, originals: list[str], names: set[str] | None = None) -> str | None:
+    """一句已清過標記的話過不過防呆：回 `None`＝過；`"leak"`＝抄了觀眾原文；`"filename"`＝含檔名。
+    **電視的 `SayForwarder` 與手機的 `read_says`（thought 那一路）共用這一個**——手機不准繞過 LEAK／檔名過濾。"""
+    if polaroidlib.caption_leaks_original(cleaned, originals):
+        return "leak"
+    if sidecarlib.looks_like_filename(cleaned, names or ()):
+        return "filename"
+    return None
+
+
+def read_thought_rows(rd: pathlib.Path) -> list[dict[str, Any]]:
+    """`twin_thoughts.ndjson` 的原始行（`{ts_ms,seq,thought}`；壞行跳過、空的／非字串不收）。"""
+    p = rd / THOUGHT_LOG_NAME
+    if not p.is_file():
+        return []
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    out = []
+    for line in text.splitlines():
+        try:
+            r = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(r, dict) and isinstance(r.get("thought"), str) and r["thought"].strip():
+            out.append(r)
+    return out
+
+
 def read_says(rd: pathlib.Path, originals: list[str] | None = None, *,
               max_items: int = 200, max_chars: int = 200) -> list[dict[str, Any]]:
     """這一跑 agent 說過的每一句話（**手機私人看，含檔名也送**；契約補充 §E／計畫 PROC3 第 3 項）。
@@ -490,16 +520,15 @@ def read_says(rd: pathlib.Path, originals: list[str] | None = None, *,
     讀不到檔／壞行 ⇒ 回已讀到的（不猜）。
     """
     p = rd / AGENT_STDOUT_NAME
-    if not p.is_file():
-        return []
-    try:
-        text = p.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return []
     origs = [o for o in (originals or []) if isinstance(o, str) and o]
     out: list[dict[str, Any]] = []
     turn = 0
     tools_seen = 0
+    names: set[str] = set()
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace") if p.is_file() else ""
+    except OSError:
+        text = ""
     for line in text.splitlines():
         line = line.strip()
         if not line:
@@ -534,7 +563,26 @@ def read_says(rd: pathlib.Path, originals: list[str] | None = None, *,
                 out.append({"seq": tools_seen + 1, "turn": max(turn, 1),
                             "text": "".join(list(cleaned)[:max_chars]), "ts": ts})
         tools_seen += sum(1 for c in content if c.get("type") == "toolCall")
-    return out
+        for c in content:
+            if c.get("type") == "toolCall" and isinstance(c.get("arguments"), dict) \
+                    and isinstance(c["arguments"].get("path"), str):
+                names.add(c["arguments"]["path"])
+    # ── 三個工具的 `thought`（2026-10-02）：手機也看得到，但**同一套防呆**（LEAK、檔名）。
+    #    原始行不含檔名以外的東西；過濾與電視的 `SayForwarder` 共用 `say_filter`。
+    for r in read_step_log(rd):
+        if isinstance(r.get("path"), str):
+            names.add(r["path"])
+    for r in read_thought_rows(rd):
+        cleaned = sidecarlib.clean_say(r["thought"])
+        if not cleaned or say_filter(cleaned, origs, names):
+            continue
+        ts = r.get("ts_ms")
+        seq = r.get("seq")
+        out.append({"seq": seq if isinstance(seq, int) and seq >= 1 else 1, "turn": 1,
+                    "text": "".join(list(cleaned)[:max_chars]),
+                    "ts": int(ts) if isinstance(ts, (int, float)) and ts >= 0 else int(time.time() * 1000)})
+    out.sort(key=lambda x: x["ts"])
+    return out[:max_items]
 
 
 def read_step_log(rd: pathlib.Path, *, max_lines: int = 500) -> list[dict[str, Any]]:
@@ -851,13 +899,12 @@ class SayForwarder(StepForwarder):
             if is_thought:
                 self.thoughts_dropped += 1
             return []                          # 空白／純標記／純程式碼區塊：不發、不計
-        if polaroidlib.caption_leaks_original(cleaned, self.originals):
+        why = say_filter(cleaned, self.originals, self._names)
+        if why == "leak":
             self.dropped += 1                  # 抄了觀眾原文：整句不發
-            if is_thought:
-                self.thoughts_dropped += 1
-            return []
-        if sidecarlib.looks_like_filename(cleaned, self._names):
+        elif why == "filename":
             self.dropped_filename += 1         # 電視不帶檔名：整句不發
+        if why:
             if is_thought:
                 self.thoughts_dropped += 1
             return []

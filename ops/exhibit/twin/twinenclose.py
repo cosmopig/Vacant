@@ -110,6 +110,25 @@ def door_dir_for(work_root: pathlib.Path, slug: str) -> pathlib.Path:
     return pathlib.Path(work_root) / "doors" / slug
 
 
+#: AF_UNIX 路徑上限（Linux `sun_path` 108 含結尾 NUL；留餘裕）。超過 ⇒ `bind()` 以 `OSError: AF_UNIX path too long` 失敗。
+SOCKET_PATH_MAX = 104
+SOCK_NAME = "relay.sock"
+
+
+def socket_path_for(door_dir: pathlib.Path) -> str:
+    return str(pathlib.Path(door_dir) / SOCK_NAME)
+
+
+def check_socket_path(door_dir: pathlib.Path) -> None:
+    """門的 socket 路徑太長就**講清楚**（不是等 `bind()` 丟一個看不懂的 OSError）。
+    `.102` 的設定（`/var/lib/vacant-twin/twinstore.agentruns/doors/<32 字>/relay.sock`）是 90 字元。"""
+    n = len(socket_path_for(door_dir).encode("utf-8"))
+    if n >= SOCKET_PATH_MAX:
+        raise RuntimeError(
+            f"門的 socket 路徑 {n} 字元 ≥ {SOCKET_PATH_MAX}（AF_UNIX 上限）：{socket_path_for(door_dir)}。"
+            "把 VACANT_TWIN_AGENTRUNS／VACANT_TWIN_DB 放到短一點的路徑。")
+
+
 def node_dir(pi_bin: str | None) -> pathlib.Path | None:
     """pi 所在的 node 安裝根（`<root>/bin/pi` → `<root>`），唯讀綁進圍牆用。"""
     exe = shutil.which(pi_bin or "pi")
@@ -318,6 +337,7 @@ def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.P
                 f"{label}={p} 在 repo（{REPO}）底下，而 repo 是整份唯讀綁進圍牆的 ⇒ "
                 "別的分身的 run 產物在圍牆裡讀得到。把 VACANT_TWIN_DB／VACANT_TWIN_AGENTRUNS "
                 "放到 checkout 外面。停。")
+    check_socket_path(door_dir)
     if door_dir.exists():
         shutil.rmtree(door_dir)
     door_dir.mkdir(parents=True)
@@ -329,7 +349,7 @@ def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.P
     door = WireProxy(wire_dir=door_dir / "wire",
                      upstreams={"openai": endpoint, "anthropic": envmap.SINK_UPSTREAM},
                      keys={}, sentinel="", mode="tee",
-                     unix_path=str(door_dir / "relay.sock"), path_policy="model")
+                     unix_path=socket_path_for(door_dir), path_policy="model")
     door.start()
     part = run_dir / EVENTS_PART
     from ops.exhibit.twin import sidecar as _sidecar
