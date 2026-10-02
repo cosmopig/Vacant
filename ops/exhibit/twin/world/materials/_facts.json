@@ -38,14 +38,6 @@
    "chain.446.mark": "雙環",
    "chain.447.mark": "魚骨"
   },
-  "帳本鏈/放大鏡輪用順序.txt": {
-   "chain.424.mark": "半月",
-   "chain.429.mark": "鎖扣",
-   "chain.431.mark": "蕨葉",
-   "chain.438.mark": "半月",
-   "chain.440.mark": "螺旋",
-   "chain.447.mark": "魚骨"
-  },
   "帳本鏈/鬆環那幾片.txt": {
    "chain.424.mark": "半月",
    "chain.431.mark": "蕨葉",
@@ -62,28 +54,7 @@
   "紙卡地/格狀圖.txt": {
    "cards.row4.count": "5"
   },
-  "草稿角/紙團_丙.txt": {
-   "chain.418.mark": "魚骨",
-   "chain.419.mark": "魚骨",
-   "chain.420.mark": "水滴",
-   "chain.421.mark": "梯",
-   "chain.422.mark": "梯",
-   "chain.423.mark": "星",
-   "chain.424.mark": "半月",
-   "chain.425.mark": "波",
-   "chain.426.mark": "三點",
-   "chain.427.mark": "鎖扣"
-  },
-  "草稿角/紙團_甲.txt": {
-   "cards.row4.count": "5"
-  },
   "長桌廣場/土堆/小陶印.txt": {
-   "seals.mound.count": "2"
-  },
-  "長桌廣場/土堆/清單_乙.txt": {
-   "seals.mound.count": "3"
-  },
-  "長桌廣場/土堆/清單_甲.txt": {
    "seals.mound.count": "2"
   },
   "長桌廣場/桌五_壓著筆的紙.txt": {

@@ -117,7 +117,8 @@ MODES = (MODE_LIVE, MODE_REPLAY)
 #: （`sidecar.py`）與 `serve_twin` 的當場累計，**不是** lifecycle、**不是**事後推導。
 #: `twin_step`（2026-09-28）同一條路：來源是分身的旁註，不是 lifecycle。
 EMITTED = ("task_opened", "routed", "working", "draft_done", "gate_ran",
-           "revised", "verdict", "receipt", "postaudit", "counters", "twin_step", "twin_say")
+           "revised", "verdict", "receipt", "postaudit", "counters", "twin_step", "twin_say",
+           "twin_fortune")
 
 #: `postaudit.when` 唯一合法的值（與 `sidecar.WHEN_AFTER` 同值，測試釘住）。
 WHEN_AFTER = "after_the_run"
@@ -171,6 +172,49 @@ TWIN_STEPS = ("read", "write", "list")
 TWIN_GROUND_KINDS = tuple("ground:" + c for c in (
     "drop", "clay", "longtable", "gate", "chain", "draft", "cards", "easel"))
 TWIN_PATH_KINDS = ("traits", "plan", "artifact", "other") + TWIN_GROUND_KINDS
+#: `twin_fortune`（P10，2026-10-02）：分身這一跑用的命盤。**全是枚舉**（與 `sidecar.FORTUNE_*` 同值，測試釘住）；
+#: `lines` 只在 `phase == "card"` 才有，≤3 句、每句 ≤60 字、已逐句對過步驟紀錄。不帶檔名、不帶星座名與觀眾原文。
+FORTUNE_PHASES = ("way", "card")
+FORTUNE_MBTI = ("INFP", "INFJ", "INTP", "INTJ", "ISFP", "ISFJ", "ISTP", "ISTJ",
+                "ENFP", "ENFJ", "ENTP", "ENTJ", "ESFP", "ESFJ", "ESTP", "ESTJ")
+FORTUNE_SOURCES = ("ai", "self", "twin")
+FORTUNE_ELEMENTS = ("火", "土", "風", "水")
+FORTUNE_BLOODS = ("A", "B", "O", "AB")
+FORTUNE_MAX_LINES = 3
+FORTUNE_LINE_MAX = 60
+#: `twin_fortune` 不准帶的欄位（本體是上面那幾個枚舉與 `lines`）。
+FORTUNE_FORBIDDEN = ("path", "name", "file", "content", "text", "zodiac", "card_text")
+
+
+def fortune_event_problems(e: dict, n: int) -> list[str]:
+    """一筆 `twin_fortune` 事件的形狀自檢（`validate` 與 `live_events` 共用）。回問題清單。"""
+    bad: list[str] = []
+    if e.get("phase") not in FORTUNE_PHASES:
+        bad.append(f"第 {n} 個事件：twin_fortune.phase 不在白名單：{e.get('phase')!r}")
+    if not (isinstance(e.get("attempt"), int) and not isinstance(e.get("attempt"), bool) and e["attempt"] >= 1):
+        bad.append(f"第 {n} 個事件：twin_fortune.attempt 要是 ≥ 1 的整數")
+    for key, allowed in (("mbti", FORTUNE_MBTI), ("mbti_source", FORTUNE_SOURCES),
+                         ("element", FORTUNE_ELEMENTS), ("blood", FORTUNE_BLOODS)):
+        v = e.get(key)
+        if v is not None and v not in allowed:
+            bad.append(f"第 {n} 個事件：twin_fortune.{key} 不在白名單：{v!r}")
+    if (e.get("mbti") is None) != (e.get("mbti_source") is None):
+        bad.append(f"第 {n} 個事件：twin_fortune 的 mbti 與 mbti_source 要同時有或同時沒有")
+    ls = e.get("lines")
+    if not isinstance(ls, list) or len(ls) > FORTUNE_MAX_LINES:
+        bad.append(f"第 {n} 個事件：twin_fortune.lines 要是 ≤ {FORTUNE_MAX_LINES} 句的清單")
+    else:
+        if e.get("phase") == "way" and ls:
+            bad.append(f"第 {n} 個事件：twin_fortune 的 way 拍不帶 lines")
+        for s in ls:
+            if not isinstance(s, str) or not s.strip() or len(s) > FORTUNE_LINE_MAX:
+                bad.append(f"第 {n} 個事件：twin_fortune.lines 每句要是非空字串、≤ {FORTUNE_LINE_MAX} 字")
+    for k in FORTUNE_FORBIDDEN:
+        if k in e:
+            bad.append(f"第 {n} 個事件：twin_fortune 帶了 {k!r}")
+    return bad
+
+
 #: `twin_say.text` 的字數上限（`sidecar.SAY_MAX` 同值，測試釘住；契約補充 §E）。
 TWIN_SAY_MAX = 80
 #: `twin_say` 不准帶的欄位（它的本體就是 `text`，其餘內容欄位照擋）。
@@ -424,6 +468,14 @@ def validate(evs: list[dict], *, require_settled: bool = True,
             for k in TWIN_SAY_FORBIDDEN:
                 if k in e:
                     bad.append(f"第 {n} 個事件：twin_say 帶了 {k!r}")
+        # ── 命盤（P10）：只在 ON／practical、全是枚舉 ──────────────────
+        if t == "twin_fortune":
+            if e.get("arm") != ARM_ON:
+                bad.append(f"第 {n} 個事件：twin_fortune 的 arm 不是 ON")
+            tk = kinds.get(e.get("task_id"))
+            if tk is not None and tk != KIND_PRACTICAL:
+                bad.append(f"第 {n} 個事件：twin_fortune 出現在非分身自主任務的格子")
+            bad.extend(fortune_event_problems(e, n))
         # ── 事後稽核不准長得像裁決（規則 9）：三個旗標缺一不可 ────────
         if t == "postaudit":
             if e.get("is_verdict") is not False or e.get("signed") is not False:

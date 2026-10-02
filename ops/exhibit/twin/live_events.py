@@ -39,6 +39,7 @@
 | 旁註 `postaudit`（`twin.sidecar/1`，**不是** lifecycle） | OFF | `postaudit`（三旗標；只在綁得上那一跑時） |
 | 旁註 `twin_step`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_step`（**不帶檔名**；契約 `plans/CONTRACT_PROCESS_20260928.md` §A） |
 | 旁註 `twin_gate`（`twin.sidecar/1`，**不是** lifecycle；`grounding_gate.prepare` 在 pi 結束後、凍結前寫） | ON（僅 `practical` 格） | 不單獨發事件：暫存，併進同一次嘗試的 `gate_ran.checks[]` |
+| 旁註 `twin_fortune`（`twin.sidecar/1`，**不是** lifecycle；P10 命盤，`fortune.py` 在段 1 結束與每次嘗試結束時寫） | ON（僅 `practical` 格） | `twin_fortune`（全是枚舉：`mbti`／`mbti_source`／`element`／`blood`；`phase` 為 `way` 或 `card`；`card` 拍帶 ≤3 句 `lines`，已逐句對過步驟紀錄） |
 | 旁註 `twin_say`（`twin.sidecar/1`，**不是** lifecycle） | ON（僅 `practical` 格） | `twin_say`（agent 自己生成、≤80 字、已過逐字抄錄防呆；契約補充 `plans/CONTRACT_PROCESS_20261001_ADDENDUM.md` §E） |
 
 `counters` 不在這張表上：它不是任何一筆輸入轉出來的，是 `Tally` 依**已經寫出去的**
@@ -294,6 +295,8 @@ class Folder:
             return self._sidecar_twin_step(ev)
         if t == "twin_gate":
             return self._sidecar_twin_gate(ev)
+        if t == "twin_fortune":
+            return self._sidecar_twin_fortune(ev)
         self.dropped.append(f"不認得的旁註 type {t!r}")
         return []
 
@@ -365,6 +368,31 @@ class Folder:
         if ev.get("cut") is True:
             st["cut"].add(ev["attempt"])
         return []
+
+    def _sidecar_twin_fortune(self, ev: dict) -> list[dict]:
+        """分身這一跑用的命盤（P10）→ 電視的 `twin_fortune`：枚舉＋（card 拍）≤3 句。綁不上或形狀不對就丟（不猜）。"""
+        rid = ev.get("run_id")
+        st = self.runs.get(rid)
+        why = None
+        if st is None:
+            why = f"twin_fortune 綁的那一跑 {rid} 這一支沒看過 run_started"
+        elif st["arm"] != tv.ARM_ON or st.get("task_kind") != tv.KIND_PRACTICAL:
+            why = f"twin_fortune 綁的那一跑 {rid} 不是分身的自主任務格（ON／practical）"
+        elif ev.get("cell_id") != st["cell_id"]:
+            why = f"twin_fortune 的 cell_id 與那一跑 {rid} 的格子不同"
+        else:
+            probs = tv.fortune_event_problems({**ev, "type": "twin_fortune"}, 0)
+            if probs:
+                why = "twin_fortune 形狀不對：" + probs[0]
+        if why:
+            self.dropped.append(why)
+            return []
+        return [{"type": "twin_fortune", "ts": self._ts(ev["ts_ms"]),
+                 "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
+                 "phase": ev["phase"], "attempt": ev["attempt"],
+                 "mbti": ev.get("mbti"), "mbti_source": ev.get("mbti_source"),
+                 "element": ev.get("element"), "blood": ev.get("blood"),
+                 "lines": list(ev.get("lines") or [])}]
 
     def _sidecar_twin_step(self, ev: dict) -> list[dict]:
         """分身工作區三個工具被呼叫的旁註 → 電視的 `twin_step`（**不帶檔名**）。

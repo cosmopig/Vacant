@@ -50,7 +50,7 @@ def mat(rel: str) -> str:
 def ledger(read, *, ground_files=None, letter="", world="", facts=None) -> dict:
     read = list(read)
     gf = list(ground_files) if ground_files is not None else sorted(
-        {*read, CHAIN, TABLE5, SEAL, GRID, RECEIPT_CARD, "地上/長桌廣場/土堆/清單_甲.txt"})
+        {*read, CHAIN, TABLE5, SEAL, GRID, RECEIPT_CARD})
     return {"v": 1, "read": read, "ground_files": gf,
             "ground_text": {r: mat(r) for r in read if r.startswith(gg.GROUND_PREFIX)},
             "letter": letter, "world": world,
@@ -101,13 +101,12 @@ def test_facts_authority_and_the_known_conflicts():
     e, c = f["entities"], f["claims"]
     assert e["chain.426.mark"]["authority_value"] == "三點"
     assert c["長桌廣場/桌五_壓著筆的紙.txt"]["chain.426.mark"] == "雙環"      # 抄錯的那一份
-    assert c["草稿角/紙團_丙.txt"]["chain.426.mark"] == "三點"
+    assert c["帳本鏈/尾段_418到447片.txt"]["chain.426.mark"] == "三點"
     assert e["cards.row4.count"]["authority_value"] == "5"
     assert c["石頭閘門/退回紙_第四列.txt"]["cards.row4.count"] == "6"
     assert e["seals.mound.count"]["authority_value"] == "2"
-    assert c["長桌廣場/土堆/清單_乙.txt"]["seals.mound.count"] == "3"
-    # 放大鏡那一行「手上收據印紋三點，片上印紋螺旋」登記的是片上的值
-    assert c["帳本鏈/放大鏡輪用順序.txt"]["chain.440.mark"] == "螺旋"
+    assert c["石頭閘門/退回紙_另一張.txt"]["seals.mound.count"] == "3"      # 閘門退回紙上的土堆清單寫 3 枚
+    assert c["帳本鏈/出生片_420到440.txt"]["chain.440.mark"] == "螺旋"
 
 
 def test_facts_claims_are_checkable_against_the_files():
@@ -146,7 +145,7 @@ PLAN_OK = """用一句話說我要做什麼
 做完的樣子：
 別人看得到。
 """
-GF = [CHAIN, TABLE5, "地上/長桌廣場/土堆/清單_甲.txt", SEAL, GRID]
+GF = [CHAIN, TABLE5, SEAL, GRID]
 
 
 def test_w1_positive_and_negative_with_line_numbers(tmp_path):
@@ -160,7 +159,7 @@ def test_w1_positive_and_negative_with_line_numbers(tmp_path):
 
 
 def test_w1_negative_control_open_one_file_in_the_folder(tmp_path):
-    led = ledger([CHAIN, TABLE5, "地上/長桌廣場/土堆/清單_甲.txt"], ground_files=GF)
+    led = ledger([CHAIN, TABLE5, SEAL], ground_files=GF)
     res = run_gate(tmp_path, PLAN_OK, {}, led)
     assert res["w1"]["ok"], res["w1"]
 

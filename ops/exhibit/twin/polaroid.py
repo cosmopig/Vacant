@@ -137,6 +137,8 @@ CAPTION_PX = 44
 CAPTION_LINES = 2
 CAPTION_LINE_H = 60
 CAPTION_BOX_H = CAPTION_LINES * CAPTION_LINE_H + 4
+#: 命盤那一行（P10）住在相片窗下緣與那一行字之間的窄帶；帶高不到這個值就不畫。
+FORTUNE_BAND_MIN_H = 30
 #: 小字。**右端停在 QR 靜區左邊**。
 FOOTER_PX = 26
 FOOTER_BOX_H = 36
@@ -817,7 +819,8 @@ def _placeholder_frame(canvas: tuple[int, int], window: tuple[int, int, int, int
 def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
             originals: Iterable[Any] = (), frame_dir: pathlib.Path | None = None,
             poses_dir: pathlib.Path | None = None,
-            qr_module_px: int = QR_MODULE_PX, _sweep_only: bool = False
+            qr_module_px: int = QR_MODULE_PX, _sweep_only: bool = False,
+            fortune_line: str = "", fortune_sentence: str = ""
             ) -> tuple[bytes, dict[str, Any]]:
     """做一張拍立得。回（PNG bytes, meta）。meta 只有版面與旗標，**不含那句話本身**。
 
@@ -884,8 +887,30 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
         cap_drawn = (min(b[0] for b in boxes), min(b[1] for b in boxes),
                      max(b[2] for b in boxes), max(b[3] for b in boxes))
 
-    # ── 小字 ──
+    # ── 命盤那一行＋一句（P10，2026-10-02）：相片窗下緣與那一行字之間的窄帶，單行小字。
+    #    只有這一帶放得下（≥ FORTUNE_BAND_MIN_H）才畫，否則不畫（`fortune_drawn: False`），不擠壓其他東西。
+    #    ⚠ 命盤那一行是枚舉組成（`fortune.first_line`）；那一句是命盤卡通過「步驟根據」檢查的第一句。
+    #    兩者都過原文那把尺（逐字抄了觀眾原文就不畫）。
     f_foot = _font(FOOTER_PX)
+    fort_drawn = None
+    fort_text = ""
+    band = (cap_box[0], win[3] + 4, cap_box[2], cap_box[1] - 2)
+    if fortune_line and band[3] - band[1] >= FORTUNE_BAND_MIN_H:
+        cand = clean_caption(fortune_line)
+        sent = clean_caption(fortune_sentence)
+        if sent and caption_leaks_original(sent, originals):
+            sent = ""
+        if caption_leaks_original(cand, originals):
+            cand = ""
+        fort_text = cand + (("｜" + sent) if cand and sent else "")
+        fort_text, _fd = _drop_missing(f_foot, fort_text)
+        if fort_text:
+            fort_text, _ = fit_text(f_foot, fort_text, band[2] - band[0])
+            fy2 = (band[1] + band[3]) // 2
+            d.text((band[0], fy2), fort_text, font=f_foot, fill=INK_SOFT, anchor="lm")
+            fort_drawn = d.textbbox((band[0], fy2), fort_text, font=f_foot, anchor="lm")
+
+    # ── 小字 ──
     footer = f"{date_str} · {EXHIBIT_NAME} · 收據 {receipt_short}"
     footer, _ = fit_text(f_foot, footer, foot_box[2] - foot_box[0])
     fy = (foot_box[1] + foot_box[3]) // 2
@@ -916,6 +941,9 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
         problems.append("QR 靜區出紙")
     if (cap_drawn is not None and _overlap(cap_drawn, qq)) or _overlap(foot_drawn, qq):
         problems.append("字壓到 QR 靜區")
+    if fort_drawn is not None and (not _inside(fort_drawn, band) or _overlap(fort_drawn, qq)
+                                   or (cap_drawn is not None and _overlap(fort_drawn, cap_drawn))):
+        problems.append("命盤那一行出框或壓到別的字")
     if problems:
         raise PolaroidError("版面放不下：" + "；".join(problems))
 
@@ -933,6 +961,7 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
         "caption_truncated": truncated, "caption_redacted": redacted,
         "caption_chars": len(caption), "caption_lines": len(lines),
         "dropped_glyphs": dropped,
+        "fortune_drawn": fort_drawn is not None, "fortune_chars": len(fort_text),
         "footer_box": list(foot_box), "footer_drawn": list(foot_drawn),
         "qr_text": SITE_URL, "qr_version": (g["n"] - 17) // 4, "qr_modules": g["n"],
         "qr_module_px": mod, "qr_box": list(qb), "qr_quiet_box": list(qq),

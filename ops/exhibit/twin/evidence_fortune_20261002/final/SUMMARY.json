@@ -1,0 +1,254 @@
+{
+ "runs": 8,
+ "errors": [],
+ "distinct_place_orders": 8,
+ "distinct_gate_sequences": 3,
+ "distinct_first_places": 4,
+ "first_fail_then_pass_n": 0,
+ "wall_median_s": 43.2,
+ "wall_max_s": 111.1,
+ "per_run": [
+  {
+   "name": "f1",
+   "given": {
+    "mbti": "ESTJ",
+    "mbti_source": "ai",
+    "zodiac": "牡羊",
+    "blood": "A"
+   },
+   "final": {
+    "mbti": "ESTJ",
+    "mbti_source": "ai",
+    "zodiac": "牡羊",
+    "blood": "A"
+   },
+   "places": [
+    "投遞口",
+    "帳本鏈",
+    "長桌廣場"
+   ],
+   "plan_first": true,
+   "browse_first": false,
+   "gates": [
+    "✓✓✓✓"
+   ],
+   "accepted": true,
+   "wall_s": 43.2,
+   "card_kept": 2,
+   "card_dropped": 1
+  },
+  {
+   "name": "f2",
+   "given": {
+    "mbti": "INFP",
+    "mbti_source": "self",
+    "zodiac": "雙魚",
+    "blood": "O"
+   },
+   "final": {
+    "mbti": "INFP",
+    "mbti_source": "self",
+    "zodiac": "雙魚",
+    "blood": "O"
+   },
+   "places": [
+    "草稿角",
+    "紙卡地",
+    "長桌廣場"
+   ],
+   "plan_first": false,
+   "browse_first": true,
+   "gates": [
+    "✓✓✓✓"
+   ],
+   "accepted": true,
+   "wall_s": 41.9,
+   "card_kept": 2,
+   "card_dropped": 1
+  },
+  {
+   "name": "f3",
+   "given": {
+    "mbti": "ENFP",
+    "mbti_source": "ai",
+    "zodiac": "雙子",
+    "blood": "B"
+   },
+   "final": {
+    "mbti": "ENFP",
+    "mbti_source": "ai",
+    "zodiac": "雙子",
+    "blood": "B"
+   },
+   "places": [
+    "投遞口",
+    "長桌廣場",
+    "紙卡地",
+    "石頭閘門",
+    "草稿角"
+   ],
+   "plan_first": false,
+   "browse_first": true,
+   "gates": [
+    "✗✓✗✓",
+    "✓✓✗✗",
+    "✓✓✗✗"
+   ],
+   "accepted": false,
+   "wall_s": 111.1,
+   "card_kept": 3,
+   "card_dropped": 0
+  },
+  {
+   "name": "f4",
+   "given": {
+    "mbti": "ISTJ",
+    "mbti_source": "ai",
+    "zodiac": "處女",
+    "blood": "AB"
+   },
+   "final": {
+    "mbti": "ISTJ",
+    "mbti_source": "ai",
+    "zodiac": "處女",
+    "blood": "AB"
+   },
+   "places": [
+    "投遞口",
+    "捏土處",
+    "帳本鏈"
+   ],
+   "plan_first": true,
+   "browse_first": false,
+   "gates": [
+    "✓✓✓✓"
+   ],
+   "accepted": true,
+   "wall_s": 44.9,
+   "card_kept": 1,
+   "card_dropped": 2
+  },
+  {
+   "name": "f5",
+   "given": {
+    "mbti": null,
+    "mbti_source": null,
+    "zodiac": "摩羯",
+    "blood": "B"
+   },
+   "final": {
+    "mbti": "INFP",
+    "mbti_source": "twin",
+    "zodiac": "摩羯",
+    "blood": "B"
+   },
+   "places": [
+    "帳本鏈",
+    "長桌廣場",
+    "紙卡地",
+    "投遞口",
+    "草稿角",
+    "石頭閘門",
+    "畫架與長椅"
+   ],
+   "plan_first": false,
+   "browse_first": true,
+   "gates": [
+    "✗✓✓✗",
+    "✓✓✗✗",
+    "✓✓✗✗"
+   ],
+   "accepted": false,
+   "wall_s": 102.3,
+   "card_kept": 3,
+   "card_dropped": 0
+  },
+  {
+   "name": "f6",
+   "given": {
+    "mbti": null,
+    "mbti_source": null,
+    "zodiac": "水瓶",
+    "blood": "A"
+   },
+   "final": {
+    "mbti": "ISFJ",
+    "mbti_source": "twin",
+    "zodiac": "水瓶",
+    "blood": "A"
+   },
+   "places": [
+    "長桌廣場",
+    "帳本鏈",
+    "投遞口"
+   ],
+   "plan_first": true,
+   "browse_first": false,
+   "gates": [
+    "✓✓✓✓"
+   ],
+   "accepted": true,
+   "wall_s": 37.9,
+   "card_kept": 1,
+   "card_dropped": 2
+  },
+  {
+   "name": "f7",
+   "given": {
+    "mbti": "ENTP",
+    "mbti_source": "self",
+    "zodiac": null,
+    "blood": null
+   },
+   "final": {
+    "mbti": "ENTP",
+    "mbti_source": "self",
+    "zodiac": null,
+    "blood": null
+   },
+   "places": [
+    "投遞口",
+    "長桌廣場",
+    "紙卡地",
+    "草稿角"
+   ],
+   "plan_first": false,
+   "browse_first": true,
+   "gates": [
+    "✓✓✓✓"
+   ],
+   "accepted": true,
+   "wall_s": 34.7,
+   "card_kept": 2,
+   "card_dropped": 1
+  },
+  {
+   "name": "f8",
+   "given": {
+    "mbti": "ISFJ",
+    "mbti_source": "ai",
+    "zodiac": null,
+    "blood": null
+   },
+   "final": {
+    "mbti": "ISFJ",
+    "mbti_source": "ai",
+    "zodiac": null,
+    "blood": null
+   },
+   "places": [
+    "帳本鏈",
+    "長桌廣場"
+   ],
+   "plan_first": true,
+   "browse_first": false,
+   "gates": [
+    "✓✓✓✓"
+   ],
+   "accepted": true,
+   "wall_s": 39.3,
+   "card_kept": 1,
+   "card_dropped": 2
+  }
+ ]
+}

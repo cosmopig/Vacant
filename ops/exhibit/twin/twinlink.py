@@ -1098,7 +1098,11 @@ def make_polaroid(store: TwinStore, sid: str, *,
             date_str=_local_date(_generated_ms(store, sid)),
             receipt_short=str(twin["verdict_hash"])[:8],
             originals=polaroidlib.originals_of(cur.get("card"), cur.get("card_text")),
-            frame_dir=frame_dir)
+            frame_dir=frame_dir,
+            # P10 命盤：拍立得印命盤那一行＋命盤卡第一句（沒有命盤＝空字串＝不畫）
+            fortune_line=str((twin.get("fortune") or {}).get("first_line") or ""),
+            fortune_sentence=twinagent.fortunelib.polaroid_sentence(
+                str(next(iter((twin.get("fortune") or {}).get("lines") or []), ""))))
         ref = store.vault.seal_polaroid(sid, png)
     except (polaroidlib.PolaroidError, twinvault.VaultError, OSError, *CARD_LEVEL_ERRORS) as e:
         # 做不出來的原因多半是永久的（版面、素材）。記一列 skipped，**不要每輪重試**；
@@ -1125,6 +1129,7 @@ def make_polaroid(store: TwinStore, sid: str, *,
         "frame": meta["frame"], "figure": meta["figure"],
         "caption_truncated": meta["caption_truncated"],
         "caption_redacted": meta["caption_redacted"], "caption_blank": meta["caption_blank"],
+        "fortune_drawn": meta.get("fortune_drawn", False),
         "dropped_glyphs": meta["dropped_glyphs"], "qr_text": meta["qr_text"],
         "at": _now(),
     }
@@ -1285,6 +1290,14 @@ def publish(store: TwinStore, cloud: str, token: str,
             _rv = twinagent.read_review(rd)
             if _rv:
                 payload["review"] = _rv
+            # ── 2026-10-02 P10 命盤：這一跑用的命盤（枚舉）＋命盤卡通過檢查的句子（≤3 句）。
+            #    mbti_source 多一個 `twin`（觀眾沒給、分身自己猜的）；沒有命盤就不送這一欄。
+            _fz = twin.get("fortune")
+            if isinstance(_fz, dict) and any(_fz.get(k) for k in ("mbti", "zodiac", "blood")):
+                payload["fortune"] = {
+                    "mbti": _fz.get("mbti"), "mbti_source": _fz.get("mbti_source"),
+                    "zodiac": _fz.get("zodiac"), "blood": _fz.get("blood"),
+                    "lines": [str(x) for x in (_fz.get("lines") or [])][:3]}
             rb = twinagent.receipt_bundle(work_root, sid,
                                           expect_head=twin.get("verdict_hash"))
             if rb.get("ok"):

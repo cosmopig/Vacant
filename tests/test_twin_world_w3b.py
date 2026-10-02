@@ -36,14 +36,14 @@ def _text(rel: str) -> str:
 
 
 def test_pool_size_places_and_links() -> None:
-    assert len(_ALL) >= 40
+    assert len(_ALL) == 24          # P10：八個地點各 3 件
     places: dict[str, int] = {}
     for rel in _ALL:
         places[twinground.place_of(rel)] = places.get(twinground.place_of(rel), 0) + 1
     assert set(places) == {"投遞口", "捏土處", "長桌廣場", "石頭閘門", "帳本鏈", "草稿角", "紙卡地", "畫架與長椅"}
-    assert min(places.values()) >= 3, places
+    assert set(places.values()) == {3}, places
     gs = twinground.groups()
-    assert len(gs) >= 6
+    assert 6 <= len(gs) <= 8
     for g, ms in gs.items():
         assert len(ms) >= 2 and all(m in _ALL for m in ms), g
 
@@ -69,41 +69,38 @@ def test_pool_links_are_checkable_facts() -> None:
     tail = _text("帳本鏈/尾段_418到447片.txt")
     assert re.search(r"^431 .*印紋：蕨葉.*鐵環：鬆", tail, re.M)
     assert "片：431" in _text("投遞口/收據卡_蕨葉.txt") and "印紋：蕨葉" in _text("投遞口/收據卡_蕨葉.txt")
-    assert "5 道" in _text("草稿角/鉛筆.txt") and "共 5 截" in _text("長桌廣場/土堆/筆芯斷截.txt")
+    assert "5 道" in _text("草稿角/鉛筆.txt") and "5 截" in _text("長桌廣場/土堆/小陶印.txt")
     births = re.findall(r"^\d+ +出生片", tail, re.M)
     assert len(births) == 4 and "共 4 片出生片" in _text("帳本鏈/出生片_420到440.txt")
     assert "63 撮" in _text("捏土處/土量刻痕.txt") and "59 撮" in _text("捏土處/土量刻痕.txt")
     # 刻意的「對不上」：432 螺旋的收據在 440 螺旋的出生片之前
     assert re.search(r"^432 .*印紋：螺旋", tail, re.M) and re.search(r"^440 +出生片 +印紋：螺旋", tail, re.M)
-    # 兩份土堆清單對不上（甲 2 枚、乙 3 枚）
-    assert "小陶印　2 枚" in _text("長桌廣場/土堆/清單_甲.txt") and "小陶印　3 枚" in _text("長桌廣場/土堆/清單_乙.txt")
+    # 土堆小罐裡只有兩枚（沒有第三枚），閘門退回紙上的土堆清單卻寫 3 枚
+    assert "沒有第三枚" in _text("長桌廣場/土堆/小陶印.txt")
+    assert re.search(r"小陶印\s*3 枚", _text("石頭閘門/退回紙_另一張.txt"))
 
 
-def test_sample_is_deterministic_and_differs_across_viewers() -> None:
+def test_everyone_gets_the_same_ground_all_24_files() -> None:
+    """P10：命盤決定走法、不決定地上有什麼——每位觀眾的地上都是同一整片（24 件）與全部關聯組。"""
     a1, a2 = twinground.sample("sub-A"), twinground.sample("sub-A")
     assert a1 == a2
-    others = {tuple(twinground.sample(f"sub-{i}")["files"]) for i in range(30)}
-    assert len(others) >= 20, "不同觀眾地上要不一樣"
-    gs = twinground.groups()
-    for i in range(30):
-        s = twinground.sample(f"sub-{i}")
-        # 每個地點至少 2 件
-        by: dict[str, int] = {}
-        for rel in s["files"]:
-            by[twinground.place_of(rel)] = by.get(twinground.place_of(rel), 0) + 1
-        assert min(by.values()) >= 2 and len(by) == 8
-        # 至少兩個關聯組整組都在
-        assert len(s["groups"]) == 2
-        for g in s["groups"]:
-            assert set(gs[g]) <= set(s["files"])
-        # 一個地點最多 4 件之外只由關聯組推高
-        assert 16 <= len(s["files"]) <= 34
+    assert {tuple(twinground.sample(f"sub-{i}")["files"]) for i in range(30)} == {tuple(_ALL)}
+    assert twinground.sample("sub-A")["groups"] == sorted(twinground.groups())
+
+
+def test_every_item_lures_some_temperament_and_all_eight_letters_are_covered() -> None:
+    """每件地上的東西至少對一種性情有吸引力；E I S N T F J P 各至少三件（`world/materials/_lure.json`）。"""
+    lure = json.loads((twinground.MATERIALS / "_lure.json").read_text(encoding="utf-8"))["lure"]
+    assert sorted(lure) == _ALL
+    assert all(v and set(v) <= set("EISNTFJP") for v in lure.values())
+    for letter in "EISNTFJP":
+        assert sum(letter in v for v in lure.values()) >= 3, letter
 
 
 def test_lay_copies_read_only_and_records_sha(tmp_path) -> None:
     import hashlib
     m = twinground.lay(tmp_path, "sub-X")
-    assert m["n_files"] == len(m["files"]) >= 16
+    assert m["n_files"] == len(m["files"]) == 24
     for f in m["files"]:
         p = tmp_path / f["path"]
         assert p.is_file() and not (p.stat().st_mode & 0o222), "要唯讀"

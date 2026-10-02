@@ -133,7 +133,12 @@ SUFFIX = ".sidecar.jsonl"
 #: 分身的 pi 以 `--mode json` 跑，`agent_stdout.log` 裡每一回合 assistant 的**文字**
 #: （不含思考區塊、不含工具呼叫的參數）→ 一筆旁註。來源同樣是分身側自己的記錄
 #: （pi 的 stdout），不是 Vacant 當場觀察到的事，理由與上面兩種同一條。
-TYPES = ("postaudit", "twin_step", "twin_say", "twin_gate")
+#:
+#: `twin_fortune`（P10，2026-10-02，`decisions/DECISION_20261002_TWIN_FORTUNE.md`）：分身這一跑用的**命盤**。
+#: 兩拍：`way`（段 1 結束、命盤定下來，電視演「它照著你的命盤……」）、`card`（每次嘗試結束、命盤卡檢查完，
+#: 電視收尾那一拍）。欄位全是**枚舉**（MBTI 16 型、mbti_source、元素、血型）；`lines` 只在 `card` 拍有，
+#: ≤ 3 句、每句 ≤ 60 字，是分身依這一跑的步驟寫、且已逐句對過步驟紀錄的「你是 X，所以我 Y」（不帶檔名）。
+TYPES = ("postaudit", "twin_step", "twin_say", "twin_gate", "twin_fortune")
 
 COMMON = ("schema", "type", "ts_ms", "cell_id", "run_id")
 
@@ -146,7 +151,17 @@ FIELDS: dict[str, tuple[str, ...]] = {
     # 寫在 `gate_ran` 之前（pi 結束、凍結之前），電視才拿得到逐格結果；權威的結果仍是
     # launcher 落的 `visible_*.json`（測試比對兩者相等）。
     "twin_gate": ("attempt", "passed", "checks"),
+    "twin_fortune": ("phase", "attempt", "mbti", "mbti_source", "element", "blood", "lines"),
 }
+#: `twin_fortune` 的枚舉（與 `tv_contract.FORTUNE_*` 同值，測試釘住；`fortune.py` 是來源）。
+FORTUNE_PHASES = ("way", "card")
+FORTUNE_MBTI = ("INFP", "INFJ", "INTP", "INTJ", "ISFP", "ISFJ", "ISTP", "ISTJ",
+                "ENFP", "ENFJ", "ENTP", "ENTJ", "ESFP", "ESFJ", "ESTP", "ESTJ")
+FORTUNE_SOURCES = ("ai", "self", "twin")
+FORTUNE_ELEMENTS = ("火", "土", "風", "水")
+FORTUNE_BLOODS = ("A", "B", "O", "AB")
+FORTUNE_MAX_LINES = 3
+FORTUNE_LINE_MAX = 60
 #: `twin_gate.checks[]` 每條准出現的欄位（與 `tv_contract.GATE_CHECK_KEYS` 同值，測試釘住）。
 GATE_CHECK_KEYS = ("id", "ok", "label", "file", "line")
 
@@ -396,6 +411,34 @@ def _runs(lifecycle_events: Iterable[dict]) -> dict[str, dict[str, Any]]:
     return runs
 
 
+def _fortune_problems(r: dict, i: int) -> list[str]:
+    """`twin_fortune` 的形狀：全是枚舉；`lines` 只在 card 拍、≤3 句、每句 ≤60 字、不是檔名。"""
+    bad: list[str] = []
+    if r.get("phase") not in FORTUNE_PHASES:
+        bad.append(f"旁註第 {i} 筆：twin_fortune 的 phase 不在白名單：{r.get('phase')!r}")
+    if not (_is_nat(r.get("attempt")) and r["attempt"] >= 1):
+        bad.append(f"旁註第 {i} 筆：twin_fortune 的 attempt 要是 ≥ 1 的整數")
+    for key, allowed in (("mbti", FORTUNE_MBTI), ("mbti_source", FORTUNE_SOURCES),
+                         ("element", FORTUNE_ELEMENTS), ("blood", FORTUNE_BLOODS)):
+        v = r.get(key)
+        if v is not None and v not in allowed:
+            bad.append(f"旁註第 {i} 筆：twin_fortune 的 {key} 不在白名單：{v!r}")
+    if (r.get("mbti") is None) != (r.get("mbti_source") is None):
+        bad.append(f"旁註第 {i} 筆：twin_fortune 的 mbti 與 mbti_source 要同時有或同時沒有")
+    ls = r.get("lines")
+    if not isinstance(ls, list) or len(ls) > FORTUNE_MAX_LINES:
+        bad.append(f"旁註第 {i} 筆：twin_fortune 的 lines 要是 ≤ {FORTUNE_MAX_LINES} 句的清單")
+    else:
+        if r.get("phase") == "way" and ls:
+            bad.append(f"旁註第 {i} 筆：twin_fortune 的 way 拍不帶 lines")
+        for s in ls:
+            if not isinstance(s, str) or not s.strip() or len(s) > FORTUNE_LINE_MAX:
+                bad.append(f"旁註第 {i} 筆：twin_fortune 的 lines 每句要是非空字串、≤ {FORTUNE_LINE_MAX} 字")
+            elif looks_like_filename(s):
+                bad.append(f"旁註第 {i} 筆：twin_fortune 的 lines 帶了像檔名的字")
+    return bad
+
+
 def validate(rows: Iterable[dict], *,
              lifecycle_events: Iterable[dict] | None = None) -> list[str]:
     """旁註契約自檢（＋給了 lifecycle 就一併驗綁定）。回問題清單（空＝合格）。"""
@@ -468,6 +511,19 @@ def validate(rows: Iterable[dict], *,
                     and r["ts_ms"] < run["ended_ms"]:
                 bad.append(f"旁註第 {i} 筆：ts_ms 早於那一跑的 run_ended——"
                            "「事後」在資料上不成立")
+        elif t == "twin_fortune":
+            bad.extend(_fortune_problems(r, i))
+            if runs is None:
+                continue
+            run = runs.get(r.get("run_id"))
+            if run is None:
+                bad.append(f"旁註第 {i} 筆：run_id {r.get('run_id')!r} 不在這份錄影裡")
+                continue
+            if run["arm"] != LC_ARM_ON:
+                bad.append(f"旁註第 {i} 筆：run_id {r.get('run_id')} 是 {run['arm']}，不是 ON 臂")
+            if r.get("cell_id") != run["cell_id"]:
+                bad.append(f"旁註第 {i} 筆：cell_id {r.get('cell_id')!r} 與那一跑的格子"
+                           f" {run['cell_id']!r} 不同")
         elif t == "twin_gate":
             if not (_is_nat(r.get("attempt")) and r["attempt"] >= 1):
                 bad.append(f"旁註第 {i} 筆：twin_gate 的 attempt 要是 ≥ 1 的整數")
@@ -573,7 +629,7 @@ def merge(lifecycle_events: list[dict], rows: list[dict]) -> list[dict]:
     after_end: dict[str, list[dict]] = {}
     live: dict[str, list[dict]] = {}
     for r in rows:
-        bucket = live if r.get("type") in ("twin_step", "twin_say", "twin_gate") else after_end
+        bucket = live if r.get("type") in ("twin_step", "twin_say", "twin_gate", "twin_fortune") else after_end
         bucket.setdefault(r.get("run_id"), []).append(r)
     for lst in live.values():
         lst.sort(key=lambda r: r.get("ts_ms", 0))

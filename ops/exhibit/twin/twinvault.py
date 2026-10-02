@@ -160,6 +160,8 @@ TWIN_ON_CHAIN_KEYS: tuple[str, ...] = (
 TWIN_OFF_CHAIN_KEYS: tuple[str, ...] = (
     "arrival", "working", "handover", "degrade_reason",
     "decision", "reason", "artifacts",
+    # P10（2026-10-02）命盤：這一跑用的命盤（枚舉）＋命盤卡三句。命盤卡句子是觀眾特質的衍生物，同一條規矩。
+    "fortune",
 )
 
 #: 撤回時**真的刪**的鏈外檔（依序；nonce 第一個——它是 hiding 的全部，誠實邊界 4）。

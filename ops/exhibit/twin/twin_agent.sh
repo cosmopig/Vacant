@@ -142,6 +142,15 @@ if [ "$RETRY" -eq 0 ]; then
     fi
 fi
 
+# ── P10 命盤（2026-10-02）：段 2 的系統提示尾端接「你做事的方式」。
+#    關卡已把這一跑用的命盤寫進 `$RUN_DIR/fortune_final.json`；沒有命盤 ⇒ 空字串，
+#    SYS 與沒有命盤時逐位元相同。重改（RETRY）時同一份檔還在，所以重來照命盤重來。
+WAY="$("$PY" "$HERE/fortune.py" way "$RUN_DIR" 2>/dev/null || true)"
+SYS="$SYS$WAY"
+MSG="$MSG$("$PY" "$HERE/fortune.py" msg "$RUN_DIR" 2>/dev/null || true)"
+# 電視的「它照著你的命盤……」那一拍（旁註 `twin_fortune` phase=way；只在第一次、沒有命盤就不發）。
+[ "$RETRY" -eq 0 ] && { "$PY" "$HERE/fortune.py" announce "$RUN_DIR" 2>/dev/null || true; }
+
 # ── 整跑時間預算（`twinagent.RUN_BUDGET_S`，預設 420 秒）：這一次 pi 最多跑 min(單次上限, 剩下的預算) 秒；
 #    重改時剩不到 `min_attempt_s`（預設 60 秒）⇒ 不再開 pi（SKIP）。被切掉的那一次照樣 prepare，但標 GATE_CUT=1
 #    （電視演「時間到」，不演成四個錯）。沒有預算設定（舊呼叫）⇒ 不限。
@@ -160,5 +169,7 @@ fi
 # ── 根據閘門的紀錄：pi 已經結束（分身改不到），凍結與驗收還沒開始 ──
 # 重寫 tests_visible/_ledger.py，並把這一次的四格結果預先寫成旁註（先於 gate_ran）。
 # 失敗不改變這一跑的結束碼；沒有 _ledger.py 時四格窗一律不亮。
+# P10 命盤卡：同一個時間點（pi 已死、凍結之前）逐句對步驟紀錄，發 `twin_fortune` phase=card 旁註（先於 gate_ran）。
+"$PY" "$HERE/fortune.py" card "$(pwd)" "$RUN_DIR" 2>/dev/null || true
 GATE_CUT="$CUT" "$PY" "$HERE/grounding_gate.py" prepare "$(pwd)" "$RUN_DIR" || true
 exit "$RC2"

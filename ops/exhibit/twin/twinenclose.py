@@ -90,7 +90,7 @@ if str(REPO) not in sys.path:
 ENC_SH = REPO / "ops" / "vacantrun" / "enclosure_20260920" / "bin" / "enc.sh"
 #: 圍牆裡看到的門（`enc.sh` 把門的目錄 `--ro-bind` 到 `/run/vacant`）。
 INNER_DOOR_SOCK = "/run/vacant/relay.sock"
-#: 圍牆裡的 `grounding_gate.prepare` 寫旁註 `twin_gate` 的地方（run-dir；主機側 `EventForwarder` 轉到真的旁註檔）。
+#: 圍牆裡的 `grounding_gate.prepare` 寫旁註 `twin_gate`（P10 起也有 `fortune.emit` 寫的 `twin_fortune`）的地方（run-dir；主機側 `EventForwarder` 轉到真的旁註檔）。
 GATE_SIDECAR_PART = "gate_sidecar_part.jsonl"
 #: launcher 在圍牆裡寫的事件檔（主機側轉送進展場 live 檔）。
 EVENTS_PART = "lifecycle_part.jsonl"
@@ -244,9 +244,14 @@ class EventForwarder(threading.Thread):
             except ValueError:
                 continue
             if not (isinstance(row, dict) and row.get("schema") == "twin.sidecar/1"
-                    and row.get("type") == "twin_gate"
+                    and row.get("type") in ("twin_gate", "twin_fortune")
                     and row.get("cell_id") == self.caller.get("cell_id")):
                 continue
+            if row.get("type") == "twin_fortune":
+                # P10 命盤旁註（`fortune.emit`）：圍牆裡寫得到的只有 run-dir，主機側先驗過形狀（全是枚舉）再轉。
+                from ops.exhibit.twin import sidecar as _sc
+                if _sc._fortune_problems(row, 0):
+                    continue
             try:
                 self.gate_dst.parent.mkdir(parents=True, exist_ok=True)
                 fd = os.open(self.gate_dst, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)

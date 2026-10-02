@@ -1,4 +1,4 @@
-"""twin/twinground — 段 0：鋪地。從世界的材料池為每一位分身確定性抽出「地上的東西」。
+"""twin/twinground — 段 0：鋪地。把世界的材料池鋪成每一位分身的「地上的東西」。
 
 ## 這支在架構裡承重什麼
 
@@ -6,19 +6,17 @@
 
 W3 的分身房間裡什麼都沒有，「好幾步」只能是嘴上的。W3b 把世界裡的**實物**
 （`world/materials/<地點>/…`：清單、帳本鏈尾段、托盤裡的信、紙團、卡片格狀圖……，
-彼此有關聯）放進房間的 `地上/<地點>/…`。每一跑從池子依 `sub_id` 的雜湊**確定性**抽樣：
-同一位重跑一樣、不同觀眾看到的地上不一樣。
+彼此有關聯）放進房間的 `地上/<地點>/…`。（W3b 當時是每一跑依 `sub_id` 雜湊抽樣；P10 起改成全部鋪，見下一節。）
 
 ⚠ 這些是地上的東西，**不是任務**：池子裡不准有任務句式或分身台詞
 （`tests/test_twin_world_w3b.py` 掃禁詞與菜單句式）。
 
-## 抽樣規則（確定性，不用模型）
+## 鋪法（P10，2026-10-02 起：全部鋪）
 
-1. 關聯組（`_links.json`）依 `h(組名)` 排序，取前 `N_GROUPS` 組，**整組成員全進**（保留「兩件東西之間的關聯」）。
-2. 每個地點的目標件數 `k = 2 + h(地點) % 3`（2–4）；不足 k 就依 `h(檔)` 補。
-   組員把某地點推過 k 就讓它超過（不砍關聯）。
-3. 複製進工作區 `地上/<地點>/…`，**檔案 0444**（唯讀語意：ws_write 蓋不掉）；清單＋sha256 回傳，
-   由呼叫端記進 run 紀錄（run-dir，不在工作區）。
+P10 把材料池從 41 件換成 24 件（八個地點各 3 件，每件都對某一種性情有吸引力，見 `world/materials/_lure.json`）。
+**每一位分身看到同一片地**——命盤決定的是「先去哪、怎麼走」，不是「地上有什麼」；這樣八個人走同一片地，
+走法不同，電視上的劇本才不一樣（以前每位觀眾抽 16–34 件，走法差異與抽樣差異混在一起，分不開）。
+`sample(sub_id)` 的簽名不變（回 `{"files", "groups"}`），但回的是整個池子與全部關聯組。
 
 ⚠ 誠實邊界：唯讀是檔案權限，不是作業系統隔離；成品「用到的數字找得到出處」
 是字面比對（`provenance`），不代表推理對。
@@ -34,7 +32,7 @@ from typing import Any
 
 MATERIALS = pathlib.Path(__file__).resolve().parent / "world" / "materials"
 GROUND_DIRNAME = "地上"
-N_GROUPS = 2
+N_GROUPS = 2          # 舊的抽樣參數（P10 起不用，留著讓舊測試的 import 不炸）
 _SALT = "vacant.twin.ground/1\n"
 
 
@@ -62,25 +60,10 @@ def place_of(rel: str) -> str:
 
 
 def sample(sub_id: str, materials: pathlib.Path = MATERIALS) -> dict[str, Any]:
-    """回 `{"files": [相對路徑…], "groups": [組名…]}`。同 sub_id 同結果。"""
+    """回 `{"files": [相對路徑…], "groups": [組名…]}`。P10 起＝整個池子＋全部關聯組（`sub_id` 不影響結果）。"""
     items = pool(materials)
     gs = groups(materials)
-    chosen_groups = sorted(gs, key=lambda g: (_h(sub_id, "group:" + g), g))[:N_GROUPS]
-    picked: set[str] = set()
-    for g in chosen_groups:
-        picked.update(m for m in gs[g] if m in items)
-    places = sorted({place_of(i) for i in items})
-    for pl in places:
-        k = 2 + _h(sub_id, "place:" + pl) % 3
-        have = [i for i in picked if place_of(i) == pl]
-        rest = sorted((i for i in items if place_of(i) == pl and i not in picked),
-                      key=lambda i: (_h(sub_id, "item:" + i), i))
-        for i in rest:
-            if len(have) >= k:
-                break
-            picked.add(i)
-            have.append(i)
-    return {"files": sorted(picked), "groups": chosen_groups}
+    return {"files": sorted(items), "groups": sorted(gs)}
 
 
 def lay(ground_root: pathlib.Path, sub_id: str,

@@ -110,7 +110,8 @@ def evidence_for(case: str, message: str, frozen: pathlib.Path, ground: dict[str
 
 
 def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
-            out_dir: pathlib.Path, enclose: str = "off", require_tier: str | None = None) -> dict[str, Any]:
+            out_dir: pathlib.Path, enclose: str = "off", require_tier: str | None = None,
+            collect: Any = None) -> dict[str, Any]:
     from ops.exhibit.twin import grounding_gate as gg
     from ops.exhibit.twin import sidecar as sidecarlib
     from ops.exhibit.twin import sidecar as sidecarlib
@@ -242,6 +243,8 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
         hit["B8"] = rec["twin"].get("requests_seen") == 0 or rec["twin"].get("degrade_kind") == "no_model_call"
         rec["branches"] = {b: v for b, v in hit.items() if v}
 
+        if collect is not None:                   # P10：撤回之前讓呼叫端多收一些（信的命盤段、命盤卡…）
+            collect(rd, ws, rec)
         w = twinlink.withdraw(st, sid, reason="gate_samples:cleanup")
         rec["withdrawn"] = bool(w.get("ok"))
         rec["erased_left"] = twinagent.run_artifacts_present(twinagent.default_work_root(db), sid)

@@ -11,6 +11,11 @@
 4. 把 `<run_dir>/stage2_in/` 裡預先備好的 WORLD.md 與 地上/ 搬進工作區（唯讀）。
    段 1 的分身看不到它們。
 
+P10（2026-10-02，命盤）：信的末尾有一段「命盤」（`fortune.parse_letter`）。本文（命盤段之前）照舊過 LEAK／時段詞／300 字；
+命盤段由 `fortune.render_section` **確定性地重寫**：標頭行（MBTI／星座／血型）由關卡寫、分身只提供每行那一句，
+且那一句要過 LEAK／時段詞／「沒給的東西不准提」三道防呆；**星座與血型沒給就不寫**；MBTI 沒給才收分身猜的四個字母。
+這一跑用的命盤寫進 `<run_dir>/fortune_final.json`（段 2 的「做事的方式」從它來）。命盤段不計入 300 字。
+
 另存一份 `<run_dir>/letter_final.md`（工作區外；`grounding_gate` 窗 2 的出處，分身之後改不到它）。
 
 信.md 空了／不存在 ⇒ 結束碼 4（第二回合不起）。`<run_dir>/letter_guard.json` 只記計數，不記內容。
@@ -24,6 +29,12 @@ import pathlib
 import re
 import shutil
 import sys
+
+try:                                   # 套件內 import；當腳本跑時退到同目錄
+    from ops.exhibit.twin import fortune
+except ImportError:                    # pragma: no cover - 單檔執行
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+    import fortune                     # type: ignore[no-redef]
 
 LEAK_WINDOW = 8
 MAX_LETTER = 300
@@ -71,6 +82,14 @@ def clean_letter(letter: str, traits: str) -> tuple[str, dict]:
                   "truncated": sum(len(p) for p in kept) > len(text)}
 
 
+def _read_json(p: pathlib.Path) -> dict:
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return d if isinstance(d, dict) else {}
+
+
 def run(ws: pathlib.Path, rd: pathlib.Path) -> int:
     ws, rd = pathlib.Path(ws), pathlib.Path(rd)
     traits_p, letter_p = ws / "TRAITS.md", ws / LETTER
@@ -86,6 +105,11 @@ def run(ws: pathlib.Path, rd: pathlib.Path) -> int:
         except FileNotFoundError:
             pass
         info["traits_removed"] = not traits_p.exists()
+        # P10：命盤卡的逐字抄錄比對要用特質全文；TRAITS.md 已不在房間，留一份在 run-dir（工作區外、撤回時跟 run-dir 一起刪）。
+        try:
+            (rd / "traits_ref.txt").write_text(traits, encoding="utf-8")
+        except OSError:
+            pass
         # 2. 頂層其他檔（含第一回合寫去別處的）全清，只留信
         for p in sorted(ws.iterdir()):
             if p.name == LETTER:
@@ -99,12 +123,24 @@ def run(ws: pathlib.Path, rd: pathlib.Path) -> int:
             info["ok"] = False
             return 4
         raw = letter_p.read_text(encoding="utf-8", errors="replace")
-        text, cnt = clean_letter(raw, traits)
+        # P10 命盤：本文與命盤段分開處理
+        body, sec = fortune.parse_letter(raw)
+        text, cnt = clean_letter(body, traits)
         info.update(cnt)
         if not text:
             letter_p.unlink()
             info["ok"] = False
             return 4
+        given = _read_json(rd / fortune.IN_NAME)
+        f = fortune.resolve(given, sec)
+        section, scnt = fortune.render_section(f, sec, traits)
+        info["fortune"] = {"lines": scnt["lines"], "dropped": scnt["dropped"], "mbti_guessed": f["mbti_guessed"],
+                           "given": bool(given.get("mbti") or given.get("zodiac") or given.get("blood"))}
+        try:
+            (rd / fortune.FINAL_NAME).write_text(json.dumps(f, ensure_ascii=False) + "\n", encoding="utf-8")
+        except OSError:
+            pass
+        text = text + ("\n\n" + section if section else "")
         letter_p.write_text(text + "\n", encoding="utf-8")
         # 段 1 結束時的信，另存一份在 run-dir（工作區外）：根據閘門的窗 2 要用「它讀到的信」
         # 當出處，而段 2 的分身改得動工作區裡的 信.md。撤回時跟 run-dir 一起刪。

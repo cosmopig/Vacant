@@ -77,7 +77,7 @@ PRECHECK_NAME = "gate_precheck.ndjson"   # prepare 每次追加一行（run-dir�
 LETTER_COPY_NAME = "letter_final.md"     # twin_letter_guard 存的、段 1 結束時的信（分身之後改不到）
 
 #: 與 `twinagent.NOT_ARTIFACTS`／`GROUND_PREFIX` 同值（測試釘住；這一支要能單獨複製進沙箱，所以不 import 它）。
-NOT_ARTIFACTS = frozenset({"TRAITS.md", "WORLD.md", "PLAN.md", "VACANT_FEEDBACK.md", "信.md"})
+NOT_ARTIFACTS = frozenset({"TRAITS.md", "WORLD.md", "PLAN.md", "VACANT_FEEDBACK.md", "信.md", "命盤卡.md"})
 GROUND_PREFIX = "地上/"
 MAX_ARTIFACTS = 12
 MAX_ARTIFACT_BYTES = 200_000

@@ -72,6 +72,7 @@ REPO = TWIN.parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
+from ops.exhibit.twin import fortune as fortunelib  # noqa: E402
 from ops.exhibit.twin import grounding_gate as gatelib  # noqa: E402
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
@@ -119,7 +120,7 @@ DEFAULT_MIN_FREE_MB = 2048
 TIER_RANK = {"A": 3, "B": 2, "B'": 1, "C": 0}
 
 #: 工作區裡**不是**成品的檔。
-NOT_ARTIFACTS = frozenset({"TRAITS.md", "WORLD.md", "PLAN.md", "VACANT_FEEDBACK.md", "信.md"})
+NOT_ARTIFACTS = frozenset({"TRAITS.md", "WORLD.md", "PLAN.md", "VACANT_FEEDBACK.md", "信.md", "命盤卡.md"})
 
 #: 地上/ 是世界的實物（唯讀），不是分身的成品。
 GROUND_PREFIX = "地上/"
@@ -165,6 +166,19 @@ LETTER_SYSTEM_PROMPT = (
     "家人、寵物、作品、地名、品牌、年月日或時刻，那個詞就不寫；"
     "要講，就改用條件、傾向和關係來講。"
     "不要逐字抄 TRAITS.md，要寫的是你從它讀出來的性情。三百字以內，用繁體中文。\n\n"
+    "信的本文寫完之後，另起一行寫「命盤」兩個字，接著照 TRAITS.md 最後那三行（MBTI、星座、血型）寫，"
+    "每一行一句、四十字以內、不寫檔名，格式固定：\n"
+    "MBTI：TRAITS.md 有給就照抄那四個字母；沒給，就寫你依特質猜的四個字母\n"
+    "依據：只有 MBTI 沒給時才寫；一句話說你從哪些性情讀出來\n"
+    "E/I：一句，直接寫這一組在他身上的習慣或動作\n"
+    "S/N：同上\nT/F：同上\nJ/P：同上\n"
+    "星座：只有 TRAITS.md 有給才寫；一句，說那個星座的元素在他身上的樣子\n"
+    "血型：只有 TRAITS.md 有給才寫；一句，說這個血型在他身上的樣子\n"
+    "E/I、S/N、T/F、J/P 這四行（MBTI 有給或你猜了的話）一行都不能少。"
+    "這幾句各不相同，不要用「這個人在這一組上」「看起來是」這類句頭，也不要重複信本文的字；"
+    "要具體到只有他才會這樣。"
+    "沒給的星座與血型，整行不要寫，也不要猜。命盤這一段和信的本文一樣：只寫傾向，"
+    "不寫現實生活裡的具體事物，不逐字抄 TRAITS.md。這是占卜遊戲，只寫「看起來像」，不寫成事實。\n\n"
     "規則：不要自稱 AI，不要提到模型或提示詞。每一次動手（讀、寫）之前，"
     "先用一句繁體中文說你現在在想什麼、接下來要做什麼，這句話裡不要寫檔名。"
     "寫好信.md 就停，最後用一句話說信寫好了。"
@@ -197,7 +211,7 @@ SYSTEM_PROMPT = (
     "（對得上、對不上、重複、缺了的）；成品裡用到的每一個數字、印紋、位置，"
     "都要能在地上的某個檔裡找到，不是你自己編的。\n\n"
     "步驟：\n"
-    "1. 先讀信.md，再讀 WORLD.md，再用 ws_list 看地上，把你覺得和信裡這個人有關的東西讀過。\n"
+    "1. 先讀信.md，再讀 WORLD.md，再用 ws_list 看地上有什麼，把你覺得和信裡這個人有關的東西打開讀過。\n"
     "2. 用 ws_write 寫 PLAN.md，結構固定：\n"
     "   第一行：一句話說你要做什麼。\n"
     "   「如果你在這裡」：用第二人稱直接對信裡那個人說話，說你走進來會先注意到什麼、"
@@ -416,6 +430,7 @@ def render_traits(card: Any, card_text: Any) -> str:
         v = c.get(key)
         if v not in (None, ""):
             lines.append(f"- {label}：{str(v)[:600]}")
+    lines += fortunelib.traits_lines(fortunelib.normalize(c))      # P10 命盤：MBTI／星座／血型三行（沒給的明講「沒給」）
     if card_text:
         lines += ["", "## 他貼回來的原文", "", str(card_text)[:6000]]
     return "\n".join(lines) + "\n"
@@ -668,6 +683,8 @@ class Job:
     sub_id: str
     traits: str
     cfg: AgentConfig
+    #: P10 命盤（`fortune.normalize(card)`：枚舉或 None）。run-dir 的 `fortune_in.json` 由它寫出。
+    fortune: dict[str, Any] = field(default_factory=dict)
 
 
 class StepForwarder(threading.Thread):
@@ -951,6 +968,9 @@ def run_one(job: Job) -> dict[str, Any]:
         stage2.mkdir()
         (stage2 / "WORLD.md").write_bytes(WORLD_PATH.read_bytes())
         res["world_sha256"] = world_sha256()
+        # P10 命盤：觀眾給的三個枚舉（沒給＝None）寫進 run-dir（工作區外、撤回時整個刪）。
+        (rd / fortunelib.IN_NAME).write_text(json.dumps(job.fortune or fortunelib.normalize(None),
+                                                        ensure_ascii=False) + "\n", encoding="utf-8")
         ground = twinground.lay(stage2, job.sub_id)
         res["ground"] = ground
         (rd / "ground_manifest.json").write_text(
@@ -1065,6 +1085,16 @@ def run_one(job: Job) -> dict[str, Any]:
             except Exception as e:                       # noqa: BLE001
                 res["summary"]["receipt_verdicts"] = [f"error:{type(e).__name__}"]
         res["outputs"] = read_outputs(pathlib.Path(frozen) if frozen else None)
+        # P10 命盤卡：每一句對步驟紀錄（找不到根據就從卡上拿掉）。沒有命盤就不出卡。
+        try:
+            _f = fortunelib.load_final(rd) or fortunelib.resolve(job.fortune or {}, {})
+            _card = fortunelib.build_card(rd, pathlib.Path(frozen) if frozen else None, _f,
+                                           fortunelib.traits_hint(rd))   # 與 twin_agent.sh 的旁註同一把尺
+            res["fortune"] = ({**fortunelib.twin_view(_f, _card), "dropped_n": len(_card["dropped"]),
+                               "places": _card.get("places") or []} if fortunelib.has_any(_f) else None)
+        except Exception as exc:                              # noqa: BLE001 — 命盤卡是加分項，不准拖垮這一跑
+            res["fortune"] = None
+            res["fortune_error"] = type(exc).__name__
         if job.cfg.gate:
             res["review"] = read_review(rd)
     except (Exception, SystemExit) as exc:               # noqa: BLE001
@@ -1131,7 +1161,10 @@ def build_twin(res: dict[str, Any], *, model: str,
         return out
 
     lines = derive_lines(o.get("decision"), o.get("reason"), o.get("artifacts") or [])
+    _fz = res.get("fortune")
     return {
+        **({"fortune": {k: _fz.get(k) for k in ("mbti", "mbti_source", "zodiac", "blood",
+                                                 "first_line", "lines")}} if _fz else {}),
         **lines,
         "decision": o.get("decision"), "reason": o.get("reason"),
         "artifacts": o.get("artifacts") or [],
@@ -1407,7 +1440,8 @@ def job_for(sub_id: str, card: Any, card_text: Any, cfg: AgentConfig) -> Job | N
     """主執行緒組 job。特質讀不到（檔案庫沒有、舊庫壞掉）⇒ `None`，呼叫端走退化。"""
     if card in (None, {}, "") and not card_text:
         return None
-    return Job(sub_id=sub_id, traits=render_traits(card, card_text), cfg=cfg)
+    return Job(sub_id=sub_id, traits=render_traits(card, card_text), cfg=cfg,
+               fortune=fortunelib.normalize(card))
 
 
 def describe(cfg: AgentConfig) -> dict[str, Any]:
