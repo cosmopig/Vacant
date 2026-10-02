@@ -53,7 +53,7 @@ th{background:var(--soft)}
   <div style="margin-top:12vh">
     <p class="mute">專案負責人簡報 · 2026-10-02</p>
     <h1>Vacant 的新架構與目前發現</h1>
-    <p>零設定的「說做完時查一次」（v3 → v3.7）、可選的可執行驗收 bridge（PR #82），<br>以及三批預註冊評測、一次冒煙目前量到什麼、量不到什麼。</p>
+    <p>零設定的「說做完時查一次」（v3 → v3.7）、可選的可執行驗收 bridge（PR #82），<br>以及歷次預註冊評測、今天的冒煙與 DABstep × v3.7 完整跑量到什麼、量不到什麼。</p>
     <p class="mute">口徑：可究責性／讓依賴有根據。本簡報所有數字附檔案出處，找不到的標「未確認」。<br>鍵盤 ← → 翻頁；Ctrl/Cmd+P 可列印全部頁面。</p>
   </div>
   <div class="src">依據：CLAUDE.md；vacant-wt/pr82 與 vacant-wt/colab 兩個 worktree 內的 decisions／ops 檔案（逐頁標註）。</div>
@@ -134,6 +134,7 @@ th{background:var(--soft)}
     <tr><td>本機 v3（09-26）</td><td>77 題×3，gemma-4-12b 關思考，15 回合上限</td><td>51.9%→59.3%，Wilcoxon p=0.021；C1（現版）對 A p=0.75</td><td>只在被告知上限時作用；差集中 6 題；多交的答案錯多於對</td></tr>
     <tr><td>u274（09-27/28）</td><td>100 題沒用過的 hard 題，不設上限，A vs v3.6.1</td><td>9 vs 10，p=1.0（不一致僅 7 對）</td><td>沒量到差別；缺檔退回 31 跑後 0 對</td></tr>
     <tr><td>Colab C5（09-27/28）</td><td>920 題程式題，A vs v3.6.1</td><td>748（81.3%）vs 758（82.4%），p=0.387</td><td>退回 96% 是誤退；缺檔退回 0 次</td></tr>
+    <tr><td>DABstep × v3.7（10-02，Colab）</td><td>77 題×3 次，gemma-4-12B QAT（vLLM），15 回合上限；A／C37／C37R</td><td>42.0% → 53.2%（p=0.0028）／60.2%（p=3.1e-5）</td><td>差來自缺檔退回；傷害 0；沒裝那組比 09-26 差；選過的題組</td></tr>
     <tr><td>PR #82 冒煙（10-02）</td><td>30 格，只跑 C（v3.7），每題 1 次</td><td>誤退 0／23、missing_output 3／3、新誤退 0</td><td>冒煙，不是檢定；bridge 沒測到</td></tr>
     <tr><td>BCB-Hard（09-24）</td><td>116 題，OFF／CH／GATE／GATE+R</td><td>假完成放行 47%→30%（p=8.8e-5）、擋錯 0；H2、H3 不成立</td><td>閘門只擋得住測得到的錯；不能說「只裝不影響」</td></tr>
   </table>
@@ -193,6 +194,7 @@ th{background:var(--soft)}
     <li>過去有增益的，都是 Vacant 握著生成（可執行驗收＋重抽＋拒交）；缺的是「真的訊號＋對的時機＋重來的權力」（推論，沒在 DABstep 上測過）。</li>
     <li>探索性：沒交就重開一跑，gemma 50→55（不是檢定，不可講成效果）。</li>
   </ul>
+  <p class="warn"><b>今天的更新：</b>DABstep × v3.7 量到差別（p=0.0028），來源正是「說做完卻沒寫要求的檔」這種<b>時機對、訊號真</b>的情況（第 14 頁）；上面的判讀對其餘的錯仍然成立。</p>
   <div class="src">出處：CLAUDE.md〈零設定〉段（docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md 摘要）；DECISION_20260926_ZERO_CONFIG_V3.md §十一〈預期〉；ops/eval/formal/explore_two_runs.py（本簡報只引 CLAUDE.md 的轉述）。</div>
 </section>
 
@@ -239,11 +241,44 @@ th{background:var(--soft)}
 
 <!-- 14 -->
 <section class="slide">
-  <h2>DABstep 77 題 × v3.7 完整跑（進行中）</h2>
+  <h2>DABstep 77 題 × v3.7 完整跑：結果</h2>
   <!-- DABSTEP_RESULTS -->
-  <div class="card" style="margin-top:1em"><p class="big mute" style="font-size:clamp(26px,3.5vw,44px)">結果待補</p>
-  <p class="mute">此處之後填入。填入時請沿用既有口徑：預註冊指定的檢定與數字、傷害次數、退回種類；不寫「Vacant 讓 agent 做得更好」。</p></div>
-  <div class="src">歷史對照：v3（15 回合上限、本機）51.9%→59.3%，p=0.021（提醒的效果，現預設關）；u274 不設上限 p=1.0。出處見第 6 頁。</div>
+  <p>預註冊批次（agent 凍結、人類未逐條簽字）。Colab G4、gemma-4-12B QAT、pi 0.87.1、<b>15 回合上限</b>；79 題 × 3 組 × 3 次 = 711 格，infra_void 0、安裝失敗 0。</p>
+  <table>
+    <tr><th>組</th><th>做什麼</th><th>答對／231</th><th>答對率</th><th>對 A（每題平均差，p）</th></tr>
+    <tr><td>A</td><td>沒裝 Vacant</td><td>97</td><td>42.0%</td><td>—</td></tr>
+    <tr><td><b>C37</b></td><td>照常 <code>vacant install</code>（產品預設）</td><td>123</td><td>53.2%</td><td><b>+11.3 pp，p=0.0028（主要檢定）</b></td></tr>
+    <tr><td>C37R</td><td><code>vacant install --budget-reminder</code></td><td>139</td><td>60.2%</td><td>+18.2 pp，p=3.1e-5（Holm 6.3e-5）</td></tr>
+  </table>
+  <p>C37R − C37：+6.9 pp，p=0.011。題數：C37 較好 26 題、A 較好 12 題。<b>Vacant 把對的改成錯：0 次。</b></p>
+  <p class="mute">檢定是凍結的 <code>wilcoxon_signed_rank_exact</code>；非零差題數 &gt; 24 時它用常態近似（函式本身的規則）。</p>
+  <div class="src">出處：colab/decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md；colab/ops/colab_dabstep_v37_20261002/results/report_d37.json；預註冊 colab/decisions/prereg/PREREG_20261002_COLAB_DABSTEP_V37.md（凍結 commit 384fa838）。</div>
+</section>
+
+<!-- 14b -->
+<section class="slide">
+  <h2>DABstep × v3.7：差從哪裡來、要小心什麼</h2>
+  <table>
+    <tr><th>每格結局（231 格／組）</th><th>A</th><th>C37</th><th>C37R</th></tr>
+    <tr><td>答對</td><td>97</td><td>123</td><td>139</td></tr>
+    <tr><td>答錯（有答案檔）</td><td>22</td><td>38</td><td>72</td></tr>
+    <tr><td><b>說做完卻沒寫 /app/answer.txt</b></td><td><b>42</b></td><td><b>0</b></td><td><b>0</b></td></tr>
+    <tr><td>被 15 回合切斷、沒交</td><td>59</td><td>67</td><td>12</td></tr>
+    <tr><td>撞 1800 秒時限、沒交</td><td>11</td><td>3</td><td>8</td></tr>
+  </table>
+  <div class="grid g2">
+    <div class="card"><h3 class="ok">機制</h3><ul>
+      <li>C37：說做完時發現要求的答案檔不存在 → <code>missing_output</code> 退回（38 格）→ 補寫，退回後答對 34 格。</li>
+      <li>C37R 多的一截來自回合預算提醒（71 格被提醒），但在上限處交出的答案 23 對、42 錯。</li>
+      <li>交出去的答案裡對的比例：81.5% → 76.4%（C37）→ 65.9%（C37R）。</li>
+    </ul></div>
+    <div class="card"><h3 class="warn">要小心</h3><ul>
+      <li>和 09-26 本機批次比：<b>有 Vacant 那組幾乎一樣</b>（答對 123、沒交 70、答錯 38），<b>變的是沒裝那組</b>（51.9% → 42.0%）。差大半來自「這個引擎下沒裝的 agent 更常說做完卻沒寫檔」。</li>
+      <li>題組是因為「過去有效」選的，不是留出驗證。</li>
+      <li>15 回合上限是評測設定；不外推到沒有上限的互動使用。</li>
+    </ul></div>
+  </div>
+  <div class="src">出處：CONCLUSION_20261002_COLAB_DABSTEP_V37.md §三、§五；results/cell_breakdown.json；pr82/decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md §二。</div>
 </section>
 
 <!-- 15 -->
@@ -252,9 +287,10 @@ th{background:var(--soft)}
   <div class="grid g2">
     <div class="card"><h3 class="ok">能說</h3><ul>
       <li>沒有問題時，模型收到的每一通請求和沒裝時逐位元組相同（正式批次 157 對的第一通請求）。</li>
-      <li>三批預註冊（DABstep、u274、Colab 920 題）都「沒有量到差別」（p=0.21／1.0／0.39）。</li>
+      <li>DABstep 付費正式、u274、Colab 920 題這三批都「沒有量到差別」（p=0.21／1.0／0.39）；今天的 DABstep × v3.7 量到了（見第 14 頁），兩件事要一起講。</li>
       <li>v3.7 在冒煙 30 格上：跑過測試腳本後誤退 0／23、缺檔退回會觸發、新誤退 0（機制，非頻率）。</li>
       <li>BCB-Hard：閘門把假完成放行 47%→30%、擋錯 0（綁在 pi＋該後端）。</li>
+      <li>DABstep 77 題、Colab gemma-4-12B、15 回合上限：照常安裝 v3.7 答對率 42.0%→53.2%（p=0.0028），差來自「說做完卻沒寫要求的檔」被退回補寫；Vacant 把對的改成錯 0 次。並同時說：沒裝那組比 09-26 那批差、題組是選過的、交出答案的正確比例下降。</li>
       <li>在 15 回合上限、本機 gemma-4-12b、77 題下，v3 答對率 51.9%→59.3%（p=0.021），並同時說：只在被告知上限時作用、差集中 6 題、多交的多是錯的。</li>
     </ul></div>
     <div class="card"><h3 class="bad">不能說</h3><ul>
@@ -274,7 +310,8 @@ th{background:var(--soft)}
   <h2>下一步建議</h2>
   <ol style="font-size:clamp(15px,1.6vw,21px)">
     <li><b>補漏退規則</b>：讓題目附的測試腳本（如 <code>run_tests.sh</code>）連續紅到說做完也算 <code>failed_step</code>；改前先用錄好的病歷離線重播量誤報（沿用 <code>replay_reviews.py</code>）。</li>
-    <li><b>等 i1001 與 DABstep × v3.7 的結果再下判斷</b>；i1001 若要續跑，先處理 Colab 回收 VM 的原因（目前未確認），並在 VM 上放不靠本機的時限。</li>
+    <li><b>先解釋 DABstep 兩批的差</b>：回 09-26 本機批次的原始紀錄，把 A 的「沒交」拆成「說做完卻沒寫檔」和「被回合切斷」，確認今天的差是 v3.7 的功勞還是引擎讓沒裝的 agent 更常漏寫檔；之後用沒用過的 DABstep 題做留出驗證（設與不設回合上限各一）。</li>
+    <li><b>i1001</b>：i1001 若要續跑，先處理 Colab 回收 VM 的原因（目前未確認），並在 VM 上放不靠本機的時限。</li>
     <li><b>bridge 另開一臂實測</b>：用 bridge 包住 pi，並含預算相同的 RETRY-NOSUITE，才能分開「驗收」與「多幾次機會」。</li>
     <li><b>產品方向</b>：證據指向缺的是「真的訊號＋對的時機＋重來的權力」；零設定預設路徑維持低侵入，增益要靠握著出口（契約型）路徑，而那條不是零設定。是否做成「握生成」的 agent 屬人類決策。</li>
     <li>展覽口徑維持：機制模擬要標明；不把冒煙或單批數字講成證明。</li>
