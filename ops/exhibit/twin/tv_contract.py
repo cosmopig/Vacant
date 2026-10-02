@@ -323,7 +323,10 @@ def validate(evs: list[dict], *, require_settled: bool = True,
                                f"accepted 只能是 {PRACTICAL_ACCEPTED_FOR[sr]!r}，"
                                f"拿到 {e.get('accepted')!r}")
         if t == "gate_ran" and "checks" in e:
-            if kinds.get(e.get("task_id")) != KIND_PRACTICAL:
+            # 同一批看不到 task_opened（現場 tail 的後段）就不咬——與規則 11、twin_step 同一個口徑；
+            # 2026-10-02 展場第一跑：咬了 ⇒ gate_ran 被丟、之後整格斷在「它說做完了」。
+            _tk = kinds.get(e.get("task_id"))
+            if _tk is not None and _tk != KIND_PRACTICAL:
                 bad.append(f"第 {n} 個事件：只有分身的自主任務的 gate_ran 才帶 checks"
                            "（題庫格的閘門沒有逐格窗）")
             ck = e.get("checks")
