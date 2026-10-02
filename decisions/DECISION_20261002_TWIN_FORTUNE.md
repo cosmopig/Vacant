@@ -254,3 +254,13 @@ G3 的事實表（32 個實體）由 `world/build_facts.py` 重建，`--check` �
    （電視只取前兩句）。契約見 vacant_hm `world3/docs/LIVE_INTERFACE.md` §十四。
 4. **整合端到端量到的缺口（已修）**：P11 的 `polaroid_hints` 在 twinagent 有輸出，但 `twinvault.TWIN_OFF_CHAIN_KEYS` 沒收它，封存 `twin.json` 時被丟掉，
    拍立得永遠拿到 `None`（背景一律退回 drop）。加進白名單（行為衍生的兩個枚舉，撤回跟 twin.json 一起刪）後重跑，背景才對得上地點。證據：`ops/exhibit/twin/evidence_p12_e2e_20261002/`（`run1_hints_dropped/` 是修前那次）。
+
+## 十四、展場第一位觀眾：door_unreconciled 誤判（2026-10-03，P12 後修）
+
+事實（.102 的鏈上 `generated` 列，不含內容）：tw-befa4be32a3d 的 `requests_seen=18`、`door_calls=17`、`tier=B`、`visible_pass`、accepted=true，卻被判 `door_unreconciled`（舊判準 `door_excess != 0`）。
+同庫另外 13 跑 door＝seen。這一跑第 1 輪 303.8 秒（agent 逾時 300 秒被殺）、第 2 輪過；run 內 attempt 通數 10＋7＝17，而 run_ended 為 18。
+1. **方向是反的**：`door_excess = 門 − 收據 = −1`，不是「門多看到呼叫」。繞過收據那一層的樣子是門＞收據；這裡是收據記了一通門沒完成的呼叫（逾時殺 pi 時在途的那通——launcher 的 proxy 出錯也照記，`wire_errors`）。
+   所以懷疑方向（段 1／命盤／拍立得流程有一通走別的 base URL）不成立：那會讓門＞收據。
+2. 修法：`twinagent.door_reconciled`——`>0` 仍判不對（繞過）；`==0` 對；`<0` 只在 `wire_errors` 解釋得了缺的通數時放行；量不到（None）、說不通照判不對。有正負控制測試。
+3. **誠實**：舊 VM 同版 pi（0.85.1）用 `--agent-timeout 75`／`20` 兩輪（共 5 跑）都被逾時殺掉但 door＝seen，**沒有重現 −1**；機制（逾時在途一通）是由 .102 的數字與程式路徑推的，未被實驗證實。
+4. 電視：名冊新增 `people[].polaroid_ready`（布林，twinlink 匯出），電視拍立得那一拍與「會送到手機」只在 true 時演（有這個欄位而非 true 一律不演）。

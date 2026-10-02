@@ -1884,6 +1884,9 @@ def build_view(store: TwinStore, *,
             "engine": twin.get("engine"),
             "latency_ms": twin.get("latency_ms"),
             "status": c.get("status"),
+            # P12：這個人的拍立得會不會有——布林（`run_outcome=="made"` 且沒撤回）；還沒生成＝None。
+            # 電視只看到 verdict accepted 會演拍立得，但對帳不平的那一跑 Vacant 判 not_made、不做拍立得（展場第一位觀眾）。
+            "polaroid_ready": (False if gone else (None if not twin else run_outcome(twin) == "made")),
             "errors": len(c.get("errors") or []),
             # 原文到底在不在檔案庫裡（撤回之後是 False）；沒有封印過的舊卡是 None。
             "card_available": c.get("card_available"),

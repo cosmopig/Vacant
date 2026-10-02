@@ -312,6 +312,7 @@ def test_event_forwarder_only_passes_contract_lines(tmp_path) -> None:
 
 
 def _res(**over) -> dict:
+    extra_summary = {k: over.pop(k) for k in ("wire_errors",) if k in over}
     base = {"sub_id": "s", "twin_id": "tw-x", "error": None, "enclosed": True,
             "require_tier": "B", "wall_s": 1.0,
             "summary": {"stop_reason": "ungated", "accepted": None, "requests_seen": 3,
@@ -325,6 +326,7 @@ def _res(**over) -> dict:
             base["summary"][k] = v
         else:
             base[k] = v
+    base["summary"].update(extra_summary)
     return base
 
 
@@ -338,6 +340,24 @@ def _res(**over) -> dict:
 def test_enclosed_run_degrades_on_bypass_bad_receipt_or_low_tier(over, kind) -> None:
     t = twinagent.build_twin(_res(**over), model="m", fallback=twinlink.fallback_twin)
     assert t["engine"] == "fallback_deterministic" and t["degrade_kind"] == kind
+
+
+def test_p12_door_deficit_explained_by_wire_errors_is_not_a_bypass() -> None:
+    """展場第一位觀眾（door 17／收據 18，visible_pass、tier B 卻被判 door_unreconciled）：
+    收據記的比門多＝launcher 記了一通門沒完成的呼叫（逾時殺掉在途那通）；有 wire_errors 解釋就是真跑。"""
+    r = _res(requests_seen=18, wire_errors=1, twin_enclosure={"door_calls": 17, "door_excess": -1})
+    t = twinagent.build_twin(r, model="m", fallback=twinlink.fallback_twin)
+    assert t["engine"] == "vacant_run:pi:m" and t["door_calls"] == 17 and t["tier"] == "B"
+    # 負控制：缺的比 launcher 記到的錯誤數多、或根本沒有錯誤紀錄（說不通）⇒ 照樣判不對
+    for we in (0, None):
+        r2 = _res(requests_seen=18, wire_errors=we, twin_enclosure={"door_calls": 17, "door_excess": -1})
+        assert twinagent.build_twin(r2, model="m", fallback=twinlink.fallback_twin)["degrade_kind"] == "door_unreconciled"
+    r3 = _res(requests_seen=20, wire_errors=1, twin_enclosure={"door_calls": 17, "door_excess": -3})
+    assert twinagent.build_twin(r3, model="m", fallback=twinlink.fallback_twin)["degrade_kind"] == "door_unreconciled"
+    # 負控制：真的繞過（門比收據多）即使 wire_errors 很多也照樣判不對
+    r4 = _res(requests_seen=18, wire_errors=5, twin_enclosure={"door_calls": 19, "door_excess": 1})
+    assert twinagent.build_twin(r4, model="m", fallback=twinlink.fallback_twin)["degrade_kind"] == "door_unreconciled"
+    assert twinagent.door_reconciled({"door_excess": True}, {"wire_errors": 9}) is False
 
 
 def test_enclosed_clean_run_is_a_real_run_and_carries_tier() -> None:

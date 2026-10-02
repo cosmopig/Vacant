@@ -1113,6 +1113,26 @@ def run_one(job: Job) -> dict[str, Any]:
     return res
 
 
+def door_reconciled(te: dict[str, Any], summary: dict[str, Any]) -> bool:
+    """門的帳對得上收據嗎（圍牆那一跑）。
+
+    `door_excess = 門看到的 − 收據記的`。
+    * `> 0`：有呼叫沒經過 launcher 的 proxy ⇒ 繞過收據那一層 ⇒ **不對**（這條是這個檢查的本意）。
+    * `== 0`：對得上。
+    * `< 0`（P12，展場第一位觀眾）：收據記的比門多＝launcher 這一側記了一通**門沒有完成的呼叫**
+      （逾時殺掉 pi 時在途的那一通、連不上門的那一通——launcher 的 proxy 出錯也照記 `wire_errors`）。
+      這不是「有一通沒被記到」，所以不是繞過；但只在 `wire_errors` 解釋得了缺的那幾通時才放行
+      （缺的比 launcher 記到的錯誤數還多＝說不通＝照樣判不對）。
+    * `None`（量不到）：不對。"""
+    ex = te.get("door_excess")
+    if not isinstance(ex, int) or isinstance(ex, bool):
+        return False
+    if ex >= 0:
+        return ex == 0
+    we = summary.get("wire_errors")
+    return isinstance(we, int) and not isinstance(we, bool) and -ex <= we
+
+
 def build_twin(res: dict[str, Any], *, model: str,
                fallback: Any) -> dict[str, Any]:
     """worker 結果 → 要封印的 twin。**`engine` 照裁決 §五 的表決定，不看心情。**
@@ -1151,7 +1171,7 @@ def build_twin(res: dict[str, Any], *, model: str,
     elif res.get("enclosed") and s.get("receipt_verdicts") != ["OK"]:
         why = ("receipt_unverified",
                f"圍牆裡那一跑的收據主機側驗不過：{s.get('receipt_verdicts')}")
-    elif res.get("enclosed") and te.get("door_excess") != 0:
+    elif res.get("enclosed") and not door_reconciled(te, s):
         why = ("door_unreconciled",
                f"門看到 {te.get('door_calls')} 通、收據記 {s.get('requests_seen')} 通"
                " ⇒ 有呼叫沒經過收據那一層（或對不上帳）")

@@ -68,6 +68,7 @@ def main(argv=None) -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--endpoint", default="http://100.119.113.56:5500/v1")
     ap.add_argument("--port", type=int, default=3377)
+    ap.add_argument("--agent-timeout", type=float, default=300.0, help="傳給 twinlink loop；調小可重現「第一輪被逾時殺掉」")
     ap.add_argument("--work", default="/tmp/vs")
     ap.add_argument("--node", default="node")
     ap.add_argument("--cards", default="A,B,C", help="A、B 正常跑完；C 中途撤回")
@@ -98,7 +99,7 @@ def main(argv=None) -> int:
         loop = subprocess.Popen(
             [sys.executable, "ops/exhibit/twin/twinlink.py", "--db", str(db), "--init", "loop", "--cloud", base,
              "--token", token, "--endpoint", a.endpoint, "--interval", "3", "--engine", "agent",
-             "--parallel", "2", "--enclose", "on", "--require-tier", "B", "--events", str(live)],
+             "--parallel", "2", "--agent-timeout", str(a.agent_timeout), "--enclose", "on", "--require-tier", "B", "--events", str(live)],
             cwd=str(REPO), stdout=open(work / "loop.log", "wb"), stderr=subprocess.STDOUT)
         procs.append(loop)
 
@@ -153,10 +154,11 @@ def main(argv=None) -> int:
             rep[k] = r_
         # 撤回後雲端那一份：沒有內容、拍立得／收據 404、fortune_result 不在
         C = final.get("C") or {}
-        rep["C_cloud"] = {"status": C.get("status"), "has_says": "says" in C, "has_steps": "steps" in C,
+        if "C" in ids:
+          rep["C_cloud"] = {"status": C.get("status"), "has_says": "says" in C, "has_steps": "steps" in C,
                           "has_review": "review" in C, "has_polaroid": "polaroid_url" in C,
                           "has_fortune_result": "fortune_result" in C}
-        for kind in ("polaroid", "receipt", "card"):
+          for kind in ("polaroid", "receipt", "card"):
             try:
                 rep["C_cloud"][kind + "_http"] = http("GET", f"{base}/api/{kind}/{ids['C']}")[0]
             except Exception as e:                          # noqa: BLE001
@@ -205,6 +207,14 @@ def main(argv=None) -> int:
                 "n_lines": len(fz.get("lines") or []), "places": fz.get("places"), "hints": twin.get("polaroid_hints")}
         except Exception as e:                                  # noqa: BLE001
             rep.setdefault("polaroid_meta", {})[k] = {"error": repr(e)[:200]}
+    import sqlite3 as _sq
+    _c = _sq.connect(str(db))
+    rep["generated_payloads"] = {}
+    for k, i in ids.items():
+        for (pj,) in _c.execute("select payload_json from twin_event where sub_id=? and kind='generated' order by seq desc limit 1", (i,)):
+            d = json.loads(pj)
+            rep["generated_payloads"][k] = {x: d.get(x) for x in ("engine", "degrade_kind", "tier", "requests_seen", "door_calls", "attempts", "stop_reason", "accepted", "enclosed")}
+    _c.close()
     st.close()
     # 撤回後的殘留：用**只有那一張卡才有**的一句當標記；A（沒撤回）的標記當正控制（量得到才算數）。
     marks = {k: MARK[k].encode("utf-8") for k in MARK}

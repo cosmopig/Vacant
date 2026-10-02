@@ -213,3 +213,16 @@ def test_negative_control_prefix_order_would_bury_him(store: TwinStore) -> None:
     _late_fresh_scene(store, now)
     v = twinlink.build_view(store, recent=0, now_ms=now)   # 關窗：全部依序
     assert [p["id"] for p in v["people"]] == ["A1", "A2", "卡很久的"]
+
+
+def test_p12_view_exports_polaroid_ready_boolean(store: TwinStore) -> None:
+    """電視靠它決定演不演拍立得：撤回＝False、還沒生成＝None、退化（not_made）＝False（展場第一位觀眾：對帳不平的那一跑電視照演）。"""
+    now = 1_900_000_000_000
+    _legacy_person(store, "舊列", sub_ms=now - MIN, gen_ms=now - MIN + 5)       # 退化查表（engine 不是 vacant_run）
+    _legacy_person(store, "還在生成", sub_ms=now - MIN, gen_ms=None)
+    v = twinlink.build_view(store, recent=10, now_ms=now)
+    by = {p["id"]: p for p in v["people"]}
+    assert by["舊列"]["polaroid_ready"] is False
+    assert by["還在生成"]["polaroid_ready"] is None
+    assert all(isinstance(p["polaroid_ready"], (bool, type(None))) for p in v["people"])
+    assert twinlink.run_outcome({"engine": "vacant_run:pi:m", "decision": "d", "verdict_hash": "a" * 64}) == "made"
