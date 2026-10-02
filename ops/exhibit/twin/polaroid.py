@@ -62,6 +62,15 @@
    擋不住素材線把圖存錯名字（那一層靠 `assets/poses/manifest.json` 的來源紀錄與人眼）。
 6. **相框不是照原比例用的。** 素材相框 829×930（0.89），卡面 1080×1350（4:5）：
    按寬度縮放後，**下緣白邊往下延長**（取白邊中段、上下鏡射接續），版面理由見裁決檔。
+7. **P11（2026-10-02，每個人不一樣）。** 相片窗背景（這一跑主要待過的地點）、相框（星座元素）、貼紙（MBTI
+   氣質／星座圖形／血型印章）、手邊的小道具（主要成品碰到的地上物件類別）由 `polaroid_layers.pick_layers`
+   依這個人的資料**確定性**挑選，素材全是世界素材（Codex 生圖，`assets/polaroid_v2/manifest.json` 逐檔釘
+   sha256；生圖只送世界參考圖與描述，沒有任何觀眾資料）。`sub_id` 只當挑款種子，不印、不進 meta、鏈上只記
+   「貼了幾張、退回幾層」兩個數字。⚠ **貼紙是命盤的圖形**：分享出去的圖看得出這個人給了星座／MBTI／血型
+   （與 P10 命盤那一行同一個層級，沒給的一個都不貼）。⚠ 素材缺、壞、sha256 對不上、相框量窗後版面與單一
+   相框版不同 ⇒ **那一層**退回單一相框版／s00（`meta.variety.fallbacks`），照樣出圖；`VACANT_POLAROID_V2_DIR=off`
+   整個關掉。**QR 的位置、大小、靜區、字框一律不動**：貼紙只放相片窗內或壓在窗的上緣，壓到字或 QR 靜區的
+   貼紙不貼（`stickers_dropped`）。
 """
 from __future__ import annotations
 
@@ -584,7 +593,9 @@ def _grade(spr: Any) -> Any:
 
 
 def render_scene(cast_id: str, size: tuple[int, int], *,
-                 poses_dir: pathlib.Path | None = None) -> tuple[Any, dict[str, Any]]:
+                 poses_dir: pathlib.Path | None = None,
+                 plate: pathlib.Path | None = None,
+                 prop: tuple[pathlib.Path, str] | None = None) -> tuple[Any, dict[str, Any]]:
     """相片窗裡那一格：**他的分身站在黏土世界的舞台上**（有姿勢圖＝舉著寫好的紙）。
 
     背景＝`s00` 空舞台板，從頂光中心欄置中裁成相片窗的比例；分身腳踩在光圈裡，
@@ -592,15 +603,17 @@ def render_scene(cast_id: str, size: tuple[int, int], *,
     """
     from PIL import Image, ImageDraw, ImageFilter
     ww, wh = size
-    plate = Image.open(PLATE_PATH).convert("RGB")
-    pw, ph = plate.size
+    # P11：`plate` 給了就用它（這個人這一跑主要待過的地點；方圖、置中裁），否則老樣子 s00。
+    plate_img = Image.open(plate or PLATE_PATH).convert("RGB")
+    spot_x = plate_img.width // 2 if plate else PLATE_SPOT_X
+    pw, ph = plate_img.size
     ch = ph
     cw = int(round(ph * ww / wh))
     if cw > pw:                                         # 相片窗比板還寬：改裁高度
         cw, ch = pw, int(round(pw * wh / ww))
-    x0 = max(0, min(pw - cw, PLATE_SPOT_X - cw // 2))
+    x0 = max(0, min(pw - cw, spot_x - cw // 2))
     y0 = ph - ch
-    img = plate.crop((x0, y0, x0 + cw, y0 + ch)).resize(size, Image.LANCZOS).convert("RGBA")
+    img = plate_img.crop((x0, y0, x0 + cw, y0 + ch)).resize(size, Image.LANCZOS).convert("RGBA")
 
     fig_p, kind = figure_for(cast_id, poses_dir)
     spr = _drop_specks(Image.open(fig_p).convert("RGBA"))
@@ -619,8 +632,42 @@ def render_scene(cast_id: str, size: tuple[int, int], *,
         fill=(20, 10, 0, 150))
     img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(max(2, wh * 0.016))))
     img.alpha_composite(spr, (cx - spr.width // 2, feet - spr.height))
+    prop_box = None
+    if prop is not None:                                  # P11：分身手邊的小道具（貼在腳邊）
+        prop_box = _place_prop(img, prop[0], prop[1], cx=cx, feet=feet, fig_w=spr.width, size=size)
     return img.convert("RGB"), {"figure": kind, "figure_file": fig_p.name,
-                                "plate": PLATE_PATH.stem}
+                                "plate": (plate or PLATE_PATH).stem, "prop_box": prop_box}
+
+
+#: 道具的高度（相片窗高的比例）與離分身的間距。
+PROP_H_FRAC = 0.17
+
+
+def _place_prop(img: Any, path: pathlib.Path, side: str, *, cx: int, feet: int,
+                fig_w: int, size: tuple[int, int]) -> list[int] | None:
+    from PIL import Image, ImageDraw, ImageFilter
+    ww, wh = size
+    pr = Image.open(path).convert("RGBA")
+    bb = pr.getchannel("A").point(lambda v: 255 if v > 32 else 0).getbbox()
+    if bb is None:
+        return None
+    pr = pr.crop(bb)
+    sc = min(wh * PROP_H_FRAC / pr.height, ww * 0.26 / pr.width)
+    pr = pr.resize((max(1, int(pr.width * sc)), max(1, int(pr.height * sc))), Image.LANCZOS)
+    pr = _grade(pr)
+    gap = int(ww * 0.012)
+    if side == "left":
+        x = cx - fig_w // 2 - gap - pr.width
+    else:
+        x = cx + fig_w // 2 + gap
+    x = max(int(ww * 0.03), min(ww - int(ww * 0.03) - pr.width, x))
+    y = feet + int(wh * 0.012) - pr.height
+    sh = Image.new("RGBA", size, (0, 0, 0, 0))
+    ImageDraw.Draw(sh).ellipse([x - 4, y + pr.height - wh * 0.012, x + pr.width + 4,
+                                y + pr.height + wh * 0.014], fill=(20, 10, 0, 140))
+    img.alpha_composite(sh.filter(ImageFilter.GaussianBlur(max(2, wh * 0.01))))
+    img.alpha_composite(pr, (x, y))
+    return [x, y, x + pr.width, y + pr.height]
 
 
 def _box(v: Any) -> tuple[int, int, int, int] | None:
@@ -750,7 +797,7 @@ def _build_frame(png: pathlib.Path, fit: dict[str, Any], canvas: tuple[int, int]
 
 
 def layout_for(frame_dir: pathlib.Path | None = None, *,
-               module: int = QR_MODULE_PX) -> dict[str, Any]:
+               module: int = QR_MODULE_PX, frame_name: str = "polaroid_frame") -> dict[str, Any]:
     """用哪一個相框、版面長怎樣。**不合格的相框退回佔位相框，並且講為什麼。**
 
     素材 json 至少要有 `window`（或素材線的 `window_px`；`[x0,y0,x1,y1]` 或 `{x,y,w,h}`，
@@ -766,7 +813,7 @@ def layout_for(frame_dir: pathlib.Path | None = None, *,
     if d is None:
         env = os.environ.get(FRAME_ENV, "").strip()
         d = pathlib.Path(env) if env else DEFAULT_FRAME_DIR
-    png, js = d / "polaroid_frame.png", d / "polaroid_frame.json"
+    png, js = d / f"{frame_name}.png", d / f"{frame_name}.json"
     if not png.is_file() or not js.is_file():
         base["frame_note"] = "no_frame_file"
         return base
@@ -816,11 +863,158 @@ def _placeholder_frame(canvas: tuple[int, int], window: tuple[int, int, int, int
     return img
 
 
+# ---------------------------------------------------------------------------
+# P11：每個人不一樣的拼貼層（素材放 `assets/polaroid_v2/`，挑選在 `polaroid_layers.py`）
+# ---------------------------------------------------------------------------
+#: 貼紙在相片窗上的位置（以相片窗為基準）：左上＝星座、右上＝MBTI 第一個、上緣偏一側＝MBTI 第二個、
+#: 下緣離道具最遠的那一角＝血型印章。**全部在相片窗內或壓在窗的上緣**——白邊下緣（字、QR）一格都不碰。
+STICKER_SIZE = {"zodiac": 190, "mbti0": 190, "mbti1": 130, "stamp": 170}
+STAMP_INK = {"red": (120, 44, 32), "blue": (34, 46, 92)}
+
+
+def _variety_plan(sub_id: Any, cast_id: str, hints: Any, fortune: Any) -> dict[str, Any] | None:
+    """挑出這個人的各層素材並確認檔案在、sha256 對得上。**任何一層壞了只丟那一層**（記在 fallbacks），
+    整個沒素材／沒開／沒 sub_id ⇒ None（呼叫端走老路：單一相框＋s00）。永不丟例外。"""
+    try:
+        from ops.exhibit.twin import polaroid_layers as L
+        if not sub_id:
+            return None
+        m = L.load_manifest()
+        if not m:
+            return None
+        h = hints if isinstance(hints, dict) else {}
+        f = fortune if isinstance(fortune, dict) else {}
+        z = f.get("zodiac")
+        pk = L.pick_layers(m, sub_id=str(sub_id), cast_id=cast_id, place=h.get("place"),
+                           element=z, mbti=f.get("mbti"), zodiac=z, blood=f.get("blood"),
+                           kind=h.get("kind"))
+        fb: list[str] = []
+        plan: dict[str, Any] = {"spec": pk.get("spec") or {}, "fallbacks": fb, "rot": pk.get("rot") or [0] * 5,
+                                "side": pk.get("prop_side") or "right"}
+
+        def res(entry: Any, what: str) -> pathlib.Path | None:
+            if not entry:
+                return None
+            p = L.resolve_file(m, entry)
+            if p is None:
+                fb.append(what + ":missing_or_bad")
+            return p
+
+        bg = pk.get("background")
+        plan["bg"] = res(bg, "bg") if bg else None
+        fr = pk.get("frame")
+        if fr:
+            png, js = res(fr, "frame"), res({"file": fr.get("json"), "sha256": fr.get("json_sha256")}
+                                           if fr.get("json_sha256") else None, "frame_json")
+            if png is not None and js is None:      # json 沒釘 sha256 就只確認檔在
+                cand = pathlib.Path(m["_dir"]) / str(fr.get("json"))
+                js = cand if cand.is_file() else None
+                if js is None:
+                    fb.append("frame_json:missing")
+            plan["frame"] = ({"dir": png.parent, "name": png.stem} if png is not None and js is not None
+                             else None)
+        else:
+            plan["frame"] = None
+        plan["stickers"] = []
+        z_e = pk.get("zodiac_sticker")
+        if z_e and (zp := res(z_e, "zodiac")):
+            plan["stickers"].append({"slot": "zodiac", "path": zp, "rot": plan["rot"][0]})
+        for i, e in enumerate((pk.get("mbti_stickers") or [])[:2]):
+            if zp := res(e, f"mbti{i}"):
+                plan["stickers"].append({"slot": f"mbti{i}", "path": zp, "rot": plan["rot"][1 + i]})
+        b_e = pk.get("blood_stamp")
+        if b_e and (zp := res(b_e, "stamp")):
+            plan["stickers"].append({"slot": "stamp", "path": zp, "rot": plan["rot"][3],
+                                     "letter": b_e.get("blood"), "tone": b_e.get("tone") or "red"})
+        pr = pk.get("prop")
+        plan["prop"] = (res(pr, "prop"), plan["side"]) if pr and res(pr, "prop") else None
+        return plan
+    except Exception as exc:                                  # noqa: BLE001 — 加分層不准拖垮拍立得
+        return {"spec": {}, "fallbacks": [f"plan_error:{type(exc).__name__}"], "rot": [0] * 5,
+                "side": "right", "bg": None, "frame": None, "stickers": [], "prop": None}
+
+
+def _sticker_image(item: dict[str, Any]):
+    from PIL import Image, ImageDraw
+    im = Image.open(item["path"]).convert("RGBA")
+    bb = im.getchannel("A").point(lambda v: 255 if v > 32 else 0).getbbox()
+    if bb:
+        im = im.crop(bb)
+    if item.get("letter"):                                   # 血型印章：空白印面，字由程式疊
+        f = _font(max(24, int(min(im.size) * 0.46)))
+        if all(_has_glyph(f, ch) for ch in str(item["letter"])):
+            d = ImageDraw.Draw(im)
+            ink = STAMP_INK.get(item.get("tone"), STAMP_INK["red"])
+            # 印面的字：深色＋兩像素描邊（縮小後仍讀得到）
+            d.text((im.width // 2, im.height // 2), str(item["letter"]), font=f, fill=ink + (255,),
+                   anchor="mm", stroke_width=max(2, im.width // 90), stroke_fill=ink + (255,))
+    return im
+
+
+def _draw_stickers(img: Any, plan: dict[str, Any], win: tuple[int, int, int, int],
+                   obstacles: list[tuple[int, int, int, int]], canvas: tuple[int, int]
+                   ) -> tuple[list[dict[str, Any]], list[str]]:
+    """把貼紙貼上去。壓到字／QR 靜區／出紙的貼紙**不貼**（記下來），不去挪字或 QR。"""
+    from PIL import Image, ImageFilter
+    drawn: list[dict[str, Any]] = []
+    dropped: list[str] = []
+    opp_left = plan.get("side") == "right"                  # 道具在右 ⇒ 印章放左下
+    for it in plan.get("stickers") or []:
+        slot = it["slot"]
+        try:
+            im = _sticker_image(it)
+            k = STICKER_SIZE[slot] / max(im.size)
+            im = im.resize((max(1, int(im.width * k)), max(1, int(im.height * k))), Image.LANCZOS)
+            im = im.rotate(float(it.get("rot") or 0), expand=True, resample=Image.BICUBIC)
+            w, h = im.size
+            if slot == "zodiac":
+                cx, cy = win[0] + 8, win[1] + 8
+            elif slot == "mbti0":
+                cx, cy = win[2] - 8, win[1] + 8
+            elif slot == "mbti1":
+                cx = (win[0] + win[2]) // 2 + (210 if plan.get("side") == "left" else -210)
+                cy = win[1] + 70
+            else:
+                cx = win[0] + 20 + w // 2 if opp_left else win[2] - 20 - w // 2
+                cy = win[3] - 14 - h // 2
+            bx = min(max(cx - w // 2, 6), canvas[0] - 6 - w)      # 貼到紙邊就往裡推，不丟
+            by = min(max(cy - h // 2, 6), canvas[1] - 6 - h)
+            box = (bx, by, bx + w, by + h)
+            if (box[0] < 0 or box[1] < 0 or box[2] > canvas[0] or box[3] > canvas[1]
+                    or any(_overlap(box, o) for o in obstacles)):
+                dropped.append(slot)
+                continue
+            sh = Image.new("RGBA", (w + 24, h + 24), (0, 0, 0, 0))
+            sh.paste((20, 10, 0, 120), (12, 14), im.getchannel("A"))
+            sh = sh.filter(ImageFilter.GaussianBlur(4))
+            img.paste(sh.convert("RGB"), (box[0] - 12, box[1] - 12), sh.getchannel("A"))
+            img.paste(im.convert("RGB"), (box[0], box[1]), im.getchannel("A"))
+            drawn.append({"slot": slot, "file": it["path"].name, "box": list(box)})
+        except Exception:                                    # noqa: BLE001
+            dropped.append(slot)
+    return drawn, dropped
+
+
+
+def _scene_with_fallback(cast_id: str, size: tuple[int, int], poses_dir: Any,
+                         plan: dict[str, Any] | None, fallbacks: list[str]):
+    """先用這個人的背景＋道具；壞了就退回 s00、沒道具（`fallbacks` 記一筆），不丟例外。"""
+    if plan and (plan.get("bg") or plan.get("prop")):
+        try:
+            return render_scene(cast_id, size, poses_dir=poses_dir, plate=plan.get("bg"),
+                                prop=plan.get("prop"))
+        except Exception as exc:                              # noqa: BLE001
+            fallbacks.append(f"scene:{type(exc).__name__}")
+    return render_scene(cast_id, size, poses_dir=poses_dir)
+
+
 def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
             originals: Iterable[Any] = (), frame_dir: pathlib.Path | None = None,
             poses_dir: pathlib.Path | None = None,
             qr_module_px: int = QR_MODULE_PX, _sweep_only: bool = False,
-            fortune_line: str = "", fortune_sentence: str = ""
+            fortune_line: str = "", fortune_sentence: str = "",
+            sub_id: str | None = None, hints: dict[str, Any] | None = None,
+            fortune: dict[str, Any] | None = None
             ) -> tuple[bytes, dict[str, Any]]:
     """做一張拍立得。回（PNG bytes, meta）。meta 只有版面與旗標，**不含那句話本身**。
 
@@ -828,6 +1022,10 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
     markdown／引號、畫不出的字、放不下的尾巴；**不改寫、不補字**。清完是空的、或逐字抄了
     觀眾原文 ⇒ 那一行留空（`caption_blank`），拍立得照發。
     `originals` ＝ 觀眾原文的自由文字格（`originals_of`）：拿來擋逐字抄錄，不會被畫出來。
+    P11（每個人不一樣）：給了 `sub_id`（只當挑款種子，不印、不進 meta）、`hints`（`{"place","kind"}` 兩個枚舉：
+    這一跑主要待過的地點、主要成品碰到的地上物件類別）、`fortune`（`{"mbti","zodiac","blood"}` 枚舉）
+    ⇒ 依這個人的資料**確定性**挑背景／相框／貼紙／道具（`polaroid_layers.pick_layers`）。
+    素材沒有、壞了、sha256 對不上、相框量窗後版面和單一相框版不同 ⇒ 那一層退回單一相框版，照樣出圖。
     `qr_module_px`／`_sweep_only` 只給掃描實驗用（量最小模組尺寸，`_sweep_only` 讓
     低於下限的模組也畫得出來以便量到懸崖在哪）。產品路徑一律用預設值。
     """
@@ -838,6 +1036,16 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
     if not re.fullmatch(r"[0-9a-f]{8}", receipt_short or ""):
         raise PolaroidError("收據短碼要是 8 個小寫十六進位字元（verdict_hash 前 8 碼）")
     lay = layout_for(frame_dir, module=qr_module_px)
+    plan = _variety_plan(sub_id, cast_id, hints, fortune)
+    fallbacks: list[str] = list(plan["fallbacks"]) if plan else []
+    if plan and plan.get("frame") and lay["frame_png"] is not None:
+        vl = layout_for(plan["frame"]["dir"], module=qr_module_px, frame_name=plan["frame"]["name"])
+        same = all(vl.get(k) == lay.get(k) for k in ("window", "caption", "footer", "qr", "canvas"))
+        if vl["frame_png"] is not None and same and not _layout_problems(vl):
+            lay = vl
+        else:
+            fallbacks.append("frame:" + ("layout_differs" if vl["frame_png"] is not None
+                                          else str(vl.get("frame_note"))[:60]))
     probs = [p for p in _layout_problems(lay)
              if not (_sweep_only and p.startswith("QR 模組小於"))]
     if lay["frame_png"] is None and probs:
@@ -850,8 +1058,8 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
         fit = lay["frame_fit"]
         frame, paper = _build_frame(lay["frame_png"], fit, canvas)
         u = fit["underlay_px"]
-        scene, fig = render_scene(cast_id, (win[2] - win[0] + 2 * u, win[3] - win[1] + 2 * u),
-                                  poses_dir=poses_dir)
+        scene, fig = _scene_with_fallback(cast_id, (win[2] - win[0] + 2 * u, win[3] - win[1] + 2 * u),
+                                          poses_dir, plan, fallbacks)
         img = Image.new("RGBA", canvas, paper + (255,))
         img.paste(scene, (win[0] - u, win[1] - u))
         img.alpha_composite(frame)
@@ -859,10 +1067,16 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
     else:
         paper = PAPER
         img = _placeholder_frame(canvas, win)
-        scene, fig = render_scene(cast_id, (win[2] - win[0], win[3] - win[1]),
-                                  poses_dir=poses_dir)
+        scene, fig = _scene_with_fallback(cast_id, (win[2] - win[0], win[3] - win[1]),
+                                          poses_dir, plan, fallbacks)
         img.paste(scene, (win[0], win[1]))
     d = ImageDraw.Draw(img)
+    stk_drawn: list[dict[str, Any]] = []
+    stk_dropped: list[str] = []
+    if plan and plan.get("stickers"):
+        obst = [tuple(cap_box), tuple(foot_box), tuple(g["quiet_box"]),
+                (cap_box[0], win[3] + 4, cap_box[2], cap_box[1] - 2)]
+        stk_drawn, stk_dropped = _draw_stickers(img, plan, win, obst, canvas)
 
     # ── 那一行字：分身自己寫的，不補字 ──
     f_cap = _font(CAPTION_PX)
@@ -970,6 +1184,9 @@ def compose(*, decision: str, cast_id: str, date_str: str, receipt_short: str,
         "frame_fit": ({"scale": round(fit["scale"], 4), "extend_px": fit["extend_px"]}
                       if fit else None),
         "bytes_n": len(png),
+        "variety": ({"spec": plan["spec"], "fallbacks": fallbacks, "stickers": stk_drawn,
+                     "stickers_dropped": stk_dropped,
+                     "prop_box": fig.get("prop_box"), "frame_variant": lay["frame"]} if plan else None),
     }
     return png, meta
 

@@ -1,0 +1,24 @@
+{
+ "file": "frame_water_3.png",
+ "size": [
+  829,
+  930
+ ],
+ "sha256": "55b40af2d602109fb8ec6c0642a71d91ceb324f4b3a176e6e2eca1e87142e2b0",
+ "window_px": {
+  "x": 50,
+  "y": 60,
+  "w": 730,
+  "h": 686
+ },
+ "window_note": "與 polaroid_frame.json 相同的相片窗（程式量過原圖黑窗、對齊後以參考窗為準）",
+ "source": {
+  "generator": "codex exec（內建生圖）",
+  "raw": "raw/frame_water_3.png",
+  "raw_sha256": "ae2e83bb5114b0abe76055793130c3f6cb66217a2decf8f5d34928715866b7f9",
+  "prompt": "The attached image is the exact layout reference: a blank instant-camera photo print (white border, wider at the bottom, a large picture window). Generate a studio product photo of ONE such blank print, shot perfectly straight-on from directly above, same proportions and same border widths and the same window position and size as the reference, perfectly flat and square to the camera, no tilt, no perspective, centred and filling about 80% of the frame height. The border is warm off-white matte hand-made paper with visible paper fibre texture and hand-made clay-craft feel, corners slightly rounded. The picture window is completely flat solid pure black (#000000), no image, no reflection. Behind the print: a perfectly flat uniform pure green background (#00FF00), nothing else, no shadow. Decoration made of hand-made clay: little clay water drops and a small seashell on the top-left and top-right corners and top edge, small, sitting only on the thin top and side borders (they may slightly overlap the paper edge but must not cover the picture window). The wide white bottom border must stay completely clean, plain paper with nothing on it. STRICT: ABSOLUTELY NO text, letters, numbers, digits, symbols, runes, writing, labels or scribbles anywhere; all paper, cards and boards are completely blank. No people, no hands. Variation 3: slightly different arrangement and sizes of the decoration. Portrait orientation 3:4.",
+  "reference_images": [
+   "polaroid_frame.png"
+  ]
+ }
+}

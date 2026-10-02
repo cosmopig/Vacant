@@ -1,0 +1,509 @@
+{
+ "version": 2,
+ "backgrounds": {
+  "drop": [
+   {
+    "file": "bg/bg_drop_1.jpg",
+    "sha256": "c2c8abc7869b61741a3df46bcb4ba3cf52db95899ca42e61727fa84ea3d6ab96"
+   },
+   {
+    "file": "bg/bg_drop_2.jpg",
+    "sha256": "6b18ed458beb4c88099fa1385ba6bc6be469907f417c789b3478528134c8a33b"
+   },
+   {
+    "file": "bg/bg_drop_3.jpg",
+    "sha256": "8cf181c72f020e5c07b832779edde81ca03282fb508cf81bc754a79311d067f0"
+   }
+  ],
+  "clay": [
+   {
+    "file": "bg/bg_clay_1.jpg",
+    "sha256": "0a1b802f9b0090e15efbe8574fa42b55c53e4932e7830b0a86a04c2cacf6a564"
+   },
+   {
+    "file": "bg/bg_clay_2.jpg",
+    "sha256": "ba345763898ba3122a46f726584bf73b4c2896d28afbc23a09143ac9ff61a98d"
+   },
+   {
+    "file": "bg/bg_clay_3.jpg",
+    "sha256": "a5c7d545dbb80022c048fd9da3ffad42e8101a05dabbc6e6c89a39af3402e7c6"
+   }
+  ],
+  "longtable": [
+   {
+    "file": "bg/bg_longtable_1.jpg",
+    "sha256": "8e1d43becaa9485939324bad47be7037f317954dc09e28b121e34fcc6fe26942"
+   },
+   {
+    "file": "bg/bg_longtable_2.jpg",
+    "sha256": "744eebf935678e690f1b1913fe0930a83d164939e4b388b54b8a14622755a699"
+   },
+   {
+    "file": "bg/bg_longtable_3.jpg",
+    "sha256": "f714e1504bd4fe0370dd12083793c00dc12bd05d0100caaeadfaa7851f50967f"
+   }
+  ],
+  "gate": [
+   {
+    "file": "bg/bg_gate_1.jpg",
+    "sha256": "4e1de84111ed873ea3dc739ded3adfbf5e24b1dc4f945b43842a62b91786ebf0"
+   },
+   {
+    "file": "bg/bg_gate_2.jpg",
+    "sha256": "546f1f999c9a5a7f221d51abac2f2dbec6f2eba17879bedaffe0b9bfae080d9b"
+   },
+   {
+    "file": "bg/bg_gate_3.jpg",
+    "sha256": "fb0f2db6844f724a92476abe77713666efa483cd8543407ca8d302da172c7e42"
+   }
+  ],
+  "chain": [
+   {
+    "file": "bg/bg_chain_1.jpg",
+    "sha256": "6be89703b9b4f104582a811caccb1d1c9f1ec475d9acf54e3247081d28c14a2e"
+   },
+   {
+    "file": "bg/bg_chain_2.jpg",
+    "sha256": "ae47e4b0473f247da00d58d5bb2e2c4f4b8b5f342efe8465b8a5c58f1f0c218c"
+   },
+   {
+    "file": "bg/bg_chain_3.jpg",
+    "sha256": "5dea6aad7e050c40c35b2b19bbcc90c7139c57888abf664dd3c8dc675477f7af"
+   }
+  ],
+  "draft": [
+   {
+    "file": "bg/bg_draft_1.jpg",
+    "sha256": "1643ffc1528fb8720f746fd7cb28a889eeca21d22a4dc72e84b8a9d41cbcf531"
+   },
+   {
+    "file": "bg/bg_draft_2.jpg",
+    "sha256": "23689c9ab8ab35929200c6fe151a4d9d386d56b5aca4a0a47eb3dc920f1b121c"
+   },
+   {
+    "file": "bg/bg_draft_3.jpg",
+    "sha256": "b296d3acb50d1a8e7e2d12f001dcefee39e841eb6db10613c581ad1da25091cb"
+   }
+  ],
+  "cards": [
+   {
+    "file": "bg/bg_cards_1.jpg",
+    "sha256": "839591fd8e5e7efd9f6ad0744f6b0e5437be4d4026c5c604cb403dc6e9233a80"
+   },
+   {
+    "file": "bg/bg_cards_2.jpg",
+    "sha256": "e5d8614f47c3a83218125948c0d1ad73222fddd75cde0bb5189e3dd8c66eddfc"
+   },
+   {
+    "file": "bg/bg_cards_3.jpg",
+    "sha256": "2da9902cced65f49c873bbc2291b356eb2961bdcee95d7c738e438ccc054163b"
+   }
+  ],
+  "easel": [
+   {
+    "file": "bg/bg_easel_1.jpg",
+    "sha256": "f8ff0211c63055907233c7d655e970d9ec4b1fa0c9d149928e38311beb025fc1"
+   },
+   {
+    "file": "bg/bg_easel_2.jpg",
+    "sha256": "b04c8495d2b299858ea6adf3d7fd64401f3b28e3658429d7a72c2042b9ec9d17"
+   },
+   {
+    "file": "bg/bg_easel_3.jpg",
+    "sha256": "f80ff239ee1777a3e551b22cedf0c75ee79d0ce1d9b1327a519a7d6cf9fba719"
+   }
+  ]
+ },
+ "frames": {
+  "fire": [
+   {
+    "file": "frames/frame_fire_1.png",
+    "sha256": "1f0a6a3df727f61a0eb619b82df4e69266d8841b1c5826ec14e8b6249477286b",
+    "json": "frames/frame_fire_1.json",
+    "json_sha256": "fb4b62fb0cd1bf9f4c0380c9523a4a3aac61ea0713593abdfb81eb40ba4b3eed"
+   },
+   {
+    "file": "frames/frame_fire_2.png",
+    "sha256": "f187228afd21c2661ddc0ba9aeb5792c7d13bfeaa6f8a93952875653a5d6942f",
+    "json": "frames/frame_fire_2.json",
+    "json_sha256": "5758f2373d5f2cafe7ae41c9d5b27678fd05672e4c1bb0889e1a24489e72f816"
+   },
+   {
+    "file": "frames/frame_fire_3.png",
+    "sha256": "be2f8a4d562c59a72fe663a43914f93a4fee169a76e60215d0bef8b23d420193",
+    "json": "frames/frame_fire_3.json",
+    "json_sha256": "32e2d342fef5109502b8598e09c11586aab1eab92da054d4ed371fa6f36aa306"
+   }
+  ],
+  "earth": [
+   {
+    "file": "frames/frame_earth_2.png",
+    "sha256": "393c9ab88ff0ea09af213632749bcfdcbcd22d2ccfc446e189b75c455c3554c2",
+    "json": "frames/frame_earth_2.json",
+    "json_sha256": "3772e68da05f511e0d8669425e52c8c69c28bd4cfa432f1ab2a027ad49526980"
+   },
+   {
+    "file": "frames/frame_earth_3.png",
+    "sha256": "69bac93072adf165001a3738e43c1ce7dd2dd6217394f2bf412e8de30aa0aeaa",
+    "json": "frames/frame_earth_3.json",
+    "json_sha256": "5e653c6b8b817d6de395a5088da19fccc6cb6828e87d5cf3614a4f673c23fa9f"
+   },
+   {
+    "file": "frames/frame_earth_1_r1.png",
+    "sha256": "1e08f212e1fa6219b8562c731e9be05a89f818922056814a1bda91686b2c4009",
+    "json": "frames/frame_earth_1_r1.json",
+    "json_sha256": "47bc3f6d4ef7e554b3dae918814beefda9d001b715d0e20cbb94ebbc3fb88b64"
+   }
+  ],
+  "air": [
+   {
+    "file": "frames/frame_air_1.png",
+    "sha256": "ae8af54b02cef9d0d814aee0d8dcf9f6b7d20382f87dc89f08c0077d4e9c28c0",
+    "json": "frames/frame_air_1.json",
+    "json_sha256": "00fa893e5cfab9043639b37227bd1c215f75134d5b710a956d02eaeba5dd4065"
+   },
+   {
+    "file": "frames/frame_air_2_r1.png",
+    "sha256": "e353c9b88fd92188265199cc0c14c7e8c499911199c953eb0b98563165ce54af",
+    "json": "frames/frame_air_2_r1.json",
+    "json_sha256": "5812f6b9ca1a3fd969c7f2fdc6c6e4cd1910e8bc52a59a44ce5c08d585738ca1"
+   },
+   {
+    "file": "frames/frame_air_3_r1.png",
+    "sha256": "6f8d5198c8f570f41630e2f0f5b98465d28a4553b82513fee50db7af4993d006",
+    "json": "frames/frame_air_3_r1.json",
+    "json_sha256": "5c95b3006296e3f987b01ded249a5e38f26ea26642e193e6a835b1ea61355fbb"
+   }
+  ],
+  "water": [
+   {
+    "file": "frames/frame_water_1.png",
+    "sha256": "18bf5885c03213cde3a407a9d4626946ce9b10e66e51d6c2bef4be91d4655a39",
+    "json": "frames/frame_water_1.json",
+    "json_sha256": "45a637b078f07fcbd7860014423f6258d8dd926c8819ed5a8d6d895c8ac9175a"
+   },
+   {
+    "file": "frames/frame_water_2.png",
+    "sha256": "c1892130f287b4568b478a750c752a47df53990f301a05df826e4ebcc82dbbb4",
+    "json": "frames/frame_water_2.json",
+    "json_sha256": "ff8da444b256da70667843ae6b9d5f0d816eae00baf32ff3504eb762300b6770"
+   },
+   {
+    "file": "frames/frame_water_3.png",
+    "sha256": "55b40af2d602109fb8ec6c0642a71d91ceb324f4b3a176e6e2eca1e87142e2b0",
+    "json": "frames/frame_water_3.json",
+    "json_sha256": "b70c2adbeb162878f6999bcdd842c9f1e486678dd76660d7d093adb4e40fd890"
+   }
+  ],
+  "neutral": [
+   {
+    "file": "frames/frame_neutral_1.png",
+    "sha256": "42aaad551acfdd804caff008f4ef912f4667a4243b14aff1e6124b7c275e53cf",
+    "json": "frames/frame_neutral_1.json",
+    "json_sha256": "6fb2f825a69d51e2b39b511909c1d17c1a5705ad9ec223cb380261639611c5ff"
+   },
+   {
+    "file": "frames/frame_neutral_2_r1.png",
+    "sha256": "90ff688d823caebf1a8ebd6f06fa761883fe32bab9f80b54b26c62c690e85585",
+    "json": "frames/frame_neutral_2_r1.json",
+    "json_sha256": "de25790e1896f18cd70004c80cce6362c28de104890831bbf2c4ffade49b401e"
+   },
+   {
+    "file": "frames/frame_neutral_3_r1.png",
+    "sha256": "93e9f421a375bc637d328654688205b87686c6ba756ecf5a88a4e22db80a095c",
+    "json": "frames/frame_neutral_3_r1.json",
+    "json_sha256": "11d2a6b993e95d0a69be01b911dbd8e79aae36b67fc2792be78c0baa1babefdb"
+   }
+  ]
+ },
+ "stickers": {
+  "mbti": {
+   "NT": [
+    {
+     "file": "stickers/sheet_mbti_NTNF_0.png",
+     "sha256": "7de3412aa1e7160b6fc393754d1db436708e8f10f83bc79dd9aae0f169050664"
+    },
+    {
+     "file": "stickers/sheet_mbti_NTNF_1.png",
+     "sha256": "d5697ee4b00f91cd73dbddb82ef3ce32acb305c73ebc0f1f41f44ffe13b66b2a"
+    },
+    {
+     "file": "stickers/sheet_mbti_NTNF_2.png",
+     "sha256": "1f0757d6324b97f7ae98c5fbe1fcba46582bebf2f27b57fb367ab536a28cdde4"
+    },
+    {
+     "file": "stickers/sheet_mbti_NTNF_3.png",
+     "sha256": "80a5d4567a3719a138a5af447c98b597221cc678f8746c5b50823be679153106"
+    }
+   ],
+   "NF": [
+    {
+     "file": "stickers/sheet_mbti_NTNF_4.png",
+     "sha256": "f6eae92949b1ce126bc82a211451bf1a0b683cfc9cdef446650132e6a1344d62"
+    },
+    {
+     "file": "stickers/sheet_mbti_NTNF_5.png",
+     "sha256": "9ead0a077a80d195f489e28b0d475a5466976e9dee1d0d3dd5243c09e11817d6"
+    },
+    {
+     "file": "stickers/sheet_mbti_NTNF_6.png",
+     "sha256": "c515c71b77dbd7fd24bf5d7a394a72193aec415fbdc2f8482b2dc2a4edfba3a6"
+    },
+    {
+     "file": "stickers/sheet_mbti_NTNF_7.png",
+     "sha256": "6ebfee4cad5e70f13b10a28348eab92aec7c134f53ef9f5e8ab3d7d0198e53f5"
+    }
+   ],
+   "SJ": [
+    {
+     "file": "stickers/sheet_mbti_SJSP_0.png",
+     "sha256": "99f290b8290d394b0e7db7c27bcdc401c07b605ebaf981e59da9492bad3fefa3"
+    },
+    {
+     "file": "stickers/sheet_mbti_SJSP_1.png",
+     "sha256": "c93b633126258757d8d8f0cd243c3978d38263c6f1c82da27563087eac58e89a"
+    },
+    {
+     "file": "stickers/sheet_mbti_SJSP_2.png",
+     "sha256": "32a19827503bc39274ed5f6b9bb77b388937b8230d842cb357351e4a24f69d32"
+    },
+    {
+     "file": "stickers/sheet_mbti_SJSP_3.png",
+     "sha256": "b81cdaf6dcc7173bbc2df6ba799fd06f5778525f4ef1dd8daa06127ce00143b4"
+    }
+   ],
+   "SP": [
+    {
+     "file": "stickers/sheet_mbti_SJSP_4.png",
+     "sha256": "8bbd13b7ff61982106eeb65c3745b56f3fa9ead32791adc7c0bdb304703e5bd9"
+    },
+    {
+     "file": "stickers/sheet_mbti_SJSP_5.png",
+     "sha256": "49156dc13c4ed632add8c80cad2bc12daaacfc26b00c4ea01cf249b641a74836"
+    },
+    {
+     "file": "stickers/sheet_mbti_SJSP_6.png",
+     "sha256": "d666e7e2245c82290689ba48b4b20bd2e71ba2c7e8869e4aff88e5685b394af5"
+    },
+    {
+     "file": "stickers/sheet_mbti_SJSP_7.png",
+     "sha256": "ed65d816d63cf28108040c5407932fcd81245b2e0e0da373fb45886d0cd501e1"
+    }
+   ]
+  },
+  "zodiac": {
+   "牡羊": {
+    "file": "stickers/sheet_zodiac_1_0.png",
+    "sha256": "fe7de9b17d09c4e3821456153535ab5baf433c95247d5a047d895a481c26cab9"
+   },
+   "金牛": {
+    "file": "stickers/sheet_zodiac_1_1.png",
+    "sha256": "6a1ad744be323247fafcacc0c972c7e42f8499e901091f5108eb076a24cf10ef"
+   },
+   "雙子": {
+    "file": "stickers/sheet_zodiac_1_2.png",
+    "sha256": "46e87ff37c390187193d74fcc8d1e998d16a63b843f198512a38651049d77087"
+   },
+   "巨蟹": {
+    "file": "stickers/sheet_zodiac_1_3.png",
+    "sha256": "21444f26ec4d85b935bbe04f006fb3e22df2b183af46a49534ac2d6b5eae0d2b"
+   },
+   "獅子": {
+    "file": "stickers/sheet_zodiac_1_4.png",
+    "sha256": "b0b920c206d1af81b4f70f3eec761ceab8fe8cd7011032e713bd45b91b50b6f4"
+   },
+   "處女": {
+    "file": "stickers/sheet_zodiac_1_5.png",
+    "sha256": "ba4d83566feba5e8bb22005c3b345b4d5b0485774601ded1d949d1e1ebbd2d86"
+   },
+   "天秤": {
+    "file": "stickers/sheet_zodiac_2_r1_0.png",
+    "sha256": "c0c9432448e41096f50cec7251b44e4517bb577ae87e0410998c58ddaf744f6f"
+   },
+   "天蠍": {
+    "file": "stickers/sheet_zodiac_2_r1_1.png",
+    "sha256": "fc5febb9ca1579b307bfa8c8c7d386ec9af9ff5efffcdfeb86aae6cf6efbad22"
+   },
+   "射手": {
+    "file": "stickers/sheet_zodiac_2_r1_2.png",
+    "sha256": "15798aa38b3fa417751e27d3e12396cd9f8cfc61266391d4c0e9db769df5a1fc"
+   },
+   "摩羯": {
+    "file": "stickers/sheet_zodiac_2_r1_3.png",
+    "sha256": "9a46302db832220d49e51ed8d47867de980565e3a3b05e06ac123a12a6565f55"
+   },
+   "水瓶": {
+    "file": "stickers/sheet_zodiac_2_r1_4.png",
+    "sha256": "4a48fe2bd228dc91d54de734ff23a4c7e8e4cc2d818c65cdfc3d74fa8ede4f2f"
+   },
+   "雙魚": {
+    "file": "stickers/sheet_zodiac_2_r1_5.png",
+    "sha256": "110b142b01a2913f07fb94e84d93ac744bc5bac4c45c1439eaafda8f0fe3dbcf"
+   }
+  },
+  "blood": [
+   {
+    "file": "stickers/sheet_stamps_0.png",
+    "sha256": "10479c6ead2fd2caeed1dea04d689b46809c2f11d8330980c29a686b380377bf",
+    "shape": "round",
+    "tone": "red"
+   },
+   {
+    "file": "stickers/sheet_stamps_1.png",
+    "sha256": "633ad16bc0d512cb2c8792af26ff8a4ac3b0ea2b89ef6821dd4e37062f4187d4",
+    "shape": "square",
+    "tone": "red"
+   },
+   {
+    "file": "stickers/sheet_stamps_2.png",
+    "sha256": "f43462cb138be537ab321e9c8dcd064db91e9024c5c3a8dde65aa1f62089b3ea",
+    "shape": "scallop",
+    "tone": "red"
+   },
+   {
+    "file": "stickers/sheet_stamps_3.png",
+    "sha256": "70f6dd8d1514e96b6139f0e9a4489e540f7eeb9d7b873eaf8f71f01489d9f5ca",
+    "shape": "oval",
+    "tone": "red"
+   },
+   {
+    "file": "stickers/sheet_stamps_4.png",
+    "sha256": "3bda9422bcc98e780582acf60e20bc8689da8c90301da3ad257efc601d9bd60f",
+    "shape": "round",
+    "tone": "blue"
+   },
+   {
+    "file": "stickers/sheet_stamps_5.png",
+    "sha256": "6247e358665d410ef9867d87b8d6648b1812d49d864de8fa98f71f472cd811c9",
+    "shape": "square",
+    "tone": "blue"
+   },
+   {
+    "file": "stickers/sheet_stamps_6.png",
+    "sha256": "d5609faa887a12886d4912e5dddc1d76fdf478a7f55532e599270559190d7d31",
+    "shape": "scallop",
+    "tone": "blue"
+   },
+   {
+    "file": "stickers/sheet_stamps_7.png",
+    "sha256": "78e15063f6485a0e68ae6f80e3c2f04d10a0542ecbcc7b92d02d0355e8b94e88",
+    "shape": "oval",
+    "tone": "blue"
+   }
+  ]
+ },
+ "props": {
+  "letter": [
+   {
+    "file": "props/sheet_props_letter_card_0.png",
+    "sha256": "61f5dc0585c537f29200079909e58555d7e7de69c56a1bdbe3879abe41c21ec5"
+   },
+   {
+    "file": "props/sheet_props_letter_card_1.png",
+    "sha256": "2f78a759efed889eb35c034c9d2da50956fc61b2e22355188c5113b3444e8a82"
+   }
+  ],
+  "card": [
+   {
+    "file": "props/sheet_props_letter_card_2.png",
+    "sha256": "f472f57b7626ddea75bed90274e0d182c91406c8a31126625964c3ec414a3e29"
+   },
+   {
+    "file": "props/sheet_props_letter_card_3.png",
+    "sha256": "a721ca31e3e5d7f077c717ba1490761046ef066d74f97bca3ae2cf5614cef5f3"
+   }
+  ],
+  "tile": [
+   {
+    "file": "props/sheet_props_tile_pencil_0.png",
+    "sha256": "0ea041be3afc69e47554566c9d239111e26097c6f0e9a7e4820431187025349b"
+   },
+   {
+    "file": "props/sheet_props_tile_pencil_1.png",
+    "sha256": "dec7ca965dfedb51bcfbec43c15a571a0eeb4d6ae1270a3081982c69905f3603"
+   }
+  ],
+  "pencil": [
+   {
+    "file": "props/sheet_props_tile_pencil_2.png",
+    "sha256": "bab96037f2cee5adc0c20e865642eebc9d8cd218add5abe8d71256b9e887fcf7"
+   },
+   {
+    "file": "props/sheet_props_tile_pencil_3.png",
+    "sha256": "7c46d54cb37d06f11174343907f6a72b03a513f11df764404d6c0ea707b6c9ef"
+   }
+  ],
+  "jar": [
+   {
+    "file": "props/sheet_props_jar_scroll_0.png",
+    "sha256": "d49d38961aaff774c4715aed63f197fdfe00a598608df204f98fd983ed1ea6d3"
+   },
+   {
+    "file": "props/sheet_props_jar_scroll_1.png",
+    "sha256": "fafb2e02f0e76c042e5094737110cbf8b49a0b64cdcf03b92900b20da60aefa5"
+   }
+  ],
+  "scroll": [
+   {
+    "file": "props/sheet_props_jar_scroll_2.png",
+    "sha256": "87fffc548f64c97671435da9a56379f14188ba1ef4ce406445eea549c6372ecb"
+   },
+   {
+    "file": "props/sheet_props_jar_scroll_3.png",
+    "sha256": "92ec86cdddabb641e3d53c23be87a8a59ce1d7aba21b212db859836abc2c7668"
+   }
+  ],
+  "paperball": [
+   {
+    "file": "props/sheet_props_paperball_clay_0.png",
+    "sha256": "726cb56b429817841764133f9d9972a740aaa8ec34cda250c67ddeb014f7ea02"
+   },
+   {
+    "file": "props/sheet_props_paperball_clay_r1_0.png",
+    "sha256": "474a2c905ed0516796ea02676fd6a831d6a617e3e3361655006671c3b7803a9e"
+   },
+   {
+    "file": "props/sheet_props_paperball_clay_r1_1.png",
+    "sha256": "141b7e39afaab27dd940865923c6dc8a2236b395dbe9b10c83f16499c6ce3b50"
+   }
+  ],
+  "clay": [
+   {
+    "file": "props/sheet_props_paperball_clay_2.png",
+    "sha256": "27bcaa0d9f11b9eee9e69672264d48874559cabbe8f81bdbca69e2d14ed21b3d"
+   },
+   {
+    "file": "props/sheet_props_paperball_clay_3.png",
+    "sha256": "a12d7575860fc68ffcf356c0e342d619db15a9f71cb54132090edfcdf4c089ab"
+   },
+   {
+    "file": "props/sheet_props_paperball_clay_r1_2.png",
+    "sha256": "88cfffc8c714536615fe0f256616a74744eb8c1882c356db65a5ce9aff9ebe6b"
+   },
+   {
+    "file": "props/sheet_props_paperball_clay_r1_3.png",
+    "sha256": "f318a9a0169b4d52375b9cd0b25fcc6c385441403514486b204cabf7b9db8690"
+   }
+  ],
+  "stamp": [
+   {
+    "file": "props/sheet_props_stamp_receipt_0.png",
+    "sha256": "784f46a7cedae2a6ab2179e782b23b1d78cd3b969170cfbd50e382f04985264a"
+   },
+   {
+    "file": "props/sheet_props_stamp_receipt_1.png",
+    "sha256": "c8bee0e70956fbe6c2bc8b542c994b521630806d270aa01726c600c500b21939"
+   }
+  ],
+  "receipt": [
+   {
+    "file": "props/sheet_props_stamp_receipt_2.png",
+    "sha256": "70b9e42b0bd0c1ce79ef9b071b4a512aef37563ed190cc25666a8ebdad544688"
+   },
+   {
+    "file": "props/sheet_props_stamp_receipt_3.png",
+    "sha256": "b3831621467df71339769663076144b34f539bc244a1bd4dfc9e3f4ba4f411e7"
+   }
+  ]
+ }
+}

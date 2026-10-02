@@ -1,0 +1,24 @@
+{
+ "file": "frame_neutral_2_r1.png",
+ "size": [
+  829,
+  930
+ ],
+ "sha256": "90ff688d823caebf1a8ebd6f06fa761883fe32bab9f80b54b26c62c690e85585",
+ "window_px": {
+  "x": 50,
+  "y": 60,
+  "w": 730,
+  "h": 686
+ },
+ "window_note": "與 polaroid_frame.json 相同的相片窗（程式量過原圖黑窗、對齊後以參考窗為準）",
+ "source": {
+  "generator": "codex exec（內建生圖）",
+  "raw": "raw/frame_neutral_2_r1.png",
+  "raw_sha256": "363a2cf9aa990df6fe23b5cb893b142d6f516974df0abcca4f697dfe4507abba",
+  "prompt": "The attached image is the exact layout reference: a blank instant-camera photo print (white border, wider at the bottom, a large picture window). Generate a studio product photo of ONE such blank print, shot perfectly straight-on from directly above, same proportions and same border widths and the same window position and size as the reference, perfectly flat and square to the camera, no tilt, no perspective, centred and filling about 80% of the frame height. The border is warm off-white matte hand-made paper with visible paper fibre texture and hand-made clay-craft feel, corners slightly rounded. The picture window is completely flat solid pure black (#000000), no image, no reflection. Behind the print: a perfectly flat uniform pure green background (#00FF00), nothing else, no shadow. Decoration made of hand-made clay: no decoration at all, just the plain paper print with a very slightly different paper texture and slightly worn corners, small, sitting only on the thin top and side borders (they may slightly overlap the paper edge but must not cover the picture window). The wide white bottom border must stay completely clean, plain paper with nothing on it. STRICT: ABSOLUTELY NO text, letters, numbers, digits, symbols, runes, writing, labels or scribbles anywhere; all paper, cards and boards are completely blank. No people, no hands. Variation 2: slightly different arrangement and sizes of the decoration. Portrait orientation 3:4. (fresh attempt 1: vary the composition; keep every rule above, especially the exact frame proportions and window position.) ABSOLUTELY PLAIN: nothing at all is placed on the paper — no confetti, no paper pieces, no stickers, no coloured flecks, no clay decoration. Only the bare off-white paper with its fibre texture and the black window.",
+  "reference_images": [
+   "polaroid_frame.png"
+  ]
+ }
+}

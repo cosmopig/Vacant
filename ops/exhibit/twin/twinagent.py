@@ -73,6 +73,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from ops.exhibit.twin import fortune as fortunelib  # noqa: E402
+from ops.exhibit.twin import polaroid_layers as polaroidlayers  # noqa: E402
 from ops.exhibit.twin import grounding_gate as gatelib  # noqa: E402
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
@@ -1085,6 +1086,14 @@ def run_one(job: Job) -> dict[str, Any]:
             except Exception as e:                       # noqa: BLE001
                 res["summary"]["receipt_verdicts"] = [f"error:{type(e).__name__}"]
         res["outputs"] = read_outputs(pathlib.Path(frozen) if frozen else None)
+        # P11 拍立得：這一跑主要待過的地點、主要成品碰到的地上物件類別（**只有兩個枚舉**，不帶檔名）
+        try:
+            res["polaroid_hints"] = polaroidlayers.hints_from_steps(
+                fortunelib.read_steps(rd),
+                [str(a.get("name") if isinstance(a, dict) else a)
+                 for a in (res["outputs"].get("artifacts") or [])])
+        except Exception:                                    # noqa: BLE001 — 拍立得的加分層不准拖垮這一跑
+            res["polaroid_hints"] = None
         # P10 命盤卡：每一句對步驟紀錄（找不到根據就從卡上拿掉）。沒有命盤就不出卡。
         try:
             _f = fortunelib.load_final(rd) or fortunelib.resolve(job.fortune or {}, {})
@@ -1162,7 +1171,10 @@ def build_twin(res: dict[str, Any], *, model: str,
 
     lines = derive_lines(o.get("decision"), o.get("reason"), o.get("artifacts") or [])
     _fz = res.get("fortune")
+    _ph = res.get("polaroid_hints")
     return {
+        **({"polaroid_hints": {"place": _ph.get("place"), "kind": _ph.get("kind")}}
+           if isinstance(_ph, dict) else {}),
         **({"fortune": {k: _fz.get(k) for k in ("mbti", "mbti_source", "zodiac", "blood",
                                                  "first_line", "title", "lines")}} if _fz else {}),
         **lines,
