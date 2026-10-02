@@ -29,3 +29,24 @@
 3. **本機常駐的護欄會跟著容器一起死**：`cu_cap_i1001.sh` 的最後一筆在 19:11，之後本機的常駐行程（含 25 分鐘的自動關機計時器）都不在了。
    這次 VM 自己在約 19:27 結束，沒有空轉太久；但「關機只靠本機常駐行程」是一個洞——下次要在 VM 上也放一個不靠本機的時限。
 4. Drive 授權要人類每台新 VM 按一次（`drivemount` 等 Enter；用 FIFO 餵 Enter 可行）。
+
+## 2026-10-01／02 第二次開機（發射）
+
+上限照「整批」算：第一次開機已花 3.86 CU ⇒ 這次 軟 56／硬 71（＝整批 60／75）。起始餘額 106.04 CU。
+
+| 時間 | 事件 |
+|---|---|
+| 23:50 | `colab new` G4；`cu_cap` 常駐；vLLM 背景安裝 |
+| 23:51–23:53 | Drive：`drive.mount` 只等授權 120 秒、CLI 從 `/dev/tty` 讀 Enter（不是 stdin）⇒ 第一次掛載逾時失敗 |
+| 23:55 | 改用 `script` 給 CLI 一個虛擬終端、每 150 秒重試、每次約 90 秒時自動送 Enter（`~/Vacant_colab_raw/drive_loop.sh`） |
+| 23:53 | `DEPLOY_OK`；凍結表在 VM 上 43 列 OK（同第一次的路徑繞法） |
+| 23:57 | 人類在瀏覽器授權 ⇒ 第 1 次重試 `Credentials propagated` ⇒ `DRIVE_OK` |
+| 23:58 | **人類授權選項 B**（「B我授權你」）：VM 上 `/usr/bin/bwrap` 換成改寫墊片（`--proc X` → `--bind X X`，其餘原樣交給 `/usr/bin/bwrap.real`）；墊片 sha256 `fde157bc…`、原檔 `e3189038…`。`/opt/eval/bin/sandbox.sh` 沒有 `--proc`（0 處）⇒ A／C 的格子沙箱行為不變；只有 bridge 的驗收沙箱受影響 |
+| 00:01 | `vm_selfcheck.py` 七個情境全過（`bridge_shim=false`：系統層墊片讓「原樣」那一路就起得來） |
+| 00:01 | 探針：模型回 `ok`、代理帳本 200；`DRIVE_OK`、`vllm_health=200`、`selfcheck ok = True` |
+| 00:02 | **發射** `launch_i1001.sh i1 32 <+8h> <Drive 鏡像>`；時限 08:01:58；本機 `sync`／`autostop`／`cu_cap` 三個常駐都在 |
+
+### 偏離（第二次開機新增）
+
+5. **bridge 驗收沙箱的 /proc**（偏離 2 的處置）：人類授權後用**系統層**墊片，不是預註冊寫的 PATH 墊片；改寫內容相同。
+   後果：K 組驗收時，候選碼在沙箱裡看得到 VM 主機的 /proc（非對抗設定；C5 的格子沙箱一直如此）。報告要寫明。
