@@ -382,7 +382,10 @@ def run_demo(root: pathlib.Path, *, sandbox: str = "auto",
 
     say(RULE)
     say("一句話：**agent 說它做完了，客戶的驗收說沒有。**")
-    say("　　　　沒有 Vacant，上面那份 solution.py 已經交出去了。")
+    say("　　　　這是一個**判決**：檔案仍在工作區裡。要讓不合格的版本不被寫進")
+    say("　　　　正式的目的端，交件走收件口（`vacant submit` → `vacant release`）：")
+    say("　　　　它只寫它重驗過的版本，寫完讀回。agent 自己寫得到目的端的話，")
+    say("　　　　那是部署要擋的（另一個帳號、ACL、分支保護）。")
     say(RULE)
     say()
     say("接你自己的 agent（`--` 後面照你平常怎麼打就怎麼打）：")
@@ -434,7 +437,8 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent("""\
             零設定、零模型、零網路的 30 秒示範：一隻假 agent 宣告完成，
-            客戶的驗收說沒有，交付被擋下來，並留下一張任何人都能重算的收據。"""))
+            客戶的驗收說沒有，判拒交（exit 20），並留下一張任何人都能重算的收據。
+            （判決不是阻擋：要讓目的端收不到不合格的版本，用 `vacant release`。）"""))
     ap.add_argument("--root", default=None,
                     help=f"落點（預設 {_tilde(default_root())}；每次執行會先清空）")
     ap.add_argument("--sandbox", default="auto",

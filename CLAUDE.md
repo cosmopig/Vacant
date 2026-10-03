@@ -9,6 +9,24 @@
 **與規劃衝突時以 15 號判決文為準**（其裁決凌駕 09–14），
 **唯獨交付定位以下面這一節為準**。
 
+## 產品原則（人類原話，2026-09-25；做任何 Vacant 產品功能前先對這一條）
+
+> 我希望的是總之我就安裝 vacant，安裝完之後我一樣打開常用的 agent，所以我每次的任務出去，
+> 他所獲得的成果可以比我沒有安裝還好，而不是我任務出去之後一樣的東西回來我要自己再去咎責。
+> 零設定是必要的……咎責只要確認每一步是否都是合理，或是說這是在當前任務正確的決定。
+> 安裝 vacant 即使用改善這樣的概念，不要安裝程序一堆有的沒的……最小程度的安裝過程。
+> 先把 C 做好、確認產品等級沒問題之後才要去測。
+
+具體後果：
+1. **裝一次、照常用。** 使用者做的事只有「安裝」＋「打開他本來就用的 agent」。不准要求寫契約、
+   設定檔、金鑰、額外指令才有效果；契約只是選配的加強。
+2. **零設定的 Stop 檢查是預設行為**：沒有契約也要記錄每一步、在 agent 說做完時查「每一步有沒有根據」
+   （給的資料讀了沒、數字有沒有出處、說測過有沒有真的跑、錯誤有沒有被忽略），把該重做的地方退回，
+   交件時附「查了什麼／改了什麼／還沒驗證的」。追究責任是為了**在交給人之前改好**，不是事後給人一份報告。
+3. **安裝最小**：評測容器裡的「有 Vacant」組，必須只用使用者會用的那幾個安裝指令，不准為了評測另外接一堆東西。
+4. **先產品等級、再評測**：用模擬使用者（乾淨環境 → 安裝 → 照常下任務，不寫契約）驗過行為與品質，
+   才准花錢跑公開題庫。評測計畫：`decisions/DECISION_20260925_ZERO_CONFIG_EVAL.md`。
+
 ## 唯一交付物：畢業專題 ＝ 實體場地展覽
 
 **不產出畢業論文，也不投稿。**（2026-08-06 人類明確更正）
@@ -86,12 +104,118 @@
 - `vacant_network/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
 - `vacant_network/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
 
+### `vacant_network/intake/` ＋ `adapters/` — **通用收件口與四個 agent 的接法**（2026-09-24）
+
+裁決：`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`（**部分取代** COMPLETE_MEDIATION：
+新產品路徑裡模型中介不再是收件的前提）。證據：`ops/intake/evidence_20260924/`（L-fake，四個真 agent）。
+
+- `intake/contract.py` — 任務契約（未知欄位一律拒絕；`inputs` 以 sha256 釘住；`authority` 四種）；`quick`＝`vacant contract quick`
+  （一行寫出人在意的事：兩條安全底線之外只有人寫的才是必要的主張、不替人猜；寫錯的欄名、讀不動的欄、總計列、
+  讀不出文字的繳付物、在繳付物外面的報告都在寫契約時就炸；`tests/test_contract_quick.py`；審查 `ops/accountability/review_contract_quick/FINDINGS.md`）
+- `intake/artifact.py` — 內容定址隔離區（竄改可偵測，不是不可能）
+- `intake/verifiers.py` — 驗證原語，結果只有 PASS／FAIL／UNKNOWN／CONFLICT；**驗證器壞掉＝UNKNOWN**
+- `intake/policy.py` — 裁決規則寫死；事實主張只收獨立證據；分母是契約
+- `intake/keys.py`／`approval.py` — 長期金鑰（verifier／approver／reviewer／**owner**）＋**收件端自己的**
+  簽章者清單；綁定內容、一次性的批准；**契約鎖**（`vacant contract lock`＝owner 簽「這個任務＝這個契約
+  雜湊＋放行政策」，收件端只依被鎖過的契約放行）。清單裡已有別人的 owner／approver／reviewer 時本機金鑰不自動加入
+- `intake/recipients.py` — `vacant release` 的接受點：自己重驗一切（契約鎖、裁決、隔離區、綁**解析後**
+  目的端的批准、帳本沒被截短）、發布、讀回（`dir:`／`git:`）。⚠ 只管它自己寫的那個目的端
+- `intake/ledger.py` — 每個任務的終態（含 `infra_void`），分母＝開過的任務
+- `intake/server.py` — HTTP 收件口（提交者給不了裁決；沒 token 不啟動）；沒過的交件回 `feedback`＋`issues`
+  （`trace.blame.locate_results`：只定位、沒有步驟與行動者）
+- `adapters/agents.py` — pi／Claude Code／OpenCode／Codex 的翻譯表（headless、加法式掛鉤、常駐安裝、技能）
+- `adapters/hook.py`＋`hookpolicy.py` — `vacant hook`：四種原生格式 → 一份政策
+- `adapters/install.py` — 鍵層級可逆安裝（使用者沒改過就逐位元還原）
+- `adapters/run.py` — `vacant do`：隔離工作區（`~/.vacant-work`，**不可在 `$VACANT_HOME` 底下**）＋headless＋交件；
+  中斷殺行程群組並記 `infra_void`；只在有必要主張 FAIL 時重試
+- 收件口的驗證沙箱一律 **hermetic**（`vrun/sandbox.py` 的 `hermetic=True`：不讀成果裡的 shell 啟動檔、
+  不載 python user site、HOME 不在成果裡）；**vrun 的 `bash -lc` 舊行為不動**（歸檔 run 可比）
+- 對抗審查（裁決 §十一，60 條逐條重現）的回歸：`tests/test_{intake_gate,intake_verifier,adapters}_hardening.py`
+
+🔴 口徑：✅「不合格的版本沒有出現在收件端的目的地」（只對經過 `vacant release` 的那個目的端）；
+❌「agent 不會繞過」「Vacant 讓 agent 做得更好」（回饋後改對是劇本）；❌「OpenCode 有交件前回饋」不帶條件
+（`opencode run` 在第一個 idle 就結束；✅「OpenCode 的互動 TUI 與 `vacant do` 有」，L-fake，`ops/accountability/e2e_tui.py`）。⚠ `vacant install` 現在是通用安裝器，舊的模型通道常駐安裝是
+`vacant possess install`；`vacant uninstall`（不帶 `--agents`）會一起拆掉它。
+
+### `vacant_network/trace/` — **可究責追緝**（2026-09-24）：追到造成錯誤的那一步
+
+裁決：`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`（補在收件口之上，不取代）。
+`/loop` 的錨：`ops/accountability/LOOP.md`＋`PROGRESS.md`。證據：`ops/accountability/evidence_20260924/`（L-fake：掛鉤路徑 33/33，含前景／背景／平行子 agent、錯的網頁、人的標記；`vacant do` 25/25；四個 agent 的真 TUI 16/16，`ops/accountability/e2e_tui.py`）。回饋輪數＝**人的一個要求之內**的上限（`hookpolicy.new_request`：人打的新要求重新算；不是人打的——子 agent 的結果、Vacant 自己的回饋、agent 自己排的提示、別的工作階段的信封——不算、也不當成值的來源，分辨只有一份 `capture.classify_prompt`；審查 `ops/accountability/review_rounds_tui/FINDINGS.md`）。
+
+- `workspace.py`／`recorder.py` — 一個專案一條簽章鏈；每一步前後看工作區（殼層寫檔也歸得到）；
+  沒被任何一步解釋的改動＝`unrecorded_change`（**缺口，不歸給任何人**）。掛鉤裡一次掃描最多
+  `HOOK_SCAN_S`＝8 秒，第一次看超過就改到背景（`recorder baseline`），那段時間「寫了什麼不知道」≠「沒寫」；
+  1000 檔以上存差異索引。量測：`ops/accountability/evidence_20260924/perf/`（4 萬檔 Stop 1.9 秒；超過 5 萬檔關掉）；審查：`ops/accountability/review_scale/FINDINGS.md`
+- `capture.py` — 四個 agent 的原生掛鉤 → 病歷（Claude／Codex 的 `tool_use_id`、OpenCode 子 session、pi `toolCallId`；
+  逐字稿在工作階段結束時封存，模型 id 標 `claimed`）。pi 的子 agent＝另一個 pi 行程：Vacant 的 pi 擴充留一個固定標記
+  （`VACANT_PI_PARENT`：session、pid、專案；子行程驗過祖先與專案才接受），叫它的是哪一個呼叫由 `Recorder.link_child`
+  用任務文字對（對不到不猜）。子 agent 的回合結束不跑驗收；Claude／Codex 的 `SubagentStart`／`SubagentStop` 記下還在跑的子 agent，主 agent 的
+  回合結束時有子 agent 在做就先不驗收（`Recorder.should_defer`：連續最多 3 次、一小時沒消息當成結束、工作階段結束一律清掉）。
+  `vacant flag` 的標記要有 owner 簽章才回饋給 agent（`cli.open_flags`）。審查：`ops/accountability/review_subagent_curl/FINDINGS.md`。子 agent 端到端：情境 E，4/4
+- `locate.py`／`rerun.py`／`blame.py` — 位置 → 引入它的那一步 → 在重建狀態上重跑同一條主張 → 值從哪裡讀來。
+  **只有重跑翻轉的 `provable` 是事實層**；往上追出來的都是推論層（值比對會被巧合騙）。`curl`／`wget` 抓回來的值是外部來源——只在整個指令就是抓網頁、網址不是本機、自己寫過的東西裡沒有這個值時。
+  重建只放繳付物（和收件口的隔離區看同一批檔）
+- `feedback.py`／`stopcheck.py`／`finalize.py` — 給 agent：位置、應有的值、第一次出現的步驟，**沒有行動者**
+  （`feedback_ks1_clean` 可執行）；給人：報告＋Claude `systemMessage`
+- `actors.py` — 後果是事件、信譽是重播：只有 `provable` 進信譽（**不 slash**；`vacant flag --dismiss` 逐位元反轉）
+- `cli.py` — `vacant trace show|verify|report|blame|actors`、`vacant flag`
+
+🔴 口徑：✅「**在有紀錄的步驟裡**，這個檢查在第 k 步由過轉不過，而第 k 步是 X 做的；證據可重跑。」
+❌「Vacant 抓出所有錯」「追緝一定正確」「真模型下產出更接近需求」（R536 預註冊草稿，**待人類簽字，沒有發射**）。
+
+### 零設定（C 組，2026-09-25）：沒有契約也在「說做完」時查一次
+
+裁決：`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`（第 2.1 版 §九）。證據：`ops/eval/evidence_20260925/`
+（`simuser/`＝模擬使用者 A/C，`replay/`＝Gate 1 真實 pi 紀錄重播）。
+
+- `adapters/mode.py` — `install.json` 的 `mode`（`vacant install` 寫 `evidence`；沒裝＝`off`；`VACANT_MODE` 只給測試）
+- `trace/evidence.py` — 只看紀錄的證據檢查；**只有五類退回**（要求寫出的檔不存在、失敗的步驟被略過、測試說法對不上、
+  沒出處的值〔要有點名資料〕、點名的檔沒打開），其餘只進交件說明。純函式，可在錄好的病歷上離線重播
+- `trace/review.py` — 退回的字句（KS-1、沒有行動者；過不了檢查的行換替代行並計數）
+- `trace/zerostop.py` — Stop：子行程＋330 秒時限、失敗一律放行；人的一個要求內最多 2 回合；解決看現況；
+  `delivery.{md,json}` 寫在病歷目錄（不進工作區、不送模型）
+- `trace/budget.py`（**v3**，`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`）— **回合預算提醒**：agent 的系統提示寫了回合上限
+  （`adapters/agents.BUDGET_RE_SRC`，JS 與 Python 共用）、只剩最後 2 或 1 回合、這一回合有執行工具、要求的檔還不存在 ⇒ 提醒搭下一通本來就要送出的請求
+  （pi `turn_end`；不多一通呼叫、不引用任何值、一個要求最多 2 次）。只剩 1 回合時交件前檢查只退回缺檔；還沒說做完就結束的那一跑也寫交件說明
+  （`zerostop.ended`；v3.1 起只在 pi 回報中止時寫）。**v3.2**：最後一回合是最終答案、接著被上限停掉（Harbor 在自己的回合結束處理器裡中止，
+  pi 就不進交件前檢查）＝說了做完——工作階段結束時**補跑同一個檢查、只寫給人**，不寫成「還沒說做完」（裁決 §七；閘門 4）。
+  **v3.3**（只改給人的說明）：被切斷的那一跑也補查；說明的 **Budget reminders** 一節標出提醒之後才寫的檔（提醒會逼出沒有根據的猜測，
+  研究 `ops/eval/evidence_20260926_local/research_12b/`）；模型錯誤結束的回合，說明寫明檢查是在錯誤之後跑的（裁決 §八；閘門 5）。
+  研究的結論：三個新的退回候選都被對抗評審否決，**不加新的退回**。**v3.4**：v3.2／v3.3 的對抗審查 14 條全部重現、全在給人的那一側，
+  修掉（已退回過的不說「沒退回」、刪檔不算寫、看不全不說「沒有」、事後檢查照 Stop 的時限且先收工作階段、用超過上限＝沒人執行、一跑一筆 ended；
+  裁決 §九、`review_v33/`、閘門 6、`simuser_v34/`）。留出題預註冊（100 題沒用過的 hard 題，A vs v3.4）：`decisions/prereg/PREREG_20260926_ZERO_CONFIG_V34_HELDOUT.md`。
+  ⚠ **v3.6 起預設關**（人類 2026-09-27：多交的答案錯的多於對的；`install.json` 的 `budget_reminder: true`＝`vacant install --budget-reminder` 才開；裁決 V3 §十）。
+  ⚠ **只在寫明上限時作用**——一般互動使用（pi 預設沒有上限）幾乎不會觸發；只有 pi 有 `turn_end`。⚠ 本機正式批次的 C2 是**凍結的 v3**。
+  pi 的邊界處理器把 Vacant 的草稿**接在** `event.entries` 後面（pi 取最後一個處理器的回傳，只回自己的會蓋掉別的擴充）
+- `ops/eval/replay_pi_session.py`＋`replay_gate.py` — 真實 pi 工作階段在題目容器裡經過真的 `vacant hook pi` 重播（量誤報）
+- `ops/eval/simuser/` — 模擬使用者：只照 README 裝、照常用 pi，A/C 對照
+
+🔴 口徑：✅「沒有問題時模型收到的每一通請求和沒裝時逐位元組相同」（simuser `correct`；正式批次 157 對的第一通請求、99 對的工具結果）；
+✅「DABstep 77 題、gemma／qwen 開思考：裝與沒裝**沒有量到差別**（p＝0.21／0.29）」（預註冊正式批次，
+`decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`）；
+❌「Vacant 讓 agent 做得更好」「Vacant 沒有用」「讓成績變差」；❌「Vacant 判斷答案對錯」（只看每一步有沒有根據）。
+⚠ 正式批次那一版有兩個誤報（跑自己寫的腳本被當成讀交付物、grep 沒找到當成失敗；**8 次退回全是誤報**，7 次退的是對的答案），事後已修，不改變結果。
+**為什麼沒有差別、和過去比、要不要做成 agent**：`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`（總報告）＋`ops/eval/evidence_20260925/INDEX.md`（每個檔的 sha256；`ops/eval/build_evidence_index.py --check`）。一句話：**時機錯**（82 個失敗裡 55 個是沒交——54 個被這一輪設的 15 回合上限切斷〔官方基線是 10 步〕、Vacant 輪不到檢查，其中 15–19 跑答案已經算出來沒寫）、**看的東西錯**（其餘的錯每一步都有根據、錯在決定）、**動作弱**（只能在同一個工作階段裡講；在重抽之上，過去量到最弱的就是這種）。過去有增益的都是 Vacant 握著生成（可執行驗收＋重抽＋拒交）；最像 agent 的 G 實驗沒有量到正確交付的增益 ⇒ 缺的是「真的訊號＋對的時機＋重來的權力」，不是 agent（推論，沒在 DABstep 上測過）。✅「用這一輪兩跑事後估：沒交就重開一跑 gemma 50→55（**探索性**、不是檢定，`ops/eval/formal/explore_two_runs.py`）」；❌ 把這個估計講成效果；❌「越像 agent 越沒用」「和過去完全一致」。
+⚠ Harbor 的 pi 用自訂端點時以 `PI_CODING_AGENT_DIR` 隔離設定，`~/.pi/agent` 的擴充不會載入——評測的 C 組要裝到那個目錄。
+**本機算力評估（2026-09-26 起）**：人類的兩台 LM Studio（gemma-4-12b-it-qat；`w401c-15` 永遠不思考、`1003` 照 `reasoning_effort` 開關、讀長提示慢）
+經過記帳代理的本機模式（`orproxy.py` 的 `upstreams`，`/t/<tag>/up/<名字>/…`）；`ops/eval/local/`（`run_batch.py` 每台機器自己的同時跑數——
+同時太多段對話會擠掉 LM Studio 的提示快取、吞吐反而不升）。紀錄：`ops/eval/evidence_20260926_local/RUNLOG.md`；預註冊（A／C1 現版／C2 v3）：
+`decisions/prereg/PREREG_20260926_ZERO_CONFIG_V3_LOCAL.md`（agent 凍結、人類授權但沒逐條簽）。
+**結果**（`decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`，三個角度的對抗驗證都判定成立）：
+✅「在這 77 題、本機 gemma-4-12b 關思考、pi 0.87.1、15 回合上限下，裝了零設定 v3 的答對率較高（51.9%→59.3%，Wilcoxon 精確 p＝0.021）」
+**＋一定要同時說**：提醒只在被告知回合上限時作用；差集中在 6 題（沒裝的一再用完回合沒寫答案）、以題數 15 對 7（符號檢定 p＝0.13）、
+兩跑翻過來就不顯著；來源是**把已經算出來卻沒寫的答案收成**（提醒後寫的 63 跑裡 25 對、38 錯——多交出來的大部分是錯的）；
+Vacant 把對的改成錯：0 次。C1（現版、沒有 v3）對沒裝：沒有量到差別（p＝0.75）。
+❌「Vacant 讓 agent 做得更好」不帶條件；❌「效果穩」；❌ 外推到沒有上限的互動使用。v3 是看過同一批題設計的 ⇒ 留出批次在跑。
+⚠ `research.wilcoxon_signed_rank_exact` 曾用浮點 `==` 判同分（三次平均的差會被拆開）：凍結的報告數字 0.019／0.46／0.118 要讀成 0.021／0.75／0.083；已修（同分先四捨五入到 12 位；差是 0.5 的倍數時新舊版相同）。
+**v3.5**（`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §八）：人打的話裡**整段**貼著全文的檔（≥ 80 位元組、前後是字的邊界）算讀過——R530 SOLO 59 格重播退回 58→35、全對的被退回 20→6；貼的是另一個版本（差一個值、一行）照樣退回（對抗審查 10 條，`ops/eval/evidence_20260926_local/v35_given_inline/`）。**u274**（預註冊，100 題沒用過的 DABstep hard 題、不設回合上限、本機 gemma-4-12b，A vs v3.6.1）：✅「**沒有量到差別**（9 對 10，p＝1.0）」；缺檔退回 31 跑之後 0 對，一半是模型出錯後被叫回來；S36-nocap（36 題 easy、看結果挑的）的 GO 沒有在 hard 題上重現（`decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`）。同日 Colab 程式題 920 題也沒有量到差別（分支 `feat/colab-campaign-20260927`）。三個缺陷在 **v3.7** 修掉（`decisions/DECISION_20260926_ZERO_CONFIG_V3.md` §十一；離線重播 `ops/eval/colab_replay/replay_reviews.py`：v3.6.1 重算全對；v3.7 第一次檢查的退回 Colab 309→29 跑、u274 36→20、S36-nocap 不變）——**只去掉誤退，對答對率的上限很小**；把可執行驗收接到原生 agent 的是 PR #82（`native_acceptance_bridge.py`，冒煙前）。**候選 2**（「最後一次自己跑的測試失敗卻說做完」當成第六類退回）**沒過擋門**（R530 重播退回 0 次），沒有併進來，patch 在 `…/candidate2/`。
+
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 
 ⚠ **這 15 支在 2026-09-20 之前完全沒有出現在這張地圖上**，而它現在是「**Vacant 附身在
 任何 agent 上**」的全部實作。裁決在 `decisions/DECISION_20260920_*.md` 五份。
 
-- `possess.py` — **`vacant install`**：把 proxy 端點寫進五個 agent **自己的常駐設定檔**
+- `possess.py` — **`vacant possess install`**（0.8.0 時叫 `vacant install`）：把 proxy 端點寫進五個 agent **自己的常駐設定檔**
   ⇒ 通道層做得到**真正的預設**（關掉終端機、重開機、打完整路徑都還在）。
   `NEVER_TOUCH` 守住所有 `auth.json`。也釘 Codex 的 `sandbox_mode` 並把
   `agent_posture{sandbox_mode, approval_policy, flags[]}` 寫進收據

@@ -1,0 +1,75 @@
+
+ pi v0.87.1
+ escape interrupt · ctrl+c/ctrl+d clear/exit · / commands · ! bash · ctrl+o more
+ Press ctrl+o to show full startup help and loaded resources.
+
+ Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.
+
+[Skills]
+  vacant
+
+[Extensions]
+  vacant.ts
+
+
+ Warning: fd not found. Offline mode enabled, skipping download.
+
+
+ Write report.md with the quarter total described in the task contract.
+
+
+
+ write calc.py
+
+ import csv
+ rows = list(csv.DictReader(open('inputs/ledger.csv')))
+ print('# Q' + 'three')
+ print()
+ print('Total:', sum(int(r['id']) for r in rows))
+
+
+
+ $ python3 calc.py > report.md
+
+ (no output)
+
+ Took 0.3s
+
+
+ Done.
+
+
+ [vacant-check]
+
+ The task contract's checks do not pass yet (this is feedback from vacant check, not a final decision):
+ - total: FAIL — report.md:3 says "306"
+   expected 69 (column 'amount', 3 rows)
+   it was copied from step 1 (write); step 2 wrote it into report.md
+   Run vacant check to re-check before finishing.
+
+
+
+ write calc.py
+
+ import csv
+ rows = list(csv.DictReader(open('inputs/ledger.csv')))
+ print('# Q' + 'three')
+ print()
+ print('Total:', sum(int(r['amount']) for r in rows))
+
+
+
+ $ python3 calc.py > report.md
+
+ (no output)
+
+ Took 0.3s
+
+
+ Fixed.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+<out>/pi/proj-c (master)
+↑60 ↓30 0.0%/131k (auto)                                                                                                                              mock-model

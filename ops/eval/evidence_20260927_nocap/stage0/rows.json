@@ -1,0 +1,10420 @@
+[
+{
+"arm": "A",
+"s": 1,
+"task": "1",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "1273",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "1464",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "16",
+"reward": 1.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "1681",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "17",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "1753",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "18",
+"reward": 0.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "19",
+"reward": 0.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "23",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "3",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "30",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "32",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "33",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "35",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "36",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "38",
+"reward": 0.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "44",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "46",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "58",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "59",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "6",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "60",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "61",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "62",
+"reward": 0.0,
+"missing": true,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 5,
+"said_done_turns": [
+5
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "65",
+"reward": 0.0,
+"missing": true,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "66",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "67",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "68",
+"reward": 0.0,
+"missing": true,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "7",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "72",
+"reward": 0.0,
+"missing": true,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 1,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1273",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1464",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "16",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1681",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "17",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1753",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "18",
+"reward": 0.0,
+"missing": true,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "19",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "23",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "3",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "30",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "32",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "33",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "35",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "36",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "38",
+"reward": 1.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "44",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "46",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "51",
+"reward": 0.0,
+"missing": true,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "53",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "58",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "59",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "6",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "60",
+"reward": 0.0,
+"missing": true,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "61",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "62",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 5,
+"said_done_turns": [
+5
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "65",
+"reward": 0.0,
+"missing": true,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "66",
+"reward": 1.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "67",
+"reward": 0.0,
+"missing": true,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "68",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "7",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 2,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "11",
+"reward": 0.0,
+"missing": true,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1273",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1464",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "16",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1681",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "17",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1753",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "18",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "19",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "23",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "26",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "3",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "30",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "32",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "33",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "35",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "36",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "38",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "44",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "46",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "58",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "59",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "6",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "60",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "61",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "62",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 5,
+"said_done_turns": [
+5
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "65",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "66",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "67",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "68",
+"reward": 0.0,
+"missing": true,
+"turns": 14,
+"said_done_turns": [],
+"final_stop": "length",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "7",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "A",
+"s": 3,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1",
+"reward": 1.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+8,
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1273",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1464",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "16",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1681",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "17",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1753",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "18",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "19",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "23",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "3",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "30",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "32",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "33",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "35",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "36",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "38",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "44",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "46",
+"reward": 0.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+11,
+13
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "50",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "58",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "59",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "6",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "60",
+"reward": 0.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+10,
+12,
+13
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[
+"failed_step"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "61",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "62",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+9,
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 4,
+"said_done_turns": [
+4
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "65",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "66",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "67",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "68",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "7",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 1,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+7,
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1273",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [
+14
+],
+"final_stop": "error",
+"reviews": [
+[
+"continue",
+[
+"failed_step",
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1464",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+11,
+14,
+15
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"continue",
+[
+"failed_step"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "16",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1681",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "17",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1753",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "18",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "19",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "23",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "24",
+"reward": 0.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+9,
+11,
+13
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[
+"failed_step"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "3",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "30",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "32",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "33",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "35",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "36",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "38",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+7,
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"unsourced"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "44",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "46",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "58",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "59",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "6",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "60",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "61",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "62",
+"reward": 1.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+12,
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 4,
+"said_done_turns": [
+4
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 4,
+"said_done_turns": [
+4
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "65",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [
+13
+],
+"final_stop": "error",
+"reviews": [
+[
+"continue",
+[
+"failed_step",
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "66",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [
+14
+],
+"final_stop": "error",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "67",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "68",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "7",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 2,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+8,
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1273",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1464",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "15",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "16",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1681",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "17",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1753",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "18",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "19",
+"reward": 0.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "23",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "24",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "3",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "30",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "32",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "33",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "35",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "36",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "38",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+6,
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"unsourced"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "44",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "46",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "58",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "59",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "6",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "60",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+13,
+15
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "61",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "62",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 5,
+"said_done_turns": [
+5
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "65",
+"reward": 0.0,
+"missing": true,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "66",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "67",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "68",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "7",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C1",
+"s": 3,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+7,
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "12",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1273",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1305",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1464",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "16",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1681",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "17",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1753",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "18",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "19",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "23",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "3",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "30",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "32",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "33",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "35",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "36",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "38",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "44",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "45",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "46",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "47",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "58",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "59",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "6",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "60",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "61",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "62",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+10,
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 5,
+"said_done_turns": [
+5
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "65",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "66",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "67",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "68",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "69",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "7",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "71",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 1,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+8,
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1273",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1305",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1464",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "16",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1681",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+9,
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "17",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+10,
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1753",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "18",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "1871",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "19",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "23",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+9,
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "3",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "30",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "32",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "33",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "35",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "36",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "38",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+8,
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"unsourced"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "44",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "46",
+"reward": 1.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "58",
+"reward": 0.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "59",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "6",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "60",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+13,
+15
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "61",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "62",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+13,
+15
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 4,
+"said_done_turns": [
+4
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "65",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "66",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [],
+"final_stop": "length",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "67",
+"reward": 0.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "68",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "69",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "7",
+"reward": 0.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "71",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 2,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "10",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+7,
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"failed_step"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "11",
+"reward": 1.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [
+10,
+12
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "12",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1273",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "13",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1305",
+"reward": 0.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+12,
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "14",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1464",
+"reward": 0.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "15",
+"reward": 1.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "16",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1681",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "17",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1753",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "18",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "1871",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "19",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "2",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "20",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "21",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "22",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "23",
+"reward": 1.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "24",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "25",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "26",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "2697",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "27",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "28",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "29",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "3",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "30",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "31",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "32",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "33",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "34",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "35",
+"reward": 1.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "36",
+"reward": 0.0,
+"missing": false,
+"turns": 11,
+"said_done_turns": [
+11
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "37",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "38",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+6,
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"unsourced"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "39",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "4",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "40",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "41",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "42",
+"reward": 1.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "43",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "44",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "45",
+"reward": 1.0,
+"missing": false,
+"turns": 13,
+"said_done_turns": [
+13
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "46",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "47",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "48",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "49",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "50",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "51",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "52",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "53",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "54",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "55",
+"reward": 1.0,
+"missing": false,
+"turns": 8,
+"said_done_turns": [
+8
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "56",
+"reward": 0.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "57",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "58",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "59",
+"reward": 0.0,
+"missing": false,
+"turns": 14,
+"said_done_turns": [
+12,
+14
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[
+"failed_step"
+]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "6",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "60",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "61",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "62",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "63",
+"reward": 1.0,
+"missing": false,
+"turns": 7,
+"said_done_turns": [
+7
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "64",
+"reward": 1.0,
+"missing": false,
+"turns": 5,
+"said_done_turns": [
+5
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "65",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "66",
+"reward": 0.0,
+"missing": false,
+"turns": 12,
+"said_done_turns": [],
+"final_stop": "toolUse",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "67",
+"reward": 0.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "68",
+"reward": 0.0,
+"missing": false,
+"turns": 10,
+"said_done_turns": [
+10
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "69",
+"reward": 0.0,
+"missing": true,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "7",
+"reward": 1.0,
+"missing": false,
+"turns": 15,
+"said_done_turns": [
+15
+],
+"final_stop": "stop",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "71",
+"reward": 0.0,
+"missing": false,
+"turns": 16,
+"said_done_turns": [],
+"final_stop": "error",
+"reviews": []
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "72",
+"reward": 0.0,
+"missing": false,
+"turns": 9,
+"said_done_turns": [
+7,
+9
+],
+"final_stop": "stop",
+"reviews": [
+[
+"continue",
+[
+"missing_output"
+]
+],
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "8",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+},
+{
+"arm": "C2",
+"s": 3,
+"task": "9",
+"reward": 1.0,
+"missing": false,
+"turns": 6,
+"said_done_turns": [
+6
+],
+"final_stop": "stop",
+"reviews": [
+[
+"allow",
+[]
+]
+]
+}
+]

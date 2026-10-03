@@ -1,0 +1,10 @@
+{"t": 1790866616.017, "event": "agent_start"}
+{"t": 1790866616.019, "event": "turn_start"}
+{"t": 1790866616.021, "event": "message_end", "role": "system"}
+{"t": 1790866616.023, "event": "message_end", "role": "user"}
+{"t": 1790866616.327, "event": "message_end", "role": "assistant", "stop": "length"}
+{"t": 1790866616.329, "event": "turn_end", "role": "assistant", "stop": "length"}
+{"t": 1790866616.33, "event": "agent_end"}
+{"t": 1790866616.332, "event": "agent_before_settle"}
+{"t": 1790866616.333, "event": "agent_settled"}
+{"t": 1790866631.543, "event": "session_shutdown"}

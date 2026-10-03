@@ -1,0 +1,300 @@
+[
+ {
+  "mutation": "#1 mention-only commands excluded",
+  "caught": true,
+  "failing_tests": [
+   "test_f1_a_failing_command_that_only_mentions_a_runner_is_not_sent_back",
+   "test_f1b_a_mention_after_the_failing_run_does_not_hide_it",
+   "test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 heredoc bodies dropped",
+  "caught": true,
+  "failing_tests": [
+   "test_f1_a_failing_command_that_only_mentions_a_runner_is_not_sent_back"
+  ]
+ },
+ {
+  "mutation": "#1 double quotes respected",
+  "caught": true,
+  "failing_tests": [
+   "test_f1_a_failing_command_that_only_mentions_a_runner_is_not_sent_back",
+   "test_f1b_a_mention_after_the_failing_run_does_not_hide_it",
+   "test_f1c_unparseable_quotes_are_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 single quotes respected",
+  "caught": true,
+  "failing_tests": [
+   "test_f1b_a_mention_after_the_failing_run_does_not_hide_it",
+   "test_f1c_unparseable_quotes_are_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 comments dropped",
+  "caught": true,
+  "failing_tests": [
+   "test_f1c_unparseable_quotes_are_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 redirection &> not a separator",
+  "caught": true,
+  "failing_tests": [
+   "test_f1c_unparseable_quotes_are_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 redirection >&N not a separator",
+  "caught": true,
+  "failing_tests": [
+   "test_f1c_unparseable_quotes_are_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 python -c is code, not a runner",
+  "caught": true,
+  "failing_tests": [
+   "test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 python -m module is the command",
+  "caught": true,
+  "failing_tests": [
+   "test_a_last_failing_run_is_sent_back_and_redone",
+   "test_b2_sent_back_then_disclosed_is_not_called_redone_or_not_sent_back",
+   "test_b_a_failure_the_final_message_mentions_is_only_noted",
+   "test_c_a_final_question_to_the_person_is_not_sent_back",
+   "test_d2_any_file_written_afterwards_is_note_only",
+   "test_d3_changes_after_the_failing_run_that_were_not_seen_are_note_only",
+   "test_d_code_changed_after_the_failing_run_is_noted_as_not_re_run",
+   "test_f1b_a_mention_after_the_failing_run_does_not_hide_it",
+   "test_f1c_unparseable_quotes_are_not_a_test_run",
+   "test_f2_timeouts_signals_and_no_tests_are_not_failures",
+   "test_f2b_pi_reads_its_own_status_line",
+   "test_f2c_pi_names_the_exit_code_from_its_status_line",
+   "test_f3_a_disclosed_failure_is_only_noted",
+   "test_f4_a_red_test_or_a_report_the_person_asked_for_is_not_sent_back",
+   "test_f4b_the_send_back_asks_to_say_first_and_to_fix_only_what_this_request_broke",
+   "test_f5_a_piped_re_run_is_not_called_redone",
+   "test_f5b_a_listed_or_negated_runner_has_no_status_of_its_own",
+   "test_f7_a_later_pass_in_another_form_is_seen",
+   "test_f9_a_different_failing_command_is_a_new_point_and_the_fixed_one_is_redone",
+   "test_f9b_sent_back_earlier_is_said_only_for_the_same_command",
+   "test_f9c_redone_needs_a_later_reliable_pass_of_the_same_command",
+   "test_g2_standard_runners_in_their_usual_forms_are_test_runs",
+   "test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run",
+   "test_j2_a_claim_after_the_send_back_is_not_called_redone",
+   "test_k_it_counts_in_the_two_rounds_and_is_then_left_for_the_person",
+   "test_l3_no_final_message_is_note_only",
+   "test_l_an_unknown_exit_status_is_not_sent_back",
+   "test_observe_mode_only_notes_it",
+   "test_the_check_after_a_cut_off_names_the_failing_run_for_the_person",
+   "test_with_one_turn_left_it_is_not_sent_back"
+  ]
+ },
+ {
+  "mutation": "#1 package install verbs excluded",
+  "caught": true,
+  "failing_tests": [
+   "test_f1_a_failing_command_that_only_mentions_a_runner_is_not_sent_back",
+   "test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 bash -c looked inside",
+  "caught": true,
+  "failing_tests": [
+   "test_f1c_unparseable_quotes_are_not_a_test_run",
+   "test_g_a_failing_command_that_only_mentions_a_runner_is_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#1 unparseable => not a runner",
+  "caught": true,
+  "failing_tests": [
+   "test_f1c_unparseable_quotes_are_not_a_test_run"
+  ]
+ },
+ {
+  "mutation": "#2 timed out => unknown",
+  "caught": true,
+  "failing_tests": [
+   "test_f2_timeouts_signals_and_no_tests_are_not_failures",
+   "test_f2b_pi_reads_its_own_status_line"
+  ]
+ },
+ {
+  "mutation": "#2 interrupted/aborted/terminated => unknown",
+  "caught": true,
+  "failing_tests": [
+   "test_f2_timeouts_signals_and_no_tests_are_not_failures",
+   "test_f2b_pi_reads_its_own_status_line",
+   "test_l2_an_interrupted_run_is_not_a_failure"
+  ]
+ },
+ {
+  "mutation": "#2 exit 124 => unknown",
+  "caught": true,
+  "failing_tests": [
+   "test_f2_timeouts_signals_and_no_tests_are_not_failures"
+  ]
+ },
+ {
+  "mutation": "#2 exit >=128 / <0 => unknown",
+  "caught": true,
+  "failing_tests": [
+   "test_f2_timeouts_signals_and_no_tests_are_not_failures"
+  ]
+ },
+ {
+  "mutation": "#2 pytest/unittest exit 5 => unknown",
+  "caught": true,
+  "failing_tests": [
+   "test_f2_timeouts_signals_and_no_tests_are_not_failures"
+  ]
+ },
+ {
+  "mutation": "#2 exit 5 only for pytest/unittest",
+  "caught": true,
+  "failing_tests": [
+   "test_f2d_exit_code_5_of_another_runner_is_a_failure"
+  ]
+ },
+ {
+  "mutation": "#2 pi status line read",
+  "caught": true,
+  "failing_tests": [
+   "test_f2b_pi_reads_its_own_status_line",
+   "test_f2c_pi_names_the_exit_code_from_its_status_line"
+  ]
+ },
+ {
+  "mutation": "#3 broader disclosure for this kind",
+  "caught": true,
+  "failing_tests": [
+   "test_f3_a_disclosed_failure_is_only_noted"
+  ]
+ },
+ {
+  "mutation": "#4 request asks for red/report => note",
+  "caught": true,
+  "failing_tests": [
+   "test_f4_a_red_test_or_a_report_the_person_asked_for_is_not_sent_back"
+  ]
+ },
+ {
+  "mutation": "#5 unreliable status => unknown",
+  "caught": true,
+  "failing_tests": [
+   "test_f5_a_piped_re_run_is_not_called_redone",
+   "test_f5b_a_listed_or_negated_runner_has_no_status_of_its_own",
+   "test_f5d_a_negated_or_looping_runner_is_not_its_own_status"
+  ]
+ },
+ {
+  "mutation": "#5 pipe/list position checked",
+  "caught": true,
+  "failing_tests": [
+   "test_f1c_unparseable_quotes_are_not_a_test_run",
+   "test_f5_a_piped_re_run_is_not_called_redone",
+   "test_f5b_a_listed_or_negated_runner_has_no_status_of_its_own"
+  ]
+ },
+ {
+  "mutation": "#5 pipefail rescues a pipe",
+  "caught": true,
+  "failing_tests": [
+   "test_f5c_pipefail_makes_a_piped_runner_count"
+  ]
+ },
+ {
+  "mutation": "#5 background & unreliable",
+  "caught": true,
+  "failing_tests": [
+   "test_f5b_a_listed_or_negated_runner_has_no_status_of_its_own"
+  ]
+ },
+ {
+  "mutation": "#5 if/! condition unreliable",
+  "caught": true,
+  "failing_tests": [
+   "test_f5d_a_negated_or_looping_runner_is_not_its_own_status"
+  ]
+ },
+ {
+  "mutation": "#5 closers transparent",
+  "caught": true,
+  "failing_tests": [
+   "test_g2_standard_runners_in_their_usual_forms_are_test_runs"
+  ]
+ },
+ {
+  "mutation": "#5/#10 redone needs a reliable ok",
+  "caught": true,
+  "failing_tests": [
+   "test_f5_a_piped_re_run_is_not_called_redone"
+  ]
+ },
+ {
+  "mutation": "#5/#10 redone needs the same command",
+  "caught": true,
+  "failing_tests": [
+   "test_f9c_redone_needs_a_later_reliable_pass_of_the_same_command"
+  ]
+ },
+ {
+  "mutation": "#5/#10 redone needs a later run",
+  "caught": true,
+  "failing_tests": [
+   "test_f9c_redone_needs_a_later_reliable_pass_of_the_same_command"
+  ]
+ },
+ {
+  "mutation": "#6 any file change (not only code)",
+  "caught": true,
+  "failing_tests": [
+   "test_d2_any_file_written_afterwards_is_note_only",
+   "test_f6_a_fix_in_any_file_after_the_failing_run_is_note_only"
+  ]
+ },
+ {
+  "mutation": "#6 cache dirs not a change",
+  "caught": true,
+  "failing_tests": [
+   "test_d2_any_file_written_afterwards_is_note_only"
+  ]
+ },
+ {
+  "mutation": "#7 RUNNERS.search (not match)",
+  "caught": true,
+  "failing_tests": [
+   "test_g2_standard_runners_in_their_usual_forms_are_test_runs"
+  ]
+ },
+ {
+  "mutation": "#8 any test_claim failure suppresses",
+  "caught": true,
+  "failing_tests": [
+   "test_f8_no_second_line_when_the_claim_check_already_sent_back_a_failure"
+  ]
+ },
+ {
+  "mutation": "#9 finding_id keyed on the command",
+  "caught": true,
+  "failing_tests": [
+   "test_f9_a_different_failing_command_is_a_new_point_and_the_fixed_one_is_redone",
+   "test_f9b_sent_back_earlier_is_said_only_for_the_same_command"
+  ]
+ },
+ {
+  "mutation": "#9 sent back earlier only same command",
+  "caught": true,
+  "failing_tests": [
+   "test_f9b_sent_back_earlier_is_said_only_for_the_same_command"
+  ]
+ }
+]

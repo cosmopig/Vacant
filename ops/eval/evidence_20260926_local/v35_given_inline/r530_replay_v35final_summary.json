@@ -1,0 +1,39 @@
+{
+ "cells": 59,
+ "cells_without_outcome": [
+  "g_r530_s2_1003_1/ow_09_minitemplate"
+ ],
+ "declared_done": 58,
+ "not_fully_correct": 39,
+ "cells_with_a_test_run": 0,
+ "last_test_run_status": {
+  "none": 59
+ },
+ "last_unknown_why": {},
+ "last_failed_reliably": 0,
+ "test_run_failed_sent": 0,
+ "test_run_failed_sent_on_fully_correct": 0,
+ "note_only": 0,
+ "note_only_why": {},
+ "precision": null,
+ "recall": 0.0,
+ "recall_among_last_failed": null,
+ "question_turns": 2,
+ "sent_on_question_turns": 0,
+ "any_send_back": 35,
+ "any_send_back_kinds": {
+  "unread": 20,
+  "failed_step": 69,
+  "test_claim": 3
+ },
+ "fidelity": {
+  "start_ok": 59,
+  "end_ok": 59,
+  "cells_with_rc_mismatch": 11
+ },
+ "fired_cells": [],
+ "repo": "/home/user/Vacant",
+ "vacant_network": "/home/user/Vacant/vacant_network/__init__.py",
+ "counterfactual_run_tests": false,
+ "inproc": true
+}

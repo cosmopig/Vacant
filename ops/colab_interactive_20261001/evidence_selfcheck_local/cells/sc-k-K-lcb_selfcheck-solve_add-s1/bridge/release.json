@@ -1,0 +1,19 @@
+{
+ "rc": 0,
+ "stderr": "",
+ "result": {
+  "released": true,
+  "task_id": "sc-k-A-lcb_selfcheck-solve_add-s1",
+  "artifact_sha256": "37f0357015ae5a29e22ced646ccd32a804e071a71f24fcec5cd168c299e301c7",
+  "destination": "dir:/srv/eval/_selfcheck/eval/receivers/sc-k-A-lcb_selfcheck-solve_add-s1/released",
+  "canonical_destination": "dir:/srv/eval/_selfcheck/eval/receivers/sc-k-A-lcb_selfcheck-solve_add-s1/released",
+  "reasons": [],
+  "effect": "published",
+  "readback_ok": true,
+  "readback_problems": [],
+  "location": "/srv/eval/_selfcheck/eval/receivers/sc-k-A-lcb_selfcheck-solve_add-s1/released/sc-k-A-lcb_selfcheck-solve_add-s1",
+  "approval_nonce": null,
+  "workspace_contract_matches_receiver": true,
+  "agent_visible_suite_matches_pinned": true
+ }
+}

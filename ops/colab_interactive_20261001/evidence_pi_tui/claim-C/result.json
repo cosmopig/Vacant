@@ -1,0 +1,259 @@
+{
+  "scenario": "claim",
+  "arm": "C",
+  "idle_s": 15.0,
+  "expect": {
+    "ready_within_10s": true,
+    "final_state_is_final": true,
+    "done_detected": true,
+    "exit_clean_rc0": true,
+    "no_process_left": true,
+    "sendback_arrived_inside_run": true,
+    "sendback_is_user_role_to_model": true,
+    "solution_written_after_sendback": true
+  },
+  "problems": [],
+  "install_rc": 0,
+  "ready_s": 1.41,
+  "done": true,
+  "wall_to_done_s": 18.71,
+  "final_state": "final",
+  "entries": [
+    "session::",
+    "model_change::",
+    "thinking_level_change::",
+    "message:system:",
+    "message:user:",
+    "message:assistant:toolUse",
+    "message:toolResult:",
+    "message:assistant:toolUse",
+    "message:toolResult:",
+    "message:assistant:stop",
+    "custom_message:vacant-check:",
+    "message:assistant:toolUse",
+    "message:toolResult:",
+    "message:assistant:stop"
+  ],
+  "exit_clean": true,
+  "exit_s": 0.45,
+  "procs_left_after_exit": 0,
+  "sendbacks": [
+    {
+      "customType": "vacant-check",
+      "after_final_assistant_s": 0.435
+    }
+  ],
+  "evlog_events": [
+    [
+      0.0,
+      "agent_start",
+      null,
+      null
+    ],
+    [
+      0.002,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      0.002,
+      "message_end",
+      "system",
+      null
+    ],
+    [
+      0.004,
+      "message_end",
+      "user",
+      null
+    ],
+    [
+      0.292,
+      "message_end",
+      "assistant",
+      "toolUse"
+    ],
+    [
+      0.665,
+      "tool_execution_end",
+      null,
+      null
+    ],
+    [
+      0.666,
+      "message_end",
+      "toolResult",
+      null
+    ],
+    [
+      0.668,
+      "turn_end",
+      "assistant",
+      "toolUse"
+    ],
+    [
+      0.671,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      0.893,
+      "message_end",
+      "assistant",
+      "toolUse"
+    ],
+    [
+      1.265,
+      "tool_execution_end",
+      null,
+      null
+    ],
+    [
+      1.266,
+      "message_end",
+      "toolResult",
+      null
+    ],
+    [
+      1.266,
+      "turn_end",
+      "assistant",
+      "toolUse"
+    ],
+    [
+      1.267,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      1.485,
+      "message_end",
+      "assistant",
+      "stop"
+    ],
+    [
+      1.486,
+      "turn_end",
+      "assistant",
+      "stop"
+    ],
+    [
+      1.486,
+      "agent_end",
+      null,
+      null
+    ],
+    [
+      1.487,
+      "agent_before_settle",
+      null,
+      null
+    ],
+    [
+      1.921,
+      "agent_start",
+      null,
+      null
+    ],
+    [
+      1.922,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      2.148,
+      "message_end",
+      "assistant",
+      "toolUse"
+    ],
+    [
+      2.6,
+      "tool_execution_end",
+      null,
+      null
+    ],
+    [
+      2.601,
+      "message_end",
+      "toolResult",
+      null
+    ],
+    [
+      2.601,
+      "turn_end",
+      "assistant",
+      "toolUse"
+    ],
+    [
+      2.602,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      2.83,
+      "message_end",
+      "assistant",
+      "stop"
+    ],
+    [
+      2.83,
+      "turn_end",
+      "assistant",
+      "stop"
+    ],
+    [
+      2.831,
+      "agent_end",
+      null,
+      null
+    ],
+    [
+      2.836,
+      "agent_before_settle",
+      null,
+      null
+    ],
+    [
+      3.306,
+      "agent_settled",
+      null,
+      null
+    ],
+    [
+      18.605,
+      "session_shutdown",
+      null,
+      null
+    ]
+  ],
+  "agent_end_to_sendback_s": [
+    0.434
+  ],
+  "last_agent_settled_to_exit_s": 15.19,
+  "agent_settled_count": 1,
+  "requests": 5,
+  "sendback_request": {
+    "msg_roles": [
+      "system",
+      "user",
+      "assistant",
+      "tool",
+      "assistant",
+      "tool",
+      "assistant",
+      "user"
+    ],
+    "last_user_head": "Before delivery: a review of the recorded steps of this task found points to red"
+  },
+  "first_request_sha256": {
+    "system_sha256": "e2d4d85b239d7362d5f4fc3fd204d6389fd39d23869f7e3ed2f54b73f51020c5",
+    "tools_sha256": "c96f354565801dfe8e928de863c64b468e0ababe36c33573974566fd1e9b8cc3",
+    "body_sha256": "1a5036ca18b55d1a1a9d98cddd15add3878d086325fc236b24263d1ebbd685f9"
+  },
+  "ok": true
+}

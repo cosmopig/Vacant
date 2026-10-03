@@ -1,0 +1,225 @@
+{
+  "summary": "Adversarially review v3.6: the turn-budget reminder is off by default and opt-in via vacant install --budget-reminder",
+  "agentCount": 7,
+  "logs": [],
+  "result": {
+    "findings": [
+      {
+        "title": "An earlier opt-in survives `vacant uninstall`, so a later plain `vacant install` turns the reminder on with no opt-in",
+        "severity": "medium-low",
+        "scenario": "Checked through the real CLI and hook path in /tmp/claude-0/v36_review/test_v36_default_off.py::test_uninstall_then_plain_install_keeps_old_opt_in. Steps: `vacant install --agents pi --force --budget-reminder`, then `vacant uninstall` (no --agents; the install banner calls this 'remove everything with `vacant uninstall`'), then a plain `vacant install --agents pi --force`. After the uninstall, install.json is still there as {'agents': {}, 'mode': 'evidence', 'budget_reminder': True, 'schema': 2}, because cmd_uninstall only forgets the agents and then calls m.save(). The plain reinstall keeps the old value (cli.py:135 only writes the field when the flag is given). hook.handle('pi','turn_check',{turn:13,budget:15}) then returns action=continue with the full 'Before the turn budget runs out…' reminder, which reaches the model even though this installation never opted in. `vacant install` prints nothing about the reminder, so the user cannot see that it is on. This matters for any A/C or simulated-user run on a reused machine or VACANT_HOME where someone earlier installed with --budget-reminder: the 'user default' arm would silently get the reminder. Fresh Harbor containers are not affected.",
+        "fix": "Make a full `vacant uninstall` (no --agents) drop `budget_reminder` from install.json, or delete install.json when no agents remain. Also have `cmd_install` print one line when it keeps an earlier `budget_reminder: true`, for example 'budget reminder: on (kept from a previous install; --no-budget-reminder turns it off)'. Add a test that runs install --budget-reminder, then uninstall, then a plain install, and asserts budget_reminder_on() is False.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this at commit eb56c02e. The tree came from `git archive eb56c02e`, extracted to /tmp/claude-0/v36_review/verify_0_0/src; I checked that nothing in vacant_network/ differs from HEAD ce75c426. The test is /tmp/claude-0/v36_review/verify_0_0/test_verify_uninstall_optin.py, run with PYTHONDONTWRITEBYTECODE=1 and PYTHONPATH pointing at that source (it asserts the import resolves there). All 3 tests pass:\n\n(1) Negative control: a fresh plain `install --agents pi --force` leaves budget_reminder_on() False, and at turn 13 of 15 hook.handle('pi','turn_check') returns {action: allow, reason: ''}.\n\n(2) In-process run through the top-level vacant_network.cli.main: `install --agents pi --force --budget-reminder`, then `uninstall` with no --agents (exit 0), then a plain `install --agents pi --force` (exit 0).\n- After the uninstall, install.json is exactly {\"agents\": {}, \"mode\": \"evidence\", \"budget_reminder\": true, \"schema\": 2}.\n- The plain reinstall's stdout says nothing about a reminder or budget. It only prints the pi extension line and \"remove everything with `vacant uninstall`\".\n- budget_reminder_on() is then True.\n- Through the real hook path (prompt → pre_tool/post_tool bash → turn_check turn=13 budget=15), the result is action=continue with NUDGE_HEADER \"Before the turn budget runs out: a requested output does not exist yet.\" and the /app/answer.txt line. A nudge event is recorded at turn 13.\n\n(3) The same sequence through subprocess calls of the real `vacant_network.cli:main` gives the same result.\n\nRoot cause in the code:\n- cmd_uninstall (adapters/cli.py ~L170-177) only runs INS.uninstall → m.forget(agent) for each agent, then m.save(). Top-level keys such as budget_reminder and mode stay.\n- cmd_install (cli.py:135-136) writes budget_reminder only when the flag is given (default=None, BooleanOptionalAction). The earlier True therefore carries over.\n\nThe commit's own test test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choice keeps the choice on purpose across reinstalls. It never covers a full uninstall in between, which the install banner calls \"remove everything\". Severity medium-low looks right: it only matters on a reused HOME/VACANT_HOME where someone opted in earlier, and fresh containers are not affected."
+        }
+      },
+      {
+        "title": "With the reminder off, the Stop send-back on the next-to-last turn still tells the model how many turns are left",
+        "severity": "low (needs the human to confirm)",
+        "scenario": "Plain `vacant install`, so the reminder is off. pi has a stated cap of 15 and the requested /app/answer.txt does not exist. The agent says it is done on turn 14, and the pi extension sends stop with turn=14, budget=15. zerostop._decide sets last_turn and calls review.render(..., budget_note=review.turns_left_note(1, 15)). The model receives: '- The request asks for /app/answer.txt, but it does not exist. Finish the task and write it. Model turns left in the stated budget: 1 of 15.' The same Stop at turn 10 has no budget sentence (checked in /tmp/claude-0/v36_review/test_v36_default_off.py::test_stop_on_last_turn_with_reminder_off). So Vacant text that exists only because of the turn budget still reaches the model without any opt-in. It is the same kind of end-of-budget pressure the human cited as the reason for turning the reminder off (more answers handed in, more of them wrong). Decision V3 §10 keeps 'only the missing file is sent back on the last turn' unchanged. But the relayed human request says only '提醒預設關掉' ('turn the reminder off by default'). The added 'turns left' sentence is not needed for the narrowing, and nobody explicitly signed off on keeping it. Nothing else changed: without a cap, turns_left is None and this sentence never appears, so the current nocap batch is not affected.",
+        "fix": "Ask the human whether the 'Model turns left in the stated budget: 1 of N' suffix is part of the kept last-turn narrowing or part of the reminder. If it belongs to the reminder, pass budget_note only when adapters.mode.budget_reminder_on() is True. Keep the narrowing itself (sending back only missing_output) unconditional, and add a test for the default-off case.",
+        "verdict": {
+          "real": true,
+          "evidence": "Reproduced at commit eb56c02e. The code came from `git archive eb56c02e` into /tmp/claude-0/v36_review/verify_0_1/src, and `git diff eb56c02e HEAD -- vacant_network` is empty. The test is /tmp/claude-0/v36_review/verify_0_1/test_verify_0_1.py and 4 of 4 pass (`PYTHONPATH=.../src .venv/bin/python -m pytest -p no:cacheprovider -s`). It drives the real hook path with `hook.handle('pi', ...)` and `_run_child=zerostop.check`, after a real plain `cli.main(['install','--agents','pi','--force'])`. That install writes `mode=evidence` with no `budget_reminder` key, and `budget_reminder_on()` returns False.\n\n(1) The reminder itself is off. `turn_check` at turns 13 and 14 with budget 15 returns `{\"action\":\"allow\",\"reason\":\"\"}`, and no nudge events are recorded.\n\n(2) `stop(final_text='Done.', turn=14, budget=15)` with /app/answer.txt missing returns `continue`. Its only finding line is exactly: `- The request asks for /app/answer.txt, but it does not exist. Finish the task and write it. Model turns left in the stated budget: 1 of 15.` The review event also records `turns_left=1, budget=15`.\n\n(3) The same Stop at turn=10 has no 'turns left' text. So does the Stop with no cap, whether budget is absent or null, so the nocap batch is not affected.\n\n(4) The narrowing runs with the reminder off: with two findings, only the missing_output line is sent back, and it carries the sentence. Turning the reminder on with `--budget-reminder` gives byte-identical Stop lines. The sentence is gated only on `turns_left<=1` in zerostop._decide (lines 182-198) and never on `budget_reminder_on()`. The pi extension sends `turn: TURNS, budget: BUDGET` on stop whatever the switch says (agents.pi_extension_text, agent_before_settle handler).\n\nCaveat on the finding's framing: the behaviour is by design, not a code slip. In DECISION_20260926_ZERO_CONFIG_V3 §二, row v3-3 says: \"只剩 1 回合時，交件前檢查只退回「要求的檔不存在」，並說還剩幾回合\". That row is separate from the v3-2 reminder, and §十 says v3-3 stays unchanged. So \"nobody explicitly signed off on keeping it\" goes too far. It is more accurate to say that the §十 summary (\"只剩最後一回合時只退回缺檔\") leaves the sentence out, and the human's words cover only '提醒預設關掉'. Whether the sentence belongs to the reminder is still a real, low-severity scope question for the human. The factual claims all reproduce as stated."
+        }
+      },
+      {
+        "title": "The budget_reminder opt-in survives a full `vacant uninstall`, so a later plain `vacant install` turns the reminder back on without being asked",
+        "scenario": "Reproduced in /tmp/claude-0/v36_review/test_v36_probe.py::test_uninstall_keeps_opt_in_and_plain_reinstall_turns_reminder_back_on. Steps: `vacant install --agents pi --force --budget-reminder`, then `vacant uninstall` with no --agents. The uninstall removes the pi extension, but cmd_uninstall still calls m.save(), and install.json is left as {'agents': {}, 'mode': 'evidence', 'budget_reminder': True, 'schema': 2}. A later plain `vacant install --agents pi --force` (no reminder flag) reaches `if getattr(args,'budget_reminder',None) is not None` in cli.py:135, leaves the old True in place, and budget_reminder_on() returns True. Driving the real hook with hook.handle('pi','turn_check',{turn:13,budget:15}) then returns action=continue and the reminder text reaches the model. This goes against the human decision (off by default) and against the install banner 'remove everything with `vacant uninstall`'. Decision V3 §十 says 'if unspecified, keep the previous choice', but after a full uninstall nothing is installed, so there is no previous choice left to keep. The same kind of leftover already exists for `mode`; this change adds a new setting that behaves the same way and that the model actually sees.",
+        "severity": "medium",
+        "fix": "In cmd_uninstall, on a full uninstall (no --agents, and no failed ops left in the manifest), drop `budget_reminder` (and preferably delete install.json when `agents` is empty) so the next install starts from the default. Otherwise, state in the §十 text and the install banner that the reminder choice outlives `vacant uninstall`. Add a test: install --budget-reminder, then uninstall, then a plain install, then assert budget_reminder_on() is False.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this at commit eb56c02e. I extracted that commit's tree with `git archive` into /tmp/claude-0/v36_review/verify_1_0/src and ran it with the repo's .venv python, confirming that `vacant_network.__file__` resolves to the extracted tree. I changed nothing under /home/user/Vacant. The code and tests are the same at HEAD (`git diff --stat eb56c02e HEAD -- vacant_network/ tests/` is empty).\n\nTest file: /tmp/claude-0/v36_review/verify_1_0/test_verify_uninstall_reminder.py. All 4 tests pass (1.32s). They use HOME and VACANT_HOME in tmp, clear PI_CODING_AGENT_DIR, and use the real `cli.main` and `hook.handle(\"pi\", ...)`.\n\n1. test_finding_reproduces_opt_in_survives_full_uninstall runs these steps:\n   - `install --agents pi --force --budget-reminder` writes the extension and turns the reminder on.\n   - A full `uninstall` (no --agents) returns 0 and removes ~/.pi/agent/extensions/vacant.ts. install.json is left as `{\"agents\": {}, \"mode\": \"evidence\", \"budget_reminder\": true, \"schema\": 2}`, the same as the finding, confirmed by a separate standalone run. `current_mode()` still returns \"evidence\" with nothing installed; that leftover existed before this change.\n   - A plain `install --agents pi --force` puts back an extension that contains turn_check, and `budget_reminder_on()` returns True. The install banner still says \"remove everything with `vacant uninstall`\".\n   - The real hook sequence is prompt, then pre_tool/post_tool bash, then `turn_check` with turn 13 and budget 15. It returns action=continue, the first line is NUDGE_HEADER, the text contains \"/app/answer.txt\" and \"2 of 15\", and one nudge event is recorded.\n2. Control, clean machine: a plain install turns the reminder off, and the same hook sequence returns `{\"action\":\"allow\",\"reason\":\"\"}` with no nudges.\n3. Control, leftover key only: I opted in, ran a full uninstall, and removed just the `budget_reminder` key. A plain reinstall then left the reminder off and the hook returned allow. So that leftover key alone turns the behaviour back on.\n4. `uninstall --agents pi` also keeps the choice. That fits §十 (\"沒說就不動上一次的選擇\") and is not the defect.\n\nWhy this counts as real: `cmd_uninstall` (cli.py) calls `INS.uninstall` for each agent, which only removes ops, then calls `m.save()`. It never removes `budget_reminder`, and never removes install.json even when `agents` is empty. `cmd_install` changes the key only when the flag is given (`if getattr(args,\"budget_reminder\",None) is not None`), so an opt-in that outlives a full uninstall comes back on the next plain install. That contradicts the install banner, the README (\"可逆：`vacant uninstall`\"), and the human decision that the reminder is off by default. §十 never says the choice survives uninstall.\n\nCaveat on severity: this only happens to a user who opted in explicitly at some earlier point. It is a leftover setting that the model sees, not a silent default-on for new users. So medium or lower is reasonable."
+        }
+      },
+      {
+        "title": "Decision V3 §十 and the commit message say requests are byte-identical to not-installed whenever the reminder is off, but Stop send-backs (including budget text) still change them",
+        "scenario": "Reproduced in /tmp/claude-0/v36_review/test_v36_probe2.py. install.json is {'mode':'evidence'} with no budget_reminder, so budget_reminder_on() is False. With pi at turn 13 of 15, turn_check correctly returns {'action':'allow','reason':''}. Then at turn 14 the agent says 'The total is 2045.' without writing /app/answer.txt, and hook.handle('pi','stop',{turn:14,budget:15}) returns action=continue with text that includes 'The request asks for /app/answer.txt, but it does not exist. ... Model turns left in the stated budget: 1 of 15.' So the model's next request differs from the not-installed case. This is the intended behaviour (the five send-back kinds and the last-turn narrowing are kept). But §十 states unconditionally '`budget.turn_check` 在關的時候直接放行，**模型收到的請求和沒裝時逐位元組相同**', and the commit message says '關的時候模型收到的請求和沒裝時逐位元組相同'. Read literally, these claim more than the code does. The claim that is true is narrower: the turn_check path adds nothing. The README's own wording ('沒有問題時…逐位元組相同') is conditioned correctly.",
+        "severity": "low",
+        "fix": "Reword §十 to say that when the reminder is off, turn_check adds nothing to any request (the extension's turn_end returns undefined), and that when there is nothing to send back, the requests are byte-identical to not-installed, as the README already says. Also note that the last-turn send-back still quotes the stated budget.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this at eb56c02e through the real hook path. I extracted the code with `git archive eb56c02e` into /tmp/claude-0/v36_review/verify_1_1/src, and the tests check that the imported vacant_network comes from that copy. Test file: /tmp/claude-0/v36_review/verify_1_1/test_verify_1_1.py. All 5 tests pass (PYTHONDONTWRITEBYTECODE=1, PYTHONPATH=src, .venv python).\n\n1) The code matches the finding. install.json is {\"agents\":{},\"mode\":\"evidence\"} with no budget_reminder field, so `budget_reminder_on()` is False. Through `hook.handle('pi','turn_check',{turn:13|14,budget:15})` the reply is exactly {\"action\":\"allow\",\"reason\":\"\"} and no nudge event is recorded. Then `hook.handle('pi','stop',{final_text:'The total is 2045.',turn:14,budget:15})` returns action=continue with this reason: \"Before delivery: a review of the recorded steps ... - The request asks for /app/answer.txt, but it does not exist. Finish the task and write it. Model turns left in the stated budget: 1 of 15. ...\". The pi extension adds that reason to the next request: `agent_before_settle` puts a vacant-check custom_message into entries and sets continue:true. So with the reminder off, the model still gets extra text, and that text quotes the stated budget. The source is zerostop._decide: `budget_note=review.turns_left_note(turns_left, budget) if last_turn`, and nothing there checks `budget_reminder_on`.\n\n2) A Stop send-back with no stated budget also returns continue with REVIEW_HEADER. The five send-back kinds are not affected by the switch.\n\n3) The narrower claim holds. When the answer file exists and there is nothing to send back, turn_check returns allow/\"\" and stop returns action=allow. The only extra is a `note`, which is for the person, not the model.\n\n4) The wording checks confirm what the finding quotes:\n- §十 of decisions/DECISION_20260926_ZERO_CONFIG_V3.md at eb56c02e says \"`budget.turn_check` 在關的時候直接放行，**模型收到的請求和沒裝時逐位元組相同**\".\n- The commit message says, with no condition, \"關的時候模型收到的請求和沒裝時逐位元組相同\".\n- The README keeps the correct condition: \"沒有問題時模型收到的每一通請求和沒裝時**逐位元組相同**\".\n\n§十's next sentence (\"其餘不變：交件前檢查（五類退回）、只剩最後一回合時只退回缺檔…\") makes the overclaim less likely to mislead. Read literally, though, both texts claim more than the code does. The behaviour itself is what the human decision intended. Severity is low: this is wording in the docs and commit message, and the code is fine."
+        }
+      },
+      {
+        "title": "`vacant install --help` says 'in evaluations it added more wrong answers than right ones', but the repo's own S36 screening recorded the opposite",
+        "scenario": "The help text and the README ('多交出來的答案錯的多於對的') state this as a general fact. The only source for it is the pre-registered local batch in CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL §三, where 63 runs wrote a file after the reminder: 25 right, 38 wrong. DECISION_20260926_BIGGER_EFFECT_REVIEW §十 (S36, on the current product) records reminder-attributable runs of 7 right vs 2 wrong in run 1, and 14 C-only-right vs 6 wrong over both runs, so the extra answers there were mostly right. S36 is labelled a screen, not evidence, but the plural 'in evaluations' covers it and is therefore not literally true. Small side note: §十's '82%→65%' matches run 1 (41/50, 45/69); pooled over three runs it is 81%→64%. That is within its '約'.",
+        "severity": "low",
+        "fix": "Scope the sentence to its source, for example: '(off by default: in the pre-registered local batch, more of the extra answers it produced were wrong than right)'. Use the same scope in the README.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this at eb56c02e using a `git archive` snapshot at /tmp/claude-0/v36_review/verify_1_2/src. The tests are in /tmp/claude-0/v36_review/verify_1_2/tests/test_finding_help_text.py and all 6 pass. The S36 recount script is /tmp/claude-0/v36_review/verify_1_2/s36_split.py.\n\n(1) The claim is really there. Running the real entry point `vacant_network.cli.main([\"install\",\"--help\"])` prints: \"off by default: in evaluations it added more wrong answers than right ones\". The README has \"多交出來的答案錯的多於對的\". I also drove the real hook path (`hook.handle('pi','turn_check',turn=13,budget=15)`) after `vacant install --agents pi --force`. With no flag it returns allow and records no nudge. With `--budget-reminder` the nudge fires. So the help line does describe this flag.\n\n(2) The only source that fits the claim is the pre-registered formal batch. From formal/summary.json, C2 minus A over the three runs is +17 right and +48 wrong, which matches the conclusion's \"25 right / 38 wrong after the reminder\". The share of delivered answers that were right is 82%→65% in run 1 (A 41/50, C2 45/69) and 81%→64% pooled (120/148, 137/213). That matches the finding's side note.\n\n(3) S36 is the opposite. I unpacked s36_jobs.tar.xz (the sha256 matches ARCHIVES.sha256) and recounted from each run's verifier/test-stdout.txt and vacant_check.json `nudges`:\n- Run 1: 11 C35 runs got a reminder. Of those where A left no answer file and C35 delivered, 7 were right and 2 wrong, exactly as §十 says.\n- Both runs pooled: 25 reminded runs, C-only right 14 vs A-only right 1, wrong answers C 6 vs A 1. That is the same as §十's \"C 單獨對 14／A 單獨對 1、錯 6 對 1\".\n- decision.json has net_right 15 and extra_wrong 2 (run 2: 9 and 4).\nSo in S36 the extra answers were mostly right.\n\n(4) There is one more counter-example the finding does not mention. In the API tier-0 run (api_tier0/tier0_g4.jsonl, gemma-26b with thinking, draws 0–1), the reminder condition had 50 tries: 11 answers written and accepted, 0 wrong.\n\nThe claim does hold for the formal batch and for the local 12B probe cited in the tier-0 README (10 right, 18 wrong). But the evaluations are mixed, so the unqualified plural \"in evaluations it added more wrong answers than right ones\" is not literally true. DECISION_20260926_ZERO_CONFIG_V3 §十 even cites BIGGER_EFFECT_REVIEW §十 as a reason, and that section records the better ratio. Severity is low; the fix is to scope the sentence to the pre-registered local batch."
+        }
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Review"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verify"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "review",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a130b583f40fb988a",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489307903,
+      "queuedAt": 1790489307828,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790489784548,
+      "tokens": 159672,
+      "toolCalls": 41,
+      "durationMs": 476624,
+      "resultPreview": "{\"findings\":[{\"title\":\"An earlier opt-in survives `vacant uninstall`, so a later plain `vacant install` turns the reminder on with no opt-in\",\"severity\":\"medium-low\",\"scenario\":\"Checked through the real CLI and hook path in /tmp/claude-0/v36_review/test_v36_default_off.py::test_uninstall_then_plain_install_keeps_old_opt_in. Steps: `vacant install --agents pi --force --budget-reminder`, then `vacan…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "review",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a712da7b3ade5915b",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489307923,
+      "queuedAt": 1790489307829,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790489654461,
+      "tokens": 152057,
+      "toolCalls": 40,
+      "durationMs": 345314,
+      "resultPreview": "{\"findings\":[{\"title\":\"The budget_reminder opt-in survives a full `vacant uninstall`, so a later plain `vacant install` turns the reminder back on without being asked\",\"scenario\":\"Reproduced in /tmp/claude-0/v36_review/test_v36_probe.py::test_uninstall_keeps_opt_in_and_plain_reinstall_turns_reminder_back_on. Steps: `vacant install --agents pi --force --budget-reminder`, then `vacant uninstall` wit…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "verify:2.1",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a864445e4de39eff3",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489658702,
+      "queuedAt": 1790489658625,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this at commit eb56c02e. I extracted that comm…",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790489763857,
+      "tokens": 92173,
+      "toolCalls": 16,
+      "durationMs": 105153,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this at commit eb56c02e. I extracted that commit's tree with `git archive` into /tmp/claude-0/v36_review/verify_1_0/src and ran it with the repo's .venv python, confirming that `vacant_network.__file__` resolves to the extracted tree. I changed nothing under /home/user/Vacant. The code and tests are the same at HEAD (`git diff --stat eb56c02e HEAD -- vacant_ne…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "verify:2.2",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a1ed258512811b598",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489767360,
+      "queuedAt": 1790489658625,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this at eb56c02e through the real hook path. I…",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790489858465,
+      "tokens": 99488,
+      "toolCalls": 15,
+      "durationMs": 91104,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this at eb56c02e through the real hook path. I extracted the code with `git archive eb56c02e` into /tmp/claude-0/v36_review/verify_1_1/src, and the tests check that the imported vacant_network comes from that copy. Test file: /tmp/claude-0/v36_review/verify_1_1/test_verify_1_1.py. All 5 tests pass (PYTHONDONTWRITEBYTECODE=1, PYTHONPATH=src, .venv python).\\n\\n1…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "verify:2.3",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a8c4ce6da83f69a3c",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489787174,
+      "queuedAt": 1790489658625,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this at eb56c02e using a `git archive` snapsho…",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790489959888,
+      "tokens": 119331,
+      "toolCalls": 26,
+      "durationMs": 172714,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this at eb56c02e using a `git archive` snapshot at /tmp/claude-0/v36_review/verify_1_2/src. The tests are in /tmp/claude-0/v36_review/verify_1_2/tests/test_finding_help_text.py and all 6 pass. The S36 recount script is /tmp/claude-0/v36_review/verify_1_2/s36_split.py.\\n\\n(1) The claim is really there. Running the real entry point `vacant_network.cli.main([\\\"in…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "verify:1.1",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a4b952838f4cd18cd",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489863661,
+      "queuedAt": 1790489787232,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this at commit eb56c02e. The tree came from `g…",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790489948872,
+      "tokens": 87519,
+      "toolCalls": 11,
+      "durationMs": 85209,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this at commit eb56c02e. The tree came from `git archive eb56c02e`, extracted to /tmp/claude-0/v36_review/verify_0_0/src; I checked that nothing in vacant_network/ differs from HEAD ce75c426. The test is /tmp/claude-0/v36_review/verify_0_0/test_verify_uninstall_optin.py, run with PYTHONDONTWRITEBYTECODE=1 and PYTHONPATH pointing at that source (it asserts the …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "verify:1.2",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "ab78dc767554092cd",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790489951315,
+      "queuedAt": 1790489787233,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Reproduced at commit eb56c02e. The code came from `git arch…",
+      "promptPreview": "Repo /home/user/Vacant at commit eb56c02e (read CLAUDE.md zero-config section). Change under review: git show eb56c02e (v3.6): vacant_network/adapters/mode.py budget_reminder_on(), vacant_network/trace/budget.py turn_check early-return, vacant_network/adapters/cli.py install --budget-reminder/--no-budget-reminder, tests/test_zero_budget.py test_v36_*, docs. Human decision (2026-09-27): the reminde…",
+      "promptFramed": true,
+      "lastProgressAt": 1790490057657,
+      "tokens": 99842,
+      "toolCalls": 17,
+      "durationMs": 106341,
+      "resultPreview": "{\"real\":true,\"evidence\":\"Reproduced at commit eb56c02e. The code came from `git archive eb56c02e` into /tmp/claude-0/v36_review/verify_0_1/src, and `git diff eb56c02e HEAD -- vacant_network` is empty. The test is /tmp/claude-0/v36_review/verify_0_1/test_verify_0_1.py and 4 of 4 pass (`PYTHONPATH=.../src .venv/bin/python -m pytest -p no:cacheprovider -s`). It drives the real hook path with `hook.ha…"
+    }
+  ],
+  "totalTokens": 810082,
+  "totalToolCalls": 166
+}

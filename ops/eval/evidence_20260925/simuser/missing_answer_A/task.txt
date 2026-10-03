@@ -1,0 +1,8 @@
+You are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`
+Don't forget to reference any documentation in the data dir before answering a question.
+
+Here is the question you need to answer: Which issuing country has the highest number of transactions?
+
+Here are the guidelines you MUST follow when answering the question above: Answer must be just the country code.
+
+When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).

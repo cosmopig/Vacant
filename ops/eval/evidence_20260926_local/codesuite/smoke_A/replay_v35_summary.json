@@ -1,0 +1,9 @@
+{
+ "runs": 10,
+ "said_done": 5,
+ "sent_back": 0,
+ "sent_back_on_reward_1": 0,
+ "sent_back_on_reward_0": 0,
+ "done_reward_1": 5,
+ "vacant_network": "/home/user/Vacant/vacant_network/__init__.py"
+}

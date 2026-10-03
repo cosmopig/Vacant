@@ -1,0 +1,3 @@
+{"steps": [{"run": "cut -d, -f11 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"}],
+ "final": "The issuing country with the most transactions is NL.",
+ "fix": {"steps": [{"write": ["/app/answer.txt", "NL"]}], "final": "Wrote NL to /app/answer.txt."}}

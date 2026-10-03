@@ -15,6 +15,14 @@
 """
 from __future__ import annotations
 
-from .cli import main
+import sys
+
+# `vacant hook …` 在 agent 的**每一次工具呼叫**前都會執行：不經過 `cli`（它在頂層
+# import 整套 eco），直接進掛鉤模組，省下啟動時間。
+if sys.argv[1:2] == ["hook"]:
+    from .adapters.hook import main as _hook_main
+    raise SystemExit(_hook_main(sys.argv[2:]))
+
+from .cli import main  # noqa: E402
 
 raise SystemExit(main())

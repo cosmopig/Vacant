@@ -1,0 +1,1 @@
+{"decision": "block", "reason": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- no_placeholder: FAIL \u2014 report.md:2 says \"999\"\n  check says: report.md: contains forbidden /999/ at offset 16\nRun `vacant check` to re-check before finishing."}

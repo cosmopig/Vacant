@@ -1,5 +1,167 @@
 # Changelog
 
+## Unreleased
+
+**Accountable trace: who did what, which step put the wrong value in, and the problem is raised
+instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`.
+
+- New `vacant_network.trace`: every tool call of pi, Claude Code, OpenCode and Codex is recorded
+  into one signed chain per project (actor incl. sub-agents, tool, input, output, and the files the
+  step changed — from Vacant's own before/after view of the workspace, so shell writes count);
+  changes no step explains are recorded as accountability gaps, never blamed on anyone.
+- When a check fails: locate (file, line, value) → the step that introduced it → re-run the same
+  check on the rebuilt before/after states (`provable`) → where the value came from (input,
+  sub-agent reply, command output, a script the agent wrote, a web page, the task message).
+  Two layers (fact / inference), five grades, seven fault classes.
+- The end-of-turn feedback now names the location, the expected value and the step where the value
+  first appeared, with no actor in it (`feedback_ks1_clean`, executable). When the agent will not be
+  asked to continue, open issues go to the human (Claude Code `systemMessage`, a report under
+  `$VACANT_HOME/trace/`, `vacant trace report`). `vacant flag` lets a person point at a wrong place.
+- Consequences are events and reputation is replayed from them: only `provable` findings touch an
+  actor (no slash; `vacant flag --dismiss` reverses exactly), input faults are tallied on the source,
+  gaps on the platform integration. Routing is advice to the human and `vacant do --agent auto`.
+- `vacant do --feedback-mode localized|generic|none` and `ops/accountability/r536/` (bank, runner,
+  analysis) for the preregistered real-model experiment (draft, awaiting sign-off).
+- Evidence (L-fake, four real agents × six planted faults, one of them a sub-agent that computes
+  the wrong value which the main agent copies, one a wrong web page fetched with `curl`): 24/24 attributions, the sub-agent case pointing at
+  the sub-agent's own step on all four agents, `ops/accountability/evidence_20260924/`. pi has no
+  built-in sub-agents; a pi process started by an extension during a tool call is now recognised
+  as a sub-agent of that session (it was treated as a second main agent and asked, at its own
+  turn end, for the parent's deliverable). A value that came from `curl`/`wget` output is traced to the
+  URL as an outside source (it was blamed on the agent as "the command produced it").
+- While a background sub-agent is still working (Claude Code's default), the end-of-turn check waits:
+  it used to push the main agent to redo the sub-agent's work. `SubagentStart` is now installed for
+  Claude Code and Codex. End to end: 25/25, including Claude's background sub-agent.
+- A human flag (`vacant flag file:line "what is wrong"`) on something no check covers now has an
+  end-to-end run on all four agents: it reaches the agent at the next session's turn end even though
+  the contract passes, it points at the step that wrote the line, and it resolves once the line
+  changes. The note is shown as the owner's words, not as a check's. End to end: 29/29.
+- Parallel delegation: a delegation call that finished first used to take a sibling sub-agent's
+  in-flight write as its own; a delegation call never writes files itself, so a file version that a
+  real step wrote is credited to that step. End to end on all four agents: 33/33.
+- Review of the last two changes (8 findings, `ops/accountability/review_defer_credit/FINDINGS.md`):
+  a session end now clears sub-agents that never reported; a deferred check voids the session's
+  earlier outcome; at most 3 consecutive deferrals; a turn end settles only the actor's own steps;
+  delegated writes are credited only to a later step with the identical before/after change;
+  flags reach the agent only with a valid owner signature (a sub-agent could inject text as the owner).
+- `vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation"
+  --total amount --lock`: a one-line contract for the things a person actually cares about. Only
+  what the person writes becomes a required check besides two safety checks (the deliverable exists,
+  no credential files): plain text for `--must`/`--must-not`/`--heading`, and for `--total` the number
+  after 'Total' (or after `=LABEL`) must equal the recomputed column total. Numeric CSV columns are
+  listed as hints, never turned into checks on a guess. What can never pass fails when the contract
+  is written: a wrong column, a column the check cannot read, a totals row that would be counted
+  twice, a report outside the deliverable, a non-text report, empty text. An adversarial review (32
+  findings, all real, all fixed: `ops/accountability/review_contract_quick/FINDINGS.md`) also fixed
+  two totals on one report that could never both pass, `./report.md` or absolute paths that always
+  rejected, and a crash on CSV rows wider than the header. Failures of a plain-text `--must` are
+  shown as the text the person wrote, not as an escaped regex.
+- The HTTP intake's reply to a failed submission now carries the same located feedback an agent gets
+  at the end of a turn (file, line, the value found, the expected value) plus a structured `issues`
+  list. A submission is only files, so nothing is traced to a step or an actor; hidden claims say only
+  that they failed (`trace.blame.locate_results`). An adversarial review (9 findings, all fixed:
+  `ops/accountability/review_http_feedback/FINDINGS.md`) made locating bounded (it was quadratic: a
+  1 MB report took 26 s), kept traceback paths inside the submission (a sandboxed submission could
+  learn which files exist on the host), and located on the frozen, verified artifact only.
+- Interactive use: the feedback-round cap now applies per request the person types, not per session.
+  In a multi-turn TUI session a question asked first could use up the rounds, and the wrong value
+  written after the next request then got no located feedback (reproduced as a negative control in
+  Claude Code's TUI). Messages the person did not type do not reset it and are not treated as a
+  source of values: a background sub-agent's result, a parent's task for a sub-agent, Vacant's own
+  feedback echoed back (matched at the start only), a prompt the agent scheduled for itself with
+  CronCreate/ScheduleWakeup (Claude Code sends it exactly like a typed one), messages from other
+  sessions. The counter is keyed by session and contract. A forged `vacant hook` call from the
+  session can still reset it; `vacant hook` is now denied before a tool runs (string level).
+  OpenCode's plugin now forwards the person's messages (`chat.message`) and pi's extension also
+  listens to `input`, so a request typed while pi is still running counts too.
+- New `ops/accountability/e2e_tui.py`: the four agents' real TUIs driven in tmux like a person would
+  (type, Enter, exit). 16/16 attributions, feedback reaching the model, feedback on the person's screen
+  and acceptance after the fix, including a multi-turn case. OpenCode's interactive TUI does get
+  pre-delivery feedback (written earlier, first measured now); `opencode run` still does not.
+  `e2e_trace.py --via-do` runs the same faults through `vacant do`: 25/25, OpenCode included.
+- The scripted mock model accepts only the experiment's fake keys (anything else is refused with 401
+  and never logged), so every model request that reached the mock carried only the fake key (that says
+  nothing about what else an agent does with other credentials it can see); it also
+  plays multi-turn scripts (`turns`).
+- Large projects: a scan inside a hook stops at 8 s (hooks are killed at 30 s); a first look that
+  does not fit moves to the background and the steps before it are recorded as not observed;
+  states of projects with 1000+ files are stored as deltas (0.9 KB per step instead of 4.9 MB at
+  40k files); re-runs rebuild only the deliverable, the same files the intake's verifiers see.
+  Measured with the real hook entry point: 40k files → first Pre 5.7–8.2 s, later hooks p95 0.6 s,
+  Stop with tracing 1.9 s (`ops/accountability/evidence_20260924/perf/`). Above 50k files the
+  per-step scan is off and the trace says so. An adversarial review of this change found 8
+  issues, all fixed (`ops/accountability/review_scale/FINDINGS.md`): a step that started before the
+  first look and ended after it now leaves a gap instead of letting a later editor be blamed;
+  unreadable stored states make the trace say "not observed" instead of blaming anyone.
+
+**The intake is real, and it plugs into pi, Claude Code, OpenCode and Codex without looking at
+model traffic.** Decision: `decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`.
+
+- New `vacant_network.intake`: versioned task contracts (`vacant contract init|lock|validate`),
+  content-addressed quarantine, per-claim verifiers with four outcomes (PASS / FAIL / UNKNOWN /
+  CONFLICT), a written decision policy (accept / reject / hold / escalate), signed human reviews,
+  bound single-use approvals, a recipient gate (`dir:` and `git:` destinations) that re-checks
+  everything and reads the destination back, a per-task signed ledger in which every event —
+  including infrastructure failures — stays in the denominator, and an HTTP intake whose
+  submitters cannot supply the verdict. Exit codes 40–45 (the `vacant run` / gateshim 20–26
+  meanings are unchanged).
+- New `vacant_network.adapters`: `vacant do <agent>` (isolated workspace + headless run + intake),
+  `vacant install` / `vacant uninstall` (hooks + an Agent Skill in each agent's own config,
+  key-level and reversible), `vacant hook <agent> <event>` (one policy, four native formats).
+- Per-run hooks never touch the user's files and never replace their settings: OpenCode's plugin is
+  merged into `OPENCODE_CONFIG_CONTENT` (not `OPENCODE_CONFIG_DIR`, which also hides the global
+  `AGENTS.md`; an unparseable user value means no injection rather than a replaced value), and
+  its end-of-session submission runs in the awaited `dispose()`. When the persistent install is
+  present, `vacant do` does not inject a second copy (pi, OpenCode and Codex hooks are additive,
+  so the stop check would otherwise run twice per turn).
+- **Adversarial review, same day** (five lenses, 60 findings, each reproduced or refuted against
+  the code; decision §十一). Fixed with a regression test each:
+  - *Recipient:* releases follow only an **owner-locked contract** (`vacant contract lock` now
+    signs the contract hash and release policy with a new `owner` key; a second contract with the
+    same task id and a weaker policy is refused); the already-published path re-checks the lock
+    and decision; approvals bind the *resolved* destination; spent nonces and withdrawals are
+    remembered in the signed ledger too; the recipient notices a truncated ledger it has seen;
+    git destinations find the task's last release (not just the branch tip) and read back with
+    `ls-tree -z`; hand-made quarantine manifests with `../` paths are refused before any write;
+    `/published` serves only what the signed ledger shows as released and not withdrawn, never
+    follows symlinks, and re-hashes every file.
+  - *Verifiers:* sandboxed checks run hermetically (no login-shell profile, no Python user site,
+    HOME outside the deliverable; `vrun`'s `bash -lc` behaviour is unchanged); `command` gets its
+    documented environment inside the sandbox; NaN/inf and decimal commas are unreadable instead of
+    matching anything; `Subtotal` is not `total`; citations checked only against the deliverable's
+    own files are not independent evidence; JSON NaN, `format` and draft-07 keywords are enforced;
+    malformed params are `UNKNOWN`, not the deliverable's fault; hidden claims stay hidden in every
+    output; reviews bind the contract hash; the scaffold forbids `.env` at any depth.
+  - *Adapters:* the shell rule compares path components and real write targets (it no longer
+    blocks `pytest tests` or every write under `~/.vacant-work`); Codex/OpenCode `apply_patch`
+    payloads are read in their real shapes; `/clear`, resume and reload do not submit; unfixable
+    holds are not pushed back to the agent; the session cannot run `vacant review|approve|release|
+    withdraw|keys|contract lock`; `CLAUDE_CONFIG_DIR` is honoured; Codex trust keys cover a
+    symlinked `~/.codex`; installs write through symlinks and keep file modes; re-installing keeps
+    the first backup; failed undo steps are kept for retry; a damaged end marker is refused
+    instead of deleting to end of file; `vacant do codex` no longer makes Codex append a
+    `[projects]` entry to the user's config on every run; pi/OpenCode hooks no longer block the
+    event loop; `vacant uninstall` also removes a 0.8.0 model-channel install.
+  - *Accounting:* interrupting `vacant do` kills the agent's process group and records
+    `infra_void`; escape detection covers `.git` config/hooks/refs, `__pycache__` and empty
+    directories; `vacant do` retries only on a required FAIL; a later rejected candidate no
+    longer hides a live release in `task status`/`report`; withdrawing a never-released task is
+    a no-op; an unreadable ledger is its own row in the report; release-stage failures are
+    `infra_void` (exit 43).
+- **Changed:** `vacant install` / `vacant uninstall` now install the universal hooks + skill. The
+  previous behaviour (resident model-channel proxy) is `vacant possess install` or
+  `vacant install --observe-model`.
+- **Fixed (P0):** acceptance counted results *received* instead of checks *declared*; a suite whose
+  second check killed the process (even with exit 0) was reported all-pass. The trusted parent now
+  derives the declared case list from the test file's syntax before any candidate code runs, the
+  driver prints an end marker, and missing / duplicate / unknown cases, non-zero exit or a missing
+  end marker all fail. `return False` and async checks no longer pass.
+- **Fixed:** `vacant on` crashed with `NameError: os`; agents spawned by `vacant run` inherited a
+  stale `PWD` (OpenCode wrote into the launch directory instead of the workspace).
+- **Wording:** `"tamper_proof": true` → `false` / `"tamper_evident": true`; "the gate stops the
+  delivery" → the gate decides refusal; `suitespec`'s "2+2=5" boundary now separates requirement
+  authority from factual authority.
+
 ## 0.8.0 — 2026-09-19
 
 **Breaking: the import package is renamed `vacant` → `vacant_network`. Every

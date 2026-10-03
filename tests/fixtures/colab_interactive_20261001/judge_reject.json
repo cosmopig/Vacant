@@ -1,0 +1,21 @@
+{
+ "rc": 40,
+ "stderr": "",
+ "result": {
+  "outcome": "reject",
+  "reasons": [
+   "visible_acceptance: FAIL — test_visible.py::check_visible_01 — assert: args=(2, 3) got=-1 want=5 [test_visible.py:6: assert got == 5, \"args=%r got=%r want=%r\" % ((2, 3), got, 5)]"
+  ],
+  "coverage": {"required": 3, "decidable": 3, "pass": 2, "fail": 1, "unknown": 0, "conflict": 0, "optional": 0},
+  "contract_sha256": "4540da0c37a125c0133ccd7669a6c0c9043c2c9d2fcd6fafc9f884514167ca2a",
+  "artifact_sha256": "1a540cd14ebf6186b6c5fd1f40f95e9da124859c77d3883c6886298c0b6f760e",
+  "results": [
+   {"claim_id": "deliverable_present", "status": "PASS", "detail": "all 1 pattern(s) present", "required": true},
+   {"claim_id": "no_secrets_shipped", "status": "PASS", "detail": "no forbidden files", "required": true},
+   {"claim_id": "visible_acceptance", "status": "FAIL",
+    "detail": "test_visible.py::check_visible_01 — assert: args=(2, 3) got=-1 want=5 [test_visible.py:6: assert got == 5, \"args=%r got=%r want=%r\" % ((2, 3), got, 5)]",
+    "required": true}
+  ],
+  "void": false, "attempt": 1, "sandbox_backend": "bwrap"
+ }
+}

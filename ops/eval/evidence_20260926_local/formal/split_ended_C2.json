@@ -1,0 +1,3140 @@
+{
+ "summary": {
+  "runs": 237,
+  "ended_notes": 82,
+  "final_answer_on_last_turn": {
+   "n": 42,
+   "reward_1": 19,
+   "nudged": 42,
+   "runs": [
+    "1-s1",
+    "17-s1",
+    "1753-s1",
+    "18-s1",
+    "19-s1",
+    "3-s1",
+    "32-s1",
+    "35-s1",
+    "36-s1",
+    "58-s1",
+    "61-s1",
+    "66-s1",
+    "67-s1",
+    "68-s1",
+    "69-s1",
+    "7-s1",
+    "9-s1",
+    "1273-s2",
+    "15-s2",
+    "18-s2",
+    "19-s2",
+    "3-s2",
+    "30-s2",
+    "36-s2",
+    "45-s2",
+    "53-s2",
+    "59-s2",
+    "61-s2",
+    "65-s2",
+    "68-s2",
+    "69-s2",
+    "71-s2",
+    "1273-s3",
+    "26-s3",
+    "3-s3",
+    "30-s3",
+    "53-s3",
+    "61-s3",
+    "62-s3",
+    "65-s3",
+    "67-s3",
+    "7-s3"
+   ]
+  },
+  "cut_off": {
+   "n": 40,
+   "reward_1": 6,
+   "nudged": 40,
+   "runs": [
+    "1273-s1",
+    "1305-s1",
+    "1464-s1",
+    "1871-s1",
+    "23-s1",
+    "2697-s1",
+    "30-s1",
+    "44-s1",
+    "45-s1",
+    "47-s1",
+    "49-s1",
+    "50-s1",
+    "71-s1",
+    "1305-s2",
+    "1464-s2",
+    "16-s2",
+    "1753-s2",
+    "1871-s2",
+    "23-s2",
+    "2697-s2",
+    "35-s2",
+    "37-s2",
+    "49-s2",
+    "50-s2",
+    "66-s2",
+    "70-s2",
+    "1681-s3",
+    "1753-s3",
+    "1871-s3",
+    "19-s3",
+    "23-s3",
+    "2697-s3",
+    "46-s3",
+    "49-s3",
+    "50-s3",
+    "58-s3",
+    "6-s3",
+    "60-s3",
+    "69-s3",
+    "71-s3"
+   ]
+  }
+ },
+ "rows": [
+  {
+   "task": "1",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "10",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "11",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "12",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1273",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "13",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1305",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "14",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1464",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "15",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "16",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1681",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "17",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "1753",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "18",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "1871",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "19",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "2",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "20",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "21",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "22",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "23",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "24",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "25",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "26",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "2697",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "27",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "28",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "29",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "3",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "30",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "31",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "32",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "33",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "34",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "35",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "36",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "37",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "38",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "39",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "4",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "40",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "41",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "42",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "43",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "44",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "45",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "46",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "47",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "48",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "49",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "5",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "50",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "51",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "52",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "53",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "54",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "55",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "56",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "57",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "58",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "59",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "6",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "60",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "61",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "62",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 12,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "63",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "64",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 5,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "65",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "66",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "67",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "68",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "69",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "7",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "70",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 14,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": null
+  },
+  {
+   "task": "71",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "72",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "8",
+   "sample": 1,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "9",
+   "sample": 1,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "1",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "10",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "11",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "12",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1273",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "13",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1305",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "14",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1464",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "15",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "16",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "1681",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "17",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 12,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1753",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "18",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "1871",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "19",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "2",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "20",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "21",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "22",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "23",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "24",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 13,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "25",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "26",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "2697",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "27",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "28",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "29",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "3",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "30",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "31",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "32",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "33",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "34",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "35",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "36",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "37",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "38",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "39",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "4",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "40",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "41",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "42",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "43",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "44",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "45",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "46",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 14,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "47",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "48",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "49",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "5",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "50",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "51",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "52",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "53",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "54",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "55",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "56",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "57",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "58",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 14,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "59",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "6",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "60",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "61",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "62",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "63",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "64",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 4,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "65",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "66",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "length",
+   "tool_results": 0,
+   "kind": "cut_off"
+  },
+  {
+   "task": "67",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 12,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "68",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "69",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "7",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 14,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "70",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "71",
+   "sample": 2,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "72",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "8",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "9",
+   "sample": 2,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 12,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "10",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "11",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 12,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "12",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1273",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "13",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1305",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 14,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "14",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1464",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "15",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "16",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1681",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "17",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1753",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "18",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "1871",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "19",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "2",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "20",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "21",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "22",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "23",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "24",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "25",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "26",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "2697",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "27",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "28",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "29",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "3",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "30",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "31",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "32",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "33",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "34",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "35",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "36",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "37",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "38",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "39",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "4",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "40",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "41",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "42",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "43",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "44",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "45",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 13,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "46",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "47",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "48",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "49",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "5",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 11,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "50",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "51",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "52",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "53",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "54",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "55",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 8,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "56",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "57",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "58",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "59",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 14,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "6",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "60",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "61",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "62",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "63",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 7,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "64",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 5,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "65",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "66",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 12,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": null
+  },
+  {
+   "task": "67",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "68",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 10,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "69",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13,
+    14
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "7",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 1.0,
+   "turns": 15,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": "final_answer_on_last_turn"
+  },
+  {
+   "task": "70",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 3,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 7,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": null
+  },
+  {
+   "task": "71",
+   "sample": 3,
+   "ended_notes": 1,
+   "reviews": 0,
+   "nudge_turns": [
+    13
+   ],
+   "reward": 0.0,
+   "turns": 15,
+   "stop_reason": "toolUse",
+   "tool_results": 1,
+   "kind": "cut_off"
+  },
+  {
+   "task": "72",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 2,
+   "nudge_turns": [],
+   "reward": 0.0,
+   "turns": 9,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "8",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  },
+  {
+   "task": "9",
+   "sample": 3,
+   "ended_notes": 0,
+   "reviews": 1,
+   "nudge_turns": [],
+   "reward": 1.0,
+   "turns": 6,
+   "stop_reason": "stop",
+   "tool_results": 0,
+   "kind": null
+  }
+ ]
+}
