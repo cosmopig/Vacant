@@ -37,3 +37,4 @@
 | 09:0x | 從 PyPI 的端到端（vacant-dev 新使用者，照 README 兩行、pi 設定在 `~/.pi/agent`、模型 1003）：`vacant install` 放 `extensions/vacant.ts`；pi 讀 data.csv 寫 answer.txt（7）；病歷 3 步、交件前檢查 1 次 allow、delivery.md 有。小缺口：`vacant --version` 不支援 |
 | 14:13 | **d37L 跑完**（711 格，06:27–14:06 開跑；逾時 A 1／C37 2／C37R 1、安裝失敗 0、模型全程 200）；14:15 t3L 第 3 次補跑開始（feasibility 照計畫停掉） |
 | 15:2x | d37L void 檢查（本機 123 個 chunk 全部 sha256 驗過，按 chunk 順序先刪同名格子再解壓；711 格全部是重跑那一批）：**1 格 void**——`d37L-C37-dabstep-66-s2`：agent 有交答案，但答案裡有單引號（"isn't"），題目自己的 `test.sh` 用 `xargs` 讀答案、遇到沒配對的單引號就在寫 reward 之前結束 ⇒ 沒分數。照預註冊補跑一次（同一台 g1004、15 回合；從 packed 清單拿掉、舊格子移到 `void_try1_d37L/`） |
+| 15:4x | d37L void 補跑完成（有分數）⇒ 第一次讀分數、凍結分析：**A 122 vs C37 121／231，p＝0.84（主要，不顯著）**；C37R 146（p＝0.0051 對 A、0.00076 對 C37）。A「說做完沒寫檔」20 格（Colab 42）；C37 補到 2 但被 15 回合切斷的 59→74 ⇒ 淨 0。傷害 0（4 格候選逐格比對，退回前就錯）。結論 `decisions/conclusions/CONCLUSION_20261003_VACANTDEV_DABSTEP_V37.md` |
