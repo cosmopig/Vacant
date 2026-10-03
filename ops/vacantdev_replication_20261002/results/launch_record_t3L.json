@@ -1,0 +1,62 @@
+{
+ "prefix": "t3L",
+ "launched": "2026-10-03T04:35:10Z",
+ "slots": 8,
+ "deadline": "2026-12-31T00:00:00Z",
+ "prereg": "PREREG_20261002_VACANTDEV_REPLICATION_V37",
+ "plan_sha256": "6b610c8d006e2ae151a30ea93c1cb690fa028e9d9b3c9c7d19cc8a875174cf19",
+ "n_tasks": 94,
+ "arms": [
+  "A",
+  "C37"
+ ],
+ "seed": 20261002,
+ "tools_sha256": {
+  "analyze.py": "898820c2d3a4a0c1a6635ffa93bcdd46dd1e58eaa563983b729060e01e84ebb9",
+  "bench_long.py": "42a22f1ec17b99c5d9faced721c1a2a3dc6b5daeffa49f3b790474e55cb4c386",
+  "bench_results_g4.jsonl": "e81c741378348a363789e024d2317a5936c8ccb691c4298849ca2f32190af479",
+  "compat_probe.py": "b2ccd89ea0091a016367cebb8da4ac7a5f5fe00083f44e7a504e787a7db52cea",
+  "serve_vllm.sh": "1bcffeaae79caa9e20e10a16af9547357f0b84ede16ce08ad01c3c2177f3ee54",
+  "setup_vllm.sh": "c536d21bdcd3e68e6d3f64e014f165bb208d04ffc566e25f528711852ad74a01",
+  "cell.sh": "5c396192e4a420ad7c57db584eeef4072d9e74c73549b3cb4b29c6393273bf95",
+  "cleanup_packed.sh": "ab7cc57980ef767d991deb9ed759bd42b7ecd5ef20f146f32d61e1761de29b5e",
+  "cu_guard.sh": "18af28996c006ab943a1f001e6ac88caf4fc6a7eed33136a86cd2f412ea9ef26",
+  "dabstep_score.py": "a81ba78835f3dd6d903a4ac785dbcc83a0f918bc02dde32e6517619bd62a49fa",
+  "deploy_vm.sh": "298b7e10860ea2610eb3c59476ab37fb09cdbe00919158f5a7788e9d167d362d",
+  "driver.py": "3f3b1ebfd593502e6c6d53e1cf2131e00d77b239cd476778fdea56caac328447",
+  "feasibility.py": "7b7ebd89e84d90a113bdbec45d36f9e80a62660b8001f16d2da5fd8b454c1f9c",
+  "gauge_task3.py": "43ff78b796c52d7deb21c484bb342b1c9550c92ed3109ea48119e40622654341",
+  "launch_batch.sh": "bc27ea8869c42a2cb22874cb62545aaf1871ae7ed2f192d906ee5fcb1529673c",
+  "orproxy.py": "bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525",
+  "packer.py": "d206cf001276c7c9ff480c0c35f02d149a23f4dcafae85a2e02cd85dcdfe709d",
+  "resume_queue.sh": "c24e83ab0412e60d29253bf0860067c130b8e4ed610eb7fb427d270be7aa45f9",
+  "run_queue.sh": "14177d394a268dc474e48948d2f4d1d5c3f8b0346eab26e0430ec90203b4ac85",
+  "sandbox.sh": "4855e8e4d0a56a06d24fa7d54e28c09e291d738d3646d5095ab8a0c0997a6af3",
+  "code_checks.py": "d6b145b74621092de73605dbfd38758d02bd21dcdf5f46861833048abceecd36",
+  "code_suite.py": "298396bcc6cabe68d9129870ef1be0d7f94b153cc8cd4219504931759714649d",
+  "dabench.py": "a541dceda5d091da9ff5fa323dd14220c5c8302935ac85d6f043d79f356435b1",
+  "databench.py": "ac5bd5be233e01ba1060ec1e698cd8eb4a73b8a4a023836587d3f415bb057b38",
+  "polyglot_py.py": "25ed44f4643200c006f9b8780783366050c2637660ae7873e7f2010a5366f182",
+  "stage_code_bank.py": "c3bef86a90f263d535d412f791e5e135f9a9e0cf7d716138ba9262211427d3d2",
+  "stage_task_bank.py": "18bd21f5b5f7e10a77689650c6b70dbc76a4607b7f5eb177c334904b6a6d07ee",
+  "sync_from_colab.sh": "bfd9ea3f76c018eea528667c05523e5c2016098005b8c397226c0fddf20833ab",
+  "t3L_void_try1.txt": "190feaa402d45eb157aae0ca35afe7135163883bf0f6267f45f5964a2b1519fc",
+  "vacant_check.py": "07afff4f22ee23115e507f94c4c8f7276317793bf5ff3a83f7141349295e8661",
+  "vm_setup.sh": "57348920af55032c7c8015278856f3ef794222a72de4242eaa4957e8ca1cf179",
+  "vmrun.sh": "31af1c44603b8807ddc6a3be7169ad0df281e85bf46445483d61c4d12ef0e9dc"
+ },
+ "wheel": {
+  "vacant_network-0.8.0-py3-none-any.whl": "92ddc44d7bb545b9f3c81d923286a952d3fa23b9d2f3b81d6f530fe9aedfbc1f"
+ },
+ "staged_tree_sha256": {
+  "dabench": "da5bad0417f1b2d625eb48476bf260fdc6aa17e7a8f7fb87a16ad9f55d497fed",
+  "databench": "e2343f4febd62baf23eae7d922777035f4567f931701b3a662cdbb54bb51bb8b",
+  "polyglot_py": "fa1929c198d7218fd1529247f0d6a8e21529ef7fc3b095acfff72f80f2394a0a"
+ },
+ "model_safetensors_sha256": "",
+ "vllm": "",
+ "pi": "0.87.1",
+ "node": "v22.23.2",
+ "gpu": "",
+ "vllm_cmdline": ""
+}

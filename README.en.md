@@ -23,6 +23,50 @@ in anything outward-facing).
 An existing pattern, not one we invented: supply-chain security does the same thing with
 **in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
 
+## Install it and keep working: zero-config (0.9.0, v3.7)
+
+```bash
+pipx install vacant-network   # 0.9.0 is the zero-config release. No pipx? `sudo apt install pipx` (Ubuntu/Debian) or `brew install pipx` (macOS)
+vacant install                # finds pi / Claude Code / OpenCode / Codex on this machine and adds one hook to each (undo: `vacant uninstall`)
+```
+
+Then open your agent as usual. **No contract, config file, key or environment variable.** For pi, `vacant install` puts a single
+extension file into pi's own config directory (`extensions/vacant.ts`); it does not replace the agent or wrap the model endpoint.
+
+It does two things:
+
+1. **Records every step** — each tool call, which files were read, what changed in the workspace — into a signed record
+   (`~/.vacant/trace/`). It stays silent while the agent works; when nothing is wrong, every model request is
+   **byte-identical** to not having Vacant installed.
+2. **Checks once, when the agent says it is done** — from the record only — and sends it back in the same session (at most two
+   rounds per request) only for near-certain problems:
+   - a file the request asked for does not exist (named in the prompt, or in a file you pointed at, e.g. `contract.md` says "write `solution.py`"; v3.7)
+   - a failed step was skipped over (a red test script followed by a green run does not count; v3.7)
+   - "tests pass" does not match the record (any test script counts, e.g. `sh run_tests.sh`; v3.7)
+   - a concrete value has no source in anything this task read or ran (only when you supplied data)
+   - a file you named was never opened (unless you pasted its full text into the request)
+
+Everything else goes into a delivery note for you (`~/.vacant/trace/projects/<project>/delivery.md`), never to the model or your
+project. **It does not judge whether an answer is right.** The turn-budget reminder (v3) is **off by default** since v3.6;
+`vacant install --budget-reminder` turns it on.
+
+### What was measured (real models, installed with the two commands above — always quote the conditions)
+
+| Batch | Setup | not installed → installed | How to read it |
+|---|---|---|---|
+| DABstep 77 tasks × 3 (2026-10-02, pre-registered) | gemma-4-12b QAT on vLLM (Colab G4), pi 0.87.1 `--print`, **15-turn cap** | 42.0% → **53.2%** (p = 0.0028) | The gain is runs where the agent said it was done without writing the answer file (42/231 without Vacant, 0 with). Correct answers turned wrong by Vacant: **0**. ⚠ The Vacant arm scored about the same as on the GGUF backend on 2026-09-26; the not-installed arm is what changed. The task set was chosen because it had shown an effect before — not a hold-out. |
+| Task-oriented 94 tasks × 2 (2026-10-02, pre-registered) | DABench / DataBench / Polyglot Python, same setup **without a turn cap** | 72.3% → 75.0% (p = 0.36) | No measured difference; "said done without the file" only 5/120 |
+| Same, GGUF + LM Studio (2026-10-03, interim) | two RTX 3090 | 119 → 124 of 188 (p = 0.37) | No measured difference; "said done without the file" 0 |
+| Earlier: paid DABstep (09-25), 100 unseen hard tasks (09-28), 920 coding tasks on Colab (09-28, v3.6.1) | see conclusions | no measured difference | the v3.6.1 false send-backs (ran `run_tests.sh`, still "no test run") are fixed in v3.7: 0/23 in the smoke |
+
+⚠ **Do not read this as "Vacant makes agents better"**, nor as "it does nothing": what it catches is "said done without writing the
+requested file"; where that is common (turn caps, some inference engines) a difference shows up, where it is rare it does not.
+Wrong decisions with a source for every step, and runs cut off by a time limit, are outside what it can see. Known limits: a provided
+test script that stays red until the agent says done is not sent back; only pi was measured with a real model, all via `pi --print`
+(the interactive TUI was verified with scripted models).
+Conclusions: `decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md`, `CONCLUSION_20261002_COLAB_TASK3_V37.md`,
+`CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md`, `CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`, `CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`.
+
 ## Plugging into your agent: pi / Claude Code / OpenCode / Codex (from 2026-09-24)
 
 The 2026-09-24 external review was right on one point: **a refusal verdict is not a blocked

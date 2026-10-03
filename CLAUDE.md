@@ -209,6 +209,14 @@ Vacant 把對的改成錯：0 次。C1（現版、沒有 v3）對沒裝：沒有
 ❌「Vacant 讓 agent 做得更好」不帶條件；❌「效果穩」；❌ 外推到沒有上限的互動使用。v3 是看過同一批題設計的 ⇒ 留出批次在跑。
 ⚠ `research.wilcoxon_signed_rank_exact` 曾用浮點 `==` 判同分（三次平均的差會被拆開）：凍結的報告數字 0.019／0.46／0.118 要讀成 0.021／0.75／0.083；已修（同分先四捨五入到 12 位；差是 0.5 的倍數時新舊版相同）。
 **v3.5**（`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §八）：人打的話裡**整段**貼著全文的檔（≥ 80 位元組、前後是字的邊界）算讀過——R530 SOLO 59 格重播退回 58→35、全對的被退回 20→6；貼的是另一個版本（差一個值、一行）照樣退回（對抗審查 10 條，`ops/eval/evidence_20260926_local/v35_given_inline/`）。**u274**（預註冊，100 題沒用過的 DABstep hard 題、不設回合上限、本機 gemma-4-12b，A vs v3.6.1）：✅「**沒有量到差別**（9 對 10，p＝1.0）」；缺檔退回 31 跑之後 0 對，一半是模型出錯後被叫回來；S36-nocap（36 題 easy、看結果挑的）的 GO 沒有在 hard 題上重現（`decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`）。同日 Colab 程式題 920 題也沒有量到差別（分支 `feat/colab-campaign-20260927`）。三個缺陷在 **v3.7** 修掉（`decisions/DECISION_20260926_ZERO_CONFIG_V3.md` §十一；離線重播 `ops/eval/colab_replay/replay_reviews.py`：v3.6.1 重算全對；v3.7 第一次檢查的退回 Colab 309→29 跑、u274 36→20、S36-nocap 不變）——**只去掉誤退，對答對率的上限很小**；把可執行驗收接到原生 agent 的是 PR #82（`native_acceptance_bridge.py`，冒煙前）。**候選 2**（「最後一次自己跑的測試失敗卻說做完」當成第六類退回）**沒過擋門**（R530 重播退回 0 次），沒有併進來，patch 在 `…/candidate2/`。
+**v3.7＝0.9.0（2026-10-03 併進 main、發到 PyPI）**。10-02／03 的實測（都是 `pi --print`、真模型 gemma-4-12b QAT）：
+冒煙（PR #82 分支 wheel，30 格）跑過 `run_tests.sh` 仍被退 0／23、`missing_output` 3／3、新誤退 0（`ops/colab_pr82_smoke_20261002/`）；
+**Colab DABstep 77×3、15 回合（預註冊）：42.0%→53.2%，p＝0.0028**——差來自「說做完卻沒寫 `/app/answer.txt`」被退回補寫（A 42／231、C 0），傷害 0，
+⚠ 有 Vacant 那組和 09-26 GGUF 那批幾乎一樣、**變的是 A**（vLLM 下更常漏寫檔）⇒ 不能說「v3.7 比之前好」（`CONCLUSION_20261002_COLAB_DABSTEP_V37.md`）；
+Colab 任務導向 94×2（不設上限）72.3% vs 75.0%，p＝0.36；vacant-dev＋1003／1004 GGUF 期中 119 vs 124，p＝0.37、A「說做完沒寫檔」0 格。
+✅「零設定補得到的是『說做完卻沒寫要求的檔』；這種情況多才量得到差」；❌ 不帶條件的「讓 agent 更好」；❌ 外推到互動介面（只用照劇本的模型驗過流程）。
+已知漏退：題目附的測試一直紅就說做完，不退（`evidence.py` `_failed_steps` 只算 agent 自己寫的腳本或人點名的材料）。
+⚠ 1003／1004 長跑：1003 的 `llama-server.exe` 會因記憶體耗盡崩潰（prompt cache 吃系統記憶體）、1004 閒置會被 TTL 卸載——分配要有健康檢查（記憶 lmstudio-models-get-unloaded）。
 
 ### `vacant_network/vrun/` — 產品本體（`vacant run` / `vacant install` 那一層）
 

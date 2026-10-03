@@ -1,0 +1,192 @@
+{
+ "seed": 20261002,
+ "arms": [
+  "C37"
+ ],
+ "samples": [
+  1
+ ],
+ "tasks": [
+  {
+   "bank": "lcb_v1",
+   "id": "lcb_3722",
+   "dir": "/srv/eval/staged/lcb_v1/lcb_3722",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v1",
+   "id": "lcb_3794",
+   "dir": "/srv/eval/staged/lcb_v1/lcb_3794",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3026",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3026",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3659",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3659",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3750",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3750",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v3",
+   "id": "lcb_2730",
+   "dir": "/srv/eval/staged/lcb_v3/lcb_2730",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v3",
+   "id": "lcb_2792",
+   "dir": "/srv/eval/staged/lcb_v3/lcb_2792",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v3",
+   "id": "lcb_2817",
+   "dir": "/srv/eval/staged/lcb_v3/lcb_2817",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v3",
+   "id": "lcb_3245",
+   "dir": "/srv/eval/staged/lcb_v3/lcb_3245",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v3",
+   "id": "lcb_3363",
+   "dir": "/srv/eval/staged/lcb_v3/lcb_3363",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_124",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_124",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_130",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_130",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_242",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_242",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_269",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_269",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_437",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_437",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_558",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_558",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_568",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_568",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_68",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_68",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_775",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_775",
+   "group": "misreject20"
+  },
+  {
+   "bank": "mbppplus",
+   "id": "mbppplus_Mbpp_801",
+   "dir": "/srv/eval/staged/mbppplus/mbppplus_Mbpp_801",
+   "group": "misreject20"
+  },
+  {
+   "bank": "lcb_v1",
+   "id": "lcb_3674",
+   "dir": "/srv/eval/staged/lcb_v1/lcb_3674",
+   "group": "nodeliver_natural"
+  },
+  {
+   "bank": "forced",
+   "id": "lcb_3674",
+   "dir": "/srv/eval/staged/forced/lcb_3674",
+   "group": "nodeliver_forced"
+  },
+  {
+   "bank": "lcb_v1",
+   "id": "lcb_3795",
+   "dir": "/srv/eval/staged/lcb_v1/lcb_3795",
+   "group": "nodeliver_natural"
+  },
+  {
+   "bank": "forced",
+   "id": "lcb_3795",
+   "dir": "/srv/eval/staged/forced/lcb_3795",
+   "group": "nodeliver_forced"
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3675",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3675",
+   "group": "nodeliver_natural"
+  },
+  {
+   "bank": "forced",
+   "id": "lcb_3675",
+   "dir": "/srv/eval/staged/forced/lcb_3675",
+   "group": "nodeliver_forced"
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3737",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3737",
+   "group": "nodeliver_natural"
+  },
+  {
+   "bank": "forced",
+   "id": "lcb_3737",
+   "dir": "/srv/eval/staged/forced/lcb_3737",
+   "group": "nodeliver_forced"
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3783",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3783",
+   "group": "nodeliver_natural"
+  },
+  {
+   "bank": "forced",
+   "id": "lcb_3783",
+   "dir": "/srv/eval/staged/forced/lcb_3783",
+   "group": "nodeliver_forced"
+  }
+ ],
+ "note": "PR #82 機制冒煙（不是預註冊批次）；選題規則見 selection.json"
+}
