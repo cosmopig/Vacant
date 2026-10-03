@@ -23,3 +23,5 @@
 | 10-03 04:3x | 診斷（Mac ssh 的 ControlPath 指到不存在的目錄，前幾次查詢都卡住；改 `-o ControlPath=none`）。同步：59 個 chunk 全部 sha256 驗過。t3L void 檢查（不讀分數）：**238／564 void**（A-s3 93、C37-s3 93、A-s2 26、C37-s2 26）；第 1 次 188 格完整 |
 | 04:40 | 停住，等人類決定：兩台都要重新載入 gemma 才能補跑／續跑，而載卸是別的工作在做的 |
 | 04:45 | 人類：「你去處理載卸，我等」（＝人類處理 1003／1004 的模型載入，好了通知）。在那之前**不發射**，只備好續跑：`cell.sh` 加健康檢查（LM Studio `/api/v0/models` 要有 gemma `state=loaded` 才分；兩台都不行就每 60 秒再看，寫 `unhealthy.log`）；`resume_queue.sh`：t3L 的 238 格 void（119 個單位、全部成對）移到 `void_try1/` 用同前綴補跑一次（預註冊）→ d37L 第一次的 51 格移到 `aborted_d37L_try1/`（不進分析）、從頭重跑；從 `packed_cells.txt` 拿掉這些名字、清 `unit_up/`、重開瘦身常駐。void 清單由本機用完整 chunk 算（`t3L_void_try1.txt`） |
+| 04:5x | 人類：「你自己掛」。LM Studio REST `POST /api/v1/models/load {"model":"gemma-4-12b-it-qat","context_length":262144}`：1003 9.6 秒、1004 7.1 秒，兩台 `loaded`、262144。經代理打：都沒有 reasoning。vacant-dev 起 `~/keep_gemma.sh`（每 120 秒；哪台沒載著 gemma 就重新載入、記 `~/keep_gemma.log`；QUEUE_DONE 後結束） |
+| 04:5x | **發射續跑** `resume_queue.sh`：238 格 void → `void_try1/`、51 格 d37L → `aborted_d37L_try1/`，從 packed 清單拿掉、`unit_up/` 清空、瘦身常駐重開；t3L 用同前綴補跑。4 分鐘後：最近 5 分鐘 g1004 80 通、g1003 31 通全 200，`unhealthy.log` 空、沒有重新載入。Mac 同步重開（加 `ControlPath=none`） |
