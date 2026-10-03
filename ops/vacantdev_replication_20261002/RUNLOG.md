@@ -22,3 +22,4 @@
 | 19:13 | d37L 可行性規則觸發（最先 40 格的代理呼叫 39／54 非 200）⇒ 停止檔；19:31 ALL_DONE（d37L 只有 51 格，無效） |
 | 10-03 04:3x | 診斷（Mac ssh 的 ControlPath 指到不存在的目錄，前幾次查詢都卡住；改 `-o ControlPath=none`）。同步：59 個 chunk 全部 sha256 驗過。t3L void 檢查（不讀分數）：**238／564 void**（A-s3 93、C37-s3 93、A-s2 26、C37-s2 26）；第 1 次 188 格完整 |
 | 04:40 | 停住，等人類決定：兩台都要重新載入 gemma 才能補跑／續跑，而載卸是別的工作在做的 |
+| 04:45 | 人類：「你去處理載卸，我等」（＝人類處理 1003／1004 的模型載入，好了通知）。在那之前**不發射**，只備好續跑：`cell.sh` 加健康檢查（LM Studio `/api/v0/models` 要有 gemma `state=loaded` 才分；兩台都不行就每 60 秒再看，寫 `unhealthy.log`）；`resume_queue.sh`：t3L 的 238 格 void（119 個單位、全部成對）移到 `void_try1/` 用同前綴補跑一次（預註冊）→ d37L 第一次的 51 格移到 `aborted_d37L_try1/`（不進分析）、從頭重跑；從 `packed_cells.txt` 拿掉這些名字、清 `unit_up/`、重開瘦身常駐。void 清單由本機用完整 chunk 算（`t3L_void_try1.txt`） |

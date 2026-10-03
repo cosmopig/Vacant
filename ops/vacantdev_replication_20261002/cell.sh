@@ -29,7 +29,16 @@ if [ "$UP" = auto ]; then
     n3=0; n4=0
     for u in /srv/eval/cells/*/upstream; do d=${u%/upstream}; [ -f "$d/DONE" ] && continue
       case $(cat "$u") in g1003) n3=$((n3+1));; g1004) n4=$((n4+1));; esac; done
-    if [ $n3 -le $n4 ]; then up=g1003; else up=g1004; fi
+    # 10-03 加：健康檢查——那台的 LM Studio 要真的載著 gemma（/api/v0/models state=loaded）才分給它；兩台都不行就每 60 秒再看一次
+    # （10-02 18:27 起 1003 沒有模型、格子幾秒內失敗，「進行中最少」反而一直把新單位分過去）
+    ok() { curl -s -m 8 "http://$1:1234/api/v0/models" | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if any(m.get(\"id\")==\"gemma-4-12b-it-qat\" and m.get(\"state\")==\"loaded\" for m in d.get(\"data\",[])) else 1)" 2>/dev/null; }
+    while true; do
+      h3=0; h4=0; ok 100.119.113.56 && h3=1; ok 100.86.226.21 && h4=1
+      if [ $h3 = 1 ] && [ $h4 = 1 ]; then if [ $n3 -le $n4 ]; then up=g1003; else up=g1004; fi; break; fi
+      if [ $h3 = 1 ]; then up=g1003; break; fi
+      if [ $h4 = 1 ]; then up=g1004; break; fi
+      echo "$(date -u +%FT%TZ) no healthy upstream" >> /srv/eval/unhealthy.log; sleep 60
+    done
     echo $up > "$f"; echo $up')
 fi
 AGENT_TIMEOUT=${AGENT_TIMEOUT:-1800}
