@@ -20,11 +20,54 @@
 唯一的 runtime 依賴（`cryptography`）真的被用到的地方；再加上整幕
 `vacant demo gate`（零網路、零模型、約 2 秒），判準**沿用 demo 自己的
 可執行防呆**，不在這裡寫第二份。
+
+⚠ **第一屏的收據總判是 `VOID` 不是 `OK`，而且那是規格**（2026-09-19 起）：
+那隻假 agent 一通模型都沒打（`requests_seen == 0`），驗章器把「鏈完整、但沒有
+中介發生過」判成 `VOID`（`vacant_network/vrun/demo.py` 模組 docstring、
+`docs/VACANT_RUN.md` §4、`tests/test_demo_gate.py` 都釘這個值）。這支以前寫
+`!= "OK"` 是把 demo 改版之前的故事編進了 CI；改版那個 commit（fb7f4bfb）
+帶走了驗章器與 demo 的新行為，卻沒有碰這支，build job 就從那天起紅。
+現在釘的是 `VOID` 加上「鏈沒壞、確實零請求」：**判回 `OK` 一樣算失敗**
+（那代表尺分不出零請求的假拒交格——demo 自己的防呆也會在同一刻死掉）。
+判斷放在 `first_screen_problem()`，`tests/test_demo_gate.py` 會拿 demo 當場跑出的
+結果與一組壞結果各餵一次（有正控制也有負控制），預期寫在測試裡、不用等 CI。
 """
 from __future__ import annotations
 
 import pathlib
 import sys
+
+
+def first_screen_problem(out: dict, refused_rc: int) -> str | None:
+    """`vacant demo gate --json` 的輸出符不符合第一屏的規格；符合回 `None`，
+    不符合回一句話說哪裡不對。
+
+    判準只有兩件事，都是 demo 文件寫明的規格，不是為了讓 CI 變綠調出來的：
+
+      1. 閘門判拒交——`gated_rc` 要等於 `vacant run` 的拒交退出碼
+         （`refused_rc` 由呼叫端從 launcher 讀進來，這裡不寫死 20）。
+      2. 收據是「鏈完整、零請求」：`receipts_verdict == "VOID"`、
+         `receipts_failed_total == 0`（VOID 不准把壞鏈偷渡成規格內）、
+         `requests_seen == 0`（VOID 的理由要是這個）。
+
+    ⚠ 單邊保證：這只確認 demo 這一幕的形狀沒漂；不是「驗章器在所有鏈上都對」
+    （那是 `vacant_network/vrun/verify_receipts.py --selftest` 與它的測試的事）。
+    """
+    if out.get("gated_rc") != refused_rc:
+        return f"閘門沒有判拒交（gated_rc={out.get('gated_rc')!r}，應為 {refused_rc}）"
+    verdict = out.get("receipts_verdict")
+    if verdict == "OK":
+        return ("收據總判是 OK——這一幕零模型請求，驗章器應該判 VOID；"
+                "判回 OK＝尺分不出零請求的假拒交格")
+    if verdict != "VOID":
+        return f"收據總判應為 VOID（鏈完整但零請求），實際 {verdict!r}"
+    # `False == 0` 在 Python 裡為真：計數欄位先把 bool 踢掉（repo 的三態防呆）。
+    for key, why in (("receipts_failed_total", "VOID 的前提是鏈沒壞"),
+                     ("requests_seen", "VOID 的理由應該是零請求")):
+        v = out.get(key)
+        if isinstance(v, bool) or v != 0:
+            return f"{why}，但 {key}={v!r}"
+    return None
 
 
 def main() -> int:
@@ -79,6 +122,8 @@ def main() -> int:
     #    stop_reason、收據鏈最後一筆是 ws_verdict、驗章器的負控制先過…），
     #    任何一條不成立就 `SystemExit`。所以這裡只看**退出碼**與它自己吐的
     #    JSON，`EXIT_REFUSED` 也是從 launcher 讀，不寫死 20。
+    #    收據總判是 `VOID`（零請求），不是 `OK`——見模組 docstring 與
+    #    `first_screen_problem()`。
     import json
     import subprocess
     import tempfile
@@ -101,12 +146,15 @@ def main() -> int:
             print("× vacant demo gate --json 沒吐出 JSON：")
             print(p.stdout[-3000:])
             return 2
-        if out.get("gated_rc") != EXIT_REFUSED or out.get("receipts_verdict") != "OK":
-            print(f"× 第一屏的結果不對：{json.dumps(out, ensure_ascii=False)[:600]}")
+        problem = first_screen_problem(out, EXIT_REFUSED)
+        if problem is not None:
+            print(f"× 第一屏的結果不對：{problem}")
+            print(f"  {json.dumps(out, ensure_ascii=False)[:600]}")
             return 2
     print(f"demo gate  閘門 rc={out['gated_rc']}（{out['stop_reason']}）、"
           f"可見驗收 {out['visible_passed']}/{out['visible_total']}、"
-          f"收據 {out['receipt_entries']} 筆 verdict={out['receipts_verdict']}")
+          f"收據 {out['receipt_entries']} 筆 verdict={out['receipts_verdict']}"
+          f"（零請求→VOID，規格）")
     print("SMOKE OK")
     return 0
 

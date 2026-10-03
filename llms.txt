@@ -7,7 +7,7 @@
 > executable acceptance tests against a candidate, decides ship-or-refuse on the result,
 > and signs every attempt — failures included — into an append-only Ed25519 hash chain
 > that anyone with the public key can re-verify offline. Install: `pip install vacant-network`
-> (import name `vacant`). Python >= 3.11. MIT.
+> (import name `vacant_network`). Python >= 3.11. MIT.
 
 The word is **accountability**, not trust: the classical definitions (Gambetta 1988,
 Mayer 1995) make "acting without monitoring" necessary for trust, and monitoring is the
@@ -16,14 +16,24 @@ entire content of this system. Do not describe Vacant as a trust layer.
 Four things to know before using anything here. (1) **The premise**: the whole mechanism
 assumes a requirement can be compiled into an executable acceptance suite; where it
 cannot, there is no free referee. (2) **Enforcement is at acceptance time, not execution
-time.** The intake check cannot be routed around, but making Vacant the single exit on a
+time.** The intake check re-verifies every digest and signature, so getting past it takes
+the signing key — which by default sits in the same OS account; making Vacant the single exit on a
 machine takes containers, ACLs or egress policy — the deployment layer's job. In
-reference-monitor terms (Saltzer & Schroeder 1975) Vacant is tamper-proof and small
-enough to verify, and does **not** satisfy complete mediation. Same pattern as in-toto /
+reference-monitor terms (Anderson 1972) Vacant is small enough to verify and
+tamper-evident but **not** tamper-proof (same-account plaintext keys), and does **not**
+satisfy complete mediation. Same pattern as in-toto /
 SLSA / Sigstore. (3) **The chain gives integrity, not completeness**: a truncated tail is
 a valid prefix and verifies (truncation/omission attack, Ma & Tsudik 2009), and the
 checkpoint chain has the same hole. (4) **Passing the acceptance suite is not meeting the
 requirement** — measured false delivery is 14.8% even with the gate.
+
+Since 2026-09-24 the intake is real and agent-independent: a versioned task contract, a
+content-addressed quarantine, per-claim PASS/FAIL/UNKNOWN/CONFLICT verifiers (documents, data,
+citations, code, owner commands, signed human review), a written decision policy, bound
+approvals, and a recipient gate that re-checks everything and reads the destination back. It
+plugs into pi, Claude Code, OpenCode and Codex through their own hooks and skills (`vacant
+install`) or their headless modes (`vacant do`), and never needs model traffic. See
+`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md` and `ops/intake/evidence_20260924/SUMMARY.md`.
 
 Everything here is meant to be checkable without trusting us: the receipt chains re-verify
 offline (`python3 -m vacant_network.vrun.verify_receipts --selftest` runs negative controls first;

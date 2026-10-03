@@ -1,0 +1,1287 @@
+{
+ "schema": "i1001.local_e2e_verify/1",
+ "n_checks": 193,
+ "n_fail": 5,
+ "checks": [
+  {
+   "scope": "screen",
+   "check": "dabench: passes 9/10, dropped=True",
+   "ok": true,
+   "detail": "A passed 9/10 screened tasks (>= 9): the plain agent leaves (almost) nothing unsolved here; bank dropped"
+  },
+  {
+   "scope": "screen",
+   "check": "databench: passes 1/1, dropped=False",
+   "ok": false,
+   "detail": "A passed 0/1 (< 9): 1 unsolved task(s) seen without Vacant; bank kept"
+  },
+  {
+   "scope": "screen",
+   "check": "polyglot_py: passes 0/1, dropped=False",
+   "ok": true,
+   "detail": "A passed 0/1 (< 9): 1 unsolved task(s) seen without Vacant; bank kept"
+  },
+  {
+   "scope": "screen",
+   "check": "12 screening cells, all arm A, all DONE, none void",
+   "ok": true,
+   "detail": 12
+  },
+  {
+   "scope": "plan",
+   "check": "main plan = 3 LCB + the kept banks' tasks (dabench dropped by the ceiling rule), arms A+C, nested R+K",
+   "ok": true,
+   "detail": "units=5 dropped=['dabench']"
+  },
+  {
+   "scope": "plan",
+   "check": "K only planned for LCB tasks",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "plan",
+   "check": "screened tasks (databench, polyglot) are re-run as A in the main run (main A cells exist, prefix differs from screening)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 A#1",
+   "check": "void by proxy non-200 (infra), not counted as agent failure",
+   "ok": true,
+   "detail": "proxy_non200: 1 call(s), 0 stream error(s)"
+  },
+  {
+   "scope": "U1 R#1/K#1",
+   "check": "whole A group voided (R and K group-void)",
+   "ok": true,
+   "detail": [
+    "group void: proxy_non200: 1 call(s), 0 s",
+    "group void: proxy_non200: 1 call(s), 0 s"
+   ]
+  },
+  {
+   "scope": "U1",
+   "check": "driver logged exactly one infra_void_rerun for the A group of U1",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1",
+   "check": "the rerun cells carry the v2 suffix and are not void",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 A#1",
+   "check": "ledger: the burst reached the ledger as a non-200 (500) row after the proxy's 5 attempts",
+   "ok": true,
+   "detail": [
+    [
+     500,
+     5
+    ],
+    [
+     200,
+     1
+    ],
+    [
+     200,
+     1
+    ],
+    [
+     200,
+     1
+    ],
+    [
+     200,
+     1
+    ]
+   ]
+  },
+  {
+   "scope": "U1 A#2",
+   "check": "passes (stub wrote the right solution), delivered, 1 session",
+   "ok": true,
+   "detail": true
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=1.05 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U1 A#2 s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U1 A#2",
+   "check": "A workspace carried the bridge contract (inert without Vacant)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 K#2",
+   "check": "bridge judge accepted at attempt 1 (rc 0) and release succeeded with read-back",
+   "ok": true,
+   "detail": [
+    {
+     "attempt": 1,
+     "rc": 0,
+     "outcome": "accept",
+     "artifact_sha256": "06b70c0667862ff4887849d54d4aea683a24178bd3b3040d43973076e9df422d"
+    }
+   ]
+  },
+  {
+   "scope": "U1 K#2",
+   "check": "K = 1 session, delivered, passes; score reused from A because the released file is byte-identical",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 K#2",
+   "check": "released artifact is byte-identical to A's final solution.py",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 K#2",
+   "check": "receiver records copied, private keys not",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 R#2",
+   "check": "R == A: no retry (delivered, no timeout), 1 session, same score",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 C",
+   "check": "Vacant installed & active (install_rc 0, c_arm_ok), no contract in workspace",
+   "ok": true,
+   "detail": [
+    0,
+    true
+   ]
+  },
+  {
+   "scope": "U1 C",
+   "check": "passes; 0 send-backs (no problem => nothing added)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=1.47 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "54 lines"
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.43 exit_note=None"
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U1 C s1",
+   "check": "Vacant send-back count == 0",
+   "ok": true,
+   "detail": "custom_message=0 meta=0"
+  },
+  {
+   "scope": "U1",
+   "check": "A and C made the same number of model calls when nothing was wrong (C adds no request)",
+   "ok": true,
+   "detail": [
+    4,
+    4
+   ]
+  },
+  {
+   "scope": "U2 A",
+   "check": "wrong solution delivered, A scored on the first-session snapshot => FAIL",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.84 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U2 A s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U2 K",
+   "check": "judge rcs [40 reject, 0 accept], released, readback ok",
+   "ok": true,
+   "detail": [
+    {
+     "attempt": 1,
+     "rc": 40,
+     "outcome": "reject",
+     "artifact_sha256": "4d11c5975224d4622d4375e426bfb2ad82b02cc1f571c64a5065fbb4e5449093"
+    },
+    {
+     "attempt": 2,
+     "rc": 0,
+     "outcome": "accept",
+     "artifact_sha256": "29bd12f434360faeaf4715a5b3898113611ef09797c81d5c03a4e3450cfb460b"
+    }
+   ]
+  },
+  {
+   "scope": "U2 K",
+   "check": "K = 2 sessions; passes on the RELEASED artifact while A (first-session snapshot) failed",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 K",
+   "check": "fix session text = same sentence + visible-check report (KS-1 clean wording)",
+   "ok": true,
+   "detail": "802 chars"
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.63 typed_ok=True typing=paste submit_unconfirmed=False"
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "59 lines"
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "typed text contains 'visible checks'",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U2 K fix s2",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U2 K fix",
+   "check": "multi-line text was typed by bracketed paste",
+   "ok": true,
+   "detail": "paste"
+  },
+  {
+   "scope": "U2 K fix",
+   "check": "the fix session ran in A's original workspace (K's final workspace has the right solution; A's snapshot cell was scored before)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 R",
+   "check": "R == A (delivered => no retry) and fails like A",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 C",
+   "check": "wrong => fails, 0 send-backs (Vacant has nothing to object to)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=1.25 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.44 exit_note=None"
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U2 C s1",
+   "check": "Vacant send-back count == 0",
+   "ok": true,
+   "detail": "custom_message=0 meta=0"
+  },
+  {
+   "scope": "U2 C",
+   "check": "one injected 500 was absorbed by the proxy retry: the first call has 2 attempts, status 200, cell NOT void",
+   "ok": true,
+   "detail": [
+    [
+     200,
+     2
+    ],
+    [
+     200,
+     1
+    ],
+    [
+     200,
+     1
+    ],
+    [
+     200,
+     1
+    ]
+   ]
+  },
+  {
+   "scope": "U3 A",
+   "check": "claimed done without writing: not delivered, FAIL",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.85 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "10 entries"
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I have written the solution to solution."
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U3 A s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U3 R",
+   "check": "retried twice (no_deliverable x2): 3 sessions [first, retry, retry], ends delivered and PASSES",
+   "ok": true,
+   "detail": [
+    "no_deliverable",
+    "no_deliverable"
+   ]
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.86 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "10 entries"
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I have written the solution to solution."
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U3 R retry s2",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.85 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.22 exit_note=None"
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U3 R retry s3",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U3 R",
+   "check": "R's retry sessions used the same instruction sentence (no feedback text)",
+   "ok": true,
+   "detail": [
+    102,
+    102,
+    102
+   ]
+  },
+  {
+   "scope": "U3 K",
+   "check": "never accepted: judge rcs [40,40,40], nothing released, 3 sessions, delivered False, score pass False",
+   "ok": true,
+   "detail": [
+    {
+     "attempt": 1,
+     "rc": 40,
+     "outcome": "reject",
+     "artifact_sha256": "602e35a92eec4bc0a2ec6ae113f07bfc6933322fb69fe8dee416e5a67217e2a2"
+    },
+    {
+     "attempt": 2,
+     "rc": 40,
+     "outcome": "reject",
+     "artifact_sha256": "1721408caa345f18b5545ffe67b6a2ec3d7e062c635a6e62df7955ebec5c01dd"
+    },
+    {
+     "attempt": 3,
+     "rc": 40,
+     "outcome": "reject",
+     "artifact_sha256": "1721408caa345f18b5545ffe67b6a2ec3d7e062c635a6e62df7955ebec5c01dd"
+    }
+   ]
+  },
+  {
+   "scope": "U3 K",
+   "check": "no release record and no released_artifact directory",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.84 typed_ok=True typing=paste submit_unconfirmed=False"
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "typed text contains 'visible checks'",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U3 K fix s2",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.83 typed_ok=True typing=paste submit_unconfirmed=False"
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "typed text contains 'visible checks'",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote solution.py. Done."
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U3 K fix s3",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U3 C",
+   "check": "Vacant send-back fired and the session continued; the file was written after it; PASSES",
+   "ok": true,
+   "detail": 1
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=1.25 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "67 lines"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "14 entries"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.44 exit_note=None"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "Updated solution.py. Done."
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "Vacant send-back count == 1",
+   "ok": true,
+   "detail": "custom_message=1 meta=1"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "the session continued after the send-back and was declared done only after it",
+   "ok": true,
+   "detail": "assistant messages after send-back=2"
+  },
+  {
+   "scope": "U3 C s1",
+   "check": "the send-back text reached the model as a user-role message in the request stream",
+   "ok": true,
+   "detail": "(checked via stub log, see run-level)"
+  },
+  {
+   "scope": "U3 C",
+   "check": "the stub saw the send-back arrive as a user message ('Before delivery') and answered it",
+   "ok": true,
+   "detail": 2
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.87 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "7 entries"
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "timeout recorded (rc 124, done_reason timeout, not exited by Ctrl-D)",
+   "ok": true,
+   "detail": "wall_s=62.4 rc=124"
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "timeout wall is near AGENT_TIMEOUT",
+   "ok": true,
+   "detail": 62.4
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "pane at the timeout shows the agent still working",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "timeout is not void",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "scope": "U4 A s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=1.26 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "7 entries"
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "timeout recorded (rc 124, done_reason timeout, not exited by Ctrl-D)",
+   "ok": true,
+   "detail": "wall_s=62.3 rc=124"
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "timeout wall is near AGENT_TIMEOUT",
+   "ok": true,
+   "detail": 62.3
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "pane at the timeout shows the agent still working",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "timeout is not void",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "scope": "U4 C s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U4 A/C",
+   "check": "timeout cells are scored (not void) and fail: no deliverable",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U4 A/C",
+   "check": "meta: timeout True, rc 124 on the cell",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U4 R",
+   "check": "retry reason 'timeout', 2 sessions, the retry (on a COPY of A's final workspace) wrote the answer and PASSES; A stays FAIL",
+   "ok": false,
+   "detail": [
+    "timeout"
+   ]
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=0.83 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "50 lines"
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.23 exit_note=None"
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote answer.txt. Done."
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U4 R retry s2",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U4",
+   "check": "no K cell for a task bank without a visible check suite",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U4 A",
+   "check": "ledger for the timed-out session has completed calls (not 'timeout without any model reply')",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U5 R",
+   "check": "retries exhausted: 3 sessions, retry_reasons [no_deliverable x2], FAIL, not void",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U5 A",
+   "check": "claimed done: not delivered, FAIL",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U5 C",
+   "check": "right solution: PASSES",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "TUI ready (footer seen) and typed text accepted",
+   "ok": true,
+   "detail": "ready_s=1.24 typed_ok=True typing=line submit_unconfirmed=False"
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "pane capture exists with the typed sentence echoed",
+   "ok": true,
+   "detail": "54 lines"
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "session jsonl first user message starts with the instruction sentence",
+   "ok": true,
+   "detail": "12 entries"
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "done by idle detection and Ctrl-D exit rc 0",
+   "ok": true,
+   "detail": "done_reason=idle_final exit_s=0.44 exit_note=None"
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "no write to the session file after done was declared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "final assistant text is visible in the pane (agent output rendered)",
+   "ok": true,
+   "detail": "I wrote affine_cipher.py. Done."
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "final entry is a finished assistant message",
+   "ok": true,
+   "detail": "state=final stop=stop"
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "no leftover processes of the cell user",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "scope": "U5 C s1",
+   "check": "Vacant send-back count == 0",
+   "ok": true,
+   "detail": "custom_message=0 meta=0"
+  },
+  {
+   "scope": "all",
+   "check": "every cell dir has DONE and a valid meta.json",
+   "ok": true,
+   "detail": 33
+  },
+  {
+   "scope": "all",
+   "check": "the only void cells are the injected ones (U1 A/R/K attempt 1)",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "scope": "all",
+   "check": "no duplicate final cells: each (arm, unit) has exactly one non-void DONE cell (attempt 2 only where attempt 1 was void)",
+   "ok": true,
+   "detail": {}
+  },
+  {
+   "scope": "all",
+   "check": "progress.jsonl carries no score fields",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "all",
+   "check": "stub 500 injections hit exactly the planned tags (U1 A#1 x5, U2 C#1 x1)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "all",
+   "check": "workspace/receiver leftovers cleaned: /srv/runs empty",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "all",
+   "check": "no cell/score Linux users left",
+   "ok": false,
+   "detail": [
+    "a000025",
+    "a000026",
+    "a000033",
+    "a000035",
+    "a000036"
+   ]
+  },
+  {
+   "scope": "all",
+   "check": "no tmux servers and no pi processes left",
+   "ok": false,
+   "detail": "sockets=['i1', 'i101', 'i103', 'i108', 'i11', 'i12', 'i13', 'i14', 'i15', 'i16', 'i17', 'i18', 'i19', 'i2', 'i20', 'i21', 'i22', 'i23', 'i24', 'i25', 'i26', 'i27', 'i28', 'i29', 'i3', 'i30', 'i31', 'i32', 'i33', 'i34', 'i35', 'i36', 'i37', 'i38', 'i39', 'i4', 'i40', 'i41', 'i43', 'i44', 'i45', 'i47', 'i49', 'i5', 'i50', 'i51', 'i52', 'i54', 'i56', 'i57', 'i59', 'i6', 'i62', 'i65', 'i66', 'i68', 'i7', 'i70', 'i72', 'i78', 'i8', 'i80', 'i83', 'i85', 'i88', 'i9', 'i90', 'i93', 'i94', 'i95', 'i96', 'i97', 'i98', 'i99']"
+  },
+  {
+   "scope": "all",
+   "check": "DRIVER_DONE, PACKER_DONE, MIRROR_OK, ALL_DONE all written",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "pack",
+   "check": "MANIFEST.tsv lists the chunks; every chunk's sha256 matches its .sha256 file and the manifest",
+   "ok": true,
+   "detail": "3 chunk(s)"
+  },
+  {
+   "scope": "pack",
+   "check": "every DONE cell is in exactly one chunk (no gap, no duplicate)",
+   "ok": true,
+   "detail": "cells=34 packed=34 dup=[] missing=[]"
+  },
+  {
+   "scope": "pack",
+   "check": "no private key file inside any chunk",
+   "ok": false,
+   "detail": [
+    "cells/t1-C-lcb_v3-lcb_2808-s1/vacant_home/intake/keys/approver/identity.key",
+    "cells/t1-C-lcb_v3-lcb_2808-s1/vacant_home/intake/keys/owner/identity.key",
+    "cells/t1-C-lcb_v3-lcb_2808-s1/vacant_home/intake/keys/reviewer/identity.key",
+    "cells/t1-C-lcb_v3-lcb_2808-s1/vacant_home/intake/keys/verifier/identity.key",
+    "cells/t1-C-databench-db_066_04-s1/vacant_home/intake/keys/approver/identity.key",
+    "cells/t1-C-databench-db_066_04-s1/vacant_home/intake/keys/owner/identity.key",
+    "cells/t1-C-databench-db_066_04-s1/vacant_home/intake/keys/reviewer/identity.key",
+    "cells/t1-C-databench-db_066_04-s1/vacant_home/intake/keys/verifier/identity.key",
+    "cells/t1-C-lcb_v1-lcb_3653-s1/vacant_home/intake/keys/approver/identity.key",
+    "cells/t1-C-lcb_v1-lcb_3653-s1/vacant_home/intake/keys/owner/identity.key",
+    "cells/t1-C-lcb_v1-lcb_3653-s1/vacant_home/intake/keys/reviewer/identity.key",
+    "cells/t1-C-lcb_v1-lcb_3653-s1/vacant_home/intake/keys/verifier/identity.key",
+    "cells/t1-C-lcb_v2-lcb_3594-s1/vacant_home/intake/keys/approver/identity.key",
+    "cells/t1-C-lcb_v2-lcb_3594-s1/vacant_home/intake/keys/owner/identity.key",
+    "cells/t1-C-lcb_v2-lcb_3594-s1/vacant_home/intake/keys/reviewer/identity.key",
+    "cells/t1-C-lcb_v2-lcb_3594-s1/vacant_home/intake/keys/verifier/identity.key",
+    "cells/t1-C-polyglot_py-pg_affine_cipher-s1/vacant_home/intake/keys/approver/identity.key",
+    "cells/t1-C-polyglot_py-pg_affine_cipher-s1/vacant_home/intake/keys/owner/identity.key",
+    "cells/t1-C-polyglot_py-pg_affine_cipher-s1/vacant_home/intake/keys/reviewer/identity.key",
+    "cells/t1-C-polyglot_py-pg_affine_cipher-s1/vacant_home/intake/keys/verifier/identity.key"
+   ]
+  },
+  {
+   "scope": "pack",
+   "check": "the chunk sizes in the manifest are the real file sizes",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "pack",
+   "check": "mirror (stand-in for Drive) has every chunk, byte-identical sha256, plus MANIFEST.tsv",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "pack",
+   "check": "MIRROR_OK content: chunks counted == manifest rows, no bad",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "scope": "resume",
+   "check": "cells that were DONE before the driver was killed were not run again (meta.ended unchanged)",
+   "ok": true,
+   "detail": "4/4"
+  },
+  {
+   "scope": "resume",
+   "check": "every in-flight cell dir at kill time was moved to cells_aborted/ and re-run from scratch (new DONE cell)",
+   "ok": true,
+   "detail": "inflight=6 moved_events=6"
+  },
+  {
+   "scope": "resume",
+   "check": "no cell exists twice (names unique, finals unique) after the restart: see 'no duplicate final cells'",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

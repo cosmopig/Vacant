@@ -1,0 +1,60 @@
+{
+ "runs": 2,
+ "cost_usd": 0.002527,
+ "rows": [
+  {
+   "task": "1716",
+   "model": "q38",
+   "think": "on",
+   "arm": "A",
+   "reward": 0.0,
+   "exception": null,
+   "infra_void": false,
+   "requests": 6,
+   "prompt_tokens": 3752,
+   "completion_tokens": 127,
+   "reasoning_tokens": 18,
+   "cost_usd": 0.0006038,
+   "started": "2026-09-25T16:14:05.802303Z",
+   "finished": "2026-09-25T16:27:56.215623Z",
+   "vacant_check": null,
+   "trial_dir": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/pilot/jobs_r2/q38-on-A/2026-09-25__16-14-05/dabstep-1716__NKWGaDk",
+   "verifier_tail": "=== DABstep Test Execution ===\nError: /app/answer.txt not found\n"
+  },
+  {
+   "task": "1716",
+   "model": "q38",
+   "think": "on",
+   "arm": "C",
+   "reward": 0.0,
+   "exception": "AgentTimeoutError",
+   "infra_void": false,
+   "requests": 10,
+   "prompt_tokens": 10353,
+   "completion_tokens": 493,
+   "reasoning_tokens": 275,
+   "cost_usd": 0.0019227,
+   "started": "2026-09-25T16:28:02.918811Z",
+   "finished": "2026-09-25T16:59:06.602696Z",
+   "vacant_check": {
+    "install_json": {
+     "mode": "evidence",
+     "agents": [
+      "pi"
+     ]
+    },
+    "pi_installed": true,
+    "chains": 1,
+    "steps": 7,
+    "reviews": 1,
+    "review_actions": [
+     "continue"
+    ],
+    "c_arm_ok": true,
+    "stop_reached": true
+   },
+   "trial_dir": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/pilot/jobs_r2/q38-on-C/2026-09-25__16-28-01/dabstep-1716__uwvyvR5",
+   "verifier_tail": "=== DABstep Test Execution ===\nError: /app/answer.txt not found\n"
+  }
+ ]
+}

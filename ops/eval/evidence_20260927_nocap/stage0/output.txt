@@ -1,0 +1,33 @@
+('A', 'capped', 'no_file') 67
+('A', 'capped', 'right') 1
+('A', 'capped', 'wrong') 1
+('A', 'done', 'no_file') 15
+('A', 'done', 'right') 119
+('A', 'done', 'wrong') 27
+('A', 'other:length', 'no_file') 1
+('C1', 'capped', 'no_file') 65
+('C1', 'capped', 'right') 1
+('C1', 'capped', 'wrong') 2
+('C1', 'done', 'no_file') 5
+('C1', 'done', 'right') 122
+('C1', 'done', 'wrong') 36
+('C2', 'capped', 'no_file') 18
+('C2', 'capped', 'right') 6
+('C2', 'capped', 'wrong') 14
+('C2', 'done', 'right') 131
+('C2', 'done', 'wrong') 60
+('C2', 'other:length', 'wrong') 1
+('C2', 'other:toolUse', 'wrong') 1
+--- C arms: runs with a missing_output send-back, and the end state
+('C1', 'no_file') 2
+('C1', 'right') 3
+('C1', 'wrong') 4
+('C2', 'right') 4
+('C2', 'wrong') 6
+--- all send-back kinds (continue) per arm
+('C1', 'failed_step') 11
+('C1', 'missing_output') 9
+('C1', 'unsourced') 2
+('C2', 'failed_step') 5
+('C2', 'missing_output') 10
+('C2', 'unsourced') 2

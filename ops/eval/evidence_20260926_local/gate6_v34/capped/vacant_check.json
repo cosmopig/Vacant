@@ -1,0 +1,1 @@
+{"install_json": {"mode": "evidence", "agents": ["pi"]}, "pi_installed": true, "chains": 1, "steps": 14, "reviews": 0, "review_actions": [], "nudges": 1, "nudge_turns": [13], "ended_notes": 1, "c_arm_ok": true, "stop_reached": false}

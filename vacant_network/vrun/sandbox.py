@@ -162,8 +162,24 @@ def _rlimits(cpu_seconds: int, memory_bytes: int):  # pragma: no cover - 子行�
     return _apply
 
 
-def _clean_env(workspace: pathlib.Path) -> dict[str, str]:
+def _shell(hermetic: bool) -> list[str]:
+    """`bash -lc`（舊行為）或 `bash --noprofile --norc -c`（hermetic）。
+
+    ⚠ `HOME` ＝ 工作區 ＋ login shell ⇒ **工作區裡的 `.bash_profile` 在指令之前執行**。
+      對 vrun 的驗收那是「防意外不防惡意」的既有邊界（`acceptance.py` docstring）；
+      對收件口，成果是不可信的——一個 `.bash_profile` 就能讓驗證器不跑、直接印出通過
+      （2026-09-24 對抗審查重現）。收件口的驗證器一律 `hermetic=True`。
+    """
+    return ["bash", "--noprofile", "--norc", "-c"] if hermetic else ["bash", "-lc"]
+
+
+def _clean_env(workspace: pathlib.Path, hermetic: bool = False,
+               extra: dict[str, str] | None = None) -> dict[str, str]:
     """乾淨環境。`HOME` ＝ 工作區，`TMPDIR` ＝ `/tmp`。
+
+    `hermetic=True` 另加 `PYTHONNOUSERSITE=1`：`HOME` 在工作區裡，
+    成果若帶 `.local/lib/python3.X/site-packages/usercustomize.py`，
+    每一支 python 啟動時都會先執行它。`extra` 蓋在最上面（呼叫端明示給的變數）。
 
     ⚠ **`TMPDIR` 刻意不指到工作區底下**。驗收測試會用 `tempfile` 開暫存檔，
       而工作區底下的任何一個新檔案都會改變樹雜湊 ⇒ 「跑一次隱藏驗收」
@@ -179,6 +195,8 @@ def _clean_env(workspace: pathlib.Path) -> dict[str, str]:
         "LC_ALL": "C.UTF-8",
         # worker 寫出來的 .pyc 會進樹雜湊 ⇒ 同一份程式碼在不同格得到不同的樹。
         "PYTHONDONTWRITEBYTECODE": "1",
+        **({"PYTHONNOUSERSITE": "1"} if hermetic else {}),
+        **(extra or {}),
     }
 
 
@@ -186,6 +204,8 @@ class Sandbox:
     """一個後端。`run()` 是唯一的執行入口，三個後端的簽章逐字相同。"""
 
     name = "none"
+    #: 收件口設 True（見 `_shell`）。vrun 的既有行為（`bash -lc`）不變，歸檔 run 可比。
+    hermetic = False
 
     def __init__(self, *, memory_bytes: int = DEFAULT_MEMORY_BYTES) -> None:
         self.memory_bytes = memory_bytes
@@ -193,8 +213,9 @@ class Sandbox:
 
     # ── 子類別實作 ────────────────────────────────────────────────────
     def _wrap(self, command: str, workspace: pathlib.Path,
-              ro_binds: tuple[pathlib.Path, ...] = ()) -> list[str]:
-        return ["bash", "-lc", command]
+              ro_binds: tuple[pathlib.Path, ...] = (),
+              env: dict[str, str] | None = None) -> list[str]:
+        return [*_shell(self.hermetic), command]
 
     def available(self) -> tuple[bool, str]:
         """這個後端在這台機器上起不起得來。回 `(ok, 原因)`。"""
@@ -221,7 +242,8 @@ class Sandbox:
     # ── 共同執行路徑 ──────────────────────────────────────────────────
     def run(self, command: str, *, workspace: str | os.PathLike,
             timeout_s: float = DEFAULT_TOOL_TIMEOUT_S,
-            ro_binds: tuple[str | os.PathLike, ...] = ()) -> SandboxResult:
+            ro_binds: tuple[str | os.PathLike, ...] = (),
+            env: dict[str, str] | None = None) -> SandboxResult:
         """跑一條 bash 指令，cwd ＝ `workspace`。
 
         `ro_binds` ＝ 這一次額外唯讀可見的主機路徑。**只有 `bwrap` 後端真的
@@ -233,8 +255,14 @@ class Sandbox:
         if not ws.is_dir():
             raise FileNotFoundError(f"工作區不存在：{ws}")
         binds = tuple(pathlib.Path(p).resolve() for p in ro_binds)
-        argv = self._wrap(command, ws, binds)
-        env = _clean_env(ws)
+        extra = dict(env or {})
+        if self.hermetic:
+            # `HOME` 不在成果裡：工作區的 `.gitconfig`（`core.fsmonitor`）、`.npmrc` 之類
+            # 會在檢查呼叫 git／npm 時執行。每一跑一個新的暫存 HOME，跑完就刪。
+            command = ('__vh="$(mktemp -d)" || exit 97; export HOME="$__vh"; '
+                       "trap 'rm -rf \"$__vh\"' EXIT; " + command)
+        argv = self._wrap(command, ws, binds, extra)
+        env = _clean_env(ws, self.hermetic, extra)
         t0 = time.time()
         proc = None
         try:
@@ -530,7 +558,8 @@ class BwrapSandbox(Sandbox):
     SYSTEM_RO = ("/usr", "/bin", "/sbin", "/lib", "/lib32", "/lib64", "/etc")
 
     def _wrap(self, command: str, workspace: pathlib.Path,
-              ro_binds: tuple[pathlib.Path, ...] = ()) -> list[str]:
+              ro_binds: tuple[pathlib.Path, ...] = (),
+              env: dict[str, str] | None = None) -> list[str]:
         pre = ["sudo", "-n"] if self.use_sudo else []
         uid_gid = (["--uid", str(os.getuid()), "--gid", str(os.getgid())]
                    if self.use_sudo else [])
@@ -551,7 +580,7 @@ class BwrapSandbox(Sandbox):
             *extra,
             "--chdir", str(workspace),
             *uid_gid,
-            "--", "bash", "-lc", command,
+            "--", *_shell(self.hermetic), command,
         ]
 
     def available(self) -> tuple[bool, str]:
@@ -595,7 +624,8 @@ class UnshareSandbox(Sandbox):
         self.regid = os.getgid() if regid is None else regid
 
     def _wrap(self, command: str, workspace: pathlib.Path,
-              ro_binds: tuple[pathlib.Path, ...] = ()) -> list[str]:
+              ro_binds: tuple[pathlib.Path, ...] = (),
+              env: dict[str, str] | None = None) -> list[str]:
         # ⚠ `ro_binds` 在這個後端**沒有作用**：整台機器的檔案系統本來就看得到。
         #   不假裝有作用，也不因此拒收參數——換後端的人要從
         #   `backend_meta.honest_bound` 讀到這件事，不是從一個例外。
@@ -606,10 +636,10 @@ class UnshareSandbox(Sandbox):
         #   Permission denied`，代表 `HOME` 是 root 的而不是工作區的。
         #   那不只是噪音：`HOME`／`TMPDIR` 決定驗收測試的暫存檔寫到哪，
         #   而暫存檔寫進工作區會改變樹雜湊。所以這裡用 `env -i` 重建。
-        env = _clean_env(workspace)
+        cenv = _clean_env(workspace, self.hermetic, env)
         return [
             "sudo", "-n", _abs("env"), "-i",
-            *[f"{k}={v}" for k, v in sorted(env.items())],
+            *[f"{k}={v}" for k, v in sorted(cenv.items())],
             _abs("unshare"), "--net", "--",
             _abs("setpriv"), f"--reuid={self.reuid}", f"--regid={self.regid}",
             "--clear-groups", "--",
@@ -619,7 +649,7 @@ class UnshareSandbox(Sandbox):
             #   這是第一道；第二道是 `openwork_arms.remove_workspace` 的
             #   `sudo chown` 回收——umask 擋不住模型自己 `chmod` 的情況。
             #   ⚠ 它對三條臂**一視同仁**，所以不是臂層級的差異。
-            _abs("bash"), "-lc", f"umask 0000; {command}",
+            _abs("bash"), *_shell(self.hermetic)[1:], f"umask 0000; {command}",
         ]
 
     def _kill_group(self, proc: subprocess.Popen) -> list[str]:

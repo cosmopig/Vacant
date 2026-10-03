@@ -388,9 +388,9 @@ def detect_one(spec: AgentSpec, home: pathlib.Path, *,
                 break
     if binary is None:
         for hint in spec.bin_hints:
-            p = pathlib.Path(hint) if hint.startswith("/") else home / hint
-            if p.is_file() and os.access(p, os.X_OK):
-                binary, via = str(p), "hint"
+            hp = pathlib.Path(hint) if hint.startswith("/") else home / hint
+            if hp.is_file() and os.access(hp, os.X_OK):
+                binary, via = str(hp), "hint"
                 break
     version = None
     if binary:
@@ -452,6 +452,7 @@ def write_tracked(home: pathlib.Path, path: pathlib.Path, data: bytes,
     if existed:
         backups.mkdir(parents=True, exist_ok=True)
         # 備份檔名帶 sha256 前綴：同一個檔被改兩次也不會互相蓋掉
+        assert before is not None  # existed ⇒ 已算過
         backup_path = backups / f"{path.name}.{before[:12]}.bak"
         shutil.copy2(path, backup_path)
         if sha256_file(backup_path) != before:
@@ -1151,7 +1152,7 @@ class _ProbeListener:
         self.connections = 0
         self.first_line = ""
         self._stop = False
-        self._th = None
+        self._th: Any = None
 
     def start(self) -> None:
         import threading
@@ -1622,7 +1623,7 @@ def install_service(state: pathlib.Path, python: str, port: int,
     logs.mkdir(parents=True, exist_ok=True)
     argv = _daemon_argv(python, port, state, upstreams)
     system = platform.system() if backend in (None, "auto") else {
-        "launchd": "Darwin", "systemd": "Linux", "bare": "-"}.get(backend, "-")
+        "launchd": "Darwin", "systemd": "Linux", "bare": "-"}.get(str(backend), "-")
     if system == "Darwin" and shutil.which("launchctl"):
         plist = home / "Library" / "LaunchAgents" / f"{LAUNCHD_LABEL}.plist"
         body = LAUNCHD_PLIST.format(
@@ -1880,6 +1881,8 @@ def install(*, home: pathlib.Path | None = None, port: int = DEFAULT_PORT,
     port = pick_port(port)
 
     # ── 1. 先把常駐 proxy 起起來並 preflight ──────────────────────────
+    svc: dict[str, Any]
+    pf: dict[str, Any]
     svc, pf = {"backend": "skipped", "supervised": False,
                "boot_persistent": False, "changes": []}, {"listening": None}
     if not skip_service:
@@ -2178,7 +2181,7 @@ def status(*, home: pathlib.Path | None = None, reprobe: bool = False,
                                "by_path": {}}
     if jpath.is_file():
         import collections
-        c: collections.Counter = collections.Counter()
+        ctr: collections.Counter = collections.Counter()
         n = 0
         for line in jpath.read_text("utf-8").splitlines():
             if not line.strip():
@@ -2188,9 +2191,9 @@ def status(*, home: pathlib.Path | None = None, reprobe: bool = False,
             except ValueError:
                 continue
             n += 1
-            c[f"{r.get('method')} {r.get('path')} [{r.get('wire')}]"] += 1
+            ctr[f"{r.get('method')} {r.get('path')} [{r.get('wire')}]"] += 1
         journal["requests_total"] = n
-        journal["by_path"] = dict(c)
+        journal["by_path"] = dict(ctr)
     reach = st.get("gate_reach") or {"measured": False,
                                      "note": "這一份 state 沒有量過（舊版）"}
     if reprobe and st.get("shim_dir"):

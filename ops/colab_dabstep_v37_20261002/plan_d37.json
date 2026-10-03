@@ -1,0 +1,490 @@
+{
+ "seed": 20261002,
+ "arms": [
+  "A",
+  "C37",
+  "C37R"
+ ],
+ "samples": [
+  1,
+  2,
+  3
+ ],
+ "tasks": [
+  {
+   "bank": "dabstep",
+   "id": "1",
+   "dir": "/srv/eval/staged/dabstep/1",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "2",
+   "dir": "/srv/eval/staged/dabstep/2",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "3",
+   "dir": "/srv/eval/staged/dabstep/3",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "4",
+   "dir": "/srv/eval/staged/dabstep/4",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "5",
+   "dir": "/srv/eval/staged/dabstep/5",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "6",
+   "dir": "/srv/eval/staged/dabstep/6",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "7",
+   "dir": "/srv/eval/staged/dabstep/7",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "8",
+   "dir": "/srv/eval/staged/dabstep/8",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "9",
+   "dir": "/srv/eval/staged/dabstep/9",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "10",
+   "dir": "/srv/eval/staged/dabstep/10",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "11",
+   "dir": "/srv/eval/staged/dabstep/11",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "12",
+   "dir": "/srv/eval/staged/dabstep/12",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "13",
+   "dir": "/srv/eval/staged/dabstep/13",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "14",
+   "dir": "/srv/eval/staged/dabstep/14",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "15",
+   "dir": "/srv/eval/staged/dabstep/15",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "16",
+   "dir": "/srv/eval/staged/dabstep/16",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "17",
+   "dir": "/srv/eval/staged/dabstep/17",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "18",
+   "dir": "/srv/eval/staged/dabstep/18",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "19",
+   "dir": "/srv/eval/staged/dabstep/19",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "20",
+   "dir": "/srv/eval/staged/dabstep/20",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "21",
+   "dir": "/srv/eval/staged/dabstep/21",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "22",
+   "dir": "/srv/eval/staged/dabstep/22",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "23",
+   "dir": "/srv/eval/staged/dabstep/23",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "24",
+   "dir": "/srv/eval/staged/dabstep/24",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "25",
+   "dir": "/srv/eval/staged/dabstep/25",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "26",
+   "dir": "/srv/eval/staged/dabstep/26",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "27",
+   "dir": "/srv/eval/staged/dabstep/27",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "28",
+   "dir": "/srv/eval/staged/dabstep/28",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "29",
+   "dir": "/srv/eval/staged/dabstep/29",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "30",
+   "dir": "/srv/eval/staged/dabstep/30",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "31",
+   "dir": "/srv/eval/staged/dabstep/31",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "32",
+   "dir": "/srv/eval/staged/dabstep/32",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "33",
+   "dir": "/srv/eval/staged/dabstep/33",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "34",
+   "dir": "/srv/eval/staged/dabstep/34",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "35",
+   "dir": "/srv/eval/staged/dabstep/35",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "36",
+   "dir": "/srv/eval/staged/dabstep/36",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "37",
+   "dir": "/srv/eval/staged/dabstep/37",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "38",
+   "dir": "/srv/eval/staged/dabstep/38",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "39",
+   "dir": "/srv/eval/staged/dabstep/39",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "40",
+   "dir": "/srv/eval/staged/dabstep/40",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "41",
+   "dir": "/srv/eval/staged/dabstep/41",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "42",
+   "dir": "/srv/eval/staged/dabstep/42",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "43",
+   "dir": "/srv/eval/staged/dabstep/43",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "44",
+   "dir": "/srv/eval/staged/dabstep/44",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "45",
+   "dir": "/srv/eval/staged/dabstep/45",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "46",
+   "dir": "/srv/eval/staged/dabstep/46",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "47",
+   "dir": "/srv/eval/staged/dabstep/47",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "48",
+   "dir": "/srv/eval/staged/dabstep/48",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "49",
+   "dir": "/srv/eval/staged/dabstep/49",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "50",
+   "dir": "/srv/eval/staged/dabstep/50",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "51",
+   "dir": "/srv/eval/staged/dabstep/51",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "52",
+   "dir": "/srv/eval/staged/dabstep/52",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "53",
+   "dir": "/srv/eval/staged/dabstep/53",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "54",
+   "dir": "/srv/eval/staged/dabstep/54",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "55",
+   "dir": "/srv/eval/staged/dabstep/55",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "56",
+   "dir": "/srv/eval/staged/dabstep/56",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "57",
+   "dir": "/srv/eval/staged/dabstep/57",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "58",
+   "dir": "/srv/eval/staged/dabstep/58",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "59",
+   "dir": "/srv/eval/staged/dabstep/59",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "60",
+   "dir": "/srv/eval/staged/dabstep/60",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "61",
+   "dir": "/srv/eval/staged/dabstep/61",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "62",
+   "dir": "/srv/eval/staged/dabstep/62",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "63",
+   "dir": "/srv/eval/staged/dabstep/63",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "64",
+   "dir": "/srv/eval/staged/dabstep/64",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "65",
+   "dir": "/srv/eval/staged/dabstep/65",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "66",
+   "dir": "/srv/eval/staged/dabstep/66",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "67",
+   "dir": "/srv/eval/staged/dabstep/67",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "68",
+   "dir": "/srv/eval/staged/dabstep/68",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "69",
+   "dir": "/srv/eval/staged/dabstep/69",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "70",
+   "dir": "/srv/eval/staged/dabstep/70",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "71",
+   "dir": "/srv/eval/staged/dabstep/71",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "72",
+   "dir": "/srv/eval/staged/dabstep/72",
+   "source": "harbor-450"
+  },
+  {
+   "bank": "dabstep",
+   "id": "1273",
+   "dir": "/srv/eval/staged/dabstep/1273",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "1305",
+   "dir": "/srv/eval/staged/dabstep/1305",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "1464",
+   "dir": "/srv/eval/staged/dabstep/1464",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "1681",
+   "dir": "/srv/eval/staged/dabstep/1681",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "1753",
+   "dir": "/srv/eval/staged/dabstep/1753",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "1871",
+   "dir": "/srv/eval/staged/dabstep/1871",
+   "source": "dev"
+  },
+  {
+   "bank": "dabstep",
+   "id": "2697",
+   "dir": "/srv/eval/staged/dabstep/2697",
+   "source": "dev"
+  }
+ ],
+ "note": "PREREG_20261002_COLAB_DABSTEP_V37"
+}

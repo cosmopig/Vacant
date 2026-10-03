@@ -1,0 +1,33 @@
+{
+ "misreject20": [
+  "lcb_v1-lcb_3722",
+  "lcb_v1-lcb_3794",
+  "lcb_v2-lcb_3026",
+  "lcb_v2-lcb_3659",
+  "lcb_v2-lcb_3750",
+  "lcb_v3-lcb_2730",
+  "lcb_v3-lcb_2792",
+  "lcb_v3-lcb_2817",
+  "lcb_v3-lcb_3245",
+  "lcb_v3-lcb_3363",
+  "mbppplus-mbppplus_Mbpp_124",
+  "mbppplus-mbppplus_Mbpp_130",
+  "mbppplus-mbppplus_Mbpp_242",
+  "mbppplus-mbppplus_Mbpp_269",
+  "mbppplus-mbppplus_Mbpp_437",
+  "mbppplus-mbppplus_Mbpp_558",
+  "mbppplus-mbppplus_Mbpp_568",
+  "mbppplus-mbppplus_Mbpp_68",
+  "mbppplus-mbppplus_Mbpp_775",
+  "mbppplus-mbppplus_Mbpp_801"
+ ],
+ "nodeliver5": [
+  "lcb_v1-lcb_3674",
+  "lcb_v1-lcb_3795",
+  "lcb_v2-lcb_3675",
+  "lcb_v2-lcb_3737",
+  "lcb_v2-lcb_3783"
+ ],
+ "seed": 20261002,
+ "rule": "misreject=C361 cell ran run_tests.sh and got test_claim/none; nodeliver=first-batch no_solution & not timeout (any arm); LCB 10 + MBPP+ 10 sampled with seed"
+}

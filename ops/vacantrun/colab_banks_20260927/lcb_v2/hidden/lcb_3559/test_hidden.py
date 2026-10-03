@@ -1,0 +1,215 @@
+"""Scoring checks for lcb_3559 -- NOT part of any workspace.
+
+⚠ 計分用的 GT。住在 hidden/ 這棵**另外的樹**，永遠不複製進 agent 的工作區；
+  任何把它的內容（含失敗訊息）回饋給模型的路徑都作廢那一批資料。
+
+case 組成 ＝ 題庫的 `visible_tests` ＋ `hidden_tests`（超集），與
+vacant_network/codebench.py::LiveCodeBenchLoader 的 `hidden_check` 同一組（ops/gain/data/lcb_bank_v2.jsonl）。
+"""
+
+import solution
+
+def _aeq(a, b):
+    """與 vacant_network/codebench.py::_lcb_check_code 的 __aeq 同一套判等（逐行對應）。"""
+    try:
+        if a == b:
+            return True
+    except (TypeError, ValueError):
+        pass
+    if isinstance(a, bool) != isinstance(b, bool):
+        return False
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= 1e-6
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        return len(a) == len(b) and all(_aeq(x, y) for x, y in zip(a, b))
+    return a == b
+
+
+def check_case_01():
+    args = [['abc', 'aaaaa', 'bcdef'], 'aabcdabc']
+    want = 3
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_02():
+    args = [['abababab', 'ab'], 'ababaababa']
+    want = 2
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_03():
+    args = [['abcdef'], 'xyz']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_04():
+    args = [['rg', 'mqrpjq', 'nvwfpopcd', 'tjuefszxj', 'wkpnruufm', 'z', 'pgud', 'ktrr', 'gluldtneh', 'ygdzgb', 'rulkfmnmr', 'rztfrr', 'kbj', 'bv', 'nywhfhzo', 'njjub', 'mtrtr', 'galnofxvq'], 'avndlp']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_05():
+    args = [['tromuhbyxkxenygidssl', 'gatbastoycnprhdgpivuvezcmshvcjryraozzoaovvwyjxuzgcdowexwjyeodntaovzsglykazbnzhdrugmtnyalnrixgt', 'rdjzhhfnziypdbhcubexfczqxaveowrhueyodtitrgwianwiwptkvmidhmylwfnwpsbieeidkmcpriv', 'hliewpqwrtbapyuncajlawrgxxyxlfvhyenddloapewznbxzcwfj', 'aropolkjpaitdyhglxiqgpcuvxbwcpkounaowquchkvtexeaevyqhlbxkivihnywkqouxcoobhfapcrxguq', 'hxabuwhhjmvgzpgjvcmuqcwizhkbrrru', 'nbclaqrmbnbabnosidegnhaousksoktvdyftgmwspfsyasrjuraxc', 'ounlvbadhxfyvsmaodcemhyhlnblxyzxjakuzrbzxgfdznjqzodgsgdjhslxfcqtlsbfqbwxbujlkys', 'datapebepikrghusrcdykdedalijmegqxxmxvr', 'onjvjuqcnshrvwnzuvxpystjowyolydfcmozxcezfgmkuwgorvqhldgyjhycdphemz', 'ijlqxdbeykr', 'abdyxknorqicbdqclbprrqupytyjrnghdapghwqtlkjwagsqhmoxyubulxxanmndrhobkiqilfpnlgjubmmywpxsfsqsq', 'egjswwr', 'dcsyeazzofknmpwhoccoduxjzdk', 'dfsvcqeexyipxfkrrepgxyxtwpphwnxzbo', 'dkysfntacpfrpprszocysltbuzikpgcnodjhtuxryzylnfdfdjsbtjqvcvakwzrutuxpkwdqrnj', 'feyzjxiosyblfesnyrvptmmphiwlgszzgkpoyvqbsmrjriuoxeuzbzyeueujvc', 'pqzzldtrqnbpnmpvosjkfzuxdzrejjsasncdnalvhogheiksjxdayqmobdxoncn', 'pqvxtdpzgaslffjdaqwndtbbsnuucjoigujedxyotojcdqzllqbjmdiagejsggewbfuypyowhymczouazghulqeoqvkomzucqnv', 'gwfwpsdlhenpwxilupsofairolb', 'rgsppnofxhhogpswjsadsjivlhyqkleugqtrzsvsowvykxdknpazl', 'kbzxmovvdslkhklxfrswpvisrqvdhzchrpjfelbuqtmohuwwlkfoodmrrlnaikukeqqrjrifgndmfgcheybravafrtrqt', 'ozvkkpiigucpyvcmhoyseorjkexcbjeyfuwnfrv', 'tgpopgpbhuzqtbnr', 'jnieacsffhvajjgjzvbcifpssqxhxwkkvwjmmwcapusiezaffhbrufmulmur', 'zifpoiybiw', 'rtwsdiymwtkcsvepofnpoffdtjlbjvaonbwsypddppferavmxzfclkyfte', 'vogfkyxdppdethlwshec', 'ahpgohvyxxpkwzfd', 'daygonzc', 'oisgfpzdntthumylcxjieuqhjfmnpvgrstaiulmwnfldnpxpwgwuwiamhnvaosfmbampmwzicmpqjwgc', 'lhqrsfokvokxrzmvsfkjdvqtmnjbshbrhpzcxccjpcdgwwihbzik', 'fnssskbngotdlzolmadr', 'xxwnhepfejakn', 'nbgpgkcbnmudlvdro', 'gmkdtpdbcjpdgnocpgaiuzhcbwolnwrcuoagmpvixnicawdrfmxnhtnnnhsyuhjyajfvnuodykdxymmhqqpfcchqpwj', 'eyfclvrhqaikwwrfkifojthasugiqfynkszbrkqdufgenmxmrysngsaehyfkvbucmemdhvcshooaiptuwaubqvbdsl', 'nnkcldgxdjjguyjrmqkqsdlzbpslqgjwtswrgbphxu', 'cqnvkdijgvxbrevofkwqmtuxpwzjkrouowpfyydreftvcgyjhktfojhnd'], 'jnieacsffhvajjgjzvbcifpssqxhxwkkvwaropolkjpaitdyfnssskbngotdlzocqnvkdijgvxbrozvkkpiigucpyvcmhotgpopgpbhuzqtbnhliewpqwrtbapyuncajlawrgxxyxlfvhyenddloapeounlvbadhxfyvsmaodcemhyhlnblxyzxjakuzrbzxgfdznjqzodgsgdjhslxfcqtlsbfqbwxbdcsyeazpqvxtdpzgaslffjdaqwndtbbsnuucjoigujedxyotojcdqzltgpopgpbtgpopgpbhuzjnieacsffhvajjgjzvbcifpssqxhxwkkvwjmmwcapusiezaffeyfclvrhqaikwwrfkifojthasugiqfynkszbrkqdufgenmxmrtgpopdkysfntacpfrpprszocysltbuzikphzifpoiybierdjzhhfnziypdbhcubexfczqxaveowrhueyodtitrzifpoidatapebepikr']
+    want = 22
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_06():
+    args = [['rut', 'rbp', 'xjcqspmpuh', 'rzjebym'], 'rzjebxjcqspmrutrrzjebymrbrutrzjebrzjerxjcqsprrrzje']
+    want = 14
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_07():
+    args = [['ekopwcynolalajsvailetnpznycvjhjghwqhfvduuismgppfbmhfjthufryuuivmzgosjzurvwshfyybpxiwjacxbyyo', 'nqnppgtifcaxawxfgjbplinedjdiwesjxycregorzrzmbenhrvhhmqmer', 'icpafrqtoswhrdiaqyvlukcbexqxzbgerhoh', 'yolifoxwcqcatbhxrvkdonzcvpgs', 'lcnjhumqpfxlaxmvloziwwqnsttdlgfjgedmvxpgbjgnkzvrewaj', 'dtxkbb', 'djduiamjniutxwhplkjtblbeudhmlejsxypqksvvapvgmkymnlgnzcnzvzmdrocruiqgnaijenafgaocfs', 'rnesokhfiepseypbbhwhbghndoyfcyvijdvammmhwqnyeknpjfpxkyhcrkwfflwjsqul', 'zidxivjppavjtvwitdgxytaqpc', 'jtciqrjwjtbbuqmgoytavqtjvxjheiuqwkdutzjaflt', 'hdjevrpgommwzxtnbjlmbewyifdwucdcugaxzyejyfresftnsyigetrgdyazmpviutunxdcylkfjvwpvmcxqehwnf', 'zxrsazllxrgfddxxhvuvxztaeemxgxkdxapkldvnywzdtohwyvcnvctzmxuicdinxmjygxgurkdbdfxipcwsixgwhebq', 'sexlxpwkidhluacxtrouapvewhcnvtsdhcbaau', 'pxzguxpknbcexxvmebhzejqxsliyzpsgpfemucavurnrzfrijwzhybkwxqvykdquimsyhwzocdrsloosdxtwk', 'mbomysldxruhurzjjot', 'olzhfkvlozfmvzcenloatbyfydcvjivmdiicyhtdlauxutco', 'cckryxlchvjonynwuvjjaixfnywwhfwimxzjrdwasjvvckzdmdebsjet', 'zaipufypsgwitopjohvjieblzcijjulngmozhzklvfymyezbhtozgelfbijnaetvoqwoqfwyhpegwdukkpqfhyccuywaauw'], 'jhrmkqsvshssonwmebymsovaszhnf']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_08():
+    args = [['aaaccdbebccbaeddbcbdebedeaaeeaaaacacded', 'a'], 'cdbcc']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_09():
+    args = [['aacbabbbabacacbbcbbb'], 'a']
+    want = 1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_10():
+    args = [['cdddcda'], 'd']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_11():
+    args = [['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'], 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']
+    want = 100
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_12():
+    args = [['q', 'f', 'e', 'h', 'i', 'l', 'p', 'j', 'z', 'x', 'g', 'm', 'yt', 'b', 'k', 'o', 's', 'd', 'o', 'l', 'r', 'j', 'z', 'z', 'i', 'rv', 'f', 'sdkrbjbprybmeutzlgqqkzyoqlxwoylcngqlzceyvszwmvxicheehklyvwgprwvovheevxatojehexgshteevyxmodognutwabldrosmlpncsxrlebwrywukzkbepdqyuefzqlvchdgxkxgzmxlkwjyfcfrtcbemgbgapanvelwkwifrmrqarzdlqyyqwbaygkgrkfbocxxpgbhnqcgnlwbcqctgpusunvlzbkloiseocgrtkepyddudchagulozeorjuvbxrojchkckmxukavfcqdbbmclrbxffaudnwrcxrfbqyuuthtrtqngtkhixwbqtxiiugqqnxzoiveiuosqiemswcpexxcpsgamgmwuishlhazoyvyblslcjrdqkpxqswjowfrkfvzeucgkkioitbogllkxuyelyebclijmosxbdvdqjajqvtkjuhrdbkpostftlcxbvyefhamqbtyecgnexawuaxbddqhtazzzkcmpwwkmcbyhwgjegtxjjauoflrqrxhymkzyltwwkhcyzobldhvulenetzrzftidcfjmmxvzbkukdzddvhfxuzxgetpykvrfgcajwqbxmmzreecmeaecmoof', 'e', 'tfn', 'h', 'v', 'y', 'e', 's', 'a', 't', 'afrzilvhpw', 'd', 'c', 'teiepcwvkzmnhhuzspduklzdiykkvtukstusnoqkbumpmystylsfqgjsitkrrlzkhlbzvjfvjxmergjbgyoiocfglthnohkamnbuazdmpofxgiriwqkhqgirwlrpgwizjjrzfpbvkxhxkyykiveidwmhwqypyehinoiaxtcpoldotypgjlbunblirg', 'a', 'b', 'c', 'ivioifcxxrehcccnh', 'x', 'p', 'kgzfbuwluhkmlzssgfxhgzwohcdtnipnfnkcypqmipwtryeddoytmlgqvkqjazczftoknkgfmovthukkuuuphskdafaqlfxecvbhhhvjlkqzusgxydhcbmimyvlqqkhrurjvqecatopjpofxlefxooxybxmdgffuvxuicxgttsoqvwygrhcehscfudetoakwkbrypgyyughhtjlwtpniltaktbwzvgmywndvgstdkkheiegczdxojievamoorucmchnfkgjjqqttcljjebrognzzsavllsswwbedpaeltleijyfmjitvklyqcjriavfekcovpmamdzannmgwfncfsrdehnuivwntkxytcgzcyplwomttyyzlpdcxbzwaalxsdbljezrncxjqlcrxsmyngodnrepcpwvxknjzeypzuyuxgilwqrexpzqtxzlqoufpekdummlushppjtvznhbsmnbsedowgnlwijlcootwwpklclpqxnskgzhadjidxqzshbubfjawhjwwzhennlsmnafzvyknmcshalcqszxqmhwgsfjzkkswfghtgqfgdzdfjbjxrqibbrgvaabbuatxcqhgjxegbdxmxwwxehjyryjqchicxkjnkxtnwxhmbdyvqyhmoedteqgiyjzfgnzuldgzcrrintaeeafqacdtqzllnflgbfwcfvthbwzasvgvfzsnhbxwfdalipysppgdurpaawqblydgeidacsyxuffmxdecunfuxmlrnebnzetshrpwynkttciarnmyeijicynkbtohzxnmbxvrofgeoakowqhkfwpwntoexvybpgndnabzenxaygbrnkddeizrczofcmobkuvaohsmzhepkjvowivyymiylmgedmfoblocdjkjlqwrgkhtkbutqfxewxrhwofcpuwlgozqsaonojvkifhtfcxopdotspxkwtaogydhldaawltdstdighbftwikaqswcxrruihilczjkihqtaeghegtwaejjfozvcymgctuckppxwucfdzumlegkdbvtvjfmcezumlrljxvlneybpenafabbzieyithaukcifdmkznifxqyqlizcjhfavkibjbaxrlmnvcoynsqbbttijoxsocftpeqbjhaxpaehdawajgfurvqoouqbddykrmmqhadaldygufhhrntianqeqhogpceghajvrhdyqnnyoixrmnrjmpxhnnntextppvenivmjzrwcnvsextmbqvzqrwzpwsyiynxxbyyqoysxpqncmdkpj', 'm', 'y', 'c', 'b', 'q', 'x', 'q', 'a', 'k', 'ducz', 'kkyvkniuxsuuvgugflodmztahcuswrxfaukykxzutliirfuuwqlyzpkoxnuvecpixibhmpkoijscgivoxnizlcksmsxhxoncyljvh', 'r', 'ltd', 'd', 'd', 'w', 'j', 'r', 'b', 't', 'w', 'x', 't', 'm', 'h', 'h', 'guwtiftcdjfvmdjwjbkgjxdplcnvaoeoakdiuo', 'r', 's', 'vdqjupehbuwlrmshnoftjtduzbzjraburqnxdrbvqc', 'v', 'uf', 's', 't', 'r', 'zxnx', 'u', 'o', 'y', 'n', 'h', 'r', 'e', 'l', 'u', 'w', 's', 'e', 'a', 'x', 'x', 'a'], 'ghpboavcmtiyjprsfurvnxorslwicdxqnnaqacvcicqagisuleagnokikpphiaicordljymunxrovthnmevitjafpmrukahcyosmnqqgvyzcjcfaeklefczsnfnlqerndovdfunubzhxoxknjehfpdtowjkctwfqpdlrgmlpzvezjqzyewrhwietgejriissxphrazsjaffkcbdepkrjqkscmjljwsgukcusstwkplaszhcgstghrajzjogrkeseaaecybhcwmcndjljcgryafccxhzdegyfenzigcnnnhbtmkwmcbgyrgxjlilzsmpxofdhejxujxjhfjtszduverclislpnlmtmowbpkdrjywpfpjhhwxdctlrizvcnseeiiuivbnkbekuvelnhvmwrueknvdxoglzjvzlzdeiazwutbopfqasxsadopcjndcoboeaaeqvhbpvcbwazzrgjvjjoykzpbfgydieddohvprigcbccevwnbkcyhnivjzgdkhdxoijjpphzdqmbraxzswxusjgvijvqwhvjsphdnwncdfsrrwaokojtqohjyaqupykkuxxqnigzpwcqurphzxzyxpbyfcjolyrltbcrwdvmhgfanefkyxnqfoijxautctefasiditkxmvlmxfvdvjrzxtjkgqdvbhfltnstoxggquijhzfmndkvwppztfzluddxhztsptvczinrzssvvsoyoktqmrllmrnwetevxyaspavtrwyvtljwkpgavhtxehvrekmkfvycslgckvjsbcrxufssthgjfhxbczhrbidtfhipwxlvfdujblyyrmsqggmohhdhfqaupdahiagdbdqzkklugsennhnzwernwlqxuafzsxvbneisgjfcahltgvwwynkrjdyijqzrsudgzyafccrmjxabygkdkxinbqpxqfusajkzuuhpqqshjpaxajnecuffwzpaixytcmumchobrdmmamafnyhgukshxiublznwcdvjjccdrijnrpslebustxpfjcjuapkwkjcpysfrvkbrlocljqwihxhomtoogccqxbhkgtsrowranapjojecnerkwbcnfkcjfcjpqclhynpkibvfcdmawznrntwjkzhujkwfvauaqlayoizcbhmejvrfktmmhiiohwufgoknarnlupxzrhmakicmoxcgagddpvnicjwoknzfpdliarpywrcvolyjkjebmnkwardupdtzayohlmkcoxdaebcsdtsnfhqwdwkkgbrogodbvzsicxsvzqzcalsydymntiluwihaphxkvllxcpirxenocutcouulhdvokadhtyrfalxwsjlyoorbyiwojkdiylgwfaglfvjcotrjhcmbirbgvhepfzcdggcxwiqnioxorymqxnampeocjblpmdyfqhdkbdtqgpnbcjnvylcudhcudoibrzuitpwauyqdojwcdmdbzsrpwyceujjyjyhjzgirggpjahkocfnqycdlppperxxawtemfkespkkqmurtqyzigqqvtceamphghejazcbuhdnnhcctxotwvqedsdzqxnmcyenvsmhjqllfkafeaogcamzsfzhnwdmyvvfkenfqrxyiwplmewbiemnvrpnrbcyjhqgsvzfqwvnpjkmbqmfuoofgdxlkvolecyyccuazmsqikkmlantzvjeednhpitvxlaqnwjwsctltpltabepromilpxdhqxzskooivvzjwltvsovbyhuoaqoziatkjsjadkghmzzvqvdlchcztlcotpqgnvcgjwbfoaaaatxvsqfivrejocjyalytmcaivhuloivozjrzyhjvzgdzftvhppymkhndjrtedkpokpezbhfbtfujuwxprgwdnsworrbznbelvqfhpzaupipjopbprokgvjcedhrdlxcxjwnxpfzpohxiudxnxqslmxgcbysegmciirphtlpncjtaofxzasbtpvhuujugpwjkhjtjqttojtbmcmmstrchgjilywazkavapripqavrkyzedhfwdshbuauwrpwaxeqgqzrrxiaiwmwhkqlhveabwxbonobclgaawgkkbavrmqsenhdglsulicuefjdskrmtupuynfwzhyeganmnvcurvkzciiscqawaqnzsvpnvfgbomsxyunixdjkdhjfbwkdesrhgzpdfvwmfpfbdpllatxvftksjkxeunjrxwiyqvjpmcwfgbietudcgmhbzfaluyvvbqlreujqlmhnpmwaqjihnucwbnpgdurgvxlqazycehwnxpxmmzpiflocpdshvhiwlkijcjjqhsgzsfnfesvjufnxtaummhqsphewodlricgvswvybqmptvaubfyirfkhiaqwayuulammfgfafixjmcfkiauequzghskzrbypuhuzwsljimssjflthkcnhyhifkdrzfnsywzlmqcqyxazbtrozjuzimfoogcpinlknfqbczfgbactnkwoldtcmicfqewxbhikhyfcwdgeanqmcsovxcctjwagjwehrbwddeqolzbkypeqeboyxtwiuchexvnsshmlgroloaygpjsyirrytvfvqdoatrawpcekugfmbikcaplkctczijeziksrfwidfdinrlnmrsgguumijttgkiauftpvqacwhkprcdzxgqbisnmjdofyfrdqxeiusnsmzurrijvlqsbcpqysebqhawrvaokkuxoqagbdfsiyjpogiimzjwhhjvlevgthkmarsulkgtyyeacaxrpamhztymwzjbxxbnjdjmqtoctlfjmdogkwltibjgjhoffruuilrclmyljjwmcxljereemlkwpujufuuochcmwvhvjilsxrmwtdxpzzwsboszxnjiazkbqmnafmwwdulpubwmnoxrjynmlpqesicbbvnhkvnvxphyvrupookxjuhsfovkijqolzvkibyjemnwvxmeogwjefkcrscyiabhcwehrgliwkbwcxcdhdydyfnkefnvgyrfkhyhpgmrarpyjeqynaymmumahzxucxtmyljptltqvxctzsgbzgqxhcchuduqcyjgdaegvgojtxdqnpmmnvszpxpoxybnmdbzkcpahxzvwcawyqptmaokdizqfchdhyxwwjtewkvexdyfiketnoiwtwddlidkpmmsibbvabhnpaydmgoiykuoalqssjurjjewcqmbfhkdtluunreekyvqbgyvaalttpnywdvasjwnaobgecbvxsgzxukkzbigmomtwvgiafxhkqmmkfxdqpvmuvtqnwksdklavygltgmriufltitxvfqiuvyotfhunhwnylywfvultrfhwhxylgumfzccjcgmlyeoyrmwdgqvkdtlycbomqzqxfupgmavnoguylkkuezoczgqvbjdzraazysdnxablgaiooldcrmnrxnuitlzszonunzhdzgbkfthlaianvdxfaxwhmygrebxmxwcgvvgiasgwqfucuqinlkxbkllowefrffudjayofznqggqaxnwfjhggshmdgcbkznpcvyrumsdmzbgrggypehvdgrmzohlwblpvwhnityedmpognckmrlwladebnoeawdlqcmagnxrlyevnqpfmsqrxmtrpvuqgdbjxbkhmemszhgadzrrnqwwnwddvixxwhwkrgieiqvcudqltwlnsihgkuovbyfuentexjnqlnmrozuksekwsutlnyarzwujyyudvrwbgapcewgxsqkgfqzqborjwkkcrjpxvrtidtrjanegavbtoxrinvhghoezzbyhjtorixkxktworgfkurebmjfjfesvgzegkcmrndwrbhsipeeuadbmblyvrfzbakudrphgsqklvsxqbbxysceocmqprqqplzmpozliqawhospjqlrmwkwygtjrtxwkobtvtuctzrgzjjgyqlxrsrehasiampktrirvcpuqqvibaqxylzjyzluzajjcsevyshcbgrcyxsyomzbwcxkpqbqbwajqsnmnydcuifxsrjpcvcxdirgqrkiegvybqfscjajiispnoieneaiibrewmqhcavbrsynpwwgjkvfswlwfaoaenpuydyfassjnekquojwlxcdbfbbtilylbmbdeaypwkdjxxxvntngbfdiutpdcmzhzfdbalmompespnxdinmhbsdiczzxkadehiolzzzljsotnrbddsouauexjpynoimahbctjcbjytowweszxzanlvwbnrhqwhvsjrbjyoofspdpouzrbfysizjxvhaovufycfnrfrblhpxcariszngoejnmyzkvmaxztldoyruvhaaolmrnjxqnjrsrasowxjrnrnxdwaietnizfdnkggidkclqdttihobmccnpolzspqahnxymwlwxoqgxuktkixmkvwaarwcczdzaygsreqeqbwchwhyxgvuzvpocbiilawgainltjc']
+    want = 4392
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_13():
+    args = [['elehv'], 'h']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_14():
+    args = [['gfefqqgwtyy'], 'g']
+    want = 1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_15():
+    args = [['ccbaaabababbbc'], 'b']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_16():
+    args = [['jq', 'netwquong', 'zgo', 'pu', 'ypzos', 'yeox', 'lin', 'fmnihemino', 'zbrl', 'jjshynp'], 'fjjshynplinpuzgozglinfmniheminypzospuzbrlfmnihemij']
+    want = 13
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_17():
+    args = [['rhwirabfvechlzcucjxrlpcwcxfgxupietupqxlbtilyazkviffbgxxcapekouisyfkkiicshnvgfgalghvpedwhcwag', 'mqjvgvvkhnrghtwofxhjxmzergbjmdpqqarmbimcvcembvtndmdm', 'ejlkxyrxfdvqwjrgkkvmavkarswmqkj', 'gzsmekvbexktpsovmijtgqv', 'demxdqknjzqpqbadrowrgnfvgeoehkmhfsvnebkqleaeuxzvonwgsznkkopcymmspkhu', 'atoitybpiwjqpkxcsgnaxxtojqylfzbeouztpgcekphllwolhycaifgcjllyzjkjcltcqxvvxbftnpmwemkkfepqolcgk', 'yhzgxhauk', 'vcooxtfnlplfchabvhobwlsteovqmcqcxqeewwr', 'nrqcwejpgwysgxzmtpktqlbxpkvhnwsxrvozkoezfqtckruuukndbvpb', 'wsjsskxhflcebjxrhmpqzxlpfyvmwshjxsaekakqhugtgfkbjqtcv', 'aszcrkjpsclcyrjcpdjavxsphjjuqmndqodppazdqtlexpfcczkqlazqizn', 'rlklfpdlxiyhyfjrscvfprjopwnolrwsrmqjum', 'tnpqrbjxxkweowhfnsfmvnodrelxtsducqlfeaxzlnbaxzsqfbycqvtibvxklrcsbulbnoyemfrdigqcvsrrlmouqmlvo', 'hbirrtpwbgfnz', 'qiueckjvjroytbnucfqrzhdlzmhphercsoruhzqceowbowkddhcyjintmsaft', 'ewqirmoujbrdsjvnjyjalenebmxzbqslkgogrvudliyykdfzzffuhwukuyfeqoxysvuqcydqkwgsfowkicoawojwmtum', 'rvjwhplggegtnkwevbmvyvmnyfdu', 'ksftxqkpztqrtvwtnzumxszdjxqtiko', 'mjqxnzprvqfvphveicchovibhqnofxqeyhixursgsw', 'xgrtlxsgoshdrgqtbphqvijpdrretyztkdfhbyhosxgxcgbipbggqkhlskwxxqttdiboclckxeulmokzmdef'], 'jmtrmzdhhfgcwqopayqttmjasoxbqnfkwkotfnbljsqjdebirujzcqqicmtenggsoiovsnflngmcdadmgxgpyjh']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_18():
+    args = [['acbbaabacbacbbb'], 'b']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_19():
+    args = [['kuac'], 'e']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_20():
+    args = [['bacbcbcbaa'], 'b']
+    want = 1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_21():
+    args = [['aeddaaebebabddbcbda'], 'c']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_22():
+    args = [['ssssss', 'xxxxxxxxxx', 'ssssss', 'rrrrrr', 'nnnnnnnnn', 'eeeee', 'pppppppp', 'aaaaaaa', 'hhhhhh', 'qqqqq', 'lllllll', 'iiiiiiiiii', 'nnnnn', 'rrrrrrrr', 'ggggg', 'kkkkkkkk', 'ooooooo', 'iiiiiiii', 'iiiiiiiiii', 'lllllllll', 'dddddd', 'kkkkkkk', 'ppppppp', 'fffff', 'llllllll', 'fffffff', 'hhhhhhhhhh', 'aaaaaaaa', 'ddddd', 'oooooooo', 'gggggggg', 'mmmmmmmm', 'eeeeee', 'eeeeeeeeee', 'nnnnnnnnn', 'sssssssss', 'wwwwwwwwww', 'dcacdbcadbdadabddccbacbbdabcbbbdbaaacabcacbadcbaaabcdbddbbbcdbcccbabbbcababadbadadcbabcbdbbbddbdcababaadddbcbccaadabcaacdadbcddacdbccbbcadcdbadcaddadcdbbaabadbacbbadaaacdbccaccdddcbdcadbbcdadcbdbccdcdcadcdaadabbdadadbcdcddbadbbcdcdddbabcaccadccdbbdddcbbbccdddcbbcdcbcdacaaabccdcdbcaadccdcaaacccbacdabbbbadbcbaabbabaddbbbcccccddacabcadadbddbbbdcaaabaccdabdbddaadbdabdcaacbbccbbbbcadcabcbcbbbbbcccaadddbadbbabdacccddbddbbadbdcbcbdaabdbbcddbacabcbbccdabcbdacabcccddbdccacabcadddcdcaabcbbbbcbdbcddbbcdcdbbdbddabccbbbcaaabadcbabbbdbdbabbaabcaadbdbbbacdbdcdabdbbdbabcbdadacdddcbbcdcbcbcadcdddbcbbbbbcdccadbabdacbcdabacacadbbdcbbbaaacdcaabcbbbbbbbcdbdbadcccabcbcbcbabcdaacabcdcdcbaaabbdcddcdacddbcaacaddaaaadbccdbaaaaddddbaddcccabdcacbaaccddbcccaacbabaadbbbacdcbbacaaaabbbacdbdbcbbbbbcdcbdcaadbabadcadddcbaadacdbbdaabbcbdaabcdbccbcacaadcabcdacbcadccdcaccdcacbdcaadbdacadbdccccabaaacdabaacdcbbcabdcaadbccbaddbccdabcaacccababaacabdbbbbcdddbcaadabdabcdddddaacaddadbbabdcbcbbbcbcdadbddbabcacccccdbbcadbdbccdbcabcaabaaccadbaaddcddbddaaccccbcadacaadbcbdadbbadabacdabccdcabaacacbabadcbdcddcadabbdabbccdccacabacabbbcbdaaabbacabcdcdcbbaaabcdadcabbcccbadcdadbcaacaccacabaccdaaacadbbbcdbdcacabbdbabcaadadcbaddabcbdbbdbbbdbcacbabadcbadabbcdadbbbcddaadbcdcbbdbccaccaaaaadabbdcacdccbcddacdaabaabbbddcaabbddcbccbccddabddbbcabcadcddccacabdacdaaccbbbbcbababaadacaacaabbdabbaabcddbcadabcaaddaabdadbbdcaadcdcdcbabdadbccbbbccadabadbbdcccdaadaacdadcaccdcabbdacaaccddbacabccababdcddcbccbdaadccdadadcdbbcbcaddaaadbdcdbcddabbcdbabddccadacdbbdbbaccddcccbbaaadaccacbdcdcaaacbdcbabbbacdddaacacdadbdadadcdbaaccbbddbcaacddaacbddccdaccacccdacacdadbdcdddbcdbdacbbbcaacaaaddadddacdcaaddcdaaadacdbcbdbbbdccddaadbdaabbcbdaddbdaaddaabbdaacbcaadabcdccbbcadacdcaddddcabdddacdacaddcaaaccdddaccccbbadbddcaaaabbadbaaadcaacdaaaaaddbddccbcdbcacdcccdbadabbacbdaccaddcccabbdddcbdddcbcbaddaddadcdbbdddacdabdaddcdbbaccddccbbbcaddabadbacacdbdabbbccdabbacbcaabbdccdbcaacaddcadaaababcbdbbaadbbacaccbcababcdacbcadddadbbbdcbdbaacbacbcdaccabdcdbaabccaddddcbacbddbdacabdbadccccbcbbbcdaaaadaadabbbccdbdcdaadcadbbbacdbcadaabaacabdcaccddaabadabcbcbacaabbdbbcddcdbaaabbabadcccbdabbabddaccdabadbccbacacbdbaccbaadacdbaccbadcdbdaadadccdadbdccbdbaacddacbcababaacccccdabcaabcbbddcadaaaacbbdddbcaccbcccacbaacddabcbdcabccbacdbdddcadcbaaabcddddcbabddadddbdccadddaaddacdabacdcccccaddccaadcccbdbbabbbadadbcabdbaadababddaacbdabbccdcdcbcaacdbbdabbbdbcbabdadbdbbcaaaadabddabbaacbdcacaacadacacddccbdddcaabdddccbbdcddacbaadbbbbdcaaaaaacabdcadbdabdccacccabbdbccbdddadcaabacbddacbcbaaabadbacbdccacbdbaadadbccacccacccabaaadbbdcdccccccbddadcacacccaddaababbadbbdccccaacadcaccccdbccbaaaccccbdacacabbcdbabdccdbcdaabdbcdbcccbbbbaccbadbadcdbadcaadcadbbacdcdbdaccbbbabbdbabcdbcccbdbadbdbdabbbcabbabddacdcddababbccaacdcbcbbcdcbcaacaabacadcbaabbddadccbbbcccbbbdcbcdbacbbacacbdbdbabcbbcaaacadbcbdbdbaadadacdadaaccaadbbbbbaddbccacbacdbbcdbcaaabccdcbbbcddbcdaacaddcaaacaabbabcbbccdbbabcabcdccacbadbdccbbbdacbcdcdbbdaaaabcbdbaadaabcddadccdcddccdddbdabcaddbbcddabbaddddbcaaaaddacbcdbddcbdbacdbdddcadcbbaaccddccadcbcabbadbbccbcadabccabbcacbddbaccbcddccaabbadddbbaadadbabddbdcbacbcbddaabcbddcbddbaaccbcbdaacabacdbadacdbdadcbadaabccbbaabadcaadcccbaaacdcbacbddcdaadabddaddcddcddcdaadddaacabcddababbcbbbdadadccadddccadabdabcbaabbaaabcbacdcbbadbddcddddabbabdabaaabcddabddddddcbcddddacadbbacacdaadaccaadccbbadcdabdabbcddcddadacaccdcabccbcbaddcccdbddbccdbccdcaaacaaacaadaabcbbcbaddabacbccdddaabddabbbcdbcbccbddccdcddbaddbbbbcacbccbbbcdaccbbbdabaadccdcacbdacdbccbcccdbdadbcbbdccddbadddbacbabdbadadbadcddcbbdcccabbdabbadccccddadccbadabacdcdcbbdabdaccdbccbdacadadaabdcbcbacbdabbcbacdadbacdadbacaacaddcbabaacdbbdcbccbabbcbcccdabdccabbdbbdcdacabadcddadddabdcdacbbbbddbbabcddbcdccccbdbabbbbacacccbcdddaaaaadababdbbddbddbbabdabbccddbccabdcabcacdabbccaddbdcbabccdbcadcbcabaadbdcbabbbcbccbcbaacbbadbaabbdaadabccbbdbbacbbccababaacccaaccbccdbaddcadddbaaddaadbbdbabbacbadbbadcaadacccdabdabcdbddacadbbacbddcdddacbdcdddbbaabbdbcacbbabddaadbacaddabaddabcdaddbbdbaadcbbdaadacbdacdacccaddbabbacdbaddcdaacddddbcdaaddccdacabadbcadcdcdbbabddccacbacdbdacbaaadcabbdccbdaacccabbcdcbcadabdadabacbccadbdbcbdccbbddcacabbcdcadaaddcbbababcabbdacccccabbdcdcccdcabcaabaadcadaccbcacbbdbbacdbbdccbadcabdddbacddabbaacbaaddcbcdbccbcadcbdadadaaaccacaccbcdcbdadbdaaaddaaaacdadcdbbaaaadddbaadcbcbbababdcdcbdbbdbdccbdddddcbcbbdadcabacbacdadacaddccbdcdabadbdacccddaabdbcabbbbadccbccdcbbddaacacbdbddadbbbadbdddbcacacdbbcacccbbdcaababdaabacbbdaccbbcdbcabbdcdaddddddbcddcadacacbcdccacbbadcbbbdcbcaaddbbaaadbacdddcacaccbdbcadaaddbcddddbaabacbbacdcabcbcdddadccbdbacbcbacddbbadddcdcbdaaadaabbadbabddacdadaaacadabacdcabcaadddccccbcdcdabcdaacaddacaacddadbbccbbadbabcdbccadacbbcbcabcaadcdbdcacddbbcbaacdaabdddabdbabbcdacacdcbadacadcdcbbacccddcddbdaddcabbbcdbdddcaaddcabaaabbdbacababcabdccdbadcbddbbaaadcbdaddbacacdcbbcbdccaaabadccbcadccdbbcdaaddbaccbccdbddbdbacdcaacccadbbabcaaaabaccccadcaadcaccaabaddcaddaacdaadccbcabcccccbdddcbaadcaadcdbbabbacbccdabccccbdbacbdbbcdadbbcdbdddbbccdbccdccddaabbbbabbcdcbdbcbabaddbcddcdcacdcbcbbaddbcdabbddaadbbcccaabcadd', 'bbbbbbb', 'cccccccc', 'dddddddd', 'cccccccccc', 'mmmmmmmmm', 'bbbbb', 'zzzzzzzzzz', 'mmmmmmmmm', 'eeeeeee', 'ttttttt', 'jjjjjjjjj', 'wwwww', 'aaaaaaaa', 'lllllllll', 'cccccc', 'sssssss', 'vvvvvvvv', 'tttttt', 'qqqqqqqqq', 'oooooooo', 'aaaaaaa', 'mmmmmmm', 'uuuuuu', 'wwwwwwww', 'uuuuuuuuu', 'tttttttttt', 'yyyyyy', 'nnnnn', 'kkkkkkkk', 'pppppppppp', 'jjjjjj', 'bbbbbb', 'hhhhhhhhhh', 'gggggg', 'rrrrr', 'ttttttttt', 'vvvvvvvvv', 'bbbbbb', 'kkkkkkkk', 'gggggg', 'xxxxxxx', 'oooooooooo', 'vvvvvvv', 'xxxxxxxx', 'dddddddddd', 'yyyyyyyyyy', 'hhhhhhhh', 'ppppppppp', 'ffffffffff', 'fffff', 'uuuuuuuuuu', 'jjjjjjj', 'rrrrrrr', 'yyyyyy', 'zzzzz', 'uuuuu', 'zzzzz', 'jjjjjjjjjj', 'iiiiii', 'qqqqqqqq', 'qqqqqqq', 'cccccc'], 'aaaaaauaaaaaaaaqqaaaqqaassaaaaaaaaaaabttaaaaaaaaaaaaaaaaaaaicajggaaaaaaabbbaaaaaavaaaaaaaaaaaaaddaaaaaaaaaaaaaaaaaaaaaaaaaabbbaaaaaaaaaaaffaaaaamaaaaaaaaooatttaaaaaaaaaaaaaaaaaaaaaammaaagggaaaaaaaaaaaaaaaaaqqqaaaaaalmllbqhhaabbbaaaaaaaaaaazaaaaaaaattaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnggaaaaaaaaaapppaffaaaaaaiaaaaaaaaaaaaaaaaaaaaaxxxxaaaaaaaaanaaaaaaaaaaaaaaaaaaaaaaaaaaaaaannnnaaaaaaaaazaaaaaaaaaaaaaaaaaaataaaaaaaaaaaaabbbaaaaazzasaaaaaaaaaaaaaaaaaaaaaappppmmmmaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaggaaaaaaraaaaaaaaaaaaacaaaaaaaaaaaqqqaaaaaaaaaaaaaaaaaaaaaaaaaaaqaaaaaaaqqaaaaaaaaaaaaaaaaaaaaaapppahhhhhaaaaaaaaaaaaaaiiiiiaaaaaaaaaaaaaaaaaaaaaaaaaaaagggaaaaaaaaeeaaaaaaaaaattttaaaaccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaalaaaaaaaaaaaaaatttabbcccwwwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccccaaaaaaaaaawwwwaaaaaaaeaaaaaaaaaaaaaaaaaaaaaaattttaaaaaaaaaaaaaaaaawwwwpddddaaaaaaaaaattaaabaaaaaaaaaaapvvaaaaaaaaaaaaaaaadcacdbctdbdadabiiccbacbbdabcbbbdbaaacabcacbadcsaaabcnnddbbbcdbcccbabbbcabagadbadadcbbbcbdbebaazzcababaadddbcbccaadabcaacdadbcddacdbppppooocdbadcalladcdbbzabadbacbbadaaacdbccaccdddcbdcadbbcddcacdbcadbdadabddcacdbccdbdadabdggcbacbbrrbcebccbaaacabcacbadcbaaabcdbddbbbwwbcccbabbbcababadbadadcbabcgggbbltffoffabaadpdbcbcyaadabcaacdadmmddkuubccbbcadcdbadcaddadcdbbaabadbacbbadaaacdbccaccdmdcbdcadbbcdakkkdbwwfrrcadcdaffabudadhdbcdcddbasbbidcdddbabfddcadccdbbdddcbbbccdddcbbcdcbcdaclllbnnnggbcwrrccdcahhhhhbzcdabbbbambcbaabbabaddbbttcctxddacabcadadbddbbbdcttttaccvvbdbddaagggabdvaaffbccbbbbcadcabcccbbwwbcccabbbdbadbbabdacdddduddbbadcccbcbdaarrrbcddbacabbbbccdabcbdacabcccdzzdccacabcadddcdcaabcbaffcbdbcddbbcdcdbbdbtttbccbbbcaaabadcbabbbdbdbabbccccaadbbbbbacdbdcdqwdbbdbabcbdadacdddcbbcdcbcbcadczddbcbbbbbcdccadbabdacmcdabawwwwiiiicbbbaaacdcaabcbuubbbbcdbdbadcccabcbcbcbabcdaacabcrrrcbaaaggdcdbeeecddbchhbbbdaaaadbccdbaaaaddddbaddcccabdcacbqqeaaaacccaaooobaadbbbacdcccacaavvbbbaddddcacdbcadbdadabddccbacbbdabcbbbdbaaacabcacbadcbaaabcdbddbbbeebcccbabbbzzbabadbssadfbabcbdbbuddxdcannnllbbbbcbccaadabcaacdaxxcddacdbccbdcadcduadcaddadcdbbmmmmdbacbvabbbacdbccaccjjjcbdsllqqcdadcboooodcdrtdcdaadabbdamrrbcdcddbadbbcdcdddbssssccadcgdbbdoocbbbccdddcbbcdcbcdacaaabccdckkcaadccdcaaacccbacdabubbadbcbaabbalssssbbcccccddacabcadadbddbbbdcaaammmcdabdbddaadbdabdcaiibbccbbbbcadcabcbfbbbbbcccaadddbadbbabdacccddbddbbadbdcbcbdaabdbbwdddcacdbcadbdadabddccbacbbdabcbbzzzzzacabcacbadcbaanncdbddbbbcsscccbabbbuababaddddadxxaacbdibjjjjdcababaadddbcbccaawabcaacdadbcddacdbccbbcadcdbadcaddadcdbbaabadbaaaaadaaacdbccppcdddcbdcadbbcdadcbdbccdcddadcdaadabbdadadbcdcddnndbbcdcdddbabnnnnadccdbgdddcbabccdddcbbcdcbcdacanabeedcdbcaqqccdcaaacccbacdabbbbadbcbaabbadddffbbcccccddacabjjjadbudbbbooatttaccdabdbddaadbdabdcaacbbccbbbbcadcabcbcbbbbbcccasdddbadbbabraciizzbnnbbjjjjcbcbdwwwdbbcdwwacabcbbccdabcbdacamcccddbdccacabcpppdjjjaabcssbbcbdbcddbboocdbbdbddablcbbbcaaabadcbsbbbdbvvabbaabcaadbdbbbacdbdcdabdbbdbuucbdadacdddccccdcacdbcabddddabdddcbawwwwabcbbggbaaacabcacbadcbadctttbcadbdadabdssssacbbnabcbbbdbaaadfbcacbadcbaahhhhbdfffffdbcccbkbbbcababadbtttttbabcbdbbbddppcaballadddbcbccppppbcaackkmbcccacdbccbbcadcdbadcaddadcdbballldbacbbahhhmmmbccaccdddcbdcadbbzzadcbdbccdcdcadcdaadabbdadadbcdcddbadbbydcbddbabcaccadcndbbdddllbeeedddcbbcdcbcdacaaabdkkwwwwwdbdadabddccbacbbdabcbbbdbaaacabcacwwwwbaaabcmmmdbbbcdbcccbabbbcababavvvvadcbabcbdbbbddbdcababkkkkdwwwccaadqqcaaczzdbcddqqqbnntttadddbaeerrrdqddbbnnbadbacbbadaaacdbccsssdddcbdcadmmmdrrcbdbcooodcadcdaadabbdadadbcdcddbadbbcdcdddbabcaccadccdbbddtttbbccdddcbbcdcbcnacaarrrrdcdbcardccuuaaacccbacdcacdbcadbdadabddccbacjjdabcbbbdbaaacabcachhhhbaaabcdbddbbbcdbcccbauuucababadbadadceabcbdbbbddbdcababattddbcbcqaadabccacdadbckdacdbccbbcadcdbadcaddadcgggaabadbacbbadaaacdbccaccdddcbdcadbbcdadcbdbccdcdcajsjjakkkbdadadbcdcddbadbbcdcppdbapppccadcctttddgcbbbccoodcbbcdclcdacaaabccdcdbcabbbcdcaaahhciicdabbooooocrrabbabaddbbbcccccddacabeadadbddjjbdcaaabacbbbbdcbcbcbabadffcabcdcxxuxxabjdcddcdauuuyyynnahhhhhadbccdbaazaddddbaedcccajjjawzzaccddbcccnnhhhbaadbbbacjjjbacaaaabbbacdbdxxxbbbbcdcbdcaadbabadcadddcbaadacdbbdaabbcbdaahcdbccbcacaadcabcdacbcadttdcaccdcacbkkkadbdacadbdccccabaaacdabaacdcbbcabixxadbccbaddbccdqqcaackkvbabaacabdbbwwwwwdbcoadabdxbcdddddaacaddadwbabdckcbbbuucyyybddbabcacccccccbcadbdbccdbcebcaabtttcadbaaddcddbddaaccbbbcadacaadbcbdadbbadabauuabccdcattttacbabadkodaaaaadagbdabbyydccavabauabbbcbdaaabbaaabcdcsssbapabxxxdcabbckkkaocdadbcpppaccachhaccdaaacadbbbcffdcacabbdbabcaadadcbaddabcbdbbubgbdbcttbabadcbadakkhhadbbwwddaadbedcbbdbccaccaaaaadabbdcacdccbcddatttabaabbbdaaaaaiiiiapppaasaaaaauaaaaaaaaaallllaaaaaaaaaaaaaaabbaaaiiiiaaaaaaaaavaayyaaaaaxxaaaaaagaaaaaaaaaaaapaaaiiiiiaaaaaaaaaaaaaaaakkaaannnnaaaaaaaaaaaaaaaaaaaaaaaaaayyyaaaaaaaaaaaaaaaalllaaaaaaaaaaaaaaaaaaaaooaaaaaaaaaaataaaaaaaaaaaaaaaaaaaaaaaaaarraaaaaaaaaaaaaaaaaaaaaqaaaaaaaooppppaakkkkaaaaaaaaddaaaaaaaaaaauaaaaaaaaavvaaaaaaaaaaaaaaaaaaaazaaaaaaaaaaaaaaaaaaaaaaxxxaaaaaaaaaaaaaaaaaaaaaaa']
+    want = 2599
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_23():
+    args = [['aaaaabbaccbcbaaaacb'], 'b']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_24():
+    args = [['adaeabcabdcaabbeceeadeaebcdddeadcbceeeadddabdc', 'a'], 'beeea']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_25():
+    args = [['akxbajfquk', 'roha', 'wjuihq', 'vkbzisu', 'cchakl', 'fzqw', 'urfkeuy'], 'wjurourfkeurfkerohakxbajfquvkbzifzqwwjuifzvkbzisrv']
+    want = 13
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_26():
+    args = [['baacbcbabcaa'], 'c']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+
+
+def check_case_27():
+    args = [['zzfnqcjp'], 'u']
+    want = -1
+    got = solution.minValidStrings(*args)
+    assert _aeq(got, want), "args=%r got=%r want=%r" % (args, got, want)
+

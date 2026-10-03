@@ -1,0 +1,150 @@
+{
+    "id": "67c324a0-3bd2-464e-ba16-5dc2ee64b5db",
+    "task_name": "dabstep-5",
+    "trial_name": "dabstep-5__DJPBZPb",
+    "trial_uri": "file:///tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/gate2/jobs/A/2026-09-25__15-45-03/dabstep-5__DJPBZPb",
+    "task_id": {
+        "git_url": "https://github.com/laude-institute/harbor-datasets.git",
+        "git_commit_id": "e25eec6e8c2d614d36578ea43f58e5aa5b90859f",
+        "path": "datasets/dabstep/dabstep-5"
+    },
+    "source": "dabstep",
+    "task_checksum": "15237b237c0ff952697c5c5eaf604bf53602ee18142e8c2b2f15c02e56c034ac",
+    "config": {
+        "task": {
+            "path": "datasets/dabstep/dabstep-5",
+            "git_url": "https://github.com/laude-institute/harbor-datasets.git",
+            "git_commit_id": "e25eec6e8c2d614d36578ea43f58e5aa5b90859f",
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": "dabstep"
+        },
+        "trial_name": "dabstep-5__DJPBZPb",
+        "trials_dir": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/gate2/jobs/A/2026-09-25__15-45-03",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "pi",
+            "import_path": null,
+            "model_name": "openrouter/mock-model",
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {
+                "max_turns": 15,
+                "model_api": "openai-completions",
+                "version": "0.87.1"
+            },
+            "env": {
+                "OPENROUTER_API_KEY": "sk-f****te2",
+                "OPENROUTER_BASE_URL": "http://172.17.0.1:18081/v1",
+                "SSL_CERT_FILE": "/usr/local/share/ccr-ca-bundle.crt",
+                "CURL_CA_BUNDLE": "/usr/local/share/ccr-ca-bundle.crt",
+                "NODE_EXTRA_CA_CERTS": "/usr/local/share/ccr-ca-bundle.crt"
+            },
+            "mcp_servers": []
+        },
+        "user_agent": null,
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "stream": false,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": [
+                {
+                    "type": "bind",
+                    "source": "/root/.ccr/ca-bundle.crt",
+                    "target": "/usr/local/share/ccr-ca-bundle.crt",
+                    "read_only": true
+                }
+            ],
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "env": {
+                "SSL_CERT_FILE": "/usr/local/share/ccr-ca-bundle.crt",
+                "CURL_CA_BUNDLE": "/usr/local/share/ccr-ca-bundle.crt"
+            },
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "extra_instructions": [],
+        "job_id": "4ca1fe34-258e-46fb-ada0-14c69758f6f9",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "pi",
+        "version": "0.87.1",
+        "model_info": {
+            "name": "mock-model",
+            "provider": "openrouter"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 20,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 10,
+        "cost_usd": null,
+        "model_usage": {
+            "harbor-endpoint/mock-model": {
+                "n_input_tokens": 20,
+                "n_cache_tokens": 0,
+                "n_output_tokens": 10,
+                "cost_usd": null
+            }
+        },
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.0
+        }
+    },
+    "verifier_environment_mode": "shared",
+    "exception_info": null,
+    "started_at": "2026-09-25T15:45:05.578671Z",
+    "finished_at": "2026-09-25T15:45:44.357715Z",
+    "environment_setup": {
+        "started_at": "2026-09-25T15:45:05.657983Z",
+        "finished_at": "2026-09-25T15:45:07.768319Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-09-25T15:45:07.768394Z",
+        "finished_at": "2026-09-25T15:45:29.700585Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-09-25T15:45:29.700775Z",
+        "finished_at": "2026-09-25T15:45:31.613697Z"
+    },
+    "verifier": {
+        "started_at": "2026-09-25T15:45:32.120992Z",
+        "finished_at": "2026-09-25T15:45:32.461871Z"
+    },
+    "step_results": null
+}

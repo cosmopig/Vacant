@@ -1,0 +1,52 @@
+2026-10-01T17:14:35Z startup sweep: {"tmux_killed": 0, "users_deleted": [], "runs_dirs_removed": []}
+2026-10-01T17:14:35Z plan kind=screen prefix=t4s units=12 arms=['A'] nested=[] slots=4
+2026-10-01T17:14:55Z done t4s-A-dabench-dab_507-s1 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:14:56Z done t4s-A-dabench-dab_724-s1 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:14:56Z done t4s-A-dabench-dab_721-s1 void=False timeout=False wall=19.7s sessions=1
+2026-10-01T17:14:56Z done t4s-A-dabench-dab_688-s1 void=False timeout=False wall=19.9s sessions=1
+2026-10-01T17:15:15Z done t4s-A-dabench-dab_249-s1 void=False timeout=False wall=19.6s sessions=1
+2026-10-01T17:15:15Z done t4s-A-dabench-dab_035-s1 void=False timeout=False wall=20.0s sessions=1
+2026-10-01T17:15:15Z done t4s-A-dabench-dab_055-s1 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:15:16Z done t4s-A-polyglot_py-pg_affine_cipher-s1 void=False timeout=False wall=20.2s sessions=1
+2026-10-01T17:15:35Z done t4s-A-dabench-dab_666-s1 void=False timeout=False wall=20.0s sessions=1
+2026-10-01T17:15:35Z done t4s-A-dabench-dab_039-s1 void=False timeout=False wall=20.0s sessions=1
+2026-10-01T17:15:35Z done t4s-A-dabench-dab_732-s1 void=False timeout=False wall=20.0s sessions=1
+2026-10-01T17:15:35Z done t4s-A-databench-db_066_04-s1 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:15:35Z plan screen finished: launched=12 already_done=0 peak_slots=4
+2026-10-01T17:15:35Z ceiling decision: {"dabench": [true, 9, 10], "databench": [false, 1, 1], "polyglot_py": [false, 0, 1]}
+2026-10-01T17:15:35Z plan kind=main prefix=t4 units=5 arms=['A', 'C'] nested=['R', 'K'] slots=4
+2026-10-01T17:16:24Z done t4-C-lcb_v3-lcb_2808-s1 void=False timeout=False wall=23.3s sessions=1
+2026-10-01T17:17:02Z done t4-A-databench-db_066_04-s1 void=False timeout=True wall=62.4s sessions=1
+2026-10-01T17:17:02Z done t4-R-databench-db_066_04-s1 void=False timeout=False wall=81.6s sessions=2
+2026-10-01T17:17:04Z done t4-C-databench-db_066_04-s1 void=False timeout=True wall=62.4s sessions=1
+2026-10-01T17:17:04Z done t4-A-lcb_v2-lcb_3594-s1 void=True timeout=None wall=25.2s sessions=1 reason=proxy_non200: 1 call(s), 0 stream error(s)
+2026-10-01T17:17:04Z done t4-R-lcb_v2-lcb_3594-s1 void=True timeout=None wall=0s sessions=0 reason=group void: proxy_non200: 1 call(s), 0 stream error(s)
+2026-10-01T17:17:04Z done t4-K-lcb_v2-lcb_3594-s1 void=True timeout=None wall=0s sessions=0 reason=group void: proxy_non200: 1 call(s), 0 stream error(s)
+2026-10-01T17:17:04Z infra_void -> rerun once: lcb_v2/lcb_3594 group A (attempt 2)
+2026-10-01T17:17:22Z done t4-A-lcb_v3-lcb_2808-s1 void=False timeout=False wall=19.2s sessions=1
+2026-10-01T17:17:22Z done t4-R-lcb_v3-lcb_2808-s1 void=False timeout=False wall=57.6s sessions=3
+2026-10-01T17:17:22Z done t4-K-lcb_v3-lcb_2808-s1 void=False timeout=False wall=58.5s sessions=3
+2026-10-01T17:17:27Z done t4-C-lcb_v2-lcb_3594-s1 void=False timeout=False wall=22.8s sessions=1
+2026-10-01T17:17:43Z done t4-A-lcb_v2-lcb_3594-s1v2 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:17:43Z done t4-R-lcb_v2-lcb_3594-s1v2 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:17:43Z done t4-K-lcb_v2-lcb_3594-s1v2 void=False timeout=False wall=19.4s sessions=1
+2026-10-01T17:17:52Z startup sweep: {"tmux_killed": 3, "users_deleted": ["a000154", "a000155", "a000159", "a000160"], "runs_dirs_removed": ["t4-A-lcb_v1-lcb_3653-s1", "t4-A-lcb_v1-lcb_3653-s1_snap", "t4-A-polyglot_py-pg_affine_cipher-s1", "t4-C-lcb_v1-lcb_3653-s1", "t4-C-polyglot_py-pg_affine_cipher-s1"]}
+2026-10-01T17:17:52Z plan kind=screen prefix=t4s units=12 arms=['A'] nested=[] slots=4
+2026-10-01T17:17:52Z plan screen finished: launched=0 already_done=12 peak_slots=0
+2026-10-01T17:17:52Z ceiling decision: {"dabench": [true, 9, 10], "databench": [false, 1, 1], "polyglot_py": [false, 0, 1]}
+2026-10-01T17:17:52Z plan kind=main prefix=t4 units=5 arms=['A', 'C'] nested=['R', 'K'] slots=4
+2026-10-01T17:17:52Z moved incomplete cell t4-A-lcb_v1-lcb_3653-s1 -> cells_aborted/t4-A-lcb_v1-lcb_3653-s1.20261001T171752Z
+2026-10-01T17:17:52Z moved incomplete cell t4-R-lcb_v1-lcb_3653-s1 -> cells_aborted/t4-R-lcb_v1-lcb_3653-s1.20261001T171752Z
+2026-10-01T17:17:52Z moved incomplete cell t4-K-lcb_v1-lcb_3653-s1 -> cells_aborted/t4-K-lcb_v1-lcb_3653-s1.20261001T171752Z
+2026-10-01T17:17:52Z moved incomplete cell t4-C-lcb_v1-lcb_3653-s1 -> cells_aborted/t4-C-lcb_v1-lcb_3653-s1.20261001T171752Z
+2026-10-01T17:17:52Z moved incomplete cell t4-A-polyglot_py-pg_affine_cipher-s1 -> cells_aborted/t4-A-polyglot_py-pg_affine_cipher-s1.20261001T171752Z
+2026-10-01T17:17:52Z moved incomplete cell t4-C-polyglot_py-pg_affine_cipher-s1 -> cells_aborted/t4-C-polyglot_py-pg_affine_cipher-s1.20261001T171752Z
+2026-10-01T17:18:36Z done t4-A-lcb_v1-lcb_3653-s1 void=False timeout=False wall=19.9s sessions=1
+2026-10-01T17:18:36Z done t4-R-lcb_v1-lcb_3653-s1 void=False timeout=False wall=19.9s sessions=1
+2026-10-01T17:18:36Z done t4-K-lcb_v1-lcb_3653-s1 void=False timeout=False wall=40.2s sessions=2
+2026-10-01T17:18:42Z done t4-C-polyglot_py-pg_affine_cipher-s1 void=False timeout=False wall=22.2s sessions=1
+2026-10-01T17:18:42Z done t4-C-lcb_v1-lcb_3653-s1 void=False timeout=False wall=22.2s sessions=1
+2026-10-01T17:18:49Z done t4-A-polyglot_py-pg_affine_cipher-s1 void=False timeout=False wall=18.7s sessions=1
+2026-10-01T17:18:49Z done t4-R-polyglot_py-pg_affine_cipher-s1 void=False timeout=False wall=56.8s sessions=3
+2026-10-01T17:18:49Z plan main finished: launched=2 already_done=3 peak_slots=4
+2026-10-01T17:18:49Z DRIVER_DONE

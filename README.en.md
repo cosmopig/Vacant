@@ -23,6 +23,149 @@ in anything outward-facing).
 An existing pattern, not one we invented: supply-chain security does the same thing with
 **in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
 
+## Install it and keep working: zero-config (0.9.0, v3.7)
+
+```bash
+pipx install vacant-network   # 0.9.0 is the zero-config release. No pipx? `sudo apt install pipx` (Ubuntu/Debian) or `brew install pipx` (macOS)
+vacant install                # finds pi / Claude Code / OpenCode / Codex on this machine and adds one hook to each (undo: `vacant uninstall`)
+```
+
+Then open your agent as usual. **No contract, config file, key or environment variable.** For pi, `vacant install` puts a single
+extension file into pi's own config directory (`extensions/vacant.ts`); it does not replace the agent or wrap the model endpoint.
+
+It does two things:
+
+1. **Records every step** — each tool call, which files were read, what changed in the workspace — into a signed record
+   (`~/.vacant/trace/`). It stays silent while the agent works; when nothing is wrong, every model request is
+   **byte-identical** to not having Vacant installed.
+2. **Checks once, when the agent says it is done** — from the record only — and sends it back in the same session (at most two
+   rounds per request) only for near-certain problems:
+   - a file the request asked for does not exist (named in the prompt, or in a file you pointed at, e.g. `contract.md` says "write `solution.py`"; v3.7)
+   - a failed step was skipped over (a red test script followed by a green run does not count; v3.7)
+   - "tests pass" does not match the record (any test script counts, e.g. `sh run_tests.sh`; v3.7)
+   - a concrete value has no source in anything this task read or ran (only when you supplied data)
+   - a file you named was never opened (unless you pasted its full text into the request)
+
+Everything else goes into a delivery note for you (`~/.vacant/trace/projects/<project>/delivery.md`), never to the model or your
+project. **It does not judge whether an answer is right.** The turn-budget reminder (v3) is **off by default** since v3.6;
+`vacant install --budget-reminder` turns it on.
+
+### What was measured (real models, installed with the two commands above — always quote the conditions)
+
+| Batch | Setup | not installed → installed | How to read it |
+|---|---|---|---|
+| DABstep 77 tasks × 3 (2026-10-02, pre-registered) | gemma-4-12b QAT on vLLM (Colab G4), pi 0.87.1 `--print`, **15-turn cap** | 42.0% → **53.2%** (p = 0.0028) | The gain is runs where the agent said it was done without writing the answer file (42/231 without Vacant, 0 with). Correct answers turned wrong by Vacant: **0**. ⚠ The Vacant arm scored about the same as on the GGUF backend on 2026-09-26; the not-installed arm is what changed. The task set was chosen because it had shown an effect before — not a hold-out. |
+| Task-oriented 94 tasks × 2 (2026-10-02, pre-registered) | DABench / DataBench / Polyglot Python, same setup **without a turn cap** | 72.3% → 75.0% (p = 0.36) | No measured difference; "said done without the file" only 5/120 |
+| Same, GGUF + LM Studio (2026-10-03, interim) | two RTX 3090 | 119 → 124 of 188 (p = 0.37) | No measured difference; "said done without the file" 0 |
+| Earlier: paid DABstep (09-25), 100 unseen hard tasks (09-28), 920 coding tasks on Colab (09-28, v3.6.1) | see conclusions | no measured difference | the v3.6.1 false send-backs (ran `run_tests.sh`, still "no test run") are fixed in v3.7: 0/23 in the smoke |
+
+⚠ **Do not read this as "Vacant makes agents better"**, nor as "it does nothing": what it catches is "said done without writing the
+requested file"; where that is common (turn caps, some inference engines) a difference shows up, where it is rare it does not.
+Wrong decisions with a source for every step, and runs cut off by a time limit, are outside what it can see. Known limits: a provided
+test script that stays red until the agent says done is not sent back; only pi was measured with a real model, all via `pi --print`
+(the interactive TUI was verified with scripted models).
+Conclusions: `decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md`, `CONCLUSION_20261002_COLAB_TASK3_V37.md`,
+`CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md`, `CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`, `CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`.
+
+## Plugging into your agent: pi / Claude Code / OpenCode / Codex (from 2026-09-24)
+
+The 2026-09-24 external review was right on one point: **a refusal verdict is not a blocked
+delivery**, and the model channel is not what the four agents have in common. This release
+makes the intake real (`vacant_network/intake/`) and plugs it into the four agents
+(`vacant_network/adapters/`) **without looking at model traffic at all**. Decision record:
+[`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md).
+
+```bash
+vacant contract quick --deliverable report.md --input data/sales.csv \
+    --must "Recommendation" --total amount --lock
+#   one line for the things you care about (besides two safety checks — the deliverable exists, no
+#   credential files — only what you write is a required check; --total reads the number after
+#   'Total' in the report, or after your own label: --total amount=Revenue; a wrong column, a column
+#   the check cannot read, or a totals row is reported right there; --lock pins inputs and signs)
+#   more kinds of checks: vacant contract init …, then edit the claims in
+#   .vacant/contract.json (exists, sections, recomputed numbers, citations, your own
+#   command, human review, ...), then
+vacant contract lock          # pin source data / acceptance suite by sha256 and sign the
+                              # contract with the owner key (release only follows a locked
+                              # contract; edit it ⇒ lock again)
+vacant install                # add hooks + a skill to pi / Claude Code / OpenCode / Codex (reversible)
+pi                            # use your agent as usual — no `vacant` on its command line
+vacant release                # the recipient re-checks everything, publishes, reads back
+vacant task report            # terminal state of every task ever opened (void and held included)
+```
+
+No hooks needed at all: `vacant do <agent> --prompt "..."` runs the agent's headless mode in an
+isolated workspace and submits the result; any CLI works with `vacant do --cmd '... {prompt} ...'`;
+closed-source services and human uploads go through `vacant intake serve` (HTTP; a submitter
+cannot supply the verdict).
+
+Four real agents + a scripted fake model (**L-fake**; Vacant never touches model traffic), one
+non-code task (report sections, a total recomputed from a pinned CSV, citations that must resolve
+with quotes found verbatim in snapshots the owner pinned) —
+[`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md):
+
+| | pi 0.87.1 | Claude Code 2.1.281 | OpenCode 1.18.32 | Codex 0.156.1 |
+|---|---|---|---|---|
+| wrong report (total 999) written to the destination by `vacant release`? | no | no | no | no |
+| right report accepted and read back at the destination? | yes | yes | yes | yes |
+| pre-delivery feedback reached the model (hooks)? | yes | yes | **no** (`opencode run` exits at the first idle; the interactive TUI and `vacant do` do, measured 2026-09-25, see the accountable-trace section) | yes |
+| contract-forbidden `git push` denied by the agent's own hook, no side effect? (persistent install and `vacant do` per-run injection, both measured) | yes | yes | yes | yes |
+| the Vacant skill's description appears in the requests the model received? | yes | yes | yes | yes |
+| user's original config byte-identical after uninstall and after a per-run-injection run? | yes | yes | yes | yes |
+
+⚠ **Do not read this table as**: "the agent cannot bypass Vacant" (agents can remove hooks and
+shell can evade string rules — the guarantee is at the recipient only), "Vacant makes agents
+better" (the fix after feedback is **scripted**, not model capability), or "holds with real
+models" (this round is L-fake), or "the destination has only this one write path" (a `dir:`
+destination is an ordinary directory under the same account; that takes deployment: another
+account, ACLs, branch protection). This round ran **after the adversarial review fixes** (five
+lenses, 60 findings each reproduced; fixed and not-fixed are listed in the decision's §十一).
+The old resident model-channel install still exists
+(`vacant possess install`, or `vacant install --observe-model`) but it no longer decides acceptance.
+
+## Tracing the error back to the step that caused it (accountable trace, from 2026-09-24)
+
+The intake answers "is this deliverable acceptable". In a project with a contract, Vacant also
+records **every step** of the agent into a signed chain (the four agents' native hooks plus
+Vacant's own before/after view of the workspace, so files written by shell commands are attributed
+too). When a check fails it:
+
+1. locates the problem (file, line, value);
+2. traces it: which step wrote it → **re-runs the same check** on the rebuilt state before and after
+   that step → where the value was read from (a given input, a sub-agent's reply, a command's output,
+   a script the agent wrote, a web page, the task message);
+3. tells the agent at the end of the turn **where, what was expected, and at which step the value
+   first appeared** — never who (KS-1);
+4. does not let it drown: when the agent will not be asked to continue, open issues go to the human
+   (Claude Code `systemMessage` and a report);
+5. consequences: only **provable** faults touch an actor's reputation (no slash; a person can dismiss
+   a finding and the effect reverses exactly); input faults are tallied on the source; changes no
+   recorded step explains are **accountability gaps** and blame nobody. Routing is advice to the
+   human, or `vacant do --agent auto`.
+
+```bash
+vacant trace show                        # every step: who, which tool, what it wrote; gaps
+vacant trace report --check              # the open issues (grade, evidence, step, source)
+vacant trace blame report.md:3           # which step put this value here, and from where
+vacant flag report.md:2 "the mayor is Alice"   # a person points at a wrong place (signed)
+vacant trace actors                      # per agent configuration: runs, accepted, provable faults
+```
+
+Four real agents × six planted faults, including a sub-agent and a wrong web page (L-fake):
+[`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) —
+**33/33 attributions correct** (the sub-agent case points at the sub-agent's own step); the located feedback reached the model's next request on Claude Code,
+Codex and pi (not on `opencode run`, a known boundary); 0/33 feedback texts named an actor.
+The same scenarios through `vacant do`: 25/25 (OpenCode gets the feedback too). A person typing into the four agents'
+**interactive TUIs** (real TUIs in tmux, including a multi-turn case): attribution, feedback reaching the model, feedback
+shown on the person's screen and acceptance after the fix are all 16/16 — OpenCode's interactive TUI does get pre-delivery feedback.
+Decision: [`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md).
+
+⚠ **Do not read this as**: "Vacant catches every error" (reads are a lower bound; only recorded steps),
+"the trace is always right" (value matching can be fooled by coincidence — that is why only a re-run
+flip is `provable` and carries consequences), or "outputs get closer to the requirement with real
+models" (this round is L-fake; that is the
+[R536 preregistration](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md), a draft awaiting sign-off).
+
 ## ⚠ Read this before installing: `pip install vacant` does not install this project
 
 The `vacant` name on PyPI (measured 2026-09-19: version 0.4.15, a 7.5 MB
@@ -814,7 +957,8 @@ Full list in [`docs/VACANT_COMPLETE_2026-09-12.md`](https://github.com/cosmopig/
 
 These are true and have code behind them:
 
-- **The intake check cannot be routed around.** `vacant_network/receipt.py` plus
+- **The intake check re-verifies everything; getting past it takes the signing key** (by
+  default a plaintext file in the same OS account). `vacant_network/receipt.py` plus
   `controller.verify_delivery` **recompute five sha256 digests** (request, task, tests,
   answer, trust card), verify the Ed25519 signature, compare `chain_head` / `stream_id` /
   `branch_id` against the **chain as it stands right now**, confirm every review is bound to
@@ -831,7 +975,7 @@ These are true and have code behind them:
   see this test code"*. The candidate **structurally cannot read the tests** — it is not a
   blocklist.
 - **"Not measured is not passed" is written as code**:
-  `"all_pass": bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`);
+  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:481`);
   likewise the gauge requires `n_broken >= 1`, so an empty stub set cannot succeed vacuously.
 - **Refusal really happens**: in R532's 836 tasks the gated arm refused 25 deliveries and
   the loop arm 68 — and refusals are in the denominator of every rate.
@@ -912,8 +1056,8 @@ machine-readable facts block, is [`AGENTS.md`](https://github.com/cosmopig/Vacan
 | **Harness owns the loop** | e.g. `ops/gain/r530/openwork_arms.py:642-696` | **Yes — the harness is the loop.** |
 
 **The right framing is "receiving desk", not "mandatory layer".** Enforcement happens at
-**acceptance time** — a delivery without a verifiable receipt is not accepted, and **that
-check cannot be routed around** (`vacant_network/receipt.py` + `controller.verify_delivery`
+**acceptance time** — a delivery without a verifiable receipt is not accepted, and **getting
+past that check takes the signing key** (`vacant_network/receipt.py` + `controller.verify_delivery`
 recompute five sha256 digests, verify Ed25519, compare `chain_head`, and `os.O_EXCL` makes a
 receipt consumable exactly once). Enforcement does **not** happen at execution time: making
 Vacant the single exit on a machine takes containers, ACLs or egress policy, which is the
@@ -979,7 +1123,7 @@ red line A4).
 - **I-3** Self-reported success is never taken on faith (`ecosystem.py:531`, then
   `controller.py:299-300` independently).
 - **I-4** "Not measured" is failure, in code:
-  `bool(total > 0 and passed == total)` (`vacant_network/vrun/acceptance.py:268`); the gauge
+  `bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:481`); the gauge
   requires `n_broken >= 1`.
 - **I-5** The gauge is two-sided: the reference must pass **and** every known-bad stub must
   be rejected.
@@ -1048,8 +1192,8 @@ The full block is [`AGENTS.md` §9](https://github.com/cosmopig/Vacant/blob/main
                   "not_recommended_for_integrators": "harness_owns_loop",
                   "enforced_at": "acceptance time", "not_enforced_at": "execution time",
                   "prior_art": ["in-toto", "SLSA", "Sigstore"],
-                  "reference_monitor_Saltzer_Schroeder_1975": {
-                    "tamper_proof": true, "small_enough_to_verify": true,
+                  "reference_monitor_properties_Anderson_1972": {
+                    "tamper_proof": false, "tamper_evident": true, "small_enough_to_verify": true,
                     "complete_mediation": false},
                   "library": "voluntary", "mcp_tool": "advisory",
                   "controller": "binding on its own spawned subprocess only",

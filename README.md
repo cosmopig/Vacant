@@ -19,6 +19,133 @@
 既有模式，不是我們發明的：供應鏈安全的 **in-toto／SLSA／Sigstore** 也是同一條
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
 
+## 裝了就用：零設定（0.9.0，v3.7）
+
+```bash
+pipx install vacant-network   # 0.9.0 起就是零設定版。沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
+vacant install                # 找到你機器上的 pi／Claude Code／OpenCode／Codex，各加一個掛鉤（可逆：`vacant uninstall`）
+```
+
+之後照常打開你的 agent。**不用寫契約、設定檔、金鑰、環境變數。**以 pi 為例，`vacant install` 只在 pi 自己的設定目錄放一個擴充檔
+（`extensions/vacant.ts`），不換掉 agent、不包模型端點。
+
+它做的事只有兩件：
+
+1. **全程記錄**：每一步工具呼叫、讀了哪些檔、工作區前後改了什麼，簽進一條病歷（`~/.vacant/trace/`）。過程中不插話；
+   沒有問題時，模型收到的每一通請求和沒裝時**逐位元組相同**。
+2. **agent 說「做完了」那一刻查一次**：只看紀錄，只在**幾乎一定是真的問題**時，在同一個工作階段裡退回請它補（人的一個要求內最多兩回合）：
+   - 要求寫出的檔不存在（提示裡寫的、或你點名的說明檔裡寫的，例如 `contract.md` 說「寫進 `solution.py`」；v3.7）
+   - 失敗的步驟被略過（測試腳本紅了、之後又跑出綠的，不算；v3.7）
+   - 說「測試通過」但紀錄對不上（任何測試腳本都認，例如 `sh run_tests.sh`；v3.7）
+   - 文件裡的具體數值在這個任務讀過、跑過的東西裡都找不到（只在你有給資料時）
+   - 你點名的檔從沒被打開（你在請求裡已經整段貼了它的全文的，不算）
+
+其他的只寫進交件說明（`~/.vacant/trace/projects/<專案>/delivery.md`：查了什麼、交件前改了什麼、還沒驗證的），
+不送給模型、不寫進你的專案。**它不判斷答案對不對**——推理錯了但每一步都有根據的答案，它看不出來。
+回合預算提醒（v3）**預設關**（v3.6 起；多交出來的答案錯的多於對的），要開用 `vacant install --budget-reminder`。
+設計與各版裁決：[`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`](decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md)、
+[`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`](decisions/DECISION_20260926_ZERO_CONFIG_V3.md)。
+
+### 量到了什麼（真模型、照上面兩個指令安裝；條件一定要一起講）
+
+| 批次 | 設定 | 沒裝 → 裝了 | 讀法 |
+|---|---|---|---|
+| DABstep 77 題 × 3（10-02，預註冊） | gemma-4-12b QAT、vLLM（Colab G4）、pi 0.87.1 `--print`、**15 回合上限** | 42.0% → **53.2%**（p＝0.0028） | 差來自「agent 說做完卻沒寫答案檔」被退回、補寫（沒裝 42／231 跑、裝了 0）；Vacant 把對的改成錯 **0 次**。⚠ 有 Vacant 那組和 09-26 在 GGUF 後端的成績幾乎一樣，變的是沒裝那組；題組是因為過去有效才選的，不是留出 |
+| 任務導向 94 題 × 2（10-02，預註冊） | DABench／DataBench／Polyglot Python，同上但**不設回合上限** | 72.3% → 75.0%（p＝0.36） | 沒有量到差別；「說做完沒寫檔」只有 5／120 |
+| 同上，換 GGUF＋LM Studio（10-03，期中） | 人類自己的兩張 RTX 3090 | 119 → 124／188（p＝0.37） | 沒有量到差別；「說做完沒寫檔」0 格 |
+| 更早：DABstep 付費（09-25）、u274 hard 100 題（09-28）、Colab 程式題 920 題（09-28，v3.6.1） | 見各結論檔 | 都沒有量到差別 | v3.6.1 的誤退（跑過 `run_tests.sh` 還被退）在 v3.7 修掉：冒煙 0／23 |
+
+⚠ **不能讀成**「Vacant 讓 agent 做得更好」，也不能讀成「沒有用」：它補得到的是「說做完卻沒寫要求的檔」這一類；
+這種情況多（例如有回合上限、某些推論引擎）才量得到差，少就量不到。錯在決定、或被時限切斷的，它看不到。
+已知的限制：題目附的測試一直紅、agent 就說做完，不會被退回；真模型只量過 pi，而且都是 `pi --print`
+（互動介面的流程用照劇本回答的模型驗過）。
+結論檔：[`CONCLUSION_20261002_COLAB_DABSTEP_V37`](decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md)、
+[`CONCLUSION_20261002_COLAB_TASK3_V37`](decisions/conclusions/CONCLUSION_20261002_COLAB_TASK3_V37.md)、
+[`CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM`](decisions/conclusions/CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md)、
+[`CONCLUSION_20260925_ZERO_CONFIG_DABSTEP`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)、
+[`CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL`](decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md)；
+為什麼零設定大多量不到差、和過去的實驗比：[`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md)。
+
+## 接到你的 agent 上：pi／Claude Code／OpenCode／Codex（2026-09-24 起）
+
+2026-09-24 的外部質疑報告說對了一件事：**判了拒交不等於擋下交付**，而模型通道也不是四個 agent
+的共通點。這一版把收件口做成真的（`vacant_network/intake/`）、把它接到四個 agent 上
+（`vacant_network/adapters/`），**完全不需要看模型流量**。裁決：
+[`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。
+
+```bash
+vacant contract quick --deliverable report.md --input data/sales.csv \
+    --must "Recommendation" --total amount --lock
+#   一行寫出人在意的事（除了「繳付物在、沒夾帶憑證檔」兩條底線，只有你寫的才是必要的檢查；--total 讀報告裡
+#   'Total' 後面的那個數字，要別的字樣就寫 --total amount=合計；寫錯的欄名、讀不動的欄、總計列當場就說；
+#   --lock＝釘住輸入、簽名）
+#   要更多種檢查：vacant contract init …，再編輯 .vacant/contract.json 的 claims
+#   （存在、段落、數字重算、引用、你自己的命令、人工審查…），然後
+vacant contract lock          # 釘住原始資料／驗收套件的 sha256，owner 金鑰簽下這份契約
+                              #（收件端只依被鎖過的契約放行；改了契約要重鎖）
+vacant install                # 在 pi／Claude Code／OpenCode／Codex 各自的設定裡加掛鉤＋技能（可逆）
+pi                            # 照常用你的 agent——命令列上沒有 vacant
+vacant release                # 收件端重驗一切、發布、讀回；不合格的版本不會被它寫進目的端
+vacant task report            # 每一個開過的任務的終態（含作廢、未決），分母不縮
+```
+
+也可以不裝任何掛鉤：`vacant do <agent> --prompt "…"` 在隔離工作區裡跑 agent 的 headless 模式，
+結束後交進收件口；任何 CLI 用 `vacant do --cmd '… {prompt} …'`；閉源服務或人工上傳走
+`vacant intake serve`（HTTP，提交者給不了裁決）。
+
+四個真 agent＋照劇本回答的假模型（**L-fake**，Vacant 不碰模型流量），同一份非程式任務
+（報告的段落、從釘住的 CSV 重算總數、引用要對得到來源且引文在**委託者釘住的**快照中逐字出現）——
+[`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md)：
+
+| | pi 0.87.1 | Claude Code 2.1.281 | OpenCode 1.18.32 | Codex 0.156.1 |
+|---|---|---|---|---|
+| 錯的報告（總數 999）被 `vacant release` 寫進目的端？ | 沒有 | 沒有 | 沒有 | 沒有 |
+| 對的報告被收下、目的端讀回一致？ | 是 | 是 | 是 | 是 |
+| 交件前回饋送到模型手上（掛鉤）？ | 是 | 是 | **否**（`opencode run` 在第一個 idle 就結束；互動 TUI 與 `vacant do` 有，2026-09-25 量的，見可究責追緝那一節） | 是 |
+| 契約禁止的 `git push` 被 agent 自己的掛鉤擋下、效果沒發生？（常駐安裝、`vacant do` 每一跑注入，兩條都量） | 是 | 是 | 是 | 是 |
+| Vacant 技能的描述出現在模型收到的請求裡？ | 是 | 是 | 是 | 是 |
+| 解除安裝後、以及每一跑注入之後，使用者原本的設定逐位元不變？ | 是 | 是 | 是 | 是 |
+
+⚠ **這張表不能讀成**：「agent 不會繞過」（掛鉤 agent 拆得掉，shell 能繞過字串規則——保證只在收件端）、
+「Vacant 讓 agent 做得更好」（回饋後改對是**劇本**寫的，不是模型能力）、「真模型下成立」（本輪是 L-fake）、
+「目的端只有這一條寫入路徑」（`dir:` 目的端在同一個帳號下是普通目錄；那要靠部署——另一個帳號、ACL、分支保護）。
+這一輪是**對抗審查修正之後**跑的：五個審查鏡頭、60 條逐條重現，修正與沒修的都寫在裁決 §十一。
+舊的模型通道常駐安裝仍在：`vacant possess install` 或 `vacant install --observe-model`，
+但它從此**不決定**收件。
+
+## 追到造成錯誤的那一步（可究責追緝，2026-09-24 起）
+
+收件口只回答「這份交付合不合格」。有契約的專案，Vacant 另外把 agent 的**每一步**記進一條簽章鏈
+（四個 agent 的原生掛鉤＋Vacant 自己看工作區前後的差異，殼層寫的檔也歸得到那一步），驗收不過時：
+
+1. 定位：哪個檔、哪一行、哪個值；
+2. 追緝：是哪一步寫進去的 → 在重建出來的那一步前後狀態上**重跑同一條驗收** → 那個值是從哪裡讀來的
+   （給定的輸入、子 agent 的回覆、指令輸出、自己寫的腳本、網頁、任務訊息）；
+3. 回饋：回合結束時告訴 agent **位置、應有的值、第一次出現在第幾步**——不提是誰（KS-1）；
+4. 不被淹沒：agent 不再被要求繼續時，未解的問題以 Claude Code 的 `systemMessage` 與報告交給人；
+5. 後果：只有**可證明**的錯進行動者信譽（不 slash，人可以撤銷），輸入錯記在來源上，
+   沒被記錄的改動記成**究責缺口**、不怪任何人；路由只給人建議，或 `vacant do --agent auto`。
+
+```bash
+vacant trace show                      # 每一步：誰、什麼工具、寫了什麼；缺口
+vacant trace report --check            # 未解問題清單（每一條的等級、證據、那一步、來源）
+vacant trace blame report.md:3         # 這個位置的值是哪一步、從哪裡來的
+vacant flag report.md:2 "市長是 Alice"  # 人指出錯處（owner 金鑰簽章；追緝；下一回合告訴 agent）
+vacant trace actors                    # 每個 agent 設定：跑了幾次、過了幾次、幾筆可證明的錯
+```
+
+四個真 agent × 六個埋錯情境（L-fake）——
+[`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md)：
+**歸因 33/33**（agent 憑空寫錯 ⇒ 可證明；輸入本來就錯 ⇒ 指到輸入那一行；腳本算錯 ⇒ 指到寫腳本那一步；
+事後有人在外面改檔 ⇒ 缺口、不怪人；子 agent 算錯、主 agent 照抄 ⇒ 指到子 agent 那一步；抓回來的網頁本身就錯 ⇒ 指到網址、agent 不背）；有位置的回饋在 Claude Code／Codex／pi 進了模型的下一次請求
+（OpenCode `run` 沒有，既有邊界）；回饋裡行動者識別 0/33。同樣的情境走 `vacant do`：25/25（OpenCode 也收得到回饋）；
+人直接開四個 agent 的**互動介面**打字（tmux 裡的真 TUI，含多回合）：歸因、回饋到模型、人在畫面上看得到、改好後收下都是 16/16——OpenCode 的互動 TUI 也有交件前回饋。裁決：
+[`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
+
+⚠ **不能讀成**：「Vacant 抓出所有錯」（讀取是下限、只有有紀錄的步驟）、「追緝一定正確」（值比對會被巧合騙；
+所以只有重跑翻轉的「可證明」才接後果）、「真模型下產出更接近需求」（本輪是 L-fake；
+那是 [R536 預註冊](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md)的事，草稿待簽字）。
+
 ## ⚠ 裝之前先讀這一條：`pip install vacant` 裝到的不是這個專案
 
 PyPI 上的 `vacant`（實測 2026-09-19 為 0.4.15，一個 7.5 MB 的
@@ -77,14 +204,14 @@ import 名 `vacant_network`。** 只有主指令名還跟對方共用。
 
 ---
 
-## 30 秒：先看一次閘門把交付擋下來
+## 30 秒：先看一次閘門判拒交
 
 零設定、零模型端點、零 API key、零網路。
 
 ```bash
 pip install vacant-network
 vacant selftest          # 先確認這份安裝是活的（端到端迴圈＋兩條簽章鏈）
-vacant demo gate         # 再看閘門把一次交付擋下來
+vacant demo gate         # 再看閘門判一次拒交（判決；阻擋要靠下面的收件口）
 ```
 
 `vacant selftest` 的逐字輸出（vacant-dev，Ubuntu 24.04／Python 3.12.3，**0.3 秒**）：
@@ -696,7 +823,7 @@ needle——**跳過 ≠ 檢查過**。
 
 這幾條是真的、有程式碼支撐，不必寫得謙虛：
 
-- **收件那一關繞不過。** `vacant_network/receipt.py` ＋ `controller.verify_delivery` 會**重算五個
+- **收件那一關逐項重驗；要越過它得持有簽章金鑰**（預設是同一個帳號裡的明文檔）。 `vacant_network/receipt.py` ＋ `controller.verify_delivery` 會**重算五個
   sha256**（request／task／tests／answer／trust card）、驗 Ed25519 簽章、比對 `chain_head`／
   `stream_id`／`branch_id` 與**當下活著的鏈**是否一致、確認每一份評審都綁在這一筆交付上，
   最後才 `policy.admit`。啟動權用 `os.O_EXCL` 認領（`vacant_network/controller.py:372`），
@@ -708,8 +835,8 @@ needle——**跳過 ≠ 檢查過**。
   做 RPC（`vacant_network/checks.py:577-600`、`444-457`）。`ops/gain/gain_run.py:957` 註解逐字：
   *"the candidate worker cannot see this test code"*。**候選碼結構上看不到測試碼**，
   不是「被擋下來」。
-- **「量不到不是通過」寫成了程式碼**：`"all_pass": bool(total > 0 and passed == total)`
-  （`vacant_network/vrun/acceptance.py:268`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
+- **「量不到不是通過」寫成了程式碼**：`"all_pass": bool(total > 0 and passed == total and complete)`
+  （`vacant_network/vrun/acceptance.py:481`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
   不能空洞地成立。
 - **拒交是真的會發生**：R532 那 836 題裡，閘門臂拒交 25 件、迴圈臂拒交 68 件，
   而且拒交算在每一個比率的分母裡。
@@ -783,7 +910,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 | **harness 自己擁有 loop** | 例如 `ops/gain/r530/openwork_arms.py:642-696` | **有——harness 就是那個 loop**，agent 沒有繞過閘門的路徑。 |
 
 **正確的定位是「收件口」不是「強制層」**：強制點在**驗收期**——沒有可驗證收據的交付不被
-接受，而**那一關繞不過**（`vacant_network/receipt.py` ＋ `controller.verify_delivery` 重算五個
+接受，而**要越過那一關得持有簽章金鑰**（`vacant_network/receipt.py` ＋ `controller.verify_delivery` 重算五個
 sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能消費一次）。強制點**不在
 執行期**：要讓 Vacant 成為全機唯一出口需要容器／ACL／egress policy，那是部署層的事。
 這與供應鏈安全的 in-toto／SLSA／Sigstore 是同一個模式。
@@ -842,8 +969,8 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
   RPC 溝通（`vacant_network/checks.py:577-600`、`444-457`）。這是結構性質，不是黑名單。
 - **I-3 自我宣稱從不被採信**：生態跑一次 verifier（`ecosystem.py:531`），controller 再獨立跑一次
   （`controller.py:299-300`）。
-- **I-4 「量不到不是通過」寫成了程式碼**：`bool(total > 0 and passed == total)`
-  （`vacant_network/vrun/acceptance.py:268`）；量具要求 `n_broken >= 1`。
+- **I-4 「量不到不是通過」寫成了程式碼**：`bool(total > 0 and passed == total and complete)`
+  （`vacant_network/vrun/acceptance.py:481`）；量具要求 `n_broken >= 1`。
 - **I-5 量具是雙向的**：`ok` 同時要求參考解通過**與**每個已知壞樁被擋。
 - **I-6 渲染是確定的**：`suitespec.render(spec)` 是 spec 的純函式 ⇒ `render_sha256` 跨機可比。
 - **I-7 拒交真的會發生**：R532 836 題，閘門臂拒交 25、迴圈臂拒交 68，且計入分母。
@@ -909,8 +1036,8 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
     "enforced_at": "acceptance time (a delivery without a verifiable receipt is not accepted)",
     "not_enforced_at": "execution time",
     "prior_art": ["in-toto", "SLSA", "Sigstore"],
-    "reference_monitor_Saltzer_Schroeder_1975": {
-      "tamper_proof": true, "small_enough_to_verify": true, "complete_mediation": false
+    "reference_monitor_properties_Anderson_1972": {
+      "tamper_proof": false, "tamper_evident": true, "small_enough_to_verify": true, "complete_mediation": false
     },
     "library": "voluntary", "mcp_tool": "advisory",
     "controller": "binding on its own spawned subprocess only",

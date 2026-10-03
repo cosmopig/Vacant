@@ -1,0 +1,196 @@
+{
+ "runs": 200,
+ "timeouts": 116,
+ "by_group": {
+  "A": {
+   "runs": 100,
+   "timeouts": 49,
+   "other_exceptions": 0,
+   "wall_median_s": 1824.7
+  },
+  "A／3+3": {
+   "runs": 45,
+   "timeouts": 27,
+   "other_exceptions": 0,
+   "wall_median_s": 1839.8
+  },
+  "A／3+3-after-restart": {
+   "runs": 49,
+   "timeouts": 19,
+   "other_exceptions": 0,
+   "wall_median_s": 1530.8
+  },
+  "A／3+3-after-restart／1003": {
+   "runs": 26,
+   "timeouts": 13,
+   "other_exceptions": 0,
+   "wall_median_s": 1555.9
+  },
+  "A／3+3-after-restart／w401": {
+   "runs": 23,
+   "timeouts": 6,
+   "other_exceptions": 0,
+   "wall_median_s": 1530.8
+  },
+  "A／3+3／1003": {
+   "runs": 21,
+   "timeouts": 14,
+   "other_exceptions": 0,
+   "wall_median_s": 1839.9
+  },
+  "A／3+3／w401": {
+   "runs": 24,
+   "timeouts": 13,
+   "other_exceptions": 0,
+   "wall_median_s": 1838.1
+  },
+  "A／4+4": {
+   "runs": 6,
+   "timeouts": 3,
+   "other_exceptions": 0,
+   "wall_median_s": 1754.1
+  },
+  "A／4+4／1003": {
+   "runs": 3,
+   "timeouts": 2,
+   "other_exceptions": 0,
+   "wall_median_s": 1840.0
+  },
+  "A／4+4／w401": {
+   "runs": 3,
+   "timeouts": 1,
+   "other_exceptions": 0,
+   "wall_median_s": 1668.2
+  },
+  "C361": {
+   "runs": 100,
+   "timeouts": 67,
+   "other_exceptions": 0,
+   "wall_median_s": 1873.3
+  },
+  "C361／3+3": {
+   "runs": 47,
+   "timeouts": 35,
+   "other_exceptions": 0,
+   "wall_median_s": 1873.6
+  },
+  "C361／3+3-after-restart": {
+   "runs": 49,
+   "timeouts": 28,
+   "other_exceptions": 0,
+   "wall_median_s": 1868.7
+  },
+  "C361／3+3-after-restart／1003": {
+   "runs": 26,
+   "timeouts": 14,
+   "other_exceptions": 0,
+   "wall_median_s": 1868.0
+  },
+  "C361／3+3-after-restart／w401": {
+   "runs": 23,
+   "timeouts": 14,
+   "other_exceptions": 0,
+   "wall_median_s": 1869.4
+  },
+  "C361／3+3／1003": {
+   "runs": 22,
+   "timeouts": 18,
+   "other_exceptions": 0,
+   "wall_median_s": 1873.8
+  },
+  "C361／3+3／w401": {
+   "runs": 25,
+   "timeouts": 17,
+   "other_exceptions": 0,
+   "wall_median_s": 1873.3
+  },
+  "C361／4+4": {
+   "runs": 4,
+   "timeouts": 4,
+   "other_exceptions": 0,
+   "wall_median_s": 1903.0
+  },
+  "C361／4+4／1003": {
+   "runs": 2,
+   "timeouts": 2,
+   "other_exceptions": 0,
+   "wall_median_s": 1902.8
+  },
+  "C361／4+4／w401": {
+   "runs": 2,
+   "timeouts": 2,
+   "other_exceptions": 0,
+   "wall_median_s": 1903.0
+  }
+ },
+ "by_machine": {
+  "1003": {
+   "calls": 2037,
+   "failed": 0,
+   "stream_errors": 3,
+   "errors": {
+    "{'message': 'Engine protocol predict stream returned an error: {\"code\":500,\"mess": 3
+   },
+   "latency_p50_s": 51.7,
+   "latency_p90_s": 169.7,
+   "prompt_tokens_median": 41425.0
+  },
+  "w401": {
+   "calls": 3051,
+   "failed": 0,
+   "stream_errors": 48,
+   "errors": {
+    "{'message': 'failed to decode, ret = 1'}": 48
+   },
+   "latency_p50_s": 18.0,
+   "latency_p90_s": 122.5,
+   "prompt_tokens_median": 46201.0
+  }
+ },
+ "runs_not_logged_by_driver": [
+  "1593-A",
+  "1604-A",
+  "1773-A",
+  "2550-A",
+  "1274-C361",
+  "1519-C361",
+  "1604-C361",
+  "1773-C361"
+ ],
+ "runs_with_zero_ok_requests": [],
+ "tasks_started": 100,
+ "tasks_not_started": 174,
+ "tasks_one_arm_only": [],
+ "void_rerun_copies": [
+  {
+   "task": "1682",
+   "void_rerun_copy": true,
+   "moved_dir": "g12-off-A-s1__u274-g12-off-A-1682-s1",
+   "exception": "NonZeroAgentExitCodeError"
+  },
+  {
+   "task": "1683",
+   "void_rerun_copy": true,
+   "moved_dir": "g12-off-A-s1__u274-g12-off-A-1683-s1",
+   "exception": "NonZeroAgentExitCodeError"
+  },
+  {
+   "task": "2573",
+   "void_rerun_copy": true,
+   "moved_dir": "g12-off-A-s1__u274-g12-off-A-2573-s1",
+   "exception": "NonZeroAgentExitCodeError"
+  },
+  {
+   "task": "1682",
+   "void_rerun_copy": true,
+   "moved_dir": "g12-off-C361-s1__u274-g12-off-C361-1682-s1",
+   "exception": "NonZeroAgentExitCodeError"
+  },
+  {
+   "task": "1683",
+   "void_rerun_copy": true,
+   "moved_dir": "g12-off-C361-s1__u274-g12-off-C361-1683-s1",
+   "exception": "NonZeroAgentExitCodeError"
+  }
+ ]
+}

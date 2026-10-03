@@ -1,0 +1,12 @@
+download /srv/eval/archive/MANIFEST.tsv
+download /srv/eval/archive/chunk_0001.tar.xz
+download /srv/eval/archive/chunk_0002.tar.xz
+download /srv/eval/archive/chunk_0003.tar.xz
+download /srv/eval/DRIVER_DONE
+download /srv/eval/ALL_DONE
+download /srv/eval/archive/MIRROR_OK
+download /srv/eval/archive/PACKER_DONE
+download /srv/eval/DRIVER_DONE
+download /srv/eval/archive/PACKER_DONE
+download /srv/eval/archive/MANIFEST.tsv
+STOP -s i1001

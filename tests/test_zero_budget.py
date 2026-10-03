@@ -1,0 +1,667 @@
+"""零設定 v3（`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`）：回合預算提醒、最後一回合只退回缺檔、
+還沒說做完就結束的交件說明、pi 擴充不蓋掉別的擴充的草稿。全部經過真的 `hook.handle("pi", …)`。"""
+import json
+import pathlib
+import re
+
+import pytest
+
+from vacant_network.adapters import agents as AG
+from vacant_network.adapters import hook
+from vacant_network.adapters import install as INS
+from vacant_network.memory import assert_ks1_clean
+from vacant_network.trace import zerostop
+from vacant_network.trace.feedback import NUDGE_HEADER, REVIEW_HEADER, VACANT_HEADERS
+from vacant_network.trace.recorder import Recorder
+
+ASK = ("Answer the question using the files in data/. Question: what is the total amount? "
+       "Write the answer to /app/answer.txt as a single number.")
+SALES = "date,amount\n2026-07-01,1200\n2026-07-02,845\n"
+
+
+def _install(mode="evidence", budget_reminder=True):
+    # v3.6 起提醒預設關；這一檔大部分的測試量的是**開了之後**的行為（`vacant install --budget-reminder`）
+    p = INS.state_root() / "install.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    d = {"agents": {}, "mode": mode}
+    if budget_reminder is not None:
+        d["budget_reminder"] = budget_reminder
+    p.write_text(json.dumps(d))
+
+
+@pytest.fixture
+def proj(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    for k in ("VACANT_TRACE", "VACANT_MODE", "VACANT_HOOK_NO_STOP", "VACANT_FEEDBACK_MODE"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(zerostop, "_run_child", zerostop.check)
+    p = tmp_path / "app"
+    (p / "data").mkdir(parents=True)
+    (p / "data" / "sales.csv").write_text(SALES)
+    _install()
+    return p
+
+
+class Pi:
+    def __init__(self, p: pathlib.Path, sid: str = "S"):
+        self.p, self.sid, self.n = p, sid, 0
+
+    def ev(self, event, **kw):
+        out, err, code = hook.handle("pi", event, {"cwd": str(self.p), "session_id": self.sid, **kw})
+        assert code == 0 and err == ""
+        return json.loads(out) if out else {}
+
+    def ask(self, text=ASK):
+        return self.ev("prompt", prompt=text)
+
+    def bash(self, cmd, output="", write=None):
+        self.n += 1
+        inp = {"command": cmd}
+        self.ev("pre_tool", tool="bash", call_id=f"c{self.n}", input=inp)
+        for rel, content in (write or {}).items():
+            (self.p / rel).write_text(content)
+        self.ev("post_tool", tool="bash", call_id=f"c{self.n}", input=inp, output=output)
+
+    def turn(self, turn, budget=15):
+        return self.ev("turn_check", turn=turn, budget=budget)
+
+
+def _nudges(p):
+    return [e for e in Recorder(p).events() if e["type"] == "nudge"]
+
+
+# ── the budget pattern ───────────────────────────────────────────────
+
+def test_budget_pattern_reads_a_stated_turn_budget_and_nothing_else():
+    R = re.compile(AG.BUDGET_RE_SRC, re.I)
+    assert R.search("You have a hard budget of 15 model turns. Complete the task").group(1) == "15"
+    assert R.search("Use at most 20 turns.").group(1) == "20"
+    assert R.search("Read up to 5 files.") is None
+    assert R.search("Summarize in 3 bullet points.") is None
+    # v3.1：專案說明裡的計畫步數、重試次數不是回合上限（pi 也把 AGENTS.md 放進系統提示）
+    assert R.search("Break large changes into at most 6 steps.") is None
+    assert R.search("Retry flaky tests up to 5 iterations.") is None
+
+
+@pytest.mark.skipif(not pathlib.Path("/opt/node22/bin/node").exists() and not __import__("shutil").which("node"),
+                    reason="node not installed")
+def test_the_extension_reads_the_last_stated_budget(tmp_path):
+    """harness 把上限接在專案說明後面：取最後一句（v3.1）。在真的 node 裡跑擴充的 readBudget。"""
+    import shutil
+    import subprocess
+    node = shutil.which("node") or "/opt/node22/bin/node"
+    js = AG.pi_extension_text()
+    src = re.search(r"const BUDGET_RE = (/.*/i);", js).group(1)
+    fn = re.search(r"function readBudget[\s\S]*?\n\}", js).group(0)
+    prog = (f"const BUDGET_RE = {src};\n{fn}\nconsole.log(JSON.stringify(["
+            "readBudget('Project rule: at most 8 turns per sub-task.\\n\\nYou have a hard budget of 15 model turns.'),"
+            "readBudget('no budget here'), readBudget('max 3 turns')]));")
+    out = subprocess.run([node, "-e", prog], capture_output=True, text=True, timeout=30)
+    assert json.loads(out.stdout) == [15, None, None]
+
+
+def test_the_extension_carries_the_same_pattern_and_appends_to_other_drafts():
+    js = AG.pi_extension_text()
+    assert "const BUDGET_RE = /" + AG.BUDGET_RE_SRC.replace("/", "\\/") + "/i;" in js
+    assert 'pi.on("turn_end"' in js and "turn_check" in js
+    # 兩個邊界處理器都接在 event.entries 後面，不蓋掉前面擴充的草稿（pi runner 取最後一個回傳）
+    assert js.count("...((event && event.entries) || [])") == 2
+    assert "left < 1 || left > 2" in js                      # 只在最後 2 回合
+    assert "ctx.signal && ctx.signal.aborted" in js          # 被上限中止的那一回合不送
+
+
+# ── the reminder ─────────────────────────────────────────────────────
+
+def test_reminder_near_the_end_of_a_stated_budget_when_the_answer_file_is_missing(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("python3 -c \"import pandas as pd; print(pd.read_csv('data/sales.csv').amount.sum())\"",
+           "2045")
+    assert a.turn(10) == {"action": "allow", "reason": ""}       # 還早：什麼都不送
+    d = a.turn(13)
+    assert d["action"] == "continue"
+    lines = d["reason"].splitlines()
+    assert lines[0] == NUDGE_HEADER and NUDGE_HEADER in VACANT_HEADERS
+    assert "/app/answer.txt" in lines[1] and "2 of 15" in lines[1]
+    assert "2045" not in d["reason"]                             # 不引用任何值
+    for ln in lines:
+        assert_ks1_clean(ln)
+    assert a.turn(13)["action"] == "allow"                       # 同一回合不重複
+    assert "1 of 15" in a.turn(14)["reason"]
+    assert a.turn(15)["action"] == "allow"                       # 上限那一回合（已中止）不送
+    assert [e["turn"] for e in _nudges(proj)] == [13, 14]
+
+
+def test_no_reminder_when_the_file_exists_or_no_budget_or_observe_mode(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    assert a.turn(13)["action"] == "allow"
+    b = Pi(proj, sid="T")
+    (proj / "answer.txt").unlink()
+    b.ask()
+    b.bash("ls data", "sales.csv")
+    assert b.ev("turn_check", turn=13)["action"] == "allow"     # 沒有寫明上限
+    _install("observe")
+    assert b.turn(13)["action"] == "allow"
+    assert _nudges(proj) == []
+
+
+def test_at_most_two_reminders_per_request_and_a_new_request_starts_over(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    assert a.turn(13, budget=15)["action"] == "continue"
+    assert a.turn(14, budget=15)["action"] == "continue"
+    assert a.turn(18, budget=20)["action"] == "allow"            # 同一個要求：已經兩次
+    a.ask("Now also write the answer to /app/answer.txt again, from scratch.")
+    a.bash("ls data", "sales.csv")
+    assert a.turn(18, budget=20)["action"] == "continue"
+
+
+def test_a_file_written_under_the_agents_subfolder_counts_as_there(tmp_path, monkeypatch, proj):
+    """專案根＝git 根、agent 在子資料夾裡工作：相對路徑的要求檔寫在子資料夾裡也算在（v3.1）。"""
+    import subprocess
+    subprocess.run(["git", "init", "-q", str(proj)], check=True)
+    sub = proj / "analysis"
+    sub.mkdir()
+    a = Pi(sub)
+    a.ask("Read ../data/sales.csv and write the total to out.txt as a single number.")
+    a.bash("echo 2045 > out.txt", "", write={"out.txt": "2045\n"})
+    (proj / "out.txt").unlink(missing_ok=True)
+    (sub / "out.txt").write_text("2045\n")
+    assert a.turn(13)["action"] == "allow"
+    d = a.ev("stop", final_text="The total is in out.txt.")
+    assert "does not exist" not in (d.get("reason") or "")
+
+
+def test_beyond_the_stated_budget_the_budget_is_ignored(proj):
+    """用超過寫明的上限（沒有人在執行它）：不再當成最後一回合（v3.1）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    d = a.ev("stop", final_text="Done.", turn=20, budget=15)
+    assert d["action"] == "continue" and "turns left" not in d["reason"]
+    assert a.turn(20, budget=15)["action"] == "allow"
+
+
+def test_no_budget_means_the_stop_check_is_unchanged(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    d = a.ev("stop", final_text="The total is 2045.")
+    assert d["action"] == "continue" and d["reason"].startswith(REVIEW_HEADER)
+    assert "turns left" not in d["reason"]
+
+
+# ── last turn: only the missing file is sent back ────────────────────
+
+def _two_findings(a):
+    """一個真的「失敗的步驟」（自己寫的腳本跑失敗、之後才寫出交付物）＋要求的檔不存在。"""
+    a.ask()
+    a.n += 1
+    w = {"path": "analyze.py", "content": "import pandas\n"}
+    a.ev("pre_tool", tool="write", call_id=f"c{a.n}", input=w)
+    (a.p / "analyze.py").write_text("import pandas\n")
+    a.ev("post_tool", tool="write", call_id=f"c{a.n}", input=w, output="ok")
+    a.n += 1
+    run = {"command": "python3 analyze.py"}
+    a.ev("pre_tool", tool="bash", call_id=f"c{a.n}", input=run)
+    a.ev("post_tool", tool="bash", call_id=f"c{a.n}", input=run,
+         output="Traceback (most recent call last):\nValueError: bad", is_error=True)
+    a.bash("echo draft > notes.md", "", write={"notes.md": "draft\n"})
+
+
+def test_with_one_turn_left_only_the_missing_file_is_sent_back(proj, tmp_path):
+    a = Pi(proj)
+    _two_findings(a)
+    full = [ln for ln in a.ev("stop", final_text="Done.")["reason"].splitlines() if ln.startswith("- ")]
+    assert len(full) == 2                                         # 沒有上限：兩條都退回
+    b = Pi(proj, sid="T")
+    _two_findings(b)
+    d = b.ev("stop", final_text="Done.", turn=14, budget=15)
+    body = [ln for ln in d["reason"].splitlines() if ln.startswith("- ")]
+    assert len(body) == 1 and "/app/answer.txt" in body[0] and "1 of 15" in body[0]
+
+
+# ── ended before the agent said it was done ─────────────────────────
+
+def test_a_run_cut_off_before_the_stop_check_still_gets_a_note_for_the_person(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.turn(13)
+    a.turn(14)
+    d = a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    assert d == {"action": "allow", "reason": ""}                # 什麼都不送給模型
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    # v3.3：被切斷的那一跑也事後補跑同一個檢查，照一般交件說明寫給人
+    assert ("Ended before the agent said it was done, after the stated 15 model turns; no delivery check "
+            "ran before that. The check ran afterwards, for you only") in note
+    assert "Found after the run ended (not sent back): answer.txt (asked for in the request) did not exist" in note
+    assert "Budget reminders were sent after turns 13, 14 (a requested file did not exist yet). Nothing was written after them." in note
+    ended = [e for e in Recorder(proj).events() if e["type"] == "ended"]
+    assert len(ended) == 1 and ended[0]["checked"] is True and ended[0]["final_answer"] is False
+
+
+def test_no_cut_off_note_unless_the_run_was_aborted(proj):
+    """`opencode run`（不跑交件前檢查）、檢查出錯、延後：都不是「還沒說做完」（v3.1）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=5, budget=15)
+    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+
+
+def test_a_run_sent_back_on_its_last_turn_and_then_cut_off_gets_a_note(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    assert a.ev("stop", final_text="Done.", turn=14, budget=15)["action"] == "continue"
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "the last delivery check had sent it back" in note
+
+
+def test_no_cut_off_note_when_the_stop_check_ran(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.ev("stop", final_text="The answer is in /app/answer.txt.")
+    a.ev("session_end", reason="quit", aborted=True)
+    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+
+
+# ── said done on the capped turn: checked afterwards, for the person (v3.2) ──
+
+def test_a_final_answer_on_the_capped_turn_is_checked_afterwards_for_the_person(proj):
+    """Harbor 的上限在自己的回合結束處理器裡中止：最後一回合是最終答案時 pi 也不進交件前檢查。
+    那不是「還沒說做完」——補跑同一個檢查，結果只寫給人（2026-09-26 審查；正式批次 C2 有 2 份）。"""
+    a = Pi(proj)
+    _two_findings(a)
+    d = a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True, final_answer=True,
+             final_text="The total amount is 2045.")
+    assert d == {"action": "allow", "reason": ""}                # 什麼都不送給模型
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "Ended before the agent said it was done" not in note
+    assert "The agent said it was done on the last of the stated 15 model turns" in note
+    assert "The check ran afterwards, for you only" in note
+    assert "Found after the run ended (not sent back): answer.txt (asked for in the request) did not exist" in note
+    assert "Found after the run ended (not sent back): step" in note and "python3 analyze.py" in note
+    ended = [e for e in Recorder(proj).events() if e["type"] == "ended"]
+    assert len(ended) == 1 and ended[0]["final_answer"] is True and ended[0]["checked"] is True
+    assert {f["kind"] for f in ended[0]["findings"]} == {"missing_output", "failed_step"}
+    assert not [e for e in Recorder(proj).events() if e["type"] == "review"]   # 不是一次交件前檢查
+
+
+def test_a_final_answer_at_the_cap_without_the_abort_flag_is_checked_too(proj):
+    """處理器的順序：Vacant 的回合結束先跑、上限的後跑 ⇒ Vacant 看不到中止；用完寫明的上限也算（v3.2）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=False, final_answer=True,
+         final_text="Done.")
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "The agent said it was done on the last of the stated 15 model turns" in note
+    assert "Found after the run ended" not in note
+
+
+def test_a_final_answer_before_the_cap_without_an_abort_gets_no_note(proj):
+    """最後一回合是最終答案、沒被中止、上限還沒到：交件前檢查本來就會跑（這裡沒跑＝出錯或延後），不補。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=5, budget=15, aborted=False, final_answer=True)
+    a.ev("session_end", reason="quit", aborted=False, final_answer=True)     # 沒有寫明上限
+    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+
+
+def test_the_check_after_the_end_failing_still_says_the_agent_said_done(proj, monkeypatch):
+    def boom(req):
+        raise RuntimeError("check crashed")
+    monkeypatch.setattr(zerostop, "_run_child", boom)
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True, final_answer=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "The agent said it was done, but the delivery check did not run." in note
+    assert "Ended before the agent said it was done" not in note
+    # 一跑只記一筆 ended，失敗的原因在同一筆裡（v3.4：原本兩筆，評測的份數算成兩倍）
+    ended = [e for e in Recorder(proj).events() if e["type"] == "ended"]
+    assert len(ended) == 1 and "check crashed" in ended[0]["error"]
+
+
+@pytest.mark.skipif(not pathlib.Path("/opt/node22/bin/node").exists() and not __import__("shutil").which("node"),
+                    reason="node not installed")
+@pytest.mark.parametrize("vacant_first", [True, False])
+def test_the_extension_reports_a_final_answer_on_the_capped_turn(tmp_path, vacant_first):
+    """在真的 node 裡載入整個擴充、用假的 pi 送事件：15 回合、最後一回合是最終答案、上限的處理器中止。
+    兩種處理器順序都要把 `final_answer`、`final_text` 交給工作階段結束（v3.2）。"""
+    import shutil
+    import subprocess
+    node = shutil.which("node") or "/opt/node22/bin/node"
+    log = tmp_path / "calls.jsonl"
+    stub = tmp_path / "stub.sh"
+    stub.write_text(f'#!/bin/sh\nprintf \'{{"event":"%s","payload":%s}}\\n\' "$1" "$(cat)" >> {log}\n'
+                    'echo \'{"action":"allow"}\'\n')
+    stub.chmod(0o755)
+    ext = tmp_path / "ext.mjs"
+    ext.write_text(AG.PI_EXTENSION % {"argv": json.dumps([str(stub)]), "timeout_ms": 5000,
+                                      "budget_re": "/" + AG.BUDGET_RE_SRC.replace("/", r"\/") + "/i"})
+    drive = tmp_path / "drive.mjs"
+    drive.write_text(r"""
+import ext from "./ext.mjs";
+const h = {};
+ext({ on: (n, f) => { (h[n] = h[n] || []).push(f); } });
+const ctl = new AbortController();
+const ctx = { cwd: "/app", hasUI: false, signal: ctl.signal,
+              sessionManager: { getSessionId: () => "S1" }, getSystemPrompt: () => SP };
+const SP = "Be brief.\n\nYou have a hard budget of 15 model turns.";
+const VACANT_FIRST = %s;
+await h.before_agent_start[0]({ prompt: "q", systemPrompt: SP }, ctx);
+for (let t = 1; t <= 15; t++) {
+  const fin = t === 15;
+  const ev = { message: { stopReason: fin ? "stop" : "toolUse",
+                          content: [{ type: "text", text: fin ? "The answer is 42." : "" }] },
+               toolResults: fin ? [] : [{ toolCallId: "c" + t }], entries: [] };
+  if (fin && !VACANT_FIRST) ctl.abort();
+  await h.turn_end[0](ev, ctx);
+  if (fin && VACANT_FIRST) ctl.abort();
+}
+await h.session_shutdown[0]({ reason: "quit" }, ctx);
+""" % ("true" if vacant_first else "false"))
+    out = subprocess.run([node, str(drive)], capture_output=True, text=True, timeout=120, cwd=tmp_path)
+    assert out.returncode == 0, out.stderr
+    calls = [json.loads(x) for x in log.read_text().splitlines()]
+    end = [c for c in calls if c["event"] == "session_end"][0]["payload"]
+    assert end["turn"] == 15 and end["budget"] == 15 and end["final_answer"] is True
+    assert end["final_text"] == "The answer is 42."
+    assert end["aborted"] is (not vacant_first)
+    ended = hook._said_done_unchecked(end)
+    assert ended is True
+    # 第 13、14 回合有工具呼叫：提醒的詢問照舊；第 15 回合（最終答案）不問
+    assert [c["payload"]["turn"] for c in calls if c["event"] == "turn_check"] == [13, 14]
+
+
+# ── v3.3: the person's note says what the reminder led to; error stops are named ──
+
+def test_a_file_written_after_the_reminder_is_marked_in_the_cut_off_note(proj):
+    """提醒逼出的答案（研究：「Not Applicable」「yes」）：說明標出它是提醒之後寫的、裡面沒有能對照紀錄的值（v3.3）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.turn(13)
+    a.bash("echo 'Not Applicable' > /app/answer.txt", "", write={"answer.txt": "Not Applicable\n"})
+    a.turn(14)
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "A budget reminder was sent after turn 13 (a requested file did not exist yet)." in note
+    assert re.search(r"- answer\.txt: written at step \d+, after the budget reminder sent after turn 13\. "
+                     r"The reminder asked for the current best answer; this note does not say whether it is right\. "
+                     r"Vacant checked no value in it against the record\.", note)
+    data = json.loads((Recorder(proj).dir / "delivery.json").read_text())
+    assert [w["path"] for w in data["written_after_reminder"]] == ["answer.txt"]
+
+
+def test_a_file_written_before_the_reminder_is_not_marked(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.n += 1
+    rm = {"command": "rm /app/answer.txt"}
+    a.ev("pre_tool", tool="bash", call_id=f"c{a.n}", input=rm)
+    (proj / "answer.txt").unlink()                              # 刪檔在這一步裡（紀錄看得到）
+    a.ev("post_tool", tool="bash", call_id=f"c{a.n}", input=rm, output="")
+    a.turn(13)
+    a.bash("cat data/sales.csv", SALES)
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "A budget reminder was sent after turn 13" in note
+    assert "Nothing was written after it." in note and "written at step" not in note
+
+
+def test_the_stop_note_marks_a_file_written_after_the_reminder(proj):
+    """提醒 → 寫檔 → 第 14 回合說做完、放行：一般的交件說明也標出來。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("cat data/sales.csv", SALES)
+    a.bash("python3 -c 'print(sum([1200.25, 845.5]))'", "2045.75")
+    a.turn(13)
+    a.bash("echo 2045.75 > /app/answer.txt", "", write={"answer.txt": "2045.75\n"})
+    assert a.ev("stop", final_text="The total is 2045.75.", turn=14, budget=15)["action"] == "allow"
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "after the budget reminder sent after turn 13" in note
+    assert "Vacant checked no value in it" not in note           # 2045.75 對得上紀錄
+
+
+def test_a_stop_after_a_model_error_is_checked_and_named_in_the_note_but_not_sent_back(proj):
+    """pi 的迴圈在模型錯誤時也會停、交件前檢查照跑（研究：第 70 題）。說明寫明是錯誤之後跑的（v3.3）；
+    **v3.7：不退回**——那不是 agent 說做完（u274：這樣觸發的缺檔退回 16 跑，之後 0 對、13 跑撞時限）。沒有錯誤的同一個情形照樣退回。"""
+    a = Pi(proj, sid="E")
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    d_err = a.ev("stop", final_text="", last_stop="error")
+    b = Pi(proj, sid="F")
+    b.ask()
+    b.bash("ls data", "sales.csv")
+    d_ok = b.ev("stop", final_text="")
+    assert d_err["action"] == "allow" and not d_err.get("reason")
+    assert d_ok["action"] == "continue" and "answer.txt" in d_ok["reason"]
+    rev = [e for e in Recorder(proj).events() if e["type"] == "review"]
+    assert [(e.get("last_turn_error"), e.get("action")) for e in rev] == [(True, "allow"), (None, "continue")]
+    assert [f["kind"] for f in rev[0]["findings"]] == ["missing_output"]      # 查到了，只寫給人
+    rd = Recorder(proj)
+    b.bash("echo 1 > /app/answer.txt", "", write={"answer.txt": "1\n"})      # 讓說明檔輪到 E 重寫
+    a.ev("stop", final_text="", last_stop="error")
+    note = (rd.dir / "delivery.md").read_text()
+    assert "Found after the model error (not sent back)" in note or "sent nothing back" in note
+    # 說明（最後寫的是 F 的；E 再跑一次看它的說明）
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.ev("stop", final_text="Done.", last_stop="error")
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert zerostop.ERROR_STOP_LINE in note
+
+
+@pytest.mark.skipif(not pathlib.Path("/opt/node22/bin/node").exists() and not __import__("shutil").which("node"),
+                    reason="node not installed")
+def test_the_extension_reports_an_error_ended_turn_to_the_stop_check(tmp_path):
+    import shutil
+    import subprocess
+    node = shutil.which("node") or "/opt/node22/bin/node"
+    log = tmp_path / "calls.jsonl"
+    stub = tmp_path / "stub.sh"
+    stub.write_text(f'#!/bin/sh\nprintf \'{{"event":"%s","payload":%s}}\\n\' "$1" "$(cat)" >> {log}\n'
+                    'echo \'{"action":"allow"}\'\n')
+    stub.chmod(0o755)
+    (tmp_path / "ext.mjs").write_text(AG.PI_EXTENSION % {
+        "argv": json.dumps([str(stub)]), "timeout_ms": 5000,
+        "budget_re": "/" + AG.BUDGET_RE_SRC.replace("/", r"\/") + "/i"})
+    (tmp_path / "drive.mjs").write_text(r"""
+import ext from "./ext.mjs";
+const h = {};
+ext({ on: (n, f) => { (h[n] = h[n] || []).push(f); } });
+const ctx = { cwd: "/app", hasUI: false, signal: new AbortController().signal,
+              sessionManager: { getSessionId: () => "S1" }, getSystemPrompt: () => "" };
+await h.before_agent_start[0]({ prompt: "q", systemPrompt: "" }, ctx);
+await h.turn_end[0]({ message: { stopReason: "toolUse", content: [] }, toolResults: [{}], entries: [] }, ctx);
+await h.turn_end[0]({ message: { stopReason: "error", errorMessage: "failed to decode", content: [] },
+                      toolResults: [], entries: [] }, ctx);
+await h.agent_before_settle[0]({ context: { llmMessages: [] }, entries: [] }, ctx);
+await h.turn_end[0]({ message: { stopReason: "stop", content: [{ type: "text", text: "ok" }] },
+                      toolResults: [], entries: [] }, ctx);
+await h.agent_before_settle[0]({ context: { llmMessages: [] }, entries: [] }, ctx);
+""")
+    out = subprocess.run([node, str(tmp_path / "drive.mjs")], capture_output=True, text=True, timeout=60,
+                         cwd=tmp_path)
+    assert out.returncode == 0, out.stderr
+    stops = [json.loads(x)["payload"] for x in log.read_text().splitlines() if '"event":"stop"' in x]
+    assert [s.get("last_stop") for s in stops] == ["error", "stop"]
+
+
+# ── v3.4: the 2026-09-26 review of v3.2/v3.3 (review_v33/) ─────────────
+
+def test_a_finding_sent_back_before_the_cut_off_is_not_called_not_sent_back(proj):
+    """最後一回合退回缺檔、接著被切斷／又交了答案：說明寫「第 1 輪退回過、結束時還在」，不寫「沒有退回」。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    assert a.ev("stop", final_text="Done.", turn=14, budget=15)["action"] == "continue"
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "Sent back in round 1; still there when the run ended: answer.txt (asked for in the request) did not exist" in note
+    assert "(not sent back)" not in note
+    b = Pi(proj, sid="T")
+    b.n = 100                                   # 工具呼叫的 id 各工作階段不同（pi 的 toolCallId 本來就唯一）
+    b.ask()
+    b.bash("ls data", "sales.csv")
+    assert b.ev("stop", final_text="Done.", turn=14, budget=15)["action"] == "continue"
+    b.ev("session_end", reason="quit", turn=15, budget=15, aborted=True, final_answer=True,
+         final_text="The total is 2045.")
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert ("The delivery check had sent it back; the agent then said it was done again on the last of the "
+            "stated 15 model turns, and the run stopped before the check could look again.") in note
+    assert "before the delivery check could send anything back" not in note and "(not sent back)" not in note
+
+
+def test_a_deletion_after_the_reminder_is_not_a_write(proj):
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo x > scratch.py", "", write={"scratch.py": "x\n"})
+    a.turn(13)
+    a.n += 1
+    rm = {"command": "rm scratch.py"}
+    a.ev("pre_tool", tool="bash", call_id=f"c{a.n}", input=rm)
+    (proj / "scratch.py").unlink()
+    a.ev("post_tool", tool="bash", call_id=f"c{a.n}", input=rm, output="")
+    # 提醒之後寫了又刪掉：也不是「提醒之後寫的」
+    a.bash("echo 1 > tmp.txt", "", write={"tmp.txt": "1\n"})
+    a.n += 1
+    rm2 = {"command": "rm tmp.txt"}
+    a.ev("pre_tool", tool="bash", call_id=f"c{a.n}", input=rm2)
+    (proj / "tmp.txt").unlink()
+    a.ev("post_tool", tool="bash", call_id=f"c{a.n}", input=rm2, output="")
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "scratch.py: written" not in note and "tmp.txt: written" not in note
+    assert "Nothing was written after it." in note
+
+
+def test_unknown_writes_after_the_reminder_are_not_called_nothing(proj, monkeypatch):
+    """工作區看不全（檔案太多）：不說「提醒之後什麼都沒寫」，也不把磁碟上在的要求的檔說成不存在（v3.4）。"""
+    from vacant_network.trace import workspace as W
+    a = Pi(proj)
+    a.ask()
+    a.bash("cat data/sales.csv", SALES)
+    a.turn(13)
+    def too_many(*a, **k):                      # 檔案數上限（`workspace.scan` 的 ValueError）
+        raise ValueError("workspace has more than 50000 files; narrow it")
+    monkeypatch.setattr(W, "scan", too_many)
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    note = (Recorder(proj).dir / "delivery.md").read_text()
+    assert "Nothing was written after it." not in note
+    assert "What was written after it is not fully known (the workspace was not fully observed)." in note
+    assert "answer.txt exists on disk, but no recorded step wrote it; its content was not checked" in note
+    assert "answer.txt (asked for in the request) did not exist" not in note
+
+
+def test_over_the_stated_budget_nothing_is_re_checked_at_quit(proj):
+    """用超過寫明的上限＝沒人在執行（v3.1）：交件前檢查失敗之後離開，不補查、不寫「在上限處停掉」（v3.4）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("echo 2045 > /app/answer.txt", "", write={"answer.txt": "2045\n"})
+    def boom(req):
+        raise RuntimeError("check crashed")
+    import vacant_network.trace.zerostop as Z
+    real = Z._run_child
+    Z._run_child = boom
+    try:
+        a.ev("stop", final_text="Done.", turn=20, budget=15)
+    finally:
+        Z._run_child = real
+    a.ev("session_end", reason="quit", turn=20, budget=15, aborted=False, final_answer=True)
+    assert not (Recorder(proj).dir / "delivery.md").exists() or \
+        "last of the stated" not in (Recorder(proj).dir / "delivery.md").read_text()
+    assert [e["type"] for e in Recorder(proj).events()].count("ended") == 0
+    assert hook._said_done_unchecked({"final_answer": True, "turn": 15, "budget": 15}) is True
+    assert hook._said_done_unchecked({"final_answer": True, "turn": 16, "budget": 15}) is False
+
+
+def test_the_session_is_closed_before_the_check_after_the_end(proj):
+    """事後的檢查被砍掉也不能少掉工作階段的結束：先記 session_closed、再跑檢查（和 Stop 同樣的順序；v3.4）。"""
+    a = Pi(proj)
+    a.ask()
+    a.bash("ls data", "sales.csv")
+    a.ev("session_end", reason="quit", turn=15, budget=15, aborted=True)
+    types = [e["type"] for e in Recorder(proj).events()]
+    assert "session_closed" in types and "ended" in types
+    assert types.index("session_closed") < types.index("ended")
+
+
+def test_the_extension_gives_a_cut_off_run_the_stop_time_limit():
+    js = AG.pi_extension_text()
+    assert "(late || ABORTED) ? TIMEOUT.stop : undefined" in js
+    assert "TURNS === BUDGET" in js and "TURNS >= BUDGET" not in js
+
+
+# ── v3.6：提醒預設關（人類 2026-09-27） ─────────────────────────────────────
+
+@pytest.mark.parametrize("setting", [None, False, "yes", 1])
+def test_v36_reminder_is_off_unless_install_json_says_true(proj, setting):
+    _install(budget_reminder=setting)                    # 沒有這個欄位、false、不是 true 的值 ⇒ 關
+    pi = Pi(proj)
+    pi.ask()
+    pi.bash("head -3 data/sales.csv", "date,region,amount\n")
+    for t in (13, 14):
+        assert pi.turn(t) == {"action": "allow", "reason": ""}   # 什麼都不送：請求和沒裝時一樣
+    assert _nudges(proj) == []
+
+
+def test_v36_malformed_install_json_means_off(proj):
+    (INS.state_root() / "install.json").write_text("{not json")
+    from vacant_network.adapters.mode import budget_reminder_on
+    assert budget_reminder_on() is False
+
+
+def test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choice(proj):
+    from vacant_network.adapters import cli as ACLI
+    from vacant_network.adapters.mode import budget_reminder_on
+    (INS.state_root() / "install.json").unlink()
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert budget_reminder_on() is False                  # 預設關
+    assert ACLI.main(["install", "--agents", "pi", "--force", "--budget-reminder"]) == 0
+    assert budget_reminder_on() is True
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert budget_reminder_on() is True                   # 沒說就不動上一次的選擇
+    assert ACLI.main(["install", "--agents", "pi", "--force", "--no-budget-reminder"]) == 0
+    assert budget_reminder_on() is False
+
+
+# ── v3.6.1：對抗審查（ops/eval/evidence_20260927_nocap/review_v36/） ─────────
+
+def test_v361_last_turn_send_back_has_no_turns_left_sentence_when_the_reminder_is_off(proj):
+    _install(budget_reminder=None)                        # 預設：關
+    b = Pi(proj, sid="T")
+    _two_findings(b)
+    d = b.ev("stop", final_text="Done.", turn=14, budget=15)
+    body = [ln for ln in d["reason"].splitlines() if ln.startswith("- ")]
+    assert len(body) == 1 and "/app/answer.txt" in body[0]  # 只退回缺檔的收窄照舊
+    assert "of 15" not in d["reason"] and "turns left" not in d["reason"].lower()
+
+
+def test_v361_full_uninstall_drops_the_opt_in_and_install_says_when_it_keeps_one(proj, capsys):
+    from vacant_network.adapters import cli as ACLI
+    from vacant_network.adapters.mode import budget_reminder_on
+    (INS.state_root() / "install.json").unlink()
+    assert ACLI.main(["install", "--agents", "pi", "--force", "--budget-reminder"]) == 0
+    capsys.readouterr()
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert "budget reminder: on (kept from a previous install" in capsys.readouterr().out
+    assert ACLI.main(["uninstall"]) == 0
+    assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
+    assert budget_reminder_on() is False                  # 整個拆掉＝回到預設
+    assert "budget reminder" not in capsys.readouterr().out

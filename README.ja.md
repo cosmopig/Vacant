@@ -21,6 +21,80 @@ Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前�
 我々の発明ではなく既存のパターンである：サプライチェーン・セキュリティの
 **in-toto／SLSA／Sigstore** も同じ——正当な attestation を伴わない artifact は受入時に拒否される。
 
+
+## 入れたらそのまま使う：ゼロ設定（0.9.0、v3.7）
+
+```bash
+pipx install vacant-network   # 0.9.0 からゼロ設定版。pipx がなければ Ubuntu／Debian は `sudo apt install pipx`、macOS は `brew install pipx`
+vacant install                # この機械の pi／Claude Code／OpenCode／Codex を見つけ、それぞれにフックを一つ追加（元に戻す：`vacant uninstall`）
+```
+
+あとはいつも通り agent を開くだけです。**契約・設定ファイル・鍵・環境変数は不要。** pi の場合、`vacant install` は pi 自身の設定ディレクトリに
+拡張ファイルを一つ置くだけです（`extensions/vacant.ts`）。agent を置き換えず、モデルのエンドポイントも包みません。
+
+やることは二つだけです：
+
+1. **全ステップを記録**：ツール呼び出し、読んだファイル、作業ディレクトリの変更を署名付きの記録（`~/.vacant/trace/`）に残します。
+   作業中は口を出さず、問題がなければモデルに届くリクエストは未導入のときと**バイト単位で同一**です。
+2. **agent が「終わった」と言った時点で一度だけ確認**：記録だけを見て、ほぼ確実に問題といえる場合だけ同じセッション内で差し戻します
+   （人の一つの依頼につき最大 2 回）：
+   - 依頼されたファイルが存在しない（プロンプト、またはあなたが指定した説明ファイルに書かれたもの。例：`contract.md` の「`solution.py` に書く」；v3.7）
+   - 失敗したステップを飛ばした（テストスクリプトが赤のあと緑になった場合は除く；v3.7）
+   - 「テスト通過」と言ったが記録と合わない（`sh run_tests.sh` などどのテストスクリプトでも認識；v3.7）
+   - 具体的な数値の出所が、このタスクで読んだもの・実行したものに見当たらない（データを渡した場合のみ）
+   - 指定したファイルが一度も開かれていない（依頼に全文を貼った場合を除く）
+
+それ以外は人向けの納品メモ（`~/.vacant/trace/projects/<プロジェクト>/delivery.md`）にだけ書き、モデルにもプロジェクトにも送りません。
+**答えが正しいかどうかは判断しません。** ターン予算リマインダー（v3）は v3.6 から**既定でオフ**です（`vacant install --budget-reminder` で有効化）。
+
+### 測定結果（実モデル、上の二つのコマンドで導入。条件と必ずセットで）
+
+| バッチ | 条件 | 未導入 → 導入 | 読み方 |
+|---|---|---|---|
+| DABstep 77 題 × 3（2026-10-02、事前登録） | gemma-4-12b QAT・vLLM（Colab G4）、pi 0.87.1 `--print`、**15 ターン上限** | 42.0% → **53.2%**（p＝0.0028） | 差は「終わったと言いながら答えのファイルを書いていない」回が差し戻されて書き足されたことによる（未導入 42／231、導入 0）。Vacant が正解を誤答に変えた回数 **0**。⚠ Vacant 側の成績は 09-26 の GGUF バックエンドとほぼ同じで、変わったのは未導入側。過去に効果があったので選んだ題セットで、ホールドアウトではない |
+| タスク指向 94 題 × 2（2026-10-02、事前登録） | DABench／DataBench／Polyglot Python、同条件で**ターン上限なし** | 72.3% → 75.0%（p＝0.36） | 差は測定されず。「書かずに終了」は 5／120 |
+| 同上、GGUF＋LM Studio（2026-10-03、中間） | RTX 3090 ×2 | 119 → 124／188（p＝0.37） | 差は測定されず。「書かずに終了」は 0 |
+| それ以前：有料 DABstep（09-25）、未使用 hard 100 題（09-28）、Colab コード 920 題（09-28、v3.6.1） | 各結論ファイル参照 | いずれも差は測定されず | v3.6.1 の誤った差し戻し（`run_tests.sh` を実行したのに「テスト未実行」）は v3.7 で修正：スモークで 0／23 |
+
+⚠ **「Vacant は agent を良くする」とは読まないこと**、「役に立たない」とも読まないこと。捕まえられるのは「依頼されたファイルを書かずに終わった」場合で、
+それが多い条件（ターン上限、一部の推論エンジン）では差が出て、少なければ出ません。各ステップに根拠のある判断ミスや、時間切れで打ち切られた回は見えません。
+既知の制限：用意されたテストが赤のまま「終わった」と言っても差し戻されない。実モデルで測ったのは pi のみで、すべて `pi --print`（対話 TUI はスクリプト化したモデルでのみ検証）。
+
+## エージェントへの接続：pi／Claude Code／OpenCode／Codex（2026-09-24〜）
+
+判定は阻止ではない——2026-09-24 の外部レビューの指摘を受け、受領口（`vacant_network/intake/`）を実装し、
+4 つのエージェントに接続した（`vacant_network/adapters/`）。モデル通信は一切見ない。
+`vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation" --total amount --lock`（一行で、気にすることだけを必須の検査にする。「成果物がある・認証情報ファイルがない」の二つの安全条件を除き、書いたものだけが必須。--total はレポートの 'Total' の後の数字を読む——別の表記なら --total amount=合計。列名の誤り・読めない列・合計行はその場で報告）または `vacant contract init` → `vacant contract lock`（入力を sha256 で固定し、owner 鍵で契約に署名）→ `vacant install` → エージェントを普段どおり使う → `vacant release`。
+4 エージェント × 非コードタスクの実測（L-fake：本物のエージェント＋台本どおりの偽モデル）は
+[`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md)、
+裁定は [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。
+
+## 誤りを起こしたステップまで遡る（説明責任の追跡、2026-09-24〜）
+
+契約のあるプロジェクトでは、Vacant は agent の**各ステップ**を署名チェーンに記録する（四つの agent の
+ネイティブフック＋Vacant 自身が見た作業領域の前後差分。シェルで書かれたファイルもそのステップに帰属）。
+検査が通らないとき：
+
+1. 位置を特定する（ファイル・行・値）；
+2. 追跡する：どのステップが書いたか → そのステップの前後の状態を再構成して**同じ検査を再実行** →
+   その値がどこから読まれたか（与えられた入力、サブエージェントの返答、コマンド出力、agent が書いた
+   スクリプト、ウェブページ、タスクのメッセージ）；
+3. ターンの終わりに agent へ**位置・あるべき値・その値が最初に現れたステップ**を伝える——誰かは言わない（KS-1）；
+4. 埋もれさせない：agent にもう続行を求めないとき、未解決の問題は人へ（Claude Code の `systemMessage` と報告書）；
+5. 帰結：**証明可能**な誤りだけが行為者の信用に入る（slash なし、人が取り消せば正確に元に戻る）。入力の誤りは
+   その出所に記録し、どのステップでも説明できない変更は**説明責任の空白**として誰も責めない。
+
+```bash
+vacant trace show | vacant trace report --check | vacant trace blame report.md:3
+vacant flag report.md:2 "市長は Alice"   |   vacant trace actors
+```
+
+実 agent 四種 × 埋め込んだ誤り六種（サブエージェントと誤った Web ページを含む、L-fake）：
+[`ops/accountability/evidence_20260924/README.md`](ops/accountability/evidence_20260924/README.md) ——
+**帰属 33/33 正解**。同じシナリオを `vacant do` 経由で：25/25（OpenCode もフィードバックを受け取る）。人が四つの agent の**対話型 TUI** に直接打ち込む場合（tmux 上の本物の TUI、複数ターンを含む）：帰属・モデルへのフィードバック・人の画面への表示・修正後の受理がすべて 16/16——OpenCode の対話型 TUI にも納品前フィードバックがある。裁定：[`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`](decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md)。
+⚠「すべての誤りを捕まえる」「追跡は常に正しい」「実モデルで成果が要求に近づく」とは読まないこと
+（最後の一つは [R536 事前登録](decisions/prereg/PREREG_20260924_R536_LOCALIZED_FEEDBACK.md)の草案、署名待ち）。
+
 ## ⚠ 入れる前にこれを読む：`pip install vacant` で入るのは本プロジェクトではない
 
 PyPI の `vacant`（2026-09-19 実測で 0.4.15、7.5 MB の `cp311-abi3-manylinux`
@@ -777,7 +851,7 @@ flowchart LR
 
 以下は本当であり、コードの裏付けがある。控えめに書く必要はない：
 
-- **受付のところは迂回できない。** `vacant_network/receipt.py` ＋ `controller.verify_delivery` が
+- **受付は全項目を再検証する。越えるには署名鍵が要る**（既定では同じ OS アカウント内の平文ファイル）。 `vacant_network/receipt.py` ＋ `controller.verify_delivery` が
   **5 つの sha256 を再計算**し（request／task／tests／answer／trust card）、Ed25519 署名を検証し、
   `chain_head`／`stream_id`／`branch_id` を**現に生きているチェーン**と突き合わせ、各査読が
   この納品そのものに束縛されていることを確認し、そのうえで初めて `policy.admit` する。
@@ -792,7 +866,7 @@ flowchart LR
   `ops/gain/gain_run.py:957` のコメント逐語：*"the candidate worker cannot see this test code"*。
   候補コードは**構造的にテストコードを見られない**——ブロックリストではない。
 - **「計測できていないことは通過ではない」がコードになっている**：
-  `"all_pass": bool(total > 0 and passed == total)`（`vacant_network/vrun/acceptance.py:268`）。
+  `"all_pass": bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:481`）。
   ゲージも同様に `n_broken >= 1` を要求し、空のスタブ集合では空虚に成立しない。
 - **拒否は実際に起きる**：R532 の 836 問でゲート腕は 25 件、ループ腕は 68 件を拒否し、
   拒否はすべての比率の分母に入っている。
@@ -868,7 +942,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
 | **ハーネスがループを所有** | 例：`ops/gain/r530/openwork_arms.py:642-696` | **する——ハーネスがループそのもの。** |
 
 **正しい位置づけは「強制層」ではなく「受付窓口」である。** 強制点は**受入時**にある——
-検証可能な領収書を伴わない納品は受理されず、**その関門は迂回できない**
+検証可能な領収書を伴わない納品は受理されず、**その関門を越えるには署名鍵が要る**
 （`vacant_network/receipt.py` ＋ `controller.verify_delivery` が 5 つの sha256 を再計算し、Ed25519 を
 検証し、`chain_head` を突き合わせ、`os.O_EXCL` により領収書は一度しか消費できない）。
 強制点は**実行時にはない**：Vacant をマシン唯一の出口にするにはコンテナ／ACL／egress policy
@@ -929,7 +1003,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   literal-only RPC（`vacant_network/checks.py:577-600`、`444-457`）。
 - **I-3** 自己申告は採用されない（`ecosystem.py:531`、さらに `controller.py:299-300` で独立に再実行）。
 - **I-4** 「計測できていない＝不通過」がコードになっている：
-  `bool(total > 0 and passed == total)`（`vacant_network/vrun/acceptance.py:268`）。ゲージは `n_broken >= 1` を要求。
+  `bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:481`）。ゲージは `n_broken >= 1` を要求。
 - **I-5** ゲージは両側：参照解が通ること**かつ**既知の壊れたスタブがすべて弾かれること。
 - **I-6** `suitespec.render(spec)` は決定的なので `render_sha256` はマシン横断で比較できる。
 - **I-7** 拒否は実際に起き、分母に数えられる：R532 836 問でゲート腕 25 件、ループ腕 68 件。
@@ -992,8 +1066,8 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
                   "not_recommended_for_integrators": "harness_owns_loop",
                   "enforced_at": "acceptance time", "not_enforced_at": "execution time",
                   "prior_art": ["in-toto", "SLSA", "Sigstore"],
-                  "reference_monitor_Saltzer_Schroeder_1975": {
-                    "tamper_proof": true, "small_enough_to_verify": true,
+                  "reference_monitor_properties_Anderson_1972": {
+                    "tamper_proof": false, "tamper_evident": true, "small_enough_to_verify": true,
                     "complete_mediation": false},
                   "library": "voluntary", "mcp_tool": "advisory",
                   "controller": "binding on its own spawned subprocess only",

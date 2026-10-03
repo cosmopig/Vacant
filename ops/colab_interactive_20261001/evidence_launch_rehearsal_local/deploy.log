@@ -1,0 +1,29 @@
+bundle sha256 ok
+tmux 3.4
+2026-10-01T15:45:20Z
+bubblewrap 0.9.0
+1.17.8
+ensurepip OK for 3.11.15
+v22.22.2
+0.87.1
+total 896
+drwxr-xr-x 2 root root   4096 Oct  1 14:33 .
+drwxr-xr-x 6 root root   4096 Oct  1 14:33 ..
+-rw-r--r-- 1 root root 906808 Oct  1 15:45 vacant_network-0.8.0-py3-none-any.whl
+負控制 OK：/srv/eval 讀不到
+ls: cannot access '/srv/eval': No such file or directory
+probe_a
+UID=1001 HOME=/home/probe_a
+SETUP_OK
+
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: python3 -m pip install --upgrade pip
+bridge venv ok: /opt/eval/bridgevenv/lib/python3.11/site-packages/vacant_network/__init__.py
+pandas 3.0.6 numpy 2.4.6
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'scipy'
+WARN: 沒有 scipy（dabench／databench 的 agent 端可能要）
+orproxy on http://127.0.0.1:18900 -> ['g4']; out=/srv/eval/proxy; spent so far $0.000000 of $1000000.0
+DEPLOY_OK
+rc=0

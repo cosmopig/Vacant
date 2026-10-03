@@ -1,0 +1,17 @@
+{
+ "steps": [
+  {
+   "run": "head -3 /app/data/payments.csv"
+  },
+  {
+   "run": "python3 -c \"import pandas as pd; print(round(pd.read_csv('/app/data/payments.csv')['eur_amount'].mean(), 2))\""
+  },
+  {
+   "write": [
+    "/app/answer.txt",
+    "91.85\n"
+   ]
+  }
+ ],
+ "final": "The average transaction amount is 91.85."
+}

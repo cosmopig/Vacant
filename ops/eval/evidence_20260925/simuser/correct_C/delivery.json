@@ -1,0 +1,38 @@
+{
+ "project": "/app",
+ "session": "pi:01a0d93a-2d3b-732a-a888-57ea9a524195",
+ "at": "2026-09-25T15:41:06+00:00",
+ "mode": "evidence",
+ "in_progress": false,
+ "checked": {
+  "checked": 1,
+  "traced": 1,
+  "derived": 0,
+  "exempt": 0,
+  "not_typed": 0,
+  "not_traced_note_only": []
+ },
+ "deliverables": [
+  "answer.txt"
+ ],
+ "named": [],
+ "opened": [],
+ "not_opened": [],
+ "in_dirs": [
+  "data/acquirer_countries.csv",
+  "data/fees.json",
+  "data/manual.md",
+  "data/merchant_category_codes.csv",
+  "data/merchant_data.json",
+  "data/payments-readme.md",
+  "data/payments.csv"
+ ],
+ "dir_opened": [
+  "data/payments.csv"
+ ],
+ "fixed": [],
+ "unverified": [
+  "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/manual.md, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md"
+ ],
+ "findings": []
+}
