@@ -31,3 +31,4 @@
 | 06:27 | d37L 從頭開跑（resume_queue.sh） |
 | 06:5x | t3L 期中分析（**第 1、2 次**；第 2 次 dab_657 補跑仍 void ⇒ 兩組拿掉）：A 119 vs C37 124／188，每題平均差 +2.7 pp，C37 好 14 題、A 好 11 題，Wilcoxon（常態近似）p＝0.37 ⇒ **沒有量到差別**。A「說做完卻沒寫答案檔」**0 格**（Colab 任務導向 5／120）；A 沒交的全是撞時限。退回只有 2 格。結果 `results/report_t3L_s12.json` |
 | 06:5x | **偏離**：第 3 次 186 格 void 排在 d37L 之後補跑（`after_queue_s3.sh`），那一輪啟動後停掉 feasibility（開跑檢查，不適合補跑）；`keep_gemma.sh` 改成 S3_DONE 才結束。（`pkill -f keep_gemma.sh` 又殺到自己的殼一次，分開重開） |
+| 08:50 | d37L 224／711（每小時約 98 格）；逾時 0、安裝失敗 0；最近一小時 g1004 501、g1003 422 通全 200；`unhealthy.log` 空、沒有重新載入。磁碟 2.1 GB 且緩慢減少（`/srv/eval` 只有約 120 MB，打包後瘦身有效；`/home/user1` 18 GB 是舊資料）⇒ 刪掉自己的測試目錄 `/var/tmp/pr82t`、`journalctl --vacuum-size=100M`、`apt-get clean` ⇒ **3.0 GB** |
