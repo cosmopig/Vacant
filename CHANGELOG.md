@@ -1,6 +1,39 @@
 # Changelog
 
-## Unreleased
+## 0.9.0 — 2026-10-03
+
+**Zero-config: install once, keep using your agent.** `pipx install vacant-network && vacant install`, then open
+pi / Claude Code / OpenCode / Codex as usual — no contract, config file, key or environment variable. Every step is
+recorded; when the agent says it is done, Vacant reads that turn's record and sends it back (at most two rounds per
+request) only for five kinds of near-certain problems: a file the request asked for does not exist, a failed step was
+skipped over, a test claim does not match the record, a value has no source in what was read (only when you supplied
+data), a file you named was never opened. Everything else goes into a delivery note for the person
+(`~/.vacant/trace/projects/<project>/delivery.md`), never to the model. When nothing is wrong, every model request is
+byte-identical to not having Vacant installed. It does not judge whether an answer is right.
+Design: `decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`; versions v3–v3.7: `decisions/DECISION_20260926_ZERO_CONFIG_V3.md`.
+
+- **v3.7 (this release):** any test script counts as running the tests (`sh run_tests.sh`, `./run_tests.sh`, …), a red
+  run followed by a green one is not "skipped"; the deliverable is also read from files the person named
+  (`contract.md` saying "write `solution.py`"); turns that ended on a model error are not sent back.
+- The turn-budget reminder (v3) is **off by default** since v3.6 (`vacant install --budget-reminder` turns it on): in a
+  pre-registered batch the extra answers it produced were more often wrong than right.
+- **What was measured with v3.7 (gemma-4-12b QAT, pi 0.87.1 `--print`, Colab G4 / vLLM unless noted):**
+  - Mechanism smoke (30 cells, not a test): after `sh run_tests.sh`, wrongly sent back as "no test run" 0/23
+    (v3.6.1: every one of the 20 tasks); `missing_output` fired 3/3 when the file was really missing; new wrong send-backs 0.
+  - DABstep 77 tasks × 3, 15-turn cap (pre-registered): not installed 42.0%, installed 53.2% (p = 0.0028), with the
+    reminder 60.2%. The gain comes from runs where the agent said it was done without writing `/app/answer.txt`
+    (42/231 without Vacant, 0 with). Correct answers turned wrong by Vacant: 0. ⚠ The same Vacant arm scored the same as
+    on the GGUF/LM Studio backend in 2026-09-26; what changed was the not-installed arm — this engine makes the agent
+    skip the file more often. Not a hold-out set.
+  - Task-oriented 94 tasks (DABench / DataBench / Polyglot Python), no turn cap: 72.3% vs 75.0%, p = 0.36 — no
+    measured difference; on the GGUF/LM Studio backend (interim, runs 1–2): 119 vs 124 of 188, p = 0.37.
+  - Do not read any of this as "Vacant makes agents better" without the conditions above.
+- Known limits: a provided test script that stays red until the agent says done is not sent back (only failures of
+  scripts the agent wrote or files the person named count); only pi was measured with a real model; all real-model
+  numbers are from `pi --print`, the interactive TUI was verified with scripted models only.
+- Version 0.8.0 was never published to PyPI; local wheels of v3–v3.7 all said 0.8.0. 0.9.0 is the first published zero-config release.
+
+### Also in 0.9.0 (previously "Unreleased")
 
 **Accountable trace: who did what, which step put the wrong value in, and the problem is raised
 instead of drowned.** Decision: `decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md`.

@@ -19,52 +19,52 @@
 既有模式，不是我們發明的：供應鏈安全的 **in-toto／SLSA／Sigstore** 也是同一條
 ——「沒有合法 attestation 的 artifact，在收件時被拒」。
 
-## 裝了就用：零設定（2026-09-25 起）
+## 裝了就用：零設定（0.9.0，v3.7）
 
 ```bash
-pipx install vacant-network   # 沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
+pipx install vacant-network   # 0.9.0 起就是零設定版。沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
 vacant install                # 找到你機器上的 pi／Claude Code／OpenCode／Codex，各加一個掛鉤（可逆：`vacant uninstall`）
 ```
 
-之後照常打開你的 agent。不用寫契約、設定檔、金鑰。agent 每一次說「做完了」，Vacant 看這一回合的紀錄，
-只在**幾乎一定是真的問題**時退回去請它重做（最多兩回合）：
+之後照常打開你的 agent。**不用寫契約、設定檔、金鑰、環境變數。**以 pi 為例，`vacant install` 只在 pi 自己的設定目錄放一個擴充檔
+（`extensions/vacant.ts`），不換掉 agent、不包模型端點。
 
-- 要求寫出的檔不存在
-- 失敗的步驟被略過、最後的訊息說「測試通過」但紀錄對不上
-- 文件裡的具體數值在這個任務讀過、跑過的東西裡都找不到（只在你有給資料時）
-- 你點名的檔從沒被打開（你在請求裡已經整段貼了它的全文的，不算；v3.5）
+它做的事只有兩件：
+
+1. **全程記錄**：每一步工具呼叫、讀了哪些檔、工作區前後改了什麼，簽進一條病歷（`~/.vacant/trace/`）。過程中不插話；
+   沒有問題時，模型收到的每一通請求和沒裝時**逐位元組相同**。
+2. **agent 說「做完了」那一刻查一次**：只看紀錄，只在**幾乎一定是真的問題**時，在同一個工作階段裡退回請它補（人的一個要求內最多兩回合）：
+   - 要求寫出的檔不存在（提示裡寫的、或你點名的說明檔裡寫的，例如 `contract.md` 說「寫進 `solution.py`」；v3.7）
+   - 失敗的步驟被略過（測試腳本紅了、之後又跑出綠的，不算；v3.7）
+   - 說「測試通過」但紀錄對不上（任何測試腳本都認，例如 `sh run_tests.sh`；v3.7）
+   - 文件裡的具體數值在這個任務讀過、跑過的東西裡都找不到（只在你有給資料時）
+   - 你點名的檔從沒被打開（你在請求裡已經整段貼了它的全文的，不算）
 
 其他的只寫進交件說明（`~/.vacant/trace/projects/<專案>/delivery.md`：查了什麼、交件前改了什麼、還沒驗證的），
-不送給模型、不寫進你的專案。沒有問題時模型收到的每一通請求和沒裝時**逐位元組相同**。
-設計：[`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`](decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md)。
+不送給模型、不寫進你的專案。**它不判斷答案對不對**——推理錯了但每一步都有根據的答案，它看不出來。
+回合預算提醒（v3）**預設關**（v3.6 起；多交出來的答案錯的多於對的），要開用 `vacant install --budget-reminder`。
+設計與各版裁決：[`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`](decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md)、
+[`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`](decisions/DECISION_20260926_ZERO_CONFIG_V3.md)。
 
-模擬使用者（乾淨的 Ubuntu 容器、只打上面兩個指令、照常用 pi，**L-fake**：模型照劇本回答）——
-[`ops/eval/evidence_20260925/simuser/SIMUSER.md`](ops/eval/evidence_20260925/simuser/SIMUSER.md)：
-沒讀資料就寫的數字被退回、重算成對的值；沒寫答案檔就說做完被退回、補寫；一開始就對的完全沒被動到。
-用 Gate 1 的**真實** pi 紀錄重播（[`ops/eval/evidence_20260925/replay/`](ops/eval/evidence_20260925/replay/)）：
-答對的 3 跑全部放行。
+### 量到了什麼（真模型、照上面兩個指令安裝；條件一定要一起講）
 
-**真模型、預註冊的正式批次（2026-09-25，DABstep 77 題，pi 0.87.1，15 回合上限）：沒有量到差別。**
-gemma-4-26b 開思考：沒裝 50／77、裝了 44／77（p＝0.21）；qwen3.8-27b 開思考：68／77 對 64／77（p＝0.29）。
-所有翻轉都發生在 Vacant 沒有退回的那幾跑（兩次獨立取樣的差異）；8 次退回全是誤報、7 次退的是本來就對的答案（兩個程式錯，事後已修），
-修好之後用同一批紀錄重播，158 跑一次都不會退回——DABstep 上真實的失敗（推理錯、回合用完）不是這幾類檢查抓得到的。
-全文與原始紀錄：[`decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)。
-為什麼是這個結果、和過去的實驗比、Vacant 要不要做成 agent：[`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md)（證據索引 [`ops/eval/evidence_20260925/INDEX.md`](ops/eval/evidence_20260925/INDEX.md)）。
+| 批次 | 設定 | 沒裝 → 裝了 | 讀法 |
+|---|---|---|---|
+| DABstep 77 題 × 3（10-02，預註冊） | gemma-4-12b QAT、vLLM（Colab G4）、pi 0.87.1 `--print`、**15 回合上限** | 42.0% → **53.2%**（p＝0.0028） | 差來自「agent 說做完卻沒寫答案檔」被退回、補寫（沒裝 42／231 跑、裝了 0）；Vacant 把對的改成錯 **0 次**。⚠ 有 Vacant 那組和 09-26 在 GGUF 後端的成績幾乎一樣，變的是沒裝那組；題組是因為過去有效才選的，不是留出 |
+| 任務導向 94 題 × 2（10-02，預註冊） | DABench／DataBench／Polyglot Python，同上但**不設回合上限** | 72.3% → 75.0%（p＝0.36） | 沒有量到差別；「說做完沒寫檔」只有 5／120 |
+| 同上，換 GGUF＋LM Studio（10-03，期中） | 人類自己的兩張 RTX 3090 | 119 → 124／188（p＝0.37） | 沒有量到差別；「說做完沒寫檔」0 格 |
+| 更早：DABstep 付費（09-25）、u274 hard 100 題（09-28）、Colab 程式題 920 題（09-28，v3.6.1） | 見各結論檔 | 都沒有量到差別 | v3.6.1 的誤退（跑過 `run_tests.sh` 還被退）在 v3.7 修掉：冒煙 0／23 |
 
-⚠ **不能讀成**「Vacant 讓 agent 做得更好」，也不能讀成「沒有用」：退回只根據紀錄，不判斷答案對不對；
-推理錯了但每一步都有根據的答案，它看不出來。
-
-**v3（2026-09-26）：在預算用完之前先交。**（⚠ **v3.6 起提醒預設關**：在本機的預註冊批次裡，它多交出來的答案錯的多於對的；要開用 `vacant install --budget-reminder`。其餘照舊。） 付費批次的失敗裡三分之二是「沒交」——agent 被回合上限切斷時答案檔還不存在，
-交件前檢查輪不到。v3 在 agent 被告知回合上限（寫在它的系統提示裡）、只剩最後 2 或 1 回合、要求的檔還不存在時，
-在下一通本來就要送出的請求後面加一段提醒：「先把目前最好的答案寫進去，之後還可以改」。不多一通模型呼叫、不引用任何值；
-沒有寫明上限時什麼都不做（一般互動使用幾乎不會觸發）。被切斷的那一跑也會有交件說明；在最後一回合才說做完、
-檢查來不及跑的那一跑（v3.2），結束時補跑同一個檢查，結果只寫給你；被切斷的那一跑也補查，而且說明會標出哪個檔是提醒之後才寫的
-（提醒會逼出沒有根據的「最好的猜測」，你應該知道；v3.3）。
-裁決：[`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`](decisions/DECISION_20260926_ZERO_CONFIG_V3.md)；
-本機算力（人類自己的 gemma-4-12b，關思考，pi 0.87.1，15 回合上限）上的預註冊比較：77 題 × 3 次，**裝了 v3 答對率 51.9%→59.3%（Wilcoxon 精確 p＝0.021）**，
-差集中在 6 題、以題數 15 對 7，顯著性很薄；來源是快被切斷時提醒先交、把已經算出來的答案收成（多交出來的大部分是錯的），Vacant 把對的改成錯 0 次；
-沒有 v3 的現版沒有量到差別。只適用於有回合上限的使用。結論：[`decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`](decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md)；
-沒被用過的 100 題上的留出批次在跑。
+⚠ **不能讀成**「Vacant 讓 agent 做得更好」，也不能讀成「沒有用」：它補得到的是「說做完卻沒寫要求的檔」這一類；
+這種情況多（例如有回合上限、某些推論引擎）才量得到差，少就量不到。錯在決定、或被時限切斷的，它看不到。
+已知的限制：題目附的測試一直紅、agent 就說做完，不會被退回；真模型只量過 pi，而且都是 `pi --print`
+（互動介面的流程用照劇本回答的模型驗過）。
+結論檔：[`CONCLUSION_20261002_COLAB_DABSTEP_V37`](decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md)、
+[`CONCLUSION_20261002_COLAB_TASK3_V37`](decisions/conclusions/CONCLUSION_20261002_COLAB_TASK3_V37.md)、
+[`CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM`](decisions/conclusions/CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md)、
+[`CONCLUSION_20260925_ZERO_CONFIG_DABSTEP`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)、
+[`CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL`](decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md)；
+為什麼零設定大多量不到差、和過去的實驗比：[`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md)。
 
 ## 接到你的 agent 上：pi／Claude Code／OpenCode／Codex（2026-09-24 起）
 
