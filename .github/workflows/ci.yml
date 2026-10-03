@@ -134,7 +134,9 @@ jobs:
       # 「官方 HumanEval+ 包不在場」「官方 EvalPlus 包不在場（.vacant-private）」
       # 這類訊息——skip 是明示的缺量測，不是通過。
       - name: pytest
-        run: python -m pytest tests/ -rs
+        # 數位分身（展場）的測試不在 Vacant 的 CI 裡跑（2026-10-03 人類：「數位分身大改，數位分身不應該跟 vacant 有關」）。
+        # 檔案還在 repo，要跑就自己 `python -m pytest tests/test_*twin*.py`；分身那邊的修改不擋 Vacant 的發布。
+        run: python -m pytest tests/ -rs --ignore-glob='tests/test_*twin*.py'
 
   security:
     name: "security scan"
