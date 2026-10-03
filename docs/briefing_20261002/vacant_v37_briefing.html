@@ -135,6 +135,7 @@ th{background:var(--soft)}
     <tr><td>u274（09-27/28）</td><td>100 題沒用過的 hard 題，不設上限，A vs v3.6.1</td><td>9 vs 10，p=1.0（不一致僅 7 對）</td><td>沒量到差別；缺檔退回 31 跑後 0 對</td></tr>
     <tr><td>Colab C5（09-27/28）</td><td>920 題程式題，A vs v3.6.1</td><td>748（81.3%）vs 758（82.4%），p=0.387</td><td>退回 96% 是誤退；缺檔退回 0 次</td></tr>
     <tr><td>DABstep × v3.7（10-02，Colab）</td><td>77 題×3 次，gemma-4-12B QAT（vLLM），15 回合上限；A／C37／C37R</td><td>42.0% → 53.2%（p=0.0028）／60.2%（p=3.1e-5）</td><td>差來自缺檔退回；傷害 0；沒裝那組比 09-26 差；選過的題組</td></tr>
+    <tr><td>DABstep 77 題 × v3.7（10-03，vacant-dev＋1003／1004 GGUF，預註冊複製）</td><td>同 Colab 那批，換 LM Studio GGUF 後端</td><td>A 52.8% vs C37 52.4%（p=0.84）；C37R 63.2%（p=0.0051）</td><td><b>Colab 的差沒有複製出來</b>：補回「說做完沒寫檔」的回合，被 15 回合上限吃掉；傷害 0</td></tr>
     <tr><td>任務導向 94 題 × v3.7（10-03，vacant-dev＋1003／1004 GGUF，期中）</td><td>同題，不設上限，A／C37 第 1、2 次（第 3 次補跑中）</td><td>119 vs 124／188，p=0.37</td><td>沒量到差別；A「說做完沒寫檔」0 格（Colab 5／120）</td></tr>
     <tr><td>任務導向 94 題 × v3.7（10-02，Colab）</td><td>DABench／DataBench／Polyglot，不設回合上限，A／C37 各 2 次</td><td>72.3% vs 75.0%，p=0.36</td><td>沒量到差別；傷害 0；「說做完沒寫檔」只有 5／120</td></tr>
     <tr><td>PR #82 冒煙（10-02）</td><td>30 格，只跑 C（v3.7），每題 1 次</td><td>誤退 0／23、missing_output 3／3、新誤退 0</td><td>冒煙，不是檢定；bridge 沒測到</td></tr>
@@ -255,6 +256,21 @@ th{background:var(--soft)}
   <p>C37R − C37：+6.9 pp，p=0.011。題數：C37 較好 26 題、A 較好 12 題。<b>Vacant 把對的改成錯：0 次。</b></p>
   <p class="mute">檢定是凍結的 <code>wilcoxon_signed_rank_exact</code>；非零差題數 &gt; 24 時它用常態近似（函式本身的規則）。</p>
   <div class="src">出處：colab/decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md；colab/ops/colab_dabstep_v37_20261002/results/report_d37.json；預註冊 colab/decisions/prereg/PREREG_20261002_COLAB_DABSTEP_V37.md（凍結 commit 384fa838）。</div>
+</section>
+
+<!-- 14a2 -->
+<section class="slide">
+  <h2>DABstep × v3.7 換到 GGUF 後端：沒有複製出 Colab 的差</h2>
+  <table>
+    <tr><th></th><th>Colab（vLLM）</th><th>vacant-dev（LM Studio GGUF）</th></tr>
+    <tr><td>A 沒裝</td><td>42.0%</td><td>52.8%</td></tr>
+    <tr><td><b>C37 照常安裝</b></td><td>53.2%（p=0.0028）</td><td><b>52.4%（p=0.84）</b></td></tr>
+    <tr><td>C37R 加開提醒</td><td>60.2%</td><td>63.2%（p=0.0051）</td></tr>
+    <tr><td>A「說做完卻沒寫檔」</td><td>42／231</td><td>20／231</td></tr>
+    <tr><td>C37 被 15 回合切斷沒交</td><td>67（A 59）</td><td>74（A 59）</td></tr>
+  </table>
+  <p>補寫要用回合；漏寫檔少的引擎上，補回的量被上限切掉的量抵銷。⇒ Colab 那個差主要是<b>引擎讓沒裝的 agent 更常漏寫檔</b>。兩邊 Vacant 把對的改成錯都是 0 次。提醒（預設關）在兩邊都有差，但多交的答案約一半是錯的。</p>
+  <div class="src">出處：colab/decisions/conclusions/CONCLUSION_20261003_VACANTDEV_DABSTEP_V37.md；CONCLUSION_20261002_COLAB_DABSTEP_V37.md。</div>
 </section>
 
 <!-- 14b -->
