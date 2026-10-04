@@ -51,17 +51,19 @@ vacant install                # 找到你機器上的 pi／Claude Code／OpenCod
 | 批次 | 設定 | 沒裝 → 裝了 | 讀法 |
 |---|---|---|---|
 | DABstep 77 題 × 3（10-02，預註冊） | gemma-4-12b QAT、vLLM（Colab G4）、pi 0.87.1 `--print`、**15 回合上限** | 42.0% → **53.2%**（p＝0.0028） | 差來自「agent 說做完卻沒寫答案檔」被退回、補寫（沒裝 42／231 跑、裝了 0）；Vacant 把對的改成錯 **0 次**。⚠ 有 Vacant 那組和 09-26 在 GGUF 後端的成績幾乎一樣，變的是沒裝那組；題組是因為過去有效才選的，不是留出 |
+| **同上，換 GGUF＋LM Studio（10-03，預註冊複製）** | 同上，人類自己的兩張 RTX 3090 | 52.8% → 52.4%（**p＝0.84**） | **Colab 的差沒有複製出來**：「說做完沒寫檔」只有 20／231，補寫用掉的回合被 15 回合上限吃掉（被切斷 59→74）；開提醒 63.2%（p＝0.0051），多交的約一半是錯的；傷害 0 |
 | 任務導向 94 題 × 2（10-02，預註冊） | DABench／DataBench／Polyglot Python，同上但**不設回合上限** | 72.3% → 75.0%（p＝0.36） | 沒有量到差別；「說做完沒寫檔」只有 5／120 |
-| 同上，換 GGUF＋LM Studio（10-03，期中） | 人類自己的兩張 RTX 3090 | 119 → 124／188（p＝0.37） | 沒有量到差別；「說做完沒寫檔」0 格 |
+| 任務導向同上，換 GGUF＋LM Studio（10-04，最終） | 人類自己的兩張 RTX 3090，3 次 | 187 → 186／282（p＝0.87） | 沒有量到差別；「說做完沒寫檔」0 格；傷害 0 |
 | 更早：DABstep 付費（09-25）、u274 hard 100 題（09-28）、Colab 程式題 920 題（09-28，v3.6.1） | 見各結論檔 | 都沒有量到差別 | v3.6.1 的誤退（跑過 `run_tests.sh` 還被退）在 v3.7 修掉：冒煙 0／23 |
 
 ⚠ **不能讀成**「Vacant 讓 agent 做得更好」，也不能讀成「沒有用」：它補得到的是「說做完卻沒寫要求的檔」這一類；
-這種情況多（例如有回合上限、某些推論引擎）才量得到差，少就量不到。錯在決定、或被時限切斷的，它看不到。
+這種情況多（例如有回合上限、某些推論引擎）才量得到差，少就量不到——同一批 DABstep 題，vLLM 上有差（p＝0.0028）、LM Studio GGUF 上沒有（p＝0.84），差的大小取決於推論引擎，不是穩定的產品性質。錯在決定、或被時限切斷的，它看不到。
 已知的限制：題目附的測試一直紅、agent 就說做完，不會被退回；真模型只量過 pi，而且都是 `pi --print`
 （互動介面的流程用照劇本回答的模型驗過）。
 結論檔：[`CONCLUSION_20261002_COLAB_DABSTEP_V37`](decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md)、
 [`CONCLUSION_20261002_COLAB_TASK3_V37`](decisions/conclusions/CONCLUSION_20261002_COLAB_TASK3_V37.md)、
-[`CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM`](decisions/conclusions/CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md)、
+[`CONCLUSION_20261003_VACANTDEV_TASK3_V37`](decisions/conclusions/CONCLUSION_20261003_VACANTDEV_TASK3_V37.md)、
+[`CONCLUSION_20261003_VACANTDEV_DABSTEP_V37`](decisions/conclusions/CONCLUSION_20261003_VACANTDEV_DABSTEP_V37.md)、
 [`CONCLUSION_20260925_ZERO_CONFIG_DABSTEP`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)、
 [`CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL`](decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md)；
 為什麼零設定大多量不到差、和過去的實驗比：[`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md)。
