@@ -1,0 +1,164 @@
+[
+ {
+  "i": 0,
+  "id": "done1",
+  "start": 1.95,
+  "end": 2.5,
+  "zh": "做完了。",
+  "en": "Done.",
+  "onscreen": true
+ },
+ {
+  "i": 1,
+  "id": "really",
+  "start": 3.5,
+  "end": 4.061,
+  "zh": "真的嗎？",
+  "en": "Is it, though?",
+  "onscreen": true
+ },
+ {
+  "i": 2,
+  "id": "audit",
+  "start": 4.25,
+  "end": 7.178,
+  "zh": "然後，你要自己回頭，一步步地查。",
+  "en": "And then you go back and check, step by step.",
+  "onscreen": false
+ },
+ {
+  "i": 3,
+  "id": "install",
+  "start": 9.3,
+  "end": 10.808,
+  "zh": "裝一次，照常用。",
+  "en": "Install once. Work as usual.",
+  "onscreen": false
+ },
+ {
+  "i": 4,
+  "id": "tools",
+  "start": 11.9,
+  "end": 13.776,
+  "zh": "你原本的工具，照樣用。",
+  "en": "Keep the tools you already use.",
+  "onscreen": false
+ },
+ {
+  "i": 5,
+  "id": "keys",
+  "start": 15.0,
+  "end": 17.681,
+  "zh": "契約、設定、憑證，都不用。",
+  "en": "Contracts, config, credentials — none needed.",
+  "onscreen": false
+ },
+ {
+  "i": 6,
+  "id": "chain",
+  "start": 17.75,
+  "end": 20.342,
+  "zh": "每一步，都簽名，串成一條鏈。",
+  "en": "Every step is signed, and linked into a chain.",
+  "onscreen": false
+ },
+ {
+  "i": 7,
+  "id": "invis",
+  "start": 20.45,
+  "end": 24.091,
+  "zh": "沒事時，它像不存在，請求一個位元組都不改。",
+  "en": "When nothing's wrong, it's invisible — not one byte of your requests changes.",
+  "onscreen": false
+ },
+ {
+  "i": 8,
+  "id": "until",
+  "start": 24.2,
+  "end": 25.47,
+  "zh": "直到——「做完了。」",
+  "en": "Until… “Done.”",
+  "onscreen": false
+ },
+ {
+  "i": 9,
+  "id": "moment",
+  "start": 25.6,
+  "end": 28.442,
+  "zh": "這一刻，它只看紀錄，查五件事。",
+  "en": "In that moment, it reads only the record, and checks five things.",
+  "onscreen": false
+ },
+ {
+  "i": 10,
+  "id": "qs1",
+  "start": 29.3,
+  "end": 32.454,
+  "zh": "檔案寫了嗎？失敗略過了嗎？測試對得上嗎？",
+  "en": "File written? Failure skipped? Test claims match?",
+  "onscreen": false
+ },
+ {
+  "i": 11,
+  "id": "qs2",
+  "start": 32.554,
+  "end": 35.183,
+  "zh": "數字有出處嗎？點名的檔開過嗎？",
+  "en": "Numbers sourced? Named file opened?",
+  "onscreen": false
+ },
+ {
+  "i": 12,
+  "id": "back",
+  "start": 35.55,
+  "end": 38.538,
+  "zh": "不對，就退回去補，在交給你之前。",
+  "en": "If not, it goes back to be fixed — before it reaches you.",
+  "onscreen": false
+ },
+ {
+  "i": 13,
+  "id": "note",
+  "start": 39.0,
+  "end": 43.547,
+  "zh": "交件時附上說明：查了什麼、改了什麼、還有什麼沒驗證。",
+  "en": "Delivered with a note: what was checked, what changed, what's still unverified.",
+  "onscreen": false
+ },
+ {
+  "i": 14,
+  "id": "num",
+  "start": 43.75,
+  "end": 48.047,
+  "zh": "十五回合上限下，正確率從百分之四十二，到五十三。",
+  "en": "With a 15-turn cap, accuracy went from 42% to 53%.",
+  "onscreen": false
+ },
+ {
+  "i": 15,
+  "id": "why",
+  "start": 48.2,
+  "end": 51.671,
+  "zh": "差別，來自說了做完、卻沒寫出來的答案。",
+  "en": "The difference: answers called done, but never written.",
+  "onscreen": false
+ },
+ {
+  "i": 16,
+  "id": "thesis",
+  "start": 51.8,
+  "end": 54.828,
+  "zh": "它不判斷對錯，只確認每一步都有根據。",
+  "en": "It doesn't judge right from wrong; it makes sure every step has grounds.",
+  "onscreen": false
+ },
+ {
+  "i": 17,
+  "id": "tag",
+  "start": 56.7,
+  "end": 58.663,
+  "zh": "讓每一次交付，都有根據。",
+  "en": "Every delivery, grounded.",
+  "onscreen": true
+ }
+]

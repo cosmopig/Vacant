@@ -1,0 +1,71 @@
+1
+00:00:01,890 --> 00:00:02,800
+Done.
+
+2
+00:00:03,440 --> 00:00:04,170
+Is it, though?
+
+3
+00:00:04,190 --> 00:00:07,478
+And then you go back and check, step by step.
+
+4
+00:00:09,240 --> 00:00:11,108
+Install once. Work as usual.
+
+5
+00:00:11,840 --> 00:00:14,076
+Keep the tools you already use.
+
+6
+00:00:14,940 --> 00:00:17,670
+Contracts, config, credentials — none needed.
+
+7
+00:00:17,690 --> 00:00:20,370
+Every step is signed, and linked into a chain.
+
+8
+00:00:20,390 --> 00:00:24,120
+When nothing's wrong, it's invisible — not one byte of your requests changes.
+
+9
+00:00:24,140 --> 00:00:25,520
+Until… “Done.”
+
+10
+00:00:25,540 --> 00:00:28,742
+In that moment, it reads only the record, and checks five things.
+
+11
+00:00:29,240 --> 00:00:32,474
+File written? Failure skipped? Test claims match?
+
+12
+00:00:32,494 --> 00:00:35,470
+Numbers sourced? Named file opened?
+
+13
+00:00:35,490 --> 00:00:38,838
+If not, it goes back to be fixed — before it reaches you.
+
+14
+00:00:38,940 --> 00:00:43,670
+Delivered with a note: what was checked, what changed, what's still unverified.
+
+15
+00:00:43,690 --> 00:00:48,120
+With a 15-turn cap, accuracy went from 42% to 53%.
+
+16
+00:00:48,140 --> 00:00:51,720
+The difference: answers called done, but never written.
+
+17
+00:00:51,740 --> 00:00:55,128
+It doesn't judge right from wrong; it makes sure every step has grounds.
+
+18
+00:00:56,640 --> 00:00:58,963
+Every delivery, grounded.

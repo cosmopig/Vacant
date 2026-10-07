@@ -1,0 +1,89 @@
+1
+00:00:01,890 --> 00:00:02,800
+做完了。
+Done.
+
+2
+00:00:03,440 --> 00:00:04,170
+真的嗎？
+Is it, though?
+
+3
+00:00:04,190 --> 00:00:07,478
+然後，你要自己回頭，一步步地查。
+And then you go back and check, step by step.
+
+4
+00:00:09,240 --> 00:00:11,108
+裝一次，照常用。
+Install once. Work as usual.
+
+5
+00:00:11,840 --> 00:00:14,076
+你原本的工具，照樣用。
+Keep the tools you already use.
+
+6
+00:00:14,940 --> 00:00:17,670
+契約、設定、憑證，都不用。
+Contracts, config, credentials — none needed.
+
+7
+00:00:17,690 --> 00:00:20,370
+每一步，都簽名，串成一條鏈。
+Every step is signed, and linked into a chain.
+
+8
+00:00:20,390 --> 00:00:24,120
+沒事時，它像不存在，請求一個位元組都不改。
+When nothing's wrong, it's invisible — not one byte of your requests changes.
+
+9
+00:00:24,140 --> 00:00:25,520
+直到——「做完了。」
+Until… “Done.”
+
+10
+00:00:25,540 --> 00:00:28,742
+這一刻，它只看紀錄，查五件事。
+In that moment, it reads only the record, and checks five things.
+
+11
+00:00:29,240 --> 00:00:32,474
+檔案寫了嗎？失敗略過了嗎？測試對得上嗎？
+File written? Failure skipped? Test claims match?
+
+12
+00:00:32,494 --> 00:00:35,470
+數字有出處嗎？點名的檔開過嗎？
+Numbers sourced? Named file opened?
+
+13
+00:00:35,490 --> 00:00:38,838
+不對，就退回去補，在交給你之前。
+If not, it goes back to be fixed — before it reaches you.
+
+14
+00:00:38,940 --> 00:00:43,670
+交件時附上說明：查了什麼、改了什麼、還有什麼沒驗證。
+Delivered with a note: what was checked, what changed, what's still unverified.
+
+15
+00:00:43,690 --> 00:00:48,120
+十五回合上限下，正確率從百分之四十二，到五十三。
+With a 15-turn cap, accuracy went from 42% to 53%.
+
+16
+00:00:48,140 --> 00:00:51,720
+差別，來自說了做完、卻沒寫出來的答案。
+The difference: answers called done, but never written.
+
+17
+00:00:51,740 --> 00:00:55,128
+它不判斷對錯，只確認每一步都有根據。
+It doesn't judge right from wrong; it makes sure every step has grounds.
+
+18
+00:00:56,640 --> 00:00:58,963
+讓每一次交付，都有根據。
+Every delivery, grounded.
