@@ -632,10 +632,15 @@ def _first_line_of(text: str) -> str:
     return ""
 
 
+ABSTRACT_WORDS = ("渴望", "靜默", "虛無", "細碎", "共振", "壓抑", "沉默", "溫潤", "圓潤")      # 與 `twinagent.ABSTRACT_WORDS` 同值（測試釘住）
+
+
 def _card_sentence(raw: str, traits: str, f: dict[str, Any], max_len: int) -> str | None:
     """卡上一句話的共同防呆：LEAK／時段詞／沒給的東西／現實詞（`clean_sentence`）＋不像檔名＋不自己說閘門給了結果。"""
     s, _why = clean_sentence(raw, traits, f, max_len)
     if not s or _FILENAME_LIKE.search(s) or RECEIPT_CLAIM.search(s):
+        return None
+    if sum(1 for w in ABSTRACT_WORDS if w in s) >= 2:           # 卡上一句話裡堆兩個以上被用爛的抽象詞 ⇒ 不上卡（寧缺）
         return None
     return s.rstrip("。.！!")
 
@@ -677,14 +682,16 @@ def compose_card_v3(f: dict[str, Any], *, plan_text: str, record_text: str, rows
         return res
     res["verdict"] = VERDICT_PREFIX + res["first_line"]
     others = {n: tx for n, tx in files.items() if n != RECORD_FILE}
-    title = title_of(others or files, f, traits, letter_text)
+    title = title_of(others, f, traits, letter_text)
     res["title"] = title
     places = visited_places(rows)
     last = last_place_before_delivery(rows)
     res["places"] = places
     w = want_of(plan_text, traits, f)
     s = said_of(record_text, traits, f)
-    td = tried_of(places, last, title or NO_NAME_TITLE, retries)
+    # 「試的紀錄」缺或空 ＝ 沒做完：第 3、4 行都不出（第 2 行是 PLAN 的，照出）
+    has_record = len(record_text.strip()) >= 30
+    td = tried_of(places, last, title or NO_NAME_TITLE, retries) if has_record else None
     res["want_line"] = (WANT_PREFIX + w) if w else None
     res["tried_line"] = td
     res["said_line"] = (SAID_PREFIX + s) if s else None

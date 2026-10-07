@@ -62,6 +62,22 @@ DIVINERS: tuple[dict[str, Any], ...] = (
      "card": {"shape": "厚實", "texture": "絨面", "color": "灰藍", "vibe": "疲倦、倔強、其實很想休息",
               "want": "想什麼都不做，只是待著，而且不覺得愧疚", "first_line": "讓我坐一下就好。",
               "mbti": "ESTP", "zodiac": "獅子", "blood": "AB"}},
+    {"name": "v9", "want_kind": "想吃一頓很慢的飯",
+     "card": {"shape": "圓潤", "texture": "指紋", "color": "暖土", "vibe": "老是趕、嘴上說不餓、其實很饞",
+              "want": "想坐下來吃一頓很慢很慢、沒有人催的飯", "first_line": "我吃很快的，真的。",
+              "mbti": "ESFJ", "zodiac": "牡羊", "blood": "A"}},
+    {"name": "v10", "want_kind": "把舊東西還給某個人",
+     "card": {"shape": "方正", "texture": "斑駁", "color": "灰藍", "vibe": "欠著事、記性太好、不太會道歉",
+              "want": "想把一件留了太久的舊東西，親手還給它原來的主人", "first_line": "這個……是你的吧。",
+              "mbti": "ISTP", "zodiac": "天蠍", "blood": "O"}},
+    {"name": "v11", "want_kind": "想大聲罵人但不會",
+     "card": {"shape": "粗獷", "texture": "光滑", "color": "赭紅", "vibe": "老好人、笑著吞下去、肚子裡有火",
+              "want": "想對一個一直欺負自己的人大聲吼出來，哪怕只有一次", "first_line": "沒關係啦，我沒事。",
+              "mbti": "ENFJ", "zodiac": "水瓶", "blood": "B"}},
+    {"name": "v12", "want_kind": "畫一張沒人看過的圖",
+     "card": {"shape": "修長", "texture": "絨面", "color": "苔綠", "vibe": "愛塗鴉、藏得很深、怕被評價",
+              "want": "想畫一張完全只為自己畫、永遠不給任何人看的圖", "first_line": "我隨便畫畫的。",
+              "mbti": "INTP", "zodiac": "雙魚", "blood": "AB"}},
 )
 
 

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import pathlib
 import sys
 import urllib.error
@@ -104,6 +105,36 @@ def _post_stream(url: str, key: str, body: dict, stall_s: float) -> str:
     return "".join(parts)
 
 
+#: 被用爛的抽象詞（與 `twinagent.ABSTRACT_WORDS` 同值，測試釘住；這支要能單獨複製進沙箱所以不 import）。
+ABSTRACT_WORDS = ("渴望", "靜默", "虛無", "細碎", "共振", "壓抑", "沉默", "溫潤", "圓潤")
+MAX_EACH = 1
+_SENT = re.compile(r"[^。！？!?\n]*[。！？!?]?|\n")
+
+
+def overused(text: str) -> dict[str, int]:
+    """每個抽象詞在整封信（含命盤段）出現的次數，只列超過 `MAX_EACH` 的。"""
+    return {w: text.count(w) for w in ABSTRACT_WORDS if text.count(w) > MAX_EACH}
+
+
+def strip_overused(text: str) -> tuple[str, int]:
+    """確定性：依序掃每個句子，某個抽象詞已經出現過 `MAX_EACH` 次，之後含它的整句拿掉。回（新文字, 拿掉幾句）。
+    換行原樣保留；命盤段的標頭行（`MBTI：`…）若整行被拿掉，由 `fortune.render_section` 重寫標頭，所以不會壞。"""
+    seen = {w: 0 for w in ABSTRACT_WORDS}
+    out, dropped = [], 0
+    for m in _SENT.finditer(text):
+        s = m.group(0)
+        if not s:
+            continue
+        hit = [w for w in ABSTRACT_WORDS if w in s]
+        if hit and any(seen[w] >= MAX_EACH for w in hit):
+            dropped += 1
+            continue
+        for w in hit:
+            seen[w] += s.count(w)
+        out.append(s)
+    return re.sub(r"\n{3,}", "\n\n", "".join(out)).strip(), dropped
+
+
 def write_letter(cwd: str | os.PathLike, system: str, first: str, base: str, model: str, key: str,
                  *, stall_s: float = DEFAULT_STALL_S, attempts: int = DEFAULT_ATTEMPTS) -> int:
     """讀 `cwd/TRAITS.md`，打模型，寫 `cwd/信.md`。成功 0；沒寫出來 3。"""
@@ -124,6 +155,25 @@ def write_letter(cwd: str | os.PathLike, system: str, first: str, base: str, mod
             print(f"寫信第 {n} 次失敗：{type(exc).__name__}", file=sys.stderr)
             continue
         if text:
+            bad = overused(text)
+            if bad and n < max(1, attempts):          # 超用了 ⇒ 重寫一次（把超用的詞講給它聽，不給例句）
+                note = "、".join(f"「{w}」用了 {c} 次" for w, c in bad.items())
+                body2 = dict(body)
+                body2["messages"] = body["messages"] + [
+                    {"role": "assistant", "content": text},
+                    {"role": "user", "content": f"上一版{note}，每個詞整封信最多只能出現一次。把超用的詞全部換成"
+                                                "具體的動作、東西、聲音或手感，整封信重寫一次，格式不變。"}]
+                try:
+                    t2 = _post_stream(url, key, body2, stall_s).strip()
+                except (urllib.error.URLError, OSError, ValueError, Stalled):
+                    t2 = ""
+                if t2:
+                    text = t2
+            text, dropped = strip_overused(text)
+            if dropped:
+                print(f"抽象詞超用，拿掉 {dropped} 句。", file=sys.stderr)
+            if not text:
+                continue
             (cwd / LETTER).write_text(text + "\n", encoding="utf-8")
             return 0
         print(f"寫信第 {n} 次回空。", file=sys.stderr)

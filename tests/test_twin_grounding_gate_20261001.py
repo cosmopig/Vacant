@@ -956,6 +956,7 @@ def _install_fake_pi(tmp_path, monkeypatch, script):
     sp.write_text(json.dumps(script, ensure_ascii=False), encoding="utf-8")
     _UP["letter"] = script.get("letter") or "這個人手慢，慢慢說。"
     _upstream_url()
+    monkeypatch.setenv("VACANT_TWIN_REQUIRE_RECORD", "0")          # P13 第二輪：假 pi 的成品沒有「試的紀錄」；專屬測試另開
     monkeypatch.setenv("VACANT_TWIN_PI", str(pi))
     monkeypatch.setenv("VACANT_TWIN_PY", sys.executable)
     monkeypatch.setenv("FAKE_PI_SCRIPT", str(sp))

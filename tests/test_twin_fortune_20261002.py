@@ -412,8 +412,13 @@ LETTER_FINAL = ("這個人手慢。\n\n命盤\nMBTI：你是 INFP（你自己選
                 "T/F：先想到的是別人的心情。\nJ/P：在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道。\n星座：雙魚（水象）。像水。\n")
 
 
-def _card(tmp, rows, letter=LETTER_FINAL, f=None, files=None, traits="", attempts=1):
+_REC_DEFAULT = "# 試的紀錄\n" + "第一步，我走過去把東西拿起來看。第二步，它掉了，我撿起來接著做。" * 2 + "\n"
+
+
+def _card(tmp, rows, letter=LETTER_FINAL, f=None, files=None, traits="", attempts=1, norecord=False):
     pathlib.Path(tmp).mkdir(parents=True, exist_ok=True)
+    if not norecord:                       # P13 第二輪：沒有「試的紀錄」就沒有第 3、4 行；預設給一份夠長的
+        files = {fz.RECORD_FILE: _REC_DEFAULT, **(files or {})}
     rd, ws = _world(pathlib.Path(tmp), rows, card=None, files=files)
     (rd / "letter_final.md").write_text(letter, encoding="utf-8")
     (rd / "run_RUN-ON.json").write_text(json.dumps({"attempts": [{}] * attempts}), encoding="utf-8")
@@ -717,7 +722,7 @@ def test_emit_writes_enumerations_only_through_gate_meta_and_event_file(tmp_path
 
 
 def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
-    rd, ws = _world(tmp_path, BROWSE_THEN_PLAN, card=None, files={"成品.md": "# 鬆環對照冊\n內文", "PLAN.md": PLAN_TXT})
+    rd, ws = _world(tmp_path, BROWSE_THEN_PLAN, card=None, files={"成品.md": "# 鬆環對照冊\n內文", "PLAN.md": PLAN_TXT, fz.RECORD_FILE: _REC_DEFAULT})
     (rd / "letter_final.md").write_text(LETTER_FINAL, encoding="utf-8")
     (rd / fz.FINAL_NAME).write_text(json.dumps(fz.resolve(FULL, {})), encoding="utf-8")
     events, side = tmp_path / "lc.jsonl", tmp_path / "lc.sidecar.jsonl"

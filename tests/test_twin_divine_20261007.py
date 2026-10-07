@@ -86,6 +86,10 @@ class _LetterUp(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)).decode("utf-8"))
         type(self).seen.append(body)
         mode = type(self).mode
+        if mode == "overuse":
+            txt = "他渴望。他又渴望，也靜默。\n命盤\nMBTI：INFP\n想試：渴望" if len(type(self).seen) == 1 else "他渴望。他渴望，也渴望。他敲桌角。\n命盤\nMBTI：INFP\n"
+            self._send(json.dumps({"choices": [{"message": {"content": txt}}]}).encode(), "application/json")
+            return
         if mode == "empty-then-ok" and len(type(self).seen) == 1:
             data = json.dumps({"choices": [{"message": {"content": ""}}]}).encode()
             self._send(data, "application/json")
@@ -258,3 +262,64 @@ def test_g1_path_followed_by_prose_is_cut_at_the_folder_or_the_file_extension() 
     assert len(bad) == 1 and "缺角的信" in bad[0]["msg"]
     # 負控制：地上真的沒有的檔，仍是「地上沒有這個檔」
     assert "地上沒有這個檔" in gg.check_read("x\n地上/帳本鏈/不存在的檔.txt\n", set(), gf)[0]["msg"]
+
+
+# ───────── 第二輪：同質化 ─────────
+
+ABS = twinagent.ABSTRACT_WORDS
+
+
+def test_abstract_word_list_is_pinned_and_in_both_prompts() -> None:
+    assert twin_letter.ABSTRACT_WORDS == fz.ABSTRACT_WORDS == ABS
+    for w in ("渴望", "靜默", "虛無", "細碎", "共振", "壓抑", "沉默", "溫潤", "圓潤"):
+        assert w in ABS and w in twinagent.LETTER_SYSTEM_PROMPT and w in twinagent.SYSTEM_PROMPT
+    assert "具體的感官細節" in twinagent.LETTER_SYSTEM_PROMPT and "小動作" in twinagent.LETTER_SYSTEM_PROMPT
+    assert "具體動作" in twinagent.SYSTEM_PROMPT and "別的居民看得見的改變" in twinagent.SYSTEM_PROMPT
+    assert "例如" not in twinagent.SYSTEM_PROMPT + twinagent.LETTER_SYSTEM_PROMPT
+
+
+def test_strip_overused_keeps_the_first_use_and_drops_later_sentences() -> None:
+    txt = "他有渴望。他又一次渴望，還很靜默。第三句渴望。他的手會敲桌角。\n命盤\nMBTI：INFP\n想試：渴望被聽見\n"
+    out, n = twin_letter.strip_overused(txt)
+    assert out.count("渴望") == 1 and n == 3 and "敲桌角" in out and "MBTI：INFP" in out
+    assert "靜默" not in out, "含超用詞的整句拿掉（同句的另一個詞跟著走）"
+    assert twin_letter.overused(txt) == {"渴望": 4}
+    ok = "他渴望。他靜默。他虛無。"                                   # 負控制：每詞各一次不動
+    assert twin_letter.strip_overused(ok) == (ok, 0) and twin_letter.overused(ok) == {}
+
+
+def test_twin_letter_rewrites_once_when_overused_then_still_enforces_the_cap(tmp_path, letter_server) -> None:
+    _LetterUp.mode = "overuse"
+    _LetterUp.seen = []
+    (tmp_path / "TRAITS.md").write_text("x\n", encoding="utf-8")
+    rc = twin_letter.write_letter(tmp_path, "s", "m", letter_server, "m", "k", stall_s=5, attempts=3)
+    assert rc == 0
+    out = (tmp_path / "信.md").read_text(encoding="utf-8")
+    assert all(out.count(w) <= 1 for w in ABS), out
+    assert len(_LetterUp.seen) == 2, "超用 ⇒ 重寫一次（只一次）"
+    assert "渴望」用了" in _LetterUp.seen[1]["messages"][-1]["content"] and _LetterUp.seen[1]["messages"][-2]["role"] == "assistant"
+
+
+def test_g1_fails_when_the_record_is_missing_or_empty_and_passes_when_present(tmp_path) -> None:
+    led = {"v": 1, "require_record": True, "read": [], "ground_files": [], "ground_text": {}, "letter": "", "world": "",
+           "facts": {"entities": {}, "claims": {}}}
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "PLAN.md").write_text("把紙船推過去\n", encoding="utf-8")
+    (ws / "成品.md").write_text("一艘船\n", encoding="utf-8")
+    r = gg.evaluate(ws, led)
+    assert not r["w1"]["ok"] and gg.RECORD_MISSING_MSG in gg.message_of(r["w1"])
+    assert gg.describe("check_w1_read", False, gg.message_of(r["w1"])) == ("G1", gg.FAIL_LABEL_G1_RECORD)
+    (ws / gg.RECORD_FILE).write_text("太短", encoding="utf-8")
+    assert not gg.evaluate(ws, led)["w1"]["ok"], "空的／太短 ＝沒做完"
+    (ws / gg.RECORD_FILE).write_text("第一步走過去。" * 8 + "\n感想：好。", encoding="utf-8")
+    assert gg.evaluate(ws, led)["w1"]["ok"]
+    (ws / gg.RECORD_FILE).unlink()
+    assert gg.evaluate(ws, {**led, "require_record": False})["w1"]["ok"], "旗標關著（測試的假 pi）不查"
+    assert_ks1_clean(gg.RECORD_MISSING_MSG)
+
+
+def test_card_line_two_is_the_concrete_plan_line_and_drops_a_pile_of_abstract_words() -> None:
+    f = fz.resolve({"mbti": "INFP", "mbti_source": "ai", "zodiac": "雙魚", "blood": "O"}, {})
+    assert fz.want_of("把桌五的音樂盒轉三圈，看第十二個音會不會響\n", "x", f) == "把桌五的音樂盒轉三圈，看第十二個音會不會響"
+    assert fz.want_of("渴望把壓抑的靜默化成共振\n", "x", f) is None

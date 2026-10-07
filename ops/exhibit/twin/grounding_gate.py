@@ -116,6 +116,11 @@ FAIL_LABEL = {"G1": "點名的東西沒打開", "G2": "找不到出處", "G3": "
               "G4": "收據不是閘門給的"}
 #: G1 的第二種失敗：計畫點名的東西地上根本沒有（id 仍是 G1）。
 FAIL_LABEL_G1_ABSENT = "點名的東西地上沒有"
+#: P13 第二輪：G1 的第三種失敗——「試的紀錄.md」缺或空（id 仍是 G1）。
+FAIL_LABEL_G1_RECORD = "還沒交試的紀錄"
+RECORD_FILE = "試的紀錄.md"
+MIN_RECORD_CHARS = 30
+RECORD_MISSING_MSG = "試的紀錄（試的紀錄.md）沒有交，或是空的"
 #: 沒有紀錄可對照（`_ledger.py` 沒備好）。量不到不是通過。
 NO_LEDGER_MSG = "這一跑的步驟紀錄沒有備好，這一格沒辦法對照"
 
@@ -147,6 +152,8 @@ def describe(case: str, ok: bool, message: str = "") -> tuple[str, str]:
     label = FAIL_LABEL[cid]
     if cid == "G1" and "地上沒有這個檔" in (message or ""):
         label = FAIL_LABEL_G1_ABSENT
+    if cid == "G1" and RECORD_MISSING_MSG in (message or ""):
+        return cid, FAIL_LABEL_G1_RECORD
     where = locate(message)
     if where:
         place = "成品" if where["file"] == "artifact" else "計畫"
@@ -630,8 +637,13 @@ def evaluate(ws: str | os.PathLike, ledger: Any) -> dict[str, dict]:
         hay.append(ledger["letter"])
     if ledger.get("world"):
         hay.append(ledger["world"])
+    w1 = check_read(plan, read, list(ledger.get("ground_files") or []))
+    if ledger.get("require_record"):
+        rec = next((tx for n, tx in arts if n == RECORD_FILE), "")
+        if len(rec.strip()) < MIN_RECORD_CHARS:
+            w1.append({"file": "plan", "line": None, "msg": RECORD_MISSING_MSG})
     res = {
-        "w1": check_read(plan, read, list(ledger.get("ground_files") or [])),
+        "w1": w1,
         "w2": check_source(arts, hay),
         "w3": check_agree(arts, read, ledger.get("facts") or {}),
         "w4": check_receipt(arts, hay),
@@ -755,7 +767,11 @@ def build_ledger(rd: str | os.PathLike, facts_path: pathlib.Path | None = None) 
     if "WORLD.md" in read:
         world = _read(rd / "stage2_in" / "WORLD.md") or ""
     letter = _read(rd / LETTER_COPY_NAME) or ""
-    return {"v": 1, "read": read, "ground_files": ground_files, "ground_text": ground_text,
+    try:
+        req = bool(json.loads(_read(rd / GATE_META_NAME) or "{}").get("require_record"))
+    except ValueError:
+        req = False
+    return {"v": 1, "require_record": req, "read": read, "ground_files": ground_files, "ground_text": ground_text,
             "world": world, "letter": letter, "facts": load_facts(facts_path)}
 
 
