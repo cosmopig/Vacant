@@ -1,0 +1,867 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/local.css">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{position:absolute;left:0;top:0;display:block}</style>
+</head><body>
+<canvas id="gl"></canvas><canvas id="c2"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ═════════════════════════ setup ═════════════════════════
+const Q = new URLSearchParams(location.search);
+const W = +(Q.get('w') || 1920), H = +(Q.get('h') || 1080);
+const PORTRAIT = H > W, S = Math.min(W, H) / 1080;
+const glc = document.getElementById('gl'), c2 = document.getElementById('c2');
+c2.width = W; c2.height = H;
+const ctx = c2.getContext('2d', { alpha: false });
+glc.style.visibility = 'hidden';
+const R = new THREE.WebGLRenderer({ canvas: glc, antialias: true, preserveDrawingBuffer: true });
+R.setPixelRatio(1); R.setSize(W, H, false);
+R.toneMapping = THREE.NeutralToneMapping; R.toneMappingExposure = 1.0;
+R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(R);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const cam = new THREE.PerspectiveCamera(PORTRAIT ? 46 : 30, W / H, .1, 400);
+
+const C = { light: '#f3f0ea', dark: '#0a0907', or: '#f26b1d', ink: '#141310', cream: '#f5efe6', green: '#1fbf6a', red: '#ff3b30', grey: '#8f8b84' };
+const ZH = '"Noto Sans TC"', LAT = '"Inter","Noto Sans TC"', MONO = '"JetBrains Mono","Noto Sans TC"';
+
+// ═════════════════════════ math ═════════════════════════
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const P = (t, a, b) => clamp((t - a) / (b - a));
+const eOutExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const eOutCubic = x => 1 - Math.pow(1 - x, 3);
+const eInCubic = x => x * x * x;
+const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eOutBack = (x, s = 1.70158) => { const c3 = s + 1; return 1 + c3 * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2); };
+/** damped spring 0→1 (overshoots), τ = seconds since start */
+const spring = (τ, w = 14, z = .42) => τ <= 0 ? 0 : 1 - Math.exp(-z * w * τ) * (Math.cos(w * Math.sqrt(1 - z * z) * τ) + (z / Math.sqrt(1 - z * z)) * Math.sin(w * Math.sqrt(1 - z * z) * τ));
+const win = (t, a, b, fi = .3, fo = .3) => Math.min(P(t, a, a + fi), 1 - P(t, b - fo, b));
+function rng(seed) { let s = (seed * 2654435761) >>> 0 || 1; return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 1e9) / 1e9; }; }
+function hex(seed, n) { const r = rng(seed * 7919 + 13); let s = ''; for (let i = 0; i < n; i++) s += '0123456789abcdef'[Math.floor(r() * 16)]; return s; }
+
+// ═════════════════════════ world (dark ↔ light) ═════════════════════════
+const isDark = t => t < 8.45 || (t >= 24.75 && t < 29.22);
+let DARK = true;
+
+// ═════════════════════════ materials / factories ═════════════════════════
+const M = {
+  or: new THREE.MeshPhysicalMaterial({ color: C.or, roughness: .26, clearcoat: 1, clearcoatRoughness: .08 }),
+  orGlass: new THREE.MeshPhysicalMaterial({ color: '#ff9a5c', roughness: .08, transmission: 1, thickness: .7, ior: 1.45, attenuationColor: new THREE.Color('#f26b1d'), attenuationDistance: .8 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .06, transmission: 1, thickness: .5, ior: 1.42 }),
+  white: new THREE.MeshPhysicalMaterial({ color: '#fbfaf7', roughness: .32, clearcoat: .7, clearcoatRoughness: .2 }),
+  grey: new THREE.MeshPhysicalMaterial({ color: '#9b978f', roughness: .4, clearcoat: .6 }),
+  ink: new THREE.MeshPhysicalMaterial({ color: '#1c1b18', roughness: .25, clearcoat: 1 }),
+  smoke: new THREE.MeshPhysicalMaterial({ color: '#3b362f', roughness: .22, clearcoat: 1, metalness: .1, transmission: .25, thickness: .3 }),
+  tube: new THREE.MeshPhysicalMaterial({ color: C.or, roughness: .3, emissive: new THREE.Color(C.or), emissiveIntensity: .25 }),
+};
+const geoCache = {};
+const rbox = (w, h, d, r) => { const k = [w, h, d, r].join(); return geoCache[k] || (geoCache[k] = new RoundedBoxGeometry(w, h, d, 5, r)); };
+function textPlane(w, h, pxW, pxH) {
+  const cv = document.createElement('canvas'); cv.width = pxW; cv.height = pxH;
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false, depthWrite: false });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  mesh.renderOrder = 2;
+  return { mesh, cv, g: cv.getContext('2d'), tex, key: null };
+}
+const STATIC = [];
+function staticDraw(tp, fn) { STATIC.push([tp, fn]); }
+function redraw(tp, key, fn) { if (tp.key === key) return; tp.key = key; tp.g.clearRect(0, 0, tp.cv.width, tp.cv.height); fn(tp.g, tp.cv.width, tp.cv.height); tp.tex.needsUpdate = true; }
+/** a rounded body with a text plane floating on its front face */
+function card(w, h, d, r, mat, pxPerUnit = 220) {
+  const grp = new THREE.Group();
+  const body = new THREE.Mesh(rbox(w, h, d, r), mat); body.castShadow = true; grp.add(body);
+  const tp = textPlane(w, h, Math.round(w * pxPerUnit), Math.round(h * pxPerUnit)); tp.mesh.position.z = d / 2 + .003; grp.add(tp.mesh);
+  grp.userData = { body, tp, w, h, d };
+  scene.add(grp); return grp;
+}
+function gtxt(g, s, x, y, size, o = {}) {
+  g.save(); g.font = `${o.weight || 600} ${size}px ${o.fam || ZH}`; g.fillStyle = o.color || C.ink;
+  g.textAlign = o.align || 'left'; g.textBaseline = o.base || 'middle'; g.globalAlpha = o.alpha === undefined ? 1 : o.alpha;
+  if (o.ls) g.letterSpacing = o.ls + 'px';
+  if (o.maxW) { const m = g.measureText(s).width; if (m > o.maxW) g.font = `${o.weight || 600} ${size * o.maxW / m}px ${o.fam || ZH}`; }
+  g.fillText(s, x, y); g.restore();
+}
+function gcheck(g, x, y, s, color, lw = 8) { g.save(); g.strokeStyle = color; g.lineWidth = lw; g.lineCap = g.lineJoin = 'round'; g.beginPath(); g.moveTo(x - s * .45, y); g.lineTo(x - s * .12, y + s * .33); g.lineTo(x + s * .5, y - s * .38); g.stroke(); g.restore(); }
+function gcross(g, x, y, s, color, lw = 8) { g.save(); g.strokeStyle = color; g.lineWidth = lw; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - s * .4, y - s * .4); g.lineTo(x + s * .4, y + s * .4); g.moveTo(x + s * .4, y - s * .4); g.lineTo(x - s * .4, y + s * .4); g.stroke(); g.restore(); }
+function tube(mat = M.tube, r = .045) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12, 1), mat); m.castShadow = true; scene.add(m); return m; }
+const UP = new THREE.Vector3(0, 1, 0);
+function link(m, a, b, prog = 1) {
+  const d = new THREE.Vector3().subVectors(b, a); const len = d.length() * prog;
+  if (len < 1e-4) { m.visible = false; return; }
+  m.visible = true; m.scale.set(1, len, 1);
+  m.position.copy(a).addScaledVector(d.normalize(), len / 2);
+  m.quaternion.setFromUnitVectors(UP, d);
+}
+
+// ═════════════════════════ lights ═════════════════════════
+const hemi = new THREE.HemisphereLight('#ffffff', '#d9d2c7', .6); scene.add(hemi);
+const key = new THREE.DirectionalLight('#ffffff', 2.2); key.position.set(5, 9, 8); key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024); key.shadow.camera.left = -14; key.shadow.camera.right = 14; key.shadow.camera.top = 14; key.shadow.camera.bottom = -14; key.shadow.radius = 6; key.shadow.bias = -.0004;
+scene.add(key); scene.add(key.target);
+const rim = new THREE.DirectionalLight(C.or, 0); rim.position.set(-6, 3, -6); scene.add(rim);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: .13 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+// ═════════════════════════ objects ═════════════════════════
+const LOGO = [
+"█   █  ███   ███   ███  █   █ █████",
+"█   █ █   █ █   █ █   █ ██  █   █  ",
+"█   █ █   █ █     █   █ ██  █   █  ",
+"█   █ █████ █     █████ █ █ █   █  ",
+"█   █ █   █ █     █   █ █  ██   █  ",
+" █ █  █   █ █   █ █   █ █  ██   █  ",
+"  █   █   █  ███  █   █ █   █   █  "];
+const PTS = []; LOGO.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '█') PTS.push([c, r]); }));
+const VOX_S = .5;
+const voxGeo = rbox(.44, .44, .44, .07);
+const vox = PTS.map(([c, r], i) => { const m = new THREE.Mesh(voxGeo, (i * 7) % 11 === 0 ? M.orGlass : M.or); m.castShadow = true; scene.add(m); return m; });
+const voxR = rng(9), voxStart = PTS.map(() => { const a = voxR() * 6.283, b = (voxR() - .5) * 2.4, d = 10 + voxR() * 10; return [Math.cos(a) * d, Math.sin(b) * d * .6, -6 - voxR() * 18, voxR() * 6, voxR() * 6, voxR() * 6, voxR()]; });
+const logoPos = ([c, r]) => new THREE.Vector3((c - 17) * VOX_S, (3 - r) * VOX_S, 0);
+
+const STEPS = [['read', 'data/payments.csv'], ['bash', 'python calc.py'], ['read', 'manual.md'], ['bash', 'sh run_tests.sh'],
+  ['edit', 'calc.py'], ['bash', 'python calc.py'], ['grep', '"fee_id" manual.md'], ['bash', 'sh run_tests.sh'],
+  ['write', 'notes.md'], ['bash', 'python report.py'], ['read', 'fees.json'], ['say', '"done."']];
+// step cards (cold open tunnel + freeze debris)
+const stepCards = STEPS.map(([tool, arg], i) => {
+  const g = card(2.6, 1.0, .16, .14, M.smoke, 200);
+  staticDraw(g.userData.tp, (x, w, h) => {
+    gtxt(x, `#${String(i + 1).padStart(2, '0')}`, 26, h / 2, 34, { fam: MONO, weight: 400, color: 'rgba(245,239,230,.55)' });
+    gtxt(x, tool, 112, h / 2, 40, { fam: MONO, weight: 700, color: '#ffb27f' });
+    gtxt(x, arg, 232, h / 2, 34, { fam: MONO, weight: 400, color: 'rgba(245,239,230,.92)', maxW: w - 260 });
+  });
+  return g;
+});
+const lens = new THREE.Mesh(new THREE.SphereGeometry(.85, 48, 32), new THREE.MeshPhysicalMaterial({ color: '#fff', roughness: 0, transmission: 1, thickness: 1.6, ior: 1.5 }));
+scene.add(lens);
+// agents
+const AG = [['π', 'pi'], ['CC', 'claude code'], ['OC', 'opencode'], ['CX', 'codex']];
+const agents = AG.map(([sym, name], i) => {
+  const g = card(1.5, 1.5, .4, .34, M.white, 240);
+  staticDraw(g.userData.tp, (x, w, h) => { gtxt(x, sym, w / 2, h * .44, 150, { fam: LAT, weight: 800, align: 'center', color: C.or }); gtxt(x, name, w / 2, h * .82, 40, { fam: LAT, weight: 600, align: 'center', color: '#55524c' }); });
+  return g;
+});
+const agTubes = AG.map(() => tube());
+// keycaps
+const KEYS = [['契約', 'contract'], ['設定', 'config'], ['金鑰', 'keys']];
+const keys = KEYS.map(([zh, en]) => {
+  const g = card(2.1, 2.1, .8, .34, M.white, 220);
+  staticDraw(g.userData.tp, (x, w, h) => { gtxt(x, zh, w / 2, h * .45, 150, { weight: 900, align: 'center' }); gtxt(x, en, w / 2, h * .8, 44, { fam: LAT, weight: 400, align: 'center', color: '#77736b' }); });
+  return g;
+});
+// chain blocks
+const chain = STEPS.slice(0, 9).map(([tool, arg], i) => {
+  const g = card(2.6, 1.6, .42, .2, M.white, 220);
+  staticDraw(g.userData.tp, (x, w, h) => {
+    gtxt(x, `#${String(i + 1).padStart(2, '0')}`, 34, 56, 40, { fam: MONO, weight: 700, color: C.or });
+    gtxt(x, tool, 132, 56, 40, { fam: MONO, weight: 700, color: C.ink });
+    gtxt(x, arg, 34, 128, 36, { fam: MONO, weight: 400, color: '#4a4740', maxW: w - 68 });
+    gtxt(x, 'prev ' + hex(i, 10), 34, h - 92, 28, { fam: MONO, weight: 400, color: '#8a867e' });
+    gtxt(x, 'sha  ' + hex(i + 1, 10), 34, h - 50, 28, { fam: MONO, weight: 700, color: C.or });
+  });
+  return g;
+});
+const chainTubes = chain.slice(1).map(() => tube(M.tube, .06));
+const seals = chain.map(() => { const m = new THREE.Mesh(new THREE.SphereGeometry(.13, 24, 16), M.or); scene.add(m); return m; });
+// request panes
+const panes = [0, 1].map(k => {
+  const g = card(3.3, 4.4, .12, .16, M.glass, 200);
+  const edge = new THREE.Mesh(rbox(3.42, 4.52, .06, .18), new THREE.MeshBasicMaterial({ color: C.green, transparent: true, opacity: 0, toneMapped: false }));
+  edge.position.z = -.05; g.add(edge); g.userData.edge = edge; return g;
+});
+// check pills
+const CH = [['檔案沒寫', 'missing file', 'missing_output'], ['失敗被略過', 'skipped failure', 'failed_step'], ['測試對不上', 'test claim mismatch', 'test_claim'], ['數字沒出處', 'unsourced number', 'unsourced'], ['點名的檔沒打開', 'named file never opened', 'unread']];
+const pillW = PORTRAIT ? 7.0 : 8.4;
+const pills = CH.map(() => card(pillW, 1.08, .36, .5, new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .18, clearcoat: 1, transmission: .35, thickness: .4 }), 200));
+const fileCard = card(1.1, 1.4, .1, .1, M.white, 200);
+staticDraw(fileCard.userData.tp, (x, w, h) => { for (let k = 0; k < 5; k++) { x.fillStyle = k ? 'rgba(31,191,106,.55)' : C.green; x.fillRect(30, 40 + k * 34, k === 4 ? 90 : 160, 14); } gtxt(x, 'answer.txt', w / 2, h - 46, 30, { fam: MONO, weight: 700, align: 'center', color: C.green }); });
+// delivery card
+const delW = PORTRAIT ? 6.2 : 10.4, delH = PORTRAIT ? 8.8 : 5.4;
+const deliv = card(delW, delH, .14, .22, M.white, 180);
+// bars
+const bars = [M.grey, M.or].map(m => { const b = new THREE.Mesh(rbox(1.6, 1, 1.6, .16), m); b.castShadow = true; scene.add(b); return b; });
+// beads
+const beadMat = () => new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .1, clearcoat: 1, emissive: new THREE.Color(C.green), emissiveIntensity: 0 });
+const beads = Array.from({ length: 9 }, () => { const m = new THREE.Mesh(new THREE.SphereGeometry(.34, 40, 24), beadMat()); m.castShadow = true; scene.add(m); return m; });
+const thread = tube(new THREE.MeshPhysicalMaterial({ color: '#c9c3b8', roughness: .5 }), .03);
+const scanPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: C.or, transparent: true, opacity: .95, side: THREE.DoubleSide, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
+scene.add(scanPlane);
+
+const ALL = [...vox, ...stepCards, lens, ...agents, ...agTubes, ...keys, ...chain, ...chainTubes, ...seals, ...panes, ...pills, fileCard, deliv, ...bars, ...beads, thread, scanPlane];
+
+// ═════════════════════════ camera rig ═════════════════════════
+/** aim: target, yaw, pitch, contentW/H to fit, screen offset (fraction of W/H) */
+function rig(target, yaw, pitch, cw, ch, sx = 0, sy = 0, extra = 1) {
+  const vf = cam.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * cam.aspect);
+  const dist = Math.max(ch / 2 / Math.tan(vf / 2), cw / 2 / Math.tan(hf / 2)) * extra;
+  cam.position.set(target.x + Math.sin(yaw) * Math.cos(pitch) * dist, target.y + Math.sin(pitch) * dist, target.z + Math.cos(yaw) * Math.cos(pitch) * dist);
+  cam.lookAt(target);
+  cam.setViewOffset(W, H, -sx * W, -sy * H, W, H);
+  cam.updateProjectionMatrix();
+}
+const _v = new THREE.Vector3();
+function proj(v) { _v.copy(v).project(cam); return [(_v.x + 1) / 2 * W, (1 - _v.y) / 2 * H]; }
+function projObj(o, dx = 0, dy = 0, dz = 0) { o.updateMatrixWorld(); return proj(new THREE.Vector3(dx, dy, dz).applyMatrix4(o.matrixWorld)); }
+
+// ═════════════════════════ 2D overlay toolkit ═════════════════════════
+let AUDIT = [];
+const ink = () => DARK ? C.cream : C.ink;
+const dim = () => DARK ? 'rgba(245,239,230,.6)' : 'rgba(20,19,16,.55)';
+function font(size, weight, fam) { return `${weight} ${Math.round(size * S)}px ${fam}`; }
+function measure(s, size, weight = 600, fam = ZH, ls = 0) { ctx.save(); ctx.letterSpacing = ls * S + 'px'; ctx.font = font(size, weight, fam); const w = ctx.measureText(s).width; ctx.restore(); return w; }
+function txt(s, x, y, o = {}) {
+  const size = o.size || 40, fam = o.fam || ZH, weight = o.weight || 600, al0 = o.align || 'center';
+  const a = o.alpha === undefined ? 1 : o.alpha; if (a <= 0.003 || !s) return 0;
+  ctx.save(); ctx.globalAlpha *= a; ctx.textAlign = al0; ctx.textBaseline = 'middle'; ctx.letterSpacing = (o.ls || 0) * S + 'px';
+  let px = size; ctx.font = font(px, weight, fam);
+  if (o.maxW) { const w = ctx.measureText(s).width; if (w > o.maxW) { px = size * o.maxW / w; ctx.font = font(px, weight, fam); } }
+  const w = ctx.measureText(s).width, sc = o.scale || 1;
+  if (o.glow) { ctx.shadowColor = o.glowColor || C.or; ctx.shadowBlur = o.glow * S; }
+  ctx.fillStyle = o.color || ink();
+  ctx.translate(x, y); if (o.rot) ctx.rotate(o.rot); ctx.scale(sc, sc); ctx.fillText(s, 0, 0);
+  ctx.restore();
+  const left = al0 === 'left' ? x : al0 === 'right' ? x - w * sc : x - w * sc / 2;
+  if (a > .04 && !o.noAudit) AUDIT.push({ s, x0: left, x1: left + w * sc, y0: y - px * S * sc / 2, y1: y + px * S * sc / 2 });
+  return w;
+}
+/** kinetic line: segments [{s, at, color?, weight?}] laid out on one line; each char springs up at its segment's time */
+function kinetic(segs, x, y, o = {}) {
+  const size = o.size || 80, fam = o.fam || ZH, weight = o.weight || 900, ls = o.ls || 0, st = o.stagger || .028;
+  const chars = []; segs.forEach(sg => [...sg.s].forEach((ch, k) => chars.push({ ch, at: sg.at + k * st, color: sg.color, weight: sg.weight || weight })));
+  ctx.save(); ctx.letterSpacing = ls * S + 'px';
+  const widths = chars.map(c => { ctx.font = font(size, c.weight, fam); return ctx.measureText(c.ch).width; });
+  ctx.restore();
+  let total = widths.reduce((a, b) => a + b, 0);
+  let k = 1; if (o.maxW && total > o.maxW) { k = o.maxW / total; total = o.maxW; }
+  let cx = o.align === 'left' ? x : x - total / 2;
+  const t = o.t, out = o.out ?? 1e9;
+  chars.forEach((c, i) => {
+    const τ = t - c.at; const p = spring(τ, o.w || 16, o.z || .45);
+    const e = eInCubic(P(t, out + i * .012, out + .28 + i * .012));
+    const a = clamp(τ * 9) * (1 - e);
+    if (a > 0) {
+      const sc = (lerp(.35, 1, p)) * k;
+      ctx.save(); ctx.globalAlpha *= a * (o.alpha ?? 1);
+      ctx.translate(cx + widths[i] * k / 2, y + (1 - p) * size * S * .55 - e * size * S * .4);
+      ctx.rotate((1 - p) * .18 * ((i % 2) ? 1 : -1));
+      ctx.scale(sc, sc); ctx.letterSpacing = ls * S + 'px';
+      ctx.font = font(size, c.weight, fam); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = c.color || o.color || ink(); ctx.fillText(c.ch, 0, 0); ctx.restore();
+    }
+    cx += widths[i] * k;
+  });
+  const left = o.align === 'left' ? x : x - total / 2;
+  if (chars.some(c => t > c.at) && t < out + .3) AUDIT.push({ s: segs.map(s => s.s).join(''), x0: left, x1: left + total, y0: y - size * S * k / 2, y1: y + size * S * k / 2 });
+  return { left, right: left + total, width: total };
+}
+// hand-drawn doodles ------------------------------------------------------
+function rough(pts, prog, seed, color = C.or, lw = 7) {
+  if (prog <= 0) return; const r = rng(seed);
+  const jit = pts.map(([x, y]) => [x + (r() - .5) * 4 * S, y + (r() - .5) * 4 * S]);
+  let L = 0; const seg = []; for (let i = 1; i < jit.length; i++) { const d = Math.hypot(jit[i][0] - jit[i - 1][0], jit[i][1] - jit[i - 1][1]); seg.push(d); L += d; }
+  let rem = L * clamp(prog);
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw * S; ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(...jit[0]);
+  for (let i = 1; i < jit.length && rem > 0; i++) { const f = Math.min(1, rem / seg[i - 1]); ctx.lineTo(lerp(jit[i - 1][0], jit[i][0], f), lerp(jit[i - 1][1], jit[i][1], f)); rem -= seg[i - 1]; }
+  ctx.stroke(); ctx.restore();
+}
+function dUnder(x0, x1, y, prog, seed, color, lw) { const pts = []; for (let i = 0; i <= 24; i++) { const u = i / 24; pts.push([lerp(x0, x1, u), y + Math.sin(u * 9 + seed) * 4 * S + u * 6 * S]); } rough(pts, prog, seed, color, lw); }
+function dStrike(x0, x1, y, prog, seed, color, lw = 9) { rough([[x0, y + 8 * S], [lerp(x0, x1, .5), y - 2 * S], [x1, y - 10 * S]], prog, seed, color, lw); }
+function dCircle(cx, cy, rx, ry, prog, seed, color, lw) { const pts = []; for (let i = 0; i <= 60; i++) { const a = -2.2 + i / 60 * 6.283 * 1.12; const k = 1 + .06 * Math.sin(i * .7 + seed); pts.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]); } rough(pts, prog, seed, color, lw); }
+function dArrow(x0, y0, x1, y1, prog, seed, color = C.or, lw = 7, bend = .25) {
+  const mx = (x0 + x1) / 2 - (y1 - y0) * bend, my = (y0 + y1) / 2 + (x1 - x0) * bend; const pts = [];
+  for (let i = 0; i <= 30; i++) { const u = i / 30; pts.push([(1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * mx + u * u * x1, (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * my + u * u * y1]); }
+  rough(pts, prog, seed, color, lw);
+  const hp = P(prog, .85, 1); if (hp > 0) { const ang = Math.atan2(y1 - my, x1 - mx), L = 22 * S; rough([[x1 - Math.cos(ang - .5) * L, y1 - Math.sin(ang - .5) * L], [x1, y1], [x1 - Math.cos(ang + .5) * L, y1 - Math.sin(ang + .5) * L]], hp, seed + 3, color, lw); }
+}
+function dSpark(cx, cy, r0, r1, prog, seed, color = C.or) { for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + seed; const p = clamp(prog * 1.4 - i * .04); rough([[cx + Math.cos(a) * r0, cy + Math.sin(a) * r0], [cx + Math.cos(a) * lerp(r0, r1, p), cy + Math.sin(a) * lerp(r0, r1, p)]], p > 0 ? 1 : 0, seed + i, color, 6); } }
+// frosted glass panel (blurs the 3D canvas behind it)
+function glass(x, y, w, h, r, o = {}) {
+  ctx.save(); ctx.globalAlpha *= (o.alpha ?? 1);
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.clip();
+  ctx.filter = `blur(${Math.round(22 * S)}px)`; ctx.drawImage(glc, 0, 0); ctx.filter = 'none';
+  ctx.fillStyle = o.tint || (DARK ? 'rgba(18,17,14,0.42)' : 'rgba(255,255,255,0.58)'); ctx.fillRect(x, y, w, h);
+  const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, DARK ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.75)'); g.addColorStop(.5, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h * .5);
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha *= (o.alpha ?? 1); ctx.lineWidth = 1.5 * S; ctx.strokeStyle = DARK ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.95)';
+  ctx.beginPath(); ctx.roundRect(x + .75 * S, y + .75 * S, w - 1.5 * S, h - 1.5 * S, r); ctx.stroke();
+  ctx.strokeStyle = DARK ? 'rgba(0,0,0,.3)' : 'rgba(20,19,16,.07)'; ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.stroke(); ctx.restore();
+}
+function ring(x, y, r, color, alpha, lw = 2) { if (alpha <= 0) return; ctx.save(); ctx.globalAlpha *= alpha; ctx.strokeStyle = color; ctx.lineWidth = lw * S; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.stroke(); ctx.restore(); }
+function check2(x, y, s, color, prog = 1, lw = 4) { rough([[x - s * .45, y], [x - s * .12, y + s * .33], [x + s * .5, y - s * .38]], prog, 77, color, lw); }
+
+// ═════════════════════════ timeline data ═════════════════════════
+let CUES = [], WORDS = [];
+const WT = (line, k) => CUES.find(c => c.i === line).start + Math.max(0, WORDS[line].words[k][0]);  // absolute time of word k
+
+// ═════════════════════════ 3D scene states ═════════════════════════
+function hideAll() { for (const o of ALL) o.visible = false; }
+function bob(t, i, a = .08) { return Math.sin(t * 1.6 + i * 1.7) * a; }
+
+function setWorld(t) {
+  DARK = isDark(t);
+  scene.background = new THREE.Color(DARK ? C.dark : C.light);
+  scene.environmentIntensity = DARK ? .75 : 1.0;
+  hemi.intensity = DARK ? .08 : .65; key.intensity = DARK ? .9 : 2.2; rim.intensity = DARK ? 3.2 : .4;
+  floor.material.opacity = DARK ? 0 : .13;
+}
+
+function scene3D(t) {
+  hideAll(); setWorld(t);
+  // ── A: the audit tunnel (4.2 – 7.1) ──
+  if (t < 7.05) {
+    rig(new THREE.Vector3(0, 0, 0), Math.sin(t * .4) * .08, .04, 10, 6);
+    if (t > 4.15) {
+      const implode = eInCubic(P(t, 6.35, 7.0));
+      stepCards.forEach((g, i) => {
+        const phase = ((t - 4.15) * .55 + i / 12) % 1;           // flows toward camera, endlessly
+        const z = lerp(-26, 6, phase), ang = i * 2.399;
+        let x = Math.cos(ang) * (2.3 + (i % 3) * .7), y = Math.sin(ang) * (1.5 + (i % 2) * .5);
+        x = lerp(x, 0, implode); y = lerp(y, 0, implode);
+        g.visible = phase < .97; g.position.set(x, y, lerp(z, -6, implode));
+        g.rotation.set(Math.sin(i) * .25, -x * .08, Math.sin(i * 3) * .12 + t * .05);
+        const f = clamp((t - 4.15) * 2.5) * (1 - implode * .9); g.scale.setScalar(f * lerp(1, .2, implode));
+      });
+      lens.visible = implode < .95; lens.scale.setScalar(clamp((t - 4.4) * 3) * (1 - implode));
+      lens.position.set(Math.cos(t * 1.4) * 1.9, Math.sin(t * 2.1) * 1.0, 1.6);
+    }
+  }
+  // ── B: voxels assemble (7.05 – 11.05) ──
+  if (t >= 7.0 && t < 11.05) {
+    const yaw = lerp(-.38, .14, eInOut(P(t, 7.0, 11.0))), dolly = lerp(1.25, 1.0, eOutCubic(P(t, 7.0, 9.2)));
+    rig(new THREE.Vector3(0, -1.4, 0), yaw, .06, 22.5, 9.5, 0, PORTRAIT ? -.06 : 0, dolly);
+    floor.position.y = -2.4;
+    const rr = rng(5);
+    vox.forEach((m, i) => {
+      const [c, r] = PTS[i]; const s = voxStart[i];
+      const d = (c / 35) * .55 + s[6] * .25, a = 7.05 + d;
+      const q = P(t, a, a + .85), e = eOutBack(q, 1.3);
+      const L = logoPos(PTS[i]);
+      m.visible = true;
+      m.position.set(lerp(s[0], L.x, e), lerp(s[1], L.y, e), lerp(s[2], L.z, e));
+      m.rotation.set(s[3] * (1 - eOutCubic(q)), s[4] * (1 - eOutCubic(q)), s[5] * (1 - eOutCubic(q)));
+      // impact ripple after 8.45, then idle breathing
+      const rip = Math.sin((c - 17) * .55 - (t - 8.45) * 11) * .35 * Math.exp(-(t - 8.45) * 2.2) * (t > 8.45 ? 1 : 0);
+      m.position.z += rip + Math.sin(t * 1.7 + c * .3) * .05 * P(t, 9, 10);
+      // exit: scatter outward (10.65 – 11.05)
+      const ex = eInCubic(P(t, 10.62 + (i % 7) * .02, 11.02));
+      if (ex > 0) { m.position.x += (L.x) * ex * 1.6; m.position.y += (L.y + 1) * ex * 3 - ex * 2; m.position.z += ex * 6; m.rotation.x += ex * 3; }
+      m.scale.setScalar(lerp(.2, 1, clamp(q * 3)) * (1 - ex * .6));
+    });
+  }
+  // ── C: install — core + agents + keycaps (11.05 – 17.6) ──
+  if (t >= 11.05 && t < 17.6) {
+    const keyPhase = eInOut(P(t, 14.85, 15.25));
+    const sx = lerp(PORTRAIT ? 0 : .23, 0, keyPhase), sy = lerp(PORTRAIT ? .06 : 0, 0, keyPhase);
+    rig(new THREE.Vector3(0, 0, 0), Math.sin(t * .35) * .14, .1, PORTRAIT ? 11.5 : 14, PORTRAIT ? 11 : 10.4, sx, sy, lerp(1, 1.15, keyPhase));
+    floor.position.y = -4.5;
+    const back = keyPhase * -9, shrink = 1 - .45 * keyPhase;
+    // V-core: the first five logo columns, compact
+    vox.forEach((m, i) => {
+      const [c, r] = PTS[i]; if (c >= 5) return;
+      m.visible = true; const s = spring(t - 11.1 - r * .03, 13, .5);
+      m.position.set((c - 2) * .3 * shrink, (3 - r) * .3 * shrink, back + Math.sin(t * 2 + r) * .04);
+      m.rotation.set(0, t * .6 + Math.sin(t) * .2, 0); m.scale.setScalar(.62 * s * shrink);
+    });
+    agents.forEach((g, i) => {
+      const at = 12.85 + i * .38, s = spring(t - at, 15, .38);
+      const ang = -Math.PI / 2 + i * Math.PI / 2 + t * .22, Rr = 3.0 * shrink;
+      g.visible = t > at - .05;
+      g.position.set(Math.cos(ang) * Rr * .93, Math.sin(ang) * Rr * .85 + bob(t, i), back + Math.sin(ang) * .6);
+      g.rotation.set(-.1, Math.sin(t * .8 + i) * .25, Math.sin(t + i) * .06);
+      g.scale.setScalar(Math.max(.001, s) * shrink);
+      link(agTubes[i], new THREE.Vector3(0, 0, back), g.position, eOutCubic(P(t, at, at + .4)));
+    });
+    // keycaps drop in, then get flicked away
+    keys.forEach((g, i) => {
+      const at = WT(4, [1, 2, 3][i]) - .05, s = spring(t - at, 14, .42);
+      if (t < at) return; g.visible = true;
+      const x = (i - 1) * (PORTRAIT ? 2.45 : 2.75);
+      const fl = Math.max(0, t - (16.2 + i * .1));
+      g.position.set(x + fl * (i - 1) * 1.5, lerp(5, .2, s) - 9 * fl * fl + bob(t, i, .05), 2.2 + fl * 2);
+      g.rotation.set(-.35 * (1 - s) + .12 + fl * 4, (i - 1) * -.18 + fl * (i - 1) * 2, (1 - s) * .4 * (i - 1) + fl * 3 * (i - 1 || 1));
+    });
+  }
+  // ── D1: signed chain (17.6 – 20.45) ──
+  if (t >= 17.6 && t < 20.45) {
+    const pan = eInOut(P(t, 17.65, 20.4));
+    const pos = i => new THREE.Vector3(i * 3.15, Math.sin(i * .9) * .35, -i * .25);
+    const tgt = new THREE.Vector3(lerp(3.2, 17.5, pan), 0, lerp(-.8, -2, pan));
+    rig(tgt, PORTRAIT ? -.95 : -.55, .2, PORTRAIT ? 8.6 : 13, 6, 0, PORTRAIT ? .02 : 0);
+    floor.position.y = -1.6;
+    chain.forEach((g, i) => {
+      const land = 17.65 + i * .26, s = spring(t - land, 13, .45);
+      if (t < land - .02) return; g.visible = true;
+      const p = pos(i); g.position.set(p.x, lerp(5, p.y, s), p.z);
+      g.rotation.set(0, .2 * Math.sin(i), (1 - s) * .3);
+      seals[i].visible = t > land + .2; seals[i].position.set(p.x + 1.1, p.y + .62 + (g.position.y - p.y), p.z + .24); seals[i].scale.setScalar(spring(t - land - .2, 18, .4));
+      if (i > 0 && t > land) link(chainTubes[i - 1], new THREE.Vector3(pos(i - 1).x + 1.3, pos(i - 1).y, pos(i - 1).z), new THREE.Vector3(p.x - 1.3, g.position.y, p.z), eOutCubic(P(t, land, land + .3)));
+    });
+  }
+  // ── D2: byte-identical panes (20.45 – 24.75) ──
+  if (t >= 20.45 && t < 24.75) {
+    rig(new THREE.Vector3(0, .25, 0), Math.sin(t * .5) * .1, .05, PORTRAIT ? 8 : 11, 8.6, 0, PORTRAIT ? -.02 : -.02);
+    floor.position.y = -3.4;
+    const merge = eInOut(P(t, 21.55, 22.1)), split = eInCubic(P(t, 23.95, 24.75));
+    panes.forEach((g, k) => {
+      const sgn = k ? 1 : -1, inn = spring(t - 20.45 - k * .12, 11, .5);
+      g.visible = true;
+      g.position.set(lerp(sgn * 10, sgn * (PORTRAIT ? 1.95 : 2.1), inn) * (1 - merge) + sgn * split * 7, bob(t, k, .06), k * .18 * merge);
+      g.rotation.set(0, sgn * -.22 * (1 - merge) - sgn * split * .6, 0);
+      redraw(g.userData.tp, Math.floor(t * 12), (x, w, h) => {
+        gtxt(x, 'POST /v1/chat/completions', 30, 50, 30, { fam: MONO, weight: 700, color: '#6b675f' });
+        const scroll = (t - 20.45) * 3.2, fr = scroll % 1, base = Math.floor(scroll);
+        const scanY = 110 + ((t - 20.5) * .55 % 1) * (h - 150);
+        for (let r = 0; r < 22; r++) {
+          const y = 120 + (r - fr) * 36; if (y < 92 || y > h - 20) continue;
+          const lit = Math.abs(y - scanY) < 20;
+          gtxt(x, hex(9000 + base + r, 24).replace(/(.{4})/g, '$1 ').trim(), 30, y, 28, { fam: MONO, weight: 400, color: lit ? C.green : 'rgba(40,38,34,.6)' });
+        }
+        x.fillStyle = 'rgba(31,191,106,.12)'; x.fillRect(0, scanY - 18, w, 36);
+      });
+      g.userData.edge.material.opacity = merge * (.55 + .2 * Math.sin(t * 8)) * (1 - split);
+    });
+    // burst of step cards just before the freeze
+    if (t > 23.9) stepCards.forEach((g, i) => {
+      const τ = t - 23.9, r = rng(i + 50), a = r() * 6.283, sp = 4 + r() * 5;
+      g.visible = true; g.scale.setScalar(clamp(τ * 4));
+      g.position.set(Math.cos(a) * sp * τ, Math.sin(a) * sp * τ * .7, τ * (3 + r() * 6));
+      g.rotation.set(τ * (r() - .5) * 4, τ * (r() - .5) * 4, τ * (r() - .5) * 3);
+    });
+  }
+  // ── E1: freeze — bullet time (24.75 – 29.22) ──
+  if (t >= 24.75 && t < 29.22) {
+    const tf = .85 + (t - 24.75) * .025;                       // world time crawls
+    const orbit = eInOut(P(t, 24.75, 29.2)) * 1.0;
+    rig(new THREE.Vector3(0, 0, 2.5), -.25 + orbit, .1, 12, 7.5);
+    const scanX = lerp(-9, 9, P(t, 27.0, 29.0));
+    stepCards.forEach((g, i) => {
+      const τ = tf, r = rng(i + 50), a = r() * 6.283, sp = 4 + r() * 5;
+      g.visible = true; g.scale.setScalar(1);
+      g.position.set(Math.cos(a) * sp * τ, Math.sin(a) * sp * τ * .7, τ * (3 + r() * 6));
+      g.rotation.set(τ * (r() - .5) * 4, τ * (r() - .5) * 4, τ * (r() - .5) * 3);
+      const near = t > 27 && t < 29.05 ? Math.exp(-Math.pow((g.position.x - scanX) / .9, 2)) : 0;
+      g.userData.body.material = near > .3 ? M.or : M.smoke;
+    });
+    if (t > 27 && t < 29.05) { scanPlane.visible = true; scanPlane.position.set(scanX, 0, 3); scanPlane.rotation.set(0, Math.PI / 2, 0); scanPlane.scale.set(.07, 11, 1); scanPlane.rotation.set(0, 0, 0); }
+  }
+  // ── E2: five checks (29.22 – 38.7) ──
+  if (t >= 29.22 && t < 38.7) {
+    rig(new THREE.Vector3(PORTRAIT ? 0 : -1.2, PORTRAIT ? -.3 : -.35, 0), Math.sin(t * .4) * .1, .05, PORTRAIT ? 7.9 : 15, PORTRAIT ? 11.5 : 8.4, 0, PORTRAIT ? -.1 : 0);
+    floor.position.y = -5;
+    const failAt = 35.35, backAt = 36.0, fixAt = 37.35;
+    const agentPos = PORTRAIT ? new THREE.Vector3(-2.5, -3.75, .5) : new THREE.Vector3(-7.2, -2.2, .5);
+    pills.forEach((g, i) => {
+      const at = WT(9, [0, 3, 6, 9, 12][i]) - .05;
+      if (t < at) return; g.visible = true;
+      const s = spring(t - at, 13, .42);
+      const home = new THREE.Vector3(PORTRAIT ? 0 : .9, PORTRAIT ? 3.4 - i * 1.25 : 2.7 - i * 1.32, 0);
+      let p = home.clone();
+      if (i === 0 && t > backAt) {
+        const go = eInOut(P(t, backAt, backAt + .55)), ret = eInOut(P(t, 37.0, fixAt));
+        const away = agentPos.clone().add(new THREE.Vector3(PORTRAIT ? 3.4 : 3.2, PORTRAIT ? 0 : .9, .3));
+        p = home.clone().lerp(away, go * (1 - ret));
+        p.z += Math.sin(go * Math.PI) * 2 * (1 - ret) + Math.sin(ret * Math.PI) * 2;
+      }
+      const shake = (i === 0 && t > failAt && t < backAt) ? Math.sin(t * 70) * .08 * (1 - P(t, failAt + .35, backAt)) : 0;
+      g.position.set(p.x + shake, p.y + bob(t, i, .04), p.z + lerp(-4, 0, s));
+      g.rotation.set(lerp(-1.3, 0, s) + Math.sin(t + i) * .03, Math.sin(t * .7 + i) * .04, 0);
+      g.scale.setScalar(lerp(.6, 1, clamp(s)) * (PORTRAIT && i === 0 ? 1 - .45 * Math.sin(Math.PI * clamp((t - backAt) / (fixAt - backAt))) : 1));
+      const state = i === 0 ? (t >= fixAt ? 'fixed' : t >= failAt ? 'fail' : 'scan') : (t >= failAt - .2 + i * .05 ? 'pass' : 'scan');
+      const bm = g.userData.body.material;
+      bm.color.set(state === 'fail' ? '#ffd9d4' : state === 'fixed' ? '#d8f7e6' : '#ffffff');
+      bm.emissive = bm.emissive || new THREE.Color(); bm.emissive.set(state === 'fail' ? C.red : '#000'); bm.emissiveIntensity = state === 'fail' ? .15 + .12 * Math.sin(t * 14) : 0;
+      const shimmer = state === 'scan' ? Math.floor(((t * 1.4 + i * .2) % 1) * 10) : 0;
+      redraw(g.userData.tp, state + shimmer, (x, w, h) => {
+        const [zh, en, code] = CH[i];
+        if (state === 'scan') { const sx2 = shimmer / 10 * w; const gr = x.createLinearGradient(sx2 - 120, 0, sx2 + 120, 0); gr.addColorStop(0, 'rgba(242,107,29,0)'); gr.addColorStop(.5, 'rgba(242,107,29,.16)'); gr.addColorStop(1, 'rgba(242,107,29,0)'); x.fillStyle = gr; x.fillRect(0, 0, w, h); }
+        gtxt(x, String(i + 1), 64, h / 2, 64, { fam: LAT, weight: 200, align: 'center', color: state === 'fail' ? C.red : C.or });
+        gtxt(x, zh, 128, h * .38, 60, { weight: 900, color: C.ink });
+        gtxt(x, en, 130, h * .76, 30, { fam: LAT, weight: 400, color: '#6f6b63' });
+        gtxt(x, code, w - 150, h / 2, 28, { fam: MONO, weight: 400, align: 'right', color: state === 'fail' ? C.red : '#9a958c' });
+        if (state === 'pass' || state === 'fixed') gcheck(x, w - 76, h / 2, 56, C.green, 10);
+        if (state === 'fail') gcross(x, w - 76, h / 2, 56, C.red, 10);
+      });
+    });
+    // the agent that gets it back, and the file it writes
+    const ag = agents[0];
+    if (t > backAt - .2 && t < 38.6) {
+      ag.visible = true; const s = spring(t - backAt + .2, 14, .4);
+      ag.position.copy(agentPos); ag.rotation.set(0, (t > 36.55 && t < 37.0 ? eInOut(P(t, 36.55, 37.0)) * Math.PI * 2 : 0) + Math.sin(t) * .1, 0);
+      ag.scale.setScalar(s * (1 - eInCubic(P(t, 38.1, 38.55))));
+    }
+    if (t > 36.85 && t < 38.6) {
+      fileCard.visible = true; const s = spring(t - 36.85, 12, .4);
+      fileCard.position.set(agentPos.x + (PORTRAIT ? 1.6 * s : 0), agentPos.y + (PORTRAIT ? 0 : 1.9 * s + .2), agentPos.z + (PORTRAIT ? 1.2 : .4));
+      fileCard.rotation.set(0, Math.sin(t * 2) * .2, 0); fileCard.scale.setScalar(s * (1 - eInCubic(P(t, 38.1, 38.55))));
+    }
+  }
+  // ── F: delivery card (38.7 – 43.7) ──
+  if (t >= 38.6 && t < 43.7) {
+    rig(new THREE.Vector3(0, 0, 0), lerp(-.14, .1, P(t, 38.6, 43.7)), .12, delW * 1.42, delH * 1.45, 0, PORTRAIT ? -.03 : -.02);
+    floor.position.y = -delH / 2 - 1.2;
+    const s = spring(t - 38.65, 9, .55), out = eInCubic(P(t, 43.3, 43.7));
+    deliv.visible = true; deliv.position.set(0, lerp(-9, 0, s) + out * 8, 0); deliv.rotation.set(lerp(-1.2, -.08, s) - out, 0, (1 - s) * .15);
+    const at = [WT(11, 3), WT(11, 6), WT(11, 9)];
+    const st = at.map(a => clamp(Math.floor((t - a) / .12) + 1, 0, 5));
+    redraw(deliv.userData.tp, st.join(), (x, w, h) => {
+      gtxt(x, 'delivery.md', 50, 64, 46, { fam: MONO, weight: 700, color: C.or });
+      gtxt(x, PORTRAIT ? '交件說明 · for the person' : '交件說明 · for the person, not the model', w - 50, 64, 30, { fam: MONO, weight: 400, align: 'right', color: '#7d796f' });
+      x.fillStyle = 'rgba(20,19,16,.08)'; x.fillRect(50, 110, w - 100, 3);
+      const secs = [['查了什麼', 'Checked', ['5 kinds of grounds', '12 steps in the record', 'sh run_tests.sh ✓'], C.ink],
+        ['改了什麼', 'Changed before delivery', ['answer.txt — written', 'after 1 send-back', 'missing_output → resolved'], C.green],
+        ['還沒驗證', 'Not verified', ['whether the answer is right', 'the decisions behind steps', '→ left for you'], C.or]];
+      secs.forEach(([zh, en, items, col], i) => {
+        if (!st[i]) return;
+        let sx, sy, sw; if (PORTRAIT) { sx = 50; sy = 150 + i * 500; sw = w - 100; } else { sw = (w - 100 - 2 * 50) / 3; sx = 50 + i * (sw + 50); sy = 160; }
+        x.fillStyle = col; x.fillRect(sx, sy, 8, PORTRAIT ? 420 : 640);
+        gtxt(x, zh, sx + 40, sy + 60, 84, { weight: 900, color: col });
+        gtxt(x, en, sx + 42, sy + 140, 34, { fam: LAT, weight: 400, color: '#7d796f', maxW: sw - 60 });
+        items.forEach((it, k) => { if (st[i] > k + 1) gtxt(x, it, sx + 42, sy + (PORTRAIT ? 230 : 250) + k * (PORTRAIT ? 64 : 84), 38, { fam: MONO, weight: 400, color: '#3a3832', maxW: sw - 60 }); });
+      });
+    });
+  }
+  // ── G: bars (43.7 – 51.3) ──
+  if (t >= 43.65 && t < 51.3) {
+    const part2 = eInOut(P(t, 48.1, 48.6));
+    rig(new THREE.Vector3(0, 1.0, 0), lerp(.32, .2, P(t, 43.6, 51.3)), .16, PORTRAIT ? 6.6 : 11.5, PORTRAIT ? 12 : 11.5, lerp(0, PORTRAIT ? 0 : -.22, part2), lerp(PORTRAIT ? .02 : 0, PORTRAIT ? -.27 : 0, part2), lerp(1, PORTRAIT ? 1.9 : 1, part2));
+    floor.position.y = -1.2;
+    const g = eOutCubic(P(t, 44.3, 45.9)), out = eInCubic(P(t, 50.95, 51.3));
+    [42.0, 53.2].forEach((v, i) => {
+      const b = bars[i], hgt = Math.max(.02, v / 60 * 6.2 * g) * (1 - out);
+      b.visible = true; b.scale.set(1, hgt, 1); b.position.set((i ? 1.25 : -1.25), -1.2 + hgt / 2, 0);
+    });
+  }
+  // ── H: beads → logo (51.3 – 60) ──
+  if (t >= 51.3) {
+    const N = 9, span = PORTRAIT ? 6.4 : 11.5;
+    const bp = i => new THREE.Vector3(-span / 2 + span * i / (N - 1), -1.4, 0);
+    if (t < 54.7) {
+      rig(new THREE.Vector3(0, 0, 0), Math.sin(t * .4) * .08, .08, span * (PORTRAIT ? 1.5 : 1.15), 7.5);
+      floor.position.y = -2.2;
+      const lit = eInOut(P(t, 52.9, 54.2)) * (N - 1);
+      link(thread, bp(0), bp(N - 1), eOutCubic(P(t, 51.4, 52.2)));
+      beads.forEach((m, i) => {
+        const s = spring(t - 51.45 - i * .06, 15, .4); m.visible = s > .001; m.scale.setScalar(Math.max(.001, s));
+        const on = lit >= i - .01, j = on ? spring(t - (52.9 + 1.3 * i / (N - 1)), 18, .3) : 0;
+        m.position.copy(bp(i)); m.position.y += (on ? Math.sin(Math.min(1, j) * Math.PI) * .25 : 0);
+        m.material.emissiveIntensity = on ? .55 : 0; m.material.color.set(on ? '#7ff0b4' : '#ffffff');
+      });
+    } else {
+      // voxels fly from the beads and assemble the logo again
+      const yaw = lerp(.25, -.08, eInOut(P(t, 54.7, 60))), dolly = lerp(.9, 1.08, eInOut(P(t, 55.8, 60)));
+      rig(new THREE.Vector3(0, PORTRAIT ? -2.6 : -2.0, 0), yaw, .05, 22.5, PORTRAIT ? 13 : 10.5, 0, PORTRAIT ? -.08 : 0, dolly);
+      floor.position.y = -2.4;
+      vox.forEach((m, i) => {
+        const [c, r] = PTS[i]; const L = logoPos(PTS[i]); const B = bp(i % N).multiplyScalar(1);
+        const d = (c / 35) * .4 + (i % 5) * .03, q = P(t, 54.75 + d, 55.55 + d), e = eOutBack(q, 1.25);
+        m.visible = true; m.position.set(lerp(B.x * 1.6, L.x, e), lerp(B.y, L.y, e) + Math.sin(q * Math.PI) * 3, lerp(0, L.z, e));
+        m.position.z += Math.sin((c - 17) * .55 - (t - 55.8) * 11) * .3 * Math.exp(-(t - 55.8) * 2.2) * (t > 55.8 ? 1 : 0);
+        m.rotation.set((1 - eOutCubic(q)) * 4, (1 - eOutCubic(q)) * 3, 0); m.scale.setScalar(lerp(.4, 1, eOutCubic(q)));
+      });
+    }
+  }
+}
+
+// ═════════════════════════ 2D overlay per scene ═════════════════════════
+function deep(t, lines, a, b, corner = 'tl') {
+  const al = win(t, a, b, .5, .4) * .7; if (al <= 0) return;
+  const m = 56 * S, lh = 24 * S, left = corner.includes('l');
+  const top = PORTRAIT ? H - 300 * S : 60 * S;
+  lines.forEach((s, i) => { const n = Math.min(s.length, Math.max(0, Math.floor((t - a - i * .12) * 70))); txt(s.slice(0, n), left ? m : W - m, top + i * lh, { size: 17, fam: MONO, weight: 400, color: dim(), align: left ? 'left' : 'right', alpha: al, maxW: PORTRAIT ? W - 2 * m : W * .42 }); });
+}
+function chapter(t, idx, label, a, b) {
+  const al = win(t, a, b, .4, .4) * .55; if (al <= 0) return;
+  const m = 56 * S, y = PORTRAIT ? H - 120 * S : H - 44 * S;
+  txt(`${String(idx).padStart(2, '0')} / 07 — ${label}`, PORTRAIT ? W / 2 : W - m, y, { size: 15, fam: MONO, weight: 400, color: dim(), align: PORTRAIT ? 'center' : 'right', alpha: al, ls: 2 });
+}
+const CX = W / 2, CY = PORTRAIT ? H * .40 : H * .45;
+
+function overlay(t) {
+  // ── A ──
+  if (t < 4.3) {
+    const big = PORTRAIT ? 150 : 170, out = 1 - P(t, 3.5, 3.62);
+    const doneAt = WT(0, 3);
+    txt('agent ›', CX, CY - big * .9 * S, { size: 22, fam: MONO, weight: 400, color: dim(), ls: 3, alpha: P(t, .3, .7) * out });
+    if (out > 0) kinetic([{ s: '做完了。', at: doneAt - .05 }], CX, CY, { t, size: big, weight: 900, ls: 4, stagger: .07, alpha: out });
+    const cp = P(t, doneAt + .35, doneAt + .7) * out;
+    if (cp > 0) { check2(CX - 70 * S, CY + big * .8 * S, 26 * S, '#4be38f', cp, 4); txt('done · exit 0', CX + 18 * S, CY + big * .8 * S, { size: 22, fam: MONO, weight: 400, color: '#4be38f', alpha: cp }); }
+    if (t > .6 && t < doneAt - .1) { const bl = Math.floor(t * 2.4) % 2 ? .0 : 1; ctx.fillStyle = C.or; ctx.globalAlpha = bl; ctx.fillRect(CX - 6 * S, CY - 70 * S, 10 * S, 140 * S); ctx.globalAlpha = 1; }
+    // 真的嗎？ — doodle question
+    const q = P(t, 3.55, 3.62);
+    if (q > 0) {
+      const o2 = 1 - P(t, 4.15, 4.3);
+      kinetic([{ s: '真的嗎？', at: 3.55, color: C.or }], CX, CY, { t, size: big * .82, weight: 900, ls: 6, stagger: .05, alpha: o2 });
+      txt('Is it, though?', CX, CY + big * .72 * S, { size: 30, fam: LAT, weight: 200, color: C.cream, ls: 4, alpha: P(t, 3.7, 3.9) * o2 });
+      const w = measure('真的嗎？', big * .82, 900, ZH, 6);
+      dCircle(CX, CY, w * .62, big * S * .62, P(t, 3.62, 4.0), 3, C.or, 6);
+    }
+  }
+  if (t >= 4.3 && t < 7.0) {
+    // the person, auditing each step
+    const a = P(t, 4.35, 4.6) * (1 - P(t, 6.3, 6.6));
+    txt('?', CX + Math.cos(t * 1.4) * 140 * S * (PORTRAIT ? .6 : 1), CY - 230 * S + Math.sin(t * 2.1) * 30 * S, { size: 120, weight: 900, color: C.or, alpha: a * .9, rot: Math.sin(t * 3) * .15, noAudit: true });
+  }
+  if (t > 6.9 && t < 7.4) { const f = P(t, 6.95, 7.05) * (1 - P(t, 7.05, 7.4)); ctx.fillStyle = `rgba(255,236,214,${f * .3})`; ctx.fillRect(0, 0, W, H); }
+  deep(t, ['trace/capture.py', 'hook: Stop · turn_end · session.idle', 'the moment an agent says "done"'], .6, 4.1);
+
+  // ── B ──
+  if (t >= 8.3 && t < 11.1) {
+    const [lx, ly] = proj(new THREE.Vector3(0, -2.3, 0));
+    const v = P(t, 8.85, 9.2), out = 1 - P(t, 10.62, 10.95);
+    txt('0.9.0', lx, ly + 34 * S, { size: 60, fam: LAT, weight: 200, ls: lerp(30, 10, eOutCubic(v)), alpha: v * out });
+    txt('zero-config · v3.7', lx, ly + 88 * S, { size: 19, fam: MONO, weight: 400, ls: 4, alpha: v * .8 * out, color: C.or });
+    const t1 = WT(2, 1) - .03, t2 = WT(2, 3) - .03, ty = ly + (PORTRAIT ? 200 : 186) * S;
+    if (PORTRAIT) {
+      kinetic([{ s: '裝一次，', at: t1 }], CX, ty, { t, size: 88, out: 10.62 });
+      const r2 = kinetic([{ s: '照常用。', at: t2, color: C.or }], CX, ty + 108 * S, { t, size: 88, out: 10.66 });
+      dUnder(r2.left, r2.right - 40 * S, ty + 160 * S, P(t, t2 + .3, t2 + .7) * out, 4, C.or, 7);
+    } else {
+      const r = kinetic([{ s: '裝一次，', at: t1 }, { s: '照常用。', at: t2, color: C.or }], CX, ty, { t, size: 92, out: 10.62 });
+      const w2 = measure('照常用。', 92, 900);
+      dUnder(r.right - w2, r.right - 40 * S, ty + 64 * S, P(t, t2 + .3, t2 + .7) * out, 4, C.or, 7);
+    }
+  }
+  if (t > 8.4 && t < 9.2) { const f = 1 - eOutCubic(P(t, 8.45, 9.1)); ctx.fillStyle = `rgba(255,255,255,${f * .85})`; ctx.fillRect(0, 0, W, H); }
+  deep(t, ['pypi: vacant-network 0.9.0 · 2026-10-03', 'first published zero-config release', 'runtime dependency: cryptography'], 8.9, 11.0, 'tr');
+  chapter(t, 1, 'VACANT 0.9.0', 8.9, 11.0);
+
+  // ── C ──
+  if (t >= 11.05 && t < 17.65) {
+    const keyPhase = eInOut(P(t, 14.85, 15.25)), out = 1 - P(t, 17.25, 17.6);
+    const tw = PORTRAIT ? 940 * S : 760 * S, th = 300 * S;
+    const tx = PORTRAIT ? CX - tw / 2 : 110 * S, ty = PORTRAIT ? 120 * S : CY - th / 2;
+    const inn = spring(t - 11.1, 12, .55), a = clamp((t - 11.05) * 5) * (1 - .85 * keyPhase) * out;
+    ctx.save(); ctx.translate(0, (1 - inn) * 60 * S);
+    glass(tx, ty, tw, th, 26 * S, { alpha: a });
+    ctx.globalAlpha = a;
+    ['#ff5f57', '#febc2e', '#28c840'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(tx + 32 * S + i * 22 * S, ty + 30 * S, 6.5 * S, 0, 6.28); ctx.fill(); });
+    const L1 = '$ pipx install vacant-network', L2 = '$ vacant install';
+    const n1 = Math.floor(clamp((t - 11.15) / .8) * L1.length), n2 = Math.floor(clamp((t - 12.15) / .45) * L2.length);
+    const lx = tx + 34 * S, l0 = ty + 82 * S, lh = 40 * S;
+    txt(L1.slice(0, n1), lx, l0, { size: 25, fam: MONO, weight: 700, align: 'left', maxW: tw - 70 * S, alpha: 1 });
+    txt(L2.slice(0, n2), lx, l0 + lh, { size: 25, fam: MONO, weight: 700, align: 'left', maxW: tw - 70 * S });
+    const paths = ['~/.pi/agent/extensions/vacant.ts', '~/.claude/settings.json · hooks', '~/.config/opencode/plugin/vacant.js', '~/.codex/config.toml · hooks'];
+    AG.forEach(([sym, name], i) => {
+      const p = P(t, 12.85 + i * .38, 13.1 + i * .38); if (p <= 0) return;
+      const y = l0 + lh * (2.15 + i * .9);
+      check2(lx + 10 * S, y, 18 * S, C.green, p, 3.5);
+      txt(name, lx + 40 * S, y, { size: 21, fam: MONO, weight: 700, align: 'left', alpha: p });
+      txt(paths[i], lx + 205 * S, y, { size: 17, fam: MONO, weight: 400, align: 'left', color: dim(), alpha: p, maxW: tw - 240 * S });
+    });
+    ctx.restore();
+    // agent name tags under tiles (projected)
+    if (keyPhase < 1) agents.forEach((g, i) => { if (!g.visible) return; });
+    // keycap strikes + 零設定
+    keys.forEach((g, i) => {
+      if (!g.visible) return;
+      const at = WT(4, [1, 2, 3][i]) + .32, p = eOutCubic(P(t, at, at + .28)), fade = 1 - P(t, 16.15 + i * .1, 16.35 + i * .1);
+      const [l] = projObj(g, -1.05, 0, .42), [r, y] = projObj(g, 1.05, 0, .42);
+      ctx.save(); ctx.globalAlpha = fade; dStrike(l - 10 * S, r + 10 * S, y - 10 * S, p, 11 + i, C.or, 11); ctx.restore();
+    });
+    const zc = spring(t - 16.55, 14, .4);
+    if (t > 16.5) {
+      const zy = CY + (PORTRAIT ? 30 : 10) * S;
+      txt('零設定', CX, zy, { size: PORTRAIT ? 120 : 140, weight: 900, color: C.or, scale: lerp(.3, 1, zc), alpha: clamp((t - 16.5) * 8) * out });
+      txt('ZERO-CONFIG', CX, zy + (PORTRAIT ? 96 : 110) * S, { size: 22, fam: MONO, weight: 400, ls: 10, alpha: P(t, 16.7, 17) * out });
+      dSpark(CX, zy, 230 * S, 300 * S, P(t, 16.6, 17.0) * out, 2, C.or);
+    }
+  }
+  deep(t, ['adapters/install.py — key-level, reversible', 'untouched settings restored bit-for-bit', 'vacant uninstall'], 12.9, 17.4, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 2, 'INSTALL ONCE', 11.3, 17.4);
+
+  // ── D ──
+  if (t >= 17.6 && t < 20.5) {
+    const a = P(t, 17.9, 18.2) * (1 - P(t, 20.1, 20.4));
+    kinetic([{ s: '每一步', at: WT(5, 0) }, { s: '·簽章·', at: WT(5, 3), color: C.or }, { s: '成鏈', at: WT(5, 6) }], CX, PORTRAIT ? 230 * S : 150 * S, { t, size: PORTRAIT ? 64 : 58, ls: 6, alpha: a, out: 20.1 });
+    chain.forEach((g, i) => { if (!g.visible) return; const land = 17.65 + i * .26 + .2; const sp = P(t, land, land + .6); if (sp > 0 && sp < 1) { const [x, y] = proj(seals[i].position); ring(x, y, lerp(6, 46, eOutCubic(sp)) * S, C.or, 1 - sp, 3); } });
+  }
+  if (t >= 20.45 && t < 24.75) {
+    panes.forEach((g, k) => {
+      const [x, y] = projObj(g, -1.55, 2.2 + .35, 0); const a = P(t, 20.7 + k * .1, 21.0 + k * .1) * (1 - P(t, 21.5, 21.75));
+      txt(k ? '裝了' : '沒裝', x, y, { size: 36, weight: 900, align: 'left', color: k ? C.or : ink(), alpha: a });
+      txt(k ? 'with Vacant' : 'without', x + measure(k ? '裝了' : '沒裝', 36, 900) + 14 * S, y + 3 * S, { size: 18, fam: LAT, weight: 400, align: 'left', color: dim(), alpha: a });
+    });
+    const eq = spring(t - 22.05, 14, .4), sp = 1 - P(t, 23.9, 24.2);
+    if (t > 22.0) {
+      const [x, y] = projObj(panes[1], 0, 2.2 + .25, 0);
+      txt('Δ = 0 bytes', CX, y - 40 * S, { size: 52, fam: MONO, weight: 700, color: C.green, scale: lerp(.5, 1, eq), alpha: clamp((t - 22) * 6) * sp });
+      const [cx2, cy2] = projObj(panes[1], 1.75, 2.3, 0);
+      dSpark(cx2, cy2, 30 * S, 70 * S, P(t, 22.1, 22.5) * sp, 5, C.green);
+    }
+  }
+  deep(t, ['~/.vacant/trace/ — one signed chain per project', 'Ed25519 · sha256(prev) → head', 'unexplained change = gap, never blamed'], 17.9, 20.3);
+  deep(t, ['nothing injected unless something is wrong', 'measured: first request of 157 pairs,', 'tool results of 99 pairs — byte-identical'], 20.8, 24.3, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 3, 'EVERY STEP, SIGNED', 17.9, 24.3);
+
+  // ── E1 freeze ──
+  if (t >= 24.6 && t < 29.4) {
+    const s = P(t, 24.75, 24.8), toTop = eInOut(P(t, 26.55, 27.1)), fade = 1 - P(t, 29.15, 29.3);
+    const big = PORTRAIT ? 160 : 190;
+    if (t > 24.6 && t < 24.75) { ctx.fillStyle = `rgba(0,0,0,${P(t, 24.6, 24.75)})`; ctx.fillRect(0, 0, W, H); }
+    if (s > 0) {
+      const r = rng(Math.floor(t * 60)), shake = (1 - P(t, 24.8, 25.25)) * 12 * S;
+      const y = lerp(CY, PORTRAIT ? 170 * S : 120 * S, toTop), sc = lerp(lerp(PORTRAIT ? 1.5 : 1.9, 1, eOutExpo(P(t, 24.75, 25.0))), .42, toTop);
+      txt('做完了。', CX + (r() - .5) * shake, y + (r() - .5) * shake, { size: big, weight: 900, scale: sc, alpha: fade, ls: 6, glow: 40 * (1 - toTop), glowColor: 'rgba(255,255,255,.4)' });
+      txt('時間停在這一刻 · time stops here', CX, CY + (PORTRAIT ? 190 : 170) * S, { size: 22, weight: 400, ls: 6, alpha: P(t, 25.2, 25.6) * (1 - P(t, 26.4, 26.7)), color: C.cream });
+      for (let k = 0; k < 3; k++) { const rp = P(t, 24.8 + k * .18, 25.9 + k * .18); if (rp > 0 && rp < 1) ring(CX, CY, lerp(60, 1100, eOutCubic(rp)) * S, k ? C.cream : C.or, (1 - rp) * .5, k ? 1 : 3); }
+      if (t > 26.9) {
+        const a = P(t, 26.9, 27.2) * fade;
+        kinetic([{ s: '只看紀錄', at: WT(8, 1) }, { s: '，查五件事', at: WT(8, 4), color: C.or }], CX, PORTRAIT ? 300 * S : 220 * S, { t, size: PORTRAIT ? 60 : 56, alpha: a, out: 29.1 });
+      }
+    }
+    if (t > 24.75 && t < 25.1) { const f = 1 - P(t, 24.75, 25.1); ctx.fillStyle = `rgba(255,255,255,${f * .5})`; ctx.fillRect(0, 0, W, H); }
+  }
+  if (t > 29.15 && t < 29.8) { const f = P(t, 29.15, 29.22) * (1 - eOutCubic(P(t, 29.22, 29.8))); ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fillRect(0, 0, W, H); }
+
+  // ── E2 checks ──
+  if (t >= 29.22 && t < 38.7) {
+    const out = 1 - P(t, 38.25, 38.6);
+    txt('agent：「做完了。」', CX, PORTRAIT ? 130 * S : 70 * S, { size: 26, weight: 600, color: dim(), alpha: P(t, 29.3, 29.6) * out });
+    if (t > 35.95) {
+      const [ax, ay] = projObj(agents[0], 0, 0, 0); const [px, py] = projObj(pills[0], -pillW / 2, 0, 0);
+      const a = P(t, 36.0, 36.2) * (1 - P(t, 37.9, 38.3));
+      if (!PORTRAIT) dArrow(px - 20 * S, py + 40 * S, ax + 70 * S, ay - 80 * S, P(t, 35.95, 36.5), 21, C.red, 6, -.3);
+      txt('↺ 退回 · sent back', ax, PORTRAIT ? ay + 115 * S : ay + 120 * S, { size: 26, weight: 900, color: C.red, alpha: a });
+      txt('≤ 2 rounds / request', ax, PORTRAIT ? ay + 150 * S : ay + 156 * S, { size: 17, fam: MONO, weight: 400, color: dim(), alpha: a });
+    }
+    if (t > 37.35) { const [x, y] = projObj(pills[0], pillW / 2 - .4, 0, .2); dSpark(x, y, 40 * S, 80 * S, P(t, 37.35, 37.7) * out, 7, C.green); }
+  }
+  deep(t, ['trace/evidence.py — five send-back kinds, pure function', 'everything else → delivery note only', 'feedback names place + step, never an actor (KS-1)'], 29.4, 35.3, PORTRAIT ? 'tl' : 'tr');
+  deep(t, ['trace/zerostop.py — 330 s limit, fails open', 'turns that ended on a model error: not sent back (v3.7)', 'resolution judged on the current state'], 35.5, 38.4, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 4, 'THE MOMENT OF "DONE"', 25.2, 38.4);
+
+  // ── F ──
+  deep(t, ['~/.vacant/trace/projects/<project>/delivery.{md,json}', 'never written into your project, never sent to the model'], 39.2, 43.4);
+  chapter(t, 5, 'DELIVERY NOTE', 39.0, 43.4);
+
+  // ── G ──
+  if (t >= 43.65 && t < 51.35) {
+    const out = 1 - P(t, 50.95, 51.3), part2 = eInOut(P(t, 48.1, 48.6));
+    [[42.0, '沒裝', 'without'], [53.2, '裝了', 'with Vacant']].forEach(([v, zh, en], i) => {
+      const b = bars[i]; const gp = eOutCubic(P(t, 44.3, 45.9));
+      const [x, ytop] = projObj(b, 0, .5, .8); const [, ybot] = projObj(b, 0, -.5, .8);
+      const sz = PORTRAIT ? lerp(56, 38, part2) : 60;
+      txt((v * gp).toFixed(1) + '%', x, ytop - 46 * S, { size: sz, fam: LAT, weight: i ? 800 : 300, color: i ? C.or : ink(), alpha: P(t, 44.3, 44.6) * out });
+      txt(zh, x, ybot + 40 * S, { size: PORTRAIT ? lerp(34, 26, part2) : 34, weight: 900, color: i ? C.or : ink(), alpha: out });
+      txt(en, x, ybot + 76 * S, { size: 17, fam: LAT, weight: 400, color: dim(), alpha: out * (1 - part2 * (PORTRAIT ? 1 : 0)) });
+    });
+    const [x1, y1] = projObj(bars[1], 0, .5, 0);
+    const pv = P(t, 46.4, 46.8);
+    txt('p = 0.0028', x1, y1 - (PORTRAIT ? 128 : 124) * S, { size: 22, fam: MONO, weight: 400, alpha: pv * out * (1 - part2) });
+    if (pv > 0) { const [x0, y0] = projObj(bars[0], 0, .5, 0); dArrow(x0, y0 - 105 * S, x1 - 128 * S, y1 - 52 * S, P(t, 46.1, 46.7) * (1 - part2), 31, C.or, 6, -.3); }
+    const cy2 = PORTRAIT ? 230 * S : 64 * S;
+    txt('DABstep 77 題 × 3 · gemma-4-12b QAT · pi 0.87.1 --print · 15 回合上限 · 預註冊', PORTRAIT ? CX : 56 * S, cy2, { size: 18, fam: MONO, weight: 400, color: dim(), align: PORTRAIT ? 'center' : 'left', alpha: P(t, 44.0, 44.5) * out * (PORTRAIT ? 1 - part2 : 1), maxW: PORTRAIT ? W - 100 * S : W * .5 });
+    if (part2 > 0) {
+      const rx = PORTRAIT ? CX : W * .66, ry = PORTRAIT ? H * .6 : CY - 30 * S, a = part2 * out;
+      kinetic([{ s: '說做完，卻沒寫 ', at: WT(13, 3) }, { s: 'answer.txt', at: WT(13, 7), color: C.or }], rx, ry - 170 * S, { t, size: PORTRAIT ? 44 : 46, alpha: a, maxW: PORTRAIT ? W - 120 * S : W * .6, stagger: .02 });
+      txt('said done, never wrote the file', rx, ry - 118 * S, { size: 19, fam: LAT, weight: 400, color: dim(), alpha: a });
+      const nA = Math.round(42 * eOutCubic(P(t, 48.6, 49.4)));
+      txt(`${nA} / 231`, rx - 190 * S, ry, { size: 76, fam: LAT, weight: 300, alpha: a });
+      dArrow(rx - 40 * S, ry + 4 * S, rx + 80 * S, ry + 4 * S, P(t, 49.15, 49.5), 41, C.or, 6, -.25);
+      const z = spring(t - 49.45, 15, .35);
+      txt('0', rx + 170 * S, ry, { size: 128, fam: LAT, weight: 800, color: C.or, scale: lerp(.2, 1, z), alpha: clamp((t - 49.45) * 8) * out });
+      dCircle(rx + 170 * S, ry, 80 * S, 86 * S, P(t, 49.6, 50.0) * out, 9, C.or, 6);
+      txt('沒裝', rx - 190 * S, ry + 70 * S, { size: 20, weight: 600, color: dim(), alpha: a });
+      txt('裝了', rx + 170 * S, ry + 104 * S, { size: 20, weight: 600, color: C.or, alpha: a });
+      txt('把對的改成錯：0 次 · correct → wrong: 0', rx, ry + 170 * S, { size: 22, fam: MONO, weight: 400, color: C.green, alpha: P(t, 49.9, 50.3) * out, maxW: PORTRAIT ? W - 120 * S : W * .6 });
+    }
+  }
+  deep(t, ['the gain = files the agent said were done but never wrote', 'not a hold-out set · the with-Vacant arm matched 09-26;', 'what changed was the without arm (vLLM backend)'], 44.2, 48.0, PORTRAIT ? 'tl' : 'tr');
+  deep(t, ['no turn cap, 94 tasks: 72.3% vs 75.0% · p = 0.36', '→ no measured difference', 'decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md'], 48.4, 51.0, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 6, 'WHAT WAS MEASURED', 44.0, 51.0);
+
+  // ── H ──
+  if (t >= 51.3 && t < 54.9) {
+    const out = 54.55, yy = PORTRAIT ? CY - 180 * S : CY - 140 * S;
+    kinetic([{ s: '它不判斷對錯', at: WT(14, 0), weight: 300, color: dim() }], CX, yy, { t, size: PORTRAIT ? 66 : 72, out });
+    txt("doesn't judge right or wrong", CX, yy + 60 * S, { size: 20, fam: LAT, weight: 400, ls: 2, color: dim(), alpha: P(t, 51.7, 52) * (1 - P(t, out, out + .3)) });
+    const r = kinetic([{ s: '只確認', at: WT(14, 4) }, { s: '每一步', at: WT(14, 6), color: C.or }, { s: '有根據', at: WT(14, 7) }], CX, yy + (PORTRAIT ? 170 : 160) * S, { t, size: PORTRAIT ? 80 : 96, out: out + .05, maxW: W - 100 * S });
+    dUnder(r.left, r.right, yy + (PORTRAIT ? 232 : 232) * S, P(t, WT(14, 8), WT(14, 8) + .5) * (1 - P(t, out, out + .25)), 6, C.or, 8);
+    txt('checks every step has grounds', CX, yy + (PORTRAIT ? 268 : 270) * S, { size: 20, fam: LAT, weight: 600, ls: 2, color: C.or, alpha: P(t, 53.2, 53.5) * (1 - P(t, out, out + .3)) });
+  }
+  if (t > 55.75 && t < 56.3) { const f = 1 - eOutCubic(P(t, 55.8, 56.3)); ctx.fillStyle = `rgba(255,255,255,${f * .6})`; ctx.fillRect(0, 0, W, H); }
+  if (t > 55.9) {
+    const [, ly] = proj(new THREE.Vector3(0, -2.2, 0));
+    const t1 = WT(15, 1) + .1;
+    const r = kinetic([{ s: '讓每一次交付，', at: t1 }, { s: '都有根據。', at: WT(15, 5), color: C.or }], CX, ly + (PORTRAIT ? 60 : 60) * S, { t, size: PORTRAIT ? 64 : 76, maxW: W - 110 * S, stagger: .035 });
+    txt('Every delivery, grounded.', CX, ly + 132 * S, { size: 30, fam: LAT, weight: 300, ls: 6, alpha: P(t, 57.0, 57.4) });
+    const c = P(t, 57.5, 57.9), cmd = 'pipx install vacant-network', cw = measure(cmd, 25, 400, MONO) + 70 * S, cy = ly + 236 * S;
+    ctx.save(); ctx.translate(0, (1 - spring(t - 57.5, 12, .5)) * 40 * S);
+    glass(CX - cw / 2, cy - 32 * S, cw, 64 * S, 32 * S, { alpha: c });
+    txt(cmd, CX, cy, { size: 25, fam: MONO, weight: 400, alpha: c });
+    ctx.restore();
+    txt('0.9.0  ·  github.com/cosmopig/Vacant', CX, cy + 72 * S, { size: 16, fam: MONO, weight: 400, ls: 3, color: dim(), alpha: P(t, 57.8, 58.2) });
+  }
+  deep(t, ['accountability, not "trust":', 'every reliance should have grounds', 'all real-model numbers: pi --print; TUI verified with scripted models'], 51.6, 54.4);
+  chapter(t, 7, 'GROUNDS', 51.6, 54.4);
+}
+
+// ═════════════════════════ subtitles (frosted glass) ═════════════════════════
+function splitZh(s) { const mid = s.length / 2; let best = -1, bd = 1e9; [...s].forEach((ch, i) => { if ('，、：'.includes(ch) && Math.abs(i - mid) < bd) { bd = Math.abs(i - mid); best = i; } }); if (best < 0) best = Math.floor(mid); return [s.slice(0, best + 1), s.slice(best + 1)]; }
+function enLines(s, maxW) {
+  if (measure(s, 24, 400, LAT) <= maxW) return [s];
+  const words = s.split(' '); let a = '', i = 0;
+  while (i < words.length && measure((a + ' ' + words[i]).trim(), 24, 400, LAT) <= maxW * .6) { a = (a + ' ' + words[i]).trim(); i++; }
+  return [a, words.slice(i).join(' ')];
+}
+function subtitles(t) {
+  for (const c of CUES) {
+    if (c.visual || c.i === 15) continue;
+    const a = c.start - .08, b = c.end + .35, al = win(t, a, b, .12, .18); if (al <= 0) continue;
+    const maxW = W - (PORTRAIT ? 130 : 420) * S;
+    const zh = (PORTRAIT && measure(c.zh, 38, 600) > maxW) ? splitZh(c.zh) : [c.zh];
+    const en = enLines(c.en, maxW);
+    const lh1 = 50 * S, lh2 = 32 * S, padY = 20 * S;
+    const h = zh.length * lh1 + en.length * lh2 + padY * 2;
+    const w = Math.min(maxW + 60 * S, Math.max(...zh.map(s => measure(s, 38, 600)), ...en.map(s => measure(s, 24, 400, LAT))) + 72 * S);
+    const yb = PORTRAIT ? H * .835 : H - 46 * S;   // bottom edge
+    const y0 = yb - h, lift = (1 - eOutCubic(P(t, a, a + .25))) * 10 * S;
+    ctx.save(); ctx.translate(0, lift);
+    glass(CX - w / 2, y0, w, h, Math.min(28 * S, h / 2), { alpha: al });
+    zh.forEach((s, k) => txt(s, CX, y0 + padY + lh1 * (k + .5), { size: 38, weight: 600, alpha: al, maxW }));
+    en.forEach((s, k) => txt(s, CX, y0 + padY + zh.length * lh1 + lh2 * (k + .5), { size: 24, fam: LAT, weight: 400, color: dim(), alpha: al, maxW }));
+    ctx.restore();
+  }
+}
+
+// ═════════════════════════ frame ═════════════════════════
+function post(t) {
+  const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .4, W / 2, H / 2, Math.max(W, H) * .8);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, DARK ? 'rgba(0,0,0,.6)' : 'rgba(80,60,40,.10)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const fb = Math.max(1 - P(t, 0, .5), P(t, 59.25, 60));
+  if (fb > 0) { ctx.fillStyle = `rgba(0,0,0,${fb})`; ctx.fillRect(0, 0, W, H); }
+}
+function render(t) {
+  AUDIT = [];
+  scene3D(t);
+  R.render(scene, cam);
+  ctx.reset(); ctx.globalAlpha = 1; ctx.drawImage(glc, 0, 0);
+  overlay(t);
+  subtitles(t);
+  post(t);
+  const m = 24 * S, bad = [];
+  for (const a of AUDIT) if (a.x0 < m || a.x1 > W - m || a.y0 < m || a.y1 > H - m) bad.push(a);
+  return bad;
+}
+window.ready = (async () => {
+  CUES = await (await fetch('cues.json')).json();
+  WORDS = await (await fetch('words.json')).json();
+  const all = JSON.stringify(CUES) + document.querySelector('script[type=module]').textContent;
+  for (const w of [300, 400, 500, 600, 700, 900]) await document.fonts.load(`${w} 40px "Noto Sans TC"`, all);
+  for (const w of [200, 300, 400, 600, 800]) await document.fonts.load(`${w} 40px "Inter"`, 'abc');
+  for (const w of [400, 700]) await document.fonts.load(`${w} 40px "JetBrains Mono"`, 'abc');
+  await document.fonts.ready;
+  for (const [tp, fn] of STATIC) redraw(tp, 'static', fn);
+  return true;
+})();
+window.frame = (t) => render(t);
+</script></body></html>
