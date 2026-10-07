@@ -417,7 +417,7 @@ def test_system_prompt_gives_no_examples() -> None:
     p = twinagent.SYSTEM_PROMPT
     assert _prompt_examples(p) == [], _prompt_examples(p)
     assert "不要寫程式" in p
-    assert "第一行：一句話說你要做什麼" in p
+    assert "第一行：一句話，說你要試什麼" in p
     # 負控制：舊版那一步量得到例子（這把尺不是恆綠）
     assert _prompt_examples(_OLD_STEP1_WITH_EXAMPLES) != []
 
@@ -432,8 +432,8 @@ def test_system_prompt_divination_structure_and_no_meta_guidance() -> None:
     """2026-10-01 占卜指令：讀沒說出口的在意／渴望／拉扯、第二人稱寫「為什麼是你」、
     PLAN.md 三段；而且 prompt 不替分身指任何後設任務方向（身份／自我定義／分身本身）。"""
     p = twinagent.SYSTEM_PROMPT
-    for must in ("沒有說出口", "渴望", "拉扯", "第二人稱", "如果你在這裡",
-                 "第一行：一句話說你要做什麼", "每一次動手"):
+    for must in ("沒有說出口", "渴望", "拉扯", "第二人稱", "為什麼是他",
+                 "第一行：一句話，說你要試什麼", "每一次動手"):
         assert must in p, must
     assert [w for w in _META_TASK_WORDS if w in p] == [], [w for w in _META_TASK_WORDS if w in p]
     assert _prompt_examples(p) == []

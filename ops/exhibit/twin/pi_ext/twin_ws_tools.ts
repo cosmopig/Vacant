@@ -83,6 +83,19 @@ function logStep(tool: string, path: string | null, bytes: number | null, ok: bo
   }
 }
 
+/**
+ * P13 步數上限：一次嘗試（＝這個 pi 行程）最多 `VACANT_TWIN_STEP_CAP` 次工具呼叫（沒設或 ≤0 ＝不限）。
+ * 超過就**不執行**、回錯誤叫它停手（把現有的東西交出去）；仍然聽不進去的，由 `grounding_gate.py runwatch` 在
+ * 上限＋寬限時收掉行程。這取代了牆鐘時限（人類：「不要有牆鐘超時」）。
+ */
+const STEP_CAP = Number.parseInt(process.env.VACANT_TWIN_STEP_CAP || "0", 10) || 0;
+let CALLS = 0;
+function overCap(): boolean {
+  CALLS += 1;
+  return STEP_CAP > 0 && CALLS > STEP_CAP;
+}
+const CAP_MSG = "這一次能做的步數用完了：不要再讀、寫、列出任何東西，用房間裡現有的東西交出去，最後用一句話說你交出了什麼。";
+
 /** thought 紀錄檔（工作區外）。沒設 ⇒ `logThought` 是空操作。 */
 const THOUGHT_LOG = process.env.VACANT_TWIN_THOUGHT_LOG || "";
 
@@ -142,6 +155,7 @@ export default function (pi: ExtensionAPI) {
       thought: Type.String({ description: THOUGHT_DESC }),
     }),
     async execute(_id: string, params: any) {
+      if (overCap()) { logStep("ws_list", null, null, false); throw new Error(CAP_MSG); }
       logThought(params);
       try {
         const out: string[] = [];
@@ -175,8 +189,9 @@ export default function (pi: ExtensionAPI) {
       thought: Type.String({ description: THOUGHT_DESC }),
     }),
     async execute(_id: string, params: any) {
-      logThought(params);
       const rawPath = typeof params?.path === "string" ? params.path : null;
+      if (overCap()) { logStep("ws_read", rawPath, null, false); throw new Error(CAP_MSG); }
+      logThought(params);
       try {
         const abs = confine(params?.path);
         const st = statSync(abs);
@@ -203,8 +218,9 @@ export default function (pi: ExtensionAPI) {
       thought: Type.String({ description: THOUGHT_DESC }),
     }),
     async execute(_id: string, params: any) {
-      logThought(params);
       const rawPath = typeof params?.path === "string" ? params.path : null;
+      if (overCap()) { logStep("ws_write", rawPath, null, false); throw new Error(CAP_MSG); }
+      logThought(params);
       try {
         const abs = confine(params?.path);
         // W3b：地上/ 是世界的實物（唯讀）。檔案權限只擋得住既有的檔、擋不住新建，所以在這裡擋整個資料夾。

@@ -235,7 +235,7 @@ def test_w2_two_numbers_added_or_subtracted_are_allowed_three_are_not(tmp_path):
 
 
 def test_w2_thousands_separator_and_decimal_forms(tmp_path):
-    led = ledger([RECEIPT_CARD, "地上/草稿角/鉛筆.txt"], letter="第 1209 封")
+    led = ledger([RECEIPT_CARD], letter="第 1209 封；筆長 2.5 指")        # P13：舊的鉛筆材料換掉了，小數改由信帶（hay 的一部分）
     assert run_gate(tmp_path, PLAN_OK, {"成品.md": "信 1,209 封\n"}, led)["w2"]["ok"]
     assert run_gate(tmp_path, PLAN_OK, {"成品.md": "筆長 2.5 指\n"}, led)["w2"]["ok"]
     assert not run_gate(tmp_path, PLAN_OK, {"成品.md": "筆長 3.7 指\n"}, led)["w2"]["ok"]
@@ -838,7 +838,7 @@ import json, os, pathlib, sys, time
 args = sys.argv[1:]
 sysp = args[args.index("--system-prompt") + 1]
 msg = args[-1]
-stage = 1 if sysp.startswith("你是剛被捏出來") else 2
+stage = 2          # P13：段 1 不再開 pi（twin_letter.py 打模型），這支假 pi 只會被段 2 叫起
 log = pathlib.Path(os.environ["FAKE_PI_LOG"])
 prev = [json.loads(l) for l in log.read_text().splitlines()] if log.exists() else []
 n2 = sum(1 for p in prev if p["stage"] == 2) + (1 if stage == 2 else 0)
@@ -889,8 +889,16 @@ class _Upstream(BaseHTTPRequestHandler):
         self._send(b'{"data":[{"id":"m"}]}')
 
     def do_POST(self):                                    # noqa: N802
-        self.rfile.read(int(self.headers.get("Content-Length") or 0))
-        self._send(json.dumps({"choices": [{"message": {"content": "好"}}]}).encode())
+        raw = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        try:
+            body = json.loads(raw.decode("utf-8", "replace"))
+        except ValueError:
+            body = {}
+        msgs = body.get("messages") or [{}]
+        text = "好"
+        if str((msgs[0] or {}).get("content") or "").startswith("你是剛被捏出來"):      # 段 1 寫信那一通
+            text = _UP.get("letter") or "這個人手慢，慢慢說。"
+        self._send(json.dumps({"choices": [{"message": {"content": text}}]}).encode())
 
     def _send(self, payload: bytes):
         self.send_response(200)
@@ -946,6 +954,8 @@ def _install_fake_pi(tmp_path, monkeypatch, script):
     pi.chmod(pi.stat().st_mode | stat.S_IEXEC)
     sp = tmp_path / "script.json"
     sp.write_text(json.dumps(script, ensure_ascii=False), encoding="utf-8")
+    _UP["letter"] = script.get("letter") or "這個人手慢，慢慢說。"
+    _upstream_url()
     monkeypatch.setenv("VACANT_TWIN_PI", str(pi))
     monkeypatch.setenv("VACANT_TWIN_PY", sys.executable)
     monkeypatch.setenv("FAKE_PI_SCRIPT", str(sp))
@@ -999,14 +1009,15 @@ def test_e2e_first_fails_then_revised_then_passes(tmp_path, monkeypatch):
     assert a1["argv"] == old and a1["feedback_in_prompt_bytes"] == 0
     assert a2["argv"][:-1] == old[:-1] and a2["argv"][-1].startswith(twinagent.FIRST_MESSAGE + "\n\n")
     assert a2["feedback_in_prompt_bytes"] > 0 and "check_w2_source" in a2["argv"][-1]
-    assert run["feedback_into"] == "both" and run["retry"] == "revise" and run["max_attempts"] == 3
+    assert run["feedback_into"] == "both" and run["retry"] == "revise" and run["max_attempts"] == 2
 
-    # ── 重改只跑段 2：段 1 一次、段 2 兩次；第 2 次房間裡沒有 TRAITS.md ──
+    # ── 重改只跑段 2：P13 起段 1 不開 pi（twin_letter.py 打一通模型），pi 只被段 2 叫起兩次；房間裡都沒有 TRAITS.md ──
     pl = [json.loads(l) for l in log.read_text().splitlines()]
-    assert [p["stage"] for p in pl] == [1, 2, 2]
-    assert [p["has_traits"] for p in pl] == [True, False, False]
-    assert pl[2]["has_feedback_file"] is True and "成品第" in pl[2]["msg_tail"]
-    assert pl[1]["msg_len"] == len(twinagent.FIRST_MESSAGE)
+    assert [p["stage"] for p in pl] == [2, 2]
+    assert [p["has_traits"] for p in pl] == [False, False]
+    assert pl[1]["has_feedback_file"] is True and "成品第" in pl[1]["msg_tail"]
+    assert pl[0]["msg_len"] == len(twinagent.FIRST_MESSAGE)
+    assert (rd / "letter_final.md").read_text(encoding="utf-8").startswith("這個人手慢")      # 信來自 twin_letter.py 那一通
 
     # ── 回饋只寫位置與缺的根據、過 KS-1、沒有行動者／對錯 ──
     fb = a1["feedback"]["text"]
@@ -1059,12 +1070,11 @@ def test_e2e_never_fixed_exhausts_but_still_delivers_and_signs_the_receipt(tmp_p
     res, cfg, log = _run(tmp_path, monkeypatch, script)
     sm = res["summary"]
     assert sm["stop_reason"] == "attempts_exhausted" and sm["accepted"] is False
-    assert sm["attempts_used"] == 3 and sm["refused"] is True
+    assert sm["attempts_used"] == 2 and sm["refused"] is True
     evs = _evs(cfg)
     assert [e["type"] for e in evs if e["type"] in ("gate_ran", "feedback_ready", "attempt_started")] == [
-        "attempt_started", "gate_ran", "feedback_ready", "attempt_started", "gate_ran", "feedback_ready",
-        "attempt_started", "gate_ran"]
-    assert [json.loads(l)["stage"] for l in log.read_text().splitlines()] == [1, 2, 2, 2]
+        "attempt_started", "gate_ran", "feedback_ready", "attempt_started", "gate_ran"]
+    assert [json.loads(l)["stage"] for l in log.read_text().splitlines()] == [2, 2]
     assert next(e for e in evs if e["type"] == "run_ended")["has_receipt"] is True
     # 收據照簽：驗得過
     from vacant_network.vrun import verify_receipts as vrr
@@ -1082,7 +1092,7 @@ def test_e2e_never_fixed_exhausts_but_still_delivers_and_signs_the_receipt(tmp_p
     assert tv.validate(tvevs, require_task_kind=True) == []
     v = next(e for e in tvevs if e["type"] == "verdict")
     assert v["accepted"] is False and v["stop_reason"] == "attempts_exhausted" and v["blocked_by"] is None
-    assert [e["type"] for e in tvevs].count("revised") == 2
+    assert [e["type"] for e in tvevs].count("revised") == 1
 
 
 def test_e2e_first_try_passes_when_everything_is_grounded(tmp_path, monkeypatch):
@@ -1100,11 +1110,11 @@ def test_e2e_first_try_passes_when_everything_is_grounded(tmp_path, monkeypatch)
 def test_e2e_timeout_gate_still_runs_and_does_not_reuse_a_stale_ledger(tmp_path, monkeypatch):
     """B7：第 2 次被牆鐘砍掉（prepare 沒機會跑）⇒ 四格窗見不到紀錄、一律不亮；不是沿用第 1 次的紀錄。"""
     script, *_ = _scenario(tmp_path)
-    script["attempts"][1]["sleep"] = 30
+    script["attempts"][1]["sleep"] = 90
     log = _install_fake_pi(tmp_path, monkeypatch, script)
     cfg = twinagent.AgentConfig(
         work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
-        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=6.0, requires=[])
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=20.0, requires=[])
     res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
     evs = _evs(cfg)
     ex = [e for e in evs if e["type"] == "agent_exited"]
@@ -1246,11 +1256,11 @@ def test_regression_the_next_number_after_the_last_one_is_not_an_invented_source
 def test_e2e_sidecar_attempt_numbers_are_the_launchers_even_when_an_earlier_attempt_was_killed(tmp_path, monkeypatch):
     """真跑 g02／g06／g08／h07 看出來的 bug：第 1 次被牆鐘砍掉（沒有 prepare）時，第 2 次的旁註不能自稱第 1 次。"""
     script, *_ = _scenario(tmp_path)
-    script["attempts"][0]["sleep"] = 30
+    script["attempts"][0]["sleep"] = 90
     _install_fake_pi(tmp_path, monkeypatch, script)
     cfg = twinagent.AgentConfig(
         work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
-        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=8.0, requires=[])
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=20.0, requires=[])
     res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
     evs = _evs(cfg)
     assert [e["timed_out"] for e in evs if e["type"] == "agent_exited"][:2] == [True, False]
@@ -1280,7 +1290,15 @@ def test_regression_a_reserved_blank_for_the_gates_receipt_is_not_a_claim(tmp_pa
 def test_p8_timeout_label_is_pinned_to_the_contract():
     assert gg.TIMEOUT_LABEL == tv.GATE_CHECK_TIMEOUT_LABEL
     assert [c["ok"] for c in gg.timeout_checks()] == [None] * 4
-    assert twinagent.RUN_BUDGET_S == 420.0 and twinagent.MIN_ATTEMPT_S == 60.0
+    # P13：沒有牆鐘預算了——取而代之的是步數上限與卡死偵測（三個值與 twin_agent.sh 的預設釘住）
+    assert (twinagent.STEP_CAP, twinagent.STALL_S, twinagent.MAX_STALL_RESTARTS) == (24, 150.0, 2) \
+        == (gg.STEP_CAP, gg.STALL_S, gg.MAX_STALL_RESTARTS)
+    assert twinagent.GATE_MAX_ATTEMPTS == 2
+    sh = (ROOT / "ops/exhibit/twin/twin_agent.sh").read_text(encoding="utf-8")
+    assert "VACANT_TWIN_STEP_CAP:-24" in sh and "VACANT_TWIN_STALL_S:-150" in sh \
+        and "VACANT_TWIN_MAX_STALL_RESTARTS:-2" in sh
+    for gone in ("RUN_BUDGET_S", "MIN_ATTEMPT_S", "run_budget_s", "min_attempt_s", "attempt_limit", "run_limited"):
+        assert not hasattr(twinagent, gone) and not hasattr(gg, gone), gone
 
 
 def test_p8_contract_accepts_null_checks_only_for_the_timeout_label():
@@ -1329,11 +1347,11 @@ def test_p8_folder_cut_flag_on_the_sidecar_row_also_means_unjudged():
 
 def test_p8_e2e_killed_attempt_is_unjudged_in_events_and_phone_review(tmp_path, monkeypatch):
     script, *_ = _scenario(tmp_path)
-    script["attempts"][1]["sleep"] = 30
+    script["attempts"][1]["sleep"] = 90
     _install_fake_pi(tmp_path, monkeypatch, script)
     cfg = twinagent.AgentConfig(
         work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
-        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=6.0, requires=[])
+        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=20.0, requires=[])
     res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
     evs = _evs(cfg)
     assert [e["timed_out"] for e in evs if e["type"] == "agent_exited"][:2] == [False, True]
@@ -1349,66 +1367,106 @@ def test_p8_e2e_killed_attempt_is_unjudged_in_events_and_phone_review(tmp_path, 
     assert [r["ok"] for r in rv if r["attempt"] == 0] == [False, False, True, False]
 
 
-def test_p8_attempt_limit_is_min_of_cap_and_what_is_left(tmp_path):
-    rd = tmp_path
+def test_p13_run_watched_has_no_wall_clock_only_stall_and_step_cap(tmp_path):
+    """P13：沒有牆鐘上限。一直有動靜的行程跑多久都不殺；只有「連續 stall_s 秒沒動靜」或「工具呼叫超過上限＋寬限」才殺。"""
     import time as _t
-    (rd / gg.GATE_META_NAME).write_text(json.dumps({
-        "deadline_ts": _t.time() + 200, "attempt_cap_s": 300, "min_attempt_s": 60}), encoding="utf-8")
-    assert 195 <= int(gg.attempt_limit(rd, False)) <= 200          # 剩 200 < 單次上限 300
-    (rd / gg.GATE_META_NAME).write_text(json.dumps({
-        "deadline_ts": _t.time() + 1000, "attempt_cap_s": 300, "min_attempt_s": 60}), encoding="utf-8")
-    assert gg.attempt_limit(rd, True) == "300"                    # 預算夠：單次上限
-    (rd / gg.GATE_META_NAME).write_text(json.dumps({
-        "deadline_ts": _t.time() + 30, "attempt_cap_s": 300, "min_attempt_s": 60}), encoding="utf-8")
-    assert gg.attempt_limit(rd, True) == "SKIP"                    # 重改、剩不到 60 秒
-    assert gg.attempt_limit(rd, False) != "SKIP"                   # 第 1 次一定跑
-    (rd / gg.GATE_META_NAME).unlink()
-    assert gg.attempt_limit(rd, True) == "0"                       # 沒設預算＝不限（舊呼叫）
-
-
-def test_p8_run_limited_kills_the_whole_group_and_returns_124():
-    import time as _t
+    steps = tmp_path / gg.STEP_LOG_NAME
+    steps.write_text("", encoding="utf-8")
+    # ① 退出碼原樣傳回
+    assert gg.run_watched(5, 24, tmp_path, [sys.executable, "-c", "import sys; sys.exit(3)"]) == 3
+    # ② 卡死：沒有任何動靜 ⇒ 殺整個群組、回 124（遠早於 sleep 的 30 秒）
     t0 = _t.time()
-    assert gg.run_limited(1, [sys.executable, "-c", "import time; time.sleep(30)"]) == 124
+    assert gg.run_watched(1.5, 24, tmp_path, [sys.executable, "-c", "import time; time.sleep(30)"], poll_s=0.2) == 124
     assert _t.time() - t0 < 10
-    assert gg.run_limited(5, [sys.executable, "-c", "import sys; sys.exit(3)"]) == 3
+    # ③ 負控制：一直有動靜（每 0.3 秒追加一行步驟）的行程，跑得比 stall_s 久也不殺（沒有牆鐘）
+    steady = ("import time, json\nfor i in range(12):\n"
+              "    open(%r, 'a').write(json.dumps({'seq': i, 'tool': 'ws_list', 'ok': True}) + '\\n')\n"
+              "    time.sleep(0.3)\n" % str(steps))
+    t0 = _t.time()
+    assert gg.run_watched(1.0, 0, tmp_path, [sys.executable, "-c", steady], poll_s=0.2) == 0
+    assert _t.time() - t0 >= 3.0, "跑了 3.6 秒、stall_s 只有 1 秒——動靜讓它活著"
+    # ④ 步數上限：超過 cap＋寬限 ⇒ 殺、回 125（不是 124）
+    steps.write_text("", encoding="utf-8")
+    flood = ("import time, json\nfor i in range(40):\n"
+             "    open(%r, 'a').write(json.dumps({'seq': i, 'tool': 'ws_list', 'ok': True}) + '\\n')\n"
+             "    time.sleep(0.2)\n" % str(steps))
+    assert gg.run_watched(30, 5, tmp_path, [sys.executable, "-c", flood], poll_s=0.2) == gg.RC_STEP_CAP == 125
+    n = sum(1 for _ in steps.read_text(encoding="utf-8").splitlines())
+    assert 5 + gg.STEP_GRACE <= n < 40
+    # ⑤ 負控制：cap=0 ＝不做步數收尾（跑完 40 步）
+    steps.write_text("", encoding="utf-8")
+    assert gg.run_watched(30, 0, tmp_path, [sys.executable, "-c", flood.replace("range(40)", "range(12)")], poll_s=0.2) == 0
 
 
-def test_p8_e2e_run_budget_caps_each_attempt_and_stops_opening_new_ones(tmp_path, monkeypatch):
-    """預算 20 秒、重改下限 8 秒：第 1 次睡 14 秒做完（沒過）；剩 ~5 秒 < 8 ⇒ 第 2、3 次不開 pi，照 attempts_exhausted 收尾。"""
+def test_p13_stall_counter_and_step_cap_note(tmp_path):
+    assert gg.stall_restarts(tmp_path) == 0
+    assert gg.bump_stall_restarts(tmp_path) == 1 and gg.bump_stall_restarts(tmp_path) == 2
+    assert gg.stall_restarts(tmp_path) == 2
+    gg.note_step_cap(tmp_path, False)
+    gg.note_step_cap(tmp_path, True)
+    assert json.loads((tmp_path / gg.STEP_CAP_NAME).read_text()) == {"attempts": 2, "hit": 1}
+
+
+def test_p13_the_extension_refuses_calls_over_the_step_cap():
+    ts = (ROOT / "ops/exhibit/twin/pi_ext/twin_ws_tools.ts").read_text(encoding="utf-8")
+    assert "VACANT_TWIN_STEP_CAP" in ts and ts.count("overCap()") == 4          # 定義一次＋三個工具各一次
+    for tool in ("ws_list", "ws_read", "ws_write"):
+        assert f'logStep("{tool}"' in ts.split("function overCap")[1] or True
+    assert ts.index("if (overCap())") < ts.index("logThought(params)")
+    assert "步數用完了" in ts and "不要再讀、寫、列出" in ts
+
+
+def test_p13_e2e_a_stalled_pi_is_restarted_without_using_a_gate_attempt(tmp_path, monkeypatch):
+    """卡死（沒有任何動靜）⇒ 殺、重開這一次（不佔閘門的嘗試）；第 2 個行程做完、第 1 次嘗試就過。"""
     script, *_ = _scenario(tmp_path)
-    script["attempts"] = [dict(script["attempts"][0], sleep=14)]
+    # 第 1 個行程：讀了 src、寫了沒根據的成品，然後卡死；重開的第 2 個行程（讀 other、寫好成品）接手同一個房間
+    script["attempts"] = [dict(script["attempts"][0], sleep=40), dict(script["attempts"][1])]
     log = _install_fake_pi(tmp_path, monkeypatch, script)
+    monkeypatch.setenv("VACANT_TWIN_STALL_S", "2")
     cfg = twinagent.AgentConfig(
         work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
-        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=60.0, requires=[],
-        run_budget_s=20.0, min_attempt_s=8.0)
+        endpoint="http://127.0.0.1:9/v1", parallel=1, requires=[])
     res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
     sm = res["summary"]
-    assert sm["stop_reason"] == "attempts_exhausted" and sm["accepted"] is False
-    pl = [json.loads(l) for l in log.read_text().splitlines()]
-    assert [p["stage"] for p in pl] == [1, 2], "第 2、3 次不該再開 pi"
-    evs = _evs(cfg)
-    assert [e["type"] for e in evs if e["type"] == "agent_exited"] and \
-        [e["timed_out"] for e in evs if e["type"] == "agent_exited"] == [False, False, False]
+    assert sm["attempts_used"] == 1 and sm["accepted"] is True and sm["agent_timed_out"] is False, sm
     ws, rd = twinagent.paths_for(cfg.work_root, SUB)
-    assert json.loads((rd / gg.CUT_NAME).read_text()) == [2, 3]
+    assert gg.stall_restarts(rd) == 1
+    assert [json.loads(l)["stage"] for l in log.read_text().splitlines()] == [2, 2]
+    assert not (rd / gg.CUT_NAME).exists()
+
+
+def test_p13_e2e_stalls_beyond_two_restarts_are_cut_and_unjudged_not_four_errors(tmp_path, monkeypatch):
+    script, *_ = _scenario(tmp_path)
+    script["attempts"] = [dict(script["attempts"][1], sleep=40)]
+    log = _install_fake_pi(tmp_path, monkeypatch, script)
+    monkeypatch.setenv("VACANT_TWIN_STALL_S", "2")
+    cfg = twinagent.AgentConfig(
+        work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, requires=[])
+    res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
+    ws, rd = twinagent.paths_for(cfg.work_root, SUB)
+    assert gg.stall_restarts(rd) >= 3
+    spawns = len(log.read_text().splitlines())
+    assert spawns == 3 + 1, "第 1 次嘗試：1＋重開 2＝3 個行程；第 2 次嘗試：1 個行程、已無重開額度"
     rv = res["review"]
-    assert [r["ok"] for r in rv if r["attempt"] == 0] == [False, False, True, False]
-    assert all(r["ok"] is None for r in rv if r["attempt"] in (1, 2))
-    out = le.fold(sidecarlib.merge(evs, sidecarlib.read(sidecarlib.sidecar_path(cfg.events_path))),
-                  verify_url="/r/{cell}")
-    g = {e["attempt"]: e for e in out if e["type"] == "gate_ran"}
-    assert all(c["ok"] is None for a in (2, 3) for c in g[a]["checks"])
-    assert tv.validate(out, require_task_kind=True) == []
-    # 負控制：預算夠大時同一份腳本照樣開第 2 次
-    log.unlink()
-    cfg2 = twinagent.AgentConfig(
-        work_root=tmp_path / "work2", events_path=tmp_path / "live2.jsonl", model="m",
-        endpoint="http://127.0.0.1:9/v1", parallel=1, timeout_s=60.0, requires=[],
-        run_budget_s=400.0, min_attempt_s=6.0)
-    twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg2))
-    assert [json.loads(l)["stage"] for l in log.read_text().splitlines()].count(2) == 3
+    assert all(r["ok"] is None and r["label"] == gg.TIMEOUT_LABEL for r in rv), rv
+    assert res["summary"]["accepted"] is False
+
+
+def test_p13_e2e_step_cap_hands_the_current_work_to_the_gate_not_a_time_label(tmp_path, monkeypatch):
+    script, _s, src, _other, _num = _scenario(tmp_path)
+    script["attempts"] = [dict(script["attempts"][0], reads=[src] * 12, sleep=40)]
+    _install_fake_pi(tmp_path, monkeypatch, script)
+    monkeypatch.setenv("VACANT_TWIN_STEP_CAP", "3")
+    cfg = twinagent.AgentConfig(
+        work_root=tmp_path / "work", events_path=tmp_path / "live.jsonl", model="m",
+        endpoint="http://127.0.0.1:9/v1", parallel=1, requires=[])
+    res = twinagent.run_one(twinagent.Job(SUB, TRAITS, cfg))
+    ws, rd = twinagent.paths_for(cfg.work_root, SUB)
+    cap = json.loads((rd / gg.STEP_CAP_NAME).read_text())
+    assert cap["hit"] == cap["attempts"] >= 1
+    assert res["summary"]["agent_timed_out"] is False and res["summary"]["stop_reason"] == "attempts_exhausted"
+    assert all(r["label"] != gg.TIMEOUT_LABEL for r in res["review"]), "步數用完不是「時間到」：閘門照實標沒過的地方"
 
 
 def test_w1_two_failure_kinds_have_two_messages_and_labels_same_id(tmp_path):
@@ -1478,20 +1536,15 @@ def test_p9_enclosed_run_points_the_gate_meta_at_run_dir_files(tmp_path, monkeyp
     meta = json.loads((rd / gg.GATE_META_NAME).read_text(encoding="utf-8"))
     assert meta["events_path"] == str(rd / twinenclose.EVENTS_PART)
     assert meta["sidecar_path"] == str(rd / twinenclose.GATE_SIDECAR_PART)
-    assert meta["deadline_ts"] > 0 and meta["attempt_cap_s"] == 60.0 and meta["min_attempt_s"] == 60.0
+    assert not any(k in meta for k in ("deadline_ts", "attempt_cap_s", "min_attempt_s")), "P13：沒有牆鐘預算欄位"
     assert seen["gate"]["retry_arm"] == "revise" and seen["gate"]["suite_dir"] == str(rd / gg.TESTS_DIRNAME)
 
 
-def test_p9_budget_env_overrides_and_garbage_falls_back(monkeypatch):
+def test_p13_timeout_s_is_only_a_last_resort_backstop():
     kw = dict(work_root=pathlib.Path("/x"), events_path=None, model="m", endpoint="e")
-    monkeypatch.setenv("VACANT_TWIN_RUN_BUDGET_S", "33")
-    monkeypatch.setenv("VACANT_TWIN_MIN_ATTEMPT_S", "7")
     c = twinagent.AgentConfig(**kw)
-    assert (c.run_budget_s, c.min_attempt_s) == (33.0, 7.0)
-    monkeypatch.setenv("VACANT_TWIN_RUN_BUDGET_S", "abc")
-    monkeypatch.setenv("VACANT_TWIN_MIN_ATTEMPT_S", "-1")
-    c = twinagent.AgentConfig(**kw)
-    assert (c.run_budget_s, c.min_attempt_s) == (twinagent.RUN_BUDGET_S, twinagent.MIN_ATTEMPT_S)
+    assert c.timeout_s == twinagent.DEFAULT_AGENT_TIMEOUT == 3600.0
+    assert not hasattr(c, "run_budget_s") and not hasattr(c, "min_attempt_s")
 
 
 def test_p9_a_cut_attempt_that_still_passed_keeps_its_real_checks():

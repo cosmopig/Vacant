@@ -7,9 +7,14 @@
 # 用法（由 launcher 起，不要手打）：
 #   twin_agent.sh <段1指令> <段1第一句> <run_dir> <段2指令> <段2第一句>
 #
-#   ⚠ W3b（2026-10-01）一跑兩個 pi 回合：段 1 讀 TRAITS.md、寫 信.md；
+#   ⚠ W3b（2026-10-01）先寫信、再進世界：段 1 讀 TRAITS.md、寫 信.md；
 #     然後 `twin_letter_guard.py` 做確定性關卡（TRAITS.md 移走、信防呆、世界與地上搬進房間）；
-#     段 2 的房間裡沒有 TRAITS.md，只有 信.md、WORLD.md、地上/。兩個回合各自 `--no-session`。
+#     段 2 的房間裡沒有 TRAITS.md，只有 信.md、WORLD.md、地上/。
+#   ⚠ **P13（2026-10-07）段 1 不再開 pi**：`twin_letter.py` 直接打一次模型（無工具、串流、經 `vacant run` 的中介），
+#     寫出 信.md。只有段 2 是 pi 工作階段（`--no-session`）。「第 1 次嘗試的 argv 與沒有閘門時逐位元相同」這個性質
+#     因此只適用於**段 2**（段 1 的兩個參數現在是 twin_letter.py 的輸入，不是 pi 的 argv）。
+#   ⚠ **P13 沒有牆鐘時限**：段 2 由 `grounding_gate.py runwatch` 看著——一次嘗試最多 STEP_CAP（24）次工具呼叫；
+#     連續 STALL_S（150）秒沒有任何新動靜才判定卡死、重開這一次（整跑最多 2 次）。
 #
 #   · cwd ＝ 這位分身的拋棄式工作區（launcher 設的），裡面只有 TRAITS.md；
 #   · `<run_dir>` ＝ 這位分身的 run-dir（工作區外）。pi 的設定目錄與 stderr 放這裡
@@ -127,10 +132,16 @@ COMMON=(-p --mode json --provider vacantproxy --model m
     --no-extensions --no-skills --no-context-files --no-prompt-templates
     --no-themes --no-approve --offline --no-session)
 
+# P13：一次嘗試最多幾次工具呼叫、卡死多久才算壞了（兩個值與 `twinagent.STEP_CAP`／`STALL_S` 同值，測試釘住）。
+export VACANT_TWIN_STEP_CAP="${VACANT_TWIN_STEP_CAP:-24}"
+STALL_S="${VACANT_TWIN_STALL_S:-150}"
+MAX_STALLS="${VACANT_TWIN_MAX_STALL_RESTARTS:-2}"
+export VACANT_TWIN_STALL_S="$STALL_S"
+
 if [ "$RETRY" -eq 0 ]; then
-    # ── 段 1：讀 TRAITS.md、寫 信.md ──
-    # ⚠ `< /dev/null`：`pi -p` 不給會永久卡住（2026-09-18 實測，V0 已知）。
-    "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS1" @TRAITS.md "$MSG1" < /dev/null
+    # ── 段 1：讀 TRAITS.md、寫 信.md（P13：不開 pi，一通模型呼叫，無工具）──
+    # `VACANT_TWIN_LETTER`：測試用的替身（與 `VACANT_TWIN_PI` 同一種），沒設就是 twin_letter.py。
+    "$PY" "${VACANT_TWIN_LETTER:-$HERE/twin_letter.py}" write "$(pwd)" "$SYS1" "$MSG1" "$BASE" "$MODEL"
     RC1=$?
 
     # ── 關卡：TRAITS.md 一定在這裡被移走（不管段 1 成不成功） ──
@@ -150,25 +161,33 @@ SYS="$SYS$WAY"
 # 電視的「它照著你的命盤……」那一拍（旁註 `twin_fortune` phase=way；只在第一次、沒有命盤就不發）。
 [ "$RETRY" -eq 0 ] && { "$PY" "$HERE/fortune.py" announce "$RUN_DIR" 2>/dev/null || true; }
 
-# ── 整跑時間預算（`twinagent.RUN_BUDGET_S`，預設 420 秒）：這一次 pi 最多跑 min(單次上限, 剩下的預算) 秒；
-#    重改時剩不到 `min_attempt_s`（預設 60 秒）⇒ 不再開 pi（SKIP）。被切掉的那一次照樣 prepare，但標 GATE_CUT=1
-#    （電視演「時間到」，不演成四個錯）。沒有預算設定（舊呼叫）⇒ 不限。
+# ── 段 2（P13：沒有牆鐘殺行程）：`runwatch` 只在「連續 STALL_S 秒沒有任何新動靜」時殺掉並回 124；
+#    124 ⇒ 重開這一次（整跑累計最多 MAX_STALLS 次，計數在 run-dir，跨嘗試）；用光仍卡死 ⇒ 這一次標沒有交件（GATE_CUT）。
+#    125 ⇒ 工具呼叫超過上限＋寬限、聽不進停手的錯誤（擴充已經在上限回錯誤）：收掉、照常交給閘門（退出碼記成 0）。
 CUT=0
-LIM=$("$PY" "$HERE/grounding_gate.py" limit "$RUN_DIR" "$RETRY" 2>/dev/null || echo 0)
-if [ "$LIM" = "SKIP" ]; then
-    echo "整跑預算剩不到下限，這一次不開 pi。" >&2
-    RC2=124; CUT=1
-else
-    # ── 段 2：房間裡只有 信.md、WORLD.md、地上/ ──
-    "$PY" "$HERE/grounding_gate.py" runlimited "${LIM:-0}" -- "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG"
+while :; do
+    "$PY" "$HERE/grounding_gate.py" runwatch "$STALL_S" "$VACANT_TWIN_STEP_CAP" "$RUN_DIR" -- \
+        "$PI_BIN" "${COMMON[@]}" --system-prompt "$SYS" @信.md "$MSG"
     RC2=$?
-    [ "$RC2" -eq 124 ] && CUT=1
-fi
+    if [ "$RC2" -eq 124 ]; then
+        N=$("$PY" "$HERE/grounding_gate.py" stalls "$RUN_DIR" bump 2>/dev/null || echo 99)
+        if [ "$N" -le "$MAX_STALLS" ]; then
+            echo "卡死（連續 ${STALL_S} 秒沒有新動靜），重開這一次（第 $N 次重開）。" >&2
+            continue
+        fi
+        echo "卡死重開已用完（$MAX_STALLS 次）。這一次沒有交件。" >&2
+        CUT=1
+    fi
+    break
+done
+HIT=0
+if [ "$RC2" -eq 125 ]; then HIT=1; RC2=0; fi
+"$PY" "$HERE/grounding_gate.py" notecap "$RUN_DIR" "$HIT" 2>/dev/null || true
 
 # ── 根據閘門的紀錄：pi 已經結束（分身改不到），凍結與驗收還沒開始 ──
-# 重寫 tests_visible/_ledger.py，並把這一次的四格結果預先寫成旁註（先於 gate_ran）。
+# 重寫 tests_visible/_ledger.py，並把這一次的四格結果預先寫成旁註 `twin_gate`（先於 `gate_ran`）。
 # 失敗不改變這一跑的結束碼；沒有 _ledger.py 時四格窗一律不亮。
-# P10 命盤卡：同一個時間點（pi 已死、凍結之前）逐句對步驟紀錄，發 `twin_fortune` phase=card 旁註（先於 gate_ran）。
+# P10 命盤卡：同一個時間點（pi 已死、凍結之前）逐句對步驟紀錄，發 `twin_fortune` phase=card 旁註（先於 `gate_ran`）。
 "$PY" "$HERE/fortune.py" card "$(pwd)" "$RUN_DIR" 2>/dev/null || true
 GATE_CUT="$CUT" "$PY" "$HERE/grounding_gate.py" prepare "$(pwd)" "$RUN_DIR" || true
 exit "$RC2"

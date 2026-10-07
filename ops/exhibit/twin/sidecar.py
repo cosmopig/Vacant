@@ -157,7 +157,7 @@ FIELDS: dict[str, tuple[str, ...]] = {
 FORTUNE_PHASES = ("way", "card")
 FORTUNE_MBTI = ("INFP", "INFJ", "INTP", "INTJ", "ISFP", "ISFJ", "ISTP", "ISTJ",
                 "ENFP", "ENFJ", "ENTP", "ENTJ", "ESFP", "ESFJ", "ESTP", "ESTJ")
-FORTUNE_SOURCES = ("ai", "self", "twin")
+FORTUNE_SOURCES = ("ai", "twin")      # P13：命盤是 AI 的判決，觀眾改不了——沒有 self
 FORTUNE_ZODIACS = ("牡羊", "金牛", "雙子", "巨蟹", "獅子", "處女", "天秤", "天蠍", "射手", "摩羯", "水瓶", "雙魚")
 FORTUNE_ELEMENTS = ("火", "土", "風", "水")
 FORTUNE_BLOODS = ("A", "B", "O", "AB")

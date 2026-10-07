@@ -196,7 +196,7 @@ def main(argv=None) -> int:
                 sub_id=ids[k], hints=twin.get("polaroid_hints"),
                 fortune={x: fz.get(x) for x in ("mbti", "zodiac", "blood")},
                 fortune_line=str(fz.get("first_line") or ""),
-                fortune_sentence=twinagent.fortunelib.polaroid_sentence(str(next(iter(fz.get("lines") or []), ""))))
+                fortune_sentence=twinagent.fortunelib.polaroid_pick(fz))
             rep.setdefault("polaroid_meta", {})[k] = {
                 "caption_source": meta.get("caption_source"), "caption_blank": meta.get("caption_blank"),
                 "fortune_drawn": meta.get("fortune_drawn"), "frame": meta.get("frame"),

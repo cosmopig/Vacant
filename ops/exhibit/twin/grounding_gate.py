@@ -28,6 +28,16 @@
 分身改不到）；它同時把這一次的四格結果預先寫成一筆旁註 `twin_gate`（先於 `gate_ran`，電視才拿得到逐格結果）。
 `prepare` 沒跑成就**刪掉** `_ledger.py`——四格窗見到沒有紀錄就一律不亮（量不到不是通過），不用上一次的舊紀錄。
 
+## P13（2026-10-07）：不看牆鐘
+
+人類：「不要有牆鐘超時」。分身那一跑**沒有**單次秒數上限、也沒有整跑預算；改成兩個**不看秒數長短**的保險：
+1. 步數上限：一次嘗試最多 `STEP_CAP`（24）次工具呼叫；pi 的擴充（`twin_ws_tools.ts`）超過就回錯誤叫它停手，
+   我們這一側（`run_watched`）在超過 `STEP_CAP + STEP_GRACE` 時才強制收掉行程。到了上限就把**現有**成品交給閘門，
+   閘門照實標出沒過的地方（不是「時間到」）。
+2. 卡死偵測：連續 `STALL_S`（150）秒**沒有任何新動靜**（pi 的 stdout 事件流、步驟紀錄、thought 紀錄都沒有變）才判定這一次壞了，
+   殺掉、**重開這一次**（整跑最多 `MAX_STALL_RESTARTS`＝2 次）；重開用光仍卡死 ⇒ 這一次標「沒有交件」（`GATE_CUT`，電視演未判）。
+串流一直有 token 進來，所以很慢但在動的模型不會被誤殺；風險寫在裁決 §四。
+
 ## 失敗訊息的規矩
 
 一句繁體中文，**只寫位置與缺的根據**（「成品第 7 行的『23』，這一跑讀過的東西裡找不到」），
@@ -252,6 +262,12 @@ def named_paths(plan_text: str, ground_files: list[str]) -> list[dict]:
     for i in range(a, b):
         for m in _PATH_RE.finditer(lines[i]):
             p = m.group(0).rstrip(".．-_")
+            # P13：PLAN 的散文裡路徑後面直接接中文（「地上/長桌廣場/土堆/裡那些被遺棄的東西」），路徑字元表不分中英文，
+            # 會把後面的字也吞進去 ⇒ 誤擋（真跑 v6 第 2 次）。檔案在 .txt 結束；否則資料夾結束在最後一個「/」。
+            if ".txt" in p:
+                p = p[: p.index(".txt") + 4]
+            elif p.count("/") >= 2 and not p.endswith("/"):
+                p = p[: p.rindex("/") + 1]
             if not p.startswith(GROUND_PREFIX):
                 p = GROUND_PREFIX + p
             folder = p.endswith("/")
@@ -378,15 +394,35 @@ def number_found(n: int, per: list[set[int]]) -> bool:
     return False
 
 
+#: P13：成品明講「這是我自己做的」的那一行，裡面的數字是它自己做出來的東西的（不是從地上抄的），不算編造。
+#: 同一個數字在別行再出現也算（它自己做的東西的尺寸、個數，之後還會提到）。只免數字與小數、不免印紋名。
+SELF_MADE_MARKERS = ("自己做的", "自己捏的", "自己造的", "自己做出來", "自己捏出來", "自己造出來", "是我做的", "是我捏的",
+                     "是我造的", "我做的", "我捏的", "我造的", "我新做的", "我新捏的")
+
+
+def self_made_numbers(artifacts: list[tuple[str, str]]) -> set[str]:
+    out: set[str] = set()
+    for _name, text in artifacts:
+        for line in text.splitlines():
+            if any(m in line for m in SELF_MADE_MARKERS):
+                for kind, tok in tokens(line):
+                    if kind in ("num", "dec"):
+                        out.add(tok)
+    return out
+
+
 def check_source(artifacts: list[tuple[str, str]], hay_texts: list[str]) -> list[dict]:
     per, decs = known_numbers(hay_texts)
     hay = "\n".join(hay_texts)
+    mine = self_made_numbers(artifacts)
     issues = []
     for ai, (name, text) in enumerate(artifacts):
         where = _fname(name, artifacts, ai)
         for ln, line in enumerate(text.splitlines(), 1):
             missing: list[str] = []
             for kind, tok in tokens(line):
+                if kind in ("num", "dec") and tok in mine:
+                    continue
                 if kind == "num":
                     ok = number_found(int(tok), per)
                 elif kind == "dec":
@@ -768,34 +804,104 @@ def cut_attempts(rd: str | os.PathLike) -> set[int]:
     return out
 
 
-def attempt_limit(rd: str | os.PathLike, retry: bool) -> str:
-    """這一次嘗試 pi 能跑幾秒：min(單次上限, 整跑剩下的預算)；重改時剩不到 `min_attempt_s` ⇒ "SKIP"。
-    `gate_meta.json` 沒有預算欄位 ⇒ 不限（回 "0"）。"""
+#: P13 步數上限／卡死偵測（見檔頭）。環境變數 `VACANT_TWIN_STEP_CAP`／`VACANT_TWIN_STALL_S` 可覆寫（測試與量測用）。
+STEP_CAP = 24
+STEP_GRACE = 4
+STALL_S = 150.0
+MAX_STALL_RESTARTS = 2
+#: 退出碼：卡死（沒有新動靜 ≥ STALL_S）＝124（沿用「這一次沒有交件」的意思）；步數超過上限＋寬限被我們收掉＝125。
+RC_STALL = 124
+RC_STEP_CAP = 125
+STALL_COUNT_NAME = "stall_restarts"       # run-dir：這一跑已經重開過幾次（跨嘗試累計）
+STEP_CAP_NAME = "step_cap.json"            # run-dir：哪幾次嘗試碰到步數上限（只有計數）
+
+
+def _count_lines(p: pathlib.Path) -> int:
     try:
-        meta = json.loads((pathlib.Path(rd) / GATE_META_NAME).read_text(encoding="utf-8"))
-        left = float(meta["deadline_ts"]) - time.time()
-        cap, floor = float(meta["attempt_cap_s"]), float(meta["min_attempt_s"])
-    except (OSError, ValueError, KeyError, TypeError):
-        return "0"
-    if retry and left < floor:
-        return "SKIP"
-    return str(max(1, int(min(cap, left))))
+        return sum(1 for ln in p.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
+    except OSError:
+        return 0
 
 
-def run_limited(secs: float, cmd: list[str]) -> int:
-    """跑 `cmd`（stdin 接 /dev/null、stdout／stderr 繼承），超過 `secs` 秒就殺整個行程群組、回 124。"""
+def _mtime(p: pathlib.Path) -> float:
+    try:
+        return p.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def run_watched(stall_s: float, cap: int, rd: str | os.PathLike, cmd: list[str], *, poll_s: float = 1.0) -> int:
+    """跑 `cmd`（stdin 接 /dev/null、stdout／stderr 繼承）。**沒有牆鐘上限**。
+    - 連續 `stall_s` 秒「沒有任何新動靜」（`agent_stdout.log`、步驟紀錄、thought 紀錄的修改時間都沒動）⇒ 殺整個行程群組、回 `RC_STALL`；
+    - 這一次的工具呼叫數（步驟紀錄行數 − 開始時的行數）≥ `cap + STEP_GRACE` ⇒ 殺掉、回 `RC_STEP_CAP`
+      （擴充在超過 `cap` 時已經在回錯誤叫它停手；這裡只收「聽不進去」的）。
+    - 否則回 cmd 的退出碼。`stall_s <= 0` ⇒ 不做卡死偵測；`cap <= 0` ⇒ 不做步數收尾。"""
     import signal
     import subprocess
+    rd = pathlib.Path(rd)
+    step_log = rd / STEP_LOG_NAME
+    watch = [rd / "agent_stdout.log", step_log, rd / "twin_thoughts.ndjson"]
+    base_steps = _count_lines(step_log)
     proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, start_new_session=True)
-    try:
-        return proc.wait(timeout=secs if secs > 0 else None)
-    except subprocess.TimeoutExpired:
+    last = time.time()
+    seen = {w: _mtime(w) for w in watch}
+
+    def _kill() -> None:
         try:
             os.killpg(proc.pid, signal.SIGKILL)
         except OSError:
             pass
         proc.wait()
-        return 124
+
+    while True:
+        try:
+            return proc.wait(timeout=poll_s)
+        except subprocess.TimeoutExpired:
+            pass
+        now = time.time()
+        for w in watch:
+            m = _mtime(w)
+            if m != seen[w]:
+                seen[w] = m
+                last = now
+        if cap > 0 and _count_lines(step_log) - base_steps >= cap + STEP_GRACE:
+            _kill()
+            return RC_STEP_CAP
+        if stall_s > 0 and now - last >= stall_s:
+            _kill()
+            return RC_STALL
+
+
+def note_step_cap(rd: str | os.PathLike, hit_cap: bool) -> None:
+    """把「這一次是不是碰到步數上限」記進 `step_cap.json`（只有計數；撤回時跟 run-dir 一起刪）。"""
+    rd = pathlib.Path(rd)
+    p = rd / STEP_CAP_NAME
+    try:
+        d = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        d = {"attempts": 0, "hit": 0}
+    d["attempts"] = int(d.get("attempts", 0)) + 1
+    d["hit"] = int(d.get("hit", 0)) + (1 if hit_cap else 0)
+    try:
+        p.write_text(json.dumps(d), encoding="utf-8")
+    except OSError:
+        pass
+
+
+def stall_restarts(rd: str | os.PathLike) -> int:
+    try:
+        return int((pathlib.Path(rd) / STALL_COUNT_NAME).read_text(encoding="utf-8").strip() or 0)
+    except (OSError, ValueError):
+        return 0
+
+
+def bump_stall_restarts(rd: str | os.PathLike) -> int:
+    n = stall_restarts(rd) + 1
+    try:
+        (pathlib.Path(rd) / STALL_COUNT_NAME).write_text(str(n), encoding="utf-8")
+    except OSError:
+        pass
+    return n
 
 
 def prepare(ws: str | os.PathLike, rd: str | os.PathLike) -> int:
@@ -860,12 +966,18 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if len(argv) == 3 and argv[0] == "prepare":
         return prepare(argv[1], argv[2])
-    if len(argv) == 3 and argv[0] == "limit":
-        print(attempt_limit(argv[1], argv[2] == "1"))
+    if len(argv) >= 6 and argv[0] == "runwatch" and argv[4] == "--":
+        return run_watched(float(argv[1]), int(argv[2]), argv[3], argv[5:])
+    if len(argv) == 3 and argv[0] == "stalls":
+        # stalls <run_dir> bump|get：重開次數（跨嘗試累計）；`get` 印數字，`bump` 加一並印新數字
+        n = bump_stall_restarts(argv[1]) if argv[2] == "bump" else stall_restarts(argv[1])
+        print(n)
         return 0
-    if len(argv) >= 4 and argv[0] == "runlimited" and argv[2] == "--":
-        return run_limited(float(argv[1]), argv[3:])
-    print("用法：grounding_gate.py prepare|limit <工作區|run_dir> …｜runlimited <秒> -- <命令…>", file=sys.stderr)
+    if len(argv) == 3 and argv[0] == "notecap":
+        note_step_cap(argv[1], argv[2] == "1")
+        return 0
+    print("用法：grounding_gate.py prepare <工作區> <run_dir>｜runwatch <stall_s> <cap> <run_dir> -- <命令…>"
+          "｜stalls <run_dir> get|bump｜notecap <run_dir> 0|1", file=sys.stderr)
     return 2
 
 

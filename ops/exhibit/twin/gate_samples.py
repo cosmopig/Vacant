@@ -210,7 +210,7 @@ def run_one(spec: dict[str, Any], endpoint: str, model: str, timeout: float,
         rec["stop_reason"], rec["accepted"] = runj.get("stop_reason"), runj.get("accepted")
         rec["review_labels"] = twinagent.read_review(rd)
         rec["cut_attempts"] = sorted(gg.cut_attempts(rd))
-        rec["run_budget_s"] = twinagent.RUN_BUDGET_S
+        rec["step_cap"], rec["stall_s"] = twinagent.STEP_CAP, twinagent.STALL_S      # P13：沒有牆鐘預算
         rec["letter_present"] = (ws / "信.md").is_file()
 
         # 事件流（lifecycle＋旁註）原封不動存下來——之後要餵電視

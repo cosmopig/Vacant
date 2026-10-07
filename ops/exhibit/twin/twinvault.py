@@ -124,6 +124,7 @@ DEFAULT_SCOPE = (
 #: 對映關係寫在這裡當單一真相，不要在呼叫端各寫一份。
 CARD_FIELD_CATEGORY: dict[str, str] = {
     "need": "needs",
+    "want": "needs",          # P13：他心裡一直想試、卻還沒試的事（AI 的占卜）；自由文字，與 need 同一類
     "first_line": "style",
     "shape": "style",
     "texture": "style",

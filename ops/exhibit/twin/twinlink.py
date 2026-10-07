@@ -522,11 +522,11 @@ SYSTEM_PROMPT = (
 def build_prompt(card: dict[str, Any] | None, card_text: str | None) -> str:
     c = card or {}
     lines = ["這是那張卡："]
-    for label, key in (("需求", "need"), ("形狀", "shape"), ("質感", "texture"),
+    for label, key in (("他心裡一直想試的事", "want"), ("需求", "need"), ("形狀", "shape"), ("質感", "texture"),
                        ("色系", "color"), ("氣質", "vibe"), ("第一句話", "first_line")):
         v = c.get(key)
         lines.append(f"{label}：{v if v else '（沒填）'}")
-    if not any(c.get(k) for k in ("need", "shape", "texture", "color", "vibe")) and card_text:
+    if not any(c.get(k) for k in ("want", "need", "shape", "texture", "color", "vibe")) and card_text:
         lines.append("（欄位沒解析出來，原文如下）")
         lines.append(str(card_text)[:600])
     p = "\n".join(lines)
@@ -576,7 +576,7 @@ def fallback_twin(card: dict[str, Any] | None) -> dict[str, Any]:
     def _f(key: str, dflt: str = "") -> str:
         v = c.get(key)
         return _safe_text(v, 600).strip() if v not in (None, "") else dflt
-    need = _f("need", "一件還沒做完的小事")
+    need = _f("want") or _f("need", "一件還沒做完的小事")
     vibe = _f("vibe")
     shape = _f("shape", "圓潤")
     color = _f("color", "暖土")
@@ -1104,8 +1104,7 @@ def make_polaroid(store: TwinStore, sid: str, *,
             sub_id=sid, hints=twin.get("polaroid_hints"),
             fortune={k: (twin.get("fortune") or {}).get(k) for k in ("mbti", "zodiac", "blood")},
             fortune_line=str((twin.get("fortune") or {}).get("first_line") or ""),
-            fortune_sentence=twinagent.fortunelib.polaroid_sentence(
-                str(next(iter((twin.get("fortune") or {}).get("lines") or []), ""))))
+            fortune_sentence=twinagent.fortunelib.polaroid_pick(twin.get("fortune")))
         ref = store.vault.seal_polaroid(sid, png)
     except (polaroidlib.PolaroidError, twinvault.VaultError, OSError, *CARD_LEVEL_ERRORS) as e:
         # 做不出來的原因多半是永久的（版面、素材）。記一列 skipped，**不要每輪重試**；
@@ -1303,7 +1302,7 @@ def publish(store: TwinStore, cloud: str, token: str,
                 payload["fortune"] = {
                     "mbti": _fz.get("mbti"), "mbti_source": _fz.get("mbti_source"),
                     "zodiac": _fz.get("zodiac"), "blood": _fz.get("blood"),
-                    "lines": [str(x) for x in (_fz.get("lines") or [])][:3]}
+                    "lines": [str(x) for x in (_fz.get("lines") or [])][:4]}
             rb = twinagent.receipt_bundle(work_root, sid,
                                           expect_head=twin.get("verdict_hash"))
             if rb.get("ok"):
@@ -2609,7 +2608,8 @@ def _add_agent_args(q: argparse.ArgumentParser) -> None:
                          "1003 吞吐 4 串封頂）"))
     q.add_argument("--agent-timeout", type=float,
                    default=twinagent.DEFAULT_AGENT_TIMEOUT, dest="agent_timeout",
-                   help="單跑牆鐘上限（秒）")
+                   help=("最後保險（秒）：P13 起分身沒有牆鐘時限，管事的是步數上限（24）與卡死偵測（150 秒沒有新動靜）；"
+                         "這個值只在行程真的掛死、連卡死偵測都沒抓到時才碰得到"))
     q.add_argument("--events", default=None,
                    help=("lifecycle 事件檔（展場 live 檔）。預設 VACANT_EVENTS，"
                          "否則庫旁邊的 twin_lifecycle.jsonl"))

@@ -36,14 +36,15 @@ def _text(rel: str) -> str:
 
 
 def test_pool_size_places_and_links() -> None:
-    assert len(_ALL) == 24          # P10：八個地點各 3 件
+    """P13：≥ 30 件新的「想動手但還沒人試過」的東西＋少數可核對的事實檔；八個地點各 3–7 件；關聯組彼此呼應。"""
+    assert len(_ALL) >= 38
     places: dict[str, int] = {}
     for rel in _ALL:
         places[twinground.place_of(rel)] = places.get(twinground.place_of(rel), 0) + 1
     assert set(places) == {"投遞口", "捏土處", "長桌廣場", "石頭閘門", "帳本鏈", "草稿角", "紙卡地", "畫架與長椅"}
-    assert set(places.values()) == {3}, places
+    assert all(3 <= n <= 8 for n in places.values()), places
     gs = twinground.groups()
-    assert 6 <= len(gs) <= 8
+    assert 8 <= len(gs) <= 16
     for g, ms in gs.items():
         assert len(ms) >= 2 and all(m in _ALL for m in ms), g
 
@@ -65,23 +66,52 @@ def test_pool_has_no_outside_words_no_menu_no_task_voice() -> None:
 
 
 def test_pool_links_are_checkable_facts() -> None:
-    """關聯能被核對：蕨葉印的卡寫片 431，鏈上 431 真的是蕨葉、鐵環鬆；筆芯 5＝鉛筆刻 5；土量 63-4=59。"""
+    """留下來的幾組可核對事實（G3 的權威與對不上）＋新世界裡彼此呼應的數字／物件。"""
     tail = _text("帳本鏈/尾段_418到447片.txt")
     assert re.search(r"^431 .*印紋：蕨葉.*鐵環：鬆", tail, re.M)
-    assert "片：431" in _text("投遞口/收據卡_蕨葉.txt") and "印紋：蕨葉" in _text("投遞口/收據卡_蕨葉.txt")
-    assert "5 道" in _text("草稿角/鉛筆.txt") and "5 截" in _text("長桌廣場/土堆/小陶印.txt")
-    births = re.findall(r"^\d+ +出生片", tail, re.M)
-    assert len(births) == 4 and "共 4 片出生片" in _text("帳本鏈/出生片_420到440.txt")
-    assert "63 撮" in _text("捏土處/土量刻痕.txt") and "59 撮" in _text("捏土處/土量刻痕.txt")
-    # 刻意的「對不上」：432 螺旋的收據在 440 螺旋的出生片之前
-    assert re.search(r"^432 .*印紋：螺旋", tail, re.M) and re.search(r"^440 +出生片 +印紋：螺旋", tail, re.M)
-    # 土堆小罐裡只有兩枚（沒有第三枚），閘門退回紙上的土堆清單卻寫 3 枚
+    assert re.search(r"^438 .*印紋：半月", tail, re.M) and "片 438" in _text("畫架與長椅/畫架上的去向.txt")
+    # 刻意的「對不上」：土堆小罐裡只有兩枚（沒有第三枚），閘門退回紙上的土堆清單卻寫 3 枚
     assert "沒有第三枚" in _text("長桌廣場/土堆/小陶印.txt")
     assert re.search(r"小陶印\s*3 枚", _text("石頭閘門/退回紙_另一張.txt"))
+    # 紙卡地格狀圖：第四列 5 張；退回紙第四列寫 6 張
+    assert "在位 24 張" in _text("紙卡地/格狀圖.txt") and "24 張卡" in _text("紙卡地/卡面上的圓.txt")
+    assert "第四列：6 張" in _text("石頭閘門/退回紙_第四列.txt")
+    # 新世界的呼應：音樂盒停在第 11 個音、斷的是第 12 根；哨子刻 12 道；第 7 格窗與 6 格窗；冷藍光與藍鉛筆、小門
+    assert "第 11 個音" in _text("長桌廣場/桌五_音樂盒.txt") and "第 12" in _text("長桌廣場/桌五_音樂盒.txt")
+    assert "12 道短線" in _text("長桌廣場/陶哨子.txt")
+    assert "第 7 格" in _text("石頭閘門/第七格窗.txt") and "6 格" in _text("石頭閘門/第七格窗.txt")
+    assert "冷藍" in _text("石頭閘門/背面的小門.txt") and "冷藍" in _text("長桌廣場/筆筒裡的藍鉛筆.txt")
+    assert "橘" in _text("畫架與長椅/長椅上的紙筒.txt") and "橘" in _text("帳本鏈/放大鏡的鏡片.txt")
+    # 水只有兩處
+    assert "兩處水" in _text("捏土處/陶杯裡的種子.txt") and "兩處水" in _text("石頭閘門/閘門旁的陶碗.txt")
 
 
-def test_everyone_gets_the_same_ground_all_24_files() -> None:
-    """P10：命盤決定走法、不決定地上有什麼——每位觀眾的地上都是同一整片（24 件）與全部關聯組。"""
+def test_the_world_invites_trying_and_never_assigns_it() -> None:
+    """人類（2026-10-07）：世界要讓人看了想進去試——材料是事實與懸念，不是任務句、不是清單。
+    每個地點至少有一件「還沒有人動過」的東西（沒人點過、沒人澆過、沒人推開、沒人撿起、沒人封好…），
+    且每件都有感官（光／聲音／溫度／觸感／氣味之一）。"""
+    untouched = ("沒有人", "沒有被", "從來沒有", "沒被", "沒有點過", "沒有撿起", "沒有扣上", "沒有壓", "沒有說過", "沒有走回來",
+                 "沒有把握", "沒有裂穿", "沒有掉", "沒有按穿", "沒有被誰", "沒有第三枚", "沒有燒黑", "沒有一點磨損", "沒有任何",
+                 "沒有蓋", "沒有開頭", "沒有印紋", "還沒", "沒有用過", "沒有去碰", "放了很久", "少了一撮", "沒有字", "沒有說")
+    sense = ("光", "亮", "響", "聲", "暖", "涼", "冷", "軟", "潮", "味", "橘", "藍", "灰", "指紋", "摸", "咚", "重", "抖", "滾", "一起一伏")
+    facts_only = {"帳本鏈/尾段_418到447片.txt", "紙卡地/格狀圖.txt", "石頭閘門/退回紙_第四列.txt",
+                  "石頭閘門/退回紙_另一張.txt", "長桌廣場/桌五_壓著筆的紙.txt", "投遞口/收據卡_蕨葉.txt",
+                  "帳本鏈/出生片_420到440.txt"}        # 留給「有沒有根據」那道閘門核對的幾份事實，不要求感官
+    by_place: dict[str, list[str]] = {}
+    for rel in _ALL:
+        t = _text(rel)
+        assert rel in facts_only or any(s in t for s in sense), rel
+        if any(u in t for u in untouched):
+            by_place.setdefault(twinground.place_of(rel), []).append(rel)
+    for place in ("投遞口", "捏土處", "長桌廣場", "石頭閘門", "帳本鏈", "草稿角", "紙卡地", "畫架與長椅"):
+        assert len(by_place.get(place, [])) >= 1, (place, by_place.get(place))
+    # 不准有「去做 X」的句式
+    for rel in _ALL:
+        assert not re.search(r"(去|來|把|替|幫).{0,4}(試試|試一下|試看看|做完|補完|完成它)", _text(rel)), rel
+
+
+def test_everyone_gets_the_same_ground_all_files() -> None:
+    """P10：命盤決定走法、不決定地上有什麼——每位觀眾的地上都是同一整片與全部關聯組。"""
     a1, a2 = twinground.sample("sub-A"), twinground.sample("sub-A")
     assert a1 == a2
     assert {tuple(twinground.sample(f"sub-{i}")["files"]) for i in range(30)} == {tuple(_ALL)}
@@ -100,7 +130,7 @@ def test_every_item_lures_some_temperament_and_all_eight_letters_are_covered() -
 def test_lay_copies_read_only_and_records_sha(tmp_path) -> None:
     import hashlib
     m = twinground.lay(tmp_path, "sub-X")
-    assert m["n_files"] == len(m["files"]) == 24
+    assert m["n_files"] == len(m["files"]) == len(_ALL)
     for f in m["files"]:
         p = tmp_path / f["path"]
         assert p.is_file() and not (p.stat().st_mode & 0o222), "要唯讀"
@@ -179,17 +209,19 @@ def test_letter_prompt_has_no_examples_and_forbids_reality() -> None:
     p = twinagent.LETTER_SYSTEM_PROMPT
     for bad in ("例如", "比如", "譬如", "像是", "每當"):
         assert bad not in p
-    for must in ("TRAITS.md", "信.md", "手慢還是手快", "愛一個人還是愛湊熱鬧", "拉扯", "習慣的手勢", "職業", "學校",
-                 "家人", "寵物", "作品", "地名", "品牌", "三百字", "不要自稱 AI"):
+    for must in ("手慢還是手快", "愛一個人還是愛湊熱鬧", "拉扯", "習慣的手勢", "職業", "學校",
+                 "家人", "寵物", "作品", "地名", "品牌", "三百字", "不要自稱 AI", "占卜", "你沒有任何工具"):
         assert must in p, must
     assert "WORLD.md" not in p and "地上" not in p, "段 1 看不到世界"
 
 
-def test_wrapper_runs_guard_between_two_pi_calls() -> None:
+def test_wrapper_stage1_is_one_model_call_then_guard_then_the_only_pi_session() -> None:
+    """P13：段 1 不再開 pi——`twin_letter.py` 一通模型呼叫 → 關卡 → 段 2 才是 pi（`runwatch` 看著）。"""
     sh = "\n".join(ln for ln in (ROOT / "ops/exhibit/twin/twin_agent.sh").read_text(encoding="utf-8").splitlines()
                    if not ln.lstrip().startswith("#"))
-    assert sh.count("@TRAITS.md") == 1 and sh.count("@信.md") == 1
-    assert sh.index("@TRAITS.md") < sh.index("twin_letter_guard.py") < sh.index("@信.md")
+    assert "@TRAITS.md" not in sh and sh.count("@信.md") == 1 and sh.count('"$PI_BIN"') == 1
+    assert sh.index("twin_letter.py") < sh.index("twin_letter_guard.py") < sh.index("runwatch") < sh.index("@信.md")
+    assert "runlimited" not in sh and "limit " not in sh.replace("runwatch", ""), "沒有牆鐘時限了"
 
 
 # ───────── 端到端（假 agent 走兩段流程）＋撤回 ─────────

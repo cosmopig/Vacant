@@ -355,7 +355,7 @@ def originals_of(card: Any, card_text: Any) -> list[str]:
     """觀眾原文裡**自由文字**的那幾格（枚舉類別不是原文，不算）。"""
     out: list[str] = []
     if isinstance(card, dict):
-        for k in ("need", "vibe", "first_line"):
+        for k in ("want", "need", "vibe", "first_line"):
             v = card.get(k)
             if isinstance(v, str) and v:
                 out.append(v)

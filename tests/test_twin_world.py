@@ -64,17 +64,27 @@ def test_system_prompt_has_no_task_direction() -> None:
     assert [w for w in _CHORE_WORDS if w in "把一張紙攤平"] != []
 
 
-def test_system_prompt_world_premise_and_complexity_conditions() -> None:
+def test_system_prompt_world_premise_and_what_to_try() -> None:
+    """P13：前提是「他心裡一直想試、卻還沒試的事」；任何事都可以試；不再要求用到地上三件東西。"""
     p = twinagent.SYSTEM_PROMPT
-    for must in ("信.md", "WORLD.md", "地上/", "走進了這個世界", "只可能發生在這個世界裡", "不是誰走進來都會想的",
-                 "三個想要", "兩件東西之間的關聯", "至少三件東西",
-                 "至少兩個地點", "共用的東西", "別的居民", "一條世界的規矩", "好幾步", "還沒做完",
-                 "如果你在這裡", "它牽動到", "步驟", "做完的樣子", "成品至少兩個檔", "ws_list 看一次房間", "不要自稱 AI",
-                 "每一次動手", "不要寫程式", "現實生活"):
+    for must in ("信.md", "WORLD.md", "地上/", "看出來的樣子", "想試", "還沒試", "走進了這個世界", "任何事都可以",
+                 "地上沒有擺出來的事", "為什麼是他", "第二人稱", "怎麼試", "試的紀錄.md", "感想：", "沒有把握",
+                 "一次失敗或意外", "這是我自己做的", "ws_list 看一次房間", "不要自稱 AI", "每一次動手", "不要寫程式", "現實生活"):
         assert must in p, must
+    for gone in ("至少三件東西", "兩件東西之間的關聯", "三個想要", "它牽動到", "成品至少兩個檔", "至少兩個地點"):
+        assert gone not in p, f"P13 拿掉了：{gone}"
     assert "TRAITS.md" not in p, "段 2 的房間裡沒有 TRAITS.md，指令不提它"
+    assert "占卜" not in p, "段 2 不說占卜：說了，分身會去做占卜這件事（後設任務）；占卜只在段 1 的信"
     for t in (twinagent.SYSTEM_PROMPT, twinagent.FIRST_MESSAGE, twinagent.CALLER_PROMPT):
         assert_ks1_clean(t)
+
+
+def test_letter_prompt_is_a_divination_with_no_tools_and_an_abstract_want_line() -> None:
+    p = twinagent.LETTER_SYSTEM_PROMPT
+    for must in ("占卜", "你沒有任何工具", "想試：", "抽象的說法", "不寫任何具體的人、事、物、地方、時間", "命盤"):
+        assert must in p, must
+    assert "ws_write" not in p and "ws_read" not in p, "段 1 不開 pi、沒有工具"
+    assert_ks1_clean(p)
 
 
 def test_world_sha_and_notartifact() -> None:
