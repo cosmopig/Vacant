@@ -1,0 +1,67 @@
+1
+00:00:00,920 --> 00:00:03,121
+Your agent says: done.
+
+2
+00:00:03,470 --> 00:00:04,200
+Is it, though?
+
+3
+00:00:04,220 --> 00:00:07,120
+Until now, you had to audit it yourself — step by step.
+
+4
+00:00:07,520 --> 00:00:10,797
+Vacant. Install once. Use your agent as usual.
+
+5
+00:00:11,520 --> 00:00:14,900
+Hooks into pi, Claude Code, OpenCode, Codex.
+
+6
+00:00:14,920 --> 00:00:17,594
+No contract. No config. No keys.
+
+7
+00:00:17,720 --> 00:00:20,400
+Every step is signed into a hash chain.
+
+8
+00:00:20,420 --> 00:00:24,487
+When nothing is wrong, requests are byte-identical to no install.
+
+9
+00:00:24,720 --> 00:00:26,800
+Until the agent says: done.
+
+10
+00:00:26,820 --> 00:00:29,200
+Reading only the record, it checks five things:
+
+11
+00:00:29,220 --> 00:00:35,500
+missing file · skipped failure · test claim mismatch · unsourced number · named file never opened
+
+12
+00:00:35,520 --> 00:00:38,862
+If something is off, it goes back — before it reaches you.
+
+13
+00:00:38,920 --> 00:00:43,609
+Delivered with a note: what was checked, what changed, what is unverified.
+
+14
+00:00:43,720 --> 00:00:48,200
+Pre-registered test, 15-turn cap: 42% → 53%.
+
+15
+00:00:48,220 --> 00:00:51,300
+Recovered: answers called done, but never written.
+
+16
+00:00:51,320 --> 00:00:54,753
+It doesn't judge right or wrong. It checks every step has grounds.
+
+17
+00:00:55,120 --> 00:00:58,858
+Vacant. Every delivery, grounded.

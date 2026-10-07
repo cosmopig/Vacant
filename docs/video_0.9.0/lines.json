@@ -1,0 +1,18 @@
+[
+["你的 agent 說：做完了。", "Your agent says: done."],
+["以前，你還得自己一步步追究。", "Until now, you had to audit it yourself — step by step."],
+["Vacant。裝一次，照常用。", "Vacant. Install once. Use your agent as usual."],
+["接上 pi、Claude Code、OpenCode、Codex。", "Hooks into pi, Claude Code, OpenCode, Codex."],
+["不用契約、設定、金鑰。", "No contract. No config. No keys."],
+["每一步，都簽進一條雜湊鏈。", "Every step is signed into a hash chain."],
+["沒問題時，請求和沒裝時逐位元組相同。", "When nothing is wrong, requests are byte-identical to no install."],
+["直到 agent 說：做完了。", "Until the agent says: done."],
+["Vacant 只看紀錄，查五件事：", "Reading only the record, it checks five things:"],
+["檔案沒寫、失敗被略過、測試對不上、數字沒出處、點名的檔沒打開。", "missing file · skipped failure · test claim mismatch · unsourced number · named file never opened"],
+["有問題，交給你之前就退回去補。", "If something is off, it goes back — before it reaches you."],
+["交件附上：查了什麼、改了什麼、還沒驗證什麼。", "Delivered with a note: what was checked, what changed, what is unverified."],
+["預註冊實測，十五回合上限下：四十二到五十三。", "Pre-registered test, 15-turn cap: 42% → 53%."],
+["補回的，是說做完卻沒寫的答案。", "Recovered: answers called done, but never written."],
+["它不判斷對錯，只確認每一步有根據。", "It doesn't judge right or wrong. It checks every step has grounds."],
+["Vacant。讓每一次交付，都有根據。", "Vacant. Every delivery, grounded."]
+]

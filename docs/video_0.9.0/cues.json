@@ -1,0 +1,139 @@
+[
+ {
+  "i": 0,
+  "zh": "你的 agent 說：做完了。",
+  "en": "Your agent says: done.",
+  "start": 1.0,
+  "dur": 1.771,
+  "end": 2.771
+ },
+ {
+  "i": -1,
+  "zh": "真的嗎？",
+  "en": "Is it, though?",
+  "start": 2.95,
+  "dur": 1.2,
+  "end": 4.15,
+  "visual": true
+ },
+ {
+  "i": 1,
+  "zh": "以前，你還得自己一步步追究。",
+  "en": "Until now, you had to audit it yourself — step by step.",
+  "start": 4.3,
+  "dur": 2.47,
+  "end": 6.77
+ },
+ {
+  "i": 2,
+  "zh": "Vacant。裝一次，照常用。",
+  "en": "Vacant. Install once. Use your agent as usual.",
+  "start": 7.6,
+  "dur": 2.847,
+  "end": 10.447
+ },
+ {
+  "i": 3,
+  "zh": "接上 pi、Claude Code、OpenCode、Codex。",
+  "en": "Hooks into pi, Claude Code, OpenCode, Codex.",
+  "start": 11.6,
+  "dur": 3.091,
+  "end": 14.691
+ },
+ {
+  "i": 4,
+  "zh": "不用契約、設定、金鑰。",
+  "en": "No contract. No config. No keys.",
+  "start": 15.0,
+  "dur": 2.244,
+  "end": 17.244
+ },
+ {
+  "i": 5,
+  "zh": "每一步，都簽進一條雜湊鏈。",
+  "en": "Every step is signed into a hash chain.",
+  "start": 17.8,
+  "dur": 2.329,
+  "end": 20.129
+ },
+ {
+  "i": 6,
+  "zh": "沒問題時，請求和沒裝時逐位元組相同。",
+  "en": "When nothing is wrong, requests are byte-identical to no install.",
+  "start": 20.5,
+  "dur": 3.637,
+  "end": 24.137
+ },
+ {
+  "i": 7,
+  "zh": "直到 agent 說：做完了。",
+  "en": "Until the agent says: done.",
+  "start": 24.8,
+  "dur": 1.812,
+  "end": 26.612
+ },
+ {
+  "i": 8,
+  "zh": "Vacant 只看紀錄，查五件事：",
+  "en": "Reading only the record, it checks five things:",
+  "start": 26.9,
+  "dur": 2.226,
+  "end": 29.126
+ },
+ {
+  "i": 9,
+  "zh": "檔案沒寫、失敗被略過、測試對不上、數字沒出處、點名的檔沒打開。",
+  "en": "missing file · skipped failure · test claim mismatch · unsourced number · named file never opened",
+  "start": 29.3,
+  "dur": 6.014,
+  "end": 35.314
+ },
+ {
+  "i": 10,
+  "zh": "有問題，交給你之前就退回去補。",
+  "en": "If something is off, it goes back — before it reaches you.",
+  "start": 35.6,
+  "dur": 2.912,
+  "end": 38.512
+ },
+ {
+  "i": 11,
+  "zh": "交件附上：查了什麼、改了什麼、還沒驗證什麼。",
+  "en": "Delivered with a note: what was checked, what changed, what is unverified.",
+  "start": 39.0,
+  "dur": 4.259,
+  "end": 43.259
+ },
+ {
+  "i": 12,
+  "zh": "預註冊實測，十五回合上限下：四十二到五十三。",
+  "en": "Pre-registered test, 15-turn cap: 42% → 53%.",
+  "start": 43.8,
+  "dur": 4.243,
+  "end": 48.043
+ },
+ {
+  "i": 13,
+  "zh": "補回的，是說做完卻沒寫的答案。",
+  "en": "Recovered: answers called done, but never written.",
+  "start": 48.3,
+  "dur": 2.747,
+  "end": 51.047
+ },
+ {
+  "i": 14,
+  "zh": "它不判斷對錯，只確認每一步有根據。",
+  "en": "It doesn't judge right or wrong. It checks every step has grounds.",
+  "start": 51.4,
+  "dur": 3.003,
+  "end": 54.403
+ },
+ {
+  "i": 15,
+  "zh": "Vacant。讓每一次交付，都有根據。",
+  "en": "Vacant. Every delivery, grounded.",
+  "start": 55.2,
+  "dur": 3.308,
+  "end": 58.508
+ }
+]

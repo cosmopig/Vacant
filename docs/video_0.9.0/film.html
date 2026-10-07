@@ -1,0 +1,842 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/local.css">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+</head><body>
+<canvas id="c"></canvas>
+<script>
+// ───────────────────────── setup ─────────────────────────
+const Q = new URLSearchParams(location.search);
+const W = +(Q.get('w') || 1920), H = +(Q.get('h') || 1080);
+const PORTRAIT = H > W;
+const cv = document.getElementById('c'); cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+const S = Math.min(W, H) / 1080;              // 1 in both 1920x1080 and 1080x1920
+const CX = W / 2, CY = PORTRAIT ? H * 0.40 : H * 0.445; // content centre (above subtitles)
+const COL = {
+  bg: '#0a0907', ink: '#f5efe6', dim: 'rgba(245,239,230,0.55)', faint: 'rgba(245,239,230,0.18)',
+  or: '#f26b1d', orD: '#7a2f06', red: '#ff4a3d', green: '#5ee6a0', mono: 'rgba(245,239,230,0.62)'
+};
+const ZH = '"Noto Sans TC"', LAT = '"Inter","Noto Sans TC"', MONO = '"JetBrains Mono","Noto Sans TC"';
+let CUES = [];
+const LOGO = [
+"█   █  ███   ███   ███  █   █ █████",
+"█   █ █   █ █   █ █   █ ██  █   █  ",
+"█   █ █   █ █     █   █ ██  █   █  ",
+"█   █ █████ █     █████ █ █ █   █  ",
+"█   █ █   █ █     █   █ █  ██   █  ",
+" █ █  █   █ █   █ █   █ █  ██   █  ",
+"  █   █   █  ███  █   █ █   █   █  "];
+const LOGO_PTS = [];
+LOGO.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '█') LOGO_PTS.push([c, r]); }));
+
+// ───────────────────────── math ─────────────────────────
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const P = (t, a, b) => clamp((t - a) / (b - a));
+const eOutExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const eOutCubic = x => 1 - Math.pow(1 - x, 3);
+const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eInCubic = x => x * x * x;
+const eOutBack = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+// fade window: in over [a,a+fi], out over [b-fo,b]
+const win = (t, a, b, fi = .35, fo = .35) => Math.min(P(t, a, a + fi), 1 - P(t, b - fo, b));
+function rng(seed) { let s = seed >>> 0 || 1; return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 1e9) / 1e9; }; }
+function hex(seed, n) { const r = rng(seed * 7919 + 13); let s = ''; for (let i = 0; i < n; i++) s += '0123456789abcdef'[Math.floor(r() * 16)]; return s; }
+
+// ───────────────────────── text + overflow audit ─────────────────────────
+let AUDIT = [];
+function font(size, weight = 500, fam = ZH) { return `${weight} ${Math.round(size * S)}px ${fam}`; }
+/** draws text; shrinks to maxW; records bounds for the per-frame overflow audit */
+function txt(s, x, y, o = {}) {
+  const size = o.size || 40, fam = o.fam || ZH, weight = o.weight || 500;
+  ctx.save();
+  ctx.globalAlpha *= (o.alpha === undefined ? 1 : o.alpha);
+  ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'middle';
+  ctx.letterSpacing = (o.ls || 0) * S + 'px';
+  let px = size;
+  ctx.font = font(px, weight, fam);
+  if (o.maxW) { const w = ctx.measureText(s).width; if (w > o.maxW) { px = size * o.maxW / w; ctx.font = font(px, weight, fam); } }
+  const w = ctx.measureText(s).width, h = px * S;
+  if (o.glow) { ctx.shadowColor = o.glowColor || o.color || COL.or; ctx.shadowBlur = o.glow * S; }
+  ctx.fillStyle = o.color || COL.ink;
+  if (o.scale && o.scale !== 1) { ctx.translate(x, y); ctx.scale(o.scale, o.scale); ctx.fillText(s, 0, 0); }
+  else ctx.fillText(s, x, y);
+  ctx.restore();
+  const sc = o.scale || 1;
+  const al0 = o.align || 'center';
+  const left = al0 === 'left' ? x : (al0 === 'right' ? x - w * sc : x - w * sc / 2);
+  if ((o.alpha === undefined ? 1 : o.alpha) > 0.04 && !o.noAudit)
+    AUDIT.push({ s, x0: left, x1: left + w * sc, y0: y - h * sc / 2, y1: y + h * sc / 2, tag: o.tag || '' });
+  return w;
+}
+function measure(s, size, weight = 500, fam = ZH, ls = 0) { ctx.save(); ctx.letterSpacing = ls * S + 'px'; ctx.font = font(size, weight, fam); const w = ctx.measureText(s).width; ctx.restore(); return w; }
+function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+// ───────────────────────── background layers ─────────────────────────
+const GRAIN = [];
+function makeGrain() {
+  for (let k = 0; k < 6; k++) {
+    const g = document.createElement('canvas'); g.width = g.height = 256;
+    const gx = g.getContext('2d'), im = gx.createImageData(256, 256), r = rng(k + 1);
+    for (let i = 0; i < im.data.length; i += 4) { const v = r() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    gx.putImageData(im, 0, 0); GRAIN.push(g);
+  }
+}
+const DUST = (() => { const r = rng(42), a = []; for (let i = 0; i < 140; i++) a.push({ x: r(), y: r(), z: .3 + r() * .7, p: r() * 6.28 }); return a; })();
+let FREEZE = 0; // 0..1, slows the world at the "done" moment
+let worldT = 0;
+function background(t, f) {
+  ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, W, H);
+  // warm radial glow that breathes
+  const gl = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * .7);
+  const b = .10 + .03 * Math.sin(t * .7);
+  gl.addColorStop(0, `rgba(242,107,29,${b * (1 - FREEZE * .7)})`); gl.addColorStop(.45, 'rgba(242,107,29,0.02)'); gl.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+  // pixel dot grid (8-bit motif)
+  const step = 36 * S, off = (worldT * 6 * S) % step;
+  ctx.fillStyle = 'rgba(245,239,230,0.045)';
+  for (let x = -step + off; x < W + step; x += step) for (let y = -step + off * .5; y < H + step; y += step) ctx.fillRect(x, y, 2 * S, 2 * S);
+  // floating dust
+  for (const d of DUST) {
+    const x = ((d.x + worldT * .006 * d.z) % 1) * W, y = ((d.y - worldT * .01 * d.z + 10) % 1) * H;
+    const a = .08 + .12 * d.z * (0.5 + .5 * Math.sin(worldT * 1.3 + d.p));
+    ctx.fillStyle = `rgba(242,107,29,${a})`; ctx.fillRect(x, y, 2.2 * S * d.z, 2.2 * S * d.z);
+  }
+}
+function post(t, f) {
+  // vignette
+  const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.72)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  // grain
+  ctx.save(); ctx.globalAlpha = .055; ctx.globalCompositeOperation = 'overlay';
+  const g = GRAIN[f % GRAIN.length]; const pat = ctx.createPattern(g, 'repeat'); ctx.fillStyle = pat;
+  ctx.translate((f * 37) % 256, (f * 91) % 256); ctx.fillRect(-256, -256, W + 512, H + 512); ctx.restore();
+  // fade from / to black
+  const fb = Math.max(1 - P(t, 0, .5), P(t, 59.25, 60));
+  if (fb > 0) { ctx.fillStyle = `rgba(0,0,0,${fb})`; ctx.fillRect(0, 0, W, H); }
+}
+
+// ───────────────────────── deep layer (for people who pause) ─────────────────────────
+function deep(t, lines, a, b, corner = 'tl') {
+  const al = win(t, a, b, .5, .4) * .62; if (al <= 0) return;
+  const m = 56 * S, lh = 24 * S;
+  const x = corner.includes('l') ? m : W - m;
+  const top = PORTRAIT ? H - 300 * S : 64 * S;
+  lines.forEach((s, i) => {
+    const shown = Math.floor(clamp((t - a - i * .12) * 60) * 1); // typewriter reveal
+    const n = Math.min(s.length, Math.max(0, Math.floor((t - a - i * .12) * 70)));
+    txt(s.slice(0, n), x, top + i * lh, { size: 17, fam: MONO, weight: 400, color: COL.mono, align: corner.includes('l') ? 'left' : 'right', alpha: al, maxW: (PORTRAIT ? W - 2 * m : W * .42), tag: 'deep' });
+  });
+}
+function chapter(t, idx, label, a, b) {
+  const al = win(t, a, b, .4, .4) * .5; if (al <= 0) return;
+  const m = 56 * S, y = PORTRAIT ? H - 120 * S : H - 44 * S;
+  txt(`${String(idx).padStart(2, '0')} / 07 — ${label}`, PORTRAIT ? W / 2 : W - m, y, { size: 15, fam: MONO, weight: 400, color: COL.dim, align: PORTRAIT ? 'center' : 'right', alpha: al, ls: 2, tag: 'chapter' });
+}
+
+// ───────────────────────── subtitles ─────────────────────────
+function subtitles(t) {
+  for (const c of CUES) {
+    if (c.visual || c.i === 15) continue;        // drawn on-screen by the scene itself
+    const a = c.start - .08, b = c.end + .35;
+    const al = win(t, a, b, .12, .18); if (al <= 0) continue;
+    const y0 = PORTRAIT ? H * .755 : H - 118 * S;
+    const maxW = W - (PORTRAIT ? 110 : 360) * S;
+    // soft backing
+    ctx.save(); ctx.globalAlpha = al * .55;
+    const g = ctx.createLinearGradient(0, y0 - 70 * S, 0, y0 + 90 * S);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.5, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, y0 - 70 * S, W, 160 * S); ctx.restore();
+    const lift = (1 - eOutCubic(P(t, a, a + .25))) * 8 * S;
+    if (PORTRAIT && measure(c.zh, 40, 500) > maxW) {
+      // wrap zh at the middle punctuation for the 1080-wide frame
+      const parts = splitZh(c.zh);
+      txt(parts[0], W / 2, y0 - 26 * S + lift, { size: 40, weight: 500, alpha: al, maxW, tag: 'sub' });
+      txt(parts[1], W / 2, y0 + 26 * S + lift, { size: 40, weight: 500, alpha: al, maxW, tag: 'sub' });
+      wrapEn(c.en, y0 + 82 * S + lift, al, maxW);
+    } else {
+      txt(c.zh, W / 2, y0 + lift, { size: 40, weight: 500, alpha: al, maxW, tag: 'sub' });
+      wrapEn(c.en, y0 + 52 * S + lift, al, maxW);
+    }
+  }
+}
+function splitZh(s) {
+  const mid = s.length / 2; let best = -1, bd = 1e9;
+  [...s].forEach((ch, i) => { if ('，、：'.includes(ch) && Math.abs(i - mid) < bd) { bd = Math.abs(i - mid); best = i; } });
+  if (best < 0) best = Math.floor(mid);
+  return [s.slice(0, best + 1), s.slice(best + 1)];
+}
+function wrapEn(s, y, al, maxW) {
+  if (measure(s, 25, 400, LAT) <= maxW) { txt(s, W / 2, y, { size: 25, fam: LAT, weight: 400, color: 'rgba(245,239,230,0.78)', alpha: al, maxW, tag: 'sub' }); return; }
+  const words = s.split(' '); let a = '', i = 0;
+  while (i < words.length && measure((a + ' ' + words[i]).trim(), 25, 400, LAT) <= maxW * .62) { a = (a + ' ' + words[i]).trim(); i++; }
+  const b = words.slice(i).join(' ');
+  txt(a, W / 2, y, { size: 25, fam: LAT, weight: 400, color: 'rgba(245,239,230,0.78)', alpha: al, maxW, tag: 'sub' });
+  txt(b, W / 2, y + 32 * S, { size: 25, fam: LAT, weight: 400, color: 'rgba(245,239,230,0.78)', alpha: al, maxW, tag: 'sub' });
+}
+
+// ───────────────────────── shared pieces ─────────────────────────
+function glitchText(s, x, y, o, t, amt) {
+  // RGB split + horizontal slice jitter
+  const r = rng(Math.floor(t * 30) + 5);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  txt(s, x - amt * 9 * S, y, { ...o, color: 'rgba(255,40,60,0.85)', noAudit: true });
+  txt(s, x + amt * 9 * S, y, { ...o, color: 'rgba(40,200,255,0.75)', noAudit: true });
+  ctx.restore();
+  txt(s, x, y, o);
+  if (amt > .05) {
+    const h = o.size * S * 1.2, slices = 5;
+    for (let i = 0; i < slices; i++) {
+      if (r() > amt) continue;
+      const sy = y - h / 2 + r() * h, sh = (4 + r() * 18) * S, dx = (r() - .5) * 60 * S * amt;
+      try { ctx.drawImage(cv, 0, sy, W, sh, dx, sy, W, sh); } catch (e) { }
+    }
+  }
+}
+function pixelLogo(cx, cy, cell, alpha, o = {}) {
+  const cols = 35, rows = 7, w = cols * cell, h = rows * cell;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  if (o.glow) { ctx.shadowColor = COL.or; ctx.shadowBlur = o.glow * S; }
+  ctx.fillStyle = o.color || COL.or;
+  for (const [c, r] of LOGO_PTS) ctx.fillRect(cx - w / 2 + c * cell, cy - h / 2 + r * cell, cell * .88, cell * .88);
+  ctx.restore();
+}
+function check(x, y, s, color, prog = 1) {
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 3 * S; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); const p1 = [x - s * .45, y], p2 = [x - s * .12, y + s * .33], p3 = [x + s * .5, y - s * .38];
+  const a = clamp(prog * 2), b = clamp(prog * 2 - 1);
+  ctx.moveTo(...p1); ctx.lineTo(lerp(p1[0], p2[0], a), lerp(p1[1], p2[1], a));
+  if (b > 0) ctx.lineTo(lerp(p2[0], p3[0], b), lerp(p2[1], p3[1], b));
+  ctx.stroke(); ctx.restore();
+}
+function cross(x, y, s, color, prog = 1) {
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 3 * S; ctx.lineCap = 'round';
+  const a = clamp(prog * 2), b = clamp(prog * 2 - 1);
+  ctx.beginPath(); ctx.moveTo(x - s * .4, y - s * .4); ctx.lineTo(x - s * .4 + s * .8 * a, y - s * .4 + s * .8 * a);
+  if (b > 0) { ctx.moveTo(x + s * .4, y - s * .4); ctx.lineTo(x + s * .4 - s * .8 * b, y - s * .4 + s * .8 * b); }
+  ctx.stroke(); ctx.restore();
+}
+function ring(x, y, r, color, alpha, lw = 2) { ctx.save(); ctx.globalAlpha *= alpha; ctx.strokeStyle = color; ctx.lineWidth = lw * S; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.stroke(); ctx.restore(); }
+function flash(t, at, dur = .5, strength = .55, color = '255,236,214') {
+  const p = P(t, at, at + dur); if (p <= 0 || p >= 1) return;
+  ctx.fillStyle = `rgba(${color},${strength * (1 - eOutCubic(p))})`; ctx.fillRect(0, 0, W, H);
+}
+const STEPS = [
+  ['read', 'data/payments.csv'], ['bash', 'python calc.py'], ['read', 'manual.md'], ['bash', 'sh run_tests.sh'],
+  ['edit', 'calc.py'], ['bash', 'python calc.py'], ['grep', '"fee_id" manual.md'], ['bash', 'sh run_tests.sh'],
+  ['write', 'notes.md'], ['bash', 'python report.py'], ['read', 'fees.json'], ['say', '"done."']];
+
+// ───────────────────────── scenes ─────────────────────────
+// A · cold open (0 – 7.1)
+function sceneA(t) {
+  if (t > 7.4) return;
+  const al = 1 - P(t, 6.75, 7.15);
+  ctx.save(); ctx.globalAlpha = al;
+  if (t < 4.25) {
+    // terminal prompt: agent › 做完了。
+    const msg = '做完了。', n = Math.floor(clamp((t - .7) / .55) * msg.length);
+    const big = PORTRAIT ? 150 : 170;
+    const shown = msg.slice(0, n);
+    const gl = t > 2.9 ? (P(t, 2.9, 3.05) * (1 - P(t, 3.4, 3.9))) : 0;
+    const out = 1 - P(t, 3.55, 3.95);
+    ctx.save(); ctx.globalAlpha *= out;
+    txt('agent ›', CX, CY - big * .9 * S, { size: 22, fam: MONO, weight: 400, color: COL.dim, ls: 3, alpha: P(t, .3, .7) });
+    if (shown) glitchText(shown, CX, CY, { size: big, weight: 900, ls: 4 }, t, gl);
+    const cw = measure(shown, big, 900, ZH, 4);
+    const blink = (Math.floor(t * 2.4) % 2 === 0 || (t > .7 && t < 1.3)) ? 1 : 0;
+    if (t < 2.9) { ctx.fillStyle = COL.or; ctx.globalAlpha *= blink; ctx.fillRect(CX + cw / 2 + 14 * S, CY - big * S * .45, 10 * S, big * S * .9); }
+    ctx.restore();
+    // ✓ done chip
+    const cp = P(t, 1.45, 1.85);
+    if (cp > 0) {
+      ctx.save(); ctx.globalAlpha = cp * out;
+      check(CX - 52 * S, CY + big * .78 * S, 22 * S, COL.green, cp);
+      txt('done · exit 0', CX + 22 * S, CY + big * .78 * S, { size: 22, fam: MONO, weight: 400, color: COL.green, alpha: 1 });
+      ctx.restore();
+    }
+    // 真的嗎？
+    const q = P(t, 3.55, 3.75);
+    if (q > 0) {
+      const gq = (1 - P(t, 3.75, 4.1)) * .9;
+      glitchText('真的嗎？', CX, CY, { size: big * .82, weight: 900, color: COL.or, ls: 6, alpha: q, glow: 30 }, t, gq);
+      txt('Is it, though?', CX, CY + big * .72 * S, { size: 30, fam: LAT, weight: 200, color: COL.ink, ls: 4, alpha: q * .85 });
+    }
+  } else {
+    // the human audits every step: endless step list, each one gets a "?"
+    const p = P(t, 4.25, 4.7);
+    const rowH = 54 * S, listW = Math.min(W - 120 * S, 860 * S), x0 = CX - listW / 2;
+    const scroll = eInOut(P(t, 4.4, 6.9)) * rowH * 7;
+    const implode = eInCubic(P(t, 6.35, 7.05));
+    for (let i = 0; i < 24; i++) {
+      const [tool, arg] = STEPS[i % STEPS.length];
+      let y = CY - rowH * 5.2 + i * rowH - scroll;
+      if (y < CY - rowH * 6.5 || y > CY + rowH * 6.5) continue;
+      const edge = 1 - clamp(Math.abs(y - CY) / (rowH * 6.2));
+      const cx = x0 + listW / 2;
+      const yy = lerp(y, CY, implode), sc = 1 - implode * .9;
+      ctx.save(); ctx.globalAlpha *= p * edge * (1 - implode * .8);
+      ctx.translate(cx, yy); ctx.scale(sc, sc); ctx.translate(-cx, -yy);
+      const hiY = CY - rowH * .5 + (Math.sin(t * 3.1) * rowH * 2.2);
+      const hot = Math.abs(y - hiY) < rowH * .6;
+      ctx.fillStyle = hot ? 'rgba(242,107,29,0.14)' : 'rgba(245,239,230,0.035)';
+      rrect(x0, yy - rowH * .42, listW, rowH * .84, 8 * S); ctx.fill();
+      txt(`#${String(i + 1).padStart(2, '0')}`, x0 + 22 * S, yy, { size: 20, fam: MONO, weight: 400, color: COL.dim, align: 'left', noAudit: true });
+      txt(tool, x0 + 100 * S, yy, { size: 22, fam: MONO, weight: 700, color: hot ? COL.or : COL.ink, align: 'left', noAudit: true });
+      txt(arg, x0 + 190 * S, yy, { size: 22, fam: MONO, weight: 400, color: COL.mono, align: 'left', maxW: listW - 290 * S, noAudit: true });
+      const qa = P(t, 4.5 + i * .09, 4.8 + i * .09);
+      txt('?', x0 + listW - 34 * S, yy, { size: 30, weight: 900, color: COL.or, alpha: qa, scale: lerp(1.8, 1, eOutBack(qa)), noAudit: true });
+      ctx.restore();
+    }
+    // magnifier ring (the human, auditing)
+    const mx = x0 + listW * .62 + Math.cos(t * 1.7) * 40 * S, my = CY + Math.sin(t * 3.1) * rowH * 2.2 - rowH * .5;
+    ring(mx, my, 46 * S, COL.ink, p * .5 * (1 - implode), 2);
+    ctx.save(); ctx.globalAlpha = p * .5 * (1 - implode); ctx.strokeStyle = COL.ink; ctx.lineWidth = 3 * S;
+    ctx.beginPath(); ctx.moveTo(mx + 33 * S, my + 33 * S); ctx.lineTo(mx + 62 * S, my + 62 * S); ctx.stroke(); ctx.restore();
+    // implosion point
+    if (implode > 0) { ctx.save(); ctx.globalAlpha = implode; ctx.shadowColor = COL.or; ctx.shadowBlur = 50 * S; ctx.fillStyle = '#fff3e6'; ctx.beginPath(); ctx.arc(CX, CY, 6 * S * implode, 0, 6.28); ctx.fill(); ctx.restore(); }
+  }
+  ctx.restore();
+  deep(t, ['trace/capture.py', 'hook: Stop · turn_end · session.idle', 'the moment an agent says "done"'], .6, 4.1);
+}
+
+// B · logo reveal (7.0 – 11.4)
+function logoParticles(t, a, b, cx, cy, cell, seed, fromFn) {
+  const r = rng(seed);
+  LOGO_PTS.forEach(([c, row], i) => {
+    const tx = cx - 35 * cell / 2 + c * cell, ty = cy - 7 * cell / 2 + row * cell;
+    const [fx, fy] = fromFn(r, i);
+    const d = (c / 35) * .35 + r() * .15;
+    const p = eOutExpo(P(t, a + d, b + d));
+    const x = lerp(fx, tx, p), y = lerp(fy, ty, p);
+    ctx.fillStyle = p > .98 ? COL.or : `rgba(255,190,140,${.4 + .6 * p})`;
+    const s = cell * .88 * lerp(.35, 1, p);
+    ctx.fillRect(x, y, s, s);
+    if (p < .98) { ctx.fillStyle = 'rgba(242,107,29,0.25)'; ctx.fillRect(lerp(fx, tx, p * .8), lerp(fy, ty, p * .8), s * .6, s * .6); }
+  });
+}
+function sceneB(t) {
+  if (t < 6.9 || t > 11.6) return;
+  const out = 1 - P(t, 10.65, 11.05);
+  const cell = (PORTRAIT ? 26 : 30) * S;
+  const ly = CY - (PORTRAIT ? 120 : 90) * S - eInOut(P(t, 10.65, 11.05)) * 80 * S;
+  ctx.save(); ctx.globalAlpha = out;
+  if (t < 8.75) logoParticles(t, 7.0, 8.15, CX, ly, cell, 9, (r) => { const a = r() * 6.28, d = (.4 + r() * .8) * Math.max(W, H); return [CX + Math.cos(a) * d, ly + Math.sin(a) * d]; });
+  else pixelLogo(CX, ly, cell, 1, { glow: 26 * (1 - P(t, 8.75, 10)) + 8 });
+  // shockwave at assembly
+  const sw = P(t, 8.5, 9.4);
+  if (sw > 0 && sw < 1) ring(CX, ly, lerp(40, 900, eOutCubic(sw)) * S, COL.or, (1 - sw) * .6, 3);
+  // version + tagline
+  const v = P(t, 8.85, 9.3);
+  txt('0.9.0', CX, ly + cell * 6.2, { size: 64, fam: LAT, weight: 200, ls: 22 * (1 - eOutCubic(v)) + 8, alpha: v, color: COL.ink });
+  txt('zero-config · v3.7', CX, ly + cell * 6.2 + 52 * S, { size: 19, fam: MONO, weight: 400, ls: 4, alpha: v * .7, color: COL.or });
+  const t1 = P(t, 9.15, 9.5), t2 = P(t, 9.75, 10.1);
+  const ty = ly + cell * 6.2 + (PORTRAIT ? 170 : 150) * S;
+  const gap = PORTRAIT ? 0 : 20 * S;
+  if (PORTRAIT) {
+    txt('裝一次，', CX, ty, { size: 74, weight: 900, alpha: t1, scale: lerp(1.15, 1, eOutCubic(t1)) });
+    txt('照常用。', CX, ty + 92 * S, { size: 74, weight: 900, alpha: t2, color: COL.or, scale: lerp(1.15, 1, eOutCubic(t2)) });
+  } else {
+    txt('裝一次，', CX - gap, ty, { size: 74, weight: 900, align: 'right', alpha: t1 });
+    txt('照常用。', CX + gap, ty, { size: 74, weight: 900, align: 'left', alpha: t2, color: COL.or });
+  }
+  ctx.restore();
+  flash(t, 8.45, .55, .35);
+  deep(t, ['pypi: vacant-network 0.9.0 · 2026-10-03', 'first published zero-config release', 'runtime dependency: cryptography'], 8.9, 11.2, 'tr');
+  chapter(t, 1, 'VACANT 0.9.0', 8.9, 11.2);
+}
+
+// C · install (11.2 – 17.6)
+const AGENTS = [['pi', '~/.pi/agent/extensions/vacant.ts'], ['claude code', '~/.claude/settings.json · hooks'], ['opencode', '~/.config/opencode/plugin/vacant.js'], ['codex', '~/.codex/config.toml · hooks']];
+function sceneC(t) {
+  if (t < 11.0 || t > 17.9) return;
+  const inn = eOutCubic(P(t, 11.05, 11.5)), out = 1 - P(t, 17.3, 17.75);
+  const dimmed = 1 - .78 * eInOut(P(t, 14.9, 15.3));
+  ctx.save(); ctx.globalAlpha = inn * out;
+  // layout
+  const tw = PORTRAIT ? 940 * S : 860 * S, th = 330 * S;
+  const tx = PORTRAIT ? CX - tw / 2 : CX - 900 * S, ty = PORTRAIT ? CY - 520 * S : CY - th / 2;
+  const ox = PORTRAIT ? CX : CX + 470 * S, oy = PORTRAIT ? CY + 210 * S : CY;
+  ctx.save(); ctx.globalAlpha *= dimmed;
+  // terminal glass
+  ctx.save(); ctx.translate(0, (1 - inn) * 30 * S);
+  ctx.fillStyle = 'rgba(22,21,15,0.92)'; rrect(tx, ty, tw, th, 18 * S); ctx.fill();
+  ctx.strokeStyle = 'rgba(245,239,230,0.12)'; ctx.lineWidth = 1.5 * S; ctx.stroke();
+  ['#ff5f57', '#febc2e', '#28c840'].forEach((c, i) => { ctx.fillStyle = c; ctx.globalAlpha *= 1; ctx.beginPath(); ctx.arc(tx + 30 * S + i * 22 * S, ty + 26 * S, 6 * S, 0, 6.28); ctx.fill(); });
+  const L1 = '$ pipx install vacant-network', L2 = '$ vacant install';
+  const n1 = Math.floor(clamp((t - 11.15) / .8) * L1.length), n2 = Math.floor(clamp((t - 12.15) / .45) * L2.length);
+  const lx = tx + 30 * S, ly0 = ty + 76 * S, lh = 40 * S;
+  txt(L1.slice(0, n1), lx, ly0, { size: 25, fam: MONO, weight: 700, align: 'left', color: COL.ink, maxW: tw - 60 * S });
+  if (n2 > 0) txt(L2.slice(0, n2), lx, ly0 + lh, { size: 25, fam: MONO, weight: 700, align: 'left', color: COL.ink, maxW: tw - 60 * S });
+  AGENTS.forEach(([name, path], i) => {
+    const a = P(t, 12.85 + i * .38, 13.05 + i * .38); if (a <= 0) return;
+    const y = ly0 + lh * (2.25 + i * .95);
+    check(lx + 10 * S, y, 18 * S, COL.green, a);
+    txt(name, lx + 40 * S, y, { size: 21, fam: MONO, weight: 700, align: 'left', color: COL.ink, alpha: a });
+    txt(path, lx + 210 * S, y, { size: 18, fam: MONO, weight: 400, align: 'left', color: COL.mono, alpha: a, maxW: tw - 250 * S });
+  });
+  ctx.restore();
+  // orbit: four agents around the Vacant core
+  const R = (PORTRAIT ? 230 : 250) * S;
+  const spin = t * .25;
+  const core = P(t, 11.6, 12.2);
+  ring(ox, oy, R, COL.ink, .12 * core, 1.5);
+  ring(ox, oy, R * .55, COL.or, .14 * core, 1);
+  ctx.save(); ctx.globalAlpha *= core; ctx.shadowColor = COL.or; ctx.shadowBlur = 40 * S; ctx.fillStyle = COL.or;
+  const cs = 13 * S; for (const [c, r] of LOGO_PTS.filter(([c]) => c < 5)) ctx.fillRect(ox - 2.5 * cs + c * cs, oy - 3.5 * cs + r * cs, cs * .86, cs * .86);
+  ctx.restore();
+  AGENTS.forEach(([name], i) => {
+    const a = P(t, 12.85 + i * .38, 13.25 + i * .38);
+    const ang = -Math.PI / 2 + i * Math.PI / 2 + spin * .3;
+    const nx = ox + Math.cos(ang) * R, ny = oy + Math.sin(ang) * R;
+    // link line draws from core outward
+    if (a > 0) {
+      ctx.save(); ctx.strokeStyle = 'rgba(242,107,29,0.55)'; ctx.lineWidth = 1.5 * S; ctx.setLineDash([6 * S, 6 * S]); ctx.lineDashOffset = -t * 40 * S;
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(lerp(ox, nx, eOutCubic(a)), lerp(oy, ny, eOutCubic(a))); ctx.stroke(); ctx.restore();
+      // travelling pulse
+      const pp = ((t * .9 + i * .25) % 1);
+      ctx.fillStyle = 'rgba(255,220,190,0.9)'; ctx.beginPath(); ctx.arc(lerp(nx, ox, pp), lerp(ny, oy, pp), 3.2 * S * a, 0, 6.28); ctx.fill();
+    }
+    const na = P(t, 11.7 + i * .12, 12.1 + i * .12);
+    ctx.save(); ctx.globalAlpha *= na;
+    ctx.fillStyle = a > 0 ? 'rgba(242,107,29,0.16)' : 'rgba(245,239,230,0.06)';
+    ctx.beginPath(); ctx.arc(nx, ny, 44 * S, 0, 6.28); ctx.fill();
+    ring(nx, ny, 44 * S, a > 0 ? COL.or : COL.faint, 1, 1.5);
+    if (a > 0 && a < 1) ring(nx, ny, lerp(44, 90, a) * S, COL.or, 1 - a, 2);
+    ctx.restore();
+    txt(name, nx, ny + 70 * S, { size: 21, fam: LAT, weight: 600, alpha: na, color: COL.ink });
+    txt(name === 'claude code' ? 'CC' : name === 'opencode' ? 'OC' : name === 'codex' ? 'CX' : 'π', nx, ny, { size: 26, fam: LAT, weight: 800, alpha: na, color: a > 0 ? COL.or : COL.dim });
+  });
+  ctx.restore(); // dimmed
+  // no contract · no config · no keys
+  const words = [['契約', 'contract'], ['設定', 'config'], ['金鑰', 'keys']];
+  const zp = P(t, 15.0, 15.25);
+  if (zp > 0) {
+    const gapX = (PORTRAIT ? 300 : 340) * S, wy = CY - 20 * S;
+    words.forEach(([zh, en], i) => {
+      const x = CX + (i - 1) * gapX, a = P(t, 15.05 + i * .3, 15.3 + i * .3);
+      txt(zh, x, wy, { size: PORTRAIT ? 96 : 110, weight: 900, alpha: a * (1 - .45 * P(t, 16.6, 16.9)), scale: lerp(1.3, 1, eOutCubic(a)) });
+      txt(en, x, wy + 84 * S, { size: 22, fam: LAT, weight: 200, ls: 6, alpha: a * .7, color: COL.ink });
+      const sk = eOutExpo(P(t, 15.45 + i * .35, 15.75 + i * .35));
+      if (sk > 0) {
+        const hw = (PORTRAIT ? 120 : 130) * S;
+        ctx.save(); ctx.strokeStyle = COL.or; ctx.lineWidth = 7 * S; ctx.lineCap = 'round'; ctx.shadowColor = COL.or; ctx.shadowBlur = 16 * S;
+        ctx.beginPath(); ctx.moveTo(x - hw, wy + 6 * S); ctx.lineTo(x - hw + 2 * hw * sk, wy - 2 * S); ctx.stroke(); ctx.restore();
+      }
+    });
+    const zc = eOutBack(P(t, 16.55, 16.95));
+    txt('零設定', CX, wy + 190 * S, { size: 56, weight: 900, color: COL.or, alpha: P(t, 16.55, 16.8), scale: lerp(.6, 1, zc), glow: 24 });
+    txt('ZERO-CONFIG', CX, wy + 248 * S, { size: 18, fam: MONO, weight: 400, ls: 8, color: COL.ink, alpha: P(t, 16.7, 17) * .7 });
+  }
+  ctx.restore();
+  deep(t, ['adapters/install.py — key-level, reversible', 'untouched settings restored bit-for-bit', 'vacant uninstall'], 12.9, 17.4, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 2, 'INSTALL ONCE', 11.4, 17.4);
+}
+
+// D · signed chain + byte-identical (17.6 – 24.6)
+function block(x, y, w, h, i, a, active) {
+  const [tool, arg] = STEPS[i % STEPS.length];
+  ctx.save(); ctx.globalAlpha *= a;
+  ctx.fillStyle = active ? 'rgba(242,107,29,0.14)' : 'rgba(22,21,15,0.95)';
+  rrect(x - w / 2, y - h / 2, w, h, 14 * S); ctx.fill();
+  ctx.strokeStyle = active ? COL.or : 'rgba(245,239,230,0.16)'; ctx.lineWidth = 1.5 * S; ctx.stroke();
+  txt(`#${String(i + 1).padStart(2, '0')}  ${tool}`, x - w / 2 + 18 * S, y - h / 2 + 28 * S, { size: 19, fam: MONO, weight: 700, align: 'left', color: active ? COL.or : COL.ink, noAudit: true });
+  txt(arg, x - w / 2 + 18 * S, y - h / 2 + 58 * S, { size: 16, fam: MONO, weight: 400, align: 'left', color: COL.mono, maxW: w - 36 * S, noAudit: true });
+  txt('prev ' + hex(i, 8), x - w / 2 + 18 * S, y + h / 2 - 46 * S, { size: 14, fam: MONO, weight: 400, align: 'left', color: 'rgba(245,239,230,0.4)', noAudit: true });
+  txt('sha  ' + hex(i + 1, 8), x - w / 2 + 18 * S, y + h / 2 - 24 * S, { size: 14, fam: MONO, weight: 400, align: 'left', color: 'rgba(242,107,29,0.8)', noAudit: true });
+  ctx.restore();
+}
+function sceneD(t) {
+  if (t < 17.4 || t > 24.9) return;
+  const inn = P(t, 17.4, 17.8), out = 1 - P(t, 24.35, 24.75);
+  ctx.save(); ctx.globalAlpha = inn * out;
+  const part1 = 1 - eInOut(P(t, 20.15, 20.6));
+  if (part1 > 0) {
+    ctx.save(); ctx.globalAlpha *= part1;
+    const bw = 250 * S, bh = 150 * S, gap = 70 * S;
+    const N = 9;
+    const pan = eInOut(P(t, 17.6, 20.6)) * (bw + gap) * 3.2;
+    for (let i = 0; i < N; i++) {
+      const land = 17.65 + i * .26, a = eOutExpo(P(t, land, land + .35));
+      let x, y;
+      if (PORTRAIT) { x = CX; y = CY - 380 * S + i * 200 * S - eInOut(P(t, 18.4, 20.4)) * 800 * S; }
+      else { x = CX - 640 * S + i * (bw + gap) - pan; y = CY + (i % 2 ? 26 : -26) * S; }
+      const drop = (1 - a) * -120 * S;
+      // link
+      if (i > 0 && a > 0) {
+        let px, py;
+        if (PORTRAIT) { px = CX; py = CY - 380 * S + (i - 1) * 200 * S - eInOut(P(t, 18.4, 20.4)) * 800 * S; }
+        else { px = CX - 640 * S + (i - 1) * (bw + gap) - pan; py = CY + ((i - 1) % 2 ? 26 : -26) * S; }
+        ctx.save(); ctx.strokeStyle = COL.or; ctx.globalAlpha *= a * .8; ctx.lineWidth = 2.5 * S; ctx.shadowColor = COL.or; ctx.shadowBlur = 10 * S;
+        if (PORTRAIT) ctx.globalAlpha *= clamp((py - (CY - 600 * S)) / (140 * S));
+        ctx.beginPath();
+        if (PORTRAIT) { ctx.moveTo(px, py + bh / 2); ctx.lineTo(x, y + drop - bh / 2); }
+        else { ctx.moveTo(px + bw / 2, py); ctx.lineTo(x - bw / 2, y + drop); }
+        ctx.stroke(); ctx.restore();
+      }
+      if (x < -bw || x > W + bw || y < -bh || y > H + bh) continue;
+      const vf = PORTRAIT ? clamp((y - (CY - 600 * S)) / (140 * S)) : 1;
+      ctx.save(); ctx.globalAlpha *= vf;
+      block(x, y + drop, PORTRAIT ? 520 * S : bw, bh, i, a, Math.abs(t - land - .4) < .25);
+      ctx.restore();
+      // Ed25519 seal ripple
+      const sp = P(t, land + .25, land + .85);
+      const bw2 = PORTRAIT ? 520 * S : bw;
+      if (sp > 0 && sp < 1) ring(x + bw2 / 2 - 22 * S, y - bh / 2 + 22 * S + drop, lerp(6, 34, sp) * S, COL.or, 1 - sp, 2);
+      if (a > .9 && vf > 0) { ctx.fillStyle = COL.or; ctx.beginPath(); ctx.arc(x + bw2 / 2 - 22 * S, y - bh / 2 + 22 * S + drop, 5 * S, 0, 6.28); ctx.fill(); }
+    }
+    txt('每一步 · 簽章 · 成鏈', CX, PORTRAIT ? CY - 600 * S : CY - 250 * S, { size: 26, weight: 300, ls: 10, color: COL.ink, alpha: P(t, 17.9, 18.4) * .8 });
+    ctx.restore();
+  }
+  // byte-identical: two request streams
+  const p2 = eOutCubic(P(t, 20.35, 20.85));
+  if (p2 > 0) {
+    ctx.save(); ctx.globalAlpha *= p2;
+    const colW = PORTRAIT ? 440 * S : 560 * S, colH = PORTRAIT ? 760 * S : 520 * S, gapC = PORTRAIT ? 40 * S : 120 * S;
+    const xs = [CX - gapC / 2 - colW, CX + gapC / 2];
+    const top = CY - colH / 2 + 10 * S;
+    const labels = [['沒裝', 'without Vacant'], ['裝了', 'with Vacant']];
+    const rows = Math.floor(colH / (30 * S)) - 2;
+    const scroll = (t - 20.35) * 3.2;
+    const scanY = top + 60 * S + ((t - 20.5) * .55 % 1) * (colH - 80 * S);
+    xs.forEach((x, k) => {
+      ctx.fillStyle = 'rgba(22,21,15,0.9)'; rrect(x, top, colW, colH, 16 * S); ctx.fill();
+      ctx.strokeStyle = 'rgba(245,239,230,0.12)'; ctx.lineWidth = 1.5 * S; ctx.stroke();
+      txt(labels[k][0], x + 24 * S, top - 34 * S, { size: 30, weight: 900, align: 'left', color: k ? COL.or : COL.ink });
+      txt(labels[k][1], x + 24 * S + measure(labels[k][0], 30, 900) + 16 * S, top - 32 * S, { size: 18, fam: LAT, weight: 400, align: 'left', color: COL.dim });
+      txt('POST /v1/chat/completions', x + 24 * S, top + 30 * S, { size: 16, fam: MONO, weight: 700, align: 'left', color: COL.dim, maxW: colW - 48 * S });
+      ctx.save(); ctx.beginPath(); ctx.rect(x, top + 50 * S, colW, colH - 60 * S); ctx.clip();
+      const fr = scroll % 1, base = Math.floor(scroll);
+      for (let r = 0; r < rows + 1; r++) {
+        const y = top + 76 * S + (r - fr) * 30 * S;
+        const line = hex(9000 + base + r, PORTRAIT ? 24 : 32).replace(/(.{4})/g, '$1 ').trim();
+        const lit = Math.abs(y - scanY) < 18 * S;
+        txt(line, x + 24 * S, y, { size: PORTRAIT ? 17 : 18, fam: MONO, weight: 400, align: 'left', color: lit ? COL.green : 'rgba(245,239,230,0.45)', noAudit: true });
+      }
+      ctx.restore();
+      ctx.fillStyle = 'rgba(94,230,160,0.12)'; ctx.fillRect(x, scanY - 16 * S, colW, 32 * S);
+    });
+    // equality badge
+    const eq = eOutBack(P(t, 21.6, 22.1));
+    ctx.save(); ctx.globalAlpha *= P(t, 21.6, 21.9);
+    const bx = CX, by = CY + 10 * S;
+    ctx.fillStyle = COL.bg; ctx.beginPath(); ctx.arc(bx, by, 58 * S * eq, 0, 6.28); ctx.fill();
+    ring(bx, by, 58 * S * eq, COL.green, 1, 2.5);
+    txt('=', bx, by - 4 * S, { size: 70, fam: LAT, weight: 200, color: COL.green, scale: eq });
+    ctx.restore();
+    const dz = P(t, 22.3, 22.7);
+    txt('Δ = 0 bytes', CX, top + colH + (PORTRAIT ? 60 : 56) * S, { size: 40, fam: MONO, weight: 700, color: COL.green, alpha: dz, glow: 18, glowColor: COL.green, ls: lerp(12, 2, eOutCubic(dz)) });
+    ctx.restore();
+  }
+  ctx.restore();
+  deep(t, ['~/.vacant/trace/ — one signed chain per project', 'Ed25519 · sha256(prev) → head', 'unexplained change = gap, never blamed'], 17.9, 20.3);
+  deep(t, ['nothing injected unless something is wrong', 'measured: first request of 157 pairs,', 'tool results of 99 pairs — byte-identical'], 20.8, 24.3, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 3, 'EVERY STEP, SIGNED', 17.9, 24.3);
+}
+
+// E · the moment of "done" (24.6 – 38.7)
+const CHECKS = [
+  ['檔案沒寫', 'missing file', 'missing_output'], ['失敗被略過', 'skipped failure', 'failed_step'],
+  ['測試對不上', 'test claim mismatch', 'test_claim'], ['數字沒出處', 'unsourced number', 'unsourced'],
+  ['點名的檔沒打開', 'named file never opened', 'unread']];
+const CHECK_AT = [29.3, 30.27, 31.43, 32.6, 33.76];
+function sceneE(t) {
+  if (t < 24.5 || t > 39.0) return;
+  const out = 1 - P(t, 38.35, 38.8);
+  ctx.save(); ctx.globalAlpha = out;
+  // slam
+  const s = P(t, 24.75, 24.95);
+  const toTop = eInOut(P(t, 26.6, 27.2));
+  const big = PORTRAIT ? 170 : 190;
+  const yDone = lerp(CY, PORTRAIT ? CY - 560 * S : CY - 330 * S, toTop);
+  const sc = lerp(lerp(PORTRAIT ? 1.6 : 2.2, 1, eOutExpo(s)), .42, toTop);
+  if (s > 0) {
+    const shake = (1 - P(t, 24.95, 25.4)) * 10 * S;
+    const r = rng(Math.floor(t * 60));
+    const fade = 1 - P(t, 34.9, 35.3) * .0;
+    txt('做完了。', CX + (r() - .5) * shake, yDone + (r() - .5) * shake, { size: big, weight: 900, scale: sc, alpha: s * fade, glow: 40 * (1 - toTop), glowColor: 'rgba(255,255,255,0.35)', ls: 6 });
+    txt('AGENT: DONE', CX, yDone + lerp(130, 58, toTop) * S, { size: 20, fam: MONO, weight: 400, ls: 10, color: COL.or, alpha: P(t, 25.1, 25.5) * (1 - P(t, 26.6, 26.9)) });
+    // time-freeze rings
+    for (let k = 0; k < 3; k++) {
+      const rp = P(t, 24.85 + k * .18, 25.9 + k * .18);
+      if (rp > 0 && rp < 1) ring(CX, CY, lerp(60, 1100, eOutCubic(rp)) * S, k ? COL.ink : COL.or, (1 - rp) * .5, k ? 1 : 3);
+    }
+    // clock glyph frozen
+    const cp = P(t, 25.2, 25.6) * (1 - toTop);
+    if (cp > 0) {
+      const ccx = CX, ccy = CY + (PORTRAIT ? 260 : 210) * S;
+      ring(ccx, ccy, 30 * S, COL.ink, cp * .6, 2);
+      ctx.save(); ctx.globalAlpha = cp * .8; ctx.strokeStyle = COL.ink; ctx.lineWidth = 2 * S;
+      ctx.beginPath(); ctx.moveTo(ccx, ccy); ctx.lineTo(ccx, ccy - 20 * S); ctx.moveTo(ccx, ccy); ctx.lineTo(ccx + 14 * S, ccy + 6 * S); ctx.stroke(); ctx.restore();
+      txt('時間停在這一刻', ccx, ccy + 58 * S, { size: 22, weight: 300, ls: 8, alpha: cp * .8 });
+    }
+  }
+  flash(t, 24.78, .35, .5);
+  // the record, scanned
+  const rec = P(t, 26.9, 27.4);
+  const listX = PORTRAIT ? CX - 450 * S : CX - 820 * S, listW = PORTRAIT ? 900 * S : 560 * S;
+  const listTop = PORTRAIT ? CY - 420 * S : CY - 210 * S, rowH = PORTRAIT ? 27 * S : 36 * S;
+  const recFade = (PORTRAIT ? 1 - .82 * eInOut(P(t, 29.0, 29.5)) : 1) * (1 - .85 * eInOut(P(t, 35.4, 35.9)));
+  if (rec > 0) {
+    ctx.save(); ctx.globalAlpha *= rec * recFade;
+    txt('RECORD · 只看紀錄', listX, listTop - 30 * S, { size: 16, fam: MONO, weight: 400, ls: 4, align: 'left', color: COL.dim });
+    for (let i = 0; i < 12; i++) {
+      const [tool, arg] = STEPS[i]; const y = listTop + i * rowH + 14 * S;
+      const a = P(t, 26.95 + i * .05, 27.2 + i * .05);
+      txt(`#${String(i + 1).padStart(2, '0')}  ${tool.padEnd(5)} ${arg}`, listX, y, { size: PORTRAIT ? 15 : 18, fam: MONO, weight: 400, align: 'left', alpha: a * .85, color: COL.mono, maxW: listW, noAudit: true });
+    }
+    // scan beam
+    const sb = ((t - 27.3) / 1.6) % 1;
+    if (t > 27.3 && t < 35.3) {
+      const y = listTop + sb * rowH * 12;
+      const g = ctx.createLinearGradient(0, y - 30 * S, 0, y + 4 * S);
+      g.addColorStop(0, 'rgba(242,107,29,0)'); g.addColorStop(1, 'rgba(242,107,29,0.35)');
+      ctx.fillStyle = g; ctx.fillRect(listX - 10 * S, y - 30 * S, listW + 20 * S, 34 * S);
+      ctx.fillStyle = COL.or; ctx.fillRect(listX - 10 * S, y + 3 * S, listW + 20 * S, 2 * S);
+    }
+    ctx.restore();
+  }
+  // five checks
+  const cx0 = PORTRAIT ? CX - 450 * S : CX - 160 * S, cw = PORTRAIT ? 900 * S : 980 * S;
+  const ch = PORTRAIT ? 100 * S : 86 * S, cg = PORTRAIT ? 18 * S : 14 * S;
+  const ctop = PORTRAIT ? CY - 330 * S : CY - 220 * S;
+  const failAt = 35.35, sentBack = 36.0, fixedAt = 37.35;
+  CHECKS.forEach(([zh, en, code], i) => {
+    const a = eOutCubic(P(t, CHECK_AT[i] - .05, CHECK_AT[i] + .35)); if (a <= 0) return;
+    const x = cx0 + (1 - a) * 60 * S, y = ctop + i * (ch + cg);
+    const isFail = i === 0;
+    const failed = isFail && t >= failAt && t < fixedAt;
+    const fixed = isFail && t >= fixedAt;
+    const pulse = failed ? .5 + .5 * Math.sin((t - failAt) * 14) : 0;
+    ctx.save(); ctx.globalAlpha *= a;
+    ctx.fillStyle = failed ? `rgba(255,74,61,${.12 + .1 * pulse})` : 'rgba(22,21,15,0.92)';
+    rrect(x, y, cw, ch, 14 * S); ctx.fill();
+    ctx.strokeStyle = failed ? COL.red : (fixed ? COL.green : 'rgba(245,239,230,0.14)'); ctx.lineWidth = (failed ? 2.5 : 1.5) * S; ctx.stroke();
+    txt(String(i + 1), x + 38 * S, y + ch / 2, { size: 30, fam: LAT, weight: 200, color: failed ? COL.red : COL.or });
+    txt(zh, x + 84 * S, y + ch / 2 - 14 * S, { size: PORTRAIT ? 34 : 32, weight: 700, align: 'left', color: COL.ink });
+    txt(en, x + 84 * S, y + ch / 2 + 22 * S, { size: 17, fam: LAT, weight: 400, align: 'left', color: COL.dim });
+    txt(code, x + cw - 96 * S, y + ch / 2, { size: 16, fam: MONO, weight: 400, align: 'right', color: failed ? COL.red : 'rgba(245,239,230,0.38)' });
+    // status: verified after the scan passes; #1 fails
+    const st = P(t, failAt - .2 + i * .05, failAt + .1 + i * .05);
+    if (st > 0) {
+      if (isFail && !fixed) cross(x + cw - 46 * S, y + ch / 2, 26 * S, COL.red, st);
+      else check(x + cw - 46 * S, y + ch / 2, 26 * S, COL.green, isFail ? P(t, fixedAt, fixedAt + .3) : st);
+    } else {
+      // scanning shimmer
+      const sh = ((t * 1.3 + i * .2) % 1);
+      ctx.fillStyle = 'rgba(245,239,230,0.05)'; ctx.fillRect(x + sh * cw * .9, y + 2 * S, cw * .1, ch - 4 * S);
+    }
+    ctx.restore();
+  });
+  // send-back loop: arrow from failed check to the agent, then answer.txt appears
+  const sb = P(t, sentBack, sentBack + .7);
+  if (sb > 0) {
+    const y1 = ctop + ch / 2;
+    const ax = PORTRAIT ? CX : cx0 - 160 * S, ay = PORTRAIT ? ctop + 5 * (ch + cg) + 110 * S : y1 + 200 * S;
+    const fade = 1 - P(t, 38.0, 38.4);
+    ctx.save(); ctx.globalAlpha *= fade;
+    // agent node
+    ctx.fillStyle = 'rgba(242,107,29,0.16)'; ctx.beginPath(); ctx.arc(ax, ay, 42 * S, 0, 6.28); ctx.fill();
+    ring(ax, ay, 42 * S, COL.or, sb, 2);
+    txt('agent', ax, ay, { size: 18, fam: MONO, weight: 700, color: COL.or, alpha: sb });
+    // dashed curve
+    const sx = PORTRAIT ? cx0 + 40 * S : cx0, sy = PORTRAIT ? ctop + ch : y1;
+    const c1x = PORTRAIT ? cx0 - 40 * S : cx0 - 170 * S, c1y = PORTRAIT ? ay - 60 * S : y1;
+    ctx.save(); ctx.strokeStyle = COL.red; ctx.lineWidth = 3 * S; ctx.setLineDash([10 * S, 8 * S]); ctx.lineDashOffset = -t * 60 * S;
+    ctx.beginPath(); const N = 30;
+    for (let k = 0; k <= N * eOutCubic(sb); k++) { const u = k / N; const bx = (1 - u) * (1 - u) * sx + 2 * (1 - u) * u * c1x + u * u * (ax - 42 * S * (PORTRAIT ? 0 : 0)); const by = (1 - u) * (1 - u) * sy + 2 * (1 - u) * u * c1y + u * u * (ay - 42 * S); k ? ctx.lineTo(bx, by) : ctx.moveTo(bx, by); }
+    ctx.stroke(); ctx.restore();
+    const lx = PORTRAIT ? ax + 70 * S : ax;
+    const lyy = PORTRAIT ? ay : ay + 78 * S;
+    txt('↺ 退回 · sent back', lx, lyy, { size: 20, fam: MONO, weight: 700, color: COL.red, alpha: P(t, sentBack + .3, sentBack + .6), align: PORTRAIT ? 'left' : 'center' });
+    txt('≤ 2 rounds / request', lx, lyy + 28 * S, { size: 15, fam: MONO, weight: 400, color: COL.dim, alpha: P(t, sentBack + .5, sentBack + .8), align: PORTRAIT ? 'left' : 'center' });
+    // file materializes
+    const fp = eOutBack(P(t, 36.9, 37.35));
+    if (fp > 0) {
+      const fx = PORTRAIT ? ax - 250 * S : ax, fy = PORTRAIT ? ay : ay - 230 * S;
+      ctx.save(); ctx.globalAlpha *= P(t, 36.9, 37.1); ctx.translate(fx, fy); ctx.scale(fp, fp);
+      ctx.fillStyle = 'rgba(94,230,160,0.12)'; rrect(-38 * S, -48 * S, 76 * S, 96 * S, 8 * S); ctx.fill();
+      ctx.strokeStyle = COL.green; ctx.lineWidth = 2 * S; ctx.stroke();
+      for (let k = 0; k < 4; k++) { ctx.fillStyle = 'rgba(94,230,160,0.6)'; ctx.fillRect(-24 * S, (-26 + k * 16) * S, (k === 3 ? 28 : 48) * S, 4 * S); }
+      ctx.restore();
+      txt('answer.txt', fx, fy + 70 * S, { size: 16, fam: MONO, weight: 700, color: COL.green, alpha: P(t, 37.0, 37.3) });
+    }
+    ctx.restore();
+  }
+  ctx.restore();
+  deep(t, ['trace/evidence.py — five send-back kinds, pure function', 'everything else → delivery note only', 'feedback names place + step, never an actor (KS-1)'], 29.4, 35.3, PORTRAIT ? 'tl' : 'tr');
+  deep(t, ['trace/zerostop.py — 330 s limit, fails open', 'turns that ended on a model error: not sent back (v3.7)', 'resolution judged on the current state'], 35.5, 38.4, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 4, 'THE MOMENT OF "DONE"', 25.2, 38.4);
+}
+
+// F · delivery note (38.7 – 43.7)
+function sceneF(t) {
+  if (t < 38.5 || t > 43.9) return;
+  const inn = eOutExpo(P(t, 38.6, 39.3)), out = 1 - P(t, 43.35, 43.75);
+  ctx.save(); ctx.globalAlpha = P(t, 38.6, 38.9) * out;
+  const cw = PORTRAIT ? 940 * S : 1380 * S, chh = PORTRAIT ? 980 * S : 520 * S;
+  const x = CX - cw / 2, y = CY - chh / 2 + (1 - inn) * 120 * S;
+  ctx.save(); ctx.shadowColor = 'rgba(242,107,29,0.25)'; ctx.shadowBlur = 80 * S;
+  ctx.fillStyle = 'rgba(24,22,17,0.96)'; rrect(x, y, cw, chh, 22 * S); ctx.fill(); ctx.restore();
+  ctx.strokeStyle = 'rgba(245,239,230,0.14)'; ctx.lineWidth = 1.5 * S; rrect(x, y, cw, chh, 22 * S); ctx.stroke();
+  txt('delivery.md', x + 40 * S, y + 50 * S, { size: 24, fam: MONO, weight: 700, align: 'left', color: COL.or });
+  txt('交件說明 · for the person, not the model', x + cw - 40 * S, y + 50 * S, { size: 17, fam: MONO, weight: 400, align: 'right', color: COL.dim, maxW: cw * .55 });
+  ctx.fillStyle = 'rgba(245,239,230,0.1)'; ctx.fillRect(x + 40 * S, y + 86 * S, cw - 80 * S, 1.5 * S);
+  const secs = [
+    ['查了什麼', 'Checked', ['5 kinds of grounds', '12 steps in the record', 'tests: sh run_tests.sh ✓'], COL.ink],
+    ['改了什麼', 'Changed before delivery', ['answer.txt — written', 'after 1 send-back', 'missing_output → resolved'], COL.green],
+    ['還沒驗證', 'Not verified', ['whether the answer is right', 'decisions behind each step', '— left for you'], COL.or]];
+  const at = [39.95, 40.9, 41.85];
+  secs.forEach(([zh, en, items, c], i) => {
+    const a = eOutCubic(P(t, at[i], at[i] + .4)); if (a <= 0) return;
+    let sx, sy, sw;
+    if (PORTRAIT) { sx = x + 40 * S; sy = y + 130 * S + i * 280 * S; sw = cw - 80 * S; }
+    else { sw = (cw - 80 * S - 2 * 40 * S) / 3; sx = x + 40 * S + i * (sw + 40 * S); sy = y + 130 * S; }
+    ctx.save(); ctx.globalAlpha *= a; ctx.translate(0, (1 - a) * 24 * S);
+    ctx.fillStyle = c; ctx.fillRect(sx, sy, 4 * S, PORTRAIT ? 230 * S : 330 * S);
+    txt(zh, sx + 26 * S, sy + 34 * S, { size: 42, weight: 900, align: 'left', color: c === COL.ink ? COL.ink : c });
+    txt(en, sx + 26 * S, sy + 82 * S, { size: 18, fam: LAT, weight: 400, align: 'left', color: COL.dim, maxW: sw - 40 * S });
+    items.forEach((it, k) => txt(it, sx + 26 * S, sy + (PORTRAIT ? 126 : 150) * S + k * (PORTRAIT ? 34 : 44) * S, { size: 19, fam: MONO, weight: 400, align: 'left', color: COL.mono, alpha: P(t, at[i] + .2 + k * .12, at[i] + .5 + k * .12), maxW: sw - 40 * S }));
+    ctx.restore();
+  });
+  ctx.restore();
+  deep(t, ['~/.vacant/trace/projects/<project>/delivery.{md,json}', 'never written into your project, never sent to the model'], 39.2, 43.4);
+  chapter(t, 5, 'DELIVERY NOTE', 39.0, 43.4);
+}
+
+// G · evidence (43.7 – 51.3)
+function counter(v, d) { return v.toFixed(d); }
+function sceneG(t) {
+  if (t < 43.5 || t > 51.6) return;
+  const out = 1 - P(t, 50.95, 51.35);
+  ctx.save(); ctx.globalAlpha = P(t, 43.6, 43.95) * out;
+  const part2 = eInOut(P(t, 48.1, 48.6));
+  // bars
+  const maxH = PORTRAIT ? 560 * S : 420 * S, bw = PORTRAIT ? 220 * S : 200 * S, gap = PORTRAIT ? 120 * S : 160 * S;
+  const baseY = PORTRAIT ? CY + 220 * S : CY + 210 * S;
+  const bars = [['沒裝', 'without', 42.0, 'rgba(245,239,230,0.35)'], ['裝了', 'with Vacant', 53.2, COL.or]];
+  const shiftX = PORTRAIT ? 0 : -part2 * 380 * S;
+  const shrink = PORTRAIT ? lerp(1, .55, part2) : 1;
+  const shiftY = PORTRAIT ? -part2 * 520 * S : 0;
+  ctx.save(); ctx.translate(CX + shiftX, baseY + shiftY); ctx.scale(shrink, shrink); ctx.translate(-CX, -baseY);
+  bars.forEach(([zh, en, v, c], i) => {
+    const gp = eOutCubic(P(t, 44.3, 45.9));
+    const val = v * gp, h = maxH * (val / 60);
+    const bx = CX + (i ? gap / 2 : -gap / 2 - bw);
+    ctx.save();
+    if (i) { ctx.shadowColor = COL.or; ctx.shadowBlur = 40 * S * gp; }
+    ctx.fillStyle = c; ctx.fillRect(bx, baseY - h, bw, h); ctx.restore();
+    txt(counter(val, 1) + '%', bx + bw / 2, baseY - h - 44 * S, { size: 56, fam: LAT, weight: i ? 800 : 200, color: i ? COL.or : COL.ink, alpha: P(t, 44.3, 44.6) });
+    txt(zh, bx + bw / 2, baseY + 42 * S, { size: 32, weight: 900, color: i ? COL.or : COL.ink });
+    txt(en, bx + bw / 2, baseY + 80 * S, { size: 17, fam: LAT, weight: 400, color: COL.dim });
+  });
+  ctx.fillStyle = 'rgba(245,239,230,0.25)'; ctx.fillRect(CX - gap / 2 - bw - 40 * S, baseY, 2 * bw + gap + 80 * S, 2 * S);
+  const pv = P(t, 46.4, 46.8);
+  txt('p = 0.0028', CX, baseY - maxH * (53.2 / 60) - 130 * S, { size: 22, fam: MONO, weight: 400, color: COL.ink, alpha: pv * .8, ls: 3 });
+  ctx.restore();
+  // conditions — always on screen with the number
+  const cy2 = PORTRAIT ? H * .655 : baseY + 136 * S;
+  const condA = P(t, 44.0, 44.5) * (1 - part2 * (PORTRAIT ? 1 : 0));
+  txt('DABstep 77 題 × 3 · gemma-4-12b QAT · pi 0.87.1 --print · 15 回合上限 · 預註冊', PORTRAIT ? CX : CX + shiftX, cy2, { size: 17, fam: MONO, weight: 400, color: COL.mono, alpha: condA, maxW: PORTRAIT ? W - 100 * S : (part2 > 0 ? 760 * S : W - 200 * S) });
+  // part 2: where the gain came from
+  if (part2 > 0) {
+    const rx = PORTRAIT ? CX : CX + 360 * S, ry = PORTRAIT ? CY + 150 * S : CY - 40 * S;
+    ctx.save(); ctx.globalAlpha *= part2;
+    txt('說做完，卻沒寫 answer.txt', rx, ry - 170 * S, { size: 30, weight: 700, color: COL.ink, maxW: PORTRAIT ? W - 120 * S : 760 * S });
+    txt('said done, never wrote the file', rx, ry - 128 * S, { size: 18, fam: LAT, weight: 400, color: COL.dim });
+    const nA = Math.round(42 * eOutCubic(P(t, 48.6, 49.4)));
+    txt(`${nA} / 231`, rx - 170 * S, ry - 20 * S, { size: 64, fam: LAT, weight: 200, color: COL.ink });
+    txt('→', rx, ry - 20 * S, { size: 50, fam: LAT, weight: 200, color: COL.or, alpha: P(t, 49.2, 49.5) });
+    const z = eOutBack(P(t, 49.45, 49.85));
+    txt('0', rx + 150 * S, ry - 20 * S, { size: 96, fam: LAT, weight: 800, color: COL.or, scale: lerp(.3, 1, z), alpha: P(t, 49.45, 49.6), glow: 30 });
+    txt('沒裝', rx - 170 * S, ry + 40 * S, { size: 18, weight: 500, color: COL.dim });
+    txt('裝了', rx + 150 * S, ry + 40 * S, { size: 18, weight: 500, color: COL.or });
+    const z2 = P(t, 49.9, 50.3);
+    txt('把對的改成錯：0 次 · correct → wrong: 0', rx, ry + 104 * S, { size: 20, fam: MONO, weight: 400, color: COL.green, alpha: z2, maxW: PORTRAIT ? W - 120 * S : 760 * S });
+    ctx.restore();
+  }
+  ctx.restore();
+  deep(t, ['the gain = files the agent said were done but never wrote', 'not a hold-out set · the with-Vacant arm matched 09-26;', 'what changed was the without arm (vLLM backend)'], 44.2, 48.0, PORTRAIT ? 'tl' : 'tr');
+  deep(t, ['no turn cap, 94 tasks: 72.3% vs 75.0% · p = 0.36', '→ no measured difference', 'decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md'], 48.4, 51.0, PORTRAIT ? 'tl' : 'tr');
+  chapter(t, 6, 'WHAT WAS MEASURED', 44.0, 51.0);
+}
+
+// H · thesis + end card (51.3 – 60)
+function sceneH(t) {
+  if (t < 51.1) return;
+  const p1 = P(t, 51.35, 51.75), o1 = 1 - P(t, 54.5, 54.95);
+  if (o1 > 0) {
+    ctx.save(); ctx.globalAlpha = p1 * o1;
+    // a line of steps, each lighting with a check — left to right
+    const N = PORTRAIT ? 6 : 9, span = PORTRAIT ? 860 * S : 1360 * S, y = CY + (PORTRAIT ? 240 : 170) * S;
+    ctx.fillStyle = 'rgba(245,239,230,0.15)'; ctx.fillRect(CX - span / 2, y - 1 * S, span, 2 * S);
+    const lit = eInOut(P(t, 52.9, 54.2));
+    ctx.save(); ctx.shadowColor = COL.green; ctx.shadowBlur = 12 * S; ctx.fillStyle = COL.green; ctx.fillRect(CX - span / 2, y - 1.5 * S, span * lit, 3 * S); ctx.restore();
+    for (let i = 0; i < N; i++) {
+      const x = CX - span / 2 + span * i / (N - 1);
+      const on = lit * (N - 1) >= i - .01;
+      ctx.fillStyle = COL.bg; ctx.beginPath(); ctx.arc(x, y, 20 * S, 0, 6.28); ctx.fill();
+      ring(x, y, 20 * S, on ? COL.green : COL.faint, 1, 2);
+      if (on) check(x, y, 16 * S, COL.green, clamp((lit * (N - 1) - i + 1) * 1.2));
+    }
+    const a1 = P(t, 51.45, 51.85), a2 = P(t, 52.7, 53.1);
+    const yy = PORTRAIT ? CY - 160 * S : CY - 110 * S;
+    txt('它不判斷對錯', CX, yy, { size: PORTRAIT ? 64 : 70, weight: 300, color: COL.dim, alpha: a1 });
+    txt("doesn't judge right or wrong", CX, yy + 56 * S, { size: 20, fam: LAT, weight: 400, ls: 2, color: COL.dim, alpha: a1 * .8 });
+    txt('只確認每一步有根據', CX, yy + (PORTRAIT ? 160 : 150) * S, { size: PORTRAIT ? 74 : 84, weight: 900, color: COL.ink, alpha: a2, scale: lerp(1.08, 1, eOutCubic(a2)) });
+    txt('checks every step has grounds', CX, yy + (PORTRAIT ? 222 : 216) * S, { size: 20, fam: LAT, weight: 600, ls: 2, color: COL.or, alpha: a2 * .9 });
+    ctx.restore();
+  }
+  // end card
+  if (t > 54.6) {
+    const cell = (PORTRAIT ? 24 : 26) * S, ly = PORTRAIT ? CY - 160 * S : CY - 150 * S;
+    const N = PORTRAIT ? 6 : 9, span = PORTRAIT ? 860 * S : 1360 * S, y0 = CY + (PORTRAIT ? 240 : 170) * S;
+    if (t < 56.0) logoParticles(t, 54.65, 55.6, CX, ly, cell, 77, (r, i) => [CX - span / 2 + span * (i % N) / (N - 1), y0]);
+    else pixelLogo(CX, ly, cell, 1, { glow: 10 + 20 * (1 - P(t, 56, 57.2)) });
+    const sw = P(t, 55.8, 56.8); if (sw > 0 && sw < 1) ring(CX, ly, lerp(30, 1000, eOutCubic(sw)) * S, COL.or, (1 - sw) * .5, 2);
+    const a = P(t, 56.1, 56.6), b = P(t, 56.6, 57.1), c = P(t, 57.4, 57.9);
+    txt('讓每一次交付，都有根據。', CX, ly + (PORTRAIT ? 180 : 170) * S, { size: PORTRAIT ? 60 : 66, weight: 900, alpha: a, ls: 4, maxW: W - 120 * S, tag: 'sub' });
+    txt('Every delivery, grounded.', CX, ly + (PORTRAIT ? 244 : 234) * S, { size: 28, fam: LAT, weight: 200, alpha: b, ls: 6, color: COL.ink, tag: 'sub' });
+    ctx.save(); ctx.globalAlpha = c;
+    const cmd = 'pipx install vacant-network', cw = measure(cmd, 24, 400, MONO) + 60 * S, cy = ly + (PORTRAIT ? 360 : 330) * S;
+    ctx.strokeStyle = 'rgba(242,107,29,0.6)'; ctx.lineWidth = 1.5 * S; rrect(CX - cw / 2, cy - 28 * S, cw, 56 * S, 28 * S); ctx.stroke();
+    txt(cmd, CX, cy, { size: 24, fam: MONO, weight: 400, color: COL.ink });
+    txt('0.9.0  ·  github.com/cosmopig/Vacant', CX, cy + 64 * S, { size: 16, fam: MONO, weight: 400, ls: 3, color: COL.dim });
+    ctx.restore();
+  }
+  deep(t, ['accountability, not "trust":', 'every reliance should have grounds', 'all real-model numbers: pi --print; TUI verified with scripted models'], 51.6, 54.4);
+  chapter(t, 7, 'GROUNDS', 51.6, 54.4);
+}
+
+// ───────────────────────── frame ─────────────────────────
+function render(t, f) {
+  AUDIT = [];
+  FREEZE = clamp(P(t, 24.75, 25.0) - P(t, 28.5, 30));
+  worldT = t < 24.75 ? t : 24.75 + (t - 24.75) * (1 - FREEZE * .97);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0;
+  background(t, f);
+  sceneA(t); sceneB(t); sceneC(t); sceneD(t); sceneE(t); sceneF(t); sceneG(t); sceneH(t);
+  subtitles(t);
+  post(t, f);
+  // audit: text must stay inside the frame with a safe margin
+  const m = 24 * S, bad = [];
+  for (const a of AUDIT) if (a.x0 < m || a.x1 > W - m || a.y0 < m || a.y1 > H - m) bad.push(a);
+  return bad;
+}
+window.ready = (async () => {
+  CUES = await (await fetch('cues.json')).json();
+  await Promise.all([
+    document.fonts.load('900 80px "Noto Sans TC"', '做完了真的嗎裝一次照常用'), document.fonts.load('300 80px "Noto Sans TC"', '它'),
+    document.fonts.load('500 80px "Noto Sans TC"', '它'), document.fonts.load('400 20px "JetBrains Mono"', 'a'),
+    document.fonts.load('700 20px "JetBrains Mono"', 'a'), document.fonts.load('200 20px "Inter"', 'a'),
+    document.fonts.load('600 20px "Inter"', 'a'), document.fonts.load('800 20px "Inter"', 'a'), document.fonts.load('400 20px "Inter"', 'a')]);
+  // warm every glyph used anywhere (subset files load lazily)
+  const all = JSON.stringify(CUES) + document.querySelector('script:not([src])').textContent;
+  for (const w of [300, 500, 700, 900]) await document.fonts.load(`${w} 40px "Noto Sans TC"`, all);
+  await document.fonts.ready;
+  makeGrain();
+  return true;
+})();
+window.frame = (t, f) => render(t, f);
+</script></body></html>
