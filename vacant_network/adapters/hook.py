@@ -313,6 +313,10 @@ def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) ->
                                            turns_left=_turns_left(turn, budget), budget=budget,
                                            error_stop=payload.get("last_stop") == "error")
     z = record.get("zero") or {}
+    # 事件紀錄分得出「沒查」和「查過沒問題」（cwd 太大一步都沒記的那一跑曾經只留下一筆 allow）
+    record = {**record, "zero_ran": bool(z.get("ran")),
+              **({} if z.get("ran") else {"why": z.get("why") or ("error" if z.get("error")
+                                                                  else "no workspace")})}
     if z.get("error"):
         _log("errors.jsonl", {"agent": agent, "event": "stop",
                               "error": f"zero-config check: {z['error']}"[:500]})

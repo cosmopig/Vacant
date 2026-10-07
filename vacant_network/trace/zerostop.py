@@ -130,7 +130,7 @@ def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | 
     說明裡寫明（v3.3；2026-09-26 研究：第 70 題解碼錯誤之後被退回缺檔、接著寫了沒有根據的答案）；**v3.7 起不退回**（`pushable_for`）。"""
     ws = capture.workspace_for(cwd, None)
     if ws is None:
-        return "allow", "", {}
+        return "allow", "", untraceable(agent, session_id, cwd, mode)
     rec = Recorder(ws)
     if not rec.chain_path.is_file():
         return "allow", "", {"zero": {"ran": False, "why": "nothing recorded"}}
@@ -151,6 +151,44 @@ def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | 
     except Exception as e:  # noqa: BLE001
         return "allow", "", {"zero": {"ran": False, "error": f"{type(e).__name__}: {e}"[:400]},
                              "user_message": DID_NOT_RUN}
+
+
+UNTRACEABLE_FILE = "untraceable_told.json"
+UNTRACEABLE_KEEP = 200
+
+
+def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str) -> dict[str, Any]:
+    """cwd 太大或不該記（`/`、家目錄或它的上層、agent 的設定目錄、Vacant 自己的目錄）：一步都沒記，
+    所以這一跑**沒有查**——不是「查過沒問題」。事件紀錄寫 `zero.ran=false, why=untraceable_cwd`；
+    `evidence` 模式下給人一行說明（只給人、不送模型；每個工作階段只說一次，記在 Vacant 的狀態目錄）。
+    那個目錄照樣不掃（掃整個家目錄不安全也太慢）。任何錯誤 ⇒ 只回紀錄欄位。"""
+    where = capture.untraceable_cwd(cwd)
+    if where is None:
+        return {}
+    record: dict[str, Any] = {"zero": {"ran": False, "why": "untraceable_cwd"}}
+    if mode != "evidence":
+        return record
+    try:
+        from ..atomic import atomic_write_text
+        from ..intake.statepaths import state_dir
+        p = state_dir() / "trace" / UNTRACEABLE_FILE
+        key = f"{agent}:{session_id or 'unknown'}"
+        try:
+            told = json.loads(p.read_text(encoding="utf-8"))
+            told = [str(x) for x in told] if isinstance(told, list) else []
+        except (OSError, ValueError):
+            told = []
+        if key in told:
+            return record
+        p.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(p, json.dumps((told + [key])[-UNTRACEABLE_KEEP:]))
+    except Exception:  # noqa: BLE001 — 記不住說過沒有：寧可多說一次，不可以不說
+        pass
+    record["user_message"] = (
+        f"Vacant did not check this work: the agent ran in {where}, which is too broad to record "
+        "(home folder, filesystem root, or a settings folder). "
+        "Open the agent inside a project folder to get the check.")
+    return record
 
 
 def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) -> list[dict[str, Any]]:
@@ -524,7 +562,7 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
     from .evidence import Evidence
     ws = capture.workspace_for(cwd, None)
     if ws is None:
-        return {}
+        return untraceable(agent, session_id, cwd, mode)
     rec = Recorder(ws)
     if not rec.chain_path.is_file():
         return {}

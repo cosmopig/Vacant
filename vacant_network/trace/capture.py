@@ -56,25 +56,39 @@ ACTIONS = {
     "subagent_stop": "subagent_stop",
 }
 MAX_TRANSCRIPT = 64 * 1024 * 1024
+#: 家目錄底下四個 agent 的設定目錄（`_traceable` 不把它們當工作區）
+AGENT_CONFIG_DIRS = (".pi", ".claude", ".codex", ".config/opencode")
 
 
 def workspace_for(cwd: str | None, contract: Any = None) -> pathlib.Path | None:
     """病歷記在哪個專案。有契約 ⇒ 契約的專案；`VACANT_TRACE=1` ⇒ cwd（舊行為）；
     裝過 Vacant（零設定，`adapters.mode`）⇒ cwd 往上找到的專案根。都不是 ⇒ 不記。"""
+    ws = _candidate(cwd, contract)
+    return ws if ws is not None and _traceable(ws) else None
+
+
+def untraceable_cwd(cwd: str | None) -> pathlib.Path | None:
+    """零設定（沒有契約）會記這個 cwd、但它太大或不該記（`_traceable` 拒絕）⇒ 回那個被拒絕的路徑；
+    其餘（會記、或本來就不記：`VACANT_TRACE=0`、沒裝）⇒ None。給 Stop 告訴人「這一跑沒查」用
+    （2026-10 事件：pi 在 `/` 開，49 個步驟一步都沒記、放行、人沒被告知）。"""
+    ws = _candidate(cwd, None)
+    return ws if ws is not None and not _traceable(ws) else None
+
+
+def _candidate(cwd: str | None, contract: Any) -> pathlib.Path | None:
     flag = os.environ.get("VACANT_TRACE", "").strip()
     if flag == "0":
         return None
     if contract is not None:
-        ws = pathlib.Path(contract.base_dir).resolve()
-    elif flag == "1" and cwd:
-        ws = pathlib.Path(cwd).resolve()
-    elif cwd and zero_config_on():
+        return pathlib.Path(contract.base_dir).resolve()
+    if flag == "1" and cwd:
+        return pathlib.Path(cwd).resolve()
+    if cwd and zero_config_on():
         ws = project_root(cwd)
         if not _traceable(ws):      # 上層的 git（例如 /tmp 或整個家目錄的 dotfiles repo）太大：退回 cwd
             ws = pathlib.Path(cwd).resolve()
-    else:
-        return None
-    return ws if _traceable(ws) else None
+        return ws
+    return None
 
 
 def zero_config_on() -> bool:
@@ -105,6 +119,11 @@ def _traceable(ws: pathlib.Path) -> bool:
     home = pathlib.Path.home().resolve()
     if ws == pathlib.Path(ws.anchor) or ws == home or ws in home.parents:
         return False
+    # agent 自己的設定目錄（工作階段紀錄、金鑰、模型設定）不是專案：它本身、它底下、它的上層都不追
+    for cd in AGENT_CONFIG_DIRS:
+        d = (home / cd).resolve()
+        if ws == d or d in ws.parents or ws in d.parents:
+            return False
     sd = state_dir().resolve()
     if ws == sd or sd in ws.parents or ws in sd.parents:
         return False
