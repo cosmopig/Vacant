@@ -55,17 +55,20 @@ project. **It does not judge whether an answer is right.** The turn-budget remin
 | Batch | Setup | not installed → installed | How to read it |
 |---|---|---|---|
 | DABstep 77 tasks × 3 (2026-10-02, pre-registered) | gemma-4-12b QAT on vLLM (Colab G4), pi 0.87.1 `--print`, **15-turn cap** | 42.0% → **53.2%** (p = 0.0028) | The gain is runs where the agent said it was done without writing the answer file (42/231 without Vacant, 0 with). Correct answers turned wrong by Vacant: **0**. ⚠ The Vacant arm scored about the same as on the GGUF backend on 2026-09-26; the not-installed arm is what changed. The task set was chosen because it had shown an effect before — not a hold-out. |
+| **Same, GGUF + LM Studio (2026-10-03, pre-registered replication)** | same, two RTX 3090 | 52.8% → 52.4% (**p = 0.84**) | **The Colab difference did not replicate**: "said done without the file" was only 20/231, and the turns spent writing it were eaten by the 15-turn cap (cut off 59 → 74). With the reminder 63.2% (p = 0.0051), about half of the extra answers wrong. Harm 0. |
+| **Same, GGUF, no turn cap (2026-10-08, pre-registered)** | no time or turn limit (4-hour safety net) | 52.4% → **60.6% (p = 0.015)** | From runs that said done without writing the answer file being sent back (67 → 15); wrong answers 30 → 63 (precision of delivered answers 80% → 69%); harm 0 |
 | Task-oriented 94 tasks × 2 (2026-10-02, pre-registered) | DABench / DataBench / Polyglot Python, same setup **without a turn cap** | 72.3% → 75.0% (p = 0.36) | No measured difference; "said done without the file" only 5/120 |
-| Same, GGUF + LM Studio (2026-10-03, interim) | two RTX 3090 | 119 → 124 of 188 (p = 0.37) | No measured difference; "said done without the file" 0 |
+| Task-oriented, same, GGUF + LM Studio (2026-10-04, final) | two RTX 3090, 3 runs | 187 → 186 of 282 (p = 0.87) | No measured difference; "said done without the file" 0; harm 0 |
+| Task-oriented, GGUF, no time limit (2026-10-06, pre-registered) | no time or turn limit | 67.4% → 69.5% (p = 0.37) | No measured difference; failures are almost all "done but wrong"; runs over 1 hour were right only 14% of the time |
 | Earlier: paid DABstep (09-25), 100 unseen hard tasks (09-28), 920 coding tasks on Colab (09-28, v3.6.1) | see conclusions | no measured difference | the v3.6.1 false send-backs (ran `run_tests.sh`, still "no test run") are fixed in v3.7: 0/23 in the smoke |
 
 ⚠ **Do not read this as "Vacant makes agents better"**, nor as "it does nothing": what it catches is "said done without writing the
-requested file"; where that is common (turn caps, some inference engines) a difference shows up, where it is rare it does not.
+requested file"; where that is common (turn caps, some inference engines) a difference shows up, where it is rare it does not — on the same DABstep tasks there was a difference on vLLM (p = 0.0028) and none on LM Studio GGUF (p = 0.84); the size depends on the inference engine, it is not a stable property of the product.
 Wrong decisions with a source for every step, and runs cut off by a time limit, are outside what it can see. Known limits: a provided
 test script that stays red until the agent says done is not sent back; only pi was measured with a real model, all via `pi --print`
 (the interactive TUI was verified with scripted models).
 Conclusions: `decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md`, `CONCLUSION_20261002_COLAB_TASK3_V37.md`,
-`CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md`, `CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`, `CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`.
+`CONCLUSION_20261003_VACANTDEV_TASK3_V37.md`, `CONCLUSION_20261003_VACANTDEV_DABSTEP_V37.md`, `CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`, `CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`.
 
 ## Plugging into your agent: pi / Claude Code / OpenCode / Codex (from 2026-09-24)
 

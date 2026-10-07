@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+**Measurements after 0.9.0 (docs only, no code change).** The same pre-registered DABstep batch on a second inference
+engine (LM Studio GGUF, two RTX 3090, 2026-10-03): not installed 52.8%, installed 52.4% (**p = 0.84 — the Colab/vLLM
+difference did not replicate**). On this engine the agent rarely said "done" without writing the answer file (20/231 vs
+42/231 on vLLM), and the turns Vacant's send-back used were eaten by the 15-turn cap (runs cut off 59 → 74), so the net
+effect was zero. With `--budget-reminder`: 63.2% (p = 0.0051), about half of the extra answers wrong. Task-oriented 94
+tasks on the same engine, final (3 runs): 187 vs 186 of 282, p = 0.87. Correct answers turned wrong by Vacant: 0 in all
+batches. ⇒ The 0.9.0 DABstep number depends on the inference engine; it is not a stable property of the product.
+Conclusions: `decisions/conclusions/CONCLUSION_20261003_VACANTDEV_DABSTEP_V37.md`, `CONCLUSION_20261003_VACANTDEV_TASK3_V37.md`.
+
+**Without time or turn limits (same engine, pre-registered, 2026-10-06/08).** DABstep 77 tasks × 3: not installed 52.4%,
+installed **60.6% (p = 0.015)** — with no turn cap the send-back for a missing answer file is no longer cut off (said done
+without the file 67 → 15 runs); the cost is more wrong answers (30 → 63). Task-oriented 94 tasks × 3: 67.4% vs 69.5%,
+p = 0.37 (no measured difference; the failures are almost all wrong-but-done). Harm 0 in both.
+Conclusions: `CONCLUSION_20261008_VACANTDEV_DABSTEP_UNLIMITED_V37.md`, `CONCLUSION_20261006_VACANTDEV_TASK3_UNLIMITED_V37.md`.
+
 ## 0.9.0 — 2026-10-03
 
 **Zero-config: install once, keep using your agent.** `pipx install vacant-network && vacant install`, then open

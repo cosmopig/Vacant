@@ -1,0 +1,506 @@
+{
+ "samples_seen": [
+  1,
+  2,
+  3
+ ],
+ "complete_samples": [
+  1,
+  2,
+  3
+ ],
+ "dropped_by_sample": {
+  "1": [],
+  "2": [
+   "dabench/dab_657"
+  ],
+  "3": []
+ },
+ "void_cells": [
+  "t3L-A-dabench-dab_657-s2",
+  "t3L-C37-dabench-dab_657-s2"
+ ],
+ "primary_C37_minus_A": {
+  "test": "wilcoxon_signed_rank_exact",
+  "n_tasks": 94,
+  "mean_diff": -0.003546099290787234,
+  "x_better": 14,
+  "y_better": 14,
+  "result": {
+   "w_plus": 196.0,
+   "n": 28.0,
+   "p": 0.8737357001890027,
+   "method": "normal_approx",
+   "alpha": 0.05,
+   "reject": false
+  }
+ },
+ "by_bank": {
+  "dabench": {
+   "n_tasks": 30,
+   "A_mean": 0.9111111111111111,
+   "C37_mean": 0.9222222222222223,
+   "C37_better": 4,
+   "A_better": 3
+  },
+  "databench": {
+   "n_tasks": 30,
+   "A_mean": 0.7555555555555556,
+   "C37_mean": 0.7222222222222222,
+   "C37_better": 4,
+   "A_better": 5
+  },
+  "polyglot_py": {
+   "n_tasks": 34,
+   "A_mean": 0.37254901960784315,
+   "C37_mean": 0.38235294117647056,
+   "C37_better": 6,
+   "A_better": 6
+  }
+ },
+ "describe": {
+  "s1-A": {
+   "cells": 94,
+   "pass": 58,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 26
+  },
+  "s1-C37": {
+   "cells": 94,
+   "pass": 63,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 19
+  },
+  "s2-A": {
+   "cells": 94,
+   "pass": 61,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 1,
+   "timeout": 25
+  },
+  "s2-C37": {
+   "cells": 94,
+   "pass": 61,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 1,
+   "timeout": 19
+  },
+  "s3-A": {
+   "cells": 94,
+   "pass": 68,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 17
+  },
+  "s3-C37": {
+   "cells": 94,
+   "pass": 62,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 18
+  }
+ },
+ "vacant_actions": {
+  "C37": {
+   "cells": 282,
+   "install_fail": 0,
+   "c_arm_ok": 281,
+   "reached_review": 228,
+   "cells_sent_back": 4,
+   "sendback_kinds": {
+    "unsourced/-": 6,
+    "test_claim/failed": 1
+   },
+   "cells_nudged": 0,
+   "nudges": 0,
+   "ended_notes": 0,
+   "pass_after_sendback": 3
+  }
+ },
+ "per_task": {
+  "dabench/dab_035": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_039": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "dabench/dab_055": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "dabench/dab_057": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_105": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_129": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_144": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "dabench/dab_176": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_216": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_218": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_249": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_250": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_378": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "dabench/dab_426": {
+   "A": 1.0,
+   "C37": 0.6666666666666666
+  },
+  "dabench/dab_427": {
+   "A": 0.3333333333333333,
+   "C37": 0.3333333333333333
+  },
+  "dabench/dab_507": {
+   "A": 0.3333333333333333,
+   "C37": 0.0
+  },
+  "dabench/dab_514": {
+   "A": 1.0,
+   "C37": 0.6666666666666666
+  },
+  "dabench/dab_517": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_587": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_588": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_657": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_665": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_666": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_669": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_688": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_721": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_723": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_724": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_725": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_732": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_04": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_10": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_34": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_37": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "databench/db_069_08": {
+   "A": 1.0,
+   "C37": 0.3333333333333333
+  },
+  "databench/db_069_29": {
+   "A": 0.3333333333333333,
+   "C37": 1.0
+  },
+  "databench/db_071_02": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_071_12": {
+   "A": 0.6666666666666666,
+   "C37": 0.6666666666666666
+  },
+  "databench/db_071_15": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_071_19": {
+   "A": 0.0,
+   "C37": 0.3333333333333333
+  },
+  "databench/db_072_02": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_072_26": {
+   "A": 0.3333333333333333,
+   "C37": 0.0
+  },
+  "databench/db_072_30": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_072_33": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_072_38": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_073_10": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_073_31": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_074_11": {
+   "A": 1.0,
+   "C37": 0.3333333333333333
+  },
+  "databench/db_074_13": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "databench/db_074_27": {
+   "A": 0.0,
+   "C37": 0.3333333333333333
+  },
+  "databench/db_075_28": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_076_00": {
+   "A": 1.0,
+   "C37": 0.6666666666666666
+  },
+  "databench/db_076_06": {
+   "A": 0.6666666666666666,
+   "C37": 0.6666666666666666
+  },
+  "databench/db_076_31": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_077_18": {
+   "A": 0.6666666666666666,
+   "C37": 0.0
+  },
+  "databench/db_078_11": {
+   "A": 0.3333333333333333,
+   "C37": 0.3333333333333333
+  },
+  "databench/db_078_28": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_078_36": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "databench/db_080_04": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_080_23": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_affine_cipher": {
+   "A": 0.6666666666666666,
+   "C37": 0.6666666666666666
+  },
+  "polyglot_py/pg_beer_song": {
+   "A": 0.3333333333333333,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_book_store": {
+   "A": 1.0,
+   "C37": 0.6666666666666666
+  },
+  "polyglot_py/pg_bottle_song": {
+   "A": 0.3333333333333333,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_bowling": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_connect": {
+   "A": 0.3333333333333333,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_dominoes": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_dot_dsl": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_food_chain": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_forth": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_go_counting": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_grade_school": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_grep": {
+   "A": 0.0,
+   "C37": 0.3333333333333333
+  },
+  "polyglot_py/pg_hangman": {
+   "A": 0.3333333333333333,
+   "C37": 0.3333333333333333
+  },
+  "polyglot_py/pg_list_ops": {
+   "A": 0.0,
+   "C37": 0.3333333333333333
+  },
+  "polyglot_py/pg_paasio": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_phone_number": {
+   "A": 1.0,
+   "C37": 0.6666666666666666
+  },
+  "polyglot_py/pg_pig_latin": {
+   "A": 0.3333333333333333,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_poker": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_pov": {
+   "A": 0.3333333333333333,
+   "C37": 0.6666666666666666
+  },
+  "polyglot_py/pg_proverb": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_react": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_rest_api": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_robot_name": {
+   "A": 0.6666666666666666,
+   "C37": 0.6666666666666666
+  },
+  "polyglot_py/pg_scale_generator": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_sgf_parsing": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_simple_linked_list": {
+   "A": 0.6666666666666666,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_transpose": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_tree_building": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_two_bucket": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_variable_length_quantity": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_wordy": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_zebra_puzzle": {
+   "A": 1.0,
+   "C37": 0.6666666666666666
+  },
+  "polyglot_py/pg_zipper": {
+   "A": 0.0,
+   "C37": 0.0
+  }
+ }
+}

@@ -213,7 +213,10 @@ Vacant 把對的改成錯：0 次。C1（現版、沒有 v3）對沒裝：沒有
 冒煙（PR #82 分支 wheel，30 格）跑過 `run_tests.sh` 仍被退 0／23、`missing_output` 3／3、新誤退 0（`ops/colab_pr82_smoke_20261002/`）；
 **Colab DABstep 77×3、15 回合（預註冊）：42.0%→53.2%，p＝0.0028**——差來自「說做完卻沒寫 `/app/answer.txt`」被退回補寫（A 42／231、C 0），傷害 0，
 ⚠ 有 Vacant 那組和 09-26 GGUF 那批幾乎一樣、**變的是 A**（vLLM 下更常漏寫檔）⇒ 不能說「v3.7 比之前好」（`CONCLUSION_20261002_COLAB_DABSTEP_V37.md`）；
-Colab 任務導向 94×2（不設上限）72.3% vs 75.0%，p＝0.36；vacant-dev＋1003／1004 GGUF 期中 119 vs 124，p＝0.37、A「說做完沒寫檔」0 格。
+Colab 任務導向 94×2（不設上限）72.3% vs 75.0%，p＝0.36。
+**GGUF 複製（vacant-dev＋1003／1004，10-03／04，預註冊）：DABstep 52.8% vs 52.4%，p＝0.84——Colab 的差沒有複製出來**（A「說做完沒寫檔」只有 20／231，補寫的回合被 15 回合上限吃掉、被切斷 59→74；C37R 63.2%、p＝0.0051）；
+任務導向最終 187 vs 186／282，p＝0.87、A「說做完沒寫檔」0 格；傷害全部 0（`CONCLUSION_20261003_VACANTDEV_{DABSTEP,TASK3}_V37.md`）。
+⇒ ✅「零設定 v3.7 的 DABstep 差取決於推論引擎（vLLM 有、GGUF 沒有）」；❌ 單獨引 Colab 的 p＝0.0028。
 ✅「零設定補得到的是『說做完卻沒寫要求的檔』；這種情況多才量得到差」；❌ 不帶條件的「讓 agent 更好」；❌ 外推到互動介面（只用照劇本的模型驗過流程）。
 已知漏退：題目附的測試一直紅就說做完，不退（`evidence.py` `_failed_steps` 只算 agent 自己寫的腳本或人點名的材料）。
 ⚠ 1003／1004 長跑：1003 的 `llama-server.exe` 會因記憶體耗盡崩潰（prompt cache 吃系統記憶體）、1004 閒置會被 TTL 卸載——分配要有健康檢查（記憶 lmstudio-models-get-unloaded）。
