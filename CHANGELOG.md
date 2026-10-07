@@ -11,6 +11,12 @@ tasks on the same engine, final (3 runs): 187 vs 186 of 282, p = 0.87. Correct a
 batches. ⇒ The 0.9.0 DABstep number depends on the inference engine; it is not a stable property of the product.
 Conclusions: `decisions/conclusions/CONCLUSION_20261003_VACANTDEV_DABSTEP_V37.md`, `CONCLUSION_20261003_VACANTDEV_TASK3_V37.md`.
 
+**Without time or turn limits (same engine, pre-registered, 2026-10-06/08).** DABstep 77 tasks × 3: not installed 52.4%,
+installed **60.6% (p = 0.015)** — with no turn cap the send-back for a missing answer file is no longer cut off (said done
+without the file 67 → 15 runs); the cost is more wrong answers (30 → 63). Task-oriented 94 tasks × 3: 67.4% vs 69.5%,
+p = 0.37 (no measured difference; the failures are almost all wrong-but-done). Harm 0 in both.
+Conclusions: `CONCLUSION_20261008_VACANTDEV_DABSTEP_UNLIMITED_V37.md`, `CONCLUSION_20261006_VACANTDEV_TASK3_UNLIMITED_V37.md`.
+
 ## 0.9.0 — 2026-10-03
 
 **Zero-config: install once, keep using your agent.** `pipx install vacant-network && vacant install`, then open
