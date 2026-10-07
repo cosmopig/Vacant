@@ -1,0 +1,71 @@
+1
+00:00:01,890 --> 00:00:02,799
+Done.
+
+2
+00:00:03,440 --> 00:00:04,220
+Is it, though?
+
+3
+00:00:04,240 --> 00:00:07,813
+And then you go back and check every step — yourself.
+
+4
+00:00:08,410 --> 00:00:11,320
+Vacant. Install once. Work as usual.
+
+5
+00:00:11,340 --> 00:00:14,920
+pi, Claude Code, OpenCode, Codex — just as they are.
+
+6
+00:00:14,940 --> 00:00:17,640
+Contracts? Config? Keys? — None of it.
+
+7
+00:00:17,660 --> 00:00:20,320
+Every step, quietly signed and chained.
+
+8
+00:00:20,340 --> 00:00:24,200
+When nothing's wrong, it's invisible — not one byte of your requests changes.
+
+9
+00:00:24,220 --> 00:00:25,629
+Until the agent says: “Done.”
+
+10
+00:00:25,840 --> 00:00:29,220
+In that moment, it reads only the record — five checks.
+
+11
+00:00:29,240 --> 00:00:32,670
+File written? Failure skipped? Test claims match?
+
+12
+00:00:32,690 --> 00:00:35,470
+Numbers sourced? Named file opened?
+
+13
+00:00:35,490 --> 00:00:38,920
+If not, it goes back to be fixed — before it reaches you.
+
+14
+00:00:38,940 --> 00:00:43,720
+Delivered with a note: what was checked, what changed, what's still unverified.
+
+15
+00:00:43,740 --> 00:00:48,190
+With a 15-turn cap, accuracy went from 42% to 53%.
+
+16
+00:00:48,210 --> 00:00:51,540
+What it recovered: answers called done, but never written.
+
+17
+00:00:51,560 --> 00:00:55,820
+It doesn't judge right from wrong. It makes sure every step has grounds.
+
+18
+00:00:55,840 --> 00:00:59,478
+Vacant. Every delivery, grounded.

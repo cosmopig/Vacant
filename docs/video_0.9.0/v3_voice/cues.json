@@ -1,0 +1,164 @@
+[
+ {
+  "i": 0,
+  "zh": "做完了。",
+  "en": "Done.",
+  "start": 1.95,
+  "end": 2.499,
+  "onscreen": true,
+  "agent": true
+ },
+ {
+  "i": 1,
+  "zh": "真的嗎？",
+  "en": "Is it, though?",
+  "start": 3.5,
+  "end": 4.143,
+  "onscreen": true,
+  "agent": false
+ },
+ {
+  "i": 2,
+  "zh": "然後，你得自己回頭，一步步地查。",
+  "en": "And then you go back and check every step — yourself.",
+  "start": 4.3,
+  "end": 7.513,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 3,
+  "zh": "Vacant。裝一次，照常用。",
+  "en": "Vacant. Install once. Work as usual.",
+  "start": 8.47,
+  "end": 11.121,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 4,
+  "zh": "pi、Claude Code、OpenCode、Codex——照樣用。",
+  "en": "pi, Claude Code, OpenCode, Codex — just as they are.",
+  "start": 11.4,
+  "end": 14.945,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 5,
+  "zh": "契約？設定？金鑰？——都不用。",
+  "en": "Contracts? Config? Keys? — None of it.",
+  "start": 15.0,
+  "end": 17.604,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 6,
+  "zh": "每一步，都安靜地簽章、成鏈。",
+  "en": "Every step, quietly signed and chained.",
+  "start": 17.72,
+  "end": 20.42,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 7,
+  "zh": "沒事時，它像不存在——請求，一個位元組都不改。",
+  "en": "When nothing's wrong, it's invisible — not one byte of your requests changes.",
+  "start": 20.4,
+  "end": 24.224,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 8,
+  "zh": "直到——agent 說：「做完了。」",
+  "en": "Until the agent says: “Done.”",
+  "start": 24.28,
+  "end": 25.329,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 9,
+  "zh": "這一刻，它只看紀錄——查五件事。",
+  "en": "In that moment, it reads only the record — five checks.",
+  "start": 25.9,
+  "end": 29.171,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 10,
+  "zh": "檔案寫了嗎？失敗略過了嗎？測試對得上嗎？",
+  "en": "File written? Failure skipped? Test claims match?",
+  "start": 29.3,
+  "end": 32.548,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 11,
+  "zh": "數字有出處嗎？點名的檔開過嗎？",
+  "en": "Numbers sourced? Named file opened?",
+  "start": 32.75,
+  "end": 35.22,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 12,
+  "zh": "不對，就退回去補——在交給你之前。",
+  "en": "If not, it goes back to be fixed — before it reaches you.",
+  "start": 35.55,
+  "end": 38.656,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 13,
+  "zh": "交件附一張說明：查了什麼、改了什麼、還有什麼沒驗證。",
+  "en": "Delivered with a note: what was checked, what changed, what's still unverified.",
+  "start": 39.0,
+  "end": 43.573,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 14,
+  "zh": "十五回合上限下，答對率——從四成二，到五成三。",
+  "en": "With a 15-turn cap, accuracy went from 42% to 53%.",
+  "start": 43.8,
+  "end": 48.241,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 15,
+  "zh": "補回來的，是說了做完、卻沒寫出來的答案。",
+  "en": "What it recovered: answers called done, but never written.",
+  "start": 48.27,
+  "end": 51.599,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 16,
+  "zh": "它不判斷對錯。只確認——每一步，都有根據。",
+  "en": "It doesn't judge right from wrong. It makes sure every step has grounds.",
+  "start": 51.62,
+  "end": 55.72,
+  "onscreen": false,
+  "agent": false
+ },
+ {
+  "i": 17,
+  "zh": "Vacant。讓每一次交付，都有根據。",
+  "en": "Vacant. Every delivery, grounded.",
+  "start": 55.9,
+  "end": 59.178,
+  "onscreen": true,
+  "agent": false
+ }
+]
