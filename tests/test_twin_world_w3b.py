@@ -42,7 +42,7 @@ def test_pool_size_places_and_links() -> None:
     for rel in _ALL:
         places[twinground.place_of(rel)] = places.get(twinground.place_of(rel), 0) + 1
     assert set(places) == {"投遞口", "捏土處", "長桌廣場", "石頭閘門", "帳本鏈", "草稿角", "紙卡地", "畫架與長椅"}
-    assert all(3 <= n <= 8 for n in places.values()), places
+    assert all(3 <= n <= 14 for n in places.values()), places        # 第三輪補了 17 件「人類常見的心願」接得住的東西
     gs = twinground.groups()
     assert 8 <= len(gs) <= 16
     for g, ms in gs.items():

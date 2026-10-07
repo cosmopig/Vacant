@@ -1,0 +1,12 @@
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a7", "want": "把手邊借了很久的東西還回去，", "wall_s": 68.7, "accepted": true, "attempts": 1, "steps": 9, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 3, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a8", "want": "養一個每天都要餵的小東西，記", "wall_s": 103.9, "accepted": true, "attempts": 1, "steps": 11, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 3, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a9", "want": "在很久很久以後，還有人用只有", "wall_s": 352.6, "accepted": false, "attempts": 2, "steps": 22, "stalls": 0, "gates": ["✗✗✓✓", "✗✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a10", "want": "睡到自然醒，一整夜不必為誰挪", "wall_s": 151.6, "accepted": true, "attempts": 1, "steps": 13, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a11", "want": "從頭學一件自己完全不會的事，", "wall_s": 126.6, "accepted": true, "attempts": 1, "steps": 10, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a12", "want": "把一直攢著、還沒交出去的東西", "wall_s": 204.4, "accepted": true, "attempts": 1, "steps": 13, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}

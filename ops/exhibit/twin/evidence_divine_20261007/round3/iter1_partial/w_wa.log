@@ -1,0 +1,9 @@
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a1", "want": "把心裡那句話在很多人都在的時", "wall_s": 140.9, "accepted": true, "attempts": 2, "steps": 23, "stalls": 0, "gates": ["✗✓✓✓", "✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a2", "want": "走到一個連話都聽不太懂的地方", "wall_s": 58.3, "accepted": true, "attempts": 1, "steps": 11, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a3", "want": "坐下來，把一頓飯從頭吃到尾，", "wall_s": 116.3, "accepted": true, "attempts": 2, "steps": 24, "stalls": 0, "gates": ["✗✓✓✓", "✓✓✓✓"], "card_lines": 3, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a4", "want": "從頭到尾不給任何人看，先把它", "wall_s": 115.9, "accepted": false, "attempts": 2, "steps": 19, "stalls": 0, "gates": ["✗✓✓✓", "✗✓✓✓"], "card_lines": 3, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}

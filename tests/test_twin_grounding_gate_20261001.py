@@ -1005,10 +1005,12 @@ def test_e2e_first_fails_then_revised_then_passes(tmp_path, monkeypatch):
     ws, rd = twinagent.paths_for(cfg.work_root, SUB)
     run = json.loads((rd / "run_RUN-ON.json").read_text(encoding="utf-8"))
     a1, a2 = run["attempts"]
-    old = (list(cfg.argv_prefix) + [twinagent.LETTER_SYSTEM_PROMPT, twinagent.LETTER_FIRST_MESSAGE,
-                                    str(rd), twinagent.SYSTEM_PROMPT, twinagent.FIRST_MESSAGE])
+    tid = twinagent.public_twin_id(SUB)       # P13 第三輪：指令尾端接這一跑（cell_id）確定性的變化；仍沒有任何觀眾原文
+    fm = twinagent.first_message_for(tid)
+    old = (list(cfg.argv_prefix) + [twinagent.letter_system_for(tid), twinagent.LETTER_FIRST_MESSAGE,
+                                    str(rd), twinagent.SYSTEM_PROMPT, fm])
     assert a1["argv"] == old and a1["feedback_in_prompt_bytes"] == 0
-    assert a2["argv"][:-1] == old[:-1] and a2["argv"][-1].startswith(twinagent.FIRST_MESSAGE + "\n\n")
+    assert a2["argv"][:-1] == old[:-1] and a2["argv"][-1].startswith(fm + "\n\n")
     assert a2["feedback_in_prompt_bytes"] > 0 and "check_w2_source" in a2["argv"][-1]
     assert run["feedback_into"] == "both" and run["retry"] == "revise" and run["max_attempts"] == 2
 
@@ -1017,7 +1019,7 @@ def test_e2e_first_fails_then_revised_then_passes(tmp_path, monkeypatch):
     assert [p["stage"] for p in pl] == [2, 2]
     assert [p["has_traits"] for p in pl] == [False, False]
     assert pl[1]["has_feedback_file"] is True and "成品第" in pl[1]["msg_tail"]
-    assert pl[0]["msg_len"] == len(twinagent.FIRST_MESSAGE)
+    assert pl[0]["msg_len"] == len(fm)
     assert (rd / "letter_final.md").read_text(encoding="utf-8").startswith("這個人手慢")      # 信來自 twin_letter.py 那一通
 
     # ── 回饋只寫位置與缺的根據、過 KS-1、沒有行動者／對錯 ──

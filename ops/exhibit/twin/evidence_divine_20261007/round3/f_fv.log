@@ -1,0 +1,8 @@
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v2", "want": "種東西", "wall_s": 155.4, "accepted": true, "attempts": 1, "steps": 15, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v3", "want": "逃跑", "wall_s": 89.2, "accepted": true, "attempts": 1, "steps": 14, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v4", "want": "想被聽見", "wall_s": 173.3, "accepted": true, "attempts": 2, "steps": 37, "stalls": 0, "gates": ["✗✓✓✓", "✓✓✓✓"], "card_lines": 2, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v8", "want": "什麼都不做", "wall_s": 48.1, "accepted": true, "attempts": 1, "steps": 11, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 3, "error": null}

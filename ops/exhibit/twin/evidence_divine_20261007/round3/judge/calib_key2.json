@@ -1,0 +1,28 @@
+{
+ "calib": {
+  "項目01": {
+   "id": "c_bad_generic",
+   "kind": "control"
+  },
+  "項目02": {
+   "id": "c_mismatch",
+   "kind": "control"
+  },
+  "項目03": {
+   "id": "old_v2",
+   "kind": "single"
+  },
+  "項目04": {
+   "id": "old_v5",
+   "kind": "single"
+  },
+  "項目05": {
+   "id": "c_good",
+   "kind": "control"
+  },
+  "項目06": {
+   "id": "c_bad_route",
+   "kind": "control"
+  }
+ }
+}

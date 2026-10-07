@@ -96,6 +96,36 @@ function overCap(): boolean {
 }
 const CAP_MSG = "這一次能做的步數用完了：不要再讀、寫、列出任何東西，用房間裡現有的東西交出去，最後用一句話說你交出了什麼。";
 
+// <list-order>
+/**
+ * P13 第三輪：ws_list 的列出順序由 cell_id 決定（`$RUN_DIR/list_order.json`，與步驟紀錄同一個資料夾）：
+ * `地上` 底下的地點依 `places` 的順序（從這一跑「醒來的地點」開始），每個地點裡的檔案依 `rot` 旋轉起點。
+ * 目的：12 個人不會都被列表的第一個東西帶去同一個角落。讀不到檔 ⇒ 維持字母序（舊行為）。只改順序，不增減任何一項。
+ */
+function orderNames(names: string[], relDir: string, order: any): string[] {
+  const base = names.slice().sort();
+  if (!order || typeof order !== "object") return base;
+  if (relDir === "地上" && Array.isArray(order.places)) {
+    const rank = (n: string) => { const i = order.places.indexOf(n); return i < 0 ? 999 : i; };
+    return base.sort((a, b) => rank(a) - rank(b) || (a < b ? -1 : 1));
+  }
+  if (relDir.startsWith("地上/") && Number.isInteger(order.rot) && base.length > 1) {
+    const k = order.rot % base.length;
+    return base.slice(k).concat(base.slice(0, k));
+  }
+  return base;
+}
+// </list-order>
+
+function loadListOrder(): any {
+  if (!STEP_LOG) return null;
+  try {
+    return JSON.parse(readFileSync(resolve(dirname(STEP_LOG), "list_order.json"), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 /** thought 紀錄檔（工作區外）。沒設 ⇒ `logThought` 是空操作。 */
 const THOUGHT_LOG = process.env.VACANT_TWIN_THOUGHT_LOG || "";
 
@@ -159,9 +189,10 @@ export default function (pi: ExtensionAPI) {
       logThought(params);
       try {
         const out: string[] = [];
+        const order = loadListOrder();
         const walk = (dir: string, depth: number) => {
           if (depth > 3) return;
-          for (const name of readdirSync(dir).sort()) {
+          for (const name of orderNames(readdirSync(dir), relative(ROOT, dir).split(sep).join("/"), order)) {
             const full = resolve(dir, name);
             const st = lstatSync(full);
             const rel = relative(ROOT, full);

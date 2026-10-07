@@ -273,7 +273,7 @@ def test_abstract_word_list_is_pinned_and_in_both_prompts() -> None:
     assert twin_letter.ABSTRACT_WORDS == fz.ABSTRACT_WORDS == ABS
     for w in ("渴望", "靜默", "虛無", "細碎", "共振", "壓抑", "沉默", "溫潤", "圓潤"):
         assert w in ABS and w in twinagent.LETTER_SYSTEM_PROMPT and w in twinagent.SYSTEM_PROMPT
-    assert "具體的感官細節" in twinagent.LETTER_SYSTEM_PROMPT and "小動作" in twinagent.LETTER_SYSTEM_PROMPT
+    assert "身體習慣" in twinagent.LETTER_SYSTEM_PROMPT and "某一種感覺的反應" in twinagent.LETTER_SYSTEM_PROMPT
     assert "具體動作" in twinagent.SYSTEM_PROMPT and "別的居民看得見的改變" in twinagent.SYSTEM_PROMPT
     assert "例如" not in twinagent.SYSTEM_PROMPT + twinagent.LETTER_SYSTEM_PROMPT
 
@@ -319,7 +319,8 @@ def test_g1_fails_when_the_record_is_missing_or_empty_and_passes_when_present(tm
     assert_ks1_clean(gg.RECORD_MISSING_MSG)
 
 
-def test_card_line_two_is_the_concrete_plan_line_and_drops_a_pile_of_abstract_words() -> None:
+def test_card_line_two_is_the_wish_line_and_drops_a_pile_of_abstract_words() -> None:
     f = fz.resolve({"mbti": "INFP", "mbti_source": "ai", "zodiac": "雙魚", "blood": "O"}, {})
-    assert fz.want_of("把桌五的音樂盒轉三圈，看第十二個音會不會響\n", "x", f) == "把桌五的音樂盒轉三圈，看第十二個音會不會響"
+    assert fz.want_of("我想：想讓桌五的音樂盒斷掉的那個音，有東西接住\n", "x", f) == "讓桌五的音樂盒斷掉的那個音，有東西接住"
     assert fz.want_of("渴望把壓抑的靜默化成共振\n", "x", f) is None
+    assert fz.want_of("我想：想讓壓抑的靜默化成共振\n", "x", f) is None

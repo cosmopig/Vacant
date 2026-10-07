@@ -81,6 +81,23 @@ DIVINERS: tuple[dict[str, Any], ...] = (
 )
 
 
+R3_INPUTS = HERE.parent / "evidence_divine_20261007" / "round3" / "inputs12_parsed.json"
+
+
+def _load_r3() -> tuple[dict[str, Any], ...]:
+    """第三輪：12 份「像真 AI 回答」（原文＋雲端 parseCard 解析後的 card；見 evidence_divine_20261007/round3/parse_inputs.mjs）。"""
+    rows = json.loads(R3_INPUTS.read_text(encoding="utf-8"))
+    return tuple({"name": r["name"], "want_kind": (r["card"].get("want") or "")[:14], "card": r["card"], "text": r["text"],
+                  "voice": r["voice"]} for r in rows)
+
+
+def _active(set_name: str | None = None) -> tuple[dict[str, Any], ...]:
+    return _load_r3() if (set_name or _SET[0]) == "r3" else DIVINERS
+
+
+_SET: list[str] = ["r2"]
+
+
 def _text_of(card: dict[str, Any]) -> str:
     """觀眾貼回來的原文（新提示詞的固定格式；合成）。"""
     return ("（合成的特質，不是真人）\n"
@@ -91,13 +108,13 @@ def _text_of(card: dict[str, Any]) -> str:
 
 def _spec_list(seed: str) -> list[dict[str, Any]]:
     return [{"name": d["name"], "persona": "dv_" + d["name"], "sub_id": f"p13-{seed}-{d['name']}",
-             "note": d["want_kind"]} for d in DIVINERS]
+             "note": d["want_kind"]} for d in _active()]
 
 
 def _install_personas() -> None:
     from ops.exhibit.twin import w3b_samples
-    extra = [{"name": "dv_" + d["name"], "card": {**d["card"], "mbti_source": "ai"}, "text": _text_of(d["card"])}
-             for d in DIVINERS]
+    extra = [{"name": "dv_" + d["name"], "card": {**d["card"], "mbti_source": "ai"}, "text": d.get("text") or _text_of(d["card"])}
+             for d in _active()]
     w3b_samples.PERSONAS = tuple(w3b_samples.PERSONAS) + tuple(extra)
 
 
@@ -119,7 +136,11 @@ def _collect(rd: pathlib.Path, ws: pathlib.Path, rec: dict[str, Any]) -> None:
     rec["card"] = card
     rec["card_md"] = fz.card_md(card) if card.get("first_line") else ""
     rec["fortune_final"] = fz.load_final(rd)
-    rec["want_given"] = next(d["card"]["want"] for d in DIVINERS if d["name"] == rec["name"].replace("dv_", ""))
+    rec["want_given"] = next(d["card"]["want"] for d in _active() if d["name"] == rec["name"].replace("dv_", ""))
+    lo = rd / "list_order.json"
+    rec["variation"] = json.loads(lo.read_text(encoding="utf-8")) if lo.is_file() else None
+    lk = rd / "look_in.json"
+    rec["look"] = json.loads(lk.read_text(encoding="utf-8")) if lk.is_file() else None
     rec["stall_restarts"] = gg.stall_restarts(rd)
     sp = rd / gg.STEP_CAP_NAME
     rec["step_cap"] = json.loads(sp.read_text(encoding="utf-8")) if sp.is_file() else {"attempts": 0, "hit": 0}
@@ -133,6 +154,7 @@ def _collect(rd: pathlib.Path, ws: pathlib.Path, rec: dict[str, Any]) -> None:
 
 
 def cmd_run(a: argparse.Namespace) -> int:
+    _SET[0] = a.set
     from ops.exhibit.twin import gate_samples
     _install_personas()
     out = pathlib.Path(a.out_dir)
@@ -157,7 +179,7 @@ def cmd_run(a: argparse.Namespace) -> int:
 
 def cmd_report(a: argparse.Namespace) -> int:
     out = pathlib.Path(a.out_dir)
-    runs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(out.glob("v[0-9]*.json"))]
+    runs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(list(out.glob("v[0-9]*.json")) + list(out.glob("a[0-9]*.json")))]
     walls = [r["wall_s"] for r in runs if isinstance(r.get("wall_s"), (int, float))]
     agent = [x["agent_wall_s"] for r in runs for x in r.get("attempts", [])
              if isinstance(x.get("agent_wall_s"), (int, float))]
@@ -190,6 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--seed", default="a")
     r.add_argument("--only", default=None)
     r.add_argument("--redo", action="store_true")
+    r.add_argument("--set", default="r2", choices=["r2", "r3"], help="r2＝第二輪的 12 組合成人格；r3＝12 份像真 AI 回答")
     r.add_argument("--enclose", default="on", choices=["off", "auto", "on"])
     r.set_defaults(fn=cmd_run)
     p = sub.add_parser("report")

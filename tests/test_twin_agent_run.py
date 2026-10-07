@@ -417,7 +417,7 @@ def test_system_prompt_gives_no_examples() -> None:
     p = twinagent.SYSTEM_PROMPT
     assert _prompt_examples(p) == [], _prompt_examples(p)
     assert "不要寫程式" in p
-    assert "第一行：一句話，只寫你對世界裡某一樣具體東西做的一個具體動作" in p
+    assert "第一行：以「我想：」開頭" in p
     # 負控制：舊版那一步量得到例子（這把尺不是恆綠）
     assert _prompt_examples(_OLD_STEP1_WITH_EXAMPLES) != []
 
@@ -433,7 +433,7 @@ def test_system_prompt_divination_structure_and_no_meta_guidance() -> None:
     PLAN.md 三段；而且 prompt 不替分身指任何後設任務方向（身份／自我定義／分身本身）。"""
     p = twinagent.SYSTEM_PROMPT
     for must in ("沒有說出口", "渴望", "拉扯", "第二人稱", "為什麼是他",
-                 "第一行：一句話，只寫你對世界裡某一樣具體東西做的一個具體動作", "每一次動手"):
+                 "第一行：以「我想：」開頭", "每一次動手"):
         assert must in p, must
     assert [w for w in _META_TASK_WORDS if w in p] == [], [w for w in _META_TASK_WORDS if w in p]
     assert _prompt_examples(p) == []

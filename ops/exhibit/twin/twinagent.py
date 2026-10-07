@@ -175,8 +175,8 @@ LETTER_SYSTEM_PROMPT = (
     "家人、寵物、作品、地名、品牌、年月日或時刻，那個詞就不寫；"
     "要講，就改用條件、傾向和關係來講。"
     "不要逐字抄特質，要寫的是你從它讀出來的性情。三百字以內，用繁體中文。\n"
-    "信的本文一定要有兩樣東西：一個具體的感官細節（這個人對某一種聲音、觸感、氣味、光的反應，要具體到只有他會這樣），"
-    "和一個他習慣做的小動作（手、腳或視線，每次緊張或專心時都會做）。這兩樣用它們自己的樣子寫，不要用比喻帶過。\n"
+    "信的本文要寫出他的一個身體習慣，和他對某一種感覺的反應，兩樣都要具體到只有他會這樣，用它們自己的樣子寫，不要用比喻帶過。"
+    "要寫哪一種感覺、習慣落在身體的哪個部位，由信末另外附的條件決定；沒有附條件時，不要寫瞳孔，也不要寫指尖摩擦。\n"
     "下列這些抽象詞已經被用得太多，整封信（包含命盤）每個詞最多出現一次，改用具體的動作與東西來說：" + "、".join(ABSTRACT_WORDS) + "。\n\n"
     "信的本文寫完之後，另起一行寫「命盤」兩個字，接著照特質最後那三行（MBTI、星座、血型）寫，"
     "每一行一句、四十字以內、不寫檔名，格式固定：\n"
@@ -219,17 +219,21 @@ SYSTEM_PROMPT = (
     "步驟：\n"
     "1. 先讀信.md，再讀 WORLD.md，再用 ws_list 看地上有什麼，把讓你停下腳步的東西打開讀過。慢慢看，不趕。\n"
     "2. 用 ws_write 寫 PLAN.md，結構固定：\n"
-    "   第一行：一句話，只寫你對世界裡某一樣具體東西做的一個具體動作（把〔那樣東西〕怎麼樣）；這一行不寫心情、感受、渴望或道理，"
-    "也不寫「我決定」。\n"
-    "   「為什麼是他」：用第二人稱直接對信裡那個人說話，點出信裡的哪一句（或哪一個性情）讓你覺得他會想試這件事，"
+    "   第一行：以「我想：」開頭，後面接一句完整的願望，動詞放在最前面（想讓…、想看…會不會…、想弄清楚…、想聽見…、想等到…、想找到…這一類說法），"
+    "寫這個人盼望世界裡某樣東西最後變成什麼樣子、或有什麼事發生；句子的主角是那樣東西，不是你的手，所以不以「把」「用」「去」「在」開頭，"
+    "也不列步驟，不是名詞片語，不是心情或道理。"
+    "句子裡一定要提到世界裡真的有的一樣東西，名字照地上寫的；「我想：」之後的部分二十四個字以內，也不寫「我決定」。\n"
+    "   「為什麼是他」：用第二人稱直接對信裡那個人說話，點出信裡的哪一句（或哪一個性情）讓你覺得他會想要這個，"
     "並說你走進來看到什麼、哪一樣東西讓你停下來。\n"
-    "   「怎麼試」：編號列出你打算分幾步試；其中有一步你沒有把握。\n"
+    "   「怎麼試」：從這裡才寫動作；編號列出你打算分幾步試，每一步對世界裡某樣具體東西做一個具體動作（把〔那樣東西〕怎麼樣）；"
+    "其中有一步你沒有把握。「怎麼試」裡提到的每一樣地上的東西，都要是你這一跑已經打開讀過的；沒讀過的，先讀再寫進去。\n"
     "3. 照 PLAN.md 動手試。寫成兩個檔，直接放在你房間的最上層（和 PLAN.md 同一層，檔名不帶資料夾）：\n"
     "   「試的紀錄.md」（檔名就是這個；第一行寫這次試的標題，不要寫檔名）：一步一步寫你是怎麼試的；中間一定會有一次失敗或意外，寫出它是怎麼發生的、你怎麼接下去；"
     "最後一行以「感想：」開頭，用一句話寫你試完的感想，用你自己的口氣。\n"
     "   另一個檔：你試的過程做出來的那樣東西本身（檔名就用這樣東西的名字，副檔名用 .md 或 .txt；內容用這個世界的口吻，是你做出來的東西，不是報告）。\n"
     "   你試的結果，必須在世界裡留下一個別的居民看得見的改變：某個地方的某樣東西，變成了和以前不一樣的樣子或位置；"
-    "只有你自己心裡的改變不算。把這個改變寫在試的紀錄的最後一段（在「感想：」之前）。\n"
+    "只有你自己心裡的改變不算。把這個改變寫成試的紀錄倒數第二段（在「感想：」之前），那一段以「改變：」開頭，第一句話說清楚你做了什麼、"
+    "哪個地方的哪樣東西因此變成什麼樣子，四十字以內。\n"
     "   不要寫程式。每一步都真的做出東西來；做不到的事不要寫成已經做了，也不要用「模擬」「假裝」帶過。"
     "任何工具回報失敗，就看它說的原因，換個做法再來一次。\n"
     "4. 寫進紙裡的數字、地名、物件名，要是你這一跑讀過的東西裡真的有的。你自己做出來的東西，第一次提到時寫明「這是我自己做的」，"
@@ -246,6 +250,45 @@ SYSTEM_PROMPT = (
 )
 
 FIRST_MESSAGE = "上面是你的說明。先讀信.md，再讀 WORLD.md，再看地上，然後照步驟開始：先寫 PLAN.md，再去試你決定要試的事。"
+
+
+# ---------------------------------------------------------------------------
+# P13 第三輪：每一跑由 cell_id（＝public_twin_id）確定性決定的「變化」——避免 12 個人都被帶去同一個角落、寫成同一種信。
+# 只用 cell_id 雜湊，不用任何觀眾資料；argv 因此「每一跑自己的固定字串」，不再是全場逐字相同
+# （仍然沒有觀眾原文；同一個 cell_id 永遠得到同一組）。
+# ---------------------------------------------------------------------------
+LETTER_SENSES = ("聲音", "氣味", "溫度", "重量", "觸感")
+LETTER_BODY_PARTS = ("肩膀", "下巴", "腳踝", "手腕", "後頸", "舌尖", "膝蓋", "耳朵", "嘴角", "腳趾")
+WAKE_PLACES = ("投遞口", "捏土處", "長桌廣場", "石頭閘門", "帳本鏈", "草稿角", "紙卡地", "畫架與長椅")
+LIST_ORDER_NAME = "list_order.json"            # run-dir 裡；pi 擴充的 ws_list 讀它（與 twin_ws_tools.ts 同值）
+_VAR_SALT = "vacant.twin.variation/r3\n"
+
+
+def _vh(cell_id: str, key: str) -> int:
+    return int(hashlib.sha256((_VAR_SALT + str(cell_id) + "\n" + key).encode("utf-8")).hexdigest(), 16)
+
+
+def variation_for(cell_id: str) -> dict[str, Any]:
+    """cell_id → {sense, body, wake, places（ws_list 的地點順序，從醒來的地點開始繞一圈）, rot（地點內檔案的起點偏移）}。確定性。"""
+    wake = WAKE_PLACES[_vh(cell_id, "wake") % len(WAKE_PLACES)]
+    i = WAKE_PLACES.index(wake)
+    step = (1, 3, 5, 7)[_vh(cell_id, "step") % 4]          # 與 8 互質 ⇒ 繞完八個地點各一次；方向與間隔也隨 cell 變
+    places = [WAKE_PLACES[(i + k * step) % len(WAKE_PLACES)] for k in range(len(WAKE_PLACES))]
+    return {"sense": LETTER_SENSES[_vh(cell_id, "sense") % len(LETTER_SENSES)],
+            "body": LETTER_BODY_PARTS[_vh(cell_id, "body") % len(LETTER_BODY_PARTS)],
+            "wake": wake, "places": places, "rot": _vh(cell_id, "rot") % 97}
+
+
+def letter_system_for(cell_id: str) -> str:
+    """段 1 指令＋這一跑的條件（感覺的種類、習慣落在身體的哪個部位）。條件是描述，不是例句。"""
+    v = variation_for(cell_id)
+    return (LETTER_SYSTEM_PROMPT + "\n本封信的條件：他對「" + v["sense"] + "」這一種感覺有一個很具體的反應；他的習慣動作發生在"
+            "「" + v["body"] + "」。信裡不寫瞳孔、不寫指尖摩擦。")
+
+
+def first_message_for(cell_id: str) -> str:
+    """段 2 第一句＋這一跑醒來的地點。"""
+    return FIRST_MESSAGE + "你剛被捏好、睜開眼的時候，人站在「" + variation_for(cell_id)["wake"] + "」。"
 
 #: 世界設定（住在裡面的人讀的版本）。每一跑複製進工作區，和 TRAITS.md 同一層。
 WORLD_PATH = pathlib.Path(__file__).resolve().parent / "world" / "WORLD.md"
@@ -691,6 +734,8 @@ class Job:
     cfg: AgentConfig
     #: P10 命盤（`fortune.normalize(card)`：枚舉或 None）。run-dir 的 `fortune_in.json` 由它寫出。
     fortune: dict[str, Any] = field(default_factory=dict)
+    #: P13 第三輪：命盤卡第 1 行要用的外形與氣質（`fortune.normalize_look(card)`：枚舉＋氣質詞或空）。寫進 run-dir 的 `look_in.json`。
+    look: dict[str, Any] = field(default_factory=dict)
 
 
 class StepForwarder(threading.Thread):
@@ -977,6 +1022,7 @@ def run_one(job: Job) -> dict[str, Any]:
         # P10 命盤：觀眾給的三個枚舉（沒給＝None）寫進 run-dir（工作區外、撤回時整個刪）。
         (rd / fortunelib.IN_NAME).write_text(json.dumps(job.fortune or fortunelib.normalize(None),
                                                         ensure_ascii=False) + "\n", encoding="utf-8")
+        (rd / fortunelib.LOOK_NAME).write_text(json.dumps(job.look or {}, ensure_ascii=False) + "\n", encoding="utf-8")
         ground = twinground.lay(stage2, job.sub_id)
         res["ground"] = ground
         (rd / "ground_manifest.json").write_text(
@@ -984,9 +1030,13 @@ def run_one(job: Job) -> dict[str, Any]:
         # argv：<段 1 指令> <段 1 第一句> 之後接 launcher 慣用的 <run_dir> <段 2 指令> <段 2 第一句>
         # 閘門開著 ⇒ 第 5 個參數尾端接 `{VACANT_FEEDBACK}`：launcher 第 1 次換成空字串
         # （渲染後的 argv 與沒有閘門時逐位元相同），重改才接上可見驗收的失敗原文。
-        first_msg = FIRST_MESSAGE + (retrypolicy.FEEDBACK_PLACEHOLDER if job.cfg.gate else "")
+        # P13 第三輪：指令尾端接這一跑（cell_id）確定性的變化；ws_list 的地點順序寫進 run-dir 給 pi 擴充讀。
+        var = variation_for(tid)
+        (rd / LIST_ORDER_NAME).write_text(json.dumps(var, ensure_ascii=False) + "\n", encoding="utf-8")   # pi 擴充只讀 places／rot
+        res["variation"] = {k: var[k] for k in ("sense", "body", "wake", "places")}
+        first_msg = first_message_for(tid) + (retrypolicy.FEEDBACK_PLACEHOLDER if job.cfg.gate else "")
         argv = (list(job.cfg.argv_prefix)
-                + [LETTER_SYSTEM_PROMPT, LETTER_FIRST_MESSAGE, str(rd), SYSTEM_PROMPT, first_msg])
+                + [letter_system_for(tid), LETTER_FIRST_MESSAGE, str(rd), SYSTEM_PROMPT, first_msg])
         suite_dir = None
         if job.cfg.gate:
             suite_dir = gatelib.write_suite(rd)           # run-dir/tests_visible/（工作區外）
@@ -1477,7 +1527,7 @@ def job_for(sub_id: str, card: Any, card_text: Any, cfg: AgentConfig) -> Job | N
     if card in (None, {}, "") and not card_text:
         return None
     return Job(sub_id=sub_id, traits=render_traits(card, card_text), cfg=cfg,
-               fortune=fortunelib.normalize(card))
+               fortune=fortunelib.normalize(card), look=fortunelib.normalize_look(card))
 
 
 def describe(cfg: AgentConfig) -> dict[str, Any]:

@@ -1,0 +1,554 @@
+{
+ "rater1": {
+  "項目01": {
+   "id": "c_mismatch",
+   "kind": "control"
+  },
+  "項目02": {
+   "id": "single_a8",
+   "kind": "single"
+  },
+  "項目03": {
+   "id": "pair_v11",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目04": {
+   "id": "pair_v9",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目05": {
+   "id": "single_a4",
+   "kind": "single"
+  },
+  "項目06": {
+   "id": "pair_v5",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目07": {
+   "id": "single_a5",
+   "kind": "single"
+  },
+  "項目08": {
+   "id": "single_a11",
+   "kind": "single"
+  },
+  "項目09": {
+   "id": "pair_v4",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目10": {
+   "id": "single_a3",
+   "kind": "single"
+  },
+  "項目11": {
+   "id": "pair_v8",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目12": {
+   "id": "single_a10",
+   "kind": "single"
+  },
+  "項目13": {
+   "id": "single_a7",
+   "kind": "single"
+  },
+  "項目14": {
+   "id": "pair_v1",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目15": {
+   "id": "pair_v10",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目16": {
+   "id": "single_a12",
+   "kind": "single"
+  },
+  "項目17": {
+   "id": "single_a9",
+   "kind": "single"
+  },
+  "項目18": {
+   "id": "pair_v12",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目19": {
+   "id": "single_a2",
+   "kind": "single"
+  },
+  "項目20": {
+   "id": "pair_v6",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目21": {
+   "id": "single_a1",
+   "kind": "single"
+  },
+  "項目22": {
+   "id": "single_a6",
+   "kind": "single"
+  },
+  "項目23": {
+   "id": "pair_v3",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目24": {
+   "id": "pair_v7",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目25": {
+   "id": "c_good",
+   "kind": "control"
+  },
+  "項目26": {
+   "id": "c_bad_route",
+   "kind": "control"
+  },
+  "項目27": {
+   "id": "pair_v2",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目28": {
+   "id": "c_bad_generic",
+   "kind": "control"
+  }
+ },
+ "rater2": {
+  "項目01": {
+   "id": "pair_v10",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目02": {
+   "id": "c_good",
+   "kind": "control"
+  },
+  "項目03": {
+   "id": "pair_v6",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目04": {
+   "id": "c_bad_route",
+   "kind": "control"
+  },
+  "項目05": {
+   "id": "single_a9",
+   "kind": "single"
+  },
+  "項目06": {
+   "id": "c_mismatch",
+   "kind": "control"
+  },
+  "項目07": {
+   "id": "pair_v11",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目08": {
+   "id": "single_a6",
+   "kind": "single"
+  },
+  "項目09": {
+   "id": "single_a10",
+   "kind": "single"
+  },
+  "項目10": {
+   "id": "pair_v12",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目11": {
+   "id": "pair_v7",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目12": {
+   "id": "pair_v1",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目13": {
+   "id": "single_a1",
+   "kind": "single"
+  },
+  "項目14": {
+   "id": "single_a3",
+   "kind": "single"
+  },
+  "項目15": {
+   "id": "pair_v4",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目16": {
+   "id": "pair_v2",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目17": {
+   "id": "c_bad_generic",
+   "kind": "control"
+  },
+  "項目18": {
+   "id": "pair_v3",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目19": {
+   "id": "single_a7",
+   "kind": "single"
+  },
+  "項目20": {
+   "id": "single_a11",
+   "kind": "single"
+  },
+  "項目21": {
+   "id": "single_a4",
+   "kind": "single"
+  },
+  "項目22": {
+   "id": "pair_v9",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目23": {
+   "id": "single_a12",
+   "kind": "single"
+  },
+  "項目24": {
+   "id": "pair_v5",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目25": {
+   "id": "pair_v8",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目26": {
+   "id": "single_a2",
+   "kind": "single"
+  },
+  "項目27": {
+   "id": "single_a8",
+   "kind": "single"
+  },
+  "項目28": {
+   "id": "single_a5",
+   "kind": "single"
+  }
+ },
+ "rater3": {
+  "項目01": {
+   "id": "c_good",
+   "kind": "control"
+  },
+  "項目02": {
+   "id": "pair_v4",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目03": {
+   "id": "pair_v7",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目04": {
+   "id": "single_a7",
+   "kind": "single"
+  },
+  "項目05": {
+   "id": "pair_v10",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目06": {
+   "id": "single_a5",
+   "kind": "single"
+  },
+  "項目07": {
+   "id": "c_bad_generic",
+   "kind": "control"
+  },
+  "項目08": {
+   "id": "single_a9",
+   "kind": "single"
+  },
+  "項目09": {
+   "id": "pair_v6",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目10": {
+   "id": "pair_v5",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目11": {
+   "id": "pair_v2",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目12": {
+   "id": "single_a2",
+   "kind": "single"
+  },
+  "項目13": {
+   "id": "single_a8",
+   "kind": "single"
+  },
+  "項目14": {
+   "id": "pair_v9",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目15": {
+   "id": "c_bad_route",
+   "kind": "control"
+  },
+  "項目16": {
+   "id": "pair_v3",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目17": {
+   "id": "pair_v11",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目18": {
+   "id": "pair_v1",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目19": {
+   "id": "single_a1",
+   "kind": "single"
+  },
+  "項目20": {
+   "id": "single_a10",
+   "kind": "single"
+  },
+  "項目21": {
+   "id": "c_mismatch",
+   "kind": "control"
+  },
+  "項目22": {
+   "id": "single_a11",
+   "kind": "single"
+  },
+  "項目23": {
+   "id": "single_a3",
+   "kind": "single"
+  },
+  "項目24": {
+   "id": "single_a12",
+   "kind": "single"
+  },
+  "項目25": {
+   "id": "pair_v8",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目26": {
+   "id": "pair_v12",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目27": {
+   "id": "single_a6",
+   "kind": "single"
+  },
+  "項目28": {
+   "id": "single_a4",
+   "kind": "single"
+  }
+ },
+ "rater4": {
+  "項目01": {
+   "id": "pair_v8",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目02": {
+   "id": "single_a3",
+   "kind": "single"
+  },
+  "項目03": {
+   "id": "single_a7",
+   "kind": "single"
+  },
+  "項目04": {
+   "id": "single_a4",
+   "kind": "single"
+  },
+  "項目05": {
+   "id": "pair_v12",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目06": {
+   "id": "c_bad_generic",
+   "kind": "control"
+  },
+  "項目07": {
+   "id": "single_a1",
+   "kind": "single"
+  },
+  "項目08": {
+   "id": "pair_v3",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目09": {
+   "id": "pair_v1",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目10": {
+   "id": "c_mismatch",
+   "kind": "control"
+  },
+  "項目11": {
+   "id": "pair_v9",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目12": {
+   "id": "single_a9",
+   "kind": "single"
+  },
+  "項目13": {
+   "id": "pair_v6",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目14": {
+   "id": "pair_v10",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目15": {
+   "id": "c_good",
+   "kind": "control"
+  },
+  "項目16": {
+   "id": "pair_v5",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目17": {
+   "id": "pair_v2",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目18": {
+   "id": "pair_v11",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目19": {
+   "id": "c_bad_route",
+   "kind": "control"
+  },
+  "項目20": {
+   "id": "pair_v7",
+   "kind": "pair",
+   "left": "old",
+   "right": "new"
+  },
+  "項目21": {
+   "id": "single_a5",
+   "kind": "single"
+  },
+  "項目22": {
+   "id": "single_a10",
+   "kind": "single"
+  },
+  "項目23": {
+   "id": "single_a11",
+   "kind": "single"
+  },
+  "項目24": {
+   "id": "single_a6",
+   "kind": "single"
+  },
+  "項目25": {
+   "id": "single_a8",
+   "kind": "single"
+  },
+  "項目26": {
+   "id": "single_a12",
+   "kind": "single"
+  },
+  "項目27": {
+   "id": "pair_v4",
+   "kind": "pair",
+   "left": "new",
+   "right": "old"
+  },
+  "項目28": {
+   "id": "single_a2",
+   "kind": "single"
+  }
+ }
+}

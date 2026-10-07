@@ -1,0 +1,56 @@
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v1", "want": "唱歌", "wall_s": 350.8, "accepted": true, "attempts": 1, "steps": 12, "stalls": 1, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+----------------------------------------
+Exception occurred during processing of request from 
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/var/tmp/vacant_p13_r3/repo/vacant_network/vrun/wireproxy.py", line 348, in handle_one_request
+    super().handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/var/tmp/vacant_p13_r3/repo/vacant_network/vrun/wireproxy.py", line 354, in <lambda>
+    (lambda method: lambda h: proxy._handle(h, method))(m))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/tmp/vacant_p13_r3/repo/vacant_network/vrun/wireproxy.py", line 431, in _handle
+    self._handle_inner(h, method)
+  File "/var/tmp/vacant_p13_r3/repo/vacant_network/vrun/wireproxy.py", line 595, in _handle_inner
+    self._finish(rec, t0, wire, req_sha)
+  File "/var/tmp/vacant_p13_r3/repo/vacant_network/vrun/wireproxy.py", line 605, in _finish
+    self._index(rec)
+  File "/var/tmp/vacant_p13_r3/repo/vacant_network/vrun/wireproxy.py", line 392, in _index
+    with self.index_path.open("a", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/twin_gate_7drxq331/twinstore.agentruns/doors/f5ff4d333dd48d389e9c2f1d8519ace2/wire/index.jsonl'
+----------------------------------------
+{"name": "v2", "want": "種東西", "wall_s": 347.2, "accepted": true, "attempts": 2, "steps": 24, "stalls": 0, "gates": ["✗✓✓✓", "✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v3", "want": "逃跑", "wall_s": 365.6, "accepted": false, "attempts": 2, "steps": 38, "stalls": 0, "gates": ["✗✓✓✓", "✗✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v4", "want": "想被聽見", "wall_s": 213.8, "accepted": true, "attempts": 2, "steps": 23, "stalls": 0, "gates": ["✗✓✓✓", "✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v5", "want": "蓋個小房子", "wall_s": 51.1, "accepted": true, "attempts": 1, "steps": 11, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v6", "want": "修好壞掉的東西", "wall_s": 32.9, "accepted": true, "attempts": 1, "steps": 9, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 3, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v7", "want": "找人說話", "wall_s": 48.3, "accepted": true, "attempts": 1, "steps": 10, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v8", "want": "什麼都不做", "wall_s": 70.4, "accepted": true, "attempts": 2, "steps": 21, "stalls": 0, "gates": ["✗✓✓✓", "✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v9", "want": "想吃一頓很慢的飯", "wall_s": 42.6, "accepted": true, "attempts": 1, "steps": 9, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v10", "want": "把舊東西還給某個人", "wall_s": 34.5, "accepted": true, "attempts": 1, "steps": 11, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v11", "want": "想大聲罵人但不會", "wall_s": 34.1, "accepted": true, "attempts": 1, "steps": 9, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "v12", "want": "畫一張沒人看過的圖", "wall_s": 38.1, "accepted": true, "attempts": 1, "steps": 10, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 3, "error": null}

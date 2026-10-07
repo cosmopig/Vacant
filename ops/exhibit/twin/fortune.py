@@ -37,6 +37,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 import re
@@ -607,11 +608,17 @@ def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, An
 
 RECORD_FILE = "試的紀錄.md"                      # 分身交的「試的紀錄」（檔名固定，才讀得到最後那句感想）
 VERDICT_PREFIX = "你的數位分身其實是："
-WANT_PREFIX = "它心裡一直想試的是："
+WANT_PREFIX = "它心裡想："
 TRIED_PREFIX = "它試了："
 SAID_PREFIX = "試完它說："
-MAX_WANT_CARD = 40
+MAX_WANT_CARD = 30          # 指令要求「我想：」之後 24 字內；卡上容忍到 30（再長就在句讀處截，截不出像樣的就不上卡）
+MAX_TRIED_CARD = 40         # 卡第 3 行（做了什麼＋世界留下的改變）的句子上限
 MAX_SAID_CARD = 40
+LOOK_NAME = "look_in.json"  # run-dir：外形三項＋氣質詞（觀眾 AI 的判決；撤回時跟 run-dir 一起刪）
+SHAPES = ("圓潤", "修長", "厚實", "小巧", "粗獷", "方正")
+TEXTURES = ("光滑", "指紋", "斑駁", "絨面")
+COLORS = ("暖土", "赭紅", "奶油", "灰藍", "苔綠", "沙金")
+MAX_VIBE_WORD = 6
 _SAID_KEY = re.compile(r"^[\s#>*_\-]*(?:感想|試完(?:我|它)?說)[\s*_]*[：:]\s*(.+)$")
 _PLAN_LABEL = re.compile(r"^(?:第一行|我決定|決定|我要試|它要試|想試)\s*[：:]\s*")
 _FILENAME_LIKE = re.compile(r"\.(md|txt)\b|[A-Za-z0-9_]+\.[a-z]{2,4}\b|/")
@@ -645,9 +652,32 @@ def _card_sentence(raw: str, traits: str, f: dict[str, Any], max_len: int) -> st
     return s.rstrip("。.！!")
 
 
-def want_of(plan_text: str, traits: str, f: dict[str, Any]) -> str | None:
-    """卡第 2 行的句子：PLAN.md 第一行（分身說它要試什麼的世界版）。過 `_card_sentence`。"""
-    return _card_sentence(_first_line_of(plan_text), traits, f, MAX_WANT_CARD)
+_WISH_LABEL = re.compile(r"^[\s#>*\-_]*(?:\d+[.、]\s*)?\**我想\**\s*[：:]\s*(.+)$")
+_CHANGE_LABEL = re.compile(r"^[\s#>*\-_]*\**(?:改變|世界(?:的)?改變|留下的改變|這個改變是)\**\s*[：:]\s*(.*)$")
+_SENT_END = "。！？!?"
+#: 願望句的開頭（去掉「想／想要」之後）：動詞在前。不在這張表裡 ⇒ 多半是名詞片語（「一張填滿了圓圈的紙卡」），不上卡。
+_WISH_VERBS = "讓|看|弄清楚|搞清楚|知道|聽|找|等|確認|證明|試|摸|見|記|被|留|吃|睡|送|還|說|唱|畫|跳|學|收|守|陪|求|聞|有人|有東西|能|可以"
+_WISH_START = re.compile(rf"^(?:{_WISH_VERBS})")
+_ACTION_START = re.compile(r"^(?:把|用|去|在|拿|走|先|從|到|將|替|幫|再|跟|對|往)")
+
+
+def wish_of(plan_text: str, traits: str, f: dict[str, Any]) -> str | None:
+    """卡第 2 行：PLAN.md 第一個「我想：」開頭的行，取冒號之後的願望句（想要，不是動作）。
+    沒有「我想：」＝沒有這一行（寧缺；不退回拿動作句充數）。句首重複的「想／想要」拿掉；> `MAX_WANT_CARD` 字在句讀處截。"""
+    for ln in str(plan_text or "").splitlines()[:12]:
+        m = _WISH_LABEL.match(ln.strip())
+        if not m:
+            continue
+        w = m.group(1).strip().strip("「」『』\"'*").rstrip("。.！!")        # 句尾標點不算進字數（真跑 a1：30 字的願望被「。」擠成 31 字而丟掉）
+        w = re.sub(rf"^想要?(?=(?:{_WISH_VERBS}))", "", _clean_paths(w)).lstrip("：: ，,")
+        if _ACTION_START.match(w) or not _WISH_START.match(w):   # 以動作開頭＝計畫句；不是「動詞在前的願望」＝名詞片語 ⇒ 寧缺
+            return None
+        w = _fit(w, MAX_WANT_CARD, wish=True) if w else None  # 太長就在子句處截，截不出完整的一句就不上卡（不硬切半個詞）
+        return _card_sentence(w, traits, f, MAX_WANT_CARD) if w else None
+    return None
+
+
+want_of = wish_of          # 舊名字（第二輪的呼叫端）
 
 
 def said_of(record_text: str, traits: str, f: dict[str, Any]) -> str | None:
@@ -657,46 +687,207 @@ def said_of(record_text: str, traits: str, f: dict[str, Any]) -> str | None:
         m = _SAID_KEY.match(ln)
         if m:
             hit = m.group(1)
-    return _card_sentence(hit, traits, f, MAX_SAID_CARD) if hit else None
+    return _card_sentence(_SELF_MADE.sub("", hit), traits, f, MAX_SAID_CARD) if hit else None
 
 
-def tried_of(places: list[str], last_place: str | None, title: str, retries: int) -> str | None:
-    """卡第 3 行：「它試了：先去了A，再到B，在C做出《標題》」。每個字都來自步驟紀錄（地點＝成功讀取／列出；退回＝嘗試數−1）。"""
-    if not places:
+def _first_sentence(text: str) -> str:
+    t = " ".join(str(text or "").split())
+    for i, ch in enumerate(t):
+        if ch in _SENT_END:
+            return t[:i]
+    return t
+
+
+_QUOTED_PATH = re.compile(r"「([^」]*(?:/|\.txt|\.md)[^」]*)」")
+_BARE_SLASH = re.compile(r"[一-鿿A-Za-z0-9_]+(?:/[一-鿿A-Za-z0-9_ ]+)+(?:\.(?:txt|md))?")
+_EXT = re.compile(r"\.(?:txt|md)\b")
+_SEQ_PREFIX = re.compile(r"桌[一二三四五六七八九十0-9]+_(?=[一-鿿])")
+
+
+def _obj_name(path: str) -> str:
+    """`地上/長桌廣場/桌五_音樂盒.txt` → `音樂盒`（資料夾、副檔名、前綴的「桌五_」都拿掉）。"""
+    last = next((x for x in reversed(path.split("/")) if x.strip()), "")
+    last = re.sub(r"\.(?:txt|md)$", "", last)
+    return last.split("_")[-1] if "_" in last else last
+
+
+def _clean_paths(t: str) -> str:
+    """模型愛把地上的檔案路徑或檔名放進句子：卡上只留物件的名字（不帶資料夾、副檔名）。"""
+    t = _QUOTED_PATH.sub(lambda m: "「" + _obj_name(m.group(1)) + "」", t)
+    t = _BARE_SLASH.sub(lambda m: _obj_name(m.group(0)), t)
+    return _SEQ_PREFIX.sub("", _EXT.sub("", t))               # 「桌五_音樂盒.txt」→「音樂盒」
+
+
+_HANGING_END = tuple("的之和與及或但而並把用在被讓對從向往跟像如")
+_LABEL_LEAD = re.compile(r"^\s*(?:試了什麼|怎麼試的?|最後怎麼收場|中間出了什麼事|改變|這個改變是)\s*[：:]\s*")
+_SELF_MADE = re.compile(r"[，,]?\s*這是我(?:自己)?做的[，,。]?")
+
+
+#: 一句像樣的「做了什麼／變成什麼」會有的動詞字（確定性字面檢查，不是語意判斷）；沒有任何一個 ⇒ 多半是名詞片語或被截斷的殘句。
+_PRED = set("放變成多少填蓋掛立斷接亮響擺貼留拆摺捏種推拉裂補綁埋圍搭刻畫寫挖移擠壓抱捲揉串排插抬翻點釘縫裝敲吹拿帶遞送做建修"
+            "能會有出開活動完到起回醒說唱長發飛漂流轉停走住著了斜靠繫移載穿折疊鋪蹲坐站躺擁握撥拍對合連齊現呈入進滿空找見聽")
+_TAIL_BAD = tuple("的之和與及或但而並把用在被讓對從向往跟像如地")
+_TAIL_PHRASES = ("情況下", "狀態下", "之下", "的時候", "之際", "之前", "之後", "以前", "以後", "為止", "而且", "然後", "但是",
+                 "所以", "因為", "如果", "假如", "雖然", "即使", "只要", "一邊", "同時")      # 掛在尾巴的從屬連接：這一段還沒說完
+_PREDICATIVE_DE = re.compile(r"(?:是|很|都|變得|變成|還是).{0,8}的$")      # 「現在長椅中間是空的」的「的」是句尾，不是修飾語
+
+
+def _complete(c: str, wish: bool = False) -> bool:
+    """這一段像不像完整的一句：結尾不掛著「的／和／把／地…」，而且有動詞字（願望句的開頭動詞不算）。"""
+    c = c.rstrip("，、；,; ")
+    if not c or (c.endswith(_TAIL_BAD) and not (c.endswith("的") and _PREDICATIVE_DE.search(c))) or c.endswith(_TAIL_PHRASES):
+        return False
+    if wish and not c.startswith(("讓", "有人", "有東西", "能", "可以")):     # 「聽見…」「看…會不會」：開頭的動詞自己就是謂語
+        return True
+    body = re.sub("|".join(PLACES) + "|「[^」]*」|角落|沒有", "", c[1:] if wish else c)     # 地名與物件名裡的字（長桌廣場的「長」…）、「沒有」不算動詞
+    return any(ch in _PRED for ch in body)
+
+
+def _fit(sent: str, limit: int, wish: bool = False) -> str | None:
+    """挑出 ≤ limit 字、像完整一句的片段：整句夠短又完整就用整句；太長就從開頭起取最長的「整段子句」（在，；處）且那一段是完整的；
+    不行就取「現在…」那一半；都不行 ⇒ None（寧缺，不硬切半個詞）。不在「、」截。"""
+    sent = sent.strip()
+    if len(sent) <= limit:
+        return sent.rstrip("，、；,; ") if _complete(sent, wish) else None
+    i = sent.rfind("現在")                       # 長句裡「現在…」那一半就是改變本身，優先
+    if i > 0 and len(sent) - i <= limit and _complete(sent[i:], wish):
+        return sent[i:].rstrip("，、；,; ")
+    clauses = re.findall(r"[^，；,;]+[，；,;]?", sent)
+    best = None
+    for k in range(1, len(clauses) + 1):
+        cand = "".join(clauses[:k]).rstrip("，、；,; ")
+        if len(cand) > limit:
+            break
+        if len(cand) >= 8 and _complete(cand, wish):
+            best = cand
+    return best
+
+
+def changed_of(record_text: str) -> str | None:
+    """「試的紀錄」裡世界留下的改變（原文一個字不改，只選句）：以「改變：」開頭的那一段的第一句；沒有就取「感想：」前面最近一段的第一句。
+    都沒有＝None。"""
+    lines = str(record_text or "").splitlines()
+    for i, ln in enumerate(lines):
+        m = _CHANGE_LABEL.match(ln.strip())
+        if m:
+            body = m.group(1).strip()
+            if not body:                                   # 標籤單獨一行，內容在下一行
+                body = next((x.strip() for x in lines[i + 1:] if x.strip()), "")
+            return _fit(_first_sentence(_clean_paths(body)), MAX_TRIED_CARD) or None
+    said = next((i for i in range(len(lines) - 1, -1, -1) if _SAID_KEY.match(lines[i])), None)
+    if said is None:
         return None
-    r = route_of(places, last_place, title, retries, verb="做出",
-                 limit=MAX_CARD_LINE_CHARS - len(TRIED_PREFIX) + 1)
-    return TRIED_PREFIX + (r[1:] if r.startswith("它") else r)
+    for ln in reversed(lines[:said]):
+        t = ln.strip()
+        if t and "這是我自己做的" not in t[:8] and not t.startswith("#"):
+            return _fit(_first_sentence(_clean_paths(t)), MAX_TRIED_CARD) or None
+    return None
+
+
+def title_line_of(record_text: str) -> str | None:
+    """「試的紀錄」第一個有內容的行（指令要求它是這次試的標題）。"""
+    for ln in str(record_text or "").splitlines():
+        t = re.sub(r"^[\s#>*\-_]+", "", ln).strip().strip("「」『』\"'*")
+        if t:
+            if t in _GENERIC_STEMS or t.startswith("試的紀錄"):      # 檔案自己的標題字樣不是這次試的名字（指令要求第一行是標題 ⇒ 沒有就是沒有）
+                return None
+            t = _LABEL_LEAD.sub("", t).rstrip("。.")
+            return t if 0 < len(t) <= MAX_TRIED_CARD else None
+    return None
+
+
+def tried_of(record_text: str, traits: str, f: dict[str, Any]) -> str | None:
+    """卡第 3 行：「它試了：<做了什麼＋世界留下的改變>」——取「試的紀錄」的改變那一句（沒有就用標題行），過卡上一句話的共同防呆。
+    **不再放路線**（先去了哪、再到哪；路線留在檔案庫）。"""
+    ch = changed_of(record_text)
+    raw = _SELF_MADE.sub("", _LABEL_LEAD.sub("", ch)) if ch else None      # 「這是我自己做的」是紙上的標記句，不是卡上的內容
+    raw = raw or title_line_of(record_text)
+    s = _card_sentence(raw, traits, f, MAX_TRIED_CARD) if raw else None
+    if not s:
+        return None
+    s = s.replace("我們", "它們").replace("我", "它")         # 卡是第三人稱：「我」→「它」
+    if s.startswith("現在"):                                  # 只剩「現在…」那一半（改變）：接在「它試了，」後面才通
+        return "它試了，" + s
+    return TRIED_PREFIX + (s[1:] if s.startswith("它") and len(s) > 6 else s)       # 「它試了：它…」→「它試了：…」
+
+
+# --- 第 1 行：AI 的判決（形狀質感色系居民＋氣質詞＋命盤代號），程式組句、不經模型 ---
+
+def normalize_look(card: Any) -> dict[str, Any]:
+    """卡 → `{shape, texture, color, vibe:[詞…]}`（枚舉不合法 ＝ None；氣質切成詞，過現實詞／時段詞，每詞 ≤ `MAX_VIBE_WORD` 字，最多 3 個）。"""
+    c = card if isinstance(card, dict) else {}
+    out: dict[str, Any] = {"shape": _enum(c.get("shape"), SHAPES), "texture": _enum(c.get("texture"), TEXTURES),
+                           "color": _enum(c.get("color"), COLORS), "vibe": []}
+    words: list[str] = []
+    for w in re.split(r"[、，,；;/／\s和與及]+", str(c.get("vibe") or "")):
+        w = w.strip("。.！!「」『』\"'*·")
+        if 1 <= len(w) <= MAX_VIBE_WORD and re.search(r"[一-鿿]", w) and not mentions_reality(w) and not any(t in w for t in TIME_WORDS) \
+                and w not in words:
+            words.append(w)
+    out["vibe"] = words[:3]
+    return out
+
+
+def code_of(f: dict[str, Any]) -> str:
+    """`ENFP · 雙子 · AB`（括號裡那一串；沒給的就不寫）。"""
+    return " · ".join(x for x in (f.get("mbti"), f.get("zodiac"), f.get("blood")) if x)
+
+
+def verdict_of(f: dict[str, Any], look: dict[str, Any] | None, seed: str = "") -> str:
+    """卡第 1 行：`你的數位分身其實是：<形狀><質感>的<色系>居民，<氣質三詞擇二>（ENFP · 雙子 · AB）`。
+    全部來自觀眾 AI 的判決欄位；氣質三詞擇二由 `seed`（run-dir 名）確定性決定；外形與氣質都沒有時退回舊寫法（只有命盤）。
+    總長 ≤ `MAX_CARD_LINE_CHARS`（超過就從氣質詞開始減）。"""
+    lk = look if isinstance(look, dict) else {}
+    body = "".join(x for x in (lk.get("shape"), lk.get("texture")) if x)
+    color = lk.get("color")
+    if color:
+        color = color if color.endswith("色") else color + "色"
+    noun = (f"{body}的" if body else "") + (color or "") + "居民" if (body or color) else ""
+    words = [w for w in (lk.get("vibe") or []) if isinstance(w, str)][:3]
+    if len(words) == 3:                                      # 三詞擇二：拿掉哪一個由 seed 決定
+        drop = int(hashlib.sha256(("vibe\n" + seed).encode("utf-8")).hexdigest(), 16) % 3
+        words = [w for i, w in enumerate(words) if i != drop]
+    code = code_of(f)
+    if not noun and not words:
+        return VERDICT_PREFIX + first_line(f)
+    while True:
+        head = noun + ("，" if noun and words else "") + "、".join(words)
+        line = VERDICT_PREFIX + head + (f"（{code}）" if code else "")
+        if len(line) <= MAX_CARD_LINE_CHARS or not words:
+            return line
+        words = words[:-1]
 
 
 def compose_card_v3(f: dict[str, Any], *, plan_text: str, record_text: str, rows: list[dict[str, Any]],
-                    files: dict[str, str], retries: int, traits: str = "", letter_text: str = "") -> dict[str, Any]:
+                    files: dict[str, str], retries: int, traits: str = "", letter_text: str = "",
+                    look: dict[str, Any] | None = None, seed: str = "") -> dict[str, Any]:
     """命盤卡第三版（P13，確定性、不經模型）。
-    第 1 行 `verdict`：AI 的判決（枚舉）；第 2 行 `want_line`：來自分身的 PLAN；第 3 行 `tried_line`：由步驟紀錄生成；
+    第 1 行 `verdict`：AI 的判決（外形＋氣質詞＋命盤，`verdict_of`）；第 2 行 `want_line`：PLAN「我想：」之後的願望句；
+    第 3 行 `tried_line`：「試的紀錄」裡的改變那一句（做了什麼＋世界留下什麼，原文選句、不是路線）；
     第 4 行 `said_line`：分身在「試的紀錄」最後寫的感想（過濾後）。2、3、4 任何一行找不到根據／過不了防呆就**沒有那一行**。
-    `lines`＝存在的 2、3、4 行（≤3，進檔案庫與手機）；`tv_lines`＝電視字幕兩行（2、3）。"""
+    `lines`＝第 1 行＋存在的 2、3、4 行（≤4，進檔案庫與手機）；`tv_lines`＝電視字幕兩行（2、3）。"""
     res: dict[str, Any] = {"first_line": first_line(f), "verdict": "", "lines": [], "tv_lines": [], "dropped": [],
                            "present": False, "card_file": False, "want_line": None, "tried_line": None,
                            "said_line": None}
     if not has_any(f):
         return res
-    res["verdict"] = VERDICT_PREFIX + res["first_line"]
+    res["verdict"] = verdict_of(f, look, seed)
     others = {n: tx for n, tx in files.items() if n != RECORD_FILE}
     title = title_of(others, f, traits, letter_text)
     res["title"] = title
-    places = visited_places(rows)
-    last = last_place_before_delivery(rows)
-    res["places"] = places
+    res["places"] = visited_places(rows)             # 路線留在檔案庫（不上卡）
     w = want_of(plan_text, traits, f)
     s = said_of(record_text, traits, f)
     # 「試的紀錄」缺或空 ＝ 沒做完：第 3、4 行都不出（第 2 行是 PLAN 的，照出）
     has_record = len(record_text.strip()) >= 30
-    td = tried_of(places, last, title or NO_NAME_TITLE, retries) if has_record else None
+    td = tried_of(record_text, traits, f) if has_record else None
     res["want_line"] = (WANT_PREFIX + w) if w else None
     res["tried_line"] = td
     res["said_line"] = (SAID_PREFIX + s) if s else None
     if plan_text.strip() and not w:
-        res["dropped"].append({"key": "want", "why": "filtered"})
+        res["dropped"].append({"key": "want", "why": "no_wish_label_or_filtered"})
+    if has_record and not td:
+        res["dropped"].append({"key": "tried", "why": "missing_or_filtered"})
     if record_text.strip() and not s:
         res["dropped"].append({"key": "said", "why": "missing_or_filtered"})
     # 雲端命盤卡上限 4 行、第一行＝判決（線 C 約定）：lines[0] 是 verdict，其後是存在的 2、3、4 行
@@ -745,9 +936,14 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
                 plan = tx
             else:
                 record = tx
+    try:
+        look = json.loads((rd / LOOK_NAME).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        look = {}
     res = compose_card_v3(f, plan_text=plan, record_text=record, rows=read_steps(rd),
                           files=_top_files(pathlib.Path(ws)) if ws else {},
-                          retries=attempts_retries(rd), traits=traits, letter_text=letter)
+                          retries=attempts_retries(rd), traits=traits, letter_text=letter,
+                          look=look if isinstance(look, dict) else {}, seed=rd.name)
     if has_any(f):
         try:
             (rd / CARD_JSON_NAME).write_text(json.dumps(res, ensure_ascii=False) + "\n", encoding="utf-8")

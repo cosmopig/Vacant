@@ -1,0 +1,2 @@
+{"endpoint_resolved": {"url": "http://100.119.113.56:5500/v1", "how": "explicit", "label": "呼叫端指定", "needs_network": null, "reachable": null, "tried": []}}
+{"name": "a9", "want": "在很久很久以後，還有人用只有", "wall_s": 141.0, "accepted": true, "attempts": 1, "steps": 12, "stalls": 0, "gates": ["✓✓✓✓"], "card_lines": 4, "error": null}

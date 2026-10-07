@@ -425,8 +425,9 @@ def _card(tmp, rows, letter=LETTER_FINAL, f=None, files=None, traits="", attempt
     return fz.build_card(rd, ws, f or fz.resolve(FULL, {}), traits), rd, ws
 
 
-PLAN_TXT = "把那顆沒有人澆過的種子種進土裡，看它肯不肯長\n\n為什麼是他：你……\n"
-RECORD_TXT = "# 試的紀錄\n第一步……\n第二步失敗了……\n感想：它比我想的輕，也比我想的倔。\n"
+PLAN_TXT = "我想：想讓那顆沒有人澆過的種子長出東西\n\n為什麼是他：你……\n"
+RECORD_TXT = ("# 試的紀錄\n第一步……\n第二步失敗了……\n改變：我把種子埋進兩道光交界的土裡，那裡現在有一個濕濕的小土堆。\n"
+              "感想：它比我想的輕，也比我想的倔。\n")
 
 
 def test_card_v3_is_four_lines_from_plan_steps_and_record_without_the_model(tmp_path) -> None:
@@ -434,8 +435,8 @@ def test_card_v3_is_four_lines_from_plan_steps_and_record_without_the_model(tmp_
     files = {"PLAN.md": PLAN_TXT, fz.RECORD_FILE: RECORD_TXT, "成品.md": "# 鬆環對照冊\n內文"}
     res, rd, ws = _card(tmp_path, BROWSE_THEN_PLAN, files=files)
     assert res["verdict"] == "你的數位分身其實是：INFP · 雙魚（水）· O 型" and res["first_line"] == "INFP · 雙魚（水）· O 型"
-    assert res["want_line"] == "它心裡一直想試的是：把那顆沒有人澆過的種子種進土裡，看它肯不肯長"
-    assert res["tried_line"] == "它試了：先去了草稿角，再到帳本鏈，在帳本鏈做出《鬆環對照冊》"
+    assert res["want_line"] == "它心裡想：讓那顆沒有人澆過的種子長出東西"
+    assert res["tried_line"] == "它試了：把種子埋進兩道光交界的土裡，那裡現在有一個濕濕的小土堆", "第 3 行＝紀錄裡的改變那一句（第三人稱），不是路線"
     assert res["said_line"] == "試完它說：它比我想的輕，也比我想的倔"
     assert res["title"] == "鬆環對照冊", "標題取「做出來的那樣東西」，不是試的紀錄"
     assert res["lines"] == [res["verdict"], res["want_line"], res["tried_line"], res["said_line"]], "雲端約定：lines[0] 是判決，共 4 行"
@@ -449,11 +450,12 @@ def test_card_v3_is_four_lines_from_plan_steps_and_record_without_the_model(tmp_
 
 def test_card_v3_a_line_without_grounds_is_absent_not_filled_with_a_canned_one(tmp_path) -> None:
     res, _, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, files={"PLAN.md": PLAN_TXT, "成品.md": "# 鬆環對照冊\n內文"})
-    assert res["said_line"] is None and res["want_line"] and res["tried_line"]          # 沒有「試的紀錄」⇒ 沒有第 4 行
-    assert len(res["lines"]) == 3 and fz.card_md(res).count("\n") == 3
+    # 紀錄裡沒有感想、沒有改變、標題只是檔案自己的字樣 ⇒ 第 3、4 行都沒有（不補罐頭句）
+    assert res["said_line"] is None and res["tried_line"] is None and res["want_line"]
+    assert len(res["lines"]) == 2 and fz.card_md(res).count("\n") == 2
     res2, _, _ = _card(tmp_path / "b", STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")],
                        files={"PLAN.md": PLAN_TXT, fz.RECORD_FILE: RECORD_TXT})
-    assert res2["tried_line"] is None, "沒碰過任何地點：不編路線"
+    assert res2["tried_line"] and "先去了" not in res2["tried_line"], "第 3 行不靠路線：步驟紀錄沒有地點也照出（來自紀錄）"
     res3, _, _ = _card(tmp_path / "c", BROWSE_THEN_PLAN, files={fz.RECORD_FILE: RECORD_TXT})
     assert res3["want_line"] is None and res3["said_line"] and res3["tried_line"], "沒有 PLAN ⇒ 沒有第 2 行"
 
@@ -461,13 +463,15 @@ def test_card_v3_a_line_without_grounds_is_absent_not_filled_with_a_canned_one(t
 def test_card_v3_filters_leak_time_reality_filename_and_receipt_claims() -> None:
     f = fz.resolve(FULL, {})
     tr = "他一直想把週末的時間安排得不那麼亂"
-    assert fz.want_of("把週末的時間安排得不那麼亂", tr, f) is None                         # 逐字抄觀眾原文（≥8 字）
-    assert fz.want_of("把種子種下去，等到每天都亮", "x", f) is None                          # 時段詞
-    assert fz.want_of("替我的伴侶做一盞燈", "x", f) is None                                 # 現實詞
-    assert fz.want_of("去看 地上/草稿角/小燈.txt", "x", f) is None                          # 像檔名
-    assert fz.want_of("點亮小燈，拿到了收據", "x", f) is None                           # 自己說閘門給了結果
-    assert fz.want_of("PLAN\n點亮那盞沒有人點過的燈", "x", f) == "點亮那盞沒有人點過的燈"     # 只是標題字樣的行不算
-    assert fz.want_of("第一行：把燈點亮。", "x", f) == "把燈點亮"
+    assert fz.want_of("我想：讓週末的時間安排得不那麼亂", tr, f) is None                         # 逐字抄觀眾原文（≥8 字）
+    assert fz.want_of("我想：讓種子在每天都亮的土裡長", "x", f) is None                          # 時段詞
+    assert fz.want_of("我想：讓我的伴侶有一盞燈", "x", f) is None                                 # 現實詞
+    assert fz.want_of("我想：看 地上/草稿角/小燈.txt", "x", f) == "看 小燈"                   # 路徑／檔名先清成物件的名字
+    assert fz.want_of("我想：看 notes.json 裡的字", "x", f) is None                          # 清不掉的檔名樣子照擋
+    assert fz.want_of("我想：讓小燈亮了，拿到了收據", "x", f) is None                           # 自己說閘門給了結果
+    assert fz.want_of("PLAN\n我想：讓那盞沒有人點過的燈亮起來", "x", f) == "讓那盞沒有人點過的燈亮起來"     # 只是標題字樣的行不算
+    assert fz.want_of("我想：想讓燈被點亮。", "x", f) == "讓燈被點亮"
+    assert fz.want_of("第一行：把燈點亮。", "x", f) is None, "沒有「我想：」＝沒有這一行（不拿動作句充數）"
     assert fz.said_of("感想：好像比我想的軟。", "x", f) == "好像比我想的軟"
     assert fz.said_of("感想：先\n感想：後來才明白不是風。", "x", f) == "後來才明白不是風", "取最後一個感想"
     assert fz.said_of("試完我說：嗯。", "x", f) == "嗯"
@@ -514,28 +518,25 @@ def test_card_v2_reading_priority_and_filters() -> None:
     assert fz.reading_of(LETTER_FINAL, f, traits="在計畫的框架中掙扎，卻往往被隨興的逃避行為帶離軌道") == "先想到的是別人的心情。"   # LEAK
 
 
-def test_card_v3_tried_line_comes_only_from_the_step_log(tmp_path) -> None:
+def test_card_v3_tried_line_comes_from_the_record_not_the_route(tmp_path) -> None:
     rows = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/投遞口/a.txt"), _row(5, "ws_list", "地上/捏土處"),
-                     _row(6, "ws_read", "地上/投遞口/b.txt"), _row(7, "ws_read", "地上/紙卡地/c.txt", ok=False),
-                     _row(8, "ws_read", "地上/帳本鏈/d.txt"), _row(9, "ws_read", "地上/草稿角/e.txt"),
-                     _row(10, "ws_read", "地上/畫架與長椅/f.txt"), _row(11, "ws_write", "PLAN.md"),
-                     _row(12, "ws_read", "地上/石頭閘門/g.txt"), _row(13, "ws_write", "成品.md"), _row(14, "ws_read", "地上/紙卡地/h.txt")]
-    res, _, _ = _card(tmp_path, rows, files={"成品.md": "# 一件小事\n內"}, attempts=3)
-    # 去重、依首次出現、失敗的讀取不算；做出的地點＝最後寫成品之前最近碰到的地點（石頭閘門）；被退回 2 次；整句連「它試了：」≤ 60 字
-    assert res["tried_line"].startswith("它試了：先去了投遞口，再到捏土處")
-    assert "在石頭閘門做出《一件小事》" in res["tried_line"]
-    assert "；中途被退回 2 次，改了 2 次" in res["tried_line"] and len(res["tried_line"]) <= fz.MAX_CARD_LINE_CHARS
-    assert "紙卡地" not in res["tried_line"], "失敗的讀取不算去過"
+                     _row(8, "ws_read", "地上/帳本鏈/d.txt"), _row(11, "ws_write", "PLAN.md"), _row(13, "ws_write", "成品.md")]
+    res, _, _ = _card(tmp_path, rows, files={"成品.md": "# 一件小事\n內", fz.RECORD_FILE: RECORD_TXT}, attempts=3)
+    t = res["tried_line"]
+    assert t.startswith("它試了：") and len(t) <= fz.MAX_CARD_LINE_CHARS
+    for route in ("先去了", "再到", "做出《", "被退回", "投遞口", "帳本鏈"):
+        assert route not in t, route
+    assert res["places"] == ["投遞口", "捏土處", "帳本鏈"], "路線仍留在卡的紀錄裡（檔案庫），只是不上卡"
 
 
-def test_card_v3_tried_line_fits_the_limit_and_single_place_reads_naturally(tmp_path) -> None:
-    long_title = "一個很長很長的世界裡的標題名字啊"
-    r = fz.tried_of(["投遞口", "長桌廣場", "畫架與長椅", "石頭閘門"], "石頭閘門", long_title, 2)
-    assert len(r) <= fz.MAX_CARD_LINE_CHARS and r.startswith("它試了：先去了投遞口")
-    assert fz.tried_of(["草稿角"], "草稿角", "寫給誰的信", 0) == "它試了：在草稿角做出《寫給誰的信》"
-    assert fz.tried_of([], None, "x", 0) is None
-    res2, _, _ = _card(tmp_path / "b", BROWSE_THEN_PLAN)                              # 沒有成品檔：標題用「一件沒有名字的小事」
-    assert res2["title"] is None and "《" + fz.NO_NAME_TITLE + "》" in res2["tried_line"]
+def test_card_v3_tried_line_fits_the_limit_and_falls_back_to_the_title(tmp_path) -> None:
+    f = fz.resolve(FULL, {})
+    r = fz.tried_of("標題\n改變：" + "那" * 60 + "\n感想：好。", "x", f)
+    assert r == "它試了：標題", "改變句太長又沒有句讀可截 ⇒ 不硬切半個詞，退到標題行"
+    assert fz.tried_of("# 試的紀錄\n改變：" + "那" * 60, "x", f) is None, "標題也只是檔案字樣 ⇒ 沒有這一行"
+    assert fz.tried_of("寫給誰的信\n我做了。\n", "x", f) == "它試了：寫給誰的信"
+    assert fz.tried_of("# 試的紀錄\n我做了。\n", "x", f) is None, "檔案自己的標題字樣不是名字"
+    assert fz.tried_of("", "x", f) is None
 
 
 def test_card_v3_never_reads_a_card_the_twin_wrote_and_no_fortune_means_no_card(tmp_path) -> None:
@@ -722,7 +723,7 @@ def test_emit_writes_enumerations_only_through_gate_meta_and_event_file(tmp_path
 
 
 def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
-    rd, ws = _world(tmp_path, BROWSE_THEN_PLAN, card=None, files={"成品.md": "# 鬆環對照冊\n內文", "PLAN.md": PLAN_TXT, fz.RECORD_FILE: _REC_DEFAULT})
+    rd, ws = _world(tmp_path, BROWSE_THEN_PLAN, card=None, files={"成品.md": "# 鬆環對照冊\n內文", "PLAN.md": PLAN_TXT, fz.RECORD_FILE: RECORD_TXT})
     (rd / "letter_final.md").write_text(LETTER_FINAL, encoding="utf-8")
     (rd / fz.FINAL_NAME).write_text(json.dumps(fz.resolve(FULL, {})), encoding="utf-8")
     events, side = tmp_path / "lc.jsonl", tmp_path / "lc.sidecar.jsonl"
@@ -734,7 +735,7 @@ def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
     assert r.returncode == 0, r.stderr
     rows = sc.read(side)
     assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) == 2
-    assert rows[0]["lines"][0].startswith("它心裡一直想試的是：") and rows[0]["lines"][1].startswith("它試了：先去了草稿角")
+    assert rows[0]["lines"][0].startswith("它心裡想：") and rows[0]["lines"][1].startswith("它試了：把種子埋進")
     assert sc.validate(rows) == []             # 電視字幕兩行＝第 2、3 行
     assert (rd / fz.CARD_JSON_NAME).is_file()
 

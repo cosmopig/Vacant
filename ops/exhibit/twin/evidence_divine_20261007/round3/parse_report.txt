@@ -1,0 +1,12 @@
+a1 raw缺: blood | cleaned缺: -
+a2 raw缺: blood | cleaned缺: -
+a3 raw缺: shape,texture,color,vibe,mbti,zodiac,blood,want,first_line | cleaned缺: -
+a4 raw缺: blood | cleaned缺: -
+a5 raw缺: shape,blood | cleaned缺: -
+a6 raw缺: blood | cleaned缺: -
+a7 raw缺: - | cleaned缺: -
+a8 raw缺: shape,texture,color,vibe,mbti,zodiac,blood,want,first_line | cleaned缺: -
+a9 raw缺: blood | cleaned缺: -
+a10 raw缺: blood | cleaned缺: -
+a11 raw缺: - | cleaned缺: -
+a12 raw缺: blood | cleaned缺: -

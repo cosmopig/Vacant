@@ -1,0 +1,1399 @@
+{
+ "a_set_new": {
+  "label": "a1..a12 新版",
+  "runs": [
+   {
+    "name": "a1",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：在長桌廣場的土堆上放了一個紙鳥，讓它成為土堆的一部分",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 2,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 186.9,
+    "steps": 37,
+    "plan_objects": [
+     "郵筒下的細線",
+     "長椅上的紙筒"
+    ],
+    "wake": "投遞口"
+   },
+   {
+    "name": "a2",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓長桌廣場的桌五音樂盒發出聲音",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "桌五_音樂盒"
+    ],
+    "l3": null,
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 1,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 355.5,
+    "steps": 39,
+    "plan_objects": [
+     "桌五_音樂盒",
+     "長椅上的紙筒"
+    ],
+    "wake": "投遞口"
+   },
+   {
+    "name": "a3",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那艘紙船在暗處找到一個完整的終點",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "土堆上的紙船"
+    ],
+    "l3": "它試了：在兩道光交界的地放了一艘帶有灰藍色「終」字、帆是撕掉的紙船",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 143.0,
+    "steps": 13,
+    "plan_objects": [
+     "兩道光交界的地",
+     "土堆上的紙船"
+    ],
+    "wake": "投遞口"
+   },
+   {
+    "name": "a4",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：把帶有三角形缺口的紙卡從紙卡地移開",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 152.0,
+    "steps": 10,
+    "plan_objects": [
+     "沒有被撿起來過的那張",
+     "沒有點過的小燈",
+     "長椅上的紙筒",
+     "頭頂那根線"
+    ],
+    "wake": "紙卡地"
+   },
+   {
+    "name": "a5",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：在畫架與長椅區域，把「畫架上的去向」拿走了",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 194.4,
+    "steps": 7,
+    "plan_objects": [
+     "兩道光交界的地",
+     "畫架上的去向",
+     "長椅底下縮著的灰藍小東西"
+    ],
+    "wake": "草稿角"
+   },
+   {
+    "name": "a6",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓點數單上的數字與地上的卡片數量完全對齊",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了：點數單對齊紀錄",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 3,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 258.5,
+    "steps": 25,
+    "plan_objects": [
+     "格狀圖",
+     "桌二的空位",
+     "退回紙_另一張",
+     "退回紙_第四列"
+    ],
+    "wake": "畫架與長椅"
+   },
+   {
+    "name": "a7",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：把沒人認領的第六封信用細線繫在了右邊長椅下的灰藍小東西上",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 68.7,
+    "steps": 9,
+    "plan_objects": [
+     "信紙與那根線",
+     "桌五_壓著筆的紙",
+     "沒人認領的信",
+     "長椅底下縮著的灰藍小東西"
+    ],
+    "wake": "投遞口"
+   },
+   {
+    "name": "a8",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那顆陶杯裡的種子在長桌廣場的土堆裡開出一個持續變化的花",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "陶杯裡的種子"
+    ],
+    "l3": "它試了，現在它斜靠在「土堆裡的洞」的洞口處，並裝載了「陶杯裡的種子」",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 103.9,
+    "steps": 11,
+    "plan_objects": [
+     "土堆上的紙船",
+     "土堆裡的洞",
+     "筆筒裡的藍鉛筆",
+     "陶杯裡的種子"
+    ],
+    "wake": "畫架與長椅"
+   },
+   {
+    "name": "a9",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓帳本鏈上的每一片陶片都對上一個獨特的編碼",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了：將「鏈尾那片空白的陶片」變成了帶有三道橫溝與指頭形缺口印紋的第 448 片",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 3,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 352.6,
+    "steps": 22,
+    "plan_objects": [
+     "多出的小印",
+     "尾段_418到447片",
+     "最後那團灰藍的土",
+     "退回紙_另一張",
+     "退回紙_第四列",
+     "鏈尾那片空白的陶片"
+    ],
+    "wake": "畫架與長椅"
+   },
+   {
+    "name": "a10",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：把長桌廣場土堆上的紙船變成了一個帶有赭紅底座和紙質細線的獨立載具",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 151.6,
+    "steps": 13,
+    "plan_objects": [
+     "土堆上的紙船",
+     "郵筒下的細線"
+    ],
+    "wake": "帳本鏈"
+   },
+   {
+    "name": "a11",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓這套從無到有的知識架構在帳本鏈上完整呈現",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了：在長桌廣場桌五上放了一張寫有分類屬性的紙條",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 126.6,
+    "steps": 10,
+    "plan_objects": [
+     "量了三次的土團"
+    ],
+    "wake": "石頭閘門"
+   },
+   {
+    "name": "a12",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那封信裡沉重的、沒說出口的情感",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了，現在放著這個帶有沙金質感的紙團",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 204.4,
+    "steps": 13,
+    "plan_objects": [
+     "一個沒打開的紙團",
+     "信紙與那根線",
+     "擦過三次的那個字",
+     "長椅上的紙筒"
+    ],
+    "wake": "石頭閘門"
+   }
+  ],
+  "l2_present": 7,
+  "l2_pairwise_distinct": true,
+  "l2_dups": [],
+  "l2_max_bigram_jaccard": 0.21428571428571427,
+  "object_runs_plan_top": [
+   [
+    "長椅上的紙筒",
+    4
+   ],
+   [
+    "土堆上的紙船",
+    3
+   ],
+   [
+    "郵筒下的細線",
+    2
+   ],
+   [
+    "兩道光交界的地",
+    2
+   ],
+   [
+    "長椅底下縮著的灰藍小東西",
+    2
+   ],
+   [
+    "退回紙_第四列",
+    2
+   ]
+  ],
+  "object_runs_plan_max": 4,
+  "object_runs_card_top": [
+   [
+    "土堆上的紙船",
+    2
+   ],
+   [
+    "桌五_音樂盒",
+    1
+   ],
+   [
+    "兩道光交界的地",
+    1
+   ],
+   [
+    "畫架上的去向",
+    1
+   ],
+   [
+    "長椅底下縮著的灰藍小東西",
+    1
+   ],
+   [
+    "沒人認領的信",
+    1
+   ]
+  ],
+  "object_runs_card_max": 2,
+  "distinct_plan_objects": 27,
+  "wake_distinct": 6,
+  "all_ok": {
+   "l2": 7,
+   "l3": 10,
+   "plan_label": 12,
+   "cloud": 12,
+   "tv": 12,
+   "l1": 12,
+   "gate_x_runs": 4,
+   "time_limit": 0
+  }
+ },
+ "v_set_new": {
+  "label": "v1..v12 新版",
+  "runs": [
+   {
+    "name": "v1",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那個斷掉的第 12 個音能響起來",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了：長桌廣場桌五上的音樂盒現在能完整地響到最後一個音了",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 1,
+    "wall_s": 350.8,
+    "steps": 12,
+    "plan_objects": [
+     "桌五_音樂盒",
+     "筆筒裡的藍鉛筆"
+    ],
+    "wake": "帳本鏈"
+   },
+   {
+    "name": "v2",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓長桌廣場的土堆上開出一個由細線與陶片捏成的微小花朵",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": null,
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 1,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 347.2,
+    "steps": 24,
+    "plan_objects": [],
+    "wake": "畫架與長椅"
+   },
+   {
+    "name": "v3",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓一張紙卡在冷藍光邊緣變出一個橘色的圓點",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了：把那個用薄紙捲成的喇叭放在了兩道光交界的地，讓它朝向暗處",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 2,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 365.6,
+    "steps": 38,
+    "plan_objects": [
+     "兩道光交界的地",
+     "冷藍光邊的紙喇叭",
+     "最後那團灰藍的土",
+     "畫架上的去向"
+    ],
+    "wake": "草稿角"
+   },
+   {
+    "name": "v4",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那艘紙船在暗處找到一個能承接住它的出口",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "土堆上的紙船"
+    ],
+    "l3": "它試了：把長桌廣場土堆上的紙船位置稍微偏移，讓它更靠近暗處的邊緣",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 1,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 213.8,
+    "steps": 23,
+    "plan_objects": [
+     "土堆上的紙船",
+     "土堆裡的洞",
+     "最後那團灰藍的土"
+    ],
+    "wake": "紙卡地"
+   },
+   {
+    "name": "v5",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那條沒寫完的線在石壁上找到對應的印紋",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "石壁上的高低線"
+    ],
+    "l3": "它試了：在草稿角那面刻有高低線的石壁上，在離地 9 掌、往上 2 掌處的那條淺線旁",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 51.1,
+    "steps": 11,
+    "plan_objects": [
+     "石壁上的高低線",
+     "石壁前那張半張紙"
+    ],
+    "wake": "帳本鏈"
+   },
+   {
+    "name": "v6",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓碗口缺了三角的陶碗重新完整",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "碗口缺了三角",
+     "閘門旁的陶碗"
+    ],
+    "l3": "它試了：把補片塞進了「碗口缺了三角」的缺口裡，讓那個陶碗變成了完整的樣子",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 32.9,
+    "steps": 9,
+    "plan_objects": [
+     "碗口缺了三角",
+     "量了三次的土團",
+     "閘門旁的陶碗"
+    ],
+    "wake": "捏土處"
+   },
+   {
+    "name": "v7",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：在長桌廣場的一個空位上放下了這個它自己做的「訴說容器」",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 48.3,
+    "steps": 10,
+    "plan_objects": [
+     "信紙與那根線",
+     "桌二的空位",
+     "閘門旁的陶碗"
+    ],
+    "wake": "紙卡地"
+   },
+   {
+    "name": "v8",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那團灰藍色的土在長桌廣場的桌五上留下一個圓形的印記",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [],
+    "l3": "它試了：把捏土處最後那團灰藍的土放在長桌廣場桌五上的紙上，讓它在紙上壓出一個圓形的印記",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 1,
+    "gate_runs_accepted_first": false,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 70.4,
+    "steps": 21,
+    "plan_objects": [
+     "最後那團灰藍的土",
+     "桌五_壓著筆的紙"
+    ],
+    "wake": "帳本鏈"
+   },
+   {
+    "name": "v9",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": null,
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：把「壓著筆的紙」放在了畫架與長椅兩道光交界處的暗影裡",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 3,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 42.6,
+    "steps": 9,
+    "plan_objects": [
+     "兩道光交界的地",
+     "桌五_壓著筆的紙"
+    ],
+    "wake": "草稿角"
+   },
+   {
+    "name": "v10",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那條沒印紋的淺線在石壁上留下一個深沉的水滴印紋",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "石壁上的高低線"
+    ],
+    "l3": "它試了：在石壁上為那條沒印紋的淺線留下一個深沉的水滴印紋",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 34.5,
+    "steps": 11,
+    "plan_objects": [
+     "石壁上的高低線"
+    ],
+    "wake": "捏土處"
+   },
+   {
+    "name": "v11",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓長椅上的紙筒發出震碎空氣的聲響",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "長椅上的紙筒"
+    ],
+    "l3": "它試了：把長椅上的紙筒拿走了，現在長椅中間是空的",
+    "l3_verb_not_route": true,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 34.1,
+    "steps": 9,
+    "plan_objects": [
+     "板角那個炭條的圓",
+     "長椅上的紙筒"
+    ],
+    "wake": "草稿角"
+   },
+   {
+    "name": "v12",
+    "plan_wish_label": true,
+    "l1_ok": true,
+    "l2": "它心裡想：讓那根細線穿過信紙上的孔",
+    "l2_starts_with_prefix": true,
+    "l2_world_object": [
+     "信紙與那根線"
+    ],
+    "l3": "它試了：把「信紙與那根線」裡的細線穿過兩張信紙的孔，並將它們疊在一起固定",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 38.1,
+    "steps": 10,
+    "plan_objects": [
+     "信紙與那根線"
+    ],
+    "wake": "草稿角"
+   }
+  ],
+  "l2_present": 10,
+  "l2_pairwise_distinct": true,
+  "l2_dups": [],
+  "l2_max_bigram_jaccard": 0.35135135135135137,
+  "object_runs_plan_top": [
+   [
+    "最後那團灰藍的土",
+    3
+   ],
+   [
+    "兩道光交界的地",
+    2
+   ],
+   [
+    "石壁上的高低線",
+    2
+   ],
+   [
+    "閘門旁的陶碗",
+    2
+   ],
+   [
+    "信紙與那根線",
+    2
+   ],
+   [
+    "桌五_壓著筆的紙",
+    2
+   ]
+  ],
+  "object_runs_plan_max": 3,
+  "object_runs_card_top": [
+   [
+    "兩道光交界的地",
+    2
+   ],
+   [
+    "石壁上的高低線",
+    2
+   ],
+   [
+    "桌五_音樂盒",
+    1
+   ],
+   [
+    "冷藍光邊的紙喇叭",
+    1
+   ],
+   [
+    "土堆上的紙船",
+    1
+   ],
+   [
+    "碗口缺了三角",
+    1
+   ]
+  ],
+  "object_runs_card_max": 2,
+  "distinct_plan_objects": 18,
+  "wake_distinct": 5,
+  "all_ok": {
+   "l2": 10,
+   "l3": 10,
+   "plan_label": 12,
+   "cloud": 12,
+   "tv": 12,
+   "l1": 12,
+   "gate_x_runs": 4,
+   "time_limit": 0
+  }
+ },
+ "v_set_round2": {
+  "label": "v1..v12 第二輪",
+  "runs": [
+   {
+    "name": "v1",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把陶哨子的裂縫用黏土填平",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "陶哨子"
+    ],
+    "l3": "它試了：在長桌廣場做出《修好的陶哨子》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 72.4,
+    "steps": 10,
+    "plan_objects": [
+     "陶哨子"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v2",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把「陶杯裡的種子」種在「兩道光交界的地」",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "兩道光交界的地",
+     "陶杯裡的種子"
+    ],
+    "l3": "它試了：先去了捏土處，再到畫架與長椅，在畫架與長椅做出《保護圈》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 118.1,
+    "steps": 9,
+    "plan_objects": [
+     "兩道光交界的地",
+     "陶杯裡的種子"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v3",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把長椅上的紙筒拆開並重新摺成一個三角形",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "長椅上的紙筒"
+    ],
+    "l3": "它試了：在畫架與長椅做出《三角形》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 65.2,
+    "steps": 9,
+    "plan_objects": [
+     "兩道光交界的地",
+     "長椅上的紙筒"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v4",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把陶哨子裝進音樂盒裡",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "桌五_音樂盒",
+     "陶哨子"
+    ],
+    "l3": "它試了：先去了投遞口，再到長桌廣場，在長桌廣場做出《帶有聲音的容器》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 117.4,
+    "steps": 10,
+    "plan_objects": [
+     "桌五_音樂盒",
+     "陶哨子"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v5",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把「畫架與長椅」的兩道光交界處的土",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "兩道光交界的地"
+    ],
+    "l3": "它試了：先去了畫架與長椅，再到長桌廣場，在長桌廣場做出《邊界空間》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 149.1,
+    "steps": 11,
+    "plan_objects": [
+     "兩道光交界的地"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v6",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把帳本鏈上斷裂的陶片重新接合",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：在帳本鏈做出《接合塊》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 55.4,
+    "steps": 9,
+    "plan_objects": [
+     "尾段_418到447片",
+     "鏈尾那片空白的陶片"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v7",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把「一張畫到邊緣的圖」放在「兩道光交界的地」",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "一張畫到邊緣的圖",
+     "兩道光交界的地"
+    ],
+    "l3": "它試了：先去了長桌廣場，再到畫架與長椅，在畫架與長椅做出《未竟的敘述》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 99.0,
+    "steps": 9,
+    "plan_objects": [
+     "一張畫到邊緣的圖",
+     "兩道光交界的地"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v8",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把長桌廣場上的陶哨子拿去捏土處",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "陶哨子"
+    ],
+    "l3": "它試了：先去了捏土處，再到長桌廣場，在長桌廣場做出《灰藍球體》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 69.3,
+    "steps": 9,
+    "plan_objects": [
+     "陶哨子"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v9",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把一張畫到邊緣的圖從長桌廣場的桌上拿下來",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "一張畫到邊緣的圖"
+    ],
+    "l3": "它試了：先去了長桌廣場，再到捏土處，在捏土處做出《填平了邊緣的圖》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 700.7,
+    "steps": 9,
+    "plan_objects": [
+     "一張畫到邊緣的圖"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v10",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把這塊灰藍色的土捏成一個細長的線條",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [],
+    "l3": "它試了：先去了捏土處，再到長桌廣場，在長桌廣場做出《灰藍色土線》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 38.3,
+    "steps": 11,
+    "plan_objects": [
+     "桌五_音樂盒"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v11",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把長桌廣場的陶哨子捏成一個更長的、帶有裂縫的聲音容器",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "陶哨子"
+    ],
+    "l3": "它試了：先去了長桌廣場，再到捏土處，在捏土處做出《聲音容器》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 42.9,
+    "steps": 8,
+    "plan_objects": [
+     "陶哨子"
+    ],
+    "wake": null
+   },
+   {
+    "name": "v12",
+    "plan_wish_label": false,
+    "l1_ok": false,
+    "l2": "它心裡一直想試的是：把長椅上的紙筒裡的內容倒出來",
+    "l2_starts_with_prefix": false,
+    "l2_world_object": [
+     "長椅上的紙筒"
+    ],
+    "l3": "它試了：先去了草稿角，再到畫架與長椅，在畫架與長椅做出《陶片與土丘》",
+    "l3_verb_not_route": false,
+    "cloud_lines_ok": true,
+    "tv_lines_ok": true,
+    "n_lines": 4,
+    "gate_x_n": 0,
+    "gate_runs_accepted_first": true,
+    "time_limit_failure": false,
+    "stall_restarts": 0,
+    "wall_s": 37.4,
+    "steps": 10,
+    "plan_objects": [
+     "兩道光交界的地",
+     "擦過三次的那個字",
+     "長椅上的紙筒"
+    ],
+    "wake": null
+   }
+  ],
+  "l2_present": 12,
+  "l2_pairwise_distinct": true,
+  "l2_dups": [],
+  "l2_max_bigram_jaccard": 0.5,
+  "object_runs_plan_top": [
+   [
+    "兩道光交界的地",
+    5
+   ],
+   [
+    "陶哨子",
+    4
+   ],
+   [
+    "長椅上的紙筒",
+    2
+   ],
+   [
+    "桌五_音樂盒",
+    2
+   ],
+   [
+    "一張畫到邊緣的圖",
+    2
+   ],
+   [
+    "陶杯裡的種子",
+    1
+   ]
+  ],
+  "object_runs_plan_max": 5,
+  "object_runs_card_top": [
+   [
+    "陶哨子",
+    4
+   ],
+   [
+    "兩道光交界的地",
+    3
+   ],
+   [
+    "長椅上的紙筒",
+    2
+   ],
+   [
+    "一張畫到邊緣的圖",
+    2
+   ],
+   [
+    "陶杯裡的種子",
+    1
+   ],
+   [
+    "桌五_音樂盒",
+    1
+   ]
+  ],
+  "object_runs_card_max": 4,
+  "distinct_plan_objects": 9,
+  "wake_distinct": 0,
+  "all_ok": {
+   "l2": 0,
+   "l3": 0,
+   "plan_label": 0,
+   "cloud": 12,
+   "tv": 12,
+   "l1": 0,
+   "gate_x_runs": 0,
+   "time_limit": 0
+  }
+ },
+ "letters": {
+  "a_set_new": {
+   "runs_with_mold_word": {
+    "瞳孔": 0,
+    "指尖": 0,
+    "摩擦": 0,
+    "摩挲": 0,
+    "微微收縮": 0,
+    "微微皺起": 0
+   },
+   "abstract_total": 22,
+   "abstract_words": {
+    "渴望": 16,
+    "靜默": 0,
+    "虛無": 1,
+    "細碎": 3,
+    "共振": 0,
+    "壓抑": 1,
+    "沉默": 0,
+    "溫潤": 0,
+    "圓潤": 1
+   },
+   "follow": {
+    "a1": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a2": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a3": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a4": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a5": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a6": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a7": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a8": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a9": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a10": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a11": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "a12": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    }
+   },
+   "n_runs": 12
+  },
+  "v_set_new": {
+   "runs_with_mold_word": {
+    "瞳孔": 0,
+    "指尖": 0,
+    "摩擦": 0,
+    "摩挲": 0,
+    "微微收縮": 0,
+    "微微皺起": 0
+   },
+   "abstract_total": 34,
+   "abstract_words": {
+    "渴望": 15,
+    "靜默": 0,
+    "虛無": 3,
+    "細碎": 3,
+    "共振": 0,
+    "壓抑": 5,
+    "沉默": 0,
+    "溫潤": 0,
+    "圓潤": 8
+   },
+   "follow": {
+    "v1": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v2": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v3": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v4": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v5": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v6": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v7": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v8": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v9": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v10": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v11": {
+     "body_part_in_letter": true,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    },
+    "v12": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": true,
+     "mold_words": 0
+    }
+   },
+   "n_runs": 12
+  },
+  "v_set_round2": {
+   "runs_with_mold_word": {
+    "瞳孔": 3,
+    "指尖": 6,
+    "摩擦": 6,
+    "摩挲": 1,
+    "微微收縮": 3,
+    "微微皺起": 1
+   },
+   "abstract_total": 29,
+   "abstract_words": {
+    "渴望": 12,
+    "靜默": 0,
+    "虛無": 0,
+    "細碎": 1,
+    "共振": 0,
+    "壓抑": 7,
+    "沉默": 2,
+    "溫潤": 1,
+    "圓潤": 6
+   },
+   "follow": {
+    "v1": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 3
+    },
+    "v2": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 3
+    },
+    "v3": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 3
+    },
+    "v4": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 1
+    },
+    "v5": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 2
+    },
+    "v6": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 2
+    },
+    "v7": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 2
+    },
+    "v8": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 0
+    },
+    "v9": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 1
+    },
+    "v10": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 3
+    },
+    "v11": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 2
+    },
+    "v12": {
+     "body_part_in_letter": false,
+     "sense_word_in_letter": false,
+     "mold_words": 0
+    }
+   },
+   "n_runs": 12
+  }
+ }
+}
