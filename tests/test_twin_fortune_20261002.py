@@ -466,7 +466,7 @@ def test_card_v3_filters_leak_time_reality_filename_and_receipt_claims() -> None
     assert fz.want_of("我想：讓週末的時間安排得不那麼亂", tr, f) is None                         # 逐字抄觀眾原文（≥8 字）
     assert fz.want_of("我想：讓種子在每天都亮的土裡長", "x", f) is None                          # 時段詞
     assert fz.want_of("我想：讓我的伴侶有一盞燈", "x", f) is None                                 # 現實詞
-    assert fz.want_of("我想：看 地上/草稿角/小燈.txt", "x", f) == "看 小燈"                   # 路徑／檔名先清成物件的名字
+    assert fz.want_of("我想：看 地上/草稿角/小燈.txt 會不會亮", "x", f) == "看小燈會不會亮"      # 路徑／檔名先清成物件的名字（清完留下的空白也拿掉）
     assert fz.want_of("我想：看 notes.json 裡的字", "x", f) is None                          # 清不掉的檔名樣子照擋
     assert fz.want_of("我想：讓小燈亮了，拿到了收據", "x", f) is None                           # 自己說閘門給了結果
     assert fz.want_of("PLAN\n我想：讓那盞沒有人點過的燈亮起來", "x", f) == "讓那盞沒有人點過的燈亮起來"     # 只是標題字樣的行不算
@@ -474,7 +474,7 @@ def test_card_v3_filters_leak_time_reality_filename_and_receipt_claims() -> None
     assert fz.want_of("第一行：把燈點亮。", "x", f) is None, "沒有「我想：」＝沒有這一行（不拿動作句充數）"
     assert fz.said_of("感想：好像比我想的軟。", "x", f) == "好像比我想的軟"
     assert fz.said_of("感想：先\n感想：後來才明白不是風。", "x", f) == "後來才明白不是風", "取最後一個感想"
-    assert fz.said_of("試完我說：嗯。", "x", f) == "嗯"
+    assert fz.said_of("試完我說：嗯。", "x", f) is None          # 第四輪：一個字不是一句話，寧缺
     assert fz.said_of("沒有感想這一行", "x", f) is None
     long_ = fz.said_of("感想：" + "長" * 80, "x", f)
     assert long_ is None or len(long_) <= fz.MAX_SAID_CARD
@@ -532,9 +532,9 @@ def test_card_v3_tried_line_comes_from_the_record_not_the_route(tmp_path) -> Non
 def test_card_v3_tried_line_fits_the_limit_and_falls_back_to_the_title(tmp_path) -> None:
     f = fz.resolve(FULL, {})
     r = fz.tried_of("標題\n改變：" + "那" * 60 + "\n感想：好。", "x", f)
-    assert r == "它試了：標題", "改變句太長又沒有句讀可截 ⇒ 不硬切半個詞，退到標題行"
+    assert r is None, "第四輪：改變句太長又沒有句讀可截 ⇒ 不硬切半個詞；標題是名詞片語、不再當後備 ⇒ 沒有這一行"
     assert fz.tried_of("# 試的紀錄\n改變：" + "那" * 60, "x", f) is None, "標題也只是檔案字樣 ⇒ 沒有這一行"
-    assert fz.tried_of("寫給誰的信\n我做了。\n", "x", f) == "它試了：寫給誰的信"
+    assert fz.tried_of("寫給誰的信\n我做了。\n", "x", f) is None, "第四輪：標題不當候選"
     assert fz.tried_of("# 試的紀錄\n我做了。\n", "x", f) is None, "檔案自己的標題字樣不是名字"
     assert fz.tried_of("", "x", f) is None
 

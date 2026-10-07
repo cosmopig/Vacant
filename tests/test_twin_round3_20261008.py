@@ -84,7 +84,7 @@ def test_card_line_two_is_the_wish_after_the_label_and_never_an_action_sentence(
     assert fz.wish_of("把陶哨子的裂縫用黏土填平\n為什麼是他\n", "x", F) is None
     assert fz.wish_of("", "x", F) is None
     # 太長：在句讀截；截不出像樣的就不上卡
-    assert fz.wish_of("我想：" + "讓音樂盒斷掉的那個音有東西接住，" * 3 + "\n", "x", F) == "讓音樂盒斷掉的那個音有東西接住"
+    assert fz.wish_of("我想：" + "讓音樂盒斷掉的那個音有東西接住，" * 3 + "\n", "x", F) == "讓音樂盒斷掉的那個音有東西接住，讓音樂盒斷掉的那個音有東西接住"
     assert fz.wish_of("我想：" + "一" * 40 + "\n", "x", F) is None
     # 抽象詞堆疊 ⇒ 不上卡
     assert fz.wish_of("我想：渴望把壓抑的靜默化成共振\n", "x", F) is None
@@ -115,11 +115,11 @@ def test_card_line_three_is_the_change_sentence_in_third_person_not_a_route() ->
     assert fz.tried_of(rec2, "x", F) == "它試了：那個角落現在多了一盞亮著的小燈"
     # 句子太長：取「現在…」那一半；沒有改變也沒有標題 ⇒ 沒有這一行
     long_ = "改變：" + "原本兩道光交界的地是一片平整而且沒有任何標記的青灰綠色區域，現在那個點出現了一圈細線\n感想：好。"
-    assert fz.tried_of("標題\n" + long_, "x", F) == "它試了，現在那個點出現了一圈細線", "只剩『現在…』那一半時接在『它試了，』後面"
-    assert fz.tried_of("標題\n改變：現在小燈亮著。\n感想：好。", "x", F) == "它試了，現在小燈亮著"
+    assert fz.tried_of("標題\n" + long_, "x", F) == "它試了：原本兩道光交界的地是一片平整而且沒有任何標記的青灰綠色區域，現在那個點出現了一圈細線", "整句完整又 ≤ 上限 ⇒ 整句；前綴永遠是『它試了：』"
+    assert fz.tried_of("標題\n改變：現在小燈亮著。\n感想：好。", "x", F) == "它試了：現在小燈亮著"
     assert fz.tried_of("", "x", F) is None
     # 標題行當後備（沒有改變段）
-    assert fz.tried_of("修補陶哨子的裂縫\n", "x", F) == "它試了：修補陶哨子的裂縫"
+    assert fz.tried_of("修補陶哨子的裂縫\n", "x", F) is None, "第四輪：標題是名詞片語、不當後備"
 
 
 def test_full_card_respects_cloud_and_tv_limits() -> None:
@@ -185,7 +185,7 @@ def test_per_cell_prompts_carry_the_condition_and_stay_clean() -> None:
 
 def test_system_prompt_first_line_is_a_wish_and_the_change_is_labelled() -> None:
     p = twinagent.SYSTEM_PROMPT
-    assert "以「我想：」開頭" in p and "主角是那樣東西，不是你的手" in p and "二十四個字以內" in p
+    assert "以「我想：」開頭" in p and "主角是那樣東西，不是你的手" in p and "三十個字以內" in p and "以句號結尾" in p
     assert "動詞放在最前面" in p and "不是名詞片語" in p
     assert "「怎麼試」：從這裡才寫動作" in p
     assert "提到的每一樣地上的東西，都要是你這一跑已經打開讀過的" in p
@@ -308,9 +308,10 @@ def test_round3_parse_report_records_what_the_real_cloud_parser_misses() -> None
 
 def test_cut_never_leaves_a_hanging_fragment_and_self_made_marker_stays_off_the_card() -> None:
     # 真跑 a1：太長的願望在「、」被截成「…由細線和紙捏成的」殘句 ⇒ 現在寧缺
-    assert fz.wish_of("我想：讓長桌廣場的土堆上出現一個由細線和紙捏成的、能發出聲音而且會轉圈的小鳥。\n", "x", F) is None
+    assert fz.wish_of("我想：讓長桌廣場的土堆上出現一個由細線和紙捏成的、能發出聲音而且會轉圈的小鳥。\n", "x", F) == \
+        "讓長桌廣場的土堆上出現一個由細線和紙捏成的、能發出聲音而且會轉圈的小鳥"        # 第四輪：整句完整且 ≤ 44 ⇒ 整句（不在『、』截）
     # 在整句的句讀（，）截，而且截出來的是完整的一句
-    assert fz.wish_of("我想：讓土堆上的紙船漂到暗處去，然後再也不用回來了啊啊啊啊啊啊啊啊啊啊\n", "x", F) == "讓土堆上的紙船漂到暗處去"
+    assert fz.wish_of("我想：讓土堆上的紙船漂到暗處去，然後再也不用回來了" + "啊" * 40 + "\n", "x", F) == "讓土堆上的紙船漂到暗處去"
     # 真跑 a1：「這是我自己做的」是紙上的標記句，不是卡上的內容
     rec = "標題\n\n改變：在土堆上放了一個這是我自己做的紙鳥，讓它成為土堆的一部分。\n感想：好。\n"
     assert fz.tried_of(rec, "x", F) == "它試了：在土堆上放了一個紙鳥，讓它成為土堆的一部分"
@@ -348,13 +349,15 @@ def test_paths_and_file_names_are_cleaned_to_object_names_and_a_predicative_de_i
     assert fz._complete("我把長椅上的紙筒拿走了，現在長椅中間是空的") is True
     assert fz._complete("一個由細線和紙捏成的") is False
     assert fz.tried_of("t\n\n改變：我把桌五_音樂盒.txt 從長桌廣場挪到了兩道光交界的地上。\n感想：好。\n", "x", F) == \
-        "它試了：把音樂盒 從長桌廣場挪到了兩道光交界的地上"
+        "它試了：把音樂盒從長桌廣場挪到了兩道光交界的地上"
 
 
 def test_subordinate_tail_and_self_made_marker_in_the_said_line() -> None:
     # 真跑 a？：「讓一張紙在沒有任何動作干擾的情況下，從一端到另一端慢慢地滑動」在逗號截成「…的情況下」——從屬子句還沒說完
     assert fz._complete("讓一張紙在沒有任何動作干擾的情況下", wish=True) is False
-    assert fz.wish_of("我想：讓一張紙在沒有任何動作干擾的情況下，從一端到另一端慢慢地平靜地滑動\n", "x", F) is None
+    assert fz.frag_reason("讓一張紙在沒有任何動作干擾的情況下", terminated=False, wish=True) == "hanging_tail"
+    assert fz.wish_of("我想：讓一張紙在沒有任何動作干擾的情況下，從一端到另一端慢慢地平靜地滑動\n", "x", F) == \
+        "讓一張紙在沒有任何動作干擾的情況下，從一端到另一端慢慢地平靜地滑動", "整句完整 ⇒ 整句；只有切在『情況下』的前半才是殘句"
     assert fz.said_of("感想：這是我自己做的，雖然沒能做出預想中的轟鳴，但至少讓那個東西動了。\n", "x", F) == \
         "雖然沒能做出預想中的轟鳴，但至少讓那個東西動了"
 
@@ -367,6 +370,6 @@ def test_label_lead_and_empty_quote_do_not_reach_the_card() -> None:
 
 
 def test_wish_length_does_not_count_the_closing_full_stop() -> None:
-    w = "讓長桌廣場的土堆上出現一個由細線和紙捏成的、能發出聲音的小鳥"
+    w = ("讓長桌廣場的土堆上出現一個由細線和紙捏成的、能發出聲音的小鳥而且" + "會轉圈" * 9)[:fz.MAX_WANT_CARD]
     assert len(w) == fz.MAX_WANT_CARD
     assert fz.wish_of("我想：" + w + "。\n", "x", F) == w

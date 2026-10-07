@@ -209,7 +209,11 @@ def mentions_ungiven(sentence: str, f: dict[str, Any]) -> bool:
 REALITY_WORDS = ("伴侶", "家人", "家庭", "父母", "爸", "媽", "老公", "老婆", "配偶", "男友", "女友", "戀人", "情人",
                  "孩子", "小孩", "兒子", "女兒", "親人", "朋友", "同事", "老闆", "主管", "客戶", "上司",
                  "工作", "職場", "公司", "上班", "下班", "學校", "學生", "老師", "同學", "論文", "考試", "課業",
-                 "寵物", "貓", "狗", "手機", "網路")
+                 "寵物", "貓", "狗", "手機", "網路",
+                 # 第四輪：金錢／債務／職涯／關係事件（真跑 a7：感想「他想面對債務」上了卡）
+                 "債務", "欠債", "欠款", "貸款", "房貸", "車貸", "借款", "卡債", "薪水", "薪資", "房租", "學費", "失業",
+                 "離職", "辭職", "面試", "履歷", "前任", "前男友", "前女友", "分手", "離婚", "結婚", "求婚", "懷孕",
+                 "住院", "醫院", "診所", "病歷", "憂鬱症", "焦慮症")
 
 
 def mentions_reality(sentence: str) -> bool:
@@ -611,9 +615,9 @@ VERDICT_PREFIX = "你的數位分身其實是："
 WANT_PREFIX = "它心裡想："
 TRIED_PREFIX = "它試了："
 SAID_PREFIX = "試完它說："
-MAX_WANT_CARD = 30          # 指令要求「我想：」之後 24 字內；卡上容忍到 30（再長就在句讀處截，截不出像樣的就不上卡）
-MAX_TRIED_CARD = 40         # 卡第 3 行（做了什麼＋世界留下的改變）的句子上限
-MAX_SAID_CARD = 40
+MAX_WANT_CARD = 44          # 指令要求「我想：」之後 30 字內、一句完整的話；卡上容忍到 44（再長取完整子句，子句不完整就換下一個候選，再不行才不上卡）
+MAX_TRIED_CARD = 56         # 卡第 3 行（做了什麼＋世界留下的改變）的句子上限（前綴 4 字 ⇒ 60 ≤ 60）
+MAX_SAID_CARD = 55          # 前綴 5 字 ⇒ 60 ≤ 60
 LOOK_NAME = "look_in.json"  # run-dir：外形三項＋氣質詞（觀眾 AI 的判決；撤回時跟 run-dir 一起刪）
 SHAPES = ("圓潤", "修長", "厚實", "小巧", "粗獷", "方正")
 TEXTURES = ("光滑", "指紋", "斑駁", "絨面")
@@ -649,7 +653,7 @@ def _card_sentence(raw: str, traits: str, f: dict[str, Any], max_len: int) -> st
         return None
     if sum(1 for w in ABSTRACT_WORDS if w in s) >= 2:           # 卡上一句話裡堆兩個以上被用爛的抽象詞 ⇒ 不上卡（寧缺）
         return None
-    return s.rstrip("。.！!")
+    return re.sub(r"(?<=[一-鿿」])[ \t]+(?=[一-鿿「])", "", s).rstrip("。.！!")          # 拿掉路徑清成物件名後留下的空白（「音樂盒 從…」）
 
 
 _WISH_LABEL = re.compile(r"^[\s#>*\-_]*(?:\d+[.、]\s*)?\**我想\**\s*[：:]\s*(.+)$")
@@ -663,17 +667,29 @@ _ACTION_START = re.compile(r"^(?:把|用|去|在|拿|走|先|從|到|將|替|幫
 
 def wish_of(plan_text: str, traits: str, f: dict[str, Any]) -> str | None:
     """卡第 2 行：PLAN.md 第一個「我想：」開頭的行，取冒號之後的願望句（想要，不是動作）。
-    沒有「我想：」＝沒有這一行（寧缺；不退回拿動作句充數）。句首重複的「想／想要」拿掉；> `MAX_WANT_CARD` 字在句讀處截。"""
-    for ln in str(plan_text or "").splitlines()[:12]:
+    候選依序：「我想：」那一句 → PLAN「為什麼是他」段與試的紀錄裡以「我想＋願望動詞」開頭的完整句；每個候選都要**是完整的一句**
+    （`frag_reason`）且過卡上共同防呆，過不了就換下一個，全部不行才沒有這一行（寧缺；不退回拿動作句充數）。"""
+    cands: list[tuple[str, bool]] = []
+    lines = str(plan_text or "").splitlines()
+    for ln in lines[:12]:
         m = _WISH_LABEL.match(ln.strip())
-        if not m:
+        if m:
+            cands += _sentences_of(m.group(1).strip().strip("「」『』\"'*"))[:1]
+            break
+    else:
+        return None                    # 沒有「我想：」標籤＝第二輪的動作句，不充數
+    for ln in lines[1:]:
+        for s, term in _sentences_of(ln):
+            m = re.match(rf"^(?:\d+[.、]\s*)?我想要?(?=(?:{_WISH_VERBS}))(.+)$", s)
+            if m:
+                cands.append((m.group(1), term))
+    for raw, term in cands:
+        w = re.sub(rf"^想要?(?=(?:{_WISH_VERBS}))", "", _clean_paths(raw)).lstrip("：: ，,")
+        if not w or _ACTION_START.match(w) or not _WISH_START.match(w):    # 以動作開頭＝計畫句；不是「動詞在前的願望」＝名詞片語
             continue
-        w = m.group(1).strip().strip("「」『』\"'*").rstrip("。.！!")        # 句尾標點不算進字數（真跑 a1：30 字的願望被「。」擠成 31 字而丟掉）
-        w = re.sub(rf"^想要?(?=(?:{_WISH_VERBS}))", "", _clean_paths(w)).lstrip("：: ，,")
-        if _ACTION_START.match(w) or not _WISH_START.match(w):   # 以動作開頭＝計畫句；不是「動詞在前的願望」＝名詞片語 ⇒ 寧缺
-            return None
-        w = _fit(w, MAX_WANT_CARD, wish=True) if w else None  # 太長就在子句處截，截不出完整的一句就不上卡（不硬切半個詞）
-        return _card_sentence(w, traits, f, MAX_WANT_CARD) if w else None
+        got = _first_ok([(w, term)], MAX_WANT_CARD, traits, f, wish=True)
+        if got:
+            return got
     return None
 
 
@@ -681,13 +697,17 @@ want_of = wish_of          # 舊名字（第二輪的呼叫端）
 
 
 def said_of(record_text: str, traits: str, f: dict[str, Any]) -> str | None:
-    """卡第 4 行的句子：「試的紀錄」裡**最後一個**「感想：…」。找不到＝None（不補罐頭句）。"""
+    """卡第 4 行的句子：「試的紀錄」裡**最後一個**「感想：…」；取第一個「完整的句子」（到 。！？ 為止、≤ `MAX_SAID_CARD`），
+    太長取完整子句，再不行換下一句，都不行＝None（不補罐頭句）。"""
     hit = None
     for ln in str(record_text or "").splitlines():
         m = _SAID_KEY.match(ln)
         if m:
             hit = m.group(1)
-    return _card_sentence(_SELF_MADE.sub("", hit), traits, f, MAX_SAID_CARD) if hit else None
+    if not hit:
+        return None
+    return _first_ok([(_SELF_MADE.sub("", s).strip(), term) for s, term in _sentences_of(_clean_paths(hit))[:3]],
+                     MAX_SAID_CARD, traits, f)
 
 
 def _first_sentence(text: str) -> str:
@@ -763,33 +783,175 @@ def _fit(sent: str, limit: int, wish: bool = False) -> str | None:
     return best
 
 
-def changed_of(record_text: str) -> str | None:
-    """「試的紀錄」裡世界留下的改變（原文一個字不改，只選句）：以「改變：」開頭的那一段的第一句；沒有就取「感想：」前面最近一段的第一句。
-    都沒有＝None。"""
+# ---------------------------------------------------------------------------
+# P13 第四輪：殘句不上卡。取**完整句**（到 。！？ 為止）且 ≤ 上限；太長退到「完整子句」且該子句自己語意完整；
+# 都不行換下一個候選句；全部不行才沒有那一行。判斷是結構規則（不只字表）：結尾掛著、從屬沒有主句、「但看到…」的時間殘片、
+# 以接續詞開頭、結尾是名詞（「…的反應」）卻沒有主要動詞、標題式結尾。規則只用於挑句，不改任何一個字。
+# 誠實邊界：確定性字面／結構啟發式，擋不住所有殘句（負控制集 `tests/test_twin_cardsentence_20261008.py` 釘住已知的），也會誤丟。
+# ---------------------------------------------------------------------------
+
+_SUBORD_HEAD = ("雖然", "儘管", "即使", "就算", "如果", "假如", "要是", "因為", "由於", "既然", "只要", "一旦", "無論", "不管",
+                "每當", "等到", "隨著", "當")
+_CONN_LEAD = re.compile(r"^(?:但是|但|可是|不過|然而|而且|而|並且|並|所以|因此|於是|然後|接著|還有|以及)")
+_TEMPORAL_FRAG = re.compile(r"^(?:看到|看著|看見|聽到|聽見|想到|發現|當|等到|每當|隨著|一邊|一面)")
+_CONT_START = ("是", "讓", "使", "令", "才", "就", "也", "並", "而", "且", "則", "還", "卻", "所以", "因此", "於是", "然後", "接著",
+               "從而", "導致", "以及", "或者", "或是")
+_TAIL_MORE = ("或者", "還是", "以及", "而是", "並且", "想要", "打算", "試圖", "需要", "應該", "可以", "能夠", "開始", "繼續", "準備",
+              "正在", "嘗試")
+_LOCATIVE_PP = re.compile(r"^(?:我|它|他)?(?:在|從|向|往|朝|於)[^，；,;]*(?:上|下|裡|中|內|旁|邊|前|後|外|處|旁邊|附近)$")
+_TITLE_END = ("紀錄", "記錄", "實驗", "嘗試", "計畫", "計劃", "過程", "筆記", "清單", "報告", "結果")
+#: 句尾名詞檢查時要遮掉的「含動詞字的名詞」（「動作」的「動」不是謂語）
+_NOUN_MASK = ("動作", "活動", "運動", "種子", "空位", "長椅", "長桌", "出口", "入口", "開口", "開始", "對稱", "連結", "完整性")
+#: 這一子句有主要動詞的證據（句尾是「…的N」時用）：有／是／把／將／成為／變成／了／過／動詞＋方向補語／「著＋這個」
+_EVID = re.compile(r"[有是把將]|成為|變成|變為|成了|[了過]|著(?:這|那|一|某)"
+                   r"|[放擺掛貼綁繫塞裝帶移挪壓蓋插疊堆丟送交遞做捏拿找看聽寫畫留](?:進|入|在|到|上|向|往|給|回|出|下|走|開|掉|起)")
+_EVID_NOISE = re.compile(r"所有|擁有|但是|於是|或是|總是|還是|而是|經過|通過|超過|把握|了解")
+
+
+def _clauses_of(s: str) -> list[str]:
+    return [c.strip() for c in re.split(r"[，,；;]", s) if c.strip()]
+
+
+def _mask(s: str) -> str:
+    s = re.sub("|".join(PLACES) + r"|「[^」]*」", "", s)
+    for w in _NOUN_MASK:
+        s = s.replace(w, "")
+    return s
+
+
+def _has_verb(s: str) -> bool:
+    return any(ch in _PRED for ch in _mask(s))
+
+
+def frag_reason(s: str, *, terminated: bool = False, wish: bool = False) -> str | None:
+    """這一段像不像**完整的一句**？回 None＝像；回字串＝殘句的理由。
+    `terminated`＝這一句在原文有 。！？ 收尾（模型自己寫完的整句，不再套「結尾是名詞」那組嚴格規則）；
+    `wish`＝願望句（開頭的動詞自己就是謂語）。切出來的子句、沒有句號的行一律用嚴格規則（terminated=False）。"""
+    c = str(s or "").strip().rstrip("，、；,; ")
+    if len(c) < 5:
+        return "short"
+    if c.endswith(_TAIL_BAD) and not (c.endswith("的") and re.search(r"是.{0,8}的$", c)) and not c.endswith("的地"):
+        return "hanging_end"                                  # 「兩道光交界的地」的「地」是名詞（地方），前面一定是「的」；副詞的「地」不會接在「的」後面
+    if c.endswith(_TAIL_PHRASES) or c.endswith(_TAIL_MORE):
+        return "hanging_tail"
+    cl = _clauses_of(c)
+    if not cl:
+        return "short"
+    if cl[-1].startswith(_SUBORD_HEAD) or (cl[0].startswith(_SUBORD_HEAD) and len(cl) < 2):
+        return "subordinate_without_main"                      # 「雖然…」沒有主句，或句子最後掛著一個「雖然很小聲」
+    last = cl[-1]
+    core = _CONN_LEAD.sub("", last, count=1)
+    if (core != last and _TEMPORAL_FRAG.match(core)) or last.startswith(("等到", "每當", "隨著")):
+        return "temporal_fragment"
+    if terminated:
+        return None
+    if any(c.endswith(w) for w in _TITLE_END) and not _EVID.search(_EVID_NOISE.sub("", c)):
+        return "title_like"
+    if not wish and cl[0].startswith(_CONT_START):
+        return "continuation_start"
+    if _LOCATIVE_PP.match(last):
+        return "locative_phrase"                              # 「（我）在…的石壁上」：只交代地點，動作在下一個子句
+    if wish and _WISH_START.match(cl[0]) and not cl[0].startswith(("讓", "有人", "有東西", "能", "可以")):
+        return None                                       # 「看…」「聽見…的第十二個音」：開頭的動詞自己就是謂語，後面的名詞是它的受詞
+    body = last[1:] if (wish and len(cl) == 1) else last
+    if not _has_verb(body):
+        return "no_verb"
+    de = last.rfind("的")
+    if 0 <= de < len(last) - 1:
+        tail = last[de + 1:]
+        if len(tail) <= 8 and not _has_verb(tail) and not _EVID.search(_EVID_NOISE.sub("", last)):
+            return "nominal_end"                          # 「…被撥動後的反應」「…沒說出口的情感」：句尾是名詞、前面沒有主要動詞
+    return None
+
+
+def _sentences_of(text: str) -> list[tuple[str, bool]]:
+    """文字 → [(句子, 有沒有 。！？ 收尾)]；沒有收尾的只可能是最後一句。"""
+    t = " ".join(str(text or "").split())
+    out: list[tuple[str, bool]] = []
+    buf = ""
+    for ch in t:
+        if ch in _SENT_END:
+            if buf.strip():
+                out.append((buf.strip(), True))
+            buf = ""
+        else:
+            buf += ch
+    if buf.strip():
+        out.append((buf.strip(), False))
+    return out
+
+
+def _fit_options(sent: str, terminated: bool, limit: int, wish: bool = False) -> list[str]:
+    """這一句放上卡的可能寫法（優先序）：整句（完整且 ≤ limit）→「現在…」那一半 → 越長越好的完整子句前綴。"""
+    s = sent.strip().rstrip("，、；,; ")
+    out: list[str] = []
+    if len(s) <= limit and frag_reason(s, terminated=terminated, wish=wish) is None:
+        out.append(s)
+    if len(s) > limit and not wish:
+        i = s.rfind("現在")
+        if i > 0 and len(s) - i <= limit and frag_reason(s[i:], terminated=False) is None:
+            out.append(s[i:])
+    clauses = re.findall(r"[^，；,;]+[，；,;]?", s)
+    pre: list[str] = []
+    for k in range(1, len(clauses)):                     # 不含整句（整句在上面處理過）
+        cand = "".join(clauses[:k]).rstrip("，、；,; ")
+        if len(cand) > limit:
+            break
+        if len(cand) >= 8 and frag_reason(cand, terminated=False, wish=wish) is None:
+            pre.append(cand)
+    out += sorted(pre, key=len, reverse=True)
+    return out
+
+
+def _first_ok(cands: list[tuple[str, bool]], limit: int, traits: str, f: dict[str, Any], wish: bool = False) -> str | None:
+    """依序試每個候選句的每個寫法，第一個既完整又過卡上共同防呆（現實詞／LEAK／沒給的東西…）的就是答案。"""
+    for s, term in cands:
+        for opt in _fit_options(s, term, limit, wish):
+            got = _card_sentence(opt, traits, f, limit)
+            if got:
+                return got
+    return None
+
+
+def changed_candidates(record_text: str) -> list[tuple[str, bool]]:
+    """「試的紀錄」裡世界留下的改變（原文選句、不改字）：以「改變：」開頭那一段的前兩句；沒有就取「感想：」前面最近一段的前兩句。
+    **標題行不當候選**（名詞片語不是做了什麼）。"""
     lines = str(record_text or "").splitlines()
+    body = None
     for i, ln in enumerate(lines):
         m = _CHANGE_LABEL.match(ln.strip())
         if m:
-            body = m.group(1).strip()
-            if not body:                                   # 標籤單獨一行，內容在下一行
-                body = next((x.strip() for x in lines[i + 1:] if x.strip()), "")
-            return _fit(_first_sentence(_clean_paths(body)), MAX_TRIED_CARD) or None
-    said = next((i for i in range(len(lines) - 1, -1, -1) if _SAID_KEY.match(lines[i])), None)
-    if said is None:
-        return None
-    for ln in reversed(lines[:said]):
-        t = ln.strip()
-        if t and "這是我自己做的" not in t[:8] and not t.startswith("#"):
-            return _fit(_first_sentence(_clean_paths(t)), MAX_TRIED_CARD) or None
+            body = m.group(1).strip() or next((x.strip() for x in lines[i + 1:] if x.strip()), "")
+            break
+    if body is None:
+        said = next((i for i in range(len(lines) - 1, -1, -1) if _SAID_KEY.match(lines[i])), None)
+        if said is None:
+            return []
+        for ln in reversed(lines[:said]):
+            t = ln.strip()
+            if t and "這是我自己做的" not in t[:8] and not t.startswith("#"):
+                body = t
+                break
+    if not body:
+        return []
+    return [(_SELF_MADE.sub("", _LABEL_LEAD.sub("", s)).strip(), term) for s, term in _sentences_of(_clean_paths(body))[:2]]
+
+
+def changed_of(record_text: str) -> str | None:
+    """（舊介面）改變那一句的第一個像樣寫法；沒有＝None。"""
+    for s, term in changed_candidates(record_text):
+        opts = _fit_options(s, term, MAX_TRIED_CARD)
+        if opts:
+            return opts[0]
     return None
 
 
 def title_line_of(record_text: str) -> str | None:
-    """「試的紀錄」第一個有內容的行（指令要求它是這次試的標題）。"""
+    """「試的紀錄」第一個有內容的行（指令要求它是這次試的標題）。第四輪起不再上卡（標題是名詞片語），只留給檔案庫。"""
     for ln in str(record_text or "").splitlines():
         t = re.sub(r"^[\s#>*\-_]+", "", ln).strip().strip("「」『』\"'*")
         if t:
-            if t in _GENERIC_STEMS or t.startswith("試的紀錄"):      # 檔案自己的標題字樣不是這次試的名字（指令要求第一行是標題 ⇒ 沒有就是沒有）
+            if t in _GENERIC_STEMS or t.startswith("試的紀錄"):
                 return None
             t = _LABEL_LEAD.sub("", t).rstrip("。.")
             return t if 0 < len(t) <= MAX_TRIED_CARD else None
@@ -797,17 +959,12 @@ def title_line_of(record_text: str) -> str | None:
 
 
 def tried_of(record_text: str, traits: str, f: dict[str, Any]) -> str | None:
-    """卡第 3 行：「它試了：<做了什麼＋世界留下的改變>」——取「試的紀錄」的改變那一句（沒有就用標題行），過卡上一句話的共同防呆。
-    **不再放路線**（先去了哪、再到哪；路線留在檔案庫）。"""
-    ch = changed_of(record_text)
-    raw = _SELF_MADE.sub("", _LABEL_LEAD.sub("", ch)) if ch else None      # 「這是我自己做的」是紙上的標記句，不是卡上的內容
-    raw = raw or title_line_of(record_text)
-    s = _card_sentence(raw, traits, f, MAX_TRIED_CARD) if raw else None
+    """卡第 3 行：`它試了：<做了什麼＋世界留下的改變>`——前綴**永遠**是「它試了：」（手機與電視都靠它拆前綴）。
+    取「試的紀錄」的改變那一句（完整句；太長取完整子句；不行換下一句），過卡上一句話的共同防呆；**不放路線、不放標題**。"""
+    s = _first_ok(changed_candidates(record_text), MAX_TRIED_CARD, traits, f)
     if not s:
         return None
-    s = s.replace("我們", "它們").replace("我", "它")         # 卡是第三人稱：「我」→「它」
-    if s.startswith("現在"):                                  # 只剩「現在…」那一半（改變）：接在「它試了，」後面才通
-        return "它試了，" + s
+    s = s.replace("我們", "它們").replace("我", "它")           # 卡是第三人稱：「我」→「它」
     return TRIED_PREFIX + (s[1:] if s.startswith("它") and len(s) > 6 else s)       # 「它試了：它…」→「它試了：…」
 
 
