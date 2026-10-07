@@ -35,6 +35,8 @@
    （`from vacant_network.intake import approval` 再呼叫它的函式），都繞得過）。
    反過來它也會多擋：沒加引號的 `grep vacant hook` 會被當成在叫 `vacant hook`；餵給 shell 的
    heredoc 不管 shell 後面帶什麼引數都當成程式碼；找不到結束定界符的 heredoc 內文也當成指令。
+   寫入側同樣有很多字串層繞法沒擋住（已知、不處理的例子：`cp -t`、`sed -i` 的各種變體、
+   `perl -pi`、`git -C … checkout`）。
    真正的分權還是把 reviewer／approver／owner 金鑰放到另一個帳號——掛鉤擋下的指令，
    在掛鉤外面（同一個帳號、同一把 owner 金鑰）照樣跑得動。
 2. **掛鉤壞掉不可以弄死 agent**：任何例外都放行並落一筆錯誤。這一層是增效與觀測，
@@ -62,8 +64,87 @@ WRITE_TOOLS = frozenset({"write", "edit", "multiedit", "patch", "apply_patch", "
 SHELL_TOOLS = frozenset({"bash", "shell", "exec", "exec_command", "local_shell",
                          "run_command", "terminal", "unified_exec"})
 #: 直譯器程式碼裡的寫入 API（`python3 -c "open(p,'w')"` 這種路徑藏在程式碼字串裡的情況）。
-_CODE_WRITE_HINT = re.compile(r"\bopen\(|write_text|write_bytes|writeFile|unlink|remove\(|"
-                              r"rmtree|rename|replace\(|truncate|chmod|appendFile")
+_CODE_WRITE_HINT = re.compile(
+    r"write_text|write_bytes|\.write\(|writeFile|appendFile|WriteStream|unlink|remove\(|"
+    r"\brm(?:Sync)?\(|rmtree|shutil\.|copyfile|copy2|rename|truncate|chmod|\bos\.replace\(")
+_OPEN_CALL = re.compile(r"(?<![\w])(\.?)open\(")
+_LITERAL = re.compile(r"""^\s*[rbRBuU]*(['"])(.*?)\1\s*$""", re.S)
+
+
+def _call_args(s: str, i: int) -> list[str] | None:
+    """`s[i]` 是 `(` 之後的位置；回傳頂層引數字串（括號／字串平衡）；沒收尾回 None。"""
+    depth, q, cur, out = 1, "", [], []
+    k = i
+    while k < len(s):
+        c = s[k]
+        if q:
+            cur.append(c)
+            if c == "\\" and k + 1 < len(s):
+                cur.append(s[k + 1])
+                k += 1
+            elif c == q:
+                q = ""
+        elif c in "'\"":
+            q = c
+            cur.append(c)
+        elif c in "([{":
+            depth += 1
+            cur.append(c)
+        elif c in ")]}":
+            depth -= 1
+            if depth == 0:
+                out.append("".join(cur))
+                return out
+            cur.append(c)
+        elif c == "," and depth == 1:
+            out.append("".join(cur))
+            cur = []
+        else:
+            cur.append(c)
+        k += 1
+    return None
+
+
+def _open_may_write(code: str) -> bool:
+    """`open(...)` 只有在看得到寫入模式、或模式看不出來（非字面值）時才算寫入。
+
+    唯讀（只有一個引數、或模式字面值不含 w/a/x/+）⇒ False。保守：拿不準算寫。
+    """
+    for m in _OPEN_CALL.finditer(code):
+        args = _call_args(code, m.end())
+        if args is None:
+            return True
+        cands: list[str] = []
+        for j, a in enumerate(args):
+            kw = re.match(r"\s*mode\s*=(.*)$", a, re.S)
+            lit0 = _LITERAL.match(a)
+            if kw:
+                cands.append(kw.group(1))
+            elif j == 1:
+                cands.append(a)
+            elif j == 0 and m.group(1) and lit0 and len(lit0.group(2)) <= 3:
+                cands.append(a)  # Path(p).open('w')：第一個引數就是模式
+        for c in cands:
+            lit = _LITERAL.match(c)
+            if lit is None or set(lit.group(2)) & set("wax+"):
+                return True
+    return False
+
+
+def _replace_may_write(code: str) -> bool:
+    """`Path(...).replace(目標)`（只有一個引數）算寫；`s.replace('a','b')` 不算。"""
+    for m in re.finditer(r"\.replace\(", code):
+        args = _call_args(code, m.end())
+        if args is None or (len(args) == 1 and args[0].strip()):
+            return True
+    return False
+
+
+def _code_may_write(code: str) -> bool:
+    return bool(_CODE_WRITE_HINT.search(code)) or _open_may_write(code) \
+        or _replace_may_write(code)
+
+
 #: 所有非選項引數都是寫入目標的指令。
 _WRITE_ALL_ARGS = frozenset({"rm", "unlink", "shred", "truncate", "chmod", "chown", "chgrp",
                              "tee", "touch", "mkdir", "rmdir", "patch"})
@@ -235,11 +316,19 @@ def _path_forms(r: pathlib.Path, cwd: str) -> list[str]:
     return [f for f in forms if f and f != "."]
 
 
+_LEFT_OK = r"(?:^|(?<=[\s'\"=(,\[{`])|(?<=\./))"
+
+
 def _in_code(token: str, roots: list[pathlib.Path], cwd: str) -> pathlib.Path | None:
-    """路徑以**完整的路徑元件**出現在一段程式碼字串裡（後面接結尾、`/`、引號、空白、括號）。"""
+    """路徑以**完整的路徑元件**出現在一段程式碼字串裡（後面接結尾、`/`、引號、空白、括號）。
+
+    相對形式（cwd==HOME 時的 `.vacant`）另外要求左邊界：開頭、引號、空白、`=`、`(`、`,`、
+    `./`；`proj/.vacant/x`、`foo.vacant/` 不算。絕對／`~`／`$HOME` 形式不加左邊界（保守）。
+    """
     for r in roots:
         for f in _path_forms(r, cwd):
-            if re.search(re.escape(f) + r"(?=$|[/'\"\s),;])", token):
+            left = "" if f[:1] in "/~$" else _LEFT_OK
+            if re.search(left + re.escape(f) + r"(?=$|[/'\"\s),;])", token):
                 return r
     return None
 
@@ -269,7 +358,7 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
             if hit is not None:
                 return "write", hit
         for tok in args:
-            if _CODE_WRITE_HINT.search(tok):
+            if _code_may_write(tok):
                 hit = _in_code(tok, write_prot, eff_cwd)
                 if hit is not None:
                     return "write", hit
