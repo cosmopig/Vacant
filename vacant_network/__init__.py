@@ -15,34 +15,79 @@ check，全部通過後才啟動 Hermes 或任意 CLI agent。底層同時保留
       host                              一台機器的常駐組裝
 """
 
-from .agent import SolveResult, Vacant, checkable_cases
-from .attest import make_attestation, verify_attestation
-from .body import CapabilityCard, VacantBody
-from .brains import Brain, HermesBrain, LMStudioBrain, OpenAIBrain
-from .checks import compile_check, extract_code, project_checked_answer
-from .codebench import code_cases
-from .composer import ComposeResult, Composer
-from .controller import (
-    AgentEvidenceError,
-    AgentRunFailed,
-    ArgvTemplate,
-    ControllerResult,
-    GatePolicy,
-    GateRejected,
-    VacantFirstController,
-    hermes_argv,
-    verify_delivery,
-)
-from .gateway import BadSignature, CallOutcome, Gateway, ReputationRejected
-from .host import Host
-from .identity import Identity, PublicIdentity
-from .logbook import ChainError, Logbook
-from .envelope import ChannelGuard, Envelope, ReplayError
-from .registry import Registry
-from .receipt import ReceiptError, VerifiedReceipt, verify_delegation_receipt
-from .reputation import Reputation
-from .substrate import EchoSubstrate, HermesACPSubstrate, LMStudioSubstrate, Substrate, SubstrateResult
-from .waker import Waker, WakeResult
+# PEP 562 惰性匯入：hook 熱路徑（`python -m vacant_network hook`，每個工具呼叫兩次）
+# 只需要 adapters／trace，不該為了套件 __init__ 連帶載入 brains（urllib.request）、
+# controller、gateway、host 等。對外名字與 __all__ 不變，`from vacant_network import X`
+# 照舊可用，首次取用才載入對應子模組。
+# 誠實邊界：以前「匯入套件」會順帶把這些子模組掛成套件屬性；現在要用到才有。
+_LAZY = {
+    "SolveResult": ".agent",
+    "Vacant": ".agent",
+    "checkable_cases": ".agent",
+    "make_attestation": ".attest",
+    "verify_attestation": ".attest",
+    "CapabilityCard": ".body",
+    "VacantBody": ".body",
+    "Brain": ".brains",
+    "HermesBrain": ".brains",
+    "LMStudioBrain": ".brains",
+    "OpenAIBrain": ".brains",
+    "compile_check": ".checks",
+    "extract_code": ".checks",
+    "project_checked_answer": ".checks",
+    "code_cases": ".codebench",
+    "ComposeResult": ".composer",
+    "Composer": ".composer",
+    "AgentEvidenceError": ".controller",
+    "AgentRunFailed": ".controller",
+    "ArgvTemplate": ".controller",
+    "ControllerResult": ".controller",
+    "GatePolicy": ".controller",
+    "GateRejected": ".controller",
+    "VacantFirstController": ".controller",
+    "hermes_argv": ".controller",
+    "verify_delivery": ".controller",
+    "BadSignature": ".gateway",
+    "CallOutcome": ".gateway",
+    "Gateway": ".gateway",
+    "ReputationRejected": ".gateway",
+    "Host": ".host",
+    "Identity": ".identity",
+    "PublicIdentity": ".identity",
+    "ChainError": ".logbook",
+    "Logbook": ".logbook",
+    "ChannelGuard": ".envelope",
+    "Envelope": ".envelope",
+    "ReplayError": ".envelope",
+    "Registry": ".registry",
+    "ReceiptError": ".receipt",
+    "VerifiedReceipt": ".receipt",
+    "verify_delegation_receipt": ".receipt",
+    "Reputation": ".reputation",
+    "EchoSubstrate": ".substrate",
+    "HermesACPSubstrate": ".substrate",
+    "LMStudioSubstrate": ".substrate",
+    "Substrate": ".substrate",
+    "SubstrateResult": ".substrate",
+    "Waker": ".waker",
+    "WakeResult": ".waker",
+}
+
+
+def __getattr__(name):
+    mod = _LAZY.get(name)
+    if mod is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+
+    val = getattr(importlib.import_module(mod, __name__), name)
+    globals()[name] = val
+    return val
+
+
+def __dir__():
+    return sorted(set(globals()) | set(_LAZY))
+
 
 __version__ = "0.9.0"
 
