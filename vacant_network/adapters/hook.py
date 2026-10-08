@@ -450,6 +450,12 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
                               if ev.command else None),
            # 給人的訊息含繳付物裡的值：不進事件紀錄（誠實邊界 2），它在病歷目錄的報告裡
            **{k: v for k, v in d.record.items() if k != "user_message"}}
+    zr = d.record.get("zero")
+    if ev.kind == "session_end" and isinstance(zr, dict) and "zero_ran" not in rec:
+        # session_end 也分得出「沒查」和「查過」（untraceable 的 session_end 不畫給人，只留這兩欄）
+        rec["zero_ran"] = bool(zr.get("ran"))
+        if not zr.get("ran"):
+            rec["why"] = zr.get("why") or "no workspace"
     _log("events.jsonl", rec)
     if contract is not None and (d.action != "allow" or ev.kind in ("stop", "session_end")):
         try:

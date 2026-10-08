@@ -112,6 +112,22 @@ def project_root(cwd: str) -> pathlib.Path:
         p = p.parent
 
 
+def _config_dirs(home: pathlib.Path) -> list[pathlib.Path]:
+    """預設的四個設定目錄＋被環境變數搬走的那幾個（`CLAUDE_CONFIG_DIR`、`CODEX_HOME`、`PI_CODING_AGENT_DIR`、
+    `$XDG_CONFIG_HOME/opencode`）。⚠ 評測（Harbor）把 `PI_CODING_AGENT_DIR` 設在 `/tmp/harbor-pi-agent`，
+    但 cwd 是題目的 `/app`，不在裡面，所以不受影響；若有人把 cwd 放進該目錄，就會被當成「太廣」而不記。"""
+    out = [(home / cd).resolve() for cd in AGENT_CONFIG_DIRS]
+    for var, sub in (("CLAUDE_CONFIG_DIR", ""), ("CODEX_HOME", ""), ("PI_CODING_AGENT_DIR", ""),
+                     ("XDG_CONFIG_HOME", "opencode")):
+        v = os.environ.get(var, "").strip()
+        if v:
+            try:
+                out.append((pathlib.Path(v).expanduser() / sub).resolve())
+            except (OSError, RuntimeError):
+                pass
+    return out
+
+
 def _traceable(ws: pathlib.Path) -> bool:
     """`/`、家目錄或它的上層（一掃就是整台機器）、Vacant 自己的狀態目錄（或它的上下層）都不追
     （2026-09-24 審查 recorder#11：原本只比「相等」，契約放在家目錄就把整個家目錄掃進去）。"""
@@ -120,8 +136,7 @@ def _traceable(ws: pathlib.Path) -> bool:
     if ws == pathlib.Path(ws.anchor) or ws == home or ws in home.parents:
         return False
     # agent 自己的設定目錄（工作階段紀錄、金鑰、模型設定）不是專案：它本身、它底下、它的上層都不追
-    for cd in AGENT_CONFIG_DIRS:
-        d = (home / cd).resolve()
+    for d in _config_dirs(home):
         if ws == d or d in ws.parents or ws in d.parents:
             return False
     sd = state_dir().resolve()

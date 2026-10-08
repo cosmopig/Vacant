@@ -118,3 +118,44 @@ def test_a_normal_project_still_gets_sent_back_for_a_missing_output(env):
     assert "Vacant did not check" not in d["reason"]
     stop = [e for e in _events() if e["kind"] == "stop"][-1]
     assert stop["zero_ran"] is True and "why" not in stop
+
+
+# ── 對抗審查（A／B／D）──────────────────────────────────────────────
+def test_session_end_does_not_use_up_the_once_per_session_message(env):
+    """A：session_end 不畫給人；不能因為它就把這個工作階段記成「說過了」，之後的 Stop 要說。"""
+    _install()
+    hook.handle("pi", "session_end", {"session_id": "A", "cwd": "/", "aborted": True,
+                                      "final_answer": False})
+    end = [e for e in _events() if e["kind"] == "session_end"][-1]
+    assert end["zero_ran"] is False and end["why"] == "untraceable_cwd"
+    assert "user_message" not in end
+    d = _pi_stop("/", session="A")
+    assert d["note"].startswith("Vacant did not check this work")
+
+
+def test_without_a_session_id_every_stop_is_told(env):
+    """B：沒有 session_id 不去重（不能全部共用 `unknown` 鍵而只有第一個被告知）。"""
+    _install()
+    for _ in range(2):
+        out, _, _ = hook.handle("pi", "stop", {"cwd": "/", "final_text": "x"})
+        assert json.loads(out)["note"].startswith("Vacant did not check this work")
+
+
+def test_relocated_config_dirs_are_not_workspaces(env, monkeypatch):
+    """D：被環境變數搬走的設定目錄也不是專案；Harbor 的 cwd（`/app` 類）不受影響。"""
+    _install()
+    moved = {"CLAUDE_CONFIG_DIR": env / "cc", "CODEX_HOME": env / "cx",
+             "PI_CODING_AGENT_DIR": env / "pi-agent"}
+    for k, v in moved.items():
+        v.mkdir()
+        monkeypatch.setenv(k, str(v))
+    xdg = env / "xdg"
+    (xdg / "opencode").mkdir(parents=True)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
+    for v in [*moved.values(), xdg / "opencode", xdg / "opencode" / "sub"]:
+        v.mkdir(parents=True, exist_ok=True)
+        assert capture.workspace_for(str(v)) is None, v
+        assert capture.untraceable_cwd(str(v)) is not None, v
+    app = env / "app"
+    app.mkdir()
+    assert capture.workspace_for(str(app)) == app.resolve()
