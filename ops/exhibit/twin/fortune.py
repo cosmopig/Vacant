@@ -958,10 +958,73 @@ def title_line_of(record_text: str) -> str | None:
     return None
 
 
-def tried_of(record_text: str, traits: str, f: dict[str, Any]) -> str | None:
+#: 兩張卡的行共用「這個詞」不算數的泛用詞（沒有指到世界上的哪個東西）
+_GENERIC_BIGRAMS = frozenset("位置 重新 回到 一半 一個 一張 一些 一點 原本 沒有 自己 現在 世界 東西 地方 想要 可以 這個 那個 那張 這張 "
+                             "出現 變成 看見 發現 開始 結果 上面 裡面 旁邊 中間 之後 之前 然後 因為 所以 如果 或是 還是 已經 能夠 "
+                             "沉重 情感 感覺 感到 壓迫 心裡 真實 內心 一點 完整".split())
+_BIGRAM_STOP = set("的了在把讓它他她我們你是有被和與及或但而並也就都很不這那一個張些點上下裡中之後前並將從向往跟像如地得著過")
+_CJK_RUN = re.compile(r"[一-鿿]+")
+
+
+def key_bigrams(text: str) -> set[str]:
+    """一句話裡的**關鍵名詞字串**（確定性、字面）：連續漢字取相鄰兩字，含虛詞字（的了在把…）或在泛用詞表裡的不算。
+    第 2 行（願望）與第 3 行（做了什麼）共用任何一個 ⇒ 兩行講的是同一個東西（紙卡、缺口、薄泥…）。"""
+    out: set[str] = set()
+    for run in _CJK_RUN.findall(str(text or "")):
+        for i in range(len(run) - 1):
+            bg = run[i:i + 2]
+            if bg[0] in _BIGRAM_STOP or bg[1] in _BIGRAM_STOP or bg in _GENERIC_BIGRAMS or bg in ABSTRACT_WORDS:
+                continue
+            out.add(bg)
+    return out
+
+
+def shared_with_wish(sentence: str, wish: str | None) -> int:
+    """這一句與第 2 行（願望句）共用的關鍵名詞字串個數（沒有願望＝0）。"""
+    if not wish:
+        return 0
+    return len(key_bigrams(sentence) & key_bigrams(wish))
+
+
+_CHANGE_MARK = re.compile(r"[了過]|現在|變成|成為|留下|放在|蓋住|堆在|擺在|落在|填")
+_RECORD_NOISE = re.compile(r"^(?:#|試的紀錄|這次試的標題|(?:改變|感想|最後怎麼收場|中間出了什麼事|試了什麼|怎麼試的?)\s*[：:])")
+
+
+def body_candidates(record_text: str) -> list[tuple[str, bool]]:
+    """「試的紀錄」正文裡的每一個句子（原文、不改字）：略過標題行、「感想：」、「改變：」（那一段由 `changed_candidates` 管）。"""
+    out: list[tuple[str, bool]] = []
+    lines = str(record_text or "").splitlines()
+    for i, ln in enumerate(lines):
+        t = ln.strip()
+        if not t or _RECORD_NOISE.match(t) or t.endswith(".md") or _SAID_KEY.match(t):
+            continue
+        if len(t) < 16 and not re.search(r"[。！？]", t) and i <= 2:         # 標題行（名詞片語）不當候選
+            continue
+        for sn, term in _sentences_of(_clean_paths(t)):
+            sn = _SELF_MADE.sub("", _LABEL_LEAD.sub("", sn)).strip()
+            if sn:
+                out.append((sn, term))
+    return out
+
+
+def rank_tried(change: list[tuple[str, bool]], body: list[tuple[str, bool]], wish: str | None) -> list[tuple[str, bool]]:
+    """第 3 行的候選排序（確定性）：① 「改變」那段裡與第 2 行共用關鍵名詞的句子 → ② 正文其他句子裡共用、且帶『做了／留下什麼』字樣的（共用越多越前面）
+    → ③ 其餘「改變」句，照原本的順序。沒有願望或沒有任何共用 ⇒ 完全等於原本的順序（只有 ③）。"""
+    seen = {c[0] for c in change}
+    t0 = [c for c in change if shared_with_wish(c[0], wish) > 0]                 # 改變段裡本來就共用的：維持原本的先後
+    t1 = [c for c in body if c[0] not in seen and shared_with_wish(c[0], wish) > 0 and _CHANGE_MARK.search(c[0])]   # 正文裡「做了／留下什麼」且共用的
+    t1.sort(key=lambda c: -shared_with_wish(c[0], wish))
+    t2 = [c for c in change if shared_with_wish(c[0], wish) <= 0]
+    return t0 + t1 + t2
+
+
+def tried_of(record_text: str, traits: str, f: dict[str, Any], wish: str | None = None) -> str | None:
     """卡第 3 行：`它試了：<做了什麼＋世界留下的改變>`——前綴**永遠**是「它試了：」（手機與電視都靠它拆前綴）。
-    取「試的紀錄」的改變那一句（完整句；太長取完整子句；不行換下一句），過卡上一句話的共同防呆；**不放路線、不放標題**。"""
-    s = _first_ok(changed_candidates(record_text), MAX_TRIED_CARD, traits, f)
+    候選＝「試的紀錄」的改變那一段，**優先和第 2 行（願望）共用世界物件名／關鍵名詞的完整句**（`rank_tried`），沒有共用的才退回現行順序；
+    完整句、太長取完整子句、不行換下一句，過卡上一句話的共同防呆；**不放路線、不放標題**。每個字仍出自紀錄。"""
+    change = changed_candidates(record_text)
+    cands = rank_tried(change, body_candidates(record_text), wish) if wish else change
+    s = _first_ok(cands, MAX_TRIED_CARD, traits, f)
     if not s:
         return None
     s = s.replace("我們", "它們").replace("我", "它")           # 卡是第三人稱：「我」→「它」
@@ -1037,7 +1100,7 @@ def compose_card_v3(f: dict[str, Any], *, plan_text: str, record_text: str, rows
     s = said_of(record_text, traits, f)
     # 「試的紀錄」缺或空 ＝ 沒做完：第 3、4 行都不出（第 2 行是 PLAN 的，照出）
     has_record = len(record_text.strip()) >= 30
-    td = tried_of(record_text, traits, f) if has_record else None
+    td = tried_of(record_text, traits, f, w) if has_record else None
     res["want_line"] = (WANT_PREFIX + w) if w else None
     res["tried_line"] = td
     res["said_line"] = (SAID_PREFIX + s) if s else None
