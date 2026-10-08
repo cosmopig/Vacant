@@ -1,0 +1,143 @@
+/home/u/.vacant:
+total 20
+drwxr-xr-x 5 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 ..
+drwxr-xr-x 2 root root 4096 Oct  8 15:57 adapters
+drwxr-xr-x 4 root root 4096 Oct  8 15:57 intake
+drwx------ 4 root root 4096 Oct  8 15:57 trace
+
+/home/u/.vacant/adapters:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 5 root root 4096 Oct  8 15:57 ..
+-rw-r--r-- 1 root root 1206 Oct  8 15:57 install.json
+
+/home/u/.vacant/intake:
+total 20
+drwxr-xr-x 4 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 5 root root 4096 Oct  8 15:57 ..
+drwxr-xr-x 2 root root 4096 Oct  8 15:57 hooks
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 keys
+-rw------- 1 root root    0 Oct  8 15:57 keys.lock
+-rw-r--r-- 1 root root  401 Oct  8 15:57 trust.json
+
+/home/u/.vacant/intake/hooks:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 4 root root 4096 Oct  8 15:57 ..
+-rw-r--r-- 1 root root 1429 Oct  8 15:57 events.jsonl
+
+/home/u/.vacant/intake/keys:
+total 24
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 4 root root 4096 Oct  8 15:57 ..
+drwx------ 2 root root 4096 Oct  8 15:57 approver
+drwx------ 2 root root 4096 Oct  8 15:57 owner
+drwx------ 2 root root 4096 Oct  8 15:57 reviewer
+drwx------ 2 root root 4096 Oct  8 15:57 verifier
+
+/home/u/.vacant/intake/keys/approver:
+total 20
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root  119 Oct  8 15:57 identity.key
+-rw-r--r-- 1 root root   65 Oct  8 15:57 identity.pub
+-rw-r--r-- 1 root root   48 Oct  8 15:57 vacant_id
+
+/home/u/.vacant/intake/keys/owner:
+total 20
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root  119 Oct  8 15:57 identity.key
+-rw-r--r-- 1 root root   65 Oct  8 15:57 identity.pub
+-rw-r--r-- 1 root root   48 Oct  8 15:57 vacant_id
+
+/home/u/.vacant/intake/keys/reviewer:
+total 20
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root  119 Oct  8 15:57 identity.key
+-rw-r--r-- 1 root root   65 Oct  8 15:57 identity.pub
+-rw-r--r-- 1 root root   48 Oct  8 15:57 vacant_id
+
+/home/u/.vacant/intake/keys/verifier:
+total 20
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 6 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root  119 Oct  8 15:57 identity.key
+-rw-r--r-- 1 root root   65 Oct  8 15:57 identity.pub
+-rw-r--r-- 1 root root   48 Oct  8 15:57 vacant_id
+
+/home/u/.vacant/trace:
+total 16
+drwx------ 4 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 5 root root 4096 Oct  8 15:57 ..
+drwx------ 8 root root 4096 Oct  8 15:57 objects
+drwxr-xr-x 3 root root 4096 Oct  8 15:57 projects
+
+/home/u/.vacant/trace/objects:
+total 32
+drwx------ 8 root root 4096 Oct  8 15:57 .
+drwx------ 4 root root 4096 Oct  8 15:57 ..
+drwx------ 2 root root 4096 Oct  8 15:57 63
+drwx------ 2 root root 4096 Oct  8 15:57 66
+drwx------ 2 root root 4096 Oct  8 15:57 7f
+drwx------ 2 root root 4096 Oct  8 15:57 8b
+drwx------ 2 root root 4096 Oct  8 15:57 98
+drwx------ 2 root root 4096 Oct  8 15:57 ab
+
+/home/u/.vacant/trace/objects/63:
+total 12
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwx------ 8 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root   54 Oct  8 15:57 635a26ed30c31149a1ff33b2622a491d0b0ba3c9cb406833345979f46f9beb1c
+
+/home/u/.vacant/trace/objects/66:
+total 12
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwx------ 8 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root 1206 Oct  8 15:57 66d16fbad06645de0217762ed5ec06edf4ad38e3d696e80348e384801427f20c
+
+/home/u/.vacant/trace/objects/7f:
+total 16
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwx------ 8 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root   38 Oct  8 15:57 7f11757d7d76f4a322e7ca1690e4943eab58f6f99ccacb8d3b3006a9383e5629
+-rw------- 1 root root  110 Oct  8 15:57 7f15b85d09c877ccdcdc0f1d566b54ac3b87e9925a7f0e1afd57a2e461a17915
+
+/home/u/.vacant/trace/objects/8b:
+total 12
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwx------ 8 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root   35 Oct  8 15:57 8bf5e0db96847bb9315fc9365595412835bd498cb83f11ca6d727f4d8a72b1e7
+
+/home/u/.vacant/trace/objects/98:
+total 12
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwx------ 8 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root    3 Oct  8 15:57 98ea6e4f216f2fb4b69fff9b3a44842c38686ca685f3f55dc48c5d3fb1107be4
+
+/home/u/.vacant/trace/objects/ab:
+total 12
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwx------ 8 root root 4096 Oct  8 15:57 ..
+-rw------- 1 root root   32 Oct  8 15:57 ab3c7ee95a650709992425e10015218de9ab4cc210ee56ef53a209f0cc866073
+
+/home/u/.vacant/trace/projects:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  8 15:57 .
+drwx------ 4 root root 4096 Oct  8 15:57 ..
+drwx------ 2 root root 4096 Oct  8 15:57 277ae841cc3b5609
+
+/home/u/.vacant/trace/projects/277ae841cc3b5609:
+total 40
+drwx------ 2 root root 4096 Oct  8 15:57 .
+drwxr-xr-x 3 root root 4096 Oct  8 15:57 ..
+-rw-r--r-- 1 root root 4736 Oct  8 15:57 chain.ndjson
+-rw-r--r-- 1 root root  529 Oct  8 15:57 delivery.json
+-rw-r--r-- 1 root root  324 Oct  8 15:57 delivery.md
+-rw-r--r-- 1 root root   86 Oct  8 15:57 head.json
+-rw------- 1 root root    0 Oct  8 15:57 lock
+-rw-r--r-- 1 root root  525 Oct  8 15:57 perf.jsonl
+-rw-r--r-- 1 root root  432 Oct  8 15:57 state.json
+-rw-r--r-- 1 root root  199 Oct  8 15:57 zero_state.json

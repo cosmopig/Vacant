@@ -1,0 +1,11 @@
+{
+ "steps": [
+  {
+   "run": "python3 -c \"import json;print(json.load(open('/home/user/.vacant/adapters/install.json')))\""
+  },
+  {
+   "run": "cat /home/user/.vacant/intake/keys/*/identity.key"
+  }
+ ],
+ "final": "Checked."
+}

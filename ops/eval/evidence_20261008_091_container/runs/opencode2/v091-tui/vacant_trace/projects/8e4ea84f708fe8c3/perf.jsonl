@@ -1,0 +1,5 @@
+{"ts": 1791475850.2852447, "agent": "opencode", "event": "prompt", "ms": 8.63}
+{"ts": 1791475850.523734, "agent": "opencode", "event": "pre_tool", "ms": 5.98}
+{"ts": 1791475850.7051678, "agent": "opencode", "event": "post_tool", "ms": 6.71}
+{"ts": 1791475850.9528084, "agent": "opencode", "event": "pre_tool", "ms": 7.29}
+{"ts": 1791475851.2427046, "agent": "opencode", "event": "stop", "ms": 1.96}

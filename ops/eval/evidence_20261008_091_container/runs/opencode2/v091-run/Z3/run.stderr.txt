@@ -1,0 +1,8 @@
+[0m
+> build · mock-model
+[0m$ [0mpython3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"
+{'agents': {'opencode': {'ops': [{'op': 'file', 'path': '/home/u/.config/opencode/plugin/vacant.js', 'sha256': '4b0f4e3c7a5240981a747e009f8c1d59d28d57f99e2578f096037489127b4586', 'created': True, 'backup': None}], 'installed_at': '2026-10-08T16:08:07+00:00'}}, 'mode': 'evidence', 'schema': 2}
+> build · mock-model
+[0m✗ [0mcat /home/u/.vacant/intake/keys/*/identity.key failed
+[91m[1mError: [0mVacant: commands may not touch /home/u/.vacant/intake/keys (signing keys).
+> build · mock-model

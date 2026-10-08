@@ -1,0 +1,8 @@
+{"ts": 1791474962.3622224, "agent": "pi", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474962.6652749, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791474962.8747754, "agent": "pi", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791474963.2256725, "agent": "pi", "event": "stop", "kind": "stop", "tool": null, "action": "continue", "contract": null, "command_sha256": null, "zero": {"ran": true, "round": 1, "sent": 1, "withheld": 0}}
+{"ts": 1791474963.4135695, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "write", "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474963.5904524, "agent": "pi", "event": "post_tool", "kind": "post_tool", "tool": "write", "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474963.9536822, "agent": "pi", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 1, "left_open": 0}}
+{"ts": 1791474972.4028986, "agent": "pi", "event": "session_end", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

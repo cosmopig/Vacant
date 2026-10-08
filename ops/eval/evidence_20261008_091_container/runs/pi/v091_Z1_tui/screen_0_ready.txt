@@ -1,0 +1,50 @@
+
+ pi v0.87.1                                                                                                                                                     
+ escape interrupt · ctrl+c/ctrl+d clear/exit · / commands · ! bash · ctrl+o more                                                                                
+ Press ctrl+o to show full startup help and loaded resources.                                                                                                   
+                                                                                                                                                                
+ Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.                                                                          
+
+[Extensions]                                                                                                                                                    
+  vacant.ts                                                                                                                                                     
+
+
+ fd not found. Downloading...                                                                                                                                   
+ ripgrep not found. Downloading...                                                                                                                              
+ Warning: Failed to download fd: fetch failed: getaddrinfo EAI_AGAIN github.com                                                                                 
+ Warning: Failed to download ripgrep: fetch failed: getaddrinfo EAI_AGAIN github.com                                                                            
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                                                                                
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/work/proj (master)
+0.0%/131k (auto)                                                                                                                                      mock-model
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

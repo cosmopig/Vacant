@@ -1,0 +1,95 @@
+model = "mock-model"
+model_provider = "mock"
+
+[model_providers.mock]
+name = "mock"
+base_url = "http://127.0.0.1:18080/v1"
+wire_api = "responses"
+env_key = "MOCK_API_KEY"
+
+[projects."/work/proj"]
+trust_level = "trusted"
+
+[projects."/"]
+trust_level = "trusted"
+
+[projects."/home/u"]
+trust_level = "trusted"
+# >>> vacant-intake >>> (managed by `vacant install`; remove with `vacant uninstall`)
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex UserPromptSubmit  # vacant-intake"
+timeout = 30
+async = false
+
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex PreToolUse  # vacant-intake"
+timeout = 30
+async = false
+
+[[hooks.PostToolUse]]
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex PostToolUse  # vacant-intake"
+timeout = 30
+async = false
+
+[[hooks.SubagentStart]]
+[[hooks.SubagentStart.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex SubagentStart  # vacant-intake"
+timeout = 30
+async = false
+
+[[hooks.SubagentStop]]
+[[hooks.SubagentStop.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex SubagentStop  # vacant-intake"
+timeout = 30
+async = false
+
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex Stop  # vacant-intake"
+timeout = 600
+async = false
+
+[[hooks.SessionEnd]]
+[[hooks.SessionEnd.hooks]]
+type = "command"
+command = "/opt/v090/bin/python3 -m vacant_network hook codex SessionEnd  # vacant-intake"
+timeout = 3
+async = false
+
+[hooks.state."/home/u/.codex/config.toml:user_prompt_submit:0:0"]
+trusted_hash = "sha256:0196acf768f5dd83183b58e2d69bc2aa00cf358452e786bf41eb610461a896be"
+enabled = true
+
+[hooks.state."/home/u/.codex/config.toml:pre_tool_use:0:0"]
+trusted_hash = "sha256:bb54ff95757b790f4b8760786254e96577afa0415adda4911284b2152636d12f"
+enabled = true
+
+[hooks.state."/home/u/.codex/config.toml:post_tool_use:0:0"]
+trusted_hash = "sha256:999e1d3cefeca42ef69bc563c797372848eb81f327a3b3846a2630508438345d"
+enabled = true
+
+[hooks.state."/home/u/.codex/config.toml:subagent_start:0:0"]
+trusted_hash = "sha256:72ae55afa5d81a1ecf3ba3a1989126f195ee015b78d9f726f9f7576a39637ebe"
+enabled = true
+
+[hooks.state."/home/u/.codex/config.toml:subagent_stop:0:0"]
+trusted_hash = "sha256:b75b6c1dfd0edf1a33df4945c7461647201c92898335d4e15e78f90ec5a6a325"
+enabled = true
+
+[hooks.state."/home/u/.codex/config.toml:stop:0:0"]
+trusted_hash = "sha256:b49fe6971ae19d8bd6ea3f93e1d9e6b3f7e7ab7a17f5792eb5be27dbbdcf1802"
+enabled = true
+
+[hooks.state."/home/u/.codex/config.toml:session_end:0:0"]
+trusted_hash = "sha256:cd0894a4b2f17f2513404b404bf9343bed2c29f52b85cb9b5f7de8905d47fc84"
+enabled = true
+# <<< vacant-intake <<<

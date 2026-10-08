@@ -1,0 +1,16 @@
+/home/u/.pi/agent:
+total 32
+drwxr-xr-x 4 root root 4096 Oct  8 15:55 .
+drwxr-xr-x 3 root root 4096 Oct  8 15:55 ..
+-rw------- 1 root root    2 Oct  8 15:55 auth.json
+drwxr-xr-x 2 root root 4096 Oct  8 15:55 extensions
+-rw------- 1 root root    2 Oct  8 15:55 models-store.json
+-rw-r--r-- 1 root root  293 Oct  8 15:55 models.json
+drwxr-xr-x 3 root root 4096 Oct  8 15:55 sessions
+-rw-r--r-- 1 root root   38 Oct  8 15:55 settings.json
+
+/home/u/.pi/agent/extensions:
+total 20
+drwxr-xr-x 2 root root  4096 Oct  8 15:55 .
+drwxr-xr-x 4 root root  4096 Oct  8 15:55 ..
+-rw-r--r-- 1 root root 12114 Oct  8 15:55 vacant.ts

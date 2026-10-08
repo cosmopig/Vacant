@@ -1,0 +1,5 @@
+{"ts": 1791474970.6154866, "agent": "pi", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474970.8761458, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791474971.0590053, "agent": "pi", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791474971.2329874, "agent": "pi", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474980.8921614, "agent": "pi", "event": "session_end", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

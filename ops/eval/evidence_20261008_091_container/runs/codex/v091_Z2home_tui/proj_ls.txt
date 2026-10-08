@@ -1,0 +1,7 @@
+total 24
+drwxr-xr-x  6 root root 4096 Oct  8 16:11 .
+drwxr-xr-x  1 root root 4096 Oct  8 16:11 ..
+drwxr-xr-x  2 root root 4096 Oct  8 16:11 .claude
+drwxr-xr-x 12 root root 4096 Oct  8 16:11 .codex
+drwxr-xr-x  3 root root 4096 Oct  8 16:11 .pi
+drwxr-xr-x  5 root root 4096 Oct  8 16:11 .vacant

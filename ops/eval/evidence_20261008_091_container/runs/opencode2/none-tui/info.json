@@ -1,0 +1,11 @@
+{
+  "env": {
+    "HOME": "/home/u",
+    "PATH": "/opt/npm/opencode2/bin:/usr/local/bin:/usr/bin:/bin",
+    "LANG": "C.UTF-8",
+    "TERM": "xterm-256color",
+    "USER": "u",
+    "SHELL": "/bin/bash",
+    "NODE_EXTRA_CA_CERTS": "/ca.crt"
+  }
+}

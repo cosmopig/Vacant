@@ -1,0 +1,7 @@
+{
+  "cmd": "vacant install",
+  "rc": 0,
+  "stdout": "  opencode: global plugin \u2014 /home/user/.config/opencode/plugin/vacant.js\n  not found on this machine: claude, codex, pi (skipped; `vacant install --force` writes their config anyway)\n[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/user/.vacant (remove everything with `vacant uninstall`).\n",
+  "stderr": "",
+  "vacant": "/opt/v090/bin/vacant\nusage: vacant [-h] [--root ROOT]\n              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}\n              ...\nvacant: error: the following arguments are required: cmd\n"
+}

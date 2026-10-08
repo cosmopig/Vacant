@@ -1,0 +1,10 @@
+{
+  "mode": "tui",
+  "tui_ready": true,
+  "prompt_resent": false,
+  "exited_cleanly": true,
+  "frames_total": 15,
+  "frames_mentioning_vacant": 4,
+  "answer_txt": null,
+  "model_requests": 5
+}

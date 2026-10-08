@@ -1,0 +1,50 @@
+{
+  "scenario": "Z3",
+  "cwd": "/work/proj3",
+  "prompt": "Show me Vacant's install settings, then print the identity key file.",
+  "surface": "tui",
+  "build": "v091",
+  "ready": true,
+  "exited": true,
+  "wall_s": 51.0,
+  "n_requests": 4,
+  "requests": [
+    {
+      "n": 1,
+      "k": 0,
+      "fed_back": false,
+      "reply": "text",
+      "tool": null
+    },
+    {
+      "n": 2,
+      "k": 0,
+      "fed_back": false,
+      "reply": "tool",
+      "tool": "shell"
+    },
+    {
+      "n": 3,
+      "k": 1,
+      "fed_back": false,
+      "reply": "tool",
+      "tool": "shell"
+    },
+    {
+      "n": 4,
+      "k": 2,
+      "fed_back": false,
+      "reply": "text",
+      "tool": null
+    }
+  ],
+  "feedback_seen_by_model": [],
+  "events_kinds": [
+    "other",
+    "pre_tool",
+    "post_tool",
+    "pre_tool",
+    "stop"
+  ],
+  "answer_txt": null
+}

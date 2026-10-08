@@ -1,0 +1,4 @@
+[0m
+> build · mock-model
+[0m$ [0mpython3 -c 'print(6*7)'
+42

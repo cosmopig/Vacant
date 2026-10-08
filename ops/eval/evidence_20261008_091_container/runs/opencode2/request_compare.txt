@@ -1,0 +1,60 @@
+### tui Z2_root v091 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2456/2456 sha=2c4ecbd04d44/2c4ecbd04d44
+req 2: identical_after_id_normalisation=True bytes=21564/21564 sha=5a8735bee111/5a8735bee111
+req 3: identical_after_id_normalisation=True bytes=21809/21809 sha=1e480b3281fc/1e480b3281fc
+### tui Z2_root v090 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2456/2456 sha=2c4ecbd04d44/2c4ecbd04d44
+req 2: identical_after_id_normalisation=True bytes=21564/21564 sha=5a8735bee111/5a8735bee111
+req 3: identical_after_id_normalisation=True bytes=21809/21809 sha=1e480b3281fc/1e480b3281fc
+### tui Z2_home v091 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2456/2456 sha=2c4ecbd04d44/2c4ecbd04d44
+req 2: identical_after_id_normalisation=True bytes=21576/21576 sha=e670a861b67e/e670a861b67e
+req 3: identical_after_id_normalisation=True bytes=21821/21821 sha=ab742244e485/ab742244e485
+### tui Z2_home v090 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2456/2456 sha=2c4ecbd04d44/2c4ecbd04d44
+req 2: identical_after_id_normalisation=True bytes=21576/21576 sha=e670a861b67e/e670a861b67e
+req 3: identical_after_id_normalisation=True bytes=21821/21821 sha=ab742244e485/ab742244e485
+### tui Z1 v091 vs none
+n_requests 5 3
+req 1: identical_after_id_normalisation=True bytes=2456/2456 sha=2c4ecbd04d44/2c4ecbd04d44
+req 2: identical_after_id_normalisation=True bytes=21583/21583 sha=0b4d04eae645/0b4d04eae645
+req 3: identical_after_id_normalisation=True bytes=21828/21828 sha=a8fb8a845da7/a8fb8a845da7
+### tui Z1 v090 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2456/2456 sha=2c4ecbd04d44/2c4ecbd04d44
+req 2: identical_after_id_normalisation=True bytes=21583/21583 sha=0b4d04eae645/0b4d04eae645
+req 3: identical_after_id_normalisation=True bytes=21828/21828 sha=a8fb8a845da7/a8fb8a845da7
+### run Z2_root v091 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2460/2460 sha=2c101e8db5a0/2c101e8db5a0
+req 2: identical_after_id_normalisation=True bytes=21568/21568 sha=eca8a401cad7/eca8a401cad7
+req 3: identical_after_id_normalisation=True bytes=21813/21813 sha=e09ef8cea6c3/e09ef8cea6c3
+### run Z2_root v090 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2460/2460 sha=2c101e8db5a0/2c101e8db5a0
+req 2: identical_after_id_normalisation=True bytes=21568/21568 sha=eca8a401cad7/eca8a401cad7
+req 3: identical_after_id_normalisation=True bytes=21813/21813 sha=e09ef8cea6c3/e09ef8cea6c3
+### run Z2_home v091 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2460/2460 sha=2c101e8db5a0/2c101e8db5a0
+req 2: identical_after_id_normalisation=True bytes=21580/21580 sha=37c8804b2a2e/37c8804b2a2e
+req 3: identical_after_id_normalisation=True bytes=21825/21825 sha=4db9ca191a4f/4db9ca191a4f
+### run Z2_home v090 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2460/2460 sha=2c101e8db5a0/2c101e8db5a0
+req 2: identical_after_id_normalisation=True bytes=21580/21580 sha=37c8804b2a2e/37c8804b2a2e
+req 3: identical_after_id_normalisation=True bytes=21825/21825 sha=4db9ca191a4f/4db9ca191a4f
+### run Z1 v091 vs none
+n_requests 5 3
+req 1: identical_after_id_normalisation=True bytes=2460/2460 sha=2c101e8db5a0/2c101e8db5a0
+req 2: identical_after_id_normalisation=True bytes=21587/21587 sha=780a2970c2ba/780a2970c2ba
+req 3: identical_after_id_normalisation=True bytes=21832/21832 sha=1fe3dbc9ef28/1fe3dbc9ef28
+### run Z1 v090 vs none
+n_requests 3 3
+req 1: identical_after_id_normalisation=True bytes=2460/2460 sha=2c101e8db5a0/2c101e8db5a0
+req 2: identical_after_id_normalisation=True bytes=21587/21587 sha=780a2970c2ba/780a2970c2ba
+req 3: identical_after_id_normalisation=True bytes=21832/21832 sha=1fe3dbc9ef28/1fe3dbc9ef28

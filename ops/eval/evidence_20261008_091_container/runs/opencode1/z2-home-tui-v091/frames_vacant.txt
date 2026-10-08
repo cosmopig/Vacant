@@ -1,0 +1,52 @@
+===== t=89.7s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Done.                                   
+  ┃  Compute 17 + 25 and write only the result to answer┃                                                          ┃                                            
+  ┃                                                     ┃  Vacant did not check this work: the agent ran in /      ┃    Context                                 
+                                                        ┃  home/user, which is too broad to record (home folder,   ┃    15 tokens                               
+  ┃                                                     ┃  filesystem root, or a settings folder). Open the        ┃    0% used                                 
+  ┃  $ python3 -c 'print(17+25)'                        ┃  agent inside a project folder to get the check.         ┃    $0.00 spent                             
+  ┃                                                     ┃                                                          ┃                                            
+  ┃  42                                                                                                                 LSP                                     
+  ┃                                                                                                                     LSPs are disabled                       
+                                                                                                                                                                
+     Done.                                                                                                                                                      
+                                                                                                                                                                
+     ▣  Build · mock-model · 4.6s                                                                                                                               
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /~                                      
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   /home/user                                                                                    15  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+

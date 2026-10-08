@@ -1,0 +1,213 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.56kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22-bookworm
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 resolve docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 2.03MB 0.0s done
+#5 DONE 0.1s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 DONE 0.1s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:8cb71386cfcfc55b27b559f73c6d5c0cdcb93b83be8281314116e271cc42cea6
+#4 extracting sha256:8cb71386cfcfc55b27b559f73c6d5c0cdcb93b83be8281314116e271cc42cea6 2.4s done
+#4 DONE 2.6s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:a4edf9c328e814bd91b20c8e2211065489ebf15a16c7663d68a880660dfc897d
+#4 extracting sha256:a4edf9c328e814bd91b20c8e2211065489ebf15a16c7663d68a880660dfc897d 0.9s done
+#4 DONE 3.5s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:c6c71fff0869aa9bd48cf80d66e30b83adc9a3fe5e77dd9aaf266282c6ec64ff
+#4 extracting sha256:c6c71fff0869aa9bd48cf80d66e30b83adc9a3fe5e77dd9aaf266282c6ec64ff 4.0s done
+#4 DONE 7.5s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:610dc773fbd71198e96c7a8710abfd1661f14d776d7169b4ef525d8eb30e1b03
+#4 extracting sha256:610dc773fbd71198e96c7a8710abfd1661f14d776d7169b4ef525d8eb30e1b03 11.1s done
+#4 DONE 18.6s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:4e8e38f4cbaba6a3cc80762eeb5e2a89514395f64c52e5500b0c469ca7d63bf4 done
+#4 extracting sha256:b27643410a32a5ea975bd689a19a820b3700e8ba5517a93c7f124fd0b159c410
+#4 extracting sha256:b27643410a32a5ea975bd689a19a820b3700e8ba5517a93c7f124fd0b159c410 3.9s done
+#4 DONE 22.6s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:263f72aebc64e70203f99bcc27dab399ea2f4e63a3c5874596ac50d44dcda664 0.1s done
+#4 DONE 22.7s
+
+#4 [1/8] FROM docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+#4 extracting sha256:11fd0fe23a0e49e854916fcd5e17a026afda1fc0c5218bba9324d0e59bb2e045 done
+#4 DONE 22.7s
+
+#6 [2/8] COPY ctx/ca.crt /ca.crt
+#6 DONE 1.2s
+
+#7 [3/8] RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip git tmux procps ca-certificates  && rm -rf /var/lib/apt/lists/*
+#7 0.176 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+#7 0.215 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#7 0.233 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+#7 0.324 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+#7 0.605 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+#7 0.622 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [349 kB]
+#7 1.820 Fetched 9388 kB in 2s (5591 kB/s)
+#7 1.820 Reading package lists...
+#7 2.626 Reading package lists...
+#7 3.277 Building dependency tree...
+#7 3.469 Reading state information...
+#7 3.623 python3 is already the newest version (3.11.2-1+b1).
+#7 3.623 python3 set to manually installed.
+#7 3.623 git is already the newest version (1:2.39.5-0+deb12u3).
+#7 3.623 procps is already the newest version (2:4.0.2-3).
+#7 3.623 ca-certificates is already the newest version (20250419~deb12u1).
+#7 3.623 The following additional packages will be installed:
+#7 3.624   libpython3.11-minimal libpython3.11-stdlib libutempter0 python3-pip-whl
+#7 3.624   python3-pkg-resources python3-setuptools python3-setuptools-whl
+#7 3.624   python3-wheel python3.11 python3.11-minimal python3.11-venv
+#7 3.625 Suggested packages:
+#7 3.625   python-setuptools-doc python3.11-doc binfmt-support
+#7 3.625 Recommended packages:
+#7 3.625   build-essential python3-dev
+#7 3.751 The following NEW packages will be installed:
+#7 3.751   libutempter0 python3-pip python3-pip-whl python3-pkg-resources
+#7 3.751   python3-setuptools python3-setuptools-whl python3-venv python3-wheel
+#7 3.752   python3.11-venv tmux
+#7 3.753 The following packages will be upgraded:
+#7 3.755   libpython3.11-minimal libpython3.11-stdlib python3.11 python3.11-minimal
+#7 3.831 4 upgraded, 10 newly installed, 0 to remove and 0 not upgraded.
+#7 3.831 Need to get 10.7 MB of archives.
+#7 3.831 After this operation, 15.0 MB of additional disk space will be used.
+#7 3.831 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 python3.11 amd64 3.11.2-6+deb12u9 [575 kB]
+#7 3.888 Get:2 http://deb.debian.org/debian-security bookworm-security/main amd64 libpython3.11-stdlib amd64 3.11.2-6+deb12u9 [1798 kB]
+#7 3.919 Get:3 http://deb.debian.org/debian-security bookworm-security/main amd64 python3.11-minimal amd64 3.11.2-6+deb12u9 [2055 kB]
+#7 3.940 Get:4 http://deb.debian.org/debian-security bookworm-security/main amd64 libpython3.11-minimal amd64 3.11.2-6+deb12u9 [821 kB]
+#7 3.958 Get:5 http://deb.debian.org/debian bookworm/main amd64 libutempter0 amd64 1.2.1-3 [8960 B]
+#7 3.972 Get:6 http://deb.debian.org/debian bookworm/main amd64 python3-pkg-resources all 66.1.1-1+deb12u2 [297 kB]
+#7 3.991 Get:7 http://deb.debian.org/debian bookworm/main amd64 python3-setuptools all 66.1.1-1+deb12u2 [522 kB]
+#7 4.010 Get:8 http://deb.debian.org/debian bookworm/main amd64 python3-wheel all 0.38.4-2 [30.8 kB]
+#7 4.023 Get:9 http://deb.debian.org/debian bookworm/main amd64 python3-pip all 23.0.1+dfsg-1 [1325 kB]
+#7 4.047 Get:10 http://deb.debian.org/debian bookworm/main amd64 python3-pip-whl all 23.0.1+dfsg-1 [1717 kB]
+#7 4.069 Get:11 http://deb.debian.org/debian bookworm/main amd64 python3-setuptools-whl all 66.1.1-1+deb12u2 [1112 kB]
+#7 4.093 Get:12 http://deb.debian.org/debian-security bookworm-security/main amd64 python3.11-venv amd64 3.11.2-6+deb12u9 [5896 B]
+#7 4.108 Get:13 http://deb.debian.org/debian bookworm/main amd64 python3-venv amd64 3.11.2-1+b1 [1200 B]
+#7 4.123 Get:14 http://deb.debian.org/debian bookworm/main amd64 tmux amd64 3.3a-3 [455 kB]
+#7 4.435 debconf: delaying package configuration, since apt-utils is not installed
+#7 4.468 Fetched 10.7 MB in 0s (29.7 MB/s)
+#7 4.491 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 23263 files and directories currently installed.)
+#7 4.512 Preparing to unpack .../00-python3.11_3.11.2-6+deb12u9_amd64.deb ...
+#7 4.571 Unpacking python3.11 (3.11.2-6+deb12u9) over (3.11.2-6+deb12u8) ...
+#7 4.621 Preparing to unpack .../01-libpython3.11-stdlib_3.11.2-6+deb12u9_amd64.deb ...
+#7 4.661 Unpacking libpython3.11-stdlib:amd64 (3.11.2-6+deb12u9) over (3.11.2-6+deb12u8) ...
+#7 5.084 Preparing to unpack .../02-python3.11-minimal_3.11.2-6+deb12u9_amd64.deb ...
+#7 5.094 Unpacking python3.11-minimal (3.11.2-6+deb12u9) over (3.11.2-6+deb12u8) ...
+#7 5.440 Preparing to unpack .../03-libpython3.11-minimal_3.11.2-6+deb12u9_amd64.deb ...
+#7 5.510 Unpacking libpython3.11-minimal:amd64 (3.11.2-6+deb12u9) over (3.11.2-6+deb12u8) ...
+#7 5.801 Selecting previously unselected package libutempter0:amd64.
+#7 5.804 Preparing to unpack .../04-libutempter0_1.2.1-3_amd64.deb ...
+#7 5.806 Unpacking libutempter0:amd64 (1.2.1-3) ...
+#7 5.830 Selecting previously unselected package python3-pkg-resources.
+#7 5.832 Preparing to unpack .../05-python3-pkg-resources_66.1.1-1+deb12u2_all.deb ...
+#7 5.833 Unpacking python3-pkg-resources (66.1.1-1+deb12u2) ...
+#7 5.885 Selecting previously unselected package python3-setuptools.
+#7 5.887 Preparing to unpack .../06-python3-setuptools_66.1.1-1+deb12u2_all.deb ...
+#7 5.889 Unpacking python3-setuptools (66.1.1-1+deb12u2) ...
+#7 5.948 Selecting previously unselected package python3-wheel.
+#7 5.950 Preparing to unpack .../07-python3-wheel_0.38.4-2_all.deb ...
+#7 5.951 Unpacking python3-wheel (0.38.4-2) ...
+#7 5.975 Selecting previously unselected package python3-pip.
+#7 5.977 Preparing to unpack .../08-python3-pip_23.0.1+dfsg-1_all.deb ...
+#7 5.978 Unpacking python3-pip (23.0.1+dfsg-1) ...
+#7 6.114 Selecting previously unselected package python3-pip-whl.
+#7 6.116 Preparing to unpack .../09-python3-pip-whl_23.0.1+dfsg-1_all.deb ...
+#7 6.117 Unpacking python3-pip-whl (23.0.1+dfsg-1) ...
+#7 6.225 Selecting previously unselected package python3-setuptools-whl.
+#7 6.227 Preparing to unpack .../10-python3-setuptools-whl_66.1.1-1+deb12u2_all.deb ...
+#7 6.231 Unpacking python3-setuptools-whl (66.1.1-1+deb12u2) ...
+#7 6.313 Selecting previously unselected package python3.11-venv.
+#7 6.315 Preparing to unpack .../11-python3.11-venv_3.11.2-6+deb12u9_amd64.deb ...
+#7 6.317 Unpacking python3.11-venv (3.11.2-6+deb12u9) ...
+#7 6.340 Selecting previously unselected package python3-venv.
+#7 6.342 Preparing to unpack .../12-python3-venv_3.11.2-1+b1_amd64.deb ...
+#7 6.344 Unpacking python3-venv (3.11.2-1+b1) ...
+#7 6.369 Selecting previously unselected package tmux.
+#7 6.372 Preparing to unpack .../13-tmux_3.3a-3_amd64.deb ...
+#7 6.376 Unpacking tmux (3.3a-3) ...
+#7 6.464 Setting up python3-pkg-resources (66.1.1-1+deb12u2) ...
+#7 6.893 Setting up python3-setuptools-whl (66.1.1-1+deb12u2) ...
+#7 6.896 Setting up python3-setuptools (66.1.1-1+deb12u2) ...
+#7 7.470 Setting up python3-pip-whl (23.0.1+dfsg-1) ...
+#7 7.473 Setting up python3-wheel (0.38.4-2) ...
+#7 7.613 Setting up python3-pip (23.0.1+dfsg-1) ...
+#7 8.743 Setting up libutempter0:amd64 (1.2.1-3) ...
+#7 8.745 Setting up libpython3.11-minimal:amd64 (3.11.2-6+deb12u9) ...
+#7 8.751 Setting up tmux (3.3a-3) ...
+#7 8.774 Setting up python3.11-minimal (3.11.2-6+deb12u9) ...
+#7 9.420 Setting up libpython3.11-stdlib:amd64 (3.11.2-6+deb12u9) ...
+#7 9.423 Setting up python3.11 (3.11.2-6+deb12u9) ...
+#7 10.20 Setting up python3.11-venv (3.11.2-6+deb12u9) ...
+#7 10.27 Setting up python3-venv (3.11.2-1+b1) ...
+#7 10.27 Processing triggers for libc-bin (2.36-9+deb12u14) ...
+#7 DONE 10.4s
+
+#8 [4/8] COPY ctx/vacant_network-0.9.1-py3-none-any.whl /tmp/whl/
+#8 DONE 0.0s
+
+#9 [5/8] RUN python3 -m venv /opt/v091 && /opt/v091/bin/pip install -q /tmp/whl/vacant_network-0.9.1-py3-none-any.whl  && python3 -m venv /opt/v090 && /opt/v090/bin/pip install -q vacant-network==0.9.0
+#9 DONE 29.9s
+
+#10 [6/8] RUN npm install -g --prefix /opt/npm/opencode2 @opencode/cli@2.0.24  && npm install -g --prefix /opt/npm/opencode1 opencode-ai@1.18.35  && npm install -g --prefix /opt/npm/pi @earendil-works/pi-coding-agent@0.87.1  && npm install -g --prefix /opt/npm/claude @anthropic-ai/claude-code@2.1.293  && npm install -g --prefix /opt/npm/codex @openai/codex@0.161.0  && npm cache clean --force
+#10 14.74 
+#10 14.74 added 5 packages in 15s
+#10 14.74 npm notice
+#10 14.74 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#10 14.74 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#10 14.74 npm notice To update run: npm install -g npm@12.2.0
+#10 14.74 npm notice
+#10 27.37 
+#10 27.37 added 3 packages in 12s
+#10 32.02 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+#10 36.75 
+#10 36.75 added 119 packages in 9s
+#10 36.75 
+#10 36.75 9 packages are looking for funding
+#10 36.75   run `npm fund` for details
+#10 43.05 
+#10 43.05 added 2 packages in 6s
+#10 56.02 
+#10 56.02 added 2 packages in 13s
+#10 56.14 npm warn using --force Recommended protections disabled.
+#10 DONE 58.5s
+
+#11 [7/8] RUN mkdir -p /opt/agents/bin  && ln -s /opt/npm/opencode2/bin/opencode /opt/agents/bin/opencode2  && ln -s /opt/npm/opencode1/bin/opencode /opt/agents/bin/opencode1  && ln -s /opt/npm/pi/bin/pi /opt/agents/bin/pi  && ln -s /opt/npm/claude/bin/claude /opt/agents/bin/claude  && ln -s /opt/npm/codex/bin/codex /opt/agents/bin/codex
+#11 DONE 0.3s
+
+#12 [8/8] COPY ctx/harness /opt/harness
+#12 DONE 0.0s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 104.3s done
+#13 exporting manifest sha256:6681ba041b0667c83841bfccad9b85b1712559835c1a005de88b2b3a9c1e9c86 done
+#13 exporting config sha256:010a98b4b09490ca0d88d2e8ad57ec70394a400628c43db27df3438b1ce12dea done
+#13 exporting attestation manifest sha256:483a2ef1362f5e5b698dfe743d50c62773e4d34a65d03688e97672269a760f4b 0.0s done
+#13 exporting manifest list sha256:7f6cc222398c71deeb1a4d31d1985bbadd9440f87a4aa13e65fe8ab0167d661c done
+#13 naming to docker.io/library/vacant091-e2e:latest done
+#13 unpacking to docker.io/library/vacant091-e2e:latest
+#13 unpacking to docker.io/library/vacant091-e2e:latest 37.8s done
+#13 DONE 142.2s

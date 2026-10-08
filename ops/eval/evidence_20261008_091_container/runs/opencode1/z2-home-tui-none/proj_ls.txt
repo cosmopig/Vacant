@@ -1,0 +1,10 @@
+total 36
+drwxr-xr-x 6 user user 4096 Oct  8 15:48 .
+drwxr-xr-x 1 root root 4096 Oct  8 15:48 ..
+-rw-r--r-- 1 user user  220 May  7 20:33 .bash_logout
+-rw-r--r-- 1 user user 3526 May  7 20:33 .bashrc
+drwxr-xr-x 4 user user 4096 Oct  8 15:48 .cache
+drwxr-xr-x 4 user user 4096 Oct  8 15:48 .config
+drwxr-xr-x 4 user user 4096 Oct  8 15:48 .local
+drwxr-xr-x 3 user user 4096 Oct  8 15:48 .npm
+-rw-r--r-- 1 user user  807 May  7 20:33 .profile

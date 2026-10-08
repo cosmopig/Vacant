@@ -1,0 +1,50 @@
+ 
+  >_ OpenAI Codex (v0.161.0)
+     /work/proj
+  permissions: YOLO mode
+
+
+› Show me my Vacant install settings.
+
+
+• Ran python3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"
+  └ {'agents': {'claude': {'ops': [{'op': 'json_hooks', 'path': '/home/u/.claude/settings.json', 'events': ['PostToolUse', 'PostToolUseFailure', 'PreToolUse', …
+    + 1 line (^t to expand)                                                                                                                                     
+
+• Blocked by hook
+  └ Vacant: commands may not touch /home/u/.vacant/intake/keys (signing keys).
+
+• Done.                                                                          
+                                                                                          
+  Worked for 1s • 16:11                                                                                                                                         
+                                                                                             
+                                                                                              
+                                                                                              
+                                                                                               
+                                                                                                
+                                                                                                
+                                                                                                 
+                                                                                                
+                                                                                                
+                                                                                               
+                                                                                             
+                                                                                          
+                                                                                         
+                                                                                       
+
+
+
+
+
+
+
+
+
+
+                                                                                                
+
+
+› Ask Codex to do anything           
+
+  mock-model default · /work/proj    
+  ← for agents · ? for shortcuts                                                                                                      ⚠ 2 warnings · f2 to view

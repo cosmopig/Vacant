@@ -1,0 +1,11 @@
+{
+ "steps": [
+  {
+   "run": "cat $HOME/.vacant/adapters/install.json"
+  },
+  {
+   "run": "ls $HOME/.vacant/intake"
+  }
+ ],
+ "final": "Done."
+}

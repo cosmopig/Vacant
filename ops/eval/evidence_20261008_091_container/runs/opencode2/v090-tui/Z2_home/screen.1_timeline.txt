@@ -1,0 +1,155 @@
+===== t+5.1s =====
+ • Done.                         +                                                                                                                              
+                                                                                                  ┃                                                          ┃  
+  ┃                                                                                               ┃  Plugin failed: /home/u/.config/         › Open plugins  ┃  
+  ┃  Compute 6 times 7 with a quick command and write the result to answer.txt.                   ┃  opencode/plugin/vacant.js                               ┃  
+  ┃                                                                                               ┃                                                          ┃  
+                                                                                                  ┃  Run /plugins to view details.                           ┃  
+  ┃                                                                                               ┃                                                          ┃  
+  ┃  $ python3 -c 'print(6*7)'                                                                                                                                  
+  ┃                                                                                                                                                             
+  ┃  42                                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     Done.                                                                                                                                                      
+                                                                                                                                                                
+     Build · mock-model · 168ms · 169.5 tok/s                                                                                                                   
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                          ⬖ Getting started                ✕    
+                                                                                                                                                                
+                                                                                                                            OpenCode includes free models so    
+                                                                                                                            you can start immediately.          
+                                                                                                                                                                
+                                                                                                                            Connect from 75+ providers to       
+                                                                                                                            use other models, including         
+  ┃                                                                                                                         Claude, GPT, Gemini etc             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                         Connect provider        /connect    
+  ┃  Build · mock-model mock                                                                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+  ~                                                                                         15 (0%)  ctrl+p commands    ~                                       
+                                                                                                                                                                
+
+===== t+6.1s =====
+   Done.                         +                                                                                                                              
+                                                                                                  ┃                                                          ┃  
+  ┃                                                                                               ┃  Plugin failed: /home/u/.config/         › Open plugins  ┃  
+  ┃  Compute 6 times 7 with a quick command and write the result to answer.txt.                   ┃  opencode/plugin/vacant.js                               ┃  
+  ┃                                                                                               ┃                                                          ┃  
+                                                                                                  ┃  Run /plugins to view details.                           ┃  
+  ┃                                                                                               ┃                                                          ┃  
+  ┃  $ python3 -c 'print(6*7)'                                                                                                                                  
+  ┃                                                                                                                                                             
+  ┃  42                                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     Done.                                                                                                                                                      
+                                                                                                                                                                
+     Build · mock-model · 168ms · 169.5 tok/s                                                                                                                   
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                          ⬖ Getting started                ✕    
+                                                                                                                                                                
+                                                                                                                            OpenCode includes free models so    
+                                                                                                                            you can start immediately.          
+                                                                                                                                                                
+                                                                                                                            Connect from 75+ providers to       
+                                                                                                                            use other models, including         
+  ┃                                                                                                                         Claude, GPT, Gemini etc             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                         Connect provider        /connect    
+  ┃  Build · mock-model mock                                                                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+  ~                                                                                         15 (0%)  ctrl+p commands    ~                                       
+                                                                                                                                                                
+
+===== t+7.1s =====
+   Done.                         +                                                                                                                              
+                                                                                                                                                                
+  ┃                                                                                                                     Done.                                   
+  ┃  Compute 6 times 7 with a quick command and write the result to answer.txt.                                                                                 
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c 'print(6*7)'                                                                                                                                  
+  ┃                                                                                                                                                             
+  ┃  42                                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     Done.                                                                                                                                                      
+                                                                                                                                                                
+     Build · mock-model · 168ms · 169.5 tok/s                                                                                                                   
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                          ⬖ Getting started                ✕    
+                                                                                                                                                                
+                                                                                                                            OpenCode includes free models so    
+                                                                                                                            you can start immediately.          
+                                                                                                                                                                
+                                                                                                                            Connect from 75+ providers to       
+                                                                                                                            use other models, including         
+  ┃                                                                                                                         Claude, GPT, Gemini etc             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                         Connect provider        /connect    
+  ┃  Build · mock-model mock                                                                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+  ~                                                                                         15 (0%)  ctrl+p commands    ~                                       
+                                                                                                                                                                

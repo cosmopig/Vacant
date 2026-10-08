@@ -1,0 +1,17 @@
+model = "mock-model"
+model_provider = "mock"
+
+[model_providers.mock]
+name = "mock"
+base_url = "http://127.0.0.1:18080/v1"
+wire_api = "responses"
+env_key = "MOCK_API_KEY"
+
+[projects."/work/proj"]
+trust_level = "trusted"
+
+[projects."/"]
+trust_level = "trusted"
+
+[projects."/home/u"]
+trust_level = "trusted"
