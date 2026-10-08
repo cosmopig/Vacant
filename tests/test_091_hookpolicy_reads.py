@@ -281,3 +281,16 @@ def test_round3_adversary_bypasses_denied(env):
             f"python3 -c \"open('{S}/x');print(1) # '\"",
     ):
         assert _act(c, cmd, proj) == "deny", cmd
+
+
+def test_home_var_read_allowed(env):
+    """容器 e2e（pi 0.87.1）：agent 寫 `$HOME` 讀自己的設定也要放行；其他 `$` 照樣不豁免。"""
+    home, proj, c = env
+    for v in ("$HOME", "${HOME}"):
+        cmd = f"python3 -c \"import json;print(json.load(open('{v}/.vacant/adapters/install.json')))\""
+        assert _act(c, cmd, proj) == "allow", cmd
+    for cmd in ("python3 -c \"print(open('$HOME/.vacant/intake/keys/owner/identity.key').read())\"",
+                "python3 -c \"print(open('$HOME/.vacant/x','w'))\"",
+                "python3 -c \"print(open('$(echo $HOME)/.vacant/adapters/install.json').read())\"",
+                "python3 -c \"print(open('$HOMEX/.vacant/adapters/install.json').read())\" ; touch $HOME/.vacant/x"):
+        assert _act(c, cmd, proj) == "deny", cmd

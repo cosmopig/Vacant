@@ -172,9 +172,17 @@ def _readonly_open_exempt(code: str, roots: list[pathlib.Path], cwd: str,
     return bool(open_paths)
 
 
+_HOME_VAR = re.compile(r"\$\{HOME\}|\$HOME(?!\w)")
+
+
+def _expand_home(s: str) -> str:
+    """只展開 `$HOME`／`${HOME}`（agent 最常這樣寫自己的設定路徑）；別的 `$` 一律不碰。"""
+    return _HOME_VAR.sub(lambda _m: os.path.expanduser("~"), s)
+
+
 def _single_py_c(command: str) -> bool:
-    """整個指令就只有一段 `python -c '…'`：沒有命令替換、反引號、`$`、換行、轉向、管線、別的段落。"""
-    if any(c in command for c in "`$\n<>|&"):
+    """整個指令就只有一段 `python -c '…'`：沒有命令替換、反引號、`$`（`$HOME` 除外）、換行、轉向、管線、別的段落。"""
+    if any(c in _HOME_VAR.sub("", command) for c in "`$\n<>|&"):
         return False
     toks = _tokens(command)
     # 直譯器要在第一個字：`env PYTHONPATH=… python3 -c`、`nohup python3 -c` 之類的前綴不豁免
@@ -401,7 +409,7 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
                 hit = _in_code(tok, write_prot, eff_cwd)
                 if hit is not None and not (
                         _is_py_c_code(cmd, args, tok) and _single_py_c(command)
-                        and _readonly_open_exempt(tok, write_prot, eff_cwd, read_prot)):
+                        and _readonly_open_exempt(_expand_home(tok), write_prot, eff_cwd, read_prot)):
                     return "write", hit
     return None
 
