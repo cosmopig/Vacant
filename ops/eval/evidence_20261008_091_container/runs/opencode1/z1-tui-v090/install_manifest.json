@@ -1,0 +1,18 @@
+{
+  "agents": {
+    "opencode": {
+      "ops": [
+        {
+          "op": "file",
+          "path": "/home/user/.config/opencode/plugin/vacant.js",
+          "sha256": "f90f3f17e043bad043c157e7844e2f81c9036843b236840c9a2cfa04f74f941b",
+          "created": true,
+          "backup": null
+        }
+      ],
+      "installed_at": "2026-10-08T15:46:12+00:00"
+    }
+  },
+  "mode": "evidence",
+  "schema": 2
+}

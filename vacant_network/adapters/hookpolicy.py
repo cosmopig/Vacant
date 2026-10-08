@@ -35,6 +35,14 @@
    （`from vacant_network.intake import approval` 再呼叫它的函式），都繞得過）。
    反過來它也會多擋：沒加引號的 `grep vacant hook` 會被當成在叫 `vacant hook`；餵給 shell 的
    heredoc 不管 shell 後面帶什麼引數都當成程式碼；找不到結束定界符的 heredoc 內文也當成指令。
+   寫入側同樣有很多字串層繞法沒擋住（已知、不處理的例子：`cp -t`、`sed -i` 的各種變體、
+   `perl -pi`、`git -C … checkout`、`sqlite3.connect(…)` 建出新檔、php 的 `fopen`／`file_put_contents`、
+   `.write(`／`os.open` 以外的低階 fd 寫法）。內聯碼裡出現 `open(`／`replace(` 一律算寫入
+   （跟 09cc052f 一樣，含 `str.replace('a','b')`、`open(p, mode='r')`）；唯一的豁免是白名單：
+   `python -c` 裡只有裸的 `open('字面值路徑'[, 'r'|'rb'|'rt'|'br'|'tr'])`、沒有其他寫入提示
+   （`_readonly_open_exempt`）。讀取也受保護的路徑（金鑰）不在豁免之內。
+   內聯碼裡的路徑比對刻意不加左邊界（執行時組路徑擋得到），所以 cwd==HOME 時
+   `proj/.vacant/…` 也會被當成狀態資料夾而多擋。
    真正的分權還是把 reviewer／approver／owner 金鑰放到另一個帳號——掛鉤擋下的指令，
    在掛鉤外面（同一個帳號、同一把 owner 金鑰）照樣跑得動。
 2. **掛鉤壞掉不可以弄死 agent**：任何例外都放行並落一筆錯誤。這一層是增效與觀測，
@@ -45,12 +53,16 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import io
 import json
 import os
 import pathlib
+import posixpath
 import re
 import shlex
 import time
+import tokenize
+import unicodedata
 from typing import Any
 
 KINDS = ("session_start", "pre_tool", "post_tool", "stop", "session_end", "turn_check", "other")
@@ -62,8 +74,125 @@ WRITE_TOOLS = frozenset({"write", "edit", "multiedit", "patch", "apply_patch", "
 SHELL_TOOLS = frozenset({"bash", "shell", "exec", "exec_command", "local_shell",
                          "run_command", "terminal", "unified_exec"})
 #: 直譯器程式碼裡的寫入 API（`python3 -c "open(p,'w')"` 這種路徑藏在程式碼字串裡的情況）。
-_CODE_WRITE_HINT = re.compile(r"\bopen\(|write_text|write_bytes|writeFile|unlink|remove\(|"
-                              r"rmtree|rename|replace\(|truncate|chmod|appendFile")
+#: 前兩行逐字是 09cc052f 的那一份（裸 `open(`、`replace(` 都算寫）；後面是 0.9.1 加的。
+#: 0.9.1 曾改成「解析 open() 的模式、只在看得到寫入模式時算寫」的黑名單——對抗審查一再找到漏洞
+#: （`p.open('w')`、`shelve.open`、`dbm.open(p,'c')`、perl 三引數 `open(F,'>',p)`、`open(p,'\167')`），
+#: 所以改回：`open(` 一律算寫，只開一個很窄的**白名單**豁免（`_readonly_open_exempt`）。
+_CODE_WRITE_HINT = re.compile(
+    r"\bopen\s*\(|write_text|write_bytes|writeFile|unlink|remove\(|"
+    r"rmtree|rename|replace\(|truncate|chmod|appendFile|"
+    r"\.write\(|WriteStream|\brm(?:Sync)?\(|shutil\.|copyfile|copy2|"
+    r"openSync|copyFile|cpSync|\bcp\(|symlink|\blink\(|\.touch\(|makedirs|mkdir|mkfifo|mknod")
+#: 白名單豁免只給 `python -c`／`python3 -c`／`python3.11 -c`（不含 pypy、node、ruby、perl、php）。
+_PY_C_INTERP = re.compile(r"python(?:[0-9]+(?:\.[0-9]+)?)?$")
+_PY_C_FLAG = re.compile(r"-[A-Za-z]*c$")
+#: 豁免的 open() 模式只收這五個。
+_READ_MODES = frozenset({"r", "rb", "rt", "br", "tr"})
+
+
+def _is_py_c_code(cmd: str, args: list[str], tok: str) -> bool:
+    """`tok` 是 `python -c`／`python3 -c`／`pythonX.Y -c` 後面那段內聯碼。"""
+    if not _PY_C_INTERP.match(cmd):
+        return False
+    return any(a == tok and i > 0 and _PY_C_FLAG.match(args[i - 1])
+               for i, a in enumerate(args))
+
+
+#: 豁免碼裡准出現的名字（`tokenize` 的 NAME）。不在表上的一律不豁免——這是**白名單**，
+#: 不是「列出危險的東西」：`getattr`、`pprint._sys`、`exec`…都因為不在表上而不豁免，不用一個一個想到。
+_EXEMPT_NAMES = frozenset({"import", "json", "pprint", "print", "open", "with", "as", "for", "in",
+                           "f", "fh", "d", "data", "x", "k", "v", "read", "load", "loads", "dumps",
+                           "keys", "items", "values", "get", "len", "sorted", "list", "dict", "str",
+                           "int", "indent", "sort_keys", "True", "False", "None"})
+#: `.` 後面准接的屬性名（`json.load`、`f.read()`、`pprint.pprint`…）；`write`、`dump`、`_sys` 都不在。
+_EXEMPT_ATTRS = frozenset({"load", "loads", "dumps", "read", "keys", "items", "values", "get",
+                           "pprint"})
+#: 准出現的運算子。沒有 `+`／`%`：路徑不能在執行時組出來。
+_EXEMPT_OPS = frozenset({"(", ")", "[", "]", ",", ";", ":", ".", "="})
+_QUOTES = ("'", '"')
+
+
+def _readonly_open_exempt(code: str, roots: list[pathlib.Path], cwd: str,
+                          read_prot: list[pathlib.Path] | None = None) -> bool:
+    """白名單：這段 `python -c` 內聯碼對受保護路徑**只有**裸的唯讀 `open(字面值)`，才不算寫入。
+
+    全部條件都要成立（任何一條不成立＝照 09cc052f 算寫）：
+    - 純 ASCII（全形字在 Python 會被 NFKC 正規化成識別字，字串層看不到）、沒有反斜線；
+    - 用 `tokenize` 切詞，每個名字都在 `_EXEMPT_NAMES`、`.` 後面的屬性都在 `_EXEMPT_ATTRS`、
+      運算子都在 `_EXEMPT_OPS`（沒有 `+`：路徑不能組）、字串都沒有前綴也不是三引號；
+    - 每一個 `open(` 都是裸呼叫（前面不是 `.`），引數只有一個字串字面值路徑，或再加一個模式字面值且恰好是
+      r／rb／rt／br／tr；路徑已經是正規形式（`..`、`//`、`/./` 一律不豁免），也不在讀取受保護的路徑底下；
+    - 提到受保護路徑的字串字面值，都是某個豁免 open() 的路徑。
+    呼叫端另外要求整個指令就只有這一段 `python -c`、直譯器在第一個字（`_single_py_c`）。
+    誠實邊界：仍是字串層；它只把「明顯是讀」的那一小撮放行，不證明程式碼不寫。`python -c` 會從
+    工作目錄載入同名模組（專案裡放一個 `json.py`，`import json` 就跑它）——這跟直接執行一支腳本檔
+    一樣是本來就擋不到的（誠實邊界 1），豁免沒有讓它更容易。
+    """
+    if not code.isascii() or "\\" in code:
+        return False
+    try:
+        toks = [t for t in tokenize.generate_tokens(io.StringIO(code).readline)
+                if t.type not in (tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER,
+                                  tokenize.INDENT, tokenize.DEDENT)]
+    except (tokenize.TokenError, SyntaxError):
+        return False
+    open_paths: set[int] = set()
+    for i, t in enumerate(toks):
+        after_dot = i > 0 and toks[i - 1].string == "."
+        if t.type == tokenize.NAME:
+            if t.string not in (_EXEMPT_ATTRS if after_dot else _EXEMPT_NAMES):
+                return False
+            if t.string != "open":
+                continue
+            seq = toks[i + 1:i + 6]
+            if len(seq) < 3 or seq[0].string != "(" or seq[1].type != tokenize.STRING:
+                return False
+            if seq[2].string != ")":
+                if not (len(seq) == 5 and seq[2].string == "," and seq[4].string == ")"
+                        and seq[3].type == tokenize.STRING and seq[3].string[0] in _QUOTES
+                        and seq[3].string[1:-1] in _READ_MODES):
+                    return False
+            path = seq[1].string[1:-1]
+            if seq[1].string[0] not in _QUOTES or not path or posixpath.normpath(path) != path:
+                return False
+            if read_prot and (_under(path, read_prot, cwd) is not None
+                              or _in_code(seq[1].string, read_prot, cwd) is not None):
+                return False
+            open_paths.add(i + 2)
+        elif t.type == tokenize.STRING:
+            if t.string[0] not in _QUOTES or t.string[:3] in ("'''", '"""'):
+                return False
+            if i not in open_paths and _in_code(t.string, roots, cwd) is not None:
+                return False
+        elif t.type == tokenize.OP:
+            if t.string not in _EXEMPT_OPS:
+                return False
+        elif t.type != tokenize.NUMBER:
+            return False
+    return bool(open_paths)
+
+
+_HOME_VAR = re.compile(r"\$\{HOME\}|\$HOME(?!\w)")
+
+
+def _expand_home(s: str) -> str:
+    """只展開 `$HOME`／`${HOME}`（agent 最常這樣寫自己的設定路徑）；別的 `$` 一律不碰。"""
+    return _HOME_VAR.sub(lambda _m: os.path.expanduser("~"), s)
+
+
+def _single_py_c(command: str) -> bool:
+    """整個指令就只有一段 `python -c '…'`：沒有命令替換、反引號、`$`（`$HOME` 除外）、換行、轉向、管線、別的段落。"""
+    if any(c in _HOME_VAR.sub("", command) for c in "`$\n<>|&"):
+        return False
+    toks = _tokens(command)
+    # 直譯器要在第一個字：`env PYTHONPATH=… python3 -c`、`nohup python3 -c` 之類的前綴不豁免
+    # （PYTHONPATH 能讓 `import json` 載到別處的碼）。
+    if not toks or not _PY_C_INTERP.match(toks[0]):
+        return False
+    segs = list(_segments(toks))
+    return len(segs) == 1 and not segs[0][1]
+
+
 #: 所有非選項引數都是寫入目標的指令。
 _WRITE_ALL_ARGS = frozenset({"rm", "unlink", "shred", "truncate", "chmod", "chown", "chgrp",
                              "tee", "touch", "mkdir", "rmdir", "patch"})
@@ -236,7 +365,13 @@ def _path_forms(r: pathlib.Path, cwd: str) -> list[str]:
 
 
 def _in_code(token: str, roots: list[pathlib.Path], cwd: str) -> pathlib.Path | None:
-    """路徑以**完整的路徑元件**出現在一段程式碼字串裡（後面接結尾、`/`、引號、空白、括號）。"""
+    """路徑以**完整的路徑元件**出現在一段程式碼字串裡（後面接結尾、`/`、引號、空白、括號）。
+
+    刻意**沒有左邊界**：`os.getcwd()+'/.vacant/…'`、`f'{os.getcwd()}/.vacant/…'`、
+    `'.//.vacant/…'` 這種執行時才組出來的路徑，左邊接的是任意字元；加左邊界會讓讀私鑰、
+    寫被鎖的契約從這裡漏過去（0.9.1 對抗審查重現過）。代價是 cwd==HOME 時
+    `proj/.vacant/…` 也會被當成狀態資料夾——安全優先，接受這個誤擋。
+    """
     for r in roots:
         for f in _path_forms(r, cwd):
             if re.search(re.escape(f) + r"(?=$|[/'\"\s),;])", token):
@@ -269,9 +404,12 @@ def _shell_verdict(command: str, cwd: str, write_prot: list[pathlib.Path],
             if hit is not None:
                 return "write", hit
         for tok in args:
-            if _CODE_WRITE_HINT.search(tok):
+            # NFKC：全形 `ｏｐｅｎ(` 在 Python 裡就是 `open(`。
+            if _CODE_WRITE_HINT.search(unicodedata.normalize("NFKC", tok)):
                 hit = _in_code(tok, write_prot, eff_cwd)
-                if hit is not None:
+                if hit is not None and not (
+                        _is_py_c_code(cmd, args, tok) and _single_py_c(command)
+                        and _readonly_open_exempt(_expand_home(tok), write_prot, eff_cwd, read_prot)):
                     return "write", hit
     return None
 

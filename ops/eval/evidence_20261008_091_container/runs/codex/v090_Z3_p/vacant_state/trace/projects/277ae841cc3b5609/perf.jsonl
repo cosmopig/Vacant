@@ -1,0 +1,5 @@
+{"ts": 1791475785.8841355, "agent": "codex", "event": "UserPromptSubmit", "ms": 18.1}
+{"ts": 1791475786.145508, "agent": "codex", "event": "PreToolUse", "ms": 31.33}
+{"ts": 1791475786.3358448, "agent": "codex", "event": "PreToolUse", "ms": 9.05}
+{"ts": 1791475786.5228744, "agent": "codex", "event": "Stop", "ms": 1.96}
+{"ts": 1791475786.9286866, "agent": "codex", "event": "SessionEnd", "ms": 12.04}

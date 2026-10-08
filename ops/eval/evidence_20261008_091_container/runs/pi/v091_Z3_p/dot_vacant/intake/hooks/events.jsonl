@@ -1,0 +1,6 @@
+{"ts": 1791476288.16731, "agent": "pi", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791476288.329673, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a707a7fda69ca08ed823ec28073ca9f4ee52dfeeac78b7f76ab8388055ce7f36"}
+{"ts": 1791476288.4647093, "agent": "pi", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a707a7fda69ca08ed823ec28073ca9f4ee52dfeeac78b7f76ab8388055ce7f36"}
+{"ts": 1791476288.5804648, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "deny", "contract": null, "command_sha256": "58b385ab9366352d5d83a48a9722b00d081219ffb3a18c301c07b6dbcf84d7db", "rule": "protect_keys"}
+{"ts": 1791476288.860164, "agent": "pi", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 0, "left_open": 0}, "zero_ran": true}
+{"ts": 1791476288.9778354, "agent": "pi", "event": "session_end", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

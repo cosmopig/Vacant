@@ -1,0 +1,14 @@
+{
+  "build": "v091",
+  "scn": "Z3",
+  "mode": "tui",
+  "cwd": "/work/proj",
+  "tui_ready": true,
+  "prompt_resent": false,
+  "exited_cleanly": true,
+  "frames": 6,
+  "frames_vacant": 4,
+  "answer_txt": null,
+  "model_requests": 4,
+  "requests_fed_back": 0
+}

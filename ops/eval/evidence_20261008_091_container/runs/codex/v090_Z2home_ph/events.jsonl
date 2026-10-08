@@ -1,0 +1,5 @@
+{"ts": 1791476080.7114995, "agent": "codex", "event": "UserPromptSubmit", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791476081.1240485, "agent": "codex", "event": "PreToolUse", "kind": "pre_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791476081.40551, "agent": "codex", "event": "PostToolUse", "kind": "post_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791476081.6346283, "agent": "codex", "event": "Stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791476081.9073138, "agent": "codex", "event": "SessionEnd", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

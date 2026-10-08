@@ -43,6 +43,15 @@ TARGETS = ("vacant_network", "ops", "examples")
 #: 已知且**有理由**的 HIGH 發現。key＝(bandit test_id, 相對路徑)。
 #: 新增一筆就是一次明示決定——要寫得出理由才加得進來。
 KNOWN: dict[tuple[str, str], str] = {
+    ("B602", "ops/eval/evidence_20261008_091_container/drivers/cc_drv/timing.py"):
+        "`shell=True` 跑的是 `vacant install` 自己寫進 Claude 設定裡的 hook 指令列——量的就是"
+        "Claude Code 用 shell 執行那一行的成本（0.9.0 對 0.9.1），拆成 argv 就不是在量同一件事。"
+        "只在一次性、`--network none` 的測試容器裡跑，指令來自容器內的設定檔、不吃外部輸入；"
+        "歸檔證據（`runs/claude/`）就是這支量的，不改碼、不進 wheel。",
+    ("B602", "ops/eval/evidence_20261008_091_container/drivers/oc1drv/drive.py"):
+        "容器 e2e 的 OpenCode 1.x 驅動程式：`shell=True` 只用在寫死的 tmux／檔案指令（指令字串由"
+        "本檔組出，沒有外部輸入），只在一次性、`--network none` 的測試容器裡跑。"
+        "歸檔證據（`runs/opencode1/`）就是這支跑的，不改碼、不進 wheel。",
     ("B103", "ops/gain/r530/run_r530.py"):
         "0o777 開在**沙箱探針目錄**上：R530 的 unshare 沙箱降權成 uid 65534，"
         "探針要寫得進去才驗得到「寫入真的被關在 cwd 裡」。那個目錄是每塊 run "

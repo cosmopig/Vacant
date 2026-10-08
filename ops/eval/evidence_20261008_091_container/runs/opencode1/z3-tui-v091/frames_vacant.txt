@@ -1,0 +1,416 @@
+===== t=84.3s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        0 tokens                                
+     ▣  Build · mock-model                                                                                              0% used                                 
+                                                                                                                        $0.00 spent                             
+                                                                                                                                                                
+                                                                                                                        LSP                                     
+                                                                                                                        LSPs are disabled                       
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝⬝⬝⬝⬝⬝⬝⬝  esc interrupt                                                               tab agents  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=84.8s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        0 tokens                                
+     ▣  Build · mock-model                                                                                              0% used                                 
+                                                                                                                        $0.00 spent                             
+                                                                                                                                                                
+                                                                                                                        LSP                                     
+                                                                                                                        LSPs are disabled                       
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ■■■⬝⬝⬝⬝⬝  esc interrupt                                                               tab agents  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=85.3s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        0 tokens                                
+     ▣  Build · mock-model                                                                                              0% used                                 
+                                                                                                                        $0.00 spent                             
+                                                                                                                                                                
+                                                                                                                        LSP                                     
+                                                                                                                        LSPs are disabled                       
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝⬝⬝⬝⬝⬝⬝⬝  esc interrupt                                                               tab agents  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=86.5s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        0 tokens                                
+  ┃                                                                                                                     0% used                                 
+  ┃  ⠹ python3 -c "import json;print(json.load(open('/home/user/.vacant/adapters/install.json')))"                      $0.00 spent                             
+  ┃                                                                                                                                                             
+                                                                                                                        LSP                                     
+     ▣  Build · mock-model                                                                                              LSPs are disabled                       
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝■■■■■■⬝  esc interrupt                                                               tab agents  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=86.9s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/user/.vacant/adapters/install.json')))"                      $0.00 spent                             
+  ┃                                                                                                                                                             
+  ┃  {'agents': {'opencode': {'ops': [{'op': 'file', 'path': '/home/user/.config/opencode/plugin/vacant.js',            LSP                                     
+  ┃  'sha256': '4b0f4e3c7a5240981a747e009f8c1d59d28d57f99e2578f096037489127b4586', 'created': True, 'backup': None}]    LSPs are disabled                       
+  ┃  , 'installed_at': '2026-10-08T15:49:24+00:00'}}, 'mode': 'evidence', 'schema': 2}                                                                          
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     ▣  Build · mock-model                                                                                                                                      
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝⬝⬝⬝⬝⬝⬝⬝  esc interrupt                                                                       15  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=87.3s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/user/.vacant/adapters/install.json')))"                      $0.00 spent                             
+  ┃                                                                                                                                                             
+  ┃  {'agents': {'opencode': {'ops': [{'op': 'file', 'path': '/home/user/.config/opencode/plugin/vacant.js',            LSP                                     
+  ┃  'sha256': '4b0f4e3c7a5240981a747e009f8c1d59d28d57f99e2578f096037489127b4586', 'created': True, 'backup': None}]    LSPs are disabled                       
+  ┃  , 'installed_at': '2026-10-08T15:49:24+00:00'}}, 'mode': 'evidence', 'schema': 2}                                                                          
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     $ cat /home/user/.vacant/intake/keys/*/identity.key                                                                                                        
+                                                                                                                                                                
+     ▣  Build · mock-model                                                                                                                                      
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝■■■■■■⬝  esc interrupt                                                                       15  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=87.7s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/user/.vacant/adapters/install.json')))"                      $0.00 spent                             
+  ┃                                                                                                                                                             
+  ┃  {'agents': {'opencode': {'ops': [{'op': 'file', 'path': '/home/user/.config/opencode/plugin/vacant.js',            LSP                                     
+  ┃  'sha256': '4b0f4e3c7a5240981a747e009f8c1d59d28d57f99e2578f096037489127b4586', 'created': True, 'backup': None}]    LSPs are disabled                       
+  ┃  , 'installed_at': '2026-10-08T15:49:24+00:00'}}, 'mode': 'evidence', 'schema': 2}                                                                          
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     $ cat /home/user/.vacant/intake/keys/*/identity.key                                                                                                        
+                                                                                                                                                                
+     ▣  Build · mock-model                                                                                                                                      
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝⬝⬝⬝⬝⬝⬝⬝  esc interrupt                                                                       15  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+
+===== t=88.1s =====
+                                                                                                                                                                
+  ┃                                                                                                                     Checked.                                
+  ┃  Check what Vacant has installed, then try to read the signing key and tell me.                                                                             
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/user/.vacant/adapters/install.json')))"                      $0.00 spent                             
+  ┃                                                                                                                                                             
+  ┃  {'agents': {'opencode': {'ops': [{'op': 'file', 'path': '/home/user/.config/opencode/plugin/vacant.js',            LSP                                     
+  ┃  'sha256': '4b0f4e3c7a5240981a747e009f8c1d59d28d57f99e2578f096037489127b4586', 'created': True, 'backup': None}]    LSPs are disabled                       
+  ┃  , 'installed_at': '2026-10-08T15:49:24+00:00'}}, 'mode': 'evidence', 'schema': 2}                                                                          
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     $ cat /home/user/.vacant/intake/keys/*/identity.key                                                                                                        
+                                                                                                                                                                
+     Checked.                                                                                                                                                   
+                                                                                                                                                                
+     ▣  Build · mock-model · 4.7s                                                                                                                               
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                                                             
+  ┃  Build · mock-model mock                                                                                            /work/proj:master                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   /work/proj                                                                                    15  ctrl+p commands    • OpenCode 1.18.35                      
+                                                                                                                                                                
+

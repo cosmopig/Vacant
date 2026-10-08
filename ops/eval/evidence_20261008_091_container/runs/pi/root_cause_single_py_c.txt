@@ -1,0 +1,2 @@
+False <- python3 -c "import json;print(json.load(open('$HOME/.vacant/adapters/install.json')))"
+True <- python3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"

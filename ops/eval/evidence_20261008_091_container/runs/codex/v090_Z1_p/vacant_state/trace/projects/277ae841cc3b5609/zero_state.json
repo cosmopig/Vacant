@@ -1,0 +1,1 @@
+{"verified": {"seq": 6, "hash": "9f369995665e7ef3e9290e2dadae61da2e0436e51ba3e1d1ff2f21adf4d9de1f"}, "sessions": {"codex:01a11c46-5960-7c73-9ef0-d1f20212cd0f": {"request": 2, "rounds": [{"round": 1, "findings": [{"finding_id": "z_16e360ba52", "kind": "missing_output", "path": "answer.txt", "asked": "answer.txt"}]}], "open": []}}}

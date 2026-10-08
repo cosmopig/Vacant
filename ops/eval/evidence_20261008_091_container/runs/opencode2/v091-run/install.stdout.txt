@@ -1,0 +1,3 @@
+  opencode: global plugin — /home/u/.config/opencode/plugin/vacant.js
+  not found on this machine: claude, codex, pi (skipped; `vacant install --force` writes their config anyway)
+[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/u/.vacant (remove everything with `vacant uninstall`).

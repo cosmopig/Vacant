@@ -149,6 +149,12 @@ def render(agent: str, ev: HookEvent, d: HookDecision) -> tuple[str, str, int]:
             return "", d.reason, 2
         if ev.kind == "stop" and d.action == "continue":
             return json.dumps({"decision": "block", "reason": d.reason}), "", 0
+        if ev.kind == "stop" and d.record.get("user_message"):
+            # Codex 的 Stop 在 exit 0 時 stdout 要是 JSON，`systemMessage` 是文件寫明的通用輸出欄位
+            # （「Surfaced as a warning in the UI or event stream」，developers.openai.com/codex/hooks）；
+            # 只給人看、不進模型的上下文。⚠ 文件沒寫 exit 0 時 stderr 會不會顯示，所以不用 stderr。
+            # 沒有訊息時維持空輸出（沒問題時和沒裝逐位元相同）
+            return json.dumps({"systemMessage": d.record["user_message"]}), "", 0
         return "", "", 0
     out = {"action": d.action, "reason": d.reason}
     if ev.kind == "stop" and d.action != "continue" and d.record.get("user_message"):
@@ -248,22 +254,27 @@ def _person_prompt(agent: str, event: str, payload: dict[str, Any], cwd: str | N
     return capture.classify_prompt(agent, payload, text, cwd, contract)[0] == "user"
 
 
-def _defer_for_subagents(contract: Any, ev: HookEvent) -> bool:
+#: 延後驗收時給人看的一句話（一串連續延後只說第一次；不含行動者、不進模型）
+DEFER_NOTICE = "Vacant postponed its check: a subagent is still running."
+
+
+def _defer_for_subagents(contract: Any, ev: HookEvent) -> tuple[bool, bool]:
+    """回 `(要不要延後, 是不是這一串延後的第一次)`。"""
     try:
         from ..trace import capture, recorder, stopcheck
         ws = capture.workspace_for(ev.cwd, contract)
         if ws is None or not ev.session_id:
-            return False
+            return False, False
         rec = recorder.Recorder(ws)
         key = f"{ev.agent}:{ev.session_id}"
         if not rec.should_defer(key):
-            return False
+            return False, False
         # 上一次回合邊界的「過／不過」已經不是現況：不可以在工作階段結束時被當成這一跑的結果
         # （審查 defer#2：先 accept、之後自己刪掉報告、叫一個背景子 agent、延後、結束 ⇒ 曾經記成成功）
         stopcheck.forget_outcome(rec, key)
-        return True
+        return True, rec.defer_streak_first
     except Exception:  # noqa: BLE001 — 看不出來就照常驗收
-        return False
+        return False, False
 
 
 def _localize(contract: Any, res: dict[str, Any], ev: HookEvent,
@@ -313,6 +324,10 @@ def _zero_stop(agent: str, payload: dict[str, Any], ev: HookEvent, mode: str) ->
                                            turns_left=_turns_left(turn, budget), budget=budget,
                                            error_stop=payload.get("last_stop") == "error")
     z = record.get("zero") or {}
+    # 事件紀錄分得出「沒查」和「查過沒問題」（cwd 太大一步都沒記的那一跑曾經只留下一筆 allow）
+    record = {**record, "zero_ran": bool(z.get("ran")),
+              **({} if z.get("ran") else {"why": z.get("why") or ("error" if z.get("error")
+                                                                  else "no workspace")})}
     if z.get("error"):
         _log("errors.jsonl", {"agent": agent, "event": "stop",
                               "error": f"zero-config check: {z['error']}"[:500]})
@@ -381,11 +396,12 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
     if ev.kind == "pre_tool":
         d = decide_pre_tool(ev, contract)
     elif ev.kind == "stop" and (contract is not None or zero != "off") \
-            and _defer_for_subagents(contract, ev):
+            and (deferred := _defer_for_subagents(contract, ev))[0]:
         # 背景的子 agent 還在做（Claude 預設把子 agent 放到背景）：主 agent 的回合結束不是交件的時候，
         # 這時驗收只會叫它把子 agent 正在做的事重做一遍。等子 agent 回報之後的那一次回合結束再驗
         # （連續延後有上限；這個工作階段上一次的驗收結果作廢——之後的工作階段結束以新的驗收為準）
-        d = HookDecision("allow", "", {"stop_check_deferred": "a delegated task is still running"})
+        d = HookDecision("allow", "", {"stop_check_deferred": "a delegated task is still running",
+                                       **({"user_message": DEFER_NOTICE} if deferred[1] else {})})
     elif ev.kind == "stop" and contract is None and zero != "off" \
             and not os.environ.get("VACANT_HOOK_NO_STOP"):
         d = _zero_stop(agent, payload, ev, zero)
@@ -446,6 +462,12 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
                               if ev.command else None),
            # 給人的訊息含繳付物裡的值：不進事件紀錄（誠實邊界 2），它在病歷目錄的報告裡
            **{k: v for k, v in d.record.items() if k != "user_message"}}
+    zr = d.record.get("zero")
+    if ev.kind == "session_end" and isinstance(zr, dict) and "zero_ran" not in rec:
+        # session_end 也分得出「沒查」和「查過」（untraceable 的 session_end 不畫給人，只留這兩欄）
+        rec["zero_ran"] = bool(zr.get("ran"))
+        if not zr.get("ran"):
+            rec["why"] = zr.get("why") or "no workspace"
     _log("events.jsonl", rec)
     if contract is not None and (d.action != "allow" or ev.kind in ("stop", "session_end")):
         try:

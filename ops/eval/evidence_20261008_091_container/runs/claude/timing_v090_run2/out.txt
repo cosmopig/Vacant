@@ -1,0 +1,36 @@
+  claude: hooks in ~/.claude/settings.json — /home/u/.claude/settings.json
+  codex: trusted hooks appended to config.toml — /home/u/.codex/config.toml
+  pi: global extension — /home/u/.pi/agent/extens
+PreToolUse cmd: /opt/v090/bin/python3 -m vacant_network hook claude PreToolUse  # vacant-intake
+{
+ "pre_only": {
+  "n": 20,
+  "total_s": 2.919,
+  "mean_ms": 146.0,
+  "median_ms": 141.6,
+  "max_ms": 175.6,
+  "rcs": [
+   0
+  ]
+ },
+ "pre_in_pairs": {
+  "n": 20,
+  "total_s": 2.857,
+  "mean_ms": 142.9,
+  "median_ms": 140.6,
+  "max_ms": 185.0,
+  "rcs": [
+   0
+  ]
+ },
+ "post_in_pairs": {
+  "n": 20,
+  "total_s": 2.893,
+  "mean_ms": 144.6,
+  "median_ms": 142.8,
+  "max_ms": 169.5,
+  "rcs": [
+   0
+  ]
+ }
+}

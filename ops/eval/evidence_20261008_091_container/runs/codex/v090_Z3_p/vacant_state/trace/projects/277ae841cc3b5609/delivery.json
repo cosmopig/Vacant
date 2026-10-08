@@ -1,0 +1,27 @@
+{
+ "project": "/work/proj",
+ "session": "codex:01a11c47-1fc1-77d3-89c8-4c50014bff6c",
+ "at": "2026-10-08T16:09:46+00:00",
+ "mode": "evidence",
+ "in_progress": false,
+ "written_after_reminder": [],
+ "checked": {
+  "checked": 0,
+  "traced": 0,
+  "derived": 0,
+  "exempt": 0,
+  "not_typed": 0,
+  "not_traced_note_only": []
+ },
+ "deliverables": [],
+ "named": [],
+ "opened": [],
+ "given_in_request": [],
+ "not_opened": [],
+ "in_dirs": [],
+ "dir_opened": [],
+ "dir_given_in_request": [],
+ "fixed": [],
+ "unverified": [],
+ "findings": []
+}

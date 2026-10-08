@@ -1,0 +1,3 @@
+./trace/untraceable_told.json
+./intake/hooks/events.jsonl
+./adapters/install.json

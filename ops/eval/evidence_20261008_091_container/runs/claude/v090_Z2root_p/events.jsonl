@@ -1,0 +1,5 @@
+{"ts": 1791475200.2010653, "agent": "claude", "event": "UserPromptSubmit", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791475200.470518, "agent": "claude", "event": "PreToolUse", "kind": "pre_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791475200.7125425, "agent": "claude", "event": "PostToolUse", "kind": "post_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791475200.9656975, "agent": "claude", "event": "Stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791475201.2287006, "agent": "claude", "event": "SessionEnd", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

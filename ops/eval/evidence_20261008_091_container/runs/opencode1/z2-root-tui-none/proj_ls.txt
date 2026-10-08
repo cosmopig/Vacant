@@ -1,0 +1,28 @@
+total 272
+drwxrwxrwx   1 root root   4096 Oct  8 15:48 .
+drwxrwxrwx   1 root root   4096 Oct  8 15:48 ..
+-rwxr-xr-x   1 root root      0 Oct  8 15:48 .dockerenv
+lrwxrwxrwx   1 root root      7 Oct  5 00:00 bin -> usr/bin
+drwxr-xr-x   2 root root   4096 Jul  2 19:05 boot
+-rw-r--r--   1 root root 197164 Oct  8 15:32 ca.crt
+drwxr-xr-x   2 root root   4096 Oct  8 15:44 d
+drwxr-xr-x   5 root root    320 Oct  8 15:48 dev
+drwxr-xr-x   1 root root   4096 Oct  8 15:48 etc
+drwxr-xr-x   1 root root   4096 Oct  8 15:48 home
+lrwxrwxrwx   1 root root      7 Oct  5 00:00 lib -> usr/lib
+lrwxrwxrwx   1 root root      9 Oct  5 00:00 lib64 -> usr/lib64
+drwxr-xr-x   2 root root   4096 Oct  8 15:44 m
+drwxr-xr-x   2 root root   4096 Oct  5 00:00 media
+drwxr-xr-x   2 root root   4096 Oct  5 00:00 mnt
+drwxrwxrwx   5 root root   4096 Oct  8 15:49 o
+drwxr-xr-x   1 root root   4096 Oct  8 15:48 opt
+dr-xr-xr-x 148 root root      0 Oct  8 15:48 proc
+drwx------   1 root root   4096 Oct  8 15:34 root
+drwxr-xr-x   1 root root   4096 Oct  6 02:34 run
+lrwxrwxrwx   1 root root      8 Oct  5 00:00 sbin -> usr/sbin
+drwxr-xr-x   2 root root   4096 Oct  5 00:00 srv
+dr-xr-xr-x  12 root root      0 Oct  8 15:48 sys
+drwxrwxrwt   1 root root   4096 Oct  8 15:48 tmp
+drwxr-xr-x   1 root root   4096 Oct  5 00:00 usr
+drwxr-xr-x   1 root root   4096 Oct  5 00:00 var
+drwxr-xr-x   2 user root   4096 Oct  8 15:48 work

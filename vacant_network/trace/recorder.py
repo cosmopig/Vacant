@@ -197,6 +197,7 @@ class Recorder:
         self.chain_path = self.dir / "chain.ndjson"
         self.state_path = self.dir / "state.json"
         self.skip = set(state_dirs())
+        self.defer_streak_first = False
         #: 在掛鉤裡用時由 `capture.py` 設成 `HOOK_SCAN_S`；命令列與 `vacant do` 不設（沒有上限）
         self.scan_deadline_s: float | None = None
         self._idx_cache: dict[str, W.Index] = {}
@@ -738,6 +739,8 @@ class Recorder:
             n = int(cnt.get(session_key, 0))
             defer = bool(running) and n < MAX_DEFERRALS
             cnt[session_key] = n + 1 if defer else 0
+            #: 這一次延後是不是這一串連續延後的第一次（給人的提示一串只說一次）
+            self.defer_streak_first = bool(defer and n == 0)
             self._save(st)
             return defer
 

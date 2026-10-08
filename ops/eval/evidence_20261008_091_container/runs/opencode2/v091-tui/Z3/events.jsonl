@@ -1,0 +1,5 @@
+{"ts": 1791475850.2930682, "agent": "opencode", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791475850.5238986, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "shell", "action": "allow", "contract": null, "command_sha256": "7e4bc890bcf24b0e3ea53830796cfc8e3629f7ec291948036d405d4a9635876b"}
+{"ts": 1791475850.705379, "agent": "opencode", "event": "post_tool", "kind": "post_tool", "tool": "shell", "action": "allow", "contract": null, "command_sha256": "7e4bc890bcf24b0e3ea53830796cfc8e3629f7ec291948036d405d4a9635876b"}
+{"ts": 1791475850.9531941, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "shell", "action": "deny", "contract": null, "command_sha256": "a70dd275ff3eadcb6cd42df64ae0fdae7954b34e82a96169c5cb3c2465d80161", "rule": "protect_keys"}
+{"ts": 1791475851.4942908, "agent": "opencode", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 0, "left_open": 0}, "zero_ran": true}

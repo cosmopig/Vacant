@@ -1,0 +1,9 @@
+{"ts": 1791474332.8037448, "agent": "opencode", "event": "prompt", "ms": 67.57}
+{"ts": 1791474337.0441453, "agent": "opencode", "event": "pre_tool", "ms": 12.68}
+{"ts": 1791474337.3480332, "agent": "opencode", "event": "post_tool", "ms": 5.44}
+{"ts": 1791474338.1049573, "agent": "opencode", "event": "stop", "ms": 1.79}
+{"ts": 1791474338.3831534, "agent": "opencode", "event": "prompt", "ms": 7.82}
+{"ts": 1791474338.629156, "agent": "opencode", "event": "pre_tool", "ms": 2.49}
+{"ts": 1791474338.7801409, "agent": "opencode", "event": "post_tool", "ms": 11.47}
+{"ts": 1791474339.3504574, "agent": "opencode", "event": "stop", "ms": 1.72}
+{"ts": 1791474367.6670287, "agent": "opencode", "event": "session_end", "ms": 5.11}

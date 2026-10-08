@@ -1,0 +1,31 @@
+{
+ "project": "/work/proj",
+ "session": "codex:01a11c46-1d0b-7b91-887f-c027fb2c2c34",
+ "at": "2026-10-08T16:08:42+00:00",
+ "mode": "evidence",
+ "in_progress": false,
+ "written_after_reminder": [],
+ "checked": {
+  "checked": 1,
+  "traced": 1,
+  "derived": 0,
+  "exempt": 0,
+  "not_typed": 0,
+  "not_traced_note_only": []
+ },
+ "deliverables": [
+  "answer.txt"
+ ],
+ "named": [],
+ "opened": [],
+ "given_in_request": [],
+ "not_opened": [],
+ "in_dirs": [],
+ "dir_opened": [],
+ "dir_given_in_request": [],
+ "fixed": [
+  "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+ ],
+ "unverified": [],
+ "findings": []
+}

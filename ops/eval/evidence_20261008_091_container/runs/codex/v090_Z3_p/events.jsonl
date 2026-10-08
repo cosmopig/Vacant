@@ -1,0 +1,5 @@
+{"ts": 1791475785.8866038, "agent": "codex", "event": "UserPromptSubmit", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791475786.145722, "agent": "codex", "event": "PreToolUse", "kind": "pre_tool", "tool": "Bash", "action": "deny", "contract": null, "command_sha256": "7e4bc890bcf24b0e3ea53830796cfc8e3629f7ec291948036d405d4a9635876b", "rule": "protect_write"}
+{"ts": 1791475786.3361561, "agent": "codex", "event": "PreToolUse", "kind": "pre_tool", "tool": "Bash", "action": "deny", "contract": null, "command_sha256": "a70dd275ff3eadcb6cd42df64ae0fdae7954b34e82a96169c5cb3c2465d80161", "rule": "protect_keys"}
+{"ts": 1791475786.7222645, "agent": "codex", "event": "Stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 0, "left_open": 0}}
+{"ts": 1791475786.928833, "agent": "codex", "event": "SessionEnd", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

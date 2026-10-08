@@ -1,0 +1,165 @@
+{
+ "app": {
+  "name": "string",
+  "version": "string",
+  "channel": "string"
+ },
+ "location": {
+  "directory": "string",
+  "workspaceID": "undefined",
+  "project": {
+   "id": "string",
+   "directory": "string",
+   "canonical": "string"
+  },
+  "~effect/Schema/Class/Location.Info": "string",
+  "toString": "fn",
+  "pipe": "fn"
+ },
+ "options": {},
+ "agent": {
+  "get": "fn",
+  "list": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "aisdk": {
+  "hook": "fn"
+ },
+ "command": {
+  "list": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "event": {
+  "subscribe": "fn"
+ },
+ "experimental": {
+  "terminal": {
+   "read": "fn"
+  }
+ },
+ "generate": {
+  "text": "fn"
+ },
+ "model": {
+  "list": "fn",
+  "default": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "provider": {
+  "list": "fn",
+  "get": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "integration": {
+  "list": "fn",
+  "get": "fn",
+  "connect": {
+   "key": "fn"
+  },
+  "oauth": {
+   "connect": "fn",
+   "status": "fn",
+   "complete": "fn",
+   "cancel": "fn"
+  },
+  "command": {
+   "connect": "fn",
+   "status": "fn",
+   "cancel": "fn"
+  },
+  "transform": "fn",
+  "reload": "fn",
+  "connection": {
+   "active": "fn",
+   "resolve": "fn",
+   "status": "fn"
+  }
+ },
+ "mcp": {
+  "list": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "permission": {
+  "hook": "fn",
+  "list": "fn",
+  "get": "fn",
+  "reply": "fn"
+ },
+ "plugin": {
+  "list": "fn"
+ },
+ "reference": {
+  "list": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "rpc": "fn",
+ "skill": {
+  "list": "fn",
+  "transform": "fn",
+  "reload": "fn"
+ },
+ "storage": {
+  "get": "fn",
+  "set": "fn",
+  "remove": "fn",
+  "scan": "fn"
+ },
+ "tool": {
+  "reload": "fn",
+  "list": "fn",
+  "transform": "fn",
+  "hook": "fn"
+ },
+ "vcs": {
+  "get": "fn",
+  "base": "fn",
+  "branch": {
+   "list": "fn"
+  },
+  "status": "fn",
+  "diff": "fn",
+  "reload": "fn",
+  "transform": "fn"
+ },
+ "websearch": {
+  "providers": "fn",
+  "query": "fn",
+  "reload": "fn",
+  "transform": "fn"
+ },
+ "worktree": {
+  "list": "fn",
+  "create": "fn",
+  "remove": "fn",
+  "refresh": "fn",
+  "reload": "fn",
+  "transform": "fn"
+ },
+ "session": {
+  "hook": "fn",
+  "create": "fn",
+  "get": "fn",
+  "remove": "fn",
+  "switchAgent": "fn",
+  "switchModel": "fn",
+  "prompt": "fn",
+  "generate": "fn",
+  "command": "fn",
+  "compact": "fn",
+  "synthetic": "fn",
+  "interrupt": "fn",
+  "update": "fn",
+  "move": "fn",
+  "wait": "fn",
+  "context": "fn"
+ },
+ "shell": {
+  "hook": "fn"
+ }
+}

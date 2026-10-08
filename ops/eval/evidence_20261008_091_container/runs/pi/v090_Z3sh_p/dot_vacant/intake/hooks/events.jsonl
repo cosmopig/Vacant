@@ -1,0 +1,7 @@
+{"ts": 1791475050.4549475, "agent": "pi", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791475050.7075436, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a7af75ed6924879cadcf8ce87318f8bb6be4b8bc227613635e3a17eed9ce9d42"}
+{"ts": 1791475050.9419384, "agent": "pi", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a7af75ed6924879cadcf8ce87318f8bb6be4b8bc227613635e3a17eed9ce9d42"}
+{"ts": 1791475051.1650133, "agent": "pi", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "7f8cbfe0cd4c07dad745f00f7dd46eb45b90c00e6765d8b56e9344a94be4bd81"}
+{"ts": 1791475051.338321, "agent": "pi", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "7f8cbfe0cd4c07dad745f00f7dd46eb45b90c00e6765d8b56e9344a94be4bd81"}
+{"ts": 1791475051.7854908, "agent": "pi", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 0, "left_open": 0}}
+{"ts": 1791475051.9291606, "agent": "pi", "event": "session_end", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

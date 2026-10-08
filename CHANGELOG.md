@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.9.1 — 2026-10-08
+
+Fixes found by reviewing a real pi session and a user's OpenCode 2.x install. No change to what the model receives
+when nothing is wrong.
+
+- **OpenCode 2.x loads the plugin.** `@opencode/cli` 2.x rejected the old function-style `vacant.js` ("Plugin must
+  export a default definition with an id and an effect or setup function"), so Vacant silently did nothing there.
+  The plugin is now one default export `{ id, server, setup }` that opencode-ai 1.18.x and @opencode/cli 2.0.24
+  both accept. Also fixed: feedback round 2 never ran (the idle ending the feedback turn was dropped), the stop check
+  had no `final_text` (test-claim check never ran for OpenCode), only the first session in a process got
+  `session_end`; delivery notes are shown as a toast where the API exists. ⚠ The 2.x path is checked against the
+  published types and a fake context, not yet with a real model; on 2.x the turn end is
+  `session.execution.succeeded` (turns that fail or are interrupted are not checked), and `vacant do` with
+  OpenCode 2.x still uses 1.x flags. Container run with the real 2.0.24 binary and a scripted model
+  (`ops/eval/evidence_20261008_091_container/`): the plugin loads, the review reaches the model, round 2 runs.
+  Known 2.x limits: the person never sees Vacant's notes (the 2.x server plugin has no UI channel; they stay in
+  `delivery.md`), and with `opencode run` the feedback round happens in the background service after the command has
+  already printed its answer and exited.
+- **No silent skip when the agent runs in `/` or the home folder.** Those folders are too broad to record, so the
+  check could not run — and nobody was told (the reviewed pi session ran in `/`: 90 tool events, 0 steps recorded,
+  Stop allowed). Now the person gets "Vacant did not check this work: …" (Claude/Codex once per session, pi/OpenCode
+  at every stop) and `events.jsonl` records `zero_ran:false, why:"untraceable_cwd"`. Agent config folders
+  (`~/.pi`, `~/.claude`, `~/.codex`, `~/.config/opencode`) are no longer recorded as projects.
+- **Codex shows Vacant's message to the person** (`systemMessage`), e.g. when the check did not run. A Stop check
+  postponed because a subagent is still running now says so once.
+- **Reading Vacant's own settings is no longer blocked as a write.** `python3 -c "…json.load(open('$HOME/.vacant/…'))"`
+  was denied ("appears to modify"). The exemption is a strict allowlist (plain `python -c`, read-only `open()` of a
+  normalized literal path, a fixed set of names); everything else is treated as before, and private keys stay
+  unreadable. Also now caught: `open (` with a space and full-width `ｏｐｅｎ(`, plus several node/ruby/perl writes.
+- **Faster hooks.** `vacant_network` imports lazily: a Claude PreToolUse hook call went from ~150 ms to ~100 ms
+  (median of 20, PyPI 0.9.0 vs this build).
+
 ## 0.9.0 — 2026-10-03
 
 **Zero-config: install once, keep using your agent.** `pipx install vacant-network && vacant install`, then open
