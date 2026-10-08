@@ -155,6 +155,8 @@ def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | 
 
 UNTRACEABLE_FILE = "untraceable_told.json"
 UNTRACEABLE_KEEP = 200
+#: 只有這些 agent 的 Stop 會可靠地把 systemMessage 畫給人，才可以記「說過了」
+TOLD_DEDUPE_AGENTS = ("claude", "codex")
 
 
 def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str, *,
@@ -166,8 +168,9 @@ def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str, 
     `render=False`（工作階段結束 `session_end`）：那個事件**不會被畫給人看**（Claude 的 systemMessage 只在 Stop 出；
     pi 的 note 只跟 stop 的決定走），所以不說、**也不記成「說過了」**——否則之後的 Stop 會是沉默的。
     沒有 session_id ⇒ 不去重、每次都說（用 `unknown` 當鍵會讓第一個沒帶 id 的工作階段以外的全部沉默）。
-    四個 agent 的 Stop 都會畫（Codex 也是 systemMessage）；pi 的 note 在沒有介面（`-p`）時只留在 Vacant 的資料夾——
-    那種情況「說過了」不等於人看到了，這是已知邊界。"""
+    只有 claude 與 codex 去重（兩者都把 Stop 的 systemMessage 畫給人）；pi（note 只在有介面時畫）與
+    opencode（外掛從不顯示 note）**不去重、每次 Stop 都說**——否則「說過了」會被用掉卻沒有人看到。
+    ⚠ 即使如此，沒有介面的 pi（`-p`）人仍可能看不到，這是已知邊界。"""
     where = capture.untraceable_cwd(cwd)
     if where is None:
         return {}
@@ -175,7 +178,7 @@ def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str, 
     if mode != "evidence" or not render:
         return record
     try:
-        if session_id:
+        if session_id and agent in TOLD_DEDUPE_AGENTS:
             from ..atomic import atomic_write_text
             from ..intake.statepaths import state_dir
             p = state_dir() / "trace" / UNTRACEABLE_FILE

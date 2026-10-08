@@ -112,20 +112,28 @@ def project_root(cwd: str) -> pathlib.Path:
         p = p.parent
 
 
-def _config_dirs(home: pathlib.Path) -> list[pathlib.Path]:
-    """預設的四個設定目錄＋被環境變數搬走的那幾個（`CLAUDE_CONFIG_DIR`、`CODEX_HOME`、`PI_CODING_AGENT_DIR`、
-    `$XDG_CONFIG_HOME/opencode`）。⚠ 評測（Harbor）把 `PI_CODING_AGENT_DIR` 設在 `/tmp/harbor-pi-agent`，
-    但 cwd 是題目的 `/app`，不在裡面，所以不受影響；若有人把 cwd 放進該目錄，就會被當成「太廣」而不記。"""
-    out = [(home / cd).resolve() for cd in AGENT_CONFIG_DIRS]
+def _config_dirs(home: pathlib.Path) -> tuple[list[pathlib.Path], list[pathlib.Path]]:
+    """回 `(固定的, 被環境變數搬走的)`。固定＝家目錄底下的四個預設設定目錄（它們的上層只有 `~`，本來就不追）；
+    搬走＝`CLAUDE_CONFIG_DIR`、`CODEX_HOME`、`PI_CODING_AGENT_DIR`、`$XDG_CONFIG_HOME/opencode`。
+    ⚠ 搬走的那幾個**只拒絕它本身和它底下、不拒絕上層**：專案可以把自己的設定目錄放在專案裡
+    （`proj/.pi-agent`），拒絕上層會讓整個專案變成追不到。⚠ 相對路徑的值（`CODEX_HOME=.`）是相對於
+    掛鉤行程的 cwd，不是 agent 的——解析出來不可靠，一律不當成設定目錄（否則會把專案本身或它的上層擋掉）。
+    評測（Harbor）把 `PI_CODING_AGENT_DIR` 設在 `/tmp/harbor-pi-agent`，cwd 是題目的 `/app`，不受影響。"""
+    fixed = [(home / cd).resolve() for cd in AGENT_CONFIG_DIRS]
+    moved: list[pathlib.Path] = []
     for var, sub in (("CLAUDE_CONFIG_DIR", ""), ("CODEX_HOME", ""), ("PI_CODING_AGENT_DIR", ""),
                      ("XDG_CONFIG_HOME", "opencode")):
         v = os.environ.get(var, "").strip()
-        if v:
-            try:
-                out.append((pathlib.Path(v).expanduser() / sub).resolve())
-            except (OSError, RuntimeError):
-                pass
-    return out
+        if not v:
+            continue
+        try:
+            raw = pathlib.Path(v).expanduser()
+            if not raw.is_absolute():
+                continue
+            moved.append((raw / sub).resolve())
+        except (OSError, RuntimeError):
+            pass
+    return fixed, moved
 
 
 def _traceable(ws: pathlib.Path) -> bool:
@@ -135,9 +143,13 @@ def _traceable(ws: pathlib.Path) -> bool:
     home = pathlib.Path.home().resolve()
     if ws == pathlib.Path(ws.anchor) or ws == home or ws in home.parents:
         return False
-    # agent 自己的設定目錄（工作階段紀錄、金鑰、模型設定）不是專案：它本身、它底下、它的上層都不追
-    for d in _config_dirs(home):
+    # agent 自己的設定目錄（工作階段紀錄、金鑰、模型設定）不是專案：固定的：它本身、它底下、它的上層都不追；搬走的：只有它本身和它底下
+    fixed, moved = _config_dirs(home)
+    for d in fixed:
         if ws == d or d in ws.parents or ws in d.parents:
+            return False
+    for d in moved:                  # 搬走的：只拒絕它本身和它底下，不拒絕上層（上層可能就是專案）
+        if ws == d or d in ws.parents:
             return False
     sd = state_dir().resolve()
     if ws == sd or sd in ws.parents or ws in sd.parents:

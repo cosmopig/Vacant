@@ -31,7 +31,7 @@ const payload = JSON.parse(readFileSync(0, "utf-8") || "{}");
 appendFileSync(process.env.VACANT_FAKE_LOG, JSON.stringify({ event, payload }) + "\n");
 let out = { action: "allow" };
 if (event === "pre_tool" && JSON.stringify(payload.input || {}).includes("DENYME")) out = { action: "deny", reason: "nope" };
-if (event === "stop") out = { action: "continue", reason: "Vacant check: report.md is missing." };
+if (event === "stop") out = { action: "continue", reason: "Vacant check: report.md is missing.", note: "NOTE-FOR-HUMAN" };
 process.stdout.write(JSON.stringify(out) + "\n");
 """
 
@@ -83,22 +83,32 @@ def test_v2_setup_hooks_feedback_two_rounds_final_text_and_per_session_end(tmp_p
     assert r["v2_cleanup_is_function"] and r["subscribe_has_signal"] and r["v2_disposed"] == 3
     assert r["v2_deny_message"] == "nope"
     # 兩輪回饋都送到（第二輪＝回饋那一回合結束的 idle），用 v2 的 session.prompt
-    assert [p["sessionID"] for p in r["v2_prompts"]] == ["S1", "S1"]
+    assert [p["sessionID"] for p in r["v2_prompts"]] == ["S1", "S1", "S1", "S3"]
     assert all(p["text"].startswith("Vacant check") for p in r["v2_prompts"])
     ev = r["v2_events"]
     stops = [e["payload"] for e in ev if e["event"] == "stop"]
-    assert [s["session_id"] for s in stops] == ["S1", "S1"]          # 子 session K1 不檢查
+    assert [s["session_id"] for s in stops] == ["S1", "S1", "S1", "S3"]   # 子 session K1 不檢查
     assert stops[0]["final_text"] == "All tests pass." and stops[1]["final_text"] == "Fixed."
     assert stops[0]["cwd"] == "/w/proj"
     ends = sorted(e["payload"]["session_id"] for e in ev if e["event"] == "session_end")
-    assert ends == ["S1", "S2"]
+    assert ends == ["S1", "S2", "S3"]
+    # 第三、四輪：新要求之後沒有文字的回合，不帶上一回合的 final_text（過時文字問題）
+    assert len(stops) == 4
+    assert "final_text" not in stops[2] and stops[2]["session_id"] == "S1"
+    assert stops[3]["session_id"] == "S3" and "final_text" not in stops[3]
+    # d.note 只給人（toast），不進送給模型的回饋
+    assert r["v2_toasts"] and r["v2_toasts"][0]["message"] == "NOTE-FOR-HUMAN"
+    assert all("NOTE-FOR-HUMAN" not in p["text"] for p in r["v2_prompts"])
     pre = [e["payload"] for e in ev if e["event"] == "pre_tool"]
     assert pre[0]["call_id"] == "c1" and pre[0]["input"] == {"filePath": "r.md"}
     k1 = [x for x in pre if x["session_id"] == "K1"][0]
     assert k1["parent_session_id"] == "S1" and k1["root_session_id"] == "S1"   # 只靠 session.get 認出
+    # session.get 還沒回來時的兩個同時第一次呼叫，都要認成子 session（競態）
+    k2 = [x for x in pre if x["session_id"] == "K2"]
+    assert len(k2) == 2 and all(x.get("parent_session_id") == "S1" for x in k2)
     post = [e["payload"] for e in ev if e["event"] == "post_tool"]
     assert post[0]["output"] == "wrote r.md"
-    assert [e["payload"]["prompt"] for e in ev if e["event"] == "prompt"] == ["write report.md"]
+    assert [e["payload"]["prompt"] for e in ev if e["event"] == "prompt"] == ["write report.md", "now rename foo", "next task"]
 
 
 @pytest.mark.skipif(NODE is None, reason="這台機器沒有 node")
@@ -113,4 +123,5 @@ def test_v1_server_uses_prompt_async_and_ends_every_root_session(tmp_path, monke
     ends = sorted(e["payload"]["session_id"] for e in ev if e["event"] == "session_end")
     assert ends == ["S1", "S2"]                                         # 兩次 dispose 也只各一次
     # server() 之後再來一個完整的 v2 ctx：不重複掛
+    assert r["v1_toasts"] and r["v1_toasts"][0]["body"]["message"] == "NOTE-FOR-HUMAN"
     assert r["v1_then_setup"] == {"returned": None, "hooked": []}

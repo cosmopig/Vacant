@@ -590,6 +590,7 @@ async function endAll(directory) {
   g.__vacantEnded = true;
   for (const id of roots) {
     g.__vacantEndedSessions.add(id);
+    g.__vacantLastText.delete(id);
     await ask("session_end", { cwd: directory, session_id: id });
   }
 }
@@ -620,13 +621,15 @@ async function lastTextV1(client, id) {
 
 // Stop check at idle. The id leaves the busy set BEFORE feedback is sent: the idle that ends the
 // feedback turn must get its own check (otherwise the second round never runs).
-async function stopCheck(id, directory, finalText, send) {
+async function stopCheck(id, directory, finalText, send, toast) {
   if (!id || g.__vacantChildSessions.has(id) || g.__vacantStopBusy.has(id)) return;
   g.__vacantStopBusy.add(id);
   let d = { action: "allow" };
   try {
     const text = await finalText();
     d = await ask("stop", { cwd: directory, session_id: id, ...(text ? { final_text: text } : {}) });
+    // the note is for the PERSON (a toast), never for the model; best-effort, never throws
+    if (d && d.note && typeof toast === "function") { try { await toast(String(d.note)); } catch (e) {} }
   } catch (e) {
     d = { action: "allow" };
   } finally {
@@ -688,6 +691,12 @@ async function server({ client, directory }) {
           // promptAsync returns at once; the blocking prompt is only the fallback for older SDKs.
           if (typeof client.session.promptAsync === "function") await client.session.promptAsync(body);
           else await client.session.prompt(body);
+        }, async (note) => {
+          // 1.x TUI toast (only exists when a TUI is attached); otherwise the note stays in delivery.md
+          const t = client && client.tui;
+          if (t && typeof t.showToast === "function") {
+            await withTimeout(t.showToast({ body: { message: note.slice(0, 500), variant: "info" } }), 3000);
+          }
         });
       }
     },
@@ -728,14 +737,29 @@ async function setup(ctx) {
   };
   // 2.0.24 does not hand plugins `session.created` for a session another client opened, so a
   // sub-agent is recognised by asking for the session once (best-effort, never throws).
-  const known = new Set();
-  const learn = async (id) => {
-    if (!id || known.has(id) || g.__vacantChildSessions.has(id)) return;
-    known.add(id);
-    try {
-      const info = await withTimeout(ctx.session.get({ sessionID: id }), 3000);
-      if (info && info.parentID) noteChild(id, info.parentID);
-    } catch (e) { /* unknown: treated as a root session */ }
+  // The in-flight promise is stored per id and every caller awaits it: two concurrent first calls of a
+  // new child session must not see it as a root while session.get is still pending.
+  const known = new Map();
+  const learn = (id) => {
+    if (!id || g.__vacantChildSessions.has(id)) return Promise.resolve();
+    if (known.has(id)) return known.get(id);
+    const p = (async () => {
+      try {
+        const info = await withTimeout(ctx.session.get({ sessionID: id }), 3000);
+        if (info && info.parentID) noteChild(id, info.parentID);
+      } catch (e) { /* unknown: treated as a root session */ }
+    })();
+    known.set(id, p);
+    return p;
+  };
+  // 2.x has no documented toast API: try the shapes a context might offer, best-effort, never throw.
+  const toast = async (note) => {
+    const msg = note.slice(0, 500);
+    // [owner, method name]: called as a method so a class-based API keeps its `this`
+    const cands = [[ctx.ui, "toast"], [ctx.ui, "showToast"], [ctx.toast, "show"], [ctx, "toast"], [ctx, "notify"]];
+    for (const [o, k] of cands) {
+      if (o && typeof o[k] === "function") { await withTimeout(Promise.resolve(o[k]({ message: msg, variant: "info" })), 3000); return; }
+    }
   };
   await hook(ctx.tool, "execute.before", async (input) => {
     await learn(input && input.sessionID);
@@ -753,6 +777,8 @@ async function setup(ctx) {
   // The task message (and Vacant's own feedback, which the hook tells apart by its header).
   await hook(ctx.session, "prompt", async (input) => {
     const text = (input && input.prompt && input.prompt.text) || "";
+    // a new user request starts a new turn: the last turn's text must not be sent as its final_text
+    if (input && input.sessionID) g.__vacantLastText.delete(input.sessionID);
     if (!text.trim()) return;
     await learn(input && input.sessionID);
     await ask("prompt", { prompt: text, cwd: directory, ...who(input && input.sessionID) });
@@ -773,12 +799,17 @@ async function setup(ctx) {
       // The end of a turn. 2.0.24 does not deliver `session.idle` to plugins (measured); a turn
       // that failed or was interrupted gets no check.
       const id = data.sessionID;
+      const atEnd = g.__vacantLastText.get(id);
       // not awaited: a long check must not hold up the events of other sessions
       learn(id).then(() => stopCheck(id, directory, async () => {
         const cur = g.__vacantLastText.get(id);
+        g.__vacantLastText.delete(id);   // consumed: a later tool-only turn has no text of its own
         const text = cur ? cur.parts.join("\n") : "";
         return text.trim() ? text : undefined;
-      }, async (text) => { await ctx.session.prompt({ sessionID: id, text }); })).catch(() => {});
+      }, async (text) => { await ctx.session.prompt({ sessionID: id, text }); }, toast)).catch(() => {})
+        // a sub-agent session is skipped by stopCheck and never consumes its text: drop it here
+        // (only if no newer turn has replaced it meanwhile)
+        .finally(() => { if (atEnd && g.__vacantLastText.get(id) === atEnd) g.__vacantLastText.delete(id); });
     }
   };
   (async () => {

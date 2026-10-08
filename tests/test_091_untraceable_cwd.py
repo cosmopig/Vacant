@@ -159,3 +159,47 @@ def test_relocated_config_dirs_are_not_workspaces(env, monkeypatch):
     app = env / "app"
     app.mkdir()
     assert capture.workspace_for(str(app)) == app.resolve()
+
+
+def test_pi_and_opencode_are_told_at_every_stop_codex_and_claude_once(env):
+    """pi（只在有介面時畫）與 opencode（外掛從不顯示）不消耗「說過了」；claude／codex 去重。"""
+    _install()
+    for agent in ("pi", "opencode"):
+        for _ in range(3):
+            r = zerostop.untraceable(agent, "SS", "/", "evidence")
+            assert r["user_message"].startswith("Vacant did not check this work"), agent
+    for agent in ("claude", "codex"):
+        assert "user_message" in zerostop.untraceable(agent, "SS", "/", "evidence")
+        assert "user_message" not in zerostop.untraceable(agent, "SS", "/", "evidence")
+
+
+def test_project_containing_its_own_relocated_config_dir_stays_traceable(env, monkeypatch):
+    """搬走的設定目錄只拒絕它本身和底下，不拒絕上層：專案裡放 `.pi-agent` 不可以讓專案追不到。"""
+    _install()
+    proj = env / "home" / "code" / "proj"
+    proj.mkdir(parents=True)
+    (proj / ".git").mkdir()
+    for var in ("PI_CODING_AGENT_DIR", "CLAUDE_CONFIG_DIR", "CODEX_HOME"):
+        d = proj / ".cfg"
+        d.mkdir(exist_ok=True)
+        monkeypatch.setenv(var, str(d))
+        assert capture.workspace_for(str(proj)) == proj.resolve(), var
+        assert capture.untraceable_cwd(str(proj)) is None, var
+        monkeypatch.delenv(var)
+    xdg = proj / "xdg"
+    (xdg / "opencode").mkdir(parents=True)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
+    assert capture.workspace_for(str(proj)) == proj.resolve()
+
+
+def test_relative_relocated_value_never_blocks_the_project(env, monkeypatch):
+    """`CODEX_HOME=.`：相對於掛鉤行程的 cwd，不可靠；解析出來等於或包住專案時不拒絕。"""
+    _install()
+    proj = env / "home" / "code" / "proj"
+    proj.mkdir(parents=True)
+    (proj / ".git").mkdir()
+    monkeypatch.setenv("CODEX_HOME", ".")
+    for here in (proj, proj.parent, proj / "sub"):
+        here.mkdir(exist_ok=True)
+        monkeypatch.chdir(here)
+        assert capture.workspace_for(str(proj)) == proj.resolve(), here

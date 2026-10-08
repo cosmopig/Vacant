@@ -38,6 +38,7 @@ results.preview_setup_null = await def.setup(undefined);
 // ── v1：假的 { client, directory } ──
 async function runV1() {
   const prompts = [];
+  const toasts = [];
   const client = { session: {
     messages: async ({ path }) => ({ data: [
       { info: { role: "user" }, parts: [{ type: "text", text: "do it" }] },
@@ -46,7 +47,7 @@ async function runV1() {
     ] }),
     promptAsync: async (x) => { prompts.push(x); return {}; },
     prompt: async () => { throw new Error("blocking prompt must not be used when promptAsync exists"); },
-  } };
+  }, tui: { showToast: async (x) => { toasts.push(x); return {}; } } };
   const map = await def.server({ client, directory: "/w/proj" });
   results.v1_hooks = Object.keys(map).sort();
   await map["chat.message"]({ sessionID: "S1" }, { parts: [{ type: "text", text: "write report.md" }] });
@@ -58,6 +59,7 @@ async function runV1() {
   await map.event({ event: { type: "session.idle", properties: { sessionID: "S1" } } });
   await map.event({ event: { type: "session.idle", properties: { sessionID: "S1" } } });   // the feedback turn ends
   results.v1_prompts = prompts;
+  results.v1_toasts = toasts;
   // after server(), a full v2 ctx must not hook a second time
   const extra = {};
   const r = await def.setup({ location: { directory: "/w" }, event: { subscribe: () => [] },
@@ -88,11 +90,16 @@ const stream = {
 const emit = (ev) => { if (push) push(ev); else queue.push(ev); };
 let disposed = 0;
 const reg = (domain) => async (name, fn) => { hooks[domain + ":" + name] = fn; return { dispose: async () => { disposed++; } }; };
+const toasts = [];
 const ctx = {
+  ui: { toast: async (x) => { toasts.push(x); } },
   location: { directory: "/w/proj" },
   tool: { hook: reg("tool") },
   session: { hook: reg("session"), prompt: async (x) => { prompts.push(x); return {}; },
-             get: async ({ sessionID }) => (sessionID === "K1" ? { id: "K1", parentID: "S1" } : { id: sessionID }) },
+             get: async ({ sessionID }) => {
+               if (sessionID === "K2") await sleep(300);   // slow lookup: the race window
+               return sessionID === "K1" ? { id: "K1", parentID: "S1" }
+                    : sessionID === "K2" ? { id: "K2", parentID: "S1" } : { id: sessionID }; } },
   event: { subscribe: (opts) => { results.subscribe_has_signal = !!(opts && opts.signal); return stream; } },
 };
 const cleanup = await def.setup(ctx);
@@ -122,6 +129,19 @@ emit({ id: "e7", type: "session.text.ended", data: { sessionID: "S1", assistantM
 emit({ id: "e8", type: "session.execution.succeeded", data: { sessionID: "S1" } });
 await waitFor(() => prompts.length >= 2);
 results.v2_prompts = prompts;
+results.v2_toasts = toasts;
+// (2) race: two concurrent first tool calls of a new child session K2 are both seen as a child
+await Promise.all([1, 2].map((i) => hooks["tool:execute.before"]({ tool: "read", sessionID: "K2", id: "r" + i, input: { filePath: "a" } })));
+// (1) stale text: S1 already consumed "Fixed."; a new prompt then a tool-only turn carries no final_text
+await hooks["session:prompt"]({ sessionID: "S1", prompt: { text: "now rename foo" } });
+emit({ id: "e9", type: "session.execution.succeeded", data: { sessionID: "S1" } });
+await waitFor(() => prompts.length >= 3);
+// also: text of turn A, then a new prompt BEFORE the stop ran (no consume) must not leak into turn B
+emit({ id: "e10", type: "session.text.ended", data: { sessionID: "S3", assistantMessageID: "m9", ordinal: 0, text: "Old claim." } });
+await sleep(150);   // let the event loop consume it before the new prompt
+await hooks["session:prompt"]({ sessionID: "S3", prompt: { text: "next task" } });
+emit({ id: "e11", type: "session.execution.succeeded", data: { sessionID: "S3" } });
+await waitFor(() => prompts.length >= 4);
 await cleanup();
 results.v2_disposed = disposed;
 results.v2_events = events();
