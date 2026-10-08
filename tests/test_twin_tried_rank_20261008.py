@@ -50,3 +50,11 @@ def test_every_char_from_record_and_compose_wires_wish():
     assert all(ch in REC_CHANGE2 or ch in "它我" for ch in body)
     res = fz.compose_card_v3(F, plan_text=f"我想：{WISH}。\n", record_text=REC_CHANGE2, rows=[], files={}, retries=0)
     assert res["tried_line"] and "紙卡" in res["tried_line"]
+
+
+def test_result_sentence_in_change_is_not_displaced_by_body_action():
+    """主線 2026-10-08：改變段第一句已是結果句（現在…）時，正文的動作句不插隊（round5 盲評 v1：評審偏好結果句）。"""
+    rec = ("我先走到長桌廣場。我把陶哨子塞進了桌五上那個音樂盒裡斷掉的第 12 個音的位置。\n\n"
+           "改變：長桌廣場桌五上的音樂盒現在能完整地響到最後一個音了。\n\n感想：聲音回來了。")
+    t = fz.tried_of(rec, "x", F, "讓那個斷掉的第 12 個音能響起來。")
+    assert t and "現在能完整地響" in t, t

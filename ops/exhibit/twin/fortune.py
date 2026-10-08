@@ -1007,14 +1007,21 @@ def body_candidates(record_text: str) -> list[tuple[str, bool]]:
     return out
 
 
+#: 「結果句」記號：世界現在怎樣了（比 `_CHANGE_MARK` 嚴格；只用來決定正文句能不能插隊）
+_RESULT_MARK = re.compile(r"現在|變成|多了|多出|不再|終於|留下")
+
+
 def rank_tried(change: list[tuple[str, bool]], body: list[tuple[str, bool]], wish: str | None) -> list[tuple[str, bool]]:
-    """第 3 行的候選排序（確定性）：① 「改變」那段裡與第 2 行共用關鍵名詞的句子 → ② 正文其他句子裡共用、且帶『做了／留下什麼』字樣的（共用越多越前面）
+    """第 3 行的候選排序（確定性）：① 「改變」那段裡與第 2 行共用關鍵名詞的句子 → ② 正文其他句子裡共用、且帶『做了／留下什麼』字樣的（共用越多越前面；改變段第一句已是結果句〔`_RESULT_MARK`〕時不插隊）
     → ③ 其餘「改變」句，照原本的順序。沒有願望或沒有任何共用 ⇒ 完全等於原本的順序（只有 ③）。"""
     seen = {c[0] for c in change}
     t0 = [c for c in change if shared_with_wish(c[0], wish) > 0]                 # 改變段裡本來就共用的：維持原本的先後
     t1 = [c for c in body if c[0] not in seen and shared_with_wish(c[0], wish) > 0 and _CHANGE_MARK.search(c[0])]   # 正文裡「做了／留下什麼」且共用的
     t1.sort(key=lambda c: -shared_with_wish(c[0], wish))
     t2 = [c for c in change if shared_with_wish(c[0], wish) <= 0]
+    # 主線 2026-10-08（round5 盲評）：評審偏好結果句（真卡 2/6 票偏正文動作句）⇒ 改變段第一句已是結果句時，正文句不插隊
+    if change and _RESULT_MARK.search(change[0][0]):
+        t1 = []        # 改變段第一句本身就是「世界現在怎樣了」的結果句：不讓正文動作句插隊（round5 盲評 v1）
     return t0 + t1 + t2
 
 
