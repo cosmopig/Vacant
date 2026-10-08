@@ -274,5 +274,10 @@ def test_round3_adversary_bypasses_denied(env):
             f"python3 -c \"print(open('{p}').read())\" > {S}/x",
             f"python3 -c \"print(open('{p}').read())\" | tee {S}/x",
             f"python3 -c \"print(open('{p}').read())\"; touch {S}/x",
+            # 直譯器前面有環境指派／wrapper；關鍵字模式；註解
+            f"PYTHONPATH=/tmp/evil python3 -c \"import json;print(open('{p}').read())\"",
+            f"env PYTHONPATH=/tmp/evil python3 -c \"import json;print(open('{p}').read())\"",
+            f"python3 -c \"print(open('{p}',mode='w'))\"",
+            f"python3 -c \"open('{S}/x');print(1) # '\"",
     ):
         assert _act(c, cmd, proj) == "deny", cmd

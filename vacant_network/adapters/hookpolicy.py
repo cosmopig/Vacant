@@ -123,8 +123,10 @@ def _readonly_open_exempt(code: str, roots: list[pathlib.Path], cwd: str,
     - 每一個 `open(` 都是裸呼叫（前面不是 `.`），引數只有一個字串字面值路徑，或再加一個模式字面值且恰好是
       r／rb／rt／br／tr；路徑已經是正規形式（`..`、`//`、`/./` 一律不豁免），也不在讀取受保護的路徑底下；
     - 提到受保護路徑的字串字面值，都是某個豁免 open() 的路徑。
-    呼叫端另外要求整個指令就只有這一段 `python -c`（`_single_py_c`）。
-    誠實邊界：仍是字串層；它只把「明顯是讀」的那一小撮放行，不證明程式碼不寫。
+    呼叫端另外要求整個指令就只有這一段 `python -c`、直譯器在第一個字（`_single_py_c`）。
+    誠實邊界：仍是字串層；它只把「明顯是讀」的那一小撮放行，不證明程式碼不寫。`python -c` 會從
+    工作目錄載入同名模組（專案裡放一個 `json.py`，`import json` 就跑它）——這跟直接執行一支腳本檔
+    一樣是本來就擋不到的（誠實邊界 1），豁免沒有讓它更容易。
     """
     if not code.isascii() or "\\" in code:
         return False
@@ -174,7 +176,12 @@ def _single_py_c(command: str) -> bool:
     """整個指令就只有一段 `python -c '…'`：沒有命令替換、反引號、`$`、換行、轉向、管線、別的段落。"""
     if any(c in command for c in "`$\n<>|&"):
         return False
-    segs = list(_segments(_tokens(command)))
+    toks = _tokens(command)
+    # 直譯器要在第一個字：`env PYTHONPATH=… python3 -c`、`nohup python3 -c` 之類的前綴不豁免
+    # （PYTHONPATH 能讓 `import json` 載到別處的碼）。
+    if not toks or not _PY_C_INTERP.match(toks[0]):
+        return False
+    segs = list(_segments(toks))
     return len(segs) == 1 and not segs[0][1]
 
 
