@@ -36,7 +36,11 @@
    反過來它也會多擋：沒加引號的 `grep vacant hook` 會被當成在叫 `vacant hook`；餵給 shell 的
    heredoc 不管 shell 後面帶什麼引數都當成程式碼；找不到結束定界符的 heredoc 內文也當成指令。
    寫入側同樣有很多字串層繞法沒擋住（已知、不處理的例子：`cp -t`、`sed -i` 的各種變體、
-   `perl -pi`、`git -C … checkout`）。
+   `perl -pi`、`git -C … checkout`、`sqlite3.connect(…)` 建出新檔、php 的 `fopen`／`file_put_contents`、
+   `.write(`／`os.open` 以外的低階 fd 寫法）。內聯碼的唯讀判定只認看得到的唯讀模式字面值；
+   `str.replace('a','b')` 不算寫入（`Path(p).replace(x)`／`os.replace` 算）。
+   內聯碼裡的路徑比對刻意不加左邊界（執行時組路徑擋得到），所以 cwd==HOME 時
+   `proj/.vacant/…` 也會被當成狀態資料夾而多擋。
    真正的分權還是把 reviewer／approver／owner 金鑰放到另一個帳號——掛鉤擋下的指令，
    在掛鉤外面（同一個帳號、同一把 owner 金鑰）照樣跑得動。
 2. **掛鉤壞掉不可以弄死 agent**：任何例外都放行並落一筆錯誤。這一層是增效與觀測，
@@ -66,7 +70,8 @@ SHELL_TOOLS = frozenset({"bash", "shell", "exec", "exec_command", "local_shell",
 #: 直譯器程式碼裡的寫入 API（`python3 -c "open(p,'w')"` 這種路徑藏在程式碼字串裡的情況）。
 _CODE_WRITE_HINT = re.compile(
     r"write_text|write_bytes|\.write\(|writeFile|appendFile|WriteStream|unlink|remove\(|"
-    r"\brm(?:Sync)?\(|rmtree|shutil\.|copyfile|copy2|rename|truncate|chmod|\bos\.replace\(")
+    r"\brm(?:Sync)?\(|rmtree|shutil\.|copyfile|copy2|rename|truncate|chmod|\bos\.replace\(|"
+    r"openSync|copyFile|cpSync|\bcp\(|symlink|\blink\(|\.touch\(|makedirs|mkdir|mkfifo|mknod")
 _OPEN_CALL = re.compile(r"(?<![\w])(\.?)open\(")
 _LITERAL = re.compile(r"""^\s*[rbRBuU]*(['"])(.*?)\1\s*$""", re.S)
 
@@ -106,9 +111,11 @@ def _call_args(s: str, i: int) -> list[str] | None:
 
 
 def _open_may_write(code: str) -> bool:
-    """`open(...)` 只有在看得到寫入模式、或模式看不出來（非字面值）時才算寫入。
+    """`open(...)`／`<x>.open(...)` 只有在模式是**看得到的唯讀字面值**（或沒給模式）時才不算寫入。
 
-    唯讀（只有一個引數、或模式字面值不含 w/a/x/+）⇒ False。保守：拿不準算寫。
+    唯讀＝模式字面值不含 w/a/x/+（大小寫不分）。保守：拿不準算寫——模式不是字面值
+    （`open(p, m)`、`Path(p).open(m)`、`'r'+'w'`、條件式）、任何 `*`／`**` 展開、
+    `<x>.open(` 的第一個引數不是字面值、括號沒收尾，一律算寫。
     """
     for m in _OPEN_CALL.finditer(code):
         args = _call_args(code, m.end())
@@ -116,17 +123,22 @@ def _open_may_write(code: str) -> bool:
             return True
         cands: list[str] = []
         for j, a in enumerate(args):
+            if a.strip().startswith("*"):
+                return True  # open(*a)／open(p, **kw)：看不到模式
             kw = re.match(r"\s*mode\s*=(.*)$", a, re.S)
             lit0 = _LITERAL.match(a)
             if kw:
                 cands.append(kw.group(1))
+            elif re.match(r"\s*\w+\s*=", a):
+                continue  # file=／buffering= 這類關鍵字引數不是模式
             elif j == 1:
                 cands.append(a)
-            elif j == 0 and m.group(1) and lit0 and len(lit0.group(2)) <= 3:
-                cands.append(a)  # Path(p).open('w')：第一個引數就是模式
+            elif j == 0 and m.group(1) and a.strip():
+                if lit0 is None or len(lit0.group(2)) <= 3:
+                    cands.append(a)  # Path(p).open('w')／Path(p).open(m)：第一個引數就是模式
         for c in cands:
             lit = _LITERAL.match(c)
-            if lit is None or set(lit.group(2)) & set("wax+"):
+            if lit is None or set(lit.group(2).lower()) & set("wax+"):
                 return True
     return False
 
@@ -316,19 +328,17 @@ def _path_forms(r: pathlib.Path, cwd: str) -> list[str]:
     return [f for f in forms if f and f != "."]
 
 
-_LEFT_OK = r"(?:^|(?<=[\s'\"=(,\[{`])|(?<=\./))"
-
-
 def _in_code(token: str, roots: list[pathlib.Path], cwd: str) -> pathlib.Path | None:
     """路徑以**完整的路徑元件**出現在一段程式碼字串裡（後面接結尾、`/`、引號、空白、括號）。
 
-    相對形式（cwd==HOME 時的 `.vacant`）另外要求左邊界：開頭、引號、空白、`=`、`(`、`,`、
-    `./`；`proj/.vacant/x`、`foo.vacant/` 不算。絕對／`~`／`$HOME` 形式不加左邊界（保守）。
+    刻意**沒有左邊界**：`os.getcwd()+'/.vacant/…'`、`f'{os.getcwd()}/.vacant/…'`、
+    `'.//.vacant/…'` 這種執行時才組出來的路徑，左邊接的是任意字元；加左邊界會讓讀私鑰、
+    寫被鎖的契約從這裡漏過去（0.9.1 對抗審查重現過）。代價是 cwd==HOME 時
+    `proj/.vacant/…` 也會被當成狀態資料夾——安全優先，接受這個誤擋。
     """
     for r in roots:
         for f in _path_forms(r, cwd):
-            left = "" if f[:1] in "/~$" else _LEFT_OK
-            if re.search(left + re.escape(f) + r"(?=$|[/'\"\s),;])", token):
+            if re.search(re.escape(f) + r"(?=$|[/'\"\s),;])", token):
                 return r
     return None
 
