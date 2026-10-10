@@ -1325,3 +1325,186 @@ def test_page_is_integrated_single_view():
         assert anchor in _PAGE, anchor
     assert "view-simple" not in _PAGE
     assert "vacant_mon_view" not in _PAGE
+
+
+# === GitHub 歸檔 runs：從 git ref 讀上游 runs/，ls-remote 對照遠端 ===============
+
+import shutil as _shutil
+
+import pytest as _pytest
+
+from vacant_network.run_monitor import GitHubRuns, _gh_arm_stats
+
+_needs_git = _pytest.mark.skipif(_shutil.which("git") is None, reason="沒有 git")
+
+
+def _git(cwd, *args):
+    return subprocess.run(["git", "-C", str(cwd), *args], check=True,
+                          capture_output=True, stdin=subprocess.DEVNULL)
+
+
+def _index_entry(name, kind="real_run", subkind="gain_run", has_summary=True, **kw):
+    files = [{"name": "summary.json"}] if has_summary else []
+    return {"name": name, "kind": kind, "subkind": subkind, "date": kw.pop("date", "2026-09-01"),
+            "files": files, "n_rows_by_arm": kw.pop("n_rows_by_arm", {}),
+            "infra_void": kw.pop("infra_void", 0), "complete": kw.pop("complete", True),
+            "bank": {"family": "mbppplus"}, **kw}
+
+
+def _write_upstream(repo, entries, summaries):
+    runs = repo / "runs"
+    runs.mkdir(parents=True, exist_ok=True)
+    (runs / "INDEX.json").write_text(json.dumps({"generated_by": "test", "runs": entries}),
+                                     encoding="utf-8")
+    for name, s in summaries.items():
+        (runs / name).mkdir(exist_ok=True)
+        (runs / name / "summary.json").write_text(
+            s if isinstance(s, str) else json.dumps(s), encoding="utf-8")
+
+
+def _commit(repo, msg):
+    _git(repo, "add", "-A")
+    _git(repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", msg)
+
+
+@_pytest.fixture
+def gh_pair(tmp_path):
+    """upstream（扮演 GitHub）＋ clone（扮演本機）。"""
+    up = tmp_path / "upstream"
+    up.mkdir()
+    _git(up, "init", "-q", "-b", "main")
+    _write_upstream(up, [
+        _index_entry("g_a", infra_void=5),
+        _index_entry("g_r530", n_rows_by_arm={}),
+        _index_entry("g_bad"),
+        _index_entry("matrix_x", subkind="agent_matrix_run", has_summary=False,
+                     n_rows_by_arm={"M": 4}, complete=None),
+        _index_entry("g_dead", kind="aborted", subkind="no_summary", has_summary=False),
+        _index_entry("_analysis_r1", kind="analysis", subkind="loop_round_recompute"),
+        _index_entry("_smoke", kind="smoke", subkind="probe_or_smoke"),
+    ], {
+        "g_a": {"arms": {"OFF5": {"tasks": 60, "processed": 60, "infra_void": 5,
+                                  "accepted_and_meets_demand": 45}}},
+        "g_r530": {"arms": ["A-SOLO"], "arms_stats": {"A-SOLO": {"processed": 5,
+                                                                 "infra_void": 0, "deliv": 1}}},
+        "g_bad": "{not json",
+        "_analysis_r1": {"arms": {}},
+    })
+    _commit(up, "init")
+    clone = tmp_path / "clone"
+    subprocess.run(["git", "clone", "-q", str(up), str(clone)], check=True,
+                   capture_output=True, stdin=subprocess.DEVNULL)
+    return up, clone
+
+
+def test_gh_arm_stats_three_layouts_and_honest_none():
+    layout, arms = _gh_arm_stats({}, {"arms": {"ON": {"tasks": 10, "infra_void": 2,
+                                                       "accepted_and_meets_demand": 7}}})
+    # 沒有 processed 也沒有 n_rows_by_arm ⇒ done 不猜
+    assert layout == "gain_arms" and arms[0]["done"] is None and arms[0]["delivered"] == 7
+    layout, arms = _gh_arm_stats({"n_rows_by_arm": {"ON": 8}},
+                                 {"arms": {"ON": {"infra_void": 2,
+                                                  "accepted_and_meets_demand": 7}}})
+    assert arms[0]["done"] == 10  # rows 不含 void 列：8＋2
+    layout, arms = _gh_arm_stats({"n_rows_by_arm": {"M": 4}}, None)
+    assert layout == "index_only" and arms == [
+        {"arm": "M", "planned": None, "done": 4, "delivered": None, "void": None}]
+    # bool 不准被當成數字（isinstance(True, int) 為真）
+    _, arms = _gh_arm_stats({}, {"arms": {"X": {"processed": True,
+                                                 "accepted_and_meets_demand": 3}}})
+    assert arms[0]["done"] is None
+
+
+@_needs_git
+def test_github_runs_reads_ref_lists_by_index_kind(gh_pair):
+    _, clone = gh_pair
+    gh = GitHubRuns(clone, fetch_every_s=0)
+    rows = {r["run_id"]: r for r in gh.runs()}
+    # analysis／smoke 依 INDEX 定義不列；aborted 照列
+    assert set(rows) == {"g_a", "g_r530", "g_bad", "matrix_x", "g_dead"}
+    a = rows["g_a"]
+    assert (a["total_delivered"], a["total_done"], a["infra_void"]) == (45, 60, 5)
+    assert a["arms"] == [{"arm": "OFF5", "planned": 60, "done": 60,
+                          "delivered": 45, "void": 5}]
+    r530 = rows["g_r530"]
+    assert r530["layout"] == "gain_arms_stats" and r530["total_delivered"] == 1
+    # 壞掉的 summary.json：數字是 None，不是 0
+    assert rows["g_bad"]["total_delivered"] is None and rows["g_bad"]["arms"] == []
+    assert rows["matrix_x"]["layout"] == "index_only" and rows["matrix_x"]["total_done"] == 4
+    st = gh.status()
+    assert st["by_kind"] == {"real_run": 4, "aborted": 1, "analysis": 1, "smoke": 1}
+    assert st["listed"] == 5 and st["read_error"] is None
+
+
+@_needs_git
+def test_github_runs_ignores_uncommitted_worktree_edits(gh_pair):
+    _, clone = gh_pair
+    (clone / "runs" / "g_a" / "summary.json").write_text(
+        json.dumps({"arms": {"OFF5": {"processed": 60, "infra_void": 0,
+                                      "accepted_and_meets_demand": 60}}}), encoding="utf-8")
+    rows = {r["run_id"]: r for r in GitHubRuns(clone, fetch_every_s=0).runs()}
+    assert rows["g_a"]["total_delivered"] == 45  # 讀 origin/main 的位元組，不讀工作樹
+
+
+@_needs_git
+def test_github_runs_detects_behind_then_fetch_syncs(gh_pair):
+    up, clone = gh_pair
+    gh = GitHubRuns(clone, fetch_every_s=0)
+    gh.check_remote()
+    assert gh.status()["in_sync"] is True
+    # GitHub 上多了一個 run
+    entries = json.loads((up / "runs" / "INDEX.json").read_text(encoding="utf-8"))["runs"]
+    _write_upstream(up, entries + [_index_entry("g_new", date="2026-10-01")],
+                    {"g_new": {"arms": {"ON": {"processed": 3, "infra_void": 0,
+                                               "accepted_and_meets_demand": 2}}}})
+    _commit(up, "new run")
+    gh.check_remote()
+    st = gh.status()
+    assert st["in_sync"] is False and st["local_sha"] != st["remote_sha"]
+    assert "g_new" not in {r["run_id"] for r in gh.runs()}
+    assert gh.fetch()["ok"] is True
+    st = gh.status()
+    assert st["in_sync"] is True
+    rows = gh.runs()
+    assert rows[0]["run_id"] == "g_new"  # 依日期新到舊
+    assert rows[0]["total_delivered"] == 2
+
+
+def test_github_not_configured_is_honest(tmp_path):
+    gh = GitHubRuns(None)
+    assert gh.status() == {"configured": False} and gh.runs() == []
+    gh = GitHubRuns(tmp_path, fetch_every_s=0)  # 不是 git repo
+    assert gh.runs() == []
+    assert gh.status()["read_error"]
+
+
+@_needs_git
+def test_github_http_endpoints_and_readonly_fetch_refused(gh_pair, tmp_path):
+    _, clone = gh_pair
+    server = make_run_monitor(tmp_path / "runs", port=0, github_repo=clone,
+                              github_fetch_s=0)
+    _serve(server)
+    try:
+        st = json.loads(urllib.request.urlopen(_url(server, "/api/github"), timeout=10).read())
+        assert st["configured"] is True and st["listed"] == 5
+        rows = json.loads(urllib.request.urlopen(_url(server, "/api/github/runs"),
+                                                 timeout=10).read())
+        assert {r["run_id"] for r in rows} >= {"g_a", "g_dead"}
+        res = json.loads(_post(server, "/api/github/fetch", {}).read())
+        assert res["ok"] is True and res["status"]["in_sync"] is True
+    finally:
+        server.shutdown()
+        server.server_close()
+    ro = make_run_monitor(tmp_path / "runs", port=0, github_repo=clone, readonly=True)
+    _serve(ro)
+    try:
+        with _pytest.raises(urllib.error.HTTPError) as ei:
+            _post(ro, "/api/github/fetch", {})
+        assert ei.value.code == 403
+    finally:
+        ro.shutdown()
+        ro.server_close()
+
+
+def test_page_has_github_section():
+    assert 'id="sec-github"' in _PAGE and "/api/github" in _PAGE

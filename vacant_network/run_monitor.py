@@ -200,6 +200,295 @@ def tail_records(runs_root: Path, run_id: str, limit: int = 50) -> list[dict[str
     return records[-limit:]
 
 
+# --- GitHub 歸檔 runs（上游 cosmopig/Vacant 的 runs/，直接從 git ref 讀）---------
+#
+# 為什麼讀 git ref 而不是讀工作樹：工作樹在哪個分支、有沒有沒提交的改動都會讓
+# 「面板上的數字」跟「GitHub 上的資料」悄悄分岔；`git cat-file <sha>:<path>` 讀到的
+# 一定是那個 commit 的位元組，面板同時顯示 commit sha ＋ `git ls-remote` 查到的
+# 遠端 sha，兩者相等＝這份資料就是 GitHub main 現在的樣子（誠實語意：截至上次
+# 檢查時刻）。歸檔 run 是靜態證據，刻意不併進即時 run 清單：不判停滯、不推播。
+#
+# 索引紀律沿用 runs/INDEX.json 自己的定義（ops/gain/build_runs_index.py）：
+# 只列 kind ∈ {real_run, aborted}；analysis（衍生物）、smoke（不進統計）等照它
+# 的定義不列，但數量照實回報。數字只抄 runner 自己寫的 summary.json，讀不到就
+# 回 None（面板顯示「—」），不從 rows 重算、不猜。
+
+_GH_LISTED_KINDS = ("real_run", "aborted")
+
+
+def _gh_arm_stats(entry: dict[str, Any], summary: dict[str, Any] | None
+                  ) -> tuple[str, list[dict[str, Any]]]:
+    """把一個 run 的逐臂統計攤平成 [{arm, planned, done, delivered, void}]。
+
+    delivered＝正確交付（accepted ∧ meets_demand；gain_run 的 accepted_and_meets_demand、
+    R530 版面的 deliv——ops/gain/power_paired.py 同一條定義）。回 (layout, arms)。"""
+    by_rows = entry.get("n_rows_by_arm") or {}
+    arms_raw = (summary or {}).get("arms")
+    stats = (summary or {}).get("arms_stats")
+    out: list[dict[str, Any]] = []
+
+    def _int(v: Any) -> int | None:
+        if isinstance(v, bool) or v is None:
+            return None
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+
+    if isinstance(arms_raw, dict) and arms_raw:
+        for arm, a in arms_raw.items():
+            if not isinstance(a, dict):
+                continue
+            void = _int(a.get("infra_void"))
+            done = _int(a.get("processed"))
+            if done is None and arm in by_rows and void is not None:
+                done = int(by_rows[arm]) + void  # rows 不含 void 列（gain_run 設計）
+            out.append({"arm": arm, "planned": _int(a.get("tasks")), "done": done,
+                        "delivered": _int(a.get("accepted_and_meets_demand")),
+                        "void": void})
+        return "gain_arms", out
+    if isinstance(stats, dict) and stats:
+        for arm, a in stats.items():
+            if not isinstance(a, dict):
+                continue
+            out.append({"arm": arm, "planned": None, "done": _int(a.get("processed")),
+                        "delivered": _int(a.get("deliv")),
+                        "void": _int(a.get("infra_void"))})
+        return "gain_arms_stats", out
+    for arm, n in sorted(by_rows.items()):
+        out.append({"arm": arm, "planned": None, "done": _int(n),
+                    "delivered": None, "void": None})
+    return "index_only", out
+
+
+def _gh_run_row(entry: dict[str, Any], summary: dict[str, Any] | None) -> dict[str, Any]:
+    layout, arms = _gh_arm_stats(entry, summary)
+
+    def _sum(key: str) -> int | None:
+        vals = [a[key] for a in arms]
+        return sum(vals) if vals and all(v is not None for v in vals) else None
+
+    bank = entry.get("bank") or {}
+    return {
+        "run_id": entry.get("name"),
+        "kind": entry.get("kind"),
+        "subkind": entry.get("subkind"),
+        "date": entry.get("date"),
+        "seed": entry.get("seed"),
+        "bank": bank.get("family"),
+        "bank_version": bank.get("version"),
+        "layout": layout,
+        "arms": arms,
+        "total_done": _sum("done"),
+        "total_delivered": _sum("delivered"),
+        "infra_void": entry.get("infra_void"),
+        "terminal": entry.get("terminal"),
+        "complete": entry.get("complete"),
+        "headline": entry.get("headline"),
+        "verdict_decisions": entry.get("verdict_decisions") or [],
+        "n_decision_refs": len(entry.get("decision_refs") or []),
+    }
+
+
+class GitHubRuns:
+    """GitHub 上游 runs/ 的唯讀視圖：從本機 git 的 `<remote>/<branch>` ref 讀
+    runs/INDEX.json ＋ 各 run 的 summary.json，並用 `git ls-remote` 對照遠端。
+
+    同步（`git fetch`）在背景做、不擋請求；唯讀實例不 fetch（不寫 .git），只做
+    ls-remote 比對——它會誠實顯示「本機落後遠端」。git_run：測試注入點，簽名
+    (args, input_bytes) -> CompletedProcess。"""
+
+    _REMOTE_CHECK_S = 120.0
+
+    def __init__(self, repo_dir: Path | str | None, *, remote: str = "origin",
+                 branch: str = "main", runs_subdir: str = "runs",
+                 fetch_every_s: float = 600.0,
+                 git_run: Callable[[list[str], bytes | None],
+                                   subprocess.CompletedProcess] | None = None) -> None:
+        self.repo_dir = Path(repo_dir) if repo_dir else None
+        self.remote = remote
+        self.branch = branch
+        self.ref = f"refs/remotes/{remote}/{branch}"
+        self.runs_subdir = runs_subdir.strip("/")
+        self.fetch_every_s = fetch_every_s
+        self._git_run = git_run or self._default_git_run
+        self._lock = threading.Lock()
+        self._busy = threading.Lock()  # 背景 fetch／ls-remote 同時只跑一個
+        self._cache_sha: str | None = None
+        self._cache_rows: list[dict[str, Any]] = []
+        self._cache_meta: dict[str, Any] = {}
+        self._remote_sha: str | None = None
+        self._remote_checked_ms: int | None = None
+        self._remote_err: str | None = None
+        self._last_fetch_ms: int | None = None
+        self._fetch_err: str | None = None
+        self._read_err: str | None = None
+        self._url: str | None = None
+
+    @property
+    def configured(self) -> bool:
+        return self.repo_dir is not None
+
+    def _default_git_run(self, args: list[str], input_bytes: bytes | None
+                         ) -> subprocess.CompletedProcess:
+        import os
+        env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}  # 公開 repo；要密碼就失敗，不卡住
+        kw: dict[str, Any] = {"input": input_bytes} if input_bytes is not None \
+            else {"stdin": subprocess.DEVNULL}
+        return subprocess.run(["git", "-C", str(self.repo_dir), *args],
+                              capture_output=True, timeout=120, env=env, **kw)
+
+    # -- 讀 git 物件 ---------------------------------------------------------------
+    def _local_sha(self) -> str | None:
+        p = self._git_run(["rev-parse", "--verify", "--quiet", self.ref + "^{commit}"], None)
+        sha = p.stdout.decode("ascii", "replace").strip() if p.returncode == 0 else ""
+        return sha or None
+
+    def _read_many(self, sha: str, paths: list[str]) -> dict[str, bytes | None]:
+        """一次 `git cat-file --batch` 讀多個檔（Windows 上逐檔開行程太慢）。"""
+        if not paths:
+            return {}
+        req = "".join(f"{sha}:{p}\n" for p in paths).encode("utf-8")
+        p = self._git_run(["cat-file", "--batch"], req)
+        if p.returncode != 0:
+            raise RuntimeError(_clean_stderr(p.stderr) or "git cat-file 失敗")
+        buf, pos, out = p.stdout, 0, {}
+        for path in paths:
+            nl = buf.index(b"\n", pos)
+            header = buf[pos:nl].split()
+            pos = nl + 1
+            if len(header) >= 2 and header[-1] == b"missing":
+                out[path] = None
+                continue
+            size = int(header[2])
+            out[path] = buf[pos:pos + size] if header[1] == b"blob" else None
+            pos += size + 1  # 內容後面跟一個換行
+        return out
+
+    def _rebuild(self, sha: str) -> None:
+        base = self.runs_subdir
+        idx_raw = self._read_many(sha, [f"{base}/INDEX.json"]).get(f"{base}/INDEX.json")
+        if idx_raw is None:
+            raise RuntimeError(f"{self.ref} 裡沒有 {base}/INDEX.json")
+        index = json.loads(idx_raw.decode("utf-8"))
+        entries = [e for e in index.get("runs") or [] if isinstance(e, dict)]
+        listed = [e for e in entries if e.get("kind") in _GH_LISTED_KINDS]
+        want = [f"{base}/{e['name']}/summary.json" for e in listed
+                if any(f.get("name") == "summary.json" for f in e.get("files") or [])]
+        blobs = self._read_many(sha, want)
+        rows = []
+        for e in listed:
+            raw = blobs.get(f"{base}/{e['name']}/summary.json")
+            summary = None
+            if raw is not None:
+                try:
+                    summary = json.loads(raw.decode("utf-8"))
+                except (ValueError, UnicodeDecodeError):
+                    summary = None  # 壞檔＝讀不到，數字回 None，不吞成 0
+            rows.append(_gh_run_row(e, summary if isinstance(summary, dict) else None))
+        rows.sort(key=lambda r: (r.get("date") or "", r.get("run_id") or ""), reverse=True)
+        by_kind: dict[str, int] = {}
+        for e in entries:
+            by_kind[str(e.get("kind"))] = by_kind.get(str(e.get("kind")), 0) + 1
+        self._cache_rows = rows
+        self._cache_meta = {
+            "index_entries": len(entries),
+            "listed": len(rows),
+            "by_kind": by_kind,
+            "listed_kinds": list(_GH_LISTED_KINDS),
+            "generated_by": index.get("generated_by"),
+        }
+        self._cache_sha = sha
+
+    def runs(self) -> list[dict[str, Any]]:
+        if not self.configured:
+            return []
+        with self._lock:
+            try:
+                sha = self._local_sha()
+                if sha is None:
+                    self._read_err = f"找不到 {self.ref}（還沒 fetch 過？）"
+                    return []
+                if sha != self._cache_sha:
+                    self._rebuild(sha)
+                self._read_err = None
+            except Exception as e:  # git 不在、ref 壞、INDEX 解析失敗：照實回報
+                self._read_err = f"{type(e).__name__}: {e}"
+            return list(self._cache_rows)
+
+    # -- 跟遠端對照 ----------------------------------------------------------------
+    def remote_url(self) -> str | None:
+        if self._url is None:
+            p = self._git_run(["remote", "get-url", self.remote], None)
+            self._url = p.stdout.decode("utf-8", "replace").strip() if p.returncode == 0 else ""
+        return self._url or None
+
+    def check_remote(self) -> None:
+        p = self._git_run(["ls-remote", self.remote, f"refs/heads/{self.branch}"], None)
+        self._remote_checked_ms = int(time.time() * 1000)
+        if p.returncode != 0:
+            self._remote_err = _clean_stderr(p.stderr) or f"ls-remote exit {p.returncode}"
+            return
+        first = p.stdout.decode("ascii", "replace").split()
+        self._remote_sha = first[0] if first else None
+        self._remote_err = None if first else f"遠端沒有 {self.branch} 分支"
+
+    def fetch(self) -> dict[str, Any]:
+        p = self._git_run(["fetch", "--quiet", self.remote, self.branch], None)
+        self._last_fetch_ms = int(time.time() * 1000)
+        self._fetch_err = None if p.returncode == 0 else (
+            _clean_stderr(p.stderr) or f"git fetch exit {p.returncode}")
+        self.check_remote()
+        return {"ok": self._fetch_err is None, "error": self._fetch_err}
+
+    def _bg(self, allow_fetch: bool) -> None:
+        if not self._busy.acquire(blocking=False):
+            return
+        try:
+            now = time.time() * 1000
+            due_fetch = (allow_fetch and self.fetch_every_s > 0
+                         and (self._last_fetch_ms is None
+                              or now - self._last_fetch_ms > self.fetch_every_s * 1000))
+            if due_fetch:
+                self.fetch()
+            elif (self._remote_checked_ms is None
+                  or now - self._remote_checked_ms > self._REMOTE_CHECK_S * 1000):
+                self.check_remote()
+        except Exception as e:
+            self._remote_err = f"{type(e).__name__}: {e}"
+        finally:
+            self._busy.release()
+
+    def kick(self, allow_fetch: bool) -> None:
+        """到期就在背景 fetch／ls-remote；請求執行緒立刻返回。"""
+        if self.configured:
+            threading.Thread(target=self._bg, args=(allow_fetch,), daemon=True).start()
+
+    def status(self) -> dict[str, Any]:
+        if not self.configured:
+            return {"configured": False}
+        self.runs()  # 確保 local sha／快取是新的
+        local = self._cache_sha
+        remote = self._remote_sha
+        return {
+            "configured": True,
+            "repo": str(self.repo_dir),
+            "remote": self.remote,
+            "branch": self.branch,
+            "url": self.remote_url(),
+            "local_sha": local,
+            "remote_sha": remote,
+            # None＝還沒查到遠端（不知道），不是「不一致」
+            "in_sync": (local == remote) if (local and remote) else None,
+            "remote_checked_ms": self._remote_checked_ms,
+            "remote_error": self._remote_err,
+            "last_fetch_ms": self._last_fetch_ms,
+            "fetch_error": self._fetch_err,
+            "read_error": self._read_err,
+            **self._cache_meta,
+        }
+
+
 # --- trace 增量統計（infra_void 只在 trace、不在 ledger——run_x1 的 resume 設計）--
 
 class TraceStats:
@@ -1644,6 +1933,25 @@ _PAGE = """<!doctype html>
           font:12px/1.6 ui-monospace,Consolas,monospace; }
   ul.ev li { border-bottom:1px solid var(--line-soft); padding:3px 0; }
   .empty { color:var(--muted); padding:22px; text-align:center; font-size:12.5px; }
+  /* ---- GitHub 歸檔 runs ---- */
+  .gh-sync { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:6px; }
+  .gh-sync a, .gh-tbl a { color:var(--accent); text-decoration:none; }
+  .gh-sync a:hover, .gh-tbl a:hover { text-decoration:underline; }
+  .gh-kinds { font-size:11.5px; color:var(--muted); margin:2px 0 10px; }
+  .gh-tools { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .gh-tools input { flex:1; max-width:320px; background:var(--inset); border:1px solid var(--line);
+                    border-radius:8px; color:var(--ink); padding:6px 10px; font-size:12px; font-family:inherit; }
+  .gh-tbl { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .gh-tbl th { font-size:11.5px; color:var(--muted); font-weight:600; text-align:left;
+               padding:6px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .gh-tbl td { padding:6px 8px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  .gh-tbl td.r, .gh-tbl th.r { text-align:right; }
+  .gh-tbl .nm { font-family:ui-monospace,Consolas,monospace; font-weight:600; word-break:break-all; }
+  .gh-tbl .num { font-family:ui-monospace,Consolas,monospace; font-variant-numeric:tabular-nums; }
+  .gh-arms { display:flex; gap:4px; flex-wrap:wrap; }
+  .gh-hl { color:var(--muted); font-size:11.5px; max-width:360px; }
+  @media (max-width:900px){ .gh-tbl th:nth-child(4), .gh-tbl td:nth-child(4),
+    .gh-tbl th:nth-child(8), .gh-tbl td:nth-child(8) { display:none; } }
   .note { color:var(--warn); font-size:12px; margin-top:6px; }
   /* ---- 信任生態：信用視覺化（demo 主場） ---- */
   .esec { font-size:11px; letter-spacing:.05em; text-transform:uppercase;
@@ -1901,6 +2209,8 @@ _PAGE = """<!doctype html>
   /* ---- 對外公開模式（7779）：老師 8/14 裁定——只留「任務執行狀況＋信任生態」，
      LM Studio／Hermes 等底層技術區塊只在內部看；再加一句話結論 hero 與故事化說明。
      全走 CSS（readonly class 由 /api/mode 非同步掛上，CSS 才不會有時序競態） ---- */
+  body.readonly #sec-github, body.readonly .rail-item[data-sec="sec-github"],
+  body.readonly .mnav a[data-sec="sec-github"],
   body.readonly #sec-lmstudio, body.readonly #sec-hermes,
   body.readonly .rail-item[data-sec="sec-lmstudio"],
   body.readonly .rail-item[data-sec="sec-hermes"],
@@ -2096,6 +2406,7 @@ _PAGE = """<!doctype html>
   <span class="rail-ind" id="rail-ind"></span>
   <a class="rail-logo" href="#" id="rail-top" title="回到頂端">V</a>
   <a class="rail-item" href="#sec-runs" data-sec="sec-runs" title="批次執行"><svg><use href="#i-runs"/></svg></a>
+  <a class="rail-item" href="#sec-github" data-sec="sec-github" title="GitHub 歸檔 runs"><svg><use href="#i-git"/></svg></a>
   <a class="rail-item" href="#sec-eco" data-sec="sec-eco" title="信任生態"><svg><use href="#i-eco"/></svg></a>
   <a class="rail-item" href="#sec-lmstudio" data-sec="sec-lmstudio" title="LM Studio 機群"><svg><use href="#i-lm"/></svg></a>
   <a class="rail-item" href="#sec-hermes" data-sec="sec-hermes" title="Hermes 日誌"><svg><use href="#i-hermes"/></svg></a>
@@ -2111,6 +2422,7 @@ _PAGE = """<!doctype html>
   <div class="srcbar" id="srcbar"></div>
   <nav class="mnav">
     <a href="#sec-runs" data-sec="sec-runs">批次執行</a>
+    <a href="#sec-github" data-sec="sec-github">GitHub</a>
     <a href="#sec-eco" data-sec="sec-eco">信任生態</a>
     <a href="#sec-lmstudio" data-sec="sec-lmstudio">LM Studio</a>
     <a href="#sec-hermes" data-sec="sec-hermes">Hermes</a>
@@ -2194,6 +2506,12 @@ _PAGE = """<!doctype html>
     </div>
     <div id="sv-panel" class="modal" aria-hidden="true"><div class="svp" id="svp-body"></div></div>
   </div></section>
+<section class="src" id="sec-github">
+  <header><h2><svg class="ic"><use href="#i-git"/></svg>GitHub 歸檔 runs</h2>
+    <span class="hint" id="gh-hint"></span>
+    <div class="actions" id="gh-actions"></div></header>
+  <div id="gh-sync"><div class="empty">載入中…</div></div>
+  <div id="gh-body"></div></section>
 <section class="src" id="sec-eco">
   <header><h2><svg class="ic"><use href="#i-eco"/></svg>信任生態</h2>
     <span class="hint" id="eco-hint"></span>
@@ -2253,6 +2571,8 @@ _PAGE = """<!doctype html>
     <rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></symbol>
   <symbol id="i-runs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 16.5l9 5 9-5"/></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10"/><path d="M18 10c0 4-6 3-11.2 7.6"/></symbol>
   <symbol id="i-eco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></symbol>
   <symbol id="i-lm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -2384,7 +2704,7 @@ function runSkip(el){
 }
 // 各來源最新快取（KPI 與 filter 重繪都吃這裡，不重新 fetch）
 // 注意：不能叫 last——renderHermes 內有同名區域 const，會踩 TDZ
-const cache = {runs:null, eco:null, lm:null, hermes:null, live:null};
+const cache = {runs:null, eco:null, lm:null, hermes:null, live:null, gh:null};
 
 // 狀態的單一真相：row icon／pill／sparkline 同色（stalled 蓋過一切；finished 靜音）
 // late＝停滯前的琥珀中間態；暫停/收尾是刻意閒置，不算遲滯（觀察歸觀察、意圖歸意圖）
@@ -3891,6 +4211,90 @@ function renderLM(l){
     : '';
 }
 
+// ---------- GitHub 歸檔 runs ----------
+// 資料讀本機 git 的 <remote>/<branch> ref（不讀工作樹）；徽章比對 ls-remote 查到的遠端 sha。
+// 列表只在 ref 的 sha 變了才重抓（歸檔資料是靜態的，不跟著 2.5s 輪詢重傳 180 列）。
+let ghRows = null, ghRowsSha = null, ghShowAll = false, ghFilter = '';
+const ghShort = s => s ? String(s).slice(0, 7) : '—';
+function ghWeb(st){
+  const m = String(st.url || '').match(/github\\.com[:/]+([^/]+)\\/([^/]+?)(?:\\.git)?\\/?$/);
+  return m ? {repo: m[1] + '/' + m[2], base: 'https://github.com/' + m[1] + '/' + m[2]} : null;
+}
+function ghSyncPill(st){
+  if(st.read_error) return '<span class="pill bad">讀取失敗</span>';
+  if(st.in_sync === true) return '<span class="pill ok">✓ 與 GitHub 一致</span>';
+  if(st.in_sync === false) return '<span class="pill warn">⚠ 本機落後 GitHub</span>';
+  return '<span class="pill">遠端比對中…</span>';
+}
+function renderGH(st){
+  cache.gh = st;
+  const host = $('#gh-sync');
+  if(!st || !st.configured){
+    host.dataset.j = '';
+    host.innerHTML = '<div class="empty">未設定 --github-repo（runs 根目錄不在 git repo 裡時要手動指定）</div>';
+    $('#gh-body').innerHTML = ''; $('#gh-hint').textContent = ''; $('#gh-actions').innerHTML = '';
+    return;
+  }
+  const t = ms => ms ? new Date(ms).toLocaleTimeString() : '—';
+  const web = ghWeb(st);
+  const k = st.by_kind || {};
+  const errs = [st.read_error && ('讀取：' + st.read_error),
+                st.remote_error && ('遠端比對：' + st.remote_error),
+                st.fetch_error && ('同步：' + st.fetch_error)].filter(Boolean);
+  const html = `<div class="gh-sync">${ghSyncPill(st)}
+      <span class="chip" title="${esc(st.remote_sha || '')}">GitHub ${esc(st.branch)} ${ghShort(st.remote_sha)}</span>
+      <span class="chip" title="${esc(st.local_sha || '')}">本機讀取 ${ghShort(st.local_sha)}</span>
+      <span class="meta">遠端查於 ${t(st.remote_checked_ms)} · 上次同步 ${t(st.last_fetch_ms)}
+      ${web ? `· <a href="${esc(web.base)}/tree/${esc(st.local_sha || st.branch)}/runs" target="_blank" rel="noopener">${esc(web.repo)}</a>` : ''}</span></div>
+    ${errs.map(e => `<div class="note">${esc(e)}</div>`).join('')}
+    ${st.index_entries != null ? `<div class="gh-kinds">runs/INDEX.json 共 ${st.index_entries} 項，列出 real_run ${k.real_run ?? 0}＋aborted ${k.aborted ?? 0}；
+      依 INDEX 定義不列：analysis ${k.analysis ?? 0}（衍生物）、smoke ${k.smoke ?? 0}（不進統計）、other ${k.other ?? 0}、replay ${k.replay ?? 0}</div>` : ''}`;
+  if(host.dataset.j !== html){ host.dataset.j = html; host.innerHTML = html; }
+  $('#gh-hint').textContent = st.listed != null ? `${st.listed} 個歸檔 run · 唯讀` : '';
+  $('#gh-actions').innerHTML = '<button class="op-only" onclick="ghFetch(this)">立即同步</button>';
+  if(st.local_sha && st.local_sha !== ghRowsSha){
+    const sha = st.local_sha;
+    fetch('/api/github/runs').then(r => r.json()).then(rows => {
+      ghRows = rows; ghRowsSha = sha; renderGHTable();
+    }).catch(() => {});
+  } else if(!st.local_sha){ ghRows = null; ghRowsSha = null; renderGHTable(); }
+}
+async function ghFetch(btn){
+  btn.disabled = true; btn.textContent = '同步中…';
+  try { await post('/api/github/fetch', {}); } finally { btn.disabled = false; btn.textContent = '立即同步'; }
+}
+function ghSetFilter(v){ ghFilter = v; renderGHTable(); }
+function ghToggleAll(){ ghShowAll = !ghShowAll; renderGHTable(); }
+function renderGHTable(){
+  const body = $('#gh-body');
+  if(!ghRows){ body.innerHTML = ''; return; }
+  const st = cache.gh || {}, web = ghWeb(st);
+  const q = ghFilter.trim().toLowerCase();
+  const rows = q ? ghRows.filter(r => [r.run_id, r.bank, r.subkind, ...(r.arms || []).map(a => a.arm)]
+                                 .some(x => String(x || '').toLowerCase().includes(q))) : ghRows;
+  const shown = ghShowAll ? rows : rows.slice(0, 25);
+  const n = v => v == null ? '—' : v;
+  const done = r => r.complete === true ? '<span class="pill ok">完成</span>'
+                  : r.complete === false ? '<span class="pill warn">未完成</span>' : '<span class="pill">—</span>';
+  const tr = shown.map(r => {
+    const link = web ? `<a href="${esc(web.base)}/tree/${esc(ghRowsSha)}/runs/${encodeURIComponent(r.run_id)}" target="_blank" rel="noopener">${esc(r.run_id)}</a>` : esc(r.run_id);
+    const arms = (r.arms || []).map(a => `<span class="chip" title="正確交付 / 已處理（不含 void 之外的推論）">${esc(a.arm)} ${n(a.delivered)}/${n(a.done)}</span>`).join('');
+    const verdict = r.headline ? `<div class="gh-hl">${esc(r.headline)}</div>`
+                  : r.verdict_decisions.length ? `<span class="chip" title="${esc(r.verdict_decisions.join('\\n'))}">裁決檔 ${r.verdict_decisions.length}</span>` : '—';
+    return `<tr><td class="nm">${link}${r.kind === 'aborted' ? ' <span class="pill warn">中止</span>' : ''}</td>
+      <td class="num">${esc(r.date || '—')}</td><td>${esc(r.subkind || '')}</td><td>${esc(r.bank || '—')}</td>
+      <td><div class="gh-arms">${arms || '—'}</div></td><td class="r num">${n(r.infra_void)}</td><td>${done(r)}</td><td>${verdict}</td></tr>`;
+  }).join('');
+  body.innerHTML = `<div class="gh-tools"><input placeholder="篩選 run／題庫／臂…" value="${esc(ghFilter)}"
+      oninput="ghSetFilter(this.value)"><span class="meta">${rows.length} 筆${q ? '（已篩選）' : ''}</span></div>
+    <table class="gh-tbl"><thead><tr><th>run</th><th>日期</th><th>類型</th><th>題庫</th>
+      <th title="每臂：正確交付（accepted ∧ meets_demand）/ 已處理">各臂 正確交付/處理</th><th class="r">infra_void</th><th>完成</th><th>裁決</th></tr></thead>
+      <tbody>${tr || '<tr><td colspan="8" class="empty">沒有符合的 run</td></tr>'}</tbody></table>
+    ${rows.length > 25 ? `<div class="btns"><button onclick="ghToggleAll()">${ghShowAll ? '只顯示前 25 筆' : '顯示全部 ' + rows.length + ' 筆'}</button></div>` : ''}`;
+  // 篩選框重建後游標保持在框內
+  if(q){ const i = body.querySelector('input'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+
 // ---------- hermes ----------
 function renderHermes(h){
   cache.hermes = h;
@@ -4082,6 +4486,7 @@ async function refresh(){
     $('#sv-off').hidden = false;
     renderKPIs();
   }
+  fetch('/api/github').then(r=>r.json()).then(renderGH).catch(()=>{});
   if(SRC.eco) fetch('/api/eco').then(r=>r.json()).then(renderEco).catch(()=>{});
   else renderEco({enabled:false});
   if(SRC.lmstudio) fetch('/api/lmstudio').then(r=>r.json()).then(renderLM).catch(()=>{});
@@ -4236,6 +4641,12 @@ class _Handler(BaseHTTPRequestHandler):
                     return
                 limit = int(qs.get("limit", ["30"])[0])
                 self._send_json(live.snapshot(limit))
+            elif path == "/api/github":
+                gh = self._ctx.github
+                gh.kick(allow_fetch=not self._ctx.readonly)
+                self._send_json(gh.status())
+            elif path == "/api/github/runs":
+                self._send_json(self._ctx.github.runs())
             elif path == "/api/runs":
                 if not self._gate("runs"):
                     self._send_json([])
@@ -4285,7 +4696,15 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_error(400, "bad json body")
             return
         try:
-            if path == "/api/sources":
+            if path == "/api/github/fetch":
+                gh = self._ctx.github
+                if not gh.configured:
+                    self._send_json({"ok": False, "error": "未設定 --github-repo"}, 400)
+                    return
+                res = gh.fetch()
+                self._send_json({**res, "status": gh.status()},
+                                200 if res["ok"] else 502)
+            elif path == "/api/sources":
                 source = body.get("source")
                 if source not in SOURCES:
                     self._send_json({"ok": False, "error": f"unknown source: {source!r}"}, 400)
@@ -4368,7 +4787,8 @@ class _Ctx:
     def __init__(self, runs_root: Path, toggles: SourceToggles, eco: EcoView,
                  lmstudio: LMStudioProxy, hermes: HermesLogs, token: str = "",
                  stall_min: float = 15.0, late_min: float | None = None,
-                 readonly: bool = False) -> None:
+                 readonly: bool = False,
+                 github: "GitHubRuns | None" = None) -> None:
         self.runs_root = runs_root
         self.toggles = toggles
         self.eco = eco
@@ -4381,6 +4801,7 @@ class _Ctx:
         self.trace_stats = TraceStats()
         self.acks = RunAcks(runs_root / "monitor_acks.json")
         self.hermes_live: HermesLive | None = None  # make_run_monitor 開串流時填入
+        self.github = github or GitHubRuns(None)
 
 
 class RunAcks:
@@ -4452,6 +4873,11 @@ def make_run_monitor(
     hermes_live: bool = False,
     live_popen: Callable[[str, str], Any] | None = None,
     readonly: bool = False,
+    github_repo: Path | str | None = None,
+    github_remote: str = "origin",
+    github_branch: str = "main",
+    github_fetch_s: float = 600.0,
+    git_run: Callable[[list[str], bytes | None], subprocess.CompletedProcess] | None = None,
 ) -> ThreadingHTTPServer:
     """組出統一監測台 server（呼叫端自行 serve_forever / shutdown）。
 
@@ -4470,6 +4896,10 @@ def make_run_monitor(
     （ntfy.sh/<topic> 即手機推播）。notify_post/http_get/ssh_run：測試注入點。
     late_min：遲滯門檻（分鐘；None＝stall_min 的一半）。遲滯是停滯前的琥珀
     中間態，只上版面不進通知（分級紀律：record/notify/page）。
+    github_repo：本機一份 cosmopig/Vacant 的 git clone（任一 worktree 皆可）；設了就
+    多一個「GitHub 歸檔 runs」區塊，資料從 `<github_remote>/<github_branch>` ref 讀，
+    並以 ls-remote 對照遠端。github_fetch_s：背景 git fetch 間隔（0＝不自動 fetch；
+    readonly 實例一律不 fetch）。git_run：測試注入點。
     port=0 → 隨機埠（真埠見 server.server_address[1]）。
     """
     runs_root = Path(runs_root)
@@ -4493,6 +4923,8 @@ def make_run_monitor(
         stall_min=stall_min,
         late_min=late_min,
         readonly=readonly,
+        github=GitHubRuns(github_repo, remote=github_remote, branch=github_branch,
+                          fetch_every_s=github_fetch_s, git_run=git_run),
     )
     server._vacant_ctx = ctx  # type: ignore[attr-defined]
     need_bg = (hermes_auto_s > 0 or notify_url

@@ -471,6 +471,7 @@ def cmd_runs_up(args: argparse.Namespace) -> int:
     lmstudio = (",".join(args.lmstudio_url) if args.lmstudio_url
                 else os.environ.get("VACANT_MON_LMSTUDIO", ""))
     hermes = args.hermes_ssh or os.environ.get("VACANT_MON_HERMES_SSH", "")
+    gh_repo = _resolve_github_repo(args.github_repo, root)
     try:
         server = make_run_monitor(
             root, port=args.port,
@@ -487,6 +488,10 @@ def cmd_runs_up(args: argparse.Namespace) -> int:
             notify_url=args.notify_url or os.environ.get("VACANT_MON_NTFY", ""),
             hermes_live=args.hermes_live,
             readonly=args.readonly,
+            github_repo=gh_repo,
+            github_remote=args.github_remote,
+            github_branch=args.github_branch,
+            github_fetch_s=args.github_fetch_min * 60.0,
         )
     except ValueError as e:
         print(f"啟動失敗：{e}", file=sys.stderr)
@@ -498,6 +503,8 @@ def cmd_runs_up(args: argparse.Namespace) -> int:
     print(f"  lmstudio : {lmstudio or '（未設定）'}")
     print(f"  hermes   : {hermes or '（未設定）'}"
           f"{'（直播：ssh tail -F，斷線自動重連）' if hermes and args.hermes_live else ''}")
+    print(f"  github   : {gh_repo or '（未設定）'}"
+          f"{'（讀 ' + args.github_remote + '/' + args.github_branch + '）' if gh_repo else ''}")
     if args.readonly:
         print("  模式     : 唯讀公開（操作一律 403；適合 tailscale funnel 對外展示）")
     if args.token:
@@ -513,6 +520,23 @@ def cmd_runs_up(args: argparse.Namespace) -> int:
         except Exception:
             pass
     return 0
+
+
+def _resolve_github_repo(value: str, runs_root: Path) -> str | None:
+    """--github-repo：off＝關；auto＝runs 根目錄所在的 git repo（找不到就關）；其餘＝路徑。"""
+    import subprocess
+
+    if value == "off":
+        return None
+    if value != "auto":
+        return value
+    try:
+        p = subprocess.run(["git", "-C", str(runs_root), "rev-parse", "--show-toplevel"],
+                           capture_output=True, timeout=15, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    top = p.stdout.decode("utf-8", "replace").strip()
+    return top if p.returncode == 0 and top else None
 
 
 def cmd_runs_pullgw(args: argparse.Namespace) -> int:
@@ -891,6 +915,13 @@ def build_parser() -> argparse.ArgumentParser:
     pru.add_argument("--notify-url", default="",
                      help="run 狀態變化（停滯/void超標/完成）推播網址，"
                           "如 https://ntfy.sh/<你的主題>（或環境變數 VACANT_MON_NTFY）")
+    pru.add_argument("--github-repo", default="auto",
+                     help="GitHub 歸檔 runs 的來源：本機一份 cosmopig/Vacant 的 git clone 路徑；"
+                          "auto＝--root 所在的 repo（預設）；off＝關。資料讀 git ref、不讀工作樹")
+    pru.add_argument("--github-remote", default="origin", help="git remote 名（預設 origin）")
+    pru.add_argument("--github-branch", default="main", help="遠端分支（預設 main）")
+    pru.add_argument("--github-fetch-min", type=float, default=10.0,
+                     help="背景 git fetch 間隔（分鐘；0=關；--readonly 一律不 fetch、只比對遠端）")
     pru.set_defaults(func=cmd_runs_up)
 
     pgw = runssub.add_parser(
