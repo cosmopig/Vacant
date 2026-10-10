@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .auditor import Auditor
-from .batch import RunLedger
+from .batch import RunControl, RunLedger
 from .checks import compile_check
 from .memory import MemoryManager, MemoryStream, assert_ks1_clean
 
@@ -245,6 +245,7 @@ def run_x1(
     seed: str = "s0",
     oracle: bool = False,        # pilot：稽核後直接寫入該族 oracle 教訓
     distill: Callable[[X1Task, str, bool], str | None] | None = None,  # 正式：+1 呼叫蒸餾
+    control: RunControl | None = None,  # 監測面板的暫停/終止/跳過旗標（選配，見下）
     trace_path: Path | None = None,
     retries: int = 4,
     retry_backoff_s: float = 2.0,
@@ -259,6 +260,13 @@ def run_x1(
     斷點續跑靠 ledger 以 (policy, task_id, seed) 跳過已完成格，並把已完成格的
     episode **重播回 MemoryStream**（否則 resume 後 M1/M2 臂帶著殘缺記憶跑，
     整條臂的記憶→品質訊號作廢）。
+
+    control（選配，不傳＝零行為差異）：只在「呼叫模型之前」生效——暫停會阻塞、
+    終止讓迴圈在下一題開始前乾淨收工（已完成格不受影響）、跳過只讓當下這題不
+    呼叫模型。跳過的題目誠實記為 outcome=skipped_by_operator 並寫入 ledger／
+    trace，不進 MemoryStream（沒有真發生的 episode 不能記），統計端
+    （transfer_curve）排除，不得算進 pass/fail。不碰模板、記憶注入、
+    retry/infra_void 判定——不是新增的實驗變因。
     """
     manager = manager or MemoryManager(policy)
     auditor = auditor or Auditor(rate=1.0)
@@ -285,6 +293,29 @@ def run_x1(
                 )
             records.append(done)
             continue
+
+        if control is not None:
+            control.wait_if_paused()
+            if control.should_stop():
+                break
+            if control.consume_skip(task.task_id):
+                ts = now_ms()
+                rec = {
+                    "policy": policy, "seed": seed, "task": task.task_id,
+                    "family": task.family, "variant": task.variant_params,
+                    "outcome": "skipped_by_operator", "passed": None, "audit": None,
+                    "memory_tokens": 0, "lesson_written": False, "infra_error": None,
+                    "ts_ms": ts, "spec_digest": _digest(task.prompt),
+                    "answer_digest": "", "lesson": None,
+                }
+                if trace_path:
+                    trace_path.parent.mkdir(parents=True, exist_ok=True)
+                    with trace_path.open("a", encoding="utf-8") as f:
+                        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                if ledger is not None:
+                    ledger.mark_done(policy, task.task_id, seed, rec)
+                records.append(rec)
+                continue
 
         memory_block = manager.inject(stream, task.prompt)
         prompt = PROMPT_TEMPLATE.format(memory=memory_block, task=task.prompt)
@@ -372,10 +403,14 @@ def transfer_curve(records: list[dict[str, Any]]) -> dict[str, list[float]]:
     """pilot 判準的原料：每族「第 m 題」的逐題通過序列（0/1，infra_void 剔除）。
 
     遷移存在 ＝ 序列後段（見過族內 m 題帶稽核結論）通過率高於前段；
-    統計檢定（McNemar/bootstrap）用 research.py 的既有函式在分析端做。"""
+    統計檢定（McNemar/bootstrap）用 research.py 的既有函式在分析端做。
+
+    infra_void 與 skipped_by_operator 都排除——後者是操作員手動跳過，不是
+    模型真的答過，算進 pass/fail 會把「沒發生的事」記成失敗，污染遷移訊號。
+    """
     by_family: dict[str, list[float]] = {}
     for r in records:
-        if r["outcome"] == "infra_void":
+        if r["outcome"] in ("infra_void", "skipped_by_operator"):
             continue
         by_family.setdefault(r["family"], []).append(1.0 if r["passed"] else 0.0)
     return by_family

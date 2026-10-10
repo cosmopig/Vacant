@@ -23,6 +23,10 @@
     vacant verify <name>                       # 重驗居民 logbook 簽章鏈
     vacant ledger tail [-n 20]                 # 印最後 n 行事件
 腦：VACANT_MCP_MODEL/VACANT_MCP_BASE 都設 → LMStudioBrain；否則內建離線確定性假腦。
+
+批次執行監測（本次新增，不對應既定規劃文件編號；給 X1/X3 那種數十小時夜跑用）：
+    vacant runs up [--root runs] [--port 7778]  # 監測台：進度/outcome分布 ＋ 暫停/恢復/終止/跳過
+harness 端要接控制，把 batch.RunControl(<out>/"control.json") 傳進 x1.run_x1(control=...)。
 """
 
 from __future__ import annotations
@@ -457,6 +461,78 @@ def cmd_eco_ledger_tail(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_runs_up(args: argparse.Namespace) -> int:
+    """起統一監測台（前景）；Ctrl-C 優雅退出。"""
+    import os
+
+    from .run_monitor import make_run_monitor
+
+    root = Path(args.root)
+    lmstudio = (",".join(args.lmstudio_url) if args.lmstudio_url
+                else os.environ.get("VACANT_MON_LMSTUDIO", ""))
+    hermes = args.hermes_ssh or os.environ.get("VACANT_MON_HERMES_SSH", "")
+    try:
+        server = make_run_monitor(
+            root, port=args.port,
+            eco_root=args.eco_root or None,
+            lmstudio_url=lmstudio,
+            hermes_ssh=hermes,
+            hermes_paths=tuple(args.hermes_path or ()),
+            hermes_eco_root=args.hermes_eco_root,
+            host=args.host,
+            token=args.token,
+            stall_min=args.stall_min,
+            late_min=args.late_min,
+            hermes_auto_s=args.hermes_auto_min * 60.0,
+            notify_url=args.notify_url or os.environ.get("VACANT_MON_NTFY", ""),
+            hermes_live=args.hermes_live,
+            readonly=args.readonly,
+        )
+    except ValueError as e:
+        print(f"啟動失敗：{e}", file=sys.stderr)
+        return 2
+    print(f"監測台 → http://{args.host}:{args.port}   (Ctrl-C 退出)")
+    print(f"  runs     : {root}")
+    print(f"  eco      : {args.eco_root or '（未設定）'}"
+          f"{'（鏡像來源：' + args.hermes_eco_root + '）' if args.hermes_eco_root else ''}")
+    print(f"  lmstudio : {lmstudio or '（未設定）'}")
+    print(f"  hermes   : {hermes or '（未設定）'}"
+          f"{'（直播：ssh tail -F，斷線自動重連）' if hermes and args.hermes_live else ''}")
+    if args.readonly:
+        print("  模式     : 唯讀公開（操作一律 403；適合 tailscale funnel 對外展示）")
+    if args.token:
+        print("  token    : 已啟用（POST 需帶 X-Vacant-Token）")
+    elif args.host in ("127.0.0.1", "localhost", "::1"):
+        print("  （手機/遠端看盤零程式做法：tailscale serve " + str(args.port) + "）")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n收到 Ctrl-C，優雅退出。")
+        try:
+            server.shutdown()
+        except Exception:
+            pass
+    return 0
+
+
+def cmd_runs_pullgw(args: argparse.Namespace) -> int:
+    """閘道側記錄對帳：run 時間窗內的 hub 完整請求記錄 → run 目錄。"""
+    import os
+
+    from .run_monitor import pull_gateway_records
+
+    url = args.url or os.environ.get("VACANT_MON_LMSTUDIO", "")
+    if not url:
+        print("需要 --url 或環境變數 VACANT_MON_LMSTUDIO（hub 監測站網址）", file=sys.stderr)
+        return 2
+    res = pull_gateway_records(Path(args.root), args.run_id, url)
+    if not res.get("ok"):
+        print(f"失敗：{res.get('error')}", file=sys.stderr)
+        return 1
+    print(f"已存 {res['count']} 筆 → {res['saved_to']}（窗口 {res['window']}）")
+    return 0
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     root = Path(args.root)
     if (root / args.name / "trust" / "vacant_id").exists():
@@ -772,6 +848,59 @@ def build_parser() -> argparse.ArgumentParser:
     _add_eco_root(plt)
     plt.add_argument("-n", type=int, default=20, help="行數（預設 20）")
     plt.set_defaults(func=cmd_eco_ledger_tail)
+
+    pruns = sub.add_parser("runs", help="批次實驗（X1/X3 等）操作 ＋ 統一監測台")
+    runssub = pruns.add_subparsers(dest="runs_cmd", required=True)
+    pru = runssub.add_parser(
+        "up", help="起統一監測台（前景；批次 runs＋信任生態＋LM Studio 機群＋Hermes 日誌）"
+    )
+    pru.add_argument("--root", default="runs", help="批次輸出根目錄（預設 runs/）")
+    pru.add_argument("--port", type=int, default=7778, help="監測台埠（預設 7778）")
+    pru.add_argument("--eco-root", default=str(_eco_default_root()),
+                     help="信任生態根目錄（預設 ~/.vacant-mcp；不存在時面板誠實顯示、不創建）")
+    pru.add_argument("--lmstudio-url", action="append", default=None,
+                     help="LM Studio hub 監測站網址（可重複給多個閘道各一張卡；"
+                          "或環境變數 VACANT_MON_LMSTUDIO 逗號分隔）")
+    pru.add_argument("--hermes-ssh", default="",
+                     help="Hermes 機器的 ssh 目標，如 user1@100.77.224.99"
+                          "（或環境變數 VACANT_MON_HERMES_SSH；金鑰認證限定）")
+    pru.add_argument("--hermes-path", action="append",
+                     help="要收取的遠端日誌路徑（可重複；預設 /tmp/vac_app.jsonl 與 /tmp/vac_wire.jsonl）")
+    pru.add_argument("--hermes-eco-root", default="/home/user1/.vacant-mcp",
+                     help="遠端生態根（「鏡像生態」按鈕的來源；預設 /home/user1/.vacant-mcp）")
+    pru.add_argument("--host", default="127.0.0.1",
+                     help="繫結位址（預設 127.0.0.1；非 loopback 必須同時給 --token。"
+                          "手機看盤零程式替代：tailscale serve <port>）")
+    pru.add_argument("--token", default="",
+                     help="操作 token：設了之後所有 POST 要帶 X-Vacant-Token（頁面會問一次）")
+    pru.add_argument("--stall-min", type=float, default=15.0,
+                     help="停滯門檻（分鐘，預設 15）：超過此時間無新進度的 run 面板標紅")
+    pru.add_argument("--late-min", type=float, default=None,
+                     help="遲滯門檻（分鐘，預設取 --stall-min 的一半）：超過此時間"
+                          "無新進度標琥珀色「遲滯」——只上版面，不推播")
+    pru.add_argument("--hermes-auto-min", type=float, default=5.0,
+                     help="自動收取間隔（分鐘；0=關。增量拉取，便宜。預設 5）")
+    pru.add_argument("--hermes-live", dest="hermes_live", action="store_true", default=True,
+                     help="常駐 ssh tail -F 即時串流（預設開；斷線退避重連、"
+                          "VM 上線自動補收歷史——實驗自動接續）")
+    pru.add_argument("--no-hermes-live", dest="hermes_live", action="store_false",
+                     help="關閉即時串流（只留手動/定時收取）")
+    pru.add_argument("--readonly", action="store_true",
+                     help="唯讀公開模式：全部 POST 403、面板隱藏操作件、自動收取關閉。"
+                          "對外展示用（tailscale funnel 這個實例；完整實例留 loopback）")
+    pru.add_argument("--notify-url", default="",
+                     help="run 狀態變化（停滯/void超標/完成）推播網址，"
+                          "如 https://ntfy.sh/<你的主題>（或環境變數 VACANT_MON_NTFY）")
+    pru.set_defaults(func=cmd_runs_up)
+
+    pgw = runssub.add_parser(
+        "pullgw", help="把 hub 監測站在該 run 時間窗的完整請求記錄拉存進 run 目錄（對帳用）"
+    )
+    pgw.add_argument("run_id", help="runs 根目錄下的 run 資料夾名（或 . 代表根目錄本身）")
+    pgw.add_argument("--root", default="runs", help="批次輸出根目錄（預設 runs/）")
+    pgw.add_argument("--url", default="",
+                     help="hub 監測站網址（預設環境變數 VACANT_MON_LMSTUDIO）")
+    pgw.set_defaults(func=cmd_runs_pullgw)
     return p
 
 
