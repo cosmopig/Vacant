@@ -1508,3 +1508,21 @@ def test_github_http_endpoints_and_readonly_fetch_refused(gh_pair, tmp_path):
 
 def test_page_has_github_section():
     assert 'id="sec-github"' in _PAGE and "/api/github" in _PAGE
+
+
+def test_eco_old_wire_format_reports_incompatible_not_500(tmp_path):
+    from vacant_network.run_monitor import EcoView
+
+    root = tmp_path / "eco"
+    (root / "residents" / "alice").mkdir(parents=True)
+
+    class _Boom(EcoView):
+        def _build(self, root):
+            raise ValueError("registry state is corrupt; refusing to reset trust history")
+
+        def _discover_names(self, root):
+            return ["alice"]
+
+    snap = _Boom(root).snapshot()
+    assert snap["incompatible"] is True and snap["exists"] is True
+    assert "refusing" in snap["error"]

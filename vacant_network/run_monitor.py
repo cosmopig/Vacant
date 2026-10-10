@@ -753,7 +753,13 @@ class EcoView:
 
         from .ecosystem import INSUFFICIENT_DATA_N
 
-        eco = self._eco_cached(root)
+        try:
+            eco = self._eco_cached(root)
+        except ValueError as e:
+            # 舊 wire-format 的生態（鐵律 6：logbook／信譽格式 2026-07 已 break）——
+            # ecosystem 拒載是對的；面板照實說「不相容、待重鑄」，不噴 500、不代為轉換
+            return {"configured": True, "exists": True, "incompatible": True,
+                    "root": str(root), "is_mirror": is_mirror, "error": str(e)}
         assert eco is not None
         roster = []
         for r in eco.residents.values():
@@ -3883,6 +3889,12 @@ function renderEco(e){
     host.innerHTML=`<div class="empty">生態不存在：${esc(e.root)}<br>
       （先跑 vacant up --root … 建生態，或用下方 Hermes 區「鏡像生態」拉遠端複本；
       本面板絕不代為創建）</div>`; return;
+  }
+  if(e.incompatible){
+    host.dataset.j='';
+    host.innerHTML=`<div class="empty">生態資料是舊格式，新版不載入：${esc(e.root)}<br>
+      （logbook／信譽格式已在 2026-07 更新，舊資料要清掉重鑄、不做轉換——
+      在來源機器換新版 vacant 重建生態後${e.is_mirror ? '，再用 Hermes 區「鏡像生態」重新拉一次' : ''}即可）</div>`; return;
   }
   // 整段 key-guard：eco 資料變動很慢（TTL 10s／鏡像靜態），資料沒變就不重建
   // DOM——線圖動畫不被輪詢打斷，也不浪費重繪
