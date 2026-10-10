@@ -852,12 +852,12 @@ def build_parser() -> argparse.ArgumentParser:
     pruns = sub.add_parser("runs", help="批次實驗（X1/X3 等）操作 ＋ 統一監測台")
     runssub = pruns.add_subparsers(dest="runs_cmd", required=True)
     pru = runssub.add_parser(
-        "up", help="起統一監測台（前景；批次 runs＋信任生態＋LM Studio 機群＋Hermes 日誌）"
+        "up", help="起統一監測台（前景；批次 runs＋究責生態＋LM Studio 機群＋Hermes 日誌）"
     )
     pru.add_argument("--root", default="runs", help="批次輸出根目錄（預設 runs/）")
     pru.add_argument("--port", type=int, default=7778, help="監測台埠（預設 7778）")
     pru.add_argument("--eco-root", default=str(_eco_default_root()),
-                     help="信任生態根目錄（預設 ~/.vacant-mcp；不存在時面板誠實顯示、不創建）")
+                     help="究責生態根目錄（預設 ~/.vacant-mcp；不存在時面板誠實顯示、不創建）")
     pru.add_argument("--lmstudio-url", action="append", default=None,
                      help="LM Studio hub 監測站網址（可重複給多個閘道各一張卡；"
                           "或環境變數 VACANT_MON_LMSTUDIO 逗號分隔）")
