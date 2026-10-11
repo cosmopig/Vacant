@@ -10,6 +10,8 @@
                                                               # （零設定／零模型／零網路；vacant_network/vrun/demo.py）
     vacant demo                                               # 跑 §11 對照實驗（原樣保留，預設 kind=eco）
     vacant selftest                                           # 端到端冒煙測試（暫存目錄）
+    vacant dashboard [--port 7790] [--open]                   # 裝完之後看每一個狀態（只讀、只在本機；
+                                                              # vacant_network/statusboard.py）
 
 預設 root = ~/.vacant（`trust/` 金鑰與究責紀錄 + HERMES_HOME 都在此；睡著的 vacant 就是這包檔）。
 
@@ -1181,6 +1183,9 @@ def main(argv: list[str] | None = None) -> int:
         return trace_main(raw)
     if raw[:1] == ["run"] and "--" in raw[1:]:
         return _agent_run_shim(raw[1:])
+    if raw[:1] == ["dashboard"]:
+        from .statusboard import main as board_main
+        return board_main(raw[1:])
     if raw[:1] == ["possess"]:
         # `vacant possess <install|uninstall|status|detect>` —— 完整轉發。
         return _possess_shim(raw[1:] or ["status"])

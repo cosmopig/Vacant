@@ -28,6 +28,7 @@ An existing pattern, not one we invented: supply-chain security does the same th
 ```bash
 pipx install vacant-network   # 0.9.0 is the zero-config release. No pipx? `sudo apt install pipx` (Ubuntu/Debian) or `brew install pipx` (macOS)
 vacant install                # finds pi / Claude Code / OpenCode / Codex on this machine and adds one hook to each (undo: `vacant uninstall`)
+vacant dashboard --open       # optional: see every Vacant status on this machine (hooks, recorded projects, each send-back and delivery note; read-only)
 ```
 
 Then open your agent as usual. **No contract, config file, key or environment variable.** For pi, `vacant install` puts a single

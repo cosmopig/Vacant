@@ -103,6 +103,11 @@
 - `vacant_network/blayer.py` — B 層機制驗收六情境（0→70% 步進 × on/off 雙組，判準寫死）
 - `vacant_network/checkpoint.py` — V1 存檔點認證＋回溯稽核（18 §2；存檔點自身成鏈）
 - `vacant_network/dashboard.py` — 觀測台＋/api/roster/scoreboard/**snapshot**（面板非信任來源）
+  ⚠ 這是**生態**（`vacant up`）的面板；產品的是下面那支
+- `vacant_network/statusboard.py` — **`vacant dashboard`**（2026-10-11）：裝完就看得到每一個狀態——模式、四個 agent
+  的掛鉤在不在／被改過、每個專案（工作階段、步驟、檢查／退回次數、最後一份交件說明、鏈驗證）、掛鉤活動與錯誤、任務帳本。
+  零設定、**只讀**（`$VACANT_HOME` 逐位元不變，`tests/test_statusboard.py`）、只綁 127.0.0.1＋擋非本機 Host。
+  不含 LM Studio／Hermes／批次夜跑（人類 2026-10-11：那些不屬於安裝後的產品；`feat/monitor-port` 沒併）
 
 ### `vacant_network/intake/` ＋ `adapters/` — **通用收件口與四個 agent 的接法**（2026-09-24）
 

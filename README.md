@@ -24,6 +24,7 @@
 ```bash
 pipx install vacant-network   # 0.9.0 起就是零設定版。沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
 vacant install                # 找到你機器上的 pi／Claude Code／OpenCode／Codex，各加一個掛鉤（可逆：`vacant uninstall`）
+vacant dashboard --open       # 選用：在本機看 Vacant 的每一個狀態（掛鉤在不在、記了哪些專案、每次退回與交件說明；只讀）
 ```
 
 之後照常打開你的 agent。**不用寫契約、設定檔、金鑰、環境變數。**以 pi 為例，`vacant install` 只在 pi 自己的設定目錄放一個擴充檔

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- **`vacant dashboard`: one local page for everything Vacant is doing.** After `vacant install` there was no way to
+  see Vacant's state without opening files under `~/.vacant` one by one. `vacant dashboard [--open] [--port 7790]`
+  shows: the mode and, for each of pi / Claude Code / OpenCode / Codex, whether its hook is still in place (a hook
+  someone removed or edited shows as a problem); every project that was recorded, with sessions, steps, how many
+  checks ran and how many sent work back, and the last delivery note; per project, each check (what was sent back,
+  in which round), the signed chain's verification, recent steps and unexplained changes; recent hook activity and
+  hook errors; tasks from the intake ledger when contracts or `vacant do` are used. Zero config: no paths, tokens or
+  endpoints. Read-only (it never writes under `$VACANT_HOME`; tested byte-for-byte), listens on 127.0.0.1 only and
+  refuses requests whose `Host` is not local. `vacant dashboard --json` prints the same data once.
+  It shows whether each step had a basis, not whether the answer is right. `vacant install` now points at it.
+
 ## 0.9.1 — 2026-10-08
 
 Fixes found by reviewing a real pi session and a user's OpenCode 2.x install. No change to what the model receives

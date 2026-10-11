@@ -150,6 +150,7 @@ def cmd_install(args) -> int:
     print(f"[vacant install] done. Open your agent as usual; each task is checked against its own "
           f"recorded steps before it is handed back. Data: {INS.state_root().parent} "
           f"(remove everything with `vacant uninstall`).")
+    print("  See what Vacant recorded and checked: `vacant dashboard --open` (local, read-only).")
     hint = _path_hint()
     if hint:
         print(hint)

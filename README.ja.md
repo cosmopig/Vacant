@@ -27,6 +27,7 @@ Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前�
 ```bash
 pipx install vacant-network   # 0.9.0 からゼロ設定版。pipx がなければ Ubuntu／Debian は `sudo apt install pipx`、macOS は `brew install pipx`
 vacant install                # この機械の pi／Claude Code／OpenCode／Codex を見つけ、それぞれにフックを一つ追加（元に戻す：`vacant uninstall`）
+vacant dashboard --open       # 任意：この機械で Vacant の状態をすべて見る（フック、記録したプロジェクト、差し戻しと納品メモ；読み取り専用）
 ```
 
 あとはいつも通り agent を開くだけです。**契約・設定ファイル・鍵・環境変数は不要。** pi の場合、`vacant install` は pi 自身の設定ディレクトリに
