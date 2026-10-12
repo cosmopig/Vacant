@@ -1099,12 +1099,15 @@ def make_polaroid(store: TwinStore, sid: str, *,
             receipt_short=str(twin["verdict_hash"])[:8],
             originals=polaroidlib.originals_of(cur.get("card"), cur.get("card_text")),
             frame_dir=frame_dir,
-            # P10 命盤：拍立得印命盤那一行＋命盤卡第一句（沒有命盤＝空字串＝不畫）
-            # P11 每個人不一樣：sub_id 只當挑款種子（不印、不進 meta）；其餘全是枚舉
+            # 2026-10-12「像不像你」：小字那一行印「像不像你？」、主字印第一句做事習慣（沒有習慣句＝空字串＝照舊印決定句）。
+            #   命盤（MBTI／星座／血型）只決定過程，不再印上拍立得、也不再挑命盤貼紙——產出不說「你是什麼人」。
+            # P11 每個人不一樣：sub_id 只當挑款種子（不印、不進 meta）；背景／相框／道具照舊依地點與物件類別挑
             sub_id=sid, hints=twin.get("polaroid_hints"),
-            fortune={k: (twin.get("fortune") or {}).get(k) for k in ("mbti", "zodiac", "blood")},
-            fortune_line=str((twin.get("fortune") or {}).get("first_line") or ""),
-            fortune_sentence=twinagent.fortunelib.polaroid_pick(twin.get("fortune")))
+            fortune=None,
+            fortune_line=(twinagent.fortunelib.MIRROR_HEAD
+                          if (twin.get("fortune") or {}).get("lines") else ""),
+            fortune_sentence=twinagent.fortunelib.polaroid_sentence(
+                str(next(iter((twin.get("fortune") or {}).get("lines") or []), ""))))
         ref = store.vault.seal_polaroid(sid, png)
     except (polaroidlib.PolaroidError, twinvault.VaultError, OSError, *CARD_LEVEL_ERRORS) as e:
         # 做不出來的原因多半是永久的（版面、素材）。記一列 skipped，**不要每輪重試**；
@@ -1295,10 +1298,12 @@ def publish(store: TwinStore, cloud: str, token: str,
             _rv = twinagent.read_review(rd)
             if _rv:
                 payload["review"] = _rv
-            # ── 2026-10-02 P10 命盤：這一跑用的命盤（枚舉）＋命盤卡通過檢查的句子（≤3 句）。
-            #    mbti_source 多一個 `twin`（觀眾沒給、分身自己猜的）；沒有命盤就不送這一欄。
+            # ── 2026-10-02 P10 命盤：這一跑用的命盤（枚舉）＋卡的句子（≤3 句）。
+            #    mbti_source 多一個 `twin`（觀眾沒給、分身自己猜的）。
+            #    2026-10-12：句子改成「像不像你」的做事習慣，沒有命盤也有 ⇒ 有命盤或有句子就送（命盤欄位可全是 null）。
             _fz = twin.get("fortune")
-            if isinstance(_fz, dict) and any(_fz.get(k) for k in ("mbti", "zodiac", "blood")):
+            if isinstance(_fz, dict) and (any(_fz.get(k) for k in ("mbti", "zodiac", "blood"))
+                                          or _fz.get("lines")):
                 payload["fortune"] = {
                     "mbti": _fz.get("mbti"), "mbti_source": _fz.get("mbti_source"),
                     "zodiac": _fz.get("zodiac"), "blood": _fz.get("blood"),

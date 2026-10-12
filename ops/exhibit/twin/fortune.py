@@ -425,6 +425,23 @@ class Evidence:
                              if r.get("tool") == "ws_read" and r.get("ok") is True and _place_of(r.get("path"))]
         self.writes = [i for i, r in enumerate(self.rows) if r.get("tool") == "ws_write" and r.get("ok") is True]
         self.n_ok = len(ok)
+        # 同一次嘗試裡 PLAN.md 寫了幾次（`seq` 回到 ≤ 前一筆＝下一次嘗試）。被閘門退回後重寫計畫是閘門逼的、不是「改主意」，
+        # 所以「改主意」只數同一次嘗試之內的重寫（整合時用 divine 的 30 張真跑量到：不分嘗試會把 9 張裡的 7 張誤判）。
+        self.plan_writes_per_attempt = max(self._per_attempt_plan_counts() or [0])
+
+    def _per_attempt_plan_counts(self) -> list[int]:
+        counts, cur, last = [], 0, None
+        for r in self.rows:
+            sq = r.get("seq")
+            if isinstance(sq, int) and isinstance(last, int) and sq <= last:
+                counts.append(cur)
+                cur = 0
+            if isinstance(sq, int):
+                last = sq
+            if r.get("tool") == "ws_write" and r.get("path") == PLAN_FILE and r.get("ok") is True:
+                cur += 1
+        counts.append(cur)
+        return counts
 
     # 動作詞的判準（每個回 (有沒有, 說明)）
     def a_plan(self) -> bool:
@@ -439,15 +456,15 @@ class Evidence:
 
     def a_recheck(self) -> bool:                     # 最後一次寫成品之後，又列過房間或讀過檔
         art_writes = [i for i in self.writes
-                      if self.rows[i].get("path") not in (PLAN_FILE, LETTER_FILE, CARD_FILE)]
+                      if self.rows[i].get("path") not in (PLAN_FILE, LETTER_FILE, CARD_FILE, "試的紀錄.md")]
         if not art_writes:
             return False
         last = art_writes[-1]
         return any(r.get("ok") is True and r.get("tool") in ("ws_list", "ws_read")
                    for r in self.rows[last + 1:])
 
-    def a_changed_mind(self) -> bool:                # PLAN.md 寫過兩次以上
-        return len(self.plan_writes) >= 2
+    def a_changed_mind(self) -> bool:                # 同一次嘗試裡 PLAN.md 寫過兩次以上
+        return self.plan_writes_per_attempt >= 2
 
     def a_two_versions(self) -> bool:                # 兩個檔，內文各有「版本一」「版本二」
         has1 = any("版本一" in t for t in self.files.values())
@@ -586,22 +603,109 @@ def last_place_before_delivery(rows: list[dict[str, Any]]) -> str | None:
     return None
 
 
+# ---------------------------------------------------------------------------
+# 5. 像不像你（2026-10-12）：給觀眾的最後產出＝它在這裡**怎麼做事**，不是「你是什麼人」
+# ---------------------------------------------------------------------------
+# 人類 2026-10-12：「最後的產出如果是『你是什麼人』，這樣不對；而是『如果我在這個世界裡，我也會做這種事』、
+# 『這根本是我』。不是 MBTI，是我在這邊做了什麼跟我本人很像。」過程（命盤決定走法、閘門、收據）不動。
+#
+# 所以命盤解讀句（「追求秩序的同時，內心仍有…」）與路線句（「它先去了投遞口，再到…」）都不再給觀眾看：
+# 前者是貼標籤，後者是世界裡的故事。觀眾拿到的每一句都是**這一跑真的做過的一個做事習慣**，
+# 用日常語言寫（不帶世界裡的地名、不帶命盤字樣、不帶「你是」），像不像由他自己認。
+# 每一句都由 `Evidence` 的判準決定，模板句、不經模型；判準不成立的句子不會出現（不補、不編）。
+
+MIRROR_HEAD = "像不像你？"
+MAX_MIRROR_LINES = 3
+MIRROR_MANY_READS = 5            # 打開過幾樣地上的東西以上算「翻了很多」
+#: 習慣句的優先序（第一句一定是「怎麼開始」；之後挑最有個人味的；做了什麼放最後）。
+#: 被退回後回去改是閘門逼的、不是它選的 ⇒ 排在最後面。
+MIRROR_ORDER = ("changed_mind", "two_versions", "recheck", "left_for", "kept", "many_reads", "few_reads", "retried")
+
+
+SYSTEM_FILES = (PLAN_FILE, LETTER_FILE, CARD_FILE, "試的紀錄.md", "TRAITS.md", "WORLD.md", "VACANT_FEEDBACK.md")
+
+
+def _product_files(files: dict[str, str]) -> dict[str, str]:
+    """「做出來的東西」＝工作區最上層扣掉系統檔（試的紀錄／PLAN／信…）。標題與習慣句的證據都只看這一份。"""
+    return {n: t for n, t in (files or {}).items() if n not in SYSTEM_FILES}
+
+
+def _artifact_writes(ev: Evidence) -> list[int]:
+    return [i for i in ev.writes if ev.rows[i].get("path") not in SYSTEM_FILES]
+
+
+def mirror_start(ev: Evidence) -> str | None:
+    """怎麼開始的（J／P 那一條是對照表裡唯一量到 8/8 穩定遵守的，所以放第一句）。"""
+    arts = _artifact_writes(ev)
+    if ev.a_browse_first():
+        seen = {p for p, i in ev.place_first.items() if i < ev.plan_writes[0]}
+        return "還沒決定要做什麼，先到處看了一圈" if len(seen) >= 2 else "先去看了一眼，才決定要做什麼"
+    if ev.a_plan_first():
+        return "先把要做的事寫下來，才開始動手"
+    if not ev.plan_writes and arts:
+        return "沒寫計畫，直接就動手做了"
+    return None
+
+
+def mirror_habits(ev: Evidence, retries: int) -> dict[str, str]:
+    """其餘可核對的習慣（鍵＝`MIRROR_ORDER`）。每一條都只在紀錄裡有那一步時才出現。"""
+    out: dict[str, str] = {}
+    k = ev.plan_writes_per_attempt
+    if k == 2:
+        out["changed_mind"] = "做到一半改了主意，把計畫重寫了一遍"
+    elif k >= 3:
+        out["changed_mind"] = f"計畫寫了又改，前後改了 {k - 1} 次"
+    if ev.a_two_versions():
+        out["two_versions"] = "拿不定主意，乾脆做了兩個版本"
+    if ev.a_recheck():
+        out["recheck"] = "交出去之前，又回頭再看了一遍"
+    if ev.a_left_for():
+        out["left_for"] = "做好的東西，特地寫明了要留給誰"
+    if ev.a_kept():
+        out["kept"] = "做好的東西，寫明了收在哪裡"
+    n_read = len(ev.file_first)
+    if n_read >= MIRROR_MANY_READS:
+        out["many_reads"] = f"前前後後翻了 {n_read} 樣東西"
+    elif n_read <= 1 and _artifact_writes(ev):
+        out["few_reads"] = "沒看幾樣東西，就動手了"
+    if retries > 0:
+        out["retried"] = f"被退回 {retries} 次，每一次都回去改"
+    return out
+
+
+def mirror_lines(rows: list[dict[str, Any]], files: dict[str, str], retries: int,
+                 title: str | None) -> list[str]:
+    """最多 3 句：怎麼開始＋最有個人味的習慣＋它最後做出來的東西（沒有標題就多放一個習慣）。"""
+    ev = Evidence(rows, None)
+    ev.files = dict(files or {})
+    out: list[str] = []
+    start = mirror_start(ev)
+    if start:
+        out.append(start)
+    habits = mirror_habits(ev, retries)
+    made = f"最後做出來的是《{title}》" if title else None
+    room = MAX_MIRROR_LINES - len(out) - (1 if made else 0)
+    out += [habits[k] for k in MIRROR_ORDER if k in habits][:max(room, 0)]
+    if made:
+        out.append(made)
+    return [x for x in out if len(x) <= MAX_CARD_LINE_CHARS][:MAX_MIRROR_LINES]
+
+
 def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, Any]], files: dict[str, str],
                  retries: int, traits: str = "") -> dict[str, Any]:
-    """命盤卡第二版（確定性，不經模型）：命盤一行＋一句解讀＋它走過的路＋它做的事。`lines`＝[解讀, 路線]（缺解讀就只有路線）。"""
-    res: dict[str, Any] = {"first_line": first_line(f), "lines": [], "dropped": [], "present": False, "card_file": False}
-    if not has_any(f):
-        return res
+    """命盤卡（確定性，不經模型）。給觀眾的 `lines`＝「像不像你」的做事習慣（`mirror_lines`，第 5 節）——
+    **有沒有命盤都做**：習慣句只看步驟紀錄。解讀句與路線句只留在 `reading`／`route` 當紀錄，不進 `lines`。"""
+    res: dict[str, Any] = {"first_line": first_line(f), "head": MIRROR_HEAD, "lines": [], "dropped": [],
+                           "present": False, "card_file": False}
     title = title_of(files, f, traits, letter_text)
     res["title"] = title
-    reading = reading_of(letter_text, f, traits)
     places = visited_places(rows)
-    last = last_place_before_delivery(rows)
     res["places"] = places
-    res["reading"] = reading
-    if places:
-        res["route"] = route_of(places, last, title or NO_NAME_TITLE, retries)
-    res["lines"] = [x for x in (reading, res.get("route")) if x]
+    if has_any(f):
+        res["reading"] = reading_of(letter_text, f, traits)
+        if places:
+            res["route"] = route_of(places, last_place_before_delivery(rows), title or NO_NAME_TITLE, retries)
+    res["lines"] = mirror_lines(rows, files, retries, title)
     res["present"] = bool(res["lines"])
     return res
 
@@ -1167,28 +1271,43 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
         look = json.loads((rd / LOOK_NAME).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         look = {}
-    res = compose_card_v3(f, plan_text=plan, record_text=record, rows=read_steps(rd),
-                          files=_top_files(pathlib.Path(ws)) if ws else {},
-                          retries=attempts_retries(rd), traits=traits, letter_text=letter,
+    rows = read_steps(rd)
+    files = _top_files(pathlib.Path(ws)) if ws else {}
+    retries = attempts_retries(rd)
+    # 過程（P13 divine）：四行卡照算、照存 `fortune_card.json`（verdict／want_line／tried_line／said_line，當紀錄）。
+    res = compose_card_v3(f, plan_text=plan, record_text=record, rows=rows, files=files,
+                          retries=retries, traits=traits, letter_text=letter,
                           look=look if isinstance(look, dict) else {}, seed=rd.name)
-    if has_any(f):
-        try:
-            (rd / CARD_JSON_NAME).write_text(json.dumps(res, ensure_ascii=False) + "\n", encoding="utf-8")
-        except OSError:
-            pass
+    # 產出（2026-10-12 mirror）：給觀眾的 `head`／`lines` 只來自 `mirror_lines`——「像不像你？」＋至多 3 句做事習慣。
+    # 系統檔（試的紀錄／PLAN／信…）不算「做出來的東西」，所以標題與證據都不看它們。
+    mir = compose_card(f, letter_text=letter, rows=rows, files=_product_files(files), retries=retries, traits=traits)
+    res["lines_v3"] = list(res.get("lines") or [])           # 舊的四行（verdict＋想＋試＋說）：只留紀錄
+    res["title"] = mir.get("title")
+    res["places"] = mir.get("places") or res.get("places") or []
+    res["head"] = MIRROR_HEAD
+    res["lines"] = list(mir["lines"])
+    res["tv_lines"] = list(mir["lines"])                     # 電視字幕＝同一份（≤3 句）
+    res["present"] = bool(res["lines"])
+    if "reading" in mir:
+        res["reading"] = mir["reading"]
+    if "route" in mir:
+        res["route"] = mir["route"]
+    try:
+        (rd / CARD_JSON_NAME).write_text(json.dumps(res, ensure_ascii=False) + "\n", encoding="utf-8")
+    except OSError:
+        pass
     return res
 
 
 def polaroid_sentence(line: str) -> str:
-    """拍立得那一行用的短句＝命盤卡的「解讀」那一句（`lines[0]`）；拿掉句尾標點。"""
+    """拍立得主字那一行＝第一句習慣（`lines[0]`）；拿掉句尾標點。"""
     return str(line or "").rstrip("。.！!")
 
 
 def card_md(card: dict[str, Any]) -> str:
-    """命盤卡全文（P13 四行）：你的數位分身其實是／它心裡一直想試的是／它試了／試完它說（有就印）。"""
-    ls = [card.get("verdict") or card.get("first_line") or "", card.get("want_line"), card.get("tried_line"),
-          card.get("said_line")]
-    return "\n".join(x for x in ls if x) + "\n"
+    """卡的全文：「像不像你？」＋至多 3 句做事習慣。不放命盤那一行與四行卡（那些是過程／紀錄，不是給觀眾的產出）。"""
+    ls = list(card.get("lines") or [])
+    return "\n".join([card.get("head") or MIRROR_HEAD] + ls) + "\n" if ls else ""
 
 
 # ---------------------------------------------------------------------------

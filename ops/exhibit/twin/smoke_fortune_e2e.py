@@ -194,9 +194,9 @@ def main(argv=None) -> int:
                 date_str="2026.10.02", receipt_short=str(twin.get("verdict_hash") or "00000000")[:8],
                 originals=pl.originals_of(cur.get("card"), cur.get("card_text")),
                 sub_id=ids[k], hints=twin.get("polaroid_hints"),
-                fortune={x: fz.get(x) for x in ("mbti", "zodiac", "blood")},
-                fortune_line=str(fz.get("first_line") or ""),
-                fortune_sentence=twinagent.fortunelib.polaroid_pick(fz))
+                fortune=None,                                   # 與 twinlink 同：命盤不上拍立得（2026-10-12）
+                fortune_line=twinagent.fortunelib.MIRROR_HEAD if fz.get("lines") else "",
+                fortune_sentence=twinagent.fortunelib.polaroid_sentence(str(next(iter(fz.get("lines") or []), ""))))
             rep.setdefault("polaroid_meta", {})[k] = {
                 "caption_source": meta.get("caption_source"), "caption_blank": meta.get("caption_blank"),
                 "fortune_drawn": meta.get("fortune_drawn"), "frame": meta.get("frame"),

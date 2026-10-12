@@ -1,0 +1,415 @@
+[
+ {
+  "id": "r3_a1",
+  "n_steps": 37,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "補全的山脈",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "被退回 1 次，每一次都回去改",
+   "最後做出來的是《補全的山脈》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_a2",
+  "n_steps": 39,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "桌五_音樂盒",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "被退回 1 次，每一次都回去改",
+   "最後做出來的是《桌五_音樂盒》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_a3",
+  "n_steps": 13,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": null,
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a4",
+  "n_steps": 10,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "圓滿的圖形",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《圓滿的圖形》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a5",
+  "n_steps": 7,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "綁住的平衡點",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "沒看幾樣東西，就動手了",
+   "最後做出來的是《綁住的平衡點》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a6",
+  "n_steps": 25,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "新捏製的卡片",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《新捏製的卡片》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_a7",
+  "n_steps": 9,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "灰藍小東西",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "最後做出來的是《灰藍小東西》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a8",
+  "n_steps": 11,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "律動容器",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《律動容器》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a9",
+  "n_steps": 22,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "第448片陶片",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《第448片陶片》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_a10",
+  "n_steps": 13,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "赭紅底座的紙船",
+  "head": "像不像你？",
+  "lines": [
+   "先去看了一眼，才決定要做什麼",
+   "最後做出來的是《赭紅底座的紙船》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a11",
+  "n_steps": 10,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "半月紋標記",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "最後做出來的是《半月紋標記》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_a12",
+  "n_steps": 13,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "沙金質感的紙團",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "最後做出來的是《沙金質感的紙團》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v1",
+  "n_steps": 12,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "修補好的音樂盒",
+  "head": "像不像你？",
+  "lines": [
+   "先去看了一眼，才決定要做什麼",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《修補好的音樂盒》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v2",
+  "n_steps": 24,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "萌發中的生命",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "被退回 1 次，每一次都回去改",
+   "最後做出來的是《萌發中的生命》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_v3",
+  "n_steps": 38,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "紙喇叭與圓點",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《紙喇叭與圓點》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v4",
+  "n_steps": 23,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "灰藍圓球",
+  "head": "像不像你？",
+  "lines": [
+   "先去看了一眼，才決定要做什麼",
+   "被退回 1 次，每一次都回去改",
+   "最後做出來的是《灰藍圓球》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_v5",
+  "n_steps": 11,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "灰藍色印紋",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "最後做出來的是《灰藍色印紋》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v6",
+  "n_steps": 9,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": null,
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "交出去之前，又回頭再看了一遍",
+   "沒看幾樣東西，就動手了"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v7",
+  "n_steps": 10,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "訴說容器",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "做到一半改了主意，把計畫重寫了一遍",
+   "最後做出來的是《訴說容器》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_v8",
+  "n_steps": 21,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "灰藍色的圓形印記",
+  "head": "像不像你？",
+  "lines": [
+   "先去看了一眼，才決定要做什麼",
+   "被退回 1 次，每一次都回去改",
+   "最後做出來的是《灰藍色的圓形印記》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r3_v9",
+  "n_steps": 9,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "滑動的紙",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《滑動的紙》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v10",
+  "n_steps": 11,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "水滴印紋",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《水滴印紋》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v11",
+  "n_steps": 9,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "撕開的紙筒",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《撕開的紙筒》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r3_v12",
+  "n_steps": 10,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "隱匿的連結",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《隱匿的連結》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r4live_a2",
+  "n_steps": 40,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "補上的卡片",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "被退回 1 次，每一次都回去改",
+   "最後做出來的是《補上的卡片》"
+  ],
+  "plan_writes": 2
+ },
+ {
+  "id": "r4live_a5",
+  "n_steps": 10,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "兩道光交界處的凹陷",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "最後做出來的是《兩道光交界處的凹陷》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r4live_a6",
+  "n_steps": 15,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "穩固的鐵環",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "前前後後翻了 5 樣東西",
+   "最後做出來的是《穩固的鐵環》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r4live_a7",
+  "n_steps": 24,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "補齊鏈尾",
+  "head": "像不像你？",
+  "lines": [
+   "先把要做的事寫下來，才開始動手",
+   "計畫寫了又改，前後改了 2 次",
+   "最後做出來的是《補齊鏈尾》"
+  ],
+  "plan_writes": 5
+ },
+ {
+  "id": "r4live_a8",
+  "n_steps": 11,
+  "unmapped_writes": 0,
+  "attempts_used": 1,
+  "title": "我的種子",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《我的種子》"
+  ],
+  "plan_writes": 1
+ },
+ {
+  "id": "r4live_a12",
+  "n_steps": 21,
+  "unmapped_writes": 0,
+  "attempts_used": 2,
+  "title": "黏土結",
+  "head": "像不像你？",
+  "lines": [
+   "還沒決定要做什麼，先到處看了一圈",
+   "交出去之前，又回頭再看了一遍",
+   "最後做出來的是《黏土結》"
+  ],
+  "plan_writes": 2
+ }
+]

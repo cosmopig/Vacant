@@ -195,3 +195,20 @@ G1 修好後重跑 v6：80.1 秒、1 次過；v1：61.3 秒、1 次過。命盤�
 * 抽象詞沒處理（a2 第 4 行『恢復了邏輯上的連續性』是完整句、但很抽象）；「完整」不等於「好」。
 * 第 2 行仍會缺：模型寫成計畫句或預測句時不拿動作句充數（A 組 2/12、真跑 1/6）。要再提高只能再收緊 PLAN 指令（第三輪的取捨：越窄越像模板）。
 * Haiku 是代理評審，3 位，只回答「句子完整嗎」；真跑 6 份不是統計。雲端 `parseCard` 對真實 AI 回答很脆（第三輪「沒解決的」那條）仍歸雲端線。
+
+## 十二、整合（2026-10-12）：divine 的過程 ＋ mirror 的產出
+
+分支 `exhibit/twin-integrated-20261012`（`feat/twin-divine` 04d33e63 併入 `exhibit/twin-mirror-20261012` 55d7d3d6）。依主線裁決（`PLAN_INTEGRATE_DIVINE_MIRROR_20261012`）：**給觀眾的產出取 mirror，輸入與過程取 divine**。
+
+**取 mirror 的（給觀眾的）**：卡的 `head`＝「像不像你？」、`lines`＝`mirror_lines` 至多 3 句做事習慣（每句 ≤60 字）；手機完成畫面（`twin_view.lines`→雲端 `fortune.lines`，雲端上限 4 行、每行 ≤60）；電視 `twin_fortune` card 旁註的 `lines`（`tv_lines` 改成同一份，≤3 句、每句 ≤60）；拍立得小字＝「像不像你？」、主字＝第一句習慣、命盤貼紙不挑（`fortune=None`）；雲端 publish 有命盤「或」有句子就送；`card_md` 只印 head＋習慣句。
+**取 divine 的（過程與紀錄）**：新提示詞、唯讀「AI 認為你是…」面板、cardparse、世界材料、PLAN「我想：」、步數上限＋卡死偵測、寫信一通、閘門與 `試的紀錄`、電視開頭命盤那一拍（`twin_fortune` phase=way）。四行卡組句器 `compose_card_v3`（其實是／心裡想／試了／說）**函式保留**，`build_card` 仍照算，結果進 `fortune_card.json` 與 `twin.fortune`（`verdict`／`want_line`／`tried_line`／`said_line`），另存 `lines_v3`；**不進 `lines`**、不上手機完成畫面、不上電視字幕、不上拍立得（同 mirror 對 reading／route 的處理）。`polaroid_pick` 函式保留但拍立得不再呼叫。
+
+**衝突怎麼解**（四檔）：`fortune.py` 的 `build_card`／`card_md`——先跑 v3 當紀錄，再跑 mirror 的 `compose_card` 取 `title`／`head`／`lines`；`twinlink.make_polaroid`、`smoke_fortune_e2e` 取 mirror；測試檔兩邊的測試都留（v3 的斷言改成斷言「v3 只在紀錄、lines 是 mirror」）。
+
+**為了讓 mirror 的判準在 divine 的病歷上成立，改了兩處**（這是整合時用 divine 的 30 張真跑離線重算量到的，`evidence_divine_20261007/round6/`）：
+1. **系統檔不算「做出來的東西」**：divine 每一跑都寫 `試的紀錄.md`（還有 PLAN、信），mirror 原本只排除 PLAN／信／命盤卡。現在 `SYSTEM_FILES` 也排除 `試的紀錄.md`、TRAITS、WORLD、VACANT_FEEDBACK：標題、成品寫入、「交出去前又看一遍」、留給誰／收在哪的證據都只看成品（`_product_files`）。否則試的紀錄裡的「留給」「收在」會被當成品證據，寫試的紀錄也會被當成最後一次成品寫入。
+2. **「改主意」只數同一次嘗試之內**：divine 的閘門會退回重做，第二次嘗試必重寫 PLAN；mirror 原本數整跑的 PLAN 寫入次數，把閘門逼出來的重寫講成「做到一半改了主意」。30 張裡原本 9 張出這句、其中 7 張只是兩次嘗試各寫一次。現在以 `seq` 回頭判斷嘗試邊界，取單次嘗試內的最大寫入數（修後 2 張，皆為真的單次內重寫）。
+   同步的測試：`test_integrated_*` 三條。
+
+**30 張離線重算**（`recompute_r6.py`，走真的 `build_card`；旁註沒有檔名，由位元組數對回；對不上檔名的寫入 0）：30 張全有卡、空卡 0、23 張 3 句、7 張 2 句（沒有合格標題或沒有第二個習慣）；每句都綁一條 `Evidence` 判準。句型出現次數：怎麼開始（每張 1 句）＝先到處看了一圈 14／先把要做的事寫下來 12／先去看了一眼 4；最後做出來的是《標題》28；交出去之前又回頭再看了一遍 14；被退回 N 次 6；沒看幾樣東西就動手 2；做到一半改了主意 1；計畫寫了又改 1；翻了 5 樣東西 1。**沒有出現**：兩個版本、留給誰、收在哪（divine 這 30 張的成品檔裡沒有這些痕跡）。
+**誠實**：(a) 句型集中在三四種（開頭三種就吃掉全部 30 句），不是 30 張各不相同；有個人味的習慣（改主意、翻很多樣）很少，「交出去前再看一遍」的出現率偏高（14/30），因為 divine 的流程在寫完成品後常會列房間確認。(b) 離線重算的步驟是從旁註還原，不是原始 `twin_steps.ndjson`；(c) 句子證明「紀錄裡有這一步」，不證明像本人。電視的 card 旁註仍只在有命盤時發（`fortune.py card` 的 `has_any` 守衛沒動）；手機／拍立得沒命盤也有句子。

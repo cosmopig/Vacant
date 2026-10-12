@@ -439,10 +439,35 @@ def test_card_v3_is_four_lines_from_plan_steps_and_record_without_the_model(tmp_
     assert res["tried_line"] == "它試了：把種子埋進兩道光交界的土裡，那裡現在有一個濕濕的小土堆", "第 3 行＝紀錄裡的改變那一句（第三人稱），不是路線"
     assert res["said_line"] == "試完它說：它比我想的輕，也比我想的倔"
     assert res["title"] == "鬆環對照冊", "標題取「做出來的那樣東西」，不是試的紀錄"
-    assert res["lines"] == [res["verdict"], res["want_line"], res["tried_line"], res["said_line"]], "雲端約定：lines[0] 是判決，共 4 行"
-    assert res["tv_lines"] == [res["want_line"], res["tried_line"]], "電視字幕兩行＝第 2、3 行"
-    assert fz.card_md(res).splitlines() == [res["verdict"], res["want_line"], res["tried_line"], res["said_line"]]
+    # 整合（2026-10-12）：四行卡只留紀錄（lines_v3／fortune_card.json），給觀眾的 head／lines 是「像不像你」
+    assert res["lines_v3"] == [res["verdict"], res["want_line"], res["tried_line"], res["said_line"]]
+    assert res["head"] == fz.MIRROR_HEAD and 1 <= len(res["lines"]) <= fz.MAX_MIRROR_LINES
+    assert res["tv_lines"] == res["lines"], "電視字幕＝同一份習慣句（≤3）"
+    for ln in res["lines_v3"]:
+        assert ln not in res["lines"]
+    assert fz.card_md(res).splitlines() == [fz.MIRROR_HEAD] + res["lines"]
     assert all(len(x) <= fz.MAX_CARD_LINE_CHARS for x in res["lines"])      # 雲端每句 ≤ 60 字
+    card_json = json.loads((rd / fz.CARD_JSON_NAME).read_text(encoding="utf-8"))
+    assert card_json["verdict"] == res["verdict"] and card_json["lines_v3"] == res["lines_v3"]
+    assert "試的紀錄" not in "".join(res["lines"]) and res["title"] == "鬆環對照冊"
+    assert (rd / fz.CARD_JSON_NAME).is_file()
+    v = fz.twin_view(fz.resolve(FULL, {}), res)
+    assert v["lines"] == res["lines"] and v["verdict"] == res["verdict"] and v["said_line"] == res["said_line"]
+
+
+def test_card_v2_is_four_parts_built_without_the_model(tmp_path) -> None:
+    rows = BROWSE_THEN_PLAN                      # 草稿角→帳本鏈；PLAN；成品.md；ws_list(.)
+    res, rd, ws = _card(tmp_path, rows, files={"成品.md": "# 鬆環對照冊\n內文"})
+    assert res["first_line"] == "INFP · 雙魚（水）· O 型"
+    assert len(res["reading"]) <= fz.MAX_SENTENCE
+    assert res["reading"].startswith("在計畫的框架中掙扎")                       # 優先挑 J/P（紀錄用，不給觀眾）
+    assert res["route"] == "它先去了草稿角，再到帳本鏈，在帳本鏈交出《鬆環對照冊》"
+    assert res["title"] == "鬆環對照冊"
+    # 2026-10-12：解讀句與路線句只留作紀錄；給觀眾的是做事習慣（先逛兩處才寫計畫、寫完成品又列了房間）
+    assert res["lines"] == ["還沒決定要做什麼，先到處看了一圈", "交出去之前，又回頭再看了一遍", "最後做出來的是《鬆環對照冊》"]
+    assert res["reading"] not in res["lines"] and res["route"] not in res["lines"]
+    md = fz.card_md(res).splitlines()
+    assert md == [fz.MIRROR_HEAD] + res["lines"]
     assert (rd / fz.CARD_JSON_NAME).is_file()
     v = fz.twin_view(fz.resolve(FULL, {}), res)
     assert v["lines"] == res["lines"] and v["verdict"] == res["verdict"] and v["said_line"] == res["said_line"]
@@ -452,7 +477,7 @@ def test_card_v3_a_line_without_grounds_is_absent_not_filled_with_a_canned_one(t
     res, _, _ = _card(tmp_path / "a", BROWSE_THEN_PLAN, files={"PLAN.md": PLAN_TXT, "成品.md": "# 鬆環對照冊\n內文"})
     # 紀錄裡沒有感想、沒有改變、標題只是檔案自己的字樣 ⇒ 第 3、4 行都沒有（不補罐頭句）
     assert res["said_line"] is None and res["tried_line"] is None and res["want_line"]
-    assert len(res["lines"]) == 2 and fz.card_md(res).count("\n") == 2
+    assert len(res["lines_v3"]) == 2, "四行卡（紀錄）：判決＋想，沒有第 3、4 行"
     res2, _, _ = _card(tmp_path / "b", STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")],
                        files={"PLAN.md": PLAN_TXT, fz.RECORD_FILE: RECORD_TXT})
     assert res2["tried_line"] and "先去了" not in res2["tried_line"], "第 3 行不靠路線：步驟紀錄沒有地點也照出（來自紀錄）"
@@ -539,13 +564,27 @@ def test_card_v3_tried_line_fits_the_limit_and_falls_back_to_the_title(tmp_path)
     assert fz.tried_of("", "x", f) is None
 
 
+def test_card_v2_route_fits_the_line_limit_and_handles_no_title_no_place(tmp_path) -> None:
+    long_title = "一個很長很長的世界裡的標題名字啊"
+    r = fz.route_of(["投遞口", "長桌廣場", "畫架與長椅", "石頭閘門"], "石頭閘門", long_title, 2)
+    assert len(r) <= fz.MAX_CARD_LINE_CHARS and r.startswith("它先去了投遞口")
+    res, _, _ = _card(tmp_path / "a", STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")])
+    assert "route" not in res                                                        # 沒碰過任何地點：不編路線
+    assert res["lines"] == []                                                        # 只寫了計畫、沒做出東西：沒有習慣句可說
+    assert fz.card_md(res) == ""
+    res2, _, _ = _card(tmp_path / "b", BROWSE_THEN_PLAN)                              # 沒有成品檔：標題用「一件沒有名字的小事」
+    assert res2["title"] is None and "《" + fz.NO_NAME_TITLE + "》" in res2["route"]
+
+
 def test_card_v3_never_reads_a_card_the_twin_wrote_and_no_fortune_means_no_card(tmp_path) -> None:
     rd, ws = _world(tmp_path / "x", BROWSE_THEN_PLAN, card="你是 P，所以我去了投遞口（亂寫的卡）")
     (rd / "letter_final.md").write_text(LETTER_FINAL, encoding="utf-8")
     res = fz.build_card(rd, ws, fz.resolve(FULL, {}))
-    assert "亂寫" not in fz.card_md(res) and "投遞口" not in (res["tried_line"] or "")
+    assert "亂寫" not in fz.card_md(res) and "投遞口" not in res["route"] and "投遞口" not in (res["tried_line"] or "")
+    # 2026-10-12：習慣句只看步驟紀錄 ⇒ 沒有命盤也出卡（但沒有解讀、沒有路線）
     none = fz.build_card(rd, ws, fz.resolve(fz.normalize(None), {}))
-    assert none["present"] is False and none["lines"] == []
+    assert none["present"] is True and none["lines"] == res["lines"]
+    assert "reading" not in none and "route" not in none
 
 
 def test_card_v2_title_has_no_filename_and_is_filtered(tmp_path) -> None:
@@ -734,9 +773,9 @@ def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
     r = subprocess.run([sys.executable, str(TWIN / "fortune.py"), "card", str(ws), str(rd)], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     rows = sc.read(side)
-    assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) == 2
-    assert rows[0]["lines"][0].startswith("它心裡想：") and rows[0]["lines"][1].startswith("它試了：把種子埋進")
-    assert sc.validate(rows) == []             # 電視字幕兩行＝第 2、3 行
+    assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) <= 3 and rows[0]["lines"]
+    assert rows[0]["lines"][0] == "還沒決定要做什麼，先到處看了一圈" and sc.validate(rows) == []     # 電視字幕＝像不像你的習慣句（≤3）
+    assert not any(x.startswith(("它心裡想：", "它試了：", "試完它說：", fz.VERDICT_PREFIX)) for x in rows[0]["lines"]), "四行卡不上電視"
     assert (rd / fz.CARD_JSON_NAME).is_file()
 
 
@@ -815,3 +854,143 @@ def test_p12_single_place_route_and_short_or_resident_titles(tmp_path) -> None:
     assert fz.title_of({"a.md": "# 灰藍小\n內"}, f) is None
     assert fz.title_of({"a.md": "# 阿水\n內"}, f, letter_text="阿水：\n你好") is None      # 信裡的稱呼
     assert fz.title_of({"a.md": "# 帳本鏈維護記錄\n內"}, f) == "帳本鏈維護記錄"
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-12「像不像你」：給觀眾的句子＝這一跑真的做過的做事習慣（不是命盤解讀、不是世界裡的路線）
+# ---------------------------------------------------------------------------
+
+def _mirror(rows, files=None, retries=0, title=None):
+    return fz.mirror_lines(rows, files or {}, retries, title)
+
+
+def test_mirror_start_follows_the_step_order() -> None:
+    assert _mirror(BROWSE_THEN_PLAN)[0] == "還沒決定要做什麼，先到處看了一圈"           # 兩個地點後才寫計畫
+    one = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/紙團_乙.txt"),
+                    _row(5, "ws_write", "PLAN.md"), _row(6, "ws_write", "成品.md")]
+    assert _mirror(one)[0] == "先去看了一眼，才決定要做什麼"                           # 只看了一處
+    assert _mirror(PLAN_THEN_BROWSE)[0] == "先把要做的事寫下來，才開始動手"
+    direct = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", "成品.md")]
+    assert _mirror(direct)[0] == "沒寫計畫，直接就動手做了"
+    # 負控制：只寫了計畫、什麼都沒看也沒做 ⇒ 沒有任何一句（不補）
+    assert _mirror(STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")]) == []
+
+
+def test_mirror_habits_appear_only_with_their_step() -> None:
+    twice = PLAN_THEN_BROWSE + [_row(9, "ws_write", "PLAN.md")]
+    assert "做到一半改了主意，把計畫重寫了一遍" in _mirror(twice)
+    assert "做到一半改了主意，把計畫重寫了一遍" not in _mirror(PLAN_THEN_BROWSE)       # 負控制：PLAN 只寫過一次
+    thrice = twice + [_row(10, "ws_write", "PLAN.md")]
+    assert "計畫寫了又改，前後改了 2 次" in _mirror(thrice)
+    two = {"a.md": "版本一\n…", "b.md": "版本二\n…"}
+    assert "拿不定主意，乾脆做了兩個版本" in _mirror(PLAN_THEN_BROWSE, files=two)
+    assert "拿不定主意，乾脆做了兩個版本" not in _mirror(PLAN_THEN_BROWSE, files={"a.md": "版本一"})
+    assert "做好的東西，特地寫明了要留給誰" in _mirror(PLAN_THEN_BROWSE, files={"給守口人.md": "x"})
+    assert "做好的東西，寫明了收在哪裡" in _mirror(PLAN_THEN_BROWSE, files={"a.md": "收在長桌下"})
+    many = STAGE1 + [_row(3, "ws_read", "信.md")] + [_row(4 + i, "ws_read", f"地上/草稿角/{i}.txt") for i in range(6)] \
+        + [_row(20, "ws_write", "PLAN.md"), _row(21, "ws_write", "成品.md")]
+    assert "前前後後翻了 6 樣東西" in _mirror(many)
+    assert any(x.startswith("沒看幾樣東西") for x in _mirror(PLAN_THEN_BROWSE))
+    assert not any(x.startswith("沒看幾樣東西") for x in _mirror(many))               # 負控制
+    assert "被退回 2 次，每一次都回去改" in _mirror(PLAN_THEN_BROWSE, retries=2)
+    assert not any("退回" in x for x in _mirror(PLAN_THEN_BROWSE, retries=0))
+
+
+def test_mirror_is_three_lines_start_habit_then_what_it_made() -> None:
+    rows = BROWSE_THEN_PLAN + [_row(11, "ws_write", "PLAN.md")]
+    ls = _mirror(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title="點數單")
+    assert len(ls) == fz.MAX_MIRROR_LINES
+    assert ls[0] == "還沒決定要做什麼，先到處看了一圈"
+    assert ls[1] == "做到一半改了主意，把計畫重寫了一遍"                               # 優先序：改主意先於兩個版本、退回
+    assert ls[2] == "最後做出來的是《點數單》"
+    no_title = _mirror(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title=None)
+    assert no_title[1:] == ["做到一半改了主意，把計畫重寫了一遍", "拿不定主意，乾脆做了兩個版本"]
+
+
+def test_mirror_lines_never_label_the_viewer_or_tell_the_world_story() -> None:
+    """產出不說「你是什麼人」：沒有命盤字樣、沒有「你是」、沒有世界裡的地名、沒有檔名；每句 ≤ 60 字。"""
+    variants = [BROWSE_THEN_PLAN, PLAN_THEN_BROWSE, BROWSE_THEN_PLAN + [_row(11, "ws_write", "PLAN.md")]]
+    seen: list[str] = []
+    for rows in variants:
+        for files in ({}, {"給誰.md": "收在這裡 留給你"}, {"a.md": "版本一", "b.md": "版本二"}):
+            for r in (0, 3):
+                seen += _mirror(rows, files=files, retries=r, title="點數單")
+    assert seen
+    banned = ("你是", "MBTI", "星座", "血型", "命盤", "型", ".md", ".txt", "_") + fz.PLACES + tuple(fz.ZODIACS) + fz.MBTI_TYPES
+    for x in set(seen):
+        assert len(x) <= fz.MAX_CARD_LINE_CHARS
+        assert not any(b in x for b in banned), x
+
+
+def test_polaroid_prints_mirror_head_and_first_habit() -> None:
+    from ops.exhibit.twin import polaroid as pl
+    ok, why = pl.available()
+    if not ok:
+        pytest.skip(why)
+    base = dict(decision="我要整理一份清單", cast_id="c05", date_str="2026-10-12", receipt_short="a1b2c3d4", originals=[])
+    _p, m = pl.compose(**base, fortune_line=fz.MIRROR_HEAD, fortune_sentence=fz.polaroid_sentence("先把要做的事寫下來，才開始動手"))
+    assert m["fortune_drawn"] is True and m["fortune_chars"] == len(fz.MIRROR_HEAD)
+    assert m["caption_source"] == "fortune_sentence"
+
+
+def test_twinlink_polaroid_and_publish_use_the_mirror_not_the_chart() -> None:
+    src = (TWIN / "twinlink.py").read_text(encoding="utf-8")
+    i = src.index("png, meta = polaroidlib.compose(")
+    call = src[i:src.index("ref = store.vault.seal_polaroid", i)]
+    assert "fortune=None" in call and "MIRROR_HEAD" in call and '"first_line"' not in call
+    j = src.index('_fz = twin.get("fortune")')
+    assert 'or _fz.get("lines")' in src[j:j + 400]                                     # 沒有命盤、有習慣句也送
+
+
+# ---------------------------------------------------------------------------
+# 整合（2026-10-12）：divine 的過程 ＋ mirror 的產出
+# ---------------------------------------------------------------------------
+
+def test_integrated_system_files_are_not_things_made() -> None:
+    """divine 的 `試的紀錄.md`、PLAN、信不是「做出來的東西」：不當標題、不算成品寫入（不觸發「交出去前又看一遍」）。"""
+    rows = BROWSE_THEN_PLAN[:-2] + [_row(9, "ws_write", "成品.md"), _row(10, "ws_write", fz.RECORD_FILE), _row(11, "ws_list", ".")]
+    assert "交出去之前，又回頭再看了一遍" in _mirror(rows)         # 成品之後還有列房間 ⇒ 看了一遍
+    only_record_after = BROWSE_THEN_PLAN[:-1] + [_row(10, "ws_write", fz.RECORD_FILE)]
+    assert "交出去之前，又回頭再看了一遍" not in _mirror(only_record_after), "寫試的紀錄不算看了一遍"
+    # 只寫了試的紀錄、沒有任何成品 ⇒ 不當成品（沒有「沒寫計畫就動手」之類的誤判）
+    no_art = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", fz.RECORD_FILE)]
+    assert _mirror(no_art) == []
+    assert fz._product_files({fz.RECORD_FILE: "x", "PLAN.md": "y", "信.md": "z", "鬆環對照冊.md": "w"}) == {"鬆環對照冊.md": "w"}
+
+
+def test_integrated_changed_mind_counts_within_one_attempt_only() -> None:
+    """被閘門退回後重寫計畫是閘門逼的：兩次嘗試各寫一次 PLAN ≠ 改主意（divine 30 張真跑量到不分嘗試會誤判 7 張）。"""
+    a1 = BROWSE_THEN_PLAN
+    a2 = [_row(1, "ws_read", "信.md"), _row(2, "ws_write", "PLAN.md"), _row(3, "ws_write", "成品.md")]
+    for i, r in enumerate(a2):                              # 第二次嘗試：seq 回到 1，時間在後
+        r["ts_ms"] = 5000 + i
+    two_attempts = a1 + a2
+    assert "做到一半改了主意，把計畫重寫了一遍" not in _mirror(two_attempts, retries=1)
+    assert "被退回 1 次，每一次都回去改" in _mirror(two_attempts, retries=1)
+    same_attempt = a1 + [_row(11, "ws_write", "PLAN.md")]
+    assert "做到一半改了主意，把計畫重寫了一遍" in _mirror(same_attempt)
+
+
+def test_integrated_build_card_keeps_divine_record_but_gives_viewers_only_the_mirror(tmp_path) -> None:
+    files = {"PLAN.md": PLAN_TXT, fz.RECORD_FILE: RECORD_TXT, "鬆環對照冊.md": "# 鬆環對照冊\n內文"}
+    res, rd, ws = _card(tmp_path, BROWSE_THEN_PLAN, files=files)
+    # 給觀眾的
+    assert res["head"] == fz.MIRROR_HEAD and 1 <= len(res["lines"]) <= 3
+    assert res["lines"][-1] == "最後做出來的是《鬆環對照冊》", "標題取成品，不是試的紀錄／PLAN"
+    banned = (fz.VERDICT_PREFIX, fz.WANT_PREFIX, fz.TRIED_PREFIX, fz.SAID_PREFIX, "其實是", "心裡想", "我想：")
+    assert not any(b in x for x in res["lines"] + res["tv_lines"] for b in banned)
+    # 過程／紀錄（divine）還在
+    assert res["want_line"] and res["tried_line"] and res["said_line"] and res["verdict"]
+    saved = json.loads((rd / fz.CARD_JSON_NAME).read_text(encoding="utf-8"))
+    assert saved["want_line"] == res["want_line"] and saved["lines_v3"][0] == res["verdict"]
+    # 上限：電視 ≤3 句、雲端 ≤4 行、每句 ≤60 字（三處同值）
+    assert len(res["tv_lines"]) <= tv.FORTUNE_MAX_LINES == sc.FORTUNE_MAX_LINES == 3
+    assert all(0 < len(x) <= tv.FORTUNE_LINE_MAX == sc.FORTUNE_LINE_MAX == fz.MAX_CARD_LINE_CHARS == 60 for x in res["tv_lines"])
+    assert fz.MAX_MIRROR_LINES <= 3
+    row = {"schema": "twin.sidecar/1", "type": "twin_fortune", "ts_ms": 1, "cell_id": "tw-abc", "run_id": "r", "phase": "card",
+           "attempt": 1, "mbti": "INFP", "mbti_source": "ai", "zodiac": "雙魚", "element": "水", "blood": "O",
+           "lines": res["tv_lines"]}
+    assert sc._fortune_problems(row, 0) == [] and tv.fortune_event_problems({**row, "type": "twin_fortune"}, 0) == []
+    # 超過上限的卡會被契約擋下（釘住上限）
+    assert sc._fortune_problems({**row, "lines": ["一句"] * 4}, 0) and sc._fortune_problems({**row, "lines": ["長" * 61]}, 0)
+    assert len(fz.twin_view(fz.resolve(FULL, {}), res)["lines"]) <= 4
