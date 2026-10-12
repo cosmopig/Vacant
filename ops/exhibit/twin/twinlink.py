@@ -1246,8 +1246,10 @@ def sync_cloud_erasure(store: TwinStore, cloud: str, token: str,
 # ---------------------------------------------------------------------------
 
 def publish(store: TwinStore, cloud: str, token: str,
-            limit: int = 0, timeout: float = 30.0) -> dict[str, Any]:
+            limit: int = 0, timeout: float = 90.0) -> dict[str, Any]:
     """把生成結果回寫雲端，讓觀眾的手機看得到。
+
+    2026-10-13 展場：拍立得約 2 MB，上行慢時 30 秒寫不完（write operation timed out）會整筆重來、手機晚兩分鐘 ⇒ 預設 90 秒。
 
     **失敗是常態不是事故**：展場斷網時這裡一路失敗，而現場完全不受影響
     （螢幕讀本機）。所以不重試到卡死，記一列 `error` 就往下一筆。
