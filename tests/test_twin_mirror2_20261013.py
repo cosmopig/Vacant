@@ -187,3 +187,20 @@ def test_pace_and_step_count_habits_are_off_everywhere_even_in_the_30_real_runs(
     for c in cards:
         for x in c["lines"]:
             assert "才開始寫計畫" not in x and "很快就開始寫計畫" not in x and "步才交" not in x and "步就交了" not in x, x
+
+
+def test_no_recognized_artifact_still_gives_evidenced_lines() -> None:
+    """2026-10-13 展前線上驗收：交了件、成品寫入卻沒被認出 ⇒ 卡上 0 句。
+    現在：跟成品無關的習慣（怎麼開始、翻了什麼、被退回）照樣出，每句仍有自己的那一步；跟成品有關的不出。"""
+    rows = [r for r in ROWS if not (r["tool"] == "ws_write" and r["path"] not in fz.SYSTEM_FILES)]
+    picks = fz.mirror_picks(rows, {}, 1, None, retry_ids=("G1",), accepted=False)
+    assert picks, "有翻東西、有寫計畫、有被退回，卻一句都沒有"
+    keys = {c["key"] for c in picks}
+    assert not keys & {"made", "short_made", "long_made", "two_versions", "several_made", "recheck", "recheck_first"}
+    for c in picks:
+        assert 1 <= c["step"] <= len(rows)
+
+
+def test_nothing_done_still_gives_nothing() -> None:
+    """負控制：完全沒翻、沒寫計畫、沒做東西 ⇒ 仍然 0 句（不補、不編）。"""
+    assert fz.mirror_picks([R("ws_list", ".", seq=1)], {}, 0, None) == []

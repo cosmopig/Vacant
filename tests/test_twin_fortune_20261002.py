@@ -967,7 +967,9 @@ def test_integrated_system_files_are_not_things_made() -> None:
     assert not any("回頭" in x for x in _mirror(only_record_after)), "寫試的紀錄不算看了一遍"
     # 只寫了試的紀錄、沒有任何成品 ⇒ 不當成品（沒有「沒寫計畫就動手」之類的誤判）
     no_art = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", fz.RECORD_FILE)]
-    assert _mirror(no_art) == []
+    got = _mirror(no_art)
+    # 2026-10-13：沒認出成品時，跟成品無關的習慣（翻了什麼）照樣出；但絕不出「沒寫計畫就動手」或任何成品句
+    assert not any(("沒寫計畫" in x) or ("做出來" in x) or ("回頭" in x) for x in got), got
     assert fz._product_files({fz.RECORD_FILE: "x", "PLAN.md": "y", "信.md": "z", "鬆環對照冊.md": "w"}) == {"鬆環對照冊.md": "w"}
 
 

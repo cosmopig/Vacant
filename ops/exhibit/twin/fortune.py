@@ -745,8 +745,11 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
             out.append({"key": key, "text": text, "step": int(ev.rows[i].get("_n") or (off + i + 1))})
 
     arts = _artifact_writes(ev)
-    if not arts:                              # 沒做出任何東西 ⇒ 沒有習慣句可說（不補、不編）
-        return out
+    # 2026-10-13 展前線上驗收：有一跑交了件、卡上卻 0 句（成品寫入沒被 _artifact_writes 認出）。
+    # 改成：沒認出成品時，跟成品無關的習慣（怎麼開始、翻了什麼、被退回）照樣出——每句仍綁自己那一步的證據；
+    # 跟成品有關的句子各自要 `arts` 才出（不補、不編）。
+    if not arts and not ev.ground_reads and not ev.plan_writes:
+        return out                            # 什麼都沒做 ⇒ 沒有習慣句可說
     att = _attempt_index(ev.rows)
     first_g = ev.ground_reads[0] if ev.ground_reads else None
     first_kind = PLACE_KIND.get(_place_of(ev.rows[first_g].get("path"))) if first_g is not None else None
@@ -861,7 +864,7 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
         if not (key_bigrams(wish) & key_bigrams(body)):
             add("plan_vs_made", "計畫寫的是一回事，最後做出來的又是另一回事", ev.plan_writes[-1])
     # ── 收尾
-    if ev.a_recheck():
+    if arts and ev.a_recheck():
         last_art = arts[-1]
         after = [i for i in range(last_art + 1, len(ev.rows))
                  if ev.rows[i].get("ok") is True and ev.rows[i].get("tool") in ("ws_list", "ws_read")]
