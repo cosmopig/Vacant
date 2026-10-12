@@ -103,6 +103,7 @@ A 線維護）。**兩邊的欄位必須一字不差**；本支是生產端的�
 """
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 
 #: 每個事件都必須有的欄位。`mode` 是 2026-09-24 加的（重播要在畫面上講明）。
@@ -191,6 +192,14 @@ _ELEMENT_OF_ZODIAC = {"牡羊": "火", "獅子": "火", "射手": "火", "金牛
                       "雙子": "風", "天秤": "風", "水瓶": "風", "巨蟹": "水", "天蠍": "水", "雙魚": "水"}
 
 
+_WANT_FILENAME_RE = re.compile(r"[\w\-\u4e00-\u9fff]+\.(?:md|txt|json|csv|html?|py|js|ts|pdf|png|jpe?g|docx?|xlsx?)\b", re.I)
+
+
+def looks_like_filename(text: str) -> bool:
+    """與 `sidecar.looks_like_filename` 的副檔名樣式同一把（契約檔不 import sidecar）。"""
+    return bool(_WANT_FILENAME_RE.search(str(text)))
+
+
 def fortune_event_problems(e: dict, n: int) -> list[str]:
     """一筆 `twin_fortune` 事件的形狀自檢（`validate` 與 `live_events` 共用）。回問題清單。"""
     bad: list[str] = []
@@ -218,6 +227,14 @@ def fortune_event_problems(e: dict, n: int) -> list[str]:
         for s in ls:
             if not isinstance(s, str) or not s.strip() or len(s) > FORTUNE_LINE_MAX:
                 bad.append(f"第 {n} 個事件：twin_fortune.lines 每句要是非空字串、≤ {FORTUNE_LINE_MAX} 字")
+    w = e.get("want")
+    if w is not None:
+        if e.get("phase") != "card":
+            bad.append(f"第 {n} 個事件：twin_fortune 的 want 只在 card 拍")
+        if not isinstance(w, str) or not w.strip() or len(w) > FORTUNE_LINE_MAX:
+            bad.append(f"第 {n} 個事件：twin_fortune.want 要是非空字串、≤ {FORTUNE_LINE_MAX} 字")
+        elif looks_like_filename(w):
+            bad.append(f"第 {n} 個事件：twin_fortune.want 帶了像檔名的字")
     for k in FORTUNE_FORBIDDEN:
         if k in e:
             bad.append(f"第 {n} 個事件：twin_fortune 帶了 {k!r}")

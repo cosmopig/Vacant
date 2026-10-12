@@ -154,10 +154,9 @@ def test_retried_open_says_passed_only_when_accepted_true() -> None:
     ev = _ev_all()
     txt = lambda acc: next(c["text"] for c in fz.mirror_candidates(ev, 1, "甲", retry_ids=("G1",), accepted=acc)   # noqa: E731
                            if c["key"] == "retried_open")
-    assert "才過" in txt(True)                                   # 正控制：通過了才能說「才過」
-    for acc in (False, None):                                    # 負控制：沒通過／不知道，不說「過」
-        assert "過" not in txt(acc).replace("被退回過", ""), txt(acc)
-        assert "回去補開了" in txt(acc)
+    for acc in (True, False, None):                              # 形容語句版（2026-10-13）：不論有沒有最終通過，都不說「才過」「過」
+        t = txt(acc)
+        assert t == "被指出漏看了什麼，會回頭補上" and "才過" not in t and "通過" not in t, t
 
 
 def test_thirty_real_runs_no_sentence_over_a_third_and_every_card_has_a_real_habit() -> None:

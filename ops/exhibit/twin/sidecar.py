@@ -439,6 +439,14 @@ def _fortune_problems(r: dict, i: int) -> list[str]:
                 bad.append(f"旁註第 {i} 筆：twin_fortune 的 lines 每句要是非空字串、≤ {FORTUNE_LINE_MAX} 字")
             elif looks_like_filename(s):
                 bad.append(f"旁註第 {i} 筆：twin_fortune 的 lines 帶了像檔名的字")
+    w = r.get("want")
+    if w is not None:
+        if r.get("phase") != "card":
+            bad.append(f"旁註第 {i} 筆：twin_fortune 的 want 只在 card 拍")
+        if not isinstance(w, str) or not w.strip() or len(w) > FORTUNE_LINE_MAX:
+            bad.append(f"旁註第 {i} 筆：twin_fortune 的 want 要是非空字串、≤ {FORTUNE_LINE_MAX} 字")
+        elif looks_like_filename(w):
+            bad.append(f"旁註第 {i} 筆：twin_fortune 的 want 帶了像檔名的字")
     return bad
 
 

@@ -1310,6 +1310,12 @@ def publish(store: TwinStore, cloud: str, token: str,
                     "mbti": _fz.get("mbti"), "mbti_source": _fz.get("mbti_source"),
                     "zodiac": _fz.get("zodiac"), "blood": _fz.get("blood"),
                     "lines": [str(x) for x in (_fz.get("lines") or [])][:4]}
+                _w = _fz.get("want")
+                if isinstance(_w, str) and _w.strip() and len(_w) <= 60:      # 2026-10-13「它想做的是…」；取不到就不送
+                    payload["fortune"]["want"] = _w
+                    _ws = _fz.get("want_step")
+                    if isinstance(_ws, int) and not isinstance(_ws, bool) and 1 <= _ws <= 500:
+                        payload["fortune"]["want_step"] = _ws
             rb = twinagent.receipt_bundle(work_root, sid,
                                           expect_head=twin.get("verdict_hash"))
             if rb.get("ok"):

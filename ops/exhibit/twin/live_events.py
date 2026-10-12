@@ -387,12 +387,15 @@ class Folder:
         if why:
             self.dropped.append(why)
             return []
-        return [{"type": "twin_fortune", "ts": self._ts(ev["ts_ms"]),
-                 "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
-                 "phase": ev["phase"], "attempt": ev["attempt"],
-                 "mbti": ev.get("mbti"), "mbti_source": ev.get("mbti_source"),
-                 "zodiac": ev.get("zodiac"), "element": ev.get("element"), "blood": ev.get("blood"),
-                 "lines": list(ev.get("lines") or [])}]
+        out = {"type": "twin_fortune", "ts": self._ts(ev["ts_ms"]),
+               "task_id": st["cell_id"], "mode": self.mode, "arm": tv.ARM_ON,
+               "phase": ev["phase"], "attempt": ev["attempt"],
+               "mbti": ev.get("mbti"), "mbti_source": ev.get("mbti_source"),
+               "zodiac": ev.get("zodiac"), "element": ev.get("element"), "blood": ev.get("blood"),
+               "lines": list(ev.get("lines") or [])}
+        if ev.get("want"):
+            out["want"] = ev["want"]                       # 2026-10-13「它想做的是…」（card 拍才有）
+        return [out]
 
     def _sidecar_twin_step(self, ev: dict) -> list[dict]:
         """分身工作區三個工具被呼叫的旁註 → 電視的 `twin_step`（**不帶檔名**）。

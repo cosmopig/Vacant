@@ -734,14 +734,53 @@ def _attempt_index(rows: list[dict[str, Any]]) -> list[int]:
     return out
 
 
+#: 給觀眾看的句子＝**形容語句**（2026-10-13 人類：不要「前前後後翻了 23 樣東西」那種系統日誌，要像在形容一個人，但不寫「你是…」）。
+#: 固定對照表、確定性、不經模型；每條習慣的判準與「（第 N 步）」不變，只換句子。`{k}`＝那一類東西（地上哪一類）。
+#: `made`（最後做出來的是《…》）不是形容，只在沒有其他句子時當最後手段（`mirror_pick`）。
+ADJ_TEXT: dict[str, str] = {
+    "start_browse": "好奇，習慣先四處逛一圈再決定",
+    "start_look": "謹慎，先看一眼才動手",
+    "start_plan": "有條理，先想清楚再做",
+    "start_nothing": "直覺派，想到就做",
+    "read_before_plan": "做功課型，動筆前先蒐集很多",
+    "first_touch": "對「{k}」特別有感",
+    "many_reads": "好奇心重，什麼都想翻翻看",
+    "few_reads": "果斷，不用看太多就能開始",
+    "linger": "最常被「{k}」吸引",
+    "reads_after_plan": "邊做邊找靈感，想到就回去翻",
+    "many_kinds": "興趣廣，不會只盯著一處",
+    "failed_go_on": "卡住不硬撞，會換條路",
+    "reread_plan": "謹慎，寫完會回頭讀自己的計畫",
+    "changed_mind": "願意推翻自己，邊做邊調整",
+    "revise_product": "反覆琢磨，不滿意就再改一版",
+    "two_versions": "拿不定主意時，乾脆兩個都做",
+    "several_made": "一做就停不下來",
+    "short_made": "簡潔，話不多但說到重點",
+    "long_made": "講究細節，一寫就很仔細",
+    "left_for": "做東西時心裡想著某個人",
+    "kept": "有收拾的習慣，東西會放好",
+    "q_mark": "喜歡留白，不把話說死",
+    "hedge": "溫和，說話習慣留餘地",
+    "digits": "務實，喜歡具體的數字",
+    "plan_vs_made": "隨性，計畫歸計畫，做著做著就變了",
+    "recheck_first": "念舊，做完還會回到起點看看",
+    "recheck": "細心，交出去前會再確認一次",
+    "retried_open": "被指出漏看了什麼，會回頭補上",
+    "retried_source": "被問到出處，會回頭補上說明",
+    "retried": "被指出問題會回頭補上",
+}
+
+
 def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text: str = "",
                       retry_ids: tuple[str, ...] = (), accepted: bool | None = None) -> list[dict[str, Any]]:
     """所有成立的習慣：`{key, text, step}`（`step`＝全部步驟裡的第幾步，1 起算）。判準不成立就不出現。"""
     out: list[dict[str, Any]] = []
     off = len(ev.all) - len(ev.rows)
 
-    def add(key: str, text: str, i: int | None) -> None:
+    def add(key: str, text: str, i: int | None, k: str = "") -> None:
         if i is not None:
+            if key in ADJ_TEXT:
+                text = ADJ_TEXT[key].format(k=k)               # 形容語句（判準與步數不變，只換句子）
             out.append({"key": key, "text": text, "step": int(ev.rows[i].get("_n") or (off + i + 1))})
 
     arts = _artifact_writes(ev)
@@ -768,7 +807,7 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
     elif not ev.plan_writes and arts:
         add("start_nothing", "沒寫計畫，直接就動手做了", arts[0])
     if first_kind and first_g is not None:
-        add("first_touch", f"第一個動手翻的，是{first_kind}", first_g)
+        add("first_touch", "", first_g, k=first_kind)
     # ── 看東西
     n_read = len(ev.file_first)
     if n_read >= MIRROR_MANY_READS and ev.file_first:
@@ -783,7 +822,8 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
     if per_kind:
         k, idxs = max(per_kind.items(), key=lambda kv: (len(kv[1]), -kv[1][0]))
         if len(idxs) >= 4 and len(idxs) > len(ev.ground_reads) / 3:
-            add("linger", f"最常翻的是{k}，一共翻了 {len(idxs)} 次", idxs[0])
+            if k != first_kind:                         # 同一類已經由「對 X 特別有感」說過，不重講
+                add("linger", "", idxs[0], k=k)
     if ev.plan_writes:
         aft = [g for g in ev.ground_reads if g > ev.plan_writes[0]]
         if len(aft) >= 3:
@@ -908,7 +948,10 @@ def _fits(c: dict[str, Any]) -> bool:
 def mirror_pick(cands: list[dict[str, Any]], seed: str = "") -> list[dict[str, Any]]:
     """從成立的習慣挑至多 3 句：稀有度（固定表）×確定性微擾優先；同組只留一句；
     至少一句不是「怎麼開始」或「最後做出來的是」；依步驟先後排（讀起來像在說這一跑的經過），「做出了什麼」放最後。"""
-    ranked = sorted((c for c in cands if _fits(c)), key=lambda c: -RARITY[c["key"]] * _jitter(seed, c["key"]))
+    fit = [c for c in cands if _fits(c)]
+    if any(c["key"] != "made" for c in fit):
+        fit = [c for c in fit if c["key"] != "made"]        # 「最後做出來的是《…》」不是形容：沒有別的句子時才用
+    ranked = sorted(fit, key=lambda c: -RARITY[c["key"]] * _jitter(seed, c["key"]))
     chosen: list[dict[str, Any]] = []
     groups: set[str] = set()
     for c in ranked:
@@ -944,6 +987,26 @@ def mirror_lines(rows: list[dict[str, Any]], files: dict[str, str], retries: int
             for c in mirror_picks(rows, files, retries, title, plan_text, retry_ids, seed, accepted)]
 
 
+MAX_WANT_PUBLIC = 60        # 給觀眾／雲端／電視的 `want` 字數上限（`wish_of` 本身 ≤ 44）
+
+
+def plan_write_step(rows: list[dict[str, Any]]) -> int | None:
+    """PLAN.md 最後一次成功寫入的那一步（「第 N 步」，與習慣句、收據頁同一套編號＝步驟紀錄檔的順位）；沒有或超過 500 ⇒ None。"""
+    n = None
+    for i, r in enumerate(rows):
+        if r.get("tool") == "ws_write" and r.get("path") == PLAN_FILE and r.get("ok") is True:
+            n = int(r.get("_n") or (i + 1))
+    return n if n is not None and n <= 500 else None
+
+
+def want_with_step(plan_text: str, rows: list[dict[str, Any]], traits: str, f: dict[str, Any]) -> tuple[str | None, int | None]:
+    """(想做的那一句, 它寫進 PLAN 的那一步)。句子取不到 ⇒ (None, None)；步數對不到寫入紀錄 ⇒ (句子, None)。"""
+    w = wish_of(plan_text, traits, f) if str(plan_text or "").strip() else None
+    if not w or len(w) > MAX_WANT_PUBLIC:
+        return None, None
+    return w, plan_write_step(rows)
+
+
 def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, Any]], files: dict[str, str],
                  retries: int, traits: str = "", plan_text: str = "", retry_ids: tuple[str, ...] = (),
                  seed: str = "", accepted: bool | None = None) -> dict[str, Any]:
@@ -960,6 +1023,8 @@ def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, An
         if places:
             res["route"] = route_of(places, last_place_before_delivery(rows), title or NO_NAME_TITLE, retries)
     res["lines"] = mirror_lines(rows, files, retries, title, plan_text, retry_ids, seed, accepted)
+    # 2026-10-13「它想做的是…」：分身這一跑想做的那件事＝PLAN「我想：」之後那一句（同一套 `wish_of` 防呆；取不到就 None，不編）。
+    res["want"], res["want_step"] = want_with_step(plan_text, rows, traits, f)
     res["present"] = bool(res["lines"])
     return res
 
@@ -1595,6 +1660,7 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
     res["lines"] = list(mir["lines"])
     res["tv_lines"] = [strip_step(x) for x in mir["lines"]]  # 電視字幕＝同一組句子、不帶步數（≤3 句）
     res["present"] = bool(res["lines"])
+    res["want"], res["want_step"] = mir.get("want"), mir.get("want_step")
     if "reading" in mir:
         res["reading"] = mir["reading"]
     if "route" in mir:
@@ -1637,10 +1703,12 @@ def twin_view(f: dict[str, Any], card: dict[str, Any]) -> dict[str, Any]:
             "blood": f.get("blood"), "first_line": card.get("first_line"), "title": card.get("title"),
             "verdict": card.get("verdict"), "want_line": card.get("want_line"),
             "tried_line": card.get("tried_line"), "said_line": card.get("said_line"),
+            "want": card.get("want"), "want_step": card.get("want_step"),
             "lines": list(card.get("lines") or [])}
 
 
-def emit(rd: pathlib.Path, phase: str, f: dict[str, Any], lines: list[str] | None = None) -> bool:
+def emit(rd: pathlib.Path, phase: str, f: dict[str, Any], lines: list[str] | None = None,
+         want: str | None = None) -> bool:
     """寫一筆旁註 `twin_fortune`（`twin.sidecar/1`；全是枚舉）。旁註位置與 run_id 從 `gate_meta.json` 與事件檔學來
     （與 `grounding_gate.prepare` 寫 `twin_gate` 同一條路）。任何一步缺了就不寫、不丟例外（旁註不准改變一跑）。"""
     import time
@@ -1660,6 +1728,8 @@ def emit(rd: pathlib.Path, phase: str, f: dict[str, Any], lines: list[str] | Non
                "mbti": f.get("mbti"), "mbti_source": f.get("mbti_source"),
                "zodiac": f.get("zodiac"), "element": element(f.get("zodiac")), "blood": f.get("blood"),
                "lines": list(lines or [])}
+        if want and phase == "card":
+            row["want"] = want
         sp = pathlib.Path(meta["sidecar_path"])
         sp.parent.mkdir(parents=True, exist_ok=True)
         with sp.open("a", encoding="utf-8") as fh:
@@ -1691,7 +1761,7 @@ def _cli(argv: list[str]) -> int:
         if f and has_any(f):
             try:
                 card = build_card(rd, ws, f, traits_hint(rd))
-                emit(rd, "card", f, card.get("tv_lines") if "tv_lines" in card else card["lines"])
+                emit(rd, "card", f, card.get("tv_lines") if "tv_lines" in card else card["lines"], want=card.get("want"))
             except Exception as exc:                   # noqa: BLE001
                 print(f"fortune card 失敗：{type(exc).__name__}", file=sys.stderr)
         return 0
