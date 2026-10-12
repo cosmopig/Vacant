@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.1 — 2026-10-12
 
 - **`vacant dashboard`: one local page for everything Vacant is doing.** After `vacant install` there was no way to
   see Vacant's state without opening files under `~/.vacant` one by one. `vacant dashboard [--open] [--port 7790]`
@@ -12,8 +12,6 @@
   endpoints. Read-only (it never writes under `$VACANT_HOME`; tested byte-for-byte), listens on 127.0.0.1 only and
   refuses requests whose `Host` is not local. `vacant dashboard --json` prints the same data once.
   It shows whether each step had a basis, not whether the answer is right. `vacant install` now points at it.
-
-## 0.9.1 — 2026-10-08
 
 Fixes found by reviewing a real pi session and a user's OpenCode 2.x install. No change to what the model receives
 when nothing is wrong.
