@@ -1094,13 +1094,15 @@ def run_one(job: Job) -> dict[str, Any]:
                  for a in (res["outputs"].get("artifacts") or [])])
         except Exception:                                    # noqa: BLE001 — 拍立得的加分層不准拖垮這一跑
             res["polaroid_hints"] = None
-        # P10 命盤卡：每一句對步驟紀錄（找不到根據就從卡上拿掉）。沒有命盤就不出卡。
+        # 給觀眾的卡（2026-10-12 起是「像不像你」的做事習慣，每一句對步驟紀錄）。
+        # 習慣句只看步驟紀錄 ⇒ 沒有命盤也出卡；兩者都沒有才是 None。
         try:
             _f = fortunelib.load_final(rd) or fortunelib.resolve(job.fortune or {}, {})
             _card = fortunelib.build_card(rd, pathlib.Path(frozen) if frozen else None, _f,
                                            fortunelib.traits_hint(rd))   # 與 twin_agent.sh 的旁註同一把尺
             res["fortune"] = ({**fortunelib.twin_view(_f, _card), "dropped_n": len(_card["dropped"]),
-                               "places": _card.get("places") or []} if fortunelib.has_any(_f) else None)
+                               "places": _card.get("places") or []}
+                              if fortunelib.has_any(_f) or _card.get("lines") else None)
         except Exception as exc:                              # noqa: BLE001 — 命盤卡是加分項，不准拖垮這一跑
             res["fortune"] = None
             res["fortune_error"] = type(exc).__name__

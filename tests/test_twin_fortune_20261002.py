@@ -418,11 +418,14 @@ def test_card_v2_is_four_parts_built_without_the_model(tmp_path) -> None:
     res, rd, ws = _card(tmp_path, rows, files={"成品.md": "# 鬆環對照冊\n內文"})
     assert res["first_line"] == "INFP · 雙魚（水）· O 型"
     assert len(res["reading"]) <= fz.MAX_SENTENCE
-    assert res["lines"][0].startswith("在計畫的框架中掙扎")                      # 優先挑 J/P
+    assert res["reading"].startswith("在計畫的框架中掙扎")                       # 優先挑 J/P（紀錄用，不給觀眾）
     assert res["route"] == "它先去了草稿角，再到帳本鏈，在帳本鏈交出《鬆環對照冊》"
-    assert res["lines"] == [res["reading"], res["route"]] and res["title"] == "鬆環對照冊"
+    assert res["title"] == "鬆環對照冊"
+    # 2026-10-12：解讀句與路線句只留作紀錄；給觀眾的是做事習慣（先逛兩處才寫計畫、寫完成品又列了房間）
+    assert res["lines"] == ["還沒決定要做什麼，先到處看了一圈", "交出去之前，又回頭再看了一遍", "最後做出來的是《鬆環對照冊》"]
+    assert res["reading"] not in res["lines"] and res["route"] not in res["lines"]
     md = fz.card_md(res).splitlines()
-    assert md == ["INFP · 雙魚（水）· O 型", res["reading"], res["route"], "它做的事：鬆環對照冊"]
+    assert md == [fz.MIRROR_HEAD] + res["lines"]
     assert (rd / fz.CARD_JSON_NAME).is_file()
     assert all(len(x) <= fz.MAX_CARD_LINE_CHARS for x in res["lines"])
 
@@ -458,9 +461,9 @@ def test_card_v2_route_fits_the_line_limit_and_handles_no_title_no_place(tmp_pat
     r = fz.route_of(["投遞口", "長桌廣場", "畫架與長椅", "石頭閘門"], "石頭閘門", long_title, 2)
     assert len(r) <= fz.MAX_CARD_LINE_CHARS and r.startswith("它先去了投遞口")
     res, _, _ = _card(tmp_path / "a", STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")])
-    assert res["lines"] == [res["reading"]] and "route" not in res                   # 沒碰過任何地點：不編路線
-    md = fz.card_md(res).splitlines()
-    assert md[-1] == "它做的事：" + fz.NO_NAME_TITLE
+    assert "route" not in res                                                        # 沒碰過任何地點：不編路線
+    assert res["lines"] == []                                                        # 只寫了計畫、沒做出東西：沒有習慣句可說
+    assert fz.card_md(res) == ""
     res2, _, _ = _card(tmp_path / "b", BROWSE_THEN_PLAN)                              # 沒有成品檔：標題用「一件沒有名字的小事」
     assert res2["title"] is None and "《" + fz.NO_NAME_TITLE + "》" in res2["route"]
 
@@ -470,8 +473,10 @@ def test_card_v2_never_reads_what_the_twin_wrote_and_no_fortune_means_no_card(tm
     (rd / "letter_final.md").write_text(LETTER_FINAL, encoding="utf-8")
     res = fz.build_card(rd, ws, fz.resolve(FULL, {}))
     assert "亂寫" not in fz.card_md(res) and "投遞口" not in res["route"]
+    # 2026-10-12：習慣句只看步驟紀錄 ⇒ 沒有命盤也出卡（但沒有解讀、沒有路線）
     none = fz.build_card(rd, ws, fz.resolve(fz.normalize(None), {}))
-    assert none["present"] is False and none["lines"] == []
+    assert none["present"] is True and none["lines"] == res["lines"]
+    assert "reading" not in none and "route" not in none
 
 
 def test_card_v2_title_has_no_filename_and_is_filtered(tmp_path) -> None:
@@ -660,8 +665,8 @@ def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
     r = subprocess.run([sys.executable, str(TWIN / "fortune.py"), "card", str(ws), str(rd)], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     rows = sc.read(side)
-    assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) == 2
-    assert rows[0]["lines"][1].startswith("它先去了草稿角") and sc.validate(rows) == []
+    assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) == 3
+    assert rows[0]["lines"][0] == "還沒決定要做什麼，先到處看了一圈" and sc.validate(rows) == []
     assert (rd / fz.CARD_JSON_NAME).is_file()
 
 
@@ -740,3 +745,89 @@ def test_p12_single_place_route_and_short_or_resident_titles(tmp_path) -> None:
     assert fz.title_of({"a.md": "# 灰藍小\n內"}, f) is None
     assert fz.title_of({"a.md": "# 阿水\n內"}, f, letter_text="阿水：\n你好") is None      # 信裡的稱呼
     assert fz.title_of({"a.md": "# 帳本鏈維護記錄\n內"}, f) == "帳本鏈維護記錄"
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-12「像不像你」：給觀眾的句子＝這一跑真的做過的做事習慣（不是命盤解讀、不是世界裡的路線）
+# ---------------------------------------------------------------------------
+
+def _mirror(rows, files=None, retries=0, title=None):
+    return fz.mirror_lines(rows, files or {}, retries, title)
+
+
+def test_mirror_start_follows_the_step_order() -> None:
+    assert _mirror(BROWSE_THEN_PLAN)[0] == "還沒決定要做什麼，先到處看了一圈"           # 兩個地點後才寫計畫
+    one = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/紙團_乙.txt"),
+                    _row(5, "ws_write", "PLAN.md"), _row(6, "ws_write", "成品.md")]
+    assert _mirror(one)[0] == "先去看了一眼，才決定要做什麼"                           # 只看了一處
+    assert _mirror(PLAN_THEN_BROWSE)[0] == "先把要做的事寫下來，才開始動手"
+    direct = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", "成品.md")]
+    assert _mirror(direct)[0] == "沒寫計畫，直接就動手做了"
+    # 負控制：只寫了計畫、什麼都沒看也沒做 ⇒ 沒有任何一句（不補）
+    assert _mirror(STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")]) == []
+
+
+def test_mirror_habits_appear_only_with_their_step() -> None:
+    twice = PLAN_THEN_BROWSE + [_row(9, "ws_write", "PLAN.md")]
+    assert "做到一半改了主意，把計畫重寫了一遍" in _mirror(twice)
+    assert "做到一半改了主意，把計畫重寫了一遍" not in _mirror(PLAN_THEN_BROWSE)       # 負控制：PLAN 只寫過一次
+    thrice = twice + [_row(10, "ws_write", "PLAN.md")]
+    assert "計畫寫了又改，前後改了 2 次" in _mirror(thrice)
+    two = {"a.md": "版本一\n…", "b.md": "版本二\n…"}
+    assert "拿不定主意，乾脆做了兩個版本" in _mirror(PLAN_THEN_BROWSE, files=two)
+    assert "拿不定主意，乾脆做了兩個版本" not in _mirror(PLAN_THEN_BROWSE, files={"a.md": "版本一"})
+    assert "做好的東西，特地寫明了要留給誰" in _mirror(PLAN_THEN_BROWSE, files={"給守口人.md": "x"})
+    assert "做好的東西，寫明了收在哪裡" in _mirror(PLAN_THEN_BROWSE, files={"a.md": "收在長桌下"})
+    many = STAGE1 + [_row(3, "ws_read", "信.md")] + [_row(4 + i, "ws_read", f"地上/草稿角/{i}.txt") for i in range(6)] \
+        + [_row(20, "ws_write", "PLAN.md"), _row(21, "ws_write", "成品.md")]
+    assert "前前後後翻了 6 樣東西" in _mirror(many)
+    assert any(x.startswith("沒看幾樣東西") for x in _mirror(PLAN_THEN_BROWSE))
+    assert not any(x.startswith("沒看幾樣東西") for x in _mirror(many))               # 負控制
+    assert "被退回 2 次，每一次都回去改" in _mirror(PLAN_THEN_BROWSE, retries=2)
+    assert not any("退回" in x for x in _mirror(PLAN_THEN_BROWSE, retries=0))
+
+
+def test_mirror_is_three_lines_start_habit_then_what_it_made() -> None:
+    rows = BROWSE_THEN_PLAN + [_row(11, "ws_write", "PLAN.md")]
+    ls = _mirror(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title="點數單")
+    assert len(ls) == fz.MAX_MIRROR_LINES
+    assert ls[0] == "還沒決定要做什麼，先到處看了一圈"
+    assert ls[1] == "做到一半改了主意，把計畫重寫了一遍"                               # 優先序：改主意先於兩個版本、退回
+    assert ls[2] == "最後做出來的是《點數單》"
+    no_title = _mirror(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title=None)
+    assert no_title[1:] == ["做到一半改了主意，把計畫重寫了一遍", "拿不定主意，乾脆做了兩個版本"]
+
+
+def test_mirror_lines_never_label_the_viewer_or_tell_the_world_story() -> None:
+    """產出不說「你是什麼人」：沒有命盤字樣、沒有「你是」、沒有世界裡的地名、沒有檔名；每句 ≤ 60 字。"""
+    variants = [BROWSE_THEN_PLAN, PLAN_THEN_BROWSE, BROWSE_THEN_PLAN + [_row(11, "ws_write", "PLAN.md")]]
+    seen: list[str] = []
+    for rows in variants:
+        for files in ({}, {"給誰.md": "收在這裡 留給你"}, {"a.md": "版本一", "b.md": "版本二"}):
+            for r in (0, 3):
+                seen += _mirror(rows, files=files, retries=r, title="點數單")
+    assert seen
+    banned = ("你是", "MBTI", "星座", "血型", "命盤", "型", ".md", ".txt", "_") + fz.PLACES + tuple(fz.ZODIACS) + fz.MBTI_TYPES
+    for x in set(seen):
+        assert len(x) <= fz.MAX_CARD_LINE_CHARS
+        assert not any(b in x for b in banned), x
+
+
+def test_polaroid_prints_mirror_head_and_first_habit() -> None:
+    from ops.exhibit.twin import polaroid as pl
+    ok, why = pl.available()
+    if not ok:
+        pytest.skip(why)
+    base = dict(decision="我要整理一份清單", cast_id="c05", date_str="2026-10-12", receipt_short="a1b2c3d4", originals=[])
+    _p, m = pl.compose(**base, fortune_line=fz.MIRROR_HEAD, fortune_sentence=fz.polaroid_sentence("先把要做的事寫下來，才開始動手"))
+    assert m["fortune_drawn"] is True and m["fortune_chars"] == len(fz.MIRROR_HEAD)
+    assert m["caption_source"] == "fortune_sentence"
+
+
+def test_twinlink_polaroid_and_publish_use_the_mirror_not_the_chart() -> None:
+    src = (TWIN / "twinlink.py").read_text(encoding="utf-8")
+    i = src.index("png, meta = polaroidlib.compose(")
+    call = src[i:src.index("ref = store.vault.seal_polaroid", i)]
+    assert "fortune=None" in call and "MIRROR_HEAD" in call and '"first_line"' not in call
+    j = src.index('_fz = twin.get("fortune")')
+    assert 'or _fz.get("lines")' in src[j:j + 400]                                     # 沒有命盤、有習慣句也送
