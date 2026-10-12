@@ -370,18 +370,25 @@ def run_enclosed(*, argv: list[str], workspace: pathlib.Path, run_dir: pathlib.P
               "events_path": str(part), "events_caller": events_caller}
     (run_dir / PARAMS_NAME).write_text(json.dumps(params, ensure_ascii=False),
                                        encoding="utf-8")
+    # Vacant 0.9.x 掛鉤（`twin_hooks.py`，VACANT_TWIN_HOOKS=1 才有；接不上＝None＝照舊）：
+    # 共用的 VACANT_HOME 可寫綁進來（誠實邊界 1）、擴充檔所在的 pi 設定目錄唯讀、環境變數轉進去。
+    from ops.exhibit.twin import twin_hooks
+    hx = twin_hooks.encl_extras()
     pi_path = str(ndir / "bin" / "pi")
     setenv = " ".join(f"{k}={v}" for k, v in {
         "PYTHONPATH": str(REPO), "PYTHONUNBUFFERED": "1",
         "HOME": str(run_dir / "home"),
         "VACANT_AGENT_MODEL": model, "VACANT_TWIN_PI": pi_path,
         "VACANT_ATTEST": "warn",
+        **((hx or {}).get("setenv") or {}),
     }.items())
     # ⚠ 環境**從零給**：loop 行程的環境裡有雲端 token 與真上游位址。
     #   bwrap 不 --clearenv 的話那些會原樣進圍牆（pi 的 /proc/self/environ 讀得到）。
     env = {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8",
-           "ENC_WS": str(workspace), "ENC_RW": str(run_dir),
-           "ENC_RO": f"{REPO}:{ndir}", "ENC_DOOR": str(door_dir),
+           "ENC_WS": str(workspace),
+           "ENC_RW": ":".join([str(run_dir), *((hx or {}).get("rw") or [])]),
+           "ENC_RO": ":".join([f"{REPO}", f"{ndir}", *((hx or {}).get("ro") or [])]),
+           "ENC_DOOR": str(door_dir),
            "ENC_PY": _python(), "ENC_PATH": f"{ndir}/bin:/usr/bin:/bin",
            "ENC_SETENV": setenv}
     cmd = ["bash", str(ENC_SH), _python(), "-m", "ops.exhibit.twin.twinenclose",

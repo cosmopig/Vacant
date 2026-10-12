@@ -126,9 +126,22 @@ cat > "$CFG/models.json" <<EOF
 EOF
 
 PY="${VACANT_TWIN_PY:-python3}"
+# ── Vacant 0.9.x 掛鉤（過渡版，2026-10-12；`twin_hooks.py`）：`VACANT_TWIN_HOOKS=1` 才接，預設關。
+#    接法＝多給 pi 一個 `-e`（`vacant install --agents pi` 裝出來的那一份擴充；`--no-extensions` 關了自動探索，
+#    所以要明確載入）。沒開、或缺擴充檔／VACANT_HOME ⇒ 不接，argv 與沒有這一段時逐位元相同（fail-open）。
+HOOK_ARGS=()
+if [ "${VACANT_TWIN_HOOKS:-0}" = "1" ]; then
+    if [ -n "${VACANT_TWIN_HOOK_EXT:-}" ] && [ -f "$VACANT_TWIN_HOOK_EXT" ] && [ -n "${VACANT_HOME:-}" ]; then
+        HOOK_ARGS=(-e "$VACANT_TWIN_HOOK_EXT")
+        echo "Vacant 掛鉤：接上 ${VACANT_TWIN_HOOK_EXT}（VACANT_HOME=${VACANT_HOME}）" >&2
+    else
+        echo "Vacant 掛鉤：VACANT_TWIN_HOOKS=1 但缺擴充檔或 VACANT_HOME ⇒ 這一跑不接（分身照舊）。" >&2
+    fi
+fi
 COMMON=(-p --mode json --provider vacantproxy --model m
     --no-builtin-tools --tools ws_list,ws_read,ws_write
     -e "$EXT"
+    ${HOOK_ARGS[@]+"${HOOK_ARGS[@]}"}
     --no-extensions --no-skills --no-context-files --no-prompt-templates
     --no-themes --no-approve --offline --no-session)
 
@@ -180,6 +193,11 @@ while :; do
     fi
     break
 done
+# Vacant 0.9.x 掛鉤（開著且真的接上了）：pi 結束後，這一跑有 trace 卻沒有交件說明（pi 0.85.1 沒有 session 內的
+# 「說做完時查一次」事件）⇒ 補跑同一個零設定檢查、只寫交件說明給人。失敗一律放行，不改這一跑的結束碼。
+if [ "${#HOOK_ARGS[@]}" -gt 0 ]; then
+    "$PY" "$HERE/twin_hooks.py" postcheck --ws "$(pwd)" --python "${VACANT_TWIN_ENC_PY:-/usr/bin/python3}" >> "$RUN_DIR/hooks_postcheck.log" 2>&1 || true
+fi
 HIT=0
 if [ "$RC2" -eq 125 ]; then HIT=1; RC2=0; fi
 "$PY" "$HERE/grounding_gate.py" notecap "$RUN_DIR" "$HIT" 2>/dev/null || true

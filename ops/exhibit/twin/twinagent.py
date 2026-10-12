@@ -78,6 +78,7 @@ from ops.exhibit.twin import grounding_gate as gatelib  # noqa: E402
 from ops.exhibit.twin import polaroid as polaroidlib  # noqa: E402
 from ops.exhibit.twin import roster as rosterlib  # noqa: E402
 from ops.exhibit.twin import sidecar as sidecarlib  # noqa: E402
+from ops.exhibit.twin import twin_hooks  # noqa: E402
 from ops.exhibit.twin import twinground  # noqa: E402
 from vacant_network.memory import assert_ks1_clean  # noqa: E402
 from vacant_network.vrun import lifecycle  # noqa: E402
@@ -1010,6 +1011,9 @@ def run_one(job: Job) -> dict[str, Any]:
         for d in (ws, rd):
             if d.exists():
                 shutil.rmtree(d)
+        # Vacant 0.9.x 掛鉤（twin_hooks，預設關）：同一位觀眾重跑時，上一跑留在 VACANT_HOME 的追緝紀錄不沿用
+        # （同一個工作區路徑＝同一條專案鏈）。沒設 VACANT_HOME 時什麼都不做。
+        twin_hooks.erase(ws)
         ws.mkdir(parents=True)
         rd.mkdir(parents=True)
         (ws / "TRAITS.md").write_text(job.traits, encoding="utf-8")
@@ -1372,6 +1376,16 @@ def erase_run_artifacts(work_root: pathlib.Path, sub_id: str) -> dict[str, Any]:
     for lp in letters:
         if lp.is_file() or lp.is_symlink():
             _rm(lp, "letter")
+    # Vacant 0.9.x 掛鉤的追緝紀錄（VACANT_HOME/trace/projects/<這一跑>，含步驟、信的差異 blob、交件說明）。
+    # 只要 VACANT_HOME 還設著就刪（開關關掉＝回滾之後也照刪）；回報只有計數。
+    try:
+        th = twin_hooks.erase(ws)
+        if th["projects"] or th["blobs"] or th["hook_files"]:
+            erased.append({"what": "vacant_trace", "files": th["projects"] + th["blobs"] + th["hook_files"],
+                           "bytes": 0})
+        problems.extend(f"vacant_trace: {x}" for x in th["problems"])
+    except Exception as exc:                              # noqa: BLE001 — 刪不掉就講，不吞
+        problems.append(f"vacant_trace: {type(exc).__name__}")
     if ws.exists():
         _rm(ws, "workspace")
     # 圍牆的門（twinenclose）：門的 journal 也是逐字落盤 ⇒ 有特質原文
@@ -1395,6 +1409,8 @@ def run_artifacts_present(work_root: pathlib.Path, sub_id: str) -> bool:
     """這位分身在 run 那一側還有**非收據**的東西嗎（撤回後應為 False）。"""
     ws, rd = paths_for(pathlib.Path(work_root), sub_id)
     if ws.exists() or (pathlib.Path(work_root) / "doors" / slug_for(sub_id)).exists():
+        return True
+    if twin_hooks.present(ws):
         return True
     if rd.exists():
         return any(c.name not in KEEP_ON_ERASE for c in rd.iterdir())
