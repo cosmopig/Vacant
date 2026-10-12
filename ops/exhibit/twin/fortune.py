@@ -1241,11 +1241,26 @@ def polaroid_pick(fz: dict[str, Any] | None) -> str:
 
 def attempts_retries(rd: pathlib.Path) -> int:
     """這一跑被閘門退回、重改過幾次＝嘗試數 − 1（`run_RUN-ON.json`）。讀不到 ⇒ 0。"""
+    n = 0
     try:
         runj = json.loads((pathlib.Path(rd) / "run_RUN-ON.json").read_text(encoding="utf-8"))
-        return max(0, len(runj.get("attempts", [])) - 1)
+        n = max(0, len(runj.get("attempts", [])) - 1)
     except (OSError, ValueError, TypeError):
-        return 0
+        pass
+    # 嘗試進行中（twin_agent.sh 每一次嘗試結束時發電視那張卡）run_RUN-ON.json 還沒寫進這一次——
+    # 改從事件流學「現在是第幾次嘗試」，退回數＝它 − 1；否則被退回過的跑，電視的卡會少「被退回 N 次」那一句、和手機對不上（整合 e2e M7）。
+    try:
+        try:
+            from ops.exhibit.twin import grounding_gate as gg
+        except ImportError:            # pragma: no cover - 單檔執行
+            import grounding_gate as gg   # type: ignore[no-redef]
+        meta = json.loads((pathlib.Path(rd) / gg.GATE_META_NAME).read_text(encoding="utf-8"))
+        _rid, attempt = gg._learn_run(meta["events_path"], meta["task_id"])
+        if isinstance(attempt, int) and attempt >= 1:
+            n = max(n, attempt - 1)
+    except Exception:                                  # noqa: BLE001
+        pass
+    return n
 
 
 def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], traits: str = "") -> dict[str, Any]:
