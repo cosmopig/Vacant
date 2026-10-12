@@ -347,6 +347,7 @@ def read_steps(rd: pathlib.Path) -> list[dict[str, Any]]:
             except json.JSONDecodeError:
                 break
             if isinstance(r, dict):
+                r["_n"] = len(rows) + 1               # 「第 N 步」＝這一行在步驟紀錄檔裡的順位（收據頁與手機的過程清單用同一個編號）
                 rows.append(r)
     except OSError:
         return []
@@ -617,9 +618,7 @@ def last_place_before_delivery(rows: list[dict[str, Any]]) -> str | None:
 MIRROR_HEAD = "像不像你？"
 MAX_MIRROR_LINES = 3
 MIRROR_MANY_READS = 5            # 打開過幾樣地上的東西以上算「翻了很多」
-#: 習慣句的優先序（第一句一定是「怎麼開始」；之後挑最有個人味的；做了什麼放最後）。
-#: 被退回後回去改是閘門逼的、不是它選的 ⇒ 排在最後面。
-MIRROR_ORDER = ("changed_mind", "two_versions", "recheck", "left_for", "kept", "many_reads", "few_reads", "retried")
+#: 習慣句的挑法見 `mirror_pick`（稀有度固定表＋同組只留一句）；每句尾端「（第 N 步）」指回步驟紀錄。
 
 
 SYSTEM_FILES = (PLAN_FILE, LETTER_FILE, CARD_FILE, "試的紀錄.md", "TRAITS.md", "WORLD.md", "VACANT_FEEDBACK.md")
@@ -630,69 +629,319 @@ def _product_files(files: dict[str, str]) -> dict[str, str]:
     return {n: t for n, t in (files or {}).items() if n not in SYSTEM_FILES}
 
 
-def _artifact_writes(ev: Evidence) -> list[int]:
-    return [i for i in ev.writes if ev.rows[i].get("path") not in SYSTEM_FILES]
+#: 地點 → 那裡放的是哪一類東西（日常說法；卡上不出現世界裡的地名，只說「那一類東西」）。
+PLACE_KIND = {"投遞口": "要寄出去的東西", "帳本鏈": "帳本和記錄", "捏土處": "捏到一半的小東西",
+              "長桌廣場": "桌上擺著的雜物", "石頭閘門": "規則和關卡", "草稿角": "沒寫完的草稿",
+              "紙卡地": "紙卡", "畫架與長椅": "畫和隨手放的東西"}
+
+#: 每條習慣的稀有度（固定表，不用模型；越大越稀有、越優先）。依 divine 那 30 張真跑的出現率定：
+#: 常見的（到處看一圈 14／30、回頭再看 14／30、做出了什麼 28／30）壓低，沒什麼人有的（改主意、寫完又讀自己的計畫…）抬高。
+#: 表本身不依賴「這一批」的內容——展場是一張一張出卡，沒有「這一批」可以看；30 張是定表的依據。
+RARITY = {
+    "start_browse": 1.0, "start_look": 2.4, "start_plan": 1.3, "start_nothing": 4.0,
+    "read_before_plan": 2.6, "many_reads": 3.6, "few_reads": 2.8, "first_touch": 1.9,
+    "linger": 2.6, "failed_go_on": 2.6, "reread_plan": 4.5, "changed_mind": 6.0, "revise_product": 4.2,
+    "several_made": 1.7, "short_made": 2.0, "long_made": 2.4, "plan_vs_made": 3.2,
+    "reads_after_plan": 1.1, "many_kinds": 1.2, "recheck": 1.4, "recheck_first": 4.0, "two_versions": 6.0, "left_for": 6.0, "kept": 6.0,
+    "retried_open": 2.6, "retried_source": 4.0, "retried": 1.6, "made": 0.35,
+    "pace_slow": 3.0, "pace_fast": 1.5, "steps_few": 1.5, "steps_many": 2.8, "q_mark": 3.0, "hedge": 3.4, "digits": 2.4,
+}
+#: 同一組只留一句（兩句講的是同一件事就只放一句）。
+MIRROR_GROUP = {
+    "start_browse": "start", "start_look": "start", "start_plan": "start", "start_nothing": "start",
+    "first_touch": "start", "read_before_plan": "reads", "many_reads": "reads", "few_reads": "reads",
+    "linger": "reads", "failed_go_on": "failed", "reread_plan": "plan", "changed_mind": "plan",
+    "revise_product": "revise", "several_made": "made_n", "short_made": "made_n", "long_made": "made_n",
+    "plan_vs_made": "plan", "reads_after_plan": "afterplan", "many_kinds": "kinds", "recheck": "end", "recheck_first": "end", "two_versions": "made_n",
+    "left_for": "note", "kept": "note", "retried_open": "retry", "retried_source": "retry",
+    "retried": "retry", "made": "made",
+    "pace_slow": "pace", "pace_fast": "pace", "steps_few": "pace", "steps_many": "pace",
+    "q_mark": "voice", "hedge": "voice", "digits": "voice",
+}
+MIRROR_ORDER = tuple(RARITY)          # 相容舊名：所有習慣鍵
+#: 節奏／步數兩類習慣（進來多久才寫計畫、全部用了幾步）反映模型延遲與步數、不是人的做事方式 ⇒ 不進候選（主線 10-13 裁定）；函式留著。
+PACE_HABITS = False
+PACE_SLOW_S = 40.0                    # 進來到寫下計畫隔這麼久（秒）以上算「想了一下」
+PACE_FAST_S = 12.0
+STEPS_FEW = 11                        # 全部步驟 ≤ 這個數算「很快就交」
+STEPS_MANY = 30
+SHORT_MADE_CHARS = 110                # 單一成品全文這個字數以下算「很短」
+LONG_MADE_CHARS = 240                 # 這個字數以上算「寫得很細」
+STEP_TAG_RE = re.compile(r"\s*（第 (\d+) 步）$")
 
 
-def mirror_start(ev: Evidence) -> str | None:
-    """怎麼開始的（J／P 那一條是對照表裡唯一量到 8/8 穩定遵守的，所以放第一句）。"""
-    arts = _artifact_writes(ev)
-    if ev.a_browse_first():
-        seen = {p for p, i in ev.place_first.items() if i < ev.plan_writes[0]}
-        return "還沒決定要做什麼，先到處看了一圈" if len(seen) >= 2 else "先去看了一眼，才決定要做什麼"
-    if ev.a_plan_first():
-        return "先把要做的事寫下來，才開始動手"
-    if not ev.plan_writes and arts:
-        return "沒寫計畫，直接就動手做了"
-    return None
+def step_tag(n: int) -> str:
+    return f"（第 {n} 步）"
 
 
-def mirror_habits(ev: Evidence, retries: int) -> dict[str, str]:
-    """其餘可核對的習慣（鍵＝`MIRROR_ORDER`）。每一條都只在紀錄裡有那一步時才出現。"""
-    out: dict[str, str] = {}
-    k = ev.plan_writes_per_attempt
-    if k == 2:
-        out["changed_mind"] = "做到一半改了主意，把計畫重寫了一遍"
-    elif k >= 3:
-        out["changed_mind"] = f"計畫寫了又改，前後改了 {k - 1} 次"
-    if ev.a_two_versions():
-        out["two_versions"] = "拿不定主意，乾脆做了兩個版本"
-    if ev.a_recheck():
-        out["recheck"] = "交出去之前，又回頭再看了一遍"
-    if ev.a_left_for():
-        out["left_for"] = "做好的東西，特地寫明了要留給誰"
-    if ev.a_kept():
-        out["kept"] = "做好的東西，寫明了收在哪裡"
-    n_read = len(ev.file_first)
-    if n_read >= MIRROR_MANY_READS:
-        out["many_reads"] = f"前前後後翻了 {n_read} 樣東西"
-    elif n_read <= 1 and _artifact_writes(ev):
-        out["few_reads"] = "沒看幾樣東西，就動手了"
-    if retries > 0:
-        out["retried"] = f"被退回 {retries} 次，每一次都回去改"
+def strip_step(line: str) -> str:
+    """拿掉句尾的「（第 N 步）」（拍立得主字與電視字幕不帶步數）。"""
+    return STEP_TAG_RE.sub("", str(line or "")).rstrip()
+
+
+def step_of(line: str) -> int | None:
+    m = STEP_TAG_RE.search(str(line or ""))
+    return int(m.group(1)) if m else None
+
+
+_STEP_TOOL_CODE = {"ws_read": "r", "ws_write": "w", "ws_list": "l"}
+_STEP_SYSTEM_KIND = {PLAN_FILE: "計畫", LETTER_FILE: "那封信", "WORLD.md": "世界說明", "TRAITS.md": "特質",
+                     "試的紀錄.md": "試的紀錄", CARD_FILE: "命盤卡"}
+
+
+def public_steps(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """收據副本的步驟清單（公開版，**不含檔名與內容**）：`{n, t, k, ok}`——n＝第幾步（步驟紀錄檔的順位，1 起算）、
+    t＝r 讀／w 寫／l 列、k＝碰的是哪一類（地上哪一類東西／計畫／那封信／成品…）、ok＝成不成功。
+    ⚠ 這份與「（第 N 步）」共用同一個編號；順序＝步驟紀錄檔的順序（不重排）。"""
+    out = []
+    for i, r in enumerate(rows):
+        path = str(r.get("path") or "")
+        pl = _place_of(path)
+        if pl:
+            kind = PLACE_KIND.get(pl, "地上的東西")
+        elif path in _STEP_SYSTEM_KIND:
+            kind = _STEP_SYSTEM_KIND[path]
+        elif path.strip("./") == "":
+            kind = "房間"
+        else:
+            kind = "成品"
+        out.append({"n": int(r.get("_n") or (i + 1)), "t": _STEP_TOOL_CODE.get(r.get("tool"), "?"),
+                    "k": kind, "ok": bool(r.get("ok"))})
+    out.sort(key=lambda x: x["n"])
     return out
 
 
-def mirror_lines(rows: list[dict[str, Any]], files: dict[str, str], retries: int,
-                 title: str | None) -> list[str]:
-    """最多 3 句：怎麼開始＋最有個人味的習慣＋它最後做出來的東西（沒有標題就多放一個習慣）。"""
+def steps_digest(steps: list[dict[str, Any]]) -> str:
+    """步驟清單的 sha256（規範化：鍵排序、無空白、不跳脫中文；瀏覽器端用同一個序列化重算）。"""
+    blob = json.dumps(steps, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _artifact_writes(ev: "Evidence") -> list[int]:
+    return [i for i in ev.writes if ev.rows[i].get("path") not in SYSTEM_FILES]
+
+
+def _attempt_index(rows: list[dict[str, Any]]) -> list[int]:
+    """每一列屬於第幾次嘗試（`seq` 回到 ≤ 前一筆＝下一次嘗試；與 `Evidence._per_attempt_plan_counts` 同一個判準）。"""
+    out, cur, last = [], 0, None
+    for r in rows:
+        sq = r.get("seq")
+        if isinstance(sq, int) and isinstance(last, int) and sq <= last:
+            cur += 1
+        if isinstance(sq, int):
+            last = sq
+        out.append(cur)
+    return out
+
+
+def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text: str = "",
+                      retry_ids: tuple[str, ...] = ()) -> list[dict[str, Any]]:
+    """所有成立的習慣：`{key, text, step}`（`step`＝全部步驟裡的第幾步，1 起算）。判準不成立就不出現。"""
+    out: list[dict[str, Any]] = []
+    off = len(ev.all) - len(ev.rows)
+
+    def add(key: str, text: str, i: int | None) -> None:
+        if i is not None:
+            out.append({"key": key, "text": text, "step": int(ev.rows[i].get("_n") or (off + i + 1))})
+
+    arts = _artifact_writes(ev)
+    if not arts:                              # 沒做出任何東西 ⇒ 沒有習慣句可說（不補、不編）
+        return out
+    att = _attempt_index(ev.rows)
+    first_g = ev.ground_reads[0] if ev.ground_reads else None
+    first_kind = PLACE_KIND.get(_place_of(ev.rows[first_g].get("path"))) if first_g is not None else None
+    # ── 怎麼開始
+    if ev.a_browse_first():
+        seen = {p for p, i in ev.place_first.items() if i < ev.plan_writes[0]}
+        if len(seen) >= 2:
+            add("start_browse", "還沒決定要做什麼，先到處看了一圈", first_g)
+        else:
+            add("start_look", "先去看了一眼，才決定要做什麼", first_g)
+        n_before = sum(1 for g in ev.ground_reads if g < ev.plan_writes[0])
+        if n_before >= 4:
+            add("read_before_plan", f"動筆寫計畫之前，已經翻過 {n_before} 次東西", ev.plan_writes[0])
+    elif ev.a_plan_first():
+        add("start_plan", "先把要做的事寫下來，才開始動手", ev.plan_writes[0])
+    elif not ev.plan_writes and arts:
+        add("start_nothing", "沒寫計畫，直接就動手做了", arts[0])
+    if first_kind and first_g is not None:
+        add("first_touch", f"第一個動手翻的，是{first_kind}", first_g)
+    # ── 看東西
+    n_read = len(ev.file_first)
+    if n_read >= MIRROR_MANY_READS and ev.file_first:
+        add("many_reads", f"前前後後翻了 {n_read} 樣東西", max(ev.file_first.values()))
+    elif n_read <= 1 and arts:
+        add("few_reads", "沒看幾樣東西，就動手了", arts[0])
+    per_kind: dict[str, list[int]] = {}
+    for g in ev.ground_reads:
+        k = PLACE_KIND.get(_place_of(ev.rows[g].get("path")))
+        if k:
+            per_kind.setdefault(k, []).append(g)
+    if per_kind:
+        k, idxs = max(per_kind.items(), key=lambda kv: (len(kv[1]), -kv[1][0]))
+        if len(idxs) >= 4 and len(idxs) > len(ev.ground_reads) / 3:
+            add("linger", f"最常翻的是{k}，一共翻了 {len(idxs)} 次", idxs[0])
+    if ev.plan_writes:
+        aft = [g for g in ev.ground_reads if g > ev.plan_writes[0]]
+        if len(aft) >= 3:
+            add("reads_after_plan", f"寫好計畫之後，還是邊做邊翻，又翻了 {len(aft)} 次東西", aft[0])
+    if len(per_kind) >= 3:
+        firsts = sorted(v[0] for v in per_kind.values())
+        add("many_kinds", f"一共翻過 {len(per_kind)} 類不同的東西，不只盯著一處", firsts[-1])
+    for i, r in enumerate(ev.rows):
+        if r.get("ok") is False and r.get("tool") == "ws_read" and _place_of(r.get("path")):
+            if any(x.get("ok") is True and x.get("tool") in ("ws_read", "ws_list") for x in ev.rows[i + 1:]):
+                add("failed_go_on", "碰到一個打不開的東西，沒卡住，換個地方繼續", i)
+                break
+    # ── 計畫
+    for i in ev.plan_writes[:1]:
+        again = [j for j, r in enumerate(ev.rows) if j > i and r.get("tool") == "ws_read" and r.get("path") == PLAN_FILE
+                 and r.get("ok") is True]
+        if again:
+            add("reread_plan", "寫好計畫之後，又回頭讀了一遍自己寫的", again[0])
+    k = ev.plan_writes_per_attempt
+    if k >= 2:
+        seenp: dict[int, int] = {}
+        step_i = None
+        for i in ev.plan_writes:
+            seenp[att[i]] = seenp.get(att[i], 0) + 1
+            if seenp[att[i]] == 2 and step_i is None:
+                step_i = i
+        add("changed_mind", "做到一半改了主意，把計畫重寫了一遍" if k == 2 else f"計畫寫了又改，前後改了 {k - 1} 次", step_i)
+    # ── 成品
+    per_path: dict[tuple[int, str], list[int]] = {}
+    for i in arts:
+        per_path.setdefault((att[i], str(ev.rows[i].get("path"))), []).append(i)
+    rew = [(len(v), v[-1]) for v in per_path.values() if len(v) >= 2]
+    if rew:
+        n, last_i = max(rew)
+        add("revise_product", f"同一件東西寫了又改，前後共 {n} 版", last_i)
+    if ev.a_two_versions() and arts:
+        add("two_versions", "拿不定主意，乾脆做了兩個版本", arts[-1])
+    if len(ev.files) >= 2 and arts and not ev.a_two_versions():
+        add("several_made", f"做出來的不只一樣，一共 {len(ev.files)} 樣", arts[-1])
+    if arts and ev.files:
+        biggest = max(len(t) for t in ev.files.values())
+        if len(ev.files) == 1 and biggest <= SHORT_MADE_CHARS:
+            add("short_made", "做出來的東西很短，幾句話就收了", arts[-1])
+        elif biggest >= LONG_MADE_CHARS:
+            add("long_made", f"有一樣東西寫得很細，光那一樣就寫了 {biggest} 個字", arts[-1])
+    if ev.a_left_for() and arts:
+        add("left_for", "做好的東西，特地寫明了要留給誰", arts[-1])
+    if ev.a_kept() and arts:
+        add("kept", "做好的東西，寫明了收在哪裡", arts[-1])
+    # ── 節奏（只看紀錄的步數與時間）與成品的口氣（只看成品有沒有問號／留餘地的詞／數字）
+    t0 = ev.rows[0].get("ts_ms") if ev.rows else None
+    if PACE_HABITS and arts and ev.plan_writes and isinstance(t0, int) and isinstance(ev.rows[ev.plan_writes[0]].get("ts_ms"), int):
+        dt = (ev.rows[ev.plan_writes[0]]["ts_ms"] - t0) / 1000.0
+        if dt >= PACE_SLOW_S:
+            add("pace_slow", f"不急著動手，過了 {int(dt // 60)} 分 {int(dt % 60)} 秒才開始寫計畫"
+                if dt >= 60 else f"不急著動手，過了 {int(dt)} 秒才開始寫計畫", ev.plan_writes[0])
+        elif dt <= PACE_FAST_S:
+            add("pace_fast", "一進來很快就開始寫計畫", ev.plan_writes[0])
+    n_all = len(ev.all)
+    if PACE_HABITS and arts and n_all <= STEPS_FEW:
+        add("steps_few", f"從頭到尾只用了 {n_all} 步就交了", arts[-1])
+    elif PACE_HABITS and arts and n_all >= STEPS_MANY:
+        add("steps_many", f"前前後後用了 {n_all} 步才交", arts[-1])
+    prod = "\n".join(ev.files.values())
+    if arts and prod:
+        if re.search(r"[?？]", prod):
+            add("q_mark", "做出來的東西裡，留了一個問號，沒把話說死", arts[-1])
+        elif len(re.findall(r"也許|可能|大概|或許|說不定", prod)) >= 2:
+            add("hedge", "寫東西習慣留餘地，用了好幾個「也許」「可能」", arts[-1])
+        elif re.search(r"\d", prod):
+            add("digits", "做出來的東西裡，有具體的數字", arts[-1])
+    wish = ""
+    m = re.search(r"我想\s*[：:]\s*(.+)", str(plan_text or ""))
+    if m:
+        wish = re.split(r"[。\n]", m.group(1))[0]
+    if wish and title and arts and ev.plan_writes:
+        body = (title or "") + " " + " ".join(t[:200] for t in ev.files.values())
+        if not (key_bigrams(wish) & key_bigrams(body)):
+            add("plan_vs_made", "計畫寫的是一回事，最後做出來的又是另一回事", ev.plan_writes[-1])
+    # ── 收尾
+    if ev.a_recheck():
+        last_art = arts[-1]
+        after = [i for i in range(last_art + 1, len(ev.rows))
+                 if ev.rows[i].get("ok") is True and ev.rows[i].get("tool") in ("ws_list", "ws_read")]
+        first_pl = min(ev.place_first, key=ev.place_first.get) if ev.place_first else None
+        back = [i for i in after if first_pl and _place_of(ev.rows[i].get("path")) == first_pl
+                and ev.rows[i].get("tool") == "ws_read"]
+        if back and len(ev.place_first) >= 2:
+            add("recheck_first", "做完之後，又回頭去看了最早翻的那一類東西", back[0])
+        elif after:
+            add("recheck", "交出去之前，又回頭再看了一遍", after[0])
+    # ── 被退回
+    if retries > 0:
+        nxt = next((i for i, a in enumerate(att) if a >= 1), None)
+        if nxt is None and ev.rows:          # 紀錄裡看不出重來的那一步（嘗試進行中、seq 沒回頭）⇒ 指到最後一步，不編
+            nxt = len(ev.rows) - 1
+        if nxt is not None:
+            ids = set(retry_ids)
+            if "G1" in ids:
+                add("retried_open", "被退回過，因為計畫裡點名要看的東西還沒打開，補開之後才過", nxt)
+            elif ids & {"G2", "G3"}:
+                add("retried_source", "被退回過，因為有個數字說不出出處，回去補上了", nxt)
+            else:
+                add("retried", f"被退回 {retries} 次，每一次都回去改", nxt)
+    if title and arts:
+        add("made", f"最後做出來的是《{title}》", arts[-1])
+    return out
+
+
+def _jitter(seed: str, key: str) -> float:
+    h = hashlib.sha256(f"{seed}|{key}".encode("utf-8")).digest()
+    return 0.8 + 0.4 * (h[0] / 255.0)           # 0.8..1.2：只在稀有度接近時決勝負，不改變「稀有的優先」
+
+
+def _fits(c: dict[str, Any]) -> bool:
+    # 句尾還要放「（第 N 步）」；收據副本的步驟清單最多 500 步，超過的指不到就不用
+    return len(c["text"]) + len(step_tag(c["step"])) <= MAX_CARD_LINE_CHARS and c["step"] <= 500
+
+
+def mirror_pick(cands: list[dict[str, Any]], seed: str = "") -> list[dict[str, Any]]:
+    """從成立的習慣挑至多 3 句：稀有度（固定表）×確定性微擾優先；同組只留一句；
+    至少一句不是「怎麼開始」或「最後做出來的是」；依步驟先後排（讀起來像在說這一跑的經過），「做出了什麼」放最後。"""
+    ranked = sorted((c for c in cands if _fits(c)), key=lambda c: -RARITY[c["key"]] * _jitter(seed, c["key"]))
+    chosen: list[dict[str, Any]] = []
+    groups: set[str] = set()
+    for c in ranked:
+        g = MIRROR_GROUP[c["key"]]
+        if g in groups:
+            continue
+        chosen.append(c)
+        groups.add(g)
+        if len(chosen) >= MAX_MIRROR_LINES:
+            break
+    if chosen and all(MIRROR_GROUP[c["key"]] in ("start", "made") for c in chosen):
+        extra = next((c for c in ranked if MIRROR_GROUP[c["key"]] not in ("start", "made")), None)
+        if extra:
+            drop = next((c for c in reversed(chosen) if MIRROR_GROUP[c["key"]] == "made"), chosen[-1])
+            chosen[chosen.index(drop)] = extra
+    chosen.sort(key=lambda c: (c["key"] == "made", c["step"]))
+    return chosen
+
+
+def mirror_picks(rows: list[dict[str, Any]], files: dict[str, str], retries: int,
+                 title: str | None, plan_text: str = "", retry_ids: tuple[str, ...] = (),
+                 seed: str = "") -> list[dict[str, Any]]:
     ev = Evidence(rows, None)
     ev.files = dict(files or {})
-    out: list[str] = []
-    start = mirror_start(ev)
-    if start:
-        out.append(start)
-    habits = mirror_habits(ev, retries)
-    made = f"最後做出來的是《{title}》" if title else None
-    room = MAX_MIRROR_LINES - len(out) - (1 if made else 0)
-    out += [habits[k] for k in MIRROR_ORDER if k in habits][:max(room, 0)]
-    if made:
-        out.append(made)
-    return [x for x in out if len(x) <= MAX_CARD_LINE_CHARS][:MAX_MIRROR_LINES]
+    return mirror_pick(mirror_candidates(ev, retries, title, plan_text, retry_ids), seed or (title or ""))
+
+
+def mirror_lines(rows: list[dict[str, Any]], files: dict[str, str], retries: int,
+                 title: str | None, plan_text: str = "", retry_ids: tuple[str, ...] = (),
+                 seed: str = "") -> list[str]:
+    """最多 3 句，每句尾端是「（第 N 步）」＝步驟紀錄裡的第 N 步（收據頁的步驟清單用同一個編號）。"""
+    return [c["text"] + step_tag(c["step"])
+            for c in mirror_picks(rows, files, retries, title, plan_text, retry_ids, seed)]
 
 
 def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, Any]], files: dict[str, str],
-                 retries: int, traits: str = "") -> dict[str, Any]:
+                 retries: int, traits: str = "", plan_text: str = "", retry_ids: tuple[str, ...] = (),
+                 seed: str = "") -> dict[str, Any]:
     """命盤卡（確定性，不經模型）。給觀眾的 `lines`＝「像不像你」的做事習慣（`mirror_lines`，第 5 節）——
     **有沒有命盤都做**：習慣句只看步驟紀錄。解讀句與路線句只留在 `reading`／`route` 當紀錄，不進 `lines`。"""
     res: dict[str, Any] = {"first_line": first_line(f), "head": MIRROR_HEAD, "lines": [], "dropped": [],
@@ -705,7 +954,7 @@ def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, An
         res["reading"] = reading_of(letter_text, f, traits)
         if places:
             res["route"] = route_of(places, last_place_before_delivery(rows), title or NO_NAME_TITLE, retries)
-    res["lines"] = mirror_lines(rows, files, retries, title)
+    res["lines"] = mirror_lines(rows, files, retries, title, plan_text, retry_ids, seed)
     res["present"] = bool(res["lines"])
     return res
 
@@ -1239,6 +1488,31 @@ def polaroid_pick(fz: dict[str, Any] | None) -> str:
     return polaroid_sentence(str(next(iter(ls), "")))
 
 
+def retry_ids_of(rd: pathlib.Path) -> tuple[str, ...]:
+    """被退回的原因類別（閘門的格號，如 G1＝點名的東西沒打開、G2／G3＝數字的出處）：讀每一次嘗試的逐格結果，只收沒過的格。
+    讀不到 ⇒ 空（習慣句退回通用說法，不編原因）。"""
+    ids: list[str] = []
+    try:
+        runj = json.loads((pathlib.Path(rd) / "run_RUN-ON.json").read_text(encoding="utf-8"))
+        try:
+            from ops.exhibit.twin import grounding_gate as gg
+        except ImportError:            # pragma: no cover - 單檔執行
+            import grounding_gate as gg   # type: ignore[no-redef]
+        for a in runj.get("attempts", []):
+            if a.get("accepted") is True or not a.get("visible_path"):
+                continue
+            vis = json.loads(pathlib.Path(a["visible_path"]).read_text(encoding="utf-8"))
+            for fl in vis.get("files", []):
+                for c in fl.get("cases", []):
+                    if not c.get("ok"):
+                        cid, _label = gg.describe(c.get("case"), False, c.get("message") or "")
+                        if cid and cid not in ids:
+                            ids.append(str(cid))
+    except Exception:                                  # noqa: BLE001
+        return tuple(ids)
+    return tuple(ids)
+
+
 def attempts_retries(rd: pathlib.Path) -> int:
     """這一跑被閘門退回、重改過幾次＝嘗試數 − 1（`run_RUN-ON.json`）。讀不到 ⇒ 0。"""
     n = 0
@@ -1295,13 +1569,14 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
                           look=look if isinstance(look, dict) else {}, seed=rd.name)
     # 產出（2026-10-12 mirror）：給觀眾的 `head`／`lines` 只來自 `mirror_lines`——「像不像你？」＋至多 3 句做事習慣。
     # 系統檔（試的紀錄／PLAN／信…）不算「做出來的東西」，所以標題與證據都不看它們。
-    mir = compose_card(f, letter_text=letter, rows=rows, files=_product_files(files), retries=retries, traits=traits)
+    mir = compose_card(f, letter_text=letter, rows=rows, files=_product_files(files), retries=retries, traits=traits,
+                       plan_text=plan, retry_ids=retry_ids_of(rd), seed=rd.name)
     res["lines_v3"] = list(res.get("lines") or [])           # 舊的四行（verdict＋想＋試＋說）：只留紀錄
     res["title"] = mir.get("title")
     res["places"] = mir.get("places") or res.get("places") or []
     res["head"] = MIRROR_HEAD
     res["lines"] = list(mir["lines"])
-    res["tv_lines"] = list(mir["lines"])                     # 電視字幕＝同一份（≤3 句）
+    res["tv_lines"] = [strip_step(x) for x in mir["lines"]]  # 電視字幕＝同一組句子、不帶步數（≤3 句）
     res["present"] = bool(res["lines"])
     if "reading" in mir:
         res["reading"] = mir["reading"]
@@ -1315,8 +1590,8 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
 
 
 def polaroid_sentence(line: str) -> str:
-    """拍立得主字那一行＝第一句習慣（`lines[0]`）；拿掉句尾標點。"""
-    return str(line or "").rstrip("。.！!")
+    """拍立得主字那一行＝第一句習慣（`lines[0]`）；拿掉句尾的「（第 N 步）」與標點（拍立得不帶步數）。"""
+    return strip_step(line).rstrip("。.！!")
 
 
 def card_md(card: dict[str, Any]) -> str:

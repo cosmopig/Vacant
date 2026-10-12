@@ -442,7 +442,7 @@ def test_card_v3_is_four_lines_from_plan_steps_and_record_without_the_model(tmp_
     # 整合（2026-10-12）：四行卡只留紀錄（lines_v3／fortune_card.json），給觀眾的 head／lines 是「像不像你」
     assert res["lines_v3"] == [res["verdict"], res["want_line"], res["tried_line"], res["said_line"]]
     assert res["head"] == fz.MIRROR_HEAD and 1 <= len(res["lines"]) <= fz.MAX_MIRROR_LINES
-    assert res["tv_lines"] == res["lines"], "電視字幕＝同一份習慣句（≤3）"
+    assert res["tv_lines"] == [fz.strip_step(x) for x in res["lines"]], "電視字幕＝同一份習慣句（≤3）、不帶步數"
     for ln in res["lines_v3"]:
         assert ln not in res["lines"]
     assert fz.card_md(res).splitlines() == [fz.MIRROR_HEAD] + res["lines"]
@@ -464,7 +464,8 @@ def test_card_v2_is_four_parts_built_without_the_model(tmp_path) -> None:
     assert res["route"] == "它先去了草稿角，再到帳本鏈，在帳本鏈交出《鬆環對照冊》"
     assert res["title"] == "鬆環對照冊"
     # 2026-10-12：解讀句與路線句只留作紀錄；給觀眾的是做事習慣（先逛兩處才寫計畫、寫完成品又列了房間）
-    assert res["lines"] == ["還沒決定要做什麼，先到處看了一圈", "交出去之前，又回頭再看了一遍", "最後做出來的是《鬆環對照冊》"]
+    assert 2 <= len(res["lines"]) <= 3 and all(fz.step_of(x) for x in res["lines"])
+    assert {"還沒決定要做什麼，先到處看了一圈", "交出去之前，又回頭再看了一遍"} <= set(_mirror(rows, {"成品.md": "# 鬆環對照冊\n內文"}, 0, "鬆環對照冊"))
     assert res["reading"] not in res["lines"] and res["route"] not in res["lines"]
     md = fz.card_md(res).splitlines()
     assert md == [fz.MIRROR_HEAD] + res["lines"]
@@ -774,7 +775,7 @@ def test_cli_card_writes_card_json_and_sidecar_row(tmp_path) -> None:
     assert r.returncode == 0, r.stderr
     rows = sc.read(side)
     assert [x["phase"] for x in rows] == ["card"] and len(rows[0]["lines"]) <= 3 and rows[0]["lines"]
-    assert rows[0]["lines"][0] == "還沒決定要做什麼，先到處看了一圈" and sc.validate(rows) == []     # 電視字幕＝像不像你的習慣句（≤3）
+    assert rows[0]["lines"] and not any("（第" in x for x in rows[0]["lines"]) and sc.validate(rows) == []     # 電視字幕＝像不像你的習慣句（≤3）
     assert not any(x.startswith(("它心裡想：", "它試了：", "試完它說：", fz.VERDICT_PREFIX)) for x in rows[0]["lines"]), "四行卡不上電視"
     assert (rd / fz.CARD_JSON_NAME).is_file()
 
@@ -861,19 +862,26 @@ def test_p12_single_place_route_and_short_or_resident_titles(tmp_path) -> None:
 # ---------------------------------------------------------------------------
 
 def _mirror(rows, files=None, retries=0, title=None):
+    """所有「成立的習慣」句子（不含步數）——挑哪三句是 `mirror_pick` 的事（稀有度），這裡驗的是各句的判準。"""
+    ev = fz.Evidence(rows, None)
+    ev.files = dict(files or {})
+    return [c["text"] for c in fz.mirror_candidates(ev, retries, title)]
+
+
+def _picked(rows, files=None, retries=0, title=None):
     return fz.mirror_lines(rows, files or {}, retries, title)
 
 
 def test_mirror_start_follows_the_step_order() -> None:
-    assert _mirror(BROWSE_THEN_PLAN)[0] == "還沒決定要做什麼，先到處看了一圈"           # 兩個地點後才寫計畫
+    assert "還沒決定要做什麼，先到處看了一圈" in _mirror(BROWSE_THEN_PLAN)           # 兩個地點後才寫計畫
     one = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/紙團_乙.txt"),
                     _row(5, "ws_write", "PLAN.md"), _row(6, "ws_write", "成品.md")]
-    assert _mirror(one)[0] == "先去看了一眼，才決定要做什麼"                           # 只看了一處
-    assert _mirror(PLAN_THEN_BROWSE)[0] == "先把要做的事寫下來，才開始動手"
+    assert "先去看了一眼，才決定要做什麼" in _mirror(one)                           # 只看了一處
+    assert "先把要做的事寫下來，才開始動手" in _mirror(PLAN_THEN_BROWSE)
     direct = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", "成品.md")]
-    assert _mirror(direct)[0] == "沒寫計畫，直接就動手做了"
+    assert "沒寫計畫，直接就動手做了" in _mirror(direct)
     # 負控制：只寫了計畫、什麼都沒看也沒做 ⇒ 沒有任何一句（不補）
-    assert _mirror(STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")]) == []
+    assert _picked(STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")]) == []
 
 
 def test_mirror_habits_appear_only_with_their_step() -> None:
@@ -896,15 +904,16 @@ def test_mirror_habits_appear_only_with_their_step() -> None:
     assert not any("退回" in x for x in _mirror(PLAN_THEN_BROWSE, retries=0))
 
 
-def test_mirror_is_three_lines_start_habit_then_what_it_made() -> None:
+def test_mirror_is_at_most_three_lines_with_steps_and_a_real_habit() -> None:
     rows = BROWSE_THEN_PLAN + [_row(11, "ws_write", "PLAN.md")]
-    ls = _mirror(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title="點數單")
-    assert len(ls) == fz.MAX_MIRROR_LINES
-    assert ls[0] == "還沒決定要做什麼，先到處看了一圈"
-    assert ls[1] == "做到一半改了主意，把計畫重寫了一遍"                               # 優先序：改主意先於兩個版本、退回
-    assert ls[2] == "最後做出來的是《點數單》"
-    no_title = _mirror(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title=None)
-    assert no_title[1:] == ["做到一半改了主意，把計畫重寫了一遍", "拿不定主意，乾脆做了兩個版本"]
+    ls = _picked(rows, files={"a.md": "版本一", "b.md": "版本二"}, retries=1, title="點數單")
+    assert 2 <= len(ls) <= fz.MAX_MIRROR_LINES and all(fz.step_of(x) for x in ls)
+    plain = [fz.strip_step(x) for x in ls]
+    assert any(not x.startswith(("還沒決定要做什麼", "先去看了一眼", "先把要做的事寫下來", "沒寫計畫", "第一個動手翻的", "最後做出來的是"))
+               for x in plain), "至少一句不是「開頭方式」或「最後做出來的是」"
+    assert plain[-1].startswith("最後做出來的是") or all(not x.startswith("最後做出來的是") for x in plain)
+    # 「改主意」最稀有 ⇒ 一定被挑中
+    assert "做到一半改了主意，把計畫重寫了一遍" in plain
 
 
 def test_mirror_lines_never_label_the_viewer_or_tell_the_world_story() -> None:
@@ -914,12 +923,16 @@ def test_mirror_lines_never_label_the_viewer_or_tell_the_world_story() -> None:
     for rows in variants:
         for files in ({}, {"給誰.md": "收在這裡 留給你"}, {"a.md": "版本一", "b.md": "版本二"}):
             for r in (0, 3):
-                seen += _mirror(rows, files=files, retries=r, title="點數單")
+                seen += _mirror(rows, files=files, retries=r, title="點數單") + _picked(rows, files=files, retries=r, title="點數單")
     assert seen
     banned = ("你是", "MBTI", "星座", "血型", "命盤", "型", ".md", ".txt", "_") + fz.PLACES + tuple(fz.ZODIACS) + fz.MBTI_TYPES
     for x in set(seen):
-        assert len(x) <= fz.MAX_CARD_LINE_CHARS
+        assert len(x) + (0 if fz.step_of(x) else len("（第 500 步）")) <= fz.MAX_CARD_LINE_CHARS
         assert not any(b in x for b in banned), x
+
+
+def _product_only(files):
+    return fz._product_files(files)
 
 
 def test_polaroid_prints_mirror_head_and_first_habit() -> None:
@@ -949,9 +962,9 @@ def test_twinlink_polaroid_and_publish_use_the_mirror_not_the_chart() -> None:
 def test_integrated_system_files_are_not_things_made() -> None:
     """divine 的 `試的紀錄.md`、PLAN、信不是「做出來的東西」：不當標題、不算成品寫入（不觸發「交出去前又看一遍」）。"""
     rows = BROWSE_THEN_PLAN[:-2] + [_row(9, "ws_write", "成品.md"), _row(10, "ws_write", fz.RECORD_FILE), _row(11, "ws_list", ".")]
-    assert "交出去之前，又回頭再看了一遍" in _mirror(rows)         # 成品之後還有列房間 ⇒ 看了一遍
+    assert any("回頭" in x for x in _mirror(rows))         # 成品之後還有列房間 ⇒ 看了一遍
     only_record_after = BROWSE_THEN_PLAN[:-1] + [_row(10, "ws_write", fz.RECORD_FILE)]
-    assert "交出去之前，又回頭再看了一遍" not in _mirror(only_record_after), "寫試的紀錄不算看了一遍"
+    assert not any("回頭" in x for x in _mirror(only_record_after)), "寫試的紀錄不算看了一遍"
     # 只寫了試的紀錄、沒有任何成品 ⇒ 不當成品（沒有「沒寫計畫就動手」之類的誤判）
     no_art = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", fz.RECORD_FILE)]
     assert _mirror(no_art) == []
@@ -976,7 +989,8 @@ def test_integrated_build_card_keeps_divine_record_but_gives_viewers_only_the_mi
     res, rd, ws = _card(tmp_path, BROWSE_THEN_PLAN, files=files)
     # 給觀眾的
     assert res["head"] == fz.MIRROR_HEAD and 1 <= len(res["lines"]) <= 3
-    assert res["lines"][-1] == "最後做出來的是《鬆環對照冊》", "標題取成品，不是試的紀錄／PLAN"
+    assert fz.title_of(_product_only(files), fz.resolve(FULL, {})) == "鬆環對照冊", "標題取成品，不是試的紀錄／PLAN"
+    assert all(fz.step_of(x) for x in res["lines"]) and [fz.strip_step(x) for x in res["lines"]] == res["tv_lines"]
     banned = (fz.VERDICT_PREFIX, fz.WANT_PREFIX, fz.TRIED_PREFIX, fz.SAID_PREFIX, "其實是", "心裡想", "我想：")
     assert not any(b in x for x in res["lines"] + res["tv_lines"] for b in banned)
     # 過程／紀錄（divine）還在
