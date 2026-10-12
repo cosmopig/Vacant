@@ -1,0 +1,19 @@
+{
+ "steps": [
+  {
+   "run": "python3 -c 'print(17+25)'"
+  }
+ ],
+ "final": "Done.",
+ "fix": {
+  "steps": [
+   {
+    "write": [
+     "answer.txt",
+     "42\n"
+    ]
+   }
+  ],
+  "final": "Done, wrote answer.txt."
+ }
+}

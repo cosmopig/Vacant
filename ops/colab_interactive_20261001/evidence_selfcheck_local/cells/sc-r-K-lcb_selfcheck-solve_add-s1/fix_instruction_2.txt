@@ -1,0 +1,8 @@
+Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+
+The visible checks for this task were run on the file you wrote. These are the results they reported:
+
+missing from the deliverable: solution.py (found 0, need 1)
+test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:1: import solution]
+
+Please correct the file so the checks pass, and write it again.

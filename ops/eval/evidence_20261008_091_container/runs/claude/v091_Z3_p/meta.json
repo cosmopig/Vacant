@@ -1,0 +1,11 @@
+{
+  "build": "v091",
+  "scn": "Z3",
+  "mode": "p",
+  "cwd": "/work/proj",
+  "exit": "0",
+  "wall": 1.7,
+  "answer_txt": null,
+  "model_requests": 3,
+  "requests_fed_back": 0
+}

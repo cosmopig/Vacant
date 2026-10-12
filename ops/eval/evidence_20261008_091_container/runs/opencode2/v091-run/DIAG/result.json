@@ -1,0 +1,44 @@
+{
+  "scenario": "DIAG",
+  "cwd": "/work/projdiag",
+  "prompt": "Compute 6 times 7 with a quick command and write the result to answer.txt.",
+  "surface": "run",
+  "build": "v091",
+  "rc": 0,
+  "client_exit_s": 2.8,
+  "requests_at_client_exit": 3,
+  "requests_after_client_exit": 0,
+  "wall_s": 37.8,
+  "n_requests": 3,
+  "requests": [
+    {
+      "n": 1,
+      "k": 0,
+      "fed_back": false,
+      "reply": "text",
+      "tool": null
+    },
+    {
+      "n": 2,
+      "k": 0,
+      "fed_back": false,
+      "reply": "tool",
+      "tool": "shell"
+    },
+    {
+      "n": 3,
+      "k": 1,
+      "fed_back": false,
+      "reply": "text",
+      "tool": null
+    }
+  ],
+  "feedback_seen_by_model": [],
+  "events_kinds": [
+    "other",
+    "pre_tool",
+    "post_tool",
+    "session_end"
+  ],
+  "answer_txt": null
+}

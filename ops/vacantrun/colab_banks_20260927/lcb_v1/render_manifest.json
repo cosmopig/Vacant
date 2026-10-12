@@ -1,0 +1,2513 @@
+{
+ "bank": "lcb_v1",
+ "build_excluded": {},
+ "generated_by": "ops/vacantrun/colab_banks_20260927/build_banks.py",
+ "n_rendered": 89,
+ "n_upstream": 91,
+ "policy_excluded": {
+  "lcb_3613": "known_bad: dataset 的 expected 只存到 5 位小數（11/7 存成 1.57143，誤差 1.429e-06），判準容差 1e-6 ⇒ 精確解也必敗。出處 decisions/DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md、ops/gain/check_bank_precision.py:93-94 KNOWN_BAD",
+  "lcb_3763": "known_bad: separateSquares 的 expected 只存到 5 位小數，與容差 1e-6 矛盾 ⇒ 精確解也會被判錯。出處 decisions/DECISION_20260903_R440T_LCB_UNPASSABLE_TASKS.md、DECISION_20260901_R441、ops/gain/check_bank_precision.py:93-94 KNOWN_BAD"
+ },
+ "run_id": "colab_banks_20260927",
+ "source": {
+  "n_upstream": 91,
+  "path": "ops/gain/data/lcb_bank_v1.jsonl",
+  "pinned_in": "vacant_network/codebench.py LCB_BANKS",
+  "sha256": "eb2a58760818d54b0a0141aa37e1603f875c53ccc76a2d87a6bf044b39a6c659"
+ },
+ "split_rule": "visible＝題庫 `visible_tests`；隱藏檔＝`visible_tests + hidden_tests`。出處 vacant_network/codebench.py:1125-1145（LiveCodeBenchLoader.iter_tasks 的 visible_check／hidden_check）；R534 同一條（ops/gain/r534/build_bank.py::render_task）。",
+ "tasks": {
+  "lcb_3487": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-12T07:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3487",
+   "entry_point": "maxRemovals",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c3e4bc0dc654afc72958d29c8ad0d59e1f0c1975bfefaa8e773048ec14023030",
+    "templates/contract.md": "3dc975116af567b98b4d1b6bd28936165fcaaf8194850141dded2fc7fb6dfa93",
+    "templates/goal.md": "6b1eba45e895f0512c19f62bb8c5960f97ee6294ab6249ab1cf014eecab180fa",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "a673f007b91b12de2599b738a86d0177b1cdd7a2315d880b167f8baa043a26ba"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 28386,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "6b1eba45e895f0512c19f62bb8c5960f97ee6294ab6249ab1cf014eecab180fa",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3487",
+   "template_bytes": 5821
+  },
+  "lcb_3502": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-19T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3502",
+   "entry_point": "numberOfSubstrings",
+   "files_sha256": {
+    "hidden/test_hidden.py": "6645aed53ce82b967cdce5bed665ed698ce4bf98e031095dfcef7ebbb325ffe2",
+    "templates/contract.md": "c001d342f14cbffab28a8f0ca7790462e594bab6b1183167fab1853044987917",
+    "templates/goal.md": "20a94bad189ec34b6200fd0e0f4323255dd5123b8d17492330af1103a5cb8802",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "eca728467c526c9e9f74c7873f1a124b8b3293724986663ba0f2239f830b0e8d"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 22045,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "20a94bad189ec34b6200fd0e0f4323255dd5123b8d17492330af1103a5cb8802",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3502",
+   "template_bytes": 4280
+  },
+  "lcb_3562": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-04T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3562",
+   "entry_point": "maximumWeight",
+   "files_sha256": {
+    "hidden/test_hidden.py": "ef4439e1d62e0bab288d1607142a4b53df2c9c17d06c3ec2fa3daaa9e349f078",
+    "templates/contract.md": "290b3c8638e11b2758e2662ddabf29d1cd8072860d89eba5623a746a5af43f0d",
+    "templates/goal.md": "44c3b39bebe8867d0ad550fe8441af2b8c1ced812c655d7f855ae87ffb2ca72d",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "517566fd4a673292aec26f0383fa5bfd0eef4501c442b0ba567b5221fa850276"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7318,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 31,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "44c3b39bebe8867d0ad550fe8441af2b8c1ced812c655d7f855ae87ffb2ca72d",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3562",
+   "template_bytes": 5279
+  },
+  "lcb_3566": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-19T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3566",
+   "entry_point": "stringSequence",
+   "files_sha256": {
+    "hidden/test_hidden.py": "406da895e53bd136c0e02e19520ad396d8e929a935c0bf4277a5be6a6267089a",
+    "templates/contract.md": "364abfd3ca81a5b66902dffdfc63218352d2fa115418657357714821aae58fbc",
+    "templates/goal.md": "1162a383c47833b8aeb601c81116f3ad14b06673beee51f863ded398aa079917",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "183e90281524d7414989a8eddf711fc6ef1a69581a7d3f556273e53597b95a63"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6878,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "1162a383c47833b8aeb601c81116f3ad14b06673beee51f863ded398aa079917",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3566",
+   "template_bytes": 4981
+  },
+  "lcb_3587": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-26T07:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3587",
+   "entry_point": "maxScore",
+   "files_sha256": {
+    "hidden/test_hidden.py": "368dad4e4fe08a94512fb5ec0d12e111cc91c33066f86332140c5d49322ee800",
+    "templates/contract.md": "34f6304e0782060c0fca926af2e72ac2c18cccf97be757442089553832fe52dc",
+    "templates/goal.md": "e39f2212e5e439a5f89cb69c4ab30ae8988c96e667a82365aad137b39264d975",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "c4f07e8498c6fcea8894c59c19ee3af14a2f1c2d1c206d2505fd280212155f54"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7032,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 36,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "e39f2212e5e439a5f89cb69c4ab30ae8988c96e667a82365aad137b39264d975",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3587",
+   "template_bytes": 5103
+  },
+  "lcb_3588": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-12T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3588",
+   "entry_point": "countWinningSequences",
+   "files_sha256": {
+    "hidden/test_hidden.py": "cee7c087c54ebebda75d27bc482bfe313800a06619af5ef55b4958a070d55c4c",
+    "templates/contract.md": "35f4a642b57eee6f67251af081615e3d506bbf3750d3b70509f73d187ec9df5e",
+    "templates/goal.md": "49af063dfd1e7ad2e6972a35b513d2a81f47e5f7edfd898881f409634828a5c2",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "b765b216e963b5fdbd6bff314a144f7d2fba473191689d496f4f57bf6d631a3e"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7807,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "49af063dfd1e7ad2e6972a35b513d2a81f47e5f7edfd898881f409634828a5c2",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3588",
+   "template_bytes": 5718
+  },
+  "lcb_3591": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-23T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3591",
+   "entry_point": "shiftDistance",
+   "files_sha256": {
+    "hidden/test_hidden.py": "9949aa5165888364bdf502b38a1b3101272453b0592eb6eeab0a6220c6977182",
+    "templates/contract.md": "e5e34e5ba5fd748838a55cb64e962e2899bae633df70e210abc56b66fdae7647",
+    "templates/goal.md": "fc6d7cd4b868f5cf2536130432f22676fba0f80a217f6035f337fc1cde393fbe",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "60e1e069f898099ae96d624300a64c17c81b0a12f4b4e26c99daace3cac6e0ad"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 43502,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 28,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "fc6d7cd4b868f5cf2536130432f22676fba0f80a217f6035f337fc1cde393fbe",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3591",
+   "template_bytes": 6046
+  },
+  "lcb_3593": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-26T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3593",
+   "entry_point": "maxScore",
+   "files_sha256": {
+    "hidden/test_hidden.py": "fc8786247789fe8568fd5f32e98a1f5487793a10251ebe222579db6898891e97",
+    "templates/contract.md": "34f6304e0782060c0fca926af2e72ac2c18cccf97be757442089553832fe52dc",
+    "templates/goal.md": "bcc8d026197ac9eedef352d041626bc2b4c3d2d7f64743402662a49d415e7aec",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "7e6131947af47960b9ea2c1d47e67d93d96a70b5dcaefcfd92c8cced4655fe91"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 8538,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "bcc8d026197ac9eedef352d041626bc2b4c3d2d7f64743402662a49d415e7aec",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3593",
+   "template_bytes": 4558
+  },
+  "lcb_3594": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-30T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3594",
+   "entry_point": "getLargestOutlier",
+   "files_sha256": {
+    "hidden/test_hidden.py": "b2c4745647db1de048dab338afbdb67ff13040fa51314f13ea83353387c31905",
+    "templates/contract.md": "ee94b7d01c3ebff93789cd48ffae9a6909bd600eb7f9da11f77252e056f500a5",
+    "templates/goal.md": "389a8a4a2c74688225ed57b93fdf05ab16d794dfeeac7c8dc155cc04697559b1",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e885f57c01b2c7c26ba28550af0a05ba7fc20784669d18d8526f02d173478d48"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6062,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "389a8a4a2c74688225ed57b93fdf05ab16d794dfeeac7c8dc155cc04697559b1",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3594",
+   "template_bytes": 4997
+  },
+  "lcb_3603": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-19T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3603",
+   "entry_point": "findAnswer",
+   "files_sha256": {
+    "hidden/test_hidden.py": "2d751b61466ee15f5f7eb995a47577eab10e2aa0663f8f8cdf9665bc5df9bf91",
+    "templates/contract.md": "c3e71143fd74bb15188452f4873a1ebb35f58e3b558d1758fc5ed2adf8b5dbf2",
+    "templates/goal.md": "f61aab1912214b4c8df08656758cc72fd240270d93827d7147af8aab5f5b0f92",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "fec93a294440a788a299fae5a7d39f30bce2d75f77446bc7aff5a0b7129963c6"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7430,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "f61aab1912214b4c8df08656758cc72fd240270d93827d7147af8aab5f5b0f92",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3603",
+   "template_bytes": 5620
+  },
+  "lcb_3604": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-12T07:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3604",
+   "entry_point": "numberOfWays",
+   "files_sha256": {
+    "hidden/test_hidden.py": "5d27e33e30770d280ae1a102cc85d6564f5be078f04467af0d903939941d2594",
+    "templates/contract.md": "ddd8ad40dccf33a0dbf5ad82d4df4f5c7a532f0bbc5cff8cbbdc9478e94c9a7e",
+    "templates/goal.md": "36f741f51145a5dba29e719121cba1fe443c039b50bcd6b3b2d405b65d09ae4a",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "ab6b16094063ef17683145a9a6c36dcfcf2a677175cf7a92fbd9127df4ccbd2f"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5707,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "36f741f51145a5dba29e719121cba1fe443c039b50bcd6b3b2d405b65d09ae4a",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3604",
+   "template_bytes": 4939
+  },
+  "lcb_3607": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-19T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3607",
+   "entry_point": "minOperations",
+   "files_sha256": {
+    "hidden/test_hidden.py": "35fb409d4c416c4734cac60cdcc77fda39376e305b0dc493a6507d3695f3ffd1",
+    "templates/contract.md": "cea2afda76f2c6bfb0b358dae2602708c64aa280ff325b31a2edb4ce33038b03",
+    "templates/goal.md": "919a569b1a011c29ca51a006b7cc32d7df698ef7eff4db767eb666128e5c4568",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "0da4dd8ba9b5878f46dbbfb364dfdeba8dc21720b284612fcdbc6dedad4fdaa8"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5612,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "919a569b1a011c29ca51a006b7cc32d7df698ef7eff4db767eb666128e5c4568",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3607",
+   "template_bytes": 4671
+  },
+  "lcb_3608": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-26T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3608",
+   "entry_point": "subsequencePairCount",
+   "files_sha256": {
+    "hidden/test_hidden.py": "d20930e56ee1e1621764e0d009e02fd59d4882b1a7449bdcafa538caad654949",
+    "templates/contract.md": "ce119ef9b14fbee67acb1183425279b8585f62458b261ca632fd8ce8a0b2743a",
+    "templates/goal.md": "4fd088aeb824e36d667948f0d840f25acb88e30398796ef3d2a1ecdac3e65fb8",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "be0732173720b5a092e164492a6d2dea95a1b9ccc202693c453ae9e2afed6f1e"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 10098,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "4fd088aeb824e36d667948f0d840f25acb88e30398796ef3d2a1ecdac3e65fb8",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3608",
+   "template_bytes": 5032
+  },
+  "lcb_3620": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-21T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3620",
+   "entry_point": "maxDistinctElements",
+   "files_sha256": {
+    "hidden/test_hidden.py": "a5726d1119ca14cdf9de21c0627185b2af16d0bcad11ad60eca27a14e8cb8742",
+    "templates/contract.md": "768b94d76b5941efef60a3c5c35dd8635868ef2ebda524bc2295d91233c892b5",
+    "templates/goal.md": "69fc99e820c1696fb958710a77ba9e10ceb8bb93b69bc3197fabbcb107385792",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "7026182d60ed575174cff06bd1b16513ac29f492e2060186fdd3be960c50ecf7"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 31951,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 30,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "69fc99e820c1696fb958710a77ba9e10ceb8bb93b69bc3197fabbcb107385792",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3620",
+   "template_bytes": 4366
+  },
+  "lcb_3622": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-09T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3622",
+   "entry_point": "maxFrequency",
+   "files_sha256": {
+    "hidden/test_hidden.py": "baf51808d910bf2fc20ec1681783b8857229de9643069186362b288dfa6653fc",
+    "templates/contract.md": "ad75c2672abc90c3eaa31a5cefc497515f4efe98746afd0142042ca35eb1e6a0",
+    "templates/goal.md": "9e63d17ba53d9a8001589bfef7aa53e9b3fdbf369be789a1d680601425f8c179",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "37f8f3682506cb8d7be7469dff1a4254c8c444520736be91d3c3a5e587148812"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 11754,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 27,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "9e63d17ba53d9a8001589bfef7aa53e9b3fdbf369be789a1d680601425f8c179",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3622",
+   "template_bytes": 4539
+  },
+  "lcb_3627": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-02T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3627",
+   "entry_point": "minTimeToReach",
+   "files_sha256": {
+    "hidden/test_hidden.py": "bb0119806db73c35e29d90bbd2accd26aee9db4011dece9286723988e1dc829c",
+    "templates/contract.md": "a9e2112dfff88e4e8211b34a834a7c82514efe8cf100142d71d637d64347d1c9",
+    "templates/goal.md": "f7390bb082861cdba1adb5924090166f1591962e55ebe0e5e4945cb1146274f1",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "5fe6e7e077f8985fcece0db5ebcdc8402bbfad2f0b8fe510966f19648964604a"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 87984,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 39,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "f7390bb082861cdba1adb5924090166f1591962e55ebe0e5e4945cb1146274f1",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3627",
+   "template_bytes": 5065
+  },
+  "lcb_3629": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-10-26T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3629",
+   "entry_point": "lengthAfterTransformations",
+   "files_sha256": {
+    "hidden/test_hidden.py": "7ae05131db00c9d7d72a7afc6280ac7d92d3d1c61c04eb03a93ce4f261c1d208",
+    "templates/contract.md": "38ec450ddad9da9950aa09aacfc47e53284af043f1c37596d43a7d45c2564efc",
+    "templates/goal.md": "5fe6983f159c47dd87c566ab21664ebb1ebc95ad6cfaa811e04f5dfb42811596",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "3af4f634f8bbd18d99200eb90f9545360ecbbd3ab7c772b34a4c8e78fad189ba"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5797,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "5fe6983f159c47dd87c566ab21664ebb1ebc95ad6cfaa811e04f5dfb42811596",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3629",
+   "template_bytes": 5076
+  },
+  "lcb_3631": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-09T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3631",
+   "entry_point": "countKReducibleNumbers",
+   "files_sha256": {
+    "hidden/test_hidden.py": "fd8265bd5be0e1b3978a282144d301f1e24655ddc075f23606181c02fd9cc2a4",
+    "templates/contract.md": "f05e17b7edd6253b2ee2125def4e7e05ce6c5fb900588f4055315368cd7eb2b9",
+    "templates/goal.md": "6739af13003e9c4363bda764db4e481da8035422a79e0f3adb0407abf54c931d",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "fb2ee1128dfe6dbbf70922d6fa8e94098d624a81150a8d1313e486b2d8dcd132"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 11489,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "6739af13003e9c4363bda764db4e481da8035422a79e0f3adb0407abf54c931d",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3631",
+   "template_bytes": 5018
+  },
+  "lcb_3634": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-04T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3634",
+   "entry_point": "calculateScore",
+   "files_sha256": {
+    "hidden/test_hidden.py": "e4c4a98080cb81e7ecc5e4f45c5dfb5bef3a384b2447900329d837dded9365eb",
+    "templates/contract.md": "429e7024b0e40e8dc12f5bd578e3330625042fe131a06ca6f9b30c1f94a28df0",
+    "templates/goal.md": "94ac35dff37297b601c39d21bcfd1cd08832e7db36a68f6748f2384ea209f5d5",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "4bc4997590c45d70a3ad0c1007710bf8dc0e37db30d60521f58997395bc4fd8f"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 23478,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 32,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "94ac35dff37297b601c39d21bcfd1cd08832e7db36a68f6748f2384ea209f5d5",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3634",
+   "template_bytes": 5098
+  },
+  "lcb_3637": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-02T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3637",
+   "entry_point": "countBalancedPermutations",
+   "files_sha256": {
+    "hidden/test_hidden.py": "19d2bb3d6e6deadb33033332e207f034658b10b0c00e7ef4c462ba255fe1f64b",
+    "templates/contract.md": "bdf8145056f7c2a25fcc02a80cb52b8881507a14e9ee6ca9558798847fb20a66",
+    "templates/goal.md": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "605caf125feda78e8228658db9f10f67579021b5201af2696fd27f378930c4e2"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6622,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "264773646deed3698f6b050383c0b4d1134c1c0bcac364a45782edced45ade37",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3637",
+   "template_bytes": 4873
+  },
+  "lcb_3638": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-14T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3638",
+   "entry_point": "makeStringGood",
+   "files_sha256": {
+    "hidden/test_hidden.py": "26e1d2c5a411f07cd7f3494b5d809f24d6f01ea480757ecf5d0ed5b37cf4641a",
+    "templates/contract.md": "607eb2be94792197631711d0e2e5cd2a5af607c9a745e192d7c23610c295fd74",
+    "templates/goal.md": "7b51038e812d4d4da84ab11968eec97f498d9f8887406eb377fd06ac58d0e17f",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "26404966572b4bf4c46711a8a76f7e47c1b5fc9677801f6ca2b34dafb8e283ad"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 21048,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 31,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "7b51038e812d4d4da84ab11968eec97f498d9f8887406eb377fd06ac58d0e17f",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3638",
+   "template_bytes": 4713
+  },
+  "lcb_3639": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-16T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3639",
+   "entry_point": "isZeroArray",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c5bc4c40192f3093c35d3cbe1e14cb4111631009bc9275a5d86a2bb1ba4e8f31",
+    "templates/contract.md": "4acb4f50f81d8706e8130504f1bc127404c7cd389a2d845d1baa3d3a67dcaec6",
+    "templates/goal.md": "540070224f40eb45079c304b010b564d1e6e8423f0d4a1b58a7e97aae3c209d1",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "3b54f2616d7884b98e47d3a8fd22f33f3f971f97a97fce523c8d389f43f5b5dc"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7371,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "540070224f40eb45079c304b010b564d1e6e8423f0d4a1b58a7e97aae3c209d1",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3639",
+   "template_bytes": 4904
+  },
+  "lcb_3646": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-09T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3646",
+   "entry_point": "sumOfGoodSubsequences",
+   "files_sha256": {
+    "hidden/test_hidden.py": "283c79133e594c1e6ba74ddb896cfd0503afcec266c4988ddaf58251c8100cde",
+    "templates/contract.md": "0b8c5df452ad893e145d89348041f94b87a293f4765b21e05344e47277d83428",
+    "templates/goal.md": "b185096d97b0cdb65f763cdfd79596dfb9fd9c03eb2960403a6360bf9906cd93",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "924281acb3ff5ffd3631afdc3fe74cb0442aa9fe0dc9d5a66887287fc6741f6a"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5607,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "b185096d97b0cdb65f763cdfd79596dfb9fd9c03eb2960403a6360bf9906cd93",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3646",
+   "template_bytes": 4459
+  },
+  "lcb_3647": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-23T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3647",
+   "entry_point": "maxRemoval",
+   "files_sha256": {
+    "hidden/test_hidden.py": "7bbef8c3c6bf15b74b5a842bdab29638af2d5ba3f144137a5ab99a1e0cbbaeb1",
+    "templates/contract.md": "6916646bbfcca574da8bba284fa90a849c43ea35d9e5ea8a402da312039cd47c",
+    "templates/goal.md": "a2fb83fadc8937d4d09c32379c142bb8323bc97457368ad378763b842ad68c24",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "71721956bcc669304e28981a6b861e9bd4f0c5970f540931ac21744d19d1fe92"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 16566,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 28,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "a2fb83fadc8937d4d09c32379c142bb8323bc97457368ad378763b842ad68c24",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3647",
+   "template_bytes": 5243
+  },
+  "lcb_3648": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-23T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3648",
+   "entry_point": "maxCollectedFruits",
+   "files_sha256": {
+    "hidden/test_hidden.py": "0b8e2ee506a4df5981e07d070ef9d58d5be4a9d4722790d4fb24e24cd6b74e73",
+    "templates/contract.md": "ca1eea4bc135bdb4db4d11d0e72ba5da655c8afcc94f39d4377d24ccbc366dd4",
+    "templates/goal.md": "18b64f8543ec01b8c9c9bdc8f0ed8d8b98a636b7c6f4a123f93d95b6c4aa779b",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "37c8009b2fcc9b40610c29e6979f78f78396eef038bbd9c887dc254d032667cf"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 19170,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 31,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "18b64f8543ec01b8c9c9bdc8f0ed8d8b98a636b7c6f4a123f93d95b6c4aa779b",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3648",
+   "template_bytes": 5735
+  },
+  "lcb_3649": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-07T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3649",
+   "entry_point": "findMinimumTime",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c87c3a55831d969517db2d5f3d2a48ceb933e5105ca325fb43197246e6643067",
+    "templates/contract.md": "e98e0e678206c49bc1c01306714b4b4f3b391a8e8ed1769c2f25ed680b7d4fa1",
+    "templates/goal.md": "a4a201bcb15e0a3fd92b0841691a2494ab9b6e5906b48ee1b60631f2568cb775",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "f420c6d70a8e960fe132650c4b20fc0526542a088073b84ee622ece9bbed3186"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6319,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "a4a201bcb15e0a3fd92b0841691a2494ab9b6e5906b48ee1b60631f2568cb775",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3649",
+   "template_bytes": 5214
+  },
+  "lcb_3653": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-07T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3653",
+   "entry_point": "maxSubarraySum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "0a62e50f6d754b0a401ed5ee4b151044d04a3c3484b6ebece6283715e8ed4240",
+    "templates/contract.md": "b32e288a8dd3589d096c3f79734a7fdb491e6e7cc84bf8fd4a708c2e4da4f9ed",
+    "templates/goal.md": "c82eec03a54997e34e4493de77101782ed0d8f28eea7aec69f5fceef836aa74d",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e5c4d9a9d08bf4b3e3902c6bba8c079e565100501d4b732c1db3006ca50c4016"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5757,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "c82eec03a54997e34e4493de77101782ed0d8f28eea7aec69f5fceef836aa74d",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3653",
+   "template_bytes": 4562
+  },
+  "lcb_3654": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-23T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3654",
+   "entry_point": "minArraySum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "93cb841ad8865202e222d887f7fe58a0b4b305f9ee6a858639b7c08c9c1f0fe5",
+    "templates/contract.md": "af9be32a6683f2713e47ceb89e505ba3539f83b669f91eabd9399afc23817d4e",
+    "templates/goal.md": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "ef61405242b1f73246630f0cc860b61164599344448bab6f1dfe7c576f8b1097"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 12174,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "9ccb6664f70d5976c62ec914cda8686a13ff477e8d0451c813ab9b8a0e62057a",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3654",
+   "template_bytes": 5135
+  },
+  "lcb_3655": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-07T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3655",
+   "entry_point": "minOperations",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c919dfb6a23b064fb4b03ad485232b0e473513538d6f3cc43fab027257048d31",
+    "templates/contract.md": "cea2afda76f2c6bfb0b358dae2602708c64aa280ff325b31a2edb4ce33038b03",
+    "templates/goal.md": "5c9b1f2645fa6ad60c9616e7ee5ded583f109a69bc83fb934579c2f3e6fdd3c3",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e4d8668232f7cc7d14aa03a5ee79ff3571b08fec48e50ccae7463e1ab922de9d"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5677,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "5c9b1f2645fa6ad60c9616e7ee5ded583f109a69bc83fb934579c2f3e6fdd3c3",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3655",
+   "template_bytes": 4892
+  },
+  "lcb_3657": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-21T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3657",
+   "entry_point": "checkValidCuts",
+   "files_sha256": {
+    "hidden/test_hidden.py": "93ac9c14244763f728c62a8c4464cf3951ecba43ae425a3aad0df73a4d96be33",
+    "templates/contract.md": "2891cc25280fe94eb4da46e98eb2593fa2467df158d25f93a2fc724cadaed5cb",
+    "templates/goal.md": "9ec4bc949d9ada837d038e36d05bf46f03fbecdb87d5a0ba66f48641761fde67",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "d5f0d2f676aa6b9308763b68bc5c9e93e35320a6f1c4c7d0ea7c005d76b067f6"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 39187,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 35,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "9ec4bc949d9ada837d038e36d05bf46f03fbecdb87d5a0ba66f48641761fde67",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3657",
+   "template_bytes": 5612
+  },
+  "lcb_3658": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-16T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3658",
+   "entry_point": "minDifference",
+   "files_sha256": {
+    "hidden/test_hidden.py": "3d1cb1c7a0296e1e212069b0b5544d57f455ca1e9fe392330fc20aa09c110274",
+    "templates/contract.md": "cade323a2cba0d046db8f97a27e9283483e069dde3663a0b982b3b0be3f3cf5a",
+    "templates/goal.md": "986baea0a9f1b603159510a92dae49952abd682a0fa0d9750879f93b825b01aa",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "a49f61ad2231c889a7000de065daaa2bd600a47cc1012e76953d67d0b12c35e0"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 32850,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 30,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "986baea0a9f1b603159510a92dae49952abd682a0fa0d9750879f93b825b01aa",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3658",
+   "template_bytes": 4783
+  },
+  "lcb_3659": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-21T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3659",
+   "entry_point": "countPathsWithXorValue",
+   "files_sha256": {
+    "hidden/test_hidden.py": "768232dc59e48390c49ded7122c90fe6fa9fb8f1fe9875efb3f929e449ef571b",
+    "templates/contract.md": "c566e7cf53fe76998b58ed58b991f20870b97b691ebad3d39f815479159cef60",
+    "templates/goal.md": "25f4293d355c82d8d6af7a504078ad168b4b469940afaadcd93d6a5e9ac99ea7",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "b7f38e2e7c89ae1329d17d0157c79d78f5badae84ac9d592aed170b88d5fd23a"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 67802,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 29,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "25f4293d355c82d8d6af7a504078ad168b4b469940afaadcd93d6a5e9ac99ea7",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3659",
+   "template_bytes": 5460
+  },
+  "lcb_3674": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-11T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3674",
+   "entry_point": "countNonDecreasingSubarrays",
+   "files_sha256": {
+    "hidden/test_hidden.py": "31a5f99bd8724ad0c3295e7ff02b713b28365667bd3f318bc0a82898474223c4",
+    "templates/contract.md": "b75136f562579d65e310272cf7a006eb77b7bfc20186e0aa0fa09f86b75f9333",
+    "templates/goal.md": "835d130af1bffacdda4ec5d9a70de86e4b5aea562da8163ae0a105de478f01f3",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "7f65ee346775ce50cecc36a02f53ab842c9c4a919785737a4e4dfac352b4f6e0"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5995,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "835d130af1bffacdda4ec5d9a70de86e4b5aea562da8163ae0a105de478f01f3",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3674",
+   "template_bytes": 5107
+  },
+  "lcb_3675": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-11-23T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3675",
+   "entry_point": "maximizeSumOfWeights",
+   "files_sha256": {
+    "hidden/test_hidden.py": "095438c9286391bfa8d946e1339820220f99e23b9ce751d7ad66a1cdfbb267d3",
+    "templates/contract.md": "4de6b08efe30781b9fad4cc45c01ebd021ff13b93f95fb04c4583e07a6a9528b",
+    "templates/goal.md": "a1ab6bd0dde91ee56edc6fcd72ec474de0836a80cc4139e57eceb9bf8aae5083",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "84e97c87b527192b05c6d47a11c34c62ec3e6ccdab4a0601f35d82d5e9c6de31"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 20644,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "a1ab6bd0dde91ee56edc6fcd72ec474de0836a80cc4139e57eceb9bf8aae5083",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3675",
+   "template_bytes": 5107
+  },
+  "lcb_3677": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-11T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3677",
+   "entry_point": "maximumAmount",
+   "files_sha256": {
+    "hidden/test_hidden.py": "9034e8075068bd1aa6f1b496cd03d5c1f91ec8bc463586781a1ef9238d6a7bcb",
+    "templates/contract.md": "1ecf5be68af8b37a7fe905d4c3da3ebdde62958841d6eea234f37cea2201c5ba",
+    "templates/goal.md": "a5fe5a0a401029cbd29e09cd870578db688624940e81b67a9b33e85b1eb837c5",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "6a9b1d8da3db7e6d56be742c913d1fc625182f2530d1a6a71c53ddf60be20a37"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 14038,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 29,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "a5fe5a0a401029cbd29e09cd870578db688624940e81b67a9b33e85b1eb837c5",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3677",
+   "template_bytes": 5314
+  },
+  "lcb_3680": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-07T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3680",
+   "entry_point": "countComponents",
+   "files_sha256": {
+    "hidden/test_hidden.py": "2b51382a182836ef574e69562ec65261cbe77d1c1e32d3e5d048399ce52c58ae",
+    "templates/contract.md": "2e14bba82e66b1ed7e0e1703d6439e66b9fe9e12ac295efef912940c9ba2dcf5",
+    "templates/goal.md": "241672b806536f976c0c1d07b94b299cc53d62ecbaef74a4c392a64ee91b5671",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "b4d84ead16ea7d49b2e956e76c3ae61617a7fb0f8aed55562af14826d9f5d7b6"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 40345,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 31,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "241672b806536f976c0c1d07b94b299cc53d62ecbaef74a4c392a64ee91b5671",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3680",
+   "template_bytes": 4668
+  },
+  "lcb_3681": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-07T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3681",
+   "entry_point": "maxRectangleArea",
+   "files_sha256": {
+    "hidden/test_hidden.py": "225ea1034f6ca4c0f7afecf8dbe0a0c745ac0afe4ad2a186a7a86353529bf300",
+    "templates/contract.md": "5b5e5ce79ac3943bb0f2a800ce8c5947f0d34d8e06b9bf19109d7f631f42383e",
+    "templates/goal.md": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "9e27a08abab734d56b74dd3e544f5e44c0d94efa84b0576e04e209689207c6c8"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7397,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "b45f83054f2f7f118de65a7e92b2a933c5f9bcb5a223843139c70287b10fa8a2",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3681",
+   "template_bytes": 5221
+  },
+  "lcb_3682": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-28T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3682",
+   "entry_point": "countGoodArrays",
+   "files_sha256": {
+    "hidden/test_hidden.py": "756bd69917762c3a565a753a821ce155b02f63784f318697a57841ded1c056ab",
+    "templates/contract.md": "d2e9a7ac87944708a9dc4576bcfbadfbc6101de29a4c40178bdca739c0cadbae",
+    "templates/goal.md": "9c1690085aff7b60720dbe831513c14d1df7bc5d4ac93550632b46af32251a82",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "a21d7c97b067d97fefc2d64efa12e15f3e441eae8a715dd0eb1b8696aa9f6b07"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5846,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "9c1690085aff7b60720dbe831513c14d1df7bc5d4ac93550632b46af32251a82",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3682",
+   "template_bytes": 4737
+  },
+  "lcb_3683": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-28T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3683",
+   "entry_point": "answerString",
+   "files_sha256": {
+    "hidden/test_hidden.py": "2e184d5b8f6792a008f3466103953dcf8d3b2b1d37e9d0556fbc4f8c180be0b0",
+    "templates/contract.md": "d49ef854ba0c12ab9331754ab72c5a95fd2862370e4edfa939359cc934dd8b73",
+    "templates/goal.md": "bae07f3f53d09850bf87098aa47708da5f5e1834a9a5815ef59a1831df2a1554",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e5b8de6cfa1248c0904223e5db7613d1e8d5bc10de2c0dd2a66aa2e5ed10eefb"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 55460,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "bae07f3f53d09850bf87098aa47708da5f5e1834a9a5815ef59a1831df2a1554",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3683",
+   "template_bytes": 4457
+  },
+  "lcb_3686": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-14T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3686",
+   "entry_point": "beautifulSplits",
+   "files_sha256": {
+    "hidden/test_hidden.py": "d2fcae3710772194d8f1c1d4169fe8eb1a2d6b70fcc527aebcabb413ff33f8ae",
+    "templates/contract.md": "8860d081321832360b60fab615c572eadce9c0dad5424f1f921d73cda853c88b",
+    "templates/goal.md": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "969cd7c87683d18a3cc65879fc7ba64d85f2e07534812421ceac76d0ea33b106"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 49271,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "e5893d082deb19d3cb251451353244d9097adbab35b9303486286ed501935cf8",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3686",
+   "template_bytes": 4345
+  },
+  "lcb_3687": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-18T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3687",
+   "entry_point": "longestSpecialPath",
+   "files_sha256": {
+    "hidden/test_hidden.py": "e30bc30762c29c5cc274e246dbb56d5609413c5e9ff4219cfc176fda5064a8a6",
+    "templates/contract.md": "12218e689471b010fb6b066dffc12feafc32f3b2be60650863ce1c25f51f14c3",
+    "templates/goal.md": "9597fbac099491b80221c89b57c90d7bce1e30f6b8695d7f6e1d5eed7ad9d5e9",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "088f03a1f5f15924b077df6a650fca43342be09983811325811ee5724b3d55ad"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 25819,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 27,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "9597fbac099491b80221c89b57c90d7bce1e30f6b8695d7f6e1d5eed7ad9d5e9",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3687",
+   "template_bytes": 5259
+  },
+  "lcb_3688": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-04T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3688",
+   "entry_point": "maxSubarraySum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "992529487d46ee180a4f0a35535ebb2dc2e6ada6cc4d1d1af79735fc5c2814ef",
+    "templates/contract.md": "b32e288a8dd3589d096c3f79734a7fdb491e6e7cc84bf8fd4a708c2e4da4f9ed",
+    "templates/goal.md": "50281a62f50f5db1ca7d1bcbd1efb74df4b3b612dd27a91e9fcc0b67aa725d78",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "c0413f3f1622815c2449e4f082df386cf079aff3eb6741c663132ef6e3033a25"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 50413,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 28,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "50281a62f50f5db1ca7d1bcbd1efb74df4b3b612dd27a91e9fcc0b67aa725d78",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3688",
+   "template_bytes": 4947
+  },
+  "lcb_3690": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-21T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3690",
+   "entry_point": "minLength",
+   "files_sha256": {
+    "hidden/test_hidden.py": "35329c1e2586eef061297fdcb7da4deedb5a7f749c98cf58d8ff4d4bc80a6448",
+    "templates/contract.md": "0ebb5fe5bd35cb3e4bdf81a3761de06b657e561fdcc6ea7d8b9b69b92c5e49eb",
+    "templates/goal.md": "ac2d867d2836ffd803f11eadcf28228b714ed5b968fc07e69e4723852ecb2112",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "1e23ab9c6d0de46a3953ed734e426aeb05005c2064042edb750b9fb7c3c36a16"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 11135,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "ac2d867d2836ffd803f11eadcf28228b714ed5b968fc07e69e4723852ecb2112",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3690",
+   "template_bytes": 4663
+  },
+  "lcb_3692": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-15T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3692",
+   "entry_point": "shortestMatchingSubstring",
+   "files_sha256": {
+    "hidden/test_hidden.py": "6d4048ee8ba05ae06e954111459ddd2d7f796a230a030d649ebe3f3bc44ade1e",
+    "templates/contract.md": "437a496823fb3a5536533c7d529afe9c7476468867a0f1bb96d62ae5dc1897d8",
+    "templates/goal.md": "7efa660b7612750c26f3b5bf921a2f09a3fe0a09baa4779a0d7930c7db2f67f1",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "dc55f8e07d86cc0b44429c2d9714ee9483f53765c3488a2e58db4ed96564680b"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6606,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "7efa660b7612750c26f3b5bf921a2f09a3fe0a09baa4779a0d7930c7db2f67f1",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3692",
+   "template_bytes": 5086
+  },
+  "lcb_3696": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-08T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3696",
+   "entry_point": "countSubstrings",
+   "files_sha256": {
+    "hidden/test_hidden.py": "02e4b257bb0dc49dae2d61d23b3995a596549e7232ac603dc431446314cbfe7a",
+    "templates/contract.md": "fcff977a9175668fd7cd1ea565793b661a900f17b445276186ccfec0ad730e21",
+    "templates/goal.md": "90cd8401e95a28e8831b59577dba74d7a1de2f45696b2c2482fbcb34f0e60115",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "1f5237c625a0430c27ccdb0c0041e86e335c1ec0c5050212325804122cda96e8"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 21000,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 29,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "90cd8401e95a28e8831b59577dba74d7a1de2f45696b2c2482fbcb34f0e60115",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3696",
+   "template_bytes": 4767
+  },
+  "lcb_3697": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-01T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3697",
+   "entry_point": "minimumIncrements",
+   "files_sha256": {
+    "hidden/test_hidden.py": "4410e60ca132fb0606df8f10a288987639968053d7870145e265cb8897635eec",
+    "templates/contract.md": "bc90ebb2f840feb86fd7e24d57ee702b131d05ca19b2042085af25bc8ca2484e",
+    "templates/goal.md": "bd281846de66cf293db0ce82e80ed1fd5f2c81d689ea0de5abbb4982c0f0d5d4",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "30100e1463d6f776a784c50c3f0543f89e82aab5ba5853d24867e4d6934be4ed"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 16313,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 34,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "bd281846de66cf293db0ce82e80ed1fd5f2c81d689ea0de5abbb4982c0f0d5d4",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3697",
+   "template_bytes": 4820
+  },
+  "lcb_3699": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-28T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3699",
+   "entry_point": "numberOfSubsequences",
+   "files_sha256": {
+    "hidden/test_hidden.py": "48fa816bc71b8a6a7be0b433c19728be5d24e6e3e48408423165e25d346e54e8",
+    "templates/contract.md": "303d9f1cc62c4eaa188248dae59c21be5db8340480e30fad97b30db04be5240f",
+    "templates/goal.md": "e351b9d400b2f82bf4563a8105dc989e1a58d296f54ad0e9d1655b932d1031ff",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e8a71355eab6cf62d03baeb029513aad45f910e24bf18a9c7db40b8c732cee4d"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 41164,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "e351b9d400b2f82bf4563a8105dc989e1a58d296f54ad0e9d1655b932d1031ff",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3699",
+   "template_bytes": 5149
+  },
+  "lcb_3700": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2024-12-21T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3700",
+   "entry_point": "subsequencesWithMiddleMode",
+   "files_sha256": {
+    "hidden/test_hidden.py": "9cf7a75fc11a89bde70412dc3a7f870401c6aa3034ae2cb3255b17c61532bfa1",
+    "templates/contract.md": "ee4c0d3c4b1da7ce0dcc1d1a7abcb3b5b27c9d0e03b248c4fc156b0c9d0a6a7e",
+    "templates/goal.md": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "bc212d1179674bb54aa36403930930de26bf201d2d1bf06883c79d6430352475"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 98156,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "dacfdc0aa1644b3706331427018856201c2777bac765a480adc1432ce0ced273",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3700",
+   "template_bytes": 5124
+  },
+  "lcb_3701": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-01T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3701",
+   "entry_point": "minCostGoodCaption",
+   "files_sha256": {
+    "hidden/test_hidden.py": "80f93b6ab7876da7868550d2c3e757b286234a76fd339148d0a53d17abd8c0cd",
+    "templates/contract.md": "ef7649eaa95a6195f150d01ce473e67b412a4e0855c5d239b193ee13bfb2caaf",
+    "templates/goal.md": "c8a32f27d22f3a5a030261eedc6fda9aa95fad9613c75b7ba4ed795debc6f3bf",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "fe12cd871721f3ca4c401ec7d1f5f0c20b23b3c2167934ff17a074a2910f1edd"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 17750,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 36,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "c8a32f27d22f3a5a030261eedc6fda9aa95fad9613c75b7ba4ed795debc6f3bf",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3701",
+   "template_bytes": 5806
+  },
+  "lcb_3714": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-18T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3714",
+   "entry_point": "minMaxSums",
+   "files_sha256": {
+    "hidden/test_hidden.py": "0aad57a39b6133997106b2ecf69a315840b973936e5bc06ec50edc381e05faff",
+    "templates/contract.md": "2da1aec5b7bea8cfe6efe646dbce9782570143bf5c3f68fb7fb30d58ce0b88ac",
+    "templates/goal.md": "8e7b4f1550408c85a863f8ae814ff0ad8f60cff8f0edbaed86843e1ed27e5304",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "9560ba1d62cf0565261112111698def869e4a021b25e1b0e065c2ead2f5adb4c"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 25720,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 31,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "8e7b4f1550408c85a863f8ae814ff0ad8f60cff8f0edbaed86843e1ed27e5304",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3714",
+   "template_bytes": 4826
+  },
+  "lcb_3715": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-04T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3715",
+   "entry_point": "maximumCoins",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c14fc56c28ce207853ab39751bfdc000895b6cb8110520f7a0d0d49534d9a231",
+    "templates/contract.md": "097ef299fd9d753777f5197f82a150b4e69c262affe93361fa16d398d999dd97",
+    "templates/goal.md": "76d0e6646704b2c21b33612112a2530f4de968ff375d8125aaa8458748c1fe60",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "943f6c585b3586799f3e669a0deac2249ba67e116973d61263206fe84e24ea96"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6630,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 37,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "76d0e6646704b2c21b33612112a2530f4de968ff375d8125aaa8458748c1fe60",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3715",
+   "template_bytes": 4587
+  },
+  "lcb_3716": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-04T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3716",
+   "entry_point": "longestSubsequence",
+   "files_sha256": {
+    "hidden/test_hidden.py": "6bd87717fe0ece2674a34fbc89aa51b14068e47f60b28c19030bbbdf8e81964c",
+    "templates/contract.md": "5eed1d210bbcc731d192d545edf20af69be13912a0e72de2808a4f0372ca5f03",
+    "templates/goal.md": "db6fd420715d824044ce65000a63d6cc0dd1e46b98dc2cc593d65e9fff791eff",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "6f62946d32c2aa509f90c35099a548532660d524e2f2a252faf2b7a25f2ab4b7"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 29043,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 31,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "db6fd420715d824044ce65000a63d6cc0dd1e46b98dc2cc593d65e9fff791eff",
+   "source_file": "lcb_test5.jsonl",
+   "task_id": "lcb_3716",
+   "template_bytes": 4961
+  },
+  "lcb_3717": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-29T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3717",
+   "entry_point": "minOperations",
+   "files_sha256": {
+    "hidden/test_hidden.py": "bb670489fd0dd42d2c113e3dfa1b6d28f948cbbc8f789b0a91eba9edf26aa730",
+    "templates/contract.md": "cea2afda76f2c6bfb0b358dae2602708c64aa280ff325b31a2edb4ce33038b03",
+    "templates/goal.md": "7c90c9da772bc329d390aeb2f45205369cc91f60a7254aa569adb12a1c127e0a",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "0a6ec529324f19e7fb2adca8a79c4b3cffd84ea609fb52af79d47179c0f105a8"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 24334,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 27,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "7c90c9da772bc329d390aeb2f45205369cc91f60a7254aa569adb12a1c127e0a",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3717",
+   "template_bytes": 5053
+  },
+  "lcb_3720": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-11T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3720",
+   "entry_point": "minMaxWeight",
+   "files_sha256": {
+    "hidden/test_hidden.py": "35fd03407278d5de35d129bfe6858304878a4b779effd54b3db2ea42d1d0c40c",
+    "templates/contract.md": "e1f3ba23d76905b8335394eacc844747748b82f13a3bac52936e7ad41eeed5a2",
+    "templates/goal.md": "d081a4b9517fffc34ba718ef864dd03da12bcec9abab1e4d42faf9f031df62b3",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "69ad1c03c5f907af646095aa1df0953ec9bfbe82cb5d7508f60a9f04e28e0d26"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6666,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "d081a4b9517fffc34ba718ef864dd03da12bcec9abab1e4d42faf9f031df62b3",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3720",
+   "template_bytes": 5893
+  },
+  "lcb_3721": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-25T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3721",
+   "entry_point": "countMentions",
+   "files_sha256": {
+    "hidden/test_hidden.py": "9975bc4a76cb37a0247d11a6e415008d1a38e37c2c904432a56e0f3845a1ea08",
+    "templates/contract.md": "c9056d64ec95562fc17012a05165f829e867f3e9ce99e5c7ba744d2a991e0ea5",
+    "templates/goal.md": "6aa4ac43917366c6eec45055d43c2b2a07f9b7d25fea90bae4abc44dcfac98ea",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "c78d8975ad65c4d4df206d3f44fd9d046e16a4e5c9486838de78abfa4e9e85b7"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 73363,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "6aa4ac43917366c6eec45055d43c2b2a07f9b7d25fea90bae4abc44dcfac98ea",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3721",
+   "template_bytes": 6795
+  },
+  "lcb_3722": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-01T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3722",
+   "entry_point": "maxSum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "28a4506a1ad3157fe4bf342ba6175b0641cc8933d283e72680897b472bc35eb2",
+    "templates/contract.md": "3dcf7e0e377ac5c2e19cec59179fb0b5111b5761ca555800b18760f70aaa9c9f",
+    "templates/goal.md": "85b9078803c746863d77d8d0260d0292c2ed567a344b1e0cb1f5ba7e00f21797",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "a03e21dd5f23e99a4a5b97bd43aa2fd5e53796d6b376edd341602e7b2d58344f"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 81075,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "85b9078803c746863d77d8d0260d0292c2ed567a344b1e0cb1f5ba7e00f21797",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3722",
+   "template_bytes": 4372
+  },
+  "lcb_3725": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-18T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3725",
+   "entry_point": "minMaxSubarraySum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "0033025bdd4945341807ca27e5bdb542ce58426d2cff45ecf9af5142ac5964d8",
+    "templates/contract.md": "b855bb689b8def1c84bd9f2126a2955ff8e262675e51aaf3d217965d2ea4c4de",
+    "templates/goal.md": "e62b3d886478cf54a3630848dea8d6deca483656a8b0d7862649140c3b05e6fb",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "5bf4451a458e6dfe420e43ed614dd118baf51c39532890bf29ec06b04829d124"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5677,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "e62b3d886478cf54a3630848dea8d6deca483656a8b0d7862649140c3b05e6fb",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3725",
+   "template_bytes": 4450
+  },
+  "lcb_3733": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-15T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3733",
+   "entry_point": "lenOfVDiagonal",
+   "files_sha256": {
+    "hidden/test_hidden.py": "7e149b58ad079891df10208c08f92522c81df78e76e703d174a2a7836d6f8e74",
+    "templates/contract.md": "ca7ece4257bd2377635ed4bc1d54301e32267da4ce89ace962001d750a19f438",
+    "templates/goal.md": "96af3c22e6d05c67128e9672c05fc1d38441a398d38b6c141cbfa1195fa3923c",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "c9fd8177b9bac513123facb4ea0ea629fd88c8d6d2e7e78a41b212e7fd7225dc"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6719,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "96af3c22e6d05c67128e9672c05fc1d38441a398d38b6c141cbfa1195fa3923c",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3733",
+   "template_bytes": 5974
+  },
+  "lcb_3737": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-18T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3737",
+   "entry_point": "minCost",
+   "files_sha256": {
+    "hidden/test_hidden.py": "8983e83ce816d8a051250652ce556c2aaf49d3c1ef653d1f0f1d8b7e2c555e49",
+    "templates/contract.md": "384b22cef26021c03d857e59d9feb06172a5868d6d813ab2117d69cdc6b7870a",
+    "templates/goal.md": "2b8a44011c19fa7e421c5b9372599fb17a416ce9f532cd6fb41a6b79231b7439",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "9b27b4e90a59c7c488bc06084f0529296e00f95e7114f6161ebda3805c5845f0"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5887,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "2b8a44011c19fa7e421c5b9372599fb17a416ce9f532cd6fb41a6b79231b7439",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3737",
+   "template_bytes": 5613
+  },
+  "lcb_3739": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-18T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3739",
+   "entry_point": "distanceSum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "424e6f3f0edae7465fe6e777356a5332e6cf53226570b998861cf411ff65acce",
+    "templates/contract.md": "f89d97c300ee5297de8f28713437bd7d8aade861cfc2f469440c2b46178bbbc8",
+    "templates/goal.md": "b9ee7f839b62c7402e5886fb58b669ad39ed7c336d2b061820c178c9c952b985",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "5aed8f7d3f2622b08f430ab7c9a19b3f073f84cbf8aaf39ca5e46b57550590d2"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5602,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "b9ee7f839b62c7402e5886fb58b669ad39ed7c336d2b061820c178c9c952b985",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3739",
+   "template_bytes": 4928
+  },
+  "lcb_3743": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-01T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3743",
+   "entry_point": "maxFreeTime",
+   "files_sha256": {
+    "hidden/test_hidden.py": "072325ad301698d1de1a0172fedeba7664a19170821c564cdc536713618dfb31",
+    "templates/contract.md": "af01840ef389b6e9cf6fa396d2115f2406b77c7323c1eed54f1e2a6ce5a25fc4",
+    "templates/goal.md": "1cc1a26517448d8daf691a2e0827622f78cd9c32658532d10bd77aa097ad5c13",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "89e50e7dddc3e4a85b4659d1fa3689c6a830a972d5171d5057532d0350dc4b92"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 25890,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "1cc1a26517448d8daf691a2e0827622f78cd9c32658532d10bd77aa097ad5c13",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3743",
+   "template_bytes": 5463
+  },
+  "lcb_3744": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-22T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3744",
+   "entry_point": "minOperations",
+   "files_sha256": {
+    "hidden/test_hidden.py": "ace6190ba37ec842bb97f78e2608baa79ab5178976980741fd5ce92af9b24197",
+    "templates/contract.md": "cea2afda76f2c6bfb0b358dae2602708c64aa280ff325b31a2edb4ce33038b03",
+    "templates/goal.md": "dcb09d07953b5a08707c77d565076aeb703b2d0b4b9bea1a1c59c13d7e2ad5ba",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "c06ce7a789f9bc67fbb68d4f87e5a3832efdc1bcce0cfecdd157dc809bf8e2d0"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5525,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 27,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "dcb09d07953b5a08707c77d565076aeb703b2d0b4b9bea1a1c59c13d7e2ad5ba",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3744",
+   "template_bytes": 5314
+  },
+  "lcb_3748": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-08T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3748",
+   "entry_point": "sortMatrix",
+   "files_sha256": {
+    "hidden/test_hidden.py": "ce4be68f00ca08e1a7d7489426f444b87196b2d6a814057da15e3a8e16ba50c7",
+    "templates/contract.md": "94836f6c9d9f6ea3cc93d442e2d457cf212574c4d78e4da09980acf58342f9dc",
+    "templates/goal.md": "91e34005edaced24cc659105ed7efd3279534a341c1e528462fca7936a6ffa39",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "cac585765dc0e1126b6303d04ca8ca05135700891109b95683e78d1ac5a78824"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 15594,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "91e34005edaced24cc659105ed7efd3279534a341c1e528462fca7936a6ffa39",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3748",
+   "template_bytes": 5006
+  },
+  "lcb_3750": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-15T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3750",
+   "entry_point": "solveQueries",
+   "files_sha256": {
+    "hidden/test_hidden.py": "49ba2748b217062fa2f6e322211b8d16a26478aca14f0ce19de789f0919caeed",
+    "templates/contract.md": "471e31049ab050afc7d67a6196ef641c319f137c760289b058ea60fcd29793f6",
+    "templates/goal.md": "40ae20780760ecc5172786d88b572d618c8748eb12a57c39f451c044e8357745",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "324b0255a5e480dfb8775c27693b16af17a7e6de145beb13fe8eb96477cd825d"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 9103,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 29,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "40ae20780760ecc5172786d88b572d618c8748eb12a57c39f451c044e8357745",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3750",
+   "template_bytes": 4972
+  },
+  "lcb_3751": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-01-25T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3751",
+   "entry_point": "maxFrequency",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c2d8703222ac04b33da0a7e85fafc3accb472bc7dd51a194dc8d67cf1a9be48d",
+    "templates/contract.md": "ad75c2672abc90c3eaa31a5cefc497515f4efe98746afd0142042ca35eb1e6a0",
+    "templates/goal.md": "ed2fc132e9527bb80633d4e70c7318320f23dd81ae74ed4d4e3dec97fcc4f62c",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "0a0f10e8d3d2aa8830098a0d6b9d671de4dafb5f846767531146613d21cadb94"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 17384,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 30,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "ed2fc132e9527bb80633d4e70c7318320f23dd81ae74ed4d4e3dec97fcc4f62c",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3751",
+   "template_bytes": 4392
+  },
+  "lcb_3754": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-01T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3754",
+   "entry_point": "maxDistance",
+   "files_sha256": {
+    "hidden/test_hidden.py": "38274e6c8ad169d9a7f3d53bc68dc61a43065871d661f09ca9c2fdccc7e1f434",
+    "templates/contract.md": "71e76715492681baed37daf9d6909e322ed1093bc239b65b07fbe103254bcf5b",
+    "templates/goal.md": "3b02053a7df85a2b6ffbcf50584c40044d2697b5d648fb9ed6d78dce25efc99d",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "84535959f71bfebd556419814e97593464fa40f21ae690777e676eca7c0d279b"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5429,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "3b02053a7df85a2b6ffbcf50584c40044d2697b5d648fb9ed6d78dce25efc99d",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3754",
+   "template_bytes": 4954
+  },
+  "lcb_3759": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-08T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3759",
+   "entry_point": "findMaxSum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "d68c482bc2eba41b6423669e7ba7c7716b32e16d6b26ac6e66bb7676c21155ef",
+    "templates/contract.md": "be2394d606da4a72beb480760979483563e2378a779b9f08a008a642784fc92a",
+    "templates/goal.md": "3718ca6b6fa0545052612fc46718b85666dc4bd47ab1452df71dcef3512be3a7",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "10855a518c559d890eea0860a1dbc3bd3cc40a747b3da443d86fe1323a74bef9"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 32564,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 27,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "3718ca6b6fa0545052612fc46718b85666dc4bd47ab1452df71dcef3512be3a7",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3759",
+   "template_bytes": 5127
+  },
+  "lcb_3760": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-08T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3760",
+   "entry_point": "assignElements",
+   "files_sha256": {
+    "hidden/test_hidden.py": "9665b0aa0bac249950ec5015e4c723df1fe1936fb99a6934a94203a8e19f4be4",
+    "templates/contract.md": "57e0a39fda91cc2e45f22adf53a9f5fe431c45ecb8e2960697345dc5152f7434",
+    "templates/goal.md": "9533c17c0b3136012ffb239e1e02d84bb60b2e64d6384c117bb1a7975b593cdf",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "bfe4d8811f4cacbb05dcc71cd76cf10b1efdadc0882b91584455fc794b429aa3"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6048,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 32,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "9533c17c0b3136012ffb239e1e02d84bb60b2e64d6384c117bb1a7975b593cdf",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3760",
+   "template_bytes": 5383
+  },
+  "lcb_3762": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-08T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3762",
+   "entry_point": "maxScore",
+   "files_sha256": {
+    "hidden/test_hidden.py": "07a948b564efddd929a341ed31ac5f3b0727b2419b1137b55afd969fc016dd8e",
+    "templates/contract.md": "34f6304e0782060c0fca926af2e72ac2c18cccf97be757442089553832fe52dc",
+    "templates/goal.md": "da1cac3f204749127b4ba1029719b9a4ec2a13ff2b2ac75e4ffb08fce4899a54",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "48f698f5dc9bf475c46265f0c4c216f2fcb67946355fb3283e1b323d106e3809"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 23531,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 27,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "da1cac3f204749127b4ba1029719b9a4ec2a13ff2b2ac75e4ffb08fce4899a54",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3762",
+   "template_bytes": 5095
+  },
+  "lcb_3764": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-22T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3764",
+   "entry_point": "maxSum",
+   "files_sha256": {
+    "hidden/test_hidden.py": "1b119cee8225fe30c318ddba4beb88923d0567c757287cf179b9b40ddedb1690",
+    "templates/contract.md": "3dcf7e0e377ac5c2e19cec59179fb0b5111b5761ca555800b18760f70aaa9c9f",
+    "templates/goal.md": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "c6693f9425aa00e0707761aa5182494531551f1f9d216dfac48bad91269bb010"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 21588,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 26,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "7d2c10449a3416c81aa01f5af96a27c3e170e7de7a27c4833ab178440e799dcb",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3764",
+   "template_bytes": 4721
+  },
+  "lcb_3765": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-29T07:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3765",
+   "entry_point": "minimumCost",
+   "files_sha256": {
+    "hidden/test_hidden.py": "cff3825bdd26fb270cdef8956dcb5c377921e5c86098ba53992e41f458a7589a",
+    "templates/contract.md": "d8e63ad7e1d339a2fe319ee3399a9eeb74251dc668cc6122bbcabba1ab363063",
+    "templates/goal.md": "45bf8fd4dc9bbb1168c2b26ab0f91f1996766ca491e78c261829ce545af5a6f1",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "48c73653338e4e90280b4890caba8373753673d324ed80df6f4ad4708d534143"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 84005,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "45bf8fd4dc9bbb1168c2b26ab0f91f1996766ca491e78c261829ce545af5a6f1",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3765",
+   "template_bytes": 5136
+  },
+  "lcb_3770": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-01T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3770",
+   "entry_point": "generateString",
+   "files_sha256": {
+    "hidden/test_hidden.py": "13a19dce0792ac4952be4d394a874163bb95a2ea846d7a2bac9ea16476381169",
+    "templates/contract.md": "9bd5054d129faa90a2d25cc5b48f7f1efe3ffe39ffaaff5dd8785f9c8ae1f6d1",
+    "templates/goal.md": "e8b2857450223dd82ec0631938199e8dadf3a399f9a842e1fdf716201bc8e367",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "73a05f56157f1a4d25ec77bc1d7d0c614e0c56cd2f8369f83c074c0ea5680a93"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 43853,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 33,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "e8b2857450223dd82ec0631938199e8dadf3a399f9a842e1fdf716201bc8e367",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3770",
+   "template_bytes": 5162
+  },
+  "lcb_3771": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-15T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3771",
+   "entry_point": "maxSubstringLength",
+   "files_sha256": {
+    "hidden/test_hidden.py": "789549c8d1b4523e11a0a16b3cba59696a593d7afe6fbdf43c484fa8a4c43c82",
+    "templates/contract.md": "ef6a6598350551d95ea4fa39d245bb2d0b8c43e660afacf6055eacc1c4b1db7b",
+    "templates/goal.md": "8da45a4641944a39b402905505af275de82f074ed76027527d10f26ef735a76d",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "800e513a3ddec21a8098ac59e93a2313cc90a0b7862b9dc8a0fce524d365bc6f"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5992,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 39,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "8da45a4641944a39b402905505af275de82f074ed76027527d10f26ef735a76d",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3771",
+   "template_bytes": 4940
+  },
+  "lcb_3776": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-01T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3776",
+   "entry_point": "minCost",
+   "files_sha256": {
+    "hidden/test_hidden.py": "81706b27093e60d729458e31ecc0b7f7296b05dd70a0f875aa5223dc25138f49",
+    "templates/contract.md": "384b22cef26021c03d857e59d9feb06172a5868d6d813ab2117d69cdc6b7870a",
+    "templates/goal.md": "ca7949f458d5fd1ab2241d7efa1a9a90ff46014ab13daca147f95f7ded0df939",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "304eaf3620c987a200f17625a1c11cd91095901e1a3a2d0e418e3a1a33c4ac53"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 53605,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "ca7949f458d5fd1ab2241d7efa1a9a90ff46014ab13daca147f95f7ded0df939",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3776",
+   "template_bytes": 5055
+  },
+  "lcb_3777": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-04-05T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3777",
+   "entry_point": "maxProduct",
+   "files_sha256": {
+    "hidden/test_hidden.py": "36d96d0ec93b10a3aa44bcee3585ab55e742d149525a9f3e1869da58577ba118",
+    "templates/contract.md": "48505532209c440045907f0b540ceb44e45d1053f5cf83037b142d0a9747cfc3",
+    "templates/goal.md": "4973102f3688f03210b9e9ffbb3202007133181a9e9e941e14d0021b039f7e80",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "84855abf31f565b782cebc30ef6ba50246d0026c02344e853902623f75f0417b"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 8569,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "4973102f3688f03210b9e9ffbb3202007133181a9e9e941e14d0021b039f7e80",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3777",
+   "template_bytes": 5334
+  },
+  "lcb_3779": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-15T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3779",
+   "entry_point": "maxWeight",
+   "files_sha256": {
+    "hidden/test_hidden.py": "c1aff1f430d85b111ab177ca71cb34841138e5b733ecb66e50b34050ddb0104b",
+    "templates/contract.md": "e49b9d6007f2b77a0d46ef4c0652f88030b94b442c56b8f12ae74d24500641c4",
+    "templates/goal.md": "47397b613b0f065ea769452f836dce41c85711fdbe67d4ee14e7303fc47cbcfc",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "1e5b7919adeeb7365b0aeea84326763018bd07ae16451e2c0a51e88aa137ca1e"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5524,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 30,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "47397b613b0f065ea769452f836dce41c85711fdbe67d4ee14e7303fc47cbcfc",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3779",
+   "template_bytes": 4933
+  },
+  "lcb_3781": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-02-22T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3781",
+   "entry_point": "maxDistance",
+   "files_sha256": {
+    "hidden/test_hidden.py": "089c39c880d12f356d1edb898a0ea8b3e1e51f15ed42d308e957912e87b52da1",
+    "templates/contract.md": "71e76715492681baed37daf9d6909e322ed1093bc239b65b07fbe103254bcf5b",
+    "templates/goal.md": "d61f5d4081b490e8a792652cc3b90aae799e89ae26bb9d2a2ffd4d28f33f3cdc",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "96c593912ded87bce783d8325e9ee86a29bb2153347833a85d9635464602bdb7"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 26240,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 33,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "d61f5d4081b490e8a792652cc3b90aae799e89ae26bb9d2a2ffd4d28f33f3cdc",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3781",
+   "template_bytes": 5274
+  },
+  "lcb_3783": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-01T06:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3783",
+   "entry_point": "permute",
+   "files_sha256": {
+    "hidden/test_hidden.py": "9e9abc9baa4498b71000d8a61d2d22cbb1ff30791b3bdc324ae190a24808c922",
+    "templates/contract.md": "3894942d1d21c26fccc76f12209428bff1e53e157cae9c323be578544b797cf5",
+    "templates/goal.md": "27be15845da0bdfc54ad3bc1658019bc4c1f6514253361afa4fecd123f87af99",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "5c8f9879ec2b51a17ae2f587385cbd688b666142baf4b4787f6d3305e0d39d14"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 7916,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "27be15845da0bdfc54ad3bc1658019bc4c1f6514253361afa4fecd123f87af99",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3783",
+   "template_bytes": 4907
+  },
+  "lcb_3784": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-15T07:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3784",
+   "entry_point": "longestCommonPrefix",
+   "files_sha256": {
+    "hidden/test_hidden.py": "768813e77ac19814e42ed2f01f84c6134a59f0b8c0c26336be57a1e707931d30",
+    "templates/contract.md": "d8e8e5d5538f60f7fe351f2206a9e7be5875382105d4a1d199d36312dab2d4ae",
+    "templates/goal.md": "55025ca2f7ef24d2e0a5c9202ab4bd4123eac0c72a9596a9686b3ceaa3bc6e05",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "1c20b2c79901e39b6d6756f6d841c7becf26675450c680b8463e72d776b115ee"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 27193,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 28,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "55025ca2f7ef24d2e0a5c9202ab4bd4123eac0c72a9596a9686b3ceaa3bc6e05",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3784",
+   "template_bytes": 5424
+  },
+  "lcb_3785": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-01T06:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3785",
+   "entry_point": "countArrays",
+   "files_sha256": {
+    "hidden/test_hidden.py": "dfae9af2c81319a126cbc727a12351d00db4ef592a5209220993ef3822768c08",
+    "templates/contract.md": "f6c3a6be74b5f95f60ee3230a6abcc36f13fa3e16126922294f32f3b7b834024",
+    "templates/goal.md": "5c228ba5003a9fa110c9aefe0ab2bd5cc859949417af1a5b0178fd7a8b7f42a6",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "08a6b0cdeccbf7c0fc78b3faf3d0e68f406a791cb0b7c20bd321f7255b11b096"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6457,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "5c228ba5003a9fa110c9aefe0ab2bd5cc859949417af1a5b0178fd7a8b7f42a6",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3785",
+   "template_bytes": 4896
+  },
+  "lcb_3786": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-01T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3786",
+   "entry_point": "longestPalindromicSubsequence",
+   "files_sha256": {
+    "hidden/test_hidden.py": "357a4898510689d0fcd48895e253899eb4bdaaee5f2cb936f46c54237bb2cda6",
+    "templates/contract.md": "22b251c5ebd7a9c334865c96eb44493e332692d5a9d4e300b999f8c2d05ad943",
+    "templates/goal.md": "61c879a360a1855b1633081e17581b972ae935bcc7e9ebdf0f3e44a7278192eb",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "1c5c29f7495c8fee5663ca7083c56e45c68a62b8f88e19ce52616f594281cc74"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6918,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "61c879a360a1855b1633081e17581b972ae935bcc7e9ebdf0f3e44a7278192eb",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3786",
+   "template_bytes": 4933
+  },
+  "lcb_3789": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-08T18:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3789",
+   "entry_point": "maxSubarrays",
+   "files_sha256": {
+    "hidden/test_hidden.py": "1573eb58c2b67b6228dccd1fc006d9ea80a34a6bf1c51075ce8de5cc08ecdfd5",
+    "templates/contract.md": "298dd0b98e0a9ace02a753b67295fb5ca49796d1d5517002c0c6d60de3c04a17",
+    "templates/goal.md": "31f1518353892ac2ca5667458a26c2688f3c012c487111876b5256ac10e035aa",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "2673ac7e40ddd9654684c8d8b605f8737d7f88e30b643db47d2995fc77a0d8ef"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6185,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 34,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "31f1518353892ac2ca5667458a26c2688f3c012c487111876b5256ac10e035aa",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3789",
+   "template_bytes": 5143
+  },
+  "lcb_3791": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-08T18:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3791",
+   "entry_point": "numOfUnplacedFruits",
+   "files_sha256": {
+    "hidden/test_hidden.py": "edce8c94a7d81e927b59d67729fc9ed3c366c68ea199dae03ec3b51a2faa9a79",
+    "templates/contract.md": "681dba96194868c918d74c167753178111a52aaa01a268fbc5229004342287ea",
+    "templates/goal.md": "77625a4f4bf394305d8423d4e841b04fbac9bf9563cbd2d0bcdf5f861593c5e5",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "2230ebf6859ee31be834a143735558aafc69826ff4eb463ea2373978f76ad6c2"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5763,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "77625a4f4bf394305d8423d4e841b04fbac9bf9563cbd2d0bcdf5f861593c5e5",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3791",
+   "template_bytes": 5051
+  },
+  "lcb_3793": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-29T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3793",
+   "entry_point": "longestPalindrome",
+   "files_sha256": {
+    "hidden/test_hidden.py": "2b27a90f2b36039a2e51c3f579008ffdcef4cf3b9685fcc095473f20ac9f73dd",
+    "templates/contract.md": "101848e51cdc81b0756304df1cb43bf98d5790028523620815e5e3ce6ba653c5",
+    "templates/goal.md": "545f210a33cc7a79bca37ec37eb21f1ec32380cf49c30e4d71b6e33ecafe2d4a",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "ccb20e201be3e62aa0d0b8bcafebd3f970a4a5b4cca6b343d25b7eeb9b6d8a81"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6470,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "545f210a33cc7a79bca37ec37eb21f1ec32380cf49c30e4d71b6e33ecafe2d4a",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3793",
+   "template_bytes": 4993
+  },
+  "lcb_3794": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-22T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3794",
+   "entry_point": "minTime",
+   "files_sha256": {
+    "hidden/test_hidden.py": "7a5750c635c1e6d531d457f7e6ae54d296cf96217661d58a9f9b7e3debe27c64",
+    "templates/contract.md": "5fb39bfe84ec491f72557405b96f1ba7dbfa49c2be59f8b6c1dc9af616f0130e",
+    "templates/goal.md": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "77f803ed22eb45048672028be5b9d6b8764f8fb39daaf2fd40ba6a4a9a3b9956"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 17552,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 37,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "e5c9c05849206faef2ba97eddb0717302d0ede0cc1570b70ad1303d753333b2c",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3794",
+   "template_bytes": 5569
+  },
+  "lcb_3795": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-15T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3795",
+   "entry_point": "minZeroArray",
+   "files_sha256": {
+    "hidden/test_hidden.py": "366cc264ea6cdc2327633bcde7f1558af87b5892430f287211a78df2b00fa52d",
+    "templates/contract.md": "5d9f5a2323f5b3803c6b600cf8ba56249e6d57e52a5367f990c12c904af20d90",
+    "templates/goal.md": "92970b65d4162c8ec77a89466388c3d508fc6be24dfccea13c00acc3598004ee",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "51d34a20183159f6d40d188fabbab40de1a7807ee073a641d90390c01e513d65"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 67701,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "92970b65d4162c8ec77a89466388c3d508fc6be24dfccea13c00acc3598004ee",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3795",
+   "template_bytes": 6202
+  },
+  "lcb_3801": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-15T19:30:00",
+   "difficulty": "hard",
+   "dir": "lcb_3801",
+   "entry_point": "beautifulNumbers",
+   "files_sha256": {
+    "hidden/test_hidden.py": "65fde1d44232ffbf62bbe78db904b2af96cce02fd1329ce81d73e9a9736d082e",
+    "templates/contract.md": "5fcd7b76626b9bf5f572cd04c5b219ecf82e575b57e0605054cb41545b31f578",
+    "templates/goal.md": "ba424e234f110004948a11cd5f5b40baf2abd83a798a5f11bbe69b06e7a0d13d",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e2908265bd25b06cdbcf2e3cbbde27e613a6cc95b8ef9c630dda387df5d95599"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5664,
+   "n_hidden_file": 26,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 40,
+   "n_visible": 2,
+   "platform": "leetcode",
+   "prompt_sha256": "ba424e234f110004948a11cd5f5b40baf2abd83a798a5f11bbe69b06e7a0d13d",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3801",
+   "template_bytes": 4134
+  },
+  "lcb_3805": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-29T07:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3805",
+   "entry_point": "maxActiveSectionsAfterTrade",
+   "files_sha256": {
+    "hidden/test_hidden.py": "f43ce4909a0191e6fd0dd536546b5324559ea789acacba95c71886033305c974",
+    "templates/contract.md": "4e56549cdaa1159aa8cc8ac6d10ce69f16183a062961ac6d46aa1338d41b53ea",
+    "templates/goal.md": "ef46cb587f83a55ac98e7b47883594db9307939e3c91eebbc1fb95b60f99c7b7",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "435d9a6d6844d17695eecc883fcd382dba0ce3e2d40e2c2e441d86054d937e1f"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 6156,
+   "n_hidden_file": 28,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 4,
+   "platform": "leetcode",
+   "prompt_sha256": "ef46cb587f83a55ac98e7b47883594db9307939e3c91eebbc1fb95b60f99c7b7",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3805",
+   "template_bytes": 5697
+  },
+  "lcb_3809": {
+   "comparator": {
+    "kind": "lcb_aeq",
+    "tol": 1e-06
+   },
+   "contest_date": "2025-03-22T19:30:00",
+   "difficulty": "medium",
+   "dir": "lcb_3809",
+   "entry_point": "numberOfComponents",
+   "files_sha256": {
+    "hidden/test_hidden.py": "a45c2e5f509c0ccb32de2b82d8c99c5e790df36d653b06517ff926badc6bf115",
+    "templates/contract.md": "bca762742962b6c7bca27f7d187b6f0e6abfbeacdd8f2483a54efec9201a9769",
+    "templates/goal.md": "ffbe7f631fed458e9363fd3e951e3e0cfc1e91ddfa6f25739a56857a20a644d2",
+    "templates/run_tests.sh": "aaa6eeeeac6636b873443cd930f7d66e90be8b13734cf0e2bd245cc9c8b350d7",
+    "templates/tests_visible/test_visible.py": "e4d590ab14ef5b9ee3fab711d360c3de11c3a29985011dedaf179ac46a535ca8"
+   },
+   "goal_mentions_hidden_word": false,
+   "hidden_bytes": 5979,
+   "n_hidden_file": 27,
+   "n_hidden_only": 24,
+   "n_hidden_total_upstream": 25,
+   "n_visible": 3,
+   "platform": "leetcode",
+   "prompt_sha256": "ffbe7f631fed458e9363fd3e951e3e0cfc1e91ddfa6f25739a56857a20a644d2",
+   "source_file": "lcb_test6.jsonl",
+   "task_id": "lcb_3809",
+   "template_bytes": 5072
+  }
+ }
+}

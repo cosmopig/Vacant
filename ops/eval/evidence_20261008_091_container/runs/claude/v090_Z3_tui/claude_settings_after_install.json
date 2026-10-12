@@ -1,0 +1,95 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude PreToolUse  # vacant-intake",
+            "timeout": 30
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude PostToolUse  # vacant-intake",
+            "timeout": 30
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude PostToolUseFailure  # vacant-intake",
+            "timeout": 30
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude SubagentStart  # vacant-intake",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude SubagentStop  # vacant-intake",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude UserPromptSubmit  # vacant-intake",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude Stop  # vacant-intake",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/opt/v090/bin/python3 -m vacant_network hook claude SessionEnd  # vacant-intake",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

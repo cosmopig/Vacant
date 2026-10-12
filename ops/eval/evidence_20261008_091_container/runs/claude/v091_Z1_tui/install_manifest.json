@@ -1,0 +1,52 @@
+{
+  "agents": {
+    "claude": {
+      "ops": [
+        {
+          "op": "json_hooks",
+          "path": "/home/u/.claude/settings.json",
+          "events": [
+            "PostToolUse",
+            "PostToolUseFailure",
+            "PreToolUse",
+            "SessionEnd",
+            "Stop",
+            "SubagentStart",
+            "SubagentStop",
+            "UserPromptSubmit"
+          ],
+          "root_key": "hooks",
+          "created": true,
+          "backup": null
+        }
+      ],
+      "installed_at": "2026-10-08T16:00:34+00:00"
+    },
+    "codex": {
+      "ops": [
+        {
+          "op": "toml_block",
+          "path": "/home/u/.codex/config.toml",
+          "created": true,
+          "backup": null,
+          "prepend": false
+        }
+      ],
+      "installed_at": "2026-10-08T16:00:34+00:00"
+    },
+    "pi": {
+      "ops": [
+        {
+          "op": "file",
+          "path": "/home/u/.pi/agent/extensions/vacant.ts",
+          "sha256": "2431378a8df6a33342f0905bbea6697da633fb6b2602ade36f4c38522f3f4c10",
+          "created": true,
+          "backup": null
+        }
+      ],
+      "installed_at": "2026-10-08T16:00:34+00:00"
+    }
+  },
+  "mode": "evidence",
+  "schema": 2
+}

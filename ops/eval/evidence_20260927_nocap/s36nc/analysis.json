@@ -1,0 +1,3171 @@
+{
+ "summary": {
+  "pairs": 72,
+  "C_only_right": 13,
+  "A_only_right": 2,
+  "net_right": 11,
+  "mcnemar_p_descriptive": 0.00738525390625,
+  "tally": {
+   "A": {
+    "right": 40,
+    "wrong": 11,
+    "no_file": 21
+   },
+   "C36": {
+    "right": 51,
+    "wrong": 14,
+    "no_file": 7
+   }
+  },
+  "extra_wrong": 3,
+  "per_sample": {
+   "1": {
+    "A": {
+     "right": 19,
+     "wrong": 8,
+     "no_file": 9
+    },
+    "C36": {
+     "right": 24,
+     "wrong": 9,
+     "no_file": 3
+    }
+   },
+   "2": {
+    "A": {
+     "right": 21,
+     "wrong": 3,
+     "no_file": 12
+    },
+    "C36": {
+     "right": 27,
+     "wrong": 5,
+     "no_file": 4
+    }
+   }
+  },
+  "C_runs_with_a_sendback": 12,
+  "C_missing_output_sendback_runs": 9,
+  "sendback_kinds_runs": {
+   "missing_output": 9,
+   "unsourced": 2,
+   "failed_step": 4
+  },
+  "end_state_after_sendback_kind": {
+   "failed_step:right": 2,
+   "failed_step:wrong": 1,
+   "missing_output:right": 6,
+   "missing_output:wrong": 3,
+   "unsourced:wrong": 1
+  },
+  "pairs_by_C_sendback_C_label_A_label": {
+   "failed_step|right|no_file": 1,
+   "failed_step|wrong|wrong": 1,
+   "failed_step+missing_output|right|no_file": 1,
+   "missing_output|right|no_file": 5,
+   "missing_output|wrong|no_file": 3,
+   "none|no_file|no_file": 4,
+   "none|no_file|right": 2,
+   "none|no_file|wrong": 1,
+   "none|right|no_file": 5,
+   "none|right|right": 38,
+   "none|right|wrong": 1,
+   "none|wrong|no_file": 2,
+   "none|wrong|wrong": 7,
+   "unsourced|wrong|wrong": 1
+  },
+  "sendback_chain_vs_stream_mismatch": [],
+  "harm": [],
+  "sendback_ended_wrong_value_before_unknown": [],
+  "A_said_done_without_file": 14,
+  "A_runs": 72,
+  "timeouts": {
+   "A": 7,
+   "C36": 7
+  },
+  "decision": "GO"
+ },
+ "cells": [
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "1",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "1",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 10,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "11",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "11",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 10,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "15",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "15",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 20,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "16",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "16",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 15,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "18",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "18",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 67,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "19",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "19",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "21",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "21",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "22",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "22",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 31,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "23",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "23",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "24",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "24",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "25",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "25",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "26",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "26",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "29",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "29",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 12,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "3",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "3",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 144,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "30",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "30",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "35",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "35",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 30,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "36",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "36",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "44",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "44",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "48",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "48",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 12,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "49",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "49",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 15,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "50",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "50",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "51",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "51",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "53",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "53",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "54",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "54",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "57",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "57",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "58",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "58",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 14,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "59",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "59",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 173,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "6",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "6",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "61",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "61",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 12,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "62",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "62",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 4,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "64",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "64",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 74,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "7",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "7",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 16,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "71",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "71",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "72",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "72",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "8",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "8",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "9",
+   "arm": "A",
+   "sample": 1,
+   "key": [
+    "9",
+    "A",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 25,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "1",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "1",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "11",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "11",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 10,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "15",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "15",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "16",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "16",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "18",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "18",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 115,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "19",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "19",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "21",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "21",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "22",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "22",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 111,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "23",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "23",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 13,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "24",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "24",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "25",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "25",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "26",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "26",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "29",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "29",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 13,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "3",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "3",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "30",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "30",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "35",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "35",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 131,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "36",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "36",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "44",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "44",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "48",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "48",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 16,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "49",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "49",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 24,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "50",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "50",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "51",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "51",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "53",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "53",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "54",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "54",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "57",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "57",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 109,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "58",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "58",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 18,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "59",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "59",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 74,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "6",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "6",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "61",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "61",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 24,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "62",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "62",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 4,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "64",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "64",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 46,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "7",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "7",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": null,
+   "turns": 20,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "71",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "71",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "72",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "72",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "8",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "8",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "9",
+   "arm": "A",
+   "sample": 2,
+   "key": [
+    "9",
+    "A",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "1",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "1",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "11",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "11",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "15",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "15",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "16",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "16",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "18",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "18",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 125,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "19",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "19",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "21",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "21",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "22",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "22",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 114,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "23",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "23",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "24",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "24",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "25",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "25",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "26",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "26",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "29",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "29",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 17,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "3",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "3",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 16,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "30",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "30",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "35",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "35",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 12,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "36",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "36",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "44",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "44",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "48",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "48",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 173,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "49",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "49",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 183,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "50",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "50",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "51",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "51",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "53",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "53",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "54",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "54",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "57",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "57",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 26,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "unsourced"
+    ],
+    [
+     "unsourced"
+    ]
+   ],
+   "reviews": 3,
+   "first_sendback": true,
+   "answer_at_first_sendback": "6.345159",
+   "answer_at_first_sendback_ok": 0,
+   "no_file_at_first_sendback": false,
+   "task": "58",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "58",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 13,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "59",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "59",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 17,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "6",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "6",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "61",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "61",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 18,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "62",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "62",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 4,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "64",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "64",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 12,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "7",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "7",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 16,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "71",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "71",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "72",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "72",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "8",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "8",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "9",
+   "arm": "C36",
+   "sample": 1,
+   "key": [
+    "9",
+    "C36",
+    1
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 10,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "1",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "1",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "11",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "11",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "15",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "15",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "16",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "16",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "18",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "18",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 51,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "19",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "19",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "21",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "21",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "22",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "22",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 104,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "23",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "23",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 11,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "24",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "24",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "25",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "25",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "26",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "26",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "29",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "29",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 20,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "3",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "3",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 39,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "30",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "30",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "35",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "35",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "36",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "36",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 9,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "44",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "44",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "48",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "48",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 25,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "49",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "49",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 132,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "50",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "50",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 14,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "51",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "51",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "53",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "53",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 6,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "54",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "54",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 7,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "57",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "57",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "58",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "58",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 15,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "failed_step"
+    ],
+    [
+     "failed_step"
+    ]
+   ],
+   "reviews": 3,
+   "first_sendback": true,
+   "answer_at_first_sendback": "IT,ES,FR",
+   "answer_at_first_sendback_ok": 1,
+   "no_file_at_first_sendback": false,
+   "task": "59",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "59",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 40,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "6",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "6",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 10,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "failed_step"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": "Martinis_Fine_Steakhouse",
+   "answer_at_first_sendback_ok": 0,
+   "no_file_at_first_sendback": false,
+   "task": "61",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "61",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 14,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ]
+   ],
+   "reviews": 2,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "62",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "62",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 4,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "64",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "64",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": true,
+   "exception": "AgentTimeoutError",
+   "turns": 46,
+   "final_stop": "toolUse",
+   "sendbacks": [],
+   "reviews": 0,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "7",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "7",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 31,
+   "final_stop": "stop",
+   "sendbacks": [
+    [
+     "missing_output"
+    ],
+    [
+     "failed_step"
+    ]
+   ],
+   "reviews": 3,
+   "first_sendback": true,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": true,
+   "task": "71",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "71",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 0.0,
+   "missing": false,
+   "exception": null,
+   "turns": 10,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "72",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "72",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "8",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "8",
+    "C36",
+    2
+   ]
+  },
+  {
+   "reward": 1.0,
+   "missing": false,
+   "exception": null,
+   "turns": 8,
+   "final_stop": "stop",
+   "sendbacks": [],
+   "reviews": 1,
+   "first_sendback": false,
+   "answer_at_first_sendback": null,
+   "answer_at_first_sendback_ok": null,
+   "no_file_at_first_sendback": null,
+   "task": "9",
+   "arm": "C36",
+   "sample": 2,
+   "key": [
+    "9",
+    "C36",
+    2
+   ]
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+{"ts": 1791474760.2641225, "agent": "opencode", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474762.8024025, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "560b14bd610f5bc194dbf4b08ddc5ec2e6b5e79a9ea13dd7eb720200182174b7"}
+{"ts": 1791474763.329629, "agent": "opencode", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "560b14bd610f5bc194dbf4b08ddc5ec2e6b5e79a9ea13dd7eb720200182174b7"}
+{"ts": 1791474764.4138846, "agent": "opencode", "event": "session_end", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

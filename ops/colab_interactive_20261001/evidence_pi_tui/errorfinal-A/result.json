@@ -1,0 +1,198 @@
+{
+  "scenario": "errorfinal",
+  "arm": "A",
+  "idle_s": 15.0,
+  "expect": {
+    "ready_within_10s": true,
+    "final_state_is_error_final": true,
+    "done_detected": true,
+    "exit_clean_rc0": true,
+    "no_process_left": true
+  },
+  "problems": [],
+  "ready_s": 1.33,
+  "done": true,
+  "wall_to_done_s": 29.37,
+  "final_state": "error_final",
+  "entries": [
+    "session::",
+    "model_change::",
+    "thinking_level_change::",
+    "message:system:",
+    "message:user:",
+    "message:assistant:error",
+    "context_edit::",
+    "message:assistant:error",
+    "context_edit::",
+    "message:assistant:error",
+    "context_edit::",
+    "message:assistant:error"
+  ],
+  "exit_clean": true,
+  "exit_s": 0.13,
+  "procs_left_after_exit": 0,
+  "sendbacks": [],
+  "evlog_events": [
+    [
+      0.0,
+      "agent_start",
+      null,
+      null
+    ],
+    [
+      0.001,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      0.002,
+      "message_end",
+      "system",
+      null
+    ],
+    [
+      0.004,
+      "message_end",
+      "user",
+      null
+    ],
+    [
+      0.116,
+      "message_end",
+      "assistant",
+      "error"
+    ],
+    [
+      0.119,
+      "turn_end",
+      "assistant",
+      "error"
+    ],
+    [
+      0.12,
+      "agent_end",
+      null,
+      null
+    ],
+    [
+      2.126,
+      "agent_start",
+      null,
+      null
+    ],
+    [
+      2.126,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      2.136,
+      "message_end",
+      "assistant",
+      "error"
+    ],
+    [
+      2.137,
+      "turn_end",
+      "assistant",
+      "error"
+    ],
+    [
+      2.137,
+      "agent_end",
+      null,
+      null
+    ],
+    [
+      6.138,
+      "agent_start",
+      null,
+      null
+    ],
+    [
+      6.139,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      6.161,
+      "message_end",
+      "assistant",
+      "error"
+    ],
+    [
+      6.161,
+      "turn_end",
+      "assistant",
+      "error"
+    ],
+    [
+      6.162,
+      "agent_end",
+      null,
+      null
+    ],
+    [
+      14.165,
+      "agent_start",
+      null,
+      null
+    ],
+    [
+      14.165,
+      "turn_start",
+      null,
+      null
+    ],
+    [
+      14.175,
+      "message_end",
+      "assistant",
+      "error"
+    ],
+    [
+      14.175,
+      "turn_end",
+      "assistant",
+      "error"
+    ],
+    [
+      14.176,
+      "agent_end",
+      null,
+      null
+    ],
+    [
+      14.178,
+      "agent_before_settle",
+      null,
+      null
+    ],
+    [
+      14.179,
+      "agent_settled",
+      null,
+      null
+    ],
+    [
+      29.425,
+      "session_shutdown",
+      null,
+      null
+    ]
+  ],
+  "agent_end_to_sendback_s": [],
+  "last_agent_settled_to_exit_s": 15.18,
+  "agent_settled_count": 1,
+  "requests": 4,
+  "sendback_request": null,
+  "first_request_sha256": {
+    "system_sha256": "e2d4d85b239d7362d5f4fc3fd204d6389fd39d23869f7e3ed2f54b73f51020c5",
+    "tools_sha256": "c96f354565801dfe8e928de863c64b468e0ababe36c33573974566fd1e9b8cc3",
+    "body_sha256": "1a5036ca18b55d1a1a9d98cddd15add3878d086325fc236b24263d1ebbd685f9"
+  },
+  "ok": true
+}

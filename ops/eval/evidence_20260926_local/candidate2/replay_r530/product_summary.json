@@ -1,0 +1,48 @@
+{
+ "cells": 59,
+ "cells_without_outcome": [
+  "g_r530_s2_1003_1/ow_09_minitemplate"
+ ],
+ "declared_done": 58,
+ "not_fully_correct": 39,
+ "cells_with_a_test_run": 17,
+ "last_test_run_status": {
+  "none": 42,
+  "failed": 7,
+  "unknown": 7,
+  "ok": 3
+ },
+ "last_unknown_why": {
+  "hidden": 2,
+  "no_tests": 5
+ },
+ "last_failed_reliably": 7,
+ "test_run_failed_sent": 0,
+ "test_run_failed_sent_on_fully_correct": 0,
+ "note_only": 7,
+ "note_only_why": {
+  "changed_after": 3,
+  "mentioned": 4
+ },
+ "precision": null,
+ "recall": 0.0,
+ "recall_among_last_failed": 0.0,
+ "question_turns": 2,
+ "sent_on_question_turns": 0,
+ "any_send_back": 58,
+ "any_send_back_kinds": {
+  "unread": 107,
+  "failed_step": 69,
+  "test_claim": 3
+ },
+ "fidelity": {
+  "start_ok": 59,
+  "end_ok": 59,
+  "cells_with_rc_mismatch": 11
+ },
+ "fired_cells": [],
+ "repo": "/home/user/Vacant/.claude/worktrees/wf_47b337c8-2fc-1",
+ "vacant_network": "/home/user/Vacant/.claude/worktrees/wf_47b337c8-2fc-1/vacant_network/__init__.py",
+ "counterfactual_run_tests": false,
+ "inproc": false
+}

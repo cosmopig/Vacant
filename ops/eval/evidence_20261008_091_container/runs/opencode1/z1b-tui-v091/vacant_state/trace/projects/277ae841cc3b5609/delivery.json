@@ -1,0 +1,38 @@
+{
+ "project": "/work/proj",
+ "session": "opencode:ses_ee3ca3dc3ffee79KKBvg4KbEXF",
+ "at": "2026-10-08T15:50:55+00:00",
+ "mode": "evidence",
+ "in_progress": false,
+ "written_after_reminder": [],
+ "checked": {
+  "checked": 0,
+  "traced": 0,
+  "derived": 0,
+  "exempt": 0,
+  "not_typed": 0,
+  "not_traced_note_only": []
+ },
+ "deliverables": [
+  "answer.tx"
+ ],
+ "named": [],
+ "opened": [],
+ "given_in_request": [],
+ "not_opened": [],
+ "in_dirs": [],
+ "dir_opened": [],
+ "dir_given_in_request": [],
+ "fixed": [],
+ "unverified": [
+  "Still open after 2 round(s): answer.txt (asked for in the request) did not exist"
+ ],
+ "findings": [
+  {
+   "kind": "missing_output",
+   "path": "answer.txt",
+   "asked": "answer.txt",
+   "finding_id": "z_16e360ba52"
+  }
+ ]
+}

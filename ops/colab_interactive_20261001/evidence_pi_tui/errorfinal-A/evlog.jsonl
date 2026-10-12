@@ -1,0 +1,25 @@
+{"t": 1790866583.542, "event": "agent_start"}
+{"t": 1790866583.543, "event": "turn_start"}
+{"t": 1790866583.544, "event": "message_end", "role": "system"}
+{"t": 1790866583.546, "event": "message_end", "role": "user"}
+{"t": 1790866583.658, "event": "message_end", "role": "assistant", "stop": "error"}
+{"t": 1790866583.661, "event": "turn_end", "role": "assistant", "stop": "error"}
+{"t": 1790866583.662, "event": "agent_end"}
+{"t": 1790866585.668, "event": "agent_start"}
+{"t": 1790866585.668, "event": "turn_start"}
+{"t": 1790866585.678, "event": "message_end", "role": "assistant", "stop": "error"}
+{"t": 1790866585.679, "event": "turn_end", "role": "assistant", "stop": "error"}
+{"t": 1790866585.679, "event": "agent_end"}
+{"t": 1790866589.68, "event": "agent_start"}
+{"t": 1790866589.681, "event": "turn_start"}
+{"t": 1790866589.703, "event": "message_end", "role": "assistant", "stop": "error"}
+{"t": 1790866589.703, "event": "turn_end", "role": "assistant", "stop": "error"}
+{"t": 1790866589.704, "event": "agent_end"}
+{"t": 1790866597.707, "event": "agent_start"}
+{"t": 1790866597.707, "event": "turn_start"}
+{"t": 1790866597.717, "event": "message_end", "role": "assistant", "stop": "error"}
+{"t": 1790866597.717, "event": "turn_end", "role": "assistant", "stop": "error"}
+{"t": 1790866597.718, "event": "agent_end"}
+{"t": 1790866597.72, "event": "agent_before_settle"}
+{"t": 1790866597.721, "event": "agent_settled"}
+{"t": 1790866612.967, "event": "session_shutdown"}

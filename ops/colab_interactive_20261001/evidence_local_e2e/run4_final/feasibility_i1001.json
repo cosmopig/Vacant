@@ -1,0 +1,12 @@
+{
+ "cells_in_window": 23,
+ "void": 1,
+ "void_rate": 0.043478260869565216,
+ "calls": 96,
+ "non200": 1,
+ "non200_rate": 0.010416666666666666,
+ "c_install_fail": 0,
+ "timeouts": 2,
+ "triggered": false,
+ "at": "2026-10-01T17:19:35Z"
+}

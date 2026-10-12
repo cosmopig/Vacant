@@ -1,0 +1,52 @@
+{
+ "schema": "i1001.ceiling_decision/1",
+ "rule": {
+  "n": 10,
+  "pass_ge": 9
+ },
+ "banks": {
+  "dabench": {
+   "dropped": false,
+   "passes": 0,
+   "n": 10,
+   "voids": [],
+   "missing": [
+    "dab_688",
+    "dab_721",
+    "dab_507",
+    "dab_724",
+    "dab_035",
+    "dab_249",
+    "dab_055",
+    "dab_666",
+    "dab_039",
+    "dab_732"
+   ],
+   "unsolved": [],
+   "reason": "screening incomplete (10 task(s) not run) and the bank could still reach 9/10: undecided, bank kept"
+  },
+  "databench": {
+   "dropped": false,
+   "passes": 0,
+   "n": 1,
+   "voids": [],
+   "missing": [
+    "db_066_04"
+   ],
+   "unsolved": [],
+   "reason": "A passed 0/1 (< 9): 0 unsolved task(s) seen without Vacant; bank kept"
+  },
+  "polyglot_py": {
+   "dropped": false,
+   "passes": 0,
+   "n": 1,
+   "voids": [],
+   "missing": [
+    "pg_affine_cipher"
+   ],
+   "unsolved": [],
+   "reason": "A passed 0/1 (< 9): 0 unsolved task(s) seen without Vacant; bank kept"
+  }
+ },
+ "dropped_banks": []
+}

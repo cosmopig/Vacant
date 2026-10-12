@@ -1,0 +1,9 @@
+total 32
+drwxr-xr-x 7 root root 4096 Oct  8 16:02 .
+drwxr-xr-x 1 root root 4096 Oct  8 16:02 ..
+drwxr-xr-x 8 root root 4096 Oct  8 16:02 .claude
+-rw-r--r-- 1 root root 2859 Oct  8 16:02 .claude.json
+drwxr-xr-x 2 root root 4096 Oct  8 16:02 .codex
+drwxr-xr-x 3 root root 4096 Oct  8 16:02 .local
+drwxr-xr-x 3 root root 4096 Oct  8 16:02 .pi
+drwxr-xr-x 5 root root 4096 Oct  8 16:02 .vacant

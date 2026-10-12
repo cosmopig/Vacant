@@ -1,0 +1,4 @@
+{"ts": 1791475748.3108485, "agent": "opencode", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791475748.5747833, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "shell", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791475748.7288537, "agent": "opencode", "event": "post_tool", "kind": "post_tool", "tool": "shell", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791475748.9771264, "agent": "opencode", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": false, "why": "untraceable_cwd"}, "zero_ran": false, "why": "untraceable_cwd"}

@@ -1,0 +1,178 @@
+{
+ "schema": "i1001.manifest_reused/1",
+ "rows": [
+  {
+   "copy": "vm/sandbox.sh",
+   "copy_sha256": "4855e8e4d0a56a06d24fa7d54e28c09e291d738d3646d5095ab8a0c0997a6af3",
+   "source": "ops/colab_campaign_20260927/sandbox.sh",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "4855e8e4d0a56a06d24fa7d54e28c09e291d738d3646d5095ab8a0c0997a6af3",
+   "source_checked": true
+  },
+  {
+   "copy": "vm/orproxy.py",
+   "copy_sha256": "bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525",
+   "source": "ops/colab_campaign_20260927/orproxy.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525",
+   "source_checked": true
+  },
+  {
+   "copy": "vm/packer.py",
+   "copy_sha256": "d206cf001276c7c9ff480c0c35f02d149a23f4dcafae85a2e02cd85dcdfe709d",
+   "source": "ops/colab_campaign_20260927/packer.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "d206cf001276c7c9ff480c0c35f02d149a23f4dcafae85a2e02cd85dcdfe709d",
+   "source_checked": true
+  },
+  {
+   "copy": "vm/cu_guard.sh",
+   "copy_sha256": "452a95185339fd79aefe2f5b2a50e308f10b04e32dc37d99e99cc30cedba6122",
+   "source": "ops/colab_campaign_20260927/cu_guard.sh",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": false,
+   "source_sha256": "18af28996c006ab943a1f001e6ac88caf4fc6a7eed33136a86cd2f412ea9ef26",
+   "source_checked": true,
+   "modification": "第 14 行 `$TH）` → `${TH}）`：全形括號緊接變數名時，bash 在 UTF-8 locale 下可能把它當成識別字的一部分而印出空值（只影響「STOP 已放」那行訊息的文字，不影響門檻判斷）。複製之後由別人改的（16:19），這裡只是登記。"
+  },
+  {
+   "copy": "vm/vacant_check.py",
+   "copy_sha256": "07afff4f22ee23115e507f94c4c8f7276317793bf5ff3a83f7141349295e8661",
+   "source": "ops/colab_campaign_20260927/vacant_check.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "07afff4f22ee23115e507f94c4c8f7276317793bf5ff3a83f7141349295e8661",
+   "source_checked": true
+  },
+  {
+   "copy": "vm/vm_setup.sh",
+   "copy_sha256": "57348920af55032c7c8015278856f3ef794222a72de4242eaa4957e8ca1cf179",
+   "source": "ops/colab_campaign_20260927/vm_setup.sh",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "57348920af55032c7c8015278856f3ef794222a72de4242eaa4957e8ca1cf179",
+   "source_checked": true
+  },
+  {
+   "copy": "scorers/code_checks.py",
+   "copy_sha256": "d6b145b74621092de73605dbfd38758d02bd21dcdf5f46861833048abceecd36",
+   "source": "ops/colab_campaign_20260927/scorers/code_checks.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "d6b145b74621092de73605dbfd38758d02bd21dcdf5f46861833048abceecd36",
+   "source_checked": true
+  },
+  {
+   "copy": "scorers/code_suite.py",
+   "copy_sha256": "298396bcc6cabe68d9129870ef1be0d7f94b153cc8cd4219504931759714649d",
+   "source": "ops/colab_campaign_20260927/scorers/code_suite.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "298396bcc6cabe68d9129870ef1be0d7f94b153cc8cd4219504931759714649d",
+   "source_checked": true
+  },
+  {
+   "copy": "scorers/dabench.py",
+   "copy_sha256": "a541dceda5d091da9ff5fa323dd14220c5c8302935ac85d6f043d79f356435b1",
+   "source": "ops/colab_campaign_20260927/scorers/dabench.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "a541dceda5d091da9ff5fa323dd14220c5c8302935ac85d6f043d79f356435b1",
+   "source_checked": true
+  },
+  {
+   "copy": "scorers/databench.py",
+   "copy_sha256": "ac5bd5be233e01ba1060ec1e698cd8eb4a73b8a4a023836587d3f415bb057b38",
+   "source": "ops/colab_campaign_20260927/scorers/databench.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "ac5bd5be233e01ba1060ec1e698cd8eb4a73b8a4a023836587d3f415bb057b38",
+   "source_checked": true
+  },
+  {
+   "copy": "scorers/polyglot_py.py",
+   "copy_sha256": "25ed44f4643200c006f9b8780783366050c2637660ae7873e7f2010a5366f182",
+   "source": "ops/colab_campaign_20260927/scorers/polyglot_py.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "25ed44f4643200c006f9b8780783366050c2637660ae7873e7f2010a5366f182",
+   "source_checked": true
+  },
+  {
+   "copy": "stage_code_bank.py",
+   "copy_sha256": "c3bef86a90f263d535d412f791e5e135f9a9e0cf7d716138ba9262211427d3d2",
+   "source": "ops/colab_campaign_20260927/stage_code_bank.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "c3bef86a90f263d535d412f791e5e135f9a9e0cf7d716138ba9262211427d3d2",
+   "source_checked": true
+  },
+  {
+   "copy": "stage_task_bank.py",
+   "copy_sha256": "18bd21f5b5f7e10a77689650c6b70dbc76a4607b7f5eb177c334904b6a6d07ee",
+   "source": "ops/colab_campaign_20260927/stage_task_bank.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "18bd21f5b5f7e10a77689650c6b70dbc76a4607b7f5eb177c334904b6a6d07ee",
+   "source_checked": true
+  },
+  {
+   "copy": "gauge_task3.py",
+   "copy_sha256": "43ff78b796c52d7deb21c484bb342b1c9550c92ed3109ea48119e40622654341",
+   "source": "ops/colab_campaign_20260927/gauge_task3.py",
+   "source_ref": "origin/feat/colab-campaign-20260927@b19395a54b2e1ba01c1ff0a68d636a6a0096ec72",
+   "verbatim": true,
+   "source_sha256": "43ff78b796c52d7deb21c484bb342b1c9550c92ed3109ea48119e40622654341",
+   "source_checked": true
+  },
+  {
+   "copy": "bridge/native_acceptance_bridge.py",
+   "copy_sha256": "5104ae0035c86609a43a679e49820371384ed0e5640cd558d66698857c9eeeec",
+   "source": "ops/eval/native_acceptance_bridge.py",
+   "source_ref": "PR #82 worktree HEAD 23293c81b49a92dbd0040ffcc014a75478614496 (ops/eval/native_acceptance_bridge.py)",
+   "verbatim": true,
+   "source_sha256": "5104ae0035c86609a43a679e49820371384ed0e5640cd558d66698857c9eeeec",
+   "source_checked": true
+  }
+ ],
+ "replaced_not_reused": [
+  {
+   "campaign_file": "cell.sh",
+   "replaced_by": "vm/tui_cell.py",
+   "why": "互動式 TUI（tmux）而非 `pi --print`；同樣的隔離（新使用者＋bwrap）、同樣的紀錄欄位，另加完成偵測／pane 紀錄／sessions"
+  },
+  {
+   "campaign_file": "driver.py",
+   "replaced_by": "vm/driver_i1001.py",
+   "why": "一個單位是 A／C 兩條線＋接在 A 之後的 R／K 兩條巢狀分支；位置數以「同時在跑的 pi 對話」計；void 重跑一次"
+  },
+  {
+   "campaign_file": "feasibility.py",
+   "replaced_by": "vm/feasibility_i1001.py",
+   "why": "原規則「逾時率 ≥30% 就停」不能用：這批的題池是 C5 的 A 失敗題，近六成本來就會撞 1800 秒；改看 void 率／非 200 率／C 安裝失敗，逾時只記錄"
+  },
+  {
+   "campaign_file": "analyze.py",
+   "replaced_by": "analyze_i1001.py",
+   "why": "預註冊的檢定換成 K 對 R、C 對 A 兩個主要檢定＋Holm"
+  },
+  {
+   "campaign_file": "launch_batch.sh",
+   "replaced_by": "launch_i1001.sh",
+   "why": "起的是 packer＋feasibility_i1001＋driver_i1001（auto：篩選→天花板規則→主跑）；發射紀錄多釘 tmux／bridge／plan"
+  },
+  {
+   "campaign_file": "deploy_vm.sh",
+   "replaced_by": "deploy_i1001.sh",
+   "why": "wheel 由本機從 HEAD 建好直接給（不在 VM 上重建）；多裝 tmux／bridge venv／receivers 目錄"
+  },
+  {
+   "campaign_file": "sync_from_colab.sh",
+   "replaced_by": "sync_i1001.sh",
+   "why": "同樣照 MANIFEST.tsv 用 `colab download` 拉＋驗 sha256；Drive 鏡像作第二份；VERIFIED.tsv 給 autostop 讀"
+  }
+ ]
+}

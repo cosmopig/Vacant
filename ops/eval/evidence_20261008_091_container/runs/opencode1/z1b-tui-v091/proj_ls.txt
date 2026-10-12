@@ -1,0 +1,6 @@
+total 20
+drwxr-xr-x 3 user user 4096 Oct  8 15:50 .
+drwxr-xr-x 3 user root 4096 Oct  8 15:49 ..
+drwxr-xr-x 8 user user 4096 Oct  8 15:49 .git
+-rw-r--r-- 1 user user    5 Oct  8 15:49 README.txt
+-rw-r--r-- 1 user user    3 Oct  8 15:50 answer.tx

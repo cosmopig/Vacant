@@ -1,0 +1,140 @@
+{
+ "schema": "i1001.plan/1",
+ "kind": "screen",
+ "seed": 20261001,
+ "arms": [
+  "A"
+ ],
+ "nested": [],
+ "samples": [
+  1
+ ],
+ "k_banks": [],
+ "tasks": [
+  {
+   "bank": "dabench",
+   "id": "dab_688",
+   "dir": "/srv/eval/staged/dabench/dab_688",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_721",
+   "dir": "/srv/eval/staged/dabench/dab_721",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_507",
+   "dir": "/srv/eval/staged/dabench/dab_507",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_724",
+   "dir": "/srv/eval/staged/dabench/dab_724",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_035",
+   "dir": "/srv/eval/staged/dabench/dab_035",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_affine_cipher",
+   "dir": "/srv/eval/staged/polyglot_py/pg_affine_cipher",
+   "role": "screen",
+   "deliverable": "affine_cipher.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_249",
+   "dir": "/srv/eval/staged/dabench/dab_249",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_055",
+   "dir": "/srv/eval/staged/dabench/dab_055",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_666",
+   "dir": "/srv/eval/staged/dabench/dab_666",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_039",
+   "dir": "/srv/eval/staged/dabench/dab_039",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_732",
+   "dir": "/srv/eval/staged/dabench/dab_732",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_066_04",
+   "dir": "/srv/eval/staged/databench/db_066_04",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  }
+ ],
+ "ceiling_rule": {
+  "n": 10,
+  "pass_ge": 9
+ },
+ "estimate": {
+  "units": 12,
+  "first_sessions": 12,
+  "max_extra_R_sessions": 0,
+  "max_extra_K_sessions": 0,
+  "max_sessions": 12,
+  "max_session_minutes": 360.0,
+  "note": "upper bound: every session hitting the wall limit; real use is far lower"
+ },
+ "source": {
+  "tasks_index_sha256": "03597627f30db2f1e1098c33108793341b851b1570892e3978c4d8d127c175bc",
+  "manifest_sha256": "75a7b15eba77c432aa6856d84d0f6995cad3f9656cd45e79581454976f3251c8"
+ }
+}

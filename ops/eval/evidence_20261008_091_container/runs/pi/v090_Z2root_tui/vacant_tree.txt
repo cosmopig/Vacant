@@ -1,0 +1,24 @@
+/home/u/.vacant:
+total 16
+drwxr-xr-x 4 root root 4096 Oct  8 15:56 .
+drwxr-xr-x 6 root root 4096 Oct  8 15:56 ..
+drwxr-xr-x 2 root root 4096 Oct  8 15:56 adapters
+drwxr-xr-x 3 root root 4096 Oct  8 15:56 intake
+
+/home/u/.vacant/adapters:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  8 15:56 .
+drwxr-xr-x 4 root root 4096 Oct  8 15:56 ..
+-rw-r--r-- 1 root root 1206 Oct  8 15:56 install.json
+
+/home/u/.vacant/intake:
+total 12
+drwxr-xr-x 3 root root 4096 Oct  8 15:56 .
+drwxr-xr-x 4 root root 4096 Oct  8 15:56 ..
+drwxr-xr-x 2 root root 4096 Oct  8 15:56 hooks
+
+/home/u/.vacant/intake/hooks:
+total 12
+drwxr-xr-x 2 root root 4096 Oct  8 15:56 .
+drwxr-xr-x 3 root root 4096 Oct  8 15:56 ..
+-rw-r--r-- 1 root root  913 Oct  8 15:56 events.jsonl

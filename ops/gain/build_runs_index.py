@@ -581,7 +581,7 @@ def _classify(d: Path, summary: dict[str, Any] | None,
     return KIND_OTHER, "unclassified"
 
 
-def _classify_twin(d: pathlib.Path) -> tuple[str, str]:
+def _classify_twin(d: Path) -> tuple[str, str]:
     """展件（`ops/exhibit/twin/`）那一種 run 根目錄的分類。
 
     它的形狀與 G 實驗不同——沒有頂層的 `summary.json`／`rows.jsonl`，

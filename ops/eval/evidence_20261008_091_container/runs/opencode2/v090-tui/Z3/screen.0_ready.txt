@@ -1,0 +1,50 @@
+                                                                                                                                                                
+                                                                                                  ┃                                                          ┃  
+                                                                                                  ┃  Plugin failed: /home/u/.config/         › Open plugins  ┃  
+                                                                                                  ┃  opencode/plugin/vacant.js                               ┃  
+                                                                                                  ┃                                                          ┃  
+                                                                                                  ┃  Run /plugins to view details.                           ┃  
+                                                                                                  ┃                                                          ┃  
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                              ▄                                                                 
+                                                             █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█                                                            
+                                                             █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀                                                            
+                                                             ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀                                                            
+                                                                                                                                                                
+                                                                                                                                                                
+                                           ┃                                                                                                                    
+                                           ┃  Ask anything… "Fix broken tests"                                                                                  
+                                           ┃                                                                                                                    
+                                           ┃  Build · mock-model mock                                                                                           
+                                           ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                          
+                                           /work/proj3:master                        shift+tab agents  ctrl+p commands                                          
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+  ⊙ 1 plugin failed /plugins                                                                                                                            2.0.24  
+                                                                                                                                                                

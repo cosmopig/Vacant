@@ -1,0 +1,302 @@
+{
+ "schema": "i1001.plan/1",
+ "kind": "screen",
+ "seed": 20261001,
+ "arms": [
+  "A"
+ ],
+ "nested": [],
+ "samples": [
+  1
+ ],
+ "k_banks": [],
+ "tasks": [
+  {
+   "bank": "polyglot_py",
+   "id": "pg_phone_number",
+   "dir": "/srv/eval/staged/polyglot_py/pg_phone_number",
+   "role": "screen_sample",
+   "deliverable": "phone_number.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_039",
+   "dir": "/srv/eval/staged/dabench/dab_039",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_affine_cipher",
+   "dir": "/srv/eval/staged/polyglot_py/pg_affine_cipher",
+   "role": "screen_sample",
+   "deliverable": "affine_cipher.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_066_04",
+   "dir": "/srv/eval/staged/databench/db_066_04",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_724",
+   "dir": "/srv/eval/staged/dabench/dab_724",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_078_36",
+   "dir": "/srv/eval/staged/databench/db_078_36",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_507",
+   "dir": "/srv/eval/staged/dabench/dab_507",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_food_chain",
+   "dir": "/srv/eval/staged/polyglot_py/pg_food_chain",
+   "role": "screen_sample",
+   "deliverable": "food_chain.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_074_27",
+   "dir": "/srv/eval/staged/databench/db_074_27",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_078_11",
+   "dir": "/srv/eval/staged/databench/db_078_11",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_072_33",
+   "dir": "/srv/eval/staged/databench/db_072_33",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_075_28",
+   "dir": "/srv/eval/staged/databench/db_075_28",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_react",
+   "dir": "/srv/eval/staged/polyglot_py/pg_react",
+   "role": "screen_sample",
+   "deliverable": "react.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_076_06",
+   "dir": "/srv/eval/staged/databench/db_076_06",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_721",
+   "dir": "/srv/eval/staged/dabench/dab_721",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_732",
+   "dir": "/srv/eval/staged/dabench/dab_732",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_pov",
+   "dir": "/srv/eval/staged/polyglot_py/pg_pov",
+   "role": "screen_sample",
+   "deliverable": "pov.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_035",
+   "dir": "/srv/eval/staged/dabench/dab_035",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_sgf_parsing",
+   "dir": "/srv/eval/staged/polyglot_py/pg_sgf_parsing",
+   "role": "screen_sample",
+   "deliverable": "sgf_parsing.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_688",
+   "dir": "/srv/eval/staged/dabench/dab_688",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_055",
+   "dir": "/srv/eval/staged/dabench/dab_055",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_dot_dsl",
+   "dir": "/srv/eval/staged/polyglot_py/pg_dot_dsl",
+   "role": "screen_sample",
+   "deliverable": "dot_dsl.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_074_13",
+   "dir": "/srv/eval/staged/databench/db_074_13",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_666",
+   "dir": "/srv/eval/staged/dabench/dab_666",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_connect",
+   "dir": "/srv/eval/staged/polyglot_py/pg_connect",
+   "role": "screen_sample",
+   "deliverable": "connect.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_069_29",
+   "dir": "/srv/eval/staged/databench/db_069_29",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_249",
+   "dir": "/srv/eval/staged/dabench/dab_249",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "databench",
+   "id": "db_080_23",
+   "dir": "/srv/eval/staged/databench/db_080_23",
+   "role": "screen_sample",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_beer_song",
+   "dir": "/srv/eval/staged/polyglot_py/pg_beer_song",
+   "role": "screen_sample",
+   "deliverable": "beer_song.py",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_wordy",
+   "dir": "/srv/eval/staged/polyglot_py/pg_wordy",
+   "role": "screen_sample",
+   "deliverable": "wordy.py",
+   "k": false,
+   "screened": true
+  }
+ ],
+ "ceiling_rule": {
+  "n": 10,
+  "pass_ge": 9
+ },
+ "estimate": {
+  "units": 30,
+  "first_sessions": 30,
+  "max_extra_R_sessions": 0,
+  "max_extra_K_sessions": 0,
+  "max_sessions": 30,
+  "max_session_minutes": 900.0,
+  "note": "upper bound: every session hitting the wall limit; real use is far lower"
+ },
+ "source": {
+  "tasks_index_sha256": "d7f41a23de1855426d3c9855caf5b138c325ad7ec012f4ee21f48236c02e6410",
+  "manifest_sha256": "f6e46b93f4f8624cfbf58bc7a7691fe8acd6683140acc56744207b74597ddd46"
+ }
+}

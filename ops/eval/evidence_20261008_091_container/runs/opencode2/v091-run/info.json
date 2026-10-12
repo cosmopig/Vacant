@@ -1,0 +1,14 @@
+{
+  "env": {
+    "HOME": "/home/u",
+    "PATH": "/opt/v091/bin:/opt/npm/opencode2/bin:/usr/local/bin:/usr/bin:/bin",
+    "LANG": "C.UTF-8",
+    "TERM": "xterm-256color",
+    "USER": "u",
+    "SHELL": "/bin/bash",
+    "NODE_EXTRA_CA_CERTS": "/ca.crt"
+  },
+  "install_rc": 0,
+  "vacant_version": "0.9.1",
+  "vacant_tree": "/home/u/.vacant\n/home/u/.vacant/adapters\n/home/u/.vacant/adapters/install.json\n"
+}

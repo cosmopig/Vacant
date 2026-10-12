@@ -1,0 +1,327 @@
+{
+ "host_python": "3.11.15",
+ "tasks": 40,
+ "problems": [],
+ "rows": [
+  {
+   "task": "2808",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "2848",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 0,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "2955",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3195",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3299",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3308",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3320",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3360",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3450",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3468",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3518",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3553",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3637",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3676",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3765",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3768",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3779",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "3811",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc310_b",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc312_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc320_c",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc323_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc330_c",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc334_b",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc337_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc343_a",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc348_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc351_e",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc356_e",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc363_a",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc377_g",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc383_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc384_b",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc388_g",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "abc397_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "arc186_d",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "arc188_c",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "arc189_b",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "arc195_c",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 0,
+   "agree_first_case_only": true
+  },
+  {
+   "task": "arc196_c",
+   "rc_no_solution": 1,
+   "rc_empty": 1,
+   "agree_empty": true,
+   "rc_first_case_only": 1,
+   "agree_first_case_only": true
+  }
+ ]
+}

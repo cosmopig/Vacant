@@ -1,0 +1,13 @@
+{"ts": 1791474647.7654147, "agent": "opencode", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474650.640988, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "560b14bd610f5bc194dbf4b08ddc5ec2e6b5e79a9ea13dd7eb720200182174b7"}
+{"ts": 1791474651.1053631, "agent": "opencode", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "560b14bd610f5bc194dbf4b08ddc5ec2e6b5e79a9ea13dd7eb720200182174b7"}
+{"ts": 1791474652.2581167, "agent": "opencode", "event": "stop", "kind": "stop", "tool": null, "action": "continue", "contract": null, "command_sha256": null, "zero": {"ran": true, "round": 1, "sent": 1, "withheld": 0}, "zero_ran": true}
+{"ts": 1791474652.4008427, "agent": "opencode", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474652.764159, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a626fa501f3b71119be73cc11d4d299a472a8da7df957505e3a6690ceef6a246"}
+{"ts": 1791474652.899078, "agent": "opencode", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a626fa501f3b71119be73cc11d4d299a472a8da7df957505e3a6690ceef6a246"}
+{"ts": 1791474653.7200851, "agent": "opencode", "event": "stop", "kind": "stop", "tool": null, "action": "continue", "contract": null, "command_sha256": null, "zero": {"ran": true, "round": 2, "sent": 1, "withheld": 0}, "zero_ran": true}
+{"ts": 1791474653.8267403, "agent": "opencode", "event": "prompt", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791474654.0983422, "agent": "opencode", "event": "pre_tool", "kind": "pre_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a626fa501f3b71119be73cc11d4d299a472a8da7df957505e3a6690ceef6a246"}
+{"ts": 1791474654.234386, "agent": "opencode", "event": "post_tool", "kind": "post_tool", "tool": "bash", "action": "allow", "contract": null, "command_sha256": "a626fa501f3b71119be73cc11d4d299a472a8da7df957505e3a6690ceef6a246"}
+{"ts": 1791474655.0100327, "agent": "opencode", "event": "stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 2, "left_open": 1}, "zero_ran": true}
+{"ts": 1791474682.8919113, "agent": "opencode", "event": "session_end", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

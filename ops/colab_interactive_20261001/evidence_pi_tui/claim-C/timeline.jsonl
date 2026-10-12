@@ -1,0 +1,16 @@
+{"t": 2.133, "kind": "enter"}
+{"t": 2.153, "kind": "change", "session_n": 0, "state": "empty", "requests": 0, "hook_procs": 1}
+{"t": 2.369, "kind": "change", "session_n": 0, "state": "empty", "requests": 0, "hook_procs": 0}
+{"t": 2.579, "kind": "change", "session_n": 0, "state": "empty", "requests": 1, "hook_procs": 0}
+{"t": 2.79, "kind": "change", "session_n": 6, "state": "running", "requests": 1, "hook_procs": 1}
+{"t": 3.009, "kind": "change", "session_n": 6, "state": "running", "requests": 1, "hook_procs": 0}
+{"t": 3.224, "kind": "change", "session_n": 7, "state": "running", "requests": 2, "hook_procs": 0}
+{"t": 3.442, "kind": "change", "session_n": 8, "state": "running", "requests": 2, "hook_procs": 1}
+{"t": 3.652, "kind": "change", "session_n": 9, "state": "running", "requests": 3, "hook_procs": 0}
+{"t": 3.87, "kind": "change", "session_n": 10, "state": "final", "requests": 3, "hook_procs": 1}
+{"t": 4.3, "kind": "change", "session_n": 11, "state": "running", "requests": 4, "hook_procs": 0}
+{"t": 4.52, "kind": "change", "session_n": 12, "state": "running", "requests": 4, "hook_procs": 1}
+{"t": 4.742, "kind": "change", "session_n": 12, "state": "running", "requests": 4, "hook_procs": 0}
+{"t": 5.188, "kind": "change", "session_n": 13, "state": "running", "requests": 5, "hook_procs": 0}
+{"t": 5.402, "kind": "change", "session_n": 14, "state": "final", "requests": 5, "hook_procs": 1}
+{"t": 5.838, "kind": "change", "session_n": 14, "state": "final", "requests": 5, "hook_procs": 0}

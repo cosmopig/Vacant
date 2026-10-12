@@ -1,0 +1,16 @@
+2026-10-01T16:06:15Z plan kind=screen prefix=t2s units=30 arms=['A'] nested=[] slots=4
+2026-10-01T16:06:35Z done t2s-A-polyglot_py-pg_phone_number-s1 void=False timeout=False wall=18.9s sessions=1
+2026-10-01T16:06:35Z done t2s-A-dabench-dab_039-s1 void=False timeout=False wall=18.9s sessions=1
+2026-10-01T16:06:35Z plan screen finished: launched=2 already_done=0 peak_slots=2
+2026-10-01T16:06:35Z ceiling decision: {"dabench": [false, 0, 10], "databench": [false, 0, 10], "polyglot_py": [false, 0, 10]}
+2026-10-01T16:06:35Z plan kind=main prefix=t2 units=227 arms=['A', 'C'] nested=['R', 'K'] slots=4
+2026-10-01T16:07:26Z done t2-C-lcb_v3-lcb_3313-s1 void=False timeout=False wall=21.7s sessions=1
+2026-10-01T16:07:26Z done t2-C-lcb_v3-lcb_3184-s1 void=False timeout=False wall=21.8s sessions=1
+2026-10-01T16:07:36Z done t2-A-lcb_v3-lcb_3313-s1 void=False timeout=False wall=18.6s sessions=1
+2026-10-01T16:07:36Z done t2-R-lcb_v3-lcb_3313-s1 void=False timeout=False wall=18.6s sessions=1
+2026-10-01T16:07:36Z done t2-K-lcb_v3-lcb_3313-s1 void=False timeout=False wall=56.7s sessions=3
+2026-10-01T16:07:36Z done t2-A-lcb_v3-lcb_3184-s1 void=False timeout=False wall=18.7s sessions=1
+2026-10-01T16:07:36Z done t2-R-lcb_v3-lcb_3184-s1 void=False timeout=False wall=18.7s sessions=1
+2026-10-01T16:07:36Z done t2-K-lcb_v3-lcb_3184-s1 void=False timeout=False wall=56.9s sessions=3
+2026-10-01T16:07:36Z plan main finished: launched=2 already_done=0 peak_slots=4
+2026-10-01T16:07:36Z DRIVER_DONE

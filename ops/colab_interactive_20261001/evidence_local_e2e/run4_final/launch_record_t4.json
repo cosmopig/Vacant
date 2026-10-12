@@ -1,0 +1,306 @@
+{
+ "prefix": "t4",
+ "launched": "2026-10-01T17:14:34Z",
+ "slots": 4,
+ "deadline": "2026-10-02T23:00:00Z",
+ "mirror": "<scratchpad>/i1001/e2e/mirror_drive4",
+ "tools_sha256": {
+  "cu_guard.sh": "452a95185339fd79aefe2f5b2a50e308f10b04e32dc37d99e99cc30cedba6122",
+  "deploy_i1001.sh": "46c7436906ac355840b458ef4826198ef99a6010d636c352e82a50c408b1217a",
+  "driver_i1001.py": "0caaaaf5ae63327f407a7c5758acc75690f32b9418af775e938ddba838881b42",
+  "feasibility_i1001.py": "a21768f3d6edd09ca40a5c995fc6cbdd0c18d90fb0eaddc1779ff129656a4d01",
+  "finalize_vm.py": "e9995a1a891e355f6a962fda5e4c332224088ac92e582365a382ccfddc7921fd",
+  "launch_i1001.sh": "32ff7f08227673d2918fe84a7f3966110f3e1699722464ed58e30da590acc289",
+  "launch_record.py": "584694fd133798d64dde5a309283dc13133192f41eaac314030d62019d712db9",
+  "orproxy.py": "bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525",
+  "packer.py": "d206cf001276c7c9ff480c0c35f02d149a23f4dcafae85a2e02cd85dcdfe709d",
+  "packer_i1001.py": "f28c99e02e9f66cc42e472a2b28207942694f3ff52e829581d183e0f9df6aa99",
+  "plan_builder.py": "26e05555f3fbe25f9c4e120a3af07350c8e8ff3e56c0a396cb5546585f75948f",
+  "sandbox.sh": "4855e8e4d0a56a06d24fa7d54e28c09e291d738d3646d5095ab8a0c0997a6af3",
+  "code_checks.py": "d6b145b74621092de73605dbfd38758d02bd21dcdf5f46861833048abceecd36",
+  "code_suite.py": "298396bcc6cabe68d9129870ef1be0d7f94b153cc8cd4219504931759714649d",
+  "dabench.py": "a541dceda5d091da9ff5fa323dd14220c5c8302935ac85d6f043d79f356435b1",
+  "databench.py": "ac5bd5be233e01ba1060ec1e698cd8eb4a73b8a4a023836587d3f415bb057b38",
+  "polyglot_py.py": "25ed44f4643200c006f9b8780783366050c2637660ae7873e7f2010a5366f182",
+  "smoke_stub.py": "11757ab9afc42cddc0f80236be6048f5a6ac3378f7c9f55fe6cf197d17ac12ac",
+  "stub_model.py": "c2e74615f2fc2cb133aec2c828788582c479a087f8b961cf89824620b711e863",
+  "tui_cell.py": "782273ced78fef3f6151eb3fbcde1076f2dc1faec0341e8360ee54d2c34d27e4",
+  "tui_lib.py": "8934bc6622e816f495db6914f7d2915252c7fbc4315c14f28eb78474a79f74b5",
+  "vacant_check.py": "07afff4f22ee23115e507f94c4c8f7276317793bf5ff3a83f7141349295e8661",
+  "vm_selfcheck.py": "06438728ffe4bba451a3e451c7568dc9d097ea278260439d855efa3105950ab1",
+  "vm_setup.sh": "57348920af55032c7c8015278856f3ef794222a72de4242eaa4957e8ca1cf179"
+ },
+ "bridge_sha256": "5104ae0035c86609a43a679e49820371384ed0e5640cd558d66698857c9eeeec",
+ "wheel": {
+  "vacant_network-0.8.0-py3-none-any.whl": "becc0471ef8c8401444b92162ffb9b87319c2349ab2e85a65f50fc67292148a3"
+ },
+ "staged_tree_sha256": {
+  "dabench": "1352b9fa21e3d7095d6aa7bd85e02eeb98548d90070d8ec9969e6bb88cc1b2e3",
+  "databench": "a6a0d91aa5e192a8e6e7a9351ada0035c855dd7d0c7906f6f0d8ed638998fff8",
+  "lcb_v1": "e55218dff6195383fb29e1f27270aba858d4d0d64deb4fb58c224cbe7ec19853",
+  "lcb_v2": "f5df92092c68db0e6e6192d4b9668d38832e6af4f246f13f95a3bf741623253e",
+  "lcb_v3": "095ccc45d2fccd06a47c12c32b50547f57d943e05840ec56bfd7c6d46dcad12f",
+  "polyglot_py": "e26cc14f382993b2e967c469b06e494f7f2b74ae8b63af4c0c5087ab4f237994"
+ },
+ "tasks_index_sha256": "03597627f30db2f1e1098c33108793341b851b1570892e3978c4d8d127c175bc",
+ "staged_manifest_sha256": "75a7b15eba77c432aa6856d84d0f6995cad3f9656cd45e79581454976f3251c8",
+ "selfcheck": {
+  "started": "2026-10-01T17:00:57Z",
+  "scenarios": {
+   "a": {
+    "seconds": 8.0,
+    "metas": {
+     "A": {
+      "cell": "sc-a-A-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "R": null,
+     "K": null,
+     "void": false
+    },
+    "failed_expectations": [],
+    "ok": true
+   },
+   "k": {
+    "seconds": 19.1,
+    "metas": {
+     "A": {
+      "cell": "sc-k-A-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "R": {
+      "cell": "sc-k-R-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "K": {
+      "cell": "sc-k-K-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "void": false
+    },
+    "failed_expectations": [],
+    "ok": true
+   },
+   "r": {
+    "seconds": 18.4,
+    "metas": {
+     "A": {
+      "cell": "sc-r-A-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "R": {
+      "cell": "sc-r-R-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "K": {
+      "cell": "sc-r-K-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "void": false
+    },
+    "failed_expectations": [],
+    "ok": true
+   },
+   "timeout": {
+    "seconds": 38.6,
+    "metas": {
+     "A": {
+      "cell": "sc-timeout-A-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "R": {
+      "cell": "sc-timeout-R-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "K": {
+      "cell": "sc-timeout-K-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     },
+     "void": false
+    },
+    "failed_expectations": [],
+    "ok": true
+   },
+   "void": {
+    "seconds": 32.8,
+    "metas": {
+     "A": {
+      "cell": "sc-void-A-lcb_selfcheck-solve_add-s1",
+      "void": true,
+      "void_reason": "model_error_final: 500 \"{\\\"error\\\": {\\\"message\\\": \\\"stub: scripted error\\\"}}\""
+     },
+     "R": null,
+     "K": null,
+     "void": true
+    },
+    "failed_expectations": [],
+    "ok": true
+   },
+   "driver": {
+    "seconds": 59.2,
+    "ok": true,
+    "failed_expectations": [],
+    "rows": 18,
+    "voids": 6,
+    "metas": {
+     "scd-A-lcb_selfcheck-u2-s1": {
+      "void": true,
+      "void_reason": "proxy_non200: 1 call(s), 0 stream error(s)",
+      "n_sessions": 1
+     },
+     "scd-C-lcb_selfcheck-u1-s1": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-A-lcb_selfcheck-u2-s1v2": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-R-lcb_selfcheck-u2-s1v2": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-K-lcb_selfcheck-u2-s1v2": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-C-lcb_selfcheck-u3-s1": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-R-lcb_selfcheck-u3-s1": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-R-lcb_selfcheck-u1-s1": {
+      "void": true,
+      "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+      "n_sessions": 0
+     },
+     "scd-K-lcb_selfcheck-u2-s1": {
+      "void": true,
+      "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+      "n_sessions": 0
+     },
+     "scd-R-lcb_selfcheck-u2-s1": {
+      "void": true,
+      "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+      "n_sessions": 0
+     },
+     "scd-A-lcb_selfcheck-u3-s1": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-K-lcb_selfcheck-u3-s1": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-R-lcb_selfcheck-u1-s1v2": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-K-lcb_selfcheck-u1-s1v2": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-K-lcb_selfcheck-u1-s1": {
+      "void": true,
+      "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+      "n_sessions": 0
+     },
+     "scd-A-lcb_selfcheck-u1-s1v2": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     },
+     "scd-A-lcb_selfcheck-u1-s1": {
+      "void": true,
+      "void_reason": "proxy_non200: 1 call(s), 0 stream error(s)",
+      "n_sessions": 1
+     },
+     "scd-C-lcb_selfcheck-u2-s1": {
+      "void": false,
+      "void_reason": null,
+      "n_sessions": 1
+     }
+    }
+   },
+   "c": {
+    "seconds": 35.6,
+    "metas": {
+     "C": {
+      "cell": "sc-c-C-lcb_selfcheck-solve_add-s1",
+      "void": false,
+      "void_reason": null
+     }
+    },
+    "failed_expectations": [],
+    "ok": true
+   }
+  },
+  "idle_s": 4.0,
+  "bridge_probe": {
+   "plain": {
+    "prepare_rc": 0,
+    "err": "",
+    "judge_rc": 0,
+    "outcome": "accept",
+    "err2": ""
+   },
+   "shim": null,
+   "shim_used": false,
+   "ok": true
+  },
+  "bridge_shim": false,
+  "ok": true,
+  "ended": "2026-10-01T17:04:32Z"
+ },
+ "model_safetensors_sha256": "",
+ "vllm": "",
+ "pi": "0.87.1",
+ "node": "v22.22.2",
+ "tmux": "tmux 3.4",
+ "bwrap": "bubblewrap 0.9.0",
+ "python3": "Python 3.11.15",
+ "kernel": "6.18.44-fc-v50",
+ "gpu": "",
+ "vllm_cmdline": "",
+ "driver_extra_args": [
+  "--agent-timeout",
+  "60",
+  "--proxy",
+  "http://127.0.0.1:18950"
+ ],
+ "fixed_variables": {
+  "model": "gemma-4-12b-it-qat (vLLM served-model-name)",
+  "thinking": "off (proxy think/off)",
+  "instruction": "Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.",
+  "agent_timeout_s": 60,
+  "idle_s": 15.0,
+  "max_units": null,
+  "turn_cap": null,
+  "terminal": "tmux 160x50, TERM=xterm-256color, history-limit 50000",
+  "pi_env": "PI_OFFLINE=1 (all arms)",
+  "isolation": "fresh Linux user + bwrap per cell (sandbox.sh)"
+ }
+}

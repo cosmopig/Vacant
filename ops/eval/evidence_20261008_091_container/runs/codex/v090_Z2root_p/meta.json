@@ -1,0 +1,11 @@
+{
+  "build": "v090",
+  "scn": "Z2root",
+  "mode": "p",
+  "cwd": "/",
+  "exit": "0",
+  "wall": 3.6,
+  "answer_txt": null,
+  "model_requests": 2,
+  "requests_fed_back": 0
+}

@@ -242,15 +242,24 @@ def tost_equiv_boot(
     }
 
 
+_TIE_DIGITS = 12  # 同分判斷的小數位數（見 wilcoxon_signed_rank_exact）
+
+
 def wilcoxon_signed_rank_exact(diffs: list[float], *, alpha: float = 0.05) -> dict[str, float]:
     """Wilcoxon signed-rank 精確檢定（雙尾）：配對差是否系統性偏離 0。
 
     去零 → 對 |diff| 排 midrank（ties 取平均秩）→ W+＝正差秩和。n≤24 時
     2^n 全枚舉精確 p；n>24 用帶 ties 變異數修正的常態近似（精確枚舉 2^25
     以上不值得，近似誤差 O(1/n²)，誠實標明 method 欄）。
+
+    同分與零的判斷先四捨五入到 `_TIE_DIGITS` 位小數（2026-09-26 修）：配對差常是「幾次裡答對幾次」的平均相減，
+    例如 1−2/3＝0.33333333333333337 與 1/3＝0.3333333333333333 在浮點上不相等，舊版用 `==` 把它們當成不同的值、
+    秩排錯（本機正式批次：舊版 W+ 197.5、p 0.0189；正確 193.5、0.0207，`decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`）。
+    差是 2 的冪次分之幾（例如兩次平均的 0.5）時新舊版逐位元組相同。
     """
-    pairs = [abs(d) for d in diffs if d != 0]
-    signs = [1 if d > 0 else -1 for d in diffs if d != 0]
+    rounded = [round(d, _TIE_DIGITS) for d in diffs]
+    pairs = [abs(d) for d in rounded if d != 0]
+    signs = [1 if d > 0 else -1 for d in rounded if d != 0]
     n = len(pairs)
     if n == 0:
         raise ValueError("全部配對差為 0：無秩可排（H0 無法被拒絕）")

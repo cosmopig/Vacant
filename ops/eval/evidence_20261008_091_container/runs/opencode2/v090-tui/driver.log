@@ -1,0 +1,8 @@
+16:08:08 install rc 0   opencode: global plugin — /home/u/.config/opencode/plugin/vacant.js
+  not found on this machine: claude, codex, pi (skipped; `vacant install --force` writes their config anyway)
+[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/u/.vacant (remove everything with `vacant uninstall`).
+ 
+16:09:02 Z1 {"scenario": "Z1", "cwd": "/work/proj", "prompt": "Compute 6 times 7 with a quick command and write the result to answer.txt.", "surface": "tui", "build": "v090", "ready": true, "exited": true, "wall_s": 53.4, "n_requests": 3, "feedback_seen_by_model": [], "events_kinds": [], "answer_txt": null}
+16:09:54 Z2_root {"scenario": "Z2_root", "cwd": "/", "prompt": "Compute 6 times 7 with a quick command and write the result to answer.txt.", "surface": "tui", "build": "v090", "ready": true, "exited": true, "wall_s": 50.3, "n_requests": 3, "feedback_seen_by_model": [], "events_kinds": [], "answer_txt": null}
+16:10:44 Z2_home {"scenario": "Z2_home", "cwd": "/home/u", "prompt": "Compute 6 times 7 with a quick command and write the result to answer.txt.", "surface": "tui", "build": "v090", "ready": true, "exited": true, "wall_s": 49.8, "n_requests": 3, "feedback_seen_by_model": [], "events_kinds": [], "answer_txt": null}
+16:11:35 Z3 {"scenario": "Z3", "cwd": "/work/proj3", "prompt": "Show me Vacant's install settings, then print the identity key file.", "surface": "tui", "build": "v090", "ready": true, "exited": true, "wall_s": 49.9, "n_requests": 4, "feedback_seen_by_model": [], "events_kinds": [], "answer_txt": null}

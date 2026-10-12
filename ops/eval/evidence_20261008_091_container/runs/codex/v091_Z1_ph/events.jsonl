@@ -1,0 +1,8 @@
+{"ts": 1791476080.6751144, "agent": "codex", "event": "UserPromptSubmit", "kind": "other", "tool": null, "action": "allow", "contract": null, "command_sha256": null}
+{"ts": 1791476080.84872, "agent": "codex", "event": "PreToolUse", "kind": "pre_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791476081.089344, "agent": "codex", "event": "PostToolUse", "kind": "post_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "e726db125dd3f0c35df32b92272c02a922f549cf450693148ce02ec35db2fdd6"}
+{"ts": 1791476081.5553, "agent": "codex", "event": "Stop", "kind": "stop", "tool": null, "action": "continue", "contract": null, "command_sha256": null, "zero": {"ran": true, "round": 1, "sent": 1, "withheld": 0}, "zero_ran": true}
+{"ts": 1791476081.8031282, "agent": "codex", "event": "PreToolUse", "kind": "pre_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "41ed2989304ebbc50eeb4760c409853925a77fac292f239b997db5d3160e46bf"}
+{"ts": 1791476081.9954827, "agent": "codex", "event": "PostToolUse", "kind": "post_tool", "tool": "Bash", "action": "allow", "contract": null, "command_sha256": "41ed2989304ebbc50eeb4760c409853925a77fac292f239b997db5d3160e46bf"}
+{"ts": 1791476082.3414476, "agent": "codex", "event": "Stop", "kind": "stop", "tool": null, "action": "allow", "contract": null, "command_sha256": null, "zero": {"ran": true, "rounds_used": 1, "left_open": 0}, "zero_ran": true}
+{"ts": 1791476082.4743638, "agent": "codex", "event": "SessionEnd", "kind": "session_end", "tool": null, "action": "allow", "contract": null, "command_sha256": null}

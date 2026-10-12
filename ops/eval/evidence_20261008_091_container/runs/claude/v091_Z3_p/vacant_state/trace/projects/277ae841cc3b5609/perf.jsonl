@@ -1,0 +1,6 @@
+{"ts": 1791475223.5747013, "agent": "claude", "event": "UserPromptSubmit", "ms": 22.04}
+{"ts": 1791475223.8292935, "agent": "claude", "event": "PreToolUse", "ms": 9.94}
+{"ts": 1791475224.0420918, "agent": "claude", "event": "PostToolUse", "ms": 14.69}
+{"ts": 1791475224.205564, "agent": "claude", "event": "PreToolUse", "ms": 7.03}
+{"ts": 1791475224.337321, "agent": "claude", "event": "Stop", "ms": 2.45}
+{"ts": 1791475224.6349945, "agent": "claude", "event": "SessionEnd", "ms": 10.19}

@@ -1,0 +1,25 @@
+{"t": 1790866558.372, "event": "agent_start"}
+{"t": 1790866558.377, "event": "turn_start"}
+{"t": 1790866558.378, "event": "message_end", "role": "system"}
+{"t": 1790866558.38, "event": "message_end", "role": "user"}
+{"t": 1790866558.47, "event": "message_end", "role": "assistant", "stop": "error"}
+{"t": 1790866558.473, "event": "turn_end", "role": "assistant", "stop": "error"}
+{"t": 1790866558.473, "event": "agent_end"}
+{"t": 1790866560.479, "event": "agent_start"}
+{"t": 1790866560.479, "event": "turn_start"}
+{"t": 1790866560.491, "event": "message_end", "role": "assistant", "stop": "error"}
+{"t": 1790866560.492, "event": "turn_end", "role": "assistant", "stop": "error"}
+{"t": 1790866560.493, "event": "agent_end"}
+{"t": 1790866564.494, "event": "agent_start"}
+{"t": 1790866564.494, "event": "turn_start"}
+{"t": 1790866564.763, "event": "message_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866564.794, "event": "tool_execution_end"}
+{"t": 1790866564.795, "event": "message_end", "role": "toolResult"}
+{"t": 1790866564.796, "event": "turn_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866564.799, "event": "turn_start"}
+{"t": 1790866565.021, "event": "message_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866565.022, "event": "turn_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866565.022, "event": "agent_end"}
+{"t": 1790866565.023, "event": "agent_before_settle"}
+{"t": 1790866565.023, "event": "agent_settled"}
+{"t": 1790866580.348, "event": "session_shutdown"}

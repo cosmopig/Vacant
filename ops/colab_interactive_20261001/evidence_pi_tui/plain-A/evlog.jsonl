@@ -1,0 +1,15 @@
+{"t": 1790866474.681, "event": "agent_start"}
+{"t": 1790866474.682, "event": "turn_start"}
+{"t": 1790866474.683, "event": "message_end", "role": "system"}
+{"t": 1790866474.685, "event": "message_end", "role": "user"}
+{"t": 1790866475.012, "event": "message_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866475.021, "event": "tool_execution_end"}
+{"t": 1790866475.022, "event": "message_end", "role": "toolResult"}
+{"t": 1790866475.023, "event": "turn_end", "role": "assistant", "stop": "toolUse"}
+{"t": 1790866475.024, "event": "turn_start"}
+{"t": 1790866475.242, "event": "message_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866475.242, "event": "turn_end", "role": "assistant", "stop": "stop"}
+{"t": 1790866475.243, "event": "agent_end"}
+{"t": 1790866475.244, "event": "agent_before_settle"}
+{"t": 1790866475.244, "event": "agent_settled"}
+{"t": 1790866490.422, "event": "session_shutdown"}

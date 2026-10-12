@@ -1,0 +1,1713 @@
+{
+ "variant": "lcb_visible v1",
+ "converter": "ops/eval/codesuite/make_lcb_suite.py",
+ "converter_sha256": "7d9f13147a3892768ec4ab535bcb25f764eef0b234e746ea9b6cbe2f4b575f39",
+ "source": {
+  "harbor_registry_entry": "livecodebench@6.0 (A subset of 100 sampled tasks from the release_v6 version)",
+  "git_url": "https://github.com/laude-institute/harbor-datasets.git",
+  "git_commit_id": "cfad8d97c75fb9e28c7b6b74b7fadb23dae57ab6",
+  "path": "datasets/livecodebench/release_v6",
+  "harbor_commit": "6cb9ff3167596c456e0b24622d473b59fc9ab6c7"
+ },
+ "export_dir": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/codesuite/lcb_export/livecodebench",
+ "export_task_dir_sha256": {
+  "3468": "2716b7e2264a3c57efbe1d83a92b1e0b0eb5b2e939826b6076a44fc46922880b",
+  "abc312_d": "2cf753ea5ef168753afef136c9d4629e5c4bbe571d769b32c68fa5d0b05592e6",
+  "arc195_c": "df27c89c63bc982c9fdae55ae15de0e477c6cfb17c6bda28aa4d8282170b955d",
+  "3768": "5aa7926bf2cd6c5498f8071c802136af318c15b91e7679e4bb13f4c1cdfba4a2",
+  "abc363_a": "fba00081e2c2c86335795c12059ce8fc49b6df93e164ade02c4b96be5e76429a",
+  "3450": "e705f3a62ba67bc3971d017081ef40af3fde25da92f4270213b1770707a3bda2",
+  "abc388_g": "87ef51d2d80d2bb457573684de03ae7d6773f92792ca613409fad1d6957cf543",
+  "abc343_a": "46ac168b38ab6ffbae81211934624f83d35af1b94902e8e11da2bbe0d147b829",
+  "arc186_d": "859bf417ae01e7eb8ee50b6f4f1b7db79df548f646744fdda33cd07b8f528bc0",
+  "abc320_c": "51be0496ef4b2b4eea7826bdcaf4bc67bf3076f714312d920a0f92ca2ab00eea",
+  "3308": "4438c119c52365469de51cf9380d6b2740feddb27d12b43cf2b96eff9fae1ac0",
+  "abc384_b": "566808d266b44777234ede7bcf1b03ab944d7719e70453333cdfe1df76614196",
+  "abc397_d": "c0214a9502371049f927ae56f2f81636678d7b356499f9179e21fd91f7ada97d",
+  "2955": "21b8596eba5d06fab3abf6b343540c86b315e66c8e72b23a1f91417912b93939",
+  "2808": "e070bc7c02f7aa5a977cf820e24540dd609703138e93f8da3a5b8fd3e89e09fd",
+  "arc189_b": "49cfaec37ef0ba2816f6ed5007cd162d314aadf3be2ad6c884926a5316f76d1d",
+  "abc323_d": "8bde19feead4221d197215a36a9cd48e359e227f4e17828dc6c496a6c754f34b",
+  "3676": "fe7af9d1004c46a5aea91b6fe6c29fe755da0370e200fb73ee741e27e62d6db1",
+  "3811": "d9692a2227abd526bd9761b3a6d9c998d00ffd4bff40ece529eed0fe31964cfc",
+  "abc348_d": "5175e828736a5f196506ee6aa34b3d8924979dabedb5e42c545ba9354cece96a",
+  "abc351_e": "8ab67d49a54f559c965b930244248527a37034a9f7e0b68be09549e522818819",
+  "abc330_c": "41d006af94380987388775a73af3d073080c23a93fcce4c79f19dee2ed9a63d9",
+  "arc196_c": "4cacf98ae3e0de3111581714865f93ee972afa71f30b9501776dc5008a52c32d",
+  "abc337_d": "96b520dc5a108b8957affdb4d5799306a357ee926c9046e63cf5a42581257459",
+  "3637": "560f923ff492f8769d6cf3802dedfc49f721050b7b8f4f36b8a32eded0a85b76",
+  "2848": "5be8e5555c4e235dd79e6557b24733bccd03da3e72bed75be96576cd95d2e711",
+  "abc383_d": "0849d0fbcfe28e92636902cb16e4198b237632913bd51f8e6b82b0d95f06bde1",
+  "3299": "2b5c79022c08f50f1f8bee9eaabb5a4655a18f06417f57259d75a9d4c39d3fe3",
+  "3360": "da9ef6a8cc54b31e7d5bcd424db3c93fa16ebfa9bbb70dff576e3ca908f913cb",
+  "3195": "dd2bf6e13a486fe557b2f764f87e42d48c99c74e25565c7123b872e199a3c100",
+  "abc310_b": "f9d10e27f113a029de825e4003fcbe6889824f1aa00ccd0f698838ab0ce75d5e",
+  "abc356_e": "3e4cb327562294dbb35c2b809744fae9fd2fed4a26c65d61b5d5972c24d59165",
+  "3553": "3626c772f1bde063b04a6af0c5e6ad4e74da9faaf8196c36d138678992dc91d2",
+  "abc377_g": "fb902b45b5645516c773d3c00d74e45ebeda5942724e659239e3e75fad0a1b62",
+  "3320": "7b5b9970da3eac092d4c6fbbb4adfe99590b922f577feb9aa9543a0931557b38",
+  "3765": "d53b383342b7848c1674b78521931c3d7dfaa5a9479e360867d3a56671fa2029",
+  "abc334_b": "c58acd2ea81028d60e19e135ba5db37d22d1e7f83b41e402e0f7166bb00bab0c",
+  "arc188_c": "f1191ef78d90f6192309d7eba22372bca887e9762b570a2dc2914a8d9fd39b73",
+  "3518": "b752e0cd1719e1e3729062209fa1a1c3eaf8885e75b8ac6a04d31229d81ebcd6",
+  "3779": "204f539dfdb142791f8dee0944c69022ec5b9438f13a6f22061d9fd3b2f13a65"
+ },
+ "suite": "ops/eval/evidence_20260926_local/codesuite/SUITE.json",
+ "suite_sha256": "9acb1f7e55a683928c34fa982d7f707bad9581d61c246e4ca65a668c2207dc64",
+ "dockerfile_mode": "pinned-base",
+ "base_image": "vacant-eval/lcb-visible-base:2",
+ "base_image_id": "see PIN_BASE.json (written by `docker-verify`, which builds the base image)",
+ "base_dockerfile_sha256": "6a67e8b117890b3cdfcc84543d542a10e3b3082e5baef841232445479d77ee35",
+ "base_ca_bundle_sha256": "4b80c4466f0ffb1456bbc13a516ce4df63cf72e1e5ef39534b2e8b73ee49c73e",
+ "test_command": "python3 -m unittest tests/test_public.py",
+ "changes": [
+  "instruction.md: the two lines naming check_solution.py now name the unittest command (text above)",
+  "environment/check_solution.py removed (it exits 0 when tests fail)",
+  "environment/tests/config.json removed (it was the grader's config incl. the hidden tests)",
+  "environment/tests/__init__.py + test_public.py added (stdlib unittest, all public cases, grader rules)",
+  "environment/Dockerfile: COPY tests/ /app/tests/ instead of the two COPY steps; FROM vacant-eval/lcb-visible-base:2 (= base/Dockerfile)",
+  "unchanged byte for byte: task.toml, solution/, tests/ (final_test.py, test.sh, config.json)"
+ ],
+ "tasks": {
+  "3468": {
+   "dir_sha256": "b36d87582308b801a63689875fdbf835f51a9194baa06370df3c57798e2485df",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "1a2f0cdb65f55520e7ea028476e7494cc102f77765fd2e6255824dcdfdef46bf",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "5934de97bc74e2c07a45c9fe36ed0e2078e34b005530aaa9b89fa06ff112e20d",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "779fb7b000233c293d4c5bed1943ee6c8361cbfca3868f62c27bf2068c8d572f",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc312_d": {
+   "dir_sha256": "d978378c37be2fa3e0c2d4ed6452ca56148559c1ffd2425a2be976fa51480c0c",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "8f6e8611e23c986756b5b49c25f92711b1f1f9bcec6b27962598a73a7a8ac089",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "4df2ff81ac67a3b2450d425cb55b18c768dd962b68444aef328056504e1f9260",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "6ca7952536bd09d3ae1129fc35af143f789e8b501e1fb26e9269e0081215420f",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "arc195_c": {
+   "dir_sha256": "dc55b22776437df4dd85c4beb1c081ce43d9ee983c3014a14c0b43530dc2d6e2",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "4f3dc7d1473abc0df27cf08d077294b1bf89bc50bb7aef101dd67779d1047103",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "9240c928c6a552d07473e61fc88b40d40b704126ad7cd7cbd51afbd37ee1a598",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "b370d181bf7ed1bfb93fe871eeb2ace88d4fe917e47a13b043393fbf02116a78",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3768": {
+   "dir_sha256": "8b30662211efbe9050da1eed0ab770944aa5dd283ca83ba4c574188a924e8190",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "448a86026c62d5664b32c6162d41314fc1001fbe7c5534969fcf9869961b728b",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "3e84d0ed372a13a259caf908596f12e244fcc5a12be29f6c26747409f7c876c0",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "199758f5a9686f51b181048993ce8c212e3134683cf27dab8b8227e37139f83b",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc363_a": {
+   "dir_sha256": "99bdf4e9f175af3a0aec430f5684981435297f34a0e7fc529a7733d2868ea965",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "ca89af8b9ca7d7b282bfc18653c1db33a5670b3654765dd96ed5c491df198f9c",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "9e95b0bafac357eef920022fb0deef835ddbd59918830caadcaf6f27a1cb7322",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "f2f32ad29b126ce436497a25791dfd1ddd39abf895c1f0ea849db9e3c39adbd5",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3450": {
+   "dir_sha256": "3cf20c35f07a064de9a14e2f6a490e83f7692e189c850b4166aa9bf0c469b870",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "d6f60281d6943b94e6bdf51830625255ee20f51619e0337bd6655ed7bf840770",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "665520d4058bdf610aa6d16e56bee976a6af5c072099251af1c603a62732f940",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "4d938c643349b60dbf757a73f6b16dcada68e9da810b467ac7dab222e2c5ac71",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc388_g": {
+   "dir_sha256": "fd890506932f1a36c7368abf42b3f15c09779f923e5cdd94cebaf9f6a7cd2f1c",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "e4d3931d00c10a092738b2599336df8cc27e9173b683bb31f3c801bc3a603821",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "6fb31eea2383138dd1f01c318051cb97c4b6918219fec3df542d688997498712",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "23e54cef656ab25056b132ffe7b96a6ca2812148b8a8fdade3c4b7c11dcb8ac5",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc343_a": {
+   "dir_sha256": "114b0ff13955f5121fccdd03effdffdc7b65d9ebfd4b0f585be5d9667fb5a2ab",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "384418ea56cb10cc3e258a680e3b6e378ddbfd977589c1c9917df5fc76c85c0c",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "7fbf472060da34feafd5d33793bb7e2c5d7bb3ac4be70e6145b44d175eb70467",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "7f0e43e592a5feca2458b533fdb6610e9939c4ed41e93b6d10f4f7335c160a19",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "arc186_d": {
+   "dir_sha256": "82a11543470dc2a1e2b565dd6aa28999465d086e7f2af379cec9947dba6d7feb",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "298762b407c8c7b62b70d2307f5f039a95bf47f90ae532e0e897620ef243c0cd",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "2c51c6feae23d31d0d62dc8992b2e1896b75e7eef65836cae3f7a0ba7eda297b",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "1cc88c33af62c639f93f63a8349c2cbafbcd7ab66f5d0765e8a08989c06aad86",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc320_c": {
+   "dir_sha256": "f5a5fdb365ca2e249ec875aba3be6bcf31837431126cdbce94c1fa46a1c44afc",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "1e9938e37b861e6e531755940bca49aff097f9f0ca118f2573028c9c1d254632",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "5347d51253c736ddf56a467281045845815942587cdc21110daca257067398f2",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "8a4bee88c54057fd0c47a70158978c197943197174627154f883d5ea9670ec60",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3308": {
+   "dir_sha256": "b663d9743911fbfc89d0b1327110ba177f2a578444b7c72215c8dda425ddd2bb",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "dad6497804cf326c97a762f5f1f36d92229e89acf349d348089223bde6fb7b0f",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "dbe20b5e4092a71fe0fd56bf26c0ffae8002499d205701ad409cf9ac7bd9b3bb",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "382f14ec4cce5c955484b65523f3f5e83d0134a85a08e0ac643b9f3059b9ec73",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc384_b": {
+   "dir_sha256": "57687ba6cf3dafaed4438cfbc4fd56ef975896dce62fab332b911be76fb4c5b0",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "a654b6aa347f8b85966faf5758acf0e8b415e088a5ef39e25fe1d6d793bd3304",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "0d3723f5c0ff8758155945753c62a0e1ffa20dd466e60b54113a244654091430",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "e7288325b0e10ff42d9673d06ba08293e090aaa2716e6a58d07032828ab2fca9",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc397_d": {
+   "dir_sha256": "ee5653ced22c45d5ebc844707dc89348cf0c251676a1f39a21b25f32054b411c",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "1ea2d116867b762bfc635848e0e1bcb3eaaa9667457f32dbf2566e17f61a8b33",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "e7d889fcc09bf476d0229657b8b40d3e111670a8404175e89c96666838f017e8",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "b217d8862fc56fcbee85079f3a7f734cc2f5768c5ec81ace88301b17d379c992",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "2955": {
+   "dir_sha256": "c5cb2e939f20307bb57680afc0c8dd0294496abd17ae4d4999c038eef174a643",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "3cf24043d1a5fe28fbe2be8bc87d08e8cbed8d2eed1a505afff9323428d3ebcf",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "07dd211b51febb69f1bd36cf2ba22a16a5581e2a3ae94ce2cea16d357e6740fc",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "ff96c69e9e6277d15549cf5d208b60b2f55499296a5325a185f742f911e7bced",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "2808": {
+   "dir_sha256": "25c30da27e9da2a09792a889319f425d32f1aa57bb9c4d87682341f8853e827f",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "58dc6acf85e140fc1a2323fecf0332c8116cc53ce0b00a49531d893e09c00dc3",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "7403e07e4a94e193be3bf164914743ee72b0e555f1c591a21b69c6bcdbf2ac1c",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "4535882ea0b258f6bf08fcad6be13d766afec4671b71f19ffac5d8a2a6f3f777",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "arc189_b": {
+   "dir_sha256": "c0a64e9f092ca5f0af08aef8d1d79214460255a0d5d75e52f4c2086da237afca",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "cb1556d87a600cde360ae18053c1535f2f2c2f4bbe7cac10320996cdde87bd1e",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "bc1d9dcfdfccbd0d73283f5c200c4d6a3290659c3a59bf7d0b3c0fb75295752e",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "b7b57d5b3f94432d1cee6941690a76d3c9e5100607eec8d0f70db4e571239221",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc323_d": {
+   "dir_sha256": "aa63ba6d123d404dd24996b2dd4abec86b602f940843fc31aaa911704b95dc16",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "ecf3e3763d3d4e5fb4c825d0812a86a37c8d86c2f59c8d994abe3dbe8fe0a904",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "900c741728d93a3ec7108078a350dc791f752e1c582aef3c2ab4ca1a0365511a",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "dd0876896b5571606d3bc10bb3790fdec16121cbeeeece8bae9a601e0590b3ca",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3676": {
+   "dir_sha256": "ac38ff89742ba2add6cbcd2d29cdd5e6d0d1c6bb20797b6b505b555307ff9416",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "3a176891ad47baea4eb898d3368dc3ec764ff32b4c025095b15fac4009935f13",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "8920fdaec9d147f218f349214b4d75c09abfd5eee945293e5d027cf05281bcb4",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "2c1a5a073f9cbd8fabfaec54f649feb46d7b3d6191589084c30c25473543385c",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3811": {
+   "dir_sha256": "c44e834299ac93dd8de4d1a2e1e55ba087ac74c1d5649a842b4b89a6dca213c1",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "7a169ca67a805a1c6bbddb5bc79c5d999e4713e2fa3510e1ae683c6a7cf9190a",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "f37a0db2a28254bcf7e7b52897317f7ddfc5fe088cb2e6c39f60d2266ee43778",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "6f50fc95a0b92dc5de50bd77dfa6f3b66bfa7b666e937f0f737edc01d3b9e088",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc348_d": {
+   "dir_sha256": "8f4513e6c2515538d13ae17994805e79ff7466271e1558af1100fd83508121b0",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "b9cda86b873b42747250a6e973fca382bd97d021a60373a6373c1b4b5d0768ab",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "8bd93b1d1149bae466c362198b7b1e34110e36767a4e285c057e804dae36de0d",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "25eae69f91011173c30d6bc48a8388217cad90742c803438f46bb1fa68f01398",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc351_e": {
+   "dir_sha256": "b03cbf2e62c04db584654586236728d20be2f79f1bd46a05a8be85b58283dc14",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "51a731c6de0d8971c9197e849750dda1e85777c6695d556a35a283febf873bf8",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "56d7eec40ea1b574282c38fbdb4d98ae5bb43b5a45261058f187fc25a9cd6963",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "d95a9c7a19ec944968d4b563c7bb153c4e4bce29d272af624b24a5350f484c13",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc330_c": {
+   "dir_sha256": "64396427f717e4e2bba26f72c3c955fb36166fad56b6b89b194cf356486020f5",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "99459a604f5c5fb06ed6b284345c7906d0fe4b882649b0037167194d39f444b0",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "29c85ab235bf26e5024780c956f1b1f9078ed74c7bd2c420ab89764e5e3d7166",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "59b856b61ebf40291a25f5d8bdc88f6bf080531a82ce7beef3ef24787f6f8a40",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "arc196_c": {
+   "dir_sha256": "a40716b42e4c487e6d089a3104d82c6f6d2ec6e1113b686a514dad808a3e1560",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "e8ac020c94dab964edfce244f811118e7e2b00f8c8af141417e48a0711f27d96",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "6584d9cc3828cce249a3e3fcfad6def41e2c550db558b837fa5a5ed0af2b2d5b",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "ffc7b6930a111e5d1be92867eb5e109738adcfff16f00c65651619ff396c1e08",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc337_d": {
+   "dir_sha256": "1fda9099749cd19d4a59d9622c2fa309f5a50662073d4336f7ed4c96f5c965a1",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "d95541d1cd6aaa6d37c0afd4183d9df99eed83f6b3e4a8751cbc48dea942b106",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "1330b2cf6072fc86e4c77db72f7d11a32230a7eb7bc93aa1bcc5b8d303bc69a5",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "b175b9dda8ad320996f9145b562ddd5dc1aacd5a2acc96296afccc8d7f5142a1",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3637": {
+   "dir_sha256": "d2c1a0f7ce9f78d24e6b884d6341727468d1086f858b72bb3f9b3c51f8fc9960",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "bfa99751b7e23b35942e2ae1b13c81540ae63d036381d3f446d36c86a4d46dd2",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "412a12aa5ae2ce58c94c943e351f9e1ca67575ee4af0d53eac12069affa8dd3c",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "ef6f5f31d8c5fb69dc3cafcbc1e0dbb20642ceefd8963590a8831b3f2fd79c8f",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "2848": {
+   "dir_sha256": "6289c8f32c8cae38025adf48e0bad32dd3c85d98faed3bb545c4172e41af5cb2",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "61c6e192d1b7145dd8e135d251e104a687ca970e8a610d9b95eeaaea6382b669",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "62a8d6fb68138eeb9ef361ff7c9cabd885ccda82f684be994ba929cb21562e52",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "aa5dafb06997756710162d169eb63a1b69aaeb003dd268aaab955a4ac3556aed",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc383_d": {
+   "dir_sha256": "9b52e1a8eb069d3cb4527612d6089c92d57e6ad8b7b2ce42a489abcee36c89f2",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "b97c18504086d91bb822a7dab747b561a619f58b5d39bbe8ece12f775a5524ef",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "df71f7f2200a0d45a8adf97f6b89a154b58daa287cd359802edd3822b10328bc",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "5826de58b3c682709b9bfabeaef117b8c85295bbac96d53380d30c1c40b5477b",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3299": {
+   "dir_sha256": "b52e6ae2173212d9a44c4fbf1da54c337874eb371d9ae2df3f405d6c595b3472",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "b06ad353cc2cdf26f855d871cef46b64d41a6c4b84e2f918918d94b3804a59a2",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "0d569d4bf6790788ea10bb6eb9f206aa65f794aec5cf6bd76feecb64e0cc9599",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "c381329df66b70d3088e315d13b9b517eb2f6f36d5635196902c9a9f815723ac",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3360": {
+   "dir_sha256": "f38c1aee6d302f99969bb8f44affe60d93243140804dc0c7adf6bb0a42565b65",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "fe6776ee4fa3c4e5e07e81bc33ac6e0e68795fb077d74e372630021d553682e5",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "bd4a5b5e53f0ce9640393916bfa22b02e0119d33314cdbd7278dcaa70c774080",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "f5e4ed55f647ec01972dcf0a86ac425b50a7c894b73564dad4570cc29b735770",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3195": {
+   "dir_sha256": "fb6a09074a7c941be06fe66eb5fab74b22840ba594bf34a8b18e816b56aa0f6a",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "d11e8986d974d5cf5ce811a4e2ade77386db401c856ae226c37f8f00475713e8",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "f5e7b4e63f9e2281cafaa49d13bdbf19beecbf331aa98d5423e47f7ad03c9ed0",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "cdaaa7e3111465e9b94b333a2c5bb3b0d53b68d17a034516a75de76d928985fe",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc310_b": {
+   "dir_sha256": "a204ca7c1289f15ad566ec8e51dc12f08c4b457391b3c710ed0fb7ba9ee3c3fa",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "f09e97ef1f2b69bc817dc6f525691ff206b9d37abbd891104f96561896146b94",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "32ab63568f6ab31e20f19422a28264965f20a3d4da2dcf54215d81abcfce2d7c",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "138ba904dad4e3b64fdec675896fe45404d05f2c50a14517031329e2ec840478",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc356_e": {
+   "dir_sha256": "025ef67d64a15ed79fdee890f878ff76b899aa707102ec8463a6a25264464a8f",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "001198c0014966ec21f3ebb987debbfe7d0d557b0d7d1a9dd466897e66b476ba",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "300e8306bf89e9789b9ff9b2a5182104fa8677286c4e069caf31a310ef3954ee",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "2638b249294e9ed78162fe3e81ab5ebefc4a5bb59abc289eb948a862ad18139e",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3553": {
+   "dir_sha256": "11e7102ced25544db1a0d33a35d8b0489449ed2b3ae2ee07a3a09874be5cedbe",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "975f97c765ef0c3568224b87fcd684ffbae55a2ba3c6f6ffcb627238ce5699c1",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "e455402392141ec4b976fa5d9a5146d7d9740d175a222d7862e197ee39d293e6",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "38bdb37b7fc3c76ea72851925b0ab7239da5608242b9f43efbf2f97520e80d40",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc377_g": {
+   "dir_sha256": "0332ae25d718f3a3544fa32a3d415dface62b678e254631a4a85faf51420d37a",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "a0a19c704b2c54d056e6d4d0f37d7f6306767ebaa3dbd6b12d4286ebc80e95f3",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "0295459b63fdf58af568ba5890529a0c3953559c6650a73999d9c34404ba9170",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "c139c4047acab10f62f69e9c35145984ee502f4f7409c32a22783b20d93dd816",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3320": {
+   "dir_sha256": "fa400c5878520b1e4916749023980c29f8e7e39b2867401c8a9aaca858d80964",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "2a6a132ec2f20637564a6b85e5100072cd64507cfcaea62a6b11389fe0eeffd1",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "acba65b39a6bd314fd2726a62d19b47226c86f2fb26992579e841dc0fbeb9f51",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "9be012cb47510d94a58f3ba235fb5e361796f926efeec35af37166ad20400b82",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "52df6aa61de2bb309ae7475f23908eb5e29ade7cdbe68254da15c2ffb5ed02e6",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3765": {
+   "dir_sha256": "7569a66fff9b26b4c1a788cd55af667d04fe294e09f1d063af591a067601d5fa",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "40f3fe09432ce033d00c9227842566d1b6f5b72d49eff9befff46b6cb748a418",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "4d8de5fdcc64c51288bbc76460f914ae3d53d40855480b8d0c9d93dde32adb4c",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "a90b5b63968436db783313636e315a5fdddd5f0cd6c936efbebeaa75fde6efda",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "abc334_b": {
+   "dir_sha256": "c0f2045b3f8c6fd1afcc5070229d9415f1be9eb53e6e5b21cbc72d164e35fa3f",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "f78171f4c9ef66ccd7e1df568017f7e3658f313914298b36c10b8cc15007845e",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "02f2db46bf683cc64d2863e83c929288cec2e5637ca25824a51e69f0d7691926",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "e067d84ef088d0714d7f0bf2ddb704f396972558247dadd8cc0a6aaf4708db32",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "arc188_c": {
+   "dir_sha256": "5c1fc044731fc9769175a62fb1c561772042cbde3416fb3fbd1c661156d96e83",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "bbad82aca1f8d9fa3fd6f8ddd7b4ca5fab1938a4f7e296e501658e0006f2042a",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "a624736a043b11870951ea4734b9ced079aed5fa05097d5b95583cc35f3fe27e",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "5a115c548266b138324d00df6da11896f995e24a14a412a3203a0c4fc700f8b3",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "3986f56e10e3ad5c840a3de63c10cc9d69e0761b9aa30a211b1a208d86be33bf",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3518": {
+   "dir_sha256": "34cd4ab953765ba7523341b3a3bd005d154aa838f0ea4de9aac4e27def64c48a",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "7e4dd361f0cf63e0f0efecb3716af33ee75f25270986be3425f911fb8030ed0e",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "e939aad44ec55424ff95970b5320a9090cb80ce31bf05f9e65409b1c0e509795",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "fc33e9156af3e9e24122aadf2d67de8170cfaed5e9bbfdc65d19e24fc9ded8f2",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  },
+  "3779": {
+   "dir_sha256": "ecc2aab0379ae653d2409d616e806cf1756bf449ad9be967efc2aecbd1cbdd17",
+   "files": {
+    "environment/Dockerfile": {
+     "sha256": "5c74886ede8ed147c5a9a5a8223d7a761d8591a765c4701caca2403ab9bb0105",
+     "mode": "100644"
+    },
+    "environment/tests/__init__.py": {
+     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "mode": "100644"
+    },
+    "environment/tests/test_public.py": {
+     "sha256": "141c2dfd7dae2653b9b08a39957ffd9cc0ae46be718c46cae7afeb53c8ef6ac7",
+     "mode": "100644"
+    },
+    "instruction.md": {
+     "sha256": "008acc31ef949247f7fe452c5a6cbacfa8c06b1cabbfb21eb4f6c2bbbd7f6374",
+     "mode": "100644"
+    },
+    "solution/solve.sh": {
+     "sha256": "c15aba08d3475eb23538b905644136ffc0f50ee38dcbe33e95f1445e1d480749",
+     "mode": "100755"
+    },
+    "task.toml": {
+     "sha256": "100de6a07b3f2b0e0e4772b2e51deaa57e0e1829f9e8894d417be432fad375d9",
+     "mode": "100644"
+    },
+    "tests/config.json": {
+     "sha256": "5075d081c5d8d9a4026c2239f76ba09ad9ad2f797b10385f4d8242839a4f326c",
+     "mode": "100644"
+    },
+    "tests/final_test.py": {
+     "sha256": "8887958f703c3103d2b167e8aa16fd2fd5aef94aec48d7fd06812a857403c9c6",
+     "mode": "100644"
+    },
+    "tests/test.sh": {
+     "sha256": "add9fbb60a7b8334e3715b30338e4b7308c3803aef7b9466134fd35b7bf0ea7a",
+     "mode": "100755"
+    }
+   }
+  }
+ }
+}

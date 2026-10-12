@@ -1,0 +1,231 @@
+{
+ "started": "2026-10-01T16:23:10Z",
+ "scenarios": {
+  "a": {
+   "seconds": 8.3,
+   "metas": {
+    "A": {
+     "cell": "sc-a-A-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "R": null,
+    "K": null,
+    "void": false
+   },
+   "failed_expectations": [],
+   "ok": true
+  },
+  "k": {
+   "seconds": 18.7,
+   "metas": {
+    "A": {
+     "cell": "sc-k-A-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "R": {
+     "cell": "sc-k-R-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "K": {
+     "cell": "sc-k-K-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "void": false
+   },
+   "failed_expectations": [],
+   "ok": true
+  },
+  "r": {
+   "seconds": 18.6,
+   "metas": {
+    "A": {
+     "cell": "sc-r-A-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "R": {
+     "cell": "sc-r-R-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "K": {
+     "cell": "sc-r-K-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "void": false
+   },
+   "failed_expectations": [],
+   "ok": true
+  },
+  "timeout": {
+   "seconds": 38.5,
+   "metas": {
+    "A": {
+     "cell": "sc-timeout-A-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "R": {
+     "cell": "sc-timeout-R-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "K": {
+     "cell": "sc-timeout-K-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    },
+    "void": false
+   },
+   "failed_expectations": [],
+   "ok": true
+  },
+  "void": {
+   "seconds": 32.8,
+   "metas": {
+    "A": {
+     "cell": "sc-void-A-lcb_selfcheck-solve_add-s1",
+     "void": true,
+     "void_reason": "model_error_final: 500 \"{\\\"error\\\": {\\\"message\\\": \\\"stub: scripted error\\\"}}\""
+    },
+    "R": null,
+    "K": null,
+    "void": true
+   },
+   "failed_expectations": [],
+   "ok": true
+  },
+  "driver": {
+   "seconds": 60.4,
+   "ok": true,
+   "failed_expectations": [],
+   "rows": 18,
+   "voids": 6,
+   "metas": {
+    "scd-A-lcb_selfcheck-u2-s1": {
+     "void": true,
+     "void_reason": "proxy_non200: 1 call(s), 0 stream error(s)",
+     "n_sessions": 1
+    },
+    "scd-C-lcb_selfcheck-u1-s1": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-A-lcb_selfcheck-u2-s1v2": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-R-lcb_selfcheck-u2-s1v2": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-K-lcb_selfcheck-u2-s1v2": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-C-lcb_selfcheck-u3-s1": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-R-lcb_selfcheck-u3-s1": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-R-lcb_selfcheck-u1-s1": {
+     "void": true,
+     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "n_sessions": 0
+    },
+    "scd-K-lcb_selfcheck-u2-s1": {
+     "void": true,
+     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "n_sessions": 0
+    },
+    "scd-R-lcb_selfcheck-u2-s1": {
+     "void": true,
+     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "n_sessions": 0
+    },
+    "scd-A-lcb_selfcheck-u3-s1": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-K-lcb_selfcheck-u3-s1": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-R-lcb_selfcheck-u1-s1v2": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-K-lcb_selfcheck-u1-s1v2": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-K-lcb_selfcheck-u1-s1": {
+     "void": true,
+     "void_reason": "group void: proxy_non200: 1 call(s), 0 stream error(s)",
+     "n_sessions": 0
+    },
+    "scd-A-lcb_selfcheck-u1-s1v2": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    },
+    "scd-A-lcb_selfcheck-u1-s1": {
+     "void": true,
+     "void_reason": "proxy_non200: 1 call(s), 0 stream error(s)",
+     "n_sessions": 1
+    },
+    "scd-C-lcb_selfcheck-u2-s1": {
+     "void": false,
+     "void_reason": null,
+     "n_sessions": 1
+    }
+   }
+  },
+  "c": {
+   "seconds": 36.5,
+   "metas": {
+    "C": {
+     "cell": "sc-c-C-lcb_selfcheck-solve_add-s1",
+     "void": false,
+     "void_reason": null
+    }
+   },
+   "failed_expectations": [],
+   "ok": true
+  }
+ },
+ "idle_s": 4.0,
+ "bridge_probe": {
+  "plain": {
+   "prepare_rc": 0,
+   "err": "",
+   "judge_rc": 0,
+   "outcome": "accept",
+   "err2": ""
+  },
+  "shim": null,
+  "shim_used": false,
+  "ok": true
+ },
+ "bridge_shim": false,
+ "ok": true,
+ "ended": "2026-10-01T16:26:47Z"
+}

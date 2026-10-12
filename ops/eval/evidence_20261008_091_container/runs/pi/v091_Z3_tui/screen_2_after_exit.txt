@@ -1,0 +1,52 @@
+
+ pi v0.87.1                                                                                                                                                     
+ escape interrupt · ctrl+c/ctrl+d clear/exit · / commands · ! bash · ctrl+o more                                                                                
+ Press ctrl+o to show full startup help and loaded resources.                                                                                                   
+                                                                                                                                                                
+ Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.                                                                          
+
+[Extensions]                                                                                                                                                    
+  vacant.ts                                                                                                                                                     
+
+
+ fd not found. Downloading...                                                                                                                                   
+ ripgrep not found. Downloading...                                                                                                                              
+ Warning: Failed to download fd: fetch failed: getaddrinfo EAI_AGAIN github.com                                                                                 
+ Warning: Failed to download ripgrep: fetch failed: getaddrinfo EAI_AGAIN github.com                                                                            
+
+                                                                                                                                                                
+ Show me my Vacant install settings.                                                                                                                            
+                                                                                                                                                                
+
+                                                                                                                                                                
+ $ python3 -c "import json;print(json.load(open('$HOME/.vacant/adapters/install.json')))"                                                                       
+                                                                                                                                                                
+ ... (1 earlier lines, ctrl+o to expand)                                                                                                                        
+ 'SessionEnd', 'Stop', 'SubagentStart', 'SubagentStop', 'UserPromptSubmit'], 'root_key': 'hooks', 'created': True, 'backup': None}], 'installed_at':            
+ '2026-10-08T16:18:10+00:00'}, 'codex': {'ops': [{'op': 'toml_block', 'path': '/home/u/.codex/config.toml', 'created': True, 'backup': None, 'prepend':         
+ False}], 'installed_at': '2026-10-08T16:18:10+00:00'}, 'pi': {'ops': [{'op': 'file', 'path': '/home/u/.pi/agent/extensions/vacant.ts', 'sha256':               
+ '2431378a8df6a33342f0905bbea6697da633fb6b2602ade36f4c38522f3f4c10', 'created': True, 'backup': None}], 'installed_at': '2026-10-08T16:18:10+00:00'}}, 'mode':  
+ 'evidence', 'schema': 2}                                                                                                                                       
+                                                                                                                                                                
+ Took 0.3s                                                                                                                                                      
+                                                                                                                                                                
+
+                                                                                                                                                                
+ $ cat $HOME/.vacant/intake/keys/*/identity.key                                                                                                                 
+                                                                                                                                                                
+ Vacant: commands may not touch /home/u/.vacant/intake/keys (signing keys).                                                                                     
+                                                                                                                                                                
+ Took 0.1s                                                                                                                                                      
+                                                                                                                                                                
+
+ Done.                                                                                                                                                          
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                                                                                
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/work/proj (master)
+↑30 ↓15 0.0%/131k (auto)                                                                                                                              mock-model
+
+To resume this session: pi --session 01a11c4e-d6f8-7727-8d3b-230630940317
+__EXITED__ 0
+

@@ -1,0 +1,17 @@
+{
+ "cells": 59,
+ "fully_correct": 20,
+ "blocked": 35,
+ "blocked_fully_correct": 6,
+ "blocked_not_fully_correct": 29,
+ "cells_by_kind": {
+  "unread": 18,
+  "failed_step": 20,
+  "test_claim": 3
+ },
+ "unread_paths": {
+  "run_tests.sh": 18,
+  "tests_visible/test_visible.py": 2
+ },
+ "blocked_only_unread": 12
+}

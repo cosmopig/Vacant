@@ -1,0 +1,54 @@
+{
+ "failed_step_ignored": {
+  "('WR', False)": 140,
+  "('OK', False)": 374,
+  "('OK', True)": 6,
+  "('WR', True)": 2
+ },
+ "any_hard_error": {
+  "('WR', True)": 38,
+  "('OK', False)": 347,
+  "('OK', True)": 33,
+  "('WR', False)": 104
+ },
+ "swallowed_exception": {
+  "('WR', False)": 141,
+  "('OK', False)": 377,
+  "('OK', True)": 3,
+  "('WR', True)": 1
+ },
+ "manual_not_opened": {
+  "('WR', False)": 142,
+  "('OK', False)": 380
+ },
+ "manual_only_partial": {
+  "('WR', False)": 142,
+  "('OK', False)": 380
+ },
+ "unsourced_value": {
+  "('WR', False)": 121,
+  "('OK', False)": 326,
+  "('OK', 'n/a')": 45,
+  "('OK', True)": 9,
+  "('WR', True)": 8,
+  "('WR', 'n/a')": 13
+ },
+ "format_mismatch": {
+  "('WR', False)": 141,
+  "('OK', False)": 379,
+  "('OK', True)": 1,
+  "('WR', True)": 1
+ },
+ "late_write_after_reminder": {
+  "('WR', False)": 104,
+  "('OK', False)": 355,
+  "('OK', True)": 25,
+  "('WR', True)": 38
+ },
+ "vacant_sent_back": {
+  "('WR', False)": 119,
+  "('OK', False)": 371,
+  "('WR', True)": 23,
+  "('OK', True)": 9
+ }
+}

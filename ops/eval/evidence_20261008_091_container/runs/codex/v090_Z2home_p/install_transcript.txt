@@ -1,0 +1,13 @@
+$ vacant install
+/opt/v090/bin/vacant
+  claude: hooks in ~/.claude/settings.json — /home/u/.claude/settings.json
+  codex: trusted hooks appended to config.toml — /home/u/.codex/config.toml
+  pi: global extension — /home/u/.pi/agent/extensions/vacant.ts
+  not found on this machine: opencode (skipped; `vacant install --force` writes their config anyway)
+[vacant install] done. Open your agent as usual; each task is checked against its own recorded steps before it is handed back. Data: /home/u/.vacant (remove everything with `vacant uninstall`).
+usage: vacant [-h] [--root ROOT]
+              {init,info,call,demo,selftest,run,bench,audit,verify-att,trace,record,up,toggle,status,scoreboard,resident,verify,ledger}
+              ...
+vacant: error: the following arguments are required: cmd
+
+[exit 0]

@@ -1,0 +1,6 @@
+{"t": 2.067, "kind": "enter"}
+{"t": 2.068, "kind": "change", "session_n": 0, "state": "empty", "requests": 0, "hook_procs": 0}
+{"t": 2.268, "kind": "change", "session_n": 7, "state": "retrying", "requests": 1, "hook_procs": 0}
+{"t": 4.283, "kind": "change", "session_n": 9, "state": "retrying", "requests": 2, "hook_procs": 0}
+{"t": 8.303, "kind": "change", "session_n": 11, "state": "retrying", "requests": 3, "hook_procs": 0}
+{"t": 16.353, "kind": "change", "session_n": 12, "state": "error_final", "requests": 4, "hook_procs": 0}

@@ -1,0 +1,39 @@
+{
+  "scenario": "Z2_home",
+  "cwd": "/home/u",
+  "prompt": "Compute 6 times 7 with a quick command and write the result to answer.txt.",
+  "surface": "run",
+  "build": "none",
+  "rc": 0,
+  "client_exit_s": 0.9,
+  "requests_at_client_exit": 3,
+  "requests_after_client_exit": 0,
+  "wall_s": 35.9,
+  "n_requests": 3,
+  "requests": [
+    {
+      "n": 1,
+      "k": 0,
+      "fed_back": false,
+      "reply": "text",
+      "tool": null
+    },
+    {
+      "n": 2,
+      "k": 0,
+      "fed_back": false,
+      "reply": "tool",
+      "tool": "shell"
+    },
+    {
+      "n": 3,
+      "k": 1,
+      "fed_back": false,
+      "reply": "text",
+      "tool": null
+    }
+  ],
+  "feedback_seen_by_model": [],
+  "events_kinds": [],
+  "answer_txt": null
+}

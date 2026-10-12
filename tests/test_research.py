@@ -143,6 +143,43 @@ class TestWilcoxonExact:
         with pytest.raises(ValueError):
             wilcoxon_signed_rank_exact([0.0, 0.0])
 
+    def test_float_ties_from_means(self):
+        # 2026-09-26：三次平均相減，1−2/3＝0.33333333333333337 ≠ 1/3＝0.3333333333333333（浮點）。
+        # 三個 |d| 其實一樣大 ⇒ midrank 2,2,2、W+＝4、平均 3；W∈{0,2,4,6} 全部 |W−3|≥1 ⇒ p＝1.0。
+        # 舊版用 == 判同分：秩 3,1.5,1.5、W+＝4.5 ⇒ p＝0.75。
+        r = wilcoxon_signed_rank_exact([1 - 2 / 3, 1 / 3, -(1 / 3)])
+        assert r["w_plus"] == 4.0
+        assert abs(r["p"] - 1.0) < 1e-12
+
+    def test_float_noise_counts_as_zero(self):
+        r = wilcoxon_signed_rank_exact([0.1 + 0.2 - 0.3, 1.0, 2.0])
+        assert r["n"] == 2.0
+
+    def test_formal_local_batch_regression(self):
+        # 本機正式批次（CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL 第二節）：C2 減 A，每一題 3 次的平均答對率之差，
+        # 照 analyze_local 的算法（浮點平均相減）⇒ 同分正確處理後 W+ 193.5、n 22、p 0.0207。
+        import json
+        import pathlib
+        cells = json.loads((pathlib.Path(__file__).resolve().parents[1] / "ops/eval/evidence_20260926_local/formal/cells.json").read_text())
+        ok = {(c["task"], c["arm"], c["sample"]): c.get("reward") == 1.0 for c in cells if not c["infra_void"]}
+        diffs = []
+        for t in sorted({c["task"] for c in cells if c["task"] not in ("5", "70")}):
+            py = [ok[(t, "C2", s)] for s in (1, 2, 3)]
+            px = [ok[(t, "A", s)] for s in (1, 2, 3)]
+            diffs.append(sum(py) / 3 - sum(px) / 3)
+        r = wilcoxon_signed_rank_exact([d for d in diffs if d != 0])
+        assert r["n"] == 22.0
+        assert r["w_plus"] == 193.5
+        assert abs(r["p"] - 0.0207) < 5e-4
+
+    def test_dyadic_diffs_unchanged(self):
+        # 兩次平均（差是 0.5 的倍數）：四捨五入不改任何值 ⇒ 和舊版逐位元組相同。
+        d = [0.5, 0.5, -0.5, 1.0, 1.0, 0.5, -1.0, 0.5]
+        r = wilcoxon_signed_rank_exact(d)
+        # 手算：|d| 0.5 有 5 個 → midrank 3；1.0 有 3 個 → midrank 7；W+＝3×4＋7×2＝26。
+        assert r["w_plus"] == 26.0
+        assert r["p"] == 0.34375  # 88/256，與修之前的版本相同（git show 5e0d2d6a:vacant_network/research.py 算出同一個數）
+
 
 class TestTostEquivBoot:
     def test_zero_diffs_equivalent(self):

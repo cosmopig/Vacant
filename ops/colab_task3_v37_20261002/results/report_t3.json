@@ -1,0 +1,501 @@
+{
+ "samples_seen": [
+  1,
+  2,
+  3
+ ],
+ "complete_samples": [
+  1,
+  2
+ ],
+ "dropped_by_sample": {
+  "1": [],
+  "2": []
+ },
+ "void_cells": [],
+ "primary_C37_minus_A": {
+  "test": "wilcoxon_signed_rank_exact",
+  "n_tasks": 94,
+  "mean_diff": 0.026595744680851064,
+  "x_better": 17,
+  "y_better": 12,
+  "result": {
+   "w_plus": 255.0,
+   "n": 29.0,
+   "p": 0.35961602027185147,
+   "method": "normal_approx",
+   "alpha": 0.05,
+   "reject": false
+  }
+ },
+ "by_bank": {
+  "dabench": {
+   "n_tasks": 30,
+   "A_mean": 0.85,
+   "C37_mean": 0.8833333333333333,
+   "C37_better": 6,
+   "A_better": 4
+  },
+  "databench": {
+   "n_tasks": 30,
+   "A_mean": 0.8,
+   "C37_mean": 0.8666666666666667,
+   "C37_better": 7,
+   "A_better": 3
+  },
+  "polyglot_py": {
+   "n_tasks": 34,
+   "A_mean": 0.5441176470588235,
+   "C37_mean": 0.5294117647058824,
+   "C37_better": 4,
+   "A_better": 5
+  }
+ },
+ "describe": {
+  "s1-A": {
+   "cells": 94,
+   "pass": 70,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 18
+  },
+  "s1-C37": {
+   "cells": 94,
+   "pass": 70,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 18
+  },
+  "s2-A": {
+   "cells": 94,
+   "pass": 66,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 22
+  },
+  "s2-C37": {
+   "cells": 94,
+   "pass": 71,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 21
+  },
+  "s3-A": {
+   "cells": 10,
+   "pass": 7,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 3
+  },
+  "s3-C37": {
+   "cells": 10,
+   "pass": 6,
+   "no_answer_file": 0,
+   "wrong": 0,
+   "void": 0,
+   "timeout": 1
+  }
+ },
+ "vacant_actions": {
+  "C37": {
+   "cells": 198,
+   "install_fail": 0,
+   "c_arm_ok": 198,
+   "reached_review": 159,
+   "cells_sent_back": 12,
+   "sendback_kinds": {
+    "missing_output/-": 8,
+    "unsourced/-": 6,
+    "unread/-": 2,
+    "test_claim/stale": 1
+   },
+   "cells_nudged": 0,
+   "nudges": 0,
+   "ended_notes": 0,
+   "pass_after_sendback": 10
+  }
+ },
+ "per_task": {
+  "dabench/dab_035": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_039": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "dabench/dab_055": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_057": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "dabench/dab_105": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_129": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_144": {
+   "A": 0.5,
+   "C37": 0.0
+  },
+  "dabench/dab_176": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "dabench/dab_216": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "dabench/dab_218": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_249": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_250": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "dabench/dab_378": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "dabench/dab_426": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "dabench/dab_427": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_507": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "dabench/dab_514": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "dabench/dab_517": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_587": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_588": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_657": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_665": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "dabench/dab_666": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_669": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_688": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_721": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_723": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_724": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_725": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "dabench/dab_732": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_04": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_10": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_34": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_066_37": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_069_08": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "databench/db_069_29": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_071_02": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_071_12": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "databench/db_071_15": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "databench/db_071_19": {
+   "A": 0.5,
+   "C37": 0.0
+  },
+  "databench/db_072_02": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "databench/db_072_26": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "databench/db_072_30": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "databench/db_072_33": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_072_38": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_073_10": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_073_31": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "databench/db_074_11": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_074_13": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_074_27": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "databench/db_075_28": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_076_00": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "databench/db_076_06": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_076_31": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_077_18": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_078_11": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "databench/db_078_28": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_078_36": {
+   "A": 0.0,
+   "C37": 0.5
+  },
+  "databench/db_080_04": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "databench/db_080_23": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_affine_cipher": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_beer_song": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_book_store": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_bottle_song": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_bowling": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_connect": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_dominoes": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_dot_dsl": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_food_chain": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_forth": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_go_counting": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_grade_school": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_grep": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_hangman": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_list_ops": {
+   "A": 0.0,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_paasio": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_phone_number": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_pig_latin": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_poker": {
+   "A": 0.5,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_pov": {
+   "A": 1.0,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_proverb": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_react": {
+   "A": 0.0,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_rest_api": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_robot_name": {
+   "A": 0.5,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_scale_generator": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_sgf_parsing": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_simple_linked_list": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_transpose": {
+   "A": 0.0,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_tree_building": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_two_bucket": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_variable_length_quantity": {
+   "A": 0.5,
+   "C37": 0.5
+  },
+  "polyglot_py/pg_wordy": {
+   "A": 0.5,
+   "C37": 0.0
+  },
+  "polyglot_py/pg_zebra_puzzle": {
+   "A": 1.0,
+   "C37": 1.0
+  },
+  "polyglot_py/pg_zipper": {
+   "A": 0.5,
+   "C37": 0.5
+  }
+ }
+}

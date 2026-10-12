@@ -1,0 +1,3 @@
+FROM vacant091-e2e
+COPY ctx/vacant_network-0.9.1-py3-none-any.whl /tmp/whl2/
+RUN /opt/v091/bin/pip install -q --force-reinstall --no-deps /tmp/whl2/vacant_network-0.9.1-py3-none-any.whl

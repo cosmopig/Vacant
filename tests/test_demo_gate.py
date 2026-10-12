@@ -29,6 +29,13 @@
   · `test_verify_glob_accepts_absolute_path`
       畫面上印給使用者複製的那行驗證指令用的是絕對路徑；
       `--glob` 吃不吃絕對路徑，決定那行字是不是一行跑不動的裝飾。
+  · `test_ci_smoke_expectation_matches_the_demo_spec` ／
+    `test_ci_smoke_expectation_has_teeth`
+      CI build job 的 smoke（`.github/scripts/smoke_install.py`）對第一屏的預期
+      必須和這一幕的規格是同一件事。2026-09-20 改版把總判由 `OK` 改成 `VOID`
+      卻沒碰那支，build job 紅了好幾天、而本檔全綠——兩邊各自對、合起來矛盾。
+      這兩條把「smoke 的預期」放進本機測試：正控制＝demo 當場跑出的真結果要過，
+      負控制＝`OK`／壞鏈／有請求／沒拒交都要被擋（不是放寬到什麼都收）。
 """
 from __future__ import annotations
 
@@ -241,3 +248,55 @@ def test_verify_glob_accepts_absolute_path(ran):
     # 帶萬用字元的絕對 pattern 也要吃（`--glob '~/.vacant-run/*'` 的形狀）
     out2 = vrr.run_glob(str(run_dir.parent / "*"))
     assert out2["runs_n"] >= 1 and out2["verdict"] == "VOID"
+
+
+# ── CI smoke 對第一屏的預期（.github/scripts/smoke_install.py）──────────────
+
+def _load_smoke():
+    """用路徑載入 CI 的 smoke 腳本（它不在套件裡、不進 wheel）。"""
+    import importlib.util
+
+    path = ROOT / ".github" / "scripts" / "smoke_install.py"
+    spec = importlib.util.spec_from_file_location("_smoke_install_under_test", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_ci_smoke_expectation_matches_the_demo_spec(ran):
+    """正控制：demo 這一幕**當場真跑出的**結果，CI smoke 必須收。
+
+    這條就是 2026-10-01 build job 紅燈的回歸：smoke 曾經要求
+    `receipts_verdict == "OK"`，而規格（本檔前面的 VOID 釘子、demo 的防呆、
+    docs/VACANT_RUN.md §4）是 `VOID`。
+    """
+    smoke = _load_smoke()
+    assert ran["receipts_verdict"] == "VOID"
+    assert smoke.first_screen_problem(ran, launcher.EXIT_REFUSED) is None
+
+
+def test_ci_smoke_expectation_has_teeth(ran):
+    """負控制：把 `OK` 換成 `VOID` 不是放寬——每一種偏離規格的結果都要被擋。"""
+    smoke = _load_smoke()
+    refused = launcher.EXIT_REFUSED
+    assert smoke.first_screen_problem(ran, refused) is None
+    bad = {
+        "舊預期 OK（尺分不出零請求）": {"receipts_verdict": "OK"},
+        "鏈壞了": {"receipts_verdict": "BROKEN"},
+        "驗不了": {"receipts_verdict": "UNVERIFIABLE"},
+        "欄位不見": {"receipts_verdict": None},
+        "VOID 但有壞筆": {"receipts_failed_total": 1},
+        "VOID 但其實有請求": {"requests_seen": 3},
+        "請求數沒記": {"requests_seen": None},
+        "bool 冒充 0": {"requests_seen": False},
+        "閘門放行": {"gated_rc": 0},
+        "拒交碼不對": {"gated_rc": refused + 1},
+    }
+    for name, patch in bad.items():
+        out = {**ran, **patch}
+        assert smoke.first_screen_problem(out, refused), f"沒擋下：{name}"
+    # 欄位整個缺也要擋（不能因為 .get 回 None 就當成沒事）
+    for key in ("receipts_verdict", "receipts_failed_total", "requests_seen",
+                "gated_rc"):
+        out = {k: v for k, v in ran.items() if k != key}
+        assert smoke.first_screen_problem(out, refused), f"欄位 {key} 缺了卻沒擋"

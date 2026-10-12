@@ -1,0 +1,2 @@
+./intake/hooks/events.jsonl
+./adapters/install.json

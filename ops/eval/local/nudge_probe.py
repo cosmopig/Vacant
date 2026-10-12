@@ -1,0 +1,189 @@
+"""照不照做探針（零設定 v3，2026-09-26）：gemma-4-12b 收到回合預算提醒之後，會不會把答案寫出來、寫的對不對。
+
+**不是救回率、不是證據**——是評測之前的真模型現實檢查（`decisions/DECISION_20260926_ZERO_CONFIG_V3.md` §五）。
+取試跑（沒裝／現版）裡真的送出的請求：第 14 通（＝第 13 回合結束之後、上限 15）送出時答案檔還不存在、第 13 回合有執行工具
+（v3 會在這一通後面加提醒的那個時點）。同一通請求：
+- **對照**：原樣再送 k 次（模型本來會做什麼）；
+- **提醒**：後面接一則 `user` 訊息＝v3 的提醒全文（pi 把擴充的 custom_message 送成 user 訊息），送 k 次。
+看回覆有沒有寫 `/app/answer.txt` 的工具呼叫、寫了什麼值、那一題的評分器接不接受。
+
+    python3 ops/eval/local/nudge_probe.py --io <代理 io.jsonl> --prefix pilot2 --dataset <釘死的題目目錄> \
+        --proxy http://127.0.0.1:18900 --upstream w401 --draws 3 --out <輸出 jsonl>
+
+付費（OpenRouter）的紀錄（2026-09-26 加；`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §四 第 0 階）：
+`--upstream ''`（付費路徑沒有 `up/`）、`--think on`、`--only-no-file <runs.json>:<jobs 根目錄>`（只取最後沒有答案檔的跑）、
+`--stop-at-usd <金額>`（每一通之前讀代理的 summary.json，花到就停）。
+
+誠實邊界：只看**下一通**的回覆，不看之後的回合（模型可能下一通先查、再下一通才寫）；「寫了」是從工具呼叫的文字抽出來的。
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import pathlib
+import re
+import sys
+import urllib.request
+from collections import defaultdict
+from typing import Any
+
+REPO = pathlib.Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "ops" / "eval" / "formal"))
+
+from analyze import score  # type: ignore[import-not-found]  # noqa: E402
+from vacant_network.trace.review import render_nudge  # noqa: E402
+
+WRITE_HINT = re.compile(r"answer\.txt")
+
+
+def requests_by_run(io: pathlib.Path, prefix: str) -> dict[str, list[dict[str, Any]]]:
+    runs: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for ln in io.open():
+        d = json.loads(ln)
+        if d.get("tag", "").startswith(prefix + "-") and d.get("status") == 200:
+            runs[d["tag"]].append(d)
+    for rs in runs.values():
+        rs.sort(key=lambda d: d["ts"])
+    return runs
+
+
+def wrote_answer_before(msgs: list[dict[str, Any]]) -> bool:
+    for m in msgs:
+        if m.get("role") == "assistant":
+            for tc in m.get("tool_calls") or []:
+                if WRITE_HINT.search(json.dumps(tc.get("function") or {})):
+                    return True
+    return False
+
+
+def written_value(resp: dict[str, Any]) -> tuple[bool, str | None]:
+    """回覆裡寫答案檔的工具呼叫 → (有沒有寫, 抽得出來的值)。"""
+    msg = ((resp.get("choices") or [{}])[0].get("message") or {})
+    for tc in msg.get("tool_calls") or []:
+        fn = tc.get("function") or {}
+        try:
+            args = json.loads(fn.get("arguments") or "{}")
+        except ValueError:
+            args = {}
+        blob = json.dumps(args)
+        if not WRITE_HINT.search(blob):
+            continue
+        if isinstance(args.get("content"), str) and "answer.txt" in str(args.get("path", "")):
+            return True, args["content"].strip()
+        cmd = str(args.get("command") or "")
+        m = re.search(r"(?:echo|printf)\s+(?:-[ne]+\s+)?(['\"]?)(.*?)\1\s*>\s*\S*answer\.txt", cmd, re.S)
+        return True, (m.group(2).replace("\\n", "").strip() if m else None)
+    return False, None
+
+
+def send(proxy: str, tag: str, upstream: str, body: dict[str, Any], think: str = "off") -> dict[str, Any]:
+    b = dict(body, stream=False)
+    b.pop("stream_options", None)
+    up = f"up/{upstream}/" if upstream else ""
+    req = urllib.request.Request(f"{proxy}/t/{tag}/{up}think/{think}/api/v1/chat/completions",
+                                 json.dumps(b).encode(), {"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=900) as r:
+        return json.load(r)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--io", required=True, type=pathlib.Path)
+    ap.add_argument("--prefix", required=True)
+    ap.add_argument("--dataset", required=True, type=pathlib.Path)
+    ap.add_argument("--proxy", default="http://127.0.0.1:18900")
+    ap.add_argument("--upstream", default="w401")
+    ap.add_argument("--draws", type=int, default=3)
+    ap.add_argument("--budget", type=int, default=15)
+    ap.add_argument("--out", required=True, type=pathlib.Path)
+    ap.add_argument("--think", default="off", choices=["on", "off"])
+    ap.add_argument("--only-no-file", help="<runs.json>:<jobs 根目錄>：只取評分器說答案檔不存在的跑")
+    ap.add_argument("--model", help="runs.json 裡的 model 欄（例 g4）")
+    ap.add_argument("--stop-at-usd", type=float, help="代理 summary.json 的 spent_usd 到這個數就停")
+    ap.add_argument("--summary", type=pathlib.Path, help="代理的 summary.json（配 --stop-at-usd）")
+    ap.add_argument("--resume", type=pathlib.Path, help="之前的結果（jsonl 或這支印出的紀錄）：已經有的 (跑, 條件, 第幾次) 不再送")
+    ap.add_argument("--workers", type=int, default=1, help="同時送幾通（只改牆鐘時間，不改設計）")
+    a = ap.parse_args()
+    runs = requests_by_run(a.io, a.prefix)
+    keep = None
+    if a.only_no_file:
+        rj, jobs = a.only_no_file.split(":", 1)
+        keep = set()
+        for r in json.loads(pathlib.Path(rj).read_text()):
+            if a.model and r.get("model") != a.model:
+                continue
+            v = pathlib.Path(jobs) / r["job"] / r["trial"] / "verifier" / "test-stdout.txt"
+            if v.is_file() and "answer.txt not found" in v.read_text(errors="replace"):
+                keep.add((r["arm"], str(r["task"])))
+
+    def spent() -> float:
+        try:
+            return float(json.loads(a.summary.read_text()).get("spent_usd") or 0.0)
+        except (OSError, ValueError, AttributeError):
+            return 0.0
+    k = a.budget - 2                     # 第 k 回合結束之後送出的是第 k+1 通
+    rows = []
+    done: set[tuple[str, str, int]] = set()
+    if a.resume and a.resume.is_file():
+        for ln in a.resume.read_text().splitlines():
+            if ln.startswith('{"run"'):
+                r = json.loads(ln)
+                rows.append(r)
+                done.add((r["run"], r["condition"], int(r["draw"])))
+    jobs = []
+    for tag, rs in sorted(runs.items()):
+        if len(rs) < k + 1:
+            continue
+        body = rs[k]["request_from_agent"]
+        msgs = body.get("messages") or []
+        if not msgs or msgs[-1].get("role") != "tool" or wrote_answer_before(msgs):
+            continue                      # 第 k 回合沒有執行工具、或答案檔已經寫過：v3 不會提醒
+        task = tag.rsplit("-s", 1)[0].rsplit("-", 1)[1]
+        arm = tag[len(a.prefix) + 1:].split("-", 1)[0] if tag.startswith(a.prefix + "-") else "?"
+        if keep is not None and (arm, task) not in keep and ("A", task) not in keep:
+            continue
+        text, _ = render_nudge(["/app/answer.txt"], turns_left=2, budget=a.budget)
+        nudged = dict(body, messages=msgs + [{"role": "user", "content": text}])
+        for cond, b in (("control", body), ("reminder", nudged)):
+            for i in range(a.draws):
+                if (tag, cond, i) not in done:
+                    jobs.append((tag, task, cond, i, b))
+
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    lock = threading.Lock()
+    stop = threading.Event()
+
+    def one(job: tuple[str, str, str, int, dict[str, Any]]) -> None:
+        tag, task, cond, i, b = job
+        if stop.is_set():
+            return
+        if a.stop_at_usd is not None and spent() >= a.stop_at_usd:
+            stop.set()
+            print(json.dumps({"stopped": "budget", "spent_usd": spent()}), flush=True)
+            return
+        try:
+            resp = send(a.proxy, f"probe-{cond}-{tag}-d{i}", a.upstream, b, a.think)
+            wrote, val = written_value(resp)
+            ok = score(a.dataset, task, val) if wrote and val is not None else None
+            err = None
+        except Exception as e:  # noqa: BLE001 — 記下來，不猜
+            wrote, val, ok, err = False, None, None, f"{type(e).__name__}: {e}"[:300]
+        row = {"run": tag, "task": task, "condition": cond, "draw": i, "wrote": wrote,
+               "value": val, "correct": ok, "error": err,
+               "request_sha256": hashlib.sha256(json.dumps(b, sort_keys=True).encode()).hexdigest()}
+        with lock:
+            rows.append(row)
+            print(json.dumps(row, ensure_ascii=False), flush=True)
+
+    with ThreadPoolExecutor(max(1, a.workers)) as pool:
+        list(pool.map(one, jobs))
+    a.out.parent.mkdir(parents=True, exist_ok=True)
+    a.out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+    return 3 if stop.is_set() else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

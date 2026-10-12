@@ -1,0 +1,4 @@
+./trace/untraceable_told.json
+./intake/hooks/events.jsonl
+./adapters/backups/config.toml.bed6f294eb1f.bak
+./adapters/install.json

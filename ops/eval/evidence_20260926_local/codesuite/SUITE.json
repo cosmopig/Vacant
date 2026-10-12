@@ -1,0 +1,551 @@
+{
+ "suite": "lcb_visible screening v1 (candidate 2: last own test run failed but said done)",
+ "created": "2026-09-26",
+ "source": {
+  "harbor_registry_entry": "livecodebench@6.0 (A subset of 100 sampled tasks from the release_v6 version)",
+  "git_url": "https://github.com/laude-institute/harbor-datasets.git",
+  "git_commit_id": "cfad8d97c75fb9e28c7b6b74b7fadb23dae57ab6",
+  "path": "datasets/livecodebench/release_v6",
+  "harbor_commit": "6cb9ff3167596c456e0b24622d473b59fc9ab6c7",
+  "export_manifest": "/tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/codesuite/lcb_export/EXPORT_MANIFEST.json",
+  "export_manifest_sha256": "e3f80501261082a04dc013ba98d56998b53e5080cb1cb8a5df84306ac1daefa0"
+ },
+ "rule": {
+  "text": "Stratify the 100 tasks by the dataset's own fields difficulty x testtype; allocate 30 screen tasks proportionally (largest remainder, ties by cell name); inside a cell take the tasks with the smallest sha256('vacant-codesuite-lcb-v1-2026-09-26:' + task_id). Then draw 10 smoke tasks from the remaining pool with the same rule. The rest is reserve (untouched).",
+  "seed": "vacant-codesuite-lcb-v1-2026-09-26",
+  "fixed_before_any_model_run": true,
+  "uses_outcomes": false,
+  "fields_used": [
+   "difficulty (tests/config.json == task.toml)",
+   "testtype of the public cases"
+  ],
+  "not_used": [
+   "any run, score, turn count, or agent behaviour",
+   "prior_vacant_banks (recorded for description only)"
+  ],
+  "smoke_purpose": "A-only go/no-go smoke (run time; how often pi says done after its own last test run failed). Disjoint from the screen so the screen's A runs are never the runs that decided to screen."
+ },
+ "strata": {
+  "easy/stdin": {
+   "pool": 10,
+   "screen": 3,
+   "smoke": 1
+  },
+  "hard/functional": {
+   "pool": 8,
+   "screen": 2,
+   "smoke": 1
+  },
+  "medium/functional": {
+   "pool": 18,
+   "screen": 5,
+   "smoke": 2
+  },
+  "easy/functional": {
+   "pool": 19,
+   "screen": 6,
+   "smoke": 2
+  },
+  "hard/stdin": {
+   "pool": 30,
+   "screen": 9,
+   "smoke": 3
+  },
+  "medium/stdin": {
+   "pool": 15,
+   "screen": 5,
+   "smoke": 1
+  }
+ },
+ "screen": [
+  {
+   "task": "3468",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 2614,
+   "order_key": "01988227ff5abe2fb4ddb8d7ad2ed50e0387656b5b7aba525f903906dcc1605c",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc312_d",
+   "difficulty": "medium",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 7685,
+   "order_key": "02669b99b7bb925d024038c44f22fd52e65bb4cad5cce852225abc865fbc771a",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "arc195_c",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 1,
+   "grader_config_bytes": 187974,
+   "order_key": "03244a0d348b21eb74f37395bb73785311235e6e9c564b81cb2f35b9943c6926",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3768",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 2849,
+   "order_key": "03f51bae3dc8247d3e77def9d28b12c40a36a1722e50da96a8aed5c7c6518d72",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc363_a",
+   "difficulty": "easy",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 2,
+   "grader_config_bytes": 2130,
+   "order_key": "0448fe320d82b538f912f925ec28de5c6535e497e3625516bcd11c658c85657b",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3450",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 3,
+   "grader_config_bytes": 2267,
+   "order_key": "048e8cd6879b9f92fbfe492e56b8cfa726d6cfb625f8d604b98fc21c6a403b17",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc388_g",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 2,
+   "grader_config_bytes": 113170,
+   "order_key": "061d40200a6754cc4235dbc999941eb27bde94333ba41a93417435faf6b173be",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc343_a",
+   "difficulty": "easy",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 1358,
+   "order_key": "096448841df07d3681d947958bc477ab7135969a00f95dcd58d0d27d05937d89",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "arc186_d",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 4,
+   "grader_config_bytes": 12046,
+   "order_key": "0a33d15f7cac213690da8a077a76d8ce32da9a3b188e54b539ac0b3bb11f43e3",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc320_c",
+   "difficulty": "medium",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 3861,
+   "order_key": "10819319b2af12d94b5ccb8a4967df62e7ab27941824997d079f73ca6be1d386",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3308",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 5052,
+   "order_key": "112e532b877e92b1eabbb81b51cbce932fe67900d5f32bb413c2396fa38d57cd",
+   "prior_vacant_banks": [
+    "lcb_bank_v3.jsonl"
+   ]
+  },
+  {
+   "task": "abc384_b",
+   "difficulty": "easy",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 6012,
+   "order_key": "12266fd13e2af5724fd853408d540e57716bd473c2e8b171632889e597103e96",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc397_d",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 1973,
+   "order_key": "1863df2d0c58400378f4e0c847c8d2561da47c508fc5315f64e981cab134d87e",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "2955",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 1954,
+   "order_key": "19ac40f8c43d1090abd1fb64cfa10d8f4d2beefb6f9f856dd7b7b92f9642b869",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "2808",
+   "difficulty": "hard",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 12888,
+   "order_key": "1a1d72f0a57c01649fe166a493d83fd0908f392eb48d144d31d49d18abac4ed8",
+   "prior_vacant_banks": [
+    "lcb_bank_v3.jsonl",
+    "lcb_v3_probe_solutions.json"
+   ]
+  },
+  {
+   "task": "arc189_b",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 2,
+   "grader_config_bytes": 4319418,
+   "order_key": "2091e21eb1b8aa54f2c246a9fda0e085398e5bae3a885f577e111cd006b2d58b",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc323_d",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 3512164,
+   "order_key": "228a5e87fffc22b988600281ace40fe866b8a3fee0275eb110768d48e7a74793",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3676",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 3,
+   "grader_config_bytes": 1435,
+   "order_key": "2935db40fe8edc8088d3ca822b8dcaf709c51d050572bdc212a07a4555bf2228",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3811",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 6244,
+   "order_key": "297b2707652337b7c3779349474c65d26bad36120309d9cd7d8ff054ad3be5bc",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc348_d",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 128256,
+   "order_key": "2a45e0d8f86e91c2995eb5e7c1f6eaf68c218b2b7bb0c82971cc85a462740ab9",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc351_e",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 2,
+   "grader_config_bytes": 41232749,
+   "order_key": "2a4619431f3053ac384770c2bf4d5eb7bf7c09e88323ada59f479c00c61cc458",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc330_c",
+   "difficulty": "medium",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 1407,
+   "order_key": "3443cd5814d296be2d1ba0aaabf6fa51ec9edf6e8d0b92fa16c0728ff35eb147",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "arc196_c",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 5796,
+   "order_key": "360267ecf2e2c5fdfb36cf3ad5eb21671a2ae39127557738a7aecb118d25e159",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc337_d",
+   "difficulty": "medium",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 4,
+   "grader_config_bytes": 302060,
+   "order_key": "4258bd74346bfa1c2013da9b76f3b485ee3af5397c7ca8559898863f75cad493",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3637",
+   "difficulty": "hard",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 3,
+   "grader_config_bytes": 2912,
+   "order_key": "46de5333a1e13ba447fb9651bb933617fb731972211d9f65b625aa28a6867e1d",
+   "prior_vacant_banks": [
+    "lcb_bank_v1.jsonl",
+    "lcb_bank_v2.jsonl"
+   ]
+  },
+  {
+   "task": "2848",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 1684,
+   "order_key": "4c8ebc86cabfeb8125273d4e53e2e73ee52d23f0e604c5b7a13a376b6d5fcca2",
+   "prior_vacant_banks": [
+    "lcb_bank_v3.jsonl"
+   ]
+  },
+  {
+   "task": "abc383_d",
+   "difficulty": "medium",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 2,
+   "grader_config_bytes": 1515,
+   "order_key": "51e723967ee0bd3b618cb72bbbaf3ca207bc0fb5eea367124a76548ac7b6c18a",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3299",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 2271018,
+   "order_key": "6dcbc50525faea1582e1db1f77e438d87a9b986abafa8496a1788335755f63f5",
+   "prior_vacant_banks": [
+    "lcb_bank_v3.jsonl"
+   ]
+  },
+  {
+   "task": "3360",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 3,
+   "grader_config_bytes": 273721,
+   "order_key": "6eb21595f4d4122fcb7cccbd32688e117a4de6e88ed731e4fc52c15156c78d43",
+   "prior_vacant_banks": [
+    "lcb_bank_v3.jsonl"
+   ]
+  },
+  {
+   "task": "3195",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 3,
+   "grader_config_bytes": 60985,
+   "order_key": "769c06e41297d38c1ee7df096db019568757e4fad25f8fd6ede40967cf5f7c6f",
+   "prior_vacant_banks": [
+    "lcb_bank_v3.jsonl"
+   ]
+  }
+ ],
+ "smoke": [
+  {
+   "task": "abc310_b",
+   "difficulty": "easy",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 22972,
+   "order_key": "1a51d9ec0de12ff3cda095facd5df2eae4c3eb7aa27ef27aeacc43d01f637032",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc356_e",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 10182019,
+   "order_key": "4290d7aa3dd1c7885e03c5453b5f7b3ad47fbb427a6fb3071a77213e4ab061e1",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3553",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 1956,
+   "order_key": "431e0154d13be986c2e6b12d7e942fd8f98ff9a629fb9473853e479cd537593b",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "abc377_g",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 2927642,
+   "order_key": "4b0386ec958189280bf1c5b6d896e0f70cda37e54bd9b9f22b295b31962bb654",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3320",
+   "difficulty": "easy",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 2254,
+   "order_key": "4c277a6961c089316b341e1911965f3336a4f7597c6b8d1d7e0d0f432371923f",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3765",
+   "difficulty": "hard",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 10783,
+   "order_key": "5ff393792f16cfa167a4504aa3f4bcc7be7e94fc9a26d561eb7ba066e4ece5fa",
+   "prior_vacant_banks": [
+    "lcb_bank_v1.jsonl",
+    "lcb_bank_v2.jsonl"
+   ]
+  },
+  {
+   "task": "abc334_b",
+   "difficulty": "medium",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 2820,
+   "order_key": "64591941a3bec318e13f8bb2dd0c790bf6d79d413f828a4179daa7f6996b3fc8",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "arc188_c",
+   "difficulty": "hard",
+   "testtype": "stdin",
+   "platform": "atcoder",
+   "n_public": 3,
+   "grader_config_bytes": 7478364,
+   "order_key": "6d9127a1b01b92c404c04e4fd26e92b16c0bf23e459030193fc5792f19af4dde",
+   "prior_vacant_banks": []
+  },
+  {
+   "task": "3518",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 1875530,
+   "order_key": "84ff924cc15d9b6720a552fc02a5053d4323c1b0b95b2ae8f8c7c075047c158f",
+   "prior_vacant_banks": [
+    "lcb_bank_v2.jsonl"
+   ]
+  },
+  {
+   "task": "3779",
+   "difficulty": "medium",
+   "testtype": "functional",
+   "platform": "leetcode",
+   "n_public": 2,
+   "grader_config_bytes": 2713033,
+   "order_key": "860daa460b467c69a961c47d572d449b73895653a9d6d2d671d4f8007718ae36",
+   "prior_vacant_banks": [
+    "lcb_bank_v1.jsonl",
+    "lcb_bank_v2.jsonl",
+    "lcb_probe_solutions.json"
+   ]
+  }
+ ],
+ "reserve": [
+  "1873_d",
+  "2850",
+  "2857",
+  "2954",
+  "3034",
+  "3046",
+  "3163",
+  "3193",
+  "3194",
+  "3199",
+  "3206",
+  "3229",
+  "3265",
+  "3353",
+  "3387",
+  "3406",
+  "3438",
+  "3455",
+  "3508",
+  "3535",
+  "3608",
+  "3653",
+  "3655",
+  "3656",
+  "3675",
+  "3696",
+  "3736",
+  "3763",
+  "abc301_f",
+  "abc306_d",
+  "abc307_a",
+  "abc308_f",
+  "abc309_d",
+  "abc310_f",
+  "abc312_e",
+  "abc325_c",
+  "abc326_e",
+  "abc328_d",
+  "abc329_c",
+  "abc329_f",
+  "abc330_e",
+  "abc333_a",
+  "abc334_d",
+  "abc341_e",
+  "abc351_f",
+  "abc354_b",
+  "abc355_c",
+  "abc363_e",
+  "abc363_f",
+  "abc364_c",
+  "abc369_a",
+  "abc382_c",
+  "abc384_f",
+  "abc389_g",
+  "abc395_a",
+  "abc399_d",
+  "arc182_e",
+  "arc184_d",
+  "arc192_b",
+  "arc196_a"
+ ]
+}

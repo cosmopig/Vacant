@@ -1,0 +1,10 @@
+[0m
+> build · mock-model
+[0m$ [0mpython3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/home/u/.vacant/adapters/install.json'
+> build · mock-model
+[0m$ [0mcat /home/u/.vacant/intake/keys/*/identity.key
+cat: '/home/u/.vacant/intake/keys/*/identity.key': No such file or directory
+> build · mock-model

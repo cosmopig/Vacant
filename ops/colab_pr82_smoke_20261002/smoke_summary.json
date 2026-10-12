@@ -1,0 +1,626 @@
+{
+ "summary": {
+  "misreject20": {
+   "cells": 20,
+   "done": 20,
+   "timeout": 0,
+   "install_fail": 0,
+   "reached_review": 20,
+   "ran_run_tests_sh": 18,
+   "cells_test_claim_none_after_run_tests": 0,
+   "cells_with_any_sendback": 0,
+   "sendback_kinds": {},
+   "all_finding_kinds_incl_allow": {},
+   "delivered_solution_py": 20,
+   "cells_missing_output_sendback": 0,
+   "pass": 19
+  },
+  "nodeliver_natural": {
+   "cells": 5,
+   "done": 5,
+   "timeout": 0,
+   "install_fail": 0,
+   "reached_review": 5,
+   "ran_run_tests_sh": 5,
+   "cells_test_claim_none_after_run_tests": 0,
+   "cells_with_any_sendback": 0,
+   "sendback_kinds": {},
+   "all_finding_kinds_incl_allow": {},
+   "delivered_solution_py": 5,
+   "cells_missing_output_sendback": 0,
+   "pass": 3
+  },
+  "nodeliver_forced": {
+   "cells": 5,
+   "done": 5,
+   "timeout": 0,
+   "install_fail": 0,
+   "reached_review": 5,
+   "ran_run_tests_sh": 1,
+   "cells_test_claim_none_after_run_tests": 0,
+   "cells_with_any_sendback": 3,
+   "sendback_kinds": {
+    "missing_output/-": 3,
+    "failed_step/-": 1
+   },
+   "all_finding_kinds_incl_allow": {
+    "missing_output/-": 3,
+    "failed_step/-": 1
+   },
+   "delivered_solution_py": 5,
+   "cells_missing_output_sendback": 3,
+   "pass": 4
+  }
+ },
+ "cells": [
+  {
+   "cell": "p82-C37-forced-lcb_3674-s1",
+   "group": "nodeliver_forced",
+   "timeout": false,
+   "wall_s": 1112.5,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "continue",
+     "ran_run_tests_sh_before": false,
+     "findings": [
+      "missing_output/-"
+     ]
+    },
+    {
+     "action": "continue",
+     "ran_run_tests_sh_before": true,
+     "findings": [
+      "failed_step/-"
+     ]
+    },
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-forced-lcb_3675-s1",
+   "group": "nodeliver_forced",
+   "timeout": false,
+   "wall_s": 104.1,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": false,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "continue",
+     "ran_run_tests_sh_before": false,
+     "findings": [
+      "missing_output/-"
+     ]
+    },
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": false,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-forced-lcb_3737-s1",
+   "group": "nodeliver_forced",
+   "timeout": false,
+   "wall_s": 134.6,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": false,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": false,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-forced-lcb_3783-s1",
+   "group": "nodeliver_forced",
+   "timeout": false,
+   "wall_s": 279.1,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": false,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "continue",
+     "ran_run_tests_sh_before": false,
+     "findings": [
+      "missing_output/-"
+     ]
+    },
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": false,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-forced-lcb_3795-s1",
+   "group": "nodeliver_forced",
+   "timeout": false,
+   "wall_s": 115.7,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": false,
+   "pass": false,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": false,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v1-lcb_3674-s1",
+   "group": "nodeliver_natural",
+   "timeout": false,
+   "wall_s": 568.3,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": false,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v1-lcb_3722-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 145.8,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": false,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": false,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v1-lcb_3794-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 431.3,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v1-lcb_3795-s1",
+   "group": "nodeliver_natural",
+   "timeout": false,
+   "wall_s": 142.3,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": false,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v2-lcb_3026-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 269.8,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v2-lcb_3659-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 21.5,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v2-lcb_3675-s1",
+   "group": "nodeliver_natural",
+   "timeout": false,
+   "wall_s": 136.6,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v2-lcb_3737-s1",
+   "group": "nodeliver_natural",
+   "timeout": false,
+   "wall_s": 136.2,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v2-lcb_3750-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 32.5,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v2-lcb_3783-s1",
+   "group": "nodeliver_natural",
+   "timeout": false,
+   "wall_s": 271.2,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v3-lcb_2730-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 41.4,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v3-lcb_2792-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 24.7,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v3-lcb_2817-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 1338.5,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": false,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": false,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v3-lcb_3245-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 113.5,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-lcb_v3-lcb_3363-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 63.6,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_124-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 39.8,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_130-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 19.3,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_242-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 13.7,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_269-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 15.1,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_437-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 35.3,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_558-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 16.1,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": false,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_568-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 15.7,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_68-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 18.7,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_775-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 15.6,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  },
+  {
+   "cell": "p82-C37-mbppplus-mbppplus_Mbpp_801-s1",
+   "group": "misreject20",
+   "timeout": false,
+   "wall_s": 31.1,
+   "install_rc": 0,
+   "delivered_solution_py": true,
+   "ran_run_tests_sh_ever": true,
+   "pass": true,
+   "test_claim_none_after_run_tests": 0,
+   "reviews": [
+    {
+     "action": "allow",
+     "ran_run_tests_sh_before": true,
+     "findings": []
+    }
+   ]
+  }
+ ],
+ "raw": "~/Vacant_colab_raw/pr82_smoke_20261002/p82_raw.tar.xz sha256 389569c34dbbe63bc8b6f721516ad689caa148ed3d89c5890bdf68f674288cb2（含 EvalPlus 內容，不進 repo）"
+}

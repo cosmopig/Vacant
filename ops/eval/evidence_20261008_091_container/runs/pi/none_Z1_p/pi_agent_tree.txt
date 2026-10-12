@@ -1,0 +1,9 @@
+ls: cannot access '/home/u/.pi/agent/extensions': No such file or directory
+/home/u/.pi/agent:
+total 24
+drwxr-xr-x 3 root root 4096 Oct  8 15:56 .
+drwxr-xr-x 3 root root 4096 Oct  8 15:56 ..
+-rw------- 1 root root    2 Oct  8 15:56 auth.json
+-rw------- 1 root root    2 Oct  8 15:56 models-store.json
+-rw-r--r-- 1 root root  293 Oct  8 15:56 models.json
+drwxr-xr-x 3 root root 4096 Oct  8 15:56 sessions

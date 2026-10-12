@@ -1,0 +1,2 @@
+{"t": 1790350837.873608, "proto": "chat", "n": 1, "k": 0, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790350838.018802, "proto": "chat", "n": 2, "k": 1, "fed_back": false, "reply": "text", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": null}

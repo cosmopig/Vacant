@@ -1,0 +1,5 @@
+total 16
+drwxr-xr-x 3 root root 4096 Oct  8 15:59 .
+drwxr-xr-x 3 root root 4096 Oct  8 15:59 ..
+drwxr-xr-x 8 root root 4096 Oct  8 15:59 .git
+-rw-r--r-- 1 root root    3 Oct  8 15:59 README.md

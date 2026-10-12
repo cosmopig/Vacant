@@ -1,0 +1,178 @@
+{
+ "2808/reference": {
+  "unittest_rc": 0,
+  "unittest": {
+   "1": true,
+   "2": true
+  },
+  "grader_public": {
+   "1": true,
+   "2": true
+  },
+  "agree": true,
+  "grader_full_rc": 0,
+  "grader_full_tail": "🎉 TASK PASSED: All 14 tests passed!"
+ },
+ "2808/off_by_one": {
+  "unittest_rc": 1,
+  "unittest": {
+   "1": false,
+   "2": false
+  },
+  "grader_public": {
+   "1": false,
+   "2": false
+  },
+  "agree": true,
+  "grader_full_rc": 1,
+  "grader_full_tail": "❌ TASK FAILED: 14 out of 14 tests failed!"
+ },
+ "2808/List_hint_no_import": {
+  "unittest_rc": 0,
+  "unittest": {
+   "1": true,
+   "2": true
+  },
+  "grader_public": {
+   "1": true,
+   "2": true
+  },
+  "agree": true,
+  "grader_full_rc": 0,
+  "grader_full_tail": "🎉 TASK PASSED: All 14 tests passed!"
+ },
+ "2808/future_import": {
+  "unittest_rc": 1,
+  "unittest": {
+   "1": false,
+   "2": false
+  },
+  "grader_public": {
+   "1": false,
+   "2": false
+  },
+  "agree": true,
+  "grader_full_rc": 1,
+  "grader_full_tail": "❌ TASK FAILED: 14 out of 14 tests failed!"
+ },
+ "3653/reference": {
+  "unittest_rc": 0,
+  "unittest": {
+   "1": true,
+   "2": true,
+   "3": true
+  },
+  "grader_public": {
+   "1": true,
+   "2": true,
+   "3": true
+  },
+  "agree": true,
+  "grader_full_rc": 0,
+  "grader_full_tail": "🎉 TASK PASSED: All 43 tests passed!"
+ },
+ "3653/off_by_one": {
+  "unittest_rc": 1,
+  "unittest": {
+   "1": false,
+   "2": false,
+   "3": false
+  },
+  "grader_public": {
+   "1": false,
+   "2": false,
+   "3": false
+  },
+  "agree": true,
+  "grader_full_rc": 1,
+  "grader_full_tail": "❌ TASK FAILED: 43 out of 43 tests failed!"
+ },
+ "3653/List_hint_no_import": {
+  "unittest_rc": 0,
+  "unittest": {
+   "1": true,
+   "2": true,
+   "3": true
+  },
+  "grader_public": {
+   "1": true,
+   "2": true,
+   "3": true
+  },
+  "agree": true,
+  "grader_full_rc": 0,
+  "grader_full_tail": "🎉 TASK PASSED: All 43 tests passed!"
+ },
+ "3653/future_import": {
+  "unittest_rc": 1,
+  "unittest": {
+   "1": false,
+   "2": false,
+   "3": false
+  },
+  "grader_public": {
+   "1": false,
+   "2": false,
+   "3": false
+  },
+  "agree": true,
+  "grader_full_rc": 1,
+  "grader_full_tail": "❌ TASK FAILED: 43 out of 43 tests failed!"
+ },
+ "3779/reference": {
+  "unittest_rc": 0,
+  "unittest": {
+   "1": true,
+   "2": true
+  },
+  "grader_public": {
+   "1": true,
+   "2": true
+  },
+  "agree": true,
+  "grader_full_rc": 0,
+  "grader_full_tail": "🎉 TASK PASSED: All 42 tests passed!"
+ },
+ "3779/off_by_one": {
+  "unittest_rc": 1,
+  "unittest": {
+   "1": false,
+   "2": false
+  },
+  "grader_public": {
+   "1": false,
+   "2": false
+  },
+  "agree": true,
+  "grader_full_rc": 1,
+  "grader_full_tail": "❌ TASK FAILED: 42 out of 42 tests failed!"
+ },
+ "3779/List_hint_no_import": {
+  "unittest_rc": 0,
+  "unittest": {
+   "1": true,
+   "2": true
+  },
+  "grader_public": {
+   "1": true,
+   "2": true
+  },
+  "agree": true,
+  "grader_full_rc": 0,
+  "grader_full_tail": "🎉 TASK PASSED: All 42 tests passed!"
+ },
+ "3779/future_import": {
+  "unittest_rc": 1,
+  "unittest": {
+   "1": false,
+   "2": false
+  },
+  "grader_public": {
+   "1": false,
+   "2": false
+  },
+  "agree": true,
+  "grader_full_rc": 1,
+  "grader_full_tail": "❌ TASK FAILED: 42 out of 42 tests failed!"
+ }
+}

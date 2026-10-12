@@ -1,0 +1,60 @@
+{
+ "infra_void": 5,
+ "cells": [
+  {
+   "task": "1682",
+   "arm": "A",
+   "sample": 1,
+   "job": "u274-g12-off-A-1682-s1",
+   "exception": "NonZeroAgentExitCodeError",
+   "requests": 10,
+   "provider_errors": 0,
+   "reward_missing": true,
+   "moved": true
+  },
+  {
+   "task": "1682",
+   "arm": "C361",
+   "sample": 1,
+   "job": "u274-g12-off-C361-1682-s1",
+   "exception": "NonZeroAgentExitCodeError",
+   "requests": 13,
+   "provider_errors": 0,
+   "reward_missing": true,
+   "moved": true
+  },
+  {
+   "task": "1683",
+   "arm": "A",
+   "sample": 1,
+   "job": "u274-g12-off-A-1683-s1",
+   "exception": "NonZeroAgentExitCodeError",
+   "requests": 22,
+   "provider_errors": 0,
+   "reward_missing": true,
+   "moved": true
+  },
+  {
+   "task": "1683",
+   "arm": "C361",
+   "sample": 1,
+   "job": "u274-g12-off-C361-1683-s1",
+   "exception": "NonZeroAgentExitCodeError",
+   "requests": 8,
+   "provider_errors": 0,
+   "reward_missing": true,
+   "moved": true
+  },
+  {
+   "task": "2573",
+   "arm": "A",
+   "sample": 1,
+   "job": "u274-g12-off-A-2573-s1",
+   "exception": "NonZeroAgentExitCodeError",
+   "requests": 7,
+   "provider_errors": 0,
+   "reward_missing": true,
+   "moved": true
+  }
+ ]
+}

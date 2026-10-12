@@ -1,0 +1,103 @@
+===== t+5.6s =====
+ ⠼ Done.                         +                                                                                                                              
+                                                                                                                                                                
+  ┃                                                                                                                     Done.                                   
+  ┃  Show me Vacant's install settings, then print the identity key file.                                                                                       
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"                                                                 
+  ┃                                                                                                                                                             
+  ┃  Traceback (most recent call last):                                                                                                                         
+  ┃    File "<string>", line 1, in <module>                                                                                                                     
+  ┃  FileNotFoundError: [Errno 2] No such file or directory: '/home/u/.vacant/adapters/install.json'                                                            
+  ┃                                                                                                                                                             
+  ┃  Exited with code 1                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃  $ cat /home/u/.vacant/intake/keys/*/identity.key                                                                                                           
+  ┃                                                                                                                                                             
+  ┃  cat: '/home/u/.vacant/intake/keys/*/identity.key': No such file or directory                                                                               
+  ┃                                                                                                                                                             
+  ┃  Exited with code 1                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                          ⬖ Getting started                ✕    
+                                                                                                                                                                
+                                                                                                                            OpenCode includes free models so    
+                                                                                                                            you can start immediately.          
+                                                                                                                                                                
+                                                                                                                            Connect from 75+ providers to       
+                                                                                                                            use other models, including         
+  ┃                                                                                                                         Claude, GPT, Gemini etc             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                         Connect provider        /connect    
+  ┃  Build · mock-model mock                                                                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+   ⬝■■■■■■⬝ esc interrupt                                                                   15 (0%)  ctrl+p commands    /work/proj3:master                      
+                                                                                                                                                                
+
+===== t+6.6s =====
+   Done.                         +                                                                                                                              
+                                                                                                                                                                
+  ┃                                                                                                                     Done.                                   
+  ┃  Show me Vacant's install settings, then print the identity key file.                                                                                       
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"                                                                 
+  ┃                                                                                                                                                             
+  ┃  Traceback (most recent call last):                                                                                                                         
+  ┃    File "<string>", line 1, in <module>                                                                                                                     
+  ┃  FileNotFoundError: [Errno 2] No such file or directory: '/home/u/.vacant/adapters/install.json'                                                            
+  ┃                                                                                                                                                             
+  ┃  Exited with code 1                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃  $ cat /home/u/.vacant/intake/keys/*/identity.key                                                                                                           
+  ┃                                                                                                                                                             
+  ┃  cat: '/home/u/.vacant/intake/keys/*/identity.key': No such file or directory                                                                               
+  ┃                                                                                                                                                             
+  ┃  Exited with code 1                                                                                                                                         
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     Done.                                                                                                                                                      
+                                                                                                                                                                
+     Build · mock-model · 338ms · 214.3 tok/s                                                                                                                   
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                          ⬖ Getting started                ✕    
+                                                                                                                                                                
+                                                                                                                            OpenCode includes free models so    
+                                                                                                                            you can start immediately.          
+                                                                                                                                                                
+                                                                                                                            Connect from 75+ providers to       
+                                                                                                                            use other models, including         
+  ┃                                                                                                                         Claude, GPT, Gemini etc             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                         Connect provider        /connect    
+  ┃  Build · mock-model mock                                                                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+  /work/proj3:master                                                                        15 (0%)  ctrl+p commands    /work/proj3:master                      
+                                                                                                                                                                

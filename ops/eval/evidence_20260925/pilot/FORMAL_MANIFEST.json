@@ -1,0 +1,415 @@
+{
+ "pin": {
+  "image": "vacant-eval/dabstep-env:1",
+  "image_id": "sha256:0e2cbfab8265d048f6ad45866b5f39f6a393b013ddbcde59c5e7a98ac8972728",
+  "official_dockerfile_sha256": "c20a321f2d96924cb750829f2a9d08a317b0365ac914017bdff0350d6f44d14e",
+  "data_sha256": {
+   "acquirer_countries.csv": "6744cf1962e4b5086342821e627f4557c32f06c3c58e8b0ff3b449dcc634f37f",
+   "fees.json": "9a833666ae9be5a8e756dd1fe076c72e7c502d64161315ffa8fee9e5bf2599dc",
+   "manual.md": "bb7f4ca6fdc759af1f480702b3a3b12e17e9293b0d38a1dbfbbc8ffc1e572d2c",
+   "merchant_category_codes.csv": "83247d79f5ddcdd180e02f184b644f4912731942a2fc58d91f2a06b911d04b41",
+   "merchant_data.json": "f158e834de27ee8407e99d9c32da690357981d2770958fd302a9bb79ced83581",
+   "payments-readme.md": "8754b92d0b3127856ff72266ea482995d2a1f6a34d0a12732f7c26f527f2c4a5",
+   "payments.csv": "5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25"
+  },
+  "tasks_rewritten": 450
+ },
+ "count": 79,
+ "tasks": [
+  {
+   "task": "1",
+   "source": "harbor-450",
+   "tests_sha256": "b69ae865d62a7827320a758629832c2b67a4e9b50319e10aa26cc1192c43a309"
+  },
+  {
+   "task": "2",
+   "source": "harbor-450",
+   "tests_sha256": "74b04118a7d3e0be54eea8ee18e3738b9722b4582ce684e460436b91a65748ec"
+  },
+  {
+   "task": "3",
+   "source": "harbor-450",
+   "tests_sha256": "b7190bc7a90bfd6f607d17472c0f3811edbe7a25df83b248b5934215fe29f777"
+  },
+  {
+   "task": "4",
+   "source": "harbor-450",
+   "tests_sha256": "660c6a64c62811c654a8bd635b5ab32aa311373231f80372e2cb5376e04775a7"
+  },
+  {
+   "task": "5",
+   "source": "dev",
+   "tests_sha256": "660c6a64c62811c654a8bd635b5ab32aa311373231f80372e2cb5376e04775a7"
+  },
+  {
+   "task": "6",
+   "source": "harbor-450",
+   "tests_sha256": "6ce7d9ff3456b9fc2f1c8fd77cde78f5d772d63dea577a6b8289d495e0ffeb83"
+  },
+  {
+   "task": "7",
+   "source": "harbor-450",
+   "tests_sha256": "bb024a79333c3764052c41b99fa4b9b66a8d699871e159177fe5ace6852faa42"
+  },
+  {
+   "task": "8",
+   "source": "harbor-450",
+   "tests_sha256": "c76610491e7677b9584f62800b2347e4510b76c39a1453d97f3494242355924e"
+  },
+  {
+   "task": "9",
+   "source": "harbor-450",
+   "tests_sha256": "2957527d8dde091cfb4e85147f195d8bb44caec5a642cb4e502e75730dcf0156"
+  },
+  {
+   "task": "10",
+   "source": "harbor-450",
+   "tests_sha256": "0f2ffd7161965f0730b40032bc9fd77c20b45a484fb7d3d701fd3449706d076a"
+  },
+  {
+   "task": "11",
+   "source": "harbor-450",
+   "tests_sha256": "ff1e4f5cbfbfc970c377624992942514e2802c73b8c34eb46b34764183ff6fd8"
+  },
+  {
+   "task": "12",
+   "source": "harbor-450",
+   "tests_sha256": "bf0a9a7ee27738c2a03592973afbfeb79f169ac686d36a04f76c5389de9d16d8"
+  },
+  {
+   "task": "13",
+   "source": "harbor-450",
+   "tests_sha256": "7e6fe97ed510ee5ae08c29a9e97c011ea85abbc7aad61c71a970bb6abf83f06c"
+  },
+  {
+   "task": "14",
+   "source": "harbor-450",
+   "tests_sha256": "ff82b5d77cf20e47e2aa264fdbf3358c11498d942a2a5e52193bf6006db457f6"
+  },
+  {
+   "task": "15",
+   "source": "harbor-450",
+   "tests_sha256": "ac1ebec0bc731627358eadf9816811bd0e24c8e31e173781a2f339b30b570e91"
+  },
+  {
+   "task": "16",
+   "source": "harbor-450",
+   "tests_sha256": "e32265e23e1aac57d3f5b35b31fde01bd47340c0c598e17fef445127fcf3b28f"
+  },
+  {
+   "task": "17",
+   "source": "harbor-450",
+   "tests_sha256": "e202fe5d6dca10816815f6191c08a28f1c52a5182d4a3e66ec6449ea2f2674a9"
+  },
+  {
+   "task": "18",
+   "source": "harbor-450",
+   "tests_sha256": "c7e4f318bfe3fb52134b997225462826f6d534e60df20a0f65757442666f9e8d"
+  },
+  {
+   "task": "19",
+   "source": "harbor-450",
+   "tests_sha256": "82458474b9fd2428ef5be83bd05d8fa7f8b9ef46dc810550ffa5f01caefc543e"
+  },
+  {
+   "task": "20",
+   "source": "harbor-450",
+   "tests_sha256": "e32265e23e1aac57d3f5b35b31fde01bd47340c0c598e17fef445127fcf3b28f"
+  },
+  {
+   "task": "21",
+   "source": "harbor-450",
+   "tests_sha256": "e32265e23e1aac57d3f5b35b31fde01bd47340c0c598e17fef445127fcf3b28f"
+  },
+  {
+   "task": "22",
+   "source": "harbor-450",
+   "tests_sha256": "b3417091bad040922a3f24cbd000e61a20333cdc76b353a2920c7059072e6795"
+  },
+  {
+   "task": "23",
+   "source": "harbor-450",
+   "tests_sha256": "b65e8a791ae600bc4cc31026efba14b01713ec90b66c079db1a9bcc9d6e1a83e"
+  },
+  {
+   "task": "24",
+   "source": "harbor-450",
+   "tests_sha256": "f98683bdf17470a3c3a9a7cabd237ff2dca72827d453e58d496939de6781fc99"
+  },
+  {
+   "task": "25",
+   "source": "harbor-450",
+   "tests_sha256": "66c0dadd8d0367c682a4756ddcf4882ce6c0d70ecdf4816b89c8233007206398"
+  },
+  {
+   "task": "26",
+   "source": "harbor-450",
+   "tests_sha256": "e32265e23e1aac57d3f5b35b31fde01bd47340c0c598e17fef445127fcf3b28f"
+  },
+  {
+   "task": "27",
+   "source": "harbor-450",
+   "tests_sha256": "d1eb75d62deef9c7f1316e14fec0204cc0a91d7eae1deae12fe637a9377f5225"
+  },
+  {
+   "task": "28",
+   "source": "harbor-450",
+   "tests_sha256": "4eeb0e3dd2cf9649381be6cf6fa95265f0055850f78718b170a1d91e65652b5f"
+  },
+  {
+   "task": "29",
+   "source": "harbor-450",
+   "tests_sha256": "6ec51d54f8dedf208387d12244037ceedf1a003cba0510f3a4e9ed3f3f0a8699"
+  },
+  {
+   "task": "30",
+   "source": "harbor-450",
+   "tests_sha256": "6ec51d54f8dedf208387d12244037ceedf1a003cba0510f3a4e9ed3f3f0a8699"
+  },
+  {
+   "task": "31",
+   "source": "harbor-450",
+   "tests_sha256": "5939ccf7eef73d1a06943056f112423ad36836d5414f13194ba74a183be866ac"
+  },
+  {
+   "task": "32",
+   "source": "harbor-450",
+   "tests_sha256": "c92a8fdff61538609ce6a18e482b9e990f597130b23a45ad1272e1b7badbf079"
+  },
+  {
+   "task": "33",
+   "source": "harbor-450",
+   "tests_sha256": "380ec99effa5de5af2b0f3ba7fbc618c1ec089ebcc207de97d1a50c3739f443c"
+  },
+  {
+   "task": "34",
+   "source": "harbor-450",
+   "tests_sha256": "a22f4954661c8e473e446c6c797c778cd32557e3cd10c954a48958cdcacb294b"
+  },
+  {
+   "task": "35",
+   "source": "harbor-450",
+   "tests_sha256": "70855a7d7b748c778396d078dfbe530f84ee9ceda5c3dc7e6de0613140827a4a"
+  },
+  {
+   "task": "36",
+   "source": "harbor-450",
+   "tests_sha256": "2588ec9189f90151983ef9c786a726d88dbd8b051f26b240909cdc7f6944e6f1"
+  },
+  {
+   "task": "37",
+   "source": "harbor-450",
+   "tests_sha256": "4b853f66d765df3cddad5bc8e1fd6b6637c37ec55e96a1580887444fb0c8f75c"
+  },
+  {
+   "task": "38",
+   "source": "harbor-450",
+   "tests_sha256": "adf74992676e72430904fee19d044ebf20daba447c75ccb433124396e76ad1b5"
+  },
+  {
+   "task": "39",
+   "source": "harbor-450",
+   "tests_sha256": "63b681e12eb109b51faf1c42feaaac0eb9ec82f4d416df27e6f3a338fc9c7341"
+  },
+  {
+   "task": "40",
+   "source": "harbor-450",
+   "tests_sha256": "dfd13cfc4bac2eb091663af0e4093f1f074fbf0eb9f59716f5164315f651dddd"
+  },
+  {
+   "task": "41",
+   "source": "harbor-450",
+   "tests_sha256": "5b82f78482b7c2723e5a7e21360e1cd61e6b80ea8d3f4dfc633887701e337e48"
+  },
+  {
+   "task": "42",
+   "source": "harbor-450",
+   "tests_sha256": "b3417091bad040922a3f24cbd000e61a20333cdc76b353a2920c7059072e6795"
+  },
+  {
+   "task": "43",
+   "source": "harbor-450",
+   "tests_sha256": "e6df58c726c3542c77695179351b8b9907394feef5a94d2a86f979951496b4a1"
+  },
+  {
+   "task": "44",
+   "source": "harbor-450",
+   "tests_sha256": "c595ad3500ee7c06a9ca22463dcf1ec4eba1f6c53304282bd24c38ea1e241e5d"
+  },
+  {
+   "task": "45",
+   "source": "harbor-450",
+   "tests_sha256": "bf0a9a7ee27738c2a03592973afbfeb79f169ac686d36a04f76c5389de9d16d8"
+  },
+  {
+   "task": "46",
+   "source": "harbor-450",
+   "tests_sha256": "449609147520aaa37ae15e28d095715d627149357994d146e7cf6823d51b83ee"
+  },
+  {
+   "task": "47",
+   "source": "harbor-450",
+   "tests_sha256": "84f38d58badaacc233375a59308a8aac47cb927569d6b0bbcf53793f834b577f"
+  },
+  {
+   "task": "48",
+   "source": "harbor-450",
+   "tests_sha256": "b3417091bad040922a3f24cbd000e61a20333cdc76b353a2920c7059072e6795"
+  },
+  {
+   "task": "49",
+   "source": "dev",
+   "tests_sha256": "5480c2b6907a1a9e68e30506ef702b0bbbd050014b9c22d1ed9c925b8d0ca633"
+  },
+  {
+   "task": "50",
+   "source": "harbor-450",
+   "tests_sha256": "6ec51d54f8dedf208387d12244037ceedf1a003cba0510f3a4e9ed3f3f0a8699"
+  },
+  {
+   "task": "51",
+   "source": "harbor-450",
+   "tests_sha256": "95bd2881a454827da0dc556ebe732f597bec5ef09eb02f3bac5b3246b57a465d"
+  },
+  {
+   "task": "52",
+   "source": "harbor-450",
+   "tests_sha256": "660c6a64c62811c654a8bd635b5ab32aa311373231f80372e2cb5376e04775a7"
+  },
+  {
+   "task": "53",
+   "source": "harbor-450",
+   "tests_sha256": "2a375e854e1456f7259c36b48b6963c8795e1f741d7c8cae638a471620a0bf61"
+  },
+  {
+   "task": "54",
+   "source": "harbor-450",
+   "tests_sha256": "e32265e23e1aac57d3f5b35b31fde01bd47340c0c598e17fef445127fcf3b28f"
+  },
+  {
+   "task": "55",
+   "source": "harbor-450",
+   "tests_sha256": "f98683bdf17470a3c3a9a7cabd237ff2dca72827d453e58d496939de6781fc99"
+  },
+  {
+   "task": "56",
+   "source": "harbor-450",
+   "tests_sha256": "96895e0f73dae2b04cf9dfd27a08699be8f595d0945cbec316f0cba0bf1d80ac"
+  },
+  {
+   "task": "57",
+   "source": "harbor-450",
+   "tests_sha256": "a22f4954661c8e473e446c6c797c778cd32557e3cd10c954a48958cdcacb294b"
+  },
+  {
+   "task": "58",
+   "source": "harbor-450",
+   "tests_sha256": "ccc60ceb436601c8d26db2900ff1b6a9ee372ddeaf68d074439501b0ec016403"
+  },
+  {
+   "task": "59",
+   "source": "harbor-450",
+   "tests_sha256": "e925ce41f628d500c4482b853de8a6307d5eb742a93e6a73df639a1becc3853b"
+  },
+  {
+   "task": "60",
+   "source": "harbor-450",
+   "tests_sha256": "589a4baff47982b998aba8a52ca5d808582a57d8b0ece4e4cd52c84037acac6d"
+  },
+  {
+   "task": "61",
+   "source": "harbor-450",
+   "tests_sha256": "ddfe814ae54960f9ec98dd792e7cf421342c428b505507e010c7947d3fb8606a"
+  },
+  {
+   "task": "62",
+   "source": "harbor-450",
+   "tests_sha256": "6dc84e6b60dbcc12cea69bf74dafced72e390e475ff8d3218ad621011cabedc6"
+  },
+  {
+   "task": "63",
+   "source": "harbor-450",
+   "tests_sha256": "a54e650327826d932af27c4fcf76b1f8970449230edb4da649f70e18cbe044da"
+  },
+  {
+   "task": "64",
+   "source": "harbor-450",
+   "tests_sha256": "d889dad20cd691af793bff2bb5eeef5e6f12b068f3fda0dfc5352ab47bebebfb"
+  },
+  {
+   "task": "65",
+   "source": "harbor-450",
+   "tests_sha256": "402dfef26640f583f28b81d253279e7542bd8305da6cfc9ee010a8559fadb4f5"
+  },
+  {
+   "task": "66",
+   "source": "harbor-450",
+   "tests_sha256": "c23f172b3520128a7715d74136915048d104e17f67ec8116a8b9f0912c203524"
+  },
+  {
+   "task": "67",
+   "source": "harbor-450",
+   "tests_sha256": "0fbbef57a71ea56776578cba8cd372a00b78f540366d9ca343334c7631358ccc"
+  },
+  {
+   "task": "68",
+   "source": "harbor-450",
+   "tests_sha256": "16b8c02311f81f8f45630dbaa515d3483509adb0b78b0a7e9c6ac671de7a2066"
+  },
+  {
+   "task": "69",
+   "source": "harbor-450",
+   "tests_sha256": "56bc94547737609ffb8fccaab5914cf52baedf98e2454d693b4127bd81f8b6f3"
+  },
+  {
+   "task": "70",
+   "source": "dev",
+   "tests_sha256": "6dc84e6b60dbcc12cea69bf74dafced72e390e475ff8d3218ad621011cabedc6"
+  },
+  {
+   "task": "71",
+   "source": "harbor-450",
+   "tests_sha256": "6dc84e6b60dbcc12cea69bf74dafced72e390e475ff8d3218ad621011cabedc6"
+  },
+  {
+   "task": "72",
+   "source": "harbor-450",
+   "tests_sha256": "8180d90e34bb720b67ef05d3ae7a69596d6f948dc79816f9528a0726bfc2c4f0"
+  },
+  {
+   "task": "1273",
+   "source": "dev",
+   "tests_sha256": "714d427f4f391df952de6b4e8905305f98450ab2bf5092d0b9c619fb3d6bf298"
+  },
+  {
+   "task": "1305",
+   "source": "dev",
+   "tests_sha256": "d102dee4398c48d3f1c0df5a19259943e745739967952545f280fa16f9ee1c86"
+  },
+  {
+   "task": "1464",
+   "source": "dev",
+   "tests_sha256": "51ae89885fe75a91516f3280312ee66202a6a0e57b82f31209c3d0d27ccaf51e"
+  },
+  {
+   "task": "1681",
+   "source": "dev",
+   "tests_sha256": "61a931c40883b2e131c89be473694a981eb6b82741cc51c729269c1453fe2a91"
+  },
+  {
+   "task": "1753",
+   "source": "dev",
+   "tests_sha256": "2f2dc8cc6d0b31ae3d1d1075e287da966245f151aa45cd36f4c6642a0d02cd6b"
+  },
+  {
+   "task": "1871",
+   "source": "dev",
+   "tests_sha256": "30ef4cc0513a1071e2411374dbcb08c96e772ccf58c99f539104913f317988f5"
+  },
+  {
+   "task": "2697",
+   "source": "dev",
+   "tests_sha256": "af61c0e44d2f975f272831679836c2d9dd2f4e6b358fa4b3b3e63e3ef70e2ae7"
+  }
+ ]
+}

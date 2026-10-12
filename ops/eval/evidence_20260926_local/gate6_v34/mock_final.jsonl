@@ -1,0 +1,15 @@
+{"t": 1790406985.1617994, "proto": "chat", "n": 1, "k": 0, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406985.7121172, "proto": "chat", "n": 2, "k": 1, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406986.2487314, "proto": "chat", "n": 3, "k": 2, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406986.7739818, "proto": "chat", "n": 4, "k": 3, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406987.192262, "proto": "chat", "n": 5, "k": 4, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406987.7433448, "proto": "chat", "n": 6, "k": 5, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406988.18302, "proto": "chat", "n": 7, "k": 6, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406988.684319, "proto": "chat", "n": 8, "k": 7, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406989.1224608, "proto": "chat", "n": 9, "k": 8, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406989.543113, "proto": "chat", "n": 10, "k": 9, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406989.9561892, "proto": "chat", "n": 11, "k": 10, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406990.4289079, "proto": "chat", "n": 12, "k": 11, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "write"}
+{"t": 1790406990.7315385, "proto": "chat", "n": 13, "k": 12, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406991.3518174, "proto": "chat", "n": 14, "k": 13, "fed_back": false, "reply": "tool", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": "bash"}
+{"t": 1790406992.0120456, "proto": "chat", "n": 15, "k": 14, "fed_back": false, "reply": "text", "role": null, "feedback": null, "skill_listed": false, "tools": ["read", "bash", "edit", "write"], "tool": null}

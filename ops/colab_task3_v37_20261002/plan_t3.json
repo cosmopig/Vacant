@@ -1,0 +1,485 @@
+{
+ "seed": 20261002,
+ "arms": [
+  "A",
+  "C37"
+ ],
+ "samples": [
+  1,
+  2,
+  3
+ ],
+ "tasks": [
+  {
+   "bank": "dabench",
+   "id": "dab_035",
+   "dir": "/srv/eval/staged/dabench/dab_035"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_039",
+   "dir": "/srv/eval/staged/dabench/dab_039"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_055",
+   "dir": "/srv/eval/staged/dabench/dab_055"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_057",
+   "dir": "/srv/eval/staged/dabench/dab_057"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_105",
+   "dir": "/srv/eval/staged/dabench/dab_105"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_129",
+   "dir": "/srv/eval/staged/dabench/dab_129"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_144",
+   "dir": "/srv/eval/staged/dabench/dab_144"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_176",
+   "dir": "/srv/eval/staged/dabench/dab_176"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_216",
+   "dir": "/srv/eval/staged/dabench/dab_216"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_218",
+   "dir": "/srv/eval/staged/dabench/dab_218"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_249",
+   "dir": "/srv/eval/staged/dabench/dab_249"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_250",
+   "dir": "/srv/eval/staged/dabench/dab_250"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_378",
+   "dir": "/srv/eval/staged/dabench/dab_378"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_426",
+   "dir": "/srv/eval/staged/dabench/dab_426"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_427",
+   "dir": "/srv/eval/staged/dabench/dab_427"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_507",
+   "dir": "/srv/eval/staged/dabench/dab_507"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_514",
+   "dir": "/srv/eval/staged/dabench/dab_514"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_517",
+   "dir": "/srv/eval/staged/dabench/dab_517"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_587",
+   "dir": "/srv/eval/staged/dabench/dab_587"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_588",
+   "dir": "/srv/eval/staged/dabench/dab_588"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_657",
+   "dir": "/srv/eval/staged/dabench/dab_657"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_665",
+   "dir": "/srv/eval/staged/dabench/dab_665"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_666",
+   "dir": "/srv/eval/staged/dabench/dab_666"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_669",
+   "dir": "/srv/eval/staged/dabench/dab_669"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_688",
+   "dir": "/srv/eval/staged/dabench/dab_688"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_721",
+   "dir": "/srv/eval/staged/dabench/dab_721"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_723",
+   "dir": "/srv/eval/staged/dabench/dab_723"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_724",
+   "dir": "/srv/eval/staged/dabench/dab_724"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_725",
+   "dir": "/srv/eval/staged/dabench/dab_725"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_732",
+   "dir": "/srv/eval/staged/dabench/dab_732"
+  },
+  {
+   "bank": "databench",
+   "id": "db_066_04",
+   "dir": "/srv/eval/staged/databench/db_066_04"
+  },
+  {
+   "bank": "databench",
+   "id": "db_066_10",
+   "dir": "/srv/eval/staged/databench/db_066_10"
+  },
+  {
+   "bank": "databench",
+   "id": "db_066_34",
+   "dir": "/srv/eval/staged/databench/db_066_34"
+  },
+  {
+   "bank": "databench",
+   "id": "db_066_37",
+   "dir": "/srv/eval/staged/databench/db_066_37"
+  },
+  {
+   "bank": "databench",
+   "id": "db_069_08",
+   "dir": "/srv/eval/staged/databench/db_069_08"
+  },
+  {
+   "bank": "databench",
+   "id": "db_069_29",
+   "dir": "/srv/eval/staged/databench/db_069_29"
+  },
+  {
+   "bank": "databench",
+   "id": "db_071_02",
+   "dir": "/srv/eval/staged/databench/db_071_02"
+  },
+  {
+   "bank": "databench",
+   "id": "db_071_12",
+   "dir": "/srv/eval/staged/databench/db_071_12"
+  },
+  {
+   "bank": "databench",
+   "id": "db_071_15",
+   "dir": "/srv/eval/staged/databench/db_071_15"
+  },
+  {
+   "bank": "databench",
+   "id": "db_071_19",
+   "dir": "/srv/eval/staged/databench/db_071_19"
+  },
+  {
+   "bank": "databench",
+   "id": "db_072_02",
+   "dir": "/srv/eval/staged/databench/db_072_02"
+  },
+  {
+   "bank": "databench",
+   "id": "db_072_26",
+   "dir": "/srv/eval/staged/databench/db_072_26"
+  },
+  {
+   "bank": "databench",
+   "id": "db_072_30",
+   "dir": "/srv/eval/staged/databench/db_072_30"
+  },
+  {
+   "bank": "databench",
+   "id": "db_072_33",
+   "dir": "/srv/eval/staged/databench/db_072_33"
+  },
+  {
+   "bank": "databench",
+   "id": "db_072_38",
+   "dir": "/srv/eval/staged/databench/db_072_38"
+  },
+  {
+   "bank": "databench",
+   "id": "db_073_10",
+   "dir": "/srv/eval/staged/databench/db_073_10"
+  },
+  {
+   "bank": "databench",
+   "id": "db_073_31",
+   "dir": "/srv/eval/staged/databench/db_073_31"
+  },
+  {
+   "bank": "databench",
+   "id": "db_074_11",
+   "dir": "/srv/eval/staged/databench/db_074_11"
+  },
+  {
+   "bank": "databench",
+   "id": "db_074_13",
+   "dir": "/srv/eval/staged/databench/db_074_13"
+  },
+  {
+   "bank": "databench",
+   "id": "db_074_27",
+   "dir": "/srv/eval/staged/databench/db_074_27"
+  },
+  {
+   "bank": "databench",
+   "id": "db_075_28",
+   "dir": "/srv/eval/staged/databench/db_075_28"
+  },
+  {
+   "bank": "databench",
+   "id": "db_076_00",
+   "dir": "/srv/eval/staged/databench/db_076_00"
+  },
+  {
+   "bank": "databench",
+   "id": "db_076_06",
+   "dir": "/srv/eval/staged/databench/db_076_06"
+  },
+  {
+   "bank": "databench",
+   "id": "db_076_31",
+   "dir": "/srv/eval/staged/databench/db_076_31"
+  },
+  {
+   "bank": "databench",
+   "id": "db_077_18",
+   "dir": "/srv/eval/staged/databench/db_077_18"
+  },
+  {
+   "bank": "databench",
+   "id": "db_078_11",
+   "dir": "/srv/eval/staged/databench/db_078_11"
+  },
+  {
+   "bank": "databench",
+   "id": "db_078_28",
+   "dir": "/srv/eval/staged/databench/db_078_28"
+  },
+  {
+   "bank": "databench",
+   "id": "db_078_36",
+   "dir": "/srv/eval/staged/databench/db_078_36"
+  },
+  {
+   "bank": "databench",
+   "id": "db_080_04",
+   "dir": "/srv/eval/staged/databench/db_080_04"
+  },
+  {
+   "bank": "databench",
+   "id": "db_080_23",
+   "dir": "/srv/eval/staged/databench/db_080_23"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_affine_cipher",
+   "dir": "/srv/eval/staged/polyglot_py/pg_affine_cipher"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_beer_song",
+   "dir": "/srv/eval/staged/polyglot_py/pg_beer_song"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_book_store",
+   "dir": "/srv/eval/staged/polyglot_py/pg_book_store"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_bottle_song",
+   "dir": "/srv/eval/staged/polyglot_py/pg_bottle_song"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_bowling",
+   "dir": "/srv/eval/staged/polyglot_py/pg_bowling"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_connect",
+   "dir": "/srv/eval/staged/polyglot_py/pg_connect"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_dominoes",
+   "dir": "/srv/eval/staged/polyglot_py/pg_dominoes"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_dot_dsl",
+   "dir": "/srv/eval/staged/polyglot_py/pg_dot_dsl"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_food_chain",
+   "dir": "/srv/eval/staged/polyglot_py/pg_food_chain"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_forth",
+   "dir": "/srv/eval/staged/polyglot_py/pg_forth"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_go_counting",
+   "dir": "/srv/eval/staged/polyglot_py/pg_go_counting"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_grade_school",
+   "dir": "/srv/eval/staged/polyglot_py/pg_grade_school"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_grep",
+   "dir": "/srv/eval/staged/polyglot_py/pg_grep"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_hangman",
+   "dir": "/srv/eval/staged/polyglot_py/pg_hangman"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_list_ops",
+   "dir": "/srv/eval/staged/polyglot_py/pg_list_ops"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_paasio",
+   "dir": "/srv/eval/staged/polyglot_py/pg_paasio"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_phone_number",
+   "dir": "/srv/eval/staged/polyglot_py/pg_phone_number"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_pig_latin",
+   "dir": "/srv/eval/staged/polyglot_py/pg_pig_latin"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_poker",
+   "dir": "/srv/eval/staged/polyglot_py/pg_poker"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_pov",
+   "dir": "/srv/eval/staged/polyglot_py/pg_pov"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_proverb",
+   "dir": "/srv/eval/staged/polyglot_py/pg_proverb"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_react",
+   "dir": "/srv/eval/staged/polyglot_py/pg_react"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_rest_api",
+   "dir": "/srv/eval/staged/polyglot_py/pg_rest_api"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_robot_name",
+   "dir": "/srv/eval/staged/polyglot_py/pg_robot_name"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_scale_generator",
+   "dir": "/srv/eval/staged/polyglot_py/pg_scale_generator"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_sgf_parsing",
+   "dir": "/srv/eval/staged/polyglot_py/pg_sgf_parsing"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_simple_linked_list",
+   "dir": "/srv/eval/staged/polyglot_py/pg_simple_linked_list"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_transpose",
+   "dir": "/srv/eval/staged/polyglot_py/pg_transpose"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_tree_building",
+   "dir": "/srv/eval/staged/polyglot_py/pg_tree_building"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_two_bucket",
+   "dir": "/srv/eval/staged/polyglot_py/pg_two_bucket"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_variable_length_quantity",
+   "dir": "/srv/eval/staged/polyglot_py/pg_variable_length_quantity"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_wordy",
+   "dir": "/srv/eval/staged/polyglot_py/pg_wordy"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_zebra_puzzle",
+   "dir": "/srv/eval/staged/polyglot_py/pg_zebra_puzzle"
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_zipper",
+   "dir": "/srv/eval/staged/polyglot_py/pg_zipper"
+  }
+ ],
+ "note": "PREREG_20261002_COLAB_TASK3_V37"
+}

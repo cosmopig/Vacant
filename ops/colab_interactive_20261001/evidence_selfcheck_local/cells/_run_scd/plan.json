@@ -1,0 +1,53 @@
+{
+ "main": {
+  "schema": "i1001.plan/1",
+  "kind": "main",
+  "seed": 1,
+  "arms": [
+   "A",
+   "C"
+  ],
+  "nested": [
+   "R",
+   "K"
+  ],
+  "samples": [
+   1
+  ],
+  "k_banks": [
+   "lcb_selfcheck"
+  ],
+  "tasks": [
+   {
+    "bank": "lcb_selfcheck",
+    "id": "u1",
+    "dir": "/srv/eval/_selfcheck/eval/staged/lcb_selfcheck/u1",
+    "role": "selfcheck",
+    "deliverable": "solution.py",
+    "k": true,
+    "screened": false
+   },
+   {
+    "bank": "lcb_selfcheck",
+    "id": "u2",
+    "dir": "/srv/eval/_selfcheck/eval/staged/lcb_selfcheck/u2",
+    "role": "selfcheck",
+    "deliverable": "solution.py",
+    "k": true,
+    "screened": false
+   },
+   {
+    "bank": "lcb_selfcheck",
+    "id": "u3",
+    "dir": "/srv/eval/_selfcheck/eval/staged/lcb_selfcheck/u3",
+    "role": "selfcheck",
+    "deliverable": "solution.py",
+    "k": true,
+    "screened": false
+   }
+  ],
+  "estimate": {
+   "units": 3
+  }
+ }
+}

@@ -1,0 +1,1244 @@
+{
+  "summary": "Classify gemma-4-12b failures and reactions to Vacant, then propose and adversarially check the next zero-config change",
+  "agentCount": 9,
+  "logs": [
+    "read batches returned: 6/6"
+  ],
+  "result": {
+    "read": [
+      {
+        "runs": [
+          {
+            "file": "formal-A-1-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "computed_but_not_written",
+            "had_candidate_answer_turn": 8,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "T12 repeats T4's `wc -l` (138237). T13 prints the header row. T14 repeats T8/T11's `awk 'END {print NR-1}'` (138236). T15 runs `grep -v \"^psp_reference\" | wc -l` (138236). Turn 16 is aborted at the 15-turn cap. /app/answer.txt was never written.",
+            "vacant_observable_signal": "T8 prints 138236 from its own awk (row count minus header). The request asks for 'just a number'. From then on, every step recomputes the same count. T11 and T14 are the exact T8 command with the exact same output, T12 is the exact T4 command, and T9/T15 are other ways of getting 138237/138236. By T11 a recorder sees a repeat with an identical result and no write to /app/answer.txt. At T13 (2 turns left) the requested file still does not exist and a candidate value has been in the record since T8. The Stop check is never reached because the cap ends the run on a toolUse turn.",
+            "notes": "Expected is not in this transcript (no file). The C1/C2 sibling verifiers show Expected 138236, so the T8 value matches. formal-C2-1-s1 (budget reminder at turn 13) wrote 138236 and scored 1. This is the clearest 're-verify until cut off' case."
+          },
+          {
+            "file": "formal-A-1305-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "never_computed",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12 reruns the grep -A/-B chain over fees.json into temp_fees.txt and cats it (13520 chars of fragments). T13 runs the same grep into temp_fees.txt again and adds only comments ('use python'). T14 writes calculate_fee.py. T15 runs it and prints three per-rule fees (0.071, 0.089, 0.032). Cut off at the cap before averaging or writing.",
+            "vacant_observable_signal": "T4 and T6 are the identical `read fees.json` (39817 chars both times). T7-T13 are seven grep -A/-B pipelines over pretty-printed JSON whose outputs are '--'-separated fragments that never show a whole rule. T11-T13 all rebuild the same temp_fees.txt. At T13 (2 turns left) there is no numeric candidate and no /app/answer.txt. Only at T15 does a script print values, and it prints three per-rule numbers while the request asks for one average fee with 6 decimals. The run ends at the cap with the file missing.",
+            "notes": "No averaged value was ever computed. The mean of the three printed per-rule fees would be 0.064. The expected value does not appear in this transcript. An earlier-batch qwen verifier (scratchpad/formal/jobs/q38-on-A/.../dabstep-1305__tnjKtFM) shows Expected 0.123217, so the partial values would not have matched either. The T14 script keeps only rules whose account_type list contains 'H', which excludes empty (wildcard) lists. That is a method choice a recorder cannot judge. formal-C2-1305 (reminders at turns 13 and 14) also ended with no file."
+          },
+          {
+            "file": "formal-A-1464-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "loop_same_command",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12-T15 are four more variants of `grep '\"account_type\":\\[.*\"R\".*\\]' fees.json | grep \"ID\" ...` (cut/tr, -B 10 | head -50, head -20, head -100). All return empty output. Cut off at the cap.",
+            "vacant_observable_signal": "T3/T4 show fees.json pretty-printed, with `\"account_type\":[` on its own line and the list items on following lines. Then 11 consecutive turns (T5-T15) start with the same single-line regex `grep '\"account_type\":\\[.*\"R\".*\\]'`, which cannot match that layout. Every one returns nothing: exit code 1 at T5, T6, T7, T8, T10, 'No matches found' at T9, empty at T11-T15. Only the downstream pipes change. By T7 (third identical empty first stage) the loop is visible. At T13 no candidate and no answer file exist. The model output only empty '<|channel>thought' text throughout.",
+            "notes": "The expected value is not in this transcript. An earlier-batch qwen verifier (q38-on-A dabstep-1464__umGA94x) shows the expected answer is a long ID list starting '1, 2, 5, 6, 8, 9, 10, ...'. formal-C2-1464 wrote 'Not Applicable' after the reminder and scored 0."
+          },
+          {
+            "file": "formal-A-19-s1.md",
+            "outcome": "wrong_answer",
+            "category": "wrong_method_count_vs_volume",
+            "had_candidate_answer_turn": 8,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "T10 reruns the same awk with head -n 20 (4 numbers, then 4 scheme names). T11 reruns it with head -n 1 (8.024467). T12 writes '8.024467' to /app/answer.txt. T13 stops with a summary that assigns each value to a scheme (TransactPlus 8.024467, SwiftCharge 7.879268, ...).",
+            "vacant_observable_signal": "The written value has a source (T8/T11 output), the manual was opened (T2), and no step failed, so none of the five checks would fire. What is observable: T8-T11 run the same awk program four times, and T8 and T9 are identical with identical output. The awk prints each rate and each scheme name on separate lines, and `sort -rn` sorts them independently. So the T13 pairing of scheme names with values has no source in any output (T10 shows 4 numbers followed by 4 names in reverse-alphabetical order). The awk computes a count ratio (fraud rows / rows). The manual opened at T2 defines fraud as fraudulent volume over total volume (manual.md:225 per ops/eval/evidence_20260925/investigation/failure_taxonomy.md). Seeing that mismatch requires comparing method to documentation, which is a correctness judgment outside Vacant's five checks.",
+            "notes": "Expected 9.676954, got 8.024467 (verifier in this transcript). formal-C2-19 gave the identical wrong answer. It never computed a volume-based rate."
+          },
+          {
+            "file": "formal-A-23-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "never_computed_silent_bug",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12 prints the numbered header list (1-20). T13 reruns the same awk (sums $10, prints nothing). T14 repeats T12 exactly. T15 prints the full numbered header list (21 columns) with a long comment re-deriving the indices. Cut off at the cap.",
+            "vacant_observable_signal": "The awk scripts at T6, T8, T10 and T13 sum `$10` as the amount. T8, T10 and T13 are byte-identical and all produce empty output with exit 0, because the `if (total_volume > 0)` guard hides a zero total. The header listings the agent itself printed (T7, numbered at T12/T14/T15) show column 9 = eur_amount and column 10 = ip_country. So from T12 on, the record shows the script summing a country-code column. That is a mismatch between two of the agent's own outputs, and the fraud-volume definition quoted in the T5 comment names 'volume' (eur_amount). Header listings repeat 5 times (T7, T11, T12, T14, T15), with T12 = T14 identical. At T13 there is no candidate and no answer file. T5's only number (4.97067e+10) is the mean of psp_reference, which the agent itself dismissed.",
+            "notes": "The expected value is not in this transcript. The formal-C2-23 verifier shows Expected 0. Because the expected rate is 0, the same script with $9 would print 0, so one wrong column index hid the right answer. formal-C2-23 (reminders at turns 13 and 14) wrote 0 and scored 1."
+          },
+          {
+            "file": "formal-A-2697-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "loop_same_command",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12, T13, T14 and T15 are the identical command `grep \"Belles_cookbook_store\" data/payments.csv | grep \"True\" | cut -d',' -f18 | sort | uniq -c`, each with the identical output (9139 False / 1071 True). Cut off at the cap.",
+            "vacant_observable_signal": "T13-T15 exactly repeat T12 with identical output, a pure loop from T13. Earlier failed steps: T5 (relative path, exit 1) was recovered at T6. T7 and T8 (grepping data rows for the header name 'has_fraudulent_dispute', exit 1) were followed by a different approach. The full 138k-row payments.csv was read twice with the read tool (T4, T9, same output). The request is about fees per ACI, but fees.json was never opened, no January (day_of_year) filter was applied, and no fee was computed. The request does not name fees.json, so the 'named file not opened' check would not fire. At T13 there is no candidate and no answer file.",
+            "notes": "No Expected value is visible in any available verifier output. This run, formal-C2-2697 and all four earlier-batch runs of 2697 ended with no answer file. The agent was far from an answer when cut off."
+          },
+          {
+            "file": "formal-A-33-s1.md",
+            "outcome": "wrong_answer",
+            "category": "wrong_column",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "T3 reads payments-readme.md. T4 runs `cut -d',' -f13 payments.csv | sort | uniq | wc -l` and gets 55194. T5 writes 55194 to /app/answer.txt. T6 stops, saying 55194 unique shoppers by email.",
+            "vacant_observable_signal": "55194 has a source (T4) and the docs were opened, so the five checks would not fire. Observable at T4 without the expected answer: field 13 of the payments.csv header is 'ip_address', and email_address is field 14. The request says 'based on email addresses', and the T6 claim says email. The CSV header was never printed in this run, so the index 13 has no grounding in the record. Only the readme (T3) lists the columns, and that listing also puts ip_address before email_address. The pipeline also does not drop the header line, so the count includes it. This is a claim-vs-command mismatch ('email' in the claim, the ip_address column in the command).",
+            "notes": "Expected 46284, got 55194 (verifier in this transcript). The C1/C2 siblings wrote 46286 and were scored correct, so the scorer is tolerant, but 55194 is far off. Short run (6 turns), no looping."
+          },
+          {
+            "file": "formal-A-43-s1.md",
+            "outcome": "wrong_answer",
+            "category": "chose_wrong_candidate",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "T7 computes the mean of per-email mean amounts: 90.69560832225703. T8 computes the mean of per-email sums: 247.30013849278367. T9 writes '247.300\\n'. T10 stops, explaining the sum-per-email method and reporting 247.300 without mentioning the 90.696 value.",
+            "vacant_observable_signal": "T5, T6 and T8 print 247.3 (mean of per-email sums, three times). T7 prints 90.6956 (mean of per-email means) for the same asked quantity. So two different values for 'average transaction amount per unique email' are in the record by T7. The delivered value has a source, so no send-back category applies. What a recorder can note for the person at Stop (T10): two aggregations gave different results, the delivered one is 247.300, no step explains why the other was dropped, and the final message omits it.",
+            "notes": "Expected 90.70, got 247.300 (verifier in this transcript). The first candidate (T5, 247.3) does not match. The T7 value 90.6956 rounds to 90.70 and likely matches, since sibling runs show the scorer accepting 61.855069 for 61.86 and 46286 for 46284. So the agent held a probably-correct value and chose the other. formal-C2-43 gave the identical 247.300."
+          },
+          {
+            "file": "formal-A-44-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "computed_but_not_written",
+            "had_candidate_answer_turn": 14,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "T12's awk gives 46284 unique shoppers and 28629 repeat customers. T13 tries bc, which fails with exit 127 (bc not found). T14 computes the percentage in python: 61.855069. T15 reruns the T12 awk (printf variant) with the same counts. Cut off at the cap without writing.",
+            "vacant_observable_signal": "T14 prints 61.855069, a number rounded to 6 decimals exactly as the request asks, computed from counts in T12. T15 recomputes the T12 counts with identical output instead of writing. /app/answer.txt never exists and the cap ends the run at T15 on a toolUse turn. At T13 (2 turns left) the counts are already in the record and the file is missing. T5-T11 show five inconsistent unique-email counts (42266, 124413, 46284, 42266, 46285) before settling. The T13 bc failure was handled at T14, not ignored.",
+            "notes": "The expected value is not in this transcript (no file). The formal-C1-44 and formal-C2-44 verifiers show Expected 61.86 and accepted 61.855069, so the T14 value matches. formal-C2-44 scored 1."
+          }
+        ],
+        "batch_summary": "I read all 9 failed arm-A runs in full. Six of them (1, 1305, 1464, 23, 2697, 44) never wrote /app/answer.txt: they were still calling tools at turn 15, and turn 16 was aborted by the cap, so a Stop check could never have run. Three (19, 33, 43) wrote a wrong answer and stopped normally. Where the verifier section has no Expected value, I took it from sibling runs of the same task and say so in each run's notes.\n\n- **Correct answer in hand, never written (2):**\n  - Run 1 printed 138236 at T8, then re-counted the same thing through T15 (T11 and T14 are exact repeats of T8).\n  - Run 44 printed 61.855069 at T14, then re-ran its counts at T15.\n  - Both match the expected value shown by the C1/C2 sibling verifiers. In both, a recorder could see at T13 that a candidate value was already in the record, the answer file did not exist, and the run was repeating commands.\n- **Never computed an answer (4):**\n  - Run 23 summed column $10 (ip_country) instead of $9 (eur_amount). Its guard hid the empty result, so T6/T8/T10/T13 printed nothing, even though its own header listings (T12/T14) show eur_amount is column 9. The expected answer is 0, so the fixed script would have printed exactly that.\n  - Run 1464 spent 11 turns (T5-T15) on the same single-line regex against multi-line JSON, and it never matched.\n  - Run 2697 repeated the identical command at T12-T15 and never opened fees.json, although the question is about fees.\n  - Run 1305 wasted T4/T6 re-reading fees.json and T7-T13 on grep fragments. It printed three per-rule fees only at T15, never averaged them, and those values would not have matched the earlier-batch Expected of 0.123217 anyway.\n- **Wrong answer with a sourced value (3):** none of Vacant's five checks would fire on these.\n  - Run 43 computed 90.6956 at T7, which likely matches the expected 90.70, but delivered 247.300. A recorder could note that two different values were computed for the same quantity.\n  - Run 33 cut column 13 (ip_address) while claiming to count email addresses, and the count includes the header line.\n  - Run 19 used a count ratio where the manual defines fraud by volume. Its final text pairs scheme names with values that `sort -rn` had separated, so that pairing has no source in any output.\n\nAcross the batch, the signals a recorder could see without the expected answer are:\n- the same command repeated with the same output (runs 1, 1464, 2697, 23, 44);\n- no answer file with 2 turns left, even though a candidate value was already in the record (runs 1 and 44);\n- a command whose column index disagrees with the agent's own header output (runs 23 and 33);\n- two different computed values for one asked quantity (run 43)."
+      },
+      {
+        "runs": [
+          {
+            "file": "formal-A-49-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "loop_same_command",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "Turn 12 reruns the awk filter $18==\"true\" (no output). Turn 13 runs grep \",true,\" | head -n 10 (no output). Turn 14 runs head -n 20 payments.csv, which again shows has_fraudulent_dispute as capitalized False. Turn 15 reruns the same awk $18==\"true\" (no output). Turn 16 is aborted at the 15-turn cap and no file was written.",
+            "vacant_observable_signal": "Turn 8 (head -n 5) shows that column 18 (has_fraudulent_dispute) holds capitalized 'False'. Every later filter still looks for lowercase 'true': turns 7 and 9 run the identical grep \",true,\" pipeline, and turns 10, 12 and 15 run the identical awk '$18 == \"true\"' command. Each returns '(no output)'. Turns 11 and 13 are near-duplicates (grep \",true,\" | head) and also return nothing. Turns 5 and 6 both return only the header ('1 ip_country'). So there are 7 empty results in a row from repeated commands, and no value is ever computed. From turn 9 on, a recorder could see a repeated command with the same empty output and no file written.",
+            "notes": "Case mismatch (true vs True/False) is visible in the tool output at turns 8 and 14. The expected answer is not shown in any transcript for task 49 (A, C2 and pilot2-A all have no answer file). The C2 run of the same task also failed with nudges at turns 13-14."
+          },
+          {
+            "file": "formal-A-52-s1.md",
+            "outcome": "wrong_answer",
+            "category": "wrong_computation_unchecked",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "Turn 3 reads payments-readme.md. Turn 4 runs one awk pipeline that sums eur_amount (col 9) by ip_country (col 10), then sort -k2 -nr | head -n 1, which gives 'LU 665078'. Turn 5 writes 'LU'. Turn 6 stops with the text 'LU'.",
+            "vacant_observable_signal": "Turn 4: the whole answer rests on one pipeline truncated by head -n 1, so the agent never saw any other country's total. The printed total (665078, 6 significant digits) is the kind of value awk's default %.6g output produces; any total of 1e6 or more would print as e+06, and sort -n would misorder it. This is a plausible cause but the transcript does not verify it. The agent also picked ip_country without saying why, although the request just says 'country' and the data has issuing_country and acquirer_country too. The value LU does have a source in the record (turn 4), so none of Vacant's five checks would fire.",
+            "notes": "Expected NL, got LU. The C1 and C2 runs of the same task also answered LU."
+          },
+          {
+            "file": "formal-A-56-s1.md",
+            "outcome": "wrong_answer",
+            "category": "wrong_filter",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "Turn 3 reads payments-readme.md, which lists a device_type column. Turn 4 runs grep \"iOS\" payments.csv | wc -l and gets 22541. Turn 5 writes 22541. Turn 6 stops with the text '22541'.",
+            "vacant_observable_signal": "Turn 4 counts every line that contains the substring 'iOS' anywhere, not rows where the device_type column (col 12, named in the readme read at turn 3) equals iOS. The file has random base64-like columns (ip_address, email_address, card_number) that can contain 'iOS'. The count is never cross-checked with a column-restricted filter. The value has a source (turn 4 output), so Vacant's five checks would not fire.",
+            "notes": "Expected 22520, got 22541 (a difference of 21). All other arms and the pilot runs gave the same 22541."
+          },
+          {
+            "file": "formal-A-62-s1.md",
+            "outcome": "no_file_said_done",
+            "category": "answered_in_text_only",
+            "had_candidate_answer_turn": 9,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "Turn 6 runs grep -i fee on manual.md. Turn 7 runs grep -i retry on manual.md and finds only the downgrade text. Turn 8 runs grep -i retry on fees.json (exit 1, no output). Turn 9 stops (stopReason=stop) with a paragraph ending 'Not Applicable', but no write call was ever made.",
+            "vacant_observable_signal": "At turn 9 the agent ends with stopReason=stop and its final text contains the answer 'Not Applicable'. No write or bash call in turns 1-9 created /app/answer.txt, although the request explicitly asks for the answer to be written there. This is exactly Vacant check 1 (a requested output file does not exist), and it is detectable at the Stop after turn 9.",
+            "notes": "The expected value is 'Not Applicable' according to the verifier in formal-C1-62-s1.md and formal-C2-62-s1.md, both of which scored correct. This is the one A failure in this set that sits squarely inside Vacant's five categories."
+          },
+          {
+            "file": "formal-A-69-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "stalled_exploration",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "Turn 12 reads payments-readme.md. Turn 13 runs ls -lh on merchant_data.json and payments.csv. Turn 14 reads merchant_data.json. Turn 15 runs ls -R /app/data/ for the third time, with output identical to turns 1 and 11. Turn 16 is aborted at the cap.",
+            "vacant_observable_signal": "Turn 9 prints average rate by volume band (<100k 53.38, 100k-1m 53.02, 1m-5m 55.21, >5m 56.82), and turn 10's comment says they 'don't seem to decrease consistently'. After that there is no new computation. Turns 11 and 15 repeat turn 1's ls -R with identical output, turn 10 re-greps the manual for volume (same output as turn 7), and turns 12-14 read files unrelated to fee volume. The agent never states a candidate or writes a file. From turn 11 a recorder could see re-listing and no progress toward a file.",
+            "notes": "The expected value is '5m' according to formal-C2-69-s1.md, where C2 answered '>5m' and was scored correct. A never proposed any volume band as its answer."
+          },
+          {
+            "file": "formal-A-70-s1.md",
+            "outcome": "no_file_other",
+            "category": "model_decode_error",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "Turn 7 counts card_bin (col 17) for Martinis. Turn 8 counts bin 4556 (2871). Turn 9 runs a broken pipeline (cut -f17 then cut -f16 on a one-field stream) that just echoes 2871 4556. Turn 10 counts shopper_interaction (Ecommerce 12562, POS 1243). Turn 11 fails with 'failed to decode, ret = 1': the bash call has empty arguments, and the run ends after 10 real turns.",
+            "vacant_observable_signal": "Turns 4 and 6 are identical reads of the 23 MB payments.csv, with the same truncated 51221-char result. Turn 5 tabulates email_address (col 14), and turns 7-10 tabulate card_bin and shopper_interaction. None of the commands touches has_fraudulent_dispute (col 18) or looks up the manual's fraud-fine rule, even though the question is about a high-fraud fine. Turn 9's output is identical to turn 8's. The run then ends on a model/decode error at turn 11, not at the cap, and no file was written.",
+            "notes": "The expected value is 'Not Applicable' according to formal-C2-70-s1.md (C2 answered 'yes' and was scored incorrect). The termination is an infrastructure or model output failure, not the budget."
+          },
+          {
+            "file": "formal-A-71-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "computed_but_not_decided",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "Turn 12 greps the manual for 'excessive' and finds only downgrade lines. Turn 13 recomputes the fraud rates and counts merchants above 8.3% (0). Turn 14 recomputes and counts merchants above 7.2% (5). Turn 15 recomputes and counts merchants under 7.2% (0). Turn 16 is aborted at the cap and no yes/no was ever stated.",
+            "vacant_observable_signal": "Turn 10 already prints all 5 merchants' fraud rates (0.0768-0.0800), and turn 11 re-runs the same pandas groupby with the same numbers. Turns 13, 14 and 15 reload the full CSV and recompute the same groupby just to try different thresholds. Turn 13 ('above 8.3%: 0') and turn 15 ('under 7.2%: 0') imply opposite yes/no answers depending on the threshold, and the agent never says which threshold the documentation defines (turns 5 and 12 found no numeric 'excessive' threshold in the manual). Turns 3 and 9 are identical reads of merchant_data.json, and turn 6 repeats turn 1's ls. From turn 11 on the data needed for a yes/no was on screen, but no file was written by turn 15.",
+            "notes": "No transcript for task 71 shows an expected value (A, C2 and pilot2-A all have no file). The C2 run also failed after nudges at turns 13-14."
+          },
+          {
+            "file": "pilot2-A-1305-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "tool_error_loop",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "Turn 12 runs /app/find_rules.py and prints the matching GlobalCard rules (17k chars). Turn 13 goes back to an inline python3 -c '...' and hits the same bash quoting error as turn 10 (an apostrophe in \"it's\" inside the single quotes). Turn 14 writes /app/find_rules_v2.py. Turn 15 runs it, which prints the rules again one per line. Turn 16 is aborted at the cap and no fee was ever computed.",
+            "vacant_observable_signal": "Turn 5 uses a relative path and jq, which is not installed. Turn 6 reads a relative 'fees.json' (ENOENT). Turn 7 repeats turn 1's ls -R, and turn 8 re-reads fees.json with output identical to turn 4. Turn 10 fails with a bash syntax error from the apostrophe in \"it's\" inside python3 -c '...'. Turn 13 repeats the same failing pattern with the same error, after turns 11-12 had already worked around it with a script file. Turns 12 and 15 both only print the rule list, and no average fee for 10 EUR is ever computed. By turn 13 a recorder could see a repeated identical error and that the fee formula had not been started.",
+            "notes": "No transcript shows the expected value (the formal-A and C2 runs of 1305 also have no file). The agent created helper scripts /app/find_rules.py and /app/find_rules_v2.py but never the answer file."
+          },
+          {
+            "file": "pilot2-A-1464-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "loop_same_command",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "Turn 12 runs a grep account_type/R + aci/B + sed variant (no output). Turn 13 runs grep account_type | grep R -B 10 | grep aci (no output). Turn 14 tries jq (not installed, exit 127). Turn 15 runs grep -n with the same single-line regexes (no output). Turn 16 is aborted at the cap.",
+            "vacant_observable_signal": "The fees.json output at turns 3 and 10 shows pretty-printed JSON in which '\"account_type\":[' is followed by a newline, so the single-line regex '\"account_type\":\\[.*\"R\".*\\]' cannot match any line. Nine grep variants built on it (turns 5, 6, 7, 8, 9, 11, 12, 13, 15) all return no output, many with exit code 1. Turn 11 is near-identical to turn 5 (-A 50 vs -A 20). Turn 10 re-reads fees.json with output identical to turn 3. Turn 14 retries jq, which had already failed in the same container in the 1305 run (not visible in this run itself). The agent never switches to python. From turn 7 a recorder could see the same empty-result command family repeating.",
+            "notes": "The expected value is a long non-empty list of IDs according to formal-C2-1464-s1.md, where C2 answered 'Not Applicable' and was scored incorrect. A never produced any candidate."
+          }
+        ],
+        "batch_summary": "I read all 9 failed arm-A runs in full. Two runs wrote a wrong answer: 52 (LU instead of NL) and 56 (22541 instead of 22520). Both answers came from a single unchecked one-line pipeline: awk sum + head -n 1 for 52, and a whole-line grep for 'iOS' instead of filtering the device_type column for 56. In both, the value has a source in the record, so none of Vacant's five checks would fire, and the C1 and C2 runs of both tasks gave the same wrong answers.\n\nOne run had the right answer but never wrote it: 62, where turn 9 ends with stopReason=stop and the text 'Not Applicable' but no answer file. Expected is 'Not Applicable' according to the C1 and C2 verifiers, and both of those arms scored correct on this task. This is the only failure here that falls into a Vacant category (requested output file missing at Stop).\n\nFive runs were cut off at the 15-turn cap with no file and no stated candidate: 49, 69, 71, 1305 and 1464. Their visible patterns are repeated identical commands with empty output (49: lowercase 'true' filter vs capitalized 'False' data; 1464: single-line grep over multi-line JSON), re-listing and re-reading after the last useful computation (69), recomputing the same statistics under different thresholds without deciding (71), and a repeated bash quoting error before any fee formula was started (1305).\n\nRun 70 ended at turn 11 on a model decode error (an empty bash call), after exploring columns unrelated to fraud; this is infrastructure, not the budget.\n\nFor the cut-off runs, the signal a recorder could see from the middle turns onward (about turns 7-11) is repeated commands with identical or empty output, with no file written. None of these five had a concrete candidate before the cap, so a 'write your best answer now' reminder would have forced a guess rather than saving a computed answer. Run 71 is the closest case: its turn 10-11 output contained all the data needed for yes/no, and the only open question was which threshold applies.\n\nWhere the Expected value is cited, it comes from other arms' verifiers for the same task, because A's verifier only reported that the file was missing. Tasks 49, 71 and 1305 have no Expected value in any transcript. Task 1464 shows only a truncated long list, which was enough to say it is non-empty."
+      },
+      {
+        "runs": [
+          {
+            "file": "pilot2-A-19-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "computed_but_not_written",
+            "had_candidate_answer_turn": 14,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "T12: awk printed per-scheme total and fraud counts. T13: combined count, fraud count per scheme. T14: awk fraud-count/total*100 per scheme printed 'SwiftCharge,8.02447' at the top. T15: re-ran the exact T14 command and got identical output. The 15-turn cap then hit (T16 'operation was aborted') and /app/answer.txt was never written.",
+            "vacant_observable_signal": "(1) Loop: T6, T9 and T11 are the identical awk command with identical all-zero output (summing the string field $18 gives 0). T14 and T15 are identical commands with identical output. T5 and T7 repeat the same scheme greps. (2) T14 printed a concrete number (SwiftCharge 8.02447) from the agent's own command. T15 spent the second-to-last turn repeating it instead of writing, and the file does not exist at the cap. With the stated 15-turn budget, the v3 conditions hold at T13 and T14: tool ran, file missing. (3) Format: the request asks for a percentage rounded to 6 decimals, but awk printed 8.02447 (5 decimals). (4) Seeing this one takes semantic judgement and is outside the five checks: T12-T14 compute a count-based rate (fraud rows / all rows). manual.md was read at T2, and other transcripts (formal-A-69 greps manual.md) show it defines fraud level as a ratio of volumes.",
+            "notes": "Expected 9.676954 does not appear in this run's verifier (no file). It is taken from sibling runs of the same task: formal-A-19, formal-C2-19 and pilot2-C1-19 all print 'Expected: 9.676954'. formal-A-19 and formal-C2-19 wrote 8.024467 and were scored incorrect, so writing the T14 candidate would still have failed. The T10 grep ',True,' counted 102919 rows (it matches any True column, e.g. is_credit). That contradicts the T12-13 fraud counts (about 10765 total), but the agent did not act on it."
+          },
+          {
+            "file": "pilot2-A-2697-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "loop_same_command",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12: grep 'Belles_cookbook_store' | grep 'has_fraudulent_dispute' | grep 'True' returned no output (exit 1). T13: awk print fields $3,$9,$18,$20 filtered on True listed the fraudulent rows, all with ACI G. T14: the same header-string grep plus cut|sort|uniq -c returned no output. T15: the same without uniq, no output. Cut off at the cap with no fee computation and no answer file.",
+            "vacant_observable_signal": "(1) The filter string grep 'has_fraudulent_dispute' matches only the CSV header (header shown at T4), so it can never match a data row. Near-identical versions ran at T7, T8, T10, T12, T14 and T15, all with no output (exit 1 at T7, T8, T10, T12): six empty repeats. (2) fees.json appears in the T1 listing and the question asks for the lowest fee, but fees.json was never opened in 15 turns. payments-readme.md (documentation in the data dir the request says to reference) was never opened either. (3) No 'January' filter (day_of_year) appears in any command. (4) T5 failed on a relative path (exit 1); this was handled at T6-T7. (5) payments.csv was read twice (T4, T9). From T13 on, the stated budget has 2 or fewer turns left with no answer file, and no candidate was ever produced.",
+            "notes": "Expected is not shown in this run or in any sibling transcript (formal-A-2697 and formal-C2-2697 also produced no file). T13 did show the fraudulent rows all use ACI G, but the agent never priced alternative ACIs."
+          },
+          {
+            "file": "pilot2-A-49-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "loop_same_command",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12: awk '$18==\"true\"' | head: no output. T13: grep ',true,' | cut -f18 | uniq -c: no output. T14: awk '$18==\"true\"' | wc -l printed 0. T15: repeated T13 exactly, no output. Cut off at the cap with no answer file.",
+            "vacant_observable_signal": "(1) Case mismatch: T7's head output shows the booleans as 'False'/'True', but every filter from T6 on uses lowercase 'true'. Identical grep ',true,' commands at T6, T8, T13 and T15 give identical empty output. awk $18==\"true\" variants at T9, T10, T12 and T14 give empty output or 0, so 8 of the last 10 turns returned nothing. (2) T3-T5 grep 'fraud' matched only the header line (T4/T5 output is '1 ip_country'). (3) T14 printed a count of 0 fraudulent rows, which contradicts the question's premise, and the agent did not change approach. (4) payments-readme.md was never opened. (5) No answer file at the cap, and the v3 budget conditions hold at T13 and T14.",
+            "notes": "No candidate was ever computed. Expected is not shown in this run or in the sibling transcripts (formal-A-49 and formal-C2-49 also produced no file)."
+          },
+          {
+            "file": "pilot2-A-51-s1.md",
+            "outcome": "no_file_said_done",
+            "category": "answered_in_text_only",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "T4: grep 'NexPay' | wc -l printed 41679. T5: read payments.csv (first 51KB). T6: grep -c 'NexPay' printed 41679 again. T7: stopReason=stop with final text '41679'. The agent never called write, so /app/answer.txt does not exist.",
+            "vacant_observable_signal": "At T7 the agent says it is done (Stop) with the text '41679'. The request explicitly says to write the answer to /app/answer.txt, and no write call occurs in the record, so the file does not exist. This is exactly the Stop check 'requested output file does not exist', firing at T7. The value is grounded: T4 and T6 outputs both show 41679.",
+            "notes": "Expected 41679 comes from sibling runs formal-A-51, formal-C1-51, formal-C2-51 and pilot2-C1-51 (all 'Expected: 41679', 'Got: 41679'). The correct answer was lost only because it was never written to the file."
+          },
+          {
+            "file": "pilot2-A-56-s1.md",
+            "outcome": "wrong_answer",
+            "category": "wrong_filter",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "T3: read payments-readme.md. T4: grep 'iOS' payments.csv | wc -l printed 22541. T5: wrote 22541 to /app/answer.txt. T6: stopped with text '22541'. The verifier shows Expected 22520, Got 22541.",
+            "vacant_observable_signal": "No problem of the five-check kind: the file exists, contains just a number, and 22541 has a source (T4 output). Seeing the error takes semantic reading: the T4 count is an unanchored whole-line substring grep for 'iOS', not a filter on the device_type column (listed in the readme read at T3). No data row was ever inspected and no column-restricted count was run before writing at T5. The run is short (6 turns), so the budget was not a factor.",
+            "notes": "The 21-row excess is consistent with 'iOS' appearing inside other fields such as the random ID strings, but the transcript does not show which lines matched, so that part is unclear."
+          },
+          {
+            "file": "pilot2-A-59-s1.md",
+            "outcome": "wrong_answer",
+            "category": "wrong_filter",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "T6: single-pass awk printed IT,FR,NL. T7: the same awk with values printed IT 99.6227, FR 95.0788, NL 92.4278. T8: wrote 'IT,FR,NL' to /app/answer.txt. T9: stopped with a sentence plus 'Final Answer: IT,FR,NL'. The verifier shows Expected IT,ES,FR, Got IT,FR,NL.",
+            "vacant_observable_signal": "The five checks pass: the file exists, the format is a comma-separated list, and the value is grounded in T5-T7 output. The observable error is the wrong column. T4 printed the header, where field 5 is hour_of_day and field 7 is day_of_year. The 'last quarter of 2023' filter at T5-T7 is '$5>=10 && $5<=12', so it selects hours 10-12, not Q4. payments-readme.md was never opened. Noticing this means comparing the request term 'last quarter' with the column name at T4/T5, which is outside the five checks.",
+            "notes": "The candidate was grounded but came from the wrong filter. It is not a loop or budget problem: the agent stopped at T9."
+          },
+          {
+            "file": "pilot2-A-62-s1.md",
+            "outcome": "no_file_said_done",
+            "category": "answered_in_text_only",
+            "had_candidate_answer_turn": 12,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "T9: grep -i 'retry' fees.json found nothing (exit 1). T10: read payments-readme.md. T11: grep -i 'retry' payments.csv returned no output. T12: stopReason=stop with final text 'Not Applicable'. The agent never called write, so /app/answer.txt does not exist.",
+            "vacant_observable_signal": "At T12 the agent stops with 'Not Applicable' as plain text. The request says to write the answer to /app/answer.txt, and no write occurs, so the Stop check 'requested output file does not exist' fires at T12. Secondary signals: T7 called a nonexistent tool named 'grep' ('Tool grep not found'), recovered at T8. The exit-1 greps at T5 and T9 are legitimate evidence of absence (T6 shows the manual mentions only 'Excessive retrying ... downgrades', with no fee amount).",
+            "notes": "Expected 'Not Applicable' comes from formal-C1-62 and formal-C2-62 ('Expected: Not Applicable', 'Got: Not Applicable', reward 1). In formal-C1-62 the C1 review actions were ['continue','allow'], consistent with the missing-file check recovering the same pattern. formal-A-62 also produced no file."
+          },
+          {
+            "file": "pilot2-A-70-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "never_computed",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12: re-read merchant_data.json (already read at T3). T13: grep Martinis | cut -f14 | sort | uniq -c | sort -nr (email_address), identical to T10 with identical output. T14: counted device_type (field 12). T15: counted ip_address (field 13). Cut off at the cap with no answer file.",
+            "vacant_observable_signal": "(1) The question is about fraud rate, but no command ever selects field 18 has_fraudulent_dispute (visible in the header at T4) or eur_amount. Instead the agent cut email_address (T5, T10, T13), card_bin (T7-T9), device_type (T14) and ip_address (T15). (2) Repeats: T10 and T13 are identical with identical output, and T5 is the same column. manual.md was read twice (T2, T11), merchant_data.json twice (T3, T12) and payments.csv twice (T4, T6). T9's pipeline cuts field 16 from single-column input and just reproduces T8's 2871. (3) fees.json and payments-readme.md were never opened. (4) No candidate answer and no file at the cap, and the v3 budget conditions hold at T13 and T14.",
+            "notes": "Expected 'Not Applicable' is visible only in sibling run formal-C2-70 (Got: yes, incorrect). formal-A-70 also produced no file. The agent never reached any yes/no/Not Applicable conclusion."
+          },
+          {
+            "file": "pilot2-A-71-s1.md",
+            "outcome": "no_file_cut_off",
+            "category": "never_computed",
+            "had_candidate_answer_turn": null,
+            "candidate_matches_expected": null,
+            "last_turns_summary": "T12: grep -n merchant_category_code fees.json | head -50 (key lines only). T13: grep -n monthly_fraud_level | cut line numbers. T14: grep -n monthly_fraud_level | head -50, a repeat of T11. T15: identical to T12 with identical output. Cut off at the cap with no answer file.",
+            "vacant_observable_signal": "(1) payments.csv, the only per-transaction fraud data, was never opened in 15 turns, yet the question asks whether any merchant is under the fraud threshold. No per-merchant rate was ever computed. (2) T6-T15 are all greps of fees.json that print only field-name lines (monthly_fraud_level, merchant_category_code, ID) without linking them to merchants. T12 and T15 are identical commands with identical output. T14 repeats T11 (with head), and T7 repeats T6 (with head). (3) T9 failed ('jq: command not found', exit 127) and no alternative such as python was tried; the next turn went back to grep. (4) payments-readme.md was never opened. (5) No file at the cap, and the v3 budget conditions hold at T13 and T14.",
+            "notes": "Expected is not shown in this run or in the sibling transcripts (formal-A-71 and formal-C2-71 also produced no file)."
+          }
+        ],
+        "batch_summary": "Nine failed arm-A pilot2 runs, in three groups.\n\n(a) Five were cut off at the 15-turn cap with no /app/answer.txt: 19, 2697, 49, 70 and 71.\n- Only 19 had a candidate: T14 printed SwiftCharge 8.02447 and T15 repeated the same command. That candidate would still be wrong: Expected 9.676954, per sibling runs formal-A-19, formal-C2-19 and pilot2-C1-19, which also wrote about 8.02 and failed. The agent computed a count-based rate, while manual.md defines fraud level by volume.\n- The other four never computed anything and were stuck in visible loops:\n  - 49: lowercase 'true' filter against 'True' data. Identical empty greps at T6, T8, T13 and T15, and awk returned 0 at T14.\n  - 2697: grep 'has_fraudulent_dispute' matches only the header. Six empty repeats, and fees.json was never opened even though the question is about fees.\n  - 70: never selected the fraud column. T10 and T13 are identical, and three files were re-read.\n  - 71: never opened payments.csv. T12 and T15 are identical, and a jq failure (exit 127) was not followed up.\n\n(b) Two stopped with the correct answer in plain text only: 51 (41679 = Expected, from siblings) and 62 ('Not Applicable' = Expected, from formal-C1-62 and formal-C2-62). Neither called write. The Stop check 'requested output file does not exist' matches both exactly, at T7 and T12.\n\n(c) Two wrote grounded but wrong answers:\n- 56: an unanchored grep 'iOS' counted 22541 against Expected 22520.\n- 59: the 'last quarter' filter used field 5, hour_of_day. The header at T4 shows it.\n\nBoth pass all five checks. Seeing the problem would require comparing the request's meaning with the column used.\n\nA recorder that never sees the expected answer could flag repeated identical command and output pairs (19, 49, 2697, 70, 71), required data files never opened (2697 fees.json, 71 payments.csv, and payments-readme.md in 2697, 49, 59, 70, 71), and a missing answer file at Stop (51, 62) or at the budget edge. The v3 reminder can change the score only where a candidate existed or at the missing-file Stop; for 19 the candidate was wrong anyway. Expected values for 2697, 49 and 71 are not visible in any transcript."
+      },
+      {
+        "runs": [
+          {
+            "file": "formal-A-25-s1.md",
+            "outcome": "correct",
+            "category": "clean_direct",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t3 read payments-readme.md; t4 one-line pandas z-score (one-sided (x-mean)/std > 3) printed 2429; t5 write '2429' to /app/answer.txt; t6 final text '2429'.",
+            "vacant_observable_signal": "Nothing to send back: the answer file exists at Stop and the value 2429 appears verbatim in the t4 output. Baseline signals: repeated identical commands: none. Turns: 6. Write at t5 = second-to-last turn of the run, but 10 of 15 budget turns left. Overwrite: none. Extra content in the file: none. Docs: manual.md t2 and payments-readme.md t3. Large output: manual.md 22,126 chars (t2) only. Tool errors: none.",
+            "notes": "The z-score is one-sided (no abs) but still scored correct."
+          },
+          {
+            "file": "formal-A-26-s1.md",
+            "outcome": "correct",
+            "category": "clean_direct",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t3 read payments.csv (51,221-char result); t4 pandas per-merchant z-score with abs, printed Crossfit_Hanna; t5 write 'Crossfit_Hanna'; t6 one-sentence answer.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t4 output and the file exists. Baseline signals: HUGE OUTPUT at t3 (raw read of payments.csv, 51,221 chars). payments-readme.md was never opened (manual.md was, at t2). Repeats: none. Turns: 6. Write at t5, 10 budget turns left. No overwrite, bare answer, no errors.",
+            "notes": "The visible text has empty '<|channel>thought<channel|>' markers (thinking is off)."
+          },
+          {
+            "file": "formal-A-37-s1.md",
+            "outcome": "correct",
+            "category": "tool_error_recovered",
+            "had_candidate_answer_turn": 7,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t5 awk counts Credit 101119 / Debit 37117; t6 awk|bc failed with 'bc: command not found', exit 127; t7 python recount printed 2.724331; t8 write '2.724331'; t9 text '2.724331'.",
+            "vacant_observable_signal": "TOOL ERROR at t6 (exit 127). It was not ignored: t7 recomputed the ratio another way, and that output is the source of the answer. So a 'failed step ignored' rule fires only if it cannot see the t7 recovery. The same counts were computed twice (awk t5, python t7). t4 was a useless 'grep -c | wc -l' that printed 1. Turns: 9. Write at t8, 7 budget turns left. No overwrite, bare answer. Docs: manual t2, readme t3. Large output: manual.md 22,126 chars only.",
+            "notes": "Expected 2.72, got 2.724331. The scorer accepted it (lenient match)."
+          },
+          {
+            "file": "formal-A-41-s1.md",
+            "outcome": "correct",
+            "category": "redundant_rechecks",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 df.isnull().sum() showed ip_address 27647 as the largest; t5 re-queried ip_address (27647); t6 re-queried email_address (13824); t7 write 'ip_address'; t8 text 'ip_address'.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t4 output. Baseline signals: NEAR-REPEATS at t4–t6 (the same pd.read_csv each time with a different column; not byte-identical). Turns: 8. Write at t7, 8 budget turns left. No overwrite, bare answer, no errors. Docs: manual t2, readme t3. Large output: manual only.",
+            "notes": ""
+          },
+          {
+            "file": "formal-A-42-s1.md",
+            "outcome": "correct",
+            "category": "tool_error_recovered",
+            "had_candidate_answer_turn": 6,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 awk duplicate scan printed only the header; t5 awk count script printed 'awk: line 1: syntax error at or near print' and an empty 'Duplicate rows:'; t6 sort -u comparison, 138237 = 138237, 'No duplicates.'; t7 write 'no'; t8 text 'no'.",
+            "vacant_observable_signal": "An ERROR TEXT appears in the t5 stdout, but no [ERROR] or exit-code marker is shown (the wrapper script's last echo presumably exited 0). A failed-step detector keyed on exit codes would not see it; one keyed on stderr or text would. Either way t6 redid the check another way. The answer 'no' is derived from the text 'No duplicates.', not a literal copy, so a literal-match source rule could misfire. Turns: 8. Write at t7. No overwrite, bare answer. Docs: manual and readme. Large output: manual only.",
+            "notes": ""
+          },
+          {
+            "file": "formal-A-51-s1.md",
+            "outcome": "correct",
+            "category": "redundant_rechecks",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 grep NexPay | wc -l printed 41679; t5 read payments.csv (51,221 chars, output not used visibly); t6 grep -c NexPay printed 41679 again; t7 write '41679'; t8 text '41679'.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t4 and t6 outputs. Baseline signals: HUGE OUTPUT at t5 (payments.csv raw read, 51,221 chars). NEAR-DUPLICATE computation at t4/t6: the same count by two grep forms, not byte-identical. Turns: 8. Write at t7, 8 budget turns left. No overwrite, bare answer, no errors. Docs: manual t2, readme t3.",
+            "notes": "The grep matches any line containing 'NexPay' rather than the card_scheme column only. It still scored correct."
+          },
+          {
+            "file": "formal-A-54-s1.md",
+            "outcome": "correct",
+            "category": "redundant_rechecks",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t3 read payments.csv (51,221 chars); t4 awk sum by merchant, head -1: Crossfit_Hanna 5.07664e+06; t5 same with head -10 (shows a 'merchant 0' header row); t6 same excluding the header, Crossfit_Hanna; t7 write; t8 text.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t4 and t6 outputs. Baseline signals: HUGE OUTPUT at t3 (51,221 chars). NEAR-IDENTICAL awk commands at t4/t5/t6 (they differ only in head -n and a header filter). payments-readme.md never opened (manual.md at t2). Turns: 8. Write at t7. No overwrite, bare answer, no errors.",
+            "notes": ""
+          },
+          {
+            "file": "formal-A-57-s1.md",
+            "outcome": "correct",
+            "category": "clean_direct_lenient_score",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 cut -f13 | sort | uniq | wc -l printed 55194; t5 write '55194'; t6 text '55194'.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t4 output and the file exists. No baseline signals: no repeats, 6 turns, write at t5 (10 budget turns left), no overwrite, bare answer, docs opened (manual t2, readme t3), large output only manual.md 22,126 chars, no errors.",
+            "notes": "Expected 55192, got 55194, and the scorer marked it correct. The pipeline did not drop the header line or empty values. That this explains the +2 is plausible but not shown. It passes only because scoring is lenient."
+          },
+          {
+            "file": "formal-A-59-s1.md",
+            "outcome": "correct",
+            "category": "self_correction",
+            "had_candidate_answer_turn": 6,
+            "candidate_matches_expected": false,
+            "last_turns_summary": "t6 awk filtered on $5 (hour_of_day) as if it were a month, with a tautological condition, giving ES,IT,LU (wrong, never written); t7 comment-only bash reasoning that there is no month column (no output); t8 read payments.csv (51,221 chars); t9 filter day_of_year >= 274, giving IT,ES,FR; t10 re-run listing the averages; t11 write 'IT,ES,FR'; t12 text.",
+            "vacant_observable_signal": "Nothing to send back: the final value is in the t9 and t10 outputs. Baseline signals: MOST TURNS in the set (12). Write at t11 with 4 budget turns left, so the v3 reminder (2 or 1 left) would not fire. HUGE OUTPUT at t8 (51,221 chars). Empty-output steps at t4 (grep for the literal string \"Crossfit_Hanna's NexPay\") and t7 (comment-only). NEAR-REPEAT of the corrected filter at t9/t10. A wrong intermediate at t6 was superseded, not written. No non-zero exits. No overwrite, bare answer. Docs: manual t2, readme t3.",
+            "notes": "The first candidate (t6, ES,IT,LU) was wrong. The correct candidate first appears at t9. Self-correction came from the model's own reasoning at t7, with no external signal."
+          },
+          {
+            "file": "formal-A-63-s1.md",
+            "outcome": "correct",
+            "category": "value_from_docs",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t2 read manual.md (22,126 chars); t3 grep -r account_type /app/data (46,815 chars, mostly fees.json lines); t4 read merchant_data.json (6,857 chars); t5 write 'R, D, H, F, S, O'; t6 text with the same list.",
+            "vacant_observable_signal": "HUGE OUTPUT at t3 (46,815 chars). The written list does not appear in any rendered tool-output head. Its source is unclear: plausibly section '2. Account Type' of the full t2 manual read (22,126 chars, only the TOC is visible). A 'value has no source' rule would false-positive here if it cannot match a list the agent composed against the full manual text. payments-readme.md never opened (not relevant to this question). Turns: 6. Write at t5, 10 left. No overwrite. The file holds the list with spaces (following the guideline example 'A, B, C'). No errors.",
+            "notes": "Expected 'R,D,H,F,S,O', got 'R, D, H, F, S, O'; accepted."
+          },
+          {
+            "file": "formal-A-9-s1.md",
+            "outcome": "correct",
+            "category": "redundant_rechecks",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t5 cut -f7 | sort | uniq -c | sort -nr | head -1 printed '437 64'; t6 same without head (4,292 chars, every day); t7 same with head -20; t8 same with head -1 | awk print $2, printed 64; t9 write '64'; t10 multi-paragraph summary ending 'The final answer is 64'.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t5 and t8 outputs. Baseline signals: FOUR VARIANTS of the same pipeline at t5–t8 (same prefix, different tail; not byte-identical). 10 turns. Write at t9, 6 budget turns left. No overwrite, bare answer, no errors. Docs: manual t2, readme t3. Largest outputs: manual 22,126 and t6 4,292 chars.",
+            "notes": ""
+          },
+          {
+            "file": "pilot2-A-26-s1.md",
+            "outcome": "correct",
+            "category": "clean_direct",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t3 read payments.csv (51,221 chars); t4 pandas per-merchant z-score with abs, printed Crossfit_Hanna; t5 write; t6 one-sentence answer.",
+            "vacant_observable_signal": "Nothing to send back. Baseline signals: HUGE OUTPUT at t3 (51,221 chars). payments-readme.md never opened (manual.md t2). Turns: 6. Write at t5, 10 left. No repeats, no overwrite, bare answer, no errors.",
+            "notes": "Nearly identical trajectory to formal-A-26."
+          },
+          {
+            "file": "pilot2-A-33-s1.md",
+            "outcome": "correct",
+            "category": "clean_direct_lenient_score",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 head -5 payments.csv; t5 cut -f14 | sort | uniq | wc -l printed 46286; t6 write '46286'; t7 text '46286'.",
+            "vacant_observable_signal": "Nothing to send back: the value is in the t5 output. No baseline signals: no repeats, 7 turns, write at t6 (9 left), no overwrite, bare answer, docs opened (manual t2, readme t3), large output only the manual, no errors.",
+            "notes": "Expected 46284, got 46286; the scorer accepted it. The same header/empty-value inclusion pattern as formal-A-57."
+          },
+          {
+            "file": "pilot2-A-37-s1.md",
+            "outcome": "correct",
+            "category": "tool_error_recovered",
+            "had_candidate_answer_turn": 8,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t5 awk on $9 (the wrong column) printed an empty 'Credit: Debit:' plus head; t6 awk on $8 gave True:101119 False:37117; t7 echo | bc failed, exit 127; t8 python round printed 2.724331; t9 explanatory text plus write '2.724331'; t10 summary text.",
+            "vacant_observable_signal": "TOOL ERROR at t7 (exit 127), recovered at t8, which is the source of the answer. A SILENT WRONG OUTPUT at t5 (empty counts from the wrong column, no error) was corrected at t6. t4 was a useless 'grep -c | wc -l' that printed 1. 10 turns. Write at t9, 6 budget turns left. No overwrite, bare answer. Docs: manual t2, readme t3. Large output: manual only.",
+            "notes": "Expected 2.72, got 2.724331; accepted."
+          },
+          {
+            "file": "pilot2-A-41-s1.md",
+            "outcome": "correct",
+            "category": "clean_with_recheck",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 df.isnull().sum() (ip_address 27647 largest); t5 re-queried ip_address, printed 27647; t6 write 'ip_address'; t7 text.",
+            "vacant_observable_signal": "Nothing to send back. One NEAR-REPEAT re-check at t5 (not identical). Turns: 7. Write at t6, 9 left. No overwrite, bare answer, no errors. Docs: manual t2, readme t3. Large output: manual only.",
+            "notes": ""
+          },
+          {
+            "file": "pilot2-A-42-s1.md",
+            "outcome": "correct",
+            "category": "clean_direct",
+            "had_candidate_answer_turn": 4,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t4 tail +2 | sort | uniq | wc -l vs total: 138236 = 138236, 'No duplicates found.'; t5 write 'no'; t6 summary ending 'no'.",
+            "vacant_observable_signal": "Nothing to send back. The answer 'no' is derived from the text 'No duplicates found.', not a literal token in the output (a literal source rule could misfire). No baseline signals: 6 turns, write at t5 (10 left), no repeats, no overwrite, bare answer, no errors, docs opened (manual, readme), large output only the manual.",
+            "notes": ""
+          },
+          {
+            "file": "pilot2-A-44-s1.md",
+            "outcome": "correct",
+            "category": "tool_error_recovered",
+            "had_candidate_answer_turn": 8,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t5 awk email counts printed '28630 46286'; t6 the SAME awk line again (only comments added), same output; t7 echo | bc failed, exit 127; t8 python printed 61.854556; t9 write '61.854556'; t10 text '61.854556'.",
+            "vacant_observable_signal": "REPEATED IDENTICAL EXECUTABLE COMMAND at t5/t6 (the tool args differ only in bash comments, so byte-level matching misses it but comment-stripped matching catches it). TOOL ERROR at t7 (exit 127), recovered at t8. HUGE OUTPUT at t4 (payments.csv raw read, 51,221 chars). payments-readme.md never opened (manual t2). 10 turns. Write at t9, 6 budget turns left. No overwrite, bare answer.",
+            "notes": "Expected 61.86, got 61.854556; accepted. The awk includes the header and empty email as keys (46286 total, the same count as pilot2-A-33's accepted 46286 vs expected 46284)."
+          },
+          {
+            "file": "pilot2-A-63-s1.md",
+            "outcome": "correct",
+            "category": "value_from_docs",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t2 read manual.md; t3 grep -r account_type (46,815 chars); t4 read merchant_data.json (6,857 chars); t5 write 'R, D, H, F, S, O'; t6 text with the same list.",
+            "vacant_observable_signal": "Same as formal-A-63. HUGE OUTPUT at t3 (46,815 chars). The written list is not visible in any rendered tool output; its source is unclear (probably the full manual read at t2), so there is false-positive risk for a 'no source' rule. payments-readme.md never opened. 6 turns. Write at t5. The file holds a list with spaces. No errors.",
+            "notes": "Expected 'R,D,H,F,S,O', got 'R, D, H, F, S, O'; accepted."
+          },
+          {
+            "file": "pilot2-A-9-s1.md",
+            "outcome": "correct",
+            "category": "redundant_rechecks",
+            "had_candidate_answer_turn": 5,
+            "candidate_matches_expected": true,
+            "last_turns_summary": "t5 uniq -c pipeline head -1 printed '437 64'; t6 full list (4,292 chars); t7 head -20; t8 head -1 | awk, printed 64; t9 write '64'; t10 long summary 'Final answer: 64'.",
+            "vacant_observable_signal": "Nothing to send back. FOUR VARIANTS of the same pipeline at t5–t8 (not byte-identical). 10 turns. Write at t9, 6 budget turns left. No overwrite, bare answer, no errors. Docs: manual t2, readme t3.",
+            "notes": "Trajectory identical to formal-A-9."
+          }
+        ],
+        "batch_summary": "False-positive baseline across the 19 correct arm-A runs (DABstep, gemma-4-12b with thinking off, 15-turn cap). All files are under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/analysis_runs/.\n\nShape of every run: all 19 wrote /app/answer.txt exactly once, at turn N-1, then gave a final text answer at turn N (stop). N ranges from 6 to 12, median 8. No correct run went past turn 12. The latest write was at turn 11 (formal-A-59), so at least 4 of the 15 budget turns were always left.\n\nHow each signal behaves as a rule on these correct runs:\n\n1. **File written only in the last 2 turns.** Measured against the run's own end, it fires on 19 of 19, so it cannot tell good runs from bad. Measured against the budget (turn 14 or 15), it fires on 0 of 19. The v3 budget reminder (2 or 1 turns left) would not have fired on any of them.\n\n2. **Answer written then overwritten.** 0 of 19.\n\n3. **File holds more than the bare answer.** 0 of 19. The two task-63 runs wrote 'R, D, H, F, S, O' with spaces, following the guideline example 'A, B, C'.\n\n4. **Repeated identical commands.**\n   - Byte-identical tool calls: 0 of 19. By comparison, 12 of 27 failing arm-A runs have them, by the same rendered-args check.\n   - Same executable line, differing only in bash comments: 1 run (pilot2-A-44, turns 5 and 6).\n   - Near-repeats or re-checks of the same computation: about 9 runs (formal/pilot2-A-9 t5–t8, formal-A-41 t4–t6, pilot2-A-41 t4–t5, formal-A-51 t4/t6, formal-A-54 t4–t6, formal-A-59 t9/t10, formal-A-37 t5/t7, pilot2-A-44). A fuzzy \"repeating itself\" rule would fire on about half the correct runs.\n\n5. **Many turns.** 10 or more turns in 5 of 19 (formal-A-9, pilot2-A-9, pilot2-A-37, pilot2-A-44 at 10; formal-A-59 at 12). None reached the cap. By comparison, 16 of 27 failing arm-A runs end at 15 turns with stop_reason toolUse.\n\n6. **Documentation never opened.** manual.md was read at turn 2 in 19 of 19. payments-readme.md was never opened in 6 of 19 (formal-A-26, formal-A-54, formal-A-63, pilot2-A-26, pilot2-A-44, pilot2-A-63). A \"specific doc not opened\" rule would fire on about a third of correct runs; a \"no doc opened\" rule would fire on none.\n\n7. **Huge tool outputs.** The 22,126-char manual read appears in 19 of 19. Outputs of 40K chars or more appear in 8 of 19:\n   - six raw reads of payments.csv at 51,221 chars (formal-A-26 t3, formal-A-51 t5, formal-A-54 t3, formal-A-59 t8, pilot2-A-26 t3, pilot2-A-44 t4);\n   - two `grep -r account_type` outputs at 46,815 chars (formal-A-63 t3, pilot2-A-63 t3).\n\n   Size alone does not separate these runs.\n\n8. **Tool errors.**\n   - Exit code 127 ('bc: command not found') in 3 of 19 (formal-A-37 t6, pilot2-A-37 t7, pilot2-A-44 t7). Each was followed next turn by a Python recomputation, and that output is the answer's source.\n   - formal-A-42 t5 printed an awk syntax error with no exit-code marker, then redid the check at t6.\n   - Silent wrong or empty intermediates: pilot2-A-37 t5 (wrong column), formal-A-59 t4, t6 (wrong filter, giving ES,IT,LU) and t7. All were superseded by the agent itself.\n\n   A naive \"any failed step\" rule fires on 3–4 of 19. A rule that counts a later successful recomputation as resolving the failure fires on 0.\n\nHow the current v2 send-back rules fare on these runs:\n- **Missing file:** 0 of 19.\n- **Failed step ignored:** 0 of 19, if a later recomputation counts as resolving it.\n- **Test claim mismatch:** does not apply (no tests).\n- **Value with no source:** the answer appears verbatim in an earlier tool output in 15 of 19. There is literal-match false-positive risk in 4:\n  - formal-A-42 and pilot2-A-42: 'no' is derived from the text 'No duplicates'.\n  - formal-A-63 and pilot2-A-63: the composed list 'R, D, H, F, S, O' is not visible in any rendered output head. Its source is unclear, probably the full manual.md read.\n- **Named file never opened:** the requests name only the /app/data directory (\"reference any documentation\") and /app/answer.txt. Whether this fires depends on how Vacant resolves \"named\"; unclear from the transcripts.\n\nOther observations:\n- **Lenient scorer.** 5 of 19 pass with values that are not string-equal to the expected answer: formal-A-57 (55194 vs 55192), pilot2-A-33 (46286 vs 46284), formal-A-37 and pilot2-A-37 (2.724331 vs 2.72), pilot2-A-44 (61.854556 vs 61.86). The two list answers also differ from expected only by spaces.\n- **One quiet self-correction.** formal-A-59's wrong first candidate at t6 was fixed by the model's own reasoning at t7–t9, with no outside signal.\n- **Confound.** The 19 successes cover 13 task ids, mostly single-table counting questions. Many failing runs read fees.json, i.e. the harder fee questions. So differences in signal rates between passing and failing runs are partly task difficulty, not only agent behaviour."
+      },
+      {
+        "runs": [
+          {
+            "file": "formal-C1-1-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check once, after turn 14 (final text '138236'): allow. Nothing sent to the model.",
+            "reaction": "No message to react to. The model wrote 138236 on its own at turn 13 and finished at turn 14.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The file was written before Vacant acted. On the same task, the A run never wrote the file in 15 turns (reward 0), and C2-1 only wrote it after the reminder. So C1-1 writing it here is run-to-run variance, not Vacant."
+          },
+          {
+            "file": "formal-C1-25-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a. Wrote 2429 at turn 5 and gave the final text at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Every step had grounds and the answer was correct. The allow was right."
+          },
+          {
+            "file": "formal-C1-26-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a. The turn-4 script printed Crossfit_Hanna, the file was written at turn 5, and the final text came at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C1-33-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 7: allow. No message.",
+            "reaction": "n/a. The turn-6 command `cut -f14 | sort | uniq | wc -l` gave 46286, and the model wrote it at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "46286 counts the header and the empty value. Expected was 46284, but the scorer accepted it. Vacant does not judge answers."
+          },
+          {
+            "file": "formal-C1-37-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 10: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Turn 7 failed (`bc`: command not found, exit 127). Turn 8 redid the step with python and got 2.724331. Vacant correctly did not report this as an ignored failure, so there was no false positive."
+          },
+          {
+            "file": "formal-C1-41-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 8: allow. No message.",
+            "reaction": "n/a. Wrote ip_address at turn 7.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C1-42-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a. Wrote 'no' at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C1-44-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 10: allow. No message.",
+            "reaction": "n/a. Wrote 61.855069 at turn 9. That value comes from turn 7's python output.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The final text at turn 10 says 'Repeat Customers: 26,035', which is in no tool output. Turn 5's shell printed 23686, and turn 7's python printed only the percentage. Also 26035/42266 is 61.60%, not the stated 61.855069. The answer file itself had a source, so the allow did not affect the reward. The transcript does not show whether the delivery note listed the unsourced figure (unclear)."
+          },
+          {
+            "file": "formal-C1-51-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 8: allow. No message.",
+            "reaction": "n/a. Wrote 41679 (from grep at turns 4 and 6) at turn 7.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C1-52-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a. Wrote LU at turn 5, based on the turn-4 awk that summed by column $10 (ip_country).",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The answer is wrong (expected NL, got LU). But every step had grounds: the value came from turn 4's output. The mistake was the choice of country column, which is outside what Vacant checks by design. None of the five pushback kinds applied."
+          },
+          {
+            "file": "formal-C1-54-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 8: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C1-56-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a. Wrote 22541 (from turn 4: `grep \"iOS\" | wc -l`) at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong answer (expected 22520). The grep matched 'iOS' anywhere in the line, not only in device_type. The value has a source, so this is a method error Vacant does not judge. The allow was consistent with the design."
+          },
+          {
+            "file": "formal-C1-57-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "55194 includes the header and the empty value. Expected was 55192, but the scorer accepted it."
+          },
+          {
+            "file": "formal-C1-62-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 9 → continue (vacant-check): 'The request asks for /app/answer.txt, but it does not exist. Finish the task and write it.' Second stop check after turn 11: allow.",
+            "reaction": "At turn 10, right after the message, the model wrote 'Not Applicable' to /app/answer.txt. Turn 11 repeated the final text.",
+            "effect": "rescued",
+            "pushback_was_valid": true,
+            "notes": "The pushback was valid: turns 1–9 had no write, and turn 9 ended with 'Not Applicable' only in the chat text. A clean rescue. The A-62 run matches this one through turn 9, with the same final text, and ended with the file missing (reward 0). The turn-8 grep no-match (exit 1) was correctly not flagged. The message names no actor and uses no KS-1 wording."
+          },
+          {
+            "file": "formal-C1-63-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a. Wrote 'R, D, H, F, S, O' at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right. The scorer accepted the version with spaces."
+          },
+          {
+            "file": "formal-C1-9-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 8: allow. No message.",
+            "reaction": "n/a. Wrote 64 at turn 7.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C2-1-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "One budget reminder, attached in turn 13's turn_end ('2 of 15' left), so turn 14 was the first turn to see it. There was no stop check: stop_reached was false, and an ended delivery note was written. No 1-left reminder was sent because the file existed by then.",
+            "reaction": "Turn 13, before the reminder, was another count check (`ls -A ... | xargs wc -l`). Turn 14, the first turn after the reminder, wrote 138236, a value computed back at turn 8 with awk NR-1. Turn 15 gave the final text.",
+            "effect": "rescued",
+            "pushback_was_valid": null,
+            "notes": "The criteria are met: no file existed before the reminder, the write came on the first turn after it, and the reward is 1. Caveat on the counterfactual: A-1 kept re-checking the count and never wrote (aborted at turn 16, reward 0), but C1-1, which had no reminder, wrote on its own at turn 13. The model had the correct value 5 turns before writing."
+          },
+          {
+            "file": "formal-C2-1305-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "Two budget reminders: one attached at the end of turn 13 ('2 of 15' left, seen by turn 14) and one at the end of turn 14 ('1 of 15' left, seen by turn 15).",
+            "reaction": "Ignored both. Turns 14 and 15 ran the identical command `grep -n \"GlobalCard\" fees.json | grep \"5812\" || true` (no output). Turn 16 was aborted, and the file was never written.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The model never computed any candidate answer. jq was missing (turn 10), and the single-line greps on multi-line JSON found nothing. The reminders did not break the repeat loop and did not cost a candidate either. A-1305 also had no file (reward 0)."
+          },
+          {
+            "file": "formal-C2-1464-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "One budget reminder, attached at the end of turn 13 ('2 of 15' left, seen by turn 14).",
+            "reaction": "Turn 14 wrote 'Not Applicable' right away. Turn 15 re-ran the same grep ('No matches found'), and turn 16 was aborted.",
+            "effect": "wrote_wrong",
+            "pushback_was_valid": null,
+            "notes": "The expected answer was a long list of fee IDs. 'Not Applicable' came from single-line grep regexes over multi-line JSON arrays (turns 5–13), which cannot match, plus jq missing at turn 8. No correct candidate ever existed, so this is not harm. A-1464 had no file (reward 0), so the reward is unchanged."
+          },
+          {
+            "file": "formal-C2-19-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "One budget reminder, attached at the end of turn 13 ('2 of 15' left, seen by turn 14).",
+            "reaction": "Turn 14 wrote 8.024467 right away, the value the model had recomputed at turns 8–13. Turn 15 gave the final text.",
+            "effect": "wrote_wrong",
+            "pushback_was_valid": null,
+            "notes": "Expected 9.676954. The model computed an unweighted count ratio per card_scheme, a method error. The outcome is unchanged: A-19 wrote the identical 8.024467 without any reminder (reward 0). The reminder only moved when a wrong answer that was already held got written. Not harm."
+          },
+          {
+            "file": "formal-C2-23-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Two budget reminders: one at the end of turn 13 ('2 of 15' left, seen by turn 14) and one at the end of turn 14 ('1 of 15' left, seen by turn 15).",
+            "reaction": "After the first reminder, turn 14 re-ran the same awk (result 0) instead of writing. After the second, turn 15, the last turn allowed, wrote '0'. Turn 16 was aborted.",
+            "effect": "rescued",
+            "pushback_was_valid": null,
+            "notes": "The criteria are met: no file before the reminders, and the correct '0' (first computed at turns 10 and 12) was written only on the capped last turn, right after the 1-left reminder. A-23 never wrote a file (aborted at turn 16, reward 0). The first reminder alone was not enough; the write followed the second."
+          },
+          {
+            "file": "formal-C2-25-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message. No budget reminder, since the run was far from the cap.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C2-26-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 6: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          },
+          {
+            "file": "formal-C2-2697-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "Two budget reminders: one at the end of turn 13 ('2 of 15' left, seen by turn 14) and one at the end of turn 14 ('1 of 15' left, seen by turn 15).",
+            "reaction": "Ignored both. Turns 12–15 ran the identical command `grep Belles_cookbook_store | grep True | cut -f18 | sort | uniq -c` four times. Turn 16 was aborted, and no file was written.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The question needs a fee-by-ACI computation, which the model never started, so there was no candidate to write. The reminders did not break the repeat loop."
+          },
+          {
+            "file": "formal-C2-33-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 8: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Turn 1 was a request timeout (infra), unrelated to Vacant. Answer 46286 vs expected 46284 was accepted, the same as C1-33."
+          },
+          {
+            "file": "formal-C2-37-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 11: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Two failed steps were followed by working ones: the turn-5 grep no-match (exit 1) was followed by the turn-7 awk, and the turn-8 `bc` exit 127 by turn-9 python. Vacant correctly did not flag them, so there was no false positive."
+          },
+          {
+            "file": "formal-C2-41-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop check after turn 8: allow. No message.",
+            "reaction": "n/a.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The allow was right."
+          }
+        ],
+        "batch_summary": "27 runs read. Overall: 3 rescued (C1-62, C2-1, C2-23), 0 harmed, 2 wrote_wrong with the reward unchanged (C2-1464, C2-19), and 22 no_effect (20 checks that sent nothing, plus 2 runs where both reminders were ignored).\n\nHow to read the turn numbers: in these transcripts a '### (vacant-budget message after turn N)' block is printed BEFORE '## Turn N'. That is only how the log is ordered. `ops/eval/local/render_run.py` (lines 60–63) shows the reminder is attached inside turn N's turn_end handler, so the first model turn that can see it is N+1.\n\nC1 (16 runs): Vacant's Stop check ran in all 16. In 15 it allowed and sent nothing (no_effect). This includes the two wrong answers: C1-52 summed amounts by the wrong country column, and C1-56 grepped 'iOS' across whole lines. In both, every step had grounds, so the errors are in the decision, which Vacant does not judge by design. There was one pushback, in C1-62, after turn 9: 'The request asks for /app/answer.txt, but it does not exist.' It was valid. The model wrote 'Not Applicable' at turn 10, and the reward is 1. This is a clean rescue: A-62 matches it through turn 9 and ended with no file (reward 0).\n\nC1: no false positives. Failures that a later step redid were correctly not flagged: `bc` exit 127 then python (C1-37), and grep no-match exit 1 (C1-62 turn 8).\n\nOne possible miss in C1-44: the final text claims 'Repeat Customers: 26,035', a number found in no tool output and inconsistent with the stated percentage. The answer file itself had a source, so the reward was not affected. The transcripts do not show whether the delivery note listed it (unclear).\n\nC2 (11 runs): 5 runs finished early; the Stop check ran and allowed with no message (C2-25, 26, 33, 37, 41; no_effect). 6 runs hit the budget window and got reminders; none of them reached the Stop check (stop_reached false, ended note written). Results for those 6:\n- C2-1: wrote 138236 in the first turn after the reminder. Rescued, with a caveat: C1-1 wrote on its own at turn 13, while A-1 never wrote.\n- C2-23: ignored the first reminder (re-ran the same awk), then wrote the correct '0' on the capped turn 15 after the 1-left reminder. Rescued; A-23 had no file.\n- C2-19: the reminder made it write 8.024467 immediately, a wrong value it had held since turn 8. A-19 wrote the same wrong value unprompted, so the outcome is unchanged (wrote_wrong).\n- C2-1464: the reminder made it write 'Not Applicable' immediately. This came from greps that cannot match multi-line JSON, and no correct candidate ever existed. A-1464 had no file (wrote_wrong).\n- C2-1305 and C2-2697: both reminders were ignored while the model repeated the same command 2–4 times. No candidate answer was ever computed (no_effect).\n\nPattern: the reminder turns an answer the model already computed into a written file (C2-1, C2-23). When the model's candidate is wrong, it gets that candidate out sooner (C2-19, C2-1464). When the model has no answer and is looping, the reminder does nothing (C2-1305, C2-2697). In no run did a correct answer file exist before a message and a wrong one end up final. In no run did a reminder take up the last turns when a correct candidate was ready but not yet written. All Vacant messages were checked: none names an actor or uses KS-1 wording."
+      },
+      {
+        "runs": [
+          {
+            "file": "formal-C2-42-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran once after turn 6 and allowed it (review_actions=[allow]); no budget reminder.",
+            "reaction": "n/a. The model had already written 'no' at turn 5 after a sort -u duplicate check at turn 4, then stopped at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct. Vacant stayed silent."
+          },
+          {
+            "file": "formal-C2-43-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 10 and allowed it.",
+            "reaction": "n/a. The model wrote 247.300 at turn 9 and stopped at turn 10.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected 90.70). This was a decision error: the model computed the per-email mean of transaction means at turn 7 (90.6956, which matches the expected answer) but chose the sum per email (247.3, from turns 5, 6 and 8). Every step had a source, so it falls outside Vacant's five classes."
+          },
+          {
+            "file": "formal-C2-44-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "one budget reminder, labelled 'after turn 13' (nudge_turns=[13], '2 of 15' turns left) and rendered just above Turn 13. No Stop review ran (stop_reached=false, ended_notes=1).",
+            "reaction": "Turn 13 ran wc -l. Turn 14 wrote 61.855069, the output of calc_robust.py from turn 11. Turn 15 was confused text (it cites counts 6725/4183 that appear in no tool output) plus a failed edit call. Turn 16 was aborted.",
+            "effect": "rescued",
+            "pushback_was_valid": null,
+            "notes": "The reminder's claim was true: /app/answer.txt did not exist before it. The first write came after the reminder and scored (expected 61.86). The counterfactual is not certain, but turn 15 shows the model still re-verifying rather than finishing, and formal-A-44 ended with no file. Placement caveat: the label and the extension code (TURNS counts turn_end events and the reminder rides the next request) suggest it rode the request for turn 14, the turn that did the write. The rendering puts it before turn 13, so whether it arrived at turn 13 or turn 14 is unclear."
+          },
+          {
+            "file": "formal-C2-49-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "two budget reminders, labelled 'after turn 13' ('2 of 15') and 'after turn 14' ('1 of 15'), rendered above Turns 13 and 14. No Stop review.",
+            "reaction": "Ignored both. From turn 4 through turn 15 the model repeated the same grep \"has_fraudulent_dispute=True\" | cut ... with no output each time. It never wrote a file, and turn 16 was aborted.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "A degenerate loop from turn 4 onward. The reminders' claim (file missing) was true but changed nothing. formal-A-49 also ended with no file."
+          },
+          {
+            "file": "formal-C2-51-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 11 and allowed it.",
+            "reaction": "n/a. The model wrote 41679 at turn 10.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "formal-C2-52-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 6 and allowed it.",
+            "reaction": "n/a. The model wrote LU at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected NL). The model summed eur_amount by ip_country ($10) with awk at turn 4; which country column to use is a decision error outside Vacant's classes."
+          },
+          {
+            "file": "formal-C2-54-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 8 and allowed it.",
+            "reaction": "n/a. The model wrote Crossfit_Hanna at turn 7.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "formal-C2-56-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 6 and allowed it.",
+            "reaction": "n/a. The model wrote 22541 at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected 22520). The turn 4 command grep \"iOS\" | wc -l also counts substring matches in other columns. The step has a source; the method is wrong, which is outside the five classes."
+          },
+          {
+            "file": "formal-C2-57-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 8 and allowed it.",
+            "reaction": "n/a. The model wrote 55194 at turn 7.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Scored correct (expected 55192; the scorer accepted 55194)."
+          },
+          {
+            "file": "formal-C2-59-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 11 and allowed it.",
+            "reaction": "n/a. The model wrote IT,FR,NL at turn 10.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected IT,ES,FR). The model treated hour_of_day ($5) as the month at turns 6 and 9, a decision error. The sibling run pilot2-C1-59 found the same mistake itself and switched to day_of_year."
+          },
+          {
+            "file": "formal-C2-62-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop pushback after turn 10: '/app/answer.txt ... does not exist. Finish the task and write it.' (review 1=continue). The second Stop check after turn 12 allowed it. No budget reminder.",
+            "reaction": "Turn 11 wrote 'Not Applicable', the same answer the model had given in its turn-10 text. Turn 12 stopped.",
+            "effect": "rescued",
+            "pushback_was_valid": true,
+            "notes": "At turn 10 the model stated 'Not Applicable' in text only, with no file. The pushback was accurate and led directly to the correct file. formal-A-62 also stopped without a file."
+          },
+          {
+            "file": "formal-C2-63-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 7 and allowed it.",
+            "reaction": "n/a. The model wrote 'R, D, H, F, S, O' at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "formal-C2-69-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "one budget reminder, labelled 'after turn 13' ('2 of 15') and rendered above Turn 13. No Stop review (stop_reached=false, ended_notes=1).",
+            "reaction": "Turn 13 re-read fees.json. Turn 14 wrote '>5m'. Turn 15 gave the final text justifying >5m.",
+            "effect": "rescued",
+            "pushback_was_valid": null,
+            "notes": "Before the reminder there was no file, and the model was cycling: cat merchant_data.json three times (turns 9-11), then ls at turn 12. After the reminder it wrote the file, which scored (expected '5m'; '>5m' accepted). The counterfactual is uncertain because the turn-15 text shows the model had settled on >5m; formal-A-69 ended with no file. The same placement caveat as C2-44 applies: whether the reminder arrived at turn 13 or 14 is unclear."
+          },
+          {
+            "file": "formal-C2-70-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "1) Stop pushback after turn 7, which ended with stopReason=error ('failed to decode', an empty bash call), not with a claim of being done: 'file does not exist, finish and write it' (review_actions=[continue]). 2) One budget reminder labelled 'after turn 13' ('2 of 15'), rendered above Turn 13.",
+            "reaction": "After the pushback, turns 8 and 9 were request timeouts. Turns 10-13 grepped Martinis rows by email, IP and card columns, with 'True' filtering at turn 10. Turn 14 wrote 'yes'. The run ended there (turns=14) with no further Stop review.",
+            "effect": "wrote_wrong",
+            "pushback_was_valid": true,
+            "notes": "The pushback's claim (file missing) was true, but it fired on an error stop. It kept the session alive, and the model later wrote 'yes' (expected 'Not Applicable'). No step in the record computes a fraud rate or compares it to a threshold, so 'yes' has no visible basis. The session ended right after the write, so the Stop check never saw it. Without Vacant the run most likely ends at turn 7 with no file (formal-A-70 also had no file), so the reward is 0 either way: this is not harm."
+          },
+          {
+            "file": "formal-C2-71-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "two budget reminders, labelled 'after turn 13' ('2 of 15') and 'after turn 14' ('1 of 15'), rendered above Turns 13 and 14. No Stop review.",
+            "reaction": "Ignored both. Turns 11-14 re-ran the same pandas per-merchant fraud-rate script (identical output: rates 0.0768-0.0800), and turn 15 printed nunique=5. It never wrote a file, and turn 16 was aborted.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "The model had the per-merchant fraud rates by turn 11 but never took the threshold decision. Whether yes or no would have been correct is unclear, because the verifier shows only 'answer.txt not found'."
+          },
+          {
+            "file": "formal-C2-9-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "one budget reminder, labelled 'after turn 13' ('2 of 15') and rendered above Turn 13. No Stop review (stop_reached=false, ended_notes=1).",
+            "reaction": "Turn 13 re-ran the same cut|sort|uniq pipeline (64). Turn 14 wrote 64. Turn 15 gave the final text.",
+            "effect": "rescued",
+            "pushback_was_valid": null,
+            "notes": "The model had the answer 64 from turn 5 but re-ran variants of the same pipeline through turn 13 without writing. The first write came after the reminder and was correct. The counterfactual is uncertain: formal-A-9, a different sample, wrote at turn 9. The placement caveat applies (the reminder arrived at turn 13 or 14, unclear)."
+          },
+          {
+            "file": "pilot2-C1-19-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 12 and allowed it.",
+            "reaction": "n/a. The model wrote 6.531712 at turn 11.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected 9.676954). The awk scripts at turns 7-10 used $19 (is_refused_by_adyen) as the fraud flag instead of $18 (has_fraudulent_dispute). This is a column-choice error that the five checks do not cover."
+          },
+          {
+            "file": "pilot2-C1-26-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 6 and allowed it.",
+            "reaction": "n/a. The model wrote Crossfit_Hanna at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "pilot2-C1-33-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 7 and allowed it.",
+            "reaction": "n/a. The model wrote 46286 at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Scored correct (expected 46284)."
+          },
+          {
+            "file": "pilot2-C1-41-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 7 and allowed it.",
+            "reaction": "n/a. The model wrote ip_address at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "pilot2-C1-42-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 7 and allowed it.",
+            "reaction": "n/a. The model wrote 'no' at turn 6.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "pilot2-C1-44-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 10 and allowed it.",
+            "reaction": "n/a. The model wrote 0.618551 at turn 9.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected 61.86). The value is right but written as a fraction instead of the requested percentage, a format/decision error outside Vacant's five classes. Turn 5's failed grep (exit 2, relative path) was followed by a successful redo, so it was not an ignored failure."
+          },
+          {
+            "file": "pilot2-C1-51-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop pushback after turn 11: '/app/answer.txt ... does not exist. Finish the task and write it.' (continue). The second Stop check after turn 13 allowed it.",
+            "reaction": "Turn 12 wrote 41679, the value from its turn-11 text and from turns 4-10. Turn 13 stopped.",
+            "effect": "rescued",
+            "pushback_was_valid": true,
+            "notes": "At turn 11 the model gave '41679' in text and never wrote the file. The pushback was accurate and produced the correct file. pilot2-A-51 also stopped without a file (turn 7)."
+          },
+          {
+            "file": "pilot2-C1-56-s1.md",
+            "final_reward": 0,
+            "vacant_actions": "none sent. The Stop check ran after turn 6 and allowed it.",
+            "reaction": "n/a. The model wrote 22541 at turn 5.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Wrong (expected 22520): the same grep-substring method error as formal-C2-56."
+          },
+          {
+            "file": "pilot2-C1-59-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "Stop pushback after turn 13: '/app/answer.txt ... does not exist. Finish the task and write it.' (review_actions=[continue]; no review is recorded for the turn-15 stop).",
+            "reaction": "Turn 14 wrote IT,ES,FR, the answer in its turn-13 text computed at turns 10 and 12. Turn 15 stopped.",
+            "effect": "rescued",
+            "pushback_was_valid": true,
+            "notes": "The model had corrected its month logic itself (hour_of_day to day_of_year at turns 9-10) and stated the right answer in text at turn 13 without writing it. The pushback was accurate and produced the correct file on the second-to-last turn."
+          },
+          {
+            "file": "pilot2-C1-63-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 4 and allowed it.",
+            "reaction": "n/a. The model wrote 'R, D, H, F, S, O' at turn 3.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          },
+          {
+            "file": "pilot2-C1-9-s1.md",
+            "final_reward": 1,
+            "vacant_actions": "none sent. The Stop check ran after turn 10 and allowed it.",
+            "reaction": "n/a. The model wrote 64 at turn 9.",
+            "effect": "no_effect",
+            "pushback_was_valid": null,
+            "notes": "Correct."
+          }
+        ],
+        "batch_summary": "I read all 27 transcripts in full. No run was harmed.\n\n**Runs where Vacant only allowed at Stop (18).** In 18 runs Vacant sent nothing: the Stop check ran and allowed the delivery.\n- 9 are formal-C2: 42, 43, 51, 52, 54, 56, 57, 59, 63.\n- 9 are pilot2-C1: 19, 26, 33, 41, 42, 44, 56, 63, 9.\n- 7 of these 18 were wrong: C2-43, C2-52, C2-56, C2-59, C1-19, C1-44, C1-56.\n- Every one of those 7 errors is a method or decision error, and each step had a source in the record, so none falls into Vacant's five classes:\n  - picked the sum instead of the mean even though the mean (90.70) was computed at turn 7 (C2-43)\n  - hour_of_day used as the month (C2-59)\n  - wrong fraud column (C1-19)\n  - grep substring overcount (C2-56, C1-56)\n  - fraction written instead of a percentage (C1-44)\n  - wrong column or method (C2-52)\n\n**Stop pushbacks (4): C2-62, C2-70, C1-51, C1-59.** All four were 'answer.txt does not exist', and all four were factually valid per the transcript.\n- 3 rescued (C2-62, C1-51, C1-59). In each, the model had stated the correct answer in its final text but never wrote the file; after the pushback it wrote exactly that answer and scored 1. The matching A-arm samples ended without a file for tasks 62 (formal) and 51 (pilot2).\n- 1 wrote_wrong (C2-70). The Stop check fired after turn 7, which ended with stopReason=error (decode failure), not a claim of being done. The session continued (with two timeouts) and the model eventually wrote 'yes' at turn 14 with no computed basis in the record (expected 'Not Applicable'). The session then ended with no further check. The reward is 0 either way.\n\n**Budget reminders (v3): 6 runs, 8 reminders.**\n- 3 rescued (C2-44, C2-69, C2-9). In each, the file was absent before the reminder, the model wrote it on rendered turn 14, and the run scored 1. The counterfactual is uncertain, since the model already had the answer. Before the reminder each was looping or re-verifying: in C2-9 the same pipeline had run since turn 5; C2-69 repeated cat merchant_data.json; C2-44 kept re-checking.\n- 2 no_effect (C2-49, C2-71). Both reminders were ignored while the model repeated an identical command until the cap.\n- 1 wrote_wrong, together with its Stop pushback (C2-70).\n\n**Timing caveat.** The reminders are labelled 'after turn 13/14' but rendered above Turn 13/14. The extension code counts turn_end events and attaches the reminder to the next request, so it most likely rode the request for turn 14/15. If so, every model that complied wrote the file on the very turn that carried the reminder. From the transcript alone, whether it arrived at turn 13 or 14 is unclear.\n\nNet for this batch: 6 rescued, 0 harmed, 2 wrote_wrong (C2-70 counted once, not per message), 19 no_effect."
+      }
+    ],
+    "proposal": {
+      "failure_profile": "Scope: 27 failed A runs (16 formal, 11 pilot2) and 19 correct A runs. Transcripts are under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/analysis_runs/.\n\nSpot checks. I checked 13 transcripts against the classifications: formal-A-1, A-43, A-44, A-69, C1-62, C2-1, C2-9, C2-23, C2-44, C2-49, C2-69, C2-70 and pilot2-C1-59. I also checked the column commands of the task 19/33/37/43/44/51/52/54/56/57/9 runs. All matched, with three corrections:\n- **When the reminder arrives.** A reminder labelled \"after turn N\" is computed in turn N's turn_end, with left = 15 − N (vacant_network/trace/budget.py). It rides turn N+1's request (ops/eval/local/render_run.py lines 60–63). So the first turn that sees it is 14 (and 15), not 13.\n- **formal-C2-69.** '>5m' was never stated before the reminder. It was picked at T14 from strings in the T4 grep output. It has a source, but it is a forced choice, not a saved answer.\n- **Repeats.** My own parse (loopscan/scan.py in the scratchpad) finds byte-identical (command, output) repeats in 14 of 27 A failures, not 12.\n\nThe 27 A failures by outcome:\n1. **Cut off at the 15-turn cap with no /app/answer.txt: 16.** T15 was toolUse and T16 was aborted. Files: formal 1, 1305, 1464, 23, 2697, 44, 49, 69, 71; pilot2 1305, 1464, 19, 2697, 49, 70, 71.\n   - Correct value already printed but never written: 2.\n     - formal-A-1 printed 138236 at T8, then T11 and T14 re-ran the identical command.\n     - formal-A-44 printed 61.855069 at T14, and T15 recounted.\n   - A wrong value printed: 1 (pilot2-A-19, 8.02447 at T14; expected 9.676954).\n   - No value at all: 13. These are loops with identical or empty outputs:\n     - 1464 ×2: a single-line regex against multi-line JSON.\n     - 49 ×2: lowercase 'true' against 'True'.\n     - 2697 ×2: fees.json never opened.\n     - 1305 ×2.\n     - 71 ×2.\n     - pilot2-70.\n     - formal-23: summed $10 (ip_country); the same script on $9 would print the expected 0.\n     - formal-69: stalled, re-listing files.\n2. **Said done with the answer only in the final text, no file: 3.** formal-A-62 T9 'Not Applicable', pilot2-A-51 T7 '41679', pilot2-A-62 T12 'Not Applicable'. All three answers were correct.\n3. **Model decode error ended the run: 1.** formal-A-70 at T11, with 4 turns left and no file.\n4. **Wrong answer whose value has a source; the run stopped normally: 7.** None of the five checks can fire on these.\n   - formal-A-19: count ratio where the manual defines fraud by volume.\n   - formal-A-33: cut -f13 (ip_address) for 'email addresses'.\n   - formal-A-43: delivered 247.300 although the mean 90.6956 was printed at T7.\n   - formal-A-52: LU instead of NL; cause unclear.\n   - formal-A-56 and pilot2-A-56: grep \"iOS\" over whole lines (22541 vs 22520).\n   - pilot2-A-59: hour_of_day used as 'quarter'.\n\nWhat the current C2 design can reach: the 3 said-done runs (Stop missing-file check) and the 2 cut-offs holding a correct value (v3 reminder). That is 5 of 27. The other 20 split into 13 loops with no value and 7 wrong answers that have a source.\n\nSignals, with no expected answer needed:\n| Signal | A failures | A successes |\n|---|---|---|\n| Byte-identical step repeated | 14/27 | 0/19 |\n| Third identical occurrence, or 3 empty outputs in a row | 8/27 | 0/19 |\n| Ended at 15 turns with toolUse | 16/27 | 0/19 |\n\nTwo-occurrence repeats also show up in correct C runs as verification re-runs (formal-C1-1, C2-51, C2-57, C2-63). So any loop threshold has to be 3 occurrences.\n\nWhat the 19 successes look like (13 task ids, mostly single-table counts):\n- 6 to 12 turns, median 8. Each wrote the answer file once, at turn N−1, with at least 4 budget turns left, so the v3 reminder would fire on none.\n- No overwrites and no extra content in the file.\n- 3 had a 'bc: command not found' error (exit 127) that the next step recovered from.\n- 5 passed only because the scorer is lenient (e.g. 55194 vs 55192, 2.724331 vs 2.72).\n\nDescriptive only, one sample, not the preregistered analysis: on the 27 formal tasks shown, A got 11 correct and C2 got 16.\n- C2 gained 1, 23, 44 and 69 through the reminder and 62 through the Stop check.\n- C2 also gained 33 and lost 59 with no Vacant message in either run, so those two are variance.",
+      "reaction_profile": "54 C runs: 16 formal C1, 27 formal C2, 11 pilot2 C1. The prefix \"formal-\" is dropped below where the arm makes it clear.\n\n| Effect | Runs | Which |\n|---|---|---|\n| Rescued | 9 | 4 by the Stop check, 5 by the budget reminder |\n| Harmed | 0 | |\n| Wrote a wrong answer | 3 | C2-19, C2-1464, C2-70; reward 0 either way |\n| No effect | 42 | 38 allow-only runs plus 4 where the reminders were ignored |\n\n**Stop pushbacks: 5, all 'the request asks for /app/answer.txt, but it does not exist', all factually valid.**\n- 4 rescued: C1-62 (T9, then the write at T10), C2-62, pilot2-C1-51 and pilot2-C1-59. In each, the correct answer was already in the final text, and the model wrote exactly that answer on the next turn.\n- 1 fired after a model decode error, not after a claim of being done (C2-70, after T7). It kept the session alive, which A-70 did not survive, and the model later wrote 'yes' with no computed basis (expected 'Not Applicable').\n- No other kind of finding fired in any of the 54 runs. There were no false positives: no correct delivery was sent back, a failed step that a later step redid was never flagged (bc exit 127 in C1-37 and C2-37), and a grep exit 1 was never flagged.\n\n**Budget reminders: 17 reminders in 12 C2 runs.**\n- Rescued, 5:\n  - C2-1: the value was in hand since T8.\n  - C2-9: 64 was in hand since T5, and the pipeline was re-run 8 times.\n  - C2-44: 61.855069 was in hand since T11.\n  - C2-23: the first reminder was ignored and '0' was written on T15 after the 1-left reminder.\n  - C2-69: '>5m' was chosen under the reminder. It has a source but was never stated as a candidate before.\n- Wrote a wrong answer, 3:\n  - C2-19 wrote the same wrong 8.024467 that A-19 wrote without any reminder.\n  - C2-1464 wrote 'Not Applicable', based on greps that cannot match.\n  - C2-70 wrote 'yes'.\n- Ignored both reminders while repeating one command, 4: C2-1305, C2-2697, C2-49 (the identical empty grep 12 times) and C2-71.\n\n**Timing.** Every compliant write came on the first turn carrying a reminder (T14), except C2-23 (T15). No run had a correct value in hand and failed to write it after a reminder. No reminder fired while the file existed.\n\n**Probe (ops/eval/evidence_20260926_local/probe/).** The reminder was re-sent 3 times to each of 16 cut-off pilot runs, giving 28 writes in 48 draws.\n- The 10 accepted writes were all runs where the value was already in hand (C1-1305, C1-62, C1-51, A-59).\n- The 18 rejected writes were guesses in runs with no value: 'Not Applicable', 'yes', 'no', 'NexPay:4532'.\n- The 1464 and 49 runs wrote nothing in 12 of 12 draws.\n\nSo the reminder turns a value in hand into a file and a missing value into a guess, and it does not break loops.\n\n**Allow-only runs (38).** 9 of them were wrong: C1-52, C1-56, C2-43, C2-52, C2-56, C2-59, pilot2-C1-19, pilot2-C1-44 and pilot2-C1-56. All had a source for the value and fall outside the five kinds by design.\n\n**Open anomaly.** C2-70 ended after rendered turn 14, with no aborted turn 16, although Vacant's count said 2 of 15 turns were left after T13. The cause is unclear: possibly the two request timeouts, a wall-clock limit, or a difference in how Harbor counts turns.",
+      "candidates": [
+        {
+          "name": "1. 'Named data column never selected' (extends the existing `unread` finding from files to CSV columns)",
+          "mechanism": "When: at Stop, inside the existing zerostop check. It sends nothing mid-run and needs no stated budget.\n\nWhat Vacant observes:\n1. For each CSV or TSV that is a named material or a member of a named data directory (here /app/data/payments.csv) and that some step processed, read the header row from the recorded workspace. No values from the file are ever shown to the model.\n2. From the person's request, take phrases that map to exactly one column: whole words, lowercased, plural stripped. Examples: 'email addresses' → email_address, 'devices' → device_type, 'IP addresses' → ip_address. A phrase that matches two or more columns is skipped ('country', 'card', 'year').\n3. A column counts as selected if any of these holds:\n   - its name appears in any command or script text in the window;\n   - a `cut -fN` or `awk $N` with a ',' delimiter on that file resolves to its index through the header;\n   - any step processes the file in a way the parser cannot resolve (pandas or csv without explicit columns, a script file). This case fails open and counts as selected.\n\nWhen it fires: a named column was never selected, and the delivered value came from a parsed shell pipeline over that file.\n\nWhat it sends back: one line, KS-1 linted, no actor, no values. For example: \"- The request refers to 'iOS devices'; /app/data/payments.csv has a column device_type, and no recorded step selected that column. Redo the part that depends on it.\"\n\nLimits: it counts inside the existing 2-rounds-per-request limit. With 1 turn left it is withheld, and only the missing-file line is sent (v3-3).",
+          "principle_fit": "- **Kind of check:** it asks the same question as `unread` (was the material the request refers to consulted?), one level finer. It never says the answer is wrong and never supplies a value or a method.\n- **Zero configuration:** it works from the person's own words plus the record. No contract is needed.\n- **Timing:** it runs at Stop, so it applies in normal interactive use too, not only when a budget is stated.\n- **KS-1:** the message has no actor and passes feedback_ks1_clean.\n- **Main principle risk:** the phrase-to-column mapping is an inference, whereas `unread` requires a file named on its own. It has to stay on the side of letting things pass ('寧可放過'): unique matches only, and fail open for anything it cannot parse.",
+          "reach_failures": "It fires on 3 of 27 A failures:\n- formal-A-33: the request says 'based on email addresses', and the only computation was `cut -d',' -f13` (ip_address).\n- formal-A-56 and pilot2-A-56: the request says 'iOS devices', and the only computation was `grep \"iOS\" payments.csv | wc -l`.\n\n2 to 3 could plausibly flip to correct:\n- For task 33, every sibling that selected f14 wrote 46286, and the scorer accepted it (pilot2-A-33, formal-C1-33, formal-C2-33, pilot2-C1-33).\n- For task 56, expected is 22520 and all five runs wrote the whole-line count 22541. That a column-restricted count gives 22520 is inferred, not shown in any transcript.\n\nIt would also fire on formal-C1-56, formal-C2-56 and pilot2-C1-56, with the same plausible flip. With 'fraud' matched to 'fraudulent' it would fire on pilot2-C1-19 ($19 instead of $18), but that run stays wrong because the expected answer needs volume.\n\nIt does not reach 52 ('country' is ambiguous), 43, 19, 59, or any loop or cut-off run.",
+          "false_positive_risk": "In this sample, 0 of 19 A successes, provided index mapping works:\n- formal-A-57 runs the exact command formal-A-33 ran, `cut -f13`, but its request says 'IP addresses', so ip_address counts as selected. This is the case that shows why index-to-header mapping is required.\n- formal-A-9 and pilot2-A-9: f7 = day_of_year for 'day of the year'.\n- formal-A-37 and pilot2-A-37: $8 = is_credit for 'credit'.\n- formal-A-54: $2 and $9.\n- pilot2-A-33 and pilot2-A-44: f14/$14 = email_address.\n- formal-A-25, formal-A-26 and formal-A-41 use pandas, which fails open.\n- formal-A-51 and formal-C2-51 ('NexPay cards'): 'card' matches 3 columns, so no fire. If it did fire, the column recount in formal-C2-51 at T9 ($3) gives the same 41679.\n\nThe unknown risk is general use: other wording and other files, where a wrong phrase-to-column link would send back a correct delivery. Measure that offline before any live run.\n\nIts reach is concentrated in 2 task ids, so the evidence is thin.",
+          "effort": "Medium: header parsing, resolving cut/awk field indices, the phrase map, fail-open rules, and tests. evidence.py is already a pure function that can be replayed offline, so the false-positive measurement costs no model calls.",
+          "needs_measurement": "1. Offline replay over every recorded chain: the 2026-09-25 paid batch (gemma-26b and qwen, 77 tasks), the local pilot and pilot2, and the formal local batch once it finishes. Report the number of fires and the fires on deliveries the scorer accepted. The target is about 0.\n2. A live flip rate on held-out tasks. All 72 easy DABstep tasks are already in the formal 79, and the held-out pool is about 365 hard tasks, mostly fees.json. The check may fire rarely there, so report the fire count first and do not claim anything from fewer than about 10 fires."
+        },
+        {
+          "name": "2. Repeat notice inside a stated turn budget",
+          "mechanism": "Where and when: in the same pi turn_end hook as v3, adding no extra model call. It acts only when all of these hold:\n- a turn budget is stated in the system prompt;\n- this is not a sub-agent;\n- the requested output is missing;\n- this turn ran a tool;\n- at least 3 turns are left. The last 2 turns stay with the v3 reminder, which can carry this line.\n\nWhat Vacant observes: it compares the step just recorded with earlier steps in the same request window. Commands are normalized with comments stripped, reusing evidence._norm_cmd, and outputs are compared by sha256. It fires when either:\n- this is the third occurrence of an identical (tool, command, output); or\n- this is the third step in a row with empty or no-match output, and all three commands share the same first pipeline stage.\n\nWhat it sends: one short factual block riding the next request, at most once per request, with no values and no advice. For example: \"The record shows a repeat: steps 7, 9 and 11 ran the same command and returned the same output (no output). Model turns used: 11 of 15. This note is only about the record; it does not say whether any answer is right.\"",
+          "principle_fit": "- **Budget:** it is gated on a stated budget like v3, so in normal interactive use the model's requests stay byte-identical.\n- **Kind of statement:** it states a fact about the record: a repeated step adds no new grounds. It judges nothing, picks nothing and names no actor, and it is KS-1 linted.\n- **Weak spot:** it is a new message type outside the five kinds, and it must not grow into advice such as 'try python' or 'check capitalization', which would be steering the method.",
+          "reach_failures": "Before the v3 window it would fire on 5 A failures:\n- formal-A-1464 at T7 (three empty greps in a row)\n- formal-A-49 at T11\n- pilot2-A-1464 at T7\n- pilot2-A-49 at T10\n- pilot2-A-19 at T11 (third identical step)\n\nInside the v3 window only: formal-A-1 (T14), formal-A-23 (T13) and formal-A-2697 (T14).\n\nPlausible flips: 0 to 1.\n- Only 49 (fix the case, then answer in the 'X. Y' format) and 1464 (parse the JSON) are reachable in the turns left.\n- 19 stays wrong.\n- 1305, 2697, 70 and 71 are far from an answer.\n\nEvidence against:\n- Four C2 loop runs ignored both v3 reminders: C2-49, C2-1305, C2-2697, C2-71.\n- In the probe, the 49 and 1464 runs wrote nothing in 12 of 12 reminder draws.",
+          "false_positive_risk": "- **A successes:** 0 of 19; none has a third identical step or 3 empty outputs in a row.\n- **Correct C runs:** it would fire on formal-C2-23 (third repeat at T9, just before it computed the correct 0 at T10) and formal-C2-69 (T11). Both were later rescued by the v3 reminder, so the notice could help there or derail them. Unclear.\n- **Threshold:** a threshold of 2 would fire on correct verification re-runs (formal-C1-1, C2-51, C2-57, C2-63), so it must stay at 3.\n- **Early stopping:** the v3 decision found gemma nearly always stops right after its first write, so any early message risks an early stop. This notice does not ask for a write, but the model may still take it as a cue to finish.",
+          "effort": "Small to medium: a new branch in turn_check and trace/budget.py, a JS condition, tests.",
+          "needs_measurement": "Measure on held-out hard DABstep tasks, where loops are common (fee tasks):\n- the loop-to-correct flip rate;\n- harm, meaning runs that would have delivered correctly and did not;\n- the invariants: requests ≤ 15, and the first request byte-identical across arms.\n\nFirst check the formal batch's reminder-ignored rate in looping runs. If loops stay sticky, drop this candidate."
+        },
+        {
+          "name": "3. 'Two near-identical computations disagree' (Stop check, no values quoted)",
+          "mechanism": "When: at Stop.\n\nWhat Vacant observes:\n1. Take the step whose output holds the delivered value (the existing source-tracing logic).\n2. Look for another step in the window whose command differs from that source step by a small edit (for example one token, `.sum()` vs `.mean()`) and whose output is a single number different from the delivered value.\n3. Check that no later step touches both.\n\nWhat it sends back when all hold: \"- Steps 7 and 8 ran nearly the same computation (they differ in one operation) and printed different results; the delivered value comes from step 8, and no recorded step compares the two.\"\n\nLimits: single numeric outputs only, one line per request.",
+          "principle_fit": "This is the weakest fit.\n- What it does claim is about grounds: the choice between two recorded computations has no recorded ground. It picks nothing.\n- But it points the agent at one specific alternative, which comes close to picking the answer.\n- 'No recorded reason' is also weak when the final text gives one. formal-A-43 explained its sum-per-email method.",
+          "reach_failures": "It fires on formal-A-43 only, and also on formal-C2-43. T7 printed 90.6956, which matches the expected 90.70; T5, T6 and T8 printed 247.3.\n\nPlausible flips: 0 to 0.5. The model chose 247.300 with an explicit rationale in both arms.",
+          "false_positive_risk": "- In this sample, 0 of 19 A successes with the numbers-only restriction.\n- It would fire on formal-A-59 if list outputs were allowed: T6 gave ES,IT,LU and T9 gave IT,ES,FR, with T7's reasoning explaining the switch.\n- formal-C2-44 (56.040316 at T10, 61.855069 at T11) is not caught, because the commands differ too much.\n- A send-back could make a model drop a correct choice. That risk was not measured.",
+          "effort": "Medium: command edit distance, output typing, tests.",
+          "needs_measurement": "The flip rate and the harm rate on held-out tasks. The sample has only one task id where it applies."
+        }
+      ],
+      "recommendation": "Build candidate 1 next, the 'named data column never selected' Stop finding. Build it in two steps and do not ship it into any run yet.\n\nWhy this one. Among the options, only it plausibly flips more than one run:\n- It reaches formal-A-33, formal-A-56 and pilot2-A-56.\n- It reaches the three wrong C runs of task 56.\n- It fires on none of the 19 A successes. formal-A-57 runs the exact command that failed in formal-A-33, but its request names IP addresses; that pair is the case showing index-to-header mapping is required.\n\nIt keeps the product principle:\n- It asks whether the material the request refers to was consulted, which is the existing `unread` logic one level finer.\n- It acts at Stop, with no budget needed.\n- It picks no value.\n\nBe honest about the evidence: all of the gain sits in two task ids.\n\nStep 1: offline replay, no model cost. Run it over every recorded chain: the paid batch, pilot, pilot2, and the formal local batch after it finishes. Stop unless:\n- fires on deliveries the scorer accepted are about 0 (at most 1 in all fires), and\n- most fires are on wrong deliveries.\n\nStep 2: a preregistered live held-out test. Use A vs C2 vs C2+column, on DABstep tasks outside the formal 79 and the pilot_10: the roughly 365 hard tasks from the Harbor 450, same gemma-4-12b with thinking off, 15-turn cap, at least 2 samples. It must show:\n- (a) more wrong→right changes than right→wrong after a column send-back;\n- (b) no correct first delivery sent back;\n- (c) the invariants hold: at most 15 requests per run, and the first request byte-identical across arms.\n\nCaveat: all 72 easy tasks are already in the formal set, and the hard tasks are mostly fees.json. The check may fire rarely, so report the fire count up front. With fewer than about 10 fires, say 'not measurable on held-out DABstep' rather than claiming an effect.\n\nDo not build candidate 2 (repeat notice) yet. Loops were sticky in this sample: four C2 loop runs ignored both reminders, and the probe's 49 and 1464 runs never wrote. Wait for the formal batch's reminder-ignored rate first. Do not build candidate 3; its principle fit and reach are both weak.\n\nv3 reminder: keep the timing (2 and 1 turns left) and the conditions.\n- Every run holding a correct value wrote on the first turn that carried a reminder, and there were no harms.\n- An earlier reminder has a concrete counterexample: formal-C2-44 held a wrong 56.040316 at T10 and got the correct 61.855069 at T11.\n- Keep the wording for score purposes. The guesses it draws out in runs with no value (C2-1464, C2-70, 18 of 28 probe writes) score 0 either way.\n- Those guesses are, however, deliveries with no grounds. The person-facing delivery note (the v3.2 post-hoc check) should say the file was written after a budget reminder and whether any check covered it.\n\nStop check's five kinds: no false positives in 54 C runs, and the missing-file kind rescued 4 of 4 valid cases. Leave them as they are.\n\nTwo small open items:\n- The Stop check also fires after a model decode error (C2-70). That kept a run alive which A-70 lost at T11. Keep it, but say in the design that this is intended.\n- C2-70 ended at turn 14 while Vacant counted 2 turns left after T13. Find out whether error and timeout turns are counted the same way by Vacant and by Harbor.\n\nEverything above is a small, non-held-out sample from the preregistered batch that is still running. None of it is evidence of an effect.",
+      "not_worth_it": "- **Earlier budget reminder or turn meter** (e.g. at 5 turns left or at turn 8). The v3 decision's simulation found +11 rescues against up to −29 harms at turn 8. Here, every run holding a value was already saved by the 2-left reminder. formal-C2-44 held a wrong 56.040316 at T10 and got the correct value at T11, so an earlier reminder could have locked in the wrong one.\n- **Rewording the reminder to 'only if you have computed an answer'.** It would cut the ungrounded guesses (C2-1464, C2-70, and 18 of 28 probe writes), but those runs score 0 either way, and it could lose rescues like C2-69 whose answer has a source. It does not raise the score. Handle this in the person's delivery note instead.\n- **Quoting the candidate value in the reminder** ('step 8 printed 138236'), or Vacant writing the file from the model's text on the capped turn. Both pick the answer, and the v3 decision already rejected them.\n- **Loop-breaking hints** ('the header shows True capitalized', 'use python for multi-line JSON'). These steer or judge the method, which is beyond what the record states.\n- **A 'negative answer from empty searches' check** ('Not Applicable', 'no' or 0 supported only by no-match searches). It would hit C2-1464, but also the correct formal-C2-23 ('0' from an empty fraud count) and formal-C1-62 ('Not Applicable' after a grep exit 1). That is too close to judging correctness.\n- **A format check against the guidelines** (decimals, percent, the 'X. Y' multiple-choice format). The scorer is lenient. The only format loss in the sample is pilot2-C1-44 (a fraction instead of a percentage), and a mechanical check cannot tell that from a legitimate value.\n- **Sending back unsourced claims in the final message.** In formal-A-19 the text pairs schemes with values that no output paired; in formal-C1-44 the text says 'Repeat Customers: 26,035'. In both, the scored file's value had a source, so a send-back costs turns and flips nothing. Keep these as delivery-note lines.\n- **A repeat threshold of 2 occurrences.** It fires on correct verification re-runs (formal-C1-1, formal-C2-51, formal-C2-57, formal-C2-63).\n- **Independent recomputation or voting, or relaunching a run that never delivered.** The v3 decision rejected these: they cost ×1.4 to ×2 or more requests and exceed the budget.\n- **Treating error stops differently at Stop.** C2-70 is reward-neutral, and the current behaviour kept a run alive that A-70 lost. No change is needed.\n\nSupporting files:\n- Transcripts: /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/analysis_runs/\n- Loop scan: /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/loopscan/scan.py\n- Code: /home/user/Vacant/vacant_network/trace/budget.py, /home/user/Vacant/vacant_network/trace/evidence.py, /home/user/Vacant/vacant_network/adapters/agents.py (pi extension, turn_end and agent_before_settle)\n- Decisions and probe: /home/user/Vacant/decisions/DECISION_20260926_ZERO_CONFIG_V3.md, /home/user/Vacant/decisions/prereg/PREREG_20260926_ZERO_CONFIG_V3_LOCAL.md, /home/user/Vacant/ops/eval/evidence_20260926_local/probe/"
+    },
+    "critics": [
+      {
+        "verdicts": [
+          {
+            "candidate": "1. 'Named data column never selected' (Stop finding, extends `unread` to CSV columns)",
+            "holds": false,
+            "problems": "1) **It sends back correct answers in this sample.** The stated rule matches whole words, lowercased, with plurals stripped. It needs single-word matches to reach task 56 ('devices' → device_type). The same rule maps 'shoppers' → shopper_interaction, the only column containing the word 'shopper'. Task 33 asks 'How many unique shoppers … based on email addresses?'. Four correct deliveries of task 33 would be sent back:\n- pilot2-A-33 (one of the 19 A successes)\n- formal-C1-33\n- formal-C2-33\n- pilot2-C1-33\n\nAll four ran `head -n 5` and then `cut -d',' -f14 … | sort | uniq | wc -l`, and wrote 46286. The name shopper_interaction appears only in head's output, never in a command. So the claim '0 of 19 A successes' is false as the rule is written. It only survives with a rule the proposal does not state:\n- counting `head` as fail-open, which also exempts nearly every agent that peeks at the file; or\n- a stoplist fitted to this sample.\n\nIn formal-A-33 the same send-back would carry a second line pointing at shopper_interaction, a column unrelated to the question.\n\n2) **Held-out tasks.** The proposal wants to test on held-out fee tasks, which are mostly about fees.json. There, 'account type H' maps 'type' → device_type (account_type is not a payments.csv column), and 'in EUR' maps → eur_amount. The formal-C2-1305 request already shows this. A field in fees.json gets mapped onto an unrelated payments.csv column.\n\n3) **It sends back in cases where `unread` stays silent.** The DABstep request names only the backticked `/app/data/`, so payments.csv is only a member of a named directory. evidence.py deliberately keeps dir-member `unread` to the delivery notes. Its honesty boundary 1 says it sends back only on files the person named on their own. Candidate 1 would send back on an inferred sub-property of a file that the design refuses to send back even when the whole file was never opened. So it is not 'unread, one level finer'.\n\n4) **The header is not in the record.** payments.csv is 23,581,339 bytes, above workspace MAX_BLOB (8 MiB), so the recorder stores only its hash. formal-A-33, formal-A-56 and pilot2-A-56 never printed the header; they read payments-readme.md. 'Read the header row from the recorded workspace' is therefore impossible. The check would have to read the live file, which breaks evidence.py's 純函式／只讀病歷 contract and the 'free offline replay' claim for the paid-batch chains.\n\n5) **It judges method, not grounds.** A whole-line grep does look at the column.\n- formal-A-51 `grep \"NexPay\" | wc -l` = 41679 was scored correct. I recounted on the dataset: filtering on column 3 alone also gives 41679. It escapes only because 'card' matches three columns. A request worded 'NexPay card scheme' ('scheme' → card_scheme) would send back a correct delivery.\n- For task 56 I verified that `$12==\"iOS\"` gives 22520, the expected answer, while whole-line grep gives 22541 (hashed IDs contain 'iOS'). So the message 'device_type was not selected' is in effect the method fix.\n\n6) **Vacant starts interpreting what the request means.** Wording like 'ignoring device type' or 'by card number, not email' would send back correct work. That adds a Stop redo for interactive users who have no budget.",
+            "evidence_checked": "Transcripts:\n- formal-A-33: read the readme, `cut -f13`, 55194, no head.\n- pilot2-A-33, formal-C1-33, formal-C2-33, pilot2-C1-33: all ran head, then `cut -f14`, got 46286 and scored 1.0. shopper_interaction appears only in result lines.\n- formal-A-56, pilot2-A-56, formal-C1-56, formal-C2-56, pilot2-C1-56: the only computation is `grep \"iOS\" | wc -l` → 22541.\n- formal-A-51: grep NexPay gave 41679, which was correct.\n- formal-A-57: `cut -f13` for IP addresses.\n\nOther checks:\n- A literal token-to-column probe over all 100 transcripts (scratchpad/colmap_probe.py) flagged the task-33 correct runs, and 'type' → device_type and 'eur' → eur_amount in the 1305 runs.\n- evidence.py `materials()`: only path-form names count as named. `run()`: dir-member unread goes to notes only. workspace.py: MAX_BLOB is 8 MiB and larger files keep only a hash.\n- The DABstep preamble names `/app/data/` in ops/eval/evidence_20260925/gate2/A/pi.txt.\n- payments.csv is 23.6 MB, header checked, recounts done with awk.",
+            "fix_or_condition": "Keep it as a note for the person in delivery.md, not sent to the model. That respects 寧可放過 and costs no turns.\n\nIf it ever becomes a send-back, all of these would be needed:\n- The request contains the column's full identifier or all of its words ('email address', 'device type', `ip_country`). Single-word matches are not allowed.\n- The file is named on its own, the same gate as `unread`.\n- The header comes from a recorded step output, not the live file.\n\nUnder those conditions, reach drops to formal-A-33 only: 1 of 27 A failures and 0 C failures, since every C run of task 33 was already correct. That is not worth building.\n\nAlso, the proposal's own step-1 stop rule (at most 1 fire on accepted deliveries) already fails in this sample (at least 4 fires) under the literal rule."
+          },
+          {
+            "candidate": "2. Repeat notice inside a stated turn budget",
+            "holds": false,
+            "problems": "1) **It is the turn meter the proposal itself rejects.** The message includes 'Model turns used: 11 of 15' and fires with at least 3 turns left. The proposal's not_worth_it list rejects an 'earlier budget reminder or turn meter'. In its own examples it fires as early as T7 (formal-A-1464, pilot2-A-1464), with 8 turns left. That is the zone where the v3 decision measured early messages as net harmful: at turn 8, +11 rescued against up to −29 harmed, because gemma stops right after its first write.\n\n2) **Its turn count can be wrong.** formal-C2-70's reminder said '2 of 15' after T13, but the run ended after T14 (the proposal lists this as an open anomaly). A turn meter would then state a false fact about the record.\n\n3) **It messages a run that ended correct.** formal-C2-23 ran the same awk command with the same output at T7, T8 and T9. The notice would ride T10's request, and T10 is the turn that first printed the delivered '0'. That breaks 'nothing sent when nothing is wrong' for a run that ended correct, with unknown effect.\n\n4) **Outside DABstep, in budgeted runs, it fires on normal work.** The (command, output) identity ignores writes made between the runs. Examples: re-running the same failing test after each edit, or polling a service that is still starting. The message would be literally true and misleading.\n\n5) **It is a new message type beyond the five kinds, and interactive users get nothing from it.** It is gated on a budget, so pi, Claude Code, Codex and OpenCode users without one never see it. It is benchmark-only machinery, against 先產品等級、再評測.\n\n6) **The evidence shows it does not work.** Loops were sticky: C2-49 ran the same empty grep 12 times through both reminders, and in the probe the 49 and 1464 runs wrote in 0 of 12 draws.",
+            "evidence_checked": "- formal-A-1464, turns 5–15: every command's first stage is `grep '\"account_type\":\\[.*\"R\".*\\]' /app/data/fees.json` and returns empty output, so it would fire at T7.\n- formal-C2-23: T7, T8 and T9 are identical awk commands with output 12397. T10 printed 0. The reminders came after T13 and T14, and '0' was written at T15.\n- formal-C2-70: the reminder after T13 said '2 of 15', and the last turn is T14.\n- DECISION_20260926_ZERO_CONFIG_V3.md §一, §三 (early reminders harmful) and §四 (applies only with a stated budget).\n- budget.py: NUDGE_TURNS_LEFT = (1, 2).",
+            "fix_or_condition": "Do not build it as a message to the model. At most, add a line to the person's delivery note ('steps 7, 9 and 11 repeated the same command and output') after the run, with nothing sent mid-run. Before any turn-count wording is extended, first resolve why Vacant's turn count and Harbor's disagree (formal-C2-70)."
+          },
+          {
+            "candidate": "3. 'Two near-identical computations disagree' (Stop check)",
+            "holds": false,
+            "problems": "1) **Its central claim is false on its only target.** In formal-A-43, T7 (`groupby(email).mean().mean()` → 90.6956) and T8 (`groupby(email).sum().mean()` → 247.3001) are adjacent, deliberately contrasted runs. Running T8 right after T7 is the comparison. The final text at T10 states the reason for the choice: sum per email, then the mean. So 'no recorded step compares the two' is misleading, and 'no recorded ground' is false.\n\n2) **It picks the answer by implication.** With two candidates and a message that points at the one not delivered, the model gets steered toward the other value. That is picking by implication. It targets exactly what the zero-config report says Vacant does not look at (錯在決定, the error is in the decision).\n\n3) **It fires on routine work in general use.** Examples: p50 then p95, before and after a fix, parameter sweeps, a dry run followed by the real run. A correct delivery would get a redo.\n\n4) **The evidence is one task id**, and no flip was observed in either arm.",
+            "evidence_checked": "formal-A-43 turns 5–10: T5 and T6 gave 247.3, T7 gave 90.6956, T8 gave 247.30013849278367, T9 wrote 247.300, and T10 explained the method. The proposal also cites formal-C2-43 (same pattern), formal-A-59 (list outputs) and formal-C2-44; I did not recheck those.",
+            "fix_or_condition": "None as a send-back. At most, a delivery-note line for the person ('two nearly identical computations printed different values; the delivered one is from step N'), never sent to the model."
+          }
+        ],
+        "overall": "None of the three candidates holds up as a message sent to the model.\n\n**Candidate 1**, the proposal's pick, fails its own zero-false-positive claim in this sample:\n- The single-word matching it needs to reach task 56 also maps 'shoppers' → shopper_interaction. That would send back 4 correct task-33 deliveries: pilot2-A-33 (an A success), formal-C1-33, formal-C2-33 and pilot2-C1-33.\n- The same matching maps 'account type' → device_type, which will be common on the held-out fee tasks the proposal wants to test on.\n- It sends back on a file that is only a member of a named directory, where the existing `unread` check refuses to.\n- It needs the live file's header: payments.csv is 23.6 MB, over the 8 MiB MAX_BLOB, so only its hash is recorded and replay cannot read the header.\n- What it really catches is whole-line grep. That is often correct: formal-A-51 grep NexPay gave 41679, which I confirmed on the dataset. So it judges method precision rather than grounds.\n\nWith a safe mapping (full column names, the file named on its own), candidate 1 reaches only formal-A-33. The move that keeps the principle is a note for the person in delivery.md.\n\n**Candidates 2 and 3** fail more plainly:\n- Candidate 2 is the early turn meter the proposal itself rejects. It would message formal-C2-23, a run that ended correct, at T10. Its turn count can be wrong, as formal-C2-70 showed. It gives interactive users nothing.\n- Candidate 3 misreads formal-A-43, where T7 and T8 are an explicit comparison with a stated reason, and it would steer the model toward the other value.\n\n**Two items in the recommendation also need care on principle grounds:**\n- In formal-C2-70 the Stop check fired after a decode-error stop, not after a claim of being done. It kept alive a session that then delivered an ungrounded 'yes' that no check covers. 'Keep it as intended' should at least put this in the design's honesty boundary and the delivery note.\n- The v3 reminder's 'write your best answer now' draws out ungrounded guesses: C2-1464, C2-70, and 18 of 28 probe writes. The proposal's 'keep for score purposes' is a benchmark rationale. It is acceptable only if the person-facing note (v3.2, which is not in the frozen formal wheel) marks those files as written after a reminder with no grounds checked.\n\nThe one reach claim I could strengthen: for task 56, filtering on column 12 alone gives 22520, which equals the expected answer, so that flip is plausible. The principle problems above still stand."
+      },
+      {
+        "verdicts": [
+          {
+            "candidate": "1. 'Named data column never selected' (Stop finding extending `unread` to CSV columns)",
+            "holds": false,
+            "problems": "1. The '0 of 19 A successes' false-positive claim is wrong under the candidate's own mapping rule (whole words, lowercased, plural stripped, unique match). 'shoppers' maps uniquely to shopper_interaction, since that is the only column with the token 'shopper'. Tasks 33 and 44 both say 'shoppers', so the check sends back correct deliveries:\n   - pilot2-A-33 (T5 `cut -d',' -f14` gives 46286, accepted)\n   - pilot2-A-44 (T5/T6 awk on $14, then 61.854556 written at T9, accepted)\n   - formal-C1-33, formal-C2-33, pilot2-C1-33 (all f14, all accepted)\n   That is 2 of 19 A successes plus 3 correct C runs. The candidate's own Step-1 gate (at most 1 fire on accepted deliveries) already fails on this sample. On formal-A-33 itself the message would carry two lines, email_address and shopper_interaction, which muddies the one rescue it counts.\n2. No lexical rule separates the only other reach from that false positive. 'devices' to device_type (task 56) has the same shape as 'shoppers' to shopper_interaction: one token of a two-token column. Tightening to full-name matches removes task 56 and leaves formal-A-33 alone.\n3. The rule is fitted to DABstep's prompt template. evidence.py passes the whole person's prompt (prompt_texts), and on the full request the boilerplate maps 'Answer must be just a number' to card_number and 'reference any documentation' to psp_reference. Those fire on almost every payments.csv shell delivery, including formal-C1-1, formal-A-51, formal-A-57 and formal-A-9, all correct. Stop-words fix this, but each one is fitted to this template.\n4. The reach is inflated by duplicate runs. All five task-56 transcripts (formal-A, pilot2-A, formal-C1, formal-C2, pilot2-C1) are byte-identical from Turn 1 to the Verifier. So the 3 A failures plus 3 C failures it reaches are 2 distinct wrong trajectories: formal-A-33 and the single 56 run. Against that it hits 3 distinct correct ones: task 33 (2 distinct trajectories) and pilot2-A-44.\n5. Whether the model would act on this kind of message was never observed. All 5 Stop send-backs in the 54 C runs were the missing-file line, with the answer already in the final text (C1-62 T9 to T10, C2-62, pilot2-C1-51, pilot2-C1-59). No C run shows gemma-12b recomputing after a send-back about content. The only such send-backs on record are 7 false 'unsourced' ones in the paid gemma-4-26b batch (docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md, 問題三/四): the same answer was delivered again and all 7 ran to the 15-turn cap. So 'plausibly flips 2–3' has no support either way.\n6. Task 56's value checks out, but the signal behind it does not. On a local copy of payments.csv (scratchpad/study/pin/payments.csv, 138236 rows), device_type=='iOS' gives 22520 (the expected value) and a whole-line 'iOS' match gives 22541. formal-A-51 uses the same whole-line method (`grep \"NexPay\" | wc -l`) and gets the correct 41679. It escapes a send-back only because 'card' happens to be ambiguous. Whether it fires depends on which words the request uses, not on whether the steps had grounds.\n7. A correct fix can still be sent back. If the model fixes task 56 with `grep \",iOS,\"` (22520), that does not 'select' device_type by name or by cut/awk index, so a second round fires on a delivery that is now correct.\n8. Principle. evidence.py honest boundary 1 limits `unread` to files named on their own, because anything looser is inference. This candidate infers from English words, so it would almost never fire on this project's Chinese-language requests; there the value is about zero, not a measured gain.",
+            "evidence_checked": "Checked by reading the transcripts and by a script. The script is /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/critic_c1/sim.py; it applies the stated mapping and selection rules to all 100 runs.\n- Re-read formal-A-33: it ran `cut -f13` at T4 and never ran head, so it guessed the index from the readme.\n- Re-read pilot2-A-33, formal-C1-33, formal-C2-33, pilot2-C1-33: all used f14 and got 46286 (accepted).\n- Re-read all five task-56 transcripts. They are identical: `grep \"iOS\" | wc -l` at T4, 22541 written at T5.\n- Re-read pilot2-A-44, formal-C1-44, formal-C2-44 and pilot2-C1-44. The python csv scripts in formal-C1-44 and formal-C2-44 fail open; pilot2-A-44 uses awk $14 and would fire.\n- Re-read formal-A-51 and formal-C2-51 (a whole-line grep of NexPay is correct there), formal-A-57 (`cut -f13` for IP addresses) and formal-A-59.\n- Read vacant_network/trace/evidence.py: materials() works on literal paths only, and prompt_texts is the whole prompt.\n- Recomputed the iOS, email and IP counts on scratchpad/study/pin/payments.csv.",
+            "fix_or_condition": "Do not build it as specified. If anything is kept, narrow it to 'wrong column by index':\n- the request contains every token of exactly one column name as a contiguous phrase or a literal ('email addresses' → email_address, 'ip_country');\n- the only pipeline that produced the delivered value selected a different column of that file by cut or awk index;\n- nothing else fires, and there are no single-token matches.\nIn this sample that reaches formal-A-33 only, and it fires on no correct run (formal-A-57's f13 is a full match for 'IP addresses'). One run is not a reason to build. Run the offline replay (paid batch, pilot, pilot2, formal) and count distinct trajectories, not duplicate runs. Report how often it fires on accepted deliveries before spending anything live."
+          },
+          {
+            "candidate": "2. Repeat notice inside a stated turn budget",
+            "holds": false,
+            "problems": "The reach estimate is overstated. The no-build call stands, and more strongly than the proposal put it.\n- Its stated trigger requires three empty outputs in a row whose commands share the same first pipeline stage. scan.py's empty3 column does not check that condition.\n- formal-A-49 T9, T10, T11 are grep, awk, grep, so it does not fire at T11. The only identical triple, awk `$18 == \"true\"` at T10/T12/T15, completes only at T15, inside the v3 window.\n- pilot2-A-49 T8, T9, T10 are grep, awk, awk, and its later empties (T12 awk, T13 grep, T14 awk) do not share a first stage either, so it does not fire before the window.\n- That leaves 3 fires before the window, not 5: formal-A-1464 T7, pilot2-A-1464 T7 (T5–T7 all begin with the same `grep '\"account_type\":...' fees.json`), and pilot2-A-19 T11 (identical awk at T6/T9/T11 printing 'TransactPlus,0').\n- Of the flips it called reachable (49 and 1464), 49 is not reached at all, and 1464 wrote nothing in 12 of 12 probe draws. Expected flips are about 0.\n- The harm estimate holds. It would fire on 2 correct runs that the v3 reminder later rescued: formal-C2-23 at T9 (identical awk triple at T7–T9, printing 12397, before the '0' computed at T10) and formal-C2-69 at T11 (the same `cat merchant_data.json` at T9–T11).\n- Stickiness is confirmed: C2-49 repeated one empty grep through two reminders.",
+            "evidence_checked": "- Ran scratchpad/loopscan/scan.py.\n- Re-read the turn-by-turn commands of formal-A-49, pilot2-A-49, formal-A-1464, pilot2-A-1464, pilot2-A-19, formal-C2-23 and formal-C2-69, applying the first-stage condition by hand.",
+            "fix_or_condition": "Keep it unbuilt. If it is ever revisited:\n- measure the reminder-ignored rate in looping runs in the formal batch;\n- note that under its own trigger rule it reaches only the 1464-type loop (a single-line regex against multi-line JSON), which the probe showed does not break."
+          },
+          {
+            "candidate": "3. 'Two near-identical computations disagree' (Stop check)",
+            "holds": true,
+            "problems": "The reach and harm estimates are accurate, and the no-build call is right. Some points need adding:\n- formal-A-43 and formal-C2-43 are the same trajectory. Their only difference is the file content, '247.300\\n' vs '247.300'. The reach is 1 trajectory.\n- T7 `.mean().mean()` (90.6956) and T8 `.sum().mean()` (247.3001) do differ by one token, so it fires. But the T10 final text in both runs states the reason for the sum-then-mean choice. The premise 'the choice has no recorded ground' is therefore false. Firing would judge the method.\n- The send-back steers the agent to the one alternative value (step 7), which in practice picks the answer.\n- The expected 90.70 (the mean of per-email means) is itself one reading of 'average transaction amount per unique email'.",
+            "evidence_checked": "- Re-read formal-A-43 T4–T10 and formal-C2-43 T4–T10, including the final text.\n- Compared the call sequences of the two runs.",
+            "fix_or_condition": "Do not build. Keep the 'two computations disagreed' fact as a delivery-note line for the person at most, never as a send-back."
+          }
+        ],
+        "overall": "The recommendation (build candidate 1 next) does not survive this check.\n\n**Candidate 1: the zero-false-positive claim fails on the proposal's own sample.**\n- Its stated rule maps 'shoppers' to shopper_interaction. That sends back 5 deliveries the scorer accepted: pilot2-A-33, pilot2-A-44, formal-C1-33, formal-C2-33, pilot2-C1-33.\n- On the full request, the DABstep boilerplate also maps 'number' to card_number and 'reference' to psp_reference.\n- No word-based rule separates the 'devices' → device_type case (task 56) from the 'shoppers' → shopper_interaction case.\n- Its reach is 2 distinct trajectories. The five task-56 runs are byte-identical, so they count as one.\n- Whether gemma-12b recomputes after a content send-back is unobserved. All 5 send-backs in the 54 C runs were the missing-file line. In the paid gemma-4-26b batch, 7 content send-backs (all false) got the same answer delivered again and ran to the 15-turn cap.\n- The task-56 value does check out on a local copy of the data (device_type=='iOS' = 22520 vs 22541 whole-line). But formal-A-51 uses the same whole-line grep method and is correct, so what separates them is the request's wording, not whether the steps had grounds.\n\n**Candidate 2.** Under its own first-pipeline-stage rule it reaches neither task-49 run, so expected flips are about 0; its harm on formal-C2-23 and C2-69 is confirmed. Not building it is right.\n\n**Candidate 3.** Its estimates hold and it should not be built: formal-A-43's final text records the reason for the choice.\n\n**Parts of the recommendation that stand:**\n- Leave the five Stop check kinds as they are.\n- Keep the v3 reminder timing.\n- Do not add loop hints, format checks or earlier reminders.\n\n**Replacement for \"build candidate 1\".** Build nothing new for the send-back path yet. Add a narrow 'wrong column by index' rule (reaching formal-A-33 only) to the offline replay list as a measurement, not a build. Every replay gate should count distinct trajectories and fires on accepted deliveries.\n\nFiles:\n- Simulation script: /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/critic_c1/sim.py\n- Data copy used for the counts: /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/study/pin/payments.csv"
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Read"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Propose"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 3,
+      "title": "Critique"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "fail:1",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "ae8367cb0c1066c88",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867347,
+      "lastProgressAt": 1790402867347,
+      "cached": true,
+      "resultPreview": "{\"runs\":[{\"file\":\"formal-A-1-s1.md\",\"outcome\":\"no_file_cut_off\",\"category\":\"computed_but_not_written\",\"had_candidate_answer_turn\":8,\"candidate_matches_expected\":true,\"last_turns_summary\":\"T12 repeats T4's `wc -l` (138237). T13 prints the header row. T14 repeats T8/T11's `awk 'END {print NR-1}'` (138236). T15 runs `grep -v \\\"^psp_reference\\\" | wc -l` (138236). Turn 16 is aborted at the 15-turn cap.…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "fail:2",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "aedca0c52e3a29100",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867348,
+      "lastProgressAt": 1790402867348,
+      "cached": true,
+      "resultPreview": "{\"runs\":[{\"file\":\"formal-A-49-s1.md\",\"outcome\":\"no_file_cut_off\",\"category\":\"loop_same_command\",\"had_candidate_answer_turn\":null,\"candidate_matches_expected\":null,\"last_turns_summary\":\"Turn 12 reruns the awk filter $18==\\\"true\\\" (no output). Turn 13 runs grep \\\",true,\\\" | head -n 10 (no output). Turn 14 runs head -n 20 payments.csv, which again shows has_fraudulent_dispute as capitalized False. Tu…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "fail:3",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "ae548ad6e51856c61",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867348,
+      "lastProgressAt": 1790402867348,
+      "cached": true,
+      "resultPreview": "{\"runs\":[{\"file\":\"pilot2-A-19-s1.md\",\"outcome\":\"no_file_cut_off\",\"category\":\"computed_but_not_written\",\"had_candidate_answer_turn\":14,\"candidate_matches_expected\":false,\"last_turns_summary\":\"T12: awk printed per-scheme total and fraud counts. T13: combined count, fraud count per scheme. T14: awk fraud-count/total*100 per scheme printed 'SwiftCharge,8.02447' at the top. T15: re-ran the exact T14 co…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "success-baseline",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a0b4da95c51859ddb",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867348,
+      "lastProgressAt": 1790402867348,
+      "cached": true,
+      "resultPreview": "{\"runs\":[{\"file\":\"formal-A-25-s1.md\",\"outcome\":\"correct\",\"category\":\"clean_direct\",\"had_candidate_answer_turn\":4,\"candidate_matches_expected\":true,\"last_turns_summary\":\"t3 read payments-readme.md; t4 one-line pandas z-score (one-sided (x-mean)/std > 3) printed 2429; t5 write '2429' to /app/answer.txt; t6 final text '2429'.\",\"vacant_observable_signal\":\"Nothing to send back: the answer file exists a…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "react:1",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a9fec57bf78521bb6",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867349,
+      "lastProgressAt": 1790402867349,
+      "cached": true,
+      "resultPreview": "{\"runs\":[{\"file\":\"formal-C1-1-s1.md\",\"final_reward\":1,\"vacant_actions\":\"Stop check once, after turn 14 (final text '138236'): allow. Nothing sent to the model.\",\"reaction\":\"No message to react to. The model wrote 138236 on its own at turn 13 and finished at turn 14.\",\"effect\":\"no_effect\",\"pushback_was_valid\":null,\"notes\":\"The file was written before Vacant acted. On the same task, the A run never …",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "react:2",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "ad3a64e023eee15f1",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867349,
+      "lastProgressAt": 1790402867349,
+      "cached": true,
+      "resultPreview": "{\"runs\":[{\"file\":\"formal-C2-42-s1.md\",\"final_reward\":1,\"vacant_actions\":\"none sent. The Stop check ran once after turn 6 and allowed it (review_actions=[allow]); no budget reminder.\",\"reaction\":\"n/a. The model had already written 'no' at turn 5 after a sort -u duplicate check at turn 4, then stopped at turn 6.\",\"effect\":\"no_effect\",\"pushback_was_valid\":null,\"notes\":\"Correct. Vacant stayed silent.\"…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "propose",
+      "phaseIndex": 2,
+      "phaseTitle": "Propose",
+      "agentId": "a12ebda93c50f3056",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867352,
+      "lastProgressAt": 1790402867352,
+      "cached": true,
+      "resultPreview": "{\"failure_profile\":\"Scope: 27 failed A runs (16 formal, 11 pilot2) and 19 correct A runs. Transcripts are under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/analysis_runs/.\\n\\nSpot checks. I checked 13 transcripts against the classifications: formal-A-1, A-43, A-44, A-69, C1-62, C2-1, C2-9, C2-23, C2-44, C2-49, C2-69, C2-70 and pilot2-C1-59. I also checked the co…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "critic:principle",
+      "phaseIndex": 3,
+      "phaseTitle": "Critique",
+      "agentId": "a648654b0ae590642",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867400,
+      "queuedAt": 1790402867355,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "None of the three candidates holds up as a message sent to …",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…",
+      "promptFramed": true,
+      "lastProgressAt": 1790403371721,
+      "tokens": 169620,
+      "toolCalls": 31,
+      "durationMs": 504302,
+      "resultPreview": "{\"verdicts\":[{\"candidate\":\"1. 'Named data column never selected' (Stop finding, extends `unread` to CSV columns)\",\"holds\":false,\"problems\":\"1) **It sends back correct answers in this sample.** The stated rule matches whole words, lowercased, with plurals stripped. It needs single-word matches to reach task 56 ('devices' → device_type). The same rule maps 'shoppers' → shopper_interaction, the only …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "critic:evidence",
+      "phaseIndex": 3,
+      "phaseTitle": "Critique",
+      "agentId": "a0800aa3678000625",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790402867418,
+      "queuedAt": 1790402867356,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "The recommendation (build candidate 1 next) does not surviv…",
+      "promptPreview": "Context (read-only research; do NOT modify any file in /home/user/Vacant, do NOT touch docker, the proxy on port 18900, or anything under /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/local; do NOT read credential files such as ~/.claude*, auth.json, .env, *.key).\nVacant is a zero-config accountability layer installed into a coding agent (here pi 0.87.1). With zer…",
+      "promptFramed": true,
+      "lastProgressAt": 1790403332662,
+      "tokens": 171519,
+      "toolCalls": 31,
+      "durationMs": 463800,
+      "resultPreview": "{\"verdicts\":[{\"candidate\":\"1. 'Named data column never selected' (Stop finding extending `unread` to CSV columns)\",\"holds\":false,\"problems\":\"1. The '0 of 19 A successes' false-positive claim is wrong under the candidate's own mapping rule (whole words, lowercased, plural stripped, unique match). 'shoppers' maps uniquely to shopper_interaction, since that is the only column with the token 'shopper'…"
+    }
+  ],
+  "totalTokens": 341139,
+  "totalToolCalls": 62
+}

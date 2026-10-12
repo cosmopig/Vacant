@@ -1,0 +1,4007 @@
+{
+  "summary": {
+    "bank": "databench",
+    "n_tasks": 30,
+    "vacant_network_version": "0.8.0",
+    "vacant_src": "/private/tmp/claude-501/-Users-cosmopig-Documents-GitHub-Vacant/0ea239a6-ec82-4ca5-89a9-d4a11558d16e/scratchpad/vn_redesign",
+    "prompt_template": "/Users/cosmopig/Documents/GitHub/Vacant/.claude/worktrees/agent-af8a9bec462ee41ec/ops/colab_campaign_20260927/task3_prompt_template.txt",
+    "by_scenario": {
+      "clean": {
+        "n": 30,
+        "ok": 0,
+        "kinds": {
+          "unread": 30
+        }
+      },
+      "missing": {
+        "n": 30,
+        "ok": 0,
+        "kinds": {
+          "unread": 30
+        }
+      },
+      "no_read": {
+        "n": 30,
+        "ok": 30,
+        "kinds": {
+          "unread": 30,
+          "unsourced": 12
+        }
+      },
+      "failed_script": {
+        "n": 30,
+        "ok": 30,
+        "kinds": {
+          "failed_step": 30,
+          "unread": 30,
+          "unsourced": 12
+        }
+      }
+    },
+    "verdict": "60 格不符"
+  },
+  "rows": [
+    {
+      "task_id": "db_066_04",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_04",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_04",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_04",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_10",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_10",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_10",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_10",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_34",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_34",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_34",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_34",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_37",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_37",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_37",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.68",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "11.42",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "12.79",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_066_37",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "8.68",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "11.42",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "12.79",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_08",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_08",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_08",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_08",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_29",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_29",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_29",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_069_29",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_02",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_02",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_02",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_02",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_12",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_12",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_12",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_12",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_15",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_15",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_15",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "145.82",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_15",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "145.82",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_19",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_19",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_19",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "122.66",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_071_19",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "122.66",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_02",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_02",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_02",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_02",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_26",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_26",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_26",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "64.85",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_26",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "64.85",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_30",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_30",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_30",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_30",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "14.16",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_33",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_33",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_33",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "17.19",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "17.28",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_33",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "17.19",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "17.28",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_38",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_38",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_38",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "11.42",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "12.79",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_072_38",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "11.42",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "12.79",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_10",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_10",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_10",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_10",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_31",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_31",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_31",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_073_31",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_11",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_11",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_11",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_11",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_13",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_13",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_13",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "21.01",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_13",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "21.01",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_27",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_27",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_27",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "144.31",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "144.31",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_074_27",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "144.31",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "144.31",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_075_28",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_075_28",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_075_28",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_075_28",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_00",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_00",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_00",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_00",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_06",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_06",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_06",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_06",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_31",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_31",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_31",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_076_31",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_077_18",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_077_18",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_077_18",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "48.41",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_077_18",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "48.41",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_11",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_11",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_11",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_11",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_28",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_28",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_28",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "27.86",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "27.86",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "30.60",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "31.97",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_28",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "27.86",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "27.86",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "30.60",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "31.97",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_36",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_36",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_36",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_078_36",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_04",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_04",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_04",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_04",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_23",
+      "scenario": "clean",
+      "expect": [],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_23",
+      "scenario": "missing",
+      "expect": [
+        "missing_output"
+      ],
+      "got": [
+        "unread"
+      ],
+      "ok": false,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_23",
+      "scenario": "no_read",
+      "expect": [
+        "unread"
+      ],
+      "got": [
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        }
+      ]
+    },
+    {
+      "task_id": "db_080_23",
+      "scenario": "failed_script",
+      "expect": [
+        "failed_step"
+      ],
+      "got": [
+        "failed_step",
+        "unread",
+        "unsourced"
+      ],
+      "ok": true,
+      "requested_outputs": [],
+      "materials_named": [
+        "contract.md",
+        "goal.md"
+      ],
+      "given_in_request": [],
+      "findings": [
+        {
+          "kind": "unread",
+          "path": "contract.md"
+        },
+        {
+          "kind": "unread",
+          "path": "goal.md"
+        },
+        {
+          "kind": "unsourced",
+          "path": "answer.txt",
+          "line": 1,
+          "value": "10.05",
+          "single_answer": true,
+          "unread_attach": [
+            "contract.md",
+            "goal.md"
+          ]
+        },
+        {
+          "kind": "failed_step",
+          "step": 2,
+          "cmd": "python3 analyze.py",
+          "error": "tool failed"
+        }
+      ]
+    }
+  ]
+}

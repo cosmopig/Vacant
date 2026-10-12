@@ -1,0 +1,50 @@
+
+ pi v0.87.1                                                                                                                                                     
+ escape interrupt · ctrl+c/ctrl+d clear/exit · / commands · ! bash · ctrl+o more                                                                                
+ Press ctrl+o to show full startup help and loaded resources.                                                                                                   
+                                                                                                                                                                
+ Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.                                                                          
+
+[Extensions]                                                                                                                                                    
+  evlog.ts                                                                                                                                                      
+
+
+ Warning: fd not found. Offline mode enabled, skipping download.                                                                                                
+
+                                                                                                                                                                
+ Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.                                                         
+                                                                                                                                                                
+
+ cut off mid-sent                                                                                                                                               
+
+ Response was truncated before completion.                                                                                                                      
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                                                                                
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/app
+↑10 ↓5 1.1%/128k (auto)                                                                                                     (harbor-endpoint) gemma-4-12b-it-qat
+
+To resume this session: pi --session-dir /logs/agent/pi/sessions --session 01a0f7f7-e987-7695-b9fb-e420435ce4d0
+__PANE_EXIT_0__
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

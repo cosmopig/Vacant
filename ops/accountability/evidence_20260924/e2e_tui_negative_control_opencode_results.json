@@ -1,0 +1,87 @@
+{
+  "schema": "vacant-e2e-tui/1",
+  "evidence_level": "L-fake (scripted model)",
+  "surface": "interactive TUI in a tmux pseudo-terminal",
+  "started": "2026-09-25T01:17:17+0000",
+  "agents": {
+    "opencode": {
+      "version": [
+        "1.18.32"
+      ],
+      "install_exit": 0,
+      "runs": {
+        "M_multi_turn": {
+          "scenario": "M_multi_turn",
+          "agent_rc": null,
+          "wall_s": 95.5,
+          "agent_stderr_tail": "",
+          "steps_recorded": 2,
+          "step_tools": [
+            "bash",
+            "bash"
+          ],
+          "gaps": 0,
+          "finding": {
+            "state": "located",
+            "fault_class": "agent",
+            "confidence": "provable",
+            "layer": "fact",
+            "location": {
+              "col": 8,
+              "kind": "offending",
+              "line": 3,
+              "note": "recomputed 69.0 from input:ledger",
+              "path": "report.md",
+              "value": "999"
+            },
+            "value": "999",
+            "source": null,
+            "note": "no recorded read contains this value",
+            "_step_writes": [
+              "report.md"
+            ],
+            "_step_tool": "bash",
+            "_cand_writes": null,
+            "step_n": 2,
+            "actor": {
+              "platform": "opencode",
+              "session": "ses_f29dc5e1fffe0pmRx6LpswbH7i"
+            }
+          },
+          "judgement": {
+            "correct": true,
+            "mismatch": []
+          },
+          "feedback_reached_model": true,
+          "feedback_text": "The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):\n- total: FAIL — report.md: report not in the deliverable\nRun `vacant check` to re-check before finishing.\"}], \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"bash\", \"description\": \"Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.\n\nBe aware: OS: linux, Shell: bash\n\nAll commands run in the current working directory by default. Use the `workdir` parameter if you need to run a command in a different directory",
+          "feedback_has_location": true,
+          "feedback_has_actor_id": false,
+          "resolved_after_feedback": true,
+          "final_decision": "reject",
+          "chain_verifies": true,
+          "chain_verify_out": "OK 13 entries",
+          "hook_ms_p50": 5.3,
+          "hook_ms_p95": 7.4,
+          "hook_calls": 10,
+          "model_requests": 6,
+          "auth_rejected": 0,
+          "earlier_turns": [
+            {
+              "requests": 4,
+              "fed_back": 1
+            }
+          ],
+          "feedback_in_last_turn": false,
+          "tui_ready": true,
+          "prompt_resent": false,
+          "exited_cleanly": true,
+          "feedback_shown_to_person": true,
+          "person_prompts_in_trace": 2,
+          "untyped_person_prompts": 0,
+          "screen_file": "opencode/M_multi_turn.screen.txt"
+        }
+      }
+    }
+  },
+  "finished": "2026-09-25T01:18:57+0000"
+}

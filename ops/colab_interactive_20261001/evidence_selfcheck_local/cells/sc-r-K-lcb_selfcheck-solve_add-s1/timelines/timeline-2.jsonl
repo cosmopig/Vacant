@@ -1,0 +1,5 @@
+{"t": 0.625, "kind": "ready", "ready": true, "ready_s": 0.62}
+{"t": 1.652, "kind": "enter"}
+{"t": 1.918, "kind": "change", "state": "empty", "session_bytes": 0, "entries": 0, "calls": 1, "hook_procs": 0}
+{"t": 2.426, "kind": "change", "state": "final", "session_bytes": 8317, "entries": 8, "calls": 1, "hook_procs": 0}
+{"t": 2.926, "kind": "change", "state": "final", "session_bytes": 8317, "entries": 8, "calls": 2, "hook_procs": 0}

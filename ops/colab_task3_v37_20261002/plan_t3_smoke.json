@@ -1,0 +1,23 @@
+{
+ "seed": 20261002,
+ "arms": [
+  "A",
+  "C37"
+ ],
+ "samples": [
+  1
+ ],
+ "tasks": [
+  {
+   "bank": "polyglot_py",
+   "id": "pg_affine_cipher",
+   "dir": "/srv/eval/staged/polyglot_py/pg_affine_cipher"
+  },
+  {
+   "bank": "dabench",
+   "id": "dab_035",
+   "dir": "/srv/eval/staged/dabench/dab_035"
+  }
+ ],
+ "note": "smoke"
+}

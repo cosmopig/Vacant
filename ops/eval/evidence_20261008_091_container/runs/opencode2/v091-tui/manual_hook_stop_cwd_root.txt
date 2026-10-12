@@ -1,0 +1,1 @@
+{"action": "allow", "reason": "", "note": "Vacant did not check this work: the agent ran in /, which is too broad to record (home folder, filesystem root, or a settings folder). Open the agent inside a project folder to get the check."}

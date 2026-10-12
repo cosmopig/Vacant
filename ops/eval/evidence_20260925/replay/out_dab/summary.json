@@ -1,0 +1,134 @@
+{
+ "runs": 6,
+ "correct": 2,
+ "sent_back": 3,
+ "false_positive_on_correct": [],
+ "rows": [
+  {
+   "trial": "dabstep-5__TxRoodQ",
+   "reward": 0.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/google/gemma-3-12b-it",
+   "steps": 1,
+   "action": "continue",
+   "stop_s": 0.377,
+   "sent_back": [
+    "missing_output"
+   ],
+   "findings": [
+    {
+     "asked": "/app/answer.txt",
+     "finding_id": "z_c1bfc8cfd7",
+     "kind": "missing_output",
+     "path": "answer.txt"
+    }
+   ],
+   "deliverables": [],
+   "reason": "Before delivery: a review of the recorded steps of this task found points to redo.\nTake the role of a careful reviewer who checks the draft against the materials given for the task. Redo only the parts listed below; leave everything else as it is.\n- The request asks for /app/answer.txt, but it does not exist. Finish the task and write it.\nThis review lists what the record shows; it does not say whether the answer is right.",
+   "note": null
+  },
+  {
+   "trial": "dabstep-5__zawEaqe",
+   "reward": 1.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/google/gemma-4-26b-a4b-it",
+   "steps": 7,
+   "action": "allow",
+   "stop_s": 0.402,
+   "sent_back": [],
+   "findings": [],
+   "deliverables": [
+    "answer.txt"
+   ],
+   "reason": "",
+   "note": "Vacant checked this turn: 0 value(s), 3/7 given file(s) opened.\nNot verified: 4 given file(s) not opened.\nNote: /root/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md"
+  },
+  {
+   "trial": "dabstep-5__Yqmbch9",
+   "reward": 1.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/qwen/qwen3.5-9b",
+   "steps": 8,
+   "action": "allow",
+   "stop_s": 0.521,
+   "sent_back": [],
+   "findings": [],
+   "deliverables": [
+    "answer.txt"
+   ],
+   "reason": "",
+   "note": "Vacant checked this turn: 0 value(s), 3/7 given file(s) opened.\nNot verified: 4 given file(s) not opened.\nNote: /root/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md"
+  },
+  {
+   "trial": "dabstep-70__4VtrWRQ",
+   "reward": 0.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/google/gemma-3-12b-it",
+   "steps": 1,
+   "action": "continue",
+   "stop_s": 0.407,
+   "sent_back": [
+    "missing_output"
+   ],
+   "findings": [
+    {
+     "asked": "/app/answer.txt",
+     "finding_id": "z_c1bfc8cfd7",
+     "kind": "missing_output",
+     "path": "answer.txt"
+    }
+   ],
+   "deliverables": [],
+   "reason": "Before delivery: a review of the recorded steps of this task found points to redo.\nTake the role of a careful reviewer who checks the draft against the materials given for the task. Redo only the parts listed below; leave everything else as it is.\n- The request asks for /app/answer.txt, but it does not exist. Finish the task and write it.\nThis review lists what the record shows; it does not say whether the answer is right.",
+   "note": null
+  },
+  {
+   "trial": "dabstep-70__bryJza5",
+   "reward": 0.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/google/gemma-4-26b-a4b-it",
+   "steps": 16,
+   "action": "continue",
+   "stop_s": 1.036,
+   "sent_back": [
+    "missing_output"
+   ],
+   "findings": [
+    {
+     "asked": "/app/answer.txt",
+     "finding_id": "z_c1bfc8cfd7",
+     "kind": "missing_output",
+     "path": "answer.txt"
+    }
+   ],
+   "deliverables": [
+    "check_tiers.py",
+    "solution.py"
+   ],
+   "reason": "Before delivery: a review of the recorded steps of this task found points to redo.\nTake the role of a careful reviewer who checks the draft against the materials given for the task. Redo only the parts listed below; leave everything else as it is.\n- The request asks for /app/answer.txt, but it does not exist. Finish the task and write it.\nThis review lists what the record shows; it does not say whether the answer is right.",
+   "note": null
+  },
+  {
+   "trial": "dabstep-70__g59Domh",
+   "reward": 0.0,
+   "rc": 0,
+   "stderr": "",
+   "model": "harbor-endpoint/qwen/qwen3.5-9b",
+   "steps": 12,
+   "action": "allow",
+   "stop_s": 0.994,
+   "sent_back": [],
+   "findings": [],
+   "deliverables": [
+    "answer.txt"
+   ],
+   "reason": "",
+   "note": "Vacant checked this turn: 0 value(s), 7/7 given file(s) opened.\nNote: /root/.vacant/trace/projects/f53b52ad6d21cceb/delivery.md"
+  }
+ ]
+}

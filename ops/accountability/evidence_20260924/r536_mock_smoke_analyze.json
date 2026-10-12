@@ -1,0 +1,67 @@
+{
+ "layer": "L1",
+ "rows": 6,
+ "void": 0,
+ "evidence_level": [
+  "L-fake"
+ ],
+ "RF": {
+  "n": 2,
+  "M1": 2,
+  "accepted": 2,
+  "first_attempt_fail": 2,
+  "convergence_failing_required_by_attempt": [
+   1.0,
+   0.0,
+   0.0
+  ]
+ },
+ "RL": {
+  "n": 2,
+  "M1": 2,
+  "accepted": 2,
+  "first_attempt_fail": 2,
+  "convergence_failing_required_by_attempt": [
+   1.0,
+   0.0,
+   0.0
+  ]
+ },
+ "RS": {
+  "n": 2,
+  "M1": 0,
+  "accepted": 0,
+  "first_attempt_fail": 2,
+  "convergence_failing_required_by_attempt": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ "primary": {
+  "test": "McNemar exact, RL vs RF on M1",
+  "b_RL_wins": 0,
+  "c_RF_wins": 0,
+  "n_pairs": 2,
+  "p": 1.0,
+  "diff": 0.0,
+  "ci95": [
+   0.0,
+   0.0
+  ]
+ },
+ "state": "RULED_OUT",
+ "secondary_RL_vs_RS": {
+  "b": 2,
+  "c": 0,
+  "n": 2,
+  "p": 0.5
+ },
+ "secondary_RF_vs_RS": {
+  "b": 2,
+  "c": 0,
+  "n": 2,
+  "p": 0.5
+ },
+ "WARNING": "L-fake rows present: plumbing only, no effect claims"
+}

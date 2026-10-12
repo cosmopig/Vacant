@@ -1,0 +1,23 @@
+ATTR ('b_C_only', 'A有交') 46
+ATTR ('b_C_only', 'A沒交') 13
+ATTR ('b_C_only', 'A沒逾時') 34
+ATTR ('b_C_only', 'A逾時') 25
+ATTR ('b_C_only', 'C沒逾時') 57
+ATTR ('b_C_only', 'C逾時') 2
+ATTR ('b_C_only', '只有誤退型') 15
+ATTR ('b_C_only', '含真退回(failed_step/unsourced)') 7
+ATTR ('b_C_only', '無退回') 37
+ATTR ('c_A_only', 'A有交') 49
+ATTR ('c_A_only', 'A沒逾時') 46
+ATTR ('c_A_only', 'A逾時') 3
+ATTR ('c_A_only', 'C沒逾時') 29
+ATTR ('c_A_only', 'C逾時') 20
+ATTR ('c_A_only', '只有誤退型') 4
+ATTR ('c_A_only', '含真退回(failed_step/unsourced)') 1
+ATTR ('c_A_only', '無退回') 44
+ATTR ('same', '只有誤退型') 270
+ATTR ('same', '含真退回(failed_step/unsourced)') 12
+ATTR ('same', '無退回') 530
+ATTR real sendback cells 20 C pass 18 A pass 12
+ATTR misfire-only cells 289 C pass 264 A pass 253
+ATTR C no_solution & timeout 24 C no_solution total 34

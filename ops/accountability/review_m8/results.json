@@ -1,0 +1,803 @@
+[
+ {
+  "dim": "blame",
+  "findings": [
+   {
+    "title": "Introducer ignores the located line: an actor whose offending text was already removed gets a provable fault for text another actor wrote",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 262,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r1_multi_occurrence_text.py   (text claim must_not_contain TODO; t1 SUB writes 'Intro TODO' (line 2); t2 MAIN adds 'Conclusion TODO' (line 3); t3 SUB replaces its own line with 'Intro done.')",
+    "observed": "final file '# Report\\nIntro done.\\nConclusion TODO\\n'; blame of report.md:3 value 'TODO' -> {state: located, fault_class: agent, confidence: provable, layer: fact, step: t1, actor: ae25 (SUB), flipped: True}; stopcheck records consequence ('provable_fault', ['builtin:general-purpose','claude','unknown','text'], step 1). SUB is charged a reputation fault for a TODO that it removed. MAIN, which wrote the remaining TODO, is never named.",
+    "expected": "The TODO at line 3 was introduced at t2 by MAIN, so blame should name t2/MAIN, or at least not give a fact-layer result to t1. introducer() (lines 253-268) tracks whether the value is present anywhere in the file (L.contains on the whole text), and rerun_flip (lines 537-543) also checks only path+value, never the line. So any earlier step that put the same token anywhere in the file keeps the introduction.",
+    "fix": "Make introducer occurrence-aware: compare len(L.occurrences(txt, value)) before and after each transition, and pick the last transition that increased the count (reset when the count reaches 0). Better: follow loc.line back through each version (difflib line mapping). In rerun_flip, require the after-state location to have the same line/col as loc, not just the same value."
+   },
+   {
+    "title": "A script the engine does not recognise ('python3 -u', 'uv run', 'cd dir && python x.py', or a pre-existing user script) turns into a provable fault on whoever ran the command",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 339,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r4_script_resolution.py   (scenario C: SUB writes a buggy calc.py, MAIN runs it into report.md; variants differ only in the command string, plus one run where scripts/calc.py already existed and no step wrote it)",
+    "observed": "ctl 'python calc.py > report.md' -> agent/lineage_internal, step t1 (SUB, the script's author), matching the test. 'python3 -u calc.py > report.md', 'uv run calc.py > report.md' and 'cd tools && python calc.py > ../report.md' all give agent/provable/fact on step t2 (MAIN, the runner), flipped True. Pre-existing 'python scripts/calc.py > report.md' (no recorded writer) also gives agent/provable on MAIN.",
+    "expected": "The same result as scenario C: point to the step that wrote the script (lineage_internal, no reputation effect). When no recorded step wrote the script (it came from the user), treat it like pre_existing/input, as the gap branch at lines 476-478 already does for scripts changed in a gap. Causes: _referenced_files marks a file as a script only when the token right before it is an interpreter (line 339), so flags and runners like '-u' or 'run' break detection. Paths resolve only against the workspace root (line 334), so 'cd' and Codex 'workdir' are ignored. _shell_origin also returns None when a script has no writer (lines 467-480). step_origin then falls through to Origin('agent', step=s) at line 457, which is direct and flips, so it becomes provable.",
+    "fix": "In _referenced_files: skip '-' flags and runner words when looking for the interpreter, and treat any referenced existing file with a script extension (.py/.js/.ts/.sh/.rb/.pl/.R) or the exec bit as a script. Resolve relative tokens also against the target of a preceding 'cd <dir>' and the tool input's 'workdir'. In _shell_origin: when a script has no recorded writer, return Origin('pre_existing', source={'kind':'file','path':f}). When a script-like token cannot be resolved, return an ambiguous or unknown origin instead of None, so no provable is possible."
+   },
+   {
+    "title": "Dict-shaped tool outputs are stored JSON-escaped, so a number at the start of a line or after a tab is invisible to lineage and the agent gets a false provable",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 204,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r3_json_escaped_outputs.py   (Claude-shaped tool_response dicts from capture-claude.md §2.3: Bash {'stdout':...}, Read {'type':'text','file':{'content':...}}, WebFetch {'result':...}; each control differs only by where the newline sits)",
+    "observed": "ctl_bash_same_line ('Q2 summary: 999 ...') -> input/lineage_exact, source notes/q2_summary.txt. bug_bash_line_start ('Q2 summary\\n999 ...') -> agent/provable/fact, 'no recorded read contains this value'. bug_read_tsv ('north\\t999') -> agent/provable. bug_webfetch_line_start ('Springfield facts:\\n4096 residents') -> agent/provable, while the same-line control gives input/lineage_exact 'the fetched content says this'. L.contains(raw,'999')=True but L.contains(json.dumps({'stdout': raw}),'999')=False.",
+    "expected": "The value is in an observed read, so the result should be lineage_exact (file, pre_existing or url), never provable (DECISION §4.5: provable requires the value NOT to be in any observed read). Recorder.post stores a non-str output as json.dumps(output) (recorder.py 268-271), which turns a newline into the two characters '\\\\n' and a tab into '\\\\t'. Trace.output_text returns that raw blob (blame.py 204-205), and occurrences() skips a number preceded by an alphanumeric (locate.py 79-81), here the 'n' or 't'. This affects every Claude Read, Bash, WebFetch and MCP output.",
+    "fix": "In Trace.output_text (and input_text), json.loads the blob when possible and return the string leaves joined with '\\n'; fall back to the raw text. Alternatively, store a decoded text rendering next to the JSON in Recorder.post."
+   },
+   {
+    "title": "json_schema locations use the JSON path as the 'wrong value', so blame follows whoever first wrote the KEY and can give a provable fault to the wrong actor",
+    "severity": "high",
+    "file": "vacant_network/trace/locate.py",
+    "line": 213,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r6_json_schema_value_is_key.py",
+    "observed": "(a) MAIN writes valid {\"total\": 60}, SUB changes it to \"sixty\": blame value 'total' -> agent/heuristic on t1 MAIN (wrong actor). (b) MAIN writes {\"total\": \"sixty\"}, SUB rewrites it to {\"total\": -5} (verifier: 'total: -5 is less than the minimum of 0'): agent/provable/fact on t1 MAIN, flipped True, so MAIN takes the fact-layer fault for SUB's value. (c) nested error 'items/0/price' -> UNKNOWN \"'items/0/price' is not in out.json at that point\".",
+    "expected": "Blame should trace the offending instance value (-5, \"sixty\", \"two\") written by SUB. _loc_json_schema sets value=ptr (lines 206 and 213), where ptr is the verifier's 'a/b/c' path. introducer then tests L.contains(file, 'total'), which is true since the key was first written. rerun_flip's value_here only checks that some error path contains 'total', so any earlier failing version counts as a flip.",
+    "fix": "In _loc_json_schema, parse the document, walk the path to the offending instance, and put its literal text (json.dumps of the instance, or the raw scalar) in Location.value. Keep the pointer in note. For '(root)' or missing-required errors, emit kind='missing'."
+   },
+   {
+    "title": "The agent's own earlier Write/Edit/Grep output is treated as an external source, so blame reports input/lineage_exact and the agent escapes",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 444,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r2_write_echo_is_external.py   (uses the measured Claude tool_response for Write/Edit from capture-claude.md §2.3, which echoes content/originalFile/oldString)",
+    "observed": "A: MAIN writes notes.md 'Total: 999', then report.md 'Total: 999' -> input/lineage_exact, note 'Write returned it', source {kind: tool_output, tool: Write}; consequence ('input_fault', source 'tool_output:tool_output'). B: MAIN writes 999, fixes it to 60, then puts 999 back itself -> input/lineage_exact 'Edit returned it'. C: MAIN greps its own notes.md -> input/lineage_exact 'Grep returned it'. D: MAIN Writes a scratch file outside the workspace and Reads it back -> input/lineage_exact 'a file outside the workspace says this'. Control (same as A but with the empty outputs the unit tests use) -> agent/provable on t3.",
+    "expected": "The value came from the agent's own earlier write, so the result should be agent (lineage_internal to that step, or provable), never an input fault. sources() relabels write-tool steps as kind 'tool' (line 291). step_origin sends every 'tool' or 'other' output to Origin('external', 'tool_output') (lines 444-447), which _grade maps to input/lineage_exact (lines 512-514). An out-of-workspace read is always 'input' (lines 419-420), even when a recorded step of the same session wrote that path.",
+    "fix": "In step_origin, when tool_kind(j.tool) == 'write', recurse with step_origin(j, value, chain, depth=depth+1) (the agent's own content) instead of returning 'external'. Treat Grep/Glob output lines that cite workspace paths as reads of those paths. Before calling an out-of-workspace read 'input', check whether an earlier step wrote that path (write-tool input file_path) and recurse into that step."
+   },
+   {
+    "title": "A sub-agent's result delivered as a <\\task-notification> UserPromptSubmit is recorded as the user's message, so the sub-agent's wrong value becomes an input fault",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 403,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r11_task_notification_is_user_prompt.py   (all events go through the real capture.observe() with Claude-shaped payloads: background Agent launch (Claude's default, capture-claude.md §0-6), sub-agent Read, UserPromptSubmit '<\\task-notification>...sums to 999...', MAIN Write 'Total: 999')",
+    "observed": "blame -> {fault_class: input, confidence: lineage_exact, note: \"the value is in the user's message\", source: {kind: prompt}}; consequences: [('input_fault', 'prompt:prompt')]; the human report says 'where it came from: **input**'.",
+    "expected": "Blame should name the sub-agent (agent, lineage_internal via the Agent call toolu_a1), not the human's message. capture.observe records every UserPromptSubmit as rec.prompt(..., source='user') (capture.py 138-140). step_origin maps any prompt hit to Origin('input', source={'kind':'prompt'}) (blame.py 403-406). Claude's measured sub-agent hand-back channel is this same event.",
+    "fix": "In capture.observe, record prompts that start with '<\\task-notification>' with source='subagent_result' and the named tool-use-id. In step_origin, route such prompts to _subagent_step of that Agent call (agent origin) instead of input."
+   },
+   {
+    "title": "An agent-modified pinned input is still reported as 'the pinned input says this' (input fault); its write history is never checked",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 414,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r5_tampered_input.py   (t1 MAIN Edits pinned data/cities.csv 3072->9999; t2 reads it (Read tool, or 'cat'); t3 writes 'Population: 9999'; text claim must_not_contain 9999)",
+    "observed": "Read variant -> input/lineage_exact, note 'the pinned input says this', source {kind: input, name: cities, path: data/cities.csv}. cat variant -> input/heuristic, 'a pinned input has this value, but no recorded read shows it being read'; its chain already contains t1 (the agent's edit of the input), yet the result is still 'input'.",
+    "expected": "Blame should name the agent's edit at t1 (agent). In the read branch (lines 408-418), any read of a pinned path returns 'input' without calling value_origin/introducer, so the agent's recorded write to that file is skipped. The final fallback (lines 448-456) reads the CURRENT file (p.read_text()) rather than the pinned content, so a tampered input matches too.",
+    "fix": "In the read branch, run introducer(rel, value, before_seq=j.seq) for pinned paths too, and if it returns a Transition, recurse via value_origin. Treat it as 'input' only when the value was there in the initial state and the file's sha at j.pre_index equals contract.input_pin(name). In the fallback, use the pinned version (for example trace.file_text(trace.initial, rel) after checking the pin) instead of the current file."
+   },
+   {
+    "title": "A write made by a background process during a read-only tool step is credited to that step and graded provable",
+    "severity": "medium",
+    "file": "vacant_network/trace/blame.py",
+    "line": 131,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r9_readonly_step_gets_provable.py   (t1 MAIN Bash 'python gen.py > report.md &' with run_in_background; the background job writes 'Total: 999' while SUB's Read of data/sales.csv is open)",
+    "observed": "{state: located, fault_class: agent, confidence: provable, layer: fact, step: t2, actor: ae25} tool: Read. A Read tool, which cannot write, gets a fact-layer reputation fault.",
+    "expected": "Writes seen during a read-only tool (Read/Grep/Glob/WebFetch/BashOutput) cannot be that tool's writes. They should at least be ambiguous (candidate_set or gap), never provable. Trace.__init__ marks a step ambiguous only for concurrent_with, post_missing, pre_missing or baseline_missing (lines 131-139).",
+    "fix": "In Trace.__init__, when tool_kind(tool) is 'read' or 'fetch' (or the tool is in a read-only set such as Grep/Glob/BashOutput) and writes is non-empty, add an ambiguity reason like 'writes observed during a read-only tool'. That routes the step to candidate_set/heuristic."
+   },
+   {
+    "title": "With real hook ordering, a foreground sub-agent's own writes are never located: they are always candidate_set with the parent's Agent/wait_agent call",
+    "severity": "medium",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 243,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r10_nested_subagent.py   (the parent's Agent call pre -> sub-agent steps -> parent post, as for a Claude fg Agent and Codex wait_agent per the capture docs; the control uses the unit test's non-nested order)",
+    "observed": "ctl_unit_test_order -> located/agent/provable on s2 (SUB). bug_fg_agent_nested -> candidate_set, note 'concurrent with a1', candidates ['s2','a1']. bug_codex_wait_agent -> the same candidate_set ['s2','a1'].",
+    "expected": "The sub-agent step's pre/post window contains only its own writes, so it should be located on the sub-agent, which is what the unit test asserts. Recorder.pre puts every pending step, including the parent's still-open Agent/wait_agent call, into concurrent_with (lines 243-245). Blame then treats the step as ambiguous (blame.py 377-379), so sub-agent attribution degrades to candidate_set in real runs.",
+    "fix": "Do not count a pending step whose tool_kind is 'agent' (Agent/Task/spawn_agent/wait_agent) as concurrent with steps of a sub-agent in the same platform/session, in Recorder.pre or when building ambiguity in Trace. Also drop the parent Agent step's own diff from the transitions, since it is exactly its children's writes."
+   },
+   {
+    "title": "python_checks failures are never located: the traceback locator's format never appears in the python_checks detail, so blame is always UNKNOWN on path '?'",
+    "severity": "medium",
+    "file": "vacant_network/trace/locate.py",
+    "line": 37,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r12_python_checks_never_located.py   (real python_checks claim, sandbox none; one recorded step by MAIN writes the only deliverable, solution.py; one case returns a wrong value, the other raises inside solution.py)",
+    "observed": "detail 'test_visible.py::check_add — assert: assertion failed [test_visible.py:3: assert add(2, 3) == 5]' (and the ZeroDivisionError variant) -> locate() = [] -> blame {state: UNKNOWN, fault_class: unattributable, note: 'nothing recorded wrote this file', line: None} for both.",
+    "expected": "At minimum the heuristic last writer of the deliverable (MAIN, t1), and a line when the exception is raised in solution.py. _TB_RE only matches 'File \"...\", line N' (line 37). python_checks' detail comes from acceptance.render_failures, whose 'where' is basename:line of the CHECK file from where_of() (acceptance.py 139-145), never a deliverable frame. blame_results then falls back to Location('?') because python_checks has no path/report param (blame.py 618-621), and _last_writer('?') is None.",
+    "fix": "Have the driver also report the deepest frame under WS (for example a 'where_ws' field), and add a python_checks locator that parses it into a deliverable file and line. In blame_results, when a claim has no path/report param, fall back to kind='missing' locations for the deliverable files (manifest) instead of the placeholder '?'."
+   },
+   {
+    "title": "One unrebuildable file anywhere in the workspace (for example a file over 8 MiB outside the deliverable) disables every provable verdict",
+    "severity": "medium",
+    "file": "vacant_network/trace/blame.py",
+    "line": 543,
+    "repro": "cd <scratch>/review_m8/blame && /home/user/Vacant/.venv/bin/python r7_big_unrelated_file.py   (scenario B with deliverable include ['report.md']; the bug run only adds assets/brochure.pdf of 8 MiB+14 bytes, not part of the deliverable)",
+    "observed": "ctl_no_big_file -> agent/provable, flipped True. bug_big_unrelated -> agent/heuristic, flipped False, unrebuildable(after): ['assets/brochure.pdf'].",
+    "expected": "The claim reads only report.md and the pinned CSV, so it should flip and be provable as in the control. rerun_flip takes materialize()'s list of every unrebuildable path in the whole workspace index (line 534) and requires it to be empty for a flip (lines 542-543). Any dataset, PDF or image over MAX_BLOB in a project therefore silently turns off the fact layer.",
+    "fix": "Only count unrebuildable paths the claim can see: filter `missing` to paths selected by the contract's deliverable include/exclude (glob_to_regex over the index paths), plus the claim's explicit path/report params, before setting unrebuildable/flipped."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "Introducer ignores the located line: an actor whose offending text was already removed gets a provable fault for text another actor wrote",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: <scratch>/review_m8/verify-blame/f1.py, run with `cd <that dir> && /home/user/Vacant/.venv/bin/python f1.py`. Setup: text claim must_not_contain TODO. t1 SUB writes '# R\\nIntro TODO\\n'. t2 MAIN adds 'Conclusion TODO'. t3 SUB changes its own line to 'Intro done.'. Observed: final file '# R\\nIntro done.\\nConclusion TODO\\n'. blame gives loc line 3 -> {located, agent, provable, fact, step t1, actor ae25 (SUB), flipped True}. stopcheck.localize records consequence ('provable_fault', ['builtin:general-purpose','claude','unknown','text'], step 1). MAIN wrote the remaining TODO at t2 and is never named. Code trace: blame.py 253-267 (introducer) checks only L.contains(whole file, value). That stays true from t1 on, so intro stays at t1. rerun_flip 537-538 matches only path+value, never loc.line, although its docstring says 'the wrong value is at that location'. This is not covered by an honest boundary: boundary 2 only makes upstream lineage inference-layer, but this is the fact layer and puts a reputation hit on the wrong actor. Fix: make introducer count occurrences, or map loc.line back through each version, and require the same line in rerun_flip."
+   },
+   {
+    "title": "A script the engine does not recognise ('python3 -u', 'uv run', 'cd dir && python x.py', or a pre-existing user script) turns into a provable fault on whoever ran the command",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: verify-blame/f2.py (`/home/user/Vacant/.venv/bin/python f2.py`). Scenario C: SUB writes the buggy calc.py (sums ids, so 6), MAIN's Bash writes report.md 'Total: 6'. Only the command string changes between runs. Observed:\n- 'python calc.py > report.md' -> agent/lineage_internal, step t1, actor ae25 (matches the unit test).\n- 'python3 -u calc.py > report.md' -> agent/provable/fact, step t2, MAIN, flipped True.\n- 'uv run calc.py > report.md' -> agent/provable/fact, step t2, MAIN, flipped True.\n- 'cd tools && python calc.py > ../report.md' (script at tools/calc.py) -> agent/provable/fact, step t2, MAIN.\n- Pre-existing scripts/calc.py with no recorded writer -> agent/provable/fact, step t2, MAIN.\n- Same path but written by SUB -> lineage_internal on t1.\nCode trace: _referenced_files line 339 needs the token right before the file to be an interpreter, so after '-u' or 'run' the script lands in reads, not scripts. Line 334 resolves paths only against the workspace root, so a preceding 'cd' is ignored. _shell_origin 467-480 then returns None (fallback=False, and no writer for a pre-existing script). step_origin falls through to Origin('agent', step=s) at line 457. That origin is direct, rerun flips, and the result is provable. Honest boundary 4 ('only files named in the command string') does not cover this: the file is named. The pre-existing-script variant is more debatable, but the -u, uv run and cd variants contradict the designed scenario C outcome and move a reputation fault onto the runner."
+   },
+   {
+    "title": "Dict-shaped tool outputs are stored JSON-escaped, so a number at the start of a line or after a tab is invisible to lineage and the agent gets a false provable",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: verify-blame/f3.py. All events go through the real capture.observe('claude', ...) with Claude-shaped tool_response dicts from capture-claude.md §2.3. Observed:\n- 'ctl bash same line' ('Q2 summary: 999 units') -> input/lineage_exact from notes/q2.txt.\n- 'bug bash line start' ('Q2 summary\\n999 units') -> agent/provable/fact on toolu_2, 'no recorded read contains this value'.\n- 'ctl read comma' ('north,999') -> input/lineage_exact.\n- 'bug read tsv' ('north\\t999') -> agent/provable.\n- 'bug read line start' ('units:\\n999') -> agent/provable.\n- 'ctl webfetch same line' -> input/lineage_exact 'the fetched content says this'.\n- 'bug webfetch line start' -> agent/provable.\nDirect check: L.contains('a\\n999','999')=True, but L.contains(json.dumps({'stdout':'a\\n999'}),'999')=False. Code trace: recorder.py 268-270 stores a non-str output as json.dumps. blame.py 204-205 output_text returns the raw JSON. locate.py 79-81 rejects a number whose previous character is alphanumeric, here the 'n' of '\\n' or the 't' of '\\t'. This contradicts DECISION §4.5, where provable requires the value NOT to be in any observed read. Unit tests pass only because their values follow a comma. Pinned inputs are partly masked by the fallback at 448-456 (input/heuristic), but other workspace files, command output and fetched pages give a false provable."
+   },
+   {
+    "title": "json_schema locations use the JSON path as the 'wrong value', so blame follows whoever first wrote the KEY and can give a provable fault to the wrong actor",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: verify-blame/f4.py. Schema: total integer, minimum 0, plus items[].price number. Observed:\n- (a) MAIN writes {\"total\": 60}, SUB writes {\"total\": \"sixty\"}: loc.value='total' -> located/agent/heuristic, step t1, MAIN (wrong actor, inference layer).\n- (b) MAIN writes {\"total\": \"sixty\"}, SUB writes {\"total\": -5}: loc.value='total' -> located/agent/provable/fact, step t1, MAIN, flipped True. SUB wrote the current bad value and is never named.\n- (c) nested error: loc.value='items/0/price' -> UNKNOWN/unattributable, \"'items/0/price' is not in out.json at that point\".\nCode trace: locate.py 206 and 213 set Location.value=ptr (the error path). introducer (blame.py 253-267) then tracks who first wrote the substring 'total'. rerun_flip 537-538 counts any after-state error whose path contains 'total' as value_here. The locate docstring documents only that the line number is approximate (boundary 2). It does not document that blame follows the key instead of the offending instance, so this is a bug, not an honest boundary."
+   },
+   {
+    "title": "The agent's own earlier Write/Edit/Grep output is treated as an external source, so blame reports input/lineage_exact and the agent escapes",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: verify-blame/f5.py. Uses real capture.observe with the measured Claude Write/Edit tool_response shapes, which echo content, originalFile and oldString. Observed:\n- A: MAIN Writes notes.md 'Total: 999', then report.md 'Total: 999' -> input/lineage_exact, note 'Write returned it', src {kind: tool_output, tool: Write}; consequence ('input_fault', 'tool_output:tool_output').\n- A-ctl: same steps with empty outputs, as the unit tests use -> agent/provable/fact on toolu_2 ('provable_fault').\n- B: MAIN writes 999, edits it to 60, then edits it back to 999 -> input/lineage_exact 'Edit returned it'.\n- D: MAIN Writes a scratch file outside the workspace, Reads it back, then writes report.md -> input/lineage_exact 'a file outside the workspace says this'.\nCode trace: sources() line 291 relabels write-tool steps as 'tool'. step_origin 444-447 returns Origin('external', tool_output) for them, and _grade 512-514 maps that to input/lineage_exact. Out-of-workspace reads always return 'input' (419-420) without checking whether a recorded step wrote that path. This is not honest boundary 2 (a coincidental match): the source step is found correctly but labelled external."
+   },
+   {
+    "title": "A sub-agent's result delivered as a <\\task-notification> UserPromptSubmit is recorded as the user's message, so the sub-agent's wrong value becomes an input fault",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: verify-blame/f6.py. All events go through capture.observe('claude', ...): a UserPromptSubmit with the real task; a background Agent launch (tool_response isAsync/async_launched, Claude's default per capture-claude.md §0-6); a sub-agent Read with agent_id ae25; a UserPromptSubmit '<\\task-notification>...<tool-use-id>toolu_a1</tool-use-id>...<result>The amount column sums to 999.</result>...'; then a MAIN Write 'Total: 999'. Observed: blame -> located/input/lineage_exact, note \"the value is in the user's message\", src {kind: prompt}. Both prompt events are recorded with source 'user'. Consequences: [('input_fault', 'prompt:prompt')]. Human report: 'where it came from: **input**'. Code trace: capture.py 138-140 records every UserPromptSubmit as rec.prompt(..., source='user'). blame.py 403-406 maps any prompt hit to Origin('input', {kind: prompt}). capture-claude.md §2.7 documents that this same event is the sub-agent hand-back channel, and no honest boundary covers treating it as the human's message."
+   },
+   {
+    "title": "An agent-modified pinned input is still reported as 'the pinned input says this' (input fault); its write history is never checked",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Scripts: verify-blame/f7.py (Edit variant, same as the original) and verify-blame/f7b.py (the path reachable through real hooks). Note: decide_pre_tool DENIES a direct Edit of a pinned input (f7b prints 'guard on Edit of pinned input: deny'), but 'python fix.py' is allowed ('guard on python fix.py: allow'). In f7b, t0 MAIN writes fix.py, t1 MAIN runs 'python fix.py', which rewrites data/cities.csv 3072->9999 (recorded as t1's write), t2 Reads it, and t3 Writes 'Population: 9999'. The text claim must_not_contain 9999 FAILs. Observed: located/input/lineage_exact, note 'the pinned input says this', src {kind: input, name: cities, path: data/cities.csv, line 2}, chain ['t3','t2']. f7 cat variant: input/heuristic 'a pinned input has this value, but no recorded read shows it being read'. That chain is ['t3'], not containing t1 as the original claimed, but the result is still input. Code trace: blame.py 408-418 returns 'input' for any read of a pinned path without calling introducer/value_origin. The fallback at 448-456 reads the CURRENT (tampered) file. The pinned content says 3072, so 'the pinned input says this' is factually false, and the agent's own recorded tamper step is skipped."
+   },
+   {
+    "title": "A write made by a background process during a read-only tool step is credited to that step and graded provable",
+    "reproduced": true,
+    "severity": "not_a_bug",
+    "evidence": "Script: verify-blame/f8.py. t1 MAIN Bash 'python gen.py > report.md' with run_in_background (Post at launch). Then SUB's Read of data/sales.csv is open (pre), the background job writes 'Total: 999', and the Read posts. Observed: located/agent/provable/fact, step t2, actor ae25, tool Read, flipped True. So it reproduces. However, this is an honest boundary already written in recorder.py's module docstring, boundary 2: '工具呼叫進行中、掛鉤外面發生的改動（使用者自己的編輯、背景行程）也會算進那一步' (changes made outside the hooks while a tool call is running, including background processes, are counted into that step). The attribution to the open step is intended. Marking a step ambiguous when a read-only tool shows writes would be a reasonable hardening, but by the review rules this is documented behaviour."
+   },
+   {
+    "title": "With real hook ordering, a foreground sub-agent's own writes are never located: they are always candidate_set with the parent's Agent/wait_agent call",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-blame/f9.py. Observed:\n- Unit-test order (Agent pre+post, then the SUB Write) -> located/agent/provable, step s2.\n- Real foreground nesting (MAIN Agent pre -> SUB Write pre/post -> MAIN Agent post) -> candidate_set/agent/heuristic, note 'concurrent with a1', candidates ['s2','a1'].\n- The same with tool 'wait_agent' -> candidate_set ['s2','a1'].\nCode trace: recorder.py 243-245 adds every pending step, including the parent's still-open Agent call, to concurrent_with. Trace.__init__ blame.py 132-133 turns that into ambiguity, and value_origin 377-379 returns candidate_set. A foreground Agent's PreToolUse necessarily fires before the sub-agent runs and PostToolUse after it (the fg tool_response carries status completed and totalDurationMs, capture-claude.md §2.3). The unit test asserts located-on-SUB with a non-nested order. e2e_trace.py boundary 3 and evidence README §3 say sub-agent end-to-end was never run, so this was not caught. Attribution is lost rather than misplaced, hence medium."
+   },
+   {
+    "title": "python_checks failures are never located: the traceback locator's format never appears in the python_checks detail, so blame is always UNKNOWN on path '?'",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-blame/f10.py. A real python_checks claim (suite = pinned input dir, sandbox none). MAIN t1 writes the only deliverable, solution.py (add returns a-b; div divides by 0). Observed detail: 'test_visible.py::check_add — assert: assertion failed [test_visible.py:4: assert add(2, 3) == 5]\\ntest_visible.py::check_div — exception: ZeroDivisionError: division by zero [test_visible.py:7: ...]'. locate() = []. blame -> UNKNOWN/unattributable, loc path '?', note 'nothing recorded wrote this file'. Code trace: locate.py 37 _TB_RE needs 'File \"...\", line N', which render_failures never produces. acceptance.where_of (139-145) reports the TEST file frame even when the exception is raised inside solution.py. blame_results 618-621 falls back to Location('?') because python_checks has no path/report param, so _last_writer('?') is None. Locate boundary 3 only excludes errors inside the check script, yet even a solution.py-raised exception goes unlocated. The '?' fallback also skips the documented 'last writer' heuristic (locate boundary 1), so every failing coding-task check ends up unattributable."
+   },
+   {
+    "title": "One unrebuildable file anywhere in the workspace (for example a file over 8 MiB outside the deliverable) disables every provable verdict",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-blame/f11.py. Scenario B with include ['report.md'] and pinned data/sales.csv; the only change is assets/brochure.pdf of MAX_BLOB+14 bytes, not in the deliverable. Observed: big=False -> agent/provable/fact, step t2, flipped True, unrebuildable []. big=True -> agent/heuristic/inference, step t2, flipped False, unrebuildable(after) ['assets/brochure.pdf']. Code trace: rerun_flip 534 keeps materialize()'s list of every unrebuildable path in the whole index, and 542-543 requires it to be empty for flipped. workspace.py boundary 3 says only that the big file itself cannot be rebuilt and is marked not re-verifiable. It does not say that all claims lose the fact layer. The error is conservative (a missed provable, not a misattribution), hence medium."
+   }
+  ],
+  "notes": "Scope: vacant_network/trace/blame.py, locate.py and rerun.py, plus the recorder and capture inputs they depend on. Nothing under /home/user/Vacant was modified (git status is clean). All repro scripts are in <scratch>/review_m8/blame/. They share a fixture in common.py that sets VACANT_HOME and HOME to fresh temp dirs and mirrors tests/test_trace_blame.py::proj. Each script runs standalone: cd into that directory, then /home/user/Vacant/.venv/bin/python rN_*.py. No network and no API keys; WebFetch and MCP outputs are synthetic recorded data.\n\nWhy the unit tests don't catch the input-side findings: the tests feed empty or plain-string tool outputs and a non-nested sub-agent order. Several of the high findings (R2, R3, R11) only appear with the measured Claude tool_response shapes in ops/accountability/capture/capture-claude.md §2.3: dicts that echo content, and Agent defaulting to background with the result coming back as a <\\task-notification> UserPromptSubmit. R10 needs the real nested Pre/Post ordering.\n\nChecked and not reported:\n- Performance: 2000 steps give Trace() 0.06 s and blame_results 1.2 s (r8_perf_long_trace.py).\n- Cycles: lineage recursion strictly decreases the event seq and is bounded by MAX_DEPTH, so it cannot loop.\n- Coincidental value matches: for example a 'total = row' overwrite bug whose result equals the last CSV cell comes out as input/lineage_exact. Honest boundary 2 of blame.py already documents coincidence matches, so this is not listed as a finding.\n- Git restore: a 'git checkout'/'git stash pop' that restores another actor's wrong content is graded provable on the restorer. That is defensible under the design's own flip definition, so it is not listed.\n- Traceback tail matching: in _loc_traceback a stdlib frame could map onto a deliverable file with the same name (for example __init__.py). This was not reproduced end to end because python_checks never emits these frames (see R12)."
+ },
+ {
+  "dim": "agent_text",
+  "findings": [
+   {
+    "title": "Hidden claim's location leaks through the '(still open)' / 'Resolved since the last check' markers and through one repeated line per failing location",
+    "severity": "high",
+    "file": "vacant_network/trace/feedback.py",
+    "line": 138,
+    "repro": "cd <scratch>/review_m8/agent_facing && /home/user/Vacant/.venv/bin/python repro_a_hidden_marker.py && /home/user/Vacant/.venv/bin/python repro_a2_hidden_count.py   (common.py sets HOME/VACANT_HOME to a mkdtemp dir. It drives hook.handle('claude', ...) with native payloads. Contract: hidden csv_total 'secret_total' on summary.md, or a hidden text must_not_contain 'Alic\\w+' on report.md.)",
+    "observed": "repro_a: stop 1 prints '- secret_total: FAIL (details withheld by the task owner)'. After the agent edits the unrelated line 'Rows: 3'->'Rows: 4', stop 2 prints '... (details withheld by the task owner)  (still open)'. After it edits 'Total: 999'->'Total: 998' (still wrong), stop 3 prints the line WITHOUT '(still open)' plus 'Resolved since the last check: 1.' The agent learns that the hidden check reads the Total value in summary.md. repro_a2: 3 matches give 3 identical '- style: FAIL (details withheld by the task owner)' lines. Replacing only 'Treasurer: Alicja' leaves 2 lines marked '(still open)' plus 'Resolved since the last check: 1.' This reveals how many places match and which edit removed one. The generic feedback_text prints one unchanging line per hidden claim.",
+    "expected": "A hidden claim prints the same single line on every round. That line does not change with the location or value of what failed (invariant 3: nothing about location or value, including via the resolved/still-open markers).",
+    "fix": "In render_agent, collapse hidden blames to one line per claim id. Key them by a claim-only id (e.g. 'h:'+claim) so that editing the value does not change the id. Never append '(still open)' to hidden lines, and leave hidden ids out of the 'Resolved since the last check' count. The stopcheck finding events can keep F.finding_id(b), since they are on the human side."
+   },
+   {
+    "title": "A hidden claim's secret pinned input becomes a value oracle (and its path leaks) through the 'the same value is in …' line of a visible claim",
+    "severity": "high",
+    "file": "vacant_network/trace/blame.py",
+    "line": 448,
+    "repro": "cd <scratch>/review_m8/agent_facing && /home/user/Vacant/.venv/bin/python repro_b_secret_input.py   (Contract: visible csv_total 'total' on report.md, plus hidden command claim 'answer_ok' reading input 'answers'. That input is an absolute path outside the workspace containing {\"q1\": 4817}, which is where policy.HIDDEN_DETAIL says real secrets belong. The agent writes a candidate number on the visible, failing Total line.)",
+    "observed": "With 'Total: 1234': '  this value first appeared at step 2 (Write)'. With 'Total: 4817': '  the same value is in /tmp/m8af-…/owner_only/answers.json (the given input); if the input is wrong, say so in the answer'. Cause: Blamer.step_origin (blame.py:448-455) falls back to scanning EVERY contract input, including ones the agent never read and that only the hidden claim uses. It returns Origin('input', observed=False). feedback.agent_lines (feedback.py:108-111) then prints that path to the agent. Each round tells the agent whether a value appears in the hidden answer data. The same run also misattributes: the report records fault_class 'input', and the agent is told to blame the input for a coincidental match.",
+    "expected": "Nothing reaches the agent about the content or path of inputs it never observed, least of all inputs behind hidden claims (invariant 3: no expected value via 'the same value is in …').",
+    "fix": "In agent_lines, emit the 'the same value is in' line only when the source was actually observed (src.get('observed', True) is True). Better, in the unobserved-input fallback at blame.py:448, skip inputs outside the workspace or inputs that visible claims don't reference, and keep it for the human report only."
+   },
+   {
+    "title": "A KS-1/actor-guard hit aborts the whole localize(): human flag silently dropped, no systemMessage/report/findings, and the generic fallback delivers the frozen phrase anyway",
+    "severity": "high",
+    "file": "vacant_network/trace/stopcheck.py",
+    "line": 87,
+    "repro": "cd <scratch>/review_m8/agent_facing && /home/user/Vacant/.venv/bin/python repro_c_flag_note_ks1.py 'stats-helper made this up; the mayor is Alice' ; /home/user/Vacant/.venv/bin/python repro_c_flag_note_ks1.py 'wrong mayor - you are responsible for checking names against the source' ; /home/user/Vacant/.venv/bin/python repro_c2_exhausted.py ; /home/user/Vacant/.venv/bin/python repro_e_ks1_fallback.py   (Control: repro_c_flag_note_ks1.py 'the mayor is Alice, not Alicia' and repro_c2_control.py)",
+    "observed": "feedback_ks1_clean raises inside render_agent (feedback.py:163). stopcheck.localize calls it at line 87, BEFORE it appends findings, consequences, report.md and report.json. decide_stop.traced (hookpolicy.py:365-369) swallows the error and returns None. (1) Flag path, contract accepted. The human's flag note names the actor that `vacant flag` itself just printed ('step 1 (Write) by claude:stats-helper#a7f3c9d2'), or uses a natural 'you are responsible'. Result: hook stdout {}, events.jsonl action 'allow' with trace_error 'KS1FeedbackError: actor identifier 'stats-helper'…' or 'KS1Violation…'. report.md is never written. The agent stops with no feedback and the human gets no systemMessage. Every later Stop repeats this, so the flag can never be delivered. The control note gives decision=block with the flag. (2) Reject path (repro_c2): stop 1 sends generic text without the flag. Once rounds are used up, stop 2 returns {} even though 'total' still FAILs. The control run returns a systemMessage 'Vacant: 1 required check(s) still not passing …'. (3) repro_e: a text claim whose regex/detail contains 'you are responsible' makes the traced text raise KS1Violation. The fallback hookpolicy.feedback_text is never KS-1 checked, so the agent still receives '…contains forbidden /(?i)you are responsible[^\\n]*/…'. There are 0 finding events and no report.md, and the exhausted stop returns {}. Also, with the built-in 'Plan' subagent in a blame chain, any text containing 'explanation'/'plan.md' trips the substring match, since 'plan' is in 'explanation'.",
+    "expected": "Invariant 5: a guard hit on agent-facing text degrades only that text. The agent still gets feedback (in the flag path, a flag line that leaves out the offending note). Findings, the report and the human systemMessage are still produced. The fallback text is subject to the same KS-1 check.",
+    "fix": "In stopcheck.localize, wrap only F.render_agent in try/except (KS1FeedbackError, KS1Violation) and set text=None. Keep appending findings/consequences, keep writing report.md/report.json, and still return 'summary'. Better, have render_agent drop or redact the offending line (e.g. replace a flag note with '(note not shown: it names an actor / uses a frozen phrase)') instead of raising for the whole text. In decide_stop's accept branch, use t['blames'] even when text is None, and send a generic flag line. Run memory.assert_ks1_clean on feedback_text output too, and redact rather than raise."
+   },
+   {
+    "title": "A deliverable that already holds the wrong value is called 'the given input', and the agent is told to 'say so in the answer' instead of fixing it",
+    "severity": "medium",
+    "file": "vacant_network/trace/feedback.py",
+    "line": 108,
+    "repro": "cd <scratch>/review_m8/agent_facing && /home/user/Vacant/.venv/bin/python repro_f_preexisting_deliverable.py   (report.md already contains 'Total: 999' when tracing starts: a stale draft, a template, or a 'fix the report' task. `vacant do` copies the project into the workspace this same way. The agent's first step is a Read.)",
+    "observed": "'- total: FAIL — report.md:2 says \"999\"' / '  expected 60 (column 'amount', 3 rows)' / '  the same value is in report.md line 2 (the given input); if the input is wrong, say so in the answer'. The finding is recorded as fault_class 'input', confidence 'lineage_exact', source {'kind':'file','path':'report.md'}. value_origin returns 'pre_existing' (blame.py:368), _grade maps it to input/lineage_exact (blame.py:512), and agent_lines prints the input sentence for src.kind 'file'. That lineage_exact grade also makes actors.consequences log an input_fault against 'file:report.md'.",
+    "expected": "When the value was already in the deliverable itself (src.path == location.path, or the path is a deliverable file rather than a contract input), the agent is told only that the value was already there before the first recorded step. It is not told the deliverable is 'the given input', and it is not told to report the input as wrong.",
+    "fix": "In agent_lines, emit the '(the given input); if the input is wrong…' sentence only for src.kind == 'input' (a contract-pinned input). For 'file' sources equal to loc.path, print '  this value was already in {path} before the first recorded step'. In blame._grade, do not grade pre_existing on a deliverable path as input/lineage_exact."
+   },
+   {
+    "title": "feedback_ks1_clean only knows the actors inside the blames; identifiers of other recorded actors reach the agent",
+    "severity": "low",
+    "file": "vacant_network/trace/feedback.py",
+    "line": 65,
+    "repro": "cd <scratch>/review_m8/agent_facing && /home/user/Vacant/.venv/bin/python repro_d_actor_not_in_blame.py   (The trace has an Explore sub-agent step (agent_id b91c04e7), which `vacant trace show` lists as 'claude:Explore#b91c04e7'. The main agent writes report.md. The human flags report.md:2 with the note 'Explore b91c04e7 misread the source; mayor is Alice'.)",
+    "observed": "The agent-facing Stop reason contains '  check says: Explore b91c04e7 misread the source; mayor is Alice'. Printed check: agent type in agent-facing text True, sub-agent id True. actor_tokens() collects only step/candidates/chain actors of the current blames, so the Explore actor is not in the set and the guard passes. If the same note names the blamed actor instead, the guard raises and everything is dropped (see the finding above), so the outcome depends on which actor the note names.",
+    "expected": "Invariant 1: agent-facing feedback never contains any recorded actor identifier (sub-agent id, agent type, model id, definition hash), whichever blame it belongs to.",
+    "fix": "Build the token set from every step actor in the trace (e.g. {agent, agent_type, model} over Trace(rec).steps, plus definition_of() hashes) and pass it to render_agent. Redact matching substrings in human-supplied text (flag notes) instead of raising."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "Hidden claim's location and match count leak through '(still open)' / 'Resolved since the last check' and through one line per failing location",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Script: cd <scratch>/review_m8/verify-agent_text && /home/user/Vacant/.venv/bin/python a_hidden.py && /home/user/Vacant/.venv/bin/python a2_hidden_count.py. It uses its own vh.py harness: HOME and VACANT_HOME are mkdtemp dirs, the contract is locked, and hook.handle('claude', ...) gets native payloads.\n\na_hidden.py uses a hidden csv_total claim on summary.md.\n- Stop 1 prints '- secret_total: FAIL (details withheld by the task owner)'.\n- After editing only 'Rows: 3'->'Rows: 4', stop 2 prints the same line plus '  (still open)'.\n- After editing 'Total: 999'->'Total: 998' (still wrong), stop 3 prints the line without '(still open)' and adds 'Resolved since the last check: 1.'\n\na2_hidden_count.py uses a hidden must_not_contain 'Alic\\w+' claim.\n- Stop 1 prints three identical '- style: FAIL (details withheld by the task owner)' lines.\n- After replacing only the Treasurer line, stop 2 prints two lines marked '(still open)' plus 'Resolved since the last check: 1.'\n\nCause (feedback.py): finding_id (lines 43-47) hashes (claim, location.path, location.value). render_agent (lines 135-143, 152, 160) builds one line per hidden blame and adds the still-open and resolved markers keyed by that id. The agent can therefore tell how many places match, and which edit touched the value the hidden check depends on. The pre-existing hookpolicy.feedback_text prints one unchanging line per hidden claim.\n\nThis contradicts feedback.py honest boundary 2: hidden claims give neither location nor value. The suggested fix is correct: collapse hidden blames to one line keyed by claim id, add no markers, and leave hidden ids out of the resolved count."
+   },
+   {
+    "title": "Unobserved-input fallback turns a hidden-only secret input into a value-membership oracle via the visible claim's 'the same value is in …' line",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: cd <scratch>/review_m8/verify-agent_text && /home/user/Vacant/.venv/bin/python b_secret.py. The setup has a visible csv_total on report.md and a hidden command claim reading input 'answers', an absolute path outside the workspace containing {\"q1\": 4817}.\n\nThe agent Writes a guess on the failing Total line:\n- 'Total: 1234' prints '  this value first appeared at step 2 (Write)'.\n- 'Total: 4817' prints '  the same value is in /tmp/vat-…/owner_only/answers.json (the given input); if the input is wrong, say so in the answer'.\n- 'Total: 5555' goes back to 'first appeared at step 4'.\n\nCause: Blamer.step_origin (blame.py:448-455) scans every contract input, including ones never read, and returns Origin('input', observed=False). _grade (blame.py:512-514) gives fault_class input with confidence heuristic. feedback.agent_lines (feedback.py:108-111) ignores 'observed' and prints the path and the input sentence to the agent.\n\nWhy medium rather than high:\n- The path itself is not new information: the contract, including input paths, is readable in the workspace, as the policy.HIDDEN_DETAIL comment says.\n- The oracle is one membership query per failing located value per round, and max_feedback_rounds defaults to 3.\n- The hook does not read-protect inputs (_protected only read-protects keys), so an unsandboxed agent could often read the file directly.\n- The coincidental-match misattribution is partly an honest boundary (blame.py boundary 2: coincidental equal values are mistaken for the source; inference layer only).\n\nStill, the value oracle against the documented place for secrets is real. So is the agent-facing advice to blame an input for a value the agent itself typed with no observed read. Minimal fix: in agent_lines, emit the 'same value is in' line only when src.get('observed', True) is true."
+   },
+   {
+    "title": "A KS-1/actor-guard hit in render_agent aborts the whole localize(): findings, report.md, report.json and the human systemMessage are lost, and flags are silently never delivered",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "All scripts run from <scratch>/review_m8/verify-agent_text.\n\n(1) Flag path, contract accepted: /home/user/Vacant/.venv/bin/python c_flag.py '<note>'. A sub-agent stats-helper#a7f3c9d2e1 writes report.md, then the human runs `vacant flag report.md:1 <note>` through trace.cli.main.\n- Control note 'the mayor is Alice, not Alicia': {\"decision\":\"block\",...flag...}, events action 'continue', report.md written.\n- Note 'stats-helper made this up; the mayor is Alice' (the actor name `vacant flag` itself printed as 'by claude:stats-helper#a7f3c9d2e1'): hook stdout {}, events action 'allow', trace_error \"KS1FeedbackError: actor identifier 'stats-helper' in agent-facing text\", report.md exists False.\n- Note '...you are responsible for checking names...': the same result, with trace_error 'KS1Violation…'.\n\n(2) Reject path, rounds=1: c2_reject.py noflag vs c2_reject.py flag.\n- Control: stop 2 gives {\"systemMessage\": \"Vacant: 1 required check(s) still not passing (feedback rounds used up…)…\"}.\n- With the flag: stop 1 gets only generic text, stop 2 gives {} even though 'total' still FAILs, and report.md is False.\n\n(3) No human input needed: c3_plan.py Plan. The built-in 'Plan' sub-agent writes plan.md and a visible text claim fails. The token 'Plan' matches 'plan.md' case-insensitively (feedback.py:58-61), giving trace_error \"KS1FeedbackError: actor identifier 'Plan'…\". Stop 2 returns {} and there is no report. With agent_type general-purpose, stop 2 returns a systemMessage and report.md is written.\n\n(4) e_ks1.py: a deliverable containing 'You are responsible…' under a must_not_contain claim. The traced text raises KS1Violation. The fallback feedback_text (never KS-1 checked) still delivers the phrase to the agent. There are 0 finding events, no report.md, and stop 2 returns {}. The fallback leak itself predates the trace; the lost report and findings are new.\n\nCause: stopcheck.py:87 calls F.render_agent, which raises at feedback.py:163. That happens before the finding/consequence appends (89-104) and the report writes (107-117). decide_stop.traced (hookpolicy.py:365-369) swallows the error and returns None.\n\nstopcheck honest boundary 1 covers 'trace itself breaks ⇒ generic feedback'. It does not cover dropping the report and the systemMessage. feedback.py's docstring promises open problems stay in the report and reach the human via systemMessage, and this breaks that promise. Fix: catch the guard around render_agent only (redact the offending line or set text=None), then still write findings and the report and return the summary."
+   },
+   {
+    "title": "A deliverable that already held the wrong value is called 'the given input' and the agent is told to 'say so in the answer'",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: cd <scratch>/review_m8/verify-agent_text && /home/user/Vacant/.venv/bin/python f_preexist.py. report.md already contains 'Total: 999' before tracing, and the agent's only step is a Read of it.\n\nAgent-facing reason:\n'- total: FAIL — report.md:2 says \"999\"'\n'  expected 60 (column 'amount', 3 rows)'\n'  the same value is in report.md line 2 (the given input); if the input is wrong, say so in the answer'.\n\nreport.json records blame fault_class 'input', confidence 'lineage_exact', source {'kind':'file','path':'report.md','line':2}. The chain holds a consequence {'kind':'input_fault','source':'file:report.md'}.\n\nTrace through the code:\n- value_origin returns Origin('pre_existing') (blame.py:366-369).\n- _grade maps pre_existing to input/lineage_exact (blame.py:512-514).\n- agent_lines prints the input sentence for src.kind 'file' (feedback.py:108-111), even though src.path equals the failing location itself.\n\nThe agent is told the deliverable is the given input and to report it rather than fix it, and an input_fault is recorded against the deliverable file. §4.5's 'user-provided file' wording makes the classification arguable. The agent-facing advice is still wrong for a deliverable. Minimal fix: when src.kind == 'file' and src.path == loc.path, print 'this value was already in {path} before the first recorded step' and do not grade it as lineage_exact input."
+   },
+   {
+    "title": "feedback_ks1_clean only knows actors inside the current blames; other recorded actors' identifiers reach the agent",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Script: cd <scratch>/review_m8/verify-agent_text && /home/user/Vacant/.venv/bin/python d_actor.py.\n\n`vacant trace show` lists '1  claude:Explore#b91c04e7  Read' and '2  claude:main  Write  a:report.md'. The human flags report.md:2 with the note 'Explore b91c04e7 misread the source; mayor is Alice'.\n\nThe agent-facing Stop reason contains '  check says: Explore b91c04e7 misread the source; mayor is Alice'. The script prints: contains 'Explore': True, contains sub-agent id: True.\n\nCause: actor_tokens (feedback.py:65-74) collects agent, agent_type and model only from step/candidates/chain of the current blames. The Explore step is not in the blame, so the guard passes. In c_flag.py, naming the blamed actor instead makes the guard raise and the whole trace drop.\n\nDecision §4.7 says the guard rejects any actor identifier. Only reachable through human-supplied text (flag notes) or verifier details naming a non-blamed actor, hence low. The fix should redact rather than raise; otherwise widening the token set worsens the abort in the previous finding."
+   }
+  ],
+  "notes": "I found five problems in what reaches the agent, each reproduced with a script. No repository file was modified. All scripts are in <scratch>/review_m8/agent_facing/. The shared harness common.py sets HOME and VACANT_HOME to a mkdtemp dir, locks a contract and drives adapters/hook.handle('claude', …) with native Claude Code payloads, the same way tests/test_trace_stop.py does. No network or model API was contacted.\n\nInvariant 4 holds (the systemMessage goes only to the human; no finding):\n- The Claude Code Stop hook is registered synchronously (agents.py:113, no \"async\"). doc_hooks.md says a synchronous hook's systemMessage is \"shown to the user\". Only async hooks deliver it to Claude.\n- In the Claude Code bundle (cc/strings.txt), the attachment-to-API normalizer maps `hook_system_message:()=>[]`, so the message never enters the model context.\n- hook.handle strips user_message from events.jsonl and from the ledger hook_event record.\n- Codex, OpenCode and pi never receive user_message: render() drops it. That is not a leak, but on those three agents the human gets no in-session message.\n\nOther checks with no finding:\n- Hidden claims' detail and evidence are already redacted by flow.check and flow.submit before localize runs, so the \"expected\" line and the check detail cannot leak for hidden claims.\n- The flag path sets hidden=False on purpose: the human chose the location.\n\nObserved but not reported (not agent-facing):\n- In decide_stop's accept-with-flags branch, localize runs twice when the rounds are used up. Consequences are idempotent by id, so nothing is double-counted.\n- The decision doc (DECISION_20260924_ACCOUNTABLE_TRACE.md:138-139) says the guard also rejects platform names and definition hashes. actor_tokens() collects neither."
+ },
+ {
+  "dim": "recorder",
+  "findings": [
+   {
+    "title": "A FIFO or character device in the workspace hangs every hook (and the Stop check) or reads without limit: scan() calls read_bytes() on files that are not regular files",
+    "severity": "high",
+    "file": "vacant_network/trace/workspace.py",
+    "line": 135,
+    "repro": "S=<scratch>/review_m8/recorder; cd $S && ./r1b_fifo_hook.sh   # real `python -m vacant_network hook claude PreToolUse`, VACANT_TRACE=1, `mkfifo named_pipe` in ws\n./r1c_fifo_stop.sh   # contract project, Stop hook with and without a FIFO\nD=$(mktemp -d $S/rvd_XXXX); mkdir -p $D/ws/rootfs/dev; mknod $D/ws/rootfs/dev/zero c 1 5; (ulimit -v 1500000; timeout 20 .venv-python r18_devnode.py $D/ws)",
+    "observed": "r1b: `exit=124 after 10s` with the FIFO; control with the FIFO removed: `exit=0 after 0s`. r1c: `fifo=no Stop hook exit=0 after 1s` / `fifo=yes Stop hook exit=124 after 20s`. The same Stop with VACANT_TRACE=0 and the FIFO present returns `exit=0 after 0s`, so the hang is in the trace, not flow.check (intake/artifact.py skips non-regular files). r18: `scan raised MemoryError after 6.6 s` (without a ulimit it keeps allocating until the OOM killer). The hang happens while the recorder lock is held. Every tool call therefore stalls until the platform's 30 s timeout, each turn end stalls for 600 s and loses its Stop verdict, and the detached finalize process (localize -> checkpoint -> scan) blocks forever with the lock held.",
+    "expected": "Special files are recorded without reading their content, the way vrun/wshash.py:95 (`FIFO／socket／device：不讀內容（會 block），但不可以靜靜跳過`) and intake/artifact.py:131 already do.",
+    "fix": "In scan(), after `st = p.lstat()`: `if not stat.S_ISREG(st.st_mode) and not stat.S_ISLNK(st.st_mode): out[rel] = Entry(f\"special:{stat.S_IFMT(st.st_mode):o}\", 0, st.st_mtime_ns); continue` (and treat `special:` like `big:` in materialize)."
+   },
+   {
+    "title": "A step that never gets its post (Codex apply_patch failure, a killed PostToolUse, or a session closed without Stop) takes the blame for later unrecorded changes such as user edits, and makes every later step ambiguous",
+    "severity": "high",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 229,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r6_orphan_pre.py && /home/user/Vacant/.venv/bin/python r6b_orphan_blame.py && /home/user/Vacant/.venv/bin/python r6c_orphan_stale.py",
+    "observed": "r6: `step call_2 writes: ['report.md'] concurrent_with: ['call_patch_failed']`, `unrecorded_change events so far: 0`, `settled call_patch_failed writes: ['notes.txt', 'report.md']`. r6b (the same scenario with and without the orphan pre):\n`orphan=False notes.txt state=UNOBSERVED conf=gap fault=unattributable`\n`orphan=True  notes.txt state=candidate_set conf=heuristic fault=agent step=call_patch_failed`\n`orphan=False report.md state=located ... step=call_2` -> `orphan=True report.md state=candidate_set`.\nr6c (session killed with a step open, the user edits report.md 12 h later, then a new session starts): `[('step','call_A','stale',['report.md'])]` and `blame: candidate_set agent call_A`. No gap is recorded.\nCause: pre() only records gaps `if prev is not None and not st[\"pending\"]` (L229); every new pre joins the pending set (L243-245); _finish_open rescans \"now\" (L319-325), so the orphan absorbs everything up to the moment it is closed.",
+    "expected": "Changes that no step explains are recorded as `unrecorded_change` and blamed on no one (DECISION §4.5 `gap`: 不動任何人; negative control D). A step that has already ended must not keep all later steps concurrent.",
+    "fix": "When pending is non-empty, still record diff(last_index, idx) in pre()/checkpoint() as `unrecorded_change` carrying `open_steps=sorted(pending)`, instead of dropping it. When closing a step as `stale`, use the last observed index as its post_index rather than a fresh scan, so the rest becomes a gap. Optionally close a same-actor pending step as `superseded` when that actor issues its next pre."
+   },
+   {
+    "title": "Secret files in the workspace (.env, id_rsa, *.pem, auth.json) are copied verbatim into $VACANT_HOME/trace/objects, and a 0600 original becomes a 0644 copy",
+    "severity": "high",
+    "file": "vacant_network/trace/workspace.py",
+    "line": 136,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r4_secrets.py",
+    "observed": "`.env orig mode 0o600 -> stored: True copy mode 0o644`\n`id_rsa orig mode 0o600 -> stored: True copy mode 0o644`\n`VACANT_HOME 0o755 trace 0o755 objects 0o755`\n`grep in objects: $T/vh/trace/objects/f7/f735...` (the fake API key in plaintext).\nscan() stores every file of 8 MB or less through Blobs.put_bytes -> atomic_write_bytes, which uses umask defaults (L84-90). No path is excluded except SKIP_DIRS. The copies are never garbage-collected, so they outlive rotation or deletion in the workspace. The same repo already lists these exact patterns as credentials in the default contract (intake/contract.py:407-409 `no_secrets_shipped`) and keeps private keys at 0600 (identity.py:48).",
+    "expected": "Credential files are not duplicated into a store that others can read. At minimum, copies do not get looser permissions than the original.",
+    "fix": "For credential-pattern paths (reuse the scaffold list, plus e.g. `**/*.key` and `**/credentials`), record `Entry(\"secret:\"+sha256, ...)` and do not store the content (materialize reports it as missing, like `big:`). Create `$VACANT_HOME/trace` with mode 0700 and write blobs 0600 (for example `os.open(tmp, O_WRONLY|O_CREAT|O_EXCL, 0o600)` in a trace-specific put)."
+   },
+   {
+    "title": "`vacant trace verify` reports an intact trace as BROKEN in VACANT_TRACE=1 mode: the recorder signs with a verifier key it never adds to trust.json",
+    "severity": "medium",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 174,
+    "repro": "cd $S && ./r13_untrusted_signer.sh",
+    "observed": "`keys: verifier  trust.json: absent`\n`BROKEN trace signer is not on the accepted-signer list`\n`verify exit=1` (the chain is untouched; `trace show` lists the step).\n_append uses `_keys.load_or_create(\"verifier\")`, which creates the key without registering it. Only intake/ledger.py:95 and flow.py:56 call `ensure_local()`, and neither runs when there is no contract. keys.ensure_local's docstring records this same bug for the hook (`掛鉤先建了鑰匙卻沒登記`). The tests hide it because every fixture calls keys.init_local().",
+    "expected": "A fresh install that traces with VACANT_TRACE=1 verifies OK. BROKEN should mean tampering.",
+    "fix": "Call `_keys.ensure_local()` before `load_or_create(\"verifier\")` in `Recorder._append` (or once in `Recorder.__init__`), as ledger.py and flow.py do."
+   },
+   {
+    "title": "Truncating chain.ndjson (dropping owner flags, findings, or steps from the tail, down to genesis only) still verifies OK; the K3 anchor that should catch this does not exist",
+    "severity": "medium",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 408,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r5_verify.py",
+    "observed": "`edit a step's writes -> (False, ...)`, `delete a middle entry -> (False, ...)`, `swap two entries -> (False, ...)`, but\n`truncate: drop last 2 (finding + owner flag) -> (True, '6 entries')`\n`truncate: keep only genesis -> (True, '1 entries')`\n`truncate to zero bytes -> EXCEPTION IndexError: list index out of range`\n`state.json n_steps still says: 4` (not consulted).\nDECISION_20260924_ACCOUNTABLE_TRACE.md §4.8 K3 lists as done `工作階段結束時把鏈頭＋筆數寫進收件端的帳本（有契約時）`, but no code under trace/ or adapters/hook.py writes the chain head or count anywhere (`grep -rn Ledger vacant_network/trace` returns nothing). Truncated owner flags silently drop out of `open_flags()` and so out of the agent feedback.",
+    "expected": "verify() detects tail truncation at least against a recorded anchor, and an empty file reports BROKEN instead of raising IndexError. If the anchor is out of scope, the honest-boundary text should say that truncation is undetectable.",
+    "fix": "Implement K3: at `session_closed`, when there is a contract, `Ledger(task_id).append(\"trace_anchor\", {\"project\": key, \"seq\": e.seq, \"head\": e.hash()})`. Also keep `st[\"chain_seq\"]`/`chain_head` in state.json on every save. In verify(), require the chain to contain the anchored (seq, head) and to be at least as long; guard `book.entries[0]`."
+   },
+   {
+    "title": "The Stop, finalize and consequence pipeline never verifies the chain: an edited, unsigned step event drives a provable-fault reputation consequence, and the report does not mention it",
+    "severity": "medium",
+    "file": "vacant_network/trace/stopcheck.py",
+    "line": 80,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r16_unverified_consequences.py",
+    "observed": "After the step's `actor` in chain.ndjson is rewritten (no re-signing):\n`vacant trace verify -> (False, 'trace chain does not verify')`\n`finding: provable actor: {'agent': 'innocent1', 'agent_type': 'docs-writer', ...}`\n`consequences: [('provable_fault', ['builtin:docs-writer', 'claude', 'unknown', 'csv_total'])]`\n`report mentions broken chain: False`\nlocalize() -> blame_results -> Trace(rec) -> rec.events() parses entries without checking signatures (recorder.py:402-406). No code under trace/ calls verify() except cmd_verify. Meanwhile the report states that `tampering is detectable` (feedback.py:204).",
+    "expected": "Consequences, which only `provable` facts are supposed to reach, are taken only from a chain that verifies. Otherwise the report says the chain is broken and no consequence is recorded.",
+    "fix": "At the top of localize() (and in finalize.main), call `ok, why = rec.verify()`. If it fails, skip `A.consequences`, append a `coverage` event `{missing: 'chain_integrity', why}`, and put `trace chain does not verify` in the report. Mark blames as `layer=inference`."
+   },
+   {
+    "title": "A torn last line in chain.ndjson (crash or ENOSPC during an append) stops all recording for good, and `vacant trace verify/show` crash with a traceback",
+    "severity": "medium",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 166,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r2_partial_line.py && ./r2b_cli.sh",
+    "observed": "r2: after half an entry is appended, every later `_append` raises: `post t2: JSONDecodeError Unterminated string ...`; `verify()`/`events()` raise the same error; the step that wrote b.txt is lost. r2b uses the real hook CLI: `steps in chain after torn write + one more step: 1`, and errors.jsonl gets `trace: JSONDecodeError`. Then `trace verify` -> `verify exit=1 last line: json.decoder.JSONDecodeError`, `trace show` -> the same traceback, and a zero-byte chain -> `IndexError: list index out of range`. _tail() parses the last line unconditionally (L165-166), and cli.main catches only ContractError/OSError. The object store grows without bound (every file version is kept), which makes ENOSPC a plausible trigger. Nothing in the chain records the loss (K6).",
+    "expected": "A torn trailing record, which was never part of the signed chain, is detected and cut back to the last newline under the lock, and the loss is recorded. verify/show print BROKEN instead of a traceback.",
+    "fix": "In _tail(): if the file does not end with b\"\\n\" or the last line fails json.loads, truncate to the last complete line (`os.truncate`) under the lock and append a `coverage` event `{missing: 'torn_append'}`. In verify() and cmd_show, catch ValueError/IndexError and return `(False, 'chain unreadable: ...')`."
+   },
+   {
+    "title": "settle() and close() ignore their actor: one session's Stop or SessionEnd closes another session's in-flight step in the same project, which turns a located write into a candidate set",
+    "severity": "medium",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 373,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r15_settle_other_session.py && /home/user/Vacant/.venv/bin/python r15b_settle_control.py",
+    "observed": "r15: `A's Stop settled: [('u1', 'codex', 'turn_end')]` (A is claude:sA, u1 belongs to codex:sB). B's real post then arrives as `pre_missing = True`, so u1 has two step events `[(2, 'turn_end', False), (3, None, True)]`. r15b, where the only difference is A's Stop:\n`A stops mid-call=False -> located step=u1`\n`A stops mid-call=True  -> candidate_set step=u1 note='no pre-tool event'`.\n`settle(self, actor, why)` calls `_finish_open(st, why)` without filtering (L369-375), and close() does the same (L382).",
+    "expected": "With one chain per project and several sessions (the design's stated reason for a project chain), a turn end or session end closes only that session's open steps.",
+    "fix": "Give `_finish_open` an actor filter: in settle() and close(), close only pending steps whose `actor.platform`/`actor.session` match the caller. Keep the global STALE_S sweep."
+   },
+   {
+    "title": "`chmod +x` is never recorded: the incremental reuse ignores the mode, so Entry.exec, diff() and materialize() keep the old bit",
+    "severity": "medium",
+    "file": "vacant_network/trace/workspace.py",
+    "line": 125,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r17_chmod.py",
+    "observed": "`writes recorded for `chmod +x run.sh`: []`\n`post_index says exec = False | real mode: 0o755`\n`reconstructed state mode: 0o644`\n`full rescan says exec = True`\nchmod changes ctime and mode but not mtime or size, so the `old.size == st.st_size and old.mtime_ns == st.st_mtime_ns` branch reuses the stale Entry. Reruns on reconstructed states then run a non-executable script, and the step that made it executable owns nothing.",
+    "expected": "The exec bit that Entry, diff() (L167) and index_root track is up to date after an incremental scan.",
+    "fix": "Add `and old.exec == bool(st.st_mode & 0o100)` to the reuse condition, or store and compare `st_ctime_ns`, which also closes part of honest boundary 1."
+   },
+   {
+    "title": "More than 50,000 files: the workspace is never recorded as a gap; every hook call re-reads and copies the whole tree, and appends another session_seen",
+    "severity": "medium",
+    "file": "vacant_network/trace/workspace.py",
+    "line": 141,
+    "repro": "cd $S && ./r3_maxfiles.sh   # 51,000 tiny files, 3 real PreToolUse hook calls; also: /home/user/Vacant/.venv/bin/python r14_deep.py",
+    "observed": "`hook call 1: exit=0 wall=32.4s` (over the 30 s PreToolUse budget), `hook call 2: wall=2.2s`, `hook call 3: wall=2.4s`\n`chain event types: ['trace_genesis', 'session_seen', 'session_seen', 'session_seen']`\n`state.json exists: no`, `objects stored: 50001`\nerrors.jsonl gets `trace: ValueError: workspace has more than 50000 files` on every call.\nBecause state is never saved, `prev` stays None and every call re-reads every byte (cost grows with total size, not file count). `_ensure_session` appends before the scan raises (recorder.py:206). DECISION §4.3 says `超過 5 萬檔就不追並記成缺口`, but nothing reaches the chain. r14: 1,100 nested directories give `pre raised RecursionError` (3.11 os.walk recurses), with the same silent result.",
+    "expected": "Oversized workspaces are detected cheaply, recorded once in the chain as a coverage gap, and later hooks return immediately without copying the tree.",
+    "fix": "Count entries in a first os.walk pass (no reads) before storing blobs. In Recorder, catch scan failures (ValueError, RecursionError, OSError), append one `coverage` event `{missing: 'workspace_scan', reason}` per session, and save `st[\"scan_disabled\"]` so later calls skip scanning. Move `_ensure_session`'s append after the scan, or save state first."
+   },
+   {
+    "title": "A hook killed between a chain append and the state save (Codex SessionEnd budget of 1-3 s) replays the same step later: duplicate step events with the same n, and the replay absorbs later user edits",
+    "severity": "medium",
+    "file": "vacant_network/trace/recorder.py",
+    "line": 382,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r7_kill_between_append_and_save.py && /home/user/Vacant/.venv/bin/python r8_timing.py",
+    "observed": "r7 simulates the kill with os._exit during close()'s second scan: `child exit: 137`, `state.pending after kill: ['call_A'] | chain steps: [('call_A', 1, 'session_end')]`. A later session then gets `step call_A n= 1 post_missing= session_end paths= ['report.md']` and `step call_A n= 1 post_missing= stale paths= ['notes.txt', 'report.md']`: the same step twice with the same n, and the user's later notes.txt edit is attributed to it with no gap. r8 shows the window is realistic: `close() with one open step: 2.03s` on a 30k-file workspace (two full scans: _finish_open at L319, then again at L384), before interpreter start-up and transcript sealing, against Codex's 3 s SessionEnd limit (agents.py CODEX_TIMEOUTS).",
+    "expected": "Chain and state stay consistent across a kill. An open step that has already been appended is not emitted again.",
+    "fix": "Persist `st[\"chain_seq\"]` on every save. In _state(), if the chain tail seq is greater than chain_seq, drop pending steps that already have a step event after chain_seq and mark sessions already `session_seen`. In close(), reuse the index _finish_open just scanned instead of scanning twice, and save state right after _finish_open's appends."
+   },
+   {
+    "title": "The home-directory and state-directory exclusions are equality checks only: a contract in $HOME traces all of $HOME, and a workspace inside $VACANT_HOME ingests Vacant's own private keys",
+    "severity": "medium",
+    "file": "vacant_network/trace/capture.py",
+    "line": 52,
+    "repro": "cd $S && ./r9_home_contract.sh && /home/user/Vacant/.venv/bin/python r10_ws_is_vacant_home.py",
+    "observed": "r9 (`vacant.contract.json` in $HOME; the agent runs in ~/Downloads/scratch, a directory with no .git): `traced workspace: $D/home`, `.ssh/id_ed25519 stored: True`, `.aws/credentials stored: True`, `.codex/auth.json stored: True`. workspace_for returns `contract.base_dir` before the `$HOME`/`/` check (L52-53 vs L57), although the module docstring says `家目錄與 / 不記（一掃就是整台機器）`. r10 (ws == $VACANT_HOME): every step's writes and gaps are the trace's own objects and chain.ndjson, and intake/keys/{owner,verifier,approver,reviewer}/identity.key (0600) end up as 0644 copies in trace/objects (checked by sha256). scan() checks `skip` only for subdirectories (workspace.py:115), never for the root. Ancestors of $HOME (e.g. cwd=/home with VACANT_TRACE=1) pass the check as well.",
+    "expected": "$HOME, `/`, any ancestor of $HOME, and anything equal to or inside `state_dirs()` are never traced, whether tracing comes from VACANT_TRACE or a contract.",
+    "fix": "In workspace_for, apply the exclusions after choosing ws on both paths: reject `ws == anchor`, `ws in (home, *home.parents)`, and `any(ws == s or s in ws.parents for s in state_dirs())`. In scan(), return {} (or raise) if `base` itself is in or under `skip_r`."
+   },
+   {
+    "title": "Directory symlinks are neither recorded nor diffed, despite the docstring promising `link:<target>`",
+    "severity": "low",
+    "file": "vacant_network/trace/workspace.py",
+    "line": 115,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r11_dir_symlink.py",
+    "observed": "`indexed paths: ['cur.txt', 'v1/result.txt', 'v2/result.txt']` (`current -> v1` is missing). After `ln -sfn v2 current && ln -sfn v2/result.txt cur.txt`: `writes recorded for t1: [('cur.txt', 'link:v1/result.txt', 'link:v2/result.txt')]`, while `current/result.txt now reads: answer from v2`. os.walk puts directory symlinks in `dirs`, which only the skip filter looks at. materialize() cannot rebuild them, so reruns on reconstructed states see a different tree. intake/artifact.py:115-121 handles exactly this case (`目錄本身是符號連結 ⇒ os.walk 不會進去，但要記下來`).",
+    "expected": "Every symlink, file or directory, is recorded as `link:<target>` (honest boundary 3).",
+    "fix": "In scan(), for each `x in dirs` where `(d/x).is_symlink()`: `out[rel] = Entry(\"link:\"+os.readlink(d/x), 0, lstat.st_mtime_ns)` and remove it from dirs."
+   },
+   {
+    "title": "The session-end trace finalize runs only when auto-submit is on: `submit_on_end=false` (or VACANT_HOOK_NO_SUBMIT) silently drops the session-end report and outcome",
+    "severity": "low",
+    "file": "vacant_network/adapters/hook.py",
+    "line": 244,
+    "repro": "cd $S && /home/user/Vacant/.venv/bin/python r12_finalize_coupling.py",
+    "observed": "`submit_on_end=True  spawned=['submit', 'finalize'] trace_finalize=222`\n`submit_on_end=False spawned=[] trace_finalize=None`\n`_spawn_finalize` is called only inside the `contract.hooks.get(\"submit_on_end\", True) and not VACANT_HOOK_NO_SUBMIT` branch (L244-253). finalize.py exists so that agents with no turn boundary (`opencode run`) still get their issues raised, and neither finalize.py nor _spawn_finalize's docstring ties it to submission.",
+    "expected": "Turning off auto-submit does not turn off the session-end trace. The only conditions are tracing being enabled and a terminal end reason.",
+    "fix": "Move `_spawn_finalize(contract, agent, payload, ev)` out of the submit branch into its own `elif ev.kind == \"session_end\" and contract is not None and ev.reason not in NON_TERMINAL_END_REASONS` path, keeping submission separate."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "A FIFO or device node in the workspace hangs every traced hook: workspace.scan() calls read_bytes() on files that are not regular files",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Scripts are in <scratch>/review_m8/verify-recorder (V=that dir). Cause: in workspace.py:113-135, os.walk puts FIFOs and devices in `files`. The code calls lstat, finds the file is not a link and has st_size 0 (so it passes the MAX_BLOB check), then calls `p.read_bytes()` at L135. On a FIFO that call blocks until a writer appears; on /dev/zero it never reaches EOF. Repro: `cd $V && python v1_fifo.py` gives `fifo=True TIMEOUT after 8.0s`; the control `MKFIFO=0 python v1_fifo.py` gives `exit=0 after 0.1s`. The real hook CLI (`./v1b_hook.sh`, VACANT_TRACE=1) gives `fifo=no exit=0 after 0s` and `fifo=yes exit=124 after 10s`. The Stop hook with a contract (`./v1d_stop.sh`) gives `VACANT_TRACE=0: Stop exit=0 after 1s` and `VACANT_TRACE=default: Stop exit=124 after 20s`, so the hang is in the trace, not in flow.check. A char device (`python v1c_dev.py`, mknod 1,5, RLIMIT_AS 1.5GB) gives `scan raised MemoryError after 4.8s`. The hang happens inside Recorder._lock(), so other hooks wait out file_lock's 30 s and then fail. The detached finalize process has no timeout at all. Fix: after lstat, when `not stat.S_ISREG(st.st_mode)`, record `Entry('special:%o' % stat.S_IFMT(st.st_mode), 0, st.st_mtime_ns)` without reading it, as vrun/wshash.py:95 and intake/artifact.py:131 already do. materialize() should treat `special:` like `big:`."
+   },
+   {
+    "title": "A step that never gets its post keeps later steps concurrent with it and absorbs later unrecorded changes (including user edits hours later), which suppresses the gap",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`python v2_orphan.py` compares a Codex-style apply_patch pre that never gets a post against a control without it. Without the orphan: `gaps=1`, `notes.txt: state=UNOBSERVED fault=unattributable conf=gap`, `report.md: state=located`. With it: `call_2 ... conc=['call_patch_failed']; gaps=0`, `settled orphan writes=['notes.txt', 'report.md'] post_missing=turn_end`, and both notes.txt and report.md become `candidate_set fault=agent conf=heuristic`. `python v2b_stale.py` covers a session killed with call_A open, a user edit 12 h later, and then a new session: `('step','call_A','stale',['report.md'])`, `gaps: 0`, `blame: candidate_set agent heuristic call_A ['call_A']`. Cause: pre() and checkpoint() record a gap only `if prev is not None and not st['pending']` (recorder.py:229, 346). Each new pre joins every pending step (L243-245). _finish_open diffs pre_index against a fresh scan (L319-325), so the window runs to whenever the step is closed. Why medium, not high: recorder boundary 2 and the _finish_open docstring do document that in-flight steps absorb outside edits and that post_missing writes are estimated 'pre to now' as candidates. The result is heuristic, so no reputation consequence follows. What is not documented: the unbounded window across sessions, every later step losing `located`, and the gap (and its integration-coverage consequence) disappearing, which goes against DECISION §4.5 gap and negative control D. Fix: when steps are pending, still record diff(last_index, idx) as unrecorded_change with open_steps listed, and close stale steps at their last observed index."
+   },
+   {
+    "title": "Credential files in the workspace are copied into $VACANT_HOME/trace/objects, and a 0600 original becomes a 0644 copy in a 0755 tree",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "`python v3_secrets.py` (umask 022) prints `.env: orig 0o600 -> stored=True copy 0o644`, `.ssh/id_rsa: orig 0o600 -> stored=True copy 0o644`, `VACANT_HOME 0o755 trace 0o755 objects 0o755`, and `grep -rl sk-fake- objects` finds the blob. Path: scan() -> Blobs.put_bytes (workspace.py:84-90, 135-136) -> atomic_write_bytes (atomic.py:27 `open(tmp,'wb')`, umask default). Nothing is excluded except SKIP_DIRS, and blobs are never collected. Copying every version is by design (workspace docstring), but nothing documents that permissions get looser. Other local accounts can read the copies wherever $HOME is traversable (the macOS default 0755 home, where ~/.vacant lands). Minimal fix: create trace/objects 0700 and write blobs 0600 (`os.open(tmp, O_CREAT|O_EXCL|O_WRONLY, 0o600)`). Optionally store only a hash for the credential patterns already listed in contract.py:407-409."
+   },
+   {
+    "title": "`vacant trace verify` reports BROKEN on an untampered trace in VACANT_TRACE=1 mode: Recorder signs with a verifier key that is never added to trust.json",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`./v4_untrusted.sh` runs a fresh VACANT_HOME, no `keys init`, and the real `python -m vacant_network hook claude PreToolUse/PostToolUse` with VACANT_TRACE=1. Output: `keys: verifier  trust.json: absent`, `BROKEN trace signer is not on the accepted-signer list`, `verify exit=1`, while `trace show` lists `1  claude:main  Write  a:a.txt`. Cause: recorder.py:174 `_keys.load_or_create('verifier')` creates the key but does not register it (keys.py:58-66). Only ensure_local() (keys.py:108) registers keys, and nothing on the no-contract trace path calls it. verify() at recorder.py:414-417 then rejects the signer. Fix: call `_keys.ensure_local()` before load_or_create in Recorder._append."
+   },
+   {
+    "title": "Truncating chain.ndjson from the tail (dropping owner flags or findings, down to genesis only) still verifies OK; the K3 chain-head anchor is not implemented; an empty file raises IndexError",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`python v5_truncate.py` prints `full: (True, '7 entries') open flags: 1`, `drop last 2 (flag+finding): verify=(True, '5 entries') open flags=0`, `keep only genesis: verify=(True, '1 entries') open flags=0`, `zero bytes: EXCEPTION IndexError: list index out of range` (recorder.py:413 `book.entries[0]`), and `edit a step: verify=(False, ...)` as the control. state.json still says n_steps 3 but is never consulted. Searching trace/, adapters/hook.py, hookpolicy.py and run.py for Ledger/anchor/chain_head finds only hook.py:265, which appends the `hook_event` record: agent, event, tool, action and d.record (submit_scheduled/pid/trace_finalize). It has no chain head or count. DECISION §4.8 K3 lists as done 「工作階段結束時把鏈頭＋筆數寫進收件端的帳本（有契約時）」, but no code writes it. Truncated owner flags silently leave open_flags() and so drop out of the feedback. Fix: at session_closed with a contract, append {project, seq, head} to the Ledger. verify() should require the anchored (seq, head) and guard against an empty book."
+   },
+   {
+    "title": "Stop, finalize and the consequence pipeline never verify the chain: an edited, unsigned step actor becomes a provable_fault consequence, and the report still says tampering is detectable",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "`python v6_unverified.py` uses the csv_total contract from test_trace_stop, with the bad-total Write done by subagent culprit1. Rewriting that step's actor in chain.ndjson without re-signing gives `verify after edit: (False, 'trace chain does not verify')`. The real hook.handle('claude','Stop') then gives `finding: provable actor: {'agent': 'innocent1', 'agent_type': 'docs-writer', ...}`, `consequences: [('provable_fault', ['builtin:docs-writer', 'claude', 'unknown', 'csv_total'])]`, `report mentions broken/verify: False`. Path: stopcheck.localize -> blame_results -> Trace(rec) -> rec.events() (recorder.py:402-406), which never checks signatures; only cli.cmd_verify calls verify(). Why low: whoever can write chain.ndjson can append directly to the unsigned $VACANT_HOME/trace/actors.ndjson (actors.py:103,120) with the same effect, so the missing check gives an attacker nothing new. Tampering stays detectable afterwards with `vacant trace verify`, as K2 and DECISION §6.1 promise. The real defect is that consequences and the report are built from a chain that fails verification without saying so. Fix: run rec.verify() at the top of localize(); on failure, skip A.consequences and state it in the report."
+   },
+   {
+    "title": "A torn last line in chain.ndjson makes every later append fail for good (all later steps are lost), and `trace verify`/`trace show` crash with a traceback",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`./v7_torn.sh` uses the real hook CLI with VACANT_TRACE=1. After one step, half a line is appended to chain.ndjson with no newline. Two more pre/post pairs then give `step events in chain: 1`, and errors.jsonl gets `trace: JSONDecodeError: Unterminated string ...` for each PostToolUse. `trace verify` ends in `json.decoder.JSONDecodeError ...` with exit 1 (an uncaught traceback), and `trace show` does the same. Truncating to zero bytes then gives `IndexError: list index out of range`. Cause: _tail() at recorder.py:165-166 json-loads the last line unconditionally. Logbook.load (logbook.py:212-223) also raises. cli.main catches only ContractError and OSError (cli.py:271-277). The loss is never recorded in the chain. Fix: in _tail(), under the lock, cut back to the last complete newline and append a coverage{missing:'torn_append'} event. verify() and show should return BROKEN instead of raising."
+   },
+   {
+    "title": "settle() and close() ignore their actor: one session's Stop closes another session's in-flight step, which duplicates the step and turns its located write into a candidate_set",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`python v8_settle.py` puts claude:sA and codex:sB in one project. When A's Stop arrives while B's u1 is in flight: `settled=[('u1', 'codex', 'turn_end')]`, u1 step events `[(2, 'turn_end', False, []), (3, None, True, ['out.txt'])]`, and blame `candidate_set heuristic step=u1 note='no pre-tool event'`. The control where A does not stop mid-call gives a single event `[(2, None, False, ['out.txt'])]` and `located heuristic step=u1`. Cause: settle(self, actor, why) calls `_finish_open(st, why)` with no actor filter (recorder.py:369-375), and close() does the same (L382). Nothing documents that one session's turn end closes another session's steps; the module stresses one chain per project with several sessions. The downgrade to candidate_set also means a real fault in u1 can never be graded provable. Fix: filter pending steps by actor platform and session in settle() and close()."
+   },
+   {
+    "title": "`chmod +x` is never recorded: incremental reuse keys only on size and mtime, so Entry.exec, diff() and materialize() keep the stale bit",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "`python v9_chmod.py` prints `writes for chmod +x: []`, `post_index exec: False | real mode: 0o755`, `materialized mode: 0o644`, and `full rescan exec: True`. Cause: at workspace.py:125-127 the reuse condition is `old.size == st.st_size and old.mtime_ns == st.st_mtime_ns`. chmod changes neither, so the stale Entry (exec=False) is reused, even though diff() (L167) and index_root compare exec. Why low: boundary 1's headline, 「mtime＋大小相同就視為沒變」 (same mtime and size is treated as unchanged), arguably covers this, and full=True catches it. Still, st_mode is already in hand from lstat, so the fix costs nothing: add `and old.exec == bool(st.st_mode & 0o100)` to the reuse condition."
+   },
+   {
+    "title": "A workspace with more than 50,000 files is never recorded as a gap: every hook call re-reads and copies the tree and appends another session_seen",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`./v10_maxfiles.sh` makes 51,000 tiny files and runs 3 real `hook claude PreToolUse` calls with VACANT_TRACE=1. Output: `hook call 1: exit=0 wall=32.36s` (over the 30 s PreToolUse timeout in agents.py:107), `hook call 2: wall=2.204s`, `hook call 3: wall=2.063s`, `chain types: ['trace_genesis', 'session_seen', 'session_seen', 'session_seen']`, `state.json: absent`, `objects stored: 50001`, plus `trace: ValueError: workspace has more than 50000 files` in errors.jsonl on every call. Cause: scan() raises at workspace.py:141-143 only after it has stored blobs. `_ensure_session` appends before the scan (recorder.py:206, 224-227), and state is never saved, so prev stays None. DECISION §4.3 says 「超過 5 萬檔就不追並記成缺口」 (over 50,000 files: stop tracing and record a gap), but nothing reaches the chain. Also `python v10b_deep.py` (1,100 nested dirs) gives `pre raised RecursionError` with the same silent result (Python 3.11.15). Fix: catch scan failures in Recorder, append one coverage event, and persist a scan_disabled flag."
+   },
+   {
+    "title": "A hook killed between the chain append and the state save replays the same open step later: duplicate step events (duplicate n) that absorb later user edits with no gap",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`python v11_kill.py` forks a close() that os._exit(137)s during close()'s second scan, after _finish_open has appended call_A's step. Output: `child exit: 137`, `state.pending after kill: ['call_A'] | n_steps: 1`, `chain steps: [('t0', 1, None), ('call_A', 2, 'session_end')]`. After a later user edit and the next session's step and turn end: `step call_A n= 2 post_missing= session_end writes= ['report.md']`, then `step call_A n= 3 post_missing= turn_end writes= ['notes.txt', 'report.md']`, and `gaps: []`. u1 also received n=2, so n is duplicated. Cause: close() appends inside _finish_open (recorder.py:334) and again at L387 and L394, but _save only runs at L398, and state carries no chain position. The window is realistic: `python v11b_timing.py` shows `close() with one open step: 2.24s` on 30k files (two full scans, L319 and L384), before interpreter start-up and transcript sealing. Codex clamps SessionEnd to 3 s (agents.py:499-500). K6's boundary covers a killed hook recording nothing; it does not cover duplicate, misattributed events. Fix: persist chain_seq in state and reconcile it in _state(); save state right after _finish_open; reuse its scan in close()."
+   },
+   {
+    "title": "$HOME and $VACANT_HOME exclusions are equality-only and skipped on the contract path: a contract in $HOME traces the whole home, and cwd=$VACANT_HOME (or an ancestor of $HOME) is traced too",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "`./v12_home.sh` puts vacant.contract.json in $HOME and runs the real `hook claude PreToolUse` from ~/Downloads/scratch (no .git, so C.find at contract.py:344-356 walks up to $HOME). Output: `traced workspace: .../home (HOME = .../home)`, `.ssh/id_ed25519 stored: True mode 0o644`, `.aws/credentials stored: True mode 0o644`. Cause: capture.workspace_for returns `contract.base_dir` at L52-53, before the anchor/home check at L57, although the docstring (L16-17) says 「家目錄與 / 不記」 (the home directory and / are never traced). `python v12b_vh.py` with VACANT_TRACE=1 shows `workspace_for($VACANT_HOME) -> .../vh` and `workspace_for(parent of $HOME) -> True`, and tracing $VACANT_HOME stores `owner identity.key 0o600 -> copy stored: True 0o644`. Its steps and gaps then list the trace's own objects/chain/state files: scan() applies `skip` only to subdirectories (workspace.py:115), never to the root. Fix: apply the anchor, home-and-ancestors, and inside-state_dirs() exclusions after choosing ws on both paths."
+   },
+   {
+    "title": "Directory symlinks are neither recorded nor diffed, although the docstring promises `link:<target>`",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "`python v13_dirlink.py` prints `indexed: ['cur.txt', 'v1/result.txt', 'v2/result.txt']`, so `current -> v1` is missing. After `ln -sfn v2 current && ln -sfn v2/result.txt cur.txt`: `t1 writes: [('cur.txt', 'link:v1/result.txt', 'link:v2/result.txt')]` only, while `current/result.txt now: answer from v2`. Cause: with followlinks=False, os.walk lists directory symlinks in `dirs`. workspace.py:115 only filters that list; it neither records nor descends into them, which contradicts boundary 3 (L25) 「連結本身以 link:<目標> 記錄」 (a link itself is recorded as link:<target>). materialize() therefore cannot rebuild them. Fix: for each symlinked x in dirs, record Entry('link:'+os.readlink(d/x), 0, lstat mtime) and drop it from dirs."
+   },
+   {
+    "title": "Session-end trace finalize is spawned only inside the auto-submit branch: `submit_on_end=false` (or VACANT_HOOK_NO_SUBMIT) silently drops the session-end report and outcome",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "`python v14_finalize.py` stubs _spawn_submit and _spawn_finalize (the latter keeps the workspace_for gate) and calls the real hook.handle for SessionEnd with reason=other. Output: `submit_on_end=True NO_SUBMIT=False: spawned=['submit', 'finalize'] trace_finalize=222`, `submit_on_end=False NO_SUBMIT=False: spawned=[] trace_finalize=None`, `submit_on_end=True NO_SUBMIT=True: spawned=[] trace_finalize=None`. Cause: `_spawn_finalize` is called only inside the `contract.hooks.get('submit_on_end', True) and not VACANT_HOOK_NO_SUBMIT` branch (hook.py:244-253). Neither finalize.py's docstring nor _spawn_finalize's ties it to submission; the docstring gives 「沒開追緝就不跑」 (don't run when tracing is off) as the only condition. The VACANT_HOOK_NO_SUBMIT case is harmless for `vacant do`, because run.py localizes itself. For a hand-run `opencode run` with submit_on_end=false, though, no report or outcome is produced at all. Fix: spawn finalize in its own session_end branch, gated only on workspace_for and a terminal reason."
+   }
+  ],
+  "notes": "All repro scripts are in <scratch>/review_m8/recorder/ (common.py sets VACANT_HOME and HOME to fresh temp dirs; nothing touches the network). Run the Python ones with /home/user/Vacant/.venv/bin/python; the .sh ones are self-contained. No file under /home/user/Vacant was modified (the untracked files under ops/accountability/capture/ were already there). I deleted the big temp trees and the FIFO and device nodes after running; rerunning a script recreates what it needs.\n\nChecked and found to hold:\n- Every hook-side trace entry point is wrapped: hook._trace, _spawn_finalize, and decide_stop's `traced()` catch Exception, and main() catches everything else. The failure modes that still reach the agent are hangs and unbounded reads (finding 1) and per-call cost (finding 10), not exceptions.\n- verify() detects in-place edits, deletion of a middle entry, and reordering.\n- Symlink loops, including `ln -s . loop`, do not recurse because followlinks=False.\n- Sockets fail with an OSError that the scan skips.\n- Two concurrent hooks are serialized by the flock, and blob writes are atomic under per-pid temp names.\n- A $VACANT_HOME inside the workspace is excluded correctly.\n\nWhat verify cannot detect beyond the findings above:\n- Swapping in another project's chain (the genesis `workspace` is not checked).\n- Deleted or missing blobs in objects/: verify never looks at them, and blame.Trace.index() silently maps a missing index blob to {}.\n- A full re-sign with the local verifier key (documented as K2).\n\nNot reproducible here: denying read permission on a file, because this container runs as root. By code reading (workspace.py:139 `except OSError: continue`), an unreadable file is dropped from the index, so a chmod 000 would show up as a deletion."
+ },
+ {
+  "dim": "consequences",
+  "findings": [
+   {
+    "title": "Consequence ids are not scoped to project, session or actor, so a second actor's provable fault is dropped and one dismissal reverses faults in other projects",
+    "severity": "high",
+    "file": "vacant_network/trace/actors.py",
+    "line": 191,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_a_fid_collision.py && /home/user/Vacant/.venv/bin/python repro_a2_same_project.py   (common.py points VACANT_HOME and HOME at a fresh temp dir; everything goes through the real hook.handle path)",
+    "observed": "repro_a: two workspaces of the same task (two `vacant do` runs). Claude writes 'Total: 999' in run1 and Codex writes the same value in run2. Both chains contain finding f_20acab9513 with confidence provable (one actor claude, the other codex). run1's chain has consequences=['provable_fault']; run2's chain has consequences=[]. ActorBook holds a single event, pf:f_20acab9513, keyed ['main','claude','unknown','csv_total']. The codex cell does not exist. After A.dismiss(f_20acab9513) for run1, a third codex run (run3) with the same mistake is also not recorded, and cells == []. repro_a2 (one project): Claude's fault is recorded and then resolved. Next, a Codex session writes 999 again. The chain shows ('f_20acab9513','open','codex','provable'), but the only consequences are [('provable_fault','claude'), ...], and cells == [('claude main [unknown]', ..., 1 provable)].",
+    "expected": "Each (project, step, actor) provable fault is recorded once, against the actor whose step wrote the value. A dismissal reverses only the finding the owner looked at, in that project.",
+    "fix": "feedback.finding_id hashes only [claim, path, value] (feedback.py:43-47). The ActorBook is machine-wide and dedupes on `pf:{fid}` / `if:{fid}` / `gap:{fid}` (actors.py:129,191,199,203). state() drops every event whose finding_id is in a global `dismissed` set (actors.py:137,145). Fix: scope the ids. In consequences() use e.g. `id=f\"pf:{project_key(workspace)}:{b['step'].get('step')}:{fid}\"` and store `finding_id=f\"{project_key(workspace)}/{fid}\"`, the same for if:/gap:. Have `vacant flag --dismiss` build the same project-scoped id from its own workspace, so a dismissal reverses only that project's finding."
+   },
+   {
+    "title": "One `vacant do` run is counted as two outcomes, which gets past the MIN_N gate; Codex/pi runs are also split across two cells",
+    "severity": "high",
+    "file": "vacant_network/adapters/run.py",
+    "line": 374,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_b_do_double_count.py   (bin/claude and bin/codex are fake_agent.py. No model or network is involved. The fake reads the real --settings / -c hooks.X=… that claude_build/codex_build pass, then fires UserPromptSubmit, PreToolUse, PostToolUse, Stop and SessionEnd through the real `python -m vacant_network hook` commands. The script runs the real `vacant do` CLI.)",
+    "observed": "After ONE `vacant do claude` the book holds out:claude:<session> outcome and out:do:<run_id> outcome, both keyed ['main','claude','unknown','csv_total']. cells: ('claude main [unknown]', runs 2). After 3 real claude runs: runs 6, recommend() actionable=True, and the advice line reads 'claude main [unknown] 6/6 accepted' with no '(n < 5 …)' qualifier. After 3 codex runs there are two cells for one configuration: 'codex main [claimed:gpt-x]' 3/3 and 'codex main [unknown]' 3/3. With 3 real claude runs and 5 real codex runs, pick_agent returns {'agent':'codex','why':'UCB over accepted runs: claude 6/6, codex 5/5'}. So UCB runs on 3 real claude runs, which is below MIN_N.",
+    "expected": "One `vacant do` run gives one outcome, in the same cell as that configuration's hook-recorded outcomes and faults. pick_agent explores until each agent has MIN_N real runs.",
+    "fix": "The SessionEnd hook inside the run records an outcome (capture.py:151 → _outcome, capture.py:170, id out:<platform>:<session>). Then run._trace_outcome (run.py:374) records a second one under out:do:<run_id>, with actor={'platform': agent}, so its substrate is always 'unknown'. Fix: record one outcome per run. Either skip capture._outcome when VACANT_HOOK_NO_SUBMIT is set (vacant do records the run itself), or drop _trace_outcome. Whichever remains should take the model from the recorder's session info (`traced['rec'].session_info(platform, session)['model']`) so the key matches the provable-fault key."
+   },
+   {
+    "title": "The SessionEnd outcome comes from the project-wide feedback_state, so a session with no Stop check inherits an earlier session's verdict and the true result is dropped",
+    "severity": "high",
+    "file": "vacant_network/trace/capture.py",
+    "line": 162,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_c_stale_outcome.py",
+    "observed": "Claude session S1 writes 999. Its Stop rejects and it ends. Then an `opencode run` session (the plugin sends no `stop` when NONINTERACTIVE) fixes report.md to 60 and sends session_end. Output: 'contract check right now: accept'. Book: 'out:opencode:ses_opencode2 accepted= False'. Cells: ('opencode main [unknown]', runs 1, accepted 0). Both background finalize processes ran and printed 'nothing open', but record_outcome is idempotent on out:opencode:<session>, so the accept is discarded.",
+    "expected": "The opencode session is recorded as accepted: the contract passes at its end, and finalize recomputed that. A session's outcome never comes from a check another session triggered.",
+    "fix": "capture._outcome reads rec.dir/feedback_state.json (capture.py:162) with no check of who produced it. finalize.py:162 then loses to it through the out:<platform>:<session> idempotency. Minimal fix: in _outcome, return early when the state is older than this session, i.e. `st.get('t', 0) < rec.session_info(actor.platform, actor.session).get('first_seen', 0)`, and let finalize record the fresh result. Better: store the outcome per session key in localize/decide_stop. The same mechanism affects `vacant do` attempt ≥2 in generic mode (and opencode in any mode), where the previous attempt's _trace_attempt state is read."
+   },
+   {
+    "title": "pick_agent keeps one arbitrary cell per platform (the last one in sort order), and model_of is ignored",
+    "severity": "medium",
+    "file": "vacant_network/trace/actors.py",
+    "line": 261,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_f_pick_collapse.py",
+    "observed": "Cells: codex [claimed:gpt-5] 19/20 (actionable), claude [unknown] 3/6, codex [claimed:gpt-5-mini] 0/2. pick_agent(..., model_of={'codex':'gpt-5'}) returns 'exploring: codex has 2 run(s)', which ignores 20 runs. After gpt-5-mini reaches 0/5, it returns agent 'claude' with 'UCB over accepted runs: claude 3/6, codex 0/5'. The 19/20 cell is discarded. In normal `vacant do` use this is hit without changing models, because of the split cells in the previous finding: repro_b's final pick uses 'codex main [unknown]'.",
+    "expected": "Routing uses either the cell for the model that will actually run (model_of) or a defined aggregate over the platform's main cells, and the MIN_N gate applies to that same set of runs.",
+    "fix": "`rows = {r['key'][1].split('/')[0]: r for r in recommend(...)}` overwrites earlier rows, so the lowest-ranked cell wins. Fix: aggregate runs/accepted over all main cells of a platform, or select the cell whose substrate is `claimed:{model_of[a]}` when model_of is given. Apply the MIN_N test to that result."
+   },
+   {
+    "title": "Dismissing a flag by the id `vacant flag` printed does not reverse the consequence that flag produced",
+    "severity": "medium",
+    "file": "vacant_network/trace/cli.py",
+    "line": 156,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_d_dismiss.py   (part iii)",
+    "observed": "'flag h_a3077d58c4 recorded …'. The next Stop records consequence if:f_540d2d46ae and sources={'input:data/sales.csv': 1}. `vacant flag --dismiss h_a3077d58c4` prints 'dismissed h_a3077d58c4', but sources is still {'input:data/sales.csv': 1}.",
+    "expected": "Dismissing a flag reverses every consequence derived from that flag's finding.",
+    "fix": "stopcheck._flag_blames sets claim='flag:<h_id>', and consequences() keys it by F.finding_id(b) = f_<hash> (stopcheck.py:60, 102). cmd_flag --dismiss writes dismiss:<h_id> (cli.py:156), which matches nothing. Fix: when dismissing a flag id, also dismiss the finding ids whose claim is f\"flag:{id}\" (look them up in the chain's finding events), or make _flag_blames use the flag id as the finding id."
+   },
+   {
+    "title": "`vacant flag --dismiss` accepts ids that were never recorded, reports success, and pre-dismisses any future finding with that id",
+    "severity": "low",
+    "file": "vacant_network/trace/cli.py",
+    "line": 150,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_d_dismiss.py   (parts i and ii)",
+    "observed": "(i) `vacant flag --dismiss f_typo00000 wrong` returns (0, 'dismissed f_typo00000 (trace entry 2)'). (ii) The id of a future finding can be predicted as f_+sha256(json.dumps(['total','report.md','999']))[:10] = f_20acab9513. Dismissing it first, then letting Claude write 999 and Stop, gives chain consequences [('dismiss','f_typo00000'), ('dismiss','f_20acab9513'), ('provable_fault','f_20acab9513')]. ActorBook cells == []: the provable fault is logged in the chain but never counts.",
+    "expected": "A dismissal refers to a finding that exists (in this project), and an unknown id is refused. A typo does not silently report success, and faults cannot be dismissed before they exist.",
+    "fix": "In cmd_flag, before A.dismiss, check that args.dismiss appears as a finding_id or flag_id in Recorder(ws).events(). Otherwise exit non-zero ('no such finding in this project'). In ActorBook.state(), apply a dismiss only to events recorded before it (compare order in the ndjson)."
+   },
+   {
+    "title": "Advisory findings are re-appended as 'open' to the signed chain on every Stop and never marked resolved",
+    "severity": "low",
+    "file": "vacant_network/trace/stopcheck.py",
+    "line": 89,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_e_advisory_dupes.py",
+    "observed": "The contract has one required claim (passes) and one required=false claim (fails). Three Stops give finding events [('f_92b99be353','idsum','open','provable')] × 3, and the next Stop adds a 4th. The book stays idempotent (one provable_fault), but `vacant trace show` lists the same finding again for every turn.",
+    "expected": "A finding is logged 'open' once and gets 'resolved' when it disappears, whether it is required or advisory.",
+    "fix": "localize dedupes against previous['open'] (stopcheck.py:89-99), which render_agent fills only with required blames (feedback.py:136-139). Fix: keep a separate `state['open_all']` holding every blame's fid. Use it for the 'open' dedupe and the 'resolved' diff, and leave state['open'] for the agent-facing 'still open' text."
+   },
+   {
+    "title": "`vacant do` run_id is unique only per second and pid: two in-process runs in the same second share a workspace and an outcome id",
+    "severity": "low",
+    "file": "vacant_network/adapters/run.py",
+    "line": 225,
+    "repro": "cd <scratch>/review_m8/consequences && /home/user/Vacant/.venv/bin/python repro_g_runid.py",
+    "observed": "Two `vacant do --cmd …` calls in one process within the same second. The first returns ACCEPT, the second REJECT, and both print workspace …/q3/20260924T181225-30912/ws, so the first run's workspace was rmtree'd by prepare_workspace. The book has only ('out:do:20260924T181225-30912','outcome',True): the reject is dropped as a duplicate.",
+    "expected": "Each do() call gets its own workspace directory and outcome id.",
+    "fix": "run_id = time.strftime('%Y%m%dT%H%M%S') + f'-{os.getpid()}-{uuid.uuid4().hex[:8]}' (or use time.time_ns()). This only affects programmatic, in-process callers: the CLI and r536/run.py start one process per run."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "Consequence ids are not scoped to project, session or actor, so a second actor's provable fault is dropped and one dismissal reverses faults in other projects",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Reproduced independently. cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v1_fid_scope.py && /home/user/Vacant/.venv/bin/python v1b_same_project.py. vc_common.py sets VACANT_HOME and HOME to a mkdtemp, and every event goes through the real hook.handle.\n\nv1_fid_scope.py uses two separate projects. Claude writes 999 in A and Codex (model gpt-x) writes 999 in B. Output: 'A findings: [(f_20acab9513, provable, claude)]' with consequences [('provable_fault','pf:f_20acab9513')]. 'B findings: [(f_20acab9513, provable, codex)]' with consequences []. The book holds only [('pf:f_20acab9513','provable_fault',['main','claude','unknown','csv_total'])]. After A.dismiss(f_20acab9513) plus a third Codex project making the same mistake: C consequences [] and cells [].\n\nv1b_same_project.py: findings [(f_20acab9513, open, claude, provable), (f_20acab9513, resolved), (f_20acab9513, open, codex, provable)], but consequences are only [('provable_fault','claude')]. The same agent repeating the mistake in another workspace (which is what every `vacant do` run gets) is also dropped: provable_faults stays 1.\n\nCause: feedback.finding_id hashes only [claim, path, value] (feedback.py:43-47). ActorBook.record dedupes on id pf:/if:/gap:{fid} machine-wide (actors.py:129, 191, 199, 203). state() skips any event whose finding_id is in the global dismissed set (actors.py:137, 145). No docstring or decision text covers this: the 全機一本 note is about cells, not about ids colliding across actors. The suggested fix (scope the ids by project/step, and have --dismiss build the same scoped id) is appropriate."
+   },
+   {
+    "title": "One `vacant do` run is counted as two outcomes, which gets past the MIN_N gate; Codex/pi runs are also split across two cells",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Reproduced with my own fake binaries. fbin/claude and fbin/codex are symlinks to fbin/fakeagent.py. No model or network is involved. The fake parses the real --settings / -c hooks.X=… that claude_build/codex_build inject, then runs those hook commands for UserPromptSubmit, PreToolUse, PostToolUse, Stop and SessionEnd (reason other, no model, matching capture-codex.md:139/156). Command: cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v2_do_double.py. It runs the real `python -m vacant_network do <agent> --attempts 1` CLI.\n\nObserved after one `do claude`: book outcomes are [('out:claude', True, ['main','claude','unknown','csv_total']), ('out:do', True, same key)], and cells are [('claude main [unknown]', 2, 2, 0)]. After 3 claude runs: 6/6, recommend actionable=True, and the line reads 'For `csv_total` tasks so far: claude main [unknown] 6/6 accepted' with no n<5 qualifier. After 3 codex runs there are two cells, 'codex main [claimed:gpt-x]' 3/3 and 'codex main [unknown]' 3/3. After 5 codex runs, pick_agent returns {'agent':'codex','why':'UCB over accepted runs: claude 6/6, codex 5/5'}, so UCB runs with only 3 real claude runs. Totals: 8 real runs (out:do:* count) against 16 outcome events.\n\nCause: capture.observe session_end → _outcome (capture.py:151, 170, id out:<platform>:<session>, model from session_info), plus run._trace_outcome (run.py:374, id out:do:<run_id>, actor={'platform': agent}, so substrate is always unknown). This violates actors.py honest boundary 1 (n < MIN_N 不採取任何行動) and shows the human doubled counts. pi was not run, but it goes through the same _trace_outcome code path with no model. The suggested fix (record one outcome per run, keyed with the session's model) is appropriate."
+   },
+   {
+    "title": "The SessionEnd outcome comes from the project-wide feedback_state, so a session with no Stop check inherits an earlier session's verdict and the true result is dropped",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Command: cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v3_stale_outcome.py. Setup: contract with submit_on_end=true. Claude S1 writes 999, then Stop (reject), then SessionEnd, and the script waits for the background finalize. Next an OpenCode `run` session sends pre_tool, writes 60, sends post_tool, then session_end with no stop. The plugin skips stop under NONINTERACTIVE (agents.py opencode plugin: `if (event.type === \"session.idle\" && !NONINTERACTIVE)`).\n\nObserved: 'contract check right now: accept'. The second background finalize printed 'nothing open'. The book, however, holds 'out:opencode:ses_oc2 accepted= False', and cells are [('claude main [unknown]',1,0,1), ('opencode main [unknown]',1,0,0)]. The chain outcome consequences are [('S1', False), ('ses_oc2', False)].\n\nCause: capture._outcome (capture.py:162) reads rec.dir/feedback_state.json, which the earlier session's check wrote, without checking whose it is. finalize.py:43 then loses the idempotency race on out:opencode:<session>. The docstring of _outcome itself says 「這個工作階段沒有檢查過（沒有契約、沒有 Stop）⇒ 不記」, so the code contradicts its own stated contract: this is a bug, not an honest boundary. The OpenCode session is charged with another session's reject. I did not separately run the `vacant do` attempt ≥2 sub-claim."
+   },
+   {
+    "title": "pick_agent keeps one arbitrary cell per platform (the last one in sort order), and model_of is ignored",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Command: cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v4_pick_collapse.py. Outcome events were written directly to a temp ActorBook.\n\nObserved recommend order: [('codex main [claimed:gpt-5]','19/20',True), ('claude main [unknown]','3/6',True), ('codex main [claimed:gpt-5-mini]','0/2',False)]. pick_agent(model_of={'codex':'gpt-5'}) returns {'agent':'codex','why':'exploring: codex has 2 run(s) on this task family (< 5)'}. After gpt-5-mini reaches 0/5 it returns {'agent':'claude','why':'UCB over accepted runs: claude 3/6, codex 0/5'}, and the 19/20 cell is discarded. inspect shows model_of is referenced 0 times in the body.\n\nCause: actors.py:261, `rows = {platform: r for r in recommend(...)}`, keeps the last (lowest-ranked) cell per platform. In the default CLI flow, the split cells from the previous finding happen to have equal counts, so this only goes wrong once a platform has cells with different records (for example after a model change). Hence medium."
+   },
+   {
+    "title": "Dismissing a flag by the id `vacant flag` printed does not reverse the consequence that flag produced",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Command: cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v5_dismiss_flag.py (first half). Claude Reads sales.csv, then writes 'Total: 60\\nLargest sale: 30'. The script runs the real trace.cli main: `flag report.md:3 'largest sale is wrong' --value 30`.\n\nObserved: 'flag h_ad8d5f7140 recorded'. The next Stop produces consequences [('input_fault','if:f_06cdcb8cde')] and sources {'input:data/sales.csv': 1}. `flag --dismiss h_ad8d5f7140` prints 'dismissed h_ad8d5f7140 (trace entry 9)', but sources are still {'input:data/sales.csv': 1} and the dismissed set is ['h_ad8d5f7140'].\n\nCause: stopcheck._flag_blames sets claim='flag:<h_id>' (stopcheck.py:60). consequences() keys the result by F.finding_id(b)=f_… (stopcheck.py:102-103, actors.py:181). cmd_flag --dismiss writes dismiss:<h_id> (cli.py:156), which matches nothing.\n\nDowngraded to low: _flag_blames passes no claim_id, so blame_location never runs rerun_flip (blame.py:578-580) and a flag blame can never be `provable`. Only the input-source and coverage-gap counters shown by `vacant trace actors` are affected, not reputation cells or routing."
+   },
+   {
+    "title": "`vacant flag --dismiss` accepts ids that were never recorded, reports success, and pre-dismisses any future finding with that id",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Same script, v5_dismiss_flag.py (second half).\n\n(i) `flag --dismiss f_typo00000 wrong` returns (0, ['dismissed f_typo00000 (trace entry 11)']).\n\n(ii) The script predicts fid = 'f_'+sha256(json.dumps(['total','report.md','999']))[:10] = f_20acab9513 and dismisses it; that returns rc 0. Then Claude writes 999 and Stops. The finding is recorded as ('f_20acab9513','open','provable'), and the chain consequences are [..., ('dismiss','f_typo00000'), ('dismiss','f_20acab9513'), ('provable_fault','f_20acab9513')]. The book contains pf:f_20acab9513, but cells == [], so the fault never counts.\n\nCause: cmd_flag (cli.py:150-158) does no existence check, and ActorBook.state (actors.py:137, 145) applies a dismiss regardless of order. It is related to, but distinct from, the id-scoping finding. Low: it needs a typo or a deliberate pre-dismissal, and the same-uid owner key is already listed as an honest boundary (trace/cli.py boundary 2)."
+   },
+   {
+    "title": "Advisory findings are re-appended as 'open' to the signed chain on every Stop and never marked resolved",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Command: cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v7_advisory.py. The contract adds an advisory claim idsum (csv_total on column id, required=false). The report says 'Total: 60'.\n\nObserved: three Stops, each returning a systemMessage ('0 required check(s) still not passing, 1 ad…'). The chain has finding events [('f_92b99be353','idsum','open','provable')] × 3, and each Stop appends another.\n\nCode trace: render_agent skips blames with required=False (feedback.py:136-137), so state['open'] never contains the advisory fid. localize dedupes against prev_open = previous['open'] (stopcheck.py:89-93) and computes resolved from the same set (stopcheck.py:98). The advisory fid is therefore re-appended on every Stop and can never produce a 'resolved' event. My attempted fix made the verifier UNKNOWN (ambiguous numbers), so 'never resolved' rests on the code trace above rather than a run. The ActorBook stays idempotent (one pf:f_92b99be353); only the chain and `trace show` get noisy. Low."
+   },
+   {
+    "title": "`vacant do` run_id is unique only per second and pid: two in-process runs in the same second share a workspace and an outcome id",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Command: cd <scratch>/review_m8/verify-consequences && /home/user/Vacant/.venv/bin/python v8_runid.py. The script aligns to the start of a second, then makes two run.do() calls with generic_build: sh writes 60, then sh writes 999.\n\nObserved: 'r1: accept …/q3/20260924T183703-3803/ws' and 'r2: reject …/q3/20260924T183703-3803/ws', same workspace dir: True. r1's workspace report.md is now '# Q3\\nTotal: 999\\n' (it was 60). The book has only [('out:do:20260924T183703-3803', True)], so the reject is dropped.\n\nCause: run.py:225 run_id = strftime('%Y%m%dT%H%M%S') + pid, and prepare_workspace rmtree's dest. A grep shows the only non-test caller of do() is adapters/cli.py:75, one process per run, so this reaches only programmatic in-process callers. Low."
+   }
+  ],
+  "notes": "I did not modify any repo file (`git status` is clean). All repros are in <scratch>/review_m8/consequences/. common.py sets VACANT_HOME and HOME to a fresh temp dir. fake_agent.py (symlinked as bin/claude and bin/codex) contacts no model or network; it only runs the hook commands that vacant do injects.\n\nInvariants that held up:\n- Nothing under vacant_network/trace or vacant_network/adapters calls slash.\n- Only `provable` blames with a step create provable_fault; lineage, heuristic and gap blames never touch a cell.\n- Repeated Stops and finalize runs do not duplicate book consequences within one project (the finding-events duplication for advisory claims is reported separately).\n- Routing advice appears only in report.md (under VACANT_HOME), never in render_agent text or the vacant do retry prompt.\n- pick_agent never scores a cell with fewer than MIN_N entries; the MIN_N bypass comes from double-counted entries.\n\nEvidence cross-check: ops/accountability/evidence_20260924 ran the agents natively, not through `vacant do`, and shows one outcome per session (claude 4 runs for 4 sessions). That confirms the SessionEnd outcome path fires with the real CLIs. So under `vacant do`, which injects SessionEnd hooks (agents.py:133-137) and then calls _trace_outcome, each run is counted twice. The r536 runner uses `vacant do`."
+ },
+ {
+  "dim": "integration",
+  "findings": [
+   {
+    "title": "UserPromptSubmit wiring records agent-generated text as the user's message, so sub-agent and parent-agent faults are blamed on the task",
+    "severity": "high",
+    "file": "vacant_network/trace/capture.py",
+    "line": 138,
+    "repro": "cd <scratch>/review_m8/integration && /home/user/Vacant/.venv/bin/python repro_bg_subagent_prompt.py ; MODE=fg /home/user/Vacant/.venv/bin/python repro_bg_subagent_prompt.py ; /home/user/Vacant/.venv/bin/python repro_codex_spawn_prompt_main.py ; UPS=0 /home/user/Vacant/.venv/bin/python repro_codex_spawn_prompt_main.py   (each script sets HOME/VACANT_HOME to its own temp dir and drives adapters.hook.handle with native payloads)",
+    "observed": "Claude, background Agent (the default; its result arrives as UserPromptSubmit '<\\task-notification>...<result>SUBAGENT-REPORT: the total amount is 999</result>', per capture-claude.md §0-6/§2.7): the finding is confidence=lineage_exact fault_class=input source={'kind':'prompt'}, the actor book tallies source 'prompt:prompt': 1, and the agent is told 'the same value is in the task's own message'. The same run with a foreground Agent gives heuristic/agent/subagent_reply. Codex: UserPromptSubmit fires inside the child with prompt = the parent's spawn message, and the child's session_id is the root session (capture-codex §2.1/2.2). When the main agent writes the 999 it put in that spawn message, the result is lineage_exact/input 'task's own message' with no provable fault. With UPS=0 (child UserPromptSubmit not delivered) the same trace gives provable/agent and 'codex main [claimed:gpt-5.5]' 1 provable fault.",
+    "expected": "Only text the user (or `vacant do`) actually gave counts as the task message. A sub-agent's reply and a parent's spawn message are agent output: they should be traced as a sub-agent reply or the parent's step, not 'the user's message' (DECISION §4.5).",
+    "fix": "In capture.observe for action 'prompt': do not record it as a user prompt when the payload has agent_id (Codex child: that is the spawn message), or when a Claude prompt starts with '<\\task-notification>' (background sub-agent result). Record those as agent-origin (for example source='agent' plus the tool-use-id from the notification), and have blame.sources() treat only user or 'vacant do' prompts as task input."
+   },
+   {
+    "title": "SessionEnd records an adoption outcome for sessions that never ran a check, using another session's (even another platform's) result",
+    "severity": "high",
+    "file": "vacant_network/trace/capture.py",
+    "line": 162,
+    "repro": "cd <scratch>/review_m8/integration && /home/user/Vacant/.venv/bin/python repro_phantom_outcome.py ; ATTEMPTS=2 /home/user/Vacant/.venv/bin/python repro_do_opencode.py   (fake_opencode.py sends exactly the generated plugin's pre_tool/post_tool/session_end payloads; there is no Stop in `opencode run`)",
+    "observed": "repro_phantom_outcome: Claude session A writes 999 and is checked at Stop (reject). A Codex session B and a pi session C then open in the same project and end with no prompt, no tool call and no Stop. The actor book gets 'out:codex:B accepted=False' and 'out:pi:C accepted=False', so cells 'codex main' and 'pi main' each show 1 run, 0 accepted. repro_do_opencode: attempt 2 (session ses_cb5a77b3) wrote 60 and was accepted, but the book records 'out:opencode:ses_cb5a77b3 accepted= False'. It inherited attempt 1's reject from feedback_state.json.",
+    "expected": "_outcome's own docstring says a session that was never checked (no Stop) is not recorded. Also a session's recorded outcome should be its own result, not the project's latest.",
+    "fix": "feedback_state.json is per project (stopcheck.py:82), so _outcome must not read it as the session's result. Store the last check outcome per session key (platform:session), written by decide_stop through the hook's session, and record in _outcome only when this session's key has an entry. Alternatively, record the outcome directly in the Stop path."
+   },
+   {
+    "title": "`vacant do` counts one run two or more times in the actor book (SessionEnd hook plus do()'s own record)",
+    "severity": "medium",
+    "file": "vacant_network/adapters/run.py",
+    "line": 374,
+    "repro": "cd <scratch>/review_m8/integration && /home/user/Vacant/.venv/bin/python repro_double_outcome.py ; ATTEMPTS=2 FIX=0 /home/user/Vacant/.venv/bin/python repro_double_outcome.py   (fake_claude.py stands in for `claude -p`: it runs the hooks from the generated --settings file with Claude's payload shapes; no model, no network)",
+    "observed": "Single attempt, accepted: 2 outcome events for one run, 'out:claude:<sid>' and 'out:do:<run_id>', both with key ['main','claude','unknown','csv_total'], so the cell shows runs=2 accepted=2. Two failing attempts: 3 events (one per attempt session plus do:), cell runs=3. pick_agent reports {'claude': 3} after a single `vacant do`, so --agent auto leaves its exploration phase (MIN_N=5) early.",
+    "expected": "One `vacant do` run is one outcome (as finalize.py says: already recorded means not recorded again).",
+    "fix": "Per-run hooks now include SessionEnd (claude_run_settings include_session_end=True; Codex CODEX_EVENTS), and capture._outcome records under platform:session while _trace_outcome records under do:<run_id>. Pick one: skip capture._outcome when VACANT_HOOK_NO_SUBMIT is set (inside `vacant do`), or drop _trace_outcome and rely on the session record."
+   },
+   {
+    "title": "A non-terminal session end (pi reload, Claude clear/resume, ...) freezes a mid-work outcome; the real end cannot correct it",
+    "severity": "medium",
+    "file": "vacant_network/trace/capture.py",
+    "line": 146,
+    "repro": "cd <scratch>/review_m8/integration && /home/user/Vacant/.venv/bin/python repro_nonterminal_end.py ; AG=claude REASON=clear /home/user/Vacant/.venv/bin/python repro_nonterminal_end.py",
+    "observed": "Sequence: the agent writes 999, Stop (continue), session_end reason=reload. The hook itself logs submit_skipped 'reason=reload (not the end of the work)'. The work continues in the same session and is fixed to 60, then Stop (accept) and session_end reason=quit. Actor book: only 'OUTCOME RECORDED: out:pi:P accepted= False'; the cell shows pi main runs=1 accepted=0. The accepted end is dropped because record_outcome is idempotent per session key. Claude with reason=clear gives the same result.",
+    "expected": "The same rule as the hardened submission path (NON_TERMINAL_END_REASONS): a context switch is not the end of the work, so no outcome is recorded and the session is not closed.",
+    "fix": "In capture.observe for action 'session_end': if payload reason is in hookpolicy.NON_TERMINAL_END_REASONS, seal the transcript if wanted, but skip rec.close() and _outcome(). hook.handle already detects this at lines 240-243 but calls _trace unconditionally at line 254."
+   },
+   {
+    "title": "New owner-authority command `vacant flag --dismiss` is not covered by the hardened pre-tool authority rule; the agent can erase its own provable fault and dismiss the human's flag",
+    "severity": "medium",
+    "file": "vacant_network/adapters/hookpolicy.py",
+    "line": 273,
+    "repro": "cd <scratch>/review_m8/integration && /home/user/Vacant/.venv/bin/python repro_flag_dismiss.py",
+    "observed": "Hook decisions on Bash commands: `vacant review total pass` -> DENY; `vacant flag --dismiss f_20acab9513 x` -> ALLOW. After the dismiss (finding id taken from `vacant trace show`, which the agent's shell may run), the provable faults go from [('claude main [unknown]', 1)] to []. Second part: the Stop feedback shown to the agent contains the human flag's id ('- flag:h_0a2518a18c: FAIL ...'). `vacant flag --dismiss h_0a2518a18c done` -> ALLOW. The next Stop output is '' (the flag no longer reaches the agent) while report.md still reads 'Total: 60 (approx.)'.",
+    "expected": "Dismissing a finding or flag is the owner's authority (DECISION K13/K14). The same tool-level deny that the 2026-09-24 adversarial review added for review/approve/release/withdraw/keys/reverify/contract lock should apply. This is string-level, as the existing honest boundary says.",
+    "fix": "Extend _AUTHORITY_RE to cover `flag` (at least `flag ... --dismiss`; ideally any `vacant flag`, since it signs with the owner key), including the `-m vacant_network.trace.cli` spelling. Also consider not printing 'flag:<id>' in agent-facing feedback."
+   },
+   {
+    "title": "At Stop, the blame runs before the trace settles open steps, so a step without PostToolUse is invisible at that turn and its signed finding stays unattributed",
+    "severity": "medium",
+    "file": "vacant_network/adapters/hook.py",
+    "line": 254,
+    "repro": "cd <scratch>/review_m8/integration && /home/user/Vacant/.venv/bin/python repro_stop_order.py",
+    "observed": "Codex: a Bash step gets PreToolUse only (a still-running process gets no PostToolUse, capture-codex §2.4) and writes report.md 'Total: 999'. Stop #1 feedback has no step line. The signed finding is {'state':'UNKNOWN','confidence':'heuristic','fault_class':'unattributable'} with step None. Only after that is step 2 settled onto the chain ('turn_end'). Stop #2 (a second feedback round) says 'this value first appeared at step 2 (Bash)', but the chain still holds only the step-less finding [('f_20acab9513','open','heuristic',None)], because localize never re-appends a finding id that is already open.",
+    "expected": "recorder.py says open steps are closed at turn end, so the check at that same Stop should see them. The first (often only) feedback and the signed finding should name the step.",
+    "fix": "In hook.handle, for ev.kind == 'stop', run _trace (capture.observe -> rec.settle) before decide_stop. Alternatively, call rec.settle(...) at the start of stopcheck.localize, before rec.checkpoint('check')."
+   },
+   {
+    "title": "The session-end trace (finalize) only runs when the contract has `submit_on_end: true`: OpenCode `run` sessions with it off get no report and no outcome",
+    "severity": "medium",
+    "file": "vacant_network/adapters/hook.py",
+    "line": 244,
+    "repro": "cd <scratch>/review_m8/integration && SUBMIT=0 /home/user/Vacant/.venv/bin/python repro_finalize_gate.py ; SUBMIT=1 /home/user/Vacant/.venv/bin/python repro_finalize_gate.py",
+    "observed": "With contract hooks.submit_on_end=false, an OpenCode session (pre/post write 999, no Stop, session_end) gives hook record {'submit_scheduled': None, 'trace_finalize': None}, 'trace report written: False', no findings and no outcomes. With submit_on_end=true, the same events give trace_finalize pid, report written, finding ('f_20acab9513','provable') and outcome out:opencode:ses_1.",
+    "expected": "DECISION §4.4 says OpenCode `run` has no pre-submit channel but the report is produced anyway. _spawn_finalize's docstring only says it skips when tracing is off, not when automatic submission is off.",
+    "fix": "Move _spawn_finalize out of the submit branch. Run it for any terminal session_end with a contract and a trace, whenever VACANT_HOOK_NO_SUBMIT is not set, independent of hooks.submit_on_end."
+   },
+   {
+    "title": "`vacant trace <wire.jsonl>` (existing MCP tee-proxy renderer) is now unreachable: the new top-level routing shadows it",
+    "severity": "low",
+    "file": "vacant_network/cli.py",
+    "line": 1176,
+    "repro": "cd <scratch>/review_m8/integration && HOME=$PWD/home_t VACANT_HOME=$PWD/vh_t /home/user/Vacant/.venv/bin/python -m vacant_network trace wire.jsonl",
+    "observed": "Prints \"vacant trace: error: argument cmd: invalid choice: 'wire.jsonl' (choose from 'show', 'verify', 'report', 'actors', 'blame')\" with rc=2. The legacy parser still registers `trace <file>` -> cmd_trace (cli.py:711-713), and invoking it directly renders the timeline (rc=0). mcp_trace.py:12 still documents `vacant trace /tmp/vacant_wire.jsonl`. tests/test_trace.py calls cmd_trace directly, so no test catches the shadowing.",
+    "expected": "The existing `vacant trace <file>` keeps working, or it is renamed and its documentation updated.",
+    "fix": "In trace/cli.main (or cli.main before routing _TRACE_TOP): if raw[0]=='trace' and raw[1] is not one of show/verify/report/actors/blame (for example it is an existing file), fall through to the legacy parser / cmd_trace."
+   },
+   {
+    "title": "PreToolUse deny output now waits for the trace lock (30 s lock timeout, the same as the 30 s hook timeout)",
+    "severity": "low",
+    "file": "vacant_network/adapters/hook.py",
+    "line": 254,
+    "repro": "cd <scratch>/review_m8/integration && N=20000 ./repro_deny_delay.sh ; N=45000 ./repro_deny_contention.sh ; N=45000 BIG=150 ./repro_deny_contention2.sh   (two PreToolUse hooks started together, as Claude does for tool calls from one response: an allowed Read doing the project's first trace scan, and a Write to .vacant/contract.json; both under `timeout 30` like Claude's configured timeout)",
+    "observed": "On its own the deny is printed in 0.19 s. Next to a first-scan Read on a 45k-file project it is printed after 28.5 s. With 45k files plus 150×6 MB files it takes 29.7 s: the Read hook was killed at 30 s (rc=124), which released the lock just before the deny's own deadline. The decision is computed at line 232 but written only after _trace (line 254), and rec.denied() takes the same file lock (recorder.py:146-148, timeout=30).",
+    "expected": "A deny decision should not depend on trace bookkeeping. The hook's honest boundary is that tracing never affects the verdict, and a hook killed at its timeout prints nothing, so the tool call would run.",
+    "fix": "For pre_tool, write and flush the rendered decision before calling _trace (or trace denials after output). Alternatively, give the trace lock a timeout well below the hook timeout on the pre/post path and record a gap when it is missed."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "UserPromptSubmit wiring records agent-generated text as the user's message, so sub-agent and parent-agent faults are blamed on the task",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Scripts: <scratch>/review_m8/verify-integration/v1_bg_subagent.py and v1_codex_spawn.py. Command: `cd .../verify-integration && /home/user/Vacant/.venv/bin/python v1_bg_subagent.py; MODE=fg ... v1_bg_subagent.py; ... v1_codex_spawn.py; UPS=0 ... v1_codex_spawn.py`. Each script uses its own temp HOME and VACANT_HOME and calls adapters.hook.handle with native payloads.\n\nClaude, background Agent (the default per capture-claude.md §0-6; the result arrives as a UserPromptSubmit `<\\task-notification>...<result>The amount column sums to 777.</result>`):\n- The chain gets a second `prompt` event with {'session':'sessA','source':'user'}.\n- finding = {confidence: lineage_exact, fault_class: input, source: {kind: prompt}}.\n- Actor book sources = {'prompt:prompt': 1}.\n- The agent is told \"the same value is in the task's own message\". That is false: the task message was 'Put the total amount in report.md'.\n- The same run with a foreground Agent gives {heuristic, agent, source: subagent_reply}.\n\nCodex (capture-codex §2.1/§2.2: the child's UserPromptSubmit carries prompt = the spawn message, with session_id = root). The parent's spawn message contains 4321 and the main agent writes 4321:\n- With the child UserPromptSubmit: lineage_exact / input / prompt, and cells=[] (no provable fault).\n- With UPS=0: {provable, agent}, cells=[('codex main [claimed:gpt-x]', 1)], and the feedback says 'this value first appeared at step 2 (apply_patch)'.\n\nThe code path: capture.py:138-140 records every UserPromptSubmit through rec.prompt(), and source defaults to 'user'. blame.py:299-303 then treats every prompt in the session as task input, and blame.py:403-406 returns Origin('input', {kind: prompt}). Nothing checks agent_id or the `<\\task-notification>` prefix. No honest boundary in the docstrings or the decision covers this.\n\nSuggested fix: in capture.observe, skip a prompt (or record it with source='agent') when payload has agent_id or the prompt starts with '<\\task-notification>'. Have blame.sources() count only source in ('user','vacant do') as task input.",
+    "title_hint": null
+   },
+   {
+    "title": "SessionEnd records an adoption outcome for sessions that never ran a check, using another session's (even another platform's) result",
+    "reproduced": true,
+    "severity": "high",
+    "evidence": "Scripts: verify-integration/v2_phantom.py and v2_do_opencode.py (with fake_oc.py, which sends the generated OpenCode plugin's pre_tool/post_tool/session_end payloads through `python -m vacant_network hook opencode`; there is no stop, as in `opencode run`). Command: `/home/user/Vacant/.venv/bin/python v2_phantom.py; /home/user/Vacant/.venv/bin/python v2_do_opencode.py`.\n\nv2_phantom: Claude session A writes 999, and Stop gives continue (reject). Then a Codex session codexB and a pi session piC each end with no prompt, no tool call and no Stop. The book gets:\n- 'OUTCOME out:codex:codexB accepted= False'\n- 'OUTCOME out:pi:piC accepted= False'\n- cells [('codex main [unknown]', 1, 0), ('pi main [unknown]', 1, 0)]\n\nv2_do_opencode: RUN.do() with attempts=2 gives [(1,'reject'),(2,'accept')]. Attempt 2's session wrote 60 and was accepted, but the book has 'out:opencode:ses_attempt2 accepted= False', inherited from attempt 1's reject in feedback_state.json (written by _trace_attempt → localize).\n\nCode: capture.py:151 calls _outcome on every session_end. _outcome (capture.py:162-172) reads the project-wide rec.dir/feedback_state.json (stopcheck.py:82,105) and records it under this platform:session. Its own docstring (lines 157-158) says a session with no Stop is not recorded. record_outcome is idempotent per id, so a later correct finalize record is dropped.\n\nSuggested fix: keep the last check outcome per session key (written in the Stop path with ev.session_id), and have _outcome record only when this session has its own entry.",
+    "title_hint": null
+   },
+   {
+    "title": "`vacant do` counts one run two or more times in the actor book (SessionEnd hook plus do()'s own record)",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-integration/v3_double.py with fake_cl.py. fake_cl.py stands in for `claude -p` and runs the hook commands from the real claude_build() `--settings` file (UserPromptSubmit/PreToolUse/PostToolUse/Stop/SessionEnd), with no model and no network. Commands: `OK=1 /home/user/Vacant/.venv/bin/python v3_double.py` and `ATTEMPTS=2 FIX=0 ROUNDS=0 /home/user/Vacant/.venv/bin/python v3_double.py`.\n\nSingle accepted attempt gives 2 outcome events with the same key ['main','claude','unknown','csv_total']:\n- 'out:claude:cl-0bed8a29 accepted= True'\n- 'out:do:20260924T183754-3875 accepted= True'\n- cells [('claude main [unknown]', 2, 2)]\n- pick_agent runs {'claude': 2, 'codex': 0}\n\nTwo failing attempts give 3 events (two out:claude:<sid> plus out:do:), so runs=3 and pick_agent runs {'claude': 3}. The same double count appears in the OpenCode run of v2_do_opencode.py (cell runs=2 for one do).\n\nCause: agents.claude_run_settings includes SessionEnd (and CODEX_EVENTS includes SessionEnd), so capture._outcome records under platform:session (capture.py:151,170), and run._trace_outcome (run.py:374 → 353-365) records again under do:<run_id>. This inflates run counts and makes --agent auto leave exploration (MIN_N) early.\n\nSuggested fix: skip capture._outcome when VACANT_HOOK_NO_SUBMIT is set (inside `vacant do`), or drop _trace_outcome.",
+    "title_hint": null
+   },
+   {
+    "title": "A non-terminal session end (pi reload, Claude clear/resume, ...) freezes a mid-work outcome; the real end cannot correct it",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-integration/v4_nonterminal.py. Commands: `/home/user/Vacant/.venv/bin/python v4_nonterminal.py` (pi, reason=reload) and `AG=claude REASON=resume /home/user/Vacant/.venv/bin/python v4_nonterminal.py`.\n\nSequence:\n1. Write 999, then stop gives continue.\n2. session_end reason=reload. The hook's own events.jsonl says submit_skipped 'reason=reload (not the end of the work)'.\n3. In the same session, write 60, then stop gives allow (accept).\n4. session_end reason=quit.\n\nResult: only 'OUTCOME out:pi:S1 accepted= False', and cells [('pi main [unknown]', 1, 0)]. session_closed is recorded twice (['reload','quit']). Claude with reason=resume gives the same: 'out:claude:S1 accepted= False'.\n\nCause: hook.handle detects NON_TERMINAL_END_REASONS at hook.py:240-243 but still calls _trace unconditionally at hook.py:254. capture.observe session_end (capture.py:146-151) then runs rec.close() and _outcome() regardless of reason. record_outcome is idempotent per session key, so the accepted end is dropped. The pi extension itself says 'only `quit` ends the work'.\n\nSuggested fix: in capture.observe, when payload reason is in hookpolicy.NON_TERMINAL_END_REASONS, skip rec.close() and _outcome() (sealing the transcript is fine).",
+    "title_hint": null
+   },
+   {
+    "title": "New owner-authority command `vacant flag --dismiss` is not covered by the hardened pre-tool authority rule; the agent can erase its own provable fault and dismiss the human's flag",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-integration/v5_flag_dismiss.py. Command: `/home/user/Vacant/.venv/bin/python v5_flag_dismiss.py`.\n\nHook decisions for Bash commands:\n- DENY: 'vacant review total pass', 'vacant approve'\n- ALLOW: 'vacant flag --dismiss f_20acab9513 ...'\n- ALLOW: 'python3 -m vacant_network flag --dismiss f_20acab9513 x'\n- ALLOW: 'vacant flag report.md:1 ...'\n\n`vacant trace show` (allowed) lists the finding id. After the dismiss, provable faults go from [('claude main [unknown]', 1)] to [].\n\nPart 2: the owner flags report.md:1 when the contract passes. The Stop feedback to the agent contains '- flag:h_2bd26ec57b: FAIL — report.md:1 says \"Total: 60 (approx.)\"'. The command `vacant flag --dismiss h_2bd26ec57b done` is ALLOWed, and the next Stop output is '' while report.md still reads 'Total: 60 (approx.)'.\n\nCause: _AUTHORITY_RE (hookpolicy.py:272-275) lists review|approve|release|withdraw|keys|reverify|contract lock/init|intake serve, but not flag. cmd_flag (trace/cli.py:145-157) signs with the owner key and calls actors.dismiss.\n\nOn honest boundaries: trace/cli.py honest boundary 2 admits the agent's shell can reach `vacant flag` and says the report names the signer. But feedback.render_report never mentions dismissals or who signed them. The agent-facing SKILL.md also names `vacant flag`. So this is an omission from the existing string-level mitigation, not an intended allowance.\n\nSuggested fix: add `flag` (at least `flag ... --dismiss`) to _AUTHORITY_RE, including the -m spellings.",
+    "title_hint": null
+   },
+   {
+    "title": "At Stop, the blame runs before the trace settles open steps, so a step without PostToolUse is invisible at that turn and its signed finding stays unattributed",
+    "reproduced": true,
+    "severity": "medium",
+    "evidence": "Script: verify-integration/v6_stop_order.py. Command: `/home/user/Vacant/.venv/bin/python v6_stop_order.py`.\n\nSetup: Codex Bash step c2 gets PreToolUse only (a long-running command per capture-codex §2.4) and writes report.md 'Total: 999'.\n\nStop#1:\n- The feedback has no step line.\n- The chain finding is ('f_20acab9513','open','heuristic','unattributable', step None).\n- Only after that is step 2 settled ('Bash','turn_end').\n\nStop#2:\n- The feedback says 'this value first appeared at step 2 (Bash)', and report.json has step 2.\n- The signed chain still holds only the step-less finding. stopcheck.localize skips fids already in prev_open (stopcheck.py:90-93).\n\nCause: hook.handle runs decide_stop → localize at hook.py:237 before _trace (hook.py:254 → capture.observe 'stop' → rec.settle at capture.py:141-142). Recorder.checkpoint records no gap while st['pending'] is non-empty (recorder.py:345). This contradicts recorder honest boundary 2, which says open steps are closed at turn end.\n\nImpact is limited to feedback and the signed finding. A post_missing step could never be provable anyway.\n\nSuggested fix: call rec.settle (or _trace) before decide_stop for kind 'stop', or settle at the start of stopcheck.localize.",
+    "title_hint": null
+   },
+   {
+    "title": "The session-end trace (finalize) only runs when the contract has `submit_on_end: true`: OpenCode `run` sessions with it off get no report and no outcome",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Script: verify-integration/v7_finalize_gate.py. Commands: `SUBMIT=0 /home/user/Vacant/.venv/bin/python v7_finalize_gate.py` and `SUBMIT=1 ...`.\n\nWith hooks.submit_on_end=false, the OpenCode pre/post write of 999 plus session_end (no stop) gives:\n- hook record {'submit_scheduled': None, 'trace_finalize': None}\n- report written: False, findings: [], outcomes: []\n\nWith true, the same events give trace_finalize pid 4016, report written: True, findings [('f_20acab9513','provable')] and outcomes [('out:opencode:ses_1', False)].\n\nCause: _spawn_finalize is called only inside the submit branch (hook.py:244-253). Neither its docstring nor DECISION §4.4 ('OpenCode `run` ... 報告照樣產出') ties the report to automatic submission.\n\nRated low, not medium: it needs a non-default contract setting (submit_on_end defaults to True). It also only matters for sessions with no Stop check outside `vacant do` (do() runs its own localize), or for changes made after the last Stop.\n\nSuggested fix: move _spawn_finalize out of the submit branch, gated only on a terminal session_end, contract present, tracing on and not VACANT_HOOK_NO_SUBMIT.",
+    "title_hint": null
+   },
+   {
+    "title": "`vacant trace <wire.jsonl>` (existing MCP tee-proxy renderer) is now unreachable: the new top-level routing shadows it",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Command: `cd verify-integration/runs/f8 && HOME=$PWD/home VACANT_HOME=$PWD/vh /home/user/Vacant/.venv/bin/python -m vacant_network trace wire.jsonl`.\n\nOutput: \"vacant trace: error: argument cmd: invalid choice: 'wire.jsonl' (choose from 'show', 'verify', 'report', 'actors', 'blame')\", rc=2.\n\nThe legacy parser still maps `trace <file>` to cmd_trace (cli.py:711-713). Calling it through cli.build_parser().parse_args(['trace','wire.jsonl']) renders the timeline ('== MCP trace: wire.jsonl ==', rc 0). mcp_trace.py:12 still documents `vacant trace /tmp/vacant_wire.jsonl`.\n\nCommit 59e7cca9 added _TRACE_TOP routing (cli.py:1165,1176-1178) with no note about the shadowing, unlike the ⚠ note for install/uninstall. tests/test_trace.py calls cmd_trace directly, so no test catches this.\n\nSuggested fix: in the router, fall through to the legacy parser when raw[1] is not a trace subcommand (for example, an existing file).",
+    "title_hint": null
+   },
+   {
+    "title": "PreToolUse deny output now waits for the trace lock (30 s lock timeout, the same as the 30 s hook timeout)",
+    "reproduced": true,
+    "severity": "low",
+    "evidence": "Script: verify-integration/v9_deny_lock.py. It runs the real hook as a subprocess under `timeout 30`, as a Write to .vacant/contract.json that must be denied. Commands: `MODE=none ...; MODE=hold HOLD=10 ...; MODE=hold HOLD=40 ...; MODE=scan N=20000 /home/user/Vacant/.venv/bin/python v9_deny_lock.py`.\n\nResults:\n- none: 'deny hook rc=0 after 0.14s; stdout=deny'\n- lock held 10 s by another process (as a concurrent hook does while it scans): 'rc=0 after 10.04s; stdout=deny'\n- lock held 40 s: 'deny hook rc=124 after 30.01s; stdout=''' (killed at the hook timeout, no deny printed)\n- real contention with a concurrent allowed Read hook doing the first scan of a 20k-file workspace: deny printed after 14.05s\n\nCause: the decision is computed at hook.py:232, but _trace runs first at hook.py:254 (capture.observe → rec.denied → Recorder._lock, file_lock timeout=30.0, recorder.py:146-148, 291-304). render and stdout come only after that (hook.py:269, main 289-293).\n\nRated low: it needs a large workspace plus concurrent hooks (Codex fires PreToolUse for parallel calls within ms; background sub-agents interleave). I did not run a real agent to confirm that a timed-out hook lets the tool proceed.\n\nSuggested fix: render and flush the deny before tracing, or use a short lock timeout on the pre/post path and record a gap when it is missed.",
+    "title_hint": null
+   }
+  ],
+  "notes": "I found 9 problems in how the trace feature is wired into the adapters, each reproduced with a script in <scratch>/review_m8/integration/. Every script sets its own HOME and VACANT_HOME and uses no network or model API. No file under /home/user/Vacant was changed (git status is clean).\n\n**Existing tests:** all 209 pass. That covers test_intake_gate_hardening, test_intake_verifier_hardening, test_adapters_hardening, test_adapters_agents, test_adapters_core, test_intake_core, test_intake_server_cli, test_trace_*.py and test_trace.py. None of them covers the failure modes below.\n\n**How the agents were simulated:**\n- fake_claude.py stands in for `claude -p`: it runs the hooks listed in the generated `--settings` file, with Claude's payload shapes.\n- fake_opencode.py sends the exact payloads the generated OpenCode plugin sends.\n- The rest of the scripts call `adapters.hook.handle` directly with native payloads.\n\n**Checked and found fine:**\n- **Install/uninstall:** a `vacant install --force` then `vacant uninstall` round trip restores the files byte-for-byte for all four agents, including the new hook events. User config that already uses the new events (a Codex `[[hooks.PostToolUse]]` plus its trust entry, a Claude UserPromptSubmit entry) is preserved. Codex trust keys are placed after the user's own groups (`post_tool_use:1:0` follows the user's `:0:0`). No files are left behind.\n- **Codex inline-table config:** a config written as `[hooks] UserPromptSubmit=[...]` makes the Codex install fail safely, with a clear message and no write.\n- **Generated JavaScript:** the pi extension and the OpenCode plugin pass `node --check`. Driving them in node with a stub hook gives correct payloads:\n  - OpenCode: a child session gets `root_session_id`, `tool.execute.after` reuses the args saved at before-time, and `dispose` sends the main session id.\n  - pi: the `before_agent_start` and `tool_result` handlers return undefined, so they don't change pi's result.\n- **Stop-loop bounds:** the flag-driven continue on an accepted contract is capped per session by `max_feedback_rounds`. It shares that budget with ordinary failure feedback.\n- **`--feedback-mode none`:** each attempt gets a fresh workspace (ws2, ws3, …). The escape baseline is taken before the new copy is made, the combination with `--in-place` is refused with a clear message, and the Stop check is switched off through `VACANT_FEEDBACK_MODE`.\n- **Finalize safety:** the background finalize never submits and can't recurse. It is not started inside `vacant do`, which sets `VACANT_HOOK_NO_SUBMIT`.\n\n**Checked but not reported:**\n- A Codex variant where the child agent writes the parent's spawn message itself traced correctly through the spawn step.\n- The deny delay (last finding) is reported as low: I measured it reaching 29.7 s against the 30 s hook timeout, but never saw a deny actually lost.\n- I couldn't check the Codex trust-hash names for the new events against the codex binary, because it isn't installed here. They use the same formula as the existing events, and capture-codex.md says all 12 events ran trusted."
+ }
+]

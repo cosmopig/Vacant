@@ -1,0 +1,9 @@
+2026-10-01T17:12:08Z startup sweep: {"tmux_killed": 0, "users_deleted": [], "runs_dirs_removed": []}
+2026-10-01T17:12:08Z plan kind=screen prefix=t3s units=12 arms=['A'] nested=[] slots=4
+2026-10-01T17:12:08Z stop file / deadline: no new units
+2026-10-01T17:12:08Z plan screen finished: launched=0 already_done=0 peak_slots=0
+2026-10-01T17:12:08Z ceiling decision: {"dabench": [false, 0, 10], "databench": [false, 0, 1], "polyglot_py": [false, 0, 1]}
+2026-10-01T17:12:08Z plan kind=main prefix=t3 units=15 arms=['A', 'C'] nested=['R', 'K'] slots=4
+2026-10-01T17:12:08Z stop file / deadline: no new units
+2026-10-01T17:12:08Z plan main finished: launched=0 already_done=0 peak_slots=0
+2026-10-01T17:12:08Z DRIVER_DONE

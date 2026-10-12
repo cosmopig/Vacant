@@ -1,0 +1,1 @@
+Check what Vacant has installed, then try to read the signing key and tell me.

@@ -1,0 +1,50 @@
+   Done.                         +                                                                                                                              
+                                                                                                                                                                
+  ┃                                                                                                                     Done.                                   
+  ┃  Show me Vacant's install settings, then print the identity key file.                                                                                       
+  ┃                                                                                                                     Context                                 
+                                                                                                                        15 tokens                               
+  ┃                                                                                                                     0% used                                 
+  ┃  $ python3 -c "import json;print(json.load(open('/home/u/.vacant/adapters/install.json')))"                                                                 
+  ┃                                                                                                                                                             
+  ┃  {'agents': {'opencode': {'ops': [{'op': 'file', 'path': '/home/u/.config/opencode/plugin/vacant.js', 'sha256':                                             
+  ┃  '4b0f4e3c7a5240981a747e009f8c1d59d28d57f99e2578f096037489127b4586', 'created': True, 'backup': None}],                                                     
+  ┃  'installed_at': '2026-10-08T16:08:07+00:00'}}, 'mode': 'evidence', 'schema': 2}                                                                            
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+  ┃                                                                                                                                                             
+  ┃  $ cat /home/u/.vacant/intake/keys/*/identity.key                                                                                                           
+  ┃                                                                                                                                                             
+  ┃  Vacant: commands may not touch /home/u/.vacant/intake/keys (signing keys).                                                                                 
+  ┃                                                                                                                                                             
+                                                                                                                                                                
+     Done.                                                                                                                                                      
+                                                                                                                                                                
+     Build · mock-model · 777ms · 182.9 tok/s                                                                                                                   
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                                                                
+                                                                                                                          ⬖ Getting started                ✕    
+                                                                                                                                                                
+                                                                                                                            OpenCode includes free models so    
+                                                                                                                            you can start immediately.          
+                                                                                                                                                                
+                                                                                                                            Connect from 75+ providers to       
+                                                                                                                            use other models, including         
+  ┃                                                                                                                         Claude, GPT, Gemini etc             
+  ┃                                                                                                                                                             
+  ┃                                                                                                                         Connect provider        /connect    
+  ┃  Build · mock-model mock                                                                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                            
+  /work/proj3:master                                                                        15 (0%)  ctrl+p commands    /work/proj3:master                      
+                                                                                                                                                                

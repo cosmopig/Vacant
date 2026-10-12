@@ -1,0 +1,385 @@
+{
+  "summary": "Adversarially review the v3.5 change: a named file whose text is already in the request counts as read",
+  "agentCount": 12,
+  "logs": [],
+  "result": {
+    "findings": [
+      {
+        "title": "Line-in-request check is a plain substring test, so a file whose values differ from the pasted text still scores 100% 'given'",
+        "severity": "high",
+        "scenario": "given_inline counts a line as present when `ln in joined`, with no line or word boundary. A line in the file that is a prefix or substring of a different pasted line therefore counts as a match. Concrete case: the person pastes a working staging config (`pool_size: 10`, `timeout_s: 30`) and asks: \"Production fails. Compare with config/prod.yaml and list every difference in diff.md.\" On disk, config/prod.yaml has `pool_size: 1` and `timeout_s: 3`. Both lines are substrings of the pasted lines, so coverage comes out at 1.0 and prod.yaml is marked given_in_request. The agent never opens prod.yaml and writes \"None: identical\" to diff.md. v3.4 sends this back as unread config/prod.yaml; I checked this through the real Stop hook. v3.5 lets it through, and the delivery note tells the person \"content already in the request: config/prod.yaml\", which is false. The same mismatch happens for any value whose digits are a prefix of the pasted value (port 808 vs 8080, retries 1 vs 10, and so on). This is a comparison or debugging task, so the whole answer depends on the part that differs. The work should be redone, and the person loses the only check that catches it. Repro: /tmp/claude-0/v35_review/test_v35_misses.py::test_C_near_copy_sibling and test_v35_stop.py::test_stop[C_prefix_values].",
+        "fix": "Match on boundaries instead of raw substrings. Better, require the whole file (whitespace-collapsed) to appear contiguously in the whitespace-collapsed request, delimited by (?<!\\S) and (?!\\S). I measured the R530 SOLO prompts: all 120 goal.md/contract.md instances are contiguous whole-file matches at coverage 1.0, so the motivating case is kept.",
+        "verdict": {
+          "real": true,
+          "evidence": "Reproduced against the uncommitted working tree via the real hook.handle path (UserPromptSubmit / PreToolUse / PostToolUse / Stop, Claude format, zerostop._run_child swapped in-process). Tests: /tmp/claude-0/v35_review/verify_0_0/test_verify_substring.py (5 passed) and /tmp/claude-0/v35_review/verify_0_0/test_verify_threshold.py (1 passed), run with PYTHONDONTWRITEBYTECODE=1 -p no:cacheprovider.\n\nScenario: the request pastes a staging config (`pool_size: 10`, `timeout_s: 30`, `retries: 10`, `port: 8080`, `db_host: db.internal`) and says \"Production fails. Compare with config/prod.yaml and list every difference in diff.md.\" On disk, config/prod.yaml has `pool_size: 1`, `timeout_s: 3`, `retries: 1`, `port: 808`. The agent never opens prod.yaml and writes \"None: the two configs are identical\" to diff.md.\n- evidence_for (v3.5): materials_named=[config/prod.yaml], given_in_request=[config/prod.yaml], observed=[config/prod.yaml], findings=[]. The substring test `ln in joined` matches all 5 prod lines. A boundary-aware match `(?<!\\S)…(?!\\S)` matches only `db_host: db.internal`, which is well under 90%.\n- The same run with given_inline patched to return set() (the v3.4 behaviour) gives findings=[unread config/prod.yaml].\n- Real Stop hook, v3.5: no decision (the work is let through). systemMessage \"0/1 given file(s) opened\". delivery.md says \"Files named in the request: 1 — opened: none; content already in the request: config/prod.yaml\". That is false: the file's values differ from the pasted text.\n- Real Stop hook, v3.4: decision=block, with the reason \"config/prod.yaml was named in the task but was not opened in the recorded steps…\".\nSo the change removes the only push-back in a comparison task where the answer depends entirely on the differing values, and it tells the person something untrue in the delivery note. That plausibly harms a real user.\n\nThe boundary fix on its own is not enough. In test_verify_threshold.py, a 16-line config that differs in one non-substring value (`pool_size: 5` vs pasted `pool_size: 10`) still clears GIVEN_INLINE_FRAC=0.9 and is marked given_in_request with no findings. The 90% per-line threshold independently lets a differing file through. The finding's stronger fix (require the whole whitespace-collapsed file to appear contiguously, delimited by (?<!\\S)/(?!\\S)) closes both holes. Boundary matching alone closes only the prefix case. Relevant code: vacant_network/trace/evidence.py Evidence.given_inline (`hit = sum(len(ln) for ln in lines if ln in joined)` / `if hit >= GIVEN_INLINE_FRAC * total`), and vacant_network/trace/zerostop.py _write_note (\"content already in the request\")."
+        }
+      },
+      {
+        "title": "The 90% threshold marks a file as given when the pasted text is a different version and the task depends on the difference",
+        "severity": "medium",
+        "scenario": "Weighted by characters, one changed or added line in a file of 10 or more lines stays under 10%, so the file counts as given even though the agent never saw that line. (a) Expected vs actual: the person pastes the 13-line expected output and asks \"Last night's output is in out/nightly.txt. Tell me in diff.md which lines differ.\" On disk, one line reads `coast 1505 MISMATCH`. The agent writes \"No lines differ\" without opening the file. v3.4 sends back unread out/nightly.txt; v3.5 allows it, and the note says \"content already in the request: out/nightly.txt\". (b) Old version pasted: \"Last week's contract.md was: <paste>. We changed one rule in contract.md since then. Update solution.py to follow the current contract.md.\" One rule changed (empty field becomes `null` instead of `\"\"`). The agent implements the pasted version, and v3.5 no longer sends back unread contract.md. (c) The spec in the repo has one extra line (`- Keys are lower-cased.`) that is not in the ticket text the person pasted. The file is still marked given. In every case the missing or changed line is exactly what the agent needed. The delivered work is wrong, and v3.4 would have sent it back. I checked v3.4 send-back and v3.5 allow for (a) and (b) through the real Stop hook, and (c) at the evidence level. Repro: test_v35_misses.py::test_A_expected_vs_actual_diff, test_B_old_version_pasted_file_changed, test_B2_spec_has_one_extra_rule_not_in_the_paste; test_v35_stop.py A/B.",
+        "fix": "Require full coverage (threshold 1.0, or the contiguous whole-file match above). R530 needs nothing below 1.0: all 120 pasted instances are exact. If some tolerance is wanted later, do not call the file 'given' in the note. Keep sending back unread whenever any line is missing from the request.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced the finding myself, running the real hook.handle path (Claude hook format) and a real Stop. Stop ran in process (zerostop._run_child -> zerostop.check), as the inproc fixture in tests/test_zero_stop.py does. The v3.5 change is now committed: HEAD~1 is 4ee1f666 and the working tree is clean. For a true v3.4 baseline I extracted e42730d7 with `git archive` into /tmp/claude-0/v35_review/verify_0_1/v34. It differs from the working tree only in evidence.py and zerostop.py. The test checks which code it imported before running.\n\nTest file: /tmp/claude-0/v35_review/verify_0_1/test_verify_near_copy.py. Run it with PYTHONDONTWRITEBYTECODE=1 and VER=v35 or VER=v34, with PYTHONPATH set to the matching code. Results: v35 10 passed; v34 5 passed, 5 skipped (the v35-only controls). In every case below, v3.4 blocks the turn and v3.5 lets it through.\n\n- **(a) Expected vs actual, number variant.** The request pastes the expected 13-line report and says \"Last night's output is in out/nightly.txt. Tell me in diff.md which lines differ.\" On disk, one line reads `coast 1550 OK` where the paste has `coast 1505 OK`. The agent writes \"No lines differ.\" without opening the file.\n  - v3.4: `decision: block`, \"out/nightly.txt was named in the task but was not opened\".\n  - v3.5: `given_in_request == ['out/nightly.txt']`, no findings, no block. systemMessage \"0/1 given file(s) opened\"; delivery.md says \"opened: none; content already in the request: out/nightly.txt\".\n- **(a) Status variant.** Same setup with dated lines and `coast 1505 MISMATCH` on disk. Same outcome.\n  - Caveat: with short lines and a longer changed line, the ratio can land just under 0.9. My first try came out at 154/173 = 0.89, and v3.5 still sent it back. So whether a file is caught depends on line lengths. With 10 or more lines of equal length, one changed line always counts as given.\n- **(b) Old version of contract.md pasted.** The paste is last week's contract.md, then \"We changed one rule in contract.md since then. Update solution.py to follow the current contract.md.\" On disk, `\"\"` became `null`. The agent reads solution.py only.\n  - v3.4 blocks on unread contract.md.\n  - v3.5 marks contract.md as given, does not block, and the note says \"content already in the request: contract.md\".\n- **(c) Repo spec has an extra rule.** docs/spec.md has one extra rule (`- Keys are lower-cased.`) that is not in the pasted ticket. v3.4 blocks; v3.5 marks the file as given and allows it.\n\nControls:\n- With GIVEN_INLINE_FRAC patched to 1.0, all four near-copy cases are sent back again.\n- A verbatim paste (including a moved line break) is still counted as given at 1.0.\n- Checked independently against R530: across the 60 A-SOLO prompts in runs/*/calls.jsonl, every template file pasted at 50% coverage or more (120 instances) has coverage 1.0 and is a contiguous whole-file match. So threshold 1.0 keeps all of the R530 gain.\n\nHarm: the unread check exists to catch \"the named material was not opened\". Here v3.5 hands the person wrong work: a diff that says nothing differs when a line differs, or code written to an outdated contract. The note then tells them the file's content was already in the request, which is false for exactly the line that mattered. This is a real regression against v3.4 in plausible everyday requests (checking expected against actual, \"I changed the file since\"). Medium severity is appropriate."
+        }
+      },
+      {
+        "title": "No size floor and no count of repeated lines: short files and one-token-per-line data count as 'given' when the request mentions the possible values",
+        "severity": "medium",
+        "scenario": "Each line is tested on its own and repeats count every time, so a file made of short common tokens counts as given whenever the request names those tokens. A request asking about a file's value usually lists the candidates. (a) flags/checkout.txt = `disabled`. The request: \"Is the new checkout enabled or disabled right now? It's set in flags/checkout.txt. Update docs/status.md to say which.\" The agent writes \"enabled\" without opening the flag file. v3.4 sends back unread flags/checkout.txt; v3.5 allows it and says the content was in the request. (b) .nvmrc = `20`. The request: \"use the same Node version as .nvmrc (it's 18 or 20, I can't remember)\". The agent writes node:18 and is not sent back. (c) data/votes.txt holds 300 lines of yes/no. The request: \"one vote per line, yes or no. Write the counts to result.json\". Both distinct lines occur in the request, so coverage is 100%. The agent makes up the counts and is not sent back. The unsourced check skips .json deliverables, so nothing catches it, and the note says \"content already in the request: data/votes.txt\". I checked v3.4 send-back and v3.5 allow for (a) and (c) through the real Stop hook, and (b) at the evidence level. Repro: test_v35_misses.py::test_D_one_line_value_among_alternatives, test_D2_python_version_file, test_E_categorical_votes; test_v35_stop.py D/E.",
+        "fix": "Add a minimum size, for example at least 80 non-blank characters of whitespace-collapsed text; the smallest R530 given file is 297 bytes. Also use the contiguous whole-file match, which handles repeated lines and line order. I checked this sketch in /tmp/claude-0/v35_review/test_fix_sketch.py (contiguous, boundary-delimited, at least 80 characters). It sends back all five scenarios above and keeps the diff's own test_v35_named_file_whose_text_is_in_the_request_is_not_pushed_back green.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this independently through the real hook.handle path, including a real Stop with the zerostop check run as a child process. My test file is /tmp/claude-0/v35_review/verify_0_2/test_verify_small_files.py. I ran the same file twice. The first run used a v3.4 baseline, which I extracted with `git archive e42730d7 vacant_network` into /tmp/claude-0/v35_review/verify_0_2/v34. The second run used the working tree, which is v3.5. In the working tree the change is now the committed version 4ee1f666 (HEAD), and `git diff` is empty. The tests check which version they import (whether given_inline exists) and print vacant_network.__file__. All 8 tests pass on each version, each run with its own expectations. PYTHONDONTWRITEBYTECODE=1 was set.\n\n(a) flags/checkout.txt contains \"disabled\". The request is \"Is the new checkout enabled or disabled right now? It's set in flags/checkout.txt. Update docs/status.md to say which.\" The agent writes \"Checkout: enabled\" without opening the flag file.\n- Evidence check: v3.4 gives ['unread' flags/checkout.txt]. v3.5 gives no findings, with given_in_request=['flags/checkout.txt'].\n- Real Stop: v3.4 returns decision=block (\"flags/checkout.txt was named in the task but was not opened...\"). v3.5 has no decision, so it allows. Its delivery.md says \"Files named in the request: 2 — opened: none; content already in the request: flags/checkout.txt\". That line is false: the request contained only the two candidate values, not the file's content.\n\n(b) .nvmrc contains \"20\". The request is \"Use the same Node version as .nvmrc (it's 18 or 20, I can't remember).\" The agent writes \"FROM node:18\". Evidence check: v3.4 gives ['unread' .nvmrc]. v3.5 gives no findings, with given_in_request=['.nvmrc'].\n\n(c) data/votes.txt has 300 lines: 180 yes and 120 no. The request is \"data/votes.txt has one vote per line, yes or no. Write the counts to result.json.\" The agent writes the made-up counts {\"yes\":150,\"no\":150} without opening the file.\n- Evidence check: v3.4 gives ['unread']. v3.5 gives no findings, with given_in_request=['data/votes.txt'].\n- Real Stop: v3.4 blocks. v3.5 allows, and its note says \"content already in the request: data/votes.txt\".\n- Nothing else catches it, because _values skips .json deliverables (CODE_HINT_EXT).\n\nThe code explains all three. given_inline tests each line with a plain substring check (`ln in joined`). Repeated lines add their length every time. There is no minimum size and no word boundary.\n\nThe problem is worse than the finding says. In test_c2 the request never contains the words yes or no. It says \"I have not counted the ballots from yesterday. They are in data/votes.txt...\". The file still counts as given in v3.5, because \"no\" is inside \"not\" and \"yes\" is inside \"yesterday\". v3.4 flags it as unread.\n\nControl: a flag file with three longer lines that do not appear in the request is still flagged as unread in v3.5. So the regression hits only short, low-variety files, which the diff's docstring rationale (\"content already given\") does not cover.\n\nChecked side claim: the smallest R530 goal.md/contract.md is ops/gain/r530/templates/ow_20_slugify/contract.md, 297 bytes. So an 80-character minimum would not affect the motivating R530 case.\n\nHarm is plausible. v3.4 would have sent back a guessed answer and made the agent open the file the person pointed to. v3.5 lets the wrong status, Node version or vote counts through. It also tells the person that the file's content was already in their request, which makes the delivery look grounded when it isn't. That goes against CLAUDE.md, which says the check exists to fix things before handing them over. Medium severity is appropriate."
+        }
+      },
+      {
+        "title": "Line matching is plain substring matching, so short lines count as 'content already in the request' when they only appear inside other text",
+        "severity": "medium",
+        "scenario": "evidence.py:400 checks `ln in joined` with no word or line boundaries and no minimum size. Probe (real hook path, Agent class, /tmp/claude-0/v35_review/test_v35_review.py::test_short_line_substring_counts_as_given): files data/orders.csv and config/limit.txt = \"25\\n\". Prompt: \"Keep the 2025 orders in data/orders.csv whose amount is above the limit in config/limit.txt. Write them to big.csv.\" The agent reads orders.csv only and writes big.csv. Result: given_in_request=['config/limit.txt'] and findings=[]. \"25\" matched inside \"2025\", so the only check that would catch the unopened threshold file (unread) is suppressed, and the note says 'content already in the request: config/limit.txt', which is false. Second probe (test_numbers_file_in_big_prompt): readings.txt holds 200 three-digit numbers, one per line. The request pastes a 161 KB server log and asks for their mean. The agent never opens readings.txt and writes 547.3. Result: given_in_request=['readings.txt'] and no unread finding. v3.4 pushed back 'unread' in both cases.",
+        "fix": "Match whole tokens: test `' '+ln+' ' in ' '+joined+' '`. Wrapped paragraphs still match because the collapsed prompt puts spaces at word edges. Also require a minimum amount of matched text (for example, total ≥ 200 chars, or ignore lines under ~20 chars when counting hits). In the R530 replay every intended file matched at 1.000 and every other file at 0.000–0.001, so a stricter rule loses none of the intended cases.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this on the real hook.handle path. The code under test is the current working tree. It matches the diff, and it is now committed as HEAD 8b9b521d with a clean tree. Tests are in /tmp/claude-0/v35_review/verify_1_0/test_verify_substring.py and all 12 pass under .venv python with PYTHONDONTWRITEBYTECODE=1.\n\nThe cause is evidence.py:400, `hit = sum(len(ln) for ln in lines if ln in joined)`. It is a plain substring test with no word boundaries and no minimum length. A short file therefore counts as fully \"in the request\" whenever its text appears inside any longer word or number in the prompt.\n\n1. Limit-file probe: data/orders.csv plus config/limit.txt containing \"25\\n\". The prompt is \"Keep the 2025 orders in data/orders.csv whose amount is above the limit in config/limit.txt. Write them to big.csv.\" The agent reads only orders.csv and writes big.csv with a guessed limit.\n   - v3.5: given_in_request=['config/limit.txt'] and findings=[]. \"25\" matched inside \"2025\".\n   - v3.4, simulated by monkeypatching given_inline to return an empty set: findings=['unread' config/limit.txt].\n   - Real Stop via hook.handle, both in-process and with the real child process: no \"decision\": \"block\". delivery.md says \"Files named in the request: 2 — opened: data/orders.csv; content already in the request: config/limit.txt\", which is false. Under v3.4 the same Stop blocks with \"config/limit.txt was named in the task but was not opened ... Inspect it\".\n2. Numbers-file probe: readings.txt holds 200 three-digit numbers and the prompt pastes a 160,978-char log. The agent never opens readings.txt. Result: given_in_request=['readings.txt'] and no unread finding.\n3. Four more ordinary one-line files are all wrongly counted as given, and none gets an unread pushback:\n   - threshold.txt \"100\", with \"$1000\" in the prompt\n   - vat.txt \"0.2\", with \"10.2%\" in the prompt\n   - region.txt \"north\", with \"northern\" in the prompt\n   - mode.txt \"strict\", with \"restrictions\" in the prompt\n\nWhy this can hurt a real person: this is the zero-config Stop check that runs by default. The one pushback that would make the agent open a threshold or config file is dropped silently. The person then receives work built on a guessed value, together with a note saying the file's content was already in the request. Short one-value config files and incidental substring collisions (years, bigger numbers, longer words) are common.\n\nOn the fix: I checked it on the 60 R530 SOLO prompts. With whole-token matching (' '+ln+' ' in ' '+joined+' ') and lines under 20 chars dropped from both the hits and the total, every goal.md and contract.md still scores 1.0 and every other named file scores 0.0. It also passes the repo's own v35 fixture and pushes back limit.txt.\n\nTwo parts of the suggested fix break cases that should pass:\n- Excluding short lines only from the hits (keeping them in the total) drops the repo test's contract.md fixture below 0.9.\n- A 200-char minimum total would reject the repo's GOAL fixture, which is about 141 chars.\n\nSo short lines should be excluded on both sides of the ratio."
+        }
+      },
+      {
+        "title": "The 10% slack treats a stale or partly pasted copy as the file, and the note then says 'content already in the request'",
+        "severity": "medium",
+        "scenario": "GIVEN_INLINE_FRAC=0.9, weighted by characters, so the unmatched 10% can be exactly the line that matters. Probe (test_stale_pasted_copy_with_one_changed_line): config.yaml on disk has 12 long service_*_endpoint lines plus 'timeout_seconds: 60'. The person pastes an older copy with 'timeout_seconds: 30' and asks for the timeout from config.yaml. The agent never opens config.yaml and writes 30 to timeout.txt. Result: given_in_request=['config.yaml'] and findings=[]. The delivery note says 'content already in the request: config.yaml', which is literally false because the file says 60. v3.4 pushed back 'unread config.yaml', which is the case the unread check exists for. The same happens when the person pastes a copy with one requirement line dropped or abridged, for example a 15-line goal.md with one ~50-char line missing (about 5%).",
+        "fix": "Require every non-trivial line to match, or at least every line that contains a digit or other value, not 90% of characters. In the R530 replay all 20 intended hits were 100% verbatim, so nothing is lost. Or keep a partial match out of 'given' and say 'N% of its text was in the request' rather than claiming the content was given.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this on the real hook.handle path (Claude hook format, real signed chain, real Stop with zerostop.check run in-process). The test file is /tmp/claude-0/v35_review/verify_1_1/test_probe_stale_copy.py. All 5 probes pass, run with PYTHONDONTWRITEBYTECODE=1 and .venv/bin/python -m pytest. The v3.5 code is in the working tree: it is committed as 4ee1f666 / 8b9b521d and the tree is clean, and it matches the diff.\n\n1. **Stale copy, evidence_for.** config.yaml on disk has 12 service_*_endpoint lines plus `timeout_seconds: 60`. The prompt pastes the same file with `timeout_seconds: 30` and asks for the timeout in config.yaml. The agent writes 30 to timeout.txt and never opens config.yaml. The matched fraction is 0.9785, above GIVEN_INLINE_FRAC=0.9. Result: materials_named=['config.yaml'], given_in_request=['config.yaml'], observed=['config.yaml'], findings=[]. The value 30 is also exempt as \"given in the request\".\n\n2. **Same scenario with given_inline stubbed to set(), which is v3.4 behavior.** findings=[{kind: 'unread', path: 'config.yaml'}].\n\n3. **Real Stop under v3.5.** There is no block. The systemMessage is \"0/1 given file(s) opened\". delivery.md says: \"- Files named in the request: 1 — opened: none; content already in the request: config.yaml\". That is false, because the file says 60 and the request says 30.\n\n4. **Real Stop under v3.4.** decision=block, with the reason \"config.yaml was named in the task but was not opened in the recorded steps. Inspect it ... and redo the parts that depend on it\". Opening the file would expose the 30/60 mismatch.\n\n5. **Dropped requirement.** goal.md has 15 lines. The paste drops one 76-character requirement line (\"Rows with more fields than the header must be rejected with exit status two.\"), so the matched fraction is 0.9327. Result: given_in_request=['goal.md'] and findings=[]. The agent never saw that requirement, and the note would call goal.md \"content already in the request\".\n\n**The motivating data does not need the 10% slack.** I recomputed the per-file fraction for every file in the R530 templates against the first A-SOLO user prompt in all 12 g_r530_s*_*_* runs. All 120 file/prompt pairs at or above 0.5 match at exactly 1.0; none falls between 0.9 and 1.0. So the slack only adds cases where a partly different copy counts as the file, as above.\n\n**Harm to a real person is plausible.** The person gets a wrong value, or a missing requirement, delivered without pushback. The delivery note, which a human reads to decide whether to trust the result, then states the file's content was in the request when it was not.\n\n**Scope.** Short files are not affected: one changed line there is usually more than 10% of the characters. Separately, because given files are merged into `observed`, the unread on-disk text also goes into the corpus used for value sourcing."
+        }
+      },
+      {
+        "title": "delivery.json does not record given_in_request, so named ≠ opened ∪ not_opened",
+        "severity": "low",
+        "scenario": "zerostop.py:414 data.update(...) still writes only named/opened/not_opened/in_dirs/dir_opened. opened now leaves out given files, and not_opened leaves them out too because they are in observed, so given files vanish from the machine-readable note. R530 replay cell g_r530_s1_1003_1/ow_03_mdtable (and ow_04): delivery.json has named=[contract.md, goal.md, run_tests.sh, tests_visible/test_visible.py], opened=[run_tests.sh, tests_visible/test_visible.py], not_opened=[], and no given_in_request key. Two of the four named files are not accounted for, although delivery.md does list them.",
+        "fix": "Add given_in_request=given_named (and the dir equivalent) to data.update in _write_note.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this against the working tree through the real hook.handle path: the Claude hook format for UserPromptSubmit, PreToolUse/PostToolUse and Stop. It holds with both the real `python -m vacant_network.trace.zerostop check` subprocess and the in-process child. Test file: /tmp/claude-0/v35_review/verify_1_2/test_given_json.py (3 passed; run with PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/user/Vacant, -p no:cacheprovider).\n\nScenario 1 (named files). The request pastes goal.md and contract.md in full and lists goal.md, contract.md and run_tests.sh. The agent reads run_tests.sh, writes solution.py, runs the tests and says it is done. Stop allows the turn. delivery.json has named=[contract.md, goal.md, run_tests.sh], opened=[run_tests.sh] and not_opened=[]. It has no given_in_request key; its keys are at, checked, deliverables, dir_opened, findings, fixed, in_dirs, in_progress, mode, named, not_opened, opened, project, session, unverified and written_after_reminder. So named minus opened minus not_opened = {contract.md, goal.md}, and those two files appear nowhere in the JSON. delivery.md does list them (\"content already in the request: contract.md, goal.md\").\n\nCause: zerostop.py:317-320 builds opened without the given files. not_opened is empty because given files are in observed. data.update at zerostop.py:414-416 never writes given_in_request.\n\nThe replay evidence matches. In the v35 replay cell g_r530_s1_1003_1__ow_03_mdtable, delivery.json has named=[contract.md, goal.md, run_tests.sh, tests_visible/test_visible.py], opened=[run_tests.sh, tests_visible/test_visible.py], not_opened=[] and no given_in_request key, exactly as the finding says. ow_04_layerconf is the same. Across all 60 v35 replay delivery.json files, 56 have named files missing from both opened and not_opened, and none has a given_in_request key.\n\nScenario 2 (folder case, broader than the finding). The request names materials/ and pastes materials/brief.md; the agent opens only materials/other.md. delivery.json has in_dirs=[brief.md, other.md], dir_opened=[other.md] and unverified=[], with no key for brief.md. Here delivery.md also leaves the file out: \"Files in the folders named in the request: 2 — opened: materials/other.md\". brief.md is not in the \"Not verified\" section and not listed as given, so it disappears from both the human note and the JSON.\n\nWhat the person sees: the on-screen systemMessage uses the same count (zerostop.py:423), so a fully correct run shows \"1/3 given file(s) opened\" (scenario 2: \"1/2\"), with nothing on screen saying the other files were already in the request. The person is left thinking files were skipped and has to check again. That is the extra checking work the product principle says the person should not have to do.\n\nSeverity is low. No in-repo consumer relies on named = opened ∪ not_opened; replay_pi_session.py and reminder_writes.py do not read these fields. Nothing is wrongly sent back, and no real error is hidden. The harm is an incomplete record of what was checked, both on the machine-readable side and, in the folder case and on the screen line, on the person's side.\n\nThe proposed fix covers the JSON: add given_in_request (named plus the folder equivalent) to data.update. It does not fix the screen fraction or the missing folder line in delivery.md."
+        }
+      },
+      {
+        "title": "Folder members whose content is in the request vanish from the delivery note and are not explained on screen",
+        "severity": "low",
+        "scenario": "zerostop.py:336 removes given files from dir_opened, and evidence.run removes them from unread_dir because they are in observed. Nothing re-adds them to the dir line. Probe (test_dir_member_given_is_silent_in_note): materials/brand.md is pasted in the prompt, the request names `materials/`, and the agent reads only schedule.md. The note says 'Files in the folders named in the request: 2 — opened: materials/schedule.md'. brand.md appears nowhere: not as opened, not as 'content already in the request' (that clause exists only on the named-files line), and not under 'Given files never opened', where v3.4 listed it. The screen says '1/2 given file(s) opened.' with no 'not verified' line, so the person cannot tell why one given file was neither opened nor reported. The same screen wording appears on allowed R530 cells ('2/4 given file(s) opened' with no mention of the 2 files whose content was in the request).",
+        "fix": "Add '; content already in the request: …' to the folder line. On screen, count the in-request files separately, for example '2/4 given file(s) opened, 2 in the request'.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this against the working tree, which now matches the committed HEAD (4ee1f666 plus 8b9b521d). The vacant_network part of `git diff HEAD~2` is identical to v35.diff. The tests go through the real `hook.handle` Claude path and a real Stop, with `zerostop._run_child` set to `zerostop.check` in-process, the same as tests/test_zero_stop.py. File: /tmp/claude-0/v35_review/verify_1_3/test_probe_dir_given.py. Result: 5 passed.\n\n1) test_dir_member_given[v35]: the project has materials/brand.md and materials/schedule.md. The request pastes brand.md in full and names `materials/`. The agent reads only schedule.md and writes plan.md.\n- Stop: no block.\n- Screen: \"Vacant checked this turn: 0 value(s), 1/2 given file(s) opened.\" There is no \"Not verified\" line.\n- delivery.md: \"Files in the folders named in the request: 2 — opened: materials/schedule.md\". The string \"brand.md\" appears nowhere in the note (asserted).\n- delivery.json: in_dirs=[brand, schedule], dir_opened=[schedule], unverified=[]. No field records brand.md as given.\n- Cause: zerostop.py:336 removes in_request files from dir_opened; evidence.run drops them from unread_dir because given is merged into observed. Nothing re-adds them. The \"content already in the request\" clause exists only on the named-files line (zerostop.py:333).\n\n2) Same test with v3.4 behaviour (given_inline patched to return an empty set): the note had \"## Not verified - Given files never opened: materials/brand.md\" and the screen said \"Not verified: 1 given file(s) not opened.\" v3.5 removed this disclosure and put nothing in its place.\n\n3) Why it matters (test_stale_paste_of_folder_member_is_silent): the person pasted an older brand.md (Price: NT$480). The file on disk says NT$520. The two still match at 90% or more, so v3.5 counts the file as given. The agent never opens it and writes \"Price: NT$480\".\n- No block.\n- Screen: \"2 value(s), 1/2 given file(s) opened\", no \"Not verified\" line.\n- Note: brand.md is absent. The only thing that would have told the person the agent never opened the current file is gone.\n\n4) Named-file contrast (test_named_given_screen, R530 shape): the note line does explain (\"opened: run_tests.sh; content already in the request: contract.md, goal.md\"). The screen, however, says \"1/3 given file(s) opened.\" with no explanation. delivery.json's opened/not_opened also leave out contract.md and goal.md, and there is no given list. This matches the finding's screen claim.\n\nI could not check the claim that R530 cells say \"2/4\". The replay cells do not store the screen text, but the mechanism is the same.\n\nSeverity is low. It is a transparency gap in the human-facing note: a file is counted but neither listed nor explained, and in the stale-paste case it hides a real signal. The suggested fix is sound: add \"; content already in the request: …\" to the folder line, count in-request files separately on screen, and add the given list to delivery.json."
+        }
+      },
+      {
+        "title": "given_inline costs O(lines × prompt) with no early exit: +8 s on every Stop for a 200 KB prompt with 30 candidate files",
+        "severity": "low",
+        "scenario": "Measured with the working tree (perf2.py): 200 KB prompt, a named data/ folder with 30 files of about 60 KB each (short lines, none in the prompt). Evidence.run went from 0.36 s (given_inline stubbed) to 8.34 s, and given_inline alone took 8.0 s. The loop searches all ~2800 lines of each file even after the 10% miss budget is gone. Neither prompt size nor candidate count is capped (each named folder adds up to 30 files), so time grows linearly. As an estimate, not measured: an 800 KB prompt with 5 named folders would take about 160 s, approaching CHECK_TIMEOUT_S=330, beyond which the whole Stop check is skipped (fails open).",
+        "fix": "Stop checking a file once missed characters exceed (1-GIVEN_INLINE_FRAC)*total. A prototype on the same data took 0.81 s instead of 7.99 s. Optionally cap the number of candidates checked, or try the whole collapsed file with `in` first.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this against the working tree. The given_inline change is now committed as HEAD 8b9b521d, the tree is clean, and the code matches v35.diff. My script is /tmp/claude-0/v35_review/verify_1_4/perf_repro.py. It records the scenario through the real hook.handle path (claude UserPromptSubmit, Bash, Write), then times four things: evidence_for, given_inline on its own, evidence_for with Evidence.given_inline stubbed out, and the real claude Stop hook, which runs the check in a zerostop child process. It was run with PYTHONDONTWRITEBYTECODE=1 and .venv Python 3.11.15.\n\nResults on this machine, which runs about twice as fast as the finder's:\n- 200 KB prompt, one named data folder of 30 files at about 60 KB each (short CSV rows, none in the prompt): Evidence.run took 4.50 s against 0.22 s with the stub. given_inline alone took 4.27 s and the real Stop hook took 4.70 s. The finder measured 8.0 s; the mechanism is the same.\n- The cost grows linearly with prompt size and with the number of candidate files. A 400 KB prompt with 30 files: given_inline 8.51 s against a 0.43 s baseline. An 800 KB prompt with 5 named folders (150 candidates): Evidence.run 86.26 s, given_inline 85.48 s, stub 0.87 s, real Stop hook 85.92 s. That confirms the finder's \"about 160 s\" estimate once the machine speed difference is allowed for.\n- Files with very short lines are worse. With one 3-digit number per line (about 15K lines per file), a 50 KB prompt already costs 9.04 s in given_inline and 9.52 s at the real Stop hook, against a 0.06 s baseline. A 5 KB prompt costs 0.92 s against 0.01 s.\n- The findings were the same with and without the stub in every case. In these runs given_inline adds only time.\n\nCause: the loop runs `hit = sum(len(ln) for ln in lines if ln in joined)` over every line, with no early exit once the 10% miss budget is used up. Neither prompt size nor candidate count is capped: MAX_DIR_MATERIALS=30 applies per folder, and individually named files have no cap at all. A check that runs past CHECK_TIMEOUT_S=330 is caught by zerostop.stop's TimeoutExpired handler, which returns \"allow\" with DID_NOT_RUN, so the check is silently skipped. At the measured linear rate, an 800 KB prompt with a few named folders of short-line files would pass 330 s. I extrapolated that case and did not run it.\n\nFix check: my early-exit prototype (/tmp/claude-0/v35_review/verify_1_4/fix_proto.py) stops checking a file once the missed characters exceed (1-GIVEN_INLINE_FRAC)*total. It returned the same sets as the committed code and cut the time from 4.27 s to 0.45 s (200 KB, CSV lines), 9.04 s to 0.98 s (50 KB, numeric lines) and 0.92 s to 0.15 s (5 KB).\n\nImpact: low but real. The delay is user-visible and happens at every Stop within a request, since the Claude Stop hook waits up to 600 s. It is a regression introduced by v3.5, and at large-context sizes it can make the zero-config check fail open. Typical small prompts pay under 1 s."
+        }
+      },
+      {
+        "title": "Docstring says different line-break positions still match, but a line break inside CJK text in the prompt stops the match",
+        "severity": "low",
+        "scenario": "Whitespace is collapsed to a single space, not removed. CJK text has no spaces between words, so a line break inserted mid-sentence in the prompt turns into a space the file does not have. Probe (test_cjk.py): goal.md holds a Chinese paragraph on one line. The prompt pastes it with a line break after '想把資料轉成' and lists goal.md among the workspace files. Result: given_in_request=[] and the 'unread' finding is still sent back. The same probe in English (a line break inserted in 'edit by hand') gives given_in_request=['goal.md'] and no findings. This is conservative (same as v3.4) but contradicts the docstring, and the product's users write Chinese.",
+        "fix": "Also compare with whitespace between two CJK characters removed on both sides, or state in the docstring that the wrap tolerance holds only for space-separated text.",
+        "verdict": {
+          "real": true,
+          "evidence": "I reproduced this through the real hook.handle path, covering both UserPromptSubmit/PreToolUse/PostToolUse and a real Stop with zerostop.check run in-process. Probe file: /tmp/claude-0/v35_review/verify_1_5/test_cjk.py (6 passed). Note that the v3.5 change is now committed at HEAD 4ee1f666, and the working tree is clean. The given_inline code matches the diff.\n\nResults. goal.md holds a Chinese paragraph on one line, and the prompt pastes it and lists goal.md among the workspace files.\n- Verbatim paste (control): given_in_request=['goal.md'], findings=[].\n- Prompt with '\\n' inserted after '想把資料轉成': given_in_request=[], findings=['unread']. The real Stop returns decision=block, reason \"goal.md was named in the task but was not opened in the recorded steps. Inspect it ... and redo the parts that depend on it.\"\n- English with a break inserted at a space ('edit\\nby hand'): given_in_request=['goal.md'], no findings, Stop does not block.\n- Reverse direction (the file is hard-wrapped mid-CJK and the prompt is on one line): this still matches, because each line of the file is a substring of the prompt.\n\nCause: joined = ' '.join(prompt.split()) turns the inserted newline into a space, while the file line has no space at that point. The line `if ln in joined` then fails. In CJK the paragraph is usually one long line, so a single miss drops the file below GIVEN_INLINE_FRAC (0.9).\n\nExtra probes:\n- A CJK prompt wrapped with textwrap.fill(width=30) also gives given_in_request=[] and 'unread'.\n- A mid-word English break ('edit by ha\\nnd'), as a terminal or pager copy would produce, also fails.\n\nSo the docstring claim \"人打的話也把所有空白壓成一個，所以換行位置不同也對得上\" holds only when the prompt breaks lines at existing whitespace. It fails for CJK text and for column wraps.\n\nImpact: this is conservative. The result is v3.4 behavior, never more pushbacks, and it is sent back at most once. But it is a false pushback on work that may be correct, which is the harm v3.5 exists to remove. It hits users who write Chinese (the product's users) whenever the pasted text is wrapped differently from the file, for example by prompt templating or a pager/tmux copy. The docstring also overstates the tolerance, and CLAUDE.md treats honesty-boundary sentences as part of the spec. Severity is low. The fix is cheap: also compare with whitespace between CJK characters removed on both sides, or narrow the docstring."
+        }
+      },
+      {
+        "title": "The new delivery-note wording has no test; the test comment says test_zero_stop covers it, but nothing does",
+        "severity": "low",
+        "scenario": "test_v35_given_file_listed_in_the_delivery_note imports zerostop and then runs `del zerostop  # 說明的字句由 test_zero_stop 以真的 Stop 驗`. No file in tests/ asserts 'content already in the request', given_in_request in a note, the changed opened/dir_opened lists, or the screen count. The zerostop.py changes, including the defects in the delivery.json and folder-member findings above, are untested. The existing suites pass on the working tree: test_zero_*.py, test_trace*.py and test_adapters*.py all passed. The R530 replay of g_r530_s1_1003_1 and g_r530_s2_1004_2 gave correct given_in_request on all 10 cells: goal.md and contract.md 100% verbatim in the prompt, run_tests.sh and tests_visible 0–0.1%.",
+        "fix": "Add a real-Stop test in test_zero_stop that checks the delivery.md line, the delivery.json fields and the screen summary for both a named file and a folder member whose content is in the request.",
+        "verdict": {
+          "real": true,
+          "evidence": "Reproduced against the v3.5 code. The code is now committed as 4ee1f666 and 8b9b521d; the working tree is clean and matches v35.diff.\n\n1) No test covers the new wording. A grep of tests/ for 'content already in the request' finds nothing. tests/test_zero_stop.py never mentions given_in_request, in_request or 'content already'. Yet tests/test_zero_evidence.py::test_v35_given_file_listed_in_the_delivery_note ends with `del zerostop  # 說明的字句由 test_zero_stop 以真的 Stop 驗`, so the comment points to coverage that does not exist. The only v3.5 assertions are on the evidence() dict. Nothing checks the changed opened/dir_opened lists, the delivery.md line, delivery.json or the screen count.\n\n2) The untested code has visible gaps. My tests in /tmp/claude-0/v35_review/verify_1_6/test_v35_note_coverage.py use the real hook.handle path: UserPromptSubmit, Pre/PostToolUse, then a real Stop with an in-process child (like the inproc fixture in test_zero_stop). All 3 pass, confirming:\n- Named files, R530-like (goal.md and contract.md pasted in the request, run_tests.sh read):\n  - delivery.md correctly says 'Files named in the request: 3 — opened: run_tests.sh; content already in the request: contract.md, goal.md'.\n  - delivery.json has no key recording the given files. Its keys are at, checked, deliverables, dir_opened, findings, fixed, in_dirs, in_progress, mode, named, not_opened, opened, project, session, unverified and written_after_reminder. opened=['run_tests.sh'], not_opened=[].\n  - The screen summary shown to the person reads 'Vacant checked this turn: 0 value(s), 1/3 given file(s) opened.' It gives no reason why the other 2 were not sent back.\n- A folder member whose text is in the request (docs/goal.md pasted, docs/notes.md read):\n  - delivery.md says only 'Files in the folders named in the request: 2 — opened: docs/notes.md'. docs/goal.md appears nowhere in the note: it is not listed as opened, not as 'content already in the request', and not under Not verified.\n  - delivery.json has dir_opened=['docs/notes.md'] and nothing about goal.md.\n  - The screen says '1/2 given file(s) opened.'\n\n3) As the finding says, the existing suites pass: test_zero_stop, test_zero_evidence, test_zero_budget and test_zero_mode all passed, and the repo tree stayed clean.\n\nThe harm is low and indirect. The person-facing summary shows opened counts that look like skipped files. Given-in-request folder members drop out of the note. delivery.json cannot tell them apart. A real-Stop test like the one the finding proposes would have caught all of this."
+        }
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Review"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verify"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "review",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a04ae57107d647718",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790457698631,
+      "queuedAt": 1790457698592,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458114292,
+      "tokens": 141173,
+      "toolCalls": 25,
+      "durationMs": 415644,
+      "resultPreview": "{\"findings\":[{\"title\":\"Line-in-request check is a plain substring test, so a file whose values differ from the pasted text still scores 100% 'given'\",\"severity\":\"high\",\"scenario\":\"given_inline counts a line as present when `ln in joined`, with no line or word boundary. A line in the file that is a prefix or substring of a different pasted line therefore counts as a match. Concrete case: the person…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "review",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a620fb8efd72b1c47",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790457698648,
+      "queuedAt": 1790457698592,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458195115,
+      "tokens": 152179,
+      "toolCalls": 38,
+      "durationMs": 495394,
+      "resultPreview": "{\"findings\":[{\"title\":\"Line matching is plain substring matching, so short lines count as 'content already in the request' when they only appear inside other text\",\"severity\":\"medium\",\"scenario\":\"evidence.py:400 checks `ln in joined` with no word or line boundaries and no minimum size. Probe (real hook path, Agent class, /tmp/claude-0/v35_review/test_v35_review.py::test_short_line_substring_counts…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "verify:1.1",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a9e18c10fac3b4508",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458120119,
+      "queuedAt": 1790458120049,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Reproduced against the uncommitted working tree via the rea…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458210727,
+      "tokens": 95453,
+      "toolCalls": 11,
+      "durationMs": 90607,
+      "resultPreview": "{\"real\":true,\"evidence\":\"Reproduced against the uncommitted working tree via the real hook.handle path (UserPromptSubmit / PreToolUse / PostToolUse / Stop, Claude format, zerostop._run_child swapped in-process). Tests: /tmp/claude-0/v35_review/verify_0_0/test_verify_substring.py (5 passed) and /tmp/claude-0/v35_review/verify_0_0/test_verify_threshold.py (1 passed), run with PYTHONDONTWRITEBYTECODE…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "verify:1.2",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a9745c6128ef81d43",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458198988,
+      "queuedAt": 1790458120050,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced the finding myself, running the real hook.hand…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458367310,
+      "tokens": 107329,
+      "toolCalls": 18,
+      "durationMs": 168322,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced the finding myself, running the real hook.handle path (Claude hook format) and a real Stop. Stop ran in process (zerostop._run_child -> zerostop.check), as the inproc fixture in tests/test_zero_stop.py does. The v3.5 change is now committed: HEAD~1 is 4ee1f666 and the working tree is clean. For a true v3.4 baseline I extracted e42730d7 with `git archive` into …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "verify:1.3",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a443896ee40b15920",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458214461,
+      "queuedAt": 1790458120050,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this independently through the real hook.handl…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458376303,
+      "tokens": 106687,
+      "toolCalls": 20,
+      "durationMs": 161842,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this independently through the real hook.handle path, including a real Stop with the zerostop check run as a child process. My test file is /tmp/claude-0/v35_review/verify_0_2/test_verify_small_files.py. I ran the same file twice. The first run used a v3.4 baseline, which I extracted with `git archive e42730d7 vacant_network` into /tmp/claude-0/v35_review/veri…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "verify:2.1",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a6f6fdfe4a6281c08",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458370285,
+      "queuedAt": 1790458199022,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this on the real hook.handle path. The code un…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458540297,
+      "tokens": 102590,
+      "toolCalls": 13,
+      "durationMs": 170011,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this on the real hook.handle path. The code under test is the current working tree. It matches the diff, and it is now committed as HEAD 8b9b521d with a clean tree. Tests are in /tmp/claude-0/v35_review/verify_1_0/test_verify_substring.py and all 12 pass under .venv python with PYTHONDONTWRITEBYTECODE=1.\\n\\nThe cause is evidence.py:400, `hit = sum(len(ln) for …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "verify:2.2",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a60f05e37778e2570",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458379065,
+      "queuedAt": 1790458199022,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this on the real hook.handle path (Claude hook…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458498964,
+      "tokens": 99869,
+      "toolCalls": 16,
+      "durationMs": 119898,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this on the real hook.handle path (Claude hook format, real signed chain, real Stop with zerostop.check run in-process). The test file is /tmp/claude-0/v35_review/verify_1_1/test_probe_stale_copy.py. All 5 probes pass, run with PYTHONDONTWRITEBYTECODE=1 and .venv/bin/python -m pytest. The v3.5 code is in the working tree: it is committed as 4ee1f666 / 8b9b521d…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "verify:2.3",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a7982c44fd57fca6f",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458501759,
+      "queuedAt": 1790458199022,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this against the working tree through the real…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458610524,
+      "tokens": 98835,
+      "toolCalls": 13,
+      "durationMs": 108764,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this against the working tree through the real hook.handle path: the Claude hook format for UserPromptSubmit, PreToolUse/PostToolUse and Stop. It holds with both the real `python -m vacant_network.trace.zerostop check` subprocess and the in-process child. Test file: /tmp/claude-0/v35_review/verify_1_2/test_given_json.py (3 passed; run with PYTHONDONTWRITEBYTEC…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "verify:2.4",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a556fbdd360100aa8",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458542727,
+      "queuedAt": 1790458199022,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this against the working tree, which now match…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458649211,
+      "tokens": 97092,
+      "toolCalls": 14,
+      "durationMs": 106483,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this against the working tree, which now matches the committed HEAD (4ee1f666 plus 8b9b521d). The vacant_network part of `git diff HEAD~2` is identical to v35.diff. The tests go through the real `hook.handle` Claude path and a real Stop, with `zerostop._run_child` set to `zerostop.check` in-process, the same as tests/test_zero_stop.py. File: /tmp/claude-0/v35_…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "verify:2.5",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a3bd731e91bf2c746",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458612897,
+      "queuedAt": 1790458199023,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this against the working tree. The given_inlin…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790459107452,
+      "tokens": 108675,
+      "toolCalls": 23,
+      "durationMs": 494555,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this against the working tree. The given_inline change is now committed as HEAD 8b9b521d, the tree is clean, and the code matches v35.diff. My script is /tmp/claude-0/v35_review/verify_1_4/perf_repro.py. It records the scenario through the real hook.handle path (claude UserPromptSubmit, Bash, Write), then times four things: evidence_for, given_inline on its ow…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "verify:2.6",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a42f0dc2b43224463",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458651950,
+      "queuedAt": 1790458199023,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "I reproduced this through the real hook.handle path, coveri…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458771087,
+      "tokens": 93197,
+      "toolCalls": 9,
+      "durationMs": 119136,
+      "resultPreview": "{\"real\":true,\"evidence\":\"I reproduced this through the real hook.handle path, covering both UserPromptSubmit/PreToolUse/PostToolUse and a real Stop with zerostop.check run in-process. Probe file: /tmp/claude-0/v35_review/verify_1_5/test_cjk.py (6 passed). Note that the v3.5 change is now committed at HEAD 4ee1f666, and the working tree is clean. The given_inline code matches the diff.\\n\\nResults. …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "verify:2.7",
+      "phaseIndex": 2,
+      "phaseTitle": "Verify",
+      "agentId": "a6e4cbb54dfaa2c1d",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790458773585,
+      "queuedAt": 1790458199023,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Reproduced against the v3.5 code. The code is now committed…",
+      "promptPreview": "Repo /home/user/Vacant (read CLAUDE.md, especially the zero-config section and the product principle). The change under review is UNCOMMITTED in the main checkout's working tree; its diff is saved at /tmp/claude-0/-home-user-Vacant/95e2b6b6-418f-504c-a59e-fd594ef13041/scratchpad/v35.diff (read it). It adds Evidence.given_inline() in vacant_network/trace/evidence.py: a file named in the person's re…",
+      "promptFramed": true,
+      "lastProgressAt": 1790458869977,
+      "tokens": 95149,
+      "toolCalls": 12,
+      "durationMs": 96392,
+      "resultPreview": "{\"real\":true,\"evidence\":\"Reproduced against the v3.5 code. The code is now committed as 4ee1f666 and 8b9b521d; the working tree is clean and matches v35.diff.\\n\\n1) No test covers the new wording. A grep of tests/ for 'content already in the request' finds nothing. tests/test_zero_stop.py never mentions given_in_request, in_request or 'content already'. Yet tests/test_zero_evidence.py::test_v35_gi…"
+    }
+  ],
+  "totalTokens": 1298228,
+  "totalToolCalls": 212
+}

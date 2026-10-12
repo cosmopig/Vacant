@@ -1,0 +1,19 @@
+{
+ "cells": 59,
+ "fully_correct": 20,
+ "blocked": 58,
+ "blocked_fully_correct": 20,
+ "blocked_not_fully_correct": 38,
+ "cells_by_kind": {
+  "unread": 55,
+  "failed_step": 20,
+  "test_claim": 3
+ },
+ "unread_paths": {
+  "contract.md": 33,
+  "goal.md": 54,
+  "run_tests.sh": 18,
+  "tests_visible/test_visible.py": 2
+ },
+ "blocked_only_unread": 35
+}

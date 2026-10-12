@@ -1,0 +1,76 @@
+{
+ "steps": [
+  {
+   "run": "cut -d, -f11 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f3 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f4 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f5 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f6 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f7 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f8 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f9 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f10 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f12 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f13 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f14 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f15 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f16 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f17 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f18 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f19 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f20 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f21 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  },
+  {
+   "run": "cut -d, -f11 /app/data/payments.csv | sort | uniq -c | sort -rn | head -3"
+  }
+ ],
+ "final": "The issuing country with the most transactions is NL.",
+ "fix": {
+  "steps": [
+   {
+    "write": [
+     "/app/answer.txt",
+     "NL"
+    ]
+   }
+  ],
+  "final": "Wrote NL to /app/answer.txt."
+ }
+}

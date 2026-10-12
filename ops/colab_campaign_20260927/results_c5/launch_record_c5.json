@@ -1,0 +1,48 @@
+{
+ "prefix": "c5",
+ "launched": "2026-09-27T14:59:58Z",
+ "slots": 48,
+ "deadline": "2026-09-28T02:59:50Z",
+ "prereg": "PREREG_20260927_COLAB_CODE5_A_VS_C361.md",
+ "plan_sha256": "dadc283f427aed840c9e31523fea6b2f1f919e420b175226389591747dc1803d",
+ "n_tasks": 920,
+ "arms": [
+  "A",
+  "C361"
+ ],
+ "seed": 20260928,
+ "tools_sha256": {
+  "analyze.py": "898820c2d3a4a0c1a6635ffa93bcdd46dd1e58eaa563983b729060e01e84ebb9",
+  "cell.sh": "983f589d0f291f41b15f808ec192fafed75f282f93c888ab293627b0387074b2",
+  "deploy_vm.sh": "f9e35bbe902a7f655c5fecbe8ff88634fd240865d43a2be254ef9b8c016b77a1",
+  "driver.py": "3f3b1ebfd593502e6c6d53e1cf2131e00d77b239cd476778fdea56caac328447",
+  "feasibility.py": "7b7ebd89e84d90a113bdbec45d36f9e80a62660b8001f16d2da5fd8b454c1f9c",
+  "launch_batch.sh": "bc27ea8869c42a2cb22874cb62545aaf1871ae7ed2f192d906ee5fcb1529673c",
+  "orproxy.py": "bf2d7291dbba06784e5f6fa856f5742ab9e044ea12b0cb60bd8b24276fcb1525",
+  "packer.py": "d206cf001276c7c9ff480c0c35f02d149a23f4dcafae85a2e02cd85dcdfe709d",
+  "sandbox.sh": "4855e8e4d0a56a06d24fa7d54e28c09e291d738d3646d5095ab8a0c0997a6af3",
+  "code_checks.cpython-313.pyc": "7295fd13c0d8ec63922105442471735f6e44d58543a6e80f664464f8e331387d",
+  "code_checks.py": "d6b145b74621092de73605dbfd38758d02bd21dcdf5f46861833048abceecd36",
+  "code_suite.py": "298396bcc6cabe68d9129870ef1be0d7f94b153cc8cd4219504931759714649d",
+  "stage_code_bank.py": "1dcd3bbd7a881413fd8117e115f74355762774ec75c2c53ed7251eae4485c972",
+  "sync_from_colab.sh": "5639ef196a3e5e112b6a5028d5b6c7bf8a5d84ba7fe1cdcb02074e4f6ccc444a",
+  "vacant_check.py": "07afff4f22ee23115e507f94c4c8f7276317793bf5ff3a83f7141349295e8661",
+  "vm_setup.sh": "57348920af55032c7c8015278856f3ef794222a72de4242eaa4957e8ca1cf179"
+ },
+ "wheel": {
+  "vacant_network-0.8.0-py3-none-any.whl": "4ec156d6648d214baa9bc5be4093f8b8731112f16a6ee61b6118d70b41def0b4"
+ },
+ "staged_tree_sha256": {
+  "humanevalplus": "aef3d61989411dbb4e0225e357a70fd8977cc5d06314149a0f9aee8678bf2db4",
+  "lcb_v1": "c1ff347f7de9d527345037cca0aa13b7babac165b45d6e131d42ccc40a42deda",
+  "lcb_v2": "f529443096338d35e59b50119a513656a487254a7251d1464bf12b06275ddbf4",
+  "lcb_v3": "73004ec4e432cc903a28bb5f0a1443707488b482c916ee3725014355710e09f7",
+  "mbppplus": "a45f1f455e392fff866893dd006c6be511285f891db2076c270afe33f76f2601"
+ },
+ "model_safetensors_sha256": "60b6e3989502969d8ae04185d72ecbbc7db63978d5af747a493d53895aa6bfa3",
+ "vllm": "0.30.0",
+ "pi": "0.87.1",
+ "node": "v22.23.2",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, 580.82.07",
+ "vllm_cmdline": "/content/venv-vllm/bin/python /content/venv-vllm/bin/vllm serve /content/gemma-4-12B-it-qat-w4a16-ct --served-model-name gemma-4-12b-it-qat --max-model-len 262144 --gpu-memory-utilization 0.90 --enable-prefix-caching --enable-auto-tool-choice --tool-call-parser gemma4 --reasoning-parser gemma4 --chat-template /content/tool_chat_template_gemma4.jinja --limit-mm-per-prompt {\"image\": 0, \"audio\": 0} --async-scheduling --enable-prompt-tokens-details --host 127.0.0.1 --port 18000"
+}

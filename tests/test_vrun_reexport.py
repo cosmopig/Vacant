@@ -180,7 +180,7 @@ def test_the_doc_line_numbers_still_point_at_the_all_pass_line():
     """README×3 與 AGENTS.md 用**絕對行號**指著「量不到不是通過」那一行。
 
     搬家把那一行的行號從 `ops/gain/r530/acceptance.py:272` 變成
-    `vacant_network/vrun/acceptance.py:268`。絕對行號的失敗方式是**安靜地指到別行**
+    `vacant_network/vrun/acceptance.py:268`（2026-09-24 對帳修正後是 `:481`）。絕對行號的失敗方式是**安靜地指到別行**
     ——讀的人會以為看到的是判準，其實是旁邊那一行。所以把它變成可執行的：
     文件裡寫幾就去讀第幾行，內容不對就紅。
     """

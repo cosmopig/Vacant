@@ -1,0 +1,127 @@
+{
+ "summary": {
+  "runs": 10,
+  "by_kind": {
+   "g12-off-A-s1:done_last_test_passed": {
+    "runs": 5,
+    "reward_1": 5
+   },
+   "g12-off-A-s1:not_done": {
+    "runs": 5,
+    "reward_1": 3
+   }
+  }
+ },
+ "rows": [
+  {
+   "trial": "3320__QTEPpEE",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 3,
+   "stop": "length",
+   "test_runs": 1,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "not_done"
+  },
+  {
+   "trial": "3518__Z5ycNtU",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 6,
+   "stop": "stop",
+   "test_runs": 3,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "done_last_test_passed"
+  },
+  {
+   "trial": "3553__KKjX7bS",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 3,
+   "stop": "stop",
+   "test_runs": 1,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "done_last_test_passed"
+  },
+  {
+   "trial": "3765__mP7546J",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 0.0,
+   "turns": 16,
+   "stop": "error",
+   "test_runs": 6,
+   "last_test_exit": 1,
+   "changed_after_last_test": true,
+   "kind": "not_done"
+  },
+  {
+   "trial": "3779__xVNqxWN",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 16,
+   "stop": "error",
+   "test_runs": 5,
+   "last_test_exit": 0,
+   "changed_after_last_test": true,
+   "kind": "not_done"
+  },
+  {
+   "trial": "abc310_b__U9L7Vbt",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 3,
+   "stop": "length",
+   "test_runs": 1,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "not_done"
+  },
+  {
+   "trial": "abc334_b__K2YdCbE",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 6,
+   "stop": "stop",
+   "test_runs": 2,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "done_last_test_passed"
+  },
+  {
+   "trial": "abc356_e__pVoPciG",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 11,
+   "stop": "stop",
+   "test_runs": 3,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "done_last_test_passed"
+  },
+  {
+   "trial": "abc377_g__GExz6Yv",
+   "arm_dir": "g12-off-A-s1",
+   "reward": 1.0,
+   "turns": 7,
+   "stop": "stop",
+   "test_runs": 3,
+   "last_test_exit": 0,
+   "changed_after_last_test": false,
+   "kind": "done_last_test_passed"
+  },
+  {
+   "trial": "arc188_c__NaUJUbC",
+   "arm_dir": "g12-off-A-s1",
+   "reward": null,
+   "turns": 16,
+   "stop": "error",
+   "test_runs": 0,
+   "last_test_exit": null,
+   "changed_after_last_test": false,
+   "kind": "not_done"
+  }
+ ]
+}

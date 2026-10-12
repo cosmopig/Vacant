@@ -1,0 +1,1 @@
+Compute 17 + 25 and write only the result to answer.txt in the current project directory.

@@ -1,0 +1,127 @@
+{
+ "schema": "i1001.plan/1",
+ "kind": "main",
+ "seed": 20261001,
+ "arms": [
+  "A",
+  "C"
+ ],
+ "nested": [
+  "R",
+  "K"
+ ],
+ "samples": [
+  1
+ ],
+ "k_banks": [
+  "lcb_v1",
+  "lcb_v2",
+  "lcb_v3"
+ ],
+ "tasks": [
+  {
+   "bank": "databench",
+   "id": "db_066_04",
+   "dir": "/srv/eval/staged/databench/db_066_04",
+   "role": "screen",
+   "deliverable": "answer.txt",
+   "k": false,
+   "screened": true
+  },
+  {
+   "bank": "lcb_v3",
+   "id": "lcb_2808",
+   "dir": "/srv/eval/staged/lcb_v3/lcb_2808",
+   "role": "lcb",
+   "deliverable": "solution.py",
+   "k": true,
+   "screened": false
+  },
+  {
+   "bank": "lcb_v2",
+   "id": "lcb_3594",
+   "dir": "/srv/eval/staged/lcb_v2/lcb_3594",
+   "role": "lcb",
+   "deliverable": "solution.py",
+   "k": true,
+   "screened": false
+  },
+  {
+   "bank": "lcb_v1",
+   "id": "lcb_3653",
+   "dir": "/srv/eval/staged/lcb_v1/lcb_3653",
+   "role": "lcb",
+   "deliverable": "solution.py",
+   "k": true,
+   "screened": false
+  },
+  {
+   "bank": "polyglot_py",
+   "id": "pg_affine_cipher",
+   "dir": "/srv/eval/staged/polyglot_py/pg_affine_cipher",
+   "role": "screen",
+   "deliverable": "affine_cipher.py",
+   "k": false,
+   "screened": true
+  }
+ ],
+ "dropped_banks": [
+  "dabench"
+ ],
+ "ceiling": {
+  "schema": "i1001.ceiling_decision/1",
+  "rule": {
+   "n": 10,
+   "pass_ge": 9
+  },
+  "banks": {
+   "dabench": {
+    "dropped": true,
+    "passes": 9,
+    "n": 10,
+    "voids": [],
+    "missing": [],
+    "unsolved": [
+     "dab_732"
+    ],
+    "reason": "A passed 9/10 screened tasks (>= 9): the plain agent leaves (almost) nothing unsolved here; bank dropped"
+   },
+   "databench": {
+    "dropped": false,
+    "passes": 1,
+    "n": 1,
+    "voids": [],
+    "missing": [],
+    "unsolved": [],
+    "reason": "A passed 1/1 (< 9): 0 unsolved task(s) seen without Vacant; bank kept"
+   },
+   "polyglot_py": {
+    "dropped": false,
+    "passes": 0,
+    "n": 1,
+    "voids": [],
+    "missing": [],
+    "unsolved": [
+     "pg_affine_cipher"
+    ],
+    "reason": "A passed 0/1 (< 9): 1 unsolved task(s) seen without Vacant; bank kept"
+   }
+  },
+  "dropped_banks": [
+   "dabench"
+  ]
+ },
+ "estimate": {
+  "units": 5,
+  "first_sessions": 10,
+  "max_extra_R_sessions": 10,
+  "max_extra_K_sessions": 6,
+  "max_sessions": 26,
+  "max_session_minutes": 780.0,
+  "note": "upper bound: every session hitting the wall limit; real use is far lower"
+ },
+ "source": {
+  "tasks_index_sha256": "03597627f30db2f1e1098c33108793341b851b1570892e3978c4d8d127c175bc",
+  "manifest_sha256": "75a7b15eba77c432aa6856d84d0f6995cad3f9656cd45e79581454976f3251c8"
+ }
+}

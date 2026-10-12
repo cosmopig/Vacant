@@ -1,0 +1,43 @@
+{
+ "schema": "i1001.ceiling_decision/1",
+ "rule": {
+  "n": 10,
+  "pass_ge": 9
+ },
+ "banks": {
+  "dabench": {
+   "dropped": true,
+   "passes": 9,
+   "n": 10,
+   "voids": [],
+   "missing": [],
+   "unsolved": [
+    "dab_732"
+   ],
+   "reason": "A passed 9/10 screened tasks (>= 9): the plain agent leaves (almost) nothing unsolved here; bank dropped"
+  },
+  "databench": {
+   "dropped": false,
+   "passes": 1,
+   "n": 1,
+   "voids": [],
+   "missing": [],
+   "unsolved": [],
+   "reason": "A passed 1/1 (< 9): 0 unsolved task(s) seen without Vacant; bank kept"
+  },
+  "polyglot_py": {
+   "dropped": false,
+   "passes": 0,
+   "n": 1,
+   "voids": [],
+   "missing": [],
+   "unsolved": [
+    "pg_affine_cipher"
+   ],
+   "reason": "A passed 0/1 (< 9): 1 unsolved task(s) seen without Vacant; bank kept"
+  }
+ },
+ "dropped_banks": [
+  "dabench"
+ ]
+}

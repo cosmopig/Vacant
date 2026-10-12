@@ -1,0 +1,11 @@
+{
+ "at": "2026-09-27T15:02:07Z",
+ "cells": 40,
+ "timeouts": 0,
+ "timeout_rate": 0.0,
+ "calls": 280,
+ "non200": 0,
+ "non200_rate": 0.0,
+ "c_install_fail": 0,
+ "triggered": false
+}

@@ -1,0 +1,8 @@
+{"ts": 1791475719.7139664, "agent": "codex", "event": "UserPromptSubmit", "ms": 18.33}
+{"ts": 1791475720.1324162, "agent": "codex", "event": "PreToolUse", "ms": 73.36}
+{"ts": 1791475720.5035274, "agent": "codex", "event": "PostToolUse", "ms": 5.98}
+{"ts": 1791475720.8373792, "agent": "codex", "event": "Stop", "ms": 2.42}
+{"ts": 1791475721.2756002, "agent": "codex", "event": "PreToolUse", "ms": 2.36}
+{"ts": 1791475721.6202974, "agent": "codex", "event": "PostToolUse", "ms": 29.46}
+{"ts": 1791475721.9334242, "agent": "codex", "event": "Stop", "ms": 7.61}
+{"ts": 1791475722.5795372, "agent": "codex", "event": "SessionEnd", "ms": 26.54}

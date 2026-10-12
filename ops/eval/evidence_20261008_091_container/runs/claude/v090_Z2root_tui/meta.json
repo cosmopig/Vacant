@@ -1,0 +1,14 @@
+{
+  "build": "v090",
+  "scn": "Z2root",
+  "mode": "tui",
+  "cwd": "/",
+  "tui_ready": true,
+  "prompt_resent": false,
+  "exited_cleanly": true,
+  "frames": 11,
+  "frames_vacant": 0,
+  "answer_txt": null,
+  "model_requests": 3,
+  "requests_fed_back": 0
+}

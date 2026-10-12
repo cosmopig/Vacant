@@ -1,0 +1,50 @@
+
+ ▐▛███▛█   Claude Code v2.1.293
+▝▜██████▀  Opus 5.5 · API Usage Billing
+ ▝▝   ▝▝   /work/proj
+
+
+❯ Show me my Vacant install settings.                                                                                                                           
+
+  Read 1 file, ran 1 shell command                          
+
+● Done.
+
+✻ Crunched for 0s · done 4:03 PM
+
+❯ Show me my Vacant install settings.                                                                                                                           
+
+● Done.
+
+✻ Crunched for 0s · done 4:03 PM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                                                              
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯                                     
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+tab to cycle) · ← for agents                   
