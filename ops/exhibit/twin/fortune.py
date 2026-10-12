@@ -735,7 +735,7 @@ def _attempt_index(rows: list[dict[str, Any]]) -> list[int]:
 
 
 def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text: str = "",
-                      retry_ids: tuple[str, ...] = ()) -> list[dict[str, Any]]:
+                      retry_ids: tuple[str, ...] = (), accepted: bool | None = None) -> list[dict[str, Any]]:
     """所有成立的習慣：`{key, text, step}`（`step`＝全部步驟裡的第幾步，1 起算）。判準不成立就不出現。"""
     out: list[dict[str, Any]] = []
     off = len(ev.all) - len(ev.rows)
@@ -880,7 +880,9 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
         if nxt is not None:
             ids = set(retry_ids)
             if "G1" in ids:
-                add("retried_open", "被退回過，因為計畫裡點名要看的東西還沒打開，補開之後才過", nxt)
+                add("retried_open", 
+                    "被退回過，因為計畫裡點名要看的東西還沒打開，補開之後才過" if accepted is True      # 「才過」只在這一跑最終通過時才說
+                    else "被退回過，因為計畫裡點名要看的東西還沒打開，回去補開了", nxt)
             elif ids & {"G2", "G3"}:
                 add("retried_source", "被退回過，因為有個數字說不出出處，回去補上了", nxt)
             else:
@@ -925,23 +927,23 @@ def mirror_pick(cands: list[dict[str, Any]], seed: str = "") -> list[dict[str, A
 
 def mirror_picks(rows: list[dict[str, Any]], files: dict[str, str], retries: int,
                  title: str | None, plan_text: str = "", retry_ids: tuple[str, ...] = (),
-                 seed: str = "") -> list[dict[str, Any]]:
+                 seed: str = "", accepted: bool | None = None) -> list[dict[str, Any]]:
     ev = Evidence(rows, None)
     ev.files = dict(files or {})
-    return mirror_pick(mirror_candidates(ev, retries, title, plan_text, retry_ids), seed or (title or ""))
+    return mirror_pick(mirror_candidates(ev, retries, title, plan_text, retry_ids, accepted), seed or (title or ""))
 
 
 def mirror_lines(rows: list[dict[str, Any]], files: dict[str, str], retries: int,
                  title: str | None, plan_text: str = "", retry_ids: tuple[str, ...] = (),
-                 seed: str = "") -> list[str]:
+                 seed: str = "", accepted: bool | None = None) -> list[str]:
     """最多 3 句，每句尾端是「（第 N 步）」＝步驟紀錄裡的第 N 步（收據頁的步驟清單用同一個編號）。"""
     return [c["text"] + step_tag(c["step"])
-            for c in mirror_picks(rows, files, retries, title, plan_text, retry_ids, seed)]
+            for c in mirror_picks(rows, files, retries, title, plan_text, retry_ids, seed, accepted)]
 
 
 def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, Any]], files: dict[str, str],
                  retries: int, traits: str = "", plan_text: str = "", retry_ids: tuple[str, ...] = (),
-                 seed: str = "") -> dict[str, Any]:
+                 seed: str = "", accepted: bool | None = None) -> dict[str, Any]:
     """命盤卡（確定性，不經模型）。給觀眾的 `lines`＝「像不像你」的做事習慣（`mirror_lines`，第 5 節）——
     **有沒有命盤都做**：習慣句只看步驟紀錄。解讀句與路線句只留在 `reading`／`route` 當紀錄，不進 `lines`。"""
     res: dict[str, Any] = {"first_line": first_line(f), "head": MIRROR_HEAD, "lines": [], "dropped": [],
@@ -954,7 +956,7 @@ def compose_card(f: dict[str, Any], *, letter_text: str, rows: list[dict[str, An
         res["reading"] = reading_of(letter_text, f, traits)
         if places:
             res["route"] = route_of(places, last_place_before_delivery(rows), title or NO_NAME_TITLE, retries)
-    res["lines"] = mirror_lines(rows, files, retries, title, plan_text, retry_ids, seed)
+    res["lines"] = mirror_lines(rows, files, retries, title, plan_text, retry_ids, seed, accepted)
     res["present"] = bool(res["lines"])
     return res
 
@@ -1513,6 +1515,18 @@ def retry_ids_of(rd: pathlib.Path) -> tuple[str, ...]:
     return tuple(ids)
 
 
+def accepted_of(rd: pathlib.Path) -> bool | None:
+    """這一跑最後一次嘗試有沒有通過（`run_RUN-ON.json`）。讀不到／嘗試還在進行中 ⇒ None（句子不說「過」）。"""
+    try:
+        runj = json.loads((pathlib.Path(rd) / "run_RUN-ON.json").read_text(encoding="utf-8"))
+        at = runj.get("attempts", [])
+        if at and isinstance(at[-1].get("accepted"), bool):
+            return at[-1]["accepted"]
+    except (OSError, ValueError, TypeError, AttributeError):
+        pass
+    return None
+
+
 def attempts_retries(rd: pathlib.Path) -> int:
     """這一跑被閘門退回、重改過幾次＝嘗試數 − 1（`run_RUN-ON.json`）。讀不到 ⇒ 0。"""
     n = 0
@@ -1570,7 +1584,7 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
     # 產出（2026-10-12 mirror）：給觀眾的 `head`／`lines` 只來自 `mirror_lines`——「像不像你？」＋至多 3 句做事習慣。
     # 系統檔（試的紀錄／PLAN／信…）不算「做出來的東西」，所以標題與證據都不看它們。
     mir = compose_card(f, letter_text=letter, rows=rows, files=_product_files(files), retries=retries, traits=traits,
-                       plan_text=plan, retry_ids=retry_ids_of(rd), seed=rd.name)
+                       plan_text=plan, retry_ids=retry_ids_of(rd), seed=rd.name, accepted=accepted_of(rd))
     res["lines_v3"] = list(res.get("lines") or [])           # 舊的四行（verdict＋想＋試＋說）：只留紀錄
     res["title"] = mir.get("title")
     res["places"] = mir.get("places") or res.get("places") or []
