@@ -287,9 +287,17 @@ def letter_system_for(cell_id: str) -> str:
             "「" + v["body"] + "」。信裡不寫瞳孔、不寫指尖摩擦。")
 
 
+#: Vacant 0.9.x 掛鉤開著（`VACANT_TWIN_HOOKS=1`）時的第一句：檔名帶反引號、前後有空白，0.9.1 的
+#: `trace/evidence.py` 才認得出「點名要讀的資料」與「要求寫出的檔」（原句中文連寫，它認不出任何一個 ⇒ 檢查形同不咬；
+#: zc_replay 離線重播：52 個 attempt 退回 0 次）。沒開時用原句，逐位元不變。KS-1：沒有責任／懲罰措辭。
+FIRST_MESSAGE_HOOKED = ("上面是你的說明。請先讀 `信.md` ，再讀 `WORLD.md` ，再看地上。"
+                        "然後照步驟開始：先把計畫寫到 `PLAN.md` ，再去試你決定要試的事，把試的過程寫到 `試的紀錄.md` 。")
+assert_ks1_clean(FIRST_MESSAGE_HOOKED)
+
+
 def first_message_for(cell_id: str) -> str:
     """段 2 第一句＋這一跑醒來的地點。"""
-    return FIRST_MESSAGE + "你剛被捏好、睜開眼的時候，人站在「" + variation_for(cell_id)["wake"] + "」。"
+    return (FIRST_MESSAGE_HOOKED if twin_hooks.enabled() else FIRST_MESSAGE) + "你剛被捏好、睜開眼的時候，人站在「" + variation_for(cell_id)["wake"] + "」。"
 
 #: 世界設定（住在裡面的人讀的版本）。每一跑複製進工作區，和 TRAITS.md 同一層。
 WORLD_PATH = pathlib.Path(__file__).resolve().parent / "world" / "WORLD.md"

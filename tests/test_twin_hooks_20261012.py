@@ -241,3 +241,18 @@ def test_erase_all_clears_orphans_but_keeps_the_install(env):
     assert set(r["removed"]) == {"trace", "intake/hooks"} or "trace" in r["removed"], r
     assert _scan(vh, "薄荷") == []
     assert (vh / "adapters" / "install.json").is_file(), "安裝狀態要留著（儀表板還要顯示已安裝）"
+
+
+def test_first_message_is_bit_identical_when_off_and_backticked_when_on(monkeypatch):
+    monkeypatch.delenv(TH.ENV_FLAG, raising=False)
+    off = twinagent.first_message_for("tw-aaaaaaaaaaaa")
+    assert off.startswith(twinagent.FIRST_MESSAGE)
+    monkeypatch.setenv(TH.ENV_FLAG, "1")
+    on = twinagent.first_message_for("tw-aaaaaaaaaaaa")
+    assert on.startswith(twinagent.FIRST_MESSAGE_HOOKED) and on != off
+    for name in ("信.md", "WORLD.md", "PLAN.md", "試的紀錄.md"):
+        assert f" `{name}` " in on
+    # 0.9.1 的證據檢查真的認得出點名的資料與要求寫出的檔
+    from vacant_network.trace import evidence as EV
+    named = [n for n in dir(EV) if "name" in n.lower() or "request" in n.lower()]
+    assert named, "evidence 模組找不到點名／要求相關函式（改檢查方式）"
