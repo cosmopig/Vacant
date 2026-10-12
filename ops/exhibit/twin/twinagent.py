@@ -1430,6 +1430,7 @@ _TASK_RE = re.compile(r"^twin:tw-[0-9a-f]{12}$")
 _B58_RE = re.compile(r"^z[1-9A-HJ-NP-Za-km-z]{20,80}$")
 #: 一條分身收據應該只有兩筆（一筆 ws_attempt、一筆 ws_verdict）。給一點餘裕，但不收一本書。
 RECEIPT_MAX_ENTRIES = 8
+RECEIPT_MAX_STEPS = 500
 
 
 class ReceiptShapeError(ValueError):
@@ -1516,12 +1517,24 @@ def receipt_bundle(work_root: pathlib.Path, sub_id: str,
         return {"ok": False, "why": "unreadable"}
     if expect_head is not None and head != expect_head:
         return {"ok": False, "why": "head_mismatch"}
-    return {"ok": True, "bundle": {
+    bundle: dict[str, Any] = {
         "v": 1, "kind": "vacant.twin.receipt/1",
         "task_id": entries[-1]["payload"].get("task_id"),
         "head": head, "n": len(entries), "pub": pub, "entries": entries,
         "honesty": ("這份收據只有雜湊、計數與固定枚舉，沒有你的原文。"
-                    "它證明這一跑的紀錄事後沒有被改過，不證明分身做得好。")}}
+                    "它證明這一跑的紀錄事後沒有被改過，不證明分身做得好。")}
+    # 2026-10-13 mirror2：逐步清單（只有第幾步／讀寫列／哪一類／成不成功，沒有檔名與內容）＋它的 sha256。
+    # 卡上每一句尾端的「（第 N 步）」指到這份清單的 n。⚠ 誠實：簽章鏈簽的是每次嘗試的工作區雜湊與裁決；
+    # 這份逐步清單是同一跑的旁註（有雜湊、沒有逐步簽章）——頁面上照實這樣寫。
+    try:
+        st = fortunelib.public_steps(fortunelib.read_steps(rd)) if (rd / STEP_LOG_NAME).is_file() else []
+    except (OSError, ValueError):
+        st = []
+    if st:
+        st = st[:RECEIPT_MAX_STEPS]
+        bundle["steps"] = st
+        bundle["steps_sha256"] = fortunelib.steps_digest(st)
+    return {"ok": True, "bundle": bundle}
 
 
 def job_for(sub_id: str, card: Any, card_text: Any, cfg: AgentConfig) -> Job | None:
