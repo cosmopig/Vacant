@@ -465,7 +465,7 @@ def test_card_v2_is_four_parts_built_without_the_model(tmp_path) -> None:
     assert res["title"] == "鬆環對照冊"
     # 2026-10-12：解讀句與路線句只留作紀錄；給觀眾的是做事習慣（先逛兩處才寫計畫、寫完成品又列了房間）
     assert 2 <= len(res["lines"]) <= 3 and all(fz.step_of(x) for x in res["lines"])
-    assert {"還沒決定要做什麼，先到處看了一圈", "交出去之前，又回頭再看了一遍"} <= set(_mirror(rows, {"成品.md": "# 鬆環對照冊\n內文"}, 0, "鬆環對照冊"))
+    assert {"好奇，習慣先四處逛一圈再決定", "細心，交出去前會再確認一次"} <= set(_mirror(rows, {"成品.md": "# 鬆環對照冊\n內文"}, 0, "鬆環對照冊"))
     assert res["reading"] not in res["lines"] and res["route"] not in res["lines"]
     md = fz.card_md(res).splitlines()
     assert md == [fz.MIRROR_HEAD] + res["lines"]
@@ -873,35 +873,35 @@ def _picked(rows, files=None, retries=0, title=None):
 
 
 def test_mirror_start_follows_the_step_order() -> None:
-    assert "還沒決定要做什麼，先到處看了一圈" in _mirror(BROWSE_THEN_PLAN)           # 兩個地點後才寫計畫
+    assert "好奇，習慣先四處逛一圈再決定" in _mirror(BROWSE_THEN_PLAN)           # 兩個地點後才寫計畫
     one = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/紙團_乙.txt"),
                     _row(5, "ws_write", "PLAN.md"), _row(6, "ws_write", "成品.md")]
-    assert "先去看了一眼，才決定要做什麼" in _mirror(one)                           # 只看了一處
-    assert "先把要做的事寫下來，才開始動手" in _mirror(PLAN_THEN_BROWSE)
+    assert "謹慎，先看一眼才動手" in _mirror(one)                           # 只看了一處
+    assert "有條理，先想清楚再做" in _mirror(PLAN_THEN_BROWSE)
     direct = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", "成品.md")]
-    assert "沒寫計畫，直接就動手做了" in _mirror(direct)
+    assert "直覺派，想到就做" in _mirror(direct)
     # 負控制：只寫了計畫、什麼都沒看也沒做 ⇒ 沒有任何一句（不補）
     assert _picked(STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_write", "PLAN.md")]) == []
 
 
 def test_mirror_habits_appear_only_with_their_step() -> None:
     twice = PLAN_THEN_BROWSE + [_row(9, "ws_write", "PLAN.md")]
-    assert "做到一半改了主意，把計畫重寫了一遍" in _mirror(twice)
-    assert "做到一半改了主意，把計畫重寫了一遍" not in _mirror(PLAN_THEN_BROWSE)       # 負控制：PLAN 只寫過一次
+    assert "願意推翻自己，邊做邊調整" in _mirror(twice)
+    assert "願意推翻自己，邊做邊調整" not in _mirror(PLAN_THEN_BROWSE)       # 負控制：PLAN 只寫過一次
     thrice = twice + [_row(10, "ws_write", "PLAN.md")]
-    assert "計畫寫了又改，前後改了 2 次" in _mirror(thrice)
+    assert "願意推翻自己，邊做邊調整" in _mirror(thrice)
     two = {"a.md": "版本一\n…", "b.md": "版本二\n…"}
-    assert "拿不定主意，乾脆做了兩個版本" in _mirror(PLAN_THEN_BROWSE, files=two)
-    assert "拿不定主意，乾脆做了兩個版本" not in _mirror(PLAN_THEN_BROWSE, files={"a.md": "版本一"})
-    assert "做好的東西，特地寫明了要留給誰" in _mirror(PLAN_THEN_BROWSE, files={"給守口人.md": "x"})
-    assert "做好的東西，寫明了收在哪裡" in _mirror(PLAN_THEN_BROWSE, files={"a.md": "收在長桌下"})
+    assert "拿不定主意時，乾脆兩個都做" in _mirror(PLAN_THEN_BROWSE, files=two)
+    assert "拿不定主意時，乾脆兩個都做" not in _mirror(PLAN_THEN_BROWSE, files={"a.md": "版本一"})
+    assert "做東西時心裡想著某個人" in _mirror(PLAN_THEN_BROWSE, files={"給守口人.md": "x"})
+    assert "有收拾的習慣，東西會放好" in _mirror(PLAN_THEN_BROWSE, files={"a.md": "收在長桌下"})
     many = STAGE1 + [_row(3, "ws_read", "信.md")] + [_row(4 + i, "ws_read", f"地上/草稿角/{i}.txt") for i in range(6)] \
         + [_row(20, "ws_write", "PLAN.md"), _row(21, "ws_write", "成品.md")]
-    assert "前前後後翻了 6 樣東西" in _mirror(many)
-    assert any(x.startswith("沒看幾樣東西") for x in _mirror(PLAN_THEN_BROWSE))
-    assert not any(x.startswith("沒看幾樣東西") for x in _mirror(many))               # 負控制
-    assert "被退回 2 次，每一次都回去改" in _mirror(PLAN_THEN_BROWSE, retries=2)
-    assert not any("退回" in x for x in _mirror(PLAN_THEN_BROWSE, retries=0))
+    assert "好奇心重，什麼都想翻翻看" in _mirror(many)
+    assert any(x.startswith("果斷，不用看太多") for x in _mirror(PLAN_THEN_BROWSE))
+    assert not any(x.startswith("果斷，不用看太多") for x in _mirror(many))               # 負控制
+    assert "被指出問題會回頭補上" in _mirror(PLAN_THEN_BROWSE, retries=2)
+    assert not any("被指出問題" in x for x in _mirror(PLAN_THEN_BROWSE, retries=0))
 
 
 def test_mirror_is_at_most_three_lines_with_steps_and_a_real_habit() -> None:
@@ -913,7 +913,7 @@ def test_mirror_is_at_most_three_lines_with_steps_and_a_real_habit() -> None:
                for x in plain), "至少一句不是「開頭方式」或「最後做出來的是」"
     assert plain[-1].startswith("最後做出來的是") or all(not x.startswith("最後做出來的是") for x in plain)
     # 「改主意」最稀有 ⇒ 一定被挑中
-    assert "做到一半改了主意，把計畫重寫了一遍" in plain
+    assert "願意推翻自己，邊做邊調整" in plain
 
 
 def test_mirror_lines_never_label_the_viewer_or_tell_the_world_story() -> None:
@@ -941,7 +941,7 @@ def test_polaroid_prints_mirror_head_and_first_habit() -> None:
     if not ok:
         pytest.skip(why)
     base = dict(decision="我要整理一份清單", cast_id="c05", date_str="2026-10-12", receipt_short="a1b2c3d4", originals=[])
-    _p, m = pl.compose(**base, fortune_line=fz.MIRROR_HEAD, fortune_sentence=fz.polaroid_sentence("先把要做的事寫下來，才開始動手"))
+    _p, m = pl.compose(**base, fortune_line=fz.MIRROR_HEAD, fortune_sentence=fz.polaroid_sentence("有條理，先想清楚再做"))
     assert m["fortune_drawn"] is True and m["fortune_chars"] == len(fz.MIRROR_HEAD)
     assert m["caption_source"] == "fortune_sentence"
 
@@ -962,14 +962,14 @@ def test_twinlink_polaroid_and_publish_use_the_mirror_not_the_chart() -> None:
 def test_integrated_system_files_are_not_things_made() -> None:
     """divine 的 `試的紀錄.md`、PLAN、信不是「做出來的東西」：不當標題、不算成品寫入（不觸發「交出去前又看一遍」）。"""
     rows = BROWSE_THEN_PLAN[:-2] + [_row(9, "ws_write", "成品.md"), _row(10, "ws_write", fz.RECORD_FILE), _row(11, "ws_list", ".")]
-    assert any("回頭" in x for x in _mirror(rows))         # 成品之後還有列房間 ⇒ 看了一遍
+    assert any("確認" in x for x in _mirror(rows))         # 成品之後還有列房間 ⇒ 看了一遍
     only_record_after = BROWSE_THEN_PLAN[:-1] + [_row(10, "ws_write", fz.RECORD_FILE)]
-    assert not any("回頭" in x for x in _mirror(only_record_after)), "寫試的紀錄不算看了一遍"
+    assert not any("確認" in x for x in _mirror(only_record_after)), "寫試的紀錄不算看了一遍"
     # 只寫了試的紀錄、沒有任何成品 ⇒ 不當成品（沒有「沒寫計畫就動手」之類的誤判）
     no_art = STAGE1 + [_row(3, "ws_read", "信.md"), _row(4, "ws_read", "地上/草稿角/a.txt"), _row(5, "ws_write", fz.RECORD_FILE)]
     got = _mirror(no_art)
     # 2026-10-13：沒認出成品時，跟成品無關的習慣（翻了什麼）照樣出；但絕不出「沒寫計畫就動手」或任何成品句
-    assert not any(("沒寫計畫" in x) or ("做出來" in x) or ("回頭" in x) for x in got), got
+    assert not any(("直覺派" in x) or ("做出來" in x) or ("確認" in x) for x in got), got
     assert fz._product_files({fz.RECORD_FILE: "x", "PLAN.md": "y", "信.md": "z", "鬆環對照冊.md": "w"}) == {"鬆環對照冊.md": "w"}
 
 
@@ -980,10 +980,10 @@ def test_integrated_changed_mind_counts_within_one_attempt_only() -> None:
     for i, r in enumerate(a2):                              # 第二次嘗試：seq 回到 1，時間在後
         r["ts_ms"] = 5000 + i
     two_attempts = a1 + a2
-    assert "做到一半改了主意，把計畫重寫了一遍" not in _mirror(two_attempts, retries=1)
-    assert "被退回 1 次，每一次都回去改" in _mirror(two_attempts, retries=1)
+    assert "願意推翻自己，邊做邊調整" not in _mirror(two_attempts, retries=1)
+    assert "被指出問題會回頭補上" in _mirror(two_attempts, retries=1)
     same_attempt = a1 + [_row(11, "ws_write", "PLAN.md")]
-    assert "做到一半改了主意，把計畫重寫了一遍" in _mirror(same_attempt)
+    assert "願意推翻自己，邊做邊調整" in _mirror(same_attempt)
 
 
 def test_integrated_build_card_keeps_divine_record_but_gives_viewers_only_the_mirror(tmp_path) -> None:
