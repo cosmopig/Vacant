@@ -642,7 +642,7 @@ RARITY = {
     "read_before_plan": 2.6, "many_reads": 3.6, "few_reads": 2.8, "first_touch": 1.9,
     "linger": 2.6, "failed_go_on": 2.6, "reread_plan": 4.5, "changed_mind": 6.0, "revise_product": 4.2,
     "several_made": 1.7, "short_made": 2.0, "long_made": 2.4, "plan_vs_made": 3.2,
-    "recheck": 1.4, "recheck_first": 4.0, "two_versions": 6.0, "left_for": 6.0, "kept": 6.0,
+    "reads_after_plan": 1.1, "many_kinds": 1.2, "recheck": 1.4, "recheck_first": 4.0, "two_versions": 6.0, "left_for": 6.0, "kept": 6.0,
     "retried_open": 2.6, "retried_source": 4.0, "retried": 1.6, "made": 0.35,
     "pace_slow": 3.0, "pace_fast": 1.5, "steps_few": 1.5, "steps_many": 2.8, "q_mark": 3.0, "hedge": 3.4, "digits": 2.4,
 }
@@ -652,13 +652,15 @@ MIRROR_GROUP = {
     "first_touch": "start", "read_before_plan": "reads", "many_reads": "reads", "few_reads": "reads",
     "linger": "reads", "failed_go_on": "failed", "reread_plan": "plan", "changed_mind": "plan",
     "revise_product": "revise", "several_made": "made_n", "short_made": "made_n", "long_made": "made_n",
-    "plan_vs_made": "plan", "recheck": "end", "recheck_first": "end", "two_versions": "made_n",
+    "plan_vs_made": "plan", "reads_after_plan": "afterplan", "many_kinds": "kinds", "recheck": "end", "recheck_first": "end", "two_versions": "made_n",
     "left_for": "note", "kept": "note", "retried_open": "retry", "retried_source": "retry",
     "retried": "retry", "made": "made",
     "pace_slow": "pace", "pace_fast": "pace", "steps_few": "pace", "steps_many": "pace",
     "q_mark": "voice", "hedge": "voice", "digits": "voice",
 }
 MIRROR_ORDER = tuple(RARITY)          # 相容舊名：所有習慣鍵
+#: 節奏／步數兩類習慣（進來多久才寫計畫、全部用了幾步）反映模型延遲與步數、不是人的做事方式 ⇒ 不進候選（主線 10-13 裁定）；函式留著。
+PACE_HABITS = False
 PACE_SLOW_S = 40.0                    # 進來到寫下計畫隔這麼久（秒）以上算「想了一下」
 PACE_FAST_S = 12.0
 STEPS_FEW = 11                        # 全部步驟 ≤ 這個數算「很快就交」
@@ -779,6 +781,13 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
         k, idxs = max(per_kind.items(), key=lambda kv: (len(kv[1]), -kv[1][0]))
         if len(idxs) >= 4 and len(idxs) > len(ev.ground_reads) / 3:
             add("linger", f"最常翻的是{k}，一共翻了 {len(idxs)} 次", idxs[0])
+    if ev.plan_writes:
+        aft = [g for g in ev.ground_reads if g > ev.plan_writes[0]]
+        if len(aft) >= 3:
+            add("reads_after_plan", f"寫好計畫之後，還是邊做邊翻，又翻了 {len(aft)} 次東西", aft[0])
+    if len(per_kind) >= 3:
+        firsts = sorted(v[0] for v in per_kind.values())
+        add("many_kinds", f"一共翻過 {len(per_kind)} 類不同的東西，不只盯著一處", firsts[-1])
     for i, r in enumerate(ev.rows):
         if r.get("ok") is False and r.get("tool") == "ws_read" and _place_of(r.get("path")):
             if any(x.get("ok") is True and x.get("tool") in ("ws_read", "ws_list") for x in ev.rows[i + 1:]):
@@ -823,7 +832,7 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
         add("kept", "做好的東西，寫明了收在哪裡", arts[-1])
     # ── 節奏（只看紀錄的步數與時間）與成品的口氣（只看成品有沒有問號／留餘地的詞／數字）
     t0 = ev.rows[0].get("ts_ms") if ev.rows else None
-    if arts and ev.plan_writes and isinstance(t0, int) and isinstance(ev.rows[ev.plan_writes[0]].get("ts_ms"), int):
+    if PACE_HABITS and arts and ev.plan_writes and isinstance(t0, int) and isinstance(ev.rows[ev.plan_writes[0]].get("ts_ms"), int):
         dt = (ev.rows[ev.plan_writes[0]]["ts_ms"] - t0) / 1000.0
         if dt >= PACE_SLOW_S:
             add("pace_slow", f"不急著動手，過了 {int(dt // 60)} 分 {int(dt % 60)} 秒才開始寫計畫"
@@ -831,9 +840,9 @@ def mirror_candidates(ev: "Evidence", retries: int, title: str | None, plan_text
         elif dt <= PACE_FAST_S:
             add("pace_fast", "一進來很快就開始寫計畫", ev.plan_writes[0])
     n_all = len(ev.all)
-    if arts and n_all <= STEPS_FEW:
+    if PACE_HABITS and arts and n_all <= STEPS_FEW:
         add("steps_few", f"從頭到尾只用了 {n_all} 步就交了", arts[-1])
-    elif arts and n_all >= STEPS_MANY:
+    elif PACE_HABITS and arts and n_all >= STEPS_MANY:
         add("steps_many", f"前前後後用了 {n_all} 步才交", arts[-1])
     prod = "\n".join(ev.files.values())
     if arts and prod:

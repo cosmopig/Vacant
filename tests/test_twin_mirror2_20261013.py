@@ -60,7 +60,7 @@ def test_step_points_at_the_step_that_proves_the_sentence() -> None:
     assert cands["recheck_first"]["step"] == 7                      # 做完之後回頭讀最早去的那一類
     assert cands["made"]["step"] == 6                               # 最後一次寫成品
     assert ROWS[cands["made"]["step"] - 1]["path"] == "成品.md"
-    assert cands["pace_slow"]["step"] == 5 and ROWS[4]["path"] == "PLAN.md"      # 隔了 90 秒才動筆寫計畫
+    assert not any(k in cands for k in ("pace_slow", "pace_fast", "steps_few", "steps_many")), "節奏／步數不進候選（反映模型延遲，不是人的習慣）"
     assert cands["q_mark"]["step"] == 6
 
 
@@ -169,3 +169,11 @@ def test_before_table_is_kept_for_comparison() -> None:
     before = json.loads((EV / "cards_before.json").read_text(encoding="utf-8"))
     cnt = collections.Counter(x if not x.startswith("最後做出來的是") else "最後做出來的是" for c in before for x in set(c["lines"]))
     assert cnt.most_common(1)[0][1] / len(before) > 1 / 3, "舊版確實有一句超過 1/3（這是要修的問題，不是編的）"
+
+
+def test_pace_and_step_count_habits_are_off_everywhere_even_in_the_30_real_runs() -> None:
+    assert fz.PACE_HABITS is False
+    cards = json.loads((EV / "cards_r7.json").read_text(encoding="utf-8"))
+    for c in cards:
+        for x in c["lines"]:
+            assert "才開始寫計畫" not in x and "很快就開始寫計畫" not in x and "步才交" not in x and "步就交了" not in x, x
