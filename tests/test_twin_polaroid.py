@@ -446,6 +446,13 @@ def test_detached_specks_in_cast40_are_not_pasted_onto_the_stage() -> None:
     """cast40 的 c20 左緣有一塊脫離本體的碎屑（365 px）；貼到深色舞台上會變一條白線。"""
     from PIL import Image as _I
     spr = _I.open(polaroid.CAST_DIR / "c20.png").convert("RGBA")
+    # 2026-10-12：素材端（vacant_hm 7d287c0）已把碎屑清掉、附帶這份也同步了 ⇒ 原圖該是乾淨的
+    assert spr.getchannel("A").crop((0, 110, 11, 154)).getextrema()[1] <= 32
+    # 防呆本身仍要量得動：自己貼一塊同位置的脫離碎屑（正控制），_drop_specks 要清掉
+    spr = spr.copy()
+    for x in range(0, 9):
+        for y in range(116, 150):
+            spr.putpixel((x, y), (200, 180, 150, 255))
     assert spr.getchannel("A").crop((0, 110, 11, 154)).getextrema()[1] > 32      # 碎屑真的在
     clean = polaroid._drop_specks(spr)
     assert clean.getchannel("A").crop((0, 110, 11, 154)).getextrema()[1] <= 32
