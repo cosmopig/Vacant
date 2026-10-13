@@ -1661,6 +1661,16 @@ def build_card(rd: pathlib.Path, ws: pathlib.Path | None, f: dict[str, Any], tra
     res["tv_lines"] = [strip_step(x) for x in mir["lines"]]  # 電視字幕＝同一組句子、不帶步數（≤3 句）
     res["present"] = bool(res["lines"])
     res["want"], res["want_step"] = mir.get("want"), mir.get("want_step")
+    if not res["want"]:
+        # 2026-10-13 線上驗收：電視（嘗試中、讀得到活的工作區 PLAN.md）有「它想做的是」，手機沒有——
+        # 收尾重算讀的是凍結後的工作區，裡面可能沒有 PLAN.md ⇒ 沿用同一跑嘗試中算出、存在 run-dir 的那一句（同一跑、同一套判準，不補不編）。
+        try:
+            prev = json.loads((rd / CARD_JSON_NAME).read_text(encoding="utf-8"))
+            if isinstance(prev.get("want"), str) and prev["want"].strip():
+                res["want"] = prev["want"]
+                res["want_step"] = prev.get("want_step") if isinstance(prev.get("want_step"), int) else None
+        except (OSError, ValueError, AttributeError):
+            pass
     if "reading" in mir:
         res["reading"] = mir["reading"]
     if "route" in mir:

@@ -119,3 +119,20 @@ def test_made_is_last_resort_only() -> None:
     cands = [{"key": "made", "text": "最後做出來的是《甲》", "step": 1}]
     assert [c["key"] for c in fz.mirror_pick(cands + [{"key": "recheck", "text": "細心", "step": 2}], "s")] == ["recheck"]
     assert [c["key"] for c in fz.mirror_pick(cands, "s")] == ["made"]
+
+
+def test_final_rebuild_keeps_want_from_attempt_card_when_frozen_ws_has_no_plan(tmp_path) -> None:
+    """2026-10-13 線上驗收：收尾重算的凍結工作區沒有 PLAN.md ⇒ 沿用同一跑嘗試中存下的 want（手機才拿得到）。"""
+    import json as _j
+    rd = tmp_path / "rd"; rd.mkdir()
+    (rd / fz.CARD_JSON_NAME).write_text(_j.dumps({"want": "讓那艘紙船在暗處找到一個完整的終點", "want_step": 7}), encoding="utf-8")
+    ws = tmp_path / "ws"; ws.mkdir()                       # 沒有 PLAN.md
+    card = fz.build_card(rd, ws, {}, "")
+    assert card["want"] == "讓那艘紙船在暗處找到一個完整的終點" and card["want_step"] == 7
+
+
+def test_final_rebuild_without_any_want_stays_none(tmp_path) -> None:
+    """負控制：同一跑從來沒算出 want ⇒ 仍然 None（不補、不編）。"""
+    rd = tmp_path / "rd"; rd.mkdir()
+    ws = tmp_path / "ws"; ws.mkdir()
+    assert fz.build_card(rd, ws, {}, "")["want"] is None
