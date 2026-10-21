@@ -28,7 +28,10 @@ import os
 import time
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+try:
+    from mcp.server.fastmcp import FastMCP
+except ModuleNotFoundError:
+    from mcp.server.mcpserver import MCPServer as FastMCP
 
 from vacant_network.trustcard import render_trust_card, card_json
 

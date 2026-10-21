@@ -354,6 +354,167 @@ def _json_schema(ctx: VerifyContext, claim: Claim):
     return "PASS", f"{rel} validates", ev
 
 
+@verifier("syntax_valid", version="1",
+          params=("path", "paths", "forbid_stubs", "required_symbols"),
+          summary="code/data files (.py, .json, .jsonl, .toml, .csv) parse cleanly, "
+                  "have no markdown code fences or conflict markers, and optionally "
+                  "define required symbols without NotImplementedError stubs")
+def _syntax_valid(ctx: VerifyContext, claim: Claim):
+    import ast
+    import tomllib
+    from ..trace.evidence import (CONFLICT_MARKER_RE, _python_stub_function,
+                                  _python_top_level_names)
+
+    pats = _str_list(claim, "paths")
+    single_pat = _str_param(claim, "path", required=False)
+    if single_pat:
+        pats.append(str(single_pat))
+    if not pats:
+        raise ParamError("syntax_valid: requires params.path or params.paths")
+    forbid_stubs = bool(claim.params.get("forbid_stubs", True))
+    req_syms = _str_list(claim, "required_symbols")
+    files: list[str] = []
+    for pat in pats:
+        for f in ctx.glob(str(pat)):
+            if f not in files:
+                files.append(f)
+    if not files:
+        return "FAIL", f"no file matches {', '.join(pats)}", {"independent": True}
+    problems: list[str] = []
+    checked: list[str] = []
+    for rel in files:
+        raw = ctx.file(rel).read_bytes()
+        try:
+            txt = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            problems.append(f"{rel}: not UTF-8 text")
+            continue
+        checked.append(rel)
+        if not txt.strip():
+            problems.append(f"{rel}: file is empty")
+            continue
+        ext = os.path.splitext(rel)[1].lower()
+        first = next((ln.strip() for ln in txt.splitlines() if ln.strip()), "")
+        if ext not in {".md", ".rst", ".adoc", ".tex", ".html", ".htm"} and first.startswith("```"):
+            problems.append(f"{rel}: starts with a Markdown code fence")
+            continue
+        if CONFLICT_MARKER_RE.search(txt):
+            problems.append(f"{rel}: contains unresolved merge conflict markers")
+            continue
+        if ext == ".py":
+            try:
+                tree = ast.parse(txt, filename=rel)
+            except SyntaxError as e:
+                problems.append(f"{rel}:{e.lineno or 1}: Python SyntaxError: {e.msg}")
+                continue
+            if forbid_stubs:
+                stub = _python_stub_function(tree, check_pass=False)
+                if stub is not None:
+                    problems.append(f"{rel}:{stub[1]}: function {stub[0]} {stub[2]}")
+            if req_syms:
+                defs, has_star = _python_top_level_names(tree)
+                if not has_star:
+                    for sym in req_syms:
+                        if sym not in defs:
+                            problems.append(f"{rel}: missing required top-level symbol {sym!r}")
+        elif ext == ".json":
+            try:
+                json.loads(txt)
+            except json.JSONDecodeError as e:
+                problems.append(f"{rel}:{e.lineno}: invalid JSON: {e.msg}")
+        elif ext == ".jsonl":
+            for i, ln in enumerate(txt.splitlines(), 1):
+                if not ln.strip():
+                    continue
+                try:
+                    json.loads(ln)
+                except json.JSONDecodeError as e:
+                    problems.append(f"{rel}:{i}: invalid JSON Lines: {e.msg}")
+                    break
+        elif ext == ".toml":
+            try:
+                tomllib.loads(txt)
+            except Exception as e:  # noqa: BLE001
+                problems.append(f"{rel}: invalid TOML: {e}")
+        elif ext in {".csv", ".tsv"}:
+            delim = "\t" if ext == ".tsv" else ","
+            try:
+                rows = list(csv.reader(io.StringIO(txt), delimiter=delim))
+            except csv.Error as e:
+                problems.append(f"{rel}: invalid CSV: {e}")
+                continue
+            nonempty_rows = [r for r in rows if any(c.strip() for c in r)]
+            if len(nonempty_rows) < 2:
+                problems.append(f"{rel}: CSV has fewer than 2 non-empty rows (header + data)")
+    ev = {"checked": checked, "problems": problems[:50], "independent": True}
+    if problems:
+        return "FAIL", "; ".join(problems[:8]), ev
+    return "PASS", f"{len(checked)} file(s) parsed cleanly", ev
+
+
+@verifier("answer_format", version="1",
+          params=("path", "format", "required_keys", "allow_multiline"),
+          summary="general-task answer file satisfies structural format "
+                  "(single_value, number, at_tags, or json) without tracebacks, NaN, or refusals")
+def _answer_format(ctx: VerifyContext, claim: Claim):
+    from ..trace.evidence import AT_TAG_VAL_RE, PROSE_ANSWER_RE, REFUSAL_FILE_RE
+
+    rel = str(_str_param(claim, "path"))
+    fmt = _str_param(claim, "format", required=False) or "single_value"
+    if fmt not in ("single_value", "number", "at_tags", "json"):
+        raise ParamError(f"answer_format: params.format must be one of "
+                         f"single_value/number/at_tags/json, got {fmt!r}")
+    req_keys = _str_list(claim, "required_keys")
+    allow_multi = bool(claim.params.get("allow_multiline", False))
+    if rel not in ctx.paths():
+        return "FAIL", f"{rel} is not in the deliverable", {"independent": True}
+    txt = ctx.file(rel).read_text(encoding="utf-8", errors="replace")
+    stripped = txt.strip()
+    if not stripped:
+        return "FAIL", f"{rel} is empty", {"independent": True}
+    if "Traceback (most recent call last):" in txt:
+        return "FAIL", f"{rel} contains a Python traceback", {"independent": True}
+    if stripped.startswith("```"):
+        return "FAIL", f"{rel} starts with a Markdown code fence", {"independent": True}
+    if REFUSAL_FILE_RE.search(stripped):
+        return "FAIL", f"{rel} contains a refusal message instead of an answer", {"independent": True}
+    lines = [ln.strip() for ln in stripped.splitlines() if ln.strip()]
+    if len(lines) == 1 and lines[0].lower() in {"nan", "-nan", "inf", "-inf", "<na>", "nat",
+                                                "tbd", "todo", "placeholder", "null", "undefined"}:
+        return "FAIL", f"{rel} contains placeholder/null value {lines[0]!r}", {"independent": True}
+    if fmt == "at_tags":
+        tags = {k: v.strip() for k, v in AT_TAG_VAL_RE.findall(txt) if v.strip()}
+        if not tags:
+            return "FAIL", f"{rel} contains no @key[value] tags", {"independent": True}
+        missing = [k for k in req_keys if k not in tags]
+        if missing:
+            return "FAIL", f"{rel} is missing required @key[value] tag(s): {', '.join(missing)}", {
+                "independent": True, "tags": sorted(tags)}
+        return "PASS", f"{rel} has {len(tags)} valid @key[value] tag(s)", {
+            "independent": True, "tags": sorted(tags)}
+    if fmt == "json":
+        try:
+            doc = json.loads(stripped)
+        except json.JSONDecodeError as e:
+            return "FAIL", f"{rel} is not valid JSON: {e.msg}", {"independent": True}
+        if req_keys and isinstance(doc, dict):
+            missing = [k for k in req_keys if k not in doc]
+            if missing:
+                return "FAIL", f"{rel} JSON is missing required key(s): {', '.join(missing)}", {
+                    "independent": True}
+        return "PASS", f"{rel} is valid JSON", {"independent": True}
+    if not allow_multi and len(lines) > 1:
+        return "FAIL", f"{rel} has {len(lines)} lines, expected a single-line answer", {
+            "independent": True}
+    if PROSE_ANSWER_RE.search(stripped):
+        return "FAIL", f"{rel} includes prose prefix or markdown heading", {"independent": True}
+    if fmt == "number":
+        cleaned = re.sub(r"^[$€£¥]|[%]$", "", lines[0].strip()).strip()
+        if _number(cleaned) is None:
+            return "FAIL", f"{rel} value {lines[0]!r} is not a finite number", {"independent": True}
+    return "PASS", f"{rel} satisfies {fmt} answer format", {"independent": True}
+
+
 # ── 數值重算 ─────────────────────────────────────────────────────────
 
 #: 「total」要是一個字（`Subtotal` 不算），中間的間隔有上限（成果是不可信的輸入，

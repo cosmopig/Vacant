@@ -350,7 +350,16 @@ class Trace:
         e = self.index(index_sha).get(path)
         if e is None or ":" in e.sha256:
             return None
-        return self.blob_text(e.sha256)
+        txt = self.blob_text(e.sha256)
+        if txt is not None:
+            return txt
+        try:
+            p = self.rec.workspace / path
+            if p.is_file() and not p.is_symlink() and W._sha_file(p) == e.sha256:
+                return p.read_bytes().decode("utf-8", "replace")
+        except OSError:
+            pass
+        return None
 
     def blob_text(self, sha: str | None) -> str | None:
         if not sha:
@@ -396,7 +405,7 @@ class Trace:
                    if not e.sha256.startswith("link:")
                    and not ALWAYS_SKIP_DIRS.intersection(r.split("/")[:-1])
                    and any(x.match(r) for x in inc) and not any(x.match(r) for x in exc)}
-        return W.materialize(idx, self.rec.blobs, dest)
+        return W.materialize(idx, self.rec.blobs, dest, workspace=self.rec.workspace)
 
 
 # ── lineage ──────────────────────────────────────────────────────────

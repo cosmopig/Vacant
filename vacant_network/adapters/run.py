@@ -338,6 +338,10 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
     finally:
         _restore_signal_handlers(old_handlers)
     _trace_outcome(traced, res, agent=agent, run_id=run_id)
+    if not in_place and base.is_dir():
+        for d in sorted(base.iterdir()):
+            if d.is_dir() and d != ws and d.name.startswith("ws"):
+                shutil.rmtree(d, ignore_errors=True)
     return {**res, "attempts": history, "workspace": str(ws), "run_dir": str(base),
             "agent": agent}
 

@@ -274,9 +274,12 @@ def load(data: bytes | str) -> Index:
     return {str(p): Entry.from_json(v) for p, v in raw.items()}
 
 
-def materialize(idx: Index, blobs: Blobs, dest: str | os.PathLike) -> list[str]:
-    """把一個索引重建成目錄（追緝重跑檢查用）。回傳重建不了的路徑（太大沒存、版本庫缺）。"""
+def materialize(idx: Index, blobs: Blobs, dest: str | os.PathLike, *,
+                workspace: str | os.PathLike | None = None) -> list[str]:
+    """把一個索引重建成目錄（追緝重跑檢查用）。回傳重建不了的路徑（太大沒存、版本庫缺）。
+    若版本庫已清理未改動過的工作區副本，只要工作區原檔仍在且 sha256 吻合，可由工作區還原。"""
     d = pathlib.Path(dest)
+    ws = pathlib.Path(workspace) if workspace is not None else None
     d.mkdir(parents=True, exist_ok=True)
     missing = []
     for rel, e in sorted(idx.items()):
@@ -291,9 +294,21 @@ def materialize(idx: Index, blobs: Blobs, dest: str | os.PathLike) -> list[str]:
             except OSError:
                 missing.append(rel)
             continue
-        if e.sha256.startswith(("big:", "secret:")) or not blobs.has(e.sha256):
+        if e.sha256.startswith(("big:", "secret:")):
             missing.append(rel)
             continue
-        out.write_bytes(blobs.get(e.sha256))
-        os.chmod(out, 0o755 if e.exec else 0o644)
+        if blobs.has(e.sha256):
+            out.write_bytes(blobs.get(e.sha256))
+            os.chmod(out, 0o755 if e.exec else 0o644)
+            continue
+        if ws is not None:
+            src = ws / rel
+            try:
+                if src.is_file() and not src.is_symlink() and _sha_file(src) == e.sha256:
+                    out.write_bytes(src.read_bytes())
+                    os.chmod(out, 0o755 if e.exec else 0o644)
+                    continue
+            except OSError:
+                pass
+        missing.append(rel)
     return missing

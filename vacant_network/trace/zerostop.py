@@ -118,7 +118,7 @@ def _run_child(req: dict[str, Any]) -> dict[str, Any]:
 # ── the decision ─────────────────────────────────────────────────────
 def _compact(f: dict[str, Any]) -> dict[str, Any]:
     return {k: f.get(k) for k in ("finding_id", "kind", "path", "line", "value", "sub", "step",
-                                  "quote", "cmd", "asked") if f.get(k) is not None}
+                                  "quote", "cmd", "asked", "detail") if f.get(k) is not None}
 
 
 def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | None, *,
@@ -333,6 +333,8 @@ def _say(f: dict[str, Any]) -> str:
         return f"{f.get('path')} (named in the request) had not been opened"
     if k == "missing_output":
         return f"{f.get('path')} (asked for in the request) did not exist"
+    if k == "invalid_output":
+        return f"{f.get('path')} had an invalid or incomplete output ({f.get('detail') or f.get('sub')})"
     if k == "test_claim":
         return f'the final message said "{f.get("quote")}" without a matching test run'
     if k == "failed_step":

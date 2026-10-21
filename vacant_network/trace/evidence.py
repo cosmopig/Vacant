@@ -22,14 +22,17 @@
 """
 from __future__ import annotations
 
+import ast
 import csv
 import datetime as _dt
 import difflib
 import hashlib
 import io
+import json
 import math
 import os
 import re
+import tomllib
 from typing import Any
 
 from .blame import Step, Trace
@@ -166,7 +169,29 @@ DOC_LABEL = re.compile(r"(?:^|\n)[ \t]*(?:[-*+][ \t]*)?(?:\*\*)?(?:deliverables?
                        r"[ \t]*[:：]?[ \t]*(`[^`\n]+`|\"[^\"\n]+\"|[^\s,;()]+)", re.I)
 #: 中文的「寫到／存成／放在 X」：動詞本身已經帶了介系詞，路徑緊接在後（v3.7；舊的 `\b` 在中文字之間永遠不成立）
 CJK_OUTPUT = re.compile(r"(?:寫入|寫到|寫在|存到|存成|存在|輸出到|輸出成|放到|放在)\s*(`[^`\n]+`|「[^」\n]+」|\"[^\"\n]+\"|[^\s,;()，。；、]+)")
-FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,6}$")
+FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,10}$")
+DIR_CUE_RE = re.compile(r"\b(?:in|from|under|inside)\s+(?:the\s+)?([A-Za-z0-9_.-]+)\s+"
+                        r"(?:directory|folder|dir)\b", re.I)
+AT_TAG_REQ_RE = re.compile(r"@([A-Za-z_][A-Za-z0-9_]*)\[")
+AT_TAG_VAL_RE = re.compile(r"@([A-Za-z_][A-Za-z0-9_]*)\[([^\[\]\n]+)\]")
+REQ_FUNC_RE = re.compile(
+    r"(?:(?:define|write|implement|create)\s+(?:a\s+)?(?:top-level\s+)?(?:async\s+)?(?:function|class)\s+"
+    r"(?:(?:named|called)\s+)?`(?:(?:async\s+)?def\s+|class\s+)?([A-Za-z_]\w*)`|"
+    r"`(?:async\s+)?def\s+([A-Za-z_]\w*)\s*\(|"
+    r"\bsolution\.([A-Za-z_]\w*)\s*\()",
+    re.I,
+)
+REFUSAL_FILE_RE = re.compile(
+    r"^\s*(?:I\s+(?:cannot|can't|could\s+not|couldn't|am\s+unable\s+to)\s+"
+    r"(?:determine|find|compute|answer|calculate|access|read)|"
+    r"Sorry,\s+I\s+(?:cannot|can't|could\s+not|am\s+unable))\b",
+    re.I,
+)
+PROSE_ANSWER_RE = re.compile(
+    r"^\s*(?:#{1,6}\s+\S|The\s+(?:final\s+)?answer\s+is\b|Based\s+on\s+the\b|Here\s+is\s+the\b)",
+    re.I,
+)
+CONFLICT_MARKER_RE = re.compile(r"^<<<<<<< .*\n(?:.*\n)*?^=======\r?$\n(?:.*\n)*?^>>>>>>> ", re.M)
 #: 執行程式的指令開頭（輸出是計算結果，不是回頭讀檔）
 INTERPRETER = re.compile(r"^\s*(?:cd\s+\S+\s*&&\s*)?(python[0-9.]*|node|nodejs|deno|bun|bash|sh|zsh|ruby|"
                          r"perl|Rscript|julia|php|go\s+run)\b")
@@ -337,14 +362,18 @@ class Evidence:
         return out, start_idx
 
     # materials ───────────────────────────────────────────────────────
-    def materials(self, prompt_texts: list[str], start_idx: str | None
-                  ) -> tuple[list[str], list[str]]:
-        """人打的話裡點名的資料：(單獨點名的檔, 點名的資料夾裡的檔)。只認路徑形式：
-        有副檔名的檔名、含 `/` 的路徑、或用反引號／引號包起來的資料夾名。"""
+    def _materials_from_texts(self, texts: list[str], start_idx: str | None
+                              ) -> tuple[list[str], list[str]]:
         files = sorted(self.tr.index(start_idx))
         root = str(self.rec.workspace)
         named, in_dirs = [], []
-        for text in prompt_texts:
+        for text in texts:
+            cued_dirs = {m.group(1).strip("/").removeprefix("./")
+                         for m in DIR_CUE_RE.finditer(text)}
+            for d_cue in sorted(cued_dirs):
+                under = [f for f in files if f.startswith(d_cue + "/")]
+                if under and len(under) <= MAX_DIR_MATERIALS:
+                    in_dirs.extend(under)
             for tok in re.findall(r"`[^`]+`|\"[^\"]+\"|'[^']+'|\S+", text):
                 quoted = tok[:1] in "`\"'"
                 t = tok.strip("`\"'()[]<>{}").rstrip(".,;:!?")
@@ -355,7 +384,7 @@ class Evidence:
                 elif t.startswith("/"):
                     t = t.lstrip("/")
                 t = t.removeprefix("./")
-                if re.search(r"\.[A-Za-z0-9]{1,6}$", t) and not t.endswith("/"):
+                if re.search(r"\.[A-Za-z0-9]{1,10}$", t) and not t.endswith("/"):
                     hits = [f for f in files if f == t or f.endswith("/" + t)]
                     if not hits and "/" not in t:
                         hits = [f for f in files if f.rsplit("/", 1)[-1] == t]
@@ -377,29 +406,75 @@ class Evidence:
         named = sorted(dict.fromkeys(named))
         return named, sorted(set(in_dirs) - set(named))
 
+    def _instruction_docs(self, prompt_texts: list[str], start_idx: str | None,
+                          base_named: list[str] | None = None) -> list[tuple[str, str]]:
+        """人點名要 agent 照著做的未修改說明檔 `[(路徑, 內容)]`。"""
+        if base_named is None:
+            base_named, _ = self._materials_from_texts(prompt_texts, start_idx)
+        docs = [f for f in base_named if _ext(f) in INSTRUCTION_EXT and self._is_instruction(f, prompt_texts)]
+        if not docs:
+            return []
+        latest = self.tr.latest_index()
+        idx = self.tr.index(start_idx)
+        out: list[tuple[str, str]] = []
+        for f in docs:
+            e = idx.get(f)
+            if e is None or getattr(e, "size", 0) > INSTRUCTION_MAX_BYTES:
+                continue
+            text = self.tr.file_text(start_idx, f)
+            if not text or "\x00" in text or (self.tr.file_text(latest, f) or "") != text:
+                continue                              # 這一回合改過它＝它是要改的東西，不是說明
+            out.append((f, text))
+        return out
+
+    def materials(self, prompt_texts: list[str], start_idx: str | None
+                  ) -> tuple[list[str], list[str]]:
+        """人打的話裡點名的資料（含人要 agent 照著做的說明檔裡點名的輸入資料）：
+        `(單獨點名的檔, 點名的資料夾裡的檔)`。只認路徑形式：有副檔名的檔名（≤10 字元，含 `.parquet`）、
+        含 `/` 的路徑、用反引號／引號包起來的資料夾名，或明確的 `in the <dir> directory/folder`。"""
+        named, in_dirs = self._materials_from_texts(prompt_texts, start_idx)
+        inst_docs = self._instruction_docs(prompt_texts, start_idx, named)
+        if inst_docs:
+            doc_paths = {f for f, _ in inst_docs}
+            req_outs = {r for r, _ in self.requested_outputs(prompt_texts)}
+            for _f, text in inst_docs:
+                got_outs = [r for r, _ in self._resolve(self._doc_output_tokens(text))
+                            if r not in doc_paths]
+                if len(got_outs) > INSTRUCTION_MAX_OUTPUTS:
+                    continue
+                req_outs.update(got_outs)
+                extra_n, extra_d = self._materials_from_texts([text], start_idx)
+                for ef in extra_n:
+                    stem = os.path.splitext(ef.rsplit("/", 1)[-1])[0]
+                    if (ef not in doc_paths and ef not in req_outs
+                            and not TEST_BASENAME.match(stem)
+                            and not any(p.startswith("tests") for p in ef.split("/"))):
+                        named.append(ef)
+                for ed in extra_d:
+                    stem = os.path.splitext(ed.rsplit("/", 1)[-1])[0]
+                    if (ed not in doc_paths and ed not in req_outs
+                            and not TEST_BASENAME.match(stem)
+                            and not any(p.startswith("tests") for p in ed.split("/"))):
+                        in_dirs.append(ed)
+        named = sorted(dict.fromkeys(named))
+        return named, sorted(set(in_dirs) - set(named))
+
     def asked_outputs(self, prompt_texts: list[str], start_idx: str | None) -> list[tuple[str, str]]:
         """人要求寫出的檔（v3.7）：人打的話裡寫的，加上人**要 agent 照著做**的說明檔（`.md`／`.txt`／`.rst`）裡對 agent 下的命令。
         說明檔＝人點名、而且檔名是說明（contract.md、TASK.md…）或那一句話裡有「照著做／依照」；這一回合 agent 自己改過的、
         大於 64 KB 的不讀；一份說明檔裡超過 3 個就全部不算（那是資料）。說明檔用這一回合開始時的內容。
         Colab 程式題：交付物只寫在 `contract.md`，v3.6.1 一次都沒認出來（沒交檔 34 格、缺檔退回 0 次）。"""
         outs = self.requested_outputs(prompt_texts)
-        named, _dirs = self.materials(prompt_texts, start_idx)
-        docs = [f for f in named if _ext(f) in INSTRUCTION_EXT and self._is_instruction(f, prompt_texts)]
-        if not docs:
+        inst_docs = self._instruction_docs(prompt_texts, start_idx)
+        if not inst_docs:
             return outs
-        latest = self.tr.latest_index()
+        doc_paths = {f for f, _ in inst_docs}
         have = {r for r, _ in outs}
         extra: list[tuple[str, str]] = []
         used: list[str] = []
-        for f in docs:
-            e = self.tr.index(start_idx).get(f)
-            if e is None or getattr(e, "size", 0) > INSTRUCTION_MAX_BYTES:
-                continue
-            text = self.tr.file_text(start_idx, f)
-            if not text or "\x00" in text or (self.tr.file_text(latest, f) or "") != text:
-                continue                              # 這一回合改過它＝它是要改的東西，不是說明
+        for f, text in inst_docs:
             got = [(r, raw) for r, raw in self._resolve(self._doc_output_tokens(text))
-                   if r not in have and r not in docs]
+                   if r not in have and r not in doc_paths]
             if len(got) > INSTRUCTION_MAX_OUTPUTS:
                 continue
             used.append(f)
@@ -525,6 +600,13 @@ class Evidence:
             d = f.rsplit("/", 1)[0] if "/" in f else ""
             pats = [re.escape(root + "/" + f), r"(?<![\w.-])" + re.escape(f),
                     r"(?:^|[\s\"'`/{(+=,:])" + re.escape(base) + r"(?![\w-])"]
+            if _ext(f) == ".py":
+                stem = os.path.splitext(base)[0]
+                pats.append(r"(?:\b(?:-m|unittest|pytest|import|from)\s+(?:[\w.]+\s+)*)"
+                            + re.escape(stem) + r"\b")
+                if "/" in f:
+                    mod = os.path.splitext(f)[0].replace("/", ".")
+                    pats.append(r"(?<![\w.-])" + re.escape(mod) + r"\b")
             for t in texts:
                 if any(re.search(p, t) for p in pats):
                     seen.add(f)
@@ -581,7 +663,7 @@ class Evidence:
             if not out:
                 continue
             inp = self.tr.input_text(s)
-            refs = set(re.findall(r"[\w./-]+\.[A-Za-z0-9]{1,6}", inp))
+            refs = set(re.findall(r"[\w./-]+\.[A-Za-z0-9]{1,10}", inp))
             # 跑自己寫的腳本是**計算**，不是回頭讀交付物（2026-09-25 正式批次：`python3 /app/analyze.py` 印出的
             # 2429 被當成「讀自己的交付物」丟掉，答對的答案被退回——6 次誤報的根因）
             runs_code = bool(INTERPRETER.match(inp)) or any(_ext(r) in CODE_HINT_EXT for r in refs)
@@ -645,6 +727,8 @@ class Evidence:
         start, prompt_texts, steps = self.window()
         delivs, start_idx = self.deliverables(steps)
         named, dir_members = self.materials(prompt_texts, start_idx)
+        inst_docs = self._instruction_docs(prompt_texts, start_idx)
+        task_texts = list(prompt_texts) + [t for _, t in inst_docs]
         deliv_set = set(delivs)
         observed = self.observed(steps, named + dir_members, deliv_set)
         given = self.given_inline(named + dir_members, prompt_texts, start_idx) - observed
@@ -656,8 +740,8 @@ class Evidence:
             findings.append({"kind": "unread", "path": f})
         materials_named = bool(named or dir_members)
         corpus = self.corpus(steps, deliv_set, observed, start_idx, prompt_texts)
-        values, value_notes = self._values(steps, delivs, corpus, prompt_texts, materials_named)
-        only_answer = any(ONLY_ANSWER.search(t) for t in prompt_texts)
+        values, value_notes = self._values(steps, delivs, corpus, task_texts, materials_named)
+        only_answer = any(ONLY_ANSWER.search(t) for t in task_texts)
         for v in values:
             v["single_answer"] = only_answer or v.pop("_short")
             if unread_dir or unread_named:
@@ -666,12 +750,15 @@ class Evidence:
         findings += self._test_claim(steps, delivs)
         findings += self._failed_steps(steps, delivs, named + dir_members)
         outs = self.asked_outputs(prompt_texts, start_idx)
-        latest = self.tr.index(self.tr.latest_index())
+        latest_idx = self.tr.latest_index()
+        latest = self.tr.index(latest_idx)
         for rel, raw in outs:
             # 相對路徑：agent 在專案的子資料夾裡寫了同一個相對路徑也算在（專案根＝git 根；v3.1）
             if rel not in latest and rel not in named + dir_members \
                     and not any(f.endswith("/" + rel) for f in latest):
                 findings.append({"kind": "missing_output", "path": rel, "asked": raw})
+        findings += self._invalid_outputs(delivs, outs, task_texts, corpus, start_idx, latest_idx,
+                                          only_answer=only_answer)
         scope = self.rec.dir.name
         for fd in findings:
             fd["finding_id"] = finding_id(fd, scope)
@@ -811,34 +898,60 @@ class Evidence:
     def _failed_steps(self, steps: list[Step], delivs: dict[str, tuple[str, str]],
                       materials: list[str]) -> list[dict[str, Any]]:
         out = []
+        has_test_claim = bool(CLAIMS.search(self.final_text or ""))
         written_scripts = {str(w["path"]).rsplit("/", 1)[-1] for s in steps for w in s.writes
                            if _ext(str(w["path"])) in {".py", ".js", ".ts", ".sh", ".mjs"}}
+        deliv_scripts = {d.rsplit("/", 1)[-1] for d in delivs
+                         if _ext(d) in {".py", ".js", ".ts", ".sh", ".mjs"}}
+        has_code_deliv = any(_ext(d) in CODE_HINT_EXT for d in delivs)
         for i, s in enumerate(steps):
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
             outp = self.tr.output_text(s)
+            is_runner = bool(RUNNERS.search(cmd))
+            is_test_script = is_test_script_run(cmd)
+            is_test_cmd = is_runner or is_test_script
             failed = bool(s.error) or bool(re.search(r"Traceback \(most recent call last\)|"
                                                      r"\bError:|Exception:", outp))
+            if is_test_cmd and (FAIL_OUT.search(outp) or FAIL_OUT_2.search(outp)):
+                failed = True
             if failed and _no_match_only(cmd, outp + "\n" + str(s.error or "")):
                 failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
-            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or RUNNERS.search(cmd):
-                continue
-            # v3.7：測試腳本紅了、之後又有一次跑測試是綠的＝修好了，不算略過（換個寫法跑也算：`sh run_tests.sh` → `./run_tests.sh`）；
-            # 之後一直沒有綠的，照舊當成失敗的步驟（R530：全部豁免會少掉 7 格真的有問題的退回）
-            if is_test_script_run(cmd) and any(
-                    tool_kind(t.tool) == "shell" and (RUNNERS.search(_command_of(self.tr, t)) or
-                                                      is_test_script_run(_command_of(self.tr, t)))
-                    and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
-                    and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in steps[i + 1:]):
-                continue
-            runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
-                           for b in written_scripts)
-            reads_given = any(m in cmd or m.rsplit("/", 1)[-1] in cmd for m in materials)
-            if not (runs_own or reads_given):
+            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd):
                 continue
             later = steps[i + 1:]
-            if not any(w for t in later for w in t.writes if str(w["path"]) in delivs):
+            # v3.7+：測試（腳本或 runner）紅了、之後又有一次跑測試是綠的＝修好了，不算略過；
+            # 若最後訊息宣稱通過，交給 `_test_claim` 處理，不重複報。
+            if is_test_cmd:
+                if has_test_claim:
+                    continue
+                if any(tool_kind(t.tool) == "shell"
+                       and (RUNNERS.search(_command_of(self.tr, t))
+                            or is_test_script_run(_command_of(self.tr, t)))
+                       and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
+                       and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in later):
+                    continue
+                # 若後面還有另一次失敗的測試執行，只報最後一次失敗的測試執行
+                if any(tool_kind(t.tool) == "shell"
+                       and (RUNNERS.search(_command_of(self.tr, t))
+                            or is_test_script_run(_command_of(self.tr, t)))
+                       and (t.error or FAIL_OUT.search(self.tr.output_text(t))
+                            or FAIL_OUT_2.search(self.tr.output_text(t))) for t in later):
+                    continue
+            runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
+                           for b in written_scripts)
+            runs_deliv = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
+                             for b in deliv_scripts)
+            reads_given = any(m in cmd or m.rsplit("/", 1)[-1] in cmd for m in materials)
+            if not (runs_own or reads_given or (is_test_cmd and has_code_deliv)):
+                continue
+            wrote_after = any(w for t in later for w in t.writes if str(w["path"]) in delivs)
+            # 先寫交付物、再跑測試或跑交付物本身失敗，之後沒改也沒重跑通過就直接收工
+            unfixed_after_deliv = bool(delivs) and not wrote_after and (
+                (is_test_cmd and has_code_deliv) or runs_deliv
+            )
+            if not (wrote_after or unfixed_after_deliv):
                 continue
             norm = _norm_cmd(cmd)
             if any(tool_kind(t.tool) == "shell" and _norm_cmd(_command_of(self.tr, t)) == norm
@@ -852,12 +965,269 @@ class Evidence:
             out.append({"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err})
         return out
 
+    def _invalid_outputs(self, delivs: dict[str, tuple[str, str]],
+                         outs: list[tuple[str, str]], task_texts: list[str], corpus: str,
+                         start_idx: str | None, latest_idx: str | None, *,
+                         only_answer: bool = False) -> list[dict[str, Any]]:
+        """檢查交付物的結構與基本有效性（`empty`、`syntax`、`stub`、`contract_shape`）。"""
+        out: list[dict[str, Any]] = []
+        latest = self.tr.index(latest_idx)
+        req_paths = {r for r, _ in outs}
+        candidates: list[tuple[str, str, str, bool]] = [
+            (path, old, new, True) for path, (old, new) in sorted(delivs.items())
+        ]
+        for rel, _raw in outs:
+            actual = rel if rel in latest else next(
+                (f for f in sorted(latest) if f.endswith("/" + rel)), None
+            )
+            if actual and actual not in delivs:
+                old_t = self.tr.file_text(start_idx, actual) or ""
+                new_t = self.tr.file_text(latest_idx, actual)
+                if new_t is not None and "\x00" not in new_t:
+                    candidates.append((actual, old_t, new_t, False))
+
+        joined_task = "\n".join(task_texts)
+        req_at_tags = list(dict.fromkeys(AT_TAG_REQ_RE.findall(joined_task)))
+        req_funcs = list(dict.fromkeys(
+            next((g for g in m.groups() if g), "")
+            for m in REQ_FUNC_RE.finditer(joined_task)
+            if any(m.groups())
+        ))
+
+        for path, old, new, was_written in candidates:
+            ext = _ext(path)
+            base = path.rsplit("/", 1)[-1]
+            is_req = path in req_paths or any(path.endswith("/" + r) for r in req_paths)
+
+            # 1) empty：要求的交付物或本回合寫出的主要檔案為空（排除 __init__.py 等合法空檔）
+            if not new.strip():
+                if is_req or (was_written and base not in {"__init__.py", "py.typed", ".gitkeep", ".keep"}):
+                    out.append({"kind": "invalid_output", "sub": "empty", "path": path,
+                                "detail": "file is empty"})
+                continue
+
+            # 2) syntax：本回合寫出的檔案有語法錯誤、未解衝突標記、或誤包了 Markdown 程式碼圍欄
+            tree: ast.Module | None = None
+            if was_written:
+                first_ln = next((ln.strip() for ln in new.splitlines() if ln.strip()), "")
+                old_first = next((ln.strip() for ln in old.splitlines() if ln.strip()), "")
+                if (ext not in {".md", ".rst", ".adoc", ".tex", ".html", ".htm"}
+                        and first_ln.startswith("```") and not old_first.startswith("```")):
+                    out.append({"kind": "invalid_output", "sub": "syntax", "path": path,
+                                "line": 1, "detail": "starts with a Markdown code fence"})
+                    continue
+                if CONFLICT_MARKER_RE.search(new) and not CONFLICT_MARKER_RE.search(old):
+                    out.append({"kind": "invalid_output", "sub": "syntax", "path": path,
+                                "detail": "contains unresolved merge conflict markers"})
+                    continue
+                if ext == ".py":
+                    try:
+                        tree = ast.parse(new, filename=path)
+                    except SyntaxError as e:
+                        out.append({"kind": "invalid_output", "sub": "syntax", "path": path,
+                                    "line": e.lineno or 1,
+                                    "detail": f"Python SyntaxError: {e.msg}"})
+                        continue
+                elif ext == ".json":
+                    try:
+                        json.loads(new)
+                    except json.JSONDecodeError as e:
+                        out.append({"kind": "invalid_output", "sub": "syntax", "path": path,
+                                    "line": e.lineno, "detail": f"invalid JSON: {e.msg}"})
+                        continue
+                elif ext == ".jsonl":
+                    bad_jsonl = None
+                    for ln_i, ln_s in enumerate(new.splitlines(), 1):
+                        if not ln_s.strip():
+                            continue
+                        try:
+                            json.loads(ln_s)
+                        except json.JSONDecodeError as e:
+                            bad_jsonl = (ln_i, e.msg)
+                            break
+                    if bad_jsonl is not None:
+                        out.append({"kind": "invalid_output", "sub": "syntax", "path": path,
+                                    "line": bad_jsonl[0],
+                                    "detail": f"invalid JSON Lines: {bad_jsonl[1]}"})
+                        continue
+                elif ext == ".toml":
+                    try:
+                        tomllib.loads(new)
+                    except Exception as e:  # noqa: BLE001
+                        out.append({"kind": "invalid_output", "sub": "syntax", "path": path,
+                                    "detail": f"invalid TOML: {e}"})
+                        continue
+            elif ext == ".py":
+                try:
+                    tree = ast.parse(new, filename=path)
+                except SyntaxError:
+                    tree = None
+
+            # 3) stub：未實作的 NotImplementedError／todo!()、或把 Traceback／NaN／拒絕訊息寫進答案檔
+            if ext == ".py" and tree is not None and (was_written or is_req):
+                stub_fn = _python_stub_function(tree, check_pass=was_written and is_req and (
+                    bool(old.strip()) or bool(re.search(r"\b(?:TODO|FIXME)\b", new))
+                ))
+                if stub_fn is not None:
+                    fn_name, fn_line, fn_why = stub_fn
+                    out.append({"kind": "invalid_output", "sub": "stub", "path": path,
+                                "line": fn_line, "detail": f"function {fn_name} {fn_why}"})
+                    continue
+            elif ext in {".rs", ".js", ".ts", ".go", ".java", ".cpp", ".c", ".cs", ".kt", ".swift"} \
+                    and (was_written or is_req):
+                if re.search(r"\b(?:todo!\s*\(|unimplemented!\s*\(|NotImplementedException|"
+                             r"UnsupportedOperationException)\b", new):
+                    out.append({"kind": "invalid_output", "sub": "stub", "path": path,
+                                "detail": "contains unimplemented stub"})
+                    continue
+
+            if was_written and ext in DOC_EXT:
+                if ("Traceback (most recent call last):" in new
+                        and "Traceback (most recent call last):" not in old
+                        and "```" not in new):
+                    out.append({"kind": "invalid_output", "sub": "stub", "path": path,
+                                "detail": "contains a Python traceback instead of a result"})
+                    continue
+                nonempty = [ln.strip() for ln in new.splitlines() if ln.strip()]
+                if len(nonempty) == 1:
+                    vlow = nonempty[0].lower()
+                    if vlow in {"nan", "-nan", "inf", "-inf", "<na>", "nat", "tbd", "todo", "placeholder"} \
+                            or (vlow in {"none", "null", "undefined"}
+                                and not re.search(r"\b" + re.escape(vlow) + r"\b",
+                                                  corpus + "\n" + joined_task, re.I)):
+                        out.append({"kind": "invalid_output", "sub": "stub", "path": path,
+                                    "detail": f"contains placeholder value {nonempty[0]!r}"})
+                        continue
+                if (is_req or only_answer) and REFUSAL_FILE_RE.search(new):
+                    out.append({"kind": "invalid_output", "sub": "stub", "path": path,
+                                "detail": "contains a refusal message instead of the answer"})
+                    continue
+
+            # 4) contract_shape：明確要求的 @key[value] 標籤、單一答案無多餘標題、要求的頂層函式、CSV 資料列
+            if (was_written or is_req) and req_at_tags and ext in {".txt", ".md", ""} \
+                    and (is_req or len(delivs) == 1):
+                found_tags = {k: v.strip() for k, v in AT_TAG_VAL_RE.findall(new) if v.strip()}
+                generic = {"value", "val", "answer", "ans", "number", "num", "key", "label",
+                           "result", "x"}
+                specific = [k for k in req_at_tags if k.lower() not in generic]
+                if not found_tags:
+                    out.append({"kind": "invalid_output", "sub": "contract_shape", "path": path,
+                                "detail": "missing required @key[value] format"})
+                    continue
+                missing_k = [k for k in specific if k not in found_tags]
+                if missing_k:
+                    tags_s = ", ".join(f"@{k}[...]" for k in missing_k[:3])
+                    out.append({"kind": "invalid_output", "sub": "contract_shape", "path": path,
+                                "detail": f"missing required tag(s): {tags_s}"})
+                    continue
+
+            if was_written and only_answer and ext == ".txt" and not req_at_tags:
+                if PROSE_ANSWER_RE.search(new) and not PROSE_ANSWER_RE.search(joined_task):
+                    out.append({"kind": "invalid_output", "sub": "contract_shape", "path": path,
+                                "detail": "the task asks for ONLY the final answer without headings or prose"})
+                    continue
+
+            if ext == ".py" and tree is not None and req_funcs \
+                    and (base == "solution.py" or is_req):
+                defs, has_star = _python_top_level_names(tree)
+                if not has_star:
+                    missing_fn = [fn for fn in req_funcs if fn not in defs]
+                    if missing_fn:
+                        out.append({"kind": "invalid_output", "sub": "contract_shape", "path": path,
+                                    "detail": f"missing required top-level definition `{missing_fn[0]}`"})
+                        continue
+
+            if was_written and is_req and ext in {".csv", ".tsv"} and not old.strip():
+                csv_lns = [ln for ln in new.splitlines() if ln.strip()]
+                if len(csv_lns) == 1:
+                    out.append({"kind": "invalid_output", "sub": "contract_shape", "path": path,
+                                "detail": "CSV output has only a header row and no data rows"})
+                    continue
+        return out
+
 
 # ── module-level helpers ────────────────────────────────────────────────
+
+def _is_abstractmethod(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    for dec in node.decorator_list:
+        if isinstance(dec, ast.Name) and "abstract" in dec.id:
+            return True
+        if isinstance(dec, ast.Attribute) and "abstract" in dec.attr:
+            return True
+    return False
+
+
+def _python_stub_function(tree: ast.Module, *, check_pass: bool = False
+                          ) -> tuple[str, int, str] | None:
+    funcs = [n for n in ast.walk(tree)
+             if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and not _is_abstractmethod(n)]
+    for fn in funcs:
+        body = list(fn.body)
+        if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) \
+                and isinstance(body[0].value.value, str):
+            body = body[1:]
+        if len(body) == 1:
+            stmt = body[0]
+            if isinstance(stmt, ast.Raise) and stmt.exc is not None:
+                exc = stmt.exc.func if isinstance(stmt.exc, ast.Call) else stmt.exc
+                if isinstance(exc, ast.Name) and exc.id in ("NotImplementedError", "NotImplemented"):
+                    return (fn.name, fn.lineno, "still raises NotImplementedError")
+            if isinstance(stmt, ast.Return) and isinstance(stmt.value, ast.Name) \
+                    and stmt.value.id == "NotImplemented":
+                return (fn.name, fn.lineno, "returns NotImplemented")
+    if check_pass:
+        top_funcs = [n for n in tree.body
+                     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                     and not _is_abstractmethod(n)]
+        if top_funcs:
+            all_pass = True
+            for fn in top_funcs:
+                body = list(fn.body)
+                if body and isinstance(body[0], ast.Expr) \
+                        and isinstance(body[0].value, ast.Constant) \
+                        and isinstance(body[0].value.value, str):
+                    body = body[1:]
+                if not (len(body) == 1 and (
+                    isinstance(body[0], ast.Pass)
+                    or (isinstance(body[0], ast.Expr)
+                        and isinstance(body[0].value, ast.Constant)
+                        and body[0].value.value is Ellipsis)
+                )):
+                    all_pass = False
+                    break
+            if all_pass:
+                return (top_funcs[0].name, top_funcs[0].lineno, "is an unimplemented stub (pass)")
+    return None
+
+
+def _python_top_level_names(tree: ast.Module) -> tuple[set[str], bool]:
+    names: set[str] = set()
+    has_star = False
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            names.add(node.name)
+        elif isinstance(node, ast.Assign):
+            for t in node.targets:
+                if isinstance(t, ast.Name):
+                    names.add(t.id)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            names.add(node.target.id)
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                names.add(alias.asname or alias.name.split(".")[0])
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.name == "*":
+                    has_star = True
+                else:
+                    names.add(alias.asname or alias.name)
+    return names, has_star
+
 
 def finding_id(f: dict[str, Any], scope: str) -> str:
     key = {"unsourced": (f.get("path"), f.get("value")), "unread": (f.get("path"),),
            "missing_output": (f.get("path"),),
+           "invalid_output": (f.get("path"), f.get("sub"), f.get("detail")),
            "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),)}
     raw = repr((scope, f["kind"], key.get(f["kind"], ())))
     return "z_" + hashlib.sha256(raw.encode()).hexdigest()[:10]
@@ -963,7 +1333,7 @@ def _command_of(tr: Trace, s: Step) -> str:
 
 def _norm_cmd(cmd: str) -> str:
     words = re.findall(r"[^\s\"']+", cmd or "")
-    first_file = next((w for w in words[1:] if re.search(r"\.\w{1,5}$", w)), "")
+    first_file = next((w for w in words[1:] if re.search(r"\.\w{1,10}$", w)), "")
     return f"{words[0] if words else ''} {first_file}".strip()
 
 

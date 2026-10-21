@@ -168,6 +168,9 @@ def _log(name: str, rec: dict[str, Any]) -> None:
         p.parent.mkdir(parents=True, exist_ok=True)
         with p.open("a", encoding="utf-8") as f:
             f.write(json.dumps({"ts": time.time(), **rec}, ensure_ascii=False) + "\n")
+        if p.stat().st_size > 2 * 1024 * 1024:
+            from ..retention import compact_logs
+            compact_logs(vacant_state_dir())
     except OSError:
         pass
 

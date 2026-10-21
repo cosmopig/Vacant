@@ -346,9 +346,11 @@ class Recorder:
         deadline = time.monotonic() + self.scan_deadline_s \
             if (self.scan_deadline_s and st is not None) else None
         try:
-            # `prev` 是這個紀錄器帶著同一個版本庫掃出來的 ⇒ 它的版本都在庫裡，不逐檔確認
+            # `prev` 是這個紀錄器帶著同一個版本庫掃出來的 ⇒ 它的版本都在庫裡，不逐檔確認；
+            # 若中間跑過 `vacant gc`（`compacted=True`），第一次重掃時確認並補齊。
+            was_compacted = bool(st.pop("compacted", False)) if st is not None else False
             return W.scan(self.workspace, prev, skip=self.skip, blobs=self.blobs,
-                          deadline=deadline, prev_stored=True)
+                          deadline=deadline, prev_stored=not was_compacted)
         except W.ScanTimeout as e:
             if st is None:
                 raise

@@ -33,8 +33,9 @@ NUDGE_FOOTER = "This reminder is only about the file; it does not say whether an
 for _t in (REVIEW_HEADER, PERSONA, FOOTER, WITHHELD, NUDGE_HEADER, NUDGE_FOOTER):
     assert_ks1_clean(_t)
 
-#: 退回的先後：要求的檔不存在、失敗的步驟、測試說法最先（最確定），值其次，點名沒讀最後
-ORDER = {"missing_output": 0, "failed_step": 1, "test_claim": 2, "unsourced": 3, "unread": 4}
+#: 退回的先後：要求的檔不存在／無效、失敗的步驟、測試說法最先（最確定），值其次，點名沒讀最後
+ORDER = {"missing_output": 0, "invalid_output": 1, "failed_step": 2, "test_claim": 3,
+         "unsourced": 4, "unread": 5}
 
 
 def q(s: Any, n: int = 80) -> str:
@@ -66,6 +67,19 @@ def line_for(f: dict[str, Any], budget_note: str = "") -> str:
     if k == "missing_output":
         return (f"- The request asks for {q(f.get('asked') or f['path'])}, but it does not exist. "
                 f"Finish the task and write it.{budget_note}")
+    if k == "invalid_output":
+        sub = f.get("sub")
+        if sub == "empty":
+            return f"- {f['path']} is empty. Write the complete output to {f['path']}.{budget_note}"
+        if sub == "syntax":
+            loc = f" line {f['line']}" if f.get("line") else ""
+            return (f"- {f['path']}{loc} cannot be parsed ({q(f.get('detail') or 'syntax error')}). "
+                    f"Fix the format and write a valid file.")
+        if sub == "stub":
+            return (f"- {f['path']} still has an unfinished placeholder or error output "
+                    f"({q(f.get('detail') or 'stub')}). Compute and write the actual result.")
+        return (f"- {f['path']} does not match the format asked for in the task "
+                f"({q(f.get('detail') or 'format mismatch')}). Rewrite {f['path']} in the requested format.")
     if k == "unread":
         return (f"- {f['path']} was named in the task but was not opened in the recorded steps. "
                 f"Inspect it (for example with head, or load it in code) and redo the parts that "

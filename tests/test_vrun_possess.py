@@ -37,13 +37,14 @@ def test_strip_terminal_noise_removes_csi_and_controls():
     assert possess.strip_terminal_noise("\x1b[0m/bin/pi\r") == "/bin/pi"
 
 
-def test_detect_by_config_dir_only(tmp_path: pathlib.Path):
+def test_detect_by_config_dir_only(tmp_path: pathlib.Path, monkeypatch):
     """**設定目錄在就算裝了**，即使 PATH 上完全找不到那支可執行檔。
 
     這是 2026-09-19 兩台機器上的實測形狀：vacant-dev 的 pi／opencode／hermes、
     人類 Mac 的 pi 都是「設定目錄在、PATH 上沒有」。只看 PATH 會判「沒裝」，
     然後那幾個 agent 一個都不會被接上。
     """
+    monkeypatch.setenv("PATH", "")
     (tmp_path / ".pi" / "agent").mkdir(parents=True)
     d = possess.detect_one(possess.AGENTS["pi"], tmp_path, probe_shell=False)
     assert d.present is True
@@ -51,7 +52,8 @@ def test_detect_by_config_dir_only(tmp_path: pathlib.Path):
     assert d.binary is None and d.binary_via == "none"
 
 
-def test_detect_absent(tmp_path: pathlib.Path):
+def test_detect_absent(tmp_path: pathlib.Path, monkeypatch):
+    monkeypatch.setenv("PATH", "")
     d = possess.detect_one(possess.AGENTS["hermes"], tmp_path, probe_shell=False)
     assert d.present is False
 
