@@ -321,3 +321,46 @@ def test_intake_verifiers_syntax_valid_and_answer_format(env):
     (ws_good / "answer.txt").write_text("@corr[0.82]\n")
     r_good = flow.submit(task, ws_good, source="test")
     assert r_good["outcome"] == "accept", r_good["reasons"]
+
+
+# ── 5. 真實 2,111 格軌跡重播抓出的誤退回歸測試 (P1/P3 Regressions) ─────
+
+def test_dabench_at_name_placeholder_and_scratch_files_do_not_false_positive(env):
+    # 回歸測試 1：contract.md 寫 `in the form @name[value]` 時，`name` 是範例佔位詞，不能誤退
+    # 回歸測試 2：明確要求寫 answer.txt 時，中間產生的 scratch 檔 (volumes.jsonl) 不能被當成交付檔誤判
+    p = _proj(env, "dabench_real", {
+        "contract.md": "Write the final output to `answer.txt` in the form @name[value].",
+        "goal.md": "Format: @mean_fare[value] where value is a float.",
+        "data.csv": "fare\n10.0\n20.0\n",
+    })
+    a = Agent(p)
+    a.ask("Read contract.md and goal.md, analyze data.csv, and write answer.txt.")
+    a.read("contract.md")
+    a.read("goal.md")
+    a.read("data.csv")
+    a.bash("python3 -c 'print(15.0)'", stdout="15.0\n")
+    # Agent 寫了一個多行 JSONL 中間暫存檔（不是單一 JSON object）
+    a.write("volumes.jsonl", "{\"a\": 1}\n{\"a\": 2}\n")
+    a.write("answer.txt", "@mean_fare[15.0]\n")
+    ev = a.evidence("Done.")
+    assert ev["findings"] == []
+
+
+def test_shell_comments_and_recovered_oneliner_do_not_false_positive(env):
+    # 回歸測試 3a：多行 bash 含 `# comment` 的 grep 沒匹配（exit 1）不應被當成 failed_step
+    # 回歸測試 3b：探索性 python -c 讀資料檔語法錯，但隨後寫 script 跑成功，不應殘留 failed_step
+    p = _proj(env, "shell_comment_real", {
+        "goal.md": "Analyze data/fees.json and write answer.txt.",
+        "data/fees.json": "[{\"id\": 1}]\n",
+    })
+    a = Agent(p)
+    a.ask("Read goal.md and write answer.txt.")
+    a.read("goal.md")
+    a.bash("# Check if pattern exists\ngrep -i 'nonexistent' data/fees.json", stdout="", error=True)
+    a.bash("python3 -c \"import json; d = json.load(open('data/fees.json')\"", stdout="SyntaxError", error=True)
+    a.write("solve.py", "import json\nd = json.load(open('data/fees.json'))\nprint(len(d))\n")
+    a.bash("python3 solve.py", stdout="1\n", error=False)
+    a.write("answer.txt", "1\n")
+    ev = a.evidence("1")
+    assert [f for f in ev["findings"] if f["kind"] == "failed_step"] == []
+

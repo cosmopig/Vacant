@@ -908,17 +908,18 @@ class Evidence:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
+            clean_cmd = _strip_shell_comments(cmd)
             outp = self.tr.output_text(s)
-            is_runner = bool(RUNNERS.search(cmd))
-            is_test_script = is_test_script_run(cmd)
+            is_runner = bool(RUNNERS.search(clean_cmd))
+            is_test_script = is_test_script_run(clean_cmd)
             is_test_cmd = is_runner or is_test_script
             failed = bool(s.error) or bool(re.search(r"Traceback \(most recent call last\)|"
                                                      r"\bError:|Exception:", outp))
             if is_test_cmd and (FAIL_OUT.search(outp) or FAIL_OUT_2.search(outp)):
                 failed = True
-            if failed and _no_match_only(cmd, outp + "\n" + str(s.error or "")):
+            if failed and _no_match_only(clean_cmd, outp + "\n" + str(s.error or "")):
                 failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
-            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd):
+            if not failed or not clean_cmd or PROBE_CMD.match(clean_cmd) or IMPORT_PROBE.search(clean_cmd):
                 continue
             later = steps[i + 1:]
             # v3.7+：測試（腳本或 runner）紅了、之後又有一次跑測試是綠的＝修好了，不算略過；
@@ -927,23 +928,24 @@ class Evidence:
                 if has_test_claim:
                     continue
                 if any(tool_kind(t.tool) == "shell"
-                       and (RUNNERS.search(_command_of(self.tr, t))
-                            or is_test_script_run(_command_of(self.tr, t)))
+                       and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
+                            or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                        and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
                        and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in later):
                     continue
                 # 若後面還有另一次失敗的測試執行，只報最後一次失敗的測試執行
                 if any(tool_kind(t.tool) == "shell"
-                       and (RUNNERS.search(_command_of(self.tr, t))
-                            or is_test_script_run(_command_of(self.tr, t)))
+                       and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
+                            or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                        and (t.error or FAIL_OUT.search(self.tr.output_text(t))
                             or FAIL_OUT_2.search(self.tr.output_text(t))) for t in later):
                     continue
-            runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
+            runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", clean_cmd)
                            for b in written_scripts)
-            runs_deliv = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
+            runs_deliv = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", clean_cmd)
                              for b in deliv_scripts)
-            reads_given = any(m in cmd or m.rsplit("/", 1)[-1] in cmd for m in materials)
+            cued_mats = [m for m in materials if m in clean_cmd or m.rsplit("/", 1)[-1] in clean_cmd]
+            reads_given = bool(cued_mats)
             if not (runs_own or reads_given or (is_test_cmd and has_code_deliv)):
                 continue
             wrote_after = any(w for t in later for w in t.writes if str(w["path"]) in delivs)
@@ -958,11 +960,26 @@ class Evidence:
                    and not t.error and not re.search(r"Traceback|\bError:",
                                                      self.tr.output_text(t)) for t in later):
                 continue
-            if self.final_text and MENTIONS_FAILURE.search(self.final_text):
+            # 單純讀給定資料的臨時指令（非跑自寫腳本、非測試）若後續已有成功的腳本或讀同資料指令取代，不算略過
+            if reads_given and not runs_own and not is_test_cmd:
+                if any(tool_kind(t.tool) == "shell"
+                       and not t.error
+                       and not re.search(r"Traceback|\bError:", self.tr.output_text(t))
+                       and (any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b",
+                                          _strip_shell_comments(_command_of(self.tr, t)))
+                                for b in written_scripts)
+                            or any(m in _command_of(self.tr, t) or m.rsplit("/", 1)[-1] in _command_of(self.tr, t)
+                                   for m in cued_mats))
+                       for t in later):
+                    continue
+            if self.final_text and MENTIONS_FAILURE.search(self.final_text) and not (is_test_cmd and has_code_deliv):
                 continue
             err = next((ln for ln in reversed(outp.strip().splitlines()) if ln.strip()),
                        str(s.error or "failed"))
-            out.append({"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err})
+            item: dict[str, Any] = {"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err}
+            if is_test_cmd and has_code_deliv:
+                item["sub"] = "test_failed"
+            out.append(item)
         return out
 
     def _invalid_outputs(self, delivs: dict[str, tuple[str, str]],
@@ -998,6 +1015,9 @@ class Evidence:
             ext = _ext(path)
             base = path.rsplit("/", 1)[-1]
             is_req = path in req_paths or any(path.endswith("/" + r) for r in req_paths)
+            # 若任務已明確點名交付物（如 answer.txt），中間產生的其它探索暫存檔不作格式／空檔攔截
+            if req_paths and not is_req:
+                continue
 
             # 1) empty：要求的交付物或本回合寫出的主要檔案為空（排除 __init__.py 等合法空檔）
             if not new.strip():
@@ -1107,7 +1127,8 @@ class Evidence:
             if (was_written or is_req) and req_at_tags and ext in {".txt", ".md", ""} \
                     and (is_req or len(delivs) == 1):
                 found_tags = {k: v.strip() for k, v in AT_TAG_VAL_RE.findall(new) if v.strip()}
-                generic = {"value", "val", "answer", "ans", "number", "num", "key", "label",
+                generic = {"name", "tag", "field", "item", "var", "id", "metric",
+                           "value", "val", "answer", "ans", "number", "num", "key", "label",
                            "result", "x"}
                 specific = [k for k in req_at_tags if k.lower() not in generic]
                 if not found_tags:
@@ -1259,11 +1280,25 @@ def _typed(raw: str, obj: Any, path: str, step_inputs: list[tuple[Step, str]]) -
     return False
 
 
+def _strip_shell_comments(cmd: str) -> str:
+    body = _HEREDOC.sub(" ", cmd or "")
+    lines = [ln.strip() for ln in body.splitlines()
+             if ln.strip() and not ln.lstrip().startswith("#")]
+    return "\n".join(lines)
+
+
 def _no_match_only(cmd: str, outp: str) -> bool:
     """這一步的「失敗」只是搜尋沒找到：指令（或管線的最後一段）是 grep／rg 類，輸出裡沒有真的錯誤。"""
-    stages = [x for x in re.split(r"(?<!\|)\|(?!\|)", cmd or "") if x.strip()]
+    clean = _strip_shell_comments(cmd)
+    lines = [ln for ln in clean.splitlines() if ln.strip()]
+    if lines and all(
+        SEARCH_CMD.match(ln) or SEARCH_CMD.match([x for x in re.split(r"(?<!\|)\|(?!\|)", ln) if x.strip()][-1])
+        for ln in lines
+    ):
+        return not SEARCH_ERR.search(outp or "")
+    stages = [x for x in re.split(r"(?<!\|)\|(?!\|)", clean) if x.strip()]
     last = stages[-1] if stages else ""
-    if not (SEARCH_CMD.match(cmd or "") or SEARCH_CMD.match(last)):
+    if not (SEARCH_CMD.match(clean) or SEARCH_CMD.match(last)):
         return False
     return not SEARCH_ERR.search(outp or "")
 
@@ -1332,7 +1367,10 @@ def _command_of(tr: Trace, s: Step) -> str:
 
 
 def _norm_cmd(cmd: str) -> str:
-    words = re.findall(r"[^\s\"']+", cmd or "")
+    clean = _strip_shell_comments(cmd)
+    lines = [ln for ln in clean.splitlines() if ln.strip()]
+    target = lines[-1] if lines and INTERPRETER.match(lines[-1]) else clean
+    words = re.findall(r"[^\s\"']+", target or cmd or "")
     first_file = next((w for w in words[1:] if re.search(r"\.\w{1,10}$", w)), "")
     return f"{words[0] if words else ''} {first_file}".strip()
 

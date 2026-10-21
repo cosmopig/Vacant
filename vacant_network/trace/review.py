@@ -97,6 +97,9 @@ def line_for(f: dict[str, Any], budget_note: str = "") -> str:
         return (f"- The final message says \"{q(f['quote'])}\", but no test or build command ran in "
                 f"the recorded steps. Run it and report the actual result.")
     if k == "failed_step":
+        if f.get("sub") == "test_failed":
+            return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\" and no later "
+                    f"test run passed. Fix the implementation and re-run the tests.")
         return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\". The "
                 f"deliverable was written after it without that output. Fix and re-run it, or say "
                 f"in the final message that it failed.")
