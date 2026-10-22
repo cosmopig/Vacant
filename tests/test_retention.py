@@ -18,6 +18,7 @@ import pathlib
 import pytest
 
 from vacant_network import cli, retention
+from vacant_network.trace.recorder import Actor, Recorder
 from vacant_network.adapters import hook, install as INS
 from vacant_network.intake import contract as C, flow, ledger
 from vacant_network.trace import capture
@@ -206,3 +207,26 @@ def test_cli_vacant_gc_json(env, capsys):
     assert out["dry_run"] is True
     assert "bytes_freed" in out
     assert "trace" in out and "quarantine" in out and "work" in out and "logs" in out
+
+
+def test_cli_vacant_gc_verify_and_older_than_hours(env, capsys):
+    # 建立一個合法 session
+    proj = env / "ws_verify"
+    proj.mkdir()
+    (proj / "main.py").write_text("print('hello')\n")
+    hook.handle("claude", "UserPromptSubmit", {
+        "session_id": "S1",
+        "cwd": str(proj),
+        "prompt": "Say hello in main.py",
+    })
+    _step(proj, 1, "Write", {"file_path": str(proj / "main.py"), "content": "print('hello world')\n"},
+          write={"main.py": "print('hello world')\n"})
+
+    # 執行 gc --verify
+    rc = cli.main(["gc", "--state-dir", str(env / "vh"), "--older-than-hours", "0.001", "--verify", "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["verified_projects"] >= 1
+    assert out["verify_ok"] is True
+    assert out["verify_errors"] == []
+

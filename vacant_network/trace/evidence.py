@@ -144,7 +144,7 @@ MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|
                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
 #: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
 OUTPUT_VERB = re.compile(r"\b(write|writes|save|store|put|output|export|generate|create|produce|"
-                         r"place|dump|寫入|寫到|存到|存成|輸出到|產生)\b", re.I)
+                         r"place|dump|record|list|寫入|寫到|存到|存成|輸出到|產生)\b", re.I)
 OUTPUT_PREP = re.compile(r"(?:\b(?:to|in|into|as|at)\b|到|至|成)\s*(`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;()]+)")
 OUTPUT_LABEL = re.compile(r"output[ _-]?(?:path|file)\b[^\n]*\n(?:[ \t]*\n)*[ \t]*(`[^`\n]+`|[^\s]+)",
                           re.I)
@@ -266,6 +266,9 @@ class Num:
         out = [(self.value * self.scale, tol * self.scale)]
         if self.pct:
             out.append((self.value / 100.0, tol / 100.0))
+        elif 0 < abs(self.value) <= 100:
+            # 支援未標註 % 但題目要求比例／百分比的同源數值換算（例如 49.67 對應 0.4967）
+            out.append((self.value / 100.0, tol / 100.0))
         return out
 
 
@@ -302,6 +305,26 @@ def _significant(n: Num) -> bool:
             return False
     digits = re.sub(r"\D", "", n.raw.split("e")[0].split("E")[0]).lstrip("0")
     return len(digits) >= 2
+
+
+def _extract_test_hint(outp: str) -> str | None:
+    """從測試輸出提取最後一個失敗斷言行或錯誤摘要（最多 120 字元），隱去敏感本機路徑。"""
+    if not outp:
+        return None
+    lines = [ln.strip() for ln in outp.splitlines() if ln.strip()]
+    candidates = []
+    for ln in lines:
+        if re.search(r"\b(?:AssertionError|FAIL:|FAILED|assert\s+|Expected\b|Error:|Exception:)", ln):
+            candidates.append(ln)
+    if not candidates:
+        return None
+    raw = candidates[-1]
+    # 移除常見絕對路徑前綴避免干擾 KS1 判定
+    sanitized = re.sub(r"/(?:[a-zA-Z0-9_.-]+/)+", "", raw)
+    sanitized = " ".join(sanitized.split())
+    if len(sanitized) > 120:
+        sanitized = sanitized[:117] + "..."
+    return sanitized
 
 
 # ── the pass ────────────────────────────────────────────────────────────
@@ -774,7 +797,9 @@ class Evidence:
                 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         notes: dict[str, Any] = {"checked": 0, "traced": 0, "derived": 0, "exempt": 0,
                                  "not_typed": 0, "not_traced_note_only": []}
-        corpus_nums = [n.value * n.scale for n, _, _ in numbers_in(corpus)][:MAX_CORPUS_NUMBERS]
+        step_calc_nums = [n.value * n.scale for s in steps if tool_kind(s.tool) != "read"
+                          for n, _, _ in numbers_in(self.tr.output_text(s))]
+        corpus_nums = step_calc_nums + [n.value * n.scale for n, _, _ in numbers_in(corpus)][:MAX_CORPUS_NUMBERS]
         corpus_nums += [n.value for n, _, _ in numbers_in(corpus) if n.pct][:500]
         tables = [corpus]
         for s in steps:
@@ -972,6 +997,25 @@ class Evidence:
                                    for m in cued_mats))
                        for t in later):
                     continue
+            # 若此失敗指令操作了交付檔 d（如 sed -i、awk、patch 修改 d 失敗），
+            # 但後續步驟中 d 已被 write/edit 工具覆寫，且最後的測試執行已通過（或後續無測試失敗），
+            # 代表該次殼層修改失敗已被後續的直接寫檔覆寫並驗證通過，不應視為未處理的失敗步驟。
+            target_delivs_in_cmd = [d for d in delivs if d in clean_cmd or d.rsplit("/", 1)[-1] in clean_cmd]
+            if target_delivs_in_cmd and not is_test_cmd:
+                overwritten = any(
+                    str(w["path"]) in target_delivs_in_cmd or str(w["path"]).rsplit("/", 1)[-1] in target_delivs_in_cmd
+                    for t in later for w in t.writes
+                )
+                has_subsequent_test_pass = any(
+                    tool_kind(t.tool) == "shell"
+                    and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
+                         or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
+                    and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
+                    and not FAIL_OUT_2.search(self.tr.output_text(t))
+                    for t in later
+                )
+                if overwritten and has_subsequent_test_pass:
+                    continue
             if self.final_text and MENTIONS_FAILURE.search(self.final_text) and not (is_test_cmd and has_code_deliv):
                 continue
             err = next((ln for ln in reversed(outp.strip().splitlines()) if ln.strip()),
@@ -979,6 +1023,9 @@ class Evidence:
             item: dict[str, Any] = {"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err}
             if is_test_cmd and has_code_deliv:
                 item["sub"] = "test_failed"
+                hint = _extract_test_hint(outp + "\n" + str(s.error or ""))
+                if hint:
+                    item["test_hint"] = hint
             out.append(item)
         return out
 
@@ -1108,6 +1155,11 @@ class Evidence:
                     out.append({"kind": "invalid_output", "sub": "stub", "path": path,
                                 "detail": "contains a Python traceback instead of a result"})
                     continue
+                # Task 3: 未展開的 Python 物件 repr() 殘留
+                if (is_req or only_answer) and re.search(r"<(?:function|generator object|cell at|built-in function)\b|\b(?:DataFrame\(|Series\(\[\])", new):
+                    out.append({"kind": "invalid_output", "sub": "stub", "path": path,
+                                "detail": "contains un-evaluated Python object representation"})
+                    continue
                 nonempty = [ln.strip() for ln in new.splitlines() if ln.strip()]
                 if len(nonempty) == 1:
                     vlow = nonempty[0].lower()
@@ -1118,6 +1170,12 @@ class Evidence:
                         out.append({"kind": "invalid_output", "sub": "stub", "path": path,
                                     "detail": f"contains placeholder value {nonempty[0]!r}"})
                         continue
+                    # Task 3: 空集合交付攔截（問句要求具體項目／名單，但寫出空集合）
+                    if vlow in {"[]", "{}", "set()", "list()"} and (is_req or only_answer):
+                        if re.search(r"\b(?:which|list|what are|find all|identify)\b", joined_task, re.I):
+                            out.append({"kind": "invalid_output", "sub": "empty", "path": path,
+                                        "detail": "empty collection []"})
+                            continue
                 if (is_req or only_answer) and REFUSAL_FILE_RE.search(new):
                     out.append({"kind": "invalid_output", "sub": "stub", "path": path,
                                 "detail": "contains a refusal message instead of the answer"})

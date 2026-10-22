@@ -690,6 +690,36 @@ def compact_vrun_dir(
     return {"bytes_freed": bytes_freed, "files_removed": files_removed}
 
 
+def verify_trace_chains(root: pathlib.Path | None = None) -> tuple[int, bool, list[str]]:
+    """驗證 trace 版本庫下所有專案的簽章鏈（Recorder.verify）。回傳 (驗證專案數, 是否全數通過, 錯誤訊息列表)。"""
+    base = (root or state_dir()) / "trace"
+    pdir = base / "projects"
+    if not pdir.is_dir():
+        return 0, True, []
+    from .trace.recorder import Recorder
+    count = 0
+    errors = []
+    for p in sorted(pdir.iterdir()):
+        if not p.is_dir() or not (p / "chain.ndjson").is_file():
+            continue
+        count += 1
+        try:
+            rec = Recorder(p, root=base)
+            rec.dir = p
+            rec.chain_path = p / "chain.ndjson"
+            rec.state_path = p / "state.json"
+            v = rec.verify()
+            if isinstance(v, tuple):
+                ok, reason = v
+            else:
+                ok, reason = v.get("ok"), v.get("reason")
+            if not ok:
+                errors.append(f"{p.name}: {reason}")
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{p.name}: {e}")
+    return count, len(errors) == 0, errors
+
+
 def gc_all(
     *,
     root: pathlib.Path | None = None,
@@ -699,11 +729,16 @@ def gc_all(
     keep_latest_per_task: int = DEFAULT_KEEP_DECISIONS,
     keep_runs_per_task: int = DEFAULT_KEEP_RUNS,
     max_age_days: float | None = None,
+    older_than_hours: float | None = None,
     max_log_bytes: int = DEFAULT_MAX_LOG_BYTES,
     aggressive: bool = False,
     dry_run: bool = False,
+    verify: bool = False,
 ) -> dict[str, Any]:
     """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。"""
+    if older_than_hours is not None and max_age_days is None:
+        max_age_days = older_than_hours / 24.0
+
     if aggressive:
         keep_recent_steps = min(keep_recent_steps, 10)
         keep_latest_per_task = min(keep_latest_per_task, 1)
@@ -740,7 +775,8 @@ def gc_all(
                    + lg["bytes_freed"] + vr["bytes_freed"])
     total_files = (tr["files_removed"] + qr["files_removed"] + wk["files_removed"]
                    + lg["logs_compacted"] + vr["files_removed"])
-    return {
+
+    rep: dict[str, Any] = {
         "dry_run": dry_run,
         "aggressive": aggressive,
         "bytes_freed": total_bytes,
@@ -752,6 +788,12 @@ def gc_all(
         "logs": lg,
         "vrun": vr,
     }
+    if verify:
+        v_count, v_ok, v_errs = verify_trace_chains(root)
+        rep["verified_projects"] = v_count
+        rep["verify_ok"] = v_ok
+        rep["verify_errors"] = v_errs
+    return rep
 
 
 def _human_bytes(n: int) -> str:
@@ -781,6 +823,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help=f"每個任務保留 ~/.vacant-work 的最近執行數（預設 {DEFAULT_KEEP_RUNS}）")
     ap.add_argument("--max-age-days", type=float, default=None,
                     help="只清理早於 N 天的非必要物件（預設立即清理冗餘副本）")
+    ap.add_argument("--older-than-hours", type=float, default=None,
+                    help="只清理超過指定小時數的非必要物件（例如 0.5 代表 30 分鐘前）")
+    ap.add_argument("--verify", action="store_true",
+                    help="清理後自動對保留之專案執行 Recorder.verify() 驗簽，確保簽章鏈 100%% 完好")
     ap.add_argument("--aggressive", action="store_true",
                     help="積極模式：只留最近 10 步、1 份候選、清空所有 ~/.vacant-work 舊目錄")
     ap.add_argument("--dry-run", action="store_true",
@@ -801,12 +847,14 @@ def main(argv: list[str] | None = None) -> int:
         keep_recent_steps=args.keep_steps,
         keep_runs_per_task=args.keep_runs,
         max_age_days=args.max_age_days,
+        older_than_hours=args.older_than_hours,
         aggressive=args.aggressive,
         dry_run=args.dry_run,
+        verify=args.verify,
     )
     if args.json:
         print(json.dumps(rep, ensure_ascii=False, indent=2))
-        return 0
+        return 0 if rep.get("verify_ok", True) else 1
     mode_tag = "（預覽 --dry-run，未刪除）" if rep["dry_run"] else "✓ 已清理"
     print(f"{mode_tag} 釋放空間：{_human_bytes(rep['bytes_freed'])}（共處理 {rep['files_removed']} 個檔案／項目）")
     print(f"  · trace 版本庫   : 釋放 {_human_bytes(rep['trace']['bytes_freed'])} "
@@ -819,8 +867,14 @@ def main(argv: list[str] | None = None) -> int:
           f"（截斷 {rep['logs']['logs_compacted']} 個日誌）")
     if args.vrun_dir:
         print(f"  · vrun 目錄      : 釋放 {_human_bytes(rep['vrun']['bytes_freed'])}")
+    if args.verify:
+        v_ok_tag = "全數通過 ✓" if rep.get("verify_ok") else "驗證失敗 ✗"
+        print(f"  · 鏈驗章 (--verify): {rep.get('verified_projects', 0)} 個專案簽章鏈 {v_ok_tag}")
+        if rep.get("verify_errors"):
+            for err in rep["verify_errors"]:
+                print(f"    - {err}")
     print("  （簽章鏈 chain.ndjson / ledger.ndjson / receipts_*.ndjson 完整保留，離線驗章不變）")
-    return 0
+    return 0 if rep.get("verify_ok", True) else 1
 
 
 if __name__ == "__main__":  # pragma: no cover

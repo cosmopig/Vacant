@@ -98,7 +98,8 @@ def line_for(f: dict[str, Any], budget_note: str = "") -> str:
                 f"the recorded steps. Run it and report the actual result.")
     if k == "failed_step":
         if f.get("sub") == "test_failed":
-            return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\" and no later "
+            hint = f" ({q(f['test_hint'], 120)})" if f.get("test_hint") else ""
+            return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\"{hint} and no later "
                     f"test run passed. Fix the implementation and re-run the tests.")
         return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\". The "
                 f"deliverable was written after it without that output. Fix and re-run it, or say "

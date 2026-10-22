@@ -60,6 +60,10 @@ class Agent:
         post = {**pre, "tool_response": output if output is not None else {}}
         if error:
             post["is_error"] = True
+            if isinstance(error, str):
+                post["error"] = error
+            elif output and isinstance(output, dict) and output.get("stdout"):
+                post["error"] = output["stdout"]
         hook.handle("claude", "PostToolUseFailure" if error else "PostToolUse", post)
 
     def read(self, rel: str) -> None:
@@ -363,4 +367,90 @@ def test_shell_comments_and_recovered_oneliner_do_not_false_positive(env):
     a.write("answer.txt", "1\n")
     ev = a.evidence("1")
     assert [f for f in ev["findings"] if f["kind"] == "failed_step"] == []
+
+
+def test_test_hint_extracted_in_test_failed_and_clean_review(env):
+    p = _proj(env, "test_hint_proj", {"solution.py": "def f(): return 0\n"})
+    a = Agent(p)
+    a.ask("Write solution.py and run pytest.")
+    a.write("solution.py", "def f(): return 1\n")
+    a.bash("pytest -q", stdout="E   AssertionError: assert 1 == 0\n1 failed in 0.1s\n", error=True)
+    ev = a.evidence("Done.")
+    failed = [f for f in ev["findings"] if f["kind"] == "failed_step"]
+    assert len(failed) == 1
+    assert failed[0].get("sub") == "test_failed"
+    assert "AssertionError" in failed[0].get("test_hint", "")
+    _assert_clean_review(ev)
+
+
+def test_sed_modify_overwritten_by_subsequent_write_exempt(env):
+    p = _proj(env, "sed_exempt", {"solution.py": "def solve(): return 0\n"})
+    a = Agent(p)
+    a.ask("Fix solution.py so tests pass.")
+    # sed 嘗試修改失敗
+    a.bash("sed -i 's/0/1/g' solution.py", stdout="sed: -e expression #1: unknown option", error=True)
+    # 隨後直接用 write 重寫正確內容
+    a.write("solution.py", "def solve(): return 42\n")
+    # 測試成功通過
+    a.bash("pytest -q", stdout="1 passed in 0.05s", error=False)
+    ev = a.evidence("Done.")
+    assert [f for f in ev["findings"] if f["kind"] == "failed_step"] == []
+
+
+def test_invalid_output_python_repr_and_empty_collection(env):
+    # (a) Python repr 殘留 (<function ...> / <generator object ...>)
+    p1 = _proj(env, "inv_repr")
+    a1 = Agent(p1)
+    a1.ask("Write the answer to answer.txt.")
+    a1.write("answer.txt", "<function solve at 0x7f123456>\n")
+    ev1 = a1.evidence()
+    inv1 = [f for f in ev1["findings"] if f["kind"] == "invalid_output"]
+    assert len(inv1) == 1 and inv1[0]["sub"] == "stub"
+    _assert_clean_review(ev1)
+
+    # (b) 問句要求 Which / List / What are 卻輸出空集合 []
+    p2 = _proj(env, "inv_empty_col", {"data.csv": "id,val\n1,10\n2,20\n"})
+    a2 = Agent(p2)
+    a2.ask("Which transactions have value > 5? List their ids in answer.txt.")
+    a2.read("data.csv")
+    a2.write("answer.txt", "[]\n")
+    ev2 = a2.evidence()
+    inv2 = [f for f in ev2["findings"] if f["kind"] == "invalid_output"]
+    assert len(inv2) == 1 and inv2[0]["sub"] == "empty"
+    _assert_clean_review(ev2)
+
+
+def test_answer_format_forbid_empty_collection_and_numeric_range(env):
+    proj = env / "vproj_adv"
+    (proj / ".vacant").mkdir(parents=True, exist_ok=True)
+    raw = C.scaffold("task-v2", deliverable=["*.json", "*.txt"], destination="dir:published")
+    raw["claims"] = [
+        {"id": "ans_range", "verifier": "answer_format",
+         "params": {"path": "answer.txt", "format": "number", "numeric_range": [0.0, 1.0]}},
+        {"id": "json_no_empty", "verifier": "answer_format",
+         "params": {"path": "out.json", "format": "json", "forbid_empty_collection": True}},
+    ]
+    cpath = proj / ".vacant" / "contract.json"
+    cpath.write_text(json.dumps(raw, indent=2))
+    flow.lock(cpath)
+    task = flow.open_task(cpath)
+
+    # 1) 壞交付：數值超出範圍 (1.5 > 1.0) + 空 JSON 陣列 [] -> reject
+    ws_bad = env / "ws_bad_adv"
+    ws_bad.mkdir()
+    (ws_bad / "answer.txt").write_text("1.5\n")
+    (ws_bad / "out.json").write_text("[]\n")
+    r_bad = flow.submit(task, ws_bad, source="test")
+    assert r_bad["outcome"] == "reject"
+    by_id = {c["claim_id"]: c["status"] for c in r_bad["results"]}
+    assert by_id == {"ans_range": "FAIL", "json_no_empty": "FAIL"}
+
+    # 2) 好交付：合法數值 0.85 + 非空 JSON 陣列 [1, 2] -> accept
+    ws_good = env / "ws_good_adv"
+    ws_good.mkdir()
+    (ws_good / "answer.txt").write_text("0.85\n")
+    (ws_good / "out.json").write_text("[1, 2]\n")
+    r_good = flow.submit(task, ws_good, source="test")
+    assert r_good["outcome"] == "accept", r_good["reasons"]
+
 

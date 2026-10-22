@@ -453,7 +453,7 @@ def _syntax_valid(ctx: VerifyContext, claim: Claim):
 
 
 @verifier("answer_format", version="1",
-          params=("path", "format", "required_keys", "allow_multiline"),
+          params=("path", "format", "required_keys", "allow_multiline", "forbid_empty_collection", "numeric_range"),
           summary="general-task answer file satisfies structural format "
                   "(single_value, number, at_tags, or json) without tracebacks, NaN, or refusals")
 def _answer_format(ctx: VerifyContext, claim: Claim):
@@ -466,6 +466,8 @@ def _answer_format(ctx: VerifyContext, claim: Claim):
                          f"single_value/number/at_tags/json, got {fmt!r}")
     req_keys = _str_list(claim, "required_keys")
     allow_multi = bool(claim.params.get("allow_multiline", False))
+    forbid_empty = bool(claim.params.get("forbid_empty_collection", False))
+    num_range = claim.params.get("numeric_range")
     if rel not in ctx.paths():
         return "FAIL", f"{rel} is not in the deliverable", {"independent": True}
     txt = ctx.file(rel).read_text(encoding="utf-8", errors="replace")
@@ -478,6 +480,8 @@ def _answer_format(ctx: VerifyContext, claim: Claim):
         return "FAIL", f"{rel} starts with a Markdown code fence", {"independent": True}
     if REFUSAL_FILE_RE.search(stripped):
         return "FAIL", f"{rel} contains a refusal message instead of an answer", {"independent": True}
+    if forbid_empty and stripped in ("[]", "{}", "set()", "list()"):
+        return "FAIL", f"{rel} is an empty collection", {"independent": True}
     lines = [ln.strip() for ln in stripped.splitlines() if ln.strip()]
     if len(lines) == 1 and lines[0].lower() in {"nan", "-nan", "inf", "-inf", "<na>", "nat",
                                                 "tbd", "todo", "placeholder", "null", "undefined"}:
@@ -497,6 +501,8 @@ def _answer_format(ctx: VerifyContext, claim: Claim):
             doc = json.loads(stripped)
         except json.JSONDecodeError as e:
             return "FAIL", f"{rel} is not valid JSON: {e.msg}", {"independent": True}
+        if forbid_empty and doc in ([], {}):
+            return "FAIL", f"{rel} is an empty JSON collection", {"independent": True}
         if req_keys and isinstance(doc, dict):
             missing = [k for k in req_keys if k not in doc]
             if missing:
@@ -510,8 +516,13 @@ def _answer_format(ctx: VerifyContext, claim: Claim):
         return "FAIL", f"{rel} includes prose prefix or markdown heading", {"independent": True}
     if fmt == "number":
         cleaned = re.sub(r"^[$€£¥]|[%]$", "", lines[0].strip()).strip()
-        if _number(cleaned) is None:
+        num_val = _number(cleaned)
+        if num_val is None:
             return "FAIL", f"{rel} value {lines[0]!r} is not a finite number", {"independent": True}
+        if num_range and isinstance(num_range, (list, tuple)) and len(num_range) == 2:
+            if num_val < num_range[0] or num_val > num_range[1]:
+                return "FAIL", f"{rel} value {num_val} is outside expected range [{num_range[0]}, {num_range[1]}]", {
+                    "independent": True}
     return "PASS", f"{rel} satisfies {fmt} answer format", {"independent": True}
 
 
