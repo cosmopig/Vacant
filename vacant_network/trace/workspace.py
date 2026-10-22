@@ -186,6 +186,37 @@ def scan(root: str | os.PathLike, prev: Index | None = None, *,
                                             os.lstat(full_x).st_mtime_ns)
                 except OSError:
                     pass
+                # 特殊例外：工作區根目錄第一層的子目錄（如 data -> /tmp/bm_... 或 /srv/...）
+                # 指向外部唯讀資料集，允許有限展開其檔案索引（最多 500 個檔案）
+                if rel_dir == ".":
+                    try:
+                        target = os.path.realpath(full_x)
+                        if os.path.isdir(target) and (target.startswith("/tmp") or target.startswith("/srv")):
+                            count = 0
+                            for s_root, _, s_files in os.walk(target):
+                                s_rel_sub = os.path.relpath(s_root, target)
+                                s_pfx = f"{x}/" if s_rel_sub == "." else f"{x}/{s_rel_sub.replace(os.sep, '/')}/"
+                                for sf in sorted(s_files):
+                                    sfp = os.path.join(s_root, sf)
+                                    if os.path.isfile(sfp) and not os.path.islink(sfp):
+                                        st_sf = os.lstat(sfp)
+                                        s_rel = s_pfx + sf
+                                        if is_secret(s_rel):
+                                            s_sha = "secret:" + _sha_file(pathlib.Path(sfp), deadline)
+                                        elif st_sf.st_size > MAX_BLOB:
+                                            s_sha = "big:" + _sha_file(pathlib.Path(sfp), deadline)
+                                        else:
+                                            with open(sfp, "rb") as sf_f:
+                                                sf_data = sf_f.read()
+                                            s_sha = blobs.put_bytes(sf_data) if blobs is not None else hashlib.sha256(sf_data).hexdigest()
+                                        out[s_rel] = Entry(s_sha, st_sf.st_size, st_sf.st_mtime_ns, bool(st_sf.st_mode & 0o100))
+                                        count += 1
+                                        if count >= 500:
+                                            break
+                                if count >= 500:
+                                    break
+                    except OSError:
+                        pass
                 continue
             keep.append(x)
         dirs[:] = keep

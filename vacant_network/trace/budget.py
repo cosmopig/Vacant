@@ -78,16 +78,40 @@ def turn_check(agent: str, session_id: str | None, cwd: str | None, turn: Any, b
     session = str(session_id or "unknown")
     key = f"{agent}:{session}"
     start, missing = missing_outputs(rec, agent, session)
+    from . import review
+    from .stopcheck import _actor_tokens
+    coding_nudge = None
     if not missing:
-        return "allow", "", {"nudge": {"why": "requested outputs exist or none asked"}}
+        from .evidence import Evidence
+        ev = Evidence(rec, platform=agent, session=session)
+        _, _, steps = ev.window()
+        test_failed_step = None
+        for s in reversed(steps):
+            cmd = str((s.input_blob and rec.blobs.get(s.input_blob)) or "")
+            if any(t in cmd for t in ("pytest", "unittest", "python3 -m unittest", "cargo test", "npm test")):
+                outp = str((s.output_blob and rec.blobs.get(s.output_blob)) or "")
+                if s.error or "FAIL" in outp or "ERROR" in outp:
+                    test_failed_step = s
+                break
+        if test_failed_step:
+            coding_nudge = (
+                f"- Model turns left in the stated budget: {left} of {budget_i}. "
+                f"Do not attempt large refactoring. Fix only the immediate test failure or write "
+                f"your best working version to the deliverable file and conclude."
+            )
+        else:
+            return "allow", "", {"nudge": {"why": "requested outputs exist or none asked"}}
     sent = [e for e in rec.events() if e.get("type") == "nudge"      # events(): payload 攤平在最上層
             and e.get("session") == key and e.get("window_start") == start]
     if len(sent) >= MAX_NUDGES or any(e.get("turn") == turn_i for e in sent):
         return "allow", "", {"nudge": {"why": "already reminded"}}
-    from . import review
-    from .stopcheck import _actor_tokens
-    text, withheld = review.render_nudge([raw for _, raw in missing], turns_left=left,
-                                         budget=budget_i, actor_tokens=_actor_tokens(rec))
+    if coding_nudge:
+        text, withheld = "\n".join([review.NUDGE_HEADER, coding_nudge, review.NUDGE_FOOTER]), 0
+        paths = []
+    else:
+        text, withheld = review.render_nudge([raw for _, raw in missing], turns_left=left,
+                                             budget=budget_i, actor_tokens=_actor_tokens(rec))
+        paths = [rel for rel, _ in missing]
     rec.append("nudge", {"session": key, "window_start": start, "turn": turn_i, "budget": budget_i,
-                         "paths": [rel for rel, _ in missing], "withheld": withheld})
-    return "continue", text, {"nudge": {"sent": len(missing), "turn": turn_i, "budget": budget_i}}
+                         "paths": paths, "withheld": withheld})
+    return "continue", text, {"nudge": {"sent": len(paths) or 1, "turn": turn_i, "budget": budget_i}}

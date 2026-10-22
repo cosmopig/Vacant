@@ -396,7 +396,7 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     #: 理由與代價見 spawn 處與 `_kill_group` 的 docstring。
     new_session = not inherit_stdin
     try:
-        if retry_arm == "resample" and n_max > 1:
+        if retry_arm in ("resample", "fresh_hint") and n_max > 1:
             # 起點的**完整**副本（含 `.git`）。理由見 `retry.py`：
             # 排除清單是樹雜湊的清單，不是重置的清單。
             origin_dir = run_dir / "_origin"
@@ -410,19 +410,19 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
             cur_attempt[0] = attempt
             seen_before = proxy.stats["requests_seen"]
 
-            # ── 2') 這一次嘗試之前：重置（resample）或留著（revise）───
-            if attempt > 1 and retry_arm == "resample":
+            # ── 2') 這一次嘗試之前：重置（resample/fresh_hint）或留著（revise）───
+            if attempt > 1 and retry_arm in ("resample", "fresh_hint"):
                 # `type: ignore[arg-type]`：`origin_dir` 在
-                # `retry_arm == "resample" and n_max > 1` 時才被建起來，而
+                # `retry_arm in ("resample", "fresh_hint") and n_max > 1` 時才被建起來，而
                 # `attempt` 只跑 `range(1, n_max + 1)` ⇒ **`attempt > 1` 蘊含
-                # `n_max > 1`**，加上這裡的 `retry_arm == "resample"`，兩個
+                # `n_max > 1`**，加上這裡的 `retry_arm in ("resample", "fresh_hint")`，兩個
                 # 前提就是上面那個 if 的條件，所以到得了這一行時 `origin_dir`
                 # 必為 Path。型別系統不追蹤「迴圈變數的值域 ⇒ 另一個變數已被
                 # 指派」這種蘊含。**不加 assert**：`python -O` 會把它拿掉，
                 # 而且那會把一個不可能發生的狀況變成一個新的失敗模式。
                 retrypolicy.restore_origin(origin_dir, workspace)  # type: ignore[arg-type]
                 back = wshash.tree_hash(workspace)
-                rec["reset"] = {"kind": "resample", "ws_sha256": back,
+                rec["reset"] = {"kind": retry_arm, "ws_sha256": back,
                                 "back_to_start": back == ws_start}
                 if back != ws_start:
                     rec["stop_reason"] = "ws_reset_failed"
@@ -619,12 +619,16 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                 break
 
             # ── 6) 沒過而且還有額度：照臂的政策準備下一次 ─────────────
-            if retry_arm == "revise":
+            if retry_arm in ("revise", "fresh_hint"):
                 # **只餵可見驗收的失敗原文**（`result` 來自
                 # `run_suite(suite="visible")`）。隱藏測資一律不進這個檔。
                 try:
-                    text = retrypolicy.render_feedback(
-                        failures, attempt=attempt, max_attempts=n_max)
+                    if retry_arm == "fresh_hint":
+                        text = retrypolicy.render_fresh_hint(
+                            failures, attempt=attempt, max_attempts=n_max)
+                    else:
+                        text = retrypolicy.render_feedback(
+                            failures, attempt=attempt, max_attempts=n_max)
                 except KS1Violation as exc:
                     # 鐵律 1：**違反＝run 作廢**。責任修辭有可能不是從模板來，
                     # 而是從客戶測試的訊息裡帶進來的——那一樣不准送出去。

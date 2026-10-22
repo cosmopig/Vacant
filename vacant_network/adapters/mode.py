@@ -48,10 +48,18 @@ def current_mode() -> str:
 
 
 def budget_reminder_on() -> bool:
-    """回合預算提醒開了沒（預設關；只有 `install.json` 的 `budget_reminder` 是 `true` 才開）。"""
+    """回合預算提醒開了沒（通用增強：預設開；只有 install.json 明確為 False 或環境變數 VACANT_BUDGET_REMINDER=0 才關）。"""
+    env = os.environ.get("VACANT_BUDGET_REMINDER", "").strip().lower()
+    if env in ("0", "false", "off", "no"):
+        return False
+    if env in ("1", "true", "on", "yes"):
+        return True
     from .install import state_root
     p = state_root() / "install.json"
     try:
-        return json.loads(p.read_text(encoding="utf-8")).get("budget_reminder") is True
+        data = json.loads(p.read_text(encoding="utf-8"))
+        if data.get("budget_reminder") is False:
+            return False
+        return True
     except (OSError, ValueError, AttributeError):
-        return False
+        return True

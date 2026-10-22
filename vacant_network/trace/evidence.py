@@ -364,6 +364,38 @@ class Evidence:
         return str(actor.get("platform")) == self.platform and \
             str(actor.get("session")) == self.session
 
+    def best_test_checkpoint(self, steps: list[Step] | None = None) -> tuple[str | None, tuple[int, int], int | None]:
+        """尋找歷史上通過最多測試的步驟檢查點。回傳 `(pre_index, (passed, failed), step_n)`。"""
+        steps = steps if steps is not None else self.tr.steps
+        best_idx: str | None = None
+        best_score: tuple[int, int] = (-1, 999999)
+        best_step_n: int | None = None
+        for s in steps:
+            cmd = _command_of(self.tr, s)
+            if not any(t in cmd for t in ("pytest", "unittest", "python3 -m unittest", "cargo test", "npm test")):
+                continue
+            raw_out = self.tr.blob_text(s.output_blob) or ""
+            outp = raw_out
+            try:
+                j_out = json.loads(raw_out)
+                if isinstance(j_out, dict):
+                    outp = str(j_out.get("stdout") or j_out.get("output") or raw_out)
+            except Exception:
+                pass
+            score = parse_test_score(outp)
+            if score is not None:
+                passed, failed = score
+                key = (passed, -failed)
+                if key > (best_score[0], -best_score[1]):
+                    idx = s.pre_index
+                    if idx:
+                        best_score = (passed, failed)
+                        best_idx = idx
+                        best_step_n = s.n
+        if best_idx is not None and best_score[0] > 0:
+            return best_idx, best_score, best_step_n
+        return None, (0, 0), None
+
     def window(self) -> tuple[int, list[str], list[Step]]:
         """回 (起點 seq, 人的要求原文, 這一回合的步驟)。起點＝這個工作階段最後一則人打的要求
         （含 `vacant do` 交給這一跑的任務）；沒有就從這個工作階段的第一步開始。"""
@@ -613,6 +645,11 @@ class Evidence:
                         break
                 if rel is None and self.rec.workspace.name in parts[:-1]:
                     rel = "/".join(parts[parts.index(self.rec.workspace.name) + 1:])
+                if rel is None and len(parts) >= 2 and parts[0] in ("app", "workspace", "work", "src"):
+                    if len(parts) == 2:
+                        rel = parts[1]
+                    else:
+                        rel = "/".join(parts[1:])
             else:
                 rel = t
             if rel and not _skipped(rel):
@@ -781,6 +818,23 @@ class Evidence:
         unread_dir = [f for f in dir_members if f not in observed and f not in deliv_set]
         for f in unread_named:
             findings.append({"kind": "unread", "path": f})
+
+        # Task E Rule 1: 資料夾內有業務說明文件（*.md / *.txt），且題目要求參考說明文件（或提到 documentation/rules/manual），但文件全未讀取
+        has_doc_cue = bool(re.search(r"\b(?:documentation|documents?|docs?|manual|readme|rules?|guides?|policies|policy)\b", "\n".join(task_texts), re.I))
+        dir_docs = [f for f in dir_members if (f.lower().endswith((".md", ".txt"))
+                                               or any(k in f.lower() for k in ("manual", "readme", "guide", "rule")))
+                    and not f.endswith("answer.txt") and not f.endswith("out.txt")]
+        data_observed = any(f in observed for f in dir_members if f not in dir_docs)
+        if has_doc_cue and dir_docs and (data_observed or delivs):
+            unread_docs = [d for d in dir_docs if d not in observed]
+            if len(unread_docs) == len(dir_docs):
+                findings.append({
+                    "kind": "unread",
+                    "path": unread_docs[0],
+                    "sub": "unread_doc",
+                    "doc_paths": unread_docs,
+                    "target": list(delivs.keys())[0] if delivs else "the requested output"
+                })
         materials_named = bool(named or dir_members)
         corpus = self.corpus(steps, deliv_set, observed, start_idx, prompt_texts)
         values, value_notes = self._values(steps, delivs, corpus, task_texts, materials_named)
@@ -1194,6 +1248,47 @@ class Evidence:
                             out.append({"kind": "invalid_output", "sub": "empty", "path": path,
                                         "detail": "empty collection []"})
                             continue
+
+                    # Task E Rule 2: 單一腳本無驗算與空篩選攔截（輸出 0 / 0.0 / Not Applicable / []）
+                    if vlow in {"not applicable", "n/a", "0", "0.0", "0.00", "0.000"} and (is_req or only_answer):
+                        if re.search(r"\b(?:what is|what are|which|how many|total|fee|amount|count|sum|find|calculate|list)\b", joined_task, re.I):
+                            last_calc = None
+                            for s in reversed(self.tr.steps):
+                                raw_in = self.tr.blob_text(s.input_blob) or ""
+                                if any(k in raw_in for k in ("python", "python3", "df", ".py")):
+                                    last_calc = s
+                                    break
+                            if last_calc:
+                                raw_out = self.tr.blob_text(last_calc.output_blob) or ""
+                                outp = raw_out
+                                try:
+                                    j_out = json.loads(raw_out)
+                                    if isinstance(j_out, dict):
+                                        outp = str(j_out.get("stdout") or j_out.get("output") or j_out.get("text") or raw_out)
+                                except Exception:
+                                    pass
+                                raw_in = self.tr.blob_text(last_calc.input_blob) or ""
+                                cmd = raw_in
+                                try:
+                                    j_in = json.loads(raw_in)
+                                    if isinstance(j_in, dict):
+                                        cmd = str(j_in.get("command") or j_in.get("cmd") or raw_in)
+                                except Exception:
+                                    pass
+                                has_inspect = any(kw in outp.lower() or kw in cmd.lower()
+                                                  for kw in ("unique", "value_counts", "head(", "groupby", "dtypes", "info("))
+                                if not has_inspect and (
+                                    "empty dataframe" in outp.lower()
+                                    or "series([], " in outp.lower()
+                                    or outp.strip() in {"0", "0.0", "0.00", "[]", "set()", ""}
+                                ):
+                                    out.append({
+                                        "kind": "invalid_output",
+                                        "sub": "empty_filter",
+                                        "path": path,
+                                        "detail": f"filter produced zero rows/empty result ({vlow}) without checking column values"
+                                    })
+                                    continue
                 if (is_req or only_answer) and REFUSAL_FILE_RE.search(new):
                     out.append({"kind": "invalid_output", "sub": "stub", "path": path,
                                 "detail": "contains a refusal message instead of the answer"})
@@ -1469,3 +1564,47 @@ def evidence_for(rec: Recorder, *, platform: str, session: str, final_text: str 
                  today: _dt.date | None = None) -> dict[str, Any]:
     return Evidence(rec, platform=platform, session=session, final_text=final_text,
                     today=today).run()
+
+
+def parse_test_score(text: str) -> tuple[int, int] | None:
+    """從測試輸出解析 (passed, failed)。"""
+    m_ran = re.search(r"Ran\s+(\d+)\s+tests?", text)
+    if m_ran:
+        total = int(m_ran.group(1))
+        if "\nOK" in text or text.strip().endswith("OK"):
+            return total, 0
+        m_fail = re.search(r"failures=(\d+)", text)
+        m_err = re.search(r"errors=(\d+)", text)
+        failed = (int(m_fail.group(1)) if m_fail else 0) + (int(m_err.group(1)) if m_err else 0)
+        return max(0, total - failed), failed
+
+    m_pass = re.search(r"(\d+)\s+passed\b", text)
+    m_fail = re.search(r"(\d+)\s+failed\b", text)
+    if m_pass or m_fail:
+        p_cnt = int(m_pass.group(1)) if m_pass else 0
+        f_cnt = int(m_fail.group(1)) if m_fail else 0
+        return p_cnt, f_cnt
+
+    m_cargo = re.search(r"test result: (?:ok|FAILED)\.\s+(\d+)\s+passed;\s+(\d+)\s+failed", text)
+    if m_cargo:
+        return int(m_cargo.group(1)), int(m_cargo.group(2))
+
+    return None
+
+
+def restore_best_checkpoint(rec: Recorder, target_index: str, step_n: int) -> bool:
+    """將工作區還原至最高分步驟的狀態，並記錄 checkpoint_restore 事件。"""
+    try:
+        idx = rec.load_index(target_index)
+        if not idx:
+            return False
+        from . import workspace as W
+        W.materialize(idx, rec.blobs, rec.workspace, workspace=rec.workspace)
+        rec.append("checkpoint_restore", {
+            "target_index": target_index,
+            "step": step_n,
+            "restored_files": sorted(idx.keys())
+        })
+        return True
+    except Exception:
+        return False

@@ -44,6 +44,7 @@ from .recorder import Recorder
 
 ZERO_MAX_ROUNDS = 2
 UNREAD_MAX_ROUNDS = 1
+TEST_FAILED_MAX_ROUNDS = 1
 CHECK_TIMEOUT_S = 330
 STATE_FILE = "zero_state.json"
 NOTE_MAX_LINES = 6
@@ -204,11 +205,20 @@ def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str, 
 def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) -> list[dict[str, Any]]:
     """這一次檢查要退回給 agent 的發現（其餘只進交件說明）。純函式：離線重播（`ops/eval/colab_replay/`）用同一份。
     - 「點名的檔沒打開」只退一回合（`UNREAD_MAX_ROUNDS`）。
+    - 「測試失敗」同對話內最多只退一回合（`TEST_FAILED_MAX_ROUNDS`），避免 12B 模型在同一對話內無效死循環。
     - **v3.7：模型錯誤結束的回合一律不退回**（只寫給人）。那不是 agent 說做完，是模型那一側壞掉；u274 的缺檔退回 31 跑裡
       16 跑是這樣觸發的，之後 0 對、13 跑撞時限沒交、3 跑交錯（`decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`）。"""
     if error_stop:
         return []
-    return [f for f in findings if f["kind"] != "unread" or used < UNREAD_MAX_ROUNDS]
+    out = []
+    for f in findings:
+        k = f.get("kind")
+        if k == "unread" and used >= UNREAD_MAX_ROUNDS:
+            continue
+        if k == "failed_step" and f.get("sub") == "test_failed" and used >= TEST_FAILED_MAX_ROUNDS:
+            continue
+        out.append(f)
+    return out
 
 
 def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
@@ -269,6 +279,13 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
                                            "withheld": withheld}}
     if not findings:
         _rounds_file(session_id, zc).unlink(missing_ok=True)
+    elif any(f.get("sub") == "test_failed" for f in findings):
+        # 測試失敗且不再退回時，自動回滾到歷史最高分檢查點
+        from .evidence import Evidence, restore_best_checkpoint
+        ev_best = Evidence(rec, platform=agent, session=session)
+        best_idx, best_score, best_n = ev_best.best_test_checkpoint()
+        if best_idx and best_score[0] > 0:
+            restore_best_checkpoint(rec, best_idx, best_n or 0)
     sess["open"] = []
     _put_session(rec, key, sess)
     # 還在的都寫進說明（含回合用完之後才不再退回的「沒打開」）；觀察模式另外列
@@ -588,6 +605,23 @@ def ended(agent: str, session_id: str | None, cwd: str | None, *, mode: str,
     reviews = [e for e in evs if e.get("type") == "review"]
     if any(e.get("type") == "ended" for e in evs) or (reviews and reviews[-1].get("action") != "continue"):
         return {"ended": {"why": "the delivery check let it through (or the note exists)"}}
+
+    # 任務被強行切斷時（ended），若當前程式碼壞掉，自動回滾至歷史最高分檢查點
+    best_idx, best_score, best_n = ev.best_test_checkpoint(steps)
+    if best_idx and best_score[0] > 0:
+        from .evidence import parse_test_score, restore_best_checkpoint
+        cur_score = (0, 0)
+        for s in reversed(steps):
+            cmd = str((s.input_blob and rec.blobs.get(s.input_blob)) or "")
+            if any(t in cmd for t in ("pytest", "unittest", "python3 -m unittest", "cargo test", "npm test")):
+                raw_out = ev.tr.blob_text(s.output_blob) or ""
+                score = parse_test_score(raw_out)
+                if score is not None:
+                    cur_score = score
+                break
+        if best_score[0] > cur_score[0]:
+            restore_best_checkpoint(rec, best_idx, best_n or 0)
+
     nudges = [e for e in evs if e.get("type") == "nudge"]
     asked = ev.asked_outputs(texts, steps[0].pre_index or ev.tr.initial)   # v3.7：含說明檔裡寫的交付物
     _s2, missing = missing_outputs(rec, agent, session)

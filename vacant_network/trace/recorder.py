@@ -645,8 +645,11 @@ class Recorder:
                        "tool": pend["tool"], "input_blob": pend["input_blob"],
                        "writes": [c.to_json() for c in changes], "output_blob": None,
                        "error": None, "pre_index": pend["pre_index"], "post_index": end_sha,
-                       "concurrent_with": sorted(set(pend.get("concurrent_with") or [])
-                                                 | (set(done) - {step})),
+                       "concurrent_with": sorted(
+                           set(int(x) if str(x).isdigit() else x for x in (pend.get("concurrent_with") or []))
+                           | {int(s) if str(s).isdigit() else s for s in done if s != step},
+                           key=lambda x: (0, int(x)) if isinstance(x, int) else (1, str(x))
+                       ),
                        "pre_missing": False, "post_missing": why,
                        "observed_by": "vacant_scan"}
             if not (pend.get("pre_index") and end_sha):

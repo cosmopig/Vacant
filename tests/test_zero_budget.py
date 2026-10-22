@@ -608,11 +608,14 @@ def test_the_extension_gives_a_cut_off_run_the_stop_time_limit():
     assert "TURNS === BUDGET" in js and "TURNS >= BUDGET" not in js
 
 
-# ── v3.6：提醒預設關（人類 2026-09-27） ─────────────────────────────────────
+# ── v3.6/v3.8：提醒開關測試（通用突破版預設為開，明確為 False 時關） ─────────
 
-@pytest.mark.parametrize("setting", [None, False, "yes", 1])
-def test_v36_reminder_is_off_unless_install_json_says_true(proj, setting):
-    _install(budget_reminder=setting)                    # 沒有這個欄位、false、不是 true 的值 ⇒ 關
+@pytest.mark.parametrize("setting", [False, "false", "0"])
+def test_v36_reminder_is_off_when_install_json_says_false(proj, setting):
+    _install(budget_reminder=setting if setting is not False else False)
+    if setting != False:
+        p = INS.state_root() / "install.json"
+        p.write_text(json.dumps({"agents": {}, "mode": "evidence", "budget_reminder": False}))
     pi = Pi(proj)
     pi.ask()
     pi.bash("head -3 data/sales.csv", "date,region,amount\n")
@@ -621,10 +624,10 @@ def test_v36_reminder_is_off_unless_install_json_says_true(proj, setting):
     assert _nudges(proj) == []
 
 
-def test_v36_malformed_install_json_means_off(proj):
+def test_v36_malformed_install_json_means_default_on(proj):
     (INS.state_root() / "install.json").write_text("{not json")
     from vacant_network.adapters.mode import budget_reminder_on
-    assert budget_reminder_on() is False
+    assert budget_reminder_on() is True
 
 
 def test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choice(proj):
@@ -632,7 +635,7 @@ def test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choi
     from vacant_network.adapters.mode import budget_reminder_on
     (INS.state_root() / "install.json").unlink()
     assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
-    assert budget_reminder_on() is False                  # 預設關
+    assert budget_reminder_on() is True                  # 預設開
     assert ACLI.main(["install", "--agents", "pi", "--force", "--budget-reminder"]) == 0
     assert budget_reminder_on() is True
     assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
@@ -644,7 +647,7 @@ def test_v36_install_flag_turns_it_on_and_off_and_a_plain_install_keeps_the_choi
 # ── v3.6.1：對抗審查（ops/eval/evidence_20260927_nocap/review_v36/） ─────────
 
 def test_v361_last_turn_send_back_has_no_turns_left_sentence_when_the_reminder_is_off(proj):
-    _install(budget_reminder=None)                        # 預設：關
+    _install(budget_reminder=False)                       # 明確關
     b = Pi(proj, sid="T")
     _two_findings(b)
     d = b.ev("stop", final_text="Done.", turn=14, budget=15)
@@ -663,5 +666,5 @@ def test_v361_full_uninstall_drops_the_opt_in_and_install_says_when_it_keeps_one
     assert "budget reminder: on (kept from a previous install" in capsys.readouterr().out
     assert ACLI.main(["uninstall"]) == 0
     assert ACLI.main(["install", "--agents", "pi", "--force"]) == 0
-    assert budget_reminder_on() is False                  # 整個拆掉＝回到預設
+    assert budget_reminder_on() is True                  # 整個拆掉＝回到預設（開）
     assert "budget reminder" not in capsys.readouterr().out

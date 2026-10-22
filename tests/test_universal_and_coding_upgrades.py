@@ -454,3 +454,70 @@ def test_answer_format_forbid_empty_collection_and_numeric_range(env):
     assert r_good["outcome"] == "accept", r_good["reasons"]
 
 
+def test_unread_doc_finding_and_clean_review(env):
+    files = {
+        "data/manual.md": "# Business Rules\nFees are waived for account_type=R.\n",
+        "data/payments.csv": "id,account_type,fee\n1,R,0\n2,S,15\n"
+    }
+    p = _proj(env, "unread_doc_proj", files=files)
+    a = Agent(p)
+    a.ask("Before answering, reference documentation in data/ dir. What is the fee? Write answer to answer.txt.")
+    a.bash("python3 -c \"import pandas as pd; df=pd.read_csv('data/payments.csv'); print(df['fee'].sum())\"", "15\n")
+    a.write("answer.txt", "15\n")
+    ev = a.evidence("15")
+    unread_docs = [f for f in ev["findings"] if f.get("sub") == "unread_doc"]
+    assert len(unread_docs) == 1
+    assert unread_docs[0]["path"] == "data/manual.md"
+    _assert_clean_review(ev)
+
+
+def test_empty_filter_finding_and_clean_review(env):
+    p = _proj(env, "empty_filter_proj")
+    a = Agent(p)
+    a.ask("What is the fee for account_type = 'R'? Write ONLY the final answer to answer.txt.")
+    a.bash("python3 -c \"import pandas as pd; df=pd.read_csv('data.csv'); print(df[df['type']=='WRONG']['fee'].sum())\"", "0\n")
+    a.write("answer.txt", "0\n")
+    ev = a.evidence("0")
+    inv = [f for f in ev["findings"] if f.get("sub") == "empty_filter"]
+    assert len(inv) == 1
+    assert inv[0]["path"] == "answer.txt"
+    _assert_clean_review(ev)
+
+
+def test_pushable_for_caps_test_failed_to_one_round():
+    from vacant_network.trace.zerostop import pushable_for
+    f_test = {"kind": "failed_step", "sub": "test_failed", "cmd": "pytest"}
+    f_miss = {"kind": "missing_output", "path": "answer.txt"}
+
+    # 第 0 回合：全部可退回
+    p0 = pushable_for([f_test, f_miss], used=0, error_stop=False)
+    assert len(p0) == 2
+
+    # 第 1 回合：test_failed 不再退回，但 missing_output 照常退回
+    p1 = pushable_for([f_test, f_miss], used=1, error_stop=False)
+    assert len(p1) == 1 and p1[0]["kind"] == "missing_output"
+
+
+def test_parse_test_score_and_best_checkpoint():
+    from vacant_network.trace.evidence import parse_test_score
+    # unittest OK
+    assert parse_test_score("Ran 24 tests in 0.05s\n\nOK") == (24, 0)
+    # unittest FAILED
+    assert parse_test_score("Ran 20 tests in 0.05s\n\nFAILED (failures=2, errors=1)") == (17, 3)
+    # pytest passed
+    assert parse_test_score("15 passed in 0.1s") == (15, 0)
+    # pytest failed
+    assert parse_test_score("12 passed, 3 failed in 0.2s") == (12, 3)
+
+
+def test_fresh_hint_renders_clean_memory():
+    from vacant_network.vrun import retry as R
+    failures = "FAILED test_square: assert 9 == 10\nAssertionError: mismatch\n"
+    hint = R.render_fresh_hint(failures, attempt=1, max_attempts=3)
+    assert len(hint.encode("utf-8")) <= 400
+    assert "AssertionError" in hint or "FAILED" in hint
+    assert "clean origin" in hint
+
+
+
+

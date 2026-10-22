@@ -257,6 +257,19 @@ class Trace:
                     self.initial = bl["index"]
             elif t == "session_closed" and self.initial is None and e.get("final_index"):
                 self.initial = e["final_index"]
+        if self.initial is None and not self.scan_disabled and not self.first_look_pending:
+            st = rec._state() if hasattr(rec, "_state") else None
+            last_idx = st.get("last_index") if isinstance(st, dict) else None
+            if last_idx:
+                self.initial = last_idx
+            elif rec.workspace and rec.workspace.is_dir():
+                try:
+                    idx = W.scan(rec.workspace, None, skip=rec.skip, blobs=rec.blobs)
+                    if idx is not None:
+                        self._idx["__live__"] = idx
+                        self.initial = "__live__"
+                except Exception:
+                    pass
         #: Vacant 自己的回饋原文（`vacant do` 接在重試提示後面的、以使用者訊息送回的）：從任何提示裡拿掉之後
         #: 才當來源（第二道防線：掛鉤沒認出 `vacant do` 的重試提示時，回饋引的錯值照樣不是「任務說的」）
         self.feedback_texts: list[str] = self._texts_of("vacant_feedback")

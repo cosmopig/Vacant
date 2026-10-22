@@ -78,9 +78,17 @@ def line_for(f: dict[str, Any], budget_note: str = "") -> str:
         if sub == "stub":
             return (f"- {f['path']} still has an unfinished placeholder or error output "
                     f"({q(f.get('detail') or 'stub')}). Compute and write the actual result.")
+        if sub == "empty_filter":
+            return (f"- {f['path']} contains a zero/empty/not-applicable result produced by a filter that "
+                    f"matched 0 rows. Verify actual column values (e.g. print df[col].unique() or value_counts()) "
+                    f"to check spelling, case sensitivity, or data types, and recompute {f['path']}.")
         return (f"- {f['path']} does not match the format asked for in the task "
                 f"({q(f.get('detail') or 'format mismatch')}). Rewrite {f['path']} in the requested format.")
     if k == "unread":
+        if f.get("sub") == "unread_doc":
+            return (f"- Documentation in the data folder ({q(f['path'])}) has not been read. "
+                    f"Inspect the documentation first to verify business rules and definitions "
+                    f"before computing and confirming {f.get('target', 'the answer')}.")
         return (f"- {f['path']} was named in the task but was not opened in the recorded steps. "
                 f"Inspect it (for example with head, or load it in code) and redo the parts that "
                 f"depend on it.")
@@ -137,10 +145,16 @@ def render_nudge(asked: list[str], *, turns_left: int, budget: int,
     toks = actor_tokens or set()
     body, withheld = [], 0
     for a in asked[: MAX_LINES - 2]:
-        ln = (f"- The request asks for {q(a)}, and it does not exist yet. Model turns left in the "
-              f"stated budget: {turns_left} of {budget}. Write your current best answer to {q(a)} "
-              f"now, in the format the request asks for; you can keep checking afterwards and "
-              f"overwrite it if the answer changes.")
+        if turns_left == 1:
+            ln = (f"- [URGENT BUDGET WARNING] The request asks for {q(a)}, and it does not exist yet. "
+                  f"Model turns left in the stated budget: {turns_left} of {budget}. Write your current "
+                  f"best answer to {q(a)} now, in the format the request asks for; otherwise the task "
+                  f"will end with zero points.")
+        else:
+            ln = (f"- The request asks for {q(a)}, and it does not exist yet. Model turns left in the "
+                  f"stated budget: {turns_left} of {budget}. Write your current best answer to {q(a)} "
+                  f"now, in the format the request asks for; you can keep checking afterwards and "
+                  f"overwrite it if the answer changes.")
         try:
             feedback_ks1_clean(ln, toks)
         except (KS1FeedbackError, ValueError, KS1Violation):

@@ -123,7 +123,7 @@ import shutil
 from ..memory import assert_ks1_clean
 
 #: 三條臂。**封閉集合**——多一個就是規格變更，不准在別處臨時造字串。
-RETRY_ARMS = ("none", "resample", "revise")
+RETRY_ARMS = ("none", "resample", "revise", "fresh_hint")
 
 #: 預設嘗試上限。
 #:
@@ -183,6 +183,24 @@ def render_feedback(block: str, *, attempt: int, max_attempts: int) -> str:
     text = FEEDBACK_TEMPLATE.format(block=block, attempt=attempt,
                                     max_attempts=max_attempts)
     return assert_ks1_clean(text)
+
+
+def render_fresh_hint(failures: str, *, attempt: int, max_attempts: int) -> str:
+    """極簡失敗記憶（<= 400 bytes）：只擷取關鍵失敗訊息，提醒下一次全新嘗試避開此坑。"""
+    lines = [ln.strip() for ln in failures.splitlines() if ln.strip()]
+    key_lines = []
+    for ln in lines:
+        if any(k in ln for k in ("FAIL:", "FAILED", "AssertionError", "Error:", "error:", "assert ")):
+            key_lines.append(ln[:120])
+            if len(key_lines) >= 3:
+                break
+    if not key_lines and lines:
+        key_lines = [lines[0][:120]]
+    hint_body = "\n".join(key_lines) or "Previous attempt did not pass visible test assertions."
+    text = (f"<!-- Attempt {attempt} failed; workspace restored to clean origin -->\n"
+            f"Previous attempt failed acceptance check:\n{hint_body}\n"
+            f"Avoid this failure in your clean implementation.")
+    return assert_ks1_clean(text[:380])
 
 
 def write_feedback(workspace: pathlib.Path, text: str) -> dict:
