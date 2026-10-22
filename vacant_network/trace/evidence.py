@@ -307,18 +307,38 @@ def _significant(n: Num) -> bool:
     return len(digits) >= 2
 
 
-def _extract_test_hint(outp: str) -> str | None:
-    """從測試輸出提取最後一個失敗斷言行或錯誤摘要（最多 120 字元），隱去敏感本機路徑。"""
+def _extract_test_hint(outp: str, err: str = "") -> str | None:
+    """從測試輸出提取最後一個失敗測試名稱與斷言／例外摘要（最多 120 字元），隱去敏感本機路徑與重複總結行。"""
     if not outp:
         return None
+    err_clean = (err or "").strip()
     lines = [ln.strip() for ln in outp.splitlines() if ln.strip()]
-    candidates = []
+    test_name: str | None = None
+    exc_line: str | None = None
     for ln in lines:
-        if re.search(r"\b(?:AssertionError|FAIL:|FAILED|assert\s+|Expected\b|Error:|Exception:)", ln):
-            candidates.append(ln)
-    if not candidates:
+        if ln == err_clean or ln.startswith("Command exited with code"):
+            continue
+        if re.match(r"^(?:FAILED\s*\(|=+\s*\d+|\d+\s+failed\b)", ln, re.I):
+            continue
+        m_u = re.match(r"^(?:FAIL|ERROR):\s+([A-Za-z0-9_]+)", ln)
+        if m_u:
+            test_name = m_u.group(1)
+            continue
+        m_p = re.match(r"^FAILED\s+\S+?::([A-Za-z0-9_]+)(?:\s+-\s+(.*))?$", ln)
+        if m_p:
+            test_name = m_p.group(1)
+            if m_p.group(2):
+                exc_line = m_p.group(2).strip()
+            continue
+        clean_ln = re.sub(r"^E\s+", "", ln)
+        if re.search(r"^(?:[A-Za-z_]\w*(?:Error|Exception)\b|assert\s+|Expected\b)", clean_ln):
+            exc_line = clean_ln
+    if test_name and exc_line:
+        raw = exc_line if test_name in exc_line else f"{test_name}: {exc_line}"
+    else:
+        raw = exc_line or test_name
+    if not raw or raw == err_clean:
         return None
-    raw = candidates[-1]
     # 移除常見絕對路徑前綴避免干擾 KS1 判定
     sanitized = re.sub(r"/(?:[a-zA-Z0-9_.-]+/)+", "", raw)
     sanitized = " ".join(sanitized.split())
@@ -1023,7 +1043,7 @@ class Evidence:
             item: dict[str, Any] = {"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err}
             if is_test_cmd and has_code_deliv:
                 item["sub"] = "test_failed"
-                hint = _extract_test_hint(outp + "\n" + str(s.error or ""))
+                hint = _extract_test_hint(outp + "\n" + str(s.error or ""), err=err)
                 if hint:
                     item["test_hint"] = hint
             out.append(item)
@@ -1132,9 +1152,7 @@ class Evidence:
 
             # 3) stub：未實作的 NotImplementedError／todo!()、或把 Traceback／NaN／拒絕訊息寫進答案檔
             if ext == ".py" and tree is not None and (was_written or is_req):
-                stub_fn = _python_stub_function(tree, check_pass=was_written and is_req and (
-                    bool(old.strip()) or bool(re.search(r"\b(?:TODO|FIXME)\b", new))
-                ))
+                stub_fn = _python_stub_function(tree, check_pass=was_written and is_req)
                 if stub_fn is not None:
                     fn_name, fn_line, fn_why = stub_fn
                     out.append({"kind": "invalid_output", "sub": "stub", "path": path,
@@ -1255,12 +1273,26 @@ def _python_stub_function(tree: ast.Module, *, check_pass: bool = False
                     and stmt.value.id == "NotImplemented":
                 return (fn.name, fn.lineno, "returns NotImplemented")
     if check_pass:
-        top_funcs = [n for n in tree.body
-                     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                     and not _is_abstractmethod(n)]
-        if top_funcs:
+        cand_funcs: list[ast.FunctionDef | ast.AsyncFunctionDef] = []
+        for node in tree.body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not _is_abstractmethod(node):
+                cand_funcs.append(node)
+            elif isinstance(node, ast.ClassDef):
+                is_exc = any(
+                    (isinstance(b, ast.Name) and b.id.endswith(("Exception", "Error")))
+                    or (isinstance(b, ast.Attribute) and b.attr.endswith(("Exception", "Error")))
+                    for b in node.bases
+                )
+                if is_exc:
+                    continue
+                for sub in node.body:
+                    if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)) and not _is_abstractmethod(sub):
+                        if not (sub.name.startswith("__") and sub.name.endswith("__") and sub.name != "__init__"):
+                            cand_funcs.append(sub)
+        non_init = [f for f in cand_funcs if f.name != "__init__"] or cand_funcs
+        if non_init:
             all_pass = True
-            for fn in top_funcs:
+            for fn in non_init:
                 body = list(fn.body)
                 if body and isinstance(body[0], ast.Expr) \
                         and isinstance(body[0].value, ast.Constant) \
@@ -1275,7 +1307,7 @@ def _python_stub_function(tree: ast.Module, *, check_pass: bool = False
                     all_pass = False
                     break
             if all_pass:
-                return (top_funcs[0].name, top_funcs[0].lineno, "is an unimplemented stub (pass)")
+                return (non_init[0].name, non_init[0].lineno, "is an unimplemented stub (pass)")
     return None
 
 
