@@ -537,16 +537,29 @@ def _contract_actions(args: list[str]) -> set[str]:
     return out
 
 
+#: 純幫助（`-h`／`--help`，沒有其他任何引數）是 argparse 的唯讀行為——印幫助就離開，
+#: 在動作之前就 exit，不練任何權威。owner／reviewer 在 agent session 裡也要看得到幫助
+#: （2026-10 回饋：`vacant flag --help` 被整條拒絕）。有任何其他位置引數或選項就不是
+#: 「純幫助」，照樣拒（寧可多擋：`--json` 之類的輸出路徑旗標不豁免）。
+_HELP_ONLY_OPTS = frozenset({"-h", "--help"})
+
+
 def _authority_of_sub(sub: list[str]) -> tuple[str, str] | None:
     """一串子指令引數 ⇒ `(rule, what)`：`("hook", …)` 偽造掛鉤事件、`("authority", 名字)` 別的權威；否則 None。
 
-    頂層子指令只看**第一個位置引數**（CLI 本來就是看 `argv[1]` 派送），跳過選項。"""
+    頂層子指令只看**第一個位置引數**（CLI 本來就是看 `argv[1]` 派送），跳過選項。
+    純幫助（只有 `-h`／`--help`、沒有其他引數）是唯讀 ⇒ 放行（見 `_HELP_ONLY_OPTS`）。"""
     words = [a for a in sub if not a.startswith("-")]
     if not words:
         return None
     head = words[0]
+    opts = [o for o in sub if o.startswith("-")]
+    # 純數字位置詞是重定向 fd（`2>&1` 會 token 成 `2`），不算位置引數；
+    # 要**有**幫助旗標才算純幫助：`vacant approve`（裸的）是行使權威，不是看幫助
+    positional = [w for w in words if not w.isdigit()]
+    help_only = positional == [head] and bool(opts) and all(o in _HELP_ONLY_OPTS for o in opts)
     if head == "hook":
-        return ("hook", "hook")
+        return None if help_only else ("hook", "hook")
     if head == "contract":
         rest = sub[sub.index("contract") + 1:]
         acts = _contract_actions(rest)
@@ -556,9 +569,9 @@ def _authority_of_sub(sub: list[str]) -> tuple[str, str] | None:
         act = next((a for a in sorted(acts) if a not in _CONTRACT_READONLY), "")
         return ("authority", f"contract {act}".strip())
     if head == "intake":
-        return ("authority", "intake serve")
+        return None if help_only else ("authority", "intake serve")
     if head in _AUTHORITY_SUB:
-        return ("authority", head)
+        return None if help_only else ("authority", head)
     return None
 
 

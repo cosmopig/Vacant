@@ -112,6 +112,18 @@ FIXED_ALLOW = [
     "bash -c 'grep -rn \"vacant hook\" docs'",
     "echo hi  # later a human runs vacant approve",
     "python3 -c 'print(\"a human runs vacant approve later\")'",
+    # 純幫助是 argparse 的唯讀行為（印幫助就離開，不練任何權威）：owner/reviewer 在 agent
+    # session 裡也要看得到幫助（2026-10 回饋：`vacant flag --help` 被整條拒絕）
+    "vacant flag --help",
+    "vacant flag -h",
+    "vacant approve --help",
+    "vacant release -h",
+    "vacant hook --help",
+    "vacant intake --help",
+    "vacant flag --help --help",
+    "python3 -m vacant_network.cli flag --help",
+    "vacant flag --help 2>&1",
+    ".venv/bin/python -m vacant_network.cli flag --help 2>&1",
 ]
 
 
@@ -129,6 +141,15 @@ KEPT_DENY = [
     "vacant keys init",
     "vacant reverify",
     "vacant flag report.md:2 wrong",
+    # 幫助豁免只限「只有幫助」：任何位置引數／寫入選項都在 ⇒ 照樣是行使權威
+    "vacant flag --help report.md:2 wrong",
+    "vacant flag report.md:2 --help",
+    "vacant flag --dismiss z_123 --help",
+    "vacant flag --js --help",          # `--js` 不是幫助 ⇒ 不全是幫助
+    "vacant approve --help --reason ok",
+    "vacant hook --help claude Stop",
+    "vacant hook claude Stop --help",
+    "vacant hook claude --help",
     "vacant hook claude Stop",
     "vacant intake serve --contract .vacant/contract.json",
     "vacant-network review quality pass --reason ok",
