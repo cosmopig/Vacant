@@ -215,6 +215,37 @@ def _spawn_finalize(contract: Any, agent: str, payload: dict[str, Any],
         return None
 
 
+def _spawn_auto_gc(agent: str, event: str) -> None:
+    """磁碟治理的零設定自動 gc：離程背景跑（`vacant gc --auto`），掛鉤立刻返回。
+
+    - **非阻擋**：`Popen(..., start_new_session=True)`，掛鉤不等它跑完（SessionEnd 只有 ~1.5s）。
+    - **單例＋頻率**：子程式裡有 flock 鎖與 `gc_last.json` 頻率限制，多端同時觸發也會收斂成
+      一次真跑；這裡先用 `gc_last.json` 做一道輕檢查，避免每回合都生一個子程式。
+    - **fail-open**：任何例外只進 `errors.jsonl`，絕不放行不了（掛鉤永遠放行）。
+    - **可關**：`VACANT_HOOK_NO_GC=1`（測試／特殊環境）。
+    """
+    import subprocess
+    try:
+        from ..retention import AUTO_GC_MIN_INTERVAL_S
+        sroot = vacant_state_dir()
+        try:
+            last = json.loads((sroot / "gc_last.json").read_text(encoding="utf-8"))
+            if time.time() - float(last.get("ts", 0)) < AUTO_GC_MIN_INTERVAL_S:
+                return
+        except (OSError, ValueError, KeyError, TypeError):
+            pass  # 沒讀到上次記錄 → 照樣觸發（子程式會再檢查）
+        logf = sroot / "intake" / "hooks" / "auto_gc.log"
+        logf.parent.mkdir(parents=True, exist_ok=True)
+        with open(logf, "ab") as out:
+            subprocess.Popen(
+                [sys.executable, "-m", "vacant_network", "gc", "--auto", "--json"],
+                stdin=subprocess.DEVNULL, stdout=out, stderr=out,
+                start_new_session=True, env=os.environ.copy())
+    except Exception as e:  # noqa: BLE001 — fail-open
+        _log("errors.jsonl", {"agent": agent, "event": event,
+                              "error": f"could not start auto gc: {e}"[:300]})
+
+
 def _trace(agent: str, event: str, payload: dict[str, Any], ev: HookEvent, contract: Any,
            d: HookDecision) -> None:
     """可究責追緝的病歷（`trace/capture.py`）。壞掉只記錯、不影響裁決（誠實邊界 1）；
@@ -479,6 +510,9 @@ def handle(agent: str, event: str, payload: dict[str, Any]) -> tuple[str, str, i
                 k: v for k, v in rec.items() if k != "contract"})
         except Exception as e:  # noqa: BLE001
             _log("errors.jsonl", {"agent": agent, "event": event, "error": str(e)[:500]})
+    if ev.kind in ("stop", "session_end") and not os.environ.get("VACANT_HOOK_NO_GC"):
+        # 磁碟治理：工作階段結束／每回合結束時，背景零設定 gc（單例鎖＋頻率限制＋時間預算，fail-open）
+        _spawn_auto_gc(agent, event)
     return render(agent, ev, d)
 
 

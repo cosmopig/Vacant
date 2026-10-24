@@ -230,3 +230,138 @@ def test_cli_vacant_gc_verify_and_older_than_hours(env, capsys):
     assert out["verify_ok"] is True
     assert out["verify_errors"] == []
 
+
+# ── 自動回收（零設定 gc）與用量檢視 ─────────────────────────────────────────────
+
+def _seed_trace_project(env, name="ap", n_files=12, size=60_000):
+    """建一個有 n_files 個大型檔案的病歷專案（供 gc／預算測試用）。"""
+    proj = env / "work" / name
+    proj.mkdir(parents=True, exist_ok=True)
+    for i in range(n_files):
+        (proj / f"f_{i:02d}.txt").write_text(f"content {i}\n" * (size // 9))
+    (proj / "main.py").write_text("x = 1\n")
+    hook.handle("claude", "UserPromptSubmit", {
+        "session_id": "S1", "cwd": str(proj), "prompt": "work",})
+    _step(proj, 1, "Write", {"file_path": str(proj / "main.py"), "content": "x = 2\n"},
+          write={"main.py": "x = 2\n"})
+    return proj
+
+
+def test_auto_gc_runs_writes_report_and_rate_limits(env, capsys):
+    _seed_trace_project(env)
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    # 第一次：跑
+    rc = cli.main(["gc", "--auto", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["status"] == "ok"
+    assert (vh / "gc_last.json").is_file()
+    assert (vh / "gc_report.json").is_file()
+    # 第二次（沒 --force）：頻率限制跳過
+    rc = cli.main(["gc", "--auto", "--json"])
+    out2 = json.loads(capsys.readouterr().out)
+    assert rc == 1
+    assert out2["status"] == "skipped_rate_limited"
+    # --force：跳過頻率限制
+    rc = cli.main(["gc", "--auto", "--force", "--json"])
+    out3 = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out3["status"] == "ok"
+
+
+def test_auto_gc_locked_when_another_holder(env, capsys):
+    _seed_trace_project(env, name="lp")
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    import fcntl
+    lock_path = vh / "gc.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(lock_path), os.O_RDWR | os.O_CREAT, 0o600)
+    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    try:
+        out = retention.auto_gc(force=True)  # 同程序另一把 fd：flock 仍會擋
+        assert out["status"] == "skipped_locked"
+        assert out["ok"] is False
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
+
+def test_auto_gc_fail_open_on_broken_state(env):
+    # 把狀態目錄佔成一個檔案 → auto_gc 必須回 error，不拋例外（fail-open）
+    broken = env / "broken_home"
+    broken.write_text("not a dir")
+    out = retention.auto_gc(root=broken, force=True)
+    assert out["ok"] is False
+    assert out["status"] == "error"
+    assert "error" in out
+
+
+def test_budget_aborts_compact_trace_at_safe_point(env, monkeypatch):
+    proj = _seed_trace_project(env, name="bp", n_files=20, size=100_000)
+    calls = {"n": 0}
+    orig = retention._remove_path
+
+    def slow_remove(p, *, dry_run=False):
+        calls["n"] += 1
+        if calls["n"] <= 3:
+            import time as _t
+            _t.sleep(0.15)  # 前幾個刪除各花 150ms → 0.25s 預算會在中途用掉
+        return orig(p, dry_run=dry_run)
+
+    monkeypatch.setattr(retention, "_remove_path", slow_remove)
+    import time as _t
+    rep = retention.compact_trace(budget=retention._Budget(_t.time() + 0.25))
+    assert rep["aborted"] is True
+    assert rep["files_removed"] < 20
+    # 簽章鏈仍然完整
+    ws = capture.workspace_for(str(proj))
+    ok, msg = Recorder(ws).verify()
+    assert ok, msg
+
+
+def test_usage_report_fields_and_cli(env, capsys):
+    _seed_trace_project(env, name="up")
+    rep = retention.usage_report()
+    assert rep["totals"]["state_dir"] > 0
+    assert "trace_objects" in rep["areas"]
+    assert rep["objects"]["count"] > 0
+    assert len(rep["projects"]) == 1 and rep["projects"][0]["bytes"] > 0
+    assert "bytes" in rep["reclaimable_estimate"]
+    rc = cli.main(["usage", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["state_dir"] == str(pathlib.Path(os.environ["VACANT_HOME"]).resolve())
+    assert "totals" in out and "projects" in out
+
+
+def test_hook_spawns_auto_gc_on_stop(env, monkeypatch):
+    _seed_trace_project(env, name="hp")
+    spawned = {}
+
+    class FakePopen:
+        def __init__(self, cmd, **kw):
+            spawned["cmd"] = cmd
+            spawned["kw"] = kw
+            self.pid = 4242
+
+    import subprocess as _sp
+    monkeypatch.setattr(_sp, "Popen", FakePopen)
+    # 直接呼叫
+    hook._spawn_auto_gc("claude", "stop")
+    assert spawned.get("cmd") is not None
+    cmd = spawned["cmd"]
+    assert "vacant_network" in cmd and "gc" in cmd and "--auto" in cmd
+    assert spawned["kw"].get("start_new_session") is True
+    # 從 handle() 走（Stop 事件；VACANT_HOOK_NO_STOP 只關驗收，不關磁碟治理）
+    monkeypatch.setenv("VACANT_HOOK_NO_STOP", "1")
+    spawned.clear()
+    out, err, rc = hook.handle("claude", "Stop", {
+        "session_id": "S1", "cwd": str(env / "work" / "hp"), "stop_hook_active": False})
+    assert rc == 0
+    assert spawned.get("cmd") is not None, "handle(Stop) 應該觸發背景 gc"
+    # VACANT_HOOK_NO_GC=1 時不觸發
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
+    spawned.clear()
+    hook.handle("claude", "Stop", {"session_id": "S1", "cwd": str(env / "work" / "hp")})
+    assert spawned.get("cmd") is None
+

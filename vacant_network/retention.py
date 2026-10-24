@@ -30,6 +30,14 @@ Vacant 的三個核心路徑都會在磁碟上留下與專案等大的副本：
    絕不會把過錯栽給別的步驟。
 2. 預設保留最新回合與最近 `keep_recent_steps`（預設 50 步）的全部索引與修改版本，因此當下與近期的
    `zerostop`、`evidence`、`blame`、`delivery.md` 行為 100% 不變。
+
+## 自動回收（零設定）與用量檢視
+
+- `auto_gc`：零設定自動 gc——**單例鎖（flock，持鎖行程死掉時由 OS 自動釋放）＋頻率限制
+  （預設一小時一次）＋時間預算（預設 30 秒，在下一個迴圈邊界停下；已刪的都是簽章鏈不引用的
+  blob，中途停下也是安全點）**，全程 fail-open（出錯只記不拋）。工作階段結束／Stop 掛鉤在背景
+  離程啟動它（`adapters/hook.py:_spawn_auto_gc`），人也可以手動 `vacant gc --auto`。
+- `usage_report`：`vacant usage`——總用量、分區、每專案、物件前 10、可回收估算、上次 gc 結果。
 """
 from __future__ import annotations
 
@@ -52,6 +60,13 @@ DEFAULT_KEEP_DECISIONS = 2
 DEFAULT_KEEP_RUNS = 3
 DEFAULT_KEEP_SET_ASIDE = 3
 DEFAULT_MAX_LOG_BYTES = 2 * 1024 * 1024  # 2 MB
+
+#: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
+AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
+AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住多久（超過就停在安全點）
+AUTO_GC_LOCK_NAME = "gc.lock"
+AUTO_GC_LAST_NAME = "gc_last.json"
+AUTO_GC_REPORT_NAME = "gc_report.json"
 
 
 def _file_size(p: pathlib.Path) -> int:
@@ -143,6 +158,23 @@ def _load_project_index(blobs: W.Blobs, idx_sha: str | None) -> W.Index:
         return {}
 
 
+class _Budget:
+    """一次 gc 的時間預算。`expired()` 為真時各 `compact_*` 在下一個迴圈邊界停下；
+    已刪的檔案都停在安全點（簽章鏈引用的 blob 永不刪），所以中途停下也是合法的。"""
+
+    def __init__(self, deadline: float | None):
+        self.deadline = deadline
+
+    def expired(self) -> bool:
+        return self.deadline is not None and time.time() >= self.deadline
+
+
+def _atomic_write_json(path: pathlib.Path, obj: Any) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def compact_trace(
     root: pathlib.Path | None = None,
     *,
@@ -151,6 +183,7 @@ def compact_trace(
     max_age_days: float | None = None,
     keep_set_aside: int = DEFAULT_KEEP_SET_ASIDE,
     dry_run: bool = False,
+    budget: _Budget | None = None,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/trace/` 下多餘的物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
@@ -180,6 +213,8 @@ def compact_trace(
 
     if proj_root.is_dir():
         for pdir in sorted(x for x in proj_root.iterdir() if x.is_dir()):
+            if budget is not None and budget.expired():
+                break
             projects_scanned += 1
             # 1) 清理過多的 chain.set-aside.*.ndjson
             set_asides = sorted(pdir.glob("chain.set-aside.*.ndjson"),
@@ -411,11 +446,18 @@ def compact_trace(
     keep_shas |= must_keep_file_shas
     cutoff_ts = (now - max_age_days * 86400.0) if max_age_days is not None else None
 
+    aborted = False
     if obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
+            if budget is not None and budget.expired():
+                aborted = True
+                break
             if not sub.is_dir():
                 continue
             for blob_file in sorted(sub.iterdir()):
+                if budget is not None and budget.expired():
+                    aborted = True
+                    break
                 sha = blob_file.name
                 if sha in keep_shas:
                     continue
@@ -436,6 +478,7 @@ def compact_trace(
         "files_removed": files_removed,
         "projects_scanned": projects_scanned,
         "kept_blobs": len(keep_shas),
+        "aborted": aborted,
     }
 
 
@@ -445,6 +488,7 @@ def compact_quarantine(
     keep_latest_per_task: int = DEFAULT_KEEP_DECISIONS,
     max_age_days: float | None = None,
     dry_run: bool = False,
+    budget: _Budget | None = None,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/quarantine/` 裡未被帳本最新裁決／放行引用的候選清單與隔離物件。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
@@ -495,6 +539,8 @@ def compact_quarantine(
     keep_objects: set[str] = set()
 
     for qroot in store_roots:
+        if budget is not None and budget.expired():
+            break
         cand_dir = qroot / "candidates"
         obj_dir = qroot / "objects"
         if cand_dir.is_dir():
@@ -519,9 +565,13 @@ def compact_quarantine(
 
         if obj_dir.is_dir():
             for sub in sorted(obj_dir.iterdir()):
+                if budget is not None and budget.expired():
+                    break
                 if not sub.is_dir():
                     continue
                 for obj_file in sorted(sub.iterdir()):
+                    if budget is not None and budget.expired():
+                        break
                     if obj_file.name in keep_objects:
                         continue
                     if cutoff_ts is not None:
@@ -551,6 +601,7 @@ def compact_work(
     max_age_days: float | None = None,
     strip_workspaces_only: bool = True,
     dry_run: bool = False,
+    budget: _Budget | None = None,
 ) -> dict[str, Any]:
     """清理 `~/.vacant-work/`（`vacant do` 的隔離工作區副本）。
 
@@ -569,6 +620,8 @@ def compact_work(
     runs_scanned = 0
 
     for task_d in sorted(x for x in base.iterdir() if x.is_dir()):
+        if budget is not None and budget.expired():
+            break
         runs = sorted(
             (x for x in task_d.iterdir() if x.is_dir()),
             key=lambda p: (p.stat().st_mtime if p.exists() else 0, p.name),
@@ -594,6 +647,8 @@ def compact_work(
                     if rdir not in old_runs and rdir.stat().st_mtime < cutoff_ts:
                         old_runs.append(rdir)
         for rdir in old_runs:
+            if budget is not None and budget.expired():
+                break
             if strip_workspaces_only:
                 for ws_d in sorted(x for x in rdir.iterdir() if x.is_dir() and x.name.startswith("ws")):
                     b, c = _remove_path(ws_d, dry_run=dry_run)
@@ -658,6 +713,7 @@ def compact_vrun_dir(
     run_dir: pathlib.Path,
     *,
     dry_run: bool = False,
+    budget: _Budget | None = None,
 ) -> dict[str, Any]:
     """清理 `vacant run` 留下的 `_frozen_ws`、`_origin_ws` 與 `wire_RUN-ON` 原始請求包，
     **保留 `receipts_*.ndjson`、`attestation.json`、`result.json`**，使 `verify_run_receipts` 100% 維持通過。"""
@@ -670,6 +726,8 @@ def compact_vrun_dir(
     targets = [base] + [x for x in base.rglob("*") if x.is_dir()]
     seen: set[pathlib.Path] = set()
     for d in targets:
+        if budget is not None and budget.expired():
+            break
         if any(p in seen for p in (d, *d.parents)):
             continue
         has_receipts = bool(list(d.glob("receipts_*.ndjson"))) or (d / "result.json").is_file()
@@ -734,6 +792,7 @@ def gc_all(
     aggressive: bool = False,
     dry_run: bool = False,
     verify: bool = False,
+    budget: _Budget | None = None,
 ) -> dict[str, Any]:
     """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。"""
     if older_than_hours is not None and max_age_days is None:
@@ -750,12 +809,14 @@ def gc_all(
         prune_redundant_workspace_blobs=True,
         max_age_days=max_age_days,
         dry_run=dry_run,
+        budget=budget,
     )
     qr = compact_quarantine(
         root,
         keep_latest_per_task=keep_latest_per_task,
         max_age_days=max_age_days,
         dry_run=dry_run,
+        budget=budget,
     )
     wk = compact_work(
         work_root,
@@ -763,11 +824,14 @@ def gc_all(
         max_age_days=max_age_days,
         strip_workspaces_only=not aggressive,
         dry_run=dry_run,
+        budget=budget,
     )
     lg = compact_logs(root, max_log_bytes=max_log_bytes, dry_run=dry_run)
     vr = {"bytes_freed": 0, "files_removed": 0}
     for vd in vrun_dirs or []:
-        res = compact_vrun_dir(vd, dry_run=dry_run)
+        if budget is not None and budget.expired():
+            break
+        res = compact_vrun_dir(vd, dry_run=dry_run, budget=budget)
         vr["bytes_freed"] += res["bytes_freed"]
         vr["files_removed"] += res["files_removed"]
 
@@ -776,9 +840,12 @@ def gc_all(
     total_files = (tr["files_removed"] + qr["files_removed"] + wk["files_removed"]
                    + lg["logs_compacted"] + vr["files_removed"])
 
+    aborted = any(r.get("aborted") for r in (tr, qr, wk, lg)) or (
+        budget is not None and budget.expired())
     rep: dict[str, Any] = {
         "dry_run": dry_run,
         "aggressive": aggressive,
+        "aborted": aborted,
         "bytes_freed": total_bytes,
         "mb_freed": round(total_bytes / (1024 * 1024), 3),
         "files_removed": total_files,
@@ -794,6 +861,237 @@ def gc_all(
         rep["verify_ok"] = v_ok
         rep["verify_errors"] = v_errs
     return rep
+
+
+def auto_gc(
+    root: pathlib.Path | None = None,
+    work_root: pathlib.Path | None = None,
+    *,
+    min_interval_s: float = AUTO_GC_MIN_INTERVAL_S,
+    budget_s: float = AUTO_GC_BUDGET_S,
+    force: bool = False,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """零設定自動 gc：單例鎖（flock）＋頻率限制＋時間預算，全程 fail-open。
+
+    - **單例**：`$VACANT_HOME/gc.lock` 用 `fcntl.flock` 非阻塞取鎖；持鎖行程死掉時 OS 自動
+      釋放，不會留死鎖。拿不到鎖 → `skipped_locked`。
+    - **頻率**：`$VACANT_HOME/gc_last.json` 記上次真跑的 ts；未到間隔 → `skipped_rate_limited`
+      （`force=True` 跳過）。
+    - **預算**：`gc_all(budget=_Budget(now+budget_s))`，各迴圈在邊界檢查並停下。
+    - **fail-open**：任何例外 → `status="error"`＋錯誤訊息，不拋不阻（掛鉤路徑永遠放行）。
+    - **dry_run**：只估算不刪除、不取鎖不計頻（供人檢視）。
+
+    回傳結構：`{"status": "ok"|"skipped_rate_limited"|"skipped_locked"|"error", "ok": bool, ...}`。
+    """
+    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    wroot = pathlib.Path(work_root).resolve() if work_root is not None else work_dir()
+    rep: dict[str, Any] = {"status": "error", "ok": False, "state_dir": str(sroot)}
+    try:
+        if dry_run:
+            rep.update(gc_all(root=sroot, work_root=wroot, dry_run=True))
+            rep["status"] = "dry_run"
+            rep["ok"] = True
+            return rep
+
+        sroot.mkdir(parents=True, exist_ok=True)
+        lock_path = sroot / AUTO_GC_LOCK_NAME
+        last_path = sroot / AUTO_GC_LAST_NAME
+        report_path = sroot / AUTO_GC_REPORT_NAME
+
+        lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
+        try:
+            import fcntl
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError:
+                rep["status"] = "skipped_locked"
+                rep["reason"] = "another gc is running (lock held)"
+                return rep
+            if not force:
+                try:
+                    last = json.loads(last_path.read_text(encoding="utf-8"))
+                    if time.time() - float(last.get("ts", 0)) < min_interval_s:
+                        rep["status"] = "skipped_rate_limited"
+                        rep["reason"] = f"last gc {int(time.time() - float(last['ts']))}s ago < {int(min_interval_s)}s"
+                        rep["last"] = last
+                        return rep
+                except (OSError, ValueError, KeyError):
+                    pass  # 沒有上次記錄或讀不到 → 照跑
+
+            t0 = time.time()
+            budget = _Budget(t0 + budget_s)
+            body = gc_all(root=sroot, work_root=wroot, dry_run=False, budget=budget)
+            elapsed = time.time() - t0
+            body.update({
+                "status": "ok",
+                "ok": True,
+                "elapsed_s": round(elapsed, 3),
+                "budget_s": budget_s,
+                "auto": True,
+            })
+            if aborted := body.get("aborted"):
+                body["status"] = "ok_partial"
+            # 寫回頻與報告（原子寫）
+            summary = {"ts": t0, "elapsed_s": body["elapsed_s"], "bytes_freed": body["bytes_freed"],
+                       "files_removed": body["files_removed"], "status": body["status"]}
+            with contextlib.suppress(OSError):
+                _atomic_write_json(last_path, summary)
+            with contextlib.suppress(OSError):
+                _atomic_write_json(report_path, body)
+            return body
+        finally:
+            with contextlib.suppress(OSError):
+                import fcntl
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
+    except Exception as e:  # noqa: BLE001 — fail-open：出錯只記不拋
+        rep["status"] = "error"
+        rep["error"] = f"{type(e).__name__}: {e}"[:300]
+        with contextlib.suppress(OSError):
+            _atomic_write_json(sroot / AUTO_GC_REPORT_NAME, rep)
+        return rep
+
+
+def usage_report(
+    root: pathlib.Path | None = None,
+    work_root: pathlib.Path | None = None,
+    *,
+    with_estimate: bool = True,
+) -> dict[str, Any]:
+    """`vacant usage`：總用量、分區、每專案、物件前 10、可回收估算、上次 gc 結果。
+
+    估算走 `gc_all(dry_run=True)`：只計算不刪除、不取鎖不計頻，失敗不阻（回 `error` 欄位）。
+    """
+    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    wroot = pathlib.Path(work_root).resolve() if work_root is not None else work_dir()
+    out: dict[str, Any] = {
+        "state_dir": str(sroot),
+        "work_dir": str(wroot),
+        "totals": {},
+        "areas": {},
+        "objects": {},
+        "projects": [],
+    }
+    try:
+        out["totals"]["state_dir"] = _tree_size(sroot)
+        out["totals"]["work_dir"] = _tree_size(wroot)
+        for name, sub in (
+            ("trace_objects", sroot / "trace" / "objects"),
+            ("trace_projects", sroot / "trace" / "projects"),
+            ("intake", sroot / "intake"),
+            ("quarantine", sroot / "quarantine"),
+            ("possess", sroot / "possess"),
+            ("adapters", sroot / "adapters"),
+        ):
+            out["areas"][name] = _tree_size(sub)
+        # 物件前 10
+        obj_root = sroot / "trace" / "objects"
+        if obj_root.is_dir():
+            tops: list[tuple[int, str]] = []
+            n_obj = 0
+            b_obj = 0
+            for sub in obj_root.iterdir():
+                if not sub.is_dir():
+                    continue
+                for f in sub.iterdir():
+                    try:
+                        sz = f.stat().st_size
+                    except OSError:
+                        sz = 0
+                    n_obj += 1
+                    b_obj += sz
+                    tops.append((sz, f.name))
+            tops.sort(reverse=True)
+            out["objects"] = {
+                "count": n_obj,
+                "bytes": b_obj,
+                "top": [{"sha256": name, "bytes": sz} for sz, name in tops[:10]],
+            }
+        # 每專案
+        pdir = sroot / "trace" / "projects"
+        if pdir.is_dir():
+            projs = []
+            for p in sorted(pdir.iterdir()):
+                if not p.is_dir():
+                    continue
+                info: dict[str, Any] = {"project": p.name, "bytes": _tree_size(p)}
+                with contextlib.suppress(OSError, ValueError):
+                    meta = json.loads((p / "project.json").read_text(encoding="utf-8"))
+                    if isinstance(meta, dict) and meta.get("workspace"):
+                        info["workspace"] = str(meta["workspace"])
+                chain_f = p / "chain.ndjson"
+                if chain_f.is_file():
+                    with contextlib.suppress(OSError):
+                        info["chain_events"] = sum(
+                            1 for ln in chain_f.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
+                try:
+                    mts = [q.stat().st_mtime for q in (p, chain_f)] if chain_f.is_file() else [p.stat().st_mtime]
+                    info["last_activity"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(max(mts)))
+                except OSError:
+                    pass
+                projs.append(info)
+            projs.sort(key=lambda r: r["bytes"], reverse=True)
+            out["projects"] = projs
+        # 上次 gc
+        with contextlib.suppress(OSError, ValueError, KeyError, TypeError):
+            out["last_gc"] = json.loads((sroot / AUTO_GC_REPORT_NAME).read_text(encoding="utf-8"))
+        with contextlib.suppress(OSError, ValueError, KeyError, TypeError):
+            out["last_gc_meta"] = json.loads((sroot / AUTO_GC_LAST_NAME).read_text(encoding="utf-8"))
+        # 可回收估算（dry-run；不取鎖不計頻）
+        if with_estimate:
+            try:
+                est = gc_all(root=sroot, work_root=wroot, dry_run=True)
+                out["reclaimable_estimate"] = {"bytes": est["bytes_freed"], "files": est["files_removed"]}
+            except Exception as e:  # noqa: BLE001 — 估算失敗不阻
+                out["reclaimable_estimate"] = {"error": f"{type(e).__name__}: {e}"[:200]}
+    except Exception as e:  # noqa: BLE001 — fail-open
+        out["error"] = f"{type(e).__name__}: {e}"[:300]
+    return out
+
+
+def usage_main(argv: list[str] | None = None) -> int:
+    """`vacant usage` CLI：預設人類可讀，`--json` 結構化。"""
+    raw = list(sys.argv[1:] if argv is None else argv)
+    ap = argparse.ArgumentParser(prog="vacant usage", description="Vacant 磁碟用量檢視")
+    ap.add_argument("--state-dir", type=pathlib.Path, default=None)
+    ap.add_argument("--work-dir", type=pathlib.Path, default=None)
+    ap.add_argument("--no-estimate", action="store_true", help="不算可回收估算（快一點）")
+    ap.add_argument("--json", action="store_true")
+    args = ap.parse_args(raw)
+    rep = usage_report(args.state_dir, args.work_dir, with_estimate=not args.no_estimate)
+    if args.json:
+        print(json.dumps(rep, ensure_ascii=False, indent=2))
+        return 0
+    h = _human_bytes
+    tot = rep.get("totals", {})
+    print(f"Vacant 磁碟用量（{rep['state_dir']}）")
+    if "state_dir" in tot:
+        print(f"  狀態目錄總計  : {h(tot['state_dir'])}")
+    for name, b in rep.get("areas", {}).items():
+        print(f"  · {name:<16}: {h(b)}")
+    if "work_dir" in tot:
+        print(f"  工作區目錄    : {h(tot['work_dir'])}（{rep['work_dir']}）")
+    ob = rep.get("objects", {})
+    if ob:
+        print(f"  trace 物件    : {ob['count']:,} 個、{h(ob['bytes'])}")
+        for t in ob.get("top", [])[:5]:
+            print(f"    {h(t['bytes']):>10}  {t['sha256'][:16]}…")
+    for pj in rep.get("projects", [])[:10]:
+        extra = f"  （{pj['chain_events']} 步）" if pj.get("chain_events") is not None else ""
+        print(f"  專案 {pj['project']}: {h(pj['bytes'])}{extra}  {pj.get('last_activity', '')}")
+    est = rep.get("reclaimable_estimate")
+    if isinstance(est, dict) and "bytes" in est:
+        print(f"  可回收（估算）: {h(est['bytes'])}（{est['files']} 個檔案；vacant gc --dry-run 可預覽）")
+    if isinstance(est, dict) and "error" in est:
+        print(f"  可回收（估算）: 失敗：{est['error']}")
+    meta = rep.get("last_gc_meta")
+    if isinstance(meta, dict) and meta.get("ts"):
+        print(f"  上次自動 gc   : {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(meta['ts']))}"
+              f"  釋放 {h(meta.get('bytes_freed', 0))}（{meta.get('status')}）")
+    if rep.get("error"):
+        print(f"  （部分統計失敗：{rep['error']}）")
+    return 0
 
 
 def _human_bytes(n: int) -> str:
@@ -829,6 +1127,14 @@ def build_parser() -> argparse.ArgumentParser:
                     help="清理後自動對保留之專案執行 Recorder.verify() 驗簽，確保簽章鏈 100%% 完好")
     ap.add_argument("--aggressive", action="store_true",
                     help="積極模式：只留最近 10 步、1 份候選、清空所有 ~/.vacant-work 舊目錄")
+    ap.add_argument("--auto", action="store_true",
+                    help="零設定自動 gc：單例鎖＋頻率限制（預設 1h）＋時間預算（預設 30s），fail-open")
+    ap.add_argument("--force", action="store_true",
+                    help="跳過頻率限制（仍受單例鎖保護）")
+    ap.add_argument("--min-interval-s", type=float, default=AUTO_GC_MIN_INTERVAL_S,
+                    help=f"--auto 的頻率限制秒數（預設 {int(AUTO_GC_MIN_INTERVAL_S)}）")
+    ap.add_argument("--budget-s", type=float, default=AUTO_GC_BUDGET_S,
+                    help=f"--auto 的時間預算秒數（預設 {int(AUTO_GC_BUDGET_S)}）")
     ap.add_argument("--dry-run", action="store_true",
                     help="只計算可釋放空間，不實際刪除任何檔案")
     ap.add_argument("--json", action="store_true", help="輸出 JSON")
@@ -839,7 +1145,37 @@ def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
     if raw[:1] in (["gc"], ["clean"]):
         raw = raw[1:]
+    if raw[:1] == ["usage"]:
+        return usage_main(raw[1:])
     args = build_parser().parse_args(raw)
+    if args.auto:
+        rep = auto_gc(
+            args.state_dir,
+            args.work_dir,
+            min_interval_s=args.min_interval_s,
+            budget_s=args.budget_s,
+            force=args.force,
+            dry_run=args.dry_run,
+        )
+        if args.json:
+            print(json.dumps(rep, ensure_ascii=False, indent=2))
+        else:
+            st = rep["status"]
+            if st in ("ok", "ok_partial"):
+                tail = f"（時間預算內未完成，停在安全點）" if st == "ok_partial" else ""
+                print(f"自動 gc {tail}: 釋放 {_human_bytes(rep['bytes_freed'])}"
+                      f"（{rep['files_removed']} 個檔案，{rep.get('elapsed_s', '?')}s）")
+                print("  （簽章鏈完整保留；vacant usage 看用量）")
+            elif st == "dry_run":
+                print(f"自動 gc 預覽（--dry-run，未刪除）: 可釋放 {_human_bytes(rep['bytes_freed'])}"
+                      f"（{rep['files_removed']} 個檔案）")
+            elif st == "skipped_rate_limited":
+                print(f"自動 gc 跳過：{rep.get('reason', 'rate limit')}（--force 可強制）")
+            elif st == "skipped_locked":
+                print("自動 gc 跳過：另一支 gc 正在執行")
+            else:
+                print(f"自動 gc 失敗（fail-open，未影響任何資料）: {rep.get('error', st)}")
+        return 0 if rep.get("ok") else 1
     rep = gc_all(
         root=args.state_dir,
         work_root=args.work_dir,

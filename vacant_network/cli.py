@@ -1184,7 +1184,7 @@ def main(argv: list[str] | None = None) -> int:
         return trace_main(raw)
     if raw[:1] == ["run"] and "--" in raw[1:]:
         return _agent_run_shim(raw[1:])
-    if raw[:1] in (["gc"], ["clean"]):
+    if raw[:1] in (["gc"], ["clean"], ["usage"]):
         from .retention import main as retention_main
         return retention_main(raw)
     if raw[:1] == ["dashboard"]:
