@@ -52,6 +52,32 @@ GIVEN_INLINE_MAX = 64 * 1024     # 貼在請求裡的檔：只看這麼大以內
 GIVEN_INLINE_MIN = 80            # 壓過空白之後至少這麼多位元組（UTF-8；中文一字 3）才算得上「貼了全文」（R530 最小的一份 297）
 COPY_TASK_MIN_PROMPT = 60        # copy_of_task：正規化後提示詞少於這個長度不報（短提示詞的巧合）
 COPY_TASK_MIN_RATIO = 0.8        # copy_of_task：len(提示詞)/len(交付檔) 下限；寧可漏抓不可誤傷（docs/UNIVERSAL_TASKS.md §3）
+# 方向 A 通用檢查（2026-09-25）：三者都只進交件說明，`zerostop.pushable_for` 明確排除
+SKELETON_MIN_LINES = 2           # skeleton：至少這麼多行是未填占位符才報
+SKELETON_MIN_RATIO = 0.5         # skeleton：占位行／非空行 比例下限；完整報告裡一個誠實的 TBD 不會觸發
+COPY_INPUT_MIN = 80              # copy_of_input：正規化後少於這個長度的素材不比（巧合）
+# stale_output：最終訊息要有一個「產出型」動詞才算「声称產出」；「已確認／Done」不觸發
+PRODUCE_CLAIM = re.compile(
+    r"已(?:寫入|寫好|寫了|整理|更新|生成|產出|建立|創建|撰寫|產)"
+    r"|報告已|written (?:to|into)|has been written|I (?:wrote|created|generated|updated)", re.I)
+# copy_of_input：提示詞本身就是複製型任務時，交付檔與素材相同是預期，不報
+COPY_CUE = re.compile(r"複製|拷貝|備份|copy|duplicate", re.I)
+
+
+def _is_placeholder_line(line: str) -> bool:
+    """單獨一行就是未填占位符（先去掉行首的清單／標題／編號標記）。
+    只認整行完全匹配的嚴格形狀：`TBD`/`TODO`、`[待填]` 這類短括號、`{{…}}`、`___`、`待補`；
+    「上線日期：TBD（待供應商確認）」這種一行裡有其它內容的不算。"""
+    s = re.sub(r"^(?:[-*+]|#{1,6}|\d+[.)、])\s*", "", line.strip())
+    if not s:
+        return False
+    return bool(
+        re.fullmatch(r"TBD|TODO|FIXME", s, re.IGNORECASE)
+        or re.fullmatch(r"\[[^\[\]]{1,20}\]", s)
+        or re.fullmatch(r"\{[^{}]{1,30}\}", s)
+        or re.fullmatch(r"_{3,}", s)
+        or re.fullmatch(r"待(?:填|補|定|確認|續|完成)", s)
+    )
 _CJK = r"[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]"
 _CJK_GAP = re.compile(rf"(?<={_CJK})\s+(?={_CJK})")
 
@@ -896,6 +922,9 @@ class Evidence:
         findings += self._invalid_outputs(delivs, outs, task_texts, corpus, start_idx, latest_idx,
                                           only_answer=only_answer)
         findings += self._copy_of_task(delivs, outs, task_texts, start_idx, latest_idx)
+        findings += self._skeleton(delivs, outs, start_idx, latest_idx)
+        findings += self._stale_outputs(outs, delivs, start_idx)
+        findings += self._copy_of_input(delivs, outs, named, task_texts, start_idx, latest_idx)
         scope = self.rec.dir.name
         for fd in findings:
             fd["finding_id"] = finding_id(fd, scope)
@@ -1030,6 +1059,116 @@ class Evidence:
                     out.append({"kind": "copy_of_task", "path": path,
                                 "detail": f"nearly identical to the task prompt "
                                           f"(ratio {len(n_t) / len(n_d):.2f})"})
+                    break
+        return out
+
+    # ── 方向 A 通用檢查（只進交件說明；zerostop.pushable_for 明確排除）──────
+    def _skeleton(self, delivs: dict[str, tuple[str, str]], outs: list[tuple[str, str]],
+                  start_idx: str | None, latest_idx: str | None) -> list[dict[str, Any]]:
+        """要求的交付檔是模板骨架：多數非空行是未填占位符（TBD／TODO／[待填]／{{…}}／___…）。
+
+        通用任務（方向 A）：領域無關、只看寫出的檔內容。保守：占位行 ≥ SKELETON_MIN_LINES
+        且占位行／非空行 ≥ SKELETON_MIN_RATIO；完整報告裡一個誠實的「日期：TBD」不觸發
+        （那一行不是獨立占位行）。
+        預設只進交件說明：`zerostop.pushable_for` 明確排除。"""
+        latest = self.tr.index(latest_idx)
+        cands: list[tuple[str, str]] = []
+        for path, (old, new) in sorted(delivs.items()):
+            cands.append((path, new))
+        for rel, _raw in outs:
+            actual = rel if rel in latest else next(
+                (f for f in sorted(latest) if f.endswith("/" + rel)), None)
+            if actual and actual not in delivs:
+                new_t = self.tr.file_text(latest_idx, actual)
+                if new_t is not None and "\x00" not in new_t:
+                    cands.append((actual, new_t))
+        out = []
+        for path, new in cands:
+            if not new or not new.strip():
+                continue                      # 空檔已由 invalid_output/empty 報過
+            lines = [l for l in new.splitlines() if l.strip()]
+            ph = sum(1 for l in lines if _is_placeholder_line(l))
+            if ph >= SKELETON_MIN_LINES and ph / len(lines) >= SKELETON_MIN_RATIO:
+                out.append({"kind": "skeleton", "path": path,
+                            "detail": f"{ph}/{len(lines)} non-empty lines are unfilled placeholder markers"})
+        return out
+
+    def _stale_outputs(self, outs: list[tuple[str, str]], delivs: dict[str, tuple[str, str]],
+                       start_idx: str | None) -> list[dict[str, Any]]:
+        """要求的交付檔在本回合前已存在、agent 沒改過，最終訊息卻稱「已寫好／已更新」
+        → 疑似把舊檔當成果交出去。
+
+        通用任務（方向 A）：領域無關、只看紀錄（該檔在回合開始時存不存在 × 有沒有寫步驟 × 最終訊息）。
+        保守：最終訊息要有「產出型」動詞（寫入/整理/更新/生成/…）；
+        只說「Done／已確認」不觸發；「確認有錯才改」的任務真的不需改也不觸發（沒有產出型動詞）。
+        預設只進交件說明：`zerostop.pushable_for` 明確排除。"""
+        if not self.final_text or not PRODUCE_CLAIM.search(self.final_text):
+            return []
+        start = self.tr.index(start_idx)
+        if not start:
+            return []
+        out = []
+        for rel, raw in outs:
+            if rel in delivs:
+                continue                      # 這一回合寫過，不是舊檔
+            actual = rel if rel in start else next(
+                (f for f in sorted(start) if f.endswith("/" + rel)), None)
+            if not actual:
+                continue                      # 回合開始時不存在（missing_output 管那個）
+            out.append({"kind": "stale_output", "path": rel, "asked": raw,
+                        "detail": "existed before this session, was never modified, "
+                                  "yet the final message claims it was produced"})
+        return out
+
+    def _copy_of_input(self, delivs: dict[str, tuple[str, str]], outs: list[tuple[str, str]],
+                       named: list[str], task_texts: list[str], start_idx: str | None,
+                       latest_idx: str | None) -> list[dict[str, Any]]:
+        """要求的交付檔內容與一份點名輸入素材逐字相同（`_collapse` 正規化後）
+        → 疑似把輸入原封不動當成果交出去，而不是做要求的整理／摘要。
+
+        通用任務（方向 A）：領域無關、只看紀錄。保守：素材須是人點名的、回合開始時在的、
+        正規化後 ≥ COPY_INPUT_MIN；內容逐字相同（不是「相似」——合法重排任務的產出與輸入
+        相似但不同，不誤觸）；提示詞本身就是複製型任務（複製/備份/copy…）則相同是預期，不報。
+        預設只進交件說明：`zerostop.pushable_for` 明確排除。"""
+        if any(COPY_CUE.search(t) for t in task_texts):
+            return []
+        start = self.tr.index(start_idx)
+        if not start:
+            return []
+        inputs: list[tuple[str, str]] = []
+        for f in sorted(set(named)):
+            if f not in start:
+                continue
+            t = self.tr.file_text(start_idx, f)
+            if t is None or "\x00" in t:
+                continue
+            c = _collapse(t).lower()
+            if len(c) >= COPY_INPUT_MIN:
+                inputs.append((f, c))
+        if not inputs:
+            return []
+        latest = self.tr.index(latest_idx)
+        cands: list[tuple[str, str]] = []
+        for path, (old, new) in sorted(delivs.items()):
+            cands.append((path, new))
+        for rel, _raw in outs:
+            actual = rel if rel in latest else next(
+                (f for f in sorted(latest) if f.endswith("/" + rel)), None)
+            if actual and actual not in delivs:
+                new_t = self.tr.file_text(latest_idx, actual)
+                if new_t is not None and "\x00" not in new_t:
+                    cands.append((actual, new_t))
+        out = []
+        for path, new in cands:
+            if not new or not new.strip():
+                continue
+            n_d = _collapse(new).lower()
+            if len(n_d) < COPY_INPUT_MIN:
+                continue
+            for f, c in inputs:
+                if n_d == c:
+                    out.append({"kind": "copy_of_input", "path": path, "input": f,
+                                "detail": f"verbatim identical to the input material {f}"})
                     break
         return out
 
@@ -1518,7 +1657,9 @@ def finding_id(f: dict[str, Any], scope: str) -> str:
     key = {"unsourced": (f.get("path"), f.get("value")), "unread": (f.get("path"),),
            "missing_output": (f.get("path"),),
            "invalid_output": (f.get("path"), f.get("sub"), f.get("detail")),
-           "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),)}
+           "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),),
+           "skeleton": (f.get("path"),), "stale_output": (f.get("path"),),
+           "copy_of_input": (f.get("path"), f.get("input"))}
     raw = repr((scope, f["kind"], key.get(f["kind"], ())))
     return "z_" + hashlib.sha256(raw.encode()).hexdigest()[:10]
 

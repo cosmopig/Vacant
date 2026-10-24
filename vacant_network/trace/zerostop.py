@@ -213,9 +213,11 @@ def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) ->
     out = []
     for f in findings:
         k = f.get("kind")
-        # 通用任務（方向 A）：把題目當答案交出去——只進交件說明，不退回（docs/UNIVERSAL_TASKS.md §3）。
+        # 通用任務（方向 A）：`copy_of_task`（把題目當答案）＋ 2026-09-25 新增三項
+        # （skeleton 模板骨架／stale_output 舊檔當成果／copy_of_input 照抄輸入素材）
+        # ——都只進交件說明，不退回（docs/UNIVERSAL_TASKS.md §3）。
         # 要改成可退回，先過 tests/test_noncode_samples.py 的零誤報門檻。
-        if k == "copy_of_task":
+        if k in ("copy_of_task", "skeleton", "stale_output", "copy_of_input"):
             continue
         if k == "unread" and used >= UNREAD_MAX_ROUNDS:
             continue
@@ -358,6 +360,14 @@ def _say(f: dict[str, Any]) -> str:
         return f"{f.get('path')} had an invalid or incomplete output ({f.get('detail') or f.get('sub')})"
     if k == "copy_of_task":
         return f"{f.get('path')} reads like a copy of the task itself ({f.get('detail') or 'nearly identical to the prompt'})"
+    if k == "skeleton":
+        return f"{f.get('path')} reads like an unfilled template ({f.get('detail') or 'mostly placeholder lines'})"
+    if k == "stale_output":
+        return (f"{f.get('path')} existed before this session and was never modified, "
+                f"yet the final message claims it was produced")
+    if k == "copy_of_input":
+        return (f"{f.get('path')} is verbatim identical to the input material "
+                f"{f.get('input') or '?'} ({f.get('detail') or 'copied, not worked on'})")
     if k == "test_claim":
         return f'the final message said "{f.get("quote")}" without a matching test run'
     if k == "failed_step":
