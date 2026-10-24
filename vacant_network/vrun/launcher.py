@@ -392,6 +392,11 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     #: V2：下一次 spawn 要接到 prompt 尾端的回饋。**第 1 次一定是空字串**
     #: ⇒ placeholder 換成 `""` ⇒ 那一次的 argv 與「沒有 Vacant」時逐位元相同。
     pending_feedback = ""
+    #: fresh_hint 的檔案管道：最近一次失敗的提示文字。`fresh_hint` 的
+    #: 下一次嘗試會**先**把工作區還原成起點，回饋檔會連帶被清掉，
+    #: 所以重置**之後**要再放回去（見步驟 2' 的 `hint_redelivered`）。
+    #: 其它臂保持空字串。
+    last_hint_text = ""
     #: agent 要不要自成一個 session（＝孫行程收得掉）。互動式那一格不行，
     #: 理由與代價見 spawn 處與 `_kill_group` 的 docstring。
     new_session = not inherit_stdin
@@ -431,6 +436,15 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                         "stop_reason": "ws_reset_failed",
                         "infra_void": f"reset={back} start={ws_start}"})
                     break
+                if (retry_arm == "fresh_hint"
+                        and retrypolicy.delivers_to_file(feedback_into)
+                        and last_hint_text):
+                    # 重置剛把回饋檔清掉（起點快照裡沒有它），在這裡放回去。
+                    # 否則 `fresh_hint` 的提示到不了 agent 手上，那一臂就
+                    # 靜默退化成光板的 `resample`——「我以為在 prompt 模式」
+                    # 的錯不准在資料裡活著（`test_vacant_run_retry.py` 有可執行證明）。
+                    rec["hint_redelivered"] = retrypolicy.write_feedback(
+                        workspace, last_hint_text)
             rec["ws_start_sha256"] = wshash.tree_hash(workspace)
 
             # ── 2'') V2：把回饋接到這一次的 argv 上（第 1 次接的是空字串）──
@@ -636,6 +650,10 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
                     summary.update({"stop_reason": "ks1_violation",
                                     "infra_void": repr(exc)})
                     break
+                if retry_arm == "fresh_hint":
+                    # 檔案管道的那份會在下一次嘗試的重置裡被清掉；留一份
+                    # 供重置之後補放（步驟 2' 的 `hint_redelivered`）。
+                    last_hint_text = text
                 # ── V2：同一份文字，兩條管道各自獨立開關 ─────────────
                 #  `file`／`both` ⇒ 寫進工作區（V1 逐字不變）。
                 #  `prompt`／`both` ⇒ 交給下一輪的 `render_argv`。
@@ -955,7 +973,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="沒過之後做什麼：none＝不重試（預設，＝V0 的行為）／"
                          "resample＝重置工作區再跑一次（不給失敗原文）／"
                          "revise＝保留工作區、把失敗原文寫進 "
-                         f"{retrypolicy.FEEDBACK_FILENAME} 再跑一次")
+                         f"{retrypolicy.FEEDBACK_FILENAME} 再跑一次／"
+                         "fresh_hint＝重置工作區、只留一條 ≤400 bytes 的關鍵"
+                         f"失敗提示到 {retrypolicy.FEEDBACK_FILENAME} 再跑一次"
+                         "（不給完整失敗原文；`--feedback-into prompt`／`both` "
+                         "時提示也接在 prompt 尾端）")
     ap.add_argument("--max-attempts", type=int, default=None,
                     help="嘗試上限（`--retry none` 恆為 1，其餘預設 "
                          f"{retrypolicy.DEFAULT_MAX_ATTEMPTS}）。"

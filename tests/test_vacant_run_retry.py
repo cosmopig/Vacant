@@ -324,6 +324,67 @@ def test_resample_agent_never_sees_the_previous_failure(tmp_path, upstream):
     assert res["summary"]["accepted"] is False
 
 
+# ══ 3b) fresh_hint：提示必須在重置**之後**還活著 ═════════════════════
+#  `fresh_hint` 的語義＝「乾淨重抽＋最小提示」。但它預設走檔案管道
+#  （`--feedback-into file`），而檔案管道的那份提示寫在 attempt N 結尾；
+#  attempt N＋1 開頭的 `restore_origin` 會把整個工作區還原成起點——
+#  提示檔連帶被清掉。重置之後不放回去，這一臂就靜默退化成光板的
+#  `resample`：提示到不了 agent 手上，而且資料上與 resample 無法分辨。
+def test_fresh_hint_in_file_mode_the_hint_survives_the_reset(tmp_path, upstream):
+    """`fresh_hint`＋預設 file 管道：假 agent 只有在**真的看到**提及
+    `check_add` 的回饋檔時才寫對的答案（`fix_when_told`）。
+    """
+    r = _go(tmp_path, mode="fix_when_told", retry_arm="fresh_hint",
+            max_attempts=3, ws_name="fh", run_name="run_fh")
+    s = r["summary"]
+
+    # attempt 1 沒有回饋檔（寫錯）；attempt 2 看到了提示（寫對）。
+    assert s["attempts_used"] == 2, s["attempts"]
+    assert s["accepted"] is True and s["stop_reason"] == "visible_pass"
+    assert launcher.exit_code(s) == 0
+    assert r["trace"][0]["feedback_exists"] is False
+    assert r["trace"][1]["feedback_exists"] is True
+    assert r["trace"][1]["feedback_mentions_check_add"] is True
+
+    # 而且它仍是**乾淨**重抽：attempt 1 留下的東西在 attempt 2 起點不存在，
+    # 重置那一步有落盤，提示是重置**之後**補放的（有 sha256，不只「寫了」）。
+    assert r["trace"][1]["leftover_exists"] is False
+    assert s["attempts"][1]["reset"]["kind"] == "fresh_hint"
+    assert s["attempts"][1]["reset"]["back_to_start"] is True
+    redel = s["attempts"][1]["hint_redelivered"]
+    assert redel and redel["bytes"] > 0 and redel["sha256"]
+
+    # 提示不是完整失敗原文：≤400 bytes（與 `test_universal_and_coding_upgrades.py`
+    # 對 renderer 的上限一致），且不含隱藏測資（canary 由
+    # `test_feedback_file_never_contains_hidden_testdata` 那套負向控制護住）。
+    fh_text = s["attempts"][0]["feedback"]["text"]
+    assert len(fh_text.encode("utf-8")) <= 400
+    assert GT_CANARY not in fh_text and NUM_CANARY not in fh_text
+
+    # 收據鏈也齊：兩次嘗試各簽一次，裁決簽一次，且現有的那把尺判過。
+    assert _chain_types(r["run_dir"]) == {"ws_attempt": 2, "ws_verdict": 1}
+    _assert_ruler_is_happy(r["run_dir"])
+
+
+def test_fresh_hint_vs_resample_the_only_difference_is_the_hint(tmp_path, upstream):
+    """負向控制：同一支 agent，`resample` 底下從來看不到檔、用完額度；
+    `fresh_hint` 底下 attempt 2 看到提示就過。兩臂唯一的差別就是那份
+    重置之後還活著的提示檔——否則這個測試就是空的。
+    """
+    fh = _go(tmp_path, mode="fix_when_told", retry_arm="fresh_hint",
+             max_attempts=2, ws_name="fh2", run_name="run_fh2")
+    rs = _go(tmp_path, mode="fix_when_told", retry_arm="resample",
+             max_attempts=2, ws_name="rs2", run_name="run_rs2")
+    assert fh["summary"]["accepted"] is True
+    assert fh["summary"]["attempts_used"] == 2
+    assert rs["summary"]["accepted"] is False
+    assert rs["summary"]["attempts_used"] == 2
+    assert rs["trace"][1]["feedback_exists"] is False
+    assert rs["trace"][1]["feedback_mentions_check_add"] is False
+    _assert_ruler_is_happy(fh["run_dir"])
+    _assert_ruler_is_happy(rs["run_dir"])
+
+
 # ══ 3) 用完額度仍沒過 ⇒ 拒交 ═════════════════════════════════════════════
 @pytest.mark.parametrize("arm", ["resample", "revise"])
 def test_attempts_exhausted_is_a_refusal_with_its_own_name(tmp_path, upstream,

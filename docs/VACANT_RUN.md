@@ -518,15 +518,16 @@ R530／R532 量到增益的那個東西是**閘門＋重抽／重改**（CONFORM
 
 V1 便宜的原因只有一句：**觸發點是行程結束，所以重試不用碰協定**（§1）。
 
-### 7.1 兩條臂
+### 7.1 三條臂（外加 `none`）
 
 | 臂 | 沒過之後 | 對應既有實驗 |
 |---|---|---|
 | `--retry resample` | **全新工作區**（整個重置回起點）、全新 agent 行程，**不給失敗原文** | R530 A-CONF／R532 CONFORM |
+| `--retry fresh_hint` | **全新工作區**（整個重置回起點），只把一條 ≤400 bytes 的關鍵失敗提示寫進 `VACANT_FEEDBACK.md`（**不是完整失敗原文**）；提示在重置**之後**補放回工作區（`attempts[i].hint_redelivered`），否則會靜默退化成光板 `resample` | —（R530／R532 未量過這一臂） |
 | `--retry revise` | **保留工作區**、把失敗原文寫進 `VACANT_FEEDBACK.md`、再跑一次 | R530 A-GATE／R532 HMIX |
 | `--retry none` | 不重試（**預設**，＝V0 的行為逐字不變） | — |
 
-⚠ **`resample` 的重置連 `.git/` 一起清。** `wshash.EXCLUDED_DIRS` 把 `.git/`
+⚠ **`resample`／`fresh_hint` 的重置連 `.git/` 一起清。** `wshash.EXCLUDED_DIRS` 把 `.git/`
 排除在樹雜湊之外——但它排除不了 agent 的眼睛。上一次嘗試如果 commit 過，
 留著 `.git` 就等於偷偷把失敗原文留在現場，那樣兩條臂的差別會消失，
 **而且消失的方式在樹雜湊上完全看不出來**。還原完會再量一次樹雜湊，
