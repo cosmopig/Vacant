@@ -213,6 +213,10 @@ def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) ->
     out = []
     for f in findings:
         k = f.get("kind")
+        # 通用任務（方向 A）：把題目當答案交出去——只進交件說明，不退回（docs/UNIVERSAL_TASKS.md §3）。
+        # 要改成可退回，先過 tests/test_noncode_samples.py 的零誤報門檻。
+        if k == "copy_of_task":
+            continue
         if k == "unread" and used >= UNREAD_MAX_ROUNDS:
             continue
         if k == "failed_step" and f.get("sub") == "test_failed" and used >= TEST_FAILED_MAX_ROUNDS:
@@ -352,6 +356,8 @@ def _say(f: dict[str, Any]) -> str:
         return f"{f.get('path')} (asked for in the request) did not exist"
     if k == "invalid_output":
         return f"{f.get('path')} had an invalid or incomplete output ({f.get('detail') or f.get('sub')})"
+    if k == "copy_of_task":
+        return f"{f.get('path')} reads like a copy of the task itself ({f.get('detail') or 'nearly identical to the prompt'})"
     if k == "test_claim":
         return f'the final message said "{f.get("quote")}" without a matching test run'
     if k == "failed_step":

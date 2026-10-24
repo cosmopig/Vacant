@@ -50,6 +50,8 @@ MAX_VALUES_PER_FILE = 60
 MAX_CORPUS_NUMBERS = 5000
 GIVEN_INLINE_MAX = 64 * 1024     # 貼在請求裡的檔：只看這麼大以內的（見 Evidence.given_inline）
 GIVEN_INLINE_MIN = 80            # 壓過空白之後至少這麼多位元組（UTF-8；中文一字 3）才算得上「貼了全文」（R530 最小的一份 297）
+COPY_TASK_MIN_PROMPT = 60        # copy_of_task：正規化後提示詞少於這個長度不報（短提示詞的巧合）
+COPY_TASK_MIN_RATIO = 0.8        # copy_of_task：len(提示詞)/len(交付檔) 下限；寧可漏抓不可誤傷（docs/UNIVERSAL_TASKS.md §3）
 _CJK = r"[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]"
 _CJK_GAP = re.compile(rf"(?<={_CJK})\s+(?={_CJK})")
 
@@ -893,6 +895,7 @@ class Evidence:
                 findings.append({"kind": "missing_output", "path": rel, "asked": raw})
         findings += self._invalid_outputs(delivs, outs, task_texts, corpus, start_idx, latest_idx,
                                           only_answer=only_answer)
+        findings += self._copy_of_task(delivs, outs, task_texts, start_idx, latest_idx)
         scope = self.rec.dir.name
         for fd in findings:
             fd["finding_id"] = finding_id(fd, scope)
@@ -990,6 +993,45 @@ class Evidence:
                     out.append({"kind": "unsourced", "path": path, "line": ln_no, "value": raw,
                                 "_short": short})
         return out, notes
+
+    def _copy_of_task(self, delivs: dict[str, tuple[str, str]], outs: list[tuple[str, str]],
+                      task_texts: list[str], start_idx: str | None,
+                      latest_idx: str | None) -> list[dict[str, Any]]:
+        """要求的交付檔 ≈ 任務提示詞原文（連指令句一起照抄）＝把題目當答案交出去。
+
+        通用任務（方向 A）：域無關、只看紀錄。三重保守條件（docs/UNIVERSAL_TASKS.md §3）：
+        `_collapse` 正規化後提示詞**包含於**交付檔、比例 ≥ COPY_TASK_MIN_RATIO、
+        提示詞 ≥ COPY_TASK_MIN_PROMPT 字。只照抄引用內容（不含指令句）的轉述任務不觸發。
+        預設只進交件說明：`zerostop.pushable_for` 明確排除，不退回給 agent。"""
+        out: list[dict[str, Any]] = []
+        texts = [_collapse(t).lower() for t in task_texts
+                 if t and len(_collapse(t)) >= COPY_TASK_MIN_PROMPT]
+        if not texts:
+            return out
+        latest = self.tr.index(latest_idx)
+        cands: list[tuple[str, str]] = []
+        for path, (old, new) in sorted(delivs.items()):
+            cands.append((path, new))
+        for rel, _raw in outs:
+            actual = rel if rel in latest else next(
+                (f for f in sorted(latest) if f.endswith("/" + rel)), None)
+            if actual and actual not in delivs:
+                new_t = self.tr.file_text(latest_idx, actual)
+                if new_t is not None and "\x00" not in new_t:
+                    cands.append((actual, new_t))
+        for path, new in cands:
+            if not new or not new.strip():
+                continue                      # 空檔已由 invalid_output/empty 報過
+            n_d = _collapse(new).lower()
+            if len(n_d) < COPY_TASK_MIN_PROMPT:
+                continue
+            for n_t in texts:
+                if n_t in n_d and len(n_t) / len(n_d) >= COPY_TASK_MIN_RATIO:
+                    out.append({"kind": "copy_of_task", "path": path,
+                                "detail": f"nearly identical to the task prompt "
+                                          f"(ratio {len(n_t) / len(n_d):.2f})"})
+                    break
+        return out
 
     def _test_claim(self, steps: list[Step], delivs: dict[str, tuple[str, str]]
                     ) -> list[dict[str, Any]]:
