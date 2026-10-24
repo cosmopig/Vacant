@@ -1,0 +1,63 @@
+# 通用任務（非程式）：現有檢查的分類與新檢查規則
+
+> 對應 ASSIGNMENT 方向 A（「通用任務：程式以外也有用」）與 BACKLOG P1 第 1 項。
+> 本頁只整理**現有的**證據檢查（`vacant_network/trace/evidence.py`），並定下新檢查的合併門檻。
+> 沒有這裡沒寫的保證；每一行都可以用對應的測試離線重播。
+
+## 1. 現有發現（finding）分類
+
+`run()`（`evidence.py`）目前會產生 6 種 kind。判定「域相關」的標準：
+**檢查邏輯本身是否依賴「有程式碼可跑／可解析」這個前提**，而不是「樣本裡恰好有程式」。
+
+| kind（sub） | 域無關？ | 依賴什麼 | 對非程式交付物的誤報風險 |
+|---|---|---|---|
+| `missing_output` | **是** | 只問「要求的檔存不存在」（`asked_outputs`） | 低：檔在就不報；對任何檔案型別都成立 |
+| `invalid_output/empty` | **是** | `new.strip()` 為空 | 低：只報空檔 |
+| `invalid_output/syntax` | **否** | `.py` 要 `ast.parse`、`.json/.jsonl/.toml` 要解析、Markdown 圍欄/衝突標記 | 對 `.md/.txt` 只剩「以 ``` 開頭」「衝突標記」兩條，兩者都是明確的垃圾訊號，誤報低；但整體是程式格式前提 |
+| `invalid_output/stub` | **否** | `NotImplementedError`/`todo!()`/Traceback 寫進答案/未展開的 Python repr | 程式碼 stub 判定域綁定；「Traceback 寫進答案檔」對非程式交付物是合理訊號，但目前綁在 `.py`/DOC_EXT 上 |
+| `invalid_output/contract_shape` | 部分 | JSON 契約形狀（`at`/函數簽名） | 只在任務寫了明確契約時觸發；非程式任務一般不適用 |
+| `invalid_output/empty_filter` | 部分 | 資料分析（CSV/parquet 過濾出 0 列） | 綁定「有表格資料」這一類非程式任務，但不是全域 |
+| `failed_step` | **否** | 有 shell 指令跑過且失敗、交付檔寫在它後面 | 非程式任務通常沒有指令；若有（如 `pandoc`），邏輯仍成立，但判定詞彙（Traceback/Error）偏程式 |
+| `test_claim` | **否** | 最後訊息宣稱測試/建置通過，要對上 RUNNERS 的輸出 | 純程式：非程式任務不該有「測試」宣稱，觸發即合理 |
+| `unsourced` | **是** | 寫入行的數值要在「讀過／跑過」的語料裡找得到（`corpus`） | 這是通用檢查：報告、單一答案、表格都適用；誤報靠 exempt 規則（給定的、日期、假設標記）壓低 |
+| `unread` | **是** | 點名檔有沒有被讀 | 域無關；誤報低（讀過就不報） |
+| `copy_of_task`（2026-10-06 新增，**僅建議**） | **是** | 要求的交付檔內容 ≈ 任務提示詞原文（`_collapse` 正規化後包含、比例 ≥ 0.8、提示詞 ≥ 60 字元） | 只抓「把題目當答案交出去」；照抄**引用內容**（不含指示句）的轉述任務不觸發。見 §3 |
+
+**結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread`、`copy_of_task`
+五種對非程式任務直接可用；`syntax/stub/test_claim/failed_step/empty_filter/contract_shape`
+的前提是「有程式碼/表格可跑」，對純文件任務大多不會觸發（不會擋，但也不會幫上忙）。
+
+## 2. 現有檢查對非程式任務的已知盲區（誠實邊界）
+
+1. **`unsourced` 只查「數值」**：報告裡的文字結論（「建議延後上線」）不在檢查範圍；
+   這是有意的——查文字結論等於查觀點，超出紀錄可驗證的範圍。
+2. **`failed_step` 的失敗詞彙偏程式**（`Traceback`、`\bError:`、`Exception:`）；
+   非程式指令失敗（如 `pandoc: error` 之外的寫法）可能漏判。目前**不擴充**：
+   擴充詞彙＝提高對良性指令（`grep` 無匹配、`diff` 有差異）的誤報，而這類任務樣本太少，
+   量不出零誤報。
+3. **交付物「內容對不對」一律不判**：所有檢查只看「紀錄顯示了什麼」（缺、空、無來源、
+   與提示詞重疊），不判答案正確性。這是 H-2 的同構：通過檢查 ≠ 滿足要求。
+
+## 3. 新檢查的合併門檻（方向 A 的規則）
+
+新檢查要併進 `run()` 之前，必須**全部**滿足：
+
+1. **只看紀錄**：輸入只准是（提示詞、寫入的檔、跑過的指令與輸出、讀過的檔）；
+   不准讀模型流量、不准猜意圖。
+2. **域無關**：邏輯裡不准出現「程式碼」「測試」「函數」這些前提（`unsourced` 的數值
+   判定算域無關，因為任何任務的交付物都可能有數值）。
+3. **預設只進交件說明**：在 `zerostop.pushable_for` 裡**明確排除**（像 `copy_of_task`），
+   不退回給 agent。要退回的檢查必須另外有零誤報證據。
+4. **離線重播零誤報**：`tests/test_noncode_samples.py` 的 5 個非程式樣本（乾淨交付）
+   全部不觸發該檢查，才准合併；觸發任一個就先修判定再重測。
+5. **保守閾值**：相似/包含類判定一律用「正規化後包含 + 長度比例 + 最小長度」三重條件，
+   寧可漏抓不可誤傷；`_collapse`（`evidence.py:57`）是唯一正規化函式。
+
+## 4. 離線重播入口
+
+```bash
+python3 -m pytest tests/test_universal_copy_of_task.py tests/test_noncode_samples.py -q
+```
+
+兩個檔案共用同一個 `Agent` 掛鉤模擬（`tests/test_universal_and_coding_upgrades.py` 的
+`env`/`Agent` 模式）：不联网、不呼叫模型，同一份 `evidence.py` 邏輯跑在合成紀錄上。
