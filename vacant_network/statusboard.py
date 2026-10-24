@@ -365,6 +365,19 @@ def overview() -> dict[str, Any]:
 
 
 # ── HTTP ────────────────────────────────────────────────────────────────
+#: `GET /api` 的索引：只列**真的存在**的端點。
+#: （2026-10-24 dogfood：裸 404 沒法看；舊 backlog 指過的 `/api/snapshot` 是舊
+#: dashboard.py 的端點、本面板沒有——不指向不存在的端點。）
+_API_INDEX = {
+    "endpoints": {
+        "/": "HTML 儀表板（總覽＋專案詳情）",
+        "/api/overview": "總覽 JSON（projects[].key 供 /api/project/<key> 用）",
+        "/api/project/<key>": "單個專案詳情 JSON（chain/flags/帳本…）",
+    },
+    "note": "read-only；數字是讀取時刻的快照——live session 持續寫鏈，前後讀取不同是正常的",
+}
+
+
 class _Handler(BaseHTTPRequestHandler):
     server_version = "vacant-dashboard"
 
@@ -404,12 +417,16 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send(200, _PAGE.encode("utf-8"), "text/html; charset=utf-8")
             elif path == "/api/overview":
                 self._json(overview())
+            elif path in ("/api", "/api/"):
+                self._json(_API_INDEX)
             elif path.startswith("/api/project/"):
                 d = project_detail(path[len("/api/project/"):])
                 if d is None:
                     self._json({"error": "no such project"}, 404)
                 else:
                     self._json(d)
+            elif path.startswith("/api/"):
+                self._json({"error": "not found", "endpoints": _API_INDEX["endpoints"]}, 404)
             else:
                 self._json({"error": "not found"}, 404)
         except Exception as e:  # noqa: BLE001 — 面板不該因為一個壞檔掛掉

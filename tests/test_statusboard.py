@@ -212,6 +212,24 @@ def test_http_serves_the_page_and_the_api(env, server):
     assert _get(server, "/nope")[0] == 404
 
 
+def test_api_index_lists_only_real_endpoints(env, server):
+    # dogfood（2026-10-24 round 17）：`GET /api` 以前回裸 {"error":"not found"}，
+    # 舊 backlog 指的 `/api/snapshot` 是舊 dashboard.py 的端點、本面板沒有——不指向不存在的端點。
+    st, ct, body = _get(server, "/api")
+    assert st == 200 and ct.startswith("application/json")
+    eps = json.loads(body)["endpoints"]
+    assert set(eps) == {"/", "/api/overview", "/api/project/<key>"}
+    st, _, body = _get(server, "/api/")
+    assert st == 200  # 尾斜線同一索引
+    assert set(json.loads(body)["endpoints"]) == set(eps)
+    # 未知 /api/*：仍是 404，但指出哪些端點真的存在
+    st, _, body = _get(server, "/api/snapshot")
+    assert st == 404 and json.loads(body)["endpoints"] == eps
+    # 非 /api 路徑維持裸 404
+    st, _, body = _get(server, "/nope")
+    assert st == 404 and json.loads(body) == {"error": "not found"}
+
+
 def test_http_is_read_only_and_local_only(env, server):
     assert _get(server, "/api/overview", method="POST")[0] == 405
     assert _get(server, "/api/overview", method="DELETE")[0] == 405
