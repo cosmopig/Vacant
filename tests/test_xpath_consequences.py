@@ -276,6 +276,26 @@ def test_trace_verify_without_a_ledger_says_it_was_not_checked(env, capsys, monk
     assert code == 0 and out.startswith("OK ") and "not checked" in out
 
 
+def test_trace_verify_on_an_untraced_project_is_not_broken(env, capsys):
+    """零設定：從來沒被追緝的專案是常態，不是 BROKEN（BROKEN＝鏈在、但驗不過）。
+    `show`／`report` 在這種情形已照實說「no trace」且退出碼 0，`verify` 要與它們一致；
+    也不准說「OK」——鏈不存在，沒有東西被驗過。"""
+    p = env / "untraced"
+    p.mkdir()
+    code, out = _verify(p, capsys)
+    assert code == 0, (code, out)
+    assert not out.startswith("OK ") and not out.startswith("BROKEN "), out
+    assert "no trace" in out, out
+
+
+def test_trace_verify_still_broken_when_the_ledger_anchored_but_the_trace_is_gone(env, capsys):
+    """任務帳本已簽過這個專案的鏈頭、病歷卻被整條刪掉 ⇒ 照舊算壞（不是「沒有東西可驗」）。"""
+    p, rec, head = _anchored_project(env)
+    rec.chain_path.unlink()
+    code, out = _verify(p, capsys)
+    assert code == 1 and out.startswith("BROKEN ") and "ledger" in out, (code, out, head)
+
+
 # ── 4. KS-1 行動者識別 ───────────────────────────────────────────────
 
 def test_actor_tokens_include_the_subagent_definition_hash_but_not_platform_names(env):

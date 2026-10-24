@@ -20,6 +20,9 @@
    報告照實寫出簽章者，不宣稱那一定是人按的。
 3. `vacant trace verify` 對任務帳本的錨點只看到最後一次錨點（回合邊界寫的）；在那之後的尾巴只有
    沒簽章的 `head.json` 在看。沒有契約或帳本時輸出寫「not checked」，退出碼仍是 0。
+4. 病歷不存在不是 BROKEN（BROKEN＝鏈在、但驗不過）：沒有病歷時 `verify` 照實說「沒有東西可驗」、
+   退出碼 0（與 `show`／`report` 一致）；唯一例外是任務帳本已簽過這個專案的鏈頭——那代表病歷
+   被整條刪掉，照舊 BROKEN、退出碼 1。
 """
 from __future__ import annotations
 
@@ -106,10 +109,26 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 def cmd_verify(args: argparse.Namespace) -> int:
     """簽章鏈＋`head.json`＋任務帳本裡簽過的鏈頭錨點（`stopcheck.verify_anchored`）。
-    沒有契約或帳本 ⇒ 照樣驗前兩項，輸出寫明「沒有對帳本」；退出碼只有 0／1。"""
+    沒有契約或帳本 ⇒ 照樣驗前兩項，輸出寫明「沒有對帳本」；退出碼只有 0／1。
+    沒有病歷 ⇒ 沒有東西可驗，退出碼 0（與 `show`／`report` 一致；不說「OK」，因為沒有鏈被驗過）——
+    除非任務帳本已簽過這個專案的鏈頭，那代表病歷被整條刪掉，照舊 BROKEN。"""
     ws, c = _workspace(args)
+    rec = Recorder(ws)
+    if not rec.chain_path.is_file():
+        from .stopcheck import ledger_anchor
+        anchor, broken, _note = ledger_anchor(rec, c)
+        if broken:
+            print("BROKEN " + broken)
+            return 1
+        if anchor is not None:
+            print(f"BROKEN no trace for {ws}, but the task ledger anchored entry "
+                  f"{anchor.get('seq')} for this project (the record was deleted or moved)")
+            return 1
+        print(f"no trace for {ws} (nothing to verify; tracing starts when the project has a "
+              f"contract, or with VACANT_TRACE=1)")
+        return 0
     from .stopcheck import verify_anchored
-    ok, why = verify_anchored(Recorder(ws), c)
+    ok, why = verify_anchored(rec, c)
     print(("OK " if ok else "BROKEN ") + why)
     return 0 if ok else 1
 

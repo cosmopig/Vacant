@@ -711,7 +711,7 @@ def build_parser() -> argparse.ArgumentParser:
     pv.add_argument("--answer", default=None, help="把實際答案餵進來，額外要求雜湊對得上")
     pv.set_defaults(func=cmd_verify_att)
 
-    pt = sub.add_parser("trace", help="把 MCP tee-proxy 的 wire log 渲染成可讀的 Hermes↔vacant 時間軸")
+    pt = sub.add_parser("trace", help="病歷追緝：show / verify / report / actors / blame（人指出錯處：vacant flag；`vacant trace <wire.jsonl>`＝tee-proxy 時間軸）")
     pt.add_argument("file")
     pt.set_defaults(func=cmd_trace)
 
