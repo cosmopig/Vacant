@@ -84,6 +84,12 @@ EXEMPT_HEADINGS = re.compile(r"^\s{0,3}#{1,6}\s*(unverified|assumptions?|open qu
                              r"未驗證|假設|待確認)\b", re.I)
 READ_VERBS = re.compile(r"\b(python3?|node|awk|grep|rg|cat|head|tail|sed|jq|less|more|read_csv|"
                         r"read_json|open|load|json\.load|pd\.|pandas|csv\.|readFile|fs\.)", re.I)
+# 純顯示指令（從命令開頭）：只把內容印出來、不含查詢/轉換。用於「已消費資料上的重覆 probe」判定。
+DISPLAY_ONLY_PROBE = re.compile(
+    r"^\s*(head|tail|cat|less|more|wc|od|xxd|strings|stat)(\s|$)", re.I)
+# 查詢/轉換動詞：出現即不視為純顯示（grep 失敗是未滿足的查詢，不是重覆 probe）。
+QUERY_IN_CMD = re.compile(
+    r"\b(grep|egrep|fgrep|awk|sed|jq|xargs|perl|ruby|python3?|node|cut|sort|uniq|tr|tee)\b", re.I)
 PROBE_CMD = re.compile(r"^\s*(pip3?|python3? -m pip|uv|npm|pnpm|yarn|npx|apt(-get)?|brew|which|"
                        r"command|type|ls|find|tree|stat|file|wc|du|df|curl|wget|git|echo|pwd|"
                        r"env|printenv|test|\[)\b")
@@ -656,6 +662,37 @@ class Evidence:
                 out.append((rel, raw))
         return out
 
+    def _material_consumed_before(self, steps: list[Step], i: int, mats: list[str],
+                                  cmd: str) -> bool:
+        """純顯示 probe（head/tail/cat…）在資料已**成功消費過**之後失敗＝重覆動作，不是略過。
+        （2026-10-25，C37 dabstep-14-s2：讀過 payments.csv 後 `head -n 1` 失敗被誤退）
+
+        刻意不收窄到「任何失敗指令」：`grep -P 'fee('` 這類**查詢**失敗，即使檔案讀過，
+        該查詢本身仍未被滿足（test_zero_evidence::test_a_search_that_errors…）——查詢/轉換
+        動詞（grep/awk/sed/jq/…）在命令裡就不豁免。
+
+        「已消費」只認兩種證據：read/search 工具成功且路徑對得上；shell 成功、命令是讀類動詞、
+        且輸出非空。`rm X`（空輸出）、`echo X`（非讀類動詞）都不算。"""
+        clean = _strip_shell_comments(cmd)
+        if not DISPLAY_ONLY_PROBE.match(clean) or QUERY_IN_CMD.search(clean):
+            return False
+        bases = {m.rsplit("/", 1)[-1] for m in mats}
+        for t in steps[:i]:
+            if t.error:
+                continue
+            kind = tool_kind(t.tool)
+            inp = self.tr.input_text(t)
+            if not any(b in inp for b in bases):
+                continue
+            if kind in ("read", "search"):
+                return True
+            if kind == "shell":
+                if not (self.tr.output_text(t) or "").strip():
+                    continue
+                if READ_VERBS.search(_strip_shell_comments(inp)):
+                    return True
+        return False
+
     def observed(self, steps: list[Step], candidates: list[str], deliverables: set[str]) -> set[str]:
         root = str(self.rec.workspace)
         seen: set[str] = set()
@@ -1061,6 +1098,11 @@ class Evidence:
                 continue
             # 單純讀給定資料的臨時指令（非跑自寫腳本、非測試）若後續已有成功的腳本或讀同資料指令取代，不算略過
             if reads_given and not runs_own and not is_test_cmd:
+                # 該資料在此步驟**之前**已有一次成功讀取＝已消費；這次是重覆 probe 失敗，不是略過。
+                # C37 dabstep-14-s2（2026-10-02 正式批次）：agent 讀過 payments.csv 後再跑
+                # `head -n 1 payments.csv` 失敗，改用別的方法算對並交付，仍被 failed_step 退回。
+                if self._material_consumed_before(steps, i, cued_mats, clean_cmd):
+                    continue
                 if any(tool_kind(t.tool) == "shell"
                        and not t.error
                        and not re.search(r"Traceback|\bError:", self.tr.output_text(t))

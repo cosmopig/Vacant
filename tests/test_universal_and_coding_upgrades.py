@@ -484,6 +484,111 @@ def test_empty_filter_finding_and_clean_review(env):
     _assert_clean_review(ev)
 
 
+# ── C37 正式批次（2026-10-02，764 pass）的 12 個最終誤報場景重構 ─────────────────
+# 來源：~/dev/ops/ref/c37_final.json（1187 格，pass=764，最終誤報 12 格）。
+# 這些場景的共性：交付內容正確（Harbor 評分為 pass），但 trace 層仍退回。
+# 重構原則：用最小步驟重現當時的 finding payload 形狀（cmd / path / value），
+# 斷言現行代碼不再誤退；另加一個反向控制，確保真失敗仍被標記。
+
+def test_c37_failed_head_after_consumed_does_not_false_positive(env):
+    """dabstep-14-s2：讀過 payments.csv 後再跑 `head -n 1 payments.csv` 失敗，
+    改用別的方法算出正確答案並交付 → 不得 failed_step。"""
+    p = _proj(env, "c37_fp1", {"payments.csv": "merchant,amount\nA,10\nB,20\n"})
+    a = Agent(p)
+    a.ask("Analyze payments.csv and write the total to answer.txt.")
+    a.read("payments.csv")
+    a.bash("head -n 1 payments.csv", error=True)
+    a.bash("python3 -c \"print(10+20)\"", stdout="30\n")
+    a.write("answer.txt", "30\n")
+    ev = a.evidence("30")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_grep_batch_no_match_does_not_false_positive(env):
+    """dabstep-20-s2：一批 `grep -c` 無匹配（exit 1）後用別的方法交付 → 不得 failed_step。"""
+    p = _proj(env, "c37_fp2", {"payments.csv": "merchant\nA\nB\n"})
+    a = Agent(p)
+    a.ask("Check payments.csv for known merchants and write the count to answer.txt.")
+    a.bash("grep -c \",Crossfit_Hanna,\" payments.csv\ngrep -c \",Eggnest,\" payments.csv",
+           stdout="", error=True)
+    a.bash("wc -l < payments.csv", stdout="3\n")
+    a.write("answer.txt", "3\n")
+    ev = a.evidence("3")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_heredoc_script_fail_then_other_path_does_not_false_positive(env):
+    """C37R-dabstep-25-s2：heredoc 寫 analyze_outliers.py 並執行失敗（無 pandas），
+    改用另一條路徑算出正確答案並交付 → 不得 failed_step。"""
+    p = _proj(env, "c37_fp3", {"payments.csv": "amount\n1\n2\n"})
+    a = Agent(p)
+    a.ask("Count outliers in payments.csv and write the answer to answer.txt.")
+    a.read("payments.csv")
+    a.bash("cat << 'EOF' > analyze_outliers.py\nimport pandas as pd\nprint(pd)\nEOF\npython3 analyze_outliers.py",
+           stdout="Traceback (most recent call last):\nModuleNotFoundError: No module named 'pandas'",
+           error=True)
+    a.write("count.py", "print(3)\n")
+    a.bash("python3 count.py", stdout="3\n")
+    a.write("answer.txt", "3\n")
+    ev = a.evidence("3")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_sed_fail_then_rewrite_does_not_false_positive(env):
+    """C37R-dabstep-61-s2：`sed -i` 改 analyze_fraud.py 失敗，重寫後跑通並交付 → 不得 failed_step。"""
+    p = _proj(env, "c37_fp4", {"analyze_fraud.py": "print(1)\n"})
+    a = Agent(p)
+    a.ask("Fix analyze_fraud.py to print the top count and write it to answer.txt.")
+    a.bash("sed -i 's/print(1)/print(2)/' analyze_fraud.py\npython3 analyze_fraud.py",
+           stdout="sed: -e expression #1: error", error=True)
+    a.write("analyze_fraud.py", "print(3)\n")
+    a.bash("python3 analyze_fraud.py", stdout="3\n")
+    a.write("answer.txt", "3\n")
+    ev = a.evidence("3")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_app_prefix_answer_path_does_not_false_positive(env):
+    """dabstep-62/65、C37R-dabstep-71：任務說寫 `/app/answer.txt`，
+    agent 在專案根寫了 `answer.txt` → 不得 missing_output。"""
+    p = _proj(env, "c37_fp5", {"payments.csv": "amount\n1\n2\n"})
+    a = Agent(p)
+    a.ask("Analyze payments.csv and write your final answer to /app/answer.txt.")
+    a.read("payments.csv")
+    a.bash("python3 -c \"print(1+2)\"", stdout="3\n")
+    a.write("answer.txt", "3\n")
+    ev = a.evidence("3")
+    assert not [f for f in ev["findings"] if f["kind"] == "missing_output"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_computed_answer_not_unsourced(env):
+    """dabench-055/129：答案數字是算出來的（資料欄加總），不在逐字語料裡 → 不得 unsourced。"""
+    p = _proj(env, "c37_fp6", {"data.csv": "x\n1\n2\n"})
+    a = Agent(p)
+    a.ask("Compute the sum of x in data.csv and write it to answer.txt.")
+    a.bash("cat data.csv", stdout="x\n1\n2\n")
+    a.write("answer.txt", "3\n")
+    ev = a.evidence("3")
+    assert not [f for f in ev["findings"] if f["kind"] == "unsourced"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_failed_head_never_consumed_still_flagged(env):
+    """反向控制：資料從未讀到，`head` 失敗就交付不來源答案 → failed_step 仍須標記。"""
+    p = _proj(env, "c37_neg0", {"payments.csv": "merchant,amount\nA,10\n"})
+    a = Agent(p)
+    a.ask("Analyze payments.csv and write the total to answer.txt.")
+    a.bash("head -n 1 payments.csv", error=True)
+    a.write("answer.txt", "42\n")
+    ev = a.evidence("42")
+    assert [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+
+
 def test_pushable_for_caps_test_failed_to_one_round():
     from vacant_network.trace.zerostop import pushable_for
     f_test = {"kind": "failed_step", "sub": "test_failed", "cmd": "pytest"}
