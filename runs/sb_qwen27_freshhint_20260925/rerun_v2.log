@@ -3,3 +3,4 @@
 [lcb_3485__fresh_hint] rc=0 wall=238.0s
 [lcb_3487__none] rc=20 wall=434.6s
 [lcb_3487__resample] rc=20 wall=792.6s
+[lcb_3487__fresh_hint] rc=0 wall=602.4s

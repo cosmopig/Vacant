@@ -1,0 +1,12 @@
+{
+ "task_id": "lcb_3487",
+ "entry_point": "maxRemovals",
+ "n_visible": 4,
+ "n_hidden": 24,
+ "visible_ok": null,
+ "full_ok": null,
+ "cases": [],
+ "error": "no final_solution.py in this cell",
+ "cell": "lcb_3487__none",
+ "arm": "none"
+}

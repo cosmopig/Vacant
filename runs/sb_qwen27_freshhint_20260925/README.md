@@ -70,3 +70,42 @@ python3 grade.py                                  # post-hoc visible+hidden grad
 ```
 
 `grade.py` writes `cells/<name>/grade.json`, `rows.jsonl`, `summary.json`.
+
+## v2 results (9 cells, completed 2026-10-24)
+
+| task | none (1 att.) | resample (≤2) | fresh_hint (≤2) |
+|---|---|---|---|
+| lcb_3026 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3485 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3487 | refused (rc=3, no deliverable) | refused ×2 (rc=3, no deliverable) | refused a1 (rc=3) → **accepted a2**, full=True |
+
+accepted@budget: **none 2/3, resample 2/3, fresh_hint 3/3**. `full=True` means
+visible + hidden all passed (graded by `grade.py`, evaluation only).
+
+Honest reading:
+
+- **All 5 failures are the same mode**: `finish_reason=length` with empty
+  `content` — the model spent the whole 32768-token output budget on
+  `reasoning_content` and produced no answer, so the agent wrote no
+  `solution.py` (rc=3, infra-void), and the gate refused a missing
+  deliverable. The gate never accepted a wrong answer in this batch.
+- **Deterministic at temp=0**: the four no-hint prompts on lcb_3487
+  (none-a1, resample-a1, resample-a2, fresh_hint-a1) all returned
+  byte-identical 48541-char reasoning and empty content (wire-captured).
+- **The only variable on fresh_hint-a2 is the 275-byte hint in the prompt**
+  ("No module named 'solution' … Avoid this failure in your clean
+  implementation"); that attempt finished (`finish_reason=stop`), wrote
+  `solution.py`, passed visible 4/4 and hidden 24/24.
+- The round-2 fix (hint redelivery after reset, `launcher.py`) is validated
+  in production receipts: `hint_redelivered` sha256 matches attempt 1's hint
+  (88089a25…), and attempt 2's `ws_start_sha256` differs from origin
+  (hint file re-placed).
+- `requests_seen=1` on every attempt → model channel mediation was measured.
+- **This is a smoke-level result, not a measurement**: n=3 tasks; on 2 of 3
+  tasks every arm passed on attempt 1 (no differentiating signal); only
+  lcb_3487 separates the arms, and it separates on a *no-deliverable*
+  failure mode. Not comparable with R532 (all arms thinking-on here; R532 was
+  non-thinking). The lcb_3487 rescue is real and attributable to the hint,
+  but one task is not an effect size.
+- Remaining 3 tasks (lcb_3495/3496/3502) deferred; materials are staged.
+  Running them needs the same budget discipline as above.
