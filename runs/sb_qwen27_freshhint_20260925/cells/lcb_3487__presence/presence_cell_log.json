@@ -1,0 +1,27 @@
+{
+ "cell": "lcb_3487__presence",
+ "arm": "presence (control: resample + meaningless same-size file)",
+ "noise_bytes": "KTtbGVUIuF5F4yjkAE6qwrZ01itFi5foJZttd3yfEVhcElR9paGzr2GkCGMQINsloHjVBVzIqX20V6GPxeFou1Bix7w0YrurmWUFIR1TlEXRXBoa5g1bgnTgcdAySIYAGAvvZg3wMZjDPLrl1GoahN8PR1PmVaF7s5ZbLwY29OJrceh",
+ "noise_sha256": "6c9b58cfab923c30454475cb8defbcb8e682c7bbe1ee2ea0ff60783893f63985",
+ "size_matched_to_neutral_hint": 175,
+ "agent_sha256": "a285612134d86a057c526c031bf1abaa8259e9496bdc1f655ed4562a9fc95b8f",
+ "max_tokens": "32768",
+ "attempt1": {
+  "rc": 20,
+  "wall_s": 405.7,
+  "stdout_tail": "",
+  "stderr_tail": "CATED: empty content, finish_reason=length, reasoning_len=48541, max_tokens=32768\n[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 24c77758c0f8→24c77758c0f8　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__presence\ntest_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]\n"
+ },
+ "feedback_redelivered": {
+  "path": "VACANT_FEEDBACK.md",
+  "bytes": 175,
+  "sha256": "6c9b58cfab923c30454475cb8defbcb8e682c7bbe1ee2ea0ff60783893f63985"
+ },
+ "attempt2": {
+  "rc": 0,
+  "wall_s": 154.9,
+  "stdout_tail": "agent: wrote solution.py (809 chars)\n",
+  "stderr_tail": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 16d4a6560f92→4d6347c8f6f7　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__presence\n"
+ },
+ "rc": 0
+}
