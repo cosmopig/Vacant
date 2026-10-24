@@ -21,7 +21,14 @@ import sys
 import urllib.request
 
 MODEL = os.environ.get("VACANT_SB_MODEL", "qwen/qwen3.8-27b")
-MAX_TOKENS = int(os.environ.get("VACANT_SB_MAX_TOKENS", "8192"))
+# 2026-10-24 (round 10): default raised 8192 -> 32768.
+# v1 (8192) incident: on lcb_3485/lcb_3487 every attempt used the whole budget
+# on reasoning_content (finish_reason=length) and returned empty content, so the
+# agent produced no deliverable and all 6 cells of those two tasks were void.
+# The LM Studio build cannot turn thinking off (enable_thinking:false and
+# /no_think both still produce reasoning_content), so the budget must cover
+# thinking + answer. See cells_v1_8192/ for the wire evidence.
+MAX_TOKENS = int(os.environ.get("VACANT_SB_MAX_TOKENS", "32768"))
 TIMEOUT_S = 600
 
 
@@ -81,7 +88,11 @@ def main() -> int:
         return 3
 
     try:
-        content = data["choices"][0]["message"]["content"] or ""
+        choice = data["choices"][0]
+        msg = choice["message"]
+        content = msg["content"] or ""
+        reasoning = msg.get("reasoning_content") or ""
+        finish = choice.get("finish_reason")
     except (KeyError, IndexError, TypeError) as e:
         print(f"agent: unexpected reply shape: {e!r}", file=sys.stderr)
         return 3
@@ -91,7 +102,18 @@ def main() -> int:
         blocks = re.findall(r"```\s*\n(.*?)```", content, re.S)
     code = blocks[-1] if blocks else content
     if not code.strip():
-        print("agent: no code in the reply", file=sys.stderr)
+        # Distinguish the two ways this happens: the model ran out of budget
+        # while thinking (content empty, finish_reason=length) versus a reply
+        # that simply contains no code. Both are infra failures (rc=3), but
+        # the log must say which one it was.
+        if finish == "length":
+            print(f"agent: BUDGET_TRUNCATED: empty content, "
+                  f"finish_reason=length, reasoning_len={len(reasoning)}, "
+                  f"max_tokens={MAX_TOKENS}", file=sys.stderr)
+        else:
+            print(f"agent: no code in the reply "
+                  f"(finish_reason={finish!r}, reasoning_len={len(reasoning)})",
+                  file=sys.stderr)
         return 3
 
     with open(os.path.join(cwd, "solution.py"), "w", encoding="utf-8") as f:

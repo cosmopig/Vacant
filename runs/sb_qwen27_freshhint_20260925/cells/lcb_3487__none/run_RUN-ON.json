@@ -7,9 +7,9 @@
     "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
   ],
   "workspace": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3487__none",
-  "proxy_url": "http://127.0.0.1:44459",
+  "proxy_url": "http://127.0.0.1:38929",
   "env": {
-    "proxy_url": "http://127.0.0.1:44459",
+    "proxy_url": "http://127.0.0.1:38929",
     "redirected": [
       "ANTHROPIC_API_URL",
       "ANTHROPIC_BASE_URL",
@@ -56,7 +56,7 @@
   "visible_passed": 0,
   "visible_total": 5,
   "verdict_sha256": "b1ce77de63af1395e6e31eb90264eb82788fbe68503d6e74d5a195a092e669db",
-  "verdict_hash": "a82b619951af7339ee516235f83a72e9b6ae9287300b54f5dfd599e6e24a854b",
+  "verdict_hash": "507f0037ed4f469991618c0f63a28a31ddbfab77cdf951788acf3bcf6958fafd",
   "retry": "none",
   "max_attempts": 1,
   "attempts_used": 1,
@@ -78,11 +78,11 @@
       "agent_timed_out": false,
       "orphans_killed": false,
       "orphan_kill_error": null,
-      "agent_wall_s": 114.989,
+      "agent_wall_s": 433.995,
       "wire_quiesced": true,
       "requests_seen": 1,
       "requests_seen_cumulative": 1,
-      "wire_digest": "96eb3ed79b812473f3c72d0a48d5b313c2ea4ba88a7e3e219e5a5788afee48a6",
+      "wire_digest": "696a3f43b56225d0cfce733d5e2ccf2a1909414e8ec0cd3f06d003016f74a66c",
       "ws_end_sha256": "24c77758c0f88ea8cf5e7218757df48894f5fc736ce70d0985c5c866c6ec4007",
       "frozen_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__none/_frozen_RUN-ON",
       "visible_passed": 0,
@@ -141,7 +141,7 @@
   "upstreams_public_allowed": false,
   "wire_blocked": 0,
   "wire_errors": 0,
-  "wire_digest": "96eb3ed79b812473f3c72d0a48d5b313c2ea4ba88a7e3e219e5a5788afee48a6",
+  "wire_digest": "696a3f43b56225d0cfce733d5e2ccf2a1909414e8ec0cd3f06d003016f74a66c",
   "model_wire": {
     "requests_indexed": 1,
     "request_blobs_persisted": 1,
@@ -151,7 +151,7 @@
     "count_semantics": "exact",
     "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
   },
-  "run_wall_s": 115.243,
+  "run_wall_s": 434.538,
   "attestation": {
     "schema": "vacant-attest/1",
     "run_id": "sb_qwen27_lcb_3487__none",
@@ -174,8 +174,8 @@
         "door_sock": null,
         "door_reachable": null,
         "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
-        "probed_at": 1792863214.400094,
-        "probed_by_pid": 137658
+        "probed_at": 1792865561.0381732,
+        "probed_by_pid": 138506
       }
     },
     "framework_hook": {
@@ -208,8 +208,8 @@
       "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
     ],
     "in_process_model": null,
-    "assembled_at": 1792863214.4002118
+    "assembled_at": 1792865561.0384154
   },
-  "agent_wall_s": 114.989,
+  "agent_wall_s": 433.995,
   "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]"
 }

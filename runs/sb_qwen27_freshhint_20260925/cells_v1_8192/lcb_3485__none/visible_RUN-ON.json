@@ -1,0 +1,57 @@
+{
+  "suite": "visible",
+  "task_id": "sb_qwen27_lcb_3485__none",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "sha256": "fbe0ddee451aaa8fa4ce74eeffe694e9f9182ddd94f371ccf43c50757b330134",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 41,
+      "declared": [
+        "check_1",
+        "check_2"
+      ],
+      "end_marker": true,
+      "complete": false,
+      "cases": [
+        {
+          "case": "<module>",
+          "ok": false,
+          "kind": "import",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:2: from solution import maxPossibleScore  # noqa: F401",
+          "output": ""
+        },
+        {
+          "case": "check_1",
+          "ok": false,
+          "kind": "import",
+          "message": "not run: the test file failed to import",
+          "where": null,
+          "output": "",
+          "synthesized": true
+        },
+        {
+          "case": "check_2",
+          "ok": false,
+          "kind": "import",
+          "message": "not run: the test file failed to import",
+          "where": null,
+          "output": "",
+          "synthesized": true
+        }
+      ],
+      "passed": 0,
+      "total": 3,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 3,
+  "all_pass": false,
+  "complete": false,
+  "suite_sha256": "52f03ea40bff6ac9470789f5e3733f7be914b42461c2acf1e213c35d5c326ab3",
+  "empty_reason": null,
+  "result_sha256": "1a71e5172a13cbeb0939942067b7a9d893843a7b788a6b2dd1d9fe160f0a57c7"
+}

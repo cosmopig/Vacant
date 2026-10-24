@@ -1,0 +1,52 @@
+# Task
+
+You are given an array of integers start and an integer d, representing n intervals [start[i], start[i] + d].
+You are asked to choose n integers where the i^th integer must belong to the i^th interval. The score of the chosen integers is defined as the minimum absolute difference between any two integers that have been chosen.
+Return the maximum possible score of the chosen integers.
+ 
+Example 1:
+
+Input: start = [6,0,3], d = 2
+Output: 4
+Explanation:
+The maximum possible score can be obtained by choosing integers: 8, 0, and 4. The score of these chosen integers is min(|8 - 0|, |8 - 4|, |0 - 4|) which equals 4.
+
+Example 2:
+
+Input: start = [2,6,13,13], d = 5
+Output: 5
+Explanation:
+The maximum possible score can be obtained by choosing integers: 2, 7, 13, and 18. The score of these chosen integers is min(|2 - 7|, |2 - 13|, |2 - 18|, |7 - 13|, |7 - 18|, |13 - 18|) which equals 5.
+
+ 
+Constraints:
+
+2 <= start.length <= 10^5
+0 <= start[i] <= 10^9
+0 <= d <= 10^9
+
+請寫一個頂層 Python 函式（不要用 class）：
+def maxPossibleScore(start: List[int], d: int):
+只能用標準函式庫。函式必須回傳答案，不要印出。
+
+## Entry point
+
+Define a function named `maxPossibleScore` in a file called `solution.py` in the
+current directory. It must handle the argument types shown in the checks
+below.
+
+## Visible acceptance checks
+
+The following checks are run against `solution.py` when this process exits:
+
+```
+- `maxPossibleScore([6, 0, 3], 2) == 4`
+- `maxPossibleScore([2, 6, 13, 13], 5) == 5`
+```
+
+## Instructions
+
+- Write the complete `solution.py` in the current directory.
+- If a file named `VACANT_FEEDBACK.md` exists in the current directory,
+  read it first: it is acceptance feedback from a previous attempt.
+- Do not write any other files.

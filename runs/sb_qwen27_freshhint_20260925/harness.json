@@ -1,0 +1,35 @@
+{
+ "v1": {
+  "agent_sha256": "see cells/*/make_batch_log.json (pre-round10 agent; file since edited)",
+  "max_tokens": 8192,
+  "thinking": "always on (could not be disabled in this LM Studio build)",
+  "cells": {
+   "lcb_3026__none": "accepted, 1/1 attempts, visible 3/3 (content complete within budget)",
+   "lcb_3026__resample": "accepted, 1/1 attempts, visible 3/3",
+   "lcb_3026__fresh_hint": "accepted, 1/1 attempts, visible 3/3",
+   "lcb_3485__none": "VOID: no deliverable (empty content, finish_reason=length)",
+   "lcb_3485__resample": "VOID: no deliverable, both attempts (empty content, finish_reason=length)",
+   "lcb_3485__fresh_hint": "VOID: no deliverable, both attempts (empty content, finish_reason=length)",
+   "lcb_3487__none": "VOID: no deliverable (empty content, finish_reason=length)",
+   "lcb_3487__resample": "VOID: no deliverable, both attempts (empty content, finish_reason=length)",
+   "lcb_3487__fresh_hint": "VOID: no deliverable, both attempts (empty content, finish_reason=length)"
+  },
+  "evidence": "cells_v1_8192/lcb_3485__none/wire_RUN-ON/*.resp.bin — content empty, reasoning_content 27079 chars, finish_reason=length",
+  "reclassified": "the 6 VOID cells are not model failures and not gate failures; the harness budget was too small for thinking+answer. Per the infra_void principle they were never measured."
+ },
+ "v2": {
+  "agent_sha256": "a285612134d86a057c526c031bf1abaa8259e9496bdc1f655ed4562a9fc95b8f",
+  "max_tokens": 32768,
+  "thinking": "always on (unchanged)",
+  "cells": [
+   "lcb_3485__none",
+   "lcb_3485__resample",
+   "lcb_3485__fresh_hint",
+   "lcb_3487__none",
+   "lcb_3487__resample",
+   "lcb_3487__fresh_hint"
+  ],
+  "started": "2026-10-24T17:57:54+00:00",
+  "note": "lcb_3026 cells kept from v1: they passed on the FIRST attempt under v1, so the budget did not bind for them (complete content, 3/3 visible)."
+ }
+}

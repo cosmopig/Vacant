@@ -7,7 +7,7 @@
       "sha256": "895b8444a644e27ec5ed7fcee696ff876a78093dac8ed341397ddcced027198d",
       "rc": 0,
       "timed_out": false,
-      "wall_ms": 37,
+      "wall_ms": 73,
       "declared": [
         "check_1",
         "check_2",

@@ -1,0 +1,266 @@
+{
+  "task_id": "sb_qwen27_lcb_3487__fresh_hint",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/dev/Vacant/.venv/bin/python",
+    "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
+  ],
+  "workspace": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3487__fresh_hint",
+  "proxy_url": "http://127.0.0.1:40059",
+  "env": {
+    "proxy_url": "http://127.0.0.1:40059",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "24c77758c0f88ea8cf5e7218757df48894f5fc736ce70d0985c5c866c6ec4007",
+  "ws_end_sha256": "28bf7f1c191b35e2bf34f0ef7cc0eb6af9eb2b291ceff2ef4a6822cd44470e5e",
+  "agent_rc": 3,
+  "agent_timed_out": false,
+  "requests_seen": 2,
+  "wire_by_protocol": {
+    "openai": 2
+  },
+  "accepted": false,
+  "refused": true,
+  "stop_reason": "attempts_exhausted",
+  "infra_void": null,
+  "visible_passed": 0,
+  "visible_total": 5,
+  "verdict_sha256": "c664de4f4c3776d7c8334b2912fed8505d2630eb38e44edd87c3cff6bd9f6c73",
+  "verdict_hash": "acd922a42116145024d88af4200e32277a001f1322933d8bc998556b020c66b7",
+  "retry": "fresh_hint",
+  "max_attempts": 2,
+  "attempts_used": 2,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "fresh_hint",
+      "reset": null,
+      "feedback": {
+        "path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3487__fresh_hint/VACANT_FEEDBACK.md",
+        "bytes": 275,
+        "sha256": "88089a25691626bacd0e35b9445753fefbfff2246d0a2b600809e31997faf93d",
+        "text": "<!-- Attempt 1 failed; workspace restored to clean origin -->\nPrevious attempt failed acceptance check:\ntest_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution im\nAvoid this failure in your clean implementation.",
+        "delivery": "file"
+      },
+      "ws_start_sha256": "24c77758c0f88ea8cf5e7218757df48894f5fc736ce70d0985c5c866c6ec4007",
+      "argv": [
+        "/home/user1/dev/Vacant/.venv/bin/python",
+        "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
+      ],
+      "argv_sha256": "2864e7088eda159005707d5b4d874565e41199b52f39e301e579773afd17038c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 3,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 125.999,
+      "wire_quiesced": true,
+      "requests_seen": 1,
+      "requests_seen_cumulative": 1,
+      "wire_digest": "bd92c624352f7958241b60fce3849ece5431a4601dc6418398cdf55e04f2a040",
+      "ws_end_sha256": "24c77758c0f88ea8cf5e7218757df48894f5fc736ce70d0985c5c866c6ec4007",
+      "frozen_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__fresh_hint/_frozen_RUN-ON",
+      "visible_passed": 0,
+      "visible_total": 5,
+      "verdict_sha256": "c664de4f4c3776d7c8334b2912fed8505d2630eb38e44edd87c3cff6bd9f6c73",
+      "visible_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__fresh_hint/visible_RUN-ON.json",
+      "accepted": false,
+      "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]",
+      "stop_reason": "visible_fail"
+    },
+    {
+      "attempt": 2,
+      "retry": "fresh_hint",
+      "reset": {
+        "kind": "fresh_hint",
+        "ws_sha256": "24c77758c0f88ea8cf5e7218757df48894f5fc736ce70d0985c5c866c6ec4007",
+        "back_to_start": true
+      },
+      "feedback": null,
+      "hint_redelivered": {
+        "path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3487__fresh_hint/VACANT_FEEDBACK.md",
+        "bytes": 275,
+        "sha256": "88089a25691626bacd0e35b9445753fefbfff2246d0a2b600809e31997faf93d"
+      },
+      "ws_start_sha256": "28bf7f1c191b35e2bf34f0ef7cc0eb6af9eb2b291ceff2ef4a6822cd44470e5e",
+      "argv": [
+        "/home/user1/dev/Vacant/.venv/bin/python",
+        "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
+      ],
+      "argv_sha256": "2864e7088eda159005707d5b4d874565e41199b52f39e301e579773afd17038c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 3,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 137.688,
+      "wire_quiesced": true,
+      "requests_seen": 1,
+      "requests_seen_cumulative": 2,
+      "wire_digest": "3edbafb665bd08b9a05087d0e07480fac1e1af73e4c752c16cf282bf1ed0d12a",
+      "ws_end_sha256": "28bf7f1c191b35e2bf34f0ef7cc0eb6af9eb2b291ceff2ef4a6822cd44470e5e",
+      "frozen_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__fresh_hint/_frozen_RUN-ON_a2",
+      "visible_passed": 0,
+      "visible_total": 5,
+      "verdict_sha256": "c664de4f4c3776d7c8334b2912fed8505d2630eb38e44edd87c3cff6bd9f6c73",
+      "visible_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__fresh_hint/visible_RUN-ON_a2.json",
+      "accepted": false,
+      "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]",
+      "stop_reason": "visible_fail"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise",
+      "fresh_hint"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__fresh_hint/_origin",
+    "ws_sha256": "24c77758c0f88ea8cf5e7218757df48894f5fc736ce70d0985c5c866c6ec4007"
+  },
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.119.113.56:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "default",
+      "defaulted": true,
+      "fallback": "sink"
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "upstreams_sinked": [
+    "anthropic"
+  ],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "3edbafb665bd08b9a05087d0e07480fac1e1af73e4c752c16cf282bf1ed0d12a",
+  "model_wire": {
+    "requests_indexed": 2,
+    "request_blobs_persisted": 2,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 264.135,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "sb_qwen27_lcb_3487__fresh_hint",
+    "agent": null,
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1792863714.4521067,
+        "probed_by_pid": 137958
+      }
+    },
+    "framework_hook": {
+      "agent": null,
+      "contract_version": null,
+      "canary_fired": null,
+      "events_n": null,
+      "log": null,
+      "install_attempted": null,
+      "version_drift": null,
+      "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
+    },
+    "reconciled": {
+      "relay_calls": 2,
+      "hook_events": null,
+      "unexplained": null,
+      "canary_calls": 0,
+      "refused_path": 0,
+      "unexplained_detail": null,
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+    },
+    "tier": "C",
+    "attested": false,
+    "b_prime_kind": null,
+    "tier_sentence": "**未認證**：既沒有圍牆也沒有掛鉤 ⇒ 這一跑不發收據。",
+    "tier_reasons": [
+      "圍牆不成立而且掛鉤沒燒 ⇒ **未受控**。（enclosure.applied=False、canary_fired=None）",
+      "⚠ 掛鉤那一欄是「沒量到」不是「量到 false」",
+      "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1792863714.4522786
+  },
+  "agent_wall_s": 137.688,
+  "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]"
+}

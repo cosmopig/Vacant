@@ -7,51 +7,41 @@
       "sha256": "fbe0ddee451aaa8fa4ce74eeffe694e9f9182ddd94f371ccf43c50757b330134",
       "rc": 0,
       "timed_out": false,
-      "wall_ms": 42,
+      "wall_ms": 54,
       "declared": [
         "check_1",
         "check_2"
       ],
       "end_marker": true,
-      "complete": false,
+      "complete": true,
       "cases": [
         {
-          "case": "<module>",
-          "ok": false,
-          "kind": "import",
-          "message": "ModuleNotFoundError: No module named 'solution'",
-          "where": "test_visible.py:2: from solution import maxPossibleScore  # noqa: F401",
+          "case": "check_1",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
           "output": ""
         },
         {
-          "case": "check_1",
-          "ok": false,
-          "kind": "import",
-          "message": "not run: the test file failed to import",
-          "where": null,
-          "output": "",
-          "synthesized": true
-        },
-        {
           "case": "check_2",
-          "ok": false,
-          "kind": "import",
-          "message": "not run: the test file failed to import",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
           "where": null,
-          "output": "",
-          "synthesized": true
+          "output": ""
         }
       ],
-      "passed": 0,
-      "total": 3,
+      "passed": 2,
+      "total": 2,
       "stderr_tail": ""
     }
   ],
-  "passed": 0,
-  "total": 3,
-  "all_pass": false,
-  "complete": false,
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "complete": true,
   "suite_sha256": "52f03ea40bff6ac9470789f5e3733f7be914b42461c2acf1e213c35d5c326ab3",
   "empty_reason": null,
-  "result_sha256": "faaf52198d9c178e5395f337daec883acde3f23e8dbad1c9a8c2a708159c705c"
+  "result_sha256": "174d9aa3595a2d28d79612ff1d84be78b2a6602909d1e45f2f03c09850a9e27c"
 }

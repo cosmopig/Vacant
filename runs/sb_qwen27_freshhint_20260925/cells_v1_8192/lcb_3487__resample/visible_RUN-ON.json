@@ -1,0 +1,77 @@
+{
+  "suite": "visible",
+  "task_id": "sb_qwen27_lcb_3487__resample",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "sha256": "895b8444a644e27ec5ed7fcee696ff876a78093dac8ed341397ddcced027198d",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 38,
+      "declared": [
+        "check_1",
+        "check_2",
+        "check_3",
+        "check_4"
+      ],
+      "end_marker": true,
+      "complete": false,
+      "cases": [
+        {
+          "case": "<module>",
+          "ok": false,
+          "kind": "import",
+          "message": "ModuleNotFoundError: No module named 'solution'",
+          "where": "test_visible.py:2: from solution import maxRemovals  # noqa: F401",
+          "output": ""
+        },
+        {
+          "case": "check_1",
+          "ok": false,
+          "kind": "import",
+          "message": "not run: the test file failed to import",
+          "where": null,
+          "output": "",
+          "synthesized": true
+        },
+        {
+          "case": "check_2",
+          "ok": false,
+          "kind": "import",
+          "message": "not run: the test file failed to import",
+          "where": null,
+          "output": "",
+          "synthesized": true
+        },
+        {
+          "case": "check_3",
+          "ok": false,
+          "kind": "import",
+          "message": "not run: the test file failed to import",
+          "where": null,
+          "output": "",
+          "synthesized": true
+        },
+        {
+          "case": "check_4",
+          "ok": false,
+          "kind": "import",
+          "message": "not run: the test file failed to import",
+          "where": null,
+          "output": "",
+          "synthesized": true
+        }
+      ],
+      "passed": 0,
+      "total": 5,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 0,
+  "total": 5,
+  "all_pass": false,
+  "complete": false,
+  "suite_sha256": "7c2307aff8adcd2597153cd8d6b050470ddc5814f7c440956de430b4096d0c80",
+  "empty_reason": null,
+  "result_sha256": "4276848852f8bbdc7e4398f1df2dadd6ac111f4c17606f58cf1b82bb6f4cb16c"
+}

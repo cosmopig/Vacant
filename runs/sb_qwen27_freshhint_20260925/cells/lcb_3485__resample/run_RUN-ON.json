@@ -7,9 +7,9 @@
     "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
   ],
   "workspace": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3485__resample",
-  "proxy_url": "http://127.0.0.1:42119",
+  "proxy_url": "http://127.0.0.1:44003",
   "env": {
-    "proxy_url": "http://127.0.0.1:42119",
+    "proxy_url": "http://127.0.0.1:44003",
     "redirected": [
       "ANTHROPIC_API_URL",
       "ANTHROPIC_BASE_URL",
@@ -42,24 +42,24 @@
     "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
   },
   "ws_start_sha256": "4876d46e9f3cbf1ded9e0f8f0b884d8b98aefa4875c38b6b0192f76662469a30",
-  "ws_end_sha256": "4876d46e9f3cbf1ded9e0f8f0b884d8b98aefa4875c38b6b0192f76662469a30",
-  "agent_rc": 3,
+  "ws_end_sha256": "46dc26379d5f27c97af70f7fe496168601500b69fcbcf93d595cd64884605519",
+  "agent_rc": 0,
   "agent_timed_out": false,
-  "requests_seen": 2,
+  "requests_seen": 1,
   "wire_by_protocol": {
-    "openai": 2
+    "openai": 1
   },
-  "accepted": false,
-  "refused": true,
-  "stop_reason": "attempts_exhausted",
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
   "infra_void": null,
-  "visible_passed": 0,
-  "visible_total": 3,
-  "verdict_sha256": "97b6a88d9ac36cf939c3a800efe7a9f6899a12e87a2f7a4c234a43f79c969f2d",
-  "verdict_hash": "a4c57669d0a5106afad09d7cbcada6411e2114c1a158eef0a4cad3b5b8ee40f2",
+  "visible_passed": 2,
+  "visible_total": 2,
+  "verdict_sha256": "28852b2705f03c2cbcf07cd3e154970d4c0d956711fc863e66cfe292f8926673",
+  "verdict_hash": "36504754b068210ed19003ea15b78932eb1f9a64099ee794b51a3dc789c76ecb",
   "retry": "resample",
   "max_attempts": 2,
-  "attempts_used": 2,
+  "attempts_used": 1,
   "attempts": [
     {
       "attempt": 1,
@@ -74,60 +74,24 @@
       "argv_sha256": "2864e7088eda159005707d5b4d874565e41199b52f39e301e579773afd17038c",
       "feedback_delivery": "file",
       "feedback_in_prompt_bytes": 0,
-      "agent_rc": 3,
+      "agent_rc": 0,
       "agent_timed_out": false,
       "orphans_killed": false,
       "orphan_kill_error": null,
-      "agent_wall_s": 140.08,
+      "agent_wall_s": 228.394,
       "wire_quiesced": true,
       "requests_seen": 1,
       "requests_seen_cumulative": 1,
-      "wire_digest": "ae3fe2c8ffc9265b5c5109a812f6446224799545f6d1098739f97d7d96e5a8b7",
-      "ws_end_sha256": "4876d46e9f3cbf1ded9e0f8f0b884d8b98aefa4875c38b6b0192f76662469a30",
+      "wire_digest": "a959ffa6b880bfc4432fe6d7ded39bb2d5217c7615b17f013c58fef9b41d05ba",
+      "ws_end_sha256": "46dc26379d5f27c97af70f7fe496168601500b69fcbcf93d595cd64884605519",
       "frozen_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3485__resample/_frozen_RUN-ON",
-      "visible_passed": 0,
-      "visible_total": 3,
-      "verdict_sha256": "97b6a88d9ac36cf939c3a800efe7a9f6899a12e87a2f7a4c234a43f79c969f2d",
+      "visible_passed": 2,
+      "visible_total": 2,
+      "verdict_sha256": "28852b2705f03c2cbcf07cd3e154970d4c0d956711fc863e66cfe292f8926673",
       "visible_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3485__resample/visible_RUN-ON.json",
-      "accepted": false,
-      "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxPossibleScore  # noqa: F401]",
-      "stop_reason": "visible_fail"
-    },
-    {
-      "attempt": 2,
-      "retry": "resample",
-      "reset": {
-        "kind": "resample",
-        "ws_sha256": "4876d46e9f3cbf1ded9e0f8f0b884d8b98aefa4875c38b6b0192f76662469a30",
-        "back_to_start": true
-      },
-      "feedback": null,
-      "ws_start_sha256": "4876d46e9f3cbf1ded9e0f8f0b884d8b98aefa4875c38b6b0192f76662469a30",
-      "argv": [
-        "/home/user1/dev/Vacant/.venv/bin/python",
-        "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
-      ],
-      "argv_sha256": "2864e7088eda159005707d5b4d874565e41199b52f39e301e579773afd17038c",
-      "feedback_delivery": "file",
-      "feedback_in_prompt_bytes": 0,
-      "agent_rc": 3,
-      "agent_timed_out": false,
-      "orphans_killed": false,
-      "orphan_kill_error": null,
-      "agent_wall_s": 140.519,
-      "wire_quiesced": true,
-      "requests_seen": 1,
-      "requests_seen_cumulative": 2,
-      "wire_digest": "467554d68a3fc876a080adb33149df4a988b926505a3bd5e7017c658feb52a61",
-      "ws_end_sha256": "4876d46e9f3cbf1ded9e0f8f0b884d8b98aefa4875c38b6b0192f76662469a30",
-      "frozen_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3485__resample/_frozen_RUN-ON_a2",
-      "visible_passed": 0,
-      "visible_total": 3,
-      "verdict_sha256": "97b6a88d9ac36cf939c3a800efe7a9f6899a12e87a2f7a4c234a43f79c969f2d",
-      "visible_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3485__resample/visible_RUN-ON_a2.json",
-      "accepted": false,
-      "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxPossibleScore  # noqa: F401]",
-      "stop_reason": "visible_fail"
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
     }
   ],
   "retry_constants": {
@@ -181,17 +145,17 @@
   "upstreams_public_allowed": false,
   "wire_blocked": 0,
   "wire_errors": 0,
-  "wire_digest": "467554d68a3fc876a080adb33149df4a988b926505a3bd5e7017c658feb52a61",
+  "wire_digest": "a959ffa6b880bfc4432fe6d7ded39bb2d5217c7615b17f013c58fef9b41d05ba",
   "model_wire": {
-    "requests_indexed": 2,
-    "request_blobs_persisted": 2,
+    "requests_indexed": 1,
+    "request_blobs_persisted": 1,
     "unindexed_requests": 0,
     "wire_quiesced": true,
     "quiesce_timeout": false,
     "count_semantics": "exact",
     "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
   },
-  "run_wall_s": 281.002,
+  "run_wall_s": 228.633,
   "attestation": {
     "schema": "vacant-attest/1",
     "run_id": "sb_qwen27_lcb_3485__resample",
@@ -214,8 +178,8 @@
         "door_sock": null,
         "door_reachable": null,
         "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
-        "probed_at": 1792862823.853526,
-        "probed_by_pid": 137512
+        "probed_at": 1792864888.4429557,
+        "probed_by_pid": 138389
       }
     },
     "framework_hook": {
@@ -229,7 +193,7 @@
       "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
     },
     "reconciled": {
-      "relay_calls": 2,
+      "relay_calls": 1,
       "hook_events": null,
       "unexplained": null,
       "canary_calls": 0,
@@ -248,8 +212,8 @@
       "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
     ],
     "in_process_model": null,
-    "assembled_at": 1792862823.8537781
+    "assembled_at": 1792864888.4431655
   },
-  "agent_wall_s": 140.519,
-  "failures": "test_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxPossibleScore  # noqa: F401]"
+  "agent_wall_s": 228.394,
+  "failures": ""
 }

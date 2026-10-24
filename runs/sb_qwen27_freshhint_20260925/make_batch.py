@@ -153,7 +153,14 @@ def run_cell(name: str) -> dict:
     proc = subprocess.run(base, env=env, capture_output=True, text=True,
                           timeout=3600)
     wall = round(time.time() - t0, 1)
+    # Audit: pin the agent file hash and the generation budget into the cell
+    # log, so a receipt can be matched to the exact harness that produced it
+    # (round 10: the v1 8192 budget incident showed why this matters).
+    agent_sha = hashlib.sha256(
+        (OUT / "agent_qwen.py").read_bytes()).hexdigest()
     rec = {"cell": name, "rc": proc.returncode, "wall_s": wall,
+           "agent_sha256": agent_sha,
+           "max_tokens": env.get("VACANT_SB_MAX_TOKENS", "32768"),
            "stdout_tail": proc.stdout[-400:], "stderr_tail": proc.stderr[-400:]}
     (cell / "make_batch_log.json").write_text(
         json.dumps({"cmd": base, **rec}, ensure_ascii=False, indent=1),
