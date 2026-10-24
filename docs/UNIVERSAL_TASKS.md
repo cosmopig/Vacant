@@ -6,7 +6,10 @@
 
 ## 1. 現有發現（finding）分類
 
-`run()`（`evidence.py`）目前會產生 6 種 kind。判定「域相關」的標準：
+`run()`（`evidence.py`）目前會產生 **7 種 kind**（2026-10-24 對照原始碼盤點：
+`missing_output`、`invalid_output`、`failed_step`、`test_claim`、`unsourced`、`unread`、
+`copy_of_task`；前 6 種可退回給 agent，`copy_of_task` 被 `zerostop.pushable_for` 明確排除、
+只進交件說明）。下表按 kind＋sub 逐行分類。判定「域相關」的標準：
 **檢查邏輯本身是否依賴「有程式碼可跑／可解析」這個前提**，而不是「樣本裡恰好有程式」。
 
 | kind（sub） | 域無關？ | 依賴什麼 | 對非程式交付物的誤報風險 |
@@ -16,10 +19,10 @@
 | `invalid_output/syntax` | **否** | `.py` 要 `ast.parse`、`.json/.jsonl/.toml` 要解析、Markdown 圍欄/衝突標記 | 對 `.md/.txt` 只剩「以 ``` 開頭」「衝突標記」兩條，兩者都是明確的垃圾訊號，誤報低；但整體是程式格式前提 |
 | `invalid_output/stub` | **否** | `NotImplementedError`/`todo!()`/Traceback 寫進答案/未展開的 Python repr | 程式碼 stub 判定域綁定；「Traceback 寫進答案檔」對非程式交付物是合理訊號，但目前綁在 `.py`/DOC_EXT 上 |
 | `invalid_output/contract_shape` | 部分 | JSON 契約形狀（`at`/函數簽名） | 只在任務寫了明確契約時觸發；非程式任務一般不適用 |
-| `invalid_output/empty_filter` | 部分 | 資料分析（CSV/parquet 過濾出 0 列） | 綁定「有表格資料」這一類非程式任務，但不是全域 |
+| `invalid_output/empty_filter` | 部分 | 資料分析：單一腳本且沒有驗證，最後計算結果是空的（空 dataframe/series，或單行 N/A/0/[] 答案） | 綁定「有 pandas/表格資料」這一類非程式任務，但不是全域 |
 | `failed_step` | **否** | 有 shell 指令跑過且失敗、交付檔寫在它後面 | 非程式任務通常沒有指令；若有（如 `pandoc`），邏輯仍成立，但判定詞彙（Traceback/Error）偏程式 |
 | `test_claim` | **否** | 最後訊息宣稱測試/建置通過，要對上 RUNNERS 的輸出 | 純程式：非程式任務不該有「測試」宣稱，觸發即合理 |
-| `unsourced` | **是** | 寫入行的數值要在「讀過／跑過」的語料裡找得到（`corpus`） | 這是通用檢查：報告、單一答案、表格都適用；誤報靠 exempt 規則（給定的、日期、假設標記）壓低 |
+| `unsourced` | **是** | 寫入行的**數值與日期**要在「讀過／跑過」的語料裡找得到（`corpus`） | 這是通用檢查：報告、單一答案、表格都適用；誤報靠 exempt 規則（給定的、今天/昨天、任務裡寫明的日期、假設標記）壓低 |
 | `unread` | **是** | 點名檔有沒有被讀 | 域無關；誤報低（讀過就不報） |
 | `copy_of_task`（2026-10-06 新增，**僅建議**） | **是** | 要求的交付檔內容 ≈ 任務提示詞原文（`_collapse` 正規化後包含、比例 ≥ 0.8、提示詞 ≥ 60 字元） | 只抓「把題目當答案交出去」；照抄**引用內容**（不含指示句）的轉述任務不觸發。見 §3 |
 
@@ -29,8 +32,9 @@
 
 ## 2. 現有檢查對非程式任務的已知盲區（誠實邊界）
 
-1. **`unsourced` 只查「數值」**：報告裡的文字結論（「建議延後上線」）不在檢查範圍；
-   這是有意的——查文字結論等於查觀點，超出紀錄可驗證的範圍。
+1. **`unsourced` 只查「具體值」（數值與日期）**：報告裡的文字結論（「建議延後上線」）
+   不在檢查範圍；這是有意的——查文字結論等於查觀點，超出紀錄可驗證的範圍。
+   （2026-10-24 校正：原寫「只查數值」，但 `_values` 同時檢查 `dates_in` 抓到的日期。）
 2. **`failed_step` 的失敗詞彙偏程式**（`Traceback`、`\bError:`、`Exception:`）；
    非程式指令失敗（如 `pandoc: error` 之外的寫法）可能漏判。目前**不擴充**：
    擴充詞彙＝提高對良性指令（`grep` 無匹配、`diff` 有差異）的誤報，而這類任務樣本太少，
