@@ -1,0 +1,9 @@
+[lcb_3495__none] rc=0 wall=28.6s
+[lcb_3495__resample] rc=0 wall=34.7s
+[lcb_3495__fresh_hint] rc=0 wall=63.9s
+[lcb_3496__none] rc=0 wall=169.1s
+[lcb_3496__resample] rc=0 wall=164.6s
+[lcb_3496__fresh_hint] rc=0 wall=164.5s
+[lcb_3502__none] rc=0 wall=73.8s
+[lcb_3502__resample] rc=0 wall=139.6s
+[lcb_3502__fresh_hint] rc=0 wall=143.2s

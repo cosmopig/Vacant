@@ -39,26 +39,30 @@ Studio). The gate is the **visible** executable test suite, run by
   `harness.json` and each cell's `make_batch_log.json` (agent sha256 +
   max_tokens).
 
-## Status (as of round 10, 2026-10-24)
+## Status (as of round 11, 2026-10-24) — all 6 tasks complete
 
 | task | none | resample | fresh_hint |
 |---|---|---|---|
-| lcb_3026 (v1) | accepted, 1/1 | accepted, 1/1 | accepted, 1/1 |
-| lcb_3485 (v1→v2) | re-running | re-running | re-running |
-| lcb_3487 (v1→v2) | re-running | re-running | re-running |
-| lcb_3495, lcb_3496, lcb_3502 | deferred | deferred | deferred |
+| lcb_3026 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3485 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3487 | refused (rc=3, no deliverable) | refused ×2 (rc=3) | refused a1 (rc=3) → **accepted a2**, full=True |
+| lcb_3495 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3496 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3502 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
 
 ## What can and cannot be concluded from this batch
 
-- No arm-difference number is citable yet: the only task with a measured
-  deliverable (lcb_3026) was passed by **all three arms on the first
-  attempt**, which leaves no room for any difference to show up.
-- A batch where 6 of 9 cells are void carries **no** effect estimate. It is
-  not a "fresh_hint wins/loses" result in either direction.
-- After v2 completes: report per task × arm — accepted?, attempts used,
-  failure shape — with the harness version per cell. `RULED_OUT` /
-  `EFFECTIVE` framing does not apply at n=3 tasks; this is a directional
-  smoke of the mechanism, not a significance claim.
+- The full 6-task batch is complete: 16/18 cells delivered and passed
+  visible+hidden; 2/18 (lcb_3487 none + resample) are no-deliverable
+  infra-voids. **Zero false-accepts** (no "visible pass, hidden fail").
+- The **only** arm difference across all 6 tasks is lcb_3487 (fresh_hint
+  rescued on a2; none/resample no-deliverable). fresh_hint 6/6 vs
+  none/resample 5/6 — the whole gap is one task.
+- `RULED_OUT` / `EFFECTIVE` framing does **not** apply at n=6 tasks with the
+  gap concentrated in one task; this is a directional smoke of the mechanism,
+  not a significance claim. Not comparable with R532 (thinking-on here).
+- Do **not** cite the round-8 `+15.4pp` (6-task subset, contaminated by the
+  last two tasks) as an effect size for this mechanism.
 
 ## Reproduce
 
@@ -71,16 +75,21 @@ python3 grade.py                                  # post-hoc visible+hidden grad
 
 `grade.py` writes `cells/<name>/grade.json`, `rows.jsonl`, `summary.json`.
 
-## v2 results (9 cells, completed 2026-10-24)
+## v2 results — full 6-task batch (18 cells, completed round 11, 2026-10-24)
 
 | task | none (1 att.) | resample (≤2) | fresh_hint (≤2) |
 |---|---|---|---|
 | lcb_3026 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
 | lcb_3485 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
-| lcb_3487 | refused (rc=3, no deliverable) | refused ×2 (rc=3, no deliverable) | refused a1 (rc=3) → **accepted a2**, full=True |
+| lcb_3487 | refused (rc=3, no deliverable) | refused ×2 (rc=3) | refused a1 (rc=3) → **accepted a2**, full=True |
+| lcb_3495 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3496 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
+| lcb_3502 | accepted a1, full=True | accepted a1, full=True | accepted a1, full=True |
 
-accepted@budget: **none 2/3, resample 2/3, fresh_hint 3/3**. `full=True` means
+accepted@budget: **none 5/6, resample 5/6, fresh_hint 6/6**. `full=True` means
 visible + hidden all passed (graded by `grade.py`, evaluation only).
+16/18 cells delivered and passed visible+hidden; the 2 non-delivered cells are
+lcb_3487 none + resample (both infra-void, no deliverable).
 
 Honest reading:
 
@@ -101,11 +110,18 @@ Honest reading:
   (88089a25…), and attempt 2's `ws_start_sha256` differs from origin
   (hint file re-placed).
 - `requests_seen=1` on every attempt → model channel mediation was measured.
-- **This is a smoke-level result, not a measurement**: n=3 tasks; on 2 of 3
-  tasks every arm passed on attempt 1 (no differentiating signal); only
-  lcb_3487 separates the arms, and it separates on a *no-deliverable*
+- **This is a smoke-level result, not a measurement**: n=6 tasks (18 cells);
+  on 5 of 6 tasks every arm passed on attempt 1 (no differentiating signal);
+  only lcb_3487 separates the arms, and it separates on a *no-deliverable*
   failure mode. Not comparable with R532 (all arms thinking-on here; R532 was
   non-thinking). The lcb_3487 rescue is real and attributable to the hint,
   but one task is not an effect size.
-- Remaining 3 tasks (lcb_3495/3496/3502) deferred; materials are staged.
-  Running them needs the same budget discipline as above.
+- **Arm split on the full batch**: fresh_hint 6/6, none 5/6, resample 5/6 —
+  the entire gap is the single task lcb_3487. The 3 newly-run tasks
+  (lcb_3495/3496/3502) were passed by all three arms on attempt 1, so they add
+  no arm-difference signal.
+- **Rescue mechanism boundary**: on lcb_3487 the hint's value is (a) breaking
+  the deterministic thinking loop by changing the prompt, and (b) its content
+  names the actual failure (missing `solution` module). This batch cannot
+  separate (a) from (b) — that would need a control arm (hint = neutral text),
+  not run.

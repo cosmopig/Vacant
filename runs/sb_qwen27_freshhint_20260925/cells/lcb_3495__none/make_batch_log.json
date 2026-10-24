@@ -1,0 +1,24 @@
+{
+ "cmd": [
+  "/home/user1/dev/Vacant/.venv/bin/vacant",
+  "run",
+  "--workspace",
+  "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3495__none",
+  "--run-dir",
+  "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3495__none",
+  "--suite",
+  "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/suites/lcb_3495",
+  "--task-id",
+  "sb_qwen27_lcb_3495__none",
+  "--",
+  "/home/user1/dev/Vacant/.venv/bin/python",
+  "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
+ ],
+ "cell": "lcb_3495__none",
+ "rc": 0,
+ "wall_s": 28.6,
+ "agent_sha256": "a285612134d86a057c526c031bf1abaa8259e9496bdc1f655ed4562a9fc95b8f",
+ "max_tokens": "32768",
+ "stdout_tail": "agent: wrote solution.py (594 chars)\n",
+ "stderr_tail": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws a3627290f288→e7ab4352a51f　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3495__none\n"
+}

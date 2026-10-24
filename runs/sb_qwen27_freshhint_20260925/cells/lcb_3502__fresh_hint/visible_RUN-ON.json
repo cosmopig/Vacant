@@ -1,0 +1,47 @@
+{
+  "suite": "visible",
+  "task_id": "sb_qwen27_lcb_3502__fresh_hint",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "sha256": "b5dff10cf46fd0dacbc5fa3e640b934d82e334c3a14794cc3e24cd2711bab88d",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 38,
+      "declared": [
+        "check_1",
+        "check_2"
+      ],
+      "end_marker": true,
+      "complete": true,
+      "cases": [
+        {
+          "case": "check_1",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_2",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 2,
+      "total": 2,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 2,
+  "total": 2,
+  "all_pass": true,
+  "complete": true,
+  "suite_sha256": "fcdff4d5a9684226bbae1be3baf602ab0bcbc2bd8326157d368be6fa9536899a",
+  "empty_reason": null,
+  "result_sha256": "00723e33ebb81c6e90dc00af6721e867fa443081c82141989eca8c75a48e234c"
+}

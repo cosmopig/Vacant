@@ -1,0 +1,127 @@
+{
+ "task_id": "lcb_3495",
+ "entry_point": "resultsArray",
+ "n_visible": 2,
+ "n_hidden": 21,
+ "visible_ok": true,
+ "full_ok": true,
+ "cases": [
+  {
+   "case": "v1",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "v2",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h1",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h2",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h3",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h4",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h5",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h6",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h7",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h8",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h9",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h10",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h11",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h12",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h13",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h14",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h15",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h16",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h17",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h18",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h19",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h20",
+   "ok": true,
+   "message": ""
+  },
+  {
+   "case": "h21",
+   "ok": true,
+   "message": ""
+  }
+ ],
+ "cell": "lcb_3495__resample",
+ "arm": "resample"
+}
