@@ -838,6 +838,38 @@ class Recorder:
         entries = [LogEntry.from_json(json.loads(x)) for x in data.split(b"\n") if x.strip()]
         return Logbook(entries), torn
 
+    def _read_head(self) -> dict[str, Any] | None:
+        try:
+            h = json.loads((self.dir / "head.json").read_text(encoding="utf-8"))
+            return h if isinstance(h, dict) else None
+        except (OSError, ValueError):
+            return None
+
+    @staticmethod
+    def _head_ahead(head: dict[str, Any] | None, last: LogEntry) -> bool:
+        """head「對不上尾巴」：seq 較新、或同 seq 不同 hash；`seq` 畸形也算對不上
+        （fail-closed：head.json 是完整性檢查的一部分，不能因讀不懂而跳過）。"""
+        if not head:
+            return False
+        seq = head.get("seq")
+        if not isinstance(seq, int) or isinstance(seq, bool) or seq < 1:
+            return True
+        return seq > last.seq or (seq == last.seq and head.get("hash") != last.hash())
+
+    def _consistent_snapshot(self) -> tuple[Logbook, int, dict[str, Any] | None]:
+        """鏈＋`head.json` 一次讀齊。寫入端整段持鎖「鏈→head」（`_append`），但這條讀路徑不持鎖：
+        若「讀鏈」與「讀 head」之間剛好插進一筆，head 會「領先尾巴」——不是截短。重讀最多兩次
+        確認：在寫的追加會在重讀後對上（2026-10-24 dogfood 在實專案抓到 `trace verify` 先 BROKEN
+        再 OK）；真截短／換尾每次重讀都對不上 ⇒ 交給呼叫端報 BROKEN。"""
+        book, torn = self._book()
+        head = self._read_head()
+        for _ in range(2):
+            if not book.entries or not self._head_ahead(head, book.entries[-1]):
+                break
+            book, torn = self._book()
+            head = self._read_head()
+        return book, torn, head
+
     def events(self) -> list[dict[str, Any]]:
         if not self.chain_path.is_file():
             return []
@@ -852,7 +884,7 @@ class Recorder:
         from ..identity import PublicIdentity
         if not self.chain_path.is_file():
             return False, "no trace"
-        book, torn = self._book()
+        book, torn, head = self._consistent_snapshot()
         if not book.entries:
             return False, "trace chain is empty"
         signer = (book.entries[0].payload or {}).get("signer")
@@ -862,15 +894,11 @@ class Recorder:
             return False, "trace signer is not on the accepted-signer list"
         if not book.verify_chain(PublicIdentity.from_hex(name, str(signer))):
             return False, "trace chain does not verify"
-        try:
-            head = json.loads((self.dir / "head.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            head = None
         last = book.entries[-1]
-        if head and (int(head.get("seq", 0)) > last.seq or
-                     (int(head.get("seq", 0)) == last.seq and head.get("hash") != last.hash())):
+        if self._head_ahead(head, last):
             return False, (f"trace chain ends at entry {last.seq} but its recorded head is entry "
-                           f"{head.get('seq')} (truncated or replaced)")
+                           f"{head.get('seq')} (truncated or replaced — or a live session was still "
+                           f"writing during the check; re-run `vacant trace verify`)")
         if anchor is not None:
             try:
                 aseq = int(anchor.get("seq") or -1)
@@ -899,7 +927,7 @@ class Recorder:
         from ..identity import PublicIdentity
         if not self.chain_path.is_file():
             return False, "no trace", None
-        book, torn = self._book()
+        book, torn, head = self._consistent_snapshot()
         es = book.entries
         if not es:
             return False, "trace chain is empty", None
@@ -930,14 +958,10 @@ class Recorder:
                                             e.type, e.payload), bytes.fromhex(e.sig)):
                 return False, f"trace entry {k} does not verify", None
             prev = e.hash()
-        try:
-            head = json.loads((self.dir / "head.json").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            head = None
-        if head and (int(head.get("seq", 0)) > last.seq or
-                     (int(head.get("seq", 0)) == last.seq and head.get("hash") != last.hash())):
+        if self._head_ahead(head, last):
             return False, (f"trace chain ends at entry {last.seq} but its recorded head is entry "
-                           f"{head.get('seq')} (truncated or replaced)"), None
+                           f"{head.get('seq')} (truncated or replaced — or a live session was still "
+                           f"writing during the check; re-run to confirm)"), None
         return True, f"{len(es) - i - 1} new entries since entry {i + 1}" + (
             f" (+{torn} bytes of a torn last line, not counted)" if torn else ""), new_mark
 
