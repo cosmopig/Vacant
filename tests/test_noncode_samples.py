@@ -213,6 +213,26 @@ def test_lfake_skeleton_report_is_caught(env):
     assert all(f["kind"] != "skeleton" for f in a.pushable(ev))   # 不退回
 
 
+@pytest.mark.parametrize("line,expect", [
+    ("{{name}}", True),           # 雙括號模板占位符（docstring 文件化的形狀）
+    ("{{待填}}", True),
+    ("{{value}}", True),
+    ("{name}", False),            # 單括號＝資料值形狀（JSONL/字典/集合字面量），不當占位符
+    ('{"a": 1}', False),          # JSONL 行（volumes.jsonl 誤報回歸）
+    ("{1, 2, 3}", False),         # Python 集合字面量
+    ("[待填]", True),
+    ("TBD", True),
+    ("TODO", True),
+    ("___", True),
+    ("待補", True),
+    ("上線日期：TBD（等待供應商確認）", False),   # 行內其它內容→誠實的 TBD
+    ("- [待填]", True),           # 行首清單標記先剝掉
+])
+def test_is_placeholder_line_shapes(line, expect):
+    from vacant_network.trace.evidence import _is_placeholder_line
+    assert _is_placeholder_line(line) is expect
+
+
 def test_clean_honest_tbd_not_flagged(env):
     """完整報告裡一個誠實的「日期：TBD（有原因）」：不算模板骨架。"""
     p = _proj(env, "n8_honest_tbd")

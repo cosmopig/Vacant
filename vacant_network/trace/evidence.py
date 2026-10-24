@@ -67,14 +67,16 @@ COPY_CUE = re.compile(r"複製|拷貝|備份|copy|duplicate", re.I)
 def _is_placeholder_line(line: str) -> bool:
     """單獨一行就是未填占位符（先去掉行首的清單／標題／編號標記）。
     只認整行完全匹配的嚴格形狀：`TBD`/`TODO`、`[待填]` 這類短括號、`{{…}}`、`___`、`待補`；
-    「上線日期：TBD（待供應商確認）」這種一行裡有其它內容的不算。"""
+    「上線日期：TBD（待供應商確認）」這種一行裡有其它內容的不算。
+    括號占位符只認**雙**括號 `{{…}}`：單括號 `{…}` 是 JSONL 行／字典／集合字面量等
+    資料值形狀，當占位符會誤報（volumes.jsonl 回歸）；寧可漏抓不可誤傷。"""
     s = re.sub(r"^(?:[-*+]|#{1,6}|\d+[.)、])\s*", "", line.strip())
     if not s:
         return False
     return bool(
         re.fullmatch(r"TBD|TODO|FIXME", s, re.IGNORECASE)
         or re.fullmatch(r"\[[^\[\]]{1,20}\]", s)
-        or re.fullmatch(r"\{[^{}]{1,30}\}", s)
+        or re.fullmatch(r"\{\{[^{}]{1,30}\}\}", s)
         or re.fullmatch(r"_{3,}", s)
         or re.fullmatch(r"待(?:填|補|定|確認|續|完成)", s)
     )
