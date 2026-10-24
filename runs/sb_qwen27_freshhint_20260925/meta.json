@@ -1,0 +1,64 @@
+{
+ "bank": "/home/user1/dev/Vacant/ops/gain/data/lcb_bank_v2.jsonl",
+ "bank_sha256": "b98f027213e2469a0a41bed813d99f029d3d6e2fac64e0fa18887c42c865b9ba",
+ "n_tasks": 6,
+ "arms": [
+  "none",
+  "resample",
+  "fresh_hint"
+ ],
+ "max_attempts_retry_arms": 2,
+ "none_arm_attempts": 1,
+ "upstream": "http://100.119.113.56:1234",
+ "model": "qwen/qwen3.8-27b",
+ "note": "thinking mode could not be disabled in this LM Studio build (enable_thinking:false and /no_think both still produced reasoning_content); all arms ran with thinking on",
+ "tasks": [
+  {
+   "task_id": "lcb_3026",
+   "entry_point": "minimumPossibleSum",
+   "n_visible": 3,
+   "n_hidden": 24
+  },
+  {
+   "task_id": "lcb_3485",
+   "entry_point": "maxPossibleScore",
+   "n_visible": 2,
+   "n_hidden": 24
+  },
+  {
+   "task_id": "lcb_3487",
+   "entry_point": "maxRemovals",
+   "n_visible": 4,
+   "n_hidden": 24
+  },
+  {
+   "task_id": "lcb_3495",
+   "entry_point": "resultsArray",
+   "n_visible": 2,
+   "n_hidden": 21
+  },
+  {
+   "task_id": "lcb_3496",
+   "entry_point": "minNumberOfSeconds",
+   "n_visible": 3,
+   "n_hidden": 24
+  },
+  {
+   "task_id": "lcb_3502",
+   "entry_point": "numberOfSubstrings",
+   "n_visible": 2,
+   "n_hidden": 24
+  }
+ ],
+ "run_round_scope": [
+  "lcb_3026",
+  "lcb_3485",
+  "lcb_3487"
+ ],
+ "deferred_this_round": [
+  "lcb_3495",
+  "lcb_3496",
+  "lcb_3502"
+ ],
+ "deferral_reason": "local 27b latency ~55-120s/generation with thinking on; 3 tasks x 3 arms x <=2 attempts fits the 60-min round, 6 tasks would not; conservative reversible decision"
+}

@@ -1,0 +1,219 @@
+{
+  "task_id": "sb_qwen27_lcb_3026__fresh_hint",
+  "arm": "RUN-ON",
+  "vacant": 1,
+  "argv": [
+    "/home/user1/dev/Vacant/.venv/bin/python",
+    "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
+  ],
+  "workspace": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/ws/lcb_3026__fresh_hint",
+  "proxy_url": "http://127.0.0.1:43007",
+  "env": {
+    "proxy_url": "http://127.0.0.1:43007",
+    "redirected": [
+      "ANTHROPIC_API_URL",
+      "ANTHROPIC_BASE_URL",
+      "CEREBRAS_BASE_URL",
+      "CUSTOM_BASE_URL",
+      "DEEPSEEK_BASE_URL",
+      "FIREWORKS_BASE_URL",
+      "GROQ_BASE_URL",
+      "LITELLM_PROXY_API_BASE",
+      "MISTRAL_BASE_URL",
+      "OLLAMA_HOST",
+      "OPENAI_API_BASE",
+      "OPENAI_API_HOST",
+      "OPENAI_BASE",
+      "OPENAI_BASE_URL",
+      "OPENROUTER_BASE_URL",
+      "TOGETHER_BASE_URL",
+      "VACANT_ENDPOINT",
+      "VACANT_MCP_BASE",
+      "XAI_BASE_URL"
+    ],
+    "stripped": [],
+    "stripped_upstream": [
+      "VACANT_RUN_UPSTREAM_OPENAI"
+    ],
+    "sentinel_vars": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY"
+    ],
+    "note": "環境變數名單擋不到用設定檔的框架（pi 的 models.json、內建 provider 的編譯期 baseUrl）——見本檔 docstring 邊界 1。"
+  },
+  "ws_start_sha256": "bb952b8d53ce5d6b7c04ff8c8bf214777e8ebe02ea3c306d9fe82276b4334055",
+  "ws_end_sha256": "95d57b05e76a655b6d3b9a7f89ac726a2701988332eccfabe94a0b4f878ded88",
+  "agent_rc": 0,
+  "agent_timed_out": false,
+  "requests_seen": 1,
+  "wire_by_protocol": {
+    "openai": 1
+  },
+  "accepted": true,
+  "refused": false,
+  "stop_reason": "visible_pass",
+  "infra_void": null,
+  "visible_passed": 3,
+  "visible_total": 3,
+  "verdict_sha256": "325b36b9c4ad6dd1d859770633c696e673148b086994a05a922c2f28a0ea9a0c",
+  "verdict_hash": "42c669a56abb028da2358e7134bd92d31b6ebec2c4360a5af7c2510d06e3c634",
+  "retry": "fresh_hint",
+  "max_attempts": 2,
+  "attempts_used": 1,
+  "attempts": [
+    {
+      "attempt": 1,
+      "retry": "fresh_hint",
+      "reset": null,
+      "feedback": null,
+      "ws_start_sha256": "bb952b8d53ce5d6b7c04ff8c8bf214777e8ebe02ea3c306d9fe82276b4334055",
+      "argv": [
+        "/home/user1/dev/Vacant/.venv/bin/python",
+        "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/agent_qwen.py"
+      ],
+      "argv_sha256": "2864e7088eda159005707d5b4d874565e41199b52f39e301e579773afd17038c",
+      "feedback_delivery": "file",
+      "feedback_in_prompt_bytes": 0,
+      "agent_rc": 0,
+      "agent_timed_out": false,
+      "orphans_killed": false,
+      "orphan_kill_error": null,
+      "agent_wall_s": 88.424,
+      "wire_quiesced": true,
+      "requests_seen": 1,
+      "requests_seen_cumulative": 1,
+      "wire_digest": "41f4afcfbcda344da0812be029c90646917022cd3c70115c873f251fa0904963",
+      "ws_end_sha256": "95d57b05e76a655b6d3b9a7f89ac726a2701988332eccfabe94a0b4f878ded88",
+      "frozen_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3026__fresh_hint/_frozen_RUN-ON",
+      "visible_passed": 3,
+      "visible_total": 3,
+      "verdict_sha256": "325b36b9c4ad6dd1d859770633c696e673148b086994a05a922c2f28a0ea9a0c",
+      "visible_path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3026__fresh_hint/visible_RUN-ON.json",
+      "accepted": true,
+      "failures": "",
+      "stop_reason": "visible_pass"
+    }
+  ],
+  "retry_constants": {
+    "retry_arms": [
+      "none",
+      "resample",
+      "revise",
+      "fresh_hint"
+    ],
+    "default_max_attempts": 3,
+    "feedback_filename": "VACANT_FEEDBACK.md",
+    "feedback_template_sha256": "76c8dd21506ac0f024ce3a82ee57b17d2c5ac69c48f6e801b0ecd0582d3bd57b",
+    "feedback_body_sha256": "d55e91b4e4de28aaf95c57f0c3fd988d94be4a80cdddda05f60534b30a1a4883",
+    "feedback_placeholder": "{VACANT_FEEDBACK}",
+    "delivery_modes": [
+      "file",
+      "prompt",
+      "both"
+    ]
+  },
+  "feedback_into": "file",
+  "origin_snapshot": {
+    "path": "/home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3026__fresh_hint/_origin",
+    "ws_sha256": "bb952b8d53ce5d6b7c04ff8c8bf214777e8ebe02ea3c306d9fe82276b4334055"
+  },
+  "sandbox": {
+    "backend": "bwrap",
+    "sandbox": "bwrap",
+    "requested": "auto"
+  },
+  "upstreams": {
+    "openai": {
+      "url": "http://100.119.113.56:1234",
+      "source": "env:VACANT_RUN_UPSTREAM_OPENAI",
+      "defaulted": false,
+      "fallback": null
+    },
+    "anthropic": {
+      "url": "http://unspecified-upstream.vacant.invalid",
+      "source": "default",
+      "defaulted": true,
+      "fallback": "sink"
+    }
+  },
+  "upstreams_defaulted": [
+    "anthropic"
+  ],
+  "upstreams_sinked": [
+    "anthropic"
+  ],
+  "upstreams_public_allowed": false,
+  "wire_blocked": 0,
+  "wire_errors": 0,
+  "wire_digest": "41f4afcfbcda344da0812be029c90646917022cd3c70115c873f251fa0904963",
+  "model_wire": {
+    "requests_indexed": 1,
+    "request_blobs_persisted": 1,
+    "unindexed_requests": 0,
+    "wire_quiesced": true,
+    "quiesce_timeout": false,
+    "count_semantics": "exact",
+    "note": "`exact` ⇒ requests_indexed 就是總數；`lower_bound` ⇒ 真實值 ≥ requests_indexed，磁碟上還有沒進索引的請求，或排空逾時（沒有旗標即視為不完整，fail-closed）"
+  },
+  "run_wall_s": 88.765,
+  "attestation": {
+    "schema": "vacant-attest/1",
+    "run_id": "sb_qwen27_lcb_3026__fresh_hint",
+    "agent": null,
+    "enclosure": {
+      "applied": false,
+      "ns_id": "net:[4026531840]",
+      "policy_sha256": null,
+      "probe": {
+        "method": "if_nameindex + /proc/self/ns/net（零位元組出網）",
+        "interfaces": [
+          "ens33",
+          "lo",
+          "tailscale0"
+        ],
+        "outer_net_ns": null,
+        "ns_differs_from_outer": null,
+        "policy_path": "/run/vacant/policy.json",
+        "policy_present": false,
+        "door_sock": null,
+        "door_reachable": null,
+        "reason": "看得到 loopback 以外的介面 ['ens33', 'tailscale0'] ⇒ 有別的路",
+        "probed_at": 1792862399.9138753,
+        "probed_by_pid": 137399
+      }
+    },
+    "framework_hook": {
+      "agent": null,
+      "contract_version": null,
+      "canary_fired": null,
+      "events_n": null,
+      "log": null,
+      "install_attempted": null,
+      "version_drift": null,
+      "reason": "沒有掛鉤日誌，而且沒宣稱裝過 ⇒ 沒量到（不是「沒有掛鉤」）"
+    },
+    "reconciled": {
+      "relay_calls": 1,
+      "hook_events": null,
+      "unexplained": null,
+      "canary_calls": 0,
+      "refused_path": 0,
+      "unexplained_detail": null,
+      "method": "貪婪時間配對：一通模型呼叫要對得上一個還沒被消耗掉的回合開端事件（canary／user_prompt_submit／post_tool_use／tool_result）。⚠ `session_start` **刻意不算**——它不會自己引起一通呼叫，算進來會讓多出來的那一通被一個空額度吸收掉",
+      "reason": "沒有掛鉤日誌 ⇒ 對不了帳（不是「零事件」）"
+    },
+    "tier": "C",
+    "attested": false,
+    "b_prime_kind": null,
+    "tier_sentence": "**未認證**：既沒有圍牆也沒有掛鉤 ⇒ 這一跑不發收據。",
+    "tier_reasons": [
+      "圍牆不成立而且掛鉤沒燒 ⇒ **未受控**。（enclosure.applied=False、canary_fired=None）",
+      "⚠ 掛鉤那一欄是「沒量到」不是「量到 false」",
+      "⚠ 對帳那一欄是「沒量到」不是「量到 0」"
+    ],
+    "in_process_model": null,
+    "assembled_at": 1792862399.9140577
+  },
+  "agent_wall_s": 88.424,
+  "failures": ""
+}
