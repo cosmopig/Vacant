@@ -1,0 +1,65 @@
+{
+  "suite": "visible",
+  "task_id": "sb_qwen27_lcb_3487__neutral_hint",
+  "files": [
+    {
+      "file": "test_visible.py",
+      "sha256": "895b8444a644e27ec5ed7fcee696ff876a78093dac8ed341397ddcced027198d",
+      "rc": 0,
+      "timed_out": false,
+      "wall_ms": 44,
+      "declared": [
+        "check_1",
+        "check_2",
+        "check_3",
+        "check_4"
+      ],
+      "end_marker": true,
+      "complete": true,
+      "cases": [
+        {
+          "case": "check_1",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_2",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_3",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        },
+        {
+          "case": "check_4",
+          "ok": true,
+          "kind": "pass",
+          "message": "",
+          "where": null,
+          "output": ""
+        }
+      ],
+      "passed": 4,
+      "total": 4,
+      "stderr_tail": ""
+    }
+  ],
+  "passed": 4,
+  "total": 4,
+  "all_pass": true,
+  "complete": true,
+  "suite_sha256": "7c2307aff8adcd2597153cd8d6b050470ddc5814f7c440956de430b4096d0c80",
+  "empty_reason": null,
+  "result_sha256": "376449c4999041387d684b7beac956239e856f773db7d0eca682e833b5af4d86"
+}

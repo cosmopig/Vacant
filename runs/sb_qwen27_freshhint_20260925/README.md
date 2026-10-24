@@ -114,14 +114,58 @@ Honest reading:
   on 5 of 6 tasks every arm passed on attempt 1 (no differentiating signal);
   only lcb_3487 separates the arms, and it separates on a *no-deliverable*
   failure mode. Not comparable with R532 (all arms thinking-on here; R532 was
-  non-thinking). The lcb_3487 rescue is real and attributable to the hint,
-  but one task is not an effect size.
+  non-thinking). The lcb_3487 rescue is real; its attribution to the hint
+  *content* was settled by the round-13 neutral control (below): it was not —
+  the no-detail file carried the same rescue. One task is not an effect size.
 - **Arm split on the full batch**: fresh_hint 6/6, none 5/6, resample 5/6 —
   the entire gap is the single task lcb_3487. The 3 newly-run tasks
   (lcb_3495/3496/3502) were passed by all three arms on attempt 1, so they add
   no arm-difference signal.
-- **Rescue mechanism boundary**: on lcb_3487 the hint's value is (a) breaking
-  the deterministic thinking loop by changing the prompt, and (b) its content
-  names the actual failure (missing `solution` module). This batch cannot
-  separate (a) from (b) — that would need a control arm (hint = neutral text),
-  not run.
+- **Rescue mechanism — settled by the round-13 neutral control**: on lcb_3487
+  the no-detail feedback file rescued exactly as the detail file did, so the
+  driver demonstrated here is the retry + "previous attempt failed acceptance"
+  signal in a present file (plausibly breaking the deterministic thinking
+  loop), **not** the specific error content. See the section below.
+
+## Neutral-hint control (round 13, 2026-10-24): the missing arm for lcb_3487
+
+The v2 table confounded two variables that both changed between the failing
+attempts and the fresh_hint rescue: (a) a `VACANT_FEEDBACK.md` file was
+present at all, and (b) it named the actual failure (`No module named
+'solution'`). The control arm adds (a) without (b): clean resample + a
+same-shape file whose body is `retry.render_fresh_hint`'s own neutral
+fallback sentence, verbatim. `neutral_cell.py`; each attempt is a plain
+`vacant run --retry none` invocation, so argv is byte-identical to the other
+arms — only the workspace file differs.
+
+| lcb_3487 arm | a1 | a2 | final grade |
+|---|---|---|---|
+| none | FAIL (no deliverable, `finish_reason=length`) | — | FAIL, no artifact |
+| resample | FAIL (no deliverable) | FAIL (clean ws, no file) | FAIL, no artifact |
+| **neutral_hint** (175 B, no detail) | FAIL (same signature) | **PASS** (gate rc=0) | **PASS: 4/4 visible, 24/24 hidden** |
+| fresh_hint (275 B, detail) | FAIL (no deliverable) | **PASS** | **PASS: 4/4 visible, 24/24 hidden** |
+
+- a1 of the neutral cell failed with the identical signature
+  (`finish_reason=length`, empty content, no `solution.py`, gate refused,
+  rc=20) — same as none/resample/fresh_hint a1.
+- a2 with the neutral file wrote a solution (928 chars) that passed the
+  visible gate and all 28 graded cases. The a2 solution differs from the
+  fresh_hint a2 solution (different DP formulation, both correct) — the input
+  difference genuinely changed the model's behavior, so this is not a
+  replay artifact.
+- **Attribution (n=1 cell, no statistical claim):** the specific error
+  content is *not demonstrated* to be the driver; the presence of the
+  retry/feedback signal sufficed in this case. Do not quote the round-12
+  result as "the hint content fixed it".
+- **Residual confound, stated:** the neutral arm changes both "a file exists
+  in the workspace" and "the file says the previous attempt failed
+  acceptance". A pure presence control (a file with no meaning) was not run,
+  so "presence alone" is not isolated either. What is excluded: the error
+  detail as a necessary condition.
+
+Reproduce:
+
+```bash
+python3 neutral_cell.py      # default SB_TID=lcb_3487; ~10 min
+python3 grade.py lcb_3487__neutral_hint
+```

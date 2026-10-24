@@ -1,0 +1,3 @@
+[neutral a1] rc=20 wall=384.5s
+[neutral a2] rc=0 wall=189.2s
+[neutral] final rc=0
