@@ -179,7 +179,7 @@ R460 那 120 題 **原封不動**再跑五次（新 seed），六臂交錯、每
 | `off_probe_n60_20260902` | `smoke` | 2026-09-02 | — | 0 | 否 | probe_or_smoke |
 | `off_probe_n60_20260902_test` | `smoke` | 2026-09-02 | — | 0 | 是 | probe_or_smoke |
 | `probe_verify_20260901` | `smoke` | 2026-09-01 | — | 0 | 否 | probe_or_smoke |
-| `sb_qwen27_freshhint_20260925` | `probe` | 2026-10-24 → 10-25 | 6 自訂任務（LCB/HE+/MBPP+ 各抽） | 6 任務 × 2–3 臂 | 是 | **機制歸因探針，非效能證據**：fresh-hint 重試臂的 lcb_3487 救援效應歸因（neutral-hint／pure-presence／label-neutral 對照，n=1 格），結論只可作機制歸因引用；詳見該目錄 README（2026-10-25 補 label-neutral 對照：label 非驅動因子，多餘 prompt 內容本身即打破 no-delivery 環）|
+| `sb_qwen27_freshhint_20260925` | `probe` | 2026-10-24 → 10-25 | 6 自訂任務（LCB/HE+/MBPP+ 各抽） | 6 任務 × 2–3 臂 | 是 | **機制歸因探針，非效能證據**：fresh-hint 重試臂的 lcb_3487 救援效應歸因（neutral-hint／pure-presence／label-neutral 對照，n=1 格），結論只可作機制歸因引用；詳見該目錄 README（2026-10-25 補 label-neutral 對照：label 非驅動因子；2026-10-25 round 26 補第二 seed 對照：noise 位元非驅動因子，「有內容即破環」跨兩份獨立內容成立，a2 層有內容 5/5 vs 無內容 0/1）|
 
 ## 五、跑完但沒被獨立稽核的 run
 

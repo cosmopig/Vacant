@@ -244,3 +244,68 @@ python3 name_cell.py a1      # ~7 min (model call); expect no-delivery signature
 python3 name_cell.py a2      # ~3-4 min; expect rc=0
 python3 grade.py lcb_3487__labelneu
 ```
+
+## Second-seed control (round 26, 2026-10-25): the specific noise bytes are NOT the driver
+
+`seed2_cell.py` closes the residual confound named in round 21: the
+round-16/21 cells both used the **same** 175-byte noise (seed 20261024,
+sha256 `6c9b58cf…`), so "this content" vs "any extra content" was not
+separated. This cell delivers noise of a **different seed (20261025)**, same
+length (175 B), same neutral header ("## Note"), same agent variant
+(`agent_qwen_neu.py`), scaffold, suite, argv and grading — the only factor
+differing from the labelneu cell is the noise bytes.
+
+The self-test is discriminating (red/green demonstrated at commit time): a
+naive copy of `name_cell.py` that reuses the seed-20261024 noise **fails**
+the sha256-distinct assertion (rc=1); the real cell passes (rc=0).
+
+**Single-factor claim verified on the wire, not by assertion**: the a2
+request bodies of both cells are on disk
+(`cells/lcb_3487__labelneu/wire_RUN-ON/f5e4ec91…req.bin` vs
+`cells/lcb_3487__seed2neu/wire_RUN-ON/cf15f572…req.bin`); model,
+`max_tokens` (32768) and `temperature` (0) are identical, and everything
+outside the feedback section is **byte-identical**. The feedback sections
+have equal length (177 B = 175 noise + 2 newlines) but different content
+(sha256 `60ab6a79…` vs `1482fdec…`).
+
+| attempt | ws state | result | signature |
+|---|---|---|---|
+| a1 | clean origin | **rc=20, no deliverable** (384.7 s) | same no-delivery signature as all other cells' a1; `finish_reason=length`, empty content |
+| a2 | + 175B noise **seed 20261025** under **"## Note"** | **rc=0** (192.6 s) | **PASS: 4/4 visible, 24/24 hidden** (`grade.json`) |
+
+**Reading**: a second, independent noise content under the same neutral
+label rescues exactly as the first did. The rescue is **not specific to the
+seed-20261024 bytes**; "any extra content in the feedback section breaks the
+deterministic no-delivery loop on this task" now holds across two distinct
+contents. The full a2-level picture on lcb_3487:
+
+| a2 feedback content | size | header label | a2 result |
+|---|---|---|---|
+| (none — resample arm) | 0 B | — | **FAIL, no deliverable** |
+| error detail ("No module named 'solution' …") | 275 B | "## Acceptance feedback …" | PASS, full=True |
+| neutral sentence, no detail | 175 B | "## Acceptance feedback …" | PASS, full=True |
+| random ASCII, seed 20261024 | 175 B | "## Acceptance feedback …" | PASS, full=True |
+| random ASCII, seed 20261024 | 175 B | "## Note" | PASS, full=True |
+| random ASCII, seed 20261025 | 175 B | "## Note" | PASS, full=True |
+
+5/5 with any content vs 0/1 without (a2 level). Content type (error detail,
+neutral sentence, random noise ×2 seeds) and the header label are all shown
+irrelevant; the demonstrated factor is "a non-empty feedback section exists
+in the prompt at attempt 2".
+
+- **caveats (unchanged, stated with the result):** n=1 cell per arm, one
+  model (qwen3.8-27b), one task, temperature 0 — mechanism attribution only,
+  no effect size, no generalization to other tasks. The body length (175 B;
+  fresh_hint used 275 B) and the alphanumeric alphabet are held constant
+  across all five rescued cells and are therefore not separated from
+  "content exists" — a length-variant cell is the natural next control if
+  this thread is continued.
+
+Reproduce:
+
+```bash
+python3 seed2_cell.py selftest   # offline, no model calls; red/green demonstrated
+python3 seed2_cell.py a1         # ~6-7 min (model call); expect rc=20
+python3 seed2_cell.py a2         # ~3-4 min; expect rc=0
+python3 grade.py lcb_3487__seed2neu
+```

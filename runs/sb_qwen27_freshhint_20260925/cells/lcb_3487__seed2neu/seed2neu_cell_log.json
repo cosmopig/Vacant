@@ -1,0 +1,29 @@
+{
+ "cell": "lcb_3487__seed2neu",
+ "arm": "second-seed neutral-label control: resample + 175B noise, seed 20261025 (labelneu/presence used seed 20261024, sha256 6c9b58cfab923c30…), SAME neutral header '## Note'",
+ "agent": "agent_qwen_neu.py (byte-identical to agent_qwen.py except the one header line; file name never reaches the model)",
+ "agent_sha256": "49cbe380c053c6107003e3f2988c88f24d09758e7a117a044cb53247bb337fa0",
+ "header_label": "## Note",
+ "noise_seed": 20261025,
+ "max_tokens": "32768",
+ "attempt1": {
+  "rc": 20,
+  "wall_s": 384.7,
+  "stdout_tail": "",
+  "stderr_tail": "CATED: empty content, finish_reason=length, reasoning_len=48541, max_tokens=32768\n[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 24c77758c0f8→24c77758c0f8　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__seed2neu\ntest_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]\n"
+ },
+ "feedback_redelivered": {
+  "path": "VACANT_FEEDBACK.md",
+  "bytes": 175,
+  "sha256": "5f9db99ffe3b900b34d4731e60dd13c9c3eae778cf7a80590da60e1f468aae55",
+  "noise_seed": 20261025,
+  "header_label": "## Note"
+ },
+ "attempt2": {
+  "rc": 0,
+  "wall_s": 192.6,
+  "stdout_tail": "agent: wrote solution.py (923 chars)\n",
+  "stderr_tail": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws e8b5532acd9a→5d28c65abad9　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__seed2neu\n"
+ },
+ "rc": 0
+}
