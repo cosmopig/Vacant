@@ -34,14 +34,9 @@ from .recorder import Recorder
 
 
 def _coverage(rec: Recorder) -> dict[str, Any]:
-    steps = gaps = post_missing = 0
-    for e in rec.events():
-        if e["type"] == "step":
-            steps += 1
-            post_missing += 1 if e.get("post_missing") else 0
-        elif e["type"] == "unrecorded_change":
-            gaps += 1
-    return {"steps": steps, "gaps": gaps, "post_missing": post_missing}
+    # 和 `trace blame`／`trace flag` 同一把尺（feedback.coverage_summary）：
+    # 步數／缺口數照實際病歷算，觀察停用時連原因和出路一起給（round 27 摩擦 3）。
+    return F.coverage_summary(rec)
 
 
 def _flag_blames(rec: Recorder, contract: Any) -> list[dict[str, Any]]:

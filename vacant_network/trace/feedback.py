@@ -275,6 +275,35 @@ def _actor(a: dict[str, Any] | None) -> str:
     return who
 
 
+def last_scan_disabled(evs: list[dict[str, Any]]) -> str | None:
+    """最近一筆「觀察被停用」的原因（`recorder._disable_scan` 記的 coverage 事件）。
+    觀察活著 ⇒ None。"""
+    for e in reversed(evs):
+        if e["type"] == "coverage" and e.get("scan_disabled"):
+            return str(e["scan_disabled"])
+    return None
+
+
+def coverage_summary(rec: Any) -> dict[str, Any]:
+    """報告的覆蓋率行：真實的步數／缺口數，加上目前的觀察狀態。
+
+    round 27 dogfood 摩擦 3：`trace blame`／`trace flag` 的呼叫方傳空 dict 進來，報告永遠寫
+    `recorded steps: 0`，和 `trace show`（1787 步）字面矛盾。覆蓋率行必須照實際病歷算；
+    觀察被停用時要寫得出路（`vacant trace rescan`），不是只留一個 0 讓人猜。"""
+    evs = list(rec.events())
+    out: dict[str, Any] = {"steps": 0, "gaps": 0, "post_missing": 0}
+    for e in evs:
+        if e["type"] == "step":
+            out["steps"] += 1
+            out["post_missing"] += 1 if e.get("post_missing") else 0
+        elif e["type"] == "unrecorded_change":
+            out["gaps"] += 1
+    disabled = last_scan_disabled(evs)
+    if disabled is not None:
+        out["scan_disabled"] = disabled
+    return out
+
+
 def render_report(blames: list[dict[str, Any]], results: list[dict[str, Any]], *,
                   outcome: str | None, coverage: dict[str, Any], why_open: str | None = None,
                   contract_task: str | None = None) -> str:
@@ -286,9 +315,16 @@ def render_report(blames: list[dict[str, Any]], results: list[dict[str, Any]], *
                  + (f" — {why_open}" if why_open else ""))
     lines.append(f"- required checks not passing: {len(open_required)}; "
                  f"advisory: {len(open_advisory)}")
-    lines.append(f"- recorded steps: {coverage.get('steps', 0)}; unrecorded changes (gaps): "
-                 f"{coverage.get('gaps', 0)}; steps without a post-tool event: "
-                 f"{coverage.get('post_missing', 0)}")
+    cov = coverage or {}
+    cov_line = (f"- recorded steps: {cov.get('steps', 0)}; unrecorded changes (gaps): "
+                f"{cov.get('gaps', 0)}; steps without a post-tool event: "
+                f"{cov.get('post_missing', 0)}")
+    if cov.get("scan_disabled"):
+        # 步數是真的（step 事件照樣記）；「0」的讀法是錯的——照實寫觀察狀態和出路
+        cov_line += (f" — file-change observation is disabled ({cov['scan_disabled']}): "
+                     "steps are recorded, but file changes are not attributed step by step; "
+                     "revive it with `vacant trace rescan`")
+    lines.append(cov_line)
     lines.append("- signing: the trace is signed with a key on this machine, same account as "
                  "the agent ⇒ tampering is detectable, not impossible")
     lines.append("")

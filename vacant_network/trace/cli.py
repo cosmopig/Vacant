@@ -84,8 +84,7 @@ def cmd_show(args: argparse.Namespace) -> int:
     # 觀察狀態是**目前**的事實，不是流裡的一行：recorder 一旦停用掃描就不會再啟用
     # （recorder._disable_scan；寧可照實記「沒觀察到」也不擋 agent 的掛鉤）。病歷主視圖
     # 看不出來就等于沒有——blame 頁的小字不能替 show 背書（round 27 dogfood）。
-    disabled = next((str(e["scan_disabled"]) for e in reversed(evs)
-                     if e["type"] == "coverage" and e.get("scan_disabled")), None)
+    disabled = F.last_scan_disabled(evs)
     if disabled is not None:
         print(f"   ·  coverage: file-change observation is disabled — {disabled} "
               f"(steps are still recorded, but file changes are no longer attributed "
@@ -192,12 +191,15 @@ def _blame_where(ws: pathlib.Path, c: Any, where: str, value: str | None) -> dic
 
 def cmd_blame(args: argparse.Namespace) -> int:
     ws, c = _workspace(args)
-    Recorder(ws).checkpoint("blame")          # 行號要對得上現在的檔
+    rec = Recorder(ws)
+    rec.checkpoint("blame")          # 行號要對得上現在的檔
     b = _blame_where(ws, c, args.where, args.value)
     if args.json:
         print(json.dumps(b, ensure_ascii=False, indent=1, default=str))
     else:
-        print(F.render_report([b], [], outcome=None, coverage={}), end="")
+        # 覆蓋率行照實際病歷算（round 27 摩擦 3）：這裡傳空 dict 會永遠寫
+        # `recorded steps: 0`，和 `trace show` 的步數字面矛盾
+        print(F.render_report([b], [], outcome=None, coverage=F.coverage_summary(rec)), end="")
     return 0
 
 
@@ -249,7 +251,7 @@ def cmd_flag(args: argparse.Namespace) -> int:
         print(json.dumps({"flag_id": fid, "blame": b}, ensure_ascii=False, indent=1, default=str))
     else:
         print(f"flag {fid} recorded (signed with the owner key {_keys.pub_hex(owner)[:12]}…)")
-        print(F.render_report([b], [], outcome=None, coverage={}), end="")
+        print(F.render_report([b], [], outcome=None, coverage=F.coverage_summary(rec)), end="")
     return 0
 
 
