@@ -519,7 +519,7 @@ button{font:inherit;background:var(--chip);color:var(--ink);border:1px solid var
 ul.f{margin:4px 0 0 18px;padding:0}
 </style></head><body>
 <header><h1>Vacant 儀表板</h1><span id="hdr" class="muted small"></span>
-<span class="muted small" style="margin-left:auto">只讀 · 只在本機 · 每 3 秒更新</span></header>
+<span class="muted small" style="margin-left:auto">只讀 · 只在本機 · 每 3 秒更新 · 數字是讀取時刻的快照</span></header>
 <main>
 <section id="sec-install"><h2>安裝</h2><div id="install" class="empty">讀取中…</div></section>
 <section id="sec-projects"><h2>專案（agent 在這些資料夾裡做事時，Vacant 有記錄）</h2><div id="projects" class="empty">讀取中…</div></section>

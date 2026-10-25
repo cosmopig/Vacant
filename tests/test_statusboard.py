@@ -230,6 +230,13 @@ def test_api_index_lists_only_real_endpoints(env, server):
     assert st == 404 and json.loads(body) == {"error": "not found"}
 
 
+def test_page_states_numbers_are_read_time_snapshot(env, server):
+    # round 17 #5：HTML 頁應說明「數字是讀取時刻的快照」（/api 索引已有、HTML 頁沒有）。
+    st, ct, body = _get(server, "/")
+    assert st == 200 and ct.startswith("text/html")
+    assert "數字是讀取時刻的快照".encode() in body
+
+
 def test_http_is_read_only_and_local_only(env, server):
     assert _get(server, "/api/overview", method="POST")[0] == 405
     assert _get(server, "/api/overview", method="DELETE")[0] == 405
