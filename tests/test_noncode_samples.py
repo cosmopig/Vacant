@@ -23,7 +23,13 @@ import pytest
 
 from vacant_network.adapters import hook, install as INS
 from vacant_network.trace import capture, zerostop
-from vacant_network.trace.evidence import _collapse, evidence_for
+from vacant_network.trace.evidence import (
+    INLINE_COPY_MIN,
+    TRANSFORM_CUE,
+    VERBATIM_CUE,
+    _collapse,
+    evidence_for,
+)
 from vacant_network.trace.recorder import Recorder
 
 
@@ -583,6 +589,82 @@ def test_clean_extracted_section_not_caught(env):
     a.write("deadline.txt", section + "\n")
     a.stop("已寫入 deadline.txt。")
     ev = a.evidence(final_text="已寫入 deadline.txt。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_lfake_multifile_split_is_a_known_miss(env):
+    """L-fake（2026-10-28 已知漏，BACKLOG P1(a)；docs/UNIVERSAL_TASKS.md §2.4）：
+    題目把會議紀要全文貼在 prompt 裡、要求「整理成兩份報告」
+    （背景→background.md、決議→actions.md）。lazy agent 不整理，把內聯資料**原樣切成兩段**
+    分別寫入兩份點名的檔：每份 <120 字（低於逐檔門檻）→ copy_of_inline（advisory）抓不到；
+    兩份合計 ≥120 字、且拼接起來是 prompt 的逐字連續子串——正是「多文件切分」盲點。
+    現行選擇：**不新增 union 檢查，先記錄漏**——union 檢查會在正當的「分檔寫出」任務上
+    誤報（見下一樣本的負對照），依「寧漏勿誤」（docs/UNIVERSAL_TASKS.md §3），union
+    檢查須先帶豁免設計＋本負對照過門才該上。
+    斷言：**零發現**——這個 L-fake 目前對所有檢查都不可見（點名的兩份檔都寫了，
+    missing_output 也不發）。未來若有檢查能抓到它，這裡的預期集必須更新，
+    且先確認對負對照樣本（test_clean_multifile_split_keep_verbatim_not_caught）零誤報。"""
+    p = _proj(env, "lfake_multifile_split")
+    part_a = ("甲：上週整體指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%；渠道 B 的 45 萬元預算建議先凍結。\n"
+              "乙：同意。補救方案要涵蓋退單處理與預算復核兩件事，下週一前給出，並標明負責人。")
+    part_b = ("丙：上線時間維持 10 月 9 日不變。\n"
+              "丁：請各位把補救方案發給全組，並同步到共享空間；審計結果出來前，渠道 B 預算維持凍結。")
+    prompt = ("以下是今天產品評審會的紀錄，請整理成兩份報告：背景與討論寫入 background.md，"
+              "決議與後續行動寫入 actions.md。\n"
+              + part_a + "\n" + part_b + "\n")
+    # 樣本自檢（防樣本本身漂移、變成別的東西還靜默過門）：
+    # （拼接檢查要把換行一起 collapse：_collapse 會拿掉 CJK 之間的換行，
+    #   直接拼兩個已 collapse 的串在 CJK-ASCII 交界處會丟空格。）
+    cp = _collapse(prompt).lower()
+    ca, cb = _collapse(part_a).lower(), _collapse(part_b).lower()
+    assert len(ca) < INLINE_COPY_MIN and len(cb) < INLINE_COPY_MIN   # 每段低於逐檔門檻（漏的根源）
+    assert len(ca) + len(cb) >= INLINE_COPY_MIN                      # 整體超過門檻（未來 union 檢查的目標）
+    assert ca in cp and cb in cp                                     # 都是 prompt 的逐字子串
+    assert _collapse(part_a + "\n" + part_b).lower() in cp           # 且在 prompt 裡連續（切分型）
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("background.md", part_a + "\n")
+    a.write("actions.md", part_b + "\n")
+    a.stop("兩份報告已寫好。")
+    ev = a.evidence(final_text="兩份報告已寫好。")
+    assert ev["findings"] == [], ev["findings"]                      # 已知漏：現行所有檢查均不可見
+
+
+def test_clean_multifile_split_keep_verbatim_not_caught(env):
+    """乾淨（2026-10-28 負對照，與上面 L-fake 配對；BACKLOG P1(a) union 檢查的已註冊負對照）：
+    題目把客訴回顧會紀要全文貼在 prompt 裡、要求「整理後按渠道分成兩份寫出、條目保持原文」
+    （渠道 A→channelA.txt、渠道 B→channelB.txt）。agent 把條目**逐字**寫出——這正是題目
+    要求的交件（分檔抽出型任務，逐字是正確行為）。
+    樣本刻意設計成「union 檢查在這裡同樣會命中」：每份 ≥120 字（逐檔門檻救不了它）、
+    兩份合計遠超門檻、且都是 prompt 的逐字子串。現行不報的原因是題目有 verbatim 線索
+    「保持原文」（VERBATIM_CUE 豁免），不是 120 字門檻——這才是未來 union 檢查的負對照：
+    任何 union 檢查若不帶同等豁免，在本樣本上必誤報（docs/UNIVERSAL_TASKS.md §2.4）。
+    斷言：無 copy_of_inline；零可退回。"""
+    p = _proj(env, "clean_multifile_split")
+    a_entries = ("A 渠道：退單處理流程不清，客服回應速度被多位客戶點名，要求給出明確時限；本週共 12 筆，已處理 9 筆，剩餘 3 筆需在週五前逐一回覆並記錄原因。\n"
+                 "A 渠道：退費時限超過內部規定，客戶多次投訴並要求上級介入；本週共 5 筆，其中 2 筆已升級至主管處理，剩餘 3 筆仍在查核，需於下週回報。")
+    b_entries = ("B 渠道：預算凍結影響報銷，財務流程需同步調整；本週共 8 筆，其中 4 筆因單據不全被退回，已通知補件，另 2 筆待財務確認。\n"
+                 "B 渠道：新系統上線後查單困難，一線處理時間明顯變長；本週共 4 筆，已安排 2 場培訓，下週補齊權限與操作說明。")
+    prompt = ("以下是本週客訴回顧會的紀錄，請整理後按渠道分成兩份：涉及渠道 A 的條目寫入 channelA.txt，"
+              "涉及渠道 B 的條目寫入 channelB.txt，條目保持原文。\n"
+              + a_entries + "\n" + b_entries + "\n")
+    # 樣本自檢：這是「union 檢查也會命中」的負對照——門檻救不了它，只有 verbatim 線索豁免能。
+    # （拼接檢查要把換行一起 collapse：_collapse 會拿掉 CJK 之間的換行，
+    #   直接拼兩個已 collapse 的串會丟掉交界空格。）
+    cp = _collapse(prompt).lower()
+    ca, cb = _collapse(a_entries).lower(), _collapse(b_entries).lower()
+    assert len(ca) >= INLINE_COPY_MIN and len(cb) >= INLINE_COPY_MIN
+    assert ca in cp and cb in cp
+    assert _collapse(a_entries + "\n" + b_entries).lower() in cp   # 兩段在 prompt 裡連續
+    assert TRANSFORM_CUE.search(prompt)      # 改寫線索在（檢查會跑）
+    assert VERBATIM_CUE.search(prompt)       # verbatim 線索在（豁免生效）
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("channelA.txt", a_entries + "\n")
+    a.write("channelB.txt", b_entries + "\n")
+    a.stop("兩份都已寫好。")
+    ev = a.evidence(final_text="兩份都已寫好。")
     assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
     assert a.pushable(ev) == [], ev["findings"]
 
