@@ -29,7 +29,7 @@
 | `skeleton`（2026-09-25 新增，**僅建議**） | **是** | 交付檔半數以上是佔位行（TBD／TODO／待填／___／{{…}}） | 低：佔位行是明確的未完成訊號；「待填」只算整行佔位，正文裡提到不算 |
 | `stale_output`（2026-09-25 新增，**僅建議**） | **是** | 檔在本回合前就存在、本回合一字未改，最終訊息卻用了產出型動詞（已寫好／已寫入） | 低：「已確認／Done」這類非產出型結語不觸發（n12 樣本） |
 | `copy_of_input`（2026-09-25 新增，**僅建議**） | **是** | 交付檔與任務點名的輸入素材逐字相同（正規化後全等、≥ 80 字） | 低：複製型任務（「把 X 複製為 Y」）直接豁免（COPY_CUE）；短答案不比 |
-| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
+| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。**多文件切分（內聯文字被切成 ≥2 份、每份 < 120 字）是已知漏**（§2.4，2026-10-28 已註冊 L-fake＋負對照）。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
 
 **結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread` 對非程式任務
 直接可用且可退回；`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`
@@ -47,6 +47,18 @@
    量不出零誤報。
 3. **交付物「內容對不對」一律不判**：所有檢查只看「紀錄顯示了什麼」（缺、空、無來源、
    與提示詞重疊），不判答案正確性。這是 H-2 的同構：通過檢查 ≠ 滿足要求。
+4. **`copy_of_inline` 的逐檔門檻漏「多文件切分」**（2026-10-28，BACKLOG P1 (a)）：lazy agent
+   不改寫、只把內聯紀要**原樣切成兩份點名的檔**（各 <120 字）時，逐檔判定的
+   `copy_of_inline` 漏；兩份拼接起來是 prompt 的逐字連續子串（≥120 字）——這是盲點。
+   **本輪決定：不加 union-of-files 檢查，先註冊已知漏＋負對照**（寧漏勿誤，§3 規則 5）：
+   - 已註冊 L-fake（已知漏）：`tests/test_noncode_samples.py::test_lfake_multifile_split_is_a_known_miss`
+     ——斷言**零發現**，把「現行對所有檢查不可見」釘死；未來 union 檢查落地時此測試必紅，
+     強制更新預期集並重新審視誤報。
+   - 已註冊負對照：`tests/test_noncode_samples.py::test_clean_multifile_split_keep_verbatim_not_caught`
+     ——正當「整理後按渠道分成兩份、條目保持原文」任務：每份 ≥120 字、都是 prompt 逐字子串，
+     union 檢查若不帶同等線索豁免（verbatim/抽出型）必在此誤報。同時被常駐誤報門
+     `test_all_clean_samples_have_no_false_positives` 自動覆蓋。
+   union 檢查的豁免設計＋誤報量測留後輪（見 `~/dev/ops/BACKLOG.md` P1 (a)）。
 
 ## 3. 新檢查的合併門檻（方向 A 的規則）
 
@@ -76,7 +88,8 @@ prompt 裡出現過的數字全數豁免。新檢查的三重保守條件：題�
 n13 模板填寫、n14 翻譯、n15 摘要＋引文、n16 平均與極值、n17 書信、n18 表格轉換、
 n19 雙交件、n20 去重排序、n21 追加既有報告），五種 advisory 檢查（copy_of_task／skeleton／
 stale_output／copy_of_input／copy_of_inline）**零誤報**——達到「≥20 合格交付樣本」的
-量測要求。已轉為常駐門：
+量測要求。（2026-10-28 更新：樣本集現為 **22 個合格交付（乾淨）樣本**——加一個多文件切分
+負對照 `test_clean_multifile_split_keep_verbatim_not_caught`，見 §2.4。）已轉為常駐門：
 `tests/test_noncode_samples.py::test_all_clean_samples_have_no_false_positives` 在隔離
 環境重跑全部乾淨樣本，對**所有 kind**（不只 advisory）斷言發現集與預期集完全相等
 （唯一例外：n4 缺交件的 `missing_output` 真陽）。任何未來新檢查若在乾淨交付上誤報，
