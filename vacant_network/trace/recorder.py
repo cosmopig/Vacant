@@ -61,6 +61,9 @@ SUBAGENT_MAX_S = 3600.0
 MAX_DEFERRALS = 3
 #: 背景的第一次完整觀察最多等這麼久；過了還沒寫回來 ⇒ 當它失敗了，這個專案不再逐步掃描
 BASELINE_WAIT_S = 600.0
+# 增量掃描超時之後，自動在背景試 `rescan` 救回的最多次數（每次＝背景完整讀一次工作區）。
+# 預算用完 ⇒ 維持停用；手動 `vacant trace rescan` 照舊可用，成功並重置預算。
+AUTO_RESCAN_MAX = 5
 #: 檔案數到這裡以上，工作區狀態存成對上一份完整索引的差異（見 `_index_blob`）
 DELTA_MIN_FILES = 1000
 #: 事件裡直接列出的清單上限；超過的整份存進版本庫，事件帶它的 sha256（鏈上每筆有 64KB 上限）
@@ -356,14 +359,16 @@ class Recorder:
                 raise
             if prev is None:
                 self._defer_baseline(st, str(e))
-            elif was_compacted:
-                # 超時的是 `vacant gc` 之後的第一次重核對（重存大量版本），不是增量 diff 本身慢。
-                # 原因要寫出真正的起因（`compacted` 只有 gc 會設）：否則使用者會以為自己的
-                # repo 掃得慢，而真正的出路是 `vacant trace rescan`（無時限的完整重看）。
-                self._disable_scan(st,
-                                   f"the first scan after `vacant gc` passed {self.scan_deadline_s:.0f}s")
             else:
-                self._disable_scan(st, f"an incremental scan passed {self.scan_deadline_s:.0f}s")
+                if was_compacted:
+                    # 超時的是 `vacant gc` 之後的第一次重核對（重存大量版本），不是增量 diff 本身慢。
+                    # 原因要寫出真正的起因（`compacted` 只有 gc 會設）：否則使用者會以為自己的
+                    # repo 掃得慢，而真正的出路是 `vacant trace rescan`（無時限的完整重看）。
+                    self._disable_scan(st,
+                                       f"the first scan after `vacant gc` passed {self.scan_deadline_s:.0f}s")
+                else:
+                    self._disable_scan(st, f"an incremental scan passed {self.scan_deadline_s:.0f}s")
+                self._maybe_auto_rescan(st)   # 照樣停用（誠實），但自動在背景試救回
             return None
         except ValueError as e:                      # 檔案數上限
             if st is None:
@@ -432,6 +437,32 @@ class Recorder:
         except OSError:
             pass
 
+    def _maybe_auto_rescan(self, st: dict[str, Any]) -> None:
+        """增量掃描超時、觀察被停用之後：自動在背景試一次救回（`rescan`，無時限的重看）。
+
+        和手動 `vacant trace rescan` 是同一份程式：救回成功 ⇒ 逐步觀察自動恢復；
+        救不回／當機／工作區太大 ⇒ 維持停用——最壞情況就是這個機制存在之前的行為。
+        記次數（每次＝背景完整讀一次工作區）；`AUTO_RESCAN_MAX` 用完就不再自動試，
+        手動 `vacant trace rescan` 照舊可用。"""
+        import subprocess
+        import sys
+        a = st.get("auto_rescan")
+        if not (isinstance(a, dict) and isinstance(a.get("n"), int)):
+            a = {"n": 0}
+        if a["n"] >= AUTO_RESCAN_MAX:
+            return
+        a["n"] += 1
+        a["ts"] = time.time()
+        st["auto_rescan"] = a
+        self._save(st)
+        try:
+            subprocess.Popen([sys.executable, "-m", "vacant_network.trace.recorder", "rescan",
+                              str(self.workspace)], stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             start_new_session=True)
+        except OSError:
+            pass
+
     def baseline(self, refresh: bool = False) -> dict[str, Any]:
         """把整個工作區看一次（沒有時限、不拿鎖地掃）。預設：已經有人看過了就不動。
 
@@ -470,6 +501,7 @@ class Recorder:
             st.pop("compacted", None)                 # 這份剛完整重存過：下一步增量走快路徑
             if refresh:
                 st.pop("scan_disabled", None)
+                st.pop("auto_rescan", None)                  # 救回成功：自動救回的預算重置
                 st.pop("unobserved_before_baseline", None)
                 info = {"rescanned": True, "was_disabled": was_disabled,
                         "files": len(idx), "seconds": round(secs, 1), "index": sha,
@@ -1017,14 +1049,18 @@ class Recorder:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """`python -m vacant_network.trace.recorder baseline <工作區>`：背景的第一次完整觀察。"""
+    """`python -m vacant_network.trace.recorder {baseline|rescan} <工作區>`：背景的重看。
+
+    `baseline`＝第一次完整觀察（看過了就不動）；`rescan`＝重新完整觀察——救回被超時
+    停用的專案，與手動 `vacant trace rescan` 同一份程式。"""
     import sys
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 2 or args[0] != "baseline":
-        print("usage: python -m vacant_network.trace.recorder baseline <workspace>",
+    if len(args) != 2 or args[0] not in ("baseline", "rescan"):
+        print("usage: python -m vacant_network.trace.recorder {baseline|rescan} <workspace>",
               file=sys.stderr)
         return 2
-    print(json.dumps(Recorder(args[1]).baseline()))
+    rec = Recorder(args[1])
+    print(json.dumps(rec.baseline() if args[0] == "baseline" else rec.rescan()))
     return 0
 
 

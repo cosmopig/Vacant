@@ -185,3 +185,81 @@ def test_cmd_rescan_too_big_exits_nonzero(proj, monkeypatch, capsys):
     rc = cli.main(["--contract", str(cp), "rescan"])
     assert rc == 2
     assert "rescan failed" in capsys.readouterr().err
+
+
+# —— 超時之後自動救回：不再需要人手跑 `vacant trace rescan` ——
+
+def test_timeout_spawns_a_background_rescan_attempt(proj, monkeypatch):
+    """超時 ⇒ 照樣停用（誠實，不讓掛鉤多等），但自動在背景試一次 `rescan` 救回。
+
+    背景救不回時（這支測試裡 Popen 被 stub 掉）維持停用——最壞情況＝舊行為。"""
+    p, _c = proj
+    spawned: list[list[str]] = []
+    monkeypatch.setattr(subprocess, "Popen", lambda argv, **kw: spawned.append(list(argv)))
+    _died_after_gc(p)                                         # 超時 ⇒ 停用
+    st = _state(p)
+    assert "scan_disabled" in st
+    assert st["auto_rescan"]["n"] == 1                        # 記了次數
+    assert len(spawned) == 1
+    assert spawned[0][-2:] == ["rescan", str(p.resolve())]    # 背景跑的就是 `rescan`
+
+
+def test_background_rescan_revives_without_human_action(proj, monkeypatch):
+    """背景行程真的跑完（這裡用同一份 `rescan()` 模擬）⇒ 逐步觀察自動恢復，不必等人。
+
+    救回成功 ⇒ 自動救回的預算重置（手動救回也是同一條路徑、同樣重置）。"""
+    p, _c = proj
+    monkeypatch.setattr(subprocess, "Popen", lambda *a, **k: None)   # 背景不真跑
+    _died_after_gc(p)
+    st = _state(p)
+    assert "scan_disabled" in st and st["auto_rescan"]["n"] == 1
+    out = R.Recorder(p).rescan()                                # 背景行程做的事
+    assert out["rescanned"] is True
+    st = _state(p)
+    assert "scan_disabled" not in st and "auto_rescan" not in st
+    # 救回之後，掛鉤照舊能歸因寫入
+    rec = R.Recorder(p)
+    rec.scan_deadline_s = R.HOOK_SCAN_S
+    rec.pre("t2", MAIN, "Write", {"file_path": "report.md"})
+    (p / "report.md").write_text("# Q3\nTotal: 60\n")
+    e = rec.post("t2", MAIN, "Write", {"file_path": "report.md"}, "ok")
+    assert [w["path"] for w in e["writes"]] == ["report.md"] and "writes_unknown" not in e
+
+
+def test_auto_rescan_budget_caps_the_background_attempts(proj, monkeypatch):
+    """每次自動救回＝背景完整讀一次工作區；預算用完 ⇒ 維持停用、不再起背景行程。
+
+    手動 `vacant trace rescan` 照舊可用（並重置預算）。"""
+    p, _c = proj
+    spawned: list[list[str]] = []
+    monkeypatch.setattr(subprocess, "Popen", lambda argv, **kw: spawned.append(list(argv)))
+    R.Recorder(p).baseline()
+    rec = R.Recorder(p)
+    st = json.loads(rec.state_path.read_text())
+    st["auto_rescan"] = {"n": R.AUTO_RESCAN_MAX, "ts": 0}
+    rec.state_path.write_text(json.dumps(st))
+    rec.scan_deadline_s = 1e-9
+    rec.pre("t", MAIN, "Bash", {"command": "ls"})
+    rec.post("t", MAIN, "Bash", {"command": "ls"}, "")
+    st = _state(p)
+    assert st["scan_disabled"]                                  # 照樣停用
+    assert st["auto_rescan"]["n"] == R.AUTO_RESCAN_MAX          # 不再加
+    assert not spawned                                           # 不再起背景行程
+    # 手動救回照舊：成功、並重置預算
+    out = R.Recorder(p).rescan()
+    assert out["rescanned"] is True and "auto_rescan" not in _state(p)
+
+
+def test_module_main_accepts_rescan(proj, capsys):
+    """`python -m vacant_network.trace.recorder rescan <ws>`：背景行程的入口。"""
+    p, _c = proj
+    _died_after_gc(p)
+    import io
+    from contextlib import redirect_stdout
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        rc = R.main(["rescan", str(p.resolve())])
+    assert rc == 0
+    info = json.loads(buf.getvalue().strip().splitlines()[-1])
+    assert info["rescanned"] is True
+    assert "scan_disabled" not in _state(p)
