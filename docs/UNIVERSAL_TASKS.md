@@ -6,10 +6,11 @@
 
 ## 1. 現有發現（finding）分類
 
-`run()`（`evidence.py`）目前會產生 **7 種 kind**（2026-10-24 對照原始碼盤點：
+`run()`（`evidence.py`）目前會產生 **11 種 kind**（2026-10-25 對照原始碼盤點：
 `missing_output`、`invalid_output`、`failed_step`、`test_claim`、`unsourced`、`unread`、
-`copy_of_task`；前 6 種可退回給 agent，`copy_of_task` 被 `zerostop.pushable_for` 明確排除、
-只進交件說明）。下表按 kind＋sub 逐行分類。判定「域相關」的標準：
+`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`；
+前 6 種可退回給 agent，後 5 種被 `zerostop.pushable_for` 明確排除、只進交件說明）。
+下表按 kind＋sub 逐行分類。判定「域相關」的標準：
 **檢查邏輯本身是否依賴「有程式碼可跑／可解析」這個前提**，而不是「樣本裡恰好有程式」。
 
 | kind（sub） | 域無關？ | 依賴什麼 | 對非程式交付物的誤報風險 |
@@ -25,9 +26,14 @@
 | `unsourced` | **是** | 寫入行的**數值與日期**要在「讀過／跑過」的語料裡找得到（`corpus`） | 這是通用檢查：報告、單一答案、表格都適用；誤報靠 exempt 規則（給定的、今天/昨天、任務裡寫明的日期、假設標記）壓低 |
 | `unread` | **是** | 點名檔有沒有被讀 | 域無關；誤報低（讀過就不報） |
 | `copy_of_task`（2026-10-06 新增，**僅建議**） | **是** | 要求的交付檔內容 ≈ 任務提示詞原文（`_collapse` 正規化後包含、比例 ≥ 0.8、提示詞 ≥ 60 字元） | 只抓「把題目當答案交出去」；照抄**引用內容**（不含指示句）的轉述任務不觸發。見 §3 |
+| `skeleton`（2026-09-25 新增，**僅建議**） | **是** | 交付檔半數以上是佔位行（TBD／TODO／待填／___／{{…}}） | 低：佔位行是明確的未完成訊號；「待填」只算整行佔位，正文裡提到不算 |
+| `stale_output`（2026-09-25 新增，**僅建議**） | **是** | 檔在本回合前就存在、本回合一字未改，最終訊息卻用了產出型動詞（已寫好／已寫入） | 低：「已確認／Done」這類非產出型結語不觸發（n12 樣本） |
+| `copy_of_input`（2026-09-25 新增，**僅建議**） | **是** | 交付檔與任務點名的輸入素材逐字相同（正規化後全等、≥ 80 字） | 低：複製型任務（「把 X 複製為 Y」）直接豁免（COPY_CUE）；短答案不比 |
+| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）與複製任務（COPY_CUE）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。見 §3 例子 |
 
-**結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread`、`copy_of_task`
-五種對非程式任務直接可用；`syntax/stub/test_claim/failed_step/empty_filter/contract_shape`
+**結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread` 對非程式任務
+直接可用且可退回；`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`
+五種域無關但預設只進交件說明（不退回）；`syntax/stub/test_claim/failed_step/empty_filter/contract_shape`
 的前提是「有程式碼/表格可跑」，對純文件任務大多不會觸發（不會擋，但也不會幫上忙）。
 
 ## 2. 現有檢查對非程式任務的已知盲區（誠實邊界）
@@ -52,10 +58,18 @@
    判定算域無關，因為任何任務的交付物都可能有數值）。
 3. **預設只進交件說明**：在 `zerostop.pushable_for` 裡**明確排除**（像 `copy_of_task`），
    不退回給 agent。要退回的檢查必須另外有零誤報證據。
-4. **離線重播零誤報**：`tests/test_noncode_samples.py` 的 5 個非程式樣本（乾淨交付）
-   全部不觸發該檢查，才准合併；觸發任一個就先修判定再重測。
+4. **離線重播零誤報**：`tests/test_noncode_samples.py` 的全部乾淨樣本（非程式＋程式）
+   不觸發該檢查，才准合併；觸發任一個就先修判定再重測。
 5. **保守閾值**：相似/包含類判定一律用「正規化後包含 + 長度比例 + 最小長度」三重條件，
    寧可漏抓不可誤傷；`_collapse`（`evidence.py:57`）是唯一正規化函式。
+
+**例子（2026-10-25，`copy_of_inline`）**：題目把一段會議紀要貼在提示詞裡、要求「整理成
+正式報告寫入 report.md」，agent 把那段紀要原樣寫成 report.md。既有的檢查都漏掉它：
+`copy_of_task` 要求連指示句都在交件裡（比例 ≥ 0.8），而交件只有數據段；`unsourced` 把
+prompt 裡出現過的數字全數豁免。新檢查的三重保守條件：題目有改寫線索（整理／摘要／分析…）、
+交件 ≥ 120 字、交件是 prompt 的**逐字**子串。反例全數豁免：「原樣寫入」的抄錄任務
+（n3／n14）、真正重寫過的報告（n15）、從清單挑出的一個短答案（n16）。
+測試：`tests/test_noncode_samples.py::test_lfake_inline_echo_is_caught` 等 5 個（2026-10-25）。
 
 ## 4. 離線重播入口
 

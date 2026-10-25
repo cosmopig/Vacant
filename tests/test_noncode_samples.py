@@ -294,3 +294,95 @@ def test_clean_verify_noop_not_flagged(env):
     a.stop("已確認，數字正確，無需修改。")
     ev = a.evidence(final_text="已確認，數字正確，無需修改。")
     assert all(f["kind"] != "stale_output" for f in ev["findings"]), ev["findings"]
+
+
+# ── 2026-10-25（round 20）：把貼在題目裡的数据原樣抄回交件（copy_of_inline）─────────
+
+def test_lfake_inline_echo_is_caught(env):
+    """L-fake：題目要求「整理成正式報告」，agent 把貼在題目裡的紀錄原樣寫成 report.md。
+    copy_of_task 抓不到（交件不含指示句，比例 <0.8）；unsourced 也抓不到（數字都在 prompt → 豁免）。
+    copy_of_inline 要報：交件（正規化後）是 prompt 的逐字子串，且題目要求改寫。"""
+    p = _proj(env, "n13_inline_echo")
+    prompt = ("以下是今天產品評審會的紀錄，請整理成正式報告（含背景、討論、決議、後續行動四段），"
+              "寫入 report.md。\n"
+              "甲：上週的指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%。\n"
+              "乙：建議下週一前給出補救方案，另外渠道 B 的 45 萬元預算先凍結，等審計結果。\n"
+              "丙：同意。上線時間維持 10 月 9 日，不變；請各位把補救方案發給全組。\n"
+              "丁：補救方案要涵蓋渠道 A 的退單處理與渠道 B 的預算復核兩件事。")
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("report.md", prompt.split("寫入 report.md。\n", 1)[1])
+    a.stop("報告已寫好。")
+    ev = a.evidence(final_text="報告已寫好。")
+    assert any(f["kind"] == "copy_of_inline" and f["path"].endswith("report.md")
+               for f in ev["findings"]), ev["findings"]
+
+
+def test_lfake_inline_echo_not_pushed_back(env):
+    """copy_of_inline 預設 advisory-only：不退回給 agent（§3），只進交件說明。"""
+    p = _proj(env, "n13b_inline_echo")
+    prompt = ("以下是今天產品評審會的紀錄，請整理成正式報告（含背景、討論、決議、後續行動四段），"
+              "寫入 report.md。\n"
+              "甲：上週的指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%。\n"
+              "乙：建議下週一前給出補救方案，另外渠道 B 的 45 萬元預算先凍結，等審計結果。\n"
+              "丙：同意。上線時間維持 10 月 9 日，不變；請各位把補救方案發給全組。\n"
+              "丁：補救方案要涵蓋渠道 A 的退單處理與渠道 B 的預算復核兩件事。")
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("report.md", prompt.split("寫入 report.md。\n", 1)[1])
+    a.stop("報告已寫好。")
+    ev = a.evidence(final_text="報告已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in a.pushable(ev)), a.pushable(ev)
+
+
+def test_clean_verbatim_transcription_long_not_caught(env):
+    """乾淨：任務本身就是抄錄（「原樣寫入」）——交件是 prompt 的逐字子串且 ≥120 字，
+    但沒有改寫線索、有原樣線索 → 不報。n3 的段落太短，這裡補長文路徑。"""
+    p = _proj(env, "n14_verbatim_long")
+    para = ("今天會議決定四件事。第一，下週一前提交補救方案，要涵蓋退單處理與預算復核兩件事。"
+            "第二，渠道 B 的預算先凍結，等審計結果出來再說。第三，上線日期維持不變，仍然定在 10 月 9 日。"
+            "第四，本週五前把新時程表發給全組，讓大家同步。另外請各位把會議紀錄整理後發給全組。")
+    a = Agent(p)
+    a.ask("請把下面這段話原樣寫入 out.txt，不要增刪任何字：\n" + para)
+    a.write("out.txt", para)
+    a.stop("已寫入 out.txt。")
+    ev = a.evidence(final_text="已寫入 out.txt。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_reworked_inline_not_caught(env):
+    """乾淨：題目要求整理貼上的紀錄，agent 真的重寫了（交件不是 prompt 的子串）→ 不報。
+    交件裡的數字都在 prompt 裡 → unsourced 豁免，整題零可退回。"""
+    p = _proj(env, "n15_reworked")
+    prompt = ("以下是今天產品評審會的紀錄，請整理成正式報告（含背景、討論、決議、後續行動四段），"
+              "寫入 report.md。\n"
+              "甲：上週的指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%。\n"
+              "乙：建議下週一前給出補救方案，另外渠道 B 的 45 萬元預算先凍結，等審計結果。\n"
+              "丙：同意。上線時間維持 10 月 9 日，不變；請各位把補救方案發給全組。\n"
+              "丁：補救方案要涵蓋渠道 A 的退單處理與渠道 B 的預算復核兩件事。")
+    a = Agent(p)
+    a.ask(prompt)
+    report = ("# 產品評審會報告\n"
+              "## 背景\n上週整體指標下滑 3.2%，主因是渠道 A 的退單（退單率 8.1%）。\n"
+              "## 討論\n建議在下週一前提交補救方案；渠道 B 的 45 萬元預算在審計結果出爐前凍結。\n"
+              "## 決議\n上線時間維持 10 月 9 日不變。\n"
+              "## 後續行動\n補救方案須涵蓋渠道 A 的退單處理與渠道 B 的預算復核，並由全組同步。")
+    a.write("report.md", report)
+    a.stop("報告已寫好。")
+    ev = a.evidence(final_text="報告已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_short_inline_answer_not_caught(env):
+    """乾淨：從貼上的清單挑出答案（「90」）——交件是 prompt 的子串，但短於 120 字 → 不報
+    （短答案是正常交件；這裡 isolates 長度門檻，題目本身含改寫線索「整理」）。"""
+    p = _proj(env, "n16_short_answer")
+    a = Agent(p)
+    a.ask("以下是三筆數字的清單：30、50、90。請整理出最大的那個，寫入 out.txt。")
+    a.write("out.txt", "90")
+    a.stop("已寫入 out.txt。")
+    ev = a.evidence(final_text="已寫入 out.txt。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]

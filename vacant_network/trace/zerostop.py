@@ -215,9 +215,10 @@ def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) ->
         k = f.get("kind")
         # 通用任務（方向 A）：`copy_of_task`（把題目當答案）＋ 2026-09-25 新增三項
         # （skeleton 模板骨架／stale_output 舊檔當成果／copy_of_input 照抄輸入素材）
+        # ＋ 2026-10-25 `copy_of_inline`（把貼在題目裡的數據原樣抄回當成果）
         # ——都只進交件說明，不退回（docs/UNIVERSAL_TASKS.md §3）。
         # 要改成可退回，先過 tests/test_noncode_samples.py 的零誤報門檻。
-        if k in ("copy_of_task", "skeleton", "stale_output", "copy_of_input"):
+        if k in ("copy_of_task", "skeleton", "stale_output", "copy_of_input", "copy_of_inline"):
             continue
         if k == "unread" and used >= UNREAD_MAX_ROUNDS:
             continue
@@ -368,6 +369,9 @@ def _say(f: dict[str, Any]) -> str:
     if k == "copy_of_input":
         return (f"{f.get('path')} is verbatim identical to the input material "
                 f"{f.get('input') or '?'} ({f.get('detail') or 'copied, not worked on'})")
+    if k == "copy_of_inline":
+        return (f"{f.get('path')} is a verbatim block from the task text while the task asked for a reworking "
+                f"({f.get('detail') or 'copied the pasted text instead of working on it'})")
     if k == "test_claim":
         return f'the final message said "{f.get("quote")}" without a matching test run'
     if k == "failed_step":

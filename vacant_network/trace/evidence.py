@@ -62,6 +62,17 @@ PRODUCE_CLAIM = re.compile(
     r"|報告已|written (?:to|into)|has been written|I (?:wrote|created|generated|updated)", re.I)
 # copy_of_input：提示詞本身就是複製型任務時，交付檔與素材相同是預期，不報
 COPY_CUE = re.compile(r"複製|拷貝|備份|copy|duplicate", re.I)
+# copy_of_inline（2026-10-25）：交件（正規化後）是 prompt 的逐字子串、且題目要求改寫
+# （整理／摘要／分析／重排……）——agent 把貼在題目裡的數據原樣抄回當成果。
+# 既有的兩個檢查都漏掉這種交件：copy_of_task 要求連指示句都在交件裡（比例 ≥0.8），
+# unsourced 又把 prompt 裡出現過的數字全數豁免（docs/UNIVERSAL_TASKS.md §3 例子）。
+INLINE_COPY_MIN = 120           # copy_of_inline：交件正規化後少於這個字數不報（短答案／短摘錄是正常交件）
+TRANSFORM_CUE = re.compile(
+    r"整理|摘要|總結|分析|重寫|改寫|改成|重組|匯總|排序|清洗|轉換"
+    r"|summar|organiz|analy[sz]|rewrit|reformat|transform|distill", re.I)
+# copy_of_inline 的反線索：任務要求逐字保留時，逐字寫出正是預期交件（n3 的「原樣寫入」）
+VERBATIM_CUE = re.compile(
+    r"原樣|照抄|逐字|一字不差|一字不漏|不要增刪|不改動|保持原文|verbatim|word for word|as-is|unchanged", re.I)
 
 
 def _is_placeholder_line(line: str) -> bool:
@@ -927,6 +938,7 @@ class Evidence:
         findings += self._skeleton(delivs, outs, start_idx, latest_idx)
         findings += self._stale_outputs(outs, delivs, start_idx)
         findings += self._copy_of_input(delivs, outs, named, task_texts, start_idx, latest_idx)
+        findings += self._copy_of_inline(delivs, outs, task_texts, latest_idx)
         scope = self.rec.dir.name
         for fd in findings:
             fd["finding_id"] = finding_id(fd, scope)
@@ -1171,6 +1183,50 @@ class Evidence:
                 if n_d == c:
                     out.append({"kind": "copy_of_input", "path": path, "input": f,
                                 "detail": f"verbatim identical to the input material {f}"})
+                    break
+        return out
+
+    def _copy_of_inline(self, delivs: dict[str, tuple[str, str]], outs: list[tuple[str, str]],
+                        task_texts: list[str], latest_idx: str | None) -> list[dict[str, Any]]:
+        """要求交出的內容（正規化後）是任務提示詞的逐字子串、且題目要求改寫
+        （整理／摘要／分析／重排……）——疑似把貼在題目裡的數據原樣抄回當成果，
+        沒有做題目要求的改寫。
+
+        通用任務（方向 A）：領域中立、只看紀錄。守則（寧可漏抓、不可誤傷）：
+        - 題目要有改寫線索（`TRANSFORM_CUE`）才查——「照原文寫入」這類抄錄任務裡
+          逐字寫出正是預期交件；`COPY_CUE`／`VERBATIM_CUE`（原樣／照抄／verbatim…）出現也直接豁免；
+        - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
+          （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
+        - 交件＝整段 prompt 的情形由 `copy_of_task` 報（比例 1.0），這裡不重複。
+        預設 advisory only：`zerostop.pushable_for` 明確排除。"""
+        texts = [t for t in task_texts if t]
+        if any(COPY_CUE.search(t) or VERBATIM_CUE.search(t) for t in texts):
+            return []
+        if not any(TRANSFORM_CUE.search(t) for t in texts):
+            return []
+        prompts = [_collapse(t).lower() for t in texts]
+        latest = self.tr.index(latest_idx)
+        cands: list[tuple[str, str]] = []
+        for path, (old, new) in sorted(delivs.items()):
+            cands.append((path, new))
+        for rel, _raw in outs:
+            actual = rel if rel in latest else next(
+                (f for f in sorted(latest) if f.endswith("/" + rel)), None)
+            if actual and actual not in delivs:
+                new_t = self.tr.file_text(latest_idx, actual)
+                if new_t is not None and "\x00" not in new_t:
+                    cands.append((actual, new_t))
+        out: list[dict[str, Any]] = []
+        for path, new in cands:
+            if not new or not new.strip():
+                continue
+            n_d = _collapse(new).lower()
+            if len(n_d) < INLINE_COPY_MIN:
+                continue
+            for n_t in prompts:
+                if n_d != n_t and n_d in n_t:
+                    out.append({"kind": "copy_of_inline", "path": path,
+                                "detail": "verbatim block from the task text; the task asked for a reworking"})
                     break
         return out
 
@@ -1661,7 +1717,8 @@ def finding_id(f: dict[str, Any], scope: str) -> str:
            "invalid_output": (f.get("path"), f.get("sub"), f.get("detail")),
            "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),),
            "skeleton": (f.get("path"),), "stale_output": (f.get("path"),),
-           "copy_of_input": (f.get("path"), f.get("input"))}
+           "copy_of_input": (f.get("path"), f.get("input")),
+           "copy_of_inline": (f.get("path"),)}
     raw = repr((scope, f["kind"], key.get(f["kind"], ())))
     return "z_" + hashlib.sha256(raw.encode()).hexdigest()[:10]
 
