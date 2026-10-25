@@ -255,6 +255,17 @@ class Trace:
                     self.unobserved_start = True
                 if self.initial is None and bl.get("index"):
                     self.initial = bl["index"]
+            elif t == "coverage" and isinstance(e.get("rescanned"), dict):
+                # 成功的 rescan（自動／手動）把觀察重新開起來：之前的停用不再成立，
+                # 否則 `blame_location` 會對一個已經健康的專案照樣回 UNOBSERVED
+                # 「not observed step by step — revive it with vacant trace rescan」（round 49）
+                self.scan_disabled = None
+                self.first_look_pending = False
+                bl = e["rescanned"]
+                if bl.get("after_unobserved"):
+                    self.unobserved_start = True
+                if self.initial is None and bl.get("index"):
+                    self.initial = bl["index"]
             elif t == "session_closed" and self.initial is None and e.get("final_index"):
                 self.initial = e["final_index"]
         if self.initial is None and not self.scan_disabled and not self.first_look_pending:

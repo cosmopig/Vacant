@@ -276,10 +276,20 @@ def _actor(a: dict[str, Any] | None) -> str:
 
 
 def last_scan_disabled(evs: list[dict[str, Any]]) -> str | None:
-    """最近一筆「觀察被停用」的原因（`recorder._disable_scan` 記的 coverage 事件）。
-    觀察活著 ⇒ None。"""
+    """**現在**「觀察被停用」的原因（`recorder._disable_scan` 記的 coverage 事件）。
+    觀察活著 ⇒ None。
+
+    成功的 `rescanned`（自動／手動 rescan，round 47 起）把觀察重新開起來：它**之後**的
+    狀態不再是「停用」，之前的停用事件不代表現況。只看最後一個改變狀態的 coverage 事件
+    ——round 49 現場案例：gc 後增量掃描超時被停用、自動 rescan 救回（state 已無
+    `scan_disabled`），但 `trace show`／`trace blame`／回合結束回饋照樣印
+    「disabled — revive it with `vacant trace rescan`」，指著一個已經健康的狀態。"""
     for e in reversed(evs):
-        if e["type"] == "coverage" and e.get("scan_disabled"):
+        if e["type"] != "coverage":
+            continue
+        if e.get("rescanned"):
+            return None
+        if e.get("scan_disabled"):
             return str(e["scan_disabled"])
     return None
 

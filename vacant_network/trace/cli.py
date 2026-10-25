@@ -81,9 +81,12 @@ def cmd_show(args: argparse.Namespace) -> int:
         print(f"no trace for {ws} (tracing starts when the project has a contract, or "
               f"with VACANT_TRACE=1)")
         return 0
-    # 觀察狀態是**目前**的事實，不是流裡的一行：recorder 一旦停用掃描就不會再啟用
-    # （recorder._disable_scan；寧可照實記「沒觀察到」也不擋 agent 的掛鉤）。病歷主視圖
-    # 看不出來就等于沒有——blame 頁的小字不能替 show 背書（round 27 dogfood）。
+    # 觀察狀態是**現在時**的事實，不是流水裡的一行（round 27 dogfood：病歷主視圖看不出來
+    # 就等于沒有——blame 頁的小字不能替 show 背書）。`last_scan_disabled` 只看最後一個
+    # 改變狀態的 coverage 事件：成功的 rescan（自動／手動，round 47 起）之後，之前的停用
+    # 事件不代表現況——round 49 現場案例：gc 後增量掃描超時被停用、自動 rescan 救回
+    # （state 已無 scan_disabled），banner 卻還印「revive it with `vacant trace rescan`」，
+    # 指著一個已經健康的狀態。
     disabled = F.last_scan_disabled(evs)
     if disabled is not None:
         print(f"   ·  coverage: file-change observation is disabled — {disabled} "
