@@ -23,7 +23,7 @@ import pytest
 
 from vacant_network.adapters import hook, install as INS
 from vacant_network.trace import capture, zerostop
-from vacant_network.trace.evidence import evidence_for
+from vacant_network.trace.evidence import _collapse, evidence_for
 from vacant_network.trace.recorder import Recorder
 
 
@@ -161,6 +161,180 @@ def test_clean_missing_file_still_reported_but_not_copied(env):
 
 
 # ── 對照樣本：L-fake 該抓的照抓（真陽）────────────────────────────────────
+
+# ── 2026-10-27：誤報量測樣本（docs/UNIVERSAL_TASKS.md §3 合併門檻的 ≥20 合格交付）──
+# 每個樣本都是一個「合法交付」，且針對某一兩個 advisory 檢查的觸發條件刻意貼邊，
+# 但不能報。為什麼不報（哪條豁免生效）寫在各 docstring；關鍵的「不是逐字子串」
+# 事實直接用 `_collapse` 斷言釘死，免得改動 `_collapse`／cue 集後靜默改判。
+
+def test_clean_reorder_lines(env):
+    """重排任務：交件是同一批行的另一種排列（加一行標題），不是 prompt 的逐字子串。
+    壓 `copy_of_inline`（「排序」是改寫線索、交件 ≥120 字，但重排後不再逐字連續）
+    與 `copy_of_task`（交件不含指令句）；行內日期全部出自 prompt，unsourced 豁免。"""
+    p = _proj(env, "n12_reorder")
+    lines = ["2026-09-10 系統上線", "2026-09-18 修補漏洞", "2026-09-12 安全複查",
+             "2026-09-20 發佈公告", "2026-09-05 專案啟動", "2026-09-22 回滾一次",
+             "2026-09-15 負載測試", "2026-09-08 需求評審", "2026-09-25 驗收通過",
+             "2026-09-02 需求收集"]
+    prompt = ("以下事件順序是亂的：" + "；".join(lines) + "。請按日期從早到晚排序，寫入 timeline.md。")
+    a = Agent(p)
+    a.ask(prompt)
+    ordered = sorted(lines)
+    out = "時間線：\n" + "\n".join(ordered)
+    assert len(_collapse(out)) >= 120 and _collapse(out) not in _collapse(prompt)
+    a.write("timeline.md", out)
+    a.stop("已排序寫入 timeline.md。")
+    ev = a.evidence(final_text="已排序寫入 timeline.md。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_template_fill(env):
+    """填寫型任務：prompt 給模板（含佔位）與資料，交件是填好的模板。
+    壓 `copy_of_task`（交件≠prompt：佔位被換成值）與 `skeleton`（交件沒有佔位行）；
+    填進的數字與日期都出自 prompt，unsourced 豁免。"""
+    p = _proj(env, "n13_fill")
+    a = Agent(p)
+    a.ask("模板：「致【單位】：關於【事由】的函。金額【金額】元，限期【日期】前回覆。」"
+          "資料：單位=資采組，事由=備品採購，金額=320，日期=2026-10-20。"
+          "請將模板填完整，寫入 letter.txt。")
+    out = "致資采組：關於備品採購的函。金額320元，限期2026-10-20前回覆。"
+    assert _collapse(out) not in _collapse("致【單位】：關於【事由】的函。金額【金額】元，限期【日期】前回覆。")
+    a.write("letter.txt", out)
+    a.stop("已填好寫入 letter.txt。")
+    ev = a.evidence(final_text="已填好寫入 letter.txt。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_translation(env):
+    """翻譯任務：交件是另一種語言的重述，不是 prompt 的逐字子串；數字與原文一致。
+    壓 `copy_of_inline`（「summarize/translate」線索＋交件 ≥120 字，但字面不同）；
+    unsourced 的數字全部豁免（都出自 prompt）。"""
+    p = _proj(env, "n14_trans")
+    a = Agent(p)
+    a.ask("Please summarize and translate the following into Traditional Chinese, "
+          "write to trans.md: The platform processed 12,480 orders last quarter, "
+          "up 9.5 percent year over year. The refund rate held at 0.4 percent. "
+          "Customer satisfaction stayed above 90 points in all three regions. "
+          "Inventory turnover improved from 4.1 to 4.6. Shipping cost per order "
+          "fell by 0.8 percent. The team attributes the gain to the new routing "
+          "rules shipped in June.")
+    out = ("摘要（繁體中文）：上季度平台共處理 12,480 筆訂單，較上年同期成長 9.5%；"
+           "退貨率維持在 0.4%。三個區域的顧客滿意度皆高於 90 分。庫存周转率從 4.1 "
+           "提升到 4.6。每單配送成本下降 0.8%。團隊將成長歸因於六月推出的新路由規則。")
+    assert len(_collapse(out)) >= 120 and _collapse(out) not in _collapse("processed 12,480 orders")
+    a.write("trans.md", out)
+    a.stop("已翻譯寫入 trans.md。")
+    ev = a.evidence(final_text="已翻譯寫入 trans.md。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_quotation_with_commentary(env):
+    """摘要＋引文：交件包含一段逐字引文，但整體是「摘要＋引文」，不是 prompt 的逐字子串。
+    壓 `copy_of_inline`（引用內容合法；整體非子串）與 `copy_of_task`（交件不含指令句）。"""
+    p = _proj(env, "n15_quote")
+    a = Agent(p)
+    a.ask("以下段落：「本季度營收 4,200 萬，年增 12%。其中訂閱收入佔六成，"
+          "成長主要来自企業客戶。」請摘要成兩句以內，並附上一句原文引文，寫入 brief.md。")
+    out = ("摘要：本季營收 4,200 萬、年增 12%；訂閱收入為主，企業客戶是成長引擎。\n"
+           "原文：「成長主要来自企業客戶。」")
+    assert _collapse(out) not in _collapse("本季度營收 4,200 萬，年增 12%。其中訂閱收入佔六成，成長主要来自企業客戶。")
+    a.write("brief.md", out)
+    a.stop("已寫入 brief.md。")
+    ev = a.evidence(final_text="已寫入 brief.md。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_average_and_max(env):
+    """CSV → 平均與極值：derived 池（sum/mean/min/max）豁免；與 n1 的加總/百分比互補。"""
+    p = _proj(env, "n16_avg", {"scores.csv": "team,score\nalpha,80\nbeta,90\ngamma,70\n"})
+    a = Agent(p)
+    a.ask("讀 scores.csv，算出平均與最高分，寫入 answer.txt，每行一個數值。")
+    a.read("scores.csv")
+    a.write("answer.txt", "80\n90")
+    a.stop("已寫入 answer.txt。")
+    ev = a.evidence(final_text="已寫入 answer.txt。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_email_draft(env):
+    """純文字書信：要點 → 正式信件，無數字無日期，五種通用檢查都該沉默。"""
+    p = _proj(env, "n17_email")
+    a = Agent(p)
+    a.ask("把以下要點寫成一封給客戶的正式信件，語氣誠懇，寫入 email.txt："
+          "（一）下週一上午系統維護兩小時；（二）期間線上申請暫停；"
+          "（三）維護完成後會寄送確認信。")
+    a.write("email.txt", "敬愛的客戶：\n\n您好！為提升服務穩定性，我們將於下週一上午進行約兩小時的"
+                         "系統維護，期間線上申請暫停受理，維護完成後將另行寄送確認信。"
+                         "由此造成不便，敬請見諒。\n\n順祝商祺\n服務團隊")
+    a.stop("信件已寫好。")
+    ev = a.evidence(final_text="信件已寫好。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_format_to_markdown_table(env):
+    """格式轉換：同一批「名稱,分數」行 → Markdown 表格（加管線符與表頭）。
+    壓 `copy_of_inline`（「轉換」是改寫線索、交件 ≥120 字，但加了表格語法後非逐字子串）；
+    數字全部出自 prompt，unsourced 豁免。"""
+    p = _proj(env, "n18_mdtable")
+    rows = [("北區", "88"), ("南區", "72"), ("東區", "91"), ("西區", "64"), ("中部", "77"),
+            ("雲林地", "69"), ("嘉義地", "81"), ("台南地", "93"), ("高雄地", "75"),
+            ("屏東地", "58"), ("宜蘭地", "86"), ("花蓮地", "62")]
+    data = "\n".join(f"{n},{s}" for n, s in rows)
+    a = Agent(p)
+    a.ask("把下面的分數轉換成 Markdown 表格（欄位：區域、分數），寫入 table.md：\n" + data)
+    out = "| 區域 | 分數 |\n|---|---|\n" + "\n".join(f"| {n} | {s} |" for n, s in rows)
+    assert len(_collapse(out)) >= 120 and _collapse(out) not in _collapse(data)
+    a.write("table.md", out)
+    a.stop("已轉換寫入 table.md。")
+    ev = a.evidence(final_text="已轉換寫入 table.md。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_two_files_both_delivered(env):
+    """雙交件：報告（散文）＋數據檔（CSV 推導值）都交了；missing_output 不該報，數字有出處。"""
+    p = _proj(env, "n19_multi", {"budget.csv": "item,cost\nhosting,200\ndomain,60\ntool,140\n"})
+    a = Agent(p)
+    a.ask("讀 budget.csv，寫兩份檔：summary.md 用兩句話說明這筆預算；"
+          "totals.txt 第一行寫總計、第二行寫最貴項目名。")
+    a.read("budget.csv")
+    a.write("summary.md", "這是一組小型營運預算，涵蓋主機、域名與工具等費用。整體以主機費為主。")
+    a.write("totals.txt", "400\nhosting")
+    a.stop("兩份都寫好了。")
+    ev = a.evidence(final_text="兩份都寫好了。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_deduplicate_and_sort(env):
+    """去重＋排序：重複項散佈在原文中，去掉後交件是 prompt 的子列（subsequence）
+    而非子串（substring）——`copy_of_inline` 的逐字子串判定不該觸發。
+    （交件 <120 字，另由短答案豁免；兩層保護都在，docstring 照實說。）"""
+    p = _proj(env, "n20_dedup")
+    items = ["無線降噪藍牙耳機", "靜音機械式鍵盤", "4K 高刷行動螢幕", "無線降噪藍牙耳機",
+             "USB 高速集線器", "心形藍牙麥克風", "靜音機械式鍵盤", "低延遲電競滑鼠",
+             "桌面磁吸理線盒", "雙螢幕懸浮支架", "USB-C 多口轉接頭", "心形藍牙麥克風",
+             "萬能行動電源", "4K 高刷行動螢幕", "雙網卡適配器", "螢幕清潔組裝"]
+    a = Agent(p)
+    a.ask("以下清單有重複：" + "、".join(items) + "。請去重並排序，寫入 unique.md。")
+    out = "清單（去重）：" + "、".join(sorted(set(items)))
+    assert _collapse(out) not in _collapse("、".join(items))   # 子列 ≠ 子串
+    assert len(_collapse(out)) < 120                              # 且 < INLINE_COPY_MIN
+    a.write("unique.md", out)
+    a.stop("已去重排序寫入 unique.md。")
+    ev = a.evidence(final_text="已去重排序寫入 unique.md。")
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_append_to_existing_report(env):
+    """追加型任務：報告檔本就在專案裡，agent 真的改了它（加一節）——
+    `stale_output` 只該抓「一字未改卻稱已寫好」，真的改過就不該報。"""
+    p = _proj(env, "n21_append", {"report.md": "第一節：背景。\n本季目標如期推進。\n"})
+    a = Agent(p)
+    a.ask("把風險一節寫入 report.md（追加在末尾）：供應商交期不穩，需準備備案。")
+    a.write("report.md", "第一節：背景。\n本季目標如期推進。\n\n風險：供應商交期不穩，需準備備案。\n")
+    a.stop("已更新 report.md。")
+    ev = a.evidence(final_text="已更新 report.md。")
+    assert a.pushable(ev) == [], ev["findings"]
+
 
 def test_lfake_prompt_echo_is_caught(env):
     """把任務提示詞當答案交出去：copy_of_task 要報（advisory，不退回）。"""
@@ -411,3 +585,45 @@ def test_clean_extracted_section_not_caught(env):
     ev = a.evidence(final_text="已寫入 deadline.txt。")
     assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
     assert a.pushable(ev) == [], ev["findings"]
+
+
+# ── 常駐誤報門（2026-10-27，docs/UNIVERSAL_TASKS.md §3 的「零誤報」合併門檻）──
+# 重跑本檔每一個 test_clean_*（各自獨立環境，避免工作區狀態互相污染），
+# 對「所有檢查」（不只五個 advisory）斷言發現集 == 預期集：
+# 全部乾淨樣本零發現；唯一例外是 n4（缺交件是該抓的 missing_output 真陽）。
+# 任何未來新增的檢查（evidence.run 裡的任何 kind）若在乾淨交付上報了，這裡必紅。
+# 這是「≥20 合格交付樣本零誤報」的機器可驗形式，取代一次性量測腳本。
+def test_all_clean_samples_have_no_false_positives(tmp_path, monkeypatch):
+    names = sorted(n for n in globals()
+                   if n.startswith("test_clean_")
+                   and callable(globals()[n]) and n != "test_all_clean_samples_have_no_false_positives")
+    assert len(names) >= 20, f"合格交付樣本不足 20：{len(names)}"
+    expected = {
+        "test_clean_missing_file_still_reported_but_not_copied": {"missing_output"},
+    }
+    for i, name in enumerate(names):
+        sub = tmp_path / f"gate_{i}_{name}"
+        sub.mkdir(parents=True, exist_ok=True)
+        monkeypatch.setenv("HOME", str(sub / "home"))
+        monkeypatch.setenv("VACANT_HOME", str(sub / "vh"))
+        (sub / "home").mkdir(exist_ok=True)
+        for k in ("VACANT_TRACE", "VACANT_MODE"):
+            monkeypatch.delenv(k, raising=False)
+        p = INS.state_root() / "install.json"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps({"agents": {}, "mode": "evidence"}))
+        seen: list[set] = []
+        orig = Agent.evidence
+
+        def spy(self, *a, **k):
+            ev = orig(self, *a, **k)
+            seen.append({f.get("kind") for f in ev["findings"]})
+            return ev
+
+        Agent.evidence = spy
+        try:
+            globals()[name](sub)
+        finally:
+            Agent.evidence = orig
+        kinds = set().union(*seen) if seen else set()
+        assert kinds == expected.get(name, set()), (name, kinds)

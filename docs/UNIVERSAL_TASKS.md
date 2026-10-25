@@ -72,6 +72,17 @@ prompt 裡出現過的數字全數豁免。新檢查的三重保守條件：題�
 逐字寫出的抽出型任務（n17，2026-10-25：逐字寫出該段正是預期交件，非 lazy echo）。
 測試：`tests/test_noncode_samples.py::test_lfake_inline_echo_is_caught` 等 6 個（2026-10-25）。
 
+**誤報量測（2026-10-27）**：樣本集現為 **21 個合格交付（乾淨）樣本**（原 11 ＋ n12 重排、
+n13 模板填寫、n14 翻譯、n15 摘要＋引文、n16 平均與極值、n17 書信、n18 表格轉換、
+n19 雙交件、n20 去重排序、n21 追加既有報告），五種 advisory 檢查（copy_of_task／skeleton／
+stale_output／copy_of_input／copy_of_inline）**零誤報**——達到「≥20 合格交付樣本」的
+量測要求。已轉為常駐門：
+`tests/test_noncode_samples.py::test_all_clean_samples_have_no_false_positives` 在隔離
+環境重跑全部乾淨樣本，對**所有 kind**（不只 advisory）斷言發現集與預期集完全相等
+（唯一例外：n4 缺交件的 `missing_output` 真陽）。任何未來新檢查若在乾淨交付上誤報，
+此門直接紅。`copy_of_inline` 仍為 advisory（不退回）：「真改寫但措辭碰巧成子串」的
+負對照仍未補（見 `~/dev/ops/BACKLOG.md` P1 候選）。
+
 ## 4. 離線重播入口
 
 ```bash
