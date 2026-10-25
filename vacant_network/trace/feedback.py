@@ -339,7 +339,10 @@ def render_report(blames: list[dict[str, Any]], results: list[dict[str, Any]], *
             lines.append(f"- value: `{_clip(shown, 200)}`")
         for e in b.get("expected") or []:
             lines.append(f"- expected: `{e.get('value')}` ({e.get('note') or e.get('path')})")
-        lines.append(f"- check: {_clip(b.get('detail') or '', 300)}")
+        if (b.get('detail') or '').strip():
+            # detail 缺席時不印這行（round 42 dogfood：無契約 `trace blame` 會渲染出一條
+            # 空的 `- check: `；同函式的 value／step／source 行都是「有內容才列」）
+            lines.append(f"- check: {_clip(b.get('detail') or '', 300)}")
         lines.append(f"- where it came from: **{b.get('fault_class')}**, "
                      f"{_GRADE_WORDS.get(str(b.get('confidence')), b.get('confidence'))}")
         if b.get("step"):

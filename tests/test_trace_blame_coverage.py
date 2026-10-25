@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 
 import vacant_network.intake.contract as C
@@ -113,3 +114,35 @@ def test_render_report_scandisabled_annotation_only_when_present():
     plain = F.render_report(coverage={"steps": 5, "gaps": 0, "post_missing": 0}, **base)
     assert "recorded steps: 5" in plain
     assert "observation is disabled" not in plain
+
+
+def test_render_report_omits_empty_check_line():
+    """round 42 dogfood：`trace blame`（無契約、blame 沒有 detail）渲染出一條空的
+    `- check: ` 行——同一函式的 value／step／source 行都是「有內容才列」，check 行
+    獨獨無條件輸出。空行沒有訊息量，還像欄位漏了值。"""
+    b = {"claim": "flag:abc", "location": {"path": "a.txt", "line": 1},
+         "value": "hello", "fault_class": "unattributable", "confidence": "low"}
+    out = F.render_report(blames=[b], results=[], outcome=None,
+                          coverage={"steps": 0, "gaps": 0, "post_missing": 0})
+    assert "- check:" not in out, f"detail 缺席時不該印 check 行: {out!r}"
+    # 有內容時照常列（不把整行砍掉）
+    b2 = dict(b, detail="assert failed: got 1, want 2")
+    out2 = F.render_report(blames=[b2], results=[], outcome=None,
+                           coverage={"steps": 0, "gaps": 0, "post_missing": 0})
+    assert "- check: assert failed: got 1, want 2" in out2
+
+
+def test_blame_without_contract_has_no_empty_check_line(tmp_path, monkeypatch, capsys):
+    """CLI 層：無契約工作區跑 `trace blame`（round 42 實測的摩擦现场）不該出現空 check 行。"""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    monkeypatch.delenv("VACANT_TRACE", raising=False)
+    keys.init_local()
+    p = tmp_path / "proj"
+    p.mkdir()
+    (p / "a.txt").write_text("hello\n")
+    monkeypatch.chdir(p)
+    rc = cli.main(["blame", "a.txt:1"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    # 精確斷言：不允許出現「- check:」後面直接到行尾的空行
+    assert not re.search(r"^- check:\s*$", out, flags=re.M), f"空的 check 行: {out!r}"
