@@ -418,7 +418,19 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
     given_named = [x for x in named if x in in_request]
     not_opened = [x for x in named if x not in observed]
     out += ["## What was checked", ""]
-    out.append("- Files written in this turn: " + (", ".join(delivs[:20]) if delivs else "none"))
+    wu = _window_writes_unknown(rec, key, res.get("window_start"))
+    if delivs:
+        line = "- Files written in this turn: " + ", ".join(delivs[:20])
+        if wu:
+            line += " — possibly not all (the workspace was not fully observed: " + wu + ")"
+    elif wu:
+        line = ("- Files written in this turn: not known (the workspace was not fully observed: "
+                + wu + ")")
+    else:
+        line = "- Files written in this turn: none"
+    out.append(line)
+    if wu:
+        data["writes_unknown"] = wu
     checked = int(v.get("checked") or 0)
     if checked:
         out.append(f"- Values in the lines written this turn: {checked} checked — "
@@ -552,6 +564,31 @@ def _write_note(rec: Recorder, key: str, res: dict[str, Any] | None, sess: dict[
 
 ERROR_STOP_LINE = ("The agent's last turn ended on a model error, not on a claim of being done; "
                    "the delivery check ran at that point and sent nothing back to the agent (v3.7).")
+
+
+def _window_writes_unknown(rec: Recorder, key: str, window_start: Any) -> str | None:
+    """這個窗口內有寫入「不知道」的步驟（或有無人解釋的改動）⇒ 第一個原因；否則 `None`。
+    （round 42 dogfood：觀察被關掉時交件說明把 `Files written in this turn` 寫成 `none` 當事實——
+    「沒測到」不可以寫成「沒有」：H-10 自洽不等於真。）"""
+    try:
+        start = int(window_start)
+    except (TypeError, ValueError):
+        start = -1
+    sid = key.split(":", 1)[1] if ":" in key else key
+    reasons: list[str] = []
+    for e in rec.events():
+        if int(e.get("seq") or 0) <= start:
+            continue
+        if e.get("type") == "unrecorded_change":
+            r = "there are changes that no step recorded"
+        elif e.get("type") == "step" and str((e.get("actor") or {}).get("session")) == sid \
+                and e.get("writes_unknown"):
+            r = str(e["writes_unknown"])
+        else:
+            continue
+        if r not in reasons:
+            reasons.append(r)
+    return reasons[0] if reasons else None
 
 
 def _reminded_writes(rec: Recorder, key: str, window_start: Any

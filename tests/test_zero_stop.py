@@ -333,3 +333,63 @@ def test_v35_content_in_the_request_is_told_as_such_in_the_note_json_and_screen(
     assert data["given_in_request"] == ["goal.md"] and data["dir_given_in_request"] == ["brief/scope.md"]
     assert set(data["named"]) == set(data["opened"]) | set(data["given_in_request"]) | set(data["not_opened"])
     assert "1/4 given file(s) opened, 2 already in the request" in d["systemMessage"], d
+
+
+def _scan_times_out(monkeypatch) -> None:
+    """把掃描換成一律超時 ⇒ 之後的步驟都記成 `writes_unknown`（掛鉤裡的時限 8s）。"""
+    import vacant_network.trace.recorder as R
+
+    def _slow(*_a, **_k):
+        raise R.W.ScanTimeout("test")
+    monkeypatch.setattr(R.W, "scan", _slow)
+
+
+def test_no_writes_is_not_claimed_when_the_workspace_was_not_fully_observed(env, inproc, monkeypatch):
+    """round 42 dogfood：觀察中途被關（掃描超時）之後，交件說明把 `Files written in this turn`
+    寫成 `none` 是把「沒測到」寫成「沒有」（H-10：自洽不等於真）。要寫「不知道」與原因。"""
+    _install("observe")
+    p = _proj(env)
+    a = Agent(p)
+    a.ask(ASK)
+    a.bash("ls")                                  # 第一步：基線看得到，沒有寫檔
+    _scan_times_out(monkeypatch)
+    a.write("report.md", "Total amount: 5,200\n")  # 寫了，但這一步記成 writes_unknown
+    d = a.stop()
+    assert "decision" not in d
+    note = _note(p)
+    line = next(l for l in note.splitlines() if l.startswith("- Files written in this turn: "))
+    assert line == ("- Files written in this turn: not known "
+                    "(the workspace was not fully observed: an incremental scan passed 8s)"), note
+    data = json.loads((Recorder(p).dir / "delivery.json").read_text())
+    assert data["writes_unknown"] == "an incremental scan passed 8s"
+
+
+def test_known_writes_are_listed_with_the_not_fully_observed_caveat(env, inproc, monkeypatch):
+    """同一個窗口裡既有歸到步驟的寫入、又有觀察不到的步驟：列出已知的，並寫「可能不只這些」。"""
+    _install("observe")
+    p = _proj(env)
+    a = Agent(p)
+    a.ask(ASK)
+    a.write("report.md", "Total amount: 5,200\n")   # 看得到、歸得到
+    _scan_times_out(monkeypatch)
+    a.write("notes.txt", "more\n")                   # 寫了，但這一步記成 writes_unknown
+    d = a.stop()
+    assert "decision" not in d
+    note = _note(p)
+    line = next(l for l in note.splitlines() if l.startswith("- Files written in this turn: "))
+    assert line.startswith("- Files written in this turn: report.md"), note
+    assert line.endswith(" — possibly not all (the workspace was not fully observed: "
+                         "an incremental scan passed 8s)"), note
+
+
+def test_the_plain_none_line_stays_when_observation_was_fine(env, inproc):
+    """沒有觀察缺口時，`none` 照樣寫（這個改動只加註腳，不改變看得到的事實）。"""
+    _install("observe")
+    p = _proj(env)
+    a = Agent(p)
+    a.ask(ASK)
+    a.bash("ls")
+    d = a.stop()
+    assert "decision" not in d
+    line = next(l for l in _note(p).splitlines() if l.startswith("- Files written in this turn: "))
+    assert line == "- Files written in this turn: none"
