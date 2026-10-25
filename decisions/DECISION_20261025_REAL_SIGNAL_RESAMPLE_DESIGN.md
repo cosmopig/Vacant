@@ -76,6 +76,21 @@
    要**贏過 pass@1**，且報出**分母＋欄位＋n**（本輪已核：331 單位、cap=3、+4.1pp / +9.7pp）。
 3. **不增加誤退**：對「本來就對」的交件，重抽**不得**把它翻成錯的、也不得白燒預算。
    要單獨量「對的被重抽且翻錯」的次數，並小於它救回的「錯的被重抽且轉對」。
+   **已量（2026-10-29，離線重播、零 LLM；cap=3、n=331 單位、每單位 ≥2 次獨立跑；
+   `python3 ~/dev/ops/ref/gate3_breakdown.py ~/dev/ops/ref/c37_final.json 3`，
+   輸出自檢與 `offline_restart_sim` 的 flag-restart／test-restart 欄位逐位一致）**：
+   - flag-restart（真實訊號）：翻錯 **0**（各題組逐單位平均皆 0.000）＜ 救回
+     逐單位平均 **0.040**（polyglot_py 0.097；trial 基數 49/1179）；對「本來就對」的起始
+     **零**多餘重跑（白燒＝0）。**在本檔庫上本條門成立。**
+   - test-restart（上限欄）：翻錯 0（**結構性**：對的交件不會被重抽）＜ 救回 0.153（polyglot_py 0.186）。
+   - **未驗證殘留＝UNKNOWN，不是 PASS**：此檔庫 1187 跑裡 flagged∩對＝**0**（135 個被標記跑
+     全錯：cell 級 precision 135/135、recall 135/423），「對的交件被標記→重抽→可能翻錯」
+     這條路徑**沒被觀察到**。反事實界（重抽≈新抽一次的近似下）：對一個單位的一次誤標記，
+     重抽落錯的機率≈該單位的錯誤率 1−pass@1（ALL 37.7%、polyglot_py 62.7%）——在難題組上
+     一次誤標記的損失大於一次真標記的收益（0.373），**這條路徑要靠含「對的交件被標記」的
+     live 資料閉合，不能拿本檔庫當 PASS**。
+   - 池子口徑：重抽池是同 cell 的歷史獨立跑（同條件），不是新跑——量的是政策在檔庫上的行為，
+     不是 live 分布。
 4. **零必填設定**：若要做「自動偵測該跑哪組測試」，必須**不需要**新增必填設定／安裝步驟；
    偵測失敗時 **fail-open**（回到「沒有訊號、不裁定」），不得 fail-closed 卡住客戶。
 5. **沙箱不越界**：重跑在沙箱內（H-6）；不開放網路、不讀工作區外、不可信程式進容器。
@@ -93,6 +108,8 @@
 ## 7. 證據／重現
 
 - 離線重播：`python3 ~/dev/ops/ref/offline_restart_sim.py ~/dev/ops/ref/c37_final.json 3`（零 LLM）。
+- 擋門 3 分解（翻錯／救回／白燒，帶與上者一致的自檢）：
+  `python3 ~/dev/ops/ref/gate3_breakdown.py ~/dev/ops/ref/c37_final.json 3`（零 LLM）。
 - 機制代碼：`vacant_network/vrun/{launcher.py, retry.py, acceptance.py}`；
   測試：`tests/test_vacant_run.py`、`tests/test_vacant_run_retry.py`。
 - 候選 2（擴充零設定證據檢查）擋門與「換一種訊號」的由來：`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §二／§七／§九。
