@@ -2,7 +2,7 @@
 
 這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §4.1-2、§4.5「撤銷」）：
 
-    vacant trace show [--json]              每一步：行動者、工具、寫了什麼；缺口
+    vacant trace show [--json] [--tail N]   每一步：行動者、工具、寫了什麼；缺口；觀察停用狀態
     vacant trace verify                     病歷的簽章鏈驗不驗得過（有任務帳本就對它簽過的鏈頭）
     vacant trace report [--check]           未解問題清單（`--check` 先重驗一次契約再追緝）
     vacant trace blame <檔>[:<行>] [--value V]   這個位置的值是哪一步、從哪裡來的
@@ -81,6 +81,26 @@ def cmd_show(args: argparse.Namespace) -> int:
         print(f"no trace for {ws} (tracing starts when the project has a contract, or "
               f"with VACANT_TRACE=1)")
         return 0
+    # 觀察狀態是**目前**的事實，不是流裡的一行：recorder 一旦停用掃描就不會再啟用
+    # （recorder._disable_scan；寧可照實記「沒觀察到」也不擋 agent 的掛鉤）。病歷主視圖
+    # 看不出來就等于沒有——blame 頁的小字不能替 show 背書（round 27 dogfood）。
+    disabled = next((str(e["scan_disabled"]) for e in reversed(evs)
+                     if e["type"] == "coverage" and e.get("scan_disabled")), None)
+    if disabled is not None:
+        print(f"   ·  coverage: file-change observation is disabled — {disabled} "
+              f"(steps are still recorded, but file changes are no longer attributed "
+              f"step by step; `trace blame` will show unattributable)")
+    tail = getattr(args, "tail", None)
+    if tail is not None:
+        if tail < 1:
+            raise SystemExit("vacant: --tail must be >= 1")
+        step_pos = [i for i, e in enumerate(evs) if e["type"] == "step"]
+        if step_pos:                             # 最近 N 步，連同它們之間的缺口/標記一起看
+            start = step_pos[-tail] if len(step_pos) > tail else step_pos[0]
+            # 窗口前一筆若是缺口/標記：它是「這裡有沒記錄到的改動」的證據，留給看的人
+            while start > 0 and evs[start - 1]["type"] in ("unrecorded_change", "finding", "flag"):
+                start -= 1
+            evs = evs[start:]
     for e in evs:
         t = e["type"]
         if t == "step":
@@ -291,6 +311,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("show")
     p.add_argument("--json", action="store_true")
+    p.add_argument("--tail", type=int, metavar="N",
+                   help="show only the last N steps (with the surrounding gaps/flags); "
+                        "--json is always the full record")
     p.set_defaults(func=cmd_show)
     p = sp.add_parser("verify")
     p.set_defaults(func=cmd_verify)
