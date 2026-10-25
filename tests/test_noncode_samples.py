@@ -672,25 +672,16 @@ def test_clean_multifile_split_keep_verbatim_not_caught(env):
     assert a.pushable(ev) == [], ev["findings"]
 
 
-def test_lfake_cross_prompt_join_is_a_known_miss(env):
-    """L-fake（2026-10-29 已知漏，BACKLOG P1(b)；docs/UNIVERSAL_TASKS.md §2.5）：
+def _lfake_join_sample(env) -> tuple[str, str, str, str, Agent]:
+    """跨輪 inline 數據樣本（2026-10-29 BACKLOG P1(b)；docs/UNIVERSAL_TASKS.md §2.5）。
+
     題目拆成兩回合：turn 1 貼合約評審紀錄的前半（A），turn 2 貼後半（B）並要求
     「整理成一條條要點，寫入 out.txt」（改寫線索）。lazy agent 不整理，把 A+B
     **原樣拼接**寫入 out.txt——交件是**整場對話**（兩 prompt 拼接）的逐字連續子串，
-    但現行 `window()` 只取**最後一則**人類 prompt 當 task text：A 根本不在最後
-    prompt 裡 → `copy_of_inline` 的逐字子串判定不命中 → 漏。
-    與 (a) 多檔拆分的根因不同：這裡**每半都已 ≥120 字**、120 字門檻不是漏的
-    原因；漏的原因是資料不在最後 prompt。樣本刻意用**純散文**（無 ASCII 數字、
-    無日期）寫成，把這個漏與 `unsourced` 的交互隔離開（unsourced 只查具體值；
-    若帶數字、且該數字不在最後 prompt，unsourced 反而會發——那就不是「漏」了）。
-    現行選擇：**不新增跨 prompt 拼接檢測，先註冊已知漏＋負對照**——「拼接整場
-    對話來判」的 join 檢查會在正當的「把兩回合資料整理成一份完整清單」任務上
-    誤報（見下一樣本），依「寧漏勿誤」（docs/UNIVERSAL_TASKS.md §3 規則 5），
-    join 檢測須先帶豁免設計＋本負對照過門才該上。
-    斷言：**零發現**——這個 L-fake 目前對所有檢查都不可見（out.txt 有寫，
-    missing_output 不發；純散文，unsourced 無值可查）。未來若有檢查能抓到它，
-    這裡的預期集必須更新，且先確認對負對照樣本
-    （test_clean_cross_prompt_merge_is_expected_output_not_caught）零誤報。"""
+    但不在任何單輪 prompt 裡。樣本刻意用**純散文**（無 ASCII 數字、無日期）寫成，
+    把這個漏與 `unsourced` 的交互隔離開（unsourced 只查具體值）。
+    回 (part_a, part_b, prompt1, prompt2, agent)；agent 已建好專案、未寫交件。
+    """
     p = _proj(env, "lfake_cross_prompt_join")
     part_a = ("甲方須於每月月底前提交服務報告，報告應涵蓋服務完成情形與異常處理紀錄；"
               "乙方應於收到報告後提出回覆意見。如甲方未按期提交，乙方得書面催告；"
@@ -702,26 +693,54 @@ def test_lfake_cross_prompt_join_is_a_known_miss(env):
               "履行期限得依影響程度順延；順延期間雙方互不追究逾期責任。")
     prompt1 = "以下是上週合約評審紀錄（前半）：\n" + part_a + "\n"
     prompt2 = part_b + "\n請把前後兩段整理成一條條要點，寫入 out.txt"
+    a = Agent(p)
+    a.ask(prompt1)
+    a.ask(prompt2)
+    return part_a, part_b, prompt1, prompt2, a
+
+
+def test_lfake_cross_prompt_join_is_caught(env):
+    """L-fake（2026-10-29 BACKLOG P1(b)；docs/UNIVERSAL_TASKS.md §2.5）：
+    inline 資料分兩輪貼出、agent 照抄拼回——跨輪 lazy echo。
+
+    單輪語料（`window()` 只取最後一輪）看不到這種交件；round 45 把跨輪拼接語料
+    （整個 session 的人類 prompt **先拼接、再 `_collapse`**）加入 `copy_of_inline`
+    的判定，與單輪同一組三重條件（改寫線索觸發＋豁免線索＋≥ `INLINE_COPY_MIN`
+    的逐字子串），advisory only。若豁免線索（如 clean merge 的「保持原文」）出現，
+    整場對話豁免——正當的跨輪合併任務不受影響（見負對照樣本）。
+
+    樣本自檢（防樣本本身漂移、變成別的東西還靜默過門）：交件是整場對話的逐字
+    連續子串、但不在任何單輪 prompt 裡（＝單輪語料漏、跨輪語料命中）；每半都已
+    ≥ 門檻（門檻非漏因）；最後一輪有改寫線索；兩輪都無豁免線索。
+    """
+    part_a, part_b, prompt1, prompt2, a = _lfake_join_sample(env)
     cp1, cp2 = _collapse(prompt1).lower(), _collapse(prompt2).lower()
     ca, cb = _collapse(part_a).lower(), _collapse(part_b).lower()
-    # 樣本自檢（防樣本本身漂移、變成別的東西還靜默過門）：
     assert len(ca) >= INLINE_COPY_MIN and len(cb) >= INLINE_COPY_MIN  # 每半超門檻 → 門檻非漏因
     assert ca in cp1 and cb in cp2            # 兩半在兩個不同 prompt（跨回合）
     assert ca not in cp2 and cb not in cp1    # 互不在對方 prompt 裡
     assert _collapse(part_a + "\n" + part_b).lower() in _collapse(prompt1 + "\n" + prompt2).lower()
     # ↑ 交件＝整場對話的逐字連續子串：若是單一 prompt，copy_of_inline 必抓到
-    #   （對照 test_lfake_inline_echo_is_caught）——漏的原因只能是跨 prompt。
-    assert TRANSFORM_CUE.search(prompt2)      # 最後 prompt 有改寫線索（若可見，檢查會跑）
-    for t in (prompt1, prompt2):              # 無任何豁免線索（漏是「不可見」，不是「豁免」）
+    #   （對照 test_lfake_inline_echo_is_caught）——單輪語料的漏因只能是跨 prompt。
+    assert TRANSFORM_CUE.search(prompt2)      # 最後 prompt 有改寫線索（檢查會跑）
+    for t in (prompt1, prompt2):              # 無任何豁免線索（否則 join 檢查被豁免擋住）
         assert not COPY_CUE.search(t) and not VERBATIM_CUE.search(t) and not EXTRACT_CUE.search(t)
     assert not re.search(r"\d", part_a + part_b)  # 純散文：無 ASCII 數字（unsourced 無值可查）
-    a = Agent(p)
-    a.ask(prompt1)
-    a.ask(prompt2)
     a.write("out.txt", part_a + "\n" + part_b + "\n")
     a.stop("out.txt 已寫好。")
     ev = a.evidence(final_text="out.txt 已寫好。")
-    assert ev["findings"] == [], ev["findings"]   # 已知漏：現行所有檢查均不可見
+    c = [f for f in ev["findings"] if f["kind"] == "copy_of_inline"]
+    assert len(c) == 1 and c[0]["path"].endswith("out.txt"), ev["findings"]
+
+
+def test_lfake_cross_prompt_join_not_pushed_back(env):
+    """跨輪照抄同樣 advisory only：進交件註記、不進 pushback（與單輪 n13 同）。"""
+    part_a, part_b, prompt1, prompt2, a = _lfake_join_sample(env)
+    a.write("out.txt", part_a + "\n" + part_b + "\n")
+    a.stop("out.txt 已寫好。")
+    ev = a.evidence(final_text="out.txt 已寫好。")
+    assert any(f["kind"] == "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev
 
 
 def test_clean_cross_prompt_merge_is_expected_output_not_caught(env):

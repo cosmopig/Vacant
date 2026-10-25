@@ -1190,6 +1190,25 @@ class Evidence:
                     break
         return out
 
+    def _session_prompt_texts(self) -> list[str]:
+        """本 session 的人類要求全文（seq 升序；含 `vacant do` 的重跑 prompt）。
+
+        `window()` 只取**最後一則**人類 prompt 當 task text；跨輪拼接判定
+        （2026-10-29 已知漏→ round 45 修復，方向 A §2.5：交件是兩輪以上 inline
+        數據拼接的逐字子串）需要整場對話。person 判定與 `window()` 同一套。
+        """
+        out: list[str] = []
+        do_runs = {run for run, sess in self.tr.do_sessions.items()
+                   if f"{self.platform}:{self.session}" in sess}
+        for p in self.tr.prompts:
+            src = str(p.get("source") or "user")
+            ps = str(p.get("session") or "")
+            person = (src == "user" and ps == self.session) or \
+                     (src == "vacant do" and (ps == "*" or ps.removeprefix("do:") in do_runs))
+            if person:
+                out.append(self.tr.prompt_text(p))
+        return out
+
     def _copy_of_inline(self, delivs: dict[str, tuple[str, str]], outs: list[tuple[str, str]],
                         task_texts: list[str], latest_idx: str | None) -> list[dict[str, Any]]:
         """要求交出的內容（正規化後）是任務提示詞的逐字子串、且題目要求改寫
@@ -1199,17 +1218,28 @@ class Evidence:
         通用任務（方向 A）：領域中立、只看紀錄。守則（寧可漏抓、不可誤傷）：
         - 題目要有改寫線索（`TRANSFORM_CUE`）才查——「照原文寫入」這類抄錄任務裡
           逐字寫出正是預期交件；`COPY_CUE`／`VERBATIM_CUE`（原樣／照抄／verbatim…）／
-          `EXTRACT_CUE`（摘出／抽出／extract…，點名要哪一段）出現也直接豁免；
+          `EXTRACT_CUE`（摘出／抽出／extract…，點名要哪一段）出現也直接豁免。
+          線索判定用**整場對話**（所有 session prompt，round 45）：任何一輪的豁免線索
+          （例如跨輪合併任務的「條目保持原文」）豁免整個任務——只看最後一輪會讓
+          正當的跨輪逐字交件在豁免外被 join 語料誤傷；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
+        - **跨輪拼接**（round 45，2026-10-29 §2.5）：交件是整場對話（≥2 輪）拼接
+          的逐字連續子串、且不等於任何單輪 prompt 時也命中。拼接語料**先拼接、
+          再 `_collapse`**（先各自 collapse 再拼接會丟掉邊界空白，
+          見 test_clean_multifile_split_keep_verbatim_not_caught 的自檢）；
         - 交件＝整段 prompt 的情形由 `copy_of_task` 報（比例 1.0），這裡不重複。
-        預設 advisory only：`zerostop.pushable_for` 明確排除。"""
+        預設 advisory only：`zerostop.pushable_for` 明確排除（單輪、跨輪同）。"""
         texts = [t for t in task_texts if t]
-        if any(COPY_CUE.search(t) or VERBATIM_CUE.search(t) or EXTRACT_CUE.search(t) for t in texts):
+        all_texts = list(dict.fromkeys(texts + [t for t in self._session_prompt_texts() if t]))
+        if any(COPY_CUE.search(t) or VERBATIM_CUE.search(t) or EXTRACT_CUE.search(t) for t in all_texts):
             return []
-        if not any(TRANSFORM_CUE.search(t) for t in texts):
+        if not any(TRANSFORM_CUE.search(t) for t in all_texts):
             return []
         prompts = [_collapse(t).lower() for t in texts]
+        # 跨輪拼接語料：只取人類 prompt（不含 instruction docs），≥2 輪才有語料。
+        sess = [t for t in self._session_prompt_texts() if t]
+        joined = _collapse("\n".join(sess)).lower() if len(sess) >= 2 else ""
         latest = self.tr.index(latest_idx)
         cands: list[tuple[str, str]] = []
         for path, (old, new) in sorted(delivs.items()):
@@ -1228,11 +1258,18 @@ class Evidence:
             n_d = _collapse(new).lower()
             if len(n_d) < INLINE_COPY_MIN:
                 continue
+            hit = False
             for n_t in prompts:
                 if n_d != n_t and n_d in n_t:
                     out.append({"kind": "copy_of_inline", "path": path,
                                 "detail": "verbatim block from the task text; the task asked for a reworking"})
+                    hit = True
                     break
+            if not hit and joined and n_d != joined and n_d in joined \
+                    and all(n_d != pt for pt in prompts):
+                out.append({"kind": "copy_of_inline", "path": path,
+                            "detail": "verbatim block spanning the whole conversation; "
+                                     "the task asked for a reworking"})
         return out
 
     def _test_claim(self, steps: list[Step], delivs: dict[str, tuple[str, str]]
