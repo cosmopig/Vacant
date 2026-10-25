@@ -243,6 +243,18 @@ def test_test_claim_after_a_failing_run_and_after_an_edit(env):
     assert [(f["kind"], f["sub"]) for f in ev["findings"]] == [("test_claim", "stale")]
 
 
+def test_test_claim_with_an_unreadable_run_is_fail_open(env):
+    """最後一次測試跑的輸出既不像成功也不像失敗（被截斷／不認識的格式）：不能當「失敗」退回（fail-open，
+    不確定時不擋），但要把這一步記在 notes 讓後續可查。"""
+    a = Agent(_proj(env, files={"app.py": "x = 1\n"}))
+    a.ask("Fix app.py.")
+    a.read("app.py")
+    a.bash("python -m pytest -q", "collected 3 items")
+    ev = a.evidence("Tests pass now.")
+    assert [(f["kind"], f.get("sub")) for f in ev["findings"]] == []
+    assert ev["notes"]["test_outcome_unreadable"] == 2
+
+
 def test_s5_own_script_fails_then_the_report_is_written_by_hand(env):
     a = Agent(_proj(env, files={"data/sales.csv": SALES}))
     a.ask("Compute the total from data/sales.csv into report.md.")
