@@ -121,11 +121,14 @@ Honest reading:
   the entire gap is the single task lcb_3487. The 3 newly-run tasks
   (lcb_3495/3496/3502) were passed by all three arms on attempt 1, so they add
   no arm-difference signal.
-- **Rescue mechanism — settled by the round-13 neutral control**: on lcb_3487
-  the no-detail feedback file rescued exactly as the detail file did, so the
-  driver demonstrated here is the retry + "previous attempt failed acceptance"
-  signal in a present file (plausibly breaking the deterministic thinking
-  loop), **not** the specific error content. See the section below.
+- **Rescue mechanism — narrowed by the round-13 neutral control and the
+  round-16 presence control**: on lcb_3487 a file with **no failure detail at
+  all** (and even a file of seeded random ASCII) rescued exactly as the
+  detail file did. What is excluded: the specific error content as a
+  necessary condition. What is not isolated: the filename
+  `VACANT_FEEDBACK.md` and "a file the agent did not write is present /
+  the workspace differs from origin" (a name-neutral control was not run).
+  See the sections below.
 
 ## Neutral-hint control (round 13, 2026-10-24): the missing arm for lcb_3487
 
@@ -143,6 +146,7 @@ arms — only the workspace file differs.
 | none | FAIL (no deliverable, `finish_reason=length`) | — | FAIL, no artifact |
 | resample | FAIL (no deliverable) | FAIL (clean ws, no file) | FAIL, no artifact |
 | **neutral_hint** (175 B, no detail) | FAIL (same signature) | **PASS** (gate rc=0) | **PASS: 4/4 visible, 24/24 hidden** |
+| **presence** (175 B, seeded random ASCII) | FAIL (same signature, rc=20) | **PASS** (gate rc=0, 154.9 s) | **PASS: 4/4 visible, 24/24 hidden** |
 | fresh_hint (275 B, detail) | FAIL (no deliverable) | **PASS** | **PASS: 4/4 visible, 24/24 hidden** |
 
 - a1 of the neutral cell failed with the identical signature
@@ -157,15 +161,39 @@ arms — only the workspace file differs.
   content is *not demonstrated* to be the driver; the presence of the
   retry/feedback signal sufficed in this case. Do not quote the round-12
   result as "the hint content fixed it".
-- **Residual confound, stated:** the neutral arm changes both "a file exists
-  in the workspace" and "the file says the previous attempt failed
-  acceptance". A pure presence control (a file with no meaning) was not run,
-  so "presence alone" is not isolated either. What is excluded: the error
-  detail as a necessary condition.
+
+## Pure-presence control (round 16, 2026-10-24): the missing arm was run — it rescues
+
+`presence_cell.py` (committed in `3211c28e`): attempt 2 gets a file of the
+SAME size as the neutral hint (175 B), same name (`VACANT_FEEDBACK.md`),
+same delivery point — but the content is seeded random ASCII
+(`noise_sha256=6c9b58cf…`, recorded in the cell log). Nothing task-relevant,
+nothing failure-relevant, no words at all.
+
+| lcb_3487 | a1 | a2 | final grade |
+|---|---|---|---|
+| presence (175 B noise) | FAIL (same signature, rc=20) | **PASS** (gate rc=0, agent wrote 809-char solution) | **PASS: 4/4 visible, 24/24 hidden** (`grade.json`) |
+
+- **Attribution (n=1 cell, no statistical claim):** a file of *meaningless
+  noise* broke the deterministic no-delivery loop as well. The demonstrated
+  driver is therefore **not** the failure signal's content; it is something
+  in "the workspace is not the clean origin at attempt 2" (file present,
+  filename, or the state change between attempts). Do not quote any lcb_3487
+  result as "the hint content fixed it".
+- **Residual confounds, stated (do not over-read):**
+  1. the filename is `VACANT_FEEDBACK.md` — a *name-neutral* control
+     (random filename + noise) was **not** run, so "the filename itself"
+     is not isolated;
+  2. "a file exists" and "the workspace differs from the origin the agent
+     saw at attempt 1" are the same event here and not separated;
+  3. n=1 cell, one model, one task — mechanism attribution only, no effect
+     size, no generalization to other tasks.
 
 Reproduce:
 
 ```bash
 python3 neutral_cell.py      # default SB_TID=lcb_3487; ~10 min
 python3 grade.py lcb_3487__neutral_hint
+python3 presence_cell.py     # round 16; ~10 min
+python3 grade.py lcb_3487__presence
 ```
