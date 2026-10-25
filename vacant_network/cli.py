@@ -775,6 +775,82 @@ def build_parser() -> argparse.ArgumentParser:
     _add_eco_root(plt)
     plt.add_argument("-n", type=int, default=20, help="行數（預設 20）")
     plt.set_defaults(func=cmd_eco_ledger_tail)
+
+    # ── 頂層命令全集（round 34）──────────────────────────────────────
+    # 這些命令在 main() 入口的 raw 分派裡就被接走（先於 parse_args），
+    # 所以這裡的 subparser 平時不會被真正解析——它們的存在是為了
+    # `vacant --help` 能把**每一個**頂層命令列出來（沒列＝不存在），
+    # 以及萬一 argparse 真收到它們（例如 `--root` 排在前面）時
+    # 是轉發到同一個分派目標，而不是 AttributeError。
+    def _fwd(target):
+        def _f(_args):  # noqa: ANN001 — argparse 給的 namespace 用不到
+            return target(list(sys.argv[1:]))
+        return _f
+
+    def _lazy(module: str, attr: str):
+        import importlib
+        return getattr(importlib.import_module(module, package=__package__), attr)
+
+    _intake_main = lambda raw: _lazy(".intake.cli", "main")(raw)  # noqa: E731
+    _adapters_main = lambda raw: _lazy(".adapters.cli", "main")(raw)  # noqa: E731
+    _flag_main = lambda raw: _lazy(".trace.cli", "flag_main")(raw)  # noqa: E731
+    _retention_main = lambda raw: _lazy(".retention", "main")(raw)  # noqa: E731
+    _board_main = lambda raw: _lazy(".statusboard", "main")(raw)  # noqa: E731
+    _possess_main = lambda raw: _lazy(".vrun.possess", "main")(raw)  # noqa: E731
+
+    # 收件口（任務合約流；擁有者/評審者用，不是做事的 session 用）
+    spc = sub.add_parser("contract", help="建任務合約（.vacant/contract.json；交付物＋驗收標準）")
+    spc.set_defaults(func=_fwd(_intake_main))
+    spc = sub.add_parser("check", help="跑合約驗收：每條 claim 一行 PASS/FAIL/UNKNOWN/CONFLICT")
+    spc.set_defaults(func=_fwd(_intake_main))
+    sps = sub.add_parser("submit", help="提交交件送驗收（判定由驗收做，不由提交者自報）")
+    sps.set_defaults(func=_fwd(_intake_main))
+    spr = sub.add_parser("review", help="對某條 claim 給 pass/fail 評審（必須附理由）")
+    spr.set_defaults(func=_fwd(_intake_main))
+    spr = sub.add_parser("reverify", help="對既有交件重新驗收（同一把尺，不重做）")
+    spr.set_defaults(func=_fwd(_intake_main))
+    spa = sub.add_parser("approve", help="簽發 release 核准（可設 TTL）")
+    spa.set_defaults(func=_fwd(_intake_main))
+    spr = sub.add_parser("release", help="把已驗收版本發布到 release.destination（發布前重驗）")
+    spr.set_defaults(func=_fwd(_intake_main))
+    spw = sub.add_parser("withdraw", help="撤回交件/核准（必須附理由）")
+    spw.set_defaults(func=_fwd(_intake_main))
+    spt = sub.add_parser("task", help="任務狀態：status / verify / report")
+    spt.set_defaults(func=_fwd(_intake_main))
+    spk = sub.add_parser("keys", help="驗證/核准/評審/擁有者金鑰：init / show / add")
+    spk.set_defaults(func=_fwd(_intake_main))
+    spi = sub.add_parser("intake", help="開收件口伺服器（HTTP；token 保護）")
+    spi.set_defaults(func=_fwd(_intake_main))
+
+    # 適配器（agent 整合）
+    spd = sub.add_parser("do", help="隔離工作區跑一個 CLI agent，結束即交驗收（如 vacant do pi 任務）")
+    spd.set_defaults(func=_fwd(_adapters_main))
+    sph = sub.add_parser("hook", help="agent 事件鉤子入口（stdin JSON；由 vacant install 裝上）")
+    sph.set_defaults(func=_fwd(_adapters_main))
+    spi = sub.add_parser("install", help="把 Vacant 掛進既有 agent（可逆；--observe-model＝舊 possess 行為）")
+    spi.set_defaults(func=_fwd(_adapters_main))
+    spu = sub.add_parser("uninstall", help="撤掉 Vacant 裝的鉤子（使用者自己的改動保留）")
+    spu.set_defaults(func=_fwd(_adapters_main))
+    spa = sub.add_parser("adapters", help="哪些 agent 在、掛了什麼、現在還在不在")
+    spa.set_defaults(func=_fwd(_adapters_main))
+
+    # 人指出錯處
+    spf = sub.add_parser("flag", help="人指出錯處：記一筆進病歷（vacant flag 檔:行 說明）")
+    spf.set_defaults(func=_fwd(_flag_main))
+
+    # 磁碟
+    spg = sub.add_parser("gc", help="回收 ~/.vacant 磁碟（clean＝同義；--dry-run 預覽；背景自動跑）")
+    spg.set_defaults(func=_fwd(_retention_main))
+    spu = sub.add_parser("usage", help="看 ~/.vacant 磁碟用量（分區/專案/可回收）")
+    spu.set_defaults(func=_fwd(_retention_main))
+
+    # 狀態 / 常駐 / 選單
+    spd = sub.add_parser("dashboard", help="本機狀態頁（只讀、只開 127.0.0.1；--json 免起伺服器）")
+    spd.set_defaults(func=_fwd(_board_main))
+    spp = sub.add_parser("possess", help="模型通道常駐（install / uninstall / status / detect）")
+    spp.set_defaults(func=_fwd(_possess_main))
+    spo = sub.add_parser("on", help="主選單：選一個本機 agent，在 Vacant 底下開（＝裸 vacant）")
+    spo.set_defaults(func=lambda _args: _on_shim(list(sys.argv[1:][1:])))
     return p
 
 

@@ -1066,6 +1066,7 @@ def usage_main(argv: list[str] | None = None) -> int:
     h = _human_bytes
     tot = rep.get("totals", {})
     print(f"Vacant 磁碟用量（{rep['state_dir']}）")
+    print("  （數字是 apparent size＝st_size 加總（du -sb 同義）；du -sh 數的是已分配 block，兩者可能不同）")
     if "state_dir" in tot:
         print(f"  狀態目錄總計  : {h(tot['state_dir'])}")
     for name, b in rep.get("areas", {}).items():

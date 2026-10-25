@@ -334,6 +334,19 @@ def test_usage_report_fields_and_cli(env, capsys):
     assert "totals" in out and "projects" in out
 
 
+def test_usage_human_output_notes_apparent_vs_block_size(env, capsys):
+    """`vacant usage` 的數字是 apparent size（st_size 加總，du -sb 同義）；
+    `du -sh` 數的是已分配 block，兩者不必然相同（BACKLOG 2026-10-19：
+    「對不熟悉 apparent/block 的人仍是摩擦」）。人讀輸出必須有一行註腳，
+    否則使用者拿 `du -sh` 對不上會以為 Vacant 數錯了。"""
+    _seed_trace_project(env, name="foot")
+    rc = cli.main(["usage"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "apparent" in out, "人讀輸出缺 apparent 註腳：\n" + out
+    assert "du -sh" in out, "註腳必須點名 du -sh（對不上的那個數字）：\n" + out
+
+
 def test_hook_spawns_auto_gc_on_stop(env, monkeypatch):
     _seed_trace_project(env, name="hp")
     spawned = {}
