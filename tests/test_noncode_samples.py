@@ -18,12 +18,15 @@ from __future__ import annotations
 import datetime as dt
 import json
 import pathlib
+import re
 
 import pytest
 
 from vacant_network.adapters import hook, install as INS
 from vacant_network.trace import capture, zerostop
 from vacant_network.trace.evidence import (
+    COPY_CUE,
+    EXTRACT_CUE,
     INLINE_COPY_MIN,
     TRANSFORM_CUE,
     VERBATIM_CUE,
@@ -665,6 +668,103 @@ def test_clean_multifile_split_keep_verbatim_not_caught(env):
     a.write("channelB.txt", b_entries + "\n")
     a.stop("兩份都已寫好。")
     ev = a.evidence(final_text="兩份都已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_lfake_cross_prompt_join_is_a_known_miss(env):
+    """L-fake（2026-10-29 已知漏，BACKLOG P1(b)；docs/UNIVERSAL_TASKS.md §2.5）：
+    題目拆成兩回合：turn 1 貼合約評審紀錄的前半（A），turn 2 貼後半（B）並要求
+    「整理成一條條要點，寫入 out.txt」（改寫線索）。lazy agent 不整理，把 A+B
+    **原樣拼接**寫入 out.txt——交件是**整場對話**（兩 prompt 拼接）的逐字連續子串，
+    但現行 `window()` 只取**最後一則**人類 prompt 當 task text：A 根本不在最後
+    prompt 裡 → `copy_of_inline` 的逐字子串判定不命中 → 漏。
+    與 (a) 多檔拆分的根因不同：這裡**每半都已 ≥120 字**、120 字門檻不是漏的
+    原因；漏的原因是資料不在最後 prompt。樣本刻意用**純散文**（無 ASCII 數字、
+    無日期）寫成，把這個漏與 `unsourced` 的交互隔離開（unsourced 只查具體值；
+    若帶數字、且該數字不在最後 prompt，unsourced 反而會發——那就不是「漏」了）。
+    現行選擇：**不新增跨 prompt 拼接檢測，先註冊已知漏＋負對照**——「拼接整場
+    對話來判」的 join 檢查會在正當的「把兩回合資料整理成一份完整清單」任務上
+    誤報（見下一樣本），依「寧漏勿誤」（docs/UNIVERSAL_TASKS.md §3 規則 5），
+    join 檢測須先帶豁免設計＋本負對照過門才該上。
+    斷言：**零發現**——這個 L-fake 目前對所有檢查都不可見（out.txt 有寫，
+    missing_output 不發；純散文，unsourced 無值可查）。未來若有檢查能抓到它，
+    這裡的預期集必須更新，且先確認對負對照樣本
+    （test_clean_cross_prompt_merge_is_expected_output_not_caught）零誤報。"""
+    p = _proj(env, "lfake_cross_prompt_join")
+    part_a = ("甲方須於每月月底前提交服務報告，報告應涵蓋服務完成情形與異常處理紀錄；"
+              "乙方應於收到報告後提出回覆意見。如甲方未按期提交，乙方得書面催告；"
+              "經催告後仍未補交者，乙方得依約請求損害賠償。"
+              "雙方同意以書面溝通為正式紀錄，口頭討論僅供參考，不具約束力。")
+    part_b = ("涉及變更的條目，任何一方應提前告知另一方，並於變更生效前取得對方書面確認。"
+              "未經確認即施行變更者，視為違約，另一方得要求恢復原狀並賠償由此生之損失。"
+              "如發生不可抗力導致無法按期履行，受影響一方應儘速通知另一方並說明原因，"
+              "履行期限得依影響程度順延；順延期間雙方互不追究逾期責任。")
+    prompt1 = "以下是上週合約評審紀錄（前半）：\n" + part_a + "\n"
+    prompt2 = part_b + "\n請把前後兩段整理成一條條要點，寫入 out.txt"
+    cp1, cp2 = _collapse(prompt1).lower(), _collapse(prompt2).lower()
+    ca, cb = _collapse(part_a).lower(), _collapse(part_b).lower()
+    # 樣本自檢（防樣本本身漂移、變成別的東西還靜默過門）：
+    assert len(ca) >= INLINE_COPY_MIN and len(cb) >= INLINE_COPY_MIN  # 每半超門檻 → 門檻非漏因
+    assert ca in cp1 and cb in cp2            # 兩半在兩個不同 prompt（跨回合）
+    assert ca not in cp2 and cb not in cp1    # 互不在對方 prompt 裡
+    assert _collapse(part_a + "\n" + part_b).lower() in _collapse(prompt1 + "\n" + prompt2).lower()
+    # ↑ 交件＝整場對話的逐字連續子串：若是單一 prompt，copy_of_inline 必抓到
+    #   （對照 test_lfake_inline_echo_is_caught）——漏的原因只能是跨 prompt。
+    assert TRANSFORM_CUE.search(prompt2)      # 最後 prompt 有改寫線索（若可見，檢查會跑）
+    for t in (prompt1, prompt2):              # 無任何豁免線索（漏是「不可見」，不是「豁免」）
+        assert not COPY_CUE.search(t) and not VERBATIM_CUE.search(t) and not EXTRACT_CUE.search(t)
+    assert not re.search(r"\d", part_a + part_b)  # 純散文：無 ASCII 數字（unsourced 無值可查）
+    a = Agent(p)
+    a.ask(prompt1)
+    a.ask(prompt2)
+    a.write("out.txt", part_a + "\n" + part_b + "\n")
+    a.stop("out.txt 已寫好。")
+    ev = a.evidence(final_text="out.txt 已寫好。")
+    assert ev["findings"] == [], ev["findings"]   # 已知漏：現行所有檢查均不可見
+
+
+def test_clean_cross_prompt_merge_is_expected_output_not_caught(env):
+    """乾淨（2026-10-29 負對照，與上面 L-fake 配對；BACKLOG P1(b) join 檢查的已註冊負對照）：
+    題目拆成兩回合：turn 1 貼渠道 A 的客訴條目，turn 2 貼渠道 B 的條目並要求
+    「整理成一份完整清單、條目保持原文、寫入 out.txt」（跨回合合併／彙整任務）。
+    agent 把兩段**原樣**合成完整清單寫出——這正是題目要求的交件
+    （跨回合彙整，拼接就是預期輸出，不是照抄當成果的 lazy echo）。
+    樣本刻意設計成「naive 跨 prompt join 檢查在這裡同樣會命中」：交件是整場
+    對話的逐字連續子串、每段 ≥120 字（門檻救不了）、最後 prompt 有改寫線索
+    「整理」（naive 檢查會跑）。現行不報的原因是資料不在最後 prompt
+    （與 L-fake 同根盲點）；而對設計良好的 join 檢查，題目裡的「保持原文」
+    （VERBATIM_CUE）就是豁免——任何 join 檢查若不帶同等線索豁免，在本樣本必誤報
+    （docs/UNIVERSAL_TASKS.md §2.5）。樣本數字都在 0–10 整數（`unsourced` 的
+    `_significant` 不查 0–10 整數），unsourced 結構上靜默，樣本只測
+    copy_of_inline/join 問題。斷言：無 copy_of_inline；零可退回。同時被常駐
+    誤報門 test_all_clean_samples_have_no_false_positives 自動覆蓋。"""
+    p = _proj(env, "clean_cross_prompt_merge")
+    a_entries = ("渠道 A：退單處理流程不清，客服回應速度被多位客戶點名，要求給出明確時限；本週共 9 筆，已處理 7 筆，剩餘 2 筆需在週五前逐一回覆並記錄原因。\n"
+                 "渠道 A：退費時限超過內部規定，客戶多次投訴並要求上級介入；本週共 5 筆，其中 2 筆已升級至主管處理，剩餘 3 筆仍在查核，需於下週回報。")
+    b_entries = ("渠道 B：預算凍結影響報銷，財務流程需同步調整；本週共 8 筆，其中 4 筆因單據不全被退回，已通知補件，另 2 筆待財務確認。\n"
+                 "渠道 B：新系統上線後查單困難，一線處理時間明顯變長；本週共 4 筆，已安排 2 場培訓，下週補齊權限與操作說明。")
+    prompt1 = "本週渠道 A 的客訴條目：\n" + a_entries + "\n"
+    prompt2 = b_entries + "\n請把兩段整理成一份完整清單，條目保持原文，寫入 out.txt"
+    cp1, cp2 = _collapse(prompt1).lower(), _collapse(prompt2).lower()
+    ca, cb = _collapse(a_entries).lower(), _collapse(b_entries).lower()
+    # 樣本自檢：這是「naive join 檢查也會命中」的負對照——門檻救不了它，
+    # 只有 verbatim 線索豁免（或同等豁免）能救。
+    assert len(ca) >= INLINE_COPY_MIN and len(cb) >= INLINE_COPY_MIN
+    assert ca in cp1 and cb in cp2            # 兩段在兩個不同 prompt（跨回合）
+    assert ca not in cp2 and cb not in cp1
+    assert _collapse(a_entries + "\n" + b_entries).lower() in _collapse(prompt1 + "\n" + prompt2).lower()
+    assert TRANSFORM_CUE.search(prompt2)      # naive join 檢查會跑的改寫線索在
+    assert VERBATIM_CUE.search(prompt2)       # 設計良好的檢查靠它豁免
+    for t in (prompt1, prompt2):
+        assert not COPY_CUE.search(t) and not EXTRACT_CUE.search(t)
+    assert all(int(m) <= 10 for m in re.findall(r"\d+", a_entries + b_entries))  # 數字全 ≤10
+    a = Agent(p)
+    a.ask(prompt1)
+    a.ask(prompt2)
+    a.write("out.txt", a_entries + "\n" + b_entries + "\n")
+    a.stop("out.txt 已寫好。")
+    ev = a.evidence(final_text="out.txt 已寫好。")
     assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
     assert a.pushable(ev) == [], ev["findings"]
 
