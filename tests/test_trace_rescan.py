@@ -67,6 +67,34 @@ def _died_after_gc(p):
     assert _state(p).get("scan_disabled")                     # 前提：專案已經「死了」
 
 
+def test_timeout_after_gc_names_gc_in_the_disable_reason(proj):
+    """停用原因要寫出真正的起因：gc 之後的第一次重核對，不是「增量 diff 慢」。
+
+    自家專案實測：理由只寫「an incremental scan passed 8s」會讓人以為自己的 repo 掃得慢；
+    其實慢在 `vacant gc` 之後的重核對／重存，出路是 `vacant trace rescan`（無時限的重看）。"""
+    p, _c = proj
+    _died_after_gc(p)
+    st = _state(p)
+    assert "vacant gc" in st["scan_disabled"]
+    # 病歷上的 coverage 事件也寫出真正的起因
+    evs = [e for e in R.Recorder(p).events()
+           if e["type"] == "coverage" and e.get("scan_disabled")]
+    assert evs and "vacant gc" in evs[-1]["scan_disabled"]
+
+
+def test_timeout_without_gc_keeps_the_incremental_reason(proj):
+    """沒跑過 gc 的超時照舊：原因不改，既有訊息不變。"""
+    p, _c = proj
+    R.Recorder(p).baseline()
+    rec = R.Recorder(p)
+    rec.scan_deadline_s = 1e-9
+    rec.pre("t", MAIN, "Bash", {"command": "ls"})
+    rec.post("t", MAIN, "Bash", {"command": "ls"}, "")
+    st = _state(p)
+    assert "vacant gc" not in st["scan_disabled"]
+    assert "an incremental scan passed" in st["scan_disabled"]
+
+
 def test_rescan_revives_a_project_that_died_after_gc(proj):
     p, _c = proj
     _died_after_gc(p)

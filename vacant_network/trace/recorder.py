@@ -345,10 +345,10 @@ class Recorder:
             return None
         deadline = time.monotonic() + self.scan_deadline_s \
             if (self.scan_deadline_s and st is not None) else None
+        # `prev` 是這個紀錄器帶著同一個版本庫掃出來的 ⇒ 它的版本都在庫裡，不逐檔確認；
+        # 若中間跑過 `vacant gc`（`compacted=True`），第一次重掃時確認並補齊。
+        was_compacted = bool(st.pop("compacted", False)) if st is not None else False
         try:
-            # `prev` 是這個紀錄器帶著同一個版本庫掃出來的 ⇒ 它的版本都在庫裡，不逐檔確認；
-            # 若中間跑過 `vacant gc`（`compacted=True`），第一次重掃時確認並補齊。
-            was_compacted = bool(st.pop("compacted", False)) if st is not None else False
             return W.scan(self.workspace, prev, skip=self.skip, blobs=self.blobs,
                           deadline=deadline, prev_stored=not was_compacted)
         except W.ScanTimeout as e:
@@ -356,6 +356,12 @@ class Recorder:
                 raise
             if prev is None:
                 self._defer_baseline(st, str(e))
+            elif was_compacted:
+                # 超時的是 `vacant gc` 之後的第一次重核對（重存大量版本），不是增量 diff 本身慢。
+                # 原因要寫出真正的起因（`compacted` 只有 gc 會設）：否則使用者會以為自己的
+                # repo 掃得慢，而真正的出路是 `vacant trace rescan`（無時限的完整重看）。
+                self._disable_scan(st,
+                                   f"the first scan after `vacant gc` passed {self.scan_deadline_s:.0f}s")
             else:
                 self._disable_scan(st, f"an incremental scan passed {self.scan_deadline_s:.0f}s")
             return None
