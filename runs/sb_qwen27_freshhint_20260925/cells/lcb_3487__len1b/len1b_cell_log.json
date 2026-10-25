@@ -1,0 +1,39 @@
+{
+ "cell": "lcb_3487__len1b",
+ "arm": "length-variant control: resample + 1-byte body under the SAME neutral header '## Note' (labelneu/presence/seed2neu used 175 B; fresh_hint 275 B)",
+ "agent": "agent_qwen_neu.py (byte-identical to agent_qwen.py except the one header line; file name never reaches the model)",
+ "agent_sha256": "49cbe380c053c6107003e3f2988c88f24d09758e7a117a044cb53247bb337fa0",
+ "header_label": "## Note",
+ "body_bytes": 1,
+ "body_sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+ "reference_lengths": {
+  "fresh_hint_detail": 275,
+  "neutral_sentence": 175,
+  "noise_seed_20261024": 175,
+  "noise_seed_20261025": 175
+ },
+ "reference_sha256": {
+  "noise_seed_20261024": "6c9b58cfab923c30454475cb8defbcb8e682c7bbe1ee2ea0ff60783893f63985",
+  "noise_seed_20261025": "5f9db99ffe3b900b34d4731e60dd13c9c3eae778cf7a80590da60e1f468aae55"
+ },
+ "max_tokens": "32768",
+ "attempt1": {
+  "rc": 20,
+  "wall_s": 387.7,
+  "stdout_tail": "",
+  "stderr_tail": "RUNCATED: empty content, finish_reason=length, reasoning_len=48541, max_tokens=32768\n[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 24c77758c0f8→24c77758c0f8　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__len1b\ntest_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]\n"
+ },
+ "feedback_redelivered": {
+  "path": "VACANT_FEEDBACK.md",
+  "bytes": 1,
+  "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+  "header_label": "## Note"
+ },
+ "attempt2": {
+  "rc": 0,
+  "wall_s": 153.5,
+  "stdout_tail": "agent: wrote solution.py (840 chars)\n",
+  "stderr_tail": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 10151527828f→aa01a486044f　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__len1b\n"
+ },
+ "rc": 0
+}

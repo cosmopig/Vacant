@@ -287,11 +287,14 @@ contents. The full a2-level picture on lcb_3487:
 | random ASCII, seed 20261024 | 175 B | "## Acceptance feedback …" | PASS, full=True |
 | random ASCII, seed 20261024 | 175 B | "## Note" | PASS, full=True |
 | random ASCII, seed 20261025 | 175 B | "## Note" | PASS, full=True |
+| **1-byte "x"** (round 31) | **1 B** | **"## Note"** | **PASS, full=True** |
 
-5/5 with any content vs 0/1 without (a2 level). Content type (error detail,
-neutral sentence, random noise ×2 seeds) and the header label are all shown
-irrelevant; the demonstrated factor is "a non-empty feedback section exists
-in the prompt at attempt 2".
+5/5 with any content at 175–275 B vs 0/1 without (a2 level); the round-31
+length cell (below) adds the 1-byte point, making it 6/6 with content at
+1–275 B. Content type (error detail, neutral sentence, random noise ×2
+seeds), the header label and the body length are all shown irrelevant; the
+demonstrated factor is "a non-empty feedback section exists in the prompt
+at attempt 2".
 
 - **caveats (unchanged, stated with the result):** n=1 cell per arm, one
   model (qwen3.8-27b), one task, temperature 0 — mechanism attribution only,
@@ -299,7 +302,8 @@ in the prompt at attempt 2".
   fresh_hint used 275 B) and the alphanumeric alphabet are held constant
   across all five rescued cells and are therefore not separated from
   "content exists" — a length-variant cell is the natural next control if
-  this thread is continued.
+  this thread is continued. **Run as round 31 (below): the 1-byte body
+  rescues, so body length is separated from "content exists".**
 
 Reproduce:
 
@@ -308,4 +312,57 @@ python3 seed2_cell.py selftest   # offline, no model calls; red/green demonstrat
 python3 seed2_cell.py a1         # ~6-7 min (model call); expect rc=20
 python3 seed2_cell.py a2         # ~3-4 min; expect rc=0
 python3 grade.py lcb_3487__seed2neu
+```
+
+## Length-variant control (round 31, 2026-10-25): body length is NOT the driver
+
+`len1b_cell.py` closes the residual confound named in round 26: all five
+prior rescued cells carried 175–275 B of content, so body length and
+alphabet were not separated from "content exists". This cell tests the
+minimum boundary: attempt 2 gets a **1-byte body ("x")** under the SAME
+neutral header ("## Note"), same agent variant (`agent_qwen_neu.py`),
+scaffold, suite, argv and grading as the seed2neu cell. The prompt diff
+versus the clean-start prompt is the entire feedback section
+("## Note\n\nx" — 10 bytes of section, 1 byte of content).
+
+The self-test is discriminating (red/green demonstrated at commit time):
+a naive copy of `seed2_cell.py` that reuses the 175 B noise **fails** the
+"body is exactly 1 byte" assertion (rc=1); the real cell passes (rc=0).
+
+**Single-factor claim verified on the wire, not by assertion**: the a2
+request bodies of `cells/lcb_3487__seed2neu` and `cells/lcb_3487__len1b`
+are on disk; `model`, `max_tokens` (32768) and `temperature` (0) are
+identical, the task prefix and the suffix after the feedback section are
+**byte-identical**, and only the feedback section differs (184 B: 175 B
+noise vs 1 B "x").
+
+| attempt | ws state | result | signature |
+|---|---|---|---|
+| a1 | clean origin | **rc=20, no deliverable** (387.7 s) | same no-delivery signature as all other cells' a1: `finish_reason=length`, empty content, reasoning_len=48541 |
+| a2 | + **1-byte "x"** under **"## Note"** | **rc=0** (153.5 s) | **PASS: 4/4 visible, 24/24 hidden** (`grade.json`) |
+
+**Reading**: even the minimum possible non-empty feedback section rescues
+exactly as 175 B of noise did. The demonstrated factor — "the prompt is no
+longer a clean start" — now holds across content lengths **1 B … 275 B**,
+content types (error detail, neutral sentence, random noise ×2 seeds) and
+both header labels. The full a2-level picture on lcb_3487 is 6/6 with any
+content vs 0/1 without.
+
+- **caveats (unchanged, stated with the result):** n=1 cell per arm, one
+  model (qwen3.8-27b), one task, temperature 0 — mechanism attribution
+  only, no effect size, no generalization to other tasks. Two factors
+  remain unseparated by construction of this scaffold: (1) the "## Note"
+  header travels with the content in every PASS cell — the agent variant
+  adds the section only when the file is non-empty, so a "header only,
+  zero content" cell would need a third agent variant; (2) task
+  generality — the signature itself (deterministic no-delivery on a1) was
+  only ever observed on lcb_3487 in this bank.
+
+Reproduce:
+
+```bash
+python3 len1b_cell.py selftest   # offline, no model calls; red/green demonstrated
+python3 len1b_cell.py a1         # ~6-7 min (model call); expect rc=20
+python3 len1b_cell.py a2         # ~2-4 min; expect rc=0
+python3 grade.py lcb_3487__len1b
 ```
