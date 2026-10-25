@@ -1335,13 +1335,18 @@ class Evidence:
                    and not t.error and not re.search(r"Traceback|\bError:",
                                                      self.tr.output_text(t)) for t in later):
                 continue
-            # 單純讀給定資料的臨時指令（非跑自寫腳本、非測試）若後續已有成功的腳本或讀同資料指令取代，不算略過
-            if reads_given and not runs_own and not is_test_cmd:
+            # 讀給定資料／跑自寫腳本失敗（非測試），但後續已有成功的替代（另一支自寫腳本跑成、
+            # 或讀到題目點名的資料）＝失敗是放棄的嘗試，不是略過。
+            # 2026-10-25：runs_own 也適用——calc.py 跑失敗、改用 awk 或另一支自寫腳本算出
+            # 正確值並交付，不應 failed_step 退回。無後續成功取代（test_s5：build.py 失敗後
+            # 直接手寫報告）仍照退；is_test_cmd 照舊走上面的測試分支，不受此豁免影響。
+            if (reads_given or runs_own) and not is_test_cmd:
                 # 該資料在此步驟**之前**已有一次成功讀取＝已消費；這次是重覆 probe 失敗，不是略過。
                 # C37 dabstep-14-s2（2026-10-02 正式批次）：agent 讀過 payments.csv 後再跑
                 # `head -n 1 payments.csv` 失敗，改用別的方法算對並交付，仍被 failed_step 退回。
-                if self._material_consumed_before(steps, i, cued_mats, clean_cmd):
+                if reads_given and self._material_consumed_before(steps, i, cued_mats, clean_cmd):
                     continue
+                recovery_mats = cued_mats if reads_given else materials
                 if any(tool_kind(t.tool) == "shell"
                        and not t.error
                        and not re.search(r"Traceback|\bError:", self.tr.output_text(t))
@@ -1349,7 +1354,7 @@ class Evidence:
                                           _strip_shell_comments(_command_of(self.tr, t)))
                                 for b in written_scripts)
                             or any(m in _command_of(self.tr, t) or m.rsplit("/", 1)[-1] in _command_of(self.tr, t)
-                                   for m in cued_mats))
+                                   for m in recovery_mats))
                        for t in later):
                     continue
             # 若此失敗指令操作了交付檔 d（如 sed -i、awk、patch 修改 d 失敗），
@@ -1757,8 +1762,12 @@ def _strip_shell_comments(cmd: str) -> str:
 
 
 def _no_match_only(cmd: str, outp: str) -> bool:
-    """這一步的「失敗」只是搜尋沒找到：指令（或管線的最後一段）是 grep／rg 類，輸出裡沒有真的錯誤。"""
+    """這一步的「失敗」只是搜尋沒找到：指令（或管線的最後一段）是 grep／rg 類，輸出裡沒有真的錯誤。
+    2026-10-25：也認 `cd dir && grep …` 這類鏈頭（INTERPRETER 早已認 `cd … &&` 前綴）——
+    逐段去掉 `cd …` 前綴後照舊判斷；`grep: No such file` 這類真錯誤仍算失敗。"""
     clean = _strip_shell_comments(cmd)
+    while (m := re.match(r"^\s*cd\s+\S+\s*(?:&&|\|\||;)\s*", clean)) is not None:
+        clean = clean[m.end() :]
     lines = [ln for ln in clean.splitlines() if ln.strip()]
     if lines and all(
         SEARCH_CMD.match(ln) or SEARCH_CMD.match([x for x in re.split(r"(?<!\|)\|(?!\|)", ln) if x.strip()][-1])

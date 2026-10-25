@@ -589,6 +589,55 @@ def test_c37_failed_head_never_consumed_still_flagged(env):
     assert [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
 
 
+def test_c37_helper_script_fails_then_awk_recovery_does_not_false_positive(env):
+    """自寫 helper（calc.py）跑失敗，agent 改用 `awk` 直接讀同一份資料算出正確值並交付
+    → 失敗是放棄的嘗試，不是略過；不得 failed_step。
+    （2026-10-25：此類真實樣式在舊邏輯下被誤報——豁免只認 reads_given，不認 runs_own。）"""
+    p = _proj(env, "c37_fp7", {"sales.csv": "day,amount\nmon,100\ntue,20\n"})
+    a = Agent(p)
+    a.ask("Read sales.csv, total the amount column, and write the result to report.md.")
+    a.write("calc.py", "import csv\nprint(sum(r['amount'] for r in csv.DictReader(open('sales.csv'))))\n")
+    a.bash("python3 calc.py",
+           stdout="Traceback (most recent call last):\nKeyError: 'amount'", error=True)
+    a.bash("awk -F, 'NR>1{n+=\\$2} END{print n}' sales.csv", stdout="120\n")
+    a.write("report.md", "# Total\n\n120\n")
+    ev = a.evidence("Wrote report.md.")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_helper_fails_then_other_script_succeeds_not_false_positive(env):
+    """自寫 calc.py 跑失敗、改用另一支自寫 count.py 跑通並交付 → 不得 failed_step。
+    （2026-10-25：與 test_s5 的差別只在「有無後續成功替代」；反向控制見 test_s5_own_script_\
+    fails_then_the_report_is_written_by_hand。）"""
+    p = _proj(env, "c37_fp8", {"data.csv": "x\n1\n2\n"})
+    a = Agent(p)
+    a.ask("Sum the x column of data.csv and write the answer to answer.txt.")
+    a.write("calc.py", "print('boom')\nraise RuntimeError('bad')\n")
+    a.bash("python3 calc.py",
+           stdout="Traceback (most recent call last):\nRuntimeError: bad", error=True)
+    a.write("count.py", "print(1+2)\n")
+    a.bash("python3 count.py", stdout="3\n")
+    a.write("answer.txt", "3\n")
+    ev = a.evidence("3")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
+def test_c37_cd_and_grep_no_match_does_not_false_positive(env):
+    """`cd . && grep -c '免運' doc.md` 無匹配（exit 1）後誠實回報「沒有」→ 不得 failed_step。
+    （2026-10-25：`cd … &&` 鏈頭讓 `_no_match_only` 認不出搜尋指令而誤報；
+    真正的 grep 錯誤仍須標記，見 test_a_search_that_errors_on_a_given_file_is_still_a_failed_step。）"""
+    p = _proj(env, "c37_fp9", {"doc.md": "# Policy\nshipping: standard only\n"})
+    a = Agent(p)
+    a.ask("Check doc.md for a 免運 policy and write your answer to answer.txt.")
+    a.bash("cd . && grep -c '免運' doc.md", stdout="0\n", error=True)
+    a.write("answer.txt", "not found\n")
+    ev = a.evidence("doc.md has no 免運 policy.")
+    assert not [f for f in ev["findings"] if f["kind"] == "failed_step"], ev["findings"]
+    _assert_clean_review(ev)
+
+
 def test_pushable_for_caps_test_failed_to_one_round():
     from vacant_network.trace.zerostop import pushable_for
     f_test = {"kind": "failed_step", "sub": "test_failed", "cmd": "pytest"}
