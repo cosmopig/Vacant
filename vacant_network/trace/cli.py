@@ -145,7 +145,14 @@ def cmd_report(args: argparse.Namespace) -> int:
         localize(c, res, cwd=str(ws), why_open="on request")
     rp = rec.dir / "report.md"
     if not rp.is_file():
-        print("no report yet (it is written at the end of each turn; or run with --check)")
+        if c is None:
+            # round 17 dogfood：無契約的工作區照原提示跑 --check 會撞 rc=1；
+            # 提示要帶得起來的前提，不帶不成立的前提。
+            print("no report yet (it is written at the end of each turn; "
+                  "or run with --check — it re-verifies the task contract first, "
+                  "which this workspace does not have yet)")
+        else:
+            print("no report yet (it is written at the end of each turn; or run with --check)")
         return 0
     print(rp.read_text(encoding="utf-8"), end="")
     return 0
