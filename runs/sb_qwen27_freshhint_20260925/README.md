@@ -181,9 +181,10 @@ nothing failure-relevant, no words at all.
   filename, or the state change between attempts). Do not quote any lcb_3487
   result as "the hint content fixed it".
 - **Residual confounds, stated (do not over-read):**
-  1. the filename is `VACANT_FEEDBACK.md` — a *name-neutral* control
-     (random filename + noise) was **not** run, so "the filename itself"
-     is not isolated;
+  1. ~~the filename is `VACANT_FEEDBACK.md` — not isolated~~ — **corrected in
+     round 21**: the filename never reaches the model (the agent embeds content
+     only), so the testable factor was the *header label*; see the label-neutral
+     control below, which isolated it;
   2. "a file exists" and "the workspace differs from the origin the agent
      saw at attempt 1" are the same event here and not separated;
   3. n=1 cell, one model, one task — mechanism attribution only, no effect
@@ -196,4 +197,50 @@ python3 neutral_cell.py      # default SB_TID=lcb_3487; ~10 min
 python3 grade.py lcb_3487__neutral_hint
 python3 presence_cell.py     # round 16; ~10 min
 python3 grade.py lcb_3487__presence
+```
+
+## Label-neutral control (round 21, 2026-10-25): the label is NOT the driver
+
+Design correction (recorded): the round 18 backlog item "name-neutral control:
+random file name" targeted the filename, but `agent_qwen.py` passes only the
+file's **content** into the model prompt (under the header line "## Acceptance
+feedback from the previous attempt"); the filename never reaches the model. The
+testable factor is therefore the **header label**, which tells the model a
+previous attempt failed acceptance. `name_cell.py` + `agent_qwen_neu.py`
+isolate exactly that: attempt 2 gets the SAME 175-byte seeded noise
+(byte-identical, imported from `presence_cell.py`; same sha256) under the neutral
+header "## Note". `agent_qwen_neu.py` is byte-identical to `agent_qwen.py` except
+that one header line (verified by `diff`).
+
+**Single-factor claim verified on the wire, not by assertion**: the a2 request
+bodies of both cells are on disk
+(`cells/lcb_3487__presence/wire_RUN-ON/78f7054c…req.bin` vs
+`cells/lcb_3487__labelneu/wire_RUN-ON/f5e4ec91…req.bin`); their
+`messages[0].content` diff to exactly one line (`-## Acceptance feedback from
+the previous attempt` / `+## Note`), with `model`, `max_tokens` (32768),
+`temperature` (0) and the noise bytes identical.
+
+| attempt | ws state | result | signature |
+|---|---|---|---|
+| a1 | clean origin | **rc=20, no deliverable** | same signature as presence a1: `finish_reason=length`, empty content, budget consumed by thinking; requests_seen=1 |
+| a2 | + 175B seeded noise (same seed/bytes/sha256 as presence) under **"## Note"** | **rc=0, full=True** | visible 4/4, hidden 24/24 (`grade.json`) |
+
+**Reading**: the rescue happens **without** the label "acceptance feedback from
+the previous attempt". The model does not need to be told a previous attempt
+failed; any extra prompt content (175 B of noise) breaks the deterministic
+no-delivery loop on this task. Attribution narrows from "the failure signal"
+(round 13) to "the prompt is no longer a clean start" — label-agnostic.
+
+- **caveats (n=1 cell, no statistical claim):** one model (qwen3.8-27b), one
+  task, one attempt per arm, temperature 0; the noise content is fixed (seed
+  20261024) — "this specific content" vs "any extra content" is still not
+  separated (needs a second seed under the same neutral label; 2 more model
+calls, not run this round).
+
+Reproduce:
+
+```bash
+python3 name_cell.py a1      # ~7 min (model call); expect no-delivery signature
+python3 name_cell.py a2      # ~3-4 min; expect rc=0
+python3 grade.py lcb_3487__labelneu
 ```

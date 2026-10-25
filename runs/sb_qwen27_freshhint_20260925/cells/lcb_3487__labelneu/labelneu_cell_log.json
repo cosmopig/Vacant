@@ -1,0 +1,27 @@
+{
+ "cell": "lcb_3487__labelneu",
+ "arm": "label-neutral control: resample + same 175B noise under header '## Note' (presence cell used '## Acceptance feedback from the previous attempt')",
+ "agent": "agent_qwen_neu.py (byte-identical to agent_qwen.py except the one header line; file name never reaches the model)",
+ "agent_sha256": "49cbe380c053c6107003e3f2988c88f24d09758e7a117a044cb53247bb337fa0",
+ "header_label": "## Note",
+ "max_tokens": "32768",
+ "attempt1": {
+  "rc": 20,
+  "wall_s": 384.5,
+  "stdout_tail": "",
+  "stderr_tail": "CATED: empty content, finish_reason=length, reasoning_len=48541, max_tokens=32768\n[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws 24c77758c0f8→24c77758c0f8　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__labelneu\ntest_visible.py::<module> — import: ModuleNotFoundError: No module named 'solution' [test_visible.py:2: from solution import maxRemovals  # noqa: F401]\n"
+ },
+ "feedback_redelivered": {
+  "path": "VACANT_FEEDBACK.md",
+  "bytes": 175,
+  "sha256": "6c9b58cfab923c30454475cb8defbcb8e682c7bbe1ee2ea0ff60783893f63985",
+  "header_label": "## Note"
+ },
+ "attempt2": {
+  "rc": 0,
+  "wall_s": 216.3,
+  "stdout_tail": "agent: wrote solution.py (916 chars)\n",
+  "stderr_tail": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 16d4a6560f92→8da179a3c1a3　wire 1 通　收據 /home/user1/dev/Vacant/runs/sb_qwen27_freshhint_20260925/cells/lcb_3487__labelneu\n"
+ },
+ "rc": 0
+}
