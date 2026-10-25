@@ -124,6 +124,12 @@ FIXED_ALLOW = [
     "python3 -m vacant_network.cli flag --help",
     "vacant flag --help 2>&1",
     ".venv/bin/python -m vacant_network.cli flag --help 2>&1",
+    # contract 分支的同一個洞（上面補了 flag/hook/intake/approve，contract 走 `_contract_actions`
+    # 漏了純數字 fd 過濾）：`2` 是重定向殘留，不能被讀成動作
+    "vacant contract --help 2>&1",
+    "vacant contract -h 2>&1",
+    "vacant contract --help > /tmp/c1.txt 2>&1",
+    ".venv/bin/python -m vacant_network.cli contract --help 2>&1",
 ]
 
 
@@ -133,6 +139,10 @@ KEPT_DENY = [
     # 頂層權威子指令、掛鉤、被遮蔽時改用的第二指令名
     "vacant contract lock",
     "vacant contract init --path .vacant/contract.json",
+    # 重定向 fd 不救真動作：有位置引數就是行使權威（幫助豁免只限「只有幫助」）
+    "vacant contract init 2>&1",
+    "vacant contract init --help",
+    "vacant contract lock 2>&1",
     "vacant-network contract lock",
     "vacant review quality pass --reason ok",
     "vacant approve",

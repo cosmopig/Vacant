@@ -513,7 +513,9 @@ def _contract_option(a: str) -> str | None:
 def _contract_actions(args: list[str]) -> set[str]:
     """`contract` 之後的引數 ⇒ argparse 可能拿到的動作（第一個位置引數）；找不到 ⇒ `{""}`。
 
-    不認得的選項當旗標讀一次、當帶值讀一次，回兩種讀法的聯集。"""
+    不認得的選項當旗標讀一次、當帶值讀一次，回兩種讀法的聯集。
+    純數字位置詞是重定向 fd（`2>&1` 會 token 成 `2`），不是動作（與 `_authority_of_sub`
+    的 `positional` 同規：contract 的動作全是字詞，argparse 對數字 choice 本來就會報錯）。"""
     out: set[str] = set()
     for unknown_takes_value in (False, True):
         act = ""
@@ -530,6 +532,9 @@ def _contract_actions(args: list[str]) -> set[str]:
                 opt = _contract_option(a)
                 valued = opt in _CONTRACT_VALUED if opt else unknown_takes_value
                 i += 2 if valued else 1
+                continue
+            if a.isdigit():
+                i += 1                      # 重定向 fd 的殘留（`2>&1`），不是位置引數
                 continue
             act = a
             break
