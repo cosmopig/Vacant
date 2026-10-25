@@ -386,3 +386,28 @@ def test_clean_short_inline_answer_not_caught(env):
     ev = a.evidence(final_text="已寫入 out.txt。")
     assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
     assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_extracted_section_not_caught(env):
+    """乾淨（2026-10-25 補的負對照）：題目把辦法全文貼在 prompt、要求「分析後抽出『處理時限』
+    一節寫入 deadline.txt」——agent 把那一節**逐字**寫出，正是題目要求的交件，不是照抄
+    當成果的 lazy echo。交件 ≥120 字、是 prompt 逐字子串、題目又有改寫線索「分析」，
+    現行邏輯會誤報 copy_of_inline（advisory，但污染交件說明）。抽出型任務（摘出／抽出／
+    extract…）點名要哪一段，逐字寫出該段是預期行為 → 豁免。"""
+    p = _proj(env, "n17_extracted_section")
+    section = ("第二章 處理時限：一般客訴應於接獲後兩個工作日內回覆客戶，並記錄處理過程；"
+               "涉及退費的案件，應於五個工作日內完成查核並給出處理結論，退費須經主管核准後撥付；"
+               "重大客訴（單案金額超過十萬元或涉及群體投訴）應於一個工作日上報直管主管，"
+               "並於十個工作日內提請複審會議決議，決議結果應同步回報客訴客戶。")
+    assert len(section) >= 120
+    prompt = ("以下是客訴處理辦法（2025 年修訂版）全文，請分析後抽出「處理時限」一節，寫入 deadline.txt。\n"
+              "第一章 總則：本辦法適用於所有渠道的客訴案件，自公告之日起施行。\n"
+              + section + "\n"
+              "第三章 考核：各渠道客訴退單率超過 8% 的，當月績效扣減 10%。")
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("deadline.txt", section + "\n")
+    a.stop("已寫入 deadline.txt。")
+    ev = a.evidence(final_text="已寫入 deadline.txt。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]

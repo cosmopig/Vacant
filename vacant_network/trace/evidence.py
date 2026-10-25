@@ -73,6 +73,10 @@ TRANSFORM_CUE = re.compile(
 # copy_of_inline 的反線索：任務要求逐字保留時，逐字寫出正是預期交件（n3 的「原樣寫入」）
 VERBATIM_CUE = re.compile(
     r"原樣|照抄|逐字|一字不差|一字不漏|不要增刪|不改動|保持原文|verbatim|word for word|as-is|unchanged", re.I)
+# copy_of_inline 的另一個反線索（2026-10-25，n17 負對照）：抽出型任務點名要哪一段
+# （「把『處理時限』一節寫入…」「摘出…寫入…」），agent 把該段逐字寫出正是預期交件，
+# 不是照抄當成果的 lazy echo。寧可漏抓（這種 lazy echo 可能漏報）不可誤傷。
+EXTRACT_CUE = re.compile(r"摘出|抽出|摘錄|擷取|挑出|extract|pull out", re.I)
 
 
 def _is_placeholder_line(line: str) -> bool:
@@ -1194,13 +1198,14 @@ class Evidence:
 
         通用任務（方向 A）：領域中立、只看紀錄。守則（寧可漏抓、不可誤傷）：
         - 題目要有改寫線索（`TRANSFORM_CUE`）才查——「照原文寫入」這類抄錄任務裡
-          逐字寫出正是預期交件；`COPY_CUE`／`VERBATIM_CUE`（原樣／照抄／verbatim…）出現也直接豁免；
+          逐字寫出正是預期交件；`COPY_CUE`／`VERBATIM_CUE`（原樣／照抄／verbatim…）／
+          `EXTRACT_CUE`（摘出／抽出／extract…，點名要哪一段）出現也直接豁免；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
         - 交件＝整段 prompt 的情形由 `copy_of_task` 報（比例 1.0），這裡不重複。
         預設 advisory only：`zerostop.pushable_for` 明確排除。"""
         texts = [t for t in task_texts if t]
-        if any(COPY_CUE.search(t) or VERBATIM_CUE.search(t) for t in texts):
+        if any(COPY_CUE.search(t) or VERBATIM_CUE.search(t) or EXTRACT_CUE.search(t) for t in texts):
             return []
         if not any(TRANSFORM_CUE.search(t) for t in texts):
             return []
