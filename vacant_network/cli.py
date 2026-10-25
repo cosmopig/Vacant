@@ -973,6 +973,12 @@ def cmd_trace(args: argparse.Namespace) -> int:
         lines = path.read_text(encoding="utf-8").splitlines()
     except FileNotFoundError:
         print(f"找不到 trace 檔：{path}", file=sys.stderr)
+        # round 17 dogfood：打錯子指令（如 `vacant trace overview`）時這裡是唯一的
+        # 回饋。名字不像路徑（不含 `/`）就指回病歷子指令；像路徑的維持單純錯誤。
+        if "/" not in str(args.file):
+            print("病歷子指令：vacant trace show / verify / report / actors / blame "
+                  "（`vacant trace <wire.jsonl>` 只用於 tee-proxy 的記錄檔）",
+                  file=sys.stderr)
         return 1
     print(f"== MCP trace: {path} ==  (★=對 vacant 工具的呼叫/回覆)")
     pending: dict = {}      # JSON-RPC id → 工具名（標記回覆）
