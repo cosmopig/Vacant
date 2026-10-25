@@ -1,0 +1,159 @@
+"""逐步觀察被永久關掉之後的救回（`trace/recorder.py` 的 `rescan` / `vacant trace rescan`）。
+
+大專案在 `vacant gc` 之後，增量掃描要重新核對／重存大量版本，超過掛鉤的 8 秒上限，
+`_disable_scan` 就把這個專案**永久**關掉（自家專案實測）。round 27 只讓人**看得見**
+這個狀態；這支釘住的是**救得回**：
+
+- `rescan` 重新完整觀察一次：重存所有版本、刷新 `last_index`、清掉「掃描停用」
+- 救回來之後，逐步觀察真的又作用（寫入能被歸因），不是只把旗標翻過去
+- 救不回（工作區太大）時不破壞既有狀態——寧可照實說救不回，也不清空已觀測到的
+- `baseline()` 預設行為不變（`rescan` 是純增量能力）
+- 命令列 `vacant trace rescan` 存在、作用、退出碼誠實
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+
+import pytest
+
+from vacant_network.intake import contract as C
+from vacant_network.intake import keys
+from vacant_network.trace import recorder as R
+from vacant_network.trace import workspace as W
+
+MAIN = R.Actor("claude", "s1")
+SALES = "id,amount\n1,10\n2,20\n3,30\n"
+TOTAL = [{"id": "total", "verifier": "csv_total", "authority": "fact",
+          "params": {"csv": "input:sales", "column": "amount", "report": "report.md"}}]
+
+
+@pytest.fixture
+def proj(tmp_path, monkeypatch):
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    monkeypatch.delenv("VACANT_TRACE", raising=False)
+    keys.init_local()
+    p = tmp_path / "proj"
+    (p / "data").mkdir(parents=True)
+    (p / ".vacant").mkdir()
+    (p / "data" / "sales.csv").write_text(SALES)
+    raw = C.scaffold("rescan", deliverable=["report.md"])
+    raw["inputs"] = {"sales": {"path": "data/sales.csv"}}
+    raw["claims"] = TOTAL
+    cp = p / ".vacant" / "contract.json"
+    cp.write_text(json.dumps(raw))
+    C.lock(cp)
+    monkeypatch.setattr(subprocess, "Popen", lambda argv, **kw: None)
+    return p, C.load(cp)
+
+
+def _state(p):
+    rec = R.Recorder(p)
+    return json.loads(rec.state_path.read_text())
+
+
+def _died_after_gc(p):
+    """重現真實故障鏈：先有完整觀察（last_index 在），`gc` 把 store 標成 compaction，
+    之後掛鉤的增量掃描（`prev_stored=False`）超時 ⇒ `_disable_scan` 永久關掉。"""
+    R.Recorder(p).baseline()                                  # 第一步：看過了，last_index 在
+    rec = R.Recorder(p)
+    st = json.loads(rec.state_path.read_text())
+    st["compacted"] = True                                    # gc 的效果
+    rec.state_path.write_text(json.dumps(st))
+    rec = R.Recorder(p)
+    rec.scan_deadline_s = 1e-9                                # 掛鉤時限極小 ⇒ 增量掃描一定超時
+    rec.pre("t", MAIN, "Bash", {"command": "ls"})
+    rec.post("t", MAIN, "Bash", {"command": "ls"}, "")
+    assert _state(p).get("scan_disabled")                     # 前提：專案已經「死了」
+
+
+def test_rescan_revives_a_project_that_died_after_gc(proj):
+    p, _c = proj
+    _died_after_gc(p)
+    out = R.Recorder(p).rescan()
+    assert out["rescanned"] is True and out["files"] >= 2
+    st = _state(p)
+    assert "scan_disabled" not in st and st["last_index"]
+    assert st.get("compacted") is None                        # 下一步增量走快路徑，不會再超時
+    # 救回不只是翻旗標：逐步觀察真的又作用，寫入能被歸因
+    rec = R.Recorder(p)
+    rec.scan_deadline_s = R.HOOK_SCAN_S
+    rec.pre("t2", MAIN, "Write", {"file_path": "report.md"})
+    (p / "report.md").write_text("# Q3\nTotal: 60\n")
+    e = rec.post("t2", MAIN, "Write", {"file_path": "report.md"}, "ok")
+    assert [w["path"] for w in e["writes"]] == ["report.md"] and "writes_unknown" not in e
+    # 病歷上有一筆「重看」的 coverage 事件，簽進鏈
+    cov = [e for e in R.Recorder(p).events() if e["type"] == "coverage" and e.get("rescanned")]
+    assert cov and cov[-1]["rescanned"]["was_disabled"] is True
+    ok, why = R.Recorder(p).verify()
+    assert ok, why
+
+
+def test_rescan_re_stores_the_blob_store_so_incremental_scans_are_safe(proj):
+    p, _c = proj
+    R.Recorder(p).baseline()
+    # 模擬 `gc` 把一部分版本從 store 剪掉：之後的增量掃描若走快路徑（假設版本都在）
+    # 會讀到空；rescan 必須重存，讓快路徑的假設重新成立
+    rec = R.Recorder(p)
+    before = rec.load_index(_state(p)["last_index"])
+    some_sha = next(iter(before.values())).sha256
+    victim = rec.blobs.path(some_sha)
+    if victim.is_file():
+        victim.unlink()
+    _died_after_gc(p)                                         # 現在專案死了
+    R.Recorder(p).rescan()
+    fresh = rec.load_index(_state(p)["last_index"])
+    # 新版本可讀（重存過的），不是一堆空
+    assert all(rec.blobs.get(v.sha256) for v in fresh.values())
+
+
+def test_rescan_too_big_keeps_existing_state(proj, monkeypatch):
+    p, _c = proj
+    R.Recorder(p).baseline()
+    last = _state(p)["last_index"]
+    assert last
+    monkeypatch.setattr(W, "MAX_FILES", 1)                    # 工作區太大，救不回
+    out = R.Recorder(p).rescan()
+    assert out["rescanned"] is False and "more than" in out["error"]
+    st = _state(p)
+    assert st["last_index"] == last                           # 不破壞既有狀態
+    # 救不回時不新增 coverage 事件（沒有東西可記，寧可照實說）
+    assert not [e for e in R.Recorder(p).events()
+                if e["type"] == "coverage" and e.get("rescanned")]
+
+
+def test_rescan_works_on_a_never_observed_project(proj):
+    p, _c = proj
+    # 從來沒看過的專案：rescan 也能當「強制第一次完整觀察」用
+    out = R.Recorder(p).rescan()
+    assert out["rescanned"] is True and _state(p)["last_index"]
+
+
+def test_baseline_default_behavior_unchanged(proj):
+    p, _c = proj
+    R.Recorder(p).baseline()
+    # 預設 `baseline()` 還是冪等、不重看（rescan 是獨立能力，不改舊語意）
+    assert R.Recorder(p).baseline() == {"skipped": "already observed"}
+
+
+def test_cmd_rescan_runs_and_revives(proj, capsys):
+    p, _c = proj
+    _died_after_gc(p)
+    from vacant_network.trace import cli
+    cp = p / ".vacant" / "contract.json"
+    rc = cli.main(["--contract", str(cp), "rescan"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "re-observed" in out and "on again" in out
+    assert "scan_disabled" not in _state(p)
+
+
+def test_cmd_rescan_too_big_exits_nonzero(proj, monkeypatch, capsys):
+    p, _c = proj
+    R.Recorder(p).baseline()
+    monkeypatch.setattr(W, "MAX_FILES", 1)
+    from vacant_network.trace import cli
+    cp = p / ".vacant" / "contract.json"
+    rc = cli.main(["--contract", str(cp), "rescan"])
+    assert rc == 2
+    assert "rescan failed" in capsys.readouterr().err

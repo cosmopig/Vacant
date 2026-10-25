@@ -89,7 +89,8 @@ def cmd_show(args: argparse.Namespace) -> int:
     if disabled is not None:
         print(f"   ·  coverage: file-change observation is disabled — {disabled} "
               f"(steps are still recorded, but file changes are no longer attributed "
-              f"step by step; `trace blame` will show unattributable)")
+              f"step by step; `trace blame` will show unattributable — revive it with "
+              f"`vacant trace rescan`)")
     tail = getattr(args, "tail", None)
     if tail is not None:
         if tail < 1:
@@ -305,6 +306,22 @@ def cmd_actors(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_rescan(args: argparse.Namespace) -> int:
+    ws, _c = _workspace(args)
+    out = Recorder(ws).rescan()
+    if getattr(args, "json", False):
+        print(json.dumps(out, ensure_ascii=False, indent=1, default=str))
+    if out.get("rescanned"):
+        if not getattr(args, "json", False):
+            revived = " (this revives step-by-step observation)" if out.get("was_disabled") else ""
+            print(f"re-observed {out.get('files', '?')} files in {out.get('seconds', '?')}s{revived}")
+            print("file-change observation is on again: subsequent steps are attributed step by step")
+        return 0
+    if not getattr(args, "json", False):
+        print(f"rescan failed: {out.get('error', out)}", file=sys.stderr)
+    return 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="vacant trace")
     ap.add_argument("--contract")
@@ -328,6 +345,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--value")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_blame)
+    p = sp.add_parser("rescan",
+                      help="re-observe the workspace: revive step-by-step observation that was "
+                           "turned off (e.g. after `vacant gc`) — long-running, user-invoked")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_rescan)
     return ap
 
 

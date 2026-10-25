@@ -426,8 +426,13 @@ class Recorder:
         except OSError:
             pass
 
-    def baseline(self) -> dict[str, Any]:
-        """把整個工作區看一次（沒有時限、不拿鎖地掃）。已經有人看過了就不動。"""
+    def baseline(self, refresh: bool = False) -> dict[str, Any]:
+        """把整個工作區看一次（沒有時限、不拿鎖地掃）。預設：已經有人看過了就不動。
+
+        `refresh=True`（`vacant trace rescan`）：重新完整看一次——重存所有版本、刷新
+        `last_index`、清掉「掃描停用」。這是大專案在 `vacant gc` 之後增量掃描超時、被
+        `_disable_scan` 永久關掉之後的救回出口。失敗時不破壞既有狀態：寧可照實說
+        「救不回」，也不清空已觀測到的。"""
         t0 = time.monotonic()
         try:
             idx: W.Index | None = W.scan(self.workspace, None, skip=self.skip, blobs=self.blobs)
@@ -439,22 +444,45 @@ class Recorder:
             st = self._state()
             if too_big is not None or idx is None:
                 st.pop("baseline_pending", None)
+                if refresh:
+                    # 救不回就別破壞既有狀態（last_index 還在、blame 還能追舊版本）
+                    self._save(st)
+                    return {"rescanned": False, "error": too_big or "no index"}
                 if not st.get("last_index") and not st.get("scan_disabled"):
                     self._disable_scan(st, too_big or "no index")
                 self._save(st)
                 return {"disabled": st.get("scan_disabled")}
-            if st.get("last_index") or st.get("scan_disabled"):
+            if (st.get("last_index") or st.get("scan_disabled")) and not refresh:
                 st.pop("baseline_pending", None)
                 self._save(st)
                 return {"skipped": "already observed"}
+            was_disabled = bool(st.get("scan_disabled"))
+            after_unobserved = bool(st.get("unobserved_before_baseline"))
             sha = self._index_blob(idx, st)
             st["last_index"] = sha
             st.pop("baseline_pending", None)
-            info = {"files": len(idx), "seconds": round(secs, 1), "index": sha,
-                    "after_unobserved": bool(st.get("unobserved_before_baseline"))}
-            self._append("coverage", {"baseline": info})
+            st.pop("compacted", None)                 # 這份剛完整重存過：下一步增量走快路徑
+            if refresh:
+                st.pop("scan_disabled", None)
+                st.pop("unobserved_before_baseline", None)
+                info = {"rescanned": True, "was_disabled": was_disabled,
+                        "files": len(idx), "seconds": round(secs, 1), "index": sha,
+                        "after_unobserved": after_unobserved}
+                self._append("coverage", {"rescanned": info})
+            else:
+                info = {"files": len(idx), "seconds": round(secs, 1), "index": sha,
+                        "after_unobserved": after_unobserved}
+                self._append("coverage", {"baseline": info})
             self._save(st)
             return info
+
+    def rescan(self) -> dict[str, Any]:
+        """重新完整觀察一次：救回被永久關掉的逐步觀察（`vacant trace rescan`）。
+
+        和背景的第一次觀察（`baseline`）不同：這裡的工作區**已經看過**（或看過之後被關），
+        目的是重存所有版本、刷新索引、把「掃描停用」翻回去。成功回 `{rescanned: True, ...}`；
+        工作區太大救不回時回 `{rescanned: False, error}`，且不破壞既有狀態。"""
+        return self.baseline(refresh=True)
 
     def _ensure_session(self, st: dict[str, Any], actor: Actor) -> None:
         key = f"{actor.platform}:{actor.session}"

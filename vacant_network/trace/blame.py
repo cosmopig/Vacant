@@ -1261,7 +1261,8 @@ def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
         # 工作區太大、不再逐步掃描：寫入都是「不知道」，不可以歸給任何人（recorder#9）
         res.update(state="UNOBSERVED", fault_class="unattributable", confidence="gap",
                    layer="inference", step=None, chain=[], value=value,
-                   note=f"the workspace was not observed step by step ({trace.scan_disabled})")
+                   note=f"the workspace was not observed step by step ({trace.scan_disabled}) "
+                        f"— revive it with `vacant trace rescan`")
         return res
     if trace.first_look_pending:
         # 第一次看還在背景：什麼都還沒看到，不可以說「那時候那裡沒有這個值」（大專案審查 #3）

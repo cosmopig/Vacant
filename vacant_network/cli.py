@@ -711,7 +711,7 @@ def build_parser() -> argparse.ArgumentParser:
     pv.add_argument("--answer", default=None, help="把實際答案餵進來，額外要求雜湊對得上")
     pv.set_defaults(func=cmd_verify_att)
 
-    pt = sub.add_parser("trace", help="病歷追緝：show / verify / report / actors / blame（人指出錯處：vacant flag；`vacant trace <wire.jsonl>`＝tee-proxy 時間軸）")
+    pt = sub.add_parser("trace", help="病歷追緝：show / verify / report / actors / blame / rescan（人指出錯處：vacant flag；`vacant trace <wire.jsonl>`＝tee-proxy 時間軸）")
     pt.add_argument("file")
     pt.set_defaults(func=cmd_trace)
 
@@ -1172,7 +1172,7 @@ _INTAKE_TOP: tuple[str, ...] = ("contract", "check", "submit", "review", "reveri
 _ADAPTER_TOP: tuple[str, ...] = ("do", "hook", "adapters", "install", "uninstall")
 #: 可究責追緝（`vacant_network/trace/`，2026-09-24）：看病歷、人指出錯處。
 _TRACE_TOP: tuple[str, ...] = ("trace", "flag")
-_TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "actors")
+_TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "actors", "rescan")
 
 
 def main(argv: list[str] | None = None) -> int:

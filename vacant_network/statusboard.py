@@ -246,6 +246,7 @@ def project_summary(key: str) -> dict[str, Any] | None:
         "n_ended_early": sum(1 for e in evs if e.get("type") == "ended"),
         "n_open_flags": len(open_flags),  # 簽章是否來自 owner 在明細頁用 open_flags() 判
         "scan_disabled": bool(st.get("scan_disabled")),
+        "scan_disabled_reason": st.get("scan_disabled"),   # 為什麼被關（救回：`vacant trace rescan`）
         "last_activity_ms": last_ms,
         "delivery": _delivery_summary(_read_json(rec.dir / "delivery.json")),
     }
