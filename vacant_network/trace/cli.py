@@ -138,7 +138,12 @@ def cmd_report(args: argparse.Namespace) -> int:
     rec = Recorder(ws)
     if args.check:
         if c is None:
-            raise SystemExit("vacant trace report --check needs a task contract")
+            # 跟 `vacant check` 同因同語（intake/cli.py 的 no-contract 訊息）：說清找過哪、
+            # 怎麼建——否則照著 `vacant trace report` 的「or run with --check」提示跑會撞這句
+            # 卻不知下一步（round 17 dogfood 的同一類摩擦）。
+            raise SystemExit("vacant trace report --check needs a task contract "
+                             "(looked for .vacant/contract.json up to the git root). "
+                             "Create one with `vacant contract init --task <id>`.")
         from ..intake import flow
         from .stopcheck import localize
         res = flow.check(c, c.base_dir)
