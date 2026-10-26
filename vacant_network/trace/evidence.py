@@ -28,6 +28,7 @@ import datetime as _dt
 import difflib
 import hashlib
 import io
+import itertools
 import json
 import math
 import os
@@ -1263,6 +1264,12 @@ class Evidence:
           test_lfake_list_label_without_list_cue_is_caught（合取側）固定；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
+        - **多文件切分**（2026-10-28 註冊已知漏 → round 83 union 檢查）：逐檔都低於
+          `INLINE_COPY_MIN`、但成對拼接是 prompt（或整場對話）的逐字連續子串且合計 ≥
+          `INLINE_COPY_MIN` 時，成對兩個檔各報一個發現。同三门＋清單豁免；只查成對
+          （≥3 檔切分仍是註冊漏，寧漏勿誤）——見 test_lfake_multifile_split_is_caught
+          （抓）＋ test_lfake_multifile_split_not_pushed_back（advisory）＋
+          test_clean_multifile_split_keep_verbatim_not_caught（verbatim 豁免負對照）；
         - **跨輪拼接**（round 45，2026-10-29 §2.5）：交件是整場對話（≥2 輪）拼接
           的逐字連續子串、且不等於任何單輪 prompt 時也命中。拼接語料**先拼接、
           再 `_collapse`**（先各自 collapse 再拼接會丟掉邊界空白，
@@ -1313,6 +1320,42 @@ class Evidence:
                 out.append({"kind": "copy_of_inline", "path": path,
                             "detail": "verbatim block spanning the whole conversation; "
                                      "the task asked for a reworking"})
+        # 多文件切分（2026-10-28 註冊已知漏 → round 83 union 檢查，docs/UNIVERSAL_TASKS.md §2.4）：
+        # 逐檔都低於 INLINE_COPY_MIN（逐檔檢查跳過），但成對的逐字拼接（按其在語料中的順序）
+        # 是語料的逐字連續子串且 ≥ INLINE_COPY_MIN——把內聯資料原樣切成多檔的 lazy 切分回顯。
+        # 三门與逐檔相同（上方 early return 已保證：改寫線索在＋無 COPY／VERBATIM／EXTRACT 豁免）；
+        # 清單形狀豁免同用（成對中任一檔是清單區塊＋題目點名清單 → 豁免，寧漏勿誤）；
+        # 只查成對（≥3 檔切分仍是註冊漏）；拼接從原文重組後再 collapse
+        #（各自 collapse 後直接拼會在 CJK-ASCII 交界丟空格，見樣本自檢）。
+        small: list[tuple[str, str]] = []
+        for path, new in cands:
+            if not new or not new.strip():
+                continue
+            if 0 < len(_collapse(new)) < INLINE_COPY_MIN:
+                small.append((path, new))
+        if len(small) >= 2:
+            list_exempt = any(LIST_REQ_CUE.search(t) for t in all_texts)
+            for (pa, raw_a), (pb, raw_b) in itertools.combinations(small, 2):
+                if list_exempt and (_is_list_block(raw_a) or _is_list_block(raw_b)):
+                    continue
+                detail = None
+                for cc in (_collapse(raw_a + "\n" + raw_b).lower(),
+                           _collapse(raw_b + "\n" + raw_a).lower()):
+                    if len(cc) < INLINE_COPY_MIN:
+                        continue
+                    if any(c and cc != c and cc in c for c in prompts):
+                        detail = ("verbatim block split across the named files; "
+                                  "the task asked for a reworking")
+                        break
+                    if joined and cc != joined and cc in joined \
+                            and all(cc != pt for pt in prompts if pt):
+                        detail = ("verbatim block spanning the whole conversation, "
+                                  "split across the named files; "
+                                  "the task asked for a reworking")
+                        break
+                if detail:
+                    out.append({"kind": "copy_of_inline", "path": pa, "detail": detail})
+                    out.append({"kind": "copy_of_inline", "path": pb, "detail": detail})
         return out
 
     def _test_claim(self, steps: list[Step], delivs: dict[str, tuple[str, str]]

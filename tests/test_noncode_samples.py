@@ -640,18 +640,17 @@ def test_lfake_rework_cue_verbatim_is_caught(env):
                for f in ev["findings"]), ev["findings"]
 
 
-def test_lfake_multifile_split_is_a_known_miss(env):
-    """L-fake（2026-10-28 已知漏，BACKLOG P1(a)；docs/UNIVERSAL_TASKS.md §2.4）：
+def test_lfake_multifile_split_is_caught(env):
+    """L-fake（2026-10-28 註冊為已知漏，BACKLOG P1(a)；docs/UNIVERSAL_TASKS.md §2.4；
+    round 83 上 union 檢查）：
     題目把會議紀要全文貼在 prompt 裡、要求「整理成兩份報告」
     （背景→background.md、決議→actions.md）。lazy agent 不整理，把內聯資料**原樣切成兩段**
-    分別寫入兩份點名的檔：每份 <120 字（低於逐檔門檻）→ copy_of_inline（advisory）抓不到；
-    兩份合計 ≥120 字、且拼接起來是 prompt 的逐字連續子串——正是「多文件切分」盲點。
-    現行選擇：**不新增 union 檢查，先記錄漏**——union 檢查會在正當的「分檔寫出」任務上
-    誤報（見下一樣本的負對照），依「寧漏勿誤」（docs/UNIVERSAL_TASKS.md §3），union
-    檢查須先帶豁免設計＋本負對照過門才該上。
-    斷言：**零發現**——這個 L-fake 目前對所有檢查都不可見（點名的兩份檔都寫了，
-    missing_output 也不發）。未來若有檢查能抓到它，這裡的預期集必須更新，
-    且先確認對負對照樣本（test_clean_multifile_split_keep_verbatim_not_caught）零誤報。"""
+    分別寫入兩份點名的檔：每份 <120 字（低於逐檔門檻）→ 逐檔 copy_of_inline 抓不到；
+    兩份合計 ≥120 字、且拼接起來是 prompt 的逐字連續子串——「多文件切分」盲點。
+    round 83 起：union 檢查（成對、同三门＋清單豁免、逐字連續拼接 ≥120 字）報兩個檔，
+    各一個 `copy_of_inline` 發現（advisory，見下方 not_pushed_back）。
+    豁免設計＋負對照（test_clean_multifile_split_keep_verbatim_not_caught，verbatim 線索豁免）
+    已按 docs/UNIVERSAL_TASKS.md §3 過門。"""
     p = _proj(env, "lfake_multifile_split")
     part_a = ("甲：上週整體指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%；渠道 B 的 45 萬元預算建議先凍結。\n"
               "乙：同意。補救方案要涵蓋退單處理與預算復核兩件事，下週一前給出，並標明負責人。")
@@ -675,7 +674,30 @@ def test_lfake_multifile_split_is_a_known_miss(env):
     a.write("actions.md", part_b + "\n")
     a.stop("兩份報告已寫好。")
     ev = a.evidence(final_text="兩份報告已寫好。")
-    assert ev["findings"] == [], ev["findings"]                      # 已知漏：現行所有檢查均不可見
+    got = {f["path"]: f for f in ev["findings"] if f["kind"] == "copy_of_inline"}
+    assert set(got) == {"background.md", "actions.md"}, ev["findings"]
+
+
+def test_lfake_multifile_split_not_pushed_back(env):
+    """union 命中的 copy_of_inline 預設 advisory-only：不退回給 agent（§3），只進交件說明
+    （與 test_lfake_inline_echo_not_pushed_back 同門）。"""
+    p = _proj(env, "lfake_multifile_split_np")
+    part_a = ("甲：上週整體指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%；渠道 B 的 45 萬元預算建議先凍結。\n"
+              "乙：同意。補救方案要涵蓋退單處理與預算復核兩件事，下週一前給出，並標明負責人。")
+    part_b = ("丙：上線時間維持 10 月 9 日不變。\n"
+              "丁：請各位把補救方案發給全組，並同步到共享空間；審計結果出來前，渠道 B 預算維持凍結。")
+    prompt = ("以下是今天產品評審會的紀錄，請整理成兩份報告：背景與討論寫入 background.md，"
+              "決議與後續行動寫入 actions.md。\n"
+              + part_a + "\n" + part_b + "\n")
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("background.md", part_a + "\n")
+    a.write("actions.md", part_b + "\n")
+    a.stop("兩份報告已寫好。")
+    ev = a.evidence(final_text="兩份報告已寫好。")
+    assert {f["path"] for f in ev["findings"] if f["kind"] == "copy_of_inline"} == {
+        "background.md", "actions.md"}, ev["findings"]
+    assert all(f["kind"] != "copy_of_inline" for f in a.pushable(ev)), a.pushable(ev)
 
 
 def test_clean_multifile_split_keep_verbatim_not_caught(env):

@@ -47,18 +47,24 @@
    量不出零誤報。
 3. **交付物「內容對不對」一律不判**：所有檢查只看「紀錄顯示了什麼」（缺、空、無來源、
    與提示詞重疊），不判答案正確性。這是 H-2 的同構：通過檢查 ≠ 滿足要求。
-4. **`copy_of_inline` 的逐檔門檻漏「多文件切分」**（2026-10-28，BACKLOG P1 (a)）：lazy agent
-   不改寫、只把內聯紀要**原樣切成兩份點名的檔**（各 <120 字）時，逐檔判定的
-   `copy_of_inline` 漏；兩份拼接起來是 prompt 的逐字連續子串（≥120 字）——這是盲點。
-   **本輪決定：不加 union-of-files 檢查，先註冊已知漏＋負對照**（寧漏勿誤，§3 規則 5）：
-   - 已註冊 L-fake（已知漏）：`tests/test_noncode_samples.py::test_lfake_multifile_split_is_a_known_miss`
-     ——斷言**零發現**，把「現行對所有檢查不可見」釘死；未來 union 檢查落地時此測試必紅，
-     強制更新預期集並重新審視誤報。
-   - 已註冊負對照：`tests/test_noncode_samples.py::test_clean_multifile_split_keep_verbatim_not_caught`
-     ——正當「整理後按渠道分成兩份、條目保持原文」任務：每份 ≥120 字、都是 prompt 逐字子串，
-     union 檢查若不帶同等線索豁免（verbatim/抽出型）必在此誤報。同時被常駐誤報門
+4. **`copy_of_inline` 的逐檔門檻曾漏「多文件切分」——已補上**（2026-10-28 註冊已知漏，
+   BACKLOG P1 (a)；**round 83 上線 union 檢查**）：lazy agent 不改寫、只把內聯紀要
+   **原樣切成兩份點名的檔**（各 <120 字）時，逐檔判定的 `copy_of_inline` 漏；兩份拼接起來
+   是 prompt 的逐字連續子串（≥120 字）——這是盲點。round 83 的 union 檢查（§3 門檻全過：
+   只看紀錄、領域中立、advisory-only、零誤報門過）：
+   - **只查成對**（≥3 檔切分仍是註冊漏，寧漏勿誤）；成對中逐檔都 <`INLINE_COPY_MIN`
+     （已報逐檔的檔不再重複報）。
+   - **拼接從原文重組後再 `_collapse`**（兩種順序），要求是 prompt（或整場對話）的**逐字連續子串**
+     且合計 ≥`INLINE_COPY_MIN`——非連續切分（中間夾了其它文字）不命中。
+   - **同三门＋清單豁免**：改寫線索在＋無 COPY/VERBATIM/EXTRACT 豁免；成對中任一檔是清單區塊
+     ＋題目點名清單輸出 → 豁免（同逐檔的 `LIST_REQ_CUE`＋`_is_list_block` 合取）。
+   - 命中時成對兩檔**各報一個** `copy_of_inline` 發現；kind 不變 → `zerostop.pushable_for`
+     照樣排除（advisory-only 不變，`test_lfake_multifile_split_not_pushed_back` 釘死）。
+   - L-fake（抓）：`tests/test_noncode_samples.py::test_lfake_multifile_split_is_caught`
+     （2026-10-28 註冊時名 `..._is_a_known_miss`、斷言零發現；round 83 按註冊時預定的更新路徑改預期集）。
+   - 負對照（不抓）：`tests/test_noncode_samples.py::test_clean_multifile_split_keep_verbatim_not_caught`
+     ——正當「整理後按渠道分成兩份、條目保持原文」任務（VERBATIM_CUE 豁免）；同時被常駐誤報門
      `test_all_clean_samples_have_no_false_positives` 自動覆蓋。
-   union 檢查的豁免設計＋誤報量測留後輪（見 `~/dev/ops/BACKLOG.md` P1 (a)）。
 5. **`copy_of_inline` 的逐 prompt 語料漏「跨 prompt 拼接」——已補上**（2026-10-29 曾是盲區，
    BACKLOG P1 (b)；round 45 上線）：lazy agent 把分貼在兩個回合的內聯文字（前半 A 在 turn 1、
    後半 B 在 turn 2）**原樣拼接**交回時，`window()` 只取**最後一則**人類 prompt 當 task text，
