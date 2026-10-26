@@ -1254,8 +1254,9 @@ class Evidence:
         - **清單型輸出豁免**（2026-10-26 清單負對照）：題目點名清單型輸出
           （`LIST_REQ_CUE`：動詞＋編號/清單/列表/列點/numbered list/bullet points）
           且交件本身就是清單區塊（`_is_list_block`）時，逐字寫出該清單正是預期交件
-          （reformat 是 no-op）；散文 lazy echo 不豁免（形狀不是清單）——見
-          test_clean_list_reformat_verbatim_not_caught；
+          （reformat 是 no-op）——見 test_clean_list_reformat_verbatim_not_caught；
+          豁免是合取：清單形狀但題目要求散文輸出（無 `LIST_REQ_CUE`）仍被抓——見
+          test_lfake_list_block_without_list_cue_is_caught（2026-10-26 round 64 邊界 pin）；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
         - **跨輪拼接**（round 45，2026-10-29 §2.5）：交件是整場對話（≥2 輪）拼接

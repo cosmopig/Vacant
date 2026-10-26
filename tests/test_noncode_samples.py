@@ -28,9 +28,11 @@ from vacant_network.trace.evidence import (
     COPY_CUE,
     EXTRACT_CUE,
     INLINE_COPY_MIN,
+    LIST_REQ_CUE,
     TRANSFORM_CUE,
     VERBATIM_CUE,
     _collapse,
+    _is_list_block,
     evidence_for,
 )
 from vacant_network.trace.recorder import Recorder
@@ -914,6 +916,46 @@ def test_clean_list_reformat_verbatim_not_caught(env):
     a.stop("list.txt 已寫好。")
     ev = a.evidence(final_text="list.txt 已寫好。")
     assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_lfake_list_block_without_list_cue_is_caught(env):
+    """L-fake（2026-10-26 清單豁免邊界 pin，round 64）：題目把三項**已就是**編號清單形狀
+    的重點貼在 prompt 裡，但要求的是**散文輸出**（「匯總成一段流暢的說明（不要分點），
+    寫入 notes.txt」）——agent 把那個編號清單**逐字**寫出（形狀仍是清單）：題目要求的
+    輸出形狀是散文、不是清單，清單豁免（`LIST_REQ_CUE` **且** `_is_list_block`）不成立
+    （prompt 沒點名清單型輸出），`copy_of_inline` 仍要報。
+    與 round 56 `test_clean_list_reformat_verbatim_not_caught` 的邊界差別：那個樣本 pin
+    **豁免側**（清單線索＋清單形狀 → 豁免）；本樣本 pin **合取式的另一半**（清單形狀但
+    無清單線索 → 不豁免）。若未來把豁免放寬成「交件是清單形狀即豁免」（去掉
+    `LIST_REQ_CUE` 條件），本樣本必紅——須先對「寧可漏抓、不可誤傷」重新辯證再改。
+    樣本自檢：交件（正規化）是 prompt 的逐字連續子串、≥ INLINE_COPY_MIN、交件是清單
+    區塊（`_is_list_block` 為真）、prompt 有改寫線索（TRANSFORM_CUE）但無
+    COPY/VERBATIM/EXTRACT/LIST_REQ 任何豁免線索、數字全部出自 prompt（unsourced
+    結構上靜默）。
+    斷言：copy_of_inline 命中（advisory）；零可退回（§3）。"""
+    p = _proj(env, "lfake_list_block_no_list_cue")
+    items = ("1. 渠道 A 的退單補救：先回覆退單率 8.1% 的客訴，建立退單追蹤表，下週一前把補救方案交給全組\n"
+             "2. 渠道 B 的 45 萬元預算復核：撥款先凍結，等審計結果出來後兩個工作日內給出復核結論\n"
+             "3. 上線時間維持 10 月 9 日；若渠道 A 的補救延誤，則順延一週，負責人須提前同步全組\n")
+    prompt = "以下是本週三項重點工作，請匯總成一段流暢的說明（不要分點），寫入 notes.txt。\n" + items
+    cd, cp = _collapse(items).lower(), _collapse(prompt).lower()
+    # 樣本自檢：清單形狀＋無清單線索＋改寫線索在——正是本 pin 要固定住的邊界。
+    assert len(cd) >= INLINE_COPY_MIN
+    assert cd in cp and cd != cp
+    assert _is_list_block(items)                  # 交件形狀＝清單區塊
+    assert TRANSFORM_CUE.search(prompt)           # 改寫線索在（檢查會跑）
+    assert not COPY_CUE.search(prompt) and not VERBATIM_CUE.search(prompt) \
+        and not EXTRACT_CUE.search(prompt) and not LIST_REQ_CUE.search(prompt)
+    assert all(float(m) in {1.0, 2.0, 3.0, 8.1, 9.0, 10.0, 45.0}
+               for m in re.findall(r"\d+(?:\.\d+)?", items))   # 數字全部出自 prompt
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("notes.txt", items)
+    a.stop("notes.txt 已寫好。")
+    ev = a.evidence(final_text="notes.txt 已寫好。")
+    assert any(f["kind"] == "copy_of_inline" and f["path"].endswith("notes.txt")
+               for f in ev["findings"]), ev["findings"]
     assert a.pushable(ev) == [], ev["findings"]
 
 

@@ -84,6 +84,11 @@
    該清單正是預期交件（no-op reformat）；豁免條件為 `LIST_REQ_CUE`（動詞＋編號/清單/
    列表/列點/numbered list/bullet points）與 `_is_list_block`（每行清單項、或首行短標籤＋
    其餘皆清單項）同時成立。散文 lazy echo（test_lfake_inline_echo_is_caught）仍被抓。
+   豁免是**合取**（清單線索 **且** 清單形狀），兩側各有一個 pin（2026-10-26，round 64）：
+   - `test_lfake_list_block_without_list_cue_is_caught`（L-fake）——資料已是清單形狀但題目
+     要求**散文**輸出（無 `LIST_REQ_CUE`）、交件仍是清單區塊 → 仍被抓；若未來把豁免放寬
+     成「交件是清單形狀即豁免」（去掉 `LIST_REQ_CUE` 條件），此樣本必紅。
+   - `test_clean_list_reformat_verbatim_not_caught`（round 56，見上）——pin 豁免側。
    另：「n15 式改寫成非子串」的風險已由 n15 本身覆蓋。
 
 ## 3. 新檢查的合併門檻（方向 A 的規則）
