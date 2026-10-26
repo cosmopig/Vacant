@@ -58,6 +58,12 @@ def _step(proj: pathlib.Path, n: int, tool: str, inp: dict, write: dict | None =
 
 
 def test_compact_trace_reclaims_untouched_blobs_and_preserves_chain_and_blame(env):
+    """**非活躍**專案：gc 回收「未變動且工作區原檔相同」的 blob；簽章鏈與 blame 不受影響。
+
+    以 `active_window_s=0.0` 模擬專案已超出活躍窗口（round 72 設計決定：活躍專案的
+    live 背景 blob 改為保留——見 `test_compact_trace_keeps_active_project_live_blobs`），
+    驗證非活躍專案的回收規則、鏈完整性與 blame 仍然成立。
+    """
     proj = env / "work" / "big_proj"
     proj.mkdir(parents=True)
     # 建立 30 個大型背景檔案（模擬大型 repo 未動到的檔案）與 1 個會被修改的檔案
@@ -80,12 +86,12 @@ def test_compact_trace_reclaims_untouched_blobs_and_preserves_chain_and_blame(en
     assert ok_before, msg_before
 
     # Dry-run 先檢查可回收的未變動背景 blob 數量（30 個背景檔）
-    dry = retention.compact_trace(dry_run=True)
+    dry = retention.compact_trace(active_window_s=0.0, dry_run=True)
     assert dry["files_removed"] == 30
     assert dry["bytes_freed"] > 50_000
 
     # 實際執行壓縮
-    res = retention.compact_trace(dry_run=False)
+    res = retention.compact_trace(active_window_s=0.0, dry_run=False)
     assert res["files_removed"] == 30
     assert res["bytes_freed"] == dry["bytes_freed"]
 
@@ -115,6 +121,44 @@ def test_compact_trace_reclaims_untouched_blobs_and_preserves_chain_and_blame(en
     tr2 = Trace(Recorder(ws))
     assert tr2.file_text(tr2.steps[1].post_index, "bg_00.txt") == "background content 0\n" * 200
     assert tr2.file_text(tr2.steps[2].post_index, "bg_00.txt") == "modified bg 0\n"
+
+
+def test_compact_trace_keeps_active_project_live_blobs(env):
+    """gc↔rescan 設計決定（round 72，2026-10-26；BACKLOG 選項 B＋活躍邊界）：
+
+    對**活躍**專案（鏈活動在 `active_window_s` 內，預設 7 天），「未變動的背景 blob」
+    正是那些檔案下一次被修改時所需的 **before 版本**。回收它們會被下一次掃描如數重存
+    （`test_gc_rescan_cycle.py` 已量化：一個 gc→scan 週期淨节省≈0；大專案上重存還
+    會超時把掃描停用、逐步觀察失守）。因此 gc 對活躍專案保留這些 blob，
+    下一次增量掃描不會重存（whack-a-mole 消失）；非活躍專案照舊回收。
+    """
+    proj = env / "work" / "active_keep"
+    proj.mkdir()
+    for i in range(8):
+        (proj / f"bg_{i:02d}.txt").write_text(f"bg {i}\n" * 200)
+    (proj / "app.py").write_text("x = 1\n")
+
+    hook.handle("claude", "UserPromptSubmit", {
+        "session_id": "S1", "cwd": str(proj), "prompt": "work"})
+    _step(proj, 1, "Write", {"file_path": str(proj / "app.py"), "content": "x = 2\n"},
+          write={"app.py": "x = 2\n"})
+
+    ws = capture.workspace_for(str(proj))
+    rec = Recorder(ws)
+    baseline = _store_total(rec)
+    assert baseline > 0
+
+    # 活躍專案（預設窗口）：gc 保留 live 背景 blob，store 不縮
+    res = retention.compact_trace(dry_run=False)
+    assert res["files_removed"] == 0
+    assert _store_total(rec) == baseline
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # whack-a-mole 消失：下一次增量掃描不會重存（store 不變）
+    _step(proj, 2, "Read", {"file_path": str(proj / "app.py")})
+    assert _store_total(rec) == baseline, (
+        "gc 保留的 blob 被下一次掃描重存：whack-a-mole 仍在")
 
 
 def test_compact_quarantine_preserves_released_and_ledger_integrity(env):
@@ -310,7 +354,9 @@ def test_budget_aborts_compact_trace_at_safe_point(env, monkeypatch):
 
     monkeypatch.setattr(retention, "_remove_path", slow_remove)
     import time as _t
-    rep = retention.compact_trace(budget=retention._Budget(_t.time() + 0.25))
+    # `active_window_s=0.0`：模擬非活躍專案（否則 blob 被保留、無東西可刪）
+    rep = retention.compact_trace(active_window_s=0.0,
+                                  budget=retention._Budget(_t.time() + 0.25))
     assert rep["aborted"] is True
     assert rep["files_removed"] < 20
     # 簽章鏈仍然完整
