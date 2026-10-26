@@ -743,6 +743,50 @@ def test_lfake_cross_prompt_join_not_pushed_back(env):
     assert a.pushable(ev) == [], ev
 
 
+def test_lfake_cross_prompt_join_transform_cue_in_early_turn_caught(env):
+    """L-fake（round 55；docs/UNIVERSAL_TASKS.md §2.5）：跨輪照抄，但改寫線索（TRANSFORM_CUE）
+    只在**第一回合**、最後一輪只有「寫入」無改寫線索。現行 `copy_of_inline` 的觸發線索判定
+    也用**整場對話**（_copy_of_inline docstring：「線索判定用整場對話（所有 session prompt，
+    round 45）」，任何一輪的改寫線索都觸發），故本樣本被抓（advisory only）。與
+    test_lfake_cross_prompt_join_is_caught（線索在最後一輪）配對，把「觸發線索看整場對話」
+    的語義固定下來：若未來把觸發收窄成只看最後一輪/window，本樣本必紅，須先補
+    同等豁免／誤報證據再改（寧漏勿誤，§3 規則 5）。
+    樣本自檢：交件是兩輪拼接的逐字連續子串、非任何單輪子串；兩半皆 ≥ INLINE_COPY_MIN；
+    第一輪有 TRANSFORM_CUE、最後一輪沒有；兩輪皆無豁免線索；純散文無 ASCII 數字
+    （unsourced 無值可查）。斷言：copy_of_inline 恰一筆（advisory）、零可退回。"""
+    p = _proj(env, "lfake_join_early_transform_cue")
+    part_a = ("會議先逐項過了一遍上個版本的未決事項：兩項高優先級都已修復，迴歸結果由雙方輪流口頭確認；"
+              "剩餘低優先級項經產品與工程雙方評估後認為影響可接受，不再追蹤。其後討論了下一個版本的發布節奏，"
+              "雙方同意先定日期、再倒排計畫，任何風險必須在會中提出，不得留到最後評審。")
+    part_b = ("對外協作部分，介面變更的通知必須提前至少兩輪會議給到對方，並取得對方書面確認後才可生效；"
+              "對方若提出異議，須在紀要中記錄並指定回覆時限，由負責人在時限前跟進進度並回覆。如會議改期，召集人須通知全部與會者並說明原因，"
+              "改期後未處理事項不得自動延入下次會議，紀要由召集人歸檔並於下次會議開頭朗讀確認。")
+    prompt1 = "以下是上週產品評審會議紀要（前半）（總結時整理成一條條要點）：\n" + part_a + "\n"
+    prompt2 = part_b + "\n請把前後兩段寫入 minutes.txt"
+    cp1, cp2 = _collapse(prompt1).lower(), _collapse(prompt2).lower()
+    ca, cb = _collapse(part_a).lower(), _collapse(part_b).lower()
+    # 樣本自檢：naive 單輪檢查看不到它（資料跨輪）；救／抓它的都是整場對話判定。
+    assert len(ca) >= INLINE_COPY_MIN and len(cb) >= INLINE_COPY_MIN
+    assert ca in cp1 and cb in cp2            # 兩半在兩個不同 prompt（跨回合）
+    assert ca not in cp2 and cb not in cp1
+    assert not (ca + cb) in cp1 and not (ca + cb) in cp2   # 單輪語料漏（根因是跨輪）
+    assert (ca + cb) in _collapse(prompt1 + "\n" + prompt2).lower()  # 拼接語料命中
+    assert TRANSFORM_CUE.search(prompt1)      # 改寫線索在第一回合
+    assert not TRANSFORM_CUE.search(prompt2)  # 最後一輪沒有——本樣本的新 pin
+    for t in (prompt1, prompt2):
+        assert not COPY_CUE.search(t) and not VERBATIM_CUE.search(t) and not EXTRACT_CUE.search(t)
+    assert not re.search(r"\d", part_a + part_b + prompt1 + prompt2)  # 無 ASCII 數字（unsourced 無值可查）
+    a = Agent(p)
+    a.ask(prompt1)
+    a.ask(prompt2)
+    a.write("minutes.txt", part_a + "\n" + part_b + "\n")
+    a.stop("minutes.txt 已寫好。")
+    ev = a.evidence(final_text="minutes.txt 已寫好。")
+    c = [f for f in ev["findings"] if f["kind"] == "copy_of_inline"]
+    assert len(c) == 1 and c[0]["path"].endswith("minutes.txt"), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]   # advisory only，不退回
+
+
 def test_clean_cross_prompt_merge_is_expected_output_not_caught(env):
     """乾淨（2026-10-29 負對照，與上面 L-fake 配對；BACKLOG P1(b) join 檢查的已註冊負對照）：
     題目拆成兩回合：turn 1 貼渠道 A 的客訴條目，turn 2 貼渠道 B 的條目並要求
