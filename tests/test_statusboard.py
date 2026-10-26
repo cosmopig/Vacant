@@ -148,6 +148,19 @@ def test_task_table_shows_decisions(env, server):
     assert "決策".encode() in body, "表頭沒有「決策」欄"
 
 
+def test_task_table_shows_the_denominator_note(env, server):
+    # round 66 dogfood（同一區）：tasks() 的 JSON 有 note（分母定義：作廢與未決
+    # 都算在分母裡——「拒絕算失敗」的紀律），但 renderTasks 沒印它——看表的人
+    # 不知道分母含什麼。這裡驗兩層：JSON 帶了 note；模板讀它並印出來。
+    from vacant_network.intake.ledger import Ledger
+    Ledger("t_demo2").append("task_opened", {"contract_sha256": "c" * 64})
+    assert SB.tasks()["note"], "ledger.report() 的分母說明應該進 JSON"
+    st, _ct, body = _get(server, "/")
+    assert st == 200
+    html = body.decode()
+    assert "t.note" in html, "任務區塊沒讀 note 欄位"
+
+
 def test_project_detail_has_the_history_the_note_and_a_verified_chain(env):
     p = _sent_back_then_fixed(env)
     det = SB.project_detail(project_key(p))
