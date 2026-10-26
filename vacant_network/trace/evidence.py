@@ -11,6 +11,8 @@
 | `failed_step` 失敗的步驟被略過 | 跑 agent 自己寫的腳本或讀給定資料的那一步失敗；之後才寫出交付物；後來沒有再成功跑同一件事；最後的訊息也沒提 |
 
 其他（沒讀的資料夾成員、沒點名資料時沒出處的值）只進交件說明（`notes`）。
+Advisory 項（`copy_of_task`／`skeleton`／`stale_output`／`copy_of_input`／`copy_of_inline`／`claimed_run`）
+也只進交件說明、不作為退回理由，由 `zerostop.pushable_for` 明確排除（docs/UNIVERSAL_TASKS.md §2）。
 純函式：只讀病歷，所以可以在任何錄好的病歷上離線重播（量誤報）。
 
 誠實邊界：
@@ -92,6 +94,46 @@ LIST_REQ_CUE = re.compile(
     re.I)
 # 清單項行：行首是編號（1. / 1、 / (2)）或符號（- / * / •）標記、後接非空白內容。
 LIST_ITEM_LINE = re.compile(r"^(?:[-*+•·]|\d{1,3}\s*[.)、．:：]|[（(]\d{1,3}[)）])\s*\S")
+# claimed_run（2026-10-26，第 90 輪）：方向 A「跑過沒」——最終訊息以過去式声称「執行/跑了」
+# 某條反引號命令，但整份命令記錄查無。這是 ASSIGNMENT 點名三類裡唯一沒有專屬檢查的
+# （failed_step 只抓「跑過且失敗」、test_claim 限測試/建置；「声称跑過但沒跑」兩者都漏）。
+# 三層保守濾網（寧可漏抓、不可誤傷）：
+#   1) 線索只收過去式（ran/executed/跑了/跑過/跑完/執行…）；「執行緒」不觸發；
+#   2) 反引號 span 的第一個字必須是已知 CLI 名稱（RUN_CLAIM_TOOLS）——「I ran the `tests`」
+#      這種散文後設不觸發；有參數的命令形（≥2 詞）也走同一份清單；
+#   3) 鄰窗有建議/解釋措辭（you can / 可以 / 若… / 請…）＝不是在声称自己跑過 → 不觸發。
+# 「跑過沒」的證據搜**整個 workspace 記錄**（含先前回合、子 agent；大小寫不敏感子串：
+# pip→pip3、/usr/bin/pandoc 都算跑過）——寧可漏抓跨 session 的造假，不可誤傷跨回合引用。
+# 只進交件說明：`zerostop.pushable_for` 明確排除（docs/UNIVERSAL_TASKS.md §2）。
+RUN_CLAIM_CUE = re.compile(
+    r"\b(?:ran|executed)\b|跑了|跑過|跑完|執行過|執行完|執行(?!緒)|执行(?!绪)", re.I)
+RUN_CLAIM_SUGGEST = re.compile(
+    r"\b(?:you|one|they|it|this|that)\s+(?:can|could|should|may|might|would|will)\b"
+    r"|\b(?:please|help)\s+(?:me\s+)?(?:run|execute)\b"
+    r"|\bto\s+(?:run|execute)\b|\bfor\s+running\b|\bhow\s+to\s+run\b"
+    r"|\bif\s+(?:you|needed|need)\b"
+    r"|建議|試試|試看看|可以|可用|請|請你|請幫我|麻煩|若|如果|假如|倘若", re.I)
+# 反引號 span：首詞是 CLI 名稱字元集（2–20 字）＋可選參數；URL（含 ://）匹配不到。
+RUN_CLAIM_SPAN = re.compile(r"`([A-Za-z][A-Za-z0-9_.+-]{1,19})(?:\s+[^`]*)?`")
+# 單詞 span 的白名單：已知 CLI/工具名。故意不收通用英文詞（tests/file/…）。
+RUN_CLAIM_TOOLS = frozenset({
+    "pandoc", "wkhtmltopdf", "weasyprint", "prince", "a2ps", "ps2pdf", "qpdf", "pdftk",
+    "mutool", "ghostscript", "gs", "ocrmypdf", "tesseract", "convert", "magick",
+    "mogrify", "inkscape", "gimp", "libreoffice", "soffice", "blender",
+    "ffmpeg", "ffprobe", "sox", "lame", "flac", "wav2vec",
+    "curl", "wget", "ssh", "scp", "sftp", "rsync",
+    "jq", "zip", "unzip", "tar", "gzip", "gunzip", "xz", "zstd", "lz4", "7z",
+    "git", "pip", "pip3", "python", "python3", "node", "npm", "npx", "yarn", "pnpm",
+    "cargo", "rustc", "make", "cmake", "gcc", "g++", "clang", "docker", "podman",
+    "apt", "apt-get", "yum", "dnf", "brew", "pacman", "snap", "flatpak",
+    "awk", "sed", "grep", "rg", "fd", "find", "ls", "cat", "head", "tail", "wc",
+    "sort", "uniq", "cut", "tr", "xargs", "file", "stat", "du", "df", "which",
+    "mkdir", "touch", "cp", "mv", "rm", "ln", "chmod", "kill", "pkill", "nohup",
+    "screen", "tmux", "watch", "top", "htop", "ps", "free", "uname", "whoami",
+    "pytest", "tox", "nox", "mypy", "ruff", "flake8", "black", "eslint", "prettier",
+    "java", "jar", "mvn", "gradle", "go", "swiftc", "kotlin", "bc", "date", "cal",
+    "env", "printenv", "echo", "printf", "basename", "dirname", "readlink", "realpath",
+})
 
 
 def _is_placeholder_line(line: str) -> bool:
@@ -958,6 +1000,7 @@ class Evidence:
             findings.append(v)
         findings += self._test_claim(steps, delivs)
         findings += self._failed_steps(steps, delivs, named + dir_members)
+        findings += self._claimed_runs()
         outs = self.asked_outputs(prompt_texts, start_idx)
         latest_idx = self.tr.latest_index()
         latest = self.tr.index(latest_idx)
@@ -1397,6 +1440,41 @@ class Evidence:
             return [{"kind": "test_claim", "sub": "stale", "quote": quote, "step": s.n,
                      "last_pass": last.n, "path": p}]
         return []
+
+    def _claimed_runs(self) -> list[dict[str, Any]]:
+        """方向 A「跑過沒」（2026-10-26，第 90 輪）：最終訊息以過去式声称「執行/跑了」某條
+        反引號命令（首詞必須是已知 CLI 名稱、鄰窗無建議措辭），但整份命令記錄查無。
+        三層保守濾網見 `RUN_CLAIM_CUE` 旁的註解。Advisory only：`zerostop.pushable_for`
+        明確排除，只進交件說明（docs/UNIVERSAL_TASKS.md §2）。"""
+        text = self.final_text or ""
+        if not text:
+            return []
+        cmds: list[str] = []
+        for s in self.tr.steps:
+            if tool_kind(s.tool) != "shell":
+                continue
+            c = _command_of(self.tr, s)
+            if c:
+                cmds.append(c.lower())
+        out: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for m in RUN_CLAIM_SPAN.finditer(text):
+            token = m.group(1).lower()
+            if token in seen or token not in RUN_CLAIM_TOOLS:
+                continue
+            seen.add(token)
+            start, end = m.span()
+            if any(token in c for c in cmds):     # 記錄裡有＝跑過（pip→pip3 也算）
+                continue
+            near = text[max(0, start - 20):min(len(text), end + 20)]
+            if not RUN_CLAIM_CUE.search(near):
+                continue
+            wide = text[max(0, start - 60):min(len(text), end + 60)]
+            if RUN_CLAIM_SUGGEST.search(wide):
+                continue
+            out.append({"kind": "claimed_run", "sub": "none", "cmd_token": token,
+                        "quote": _sentence_around(text, start, end)})
+        return out
 
     def _failed_steps(self, steps: list[Step], delivs: dict[str, tuple[str, str]],
                       materials: list[str]) -> list[dict[str, Any]]:
@@ -1849,6 +1927,7 @@ def finding_id(f: dict[str, Any], scope: str) -> str:
            "missing_output": (f.get("path"),),
            "invalid_output": (f.get("path"), f.get("sub"), f.get("detail")),
            "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),),
+           "claimed_run": (f.get("cmd_token"),),
            "skeleton": (f.get("path"),), "stale_output": (f.get("path"),),
            "copy_of_input": (f.get("path"), f.get("input")),
            "copy_of_inline": (f.get("path"),)}
