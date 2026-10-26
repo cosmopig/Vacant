@@ -1,0 +1,64 @@
+{
+ "prereg_id": "v5_live_fresh_hint_vs_resample_34tasks_20261026",
+ "prereg_file": "/home/user1/dev/Vacant/ops/realrun/prereg_v5.json",
+ "alpha": 0.05,
+ "arm_a": "B_resample3",
+ "arm_b": "C_fresh_hint3",
+ "n_pairs": 102,
+ "n_runs_per_arm": 102,
+ "per_rep": [
+  {
+   "rep": 1,
+   "root": "runs_v5_r1",
+   "n_pairs": 34,
+   "b": 2,
+   "c": 3,
+   "p": 1.0,
+   "voids": [],
+   "a_acc": 22,
+   "b_acc": 23
+  },
+  {
+   "rep": 2,
+   "root": "runs_v5_r2",
+   "n_pairs": 34,
+   "b": 3,
+   "c": 3,
+   "p": 1.0,
+   "voids": [],
+   "a_acc": 22,
+   "b_acc": 22
+  },
+  {
+   "rep": 3,
+   "root": "runs_v5_r3",
+   "n_pairs": 34,
+   "b": 1,
+   "c": 2,
+   "p": 1.0,
+   "voids": [],
+   "a_acc": 21,
+   "b_acc": 22
+  }
+ ],
+ "pooled": {
+  "b": 6,
+  "c": 8,
+  "p": 0.79052734375
+ },
+ "state": "UNRESOLVED",
+ "state_note": "all registered reps present",
+ "states_from_plan": {
+  "EFFECTIVE": "c > b 且 p < 0.05：「本批上 fresh_hint 接受的多於 resample」。May NOT state 'proves better'（單一模型、單一槽位、H-12）；引用必須帶 n=102 pairs 與 scorer=false。",
+  "CONTRADICTS": "b > c 且 p < 0.05：顯著但方向相反。不寫任何方向的「有效」結論，也**不寫「有害」**結論（R532 AMEND1 方向守衛）。",
+  "UNRESOLVED": "其餘（含對稱分歧、未達 α）：null 不是 negative。",
+  "INCOMPLETE": "完成 rep 數 < 3：可自已完成格續跑（runner 跳過已完成格）；**不可中途改設計**；決定狀態只在 3 rep 齊後判定。"
+ },
+ "caveats": [
+  "預期效應比 v4 批（+10pp, p=0.0414）**小**：v4 量的是一次重抽對零重試的增益；本批量的是重抽之上的提示增益。pilot（2026-09-25, n=6）差 1 格、無統計力。UNRESOLVED 是合法結果，不是失敗。",
+  "本批 control（resample）與 v4 的 B_resample3 同臂同題同模型，但 v4 的 mini_agent（a6a8be86）不讀回饋檔、本批的（889cd5ea）無檔時行為逐位元組相同——跨批的 v4-B vs v5-B 比對**只是描述性參考**，主分析是本批內 control vs treatment。",
+  "兩臂差異在模型輸入端**只可能是** treatment 第 2 次嘗試起的 hint 全文（≤380B，來自可見套件失敗行）；system prompt 與 task prompt 兩臂逐字相同（KS-1），agent/模型/參數/超時完全相同。",
+  "若 fresh_hint 臂在 attempt 1 就通過，hint 根本沒被用到（該格兩臂同）——「hint 有沒有用」只體現在 attempt 1 失敗的題上。",
+  "單一模型（qwen3.8-27b）、單一上游槽位、polyglot_py 34 題——不外推到其他模型/題庫（H-12）。"
+ ]
+}
