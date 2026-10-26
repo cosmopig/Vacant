@@ -127,6 +127,27 @@ def test_a_sent_back_then_fixed_task_shows_up_with_its_checks(env):
     assert stops[0]["zero"]["round"] == 1
 
 
+def test_task_table_shows_decisions(env, server):
+    # round 66 dogfood（本輪焦點：trace/dashboard 找摩擦）：任務帳本 JSON 有
+    # decisions（裁決數——「拒絕算失敗」的分母核心），但 UI 表格只印
+    # 嘗試／作廢，最關鍵的裁決數被藏掉。頁面是 JS 從 /api 渲染，這裡驗模板
+    # （同 test_page_shows_scan_disabled_with_reason_and_rescue 的做法）。
+    from vacant_network.intake.ledger import Ledger
+    led = Ledger("t_demo")
+    led.append("task_opened", {"contract_sha256": "c" * 64})
+    led.append("attempt_started", {"adapter": "test"})
+    led.append("decision", {"outcome": "reject", "artifact_sha256": "a" * 64})
+    t = SB.tasks()
+    assert t["n_tasks"] == 1
+    [row] = t["tasks"]
+    assert row["state"] == "rejected" and row["attempts"] == 1 and row["decisions"] == 1
+    st, _ct, body = _get(server, "/")
+    assert st == 200
+    html = body.decode()
+    assert "r.decisions" in html, "任務表沒讀 decisions 欄位"
+    assert "決策".encode() in body, "表頭沒有「決策」欄"
+
+
 def test_project_detail_has_the_history_the_note_and_a_verified_chain(env):
     p = _sent_back_then_fixed(env)
     det = SB.project_detail(project_key(p))

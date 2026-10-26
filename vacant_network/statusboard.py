@@ -598,8 +598,8 @@ function renderTasks(t){
   if(t.error){$('tasks').innerHTML=`<p class="bad">${esc(t.error)}</p>`;return}
   if(!t.n_tasks){$('tasks').className='empty';$('tasks').innerHTML='沒有任務（零設定的日常使用不會產生任務）。';return}
   let h=`<p>${Object.entries(t.by_state).map(([k,v])=>`<span class="chip">${esc(k)} ${v}</span>`).join(' ')} <span class="muted small">共 ${t.n_tasks}</span></p>
-  <div class="scroll"><table><tr><th>任務</th><th>狀態</th><th>嘗試</th><th>作廢</th><th>最後結果</th></tr>`;
-  for(const r of t.tasks.slice().reverse())h+=`<tr><td class="mono">${esc(r.task_id)}</td><td>${esc(r.state)}</td><td>${esc(r.attempts)}</td><td>${esc(r.void)}</td><td>${esc(r.latest_outcome??'')}</td></tr>`;
+  <div class="scroll"><table><tr><th>任務</th><th>狀態</th><th>嘗試</th><th>決策</th><th>作廢</th><th>最後結果</th></tr>`;
+  for(const r of t.tasks.slice().reverse())h+=`<tr><td class="mono">${esc(r.task_id)}</td><td>${esc(r.state)}</td><td>${esc(r.attempts)}</td><td>${esc(r.decisions)}</td><td>${esc(r.void)}</td><td>${esc(r.latest_outcome??'')}</td></tr>`;
   $('tasks').className='';$('tasks').innerHTML=h+'</table></div>';
 }
 async function openProject(k){SEL=k;$('sec-detail').hidden=false;await refreshDetail();$('sec-detail').scrollIntoView({behavior:'smooth'})}
