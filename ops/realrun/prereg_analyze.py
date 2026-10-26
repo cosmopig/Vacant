@@ -127,7 +127,10 @@ def analyze(prereg_path: Path, roots: list[Path]) -> dict:
         "state": state,
         "state_note": note,
         "states_from_plan": plan["decision_states"],
-        "caveats": plan["known_caveats"],
+        # v5 prereg carries its caveats under "honesty" (frozen file; no key
+        # added after the fact). Earlier preregs use "known_caveats". Neither
+        # is normative for the decision; both are just carried through.
+        "caveats": plan.get("known_caveats", plan.get("honesty", [])),
     }
 
 
