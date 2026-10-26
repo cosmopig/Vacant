@@ -1,0 +1,41 @@
+{
+  "schema": "vacant.prereg/1",
+  "id": "v3_live_resample_20261026",
+  "registered": "round 74, 2026-10-26, BEFORE the first model call of batch v3",
+  "question": "In the live system (real model channel, `vacant run` gate), does arm B (retry=resample, max-attempts=3, restart driven by the visible suite) accept more runs than arm A (retry=none), on the 6 polyglot_py tasks?",
+  "why_this_row": "For polyglot_py the visible tests ARE the grader (test text is in the prompt; suite runs the same test class), so resample-on-visible-failure is the valid real-signal row, NOT the upper-bound scorer row. Offline replay of this same row (round 67, ref/offline_restart_sim.py over ref/c37_final.json): polyglot_py 37.3 -> 47.0% (+9.7pp, n=68 units with >=2 independent runs; ALL 62.3 -> 66.4%, +4.1pp, n=331). This batch is the live-system confirmation attempt for that row.",
+  "fixed": {
+    "tasks": ["pg_affine_cipher", "pg_book_store", "pg_bottle_song", "pg_hangman", "pg_pig_latin", "pg_pov"],
+    "arms": {
+      "A_none": ["--retry", "none"],
+      "B_resample3": ["--retry", "resample", "--max-attempts", "3"]
+    },
+    "agent": "repo ops/realrun/mini_agent.py @ a6a8be86 (reasoning_effort=none)",
+    "model": "qwen/qwen3.8-27b @ http://100.119.113.56:1234 (single slot; requests serialize)",
+    "reps": 3,
+    "rep_definition": "one full 6-task x 2-arm grid in a fresh root (runs_v3_r{k}); each run is a fresh process, fresh workspace, no shared state; reps are independent",
+    "per_attempt_timeout_s": 240,
+    "scorer_used": false,
+    "visible_equals_grader": true,
+    "runner": "ops-disk ~/dev/ops/realrun/run_batch.py (round 73 version: REALRUN_ROOT + --arms/--tasks filters)"
+  },
+  "outcome": "per-run summary.accepted (visible suite passed). Refusals count as failures (in the denominator). infra_void runs (model channel failed) are dropped from denominators and reported separately; never back-filled.",
+  "analysis": {
+    "primary_unit": "(task, rep) pair; n_pairs = 18; n_runs per arm = 18 (36 total)",
+    "primary_statistic": "exact two-sided McNemar on discordant pairs via vacant_network.research.mcnemar_exact(b, c); b = (A pass, B fail), c = (A fail, B pass)",
+    "alpha": 0.05,
+    "per_rep": "descriptive: (b, c, p) per rep; same direction across all 3 reps with none passing correction is UNRESOLVED, not negative, not positive",
+    "not_done": ["no pooling of v1/v2 into v3 (separate unregistered batches)", "no pooling of independent batches into one manufactured n", "no hidden-suite/scorer signal enters the arm decision (round 67 guard test pins this)"]
+  },
+  "decision_states": {
+    "EFFECTIVE": "c > b AND p < 0.05 -> may state: B accepted more than A on this batch (n=18 pairs, 6 tasks x 3 reps), direction-consistent with the offline real-signal row (polyglot_py +9.7pp, n=68). May NOT state 'proves better' (one batch, one model, small n, H-12).",
+    "CONTRADICTS": "c < b AND p < 0.05 -> no effect claim in EITHER direction; investigate. 'the loop is harmful' is NOT a pre-registered conclusion (R532 AMEND1 direction guard: a significant result in the opposite direction has no pre-registered state and draws no harm conclusion).",
+    "UNRESOLVED": "otherwise (including c > b with p >= 0.05) -> record direction and magnitude only; a null here is not a negative result (n=18 is underpowered to detect +9.7pp).",
+    "INCOMPLETE": "round budget ended before rep 3 finished -> only completed reps reported descriptively; no decision state assigned; partial batch is neither clean nor dirty."
+  },
+  "known_caveats": [
+    "n=18 pairs is underpowered for a +9.7pp effect; UNRESOLVED is the expected-common outcome and is a legitimate state",
+    "single model, single slot, 6 tasks: does not transfer to another model/harness/budget/corpus without re-running (H-12)",
+    "v1 (3/6 vs 2/6) and v2 (4/6 vs 4/6) remain unregistered smoke evidence; this prereg does not retroactively cover them"
+  ]
+}
