@@ -1,0 +1,44 @@
+{
+  "schema": "vacant.prereg/1",
+  "id": "v4_live_resample_34tasks_20261026",
+  "registered": "round 76, 2026-10-26, BEFORE the first model call of batch v4 (smoke cell included: any model call of round 76 happens only after this file is committed)",
+  "question": "In the live system (real model channel, `vacant run` gate), does arm B (retry=resample, max-attempts=3, restart driven by the visible suite) accept more runs than arm A (retry=none), on the full 34-task polyglot_py bank?",
+  "why_this_row": "For polyglot_py the visible tests ARE the grader (test text is in the prompt; suite runs the same test class), so resample-on-visible-failure is the valid real-signal row, NOT the upper-bound scorer row (round 67 guard test pins this). Offline replay of this same row (round 67, ref/offline_restart_sim.py over ref/c37_final.json): polyglot_py 37.3 -> 47.0% (+9.7pp, n=68 units with >=2 independent runs; ALL 62.3 -> 66.4%, +4.1pp, n=331). v3 (round 74, n=18 pairs) was UNRESOLVED at p=0.0625 with 3/3 reps direction-consistent; this is the pre-registered, higher-n confirmation attempt on the same row.",
+  "fixed": {
+    "tasks": ["pg_affine_cipher", "pg_beer_song", "pg_book_store", "pg_bottle_song", "pg_bowling", "pg_connect", "pg_dominoes", "pg_dot_dsl", "pg_food_chain", "pg_forth", "pg_go_counting", "pg_grade_school", "pg_grep", "pg_hangman", "pg_list_ops", "pg_paasio", "pg_phone_number", "pg_pig_latin", "pg_poker", "pg_pov", "pg_proverb", "pg_react", "pg_rest_api", "pg_robot_name", "pg_scale_generator", "pg_sgf_parsing", "pg_simple_linked_list", "pg_transpose", "pg_tree_building", "pg_two_bucket", "pg_variable_length_quantity", "pg_wordy", "pg_zebra_puzzle", "pg_zipper"],
+    "task_build": "ops-disk ~/dev/ops/realrun/prep.py (round 76 version) from the ref bank ~/dev/ops/ref/bm_tasks/polyglot_py (34 task dirs). All 34 tasks built successfully; the 6 tasks also used in v3 rebuilt byte-identical (md5-verified: no pipeline drift). Task-level infra accommodation, documented here before any model call: pg_paasio ships an auxiliary test-helper module test_utils.py in the benchmark workspace (visible to the original agent); the suite embeds it base64-encoded and registers it in sys.modules before the pasted test source runs, and its text is added to the prompt (it was visible in the original benchmark workspace). No other task needs a helper. No task excluded.",
+    "arms": {
+      "A_none": ["--retry", "none"],
+      "B_resample3": ["--retry", "resample", "--max-attempts", "3"]
+    },
+    "agent": "repo ops/realrun/mini_agent.py @ a6a8be86 (reasoning_effort=none; unchanged since v3)",
+    "model": "qwen/qwen3.8-27b @ http://100.119.113.56:1234 (single slot; requests serialize)",
+    "reps": 3,
+    "rep_definition": "one full 34-task x 2-arm grid in a fresh root (runs_v4_r{k}); each run is a fresh process, fresh workspace, no shared state; reps are independent",
+    "per_attempt_timeout_s": 240,
+    "scorer_used": false,
+    "visible_equals_grader": true,
+    "runner": "ops-disk ~/dev/ops/realrun/run_batch.py (round 76 version: REALRUN_ROOT + --arms/--tasks filters + idempotent skip of completed cells)"
+  },
+  "outcome": "per-run summary.accepted (visible suite passed). Refusals count as failures (in the denominator). infra_void runs (model channel failed) are dropped from denominators and reported separately; never back-filled.",
+  "analysis": {
+    "primary_unit": "(task, rep) pair; n_pairs = 102; n_runs per arm = 102 (204 total)",
+    "primary_statistic": "exact two-sided McNemar on discordant pairs via vacant_network.research.mcnemar_exact(b, c); b = (A pass, B fail), c = (A fail, B pass)",
+    "alpha": 0.05,
+    "per_rep": "descriptive: (b, c, p) per rep; same direction across all 3 reps with none passing correction is UNRESOLVED, not negative, not positive",
+    "power_note": "n=102 is adequately powered for the expected effect size: if the true effect is +9.7pp on a ~50% baseline (A 51/102, B 61/102, discordants roughly b=2, c=10) the exact two-sided McNemar p is ~0.04; with b=0, c=8, p=0.0078. UNRESOLVED remains a legitimate state (H-12).",
+    "not_done": ["no pooling of v1/v2/v3 into v4 (separate registered/unregistered batches)", "no pooling of independent batches into one manufactured n", "no hidden-suite/scorer signal enters the arm decision (round 67 guard test pins this)", "no post-hoc task selection: all 34 tasks count, including any that both arms fail"]
+  },
+  "decision_states": {
+    "EFFECTIVE": "c > b AND p < 0.05 -> may state: B accepted more than A on this batch (n=102 pairs, 34 tasks x 3 reps), direction-consistent with the offline real-signal row (polyglot_py +9.7pp, n=68) and the v3 direction (3/3 reps). May NOT state 'proves better' (one batch, one model, H-12).",
+    "CONTRADICTS": "c < b AND p < 0.05 -> no effect claim in EITHER direction; investigate. 'the loop is harmful' is NOT a pre-registered conclusion (R532 AMEND1 direction guard: a significant result in the opposite direction has no pre-registered state and draws no harm conclusion).",
+    "UNRESOLVED": "otherwise (including c > b with p >= 0.05) -> record direction and magnitude only; a null here is not a negative result.",
+    "INCOMPLETE": "fewer than the 3 registered reps present at analysis time -> resume the incomplete (task, arm, rep) cells (the runner skips completed cells; resume is infrastructure, not a design change) and analyze only once all 3 registered reps exist. If the batch cannot be completed (model slot down, disk, etc.), report completed reps descriptively only; no decision state assigned; partial batch is neither clean nor dirty."
+  },
+  "known_caveats": [
+    "single model, single slot, 34 tasks: does not transfer to another model/harness/budget/corpus without re-running (H-12)",
+    "the model channel is a single slot shared with the loop harness; wall times are not a metric and long model calls serialize (v3 observed 4-14s/run on the 6 small tasks; the 28 additional tasks include larger ones, so the v4 batch may span two rounds — the INCOMPLETE/resume rule above governs)",
+    "max_tokens=4096 per attempt: a truncated answer is a legitimate failure of the attempt, not infra_void; both arms face the same ceiling",
+    "v1 (3/6 vs 2/6), v2 (4/6 vs 4/6) remain unregistered smoke evidence and v3 (n=18, UNRESOLVED) is its own registered batch; this prereg does not pool them and does not retroactively cover them"
+  ]
+}
