@@ -107,7 +107,12 @@ stale_output／copy_of_input／copy_of_inline）**零誤報**——達到「≥2
 量測要求。（2026-10-28 更新：樣本集現為 **22 個合格交付（乾淨）樣本**——加一個多文件切分
 負對照 `test_clean_multifile_split_keep_verbatim_not_caught`，見 §2.4。2026-10-29 再更新：
 樣本集現為 **23 個**——加一個跨 prompt 拼接負對照
-`test_clean_cross_prompt_merge_is_expected_output_not_caught`，見 §2.5。）已轉為常駐門：
+`test_clean_cross_prompt_merge_is_expected_output_not_caught`，見 §2.5。round 55 再更新：
+樣本集現為 **24 個**——加一個豁免線索在**早期回合**的跨 prompt 拼接負對照
+`test_clean_cross_prompt_merge_cue_in_early_turn_only_not_caught`：VERBATIM_CUE 只在
+第一回合、最後一輪只有改寫線索，把 `copy_of_inline` 的「線索判定用整場對話」豁免語義
+固定下來（若未來收窄成只看最後一輪，本樣本必紅，須先對「寧可漏抓、不可誤傷」重新辯證）。）
+已轉為常駐門：
 `tests/test_noncode_samples.py::test_all_clean_samples_have_no_false_positives` 在隔離
 環境重跑全部乾淨樣本，對**所有 kind**（不只 advisory）斷言發現集與預期集完全相等
 （唯一例外：n4 缺交件的 `missing_output` 真陽）。任何未來新檢查若在乾淨交付上誤報，

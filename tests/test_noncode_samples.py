@@ -788,6 +788,51 @@ def test_clean_cross_prompt_merge_is_expected_output_not_caught(env):
     assert a.pushable(ev) == [], ev["findings"]
 
 
+def test_clean_cross_prompt_merge_cue_in_early_turn_only_not_caught(env):
+    """乾淨（round 55 負對照，與 test_clean_cross_prompt_merge_is_expected_output_not_caught 同型，
+    差別只在豁免線索的位置）：跨回合彙整任務，「條目保持原文」（VERBATIM_CUE）出現在
+    **第一回合**、最後一回合只有改寫線索「整理」沒有豁免線索；agent 把兩段原樣合成
+    完整清單寫出——正是題目要求的交件。現行 `copy_of_inline` 的線索判定用**整場對話**
+    （_copy_of_inline docstring：「線索判定用整場對話（所有 session prompt，round 45）」，
+    任何一輪的豁免線索豁免整個任務），故本樣本不報。本樣本把這條豁免語義固定下來：
+    若未來把豁免收窄成只看最後一輪／只看 window，本樣本必紅，須先對
+    「寧可漏抓、不可誤傷」重新辯證（docs/UNIVERSAL_TASKS.md §2.5 規則 2）。
+    樣本自檢：交件是兩輪拼接的逐字連續子串（非任何單輪子串），兩段皆 ≥ INLINE_COPY_MIN，
+    最後一輪有 TRANSFORM_CUE、無 VERBATIM/COPY/EXTRACT，第一輪有 VERBATIM_CUE，數字全 ≤10
+    （unsourced 結構上靜默）。斷言：無 copy_of_inline；零可退回。同時被常駐誤報門
+    test_all_clean_samples_have_no_false_positives 自動覆蓋（第 24 個乾淨樣本）。"""
+    p = _proj(env, "clean_merge_early_cue")
+    w1 = ("第一週：快照任務逾時，當值人員手動重跑後成功，本週累計 3 次，皆於兩小時內完成；監控告警閾值調整後，"
+          "告警數量較前一日減少約 4 成，值班人員確認無漏報。\n"
+          "第一週：兩台交換機例行重啟，期間有 2 條連線中斷，恢復後未再發生；備用電源點檢完成，未發現異常，紀錄已歸檔。")
+    w2 = ("第二週：新增 1 套日誌採集，上線當日發現 2 處格式不合，修正後運行正常；讀寫分離切換完成，查詢延遲下降約 3 成，核心報告 5 份皆通過迴歸；\n"
+          "第二週：安全掃描完成，高風險項目 1 項已修復，其餘 2 項列入下週排程，負責人確認了時限與複驗安排。")
+    prompt1 = "以下是第一週的運維事件紀錄（整理時各條目保持原文）：\n" + w1 + "\n"
+    prompt2 = w2 + "\n請把兩週紀錄整理成一份完整清單，寫入 ops.txt"
+    cp1, cp2 = _collapse(prompt1).lower(), _collapse(prompt2).lower()
+    ca, cb = _collapse(w1).lower(), _collapse(w2).lower()
+    # 樣本自檢：naive（無豁免）的 join 檢查在這裡會命中，救它的只能是整場對話豁免。
+    assert len(ca) >= INLINE_COPY_MIN and len(cb) >= INLINE_COPY_MIN
+    assert ca in cp1 and cb in cp2            # 兩段在兩個不同 prompt（跨回合）
+    assert ca not in cp2 and cb not in cp1
+    assert not (ca + cb) in cp1 and not (ca + cb) in cp2   # 單輪子串檢查不命中
+    assert (ca + cb) in _collapse(prompt1 + "\n" + prompt2).lower()  # 拼接子串命中
+    assert TRANSFORM_CUE.search(prompt2)      # 最後一輪有改寫線索（naive 檢查會跑）
+    assert VERBATIM_CUE.search(prompt1)       # 豁免線索在第一回合
+    assert not VERBATIM_CUE.search(prompt2)   # 且不在最後一輪——本樣本的新 pin
+    for t in (prompt1, prompt2):
+        assert not COPY_CUE.search(t) and not EXTRACT_CUE.search(t)
+    assert all(int(m) <= 10 for m in re.findall(r"\d+", w1 + w2))   # 數字全 ≤10
+    a = Agent(p)
+    a.ask(prompt1)
+    a.ask(prompt2)
+    a.write("ops.txt", w1 + "\n" + w2 + "\n")
+    a.stop("ops.txt 已寫好。")
+    ev = a.evidence(final_text="ops.txt 已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
 # ── 常駐誤報門（2026-10-27，docs/UNIVERSAL_TASKS.md §3 的「零誤報」合併門檻）──
 # 重跑本檔每一個 test_clean_*（各自獨立環境，避免工作區狀態互相污染），
 # 對「所有檢查」（不只五個 advisory）斷言發現集 == 預期集：
