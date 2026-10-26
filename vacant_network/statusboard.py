@@ -572,7 +572,7 @@ function deliv(d){
 function renderProjects(ps){
   if(!ps.length){$('projects').className='empty';$('projects').innerHTML='還沒有紀錄。裝好之後在一個專案資料夾（git repo）裡照常用 agent，這裡就會出現。';return}
   let h=`<div class="scroll"><table><tr><th>專案</th><th>工作階段</th><th>步驟</th><th>檢查／退回</th><th>最後一次交件前檢查</th><th>最後活動</th></tr>`;
-  for(const p of ps){h+=`<tr class="click" data-k="${esc(p.key)}"><td><b>${esc(p.workspace.split(/[\\/]/).filter(Boolean).pop()||p.workspace)}</b><div class="mono small muted">${esc(p.workspace)}</div>${p.workspace_exists?'':'<span class="chip muted">資料夾已不在</span>'}${p.n_open_flags?` <span class="chip bad">人的標記 ${p.n_open_flags}</span>`:''}${p.n_gaps?` <span class="chip warn">沒記到的改動 ${p.n_gaps}</span>`:''}</td>
+  for(const p of ps){h+=`<tr class="click" data-k="${esc(p.key)}"><td><b>${esc(p.workspace.split(/[\\/]/).filter(Boolean).pop()||p.workspace)}</b><div class="mono small muted">${esc(p.workspace)}</div>${p.workspace_exists?'':'<span class="chip muted">資料夾已不在</span>'}${p.n_open_flags?` <span class="chip bad">人的標記 ${p.n_open_flags}</span>`:''}${p.n_gaps?` <span class="chip warn">沒記到的改動 ${p.n_gaps}</span>`:''}${p.scan_disabled?` <span class="chip warn" title="步驟仍會記錄，但檔案改動不再逐步歸因（trace blame 會顯示未歸因）；救回：vacant trace rescan">檔案改動觀察已停用${p.scan_disabled_reason?`（${esc(p.scan_disabled_reason)}）`:''}</span>`:''}</td>
    <td>${p.n_sessions}${p.n_open_sessions?` <span class="muted small">（進行中 ${p.n_open_sessions}）</span>`:''}</td>
    <td>${p.n_steps}</td><td>${p.n_checks} / <span class="${p.n_sent_back?'warn':''}">${p.n_sent_back}</span></td>
    <td>${deliv(p.delivery)}</td><td class="small muted">${ago(p.last_activity_ms)}</td></tr>`}
@@ -609,6 +609,7 @@ async function refreshDetail(){
   $('dtitle').textContent='專案明細';
   let h=`<p class="mono">${esc(d.workspace)}</p><p>簽章鏈：${d.chain_ok?'<span class="ok">驗證通過</span>':`<span class="bad">沒通過</span> <span class="small muted">${esc(d.chain_note)}</span>`}
    <button style="float:right" onclick="SEL=null;document.getElementById('sec-detail').hidden=true">關閉</button></p>`;
+  if(d.scan_disabled){h+=`<p class="warn">檔案改動觀察已停用：${esc(d.scan_disabled_reason||'（無原因記錄）')}——步驟仍會記錄，但檔案改動不再逐步歸因（trace blame 會顯示未歸因）。救回：<code>vacant trace rescan</code></p>`}
   if(d.flags.length){h+='<h2>人的標記（還沒撤銷）</h2><ul class="f">'+d.flags.map(f=>`<li>${esc((f.location||{}).path||'')} ${esc(f.note||'')}</li>`).join('')+'</ul>'}
   h+='<h2>交件前檢查（歷次）</h2>';
   if(!d.checks.length)h+='<div class="empty">還沒有檢查。agent 說做完的時候才會檢查。</div>';

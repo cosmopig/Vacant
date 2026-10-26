@@ -266,3 +266,48 @@ def test_install_points_at_the_dashboard(env, capsys, monkeypatch):
     monkeypatch.setattr(A, "detect", lambda: {n: None for n in A.AGENTS})
     acli.main(["install", "--agents", "claude", "--force"])
     assert "vacant dashboard" in capsys.readouterr().out
+
+
+# ── scan_disabled 可發現性 ──────────────────────────────────────────────
+def _disable_scan(p, why="an incremental scan passed 8s"):
+    """同一個寫法、同一個來源：recorder._disable_scan（recorder.py:420-422）
+    把原因字串寫進 state.json["scan_disabled"]；救回（rescan 成功）會把它 pop 掉。"""
+    sp = SB._projects_dir() / project_key(p) / "state.json"
+    st = json.loads(sp.read_text(encoding="utf-8"))
+    st["scan_disabled"] = why
+    sp.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+    SB._EVENTS._c.clear()
+
+
+def test_project_summary_carries_the_disable_reason(env):
+    # round 27 backlog 項：JSON 端有原因欄位（round 29 補的），這裡釘住它；
+    # detail 也必須帶（明細頁要印出來用）。
+    p = _sent_back_then_fixed(env)
+    _disable_scan(p)
+    s = SB.project_summary(project_key(p))
+    assert s["scan_disabled"] is True
+    assert s["scan_disabled_reason"] == "an incremental scan passed 8s"
+    d = SB.project_detail(project_key(p))
+    assert d["scan_disabled"] is True and d["scan_disabled_reason"]
+    # 健康時：兩個欄位都在、都是假值（前端靠 scan_disabled 判要不要顯示）
+    p2 = _proj(env, "healthy")
+    a = Agent(p2)
+    a.ask(ASK)
+    a.write("r.md", "x")
+    s2 = SB.project_summary(project_key(p2))
+    assert s2["scan_disabled"] is False and not s2["scan_disabled_reason"]
+
+
+def test_page_shows_scan_disabled_with_reason_and_rescue(env, server):
+    # round 27 backlog 項：`scan_disabled: true` 時專案區塊看不到**為什麼**、
+    # 怎麼救回——CLI 端（trace show 標頭）round 27 已修，UI 端一直沒有。
+    # 頁面是 JS 從 /api 渲染的，所以這裡驗模板（同 test_page_states_numbers…）：
+    # 模板必須讀 scan_disabled、印出原因、並給出救回指令。
+    _sent_back_then_fixed(env)
+    st, ct, body = _get(server, "/")
+    assert st == 200 and ct.startswith("text/html")
+    html = body.decode()
+    assert "p.scan_disabled" in html, "專案表沒讀 scan_disabled 欄位"
+    assert "scan_disabled_reason" in html, "原因（為什麼被關）沒被印出來"
+    assert "檔案改動觀察已停用" in html, "停用狀態沒有可讀的中文說明"
+    assert "vacant trace rescan" in html, "沒有給救回指令"
