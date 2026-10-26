@@ -1,0 +1,63 @@
+{
+ "prereg_id": "v4_live_resample_34tasks_20261026",
+ "prereg_file": "/home/user1/dev/Vacant/ops/realrun/prereg_v4.json",
+ "alpha": 0.05,
+ "arm_a": "A_none",
+ "arm_b": "B_resample3",
+ "n_pairs": 102,
+ "n_runs_per_arm": 102,
+ "per_rep": [
+  {
+   "rep": 1,
+   "root": "runs_v4_r1",
+   "n_pairs": 34,
+   "b": 2,
+   "c": 3,
+   "p": 1.0,
+   "voids": [],
+   "a_acc": 20,
+   "b_acc": 21
+  },
+  {
+   "rep": 2,
+   "root": "runs_v4_r2",
+   "n_pairs": 34,
+   "b": 2,
+   "c": 4,
+   "p": 0.6875,
+   "voids": [],
+   "a_acc": 19,
+   "b_acc": 21
+  },
+  {
+   "rep": 3,
+   "root": "runs_v4_r3",
+   "n_pairs": 34,
+   "b": 1,
+   "c": 8,
+   "p": 0.0390625,
+   "voids": [],
+   "a_acc": 17,
+   "b_acc": 24
+  }
+ ],
+ "pooled": {
+  "b": 5,
+  "c": 15,
+  "p": 0.04138946533203125
+ },
+ "state": "EFFECTIVE",
+ "state_note": "all registered reps present",
+ "states_from_plan": {
+  "EFFECTIVE": "c > b AND p < 0.05 -> may state: B accepted more than A on this batch (n=102 pairs, 34 tasks x 3 reps), direction-consistent with the offline real-signal row (polyglot_py +9.7pp, n=68) and the v3 direction (3/3 reps). May NOT state 'proves better' (one batch, one model, H-12).",
+  "CONTRADICTS": "c < b AND p < 0.05 -> no effect claim in EITHER direction; investigate. 'the loop is harmful' is NOT a pre-registered conclusion (R532 AMEND1 direction guard: a significant result in the opposite direction has no pre-registered state and draws no harm conclusion).",
+  "UNRESOLVED": "otherwise (including c > b with p >= 0.05) -> record direction and magnitude only; a null here is not a negative result.",
+  "INCOMPLETE": "fewer than the 3 registered reps present at analysis time -> resume the incomplete (task, arm, rep) cells (the runner skips completed cells; resume is infrastructure, not a design change) and analyze only once all 3 registered reps exist. If the batch cannot be completed (model slot down, disk, etc.), report completed reps descriptively only; no decision state assigned; partial batch is neither clean nor dirty."
+ },
+ "caveats": [
+  "single model, single slot, 34 tasks: does not transfer to another model/harness/budget/corpus without re-running (H-12)",
+  "the model channel is a single slot shared with the loop harness; wall times are not a metric and long model calls serialize (v3 observed 4-14s/run on the 6 small tasks; the 28 additional tasks include larger ones, so the v4 batch may span two rounds — the INCOMPLETE/resume rule above governs)",
+  "max_tokens=4096 per attempt: a truncated answer is a legitimate failure of the attempt, not infra_void; both arms face the same ceiling",
+  "v1 (3/6 vs 2/6), v2 (4/6 vs 4/6) remain unregistered smoke evidence and v3 (n=18, UNRESOLVED) is its own registered batch; this prereg does not pool them and does not retroactively cover them"
+ ]
+}
