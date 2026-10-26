@@ -40,6 +40,12 @@ def call_model(base: str, key: str, model: str, system: str, user: str,
         ],
         "temperature": temperature,
         "max_tokens": max_tokens,
+        # match the established eval harness (ops/ref/run_20_eval.py). Without
+        # this, the model can spend the whole budget on reasoning and return
+        # empty content — observed in live batch v1 (7/12 runs had at least
+        # one empty-reply attempt; wire logs show content="" with a long
+        # reasoning_content)
+        "reasoning_effort": "none",
     }).encode("utf-8")
     req = urllib.request.Request(
         base.rstrip("/") + "/chat/completions",
