@@ -1027,3 +1027,45 @@ def test_grandchildren_are_killed_before_the_freeze(tmp_path):
     time.sleep(2.5)                                  # 給孫行程它要的那 1.5 秒
     assert not (ws / "sneaky.txt").exists()          # 它沒能寫成
     assert s["ws_end_sha256"] == launcher.wshash.tree_hash(ws)
+
+
+# ══ 8) 重抽的決策由**真實訊號**（可見驗收）驅動，從不被**評分器**（隱藏套件）驅動 ═════
+def test_retry_decision_is_visible_driven_and_hidden_never_runs(
+        tmp_path, upstream, monkeypatch):
+    """本輪焦點：用**真實訊號**（可見驗收）驅動重抽／回饋，不是用評分器（隱藏測資）。
+
+    承重的不變量，釘在**決策層**：`run()` 的活路徑裡，`acceptance.run_suite`
+    **只**會被以 `suite="visible"` 呼叫，而 `suite="hidden"`（＝評分器）**一次都不會被執行**。
+    這讓「flag-restart 欄（Vacant 自己的訊號）才是可達的、test-restart 欄（評分器）
+    只是上界且不可當成效引用」這件事變成**結構性**的，而不只是寫在文件裡。
+
+    沒有這條測試，未來有人「改善」重抽成功率時，最省事的做法就是讓重抽決策去偷看
+    隱藏套件——而那正是把 +15.4pp（test-restart 上界）偽造成「成效」的那個錯誤。
+    """
+    import vacant_network.vrun.acceptance as acceptance
+
+    calls: list[str] = []
+    real_run = acceptance.run_suite
+
+    def spy(*a, **kw):
+        # `suite` 是 keyword-only（`run_suite` 簽名的 `*` 之後）⇒ 必然以 kw 傳入。
+        assert "suite" in kw, (
+            f"run_suite 必須帶明確的 suite=，否則我們量不到決策吃的是哪套：{a} {kw}")
+        calls.append(kw["suite"])
+        return real_run(*a, **kw)
+
+    monkeypatch.setattr(acceptance, "run_suite", spy)
+
+    r = _go(tmp_path, mode="always_bad", retry_arm="revise", max_attempts=3,
+            suite=_suite(tmp_path))
+
+    attempts = r["summary"]["attempts"]
+    # 量具接上了：一次嘗試一次套件執行（這裡是 3 次）。錄到 3 筆＝spy 真的在場，
+    #   下面的「沒有 hidden」才有意義（不是量具沒接上才零命中）。
+    assert len(calls) == len(attempts) == 3, (calls, len(attempts))
+    # 每一次重抽決策都吃**可見驗收**——真實訊號。
+    assert set(calls) == {"visible"}, calls
+    # **評分器（隱藏套件）一次都不會在活路徑被執行。**
+    assert "hidden" not in calls, calls
+    # 決策真的被行使了：always_bad ⇒ 燒完額度 ⇒ 拒交（不是「沒跑到決策」）。
+    assert r["summary"]["stop_reason"] == "attempts_exhausted"
