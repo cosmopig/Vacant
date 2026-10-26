@@ -1,0 +1,60 @@
+{
+  "id": "v5_live_fresh_hint_vs_resample_34tasks_20261026",
+  "created": "2026-10-26",
+  "question": "在已經贏的乾淨重抽（v4: resample > none, EFFECTIVE）之上，「短失敗提示」還多貢獻多少？即重試訊號的內容（≤400B 的關鍵失敗行）是否比「什麼都不說、乾淨重抽」更好。",
+  "fixed": {
+    "task_build": "同 v4：ops-disk ~/dev/ops/realrun/prep.py (round 76 version) from the ref bank ~/dev/ops/ref/bm_tasks/polyglot_py (34 task dirs)；v4 已驗證 34/34 建置成功、其中 6 題與 v3 逐位元組一致（無管線漂移）。",
+    "tasks": [
+      "pg_affine_cipher", "pg_beer_song", "pg_book_store", "pg_bottle_song",
+      "pg_bowling", "pg_connect", "pg_dominoes", "pg_dot_dsl", "pg_food_chain",
+      "pg_forth", "pg_go_counting", "pg_grade_school", "pg_grep", "pg_hangman",
+      "pg_list_ops", "pg_paasio", "pg_phone_number", "pg_pig_latin", "pg_poker",
+      "pg_pov", "pg_proverb", "pg_react", "pg_rest_api", "pg_robot_name",
+      "pg_scale_generator", "pg_sgf_parsing", "pg_simple_linked_list",
+      "pg_transpose", "pg_tree_building", "pg_two_bucket",
+      "pg_variable_length_quantity", "pg_wordy", "pg_zebra_puzzle", "pg_zipper"
+    ],
+    "arms": {
+      "B_resample3": ["--retry", "resample", "--max-attempts", "3"],
+      "C_fresh_hint3": ["--retry", "fresh_hint", "--max-attempts", "3"]
+    },
+    "arm_roles": {
+      "control": "B_resample3",
+      "treatment": "C_fresh_hint3",
+      "note": "命名沿用 runner 臂名（run 目錄名）；本批內 control=純乾淨重抽，treatment=乾淨重抽+hint 檔。"
+    },
+    "agent": "repo ops/realrun/mini_agent.py @ 889cd5ea（本輪新增：工作區有非空 VACANT_FEEDBACK.md 時逐字接在 user message 後；檔不存在/全空白時 user message 與 prompt 逐位元組相同——契約由 tests/test_mini_agent_feedback.py 釘死）。reasoning_effort=none、temperature=0.2、max_tokens=4096，與 v3/v4 相同。",
+    "model": "qwen/qwen3.8-27b @ http://100.119.113.56:1234 (single slot; requests serialize)",
+    "reps": 3,
+    "rep_definition": "one full 34-task x 2-arm grid in a fresh root (runs_v5_r{k}); each run is a fresh process, fresh workspace, no shared state; reps are independent",
+    "per_attempt_timeout_s": 240,
+    "feedback_into": "file（預設 --feedback-into file）：launcher 把 hint 寫進工作區 VACANT_FEEDBACK.md，agent（889cd5ea）讀檔拼接。resample 臂的 launcher 從不寫該檔（只有 revise/fresh_hint 渲染回饋），且 agent 無檔時行為與 v4 的 mini_agent 逐位元組相同。",
+    "hint_content_rule": "render_fresh_hint：≤380 bytes，取自**可見**驗收失敗的關鍵行（FAIL:/FAILED/AssertionError/Error 等，最多 3 行×120 字元），assert_ks1_clean 把關；隱藏測試資料永不進 hint（A4）。",
+    "scorer_used": false,
+    "visible_equals_grader": true,
+    "runner": "ops-disk ~/dev/ops/realrun/run_batch.py (round 81 version: v4 基礎 + C_fresh_hint3 臂)"
+  },
+  "analysis": {
+    "primary_unit": "(task, rep) pair（同 v4）",
+    "statistic": "exact two-sided McNemar（vacant_network.research.mcnemar_exact）",
+    "alpha": 0.05,
+    "b": "control (resample) 接受 且 treatment (fresh_hint) 未接受的格數",
+    "c": "control 未接受 且 treatment 接受的格數",
+    "denominator": "accepted = 最後一次嘗試通過可見驗收套件（`vacant run` 門）；infra_void 出分母、單獨報告；smoke cell ＝ rep1 中該 task 的正式格（v4 同口徑）",
+    "pooling": "3 個 rep 池化為主結果；per-rep 為描述性；**不跨批 pool**（v1–v4 各自預註冊，不可合併成一個大 n）"
+  },
+  "decision_states": {
+    "EFFECTIVE": "c > b 且 p < 0.05：「本批上 fresh_hint 接受的多於 resample」。May NOT state 'proves better'（單一模型、單一槽位、H-12）；引用必須帶 n=102 pairs 與 scorer=false。",
+    "CONTRADICTS": "b > c 且 p < 0.05：顯著但方向相反。不寫任何方向的「有效」結論，也**不寫「有害」**結論（R532 AMEND1 方向守衛）。",
+    "UNRESOLVED": "其餘（含對稱分歧、未達 α）：null 不是 negative。",
+    "INCOMPLETE": "完成 rep 數 < 3：可自已完成格續跑（runner 跳過已完成格）；**不可中途改設計**；決定狀態只在 3 rep 齊後判定。"
+  },
+  "honesty": [
+    "預期效應比 v4 批（+10pp, p=0.0414）**小**：v4 量的是一次重抽對零重試的增益；本批量的是重抽之上的提示增益。pilot（2026-09-25, n=6）差 1 格、無統計力。UNRESOLVED 是合法結果，不是失敗。",
+    "本批 control（resample）與 v4 的 B_resample3 同臂同題同模型，但 v4 的 mini_agent（a6a8be86）不讀回饋檔、本批的（889cd5ea）無檔時行為逐位元組相同——跨批的 v4-B vs v5-B 比對**只是描述性參考**，主分析是本批內 control vs treatment。",
+    "兩臂差異在模型輸入端**只可能是** treatment 第 2 次嘗試起的 hint 全文（≤380B，來自可見套件失敗行）；system prompt 與 task prompt 兩臂逐字相同（KS-1），agent/模型/參數/超時完全相同。",
+    "若 fresh_hint 臂在 attempt 1 就通過，hint 根本沒被用到（該格兩臂同）——「hint 有沒有用」只體現在 attempt 1 失敗的題上。",
+    "單一模型（qwen3.8-27b）、單一上游槽位、polyglot_py 34 題——不外推到其他模型/題庫（H-12）。"
+  ],
+  "frozen_before_first_model_call": true
+}
