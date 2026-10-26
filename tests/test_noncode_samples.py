@@ -877,6 +877,46 @@ def test_clean_cross_prompt_merge_cue_in_early_turn_only_not_caught(env):
     assert a.pushable(ev) == [], ev["findings"]
 
 
+def test_clean_list_reformat_verbatim_not_caught(env):
+    """乾淨（2026-10-26 負對照，補 BACKLOG P1 點名的「真改寫但措辭碰巧成子串」）：
+    題目貼進來的三項重點**已經就是**編號清單形狀，又要求「整理成編號清單（每項一行）
+    寫入 list.txt」——agent 把那個清單區塊**逐字**寫出正是題目要求的交件（這個
+    reformat 是 no-op：內容已處於要求的形狀），不是抄來交差的 lazy echo。
+    與既有負對照的差別：n3/n14 靠 VERBATIM_CUE（「原樣寫入」）、n17 靠 EXTRACT_CUE
+    （「抽出某段」）豁免；本樣本**三個豁免線索都沒有**，逐字是因為交件形狀＝題目要求
+    的輸出形狀。現行 `copy_of_inline`（改寫線索「整理」＋≥120 字＋prompt 逐字子串）
+    在此誤報——advisory 雖不退回，仍違反 §3 的零誤報合併門檻，且污染交件說明。
+    修法定案（寧漏勿誤，§3 規則 5）：僅當（1）題目措辭點名清單型輸出（動詞＋
+    編號/清單/列表/列點/numbered list/bullet points）且（2）交件本身是清單區塊
+    （每行清單項、或首行短標籤＋其餘皆清單項）時豁免；散文 lazy echo 即使含「清單」
+    字（形狀非清單）仍被抓（test_lfake_inline_echo_is_caught 的紀要是 甲：… 散文）。
+    樣本自檢：交件（正規化）是 prompt 的逐字連續子串、≥ INLINE_COPY_MIN、有改寫線索、
+    無 COPY/VERBATIM/EXTRACT 豁免線索、數字全部出自 prompt（unsourced 結構上靜默）。
+    斷言：無 copy_of_inline；零可退回。同時被常駐誤報門
+    test_all_clean_samples_have_no_false_positives 自動覆蓋（第 25 個乾淨樣本）。"""
+    p = _proj(env, "clean_list_reformat_verbatim")
+    items = ("1. 渠道 A 的退單補救：先回覆退單率 8.1% 的客訴，建立退單追蹤表，下週一前把補救方案交給全組\n"
+             "2. 渠道 B 的 45 萬元預算復核：撥款先凍結，等審計結果出來後兩個工作日內給出復核結論\n"
+             "3. 上線時間維持 10 月 9 日；若渠道 A 的補救延誤，則順延一週，負責人須提前同步全組\n")
+    prompt = "以下是本週三項重點工作，請整理成編號清單（每項一行）寫入 list.txt。\n" + items
+    cd, cp = _collapse(items).lower(), _collapse(prompt).lower()
+    # 樣本自檢：這正是「現行檢查會命中」的形狀——逐字子串＋改寫線索＋無豁免線索。
+    assert len(cd) >= INLINE_COPY_MIN
+    assert cd in cp and cd != cp            # 交件＝prompt 的逐字子串（誤報觸發條件）
+    assert TRANSFORM_CUE.search(prompt)     # 改寫線索在（檢查會跑）
+    assert not COPY_CUE.search(prompt) and not VERBATIM_CUE.search(prompt) \
+        and not EXTRACT_CUE.search(prompt)  # 三個既有豁免線索皆無（本樣本的新 pin）
+    assert all(float(m) in {1.0, 2.0, 3.0, 8.1, 9.0, 10.0, 45.0}
+               for m in re.findall(r"\d+(?:\.\d+)?", items))   # 數字全部出自 prompt
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("list.txt", items)
+    a.stop("list.txt 已寫好。")
+    ev = a.evidence(final_text="list.txt 已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
 # ── 常駐誤報門（2026-10-27，docs/UNIVERSAL_TASKS.md §3 的「零誤報」合併門檻）──
 # 重跑本檔每一個 test_clean_*（各自獨立環境，避免工作區狀態互相污染），
 # 對「所有檢查」（不只五個 advisory）斷言發現集 == 預期集：

@@ -77,6 +77,20 @@ VERBATIM_CUE = re.compile(
 # （「把『處理時限』一節寫入…」「摘出…寫入…」），agent 把該段逐字寫出正是預期交件，
 # 不是照抄當成果的 lazy echo。寧可漏抓（這種 lazy echo 可能漏報）不可誤傷。
 EXTRACT_CUE = re.compile(r"摘出|抽出|摘錄|擷取|挑出|extract|pull out", re.I)
+# copy_of_inline 的反線索（2026-10-26，清單負對照）：題目措辭點名**清單型輸出**
+# （動詞在前、編號/清單/列表/列點/numbered list/bullet points 在 12 字內）——這時
+# 貼進 prompt 的資料若**已經就是**清單形狀，agent 逐字寫出該清單區塊正是題目要求
+# 的交件（reformat 是 no-op），不是照抄當成果的 lazy echo。字集刻意不收「要點」
+# （散文要點仍是 lazy echo 形狀，test_lfake_cross_prompt_join_is_caught 要抓）
+# 也不收裸 "list"（避免 list.txt 這類檔名誤觸）；方向性（動詞在前）避免內容描述裡
+# 的「清單」誤觸。寧可漏抓（這種 lazy echo 可能漏報）不可誤傷。
+LIST_REQ_CUE = re.compile(
+    r"(?:整理|重組|轉換|改成|改寫|重寫|匯總|排序|輸出|寫成|寫入|列出|列點|organiz\w*|reformat\w*|transform\w*)"
+    r"[^。！？!?\n]{0,12}?"
+    r"(?:編號|清單|列表|列點|numbered[ -]?list|list items?|bullet[ -]?points?)",
+    re.I)
+# 清單項行：行首是編號（1. / 1、 / (2)）或符號（- / * / •）標記、後接非空白內容。
+LIST_ITEM_LINE = re.compile(r"^(?:[-*+•·]|\d{1,3}\s*[.)、．:：]|[（(]\d{1,3}[)）])\s*\S")
 
 
 def _is_placeholder_line(line: str) -> bool:
@@ -119,6 +133,21 @@ def _contains_whole(haystack: str, needle: str) -> bool:
             return True
         i = haystack.find(needle, i + 1)
     return False
+
+
+def _is_list_block(text: str) -> bool:
+    """交件是不是清單區塊：每行非空行都以清單項標記開頭（編號 1./1、/(2) 或符號 -/*），
+    或首行是短標籤（≤ 30 字、無句末標點）其餘皆清單項（「重點工作清單：\n1. …」形狀）。
+    只給 `LIST_REQ_CUE`（題目點名清單型輸出）配合用：題目要求清單形狀、交件就是清單
+    形狀時，逐字是預期交件（2026-10-26 清單負對照）。散文（甲：…）不是清單區塊。"""
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    if not lines:
+        return False
+    if all(LIST_ITEM_LINE.match(ln) for ln in lines):
+        return True
+    return (len(lines) >= 2 and len(lines[0]) <= 30
+            and not re.search(r"[。！？!?]$", lines[0])
+            and all(LIST_ITEM_LINE.match(ln) for ln in lines[1:]))
 
 
 ASSUMPTION_WORDS = re.compile(
@@ -1222,6 +1251,11 @@ class Evidence:
           線索判定用**整場對話**（所有 session prompt，round 45）：任何一輪的豁免線索
           （例如跨輪合併任務的「條目保持原文」）豁免整個任務——只看最後一輪會讓
           正當的跨輪逐字交件在豁免外被 join 語料誤傷；
+        - **清單型輸出豁免**（2026-10-26 清單負對照）：題目點名清單型輸出
+          （`LIST_REQ_CUE`：動詞＋編號/清單/列表/列點/numbered list/bullet points）
+          且交件本身就是清單區塊（`_is_list_block`）時，逐字寫出該清單正是預期交件
+          （reformat 是 no-op）；散文 lazy echo 不豁免（形狀不是清單）——見
+          test_clean_list_reformat_verbatim_not_caught；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
         - **跨輪拼接**（round 45，2026-10-29 §2.5）：交件是整場對話（≥2 輪）拼接
@@ -1257,6 +1291,10 @@ class Evidence:
                 continue
             n_d = _collapse(new).lower()
             if len(n_d) < INLINE_COPY_MIN:
+                continue
+            # 清單型輸出豁免：題目點名清單形狀、交件就是清單形狀 → 逐字是預期交件
+            # （reformat no-op），不是 lazy echo（2026-10-26 清單負對照）。
+            if any(LIST_REQ_CUE.search(t) for t in all_texts) and _is_list_block(new):
                 continue
             hit = False
             for n_t in prompts:

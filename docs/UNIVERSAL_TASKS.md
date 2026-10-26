@@ -29,7 +29,7 @@
 | `skeleton`（2026-09-25 新增，**僅建議**） | **是** | 交付檔半數以上是佔位行（TBD／TODO／待填／___／{{…}}） | 低：佔位行是明確的未完成訊號；「待填」只算整行佔位，正文裡提到不算 |
 | `stale_output`（2026-09-25 新增，**僅建議**） | **是** | 檔在本回合前就存在、本回合一字未改，最終訊息卻用了產出型動詞（已寫好／已寫入） | 低：「已確認／Done」這類非產出型結語不觸發（n12 樣本） |
 | `copy_of_input`（2026-09-25 新增，**僅建議**） | **是** | 交付檔與任務點名的輸入素材逐字相同（正規化後全等、≥ 80 字） | 低：複製型任務（「把 X 複製為 Y」）直接豁免（COPY_CUE）；短答案不比 |
-| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。**多文件切分（內聯文字被切成 ≥2 份、每份 < 120 字）是已知漏**（§2.4，2026-10-28 已註冊 L-fake＋負對照）；跨 prompt 拼接（內聯文字分貼在 ≥2 回合）**round 45 起已抓**（跨輪拼接語料，advisory；§2.5，含 round 55 早期回合線索的兩對語義 pin）。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
+| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）、**清單型輸出**（題目點名編號／清單／列表／列點輸出、交件本身就是清單區塊——逐字寫出該清單正是預期交件，reformat 是 no-op；`LIST_REQ_CUE`＋`_is_list_block`，2026-10-26 清單負對照）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。**多文件切分（內聯文字被切成 ≥2 份、每份 < 120 字）是已知漏**（§2.4，2026-10-28 已註冊 L-fake＋負對照）；跨 prompt 拼接（內聯文字分貼在 ≥2 回合）**round 45 起已抓**（跨輪拼接語料，advisory；§2.5，含 round 55 早期回合線索的兩對語義 pin）。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
 
 **結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread` 對非程式任務
 直接可用且可退回；`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`
@@ -78,8 +78,13 @@
    - `test_clean_cross_prompt_merge_cue_in_early_turn_only_not_caught`——豁免線索**只在第一回合**、
      最後一輪只有改寫線索 → 不報；若未來把豁免收窄成只看最後一輪/window，此樣本必紅，
      須先對「寧可漏抓、不可誤傷」重新辯證（§3 規則 5）。
-   `copy_of_inline` 仍為 advisory（不退回）：「真改寫但措辭碰巧成子串」的負對照仍未補
-   （見 `~/dev/ops/BACKLOG.md` P1 候選）。
+   `copy_of_inline` 仍為 advisory（不退回）。「真改寫但措辭碰巧成子串」的負對照已補
+   （2026-10-26，round 56）：`test_clean_list_reformat_verbatim_not_caught`——貼進 prompt
+   的三項重點**已就是**編號清單形狀、題目要求「整理成編號清單寫入 list.txt」，逐字寫出
+   該清單正是預期交件（no-op reformat）；豁免條件為 `LIST_REQ_CUE`（動詞＋編號/清單/
+   列表/列點/numbered list/bullet points）與 `_is_list_block`（每行清單項、或首行短標籤＋
+   其餘皆清單項）同時成立。散文 lazy echo（test_lfake_inline_echo_is_caught）仍被抓。
+   另：「n15 式改寫成非子串」的風險已由 n15 本身覆蓋。
 
 ## 3. 新檢查的合併門檻（方向 A 的規則）
 
@@ -116,13 +121,18 @@ stale_output／copy_of_input／copy_of_inline）**零誤報**——達到「≥2
 樣本集現為 **24 個**——加一個豁免線索在**早期回合**的跨 prompt 拼接負對照
 `test_clean_cross_prompt_merge_cue_in_early_turn_only_not_caught`：VERBATIM_CUE 只在
 第一回合、最後一輪只有改寫線索，把 `copy_of_inline` 的「線索判定用整場對話」豁免語義
-固定下來（若未來收窄成只看最後一輪，本樣本必紅，須先對「寧可漏抓、不可誤傷」重新辯證）。）
+固定下來（若未來收窄成只看最後一輪，本樣本必紅，須先對「寧可漏抓、不可誤傷」重新辯證）。
+round 56 再更新（2026-10-26）：樣本集現為 **25 個**——加一個清單型 no-op reformat
+負對照 `test_clean_list_reformat_verbatim_not_caught`（見 §2.5），並加 `LIST_REQ_CUE`＋
+`_is_list_block` 清單形狀豁免（寧漏勿誤，§3 規則 5）。）
 已轉為常駐門：
 `tests/test_noncode_samples.py::test_all_clean_samples_have_no_false_positives` 在隔離
 環境重跑全部乾淨樣本，對**所有 kind**（不只 advisory）斷言發現集與預期集完全相等
 （唯一例外：n4 缺交件的 `missing_output` 真陽）。任何未來新檢查若在乾淨交付上誤報，
 此門直接紅。`copy_of_inline` 仍為 advisory（不退回）：「真改寫但措辭碰巧成子串」的
-負對照仍未補（見 `~/dev/ops/BACKLOG.md` P1 候選）。
+負對照已補（2026-10-26，round 56）：清單型 no-op reformat 樣本
+`test_clean_list_reformat_verbatim_not_caught`＋`LIST_REQ_CUE`/`_is_list_block` 豁免；
+見 §2.5 與 `~/dev/ops/BACKLOG.md` P1。
 
 **門檻敏感性量測（2026-10-27，backlog P1 候選 (c)）**：`INLINE_COPY_MIN = 120` 原是
 「拍的值」。`tests/test_inline_copy_min_sensitivity.py` 把門檻掃過 2…300（含現行 120、
