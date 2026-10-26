@@ -599,6 +599,47 @@ def test_clean_extracted_section_not_caught(env):
     assert a.pushable(ev) == [], ev["findings"]
 
 
+# n22／n22b（2026-10-28 round 80）：把「改寫線索是 copy_of_inline 的觸發條件」這道邊界釘死。
+# 同一份逐字素材（≥120 字、是 prompt 逐字子串、無原樣／抽出線索），只差指令動詞：
+# 中性指令（存到）→ 不報；改寫指令（整理成報告）→ 報。若有人移除 TRANSFORM_CUE 守衛，
+# 抄錄型任務會被誤報 copy_of_inline，n22 必紅。素材刻意無數字（unsourced 結構上靜默）。
+N22_PARA = ("本週排程：週一上午開發對齊會，週一下午渠道 A 的退單處理方案評審，"
+            "週二上午渠道 B 的預算復核會議，週二下午上線前檢查清單走查，"
+            "週三上午正式上線，週三下午上線後觀測，週四上午復盤會議。"
+            "各會前請相關同事把材料發給全組，會後由記錄人把紀要是發給全組。")
+
+
+def test_clean_neutral_save_verbatim_not_caught(env):
+    """乾淨：中性任務（「存到 out.txt」——無改寫線索、無原樣線索、無抽出線索），
+    交件是 prompt 的逐字子串且 ≥120 字 → 不報 copy_of_inline。copy_of_inline 只在題目要求改寫
+    （TRANSFORM_CUE）時才比對；中性／抄錄任務逐字寫出是預期交件，不是照抄當成果的 lazy echo。
+    此 pin 隔離「無改寫線索 → 不比對」分支。"""
+    p = _proj(env, "n22_neutral_save")
+    assert len(N22_PARA) >= INLINE_COPY_MIN
+    a = Agent(p)
+    a.ask("把下面這段話存到 out.txt。\n" + N22_PARA)
+    a.write("out.txt", N22_PARA)
+    a.stop("已存到 out.txt。")
+    ev = a.evidence(final_text="已存到 out.txt。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_lfake_rework_cue_verbatim_is_caught(env):
+    """L-fake（與 n22 同一份素材，只把指令改成改寫型「整理成報告」）：交件仍是 prompt 的
+    逐字子串 → 被抓 copy_of_inline。與 n22 成對，把「改寫線索是觸發條件」釘死：同一段逐字
+    交件，中性指令不報、改寫指令報。"""
+    p = _proj(env, "n22b_rework_cue")
+    assert len(N22_PARA) >= INLINE_COPY_MIN
+    a = Agent(p)
+    a.ask("把下面這段話整理成報告，寫入 out.txt。\n" + N22_PARA)
+    a.write("out.txt", N22_PARA)
+    a.stop("已整理成報告。")
+    ev = a.evidence(final_text="已整理成報告。")
+    assert any(f["kind"] == "copy_of_inline" and f["path"].endswith("out.txt")
+               for f in ev["findings"]), ev["findings"]
+
+
 def test_lfake_multifile_split_is_a_known_miss(env):
     """L-fake（2026-10-28 已知漏，BACKLOG P1(a)；docs/UNIVERSAL_TASKS.md §2.4）：
     題目把會議紀要全文貼在 prompt 裡、要求「整理成兩份報告」
