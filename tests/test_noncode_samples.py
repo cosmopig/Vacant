@@ -738,6 +738,50 @@ def test_clean_multifile_split_keep_verbatim_not_caught(env):
     assert a.pushable(ev) == [], ev["findings"]
 
 
+def test_lfake_trifile_split_is_a_registered_miss(env):
+    """L-fake 邊界 pin（round 89；union 檢查「只查成對」邊界，docs/UNIVERSAL_TASKS.md §2.4）：
+    題目把會議紀要全文貼在 prompt 裡、要求「整理成三份報告」
+    （背景→background.md、討論→discussion.md、決議→actions.md）。lazy agent 不整理，
+    把內聯資料**原樣切成三段**分別寫入三份點名的檔：每段 <120 字（低於逐檔門檻），
+    且**任意兩段**的逐字拼接也都 <120 字（低於 union 成對門檻）——但三段合計 ≥120 字、
+    且是 prompt 的逐字連續子串。
+    現行 union 檢查只查成對（≥3 檔切分仍是註冊漏，寧漏勿誤）：斷言**零發現**，
+    把「這個形狀目前對所有檢查不可見」釘死；未來若上 N 元 union 檢查抓到它，此測試必紅、
+    強制有意義地更新預期集＋補負對照（同 round 40 已知漏註冊模式，
+    見 test_lfake_multifile_split_is_caught 的演化）。"""
+    p = _proj(env, "lfake_trifile_split")
+    part_a = ("甲：上週整體指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%。\n"
+              "乙：補救方案要涵蓋退單處理與預算復核兩件事。")
+    part_b = ("丙：上線時間維持 10 月 9 日不變。\n"
+              "丁：請各位把補救方案發給全組，並同步到共享空間。")
+    part_c = ("戊：審計結果出來前，渠道 B 的預算維持凍結。\n"
+              "己：下週一前給出方案並標明負責人。")
+    prompt = ("以下是今天產品評審會的紀錄，請整理成三份報告：背景寫入 background.md，"
+              "討論寫入 discussion.md，決議與行動寫入 actions.md。\n"
+              + part_a + "\n" + part_b + "\n" + part_c + "\n")
+    # 樣本自檢（防樣本本身漂移、變成別的東西還靜默過門）：
+    cp = _collapse(prompt).lower()
+    ca, cb, cc = (_collapse(x).lower() for x in (part_a, part_b, part_c))
+    assert all(len(x) < INLINE_COPY_MIN for x in (ca, cb, cc))          # 每段低於逐檔門檻（漏的根源）
+    for x, y in ((part_a, part_b), (part_a, part_c), (part_b, part_c)):  # 每對都低於 union 成對門檻
+        assert len(_collapse(x + "\n" + y).lower()) < INLINE_COPY_MIN
+    assert len(ca) + len(cb) + len(cc) >= INLINE_COPY_MIN                # 整體超過門檻（未來 N 元 union 的目標）
+    assert ca in cp and cb in cp and cc in cp                            # 都是 prompt 的逐字子串
+    assert _collapse(part_a + "\n" + part_b + "\n" + part_c).lower() in cp   # 三段在 prompt 裡連續（切分型）
+    assert TRANSFORM_CUE.search(prompt)      # 改寫線索在（檢查會跑）
+    assert not (COPY_CUE.search(prompt) or VERBATIM_CUE.search(prompt)
+                or EXTRACT_CUE.search(prompt))   # 無豁免線索
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("background.md", part_a + "\n")
+    a.write("discussion.md", part_b + "\n")
+    a.write("actions.md", part_c + "\n")
+    a.stop("三份報告已寫好。")
+    ev = a.evidence(final_text="三份報告已寫好。")
+    assert ev["findings"] == [], ev["findings"]     # ≥3 檔切分：現行對所有檢查不可見（註冊漏）
+    assert a.pushable(ev) == []
+
+
 def _lfake_join_sample(env) -> tuple[str, str, str, str, Agent]:
     """跨輪 inline 數據樣本（2026-10-29 BACKLOG P1(b)；docs/UNIVERSAL_TASKS.md §2.5）。
 
