@@ -28,6 +28,7 @@ from vacant_network.trace.evidence import (
     COPY_CUE,
     EXTRACT_CUE,
     INLINE_COPY_MIN,
+    LIST_ITEM_LINE,
     LIST_REQ_CUE,
     TRANSFORM_CUE,
     VERBATIM_CUE,
@@ -952,6 +953,89 @@ def test_lfake_list_block_without_list_cue_is_caught(env):
     a = Agent(p)
     a.ask(prompt)
     a.write("notes.txt", items)
+    a.stop("notes.txt 已寫好。")
+    ev = a.evidence(final_text="notes.txt 已寫好。")
+    assert any(f["kind"] == "copy_of_inline" and f["path"].endswith("notes.txt")
+               for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_clean_list_label_verbatim_not_caught(env):
+    """乾淨（2026-10-26 清單豁免**標籤分支** pin，round 65）：貼進 prompt 的資料是
+    **短標題行＋編號清單項**（「重點工作清單：\n1. …\n2. …\n3. …」），題目要求「整理成
+    編號清單（每項一行）寫入 list.txt」——agent 連標題行**逐字**寫出正是題目要求的交件
+    （reformat 是 no-op）。與既有乾淨樣本 `test_clean_list_reformat_verbatim_not_caught`
+    （round 56，全行皆清單項、走 `_is_list_block` **第一分支**）的差別：本樣本走**第二分支**
+    （首行 ≤30 字短標籤、無句末標點、其餘皆清單項）——round 64 交接點名該分支仍無專屬樣本。
+    樣本自檢：交件（正規化）是 prompt 的逐字連續子串、≥ INLINE_COPY_MIN、交件是清單區塊
+    且**不是**全行清單項（必是標籤分支使然）、prompt 有清單線索＋改寫線索、無
+    COPY/VERBATIM/EXTRACT 任何豁免線索、數字全部出自 prompt（unsourced 結構上靜默）。
+    斷言：無 copy_of_inline；零可退回。同時被常駐誤報門
+    test_all_clean_samples_have_no_false_positives 自動覆蓋（第 26 個乾淨樣本）。"""
+    p = _proj(env, "clean_list_label_verbatim")
+    items = ("1. 渠道 A 的退單補救：先回覆退單率 8.1% 的客訴，建立退單追蹤表，下週一前把補救方案交給全組\n"
+             "2. 渠道 B 的 45 萬元預算復核：撥款先凍結，等審計結果出來後兩個工作日內給出復核結論\n"
+             "3. 上線時間維持 10 月 9 日；若渠道 A 的補救延誤，則順延一週，負責人須提前同步全組\n")
+    block = "重點工作清單：\n" + items
+    prompt = "以下是本週三項重點工作（已就是清單形狀），請整理成編號清單（每項一行）寫入 list.txt。\n" + block
+    cd, cp = _collapse(block).lower(), _collapse(prompt).lower()
+    # 樣本自檢：逐字子串＋改寫線索＋無豁免線索＋清單線索——豁免應由標籤分支成立。
+    assert len(cd) >= INLINE_COPY_MIN
+    assert cd in cp and cd != cp
+    lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+    assert not all(LIST_ITEM_LINE.match(ln) for ln in lines)   # 第一分支不成立
+    assert _is_list_block(block)                                # → 必是第二（標籤）分支
+    assert LIST_REQ_CUE.search(prompt) and TRANSFORM_CUE.search(prompt)
+    assert not COPY_CUE.search(prompt) and not VERBATIM_CUE.search(prompt) \
+        and not EXTRACT_CUE.search(prompt)
+    assert all(float(m) in {1.0, 2.0, 3.0, 8.1, 9.0, 10.0, 45.0}
+               for m in re.findall(r"\d+(?:\.\d+)?", block))   # 數字全部出自 prompt
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("list.txt", block)
+    a.stop("list.txt 已寫好。")
+    ev = a.evidence(final_text="list.txt 已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_lfake_list_label_without_list_cue_is_caught(env):
+    """L-fake（2026-10-26 清單豁免**標籤分支**的合取邊界 pin，round 65）：貼進 prompt 的
+    資料是**短標題行＋編號清單項**（走 `_is_list_block` **第二分支**），但題目要求的是
+    **散文輸出**（「匯總成一段流暢的說明（不要分點），寫入 notes.txt」）——agent 連標題行
+    **逐字**寫出（形狀仍是清單區塊）：題目要求的輸出形狀是散文、不是清單，清單豁免
+    （`LIST_REQ_CUE` **且** `_is_list_block`）因 `LIST_REQ_CUE` 不成立而失敗，
+    `copy_of_inline` 仍要報。
+    與 round 64 `test_lfake_list_block_without_list_cue_is_caught` 的邊界差別：那個樣本 pin
+    **第一分支**（全行清單項、無清單線索 → 不豁免）；本樣本 pin **第二分支**（標籤＋清單項、
+    無清單線索 → 不豁免）——round 64 交接點名第二分支仍無專屬 L-fake。若未來把豁免放寬成
+    「交件是清單形狀即豁免」（去掉 `LIST_REQ_CUE` 條件），本樣本必紅——須先對「寧可漏抓、
+    不可誤傷」重新辯證再改。
+    樣本自檢：交件（正規化）是 prompt 的逐字連續子串、≥ INLINE_COPY_MIN、交件是清單區塊
+    且不是全行清單項（必是標籤分支使然）、prompt 有改寫線索但無 COPY/VERBATIM/EXTRACT/
+    LIST_REQ 任何豁免線索、數字全部出自 prompt（unsourced 結構上靜默）。
+    斷言：copy_of_inline 命中（advisory）；零可退回（§3）。"""
+    p = _proj(env, "lfake_list_label_no_list_cue")
+    items = ("1. 渠道 A 的退單補救：先回覆退單率 8.1% 的客訴，建立退單追蹤表，下週一前把補救方案交給全組\n"
+             "2. 渠道 B 的 45 萬元預算復核：撥款先凍結，等審計結果出來後兩個工作日內給出復核結論\n"
+             "3. 上線時間維持 10 月 9 日；若渠道 A 的補救延誤，則順延一週，負責人須提前同步全組\n")
+    block = "重點工作清單：\n" + items
+    prompt = "以下是本週三項重點工作，請匯總成一段流暢的說明（不要分點），寫入 notes.txt。\n" + block
+    cd, cp = _collapse(block).lower(), _collapse(prompt).lower()
+    # 樣本自檢：標籤分支＋無清單線索＋改寫線索在——正是本 pin 要固定住的邊界。
+    assert len(cd) >= INLINE_COPY_MIN
+    assert cd in cp and cd != cp
+    lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+    assert not all(LIST_ITEM_LINE.match(ln) for ln in lines)   # 第一分支不成立
+    assert _is_list_block(block)                                # → 必是第二（標籤）分支
+    assert TRANSFORM_CUE.search(prompt)
+    assert not COPY_CUE.search(prompt) and not VERBATIM_CUE.search(prompt) \
+        and not EXTRACT_CUE.search(prompt) and not LIST_REQ_CUE.search(prompt)
+    assert all(float(m) in {1.0, 2.0, 3.0, 8.1, 9.0, 10.0, 45.0}
+               for m in re.findall(r"\d+(?:\.\d+)?", block))   # 數字全部出自 prompt
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("notes.txt", block)
     a.stop("notes.txt 已寫好。")
     ev = a.evidence(final_text="notes.txt 已寫好。")
     assert any(f["kind"] == "copy_of_inline" and f["path"].endswith("notes.txt")

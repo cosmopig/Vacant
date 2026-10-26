@@ -89,6 +89,13 @@
      要求**散文**輸出（無 `LIST_REQ_CUE`）、交件仍是清單區塊 → 仍被抓；若未來把豁免放寬
      成「交件是清單形狀即豁免」（去掉 `LIST_REQ_CUE` 條件），此樣本必紅。
    - `test_clean_list_reformat_verbatim_not_caught`（round 56，見上）——pin 豁免側。
+   **round 65 補第二分支 pin**（round 64 交接點名「首行短標籤分支仍無專屬樣本」）：上述
+   兩樣本只走 `_is_list_block` **第一分支**（全行皆清單項）；**第二分支**（首行 ≤30 字短標籤、
+   無句末標點、其餘皆清單項）有自己的成對 pin：
+   - `test_clean_list_label_verbatim_not_caught`（乾淨）——交件是**短標題行＋編號清單項**
+     （第二分支）、題目點名清單輸出（`LIST_REQ_CUE` 成立）→ 豁免成立、不報；
+   - `test_lfake_list_label_without_list_cue_is_caught`（L-fake）——同一標籤形狀、題目要求
+     **散文**輸出（無 `LIST_REQ_CUE`）→ 豁免不成立、仍被抓。
    另：「n15 式改寫成非子串」的風險已由 n15 本身覆蓋。
 
 ## 3. 新檢查的合併門檻（方向 A 的規則）
@@ -129,7 +136,10 @@ stale_output／copy_of_input／copy_of_inline）**零誤報**——達到「≥2
 固定下來（若未來收窄成只看最後一輪，本樣本必紅，須先對「寧可漏抓、不可誤傷」重新辯證）。
 round 56 再更新（2026-10-26）：樣本集現為 **25 個**——加一個清單型 no-op reformat
 負對照 `test_clean_list_reformat_verbatim_not_caught`（見 §2.5），並加 `LIST_REQ_CUE`＋
-`_is_list_block` 清單形狀豁免（寧漏勿誤，§3 規則 5）。）
+`_is_list_block` 清單形狀豁免（寧漏勿誤，§3 規則 5）。round 65 再更新：樣本集現為
+**26 個合格交付（乾淨）樣本**——加一個第二分支（短標題行＋清單項）清單 no-op reformat
+負對照 `test_clean_list_label_verbatim_not_caught`（見 §2.5；另加同分支合取邊界 L-fake
+`test_lfake_list_label_without_list_cue_is_caught`，不計入乾淨樣本）。）
 已轉為常駐門：
 `tests/test_noncode_samples.py::test_all_clean_samples_have_no_false_positives` 在隔離
 環境重跑全部乾淨樣本，對**所有 kind**（不只 advisory）斷言發現集與預期集完全相等

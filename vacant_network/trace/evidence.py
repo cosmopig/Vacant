@@ -1257,6 +1257,10 @@ class Evidence:
           （reformat 是 no-op）——見 test_clean_list_reformat_verbatim_not_caught；
           豁免是合取：清單形狀但題目要求散文輸出（無 `LIST_REQ_CUE`）仍被抓——見
           test_lfake_list_block_without_list_cue_is_caught（2026-10-26 round 64 邊界 pin）；
+          `_is_list_block` 的兩個分支各有專屬 pin（round 65）：全行清單項分支由上述兩樣本
+          固定；短標題行分支（首行 ≤30 字＋其餘皆清單項）由
+          test_clean_list_label_verbatim_not_caught（豁免側）＋
+          test_lfake_list_label_without_list_cue_is_caught（合取側）固定；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
         - **跨輪拼接**（round 45，2026-10-29 §2.5）：交件是整場對話（≥2 輪）拼接
