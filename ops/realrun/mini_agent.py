@@ -16,6 +16,13 @@
   mini_agent.py <output-file> <prompt...>
 把 prompt 當 user message 送出，回傳的第一個 fenced code block（取最大者）
 寫成 <output-file> 到**目前目錄**（＝ `vacant run` 的工作區）。
+
+file-mode 回饋（`--retry revise/fresh_hint` 的預設通道）：
+  launcher 把 hint 寫進工作區的 `VACANT_FEEDBACK.md`；本 agent 若發現該檔
+  **存在且非空**，就把全文逐字接在 user message 後面（prompt + "\n\n---\n" +
+  全文）。檔不存在或全空白時，user message 與 prompt 逐位元組相同——
+  resample 臂的行為因此完全不變，兩臂模板逐字相同（KS-1），差異只在
+  hint 資料的有無。契約由 `tests/test_mini_agent_feedback.py` 釘死。
 """
 from __future__ import annotations
 
@@ -27,6 +34,24 @@ import urllib.error
 import urllib.request
 
 FENCE_RE = re.compile(r"```[a-zA-Z0-9_-]*[ \t]*\n(.*?)```", re.S)
+FEEDBACK_FILENAME = "VACANT_FEEDBACK.md"
+
+
+def user_prompt_with_feedback(prompt: str) -> str:
+    """工作區有非空的 `VACANT_FEEDBACK.md` 就把它逐字接在 prompt 後。
+
+    這是 file-mode 回饋通道（`vacant_network/vrun/retry.py` 的 `FEEDBACK_FILENAME`）
+    的 agent 端：hint 是**資料**不是模板，兩臂的 system＋task prompt 保持
+    逐字相同；檔不存在／全空白時回傳值與輸入 prompt 逐位元組相同。
+    """
+    p = os.path.join(os.getcwd(), FEEDBACK_FILENAME)
+    if not os.path.exists(p):
+        return prompt
+    with open(p, encoding="utf-8") as f:
+        text = f.read()
+    if not text.strip():
+        return prompt
+    return prompt + "\n\n---\n" + text
 
 
 def call_model(base: str, key: str, model: str, system: str, user: str,
@@ -71,7 +96,7 @@ def main() -> None:
         print("usage: mini_agent.py <output-file> <prompt...>", file=sys.stderr)
         raise SystemExit(2)
     out = sys.argv[1]
-    prompt = " ".join(sys.argv[2:])
+    prompt = user_prompt_with_feedback(" ".join(sys.argv[2:]))
     base = os.environ.get("OPENAI_BASE_URL") or os.environ.get("OPENAI_API_BASE")
     if not base:
         print("mini_agent: OPENAI_BASE_URL 未設定"
