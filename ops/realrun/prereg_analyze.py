@@ -73,6 +73,24 @@ def discordant(pairs: list[dict]) -> tuple[int, int]:
     return b, c
 
 
+def rep_complete(rp: dict) -> bool:
+    """A rep is COMPLETE only when every registered task has a run dir on BOTH
+    arms (i.e. no `missing_run_dir` void). A `missing_run_dir` void means the
+    cell is still being written — the rep is in flight, not done.
+
+    An `infra_void` cell is NOT incompleteness: the run dir exists, the model
+    call was attempted and recorded as void, and the pair is dropped from the
+    statistic by design (pre-registered infra_void rule). Treating an attempted
+    void as "missing" would let a flaky endpoint fake an incomplete batch.
+
+    This is the actual "5 rep 齊" (all reps complete) test the pre-registered
+    budget rule requires. Counting root DIRECTORIES is NOT sufficient: a partial
+    rep (e.g. 5 of 34 cells written) must not count as a present rep, or the
+    batch would render a decision state mid-write.
+    """
+    return not any(v["reason"] == "missing_run_dir" for v in rp["voids"])
+
+
 def decision_state(c: int, b: int, p: float, alpha: float,
                    states: dict | None = None) -> str:
     """Exactly the pre-registered rule (see prereg_v3.json decision_states).
@@ -111,6 +129,7 @@ def analyze(prereg_path: Path, roots: list[Path]) -> dict:
             "b": b, "c": c, "p": p, "voids": rp["voids"],
             "a_acc": sum(1 for x in rp["pairs"] if x["a"]),
             "b_acc": sum(1 for x in rp["pairs"] if x["b"]),
+            "complete": rep_complete(rp),
         })
     # pooled: all reps' pairs concatenated (the pre-registered primary unit)
     all_pairs = []
@@ -119,13 +138,24 @@ def analyze(prereg_path: Path, roots: list[Path]) -> dict:
     b, c = discordant(all_pairs)
     p = mcnemar_exact(b, c)
 
-    if len(roots) < reps_registered:
+    # Budget rule (pre-registered): a decision state may only be rendered once
+    # ALL registered reps are COMPLETE (every task present on both arms). Two
+    # independent causes of incompleteness, either one blocks the state:
+    #   1. fewer roots passed than registered reps (batch not fully launched);
+    #   2. a passed root is still being written (partial rep, e.g. 5 of 34
+    #      cells) — counting directories would let a mid-write batch render a
+    #      decision state. infra_void cells are attempts, not gaps.
+    complete_reps = sum(1 for x in per_rep if x["complete"])
+    if len(roots) < reps_registered or complete_reps < reps_registered:
         state = "INCOMPLETE"
-        note = (f"{len(roots)}/{reps_registered} registered reps present; "
-                "pre-registered budget rule: no decision state assigned")
+        note = (f"{complete_reps}/{reps_registered} registered reps complete "
+                f"(all {len(tasks)} tasks present on both arms); "
+                "pre-registered budget rule: no decision state assigned; "
+                "pooled numbers are descriptive only (partial batch)")
     else:
         state = decision_state(c, b, p, alpha, plan.get("decision_states", {}))
-        note = "all registered reps present"
+        note = (f"all {reps_registered} registered reps complete "
+                f"(all {len(tasks)} tasks present on both arms)")
     return {
         "prereg_id": plan.get("id"),
         "prereg_file": str(prereg_path),
@@ -245,6 +275,31 @@ def selftest() -> int:
         rep6 = analyze(plan3, [r1, r2])
         check("c5 INCOMPLETE", rep6["state"] == "INCOMPLETE"
               and "no decision state" in rep6["state_note"])
+
+        # case 6 (REGRESSION): registered reps=3, ALL 3 roots passed, but the
+        # third is only PARTIALLY written (3 of 6 tasks). Counting directories
+        # would render a decision state mid-write; the completeness test must
+        # catch the partial rep and hold the batch at INCOMPLETE.
+        rpart = base / "rpart"
+        for i, t in enumerate(tasks):
+            if i < 3:  # only the first 3 tasks written; t3..t5 still missing
+                mk(rpart, "A", t, False)
+                mk(rpart, "B", t, True)
+        rep7 = analyze(plan3, [r1, r2, rpart])
+        check("c6 partial rep still INCOMPLETE",
+              rep7["state"] == "INCOMPLETE"
+              and "no decision state" in rep7["state_note"])
+        # the partial rep is flagged incomplete, the two full ones complete
+        flags = [x["complete"] for x in rep7["per_rep"]]
+        check("c6 per-rep complete flags [T,T,F]", flags == [True, True, False])
+        # once the partial rep is filled in, the SAME three roots render a state
+        for i, t in enumerate(tasks):
+            if i >= 3:
+                mk(rpart, "A", t, False)
+                mk(rpart, "B", t, True)
+        rep8 = analyze(plan3, [r1, r2, rpart])
+        check("c6 complete after fill -> decision state rendered",
+              rep8["state"] != "INCOMPLETE")
 
     if fails:
         print(f"SELFTEST FAIL: {fails}")
