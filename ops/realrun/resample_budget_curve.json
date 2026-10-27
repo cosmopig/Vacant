@@ -1,0 +1,244 @@
+{
+  "schema": "vacant.realrun.resample_budget_curve/1",
+  "column": "flag_restart",
+  "definition": {
+    "unit": "same unit as the single-cap replay: (suite, batch, task) group with >=2 archived independent runs; groups weighted equally",
+    "column_note": "flag_restart is the only column citable on every suite (scorer_used=false). test_restart is a real signal only on visible_tests_are_grader_suites (see the cap=3 mirror); oracle_any is always an upper bound.",
+    "cap_note": "cap=K = at most K attempts before the stop condition (Vacant's recorded findings empty)."
+  },
+  "caps": {
+    "1": {
+      "suites": {
+        "dabench": {
+          "units": 60,
+          "pct": 79.36,
+          "mean_runs": 1.0,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 60
+        },
+        "dabstep": {
+          "units": 144,
+          "pct": 65.05,
+          "mean_runs": 1.0,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 151
+        },
+        "databench": {
+          "units": 59,
+          "pct": 67.32,
+          "mean_runs": 1.0,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 60
+        },
+        "polyglot_py": {
+          "units": 68,
+          "pct": 37.28,
+          "mean_runs": 1.0,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 68
+        }
+      },
+      "all": {
+        "units": 331,
+        "pct": 62.34,
+        "mean_runs": 1.0,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty",
+        "groups_with_n_ge_cap": 339
+      }
+    },
+    "2": {
+      "suites": {
+        "dabench": {
+          "units": 60,
+          "pct": 81.31,
+          "mean_runs": 1.0292,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 60
+        },
+        "dabstep": {
+          "units": 144,
+          "pct": 67.4,
+          "mean_runs": 1.1064,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 144
+        },
+        "databench": {
+          "units": 59,
+          "pct": 70.14,
+          "mean_runs": 1.0325,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 59
+        },
+        "polyglot_py": {
+          "units": 68,
+          "pct": 43.04,
+          "mean_runs": 1.3375,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 68
+        }
+      },
+      "all": {
+        "units": 331,
+        "pct": 65.4,
+        "mean_runs": 1.1267,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty",
+        "groups_with_n_ge_cap": 331
+      }
+    },
+    "3": {
+      "suites": {
+        "dabench": {
+          "units": 60,
+          "pct": 81.31,
+          "mean_runs": 1.0292,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 58
+        },
+        "dabstep": {
+          "units": 144,
+          "pct": 67.74,
+          "mean_runs": 1.1388,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 127
+        },
+        "databench": {
+          "units": 59,
+          "pct": 70.14,
+          "mean_runs": 1.0325,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 52
+        },
+        "polyglot_py": {
+          "units": 68,
+          "pct": 46.96,
+          "mean_runs": 1.4858,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 51
+        }
+      },
+      "all": {
+        "units": 331,
+        "pct": 66.36,
+        "mean_runs": 1.1713,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty",
+        "groups_with_n_ge_cap": 288
+      }
+    },
+    "4": {
+      "suites": {
+        "dabench": {
+          "units": 60,
+          "pct": 81.31,
+          "mean_runs": 1.0292,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 27
+        },
+        "dabstep": {
+          "units": 144,
+          "pct": 67.74,
+          "mean_runs": 1.1405,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 52
+        },
+        "databench": {
+          "units": 59,
+          "pct": 70.14,
+          "mean_runs": 1.0325,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 26
+        },
+        "polyglot_py": {
+          "units": 68,
+          "pct": 46.96,
+          "mean_runs": 1.4895,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 13
+        }
+      },
+      "all": {
+        "units": 331,
+        "pct": 66.36,
+        "mean_runs": 1.1728,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty",
+        "groups_with_n_ge_cap": 118
+      }
+    },
+    "5": {
+      "suites": {
+        "dabench": {
+          "units": 60,
+          "pct": 81.31,
+          "mean_runs": 1.0292,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 7
+        },
+        "dabstep": {
+          "units": 144,
+          "pct": 67.74,
+          "mean_runs": 1.1405,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 45
+        },
+        "databench": {
+          "units": 59,
+          "pct": 70.14,
+          "mean_runs": 1.0325,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 4
+        },
+        "polyglot_py": {
+          "units": 68,
+          "pct": 46.96,
+          "mean_runs": 1.4895,
+          "scorer_used": false,
+          "signal": "vacant_findings_empty",
+          "groups_with_n_ge_cap": 3
+        }
+      },
+      "all": {
+        "units": 331,
+        "pct": 66.36,
+        "mean_runs": 1.1728,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty",
+        "groups_with_n_ge_cap": 59
+      }
+    }
+  },
+  "reading": {
+    "caveats": [
+      "offline replay over archived runs (zero model calls), not a live run (H-12: does not transfer to another model/bank without re-running)",
+      "where a group has fewer archived runs than the cap, the cyclic average reuses archived runs: that cap's number is a property of the archived set, not fresh live attempts; see groups_with_n_ge_cap",
+      "flatness from cap a to cap b means no group in this bank gains under the recorded stop rule from attempts a+1..b"
+    ]
+  },
+  "input": {
+    "path": "runs/_replay/c37_final.json",
+    "sha256": "9c6e2b1383e478f88805ccac0f0db219f32316fb4692107d9d4e9e76804bbf5c",
+    "rows": 1187,
+    "rows_used": 1187
+  }
+}

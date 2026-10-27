@@ -30,6 +30,13 @@
   python3 ops/realrun/offline_real_signal_replay.py --selftest
   python3 ops/realrun/offline_real_signal_replay.py <replay.json> [K] [--json]
   python3 ops/realrun/offline_real_signal_replay.py <replay.json> [K] --write-mirror <path>
+  python3 ops/realrun/offline_real_signal_replay.py <replay.json> --curve [Kmax=5] [--write-mirror <path>]
+
+--curve（round 116 新增，只讀聚合，不改上面任何單 cap 輸出）：
+  同一份輸入跑 cap=1..Kmax，只輸出**可引用欄 flag_restart**（所有題型 scorer_used=false），
+  回答「每個重抽 slot 各買進多少成果」。每個 (cap, 題型) 附 groups_with_n_ge_cap＝
+  該 cap 下「archived run 數 ≥ cap」的組數（cap 超過組的 archived run 數時，本工具的 cyclic
+  語義會重用已 archieve 的 run——那個 cap 的數字是 archived 集合的性質，不是新的一次 live 嘗試）。
 """
 from __future__ import annotations
 
@@ -40,6 +47,7 @@ import sys
 from pathlib import Path
 
 SCHEMA = "vacant.realrun.offline_real_signal_replay/1"
+SCHEMA_CURVE = "vacant.realrun.resample_budget_curve/1"
 
 # 可見測試就是評分器的題型：該處 test_restart 是客戶自己的可執行驗收（真實訊號），
 # 不是上界。其餘題型的 pass 欄是 grader 判定，agent 看不到那個測試。
@@ -145,6 +153,58 @@ def replay(rows: list[dict], cap: int = 3) -> dict:
     }
 
 
+def curve(rows: list[dict], caps: list[int]) -> dict:
+    """重抽預算曲線（只讀聚合）：cap=1..Kmax 的 flag_restart 欄（唯一所有題型皆可引用的欄）。
+
+    語義（與 simulate() 一致）：cap=K＝在「Vacant 紀錄訊號 findings 為空」的停止條件下
+    最多 K 次嘗試。組的 archived run 數 n < K 時，cyclic 起點平均會重用已 archieve 的 run，
+    該 cap 的數字因此是 archived 集合的性質，不是 K 次全新 live 嘗試——groups_with_n_ge_cap
+    就是「該 cap 下真正有足量 archived run」的組數。
+    """
+    groups = group_rows(rows)
+    entry_caps: dict[str, dict] = {}
+    for K in caps:
+        full = replay(rows, cap=K)
+
+        def pick(r: dict) -> dict:
+            fr = r["flag_restart"]
+            assert fr["scorer_used"] is False  # flag_restart 永遠不用評分器
+            return {
+                "units": r["units"],
+                "pct": fr["pct"],
+                "mean_runs": fr["mean_runs"],
+                "scorer_used": False,
+                "signal": fr["signal"],
+            }
+
+        suites = {}
+        for suite, r in full["suites"].items():
+            e = pick(r)
+            e["groups_with_n_ge_cap"] = sum(
+                1 for (s, _b, _t), cells in groups.items() if s == suite and len(cells) >= K)
+            suites[suite] = e
+        all_e = pick(full["all"])
+        all_e["groups_with_n_ge_cap"] = sum(1 for cells in groups.values() if len(cells) >= K)
+        entry_caps[str(K)] = {"suites": suites, "all": all_e}
+    return {
+        "schema": SCHEMA_CURVE,
+        "column": "flag_restart",
+        "definition": {
+            "unit": "same unit as the single-cap replay: (suite, batch, task) group with >=2 archived independent runs; groups weighted equally",
+            "column_note": "flag_restart is the only column citable on every suite (scorer_used=false). test_restart is a real signal only on visible_tests_are_grader_suites (see the cap=3 mirror); oracle_any is always an upper bound.",
+            "cap_note": "cap=K = at most K attempts before the stop condition (Vacant's recorded findings empty).",
+        },
+        "caps": entry_caps,
+        "reading": {
+            "caveats": [
+                "offline replay over archived runs (zero model calls), not a live run (H-12: does not transfer to another model/bank without re-running)",
+                "where a group has fewer archived runs than the cap, the cyclic average reuses archived runs: that cap's number is a property of the archived set, not fresh live attempts; see groups_with_n_ge_cap",
+                "flatness from cap a to cap b means no group in this bank gains under the recorded stop rule from attempts a+1..b",
+            ],
+        },
+    }
+
+
 def sha256_of(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
@@ -190,6 +250,44 @@ def selftest() -> None:
     # 錯誤行被剔除
     rows.append({"cell": "b-t-5", "task_dir": "/x/dabstep/2", "error": "boom"})
     assert replay(rows, cap=2)["all"]["units"] == 2
+    # curve()：手算期望（ALL＝每組等權）。
+    # 組 A（dabstep, n=2）[T(findings 空), F(findings 有)]：
+    #   K=1 → start0 停於 T、start1 取 F → 0.5；K=2 → start1 走完 F 後 wrap 回 T 停 → 1.0；K=3 同 1.0。
+    #   mean_runs：K=2 → (1+2)/2 = 1.5。
+    # 組 B（polyglot_py, n=3）[F, F, T(findings 空)]：
+    #   K=1 → 1/3；K=2 → (F,F 走完取 F / F,T 停於 T / T 停) = 2/3；K=3 → 1.0。
+    #   mean_runs：K=1 → 1.0；K=2 → (2+2+1)/3 = 5/3；K=3 → (3+2+1)/3 = 2.0。
+    # ALL：K=1 → (0.5+1/3)/2；K=2 → (1+2/3)/2；K=3 → 1.0。
+    crows = [
+        {"cell": "c-a-1", "task_dir": "/x/dabstep/7", "pass": True, "findings_final": []},
+        {"cell": "c-a-2", "task_dir": "/x/dabstep/7", "pass": False, "findings_final": ["f"]},
+        {"cell": "c-b-1", "task_dir": "/x/polyglot_py/8", "pass": False, "findings_final": ["f"]},
+        {"cell": "c-b-2", "task_dir": "/x/polyglot_py/8", "pass": False, "findings_final": ["f"]},
+        {"cell": "c-b-3", "task_dir": "/x/polyglot_py/8", "pass": True, "findings_final": []},
+    ]
+    cv = curve(crows, [1, 2, 3])
+    assert cv["column"] == "flag_restart"
+    # replay() 的四捨五入口徑：pct 2 位、mean_runs 4 位——期望值用同口徑。
+    assert cv["caps"]["1"]["all"]["pct"] == round(100 * (0.5 + 1 / 3) / 2, 2)  # 41.67
+    assert cv["caps"]["2"]["all"]["pct"] == round(100 * (1 + 2 / 3) / 2, 2)  # 83.33
+    assert cv["caps"]["3"]["all"]["pct"] == 100.0
+    assert cv["caps"]["1"]["suites"]["dabstep"]["pct"] == 50.0
+    assert cv["caps"]["2"]["suites"]["dabstep"]["pct"] == 100.0
+    assert cv["caps"]["3"]["suites"]["dabstep"]["pct"] == 100.0
+    assert cv["caps"]["2"]["suites"]["dabstep"]["mean_runs"] == 1.5
+    assert cv["caps"]["1"]["suites"]["polyglot_py"]["pct"] == round(100 / 3, 2)  # 33.33
+    assert cv["caps"]["2"]["suites"]["polyglot_py"]["pct"] == round(200 / 3, 2)  # 66.67
+    assert cv["caps"]["3"]["suites"]["polyglot_py"]["pct"] == 100.0
+    # mean_runs 組 B：K=1 → 1.0；K=2 → (2+2+1)/3 = 5/3；K=3 → (3+2+1)/3 = 2.0
+    assert cv["caps"]["1"]["suites"]["polyglot_py"]["mean_runs"] == 1.0
+    assert cv["caps"]["2"]["suites"]["polyglot_py"]["mean_runs"] == round(5 / 3, 4)  # 1.6667
+    assert cv["caps"]["3"]["suites"]["polyglot_py"]["mean_runs"] == 2.0
+    # groups_with_n_ge_cap：n=2 與 n=3 → K=1/2 皆 2，K=3 只有 n=3 那組
+    assert cv["caps"]["2"]["all"]["groups_with_n_ge_cap"] == 2
+    assert cv["caps"]["3"]["all"]["groups_with_n_ge_cap"] == 1
+    # 每欄 scorer_used 恆為 False（flag 欄守衛）
+    for K in ("1", "2", "3"):
+        assert cv["caps"][K]["all"]["scorer_used"] is False
     print("selftest OK")
 
 
@@ -201,6 +299,30 @@ def main(argv: list[str]) -> int:
         print(__doc__, file=sys.stderr)
         return 2
     path = Path(argv[0])
+    if "--curve" in argv:
+        idx = argv.index("--curve")
+        kmax = 5
+        if idx + 1 < len(argv) and argv[idx + 1].isdigit():
+            kmax = int(argv[idx + 1])
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        out = curve(rows, list(range(1, kmax + 1)))
+        out["input"] = {"path": str(path), "sha256": sha256_of(path),
+                        "rows": len(rows),
+                        "rows_used": sum(1 for r in rows if "error" not in r)}
+        if "--write-mirror" in argv:
+            mp = Path(argv[argv.index("--write-mirror") + 1])
+            mp.parent.mkdir(parents=True, exist_ok=True)
+            mp.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            print(f"wrote {mp}")
+        if "--json" in argv or "--write-mirror" not in argv:
+            print(json.dumps(out, ensure_ascii=False, indent=2))
+        else:
+            names = sorted(out["caps"]["1"]["suites"])
+            for K in sorted(out["caps"], key=int):
+                row = out["caps"][K]
+                cells = "  ".join(f"{s}={row['suites'][s]['pct']}%" for s in names)
+                print(f"K={K}  {cells}  ALL={row['all']['pct']}%")
+        return 0
     cap = int(argv[1]) if len(argv) > 1 else 3
     rows = json.loads(path.read_text(encoding="utf-8"))
     out = replay(rows, cap)
