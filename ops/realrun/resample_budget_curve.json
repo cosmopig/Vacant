@@ -23,7 +23,7 @@
           "mean_runs": 1.0,
           "scorer_used": false,
           "signal": "vacant_findings_empty",
-          "groups_with_n_ge_cap": 151
+          "groups_with_n_ge_cap": 144
         },
         "databench": {
           "units": 59,
@@ -31,7 +31,7 @@
           "mean_runs": 1.0,
           "scorer_used": false,
           "signal": "vacant_findings_empty",
-          "groups_with_n_ge_cap": 60
+          "groups_with_n_ge_cap": 59
         },
         "polyglot_py": {
           "units": 68,
@@ -48,7 +48,7 @@
         "mean_runs": 1.0,
         "scorer_used": false,
         "signal": "vacant_findings_empty",
-        "groups_with_n_ge_cap": 339
+        "groups_with_n_ge_cap": 331
       }
     },
     "2": {

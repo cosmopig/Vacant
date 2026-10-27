@@ -35,8 +35,10 @@
 --curve（round 116 新增，只讀聚合，不改上面任何單 cap 輸出）：
   同一份輸入跑 cap=1..Kmax，只輸出**可引用欄 flag_restart**（所有題型 scorer_used=false），
   回答「每個重抽 slot 各買進多少成果」。每個 (cap, 題型) 附 groups_with_n_ge_cap＝
-  該 cap 下「archived run 數 ≥ cap」的組數（cap 超過組的 archived run 數時，本工具的 cyclic
-  語義會重用已 archieve 的 run——那個 cap 的數字是 archived 集合的性質，不是新的一次 live 嘗試）。
+  該 cap 下「archived run 數 ≥ cap」的組數，且只數進入 units 的組（≥2 archived runs，
+  與 replay() 同一把尺；cap=1 時故必等於 units）。cap 超過組的 archived run 數時，
+  本工具的 cyclic 語義會重用已 archieve 的 run——那個 cap 的數字是 archived 集合的
+  性質，不是新的一次 live 嘗試。
 """
 from __future__ import annotations
 
@@ -160,6 +162,11 @@ def curve(rows: list[dict], caps: list[int]) -> dict:
     最多 K 次嘗試。組的 archived run 數 n < K 時，cyclic 起點平均會重用已 archieve 的 run，
     該 cap 的數字因此是 archived 集合的性質，不是 K 次全新 live 嘗試——groups_with_n_ge_cap
     就是「該 cap 下真正有足量 archived run」的組數。
+
+    口徑（釘死）：groups_with_n_ge_cap 只數「進入 units 的組」（≥2 archived runs，與
+    replay() 的 len(cells) >= 2 過濾同一把尺）。singleton 組不進任何平均，故 cap=1 時
+    groups_with_n_ge_cap 必等於 units；K≥2 時必 ≤ 之。舊版漏掉這個過濾，cap=1 會數到
+    singleton（dabstep 151>144、ALL 339>331），違反「子集」語義。
     """
     groups = group_rows(rows)
     entry_caps: dict[str, dict] = {}
@@ -181,10 +188,12 @@ def curve(rows: list[dict], caps: list[int]) -> dict:
         for suite, r in full["suites"].items():
             e = pick(r)
             e["groups_with_n_ge_cap"] = sum(
-                1 for (s, _b, _t), cells in groups.items() if s == suite and len(cells) >= K)
+                1 for (s, _b, _t), cells in groups.items()
+                if s == suite and len(cells) >= 2 and len(cells) >= K)
             suites[suite] = e
         all_e = pick(full["all"])
-        all_e["groups_with_n_ge_cap"] = sum(1 for cells in groups.values() if len(cells) >= K)
+        all_e["groups_with_n_ge_cap"] = sum(
+            1 for cells in groups.values() if len(cells) >= 2 and len(cells) >= K)
         entry_caps[str(K)] = {"suites": suites, "all": all_e}
     return {
         "schema": SCHEMA_CURVE,
@@ -264,6 +273,9 @@ def selftest() -> None:
         {"cell": "c-b-1", "task_dir": "/x/polyglot_py/8", "pass": False, "findings_final": ["f"]},
         {"cell": "c-b-2", "task_dir": "/x/polyglot_py/8", "pass": False, "findings_final": ["f"]},
         {"cell": "c-b-3", "task_dir": "/x/polyglot_py/8", "pass": True, "findings_final": []},
+        # singleton 組（只 1 筆 archived run）：不進 units（replay() 的 >=2 過濾），
+        # 也不得進 groups_with_n_ge_cap——cap=1 時兩者必相等。
+        {"cell": "c-s-1", "task_dir": "/x/databench/9", "pass": True, "findings_final": []},
     ]
     cv = curve(crows, [1, 2, 3])
     assert cv["column"] == "flag_restart"
@@ -285,6 +297,9 @@ def selftest() -> None:
     # groups_with_n_ge_cap：n=2 與 n=3 → K=1/2 皆 2，K=3 只有 n=3 那組
     assert cv["caps"]["2"]["all"]["groups_with_n_ge_cap"] == 2
     assert cv["caps"]["3"]["all"]["groups_with_n_ge_cap"] == 1
+    # cap=1：n_ge_cap 必等於 units（singleton 不數）；舊版漏 >=2 過濾會數成 3
+    assert cv["caps"]["1"]["all"]["units"] == 2
+    assert cv["caps"]["1"]["all"]["groups_with_n_ge_cap"] == 2
     # 每欄 scorer_used 恆為 False（flag 欄守衛）
     for K in ("1", "2", "3"):
         assert cv["caps"][K]["all"]["scorer_used"] is False
