@@ -104,6 +104,18 @@ def test_coverage_summary_counts_steps_gaps_and_state(tmp_path, monkeypatch):
     assert cov["scan_disabled"] == "the last recorded view of the workspace is unreadable (ValueError)"
 
 
+def test_blame_report_names_the_workspace(tmp_path, monkeypatch, capsys):
+    """round 107 dogfood：blame 報告不說自己屬於哪個專案——站在別目錄用 --contract 跑，
+    靜默看到該專案的結論（trace show 同一類）。人的視圖必須帶專案路徑。"""
+    p = _proj(tmp_path, monkeypatch)
+    _add_steps(p, 1)
+    monkeypatch.chdir(tmp_path)            # 故意站在別的目錄
+    rc = cli.main(["--contract", str(p / ".vacant" / "contract.json"), "blame", f"{p / 'a.txt'}:1"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert str(p) in out, f"blame report does not name its workspace:\n{out}"
+
+
 def test_render_report_scandisabled_annotation_only_when_present():
     base = dict(blames=[], results=[], outcome=None, why_open=None)
     with_sd = F.render_report(coverage={"steps": 5, "gaps": 0, "post_missing": 0,
@@ -130,6 +142,15 @@ def test_render_report_omits_empty_check_line():
     out2 = F.render_report(blames=[b2], results=[], outcome=None,
                            coverage={"steps": 0, "gaps": 0, "post_missing": 0})
     assert "- check: assert failed: got 1, want 2" in out2
+
+
+def test_render_report_names_workspace_only_when_given():
+    """round 107 dogfood：人的報告要帶專案名；舊呼叫方（不傳 workspace）輸出不變。"""
+    base = dict(blames=[], results=[], outcome=None)
+    with_ws = F.render_report(coverage={}, workspace="/tmp/proj", **base)
+    assert "- workspace: /tmp/proj" in with_ws
+    plain = F.render_report(coverage={}, **base)
+    assert "workspace" not in plain
 
 
 def test_blame_without_contract_has_no_empty_check_line(tmp_path, monkeypatch, capsys):

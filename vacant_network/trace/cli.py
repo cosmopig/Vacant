@@ -123,6 +123,10 @@ def cmd_show(args: argparse.Namespace) -> int:
         print(f"no trace for {ws} (tracing starts when the project has a contract, or "
               f"with VACANT_TRACE=1)")
         return 0
+    # round 107 dogfood：步驟視圖不說自己是哪個專案的病歷——在錯的 cwd 跑會靜默看到別專案
+    # 的步（no-trace 訊息、verify、dashboard 都帶專案名，show 主視圖沒有）：首行帶專案路徑。
+    # 只加在人的視圖；--json 的結構不變（機器消費方不該被格式變化打破）。
+    print(f"workspace: {ws}")
     # 觀察狀態是**現在時**的事實，不是流水裡的一行（round 27 dogfood：病歷主視圖看不出來
     # 就等于沒有——blame 頁的小字不能替 show 背書）。`last_scan_disabled` 只看最後一個
     # 改變狀態的 coverage 事件：成功的 rescan（自動／手動，round 47 起）之後，之前的停用
@@ -247,7 +251,9 @@ def cmd_blame(args: argparse.Namespace) -> int:
     else:
         # 覆蓋率行照實際病歷算（round 27 摩擦 3）：這裡傳空 dict 會永遠寫
         # `recorded steps: 0`，和 `trace show` 的步數字面矛盾
-        print(F.render_report([b], [], outcome=None, coverage=F.coverage_summary(rec)), end="")
+        # workspace 行：人的視圖要帶專案名（round 107）；JSON 結構不變
+        print(F.render_report([b], [], outcome=None, coverage=F.coverage_summary(rec),
+                              workspace=str(ws)), end="")
     return 0
 
 
@@ -299,7 +305,8 @@ def cmd_flag(args: argparse.Namespace) -> int:
         print(json.dumps({"flag_id": fid, "blame": b}, ensure_ascii=False, indent=1, default=str))
     else:
         print(f"flag {fid} recorded (signed with the owner key {_keys.pub_hex(owner)[:12]}…)")
-        print(F.render_report([b], [], outcome=None, coverage=F.coverage_summary(rec)), end="")
+        print(F.render_report([b], [], outcome=None, coverage=F.coverage_summary(rec),
+                              workspace=str(ws)), end="")
     return 0
 
 

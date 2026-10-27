@@ -150,6 +150,19 @@ def test_show_survives_gc_of_the_input_blob(proj, capsys, monkeypatch):
     assert "echo hello" not in bash_line        # blob 不在 ⇒ 空白，不假裝還有
 
 
+def test_show_names_the_workspace(proj, capsys, monkeypatch):
+    """round 107 dogfood：步驟視圖不說自己是哪個專案的病歷——在錯的 cwd 跑會靜默看到
+    別專案的步（no-trace 訊息、verify、dashboard 都帶專案名；show 主視圖沒有）。
+    視圖首行必須是專案路徑，看的人才知道這是谁的病歷。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    _step(rec, "s1")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    first = out.splitlines()[0]
+    assert str(p) in first, f"trace show does not name its workspace:\n{out}"
+
+
 def test_show_json_ignores_tail(proj, monkeypatch, capsys):
     p, rec = proj
     monkeypatch.chdir(p)

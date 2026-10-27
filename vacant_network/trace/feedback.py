@@ -316,9 +316,13 @@ def coverage_summary(rec: Any) -> dict[str, Any]:
 
 def render_report(blames: list[dict[str, Any]], results: list[dict[str, Any]], *,
                   outcome: str | None, coverage: dict[str, Any], why_open: str | None = None,
-                  contract_task: str | None = None) -> str:
+                  contract_task: str | None = None, workspace: str | None = None) -> str:
     """給人的未解問題清單（Markdown）。有問題就一條一條列，**不省略**。"""
     lines = [f"# Vacant — open issues{f' for {contract_task}' if contract_task else ''}", ""]
+    if workspace:
+        # round 107 dogfood：報告不說自己屬於哪個專案——站在別目錄跑 blame／flag 會靜默
+        # 看到該專案的結論。舊呼叫方不傳 workspace：輸出與以前完全一致。
+        lines.append(f"- workspace: {workspace}")
     open_required = [r for r in results if r.get("status") != "PASS" and r.get("required", True)]
     open_advisory = [r for r in results if r.get("status") != "PASS" and not r.get("required", True)]
     lines.append(f"- outcome of the last check: **{outcome or '?'}**"

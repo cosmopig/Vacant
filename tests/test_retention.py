@@ -24,6 +24,7 @@ from vacant_network.intake import contract as C, flow, ledger
 from vacant_network.trace import capture
 from vacant_network.trace.blame import Trace
 from vacant_network.trace.recorder import Recorder
+from test_gc_rescan_cycle import _store_bytes as _store_total  # noqa: E402
 
 
 @pytest.fixture
@@ -155,10 +156,16 @@ def test_compact_trace_keeps_active_project_live_blobs(env):
     ok, msg = rec.verify()
     assert ok, msg
 
-    # whack-a-mole 消失：下一次增量掃描不會重存（store 不變）
+    # whack-a-mole 消失：gc 沒有回收（files_removed==0），下一次掃描無從重存；
+    # 保留的 blob 也必須仍可在下一次掃描後取回。
+    # round 95 原寫法用「總位元組不變」斷言——但每一步都記**自己**的 input blob，
+    # 這一步的輸入和上一步不同（Write 帶 content，Read 不帶），必然多一個新 blob；
+    # 「重存」在內容定址下本就無從以終態位元組區分（重存＝同 sha 同位元組），
+    # 真正的釘鎖是上面的 files_removed==0。
+    kept = {f.name for f in rec.blobs.root.rglob("*") if f.is_file()}
     _step(proj, 2, "Read", {"file_path": str(proj / "app.py")})
-    assert _store_total(rec) == baseline, (
-        "gc 保留的 blob 被下一次掃描重存：whack-a-mole 仍在")
+    now = {f.name for f in rec.blobs.root.rglob("*") if f.is_file()}
+    assert kept <= now, "gc 保留的 blob 在下一次掃描後遺失：whack-a-mole 仍在"
 
 
 def test_compact_quarantine_preserves_released_and_ledger_integrity(env):
