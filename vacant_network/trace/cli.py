@@ -71,6 +71,30 @@ def _rel(ws: pathlib.Path, path: str) -> str:
         raise SystemExit(f"vacant: {path} is not inside the project {ws}") from None
 
 
+def _fmt_clock(ts_ms: Any) -> str:
+    """`ts_ms`（epoch ms）→ 本地 `HH:MM:SS`；缺或壞 → 空字串（舊條目照樣印，round 122）。"""
+    try:
+        return time.strftime("%H:%M:%S", time.localtime(ts_ms / 1000))
+    except (TypeError, ValueError, OverflowError, OSError):
+        return ""
+
+
+def _fmt_dur(ms: Any) -> str:
+    """步的耗時 ms → `737ms`／`12s`／`12.4s`／`2m03s`；缺或壞 → 空字串（舊條目沒有
+    `wall_ms`，本專案 41/6816 步）。"""
+    try:
+        ms = int(ms)
+    except (TypeError, ValueError):
+        return ""
+    if ms < 0:
+        return ""
+    if ms < 1000:
+        return f"{ms}ms"
+    if ms < 60_000:
+        return f"{ms / 1000:.1f}s".replace(".0s", "s")
+    return f"{ms // 60_000}m{ms % 60_000 // 1000:02d}s"
+
+
 def _input_preview(rec: Recorder, e: dict, limit: int = 64) -> str:
     """一步的工具輸入，取一行預覽（從物件庫）。沒有就回空字串。
 
@@ -163,7 +187,14 @@ def cmd_show(args: argparse.Namespace) -> int:
             flags = [k for k in ("denied", "post_missing", "pre_missing") if e.get(k)]
             if e.get("concurrent_with"):
                 flags.append("concurrent")
-            print(f"{e.get('n', '?'):>4}  {who:<28} {e.get('tool', '?'):<14} {w}"
+            # round 122 dogfood：行以前只有「誰、用什麼工具、對哪個檔」——沒有「什麼時候」
+            # 也沒有「花了多久」，兩者在記錄裡都有（ts_ms/wall_ms），要看只能轉 --json 自己換算。
+            # 舊條目缺欄位就省掉該段（_fmt_* 回空），不崩潰、不印 None。
+            clock = _fmt_clock(e.get("ts_ms"))
+            dur = _fmt_dur(e.get("wall_ms"))
+            print(f"{e.get('n', '?'):>4}  " + (f"{clock}  " if clock else "")
+                  + f"{who:<28} {e.get('tool', '?'):<14} {w}"
+                  + (f"  ({dur})" if dur else "")
                   + (f"  [{', '.join(flags)}]" if flags else "")
                   + (f"  error: {str(e['error'])[:60]}" if e.get("error") else "")
                   # round 117 dogfood：`error` 常只有一句 `tool reported an error`，真正的文字

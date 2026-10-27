@@ -11,11 +11,15 @@
    ——行沒有內容、看不出那步做了什麼（第 92 輪 dogfood）。工具輸入（實際做了什麼）
    存在物件庫裡；沒有歸屬寫入的步，show 印它的一行預覽。blob 被 gc 掉就退回空白行，
    `show` 永遠不因這個失敗（本專案 5094 個輸入 blob 已有 4930 個被 gc）。
+4. 步的視圖行沒有「什麼時候」也沒有「花了多久」——兩者在記錄裡都有（`ts_ms`／`wall_ms`），
+   要看只能轉 `--json` 自己換算（round 122 dogfood）。人看的視圖直接印本地時間與耗時；
+   舊條目缺欄位（本專案 41/6816 步沒有 `wall_ms`）就省掉該段，不崩潰。
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 
 import pytest
 
@@ -185,6 +189,48 @@ def test_show_prints_no_preview_for_a_clean_step(proj, capsys, monkeypatch):
     assert cli.cmd_show(_args()) == 0
     out = capsys.readouterr().out
     assert "[out:" not in out and "error:" not in out
+
+
+def test_show_prints_step_time_and_duration(proj, capsys, monkeypatch):
+    """round 122 dogfood：步的視圖行沒有「什麼時候」也沒有「花了多久」——兩者在記錄裡都有
+    （`ts_ms`／`wall_ms`），要看只能轉 `--json` 自己換算。人看的視圖直接印出來。
+    時區是本地時間（給人的視圖，不是 wire 格式）。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    actor = R.Actor("pi", "s1")
+    rec.pre("b1", actor, "bash", {"command": "echo hello"})
+    rec.post("b1", actor, "bash", {"command": "echo hello"}, "hello\n")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    bash_line = next(l for l in out.splitlines() if "bash" in l)
+    assert re.search(r"\b\d{2}:\d{2}:\d{2}\b", bash_line), f"no time on step line:\n{out}"
+    assert re.search(r"\(\d+ms\)", bash_line), f"no duration on step line:\n{out}"
+
+
+def test_show_time_survives_missing_fields(proj, capsys, monkeypatch):
+    """舊條目可能沒有 `wall_ms`（本專案 41/6816 步）或 `ts_ms`：行照印、缺哪個省哪個，
+    不崩潰、不印 None。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    _step(rec, "s1")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    assert "None" not in out
+    step_line = next(l for l in out.splitlines() if "bash" in l)
+    assert re.search(r"\b\d{2}:\d{2}:\d{2}\b", step_line)   # ts_ms 現在一定有
+
+
+def test_fmt_clock_and_dur_unit():
+    assert cli._fmt_clock(None) == ""
+    assert cli._fmt_clock(0) == "" or re.fullmatch(r"\d{2}:\d{2}:\d{2}", cli._fmt_clock(0))
+    assert re.fullmatch(r"\d{2}:\d{2}:\d{2}", cli._fmt_clock(1793141380703))
+    assert cli._fmt_dur(None) == ""                          # 舊條目沒有 wall_ms
+    assert cli._fmt_dur("") == ""
+    assert cli._fmt_dur(0) == "0ms"
+    assert cli._fmt_dur(737) == "737ms"
+    assert cli._fmt_dur(12000) == "12s"
+    assert cli._fmt_dur(12400) == "12.4s"
+    assert cli._fmt_dur(123000) == "2m03s"
 
 
 def test_show_json_ignores_tail(proj, monkeypatch, capsys):
