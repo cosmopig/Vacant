@@ -29,6 +29,15 @@ def test_unknown_word_gets_subcommand_hint(capsys):
         assert sub in text, f"提示缺子指令 {sub!r}"
 
 
+def test_flag_is_pointed_to_the_top_level_command(capsys):
+    """round 117 dogfood：`flag` 是頂層指令（`vacant trace --help` 的「人指出錯處：vacant flag」
+    很容易被讀成 `vacant trace flag`）。它不存在時，提示必須指回真正的形態，
+    而不是把它當成打錯的病歷子指令。"""
+    rc, text = _run("flag", capsys)
+    assert rc == 1
+    assert "vacant flag <file>:<line>" in text
+
+
 def test_path_like_name_keeps_plain_error(capsys):
     rc, text = _run("/no/such/dir/wire.jsonl", capsys)
     assert rc == 1

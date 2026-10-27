@@ -69,6 +69,24 @@ DELTA_MIN_FILES = 1000
 #: 事件裡直接列出的清單上限；超過的整份存進版本庫，事件帶它的 sha256（鏈上每筆有 64KB 上限）
 INLINE_LIST = 64
 _LIST_KEYS = ("writes", "reads", "changes")
+#: 失敗步的錯誤預覽多長：留在簽名條目裡（不是 blob），gc 之後還在；夠看到「為什麼」，
+#: 不夠塞進每一步的簽名裡浪費空間。
+ERROR_PREVIEW_LIMIT = 160
+
+
+def error_preview(output: Any, limit: int = ERROR_PREVIEW_LIMIT) -> str | None:
+    """失敗步的錯誤預覽：輸出最後一非空行（空白正規化、截到 limit）。
+
+    平台回報的 `error` 常常只有一句 `tool reported an error`（pi 只報 `is_error`），
+    真正的文字在輸出 blob 裡；blob 會被 gc 掉，條目不會。取最後一行是因為錯誤
+    文字（例外、`Error:`、`FAILED`）慣常落在輸出結尾——和 evidence 層取法一致。"""
+    if not isinstance(output, str):
+        return None
+    for ln in reversed(output.strip().splitlines()):
+        ln = " ".join(ln.split())
+        if ln:
+            return ln[:limit]
+    return None
 
 
 def _fit(payload: dict[str, Any], blobs: W.Blobs) -> dict[str, Any]:
@@ -645,6 +663,7 @@ class Recorder:
                 "reads": [r.to_json() for r in (reads or [])],
                 "writes": [c.to_json() for c in changes],
                 "output_blob": out_blob, "error": (error or "")[:500] or None,
+                "error_preview": (error_preview(output) if error else None),
                 "pre_index": base_sha, "post_index": idx_sha if idx is not None else None,
                 "concurrent_with": (pend or {}).get("concurrent_with") or [],
                 "pre_missing": pend is None, "baseline_missing": base_sha is None,

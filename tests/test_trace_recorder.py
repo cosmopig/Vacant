@@ -111,6 +111,49 @@ def test_tampering_with_the_chain_is_detected(env):
     assert not ok and "does not verify" in why
 
 
+def test_failed_step_keeps_a_short_error_preview_in_the_signed_entry(env):
+    """round 117 dogfood：pi 的失敗步只記 `error: tool reported an error`，真正的錯誤文字
+    在輸出 blob 裡；blob 會被 gc 掉（本機 5094 個輸入 blob 已 4930 個被 gc），錯誤原因
+    就永久只剩一句話。入口（簽名條目）裡要留一短段預覽，gc 之後還在。"""
+    ws, rec = env
+    rec.pre("t1", MAIN, "Bash", {"command": "pytest"})
+    out = "collected 3 items\nFAILED tests/test_x.py::test_y\nValueError: boom\n"
+    e = rec.post("t1", MAIN, "Bash", {"command": "pytest"}, out,
+                 error="tool reported an error")
+    assert e["error"] == "tool reported an error"
+    assert e["error_preview"] == "ValueError: boom"    # 最後一非空行，空白正規化
+    # 預覽在簽名條目裡、不在 blob 裡：blob 被 gc 掉之後，重新讀鏈還在
+    import os
+    blob_path = ws.parent / "vh" / "trace" / "objects" / e["output_blob"][:2] / e["output_blob"]
+    os.unlink(blob_path)
+    fresh = [x for x in rec.events() if x.get("type") == "step" and x.get("step") == "t1"][0]
+    assert fresh["error_preview"] == "ValueError: boom"
+    ok, why = rec.verify()
+    assert ok, why
+
+
+def test_error_preview_bounds_and_absent_cases(env):
+    ws, rec = env
+    rec.pre("t1", MAIN, "Bash", {})
+    long_line = "x" * 500
+    e1 = rec.post("t1", MAIN, "Bash", {}, long_line, error="tool failed")
+    assert e1["error_preview"] == "x" * 160             # 截到 160
+    rec.pre("t2", MAIN, "Bash", {})
+    e2 = rec.post("t2", MAIN, "Bash", {}, "  tab\t\tline\n\n", error="tool failed")
+    assert e2["error_preview"] == "tab line"            # 空白正規化
+    rec.pre("t3", MAIN, "Bash", {})
+    e3 = rec.post("t3", MAIN, "Bash", {}, "fine output")   # 沒有錯誤 ⇒ 沒有預覽
+    assert e3["error"] is None and e3["error_preview"] is None
+    rec.pre("t4", MAIN, "Bash", {})
+    e4 = rec.post("t4", MAIN, "Bash", {}, None, error="PostToolUseFailure: exit 1")
+    assert e4["error"] and e4["error_preview"] is None  # 輸出為 None（claude 形狀）
+    rec.pre("t5", MAIN, "Bash", {})
+    e5 = rec.post("t5", MAIN, "Bash", {}, {"type": "err"}, error="tool failed")
+    assert e5["error_preview"] is None                  # 非文字輸出：不硬造預覽
+    ok, why = rec.verify()
+    assert ok, why
+
+
 def test_vacant_state_dir_inside_workspace_is_not_traced(tmp_path, monkeypatch):
     ws = tmp_path / "ws"
     monkeypatch.setenv("VACANT_HOME", str(ws / ".vh"))

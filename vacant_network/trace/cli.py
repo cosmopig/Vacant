@@ -165,7 +165,11 @@ def cmd_show(args: argparse.Namespace) -> int:
                 flags.append("concurrent")
             print(f"{e.get('n', '?'):>4}  {who:<28} {e.get('tool', '?'):<14} {w}"
                   + (f"  [{', '.join(flags)}]" if flags else "")
-                  + (f"  error: {str(e['error'])[:60]}" if e.get("error") else ""))
+                  + (f"  error: {str(e['error'])[:60]}" if e.get("error") else "")
+                  # round 117 dogfood：`error` 常只有一句 `tool reported an error`，真正的文字
+                  # 在 blob（會 gc）；入口留了短預覽（`error_preview`），印出來才看得懂為什麼。
+                  # 舊條目沒有這個欄位：不印，不報錯。
+                  + (f"  [out: {str(e['error_preview'])[:80]}]" if e.get("error_preview") else ""))
         elif t == "unrecorded_change":
             print(f"   ·  GAP ({e.get('observed_at')}): "
                   + ", ".join(c["path"] for c in (e.get("changes") or [])[:6]))

@@ -163,6 +163,30 @@ def test_show_names_the_workspace(proj, capsys, monkeypatch):
     assert str(p) in first, f"trace show does not name its workspace:\n{out}"
 
 
+def test_show_prints_the_error_preview_of_a_failed_step(proj, capsys, monkeypatch):
+    """round 117 dogfood：失敗步的 `trace show` 行只有一句 `error: tool reported an error`，
+    真正的原因在 blob（會 gc）。入口裡留了短預覽，show 必須印出來。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    rec.pre("s1", R.Actor("pi", "s1"), "bash", {})
+    rec.post("s1", R.Actor("pi", "s1"), "bash", {},
+             "collected 3 items\nFAILED tests/test_x.py::test_y\nValueError: boom\n",
+             error="tool reported an error")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    assert "error: tool reported an error" in out
+    assert "[out: ValueError: boom]" in out, f"preview not shown:\n{out}"
+
+
+def test_show_prints_no_preview_for_a_clean_step(proj, capsys, monkeypatch):
+    p, rec = proj
+    monkeypatch.chdir(p)
+    _step(rec, "s1")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    assert "[out:" not in out and "error:" not in out
+
+
 def test_show_json_ignores_tail(proj, monkeypatch, capsys):
     p, rec = proj
     monkeypatch.chdir(p)

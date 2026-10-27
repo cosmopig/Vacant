@@ -1052,9 +1052,17 @@ def cmd_trace(args: argparse.Namespace) -> int:
         # round 17 dogfood：打錯子指令（如 `vacant trace overview`）時這裡是唯一的
         # 回饋。名字不像路徑（不含 `/`）就指回病歷子指令；像路徑的維持單純錯誤。
         if "/" not in str(args.file):
-            print("病歷子指令：vacant trace show / verify / report / actors / blame "
-                  "（`vacant trace <wire.jsonl>` 只用於 tee-proxy 的記錄檔）",
-                  file=sys.stderr)
+            # round 117 dogfood：`flag` 是頂層指令（`vacant trace --help` 的「人指出錯處：
+            # vacant flag」很容易被讀成 `vacant trace flag`）：指回真正的形態，
+            # 不要把它當成打錯的病歷子指令。
+            if str(args.file) == "flag":
+                print("flag 是頂層指令：vacant flag <file>:<line>"
+                      "（病歷子指令：vacant trace show / verify / report / actors / blame）",
+                      file=sys.stderr)
+            else:
+                print("病歷子指令：vacant trace show / verify / report / actors / blame "
+                      "（`vacant trace <wire.jsonl>` 只用於 tee-proxy 的記錄檔）",
+                      file=sys.stderr)
         return 1
     print(f"== MCP trace: {path} ==  (★=對 vacant 工具的呼叫/回覆)")
     pending: dict = {}      # JSON-RPC id → 工具名（標記回覆）
