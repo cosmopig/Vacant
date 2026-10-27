@@ -114,3 +114,13 @@
   測試：`tests/test_vacant_run.py`、`tests/test_vacant_run_retry.py`。
 - 候選 2（擴充零設定證據檢查）擋門與「換一種訊號」的由來：`decisions/DECISION_20260926_BIGGER_EFFECT_REVIEW.md` §二／§七／§九。
 - 零設定證據檢查（`test_claim`／`failed_step`，候選 2 所擴充者）的交件時測試：`tests/test_zero_evidence.py`。
+
+## AMEND1（round 111，2026-10-27）— 移除與本決策矛盾的「第二把尺」
+
+- round 23（`b4db1dfd`）曾另寫 `ops/eval/c37_offline_restart_sim.py`（及其 test）：flag-restart 列改為
+  「前 cap 格任一 findings 為空即成功」（不看該跑是否過）＝同檔庫算出 97.1%（對本檔 66.4%，差 30pp）；
+  且把 cell 的 C37/C37R 實驗系列當「suite」，使「可見測試＝評分器」守則（polyglot_py）永不命中；其
+  docstring 自稱「唯一正典版」、稱本檔指定的 ref 工具「只是 shim」，均與事實相反。round 111 判定本檔
+  （ref 工具 `~/dev/ops/ref/offline_restart_sim.py` ＋ repo 副本 `ops/realrun/offline_real_signal_replay.py`）
+  為準，**刪除該第二實現與其 test**（repo commit，git 可還原）；本檔數字與引用口徑不變。
+  若日後重現該類工具，先與本檔 §3 數字逐欄對齊，否則不得標「可引用」。
