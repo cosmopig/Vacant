@@ -53,19 +53,21 @@ class Agent:
         hook.handle("claude", "UserPromptSubmit",
                     {"session_id": self.s, "cwd": str(self.p), "prompt": text})
 
-    def step(self, tool, inp, output=None, error=False):
+    def step(self, tool, inp, output=None, error=False, effect=None):
         self.n += 1
         pre = {"session_id": self.s, "cwd": str(self.p), "tool_name": tool,
                "tool_use_id": f"t{self.n}", "tool_input": inp}
         hook.handle("claude", "PreToolUse", pre)
+        if effect is not None:
+            effect()                     # 工具副作用：Pre → 落盤 → Post（與 recorder 的 diff 對齊）
         post = {**pre, "tool_response": output if output is not None else {}}
         if error:
             post["is_error"] = True
             post["error"] = error if isinstance(error, str) else "err"
         hook.handle("claude", "PostToolUseFailure" if error else "PostToolUse", post)
 
-    def bash(self, cmd, stdout=""):
-        self.step("Bash", {"command": cmd}, {"stdout": stdout, "stderr": ""})
+    def bash(self, cmd, stdout="", effect=None):
+        self.step("Bash", {"command": cmd}, {"stdout": stdout, "stderr": ""}, effect=effect)
 
     def read(self, rel):
         f = self.p / rel
@@ -73,9 +75,9 @@ class Agent:
 
     def write(self, rel, content):
         f = self.p / rel
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(content)
-        self.step("Write", {"file_path": str(f), "content": content}, {})
+        self.step("Write", {"file_path": str(f), "content": content}, {},
+                  effect=lambda: (f.parent.mkdir(parents=True, exist_ok=True),
+                                  f.write_text(content)))
 
     def stop(self, last_msg="Done."):
         out, err, code = hook.handle("claude", "Stop",
@@ -139,7 +141,8 @@ def test_lfake_two_urls_one_touched_only_reports_the_other(env):
     a = Agent(p)
     a.ask("下載 https://a.example.com/one.csv 和 https://b.example.com/two.csv，"
           "合併後寫入 merged.csv。")
-    a.bash("curl -fsS https://a.example.com/one.csv -o one.csv", "item,amount")
+    a.bash("curl -fsS https://a.example.com/one.csv -o one.csv", "item,amount",
+           effect=lambda: (p / "one.csv").write_text("item,amount\none,1\n", encoding="utf-8"))
     a.read("one.csv")
     a.write("merged.csv", "item,amount\napple,30\n")
     a.stop("已合併兩份資料寫入 merged.csv。")
@@ -189,8 +192,8 @@ def test_url_touched_by_curl_not_caught(env):
     p = _proj(env, "u6_fetched")
     a = Agent(p)
     a.ask("請下載 https://example.com/data.csv，整理後寫入 report.csv 交回。")
-    a.bash("curl -fsS https://example.com/data.csv -o raw.csv", "item,amount")
-    p.join("raw.csv").write_text("item,amount\napple,30\n", encoding="utf-8")  # curl 的產物
+    a.bash("curl -fsS https://example.com/data.csv -o raw.csv", "item,amount",
+           effect=lambda: (p / "raw.csv").write_text("item,amount\napple,30\n", encoding="utf-8"))
     a.read("raw.csv")
     a.write("report.csv", "item,amount\napple,30\n")
     a.stop("已下載並整理成 report.csv，交回。")
@@ -242,8 +245,8 @@ def test_www_prefix_stripped_in_key(env):
     p = _proj(env, "u10_www")
     a = Agent(p)
     a.ask("請下載 https://www.example.com/data，整理後寫入 report.csv 交回。")
-    a.bash("curl -fsS https://example.com/data -o raw.csv", "item,amount")
-    p.join("raw.csv").write_text("item,amount\napple,30\n", encoding="utf-8")  # curl 的產物
+    a.bash("curl -fsS https://example.com/data -o raw.csv", "item,amount",
+           effect=lambda: (p / "raw.csv").write_text("item,amount\napple,30\n", encoding="utf-8"))
     a.read("raw.csv")
     a.write("report.csv", "item,amount\napple,30\n")
     a.stop("已下載並整理成 report.csv。")
