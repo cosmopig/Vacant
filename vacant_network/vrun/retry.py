@@ -127,6 +127,7 @@ from __future__ import annotations
 
 import hashlib
 import pathlib
+import re
 import shutil
 
 from ..memory import assert_ks1_clean
@@ -194,22 +195,138 @@ def render_feedback(block: str, *, attempt: int, max_attempts: int) -> str:
     return assert_ks1_clean(text)
 
 
+#: v5 hint 的投遞稽核（`ops/realrun/hint_diagnostic_loss.py`）：舊版
+#: `ln[:120]` 頭截斷在 85/86 份真實 hint 上把診斷內容（失敗測試名、
+#: AssertionError 的實際值）截掉了——模型收到「有東西失敗了」，收不到
+#: 「什麼失敗了」。v2 在**同一個 380B 預算**內只改內容選擇：診斷事實
+#: 優先、样板行（Traceback 頭、完整路徑）讓位。
+_HINT_BUDGET_BYTES = 380
+
+
+def _hint_tokens(failures: str) -> list[str]:
+    """把失敗原文切成候選行：換行、以及可見套件把 traceback 用 ` | ` 黏起來的假行。"""
+    toks: list[str] = []
+    for raw in re.split(r"\n|\s\|\s", failures or ""):
+        t = raw.strip()
+        if t and t not in toks:
+            toks.append(t)
+    return toks
+
+
+def _hint_facts(failures: str) -> list[tuple[int, str]]:
+    """高價值短事實：錯誤類型+訊息、失敗測試名、N/M 摘要。
+
+    這些是模型要據以修正的東西；v1 的 `ln[:120]` 恰恰把這些截掉。
+    """
+    facts: list[tuple[int, str]] = []
+    seen: set[str] = set()
+
+    def add(score: int, text: str) -> None:
+        text = text.strip()
+        if text and text not in seen and len(text.encode("utf-8")) <= 120:
+            seen.add(text)
+            facts.append((score, text))
+
+    m = re.search(r"((?:\w*Error):[^|\n]*)", failures)
+    if m:
+        add(8, m.group(1))
+    names = 0
+    for name in dict.fromkeys(re.findall(r"\bin (test_\w+)", failures)):
+        add(7, f"failed test: {name}")
+        names += 1
+        if names >= 2:
+            break
+    m = re.search(r"(\d+/\d+[\w ]*tests? failed|\d+ passed, \d+ failed|\d+ failed)", failures)
+    if m:
+        add(6, m.group(1))
+    return facts
+
+
+def _hint_score(tok: str) -> int:
+    # 样板先判，否則 File 行裡的 `in test_xxx` 會把它抬上去
+    if tok.startswith("Traceback (most recent call last):") or tok.startswith('File "'):
+        return 0                      # Traceback 頭、完整路徑：讓位
+    if re.search(r"\b\w*Error\b\s*:", tok):
+        return 6                      # 錯誤類型+訊息行
+    if re.search(r"\d+/\d+.*?failed|\d+ failed|\bFAILED\b", tok):
+        return 5                      # N/M 摘要
+    if re.search(r"\bin test_\w+\b", tok) or re.search(r"\bassert\b", tok):
+        return 4                      # 點名失敗測試 / assert 式
+    if re.search(r"[=(){}\[\]]", tok):
+        return 3                      # 像來源碼的行
+    if re.search(r"\b\w*Error\b", tok):
+        return 2                      # 來源碼裡提到 Error（無訊息）
+    return 1
+
+
+def _hint_fit(tok: str, cap_bytes: int) -> str:
+    """把一條候選行壓進 `cap_bytes`：有錯誤標記就以其為錨取窗口，否則取頭。
+
+    按 **bytes** 收（中文明錯誤訊息下字元截斷會超預算）；不切半個 UTF-8 字元。
+    """
+    b = tok.encode("utf-8")
+    if len(b) <= cap_bytes:
+        return tok
+    m = re.search(r"\b\w*Error\b\s*:|\bassert\b|\bin test_\w+\b", tok)
+    if m:
+        off = len(tok[: m.start()].encode("utf-8"))
+        start = max(0, off - cap_bytes // 4)
+        while start < len(b) and (b[start] & 0xC0) == 0x80:   # 對齊字元邊界
+            start += 1
+        chunk = b[start:start + cap_bytes]
+    else:
+        chunk = b[:cap_bytes]
+    return chunk.decode("utf-8", errors="ignore").rstrip()
+
+
+def _hint_redundant(tok: str, picked: list[str]) -> bool:
+    words = [w for w in re.split(r"\s+", tok) if w]
+    if not words:
+        return True
+    have: set[str] = set()
+    for p in picked:
+        have.update(re.split(r"\s+", p))
+    # 0.8 而不是 0.5：`3 != 2` 對 `2 != 1` 是 75% 重疊，但那是另一題的診斷，要保
+    return sum(1 for w in words if w in have) / len(words) >= 0.8
+
+
 def render_fresh_hint(failures: str, *, attempt: int, max_attempts: int) -> str:
-    """極簡失敗記憶（<= 400 bytes）：只擷取關鍵失敗訊息，提醒下一次全新嘗試避開此坑。"""
-    lines = [ln.strip() for ln in failures.splitlines() if ln.strip()]
-    key_lines = []
-    for ln in lines:
-        if any(k in ln for k in ("FAIL:", "FAILED", "AssertionError", "Error:", "error:", "assert ")):
-            key_lines.append(ln[:120])
-            if len(key_lines) >= 3:
-                break
-    if not key_lines and lines:
-        key_lines = [lines[0][:120]]
-    hint_body = "\n".join(key_lines) or "Previous attempt did not pass visible test assertions."
-    text = (f"<!-- Attempt {attempt} failed; workspace restored to clean origin -->\n"
-            f"Previous attempt failed acceptance check:\n{hint_body}\n"
-            f"Avoid this failure in your clean implementation.")
-    return assert_ks1_clean(text[:380])
+    """fresh_hint 臂的提示：乾淨重抽 + 一份短提示（v2，round 96）。
+
+    預算與 v5 相同（≤380 bytes），內容選擇改過：診斷事實（錯誤類型+
+    訊息、失敗測試名、N/M 摘要）優先入場，样板行讓位。v5 的頭截斷把
+    85/86 份真實 hint 的診斷內容截掉（`ops/realrun/hint_diagnostic_loss.py`）。
+    內容仍只來自 `failures`（**可見**驗收的渲染結果，呼叫端保證不混入
+    隱藏測試——A4）。KS-1 把關照舊：KS1Violation 由 launcher 接住判
+    infra_void（那一格沒有量到任何東西）。
+    """
+    header = f"<!-- Attempt {attempt} failed; workspace restored to clean origin -->\n"
+    lead = "Previous attempt failed acceptance check:\n"
+    tail = "Avoid this failure in your clean implementation."
+    overhead = len((header + lead + tail + "\n").encode("utf-8"))
+    budget = max(80, _HINT_BUDGET_BYTES - overhead)
+
+    picks = _hint_facts(failures or "")
+    for tok in _hint_tokens(failures or ""):
+        picks.append((_hint_score(tok), tok))
+    picks.sort(key=lambda p: -p[0])          # 穩定排序：同分保持事實/原文順序
+
+    body_lines: list[str] = []
+    used = 0
+    cap = min(120, budget)
+    for score, tok in picks:
+        if score <= 0 or _hint_redundant(tok, body_lines):
+            continue
+        line = _hint_fit(tok, cap)
+        b = len(line.encode("utf-8")) + (1 if body_lines else 0)   # 連行續字元一起算
+        if used + b <= budget or not body_lines:
+            body_lines.append(line)
+            used += b
+        if used >= budget:
+            break
+    body = "\n".join(body_lines) or "Previous attempt did not pass visible test assertions."
+    text = header + lead + body + "\n" + tail
+    return assert_ks1_clean(text[: _HINT_BUDGET_BYTES])
 
 
 def write_feedback(workspace: pathlib.Path, text: str) -> dict:

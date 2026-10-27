@@ -1,0 +1,33 @@
+{
+ "schema": "vacant.audit/v5_hint_diagnostic_loss/1",
+ "arm": "C_fresh_hint3",
+ "roots": [
+  "/home/user1/dev/ops/realrun/runs_v5_r1",
+  "/home/user1/dev/ops/realrun/runs_v5_r2",
+  "/home/user1/dev/ops/realrun/runs_v5_r3"
+ ],
+ "n_hints": 0,
+ "kept": 0,
+ "lost_tail": 0,
+ "loss_rate": null,
+ "purpose": "descriptive measurement of diagnostic-tail loss in v5 fresh_hint; boundary condition for the UNRESOLVED verdict; motivates v6 prereg",
+ "out_of_prereg": true,
+ "decision_state": null,
+ "per_root": [
+  {
+   "root": "/home/user1/dev/ops/realrun/runs_v5_r1",
+   "cells": {},
+   "n_cells": 0
+  },
+  {
+   "root": "/home/user1/dev/ops/realrun/runs_v5_r2",
+   "cells": {},
+   "n_cells": 0
+  },
+  {
+   "root": "/home/user1/dev/ops/realrun/runs_v5_r3",
+   "cells": {},
+   "n_cells": 0
+  }
+ ]
+}
