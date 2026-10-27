@@ -263,6 +263,131 @@ def _declared_from_source(source: bytes) -> list[str]:
     return ["main"] if any(n.name == "main" for n in fns) else []
 
 
+# ── L2 方言偵測（DECISION_20261025_VISIBLE_SUITE_DIALECTS §4.2）───────────
+# 純函數、只讀語法樹、不執行。分類發生在任何候選碼跑起來之前，所以候選碼
+# 改不到分類結果。四個值：check / unittest / mixed / none。設計是 fail-closed：
+# 認不出來的（none）與兩套語義混在一起的（mixed）都不該被當成「能照現行
+# driver 跑」的檔案——那是 driver 分支的事，這裡只負責誠實地說它是哪一類。
+
+DIALECT_CHECK = "check"
+DIALECT_UNTEST = "unittest"
+DIALECT_MIXED = "mixed"
+DIALECT_NONE = "none"
+
+
+def _ast_of(source: bytes):
+    try:
+        return ast.parse(source.decode("utf-8"))
+    except (SyntaxError, ValueError, UnicodeDecodeError):
+        return None
+
+
+def _top_level_functions(tree) -> list:
+    return [n for n in tree.body
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+
+
+def _has_check_signal(tree) -> bool:
+    """頂層有 `def check_*`（含 async）或 `def main` ＝ check 方言的形狀。
+
+    與現行 `_declared_from_source` 的判據對齊：先 check_*，沒有才看 main。
+    """
+    fns = _top_level_functions(tree)
+    if any(n.name.startswith("check_") for n in fns):
+        return True
+    return any(n.name == "main" for n in fns)
+
+
+def _base_is_unittest_case(base) -> bool:
+    """一個 base 是否指向 `unittest.TestCase`。
+
+    兩種合法寫法都認：`class X(unittest.TestCase)`（Attribute）與
+    `from unittest import TestCase` 後的 `class X(TestCase)`（Name）。
+    設計 §4.2 的判據是「`class … (unittest.TestCase)` 子類」；`from-import`
+    那一支是它明確涵蓋的「含 `from unittest import …`」的執行形態。
+    """
+    if isinstance(base, ast.Attribute):
+        return base.attr == "TestCase"
+    if isinstance(base, ast.Name):
+        return base.id == "TestCase"
+    return False
+
+
+def _has_unittest_class(tree) -> bool:
+    """頂層有 `class …(unittest.TestCase)` 子類（只認頂層，與 check 方言對齊）。"""
+    return any(
+        isinstance(n, ast.ClassDef)
+        and any(_base_is_unittest_case(b) for b in n.bases)
+        for n in tree.body)
+
+
+def _has_unittest_import(tree) -> bool:
+    """頂層有 `import unittest`（含 `import unittest as x`）或 `from unittest import …`。"""
+    for n in tree.body:
+        if isinstance(n, ast.Import):
+            if any(a.name == "unittest" for a in n.names):
+                return True
+        elif isinstance(n, ast.ImportFrom):
+            if n.module == "unittest":
+                return True
+    return False
+
+
+def classify_dialect(source: bytes) -> str:
+    """L2 方言偵測：靜態、只讀語法樹、四值（`check`/`unittest`/`mixed`/`none`）。
+
+    判據（頂層，與現行 check 方言「只認頂層」對齊）：
+      - `check`    頂層有 `def check_*` 或 `def main`
+      - `unittest` 有 `import unittest`（含 `from unittest import …`）**且**
+                   頂層有 `class …(unittest.TestCase)` 子類
+      - `mixed`    兩套語義都在——**顯式失敗**的候選（driver 不猜、不拆半跑）
+      - `none`     都沒有（含 `test_utils.py` 這種工具檔）
+    語法錯誤 ⇒ `none`（不猜；driver import 時會自己報 `import` 失敗）。
+
+    純函數、不執行：分類與宣告都發生在任何候選碼跑起來之前。
+    """
+    tree = _ast_of(source)
+    if tree is None:
+        return DIALECT_NONE
+    has_check = _has_check_signal(tree)
+    has_unittest = _has_unittest_import(tree) and _has_unittest_class(tree)
+    if has_check and has_unittest:
+        return DIALECT_MIXED
+    if has_check:
+        return DIALECT_CHECK
+    if has_unittest:
+        return DIALECT_UNTEST
+    return DIALECT_NONE
+
+
+def declared_unittest_cases(source: bytes) -> list[str]:
+    """unittest 方言的**宣告清單**：頂層 `TestCase` 子類的每個 `test*` 方法，
+    記 `ClassName.method`（與 `_declared_from_source` 同形：只讀語法樹、不執行、
+    依定義順序、去重）。
+
+    這是對帳（`_reconcile`）的分母來源：宣告了沒跑、跑了沒宣告、重複——任一
+    即該檔失敗；零案例的檔案＝失敗，不是「空＝過」（I-4）。設計 §4.3 的
+    宣告清單就是這份。`setUp`/`tearDown`/非 `test*` 方法不列入（不是 case）。
+    語法錯誤 ⇒ 空清單。
+    """
+    tree = _ast_of(source)
+    if tree is None:
+        return []
+    out: list[str] = []
+    for n in tree.body:
+        if not isinstance(n, ast.ClassDef):
+            continue
+        if not any(_base_is_unittest_case(b) for b in n.bases):
+            continue
+        for m in n.body:
+            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                    and m.name.startswith("test"):
+                name = f"{n.name}.{m.name}"
+                if name not in out:
+                    out.append(name)
+    return out
+
+
 def _parse_records(stdout: str, nonce: str) -> tuple[list[dict], dict | None]:
     """把 driver 的輸出分成 case 紀錄與結束標記。"""
     cases: list[dict] = []
