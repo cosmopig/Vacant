@@ -149,6 +149,38 @@ def test_task_table_shows_decisions(env, server):
     assert "決策".encode() in body, "表頭沒有「決策」欄"
 
 
+# ── 任務帳本的鏈驗證 ──────────────────────────────────────────────
+# round 112 dogfood（本輪焦點：trace/dashboard 找摩擦）：CLI `vacant task report`
+# 每則任務都驗鏈並印 `ledger=ok/BROKEN`，但儀表板 tasks() 叫 report() 時不傳
+# trust——任務表把鏈上讀出的狀態（state/嘗試/決策）照樣顯示，鏈本身有沒有驗過
+# 完全看不出來：一則被動過的帳本在面板上還是「open、一切正常」。讀端修：
+# report(trust=…) 驗過後把 ledger_ok/ledger_note 帶進 JSON，模板加「鏈」欄。
+
+def test_tasks_json_carries_the_ledger_chain_verdict(env):
+    from vacant_network.intake.ledger import Ledger
+    led = Ledger("t_chain")
+    led.append("task_opened", {"contract_sha256": "c" * 64})
+    row = [x for x in SB.tasks()["tasks"] if x["task_id"] == "t_chain"][0]
+    assert row["ledger_ok"] is True, row
+    # 動過鏈上某筆（payload 改一個位元、簽章必不符）：面板必須說 BROKEN
+    lines = led.path.read_text(encoding="utf-8").splitlines()
+    last = json.loads(lines[-1])
+    last["payload"]["contract_sha256"] = "d" * 64
+    lines[-1] = json.dumps(last)
+    led.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    row2 = [x for x in SB.tasks()["tasks"] if x["task_id"] == "t_chain"][0]
+    assert row2["ledger_ok"] is False, row2
+    assert row2["ledger_note"], "BROKEN 要帶得出為什麼"
+
+
+def test_page_renders_the_ledger_chain_verdict(env, server):
+    st, _ct, body = _get(server, "/")
+    assert st == 200
+    html = body.decode()
+    assert "ledger_ok" in html, "任務表沒讀 ledger_ok 欄位"
+    assert "鏈".encode() in body, "表頭沒有「鏈」欄"
+
+
 def test_task_table_shows_the_denominator_note(env, server):
     # round 66 dogfood（同一區）：tasks() 的 JSON 有 note（分母定義：作廢與未決
     # 都算在分母裡——「拒絕算失敗」的紀律），但 renderTasks 沒印它——看表的人

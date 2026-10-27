@@ -395,17 +395,28 @@ def project_detail(key: str) -> dict[str, Any] | None:
 
 # ── 4. 任務帳本 ──────────────────────────────────────────────────────────
 def tasks() -> dict[str, Any]:
+    # round 112 dogfood：CLI `vacant task report` 驗每條帳本鏈（ledger=ok/BROKEN），
+    # 儀表板以前不驗——被動過的帳本在面板上還是「open、一切正常」。這裡跟 CLI 同標：
+    # report(trust=…) 驗過，把結果帶進 JSON。簽章者清單讀不到時退回不驗（fail-open，
+    # 欄位留空、chain_verified=false，頁面照實說「未驗」——未驗不是 ok）。
     from .intake.ledger import ledger_dir, report
     if not ledger_dir().is_dir():
         return {"n_tasks": 0, "tasks": [], "by_state": {}}
+    trust = None
     try:
-        r = report()
+        from .intake import keys
+        trust = keys.Trust.load()
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        r = report(trust=trust)
     except Exception as e:  # noqa: BLE001
         return {"n_tasks": 0, "tasks": [], "by_state": {}, "error": f"{type(e).__name__}: {e}"[:300]}
-    keep = ("task_id", "state", "attempts", "decisions", "void", "latest_outcome", "destination_live")
+    keep = ("task_id", "state", "attempts", "decisions", "void", "latest_outcome",
+            "destination_live", "ledger_ok", "ledger_note")
     return {"n_tasks": r.get("n_tasks", 0), "by_state": {k: v for k, v in (r.get("by_state") or {}).items() if v},
             "tasks": [{k: t.get(k) for k in keep} for t in r.get("tasks", [])][-50:],
-            "note": r.get("note")}
+            "note": r.get("note"), "chain_verified": trust is not None}
 
 
 def overview() -> dict[str, Any]:
@@ -642,13 +653,19 @@ function renderHooks(hk){
   h+='</table></div>';
   $('hooks').className='';$('hooks').innerHTML=h;
 }
+function chainCell(r){
+  if(r.ledger_ok==null)return'<span class="muted">未驗</span>';
+  if(r.ledger_ok)return'<span class="chip ok">ok</span>';
+  return`<span class="bad" title="${esc(r.ledger_note||'')}">BROKEN</span>`;
+}
 function renderTasks(t){
   if(t.error){$('tasks').innerHTML=`<p class="bad">${esc(t.error)}</p>`;return}
   if(!t.n_tasks){$('tasks').className='empty';$('tasks').innerHTML='沒有任務（零設定的日常使用不會產生任務）。';return}
   let h=`<p>${Object.entries(t.by_state).map(([k,v])=>`<span class="chip">${esc(k)} ${v}</span>`).join(' ')} <span class="muted small">共 ${t.n_tasks}</span></p>
-  <div class="scroll"><table><tr><th>任務</th><th>狀態</th><th>嘗試</th><th>決策</th><th>作廢</th><th>最後結果</th></tr>`;
-  for(const r of t.tasks.slice().reverse())h+=`<tr><td class="mono">${esc(r.task_id)}</td><td>${esc(r.state)}</td><td>${esc(r.attempts)}</td><td>${esc(r.decisions)}</td><td>${esc(r.void)}</td><td>${esc(r.latest_outcome??'')}</td></tr>`;
+  <div class="scroll"><table><tr><th>任務</th><th>狀態</th><th>嘗試</th><th>決策</th><th>作廢</th><th>鏈</th><th>最後結果</th></tr>`;
+  for(const r of t.tasks.slice().reverse())h+=`<tr><td class="mono">${esc(r.task_id)}</td><td>${esc(r.state)}</td><td>${esc(r.attempts)}</td><td>${esc(r.decisions)}</td><td>${esc(r.void)}</td><td>${chainCell(r)}</td><td>${esc(r.latest_outcome??'')}</td></tr>`;
   h+='</table></div>';
+  if(t.chain_verified===false)h+=`<p class="warn small">鏈狀態未驗（簽章者清單讀不到）——未驗不是 ok。</p>`;
   if(t.note)h+=`<p class="muted small">${esc(t.note)}——分母含作廢與未決（拒絕算失敗）。</p>`;
   $('tasks').className='';$('tasks').innerHTML=h;
 }
