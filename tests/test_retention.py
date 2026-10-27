@@ -133,7 +133,7 @@ def test_compact_trace_keeps_active_project_live_blobs(env):
     下一次增量掃描不會重存（whack-a-mole 消失）；非活躍專案照舊回收。
     """
     proj = env / "work" / "active_keep"
-    proj.mkdir()
+    proj.mkdir(parents=True)
     for i in range(8):
         (proj / f"bg_{i:02d}.txt").write_text(f"bg {i}\n" * 200)
     (proj / "app.py").write_text("x = 1\n")

@@ -60,6 +60,10 @@ DEFAULT_KEEP_DECISIONS = 2
 DEFAULT_KEEP_RUNS = 3
 DEFAULT_KEEP_SET_ASIDE = 3
 DEFAULT_MAX_LOG_BYTES = 2 * 1024 * 1024  # 2 MB
+# round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在此窗口內的專案視為「活躍」，
+# gc 保留其「未變動且工作區原檔 bit 相同」的 live 背景 blob（下次修改所需的 before
+# 版本；回收它們只買回 I/O、超時與失觀，省不下任何持久磁碟）。預設 7 天。
+DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
@@ -184,8 +188,15 @@ def compact_trace(
     keep_set_aside: int = DEFAULT_KEEP_SET_ASIDE,
     dry_run: bool = False,
     budget: _Budget | None = None,
+    active_window_s: float | None = DEFAULT_ACTIVE_WINDOW_S,
 ) -> dict[str, Any]:
-    """清理 `$VACANT_HOME/trace/` 下多餘的物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。"""
+    """清理 `$VACANT_HOME/trace/` 下多餘的物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。
+
+    round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在 `active_window_s` 內（預設
+    7 天）的**活躍專案**，其「未變動且工作區原檔 bit 相同」的 live 背景 blob 正是那些
+    檔案下次被修改時所需的 before 版本，對它回收只買回 I/O、超時與失觀（下一次掃描
+    如數重存），故予以保留；**非活躍專案**（超出窗口）照舊回收。`active_window_s=None`
+    表示無活躍窗口（全部照舊回收）；`0.0` 等於「無任何專案活躍」。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
     troot = sroot / "trace"
     obj_root = troot / "objects"
@@ -274,6 +285,15 @@ def compact_trace(
             chain_file = pdir / "chain.ndjson"
             if not chain_file.is_file():
                 continue
+
+            # round 72：活躍邊界（以鏈上活動的磁碟時間為準；與本檔其他 max_age 判斷同用 mtime）
+            project_active = False
+            if active_window_s is not None:
+                last_activity = 0.0
+                for _name in ("chain.ndjson", "state.json", "head.json"):
+                    with contextlib.suppress(OSError):
+                        last_activity = max(last_activity, (pdir / _name).stat().st_mtime)
+                project_active = last_activity > 0 and (now - last_activity) < active_window_s
 
             events: list[dict[str, Any]] = []
             with contextlib.suppress(OSError):
@@ -431,7 +451,12 @@ def compact_trace(
                                     live_ok = True
                         seen_idx_entries[cache_key] = live_ok
                     if seen_idx_entries[cache_key]:
-                        redundant_candidates.add(fsha)
+                        if project_active:
+                            # 活躍專案：保留（下次修改所需的 before 版本；回收＝whack-a-mole）
+                            keep_shas.add(fsha)
+                            must_keep_file_shas.add(fsha)
+                        else:
+                            redundant_candidates.add(fsha)
                     else:
                         keep_shas.add(fsha)
                         must_keep_file_shas.add(fsha)

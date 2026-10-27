@@ -6,10 +6,11 @@
 
 ## 1. 現有發現（finding）分類
 
-`run()`（`evidence.py`）目前會產生 **11 種 kind**（2026-10-25 對照原始碼盤點：
+`run()`（`evidence.py`）目前會產生 **12 種 kind**（2026-10-25 對照原始碼盤點、2026-10-26 加
+`claimed_run`：
 `missing_output`、`invalid_output`、`failed_step`、`test_claim`、`unsourced`、`unread`、
-`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`；
-前 6 種可退回給 agent，後 5 種被 `zerostop.pushable_for` 明確排除、只進交件說明）。
+`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`、`claimed_run`；
+前 6 種可退回給 agent，後 6 種被 `zerostop.pushable_for` 明確排除、只進交件說明）。
 下表按 kind＋sub 逐行分類。判定「域相關」的標準：
 **檢查邏輯本身是否依賴「有程式碼可跑／可解析」這個前提**，而不是「樣本裡恰好有程式」。
 
@@ -30,11 +31,15 @@
 | `stale_output`（2026-09-25 新增，**僅建議**） | **是** | 檔在本回合前就存在、本回合一字未改，最終訊息卻用了產出型動詞（已寫好／已寫入） | 低：「已確認／Done」這類非產出型結語不觸發（n12 樣本） |
 | `copy_of_input`（2026-09-25 新增，**僅建議**） | **是** | 交付檔與任務點名的輸入素材逐字相同（正規化後全等、≥ 80 字） | 低：複製型任務（「把 X 複製為 Y」）直接豁免（COPY_CUE）；短答案不比 |
 | `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）、**清單型輸出**（題目點名編號／清單／列表／列點輸出、交件本身就是清單區塊——逐字寫出該清單正是預期交件，reformat 是 no-op；`LIST_REQ_CUE`＋`_is_list_block`，2026-10-26 清單負對照）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。**多文件切分（內聯文字被切成 ≥2 份、每份 < 120 字）是已知漏**（§2.4，2026-10-28 已註冊 L-fake＋負對照）；跨 prompt 拼接（內聯文字分貼在 ≥2 回合）**round 45 起已抓**（跨輪拼接語料，advisory；§2.5，含 round 55 早期回合線索的兩對語義 pin）。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
+| `claimed_run`（2026-10-26 新增，**僅建議**） | **是** | 最終訊息以**過去式**（ran／executed／跑了／跑過／跑完／執行過／執行完／執行（`執行緒`除外））宣稱「執行」某條反引號命令、首詞在已知 CLI 白名單（`RUN_CLAIM_TOOLS`）、鄰窗無建議措辭，但整份 session 命令記錄（含前回合、sub-agent）查無 | 低：三層保守濾網（過去式線索＋CLI 白名單＋建議豁免）；記錄裡跑過就算（子串比對，`pip`→`pip3`、參數不同、跨回合都算跑過）；非 CLI 的反引號詞、路徑 span（`./scripts/…`）、`執行緒`名詞都不觸發。專屬樣本 `tests/test_universal_claimed_run.py`（12 個：3 抓＋5 advisory/混排 pin＋6 負對照，2026-10-27）；零誤報由常駐門 `test_all_clean_samples_have_no_false_positives`（對所有 kind）覆蓋 |
 
 **結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread` 對非程式任務
-直接可用且可退回；`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`
-五種域無關但預設只進交件說明（不退回）；`syntax/stub/test_claim/failed_step/empty_filter/contract_shape`
+直接可用且可退回；`copy_of_task`、`skeleton`、`stale_output`、`copy_of_input`、`copy_of_inline`、
+`claimed_run` 六種域無關但預設只進交件說明（不退回）；`syntax/stub/test_claim/failed_step/empty_filter/contract_shape`
 的前提是「有程式碼/表格可跑」，對純文件任務大多不會觸發（不會擋，但也不會幫上忙）。
+`claimed_run` 補上 ASSIGNMENT 點名的「跑過沒」維度（2026-10-26）：agent 說「我跑了 `pandoc`」
+但記錄裡查無——對非程式任務（`pandoc`／`curl`／`pip` 一類的工具鏈）與程式任務同構，
+且比 `test_claim`（只認程式的「測試通過」宣稱）更通用。
 
 ## 2. 現有檢查對非程式任務的已知盲區（誠實邊界）
 
@@ -175,7 +180,8 @@ backlog 點名的 80／200、以及 n13 實測長度 148 的兩側），在 21 �
 ## 4. 離線重播入口
 
 ```bash
-python3 -m pytest tests/test_universal_copy_of_task.py tests/test_noncode_samples.py -q
+python3 -m pytest tests/test_universal_copy_of_task.py tests/test_universal_claimed_run.py \
+  tests/test_noncode_samples.py -q
 ```
 
 兩個檔案共用同一個 `Agent` 掛鉤模擬（`tests/test_universal_and_coding_upgrades.py` 的
