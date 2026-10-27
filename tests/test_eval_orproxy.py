@@ -1,6 +1,7 @@
 """ops/eval/orproxy.py：不碰網路的部分——白名單、預算閘、記帳加總、金鑰遮蔽、續跑重建。"""
 import json
 import threading
+import time
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
@@ -192,6 +193,29 @@ def _ledger(tmp_path):
     return [json.loads(x) for x in (tmp_path / "led" / "ledger.jsonl").read_text().splitlines()]
 
 
+def _wait_ledger_line(tmp_path, timeout_s=30.0):
+    """等第一個可解析的 ledger 行。
+
+    帳是**回應送出之後**才寫的（orproxy._relay→_finish），所以測試必須等。
+    原實作固定等 100×20ms＝2 秒：機器繁忙時（旁邊跑模型容器、GIL 搶排慢）
+    寫帳的 worker 排不進來就 FileNotFoundError——2026-09-27 曾 3 次失敗 1 次
+    （docs/HANDOFF_EVAL_2026-09-27.md §5.1，當時註記「本機測試伺服器的時序，原因沒查」）。
+    改成寬鬆上限＋輪詢到可解析為止：慢只是慢，不再是 flake。
+    """
+    f = tmp_path / "led" / "ledger.jsonl"
+    deadline = time.monotonic() + timeout_s
+    while True:
+        if f.exists():
+            try:
+                first = f.read_text().splitlines()[0]
+                return json.loads(first)   # 寫入中途（極端情況）會 ValueError→再等一拍
+            except (IndexError, ValueError):
+                pass
+        if time.monotonic() > deadline:
+            raise AssertionError(f"ledger.jsonl 未在 {timeout_s}s 內出現")
+        time.sleep(0.02)
+
+
 def test_a_rate_limit_inside_a_200_stream_is_retried_not_passed_to_the_agent(tmp_path, monkeypatch):
     srv, up, calls = _serve_stream(tmp_path, monkeypatch, [RATE, RATE, GOOD])
     try:
@@ -287,12 +311,7 @@ def test_local_mode_routes_to_the_named_machine_without_a_key(tmp_path):
         assert code == 200 and body["choices"][0]["message"]["content"] == "ok"
         path, auth, sent = seen[0]
         assert path == "/v1/chat/completions" and auth is None and sent["reasoning_effort"] == "none"
-        led_file = tmp_path / "led" / "ledger.jsonl"
-        for _ in range(100):                                 # 帳在回應送出之後才寫
-            if led_file.exists():
-                break
-            __import__("time").sleep(0.02)
-        rec = json.loads(led_file.read_text().splitlines()[0])
+        rec = _wait_ledger_line(tmp_path)                     # 帳在回應送出之後才寫
         assert rec["upstream"] == "a" and rec["cost"] is None and rec["usage"]["prompt_tokens"] == 3
         code, body = _post(srv, "/t/run1/up/zzz/api/v1/chat/completions", {"model": "gemma-4-12b-it-qat"})
         assert code == 400 and "upstream" in body["error"]
