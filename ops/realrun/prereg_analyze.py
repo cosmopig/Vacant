@@ -73,13 +73,24 @@ def discordant(pairs: list[dict]) -> tuple[int, int]:
     return b, c
 
 
-def decision_state(c: int, b: int, p: float, alpha: float) -> str:
-    """Exactly the pre-registered rule (see prereg_v3.json decision_states)."""
+def decision_state(c: int, b: int, p: float, alpha: float,
+                   states: dict | None = None) -> str:
+    """Exactly the pre-registered rule (see prereg_v3.json decision_states).
+
+    The RULE (c > b / b > c / otherwise) is identical across v3–v7. Only the
+    state LABELS come from the plan file itself: v3–v6 plans name the positive
+    and null states EFFECTIVE/UNRESOLVED; v7 (cross-model replication) names
+    them REPLICATED/NOT_REPLICATED. CONTRADICTS and INCOMPLETE are shared.
+    Nothing here invents a label: it is read off the plan's own keys.
+    """
+    ds = states or {}
+    positive = "REPLICATED" if "REPLICATED" in ds else "EFFECTIVE"
+    null = "NOT_REPLICATED" if "NOT_REPLICATED" in ds else "UNRESOLVED"
     if p < alpha and c > b:
-        return "EFFECTIVE"
+        return positive
     if p < alpha and c < b:
         return "CONTRADICTS"
-    return "UNRESOLVED"
+    return null
 
 
 def analyze(prereg_path: Path, roots: list[Path]) -> dict:
@@ -113,7 +124,7 @@ def analyze(prereg_path: Path, roots: list[Path]) -> dict:
         note = (f"{len(roots)}/{reps_registered} registered reps present; "
                 "pre-registered budget rule: no decision state assigned")
     else:
-        state = decision_state(c, b, p, alpha)
+        state = decision_state(c, b, p, alpha, plan.get("decision_states", {}))
         note = "all registered reps present"
     return {
         "prereg_id": plan.get("id"),

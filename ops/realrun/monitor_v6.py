@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Interim health monitor for the v6 batch (prereg_v6.json).
+"""Interim health monitor for the v6 batch (prereg_v6.json); round 109 adds
+--batch v7 (prereg_v7.json, cross-model replication) reusing the same 68-cell
+grid. The pair/statistic logic is batch-agnostic; only the run-root, prereg
+and analyze file names follow the batch.
 
 Read-only. Prints per-rep completeness and INTERIM descriptive tallies.
 It NEVER assigns a decision state: per the pre-registered INCOMPLETE rule,
@@ -8,7 +11,7 @@ Interim (b, c, p) figures are descriptive only and must not be quoted as a
 result (same discipline as v4/v5 interim tallies in STATE.md).
 
 Usage:
-  python3 ops/realrun/monitor_v6.py [--runs-root ~/dev/ops/realrun]
+  python3 ops/realrun/monitor_v6.py [--runs-root ~/dev/ops/realrun] [--batch v6|v7]
 Exit: 0 always (monitoring, not gating); 2 if the runs root is missing.
 """
 from __future__ import annotations
@@ -73,16 +76,20 @@ def pairs(rows: list[dict]) -> tuple[int, int, int, int]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--runs-root", default="~/dev/ops/realrun")
+    # round 109: v7 (cross-model replication, prereg_v7.json) reuses this
+    # monitor; default stays v6 so existing pinned behavior is unchanged.
+    ap.add_argument("--batch", choices=("v6", "v7"), default="v6")
     args = ap.parse_args()
     base = Path(args.runs_root).expanduser()
     if not base.is_dir():
         print(f"ERROR: runs root not found: {base}", file=sys.stderr)
         return 2
 
+    batch = args.batch
     done_cells = 0
     ready = True
     for k in range(1, REPS + 1):
-        root = base / f"runs_v6_r{k}"
+        root = base / f"runs_{batch}_r{k}"
         rows = read_progress(root)
         cells = len(rows)
         done_cells += cells
@@ -123,12 +130,12 @@ def main() -> int:
     if ready:
         print("READY_TO_ANALYZE: all 5 reps complete.")
         print(f"  cd {Path.home()}/dev/Vacant && "
-              "python3 ops/realrun/prereg_analyze.py --prereg ops/realrun/prereg_v6.json "
-              " --roots " + " ".join(f"{base}/runs_v6_r{k}" for k in range(1, REPS + 1))
-              + " --json ops/realrun/analyze_v6.json")
+              f"python3 ops/realrun/prereg_analyze.py --prereg ops/realrun/prereg_{batch}.json "
+              " --roots " + " ".join(f"{base}/runs_{batch}_r{k}" for k in range(1, REPS + 1))
+              + f" --json ops/realrun/analyze_{batch}.json")
     else:
         print("NOT_READY: decision only after 5 reps (prereg INCOMPLETE rule). "
-              "Resume is infra, not a design change: re-run launch_v6.sh (idempotent).")
+              f"Resume is infra, not a design change: re-run launch_{batch}.sh (idempotent).")
     return 0
 
 
