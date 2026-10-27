@@ -2,7 +2,8 @@
 
 這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §4.1-2、§4.5「撤銷」）：
 
-    vacant trace show [--json] [--tail N]   每一步：行動者、工具、寫了什麼；缺口；觀察停用狀態
+    vacant trace show [--json] [--tail N]   每一步：行動者、工具、寫了什麼（沒有歸屬寫入時：
+                                            工具輸入的一行預覽，blob 被 gc 就空白）；缺口；觀察停用狀態
     vacant trace verify                     病歷的簽章鏈驗不驗得過（有任務帳本就對它簽過的鏈頭）
     vacant trace report [--check]           未解問題清單（`--check` 先重驗一次契約再追緝）
     vacant trace blame <檔>[:<行>] [--value V]   這個位置的值是哪一步、從哪裡來的
@@ -70,6 +71,47 @@ def _rel(ws: pathlib.Path, path: str) -> str:
         raise SystemExit(f"vacant: {path} is not inside the project {ws}") from None
 
 
+def _input_preview(rec: Recorder, e: dict, limit: int = 64) -> str:
+    """一步的工具輸入，取一行預覽（從物件庫）。沒有就回空字串。
+
+    病歷 4062 個 bash 步、4055 個沒有歸屬寫入，read 也一樣——`show` 以前對這些步
+    印出的是空行，看不出那步做了什麼。輸入（實際做了什麼）存在物件庫，預覽它就是
+    這行誠實的內容。fail-open：blob 被 gc 掉或損壞就回空、`show` 退回舊的空行——
+    本專案 5094 個輸入 blob 已有 4930 個被 gc，這是常態而不是例外，`show` 不能
+    因為它失敗。"""
+    sha = e.get("input_blob")
+    if not sha:
+        return ""
+    try:
+        if not rec.blobs.has(sha):
+            return ""
+        data = rec.blobs.get(sha)
+    except Exception:
+        return ""
+    text = data.decode("utf-8", "replace").strip()
+    try:
+        obj: Any = json.loads(text)
+    except (ValueError, TypeError):
+        obj = None
+    if isinstance(obj, dict):
+        for key in ("command", "path"):            # 最常用的兩個工具輸入
+            v = obj.get(key)
+            if isinstance(v, str) and v.strip():
+                text = v.strip()
+                break
+        else:
+            for v in obj.values():
+                if isinstance(v, str) and v.strip():
+                    text = v.strip()
+                    break
+    elif isinstance(obj, str):
+        text = obj.strip()
+    first = text.splitlines()[0].strip() if text else ""
+    if len(first) > limit:
+        first = first[:limit] + "…"
+    return first
+
+
 def cmd_show(args: argparse.Namespace) -> int:
     ws, _c = _workspace(args)
     rec = Recorder(ws)
@@ -111,6 +153,9 @@ def cmd_show(args: argparse.Namespace) -> int:
             who = f"{a.get('platform')}:{a.get('agent_type') or 'main'}" + \
                 (f"#{str(a['agent'])[:8]}" if a.get("agent") else "")
             w = ", ".join(f"{x['kind'][0]}:{x['path']}" for x in (e.get("writes") or [])[:6])
+            if not w:
+                # 沒有歸屬寫入的步（bash 99.8%）：行印工具輸入的一行預覽，blob 被 gc 就空白
+                w = _input_preview(rec, e)
             flags = [k for k in ("denied", "post_missing", "pre_missing") if e.get(k)]
             if e.get("concurrent_with"):
                 flags.append("concurrent")

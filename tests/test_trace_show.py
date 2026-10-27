@@ -7,6 +7,10 @@
    小字裡有，等于沒有）。
 2. 本機病歷 1900+ 步；看最近幾步只能 `vacant trace show | tail`。加 `--tail N`
    （只影響人的視圖；`--json` 仍是全量記錄）。
+3. 本專案病歷 4062 個 bash 步、4055 個沒有歸屬寫入，`trace show` 印出的行是空的
+   ——行沒有內容、看不出那步做了什麼（第 92 輪 dogfood）。工具輸入（實際做了什麼）
+   存在物件庫裡；沒有歸屬寫入的步，show 印它的一行預覽。blob 被 gc 掉就退回空白行，
+   `show` 永遠不因這個失敗（本專案 5094 個輸入 blob 已有 4930 個被 gc）。
 """
 from __future__ import annotations
 
@@ -97,6 +101,53 @@ def test_show_tail_rejects_zero(proj, monkeypatch):
     _step(rec, "s1")
     with pytest.raises(SystemExit, match="--tail"):
         cli.cmd_show(_args(tail=0))
+
+
+def test_show_prints_input_preview_when_step_wrote_nothing(proj, capsys, monkeypatch):
+    """沒有歸屬寫入的步（bash 99.8%、read 99.7%）：行必須有內容——工具輸入的一行預覽。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    actor = R.Actor("pi", "s1")
+    rec.pre("b1", actor, "bash", {"command": "echo hello"})
+    rec.post("b1", actor, "bash", {"command": "echo hello"}, "hello\n")
+    rec.pre("r1", actor, "read", {"path": "data/sales.csv"})
+    rec.post("r1", actor, "read", {"path": "data/sales.csv"}, "")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    bash_line = next(l for l in out.splitlines() if "bash" in l)
+    assert "echo hello" in bash_line, f"bash step printed no content:\n{out}"
+    read_line = next(l for l in out.splitlines() if " read " in l)
+    assert "data/sales.csv" in read_line, f"read step printed no content:\n{out}"
+
+
+def test_show_input_preview_truncates_long_input(proj, capsys, monkeypatch):
+    p, rec = proj
+    monkeypatch.chdir(p)
+    actor = R.Actor("pi", "s1")
+    cmd = "echo " + "x" * 300
+    rec.pre("b1", actor, "bash", {"command": cmd})
+    rec.post("b1", actor, "bash", {"command": cmd}, "")
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    bash_line = next(l for l in out.splitlines() if "bash" in l)
+    assert "x" * 100 not in bash_line           # 不整段貼進來
+    assert "…" in bash_line                     # 截斷要看得出
+
+
+def test_show_survives_gc_of_the_input_blob(proj, capsys, monkeypatch):
+    """gc 會把 blob 刪掉（本專案歷史步 96% 的輸入 blob 已不在）：show 退回空白預覽，
+    絕不因此失敗。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    actor = R.Actor("pi", "s1")
+    rec.pre("b1", actor, "bash", {"command": "echo hello"})
+    rec.post("b1", actor, "bash", {"command": "echo hello"}, "hello\n")
+    sha = next(e["input_blob"] for e in rec.events() if e.get("type") == "step")
+    rec.blobs.path(sha).unlink()                # 模擬 gc
+    assert cli.cmd_show(_args()) == 0
+    out = capsys.readouterr().out
+    bash_line = next(l for l in out.splitlines() if "bash" in l)
+    assert "echo hello" not in bash_line        # blob 不在 ⇒ 空白，不假裝還有
 
 
 def test_show_json_ignores_tail(proj, monkeypatch, capsys):
