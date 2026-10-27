@@ -50,6 +50,29 @@ scorer 兩批皆**未使用**（真實訊號列；`scorer_used=false`、`visible
 - 證據：`ops/realrun/analyze_v5.json`（repo 鏡像）；ops-disk `runs_v5_r{1,2,3}`；204/204 格、0 infra_void。
 - 釘死：`tests/test_realrun_v5_prereg.py`（9/9；含 (b,c)→p 重算、狀態規則、rep 齊全、EFFECTIVE 文本禁 overclaim）。
 
+### 2a. v5 治療投遞稽核（2026-10-26 本輪補，離線、零模型調用）
+
+UNRESOLVED 判定生效的**邊界條件**＝「治療（fresh_hint）真的按預註冊投遞了」，此前只有
+round 81 的 smoke 實證過 hint 進 model input。本輪用落盤證據把 204/204 格全數稽核：
+
+- 腳本：`ops/realrun/audit_v5_hint_delivery.py`（`--selftest` 8 例：好格全過、6 種 anomaly
+  形狀全被抓、D5 配對工作）；鏡像：`ops/realrun/audit_v5_hint_delivery.json`；
+  釘死：`tests/test_realrun_v5_hint_delivery.py`（6/6，含落盤在場時重跑對鏡像）。
+- 五層檢查全數通過（204/204 格、0 anomaly）：
+  - D1 介斷：wire 請求數 == attempts_used == requests_seen（每 attempt 有真實模型通道證據）；
+  - D2 重置：每個 attempt k>=2 都從乾淨 origin 開始（back_to_start 且 ws_sha256 == origin）；
+  - D3 檔：treatment att>=2 的格有非空 ≤380B 提示檔、文字 == 最後一次寫入的提示；att==1 的格無檔；
+    control **204 格全無提示檔**（負對照成立）；
+  - D4 wire 內文（最硬）：attempt 1 的請求體無提示標記；treatment 每個 attempt k>=2 的請求體
+    （JSON 解析後）逐字包含該次該看到的提示全文；control 全格無標記；
+  - D5 prompt 同：同 (rep, task) 兩臂 attempt-1 的 argv_sha256 相同——launcher prompt 逐位元組一致，
+    兩臂模型輸入差異只可能來自 agent 端追加的提示檔（正是預註冊聲稱的唯一差異）。
+- **描述性子集**（out_of_prereg、decision_state=null、無 p，不是新判定）：treatment 真正用到
+  提示的格共 **49/102 pairs**（att==1 就過的 53 pairs 上兩臂模型輸入相同、hint 無機會發揮）；
+  這 49 pairs 上 control 接受 17 vs treatment 接受 14（b=6, c=3）。方向守衛：這是**暴露度**的
+  描述性記錄，不得引用為任何方向的結論（無預註冊、無統計力、n=49）；v5 的主判定不變——
+  **UNRESOLVED（b=6, c=8, p=0.7905, n=102 pairs, scorer=false）**。
+
 ## 3. 可引用／不可引用（統一口徑）
 
 - **可引用**：「乾淨重抽優於一發」＝v4 EFFECTIVE per prereg（p=0.0414, n=102 pairs, scorer=false,
@@ -75,6 +98,11 @@ scorer 兩批皆**未使用**（真實訊號列；`scorer_used=false`、`visible
 - 預註冊（repo 鏡像）：`ops/realrun/prereg_v4.json`、`ops/realrun/prereg_v5.json`（ops-disk `~/dev/ops/realrun/`）。
 - 分析：`ops/realrun/analyze_v4.json`、`ops/realrun/analyze_v5.json`（p 可由 (b,c) 用 `mcnemar_exact` 重算）。
 - 釘死測試：`tests/test_realrun_v4_prereg.py`（6/6）、`tests/test_realrun_v5_prereg.py`（9/9）、
+  `tests/test_realrun_v5_hint_delivery.py`（6/6；v5 投遞稽核）、
   `tests/test_decision_live_v4v5_close.py`（本檔與落盤數據的一致性）。
+- v5 投遞稽核：`ops/realrun/audit_v5_hint_delivery.py --selftest`；落盤在場時
+  `python3 ops/realrun/audit_v5_hint_delivery.py --prereg ops/realrun/prereg_v5.json \
+  --roots ~/dev/ops/realrun/runs_v5_r1 ~/dev/ops/realrun/runs_v5_r2 ~/dev/ops/realrun/runs_v5_r3 \
+  --json ops/realrun/audit_v5_hint_delivery.json`（離線、零模型調用；204/204 格 0 anomaly）。
 - 執行：`ops/realrun/run_batch.py`＋`mini_agent.py`（`889cd5ea`）；離線重播（零 LLM）：
   `python3 ~/dev/ops/ref/offline_restart_sim.py ~/dev/ops/ref/c37_final.json 3`。

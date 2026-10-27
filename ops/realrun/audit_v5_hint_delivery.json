@@ -1,0 +1,6782 @@
+{
+ "schema": "vacant.audit/v5_hint_delivery/1",
+ "generated": "2026-10-27T01:10:32+00:00",
+ "purpose": "verify the v5 treatment (fresh_hint) was delivered as the prereg describes; boundary condition of the UNRESOLVED verdict, not a new analysis",
+ "roots": [
+  "/home/user1/dev/ops/realrun/runs_v5_r1",
+  "/home/user1/dev/ops/realrun/runs_v5_r2",
+  "/home/user1/dev/ops/realrun/runs_v5_r3"
+ ],
+ "arms": {
+  "control": "B_resample3",
+  "treatment": "C_fresh_hint3"
+ },
+ "n_cells": 204,
+ "per_root": {
+  "/home/user1/dev/ops/realrun/runs_v5_r1": {
+   "B_resample3": {
+    "cells": {
+     "pg_affine_cipher": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "caa66108205fc2c54810240bc217b465b818f6a4b071edb4bed977ca9537e5ef"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_beer_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "264a1099bd76d84dfa03dbe9b30ad4e289d2f16b549ed6cd0683e38bf450ffea"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_book_store": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "1dd3d094286097d35767867d8747a937abb716bd6f3ba5c86e8db385585f54e5"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bottle_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "256a75955d6846ab0134d3f155a14ba7118f0d4061d6059c465078c5ac4123bf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bowling": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6b4ad6d5e488d4843fa64c87b8b3c25c4104287881dcb2ce5e3b4471a6297099"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_connect": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "4c873a7bf4c3dbdb1243ea35b89586d73422f0601a9d717b8edb834d1710cf13"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dominoes": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "9ecb3524f97a863571b50e53f15e1e32b28af2c40980e8c807efbf37bc3ffb55"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dot_dsl": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "0474be3020fc4a33ba21a5dc946a703b06068640f8b39a2d831be1ed420a643c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_food_chain": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5aa164ee4ac16d469f7fbd18bb118bfbb2c4efb09efe68790a253feec693716"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_forth": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "fb97130931e1015c732817a9da53ee16c6e771fcd389c938df90b8b0051e0723"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_go_counting": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ee5dd964bb316f4a2d5a993f80ab1ef45c709aba8b5554ea8113fd856b2b3319"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grade_school": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ebbacd2badb9443001abdb20e2f8b8429cf7f4cae509d64b7bced21002ff2b97"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grep": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "b9c63219735d4de44c492b51517bca1ca97db56c951c15ddc2ca69c4e79baecf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_hangman": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "a5fd99b206af94ffa728697a90b852cbf77f8897dbc79b85ff6899ab695b0631"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_list_ops": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "17d769295da6349bbfba4b6d433a280d3df6e271d5a91f031b8992788bfa7e4f"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_paasio": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "d0c9d2fd0a089eef588839dcc805bad7fdea2aba3d1bb0de18c1cb80aad0d080"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_phone_number": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "eb801565f29bdf1dd94d5eea572ed0e2cbb412fb7289a6788e4b12b1da96b78c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pig_latin": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "e6afee5d0e52a51b300988eecdb18e5a96dd84d93c22d2301dc05fe691b320a7"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_poker": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "2a24048447502ee9bd9c364c75dde48e4cc4b074c454755e97bf8884bd5c3ffa"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pov": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "203ddcf633717be07beca135fb62188de84f7cf9ff00490a01eb6f3c0560153a"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_proverb": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "488b74fdb257595fa1f32f2bada5123beda81b2662dba8e2b2ea1356e6cb9420"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_react": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "847f9f0b12e1b7558d2f925ce6bd772a8a946bcbc54555da327e173f9ae18bc8"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_rest_api": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6c30931f5f554542c5ab8e774aee6a2b523755fe9fb6d29e58a761781238f61b"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_robot_name": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "bf6d1b8a98bf2161b9cb7dac6074c288873258d38e00f0e0ca55ca47799a8e62"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_scale_generator": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "13c4cf01cbc477b5b39f406e16a75325171b3f3edfa079ba4c6c7e39afda74e7"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_sgf_parsing": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "8cbe2b983e75ecb718f33bf04b5cc8a121edc045545c5f57b7ac207f178ed618"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_simple_linked_list": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "512a511d7cd9e2ac23df1860ef3fcd9f13642fb78fa1727b76ddcf8d58138394"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_transpose": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "bacfa6a129c139409056792f0ab9473c05107f6101f1578f1cd3778f3569c31e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_tree_building": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "5633cb9ad2a3a78eba715cb01147c59a0e8708929929b0bfe54706c9b4d323bb"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_two_bucket": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "c5e368f004473fe31005c676fad9ae1f2e6d38ed201520c77a34e0e6eb69a687"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_variable_length_quantity": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "61f5df3869de9bfdf440c8c236baad1746d2c4ef2473119f9877ed5917a079f6"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_wordy": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c3996feb248f45cf72b82d67a645662df12e8da6ab92caa091d2a138a67aac8e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_zebra_puzzle": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "69803832873415d820737c3d11c3ddd30bfaa68c3624e1155c49371af971f6b9"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zipper": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e143c51cbd4c0b1387f632a3e373e706d0f376cfc0447516665e5db8eec95720"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     }
+    },
+    "n_cells": 34,
+    "n_accepted": 22,
+    "anomalies": []
+   },
+   "C_fresh_hint3": {
+    "cells": {
+     "pg_affine_cipher": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "caa66108205fc2c54810240bc217b465b818f6a4b071edb4bed977ca9537e5ef"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_beer_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "264a1099bd76d84dfa03dbe9b30ad4e289d2f16b549ed6cd0683e38bf450ffea"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_book_store": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "1dd3d094286097d35767867d8747a937abb716bd6f3ba5c86e8db385585f54e5"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bottle_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "256a75955d6846ab0134d3f155a14ba7118f0d4061d6059c465078c5ac4123bf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bowling": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6b4ad6d5e488d4843fa64c87b8b3c25c4104287881dcb2ce5e3b4471a6297099"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_connect": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "4c873a7bf4c3dbdb1243ea35b89586d73422f0601a9d717b8edb834d1710cf13"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_dominoes": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "9ecb3524f97a863571b50e53f15e1e32b28af2c40980e8c807efbf37bc3ffb55"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dot_dsl": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "0474be3020fc4a33ba21a5dc946a703b06068640f8b39a2d831be1ed420a643c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_food_chain": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5aa164ee4ac16d469f7fbd18bb118bfbb2c4efb09efe68790a253feec693716"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_forth": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "fb97130931e1015c732817a9da53ee16c6e771fcd389c938df90b8b0051e0723"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_go_counting": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ee5dd964bb316f4a2d5a993f80ab1ef45c709aba8b5554ea8113fd856b2b3319"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grade_school": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ebbacd2badb9443001abdb20e2f8b8429cf7f4cae509d64b7bced21002ff2b97"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grep": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "b9c63219735d4de44c492b51517bca1ca97db56c951c15ddc2ca69c4e79baecf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_hangman": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "a5fd99b206af94ffa728697a90b852cbf77f8897dbc79b85ff6899ab695b0631"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_list_ops": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "17d769295da6349bbfba4b6d433a280d3df6e271d5a91f031b8992788bfa7e4f"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_paasio": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "d0c9d2fd0a089eef588839dcc805bad7fdea2aba3d1bb0de18c1cb80aad0d080"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_phone_number": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "eb801565f29bdf1dd94d5eea572ed0e2cbb412fb7289a6788e4b12b1da96b78c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pig_latin": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e6afee5d0e52a51b300988eecdb18e5a96dd84d93c22d2301dc05fe691b320a7"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_poker": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "2a24048447502ee9bd9c364c75dde48e4cc4b074c454755e97bf8884bd5c3ffa"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pov": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "203ddcf633717be07beca135fb62188de84f7cf9ff00490a01eb6f3c0560153a"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_proverb": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "488b74fdb257595fa1f32f2bada5123beda81b2662dba8e2b2ea1356e6cb9420"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_react": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "847f9f0b12e1b7558d2f925ce6bd772a8a946bcbc54555da327e173f9ae18bc8"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_rest_api": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6c30931f5f554542c5ab8e774aee6a2b523755fe9fb6d29e58a761781238f61b"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_robot_name": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "bf6d1b8a98bf2161b9cb7dac6074c288873258d38e00f0e0ca55ca47799a8e62"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_scale_generator": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "13c4cf01cbc477b5b39f406e16a75325171b3f3edfa079ba4c6c7e39afda74e7"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_sgf_parsing": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "8cbe2b983e75ecb718f33bf04b5cc8a121edc045545c5f57b7ac207f178ed618"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_simple_linked_list": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "512a511d7cd9e2ac23df1860ef3fcd9f13642fb78fa1727b76ddcf8d58138394"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_transpose": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "bacfa6a129c139409056792f0ab9473c05107f6101f1578f1cd3778f3569c31e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_tree_building": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "5633cb9ad2a3a78eba715cb01147c59a0e8708929929b0bfe54706c9b4d323bb"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_two_bucket": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "c5e368f004473fe31005c676fad9ae1f2e6d38ed201520c77a34e0e6eb69a687"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_variable_length_quantity": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "61f5df3869de9bfdf440c8c236baad1746d2c4ef2473119f9877ed5917a079f6"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_wordy": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "c3996feb248f45cf72b82d67a645662df12e8da6ab92caa091d2a138a67aac8e"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zebra_puzzle": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "69803832873415d820737c3d11c3ddd30bfaa68c3624e1155c49371af971f6b9"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zipper": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e143c51cbd4c0b1387f632a3e373e706d0f376cfc0447516665e5db8eec95720"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     }
+    },
+    "n_cells": 34,
+    "n_accepted": 23,
+    "anomalies": []
+   }
+  },
+  "/home/user1/dev/ops/realrun/runs_v5_r2": {
+   "B_resample3": {
+    "cells": {
+     "pg_affine_cipher": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "caa66108205fc2c54810240bc217b465b818f6a4b071edb4bed977ca9537e5ef"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_beer_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "264a1099bd76d84dfa03dbe9b30ad4e289d2f16b549ed6cd0683e38bf450ffea"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_book_store": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "1dd3d094286097d35767867d8747a937abb716bd6f3ba5c86e8db385585f54e5"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bottle_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "256a75955d6846ab0134d3f155a14ba7118f0d4061d6059c465078c5ac4123bf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bowling": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6b4ad6d5e488d4843fa64c87b8b3c25c4104287881dcb2ce5e3b4471a6297099"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_connect": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "4c873a7bf4c3dbdb1243ea35b89586d73422f0601a9d717b8edb834d1710cf13"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_dominoes": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "9ecb3524f97a863571b50e53f15e1e32b28af2c40980e8c807efbf37bc3ffb55"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dot_dsl": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "0474be3020fc4a33ba21a5dc946a703b06068640f8b39a2d831be1ed420a643c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_food_chain": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "c5aa164ee4ac16d469f7fbd18bb118bfbb2c4efb09efe68790a253feec693716"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_forth": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "fb97130931e1015c732817a9da53ee16c6e771fcd389c938df90b8b0051e0723"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_go_counting": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ee5dd964bb316f4a2d5a993f80ab1ef45c709aba8b5554ea8113fd856b2b3319"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grade_school": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ebbacd2badb9443001abdb20e2f8b8429cf7f4cae509d64b7bced21002ff2b97"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grep": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "b9c63219735d4de44c492b51517bca1ca97db56c951c15ddc2ca69c4e79baecf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_hangman": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "a5fd99b206af94ffa728697a90b852cbf77f8897dbc79b85ff6899ab695b0631"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_list_ops": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "17d769295da6349bbfba4b6d433a280d3df6e271d5a91f031b8992788bfa7e4f"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_paasio": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "d0c9d2fd0a089eef588839dcc805bad7fdea2aba3d1bb0de18c1cb80aad0d080"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_phone_number": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "eb801565f29bdf1dd94d5eea572ed0e2cbb412fb7289a6788e4b12b1da96b78c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pig_latin": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "e6afee5d0e52a51b300988eecdb18e5a96dd84d93c22d2301dc05fe691b320a7"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_poker": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "2a24048447502ee9bd9c364c75dde48e4cc4b074c454755e97bf8884bd5c3ffa"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pov": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "203ddcf633717be07beca135fb62188de84f7cf9ff00490a01eb6f3c0560153a"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_proverb": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "488b74fdb257595fa1f32f2bada5123beda81b2662dba8e2b2ea1356e6cb9420"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_react": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "847f9f0b12e1b7558d2f925ce6bd772a8a946bcbc54555da327e173f9ae18bc8"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_rest_api": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6c30931f5f554542c5ab8e774aee6a2b523755fe9fb6d29e58a761781238f61b"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_robot_name": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "bf6d1b8a98bf2161b9cb7dac6074c288873258d38e00f0e0ca55ca47799a8e62"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_scale_generator": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "13c4cf01cbc477b5b39f406e16a75325171b3f3edfa079ba4c6c7e39afda74e7"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_sgf_parsing": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "8cbe2b983e75ecb718f33bf04b5cc8a121edc045545c5f57b7ac207f178ed618"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_simple_linked_list": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "512a511d7cd9e2ac23df1860ef3fcd9f13642fb78fa1727b76ddcf8d58138394"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_transpose": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "bacfa6a129c139409056792f0ab9473c05107f6101f1578f1cd3778f3569c31e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_tree_building": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "5633cb9ad2a3a78eba715cb01147c59a0e8708929929b0bfe54706c9b4d323bb"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_two_bucket": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5e368f004473fe31005c676fad9ae1f2e6d38ed201520c77a34e0e6eb69a687"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_variable_length_quantity": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "61f5df3869de9bfdf440c8c236baad1746d2c4ef2473119f9877ed5917a079f6"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_wordy": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c3996feb248f45cf72b82d67a645662df12e8da6ab92caa091d2a138a67aac8e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_zebra_puzzle": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "69803832873415d820737c3d11c3ddd30bfaa68c3624e1155c49371af971f6b9"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zipper": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e143c51cbd4c0b1387f632a3e373e706d0f376cfc0447516665e5db8eec95720"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     }
+    },
+    "n_cells": 34,
+    "n_accepted": 22,
+    "anomalies": []
+   },
+   "C_fresh_hint3": {
+    "cells": {
+     "pg_affine_cipher": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "caa66108205fc2c54810240bc217b465b818f6a4b071edb4bed977ca9537e5ef"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_beer_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "264a1099bd76d84dfa03dbe9b30ad4e289d2f16b549ed6cd0683e38bf450ffea"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_book_store": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "1dd3d094286097d35767867d8747a937abb716bd6f3ba5c86e8db385585f54e5"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_bottle_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "256a75955d6846ab0134d3f155a14ba7118f0d4061d6059c465078c5ac4123bf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bowling": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6b4ad6d5e488d4843fa64c87b8b3c25c4104287881dcb2ce5e3b4471a6297099"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_connect": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "4c873a7bf4c3dbdb1243ea35b89586d73422f0601a9d717b8edb834d1710cf13"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dominoes": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "9ecb3524f97a863571b50e53f15e1e32b28af2c40980e8c807efbf37bc3ffb55"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dot_dsl": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "0474be3020fc4a33ba21a5dc946a703b06068640f8b39a2d831be1ed420a643c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_food_chain": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5aa164ee4ac16d469f7fbd18bb118bfbb2c4efb09efe68790a253feec693716"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_forth": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "fb97130931e1015c732817a9da53ee16c6e771fcd389c938df90b8b0051e0723"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_go_counting": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ee5dd964bb316f4a2d5a993f80ab1ef45c709aba8b5554ea8113fd856b2b3319"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grade_school": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ebbacd2badb9443001abdb20e2f8b8429cf7f4cae509d64b7bced21002ff2b97"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grep": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "b9c63219735d4de44c492b51517bca1ca97db56c951c15ddc2ca69c4e79baecf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_hangman": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "a5fd99b206af94ffa728697a90b852cbf77f8897dbc79b85ff6899ab695b0631"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_list_ops": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "17d769295da6349bbfba4b6d433a280d3df6e271d5a91f031b8992788bfa7e4f"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_paasio": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "d0c9d2fd0a089eef588839dcc805bad7fdea2aba3d1bb0de18c1cb80aad0d080"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_phone_number": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "eb801565f29bdf1dd94d5eea572ed0e2cbb412fb7289a6788e4b12b1da96b78c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pig_latin": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "e6afee5d0e52a51b300988eecdb18e5a96dd84d93c22d2301dc05fe691b320a7"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_poker": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "2a24048447502ee9bd9c364c75dde48e4cc4b074c454755e97bf8884bd5c3ffa"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pov": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "203ddcf633717be07beca135fb62188de84f7cf9ff00490a01eb6f3c0560153a"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_proverb": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "488b74fdb257595fa1f32f2bada5123beda81b2662dba8e2b2ea1356e6cb9420"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_react": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "847f9f0b12e1b7558d2f925ce6bd772a8a946bcbc54555da327e173f9ae18bc8"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_rest_api": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "6c30931f5f554542c5ab8e774aee6a2b523755fe9fb6d29e58a761781238f61b"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_robot_name": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "bf6d1b8a98bf2161b9cb7dac6074c288873258d38e00f0e0ca55ca47799a8e62"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_scale_generator": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "13c4cf01cbc477b5b39f406e16a75325171b3f3edfa079ba4c6c7e39afda74e7"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_sgf_parsing": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "8cbe2b983e75ecb718f33bf04b5cc8a121edc045545c5f57b7ac207f178ed618"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_simple_linked_list": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "512a511d7cd9e2ac23df1860ef3fcd9f13642fb78fa1727b76ddcf8d58138394"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_transpose": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "bacfa6a129c139409056792f0ab9473c05107f6101f1578f1cd3778f3569c31e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_tree_building": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "5633cb9ad2a3a78eba715cb01147c59a0e8708929929b0bfe54706c9b4d323bb"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_two_bucket": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5e368f004473fe31005c676fad9ae1f2e6d38ed201520c77a34e0e6eb69a687"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_variable_length_quantity": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "61f5df3869de9bfdf440c8c236baad1746d2c4ef2473119f9877ed5917a079f6"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_wordy": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c3996feb248f45cf72b82d67a645662df12e8da6ab92caa091d2a138a67aac8e"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zebra_puzzle": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "69803832873415d820737c3d11c3ddd30bfaa68c3624e1155c49371af971f6b9"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zipper": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e143c51cbd4c0b1387f632a3e373e706d0f376cfc0447516665e5db8eec95720"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     }
+    },
+    "n_cells": 34,
+    "n_accepted": 22,
+    "anomalies": []
+   }
+  },
+  "/home/user1/dev/ops/realrun/runs_v5_r3": {
+   "B_resample3": {
+    "cells": {
+     "pg_affine_cipher": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "caa66108205fc2c54810240bc217b465b818f6a4b071edb4bed977ca9537e5ef"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_beer_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "264a1099bd76d84dfa03dbe9b30ad4e289d2f16b549ed6cd0683e38bf450ffea"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_book_store": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "1dd3d094286097d35767867d8747a937abb716bd6f3ba5c86e8db385585f54e5"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bottle_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "256a75955d6846ab0134d3f155a14ba7118f0d4061d6059c465078c5ac4123bf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bowling": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6b4ad6d5e488d4843fa64c87b8b3c25c4104287881dcb2ce5e3b4471a6297099"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_connect": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "4c873a7bf4c3dbdb1243ea35b89586d73422f0601a9d717b8edb834d1710cf13"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_dominoes": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "9ecb3524f97a863571b50e53f15e1e32b28af2c40980e8c807efbf37bc3ffb55"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dot_dsl": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "0474be3020fc4a33ba21a5dc946a703b06068640f8b39a2d831be1ed420a643c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_food_chain": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5aa164ee4ac16d469f7fbd18bb118bfbb2c4efb09efe68790a253feec693716"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_forth": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "fb97130931e1015c732817a9da53ee16c6e771fcd389c938df90b8b0051e0723"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_go_counting": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ee5dd964bb316f4a2d5a993f80ab1ef45c709aba8b5554ea8113fd856b2b3319"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grade_school": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ebbacd2badb9443001abdb20e2f8b8429cf7f4cae509d64b7bced21002ff2b97"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grep": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "b9c63219735d4de44c492b51517bca1ca97db56c951c15ddc2ca69c4e79baecf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_hangman": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "a5fd99b206af94ffa728697a90b852cbf77f8897dbc79b85ff6899ab695b0631"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_list_ops": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "17d769295da6349bbfba4b6d433a280d3df6e271d5a91f031b8992788bfa7e4f"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_paasio": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "d0c9d2fd0a089eef588839dcc805bad7fdea2aba3d1bb0de18c1cb80aad0d080"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_phone_number": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "eb801565f29bdf1dd94d5eea572ed0e2cbb412fb7289a6788e4b12b1da96b78c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pig_latin": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "e6afee5d0e52a51b300988eecdb18e5a96dd84d93c22d2301dc05fe691b320a7"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_poker": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "2a24048447502ee9bd9c364c75dde48e4cc4b074c454755e97bf8884bd5c3ffa"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pov": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "203ddcf633717be07beca135fb62188de84f7cf9ff00490a01eb6f3c0560153a"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_proverb": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "488b74fdb257595fa1f32f2bada5123beda81b2662dba8e2b2ea1356e6cb9420"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_react": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "847f9f0b12e1b7558d2f925ce6bd772a8a946bcbc54555da327e173f9ae18bc8"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_rest_api": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6c30931f5f554542c5ab8e774aee6a2b523755fe9fb6d29e58a761781238f61b"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_robot_name": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "bf6d1b8a98bf2161b9cb7dac6074c288873258d38e00f0e0ca55ca47799a8e62"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_scale_generator": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "13c4cf01cbc477b5b39f406e16a75325171b3f3edfa079ba4c6c7e39afda74e7"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_sgf_parsing": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "8cbe2b983e75ecb718f33bf04b5cc8a121edc045545c5f57b7ac207f178ed618"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_simple_linked_list": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "512a511d7cd9e2ac23df1860ef3fcd9f13642fb78fa1727b76ddcf8d58138394"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_transpose": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "bacfa6a129c139409056792f0ab9473c05107f6101f1578f1cd3778f3569c31e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_tree_building": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "5633cb9ad2a3a78eba715cb01147c59a0e8708929929b0bfe54706c9b4d323bb"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_two_bucket": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "c5e368f004473fe31005c676fad9ae1f2e6d38ed201520c77a34e0e6eb69a687"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_variable_length_quantity": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "61f5df3869de9bfdf440c8c236baad1746d2c4ef2473119f9877ed5917a079f6"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_wordy": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c3996feb248f45cf72b82d67a645662df12e8da6ab92caa091d2a138a67aac8e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_zebra_puzzle": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "69803832873415d820737c3d11c3ddd30bfaa68c3624e1155c49371af971f6b9"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zipper": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": false,
+          "exact_hint": null
+         },
+         {
+          "attempt": 3,
+          "marker": false,
+          "exact_hint": null
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e143c51cbd4c0b1387f632a3e373e706d0f376cfc0447516665e5db8eec95720"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     }
+    },
+    "n_cells": 34,
+    "n_accepted": 21,
+    "anomalies": []
+   },
+   "C_fresh_hint3": {
+    "cells": {
+     "pg_affine_cipher": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "caa66108205fc2c54810240bc217b465b818f6a4b071edb4bed977ca9537e5ef"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_beer_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "264a1099bd76d84dfa03dbe9b30ad4e289d2f16b549ed6cd0683e38bf450ffea"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 3,
+      "stop_reason": "visible_pass"
+     },
+     "pg_book_store": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "1dd3d094286097d35767867d8747a937abb716bd6f3ba5c86e8db385585f54e5"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bottle_song": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "256a75955d6846ab0134d3f155a14ba7118f0d4061d6059c465078c5ac4123bf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_bowling": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6b4ad6d5e488d4843fa64c87b8b3c25c4104287881dcb2ce5e3b4471a6297099"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_connect": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "4c873a7bf4c3dbdb1243ea35b89586d73422f0601a9d717b8edb834d1710cf13"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_dominoes": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "9ecb3524f97a863571b50e53f15e1e32b28af2c40980e8c807efbf37bc3ffb55"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_dot_dsl": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "0474be3020fc4a33ba21a5dc946a703b06068640f8b39a2d831be1ed420a643c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_food_chain": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "c5aa164ee4ac16d469f7fbd18bb118bfbb2c4efb09efe68790a253feec693716"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_forth": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "fb97130931e1015c732817a9da53ee16c6e771fcd389c938df90b8b0051e0723"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_go_counting": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ee5dd964bb316f4a2d5a993f80ab1ef45c709aba8b5554ea8113fd856b2b3319"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grade_school": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "ebbacd2badb9443001abdb20e2f8b8429cf7f4cae509d64b7bced21002ff2b97"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_grep": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "b9c63219735d4de44c492b51517bca1ca97db56c951c15ddc2ca69c4e79baecf"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_hangman": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "a5fd99b206af94ffa728697a90b852cbf77f8897dbc79b85ff6899ab695b0631"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_list_ops": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "17d769295da6349bbfba4b6d433a280d3df6e271d5a91f031b8992788bfa7e4f"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_paasio": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "d0c9d2fd0a089eef588839dcc805bad7fdea2aba3d1bb0de18c1cb80aad0d080"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_phone_number": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "eb801565f29bdf1dd94d5eea572ed0e2cbb412fb7289a6788e4b12b1da96b78c"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_pig_latin": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "e6afee5d0e52a51b300988eecdb18e5a96dd84d93c22d2301dc05fe691b320a7"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_poker": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "2a24048447502ee9bd9c364c75dde48e4cc4b074c454755e97bf8884bd5c3ffa"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_pov": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "203ddcf633717be07beca135fb62188de84f7cf9ff00490a01eb6f3c0560153a"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_proverb": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "488b74fdb257595fa1f32f2bada5123beda81b2662dba8e2b2ea1356e6cb9420"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_react": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "847f9f0b12e1b7558d2f925ce6bd772a8a946bcbc54555da327e173f9ae18bc8"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_rest_api": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "6c30931f5f554542c5ab8e774aee6a2b523755fe9fb6d29e58a761781238f61b"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_robot_name": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "bf6d1b8a98bf2161b9cb7dac6074c288873258d38e00f0e0ca55ca47799a8e62"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_scale_generator": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "13c4cf01cbc477b5b39f406e16a75325171b3f3edfa079ba4c6c7e39afda74e7"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_sgf_parsing": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "8cbe2b983e75ecb718f33bf04b5cc8a121edc045545c5f57b7ac207f178ed618"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_simple_linked_list": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "512a511d7cd9e2ac23df1860ef3fcd9f13642fb78fa1727b76ddcf8d58138394"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_transpose": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "bacfa6a129c139409056792f0ab9473c05107f6101f1578f1cd3778f3569c31e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_tree_building": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "5633cb9ad2a3a78eba715cb01147c59a0e8708929929b0bfe54706c9b4d323bb"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_two_bucket": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 2,
+        "attempts_used": 2,
+        "requests_seen": 2
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c5e368f004473fe31005c676fad9ae1f2e6d38ed201520c77a34e0e6eb69a687"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 2,
+      "stop_reason": "visible_pass"
+     },
+     "pg_variable_length_quantity": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "61f5df3869de9bfdf440c8c236baad1746d2c4ef2473119f9877ed5917a079f6"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_wordy": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "c3996feb248f45cf72b82d67a645662df12e8da6ab92caa091d2a138a67aac8e"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     },
+     "pg_zebra_puzzle": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 1,
+        "attempts_used": 1,
+        "requests_seen": 1
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": false,
+        "file_bytes": null
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": []
+       },
+       "argv_sha256_attempt1": "69803832873415d820737c3d11c3ddd30bfaa68c3624e1155c49371af971f6b9"
+      },
+      "anomalies": [],
+      "accepted": true,
+      "attempts_used": 1,
+      "stop_reason": "visible_pass"
+     },
+     "pg_zipper": {
+      "pass": true,
+      "checks": {
+       "D1_mediation": {
+        "pass": true,
+        "wire_requests": 3,
+        "attempts_used": 3,
+        "requests_seen": 3
+       },
+       "D2_clean_reset": {
+        "pass": true
+       },
+       "D3_hint_file": {
+        "pass": true,
+        "file_present": true,
+        "file_bytes": 275
+       },
+       "D4_wire_content": {
+        "pass": true,
+        "per_attempt": [
+         {
+          "attempt": 2,
+          "marker": true,
+          "exact_hint": true
+         },
+         {
+          "attempt": 3,
+          "marker": true,
+          "exact_hint": true
+         }
+        ]
+       },
+       "argv_sha256_attempt1": "e143c51cbd4c0b1387f632a3e373e706d0f376cfc0447516665e5db8eec95720"
+      },
+      "anomalies": [],
+      "accepted": false,
+      "attempts_used": 3,
+      "stop_reason": "attempts_exhausted"
+     }
+    },
+    "n_cells": 34,
+    "n_accepted": 22,
+    "anomalies": []
+   }
+  }
+ },
+ "D5_prompt_identical_across_arms": {
+  "pass": true,
+  "mismatches": []
+ },
+ "control_nonempty_hint_files": 0,
+ "descriptive_hint_used_subset": {
+  "out_of_prereg": true,
+  "decision_state": null,
+  "definition": "pairs where the treatment cell actually used the hint (attempts_used>=2)",
+  "n_pairs": 49,
+  "control_accepted": 17,
+  "treatment_accepted": 14,
+  "b_control_only": 6,
+  "c_treatment_only": 3,
+  "note": "descriptive only: exposure of the UNRESOLVED verdict, NOT a decision and NOT a new effect claim; no p-value is assigned to it"
+ },
+ "all_checks_passed": true,
+ "prereg_id": "v5_live_fresh_hint_vs_resample_34tasks_20261026"
+}
