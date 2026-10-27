@@ -27,6 +27,7 @@ Vacant 的三個承重路徑（追緝版本庫、收件隔離區、一次性工�
 | `DEFAULT_KEEP_SET_ASIDE` | 3 | 每專案保留最近 3 份 `chain.set-aside.*.ndjson` |
 | `DEFAULT_KEEP_DECISIONS` | 2 | 收件帳本保留最新 2 份接受／放行／待審裁決引用的物件 |
 | `DEFAULT_MAX_LOG_BYTES` | 2 MB | hooks 追加日誌超過 2 MB 時截斷 |
+| `DEFAULT_ACTIVE_WINDOW_S` | 7 天 | 活躍窗口：鏈活動在窗口內的專案視為「活躍」，其未變動背景 blob 保留（見「穩態用量」） |
 | `AUTO_GC_MIN_INTERVAL_S` | 3600 s | 自動 gc 頻率限制 |
 | `AUTO_GC_BUDGET_S` | 30 s | 自動 gc 時間預算 |
 
@@ -53,16 +54,33 @@ Vacant 的三個承重路徑（追緝版本庫、收件隔離區、一次性工�
 quarantine、possess、adapters）、每專案占用與步數、物件前 10、**可回收估算**
 （dry-run 走完整 gc 邏輯、不取鎖不計頻）、上次自動 gc 的結果。
 
-## 使用者機器穩態用量（估算）
+## 穩態用量（使用者機器）
 
-- 單專案的佔用 ≈ 該專案被改動過的檔案版本（內容定址去重）＋ 每步索引。
-  未改動的檔案雖然**第一次掃描會先複製一份**（這是設計上的快照，
-  見下「已知限制」），但之後任一輪 gc 都會把仍在工作區原位、重算吻合的副本清掉。
-- 實測（本機 `~/.vacant`，143 個歷史專案）：一次自動 gc 釋放 **743.7 MB / 19,397 檔**
-  （2026-10-24 11:42，`gc_report.json`）；之後穩態約 **25 MB**、trace 物件 300 個，
-  增量 gc 每輪只清 KB 級。
-- 粗估：一個日常專案穩態在 **數 MB 到數十 MB** 級；十個專案同時追緝，
-  預算 1 GB 內有餘裕。
+「未變動背景 blob」能不能回收，取決於**專案是否活躍**
+（`DEFAULT_ACTIVE_WINDOW_S`，預設 7 天）：
+
+- **活躍專案**（鏈活動在窗口內）：除最近 50 步、所有被改動版本與目前索引外，
+  **未變動的背景 blob（原檔快照）按設計保留**——那正是該檔下一次被修改時所需的
+  **before 版本**；回收它只會買回「下一次掃描如數重存」（round 72 設計決定，
+  gc↔rescan whack-a-mole；可執行證據：`tests/test_retention.py::test_compact_trace_keeps_active_project_live_blobs`）。
+  ⇒ 活躍專案穩態 ≈ **該專案 ≤8 MB 檔案的快照總量**＋最近 50 步的被改版本＋每步索引。
+  工作區越大佔用越大——這是「原檔被刪掉仍可讀」保證的設計成本，不是洩漏；
+  佔用量受工作區規模限界，不隨輪次無界增長。
+- **非活躍專案**（超過 7 天無活動）：未變動背景 blob 被回收，
+  只留鏈、目前索引與保留集合內的被改版本——MB 級以下
+  （`tests/test_retention.py::test_compact_trace_reclaims_untouched_blobs_and_preserves_chain_and_blame`，
+  以 `active_window_s=0.0` 模擬非活躍）。
+
+實測（本機 `~/.vacant`，`vacant usage`）：
+
+- 2026-10-24（活躍保留政策落地前）：一次自動 gc 釋放 743.7 MB / 19,397 檔
+  （`gc_report.json`）；當時穩態約 25 MB / 300 個 trace 物件
+  （當時活躍專案的快照也會被回收，故數字小）。
+- 2026-10-27（活躍保留政策下）：總計 788.03 MB，其中活躍開發專案（6007 步）佔約
+  760 MB / 21,030 個物件，其餘 142 個歷史專案合計僅約 11 MB；當輪政策下「可回收（估算）」
+  只有 469.1 KB——佔用的主體是活躍專案的 live 快照，**屬政策保留、非待清理**。
+  自動 gc 同日正常執行（05:04，釋放 1.09 MB，status ok）；
+  `vacant gc --verify`：143 個專案簽章鏈全數通過。
 
 ## 已知限制（誠實邊界）
 
@@ -76,6 +94,13 @@ quarantine、possess、adapters）、每專案占用與步數、物件前 10、*
    （`status="ok_partial"`），極大的狀態目錄需要人手 `vacant gc`（可加大 `--budget-s`）。
 4. 沙箱與簽章鏈的安全性與磁碟用量無關：gc 不引入新的信任假設，
    也不降低 H-3／H-4 的既有邊界。
+5. **活躍專案佔用 ∝ 工作區大小**：只要專案活躍（7 天內有鏈活動），其 ≤8 MB 檔案快照就保留；
+   多 GB 級開發工作區會讓 `trace/objects/` 佔據數百 MB（2026-10-27 實測總計 788.03 MB，
+   見「穩態用量」）。專案 7 天不活躍後自動收縮到最小。**目前沒有 CLI 開關可以回收活躍專案的
+   live 快照**（`vacant gc --aggressive` 只縮短保留步數，不改活躍窗口——`gc_all()` 呼叫
+   `compact_trace()` 時未傳 `active_window_s`，恆為預設 7 天）；只有 API
+   `retention.compact_trace(active_window_s=0.0)` 能做到。逃生門開關已列 BACKLOG。
+   注意這是**設計成本**（避免 gc↔rescan whack-a-mole），不是洩漏：佔用量受工作區規模限界。
 
 ## 相關檔案與測試
 
