@@ -124,3 +124,7 @@
   （ref 工具 `~/dev/ops/ref/offline_restart_sim.py` ＋ repo 副本 `ops/realrun/offline_real_signal_replay.py`）
   為準，**刪除該第二實現與其 test**（repo commit，git 可還原）；本檔數字與引用口徑不變。
   若日後重現該類工具，先與本檔 §3 數字逐欄對齊，否則不得標「可引用」。
+- 落盤可引 artifact＝`ops/realrun/offline_real_signal_replay.json`（input sha256 `9c6e2b13…`＝
+  `runs/_replay/c37_final.json`、1187 rows；ALL 62.34→66.36 n=331 flag_restart scorer_used=false；
+  polyglot_py 37.28→46.96 n=68；test_restart 77.68／oracle 78.25 皆 scorer_used=true＝上界）；
+  97.1% 的數字從未出現在該 artifact。
