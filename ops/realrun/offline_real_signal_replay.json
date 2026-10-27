@@ -1,0 +1,130 @@
+{
+  "schema": "vacant.realrun.offline_real_signal_replay/1",
+  "cap": 3,
+  "definition": {
+    "unit": "(suite, batch, task) group with >=2 archived independent runs; groups weighted equally",
+    "columns": {
+      "pass_at_1": "one archived run, as recorded",
+      "flag_restart": "rerun while Vacant's recorded findings are non-empty; real signal, no scorer",
+      "test_restart": "rerun while the archived run failed the grader; real signal ONLY where visible tests are the grader, otherwise an upper bound",
+      "oracle_any": "at least one archived run in the group passes; always an upper bound"
+    },
+    "visible_tests_are_grader_suites": [
+      "polyglot_py"
+    ],
+    "quoting_rule": "flag_restart is the citable real-signal column. test_restart is citable only for suites in visible_tests_are_grader_suites. oracle_any and other test_restart values are upper bounds; quoting them as an achieved effect is a misstatement."
+  },
+  "suites": {
+    "dabench": {
+      "units": 60,
+      "pass_at_1_pct": 79.36,
+      "flag_restart": {
+        "pct": 81.31,
+        "mean_runs": 1.0292,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty"
+      },
+      "test_restart": {
+        "pct": 97.92,
+        "mean_runs": 1.2586,
+        "scorer_used": true,
+        "signal": "recorded_grader_pass"
+      },
+      "oracle_any": {
+        "pct": 98.33,
+        "scorer_used": true,
+        "signal": "any_archived_run_passes"
+      }
+    },
+    "dabstep": {
+      "units": 144,
+      "pass_at_1_pct": 65.05,
+      "flag_restart": {
+        "pct": 67.74,
+        "mean_runs": 1.1388,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty"
+      },
+      "test_restart": {
+        "pct": 75.26,
+        "mean_runs": 1.5551,
+        "scorer_used": true,
+        "signal": "recorded_grader_pass"
+      },
+      "oracle_any": {
+        "pct": 75.69,
+        "scorer_used": true,
+        "signal": "any_archived_run_passes"
+      }
+    },
+    "databench": {
+      "units": 59,
+      "pass_at_1_pct": 67.32,
+      "flag_restart": {
+        "pct": 70.14,
+        "mean_runs": 1.0325,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty"
+      },
+      "test_restart": {
+        "pct": 88.14,
+        "mean_runs": 1.4658,
+        "scorer_used": true,
+        "signal": "recorded_grader_pass"
+      },
+      "oracle_any": {
+        "pct": 89.83,
+        "scorer_used": true,
+        "signal": "any_archived_run_passes"
+      }
+    },
+    "polyglot_py": {
+      "units": 68,
+      "pass_at_1_pct": 37.28,
+      "flag_restart": {
+        "pct": 46.96,
+        "mean_runs": 1.4858,
+        "scorer_used": false,
+        "signal": "vacant_findings_empty"
+      },
+      "test_restart": {
+        "pct": 55.88,
+        "mean_runs": 1.9346,
+        "scorer_used": false,
+        "signal": "recorded_grader_pass"
+      },
+      "oracle_any": {
+        "pct": 55.88,
+        "scorer_used": true,
+        "signal": "any_archived_run_passes"
+      }
+    }
+  },
+  "all": {
+    "units": 331,
+    "pass_at_1_pct": 62.34,
+    "flag_restart": {
+      "pct": 66.36,
+      "mean_runs": 1.1713,
+      "scorer_used": false,
+      "signal": "vacant_findings_empty"
+    },
+    "test_restart": {
+      "pct": 77.68,
+      "mean_runs": 1.5634,
+      "scorer_used": true,
+      "signal": "recorded_grader_pass"
+    },
+    "oracle_any": {
+      "pct": 78.25,
+      "scorer_used": true,
+      "signal": "any_archived_run_passes"
+    }
+  },
+  "input": {
+    "path": "/home/user1/dev/ops/ref/c37_final.json",
+    "sha256": "9c6e2b1383e478f88805ccac0f0db219f32316fb4692107d9d4e9e76804bbf5c",
+    "rows": 1187,
+    "rows_used": 1187
+  }
+}
