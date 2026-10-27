@@ -27,6 +27,7 @@ REPO = Path(__file__).resolve().parent.parent
 HERE = REPO / "ops" / "realrun"
 REPLAY = HERE / "offline_real_signal_replay.py"
 MIRROR = HERE / "offline_real_signal_replay.json"
+V5_AUDIT = HERE / "audit_v5_hint_delivery.json"
 
 
 def _load(p: Path) -> dict:
@@ -118,3 +119,31 @@ def test_quoting_rule_text_present() -> None:
     assert "flag_restart" in q and "upper bound" in q.lower()
     # 禁句不得出現：不得把 77.7 說成可引用成效
     assert "77.7" not in q
+
+
+def test_v5_delivery_premise_pinned() -> None:
+    """v5 兩臂「重抽觸發＝可見驗收、治療照 prereg 投遞」是落盤事實，不是假設。
+
+    `ops/realrun/audit_v5_hint_delivery.json`（round 93 的審計鏡像）記錄
+    `all_checks_passed=true`；本測試把該前提讀出來釘死：治療 fresh_hint 照
+    prereg 投遞、控制臂無 hint 檔、兩臂 prompt 逐字相同、兩臂 stop_reason 只有
+    visible_pass／attempts_exhausted（隱藏評分器不參與重抽觸發）。這是本輪
+    STATE「v5 兩臂本已此形」一行的依賴證據。
+    """
+    if not V5_AUDIT.exists():
+        pytest.skip(f"v5 審計鏡像不在本 repo：{V5_AUDIT}")
+    a = _load(V5_AUDIT)
+    assert a["schema"] == "vacant.audit/v5_hint_delivery/1"
+    assert a["prereg_id"] == "v5_live_fresh_hint_vs_resample_34tasks_20261026"
+    assert a["all_checks_passed"] is True
+    assert a["control_nonempty_hint_files"] == 0
+    assert a["D5_prompt_identical_across_arms"]["pass"] is True
+    n = 0
+    for root, arms in a["per_root"].items():
+        for arm, body in arms.items():
+            for cell, c in body["cells"].items():
+                assert c["stop_reason"] in ("visible_pass", "attempts_exhausted"), \
+                    (root, arm, cell)
+                assert not c.get("anomalies"), (root, arm, cell)
+                n += 1
+    assert n == a["n_cells"] == 204, (n, a["n_cells"])
