@@ -1,0 +1,240 @@
+{
+ "schema": "vacant.realrun.live_budget_curve/1",
+ "descriptive_only": true,
+ "note": "per-attempt decomposition of the registered B_resample3 arm; no decision state; batches not pooled; scorer_used=false",
+ "batches": [
+  {
+   "batch": "v4",
+   "roots": [
+    "/home/user1/dev/ops/realrun/runs_v4_r1",
+    "/home/user1/dev/ops/realrun/runs_v4_r2",
+    "/home/user1/dev/ops/realrun/runs_v4_r3"
+   ],
+   "input": [
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v4_r1",
+     "progress_sha256": "17a00ccbae577a0db373321de3be4cd1db552b68d7d64c50dc534ba8cb67c10c"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v4_r2",
+     "progress_sha256": "1fd67e72f6f473d1472262237874506fa93336136a91dbbe09fbef0356a2f9ac"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v4_r3",
+     "progress_sha256": "797f3d65ba7f070effc2d71b538be2aa450ae23877a8138788521ca6fc849716"
+    }
+   ],
+   "n_reps": 3,
+   "n_cells": 204,
+   "n_voids_excluded": 0,
+   "arm_a": {
+    "n": 102,
+    "accepted": 56,
+    "pct": 54.9
+   },
+   "arm_b": {
+    "n": 102,
+    "accepted": 66,
+    "pct": 64.71,
+    "accepted_by_attempt": {
+     "1": 50,
+     "2": 9,
+     "3": 7
+    },
+    "rejected_by_attempt": {
+     "3": 36
+    }
+   },
+   "caps": {
+    "1": {
+     "accepted": 50,
+     "n_cells": 102,
+     "pct": 49.02
+    },
+    "2": {
+     "accepted": 59,
+     "n_cells": 102,
+     "pct": 57.84
+    },
+    "3": {
+     "accepted": 66,
+     "n_cells": 102,
+     "pct": 64.71
+    }
+   },
+   "margins_pp": {
+    "cap2_minus_cap1": 8.82,
+    "cap3_minus_cap2": 6.86
+   },
+   "descriptive_only": true,
+   "decision_state": null,
+   "scorer_used": false,
+   "meta": {
+    "model": "qwen/qwen3.8-27b",
+    "prereg_id": "v4_live_resample_34tasks_20261026"
+   }
+  },
+  {
+   "batch": "v6",
+   "roots": [
+    "/home/user1/dev/ops/realrun/runs_v6_r1",
+    "/home/user1/dev/ops/realrun/runs_v6_r2",
+    "/home/user1/dev/ops/realrun/runs_v6_r3",
+    "/home/user1/dev/ops/realrun/runs_v6_r4",
+    "/home/user1/dev/ops/realrun/runs_v6_r5"
+   ],
+   "input": [
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v6_r1",
+     "progress_sha256": "87589370ca6c0491f083f6073091f88420653e57994fa656f19555d6a2a22589"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v6_r2",
+     "progress_sha256": "377d1b985ad92f0504c9cc187040e706fdfa57a5a410010cf71d482d985a0942"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v6_r3",
+     "progress_sha256": "eb78ca61ad5f0e7fabc2cd7e2c58e3ee8cc0f926c1b161e9dae0785dfc31e44a"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v6_r4",
+     "progress_sha256": "e35988e4c8d4f9ec081ec85773d13d648480e2838ebcc6f6dddd0b76ec64a397"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v6_r5",
+     "progress_sha256": "fc73dffd5c9104f3dd65d7cb693e1d115c54221c1d8269aa4e31f2b53a9e2308"
+    }
+   ],
+   "n_reps": 5,
+   "n_cells": 340,
+   "n_voids_excluded": 0,
+   "arm_a": {
+    "n": 170,
+    "accepted": 87,
+    "pct": 51.18
+   },
+   "arm_b": {
+    "n": 170,
+    "accepted": 104,
+    "pct": 61.18,
+    "accepted_by_attempt": {
+     "1": 88,
+     "2": 12,
+     "3": 4
+    },
+    "rejected_by_attempt": {
+     "3": 66
+    }
+   },
+   "caps": {
+    "1": {
+     "accepted": 88,
+     "n_cells": 170,
+     "pct": 51.76
+    },
+    "2": {
+     "accepted": 100,
+     "n_cells": 170,
+     "pct": 58.82
+    },
+    "3": {
+     "accepted": 104,
+     "n_cells": 170,
+     "pct": 61.18
+    }
+   },
+   "margins_pp": {
+    "cap2_minus_cap1": 7.06,
+    "cap3_minus_cap2": 2.35
+   },
+   "descriptive_only": true,
+   "decision_state": null,
+   "scorer_used": false,
+   "meta": {
+    "model": "qwen/qwen3.8-27b",
+    "prereg_id": "v6_live_resample_scaleup_34tasks_20261027"
+   }
+  },
+  {
+   "batch": "v7",
+   "roots": [
+    "/home/user1/dev/ops/realrun/runs_v7_r1",
+    "/home/user1/dev/ops/realrun/runs_v7_r2",
+    "/home/user1/dev/ops/realrun/runs_v7_r3",
+    "/home/user1/dev/ops/realrun/runs_v7_r4",
+    "/home/user1/dev/ops/realrun/runs_v7_r5"
+   ],
+   "input": [
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v7_r1",
+     "progress_sha256": "7403fdf5417f31362e28e69bcdcd2e50495bc9a324e08b6c4ac28a92abd00449"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v7_r2",
+     "progress_sha256": "70a9aed7f120ef4daa231e6effd296fbb42fe91bddf27f2227fe5454680f0810"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v7_r3",
+     "progress_sha256": "ea7023c8156fe83ebb5b5b1daca929186919721847895705fd138205b53b59b6"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v7_r4",
+     "progress_sha256": "df1425a4b734440ef4774729c0af4a5e5a3c64468d7a3f763d755a09dd33cef3"
+    },
+    {
+     "root": "/home/user1/dev/ops/realrun/runs_v7_r5",
+     "progress_sha256": "8cac1908241d727dbb695f9ead6292f1b58c6126a051b7c9f043f11eb7bcc7ac"
+    }
+   ],
+   "n_reps": 5,
+   "n_cells": 340,
+   "n_voids_excluded": 0,
+   "arm_a": {
+    "n": 170,
+    "accepted": 45,
+    "pct": 26.47
+   },
+   "arm_b": {
+    "n": 170,
+    "accepted": 59,
+    "pct": 34.71,
+    "accepted_by_attempt": {
+     "1": 40,
+     "2": 12,
+     "3": 7
+    },
+    "rejected_by_attempt": {
+     "3": 111
+    }
+   },
+   "caps": {
+    "1": {
+     "accepted": 40,
+     "n_cells": 170,
+     "pct": 23.53
+    },
+    "2": {
+     "accepted": 52,
+     "n_cells": 170,
+     "pct": 30.59
+    },
+    "3": {
+     "accepted": 59,
+     "n_cells": 170,
+     "pct": 34.71
+    }
+   },
+   "margins_pp": {
+    "cap2_minus_cap1": 7.06,
+    "cap3_minus_cap2": 4.12
+   },
+   "descriptive_only": true,
+   "decision_state": null,
+   "scorer_used": false,
+   "meta": {
+    "model": "gemma-4-12b-it-qat",
+    "prereg_id": "v7_live_resample_crossmodel_34tasks_20261027"
+   }
+  }
+ ]
+}
