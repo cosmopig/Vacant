@@ -11,7 +11,7 @@
 | `failed_step` 失敗的步驟被略過 | 跑 agent 自己寫的腳本或讀給定資料的那一步失敗；之後才寫出交付物；後來沒有再成功跑同一件事；最後的訊息也沒提 |
 
 其他（沒讀的資料夾成員、沒點名資料時沒出處的值）只進交件說明（`notes`）。
-Advisory 項（`copy_of_task`／`skeleton`／`stale_output`／`copy_of_input`／`copy_of_inline`／`claimed_run`）
+Advisory 項（`copy_of_task`／`skeleton`／`stale_output`／`copy_of_input`／`copy_of_inline`／`claimed_run`／`unfetched`）
 也只進交件說明、不作為退回理由，由 `zerostop.pushable_for` 明確排除（docs/UNIVERSAL_TASKS.md §2）。
 純函式：只讀病歷，所以可以在任何錄好的病歷上離線重播（量誤報）。
 
@@ -134,6 +134,38 @@ RUN_CLAIM_TOOLS = frozenset({
     "java", "jar", "mvn", "gradle", "go", "swiftc", "kotlin", "bc", "date", "cal",
     "env", "printenv", "echo", "printf", "basename", "dirname", "readlink", "realpath",
 })
+
+# unfetched（2026-11-03，第 100 輪）：方向 A「抓過沒」—— ASSIGNMENT 點名三類（跑過沒／數字追得到／
+# 抓過沒）最後一類沒有專屬檢查的缺口。任務點到一個 URL、鄰窗有抓取類線索（fetch/download/retrieve/
+# grab/pull/obtain/access/visit/open/scrape/load/read、下載/抓取/獲取/取得/訪問/打開/拉取/讀取），
+# 但整份記錄沒有任何一步碰到該 URL（任何步驟的輸入或輸出裡都查無同 key 的 URL），且最終訊息沒有
+# 老實說連不上 → advisory 發現。兩層保守濾網（寧可漏抓、不可誤傷，docs/UNIVERSAL_TASKS.md §3）：
+#   1) 抓取線索：線索必須在 URL ±60 字元內——參考連結／註腳引用（"see https://…"、polyglot_py
+#      goal.md 樣本集裡的維基註腳）不觸發；
+#   2) 誠實豁免：最終訊息裡「連不上／404／逾時」線索在該 URL ±80 內，或整段訊息有「fetch 動詞
+#      附近說連不上」（URL 不必重提）→ 不報——老實說「連不上」是合規結果，不是缺紀錄。
+# 證據面：URL（host＋第一路徑段，小寫、去 www.）出現在**任何一步**的輸入或輸出就算碰到——
+# shell curl/wget、fetch 工具呼叫、腳本裡的 URL、甚至把 URL 貼進報告都算（寧漏勿誤）。
+# Advisory only：`zerostop.pushable_for` 明確排除（docs/UNIVERSAL_TASKS.md §2）。
+URL_RE = re.compile(r"https?://[^\s<>\"'()\[\]{}，。；、（）]+")
+FETCH_CUE = re.compile(
+    r"\b(?:fetch|download|retriev\w*|grab|pull|obtain|access|visit|open|scrape|load|read)\w*"
+    r"|下載|抓取|獲取|取得|訪問|打開|拉取|讀取", re.I)
+UNFETCHED_UNAVAILABLE = re.compile(
+    r"\bunreachable\b|\bunavailable\b|couldn'?t|could not|failed to|timed? ?out|time-?out"
+    r"|\b404\b|no response|not responding|connection (?:error|refused|reset)"
+    r"|無法(?:連接|連線|訪問|打開|存取|取得)|連線失敗|逾時|超時|連不上|打不開"
+    r"|抓(?:取)?(?:失敗|不到)|下載(?:失敗|不到)|取不到", re.I)
+
+
+def _url_key(u: str) -> str:
+    """URL 比對 key：host（小寫、去 `www.`）＋第一路徑段（小寫）。
+    query/fragment 差異不影響比對（抓 `/v1/rates?d=1` 就算碰到 `/v1/rates`）。"""
+    m = re.match(r"https?://([^/]+)(?:/([^/?#]*))?", u.strip())
+    if not m:
+        return u.strip().lower()
+    host = m.group(1).lower().split("@")[-1].removeprefix("www.")
+    return f"{host}/{(m.group(2) or '').lower()}"
 
 
 def _is_placeholder_line(line: str) -> bool:
@@ -1001,6 +1033,7 @@ class Evidence:
         findings += self._test_claim(steps, delivs)
         findings += self._failed_steps(steps, delivs, named + dir_members)
         findings += self._claimed_runs()
+        findings += self._unfetched_sources(task_texts)
         outs = self.asked_outputs(prompt_texts, start_idx)
         latest_idx = self.tr.latest_index()
         latest = self.tr.index(latest_idx)
@@ -1474,6 +1507,48 @@ class Evidence:
                 continue
             out.append({"kind": "claimed_run", "sub": "none", "cmd_token": token,
                         "quote": _sentence_around(text, start, end)})
+        return out
+
+    def _unfetched_sources(self, task_texts: list[str]) -> list[dict[str, Any]]:
+        """方向 A「抓過沒」（2026-11-03，第 100 輪）：任務點到 URL＋鄰窗有抓取線索，但整份記錄
+        沒有任何一步碰到該 URL，且最終訊息沒有老實說連不上。濾網與證據面見 `URL_RE` 旁註解。
+        Advisory only：`zerostop.pushable_for` 明確排除，只進交件說明（docs/UNIVERSAL_TASKS.md §2）。"""
+        task = "\n".join(task_texts)
+        cand: list[tuple[str, str]] = []          # (url, 任務文字裡的線索句)
+        for m in URL_RE.finditer(task):
+            url = m.group(0).rstrip(".,;:!?。，；：、")
+            key = _url_key(url)
+            if any(key == _url_key(u) for u, _ in cand):
+                continue
+            start, end = m.span()
+            if FETCH_CUE.search(task[max(0, start - 60):min(len(task), end + 60)]):
+                cand.append((url, _sentence_around(task, start, end)))
+        if not cand:
+            return []
+        # 證據面：任何一步的輸入／輸出碰到該 URL 就算抓過（curl、fetch 工具、腳本、引用皆算——寧漏勿誤）。
+        touched: set[str] = set()
+        for s in self.tr.steps:
+            for txt in (self.tr.input_text(s), self.tr.output_text(s)):
+                if txt:
+                    touched.update(_url_key(u) for u in URL_RE.findall(txt))
+        final = self.final_text or ""
+        # 整段誠實豁免：最終訊息在 fetch 動詞附近老實說連不上（URL 不必重提）→ 一律不報。
+        if final and any(
+                UNFETCHED_UNAVAILABLE.search(final[max(0, mm.start() - 100):min(len(final), mm.end() + 100)])
+                for mm in FETCH_CUE.finditer(final)):
+            return []
+        out: list[dict[str, Any]] = []
+        for url, quote in cand:
+            key = _url_key(url)
+            if key in touched:
+                continue
+            if final and any(
+                    UNFETCHED_UNAVAILABLE.search(final[max(0, mm.start() - 80):min(len(final), mm.end() + 80)])
+                    for mm in URL_RE.finditer(final)
+                    if _url_key(mm.group(0).rstrip(".,;:!?。，；：、")) == key):
+                continue
+            out.append({"kind": "unfetched", "sub": "none", "url": url,
+                        "host": key.split("/", 1)[0], "quote": quote})
         return out
 
     def _failed_steps(self, steps: list[Step], delivs: dict[str, tuple[str, str]],

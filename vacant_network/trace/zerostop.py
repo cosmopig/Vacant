@@ -217,10 +217,11 @@ def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) ->
         # （skeleton 模板骨架／stale_output 舊檔當成果／copy_of_input 照抄輸入素材）
         # ＋ 2026-10-25 `copy_of_inline`（把貼在題目裡的數據原樣抄回當成果）
         # ＋ 2026-10-26 `claimed_run`（稱已執行某命令但記錄查無，「跑過沒」）
+        # ＋ 2026-11-03 `unfetched`（任務點到 URL 要抓取但記錄查無、也沒老實說連不上，「抓過沒」）
         # ——都只進交件說明，不退回（docs/UNIVERSAL_TASKS.md §2）。
         # 要改成可退回，先過 tests/test_noncode_samples.py 的零誤報門檻。
         if k in ("copy_of_task", "skeleton", "stale_output", "copy_of_input", "copy_of_inline",
-                "claimed_run"):
+                "claimed_run", "unfetched"):
             continue
         if k == "unread" and used >= UNREAD_MAX_ROUNDS:
             continue
@@ -377,6 +378,9 @@ def _say(f: dict[str, Any]) -> str:
     if k == "claimed_run":
         return (f"the final message claims it ran `{f.get('cmd_token')}` "
                 f"but no such command appears in the record")
+    if k == "unfetched":
+        return (f"the task asked to obtain a source at {f.get('url')} "
+                f"but the record shows no fetch of it (unverified)")
     if k == "test_claim":
         return f'the final message said "{f.get("quote")}" without a matching test run'
     if k == "failed_step":
