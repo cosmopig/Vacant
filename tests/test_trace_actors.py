@@ -1,10 +1,18 @@
-"""後果（`trace/actors.py`）：只有事實層進信譽、人撤銷逐位元反轉、輸入錯記來源、缺口不怪人、路由。"""
+"""後果（`trace/actors.py`）：只有事實層進信譽、人撤銷逐位元反轉、輸入錯記來源、缺口不怪人、路由。
+
+round 122 dogfood：`trace actors` 是各視圖中唯一不說自己範圍的——表是全機的，表頭不說；
+在單一專案裡看它，容易當成該專案的統計（本專案 100% `pi:main`，表裡卻只有其他專案的
+`opencode`）。視圖第一行要說清範圍（round 107 `show` 的 workspace 行是同一類問題）。
+"""
 from __future__ import annotations
+
+import argparse
 
 import pytest
 
 from vacant_network.trace import actors as A
 from vacant_network.trace import feedback as F
+from vacant_network.trace import cli
 
 
 @pytest.fixture
@@ -25,6 +33,17 @@ def _blame(conf, fault="agent", actor=None, claim="total", source=None, value="9
                      "actor": actor or {"platform": "claude", "session": "s",
                                         "agent": "a1", "agent_type": "helper"}},
             "source": source, "chain": [{"actor": {"platform": "claude"}}]}
+
+
+def test_actors_view_states_its_machine_scope(book, capsys):
+    ab = book
+    ab.record({"id": "o:test1", "kind": "outcome",
+               "key": ["claude", "main", "unknown", "python_checks"], "accepted": True})
+    assert cli.cmd_actors(argparse.Namespace(json=False)) == 0
+    out = capsys.readouterr().out
+    first = out.splitlines()[0]
+    assert "this machine" in first, f"actors view does not state machine-wide scope: {out!r}"
+    assert "claude" in out
 
 
 def test_only_provable_touches_reputation(book, tmp_path):

@@ -377,14 +377,23 @@ def open_flags(rec: Recorder) -> list[dict[str, Any]]:
 
 def cmd_actors(args: argparse.Namespace) -> int:
     from . import actors as A
-    st = A.ActorBook().state()
+    ab = A.ActorBook()
+    st = ab.state()
     st.pop("reputation", None)
     if args.json:
         print(json.dumps(st, ensure_ascii=False, indent=1))
         return 0
+    # round 122 dogfood：這表是全機的（`ActorBook` 一句「全機一本」），卻是各視圖中唯一
+    # 不說自己範圍的——`show`/`blame`/`verify` 都說哪一個 workspace。在單一專案裡讀它，
+    # 容易當成該專案的統計（本專案 100% `pi:main`，表裡卻只有其他專案的 `opencode`）。
+    # 第一行說清範圍；空表也說。
+    scope = (f"scope: this machine — {ab.path} "
+             f"(consequences from all projects on this machine, not just one)")
     if not st["cells"] and not st["sources"]:
+        print(scope)
         print("no consequences recorded yet")
         return 0
+    print(scope)
     print(f"{'actor':<60} {'runs':>5} {'accepted':>8} {'undecided':>9} {'provable':>8}  family")
     for c in st["cells"]:
         print(f"{c['label'][:60]:<60} {c['runs']:>5} {c['accepted']:>8} "
