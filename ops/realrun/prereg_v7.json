@@ -1,0 +1,88 @@
+{
+ "schema": "vacant.prereg/1",
+ "id": "v7_live_resample_crossmodel_34tasks_20261027",
+ "registered": "round 109, 2026-10-27, BEFORE the first model call of batch v7 (smoke cell included: any model call of round 109 happens only after this file is committed)",
+ "frozen_before_first_model_call": true,
+ "question": "v4（round 76–77, n=102 pairs, p=0.0414）與 v6（round 101–108, n=170 pairs, p=4.88e-4）在同一行（可見驗收失敗驅動的乾淨重抽 vs. 單發）上量到 EFFECTIVE，但兩批都是同一個模型（qwen/qwen3.8-27b、同一 harness）。H-12：單一模型的數字不轉移到另一個模型。本批在同一 34 題 polyglot_py 列、同一 harness 上改用第二個本地模型（gemma-4-12b-it-qat）量同一行，回答「這一行是否跨模型」。兩個結果都是合法結論：REPLICATED 把該行從「單模型觀察」推進為「兩模型觀察」；NOT_REPLICATED 是誠實的邊界（效應可能是模型特定的），不否定 qwen 上 v4/v6 的批次結論。",
+ "why_this_row": "同 v6：方向 B 的核心產品主張＝「用可見測試當驗收、失敗時乾淨重抽」比單發接受更多。該行是 v5 排除提示（hint）邊際貢獻後唯一收口的核心行（resample＝純機制，不給失敗原文）。v4/v6 在 qwen 上已兩批 EFFECTIVE；H-12 的正面對策就是第二模型複製。round 109 發現端點 http://100.86.226.21:1234 暴露 gemma-4-12b-it-qat（與 R460R/R529 實驗同一模型名，但那些批次用 LCB 題庫與 gain harness，不是本 mini_agent/vrun 列——所以這是本列在 gemma 上的第一次量測），解除了 v6 prereg 記下的阻塞（「100.119.113.56:1234 只有 qwen」）。",
+ "fixed": {
+  "tasks": [
+   "pg_affine_cipher",
+   "pg_beer_song",
+   "pg_book_store",
+   "pg_bottle_song",
+   "pg_bowling",
+   "pg_connect",
+   "pg_dominoes",
+   "pg_dot_dsl",
+   "pg_food_chain",
+   "pg_forth",
+   "pg_go_counting",
+   "pg_grade_school",
+   "pg_grep",
+   "pg_hangman",
+   "pg_list_ops",
+   "pg_paasio",
+   "pg_phone_number",
+   "pg_pig_latin",
+   "pg_poker",
+   "pg_pov",
+   "pg_proverb",
+   "pg_react",
+   "pg_rest_api",
+   "pg_robot_name",
+   "pg_scale_generator",
+   "pg_sgf_parsing",
+   "pg_simple_linked_list",
+   "pg_transpose",
+   "pg_tree_building",
+   "pg_two_bucket",
+   "pg_variable_length_quantity",
+   "pg_wordy",
+   "pg_zebra_puzzle",
+   "pg_zipper"
+  ],
+  "task_build": "同 v4/v5/v6：ops-disk ~/dev/ops/realrun/tasks/（prep.py round 76 版 from ~/dev/ops/ref/bm_tasks/polyglot_py，34 task dirs）已存在且 v4/v5/v6 已用，本批不重建（無管線漂移）。",
+  "arms": {
+   "A_none": ["--retry", "none"],
+   "B_resample3": ["--retry", "resample", "--max-attempts", "3"]
+  },
+  "arm_roles": {
+   "control": "A_none",
+   "treatment": "B_resample3",
+   "note": "control＝單發（無重試）；treatment＝可見驗收失敗時乾淨重抽、最多 3 次嘗試、不給失敗原文（resample 臂的 launcher 從不寫 VACANT_FEEDBACK.md）。臂邏輯在 Vacant 側，與模型無關。"
+  },
+  "agent": "repo ops/realrun/mini_agent.py @ 889cd5ea（與 v4/v5/v6 逐位元組相同；resample 臂從無 VACANT_FEEDBACK.md）。reasoning_effort=none、temperature=0.2、max_tokens=4096，與 v3/v4/v5/v6 相同。",
+  "model": "gemma-4-12b-it-qat @ http://100.86.226.21:1234（round 109 發現；/v1/models 列有 qwen/qwen3.8-27b、qwen_qwen3.6-35b-a3b、gemma-4-12b-it-qat、text-embedding-nomic-embed-text-v1.5）",
+  "reps": 5,
+  "rep_definition": "one full 34-task x 2-arm grid in a fresh root (runs_v7_r{k}); each run is a fresh process, fresh workspace, no shared state; reps are independent. 5 reps -> n_pairs = 170.",
+  "per_attempt_timeout_s": 240,
+  "scorer_used": false,
+  "visible_equals_grader": true,
+  "runner": "ops-disk ~/dev/ops/realrun/run_batch.py（round 81 版＋round 109 env 覆寫：REALRUN_UPSTREAM/REALRUN_MODEL，預設值與 v4/v5/v6 位元組相同；--arms A_none,B_resample3 限兩臂；REALRUN_ROOT=runs_v7_r{k} 每 rep 一個 root；idempotent skip 已完成格）"
+ },
+ "analysis": {
+  "primary_unit": "(task, rep) pair; n_pairs = 170; n_runs per arm = 170 (340 total)",
+  "primary_statistic": "exact two-sided McNemar on discordant pairs via vacant_network.research.mcnemar_exact(b, c); b = (A_none pass, B_resample fail), c = (A_none fail, B_resample pass)",
+  "alpha": 0.05,
+  "per_rep": "descriptive: (b, c, p) per rep; same direction across all 5 reps with none passing correction is UNRESOLVED, not negative, not positive",
+  "power_note": "n=170 與 v6 相同。若 gemma 上該行有 v6 量級（~10pp on ~50% baseline）的效應，discordant ratio 約 (b~8, c~24)，exact two-sided McNemar 應遠低於 0.05。若 gemma 基線接受率明顯不同（12B QAT 在該列的能力未知——本列在 gemma 上無先驗量測），discordant pairs 可能偏少，NOT_REPLICATED 是合法落點。不以此推斷效應不存在（H-12）。",
+  "not_done": [
+   "no pooling of v4/v6 (qwen) with v7 (gemma) into one n (different models; separate registered batches)",
+   "no pooling of independent batches into one manufactured n",
+   "no hidden-suite/scorer signal enters the arm decision (round 67/98 guard tests pin this)",
+   "no post-hoc task selection: all 34 tasks count, including any that both arms fail"
+  ]
+ },
+ "decision_states": {
+  "REPLICATED": "c > b AND p < 0.05 -> may state: the same real-signal row (resample driven by visible test failure vs. none) is effective on a second local model, gemma-4-12b-it-qat (n=170 pairs, 34 tasks x 5 reps), complementing v4/v6 on qwen/qwen3.8-27b. Quotable only with n=170 pairs and scorer=false. May NOT state 'proves better' or transfer R460R/R529 numbers (different banks/harnesses); this is the first measurement of THIS row on gemma.",
+  "CONTRADICTS": "b > c AND p < 0.05 -> no effect claim in EITHER direction; investigate. 'the loop is harmful' is NOT a pre-registered conclusion (R532 AMEND1 direction guard). 不寫「有害」結論。",
+  "NOT_REPLICATED": "otherwise (including c > b with p >= 0.05, or b > c with p >= 0.05) -> record direction and magnitude only; a null here is not a negative result and does not invalidate v4/v6 on qwen. The honest reading is 'the row holds on qwen; on gemma this batch did not establish it (H-12: numbers do not transfer without being re-run)'.",
+  "INCOMPLETE": "完成 rep 數 < 5：可自已完成格續跑（runner 跳過已完成格，續跑是基礎設施不是改設計；**不可中途改設計**）；決定狀態只在 5 rep 齊後判定。若批次無法完成（model slot 掛掉、磁碟等），已完成 rep 只描述性報告、不給決定狀態；partial batch is neither clean nor dirty."
+ },
+ "known_caveats": [
+  "gemma-4-12b-it-qat 在此端點的推理速度/穩定性未知；smoke cell（pg_pig_latin, A_none）是 v7 的第一個模型呼叫，其 wall time 與 requests_seen 是端點健康的唯一證據。",
+  "100.86.226.21 與 100.119.113.56 模型列表不同（後者只有 qwen），視為不同服務；若底層硬體共享導致排隊，wall time 會反映在每格紀錄裡，不影響判定口徑（per_attempt_timeout_s=240、infra_void 照舊剔除並記錄）。",
+  "reasoning_effort=none 為 v1 起的固定請求欄位；若該端點不接受此欄位，smoke cell 會以模型呼叫失敗顯現（fail 於第一個模型呼叫，不會污染批次）。"
+ ]
+}
