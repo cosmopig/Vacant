@@ -6,6 +6,7 @@ import hashlib
 import http.client
 import json
 import threading
+import time
 
 import pytest
 
@@ -210,6 +211,78 @@ def test_project_keys_are_not_paths(env):
     _sent_back_then_fixed(env)
     for bad in ("../../etc", "..", "abc", "0123456789abcdeg", "/etc/passwd"):
         assert SB.project_detail(bad) is None
+
+
+# ── stale open sessions ────────────────────────────────────────────────
+# round 97 dogfood（本輪焦點：trace/dashboard 找摩擦）：本專案的 live 資料裡，
+# `pi:01a16db8-…` 在 state.json 仍 `closed: false`，鏈上它的最後一步是 64 小時前
+# 一個沒有 post_index 的 step（當輪被 60 分鐘預算殺掉，close 事件沒發出），
+# 但儀表板把它算進「進行中 2」——看的人以為還在跑。誠實說法是 UNKNOWN：
+# 「state 說 open、鏈上看不到結束、也超過 24h 沒有活動」，不該跟剛活動過的
+# 進行中混在一起。讀端修：不寫 state.json、不改寫鏈，只把「open 但沉默」
+# 單獨標出來（fail-open：判斷不了就不標）。
+
+def _open_session(env, name="proj"):
+    _install()
+    p = _proj(env, name)
+    a = Agent(p)
+    a.ask(ASK)
+    a.write("report.md", "# Sales\n\nTotal amount: 4,812\n")
+    # 刻意不 stop()——agent 行程被殺、session 沒被關（live 資料裡的真實形狀）
+    return p
+
+
+def test_fresh_open_session_is_not_stale(env):
+    p = _open_session(env)
+    proj = SB.overview()["projects"][0]
+    assert proj["n_open_sessions"] == 1
+    assert proj["n_open_stale"] == 0, "剛活動過的 open session 不該被當 stale"
+    assert proj["stale_sessions"] == []
+
+
+def test_open_session_quiet_for_48h_is_stale_under_default_threshold(env):
+    p = _open_session(env)
+    st_path = Recorder(p).state_path
+    st = json.loads(st_path.read_text())
+    st["sessions"]["claude:GHOST"] = {"first_seen": time.time() - 48 * 3600, "closed": False}
+    st_path.write_text(json.dumps(st))
+    proj = SB.overview()["projects"][0]
+    assert proj["n_open_sessions"] == 2              # 相容：state 說 open 就還算 open
+    assert proj["n_open_stale"] == 1
+    row = proj["stale_sessions"][0]
+    assert row["session"] == "claude:GHOST" and row["age_hours"] >= 47
+
+
+def test_stale_threshold_is_the_module_constant(env, monkeypatch):
+    p = _open_session(env)
+    monkeypatch.setattr(SB, "STALE_SESSION_MS", -1)          # 閾值歸零：有過活動就算 stale
+    assert SB.overview()["projects"][0]["n_open_stale"] == 1
+    monkeypatch.setattr(SB, "STALE_SESSION_MS", 10 ** 15)    # 閾值極大：什麼都不 stale
+    assert SB.overview()["projects"][0]["n_open_stale"] == 0
+
+
+def test_detail_marks_stale_session_instead_of_green_active(env):
+    p = _open_session(env)
+    st_path = Recorder(p).state_path
+    st = json.loads(st_path.read_text())
+    st["sessions"]["claude:GHOST"] = {"first_seen": time.time() - 48 * 3600, "closed": False}
+    st["sessions"]["claude:DEAD"] = {"first_seen": time.time() - 72 * 3600, "closed": True}
+    st_path.write_text(json.dumps(st))
+    det = SB.project_detail(project_key(p))
+    rows = {s["session"]: s for s in det["sessions"]}
+    assert rows["claude:GHOST"]["stale"] is True
+    assert rows["claude:S"]["stale"] is False
+    assert rows["claude:DEAD"]["stale"] is False            # closed 的不參與 stale 判定
+    assert rows["claude:S"]["last_ms"] is not None
+
+
+def test_page_shows_stale_open_sessions(env, server):
+    p = _open_session(env)
+    st, _ct, body = _get(server, "/")
+    assert st == 200
+    html = body.decode()
+    assert "n_open_stale" in html, "專案表沒讀 stale 欄位"
+    assert "stale" in html
 
 
 # ── HTTP ────────────────────────────────────────────────────────────────

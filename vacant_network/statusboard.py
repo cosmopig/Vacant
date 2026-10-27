@@ -46,6 +46,7 @@ TAIL_BYTES = 256 * 1024          # 掛鉤紀錄只讀尾巴：長期安裝下它
 HOOK_TAIL = 40
 STEP_TAIL = 60
 REVIEW_TAIL = 30
+STALE_SESSION_MS = 24 * 3600 * 1000   # state 說 open、鏈上超過這個時長沒有活動 → 標「沉默」（可能是中斷，不是結束）
 _KEY_RE = re.compile(r"^[0-9a-f]{16}$")
 
 
@@ -233,12 +234,16 @@ def project_summary(key: str) -> dict[str, Any] | None:
     open_flags = [e for e in flags if e.get("flag_id") and not e.get("dismisses")
                   and str(e["flag_id"]) not in dismissed]
     last_ms = max((e.get("ts_ms") or 0 for e in evs), default=0) or _mtime_ms(rec.state_path)
+    stale = _stale_open_sessions(sessions, evs)
     return {
         "key": key,
         "workspace": str(rec.workspace),
         "workspace_exists": rec.workspace.is_dir(),
         "n_sessions": len(sessions),
         "n_open_sessions": sum(1 for s in sessions.values() if isinstance(s, dict) and not s.get("closed")),
+        "n_open_stale": len(stale),
+        "stale_sessions": stale,
+        "stale_after_hours": round(STALE_SESSION_MS / 3600000, 1),
         "n_steps": int(st.get("n_steps") or sum(1 for e in evs if e.get("type") == "step")),
         "n_gaps": sum(1 for e in evs if e.get("type") == "unrecorded_change"),
         "n_checks": len(reviews),
@@ -284,6 +289,45 @@ def _step_row(e: dict[str, Any]) -> dict[str, Any]:
             "writes_unknown": bool(e.get("writes_unknown"))}
 
 
+def _session_last_ms_by(evs: list[dict[str, Any]]) -> dict[str, int]:
+    """每個 session 在鏈上最後一次活動的 ts_ms（沒有就是沒有——UNKNOWN，不猜）。"""
+    m: dict[str, int] = {}
+    for e in evs:
+        k = _session_of(e)
+        if k:
+            m[k] = max(m.get(k, 0), int(e.get("ts_ms") or 0))
+    return m
+
+
+def _stale_open_sessions(sessions: dict[str, Any], evs: list[dict[str, Any]],
+                         threshold_ms: int | None = None, now_ms: int | None = None) -> list[dict[str, Any]]:
+    """state 裡 `closed: false`、但鏈上超過 threshold 沒有活動的 session。
+
+    這是讀端判定：不改 state.json、不改鏈。誠實口徑——「看不到結束、也看不到
+    最近活動」是 UNKNOWN（可能中斷），不宣稱「已結束」。fail-open：任何異常
+    都回空列表，不讓整頁消失。"""
+    threshold = STALE_SESSION_MS if threshold_ms is None else threshold_ms
+    now = now_ms if now_ms is not None else int(time.time() * 1000)
+    out: list[dict[str, Any]] = []
+    try:
+        last = _session_last_ms_by(evs)
+        for k, s in sessions.items():
+            if not isinstance(s, dict) or s.get("closed"):
+                continue
+            lm = last.get(k)
+            if lm is None:                       # 鏈上看不到它：退回 state 的 first_seen
+                fs = s.get("first_seen")
+                lm = int(fs * 1000) if isinstance(fs, (int, float)) else None
+            if lm is None:                       # 還是看不到 → 判斷不了，不標（UNKNOWN）
+                continue
+            if now - lm > threshold:
+                out.append({"session": k, "last_ms": lm,
+                            "age_hours": round((now - lm) / 3600000, 1)})
+    except Exception:  # noqa: BLE001
+        return []
+    return out
+
+
 def project_detail(key: str) -> dict[str, Any] | None:
     from .trace.cli import open_flags
 
@@ -320,11 +364,15 @@ def project_detail(key: str) -> dict[str, Any] | None:
                            "findings": [_say(f) for f in (e.get("findings") or [])][:12]})
     st = _read_json(rec.state_path) or {}
     sessions = []
+    last_by = _session_last_ms_by(evs)
+    stale_set = {r["session"] for r in (summary.get("stale_sessions") or [])}
     for sk, s in (st.get("sessions") or {}).items():
         if not isinstance(s, dict):
             continue
         sessions.append({"session": sk, "first_seen": s.get("first_seen"),
                          "closed": bool(s.get("closed")), "model": s.get("model"),
+                         "last_ms": last_by.get(sk),
+                         "stale": sk in stale_set,
                          "n_steps": sum(1 for e in evs if e.get("type") == "step"
                                         and _session_of(e) == sk)})
     sessions.sort(key=lambda s: s.get("first_seen") or 0, reverse=True)
@@ -573,7 +621,7 @@ function renderProjects(ps){
   if(!ps.length){$('projects').className='empty';$('projects').innerHTML='還沒有紀錄。裝好之後在一個專案資料夾（git repo）裡照常用 agent，這裡就會出現。';return}
   let h=`<div class="scroll"><table><tr><th>專案</th><th>工作階段</th><th>步驟</th><th>檢查／退回</th><th>最後一次交件前檢查</th><th>最後活動</th></tr>`;
   for(const p of ps){h+=`<tr class="click" data-k="${esc(p.key)}"><td><b>${esc(p.workspace.split(/[\\/]/).filter(Boolean).pop()||p.workspace)}</b><div class="mono small muted">${esc(p.workspace)}</div>${p.workspace_exists?'':'<span class="chip muted">資料夾已不在</span>'}${p.n_open_flags?` <span class="chip bad">人的標記 ${p.n_open_flags}</span>`:''}${p.n_gaps?` <span class="chip warn">沒記到的改動 ${p.n_gaps}</span>`:''}${p.scan_disabled?` <span class="chip warn" title="步驟仍會記錄，但檔案改動不再逐步歸因（trace blame 會顯示未歸因）；救回：vacant trace rescan">檔案改動觀察已停用${p.scan_disabled_reason?`（${esc(p.scan_disabled_reason)}）`:''}</span>`:''}</td>
-   <td>${p.n_sessions}${p.n_open_sessions?` <span class="muted small">（進行中 ${p.n_open_sessions}）</span>`:''}</td>
+   <td>${p.n_sessions}${p.n_open_sessions?` <span class="muted small">（進行中 ${p.n_open_sessions}${p.n_open_stale?` · 超過 ${p.stale_after_hours??24}h 無活動 ${p.n_open_stale}（可能是中斷，不是結束）`:''}）</span>`:''}</td>
    <td>${p.n_steps}</td><td>${p.n_checks} / <span class="${p.n_sent_back?'warn':''}">${p.n_sent_back}</span></td>
    <td>${deliv(p.delivery)}</td><td class="small muted">${ago(p.last_activity_ms)}</td></tr>`}
   h+='</table></div><p class="muted small">點一列看明細。</p>';
@@ -624,7 +672,7 @@ async function refreshDetail(){
      <td>${c.findings&&c.findings.length?'<ul class="f">'+c.findings.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>':'<span class="muted">—</span>'}${c.missing&&c.missing.length?'<div class="small">缺：'+c.missing.map(esc).join(', ')+'</div>':''}</td></tr>`}
    h+='</table></div>'}
   if(d.delivery_md)h+=`<h2>最後一次的交件說明</h2><pre>${esc(d.delivery_md)}</pre>`;
-  h+=`<h2>工作階段</h2>`+(d.sessions.length?'<div class="scroll"><table><tr><th>工作階段</th><th>步驟</th><th>狀態</th><th>開始</th></tr>'+d.sessions.map(s=>`<tr><td class="mono">${esc(s.session)}</td><td>${s.n_steps}</td><td>${s.closed?'結束':'<span class="ok">進行中</span>'}</td><td class="small muted">${tsS(s.first_seen)}</td></tr>`).join('')+'</table></div>':'<div class="empty">—</div>');
+  h+=`<h2>工作階段</h2>`+(d.sessions.length?'<div class="scroll"><table><tr><th>工作階段</th><th>步驟</th><th>狀態</th><th>開始</th></tr>'+d.sessions.map(s=>`<tr><td class="mono">${esc(s.session)}</td><td>${s.n_steps}</td><td>${s.closed?'結束':s.stale?`<span class="warn">超過 ${d.stale_after_hours??24}h 無活動（可能是中斷，不是結束）</span>`:'<span class="ok">進行中</span>'}</td><td class="small muted">${tsS(s.first_seen)}</td></tr>`).join('')+'</table></div>':'<div class="empty">—</div>');
   h+=`<h2>最近的步驟 <span class="muted small">（最後 ${d.n_steps_shown} 步，共 ${d.n_steps}）</span></h2>`;
   if(!d.steps.length)h+='<div class="empty">—</div>';
   else{h+='<div class="scroll"><table><tr><th>#</th><th>時間</th><th>誰</th><th>工具</th><th>寫了</th></tr>';
