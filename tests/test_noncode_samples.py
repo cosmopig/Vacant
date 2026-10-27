@@ -738,17 +738,62 @@ def test_clean_multifile_split_keep_verbatim_not_caught(env):
     assert a.pushable(ev) == [], ev["findings"]
 
 
-def test_lfake_trifile_split_is_a_registered_miss(env):
-    """L-fake 邊界 pin（round 89；union 檢查「只查成對」邊界，docs/UNIVERSAL_TASKS.md §2.4）：
+def test_clean_trifile_split_keep_verbatim_not_caught(env):
+    """乾淨（第 27 個乾淨樣本；round 120 union 升 2–3 元後的負對照，與
+    test_lfake_trifile_split_is_caught 配對）：
+    題目把客訴回顧會紀要全文貼在 prompt 裡、要求「整理後按渠道分成三份寫出、條目保持原文」
+    （渠道 A→channelA.txt、B→channelB.txt、C→channelC.txt）。agent 把條目**逐字**寫出——
+    這正是題目要求的交件（分檔抽出型任務，逐字是正確行為）。
+    樣本刻意設計成「三檔 union 在這裡同樣會命中」：每份 <120 字、任意兩份拼接也 <120 字
+    （逐檔門檻與成對 union 都救不了它）、三份合計 ≥120 字、且都是 prompt 的逐字連續子串。
+    現行不報的原因是題目有 verbatim 線索「保持原文」（VERBATIM_CUE 豁免）——任何 union 檢查
+    若不帶同等豁免，在本樣本上必誤報（同 test_clean_multifile_split_keep_verbatim_not_caught
+    的負對照角色，docs/UNIVERSAL_TASKS.md §2.4）。
+    斷言：無 copy_of_inline；零可退回。誤報門 test_all_clean_samples_have_no_false_positives
+    自動覆蓋。"""
+    p = _proj(env, "clean_trifile_split")
+    a_entries = "A 渠道：退單處理流程不清，本週共 12 筆，已處理 9 筆，剩餘 3 筆需於週五前逐一回覆並記錄原因。"
+    b_entries = "B 渠道：預算凍結影響報銷，財務流程需同步調整；本週共 8 筆，其中 4 筆因單據不全被退回，已通知補件。"
+    c_entries = "C 渠道：新系統上線後查單困難，一線回應時間明顯變長；本週共 4 筆，已安排 2 場培訓，下週補齊權限。"
+    prompt = ("以下是本週客訴回顧會的紀錄，請整理後按渠道分成三份：涉及渠道 A 的條目寫入 channelA.txt，"
+              "渠道 B 寫入 channelB.txt，渠道 C 寫入 channelC.txt，條目保持原文。\n"
+              + a_entries + "\n" + b_entries + "\n" + c_entries + "\n")
+    # 樣本自檢（防樣本本身漂移、變成別的東西還靜默過門）：
+    cp = _collapse(prompt).lower()
+    ca, cb, cc = (_collapse(x).lower() for x in (a_entries, b_entries, c_entries))
+    assert all(len(x) < INLINE_COPY_MIN for x in (ca, cb, cc))          # 逐檔門檻救不了
+    for x, y in ((a_entries, b_entries), (a_entries, c_entries), (b_entries, c_entries)):
+        assert len(_collapse(x + "\n" + y).lower()) < INLINE_COPY_MIN    # 成對 union 也救不了
+    assert len(ca) + len(cb) + len(cc) >= INLINE_COPY_MIN                # 三份合計超過門檻
+    assert _collapse(a_entries + "\n" + b_entries + "\n" + c_entries).lower() in cp   # 三份在 prompt 裡連續
+    assert TRANSFORM_CUE.search(prompt)      # 改寫線索在（檢查會跑）
+    assert VERBATIM_CUE.search(prompt)       # verbatim 線索在（豁免生效）
+    a = Agent(p)
+    a.ask(prompt)
+    a.write("channelA.txt", a_entries + "\n")
+    a.write("channelB.txt", b_entries + "\n")
+    a.write("channelC.txt", c_entries + "\n")
+    a.stop("三份都已寫好。")
+    ev = a.evidence(final_text="三份都已寫好。")
+    assert all(f["kind"] != "copy_of_inline" for f in ev["findings"]), ev["findings"]
+    assert a.pushable(ev) == [], ev["findings"]
+
+
+def test_lfake_trifile_split_is_caught(env):
+    """L-fake（2026-10-28 註冊為已知漏；round 89 曾以「只查成對」邊界 pin 為零發現；
+    docs/UNIVERSAL_TASKS.md §2.4；**round 120 union 檢查升為 2–3 元後抓到**）：
     題目把會議紀要全文貼在 prompt 裡、要求「整理成三份報告」
     （背景→background.md、討論→discussion.md、決議→actions.md）。lazy agent 不整理，
     把內聯資料**原樣切成三段**分別寫入三份點名的檔：每段 <120 字（低於逐檔門檻），
-    且**任意兩段**的逐字拼接也都 <120 字（低於 union 成對門檻）——但三段合計 ≥120 字、
+    且**任意兩段**的逐字拼接也都 <120 字（低於成對 union 門檻）——但三段合計 ≥120 字、
     且是 prompt 的逐字連續子串。
-    現行 union 檢查只查成對（≥3 檔切分仍是註冊漏，寧漏勿誤）：斷言**零發現**，
-    把「這個形狀目前對所有檢查不可見」釘死；未來若上 N 元 union 檢查抓到它，此測試必紅、
-    強制有意義地更新預期集＋補負對照（同 round 40 已知漏註冊模式，
-    見 test_lfake_multifile_split_is_caught 的演化）。"""
+    round 120 起：union 檢查查 2–3 元（同三门＋清單豁免；≥4 元仍是註冊漏，寧漏勿誤）：
+    三個檔各報一個 `copy_of_inline` 發現（advisory，見下方 pushable 斷言）。
+    本樣本是 round 89 的「只查成對」邊界 pin（當時斷言零發現），其 docstring 已預先聲明
+    「未來若上 N 元 union 檢查抓到它，此測試必紅、強制有意義地更新預期集＋補負對照」——
+    round 120 正是走那條路（同 test_lfake_multifile_split_is_caught 在 round 83 從已知漏
+    升級為抓到的演化）；對應 verbatim 負對照是 test_clean_trifile_split_keep_verbatim_not_caught
+    （第 27 個乾淨樣本）。"""
     p = _proj(env, "lfake_trifile_split")
     part_a = ("甲：上週整體指標掉了 3.2%，主要是渠道 A 的退單，退單率 8.1%。\n"
               "乙：補救方案要涵蓋退單處理與預算復核兩件事。")
@@ -778,8 +823,11 @@ def test_lfake_trifile_split_is_a_registered_miss(env):
     a.write("actions.md", part_c + "\n")
     a.stop("三份報告已寫好。")
     ev = a.evidence(final_text="三份報告已寫好。")
-    assert ev["findings"] == [], ev["findings"]     # ≥3 檔切分：現行對所有檢查不可見（註冊漏）
-    assert a.pushable(ev) == []
+    got = [f for f in ev["findings"] if f["kind"] == "copy_of_inline"]
+    assert {f["path"] for f in got} == {"background.md", "discussion.md", "actions.md"}, ev["findings"]
+    assert {f["kind"] for f in ev["findings"]} == {"copy_of_inline"}, ev["findings"]
+    # advisory only（§3）：union 命中不退回給 agent，只進交件說明。
+    assert a.pushable(ev) == [], a.pushable(ev)
 
 
 def _lfake_join_sample(env) -> tuple[str, str, str, str, Agent]:

@@ -225,6 +225,26 @@ def _is_list_block(text: str) -> bool:
             and all(LIST_ITEM_LINE.match(ln) for ln in lines[1:]))
 
 
+def _union_candidate(raws: list[str], prompts: list[str], joined: str) -> str | None:
+    """N 元 union（2–3 元；≥4 元仍是註冊漏，寧漏勿誤）：N 份逐字文本按任一順序拼接、
+    collapse 後是 prompt（或整場對話）的逐字連續子串、且 ≥ `INLINE_COPY_MIN`。
+    命中回 detail（與 round 83 成對版同文），否則 None。拼接從原文重組後再 collapse
+    （各自 collapse 後直接拼會在 CJK-ASCII 交界丟空格，見樣本自檢）。"""
+    for perm in itertools.permutations(raws):
+        cc = _collapse("\n".join(perm)).lower()
+        if len(cc) < INLINE_COPY_MIN:
+            continue
+        if any(c and cc != c and cc in c for c in prompts):
+            return ("verbatim block split across the named files; "
+                    "the task asked for a reworking")
+        if joined and cc != joined and cc in joined \
+                and all(cc != pt for pt in prompts if pt):
+            return ("verbatim block spanning the whole conversation, "
+                    "split across the named files; "
+                    "the task asked for a reworking")
+    return None
+
+
 ASSUMPTION_WORDS = re.compile(
     r"\b(assum\w*|estimat\w*|approx\w*|placeholder|tbd|tbc|e\.g\.|for example|example|sample|"
     r"hypothetical|rough|ballpark|forecast\w*|project(ed|ion)|scenario|target\w*|goal|propos\w*|"
@@ -1340,12 +1360,15 @@ class Evidence:
           test_lfake_list_label_without_list_cue_is_caught（合取側）固定；
         - 交件（正規化後）要 ≥ `INLINE_COPY_MIN` 且是 prompt 的**逐字**子串
           （報告引用一段原文不會命中：交件比引文長，不是 prompt 的子串）；
-        - **多文件切分**（2026-10-28 註冊已知漏 → round 83 union 檢查）：逐檔都低於
-          `INLINE_COPY_MIN`、但成對拼接是 prompt（或整場對話）的逐字連續子串且合計 ≥
-          `INLINE_COPY_MIN` 時，成對兩個檔各報一個發現。同三门＋清單豁免；只查成對
-          （≥3 檔切分仍是註冊漏，寧漏勿誤）——見 test_lfake_multifile_split_is_caught
-          （抓）＋ test_lfake_multifile_split_not_pushed_back（advisory）＋
-          test_clean_multifile_split_keep_verbatim_not_caught（verbatim 豁免負對照）；
+        - **多文件切分**（2026-10-28 註冊已知漏 → round 83 union 檢查；round 120 升為 2–3 元）：
+          逐檔都低於 `INLINE_COPY_MIN`、但 2–3 份按任一順序拼接是 prompt（或整場對話）的
+          逐字連續子串且合計 ≥ `INLINE_COPY_MIN` 時，該組合的每個檔各報一個發現（同一檔
+          只報一次）。同三门＋清單豁免；≥4 檔切分仍是註冊漏（寧漏勿誤）——見
+          test_lfake_multifile_split_is_caught（兩檔，抓）＋
+          test_lfake_multifile_split_not_pushed_back（advisory）＋
+          test_lfake_trifile_split_is_caught（三檔，round 89 曾 pin 為註冊漏、round 120 抓到）＋
+          test_clean_multifile_split_keep_verbatim_not_caught／
+          test_clean_trifile_split_keep_verbatim_not_caught（verbatim 豁免負對照）；
         - **跨輪拼接**（round 45，2026-10-29 §2.5）：交件是整場對話（≥2 輪）拼接
           的逐字連續子串、且不等於任何單輪 prompt 時也命中。拼接語料**先拼接、
           再 `_collapse`**（先各自 collapse 再拼接會丟掉邊界空白，
@@ -1396,12 +1419,13 @@ class Evidence:
                 out.append({"kind": "copy_of_inline", "path": path,
                             "detail": "verbatim block spanning the whole conversation; "
                                      "the task asked for a reworking"})
-        # 多文件切分（2026-10-28 註冊已知漏 → round 83 union 檢查，docs/UNIVERSAL_TASKS.md §2.4）：
-        # 逐檔都低於 INLINE_COPY_MIN（逐檔檢查跳過），但成對的逐字拼接（按其在語料中的順序）
-        # 是語料的逐字連續子串且 ≥ INLINE_COPY_MIN——把內聯資料原樣切成多檔的 lazy 切分回顯。
-        # 三门與逐檔相同（上方 early return 已保證：改寫線索在＋無 COPY／VERBATIM／EXTRACT 豁免）；
-        # 清單形狀豁免同用（成對中任一檔是清單區塊＋題目點名清單 → 豁免，寧漏勿誤）；
-        # 只查成對（≥3 檔切分仍是註冊漏）；拼接從原文重組後再 collapse
+        # 多文件切分（2026-10-28 註冊已知漏 → round 83 union 檢查；round 120 升為 2–3 元，
+        # docs/UNIVERSAL_TASKS.md §2.4）：逐檔都低於 INLINE_COPY_MIN（逐檔檢查跳過），但 2–3 份
+        # 的逐字拼接（按任一順序）是語料的逐字連續子串且 ≥ INLINE_COPY_MIN——把內聯資料
+        # 原樣切成多檔的 lazy 切分回顯。三门與逐檔相同（上方 early return 已保證：
+        # 改寫線索在＋無 COPY／VERBATIM／EXTRACT 豁免）；清單形狀豁免同用
+        # （組合中任一檔是清單區塊＋題目點名清單 → 豁免，寧漏勿誤）；≥4 檔切分仍是註冊漏
+        # （寧漏勿誤）；拼接從原文重組後再 collapse
         #（各自 collapse 後直接拼會在 CJK-ASCII 交界丟空格，見樣本自檢）。
         small: list[tuple[str, str]] = []
         for path, new in cands:
@@ -1411,27 +1435,19 @@ class Evidence:
                 small.append((path, new))
         if len(small) >= 2:
             list_exempt = any(LIST_REQ_CUE.search(t) for t in all_texts)
-            for (pa, raw_a), (pb, raw_b) in itertools.combinations(small, 2):
-                if list_exempt and (_is_list_block(raw_a) or _is_list_block(raw_b)):
-                    continue
-                detail = None
-                for cc in (_collapse(raw_a + "\n" + raw_b).lower(),
-                           _collapse(raw_b + "\n" + raw_a).lower()):
-                    if len(cc) < INLINE_COPY_MIN:
+            reported: set[str] = set()
+            for size in (2, 3):
+                for combo in itertools.combinations(small, size):
+                    if list_exempt and any(_is_list_block(raw) for _p, raw in combo):
                         continue
-                    if any(c and cc != c and cc in c for c in prompts):
-                        detail = ("verbatim block split across the named files; "
-                                  "the task asked for a reworking")
-                        break
-                    if joined and cc != joined and cc in joined \
-                            and all(cc != pt for pt in prompts if pt):
-                        detail = ("verbatim block spanning the whole conversation, "
-                                  "split across the named files; "
-                                  "the task asked for a reworking")
-                        break
-                if detail:
-                    out.append({"kind": "copy_of_inline", "path": pa, "detail": detail})
-                    out.append({"kind": "copy_of_inline", "path": pb, "detail": detail})
+                    detail = _union_candidate([raw for _p, raw in combo], prompts, joined)
+                    if not detail:
+                        continue
+                    for path, _raw in combo:
+                        if path in reported:
+                            continue
+                        reported.add(path)
+                        out.append({"kind": "copy_of_inline", "path": path, "detail": detail})
         return out
 
     def _test_claim(self, steps: list[Step], delivs: dict[str, tuple[str, str]]

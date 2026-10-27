@@ -30,7 +30,7 @@
 | `skeleton`（2026-09-25 新增，**僅建議**） | **是** | 交付檔半數以上是佔位行（TBD／TODO／待填／___／{{…}}） | 低：佔位行是明確的未完成訊號；「待填」只算整行佔位，正文裡提到不算 |
 | `stale_output`（2026-09-25 新增，**僅建議**） | **是** | 檔在本回合前就存在、本回合一字未改，最終訊息卻用了產出型動詞（已寫好／已寫入） | 低：「已確認／Done」這類非產出型結語不觸發（n12 樣本） |
 | `copy_of_input`（2026-09-25 新增，**僅建議**） | **是** | 交付檔與任務點名的輸入素材逐字相同（正規化後全等、≥ 80 字） | 低：複製型任務（「把 X 複製為 Y」）直接豁免（COPY_CUE）；短答案不比 |
-| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）、**清單型輸出**（題目點名編號／清單／列表／列點輸出、交件本身就是清單區塊——逐字寫出該清單正是預期交件，reformat 是 no-op；`LIST_REQ_CUE`＋`_is_list_block`，2026-10-26 清單負對照）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。**多文件切分（內聯文字被切成 ≥2 份、每份 < 120 字）是已知漏**（§2.4，2026-10-28 已註冊 L-fake＋負對照）；跨 prompt 拼接（內聯文字分貼在 ≥2 回合）**round 45 起已抓**（跨輪拼接語料，advisory；§2.5，含 round 55 早期回合線索的兩對語義 pin）。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
+| `copy_of_inline`（2026-10-25 新增，**僅建議**） | **是** | 交付檔（正規化後）是 prompt 的逐字子串（≥ 120 字）、且題目要求改寫（整理／摘要／分析／重排…） | 抄錄任務（「原樣寫入」，VERBATIM_CUE）、複製任務（COPY_CUE）、抽出型任務（「抽出／摘出／extract…某段寫入」，EXTRACT_CUE，2026-10-25 n17）、**清單型輸出**（題目點名編號／清單／列表／列點輸出、交件本身就是清單區塊——逐字寫出該清單正是預期交件，reformat 是 no-op；`LIST_REQ_CUE`＋`_is_list_block`，2026-10-26 清單負對照）豁免；短答案（< 120 字）不報；交件＝整段 prompt 由 `copy_of_task` 報（比例 1.0），不重複。**多文件切分 2–3 份（每份 < 120 字）已抓**（round 83 兩檔＋round 120 三檔，union 檢查；≥4 份仍是註冊漏，寧漏勿誤；§2.4）；跨 prompt 拼接（內聯文字分貼在 ≥2 回合）**round 45 起已抓**（跨輪拼接語料，advisory；§2.5，含 round 55 早期回合線索的兩對語義 pin）。見 §3 例子；120 的敏感性實測見 `tests/test_inline_copy_min_sensitivity.py`（2026-10-27） |
 | `claimed_run`（2026-10-26 新增，**僅建議**） | **是** | 最終訊息以**過去式**（ran／executed／跑了／跑過／跑完／執行過／執行完／執行（`執行緒`除外））宣稱「執行」某條反引號命令、首詞在已知 CLI 白名單（`RUN_CLAIM_TOOLS`）、鄰窗無建議措辭，但整份 session 命令記錄（含前回合、sub-agent）查無 | 低：三層保守濾網（過去式線索＋CLI 白名單＋建議豁免）；記錄裡跑過就算（子串比對，`pip`→`pip3`、參數不同、跨回合都算跑過）；非 CLI 的反引號詞、路徑 span（`./scripts/…`）、`執行緒`名詞都不觸發。專屬樣本 `tests/test_universal_claimed_run.py`（12 個：3 抓＋5 advisory/混排 pin＋6 負對照，2026-10-27）；零誤報由常駐門 `test_all_clean_samples_have_no_false_positives`（對所有 kind）覆蓋 |
 
 **結論：** `missing_output`、`invalid_output/empty`、`unsourced`、`unread` 對非程式任務
@@ -53,23 +53,27 @@
 3. **交付物「內容對不對」一律不判**：所有檢查只看「紀錄顯示了什麼」（缺、空、無來源、
    與提示詞重疊），不判答案正確性。這是 H-2 的同構：通過檢查 ≠ 滿足要求。
 4. **`copy_of_inline` 的逐檔門檻曾漏「多文件切分」——已補上**（2026-10-28 註冊已知漏，
-   BACKLOG P1 (a)；**round 83 上線 union 檢查**）：lazy agent 不改寫、只把內聯紀要
-   **原樣切成兩份點名的檔**（各 <120 字）時，逐檔判定的 `copy_of_inline` 漏；兩份拼接起來
-   是 prompt 的逐字連續子串（≥120 字）——這是盲點。round 83 的 union 檢查（§3 門檻全過：
+   BACKLOG P1 (a)；**round 83 上線 union 檢查；round 120 升為 2–3 元**）：lazy agent 不改寫、
+   只把內聯紀要**原樣切成 2–3 份點名的檔**（各 <120 字）時，逐檔判定的 `copy_of_inline` 漏；
+   拼接起來是 prompt 的逐字連續子串（≥120 字）——這是盲點。union 檢查（§3 門檻全過：
    只看紀錄、領域中立、advisory-only、零誤報門過）：
-   - **只查成對**（≥3 檔切分仍是註冊漏，寧漏勿誤）；成對中逐檔都 <`INLINE_COPY_MIN`
-     （已報逐檔的檔不再重複報）。
-   - **拼接從原文重組後再 `_collapse`**（兩種順序），要求是 prompt（或整場對話）的**逐字連續子串**
-     且合計 ≥`INLINE_COPY_MIN`——非連續切分（中間夾了其它文字）不命中。
-   - **同三门＋清單豁免**：改寫線索在＋無 COPY/VERBATIM/EXTRACT 豁免；成對中任一檔是清單區塊
+   - **查 2–3 元**（round 120 起；≥4 檔切分仍是註冊漏，寧漏勿誤）；組合中逐檔都
+     <`INLINE_COPY_MIN`（已報逐檔的檔不再重複報；同一檔跨組合只報一次）。
+   - **拼接從原文重組後再 `_collapse`**（組合的任一順序），要求是 prompt（或整場對話）的
+     **逐字連續子串**且合計 ≥`INLINE_COPY_MIN`——非連續切分（中間夾了其它文字）不命中。
+   - **同三门＋清單豁免**：改寫線索在＋無 COPY/VERBATIM/EXTRACT 豁免；組合中任一檔是清單區塊
      ＋題目點名清單輸出 → 豁免（同逐檔的 `LIST_REQ_CUE`＋`_is_list_block` 合取）。
-   - 命中時成對兩檔**各報一個** `copy_of_inline` 發現；kind 不變 → `zerostop.pushable_for`
+   - 命中時該組合每個檔**各報一個** `copy_of_inline` 發現；kind 不變 → `zerostop.pushable_for`
      照樣排除（advisory-only 不變，`test_lfake_multifile_split_not_pushed_back` 釘死）。
    - L-fake（抓）：`tests/test_noncode_samples.py::test_lfake_multifile_split_is_caught`
-     （2026-10-28 註冊時名 `..._is_a_known_miss`、斷言零發現；round 83 按註冊時預定的更新路徑改預期集）。
+     （2026-10-28 註冊時名 `..._is_a_known_miss`、斷言零發現；round 83 按註冊時預定的更新路徑改預期集）
+     ＋ `test_lfake_trifile_split_is_caught`（三檔；round 89 曾 pin 為「≥3 檔切分仍是註冊漏」、
+     斷言零發現；round 120 按該 pin 預定的更新路徑改預期集，同 round 83 的演化）。
    - 負對照（不抓）：`tests/test_noncode_samples.py::test_clean_multifile_split_keep_verbatim_not_caught`
-     ——正當「整理後按渠道分成兩份、條目保持原文」任務（VERBATIM_CUE 豁免）；同時被常駐誤報門
-     `test_all_clean_samples_have_no_false_positives` 自動覆蓋。
+     （兩檔）＋ `test_clean_trifile_split_keep_verbatim_not_caught`（三檔；樣本自檢確認「三檔
+     union 在這裡同樣會命中」、是 VERBATIM_CUE 豁免救的）——正當「整理後分檔、條目保持原文」
+     任務（VERBATIM_CUE 豁免）；同時被常駐誤報門 `test_all_clean_samples_have_no_false_positives`
+     自動覆蓋。
 5. **`copy_of_inline` 的逐 prompt 語料漏「跨 prompt 拼接」——已補上**（2026-10-29 曾是盲區，
    BACKLOG P1 (b)；round 45 上線）：lazy agent 把分貼在兩個回合的內聯文字（前半 A 在 turn 1、
    後半 B 在 turn 2）**原樣拼接**交回時，`window()` 只取**最後一則**人類 prompt 當 task text，
@@ -150,7 +154,9 @@ round 56 再更新（2026-10-26）：樣本集現為 **25 個**——加一個�
 `_is_list_block` 清單形狀豁免（寧漏勿誤，§3 規則 5）。round 65 再更新：樣本集現為
 **26 個合格交付（乾淨）樣本**——加一個第二分支（短標題行＋清單項）清單 no-op reformat
 負對照 `test_clean_list_label_verbatim_not_caught`（見 §2.5；另加同分支合取邊界 L-fake
-`test_lfake_list_label_without_list_cue_is_caught`，不計入乾淨樣本）。）
+`test_lfake_list_label_without_list_cue_is_caught`，不計入乾淨樣本）。round 120 再更新：
+樣本集現為 **27 個**——加一個三檔切分 verbatim 負對照
+`test_clean_trifile_split_keep_verbatim_not_caught`（見 §2.4；union 升 2–3 元後的豁免負對照）。）
 已轉為常駐門：
 `tests/test_noncode_samples.py::test_all_clean_samples_have_no_false_positives` 在隔離
 環境重跑全部乾淨樣本，對**所有 kind**（不只 advisory）斷言發現集與預期集完全相等
