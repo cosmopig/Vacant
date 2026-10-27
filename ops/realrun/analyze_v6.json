@@ -1,0 +1,85 @@
+{
+ "prereg_id": "v6_live_resample_scaleup_34tasks_20261027",
+ "prereg_file": "ops/realrun/prereg_v6.json",
+ "alpha": 0.05,
+ "arm_a": "A_none",
+ "arm_b": "B_resample3",
+ "n_pairs": 170,
+ "n_runs_per_arm": 170,
+ "per_rep": [
+  {
+   "rep": 1,
+   "root": "/home/user1/dev/ops/realrun/runs_v6_r1",
+   "n_pairs": 34,
+   "b": 0,
+   "c": 3,
+   "p": 0.25,
+   "voids": [],
+   "a_acc": 19,
+   "b_acc": 22
+  },
+  {
+   "rep": 2,
+   "root": "/home/user1/dev/ops/realrun/runs_v6_r2",
+   "n_pairs": 34,
+   "b": 1,
+   "c": 7,
+   "p": 0.0703125,
+   "voids": [],
+   "a_acc": 14,
+   "b_acc": 20
+  },
+  {
+   "rep": 3,
+   "root": "/home/user1/dev/ops/realrun/runs_v6_r3",
+   "n_pairs": 34,
+   "b": 0,
+   "c": 5,
+   "p": 0.0625,
+   "voids": [],
+   "a_acc": 17,
+   "b_acc": 22
+  },
+  {
+   "rep": 4,
+   "root": "/home/user1/dev/ops/realrun/runs_v6_r4",
+   "n_pairs": 34,
+   "b": 1,
+   "c": 2,
+   "p": 1.0,
+   "voids": [],
+   "a_acc": 18,
+   "b_acc": 19
+  },
+  {
+   "rep": 5,
+   "root": "/home/user1/dev/ops/realrun/runs_v6_r5",
+   "n_pairs": 34,
+   "b": 1,
+   "c": 3,
+   "p": 0.625,
+   "voids": [],
+   "a_acc": 19,
+   "b_acc": 21
+  }
+ ],
+ "pooled": {
+  "b": 3,
+  "c": 20,
+  "p": 0.00048828125
+ },
+ "state": "EFFECTIVE",
+ "state_note": "all registered reps present",
+ "states_from_plan": {
+  "EFFECTIVE": "c > b AND p < 0.05 -> may state: B (resample) accepted more than A (none) on this batch (n=170 pairs, 34 tasks x 5 reps), the same real-signal row as v4 (n=102, p=0.0414) re-measured at higher power. May NOT state 'proves better' (one batch, one model, H-12). Quotable only with n=170 pairs and scorer=false.",
+  "CONTRADICTS": "b > c AND p < 0.05 -> no effect claim in EITHER direction; investigate. 'the loop is harmful' is NOT a pre-registered conclusion (R532 AMEND1 direction guard: a significant result in the opposite direction has no pre-registered state and draws no harm conclusion). 不寫「有害」結論。",
+  "UNRESOLVED": "otherwise (including c > b with p >= 0.05, or b > c with p >= 0.05) -> record direction and magnitude only; a null here is not a negative result. If v4 was a borderline fluke this is the honest landing; if the effect is real but smaller than v4's point estimate, this is also the honest landing.",
+  "INCOMPLETE": "完成 rep 數 < 5：可自已完成格續跑（runner 跳過已完成格，續跑是基礎設施不是改設計；**不可中途改設計**）；決定狀態只在 5 rep 齊後判定。若批次無法完成（model slot 掛掉、磁碟等），已完成 rep 只描述性報告、不給決定狀態；partial batch is neither clean nor dirty."
+ },
+ "caveats": [
+  "single model, single slot, 34 tasks: does not transfer to another model/harness/budget/corpus without re-running (H-12)",
+  "the model channel is a single slot shared with the loop harness; wall times are not a metric and long model calls serialize (v4/v5 observed 14-17s/cell; 5 reps x 68 cells may span several rounds — the INCOMPLETE/resume rule above governs)",
+  "max_tokens=4096 per attempt: a truncated answer is a refused delivery, counted in the denominator (a refusal is a failure, not dropped)",
+  "this is the SAME row as v4, not a new mechanism: v6 exists only to raise power on the borderline v4 result, not to test a new claim"
+ ]
+}
