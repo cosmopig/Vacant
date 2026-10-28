@@ -65,6 +65,12 @@ DEFAULT_MAX_LOG_BYTES = 2 * 1024 * 1024  # 2 MB
 # 版本；回收它們只買回 I/O、超時與失觀，省不下任何持久磁碟）。預設 7 天。
 DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 
+# 2026-10-28 Axis 2（取代 round 72 的「保留活躍專案 before 版本」）：
+# store-on-change 之後，版本庫不再重存未改動檔案；自動 gc 另設一個使用量上限，
+# 超過時按「工作區冗餘 → 最舊舊版本」的順序回收（讀取端回退工作區＋驗 sha，
+# 取不回誠實 UNKNOWN）。512 MiB；`VACANT_TRACE_BUDGET_BYTES` 可覆寫（0＝關）。
+DEFAULT_TRACE_BUDGET_BYTES = 512 * 1024 * 1024
+
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
 AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住多久（超過就停在安全點）
@@ -94,6 +100,63 @@ def _tree_size(p: pathlib.Path) -> int:
             except OSError:
                 pass
     return total
+
+
+def _sweep_to_target(
+    obj_root: pathlib.Path,
+    keep_shas: set[str],
+    redundant_live: set[str],
+    target_bytes: int,
+    *,
+    dry_run: bool,
+    budget: _Budget | None = None,
+) -> dict[str, Any]:
+    """把版本庫壓到 `target_bytes` 以下（2026-10-28 Axis 2）。
+
+    優先序：先回收「与工作區冗餘」的 blob（工作區仍有 bit 相同原檔、讀取端回退取得，
+    內容零損失），再按最舊優先回收其餘非必須保留的舊版本（內容轉為 UNKNOWN：
+    `file_text` 回 None、`materialize` 列進 missing；不崩、不假 PASS）。鏈、事件體、
+    近期步驟索引、writes 前後版本（keep_shas 且不在 redundant_live）從不動。"""
+    cands: list[tuple[int, int, int, pathlib.Path]] = []
+    total = 0
+    if obj_root.is_dir():
+        for sub in sorted(obj_root.iterdir()):
+            if not sub.is_dir():
+                continue
+            for bf in sorted(sub.iterdir()):
+                sha = bf.name
+                if sha in keep_shas and sha not in redundant_live:
+                    continue
+                try:
+                    sz = bf.stat().st_size
+                except OSError:
+                    continue
+                total += sz
+                # 0＝工作區冗餘（先回收，零損失）；1＝其餘舊版本（後回收，內容轉 UNKNOWN）
+                cands.append((0 if (sha in keep_shas) else 1, sz, bf.stat().st_mtime_ns, bf))
+    cands.sort(key=lambda t: (t[0], t[2]))
+    freed = 0
+    removed = 0
+    aborted = False
+    remaining = total
+    for rank, size, _mts, bf in cands:
+        if remaining <= target_bytes:
+            break
+        if budget is not None and budget.expired():
+            aborted = True
+            break
+        b, c = _remove_path(bf, dry_run=dry_run)
+        remaining -= b
+        freed += b
+        removed += c
+    if not dry_run and obj_root.is_dir():
+        for sub in sorted(obj_root.iterdir()):
+            with contextlib.suppress(OSError):
+                if sub.is_dir() and not any(sub.iterdir()):
+                    sub.rmdir()
+    return {"target_bytes": target_bytes, "bytes_freed": freed, "files_removed": removed,
+            "bytes_remaining": remaining, "target_reached": remaining <= target_bytes,
+            "aborted": aborted}
 
 
 def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
@@ -189,8 +252,13 @@ def compact_trace(
     dry_run: bool = False,
     budget: _Budget | None = None,
     active_window_s: float | None = DEFAULT_ACTIVE_WINDOW_S,
+    target_bytes: int | None = None,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/trace/` 下多餘的物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。
+
+    `target_bytes`（2026-10-28 Axis 2）：常規回收後若版本庫仍大於此位元組數，再按
+    「工作區冗餘 → 最舊舊版本」的順序回收（見 `_sweep_to_target`）：讀取端回退
+    「工作區＋驗 sha」，取不回誠實回 UNKNOWN；必須保留的 blob 從不動。
 
     round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在 `active_window_s` 內（預設
     7 天）的**活躍專案**，其「未變動且工作區原檔 bit 相同」的 live 背景 blob 正是那些
@@ -208,6 +276,9 @@ def compact_trace(
     keep_shas: set[str] = set()
     # 已被工作區原位檔案涵蓋、且從未在任何步驟被改寫的純重複檔案 sha256
     redundant_candidates: set[str] = set()
+    # 2026-10-28 Axis 2：「工作區仍有 bit 相同原檔」的 blob（含活躍專案的）——
+    # 常規回收保留（取代 round 72 的 whack-a-mole 理由），但超出 target_bytes 時可安全回收
+    redundant_live: set[str] = set()
     must_keep_file_shas: set[str] = set()
     projects_scanned = 0
     bytes_freed = 0
@@ -451,6 +522,7 @@ def compact_trace(
                                     live_ok = True
                         seen_idx_entries[cache_key] = live_ok
                     if seen_idx_entries[cache_key]:
+                        redundant_live.add(fsha)
                         if project_active:
                             # 活躍專案：保留（下次修改所需的 before 版本；回收＝whack-a-mole）
                             keep_shas.add(fsha)
@@ -498,13 +570,23 @@ def compact_trace(
                     if not any(sub.iterdir()):
                         sub.rmdir()
 
-    return {
-        "bytes_freed": bytes_freed,
-        "files_removed": files_removed,
+    target: dict[str, Any] | None = None
+    if target_bytes is not None and target_bytes >= 0:
+        target = _sweep_to_target(obj_root, keep_shas, redundant_live, int(target_bytes),
+                                  dry_run=dry_run, budget=budget)
+        if target["aborted"]:
+            aborted = True
+
+    rep = {
+        "bytes_freed": bytes_freed + (target["bytes_freed"] if target else 0),
+        "files_removed": files_removed + (target["files_removed"] if target else 0),
         "projects_scanned": projects_scanned,
         "kept_blobs": len(keep_shas),
         "aborted": aborted,
     }
+    if target is not None:
+        rep["target"] = target
+    return rep
 
 
 def compact_quarantine(
@@ -818,8 +900,12 @@ def gc_all(
     dry_run: bool = False,
     verify: bool = False,
     budget: _Budget | None = None,
+    target_bytes: int | None = None,
 ) -> dict[str, Any]:
-    """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。"""
+    """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。
+
+    `target_bytes`：把 trace 版本庫壓到此位元組數以下（2026-10-28 Axis 2；見
+    `compact_trace`）；None＝常規保守回收。"""
     if older_than_hours is not None and max_age_days is None:
         max_age_days = older_than_hours / 24.0
 
@@ -835,6 +921,7 @@ def gc_all(
         max_age_days=max_age_days,
         dry_run=dry_run,
         budget=budget,
+        target_bytes=target_bytes,
     )
     qr = compact_quarantine(
         root,
@@ -888,6 +975,19 @@ def gc_all(
     return rep
 
 
+def _resolve_auto_budget() -> int | None:
+    """自動 gc 的版本庫上限：`VACANT_TRACE_BUDGET_BYTES` 覆寫（0＝關），
+    否則 512 MiB 預設（2026-10-28 Axis 2）。"""
+    env = os.environ.get("VACANT_TRACE_BUDGET_BYTES")
+    if env is not None:
+        try:
+            v = int(env)
+            return None if v <= 0 else v
+        except ValueError:
+            return DEFAULT_TRACE_BUDGET_BYTES
+    return DEFAULT_TRACE_BUDGET_BYTES
+
+
 def auto_gc(
     root: pathlib.Path | None = None,
     work_root: pathlib.Path | None = None,
@@ -896,6 +996,7 @@ def auto_gc(
     budget_s: float = AUTO_GC_BUDGET_S,
     force: bool = False,
     dry_run: bool = False,
+    target_bytes: int | None = None,
 ) -> dict[str, Any]:
     """零設定自動 gc：單例鎖（flock）＋頻率限制＋時間預算，全程 fail-open。
 
@@ -913,8 +1014,10 @@ def auto_gc(
     wroot = pathlib.Path(work_root).resolve() if work_root is not None else work_dir()
     rep: dict[str, Any] = {"status": "error", "ok": False, "state_dir": str(sroot)}
     try:
+        if target_bytes is None:
+            target_bytes = _resolve_auto_budget()
         if dry_run:
-            rep.update(gc_all(root=sroot, work_root=wroot, dry_run=True))
+            rep.update(gc_all(root=sroot, work_root=wroot, dry_run=True, target_bytes=target_bytes))
             rep["status"] = "dry_run"
             rep["ok"] = True
             return rep
@@ -946,7 +1049,8 @@ def auto_gc(
 
             t0 = time.time()
             budget = _Budget(t0 + budget_s)
-            body = gc_all(root=sroot, work_root=wroot, dry_run=False, budget=budget)
+            body = gc_all(root=sroot, work_root=wroot, dry_run=False, budget=budget,
+                          target_bytes=target_bytes)
             elapsed = time.time() - t0
             body.update({
                 "status": "ok",
@@ -1033,6 +1137,15 @@ def usage_report(
                 "bytes": b_obj,
                 "top": [{"sha256": name, "bytes": sz} for sz, name in tops[:10]],
             }
+        # 2026-10-28 Axis 2：使用量上限（自動 gc 的收縮目標）
+        _budget = _resolve_auto_budget()
+        out["budget"] = {
+            "trace_objects_bytes": (out.get("objects") or {}).get("bytes", 0),
+            "budget_bytes": _budget,
+            "within_budget": (_budget is None)
+            or ((out.get("objects") or {}).get("bytes", 0) <= _budget),
+            "override_env": "VACANT_TRACE_BUDGET_BYTES",
+        }
         # 每專案
         pdir = sroot / "trace" / "projects"
         if pdir.is_dir():
@@ -1103,6 +1216,10 @@ def usage_main(argv: list[str] | None = None) -> int:
         print(f"  trace 物件    : {ob['count']:,} 個、{h(ob['bytes'])}")
         for t in ob.get("top", [])[:5]:
             print(f"    {h(t['bytes']):>10}  {t['sha256'][:16]}…")
+    bu = rep.get("budget", {})
+    if bu and bu.get("budget_bytes") is not None:
+        state = "✓ 在上限內" if bu.get("within_budget") else "⚠ 超上限（vacant gc --auto 會收縮）"
+        print(f"  使用量上限    : {h(bu['budget_bytes'])}（trace 物件 {h(bu.get('trace_objects_bytes', 0))}）{state}")
     for pj in rep.get("projects", [])[:10]:
         extra = f"  （{pj['chain_events']} 步）" if pj.get("chain_events") is not None else ""
         print(f"  專案 {pj['project']}: {h(pj['bytes'])}{extra}  {pj.get('last_activity', '')}")
@@ -1130,6 +1247,22 @@ def _human_bytes(n: int) -> str:
     return f"{n / (1024 * 1024 * 1024):.2f} GB"
 
 
+def _parse_size(s: str) -> int:
+    """`--target-bytes` 的值：整數位元組，或帶 K/M/G 後綴（如 `256M`、`1G`）。"""
+    s = s.strip().upper()
+    mult = 1
+    if s and s[-1] in "KMG":
+        mult = {"K": 1024, "M": 1024 * 1024, "G": 1024 * 1024 * 1024}[s[-1]]
+        s = s[:-1]
+    try:
+        v = int(s, 10)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expecting bytes or K/M/G suffix, got {s!r}")
+    if v < 0:
+        raise argparse.ArgumentTypeError("must be >= 0")
+    return v * mult
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="vacant gc",
@@ -1147,6 +1280,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help=f"每個任務保留 ~/.vacant-work 的最近執行數（預設 {DEFAULT_KEEP_RUNS}）")
     ap.add_argument("--max-age-days", type=float, default=None,
                     help="只清理早於 N 天的非必要物件（預設立即清理冗餘副本）")
+    ap.add_argument("--target-bytes", type=_parse_size, default=None, metavar="N",
+                    help="把 trace 版本庫壓到 N 位元組以下（如 256M／1G）：先回收與工作區"
+                         "冗餘的 blob，再最舊優先回收舊版本；讀取端取不回誠實 UNKNOWN，"
+                         "簽章鏈與必須保留物件不動（2026-10-28 Axis 2）")
     ap.add_argument("--older-than-hours", type=float, default=None,
                     help="只清理超過指定小時數的非必要物件（例如 0.5 代表 30 分鐘前）")
     ap.add_argument("--verify", action="store_true",
@@ -1182,6 +1319,7 @@ def main(argv: list[str] | None = None) -> int:
             budget_s=args.budget_s,
             force=args.force,
             dry_run=args.dry_run,
+            target_bytes=args.target_bytes,
         )
         if args.json:
             print(json.dumps(rep, ensure_ascii=False, indent=2))
@@ -1213,14 +1351,23 @@ def main(argv: list[str] | None = None) -> int:
         aggressive=args.aggressive,
         dry_run=args.dry_run,
         verify=args.verify,
+        target_bytes=args.target_bytes,
     )
     if args.json:
         print(json.dumps(rep, ensure_ascii=False, indent=2))
         return 0 if rep.get("verify_ok", True) else 1
     mode_tag = "（預覽 --dry-run，未刪除）" if rep["dry_run"] else "✓ 已清理"
     print(f"{mode_tag} 釋放空間：{_human_bytes(rep['bytes_freed'])}（共處理 {rep['files_removed']} 個檔案／項目）")
-    print(f"  · trace 版本庫   : 釋放 {_human_bytes(rep['trace']['bytes_freed'])} "
-          f"（掃描 {rep['trace']['projects_scanned']} 個專案，保留 {rep['trace']['kept_blobs']} 個必要物件）")
+    tinfo = rep["trace"].get("target")
+    if tinfo is not None:
+        tag = "✓ 已達標" if tinfo["target_reached"] and not tinfo["aborted"] else "（預算內未達標）"
+        print(f"  · trace 版本庫   : 釋放 {_human_bytes(rep['trace']['bytes_freed'])} "
+              f"（掃描 {rep['trace']['projects_scanned']} 個專案，保留 {rep['trace']['kept_blobs']} 個必要物件）")
+        print(f"    └ 目標 {tinfo['target_bytes'] / (1024 * 1024):.0f} MiB {tag}: 現餘 "
+              f"{_human_bytes(tinfo['bytes_remaining'])}")
+    else:
+        print(f"  · trace 版本庫   : 釋放 {_human_bytes(rep['trace']['bytes_freed'])} "
+              f"（掃描 {rep['trace']['projects_scanned']} 個專案，保留 {rep['trace']['kept_blobs']} 個必要物件）")
     print(f"  · quarantine 隔離: 釋放 {_human_bytes(rep['quarantine']['bytes_freed'])} "
           f"（保留 {rep['quarantine']['candidates_kept']} 份候選清單）")
     print(f"  · vacant-work    : 釋放 {_human_bytes(rep['work']['bytes_freed'])} "

@@ -422,12 +422,44 @@ class Recorder:
             return prev, None, last
         return prev, idx, self._index_blob(idx, st)
 
+    def _retain_versions(self, changes: list[W.Change]) -> None:
+        """Store-on-change：改動被觀測的那一刻，存下改動檔案的 **after** 版本
+        （從工作區讀回並逐位元組驗 sha 才落盤）——工作區是現況的唯一真相，
+        版本庫是歷史。未改動的檔案從不存（掃描不拷貝）。第一次改動之前的
+        before 版本在改動被觀測時已被覆蓋或刪除，無從補存——讀取端
+        （`file_text`／`materialize`）回退「工作區＋驗 sha」，取不回來就誠實
+        回 None／列進 missing（UNKNOWN），不崩、不假 PASS。這取代 round 72 的
+        「保留 before 版本」——那是一個 repo 重存到 771MB 的根源（2026-10-28
+        Axis 2）。外部（工作區外）內容由掃描展開符號連結時存（有界），不在此。
+        best-effort：存檔失敗不阻擋記下這一步。"""
+        for c in changes:
+            if not c.after or ":" in c.after:
+                continue
+            p = self.workspace / c.path
+            try:
+                if p.is_symlink() or not p.is_file():
+                    continue
+                if W._sha_file(p) != c.after:
+                    continue
+                self.blobs.put_bytes(p.read_bytes(), durable=True)
+            except OSError:
+                continue
+
+    def _gap_retain(self, prev: W.Index | None, idx: W.Index | None) -> list[dict[str, Any]]:
+        """缺口＝上次看到到現在之間的改動；同時把這些改動的 after 版本存入
+        版本庫（store-on-change，見 `_retain_versions`）。"""
+        if prev is None or idx is None:
+            return []
+        changes = W.diff(prev, idx)
+        self._retain_versions(changes)
+        return [c.to_json() for c in changes]
+
     def _gap_since(self, st: dict[str, Any], prev: W.Index | None, idx: W.Index | None,
                    idx_sha: str | None, observed_at: str) -> None:
         """上一次看到之後到現在的改動記成缺口，並把「上一次看到」往前推（同一批改動不再被算一次）。"""
         if prev is None or idx is None:
             return
-        gap = [c.to_json() for c in W.diff(prev, idx)]
+        gap = self._gap_retain(prev, idx)
         if gap:
             self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                "before_index": st["last_index"],
@@ -591,7 +623,7 @@ class Recorder:
                 # 已經有界的孤兒步驟（同一個行動者後來又開始了下一步）不算「在進行」——否則它會
                 # 一直擋住缺口，兩步之間的改動就此消失（審查 recorder#1）。平行的平台上這會把
                 # 還在跑的那一步的寫入記成缺口：寧可「沒人解釋」，不可錯怪。
-                gap = [c.to_json() for c in W.diff(prev, idx)]
+                gap = self._gap_retain(prev, idx)
             if gap:
                 self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                    "before_index": st["last_index"],
@@ -638,6 +670,8 @@ class Recorder:
             # 不可以把整個既有工作區算成這一步寫的。這一次沒看 ⇒ 也是不知道
             changes = W.diff(self.load_index(base_sha), idx) \
                 if base_sha and idx is not None else []
+            if changes:
+                self._retain_versions(changes)
             delegated: list[str] = []
             if pend and tool_kind(tool) == "agent":
                 # 子 agent 自己的步驟已經記下它們的寫入；父呼叫只留沒有任何子步驟解釋的那些
@@ -726,6 +760,8 @@ class Recorder:
             end_sha = pend.get("bound_index") or (idx_sha if idx is not None else None)
             changes = W.diff(self.load_index(pend["pre_index"]), self.load_index(end_sha)) \
                 if pend.get("pre_index") and end_sha else []
+            if changes:
+                self._retain_versions(changes)
             payload = {"step": step, "n": st["n_steps"], "actor": pend["actor"],
                        "tool": pend["tool"], "input_blob": pend["input_blob"],
                        "writes": [c.to_json() for c in changes], "output_blob": None,
@@ -755,7 +791,7 @@ class Recorder:
             prev, idx, idx_sha = self._observe(st)
             if prev is not None and idx is not None and \
                     not any(v.get("pre_index") for v in st["pending"].values()):
-                gap = [c.to_json() for c in W.diff(prev, idx)]
+                gap = self._gap_retain(prev, idx)
                 if gap:
                     self._append("unrecorded_change", {"changes": gap, "n": len(gap),
                                                        "before_index": st["last_index"],
@@ -896,7 +932,7 @@ class Recorder:
                     st["subagents"][k]["running"] = False
             (st.get("deferrals") or {}).pop(key, None)
             prev, idx, idx_sha = self._observe(st)
-            gap = [c.to_json() for c in W.diff(prev, idx)] \
+            gap = self._gap_retain(prev, idx) \
                 if prev is not None and idx is not None and \
                 not any(v.get("pre_index") for v in st["pending"].values()) else []
             if gap:
