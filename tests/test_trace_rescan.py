@@ -4,7 +4,9 @@
 `_disable_scan` 就把這個專案**永久**關掉（自家專案實測）。round 27 只讓人**看得見**
 這個狀態；這支釘住的是**救得回**：
 
-- `rescan` 重新完整觀察一次：重存所有版本、刷新 `last_index`、清掉「掃描停用」
+- `rescan` 重新完整觀察一次：刷新 `last_index`、清掉「掃描停用」
+  （round 142+ store-on-change：rescan 不再重存所有版本——內容落盤改為 copy-on-change，
+  讀端缺版本時回工作區驗 sha、取不回就誠實 UNKNOWN）
 - 救回來之後，逐步觀察真的又作用（寫入能被歸因），不是只把旗標翻過去
 - 救不回（工作區太大）時不破壞既有狀態——寧可照實說救不回，也不清空已觀測到的
 - `baseline()` 預設行為不變（`rescan` 是純增量能力）
@@ -117,22 +119,34 @@ def test_rescan_revives_a_project_that_died_after_gc(proj):
     assert ok, why
 
 
-def test_rescan_re_stores_the_blob_store_so_incremental_scans_are_safe(proj):
+def test_rescan_reads_back_after_gc_reclaims_the_store(proj):
+    """gc 把 store 剪光 ⇒ 讀端仍由「工作區 + sha 驗證」回退取回逐位元組相同內容。
+
+    round 72 時代的假設是「rescan 重存所有版本，讓快路徑的假設重新成立」；
+    round 142+ store-on-change 把容錯搬到讀端：內容定址的讀取優先 store、缺了
+    回工作區驗 sha、還取不回就誠實 UNKNOWN。rescan 的本职是救回逐步觀察
+    （上面的 test），本測試釘住「store 被回收後讀取不失手」。
+    """
     p, _c = proj
     R.Recorder(p).baseline()
-    # 模擬 `gc` 把一部分版本從 store 剪掉：之後的增量掃描若走快路徑（假設版本都在）
-    # 會讀到空；rescan 必須重存，讓快路徑的假設重新成立
-    rec = R.Recorder(p)
-    before = rec.load_index(_state(p)["last_index"])
-    some_sha = next(iter(before.values())).sha256
-    victim = rec.blobs.path(some_sha)
-    if victim.is_file():
-        victim.unlink()
+    # 模擬 `gc` 把 store 的內容 blob 全部回收（新語義下 gc 可以回收任何非鏈必需的內容）
+    for f in R.Recorder(p).blobs.root.rglob("*"):
+        if f.is_file():
+            f.unlink()
     _died_after_gc(p)                                         # 現在專案死了
     R.Recorder(p).rescan()
-    fresh = rec.load_index(_state(p)["last_index"])
-    # 新版本可讀（重存過的），不是一堆空
-    assert all(rec.blobs.get(v.sha256) for v in fresh.values())
+    # 讀端（blame/file_text）回退工作區：逐位元組相同，不是一堆空
+    from vacant_network.trace.blame import Trace
+    tr = Trace(R.Recorder(p))
+    idx_sha = _state(p)["last_index"]
+    idx = tr.index(idx_sha)
+    for rel, e in idx.items():
+        if e.sha256.startswith(("secret:", "big:", "link:")):
+            continue
+        assert tr.file_text(idx_sha, rel) == (p / rel).read_text(), (
+            f"{rel}: read side lost its footing after the store was reclaimed")
+    ok, why = R.Recorder(p).verify()
+    assert ok, why
 
 
 def test_rescan_too_big_keeps_existing_state(proj, monkeypatch):

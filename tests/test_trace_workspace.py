@@ -25,10 +25,21 @@ def test_scan_diff_and_rebuild_any_state(tmp_path):
     s1 = W.scan(ws, s0, blobs=store)
     ch = {c.path: c.kind for c in W.diff(s0, s1)}
     assert ch == {"report.md": "modified", "data/a.csv": "deleted", "notes/new.txt": "added"}
-    back = tmp_path / "back"
-    assert W.materialize(s0, store, back) == []
-    assert (back / "report.md").read_text() == "Total: 60\n"      # 之前的狀態可以重建
     assert W.index_root(W.load(W.dump(s1))) == W.index_root(s1)
+
+    # Axis 2（2026-10-28）store-on-change：baseline 內容不落盤（寫端約束）；檔案其後
+    # 被改動/刪除，那份狀態確實不存在——materialize 誠實列 missing（不崩、不假重建），
+    # 而不是靜默回空
+    back = tmp_path / "back"
+    assert set(W.materialize(s0, store, back)) == {"report.md", "data/a.csv"}
+
+    # 未變動檔案仍可由「工作區 + sha 驗證」回退逐位元組重建（零磁碟成本）
+    _w(ws, {"keep.txt": "kept\n"})
+    s2 = W.scan(ws, s1, blobs=store)
+    back2 = tmp_path / "back2"
+    missing = W.materialize(s2, store, back2, workspace=ws)
+    assert "keep.txt" not in missing
+    assert (back2 / "keep.txt").read_text() == "kept\n"
 
 
 def test_incremental_scan_reuses_unchanged_hashes(tmp_path, monkeypatch):
