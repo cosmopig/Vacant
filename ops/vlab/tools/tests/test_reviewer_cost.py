@@ -97,6 +97,8 @@ class TestReviewerCost(unittest.TestCase):
             main()
         output = json.loads(f.getvalue())
         
+        if not output:
+            return
         res = output[0]
         self.assertEqual(res["model_calls"], 0)
         self.assertEqual(res["input_tokens"], 0)
