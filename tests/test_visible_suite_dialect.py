@@ -6,8 +6,9 @@
 
 這批測試釘住產品對這批題的語義——誠實、不是假通過：
 
-  A  `*_test.py`（unittest 方言）        → 產品看不到（預設命名維持現狀）⇒
-                                          `no_suite`／`ungated`
+  A  `*_test.py`（unittest 方言）        → [P0-2 後] 預設命名＝`test_*.py`＋`*_test.py`：
+                                          看得到、照實執行（對的過、錯的紅）；
+                                          真正沒有測試檔時仍 `no_suite`／`ungated`
   B  同一個檔改名 `test_*.py`            → 看得到；adapter 落地後按 unittest
                                           方言執行：對的實現要過，錯的實現
                                           照樣紅（負對照保留原釘住意圖）
@@ -20,7 +21,7 @@
 adapter 落地（round 124，G1–G3 綠）後，依設計 §五的要求 B **改寫**（不是
 刪除）為落地後語義，並加一筆「錯的實現仍拒」的負對照——原釘住的意圖
 （這條路徑不能靜默變成通過）保留；C/D 不變；A 的命名規則仍是產品現狀
-（opt-in 命名是獨立門 G5，不屬於本檔）。
+（P0-2 雙命名於 round 131 落地後，A 段依新語義改寫——見下）。
 被刪掉的釘住測試等于把語義變遷藏起來，所以這裡連舊語義都寫在註解裡。
 
 零模型呼叫：agent 是 `python3 -c pass`（不發任何請求）。
@@ -78,27 +79,40 @@ def _run_suite(tmp_path: Path, filename: str, body: str) -> dict:
                                 verify_root=tmp_path / "verify")
 
 
-# ── A：*_test.py（unittest 方言）＝ 產品今天看不到的那 33/34 題 ──────────
-def test_unittest_test_named_file_is_invisible_to_product(tmp_path: Path):
-    """34 題 polyglot_py 的真實形狀。現行規則下＝無訊號，**不是**通過。"""
+# ── A：*_test.py（unittest 方言）＝ polyglot_py 33/34 題的真實形狀 ──────
+# [round 51/126 釘住] 舊預期（P0-2 前）：產品**看不到** `*_test.py` ⇒
+#   A1 `test_files(sd) == []`
+#   A2 launcher ⇒ `stop_reason == "no_suite"`、`refused is True`、exit != 0
+#   A3 `--allow-no-suite` ⇒ `stop_reason == "ungated"`、`accepted is None`
+# P0-2（round 131，`ops/packets/p02_testpy_discovery.md`）把預設命名擴為
+# `test_*.py` ＋ `*_test.py`：這 34 題變**真訊號**，舊釘住的三條預期因此改寫
+# （不是刪除）：A1→A1′ 看得到；A2→A2′ 對的實現要過（原「無訊號不是通過」的
+# 意圖由 C 段的顯式 driver_error 與 B3 負對照繼續保留）；A3→A3′ 改用
+# **真正不匹配任何命名**的檔，保留「量不到 ≠ 通過、收據不得寫 True」的釘住。
+def test_unittest_test_named_file_is_now_visible(tmp_path: Path):
+    """[A1′] P0-2：`*_test.py` 進入預設命名，`test_files()` 撿得到。"""
     sd = _suite_dir(tmp_path, "suite", "wordy_test.py", UNITTEST_FILE)
-    assert acceptance.test_files(sd) == []
+    assert acceptance.test_files(sd) == [sd / "wordy_test.py"]
 
 
-def test_launcher_unittest_suite_dir_is_no_signal(tmp_path: Path):
+def test_launcher_unittest_suite_dir_is_real_signal(tmp_path: Path):
+    """[A2′] P0-2：`*_test.py` 是可見訊號；工作區有對的實現 ⇒ `visible_pass`。"""
     ws = _ws(tmp_path, "ws")
     sd = _suite_dir(tmp_path, "suite", "wordy_test.py", UNITTEST_FILE)
     s = launcher.run([sys.executable, "-c", "pass"], workspace=ws,
                      run_dir=tmp_path / "run1", suite_dir=sd, vacant_on=True,
                      task_id="dialect-pin", sandbox_name="none")
-    assert s["stop_reason"] == "no_suite"
-    assert s["refused"] is True
-    assert launcher.exit_code(s) != 0
+    assert s["stop_reason"] == "visible_pass"
+    assert s["accepted"] is True
 
 
-def test_launcher_unittest_suite_dir_with_allow_is_null_not_true(tmp_path: Path):
+def test_launcher_suite_dir_without_matching_tests_still_null_not_true(
+        tmp_path: Path):
+    """[A3′] 真正沒有測試檔（不匹配 `test_*.py`／`*_test.py`）＋
+    `--allow-no-suite` ⇒ `ungated`、`accepted is None`：量不到 ≠ 通過，
+    收據不得寫 True（round 51 原釘住意圖保留）。"""
     ws = _ws(tmp_path, "ws")
-    sd = _suite_dir(tmp_path, "suite", "wordy_test.py", UNITTEST_FILE)
+    sd = _suite_dir(tmp_path, "suite", "wordy.py", UNITTEST_FILE)  # 名字不匹配
     s = launcher.run([sys.executable, "-c", "pass"], workspace=ws,
                      run_dir=tmp_path / "run2", suite_dir=sd, vacant_on=True,
                      allow_no_suite=True, task_id="dialect-pin",

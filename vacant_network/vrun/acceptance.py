@@ -152,6 +152,12 @@ def where_of(exc, testfile):
     return "%s:%d: %s" % (os.path.basename(f.filename), f.lineno, (f.line or "").strip())
 
 sys.path.insert(0, WS)
+# P0-2: 套件目錄（vdir＝套件檔的副本）排在工作區**前面**——套件自己的
+# helper（`test_utils.py` 之類）永遠先被解析；候選碼把工作區塞一個同檔名
+# 檔也劫不走套件的 helper（helper 注入攻擊）。
+_SUITE_DIR = os.path.dirname(os.path.abspath(TESTFILE))
+if _SUITE_DIR:
+    sys.path.insert(0, _SUITE_DIR)
 spec = importlib.util.spec_from_file_location("r530_testmod", TESTFILE)
 mod = importlib.util.module_from_spec(spec)
 buf = io.StringIO()
@@ -227,17 +233,57 @@ emit({"end": True, "ran": len(checks)})
 '''
 
 
+def _is_test_name(name: str) -> bool:
+    """測試檔命名的**唯一來源**（P0-2，round 131）。
+
+    收 `test_*.py` **加** `*_test.py`（polyglot_py 34 題的真實形狀是後半部）；
+    光板的 `test.py` 不收（stem 要 `test_` 前綴或 `_test` 後綴）。
+    `test_files()`、launcher 的 `has_suite`、gateshim 的套件目錄發現都用這一個，
+    兩處不會再漂移（漂移＝「launcher 以為有套件、門上什麼都看不到」的 0/34 形狀）。
+    """
+    if not name.endswith(".py"):
+        return False
+    stem = name[:-3]
+    return stem.startswith("test_") or stem.endswith("_test")
+
+
+def _static_import_roots(source: bytes) -> frozenset[str]:
+    """這個檔案靜態 import 的頂層模組名（純語法樹、不執行）。
+
+    供 helper 判定用：`from test_utils import …` ⇒ `test_utils`；
+    `import test_utils` ⇒ `test_utils`。只認 level-0（絕對）import——
+    相對 import 指的是同一包、不該被算成對兄弟檔的引用。
+    語法錯誤 ⇒ 空集合（沒有 import 來源 ⇒ 不能當 helper ⇒ 照舊執行、
+    落到顯式失敗）。
+    """
+    try:
+        tree = ast.parse(source.decode("utf-8"))
+    except (SyntaxError, ValueError, UnicodeDecodeError):
+        return frozenset()
+    roots: set[str] = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Import):
+            roots.update(a.name.split(".")[0] for a in n.names)
+        elif isinstance(n, ast.ImportFrom):
+            if n.level == 0 and n.module:
+                roots.add(n.module.split(".")[0])
+    return frozenset(roots)
+
+
 def test_files(suite_dir: str | pathlib.Path) -> list[pathlib.Path]:
     """一個驗收目錄裡的測試檔，**排序固定**（檔名字典序）。
 
-    只收 `test_*.py`：目錄裡允許放 helper（`_support.py`）給測試 import，
-    而 helper 不是一個測試檔。認不出來的東西一律不當測試——
-    「多跑了一個不是測試的東西」與「漏跑了一個測試」都會讓分數說謊。
+    收 `test_*.py` 與 `*_test.py`（P0-2，`_is_test_name`）：目錄裡允許放
+    helper（`test_utils.py`、`_support.py`）給測試 import，而 helper 不是
+    一個測試檔（`run_suite` 的 helper 判定決定它執不執行）。認不出來的
+    東西一律不當測試——「多跑了一個不是測試的東西」與「漏跑了一個測試」
+    都會讓分數說謊。
     """
     d = pathlib.Path(suite_dir)
     if not d.is_dir():
         return []
-    return sorted(p for p in d.glob("test_*.py") if p.is_file())
+    return sorted(p for p in d.glob("*.py")
+                  if p.is_file() and _is_test_name(p.name))
 
 
 def declared_cases(test_file: str | pathlib.Path) -> list[str]:
@@ -346,6 +392,11 @@ def where_of(info, testfile):
     return f"{os.path.basename(testfile)}:{hit}"
 
 sys.path.insert(0, WS)
+# P0-2: 同 check driver——套件目錄（vdir）排在工作區前面，helper 解析
+# 永遠以套件自己的那份為準。
+_SUITE_DIR = os.path.dirname(os.path.abspath(TESTFILE))
+if _SUITE_DIR:
+    sys.path.insert(0, _SUITE_DIR)
 spec = importlib.util.spec_from_file_location("r530_testmod", TESTFILE)
 mod = importlib.util.module_from_spec(spec)
 # unittest.TestSuite._handleModuleSetUp／_handleTearDownModule 從
@@ -753,10 +804,12 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
         for p in sorted(src.iterdir()):
             if p.is_file() and p.suffix == ".py":
                 blobs[p.name] = p.read_bytes()
-    names = sorted(n for n in blobs if n.startswith("test_"))
+    # P0-2 (round 131)：命名＝`test_*.py` **或** `*_test.py`（`_is_test_name`
+    # 是命名規則的唯一來源，`test_files()` 與 launcher 的 `has_suite` 共用）。
+    names = sorted(n for n in blobs if _is_test_name(n))
     if not names:
         return _empty_result(suite, task_id,
-                             reason=f"驗收目錄沒有 test_*.py：{src}")
+                             reason=f"驗收目錄沒有 test_*.py 或 *_test.py 測試檔：{src}")
     suite_sha = suite_digest(blobs)
     # 方言路由（設計 §4.2）：每個被發現的檔先由靜態分類器決定走哪支 driver。
     #   check / none → 舊 driver（與 adapter 前逐位相同，`none` 照舊給
@@ -765,6 +818,22 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
     #   mixed        → 兩半都不跑、不拆半——直接合成一筆顯式 protocol 失敗。
     # 分類在任何候選碼執行前完成（純語法樹），候選碼改不到路由結果。
     dialects = {n: classify_dialect(blobs[n]) for n in names}
+    # P0-2: helper 判定——**符合命名**的檔、靜態 dialect 為 `none`、且被同套件
+    # 另一個**符合命名**的檔靜態 import ⇒ helper（如 polyglot_py pg_paasio 的
+    # `test_utils.py`），**不執行**。單獨一個 `none` 檔照舊執行、落到顯式
+    # `driver_error`（round 51/126 的 pin，`tests/test_visible_suite_dialect.py` §C）。
+    # 判定是純語法樹（不執行）：候選碼改不到 helper 判定，helper 鏈可以有多層
+    # （test→test_mid(none)→test_utils(none)，兩層都因被上游引用而成為 helper）。
+    import_roots = {n: _static_import_roots(blobs[n]) for n in names}
+    helpers = {n for n in names
+               if dialects[n] == DIALECT_NONE
+               and any(n[:-3] in import_roots[o] for o in names if o != n)}
+    names = [n for n in names if n not in helpers]
+    if not names:
+        # 所有符合命名的檔都是 helper ⇒ 沒有可執行的測試 ⇒ 不是通過（fail-closed）。
+        return _empty_result(suite, task_id,
+                             reason=(f"驗收目錄只有 helper（被其他測試檔 import 的"
+                                     f"工具檔 {sorted(helpers)}）、沒有可執行的測試檔：{src}"))
     for rel in names:
         dialect = dialects[rel]
         if dialect == DIALECT_MIXED:
@@ -825,7 +894,36 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
             "stderr_tail": (res.stderr or "")[-400:],
         })
     out = _finish(suite, task_id, files_rec, suite_sha256=suite_sha)
+    # P0-2: discovery 稽核紀錄——驗收目錄裡**每個 .py** 一筆（不管執不執行），
+    # 供逐題回答「看到了什麼、執行了什麼、為什麼」。純增量欄位：**不進**
+    # `result_digest`（動簽進收據的欄位集合＝全世界既有收據的雜湊形狀都變）。
+    out["discovery"] = [_discovery_record(n, blobs, dialects, import_roots, helpers)
+                        for n in sorted(blobs)]
     return out
+
+
+def _discovery_record(name: str, blobs: dict[str, bytes],
+                      dialects: dict[str, str],
+                      import_roots: dict[str, frozenset[str]],
+                      helpers: set[str]) -> dict:
+    """P0-2 discovery 稽核筆（欄位語意見 `run_suite` 末段的註解）。"""
+    rec = {"name": name,
+           "sha256": hashlib.sha256(blobs[name]).hexdigest()}
+    if name not in dialects:
+        # 不合測試檔命名（`test_*.py`／`*_test.py`）：永遠不執行。
+        rec.update({"role": "helper", "dialect": None, "executed": False,
+                    "reason": "not_test_name"})
+    elif name in helpers:
+        # 符合命名但被另一個測試檔靜態 import ⇒ helper，不執行。
+        importers = sorted(o for o in dialects
+                           if o != name and name[:-3] in import_roots[o])
+        rec.update({"role": "helper", "dialect": DIALECT_NONE,
+                    "executed": False, "imported_by": importers,
+                    "reason": (f"helper: statically imported by "
+                              f"{', '.join(importers)}")})
+    else:
+        rec.update({"role": "test", "dialect": dialects[name], "executed": True})
+    return rec
 
 
 def _mixed_failure_record(rel: str, blob: bytes) -> dict:
