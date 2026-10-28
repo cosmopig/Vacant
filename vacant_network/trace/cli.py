@@ -2,8 +2,11 @@
 
 這支在架構裡承重什麼（`decisions/DECISION_20260924_ACCOUNTABLE_TRACE.md` §4.1-2、§4.5「撤銷」）：
 
-    vacant trace show [--json] [--tail N]   每一步：行動者、工具、寫了什麼（沒有歸屬寫入時：
+    vacant trace show [--json] [--tail N] [--session PREFIX] [--errors]
+                                            每一步：行動者、工具、寫了什麼（沒有歸屬寫入時：
                                             工具輸入的一行預覽，blob 被 gc 就空白）；缺口；觀察停用狀態
+                                            （round 127 dogfood：`--session` 只看一個工作階段、`--errors`
+                                            只看失敗步；`--json` 仍是全量記錄）
     vacant trace verify                     病歷的簽章鏈驗不驗得過（有任務帳本就對它簽過的鏈頭）
     vacant trace report [--check]           未解問題清單（`--check` 先重驗一次契約再追緝）
     vacant trace blame <檔>[:<行>] [--value V]   這個位置的值是哪一步、從哪裡來的
@@ -95,6 +98,54 @@ def _fmt_dur(ms: Any) -> str:
     return f"{ms // 60_000}m{ms % 60_000 // 1000:02d}s"
 
 
+def _event_session(e: dict) -> str | None:
+    """一個事件屬於哪個工作階段（若有）：step／session_seen／session_closed 在
+    `actor.session`，prompt／review 在頂層 `session`；專案層事件（coverage／
+    unrecorded_change／trace_genesis）沒有工作階段，回 None。"""
+    t = e.get("type")
+    if t in ("step", "session_seen", "session_closed"):
+        s = (e.get("actor") or {}).get("session")
+    elif t in ("prompt", "review"):
+        s = e.get("session")
+    else:
+        s = None
+    return s if isinstance(s, str) and s else None
+
+
+def _session_plain(s: str) -> str:
+    """同一個工作階段在鏈裡有兩種歷史寫法：`pi:<uuid>`（review 事件帶 platform
+    前綴）與裸 `<uuid>`（step／prompt／session 事件）——本專案實際數據如此。
+    比較與列舉都用裸形式，兩種寫法才算同一個階段。"""
+    return s.partition(":")[2] if ":" in s else s
+
+
+def _session_matches(e: dict, prefix: str) -> bool:
+    s = _event_session(e)
+    if not s:
+        return False
+    a, b = _session_plain(s), _session_plain(prefix)
+    if not b:                      # `--session pi:` 這種退化前綴：不算匹配
+        return False
+    return a.startswith(b) or b.startswith(a)
+
+
+def _recent_sessions(evs: list[dict], limit: int = 5) -> list[str]:
+    """最近出現過的工作階段（新→舊，裸形式去重），供 `--session` 前綴打錯時指路。"""
+    out: list[str] = []
+    seen: set[str] = set()
+    for e in reversed(evs):
+        s = _event_session(e)
+        if not s:
+            continue
+        ps = _session_plain(s)
+        if ps not in seen:
+            seen.add(ps)
+            out.append(ps)
+            if len(out) >= limit:
+                break
+    return out
+
+
 def _input_preview(rec: Recorder, e: dict, limit: int = 64) -> str:
     """一步的工具輸入，取一行預覽（從物件庫）。沒有就回空字串。
 
@@ -163,6 +214,24 @@ def cmd_show(args: argparse.Namespace) -> int:
               f"(steps are still recorded, but file changes are no longer attributed "
               f"step by step; `trace blame` will show unattributable — revive it with "
               f"`vacant trace rescan`)")
+    # round 127 dogfood：本專案病歷 7000+ 步，看某一個工作階段／只看失敗步只能
+    # `trace show | grep`——grep 得到的是步的行，看不出「這一步做了什麼」（預覽在
+    # 同一行，但 grep 的上下行沒有）。視圖直接給過濾；`--json` 不受影響（機器
+    # 消费方要的是全量記錄）。
+    session = (getattr(args, "session", None) or "").strip() or None
+    if session:
+        full = evs
+        evs = [e for e in evs if _session_matches(e, session)]
+        if not evs:
+            raise SystemExit(
+                f"vacant trace show: no session in this project starts with {session!r}. "
+                f"Recent sessions: {', '.join(_recent_sessions(full)) or '(none)'}")
+        skipped = len(full) - len(evs)
+    if getattr(args, "errors", False):
+        evs = [e for e in evs if e.get("type") == "step" and e.get("error")]
+        if not evs:
+            print("no failed steps in this view")
+            return 0
     tail = getattr(args, "tail", None)
     if tail is not None:
         if tail < 1:
@@ -174,6 +243,10 @@ def cmd_show(args: argparse.Namespace) -> int:
             while start > 0 and evs[start - 1]["type"] in ("unrecorded_change", "finding", "flag"):
                 start -= 1
             evs = evs[start:]
+    if session and skipped:
+        # 被濾掉的是專案層事件（沒有工作階段可歸），照實報告而不是靜默丟掉
+        print(f"   ·  {skipped} project-level entries not shown (no session: "
+              f"coverage / unrecorded_change)")
     for e in evs:
         t = e["type"]
         if t == "step":
@@ -432,6 +505,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--tail", type=int, metavar="N",
                    help="show only the last N steps (with the surrounding gaps/flags); "
                         "--json is always the full record")
+    p.add_argument("--session", metavar="PREFIX",
+                   help="show only that session's steps (prefix match; project-level "
+                        "entries without a session are not shown)")
+    p.add_argument("--errors", action="store_true",
+                   help="show only steps that failed")
     p.set_defaults(func=cmd_show)
     p = sp.add_parser("verify")
     p.set_defaults(func=cmd_verify)

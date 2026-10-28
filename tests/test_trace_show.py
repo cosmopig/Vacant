@@ -14,6 +14,9 @@
 4. 步的視圖行沒有「什麼時候」也沒有「花了多久」——兩者在記錄裡都有（`ts_ms`／`wall_ms`），
    要看只能轉 `--json` 自己換算（round 122 dogfood）。人看的視圖直接印本地時間與耗時；
    舊條目缺欄位（本專案 41/6816 步沒有 `wall_ms`）就省掉該段，不崩潰。
+5. 本專案病歷 7000+ 步：看某一個工作階段／只看失敗步只能整卷翻（round 127 dogfood）。
+   加 `--session PREFIX`（前綴比對；專案層事件沒有工作階段、不進這個視圖、照實報告
+   濾掉了幾筆）與 `--errors`（只看失敗步）；`--json` 仍是全量記錄。
 """
 from __future__ import annotations
 
@@ -231,6 +234,126 @@ def test_fmt_clock_and_dur_unit():
     assert cli._fmt_dur(12000) == "12s"
     assert cli._fmt_dur(12400) == "12.4s"
     assert cli._fmt_dur(123000) == "2m03s"
+
+
+def test_show_session_filter_keeps_only_that_session(proj, capsys, monkeypatch):
+    """兩個工作階段的步混在一起：`--session` 前綴只留一個。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    a1, a2 = R.Actor("pi", "01a1"), R.Actor("pi", "01a2")
+    rec.pre("b1", a1, "bash", {}); rec.post("b1", a1, "bash", {}, "")
+    rec.pre("b2", a2, "bash", {}); rec.post("b2", a2, "bash", {}, "")
+    rec.pre("b3", a1, "bash", {}); rec.post("b3", a1, "bash", {}, "")
+    assert cli.cmd_show(_args(session="01a1")) == 0
+    out = capsys.readouterr().out
+    step_lines = [l for l in out.splitlines() if "pi:main" in l and "bash" in l]
+    assert len(step_lines) == 2
+    assert cli.cmd_show(_args(session="01a2")) == 0
+    out = capsys.readouterr().out
+    step_lines = [l for l in out.splitlines() if "pi:main" in l and "bash" in l]
+    assert len(step_lines) == 1
+
+
+def test_show_session_no_match_lists_recent_sessions(proj, monkeypatch):
+    """前綴打錯時不給空白視圖：非零退出、列出最近的工作階段，不用 `--json` 自己猜。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    _step(rec, "s1")
+    with pytest.raises(SystemExit) as ex:
+        cli.cmd_show(_args(session="nope"))
+    msg = str(ex.value)
+    assert "no session" in msg
+    assert "'nope'" in msg                 # 說清楚是哪個前綴沒找到
+    assert "s1" in msg                     # 指路：最近的工作階段列出來了
+
+
+def test_show_session_reports_hidden_project_level_entries(proj, capsys, monkeypatch):
+    """專案層事件（沒有工作階段）被濾掉時照實報告，不靜默丟掉。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    rec._append("coverage", {"scan_disabled": "an incremental scan passed 8s"})
+    _step(rec, "s1")
+    assert cli.cmd_show(_args(session="s1")) == 0
+    out = capsys.readouterr().out
+    # 兩筆沒有工作階段：trace_genesis 與那筆 coverage
+    assert "2 project-level entries not shown" in out
+
+
+def test_show_session_treats_prefixed_and_plain_as_one(proj, capsys, monkeypatch):
+    """同一個工作階段的兩種歷史寫法要算同一個視圖：step 事件裸寫 session、review
+    事件帶 `pi:` 前綴（本專案實際數據：128 筆 review 全是 `pi:<uuid>`）。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    a = R.Actor("pi", "abc123")
+    rec.pre("b1", a, "bash", {}); rec.post("b1", a, "bash", {}, "")
+    rec._append("review", {"action": "allow", "session": "pi:abc123", "mode": "evidence"})
+    assert cli.cmd_show(_args(session="abc123")) == 0
+    out = capsys.readouterr().out
+    # 濾掉的只有 trace_genesis（1 筆）：`pi:abc123` 的 review 被算進同一個視圖
+    assert "1 project-level entries not shown" in out
+
+
+def test_show_session_degenerate_prefix_matches_nothing(proj, monkeypatch):
+    """`--session pi:` 這種只有前綴沒有 id 的退化輸入：不算匹配，給「找不到」而非全量。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    _step(rec, "s1")
+    with pytest.raises(SystemExit) as ex:
+        cli.cmd_show(_args(session="pi:"))
+    assert "no session" in str(ex.value)
+
+
+def test_show_errors_only_failed_steps(proj, capsys, monkeypatch):
+    """`--errors` 只留失敗步；沒有失敗步是合法的空結果（rc 0），不是錯。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    actor = R.Actor("pi", "s1")
+    rec.pre("ok1", actor, "bash", {}); rec.post("ok1", actor, "bash", {}, "")
+    rec.pre("bad1", actor, "bash", {})
+    rec.post("bad1", actor, "bash", {}, "ValueError: boom\n", error="tool reported an error")
+    rec.pre("ok2", actor, "bash", {}); rec.post("ok2", actor, "bash", {}, "")
+    assert cli.cmd_show(_args(errors=True)) == 0
+    out = capsys.readouterr().out
+    step_lines = [l for l in out.splitlines() if "pi:main" in l and "bash" in l]
+    assert len(step_lines) == 1
+    assert "ValueError: boom" in out
+
+
+def test_show_errors_none_is_an_empty_result_not_an_error(proj, capsys, monkeypatch):
+    p, rec = proj
+    monkeypatch.chdir(p)
+    _step(rec, "s1")
+    assert cli.cmd_show(_args(errors=True)) == 0
+    out = capsys.readouterr().out
+    assert "no failed steps in this view" in out
+
+
+def test_show_session_and_tail_compose(proj, capsys, monkeypatch):
+    """`--tail` 數的是過濾之後的步：該工作階段的最後 N 步。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    a1, a2 = R.Actor("pi", "s1"), R.Actor("pi", "s2")
+    for i in range(4):
+        rec.pre(f"a{i}", a1, "bash", {}); rec.post(f"a{i}", a1, "bash", {}, "")
+    rec.pre("b0", a2, "bash", {}); rec.post("b0", a2, "bash", {}, "")
+    assert cli.cmd_show(_args(session="s1", tail=2)) == 0
+    out = capsys.readouterr().out
+    step_lines = [l for l in out.splitlines() if "pi:main" in l and "bash" in l]
+    assert len(step_lines) == 2
+
+
+def test_show_json_ignores_session_and_errors(proj, monkeypatch, capsys):
+    """`--json` 是全量記錄：視圖參數（session/errors）不影響它，和 `--tail` 同一約束。"""
+    p, rec = proj
+    monkeypatch.chdir(p)
+    actor = R.Actor("pi", "s1")
+    rec.pre("ok1", actor, "bash", {}); rec.post("ok1", actor, "bash", {}, "")
+    rec.pre("bad1", actor, "bash", {})
+    rec.post("bad1", actor, "bash", {}, "x", error="tool reported an error")
+    assert cli.cmd_show(_args(json=True, session="s1", errors=True)) == 0
+    evs = json.loads(capsys.readouterr().out)
+    steps = [e for e in evs if e.get("type") == "step"]
+    assert len(steps) == 2                    # 兩步都在，未被視圖參數濾掉
 
 
 def test_show_json_ignores_tail(proj, monkeypatch, capsys):
