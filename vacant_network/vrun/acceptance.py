@@ -9,11 +9,17 @@ R530 的交付是**一個目錄**（`solution.py` 或 `solution/` 套件、可�
 
 ## 測試檔是什麼形狀（`TASK_FORMAT.md` 是規格，這裡是執行語意）
 
-一個測試檔 ＝ 一個 `.py`，兩種寫法擇一，**檔案層級只准有一種**：
+一個測試檔 ＝ 一個 `.py`，三種寫法擇一，**檔案層級只准有一種**
+（靜態分類器 `classify_dialect` 決定路由；同一檔宣告兩套語義＝`mixed`，
+兩半都不跑、直接記一筆顯式 `protocol` 失敗）：
 
   1. 一組零引數的 `check_*()` 函式 ⇒ **每個函式一條 case**，
      依**定義順序**執行（Python 的 module `__dict__` 保序，所以順序是確定的）。
   2. 一個 `main()` ⇒ 整個檔案算**一條** case（名字就叫 `main`）。
+  3. `unittest.TestCase` 子類（頂層）⇒ **每個 `test*()` 方法一條 case**
+     （`ClassName.method`），依 `dir()` 字典序執行（機器間確定，I-6）。
+     `async def test_*` 與 `skipTest` 都記**顯式失敗**（kind=protocol）——
+     前者 unittest 根本不等候、方法體一行不跑，後者什麼都沒驗。
 
 判準：函式**回傳 `None`（或 `True`）** ＝ 過；丟任何例外 ＝ 不過。
 `AssertionError` 與其他例外分開記（`kind`），因為回饋要說得出是「答錯了」
@@ -36,8 +42,9 @@ R530 的交付是**一個目錄**（`solution.py` 或 `solution/` 套件、可�
 修法是**對帳**，不是只加一個 `rc != 0`（退出碼 0 的提早結束一樣會漏）：
 
 1. **宣告清單**：父行程在跑任何候選碼之前，用 `ast` 讀測試檔頂層的
-   `def check_*`（或 `def main`），得到**預期的 case id 與順序**
-   （`declared_cases()`）。driver 只跑這份清單上的名字。
+   `def check_*`（或 `def main`；unittest 方言則是 `TestCase` 子類的
+   `test*()` 方法，`declared_unittest_cases()`），得到**預期的 case id**
+   （`declared_cases()`）。check driver 只跑這份清單上的名字。
 2. **結束標記**：driver 跑完清單才印一行 `{"end": true}`。
 3. **對帳**（`_reconcile()`）：每個宣告的 id 恰好一筆結果；缺的補一筆
    `kind="incomplete"`、重複或清單外的記 `kind="protocol"`；
@@ -273,6 +280,163 @@ DIALECT_CHECK = "check"
 DIALECT_UNTEST = "unittest"
 DIALECT_MIXED = "mixed"
 DIALECT_NONE = "none"
+
+# unittest 方言 driver（設計 §4.3）：同一套 nonce 協定、同一套檔案層級 id
+# （<module>/<file>）、同一套結束標記——父程序的 `_parse_records`／`_reconcile`
+# 對兩種 driver 的輸出完全同形，對帳邏輯不改一行。
+#
+# 與 `DRIVER_SRC` 的差異只有「案例怎麼跑」：
+#  - 案例＝`TestLoader().loadTestsFromModule(mod)` 的葉子（設計 §4.3：順序＝
+#    dir() 字典序，機器間確定 ⇒ I-6）；case id 記 `ClassName.method`，與
+#    `declared_unittest_cases` 的宣告清單同形（對帳分母）。
+#  - `async def test_*` 顯式失敗（kind=protocol）：unittest 跑 async 方法時
+#    只調用、不等候，**方法體一行都不執行卻回報 pass**——實測確認的洞，
+#    寧可顯式紅也不靜默綠（I-4）。
+#  - `self.skipTest`／`@skip` 顯式失敗（kind=protocol）：被跳過的案例什麼都
+#    沒驗，算過等於把分母藏掉。
+#  - 零案例檔案：一筆 <file> driver_error（與 check 方言「無 check_*/main」
+#    同形），不是「空＝過」。
+UNTEST_DRIVER_SRC = '''
+import contextlib, importlib.util, inspect, io, json, os, sys, traceback, unittest
+
+NONCE = sys.argv[3]
+WS = sys.argv[1]
+TESTFILE = sys.argv[2]
+REAL_STDOUT = sys.stdout
+
+def emit(rec):
+    line = json.dumps(rec, ensure_ascii=False, sort_keys=True)
+    REAL_STDOUT.write(NONCE + line + "\\n")
+    REAL_STDOUT.flush()
+
+def clip(s, n):
+    if s is None:
+        return ""
+    if len(s) <= n:
+        return s
+    return s[: n - 20] + "\\n...[clipped...]"
+
+def last_line(info):
+    lines = [l for l in (info or "").splitlines() if l.strip()]
+    return lines[-1].strip() if lines else ""
+
+def where_of(info, testfile):
+    """從 traceback 字串（unittest 的 TestResult 只存字串形）取測試檔的
+    `file:line: text`——與 check 方言 driver 的 where 同形。"""
+    base = os.path.basename(testfile).lower()
+    lines = (info or "").splitlines()
+    hit = None
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if not s.startswith('File "'):
+            continue
+        q = s.find('"', 6)
+        if q < 0:
+            continue
+        if os.path.basename(s[6:q]).lower() != base:
+            continue
+        j = s.find("line ", q)
+        if j < 0:
+            continue
+        num = s[j + 5:].split(",")[0].strip()
+        nxt = lines[i + 1].strip() if i + 1 < len(lines) else ""
+        hit = f"{num}: {nxt}"
+    if hit is None:
+        return None
+    return f"{os.path.basename(testfile)}:{hit}"
+
+sys.path.insert(0, WS)
+spec = importlib.util.spec_from_file_location("r530_testmod", TESTFILE)
+mod = importlib.util.module_from_spec(spec)
+buf = io.StringIO()
+try:
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+        spec.loader.exec_module(mod)
+except BaseException as e:
+    info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+    emit({"case": "<module>", "ok": False, "kind": "import",
+          "message": clip(last_line(info) or type(e).__name__, 400),
+          "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
+    emit({"end": True, "ran": 0})
+    raise SystemExit(0)
+
+loader = unittest.TestLoader()
+try:
+    suite = loader.loadTestsFromModule(mod)
+except BaseException as e:
+    info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+    emit({"case": "<file>", "ok": False, "kind": "driver_error",
+          "message": clip("loading the unittest suite failed: " + (last_line(info) or type(e).__name__), 400),
+          "where": where_of(info, TESTFILE), "output": ""})
+    emit({"end": True, "ran": 0})
+    raise SystemExit(0)
+
+leaves = []
+def _walk(s):
+    for t in s:
+        if isinstance(t, unittest.TestSuite):
+            _walk(t)
+        else:
+            leaves.append(t)
+_walk(suite)
+
+if not leaves:
+    emit({"case": "<file>", "ok": False, "kind": "driver_error",
+          "message": ("no unittest.TestCase.test*() case found in this file "
+                      "(a TestCase subclass without test methods verifies nothing)"),
+          "where": None, "output": ""})
+    emit({"end": True, "ran": 0})
+    raise SystemExit(0)
+
+ran = 0
+for test in leaves:
+    ran += 1
+    case = f"{test.__class__.__qualname__}.{test._testMethodName}"
+    meth = getattr(type(test), test._testMethodName)
+    if inspect.iscoroutinefunction(meth):
+        # unittest 對 async 方法只調用不等候：方法體不執行、回報 pass。
+        # 寧可顯式失敗，不可靜默通過（見 UNTEST_DRIVER_SRC 註解）。
+        emit({"case": case, "ok": False, "kind": "protocol",
+              "message": ("async test methods are not awaited by the unittest "
+                          "runner, so their body never executes; write the case "
+                          "synchronously (or drop the async keyword)"),
+              "where": None, "output": ""})
+        continue
+    buf = io.StringIO()
+    res = unittest.TestResult()
+    try:
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+            test.run(res)
+    except BaseException as e:
+        info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+        emit({"case": case, "ok": False, "kind": "exception",
+              "message": clip(last_line(info) or type(e).__name__, 400),
+              "where": where_of(info, TESTFILE),
+              "output": clip(buf.getvalue(), 1200)})
+        continue
+    if res.skipped:
+        # TestResult.skipped 存 (test, reason)——reason 是第二項。
+        emit({"case": case, "ok": False, "kind": "protocol",
+              "message": (f"the case skipped itself ({res.skipped[0][1]}); "
+                          f"a skipped case verifies nothing and counts as a failure"),
+              "where": None, "output": clip(buf.getvalue(), 1200)})
+    elif res.failures:
+        # TestResult.failures 存 (test, traceback 字串)——不是例外物件。
+        info = res.failures[0][1]
+        emit({"case": case, "ok": False, "kind": "assert",
+              "message": clip(last_line(info) or "assertion failed", 400),
+              "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
+    elif res.errors:
+        info = res.errors[0][1]
+        emit({"case": case, "ok": False, "kind": "exception",
+              "message": clip(last_line(info) or "exception", 400),
+              "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
+    else:
+        emit({"case": case, "ok": True, "kind": "pass",
+              "message": "", "where": None, "output": clip(buf.getvalue(), 1200)})
+
+emit({"end": True, "ran": ran})
+'''
 
 
 def _ast_of(source: bytes):
@@ -513,19 +677,37 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
         return _empty_result(suite, task_id,
                              reason=f"驗收目錄沒有 test_*.py：{src}")
     suite_sha = suite_digest(blobs)
-    plan = {n: _declared_from_source(blobs[n]) for n in names}
+    # 方言路由（設計 §4.2）：每個被發現的檔先由靜態分類器決定走哪支 driver。
+    #   check / none → 舊 driver（與 adapter 前逐位相同，`none` 照舊給
+    #                  顯式 driver_error，不靜默跳過）；
+    #   unittest     → UNTEST_DRIVER_SRC，宣告清單換成 declared_unittest_cases；
+    #   mixed        → 兩半都不跑、不拆半——直接合成一筆顯式 protocol 失敗。
+    # 分類在任何候選碼執行前完成（純語法樹），候選碼改不到路由結果。
+    dialects = {n: classify_dialect(blobs[n]) for n in names}
     for rel in names:
-        declared = plan[rel]
+        dialect = dialects[rel]
+        if dialect == DIALECT_MIXED:
+            files_rec.append(_mixed_failure_record(rel, blobs[rel]))
+            continue
+        if dialect == DIALECT_UNTEST:
+            declared = declared_unittest_cases(blobs[rel])
+            driver_name = "driver_untest.py"
+        else:
+            declared = _declared_from_source(blobs[rel])
+            driver_name = "driver.py"
         vdir = vroot / f"_v_{suite}_{secrets.token_hex(8)}"
         try:
             vdir.mkdir(parents=True)
             (vdir / "driver.py").write_text(DRIVER_SRC, encoding="utf-8")
+            if driver_name == "driver_untest.py":
+                (vdir / driver_name).write_text(UNTEST_DRIVER_SRC,
+                                                encoding="utf-8")
             for n, b in blobs.items():
                 (vdir / n).write_bytes(b)
             tf = vdir / rel
             mf = vdir / f"_declared_{tf.stem}.json"
             mf.write_text(json.dumps(declared), encoding="utf-8")
-            cmd = (f"python3 {_q(vdir / 'driver.py')} {_q(ws)} {_q(tf)} "
+            cmd = (f"python3 {_q(vdir / driver_name)} {_q(ws)} {_q(tf)} "
                    f"{_q(nonce)} {_q(mf)}")
             res = sandbox.run(cmd, workspace=ws, timeout_s=timeout_s,
                               ro_binds=(vdir,))
@@ -563,6 +745,35 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
         })
     out = _finish(suite, task_id, files_rec, suite_sha256=suite_sha)
     return out
+
+
+def _mixed_failure_record(rel: str, blob: bytes) -> dict:
+    """`mixed` 檔（同一檔既宣告 `check_*` 又宣告 `unittest.TestCase` 子類）的
+    檔案層級失敗紀錄——兩半**都不執行**（設計 §4.2：「不猜、不拆半跑」）。
+
+    形狀與真實跑過一支 driver 的檔案紀錄同形（`_finish`/`render_failures`/
+    收據雜湊不需特判）：`complete=False`、`rc=None`（driver 沒跑過）、
+    `end_marker=False`、唯一 case 是這筆 protocol 失敗 ⇒ `all_pass` 必為
+    False，且失敗原因會原樣進回饋（**不標 `synthesized`**——這是要讓寫測試
+    的人看到並改的動作項，不是重複貼的雜訊）。
+    """
+    check_names = _declared_from_source(blob)
+    untest_names = declared_unittest_cases(blob)
+    cases = [{"case": "<file>", "ok": False, "kind": "protocol",
+              "message": (f"this file declares two dialects at once "
+                          f"(check_*: {check_names or 'none'}; unittest: "
+                          f"{untest_names or 'none'}); neither half was run — "
+                          f"split it into one file per dialect"),
+              "where": None, "output": ""}]
+    return {"file": rel,
+            "sha256": hashlib.sha256(blob).hexdigest(),
+            "rc": None, "timed_out": False, "wall_ms": 0,
+            "declared": [],
+            "end_marker": False,
+            "complete": False,
+            "cases": cases,
+            "passed": 0, "total": len(cases),
+            "stderr_tail": ""}
 
 
 def _driver_error_message(res) -> str:
