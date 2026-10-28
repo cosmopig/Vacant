@@ -73,9 +73,11 @@ DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 # round 142（2026-10-28）：512 MiB → 64 MiB。512 MiB 實測為「恰好高於舊式全量
 # 複製快照（2G repo 上 542 MB，其中 247 MB 是未變動檔的零價值副本）」⇒ sweep
 # 空轉、垃圾永不回收（ASSIGNMENT 主軸 2 人類回報的 564 M 現狀）。64 MiB＝2G
-# repo 的 3.2%，實測工作集（近 50 步 I/O＋索引＋近期版本）裝得下（63.4 MiB，
-# 見 ops/packets/axis2_budget_64mib.md dry-run）；未變動檔副本由讀端工作區回退
-# 兜底，回收零損失。見 tests/test_retention.py::test_default_trace_budget_bounded_for_large_workspaces。
+# repo 的 3.2%，實測硬底（活躍索引＋近 50 步 I/O＋已改檔版本）裝得下
+# （本專案實測 5.97 MiB，2026-10-28 round 145）；未變動檔副本（同專案 63.18 MiB）
+# 由讀端工作區回退兜底，超標時 sweep 優先回收、零損失。
+# round 145 另修 `_sweep_to_target` 計數 bug（只數候選不數硬底 ⇒ 69.15 MiB 現狀
+# 下 sweep 空轉），見同檔 round 145 註記與 tests/test_retention.py 回歸測試。
 DEFAULT_TRACE_BUDGET_BYTES = 64 * 1024 * 1024
 
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
@@ -123,22 +125,32 @@ def _sweep_to_target(
     優先序：先回收「与工作區冗餘」的 blob（工作區仍有 bit 相同原檔、讀取端回退取得，
     內容零損失），再按最舊優先回收其餘非必須保留的舊版本（內容轉為 UNKNOWN：
     `file_text` 回 None、`materialize` 列進 missing；不崩、不假 PASS）。鏈、事件體、
-    近期步驟索引、writes 前後版本（keep_shas 且不在 redundant_live）從不動。"""
+    近期步驟索引、writes 前後版本（keep_shas 且不在 redundant_live）＝硬底（hard floor），
+    此機制不動。
+
+    2026-10-28 round 145 修正：判斷「是否已達標」必須以**整個版本庫**
+    （候選＋硬底）計，而非只看候選——否則「硬底 5.97 MiB＋冗餘 63.18 MiB＝69.15 MiB
+    ＞ 64 MiB 預算」時，候選單獨 63.18 MiB＜預算 ⇒ sweep 空轉、預算形同虛設
+    （真實 `~/.vacant` 實測）。若硬底本身超過預算，本機制誠實回報
+    `target_reached=False` 並附上 `hard_keep_bytes`（能刪的已全刪）；不假達標。
+    """
     cands: list[tuple[int, int, int, pathlib.Path]] = []
-    total = 0
+    total = 0          # 整個版本庫（含硬底）的位元組數
+    hard_keep = 0      # 硬底位元組（本機制不可回收）
     if obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
             if not sub.is_dir():
                 continue
             for bf in sorted(sub.iterdir()):
                 sha = bf.name
-                if sha in keep_shas and sha not in redundant_live:
-                    continue
                 try:
                     sz = bf.stat().st_size
                 except OSError:
                     continue
                 total += sz
+                if sha in keep_shas and sha not in redundant_live:
+                    hard_keep += sz
+                    continue
                 # 0＝工作區冗餘（先回收，零損失）；1＝其餘舊版本（後回收，內容轉 UNKNOWN）
                 cands.append((0 if (sha in keep_shas) else 1, sz, bf.stat().st_mtime_ns, bf))
     cands.sort(key=lambda t: (t[0], t[2]))
@@ -163,7 +175,7 @@ def _sweep_to_target(
                     sub.rmdir()
     return {"target_bytes": target_bytes, "bytes_freed": freed, "files_removed": removed,
             "bytes_remaining": remaining, "target_reached": remaining <= target_bytes,
-            "aborted": aborted}
+            "hard_keep_bytes": hard_keep, "aborted": aborted}
 
 
 def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
@@ -984,7 +996,7 @@ def gc_all(
 
 def _resolve_auto_budget() -> int | None:
     """自動 gc 的版本庫上限：`VACANT_TRACE_BUDGET_BYTES` 覆寫（0＝關），
-    否則 512 MiB 預設（2026-10-28 Axis 2）。"""
+    否則 64 MiB 預設（round 142 由 512 MiB 下修；Axis 2）。"""
     env = os.environ.get("VACANT_TRACE_BUDGET_BYTES")
     if env is not None:
         try:
