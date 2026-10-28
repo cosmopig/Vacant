@@ -168,6 +168,66 @@ def test_compact_trace_keeps_active_project_live_blobs(env):
     assert kept <= now, "gc 保留的 blob 在下一次掃描後遺失：whack-a-mole 仍在"
 
 
+def test_default_trace_budget_bounded_for_large_workspaces(env):
+    """ASSIGNMENT 主軸 2（round 142）：2G repo 不該背 247 MB 的「未變動檔複製」。
+
+    實測背景（2026-10-28）：舊碼初掃把本 repo ≤8 MB 檔案全量複製進 trace/objects
+    （542 MB/17,097 blob），而當時 512 MiB 預算恰好高於現況 536 MB ⇒ sweep 空轉。
+    未變動檔案的副本零追緝價值（讀端回退工作區＋驗 sha，round 139）；預算應定在
+    「工作集之上、垃圾之下」——64 MiB（本專案實測工作集 63.4 MiB，見 dry-run）。
+    """
+    assert retention.DEFAULT_TRACE_BUDGET_BYTES <= 64 * 1024 * 1024, (
+        f"預設預算 {retention.DEFAULT_TRACE_BUDGET_BYTES} B 過高："
+        f"舊式全量複製快照會落在預算內而永不回收"
+    )
+
+
+def test_target_sweep_reclaims_active_project_redundant_blobs(env):
+    """Axis 2 sweep 對**活躍**專案也生效（既有測試只釘了非活躍專案與「保留」兩端）：
+
+    round 72 說「活躍專案的未變動背景 blob 常規保留」（whack-a-mole）；Axis 2 補充
+    「超出 target_bytes 時可安全回收」（讀端回退工作區＋驗 sha，零損失）。兩條同時成立：
+    未超標 ⇒ 保留；超標 ⇒ 回收且 blame 誠實（未改檔＝工作區回退；已改檔＝UNKNOWN）。
+    """
+    proj = env / "work" / "active_sweep"
+    proj.mkdir(parents=True)
+    for i in range(40):
+        (proj / f"bg_{i:02d}.txt").write_text(f"background content {i}\n" * 500)
+    (proj / "app.py").write_text("x = 1\n")
+
+    hook.handle("claude", "UserPromptSubmit", {
+        "session_id": "S1", "cwd": str(proj), "prompt": "work"})
+    _step(proj, 1, "Write", {"file_path": str(proj / "app.py"), "content": "x = 2\n"},
+          write={"app.py": "x = 2\n"})
+
+    ws = capture.workspace_for(str(proj))
+    rec = Recorder(ws)
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # 未超標（預設 64 MiB ≫ 本 store）：活躍專案的背景 blob 照舊保留（round 72）
+    keep = retention.compact_trace(dry_run=False)
+    assert keep["files_removed"] == 0
+
+    # 超標：sweep 按「工作區冗餘優先」回收，直到 ≤ 目標
+    target = 100 * 1024
+    res = retention.compact_trace(dry_run=False, target_bytes=target)
+    assert res["target"]["target_reached"] is True
+    assert res["target"]["bytes_remaining"] <= target
+
+    # 簽章鏈 100% 完好（blob 回收不影響 Ed25519 鏈）
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # 讀端誠實：未變動檔經工作區回退仍取回原文；已改檔的舊版本誠實 None
+    tr = Trace(rec)
+    idx = tr.steps[-1].post_index
+    assert tr.file_text(idx, "bg_00.txt") == "background content 0\n" * 500
+    (proj / "bg_01.txt").write_text("changed after gc\n")
+    assert tr.file_text(idx, "bg_01.txt") is None
+    assert tr.file_text(idx, "app.py") == "x = 2\n"  # 被改檔的 must-keep 版本不受影響
+
+
 def test_compact_quarantine_preserves_released_and_ledger_integrity(env):
     proj = env / "qproj"
     (proj / ".vacant").mkdir(parents=True, exist_ok=True)

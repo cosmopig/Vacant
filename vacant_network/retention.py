@@ -68,8 +68,15 @@ DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 # 2026-10-28 Axis 2（取代 round 72 的「保留活躍專案 before 版本」）：
 # store-on-change 之後，版本庫不再重存未改動檔案；自動 gc 另設一個使用量上限，
 # 超過時按「工作區冗餘 → 最舊舊版本」的順序回收（讀取端回退工作區＋驗 sha，
-# 取不回誠實 UNKNOWN）。512 MiB；`VACANT_TRACE_BUDGET_BYTES` 可覆寫（0＝關）。
-DEFAULT_TRACE_BUDGET_BYTES = 512 * 1024 * 1024
+# 取不回誠實 UNKNOWN）。`VACANT_TRACE_BUDGET_BYTES` 可覆寫（0＝關）。
+#
+# round 142（2026-10-28）：512 MiB → 64 MiB。512 MiB 實測為「恰好高於舊式全量
+# 複製快照（2G repo 上 542 MB，其中 247 MB 是未變動檔的零價值副本）」⇒ sweep
+# 空轉、垃圾永不回收（ASSIGNMENT 主軸 2 人類回報的 564 M 現狀）。64 MiB＝2G
+# repo 的 3.2%，實測工作集（近 50 步 I/O＋索引＋近期版本）裝得下（63.4 MiB，
+# 見 ops/packets/axis2_budget_64mib.md dry-run）；未變動檔副本由讀端工作區回退
+# 兜底，回收零損失。見 tests/test_retention.py::test_default_trace_budget_bounded_for_large_workspaces。
+DEFAULT_TRACE_BUDGET_BYTES = 64 * 1024 * 1024
 
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
