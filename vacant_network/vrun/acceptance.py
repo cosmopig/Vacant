@@ -656,8 +656,52 @@ def classify_dialect(source: bytes) -> str:
     return DIALECT_NONE
 
 
+def _is_static_testcase_class(node, top) -> bool:
+    """頂層類別是否為 `TestCase` 子類：直接繼承 `unittest.TestCase`／`TestCase`，
+    或透過**本模組頂層**類別的繼承鏈（`Sub(Base)`、`Base(unittest.TestCase)`）。
+
+    與 loader 的 `issubclass` 判據同形；其他模組定義的 base 靜態不可判定
+    （執行時若該 case 被跑出來，對帳會給顯式失敗，fail-closed，不假過）。
+    """
+    def walk(cls, seen):
+        for b in cls.bases:
+            if _base_is_unittest_case(b):
+                return True
+            if isinstance(b, ast.Name) and b.id in top and b.id not in seen \
+                    and walk(top[b.id], seen | {b.id}):
+                return True
+        return False
+    return walk(node, {node.name})
+
+
+def _static_test_names(node, top) -> list[str]:
+    """該類別上**可見**的 `test*` 方法名：自己的＋繼承自本模組頂層 base 的，
+    去重、依定義順序。
+
+    與 `unittest.TestLoader.loadTestsFromTestCase` 的收集判據同形：它從
+    `dir(cls)` 收集（含繼承方法），所以 `Sub(Base)` 也會執行 `Base` 的 `test*`
+    （case id 為 `Sub.<方法名>`）。跨模組 base 的 `test*` 靜態不可見——
+    執行時被跑出來即對帳為「未宣告」，顯式失敗（fail-closed，不假過）。
+    """
+    names: list[str] = []
+    def add(nm: str) -> None:
+        if nm not in names:
+            names.append(nm)
+    def walk(cls, seen) -> None:
+        for m in cls.body:
+            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                    and m.name.startswith("test"):
+                add(m.name)
+        for b in cls.bases:
+            if isinstance(b, ast.Name) and b.id in top and b.id not in seen:
+                walk(top[b.id], seen | {b.id})
+    walk(node, {node.name})
+    return names
+
+
 def declared_unittest_cases(source: bytes) -> list[str]:
-    """unittest 方言的**宣告清單**：頂層 `TestCase` 子類的每個 `test*` 方法，
+    """unittest 方言的**宣告清單**：每個頂層 `TestCase` 子類（含本模組繼承鏈，
+    如 `Sub(Base)`）上可見的 `test*` 方法（自己的＋繼承自本模組 base 的），
     記 `ClassName.method`（與 `_declared_from_source` 同形：只讀語法樹、不執行、
     依定義順序、去重）。
 
@@ -665,22 +709,25 @@ def declared_unittest_cases(source: bytes) -> list[str]:
     即該檔失敗；零案例的檔案＝失敗，不是「空＝過」（I-4）。設計 §4.3 的
     宣告清單就是這份。`setUp`/`tearDown`/非 `test*` 方法不列入（不是 case）。
     語法錯誤 ⇒ 空清單。
+
+    繼承與 `TestLoader` 同形（round-143，GPT 審查 P0-1「inherited tests」）：
+    loader 從 `dir(cls)` 收集，`Sub(Base)` 會執行 `Base` 的 `test*` 方法；
+    宣告若只數直接定義，每個繼承 case 都會變成「未宣告的 id」，把正確套件
+    誤判成 protocol 失敗。跨模組 base 的 `test*` 靜態不可枚舉：執行時若被跑
+    出來，對帳給顯式 protocol 失敗（fail-closed，永不假過）。
     """
     tree = _ast_of(source)
     if tree is None:
         return []
+    top = {n.name: n for n in tree.body if isinstance(n, ast.ClassDef)}
     out: list[str] = []
     for n in tree.body:
-        if not isinstance(n, ast.ClassDef):
+        if not isinstance(n, ast.ClassDef) or not _is_static_testcase_class(n, top):
             continue
-        if not any(_base_is_unittest_case(b) for b in n.bases):
-            continue
-        for m in n.body:
-            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) \
-                    and m.name.startswith("test"):
-                name = f"{n.name}.{m.name}"
-                if name not in out:
-                    out.append(name)
+        for m in _static_test_names(n, top):
+            name = f"{n.name}.{m}"
+            if name not in out:
+                out.append(name)
     return out
 
 

@@ -28,7 +28,7 @@ from vacant_network.vrun import sandbox as sb
 IMPL = "def solve(a, b):\n    return a * b\n"
 
 
-def _run(testfile: str) -> dict:
+def _run(testfile: str, *, timeout_s: float | None = None) -> dict:
     with tempfile.TemporaryDirectory() as td:
         t = pathlib.Path(td)
         ws = t / "ws"
@@ -38,14 +38,43 @@ def _run(testfile: str) -> dict:
         sdir.mkdir()
         (sdir / "test_main.py").write_text(testfile, encoding="utf-8")
         backend, _meta = sb.make_sandbox("auto", workdir=str(t / "vroot"))
+        kw = {"timeout_s": timeout_s} if timeout_s is not None else {}
         return acceptance.run_suite(
             backend, ws, sdir, suite="visible", task_id="u",
+            verify_root=t / "vroot", **kw)
+
+
+def _run_with_marker(testfile: str, marker_name: str) -> tuple[dict, str]:
+    """執行後**在同一個暫存目錄內**讀 tearDown 副作用 marker 檔。
+
+    必須在 TemporaryDirectory 存活期間檢查：tearDownClass／tearDownModule
+    的副作用寫進工作區，若 driver 靜默跳過 hook，這檔就不會存在。
+    回 `(結果, marker 內容)`；marker 不存在 ⇒ 空字串。"""
+    with tempfile.TemporaryDirectory() as td:
+        t = pathlib.Path(td)
+        ws = t / "ws"
+        ws.mkdir()
+        (ws / "solution.py").write_text(IMPL, encoding="utf-8")
+        sdir = t / "suite"
+        sdir.mkdir()
+        (sdir / "test_main.py").write_text(testfile, encoding="utf-8")
+        backend, _meta = sb.make_sandbox("auto", workdir=str(t / "vroot"))
+        res = acceptance.run_suite(
+            backend, ws, sdir, suite="visible", task_id="u",
             verify_root=t / "vroot")
+        marker = ws / marker_name
+        content = marker.read_text(encoding="utf-8") if marker.exists() else ""
+        return res, content
 
 
 def _cases(res: dict) -> list[dict]:
     assert len(res["files"]) == 1
     return res["files"][0]["cases"]
+
+
+def _file(res: dict) -> dict:
+    assert len(res["files"]) == 1
+    return res["files"][0]
 
 
 # ── P0-1(A)：round-124 已修；釘住「合法＝過」──────────────────────────
@@ -152,3 +181,174 @@ def test_unexpectedsuccess_is_explicit_not_silent():
     case = by_case["SolveTest.test_now_fixed"]
     assert case["kind"] == "unexpected_success", case
     assert case["ok"] is True, case
+
+
+# ── P0-1 checklist 缺口（round-143）：inherited tests／tearDown*／timeout ──
+
+INHERIT_GOOD_FILE = """import unittest
+from solution import solve
+
+
+class Base(unittest.TestCase):
+    def test_base(self):
+        self.assertEqual(solve(2, 3), 6)
+
+
+class Sub(Base):
+    def test_sub(self):
+        self.assertEqual(solve(0, 5), 0)
+"""
+
+
+def test_inherited_tests_pass_and_all_three_declared():
+    """`Sub(Base)`：loader 從 `dir(Sub)` 收集，`Sub` 也會執行 `Base` 的
+    `test_base`（case id `Sub.test_base`）。宣告清單與對帳必須數到全部三筆，
+    否則每個繼承 case 都是「未宣告的 id」⇒ 正確套件被誤判 protocol 失敗
+    （round-143 實測的缺陷：宣告只有 `Base.test_base`）。"""
+    res = _run(INHERIT_GOOD_FILE)
+    assert res["all_pass"] is True, res
+    assert (res["passed"], res["total"]) == (3, 3), res
+    assert set(c["case"] for c in _cases(res)) == {
+        "Base.test_base", "Sub.test_base", "Sub.test_sub"}
+
+
+INHERIT_BAD_FILE = """import unittest
+from solution import solve
+
+
+class Base(unittest.TestCase):
+    def test_base(self):
+        self.assertEqual(solve(2, 3), 6)
+
+
+class Sub(Base):
+    def test_sub(self):
+        self.assertEqual(solve(2, 3), 999)   # 錯的：必須紅
+"""
+
+
+def test_inherited_bad_still_red_and_others_recorded():
+    """繼承 case 進分母的另一面：`Sub.test_sub` 失敗 ⇒ 整組紅；
+    同檔正常的 `Base.test_base` 與繼承的 `Sub.test_base` 照樣被記錄。"""
+    res = _run(INHERIT_BAD_FILE)
+    assert res["all_pass"] is False, res
+    by_case = {c["case"]: c for c in _cases(res)}
+    assert by_case["Sub.test_sub"]["ok"] is False
+    assert by_case["Base.test_base"]["ok"] is True
+    assert by_case["Sub.test_base"]["ok"] is True
+
+
+TEARDOWNCLASS_GOOD_FILE = """import unittest
+
+
+class T(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.factor = 2
+
+    @classmethod
+    def tearDownClass(cls):
+        # 副作用寫進工作區：driver 若靜默跳過 tearDownClass，這檔不會存在。
+        with open("tdclass_ran.txt", "w") as f:
+            f.write("done")
+
+    def test_one(self):
+        self.assertEqual(self.factor * 3, 6)
+"""
+
+
+def test_teardownclass_runs_and_passes():
+    res, content = _run_with_marker(TEARDOWNCLASS_GOOD_FILE, "tdclass_ran.txt")
+    assert res["all_pass"] is True, res
+    assert content == "done", "tearDownClass 沒有被執行（副作用 marker 不存在）"
+
+
+TEARDOWNCLASS_BAD_FILE = """import unittest
+
+
+class T(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        raise RuntimeError("teardown exploded")
+
+    def test_a(self):
+        self.assertTrue(True)
+"""
+
+
+def test_teardownclass_failure_is_explicit_red():
+    """tearDownClass 拋例外 ⇒ 整組**顯式紅**（不可靜默當 PASS：案例本身
+    全綠不能蓋過 teardown 異常——舊 driver 的 setUp* 同根因）。"""
+    res = _run(TEARDOWNCLASS_BAD_FILE)
+    assert res["all_pass"] is False, res
+    assert any(c["ok"] is False for c in _cases(res)), res
+    assert _file(res)["complete"] is False
+
+
+TEARDOWNMODULE_GOOD_FILE = """import unittest
+
+
+def tearDownModule():
+    # 副作用寫進工作區：driver 若靜默跳過 tearDownModule，這檔不會存在。
+    with open("tdmodule_ran.txt", "w") as f:
+        f.write("done")
+
+
+class T(unittest.TestCase):
+    def test_one(self):
+        self.assertTrue(True)
+"""
+
+
+def test_teardownmodule_runs_and_passes():
+    res, content = _run_with_marker(TEARDOWNMODULE_GOOD_FILE, "tdmodule_ran.txt")
+    assert res["all_pass"] is True, res
+    assert content == "done", "tearDownModule 沒有被執行（副作用 marker 不存在）"
+
+
+TEARDOWNMODULE_BAD_FILE = """import unittest
+
+
+def tearDownModule():
+    raise RuntimeError("module teardown exploded")
+
+
+class T(unittest.TestCase):
+    def test_a(self):
+        self.assertTrue(True)
+"""
+
+
+def test_teardownmodule_failure_is_explicit_red():
+    """tearDownModule 拋例外 ⇒ 整組**顯式紅**（同 tearDownClass）。"""
+    res = _run(TEARDOWNMODULE_BAD_FILE)
+    assert res["all_pass"] is False, res
+    assert any(c["ok"] is False for c in _cases(res)), res
+    assert _file(res)["complete"] is False
+
+
+TIMEOUT_FILE = """import unittest
+import time
+
+
+class T(unittest.TestCase):
+    def test_hang(self):
+        while True:
+            time.sleep(0.05)
+"""
+
+
+def test_timeout_is_explicit_red_and_bounded():
+    """卡死的測試 ⇒ 顯式紅（`kind="timeout"` 檔案層＋案例層 incomplete）、
+    wall 時間有界（不能被卡住）。"""
+    import time as _time
+    t0 = _time.monotonic()
+    res = _run(TIMEOUT_FILE, timeout_s=3)
+    elapsed = _time.monotonic() - t0
+    assert res["all_pass"] is False, res
+    f = _file(res)
+    assert f["timed_out"] is True
+    assert any(c["ok"] is False and c["kind"] == "timeout" for c in _cases(res)), res
+    assert any(c["ok"] is False and c["kind"] == "incomplete" and c["case"] == "T.test_hang"
+               for c in _cases(res)), res
+    assert elapsed < 30, f"wall 時間 {elapsed:.1f}s 超出有界預期"

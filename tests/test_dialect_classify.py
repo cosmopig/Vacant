@@ -241,3 +241,62 @@ def test_declared_non_unittest_file_is_empty():
 
 def test_declared_syntax_error_is_empty_not_crash():
     assert dec("import unittest\nclass T(unittest.TestCase(:\n    pass\n") == []
+
+
+# ── round-143 GPT 審查 P0-1「inherited tests」：宣告與 TestLoader 同形 ──
+def test_declared_inherits_test_methods_from_in_module_base():
+    # loader 從 dir(Sub) 收集：Sub 也會執行 Base.test_base（case id Sub.test_base）。
+    # 宣告清單必須數到它，否則每個繼承 case 都是「未宣告的 id」⇒ protocol 失敗。
+    assert dec(
+        "import unittest\n"
+        "class Base(unittest.TestCase):\n"
+        "    def test_base(self):\n        pass\n"
+        "class Sub(Base):\n"
+        "    def test_sub(self):\n        pass\n"
+    ) == ["Base.test_base", "Sub.test_sub", "Sub.test_base"]
+
+
+def test_declared_inherited_override_dedupes_to_one_case():
+    # Sub 覆寫 test_a：dir(Sub) 只有一個 test_a ⇒ 只算 Sub.test_a 一筆。
+    assert dec(
+        "import unittest\n"
+        "class Base(unittest.TestCase):\n"
+        "    def test_a(self):\n        pass\n"
+        "class Sub(Base):\n"
+        "    def test_a(self):\n        pass\n"
+    ) == ["Base.test_a", "Sub.test_a"]
+
+
+def test_declared_three_level_chain_inherits_all():
+    assert dec(
+        "import unittest\n"
+        "class A(unittest.TestCase):\n"
+        "    def test_a(self):\n        pass\n"
+        "class B(A):\n"
+        "    def test_b(self):\n        pass\n"
+        "class C(B):\n"
+        "    def test_c(self):\n        pass\n"
+    ) == ["A.test_a", "B.test_b", "B.test_a", "C.test_c", "C.test_b", "C.test_a"]
+
+
+def test_declared_non_testcase_base_contributes_nothing():
+    # 非 TestCase 的頂層類別（Data）不是 case 類別；它的 test* 也不進任何
+    # 清單（沒有 TestCase 子類繼承它）。
+    assert dec(
+        "import unittest\n"
+        "class Data:\n"
+        "    def test_data(self):\n        pass\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_a(self):\n        pass\n"
+    ) == ["T.test_a"]
+
+
+def test_declared_base_with_only_setup_contributes_nothing():
+    # base 只有 setUp（沒有 test*）⇒ 它自己零案例；Sub 只算自己的。
+    assert dec(
+        "import unittest\n"
+        "class Base(unittest.TestCase):\n"
+        "    def setUp(self):\n        pass\n"
+        "class Sub(Base):\n"
+        "    def test_sub(self):\n        pass\n"
+    ) == ["Sub.test_sub"]
