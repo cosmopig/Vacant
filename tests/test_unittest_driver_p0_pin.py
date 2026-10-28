@@ -278,11 +278,22 @@ class T(unittest.TestCase):
 
 def test_teardownclass_failure_is_explicit_red():
     """tearDownClass 拋例外 ⇒ 整組**顯式紅**（不可靜默當 PASS：案例本身
-    全綠不能蓋過 teardown 異常——舊 driver 的 setUp* 同根因）。"""
+    全綠不能蓋過 teardown 異常——舊 driver 的 setUp* 同根因）。
+
+    且失敗記錄必須**指名 tearDownClass**、driver 正常收尾（有 end marker、
+    rc=0）——不可靠 driver 撞 `_ErrorHolder` 炸掉後由父層合成 driver_error
+    來「碰巧紅」（那是 driver bug 披著驗收結果的外衣，見 fixture-failure
+    一節）。"""
     res = _run(TEARDOWNCLASS_BAD_FILE)
     assert res["all_pass"] is False, res
     assert any(c["ok"] is False for c in _cases(res)), res
     assert _file(res)["complete"] is False
+    _assert_driver_clean(res)
+    fixture = [c for c in _cases(res) if "tearDownClass" in c["message"]]
+    assert fixture, f"沒有指名 tearDownClass 的顯式失敗記錄: {res}"
+    assert any("teardown exploded" in c["message"] for c in _cases(res)), res
+    # 案例本身確實跑過並成功——記錄保留，不被 fixture 失敗吞掉。
+    assert any(c["case"] == "T.test_a" and c["ok"] is True for c in _cases(res)), res
 
 
 TEARDOWNMODULE_GOOD_FILE = """import unittest
@@ -320,11 +331,96 @@ class T(unittest.TestCase):
 
 
 def test_teardownmodule_failure_is_explicit_red():
-    """tearDownModule 拋例外 ⇒ 整組**顯式紅**（同 tearDownClass）。"""
+    """tearDownModule 拋例外 ⇒ 整組**顯式紅**（同 tearDownClass，
+    且指名 fixture、driver 正常收尾——同上一個註解）。"""
     res = _run(TEARDOWNMODULE_BAD_FILE)
     assert res["all_pass"] is False, res
     assert any(c["ok"] is False for c in _cases(res)), res
     assert _file(res)["complete"] is False
+    _assert_driver_clean(res)
+    fixture = [c for c in _cases(res) if "tearDownModule" in c["message"]]
+    assert fixture, f"沒有指名 tearDownModule 的顯式失敗記錄: {res}"
+    assert any("module teardown exploded" in c["message"] for c in _cases(res)), res
+    assert any(c["case"] == "T.test_a" and c["ok"] is True for c in _cases(res)), res
+
+
+# ── fixture 失敗的「壞對照」：顯式紅，不是 driver 崩潰 ───────────────
+#
+# CPython 把 setUpClass／tearDownClass／setUpModule／tearDownModule 的
+# 失敗透過一個**合成物件**（`unittest._ErrorHolder`，沒有 `_testMethodName`）
+# 交給 `TestResult.addError`。driver 若用 `test._testMethodName` 拼 case id，
+# 遇到它就會 AttributeError 崩潰（rc=1、沒有 end marker）：結果**碰巧**
+# fail-closed，但失敗記錄變成「driver 本身炸了」（driver_error、
+# 『test process did not finish normally』）——把 harness bug 披在驗收
+# 結果外面，且漏掉的 case 被記成「test process 提早結束」。
+#
+# P0-1 驗收要求這四組 fixture 的**好/壞對照**：壞對照必須是**指名該
+# fixture 的、格式良好的失敗記錄**，driver 正常收尾（end marker、rc=0）。
+
+def _assert_driver_clean(res: dict) -> None:
+    """driver 正常收尾：沒有 driver_error、沒有『end marker missing』。
+
+    父層只在「沒有 end marker」或「rc 非 0」時才合成
+    『did not finish normally』記錄——兩樣都沒有 ⇒ driver 乾淨結束。"""
+    for c in _cases(res):
+        assert c["kind"] != "driver_error", f"driver 崩潰（不是驗收結果）: {res}"
+        assert "did not finish normally" not in c.get("message", ""), \
+            f"driver 沒有正常收尾: {res}"
+
+
+SETUPCLASS_FAIL_FILE = """import unittest
+
+
+class SolveTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        raise RuntimeError("setup exploded")
+
+    def test_one(self):
+        self.assertTrue(True)
+"""
+
+
+def test_setupclass_failure_is_explicit_not_driver_crash():
+    """setUpClass 拋例外 ⇒ **指名 setUpClass 的顯式紅**：
+    沒有 driver_error、沒有 end-marker-missing、driver rc=0 收尾；
+    被跳過的宣告案例仍記錄為失敗（fail-closed，不靠崩潰碰紅）。"""
+    res = _run(SETUPCLASS_FAIL_FILE)
+    assert res["all_pass"] is False, res
+    assert _file(res)["complete"] is False
+    _assert_driver_clean(res)
+    fixture = [c for c in _cases(res)
+               if c["case"] in ("<file>", "<module>") and "setUpClass" in c["message"]]
+    assert fixture, f"沒有指名 setUpClass 的檔案層失敗記錄: {res}"
+    assert any("setup exploded" in c["message"] for c in _cases(res)), res
+    assert any(c["case"] == "SolveTest.test_one" and c["ok"] is False
+               for c in _cases(res)), res
+
+
+SETUPMODULE_FAIL_FILE = """import unittest
+
+
+def setUpModule():
+    raise RuntimeError("module setup exploded")
+
+
+class T(unittest.TestCase):
+    def test_a(self):
+        self.assertTrue(True)
+"""
+
+
+def test_setupmodule_failure_is_explicit_not_driver_crash():
+    """setUpModule 拋例外 ⇒ 指名 setUpModule 的顯式紅（同 setUpClass）。"""
+    res = _run(SETUPMODULE_FAIL_FILE)
+    assert res["all_pass"] is False, res
+    assert _file(res)["complete"] is False
+    _assert_driver_clean(res)
+    fixture = [c for c in _cases(res)
+               if c["case"] in ("<file>", "<module>") and "setUpModule" in c["message"]]
+    assert fixture, f"沒有指名 setUpModule 的檔案層失敗記錄: {res}"
+    assert any("module setup exploded" in c["message"] for c in _cases(res)), res
+    assert any(c["case"] == "T.test_a" and c["ok"] is False for c in _cases(res)), res
 
 
 TIMEOUT_FILE = """import unittest
@@ -352,3 +448,43 @@ def test_timeout_is_explicit_red_and_bounded():
     assert any(c["ok"] is False and c["kind"] == "incomplete" and c["case"] == "T.test_hang"
                for c in _cases(res)), res
     assert elapsed < 30, f"wall 時間 {elapsed:.1f}s 超出有界預期"
+
+
+# ---------------------------------------------------------------------------
+# P0-1 驗收準則「原 `check_*` 雜湊不變」——永久 driver 指紋釘住
+# ---------------------------------------------------------------------------
+#
+# driver 源碼的 sha256。driver 改一個字節，這裡就紅——把「重構」變成
+# 測試看得見的改變，而不是靠記憶或 commit message。
+#
+# - DRIVER_SRC（check dialect）必須逐字等於 round-149 前的雜湊：
+#   P0-1 重構（1ada835b）只動 UNTEST_DRIVER_SRC，驗收準則
+#   「原 `check_*` 雜湊不變」要求它保持不變。
+# - UNTEST_DRIVER_SRC 是 round-149 修復後的基準（fixture 失敗不再崩潰
+#   driver；setUp*/tearDown* 失敗發顯式 <file> 記錄）。有意改 driver 時
+#   更新此雜湊並在 commit 說明。
+
+DRIVER_SRC_SHA256 = "5c55928866c22b5be9b8954955438f4721d1f088443008d94108e4451fb259d3"
+UNTEST_DRIVER_SRC_SHA256 = "51b2525f02c89edfdb4d37bc5b39cdc73137c544bb1d948a566735a19a6c36d4"
+
+
+def _sha256_of(src: str) -> str:
+    import hashlib
+    return hashlib.sha256(src.encode("utf-8")).hexdigest()
+
+
+def test_check_driver_fingerprint_unchanged():
+    """check dialect driver（DRIVER_SRC）必須逐字等於 round-149 前雜湊——
+    P0-1 驗收準則「原 `check_*` 雜湊不變」。"""
+    assert _sha256_of(acceptance.DRIVER_SRC) == DRIVER_SRC_SHA256, (
+        "DRIVER_SRC 改了！P0-1 驗收準則要求原 check_* driver 不變。"
+        "若此改變是有意為之，更新 DRIVER_SRC_SHA256 並在 commit 說明。")
+
+
+def test_unittest_driver_fingerprint_pinned():
+    """unittest driver（UNTEST_DRIVER_SRC）釘在 round-149 修復後基準
+    （fixture 失敗發顯式 <file> 記錄，不再崩潰 driver）。
+    任何 driver 改變都必須更新此雜湊並說明。"""
+    assert _sha256_of(acceptance.UNTEST_DRIVER_SRC) == UNTEST_DRIVER_SRC_SHA256, (
+        "UNTEST_DRIVER_SRC 改了！若此改變是有意為之，"
+        "更新 UNTEST_DRIVER_SRC_SHA256 並在 commit 說明。")
