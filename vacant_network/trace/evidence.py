@@ -157,6 +157,32 @@ UNFETCHED_UNAVAILABLE = re.compile(
     r"|無法(?:連接|連線|訪問|打開|存取|取得)|連線失敗|逾時|超時|連不上|打不開"
     r"|抓(?:取)?(?:失敗|不到)|下載(?:失敗|不到)|取不到", re.I)
 
+# claimed_write（2026-11-04，第 125 輪）：方向 A「寫過沒」——與 claimed_run／unfetched 同族的
+# 「誠實性」檢查。最終訊息以過去式声称「寫入／存成／產生」某個反引號檔名，但整份記錄查無
+# 該檔（任何一步的輸入或輸出都碰不到它的 basename），且該檔在最新索引裡也不存在 → advisory 發現。
+# 填補缺口：missing_output 只抓「任務點名要的檔」、stale_output 只抓「舊檔當成果」；「沒被要求、
+# 卻聲稱已寫、實際不存在」兩邊都漏。四層保守濾網（寧可漏抓、不可誤傷，docs/UNIVERSAL_TASKS.md §3）：
+#   1) 線索只收過去式寫檔動詞（wrote/written/saved/created/generated/updated/compiled/exported、
+#      寫入/寫了/寫好/存成/產生/生成/更新/建立/創建）；現在式／祈使式（write／請寫／幫我寫）不觸發；
+#   2) 反引號 span 必須是「檔名形」（含副檔名，如 report.md）——URL（含 ://）、純詞（tests／file）
+#      因字元集／副檔名要求匹配不到；
+#   3) 鄰窗有建議／解釋措辭（you can／可以／請／please ... write／建議／試試）＝不是在声称自己寫過 → 不觸發；
+#   4) 證據面：檔名 basename 出現在**任何一步**的輸入或輸出、或該檔在最新索引裡存在
+#      → 視為已記錄 → 不報（寧可漏抓跨 session／跨回合的造假，不可誤傷真實寫檔）。
+# Advisory only：`zerostop.pushable_for` 明確排除（docs/UNIVERSAL_TASKS.md §2）。
+WRITE_CLAIM_CUE = re.compile(
+    r"\b(?:wrote|written|saved|created|generated|updated|compiled|exported)\b"
+    r"|寫入|寫了|寫好|寫進|寫成|寫到|存成|存到|存為|已寫|已存|產生|生成|更新|建立|創建", re.I)
+WRITE_CLAIM_SUGGEST = re.compile(
+    r"\b(?:you|one|they|it|this|that)\s+(?:can|could|should|may|might|would|will)\b"
+    r"|\b(?:please|help)\s+(?:me\s+)?(?:write|save|create|generate|update)\b"
+    r"|\bto\s+(?:write|save|create|generate)\b|\bfor\s+(?:writing|saving|creating|generating)\b"
+    r"|\bhow\s+to\s+(?:write|save|create)\b"
+    r"|\bif\s+(?:you|needed|need)\b"
+    r"|建議|試試|試看看|可以|可用|請|請你|請幫我|麻煩|若|如果|假如|倘若", re.I)
+# 反引號 span：檔名形（字母／數字／._/-/／＋ 點＋ 1–8 字副檔名）。URL（含 ://）因 ':' 不在字元集而匹配不到。
+WRITE_CLAIM_SPAN = re.compile(r"`([A-Za-z0-9_./-]+?\.[A-Za-z0-9]{1,8})`")
+
 
 def _url_key(u: str) -> str:
     """URL 比對 key：host（小寫、去 `www.`）＋第一路徑段（小寫）。
@@ -1054,6 +1080,7 @@ class Evidence:
         findings += self._failed_steps(steps, delivs, named + dir_members)
         findings += self._claimed_runs()
         findings += self._unfetched_sources(task_texts)
+        findings += self._claimed_writes()
         outs = self.asked_outputs(prompt_texts, start_idx)
         latest_idx = self.tr.latest_index()
         latest = self.tr.index(latest_idx)
@@ -1567,6 +1594,50 @@ class Evidence:
                         "host": key.split("/", 1)[0], "quote": quote})
         return out
 
+    def _claimed_writes(self) -> list[dict[str, Any]]:
+        """方向 A「寫過沒」（2026-11-04，第 125 輪）：最終訊息以過去式聲稱「寫入/存成/產生」某個
+        反引號檔名，但整份記錄查無該檔（任何一步的輸入或輸出都碰不到它的 basename），且該檔在最新
+        索引裡也不存在。濾網與證據面見 `WRITE_CLAIM_CUE` 旁註解。Advisory only：
+        `zerostop.pushable_for` 明確排除，只進交件說明（docs/UNIVERSAL_TASKS.md §2）。"""
+        text = self.final_text or ""
+        if not text:
+            return []
+        latest = self.tr.index(self.tr.latest_index())
+        out: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for m in WRITE_CLAIM_SPAN.finditer(text):
+            path = m.group(1)
+            base = path.rsplit("/", 1)[-1]
+            key = base.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            # 證據面①：basename 出現在任何一步的輸入或輸出 → 視為已記錄（寧漏勿誤）。
+            recorded = False
+            for s in self.tr.steps:
+                for t in (self.tr.input_text(s), self.tr.output_text(s)):
+                    if t and base.lower() in t.lower():
+                        recorded = True
+                        break
+                if recorded:
+                    break
+            if recorded:
+                continue
+            # 證據面②：該檔在最新索引裡存在（絕對／相對路徑皆算）→ 聲稱與現實一致 → 不報。
+            if any(f == path or f.endswith("/" + path) or f.rsplit("/", 1)[-1].lower() == key
+                   for f in latest):
+                continue
+            start, end = m.span()
+            near = text[max(0, start - 80):min(len(text), end + 80)]
+            if not WRITE_CLAIM_CUE.search(near):
+                continue
+            wide = text[max(0, start - 100):min(len(text), end + 100)]
+            if WRITE_CLAIM_SUGGEST.search(wide):
+                continue
+            out.append({"kind": "claimed_write", "sub": "none", "path": path,
+                        "quote": _sentence_around(text, start, end)})
+        return out
+
     def _failed_steps(self, steps: list[Step], delivs: dict[str, tuple[str, str]],
                       materials: list[str]) -> list[dict[str, Any]]:
         out = []
@@ -2019,6 +2090,7 @@ def finding_id(f: dict[str, Any], scope: str) -> str:
            "invalid_output": (f.get("path"), f.get("sub"), f.get("detail")),
            "test_claim": (f.get("sub"),), "failed_step": (_norm_cmd(f.get("cmd") or ""),),
            "claimed_run": (f.get("cmd_token"),),
+           "claimed_write": (f.get("path"),),
            "skeleton": (f.get("path"),), "stale_output": (f.get("path"),),
            "copy_of_input": (f.get("path"), f.get("input")),
            "copy_of_inline": (f.get("path"),)}
