@@ -699,7 +699,7 @@ def _citations(ctx: VerifyContext, claim: Claim):
 # ── 可執行檢查 ───────────────────────────────────────────────────────
 
 @verifier("python_checks", version="3", params=("suite", "timeout_s"),
-          summary="a pinned directory of test_*.py check_* functions passes "
+          summary="a pinned directory of test_*.py / *_test.py files passes "
                   "(declared-case reconciliation, vrun/acceptance.py)")
 def _python_checks(ctx: VerifyContext, claim: Claim):
     """⚠ **防意外，不防惡意**：受測的程式碼與檢查跑在同一個直譯器裡，一份有意偽造的成果

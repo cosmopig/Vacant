@@ -385,8 +385,10 @@ def run(argv: list[str], *, workspace: pathlib.Path, run_dir: pathlib.Path,
     #: 例外把 `run()` 打穿時，外面仍然要看得到「這一跑結束了」——
     #: 不然等 `run_ended` 的畫面會永遠等下去（電視的佇列只看最前面那一格）。
     ended = False
+    #: P0-2：走 `acceptance.test_files`（`_is_test_name` 單一來源）——
+    #: `test_*.py` 與 `*_test.py` 都算有套件；兩處字串不再漂移。
     has_suite = (suite_dir is not None
-                 and any(pathlib.Path(suite_dir).glob("test_*.py")))
+                 and bool(acceptance.test_files(suite_dir)))
     sandbox = None
     origin_dir = None
     #: V2：下一次 spawn 要接到 prompt 尾端的回饋。**第 1 次一定是空字串**
@@ -953,7 +955,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--run-dir", default=None,
                     help="收據與 wire log 的落點（預設 ~/.vacant-run/<task_id>；放在工作區裡會被拒絕）")
     ap.add_argument("--suite", default=None,
-                    help="可見驗收目錄（內含 test_*.py）。沒給且沒 --allow-no-suite ⇒ 拒交")
+                    help="可見驗收目錄（內含 test_*.py 或 *_test.py）。沒給且沒 --allow-no-suite ⇒ 拒交")
     ap.add_argument("--allow-no-suite", action="store_true",
                     help="明講「這一次不量」：accepted 落成 null，不是 true")
     ap.add_argument("--task-id", default=None, help="收據裡的 task_id（預設自動產生）")

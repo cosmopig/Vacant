@@ -867,7 +867,7 @@ flowchart LR
   `ops/gain/gain_run.py:957` のコメント逐語：*"the candidate worker cannot see this test code"*。
   候補コードは**構造的にテストコードを見られない**——ブロックリストではない。
 - **「計測できていないことは通過ではない」がコードになっている**：
-  `"all_pass": bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:898`）。
+  `"all_pass": bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:996`）。
   ゲージも同様に `n_broken >= 1` を要求し、空のスタブ集合では空虚に成立しない。
 - **拒否は実際に起きる**：R532 の 836 問でゲート腕は 25 件、ループ腕は 68 件を拒否し、
   拒否はすべての比率の分母に入っている。
@@ -1004,7 +1004,7 @@ open examples/receipt_viewer_multiparty.html                       # Linux: xdg-
   literal-only RPC（`vacant_network/checks.py:577-600`、`444-457`）。
 - **I-3** 自己申告は採用されない（`ecosystem.py:531`、さらに `controller.py:299-300` で独立に再実行）。
 - **I-4** 「計測できていない＝不通過」がコードになっている：
-  `bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:898`）。ゲージは `n_broken >= 1` を要求。
+  `bool(total > 0 and passed == total and complete)`（`vacant_network/vrun/acceptance.py:996`）。ゲージは `n_broken >= 1` を要求。
 - **I-5** ゲージは両側：参照解が通ること**かつ**既知の壊れたスタブがすべて弾かれること。
 - **I-6** `suitespec.render(spec)` は決定的なので `render_sha256` はマシン横断で比較できる。
 - **I-7** 拒否は実際に起き、分母に数えられる：R532 836 問でゲート腕 25 件、ループ腕 68 件。
