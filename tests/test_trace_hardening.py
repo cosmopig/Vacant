@@ -272,14 +272,26 @@ def test_recorder2_secrets_are_hashed_not_stored_and_the_store_is_private(tmp_pa
     (ws / ".env").write_text("TOKEN=abc")
     (ws / ".ssh" / "id_rsa").write_text("KEY")
     (ws / "a.txt").write_text("ok")
+    # 預設（Axis 2，2026-10-28，store-on-change）：未變動檔案的內容**不落盤**（比舊的
+    # 「以 0o600 存」更強：內容根本不在磁碟上）；secret 仍然只雜湊在索引裡
     store = W.Blobs(tmp_path / "objects")
     idx = W.scan(ws, blobs=store)
     assert idx[".env"].sha256.startswith("secret:") and idx[".ssh/id_rsa"].sha256.startswith(
         "secret:")
     stored = [p.read_bytes() for p in (tmp_path / "objects").rglob("*") if p.is_file()]
     assert b"TOKEN=abc" not in stored and b"KEY" not in stored
-    blob = store.path(idx["a.txt"].sha256)
+    assert not store.path(idx["a.txt"].sha256).exists()
+
+    # 相容路徑 store=True（舊時代的全量存檔）：secret 仍只雜湊，一般檔落盤時仍私有
+    store2 = W.Blobs(tmp_path / "objects2")
+    idx2 = W.scan(ws, blobs=store2, store=True)
+    assert idx2[".env"].sha256.startswith("secret:") and idx2[".ssh/id_rsa"].sha256.startswith(
+        "secret:")
+    stored2 = [p.read_bytes() for p in (tmp_path / "objects2").rglob("*") if p.is_file()]
+    assert b"TOKEN=abc" not in stored2 and b"KEY" not in stored2
+    blob = store2.path(idx2["a.txt"].sha256)
     assert oct(blob.stat().st_mode & 0o777) == "0o600"
+    assert oct(blob.parent.stat().st_mode & 0o777) == "0o700"
 
 
 def test_recorder3_4_verify_is_trusted_and_catches_truncation(tmp_path, monkeypatch):

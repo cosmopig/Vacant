@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -424,8 +425,26 @@ def test_auto_gc_fail_open_on_broken_state(env):
     assert "error" in out
 
 
+def _seed_legacy_blob(rec: Recorder, content: bytes) -> str:
+    """把一份內容直接放進物件庫，模擬舊「掃描即全存」時代的 legacy store。
+
+    round 142+ 的 store-on-change 不再因掃描產生未引用 blob（寫端約束），
+    所以「大量可回收存量」的現實形態是 legacy store——正是 1003 上 872M store 的
+    形態。測試用它建立可回收的存量。"""
+    sha = hashlib.sha256(content).hexdigest()
+    p = rec.blobs.root / sha[:2] / sha
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(content)
+    return sha
+
+
 def test_budget_aborts_compact_trace_at_safe_point(env, monkeypatch):
-    proj = _seed_trace_project(env, name="bp", n_files=20, size=100_000)
+    """預算在「大量刪除中途」到期 ⇒ 安全點中止：鏈完整、已刪的不復存在、
+    剩餘可下次繼續刪。慢速 `_remove_path` 模擬每檔 I/O，0.25s 預算只夠刪兩三檔。"""
+    proj = _seed_trace_project(env, name="bp", n_files=1)
+    rec = Recorder(capture.workspace_for(str(proj)))
+    for i in range(20):   # legacy store：20 個未受鏈引用的大 blob
+        _seed_legacy_blob(rec, f"legacy blob {i}\n".encode() * 2000)
     calls = {"n": 0}
     orig = retention._remove_path
 
@@ -442,7 +461,9 @@ def test_budget_aborts_compact_trace_at_safe_point(env, monkeypatch):
     rep = retention.compact_trace(active_window_s=0.0,
                                   budget=retention._Budget(_t.time() + 0.25))
     assert rep["aborted"] is True
-    assert rep["files_removed"] < 20
+    assert 1 <= rep["files_removed"] < 20
+    # 未刪的 blob 還在（下次可繼續刪）
+    assert _store_total(rec) > 0
     # 簽章鏈仍然完整
     ws = capture.workspace_for(str(proj))
     ok, msg = Recorder(ws).verify()

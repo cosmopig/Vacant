@@ -837,7 +837,7 @@ needle——**跳過 ≠ 檢查過**。
   *"the candidate worker cannot see this test code"*。**候選碼結構上看不到測試碼**，
   不是「被擋下來」。
 - **「量不到不是通過」寫成了程式碼**：`"all_pass": bool(total > 0 and passed == total and complete)`
-  （`vacant_network/vrun/acceptance.py:996`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
+  （`vacant_network/vrun/acceptance.py:1081`）；量具同理，`n_broken >= 1` 才算數，空的壞樁集合
   不能空洞地成立。
 - **拒交是真的會發生**：R532 那 836 題裡，閘門臂拒交 25 件、迴圈臂拒交 68 件，
   而且拒交算在每一個比率的分母裡。
@@ -971,7 +971,7 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 - **I-3 自我宣稱從不被採信**：生態跑一次 verifier（`ecosystem.py:531`），controller 再獨立跑一次
   （`controller.py:299-300`）。
 - **I-4 「量不到不是通過」寫成了程式碼**：`bool(total > 0 and passed == total and complete)`
-  （`vacant_network/vrun/acceptance.py:996`）；量具要求 `n_broken >= 1`。
+  （`vacant_network/vrun/acceptance.py:1081`）；量具要求 `n_broken >= 1`。
 - **I-5 量具是雙向的**：`ok` 同時要求參考解通過**與**每個已知壞樁被擋。
 - **I-6 渲染是確定的**：`suitespec.render(spec)` 是 spec 的純函式 ⇒ `render_sha256` 跨機可比。
 - **I-7 拒交真的會發生**：R532 836 題，閘門臂拒交 25、迴圈臂拒交 68，且計入分母。

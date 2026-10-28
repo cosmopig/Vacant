@@ -462,6 +462,7 @@ class Capture(unittest.TestResult):
     def __init__(self):
         super().__init__()
         self.results = []
+        self.fixtures = []
         self._buf = None
         self._prev = None
 
@@ -479,6 +480,17 @@ class Capture(unittest.TestResult):
 
     def _record(self, test, status, detail):
         out = self._buf.getvalue() if self._buf is not None else ""
+        if getattr(test, "_testMethodName", None) is None:
+            # CPython 把 setUpClass／tearDownClass／setUpModule／
+            # tearDownModule（以及 addCleanup）的失敗報告成一個合成物件
+            # （unittest._ErrorHolder，沒有 `_testMethodName`）。若混進
+            # case 清單，輸出迴圈用 `test._testMethodName` 拼 id 會
+            # AttributeError 崩潰（rc=1、無 end marker——「碰巧」fail-closed，
+            # 但記錄變成 driver_error 而不是「哪個 fixture 失敗」）。
+            # 單列為檔案層 fixture 結果；輸出迴圈只從真 case 拼 id。
+            # （GPT 審查 2026-10-28 P0-1 好/壞對照；round-149 釘住。）
+            self.fixtures.append((test, status, detail, out))
+            return
         self.results.append((test, status, detail, out))
 
     def addSuccess(self, test):
@@ -517,11 +529,35 @@ for test in async_leaves:
                       "synchronously (or drop the async keyword)"),
           "where": None, "output": ""})
 
+def _emit_fixtures(cap):
+    """把 fixture 層結果（setUp*/tearDown* 失敗）發成 `<file>` 記錄：
+    與 case 記錄同形、顯式紅、指名 fixture，driver 正常收尾（end marker、
+    rc=0）——不靠 driver 崩潰來「碰巧紅」。"""
+    for test, status, detail, _out in cap.fixtures:
+        desc = (getattr(test, "description", None) or "fixture")
+        # 模組名是 driver 的內部 spec 名，換回測試檔名讓記錄可讀。
+        desc = desc.replace("r530_testmod", os.path.basename(TESTFILE))
+        if status in ("assert", "exception"):
+            info = "".join(traceback.format_exception(*detail))
+            emit({"case": "<file>", "ok": False, "kind": status,
+                  "message": clip(f"{desc} failed: " +
+                                  (last_line(info) or "fixture failure"), 400),
+                  "where": where_of(info, TESTFILE), "output": ""})
+        else:
+            # fixture 自己 raise SkipTest（addSkip）或其他異常結果——
+            # 對驗收門而言，fixture 不跑案例＝什麼都沒驗證，顯式紅。
+            emit({"case": "<file>", "ok": False, "kind": "protocol",
+                  "message": (f"{desc} reported {status} ({detail}); a fixture "
+                              f"that skips the cases verifies nothing about "
+                              f"the candidate"),
+                  "where": None, "output": ""})
+
 cap = Capture()
 try:
     unittest.TestSuite(sync_leaves).run(cap)
 except BaseException as e:
     # 逐 case 的例外 unittest 會吞進 Capture；走到這裡是套件機件本身炸了。
+    _emit_fixtures(cap)
     info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
     emit({"case": "<file>", "ok": False, "kind": "exception",
           "message": clip("running the unittest suite failed: " +
@@ -566,6 +602,8 @@ for test, status, detail, out in cap.results:
         emit({"case": case, "ok": True, "kind": "unexpected_success",
               "message": "the case was marked @expectedFailure but actually succeeded",
               "where": None, "output": clip(out, 1200)})
+
+_emit_fixtures(cap)
 
 emit({"end": True, "ran": len(async_leaves) + len(cap.results)})
 '''

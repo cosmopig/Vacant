@@ -516,8 +516,9 @@ class Recorder:
     def baseline(self, refresh: bool = False) -> dict[str, Any]:
         """把整個工作區看一次（沒有時限、不拿鎖地掃）。預設：已經有人看過了就不動。
 
-        `refresh=True`（`vacant trace rescan`）：重新完整看一次——重存所有版本、刷新
-        `last_index`、清掉「掃描停用」。這是大專案在 `vacant gc` 之後增量掃描超時、被
+        `refresh=True`（`vacant trace rescan`）：重新完整看一次——刷新
+        `last_index`、清掉「掃描停用」（round 142+ store-on-change：不再重存所有版本，
+        內容落盤改為 copy-on-change，讀端缺版本時回工作區驗 sha）。這是大專案在 `vacant gc` 之後增量掃描超時、被
         `_disable_scan` 永久關掉之後的救回出口。失敗時不破壞既有狀態：寧可照實說
         「救不回」，也不清空已觀測到的。"""
         t0 = time.monotonic()
