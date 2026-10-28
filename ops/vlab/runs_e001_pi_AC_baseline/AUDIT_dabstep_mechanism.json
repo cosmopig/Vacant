@@ -1,0 +1,2422 @@
+{
+  "exp": "e001_pi_AC_baseline",
+  "base": "/srv/vlab/runs",
+  "suite": "dabstep",
+  "n_cells": 50,
+  "n_C_cells": 25,
+  "C_cells_no_home_evidence": 0,
+  "C_cells_zero_ran_true": 24,
+  "C_cells_zero_ran_unknown": 0,
+  "C_cells_with_kickback": 8,
+  "pushed_finding_kinds": {
+    "missing_output/None": 8,
+    "invalid_output/contract_shape": 1
+  },
+  "advisory_finding_kinds": {},
+  "n_pairs": 25,
+  "a_only": 0,
+  "c_only": 1,
+  "note": "本表只報機制發生的事實；『有/沒幫助』的解讀走預註冊計畫（packets/e001_dabstep_analysis.md §5），本腳本不判內容對錯、不做檢定",
+  "cells": [
+    {
+      "cell": "dabstep-1-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 16.7,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 13,
+      "tokens": 82483,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 6,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 15.0,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 11,
+      "tokens": 67230,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 6,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-10-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "10",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 9.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 32640,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 2,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-10-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "10",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 11.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 7,
+      "tokens": 40668,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 2,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/payments-readme.md, data/payments.csv"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-11-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "11",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 12.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 10,
+      "tokens": 62306,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 7,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-11-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "11",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 15.6,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 9,
+      "tokens": 53613,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 7,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-12-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "12",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 26.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 127052,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 11,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-12-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "12",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 26.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 11,
+      "tokens": 211121,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 10,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-1273-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1273",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 66.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 13,
+      "tokens": 310985,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1273-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1273",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 50.2,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 10,
+      "tokens": 186783,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt",
+          "data/calculate_fee.py",
+          "data/debug_rules.py"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-13-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "13",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 11.0,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 29521,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 2,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-13-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "13",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 11.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 8,
+      "tokens": 44081,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 2,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-1305-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1305",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 79.0,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 17,
+      "tokens": 428891,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 9,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1305-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1305",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 496.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 36,
+      "tokens": 961969,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-14-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "14",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 24.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 127023,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 22,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-14-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "14",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 26.7,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 6,
+      "tokens": 127023,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 22,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-1464-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1464",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 42.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 16,
+      "tokens": 437763,
+      "app_files": [
+        {
+          "path": "find_fees.py",
+          "size": 314,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1464-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1464",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 75.3,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 21,
+      "tokens": 556159,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 242,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md, data/payments.csv"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-15-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "15",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 13.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 9,
+      "tokens": 52845,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-15-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "15",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 48.3,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 27,
+      "tokens": 197153,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-16-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "16",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 64.2,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 18,
+      "tokens": 622480,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-16-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "16",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 31.9,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 6,
+      "tokens": 127936,
+      "app_files": [
+        {
+          "path": "analyze_fraud.py",
+          "size": 926,
+          "empty": false
+        },
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "analyze_fraud.py",
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-1681-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1681",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 77.0,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 15,
+      "tokens": 478536,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1681-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1681",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 358.6,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 49,
+      "tokens": 1648437,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 893,
+          "empty": false
+        },
+        {
+          "path": "fees_to_check.txt",
+          "size": 1352,
+          "empty": false
+        },
+        {
+          "path": "r_details.json",
+          "size": 26014,
+          "empty": false
+        },
+        {
+          "path": "r_ids.txt",
+          "size": 606,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt",
+          "fees_to_check.txt",
+          "r_details.json",
+          "r_ids.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-17-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "17",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 41.7,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 7,
+      "tokens": 168894,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        },
+        {
+          "path": "solution.py",
+          "size": 984,
+          "empty": false
+        },
+        {
+          "path": "solution_check.py",
+          "size": 1042,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-17-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "17",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 71.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 18,
+      "tokens": 634344,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        },
+        {
+          "path": "solution.py",
+          "size": 942,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt",
+          "solution.py"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-1753-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1753",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 68.6,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 15,
+      "tokens": 389173,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1753-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1753",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 96.6,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 18,
+      "tokens": 380173,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 78,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 2,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          },
+          {
+            "round": 2,
+            "kind": "invalid_output",
+            "sub": "contract_shape",
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 2,
+        "sent_total": 2,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 3
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards",
+          "round 2: answer.txt had an invalid or incomplete output (the task asks for ONLY the final answer without headings or prose); the record now matches"
+        ],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/merchant_category_codes.csv, data/payments-readme.md"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-18-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "18",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 562.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 177,
+      "tokens": 4408428,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-18-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "18",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 29.3,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 13,
+      "tokens": 102552,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 11,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-1871-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "1871",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 1800.0,
+      "timed_out": true,
+      "agent_rc": 124,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 196,
+      "tokens": 7341261,
+      "app_files": [
+        {
+          "path": "calculate_delta.py",
+          "size": 4670,
+          "empty": false
+        },
+        {
+          "path": "days.txt",
+          "size": 51204,
+          "empty": false
+        },
+        {
+          "path": "identify_fee.py",
+          "size": 1969,
+          "empty": false
+        },
+        {
+          "path": "jan_days.txt",
+          "size": 3238,
+          "empty": false
+        },
+        {
+          "path": "jan_transactions.csv",
+          "size": 0,
+          "empty": true
+        },
+        {
+          "path": "jan_transactions.txt",
+          "size": 9578,
+          "empty": false
+        },
+        {
+          "path": "merchant_info.json",
+          "size": 166,
+          "empty": false
+        },
+        {
+          "path": "unique_days.txt",
+          "size": 1352,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [
+        "jan_transactions.csv"
+      ],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-1871-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "1871",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 1800.0,
+      "timed_out": true,
+      "agent_rc": 124,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 226,
+      "tokens": 9162745,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": false,
+        "n_rounds": null,
+        "findings": [],
+        "open": [],
+        "kickbacks": null,
+        "sent_total": null,
+        "withheld_total": null,
+        "final_action": null,
+        "n_stop_events": 0
+      },
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-19-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "19",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 91.2,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 32,
+      "tokens": 288771,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-19-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "19",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 158.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 72,
+      "tokens": 806377,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 8,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-2-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "2",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 28.5,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 9,
+      "tokens": 182165,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 6,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-2-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "2",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 31.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 9,
+      "tokens": 182165,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 6,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-20-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "20",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 24.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 127006,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-20-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "20",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 27.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 6,
+      "tokens": 127006,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-21-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "21",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 26.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 7,
+      "tokens": 166765,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-21-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "21",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 34.8,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 9,
+      "tokens": 246989,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        },
+        {
+          "path": "calculate_avg.py",
+          "size": 505,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt",
+          "calculate_avg.py"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-22-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "22",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 10.6,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 29563,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 2,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-22-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "22",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 76.6,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 25,
+      "tokens": 229950,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 2,
+          "empty": false
+        },
+        {
+          "path": "calculate_corr.py",
+          "size": 976,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt",
+          "calculate_corr.py"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-23-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "23",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 820.4,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 403,
+      "tokens": 11353440,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-23-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "23",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 323.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 184,
+      "tokens": 2712900,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 10,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 1,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 1,
+        "sent_total": 1,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 2
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards"
+        ],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-24-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "24",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 245.0,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 160,
+      "tokens": 3012512,
+      "app_files": [],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-24-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "24",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 179.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 62,
+      "tokens": 2176611,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 5,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [
+          "Given files never opened: data/acquirer_countries.csv, data/fees.json, data/merchant_category_codes.csv, data/merchant_data.json, data/payments-readme.md"
+        ],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-25-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "25",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 12.2,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 29626,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 4,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-25-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "25",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 21.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 10,
+      "tokens": 60929,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 4,
+          "empty": false
+        },
+        {
+          "path": "calculate_outliers.py",
+          "size": 564,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt",
+          "calculate_outliers.py"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    },
+    {
+      "cell": "dabstep-26-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "26",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 31.3,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 6,
+      "tokens": 127833,
+      "app_files": [
+        {
+          "path": "analyze_outliers.py",
+          "size": 846,
+          "empty": false
+        },
+        {
+          "path": "answer.txt",
+          "size": 14,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-26-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "26",
+      "rep": 1,
+      "agent": "pi",
+      "pass": true,
+      "wall_s": 51.1,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 11,
+      "tokens": 332057,
+      "app_files": [
+        {
+          "path": "analyze_outliers.py",
+          "size": 1503,
+          "empty": false
+        },
+        {
+          "path": "answer.txt",
+          "size": 15,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 0,
+        "findings": [],
+        "open": [],
+        "kickbacks": 0,
+        "sent_total": 0,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 1
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "analyze_outliers.py",
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [],
+        "unverified": [],
+        "advisory_findings": []
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "suite": "dabstep",
+      "task": "1",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 16.7,
+      "wall_C": 15.0
+    },
+    {
+      "suite": "dabstep",
+      "task": "10",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 9.8,
+      "wall_C": 11.4
+    },
+    {
+      "suite": "dabstep",
+      "task": "11",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 12.4,
+      "wall_C": 15.6
+    },
+    {
+      "suite": "dabstep",
+      "task": "12",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 26.8,
+      "wall_C": 26.8
+    },
+    {
+      "suite": "dabstep",
+      "task": "1273",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 66.1,
+      "wall_C": 50.2
+    },
+    {
+      "suite": "dabstep",
+      "task": "13",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 11.0,
+      "wall_C": 11.8
+    },
+    {
+      "suite": "dabstep",
+      "task": "1305",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 79.0,
+      "wall_C": 496.1
+    },
+    {
+      "suite": "dabstep",
+      "task": "14",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 24.4,
+      "wall_C": 26.7
+    },
+    {
+      "suite": "dabstep",
+      "task": "1464",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 42.1,
+      "wall_C": 75.3
+    },
+    {
+      "suite": "dabstep",
+      "task": "15",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 13.8,
+      "wall_C": 48.3
+    },
+    {
+      "suite": "dabstep",
+      "task": "16",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 64.2,
+      "wall_C": 31.9
+    },
+    {
+      "suite": "dabstep",
+      "task": "1681",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 77.0,
+      "wall_C": 358.6
+    },
+    {
+      "suite": "dabstep",
+      "task": "17",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 41.7,
+      "wall_C": 71.4
+    },
+    {
+      "suite": "dabstep",
+      "task": "1753",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 2,
+      "C_findings": [
+        "missing_output/None",
+        "invalid_output/contract_shape"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 68.6,
+      "wall_C": 96.6
+    },
+    {
+      "suite": "dabstep",
+      "task": "18",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 562.4,
+      "wall_C": 29.3
+    },
+    {
+      "suite": "dabstep",
+      "task": "1871",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": false,
+      "C_kickbacks": null,
+      "C_findings": [],
+      "C_advisory": null,
+      "A_empty_files": [
+        "jan_transactions.csv"
+      ],
+      "C_empty_files": [],
+      "wall_A": 1800.0,
+      "wall_C": 1800.0
+    },
+    {
+      "suite": "dabstep",
+      "task": "19",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 91.2,
+      "wall_C": 158.4
+    },
+    {
+      "suite": "dabstep",
+      "task": "2",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 28.5,
+      "wall_C": 31.8
+    },
+    {
+      "suite": "dabstep",
+      "task": "20",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 24.1,
+      "wall_C": 27.4
+    },
+    {
+      "suite": "dabstep",
+      "task": "21",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 26.8,
+      "wall_C": 34.8
+    },
+    {
+      "suite": "dabstep",
+      "task": "22",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 10.6,
+      "wall_C": 76.6
+    },
+    {
+      "suite": "dabstep",
+      "task": "23",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 1,
+      "C_findings": [
+        "missing_output/None"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 820.4,
+      "wall_C": 323.1
+    },
+    {
+      "suite": "dabstep",
+      "task": "24",
+      "A": false,
+      "C": true,
+      "direction": "C_only",
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 245.0,
+      "wall_C": 179.1
+    },
+    {
+      "suite": "dabstep",
+      "task": "25",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 12.2,
+      "wall_C": 21.1
+    },
+    {
+      "suite": "dabstep",
+      "task": "26",
+      "A": true,
+      "C": true,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 0,
+      "C_findings": [],
+      "C_advisory": [],
+      "A_empty_files": [],
+      "C_empty_files": [],
+      "wall_A": 31.3,
+      "wall_C": 51.1
+    }
+  ]
+}
