@@ -348,6 +348,11 @@ def where_of(info, testfile):
 sys.path.insert(0, WS)
 spec = importlib.util.spec_from_file_location("r530_testmod", TESTFILE)
 mod = importlib.util.module_from_spec(spec)
+# unittest.TestSuite._handleModuleSetUp／_handleTearDownModule 從
+# `sys.modules[test.__class__.__module__]` 找測試模組——執行前不註冊，
+# 查不到（KeyError）會靜默跳過 setUpModule／tearDownModule
+# （GPT 審查 2026-10-28 P0-1(A)，與 setUpClass 同根因）。
+sys.modules[spec.name] = mod
 buf = io.StringIO()
 try:
     with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
@@ -388,54 +393,130 @@ if not leaves:
     emit({"end": True, "ran": 0})
     raise SystemExit(0)
 
-ran = 0
+# ── 執行：走標準 TestSuite，不是逐葉 test.run() ────────────────────────
+# round-51 的寫法對每個葉子呼叫 `test.run(res)`。但 `setUpClass`／
+# `setUpModule`／`tearDownClass`／`tearDownModule` 只由 `TestSuite.run`
+# 觸發（unittest.TestSuite._handleClassSetUp／_handleModuleSetUp）——
+# 逐葉呼叫**從不執行** class/module 層級的 setup hook：
+# 依賴 setUpClass 的合法 TestCase 被誤判成 AttributeError（GPT 審查
+# 2026-10-28 P0-1(A)）；同時 `@expectedFailure` 案例落進
+# `res.expectedFailure`（failures／errors 都是空的）掉進 else 分支 →
+# 假通過（P0-1(B)）。正確做法（即審查指定）：用 `suite.run(result)`
+# 跑，以自訂 TestResult 收集逐 case 結果。
+
+class Capture(unittest.TestResult):
+    """收集逐 case 結果：`(test, status, detail, output)`，執行順序。
+    status ∈ pass／assert／exception／skip／expected_failure／unexpected_success。"""
+
+    def __init__(self):
+        super().__init__()
+        self.results = []
+        self._buf = None
+        self._prev = None
+
+    def startTest(self, test):
+        super().startTest(test)
+        self._buf = io.StringIO()
+        self._prev = (sys.stdout, sys.stderr)
+        sys.stdout = self._buf
+        sys.stderr = self._buf
+
+    def stopTest(self, test):
+        if self._prev is not None:
+            sys.stdout, sys.stderr = self._prev
+        super().stopTest(test)
+
+    def _record(self, test, status, detail):
+        out = self._buf.getvalue() if self._buf is not None else ""
+        self.results.append((test, status, detail, out))
+
+    def addSuccess(self, test):
+        self._record(test, "pass", None)
+
+    def addFailure(self, test, err):
+        self._record(test, "assert", err)
+
+    def addError(self, test, err):
+        self._record(test, "exception", err)
+
+    def addSkip(self, test, reason):
+        self._record(test, "skip", reason)
+
+    def addExpectedFailure(self, test, err):
+        self._record(test, "expected_failure", err)
+
+    def addUnexpectedSuccess(self, test):
+        self._record(test, "unexpected_success", None)
+
+async_leaves = []
+sync_leaves = []
 for test in leaves:
-    ran += 1
-    case = f"{test.__class__.__qualname__}.{test._testMethodName}"
     meth = getattr(type(test), test._testMethodName)
     if inspect.iscoroutinefunction(meth):
-        # unittest 對 async 方法只調用不等候：方法體不執行、回報 pass。
-        # 寧可顯式失敗，不可靜默通過（見 UNTEST_DRIVER_SRC 註解）。
-        emit({"case": case, "ok": False, "kind": "protocol",
-              "message": ("async test methods are not awaited by the unittest "
-                          "runner, so their body never executes; write the case "
-                          "synchronously (or drop the async keyword)"),
-              "where": None, "output": ""})
-        continue
-    buf = io.StringIO()
-    res = unittest.TestResult()
-    try:
-        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-            test.run(res)
-    except BaseException as e:
-        info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
-        emit({"case": case, "ok": False, "kind": "exception",
-              "message": clip(last_line(info) or type(e).__name__, 400),
-              "where": where_of(info, TESTFILE),
-              "output": clip(buf.getvalue(), 1200)})
-        continue
-    if res.skipped:
-        # TestResult.skipped 存 (test, reason)——reason 是第二項。
-        emit({"case": case, "ok": False, "kind": "protocol",
-              "message": (f"the case skipped itself ({res.skipped[0][1]}); "
-                          f"a skipped case verifies nothing and counts as a failure"),
-              "where": None, "output": clip(buf.getvalue(), 1200)})
-    elif res.failures:
-        # TestResult.failures 存 (test, traceback 字串)——不是例外物件。
-        info = res.failures[0][1]
+        async_leaves.append(test)
+    else:
+        sync_leaves.append(test)
+for test in async_leaves:
+    # unittest 對 async 方法只調用不等候：方法體不執行、回報 pass。
+    # 寧可顯式失敗，不可靜默通過（round-51 的守衛保留）。
+    emit({"case": f"{test.__class__.__qualname__}.{test._testMethodName}",
+          "ok": False, "kind": "protocol",
+          "message": ("async test methods are not awaited by the unittest "
+                      "runner, so their body never executes; write the case "
+                      "synchronously (or drop the async keyword)"),
+          "where": None, "output": ""})
+
+cap = Capture()
+try:
+    unittest.TestSuite(sync_leaves).run(cap)
+except BaseException as e:
+    # 逐 case 的例外 unittest 會吞進 Capture；走到這裡是套件機件本身炸了。
+    info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+    emit({"case": "<file>", "ok": False, "kind": "exception",
+          "message": clip("running the unittest suite failed: " +
+                          (last_line(info) or type(e).__name__), 400),
+          "where": where_of(info, TESTFILE), "output": ""})
+    emit({"end": True, "ran": len(async_leaves) + len(cap.results)})
+    raise SystemExit(0)
+
+for test, status, detail, out in cap.results:
+    case = f"{test.__class__.__qualname__}.{test._testMethodName}"
+    if status == "pass":
+        emit({"case": case, "ok": True, "kind": "pass",
+              "message": "", "where": None, "output": clip(out, 1200)})
+    elif status == "assert":
+        # addFailure 的 err 是 (type, value, tb) 三元組。
+        info = "".join(traceback.format_exception(*detail))
         emit({"case": case, "ok": False, "kind": "assert",
               "message": clip(last_line(info) or "assertion failed", 400),
-              "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
-    elif res.errors:
-        info = res.errors[0][1]
+              "where": where_of(info, TESTFILE), "output": clip(out, 1200)})
+    elif status == "exception":
+        info = "".join(traceback.format_exception(*detail))
         emit({"case": case, "ok": False, "kind": "exception",
               "message": clip(last_line(info) or "exception", 400),
-              "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
-    else:
-        emit({"case": case, "ok": True, "kind": "pass",
-              "message": "", "where": None, "output": clip(buf.getvalue(), 1200)})
+              "where": where_of(info, TESTFILE), "output": clip(out, 1200)})
+    elif status == "skip":
+        emit({"case": case, "ok": False, "kind": "protocol",
+              "message": (f"the case skipped itself ({detail}); "
+                          f"a skipped case verifies nothing and counts as a failure"),
+              "where": None, "output": clip(out, 1200)})
+    elif status == "expected_failure":
+        # @expectedFailure：unittest 算「既非 pass 也非 fail」。對驗收門而言，
+        # 一個「預期候選是壞的」案例驗證不了候選任何事——當 pass 是假通過
+        # （GPT 審查 P0-1(B)）。fail-closed：顯式紅。
+        emit({"case": case, "ok": False, "kind": "expected_failure",
+              "message": ("the case is marked @expectedFailure and failed as expected; "
+                          "an acceptance suite that expects a failure verifies nothing "
+                          "about the candidate, so it cannot count as a pass"),
+              "where": None, "output": clip(out, 1200)})
+    else:  # unexpected_success
+        # 標記了 @expectedFailure 但實際成功：測試確實跑過並成功——
+        # 要顯式記錄 kind，不靜默寫成普通 "pass"（GPT 審查 P0-1(B)）。
+        emit({"case": case, "ok": True, "kind": "unexpected_success",
+              "message": "the case was marked @expectedFailure but actually succeeded",
+              "where": None, "output": clip(out, 1200)})
 
-emit({"end": True, "ran": ran})
+emit({"end": True, "ran": len(async_leaves) + len(cap.results)})
 '''
 
 
