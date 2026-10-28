@@ -80,6 +80,24 @@ DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 # 下 sweep 空轉），見同檔 round 145 註記與 tests/test_retention.py 回歸測試。
 DEFAULT_TRACE_BUDGET_BYTES = 64 * 1024 * 1024
 
+# 2026-10-28 Axis 2 最優先（人類點名：~/.vacant 用量沒有上限）：
+# `possess/proxyd/wire` 是模型通道的 wire 原始捕獲——每一通模型呼叫一對
+# `.req.bin`/`.resp.bin`（原始位元組），隨每通呼叫無上限成長（本機實測
+# 4957 個檔案／17.1 MiB，單通回應 ~755 KB）。
+# 可究責證據在 `index.jsonl`：一通一行（ts、request/response sha256、狀態、
+# 位元組數），`vrun/attest.read_relay_calls` 讀它做「通道是否被中介」的對帳。
+# 原始 body 唯一消費者是 wireproxy 同一通內回讀位元組數，**沒有其他讀端**。
+# ⇒ 原始 body 設位元組上限（保留最新、刪最舊）；被刪 body 的內容誠實 UNKNOWN，
+#   其 sha256/ts/狀態仍在 journal 裡——「這通被中介、內容是 X」的 X 取不回。
+DEFAULT_WIRE_BODY_BYTES = 96 * 1024 * 1024
+#: index.jsonl 是中介證據（requests_seen／attest 對帳）。8 MiB ≈ 1.7 萬通；
+#: 超過時保留最新完整行（一半上限），更早行的證據誠實 UNKNOWN（不是 0、不是 PASS）。
+DEFAULT_WIRE_INDEX_BYTES = 8 * 1024 * 1024
+#: possess/hooks 每 session 一個事件 jsonl（canary／session_start…，attest 對帳用）。
+#: 單檔 2 MiB 上限（與 intake 日誌同口徑）；只保留最新 N 個 session，更早的誠實 UNKNOWN。
+DEFAULT_HOOKS_MAX_FILE_BYTES = 2 * 1024 * 1024
+DEFAULT_HOOKS_KEEP_SESSIONS = 200
+
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
 AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住多久（超過就停在安全點）
@@ -958,6 +976,9 @@ def gc_all(
         budget=budget,
     )
     lg = compact_logs(root, max_log_bytes=max_log_bytes, dry_run=dry_run)
+    # 4b) 模型通道 wire 捕獲＋session hook 事件（2026-10-28 Axis 2 最優先）
+    wire = compact_wire(root, budget=budget)
+    hooks = compact_session_hooks(root, dry_run=dry_run)
     vr = {"bytes_freed": 0, "files_removed": 0}
     for vd in vrun_dirs or []:
         if budget is not None and budget.expired():
@@ -967,9 +988,13 @@ def gc_all(
         vr["files_removed"] += res["files_removed"]
 
     total_bytes = (tr["bytes_freed"] + qr["bytes_freed"] + wk["bytes_freed"]
-                   + lg["bytes_freed"] + vr["bytes_freed"])
+                   + lg["bytes_freed"]
+                   + wire["body_bytes_freed"] + wire["index_bytes_freed"]
+                   + hooks["bytes_freed"] + vr["bytes_freed"])
     total_files = (tr["files_removed"] + qr["files_removed"] + wk["files_removed"]
-                   + lg["logs_compacted"] + vr["files_removed"])
+                   + lg["logs_compacted"]
+                   + wire["body_files_removed"] + hooks["files_removed"]
+                   + vr["files_removed"])
 
     aborted = any(r.get("aborted") for r in (tr, qr, wk, lg)) or (
         budget is not None and budget.expired())
@@ -984,6 +1009,8 @@ def gc_all(
         "quarantine": qr,
         "work": wk,
         "logs": lg,
+        "wire": wire,
+        "session_hooks": hooks,
         "vrun": vr,
     }
     if verify:
@@ -1005,6 +1032,189 @@ def _resolve_auto_budget() -> int | None:
         except ValueError:
             return DEFAULT_TRACE_BUDGET_BYTES
     return DEFAULT_TRACE_BUDGET_BYTES
+
+
+def _resolve_wire_body_budget() -> int:
+    """`VACANT_WIRE_BODY_BYTES` 覆寫（0＝關），否則 96 MiB 預設（Axis 2 最優先）。"""
+    env = os.environ.get("VACANT_WIRE_BODY_BYTES")
+    if env is not None:
+        try:
+            v = int(env)
+            return max(0, v)
+        except ValueError:
+            return DEFAULT_WIRE_BODY_BYTES
+    return DEFAULT_WIRE_BODY_BYTES
+
+
+def _resolve_wire_index_budget() -> int:
+    """`VACANT_WIRE_INDEX_BYTES` 覆寫（0＝關），否則 8 MiB 預設（Axis 2 最優先）。"""
+    env = os.environ.get("VACANT_WIRE_INDEX_BYTES")
+    if env is not None:
+        try:
+            v = int(env)
+            return max(0, v)
+        except ValueError:
+            return DEFAULT_WIRE_INDEX_BYTES
+    return DEFAULT_WIRE_INDEX_BYTES
+
+
+def compact_wire(
+    root: pathlib.Path | None = None,
+    *,
+    max_body_bytes: int | None = None,
+    max_index_bytes: int | None = None,
+    dry_run: bool = False,
+    budget: _Budget | None = None,
+) -> dict[str, Any]:
+    """收緊模型通道 wire 原始捕獲（`possess/proxyd/wire`；2026-10-28 Axis 2 最優先）。
+
+    - `.req.bin`／`.resp.bin`：每一通模型呼叫的原始位元組，無上限成長。保留最新、
+      刪最舊，直到合計 ≤ `max_body_bytes`。唯一讀端是 wireproxy 同一通內的位元組數
+      自驗；**可究責證據在 index.jsonl（每通 sha256/ts/狀態），本函式不刪它**。
+      被刪 body 的內容誠實 UNKNOWN（journal 的 sha256 仍在）。
+    - `index.jsonl`：中介日誌（`vrun/attest.read_relay_calls`／requests_seen 對帳）。
+      超過 `max_index_bytes` 時保留最新完整行（一半上限、至少 4 KB）原子重寫；
+      更早行的證據誠實 UNKNOWN。常駐 proxy 每通以 `open("a")` 追記，gc 重寫與它
+      競爭時最多丟少量行（fail-open：證據缺失＝UNKNOWN，不損毀、不會偽成 PASS）。
+    - 任何 OSError 跳過不拋（fail-open）。
+    """
+    if max_body_bytes is None:
+        max_body_bytes = _resolve_wire_body_budget()
+    if max_index_bytes is None:
+        max_index_bytes = _resolve_wire_index_budget()
+    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    wdir = sroot / "possess" / "proxyd" / "wire"
+    rep: dict[str, Any] = {
+        "wire_dir": str(wdir),
+        "body_bytes_before": 0, "body_files_before": 0,
+        "body_bytes_freed": 0, "body_files_removed": 0,
+        "index_bytes_before": 0, "index_lines_before": 0,
+        "index_bytes_freed": 0, "index_lines_dropped": 0,
+    }
+    if not wdir.is_dir():
+        return rep
+    # ── 原始 body：位元組上限，保留最新 ──
+    bodies: list[tuple[float, int, pathlib.Path]] = []
+    total = 0
+    for f in wdir.iterdir():
+        if f.name == "index.jsonl" or not f.is_file() or f.is_symlink():
+            continue
+        try:
+            st = f.lstat()
+        except OSError:
+            continue
+        bodies.append((st.st_mtime, st.st_size, f))
+        total += st.st_size
+    rep["body_bytes_before"] = total
+    rep["body_files_before"] = len(bodies)
+    if max_body_bytes > 0 and total > max_body_bytes:
+        bodies.sort(key=lambda t: t[0])  # 最舊在前
+        for _mt, sz, f in bodies:
+            if total <= max_body_bytes or (budget is not None and budget.expired()):
+                break
+            if not dry_run:
+                with contextlib.suppress(OSError):
+                    f.unlink(missing_ok=True)
+            total -= sz
+            rep["body_bytes_freed"] += sz
+            rep["body_files_removed"] += 1
+    # ── index.jsonl：保留最新完整行 ──
+    ip = wdir / "index.jsonl"
+    try:
+        isz = ip.lstat().st_size if ip.is_file() else 0
+    except OSError:
+        isz = 0
+    rep["index_bytes_before"] = isz
+    if max_index_bytes > 0 and isz > max_index_bytes:
+        keep_bytes = max(4096, max_index_bytes // 2)
+        try:
+            raw = ip.read_bytes()
+        except OSError:
+            raw = b""
+        tail = raw[-keep_bytes:]
+        nl = tail.find(b"\n")
+        if 0 <= nl < len(tail) - 1:
+            tail = tail[nl + 1:]
+        if not dry_run and tail != raw:
+            try:
+                atomic_write_text(ip, tail.decode("utf-8", errors="replace"))
+            except OSError:
+                tail = raw  # 重寫失敗＝不動原檔（fail-open）
+        freed = max(0, len(raw) - len(tail))
+        if freed > 0:
+            rep["index_bytes_freed"] = freed
+            rep["index_lines_before"] = raw.count(b"\n")
+            rep["index_lines_dropped"] = max(0, raw.count(b"\n") - tail.count(b"\n"))
+    return rep
+
+
+def compact_session_hooks(
+    root: pathlib.Path | None = None,
+    *,
+    max_file_bytes: int = DEFAULT_HOOKS_MAX_FILE_BYTES,
+    keep_sessions: int = DEFAULT_HOOKS_KEEP_SESSIONS,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """收緊 `possess/hooks` 的 per-session 事件 jsonl（2026-10-28 Axis 2 最優先）。
+
+    每個 agent session 一個 `pi_<uuid>.jsonl`（canary／session_start…），
+    `vrun/attest.read_hook_events` 依 run_id 讀**當下 session** 的事件做對帳。
+    單檔超 `max_file_bytes` 保留最新完整行；session 數超 `keep_sessions` 保留最新。
+    被刪 session 的事件誠實 UNKNOWN（不是 0、不是 PASS）。fail-open。
+    """
+    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    hdir = sroot / "possess" / "hooks"
+    rep: dict[str, Any] = {
+        "hooks_dir": str(hdir),
+        "bytes_before": 0, "files_before": 0,
+        "bytes_freed": 0, "files_removed": 0, "files_truncated": 0,
+    }
+    if not hdir.is_dir():
+        return rep
+    files: list[tuple[float, int, pathlib.Path]] = []
+    total = 0
+    for f in hdir.iterdir():
+        if not f.is_file() or f.is_symlink() or not f.name.endswith(".jsonl"):
+            continue
+        try:
+            st = f.lstat()
+        except OSError:
+            continue
+        files.append((st.st_mtime, st.st_size, f))
+        total += st.st_size
+    rep["bytes_before"] = total
+    rep["files_before"] = len(files)
+    # 單檔上限：保留最新完整行
+    for _mt, sz, f in files:
+        if sz <= max_file_bytes:
+            continue
+        keep_bytes = max(4096, max_file_bytes // 2)
+        try:
+            raw = f.read_bytes()
+        except OSError:
+            continue
+        tail = raw[-keep_bytes:]
+        nl = tail.find(b"\n")
+        if 0 <= nl < len(tail) - 1:
+            tail = tail[nl + 1:]
+        if tail == raw:
+            continue
+        if not dry_run:
+            try:
+                atomic_write_text(f, tail.decode("utf-8", errors="replace"))
+            except OSError:
+                continue
+        rep["bytes_freed"] += max(0, len(raw) - len(tail))
+        rep["files_truncated"] += 1
+    # session 數上限：保留最新 keep_sessions 個
+    files.sort(key=lambda t: t[0], reverse=True)  # 最新在前
+    for _mt, sz, f in files[keep_sessions:]:
+        if not dry_run:
+            with contextlib.suppress(OSError):
+                f.unlink(missing_ok=True)
+        rep["bytes_freed"] += sz
+        rep["files_removed"] += 1
+    return rep
 
 
 def auto_gc(
@@ -1130,6 +1340,8 @@ def usage_report(
             ("intake", sroot / "intake"),
             ("quarantine", sroot / "quarantine"),
             ("possess", sroot / "possess"),
+            ("possess_wire", sroot / "possess" / "proxyd" / "wire"),
+            ("possess_hooks", sroot / "possess" / "hooks"),
             ("adapters", sroot / "adapters"),
         ):
             out["areas"][name] = _tree_size(sub)
@@ -1164,6 +1376,14 @@ def usage_report(
             "within_budget": (_budget is None)
             or ((out.get("objects") or {}).get("bytes", 0) <= _budget),
             "override_env": "VACANT_TRACE_BUDGET_BYTES",
+        }
+        # 2026-10-28 Axis 2 最優先：模型通道 wire 捕獲上限
+        out["budget"]["wire"] = {
+            "wire_bytes": out["areas"].get("possess_wire", 0),
+            "hooks_bytes": out["areas"].get("possess_hooks", 0),
+            "wire_body_budget_bytes": _resolve_wire_body_budget(),
+            "wire_index_budget_bytes": _resolve_wire_index_budget(),
+            "override_env": ["VACANT_WIRE_BODY_BYTES", "VACANT_WIRE_INDEX_BYTES"],
         }
         # 每專案
         pdir = sroot / "trace" / "projects"
