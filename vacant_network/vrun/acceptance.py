@@ -152,6 +152,12 @@ def where_of(exc, testfile):
     return "%s:%d: %s" % (os.path.basename(f.filename), f.lineno, (f.line or "").strip())
 
 sys.path.insert(0, WS)
+# P0-2: 套件目錄（vdir＝套件檔的副本）排在工作區**前面**——套件自己的
+# helper（`test_utils.py` 之類）永遠先被解析；候選碼把工作區塞一個同檔名
+# 檔也劫不走套件的 helper（helper 注入攻擊）。
+_SUITE_DIR = os.path.dirname(os.path.abspath(TESTFILE))
+if _SUITE_DIR:
+    sys.path.insert(0, _SUITE_DIR)
 spec = importlib.util.spec_from_file_location("r530_testmod", TESTFILE)
 mod = importlib.util.module_from_spec(spec)
 buf = io.StringIO()
@@ -227,17 +233,57 @@ emit({"end": True, "ran": len(checks)})
 '''
 
 
+def _is_test_name(name: str) -> bool:
+    """測試檔命名的**唯一來源**（P0-2，round 131）。
+
+    收 `test_*.py` **加** `*_test.py`（polyglot_py 34 題的真實形狀是後半部）；
+    光板的 `test.py` 不收（stem 要 `test_` 前綴或 `_test` 後綴）。
+    `test_files()`、launcher 的 `has_suite`、gateshim 的套件目錄發現都用這一個，
+    兩處不會再漂移（漂移＝「launcher 以為有套件、門上什麼都看不到」的 0/34 形狀）。
+    """
+    if not name.endswith(".py"):
+        return False
+    stem = name[:-3]
+    return stem.startswith("test_") or stem.endswith("_test")
+
+
+def _static_import_roots(source: bytes) -> frozenset[str]:
+    """這個檔案靜態 import 的頂層模組名（純語法樹、不執行）。
+
+    供 helper 判定用：`from test_utils import …` ⇒ `test_utils`；
+    `import test_utils` ⇒ `test_utils`。只認 level-0（絕對）import——
+    相對 import 指的是同一包、不該被算成對兄弟檔的引用。
+    語法錯誤 ⇒ 空集合（沒有 import 來源 ⇒ 不能當 helper ⇒ 照舊執行、
+    落到顯式失敗）。
+    """
+    try:
+        tree = ast.parse(source.decode("utf-8"))
+    except (SyntaxError, ValueError, UnicodeDecodeError):
+        return frozenset()
+    roots: set[str] = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Import):
+            roots.update(a.name.split(".")[0] for a in n.names)
+        elif isinstance(n, ast.ImportFrom):
+            if n.level == 0 and n.module:
+                roots.add(n.module.split(".")[0])
+    return frozenset(roots)
+
+
 def test_files(suite_dir: str | pathlib.Path) -> list[pathlib.Path]:
     """一個驗收目錄裡的測試檔，**排序固定**（檔名字典序）。
 
-    只收 `test_*.py`：目錄裡允許放 helper（`_support.py`）給測試 import，
-    而 helper 不是一個測試檔。認不出來的東西一律不當測試——
-    「多跑了一個不是測試的東西」與「漏跑了一個測試」都會讓分數說謊。
+    收 `test_*.py` 與 `*_test.py`（P0-2，`_is_test_name`）：目錄裡允許放
+    helper（`test_utils.py`、`_support.py`）給測試 import，而 helper 不是
+    一個測試檔（`run_suite` 的 helper 判定決定它執不執行）。認不出來的
+    東西一律不當測試——「多跑了一個不是測試的東西」與「漏跑了一個測試」
+    都會讓分數說謊。
     """
     d = pathlib.Path(suite_dir)
     if not d.is_dir():
         return []
-    return sorted(p for p in d.glob("test_*.py") if p.is_file())
+    return sorted(p for p in d.glob("*.py")
+                  if p.is_file() and _is_test_name(p.name))
 
 
 def declared_cases(test_file: str | pathlib.Path) -> list[str]:
@@ -346,8 +392,18 @@ def where_of(info, testfile):
     return f"{os.path.basename(testfile)}:{hit}"
 
 sys.path.insert(0, WS)
+# P0-2: 同 check driver——套件目錄（vdir）排在工作區前面，helper 解析
+# 永遠以套件自己的那份為準。
+_SUITE_DIR = os.path.dirname(os.path.abspath(TESTFILE))
+if _SUITE_DIR:
+    sys.path.insert(0, _SUITE_DIR)
 spec = importlib.util.spec_from_file_location("r530_testmod", TESTFILE)
 mod = importlib.util.module_from_spec(spec)
+# unittest.TestSuite._handleModuleSetUp／_handleTearDownModule 從
+# `sys.modules[test.__class__.__module__]` 找測試模組——執行前不註冊，
+# 查不到（KeyError）會靜默跳過 setUpModule／tearDownModule
+# （GPT 審查 2026-10-28 P0-1(A)，與 setUpClass 同根因）。
+sys.modules[spec.name] = mod
 buf = io.StringIO()
 try:
     with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
@@ -388,54 +444,130 @@ if not leaves:
     emit({"end": True, "ran": 0})
     raise SystemExit(0)
 
-ran = 0
+# ── 執行：走標準 TestSuite，不是逐葉 test.run() ────────────────────────
+# round-51 的寫法對每個葉子呼叫 `test.run(res)`。但 `setUpClass`／
+# `setUpModule`／`tearDownClass`／`tearDownModule` 只由 `TestSuite.run`
+# 觸發（unittest.TestSuite._handleClassSetUp／_handleModuleSetUp）——
+# 逐葉呼叫**從不執行** class/module 層級的 setup hook：
+# 依賴 setUpClass 的合法 TestCase 被誤判成 AttributeError（GPT 審查
+# 2026-10-28 P0-1(A)）；同時 `@expectedFailure` 案例落進
+# `res.expectedFailure`（failures／errors 都是空的）掉進 else 分支 →
+# 假通過（P0-1(B)）。正確做法（即審查指定）：用 `suite.run(result)`
+# 跑，以自訂 TestResult 收集逐 case 結果。
+
+class Capture(unittest.TestResult):
+    """收集逐 case 結果：`(test, status, detail, output)`，執行順序。
+    status ∈ pass／assert／exception／skip／expected_failure／unexpected_success。"""
+
+    def __init__(self):
+        super().__init__()
+        self.results = []
+        self._buf = None
+        self._prev = None
+
+    def startTest(self, test):
+        super().startTest(test)
+        self._buf = io.StringIO()
+        self._prev = (sys.stdout, sys.stderr)
+        sys.stdout = self._buf
+        sys.stderr = self._buf
+
+    def stopTest(self, test):
+        if self._prev is not None:
+            sys.stdout, sys.stderr = self._prev
+        super().stopTest(test)
+
+    def _record(self, test, status, detail):
+        out = self._buf.getvalue() if self._buf is not None else ""
+        self.results.append((test, status, detail, out))
+
+    def addSuccess(self, test):
+        self._record(test, "pass", None)
+
+    def addFailure(self, test, err):
+        self._record(test, "assert", err)
+
+    def addError(self, test, err):
+        self._record(test, "exception", err)
+
+    def addSkip(self, test, reason):
+        self._record(test, "skip", reason)
+
+    def addExpectedFailure(self, test, err):
+        self._record(test, "expected_failure", err)
+
+    def addUnexpectedSuccess(self, test):
+        self._record(test, "unexpected_success", None)
+
+async_leaves = []
+sync_leaves = []
 for test in leaves:
-    ran += 1
-    case = f"{test.__class__.__qualname__}.{test._testMethodName}"
     meth = getattr(type(test), test._testMethodName)
     if inspect.iscoroutinefunction(meth):
-        # unittest 對 async 方法只調用不等候：方法體不執行、回報 pass。
-        # 寧可顯式失敗，不可靜默通過（見 UNTEST_DRIVER_SRC 註解）。
-        emit({"case": case, "ok": False, "kind": "protocol",
-              "message": ("async test methods are not awaited by the unittest "
-                          "runner, so their body never executes; write the case "
-                          "synchronously (or drop the async keyword)"),
-              "where": None, "output": ""})
-        continue
-    buf = io.StringIO()
-    res = unittest.TestResult()
-    try:
-        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-            test.run(res)
-    except BaseException as e:
-        info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
-        emit({"case": case, "ok": False, "kind": "exception",
-              "message": clip(last_line(info) or type(e).__name__, 400),
-              "where": where_of(info, TESTFILE),
-              "output": clip(buf.getvalue(), 1200)})
-        continue
-    if res.skipped:
-        # TestResult.skipped 存 (test, reason)——reason 是第二項。
-        emit({"case": case, "ok": False, "kind": "protocol",
-              "message": (f"the case skipped itself ({res.skipped[0][1]}); "
-                          f"a skipped case verifies nothing and counts as a failure"),
-              "where": None, "output": clip(buf.getvalue(), 1200)})
-    elif res.failures:
-        # TestResult.failures 存 (test, traceback 字串)——不是例外物件。
-        info = res.failures[0][1]
+        async_leaves.append(test)
+    else:
+        sync_leaves.append(test)
+for test in async_leaves:
+    # unittest 對 async 方法只調用不等候：方法體不執行、回報 pass。
+    # 寧可顯式失敗，不可靜默通過（round-51 的守衛保留）。
+    emit({"case": f"{test.__class__.__qualname__}.{test._testMethodName}",
+          "ok": False, "kind": "protocol",
+          "message": ("async test methods are not awaited by the unittest "
+                      "runner, so their body never executes; write the case "
+                      "synchronously (or drop the async keyword)"),
+          "where": None, "output": ""})
+
+cap = Capture()
+try:
+    unittest.TestSuite(sync_leaves).run(cap)
+except BaseException as e:
+    # 逐 case 的例外 unittest 會吞進 Capture；走到這裡是套件機件本身炸了。
+    info = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+    emit({"case": "<file>", "ok": False, "kind": "exception",
+          "message": clip("running the unittest suite failed: " +
+                          (last_line(info) or type(e).__name__), 400),
+          "where": where_of(info, TESTFILE), "output": ""})
+    emit({"end": True, "ran": len(async_leaves) + len(cap.results)})
+    raise SystemExit(0)
+
+for test, status, detail, out in cap.results:
+    case = f"{test.__class__.__qualname__}.{test._testMethodName}"
+    if status == "pass":
+        emit({"case": case, "ok": True, "kind": "pass",
+              "message": "", "where": None, "output": clip(out, 1200)})
+    elif status == "assert":
+        # addFailure 的 err 是 (type, value, tb) 三元組。
+        info = "".join(traceback.format_exception(*detail))
         emit({"case": case, "ok": False, "kind": "assert",
               "message": clip(last_line(info) or "assertion failed", 400),
-              "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
-    elif res.errors:
-        info = res.errors[0][1]
+              "where": where_of(info, TESTFILE), "output": clip(out, 1200)})
+    elif status == "exception":
+        info = "".join(traceback.format_exception(*detail))
         emit({"case": case, "ok": False, "kind": "exception",
               "message": clip(last_line(info) or "exception", 400),
-              "where": where_of(info, TESTFILE), "output": clip(buf.getvalue(), 1200)})
-    else:
-        emit({"case": case, "ok": True, "kind": "pass",
-              "message": "", "where": None, "output": clip(buf.getvalue(), 1200)})
+              "where": where_of(info, TESTFILE), "output": clip(out, 1200)})
+    elif status == "skip":
+        emit({"case": case, "ok": False, "kind": "protocol",
+              "message": (f"the case skipped itself ({detail}); "
+                          f"a skipped case verifies nothing and counts as a failure"),
+              "where": None, "output": clip(out, 1200)})
+    elif status == "expected_failure":
+        # @expectedFailure：unittest 算「既非 pass 也非 fail」。對驗收門而言，
+        # 一個「預期候選是壞的」案例驗證不了候選任何事——當 pass 是假通過
+        # （GPT 審查 P0-1(B)）。fail-closed：顯式紅。
+        emit({"case": case, "ok": False, "kind": "expected_failure",
+              "message": ("the case is marked @expectedFailure and failed as expected; "
+                          "an acceptance suite that expects a failure verifies nothing "
+                          "about the candidate, so it cannot count as a pass"),
+              "where": None, "output": clip(out, 1200)})
+    else:  # unexpected_success
+        # 標記了 @expectedFailure 但實際成功：測試確實跑過並成功——
+        # 要顯式記錄 kind，不靜默寫成普通 "pass"（GPT 審查 P0-1(B)）。
+        emit({"case": case, "ok": True, "kind": "unexpected_success",
+              "message": "the case was marked @expectedFailure but actually succeeded",
+              "where": None, "output": clip(out, 1200)})
 
-emit({"end": True, "ran": ran})
+emit({"end": True, "ran": len(async_leaves) + len(cap.results)})
 '''
 
 
@@ -672,10 +804,12 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
         for p in sorted(src.iterdir()):
             if p.is_file() and p.suffix == ".py":
                 blobs[p.name] = p.read_bytes()
-    names = sorted(n for n in blobs if n.startswith("test_"))
+    # P0-2 (round 131)：命名＝`test_*.py` **或** `*_test.py`（`_is_test_name`
+    # 是命名規則的唯一來源，`test_files()` 與 launcher 的 `has_suite` 共用）。
+    names = sorted(n for n in blobs if _is_test_name(n))
     if not names:
         return _empty_result(suite, task_id,
-                             reason=f"驗收目錄沒有 test_*.py：{src}")
+                             reason=f"驗收目錄沒有 test_*.py 或 *_test.py 測試檔：{src}")
     suite_sha = suite_digest(blobs)
     # 方言路由（設計 §4.2）：每個被發現的檔先由靜態分類器決定走哪支 driver。
     #   check / none → 舊 driver（與 adapter 前逐位相同，`none` 照舊給
@@ -684,6 +818,22 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
     #   mixed        → 兩半都不跑、不拆半——直接合成一筆顯式 protocol 失敗。
     # 分類在任何候選碼執行前完成（純語法樹），候選碼改不到路由結果。
     dialects = {n: classify_dialect(blobs[n]) for n in names}
+    # P0-2: helper 判定——**符合命名**的檔、靜態 dialect 為 `none`、且被同套件
+    # 另一個**符合命名**的檔靜態 import ⇒ helper（如 polyglot_py pg_paasio 的
+    # `test_utils.py`），**不執行**。單獨一個 `none` 檔照舊執行、落到顯式
+    # `driver_error`（round 51/126 的 pin，`tests/test_visible_suite_dialect.py` §C）。
+    # 判定是純語法樹（不執行）：候選碼改不到 helper 判定，helper 鏈可以有多層
+    # （test→test_mid(none)→test_utils(none)，兩層都因被上游引用而成為 helper）。
+    import_roots = {n: _static_import_roots(blobs[n]) for n in names}
+    helpers = {n for n in names
+               if dialects[n] == DIALECT_NONE
+               and any(n[:-3] in import_roots[o] for o in names if o != n)}
+    names = [n for n in names if n not in helpers]
+    if not names:
+        # 所有符合命名的檔都是 helper ⇒ 沒有可執行的測試 ⇒ 不是通過（fail-closed）。
+        return _empty_result(suite, task_id,
+                             reason=(f"驗收目錄只有 helper（被其他測試檔 import 的"
+                                     f"工具檔 {sorted(helpers)}）、沒有可執行的測試檔：{src}"))
     for rel in names:
         dialect = dialects[rel]
         if dialect == DIALECT_MIXED:
@@ -744,7 +894,36 @@ def run_suite(sandbox: Sandbox, workspace: str | pathlib.Path,
             "stderr_tail": (res.stderr or "")[-400:],
         })
     out = _finish(suite, task_id, files_rec, suite_sha256=suite_sha)
+    # P0-2: discovery 稽核紀錄——驗收目錄裡**每個 .py** 一筆（不管執不執行），
+    # 供逐題回答「看到了什麼、執行了什麼、為什麼」。純增量欄位：**不進**
+    # `result_digest`（動簽進收據的欄位集合＝全世界既有收據的雜湊形狀都變）。
+    out["discovery"] = [_discovery_record(n, blobs, dialects, import_roots, helpers)
+                        for n in sorted(blobs)]
     return out
+
+
+def _discovery_record(name: str, blobs: dict[str, bytes],
+                      dialects: dict[str, str],
+                      import_roots: dict[str, frozenset[str]],
+                      helpers: set[str]) -> dict:
+    """P0-2 discovery 稽核筆（欄位語意見 `run_suite` 末段的註解）。"""
+    rec = {"name": name,
+           "sha256": hashlib.sha256(blobs[name]).hexdigest()}
+    if name not in dialects:
+        # 不合測試檔命名（`test_*.py`／`*_test.py`）：永遠不執行。
+        rec.update({"role": "helper", "dialect": None, "executed": False,
+                    "reason": "not_test_name"})
+    elif name in helpers:
+        # 符合命名但被另一個測試檔靜態 import ⇒ helper，不執行。
+        importers = sorted(o for o in dialects
+                           if o != name and name[:-3] in import_roots[o])
+        rec.update({"role": "helper", "dialect": DIALECT_NONE,
+                    "executed": False, "imported_by": importers,
+                    "reason": (f"helper: statically imported by "
+                              f"{', '.join(importers)}")})
+    else:
+        rec.update({"role": "test", "dialect": dialects[name], "executed": True})
+    return rec
 
 
 def _mixed_failure_record(rel: str, blob: bytes) -> dict:

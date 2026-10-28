@@ -1,0 +1,1198 @@
+{
+  "exp": "e002_hypothesis_arms",
+  "packet": "/home/user1/dev/ops/packets/e002.md",
+  "cells": [
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "pi",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "pi",
+      "arm": "C",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "pi",
+      "arm": "H",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "pi",
+      "arm": "M",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "pi",
+      "arm": "S",
+      "rep": 1
+    }
+  ],
+  "vacant_sha": "1ada835b",
+  "timeout": 1800
+}
