@@ -414,7 +414,7 @@ Each one is falsifiable; the check is given.
   independently, before any launch (`vacant_network/controller.py:299-300` →
   `GateRejected("local objective re-check rejected the delivered answer")`).
 - **I-4 — "Not measured" is not "passed", and it is written as code.**
-  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:898`) —
+  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:996`) —
   a suite that reported zero tests fails. Same shape in the library: `GaugeOutcome.ok`
   requires `n_broken >= 1`, so an empty set of known-bad stubs cannot satisfy
   `all_rejected` vacuously (that would be fail-open).

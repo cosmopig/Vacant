@@ -58,12 +58,20 @@ def _step(proj: pathlib.Path, n: int, tool: str, inp: dict, write: dict | None =
     hook.handle("claude", "PostToolUse", post)
 
 
-def test_compact_trace_reclaims_untouched_blobs_and_preserves_chain_and_blame(env):
-    """**非活躍**專案：gc 回收「未變動且工作區原檔相同」的 blob；簽章鏈與 blame 不受影響。
+def test_compact_trace_write_side_restraint_honest_unknown_and_chain_intact(env):
+    """round 142 store-on-change 取代了「先全量複製、再回收」的舊設計（round 145 更新本測試）。
 
-    以 `active_window_s=0.0` 模擬專案已超出活躍窗口（round 72 設計決定：活躍專案的
-    live 背景 blob 改為保留——見 `test_compact_trace_keeps_active_project_live_blobs`），
-    驗證非活躍專案的回收規則、鏈完整性與 blame 仍然成立。
+    新語義（`workspace.scan` docstring，被明確定義）：
+    1. **寫端約束**：未變動檔案的內容不落盤（只記 sha/size/mtime）——磁碟約束在寫入端
+       完成，gc 對這類專案沒有東西可回收（files_removed==0），而不是「回收了才省到」。
+    2. **改動那一刻存 after 版本**（copy-on-change）；第一次改動之前的 before 版本是
+       **被明確定義的 UNKNOWN**——誠實回 None／missing，不崩、不假 PASS。
+    3. blob 回收（舊設計存量資料或 after 版本超標時）不傷 Ed25519 簽章鏈；讀端經
+       工作區 SHA-256 驗證回退仍可讀取未變動檔案。
+
+    場景：30 個大型背景檔案 + app.py（v1→v2）。未變動檔案零 blob、可經工作區回退讀取；
+    app.py 的 after 版本在庫、before 版本誠實 UNKNOWN；gc 前後簽章鏈 100% 完整；
+    gc 後再改一個 bg 檔：after 版本照存（copy-on-change），其 before 誠實 UNKNOWN。
     """
     proj = env / "work" / "big_proj"
     proj.mkdir(parents=True)
@@ -86,42 +94,51 @@ def test_compact_trace_reclaims_untouched_blobs_and_preserves_chain_and_blame(en
     ok_before, msg_before = rec.verify()
     assert ok_before, msg_before
 
-    # Dry-run 先檢查可回收的未變動背景 blob 數量（30 個背景檔）
+    # 1. 寫端約束：30 個未變動背景檔案的內容**不落盤**（零 blob）
+    bg_shas = {hashlib.sha256(f"background content {i}\n".encode() * 200).hexdigest()
+               for i in range(30)}
+    stored = {f.name for f in rec.blobs.root.rglob("*") if f.is_file()}
+    assert bg_shas.isdisjoint(stored), "未變動檔案不該被複製進版本庫（round 142 寫端約束）"
+
+    # 2. gc 沒有東西可回收（寫端約束本身就是約束）；dry-run 與實際一致
     dry = retention.compact_trace(active_window_s=0.0, dry_run=True)
-    assert dry["files_removed"] == 30
-    assert dry["bytes_freed"] > 50_000
-
-    # 實際執行壓縮
+    assert dry["files_removed"] == 0
     res = retention.compact_trace(active_window_s=0.0, dry_run=False)
-    assert res["files_removed"] == 30
-    assert res["bytes_freed"] == dry["bytes_freed"]
+    assert res["files_removed"] == 0
 
-    # 1. 簽章鏈與增量驗證必須 100% 完好
+    # 3. 簽章鏈與增量驗證 100% 完好
     ok_after, msg_after = rec.verify()
     assert ok_after, msg_after
     ok_since, _, _ = rec.verify_since(0)
     assert ok_since
 
-    # 2. 已修改檔案的歷史前後版本都還在 objects 內
+    # 4. 讀端語義：app.py after 版本在庫；before 版本（第一次改動前）是被明確定義的
+    #    UNKNOWN（誠實 None，不假 PASS）；未變動 bg 檔經工作區 SHA-256 回退取回原文
     tr = Trace(rec)
     s1_idx = tr.steps[0].post_index
     s2_idx = tr.steps[1].post_index
-    assert tr.file_text(s1_idx, "app.py") == "def calc():\n    return 1\n"
+    assert tr.file_text(s1_idx, "app.py") is None, "第一次改動前的 before 版本＝定義的 UNKNOWN"
     assert tr.file_text(s2_idx, "app.py") == "def calc():\n    return 2\n"
-
-    # 3. 未變動背景檔案雖從 objects 移除，但透過即時工作區 SHA-256 比對仍可讀取與還原
     assert tr.file_text(s2_idx, "bg_00.txt") == "background content 0\n" * 200
     dest = env / "materialized"
-    tr.materialize(s1_idx, dest)
-    assert (dest / "app.py").read_text() == "def calc():\n    return 1\n"
+    missing = tr.materialize(s2_idx, dest)
+    assert (dest / "app.py").read_text() == "def calc():\n    return 2\n"
     assert (dest / "bg_15.txt").read_text() == "background content 15\n" * 200
+    assert "app.py" not in missing and "bg_15.txt" not in missing
+    # s1 快照：app.py 的 before 版本誠實列進 missing（不崩、不假還原）
+    dest2 = env / "materialized_s1"
+    missing2 = tr.materialize(s1_idx, dest2)
+    assert "app.py" in missing2
 
-    # 4. 壓縮後若繼續執行新步驟並修改原本未變動的 bg_00.txt，Recorder._scan 會自動補存 before blob
+    # 5. gc 後繼續執行新步驟並修改原本未變動的 bg_00.txt：after 版本照存
+    #    （copy-on-change）；其 before（原始 bg 內容）不追溯存＝誠實 UNKNOWN
     _step(proj, 3, "Write", {"file_path": str(proj / "bg_00.txt"), "content": "modified bg 0\n"},
           write={"bg_00.txt": "modified bg 0\n"})
     tr2 = Trace(Recorder(ws))
-    assert tr2.file_text(tr2.steps[1].post_index, "bg_00.txt") == "background content 0\n" * 200
     assert tr2.file_text(tr2.steps[2].post_index, "bg_00.txt") == "modified bg 0\n"
+    assert tr2.file_text(tr2.steps[1].post_index, "bg_00.txt") is None, "改動前版本＝定義的 UNKNOWN"
+    ok3, msg3 = rec.verify()
+    assert ok3, msg3
 
 
 def test_compact_trace_keeps_active_project_live_blobs(env):
@@ -166,6 +183,66 @@ def test_compact_trace_keeps_active_project_live_blobs(env):
     _step(proj, 2, "Read", {"file_path": str(proj / "app.py")})
     now = {f.name for f in rec.blobs.root.rglob("*") if f.is_file()}
     assert kept <= now, "gc 保留的 blob 在下一次掃描後遺失：whack-a-mole 仍在"
+
+
+def test_default_trace_budget_bounded_for_large_workspaces(env):
+    """ASSIGNMENT 主軸 2（round 142）：2G repo 不該背 247 MB 的「未變動檔複製」。
+
+    實測背景（2026-10-28）：舊碼初掃把本 repo ≤8 MB 檔案全量複製進 trace/objects
+    （542 MB/17,097 blob），而當時 512 MiB 預算恰好高於現況 536 MB ⇒ sweep 空轉。
+    未變動檔案的副本零追緝價值（讀端回退工作區＋驗 sha，round 139）；預算應定在
+    「工作集之上、垃圾之下」——64 MiB（本專案實測工作集 63.4 MiB，見 dry-run）。
+    """
+    assert retention.DEFAULT_TRACE_BUDGET_BYTES <= 64 * 1024 * 1024, (
+        f"預設預算 {retention.DEFAULT_TRACE_BUDGET_BYTES} B 過高："
+        f"舊式全量複製快照會落在預算內而永不回收"
+    )
+
+
+def test_target_sweep_reclaims_active_project_redundant_blobs(env):
+    """Axis 2 sweep 對**活躍**專案也生效（既有測試只釘了非活躍專案與「保留」兩端）：
+
+    round 72 說「活躍專案的未變動背景 blob 常規保留」（whack-a-mole）；Axis 2 補充
+    「超出 target_bytes 時可安全回收」（讀端回退工作區＋驗 sha，零損失）。兩條同時成立：
+    未超標 ⇒ 保留；超標 ⇒ 回收且 blame 誠實（未改檔＝工作區回退；已改檔＝UNKNOWN）。
+    """
+    proj = env / "work" / "active_sweep"
+    proj.mkdir(parents=True)
+    for i in range(40):
+        (proj / f"bg_{i:02d}.txt").write_text(f"background content {i}\n" * 500)
+    (proj / "app.py").write_text("x = 1\n")
+
+    hook.handle("claude", "UserPromptSubmit", {
+        "session_id": "S1", "cwd": str(proj), "prompt": "work"})
+    _step(proj, 1, "Write", {"file_path": str(proj / "app.py"), "content": "x = 2\n"},
+          write={"app.py": "x = 2\n"})
+
+    ws = capture.workspace_for(str(proj))
+    rec = Recorder(ws)
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # 未超標（預設 64 MiB ≫ 本 store）：活躍專案的背景 blob 照舊保留（round 72）
+    keep = retention.compact_trace(dry_run=False)
+    assert keep["files_removed"] == 0
+
+    # 超標：sweep 按「工作區冗餘優先」回收，直到 ≤ 目標
+    target = 100 * 1024
+    res = retention.compact_trace(dry_run=False, target_bytes=target)
+    assert res["target"]["target_reached"] is True
+    assert res["target"]["bytes_remaining"] <= target
+
+    # 簽章鏈 100% 完好（blob 回收不影響 Ed25519 鏈）
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # 讀端誠實：未變動檔經工作區回退仍取回原文；已改檔的舊版本誠實 None
+    tr = Trace(rec)
+    idx = tr.steps[-1].post_index
+    assert tr.file_text(idx, "bg_00.txt") == "background content 0\n" * 500
+    (proj / "bg_01.txt").write_text("changed after gc\n")
+    assert tr.file_text(idx, "bg_01.txt") is None
+    assert tr.file_text(idx, "app.py") == "x = 2\n"  # 被改檔的 must-keep 版本不受影響
 
 
 def test_compact_quarantine_preserves_released_and_ledger_integrity(env):

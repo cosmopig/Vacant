@@ -132,7 +132,7 @@ import sys
 import time
 import uuid
 
-from . import attest, hookcli, launcher, possess
+from . import acceptance, attest, hookcli, launcher, possess
 
 EXIT_UNGATED = 21
 EXIT_NO_MEDIATION = 23
@@ -201,7 +201,7 @@ def resolve_suite(cwd: pathlib.Path) -> tuple[pathlib.Path | None, str]:
     for d in [here, *here.parents]:
         for name in SUITE_DIRNAMES:
             cand = d / name
-            if cand.is_dir() and any(cand.glob("test_*.py")):
+            if cand.is_dir() and bool(acceptance.test_files(cand)):
                 return cand, f"dir:{name}"
         for tname in SUITE_TOML:
             t = d / tname

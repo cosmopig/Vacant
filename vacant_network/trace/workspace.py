@@ -156,18 +156,34 @@ class Blobs:
 def scan(root: str | os.PathLike, prev: Index | None = None, *,
          skip: set[pathlib.Path] | frozenset[pathlib.Path] = frozenset(),
          blobs: Blobs | None = None, full: bool = False,
-         deadline: float | None = None, prev_stored: bool = False) -> Index:
+         deadline: float | None = None, prev_stored: bool = False,
+         store: bool = False) -> Index:
     """掃一次工作區。`prev` 的項目若大小與 mtime 都相同就沿用雜湊（見誠實邊界 1）。
-    給 `blobs` ⇒ 每個**新看到的版本**都存進版本庫；沿用的版本也確認在庫裡——除非
-    `prev_stored`（`prev` 是帶著同一個版本庫掃出來的：它的每個版本在那時都已經存了；
-    逐檔確認曾經佔掉大專案每次掛鉤的三分之一）。`deadline`（`time.monotonic()` 的時刻）
-    過了 ⇒ `ScanTimeout`。"""
+    `deadline`（`time.monotonic()` 的時刻）過了 ⇒ `ScanTimeout`。
+
+    內容存檔（`store`，預設 **False**）：2026-10-28 Axis 2 決定——掃描**不**再把
+    工作區檔案的位元組拷進版本庫；工作區本身就是現況的唯一真相，索引只記
+    sha/size/mtime，讀取端（blame/file_text/materialize）需要時回工作區驗 sha 取回，
+    取不回就誠實回 None／列進 missing（UNKNOWN），不崩、不假 PASS。改動在觀測的
+    那一刻由 Recorder 存下 **after** 版本（copy-on-change，見 `recorder._retain_versions`）；
+    第一次改動之前的 before 版本不追溯存（已被覆蓋或刪除），這是被明確定義的 UNKNOWN。
+    `store=True` 是舊的「掃描即全存」行為，僅為相容與測試保留。
+    外部展開（工作區外、cell 清理後可能消失的位元組）不受 `store` 影響，照樣存。
+    `prev_stored` 只在 `store=True` 時有意義（沿用版本是否已在庫裡）。
+    """
     import time
     base = pathlib.Path(root).resolve()
     base_s = str(base)
     prev = prev or {}
     out: Index = {}
     skip_r = {os.path.realpath(s) for s in skip}
+    _store_on = store and blobs is not None
+
+    def _put(data: bytes) -> str:
+        """工作區檔案內容：預設只算 sha 不落盤（store-on-change，見 docstring）。"""
+        if _store_on:
+            return blobs.put_bytes(data)
+        return hashlib.sha256(data).hexdigest()
     # 熱迴圈只用字串路徑（pathlib 的物件開銷曾經佔掉大專案每次掃描的四成）
     for dirpath, dirs, files in os.walk(base_s, followlinks=False):
         if deadline is not None and time.monotonic() > deadline:
@@ -238,7 +254,7 @@ def scan(root: str | os.PathLike, prev: Index | None = None, *,
                 if not full and old is not None and old.size == st.st_size \
                         and old.mtime_ns == st.st_mtime_ns and old.exec == x_bit:
                     out[rel] = old
-                    if blobs is not None and not prev_stored and st.st_size <= MAX_BLOB \
+                    if _store_on and not prev_stored and st.st_size <= MAX_BLOB \
                             and ":" not in old.sha256 and not blobs.has(old.sha256):
                         blobs.put_file(pathlib.Path(full_p), old.sha256)
                     continue
@@ -252,8 +268,7 @@ def scan(root: str | os.PathLike, prev: Index | None = None, *,
                     continue
                 with open(full_p, "rb") as f:
                     data = f.read()
-                sha = blobs.put_bytes(data) if blobs is not None \
-                    else hashlib.sha256(data).hexdigest()
+                sha = _put(data)
                 out[rel] = Entry(sha, st.st_size, st.st_mtime_ns, x_bit)
             except OSError:
                 continue            # 掃描中途被刪掉的檔：這一次就是不在
