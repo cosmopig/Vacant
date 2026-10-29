@@ -5,7 +5,12 @@ import tarfile
 import io
 from pathlib import Path
 
-from ops.vlab.tools import disk_report, e002_wiring_gauge, holm_e002
+from ops.vlab.tools import (
+    disk_report,
+    e002_wiring_gauge,
+    envelope_compliance,
+    holm_e002,
+)
 
 
 def test_e002_wiring_gauge_selftest_and_passing_cell_marker(tmp_path: Path) -> None:
@@ -59,6 +64,55 @@ def test_e002_wiring_gauge_selftest_and_passing_cell_marker(tmp_path: Path) -> N
 
 def test_disk_report_skips_infra_dirs() -> None:
     assert disk_report.selftest() == 0
+
+
+def test_envelope_compliance_selftest() -> None:
+    assert envelope_compliance.selftest() == 0
+
+
+def test_envelope_compliance_verdicts_infra_skip_and_exit_codes(tmp_path: Path) -> None:
+    env = 256 * 1024 * 1024  # 與 retention.STABLE_ENVELOPE_BYTES 同值（字面量，避免 import 依賴）
+    exp = tmp_path / "exp_env"
+
+    def mk(name: str, cj: dict | None) -> None:
+        d = exp / name
+        d.mkdir(parents=True)
+        if cj is not None:
+            (d / "cell.json").write_text(json.dumps(cj), encoding="utf-8")
+
+    mk("c_pass", {"arm": "C", "vacant_home_bytes": 100 * 1024})
+    mk("c_fail", {"arm": "C", "vacant_home_bytes": env + 1})
+    mk("c_noev", {"arm": "C"})  # 無 vacant_home_bytes → NO_EVIDENCE，不判 FAIL
+    mk("a_na", {"arm": "A"})    # 設計上沒裝 Vacant 的臂 → NA
+    mk(".infra-c_x", {"arm": "C", "vacant_home_bytes": env + 999})  # 重試副檔 → 跳過
+
+    out = envelope_compliance.evaluate(tmp_path, "exp_env", env, "test")
+    by = {c["cell"]: c for c in out["cells"]}
+    assert out["n_cells"] == 4  # infra 副檔留痕、不計入
+    assert by["c_pass"]["compliance"] == "PASS"
+    assert by["c_fail"]["compliance"] == "FAIL"
+    assert by["c_noev"]["compliance"] == "NO_EVIDENCE"
+    assert by["a_na"]["compliance"] == "NA"
+    assert by[".infra-c_x"].get("skipped")  # 不可被計入任何判定
+    assert out["verdict"] == "FAIL"
+    assert out["by_arm"]["C"]["verdict"] == "FAIL"
+    assert out["by_arm"]["A"]["verdict"] == "NA"
+
+    # 移除 FAIL 格 → 整體 PASS（剩餘 C 格皆在封頂內）
+    (exp / "c_fail" / "cell.json").unlink()
+    out2 = envelope_compliance.evaluate(tmp_path, "exp_env", env, "test")
+    assert out2["verdict"] == "PASS"
+
+    # main() 退出碼：FAIL→1、PASS→0（NA/NO_EVIDENCE 不影響退出碼）
+    (exp / "c_fail" / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": env + 1}), encoding="utf-8")
+    assert envelope_compliance.main(["exp_env", "--base", str(tmp_path)]) == 1
+    (exp / "c_fail" / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 1024}), encoding="utf-8")
+    assert envelope_compliance.main(["exp_env", "--base", str(tmp_path)]) == 0
+
+    # 輸入不存在 → rc=2，不假 PASS
+    assert envelope_compliance.main(["no_such_exp", "--base", str(tmp_path)]) == 2
 
 
 def test_holm_e002_paired_and_recompute(tmp_path: Path) -> None:
