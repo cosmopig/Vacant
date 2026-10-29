@@ -513,13 +513,24 @@ def _significant(n: Num) -> bool:
 
 
 def _extract_test_hint(outp: str, err: str = "") -> str | None:
-    """從測試輸出提取最後一個失敗測試名稱與斷言／例外摘要（最多 120 字元），隱去敏感本機路徑與重複總結行。"""
+    """從測試輸出提取最後一個失敗測試名稱與斷言／例外摘要（最多 240 字元）。
+
+    - 以「最後一個失敗測試」為主體（相容舊行為）；多個測試失敗時附註其餘名字
+      （>4 個只給計數），避免 agent 只看到一個失敗而忽略其餘（2026-10-29 e002 C-arm）。
+    - 多行斷言訊息（如 set diff 的缺失項目、list diff 的差異元素）附帶其後細節行。
+    - 隱去敏感本機路徑與重複總結行。
+    """
     if not outp:
         return None
     err_clean = (err or "").strip()
     lines = [ln.strip() for ln in outp.splitlines() if ln.strip()]
-    test_name: str | None = None
-    exc_line: str | None = None
+    # 結構行＝區塊邊界／traceback／總結行：不是斷言訊息的細節行
+    STRUCT = re.compile(
+        r"^(?:=+$|-+$|\?\s|Traceback|During handling|The above exception|"
+        r"Ran\s+\d+|FAILED\b|FAIL:|ERROR:|E\s|File\s|>\s"
+        r"|\S+\.py:\d+:|Command exited with code)")
+    blocks: list[dict[str, Any]] = []  # 每個失敗區塊 {name, exc, detail[]}
+    cur: dict[str, Any] | None = None
     for ln in lines:
         if ln == err_clean or ln.startswith("Command exited with code"):
             continue
@@ -527,28 +538,48 @@ def _extract_test_hint(outp: str, err: str = "") -> str | None:
             continue
         m_u = re.match(r"^(?:FAIL|ERROR):\s+([A-Za-z0-9_]+)", ln)
         if m_u:
-            test_name = m_u.group(1)
+            cur = {"name": m_u.group(1), "exc": None, "detail": []}
+            blocks.append(cur)
             continue
         m_p = re.match(r"^FAILED\s+\S+?::([A-Za-z0-9_]+)(?:\s+-\s+(.*))?$", ln)
         if m_p:
-            test_name = m_p.group(1)
-            if m_p.group(2):
-                exc_line = m_p.group(2).strip()
+            cur = {"name": m_p.group(1),
+                   "exc": m_p.group(2).strip() if m_p.group(2) else None, "detail": []}
+            blocks.append(cur)
             continue
         clean_ln = re.sub(r"^E\s+", "", ln)
         if re.search(r"^(?:[A-Za-z_]\w*(?:Error|Exception)\b|assert\s+|Expected\b)", clean_ln):
-            exc_line = clean_ln
-    if test_name and exc_line:
-        raw = exc_line if test_name in exc_line else f"{test_name}: {exc_line}"
+            if cur is None:
+                cur = {"name": None, "exc": None, "detail": []}
+                blocks.append(cur)
+            cur["exc"] = clean_ln
+            cur["detail"] = []
+            continue
+        if cur is not None and cur["exc"] is not None and not STRUCT.match(ln):
+            cur["detail"].append(ln)
+    if not blocks:
+        return None
+    last = blocks[-1]
+    if last["name"] and last["exc"]:
+        raw = last["exc"] if last["name"] in last["exc"] else f"{last['name']}: {last['exc']}"
     else:
-        raw = exc_line or test_name
+        raw = last["exc"] or last["name"]
     if not raw or raw == err_clean:
         return None
+    # 多個測試失敗：附註其餘失敗測試名字（>4 個只給計數），讓 agent 知道「不止一個」
+    others = [b["name"] for b in blocks if b["name"] and b["name"] != last["name"]]
+    if others:
+        suffix = ("also failing: " + ", ".join(others)) if len(others) <= 4 \
+            else f"+{len(others)} other failing tests"
+        raw = f"{raw}; {suffix}"
+    # 斷言的後續細節行（set/list diff 等）附在摘要後
+    if last["detail"]:
+        raw = f"{raw} | {"; ".join(last['detail'][:3])}"
     # 移除常見絕對路徑前綴避免干擾 KS1 判定
     sanitized = re.sub(r"/(?:[a-zA-Z0-9_.-]+/)+", "", raw)
     sanitized = " ".join(sanitized.split())
-    if len(sanitized) > 120:
-        sanitized = sanitized[:117] + "..."
+    if len(sanitized) > 240:
+        sanitized = sanitized[:237] + "..."
     return sanitized
 
 

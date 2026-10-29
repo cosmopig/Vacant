@@ -463,6 +463,71 @@ def test_extract_test_hint_unittest_multiline_and_summary_only(env):
                               err="FAILED (failures=7)") is None
 
 
+def test_extract_test_hint_multiple_failing_tests_all_named(env):
+    """紅燈（2026-10-29 e002 C-arm）：bottle_song 7 個測試失敗，delivered hint 只點名最後一個，
+    agent 不知道其餘 6 個也在失敗。hint 必須讓 agent 知道還有其他失敗測試。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = (
+        "======================================================================\n"
+        "FAIL: test_first (mod.T.test_first)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 5, in test_first\n'
+        "    self.assertEqual(a, b)\n"
+        "AssertionError: 'one' != 'two'\n"
+        "----------------------------------------------------------------------\n"
+        "FAIL: test_second (mod.T.test_second)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 9, in test_second\n'
+        "    self.assertEqual(a, b)\n"
+        "AssertionError: 'three' != 'four'\n"
+        "----------------------------------------------------------------------\n"
+        "Ran 2 tests in 0.001s\n"
+        "\n"
+        "FAILED (failures=2)\n"
+    )
+    hint = _extract_test_hint(out, err="FAILED (failures=2)")
+    assert hint is not None
+    assert hint.startswith("test_second")       # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "AssertionError" in hint
+    assert "test_first" in hint                  # 紅燈：其餘失敗測試不得消失
+    # 失敗數多時（>4 個）用計數而非全列，但必須讓 agent 知道「不止一個」
+    many = "\n".join(
+        f"FAIL: test_t{i} (mod.T.test_t{i})\n"
+        f"AssertionError: {i} != {i+1}\n" for i in range(7)
+    ) + "\nRan 7 tests in 0.001s\n\nFAILED (failures=7)\n"
+    h7 = _extract_test_hint(many, err="FAILED (failures=7)")
+    assert h7 is not None and "other failing" in h7 and "6" in h7
+
+
+def test_extract_test_hint_multiline_assertion_detail(env):
+    """紅燈（2026-10-29 e002 C-arm）：go_counting 的 set diff 斷言，缺失項目在
+    AssertionError 行的下一、兩行，舊抽取只留第一行（『Items in the second set
+    but not the first:』），agent 不知道缺了哪些。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = (
+        "======================================================================\n"
+        "FAIL: test_two_territory (mod.T.test_two_territory)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 78, in test_two_territory\n'
+        "    self.assertSetEqual(got, expected)\n"
+        "AssertionError: Items in the second set but not the first:\n"
+        "(0, 1)\n"
+        "(0, 0)\n"
+        "----------------------------------------------------------------------\n"
+        "Ran 1 test in 0.001s\n"
+        "\n"
+        "FAILED (failures=1)\n"
+    )
+    hint = _extract_test_hint(out, err="FAILED (failures=1)")
+    assert hint is not None
+    assert hint.startswith("test_two_territory")
+    assert "AssertionError" in hint
+    assert "(0, 1)" in hint and "(0, 0)" in hint   # 紅燈：斷言的後續細節行不得丟
+
+
 def test_sed_modify_overwritten_by_subsequent_write_exempt(env):
     p = _proj(env, "sed_exempt", {"solution.py": "def solve(): return 0\n"})
     a = Agent(p)
