@@ -514,3 +514,104 @@ def test_setupclass_failure_preserves_fixture_stdout():
     assert len(fixture) == 1, res
     assert "fixture diagnostic line" in fixture[0]["output"], fixture[0]
 
+
+# ── round 167（2026-10-29）：實測探查後鎖定的三個常見未 pin 形狀 ─────────
+#
+# P0-1 檢查清單 pin 了 setUpClass／setUpModule（class／module 層級），但真實
+# bank 套件最常見的 fixture 形狀是**實例層級 `setUp`**（每個 case 前跑）。round 167
+# 以真的 `run_suite` 實測三種未 pin 形狀，全部行為正確（合法＝綠、壞＝顯式紅），
+# 此三 pin 把實測結果鎖住，防後續 driver 改動回歸：
+#   1. 實例 setUp 提供狀態、case 依賴它 ⇒ 合法套件通過（round 51 逐葉跑法的
+#      同類回歸面：若 driver 改回不跑 fixture 的寫法，此 pin 翻紅）；
+#   2. 實例 setUp 拋例外 ⇒ 每個 case 都顯式紅（exception）、`all_pass` 假、
+#      `complete` 真——不可靜默當 skip／漏記；
+#   3. `@unittest.skip` **裝飾器**形式（現有 pin 只鎖了 `skipTest` 呼叫形式）
+#      ⇒ 同樣是 protocol 失敗，不可靜默通過。
+
+INSTANCE_SETUP_FILE = """import unittest
+from solution import solve
+
+
+class SolveTest(unittest.TestCase):
+    def setUp(self):
+        self.a, self.b = 6, 7
+
+    def test_uses_instance_setup(self):
+        self.assertEqual(solve(self.a, self.b), 42)
+
+    def test_second_case(self):
+        self.assertEqual(solve(0, 5), 0)
+"""
+
+
+def test_instance_setup_dependency_passes():
+    """實例層級 `setUp` 提供的狀態被 case 依賴——合法套件必須通過。
+
+    這是真實測試套件最常見的 fixture 形狀（比 setUpClass／setUpModule 更普遍）。
+    任何改回「不跑 fixture」或「只跑部分 case」的 driver 改動都應讓此 pin 翻紅。"""
+    res = _run(INSTANCE_SETUP_FILE)
+    assert res["all_pass"] is True, res
+    cs = {c["case"]: c for c in _cases(res)}
+    assert cs["SolveTest.test_uses_instance_setup"]["ok"] is True
+    assert cs["SolveTest.test_uses_instance_setup"]["kind"] == "pass"
+    assert cs["SolveTest.test_second_case"]["ok"] is True
+    assert _file(res)["complete"] is True
+
+
+INSTANCE_SETUP_FAIL_FILE = """import unittest
+
+
+class T(unittest.TestCase):
+    def setUp(self):
+        raise RuntimeError("instance setup boom")
+
+    def test_a(self):
+        self.assertEqual(1, 1)
+
+    def test_b(self):
+        self.assertEqual(1, 1)
+"""
+
+
+def test_instance_setup_failure_is_explicit_red_for_every_case():
+    """實例 `setUp` 拋例外 ⇒ 每個 case 都必須有**顯式紅**記錄（exception），
+    `all_pass` 假、`complete` 真（宣告的 case 數＝記錄的 case 數）。
+
+    不可靜默當 skip（藏分母，I-4），也不可只記一筆漏掉其餘。"""
+    res = _run(INSTANCE_SETUP_FAIL_FILE)
+    assert res["all_pass"] is False, res
+    cs = {c["case"]: c for c in _cases(res)}
+    for name in ("T.test_a", "T.test_b"):
+        assert name in cs, res
+        assert cs[name]["ok"] is False
+        assert cs[name]["kind"] == "exception", cs[name]
+    assert _file(res)["complete"] is True
+
+
+SKIP_DECORATOR_FILE = """import unittest
+from solution import solve
+
+
+class T(unittest.TestCase):
+    @unittest.skip("not yet")
+    def test_skipped_by_decorator(self):
+        self.assertEqual(solve(2, 3), 6)
+
+    def test_plain(self):
+        self.assertEqual(solve(2, 3), 6)
+"""
+
+
+def test_skip_decorator_case_fails_not_silently():
+    """`@unittest.skip` 裝飾器形式＝`skipTest` 呼叫形式——跳過的 case 什麼都沒驗，
+    必須 protocol 失敗（`tests/test_unittest_driver.py::test_g1_skipped_case_fails_not_passes`
+    只鎖了 `skipTest` 呼叫形式；裝飾器是真實套件的常見寫法，round 167 補鎖）。"""
+    res = _run(SKIP_DECORATOR_FILE)
+    assert res["all_pass"] is False, res
+    cs = {c["case"]: c for c in _cases(res)}
+    c = cs["T.test_skipped_by_decorator"]
+    assert c["ok"] is False
+    assert c["kind"] == "protocol"
+    assert "skip" in c["message"].lower()
+    assert cs["T.test_plain"]["ok"] is True
+
