@@ -59,3 +59,48 @@ def test_compact_session_hooks_no_double_count_on_oversized_old_session(tmp_path
     assert rep["files_truncated"] == 0
     # bytes_freed should be exactly the size of f1 (3MB)
     assert rep["bytes_freed"] == 3 * 1024 * 1024
+
+def test_compact_session_hooks_dry_run(tmp_path):
+    # Setup: possess/hooks/
+    hooks_dir = tmp_path / "possess" / "hooks"
+    hooks_dir.mkdir(parents=True)
+    
+    f1 = hooks_dir / "session1.jsonl"
+    f2 = hooks_dir / "session2.jsonl"
+    
+    f1.write_text("content", encoding="utf-8")
+    import time; time.sleep(0.01)
+    f2.write_text("content", encoding="utf-8")
+    
+    # Call compact_session_hooks with dry_run=True
+    rep = compact_session_hooks(root=tmp_path, keep_sessions=1, dry_run=True)
+    
+    assert rep["files_removed"] == 1
+    assert f1.exists()
+    assert f2.exists()
+
+def test_compact_session_hooks_truncation_accounting(tmp_path):
+    # Setup: possess/hooks/
+    hooks_dir = tmp_path / "possess" / "hooks"
+    hooks_dir.mkdir(parents=True)
+    
+    f1 = hooks_dir / "session1.jsonl" # Kept, but oversized
+    f2 = hooks_dir / "session2.jsonl" # Kept, small
+    
+    # Ensure f1 is newer than f2 so it's kept in keep_sessions=2
+    f2.write_text("content", encoding="utf-8")
+    import time; time.sleep(0.01)
+    f1.write_text("content", encoding="utf-8")
+    
+    # Make f1 oversized (e.g., 3MB, while max_file_bytes is 2MB)
+    with open(f1, "wb") as f:
+        f.write(b"x" * (3 * 1024 * 1024))
+
+    # Call compact_session_hooks
+    # keep_sessions=2 means both are kept. f1 is > max_file_bytes so it's truncated.
+    rep = compact_session_hooks(root=tmp_path, max_file_bytes=2*1024*1024, keep_sessions=2)
+    
+    assert rep["files_removed"] == 0
+    assert rep["files_truncated"] == 1
+    # bytes_freed should be exactly the amount truncated (3MB - 1MB = 2MB)
+    assert rep["bytes_freed"] == 2 * 1024 * 1024
