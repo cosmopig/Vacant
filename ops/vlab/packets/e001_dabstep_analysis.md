@@ -69,3 +69,41 @@
 1. 若 C < A 且核實是 `unsourced` 誤報 → BACKLOG P0：誤報樣本進 `test_noncode_samples.py`，修到零誤報再談 e003。
 2. 若 C > A 且核實是 L-fake 被退回後改對 → e003：dabstep 全 79 題 ×2 rep、只比 A/C、加「L-fake 率」指標（`unsourced` 命中數/總數），預註冊後才發射。
 3. 若 C ≈ A → 主軸 4 記「無可測影響（機制不判內容正確性）」，e003 不做，資源轉主軸 2（`~/.vacant` 成長）。
+
+---
+
+## 8. 實際結果與解讀（round 171，2026-10-29，依 §5 解讀框架填寫；§1–7 預註冊內容不改動）
+
+**官方數據＝repo 已 commit 的 26 對版**（`ops/vlab/runs_e001_pi_AC_baseline/`，argon
+`4f85e1d6` 刷新後）。⚠ `/srv/vlab/runs/e001_pi_AC_baseline/` 下的同名檔是 dabstep-2697
+完成**之前**的舊 25 對快照（sha256 不同），**不可引用**；本包與 FINDINGS.md 一律引 repo 版。
+
+- **A 13/26（50.0%）、C 14/26（53.8%）**；A_only＝0、C_only＝1（dabstep-24）、
+  McNemar exact p（雙側）＝1.0；incomplete＝0。
+- **成本**（描述性，n＝26、1 rep）：A 呼叫/成功 108.62、token/成功 3,057,129、均牆 228.5s、
+  逾時 1；C 呼叫/成功 64.93、token/成功 1,645,720、均牆 169.6s、逾時 1；
+  C 臂 `vacant_home_bytes` 總計 18,531,396 B（≈713 KB/格）。
+- 來源 sha256：`REPORT_dabstep_subset.json` 83cebaf8…cd67d、
+  `AUDIT_dabstep_mechanism.json` 79c0e7b4…caaddfe、`REPORT_dabstep_subset.md` dbcc0c85…e542dfdc4a。
+
+**§5 要求的 discordant pair 逐格核實（dabstep-24）——已完成**：
+- A 格：`score.json` `answer_exists=false`、app_final **零檔案**——agent rc=0 正常結束但
+  從頭到尾沒寫 answer 檔（正是 L-fake 形狀：missing output）。
+- C 格：`zero_ran=true, n_rounds=0, findings=[], final_action=allow`——**機制零介入**。
+- ⇒ 依 §5「C > A 必須逐 pair 核實 L-fake 被退回後改對，**否則不算**」：這 1 對
+  **不歸因機制**，是跨 run 隨機差（A 臂 agent 沒寫檔、C 臂 agent 寫了）。
+
+**機制事實（描述，不判內容對錯；源＝AUDIT_dabstep_mechanism.json）**：
+- 26 C 格 25 格 `zero_ran=true`；9 格觸發 `missing_output` kickback（另 2 格
+  `invalid_output/contract_shape`），全部 `final_action=allow`（被退回後 agent 補了檔）。
+- 該 9 格對隱藏 scorer：**1 過（dabstep-22）／8 掛**（10、17、19、23、1464、1681、1753、2697）
+  ——gate 保住了「檔寫出來」，保不住「內容對」；dabstep-2697 被退回 2 回仍掛。
+- **§5 的 UNKNOWN 已結**：26 格 C 臂 app_final.tgz **全部無可見測試檔**（只有 answer.txt
+  ＋分析腳本）⇒ `test_claim`/`failed_step` 在該題庫確為休眠，與 §5 預測一致。
+
+**結論（§7 分支 3；分支 2 前提不成立）**：
+在此設定（gemma-4-12b-it-qat、pi、26 題、1 rep）對資料分析題，**看不到可歸因機制的
+影響**；唯一 C 優勢格機制零介入。機制在「內容正確」維度本來就不管（H-2 同構），
+沒有幫助是預期的——記為「無可測影響」，不是「失效」。「L-fake 被退回後改對」的
+假說（分支 2）在本批**未被支持**：**e003（dabstep 全 79 題×2 rep）不發射**；
+資源轉主軸 2（§7-3）。能說／不能說的句子見 repo `ops/vlab/FINDINGS.md`。
