@@ -914,3 +914,69 @@ def test_compact_logs_includes_auto_gc_log_and_dry_run_matches(env):
     assert (hdir / "auto_gc.log").stat().st_size <= 10_000
 
 
+def test_usage_envelope_disabled_wire_caps_and_group_overrun(env, monkeypatch, capsys):
+    """VACANT_WIRE_BODY_BYTES=0 / VACANT_WIRE_INDEX_BYTES=0 代表「上限已關」（None），
+    不可當成 0 B 上限誤報超標；且當任一有上限的分組（如 trace_objects）超標時，
+    即使總量 ≤ 256 MiB，within_envelope 也必須為 False。"""
+    from vacant_network.intake.statepaths import state_dir
+    vh = state_dir()
+    wdir = vh / "possess" / "proxyd" / "wire"
+    wdir.mkdir(parents=True, exist_ok=True)
+    (wdir / "a.req.bin").write_bytes(b"x" * 1000)
+    (wdir / "index.jsonl").write_text('{"n": 1}\n', encoding="utf-8")
+    odir = vh / "trace" / "objects" / "aa"
+    odir.mkdir(parents=True, exist_ok=True)
+    (odir / ("a" * 64)).write_bytes(b"z" * 500)
+
+    monkeypatch.setenv("VACANT_WIRE_BODY_BYTES", "0")
+    monkeypatch.setenv("VACANT_WIRE_INDEX_BYTES", "0")
+    monkeypatch.setenv("VACANT_TRACE_BUDGET_BYTES", "100")
+
+    rep = retention.usage_report(with_estimate=False)
+    envl = rep["envelope"]
+    groups = {g["name"]: g for g in envl["groups"]}
+    assert groups["wire_body"]["cap_bytes"] is None
+    assert groups["wire_body"]["headroom_bytes"] is None
+    assert groups["wire_index"]["cap_bytes"] is None
+    assert groups["wire_index"]["headroom_bytes"] is None
+    assert groups["trace_objects"]["cap_bytes"] == 100
+    assert groups["trace_objects"]["headroom_bytes"] == -400
+    assert envl["within_envelope"] is False
+
+    rc = cli.main(["usage", "--no-estimate"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "wire_body    : 1000 B（上限已關）" in out, out
+    assert "wire_index   : 9 B（上限已關）" in out, out
+    assert "⚠" in out and "✓ 在封頂內" not in out, out
+
+
+def test_compact_logs_truncates_project_perf_jsonl_and_prunes_stale_rounds(env):
+    """compact_logs 除 intake/hooks 日誌外，也必須截斷 trace/projects/*/perf.jsonl，
+    並清理超過保留數量的舊 intake/hooks/rounds_*.json。"""
+    from vacant_network.intake.statepaths import state_dir
+    vh = state_dir()
+    pdir = vh / "trace" / "projects" / "proj1"
+    pdir.mkdir(parents=True, exist_ok=True)
+    perf = pdir / "perf.jsonl"
+    perf.write_text(('{"ts": 1.0, "agent": "pi", "event": "post", "ms": 12.3, "pad": "' + ("p" * 80) + '"}\n') * 300)
+
+    hdir = vh / "intake" / "hooks"
+    hdir.mkdir(parents=True, exist_ok=True)
+    for i in range(15):
+        rf = hdir / f"rounds_sess{i:03d}_tag.json"
+        rf.write_text('{"n": 1}\n', encoding="utf-8")
+        os.utime(rf, (1000 + i, 1000 + i))
+
+    dry = retention.compact_logs(vh, max_log_bytes=10_000, keep_rounds_files=10, dry_run=True)
+    real = retention.compact_logs(vh, max_log_bytes=10_000, keep_rounds_files=10, dry_run=False)
+    assert dry["logs_compacted"] == real["logs_compacted"] == 1
+    assert dry["bytes_freed"] == real["bytes_freed"] > 15_000
+    assert perf.stat().st_size <= 10_000
+    remaining_rounds = sorted(p.name for p in hdir.glob("rounds_*.json"))
+    assert len(remaining_rounds) == 10
+    assert "rounds_sess000_tag.json" not in remaining_rounds
+    assert "rounds_sess014_tag.json" in remaining_rounds
+
+
+
