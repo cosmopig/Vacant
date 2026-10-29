@@ -107,6 +107,14 @@ DEFAULT_WIRE_INDEX_BYTES = 8 * 1024 * 1024
 DEFAULT_HOOKS_MAX_FILE_BYTES = 2 * 1024 * 1024
 DEFAULT_HOOKS_KEEP_SESSIONS = 200
 
+# 2026-10-29 round 166 DECISION（ASSIGNMENT 🔴 最優先「用量有上限」，目標數字見
+# ops/packets/disk_top_priority.md §3）：`~/.vacant` 的**穩態封頂**＝各分組上限的
+# 加總（trace 64 MiB ＋ wire body 96 ＋ wire index 8 ＋ 日誌 2 MiB/檔 ＋ 固定安裝面
+# ~10 MiB）。對 2 GiB repo 是 12.5%——「不該是 repo 的一半」有 4 倍餘裕。
+# ⚠ 誠實口徑（§4）：它是**加總**，不是一條程式保證的單一硬上限；`vacant usage`
+# 的量具輸出必須自報這一點，不得被讀成單一開關。
+STABLE_ENVELOPE_BYTES = 256 * 1024 * 1024
+
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
 AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住多久（超過就停在安全點）
@@ -1502,6 +1510,44 @@ def usage_report(
             "wire_index_budget_bytes": _resolve_wire_index_budget(),
             "override_env": ["VACANT_WIRE_BODY_BYTES", "VACANT_WIRE_INDEX_BYTES"],
         }
+        # 2026-10-29 round 168（ASSIGNMENT 🔴 最優先、驗收條件 1 → 常規量具）：
+        # 穩態封頂＝各分組上限的**加總**（STABLE_ENVELOPE_BYTES；口徑與理由見
+        # ops/packets/disk_top_priority.md §3/§4）＋各分組餘量。⚠ 它不是一條程式
+        # 保證的單一硬上限——`note` 必須自報這一點，避免被讀成單一開關。
+        # 量具失敗不阻報告其餘部分（fail-open）。
+        try:
+            tr_bytes = (out.get("objects") or {}).get("bytes", 0)
+            tr_cap = _resolve_auto_budget()
+            wire_total = out["areas"].get("possess_wire", 0)
+            idx_f = sroot / "possess" / "proxyd" / "wire" / "index.jsonl"
+            try:
+                idx_bytes = idx_f.stat().st_size if idx_f.is_file() else 0
+            except OSError:
+                idx_bytes = 0
+            body_bytes = max(wire_total - idx_bytes, 0)
+            body_cap = _resolve_wire_body_budget()
+            idx_cap = _resolve_wire_index_budget()
+            total = (out.get("totals", {}).get("state_dir", 0)
+                     + out.get("totals", {}).get("work_dir", 0))
+            out["envelope"] = {
+                "planned_steady_state_bytes": STABLE_ENVELOPE_BYTES,
+                "note": ("各分組上限的加總（trace 64 MiB ＋ wire body 96 MiB ＋ wire index 8 MiB"
+                         "＋日誌 2 MiB/檔＋固定安裝面 ~10 MiB），不是一條單一開關；"
+                         "口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
+                "total_bytes": total,
+                "within_envelope": total <= STABLE_ENVELOPE_BYTES,
+                "pct_of_envelope": round(100.0 * total / STABLE_ENVELOPE_BYTES, 2),
+                "groups": [
+                    {"name": "trace_objects", "bytes": tr_bytes, "cap_bytes": tr_cap,
+                     "headroom_bytes": (tr_cap - tr_bytes) if tr_cap is not None else None},
+                    {"name": "wire_body", "bytes": body_bytes, "cap_bytes": body_cap,
+                     "headroom_bytes": body_cap - body_bytes},
+                    {"name": "wire_index", "bytes": idx_bytes, "cap_bytes": idx_cap,
+                     "headroom_bytes": idx_cap - idx_bytes},
+                ],
+            }
+        except Exception:  # noqa: BLE001 — 封頂量具失敗不阻報告（fail-open）
+            pass
         # 每專案
         pdir = sroot / "trace" / "projects"
         if pdir.is_dir():
@@ -1576,6 +1622,24 @@ def usage_main(argv: list[str] | None = None) -> int:
     if bu and bu.get("budget_bytes") is not None:
         state = "✓ 在上限內" if bu.get("within_budget") else "⚠ 超上限（vacant gc --auto 會收縮）"
         print(f"  使用量上限    : {h(bu['budget_bytes'])}（trace 物件 {h(bu.get('trace_objects_bytes', 0))}）{state}")
+    envl = rep.get("envelope")
+    if isinstance(envl, dict) and envl.get("planned_steady_state_bytes") is not None:
+        cap = envl["planned_steady_state_bytes"]
+        # 封頂以 MiB 定義（64/96/8/256 MiB）：整 MiB 就印 MiB（「256 MiB」），
+        # 非整（使用者 env 覆寫）才退回 _human_bytes 的 MB 口徑。
+        def _capfmt(n: int) -> str:
+            return f"{n // (1024 * 1024)} MiB" if n % (1024 * 1024) == 0 else h(n)
+        mark = "✓ 在封頂內" if envl.get("within_envelope") else "⚠ 超封頂（vacant gc --auto 會逐組收縮）"
+        print(f"  穩態封頂    : 總計 {h(envl['total_bytes'])} / {_capfmt(cap)}（{envl['pct_of_envelope']}%）{mark}")
+        for g in envl.get("groups", []):
+            if g.get("cap_bytes") is None:
+                print(f"    · {g['name']:<13}: {h(g['bytes'])}（上限已關）")
+                continue
+            ok = g["bytes"] <= g["cap_bytes"]
+            tail = (f"✓ 餘量 {h(g['cap_bytes'] - g['bytes'])}" if ok
+                    else "⚠ 超上限（vacant gc --auto 會收縮）")
+            print(f"    · {g['name']:<13}: {h(g['bytes'])} / {_capfmt(g['cap_bytes'])} {tail}")
+        print("    └ 封頂＝各分組上限的加總，不是一條單一開關（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:
         extra = f"  （{pj['chain_events']} 步）" if pj.get("chain_events") is not None else ""
         print(f"  專案 {pj['project']}: {h(pj['bytes'])}{extra}  {pj.get('last_activity', '')}")

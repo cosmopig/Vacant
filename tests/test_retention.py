@@ -528,6 +528,73 @@ def test_usage_report_fields_and_cli(env, capsys):
     assert "totals" in out and "projects" in out
 
 
+def test_usage_envelope_gauge(env, capsys):
+    """round 168（ASSIGNMENT 🔴 最優先、驗收條件 1 → 常規量具）：
+    `vacant usage` 給出「總計對穩態封頂的百分比＋各分組餘量」。
+
+    誠實口徑（ops/packets/disk_top_priority.md §3/§4）：封頂是各分組上限的
+    **加總**（trace 64 MiB ＋ wire body 96 ＋ wire index 8 ＋ 固定面 ~10 MiB），
+    不是一條程式保證的單一硬上限——人讀輸出必須帶「不是一條單一開關」的註記，
+    不得被讀成單一硬上限。wire body／index 分開計量（index.jsonl 是 index，
+    其餘是 body）。量具同時進 `--json`（機器可讀）。
+    """
+    _seed_trace_project(env, name="envl")
+    # wire 兩分組：body（.req/.resp.bin）與 index（index.jsonl）分開落盤
+    wdir = pathlib.Path(os.environ["VACANT_HOME"]) / "possess" / "proxyd" / "wire"
+    wdir.mkdir(parents=True, exist_ok=True)
+    (wdir / "a.req.bin").write_bytes(b"x" * 3000)
+    (wdir / "a.resp.bin").write_bytes(b"y" * 4000)
+    idx_line = '{"n": 1}\n'
+    (wdir / "index.jsonl").write_text(idx_line, encoding="utf-8")
+
+    rep = retention.usage_report()
+    envl = rep["envelope"]
+    # 封頂是明碼常數，加總口徑（不是一條單一開關）
+    assert envl["planned_steady_state_bytes"] == retention.STABLE_ENVELOPE_BYTES == 256 * 1024 * 1024
+    assert "不是一條單一開關" in envl["note"]
+    groups = {g["name"]: g for g in envl["groups"]}
+    # trace 物件：現值 vs 64 MiB 上限＋餘量
+    tr = groups["trace_objects"]
+    assert tr["bytes"] > 0
+    assert tr["cap_bytes"] == retention.DEFAULT_TRACE_BUDGET_BYTES
+    assert tr["headroom_bytes"] == tr["cap_bytes"] - tr["bytes"]
+    # wire body＝7000（body 檔加總、不含 index.jsonl）；index＝該行位元組數
+    assert groups["wire_body"]["bytes"] == 7000
+    assert groups["wire_body"]["cap_bytes"] == retention.DEFAULT_WIRE_BODY_BYTES
+    assert groups["wire_index"]["bytes"] == len(idx_line.encode())
+    assert groups["wire_index"]["cap_bytes"] == retention.DEFAULT_WIRE_INDEX_BYTES
+    assert groups["wire_index"]["headroom_bytes"] == (
+        retention.DEFAULT_WIRE_INDEX_BYTES - len(idx_line.encode()))
+    # 總計（state＋work）vs 封頂：百分比與在不在內
+    assert envl["total_bytes"] > 0
+    assert envl["within_envelope"] is True
+    assert 0 < envl["pct_of_envelope"] < 1
+    assert abs(envl["pct_of_envelope"]
+               - round(100.0 * envl["total_bytes"] / retention.STABLE_ENVELOPE_BYTES, 2)) < 0.01
+    # 人讀輸出：封頂行＋各分組餘量＋「不是一條單一開關」註記
+    rc = cli.main(["usage"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "穩態封頂" in out and "256 MiB" in out, out
+    assert "不是一條單一開關" in out, "封頂口徑必須自報是加總、不是單一硬上限：\n" + out
+    assert "餘量" in out, "各分組餘量缺：\n" + out
+    # JSON 同欄位（常規量具＝機器可讀）
+    rc = cli.main(["usage", "--json"])
+    outj = json.loads(capsys.readouterr().out)
+    assert outj["envelope"]["total_bytes"] == envl["total_bytes"]
+    assert outj["envelope"]["within_envelope"] is True
+
+
+def test_usage_envelope_fail_open_missing_home(tmp_path, monkeypatch, capsys):
+    """state 目錄不存在時封頂量具仍要給得出（total=0、在內），不崩（fail-open）。"""
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "nope"))
+    rep = retention.usage_report()
+    envl = rep["envelope"]
+    assert envl["total_bytes"] == 0
+    assert envl["within_envelope"] is True
+    assert envl["pct_of_envelope"] == 0.0
+
+
 def test_usage_human_output_notes_apparent_vs_block_size(env, capsys):
     """`vacant usage` 的數字是 apparent size（st_size 加總，du -sb 同義）；
     `du -sh` 數的是已分配 block，兩者不必然相同（BACKLOG 2026-10-19：
