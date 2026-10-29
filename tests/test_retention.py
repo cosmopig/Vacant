@@ -441,6 +441,96 @@ def test_auto_gc_runs_writes_report_and_rate_limits(env, capsys):
     assert out3["status"] == "ok"
 
 
+def test_auto_gc_records_growth_point(env, capsys):
+    """round 186（ASSIGNMENT 🔴 最優先驗收：「量它從零開始一天長多少」）：
+    auto gc 每次真跑自動記一筆用量點進 `$VACANT_HOME/growth.jsonl`（零設定、fail-open），
+    schema 含 ts/home/total_bytes/per_dir_bytes/objects_files/gc_last（與 ops 工具同欄位）；
+    頻率限制跳過（skipped_rate_limited）不記新筆。"""
+    _seed_trace_project(env)
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    gpath = vh / "growth.jsonl"
+
+    rc = cli.main(["gc", "--auto", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["status"] == "ok"
+    assert out["growth"]["ok"] is True
+
+    assert gpath.is_file()
+    lines = [json.loads(l) for l in gpath.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert len(lines) == 1
+    rec = lines[0]
+    assert rec["home"] == str(vh)
+    assert rec["total_bytes"] > 0
+    assert "trace" in rec["per_dir_bytes"]
+    assert rec["objects_files"] >= 0
+    assert rec["gc_last"]["status"] == "ok"
+    assert rec["source"] == "auto_gc"
+
+    # 頻率限制跳過：不濫記
+    rc = cli.main(["gc", "--auto", "--json"])
+    out2 = json.loads(capsys.readouterr().out)
+    assert rc == 1 and out2["status"] == "skipped_rate_limited"
+    lines2 = [l for l in gpath.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert len(lines2) == 1, "skipped 不得記新筆"
+
+
+def test_growth_point_byte_cap_and_dedup(env, capsys, monkeypatch):
+    """round 186：growth.jsonl 位元組硬上限（保留最新、淘汰最舊）；同分鐘同 home 的舊筆
+    被本筆取代（--force 連跑不濫記）；無效行不背。"""
+    _seed_trace_project(env)
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    gpath = vh / "growth.jsonl"
+    # 塞 6 筆舊歷史（每筆 ~220 B，總量 1.3 KB 超上限）＋ 1 行垃圾
+    old = [{"ts": f"2026-10-0{i}T00:00:00+0000", "home": str(vh),
+            "total_bytes": i, "pad": "x" * 100} for i in range(1, 7)]
+    gpath.write_text("\n".join(json.dumps(r) for r in old) + "\nnot json\n")
+    cap = 800
+    monkeypatch.setattr(retention, "DEFAULT_GROWTH_LOG_BYTES", cap)
+
+    rc = cli.main(["gc", "--auto", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0 and out["status"] == "ok"
+
+    raw = gpath.read_text(encoding="utf-8")
+    assert len(raw.encode("utf-8")) <= cap, "超位元組上限的成長日誌自身會突破封頂"
+    lines = [json.loads(l) for l in raw.splitlines() if l.strip()]
+    assert lines[-1]["total_bytes"] > 0 and "pad" not in lines[-1], "最新行（本筆）必留"
+    assert "not json" not in raw, "無效行不背"
+    # 最舊優先淘汰：留下的舊筆必是 6 筆中最新的後綴
+    old_kept = [r for r in lines if "pad" in r]
+    assert old_kept == old[-len(old_kept):], "淘汰必須最舊優先"
+
+
+def test_growth_point_fail_open_does_not_break_gc(env, capsys, monkeypatch):
+    """round 186：growth 快照出錯只記 body、不得拖垮 gc（fail-open 紅線）。"""
+    _seed_trace_project(env)
+
+    def boom(sroot):
+        raise OSError("disk gone")
+    monkeypatch.setattr(retention, "_growth_snapshot", boom)
+
+    rc = cli.main(["gc", "--auto", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0 and out["status"] == "ok", "量具錯誤不得讓 gc 失敗"
+    assert out["growth"]["ok"] is False
+    assert "disk gone" in out["growth"].get("error", "")
+
+
+def test_envelope_accounting_accounts_growth_log(env):
+    """round 186：growth.jsonl 已註冊進 ENVELOPE_COMPONENTS（位元組硬上限），
+    封頂帳目不把它點名為 unaccounted（accounting_complete 保持成立）。"""
+    _seed_trace_project(env)
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    (vh / "growth.jsonl").write_text('{"ts": "x", "total_bytes": 1}\n')
+
+    acct = retention.envelope_accounting(vh)
+    assert acct["unaccounted"] == []
+    assert acct["accounting_complete"] is True
+    names = {c["name"] for c in acct["components"]}
+    assert "growth.jsonl" in names
+
+
 def test_auto_gc_locked_when_another_holder(env, capsys):
     _seed_trace_project(env, name="lp")
     vh = pathlib.Path(os.environ["VACANT_HOME"])

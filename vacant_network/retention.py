@@ -115,6 +115,13 @@ DEFAULT_HOOKS_KEEP_SESSIONS = 200
 # 的量具輸出必須自報這一點，不得被讀成單一開關。
 STABLE_ENVELOPE_BYTES = 256 * 1024 * 1024
 
+# 2026-10-29 round 186（ASSIGNMENT 🔴 最優先驗收 4(a)/(b)：「量它從零開始一天長多少」）：
+# 此前成長量測靠人手跑 ops/vlab/tools/vacant_growth_log.py（~/dev/ops/data/vacant_growth.jsonl）。
+# 現行 auto gc 每次真跑（至多每小時一次、≤24 筆/日）就自動記一筆用量點進
+# $VACANT_HOME/growth.jsonl——零設定、fail-open、schema 與 ops 工具同欄位可併排。
+# 量具本身也須有上限（否則封頂自我矛盾）：位元組硬上限，保留最新、淘汰最舊。
+DEFAULT_GROWTH_LOG_BYTES = 256 * 1024  # 256 KiB ≈ 400+ 筆/日 × 數月
+
 # 2026-10-29 round 176（ASSIGNMENT 🔴 最優先「用量有上限」；packet
 # ops/packets/disk_top_priority.md §4 誠實缺口「總計封頂本身不是一條程式保證，
 # 只是一個可驗算的加總」→ 本輪把它變成程式可驗的不變量）：
@@ -142,6 +149,8 @@ ENVELOPE_COMPONENTS: tuple[tuple[str, str, int | None, str], ...] = (
     ("gc_report.json", "fixed", None, "上次 gc 結果，小檔"),
     ("gc_last.json", "fixed", None, "上次 gc 時間，小檔"),
     ("gc.lock", "fixed", None, "gc 鎖，0 B"),
+    ("growth.jsonl", "bytes", DEFAULT_GROWTH_LOG_BYTES,
+     "auto gc 用量點（≤1 筆/小時）；位元組硬上限 256 KiB（保留最新、淘汰最舊）"),
 )
 
 
@@ -183,6 +192,7 @@ AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住�
 AUTO_GC_LOCK_NAME = "gc.lock"
 AUTO_GC_LAST_NAME = "gc_last.json"
 AUTO_GC_REPORT_NAME = "gc_report.json"
+AUTO_GC_GROWTH_LOG_NAME = "growth.jsonl"
 
 
 def _file_size(p: pathlib.Path) -> int:
@@ -1443,6 +1453,81 @@ def compact_session_hooks(
     return rep
 
 
+def _growth_snapshot(sroot: pathlib.Path) -> dict[str, Any]:
+    """round 186：算一筆 `~/.vacant` 用量快照（唯讀；出錯照拋，由呼叫端 fail-open）。
+
+    schema 與 `ops/vlab/tools/vacant_growth_log.py` 同欄位（ts/home/total_bytes/
+    per_dir_bytes/objects_files/gc_last），另加 `source` 標明來源；兩份 JSONL 可併排。
+    """
+    rec: dict[str, Any] = {
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "home": str(sroot),
+        "total_bytes": 0,
+        "source": "auto_gc",
+    }
+    if not sroot.is_dir():
+        rec["note"] = "home missing"
+        return rec
+    rec["total_bytes"] = _tree_size(sroot)
+    per_dir: dict[str, int] = {}
+    for d in sorted(p for p in sroot.iterdir() if p.is_dir()):
+        per_dir[d.name] = _tree_size(d)
+    rec["per_dir_bytes"] = per_dir
+    obj = sroot / "trace" / "objects"
+    if obj.is_dir():
+        rec["objects_files"] = sum(1 for _ in obj.glob("**/*") if _.is_file())
+    rep = sroot / AUTO_GC_REPORT_NAME
+    if rep.is_file():
+        try:
+            r = json.loads(rep.read_text(encoding="utf-8"))
+            rec["gc_last"] = {
+                "status": r.get("status"),
+                "target_reached": (r.get("trace") or {}).get("target", {}).get("target_reached"),
+            }
+        except (OSError, ValueError):
+            pass
+    return rec
+
+
+def record_growth_point(root: pathlib.Path | None = None) -> dict[str, Any]:
+    """round 186（ASSIGNMENT 🔴 最優先：「量它從零開始一天長多少」）：auto gc 每次真跑
+    自動記一筆用量點進 `$VACANT_HOME/growth.jsonl`。
+
+    - **零設定、fail-open**：快照出錯只回 `ok=False`＋錯誤訊息，不拋（gc 主路徑不受影響）。
+    - **去重**：同一分鐘＋同一 home 的舊筆由本筆取代（`--force` 連跑不濫記）。
+    - **位元組硬上限**（`DEFAULT_GROWTH_LOG_BYTES`）：超標淘汰最舊行、最新行必留；
+      無效行直接丟。原子寫入，不半截。
+    """
+    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    path = sroot / AUTO_GC_GROWTH_LOG_NAME
+    out: dict[str, Any] = {"status": "error", "ok": False, "path": str(path)}
+    try:
+        rec = _growth_snapshot(sroot)
+        minute = rec["ts"][:16]
+        lines: list[str] = []
+        if path.is_file():
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    last = json.loads(line)
+                    if last.get("home") == rec["home"] and str(last.get("ts", ""))[:16] == minute:
+                        continue  # 同分鐘同 home：本筆取代舊筆
+                except ValueError:
+                    continue  # 無效行：丟（量具不背外人的垃圾）
+                lines.append(line)
+        lines.append(json.dumps(rec, ensure_ascii=False))
+        while (len(lines) > 1 and
+               sum(len(l.encode("utf-8")) + 1 for l in lines) > DEFAULT_GROWTH_LOG_BYTES):
+            lines.pop(0)  # 最舊優先淘汰；最新行（本筆）必留
+        atomic_write_text(path, "\n".join(lines) + "\n")
+        out.update({"status": "ok", "ok": True, "record": rec})
+    except Exception as e:  # noqa: BLE001 — fail-open：量具錯誤不得拖垮 gc
+        out["status"] = "error"
+        out["error"] = f"{type(e).__name__}: {e}"[:300]
+    return out
+
+
 def auto_gc(
     root: pathlib.Path | None = None,
     work_root: pathlib.Path | None = None,
@@ -1523,6 +1608,9 @@ def auto_gc(
                 _atomic_write_json(last_path, summary)
             with contextlib.suppress(OSError):
                 _atomic_write_json(report_path, body)
+            # round 186：記一筆用量點（「從零開始一天長多少」的自動量測；fail-open，
+            # 快照出錯只記 body、不影響 gc 結果）
+            body["growth"] = record_growth_point(sroot)
             return body
         finally:
             with contextlib.suppress(OSError):

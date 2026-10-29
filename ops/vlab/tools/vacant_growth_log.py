@@ -8,6 +8,8 @@ ASSIGNMENT 10/28 驗收 1 要求「量它從零開始一天長多少」：本工
 - **唯讀**：不碰 `~/.vacant` 任何檔案（只 stat／du）。
 - 輸出預設 `~/dev/ops/data/vacant_growth.jsonl`（可用 `--out` 改）。
 - 同一分鐘內重複跑會覆蓋最後一筆（避免誤觸濫記）。
+- round 186 起 `auto gc` 每次真跑會自動記同 schema 的用量點進 `~/.vacant/growth.jsonl`
+  （零設定、fail-open、位元組硬上限）；本工具仍是人手觸發的唯讀快照，兩份 JSONL 可併排。
 
 用法:
     python3 vacant_growth_log.py [--home PATH] [--out FILE] [--json]
