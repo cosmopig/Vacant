@@ -976,7 +976,7 @@ These are true and have code behind them:
   see this test code"*. The candidate **structurally cannot read the tests** — it is not a
   blocklist.
 - **"Not measured is not passed" is written as code**:
-  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:1081`);
+  `"all_pass": bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:1089`);
   likewise the gauge requires `n_broken >= 1`, so an empty stub set cannot succeed vacuously.
 - **Refusal really happens**: in R532's 836 tasks the gated arm refused 25 deliveries and
   the loop arm 68 — and refusals are in the denominator of every rate.
@@ -1124,7 +1124,7 @@ red line A4).
 - **I-3** Self-reported success is never taken on faith (`ecosystem.py:531`, then
   `controller.py:299-300` independently).
 - **I-4** "Not measured" is failure, in code:
-  `bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:1081`); the gauge
+  `bool(total > 0 and passed == total and complete)` (`vacant_network/vrun/acceptance.py:1089`); the gauge
   requires `n_broken >= 1`.
 - **I-5** The gauge is two-sided: the reference must pass **and** every known-bad stub must
   be rejected.
