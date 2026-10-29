@@ -635,6 +635,19 @@ def compact_trace(
                             initial_idx = fidx
                         latest_idx = fidx
                         aux_index_events.append((seq_num, fidx))
+                elif t == "checkpoint_restore":
+                    tidx = e.get("target_index")
+                    if isinstance(tidx, str) and tidx:
+                        latest_idx = tidx
+                        aux_index_events.append((seq_num, tidx))
+                    for ch in e.get("changes") or []:
+                        if isinstance(ch, dict):
+                            if ch.get("path"):
+                                modified_paths.add(str(ch["path"]))
+                            for k in ("before", "after"):
+                                v = ch.get(k)
+                                if isinstance(v, str) and ":" not in v:
+                                    _note_file_sha(v)
 
             if initial_idx:
                 _keep_index(initial_idx)

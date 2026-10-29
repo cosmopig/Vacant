@@ -34,6 +34,7 @@ import itertools
 import json
 import math
 import os
+import pathlib
 import re
 import tomllib
 from typing import Any
@@ -568,29 +569,45 @@ class Evidence:
         return str(actor.get("platform")) == self.platform and \
             str(actor.get("session")) == self.session
 
-    def best_test_checkpoint(self, steps: list[Step] | None = None) -> tuple[str | None, tuple[int, int], int | None]:
-        """尋找歷史上通過最多測試的步驟檢查點。回傳 `(pre_index, (passed, failed), step_n)`。"""
-        steps = steps if steps is not None else self.tr.steps
-        best_idx: str | None = None
-        best_score: tuple[int, int] = (-1, 999999)
-        best_step_n: int | None = None
-        for s in steps:
-            cmd = _command_of(self.tr, s)
-            if not any(t in cmd for t in ("pytest", "unittest", "python3 -m unittest", "cargo test", "npm test")):
-                continue
+    def _is_test_step_cmd(self, s: Step) -> bool:
+        if tool_kind(s.tool) != "shell":
+            return False
+        clean_cmd = _strip_shell_comments(_command_of(self.tr, s))
+        return bool(clean_cmd and (RUNNERS.search(clean_cmd) or is_test_script_run(clean_cmd)))
+
+    def _step_test_output(self, s: Step) -> str:
+        outp = self.tr.output_text(s)
+        if not outp:
             raw_out = self.tr.blob_text(s.output_blob) or ""
-            outp = raw_out
             try:
                 j_out = json.loads(raw_out)
                 if isinstance(j_out, dict):
                     outp = str(j_out.get("stdout") or j_out.get("output") or raw_out)
+                else:
+                    outp = raw_out
             except Exception:
-                pass
-            score = parse_test_score(outp)
+                outp = raw_out
+        if s.error:
+            outp = f"{outp}\n{s.error}" if outp else str(s.error)
+        return outp
+
+    def best_test_checkpoint(self, steps: list[Step] | None = None) -> tuple[str | None, tuple[int, int], int | None]:
+        """尋找目前要求視窗內通過最多測試的步驟檢查點。回傳 `(pre_index, (passed, failed), step_n)`。
+        同分時取較晚的步驟（`>=`），避免平手時把較晚狀態覆寫回較早狀態。"""
+        if steps is None:
+            _start, _texts, win_steps = self.window()
+            steps = win_steps if win_steps else self.tr.steps
+        best_idx: str | None = None
+        best_score: tuple[int, int] = (-1, 999999)
+        best_step_n: int | None = None
+        for s in steps:
+            if not self._is_test_step_cmd(s):
+                continue
+            score = parse_test_score(self._step_test_output(s))
             if score is not None:
                 passed, failed = score
                 key = (passed, -failed)
-                if key > (best_score[0], -best_score[1]):
+                if key >= (best_score[0], -best_score[1]):
                     idx = s.pre_index
                     if idx:
                         best_score = (passed, failed)
@@ -599,6 +616,37 @@ class Evidence:
         if best_idx is not None and best_score[0] > 0:
             return best_idx, best_score, best_step_n
         return None, (0, 0), None
+
+    def maybe_restore_best_checkpoint(self, steps: list[Step] | None = None) -> bool:
+        """若最後一次測試比同回合先前的測試檢查點退步（且最後一次測試後未再改寫檔案），
+        將工作區還原至最高分檢查點並記錄 `checkpoint_restore` 事件。"""
+        if steps is None:
+            _start, _texts, steps = self.window()
+        if not steps:
+            return False
+        best_idx, best_score, best_n = self.best_test_checkpoint(steps)
+        if not best_idx or best_score[0] <= 0:
+            return False
+        last_test_pos: int | None = None
+        cur_score: tuple[int, int] = (0, 999999)
+        for i in range(len(steps) - 1, -1, -1):
+            s = steps[i]
+            if not self._is_test_step_cmd(s):
+                continue
+            last_test_pos = i
+            parsed = parse_test_score(self._step_test_output(s))
+            if parsed is not None:
+                cur_score = parsed
+            break
+        if last_test_pos is None:
+            return False
+        if any(t.writes for t in steps[last_test_pos + 1:]):
+            return False
+        if (best_score[0], -best_score[1]) <= (cur_score[0], -cur_score[1]):
+            return False
+        if best_idx == self.tr.latest_index():
+            return False
+        return restore_best_checkpoint(self.rec, best_idx, best_n or 0)
 
     def window(self) -> tuple[int, list[str], list[Step]]:
         """回 (起點 seq, 人的要求原文, 這一回合的步驟)。起點＝這個工作階段最後一則人打的要求
@@ -2261,18 +2309,54 @@ def parse_test_score(text: str) -> tuple[int, int] | None:
 
 
 def restore_best_checkpoint(rec: Recorder, target_index: str, step_n: int) -> bool:
-    """將工作區還原至最高分步驟的狀態，並記錄 checkpoint_restore 事件。"""
+    """將工作區還原至最高分步驟的狀態，更新 state.last_index 並記錄 checkpoint_restore 事件。"""
     try:
         idx = rec.load_index(target_index)
         if not idx:
             return False
         from . import workspace as W
-        W.materialize(idx, rec.blobs, rec.workspace, workspace=rec.workspace)
-        rec.append("checkpoint_restore", {
-            "target_index": target_index,
-            "step": step_n,
-            "restored_files": sorted(idx.keys())
-        })
+        with rec._lock():
+            st = rec._state()
+            before_index = st.get("last_index")
+            cur_idx: W.Index = {}
+            if isinstance(before_index, str) and before_index:
+                try:
+                    cur_idx = rec.load_index(before_index)
+                except Exception:
+                    cur_idx = {}
+            if not cur_idx and rec.workspace.is_dir():
+                cur_idx = W.scan(rec.workspace, None, skip=rec.skip, blobs=rec.blobs)
+            changes = W.diff(cur_idx, idx) if cur_idx else []
+            # 先確認所有目標檔案皆可完整還原（在庫裡或工作區原位 sha 相符），避免半途失敗污染工作區
+            for rel, e in sorted(idx.items()):
+                if ".." in pathlib.PurePosixPath(rel).parts or e.sha256.startswith(("big:", "secret:")):
+                    return False
+                if e.sha256.startswith("link:"):
+                    continue
+                if rec.blobs.has(e.sha256):
+                    continue
+                src = rec.workspace / rel
+                if not (src.is_file() and not src.is_symlink() and W._sha_file(src) == e.sha256):
+                    return False
+            # 移除 target_index 之後才新增的檔案
+            for c in changes:
+                if c.after is None:
+                    gone = rec.workspace / c.path
+                    if ".." not in pathlib.PurePosixPath(c.path).parts and (gone.is_file() or gone.is_symlink()):
+                        gone.unlink(missing_ok=True)
+            missing = W.materialize(idx, rec.blobs, rec.workspace, workspace=rec.workspace)
+            if missing:
+                return False
+            restored = [c.path for c in changes] if changes else sorted(idx.keys())
+            st["last_index"] = target_index
+            rec._save(st)
+            rec._append("checkpoint_restore", {
+                "before_index": before_index,
+                "target_index": target_index,
+                "step": step_n,
+                "restored_files": restored,
+                "changes": [c.to_json() for c in changes],
+            })
         return True
     except Exception:
         return False

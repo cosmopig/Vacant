@@ -80,7 +80,7 @@ def _verdict(states: list[str]) -> str:
 
 def _cell_state(cell: Path, envelope: int) -> dict:
     name = cell.name
-    if cell.name.startswith(".infra-"):
+    if ".infra-" in cell.name:
         return {"cell": name, "skipped": "infra-retry 副檔，不計入"}
     cj = _load_json(cell / "cell.json")
     if cj is None:
@@ -192,11 +192,16 @@ def selftest() -> int:
         (root / ".infra-c_x").mkdir()
         (root / ".infra-c_x" / "cell.json").write_text(json.dumps(
             {"arm": "C", "vacant_home_bytes": env_default + 999}), encoding="utf-8")
+        (root / "c_pass.infra-20261028T192916").mkdir()
+        (root / "c_pass.infra-20261028T192916" / "cell.json").write_text(json.dumps(
+            {"arm": "C", "vacant_home_bytes": env_default + 999}), encoding="utf-8")
 
         out = evaluate(base, "exp_st", env_default, "selftest")
         by = {c["cell"]: c for c in out["cells"]}
         check("infra 副檔被跳過（留痕、不計入）",
-              bool(by[".infra-c_x"]["skipped"]) and out["n_cells"] == 8
+              bool(by[".infra-c_x"]["skipped"])
+              and bool(by["c_pass.infra-20261028T192916"]["skipped"])
+              and out["n_cells"] == 8
               and by["c_pass"]["compliance"] == "PASS")
         check("PASS 判定", by["c_pass"]["compliance"] == "PASS")
         check("FAIL 判定（超封頂）", by["c_fail"]["compliance"] == "FAIL")

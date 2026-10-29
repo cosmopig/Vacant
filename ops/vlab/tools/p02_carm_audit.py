@@ -83,8 +83,21 @@ def _read_chain(cell: Path) -> list[dict]:
     return out
 
 
+def _iter_strings(obj):
+    if isinstance(obj, str):
+        yield obj
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from _iter_strings(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _iter_strings(v)
+
+
 def _scan_events(cell: Path) -> dict:
-    """events.jsonl：agent 有無參考/執行測試檔（證據，不是判定）。"""
+    """events.jsonl：agent 有無參考/執行測試檔（證據，不是判定）。
+    逐行解開 JSON 字串值後再跑正則，避免原始 JSON 的 `\\n<task>_test.py` 轉義序列被 `\\b`
+    誤切出不存在的 `n<task>_test.py`。"""
     ev = cell / "events.jsonl"
     if not ev.is_file():
         return {"test_files_referenced": [], "test_exec_evidence": None,
@@ -94,24 +107,34 @@ def _scan_events(cell: Path) -> dict:
     except OSError:
         return {"test_files_referenced": [], "test_exec_evidence": None,
                 "exec_samples": []}
-    refs = sorted(set(TESTFILE.findall(text)))
-    execs = sorted(set(EXEC.findall(text)))
+    ref_set: set[str] = set()
+    exec_set: set[str] = set()
     samples: list[str] = []
-    if execs:
-        for line in text.splitlines():
-            if EXEC.search(line):
-                try:
-                    e = json.loads(line)
-                except ValueError:
-                    continue
-                if e.get("type") in ("tool_execution_start", "tool_execution_update",
-                                    "tool_execution_end"):
-                    args = e.get("args") or {}
-                    cmd = args.get("command") if isinstance(args, dict) else None
-                    if isinstance(cmd, str) and cmd.strip() and cmd not in samples:
-                        samples.append(cmd.strip()[:200])
-                if len(samples) >= 3:
-                    break
+    for line in text.splitlines():
+        line_s = line.strip()
+        if not line_s:
+            continue
+        try:
+            e = json.loads(line_s)
+        except ValueError:
+            chunks = [line_s]
+            e = None
+        else:
+            chunks = list(_iter_strings(e))
+        for ch in chunks:
+            ref_set.update(TESTFILE.findall(ch))
+            exec_set.update(EXEC.findall(ch))
+        if isinstance(e, dict) and e.get("type") in (
+            "tool_execution_start", "tool_execution_update", "tool_execution_end"
+        ):
+            args = e.get("args") or {}
+            cmd = args.get("command") if isinstance(args, dict) else None
+            if isinstance(cmd, str) and EXEC.search(cmd):
+                s_cmd = cmd.strip()[:200]
+                if s_cmd and s_cmd not in samples and len(samples) < 3:
+                    samples.append(s_cmd)
+    refs = sorted(ref_set)
+    execs = sorted(exec_set)
     return {"test_files_referenced": refs,
             "test_exec_evidence": bool(execs),
             "exec_samples": samples}
@@ -124,13 +147,15 @@ def cell_record(cell: Path) -> dict:
     # task 可含連字號）。.infra-<ts> 隔離目錄（infra 失敗被隔離）不解析任務，
     # 只記為 quarantined（與 e002_wiring_gauge 同樣把 .infra- 排除在判定外）。
     if ".infra-" in name:
-        return {"cell": name, "task": None, "state": "quarantined_infra",
+        return {"cell": name, "suite": None, "task": None, "state": "quarantined_infra",
                 "arm": None, "c_installed": None, "review": None, "score": None,
                 "test_files_referenced": None, "test_exec_evidence": None,
                 "infra": None}
     parts = name.split("-")
+    suite_from_name = parts[0] if len(parts) >= 5 else None
     task = "-".join(parts[1:-3]) if len(parts) >= 5 else None
-    rec = {"cell": name, "task": task,
+    suite = str((cj or {}).get("suite") or suite_from_name or "") or None
+    rec = {"cell": name, "suite": suite, "task": task,
            "state": "complete" if cj is not None else "incomplete"}
     if cj is None:
         rec.update({"arm": None, "c_installed": None, "review": None,
@@ -165,6 +190,17 @@ def cell_record(cell: Path) -> dict:
     return rec
 
 
+def filter_suite(records: list[dict], suite: str | None) -> list[dict]:
+    if not suite or suite == "all":
+        return records
+    return [
+        r for r in records
+        if r.get("state") == "quarantined_infra"
+        or r.get("suite") == suite
+        or (r.get("suite") is None and str(r.get("cell") or "").startswith(suite + "-"))
+    ]
+
+
 def expected_tasks(cells: list[dict]) -> tuple[list[str], str]:
     a = sorted({r["task"] for r in cells if r.get("arm") == "A" and r.get("task")})
     if a:
@@ -181,12 +217,12 @@ def per_task_table(records: list[dict], tasks: list[str]) -> list[dict]:
             "task": t,
             "c_cells": len(rows),
             "c_complete": len(comp),
-            "c_installed_all": (len(comp) > 0 and all(r["c_installed"] for r in comp)) or None,
+            "c_installed_all": all(bool(r["c_installed"]) for r in comp) if comp else None,
             "review_actions": [[x["action"] for x in r["review"]] if r.get("review") else None
                               for r in comp],
             "score": [r["score"] for r in comp if r.get("score") is not None],
             "test_files_referenced": sorted({f for r in comp for f in (r.get("test_files_referenced") or [])}),
-            "test_exec_evidence_all": (len(comp) > 0 and all(r.get("test_exec_evidence") for r in comp)) or None,
+            "test_exec_evidence_all": all(bool(r.get("test_exec_evidence")) for r in comp) if comp else None,
             "record_complete": bool(comp) and all(
                 r["c_installed"] and r.get("review") is not None and r.get("score") is not None
                 for r in comp),
@@ -206,8 +242,9 @@ def criteria(records: list[dict], per_task: list[dict]) -> dict:
         "c_installed_FAIL": sum(1 for r in c if not r["c_installed"]),
         "review_NO_EVIDENCE": sum(1 for r in c if r.get("review") is None),
         "review_allow": sum(1 for r in c if final_action(r) == "allow"),
+        "review_continue": sum(1 for r in c if final_action(r) == "continue"),
         "review_refuse": sum(1 for r in c if final_action(r) == "refuse"),
-        "review_other": sum(1 for r in c if final_action(r) not in (None, "allow", "refuse")),
+        "review_other": sum(1 for r in c if final_action(r) not in (None, "allow", "continue", "refuse")),
         "score_NO_EVIDENCE": sum(1 for r in c if r.get("score") is None),
         "score_pass": sum(1 for r in c if (r.get("score") or {}).get("pass") is True),
         "score_fail": sum(1 for r in c if (r.get("score") or {}).get("pass") is False),
@@ -231,7 +268,7 @@ def selftest() -> int:
         (good / "score.json").write_text(json.dumps(
             {"pass": True, "tests_passed": 31, "tests_total": 31}), encoding="utf-8")
         (good / "events.jsonl").write_text(
-            '{"type":"tool_execution_end","args":{"command":"python bowling_test.py"}}\n',
+            '{"type":"tool_execution_end","args":{"command":"ls\\npython bowling_test.py"}}\n',
             encoding="utf-8")
         tgz = good / "vacant_home.tgz"
         import io
@@ -248,7 +285,7 @@ def selftest() -> int:
         a.mkdir()
         (a / "cell.json").write_text(json.dumps({"arm": "A", "agent_rc": 0, "timed_out": False}), encoding="utf-8")
 
-        records = [cell_record(p) for p in sorted(base.iterdir())]
+        records = filter_suite([cell_record(p) for p in sorted(base.iterdir())], "polyglot_py")
         tasks, source = expected_tasks(records)
         table = per_task_table(records, tasks)
         crit = criteria(records, table)
@@ -256,6 +293,7 @@ def selftest() -> int:
             tasks == ["pg_demo"] and source == "arm_A"
             and crit["c_complete_cells"] == 1
             and crit["review_allow"] == 1
+            and crit["review_continue"] == 0
             and crit["score_pass"] == 1
             and crit["tasks_with_complete_record"] == 1
             and any(r["cell"].endswith("-C-r1") and r["test_exec_evidence"] is True
@@ -271,6 +309,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("exp", nargs="?", help="實驗名（/srv/vlab/runs 下的目錄名）")
     ap.add_argument("--base", default="/srv/vlab/runs")
+    ap.add_argument("--suite", default="polyglot_py",
+                    help="只審指定 suite（預設 polyglot_py；傳 all 則不篩選）")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
@@ -282,14 +322,15 @@ def main(argv: list[str] | None = None) -> int:
     if not run.is_dir():
         print(json.dumps({"error": f"找不到執行目錄 {run}"}, ensure_ascii=False), file=sys.stderr)
         return 2
-    records = [cell_record(p) for p in sorted(p for p in run.iterdir() if p.is_dir())]
+    all_records = [cell_record(p) for p in sorted(p for p in run.iterdir() if p.is_dir())]
+    records = filter_suite(all_records, a.suite)
     if not records:
         print(json.dumps({"error": "no cells"}, ensure_ascii=False), file=sys.stderr)
         return 2
     tasks, source = expected_tasks(records)
     table = per_task_table(records, tasks)
     crit = criteria(records, table)
-    doc = {"exp": a.exp, "base": str(a.base), "n_cells": len(records),
+    doc = {"exp": a.exp, "base": str(a.base), "suite": a.suite, "n_cells": len(records),
            "expected_tasks": tasks, "expected_tasks_source": source,
            "cells": records, "per_task": table, "criteria": crit}
     text = json.dumps(doc, ensure_ascii=False, indent=1)
