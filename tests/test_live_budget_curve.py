@@ -24,6 +24,24 @@ REPO = Path(__file__).resolve().parent.parent
 TOOL = REPO / "ops" / "realrun" / "live_budget_curve.py"
 MIRROR = REPO / "ops" / "realrun" / "live_budget_curve.json"
 
+import pytest
+
+
+def _missing_inputs() -> list[str]:
+    """鏡像 pin 的 progress.jsonl 哪些不在這台機器上（空＝齊全）。"""
+    out: list[str] = []
+    for b in json.loads(MIRROR.read_text(encoding="utf-8"))["batches"]:
+        for p in b.get("input", []):
+            f = Path(p["root"]) / "progress.jsonl"
+            if not f.exists():
+                out.append(str(f))
+    return out
+
+
+# 證據在 1003 dev VM 的磁碟上、這台機器沒有 ⇒ **沒量到（不是不合格）**，
+# 照本庫慣例跳過（同 `test_citation_archive.py` 的 skipif；UNKNOWN，不是 PASS/FAIL）。
+_MISSING_INPUTS = _missing_inputs()
+
 
 def _tool():
     spec = importlib.util.spec_from_file_location("live_budget_curve", TOOL)
@@ -49,6 +67,11 @@ def test_selftest():
     assert "SELFTEST PASS" in r.stdout
 
 
+@pytest.mark.skipif(
+    bool(_MISSING_INPUTS),
+    reason="輸入不在這台機器 ⇒ 沒量到（不是不合格）：" + "；".join(_MISSING_INPUTS[:3])
+           + ("…（共 %d 個）" % len(_MISSING_INPUTS) if len(_MISSING_INPUTS) > 3 else ""),
+)
 def test_inputs_pinned():
     m = _mirror()
     assert m["schema"] == "vacant.realrun.live_budget_curve/1"
@@ -61,6 +84,11 @@ def test_inputs_pinned():
                 f"{b['batch']}: {p} changed after the mirror was written"
 
 
+@pytest.mark.skipif(
+    bool(_MISSING_INPUTS),
+    reason="輸入不在這台機器 ⇒ 沒量到（不是不合格）：" + "；".join(_MISSING_INPUTS[:3])
+           + ("…（共 %d 個）" % len(_MISSING_INPUTS) if len(_MISSING_INPUTS) > 3 else ""),
+)
 def test_mirror_matches_tool_rederivation():
     mod = _tool()
     m = _mirror()

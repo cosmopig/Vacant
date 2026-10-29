@@ -574,7 +574,10 @@ def test_compact_wire_caps_bodies_keeps_index_and_journal(tmp_path, monkeypatch)
     assert rep["body_files_removed"] == 16
     assert rep["body_bytes_freed"] == 16 * MB
     kept = sorted(f.name for f in wdir.iterdir() if f.suffix == ".bin")
-    assert kept == [f"r{i:04d}.{k}.bin" for i in range(6, 10) for k in ("req", "resp")]
+    # 4 個**檔**（非 4 通）＝4 MiB：最新兩通的 req/resp（round 154 同 commit 的
+    # 註解與 `body_files_removed == 16` 皆為按檔口徑；被拆對的 body 內容誠實 UNKNOWN，
+    # 證據在 index.jsonl 的 sha256，見 `compact_wire` docstring）
+    assert kept == [f"r{i:04d}.{k}.bin" for i in range(8, 10) for k in ("req", "resp")]
     # index：10 行 × ~1.1 KB > 8 KiB → 保留最新完整行（keep=4 KiB）；每行仍是合法 JSON
     text = (wdir / "index.jsonl").read_text(encoding="utf-8")
     kept_lines = [json.loads(l) for l in text.splitlines() if l.strip()]
@@ -582,11 +585,13 @@ def test_compact_wire_caps_bodies_keeps_index_and_journal(tmp_path, monkeypatch)
     assert kept_lines[-1]["call_id"] == 9          # 最新一通保留
     assert min(l["call_id"] for l in kept_lines) >= 1   # 最舊的至少被截掉一些
     assert rep["index_lines_dropped"] == 10 - len(kept_lines)
-    # attest 仍可讀（追緝/對帳不受影響；被截掉的通＝UNKNOWN，不損毀）
+    # attest 仍可讀（追緝/對帳不受影響；被截掉的通＝UNKNOWN，不損毀）。
+    # `read_relay_calls` 回 `list[dict] | None`（見 `vrun/attest.py`）；不可解析的
+    # 行會帶 `_unparsable`——截斷必須是整行，所以每一行都不該有它。
     from vacant_network.vrun import attest
-    calls, meta = attest.read_relay_calls(wdir / "index.jsonl", since=0)
-    assert len(calls) == len(kept_lines)
-    assert meta["first_ts"] is not None
+    calls = attest.read_relay_calls(wdir / "index.jsonl", since=0)
+    assert calls is not None and len(calls) == len(kept_lines)
+    assert all("_unparsable" not in c for c in calls), "截斷後不得有殘行"
 
 
 def test_compact_wire_dry_run_changes_nothing(tmp_path, monkeypatch):

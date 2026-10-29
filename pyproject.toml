@@ -102,5 +102,8 @@ markers = [
   "no_evidence_needed: 這條不需要 iCloud 上的引用證據（用 tmp_path 造假檔）",
 ]
 testpaths = ["tests"]
-addopts = "-q"
+# fixtures/ 是任務銀行與 session 數據（如 p02_real_bank/bowling_test.py，其中的
+# `bowling_test.py` 是**被測任務的**測試檔、import 候選工作區的 `bowling`）——是數據、不是測試，
+# 不得被收集（round 155 加入此 fixture 後，`*_test.py` 匹配讓全量 pytest 在收集階段就中斷）。
+addopts = "-q --ignore=tests/fixtures"
 pythonpath = ["."]
