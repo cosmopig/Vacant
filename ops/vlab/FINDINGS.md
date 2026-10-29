@@ -39,3 +39,50 @@ kickback（全部被退回後補檔、final_action=allow），該 9 格隱藏 sc
   完成前的舊快照）。
 - **e003（dabstep 全 79 題×2 rep）不發射**（分支 2 前提「L-fake 被退回後改對」
   未被本批支持）；主軸 4 就此記為「無可測影響」，資源轉主軸 2。
+
+## 2026-10-29 · e001_pi_AC_baseline · polyglot_py 34 對（主軸 1 & 3：程式題基線）
+
+**設定**：gemma-4-12b-it-qat、pi harness、polyglot_py 34 題、1 rep、A/C 同題配對。
+**來源**：`ops/vlab/runs_e001_pi_AC_baseline/REPORT_polyglot_py_subset.{json,md}`（repo
+commit `4480d6f9`）。
+
+**數字**：A 15/34（44.12%）vs C 20/34（58.82%）；A_only＝2、C_only＝7、McNemar exact
+雙側 p＝0.1797；成本（描述性）：A 117.07 呼叫/成功・3,299,729 token/成功・均牆 627.5s・
+逾時 6，C 86.20 呼叫/成功・2,346,870 token/成功・均牆 607.7s・逾時 4、
+`vacant_home_bytes` 合計 5,224,614 B（≈151 KB/格）。
+
+**能說**：
+- 在 polyglot_py 34 對中觀察到 C 臂 20/34（58.82%）對 A 臂 15/34（44.12%）
+  （A_only＝2、C_only＝7）的**正向傾向**。
+- C 臂的逐題紀錄是可究責的：34/34 格有完整 C 臂紀錄（test 檔引用＋執行證據，
+  `P02_CARM_AUDIT.json`：review_allow 30／review_continue 2／review_other 0）；
+  60/60 C 格 `vacant_home` 在 256 MiB 穩態封頂內（`ENVELOPE_COMPLIANCE.json`
+  verdict＝PASS）——這是紀錄層面的合規，不是成效。
+
+**不能說**：
+- 單一 rep 下 `McNemar p＝0.1797` 未達 α＝0.05，**不能宣稱已證明 C 臂顯著優於 A 臂**；
+  「正向傾向」只是本批觀察。
+- 成本差（86.20 vs 117.07 呼叫/成功）為描述性，未做顯著性檢驗，不能當結論引用。
+
+## 2026-10-29 · e001_pi_AC_baseline · 全體 60 對匯總（polyglot_py 34 + dabstep 26）
+
+**設定**：同上，全部 60 題（34 polyglot_py＋26 dabstep）、1 rep。
+**來源**：`/srv/vlab/runs/e001_pi_AC_baseline/REPORT.{json,md}`（rescore_mismatch＝0；
+repo 內子集檔為同源 commit 版）＋ 上兩節。
+
+**數字**：A 28/60（46.67%）vs C 34/60（56.67%）；A_only＝2、C_only＝8、McNemar exact
+雙側 p＝0.1094（distinct_tasks＝60）；成本（描述性）：A 113.14 呼叫/成功・
+3,187,094 token/成功・逾時 7・均牆 454.6s，C 77.44 呼叫/成功・2,058,161 token/成功・
+逾時 5・均牆 417.9s、`vacant_home_bytes` 合計 23,756,010 B（≈392 KB/格）；
+14 格 infra 不進分母。
+
+**能說**：
+- 全體 60 對觀察到 C 臂 34/60（56.67%）對 A 臂 28/60（46.67%）（A_only＝2、
+  C_only＝8）的正向傾向；C 臂成本更低（77.44 vs 113.14 呼叫/成功、
+  2.06M vs 3.19M token/成功）是**描述性**觀察。
+
+**不能說**：
+- 單一 rep 下 `McNemar p＝0.1094` 未達 α＝0.05，不能宣稱已證明 C 臂顯著優於 A 臂；
+  兩子集方向一致（C 較高）是傾向，不是顯著性。
+- 程式題與不同介入機制（H/M/S/C）的比較由 `e002_hypothesis_arms` 檢驗——本批只有
+  A/C 兩臂，不能對 H/M/S 下任何結論。
