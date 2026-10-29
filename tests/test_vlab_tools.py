@@ -79,3 +79,28 @@ def test_holm_e002_paired_and_recompute(tmp_path: Path) -> None:
     assert loaded == {"C": 0.02, "H": 0.50, "M": None}
     assert holm_e002.main(["e002_test", "--base", str(tmp_path)]) == 0
 
+
+def test_holm_e002_recompute_skips_infra_dirs_and_reads_cell_json(tmp_path: Path) -> None:
+    exp = tmp_path / "e002_infra_test"
+    exp.mkdir()
+    a1 = exp / "polyglot_py-pg_affine_cipher-pi-A-r1"
+    a1.mkdir(parents=True)
+    (a1 / "cell.json").write_text(json.dumps({"suite": "polyglot_py", "task": "pg_affine_cipher", "agent": "pi", "rep": 1, "arm": "A"}))
+    (a1 / "score.json").write_text(json.dumps({"pass": True}))
+
+    c1 = exp / "polyglot_py-pg_affine_cipher-pi-C-r1"
+    c1.mkdir(parents=True)
+    (c1 / "cell.json").write_text(json.dumps({"suite": "polyglot_py", "task": "pg_affine_cipher", "agent": "pi", "rep": 1, "arm": "C"}))
+    (c1 / "score.json").write_text(json.dumps({"pass": False}))
+
+    # .infra- 重試殘留目錄（即使尾巴帶 -C-r1 或內含 score.json pass=True 也必須跳過，不可覆蓋 c1 的 False）
+    c_infra = exp / "polyglot_py-pg_affine_cipher-pi-C-r1.infra-retry-C-r1"
+    c_infra.mkdir(parents=True)
+    (c_infra / "cell.json").write_text(json.dumps({"suite": "polyglot_py", "task": "pg_affine_cipher", "agent": "pi", "rep": 1, "arm": "C"}))
+    (c_infra / "score.json").write_text(json.dumps({"pass": True}))
+
+    p2, detail = holm_e002.recompute_pair(tmp_path, "e002_infra_test", "C")
+    assert detail == {"n_tasks_common": 1, "b": 0, "c": 1, "n_A": 1, "n_X": 1}
+    assert p2 == 1.0
+
+

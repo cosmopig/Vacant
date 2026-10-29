@@ -465,7 +465,7 @@ def test_timeout_is_explicit_red_and_bounded():
 #   更新此雜湊並在 commit 說明。
 
 DRIVER_SRC_SHA256 = "5c55928866c22b5be9b8954955438f4721d1f088443008d94108e4451fb259d3"
-UNTEST_DRIVER_SRC_SHA256 = "cdc3e24b8674400e8986daf19aedeaa7f6c9e831454aa42f7511fab94e23fa64"
+UNTEST_DRIVER_SRC_SHA256 = "c01134a4a1511dbec6f8350a3317e1dba8f768316962a178dbe90c379c03996b"
 
 
 def _sha256_of(src: str) -> str:
@@ -614,4 +614,71 @@ def test_skip_decorator_case_fails_not_silently():
     assert c["kind"] == "protocol"
     assert "skip" in c["message"].lower()
     assert cs["T.test_plain"]["ok"] is True
+
+
+SUBTEST_FAIL_FILE = """import unittest
+from solution import solve
+
+
+class T(unittest.TestCase):
+    def test_subtest_fails(self):
+        print("subtest diagnostic stdout")
+        for a, b, want in [(2, 3, 6), (2, 3, 999)]:
+            with self.subTest(a=a, b=b):
+                self.assertEqual(solve(a, b), want)
+
+    def test_subtest_passes(self):
+        for a, b, want in [(1, 2, 2), (3, 4, 12)]:
+            with self.subTest(a=a, b=b):
+                self.assertEqual(solve(a, b), want)
+"""
+
+
+def test_subtest_failure_reports_assert_and_complete():
+    """`with self.subTest(...):` 失敗時，CPython 只呼叫 `addSubTest` 而不呼叫 `addFailure`／`addSuccess`。
+    driver 必須把該 case 記為 `kind="assert"`、`ok=False`、`complete=True`，並保留 stdout 與失敗位置，
+    不可漏記導致 `incomplete`／`driver_error`。"""
+    res = _run(SUBTEST_FAIL_FILE)
+    assert res["all_pass"] is False, res
+    assert _file(res)["complete"] is True, res
+    cs = {c["case"]: c for c in _cases(res)}
+    fail = cs["T.test_subtest_fails"]
+    assert fail["ok"] is False
+    assert fail["kind"] == "assert", fail
+    assert "999" in fail["message"], fail
+    assert "subtest diagnostic stdout" in fail["output"], fail
+    assert fail["where"] is not None and "test_main.py:" in fail["where"], fail
+    ok_case = cs["T.test_subtest_passes"]
+    assert ok_case["ok"] is True
+    assert ok_case["kind"] == "pass"
+
+
+CASE_FAIL_PLUS_TEARDOWN_FAIL_FILE = """import unittest
+
+
+class T(unittest.TestCase):
+    def test_both_fail(self):
+        print("body stdout")
+        self.assertEqual(1, 2)
+
+    def tearDown(self):
+        print("teardown stdout")
+        raise RuntimeError("teardown cleanup failed")
+"""
+
+
+def test_case_failure_plus_instance_teardown_failure_does_not_duplicate_case():
+    """當測試方法本身失敗（addFailure）且實例 `tearDown` 或 `addCleanup` 也拋例外（addError）時，
+    driver 對同一個 case 只可發出一筆失敗紀錄（`complete=True`），不可重複發出同名 case
+    導致對帳層誤判 `reported more than one result`（`complete=False`）。"""
+    res = _run(CASE_FAIL_PLUS_TEARDOWN_FAIL_FILE)
+    assert res["all_pass"] is False, res
+    assert _file(res)["complete"] is True, res
+    cases = [c for c in _cases(res) if c["case"] == "T.test_both_fail"]
+    assert len(cases) == 1, _cases(res)
+    c = cases[0]
+    assert c["ok"] is False
+    assert c["kind"] in ("assert", "exception"), c
+    assert "body stdout" in c["output"] and "teardown stdout" in c["output"], c
+
 

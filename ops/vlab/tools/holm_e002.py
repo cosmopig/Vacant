@@ -110,7 +110,7 @@ def recompute_pair(base: Path, exp: str, x: str) -> tuple[float | None, dict]:
     a: dict[str, bool] = {}
     xa: dict[str, bool] = {}
     for d in sorted(expdir.iterdir()):
-        if not d.is_dir():
+        if not d.is_dir() or ".infra-" in d.name:
             continue
         arm, res = cell_outcome(d)
         if arm is None or res is None:

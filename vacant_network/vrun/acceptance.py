@@ -466,6 +466,7 @@ class Capture(unittest.TestResult):
         self._buf = None
         self._prev = None
         self._fbuf = io.StringIO()
+        self._active_idx = None
 
     def startTest(self, test):
         super().startTest(test)
@@ -475,11 +476,16 @@ class Capture(unittest.TestResult):
         self._prev = (sys.stdout, sys.stderr)
         sys.stdout = self._buf
         sys.stderr = self._buf
+        self._active_idx = None
 
     def stopTest(self, test):
+        if self._active_idx is not None and self._buf is not None:
+            t0, st0, det0, _ = self.results[self._active_idx]
+            self.results[self._active_idx] = (t0, st0, det0, self._buf.getvalue())
         if self._prev is not None:
             sys.stdout, sys.stderr = self._prev
         self._buf = None
+        self._active_idx = None
         super().stopTest(test)
 
     def _record(self, test, status, detail):
@@ -498,7 +504,22 @@ class Capture(unittest.TestResult):
             self._fbuf.truncate(0)
             self.fixtures.append((test, status, detail, fout))
             return
+        if self._active_idx is not None:
+            t0, st0, det0, _ = self.results[self._active_idx]
+            if st0 == "pass" and status != "pass":
+                st0, det0 = status, detail
+            elif st0 != "exception" and status == "exception":
+                st0, det0 = status, detail
+            self.results[self._active_idx] = (t0, st0, det0, out)
+            return
+        self._active_idx = len(self.results)
         self.results.append((test, status, detail, out))
+
+    def addSubTest(self, test, subtest, err):
+        super().addSubTest(test, subtest, err)
+        if err is not None:
+            status = "assert" if issubclass(err[0], test.failureException) else "exception"
+            self._record(test, status, err)
 
     def addSuccess(self, test):
         self._record(test, "pass", None)

@@ -938,19 +938,30 @@ def compact_logs(
     root: pathlib.Path | None = None,
     *,
     max_log_bytes: int = DEFAULT_MAX_LOG_BYTES,
+    keep_rounds_files: int = DEFAULT_HOOKS_KEEP_SESSIONS,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """截斷過大的掛鉤追加日誌（保留最新一半的完整行），避免 `events.jsonl`／`errors.jsonl` 無限膨脹。"""
+    """截斷過大的掛鉤追加日誌（保留最新一半的完整行），避免 `events.jsonl`／`errors.jsonl`／`perf.jsonl` 無限膨脹，
+    並清理超額的舊 `intake/hooks/rounds_*.json`。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
-    hdir = sroot / "intake" / "hooks"
-    if not hdir.is_dir() or max_log_bytes <= 0:
+    if max_log_bytes <= 0:
         return {"bytes_freed": 0, "logs_compacted": 0}
 
     bytes_freed = 0
     logs_compacted = 0
     keep_bytes = max(4096, max_log_bytes // 2)
-    for name in ("events.jsonl", "errors.jsonl", "submit.log", "finalize.log", "auto_gc.log"):
-        p = hdir / name
+    hdir = sroot / "intake" / "hooks"
+    candidates: list[pathlib.Path] = []
+    if hdir.is_dir():
+        for name in ("events.jsonl", "errors.jsonl", "submit.log", "finalize.log", "auto_gc.log"):
+            candidates.append(hdir / name)
+    pdir = sroot / "trace" / "projects"
+    if pdir.is_dir():
+        for pj in sorted(pdir.iterdir()):
+            if pj.is_dir():
+                candidates.append(pj / "perf.jsonl")
+
+    for p in candidates:
         if not p.is_file() or p.is_symlink():
             continue
         try:
@@ -970,6 +981,21 @@ def compact_logs(
             bytes_freed += max(0, sz - new_sz)
         except OSError:
             continue
+
+    if hdir.is_dir() and keep_rounds_files >= 0:
+        rfiles: list[tuple[float, int, pathlib.Path]] = []
+        for rf in hdir.glob("rounds_*.json"):
+            if not rf.is_file() or rf.is_symlink():
+                continue
+            with contextlib.suppress(OSError):
+                st = rf.lstat()
+                rfiles.append((st.st_mtime, st.st_size, rf))
+        rfiles.sort(key=lambda t: t[0], reverse=True)
+        for _mt, sz, rf in rfiles[keep_rounds_files:]:
+            if not dry_run:
+                with contextlib.suppress(OSError):
+                    rf.unlink(missing_ok=True)
+            bytes_freed += sz
     return {"bytes_freed": bytes_freed, "logs_compacted": logs_compacted}
 
 
@@ -1525,26 +1551,33 @@ def usage_report(
             except OSError:
                 idx_bytes = 0
             body_bytes = max(wire_total - idx_bytes, 0)
-            body_cap = _resolve_wire_body_budget()
-            idx_cap = _resolve_wire_index_budget()
+            body_cap_raw = _resolve_wire_body_budget()
+            idx_cap_raw = _resolve_wire_index_budget()
+            body_cap: int | None = body_cap_raw if body_cap_raw > 0 else None
+            idx_cap: int | None = idx_cap_raw if idx_cap_raw > 0 else None
             total = (out.get("totals", {}).get("state_dir", 0)
                      + out.get("totals", {}).get("work_dir", 0))
+            groups = [
+                {"name": "trace_objects", "bytes": tr_bytes, "cap_bytes": tr_cap,
+                 "headroom_bytes": (tr_cap - tr_bytes) if tr_cap is not None else None},
+                {"name": "wire_body", "bytes": body_bytes, "cap_bytes": body_cap,
+                 "headroom_bytes": (body_cap - body_bytes) if body_cap is not None else None},
+                {"name": "wire_index", "bytes": idx_bytes, "cap_bytes": idx_cap,
+                 "headroom_bytes": (idx_cap - idx_bytes) if idx_cap is not None else None},
+            ]
+            within_groups = all(
+                g["cap_bytes"] is None or g["bytes"] <= g["cap_bytes"]
+                for g in groups
+            )
             out["envelope"] = {
                 "planned_steady_state_bytes": STABLE_ENVELOPE_BYTES,
                 "note": ("各分組上限的加總（trace 64 MiB ＋ wire body 96 MiB ＋ wire index 8 MiB"
                          "＋日誌 2 MiB/檔＋固定安裝面 ~10 MiB），不是一條單一開關；"
                          "口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
                 "total_bytes": total,
-                "within_envelope": total <= STABLE_ENVELOPE_BYTES,
+                "within_envelope": (total <= STABLE_ENVELOPE_BYTES) and within_groups,
                 "pct_of_envelope": round(100.0 * total / STABLE_ENVELOPE_BYTES, 2),
-                "groups": [
-                    {"name": "trace_objects", "bytes": tr_bytes, "cap_bytes": tr_cap,
-                     "headroom_bytes": (tr_cap - tr_bytes) if tr_cap is not None else None},
-                    {"name": "wire_body", "bytes": body_bytes, "cap_bytes": body_cap,
-                     "headroom_bytes": body_cap - body_bytes},
-                    {"name": "wire_index", "bytes": idx_bytes, "cap_bytes": idx_cap,
-                     "headroom_bytes": idx_cap - idx_bytes},
-                ],
+                "groups": groups,
             }
         except Exception:  # noqa: BLE001 — 封頂量具失敗不阻報告（fail-open）
             pass
