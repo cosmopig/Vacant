@@ -9,6 +9,7 @@ from ops.vlab.tools import (
     disk_report,
     e002_wiring_gauge,
     envelope_compliance,
+    growth_report,
     holm_e002,
     p02_carm_audit,
 )
@@ -69,6 +70,57 @@ def test_disk_report_skips_infra_dirs() -> None:
 
 def test_envelope_compliance_selftest() -> None:
     assert envelope_compliance.selftest() == 0
+
+
+def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path) -> None:
+    """growth_report（主軸 2「一天長多少」量具）：selftest 紅綠對照＋判定口徑。
+
+    紅燈（不能假 PASS）：
+    - 無任何點 → UNKNOWN（不是 PASS，也不是 0 用量）；
+    - 序列 <20h → UNKNOWN（證據不足）；
+    - 最新點超穩態封頂 → FAIL。
+    綠燈：≥20h 序列＋在封頂內＋gc ok/target_reached → PASS。
+    """
+    assert growth_report.selftest() == 0
+
+    def _point(ts: str, total: int, trace: int, gc_status: str = "ok") -> str:
+        return json.dumps({"ts": ts, "home": str(tmp_path), "total_bytes": total,
+                           "per_dir_bytes": {"trace": trace},
+                           "gc_last": {"status": gc_status, "target_reached": True}})
+
+    env = growth_report.ENVELOPE_BYTES
+    assert env is not None  # 量具與產品同來源；import 不到時量具自己降級 UNKNOWN
+
+    # UNKNOWN：兩份來源都缺
+    r = growth_report.report(home=tmp_path / "nope1", ops_data=tmp_path / "nope2")
+    assert r["verdict"] == "UNKNOWN" and r["sources"] == [], r
+
+    # UNKNOWN：只跨 2h（證據不足）
+    (tmp_path / "short").mkdir()
+    (tmp_path / "short" / "growth.jsonl").write_text(
+        _point("2026-10-29T00:00:00+0000", 20 * 1024 * 1024, 10 * 1024 * 1024) + "\n"
+        + _point("2026-10-29T02:00:00+0000", 22 * 1024 * 1024, 11 * 1024 * 1024) + "\n", encoding="utf-8")
+    r = growth_report.report(home=tmp_path / "short", ops_data=tmp_path / "nope2")
+    assert r["verdict"] == "UNKNOWN", r
+
+    # FAIL：最新點超穩態封頂（即使 gc ok 也不能 PASS）
+    (tmp_path / "over").mkdir()
+    (tmp_path / "over" / "growth.jsonl").write_text(
+        _point("2026-10-28T00:00:00+0000", 10 * 1024 * 1024, 5 * 1024 * 1024) + "\n"
+        + _point("2026-10-29T00:00:00+0000", env + 1, 5 * 1024 * 1024) + "\n", encoding="utf-8")
+    r = growth_report.report(home=tmp_path / "over", ops_data=tmp_path / "nope2")
+    assert r["verdict"] == "FAIL", r
+
+    # PASS：26h 3 點、在封頂內、gc ok
+    (tmp_path / "ok").mkdir()
+    (tmp_path / "ok" / "growth.jsonl").write_text(
+        _point("2026-10-28T00:00:00+0000", 20 * 1024 * 1024, 10 * 1024 * 1024) + "\n"
+        + _point("2026-10-28T12:00:00+0000", 30 * 1024 * 1024, 15 * 1024 * 1024) + "\n"
+        + _point("2026-10-29T02:00:00+0000", 40 * 1024 * 1024, 20 * 1024 * 1024) + "\n", encoding="utf-8")
+    r = growth_report.report(home=tmp_path / "ok", ops_data=tmp_path / "nope2")
+    assert r["verdict"] == "PASS", r
+    # 24h 視窗最大增長：00:00→12:00(+10MiB)、12:00→02:00(+10MiB)；00:00→02:00(+26h) 出窗
+    assert r["max_24h_growth_bytes"] == 10 * 1024 * 1024, r
 
 
 def test_envelope_compliance_verdicts_infra_skip_and_exit_codes(tmp_path: Path) -> None:

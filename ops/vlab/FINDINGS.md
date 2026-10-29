@@ -132,3 +132,43 @@ REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
 - 不顯著 ≠ 無效也 ≠ 有效：兩批皆**未建立**（unresolved，不是負結果）。
 - e002 的 Holm 校正 p 未定（H/M/S 未完成）；H-acc/H-harness/H-multi/H-stakes 判定全部
   待批完成；本節任何數字不得提前用於判定。
+
+## 2026-10-29 · 主軸 2 ·「~/.vacant 從零開始一天長多少」（真機跨日序列收口）
+
+**量具**：`ops/vlab/tools/growth_report.py`（round 187 新增；唯讀；上限常數直接
+import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
+`STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
+`tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
+**序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 6 點跨 24.55h：
+
+| ts | 總計 | trace | objects | gc |
+|---|---|---|---|---|
+| 10/28 20:20 | 82.3 MiB | 65.0 MiB | 821 | ok, target_reached=true |
+| 10/29 00:48 | 35.2 MiB | 17.7 MiB | 522 | ok, true |
+| 10/29 09:32 | 51.3 MiB | 34.2 MiB | 537 | ok, true |
+| 10/29 14:46 | 49.7 MiB | 32.3 MiB | 750 | ok, true |
+| 10/29 17:44 | 50.1 MiB | 32.6 MiB | 620 | ok, true |
+| 10/29 20:53 | 50.7 MiB | 33.1 MiB | 548 | ok, true |
+
+零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
+sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
+round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
+
+**能說**（round 187 真機 `growth_report.py` verdict=PASS，rc=0）：
+- **一天長多少：24h 視窗最大增長 16.0 MiB**（2G repo 全日開發＋e002 實驗負載下）。
+- 穩態鋸齒 35–82 MiB：峰值 82.3 MiB 是 10/28 20:20 舊日累積，次日 gc 削至 35.2 MiB
+  後在 50 MiB 附近走平——**不是線性增長，回收在真實使用裡生效**（6 點全 gc ok＋target_reached）。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 50.7 MiB（19.8%）、
+  最新 trace 33.1 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（6 點、24.55h），不是模擬、不是單點。
+
+**不能說**：
+- 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
+  誠實邊界），工作集過大時會暫超待 gc 收回；10/28 20:20 的 trace 65.0 MiB 就是暫超實例
+  （量具因此只對**最新點**判 FAIL，歷史峰値只記在 `peak_overrun`）。
+- 不能外推到別的使用模式：序列是「單機、單使用者、單 repo、兩日」，負載＝日常開發＋
+  e002 實驗；更高並發／更多 repo 需重新量（H-12 同口徑）。
+- e002 C/H/M/S 臂未全部完成：四量具（report.py --rescore／e002_wiring_gauge／
+  envelope_compliance／p02_carm_audit）round 187 對已完成臂 rc=0（A 34/34、C 34/34、
+  H 進行中），**最終 C 臂 `vacant_home_bytes` 分佈回寫要等 H/M/S 完成**（disk_top_priority §5-4）。
