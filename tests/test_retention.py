@@ -30,7 +30,6 @@ def test_compact_session_hooks_no_double_count_on_oversized_old_session(tmp_path
     hooks_dir = tmp_path / "possess" / "hooks"
     hooks_dir.mkdir(parents=True)
     
-    # Create 3 files, oldest is oversized
     f1 = hooks_dir / "session1.jsonl" # Oldest (will be deleted)
     f2 = hooks_dir / "session2.jsonl" # Middle (kept)
     f3 = hooks_dir / "session3.jsonl" # Newest (kept)
@@ -45,7 +44,6 @@ def test_compact_session_hooks_no_double_count_on_oversized_old_session(tmp_path
     f3.write_text("content", encoding="utf-8")
     
     # Make f1 oversized (e.g., 3MB, while max_file_bytes is 2MB)
-    # We need to overwrite it with large content but keep the name
     with open(f1, "wb") as f:
         f.write(b"x" * (3 * 1024 * 1024))
 
