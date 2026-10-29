@@ -137,23 +137,30 @@ def _sweep_to_target(
     *,
     dry_run: bool,
     budget: _Budget | None = None,
+    excluded_shas: set[str] | None = None,
+    structural_shas: set[str] | None = None,
+    file_shas: set[str] | None = None,
+    latest_file_shas: set[str] | None = None,
+    first_seen_order: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     """把版本庫壓到 `target_bytes` 以下（2026-10-28 Axis 2）。
 
     優先序：先回收「与工作區冗餘」的 blob（工作區仍有 bit 相同原檔、讀取端回退取得，
     內容零損失），再按最舊優先回收其餘非必須保留的舊版本（內容轉為 UNKNOWN：
-    `file_text` 回 None、`materialize` 列進 missing；不崩、不假 PASS）。鏈、事件體、
-    近期步驟索引、writes 前後版本（keep_shas 且不在 redundant_live）＝硬底（hard floor），
-    此機制不動。
-
-    2026-10-28 round 145 修正：判斷「是否已達標」必須以**整個版本庫**
-    （候選＋硬底）計，而非只看候選——否則「硬底 5.97 MiB＋冗餘 63.18 MiB＝69.15 MiB
-    ＞ 64 MiB 預算」時，候選單獨 63.18 MiB＜預算 ⇒ sweep 空轉、預算形同虛設
-    （真實 `~/.vacant` 實測）。若硬底本身超過預算，本機制誠實回報
-    `target_reached=False` 並附上 `hard_keep_bytes`（能刪的已全刪）；不假達標。
+    `file_text` 回 None、`materialize` 列進 missing；不崩、不假 PASS）。鏈、事件結構、
+    近期步驟索引（`structural_shas`）＝硬底（hard floor），此機制不動。
     """
-    cands: list[tuple[int, int, int, pathlib.Path]] = []
-    total = 0          # 整個版本庫（含硬底）的位元組數
+    excluded = excluded_shas or set()
+    structural = (
+        structural_shas
+        if structural_shas is not None
+        else (keep_shas - redundant_live)
+    )
+    files_set = file_shas or set()
+    latest_set = latest_file_shas or set()
+    order_map = first_seen_order or {}
+    cands: list[tuple[int, int, int, int, pathlib.Path]] = []
+    total = 0          # 整個版本庫（含硬底，排除第一階段已刪孤兒）的位元組數
     hard_keep = 0      # 硬底位元組（本機制不可回收）
     if obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
@@ -161,22 +168,36 @@ def _sweep_to_target(
                 continue
             for bf in sorted(sub.iterdir()):
                 sha = bf.name
+                if sha in excluded:
+                    continue
                 try:
-                    sz = bf.stat().st_size
+                    st = bf.stat()
+                    sz = st.st_size
                 except OSError:
                     continue
                 total += sz
-                if sha in keep_shas and sha not in redundant_live:
+                if sha in structural and sha not in redundant_live:
                     hard_keep += sz
                     continue
-                # 0＝工作區冗餘（先回收，零損失）；1＝其餘舊版本（後回收，內容轉 UNKNOWN）
-                cands.append((0 if (sha in keep_shas) else 1, sz, bf.stat().st_mtime_ns, bf))
-    cands.sort(key=lambda t: (t[0], t[2]))
+                # 0＝工作區冗餘或孤兒（先回收，零損失）
+                # 1＝已被覆寫的舊檔案版本（次優先回收，內容轉 UNKNOWN）
+                # 2＝最新檔案版本（可回退工作區或轉 UNKNOWN）
+                # 3＝步驟 I/O／提示內容 blob
+                if sha in redundant_live or sha not in keep_shas:
+                    rank = 0
+                elif sha in files_set and sha not in latest_set:
+                    rank = 1
+                elif sha in files_set:
+                    rank = 2
+                else:
+                    rank = 3
+                cands.append((rank, order_map.get(sha, 0), st.st_mtime_ns, sz, bf))
+    cands.sort(key=lambda t: (t[0], t[1], t[2]))
     freed = 0
     removed = 0
     aborted = False
     remaining = total
-    for rank, size, _mts, bf in cands:
+    for _rank, _ord, _mts, _size, bf in cands:
         if remaining <= target_bytes:
             break
         if budget is not None and budget.expired():
@@ -317,6 +338,9 @@ def compact_trace(
     # 常規回收保留（取代 round 72 的 whack-a-mole 理由），但超出 target_bytes 時可安全回收
     redundant_live: set[str] = set()
     must_keep_file_shas: set[str] = set()
+    structural_shas: set[str] = set()
+    latest_file_shas: set[str] = set()
+    first_seen_order: dict[str, int] = {}
     projects_scanned = 0
     bytes_freed = 0
     files_removed = 0
@@ -326,9 +350,16 @@ def compact_trace(
         if not sha or ":" in sha:
             return
         keep_shas.add(sha)
+        structural_shas.add(sha)
         base = _index_base_sha(blobs, sha)
         if base:
             keep_shas.add(base)
+            structural_shas.add(base)
+
+    def _note_file_sha(sha: str) -> None:
+        keep_shas.add(sha)
+        must_keep_file_shas.add(sha)
+        first_seen_order.setdefault(sha, len(first_seen_order) + 1)
 
     if proj_root.is_dir():
         for pdir in sorted(x for x in proj_root.iterdir() if x.is_dir()):
@@ -366,6 +397,7 @@ def compact_trace(
 
             # 2) state.json 裡的現用索引一定要留（下一步增量掃描靠它們）
             active_indices: set[str] = set()
+            latest_idx: str | None = None
             with contextlib.suppress(OSError, ValueError):
                 st = json.loads((pdir / "state.json").read_text(encoding="utf-8"))
                 if isinstance(st, dict):
@@ -378,6 +410,8 @@ def compact_trace(
                         if isinstance(v, str) and v:
                             _keep_index(v)
                             active_indices.add(v)
+                            if k == "last_index":
+                                latest_idx = v
                     for pend_map in (st.get("pending"), st.get("open")):
                         for pend in (pend_map or {}).values():
                             if isinstance(pend, dict):
@@ -389,6 +423,7 @@ def compact_trace(
                                 ib = pend.get("input_blob")
                                 if isinstance(ib, str) and ib:
                                     keep_shas.add(ib)
+                                    structural_shas.add(ib)
 
             chain_file = pdir / "chain.ndjson"
             if not chain_file.is_file():
@@ -431,22 +466,27 @@ def compact_trace(
                         v = e.get(k)
                         if isinstance(v, str) and v and ":" not in v:
                             keep_shas.add(v)
+                            structural_shas.add(v)
                 elif t == "prompt":
                     tb = e.get("text_blob")
                     if isinstance(tb, str) and tb:
                         keep_shas.add(tb)
+                        structural_shas.add(tb)
                     if str(e.get("source") or "user") in ("user", "vacant do"):
                         last_user_seq = max(last_user_seq, int(e.get("seq") or 0))
                 elif t == "step":
                     step_events.append(e)
                     if initial_idx is None and isinstance(e.get("pre_index"), str):
                         initial_idx = e["pre_index"]
+                    if isinstance(e.get("post_index"), str) and e["post_index"]:
+                        latest_idx = e["post_index"]
                     for w in e.get("writes") or []:
                         if isinstance(w, dict) and w.get("path"):
                             modified_paths.add(str(w["path"]))
                     wb = e.get("writes_blob")
                     if isinstance(wb, str) and blobs.has(wb):
                         keep_shas.add(wb)
+                        structural_shas.add(wb)
                         with contextlib.suppress(OSError, ValueError):
                             for w in json.loads(blobs.get(wb)):
                                 if isinstance(w, dict) and w.get("path"):
@@ -454,6 +494,8 @@ def compact_trace(
                 elif t == "unrecorded_change":
                     if initial_idx is None and isinstance(e.get("before_index"), str):
                         initial_idx = e["before_index"]
+                    if isinstance(e.get("after_index"), str) and e["after_index"]:
+                        latest_idx = e["after_index"]
                     _keep_index(e.get("before_index"))
                     _keep_index(e.get("after_index"))
                     for ch in e.get("changes") or []:
@@ -463,11 +505,11 @@ def compact_trace(
                             for k in ("before", "after"):
                                 v = ch.get(k)
                                 if isinstance(v, str) and ":" not in v:
-                                    keep_shas.add(v)
-                                    must_keep_file_shas.add(v)
+                                    _note_file_sha(v)
                     cb = e.get("changes_blob")
                     if isinstance(cb, str) and blobs.has(cb):
                         keep_shas.add(cb)
+                        structural_shas.add(cb)
                         with contextlib.suppress(OSError, ValueError):
                             for ch in json.loads(blobs.get(cb)):
                                 if isinstance(ch, dict):
@@ -476,8 +518,7 @@ def compact_trace(
                                     for k in ("before", "after"):
                                         v = ch.get(k)
                                         if isinstance(v, str) and ":" not in v:
-                                            keep_shas.add(v)
-                                            must_keep_file_shas.add(v)
+                                            _note_file_sha(v)
                 elif t == "coverage" and isinstance(e.get("baseline"), dict):
                     bidx = e["baseline"].get("index")
                     if isinstance(bidx, str):
@@ -488,6 +529,7 @@ def compact_trace(
                 elif t == "session_closed" and isinstance(e.get("final_index"), str):
                     if initial_idx is None:
                         initial_idx = e["final_index"]
+                    latest_idx = e["final_index"]
                     _keep_index(e["final_index"])
                     active_indices.add(e["final_index"])
 
@@ -507,6 +549,7 @@ def compact_trace(
                     v = s.get(k)
                     if isinstance(v, str) and v:
                         keep_shas.add(v)
+                        structural_shas.add(v)
                 for k in ("pre_index", "post_index"):
                     v = s.get(k)
                     if isinstance(v, str) and v:
@@ -520,6 +563,7 @@ def compact_trace(
                 for r in reads:
                     if isinstance(r, dict) and isinstance(r.get("blob"), str) and r["blob"]:
                         keep_shas.add(r["blob"])
+                        structural_shas.add(r["blob"])
                 writes = list(s.get("writes") or [])
                 wb = s.get("writes_blob")
                 if isinstance(wb, str) and blobs.has(wb):
@@ -530,8 +574,15 @@ def compact_trace(
                         for k in ("before", "after"):
                             v = w.get(k)
                             if isinstance(v, str) and ":" not in v:
-                                keep_shas.add(v)
-                                must_keep_file_shas.add(v)
+                                _note_file_sha(v)
+
+            if latest_idx:
+                lidx_map = _load_project_index(blobs, latest_idx)
+                for rel in modified_paths:
+                    ent = lidx_map.get(rel)
+                    if ent is not None and ":" not in ent.sha256:
+                        latest_file_shas.add(ent.sha256)
+                        structural_shas.add(ent.sha256)
 
             # 索引裡出現的檔案內容：
             # 若檔案曾被改動過、或工作區已不在／內容已變 ⇒ 留在版本庫；
@@ -545,8 +596,7 @@ def compact_trace(
                     if ":" in fsha:
                         continue
                     if rel in modified_paths or not prune_redundant_workspace_blobs or ws_path is None:
-                        keep_shas.add(fsha)
-                        must_keep_file_shas.add(fsha)
+                        _note_file_sha(fsha)
                         continue
                     cache_key = (rel, fsha)
                     if cache_key not in seen_idx_entries:
@@ -562,13 +612,11 @@ def compact_trace(
                         redundant_live.add(fsha)
                         if project_active:
                             # 活躍專案：保留（下次修改所需的 before 版本；回收＝whack-a-mole）
-                            keep_shas.add(fsha)
-                            must_keep_file_shas.add(fsha)
+                            _note_file_sha(fsha)
                         else:
                             redundant_candidates.add(fsha)
                     else:
-                        keep_shas.add(fsha)
-                        must_keep_file_shas.add(fsha)
+                        _note_file_sha(fsha)
             if not dry_run and prune_redundant_workspace_blobs and (pdir / "state.json").is_file():
                 with contextlib.suppress(OSError, ValueError):
                     st_cur = json.loads((pdir / "state.json").read_text(encoding="utf-8"))
@@ -581,6 +629,7 @@ def compact_trace(
     cutoff_ts = (now - max_age_days * 86400.0) if max_age_days is not None else None
 
     aborted = False
+    phase1_removed: set[str] = set()
     if obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
             if budget is not None and budget.expired():
@@ -602,6 +651,8 @@ def compact_trace(
                 b, c = _remove_path(blob_file, dry_run=dry_run)
                 bytes_freed += b
                 files_removed += c
+                if c > 0:
+                    phase1_removed.add(sha)
             if not dry_run:
                 with contextlib.suppress(OSError):
                     if not any(sub.iterdir()):
@@ -609,8 +660,19 @@ def compact_trace(
 
     target: dict[str, Any] | None = None
     if target_bytes is not None and target_bytes >= 0:
-        target = _sweep_to_target(obj_root, keep_shas, redundant_live, int(target_bytes),
-                                  dry_run=dry_run, budget=budget)
+        target = _sweep_to_target(
+            obj_root,
+            keep_shas,
+            redundant_live,
+            int(target_bytes),
+            dry_run=dry_run,
+            budget=budget,
+            excluded_shas=phase1_removed,
+            structural_shas=structural_shas,
+            file_shas=must_keep_file_shas,
+            latest_file_shas=latest_file_shas,
+            first_seen_order=first_seen_order,
+        )
         if target["aborted"]:
             aborted = True
 
@@ -977,7 +1039,7 @@ def gc_all(
     )
     lg = compact_logs(root, max_log_bytes=max_log_bytes, dry_run=dry_run)
     # 4b) 模型通道 wire 捕獲＋session hook 事件（2026-10-28 Axis 2 最優先）
-    wire = compact_wire(root, budget=budget)
+    wire = compact_wire(root, dry_run=dry_run, budget=budget)
     hooks = compact_session_hooks(root, dry_run=dry_run)
     vr = {"bytes_freed": 0, "files_removed": 0}
     for vd in vrun_dirs or []:
@@ -1184,8 +1246,18 @@ def compact_session_hooks(
         total += st.st_size
     rep["bytes_before"] = total
     rep["files_before"] = len(files)
-    # 單檔上限：保留最新完整行
-    for _mt, sz, f in files:
+    # session 數上限：先保留最新 keep_sessions 個、刪超額舊 session（避免先截斷再刪除重複計入 bytes_freed）
+    files.sort(key=lambda t: t[0], reverse=True)  # 最新在前
+    kept_files = files[:keep_sessions] if keep_sessions >= 0 else []
+    drop_files = files[keep_sessions:] if keep_sessions >= 0 else files
+    for _mt, sz, f in drop_files:
+        if not dry_run:
+            with contextlib.suppress(OSError):
+                f.unlink(missing_ok=True)
+        rep["bytes_freed"] += sz
+        rep["files_removed"] += 1
+    # 單檔上限：對保留下來的 session 保留最新完整行
+    for _mt, sz, f in kept_files:
         if sz <= max_file_bytes:
             continue
         keep_bytes = max(4096, max_file_bytes // 2)
@@ -1206,14 +1278,6 @@ def compact_session_hooks(
                 continue
         rep["bytes_freed"] += max(0, len(raw) - len(tail))
         rep["files_truncated"] += 1
-    # session 數上限：保留最新 keep_sessions 個
-    files.sort(key=lambda t: t[0], reverse=True)  # 最新在前
-    for _mt, sz, f in files[keep_sessions:]:
-        if not dry_run:
-            with contextlib.suppress(OSError):
-                f.unlink(missing_ok=True)
-        rep["bytes_freed"] += sz
-        rep["files_removed"] += 1
     return rep
 
 

@@ -385,6 +385,18 @@ class Trace:
             pass
         return None
 
+    def file_missing_blob(self, index_sha: str | None, path: str) -> bool:
+        e = self.index(index_sha).get(path)
+        if e is None or ":" in e.sha256:
+            return False
+        return self.file_text(index_sha, path) is None
+
+    def step_missing_blob(self, s: Step) -> bool:
+        for b in (s.input_blob, s.output_blob):
+            if b and self.blob_text(b) is None:
+                return True
+        return False
+
     def blob_text(self, sha: str | None) -> str | None:
         if not sha:
             return None
@@ -480,10 +492,13 @@ class Blamer:
         給 `line`（1 起算，最後一個版本裡的行號）⇒ 追**那一行**（逐行對齊往回）。"""
         vers = self._versions(path, before_seq)
         if line is not None:
-            got = self._line_introducer(vers, value, line - 1)
+            got = self._line_introducer(vers, value, line - 1, path=path)
             if got is not None:
                 return got
         # 沒有行號（或行號對不上）：最後一次讓出現次數增加的轉變
+        for tr, txt in vers[1:]:
+            if txt is None and isinstance(tr, Transition) and self.t.file_missing_blob(tr.after, path):
+                return "missing_blob"
         prev = len(L.occurrences(vers[0][1], value)) if vers[0][1] is not None else 0
         intro: Transition | str | None = "initial" if prev else None
         for tr, txt in vers[1:]:
@@ -493,10 +508,20 @@ class Blamer:
             elif now == 0:
                 intro = None
             prev = now
+        if (
+            isinstance(intro, Transition)
+            and intro is vers[1][0]
+            and vers[0][1] is None
+            and self.t.file_missing_blob(self.t.initial, path)
+            and intro.step is not None
+            and tool_kind(intro.step.tool) != "shell"
+            and not L.contains(self.t.input_text(intro.step), value)
+        ):
+            return "missing_blob"
         return intro
 
     def _line_introducer(self, vers: list[tuple[Transition | str, str | None]], value: str,
-                         idx: int) -> Transition | str | None:
+                         idx: int, *, path: str = "") -> Transition | str | None:
         last_txt = vers[-1][1]
         if last_txt is None:
             return None
@@ -504,11 +529,23 @@ class Blamer:
         if not (0 <= idx < len(cur)) or not L.contains(cur[idx], value):
             return None
         for k in range(len(vers) - 1, 0, -1):
-            prev_txt = vers[k - 1][1]
+            prev_tag, prev_txt = vers[k - 1]
             tag = vers[k][0]
             key = tag.seq if isinstance(tag, Transition) else -1
             self.intro_line[f"{key}"] = idx + 1
             if prev_txt is None:
+                if path:
+                    if isinstance(prev_tag, Transition) and self.t.file_missing_blob(prev_tag.after, path):
+                        return "missing_blob"
+                    if (
+                        prev_tag == "initial"
+                        and self.t.file_missing_blob(self.t.initial, path)
+                        and isinstance(tag, Transition)
+                        and tag.step is not None
+                        and tool_kind(tag.step.tool) != "shell"
+                        and not L.contains(self.t.input_text(tag.step), value)
+                    ):
+                        return "missing_blob"
                 return tag
             prev = prev_txt.splitlines()
             mapped = None
@@ -796,6 +833,8 @@ class Blamer:
         intro = self.introducer(path, value, before_seq, line=line)
         if intro is None:
             return Origin("unknown", note=f"{value!r} is not in {path} at that point")
+        if intro == "missing_blob":
+            return Origin("unknown", note=f"a recorded version of {path} was not stored or was reclaimed by gc")
         if intro == "initial" and self.t.unobserved_start:
             chain.append({"via": f"{path} already had it when Vacant first managed to look"})
             return Origin("gap", source={"observed_at": "baseline"},
@@ -921,6 +960,11 @@ class Blamer:
                                                        "path": rel, "observed": False},
                               note="a pinned input has this value, but no recorded read "
                                    "shows it being read")
+        if self.t.step_missing_blob(s) or any(
+            j.seq < s.seq and j.ctx == s.ctx and self.t.step_missing_blob(j)
+            for j in self.t.steps
+        ):
+            return Origin("unknown", note="recorded step data was reclaimed by gc")
         return Origin("agent", step=s, note="no recorded read contains this value")
 
     def _from_read(self, j: Step, ref: Any, value: str, chain: list[dict[str, Any]],
@@ -1281,6 +1325,11 @@ def _blame_location(trace: Trace, loc: L.Location, *, contract: Any = None,
                    layer="inference", step=None, chain=[], value=value,
                    note="the workspace has not been observed yet (the first full look is still "
                         "running in the background)")
+        return res
+    if value is None and loc.line is not None and trace.file_missing_blob(trace.latest_index(), loc.path):
+        res.update(state="UNKNOWN", fault_class="unattributable", confidence="heuristic",
+                   layer="inference", step=None, chain=[], value=None,
+                   note=f"the content of {loc.path} was reclaimed by gc")
         return res
     if not value or loc.kind == "missing":
         # 缺的東西沒有值可追：最後寫這個檔的是誰（推論層）。**不該存在的檔**（契約禁止的）問題是它在：

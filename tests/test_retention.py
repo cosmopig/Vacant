@@ -632,3 +632,98 @@ def test_compact_session_hooks_count_and_file_caps(tmp_path, monkeypatch):
     remaining = sorted(f.name for f in hdir.iterdir())
     assert "pi_big.jsonl" in remaining
     assert len(remaining) == 200
+
+
+def test_gc_all_dry_run_does_not_touch_wire(tmp_path, monkeypatch):
+    _wire_env(tmp_path, monkeypatch)
+    sroot, wdir = _mk_wire(tmp_path, n_calls=4, body_bytes=2048)
+    monkeypatch.setenv("VACANT_WIRE_BODY_BYTES", "2048")
+    monkeypatch.setenv("VACANT_WIRE_INDEX_BYTES", "1024")
+    before = {p.name: p.read_bytes() for p in wdir.iterdir()}
+    rep = retention.gc_all(root=sroot, work_root=tmp_path / "work", dry_run=True, verify=False)
+    after = {p.name: p.read_bytes() for p in wdir.iterdir()}
+    assert rep["dry_run"] is True
+    assert before == after, "gc_all(dry_run=True) 不得刪除或截斷 wire 檔案"
+    assert rep["wire"]["body_files_removed"] > 0
+
+
+def test_compact_session_hooks_no_double_count_on_oversized_old_session(tmp_path, monkeypatch):
+    import time as _time
+    _wire_env(tmp_path, monkeypatch)
+    from vacant_network.intake.statepaths import state_dir
+    sroot = state_dir().resolve()
+    hdir = sroot / "possess" / "hooks"
+    hdir.mkdir(parents=True, exist_ok=True)
+    now = _time.time()
+    for i, sz in enumerate([30_000, 1_000, 1_000]):
+        p = hdir / f"s{i}.jsonl"
+        p.write_text(("a" * 99 + "\n") * (sz // 100))
+        t = now - (10 - i) * 60
+        os.utime(p, (t, t))
+    rep = retention.compact_session_hooks(sroot, max_file_bytes=10_000, keep_sessions=2)
+    assert rep["files_removed"] == 1
+    assert rep["files_truncated"] == 0
+    assert rep["bytes_freed"] == 30_000
+    assert rep["bytes_freed"] <= rep["bytes_before"]
+
+
+def test_compact_trace_dry_run_matches_real_run_with_orphans_and_target(env):
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ws = env / "work" / "orphan_sweep"
+    ws.mkdir(parents=True)
+    (ws / "bg.txt").write_bytes(b"B" * 30_000)
+    rec = Recorder(ws)
+    rec.baseline()
+    rec.blobs.put_bytes((ws / "bg.txt").read_bytes())
+    rec.blobs.put_bytes(b"O" * 50_000)
+    dry = retention.compact_trace(vh, dry_run=True, target_bytes=40_000)
+    real = retention.compact_trace(vh, dry_run=False, target_bytes=40_000)
+    assert dry["bytes_freed"] == real["bytes_freed"] == 50_000
+    assert dry["files_removed"] == real["files_removed"] == 1
+    assert dry["target"]["bytes_freed"] == real["target"]["bytes_freed"] == 0
+
+
+def test_target_sweep_evicts_historical_versions_and_blame_returns_unknown(env):
+    from vacant_network.trace.blame import blame_location
+    from vacant_network.trace.locate import Location
+
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ws = env / "work" / "hist_sweep"
+    ws.mkdir(parents=True)
+    (ws / "app.py").write_text("line1 = 100\nline2 = 999\n")
+    rec = Recorder(ws)
+    rec.baseline()
+    s1 = Actor("claude", "s1")
+    s2 = Actor("claude", "s2")
+
+    # 1) store=False 下，初始已存在於 app.py 的 line2 = 999 未落盤；
+    #    s1 只改了 line1 = 200，追緝 line2 = 999 必須誠實回 UNKNOWN，不可誣賴 s1
+    rec.pre("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"})
+    (ws / "app.py").write_text("line1 = 200\nline2 = 999\n")
+    rec.post("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"}, "ok")
+    b0 = blame_location(Trace(rec), Location("app.py", line=2, value="999"))
+    assert b0["state"] == "UNKNOWN" and b0["fault_class"] == "unattributable"
+
+    # 2) 連續多步修改產生大量歷史版本（~250 KB），超過 target_bytes=60 KB：
+    #    GC 必須能回收舊版本壓到預算以下，且回收後追緝被刪版本引入的值時誠實回 UNKNOWN
+    rec.pre("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"})
+    (ws / "app.py").write_text("pad = '" + ("A" * 50_000) + "'\nmagic = 77777\n")
+    rec.post("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"}, "ok")
+
+    for i in range(3, 7):
+        content = f"pad = '{chr(65 + i) * 50_000}'\nmagic = 77777\n"
+        rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
+        (ws / "app.py").write_text(content)
+        rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
+
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    assert res["target"]["target_reached"] is True
+    assert res["target"]["bytes_remaining"] <= 60_000
+    assert res["target"]["files_removed"] >= 3
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # 舊版本被 GC 回收後，追緝 magic = 77777 不可誣賴最後修改 pad 的 s2，必須回 UNKNOWN
+    b_after = blame_location(Trace(rec), Location("app.py", line=2, value="77777"))
+    assert b_after["state"] == "UNKNOWN" and b_after["fault_class"] == "unattributable"
+
