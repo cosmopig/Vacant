@@ -1189,6 +1189,14 @@ def compact_session_hooks(
     to_keep = files[:keep_sessions]
     to_delete = files[keep_sessions:]
 
+    # session 數上限：保留最新 keep_sessions 個（刪除其餘檔案）
+    for _mt, sz, f in to_delete:
+        if not dry_run:
+            with contextlib.suppress(OSError):
+                f.unlink(missing_ok=True)
+        rep["bytes_freed"] += sz
+        rep["files_removed"] += 1
+
     # 單檔上限：保留最新完整行（僅針對要保留的檔案）
     for _mt, sz, f in to_keep:
         if sz <= max_file_bytes:
@@ -1211,14 +1219,6 @@ def compact_session_hooks(
                 continue
         rep["bytes_freed"] += max(0, len(raw) - len(tail))
         rep["files_truncated"] += 1
-
-    # session 數上限：保留最新 keep_sessions 個（刪除其餘檔案）
-    for _mt, sz, f in to_delete:
-        if not dry_run:
-            with contextlib.suppress(OSError):
-                f.unlink(missing_ok=True)
-        rep["bytes_freed"] += sz
-        rep["files_removed"] += 1
     return rep
 
 
