@@ -585,6 +585,59 @@ def test_usage_envelope_gauge(env, capsys):
     assert outj["envelope"]["within_envelope"] is True
 
 
+def test_envelope_byte_caps_sum_within_stable():
+    """round 176（packet §4 誠實缺口→程式不變量）：各分組位元組上限的**加總**
+    必須 ≤ 穩態封頂——否則「加總」就超出封頂、封頂變成紙面數字。
+    純常數斷言，不碰磁碟。"""
+    s = (retention.DEFAULT_TRACE_BUDGET_BYTES
+         + retention.DEFAULT_WIRE_BODY_BYTES
+         + retention.DEFAULT_WIRE_INDEX_BYTES)
+    assert s <= retention.STABLE_ENVELOPE_BYTES, (
+        f"分組位元組上限加總 {s} B 超出穩態封頂 {retention.STABLE_ENVELOPE_BYTES} B："
+        "「加總」已不是封頂，需調大 STABLE_ENVELOPE_BYTES 或調小分組上限")
+
+
+def test_envelope_accounting_registry_complete(env):
+    """round 176（ASSIGNMENT 🔴 最優先、packet §4：「總計封頂本身不是一條程式保證，
+    只是一個可驗算的加總」）→ 本輪把它變成程式可驗的不變量：state_dir 的每個
+    top-level 組件都必須在 ENVELOPE_COMPONENTS 註冊表裡（有名有姓的上限：位元組硬
+    上限／每檔上限／計數制／固定不增長）；已知布局 ⇒ unaccounted == []。"""
+    _seed_trace_project(env, name="acc")
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    acct = retention.envelope_accounting(vh)
+    assert acct["accounting_complete"] is True
+    assert acct["unaccounted"] == []
+    names = {c["name"] for c in acct["components"]}
+    assert names <= {name for name, *_ in retention.ENVELOPE_COMPONENTS}
+    assert acct["byte_caps_sum"] <= retention.STABLE_ENVELOPE_BYTES
+    # 量具同報（人讀與 JSON 都看得到）
+    rep = retention.usage_report()
+    envl = rep["envelope"]
+    assert envl["accounting"]["accounting_complete"] is True
+    assert envl["within_envelope"] is True
+
+
+def test_envelope_accounting_flags_unknown_component(env):
+    """round 176：註冊表裡沒有負責人的 top-level 組件（某程式路徑無上限寫新資料，
+    或外人放檔）必須被量具**点名**，且不得宣稱「在封頂內」——帳目不完整不是
+    「在內」。只報告、不刪除（fail-open：Vacant 不刪自己語義不認得的檔）。"""
+    _seed_trace_project(env, name="acc2")
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    (vh / "mystery_dir").mkdir()
+    (vh / "mystery_dir" / "blob.bin").write_bytes(b"x" * 1000)
+
+    acct = retention.envelope_accounting(vh)
+    assert acct["unaccounted"] == ["mystery_dir"]
+    assert acct["accounting_complete"] is False
+
+    rep = retention.usage_report()
+    envl = rep["envelope"]
+    assert envl["accounting"]["unaccounted"] == ["mystery_dir"]
+    assert envl["within_envelope"] is False, "帳目不完整時不得宣稱在封頂內"
+    # 該檔未被刪除（fail-open）
+    assert (vh / "mystery_dir" / "blob.bin").is_file()
+
+
 def test_usage_envelope_fail_open_missing_home(tmp_path, monkeypatch, capsys):
     """state 目錄不存在時封頂量具仍要給得出（total=0、在內），不崩（fail-open）。"""
     monkeypatch.setenv("VACANT_HOME", str(tmp_path / "nope"))

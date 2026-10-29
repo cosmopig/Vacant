@@ -115,6 +115,68 @@ DEFAULT_HOOKS_KEEP_SESSIONS = 200
 # 的量具輸出必須自報這一點，不得被讀成單一開關。
 STABLE_ENVELOPE_BYTES = 256 * 1024 * 1024
 
+# 2026-10-29 round 176（ASSIGNMENT 🔴 最優先「用量有上限」；packet
+# ops/packets/disk_top_priority.md §4 誠實缺口「總計封頂本身不是一條程式保證，
+# 只是一個可驗算的加總」→ 本輪把它變成程式可驗的不變量）：
+# ENVELOPE_COMPONENTS ＝ state_dir 的**每個** top-level 組件的名冊。每個組件必須
+# 有名有姓的上限（bytes＝位元組硬上限；per_file＝每檔位元組上限；count＝計數制；
+# fixed＝固定不增長的安裝面/小檔）。若某程式路徑日後無上限地在 state_dir 寫新
+# top-level 目錄，`envelope_accounting` 會把它点名為 unaccounted，`vacant usage`
+# 的封頂量具不再宣稱「在封頂內」（只報告、不刪除——fail-open：Vacant 不刪自己
+# 語義不認得的檔）。新增 state_dir top-level 寫入時，必須在此表註冊並說明上限，
+# 否則常規測試 test_envelope_accounting_* 會紅。
+ENVELOPE_COMPONENTS: tuple[tuple[str, str, int | None, str], ...] = (
+    # (top-level 名, 上限類型, 位元組值（count/fixed 為 None 或計數）, 註記)
+    ("trace", "bytes", DEFAULT_TRACE_BUDGET_BYTES,
+     "objects 位元組硬上限（env VACANT_TRACE_BUDGET_BYTES 可覆寫、0＝關）；"
+     "projects 是步索引（keep 50 步）＋其 blob 歸 objects"),
+    ("possess", "bytes", DEFAULT_WIRE_BODY_BYTES + DEFAULT_WIRE_INDEX_BYTES,
+     "wire body 96 MiB＋index 8 MiB 位元組硬上限（env 可覆寫）；hooks 2 MiB/檔；"
+     "bin/state.json 為固定安裝面"),
+    ("intake", "per_file", DEFAULT_MAX_LOG_BYTES,
+     "hook 日誌 2 MiB/檔（compact_logs）；keys/ledger/trust/store/tasks 為計數制"
+     "（帳本裁決，DEFAULT_KEEP_DECISIONS/每 task）"),
+    ("quarantine", "count", DEFAULT_KEEP_DECISIONS,
+     "每 task 保留 2 裁決（compact_quarantine）；單 blob ≤ MAX_BLOB 8 MiB"),
+    ("adapters", "fixed", None, "安裝面（install.json／hook 註冊），不增長"),
+    ("gc_report.json", "fixed", None, "上次 gc 結果，小檔"),
+    ("gc_last.json", "fixed", None, "上次 gc 時間，小檔"),
+    ("gc.lock", "fixed", None, "gc 鎖，0 B"),
+)
+
+
+def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
+    """round 176：封頂**帳目**——state_dir 的每個 top-level 組件必須在
+    ENVELOPE_COMPONENTS 註冊（有名有姓的上限）；不在的列為 `unaccounted`
+    （某程式路徑無上限寫了新資料，或外人放檔）→ 封頂量具不得宣稱「在封頂內」。
+
+    唯讀：不刪、不改（fail-open）。回傳：
+      components                  各 top-level 組件現行位元組數
+      unaccounted                 註冊表外的 top-level 名（按名排序）
+      accounting_complete         unaccounted 為空（帳目完整）
+      byte_caps_sum               位元組硬上限分組的加總（bytes 類型）
+      byte_caps_sum_within_envelope  該加總 ≤ STABLE_ENVELOPE_BYTES（封頂不是紙面數字）
+    """
+    r = pathlib.Path(root)
+    known = {name for name, *_ in ENVELOPE_COMPONENTS}
+    components: list[dict[str, Any]] = []
+    unaccounted: list[str] = []
+    if r.is_dir():
+        for entry in sorted(r.iterdir(), key=lambda p: p.name):
+            if entry.name in known:
+                components.append({"name": entry.name, "bytes": _tree_size(entry)})
+            else:
+                unaccounted.append(entry.name)
+    byte_caps_sum = sum(b for _, kind, b, _ in ENVELOPE_COMPONENTS
+                        if kind == "bytes" and b)
+    return {
+        "components": components,
+        "unaccounted": unaccounted,
+        "accounting_complete": not unaccounted,
+        "byte_caps_sum": byte_caps_sum,
+        "byte_caps_sum_within_envelope": byte_caps_sum <= STABLE_ENVELOPE_BYTES,
+    }
+
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
 AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住多久（超過就停在安全點）
@@ -1542,6 +1604,9 @@ def usage_report(
         # 保證的單一硬上限——`note` 必須自報這一點，避免被讀成單一開關。
         # 量具失敗不阻報告其餘部分（fail-open）。
         try:
+            # round 176：封頂帳目（每個 top-level 組件都要有命名上限；不在註冊表
+            # 的組件 → 量具不得宣稱「在封頂內」）。唯讀、fail-open。
+            acct = envelope_accounting(sroot)
             tr_bytes = (out.get("objects") or {}).get("bytes", 0)
             tr_cap = _resolve_auto_budget()
             wire_total = out["areas"].get("possess_wire", 0)
@@ -1572,12 +1637,15 @@ def usage_report(
             out["envelope"] = {
                 "planned_steady_state_bytes": STABLE_ENVELOPE_BYTES,
                 "note": ("各分組上限的加總（trace 64 MiB ＋ wire body 96 MiB ＋ wire index 8 MiB"
-                         "＋日誌 2 MiB/檔＋固定安裝面 ~10 MiB），不是一條單一開關；"
-                         "口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
+                         "＋日誌 2 MiB/檔＋計數制分組＋固定安裝面），不是一條單一開關；"
+                         "每個 top-level 組件都須有命名上限（accounting.unaccounted 為空才"
+                         "算帳目完整）；口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
                 "total_bytes": total,
-                "within_envelope": (total <= STABLE_ENVELOPE_BYTES) and within_groups,
+                "within_envelope": (total <= STABLE_ENVELOPE_BYTES) and within_groups
+                and acct["accounting_complete"],
                 "pct_of_envelope": round(100.0 * total / STABLE_ENVELOPE_BYTES, 2),
                 "groups": groups,
+                "accounting": acct,
             }
         except Exception:  # noqa: BLE001 — 封頂量具失敗不阻報告（fail-open）
             pass
@@ -1662,7 +1730,14 @@ def usage_main(argv: list[str] | None = None) -> int:
         # 非整（使用者 env 覆寫）才退回 _human_bytes 的 MB 口徑。
         def _capfmt(n: int) -> str:
             return f"{n // (1024 * 1024)} MiB" if n % (1024 * 1024) == 0 else h(n)
-        mark = "✓ 在封頂內" if envl.get("within_envelope") else "⚠ 超封頂（vacant gc --auto 會逐組收縮）"
+        acct = envl.get("accounting") or {}
+        unacc = acct.get("unaccounted") or []
+        if envl.get("within_envelope"):
+            mark = "✓ 在封頂內"
+        elif unacc:
+            mark = "⚠ 帳目不完整（有無命名上限的 top-level 組件）"
+        else:
+            mark = "⚠ 超封頂（vacant gc --auto 會逐組收縮）"
         print(f"  穩態封頂    : 總計 {h(envl['total_bytes'])} / {_capfmt(cap)}（{envl['pct_of_envelope']}%）{mark}")
         for g in envl.get("groups", []):
             if g.get("cap_bytes") is None:
@@ -1672,7 +1747,11 @@ def usage_main(argv: list[str] | None = None) -> int:
             tail = (f"✓ 餘量 {h(g['cap_bytes'] - g['bytes'])}" if ok
                     else "⚠ 超上限（vacant gc --auto 會收縮）")
             print(f"    · {g['name']:<13}: {h(g['bytes'])} / {_capfmt(g['cap_bytes'])} {tail}")
-        print("    └ 封頂＝各分組上限的加總，不是一條單一開關（ops/packets/disk_top_priority.md §3/§4）")
+        if unacc:
+            print(f"    ⚠ 無命名上限的組件: {', '.join(unacc)}（只報告、不刪除；"
+                  "新增 top-level 寫入必須在 retention.ENVELOPE_COMPONENTS 註冊）")
+        print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
+              "（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:
         extra = f"  （{pj['chain_events']} 步）" if pj.get("chain_events") is not None else ""
         print(f"  專案 {pj['project']}: {h(pj['bytes'])}{extra}  {pj.get('last_activity', '')}")
