@@ -64,9 +64,12 @@ def load_report_p(base: Path, exp: str, arms: tuple[str, ...]) -> dict[str, floa
     if not rpath.is_file():
         return {}
     r = json.loads(rpath.read_text())
+    paired = r.get("paired") if isinstance(r.get("paired"), dict) else {}
     out: dict[str, float | None] = {}
     for x in arms:
-        blk = r.get("A_vs_" + x)
+        blk = paired.get("A_vs_" + x)
+        if not isinstance(blk, dict):
+            blk = r.get("A_vs_" + x)
         if not isinstance(blk, dict):
             out[x] = None
             continue
