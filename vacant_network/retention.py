@@ -977,7 +977,7 @@ def gc_all(
     )
     lg = compact_logs(root, max_log_bytes=max_log_bytes, dry_run=dry_run)
     # 4b) 模型通道 wire 捕獲＋session hook 事件（2026-10-28 Axis 2 最優先）
-    wire = compact_wire(root, budget=budget)
+    wire = compact_wire(root, dry_run=dry_run, budget=budget)
     hooks = compact_session_hooks(root, dry_run=dry_run)
     vr = {"bytes_freed": 0, "files_removed": 0}
     for vd in vrun_dirs or []:
@@ -1176,19 +1176,16 @@ def compact_session_hooks(
     rep["files_before"] = len(files)
 
     files.sort(key=lambda t: (t[0], -t[1]), reverse=True)
-    to_keep = files[:keep_sessions]
-    to_delete = files[keep_sessions:]
-
-    # session 數上限：保留最新 keep_sessions 個（刪除其餘檔案）
-    for _mt, sz, f in to_delete:
+    # 先處理超額舊檔案（保留最新 keep_sessions 個）
+    for _mt, sz, f in files[keep_sessions:]:
         if not dry_run:
             with contextlib.suppress(OSError):
                 f.unlink(missing_ok=True)
         rep["bytes_freed"] += sz
         rep["files_removed"] += 1
 
-    # 單檔上限：保留最新完整行（僅針對要保留的檔案）
-    for _mt, sz, f in to_keep:
+    # 再只對保留下來的檔案檢查單檔上限（避免重複計算 bytes_freed）
+    for _mt, sz, f in files[:keep_sessions]:
         if sz <= max_file_bytes:
             continue
         keep_bytes = max(4096, max_file_bytes // 2)

@@ -1,80 +1,61 @@
-import os
 import pathlib
-import time
-import shutil
+import pytest
+from vacant_network.retention import gc_all, compact_session_hooks
+from vacant_network.atomic import atomic_write_text
 
-from vacant_network import retention
-
-def test_gc_all_dry_run_does_not_touch_wire():
-    # 建立虛擬目錄結構，模擬 wire 通道內容
-    sroot = pathlib.Path("/tmp/vacant_test_retention")
-    sroot.mkdir(parents=True, exist_ok=True)
-    wdir = sroot / "possess" / "proxyd" / "wire"
-    wdir.mkdir(parents=True, exist_ok=True)
-
-    # 建立兩個 body 檔案，總大小超過預設上限 (96 MiB)，但我們用小一點的測試
-    # 因為 compact_wire 會讀取 _resolve_wire_body_budget()。
-    # 我們手動 mock 這個行為或直接在環境變數中設定。
-    os.environ["VACANT_WIRE_BODY_BYTES"] = "1024"  # 1 KB
+def test_gc_all_dry_run_does_not_touch_wire(tmp_path):
+    # Setup: possess/proxyd/wire/
+    wire_dir = tmp_path / "possess" / "proxyd" / "wire"
+    wire_dir.mkdir(parents=True)
     
-    f1 = wdir / "body1"
-    f2 = wdir / "body2"
-    f1.write_bytes(b"a" * 600)
-    f2.write_bytes(b"b" * 600)
-
-    # 執行 dry_run gc
-    rep = retention.compact_wire(root=sroot, dry_run=True)
+    req_bin = wire_dir / ".req.bin"
+    resp_bin = wire_dir / ".resp.bin"
+    index_jsonl = wire_dir / "index.jsonl"
     
-    assert rep["body_bytes_freed"] == 1200
-    assert f1.exists()
-    assert f2.exists()
-    os.environ.pop("VACANT_WIRE_BODY_BYTES", None)
-
-def test_compact_session_hooks_no_double_count_on_oversized_old_session():
-    # 建立虛擬目錄結構，模擬 hooks 目錄
-    sroot = pathlib.Path("/tmp/vacant_test_retention_2")
-    sroot.mkdir(parents=True, exist_ok=True)
-    hdir = sroot / "possess" / "hooks"
-    hdir.mkdir(parents=True, exist_ok=True)
-
-    # 建立三個 session 檔案，其中一個是舊的且超大
-    # 我們要測試：當一個檔案同時滿足「過期（被刪除）」和「單檔上限（被截斷）」時，
-    # bytes_freed 只會計算一次。
-    max_file_bytes = 1024 * 1024  # 1 MB
-    keep_sessions = 1
-
-    f1 = hdir / "session1.jsonl" # 最新 (mtime 會被我們手動設)
-    f2 = hdir / "session2.jsonl" # 過期，且超大
-    f3 = hdir / "session3.jsonl" # 過期，但小於上限
-
-    # 內容：f1=500B, f2=2MB (超過 max_file_bytes), f3=1KB
-    f1.write_bytes(b"s1" * 500)
-    f2.write_bytes(b"s2" * (2 * 1024 * 1024))
-    f3.write_bytes(b"s3" * 1024)
-
-    # 手動設定 mtime：f1 最新的，f2 和 f3 是舊的
-    now = time.time()
-    os.utime(f1, (now, now))
-    os.utime(f2, (now - 1000, now - 1000))
-    os.utime(f3, (now - 2000, now - 2000))
-
-    # 執行 compact_session_hooks
-    rep = retention.compact_session_hooks(root=sroot, max_file_bytes=max_file_bytes, keep_sessions=keep_sessions)
-
-    # 計算預期：
-    # f1: 保留 (最新) -> freed=0
-    # f2: 刪除 (過期) -> freed=2MB
-    # f3: 刪除 (過期) -> freed=1KB
-    # 如果發生 double count，f2 的 2MB 會被加兩次（一次在截斷迴圈，一次在刪除迴圈）。
-    # 正確的結果應該是 2MB + 1KB = 2048 KB (或接近)。
-    # 因為 f2 在 files[keep_sessions:] 中會先被處理並 unlink。
-    # 然後在 files[:keep_sessions] 中，f1 會被檢查截斷（但它本身就小於上限）。
+    # Create oversized files
+    req_bin.write_bytes(b"a" * 1024 * 1024) # 1MB
+    resp_bin.write_bytes(b"b" * 1024 * 1024) # 1MB
+    index_jsonl.write_text("dummy content", encoding="utf-8")
     
-    assert rep["bytes_freed"] == (2 * 1024 * 1024 + 1024)
-    assert f2.exists() is False
-    assert f3.exists() is False
-    assert f1.exists() is True
+    # Call gc_all with dry_run=True
+    gc_all(root=tmp_path, dry_run=True)
+    
+    # Assertions
+    assert req_bin.exists()
+    assert resp_bin.exists()
+    assert index_jsonl.read_text(encoding="utf-8") == "dummy content"
 
-    # 清理
-    shutil.rmtree(sroot)
+def test_compact_session_hooks_no_double_count_on_oversized_old_session(tmp_path):
+    # Setup: possess/hooks/
+    hooks_dir = tmp_path / "possess" / "hooks"
+    hooks_dir.mkdir(parents=True)
+    
+    # Create 3 files, oldest is oversized
+    f1 = hooks_dir / "session1.jsonl" # Oldest (will be deleted)
+    f2 = hooks_dir / "session2.jsonl" # Middle (kept)
+    f3 = hooks_dir / "session3.jsonl" # Newest (kept)
+    
+    # We need to ensure f1 is the oldest in mtime sort. 
+    # Since we can't easily set mtime on some filesystems, let's just rely on creation order if it works,
+    # or use a small sleep. Actually, compact_session_hooks sorts by mtime.
+    f1.write_text("content", encoding="utf-8")
+    import time; time.sleep(0.01)
+    f2.write_text("content", encoding="utf-8")
+    import time; time.sleep(0.01)
+    f3.write_text("content", encoding="utf-8")
+    
+    # Make f1 oversized (e.g., 3MB, while max_file_bytes is 2MB)
+    # We need to overwrite it with large content but keep the name
+    with open(f1, "wb") as f:
+        f.write(b"x" * (3 * 1024 * 1024))
 
+    # Call compact_session_hooks
+    # keep_sessions=2 means f1 should be deleted, f2 and f3 kept.
+    rep = compact_session_hooks(root=tmp_path, max_file_bytes=2*1024*1024, keep_sessions=2)
+    
+    assert rep["files_removed"] == 1
+    # Since f1 was deleted and it was the only one > max_file_bytes among those kept (none),
+    # files_truncated should be 0.
+    assert rep["files_truncated"] == 0
+    # bytes_freed should be exactly the size of f1 (3MB)
+    assert rep["bytes_freed"] == 3 * 1024 * 1024
