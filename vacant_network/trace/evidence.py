@@ -157,7 +157,7 @@ UNFETCHED_UNAVAILABLE = re.compile(
     r"|無法(?:連接|連線|訪問|打開|存取|取得)|連線失敗|逾時|超時|連不上|打不開"
     r"|抓(?:取)?(?:失敗|不到)|下載(?:失敗|不到)|取不到", re.I)
 
-# claimed_write（2026-11-04，第 125 輪）：方向 A「寫過沒」——與 claimed_run／unfetched 同族的
+# claimed_write（2026-10-28，第 125 輪）：方向 A「寫過沒」——與 claimed_run／unfetched 同族的
 # 「誠實性」檢查。最終訊息以過去式声称「寫入／存成／產生」某個反引號檔名，但整份記錄查無
 # 該檔（任何一步的輸入或輸出都碰不到它的 basename），且該檔在最新索引裡也不存在 → advisory 發現。
 # 填補缺口：missing_output 只抓「任務點名要的檔」、stale_output 只抓「舊檔當成果」；「沒被要求、
@@ -166,7 +166,7 @@ UNFETCHED_UNAVAILABLE = re.compile(
 #      寫入/寫了/寫好/存成/產生/生成/更新/建立/創建）；現在式／祈使式（write／請寫／幫我寫）不觸發；
 #   2) 反引號 span 必須是「檔名形」（含副檔名，如 report.md）——URL（含 ://）、純詞（tests／file）
 #      因字元集／副檔名要求匹配不到；
-#   3) 鄰窗有建議／解釋措辭（you can／可以／請／please ... write／建議／試試）＝不是在声称自己寫過 → 不觸發；
+#   3) 鄰窗有建議／解釋／否定措辭（you can／可以／請／not／未／沒有）＝不是在声称自己寫過 → 不觸發；
 #   4) 證據面：檔名 basename 出現在**任何一步**的輸入或輸出、或該檔在最新索引裡存在
 #      → 視為已記錄 → 不報（寧可漏抓跨 session／跨回合的造假，不可誤傷真實寫檔）。
 # Advisory only：`zerostop.pushable_for` 明確排除（docs/UNIVERSAL_TASKS.md §2）。
@@ -180,6 +180,9 @@ WRITE_CLAIM_SUGGEST = re.compile(
     r"|\bhow\s+to\s+(?:write|save|create)\b"
     r"|\bif\s+(?:you|needed|need)\b"
     r"|建議|試試|試看看|可以|可用|請|請你|請幫我|麻煩|若|如果|假如|倘若", re.I)
+WRITE_CLAIM_NEGATION = re.compile(
+    r"\b(?:not|never|no|neither|nor|without|did\s+not|didn't|have\s+not|haven't|has\s+not|hasn't|was\s+not|wasn't|were\s+not|weren't)\b"
+    r"|沒有|沒寫|未寫|未存|未產生|未生成|未建立|未創建|未更新|並未|不寫|不產生|不生成|無需產生|無須產生", re.I)
 # 反引號 span：檔名形（字母／數字／._/-/／＋ 點＋ 1–8 字副檔名）。URL（含 ://）因 ':' 不在字元集而匹配不到。
 WRITE_CLAIM_SPAN = re.compile(r"`([A-Za-z0-9_./-]+?\.[A-Za-z0-9]{1,8})`")
 
@@ -1595,7 +1598,7 @@ class Evidence:
         return out
 
     def _claimed_writes(self) -> list[dict[str, Any]]:
-        """方向 A「寫過沒」（2026-11-04，第 125 輪）：最終訊息以過去式聲稱「寫入/存成/產生」某個
+        """方向 A「寫過沒」（2026-10-28，第 125 輪）：最終訊息以過去式聲稱「寫入/存成/產生」某個
         反引號檔名，但整份記錄查無該檔（任何一步的輸入或輸出都碰不到它的 basename），且該檔在最新
         索引裡也不存在。濾網與證據面見 `WRITE_CLAIM_CUE` 旁註解。Advisory only：
         `zerostop.pushable_for` 明確排除，只進交件說明（docs/UNIVERSAL_TASKS.md §2）。"""
@@ -1630,6 +1633,8 @@ class Evidence:
             start, end = m.span()
             near = text[max(0, start - 80):min(len(text), end + 80)]
             if not WRITE_CLAIM_CUE.search(near):
+                continue
+            if WRITE_CLAIM_NEGATION.search(near):
                 continue
             wide = text[max(0, start - 100):min(len(text), end + 100)]
             if WRITE_CLAIM_SUGGEST.search(wide):

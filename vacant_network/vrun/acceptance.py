@@ -465,9 +465,12 @@ class Capture(unittest.TestResult):
         self.fixtures = []
         self._buf = None
         self._prev = None
+        self._fbuf = io.StringIO()
 
     def startTest(self, test):
         super().startTest(test)
+        self._fbuf.seek(0)
+        self._fbuf.truncate(0)
         self._buf = io.StringIO()
         self._prev = (sys.stdout, sys.stderr)
         sys.stdout = self._buf
@@ -476,6 +479,7 @@ class Capture(unittest.TestResult):
     def stopTest(self, test):
         if self._prev is not None:
             sys.stdout, sys.stderr = self._prev
+        self._buf = None
         super().stopTest(test)
 
     def _record(self, test, status, detail):
@@ -489,7 +493,10 @@ class Capture(unittest.TestResult):
             # 但記錄變成 driver_error 而不是「哪個 fixture 失敗」）。
             # 單列為檔案層 fixture 結果；輸出迴圈只從真 case 拼 id。
             # （GPT 審查 2026-10-28 P0-1 好/壞對照；round-149 釘住。）
-            self.fixtures.append((test, status, detail, out))
+            fout = self._fbuf.getvalue() + out
+            self._fbuf.seek(0)
+            self._fbuf.truncate(0)
+            self.fixtures.append((test, status, detail, fout))
             return
         self.results.append((test, status, detail, out))
 
@@ -542,7 +549,7 @@ def _emit_fixtures(cap):
             emit({"case": "<file>", "ok": False, "kind": status,
                   "message": clip(f"{desc} failed: " +
                                   (last_line(info) or "fixture failure"), 400),
-                  "where": where_of(info, TESTFILE), "output": ""})
+                  "where": where_of(info, TESTFILE), "output": clip(_out, 1200)})
         else:
             # fixture 自己 raise SkipTest（addSkip）或其他異常結果——
             # 對驗收門而言，fixture 不跑案例＝什麼都沒驗證，顯式紅。
@@ -550,11 +557,12 @@ def _emit_fixtures(cap):
                   "message": (f"{desc} reported {status} ({detail}); a fixture "
                               f"that skips the cases verifies nothing about "
                               f"the candidate"),
-                  "where": None, "output": ""})
+                  "where": None, "output": clip(_out, 1200)})
 
 cap = Capture()
 try:
-    unittest.TestSuite(sync_leaves).run(cap)
+    with contextlib.redirect_stdout(cap._fbuf), contextlib.redirect_stderr(cap._fbuf):
+        unittest.TestSuite(sync_leaves).run(cap)
 except BaseException as e:
     # 逐 case 的例外 unittest 會吞進 Capture；走到這裡是套件機件本身炸了。
     _emit_fixtures(cap)

@@ -217,8 +217,8 @@ def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) ->
         # （skeleton 模板骨架／stale_output 舊檔當成果／copy_of_input 照抄輸入素材）
         # ＋ 2026-10-25 `copy_of_inline`（把貼在題目裡的數據原樣抄回當成果）
         # ＋ 2026-10-26 `claimed_run`（稱已執行某命令但記錄查無，「跑過沒」）
-        # ＋ 2026-11-03 `unfetched`（任務點到 URL 要抓取但記錄查無、也沒老實說連不上，「抓過沒」）
-        # ＋ 2026-11-04 `claimed_write`（稱已寫入某檔但記錄查無、該檔也不存在，「寫過沒」）
+        # ＋ 2026-10-27 `unfetched`（任務點到 URL 要抓取但記錄查無、也沒老實說連不上，「抓過沒」）
+        # ＋ 2026-10-28 `claimed_write`（稱已寫入某檔但記錄查無、該檔也不存在，「寫過沒」）
         # ——都只進交件說明，不退回（docs/UNIVERSAL_TASKS.md §2）。
         # 要改成可退回，先過 tests/test_noncode_samples.py 的零誤報門檻。
         if k in ("copy_of_task", "skeleton", "stale_output", "copy_of_input", "copy_of_inline",

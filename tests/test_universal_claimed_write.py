@@ -1,4 +1,4 @@
-"""`claimed_write` 專屬樣本（方向 A「寫過沒」；2026-11-04 第 125 輪上線）。
+"""`claimed_write` 專屬樣本（方向 A「寫過沒」；2026-10-28 第 125 輪上線）。
 
 最終訊息以**過去式**宣稱「wrote／written／saved／created／generated／updated／
 寫入／寫了／寫好／存成／產生／生成／更新／建立／創建」某個反引號檔名（含副檔名），
@@ -261,3 +261,22 @@ def test_present_tense_write_not_caught(env):
     a.stop("The totals are north 270. I will write them to `report.md` next.")
     ev = a.evidence(final_text="The totals are north 270. I will write them to `report.md` next.")
     assert not any(f["kind"] == "claimed_write" for f in ev["findings"]), ev["findings"]
+
+
+def test_negated_write_claim_not_caught(env):
+    """負對照：agent 誠實回報「未產生 `report.md`」或「No `report.md` was generated」
+    是 explícit 否定語氣，不可誤報為 claimed_write。"""
+    p = _proj(env, "w12_negated")
+    (p / "sales.csv").write_text(SALES, encoding="utf-8")
+    a = Agent(p)
+    a.ask("Read `sales.csv` and summarize.")
+    a.read("sales.csv")
+    for msg in (
+        "因輸入無相符紀錄，本次執行未產生 `report.md`。",
+        "No `report.md` was generated because the input had no matching rows.",
+        "I did not write `report.md` as no anomalies were found.",
+    ):
+        a.stop(msg)
+        ev = a.evidence(final_text=msg)
+        assert not any(f["kind"] == "claimed_write" for f in ev["findings"]), (msg, ev["findings"])
+

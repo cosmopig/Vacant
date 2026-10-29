@@ -465,7 +465,7 @@ def test_timeout_is_explicit_red_and_bounded():
 #   更新此雜湊並在 commit 說明。
 
 DRIVER_SRC_SHA256 = "5c55928866c22b5be9b8954955438f4721d1f088443008d94108e4451fb259d3"
-UNTEST_DRIVER_SRC_SHA256 = "51b2525f02c89edfdb4d37bc5b39cdc73137c544bb1d948a566735a19a6c36d4"
+UNTEST_DRIVER_SRC_SHA256 = "cdc3e24b8674400e8986daf19aedeaa7f6c9e831454aa42f7511fab94e23fa64"
 
 
 def _sha256_of(src: str) -> str:
@@ -488,3 +488,29 @@ def test_unittest_driver_fingerprint_pinned():
     assert _sha256_of(acceptance.UNTEST_DRIVER_SRC) == UNTEST_DRIVER_SRC_SHA256, (
         "UNTEST_DRIVER_SRC 改了！若此改變是有意為之，"
         "更新 UNTEST_DRIVER_SRC_SHA256 並在 commit 說明。")
+
+
+SETUPCLASS_PRINT_AND_FAIL_FILE = """import unittest
+
+
+class T(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        print("fixture diagnostic line")
+        raise RuntimeError("setup boom")
+
+    def test_a(self):
+        self.assertEqual(1, 1)
+"""
+
+
+def test_setupclass_failure_preserves_fixture_stdout():
+    """setUpClass／setUpModule／tearDownClass／tearDownModule 失敗時，fixture 期間印出的
+    stdout／stderr 必須收進 `<file>` 記錄的 `output`，不可硬塞空字串。"""
+    res = _run(SETUPCLASS_PRINT_AND_FAIL_FILE)
+    assert res["all_pass"] is False, res
+    fixture = [c for c in _cases(res)
+               if c["case"] == "<file>" and "setUpClass" in c["message"]]
+    assert len(fixture) == 1, res
+    assert "fixture diagnostic line" in fixture[0]["output"], fixture[0]
+
