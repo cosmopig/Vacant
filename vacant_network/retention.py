@@ -1207,7 +1207,7 @@ def compact_session_hooks(
         rep["bytes_freed"] += max(0, len(raw) - len(tail))
         rep["files_truncated"] += 1
     # session 數上限：保留最新 keep_sessions 個
-    files.sort(key=lambda t: t[0], reverse=True)  # 最新在前
+    files.sort(key=lambda t: (t[0], -t[1]))  # 最新在前，同 mtime 則較小的先處理（避免刪除大檔案）
     for _mt, sz, f in files[keep_sessions:]:
         if not dry_run:
             with contextlib.suppress(OSError):
@@ -1278,7 +1278,7 @@ def auto_gc(
 
             t0 = time.time()
             budget = _Budget(t0 + budget_s)
-            body = gc_all(root=sroot, work_root=wroot, dry_run=False, budget=budget,
+            body = gc_all(root=sroot, work_root=wroot, dry_run=dry_run, budget=budget,
                           target_bytes=target_bytes)
             elapsed = time.time() - t0
             body.update({
