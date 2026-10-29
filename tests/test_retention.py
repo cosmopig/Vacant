@@ -336,6 +336,49 @@ def test_cli_vacant_gc_json(env, capsys):
     assert out["dry_run"] is True
     assert "bytes_freed" in out
     assert "trace" in out and "quarantine" in out and "work" in out and "logs" in out
+    # 2026-10-28 Axis 2 最優先新增的兩段也必須在 JSON 報告裡
+    assert "wire" in out and "session_hooks" in out
+
+
+def test_gc_cli_reports_wire_and_session_hooks(env, monkeypatch, capsys):
+    """round 164 回歸：`vacant gc` 的人類輸出必須逐段顯示 2026-10-28 Axis 2 最優先
+    新增的兩段（模型 wire 捕獲／session 事件），且釋放位元組與 `--json` 報告一致。
+    修前：總計 bytes_freed 含這兩段、明細行卻沒有——實際環境裡它們是最大非-trace
+    兩段（本機 wire 25 MB、hooks 0.9 MB），使用者看不出回收到哪。
+    """
+    import time as _time
+    from vacant_network.intake.statepaths import state_dir
+    sroot = state_dir().resolve()
+    # wire：兩通 body（各 4 KiB）= 8 KiB > 4 KiB 上限 → 最舊一通可回收（4096 B）
+    monkeypatch.setenv("VACANT_WIRE_BODY_BYTES", "4096")
+    wdir = sroot / "possess" / "proxyd" / "wire"
+    wdir.mkdir(parents=True, exist_ok=True)
+    now = _time.time()
+    for i, name in enumerate(("old.req.bin", "new.resp.bin")):
+        p = wdir / name
+        p.write_bytes(b"0" * 4096)
+        t = now - (2 - i) * 60
+        os.utime(p, (t, t))
+    # session 事件：單檔 ~2.6 MB > 預設單檔上限 2 MiB → 有可截斷位元組
+    hdir = sroot / "possess" / "hooks"
+    hdir.mkdir(parents=True, exist_ok=True)
+    line = json.dumps({"event": "canary", "pad": "x" * 256}) + "\n"
+    (hdir / "pi_1.jsonl").write_text(line * 10_000, encoding="utf-8")
+
+    rc = retention.main(["gc", "--dry-run", "--json"])
+    assert rc == 0
+    rep = json.loads(capsys.readouterr().out)
+    assert rep["wire"]["body_bytes_freed"] == 4096
+    assert rep["wire"]["body_files_removed"] == 1
+    assert rep["session_hooks"]["bytes_freed"] > 0
+
+    rc = retention.main(["gc", "--dry-run"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    wire_line = next(l for l in out.splitlines() if "模型 wire" in l)
+    hooks_line = next(l for l in out.splitlines() if "session 事件" in l)
+    assert retention._human_bytes(rep["wire"]["body_bytes_freed"]) in wire_line
+    assert retention._human_bytes(rep["session_hooks"]["bytes_freed"]) in hooks_line
 
 
 def test_cli_vacant_gc_verify_and_older_than_hours(env, capsys):

@@ -328,7 +328,10 @@ def compact_trace(
     obj_root = troot / "objects"
     proj_root = troot / "projects"
     if not troot.is_dir():
-        return {"bytes_freed": 0, "files_removed": 0, "projects_scanned": 0}
+        # 必須與完整回傳同形（round 164：缺 `kept_blobs`/`aborted` 會讓 `vacant gc`
+        # 的人類輸出在新狀態目錄上 KeyError）
+        return {"bytes_freed": 0, "files_removed": 0, "projects_scanned": 0,
+                "kept_blobs": 0, "aborted": False}
 
     blobs = W.Blobs(obj_root)
     keep_shas: set[str] = set()
@@ -1677,6 +1680,14 @@ def main(argv: list[str] | None = None) -> int:
           f"（掃描 {rep['work']['runs_scanned']} 次執行）")
     print(f"  · hooks 日誌     : 釋放 {_human_bytes(rep['logs']['bytes_freed'])} "
           f"（截斷 {rep['logs']['logs_compacted']} 個日誌）")
+    # 2026-10-28 Axis 2 最優先新增的兩段（wire 捕獲／session 事件）：總計
+    # bytes_freed 已含它們，但明細必須逐段顯示，使用者才看得到回收到哪。
+    w = rep["wire"]
+    print(f"  · 模型 wire    : 釋放 {_human_bytes(w['body_bytes_freed'] + w['index_bytes_freed'])} "
+          f"（bodies {w['body_files_removed']} 檔／index 行 {w['index_lines_dropped']}）")
+    sh = rep["session_hooks"]
+    print(f"  · session 事件 : 釋放 {_human_bytes(sh['bytes_freed'])} "
+          f"（刪 {sh['files_removed']} 檔／截斷 {sh['files_truncated']} 檔）")
     if args.vrun_dir:
         print(f"  · vrun 目錄      : 釋放 {_human_bytes(rep['vrun']['bytes_freed'])}")
     if args.verify:
