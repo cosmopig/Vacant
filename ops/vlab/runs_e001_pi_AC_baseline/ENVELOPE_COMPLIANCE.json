@@ -1,0 +1,1416 @@
+{
+  "exp": "e001_pi_AC_baseline",
+  "base": "/srv/vlab/runs",
+  "envelope_bytes": 268435456,
+  "envelope_source": "vacant_network.retention.STABLE_ENVELOPE_BYTES",
+  "n_cells": 120,
+  "cells": [
+    {
+      "cell": "dabstep-1-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 618020,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002302,
+      "vacant_objects_bytes": 592977
+    },
+    {
+      "cell": "dabstep-10-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-10-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 610125,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002273,
+      "vacant_objects_bytes": 591747
+    },
+    {
+      "cell": "dabstep-11-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-11-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 616209,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002296,
+      "vacant_objects_bytes": 594303
+    },
+    {
+      "cell": "dabstep-12-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-12-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 672508,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002505,
+      "vacant_objects_bytes": 647460
+    },
+    {
+      "cell": "dabstep-1273-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1273-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 698004,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.0026,
+      "vacant_objects_bytes": 674241
+    },
+    {
+      "cell": "dabstep-13-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-13-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 612481,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002282,
+      "vacant_objects_bytes": 592204
+    },
+    {
+      "cell": "dabstep-1305-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1305-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 748994,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.00279,
+      "vacant_objects_bytes": 683452
+    },
+    {
+      "cell": "dabstep-14-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-14-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 660030,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002459,
+      "vacant_objects_bytes": 643224
+    },
+    {
+      "cell": "dabstep-1464-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1464-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 716439,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002669,
+      "vacant_objects_bytes": 675336
+    },
+    {
+      "cell": "dabstep-15-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-15-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 644584,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002401,
+      "vacant_objects_bytes": 593358
+    },
+    {
+      "cell": "dabstep-16-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-16-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 663221,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002471,
+      "vacant_objects_bytes": 646287
+    },
+    {
+      "cell": "dabstep-1681-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1681-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 925384,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.003447,
+      "vacant_objects_bytes": 838800
+    },
+    {
+      "cell": "dabstep-17-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-17-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 695966,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002593,
+      "vacant_objects_bytes": 659486
+    },
+    {
+      "cell": "dabstep-1753-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1753-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 729590,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002718,
+      "vacant_objects_bytes": 693716
+    },
+    {
+      "cell": "dabstep-18-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-18-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 626789,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002335,
+      "vacant_objects_bytes": 598545
+    },
+    {
+      "cell": "dabstep-1871-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-1871-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": 1146648,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.004272,
+      "vacant_objects_bytes": 775027
+    },
+    {
+      "cell": "dabstep-19-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-19-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 718978,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002678,
+      "vacant_objects_bytes": 594741
+    },
+    {
+      "cell": "dabstep-2-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-2-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 665136,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002478,
+      "vacant_objects_bytes": 643352
+    },
+    {
+      "cell": "dabstep-20-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-20-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 659937,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002458,
+      "vacant_objects_bytes": 643136
+    },
+    {
+      "cell": "dabstep-21-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-21-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 669881,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002496,
+      "vacant_objects_bytes": 647890
+    },
+    {
+      "cell": "dabstep-22-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-22-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 658946,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002455,
+      "vacant_objects_bytes": 611186
+    },
+    {
+      "cell": "dabstep-23-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-23-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 904249,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.003369,
+      "vacant_objects_bytes": 596131
+    },
+    {
+      "cell": "dabstep-24-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-24-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 770615,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002871,
+      "vacant_objects_bytes": 662699
+    },
+    {
+      "cell": "dabstep-25-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-25-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 619033,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002306,
+      "vacant_objects_bytes": 595337
+    },
+    {
+      "cell": "dabstep-26-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-26-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 677255,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002523,
+      "vacant_objects_bytes": 652081
+    },
+    {
+      "cell": "dabstep-2697-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "dabstep-2697-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 802374,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002989,
+      "vacant_objects_bytes": 723055
+    },
+    {
+      "cell": "polyglot_py-pg_affine_cipher-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_affine_cipher-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 41185,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000153,
+      "vacant_objects_bytes": 18355
+    },
+    {
+      "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-20261028T060420",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-20261028T061157",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-20261028T061254",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-legacy",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_beer_song-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_beer_song-pi-A-r1.infra-20261028T060419",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_beer_song-pi-A-r1.infra-20261028T061156",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_beer_song-pi-A-r1.infra-legacy",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_beer_song-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 114655,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000427,
+      "vacant_objects_bytes": 76848
+    },
+    {
+      "cell": "polyglot_py-pg_beer_song-pi-C-r1.infra-legacy",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_book_store-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_book_store-pi-A-r1.infra-legacy",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_book_store-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 39383,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000147,
+      "vacant_objects_bytes": 19902
+    },
+    {
+      "cell": "polyglot_py-pg_book_store-pi-C-r1.infra-legacy",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_bottle_song-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_bottle_song-pi-A-r1.infra-legacy",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_bottle_song-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 93873,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.00035,
+      "vacant_objects_bytes": 56191
+    },
+    {
+      "cell": "polyglot_py-pg_bowling-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_bowling-pi-A-r1.infra-20261028T071108",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_bowling-pi-A-r1.infra-20261028T071832",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_bowling-pi-A-r1.infra-20261028T075308",
+      "skipped": "infra-retry 副檔，不計入"
+    },
+    {
+      "cell": "polyglot_py-pg_bowling-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 333481,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.001242,
+      "vacant_objects_bytes": 236381
+    },
+    {
+      "cell": "polyglot_py-pg_connect-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_connect-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 36727,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000137,
+      "vacant_objects_bytes": 18966
+    },
+    {
+      "cell": "polyglot_py-pg_dominoes-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_dominoes-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 55885,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000208,
+      "vacant_objects_bytes": 29871
+    },
+    {
+      "cell": "polyglot_py-pg_dot_dsl-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_dot_dsl-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 44588,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000166,
+      "vacant_objects_bytes": 20262
+    },
+    {
+      "cell": "polyglot_py-pg_food_chain-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_food_chain-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 191031,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000712,
+      "vacant_objects_bytes": 89230
+    },
+    {
+      "cell": "polyglot_py-pg_forth-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_forth-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 314395,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.001171,
+      "vacant_objects_bytes": 198826
+    },
+    {
+      "cell": "polyglot_py-pg_go_counting-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_go_counting-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 104517,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000389,
+      "vacant_objects_bytes": 61162
+    },
+    {
+      "cell": "polyglot_py-pg_grade_school-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_grade_school-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 37568,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.00014,
+      "vacant_objects_bytes": 18072
+    },
+    {
+      "cell": "polyglot_py-pg_grep-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_grep-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 179369,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000668,
+      "vacant_objects_bytes": 77289
+    },
+    {
+      "cell": "polyglot_py-pg_hangman-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_hangman-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 227076,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000846,
+      "vacant_objects_bytes": 62056
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 53020,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000198,
+      "vacant_objects_bytes": 16089
+    },
+    {
+      "cell": "polyglot_py-pg_paasio-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_paasio-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 206747,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.00077,
+      "vacant_objects_bytes": 119715
+    },
+    {
+      "cell": "polyglot_py-pg_phone_number-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_phone_number-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 44911,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000167,
+      "vacant_objects_bytes": 23751
+    },
+    {
+      "cell": "polyglot_py-pg_pig_latin-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_pig_latin-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": 806768,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.003005,
+      "vacant_objects_bytes": 262874
+    },
+    {
+      "cell": "polyglot_py-pg_poker-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_poker-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 96295,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000359,
+      "vacant_objects_bytes": 48306
+    },
+    {
+      "cell": "polyglot_py-pg_pov-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_pov-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 58862,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000219,
+      "vacant_objects_bytes": 36014
+    },
+    {
+      "cell": "polyglot_py-pg_proverb-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_proverb-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 27611,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000103,
+      "vacant_objects_bytes": 8170
+    },
+    {
+      "cell": "polyglot_py-pg_react-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_react-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": 500533,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.001865,
+      "vacant_objects_bytes": 112738
+    },
+    {
+      "cell": "polyglot_py-pg_rest_api-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_rest_api-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 166266,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000619,
+      "vacant_objects_bytes": 97994
+    },
+    {
+      "cell": "polyglot_py-pg_robot_name-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_robot_name-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 31776,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000118,
+      "vacant_objects_bytes": 9122
+    },
+    {
+      "cell": "polyglot_py-pg_scale_generator-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_scale_generator-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 138289,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000515,
+      "vacant_objects_bytes": 88056
+    },
+    {
+      "cell": "polyglot_py-pg_sgf_parsing-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_sgf_parsing-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": 590372,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.002199,
+      "vacant_objects_bytes": 468582
+    },
+    {
+      "cell": "polyglot_py-pg_simple_linked_list-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_simple_linked_list-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 69741,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.00026,
+      "vacant_objects_bytes": 37145
+    },
+    {
+      "cell": "polyglot_py-pg_transpose-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_transpose-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 116332,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000433,
+      "vacant_objects_bytes": 40771
+    },
+    {
+      "cell": "polyglot_py-pg_tree_building-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_tree_building-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 35443,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000132,
+      "vacant_objects_bytes": 15982
+    },
+    {
+      "cell": "polyglot_py-pg_two_bucket-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_two_bucket-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 44402,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000165,
+      "vacant_objects_bytes": 23259
+    },
+    {
+      "cell": "polyglot_py-pg_variable_length_quantity-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_variable_length_quantity-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 32307,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.00012,
+      "vacant_objects_bytes": 11171
+    },
+    {
+      "cell": "polyglot_py-pg_wordy-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_wordy-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 98530,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000367,
+      "vacant_objects_bytes": 52016
+    },
+    {
+      "cell": "polyglot_py-pg_zebra_puzzle-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_zebra_puzzle-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 0,
+      "timed_out": false,
+      "vacant_home_bytes": 47456,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000177,
+      "vacant_objects_bytes": 24676
+    },
+    {
+      "cell": "polyglot_py-pg_zipper-pi-A-r1",
+      "arm": "A",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": null,
+      "compliance": "NA",
+      "note": "此臂設計上沒裝 Vacant，超出封頂口徑"
+    },
+    {
+      "cell": "polyglot_py-pg_zipper-pi-C-r1",
+      "arm": "C",
+      "state": "complete",
+      "agent_rc": 124,
+      "timed_out": true,
+      "vacant_home_bytes": 245220,
+      "compliance": "PASS",
+      "note": null,
+      "ratio_of_envelope": 0.000914,
+      "vacant_objects_bytes": 86990
+    }
+  ],
+  "by_arm": {
+    "A": {
+      "n_cells": 60,
+      "n_complete": 60,
+      "counts": {
+        "PASS": 0,
+        "FAIL": 0,
+        "NO_EVIDENCE": 0,
+        "NA": 60
+      },
+      "verdict": "NA"
+    },
+    "C": {
+      "n_cells": 60,
+      "n_complete": 60,
+      "counts": {
+        "PASS": 60,
+        "FAIL": 0,
+        "NO_EVIDENCE": 0,
+        "NA": 0
+      },
+      "verdict": "PASS",
+      "home_bytes_min_med_max": [
+        27611,
+        333481,
+        1146648
+      ]
+    }
+  },
+  "verdict": "PASS",
+  "note": "256 MiB 是穩態封頂（trace 64＋wire body 96＋wire index 8＋日誌/隔離＋固定安裝面 ~10 MiB），不是單一任務預算；單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是全部——『一天長多少』看 vacant_growth_log.py 的真機序列，GC 回收與回收後 UNKNOWN 另證。NA/NO_EVIDENCE 是誠實狀態，不代表合規。"
+}

@@ -1,0 +1,2738 @@
+{
+ "exp": "e001_pi_AC_baseline",
+ "base": "/srv/vlab/runs",
+ "suite": "polyglot_py",
+ "n_cells": 82,
+ "expected_tasks": [
+  "pg_affine_cipher",
+  "pg_beer_song",
+  "pg_book_store",
+  "pg_bottle_song",
+  "pg_bowling",
+  "pg_connect",
+  "pg_dominoes",
+  "pg_dot_dsl",
+  "pg_food_chain",
+  "pg_forth",
+  "pg_go_counting",
+  "pg_grade_school",
+  "pg_grep",
+  "pg_hangman",
+  "pg_list_ops",
+  "pg_paasio",
+  "pg_phone_number",
+  "pg_pig_latin",
+  "pg_poker",
+  "pg_pov",
+  "pg_proverb",
+  "pg_react",
+  "pg_rest_api",
+  "pg_robot_name",
+  "pg_scale_generator",
+  "pg_sgf_parsing",
+  "pg_simple_linked_list",
+  "pg_transpose",
+  "pg_tree_building",
+  "pg_two_bucket",
+  "pg_variable_length_quantity",
+  "pg_wordy",
+  "pg_zebra_puzzle",
+  "pg_zipper"
+ ],
+ "expected_tasks_source": "arm_A",
+ "cells": [
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_affine_cipher",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_affine_cipher",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "affine_cipher.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 16,
+    "tests_total": 16
+   },
+   "test_files_referenced": [
+    "affine_cipher_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q affine_cipher_test.py",
+    "python3 -m unittest affine_cipher_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-20261028T060420",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-20261028T061157",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-20261028T061254",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-C-r1.infra-legacy",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_beer_song",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-A-r1.infra-20261028T060419",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-A-r1.infra-20261028T061156",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-A-r1.infra-legacy",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_beer_song",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "beer_song.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 8,
+    "tests_total": 8
+   },
+   "test_files_referenced": [
+    "beer_song_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q beer_song_test.py",
+    "python3 -m unittest beer_song_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-C-r1.infra-legacy",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_book_store-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_book_store",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_book_store-pi-A-r1.infra-legacy",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_book_store-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_book_store",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "book_store.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 20,
+    "tests_total": 20
+   },
+   "test_files_referenced": [
+    "book_store_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest book_store_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_book_store-pi-C-r1.infra-legacy",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_bottle_song-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bottle_song",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_bottle_song-pi-A-r1.infra-legacy",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_bottle_song-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bottle_song",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "bottle_song.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 7,
+    "tests_total": 7
+   },
+   "test_files_referenced": [
+    "bottle_song_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest bottle_song_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bowling",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-A-r1.infra-20261028T071108",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-A-r1.infra-20261028T071832",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-A-r1.infra-20261028T075308",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bowling",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest bowling_test.py",
+       "finding_id": "z_de6e706ef2",
+       "kind": "failed_step",
+       "step": 47,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "bowling.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest bowling_test.py",
+       "finding_id": "z_de6e706ef2",
+       "kind": "failed_step",
+       "step": 53,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "bowling.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 26,
+    "tests_total": 31
+   },
+   "test_files_referenced": [
+    "bowling_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest bowling_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_connect-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_connect",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_connect-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_connect",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "connect.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 10,
+    "tests_total": 10
+   },
+   "test_files_referenced": [
+    "connect_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest connect_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_dominoes-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dominoes",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_dominoes-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dominoes",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "dominoes.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 13,
+    "tests_total": 13
+   },
+   "test_files_referenced": [
+    "dominoes_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest dominoes_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_dot_dsl-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dot_dsl",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_dot_dsl-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dot_dsl",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "dot_dsl.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 12,
+    "tests_total": 12
+   },
+   "test_files_referenced": [
+    "dot_dsl_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest dot_dsl_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_food_chain-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_food_chain",
+   "state": "complete",
+   "arm": "A",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_food_chain-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_food_chain",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "food_chain.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 0,
+    "tests_total": 10
+   },
+   "test_files_referenced": [
+    "food_chain_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 food_chain_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_forth-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_forth",
+   "state": "complete",
+   "arm": "A",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_forth-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_forth",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest forth_test.py",
+       "finding_id": "z_24a4131bc6",
+       "kind": "failed_step",
+       "step": 52,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "forth.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest forth_test.py",
+       "finding_id": "z_24a4131bc6",
+       "kind": "failed_step",
+       "step": 64,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "forth.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 51,
+    "tests_total": 54
+   },
+   "test_files_referenced": [
+    "forth_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest forth_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_go_counting-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_go_counting",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_go_counting-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_go_counting",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest go_counting_test.py",
+       "finding_id": "z_5c30e16e76",
+       "kind": "failed_step",
+       "step": 17,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "go_counting.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "go_counting.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 11,
+    "tests_total": 11
+   },
+   "test_files_referenced": [
+    "go_counting_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest go_counting_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_grade_school-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grade_school",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_grade_school-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grade_school",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "grade_school.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 20,
+    "tests_total": 20
+   },
+   "test_files_referenced": [
+    "grade_school_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest grade_school_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_grep-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grep",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_grep-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grep",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "grep.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 25,
+    "tests_total": 25
+   },
+   "test_files_referenced": [
+    "grep_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest grep_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_hangman-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_hangman",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_hangman-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_hangman",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest hangman_test.py",
+       "finding_id": "z_419577b75a",
+       "kind": "failed_step",
+       "step": 66,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "hangman.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest hangman_test.py",
+       "finding_id": "z_419577b75a",
+       "kind": "failed_step",
+       "step": 97,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "hangman.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 6,
+    "tests_total": 7
+   },
+   "test_files_referenced": [
+    "hangman_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest hangman_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_list_ops-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_list_ops",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_list_ops-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_list_ops",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest list_ops_test.py",
+       "finding_id": "z_b1fc3218a2",
+       "kind": "failed_step",
+       "step": 9,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "list_ops.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "list_ops.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 24,
+    "tests_total": 24
+   },
+   "test_files_referenced": [
+    "list_ops_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest list_ops_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_paasio-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_paasio",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_paasio-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_paasio",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest paasio_test.py",
+       "finding_id": "z_5575c9c90d",
+       "kind": "failed_step",
+       "step": 20,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "paasio.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "paasio.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 23,
+    "tests_total": 25
+   },
+   "test_files_referenced": [
+    "paasio_test.py",
+    "test_utils.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest paasio_test.py",
+    "python3 paasio_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_phone_number-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_phone_number",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_phone_number-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_phone_number",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "phone_number.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 21,
+    "tests_total": 21
+   },
+   "test_files_referenced": [
+    "phone_number_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest phone_number_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pig_latin",
+   "state": "complete",
+   "arm": "A",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pig_latin",
+   "state": "complete",
+   "arm": "C",
+   "infra": "BAD",
+   "c_installed": true,
+   "review": null,
+   "score": {
+    "pass": false,
+    "tests_passed": 0,
+    "tests_total": 22
+   },
+   "test_files_referenced": [
+    "pig_latin_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest pig_latin_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_poker-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_poker",
+   "state": "complete",
+   "arm": "A",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_poker-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_poker",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest poker_test.py",
+       "finding_id": "z_315ddd7d72",
+       "kind": "failed_step",
+       "step": 17,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "poker.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest poker_test.py",
+       "finding_id": "z_315ddd7d72",
+       "kind": "failed_step",
+       "step": 23,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "poker.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 33,
+    "tests_total": 37
+   },
+   "test_files_referenced": [
+    "poker_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest poker_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_pov-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pov",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_pov-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pov",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "pov.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 15,
+    "tests_total": 15
+   },
+   "test_files_referenced": [
+    "pov_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q pov_test.py",
+    "python3 -m unittest pov_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_proverb-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_proverb",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_proverb-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_proverb",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "proverb.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 8,
+    "tests_total": 8
+   },
+   "test_files_referenced": [
+    "proverb_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q proverb_test.py",
+    "python3 -m unittest proverb_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_react",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_react",
+   "state": "complete",
+   "arm": "C",
+   "infra": "BAD",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest react_test.py",
+       "finding_id": "z_4c8f447db0",
+       "kind": "failed_step",
+       "step": 180,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "react.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 13,
+    "tests_total": 14
+   },
+   "test_files_referenced": [
+    "react_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest react_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_rest_api",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_rest_api",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest rest_api_test.py",
+       "finding_id": "z_3ab78568bd",
+       "kind": "failed_step",
+       "step": 23,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "rest_api.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest rest_api_test.py",
+       "finding_id": "z_3ab78568bd",
+       "kind": "failed_step",
+       "step": 36,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "rest_api.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 8,
+    "tests_total": 9
+   },
+   "test_files_referenced": [
+    "rest_api_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest rest_api_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_robot_name-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_robot_name",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_robot_name-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_robot_name",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "robot_name.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 4,
+    "tests_total": 4
+   },
+   "test_files_referenced": [
+    "robot_name_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest robot_name_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_scale_generator-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_scale_generator",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_scale_generator-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_scale_generator",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest scale_generator_test.py",
+       "finding_id": "z_2c49cdc539",
+       "kind": "failed_step",
+       "step": 18,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "scale_generator.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest scale_generator_test.py",
+       "finding_id": "z_2c49cdc539",
+       "kind": "failed_step",
+       "step": 24,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "scale_generator.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 15,
+    "tests_total": 17
+   },
+   "test_files_referenced": [
+    "scale_generator_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest scale_generator_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_sgf_parsing-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_sgf_parsing",
+   "state": "complete",
+   "arm": "A",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_sgf_parsing-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_sgf_parsing",
+   "state": "complete",
+   "arm": "C",
+   "infra": "BAD",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest sgf_parsing_test.py",
+       "finding_id": "z_355889f37b",
+       "kind": "failed_step",
+       "step": 33,
+       "sub": "test_failed"
+      },
+      {
+       "detail": "Python SyntaxError: invalid syntax",
+       "finding_id": "z_2497b2af66",
+       "kind": "invalid_output",
+       "line": 37,
+       "path": "sgf_parsing.py",
+       "sub": "syntax"
+      }
+     ],
+     "deliverables": [
+      "sgf_parsing.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 2,
+    "tests_total": 23
+   },
+   "test_files_referenced": [
+    "sgf_parsing_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m unittest sgf_parsing_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_simple_linked_list-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_simple_linked_list",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_simple_linked_list-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_simple_linked_list",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "simple_linked_list.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 20,
+    "tests_total": 20
+   },
+   "test_files_referenced": [
+    "simple_linked_list_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q simple_linked_list_test.py",
+    "python3 -m unittest simple_linked_list_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_transpose-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_transpose",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_transpose-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_transpose",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest transpose_test.py",
+       "finding_id": "z_ef55924a29",
+       "kind": "failed_step",
+       "step": 32,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "transpose.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest transpose_test.py",
+       "finding_id": "z_ef55924a29",
+       "kind": "failed_step",
+       "step": 32,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "transpose.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 8,
+    "tests_total": 12
+   },
+   "test_files_referenced": [
+    "transpose_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q transpose_test.py",
+    "python3 -m unittest transpose_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_tree_building-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_tree_building",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_tree_building-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_tree_building",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "tree_building.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 13,
+    "tests_total": 13
+   },
+   "test_files_referenced": [
+    "tree_building_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q tree_building_test.py",
+    "python3 -m unittest tree_building_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_two_bucket-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_two_bucket",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_two_bucket-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_two_bucket",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "two_bucket.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 9,
+    "tests_total": 9
+   },
+   "test_files_referenced": [
+    "two_bucket_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q two_bucket_test.py",
+    "python3 -m unittest two_bucket_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_variable_length_quantity-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_variable_length_quantity",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_variable_length_quantity-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_variable_length_quantity",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "variable_length_quantity.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": false,
+    "tests_passed": 2,
+    "tests_total": 26
+   },
+   "test_files_referenced": [
+    "variable_length_quantity_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q variable_length_quantity_test.py",
+    "python3 variable_length_quantity_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_wordy-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_wordy",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_wordy-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_wordy",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "continue",
+     "findings": [
+      {
+       "cmd": "python3 -m unittest wordy_test.py",
+       "finding_id": "z_55b0fc0c10",
+       "kind": "failed_step",
+       "step": 21,
+       "sub": "test_failed"
+      }
+     ],
+     "deliverables": [
+      "wordy.py"
+     ]
+    },
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "wordy.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 25,
+    "tests_total": 25
+   },
+   "test_files_referenced": [
+    "wordy_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q wordy_test.py",
+    "python3 -m unittest wordy_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_zebra_puzzle-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zebra_puzzle",
+   "state": "complete",
+   "arm": "A",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_zebra_puzzle-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zebra_puzzle",
+   "state": "complete",
+   "arm": "C",
+   "infra": "OK",
+   "c_installed": true,
+   "review": [
+    {
+     "action": "allow",
+     "findings": [],
+     "deliverables": [
+      "zebra_puzzle.py"
+     ]
+    }
+   ],
+   "score": {
+    "pass": true,
+    "tests_passed": 2,
+    "tests_total": 2
+   },
+   "test_files_referenced": [
+    "zebra_puzzle_test.py"
+   ],
+   "test_exec_evidence": true,
+   "exec_samples": [
+    "python3 -m pytest -q zebra_puzzle_test.py",
+    "python3 zebra_puzzle_test.py",
+    "python3 -m unittest zebra_puzzle_test.py"
+   ]
+  },
+  {
+   "cell": "polyglot_py-pg_zipper-pi-A-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zipper",
+   "state": "complete",
+   "arm": "A",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_zipper-pi-C-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zipper",
+   "state": "complete",
+   "arm": "C",
+   "infra": "BAD",
+   "c_installed": true,
+   "review": null,
+   "score": {
+    "pass": false,
+    "tests_passed": 3,
+    "tests_total": 14
+   },
+   "test_files_referenced": [
+    "zipper_test.py"
+   ],
+   "test_exec_evidence": true
+  }
+ ],
+ "per_task": [
+  {
+   "task": "pg_affine_cipher",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 16,
+     "tests_total": 16
+    }
+   ],
+   "test_files_referenced": [
+    "affine_cipher_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_beer_song",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 8,
+     "tests_total": 8
+    }
+   ],
+   "test_files_referenced": [
+    "beer_song_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_book_store",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 20,
+     "tests_total": 20
+    }
+   ],
+   "test_files_referenced": [
+    "book_store_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_bottle_song",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 7,
+     "tests_total": 7
+    }
+   ],
+   "test_files_referenced": [
+    "bottle_song_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_bowling",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 26,
+     "tests_total": 31
+    }
+   ],
+   "test_files_referenced": [
+    "bowling_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_connect",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 10,
+     "tests_total": 10
+    }
+   ],
+   "test_files_referenced": [
+    "connect_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_dominoes",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 13,
+     "tests_total": 13
+    }
+   ],
+   "test_files_referenced": [
+    "dominoes_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_dot_dsl",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 12,
+     "tests_total": 12
+    }
+   ],
+   "test_files_referenced": [
+    "dot_dsl_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_food_chain",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 0,
+     "tests_total": 10
+    }
+   ],
+   "test_files_referenced": [
+    "food_chain_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_forth",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 51,
+     "tests_total": 54
+    }
+   ],
+   "test_files_referenced": [
+    "forth_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_go_counting",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 11,
+     "tests_total": 11
+    }
+   ],
+   "test_files_referenced": [
+    "go_counting_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_grade_school",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 20,
+     "tests_total": 20
+    }
+   ],
+   "test_files_referenced": [
+    "grade_school_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_grep",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 25,
+     "tests_total": 25
+    }
+   ],
+   "test_files_referenced": [
+    "grep_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_hangman",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 6,
+     "tests_total": 7
+    }
+   ],
+   "test_files_referenced": [
+    "hangman_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_list_ops",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 24,
+     "tests_total": 24
+    }
+   ],
+   "test_files_referenced": [
+    "list_ops_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_paasio",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 23,
+     "tests_total": 25
+    }
+   ],
+   "test_files_referenced": [
+    "paasio_test.py",
+    "test_utils.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_phone_number",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 21,
+     "tests_total": 21
+    }
+   ],
+   "test_files_referenced": [
+    "phone_number_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_pig_latin",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    null
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 0,
+     "tests_total": 22
+    }
+   ],
+   "test_files_referenced": [
+    "pig_latin_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": false
+  },
+  {
+   "task": "pg_poker",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 33,
+     "tests_total": 37
+    }
+   ],
+   "test_files_referenced": [
+    "poker_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_pov",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 15,
+     "tests_total": 15
+    }
+   ],
+   "test_files_referenced": [
+    "pov_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_proverb",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 8,
+     "tests_total": 8
+    }
+   ],
+   "test_files_referenced": [
+    "proverb_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_react",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 13,
+     "tests_total": 14
+    }
+   ],
+   "test_files_referenced": [
+    "react_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_rest_api",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 8,
+     "tests_total": 9
+    }
+   ],
+   "test_files_referenced": [
+    "rest_api_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_robot_name",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 4,
+     "tests_total": 4
+    }
+   ],
+   "test_files_referenced": [
+    "robot_name_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_scale_generator",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 15,
+     "tests_total": 17
+    }
+   ],
+   "test_files_referenced": [
+    "scale_generator_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_sgf_parsing",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 2,
+     "tests_total": 23
+    }
+   ],
+   "test_files_referenced": [
+    "sgf_parsing_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_simple_linked_list",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 20,
+     "tests_total": 20
+    }
+   ],
+   "test_files_referenced": [
+    "simple_linked_list_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_transpose",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 8,
+     "tests_total": 12
+    }
+   ],
+   "test_files_referenced": [
+    "transpose_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_tree_building",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 13,
+     "tests_total": 13
+    }
+   ],
+   "test_files_referenced": [
+    "tree_building_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_two_bucket",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 9,
+     "tests_total": 9
+    }
+   ],
+   "test_files_referenced": [
+    "two_bucket_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_variable_length_quantity",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 2,
+     "tests_total": 26
+    }
+   ],
+   "test_files_referenced": [
+    "variable_length_quantity_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_wordy",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "continue",
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 25,
+     "tests_total": 25
+    }
+   ],
+   "test_files_referenced": [
+    "wordy_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_zebra_puzzle",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    [
+     "allow"
+    ]
+   ],
+   "score": [
+    {
+     "pass": true,
+     "tests_passed": 2,
+     "tests_total": 2
+    }
+   ],
+   "test_files_referenced": [
+    "zebra_puzzle_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": true
+  },
+  {
+   "task": "pg_zipper",
+   "c_cells": 1,
+   "c_complete": 1,
+   "c_installed_all": true,
+   "review_actions": [
+    null
+   ],
+   "score": [
+    {
+     "pass": false,
+     "tests_passed": 3,
+     "tests_total": 14
+    }
+   ],
+   "test_files_referenced": [
+    "zipper_test.py"
+   ],
+   "test_exec_evidence_all": true,
+   "record_complete": false
+  }
+ ],
+ "criteria": {
+  "c_complete_cells": 34,
+  "c_installed_FAIL": 0,
+  "review_NO_EVIDENCE": 2,
+  "review_allow": 30,
+  "review_continue": 2,
+  "review_refuse": 0,
+  "review_other": 0,
+  "score_NO_EVIDENCE": 0,
+  "score_pass": 20,
+  "score_fail": 14,
+  "score_zero_tests": 0,
+  "test_files_referenced_in_all": 34,
+  "test_exec_evidence_in_all": 34,
+  "tasks_with_complete_record": 32,
+  "tasks_total": 34
+ }
+}
