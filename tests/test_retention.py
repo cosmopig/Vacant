@@ -529,3 +529,106 @@ def test_hook_spawns_auto_gc_on_stop(env, monkeypatch):
     hook.handle("claude", "Stop", {"session_id": "S1", "cwd": str(env / "work" / "hp")})
     assert spawned.get("cmd") is None
 
+
+# ─────────────── 2026-10-28 Axis 2 最優先：wire 捕獲＋session hook 上限 ───────────────
+
+def _wire_env(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    return tmp_path
+
+
+def _mk_wire(tmp_path, n_calls=10, body_bytes=1024 * 1024, line_pad=900):
+    """造 n_calls 通 wire 捕獲（body 舊→新）＋index journal 每通一行。"""
+    import time as _time
+    from vacant_network.intake.statepaths import state_dir
+    sroot = state_dir().resolve()
+    wdir = sroot / "possess" / "proxyd" / "wire"
+    wdir.mkdir(parents=True, exist_ok=True)
+    now = _time.time()
+    for i in range(n_calls):
+        for kind in ("req", "resp"):
+            p = wdir / f"r{i:04d}.{kind}.bin"
+            p.write_bytes(b"0" * body_bytes)
+            _time_t = now - (n_calls - i) * 60
+            os.utime(p, (_time_t, _time_t))
+    lines = [json.dumps({
+        "call_id": i, "ts": now - (n_calls - i) * 60, "mode": "live", "status": 200,
+        "request_sha256": "x" * 40, "response_sha256": "y" * 40,
+        "request_bytes": body_bytes, "response_bytes": body_bytes,
+        "pad": "z" * line_pad,
+    }) for i in range(n_calls)]
+    (wdir / "index.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return sroot, wdir
+
+
+def test_compact_wire_caps_bodies_keeps_index_and_journal(tmp_path, monkeypatch):
+    _wire_env(tmp_path, monkeypatch)
+    sroot, wdir = _mk_wire(tmp_path, n_calls=10, body_bytes=1024 * 1024)
+    MB = 1024 * 1024
+    rep = retention.compact_wire(sroot, max_body_bytes=4 * MB, max_index_bytes=8 * 1024)
+    # body：20 檔 × 1 MiB = 20 MiB → 保留最新 4 檔（4 MiB）、刪最舊 16 檔
+    assert rep["body_files_before"] == 20
+    assert rep["body_files_removed"] == 16
+    assert rep["body_bytes_freed"] == 16 * MB
+    kept = sorted(f.name for f in wdir.iterdir() if f.suffix == ".bin")
+    # 4 個**檔**（非 4 通）＝4 MiB：最新兩通的 req/resp（round 154 同 commit 的
+    # 註解與 `body_files_removed == 16` 皆為按檔口徑；被拆對的 body 內容誠實 UNKNOWN，
+    # 證據在 index.jsonl 的 sha256，見 `compact_wire` docstring）
+    assert kept == [f"r{i:04d}.{k}.bin" for i in range(8, 10) for k in ("req", "resp")]
+    # index：10 行 × ~1.1 KB > 8 KiB → 保留最新完整行（keep=4 KiB）；每行仍是合法 JSON
+    text = (wdir / "index.jsonl").read_text(encoding="utf-8")
+    kept_lines = [json.loads(l) for l in text.splitlines() if l.strip()]
+    assert 1 <= len(kept_lines) < 10
+    assert kept_lines[-1]["call_id"] == 9          # 最新一通保留
+    assert min(l["call_id"] for l in kept_lines) >= 1   # 最舊的至少被截掉一些
+    assert rep["index_lines_dropped"] == 10 - len(kept_lines)
+    # attest 仍可讀（追緝/對帳不受影響；被截掉的通＝UNKNOWN，不損毀）。
+    # `read_relay_calls` 回 `list[dict] | None`（見 `vrun/attest.py`）；不可解析的
+    # 行會帶 `_unparsable`——截斷必須是整行，所以每一行都不該有它。
+    from vacant_network.vrun import attest
+    calls = attest.read_relay_calls(wdir / "index.jsonl", since=0)
+    assert calls is not None and len(calls) == len(kept_lines)
+    assert all("_unparsable" not in c for c in calls), "截斷後不得有殘行"
+
+
+def test_compact_wire_dry_run_changes_nothing(tmp_path, monkeypatch):
+    _wire_env(tmp_path, monkeypatch)
+    sroot, wdir = _mk_wire(tmp_path, n_calls=10, body_bytes=1024 * 1024)
+    before = {p.name: p.stat().st_size for p in wdir.iterdir()}
+    rep = retention.compact_wire(sroot, max_body_bytes=4 * 1024 * 1024,
+                                 max_index_bytes=8 * 1024, dry_run=True)
+    after = {p.name: p.stat().st_size for p in wdir.iterdir()}
+    assert before == after, "dry-run 不得改動任何檔案"
+    assert rep["body_files_removed"] == 16          # 估算有、刪除無
+
+
+def test_compact_session_hooks_count_and_file_caps(tmp_path, monkeypatch):
+    import time as _time
+    _wire_env(tmp_path, monkeypatch)
+    from vacant_network.intake.statepaths import state_dir
+    sroot = state_dir().resolve()
+    hdir = sroot / "possess" / "hooks"
+    hdir.mkdir(parents=True, exist_ok=True)
+    now = _time.time()
+    for i in range(250):
+        p = hdir / f"pi_{i:04d}.jsonl"
+        p.write_text(json.dumps({"run_id": str(i), "event": "session_start"}) + "\n")
+        t = now - (300 - i) * 10
+        os.utime(p, (t, t))
+    big = hdir / "pi_big.jsonl"
+    big.write_text(json.dumps({"event": "x", "pad": "z" * 200}) * 20000)  # ~4.2 MiB
+    os.utime(big, (now - 5, now - 5))
+    rep = retention.compact_session_hooks(sroot, max_file_bytes=2 * 1024 * 1024,
+                                          keep_sessions=200)
+    # 251 檔 → 保留最新 200 個（含 big）→ 刪 51 個最舊
+    assert rep["files_before"] == 251
+    assert rep["files_removed"] == 51
+    # big（最新）保留但被截到 ≤ 1 MiB（一半上限）＋一行的餘量
+    assert rep["files_truncated"] == 1
+    assert big.stat().st_size <= 2 * 1024 * 1024 + 1024
+    remaining = sorted(f.name for f in hdir.iterdir())
+    assert "pi_big.jsonl" in remaining
+    assert len(remaining) == 200
