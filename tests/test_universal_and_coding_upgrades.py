@@ -13,6 +13,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import pathlib
+import re
 
 import pytest
 
@@ -381,6 +382,85 @@ def test_test_hint_extracted_in_test_failed_and_clean_review(env):
     assert failed[0].get("sub") == "test_failed"
     assert "AssertionError" in failed[0].get("test_hint", "")
     _assert_clean_review(ev)
+
+
+# e002 C 臂實測形態：unittest 多行 FAIL（多個測試方法）+ "FAILED (failures=N)" 總結行。
+# 紅燈：hint 必須點名具體失敗的測試方法與斷言差異，而不是只有總結行——
+# 否則模型拿不到可修改的線索（e002_hypothesis_arms C 臂退回題的診斷結論：
+# 回饋若只到 "FAILED (failures=7)" 這層，模型沒有修的方向）。
+def test_unittest_multifail_hint_names_failing_test_not_summary(env):
+    p = _proj(env, "unittest_multifail",
+              {"bottle_song.py": "def recite(start=10, take=None):\n    raise NotImplementedError\n"})
+    a = Agent(p)
+    a.ask("Write bottle_song.py and run the unittest suite.")
+    a.write("bottle_song.py", "def recite(start=10, take=None):\n    return []\n")
+    unittest_out = (
+        "FFFFFFF\n"
+        "======================================================================\n"
+        "FAIL: test_first_generic_verse (bottle_song_test.BottleSongTest.test_first_generic_verse)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/bottle_song_test.py", line 20, in test_first_generic_verse\n'
+        "    self.assertEqual(recite(start=10), expected)\n"
+        'AssertionError: "10 green bottles hanging on the wall,\\n1[1745 chars]all." != '
+        "['Ten green bottles hanging on the wall,'[146 chars]ll.\"]\n"
+        "\n"
+        "======================================================================\n"
+        "FAIL: test_verse_with_2_bottles (bottle_song_test.BottleSongTest.test_verse_with_2_bottles)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/bottle_song_test.py", line 38, in test_verse_with_2_bottles\n'
+        "    self.assertEqual(recite(start=2), expected)\n"
+        'AssertionError: "2 green bottles hanging on the wall,\\n2 [311 chars]all." != '
+        "['Two green bottles hanging on the wall,'[144 chars]ll.\"]\n"
+        "----------------------------------------------------------------------\n"
+        "Ran 7 tests in 0.001s\n"
+        "\n"
+        "FAILED (failures=7)\n"
+    )
+    a.bash("python -m unittest bottle_song_test.py", stdout=unittest_out, error=True)
+    ev = a.evidence("Done.")
+    failed = [f for f in ev["findings"] if f["kind"] == "failed_step"]
+    assert len(failed) == 1
+    assert failed[0].get("sub") == "test_failed"
+    hint = failed[0].get("test_hint", "")
+    # 紅燈 1：hint 必須點名具體失敗的測試方法（哪個 FAIL 區塊隨平台記錄路徑而異，
+    # 但必須是 test_xxx 之一；直接抽取器的「最後一個區塊」行為由下方單元測試 pin）
+    assert re.search(r"test_(first_generic_verse|verse_with_2_bottles)\b", hint)
+    # 紅燈 2：hint 必須帶斷言差異，而不是只有總結行
+    assert "AssertionError" in hint
+    assert "FAILED (failures=" not in hint
+    # 紅燈 3：渲染出的 review 訊息含失敗測試方法名與斷言，且過 KS-1
+    txt = _assert_clean_review(ev)
+    assert re.search(r"test_(first_generic_verse|verse_with_2_bottles)\b", txt)
+    assert "AssertionError" in txt
+
+
+def test_extract_test_hint_unittest_multiline_and_summary_only(env):
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = (
+        "======================================================================\n"
+        "FAIL: test_two (suite_mod.SuiteTest.test_two)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/home/user1/dev/Vacant/tests/suite_mod_test.py", line 8, in test_two\n'
+        "    self.assertEqual(got, expected)\n"
+        "AssertionError: 42 != 43\n"
+        "----------------------------------------------------------------------\n"
+        "Ran 2 tests in 0.001s\n"
+        "\n"
+        "FAILED (failures=1)\n"
+    )
+    hint = _extract_test_hint(out, err="FAILED (failures=1)")
+    assert hint is not None
+    assert hint.startswith("test_two")
+    assert "AssertionError" in hint
+    # 總結行不得成為 hint；敏感路徑不得外洩
+    assert "FAILED (failures=" not in hint
+    assert "/home/user1" not in hint
+    # 只有總結行（無 FAIL 區塊、無斷言）→ 回 None，而不是把總結行當 hint
+    assert _extract_test_hint("Ran 7 tests in 0.001s\n\nFAILED (failures=7)\n",
+                              err="FAILED (failures=7)") is None
 
 
 def test_sed_modify_overwritten_by_subsequent_write_exempt(env):
