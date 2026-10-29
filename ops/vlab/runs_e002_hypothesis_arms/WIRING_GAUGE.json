@@ -1,7 +1,7 @@
 {
  "exp": "e002_hypothesis_arms",
  "base": "/srv/vlab/runs",
- "n_cells": 47,
+ "n_cells": 72,
  "cells": [
   {
    "cell": "polyglot_py-pg_affine_cipher-pi-A-r1",
@@ -31,6 +31,21 @@
    "unittest_marker": true
   },
   {
+   "cell": "polyglot_py-pg_affine_cipher-pi-H-r1",
+   "state": "complete",
+   "arm": "H",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "arm_wiring": "PASS",
+   "baseline_purity": "NA",
+   "append_sha256": "75990b94c32f53af73a9de4ac4f33cf361bb8928d231f6e93f0fa0aaecb2f79f",
+   "append_path": "/srv/vlab/arms/e002_H.md",
+   "c_gate": "NA",
+   "unittest_marker": null,
+   "c_installed": null
+  },
+  {
    "cell": "polyglot_py-pg_beer_song-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -56,6 +71,21 @@
    "c_gate": "PASS",
    "tests_total": 8,
    "unittest_marker": true
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-H-r1",
+   "state": "complete",
+   "arm": "H",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "arm_wiring": "PASS",
+   "baseline_purity": "NA",
+   "append_sha256": "75990b94c32f53af73a9de4ac4f33cf361bb8928d231f6e93f0fa0aaecb2f79f",
+   "append_path": "/srv/vlab/arms/e002_H.md",
+   "c_gate": "NA",
+   "unittest_marker": null,
+   "c_installed": null
   },
   {
    "cell": "polyglot_py-pg_book_store-pi-A-r1",
@@ -85,6 +115,21 @@
    "unittest_marker": true
   },
   {
+   "cell": "polyglot_py-pg_book_store-pi-H-r1",
+   "state": "complete",
+   "arm": "H",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "arm_wiring": "PASS",
+   "baseline_purity": "NA",
+   "append_sha256": "75990b94c32f53af73a9de4ac4f33cf361bb8928d231f6e93f0fa0aaecb2f79f",
+   "append_path": "/srv/vlab/arms/e002_H.md",
+   "c_gate": "NA",
+   "unittest_marker": null,
+   "c_installed": null
+  },
+  {
    "cell": "polyglot_py-pg_bottle_song-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -110,6 +155,16 @@
    "c_gate": "PASS",
    "tests_total": 7,
    "unittest_marker": true
+  },
+  {
+   "cell": "polyglot_py-pg_bottle_song-pi-H-r1",
+   "state": "incomplete",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_gate": "NA",
+   "unittest_marker": null,
+   "c_installed": null,
+   "infra": null
   },
   {
    "cell": "polyglot_py-pg_bowling-pi-A-r1",
@@ -342,13 +397,17 @@
   },
   {
    "cell": "polyglot_py-pg_grep-pi-C-r1",
-   "state": "incomplete",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 124,
+   "timed_out": true,
+   "infra": "BAD",
    "baseline_purity": "NA",
    "arm_wiring": "NA",
-   "c_gate": "NA",
-   "unittest_marker": null,
-   "c_installed": null,
-   "infra": null
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 25,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_hangman-pi-A-r1",
@@ -364,6 +423,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_hangman-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 124,
+   "timed_out": true,
+   "infra": "BAD",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 7,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_list_ops-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -375,6 +448,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_list_ops-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 24,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_paasio-pi-A-r1",
@@ -390,6 +477,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_paasio-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 25,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_phone_number-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -401,6 +502,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_phone_number-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 21,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_pig_latin-pi-A-r1",
@@ -416,6 +531,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_pig_latin-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 22,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_poker-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -427,6 +556,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_poker-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 37,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_pov-pi-A-r1",
@@ -442,6 +585,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_pov-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 15,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_proverb-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -453,6 +610,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_proverb-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 8,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_react-pi-A-r1",
@@ -468,6 +639,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_react-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 14,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_rest_api-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -479,6 +664,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 9,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_robot_name-pi-A-r1",
@@ -494,6 +693,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_robot_name-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 4,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_scale_generator-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -505,6 +718,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_scale_generator-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 17,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_sgf_parsing-pi-A-r1",
@@ -520,6 +747,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_sgf_parsing-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 124,
+   "timed_out": true,
+   "infra": "BAD",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 23,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_simple_linked_list-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -531,6 +772,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_simple_linked_list-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 20,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_transpose-pi-A-r1",
@@ -546,6 +801,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_transpose-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 12,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_tree_building-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -557,6 +826,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_tree_building-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 13,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_two_bucket-pi-A-r1",
@@ -572,6 +855,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_two_bucket-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 9,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_variable_length_quantity-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -583,6 +880,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_variable_length_quantity-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 26,
+   "unittest_marker": true
   },
   {
    "cell": "polyglot_py-pg_wordy-pi-A-r1",
@@ -598,6 +909,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_wordy-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 25,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_zebra_puzzle-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -611,6 +936,20 @@
    "c_installed": null
   },
   {
+   "cell": "polyglot_py-pg_zebra_puzzle-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 2,
+   "unittest_marker": true
+  },
+  {
    "cell": "polyglot_py-pg_zipper-pi-A-r1",
    "state": "complete",
    "arm": "A",
@@ -622,6 +961,20 @@
    "c_gate": "NA",
    "unittest_marker": null,
    "c_installed": null
+  },
+  {
+   "cell": "polyglot_py-pg_zipper-pi-C-r1",
+   "state": "complete",
+   "arm": "C",
+   "agent_rc": 0,
+   "timed_out": false,
+   "infra": "OK",
+   "baseline_purity": "NA",
+   "arm_wiring": "NA",
+   "c_installed": true,
+   "c_gate": "PASS",
+   "tests_total": 14,
+   "unittest_marker": true
   }
  ],
  "criteria": {
@@ -629,26 +982,26 @@
    "PASS": 34,
    "FAIL": 0,
    "NO_EVIDENCE": 0,
-   "NA": 13
+   "NA": 38
   },
   "arm_wiring_HMS": {
-   "PASS": 0,
+   "PASS": 3,
    "FAIL": 0,
    "NO_EVIDENCE": 0,
-   "NA": 47
+   "NA": 69
   },
   "c_gate_C": {
-   "PASS": 12,
+   "PASS": 34,
    "FAIL": 0,
    "NO_EVIDENCE": 0,
-   "NA": 35
+   "NA": 38
   },
   "infra": {
-   "OK": 37,
-   "BAD": 9,
+   "OK": 59,
+   "BAD": 12,
    "NO_EVIDENCE": 1
   },
-  "c_unittest_marker_true": 12,
+  "c_unittest_marker_true": 34,
   "c_unittest_marker_false": 0
  }
 }
