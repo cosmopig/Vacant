@@ -673,5 +673,83 @@ def test_fresh_hint_renders_clean_memory():
     assert "clean origin" in hint
 
 
+def test_checkpoint_restore_records_chain_event_and_only_restores_on_regression(env):
+    """重現並釘住 e002 C 臂實跑缺陷：
+    1. restore_best_checkpoint 必須寫入合法的 `checkpoint_restore` 鏈事件（通過 rec.verify()），
+       並更新 state.last_index 與 Trace.latest_index()，後續步驟不產生假 unrecorded_change。
+    2. zerostop 只在分數退步（best_score > cur_score）且最後一次測試後無新寫入時才回滾；
+       分數平手（如 pg_bottle_song 連續 (1, 6)）或最後一次測試後有修改時不得覆寫工作區。
+    3. zerostop.ended 在步驟 input_blob 被 GC 回收後不得因 FileNotFoundError 崩潰。
+    """
+    from vacant_network.trace.blame import Trace
+
+    # (A) 分數退步：v1 (5 passed, 1 failed) -> v2 (2 passed, 4 failed)
+    p1 = _proj(env, "ckpt_regress", {"solution.py": "v0\n"})
+    a1 = Agent(p1)
+    a1.ask("Implement solution.py and run solution_test.py.")
+    a1.write("solution.py", "def f():\n    return 'v1_best'\n")
+    a1.bash("python3 solution_test.py",
+            stdout="Ran 6 tests in 0.01s\n\nFAILED (failures=1)", error=True)
+    # 第一次 stop：退回 failed_step/test_failed（round 1）
+    r1 = a1.stop("Tried v1.")
+    assert r1.get("decision") == "block"
+
+    # 第二回合：agent 改壞成 v2 (2 passed, 4 failed) 後再 stop（used=1，不再退回）
+    a1.write("solution.py", "def f():\n    return 'v2_worse'\n")
+    a1.bash("python3 solution_test.py",
+            stdout="Ran 6 tests in 0.01s\n\nFAILED (failures=4)", error=True)
+    r2 = a1.stop("Tried v2.")
+    assert r2.get("decision") != "block"
+    # 工作區必須已回滾到 v1_best，且鏈上有 checkpoint_restore 事件並通過驗鏈
+    assert (p1 / "solution.py").read_text() == "def f():\n    return 'v1_best'\n"
+    rec1 = Recorder(capture.workspace_for(str(p1)))
+    ok, msg = rec1.verify()
+    assert ok, msg
+    evs1 = rec1.events()
+    restores1 = [e for e in evs1 if e.get("type") == "checkpoint_restore"]
+    assert len(restores1) == 1
+    tr1 = Trace(rec1)
+    assert tr1.latest_index() == restores1[0]["target_index"]
+    assert tr1.file_text(tr1.latest_index(), "solution.py") == "def f():\n    return 'v1_best'\n"
+
+    # (B) 分數平手（如 pg_bottle_song 連續 1 passed, 6 failed）：不得把 v2 覆寫回 v1
+    p2 = _proj(env, "ckpt_tie", {"solution.py": "v0\n"})
+    a2 = Agent(p2)
+    a2.ask("Implement solution.py and run solution_test.py.")
+    a2.write("solution.py", "def f():\n    return 'v1_tie'\n")
+    a2.bash("python3 -m unittest solution_test.py",
+            stdout="Ran 7 tests in 0.01s\n\nFAILED (failures=6)", error=True)
+    assert a2.stop("Tried v1.").get("decision") == "block"
+    a2.write("solution.py", "def f():\n    return 'v2_tie_latest'\n")
+    a2.bash("python3 -m unittest solution_test.py",
+            stdout="Ran 7 tests in 0.01s\n\nFAILED (failures=6)", error=True)
+    assert a2.stop("Tried v2.").get("decision") != "block"
+    assert (p2 / "solution.py").read_text() == "def f():\n    return 'v2_tie_latest'\n"
+    rec2 = Recorder(capture.workspace_for(str(p2)))
+    assert not [e for e in rec2.events() if e.get("type") == "checkpoint_restore"]
+
+    # (C) 最後一次測試失敗後 agent 又改了交付檔（尚未重跑測試）且被強制切斷（ended），
+    #     且舊步驟的 input_blob 已被 GC 刪除：不得崩潰，也不得覆寫最後一次未測修改
+    p3 = _proj(env, "ckpt_post_edit", {"solution.py": "v0\n"})
+    a3 = Agent(p3)
+    a3.ask("Implement solution.py and run pytest.")
+    a3.write("solution.py", "def f():\n    return 'v1_good'\n")
+    a3.bash("pytest -q", stdout="5 passed, 1 failed in 0.02s", error=True)
+    assert a3.stop("Tried v1.").get("decision") == "block"
+    a3.write("solution.py", "def f():\n    return 'v2_bad'\n")
+    a3.bash("pytest -q", stdout="1 passed, 5 failed in 0.02s", error=True)
+    a3.write("solution.py", "def f():\n    return 'v3_untested_fix'\n")
+    rec3 = Recorder(capture.workspace_for(str(p3)))
+    # 模擬 GC 刪除了某個步驟的 input_blob
+    for e in rec3.events():
+        if e.get("type") == "step" and e.get("input_blob"):
+            rec3.blobs.path(e["input_blob"]).unlink(missing_ok=True)
+            break
+    end_res = zerostop.ended("claude", a3.s, str(p3), mode="evidence")
+    assert "ended" in end_res
+    assert (p3 / "solution.py").read_text() == "def f():\n    return 'v3_untested_fix'\n"
+
+
+
 
 

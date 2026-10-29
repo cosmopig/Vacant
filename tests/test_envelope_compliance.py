@@ -120,3 +120,25 @@ def test_real_e001_no_fail() -> None:
     out = json.loads(p.stdout)
     cs = [c for c in out["cells"] if c.get("arm") == "C" and c.get("vacant_home_bytes")]
     assert cs, "e001 應至少有 C 格帶 vacant_home_bytes 證據"
+    assert out["n_cells"] == 120
+    assert out["by_arm"]["A"]["n_cells"] == 60
+    assert out["by_arm"]["C"]["n_cells"] == 60
+    assert out["by_arm"]["C"]["home_bytes_min_med_max"] == [27611, 333481, 1146648]
+
+
+def test_skips_suffix_infra_retry_dirs(tmp_path: Path) -> None:
+    """cell.py 將重試備份命名為 `<cid>.infra-<timestamp>`（後綴而非前綴）：必須被跳過。"""
+    _mk_exp(tmp_path, {
+        "polyglot_py-pg_zipper-pi-C-r1": {"arm": "C", "vacant_home_bytes": 50_000},
+        "polyglot_py-pg_zipper-pi-C-r1.infra-20261028T192916": {
+            "arm": "C", "vacant_home_bytes": 300 * 1024 * 1024
+        },
+        ".infra-legacy": {"arm": "C", "vacant_home_bytes": 300 * 1024 * 1024},
+    })
+    p = _run(tmp_path)
+    assert p.returncode == 0, p.stdout + p.stderr
+    out = json.loads(p.stdout)
+    assert out["n_cells"] == 1
+    assert out["by_arm"]["C"]["n_cells"] == 1
+    assert out["verdict"] == "PASS"
+
