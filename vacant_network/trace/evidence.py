@@ -135,7 +135,7 @@ RUN_CLAIM_TOOLS = frozenset({
     "env", "printenv", "echo", "printf", "basename", "dirname", "readlink", "realpath",
 })
 
-# unfetched（2026-11-03，第 100 輪）：方向 A「抓過沒」—— ASSIGNMENT 點名三類（跑過沒／數字追得到／
+# unfetched（2026-10-28，第 100 輪）：方向 A「抓過沒」—— ASSIGNMENT 點名三類（跑過沒／數字追得到／
 # 抓過沒）最後一類沒有專屬檢查的缺口。任務點到一個 URL、鄰窗有抓取類線索（fetch/download/retrieve/
 # grab/pull/obtain/access/visit/open/scrape/load/read、下載/抓取/獲取/取得/訪問/打開/拉取/讀取），
 # 但整份記錄沒有任何一步碰到該 URL（任何步驟的輸入或輸出裡都查無同 key 的 URL），且最終訊息沒有
@@ -1556,7 +1556,7 @@ class Evidence:
         return out
 
     def _unfetched_sources(self, task_texts: list[str]) -> list[dict[str, Any]]:
-        """方向 A「抓過沒」（2026-11-03，第 100 輪）：任務點到 URL＋鄰窗有抓取線索，但整份記錄
+        """方向 A「抓過沒」（2026-10-28，第 100 輪）：任務點到 URL＋鄰窗有抓取線索，但整份記錄
         沒有任何一步碰到該 URL，且最終訊息沒有老實說連不上。濾網與證據面見 `URL_RE` 旁註解。
         Advisory only：`zerostop.pushable_for` 明確排除，只進交件說明（docs/UNIVERSAL_TASKS.md §2）。"""
         task = "\n".join(task_texts)
