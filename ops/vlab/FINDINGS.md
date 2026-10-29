@@ -89,7 +89,8 @@ repo 內子集檔為同源 commit 版）＋ 上兩節。
 
 ## 2026-10-29 · e002_hypothesis_arms · polyglot_py A/C 中間（主軸 4 追蹤）
 
-**狀態**：e002 進行中——A、C 臂各 34/34 完成（infra 2 格不進分母），H 4/34、M/S 未開始。
+**狀態**：e002 進行中——A、C 臂各 34/34 完成，H 4/34、M/S 未開始（REPORT.json `infra`
+3 格不進分母：A/C 各 1 格模型崩潰已重跑＋H 臂 1 格跑中；`cells_scored`＝72）。
 預註冊確認線（Holm 4 組比較，`ops/packets/e002.md` §4）需全批完成才能判定 H-acc 等假設。
 **本節只有中間觀察，不是判定。**
 
@@ -100,8 +101,10 @@ rescore_mismatch＝[]＝0）。
 **數字（本批）**：A 18/34（52.94%）vs C 22/34（64.71%）；A_only＝3、C_only＝7、
 McNemar exact 雙側 p＝0.3438（distinct_tasks＝34、淨正 7／淨負 3）；成本（描述性）：
 A 65.72 呼叫/成功・1,550,104 token/成功・逾時 8，C 67.95 呼叫/成功・1,716,779 token/成功・
-逾時 4。預註冊成本紅線（C_C ≤ 2×C_A）：呼叫 67.95 ≤ 131.44、token 1.72M ≤ 3.10M——
-**未觸發**（中間值）。
+逾時 4（皆取自 REPORT.json `per_arm.{A,C}`；配對數取自 `A_vs_C`）。預註冊成本紅線
+（C_C ≤ 2×C_A）：呼叫 67.95 ≤ 131.44（＝2×65.72，由 REPORT.json
+`per_arm.A.calls_per_success`×2 算出）、token 1,716,779 ≤ 3,100,208（＝2×1,550,104，
+同式）——**未觸發**（中間值）。
 
 **跨批一致性（兩批 A/C，非重現論證）**：
 
@@ -109,6 +112,12 @@ A 65.72 呼叫/成功・1,550,104 token/成功・逾時 8，C 67.95 呼叫/成�
 |---|---|---|---|---|---|---|
 | e001 | `dd2c6746` | 15/34 | 20/34 | 2/7 | 0.1797 | 117.07 vs 86.20 |
 | e002 | `cf62d258` | 18/34 | 22/34 | 3/7 | 0.3438 | 65.72 vs 67.95 |
+
+數字來源：e001 行＝repo 版 `ops/vlab/runs_e001_pi_AC_baseline/REPORT_polyglot_py_subset.json`
+（見上節 e001 polyglot 來源行；e001-dabstep 包 §8 規定 /srv/vlab 同名檔是 dabstep-2697 前
+的舊 25 對快照，**不可引用**）；e002 行＝上段 REPORT.json。Vacant build：e002 C 臂＝
+REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
+`/srv/vlab/done/01_e001.json` `vacant_sha`＝`dd2c6746…`（e001 子集 REPORT 不帶該欄）。
 
 **能說**：
 - 兩批（同模型/同 agent/同任務庫）方向一致（C 較高）、皆不顯著（0.1797、0.3438）。
