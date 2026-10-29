@@ -1217,6 +1217,8 @@ def compact_session_hooks(
                 atomic_write_text(f, tail.decode("utf-8", errors="replace"))
             except OSError:
                 continue
+        # Fix: Only add to bytes_freed if the file was actually truncated (not already deleted)
+        # Since we are in the 'to_keep' loop, it hasn't been unlinked yet.
         rep["bytes_freed"] += max(0, len(raw) - len(tail))
         rep["files_truncated"] += 1
     return rep
