@@ -1094,30 +1094,20 @@ def compact_wire(
     if not wdir.is_dir():
         return rep
     # ── 原始 body：位元組上限，保留最新 ──
-    bodies: list[tuple[float, int, pathlib.Path]] = []
-    total = 0
-    for f in wdir.iterdir():
-        if f.name == "index.jsonl" or not f.is_file() or f.is_symlink():
-            continue
-        try:
-            st = f.lstat()
-        except OSError:
-            continue
-        bodies.append((st.st_mtime, st.st_size, f))
-        total += st.st_size
-    rep["body_bytes_before"] = total
-    rep["body_files_before"] = len(bodies)
-    if max_body_bytes > 0 and total > max_body_bytes:
-        bodies.sort(key=lambda t: (t[0], t[1]))  # 最舊在前，同 mtime 則較小的先處理（避免刪除大檔案）
-        for _mt, sz, f in bodies:
-            if total <= max_body_bytes or (budget is not None and budget.expired()):
-                break
-            if not dry_run:
-                with contextlib.suppress(OSError):
-                    f.unlink(missing_ok=True)
-            total -= sz
-            rep["body_bytes_freed"] += sz
-            rep["body_files_removed"] += 1
+        bodies.sort(key=lambda t: (t[0], -t[1]))  # 最舊在前，同 mtime 則較大的先處理（避免刪除大檔案）
+        total = sum(b[1] for b in bodies)
+        rep["body_bytes_before"] = total
+        rep["body_files_before"] = len(bodies)
+        if max_body_bytes > 0 and total > max_body_bytes:
+            for _mt, sz, f in bodies:
+                if total <= max_body_bytes or (budget is not None and budget.expired()):
+                    break
+                if not dry_run:
+                    with contextlib.suppress(OSError):
+                        f.unlink(missing_ok=True)
+                total -= sz
+                rep["body_bytes_freed"] += sz
+                rep["body_files_removed"] += 1
     # ── index.jsonl：保留最新完整行 ──
     ip = wdir / "index.jsonl"
     try:
