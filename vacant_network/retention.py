@@ -1,15 +1,24 @@
 """retention — **磁碟空間與資料留存治理**：清掉過程留下的巨量工作區副本與孤立物件，**不動任何簽章鏈**。
 
 這支在架構裡承重什麼：
-Vacant 的三個核心路徑都會在磁碟上留下與專案等大的副本：
-1. **追緝版本庫（`$VACANT_HOME/trace/objects/`）**：第一次掃描工作區時，`workspace.scan` 會把專案裡每一個
-   ≤ 8 MB 的檔案都複製進 `trace/objects/`（即使 agent 從頭到尾沒改過它），之後每一步又存下 `input_blob`、
-   `output_blob` 與完整／差異索引。
+Vacant 的幾個路徑會在磁碟上留下副本；每一塊都有留存上限或回收路徑：
+1. **追緝版本庫（`$VACANT_HOME/trace/objects/`）**：2026-10-28（Axis 2）起 `workspace.scan` **不再**把工作區檔案
+   位元組複製進來——索引只記 sha/size/mtime，讀取端需要時回工作區驗 sha 取回，取不回就誠實 UNKNOWN
+   （見 `workspace.scan` docstring）。只有「被改動的那一刻」由 Recorder 存下 after 版本（copy-on-change），
+   加上每步的 `input_blob`／`output_blob`／索引。整塊受 `DEFAULT_TRACE_BUDGET_BYTES`（64 MiB，
+   `VACANT_TRACE_BUDGET_BYTES` 可覆寫）上限約束，超標由 `_sweep_to_target` 回收最舊。
+   （本 docstring 曾在 round 142 前描述舊的「全量複製 ≤ 8 MB」行為，round 166 修正為現行行為——
+   人類 10/28 回報的主因引用正是這段過時文字。）
 2. **收件隔離區（`$VACANT_HOME/quarantine/`）**：每次 `vacant check`（含掛鉤在 Stop 的檢查）與 `vacant submit`
-   都會把繳付物再凍結一份進 `quarantine/objects/`；被退回或中間檢查產生的候選物件從不回收。
+   都會把繳付物再凍結一份進 `quarantine/objects/`；`compact_quarantine` 只留每 task 最近
+   `DEFAULT_KEEP_DECISIONS`（2）次決策，其餘回收。
 3. **一次性工作區（`~/.vacant-work/<task>/<run>/ws*`）與 `vacant run` 暫存（`_frozen_ws`／`_origin_ws`）**：
-   每次重試都完整複製整個專案，結束後留在原地。
-4. **掛鉤追加日誌（`$VACANT_HOME/intake/hooks/*.jsonl`、`*.log`）**：只增不減。
+   每次重試都完整複製整個專案；`compact_work`／`compact_vrun_dir` 只留每 task 最近 `DEFAULT_KEEP_RUNS`（3）
+   次並剝離 workspace，簽章鏈引用的 receipts／attestation 保留。
+4. **掛鉤追加日誌（`$VACANT_HOME/intake/hooks/*.jsonl`、`*.log`）**：`compact_logs` 把單檔截在
+   `DEFAULT_MAX_LOG_BYTES`（2 MiB，保留最新一半完整行）。
+5. **wire 中介記錄（`$VACANT_HOME/possess/proxyd/wire`）**：`compact_wire` 依
+   `DEFAULT_WIRE_BODY_BYTES`（96 MiB）／`DEFAULT_WIRE_INDEX_BYTES`（8 MiB）上限回收最舊。
 
 ## 為什麼清理不會弄壞簽章鏈（究責紅線）
 
