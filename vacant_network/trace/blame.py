@@ -238,6 +238,16 @@ class Trace:
                     {str(c["path"]) for c in changes},
                     gap={"seq": e["seq"], "observed_at": e.get("observed_at"),
                          "paths": sorted({str(c["path"]) for c in changes})[:20]}))
+            elif t == "checkpoint_restore":
+                if self.initial is None and e.get("before_index"):
+                    self.initial = e["before_index"]
+                rpaths = {str(p) for p in (e.get("restored_files") or [])}
+                for ch in e.get("changes") or []:
+                    if isinstance(ch, dict) and ch.get("path"):
+                        rpaths.add(str(ch["path"]))
+                self.transitions.append(Transition(
+                    int(e["seq"]), "checkpoint_restore", None,
+                    e.get("before_index"), e.get("target_index"), rpaths))
             elif t == "prompt":
                 self.prompts.append(e)
             elif t == "session_seen" and e.get("do_run"):
