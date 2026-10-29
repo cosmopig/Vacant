@@ -77,3 +77,4 @@ def test_compact_session_hooks_no_double_count_on_oversized_old_session():
 
     # 清理
     shutil.rmtree(sroot)
+

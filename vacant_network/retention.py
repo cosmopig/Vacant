@@ -1108,7 +1108,7 @@ def compact_wire(
     rep["body_bytes_before"] = total
     rep["body_files_before"] = len(bodies)
     if max_body_bytes > 0 and total > max_body_bytes:
-        bodies.sort(key=lambda t: t[0])  # 最舊在前
+        bodies.sort(key=lambda t: (t[0], t[1]))  # 最舊在前，同 mtime 則較小的先處理（避免刪除大檔案）
         for _mt, sz, f in bodies:
             if total <= max_body_bytes or (budget is not None and budget.expired()):
                 break
@@ -1184,8 +1184,13 @@ def compact_session_hooks(
         total += st.st_size
     rep["bytes_before"] = total
     rep["files_before"] = len(files)
-    # 單檔上限：保留最新完整行
-    for _mt, sz, f in files:
+
+    files.sort(key=lambda t: (t[0], -t[1]), reverse=True)
+    to_keep = files[:keep_sessions]
+    to_delete = files[keep_sessions:]
+
+    # 單檔上限：保留最新完整行（僅針對要保留的檔案）
+    for _mt, sz, f in to_keep:
         if sz <= max_file_bytes:
             continue
         keep_bytes = max(4096, max_file_bytes // 2)
@@ -1206,9 +1211,9 @@ def compact_session_hooks(
                 continue
         rep["bytes_freed"] += max(0, len(raw) - len(tail))
         rep["files_truncated"] += 1
-    # session 數上限：保留最新 keep_sessions 個
-    files.sort(key=lambda t: (t[0], -t[1]))  # 最新在前，同 mtime 則較小的先處理（避免刪除大檔案）
-    for _mt, sz, f in files[keep_sessions:]:
+
+    # session 數上限：保留最新 keep_sessions 個（刪除其餘檔案）
+    for _mt, sz, f in to_delete:
         if not dry_run:
             with contextlib.suppress(OSError):
                 f.unlink(missing_ok=True)
