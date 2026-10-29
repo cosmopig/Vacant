@@ -183,8 +183,11 @@ def selftest() -> int:
     mk("hshort", "H", append={"path": "x", "sha256": "ab"})  # 短 hash
     mk("aclean", "A", append=None)
     mk("adirty", "A", append=SHA)                     # A 臂混入附加文本
+    # detail 形狀用真 bank（tests/fixtures/p02_real_bank/bowling_test.py）的真實 case 名，
+    # 不是發明詞——31 個真名已逐個對 UNITTEST_MARK 驗證過。
     mk("cgood", "C", score={"pass": False, "tests_total": 31,
-                            "detail": "test_strike (bowling_test.BowlingTest)"},
+                            "detail": ("test_consecutive_spares_each_get_a_one_roll_bonus "
+                                       "(bowling_test.BowlingTest)")},
        home=True)
     mk("czero", "C", score={"pass": True, "tests_total": 0})  # 零測試不是過門
     mk("cnone", "C", score=None, home=True)             # 未完成形狀
