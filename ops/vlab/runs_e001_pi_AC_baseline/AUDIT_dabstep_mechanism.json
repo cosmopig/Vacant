@@ -2,18 +2,18 @@
   "exp": "e001_pi_AC_baseline",
   "base": "/srv/vlab/runs",
   "suite": "dabstep",
-  "n_cells": 50,
-  "n_C_cells": 25,
+  "n_cells": 52,
+  "n_C_cells": 26,
   "C_cells_no_home_evidence": 0,
-  "C_cells_zero_ran_true": 24,
+  "C_cells_zero_ran_true": 25,
   "C_cells_zero_ran_unknown": 0,
-  "C_cells_with_kickback": 8,
+  "C_cells_with_kickback": 9,
   "pushed_finding_kinds": {
-    "missing_output/None": 8,
-    "invalid_output/contract_shape": 1
+    "missing_output/None": 9,
+    "invalid_output/contract_shape": 2
   },
   "advisory_finding_kinds": {},
-  "n_pairs": 25,
+  "n_pairs": 26,
   "a_only": 0,
   "c_only": 1,
   "note": "本表只報機制發生的事實；『有/沒幫助』的解讀走預註冊計畫（packets/e001_dabstep_analysis.md §5），本腳本不判內容對錯、不做檢定",
@@ -2021,6 +2021,101 @@
         "unverified": [],
         "advisory_findings": []
       }
+    },
+    {
+      "cell": "dabstep-2697-pi-A-r1",
+      "arm": "A",
+      "suite": "dabstep",
+      "task": "2697",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 1735.7,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": null,
+      "vacant_sha": null,
+      "model_calls": 247,
+      "tokens": 9324721,
+      "app_files": [
+        {
+          "path": "jan_belles.csv",
+          "size": 0,
+          "empty": true
+        }
+      ],
+      "empty_app_files": [
+        "jan_belles.csv"
+      ],
+      "zero": null,
+      "delivery": null
+    },
+    {
+      "cell": "dabstep-2697-pi-C-r1",
+      "arm": "C",
+      "suite": "dabstep",
+      "task": "2697",
+      "rep": 1,
+      "agent": "pi",
+      "pass": false,
+      "wall_s": 342.0,
+      "timed_out": false,
+      "agent_rc": 0,
+      "install_rc": 0,
+      "vacant_sha": "dd2c67464eff9ba2eec478d60cf245bc601b2a57",
+      "model_calls": 45,
+      "tokens": 1663112,
+      "app_files": [
+        {
+          "path": "answer.txt",
+          "size": 160,
+          "empty": false
+        }
+      ],
+      "empty_app_files": [],
+      "zero": {
+        "home_present": true,
+        "zero_ran": true,
+        "n_rounds": 2,
+        "findings": [
+          {
+            "round": 1,
+            "kind": "missing_output",
+            "sub": null,
+            "step": null,
+            "cmd": null,
+            "file": null
+          },
+          {
+            "round": 2,
+            "kind": "invalid_output",
+            "sub": "contract_shape",
+            "step": null,
+            "cmd": null,
+            "file": null
+          }
+        ],
+        "open": [],
+        "kickbacks": 2,
+        "sent_total": 2,
+        "withheld_total": 0,
+        "final_action": "allow",
+        "n_stop_events": 3
+      },
+      "delivery": {
+        "present": true,
+        "in_progress": false,
+        "deliverables": [
+          "answer.txt"
+        ],
+        "not_opened": [],
+        "fixed": [
+          "round 1: answer.txt (asked for in the request) did not exist; it was written afterwards",
+          "round 2: answer.txt had an invalid or incomplete output (the task asks for ONLY the final answer without headings or prose); the record now matches"
+        ],
+        "unverified": [],
+        "advisory_findings": []
+      }
     }
   ],
   "pairs": [
@@ -2417,6 +2512,26 @@
       "C_empty_files": [],
       "wall_A": 31.3,
       "wall_C": 51.1
+    },
+    {
+      "suite": "dabstep",
+      "task": "2697",
+      "A": false,
+      "C": false,
+      "direction": null,
+      "C_zero_ran": true,
+      "C_kickbacks": 2,
+      "C_findings": [
+        "missing_output/None",
+        "invalid_output/contract_shape"
+      ],
+      "C_advisory": [],
+      "A_empty_files": [
+        "jan_belles.csv"
+      ],
+      "C_empty_files": [],
+      "wall_A": 1735.7,
+      "wall_C": 342.0
     }
   ]
 }

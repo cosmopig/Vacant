@@ -134,7 +134,7 @@ def collect(exp: str, base: Path) -> list[dict]:
     if not root.is_dir():
         raise SystemExit(f"實驗目錄不存在：{root}")
     recs = []
-    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+    for d in sorted(p for p in root.iterdir() if p.is_dir() and ".infra-" not in p.name):
         r = cell_record(d)
         if r is not None:
             recs.append(r)
@@ -187,10 +187,12 @@ def selftest() -> int:
                     t.addfile(ti, _io.BytesIO(payload))
         mkcell("c1", "C", 114655, 76848, False, gc=True)
         mkcell("c2", "C", 41185, 18355, True, gc=False)
+        mkcell("c1.infra-1-12345", "C", 19002, 0, False, gc=True)
         mkcell("a1", "A", None, None, True, gc=False)
+        mkcell("a1.infra-1-12345", "A", None, None, False, gc=False)
         recs = collect("exp_x", base)
         by_arm = aggregate(recs)
-        check("three cells", len(recs) == 3)
+        check("three cells (infra skipped)", len(recs) == 3)
         c = by_arm.get("C", {})
         check("C.n==2", c.get("n") == 2)
         check("C.n_with_home==2", c.get("n_with_home") == 2)

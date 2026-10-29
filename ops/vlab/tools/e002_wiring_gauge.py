@@ -36,6 +36,7 @@ import argparse
 import json
 import re
 import sys
+import tarfile
 from pathlib import Path
 
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -48,6 +49,40 @@ def _load_json(path: Path):
             return json.load(f)
     except (OSError, ValueError):
         return None
+
+
+def _inspect_c_evidence(cell: Path, sc: dict | None) -> tuple[bool, bool]:
+    """回傳 `(has_hook_or_score_evidence, has_unittest_marker)`。"""
+    texts: list[str] = []
+    if isinstance(sc, dict) and sc.get("detail"):
+        texts.append(str(sc["detail"]))
+    ev = cell / "events.jsonl"
+    if ev.is_file():
+        try:
+            texts.append(ev.read_text(encoding="utf-8", errors="replace"))
+        except OSError:
+            pass
+    tgz = cell / "vacant_home.tgz"
+    has_tar_evidence = False
+    if tgz.is_file():
+        try:
+            with tarfile.open(tgz, "r:gz") as tf:
+                for m in tf.getmembers():
+                    if not m.isfile():
+                        continue
+                    if (
+                        m.name.endswith("zero_state.json")
+                        or m.name.endswith("intake/hooks/events.jsonl")
+                        or m.name.endswith("chain.ndjson")
+                    ):
+                        has_tar_evidence = True
+                        f = tf.extractfile(m)
+                        if f is not None:
+                            texts.append(f.read().decode("utf-8", errors="replace"))
+        except (tarfile.TarError, OSError):
+            pass
+    has_marker = any(UNITTEST_MARK.search(t) for t in texts)
+    return has_tar_evidence, has_marker
 
 
 def cell_record(cell: Path) -> dict:
@@ -84,17 +119,24 @@ def cell_record(cell: Path) -> dict:
 
     # C 臂＝裝 Vacant 走驗收門
     if arm.startswith("C"):
-        rec["c_installed"] = (cell / "vacant_home.tgz").is_file()
+        c_installed = (cell / "vacant_home.tgz").is_file() and (cj.get("install_rc") in (None, 0))
+        rec["c_installed"] = c_installed
         sc = _load_json(cell / "score.json")
         if sc is None:
             rec["c_gate"] = "NO_EVIDENCE"
             rec["unittest_marker"] = None
         else:
+            has_tar_ev, has_marker = _inspect_c_evidence(cell, sc)
             tt = sc.get("tests_total")
-            rec["c_gate"] = "PASS" if (isinstance(tt, int) and tt >= 1) else "FAIL"
+            if not c_installed:
+                rec["c_gate"] = "FAIL"
+            elif "tests_total" in sc:
+                rec["c_gate"] = "PASS" if (isinstance(tt, int) and tt >= 1) else "FAIL"
+            else:
+                # 非程式題（如 dabstep）score.json 無 tests_total，驗 C 臂確實掛載且有 hook/trace 證據
+                rec["c_gate"] = "PASS" if ("pass" in sc and has_tar_ev) else "FAIL"
             rec["tests_total"] = tt
-            detail = sc.get("detail")
-            rec["unittest_marker"] = bool(detail and UNITTEST_MARK.search(str(detail)))
+            rec["unittest_marker"] = has_marker
     else:
         rec["c_gate"] = "NA"
         rec["unittest_marker"] = None
@@ -106,7 +148,7 @@ def collect(exp: str, base: Path) -> list[dict]:
     run = base / exp
     if not run.is_dir():
         raise SystemExit(f"找不到執行目錄 {run}")
-    cells = sorted(p for p in run.iterdir() if p.is_dir())
+    cells = sorted(p for p in run.iterdir() if p.is_dir() and ".infra-" not in p.name)
     return [cell_record(c) for c in cells]
 
 
@@ -189,14 +231,19 @@ def selftest() -> int:
                             "detail": ("test_consecutive_spares_each_get_a_one_roll_bonus "
                                        "(bowling_test.BowlingTest)")},
        home=True)
-    mk("czero", "C", score={"pass": True, "tests_total": 0})  # 零測試不是過門
+    mk("czero", "C", score={"pass": True, "tests_total": 0}, home=True)  # 零測試不是過門
+    mk("cuninstalled", "C", score={"pass": True, "tests_total": 31}, home=False)  # 未裝 Vacant 必 FAIL
     mk("cnone", "C", score=None, home=True)             # 未完成形狀
     d = exp / "polyglot_py-task1-pi-H-r1-incomplete"
     d.mkdir()                                          # 無 cell.json
+    infra_d = exp / "polyglot_py-task1-pi-C-r1.infra-1-999"
+    infra_d.mkdir()
+    (infra_d / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 1, "timed_out": False}), encoding="utf-8")
 
     records = collect("synthetic", base)
     by = {r["cell"]: r for r in records}
     checks = [
+        ("infra retry skipped", "polyglot_py-task1-pi-C-r1.infra-1-999" not in by),
         ("hgood wiring PASS", by["polyglot_py-task1-pi-H-r1-hgood"]["arm_wiring"] == "PASS"),
         ("hbad wiring FAIL", by["polyglot_py-task1-pi-H-r1-hbad"]["arm_wiring"] == "FAIL"),
         ("hshort wiring FAIL", by["polyglot_py-task1-pi-H-r1-hshort"]["arm_wiring"] == "FAIL"),
@@ -206,6 +253,7 @@ def selftest() -> int:
         ("cgood unittest marker", by["polyglot_py-task1-pi-C-r1-cgood"]["unittest_marker"] is True),
         ("cgood installed", by["polyglot_py-task1-pi-C-r1-cgood"]["c_installed"] is True),
         ("czero gate FAIL", by["polyglot_py-task1-pi-C-r1-czero"]["c_gate"] == "FAIL"),
+        ("cuninstalled gate FAIL", by["polyglot_py-task1-pi-C-r1-cuninstalled"]["c_gate"] == "FAIL"),
         ("cnone gate NO_EVIDENCE", by["polyglot_py-task1-pi-C-r1-cnone"]["c_gate"] == "NO_EVIDENCE"),
         ("incomplete all NA",
          by["polyglot_py-task1-pi-H-r1-incomplete"]["arm_wiring"] == "NA"
@@ -218,17 +266,17 @@ def selftest() -> int:
         ok = ok and cond
     crit = criteria(records)
     for name, cond in [
-        ("crit wiring PASS==1 FAIL==2 NA==6",
+        ("crit wiring PASS==1 FAIL==2 NA==7",
          crit["arm_wiring_HMS"]["FAIL"] == 2 and crit["arm_wiring_HMS"]["PASS"] == 1
-         and crit["arm_wiring_HMS"]["NA"] == 6),
-        ("crit gate PASS==1 FAIL==1 NO_EVIDENCE==1 NA==6",
-         crit["c_gate_C"]["FAIL"] == 1 and crit["c_gate_C"]["PASS"] == 1
+         and crit["arm_wiring_HMS"]["NA"] == 7),
+        ("crit gate PASS==1 FAIL==2 NO_EVIDENCE==1 NA==6",
+         crit["c_gate_C"]["FAIL"] == 2 and crit["c_gate_C"]["PASS"] == 1
          and crit["c_gate_C"]["NO_EVIDENCE"] == 1 and crit["c_gate_C"]["NA"] == 6),
-        ("crit baseline PASS==1 FAIL==1 NA==7",
+        ("crit baseline PASS==1 FAIL==1 NA==8",
          crit["baseline_purity_A"]["FAIL"] == 1 and crit["baseline_purity_A"]["PASS"] == 1
-         and crit["baseline_purity_A"]["NA"] == 7),
-        ("crit infra OK==8 NO_EVIDENCE==1",
-         crit["infra"]["OK"] == 8 and crit["infra"]["NO_EVIDENCE"] == 1),
+         and crit["baseline_purity_A"]["NA"] == 8),
+        ("crit infra OK==9 NO_EVIDENCE==1",
+         crit["infra"]["OK"] == 9 and crit["infra"]["NO_EVIDENCE"] == 1),
     ]:
         print(("PASS " if cond else "FAIL ") + name)
         ok = ok and cond
