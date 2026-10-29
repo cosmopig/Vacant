@@ -386,7 +386,12 @@ class Trace:
         return None
 
     def file_missing_blob(self, index_sha: str | None, path: str) -> bool:
-        e = self.index(index_sha).get(path)
+        if not index_sha:
+            return False
+        idx = self.index(index_sha)
+        if index_sha in self.unreadable:
+            return True
+        e = idx.get(path)
         if e is None or ":" in e.sha256:
             return False
         return self.file_text(index_sha, path) is None
@@ -961,8 +966,12 @@ class Blamer:
                               note="a pinned input has this value, but no recorded read "
                                    "shows it being read")
         if self.t.step_missing_blob(s) or any(
-            j.seq < s.seq and j.ctx == s.ctx and self.t.step_missing_blob(j)
+            j.seq < s.seq and j.ctx[:2] == s.ctx[:2] and self.t.step_missing_blob(j)
             for j in self.t.steps
+        ) or any(
+            int(p.get("seq", 0)) < s.seq and p.get("text_blob")
+            and self.t.blob_text(p.get("text_blob")) is None
+            for p in self.t.prompts
         ):
             return Origin("unknown", note="recorded step data was reclaimed by gc")
         return Origin("agent", step=s, note="no recorded read contains this value")

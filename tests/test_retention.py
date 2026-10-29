@@ -770,3 +770,80 @@ def test_target_sweep_evicts_historical_versions_and_blame_returns_unknown(env):
     b_after = blame_location(Trace(rec), Location("app.py", line=2, value="77777"))
     assert b_after["state"] == "UNKNOWN" and b_after["fault_class"] == "unattributable"
 
+
+def test_gc_all_and_usage_report_respect_trace_budget_env(env, monkeypatch):
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ws = env / "work" / "budget_env_proj"
+    ws.mkdir(parents=True)
+    (ws / "app.py").write_text("x = 1\n")
+    rec = Recorder(ws)
+    rec.baseline()
+    s1 = Actor("claude", "s1")
+    for i in range(4):
+        body = f"pad = '{chr(65 + i) * 30_000}'\nx = {i}\n"
+        rec.pre(f"t{i}", s1, "Write", {"file_path": str(ws / "app.py"), "content": f"x={i}"})
+        (ws / "app.py").write_text(body)
+        rec.post(f"t{i}", s1, "Write", {"file_path": str(ws / "app.py"), "content": f"x={i}"}, "ok")
+
+    monkeypatch.setenv("VACANT_TRACE_BUDGET_BYTES", "50000")
+    urep = retention.usage_report(vh, env / "work")
+    assert urep["budget"]["within_budget"] is False
+    assert urep["reclaimable_estimate"]["bytes"] > 50_000
+
+    dry = retention.gc_all(root=vh, work_root=env / "work", dry_run=True)
+    real = retention.gc_all(root=vh, work_root=env / "work", dry_run=False, verify=True)
+    assert dry["bytes_freed"] == real["bytes_freed"] > 50_000
+    assert real["verify_ok"] is True
+    assert real["trace"]["target"]["target_reached"] is True
+    assert real["trace"]["target"]["bytes_remaining"] <= 50_000
+
+
+def test_target_sweep_evicts_rank2_and_rank3_and_blame_returns_unknown(env):
+    from vacant_network.trace.blame import blame_location
+    from vacant_network.trace.locate import Location
+
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ws = env / "work" / "rank23_sweep"
+    ws.mkdir(parents=True)
+    (ws / "README.md").write_text("init\n")
+    rec = Recorder(ws)
+    rec.baseline()
+    s1 = Actor("claude", "s1")
+    rec.prompt("please set magic = 424242\n" + ("P" * 30_000), session="s1", source="user")
+    rec.pre("step0", s1, "Write", {"file_path": str(ws / "app.py"), "content": "write_app"})
+    (ws / "app.py").write_text("pad = '" + ("A" * 30_000) + "'\nmagic = 424242\n")
+    rec.post("step0", s1, "Write", {"file_path": str(ws / "app.py"), "content": "write_app"},
+             "W" * 30_000)
+
+    # 回收前：424242 來自任務提示（input / lineage_exact）
+    b_before = blame_location(Trace(rec), Location("app.py", line=2, value="424242"))
+    assert b_before["state"] == "located" and b_before["fault_class"] == "input"
+    assert b_before["confidence"] == "lineage_exact"
+
+    # 壓到 10 KB：無 rank 0/1 可刪，必須動用 rank 2（最新檔案版本 app.py 30 KB）
+    # 與 rank 3（提示 text_blob 30 KB、步驟 output_blob 30 KB）
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=10_000)
+    assert res["target"]["target_reached"] is True
+    assert res["target"]["bytes_remaining"] <= 10_000
+    assert res["target"]["files_removed"] >= 3
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    # app.py 經工作區回退仍可讀到 step0 引入 424242，但提示與步驟 I/O blob 已被 GC 回收，
+    # 追緝不可誣賴 agent_fault，必須誠實回 UNKNOWN
+    b_after = blame_location(Trace(rec), Location("app.py", line=2, value="424242"))
+    assert b_after["state"] == "UNKNOWN" and b_after["fault_class"] == "unattributable"
+
+
+def test_compact_logs_includes_auto_gc_log_and_dry_run_matches(env):
+    from vacant_network.intake.statepaths import state_dir
+    hdir = state_dir() / "intake" / "hooks"
+    hdir.mkdir(parents=True, exist_ok=True)
+    (hdir / "auto_gc.log").write_text(("gc line " + ("x" * 90) + "\n") * 300)
+    dry = retention.compact_logs(max_log_bytes=10_000, dry_run=True)
+    real = retention.compact_logs(max_log_bytes=10_000, dry_run=False)
+    assert dry["logs_compacted"] == real["logs_compacted"] == 1
+    assert dry["bytes_freed"] == real["bytes_freed"] > 15_000
+    assert (hdir / "auto_gc.log").stat().st_size <= 10_000
+
+

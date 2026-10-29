@@ -265,7 +265,11 @@ def _index_base_sha(blobs: W.Blobs, idx_sha: str | None) -> str | None:
     return None
 
 
-def _load_project_index(blobs: W.Blobs, idx_sha: str | None) -> W.Index:
+def _load_project_index(
+    blobs: W.Blobs,
+    idx_sha: str | None,
+    _base_cache: dict[str, dict[str, W.Entry]] | None = None,
+) -> W.Index:
     if not idx_sha or ":" in idx_sha or not blobs.has(idx_sha):
         return {}
     try:
@@ -273,15 +277,24 @@ def _load_project_index(blobs: W.Blobs, idx_sha: str | None) -> W.Index:
         if not isinstance(raw, dict):
             return {}
         if "" not in raw:
-            return {str(k): W.Entry.from_json(v) for k, v in raw.items()}
+            out = {str(k): W.Entry.from_json(v) for k, v in raw.items()}
+            if _base_cache is not None:
+                _base_cache[idx_sha] = out
+            return dict(out)
         meta = raw[""]
         base_sha = meta.get("base")
         if not isinstance(base_sha, str) or not blobs.has(base_sha):
             return {}
-        base_raw = json.loads(blobs.get(base_sha))
-        if not isinstance(base_raw, dict) or "" in base_raw:
-            return {}
-        out = {str(k): W.Entry.from_json(v) for k, v in base_raw.items()}
+        if _base_cache is not None and base_sha in _base_cache:
+            out = dict(_base_cache[base_sha])
+        else:
+            base_raw = json.loads(blobs.get(base_sha))
+            if not isinstance(base_raw, dict) or "" in base_raw:
+                return {}
+            base_entries = {str(k): W.Entry.from_json(v) for k, v in base_raw.items()}
+            if _base_cache is not None:
+                _base_cache[base_sha] = base_entries
+            out = dict(base_entries)
         for d in meta.get("del") or []:
             out.pop(str(d), None)
         for k, v in raw.items():
@@ -358,8 +371,10 @@ def compact_trace(
     files_removed = 0
     now = time.time()
 
+    base_cache: dict[str, dict[str, W.Entry]] = {}
+
     def _keep_index(sha: str | None) -> None:
-        if not sha or ":" in sha:
+        if not sha or ":" in sha or sha in structural_shas:
             return
         keep_shas.add(sha)
         structural_shas.add(sha)
@@ -371,6 +386,10 @@ def compact_trace(
     def _note_file_sha(sha: str) -> None:
         keep_shas.add(sha)
         must_keep_file_shas.add(sha)
+        first_seen_order.setdefault(sha, len(first_seen_order) + 1)
+
+    def _note_io_sha(sha: str) -> None:
+        keep_shas.add(sha)
         first_seen_order.setdefault(sha, len(first_seen_order) + 1)
 
     if proj_root.is_dir():
@@ -465,10 +484,12 @@ def compact_trace(
             initial_idx: str | None = None
             last_user_seq = -1
             step_events: list[dict[str, Any]] = []
+            aux_index_events: list[tuple[int, str]] = []
             modified_paths: set[str] = set()
 
             for e in events:
                 t = e.get("type")
+                seq_num = int(e.get("seq") or 0)
                 if t == "trace_genesis" and ws_path is None and e.get("workspace"):
                     cand_ws = pathlib.Path(str(e["workspace"]))
                     if cand_ws.is_dir():
@@ -477,15 +498,13 @@ def compact_trace(
                     for k in ("blob", "sha256", "transcript_blob"):
                         v = e.get(k)
                         if isinstance(v, str) and v and ":" not in v:
-                            keep_shas.add(v)
-                            structural_shas.add(v)
+                            _note_io_sha(v)
                 elif t == "prompt":
                     tb = e.get("text_blob")
                     if isinstance(tb, str) and tb:
-                        keep_shas.add(tb)
-                        structural_shas.add(tb)
+                        _note_io_sha(tb)
                     if str(e.get("source") or "user") in ("user", "vacant do"):
-                        last_user_seq = max(last_user_seq, int(e.get("seq") or 0))
+                        last_user_seq = max(last_user_seq, seq_num)
                 elif t == "step":
                     step_events.append(e)
                     if initial_idx is None and isinstance(e.get("pre_index"), str):
@@ -508,8 +527,10 @@ def compact_trace(
                         initial_idx = e["before_index"]
                     if isinstance(e.get("after_index"), str) and e["after_index"]:
                         latest_idx = e["after_index"]
-                    _keep_index(e.get("before_index"))
-                    _keep_index(e.get("after_index"))
+                    for k in ("before_index", "after_index"):
+                        v = e.get(k)
+                        if isinstance(v, str) and v:
+                            aux_index_events.append((seq_num, v))
                     for ch in e.get("changes") or []:
                         if isinstance(ch, dict):
                             if ch.get("path"):
@@ -533,35 +554,53 @@ def compact_trace(
                                             _note_file_sha(v)
                 elif t == "coverage" and isinstance(e.get("baseline"), dict):
                     bidx = e["baseline"].get("index")
-                    if isinstance(bidx, str):
+                    if isinstance(bidx, str) and bidx:
                         if initial_idx is None:
                             initial_idx = bidx
-                        _keep_index(bidx)
-                        active_indices.add(bidx)
+                        aux_index_events.append((seq_num, bidx))
                 elif t == "session_closed" and isinstance(e.get("final_index"), str):
-                    if initial_idx is None:
-                        initial_idx = e["final_index"]
-                    latest_idx = e["final_index"]
-                    _keep_index(e["final_index"])
-                    active_indices.add(e["final_index"])
+                    fidx = e["final_index"]
+                    if fidx:
+                        if initial_idx is None:
+                            initial_idx = fidx
+                        latest_idx = fidx
+                        aux_index_events.append((seq_num, fidx))
 
             if initial_idx:
                 _keep_index(initial_idx)
                 active_indices.add(initial_idx)
+            if latest_idx:
+                _keep_index(latest_idx)
+                active_indices.add(latest_idx)
 
             # 保留最近 keep_recent_steps 步 ＋ 目前這個要求（last_user_seq 之後）的所有步驟
             recent_steps = step_events[-keep_recent_steps:] if keep_recent_steps > 0 else []
             kept_steps = {id(s): s for s in recent_steps}
-            for s in step_events:
-                if int(s.get("seq") or 0) > last_user_seq:
-                    kept_steps[id(s)] = s
+            if last_user_seq >= 0:
+                for s in step_events:
+                    if int(s.get("seq") or 0) > last_user_seq:
+                        kept_steps[id(s)] = s
+
+            min_kept_seq = (
+                min((int(s.get("seq") or 0) for s in kept_steps.values()), default=0)
+                if len(step_events) > keep_recent_steps
+                else 0
+            )
+            for seq_num, aidx in aux_index_events:
+                if seq_num >= min_kept_seq:
+                    _keep_index(aidx)
+                    active_indices.add(aidx)
 
             for s in kept_steps.values():
-                for k in ("input_blob", "output_blob", "writes_blob", "reads_blob", "payload_blob"):
+                for k in ("writes_blob", "reads_blob", "payload_blob"):
                     v = s.get(k)
                     if isinstance(v, str) and v:
                         keep_shas.add(v)
                         structural_shas.add(v)
+                for k in ("input_blob", "output_blob"):
+                    v = s.get(k)
+                    if isinstance(v, str) and v:
+                        _note_io_sha(v)
                 for k in ("pre_index", "post_index"):
                     v = s.get(k)
                     if isinstance(v, str) and v:
@@ -574,8 +613,7 @@ def compact_trace(
                         reads = json.loads(blobs.get(rb))
                 for r in reads:
                     if isinstance(r, dict) and isinstance(r.get("blob"), str) and r["blob"]:
-                        keep_shas.add(r["blob"])
-                        structural_shas.add(r["blob"])
+                        _note_io_sha(r["blob"])
                 writes = list(s.get("writes") or [])
                 wb = s.get("writes_blob")
                 if isinstance(wb, str) and blobs.has(wb):
@@ -589,12 +627,12 @@ def compact_trace(
                                 _note_file_sha(v)
 
             if latest_idx:
-                lidx_map = _load_project_index(blobs, latest_idx)
+                lidx_map = _load_project_index(blobs, latest_idx, base_cache)
                 for rel in modified_paths:
                     ent = lidx_map.get(rel)
                     if ent is not None and ":" not in ent.sha256:
                         latest_file_shas.add(ent.sha256)
-                        structural_shas.add(ent.sha256)
+                        _note_file_sha(ent.sha256)
 
             # 索引裡出現的檔案內容：
             # 若檔案曾被改動過、或工作區已不在／內容已變 ⇒ 留在版本庫；
@@ -602,10 +640,10 @@ def compact_trace(
             # 工作區本身就是這份內容，版本庫裡的重複副本可安全回收。
             seen_idx_entries: dict[tuple[str, str], bool] = {}
             for idx_sha in list(active_indices):
-                idx = _load_project_index(blobs, idx_sha)
+                idx = _load_project_index(blobs, idx_sha, base_cache)
                 for rel, entry in idx.items():
                     fsha = entry.sha256
-                    if ":" in fsha:
+                    if ":" in fsha or not blobs.has(fsha):
                         continue
                     if rel in modified_paths or not prune_redundant_workspace_blobs or ws_path is None:
                         _note_file_sha(fsha)
@@ -903,7 +941,7 @@ def compact_logs(
     bytes_freed = 0
     logs_compacted = 0
     keep_bytes = max(4096, max_log_bytes // 2)
-    for name in ("events.jsonl", "errors.jsonl", "submit.log", "finalize.log"):
+    for name in ("events.jsonl", "errors.jsonl", "submit.log", "finalize.log", "auto_gc.log"):
         p = hdir / name
         if not p.is_file() or p.is_symlink():
             continue
@@ -912,16 +950,16 @@ def compact_logs(
             if sz <= max_log_bytes:
                 continue
             logs_compacted += 1
+            raw = p.read_bytes()[-keep_bytes:]
+            nl = raw.find(b"\n")
+            if nl >= 0 and nl + 1 < len(raw):
+                raw = raw[nl + 1:]
+            kept_text = raw.decode("utf-8", errors="replace")
+            new_sz = len(kept_text.encode("utf-8"))
             if not dry_run:
-                raw = p.read_bytes()[-keep_bytes:]
-                nl = raw.find(b"\n")
-                if nl >= 0 and nl + 1 < len(raw):
-                    raw = raw[nl + 1:]
-                atomic_write_text(p, raw.decode("utf-8", errors="replace"))
+                atomic_write_text(p, kept_text)
                 new_sz = p.stat().st_size
-                bytes_freed += max(0, sz - new_sz)
-            else:
-                bytes_freed += max(0, sz - keep_bytes)
+            bytes_freed += max(0, sz - new_sz)
         except OSError:
             continue
     return {"bytes_freed": bytes_freed, "logs_compacted": logs_compacted}
@@ -1016,7 +1054,10 @@ def gc_all(
     """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。
 
     `target_bytes`：把 trace 版本庫壓到此位元組數以下（2026-10-28 Axis 2；見
-    `compact_trace`）；None＝常規保守回收。"""
+    `compact_trace`）；None＝使用 `_resolve_auto_budget()`（預設 64 MiB，或
+    `VACANT_TRACE_BUDGET_BYTES` 覆寫，0＝不壓目標上限）。"""
+    if target_bytes is None:
+        target_bytes = _resolve_auto_budget()
     if older_than_hours is not None and max_age_days is None:
         max_age_days = older_than_hours / 24.0
 
