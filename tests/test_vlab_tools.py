@@ -490,4 +490,20 @@ def test_dabstep_subset_report_cli_normal_run_and_files(tmp_path: Path, capsys) 
     assert data["n_scored"] == 1
 
 
+def test_envelope_compliance_cli_normal_pass_and_out_file(tmp_path: Path, capsys) -> None:
+    """envelope_compliance CLI：C 臂格子 vacant_home_bytes 合規（100MiB ≤ 256MiB）→ verdict PASS、main 回 0、--out 另存 JSON。"""
+    cell = tmp_path / "runs" / "exp_pass" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 100 * 1024 * 1024}), encoding="utf-8")
+    rc = envelope_compliance.main([
+        "exp_pass", "--base", str(tmp_path / "runs"),
+        "--out", str(tmp_path / "out.json"),
+    ])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    assert '"verdict": "PASS"' in capsys.readouterr().out
+    assert '"verdict": "PASS"' in (tmp_path / "out.json").read_text(encoding="utf-8")
+
+
 
