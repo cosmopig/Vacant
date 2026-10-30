@@ -818,3 +818,21 @@ def test_extract_test_hint_multiple_failures_priority(env):
     assert "AssertionError" in hint
     # 紅燈：其餘失敗測試名字必在前 120 字元內（改之前被長斷言擠出截斷窗口）
     assert "test_alpha" in hint[:120]
+
+
+def test_extract_test_hint_pytest_multiple_failures_priority(env):
+    """pytest 格式（`FAILED path::test_name - exc`）的多失敗前置紅燈（2026-10-30，審查指示 §四-4【P1】）：
+    多個失敗且末尾測試斷言過長時，其餘失敗測試名字 `(also failing: ...)` 仍前置緊接於
+    測試名稱之後，使真實 agent（pi／OpenCode）在前 120 字元內看到所有失敗測試名。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    long_list = ", ".join(str(i) for i in range(40))
+    out = (
+        "FAILED test_calc.py::test_alpha - AssertionError: 1 != 2\n"
+        f"FAILED test_calc.py::test_beta - AssertionError: [{long_list}] != [{long_list}]\n"
+    )
+    hint = _extract_test_hint(out, err="2 failed")
+    assert hint is not None
+    assert hint.startswith("test_beta")          # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "also failing: test_alpha" in hint    # 其餘失敗名字緊接名稱之後、先於長斷言
+    # 紅燈：其餘失敗測試名字必在前 120 字元內（長斷言不得把名字擠出截斷窗口）
+    assert "test_alpha" in hint[:120]
