@@ -1731,3 +1731,15 @@ def test_usage_main_missing_dir_safe(tmp_path: Path, capsys) -> None:
     rep = json.loads(capsys.readouterr().out)
     assert rep["totals"]["state_dir"] == 0
     assert rep["envelope"]["within_envelope"] is True
+
+
+def test_retention_main_auto_dry_run_human_output_safe(tmp_path: Path, capsys) -> None:
+    """retention.main（`vacant gc` CLI）：--auto --dry-run 且狀態目錄不存在時，
+    人讀模式 rc==0、stdout 含「自動 gc 預覽（--dry-run，未刪除）: 可釋放 0 B（0 個檔案）」、
+    不建立目錄、不拋異常（ASSIGNMENT 🔴最優先 驗收 (c)；retention.main 零改動）。"""
+    p = tmp_path / "nonexistent_vh"
+    rc = retention.main(["gc", "--auto", "--dry-run", "--state-dir", str(p)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "自動 gc 預覽（--dry-run，未刪除）: 可釋放 0 B（0 個檔案）" in out
+    assert not p.exists()
