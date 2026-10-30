@@ -1230,3 +1230,21 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert mcells["cell-M-noagent"]["state"] == "complete"
     assert "lacks second agent" in " ".join(mcells["cell-M-noagent"]["unknown"])
     assert out["bad"] == ["cell-M-noagent"]
+
+    # P20261030_2110-4（ASSIGNMENT「研發工具需納入回歸測試」）：--out 落盤 ＋ M 臂第二 agent 彙總頂層契約納入回歸——
+    # 獨立乾淨 runs-dir（tmp_path 下 out_runs，僅合格 M 格）→ main --runs-dir --out rc==0、
+    # audit.json 存在且為合法 JSON、summary.per_arm["M"] 具備 second_agent_verified/unknown_cells。
+    out_runs = tmp_path / "out_runs"
+    out_runs.mkdir()
+    opencode_cell_audit._mock_cell(out_runs, "cell-M-ok2", "M",
+                                   bash_command="opencode run --model x --print", score_pass=True)
+    audit_json = tmp_path / "audit.json"
+    capsys.readouterr()  # 排空殘留，保持 --out stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(out_runs), "--out", str(audit_json), "--json"])
+    assert rc == 0
+    assert audit_json.is_file()
+    out = json.loads(audit_json.read_text(encoding="utf-8"))  # 落盤檔可解析為合法 JSON
+    m = out["summary"]["per_arm"]["M"]
+    # P20261030_2126-1（2110-4 重發；核心斷言已於 94894736 落）：step 4 字面「具備」——兩欄位存在。
+    assert {"second_agent_verified_cells", "second_agent_unknown_cells"} <= set(m)
+    assert m["second_agent_verified_cells"] == 1 and m["second_agent_unknown_cells"] == 0
