@@ -1784,3 +1784,19 @@ def test_retention_main_gc_dry_run_human_output_safe(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "（預覽 --dry-run，未刪除） 釋放空間：0 B" in out
     assert "trace 版本庫   : 釋放 0 B" in out
+
+
+def test_sweep_to_target_missing_dir_safe(tmp_path: Path) -> None:
+    """_sweep_to_target 物件庫目錄不存在：安全回傳完整結構字典（target_reached=True、零釋放）、
+    絕不拋出異常、絕不建立目錄（ASSIGNMENT 🔴最優先 驗收 (c)；核心零改動）。"""
+    missing_obj = tmp_path / "nonexistent_obj"
+    res = retention._sweep_to_target(missing_obj, keep_shas=set(), redundant_live=set(),
+                                     target_bytes=1024, dry_run=True)
+    assert res["target_bytes"] == 1024
+    assert res["bytes_freed"] == 0
+    assert res["files_removed"] == 0
+    assert res["bytes_remaining"] == 0
+    assert res["target_reached"] is True
+    assert res["hard_keep_bytes"] == 0
+    assert res["aborted"] is False
+    assert not missing_obj.exists()
