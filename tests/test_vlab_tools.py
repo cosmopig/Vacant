@@ -396,4 +396,17 @@ def test_growth_report_cli_missing_points_unknown_exit_code(tmp_path: Path, caps
     assert data["verdict"] == "UNKNOWN"
 
 
+def test_disk_report_cli_normal_run(tmp_path: Path, capsys) -> None:
+    cell = tmp_path / "runs" / "exp_norm" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 50000}), encoding="utf-8")
+    rc = disk_report.main(["exp_norm", "--base", str(tmp_path / "runs")])
+    assert rc == 0
+    data = json.loads(capsys.readouterr().out)
+    assert data["n_cells"] == 1
+    assert data["by_arm"]["C"]["n"] == 1
+    assert data["by_arm"]["C"]["home_bytes"]["min"] == 50000
+
+
 
