@@ -528,6 +528,29 @@ def test_extract_test_hint_multiline_assertion_detail(env):
     assert "(0, 1)" in hint and "(0, 0)" in hint   # 紅燈：斷言的後續細節行不得丟
 
 
+def test_extract_test_hint_python311_compatibility():
+    """紅燈（Argon 審查 20261030_0233）：vacant_network/trace/evidence.py
+    不得使用 Python 3.12 PEP 701 巢狀雙引號 f-string（如 f\"{raw} | {\"; \".join(...)}\"），
+    以確保 pyproject.toml 與 AGENTS.md 承諾的 Python 3.11 相容性。"""
+    import pathlib, subprocess
+    ev_path = pathlib.Path(__file__).resolve().parent.parent / "vacant_network" / "trace" / "evidence.py"
+    text = ev_path.read_text(encoding="utf-8")
+    # 檢查是否有同類型引號巢狀在 f-string 運算式中
+    import re
+    bad_fstrings = [
+        ln.strip() for ln in text.splitlines()
+        if re.search(r'f"[^"\n]*\{[^}\n]*"[^}\n]*\}', ln)
+    ]
+    assert not bad_fstrings, f"Found Python 3.12-only f-string nesting in evidence.py: {bad_fstrings}"
+    # 若有本機 python 3.11 工具鏈，直接執行編譯檢查
+    py311_bin = pathlib.Path("/home/user1/dev/wt/argon/.argon_py311/python/bin/python3.11")
+    ld = pathlib.Path("/lib64/ld-linux-x86-64.so.2")
+    if py311_bin.is_file() and ld.is_file():
+        res = subprocess.run([str(ld), str(py311_bin), "-m", "py_compile", str(ev_path)],
+                             capture_output=True, text=True)
+        assert res.returncode == 0, f"Python 3.11 py_compile failed:\n{res.stderr}"
+
+
 def test_review_chain_record_keeps_error_and_test_hint(env):
     """紅燈（2026-10-29/30 GPT review P0 + Argon P2）：chain 的 review event 必須保留
     `error` 與 `test_hint`——否則審計紀錄丟掉的正是送給 agent 的反饋內容，審查者

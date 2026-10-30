@@ -574,7 +574,8 @@ def _extract_test_hint(outp: str, err: str = "") -> str | None:
         raw = f"{raw}; {suffix}"
     # 斷言的後續細節行（set/list diff 等）附在摘要後
     if last["detail"]:
-        raw = f"{raw} | {"; ".join(last['detail'][:3])}"
+        detail_str = "; ".join(last["detail"][:3])
+        raw = f"{raw} | {detail_str}"
     # 移除常見絕對路徑前綴避免干擾 KS1 判定
     sanitized = re.sub(r"/(?:[a-zA-Z0-9_.-]+/)+", "", raw)
     sanitized = " ".join(sanitized.split())

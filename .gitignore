@@ -17,6 +17,9 @@ var/
 # 私有實驗資料（EvalPlus 官方題庫等）：不進版控
 .vacant-private/
 
+# argon 臨時工具鏈與環境（如 .argon_py311）：不進版控
+.argon*
+
 # 展件分身真相來源的**執行期**資料庫。進版控的是
 # `evidence_*/…_events.jsonl`（人讀的事件流）與 verify／stats 的輸出——
 # 二進位 sqlite 檔本身不進，WAL/SHM 更不該進（它們隨時在變）。
