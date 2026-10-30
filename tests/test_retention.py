@@ -1534,3 +1534,26 @@ def test_verify_trace_chains_missing_or_empty_projects_dir(tmp_path):
     assert count == 0
     assert ok is True
     assert errs == []
+
+
+def test_cli_vacant_gc_verify_corrupted_chain_human_output_and_exit_code(tmp_path, capsys):
+    """ASSIGNMENT 🔴最優先驗收(c) 人讀版：`vacant gc --verify`（非 --json）遇損毀簽章鏈，
+    stdout 印出「驗證失敗 ✗」、列出損毀專案名錯誤項目，並以 exit code 1 退出，不可誤判 0／假 PASS。"""
+    vh = tmp_path / "vh"
+    pdir = vh / "trace" / "projects" / "bad_proj"
+    pdir.mkdir(parents=True)
+    (pdir / "chain.ndjson").write_text("corrupted chain\n", encoding="utf-8")
+    saved = os.environ.get("VACANT_WORK")
+    os.environ["VACANT_WORK"] = str(tmp_path / "work_empty")  # hermetic：gc 不觸及真實工作目錄
+    try:
+        rc = retention.main(["gc", "--state-dir", str(vh), "--verify"])
+    finally:
+        if saved is None:
+            os.environ.pop("VACANT_WORK", None)
+        else:
+            os.environ["VACANT_WORK"] = saved
+    assert rc == 1
+    out = capsys.readouterr().out
+    assert "驗證失敗 ✗" in out
+    assert "bad_proj" in out
+    assert "1 個專案簽章鏈 驗證失敗 ✗" in out
