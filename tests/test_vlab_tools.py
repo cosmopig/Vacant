@@ -782,3 +782,22 @@ def test_growth_report_load_points_dedup_and_invalid_lines(tmp_path: Path) -> No
     assert [p["total_bytes"] for p in pts] == [1000, 2000]
     dup = next(p for p in pts if p["total_bytes"] == 1000)
     assert dup["_src"] == str(f1)
+
+
+def test_holm_e002_cli_recompute_cells_fallback(tmp_path: Path, capsys) -> None:
+    # P20261030_1301-3（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具回退重算路徑）：
+    # 無 REPORT.json 但存在原始格子（A 臂與 C 臂 score.json）時，main 須從格子
+    # 重算 A_vs_C 的 McNemar 雙尾 p、以 exit 0 正常結束，且輸出標記
+    # "source": "recomputed"（與主路徑 "report_json" 區分），完成雙路徑契約閉環。
+    exp_dir = tmp_path / "runs" / "exp_fb"
+    a_cell = exp_dir / "polyglot_py-task1-pi-A-r1"
+    c_cell = exp_dir / "polyglot_py-task1-pi-C-r1"
+    a_cell.mkdir(parents=True)
+    c_cell.mkdir(parents=True)
+    (a_cell / "score.json").write_text(json.dumps({"pass": False}), encoding="utf-8")
+    (c_cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    rc = holm_e002.main(["exp_fb", "--base", str(tmp_path / "runs"), "--arms", "C"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert '"schema": "vacant.holm/1"' in out
+    assert '"source": "recomputed"' in out
