@@ -1680,3 +1680,15 @@ def test_usage_report_missing_dir_safe(tmp_path: Path) -> None:
     assert rep["projects"] == []
     assert all(v == 0 for v in rep["areas"].values())
     assert rep["areas"]
+
+
+def test_envelope_accounting_missing_dir_safe(tmp_path: Path) -> None:
+    """envelope_accounting：狀態目錄（$VACANT_HOME）不存在時，安全回傳標準會計字典——
+    帳目完整、零越限、封頂加總在封頂內——不拋異常（ASSIGNMENT 🔴最優先 驗收 (c)）。"""
+    acct = retention.envelope_accounting(tmp_path / "nonexistent")
+    assert acct["components"] == []
+    assert acct["unaccounted"] == []
+    assert acct["accounting_complete"] is True
+    assert acct["within_caps"] is True
+    assert acct["fixed_within_caps"] is True
+    assert acct["byte_caps_sum_within_envelope"] is True
