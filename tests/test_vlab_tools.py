@@ -383,4 +383,17 @@ def test_dabstep_subset_report_cli_missing_cells_exit_code(tmp_path: Path, capsy
     assert "no dabstep cells under" in capsys.readouterr().err
 
 
+def test_growth_report_cli_missing_points_unknown_exit_code(tmp_path: Path, capsys) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / "growth.jsonl").write_text("", encoding="utf-8")
+    ops_data = tmp_path / "ops_data"
+    ops_data.mkdir()
+    rc = growth_report.main(["--home", str(home),
+                             "--ops-data", str(ops_data), "--json"])
+    assert rc == 1
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "UNKNOWN"
+
+
 
