@@ -526,46 +526,91 @@ def _extract_test_hint(outp: str, err: str = "") -> str | None:
     lines = [ln.strip() for ln in outp.splitlines() if ln.strip()]
     # 結構行＝區塊邊界／traceback／總結行：不是斷言訊息的細節行
     STRUCT = re.compile(
-        r"^(?:=+$|-+$|\?\s|Traceback|During handling|The above exception|"
+        r"^(?:=+.*=+$|=+$|-+$|_{2,}.*_{2,}$|_+$|\?\s|Traceback|During handling|The above exception|"
         r"Ran\s+\d+|FAILED\b|FAIL:|ERROR:|E\s|File\s|>\s"
         r"|\S+\.py:\d+:|Command exited with code)")
     blocks: list[dict[str, Any]] = []  # 每個失敗區塊 {name, exc, detail[]}
     cur: dict[str, Any] | None = None
+
+    def _get_or_open_block(name: str, exc: str | None = None) -> dict[str, Any]:
+        for b in blocks:
+            if b["name"] == name:
+                blocks.remove(b)
+                blocks.append(b)
+                if exc and not b["exc"]:
+                    b["exc"] = exc
+                return b
+        b = {"name": name, "exc": exc, "detail": []}
+        blocks.append(b)
+        return b
+
     for ln in lines:
         if ln == err_clean or ln.startswith("Command exited with code"):
             continue
         if re.match(r"^(?:FAILED\s*\(|=+\s*\d+|\d+\s+failed\b)", ln, re.I):
             continue
+        if re.match(r"^=+.*=+$", ln):
+            cur = None
+            continue
         m_u = re.match(r"^(?:FAIL|ERROR):\s+([A-Za-z0-9_]+)", ln)
         if m_u:
-            cur = {"name": m_u.group(1), "exc": None, "detail": []}
-            blocks.append(cur)
+            cur = _get_or_open_block(m_u.group(1))
+            continue
+        m_hdr = re.match(r"^_{3,}\s+(?:[A-Za-z0-9_]+\.)*([A-Za-z0-9_]+)(?:\[.*?\])?\s+_{3,}$", ln)
+        if m_hdr:
+            cur = _get_or_open_block(m_hdr.group(1))
             continue
         m_p = re.match(r"^FAILED\s+\S+?::([A-Za-z0-9_]+)(?:\s+-\s+(.*))?$", ln)
         if m_p:
-            cur = {"name": m_p.group(1),
-                   "exc": m_p.group(2).strip() if m_p.group(2) else None, "detail": []}
-            blocks.append(cur)
+            cur = _get_or_open_block(
+                m_p.group(1),
+                m_p.group(2).strip() if m_p.group(2) else None,
+            )
             continue
+        is_e_line = bool(re.match(r"^E\s+", ln))
         clean_ln = re.sub(r"^E\s+", "", ln)
         if re.search(r"^(?:[A-Za-z_]\w*(?:Error|Exception)\b|assert\s+|Expected\b)", clean_ln):
             if cur is None:
                 cur = {"name": None, "exc": None, "detail": []}
                 blocks.append(cur)
-            cur["exc"] = clean_ln
-            cur["detail"] = []
+            if cur["exc"] is not None and is_e_line and clean_ln.startswith("assert "):
+                cur["detail"].append(clean_ln)
+            else:
+                cur["exc"] = clean_ln
+                cur["detail"] = []
             continue
-        if cur is not None and cur["exc"] is not None and not STRUCT.match(ln):
-            cur["detail"].append(ln)
+        if cur is not None and cur["exc"] is not None:
+            if is_e_line and clean_ln:
+                cur["detail"].append(clean_ln)
+            elif not STRUCT.match(ln):
+                cur["detail"].append(ln)
     if not blocks:
         return None
     last = blocks[-1]
     # 多個測試失敗：其餘失敗測試名字緊接最後一個名字之後、先於斷言訊息（>4 個只給計數），
-    # 讓 agent 知道「不止一個」，且長斷言訊息不會把名字擠出截斷窗口（2026-10-30 e002 C 臂）
+    # 讓 agent 知道「不止一個」，且長斷言訊息不會把名字擠出截斷窗口（2026-10-30 e002 C 臂）。
+    # 同時限制前綴總長度（<= 115 字元），避免 2~4 個超長測試名稱反過來把最後測試的 AssertionError 擠出 240 字元窗口。
     others = [b["name"] for b in blocks if b["name"] and b["name"] != last["name"]]
     if others:
-        suffix = ("also failing: " + ", ".join(others)) if len(others) <= 4 \
-            else f"+{len(others)} other failing tests"
+        if len(others) <= 4:
+            suffix = "also failing: " + ", ".join(others)
+            if last["name"] and last["exc"] and (len(last["name"]) + len(suffix) + 3 > 115):
+                kept: list[str] = []
+                for name in others:
+                    rem = len(others) - (len(kept) + 1)
+                    tail = f", +{rem} more" if rem > 0 else ""
+                    cand = "also failing: " + ", ".join(kept + [name]) + tail
+                    if len(last["name"]) + len(cand) + 3 <= 115:
+                        kept.append(name)
+                    else:
+                        break
+                if kept:
+                    rem = len(others) - len(kept)
+                    suffix = "also failing: " + ", ".join(kept) + (f", +{rem} more" if rem > 0 else "")
+                else:
+                    suffix = f"also failing: +{len(others)} other failing tests"
+        else:
+            suffix = f"+{len(others)} other failing tests"
         paren = f" ({suffix})"
     else:
         paren = ""

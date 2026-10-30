@@ -866,3 +866,68 @@ def test_extract_test_hint_unittest_more_than_four_failures_count_summary(env):
     assert "+5 other failing tests" in hint          # len(others)==5 > 4 → 計數摘要分支
     assert "AssertionError" in hint                  # 斷言訊息仍附帶
     assert len(hint) <= 240                          # 不膨脹窗口
+
+
+def test_extract_test_hint_long_other_names_do_not_starve_assertion_and_pytest_full_output(env):
+    """紅燈（2026-10-30 審查重現）：
+    1) 真實 e002 C 臂 `polyglot_py-pg_poker-pi-C-r1` 有 4 個失敗測試且前 3 個名字極長（共 164 字元），
+       `05ec4323` 將 `(also failing: ...)` 無上限塞在 `AssertionError` 之前，導致前綴吃掉 206 字元，
+       把真正的斷言差異 `["4S 5H 5S 5D 5C"] != ["7S 8S 9S 6S 10S"]` 截斷成 `AssertionError: Lists diffe...`。
+       修復後：前綴在超過預算時自動改用精簡附加（如 `also failing: <first>, +2 more`），既在前 120 字元保留失敗測試提示，
+       又完整保留末尾測試的斷言差異值。
+    2) 真實 `pytest` 輸出同時包含 `=== FAILURES ===`（`___ test_name ___` 與多行 `E   ` 斷言細節）與
+       `=== short test summary info ===`（`FAILED file.py::test_name`，在 `-q` 或多行錯誤下不帶 `- exc`）時，
+       不得因 summary 行覆蓋而遺失 `FAILURES` 區塊的 `AssertionError` 與 `E   ` 細節行，亦不得重複計入 `others`。
+    """
+    from vacant_network.trace.evidence import _extract_test_hint
+
+    poker_out = (
+        "======================================================================\n"
+        "FAIL: test_aces_can_end_a_straight_10_j_q_k_a (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["4S 5H 4C 8D 4H"] != ["10D JH QS KD AC"]\n'
+        "======================================================================\n"
+        "FAIL: test_aces_can_end_a_straight_flush_10_j_q_k_a (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["4S 5H 4C 8D 4H"] != ["10S JS QS KS AS"]\n'
+        "======================================================================\n"
+        "FAIL: test_aces_cannot_be_in_the_middle_of_a_straight_flush_q_k_a_2_3 (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["Q", "K"] != ["A", "2"]\n'
+        "======================================================================\n"
+        "FAIL: test_straight_flush_beats_four_of_a_kind (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["4S 5H 5S 5D 5C"] != ["7S 8S 9S 6S 10S"]\n'
+        "----------------------------------------------------------------------\n"
+        "Ran 37 tests in 0.002s\n\n"
+        "FAILED (failures=4)\n"
+    )
+    poker_hint = _extract_test_hint(poker_out, err="Command exited with code 1")
+    assert poker_hint is not None
+    assert poker_hint.startswith("test_straight_flush_beats_four_of_a_kind")
+    assert "also failing:" in poker_hint[:120]
+    assert '["4S 5H 5S 5D 5C"] != ["7S 8S 9S 6S 10S"]' in poker_hint
+    assert len(poker_hint) <= 240
+
+    pytest_q = (
+        "=================================== FAILURES ===================================\n"
+        "__________________________________ test_alpha __________________________________\n"
+        "    def test_alpha():\n"
+        ">       assert 1 == 2\n"
+        "E       AssertionError: assert 1 == 2\n"
+        "__________________________________ test_beta ___________________________________\n"
+        "    def test_beta():\n"
+        ">       assert [1, 2] == [1, 3]\n"
+        "E       AssertionError: assert [1, 2] == [1, 3]\n"
+        "E         At index 1 diff: 2 != 3\n"
+        "=========================== short test summary info ============================\n"
+        "FAILED test_sample.py::test_alpha\n"
+        "FAILED test_sample.py::test_beta\n"
+        "2 failed in 0.02s\n"
+    )
+    py_hint = _extract_test_hint(pytest_q, err="Command exited with code 1")
+    assert py_hint is not None
+    assert py_hint.startswith("test_beta (also failing: test_alpha):")
+    assert "AssertionError: assert [1, 2] == [1, 3]" in py_hint
+    assert "At index 1 diff: 2 != 3" in py_hint
+
