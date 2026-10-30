@@ -11,11 +11,12 @@
   python3 ops/vlab/tools/opencode_cell_audit.py --selftest
 退出碼：0 全部 OK；1 有格子 FAIL/UNKNOWN；2 selftest 失敗。
 """
-import argparse, json, shutil, sys, tarfile, tempfile
+import argparse, json, re, shutil, sys, tarfile, tempfile
 from collections import Counter
 from pathlib import Path
 
 STEP, TOOL, ZERO64 = ("step_finish", "step-finish"), ("tool_use", "tool"), "0" * 64
+_SECOND_RE = re.compile(r"opencode|\bpi\b")  # 第二 agent 證據：opencode / pi 獨立字詞（pip 等不誤中）
 
 
 def _i(x) -> int:
@@ -25,10 +26,26 @@ def _i(x) -> int:
         return 0
 
 
+def _cmd_text(e: dict) -> str:
+    """tool_use 事件命令文字多路徑收集（OpenCode part 形態不固定：command/input/state）。"""
+    bits: list[str] = []
+
+    def walk(x) -> None:
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if isinstance(v, str) and k in ("command", "cmd", "input"):
+                    bits.append(v)
+                elif isinstance(v, dict) and k in ("part", "input", "state"):
+                    walk(v)
+
+    walk(e)
+    return " ".join(bits)
+
+
 def parse_events(path) -> dict:
-    """OpenCode events.jsonl → 成本統計（model_calls/tokens/tool_calls）。"""
+    """OpenCode events.jsonl → 成本統計（model_calls/tokens/tool_calls）＋ M 臂第二 agent 偵測。"""
     st = {"model_calls": 0, "input_tokens": 0, "output_tokens": 0,
-          "total_tokens": 0, "tool_calls": 0, "tools": {}}
+          "total_tokens": 0, "tool_calls": 0, "tools": {}, "has_second_agent": False}
     for line in Path(path).read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             e = json.loads(line.strip()) if line.strip() else {}
@@ -45,8 +62,11 @@ def parse_events(path) -> dict:
             st["total_tokens"] += _i(tk.get("total"))
         elif t in TOOL:
             st["tool_calls"] += 1
-            if part.get("tool"):
-                st["tools"][part["tool"]] = st["tools"].get(part["tool"], 0) + 1
+            tool = part.get("tool")
+            if tool:
+                st["tools"][tool] = st["tools"].get(tool, 0) + 1
+                if tool in ("bash", "shell") and _SECOND_RE.search(_cmd_text(e)):
+                    st["has_second_agent"] = True
     return st
 
 
@@ -128,6 +148,10 @@ def audit_cell(cell_path) -> dict:
     else:
         rec["ok"] = False
         rec["unknown"].append("events.jsonl missing")
+    if rec["arm"] == "M":  # e004 封包 §3：M 臂須有真第二 agent 證據，否則 H-review(M) UNKNOWN
+        rec["second_agent_verified"] = bool((rec.get("events") or {}).get("has_second_agent"))
+        if not rec["second_agent_verified"]:
+            rec["unknown"].append("M arm lacks second agent execution evidence (H-review(M) UNKNOWN)")
 
     tgz = cell / "vacant_home.tgz"
     if tgz.is_file():
@@ -173,18 +197,22 @@ def summarize(recs: list) -> dict:
     return {"per_arm": per_arm}
 
 
-def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False, score_pass: bool | None = None) -> Path:
-    """合成 mock 格子：OpenCode 格式 events.jsonl ＋（C 臂）vacant_home.tgz。"""
+def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False, score_pass: bool | None = None,
+               bash_command: str | None = None) -> Path:
+    """合成 mock 格子：OpenCode 格式 events.jsonl ＋（C 臂）vacant_home.tgz；bash_command 可注入第二 agent 命令。"""
     cell = root / name
     cell.mkdir(parents=True)
     (cell / "cell.json").write_text(json.dumps(
         {"exp": "mock", "cell": name, "arm": arm, "agent": "opencode", "agent_rc": 0, "wall_s": 1.5}), encoding="utf-8")
     ev = [{"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 300, "input": 100, "output": 10, "cache": {"write": 0, "read": 0}}}},
           {"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 500, "input": 200, "output": 20}}},
-          {"type": "tool_use", "part": {"type": "tool", "tool": "read"}},
-          {"type": "tool_use", "part": {"type": "tool", "tool": "bash"}},
-          {"type": "tool_use", "part": {"type": "tool", "tool": "read"}},
-          {"type": "text", "text": "noise"}, "not-json"]
+          {"type": "tool_use", "part": {"type": "tool", "tool": "read"}}]
+    bash_ev = {"type": "tool_use", "part": {"type": "tool", "tool": "bash"}}
+    if bash_command:
+        bash_ev["part"]["command"] = bash_command
+    ev.append(bash_ev)
+    ev += [{"type": "tool_use", "part": {"type": "tool", "tool": "read"}},
+           {"type": "text", "text": "noise"}, "not-json"]
     (cell / "events.jsonl").write_text("\n".join(json.dumps(x) if not isinstance(x, str) else x for x in ev) + "\n", encoding="utf-8")
     if arm == "C":
         home = root / (name + "_home")
@@ -222,9 +250,11 @@ def selftest() -> bool:
         f = audit_cell(_mock_cell(root, "mock-opencode-C-nopass", "C", score_pass=False))
         (root / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
         i = audit_cell(root / "mock-opencode-A-incomplete")
+        m = audit_cell(_mock_cell(root, "mock-opencode-M-r1", "M", bash_command="pi run --model x", score_pass=True))
+        m2 = audit_cell(_mock_cell(root, "mock-opencode-M-noagent", "M", score_pass=False))
         exp_ev = {"model_calls": 2, "input_tokens": 300, "output_tokens": 30,
-                  "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}}
-        per_arm = summarize([a, c, t, f, i])["per_arm"]
+                  "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}, "has_second_agent": False}
+        per_arm = summarize([a, c, t, f, i, m, m2])["per_arm"]
         return (a["events"] == exp_ev and a["arm"] == "A" and a["ok"] and "vacant" not in a
                 and c["arm"] == "C" and c["ok"] and not c["unknown"]
                 and c["vacant"]["review"] == {"n": 4, "actions": {"allow": 3, "deny": 1}, "denied": 1}
@@ -235,7 +265,12 @@ def selftest() -> bool:
                 and i["unknown"] == []
                 and a["score_pass"] is True and c["score_pass"] is True
                 and t["score_pass"] is False and f["score_pass"] is False and i["score_pass"] is None
-                and set(per_arm) == {"A", "C"}
+                and m["score_pass"] is True and m2["score_pass"] is False
+                and "second_agent_verified" not in a and m["second_agent_verified"] is True
+                and m["events"]["has_second_agent"] is True and m["ok"] and not m["unknown"]
+                and m2["second_agent_verified"] is False and m2["state"] == "complete"
+                and "M arm lacks second agent execution evidence (H-review(M) UNKNOWN)" in m2["unknown"]
+                and set(per_arm) == {"A", "C", "M"}
                 and per_arm["A"] == {"cells": 1, "pass": 1, "model_calls": 2, "total_tokens": 800,
                                      "calls_per_success": 2.0, "tokens_per_success": 800.0,
                                      "calls_vs_A": 1.0, "tokens_vs_A": 1.0, "over_2x_A_cost": False}
@@ -243,7 +278,10 @@ def selftest() -> bool:
                 and per_arm["C"]["model_calls"] == 6 and per_arm["C"]["total_tokens"] == 2400
                 and per_arm["C"]["calls_per_success"] == 6.0 and per_arm["C"]["tokens_per_success"] == 2400.0
                 and per_arm["C"]["calls_vs_A"] == 3.0 and per_arm["C"]["tokens_vs_A"] == 3.0
-                and per_arm["C"]["over_2x_A_cost"] is True)
+                and per_arm["C"]["over_2x_A_cost"] is True
+                and per_arm["M"] == {"cells": 2, "pass": 1, "model_calls": 4, "total_tokens": 1600,
+                                     "calls_per_success": 4.0, "tokens_per_success": 1600.0,
+                                     "calls_vs_A": 2.0, "tokens_vs_A": 2.0, "over_2x_A_cost": False})
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
