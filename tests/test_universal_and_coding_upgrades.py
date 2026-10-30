@@ -528,6 +528,32 @@ def test_extract_test_hint_multiline_assertion_detail(env):
     assert "(0, 1)" in hint and "(0, 0)" in hint   # 紅燈：斷言的後續細節行不得丟
 
 
+def test_review_chain_record_keeps_error_and_test_hint(env):
+    """紅燈（2026-10-29/30 GPT review P0 + Argon P2）：chain 的 review event 必須保留
+    `error` 與 `test_hint`——否則審計紀錄丟掉的正是送給 agent 的反饋內容，審查者
+    只能看到 {"kind":"failed_step","sub":"test_failed"}（e002 C 臂 chain 的實際形態）。
+    `_compact` 寫於 2026-09-25；`error`/`test_hint` 兩個欄位是 2026-10-22 才加進
+    failed_step finding 的，allowlist 沒跟上，chain 紀錄從那天起靜默漏掉反饋。"""
+    f = {"finding_id": "z_ab3f2282dd", "kind": "failed_step", "step": 38,
+         "cmd": "python3 -m unittest bottle_song_test.py", "sub": "test_failed",
+         "error": "FAILED (failures=6)",
+         "test_hint": ("test_verse_with_2_bottles: AssertionError: Lists differ: "
+                      "['Two[122 chars]ly fall,'] != ['Two[122 chars]ly fall,']; +5 other failing..."),
+         "internal_only": "should-stay-out"}
+    c = zerostop._compact(f)
+    assert c["finding_id"] == "z_ab3f2282dd" and c["sub"] == "test_failed" and c["step"] == 38
+    assert c["error"] == "FAILED (failures=6)"          # 紅燈：error 不得被丟
+    assert c["test_hint"].startswith("test_verse_with_2_bottles")  # 紅燈：test_hint 不得被丟
+    assert "internal_only" not in c                      # 白名單外的欄位照舊不進
+
+
+def test_review_chain_record_caps_long_error(env):
+    """error 進 chain 時要截斷（s.error 可能是多行長文），不能無上限膨脹紀錄。"""
+    c = zerostop._compact({"kind": "failed_step", "step": 1, "cmd": "pytest",
+                           "error": "x" * 900})
+    assert len(c["error"]) <= 400
+
+
 def test_sed_modify_overwritten_by_subsequent_write_exempt(env):
     p = _proj(env, "sed_exempt", {"solution.py": "def solve(): return 0\n"})
     a = Agent(p)

@@ -118,8 +118,14 @@ def _run_child(req: dict[str, Any]) -> dict[str, Any]:
 
 # ── the decision ─────────────────────────────────────────────────────
 def _compact(f: dict[str, Any]) -> dict[str, Any]:
-    return {k: f.get(k) for k in ("finding_id", "kind", "path", "line", "value", "sub", "step",
-                                  "quote", "cmd", "asked", "detail") if f.get(k) is not None}
+    # `error`/`test_hint`（2026-10-22 才進 failed_step finding）必須保留：chain 是審計紀錄，
+    # 送給 agent 的反饋內容（錯誤行＋測試提示）丢了，審查者就看不到模型當時拿到什麼線索。
+    out = {k: f.get(k) for k in ("finding_id", "kind", "path", "line", "value", "sub", "step",
+                                  "quote", "cmd", "asked", "detail", "error", "test_hint")
+           if f.get(k) is not None}
+    if isinstance(out.get("error"), str) and len(out["error"]) > 400:
+        out["error"] = out["error"][:400]   # s.error 可能是多行長文；test_hint 在上游已限 240
+    return out
 
 
 def stop(agent: str, session_id: str | None, cwd: str | None, final_text: str | None, *,
