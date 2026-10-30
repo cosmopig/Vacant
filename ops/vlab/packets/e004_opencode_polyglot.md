@@ -56,6 +56,7 @@
 
 - **判定回退**：不顯著 ⇒「未建立」（不是負結果）；顯著但成本 > 2×A ⇒「有效但昂貴」；量不到 ⇒ UNKNOWN（H-stakes(b)「真實後果＝路由/續約」本輪不測，BACKLOG）。
 - **機構回退**：任一臂 infra 連敗（臂檔不被 opencode 接受、第二 agent 命令不存在等）⇒ 該臂不計、先修機構/臂檔並複測冒煙再議發射；infra 格永不回填、結果永不捏造。
+  - **觸發事實（2026-10-30）**：`/srv/vlab/bin/cell.py:158` 對非 pi agent 且設定 `VLAB_APPEND_SYSTEM` 直接 `raise SystemExit("VLAB_APPEND_SYSTEM 目前只支援 pi")`；H/M/S 臂 102 格（34 題×3 臂）全落在此確定性失敗路徑，labd.log 已實測 12 格 rc=1（20:57–21:22，pg_affine_cipher/beer_song/book_store/bottle_song 各題 H/M/S）。依本條正式觸發機構回退並終止排程：`/srv/vlab/running/05_e004_opencode_polyglot.json` 已移至 `/srv/vlab/done/05_e004_opencode_polyglot.fallback.json`，labd 重啟後無 running 工作；H/M/S 臂不計、infra 格不回填、無任何結果判定；複測前需先修 cell.py 對非 pi agent 的 `VLAB_APPEND_SYSTEM` 支援（或改臂檔機制）並冒煙複測。
 - 1 rep/題：配對設計消掉任務難度差異，但無 rep 內變異；rep 擴充另包。
 - 模型為 gemma-4-12b 本地量化（H-12 類邊界）：結果不外推到別的模型/預算/任務庫。
 - 臂檔為 pi 時期文字（e002_M.md 含 `pi -p` 字面）：opencode 下第二 agent 證據照 §3 證據規則判定；文字落差記為限制、非機制訊號。
