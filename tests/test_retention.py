@@ -1668,3 +1668,15 @@ def test_gc_all_missing_dir_and_verify_safe(tmp_path: Path) -> None:
     assert rep["verify_ok"] is True
     assert rep["verified_projects"] == 0
     assert rep["verify_errors"] == []
+
+
+def test_usage_report_missing_dir_safe(tmp_path: Path) -> None:
+    """usage_report：狀態目錄與工作區目錄皆不存在時，安全回傳零用量統計字典，不拋異常。"""
+    rep = retention.usage_report(
+        tmp_path / "nonexistent_vh", tmp_path / "nonexistent_work", with_estimate=False
+    )
+    assert rep["totals"]["state_dir"] == 0
+    assert rep["totals"]["work_dir"] == 0
+    assert rep["projects"] == []
+    assert all(v == 0 for v in rep["areas"].values())
+    assert rep["areas"]
