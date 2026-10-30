@@ -1874,3 +1874,42 @@ def test_compact_quarantine_dry_run_safe(tmp_path: Path) -> None:
     assert res["bytes_freed"] > 0
     assert res["files_removed"] >= 1
     assert obj_file.is_file()
+
+
+def test_compact_session_hooks_dry_run_safe(tmp_path: Path) -> None:
+    """compact_session_hooks：dry_run=True 只統計 bytes_freed/files_removed/files_truncated，
+    絕不實際刪除超額舊 session 檔案、亦不截斷過大保留 session 檔案（2026-10-30 1628-1）。"""
+    hdir = tmp_path / "custom_vh" / "possess" / "hooks"
+    hdir.mkdir(parents=True)
+    old_sess = hdir / "pi_old.jsonl"
+    old_sess.write_text("old line\n" * 10, encoding="utf-8")
+    new_sess = hdir / "pi_new.jsonl"
+    new_sess.write_text("line\n" * 100, encoding="utf-8")
+    os.utime(old_sess, (1700000000.0, 1700000000.0))  # 舊 session（超額，刪除候選）
+    os.utime(new_sess, (1700001000.0, 1700001000.0))  # 新 session（保留、過大 → 截斷候選）
+
+    res = retention.compact_session_hooks(tmp_path / "custom_vh", keep_sessions=1,
+                                          max_file_bytes=50, dry_run=True)
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] == 1
+    assert res["files_truncated"] == 1
+    # dry-run：絕不實際刪除
+    assert old_sess.is_file()
+    assert old_sess.read_text(encoding="utf-8") == "old line\n" * 10
+    # dry-run：絕不實際截斷
+    assert new_sess.stat().st_size == len(("line\n" * 100).encode("utf-8"))
+
+
+def test_auto_gc_target_bytes_override_safe(tmp_path: Path) -> None:
+    """auto_gc：傳入顯式 target_bytes 時優先採用該位元組預算（而非回退
+    `_resolve_auto_budget()` 預設 64 MiB），透傳至 gc_all/compact_trace 的 target 回收流程
+    （2026-10-30 1628-2）。"""
+    sroot = tmp_path / "custom_vh"
+    (sroot / "trace" / "objects").mkdir(parents=True)
+
+    rep = retention.auto_gc(sroot, tmp_path / "work", dry_run=True,
+                            target_bytes=32 * 1024 * 1024)
+    assert rep["status"] == "dry_run"
+    assert rep["ok"] is True
+    assert rep["trace"]["target"]["target_bytes"] == 32 * 1024 * 1024
+    assert rep["trace"]["target"]["target_reached"] is True
