@@ -70,6 +70,10 @@
   無 `vacant_home.tgz`），只有 C 臂 vacant_sha=1ada835b → **e002 磁碟足跡＝C 臂而已**（round 192
   已 34/34 回寫、verdict=PASS）；§5-4「M/S 臂 vacant_home_bytes 回寫」一項因此**依設計 N/A**，
   剩餘的是 e002 分析回寫（rescore＋四量具；M 9/35、S 未開始），屬分析 backlog、非磁碟阻塞項。
+- **10/30（round 200）**：「一天長多少」跨日序列定版：`growth_report.py` 真機 verdict **PASS**（rc=0）——
+  序列 2026-10-28T20:20 → 2026-10-30T05:45（**33.42h，15 點**），24h 視窗最大增長 **16.3 MiB**、
+  峰值 82.3 MiB（清場前舊日累積之暫超工作集，非穩態違反）、最新 **52.7 MiB ≤ 256 MiB 穩態封頂（20.6%）**、
+  最新 trace 35.5 MiB ≤ 64 MiB、15 點全 gc ok＋target_reached；序列表與「能說」已同步回寫 FINDINGS.md 主軸 2。
 
 ## 2. 四條驗收條件對現狀
 
