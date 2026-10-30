@@ -1836,3 +1836,25 @@ def test_retention_resolve_budget_env_and_fallback(monkeypatch) -> None:
         assert fn() == int(pos)
         monkeypatch.setenv(name, "invalid")
         assert fn() == default
+
+
+def test_compact_work_dry_run_safe(tmp_path: Path) -> None:
+    """P20261030_1547-2：compact_work dry_run=True 只統計預估釋放，絕不實際刪除。
+
+    同 task 兩筆 run（run1 舊、run2 新），keep_runs_per_task=1 下 run1/ws
+    會被列為待回收：bytes_freed / files_removed 有預估，但 junk.bin 與目錄都還在。
+    """
+    wroot = tmp_path / "work"
+    run1_ws = wroot / "t1" / "run1" / "ws"
+    run1_ws.mkdir(parents=True)
+    junk = run1_ws / "junk.bin"
+    junk.write_bytes(b"x" * 1000)
+    (wroot / "t1" / "run2" / "ws").mkdir(parents=True)
+
+    res = retention.compact_work(wroot, keep_runs_per_task=1, dry_run=True)
+
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] > 0
+    assert res["runs_scanned"] == 2
+    assert junk.is_file()
+    assert run1_ws.is_dir()
