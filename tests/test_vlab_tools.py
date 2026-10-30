@@ -422,4 +422,23 @@ def test_p02_carm_audit_cli_missing_dir_exit_code(tmp_path: Path, capsys) -> Non
     assert "找不到執行目錄" in capsys.readouterr().err
 
 
+def test_growth_report_cli_over_envelope_fail_exit_code(tmp_path: Path, capsys) -> None:
+    """growth_report CLI：最新點超 256 MiB 穩態封頂 → verdict=FAIL 且 exit 1（嚴防超標假 PASS）。"""
+    home = tmp_path / "home"
+    home.mkdir()
+    # 兩筆跨 26h（≥ MIN_EVIDENCE_HOURS=20h）；最新點 total 270 MiB > 封頂 268435456
+    p1 = {"ts": "2026-10-28T12:00:00+00:00", "total_bytes": 100 * 1024 * 1024,
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-29T14:00:00+00:00", "total_bytes": 270 * 1024 * 1024,
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (home / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+    rc = growth_report.main(["--home", str(home),
+                             "--ops-data", str(tmp_path / "empty_ops"), "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 1
+    assert data["verdict"] == "FAIL"
+    assert data["peak_overrun"]["over_stable_envelope"] is True
+
+
 
