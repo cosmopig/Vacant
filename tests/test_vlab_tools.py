@@ -823,23 +823,6 @@ def test_holm_e002_cli_absent_arm_excluded_from_holm_set(tmp_path: Path, capsys)
     assert "S" in doc["absent_pairs"]
 
 
-def test_holm_e002_cli_absent_arm_committed_fixture(tmp_path: Path, capsys) -> None:
-    # P20261030_1301-4 redo 271-r2：工單步驟 3 的 REPORT.json fixture 已 committed 為
-    # 持久來源 tests/fixtures/holm_e002_absent_arm/REPORT.json（僅 A_vs_C 有 p）。
-    # 本測試把它拷貝進 tmp 實驗目錄，斷言同一缺臂契約：S 無 p 且無格子 →
-    # absent_pairs（不是假 p、不崩潰），m 只數有 p 的組，exit 0。
-    fixture = Path(__file__).resolve().parent / "fixtures" / "holm_e002_absent_arm" / "REPORT.json"
-    exp_dir = tmp_path / "runs" / "exp_absfx"
-    exp_dir.mkdir(parents=True)
-    (exp_dir / "REPORT.json").write_bytes(fixture.read_bytes())
-    rc = holm_e002.main(["exp_absfx", "--base", str(tmp_path / "runs"), "--arms", "C,S"])
-    doc = json.loads(capsys.readouterr().out)
-    assert rc == 0
-    assert doc["m"] == 1
-    assert "C" in doc["pairs"]
-    assert "S" in doc["absent_pairs"]
-
-
 def test_growth_report_cli_selftest_flag(capsys) -> None:
     # P20261030_1317-2：growth_report CLI --selftest 旗標契約（ASSIGNMENT 🔴最優先 驗收(a)）：
     # 非 --json 印出 "selftest: OK" 且 exit 0；--json 靜默（無字串輸出）且 exit 0。
@@ -951,3 +934,23 @@ def test_dabstep_subset_report_cli_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "exp 需要（或 --selftest）" in err
+
+
+def test_noncode_cell_audit_cli_missing_exp_error(capsys) -> None:
+    # 未給 exp 且無 --selftest 時 ap.error → SystemExit(2)、stderr 含
+    # "需要 <exp>（或 --selftest）"（noncode_cell_audit.py main L474-475）。
+    with pytest.raises(SystemExit) as excinfo:
+        noncode_cell_audit.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "需要 <exp>（或 --selftest）" in err
+
+
+def test_holm_e002_cli_missing_exp_error(capsys) -> None:
+    # 未給必填 positional `exp` 時 argparse 自動以 exit code 2 終止、stderr 含
+    # "required: exp"（holm_e002.py main L136-137 ap.add_argument("exp")）。
+    with pytest.raises(SystemExit) as excinfo:
+        holm_e002.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "required: exp" in err

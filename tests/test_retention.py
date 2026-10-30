@@ -1621,3 +1621,62 @@ def test_compact_quarantine_missing_dir_and_orphan_objects(tmp_path) -> None:
     res = retention.compact_quarantine(tmp_path / "custom_vh", dry_run=False, orphan_grace_s=0.0)
     assert res["files_removed"] >= 1
     assert not obj_file.is_file()
+
+
+def test_compact_wire_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_wire：wire 捕獲目錄不存在時安全回傳零釋放統計字典、不拋異常。"""
+    rep = retention.compact_wire(tmp_path / "nonexistent")
+    assert rep["body_bytes_freed"] == 0
+    assert rep["body_files_removed"] == 0
+    assert rep["index_bytes_freed"] == 0
+    assert rep["index_lines_dropped"] == 0
+
+
+def test_compact_logs_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_logs：狀態目錄不存在（無 intake/hooks 與 trace/projects）時安全回傳零釋放字典、不拋異常。"""
+    rep = retention.compact_logs(tmp_path / "nonexistent")
+    assert rep == {"bytes_freed": 0, "logs_compacted": 0}
+
+
+def test_compact_session_hooks_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_session_hooks：possess/hooks 目錄不存在時安全回傳零釋放統計字典、不拋異常。"""
+    rep = retention.compact_session_hooks(tmp_path / "nonexistent")
+    assert rep["bytes_before"] == 0
+    assert rep["files_before"] == 0
+    assert rep["bytes_freed"] == 0
+    assert rep["files_removed"] == 0
+    assert rep["files_truncated"] == 0
+
+
+def test_compact_trace_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_trace：狀態目錄下無 trace 子目錄時安全回傳與完整報告同形的零釋放字典、不拋異常。"""
+    rep = retention.compact_trace(tmp_path / "nonexistent")
+    assert rep == {"bytes_freed": 0, "files_removed": 0, "projects_scanned": 0,
+                   "kept_blobs": 0, "aborted": False}
+
+
+def test_gc_all_missing_dir_and_verify_safe(tmp_path: Path) -> None:
+    """gc_all：狀態目錄與工作區目錄皆不存在時，綜合各模組清理安全回傳零釋放字典、verify 安全回傳，不崩潰。"""
+    rep = retention.gc_all(
+        root=tmp_path / "nonexistent_vh",
+        work_root=tmp_path / "nonexistent_work",
+        verify=True,
+    )
+    assert rep["bytes_freed"] == 0
+    assert rep["files_removed"] == 0
+    assert rep["aborted"] is False
+    assert rep["verify_ok"] is True
+    assert rep["verified_projects"] == 0
+    assert rep["verify_errors"] == []
+
+
+def test_usage_report_missing_dir_safe(tmp_path: Path) -> None:
+    """usage_report：狀態目錄與工作區目錄皆不存在時，安全回傳零用量統計字典，不拋異常。"""
+    rep = retention.usage_report(
+        tmp_path / "nonexistent_vh", tmp_path / "nonexistent_work", with_estimate=False
+    )
+    assert rep["totals"]["state_dir"] == 0
+    assert rep["totals"]["work_dir"] == 0
+    assert rep["projects"] == []
+    assert all(v == 0 for v in rep["areas"].values())
+    assert rep["areas"]
