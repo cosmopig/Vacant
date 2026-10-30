@@ -409,4 +409,11 @@ def test_disk_report_cli_normal_run(tmp_path: Path, capsys) -> None:
     assert data["by_arm"]["C"]["home_bytes"]["min"] == 50000
 
 
+def test_noncode_cell_audit_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
+    (tmp_path / "runs" / "empty_exp").mkdir(parents=True)
+    rc = noncode_cell_audit.main(["empty_exp", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    assert "找不到任何 cell.json" in capsys.readouterr().err
+
+
 
