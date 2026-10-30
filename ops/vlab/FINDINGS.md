@@ -357,7 +357,7 @@ review 25+143 全 allow；A 臂 2 格零 Vacant 資料。成本（描述）：�
 trace 僅鏈結構重算（H-3/H-4 口徑），未驗簽章與完整性；不外推到其他模型／題庫。
 **下一步**：GO ⇒ OpenCode 通用多輪評測盤（對齊 e002 五臂結構）另開獨立預註冊封包（本包 §3.5）。
 
-## 2026-10-30 · 主軸 1 · e004_opencode_polyglot 170 格五臂全盤發射（預註冊＋排程事實，未含結果）
+## 2026-10-30 · 主軸 1 · e004_opencode_polyglot 機構回退：e004 因 cell.py:158 未支援非 pi agent 之 VLAB_APPEND_SYSTEM 導致 H/M/S 102 格 infra 中斷，觸發封包 §4 機構回退（發射與排程事實保留；無結果數據）
 
 **發射**：2026-10-30 20:40:56 labd「開始 e004_opencode_polyglot：170 格」（/srv/vlab/labd.log）；佇列檔
 `ops/vlab/queue/05_e004_opencode_polyglot.json`（sha256=d5f401170a653b9727e31ea10b804da17e02909705aa9bd97bc0322dbba6dea1、
@@ -366,4 +366,5 @@ trace 僅鏈結構重算（H-3/H-4 口徑），未驗簽章與完整性；不外
 H/M/S 臂 env.VLAB_APPEND_SYSTEM 沿用 e002 臂檔（round 355 抽樣核對）。
 **預註冊**：封包 `ops/vlab/packets/e004_opencode_polyglot.md`（commit 11663a95）——判定＝Holm 4 組校正 α=0.05＋2×A 成本紅線、
 M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
-**口徑**：此段僅為發射與排程事實；1004 完賽前無結果數據、不預填、不宣稱；完賽後以 opencode_cell_audit 審計 170 格，再依封包 §3 判定。
+**口徑**：此段僅為發射與排程事實；1004 完賽前無結果數據、不預填、不宣稱；原擬完賽後以 opencode_cell_audit 審計 170 格，再依封包 §3 判定——排程已於 2026-10-30 終止，170 格未完賽，無結果判定。
+**機構回退（2026-10-30，終止）**：`/srv/vlab/bin/cell.py:158` 對非 pi agent 且設定 `VLAB_APPEND_SYSTEM` 直接 `raise SystemExit("VLAB_APPEND_SYSTEM 目前只支援 pi")`；H/M/S 臂 102 格（34 題×3 臂）全落在此確定性失敗路徑，labd.log 已實測 12 格 rc=1（20:57–21:22，pg_affine_cipher/beer_song/book_store/bottle_song 各題 H/M/S）。依封包 §4 正式觸發機構回退：排程終止（running/05_e004_opencode_polyglot.json 已移至 done/05_e004_opencode_polyglot.fallback.json，labd 重啟後無 running 工作）、H/M/S 臂不計、infra 格永不回填、無任何結果判定；A 臂 5 格／C 臂 4 格（agent_rc=0，未出分數）為唯一既有數據，pg_bowling C 未完成＝UNKNOWN。複測前需先修 cell.py 對非 pi agent 的 `VLAB_APPEND_SYSTEM` 支援（或改臂檔機制）並冒煙複測。

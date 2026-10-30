@@ -1248,3 +1248,61 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2126-1（2110-4 重發；核心斷言已於 94894736 落）：step 4 字面「具備」——兩欄位存在。
     assert {"second_agent_verified_cells", "second_agent_unknown_cells"} <= set(m)
     assert m["second_agent_verified_cells"] == 1 and m["second_agent_unknown_cells"] == 0
+
+    # P20261030_2213-2（ASSIGNMENT「研發工具需納入回歸測試」＋審查第 2 條；核心已於 7392cf52 落）：
+    # 未完成格與頂層統計回歸——於既有 runs-dir 追加一個無 cell.json 子目錄 mock-opencode-A-incomplete →
+    # main --runs-dir：該格由目錄名解析 arm=="A"（倒數第二 token，剝 .infra- 尾綴）且 state=="incomplete"、ok 全 NA；
+    # 頂層 summary 具 incomplete_cells／quarantined_cells 欄位且計數正確；incomplete 格不計入 bad／退出碼（p02 規矩）。
+    (tmp_path / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(tmp_path), "--json"])
+    assert rc == 1  # bad 仍僅 cell-M-noagent（前段）；incomplete 格不影響退出碼
+    out = json.loads(capsys.readouterr().out)
+    assert "mock-opencode-A-incomplete" not in out["bad"]
+    inc = {c["cell"]: c for c in out["cells"]}["mock-opencode-A-incomplete"]
+    assert inc["arm"] == "A" and inc["state"] == "incomplete" and inc["ok"] is None and inc["events"] is None
+    assert "incomplete_cells" in out["summary"] and "quarantined_cells" in out["summary"]
+    assert out["summary"]["incomplete_cells"] >= 1 and out["summary"]["quarantined_cells"] == 0
+
+    # P20261030_2230-2（ASSIGNMENT「研發工具需納入回歸測試」＋審查第 2 條第 3 點；核心已於 a9ae02d3 落）：
+    # 隔離崩潰格 bad 判定回歸——獨立 crash_runs 下僅一格 .infra-test-opencode-H-r1 →
+    # main --runs-dir：bad 精確含該隔離格、quarantined_cells==1、n_cells==1、rc==1
+    # （存在 infra 崩潰格時不得 bad:[]＋exit 0；quarantined_cells 在 summary 頂層欄位）。
+    crash_runs = tmp_path / "crash_runs"
+    crash_runs.mkdir()
+    (crash_runs / ".infra-test-opencode-H-r1").mkdir()  # .infra- 隔離目錄 → quarantined_infra（確定崩潰 → bad）
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(crash_runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == [".infra-test-opencode-H-r1"]
+    assert out["summary"]["quarantined_cells"] == 1 and out["n_cells"] == 1
+
+
+def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
+    # （523236d3）納入常規回歸——--selftest、--report/--audit/--json CLI、四項假說判定結構與 M 臂第二 agent 證據。
+    from ops.vlab.tools import e004_verdict
+
+    assert e004_verdict.selftest() == 0
+    capsys.readouterr()  # 排空殘留，保持 --selftest stdout 乾淨
+    rc = e004_verdict.main(["--selftest"])
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "e004_verdict selftest PASS" in captured.out
+
+    # 合成 mock REPORT.json 與 audit.json 只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    rep = tmp_path / "REPORT.json"
+    rep.write_text(json.dumps(e004_verdict._mock_report()), encoding="utf-8")
+    aud = tmp_path / "audit.json"
+    aud.write_text(json.dumps(e004_verdict._mock_audit(5)), encoding="utf-8")
+    capsys.readouterr()
+    rc = e004_verdict.main(["--report", str(rep), "--audit", str(aud), "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    # 四項假說判定全部在案、各帶判定態；mock 期望態（Holm m=4：C/M 顯著、H/S 不顯著；M 有第二 agent 證據）。
+    hyp = out["hypotheses"]
+    assert {"H-acc", "H-review(H)", "H-review(M)", "H-stakes(a)"} <= set(hyp)
+    assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件

@@ -5,11 +5,12 @@
 - C 臂 vacant_home.tgz：review 判定分佈（hooks events 的 action）＋ trace 鏈
   （seq 連續、prev_hash 串接以 vacant_network.logbook._entry_hash 重算）。
 誠實規則（與 p02_carm_audit 同規矩）：格未完成（無 cell.json）→ state=incomplete，
-全 NA、不計入退出碼判定；.infra- 隔離目錄 → state=quarantined_infra，同不計入。
+全 NA、不計入退出碼判定；.infra- 隔離目錄 → state=quarantined_infra，
+計入 bad（退出碼 1）：infra 崩潰是確定崩潰，不是「未知」。
 唯讀（僅 --out 給定時寫該檔）。用法：
   python3 ops/vlab/tools/opencode_cell_audit.py --runs-dir <dir> [--json] [--out PATH]
   python3 ops/vlab/tools/opencode_cell_audit.py --selftest
-退出碼：0 全部 OK；1 有格子 FAIL/UNKNOWN；2 selftest 失敗。
+退出碼：0 全部 OK；1 有格子 FAIL/UNKNOWN 或存在 quarantined_infra；2 selftest 失敗。
 """
 import argparse, json, re, shutil, sys, tarfile, tempfile
 from collections import Counter
@@ -117,6 +118,14 @@ def audit_vacant_home(tgz) -> dict:
     return out
 
 
+def _arm_from_name(name: str) -> str | None:
+    """從格子目錄名解析 arm：<suite>-<task>-<agent>-<arm>-<rep>，arm＝倒數第二個 token。
+    .infra-<ts> 隔離尾綴（cell.py 加）先剝掉，否則倒數第二個 token 是 rN.infra 而非臂。
+    少於 2 個 token 解析失敗 → None。"""
+    parts = name.split(".infra-", 1)[0].split("-")
+    return parts[-2] if len(parts) >= 2 else None
+
+
 def audit_cell(cell_path) -> dict:
     """審計一個格子（唯讀）→ JSON 可序列化 dict。未完成格＝state=incomplete＋NA（p02 規矩）。"""
     cell = Path(cell_path)
@@ -129,8 +138,8 @@ def audit_cell(cell_path) -> dict:
         state = None
     if state is not None:
         return {"cell": cell.name, "state": state, "ok": None, "unknown": [],
-                "arm": None, "agent_rc": None, "wall_s": None, "events": None, "vacant": None,
-                "score_pass": None}
+                "arm": _arm_from_name(cell.name), "agent_rc": None, "wall_s": None, "events": None,
+                "vacant": None, "score_pass": None}
     meta = json.loads(cj.read_text(encoding="utf-8"))
     rec: dict = {"cell": cell.name, "state": "complete", "ok": True, "unknown": [], "score_pass": None}
     rec.update(arm=meta.get("arm"), agent_rc=meta.get("agent_rc"), wall_s=meta.get("wall_s"))
@@ -199,7 +208,9 @@ def summarize(recs: list) -> dict:
             d["tokens_vs_A"] = d["tokens_per_success"] / base["tokens_per_success"] if d["tokens_per_success"] else None
             d["over_2x_A_cost"] = (d["calls_vs_A"] is not None and d["calls_vs_A"] > 2) or \
                                  (d["tokens_vs_A"] is not None and d["tokens_vs_A"] > 2)
-    return {"per_arm": per_arm}
+    return {"per_arm": per_arm,
+            "incomplete_cells": sum(1 for r in recs if r.get("state") == "incomplete"),
+            "quarantined_cells": sum(1 for r in recs if r.get("state") == "quarantined_infra")}
 
 
 def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False, score_pass: bool | None = None,
@@ -255,9 +266,11 @@ def selftest() -> bool:
         f = audit_cell(_mock_cell(root, "mock-opencode-C-nopass", "C", score_pass=False))
         (root / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
         i = audit_cell(root / "mock-opencode-A-incomplete")
+        (root / ".infra-mock-opencode-crash").mkdir()  # .infra- 隔離目錄 → quarantined_infra（確定崩潰 → bad）
+        q = audit_cell(root / ".infra-mock-opencode-crash")
         m = audit_cell(_mock_cell(root, "mock-opencode-M-r1", "M", bash_command="pi run --model x", score_pass=True))
         m2 = audit_cell(_mock_cell(root, "mock-opencode-M-noagent", "M", score_pass=False))
-        for d in root.iterdir():  # _mock_cell 的 C 臂暫存目錄非格子；清掉使 runs-dir 恰為 7 格
+        for d in root.iterdir():  # _mock_cell 的 C 臂暫存目錄非格子；清掉使 runs-dir 恰為 8 格
             if d.is_dir() and d.name.endswith("_home"):
                 shutil.rmtree(d, ignore_errors=True)
         out_path = root / "audit_out.json"  # --out 寫入臨時檔：落盤 JSON 與 stdout 同內容
@@ -266,7 +279,7 @@ def selftest() -> bool:
         msum = payload["summary"]["per_arm"]["M"]
         exp_ev = {"model_calls": 2, "input_tokens": 300, "output_tokens": 30,
                   "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}, "has_second_agent": False}
-        per_arm = summarize([a, c, t, f, i, m, m2])["per_arm"]
+        per_arm = summarize([a, c, t, f, i, m, m2, q])["per_arm"]
         return (a["events"] == exp_ev and a["arm"] == "A" and a["ok"] and "vacant" not in a
                 and c["arm"] == "C" and c["ok"] and not c["unknown"]
                 and c["vacant"]["review"] == {"n": 4, "actions": {"allow": 3, "deny": 1}, "denied": 1}
@@ -274,7 +287,10 @@ def selftest() -> bool:
                 and c["vacant"]["trace"]["prev_link"] == "ok"
                 and t["vacant"]["trace"]["prev_link"] == "broken" and t["ok"] is False
                 and i["state"] == "incomplete" and i["ok"] is None and i["events"] is None
-                and i["unknown"] == []
+                and i["unknown"] == [] and i["arm"] == "A"
+                and q["state"] == "quarantined_infra" and q["ok"] is None and q["events"] is None
+                and payload["summary"]["incomplete_cells"] == 1
+                and payload["summary"]["quarantined_cells"] == 1
                 and a["score_pass"] is True and c["score_pass"] is True
                 and t["score_pass"] is False and f["score_pass"] is False and i["score_pass"] is None
                 and m["score_pass"] is True and m2["score_pass"] is False
@@ -297,8 +313,8 @@ def selftest() -> bool:
                                      "second_agent_verified_cells": 1, "second_agent_unknown_cells": 1}
                 and per_arm["M"]["second_agent_verified_cells"] == 1
                 and per_arm["M"]["second_agent_unknown_cells"] == 1
-                and rc == 1 and payload["n_cells"] == 7
-                and payload["bad"] == ["mock-opencode-C-tampered", "mock-opencode-M-noagent"]
+                and rc == 1 and payload["n_cells"] == 8
+                and payload["bad"] == [".infra-mock-opencode-crash", "mock-opencode-C-tampered", "mock-opencode-M-noagent"]
                 and msum["second_agent_verified_cells"] == 1 and msum["second_agent_unknown_cells"] == 1)
     finally:
         shutil.rmtree(root, ignore_errors=True)
@@ -319,7 +335,7 @@ def main(argv=None) -> int:
         ap.error("--runs-dir 必給且存在（或用 --selftest）")
     cells = sorted(d for d in a.runs_dir.iterdir() if d.is_dir())
     recs = [audit_cell(c) for c in cells]
-    bad = [r["cell"] for r in recs if r.get("state") == "complete" and (not r["ok"] or r["unknown"])]
+    bad = [r["cell"] for r in recs if r.get("state") == "quarantined_infra" or (r.get("state") == "complete" and (not r["ok"] or r["unknown"]))]
     text = json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad,
                        "summary": summarize(recs), "cells": recs},
                       ensure_ascii=False, indent=1)

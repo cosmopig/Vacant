@@ -1,0 +1,52 @@
+{
+  "exp": "e005_opencode_five_arm_smoke",
+  "vacant_sha": "bf1a9f1afb211460b48611f8f28b1d9433985c4a",
+  "timeout": 900,
+  "cells": [
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "bf1a9f1afb211460b48611f8f28b1d9433985c4a"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    }
+  ]
+}
