@@ -192,6 +192,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/30 14:18 | 59.1 MiB | 41.6 MiB | 706 | ok, true |
 | 10/30 15:19 | 60.0 MiB | 42.4 MiB | 718 | ok, true |
 | 10/30 16:32 | 61.8 MiB | 44.0 MiB | 948 | ok, true |
+| 10/30 18:51 | 54.1 MiB | 24.3 MiB | 380 | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
@@ -204,7 +205,10 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   連續 26 個小時點呈現單調緩升（+12.1 MiB），主因是 `compact_trace` 第一階段原先未對
   `unrecorded_change` 檔案 blob 與已過期工作階段之 `prompt` blob 套用 `min_kept_seq` 視窗
   （且未達 64 MiB 前第二階段 `_sweep_to_target` 不啟動）；該視窗漏洞已於 `auto/argon` 修復，
-  在真機 `~/.vacant` 上可立即多回收 8.34 MiB（399 個過期 blob）。
+  在真機 `~/.vacant` 上可立即多回收 8.34 MiB（399 個過期 blob）——**10/30 18:50 真機驗證（round 337）**：
+  auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
+  總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,752,169 B（54.1 MiB，gc 後）；`gc --verify` verify_ok=True（8/8 專案）、
+  `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
 - 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 61.8 MiB（24.1%）、
   最新 trace 44.0 MiB ≤ 64 MiB 上限。
 - 這是**真機 `~/.vacant`** 的跨日序列（30 點、44.2h），不是模擬、不是單點。

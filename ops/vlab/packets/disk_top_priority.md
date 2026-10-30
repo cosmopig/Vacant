@@ -123,6 +123,13 @@
   同輪再驗證 auto/argon `8b4fd154` 合併與 fixture 清理之驗收判準在本 HEAD 全數成立——
   `test_zero_evidence`（84）＋`test_retention`（76）＋`test_vlab_tools`（54）214 passed rc=0、packet diff rc=0、
   `tests/fixtures/holm_e002_absent_arm` 不存在（合併自 round 310 起已含於本分支，`git merge --no-edit auto/argon`＝Already up to date）。
+- **10/30（18:51 續記）**：b55a18e4 回收效果真機實跑（工單 P20261030_1804-2；審查 20261030_1656 第四節指示 2、本驗收 (a)）——前後數字全數實測：
+  16:32 點 64,827,429 B（61.8 MiB、trace 46,097,192 B／948 物件）→ **18:50:10 auto_gc（新碼，auto=true）釋放 9,482,666 B（9.04 MiB）、974 檔、trace 保留 378 blobs、status ok＋target_reached**
+  （即 FINDINGS 主軸 2 預測「過期 `unrecorded_change` 檔 blob 與已過期工作階段 `prompt` blob 可立即多回收 8.34 MiB（399 個過期 blob）」之回收；實測更大，因 16:32–18:50 間又累積過期 blob）→
+  18:51:04 顯式 gc 前：總計 56,811,100 B（54.2 MiB）、trace 391 物件／25,513,061 B（24.33 MiB）→ 18:51:25 顯式 `vacant gc` 再釋放 65.2 KB（17 檔、保留 379 blobs、目標 64 MiB ✓）→
+  gc 後：總計 56,752,169 B（54.1 MiB）、trace 380 物件／25,449,135 B（24.27 MiB）；`vacant gc --verify --json` **verify_ok=True、8/8 專案、0 錯誤、rc=0**；
+  `growth_report.py` verdict **PASS** rc=0（32 點／46.5h、24h 視窗最大增長 17,054,166 B、最新 56,771,218 B ≤ 256 MiB 封頂 22.2%、gc ok＋target_reached）；終態 56,755,707 B／379 物件、within_caps=true。
+  誠實註記：大頭回收由 18:50:10 auto_gc 完成（早於本輪顯式 gc），故本輪顯式 gc 差異僅約 57.5 KiB；兩次 gc 數字各按實測記錄、不合併不捏造。
 
 ## 2. 四條驗收條件對現狀
 
