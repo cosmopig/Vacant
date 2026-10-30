@@ -759,3 +759,26 @@ def test_holm_e002_cli_baseline_arm_error(capsys) -> None:
     except SystemExit as exc:
         assert exc.code == 2
     assert "A 是基線臂，不進校正組" in capsys.readouterr().err
+
+
+def test_growth_report_load_points_dedup_and_invalid_lines(tmp_path: Path) -> None:
+    # P20261030_1301-2（ASSIGNMENT 🔴最優先 驗收 a：真機 ~/.vacant 增長歷史多來源讀取與去重容錯契約）：
+    # load_points 面對多份 JSONL 時——缺檔跳過、損毀行與缺欄位行安全略過、
+    # 同 (ts, total_bytes) 重複點只留一筆且 _src 記錄先讀到之檔案。
+    f1 = tmp_path / "g1.jsonl"
+    f2 = tmp_path / "g2.jsonl"
+    f3 = tmp_path / "missing.jsonl"  # 不存在：必須被跳過，不拋異常
+    f1.write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "total_bytes": 1000}) + "\n"
+        + "bad json line\n"
+        + json.dumps({"ts": "2026-10-28T01:00:00+0000"}) + "\n",
+        encoding="utf-8")
+    f2.write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "total_bytes": 1000}) + "\n"
+        + json.dumps({"ts": "2026-10-28T02:00:00+0000", "total_bytes": 2000}) + "\n",
+        encoding="utf-8")
+    pts = growth_report.load_points(f1, f2, f3)
+    assert len(pts) == 2
+    assert [p["total_bytes"] for p in pts] == [1000, 2000]
+    dup = next(p for p in pts if p["total_bytes"] == 1000)
+    assert dup["_src"] == str(f1)
