@@ -232,6 +232,20 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格）、
   rescore mismatch 0、envelope_compliance verdict=PASS、四量具 rc=0（18/18 階段值
   35,563/161,209/290,622 為中間值）。
+- e002 **C 臂未通過 12 題型態分析**（round 207 回寫；來源＝`ops/vlab/tools/e002_carm_failures.py`
+  EXIT=0 客觀輸出：34 格中 12 格未通過＝4 逾時＋8 未收斂，22+12＝34 與上條 22/34 口徑一致）：
+  - **4 逾時格**（agent rc=124 牆鐘逾時；測試進度為 score.json 記錄值）：**forth 52/54、grep 17/25、
+    hangman 5/7、sgf_parsing 17/23**（hangman 最後 hint：`test_after_10_failures_the_game_is_over:
+    'ongoing' != 'lose'`）。**react 實為 PASS 格**（score.json `pass=true`、14/14），不屬逾時題——
+    更正先前審查指示「第 4 逾時題為 react」之誤記，實為 **sgf_parsing**。
+  - **8 未收斂格**（agent rc=0、測試未過）：bottle_song 1/7、food_chain 3/10、go_counting 10/11、
+    paasio 23/25、poker 33/37、rest_api 6/9、scale_generator 12/17、zipper 9/14。
+  - 退回次數：其中 7 格退回 1 次（rejections=1、1 round 後仍 open，最後 hint 為
+    「step N (python3 -m unittest X_test.py) had failed」）；**zipper 無 rounds 記錄，退回次數
+    誠實記為 UNKNOWN**（工具註明 rejections=null＝UNKNOWN 不是 0）——既不寫「退回 1 次」
+    也不寫「未退回」。
+  - 口徑：本條是失敗格客觀型態記錄（哪題、測試進度、退回次數、最後 hint），可查證、可重算
+    （重跑該工具即得同輸出）；不作為「C 臂較好」的證據，也不證明任何成效。
 **證據**：`tests/test_retention.py::test_envelope_counted_components_have_named_total_caps`＋
 `test_envelope_accounting_flags_counted_component_overrun`（intake 8 MiB+16K、
 quarantine 16 MiB+16K 越限點名＋不刪除＋`within_envelope` False）＋
