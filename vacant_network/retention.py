@@ -603,8 +603,8 @@ def compact_trace(
                         v = st.get(k)
                         if isinstance(v, str) and v:
                             _keep_index(v)
-                            active_indices.add(v)
                             if k == "last_index":
+                                active_indices.add(v)
                                 latest_idx = v
                     for pend_map in (st.get("pending"), st.get("open")):
                         for pend in (pend_map or {}).values():
@@ -643,12 +643,13 @@ def compact_trace(
                             events.append({"seq": row.get("seq", 0), "type": row.get("type"),
                                            **(row.get("payload") or {})})
 
-            # 找出初始索引、最後一則使用者提示的起點、以及所有曾被改動過的檔案版本
+            # 找出初始索引、最後一則使用者提示的起點、以及保留視窗內的步驟與修改檔案版本
             initial_idx: str | None = None
             last_user_seq = -1
             step_events: list[dict[str, Any]] = []
             aux_index_events: list[tuple[int, str]] = []
             modified_paths: set[str] = set()
+            do_sessions: dict[str, set[str]] = {}
 
             for e in events:
                 t = e.get("type")
@@ -657,15 +658,12 @@ def compact_trace(
                     cand_ws = pathlib.Path(str(e["workspace"]))
                     if cand_ws.is_dir():
                         ws_path = cand_ws
-                elif t == "transcript":
-                    for k in ("blob", "sha256", "transcript_blob"):
-                        v = e.get(k)
-                        if isinstance(v, str) and v and ":" not in v:
-                            _note_io_sha(v)
+                elif t == "session_seen" and e.get("do_run"):
+                    a = e.get("actor") or {}
+                    do_sessions.setdefault(str(e["do_run"]), set()).add(
+                        f"{a.get('platform')}:{a.get('session')}"
+                    )
                 elif t == "prompt":
-                    tb = e.get("text_blob")
-                    if isinstance(tb, str) and tb:
-                        _note_io_sha(tb)
                     if str(e.get("source") or "user") in ("user", "vacant do"):
                         last_user_seq = max(last_user_seq, seq_num)
                 elif t == "step":
@@ -674,17 +672,6 @@ def compact_trace(
                         initial_idx = e["pre_index"]
                     if isinstance(e.get("post_index"), str) and e["post_index"]:
                         latest_idx = e["post_index"]
-                    for w in e.get("writes") or []:
-                        if isinstance(w, dict) and w.get("path"):
-                            modified_paths.add(str(w["path"]))
-                    wb = e.get("writes_blob")
-                    if isinstance(wb, str) and blobs.has(wb):
-                        keep_shas.add(wb)
-                        structural_shas.add(wb)
-                        with contextlib.suppress(OSError, ValueError):
-                            for w in json.loads(blobs.get(wb)):
-                                if isinstance(w, dict) and w.get("path"):
-                                    modified_paths.add(str(w["path"]))
                 elif t == "unrecorded_change":
                     if initial_idx is None and isinstance(e.get("before_index"), str):
                         initial_idx = e["before_index"]
@@ -694,6 +681,85 @@ def compact_trace(
                         v = e.get(k)
                         if isinstance(v, str) and v:
                             aux_index_events.append((seq_num, v))
+                elif t == "coverage" and isinstance(e.get("baseline"), dict):
+                    bidx = e["baseline"].get("index")
+                    if isinstance(bidx, str) and bidx:
+                        if initial_idx is None:
+                            initial_idx = bidx
+                        aux_index_events.append((seq_num, bidx))
+                elif t == "session_closed" and isinstance(e.get("final_index"), str):
+                    fidx = e["final_index"]
+                    if fidx:
+                        if initial_idx is None:
+                            initial_idx = fidx
+                        latest_idx = fidx
+                        aux_index_events.append((seq_num, fidx))
+                elif t == "checkpoint_restore":
+                    tidx = e.get("target_index")
+                    if isinstance(tidx, str) and tidx:
+                        latest_idx = tidx
+                        aux_index_events.append((seq_num, tidx))
+
+            # 保留最近 keep_recent_steps 步 ＋ 目前這個要求（last_user_seq 之後）的所有步驟
+            recent_steps = step_events[-keep_recent_steps:] if keep_recent_steps > 0 else []
+            kept_steps = {id(s): s for s in recent_steps}
+            if last_user_seq >= 0:
+                for s in step_events:
+                    if int(s.get("seq") or 0) > last_user_seq:
+                        kept_steps[id(s)] = s
+
+            min_kept_seq = (
+                min(
+                    (int(s.get("seq") or 0) for s in kept_steps.values()),
+                    default=(max((int(e.get("seq") or 0) for e in events), default=0) + 1),
+                )
+                if len(step_events) > keep_recent_steps
+                else 0
+            )
+            kept_sessions = {
+                str((s.get("actor") or {}).get("session") or "")
+                for s in kept_steps.values()
+            }
+            kept_actors = {
+                f"{(s.get('actor') or {}).get('platform')}:{(s.get('actor') or {}).get('session')}"
+                for s in kept_steps.values()
+            }
+            for dr, sess_set in do_sessions.items():
+                if sess_set & kept_actors:
+                    kept_sessions.add(f"do:{dr}")
+
+            if initial_idx:
+                _keep_index(initial_idx)
+                if min_kept_seq == 0:
+                    active_indices.add(initial_idx)
+            if latest_idx:
+                _keep_index(latest_idx)
+                active_indices.add(latest_idx)
+
+            for e in events:
+                t = e.get("type")
+                seq_num = int(e.get("seq") or 0)
+                if t == "transcript":
+                    sess = str((e.get("actor") or {}).get("session") or "")
+                    if seq_num >= min_kept_seq or (sess and sess in kept_sessions):
+                        for k in ("blob", "sha256", "transcript_blob"):
+                            v = e.get(k)
+                            if isinstance(v, str) and v and ":" not in v:
+                                _note_io_sha(v)
+                elif t == "prompt":
+                    psess = str(e.get("session") or "")
+                    src = str(e.get("source") or "user")
+                    keep_prompt = (
+                        seq_num >= min_kept_seq
+                        or (last_user_seq >= 0 and seq_num >= last_user_seq)
+                        or (psess and psess in kept_sessions)
+                        or (psess == "*" and src == "vacant do" and bool(kept_steps))
+                    )
+                    if keep_prompt:
+                        tb = e.get("text_blob")
+                        if isinstance(tb, str) and tb:
+                            _note_io_sha(tb)
+                elif t == "unrecorded_change" and seq_num >= min_kept_seq:
                     for ch in e.get("changes") or []:
                         if isinstance(ch, dict):
                             if ch.get("path"):
@@ -715,24 +781,7 @@ def compact_trace(
                                         v = ch.get(k)
                                         if isinstance(v, str) and ":" not in v:
                                             _note_file_sha(v)
-                elif t == "coverage" and isinstance(e.get("baseline"), dict):
-                    bidx = e["baseline"].get("index")
-                    if isinstance(bidx, str) and bidx:
-                        if initial_idx is None:
-                            initial_idx = bidx
-                        aux_index_events.append((seq_num, bidx))
-                elif t == "session_closed" and isinstance(e.get("final_index"), str):
-                    fidx = e["final_index"]
-                    if fidx:
-                        if initial_idx is None:
-                            initial_idx = fidx
-                        latest_idx = fidx
-                        aux_index_events.append((seq_num, fidx))
-                elif t == "checkpoint_restore":
-                    tidx = e.get("target_index")
-                    if isinstance(tidx, str) and tidx:
-                        latest_idx = tidx
-                        aux_index_events.append((seq_num, tidx))
+                elif t == "checkpoint_restore" and seq_num >= min_kept_seq:
                     for ch in e.get("changes") or []:
                         if isinstance(ch, dict):
                             if ch.get("path"):
@@ -742,26 +791,6 @@ def compact_trace(
                                 if isinstance(v, str) and ":" not in v:
                                     _note_file_sha(v)
 
-            if initial_idx:
-                _keep_index(initial_idx)
-                active_indices.add(initial_idx)
-            if latest_idx:
-                _keep_index(latest_idx)
-                active_indices.add(latest_idx)
-
-            # 保留最近 keep_recent_steps 步 ＋ 目前這個要求（last_user_seq 之後）的所有步驟
-            recent_steps = step_events[-keep_recent_steps:] if keep_recent_steps > 0 else []
-            kept_steps = {id(s): s for s in recent_steps}
-            if last_user_seq >= 0:
-                for s in step_events:
-                    if int(s.get("seq") or 0) > last_user_seq:
-                        kept_steps[id(s)] = s
-
-            min_kept_seq = (
-                min((int(s.get("seq") or 0) for s in kept_steps.values()), default=0)
-                if len(step_events) > keep_recent_steps
-                else 0
-            )
             for seq_num, aidx in aux_index_events:
                 if seq_num >= min_kept_seq:
                     _keep_index(aidx)
@@ -797,6 +826,8 @@ def compact_trace(
                         writes = json.loads(blobs.get(wb))
                 for w in writes:
                     if isinstance(w, dict):
+                        if w.get("path"):
+                            modified_paths.add(str(w["path"]))
                         for k in ("before", "after"):
                             v = w.get(k)
                             if isinstance(v, str) and ":" not in v:
