@@ -204,7 +204,9 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   e002 實驗；更高並發／更多 repo 需重新量（H-12 同口徑）。
 - e002 全臂尚未完成：四量具（report.py --rescore／e002_wiring_gauge／
   envelope_compliance／p02_carm_audit）對已完成臂 rc=0（A/C/H/M 四臂各 34/34 完成，
-  S 臂 23/34 進行中；C 臂 34/34 `vacant_home_bytes` 已最終回寫，A/H/M/S 臂不裝 Vacant 故依設計 N/A），
+  S 臂 23/34 進行中；C 臂 34/34 `vacant_home_bytes` 已最終回寫，A/H/M/S 臂不裝 Vacant 故依設計 N/A；
+  p02_carm_audit.py 的 CLI 契約 10/30 16:1x 補實讀核對：selftest PASS rc=0、e002 live rc=0，
+  C 臂 34/34、c_installed_FAIL=0、score 22 pass／12 fail 與 REPORT.json 一致、tasks_with_complete_record 31/34），
   **全臂最終分析回寫要等 S 臂完成**（disk_top_priority §5-4）。
 
 ## 2026-10-29 · 主軸 2 ·「fixed 安裝面也有命名上限」（packet §4 誠實缺口收口）

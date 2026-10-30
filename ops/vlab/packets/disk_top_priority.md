@@ -99,6 +99,12 @@
   序列 2026-10-28T20:20 → 2026-10-30T15:19（**42.98h，28 點**）、24h 視窗最大增長 **17054166 B（16.3 MiB）**、
   峰值 82.3 MiB（清場前舊日累積之暫超工作集，非穩態違反）、最新 **62924010 B（60.0 MiB）≤ 256 MiB 穩態封頂（23.4%）**、
   最新 trace 44423149 B（42.4 MiB）≤ 64 MiB、28 點全 gc ok＋target_reached；序列表與「能說」已同步回寫 FINDINGS.md 主軸 2。
+- **10/30（16:1x 續記）**：e002 最終五量具清單補實讀——最後一個尚未「實讀 main()」的量具 `p02_carm_audit.py` 已全文實讀核對（330 行）：
+  `exp` 位置參數 `nargs="?"` 與 `--selftest` 二擇一（`if not a.exp: ap.error`）、`--base` 預設 `/srv/vlab/runs`、
+  `--suite` 預設 `polyglot_py`（傳 `all` 不篩選）、`--out` 可選寫檔（預設純 stdout）；退出碼 0＝無線路 FAIL／1＝`c_installed_FAIL`／2＝selftest 失敗或輸入不可讀。
+  `--selftest` 本 HEAD 實跑 **PASS rc=0**；e002 live 實跑（純讀、無 `--out`）**rc=0**：C 臂 34/34 complete、`c_installed_FAIL=0`、
+  review 30 allow／1 continue／3 NO_EVIDENCE、score 22 pass／12 fail（**與 REPORT.json C 臂 pass=22 一致**）、`tasks_with_complete_record` 31/34
+  （3 題 NO_EVIDENCE＝鏈上無 review 條目的誠實記錄，非 FAIL、不影響退出碼）。S 臂 34/34 完賽仍是五量具最終重跑的門（資深審查指示 10/30 第 3 條）。
 
 ## 2. 四條驗收條件對現狀
 
@@ -174,4 +180,5 @@ trace 整體 96 MiB）；`envelope_accounting.overrun` 通用點名越限組件�
    rescore mismatch 0、envelope_compliance verdict=PASS，見 §1 round 192 筆）。
    **仍待（分析 backlog，非磁碟阻塞項）**：e002 S 臂完成時重跑 `report.py --rescore`＋
    `e002_wiring_gauge.py`＋`envelope_compliance.py`＋`p02_carm_audit.py` 四量具，
-   把最終全臂結果回寫（A/C/H/M 四臂 34/34 已完成、S 臂 23/34 進行中（10/30 15:49 重算）、四量具對已完成臂 rc=0；A/H/M/S 臂皆不裝 Vacant、`vacant_sha=null`、無 `vacant_home.tgz`，故 M/S 臂 `vacant_home_bytes` 依設計 N/A，見 §1 round 196）。
+   把最終全臂結果回寫（A/C/H/M 四臂 34/34 已完成、S 臂 23/34 進行中（10/30 15:49 重算）、四量具對已完成臂 rc=0；A/H/M/S 臂皆不裝 Vacant、`vacant_sha=null`、無 `vacant_home.tgz`，故 M/S 臂 `vacant_home_bytes` 依設計 N/A，見 §1 round 196。
+   p02_carm_audit.py 的 CLI 契約於 10/30 16:1x 補實讀核對、selftest PASS＋e002 live rc=0，見 §1 16:1x 筆）。
