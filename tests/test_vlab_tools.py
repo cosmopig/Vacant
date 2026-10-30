@@ -311,4 +311,24 @@ def test_noncode_cell_audit_selftest() -> None:
     assert noncode_cell_audit.main(["--selftest"]) == 0
 
 
+def test_vacant_growth_log_cli_json_mode(tmp_path: Path, capsys) -> None:
+    # P20261030_0906-1（ASSIGNMENT 驗收 a＋審查 §四-1）：人手觸發快照量具的 CLI 入口
+    # main(["--home", ..., "--json"]) 在 symlink 狀態目錄下須解析實體路徑、只印 JSON、
+    # 回 0、不寫任何檔案（--json 分支在 a.out 寫入前就 return）。
+    real_home = tmp_path / "real_vacant"
+    (real_home / "trace" / "objects").mkdir(parents=True)
+    (real_home / "trace" / "objects" / "ab12").write_text("blob-bytes", encoding="utf-8")
+
+    sym_home = tmp_path / "sym_vacant"
+    sym_home.symlink_to(real_home)
+
+    rc = vacant_growth_log.main(["--home", str(sym_home), "--json"])
+    assert rc == 0
+
+    rec = json.loads(capsys.readouterr().out)
+    assert rec["home"] == str(real_home.resolve())
+    assert rec["total_bytes"] > 0
+    assert rec["objects_files"] == 1
+
+
 
