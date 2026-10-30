@@ -55,3 +55,37 @@
 - 原始格：`/srv/vlab/runs/e003_opencode_smoke/<suite>-<task>-opencode-<arm>-r1/`（`cell.json`、`score.json`、`events.jsonl`、`app_final.tgz`、C 臂 `vacant_home.tgz`）。
 - 背景探測（10/28，只引用不併入）：`/srv/vlab/done/00_smoke_opencode.json`、`/srv/vlab/runs/smoke_opencode/`。
 - 判準核對（發射後）：`report.py e003_opencode_smoke` 出 `REPORT.{json,md}`，副本提交本庫 `ops/vlab/runs_e003_opencode_smoke/`。
+
+## 5. 實際結果（2026-10-30，`opencode_cell_audit` 量具審計 4 格）
+
+**GO/NO-GO 判定：GO**（四條預註冊判準全成立；通過率與成本明言非判準，只作描述）。
+
+判準逐條核對（每格 pass 取自各格 `score.json`；成本/呼叫取自 `AUDIT.json`；`REPORT.json` infra=[]）：
+
+1. **4 格皆正常結束、無 infra 崩潰：成立。** 4/4 格有 `cell.json`＋`score.json`（pass ∈ {true,false}）；
+   REPORT.json `infra:[]`。pg_affine_cipher A 格 agent_rc=124（牆鐘逾時）但有 score（pass=false）——
+   判準容許 rc 非零，非 infra。
+2. **C 臂（2 格）正確掛載並留下 trace 證據：成立。** 兩格 `install_rc=0`、`vacant_home.tgz` 非空、
+   含 `.vacant/intake/hooks/events.jsonl`；audit 另重算 trace 鏈：affine C 16 筆、pig C 75 筆，
+   seq 連續、prev_hash 重算相符（prev_link=ok）；review actions 25/25 與 143/143 全 allow、denied=0。
+3. **A 臂（2 格）純對照：成立。** 兩格皆無 `vacant_home.tgz`、install.log 空（無掛載、未產生 ~/.vacant）。
+4. **無臂專屬機構崩潰：成立。** audit `bad=[]`、`unknown=[]`；install/agent 日誌無 plugin 載入或例外錯誤。
+
+每格數字（呼叫/token 與 AUDIT.json 一致；pass 為 score.json 原值；成本為描述，非判準）：
+
+| 格 | pass | agent_rc | 模型呼叫 | tokens in/out/total | 工具呼叫 |
+|---|---|---|---|---|---|
+| pg_affine_cipher A | false | 124 | 12 | 169,702 / 12,591 / 182,293 | 12 |
+| pg_affine_cipher C | true | 0 | 13 | 139,083 / 3,627 / 142,710 | 12 |
+| pg_pig_latin A | true | 0 | 8 | 69,901 / 3,484 / 73,385 | 7 |
+| pg_pig_latin C | false | 0 | 72 | 1,779,788 / 28,492 / 1,808,280 | 71 |
+| 合計 | A 1/2、C 1/2 | — | 105 | — / — / 2,206,668 | 102 |
+
+**能說**：OpenCode 在 vlab 格子完成 4 格執行流程（2 過 2 掛；兩臂各 1/2，通過率明言非判準）；
+C 臂 Vacant 真的掛載並留下可重算的 trace 證據（events.jsonl、review 168 次全 allow、trace 鏈 91 筆、
+prev_hash 重算相符）；A 臂零 Vacant 資料。這是 OpenCode 真實 agent 串接的第 1 組客觀證據。
+**不能說**：不能說「Vacant 讓 OpenCode 結果變好／變差」——2 題×1 rep，pass 率與 A/C 差異被本包明言排除；
+trace 僅鏈結構完整性重算（H-3/H-4 口徑），未驗簽章、未驗完整性；不外推到其他模型／題庫。
+
+**證據**：`ops/vlab/runs_e003_opencode_smoke/AUDIT.json`＋同目錄 `REPORT.{json,md}`＋
+`/srv/vlab/done/04_e003_opencode_smoke.json`（failed_cells=[]）。
