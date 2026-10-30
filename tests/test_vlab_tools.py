@@ -1189,3 +1189,25 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     out = json.loads(capsys.readouterr().out)
     assert out["tool"] == "opencode_cell_audit"
     assert out["n_cells"] == 0 and out["bad"] == [] and out["cells"] == []
+
+    # P20261030_2054-2（ASSIGNMENT「研發工具需納入回歸測試」）：分臂成本彙總頂層契約納入回歸——
+    # 兩個 mock 格（A/C、score pass=True）→ main --runs-dir rc==0、頂層含 summary、
+    # per_arm.A 必有 calls_per_success/tokens_per_success；C 臂 tokens 3×A → 2×A 紅線分支受測。
+    import shutil
+    a_cell = opencode_cell_audit._mock_cell(tmp_path, "cell-A-r1", "A", score_pass=True)
+    c_cell = opencode_cell_audit._mock_cell(tmp_path, "cell-C-r1", "C", score_pass=True)
+    shutil.rmtree(tmp_path / "cell-C-r1_home", ignore_errors=True)  # _mock_cell 的 C 臂暫存目錄，清掉使 runs-dir 恰為兩格
+    with (c_cell / "events.jsonl").open("a", encoding="utf-8") as f:  # C 追加 2 通 step_finish → 4 通/2400 tokens＝3×A
+        f.write(json.dumps({"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 800}}}) + "\n")
+        f.write(json.dumps({"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 800}}}) + "\n")
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(tmp_path), "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["n_cells"] == 2 and out["bad"] == []
+    assert "summary" in out and set(out["summary"]["per_arm"]) == {"A", "C"}
+    a = out["summary"]["per_arm"]["A"]
+    assert a["calls_per_success"] == 2.0 and a["tokens_per_success"] == 800.0 and a["over_2x_A_cost"] is False
+    c = out["summary"]["per_arm"]["C"]
+    assert c["calls_per_success"] == 4.0 and c["tokens_per_success"] == 2400.0
+    assert c["calls_vs_A"] == 2.0 and c["tokens_vs_A"] == 3.0 and c["over_2x_A_cost"] is True
