@@ -934,3 +934,13 @@ def test_dabstep_subset_report_cli_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "exp 需要（或 --selftest）" in err
+
+
+def test_noncode_cell_audit_cli_missing_exp_error(capsys) -> None:
+    # 未給 exp 且無 --selftest 時 ap.error → SystemExit(2)、stderr 含
+    # "需要 <exp>（或 --selftest）"（noncode_cell_audit.py main L474-475）。
+    with pytest.raises(SystemExit) as excinfo:
+        noncode_cell_audit.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "需要 <exp>（或 --selftest）" in err
