@@ -529,4 +529,26 @@ def test_noncode_cell_audit_cli_table_and_out_file(tmp_path: Path, capsys) -> No
     assert "zero_ran" in out
 
 
+def test_vacant_growth_log_cli_append_and_overwrite(tmp_path: Path, capsys) -> None:
+    """vacant_growth_log CLI：--out 寫 JSONL 快照、stdout 印 recorded、main 回 0；同一分鐘重複跑覆蓋最後一筆（防濫記），不追加第二行。"""
+    h = tmp_path / "home"
+    (h / "trace" / "objects").mkdir(parents=True)
+    (h / "trace" / "objects" / "blob0").write_text("x", encoding="utf-8")
+    out_log = tmp_path / "data" / "growth.jsonl"
+
+    rc = vacant_growth_log.main(["--home", str(h), "--out", str(out_log)])
+    assert rc == 0
+    assert out_log.is_file()
+    lines = out_log.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 1
+    rec = json.loads(lines[0])
+    assert rec["total_bytes"] >= 1
+    assert "recorded" in capsys.readouterr().out
+
+    # 同一分鐘內重複執行：覆蓋最後一筆，行數維持 1（防濫記契約）
+    rc = vacant_growth_log.main(["--home", str(h), "--out", str(out_log)])
+    assert rc == 0
+    assert len(out_log.read_text(encoding="utf-8").splitlines()) == 1
+
+
 
