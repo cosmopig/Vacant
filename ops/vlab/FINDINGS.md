@@ -87,12 +87,13 @@ repo 內子集檔為同源 commit 版）＋ 上兩節。
 - 程式題與不同介入機制（H/M/S/C）的比較由 `e002_hypothesis_arms` 檢驗——本批只有
   A/C 兩臂，不能對 H/M/S 下任何結論。
 
-## 2026-10-29 · e002_hypothesis_arms · polyglot_py A/C 中間（主軸 4 追蹤）
+## 2026-10-29 · e002_hypothesis_arms · polyglot_py A/C/H/M 完賽、S 進行中（主軸 4 追蹤）
 
-**狀態**：e002 進行中——A、C 臂各 34/34 完成，H 4/34、M/S 未開始（REPORT.json `infra`
-3 格不進分母：A/C 各 1 格模型崩潰已重跑＋H 臂 1 格跑中；`cells_scored`＝72）。
-預註冊確認線（Holm 4 組比較，`ops/packets/e002.md` §4）需全批完成才能判定 H-acc 等假設。
-**本節只有中間觀察，不是判定。**
+**狀態**（2026-10-30 更新）：e002 進行中——A/C/H/M 四臂各 34/34 完成，S 臂 9/34 進行中
+（REPORT.json `infra` 7 格不進分母；`cells_scored`＝145）。
+預註冊確認線（Holm 4 組比較，`ops/packets/e002.md` §4）待 S 臂完成後才能對
+H-stakes 等預註冊假設做校正判準。
+**本節只有客觀觀察，不是判定。**
 
 **設定**：gemma-4-12b-it-qat、pi 0.87.1、polyglot_py 34 題、A/C 同題配對。
 **來源**：`/srv/vlab/runs/e002_hypothesis_arms/REPORT.{json,md}`（report.py 由原始格重算；
@@ -105,6 +106,14 @@ A 65.72 呼叫/成功・1,550,104 token/成功・逾時 8，C 67.95 呼叫/成�
 （C_C ≤ 2×C_A）：呼叫 67.95 ≤ 131.44（＝2×65.72，由 REPORT.json
 `per_arm.A.calls_per_success`×2 算出）、token 1,716,779 ≤ 3,100,208（＝2×1,550,104，
 同式）——**未觸發**（中間值）。
+
+**H/M 臂完賽數字（2026-10-30 回寫）**：H 15/34（44.12%）——成本（描述性）：130.2 呼叫/
+成功・3,858,922 token/成功・逾時 11；M 15/34（44.12%）——成本（描述性）：116.13 呼叫/成功・
+3,180,187 token/成功・逾時 8（皆取自 REPORT.json `per_arm.{H,M}`）。
+跨臂配對（REPORT.json `paired`）：A_vs_H A_only＝5、H_only＝2、McNemar exact 雙側
+p＝0.4531（未達顯著）；A_vs_M A_only＝6、M_only＝3、McNemar exact 雙側 p＝0.5078
+（未達顯著；distinct_tasks＝34）。S 臂 9/34 進行中（A_vs_S 配對 9、p＝1.0，皆中間值，
+不作結論）。
 
 **跨批一致性（兩批 A/C，非重現論證）**：
 
@@ -124,14 +133,17 @@ REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
   按 round 130 BACKLOG 規則（e001 C@`dd2c6746` vs e002 C@`cf62d258`：一致＝無版本/環境
   紅旗）——**無紅旗**。
 - e002 C 臂成本紅線未觸發（中間值）。
+- A/C/H/M 四臂 34/34 完賽、M 臂 15/34（44.12%）、A_vs_M p＝0.5078 未達顯著——
+  這些是**已確立事實**（完賽與配對數字），不是假設判定。
 
 **不能說**：
 - 兩批 C 臂的 Vacant build **不同**（`dd2c6746` vs `cf62d258`）：跨批比較是
   **版本/環境一致性檢查，不是獨立機制重現**，不能當重現證據引用，更不得池成一個 n
   （紅線 4）。
 - 不顯著 ≠ 無效也 ≠ 有效：兩批皆**未建立**（unresolved，不是負結果）。
-- e002 的 Holm 校正 p 未定（H/M/S 未完成）；H-acc/H-harness/H-multi/H-stakes 判定全部
-  待批完成；本節任何數字不得提前用於判定。
+- e002 的 Holm 4 組校正判準（預註冊，`ops/packets/e002.md` §4）**待 S 臂完成後方能判定**
+  （H/M 已完賽，僅餘 S）；H-acc/H-harness/H-multi/H-stakes 判定全部待批完成；本節任何
+  數字（含 A_vs_M p＝0.5078、A_vs_H p＝0.4531）不得提前用於判定。
 
 ## 2026-10-29 · 主軸 2 ·「~/.vacant 從零開始一天長多少」（真機跨日序列收口）
 
