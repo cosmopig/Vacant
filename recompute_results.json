@@ -1,0 +1,18 @@
+{
+  "A": {
+    "n": 7,
+    "pass": 0.0,
+    "rate": 0.0,
+    "calls_per_success": 0,
+    "tokens_per_success": 0,
+    "timeouts": 0
+  },
+  "C": {
+    "n": 5,
+    "pass": 0.0,
+    "rate": 0.0,
+    "calls_per_success": 0,
+    "tokens_per_success": 0,
+    "timeouts": 0
+  }
+}
