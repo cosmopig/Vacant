@@ -262,6 +262,7 @@ def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
 AUTO_GC_MIN_INTERVAL_S = 3600.0   # 頻率限制：同一台機器至多每小時真跑一次
 AUTO_GC_BUDGET_S = 30.0           # 時間預算：一次自動 gc 最多佔住多久（超過就停在安全點）
+AUTO_GC_ORPHAN_GRACE_S = 60.0     # 孤立物件寬限期：自動 gc 不清理 60s 內剛建立的 blob，防併發寫入競態
 AUTO_GC_LOCK_NAME = "gc.lock"
 AUTO_GC_LAST_NAME = "gc_last.json"
 AUTO_GC_REPORT_NAME = "gc_report.json"
@@ -486,6 +487,7 @@ def compact_trace(
     budget: _Budget | None = None,
     active_window_s: float | None = DEFAULT_ACTIVE_WINDOW_S,
     target_bytes: int | None = None,
+    orphan_grace_s: float = 0.0,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/trace/` 下多餘的物件或過期的擱置鏈，不動 `chain.ndjson` 或 `head.json`。
 
@@ -860,10 +862,15 @@ def compact_trace(
                 sha = blob_file.name
                 if sha in keep_shas:
                     continue
+                try:
+                    mtime = blob_file.stat().st_mtime
+                except OSError:
+                    continue
+                if mtime >= now or (orphan_grace_s > 0 and (now - mtime) < orphan_grace_s):
+                    continue
                 if cutoff_ts is not None and sha not in redundant_candidates:
-                    with contextlib.suppress(OSError):
-                        if blob_file.stat().st_mtime >= cutoff_ts:
-                            continue
+                    if mtime >= cutoff_ts:
+                        continue
                 b, c = _remove_path(blob_file, dry_run=dry_run)
                 bytes_freed += b
                 files_removed += c
@@ -911,6 +918,7 @@ def compact_quarantine(
     max_age_days: float | None = None,
     dry_run: bool = False,
     budget: _Budget | None = None,
+    orphan_grace_s: float = 0.0,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/quarantine/` 裡未被帳本最新裁決／放行引用的候選清單或隔離物件。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
@@ -996,10 +1004,15 @@ def compact_quarantine(
                         break
                     if obj_file.name in keep_objects:
                         continue
+                    try:
+                        mtime = obj_file.stat().st_mtime
+                    except OSError:
+                        continue
+                    if mtime >= now or (orphan_grace_s > 0 and (now - mtime) < orphan_grace_s):
+                        continue
                     if cutoff_ts is not None:
-                        with contextlib.suppress(OSError):
-                            if obj_file.stat().st_mtime >= cutoff_ts:
-                                continue
+                        if mtime >= cutoff_ts:
+                            continue
                     b, c = _remove_path(obj_file, dry_run=dry_run)
                     bytes_freed += b
                     files_removed += c
@@ -1242,6 +1255,7 @@ def gc_all(
     verify: bool = False,
     budget: _Budget | None = None,
     target_bytes: int | None = None,
+    orphan_grace_s: float = 0.0,
 ) -> dict[str, Any]:
     """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。
 
@@ -1266,6 +1280,7 @@ def gc_all(
         dry_run=dry_run,
         budget=budget,
         target_bytes=target_bytes,
+        orphan_grace_s=orphan_grace_s,
     )
     qr = compact_quarantine(
         root,
@@ -1273,6 +1288,7 @@ def gc_all(
         max_age_days=max_age_days,
         dry_run=dry_run,
         budget=budget,
+        orphan_grace_s=orphan_grace_s,
     )
     wk = compact_work(
         work_root,
@@ -1630,7 +1646,8 @@ def auto_gc(
         if target_bytes is None:
             target_bytes = _resolve_auto_budget()
         if dry_run:
-            rep.update(gc_all(root=sroot, work_root=wroot, dry_run=True, target_bytes=target_bytes))
+            rep.update(gc_all(root=sroot, work_root=wroot, dry_run=True, target_bytes=target_bytes,
+                              orphan_grace_s=AUTO_GC_ORPHAN_GRACE_S))
             rep["status"] = "dry_run"
             rep["ok"] = True
             return rep
@@ -1663,7 +1680,7 @@ def auto_gc(
             t0 = time.time()
             budget = _Budget(t0 + budget_s)
             body = gc_all(root=sroot, work_root=wroot, dry_run=False, budget=budget,
-                          target_bytes=target_bytes)
+                          target_bytes=target_bytes, orphan_grace_s=AUTO_GC_ORPHAN_GRACE_S)
             elapsed = time.time() - t0
             body.update({
                 "status": "ok",
@@ -1929,7 +1946,9 @@ def usage_main(argv: list[str] | None = None) -> int:
             print(f"    ⚠ 無命名上限的組件: {', '.join(unacc)}（只報告、不刪除；"
                   "新增 top-level 寫入必須在 retention.ENVELOPE_COMPONENTS 註冊）")
         for name, v in (acct.get("overrun") or {}).items():
-            print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS）")
+            print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
+                  "（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 或 "
+                  "ENVELOPE_COMPONENTS）")
         print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
               "（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:

@@ -1270,4 +1270,51 @@ def test_compact_logs_truncates_project_perf_jsonl_and_prunes_stale_rounds(env):
     assert "rounds_sess014_tag.json" in remaining_rounds
 
 
+def test_compact_trace_protects_recent_orphan_blobs_against_race_condition(env):
+    """驗證 compact_trace 在清理未引用孤立物件時，對最近建立的 blob（處於 orphan_grace_s 內）予以保留，
+    避免背景 auto_gc 併發執行時誤刪主行程剛寫入的新 blob。"""
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ws = env / "work" / "recent_orphan"
+    ws.mkdir(parents=True)
+    rec = Recorder(ws)
+    rec.baseline()
+    
+    # 建立一個孤立 blob（未記在鏈上）
+    orphan_bytes = b"RECENT_CONCURRENT_BLOB_CONTENT_12345"
+    sha = rec.blobs.put_bytes(orphan_bytes)
+    blob_path = rec.blobs.path(sha)
+    assert blob_path.is_file()
+
+    # 1) 當 orphan_grace_s=60.0 時，剛建立的新 blob 必須受到保護，不可被刪除
+    res_protected = retention.compact_trace(vh, dry_run=False, orphan_grace_s=60.0)
+    assert res_protected["files_removed"] == 0
+    assert blob_path.is_file()
+
+    # 2) 手動將 blob 的 mtime 推回 120 秒前
+    import time
+    old_time = time.time() - 120.0
+    os.utime(blob_path, (old_time, old_time))
+
+    # 超過 60 秒寬限期後，才能被判定為歷史孤兒清理
+    res_pruned = retention.compact_trace(vh, dry_run=False, orphan_grace_s=60.0)
+    assert res_pruned["files_removed"] == 1
+    assert not blob_path.exists()
+
+
+def test_usage_overrun_hint_guides_to_both_caps_registries(env, capsys):
+    """當組件超過命名上限時，vacant usage 人讀提示文字必須引導至 COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS。"""
+    from vacant_network import cli
+    vh = retention.state_dir()
+    adapters = vh / "adapters"
+    adapters.mkdir(parents=True, exist_ok=True)
+    (adapters / "heavy.bin").write_bytes(b"A" * 1_150_000)
+    rc = cli.main(["usage", "--no-estimate"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "⚠ adapters 超命名上限" in out
+    assert "retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS" in out
+
+
+
+
 
