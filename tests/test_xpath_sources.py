@@ -49,6 +49,7 @@ def _isolate(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path / "home"))
     monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
     monkeypatch.setenv("VACANT_WORK", str(tmp_path / "work"))
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
     monkeypatch.delenv("VACANT_TRACE", raising=False)
     monkeypatch.delenv("VACANT_DO_RUN", raising=False)
     keys.init_local()

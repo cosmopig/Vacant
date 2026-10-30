@@ -58,7 +58,7 @@
   只報告、不刪除（fail-open；`trace/projects/chain.ndjson` 是記責記錄，GC 向來不碰）。
   紅燈測試先行（3 新測試）；`tests/test_retention.py` **42 passed**（39→42）、四驗收檔 **94 passed（RC=0）**；
   真機 `vacant usage` 實測 **52.22 MB / 256 MiB（20.4%）✓、overrun={}、all_caps_sum 228.25 MiB ≤ 256 MiB**。
-  同筆：e002 **C 臂最終回寫**——34 scored cells 全 PASS、1 infra（NA 不進分母）、
+  同筆：e002 **C 臂最終回寫**——envelope_compliance 34 格全 PASS（未超 256 MiB 穩態封頂）、題目 benchmark 評分 22/34 PASS（64.71%）、1 infra（NA 不進分母）、
   `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格，
   18/18 階段值 35,563/161,209/290,622 的 34/34 最終值）、envelope_compliance verdict=PASS、
   rescore mismatch 0、四量具 rc=0；M 臂 5/35 進行中、S 臂未開始（H 臂 10/29 已完成）。
