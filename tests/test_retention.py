@@ -1436,3 +1436,20 @@ def test_verify_trace_chains_valid_chain_passes(env):
     assert count == 1
     assert ok is True
     assert errs == []
+
+
+def test_verify_trace_chains_mixed_valid_and_corrupted_projects(env):
+    """ASSIGNMENT 🔴最優先驗收(c)記責隔離：同時存在合法簽章鏈與損毀鏈時，
+    verify_trace_chains 計數 2、整體 ok=False，且 errors 僅點名損毀專案——
+    局部損毀不誤傷合法專案（與正/負兩對照合成三向契約閉環）。"""
+    _seed_trace_project(env, name="valid_proj", n_files=1)
+    cproj = pathlib.Path(os.environ["VACANT_HOME"]) / "trace" / "projects" / "corrupted_proj"
+    cproj.mkdir(parents=True, exist_ok=True)
+    (cproj / "chain.ndjson").write_text("not a json chain\n", encoding="utf-8")
+
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 2
+    assert ok is False
+    assert len(errs) == 1
+    assert "corrupted_proj" in errs[0]
+    assert all("valid_proj" not in e for e in errs)
