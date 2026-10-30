@@ -1436,3 +1436,147 @@ def test_verify_trace_chains_valid_chain_passes(env):
     assert count == 1
     assert ok is True
     assert errs == []
+
+
+def test_verify_trace_chains_mixed_valid_and_corrupted_projects(env):
+    """ASSIGNMENT 🔴最優先驗收(c)記責隔離：同時存在合法簽章鏈與損毀鏈時，
+    verify_trace_chains 計數 2、整體 ok=False，且 errors 僅點名損毀專案——
+    局部損毀不誤傷合法專案（與正/負兩對照合成三向契約閉環）。"""
+    _seed_trace_project(env, name="valid_proj", n_files=1)
+    cproj = pathlib.Path(os.environ["VACANT_HOME"]) / "trace" / "projects" / "corrupted_proj"
+    cproj.mkdir(parents=True, exist_ok=True)
+    (cproj / "chain.ndjson").write_text("not a json chain\n", encoding="utf-8")
+
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 2
+    assert ok is False
+    assert len(errs) == 1
+    assert "corrupted_proj" in errs[0]
+    assert all("valid_proj" not in e for e in errs)
+
+
+def test_verify_trace_chains_explicit_root_and_non_project_dirs(tmp_path):
+    """ASSIGNMENT 🔴最優先驗收(c)離線判定：verify_trace_chains 支援顯式指定
+    狀態目錄（root=Path，不依賴 $VACANT_HOME），且遍歷 projects 時自動忽略
+    非目錄雜檔與無 chain.ndjson 之子目錄——不誤傷、不崩潰。"""
+    custom_vh = tmp_path / "custom_vacant"
+    pdir = custom_vh / "trace" / "projects"
+    pdir.mkdir(parents=True)
+    (pdir / "empty_proj").mkdir()
+    (pdir / "stray_file.txt").write_text("stray\n", encoding="utf-8")
+    bad_proj = pdir / "bad_proj"
+    bad_proj.mkdir()
+    (bad_proj / "chain.ndjson").write_text("not json\n", encoding="utf-8")
+
+    count, ok, errs = retention.verify_trace_chains(root=custom_vh)
+    assert count == 1
+    assert ok is False
+    assert len(errs) == 1
+    assert "bad_proj" in errs[0]
+
+
+def test_record_growth_point_dedup_and_invalid_line_handling(tmp_path):
+    """ASSIGNMENT 🔴最優先驗收(a)真機 growth.jsonl 契約：record_growth_point
+    同分鐘同 home 連跑以最新筆覆蓋舊筆（--force 連跑不濫記），且損毀行安全
+    跳過不崩潰——寫入後檔案恰 1 行、兩次回傳 ok 皆 True。"""
+    custom_vh = tmp_path / "custom_vh"
+    custom_vh.mkdir()
+    (custom_vh / "growth.jsonl").write_text("invalid json line\n", encoding="utf-8")
+
+    r1 = retention.record_growth_point(root=custom_vh)
+    r2 = retention.record_growth_point(root=custom_vh)
+    assert r1["ok"] is True
+    assert r2["ok"] is True
+
+    lines = (custom_vh / "growth.jsonl").read_text(encoding="utf-8").strip().splitlines()
+    assert len(lines) == 1
+    assert json.loads(lines[0])["home"] == str(custom_vh.resolve())
+
+
+def test_cli_vacant_gc_verify_corrupted_chain_exit_code(tmp_path, capsys):
+    """ASSIGNMENT 🔴最優先驗收(c)：`vacant gc --verify` 遇損毀簽章鏈→回傳 exit code 1，
+    `--json` 含 "verify_ok": false 與含損毀專案名之 verify_errors——拒絕假 PASS；
+    該專案仍計入 verified_projects（已掃描、驗證失敗）。"""
+    vh = tmp_path / "vh"
+    pdir = vh / "trace" / "projects" / "broken_proj"
+    pdir.mkdir(parents=True)
+    (pdir / "chain.ndjson").write_text("bad chain\n", encoding="utf-8")
+    saved = os.environ.get("VACANT_WORK")
+    os.environ["VACANT_WORK"] = str(tmp_path / "work_empty")  # hermetic：gc 不觸及真實工作目錄
+    try:
+        rc = retention.main(["gc", "--state-dir", str(vh), "--verify", "--json"])
+    finally:
+        if saved is None:
+            os.environ.pop("VACANT_WORK", None)
+        else:
+            os.environ["VACANT_WORK"] = saved
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["verify_ok"] is False
+    assert out["verified_projects"] == 1
+    assert any("broken_proj" in e for e in out["verify_errors"])
+
+
+def test_verify_trace_chains_missing_or_empty_projects_dir(tmp_path):
+    """ASSIGNMENT 驗收 (c)：全新安裝／空狀態目錄——verify_trace_chains 安全回傳 (0, True, [])。
+
+    1) trace/projects 不存在：不崩潰、不拋 FileNotFoundError，回傳 (0, True, [])。
+    2) trace/projects 存在但內部無專案：同樣回傳 (0, True, [])。
+    """
+    empty_vh = tmp_path / "empty_vh"
+    empty_vh.mkdir()  # 完全空白目錄（未建立 trace 目錄）
+    count, ok, errs = retention.verify_trace_chains(root=empty_vh)
+    assert count == 0
+    assert ok is True
+    assert errs == []
+    (empty_vh / "trace" / "projects").mkdir(parents=True)  # 存在但內部無專案
+    count, ok, errs = retention.verify_trace_chains(root=empty_vh)
+    assert count == 0
+    assert ok is True
+    assert errs == []
+
+
+def test_cli_vacant_gc_verify_corrupted_chain_human_output_and_exit_code(tmp_path, capsys):
+    """ASSIGNMENT 🔴最優先驗收(c) 人讀版：`vacant gc --verify`（非 --json）遇損毀簽章鏈，
+    stdout 印出「驗證失敗 ✗」、列出損毀專案名錯誤項目，並以 exit code 1 退出，不可誤判 0／假 PASS。"""
+    vh = tmp_path / "vh"
+    pdir = vh / "trace" / "projects" / "bad_proj"
+    pdir.mkdir(parents=True)
+    (pdir / "chain.ndjson").write_text("corrupted chain\n", encoding="utf-8")
+    saved = os.environ.get("VACANT_WORK")
+    os.environ["VACANT_WORK"] = str(tmp_path / "work_empty")  # hermetic：gc 不觸及真實工作目錄
+    try:
+        rc = retention.main(["gc", "--state-dir", str(vh), "--verify"])
+    finally:
+        if saved is None:
+            os.environ.pop("VACANT_WORK", None)
+        else:
+            os.environ["VACANT_WORK"] = saved
+    assert rc == 1
+    out = capsys.readouterr().out
+    assert "驗證失敗 ✗" in out
+    assert "bad_proj" in out
+    assert "1 個專案簽章鏈 驗證失敗 ✗" in out
+
+
+def test_compact_vrun_dir_attempt_workspaces_and_missing_dir(tmp_path):
+    # 1) 目標目錄不存在：安全回傳 0 位元組 / 0 檔案，不崩潰
+    missing = retention.compact_vrun_dir(tmp_path / "nonexistent")
+    assert missing == {"bytes_freed": 0, "files_removed": 0}
+
+    # 2) 含收據之執行目錄：清理 _attempt_*_ws 重試工作區，保留 receipts_*.ndjson
+    run_dir = tmp_path / "runs"
+    t1 = run_dir / "t1"
+    for name in ("_attempt_1_ws", "_attempt_2_ws"):
+        ws = t1 / name
+        ws.mkdir(parents=True)
+        (ws / "tmp.py").write_text("x = 1\n", encoding="utf-8")
+    receipts = t1 / "receipts_run.ndjson"
+    receipts.write_text("{\"attempt\": 1}\n", encoding="utf-8")
+
+    res = retention.compact_vrun_dir(run_dir, dry_run=False)
+    assert res["files_removed"] >= 2
+    assert not (t1 / "_attempt_1_ws").exists()
+    assert not (t1 / "_attempt_2_ws").exists()
+    assert receipts.is_file()
+    assert receipts.read_text(encoding="utf-8") == "{\"attempt\": 1}\n"

@@ -5,6 +5,8 @@ import tarfile
 import io
 from pathlib import Path
 
+import pytest
+
 from ops.vlab.tools import (
     dabstep_subset_report,
     disk_report,
@@ -717,3 +719,209 @@ def test_growth_report_cli_out_file(tmp_path: Path) -> None:
     data = json.loads(out.read_text(encoding="utf-8"))
     assert data["verdict"] == "PASS"
     assert data["n_points"] == 3
+
+
+def test_holm_e002_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
+    # P20261030_1146-2（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具常規回歸）：CLI 空資料契約。
+    # 實驗目錄無 REPORT.json 且無原始格子可重算時，main 須把「無事可做」警示寫到
+    # stderr 並回傳 exit code 1（fail-open 的對偶：無事可做不是 PASS，也不是崩潰）。
+    empty_base = tmp_path / "runs"
+    (empty_base / "exp_empty").mkdir(parents=True)
+    rc = holm_e002.main(["exp_empty", "--base", str(empty_base)])
+    assert rc == 1
+    assert "無事可做" in capsys.readouterr().err
+
+
+def test_holm_e002_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
+    # P20261030_1146-3（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具常規回歸）：CLI 正常執行契約。
+    # REPORT.json 含配對 p 時，main 須把合法 JSON 輸出至 stdout（schema vacant.holm/1、m=1）、
+    # 支援 --out 另存且以 exit code 0 退出——與 1146-2「無事可做 exit 1」構成雙向契約閉環。
+    exp_dir = tmp_path / "runs" / "exp_norm"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "REPORT.json").write_text(
+        json.dumps({"paired": {"A_vs_C": {"mcnemar_p_two_sided": 0.05}}}),
+        encoding="utf-8")
+    out = tmp_path / "out.json"
+    rc = holm_e002.main(["exp_norm", "--base", str(tmp_path / "runs"), "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["schema"] == "vacant.holm/1"
+    assert data["m"] == 1
+    assert "vacant.holm/1" in capsys.readouterr().out
+
+
+def test_holm_e002_cli_baseline_arm_error(capsys) -> None:
+    # P20261030_1202-2（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具邊界守護）：CLI 基線臂契約。
+    # --arms 包含基線臂 A 時，argparse 解析階段須立即報錯（exit 2、stderr 點名原因），
+    # 防止把基準對照組誤納入多重校正集。
+    try:
+        holm_e002.main(["exp_any", "--arms", "A,C"])
+        assert False, "expected SystemExit"
+    except SystemExit as exc:
+        assert exc.code == 2
+    assert "A 是基線臂，不進校正組" in capsys.readouterr().err
+
+
+def test_growth_report_load_points_dedup_and_invalid_lines(tmp_path: Path) -> None:
+    # P20261030_1301-2（ASSIGNMENT 🔴最優先 驗收 a：真機 ~/.vacant 增長歷史多來源讀取與去重容錯契約）：
+    # load_points 面對多份 JSONL 時——缺檔跳過、損毀行與缺欄位行安全略過、
+    # 同 (ts, total_bytes) 重複點只留一筆且 _src 記錄先讀到之檔案。
+    f1 = tmp_path / "g1.jsonl"
+    f2 = tmp_path / "g2.jsonl"
+    f3 = tmp_path / "missing.jsonl"  # 不存在：必須被跳過，不拋異常
+    f1.write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "total_bytes": 1000}) + "\n"
+        + "bad json line\n"
+        + json.dumps({"ts": "2026-10-28T01:00:00+0000"}) + "\n",
+        encoding="utf-8")
+    f2.write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "total_bytes": 1000}) + "\n"
+        + json.dumps({"ts": "2026-10-28T02:00:00+0000", "total_bytes": 2000}) + "\n",
+        encoding="utf-8")
+    pts = growth_report.load_points(f1, f2, f3)
+    assert len(pts) == 2
+    assert [p["total_bytes"] for p in pts] == [1000, 2000]
+    dup = next(p for p in pts if p["total_bytes"] == 1000)
+    assert dup["_src"] == str(f1)
+
+
+def test_holm_e002_cli_recompute_cells_fallback(tmp_path: Path, capsys) -> None:
+    # P20261030_1301-3（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具回退重算路徑）：
+    # 無 REPORT.json 但存在原始格子（A 臂與 C 臂 score.json）時，main 須從格子
+    # 重算 A_vs_C 的 McNemar 雙尾 p、以 exit 0 正常結束，且輸出標記
+    # "source": "recomputed"（與主路徑 "report_json" 區分），完成雙路徑契約閉環。
+    exp_dir = tmp_path / "runs" / "exp_fb"
+    a_cell = exp_dir / "polyglot_py-task1-pi-A-r1"
+    c_cell = exp_dir / "polyglot_py-task1-pi-C-r1"
+    a_cell.mkdir(parents=True)
+    c_cell.mkdir(parents=True)
+    (a_cell / "score.json").write_text(json.dumps({"pass": False}), encoding="utf-8")
+    (c_cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    rc = holm_e002.main(["exp_fb", "--base", str(tmp_path / "runs"), "--arms", "C"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert '"schema": "vacant.holm/1"' in out
+    assert '"source": "recomputed"' in out
+
+
+def test_holm_e002_cli_absent_arm_excluded_from_holm_set(tmp_path: Path, capsys) -> None:
+    # P20261030_1301-4（ASSIGNMENT 主軸 3：e002 缺臂不進校正組之邊界契約）：
+    # 指定臂 S 在 REPORT.json 沒有 A_vs_S 的 p、也沒有原始格子可重算時，main 須將
+    # S 歸入 absent_pairs 排除於 Holm 校正集外（「未測」是 UNKNOWN，不是 p=1.0，
+    # 也不崩潰），C 臂照常校正，m 只數有 p 的組，exit 0。
+    exp_dir = tmp_path / "runs" / "exp_abs"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "REPORT.json").write_text(
+        json.dumps({"paired": {"A_vs_C": {"mcnemar_p_two_sided": 0.04}}}),
+        encoding="utf-8")
+    rc = holm_e002.main(["exp_abs", "--base", str(tmp_path / "runs"), "--arms", "C,S"])
+    doc = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert doc["m"] == 1
+    assert "C" in doc["pairs"]
+    assert "S" in doc["absent_pairs"]
+
+
+def test_holm_e002_cli_absent_arm_committed_fixture(tmp_path: Path, capsys) -> None:
+    # P20261030_1301-4 redo 271-r2：工單步驟 3 的 REPORT.json fixture 已 committed 為
+    # 持久來源 tests/fixtures/holm_e002_absent_arm/REPORT.json（僅 A_vs_C 有 p）。
+    # 本測試把它拷貝進 tmp 實驗目錄，斷言同一缺臂契約：S 無 p 且無格子 →
+    # absent_pairs（不是假 p、不崩潰），m 只數有 p 的組，exit 0。
+    fixture = Path(__file__).resolve().parent / "fixtures" / "holm_e002_absent_arm" / "REPORT.json"
+    exp_dir = tmp_path / "runs" / "exp_absfx"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "REPORT.json").write_bytes(fixture.read_bytes())
+    rc = holm_e002.main(["exp_absfx", "--base", str(tmp_path / "runs"), "--arms", "C,S"])
+    doc = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert doc["m"] == 1
+    assert "C" in doc["pairs"]
+    assert "S" in doc["absent_pairs"]
+
+
+def test_growth_report_cli_selftest_flag(capsys) -> None:
+    # P20261030_1317-2：growth_report CLI --selftest 旗標契約（ASSIGNMENT 🔴最優先 驗收(a)）：
+    # 非 --json 印出 "selftest: OK" 且 exit 0；--json 靜默（無字串輸出）且 exit 0。
+    # 守護量具 CLI 入口防偽防崩潰；growth_report.main 的 selftest 分支見其 L303-310。
+    rc = growth_report.main(["--selftest"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "selftest: OK" in out.strip()
+    rc = growth_report.main(["--selftest", "--json"])
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == ""
+
+
+def test_envelope_compliance_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # P20261030_1317-3：envelope_compliance CLI --selftest 旗標與缺參數防禦契約
+    # （ASSIGNMENT 🔴最優先 驗收(b)）：--selftest 執行自檢並回傳 0、stdout 含
+    # "SELFTEST OK"；未給 <exp> 且無 --selftest 時 ap.error 安全報錯 SystemExit(2)、
+    # stderr 含 "需要 <exp>"。見 ops/vlab/tools/envelope_compliance.py main L250-254。
+    rc = envelope_compliance.main(["--selftest"])
+    assert rc == 0
+    assert "SELFTEST OK" in capsys.readouterr().out
+    with pytest.raises(SystemExit) as excinfo:
+        envelope_compliance.main([])
+    assert excinfo.value.code == 2
+    assert "需要 <exp>" in capsys.readouterr().err
+
+
+def test_e002_wiring_gauge_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # P20261030_1334-3：e002_wiring_gauge CLI --selftest 旗標與缺參數防禦契約
+    # （ASSIGNMENT 主軸 3 收官四量具之一）：--selftest 執行自檢並回傳 0、stdout
+    # 含 "SELFTEST PASS"；未給 <exp> 且無 --selftest 時 ap.error 安全報錯
+    # SystemExit(2)、stderr 含 "exp 或 --selftest 必給其一"。
+    # 見 ops/vlab/tools/e002_wiring_gauge.py main L182-186。
+    rc = e002_wiring_gauge.main(["--selftest"])
+    assert rc == 0
+    assert "SELFTEST PASS" in capsys.readouterr().out
+    with pytest.raises(SystemExit) as excinfo:
+        e002_wiring_gauge.main([])
+    assert excinfo.value.code == 2
+    assert "exp 或 --selftest 必給其一" in capsys.readouterr().err
+
+
+def test_growth_report_cli_human_output(tmp_path: Path, capsys) -> None:
+    # P20261030_1334-2：growth_report CLI 人讀文字輸出與退出碼 0 契約（ASSIGNMENT 🔴最優先 驗收(a)）。
+    # 未帶 --json 時 main 印 human(base) 文字報表（ops/vlab/tools/growth_report.py human L219-242），
+    # verdict=PASS 時回傳 0（main L315-317）。假 home 寫入跨 26h 的 3 點合格序列（未超標、gc status=ok）。
+    home = tmp_path / "fx_home"
+    home.mkdir()
+    MiB = 1024 * 1024
+
+    def _point(ts: str, total: int, trace: int) -> str:
+        return json.dumps({"ts": ts, "home": str(home), "total_bytes": total,
+                           "per_dir_bytes": {"trace": trace, "possess": 1000},
+                           "objects_files": 10,
+                           "gc_last": {"status": "ok", "target_reached": True}})
+
+    (home / "growth.jsonl").write_text(
+        "\n".join([
+            _point("2026-10-28T00:00:00+0000", 20 * MiB, 10 * MiB),
+            _point("2026-10-28T12:00:00+0000", 30 * MiB, 15 * MiB),
+            _point("2026-10-29T02:00:00+0000", 40 * MiB, 20 * MiB),
+        ]) + "\n", encoding="utf-8")
+
+    rc = growth_report.main(["--home", str(home), "--ops-data", str(tmp_path / "empty_ops")])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "verdict: PASS" in out
+    assert "「一天長多少」" in out
+    assert "封頂:" in out
+
+
+def test_p02_carm_audit_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # --selftest 執行自檢並回傳 0（p02_carm_audit.py main L317-318），stdout 解析為 JSON 後
+    # 含 "selftest": "PASS"（selftest L302-304）；未給 exp 且無 --selftest 時 ap.error
+    # → SystemExit(2)、stderr 含 "exp 或 --selftest 必給其一"（main L320）。
+    rc = p02_carm_audit.main(["--selftest"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert json.loads(out)["selftest"] == "PASS"
+
+    with pytest.raises(SystemExit) as excinfo:
+        p02_carm_audit.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "exp 或 --selftest 必給其一" in err
