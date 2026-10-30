@@ -1947,3 +1947,35 @@ def test_compact_wire_dry_run_safe(tmp_path: Path) -> None:
     assert rep["index_lines_dropped"] > 0
     # dry-run：index.jsonl 內容逐字未變、未被截斷
     assert ip.read_bytes() == index_raw
+
+
+def test_compact_logs_dry_run_safe(tmp_path: Path) -> None:
+    """compact_logs dry_run=True 預覽不截斷不刪除：過大日誌只統計 bytes_freed 與 logs_compacted、
+    超額 rounds_*.json 只累加預計釋放位元組數，絕不實際截斷或刪除檔案（2026-10-30 1643-2）。"""
+    hdir = tmp_path / "custom_vh" / "intake" / "hooks"
+    hdir.mkdir(parents=True)
+
+    ev = hdir / "events.jsonl"
+    events_raw = ("entry line data\n" * 500).encode("utf-8")  # 8000 位元組 > 5000 上限
+    ev.write_bytes(events_raw)
+
+    r1 = hdir / "rounds_1.json"
+    r2 = hdir / "rounds_2.json"
+    r1.write_text('{"round": 1}')
+    r2.write_text('{"round": 2}')
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(r1, (past, past))
+    os.utime(r2, (past + 1000.0, past + 1000.0))
+
+    res = retention.compact_logs(
+        tmp_path / "custom_vh",
+        max_log_bytes=5000, keep_rounds_files=1, dry_run=True)
+    # dry-run：只統計預計釋放位元組數與壓縮日誌數
+    assert res["bytes_freed"] > 0
+    assert res["logs_compacted"] == 1
+    # dry-run：過大日誌原樣保留、內容完全未被截斷
+    assert ev.is_file()
+    assert ev.read_bytes() == events_raw
+    # dry-run：超額輪次檔案原樣保留、未被刪除
+    assert r1.is_file()
+    assert r2.is_file()
