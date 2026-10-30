@@ -458,4 +458,16 @@ def test_disk_report_cli_table_and_out_file(tmp_path: Path, capsys) -> None:
     assert "home min" in out
 
 
+def test_envelope_compliance_cli_over_envelope_fail_exit_code(tmp_path: Path, capsys) -> None:
+    """envelope_compliance CLI：C 臂格子 vacant_home_bytes 超標（300MiB > 256MiB）→ verdict FAIL、main 回 1（不假裝通過）。"""
+    cell = tmp_path / "runs" / "exp_over" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 300 * 1024 * 1024}), encoding="utf-8")
+    rc = envelope_compliance.main(["exp_over", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "FAIL"
+
+
 
