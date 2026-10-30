@@ -1277,6 +1277,9 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     out = json.loads(capsys.readouterr().out)
     assert out["bad"] == [".infra-test-opencode-H-r1"]
     assert out["summary"]["quarantined_cells"] == 1 and out["n_cells"] == 1
+    # P20261030_2300-2（審查指示第 2 條第 1 點）：.infra- 隔離格之 arm 解析鎖進常規回歸——
+    # _arm_from_name 剝 .infra- 前綴後回 "H"，非 None（3f61ec5c 核心已落，此斷言防再犯）。
+    assert out["cells"][0]["arm"] == "H"
 
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:

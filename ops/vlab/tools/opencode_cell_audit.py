@@ -120,8 +120,11 @@ def audit_vacant_home(tgz) -> dict:
 
 def _arm_from_name(name: str) -> str | None:
     """從格子目錄名解析 arm：<suite>-<task>-<agent>-<arm>-<rep>，arm＝倒數第二個 token。
-    .infra-<ts> 隔離尾綴（cell.py 加）先剝掉，否則倒數第二個 token 是 rN.infra 而非臂。
+    .infra- 隔離前綴（如 .infra-test-opencode-H-r1）與 .infra-<ts> 隔離尾綴（cell.py 加）都先剝掉，
+    否則倒數第二個 token 是 rN.infra（尾綴）或整串被前綴吞掉（前綴）而非臂。
     少於 2 個 token 解析失敗 → None。"""
+    if name.startswith(".infra-"):
+        name = name[7:]
     parts = name.split(".infra-", 1)[0].split("-")
     return parts[-2] if len(parts) >= 2 else None
 
@@ -266,8 +269,8 @@ def selftest() -> bool:
         f = audit_cell(_mock_cell(root, "mock-opencode-C-nopass", "C", score_pass=False))
         (root / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
         i = audit_cell(root / "mock-opencode-A-incomplete")
-        (root / ".infra-mock-opencode-crash").mkdir()  # .infra- 隔離目錄 → quarantined_infra（確定崩潰 → bad）
-        q = audit_cell(root / ".infra-mock-opencode-crash")
+        (root / ".infra-mock-opencode-crash-H-r1").mkdir()  # .infra- 隔離目錄 → quarantined_infra（確定崩潰 → bad）
+        q = audit_cell(root / ".infra-mock-opencode-crash-H-r1")
         m = audit_cell(_mock_cell(root, "mock-opencode-M-r1", "M", bash_command="pi run --model x", score_pass=True))
         m2 = audit_cell(_mock_cell(root, "mock-opencode-M-noagent", "M", score_pass=False))
         for d in root.iterdir():  # _mock_cell 的 C 臂暫存目錄非格子；清掉使 runs-dir 恰為 8 格
@@ -289,6 +292,7 @@ def selftest() -> bool:
                 and i["state"] == "incomplete" and i["ok"] is None and i["events"] is None
                 and i["unknown"] == [] and i["arm"] == "A"
                 and q["state"] == "quarantined_infra" and q["ok"] is None and q["events"] is None
+                and q["arm"] == "H"
                 and payload["summary"]["incomplete_cells"] == 1
                 and payload["summary"]["quarantined_cells"] == 1
                 and a["score_pass"] is True and c["score_pass"] is True
@@ -314,7 +318,7 @@ def selftest() -> bool:
                 and per_arm["M"]["second_agent_verified_cells"] == 1
                 and per_arm["M"]["second_agent_unknown_cells"] == 1
                 and rc == 1 and payload["n_cells"] == 8
-                and payload["bad"] == [".infra-mock-opencode-crash", "mock-opencode-C-tampered", "mock-opencode-M-noagent"]
+                and payload["bad"] == [".infra-mock-opencode-crash-H-r1", "mock-opencode-C-tampered", "mock-opencode-M-noagent"]
                 and msum["second_agent_verified_cells"] == 1 and msum["second_agent_unknown_cells"] == 1)
     finally:
         shutil.rmtree(root, ignore_errors=True)
