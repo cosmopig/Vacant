@@ -470,4 +470,24 @@ def test_envelope_compliance_cli_over_envelope_fail_exit_code(tmp_path: Path, ca
     assert data["verdict"] == "FAIL"
 
 
+def test_dabstep_subset_report_cli_normal_run_and_files(tmp_path: Path, capsys) -> None:
+    """dabstep_subset_report CLI：有 1 個 C 臂 scored 格子 → main 回 0、--out/--md 皆產出、stdout JSON n_cells/n_scored 皆 1。"""
+    cell = tmp_path / "runs" / "exp_dab" / "cell1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"suite": "dabstep", "task": "t1", "arm": "C"}), encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    rc = dabstep_subset_report.main([
+        "exp_dab", "--base", str(tmp_path / "runs"),
+        "--out", str(tmp_path / "out.json"),
+        "--md", str(tmp_path / "out.md"),
+    ])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    assert (tmp_path / "out.md").is_file()
+    data = json.loads(capsys.readouterr().out)
+    assert data["n_cells"] == 1
+    assert data["n_scored"] == 1
+
+
 
