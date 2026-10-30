@@ -925,3 +925,19 @@ def test_p02_carm_audit_cli_selftest_and_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "exp 或 --selftest 必給其一" in err
+
+
+def test_disk_report_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # --selftest 執行自檢並回傳 0（disk_report.py main L220-221），stdout 含
+    # "selftest: PASS"（selftest 末行 print）；未給 exp 且無 --selftest 時 ap.error
+    # → SystemExit(2)、stderr 含 "需要 <exp>（或 --selftest）"（main L222-223）。
+    rc = disk_report.main(["--selftest"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "selftest: PASS" in out
+
+    with pytest.raises(SystemExit) as excinfo:
+        disk_report.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "需要 <exp>（或 --selftest）" in err
