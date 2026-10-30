@@ -9,7 +9,7 @@
 - e001/e002 的 C 臂都在 pi agent 上驗證；**OpenCode 至今沒有預註冊冒煙**。
 - 背景事實（已量測、非成效結論）：2026-10-28 跑過 2 格 ad-hoc 探測（`/srv/vlab/done/00_smoke_opencode.json`、
   報告 `/srv/vlab/runs/smoke_opencode/REPORT.{json,md}`）：A/C × pg_pig_latin，0 infra、兩格皆正常結束、pass 皆 0；
-  C 臂 `install_rc=0`、留下 `vacant_home.tgz`（15,029 B，含 `.vacant/intake/hooks/events.jsonl`），該次 vacant_sha=dd2c6746（P0-1 修前）。
+  C 臂 `install_rc=0`、留下 `vacant_home.tgz`（15,029 B＝該 tgz 檔 stat 實測大小，含 `.vacant/intake/hooks/events.jsonl`），該次 vacant_sha=dd2c6746（P0-1 修前）。
 - 假設（冒煙層，互相獨立）：
   - H-run：OpenCode 能在 vlab 格子環境中完成 polyglot_py 程式任務的**執行流程**——兩臂皆正常結束、無 infra 崩潰；pass/fail 只記錄、不判定。
   - H-mnt：C 臂 `vacant install`（opencode plugin）能在格子 HOME 內正確掛載，並在該格 HOME 留下 trace 證據（收據/事件鏈），不是「裝了但沒記到」。
