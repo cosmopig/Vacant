@@ -801,7 +801,7 @@ def test_envelope_counted_components_have_named_total_caps():
         f"所有命名位元組上限加總 {s} B 超出穩態封頂 {retention.STABLE_ENVELOPE_BYTES} B")
 
 
-def test_envelope_accounting_flags_counted_component_overrun(env):
+def test_envelope_accounting_flags_counted_component_overrun(env, capsys):
     """round 192（packet §4「有界但無 byte cap」→ 收口）：count-based 分組
     （intake／quarantine）實際位元組長過命名總上限 ⇒ 量具必須點名（`overrun`
     含該組件、`within_caps` False）、封頂量具不得宣稱「在封頂內」；只報告、
@@ -842,6 +842,15 @@ def test_envelope_accounting_flags_counted_component_overrun(env):
     envl = retention.usage_report()["envelope"]
     assert envl["accounting"]["within_caps"] is False
     assert envl["within_envelope"] is False
+
+    # R20261030_0233-2：組件越限的人讀提示必須同時點出兩處上限定義，
+    # 避免維護者只查 COMPONENT_TOTAL_CAPS（count-based 總上限）而漏掉
+    # fixed 組件（adapters 等）的 ENVELOPE_COMPONENTS（位元組硬上限）。
+    rc = cli.main(["usage"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS" in out, (
+        "組件超命名上限的提示必須同時指向 COMPONENT_TOTAL_CAPS 與 ENVELOPE_COMPONENTS：\n" + out)
 
 
 def test_envelope_accounting_flags_trace_projects_overrun(env):

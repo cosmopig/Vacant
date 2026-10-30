@@ -1930,7 +1930,7 @@ def usage_main(argv: list[str] | None = None) -> int:
                   "新增 top-level 寫入必須在 retention.ENVELOPE_COMPONENTS 註冊）")
         for name, v in (acct.get("overrun") or {}).items():
             print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
-                  "（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS）")
+                  "（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS）")
         print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
               "（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:
