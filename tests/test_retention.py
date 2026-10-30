@@ -1453,3 +1453,23 @@ def test_verify_trace_chains_mixed_valid_and_corrupted_projects(env):
     assert len(errs) == 1
     assert "corrupted_proj" in errs[0]
     assert all("valid_proj" not in e for e in errs)
+
+
+def test_verify_trace_chains_explicit_root_and_non_project_dirs(tmp_path):
+    """ASSIGNMENT 🔴最優先驗收(c)離線判定：verify_trace_chains 支援顯式指定
+    狀態目錄（root=Path，不依賴 $VACANT_HOME），且遍歷 projects 時自動忽略
+    非目錄雜檔與無 chain.ndjson 之子目錄——不誤傷、不崩潰。"""
+    custom_vh = tmp_path / "custom_vacant"
+    pdir = custom_vh / "trace" / "projects"
+    pdir.mkdir(parents=True)
+    (pdir / "empty_proj").mkdir()
+    (pdir / "stray_file.txt").write_text("stray\n", encoding="utf-8")
+    bad_proj = pdir / "bad_proj"
+    bad_proj.mkdir()
+    (bad_proj / "chain.ndjson").write_text("not json\n", encoding="utf-8")
+
+    count, ok, errs = retention.verify_trace_chains(root=custom_vh)
+    assert count == 1
+    assert ok is False
+    assert len(errs) == 1
+    assert "bad_proj" in errs[0]
