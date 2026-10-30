@@ -48,6 +48,20 @@
   target_reached=true。直答 ASSIGNMENT「量它從零開始一天長多少」：2G repo 全日開發＋
   e002 實驗負載下，一天長 ≤16 MiB、穩態 35–51 MiB 鋸齒、全程 ≤ 封頂 32%。
   `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內。
+- **10/30（round 192）**：§4 最後一個誠實缺口收口——count-based 分組（`trace/projects`
+  步鏈＋索引、`intake`、`quarantine`）向來只有**機制**上限（50 步回收／2 MiB 每檔／每 task 2 裁決）、
+  **沒有總位元組上限**：檔案數／專案數／步數隨時間累積時可長期增長，量具偵測不到。round 192
+  新增 `retention.COMPONENT_TOTAL_CAPS` 命名總上限（trace 整體＝objects 64＋projects 子 32 MiB、
+  intake 8 MiB、quarantine 16 MiB）；`envelope_accounting` 新增通用 `overrun`／`within_caps`
+  點名越限組件（`fixed_overrun` 保留為子集）、`all_caps_sum`＝所有命名上限加總 **228.25 MiB ≤ 256 MiB**；
+  `within_envelope` 新增 `within_caps` 條件；`vacant usage` 人讀輸出點名越限組件。
+  只報告、不刪除（fail-open；`trace/projects/chain.ndjson` 是記責記錄，GC 向來不碰）。
+  紅燈測試先行（3 新測試）；`tests/test_retention.py` **42 passed**（39→42）、四驗收檔 **94 passed（RC=0）**；
+  真機 `vacant usage` 實測 **52.22 MB / 256 MiB（20.4%）✓、overrun={}、all_caps_sum 228.25 MiB ≤ 256 MiB**。
+  同筆：e002 **C 臂最終回寫**——34 scored cells 全 PASS、1 infra（NA 不進分母）、
+  `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格，
+  18/18 階段值 35,563/161,209/290,622 的 34/34 最終值）、envelope_compliance verdict=PASS、
+  rescore mismatch 0、四量具 rc=0；M 臂 5/35 進行中、S 臂未開始（H 臂 10/29 已完成）。
 
 ## 2. 四條驗收條件對現狀
 
@@ -56,7 +70,7 @@
 | 1 | 用量有上限；2G repo 用一天不能是 repo 的一半 | **有**（分組硬上限，見 §3 目標數字）＋**round 168 起 `vacant usage` 直接量出「總計 vs 封頂百分比＋各組餘量」**＋**round 176 起帳目完整性也是量具的一部分（無命名上限的 top-level 組件會被点名，且不得宣稱「在封頂內」）**＋**round 178 起「一天長多少」有真機 24h 序列（§1 末筆，4 筆 JSONL）** | 本輪實測 43.08 MB（r166）→ 52.65 MB（r168）→ 48.83 MB（r176）→ 49.7 MiB（r178 14:46，均在 256 MiB 內、≤32%）；真機序列峰值 82.3 MiB（10/28 20:20，舊日累積）GC 後 35.2 MiB；`test_usage_envelope_gauge`＋`test_envelope_accounting_*`＋`test_envelope_byte_caps_sum_within_stable`＋fail-open 測試 |
 | 2 | 未改動的原位檔不整份複製（記 sha256，需要時回工作區驗 hash） | **有**（10/28 起 scan 不落盤；取不回誠實 UNKNOWN，不崩、不假 PASS） | `workspace.py:156` docstring；`blame.py:837/967`（reclaimed → `unknown`）；測試 `test_gc_rescan_cycle.py:129`、`test_retention.py:203`、`test_trace_rescan.py:122` |
 | 3 | 超預算時 GC 刪到預算以下；刪掉的內容回 UNKNOWN 不崩不 PASS | **有**（`_sweep_to_target` + auto_gc 單例鎖/頻率/時間預算，fail-open） | `retention.py:1098`（64 MiB 解析）、`axis2_budget_64mib.md` dry-run 實測；UNKNOWN 語義三測試 |
-| 4 | 驗收：(a) 真實 `~/.vacant` 前後數字 (b) lab C 組 `vacant_home_bytes` (c) 回收後 verify/blame | **(a) 有**：10/28 前 542 MB（舊碼複製產物）→ 清場（零點 10/28 08:14）→ 跨日序列 24.55h/6 點 82.3→35.2（GC）→…→50.7 MiB（round 187 `growth_report.py` 真機 verdict=PASS：24h 視窗最大增長 16.0 MiB、全程 ≤256 MiB 封頂 32%、gc ok＋target_reached）。**(b) 有**：e001 C 組 60/60 格 vacant_home_bytes：min 27,611 B（27.0 KB）、median 323,938.0 B（316.3 KB）、max 1,146,648 B（1.09 MiB）、gc_fired 57/60（95.0%）；e002 C 臂 18/18 格 min 35,563／med 161,209／max 290,622 B（envelope_compliance verdict＝PASS）。**(c) 有**：三測試 + axis2_reclaim 實驗 | `axis2_budget_64mib.md`、`axis2_disk.md`、`tests/`（上列＋`test_growth_report_selftest_and_verdict_semantics`）、`~/dev/ops/data/vacant_growth.jsonl`、`~/.vacant/growth.jsonl`、`ops/vlab/tools/{envelope_compliance,growth_report}.py` |
+| 4 | 驗收：(a) 真實 `~/.vacant` 前後數字 (b) lab C 組 `vacant_home_bytes` (c) 回收後 verify/blame | **(a) 有**：10/28 前 542 MB（舊碼複製產物）→ 清場（零點 10/28 08:14）→ 跨日序列 24.55h/6 點 82.3→35.2（GC）→…→50.7 MiB（round 187 `growth_report.py` 真機 verdict=PASS：24h 視窗最大增長 16.0 MiB、全程 ≤256 MiB 封頂 32%、gc ok＋target_reached）。**(b) 有**：e001 C 組 60/60 格 vacant_home_bytes：min 27,611 B（27.0 KB）、median 323,938.0 B（316.3 KB）、max 1,146,648 B（1.09 MiB）、gc_fired 57/60（95.0%）；e002 **C 臂最終** 34/34 格 min 29,089／med 105,134／max 316,854 B、1 infra（NA 不進分母）、envelope_compliance verdict＝PASS、rescore mismatch 0（round 192 回寫；18/18 階段值 35,563/161,209/290,622 為中間值）；M 5/35、S 未開始。**(c) 有**：三測試 + axis2_reclaim 實驗 | `axis2_budget_64mib.md`、`axis2_disk.md`、`tests/`（上列＋`test_growth_report_selftest_and_verdict_semantics`）、`~/dev/ops/data/vacant_growth.jsonl`、`~/.vacant/growth.jsonl`、`ops/vlab/tools/{envelope_compliance,growth_report}.py` |
 
 ## 3. 目標數字（自訂，附理由）
 
@@ -64,13 +78,13 @@
 
 | 分區 | 上限 | 機制 | 本輪實測 |
 |---|---|---|---|
-| trace 版本庫 | **64 MiB**（硬） | `_sweep_to_target` 刪最舊；`VACANT_TRACE_BUDGET_BYTES` 覆寫、0＝關 | 21.95 MB ✓ |
+| trace 版本庫 | **64 MiB**（硬）＋ projects 子 **32 MiB**（round 192 總上限） | `_sweep_to_target` 刪最舊；`VACANT_TRACE_BUDGET_BYTES` 覆寫、0＝關；projects 步鏈 50 步計數制回收＋總警報（只報告不刪） | 21.95 MB ✓（projects 5.46 MB） |
 | wire body | **96 MiB**（硬） | `compact_wire`；`VACANT_WIRE_BODY_BYTES` 覆寫 | 15.10 MB ✓ |
 | wire index | **8 MiB**（硬） | `compact_wire`；`VACANT_WIRE_INDEX_BYTES` 覆寫 | （含於 wire）✓ |
-| 掛鉤日誌 | 2 MiB/檔 | `compact_logs` 截半，保留最新完整行 | 2.18 MB（intake 合計）✓ |
-| quarantine / work | 計數制（每 task 2 決策 / 3 run） | `compact_quarantine`／`compact_work`／`compact_vrun_dir`；單 blob ≤ 8 MiB（MAX_BLOB） | 0 B / 0 B ✓ |
-| 固定安裝面（bin/hooks/keys/projects 索引） | ~10 MiB 餘量 | 非增長性 | ~6 MB ✓ |
-| **合計** | **168 MiB 硬 + 計數制 + 固定面 → 256 MiB 封頂** | | **49.7 MiB（19.4% of 256，round 178 真機 14:46 實測；24h 峰值 82.3 MiB＝32%）** |
+| 掛鉤日誌（intake） | 2 MiB/檔＋總 **8 MiB**（round 192） | `compact_logs` 截半，保留最新完整行；總上限警報（只報告不刪） | 1.94 MB ✓ |
+| quarantine / work | 計數制（每 task 2 決策 / 3 run）＋ quarantine 總 **16 MiB**（round 192） | `compact_quarantine`／`compact_work`／`compact_vrun_dir`；單 blob ≤ 8 MiB（MAX_BLOB）；總上限警報（只報告不刪） | 0 B ✓ |
+| 固定安裝面（bin/hooks/keys/projects 索引） | 1 MiB/件×4（round 190） | 非增長性；`envelope_accounting.fixed_overrun` 點名越限（只報告不刪） | ~6 MB ✓ |
+| **合計** | **所有命名上限加總 228.25 MiB（round 192：172.25 機制＋32 projects＋8 intake＋16 quarantine）→ 256 MiB 封頂** | `all_caps_sum` ≤ 256 MiB 有常規測試把關 | **52.22 MB（20.4% of 256，round 192 真機實測；24h 峰值 82.3 MiB＝32%）** |
 
 **為什麼使用者可以接受 256 MiB**：
 1. 它對 2 GiB repo 是 **12.5%**——「不該是 repo 的一半」（50%）有 **4 倍餘裕**。
@@ -93,8 +107,14 @@
   `within_envelope` 多一個 `fixed_within_caps` 條件；fixed 面沒有回收路徑，量具只報告不刪除；
   紅燈測試先行＋真機實測 `fixed_overrun={}`、`byte_caps_sum` 168.25→172.25 MiB ≤ 256 MiB；
   1 MiB 是警報上限不是硬刪上限，合理增大應在此表調大並留記錄）。
-- **計數制分組**（50 步索引、2 決策、3 run）在單檔逼近 MAX_BLOB（8 MiB）時可超過
-  小預算；有界但沒有 byte 封頂。
+~~**計數制分組**（50 步索引、2 決策、3 run）在單檔逼近 MAX_BLOB（8 MiB）時可超過
+  小預算；有界但沒有 byte 封頂。~~（**round 192 收口**：`trace/projects` 步鏈＋索引、`intake`、
+`quarantine` 都有命名**總**位元組上限（`retention.COMPONENT_TOTAL_CAPS`：32 / 8 / 16 MiB；
+trace 整體 96 MiB）；`envelope_accounting.overrun` 通用點名越限組件（fixed 為其子集）、
+`within_envelope` 新增 `within_caps` 條件、`all_caps_sum`＝228.25 MiB ≤ 256 MiB 有常規測試；
+只報告不刪除——步鏈是記責記錄（GC 向來不碰 chain.ndjson），越限是量具的事不是回收路徑的事；
+紅燈測試 3 支先行、真機 `overrun={}` 實測在內。注意：這是**警報上限**不是硬刪上限，
+長期超限時應調大常數並留記錄，不該靠量具假裝沒事。）
 - 人類 872 MB 的數字是**舊碼 + 清場前**的；不能用來評現行碼（§1 時序）。
 - `retention.py` 模組 docstring 曾長期描述舊行為（「首掃全量複製 ≤8MB」）——
   **人類 10/28 回報引用正是這段過時文字**；本輪已改寫為現行行為（round 166 提交）。
@@ -112,6 +132,11 @@
    cell.py/labd.py/report.py 零改動；每輪 e002 監測固定跑）
 4. ~~`vacant_growth.jsonl` 隔天再記一筆，補齊「從零起算」的跨日序列~~（round 187 完成：
    序列 24.55h/6 點、`growth_report.py` 真機 verdict=PASS，見 §1 round 187 筆）。
-   **仍待**：e002 C/H/M/S 臂完成時重跑 `report.py --rescore`＋`e002_wiring_gauge.py`＋
-   `envelope_compliance.py`＋`p02_carm_audit.py` 四量具並把最終 C 臂 `vacant_home_bytes` 分佈
-   回寫 §2-4(b)（round 187 監測：A/C 已完成、H 進行中、M/S 待排；四量具對已完成臂 rc=0）。
+   ~~**仍待**：e002 C 臂最終 `vacant_home_bytes` 分佈回寫 §2-4(b)~~（**round 192 完成**：
+   C 臂 34/34 格全 PASS、min 29,089／med 105,134／max 316,854 B、1 infra（NA）、
+   rescore mismatch 0、envelope_compliance verdict=PASS，見 §1 round 192 筆）。
+   **仍待**：e002 M 臂（5/35 進行中）＋ S 臂（未開始）完成時重跑 `report.py --rescore`＋
+   `e002_wiring_gauge.py`＋`envelope_compliance.py`＋`p02_carm_audit.py` 四量具，
+   把最終全臂結果回寫（round 192 監測：A/C/H 已完成、四量具對已完成臂 rc=0）；
+   若 M/S 臂的 `vacant_home_bytes` 出現超命名上限的格，按 §4 round 192 收口口徑處理
+   （`overrun` 點名＋只報告不刪＋調大常數留記錄）。

@@ -199,3 +199,42 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   （adapters 是安裝面，Vacant 不刪自己語義不認得的增長）。
 - 1 MiB 是**警報上限**不是硬刪上限：選值＝現行實測（~40 KiB）的 25 倍，
   若某版本合理增大 adapters，應在此表調大命名上限並留記錄，而非讓量具常紅。
+
+## 2026-10-30 · 主軸 1 ·「count-based 分組也有命名總上限」（packet §4 最後一個誠實缺口收口）＋ e002 C 臂最終回寫
+
+**改動**（round 192，小改動＋紅燈測試先行）：`trace/projects` 步鏈＋索引、`intake`、
+`quarantine` 三個 count-based 分組向來只有**機制**上限（50 步回收／2 MiB 每檔／每 task
+2 裁決）、**沒有總位元組上限**——檔案數／專案數／步數隨時間累積時可長期增長，量具偵測
+不到。round 192 新增 `retention.COMPONENT_TOTAL_CAPS` 命名總上限：trace 整體
+＝objects 64＋projects 子 **32 MiB**（`DEFAULT_TRACE_PROJECTS_CAP_BYTES`）、intake
+**8 MiB**（`DEFAULT_INTAKE_TOTAL_CAP_BYTES`）、quarantine **16 MiB**
+（`DEFAULT_QUARANTINE_TOTAL_CAP_BYTES`）；`envelope_accounting` 新增通用 `overrun`
+（{name: {bytes, cap_bytes}}，fixed 與 count-based 都在內）＋`within_caps`，
+`fixed_overrun`／`fixed_within_caps` 保留為 fixed 子集（round 190 欄位同義）；新增
+`all_caps_sum`＝所有命名上限加總（172.25＋32＋8＋16＝**228.25 MiB ≤ 256 MiB**）＋
+`all_caps_sum_within_envelope`；`usage_report().envelope.within_envelope` 改為要求
+`within_caps`；`vacant usage` 人讀輸出點名越限組件（`⚠ <name> 超命名上限: X / Y`）。
+**能說**：
+- 「count-based 分組無上限增長」從「要靠人類注意到」變成量具自動點名
+  （`envelope_accounting().overrun`／`vacant usage` 的 `within_envelope` False）。
+- 所有命名位元組上限加總 228.25 MiB ≤ 256 MiB 封頂有常規測試把關
+  （`test_envelope_counted_components_have_named_total_caps`）——封頂不再是紙面數字。
+- e002 **C 臂最終**：34 scored cells 全 PASS、1 infra（NA 不進分母）、
+  `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格）、
+  rescore mismatch 0、envelope_compliance verdict=PASS、四量具 rc=0（18/18 階段值
+  35,563/161,209/290,622 為中間值）。
+**證據**：`tests/test_retention.py::test_envelope_counted_components_have_named_total_caps`＋
+`test_envelope_accounting_flags_counted_component_overrun`（intake 8 MiB+16K、
+quarantine 16 MiB+16K 越限點名＋不刪除＋`within_envelope` False）＋
+`test_envelope_accounting_flags_trace_projects_overrun`（trace/projects 灌 96 MiB+16K
+越限點名＋不刪除）；`tests/test_retention.py` **42 passed**（39→42）；四驗收檔
+（envelope_compliance／vlab_tools／universal_and_coding_upgrades／retention）**94 passed
+（RC=0）**；真機 `vacant usage` 實測 **52.22 MB / 256 MiB（20.4%）✓、overrun={}、
+within_caps=True、all_caps_sum 228.25 MiB ≤ 256 MiB**。
+**不能說**：
+- 不能說這些分組「有回收路徑」——越限時量具只報告、不刪除（fail-open）；
+  `trace/projects/chain.ndjson` 是記責記錄，GC 向來不碰，這是語義決定不是漏做。
+- 32/8/16 MiB 是**警報上限**不是硬刪上限：選值＝現行實測（projects 5.46 MB／intake
+  1.94 MB／quarantine 0 B）的 ≥3 倍，長期超限時應調大常數並留記錄，不該靠量具假裝沒事。
+- e002 全臂最終仍**未完成**：M 臂 5/35 進行中、S 臂未開始（A/C/H 已完成、rc=0）；
+  全臂回寫等 M/S 完成（disk_top_priority §5-4）。
