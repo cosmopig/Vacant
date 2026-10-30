@@ -1743,3 +1743,16 @@ def test_retention_main_auto_dry_run_human_output_safe(tmp_path: Path, capsys) -
     out = capsys.readouterr().out
     assert "自動 gc 預覽（--dry-run，未刪除）: 可釋放 0 B（0 個檔案）" in out
     assert not p.exists()
+
+import argparse  # noqa: E402  (test_retention_parse_size_valid_and_invalid 用)
+
+
+def test_retention_parse_size_valid_and_invalid():
+    """`vacant gc --target-bytes` 的 _parse_size：整數與 K/M/G 後綴 → 精確位元組數；負數/非數字 → ArgumentTypeError。"""
+    assert retention._parse_size("1024") == 1024
+    assert retention._parse_size("64K") == 64 * 1024
+    assert retention._parse_size("256M") == 256 * 1024 * 1024
+    assert retention._parse_size("1G") == 1024 * 1024 * 1024
+    for bad in ("-1", "invalid"):
+        with pytest.raises(argparse.ArgumentTypeError):
+            retention._parse_size(bad)
