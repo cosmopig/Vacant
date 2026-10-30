@@ -1248,3 +1248,32 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2126-1（2110-4 重發；核心斷言已於 94894736 落）：step 4 字面「具備」——兩欄位存在。
     assert {"second_agent_verified_cells", "second_agent_unknown_cells"} <= set(m)
     assert m["second_agent_verified_cells"] == 1 and m["second_agent_unknown_cells"] == 0
+
+
+def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
+    # （523236d3）納入常規回歸——--selftest、--report/--audit/--json CLI、四項假說判定結構與 M 臂第二 agent 證據。
+    from ops.vlab.tools import e004_verdict
+
+    assert e004_verdict.selftest() == 0
+    capsys.readouterr()  # 排空殘留，保持 --selftest stdout 乾淨
+    rc = e004_verdict.main(["--selftest"])
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "e004_verdict selftest PASS" in captured.out
+
+    # 合成 mock REPORT.json 與 audit.json 只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    rep = tmp_path / "REPORT.json"
+    rep.write_text(json.dumps(e004_verdict._mock_report()), encoding="utf-8")
+    aud = tmp_path / "audit.json"
+    aud.write_text(json.dumps(e004_verdict._mock_audit(5)), encoding="utf-8")
+    capsys.readouterr()
+    rc = e004_verdict.main(["--report", str(rep), "--audit", str(aud), "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    # 四項假說判定全部在案、各帶判定態；mock 期望態（Holm m=4：C/M 顯著、H/S 不顯著；M 有第二 agent 證據）。
+    hyp = out["hypotheses"]
+    assert {"H-acc", "H-review(H)", "H-review(M)", "H-stakes(a)"} <= set(hyp)
+    assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件
