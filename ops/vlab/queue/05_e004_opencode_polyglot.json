@@ -1,0 +1,1538 @@
+{
+  "exp": "e004_opencode_polyglot",
+  "packet": "/home/user1/dev/ops/packets/e004_opencode_polyglot.md",
+  "cells": [
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_beer_song",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_book_store",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bottle_song",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_bowling",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_connect",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dominoes",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_dot_dsl",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_food_chain",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_forth",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_go_counting",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grade_school",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_grep",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_hangman",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_list_ops",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_paasio",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_phone_number",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_poker",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pov",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_proverb",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_react",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_rest_api",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_robot_name",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_scale_generator",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_sgf_parsing",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_simple_linked_list",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_transpose",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_tree_building",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_two_bucket",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_variable_length_quantity",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_wordy",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zebra_puzzle",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "opencode",
+      "arm": "H",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_H.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "opencode",
+      "arm": "M",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_M.md"
+      }
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_zipper",
+      "agent": "opencode",
+      "arm": "S",
+      "rep": 1,
+      "env": {
+        "VLAB_APPEND_SYSTEM": "/srv/vlab/arms/e002_S.md"
+      }
+    }
+  ],
+  "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1",
+  "timeout": 1800
+}
