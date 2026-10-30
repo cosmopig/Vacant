@@ -668,3 +668,26 @@ def test_p02_carm_audit_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> N
     doc = json.loads(out.read_text(encoding="utf-8"))
     assert doc["n_cells"] == 1
     assert "\"n_cells\": 1" in capsys.readouterr().out
+
+
+def test_e002_wiring_gauge_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
+    """e002_wiring_gauge CLI：A/C 格皆合法且無線路 FAIL 時，main 回 0 且 --out 另存可解析 JSON（與缺格 exit 1 契約閉環）。"""
+    a = tmp_path / "runs" / "exp_w" / "polyglot_py-task1-pi-A-r1-g1"
+    a.mkdir(parents=True)
+    (a / "cell.json").write_text(json.dumps(
+        {"arm": "A", "agent_rc": 0, "timed_out": False, "append_system": None}), encoding="utf-8")
+    (a / "score.json").write_text(json.dumps({"pass": True, "tests_total": 2}), encoding="utf-8")
+    c = tmp_path / "runs" / "exp_w" / "polyglot_py-task1-pi-C-r1-g2"
+    c.mkdir(parents=True)
+    (c / "cell.json").write_text(json.dumps(
+        {"arm": "C", "agent_rc": 0, "timed_out": False, "append_system": None, "install_rc": 0}),
+        encoding="utf-8")
+    (c / "score.json").write_text(json.dumps({"pass": True, "tests_total": 2}), encoding="utf-8")
+    (c / "vacant_home.tgz").write_bytes(b"")
+    out = tmp_path / "out.json"
+    rc = e002_wiring_gauge.main(["exp_w", "--base", str(tmp_path / "runs"), "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["n_cells"] == 2
+    assert "\"n_cells\": 2" in capsys.readouterr().out
