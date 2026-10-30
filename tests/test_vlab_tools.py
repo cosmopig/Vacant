@@ -728,3 +728,22 @@ def test_holm_e002_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
     rc = holm_e002.main(["exp_empty", "--base", str(empty_base)])
     assert rc == 1
     assert "無事可做" in capsys.readouterr().err
+
+
+def test_holm_e002_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
+    # P20261030_1146-3（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具常規回歸）：CLI 正常執行契約。
+    # REPORT.json 含配對 p 時，main 須把合法 JSON 輸出至 stdout（schema vacant.holm/1、m=1）、
+    # 支援 --out 另存且以 exit code 0 退出——與 1146-2「無事可做 exit 1」構成雙向契約閉環。
+    exp_dir = tmp_path / "runs" / "exp_norm"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "REPORT.json").write_text(
+        json.dumps({"paired": {"A_vs_C": {"mcnemar_p_two_sided": 0.05}}}),
+        encoding="utf-8")
+    out = tmp_path / "out.json"
+    rc = holm_e002.main(["exp_norm", "--base", str(tmp_path / "runs"), "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["schema"] == "vacant.holm/1"
+    assert data["m"] == 1
+    assert "vacant.holm/1" in capsys.readouterr().out
