@@ -141,7 +141,8 @@ fi
 # 🔴 圍牆把 repo 整份唯讀綁進去 ⇒ 庫（與它旁邊的 run 產物）住在 repo 底下的話，
 #    別的分身的 wire log 在圍牆裡讀得到。twinenclose 會逐跑拒絕，這裡在開機就講。
 if [ "$PRINT_ONLY" = "0" ] && [ "${VACANT_TWIN_ENCLOSE:-off}" != "off" ]; then
-  case "$(cd "$(dirname "$DB")" 2>/dev/null && pwd)/" in
+  DB_DIR="$(mkdir -p "$(dirname "$DB")" 2>/dev/null && cd "$(dirname "$DB")" && pwd)"
+  case "${DB_DIR}/" in
     "$REPO"/*)
       echo "✗ VACANT_TWIN_ENCLOSE=${VACANT_TWIN_ENCLOSE} 但庫在 repo 底下（${DB}）。" >&2
       echo "  圍牆把 repo 唯讀綁進去 ⇒ 別的分身的 run 產物在圍牆裡讀得到。" >&2
