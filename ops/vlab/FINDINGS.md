@@ -140,7 +140,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 15 點跨 33.42h（2026-10-28T20:20 → 2026-10-30T05:45）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 20 點跨 35.88h（2026-10-28T20:20 → 2026-10-30T08:13）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -159,18 +159,23 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/30 03:37 | 52.7 MiB | 34.8 MiB | 567 | ok, true |
 | 10/30 04:45 | 53.5 MiB | 35.5 MiB | 590 | ok, true |
 | 10/30 05:45 | 52.7 MiB | 35.5 MiB | 586 | ok, true |
+| 10/30 06:47 | 53.3 MiB | 36.1 MiB | 587 | ok, true |
+| 10/30 07:33 | 53.8 MiB | 36.4 MiB | 598 | ok, true |
+| 10/30 08:02 | 54.4 MiB | 37.0 MiB | 577 | ok, true |
+| 10/30 08:08 | 54.5 MiB | 37.0 MiB | 591 | ok, true |
+| 10/30 08:13 | 54.5 MiB | 37.1 MiB | 596 | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
 round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 
-**能說**（round 200 真機 `growth_report.py` verdict=PASS，rc=0）：
+**能說**（round 217 真機 `growth_report.py` verdict=PASS，rc=0）：
 - **一天長多少：24h 視窗最大增長 16.3 MiB**（2G repo 全日開發＋e002 實驗負載下）。
 - 穩態鋸齒 35–82 MiB：峰值 82.3 MiB 是 10/28 20:20 舊日累積，次日 gc 削至 35.2 MiB
-  後在 50 MiB 附近走平——**不是線性增長，回收在真實使用裡生效**（15 點全 gc ok＋target_reached）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 52.7 MiB（20.6%）、
-  最新 trace 35.5 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（15 點、33.42h），不是模擬、不是單點。
+  後在 50 MiB 附近走平——**不是線性增長，回收在真實使用裡生效**（20 點全 gc ok＋target_reached）。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 54.5 MiB（21.3%）、
+  最新 trace 37.1 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（20 點、35.88h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
@@ -232,6 +237,22 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格）、
   rescore mismatch 0、envelope_compliance verdict=PASS、四量具 rc=0（18/18 階段值
   35,563/161,209/290,622 為中間值）。
+- e002 **C 臂未通過 12 題型態分析**（round 207 回寫；來源＝`ops/vlab/tools/e002_carm_failures.py`
+  EXIT=0 客觀輸出：34 格中 12 格未通過＝4 逾時＋8 未收斂，22+12＝34 與上條 22/34 口徑一致）：
+  - **4 逾時格**（agent rc=124 牆鐘逾時；測試進度為 score.json 記錄值）：**forth 52/54、grep 17/25、
+    hangman 5/7、sgf_parsing 17/23**（其中 forth/grep/sgf_parsing 為 `stop_checks=0, rejections=0` 未及收件即逾時；
+    hangman 為 `stop_checks=1, rejections=1`，被退回 1 次後於重試中逾時，最後 hint：`test_after_10_failures_the_game_is_over:
+    AssertionError: 'ongoing' != 'lose'`）。**react 實為 PASS 格**（score.json `pass=true`、14/14），不屬逾時題——
+    更正先前審查指示「第 4 逾時題為 react」之誤記，實為 **sgf_parsing**。
+  - **8 未收斂格**（agent rc=0、測試未過）：bottle_song 1/7、food_chain 3/10、go_counting 10/11、
+    paasio 23/25、poker 33/37、rest_api 6/9、scale_generator 12/17、zipper 9/14。
+  - 退回次數：其中 7 格退回 1 次（`stop_checks=2, rejections=1`，1 round 後仍 open，最後 hint 為
+    「step N (python3 -m unittest X_test.py) had failed」）；**zipper 為 `stop_checks=1, rejections=0`**
+    （`vacant_home.tgz` 內 `events.jsonl`、`chain.ndjson` 與 `delivery.json` 明確記錄 `action="allow", rounds_used=0`，
+    因 `021c8924` 修補前 `python3 zipper_test.py` 跑 0 測試 exit 0，zerostop 見 `findings=[]` 放行並 unlink 暫存 `rounds_*.json`；
+    已修補 `e002_carm_failures.py` 讀取 `events.jsonl`/`chain.ndjson`，不再誤報為 UNKNOWN）。
+  - 口徑：本條是失敗格客觀型態記錄（哪題、測試進度、退回次數、最後 hint），可查證、可重算
+    （重跑該工具即得同輸出）；不作為「C 臂較好」的證據，也不證明任何成效。
 **證據**：`tests/test_retention.py::test_envelope_counted_components_have_named_total_caps`＋
 `test_envelope_accounting_flags_counted_component_overrun`（intake 8 MiB+16K、
 quarantine 16 MiB+16K 越限點名＋不刪除＋`within_envelope` False）＋

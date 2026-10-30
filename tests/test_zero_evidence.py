@@ -717,3 +717,217 @@ def test_v37_a_red_test_script_never_followed_by_a_green_run_is_still_a_failed_s
                   [("bash", "sh run_tests.sh", "FAIL check_01\n2 check(s) failed\n", True),
                    ("write", "solution.py", "def f(x):\n    return 2 * x\n")], final="Done.")
     assert [f["kind"] for f in ev["findings"]] == ["failed_step"]
+
+
+def test_direct_python_run_of_unittest_file_without_main_is_caught_as_failed_step(env):
+    """e002 C 臂真實漏放（polyglot_py-pg_zipper-pi-C-r1）：
+    測試檔定義了 unittest.TestCase 子類別但沒有 `unittest.main()`，agent 直接跑
+    `python3 zipper_test.py`（未加 `-m unittest` 或 `pytest`）時，Python 只載入類別定義即結束、
+    輸出為空且 exit 0（實際執行 0 個測試）。
+    1) 單獨跑 `python3 zipper_test.py` 必須被抓為 `failed_step`（`sub="test_failed"`）並提示用 `-m unittest`；
+    2) 先前若有真實測試失敗，後續跑 `python3 zipper_test.py`（空輸出）不得將先前的失敗洗白為「已通過」；
+    3) 若最終訊息宣稱「All tests passed」，`_test_claim` 也必須判為 `sub="failed"` 而非 `unreadable`。"""
+    unittest_no_main = (
+        "import unittest\n"
+        "from zipper import Zipper\n\n\n"
+        "class ZipperTest(unittest.TestCase):\n"
+        "    def test_ basic(self):\n"
+        "        self.assertEqual(1, 1)\n"
+    ).replace("test_ basic", "test_basic")
+    # 1) 如同 pg_zipper：讀檔 → 寫 zipper.py → 跑 `python3 zipper_test.py` 空輸出 → 收工
+    ev1 = _v37_run(
+        env / "c1",
+        "Read goal.md and implement zipper.py.",
+        {"goal.md": "# Goal\nImplement Zipper in `zipper.py`.\n",
+         "zipper.py": "class Zipper:\n    pass\n",
+         "zipper_test.py": unittest_no_main},
+        [("read", "goal.md"),
+         ("read", "zipper_test.py"),
+         ("write", "zipper.py", "class Zipper:\n    def value(self):\n        return 0\n"),
+         ("bash", "python3 zipper_test.py", "")],
+        final="Tests in `zipper_test.py` have been executed successfully.",
+    )
+    f1 = [f for f in ev1["findings"] if f["kind"] == "failed_step"]
+    assert len(f1) == 1
+    assert f1[0]["sub"] == "test_failed"
+    assert "0 tests ran" in f1[0]["error"]
+    assert "python3 -m unittest zipper_test.py" in f1[0].get("test_hint", "")
+
+    # 2) 先前 `python3 -m unittest` 失敗，後面跑 `python3 zipper_test.py` 空輸出不得洗白
+    ev2 = _v37_run(
+        env / "c2",
+        "Read goal.md and implement zipper.py.",
+        {"goal.md": "# Goal\nImplement Zipper in `zipper.py`.\n",
+         "zipper.py": "class Zipper:\n    pass\n",
+         "zipper_test.py": unittest_no_main},
+        [("read", "goal.md"),
+         ("write", "zipper.py", "class Zipper:\n    def value(self):\n        return 0\n"),
+         ("bash", "python3 -m unittest zipper_test.py",
+          "FAIL: test_basic (zipper_test.ZipperTest)\nAssertionError: 0 != 1\n\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+          True),
+         ("bash", "python3 zipper_test.py", "")],
+        final="Done.",
+    )
+    assert [f["kind"] for f in ev2["findings"]] == ["failed_step"]
+
+    # 3) 最終訊息命中 CLAIMS（"All tests passed."）時，_test_claim 必須報 sub="failed"
+    ev3 = _v37_run(
+        env / "c3",
+        "Read goal.md and implement zipper.py.",
+        {"goal.md": "# Goal\nImplement Zipper in `zipper.py`.\n",
+         "zipper.py": "class Zipper:\n    pass\n",
+         "zipper_test.py": unittest_no_main},
+        [("read", "goal.md"),
+         ("write", "zipper.py", "class Zipper:\n    def value(self):\n        return 0\n"),
+         ("bash", "python3 zipper_test.py", "")],
+        final="All tests passed.",
+    )
+    assert [(f["kind"], f.get("sub")) for f in ev3["findings"]] == [("test_claim", "failed")]
+
+
+
+def test_extract_test_hint_multiple_failures_priority(env):
+    """紅燈（2026-10-30 e002 C 臂，審查指示 §四-4【P1】）：多個失敗測試且末尾測試斷言過長時，
+    其餘失敗測試的名字不得被長斷言訊息擠出截斷窗口——agent 的前 120 字元必須看到它們，
+    否則漏修其餘失敗目標。改之前：`(also failing: ...)` 附在長斷言之後，被 240 字元截斷掉。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    long_list = ", ".join(str(i) for i in range(40))
+    out = (
+        "======================================================================\n"
+        "FAIL: test_alpha (mod.T.test_alpha)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 5, in test_alpha\n'
+        "    self.assertEqual(a, b)\n"
+        "AssertionError: 1 != 2\n"
+        "----------------------------------------------------------------------\n"
+        "FAIL: test_beta (mod.T.test_beta)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 9, in test_beta\n'
+        "    self.assertEqual(a, b)\n"
+        f"AssertionError: [{long_list}] != [{long_list}]\n"
+        "----------------------------------------------------------------------\n"
+        "Ran 2 tests in 0.001s\n"
+        "\n"
+        "FAILED (failures=2)\n"
+    )
+    hint = _extract_test_hint(out, err="FAILED (failures=2)")
+    assert hint is not None
+    assert hint.startswith("test_beta")          # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "AssertionError" in hint
+    # 紅燈：其餘失敗測試名字必在前 120 字元內（改之前被長斷言擠出截斷窗口）
+    assert "test_alpha" in hint[:120]
+
+
+def test_extract_test_hint_pytest_multiple_failures_priority(env):
+    """pytest 格式（`FAILED path::test_name - exc`）的多失敗前置紅燈（2026-10-30，審查指示 §四-4【P1】）：
+    多個失敗且末尾測試斷言過長時，其餘失敗測試名字 `(also failing: ...)` 仍前置緊接於
+    測試名稱之後，使真實 agent（pi／OpenCode）在前 120 字元內看到所有失敗測試名。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    long_list = ", ".join(str(i) for i in range(40))
+    out = (
+        "FAILED test_calc.py::test_alpha - AssertionError: 1 != 2\n"
+        f"FAILED test_calc.py::test_beta - AssertionError: [{long_list}] != [{long_list}]\n"
+    )
+    hint = _extract_test_hint(out, err="2 failed")
+    assert hint is not None
+    assert hint.startswith("test_beta")          # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "also failing: test_alpha" in hint    # 其餘失敗名字緊接名稱之後、先於長斷言
+    # 紅燈：其餘失敗測試名字必在前 120 字元內（長斷言不得把名字擠出截斷窗口）
+    assert "test_alpha" in hint[:120]
+
+
+def test_extract_test_hint_more_than_four_failures_count_summary(env):
+    """>4 個其他失敗測試時給計數摘要而非逐一列名（2026-10-30，審查指示 §四-4【P1】）：
+    6 個失敗測試（test_t1..test_t6）時，agent 須獲知「+5 other failing tests」概況，
+    但不得因 5 個測試名字逐一列出而膨脹——hint 維持 ≤240 字元且格式不破損。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = "\n".join(
+        f"FAILED test_calc.py::test_t{i} - AssertionError: {i} != {i + 1}" for i in range(1, 7)
+    ) + "\n"
+    hint = _extract_test_hint(out, err="6 failed")
+    assert hint is not None
+    assert hint.startswith("test_t6")                # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "+5 other failing tests" in hint          # len(others)==5 > 4 → 計數摘要分支
+    assert len(hint) <= 240                          # 不膨脹、格式不破損
+
+
+def test_extract_test_hint_unittest_more_than_four_failures_count_summary(env):
+    """unittest 格式（`FAIL: name (module.Class)`）多失敗計數摘要（2026-10-30，審查指示 §四-4【P1】）：
+    6 個失敗測試（test_u1..test_u6）時，agent 須獲知「+5 other failing tests」概況，
+    且 hint 維持 ≤240 字元，避免真實 agent 被大量失敗訊息擠爆窗口。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = "\n".join([f"FAIL: test_u{i} (tests.TestClass)" for i in range(1, 7)]
+                    + ["AssertionError: expected False got True"])
+    hint = _extract_test_hint(out, "FAILED (failures=6)")
+    assert hint is not None
+    assert hint.startswith("test_u6")                # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "+5 other failing tests" in hint          # len(others)==5 > 4 → 計數摘要分支
+    assert "AssertionError" in hint                  # 斷言訊息仍附帶
+    assert len(hint) <= 240                          # 不膨脹窗口
+
+
+def test_extract_test_hint_long_other_names_do_not_starve_assertion_and_pytest_full_output(env):
+    """紅燈（2026-10-30 審查重現）：
+    1) 真實 e002 C 臂 `polyglot_py-pg_poker-pi-C-r1` 有 4 個失敗測試且前 3 個名字極長（共 164 字元），
+       `05ec4323` 將 `(also failing: ...)` 無上限塞在 `AssertionError` 之前，導致前綴吃掉 206 字元，
+       把真正的斷言差異 `["4S 5H 5S 5D 5C"] != ["7S 8S 9S 6S 10S"]` 截斷成 `AssertionError: Lists diffe...`。
+       修復後：前綴在超過預算時自動改用精簡附加（如 `also failing: <first>, +2 more`），既在前 120 字元保留失敗測試提示，
+       又完整保留末尾測試的斷言差異值。
+    2) 真實 `pytest` 輸出同時包含 `=== FAILURES ===`（`___ test_name ___` 與多行 `E   ` 斷言細節）與
+       `=== short test summary info ===`（`FAILED file.py::test_name`，在 `-q` 或多行錯誤下不帶 `- exc`）時，
+       不得因 summary 行覆蓋而遺失 `FAILURES` 區塊的 `AssertionError` 與 `E   ` 細節行，亦不得重複計入 `others`。
+    """
+    from vacant_network.trace.evidence import _extract_test_hint
+
+    poker_out = (
+        "======================================================================\n"
+        "FAIL: test_aces_can_end_a_straight_10_j_q_k_a (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["4S 5H 4C 8D 4H"] != ["10D JH QS KD AC"]\n'
+        "======================================================================\n"
+        "FAIL: test_aces_can_end_a_straight_flush_10_j_q_k_a (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["4S 5H 4C 8D 4H"] != ["10S JS QS KS AS"]\n'
+        "======================================================================\n"
+        "FAIL: test_aces_cannot_be_in_the_middle_of_a_straight_flush_q_k_a_2_3 (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["Q", "K"] != ["A", "2"]\n'
+        "======================================================================\n"
+        "FAIL: test_straight_flush_beats_four_of_a_kind (poker_test.PokerTest)\n"
+        "----------------------------------------------------------------------\n"
+        'AssertionError: Lists differ: ["4S 5H 5S 5D 5C"] != ["7S 8S 9S 6S 10S"]\n'
+        "----------------------------------------------------------------------\n"
+        "Ran 37 tests in 0.002s\n\n"
+        "FAILED (failures=4)\n"
+    )
+    poker_hint = _extract_test_hint(poker_out, err="Command exited with code 1")
+    assert poker_hint is not None
+    assert poker_hint.startswith("test_straight_flush_beats_four_of_a_kind")
+    assert "also failing:" in poker_hint[:120]
+    assert '["4S 5H 5S 5D 5C"] != ["7S 8S 9S 6S 10S"]' in poker_hint
+    assert len(poker_hint) <= 240
+
+    pytest_q = (
+        "=================================== FAILURES ===================================\n"
+        "__________________________________ test_alpha __________________________________\n"
+        "    def test_alpha():\n"
+        ">       assert 1 == 2\n"
+        "E       AssertionError: assert 1 == 2\n"
+        "__________________________________ test_beta ___________________________________\n"
+        "    def test_beta():\n"
+        ">       assert [1, 2] == [1, 3]\n"
+        "E       AssertionError: assert [1, 2] == [1, 3]\n"
+        "E         At index 1 diff: 2 != 3\n"
+        "=========================== short test summary info ============================\n"
+        "FAILED test_sample.py::test_alpha\n"
+        "FAILED test_sample.py::test_beta\n"
+        "2 failed in 0.02s\n"
+    )
+    py_hint = _extract_test_hint(pytest_q, err="Command exited with code 1")
+    assert py_hint is not None
+    assert py_hint.startswith("test_beta (also failing: test_alpha):")
+    assert "AssertionError: assert [1, 2] == [1, 3]" in py_hint
+    assert "At index 1 diff: 2 != 3" in py_hint
+

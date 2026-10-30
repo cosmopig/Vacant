@@ -1324,6 +1324,104 @@ def test_usage_overrun_hint_guides_to_both_caps_registries(env, capsys):
     assert "retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS" in out
 
 
+def test_usage_report_and_growth_point_resolve_symlinked_vacant_home(tmp_path, monkeypatch, capsys):
+    """當 ~/.vacant（或 $VACANT_HOME / $VACANT_WORK）是指向其他分割區或目錄的 symlink 時，
+    usage_report、vacant usage CLI 與 record_growth_point 必須先 resolve 根目錄，
+    不可讓 _tree_size 將根目錄當成 symlink 回傳 0 B 而導致 totals.state_dir=0、
+    envelope.total_bytes=0 與 growth.jsonl total_bytes=0。"""
+    real_vh = tmp_path / "real_vacant"
+    real_vh.mkdir(parents=True)
+    sym_vh = tmp_path / "sym_vacant"
+    sym_vh.symlink_to(real_vh)
+
+    real_wk = tmp_path / "real_work"
+    real_wk.mkdir(parents=True)
+    sym_wk = tmp_path / "sym_work"
+    sym_wk.symlink_to(real_wk)
+
+    monkeypatch.setenv("VACANT_HOME", str(sym_vh))
+    monkeypatch.setenv("VACANT_WORK", str(sym_wk))
+
+    odir = sym_vh / "trace" / "objects" / "ab"
+    odir.mkdir(parents=True)
+    (odir / ("b" * 64)).write_bytes(b"x" * 4096)
+    (sym_wk / "run1").mkdir(parents=True)
+    (sym_wk / "run1" / "artifact.bin").write_bytes(b"y" * 2048)
+
+    rep = retention.usage_report(with_estimate=False)
+    assert rep["state_dir"] == str(real_vh.resolve())
+    assert rep["work_dir"] == str(real_wk.resolve())
+    assert rep["totals"]["state_dir"] >= 4096
+    assert rep["totals"]["work_dir"] >= 2048
+    assert rep["envelope"]["total_bytes"] == rep["totals"]["state_dir"] + rep["totals"]["work_dir"]
+
+    rc = cli.main(["usage", "--no-estimate", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["state_dir"] == str(real_vh.resolve())
+    assert out["totals"]["state_dir"] >= 4096
+    assert out["envelope"]["total_bytes"] >= 6144
+
+    gp = retention.record_growth_point()
+    assert gp["ok"] is True
+    assert gp["record"]["home"] == str(real_vh.resolve())
+    assert gp["record"]["total_bytes"] >= 4096
+
+
+def test_auto_gc_resolves_symlinked_vacant_home(tmp_path, monkeypatch):
+    """ASSIGNMENT 🔴最優先驗收(a)＋審查指示 §四-1：$VACANT_HOME 為 symlink 時，
+    auto_gc 必須先解析到實體狀態目錄；gc_report.json／gc.lock／growth.jsonl
+    都要寫進實體目錄，且成長紀錄 `home` 記實體解析路徑、`total_bytes > 0`
+    （symlink 不得被當成根導致 _tree_size 回 0 B、穩態封頂量具失去錨點）。"""
+    real_vh = tmp_path / "real_vacant"
+    real_vh.mkdir(parents=True)
+    sym_vh = tmp_path / "sym_vacant"
+    sym_vh.symlink_to(real_vh)
+    monkeypatch.setenv("VACANT_HOME", str(sym_vh))
+
+    res = retention.auto_gc(force=True)
+    assert res["status"] == "ok"
+    assert res["growth"]["record"]["home"] == str(real_vh.resolve())
+    assert res["growth"]["record"]["total_bytes"] > 0
+    assert (real_vh / retention.AUTO_GC_REPORT_NAME).exists()
+    assert (real_vh / "gc.lock").exists()
+    assert (real_vh / "growth.jsonl").exists()
+
+
+def test_verify_trace_chains_resolves_symlinked_vacant_home(tmp_path, monkeypatch):
+    """ASSIGNMENT 🔴最優先驗收(a)(c)＋審查指示 §四-1：$VACANT_HOME 為 symlink 時，
+    verify_trace_chains 必須透過 _resolve_state_dir 解析到實體狀態目錄；
+    trace 專案目錄不存在時回 (0, True, [])——symlink 根不得被當成找不到
+    專案目錄或誤判失敗。"""
+    real_vh = tmp_path / "real_vacant"
+    real_vh.mkdir(parents=True)
+    sym_vh = tmp_path / "sym_vacant"
+    sym_vh.symlink_to(real_vh)
+    monkeypatch.setenv("VACANT_HOME", str(sym_vh))
+
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 0
+    assert ok is True
+    assert errs == []
 
 
 
+
+
+
+
+
+def test_verify_trace_chains_detects_corrupted_chain(tmp_path, monkeypatch):
+    """ASSIGNMENT 🔴最優先驗收(c)負對照：chain.ndjson 遭損毀時，verify_trace_chains
+    必須誠實回 (count=1, ok=False, errors 點名該專案)——不漏放、不崩潰。"""
+    real_vh = tmp_path / "real_vacant"
+    proj = real_vh / "trace" / "projects" / "corrupted_proj"
+    proj.mkdir(parents=True)
+    (proj / "chain.ndjson").write_text("not a json chain\n", encoding="utf-8")
+    monkeypatch.setenv("VACANT_HOME", str(real_vh))
+
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 1
+    assert ok is False
+    assert len(errs) == 1
+    assert "corrupted_proj" in errs[0]
