@@ -1166,3 +1166,26 @@ def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     rc = e002_pair_breakdown.main(["missing_exp", "--base", str(tmp_path)])
     assert rc == 2
     assert "找不到 run 目錄" in capsys.readouterr().err
+
+
+def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_2008-1（ASSIGNMENT「研發工具需納入回歸測試」＋ GPT 審查 P1-1 同時量成本）：
+    # OpenCode 格子唯讀審計量具 opencode_cell_audit（成本 ＋ C 臂 Vacant 證據）納入常規回歸：
+    # (a) selftest() 須通過（合成 A/C/tamper/incomplete mock 格，含破壞對照）；
+    # (b) CLI --selftest 回 0 且 stdout 含 "selftest PASS"；
+    # (c) --runs-dir 指空目錄回 0，stdout 為 JSON 且 n_cells=0、bad=[]、cells=[]。
+    # 只測既有工具，核心零改動。
+    from ops.vlab.tools import opencode_cell_audit
+
+    assert opencode_cell_audit.selftest() is True
+
+    capsys.readouterr()  # 排空殘留，保持 --selftest stdout 乾淨
+    rc = opencode_cell_audit.main(["--selftest"])
+    assert rc == 0
+    assert "selftest PASS" in capsys.readouterr().out
+
+    rc = opencode_cell_audit.main(["--runs-dir", str(tmp_path), "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["tool"] == "opencode_cell_audit"
+    assert out["n_cells"] == 0 and out["bad"] == [] and out["cells"] == []
