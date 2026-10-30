@@ -1680,3 +1680,28 @@ def test_usage_report_missing_dir_safe(tmp_path: Path) -> None:
     assert rep["projects"] == []
     assert all(v == 0 for v in rep["areas"].values())
     assert rep["areas"]
+
+
+def test_envelope_accounting_missing_dir_safe(tmp_path: Path) -> None:
+    """envelope_accounting：狀態目錄（$VACANT_HOME）不存在時，安全回傳標準會計字典——
+    帳目完整、零越限、封頂加總在封頂內——不拋異常（ASSIGNMENT 🔴最優先 驗收 (c)）。"""
+    acct = retention.envelope_accounting(tmp_path / "nonexistent")
+    assert acct["components"] == []
+    assert acct["unaccounted"] == []
+    assert acct["accounting_complete"] is True
+    assert acct["within_caps"] is True
+    assert acct["fixed_within_caps"] is True
+    assert acct["byte_caps_sum_within_envelope"] is True
+
+
+def test_auto_gc_dry_run_missing_dir_safe(tmp_path: Path) -> None:
+    """auto_gc：狀態目錄不存在＋dry_run=True 時，經 gc_all(dry_run=True) 安全回傳——
+    status="dry_run"、ok=True、bytes_freed=0、files_removed=0——不建目錄、不拋異常
+    （ASSIGNMENT 🔴最優先 驗收 (c)；retention.py 核心零改動）。"""
+    p = tmp_path / "nonexistent_vh"
+    rep = retention.auto_gc(root=p, dry_run=True)
+    assert rep["status"] == "dry_run"
+    assert rep["ok"] is True
+    assert rep["bytes_freed"] == 0
+    assert rep["files_removed"] == 0
+    assert not p.exists()

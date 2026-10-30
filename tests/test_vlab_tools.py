@@ -954,3 +954,30 @@ def test_holm_e002_cli_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "required: exp" in err
+
+
+def test_noncode_cell_audit_cli_selftest_flag(capsys) -> None:
+    # --selftest 旗標：離線自測通過 → main 回傳 0、stdout 含 "selftest: PASS"
+    # （noncode_cell_audit.py main L466-476：a.selftest → selftest()；
+    #  selftest() 末 print("selftest:", "PASS" if ok else "FAIL")、return 0 if ok else 2）。
+    assert noncode_cell_audit.main(["--selftest"]) == 0
+    assert "selftest: PASS" in capsys.readouterr().out
+
+
+def test_vacant_growth_log_cli_human_output(tmp_path: Path, capsys) -> None:
+    # P20261030_1456-4（ASSIGNMENT 🔴最優先 驗收 a：量它從零開始一天長多少）：
+    # 非 --json 模式下 CLI 入口 main(["--home", ..., "--out", ...]) 須回 0、
+    # 終端印出人類可讀記錄摘要——含 "recorded"、輸出路徑檔名、"B ("、"MiB) at "
+    # （vacant_growth_log.py main L67-104：寫檔後 print(f"recorded {a.out}: {n:,} B "
+    #  f"({x} MiB) at {ts}")、return 0）。
+    rc = vacant_growth_log.main([
+        "--home", str(tmp_path / "home"),
+        "--out", str(tmp_path / "growth.jsonl"),
+    ])
+    assert rc == 0
+
+    out = capsys.readouterr().out
+    assert "recorded" in out
+    assert "growth.jsonl" in out
+    assert "B (" in out
+    assert "MiB) at " in out
