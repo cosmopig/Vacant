@@ -5,6 +5,8 @@ import tarfile
 import io
 from pathlib import Path
 
+import pytest
+
 from ops.vlab.tools import (
     dabstep_subset_report,
     disk_report,
@@ -849,3 +851,17 @@ def test_growth_report_cli_selftest_flag(capsys) -> None:
     rc = growth_report.main(["--selftest", "--json"])
     assert rc == 0
     assert capsys.readouterr().out.strip() == ""
+
+
+def test_envelope_compliance_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # P20261030_1317-3：envelope_compliance CLI --selftest 旗標與缺參數防禦契約
+    # （ASSIGNMENT 🔴最優先 驗收(b)）：--selftest 執行自檢並回傳 0、stdout 含
+    # "SELFTEST OK"；未給 <exp> 且無 --selftest 時 ap.error 安全報錯 SystemExit(2)、
+    # stderr 含 "需要 <exp>"。見 ops/vlab/tools/envelope_compliance.py main L250-254。
+    rc = envelope_compliance.main(["--selftest"])
+    assert rc == 0
+    assert "SELFTEST OK" in capsys.readouterr().out
+    with pytest.raises(SystemExit) as excinfo:
+        envelope_compliance.main([])
+    assert excinfo.value.code == 2
+    assert "需要 <exp>" in capsys.readouterr().err
