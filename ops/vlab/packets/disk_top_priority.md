@@ -138,6 +138,10 @@
   **34 點跨 48.65h**（2026-10-28T20:20 → 2026-10-30T20:59）、最新 **57,752,779 B（55.1 MiB）≤ 256 MiB 穩態封頂（21.5%）**、
   24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace 39,481,841 B（37.7 MiB ≤ 64 MiB）、
   34 點全 gc ok＋target_reached（兩份 JSONL 併排去重後逐點核對）、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
+- **10/30（22:02 續記，工單 P20261030_2230-4）**：跨日序列續點——`growth_report.py --json` 實測：
+  **35 點跨 49.7h**（2026-10-28T20:20 → 2026-10-30T22:02）、最新 **58,474,522 B（55.8 MiB）≤ 256 MiB 穩態封頂（21.8%）**、
+  24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **40,028,740 B（38.2 MiB ≤ 64 MiB）**、trace 404 blobs、
+  `gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0（續記，不覆蓋 20:59 之 48h 里程碑紀錄）。
 
 ## 2. 四條驗收條件對現狀
 
