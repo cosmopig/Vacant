@@ -62,6 +62,14 @@
   `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格，
   18/18 階段值 35,563/161,209/290,622 的 34/34 最終值）、envelope_compliance verdict=PASS、
   rescore mismatch 0、四量具 rc=0；M 臂 5/35 進行中、S 臂未開始（H 臂 10/29 已完成）。
+- **10/30（round 196）**：「一天長多少」序列續記：`vacant_growth_log.py` 唯讀快照 03:06 **52.4 MiB**
+  （trace 34.5 MiB、objects 725、gc ok＋target_reached）；併排後序列 10/28 20:20 → 10/30 03:06
+  （**30.78h，12 點**），`growth_report.py` 真機 verdict **PASS**：24h 視窗最大增長 **16.3 MiB**、
+  峰值 82.3 MiB（清場前舊日累積）、淨增長 −30.0 MiB（鋸齒、GC 削回）。同筆澄清（e002.md §98＋
+  各臂 cell.json 實證）：e002 **A/H/M/S 臂皆不裝 Vacant、不碰 `~/.vacant`**（`vacant_sha=null`、
+  無 `vacant_home.tgz`），只有 C 臂 vacant_sha=1ada835b → **e002 磁碟足跡＝C 臂而已**（round 192
+  已 34/34 回寫、verdict=PASS）；§5-4「M/S 臂 vacant_home_bytes 回寫」一項因此**依設計 N/A**，
+  剩餘的是 e002 分析回寫（rescore＋四量具；M 9/35、S 未開始），屬分析 backlog、非磁碟阻塞項。
 
 ## 2. 四條驗收條件對現狀
 
