@@ -784,3 +784,37 @@ def test_direct_python_run_of_unittest_file_without_main_is_caught_as_failed_ste
     )
     assert [(f["kind"], f.get("sub")) for f in ev3["findings"]] == [("test_claim", "failed")]
 
+
+
+def test_extract_test_hint_multiple_failures_priority(env):
+    """紅燈（2026-10-30 e002 C 臂，審查指示 §四-4【P1】）：多個失敗測試且末尾測試斷言過長時，
+    其餘失敗測試的名字不得被長斷言訊息擠出截斷窗口——agent 的前 120 字元必須看到它們，
+    否則漏修其餘失敗目標。改之前：`(also failing: ...)` 附在長斷言之後，被 240 字元截斷掉。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    long_list = ", ".join(str(i) for i in range(40))
+    out = (
+        "======================================================================\n"
+        "FAIL: test_alpha (mod.T.test_alpha)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 5, in test_alpha\n'
+        "    self.assertEqual(a, b)\n"
+        "AssertionError: 1 != 2\n"
+        "----------------------------------------------------------------------\n"
+        "FAIL: test_beta (mod.T.test_beta)\n"
+        "----------------------------------------------------------------------\n"
+        "Traceback (most recent call last):\n"
+        '  File "/app/mod_test.py", line 9, in test_beta\n'
+        "    self.assertEqual(a, b)\n"
+        f"AssertionError: [{long_list}] != [{long_list}]\n"
+        "----------------------------------------------------------------------\n"
+        "Ran 2 tests in 0.001s\n"
+        "\n"
+        "FAILED (failures=2)\n"
+    )
+    hint = _extract_test_hint(out, err="FAILED (failures=2)")
+    assert hint is not None
+    assert hint.startswith("test_beta")          # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "AssertionError" in hint
+    # 紅燈：其餘失敗測試名字必在前 120 字元內（改之前被長斷言擠出截斷窗口）
+    assert "test_alpha" in hint[:120]

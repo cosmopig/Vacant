@@ -560,18 +560,26 @@ def _extract_test_hint(outp: str, err: str = "") -> str | None:
     if not blocks:
         return None
     last = blocks[-1]
-    if last["name"] and last["exc"]:
-        raw = last["exc"] if last["name"] in last["exc"] else f"{last['name']}: {last['exc']}"
-    else:
-        raw = last["exc"] or last["name"]
-    if not raw or raw == err_clean:
-        return None
-    # 多個測試失敗：附註其餘失敗測試名字（>4 個只給計數），讓 agent 知道「不止一個」
+    # 多個測試失敗：其餘失敗測試名字緊接最後一個名字之後、先於斷言訊息（>4 個只給計數），
+    # 讓 agent 知道「不止一個」，且長斷言訊息不會把名字擠出截斷窗口（2026-10-30 e002 C 臂）
     others = [b["name"] for b in blocks if b["name"] and b["name"] != last["name"]]
     if others:
         suffix = ("also failing: " + ", ".join(others)) if len(others) <= 4 \
             else f"+{len(others)} other failing tests"
-        raw = f"{raw}; {suffix}"
+        paren = f" ({suffix})"
+    else:
+        paren = ""
+    if last["name"] and last["exc"]:
+        if not paren and last["name"] in last["exc"]:
+            raw = last["exc"]
+        else:
+            raw = f"{last['name']}{paren}: {last['exc']}"
+    else:
+        raw = last["exc"] or last["name"]
+        if others and raw:
+            raw = f"{raw}; {suffix}"
+    if not raw or raw == err_clean:
+        return None
     # 斷言的後續細節行（set/list diff 等）附在摘要後
     if last["detail"]:
         detail_str = "; ".join(last["detail"][:3])
