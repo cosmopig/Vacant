@@ -58,7 +58,7 @@
   只報告、不刪除（fail-open；`trace/projects/chain.ndjson` 是記責記錄，GC 向來不碰）。
   紅燈測試先行（3 新測試）；`tests/test_retention.py` **42 passed**（39→42）、四驗收檔 **94 passed（RC=0）**；
   真機 `vacant usage` 實測 **52.22 MB / 256 MiB（20.4%）✓、overrun={}、all_caps_sum 228.25 MiB ≤ 256 MiB**。
-  同筆：e002 **C 臂最終回寫**——34 scored cells 全 PASS、1 infra（NA 不進分母）、
+  同筆：e002 **C 臂最終回寫**——envelope_compliance 34 格全 PASS（未超 256 MiB 穩態封頂）、題目 benchmark 評分 22/34 PASS（64.71%）、1 infra（NA 不進分母）、
   `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格，
   18/18 階段值 35,563/161,209/290,622 的 34/34 最終值）、envelope_compliance verdict=PASS、
   rescore mismatch 0、四量具 rc=0；M 臂 5/35 進行中、S 臂未開始（H 臂 10/29 已完成）。
@@ -141,7 +141,7 @@ trace 整體 96 MiB）；`envelope_accounting.overrun` 通用點名越限組件�
 4. ~~`vacant_growth.jsonl` 隔天再記一筆，補齊「從零起算」的跨日序列~~（round 187 完成：
    序列 24.55h/6 點、`growth_report.py` 真機 verdict=PASS，見 §1 round 187 筆）。
    ~~**仍待**：e002 C 臂最終 `vacant_home_bytes` 分佈回寫 §2-4(b)~~（**round 192 完成**：
-   C 臂 34/34 格全 PASS、min 29,089／med 105,134／max 316,854 B、1 infra（NA）、
+   C 臂：envelope_compliance 34/34 格 PASS（未超 256 MiB 穩態封頂）、題目 benchmark 評分 22/34 PASS（64.71%）、min 29,089／med 105,134／max 316,854 B、1 infra（NA）、
    rescore mismatch 0、envelope_compliance verdict=PASS，見 §1 round 192 筆）。
    **仍待**：e002 M 臂（5/35 進行中）＋ S 臂（未開始）完成時重跑 `report.py --rescore`＋
    `e002_wiring_gauge.py`＋`envelope_compliance.py`＋`p02_carm_audit.py` 四量具，
