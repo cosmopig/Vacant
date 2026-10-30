@@ -130,6 +130,10 @@
   gc 後（取自 `~/.vacant/growth.jsonl` 18:50:12 點、與 growth_report 同源）：總計 56,771,218 B（54.1 MiB）、trace 38,747,060 B（36.9 MiB）；`vacant gc --verify --json` **verify_ok=True、8/8 專案、0 錯誤、rc=0**；
   `growth_report.py` verdict **PASS** rc=0（32 點／46.5h、24h 視窗最大增長 17,054,166 B、最新 56,771,218 B ≤ 256 MiB 封頂 22.2%、gc ok＋target_reached）；終態 56,755,707 B／379 物件、within_caps=true。
   誠實註記：大頭回收由 18:50:10 auto_gc 完成（早於本輪顯式 gc），故本輪顯式 gc 差異僅約 57.5 KiB；兩次 gc 數字各按實測記錄、不合併不捏造。
+- **10/30（20:4x 續記）**：48h 跨日序列續點（工單 P20261030_2023-4）——`growth_report.py --json` 實測數字：
+  33 點跨 **47.58h**（2026-10-28T20:20 → 2026-10-30T19:55）、最新 **56,988,186 B（56.9 MB／54.3 MiB）≤ 256 MiB 封頂 21.2%**、
+  24h 視窗最大增長 17,054,166 B（17.1 MB／16.3 MiB）、最新 trace 38,838,354 B（38.8 MB／37.0 MiB ≤ 64 MiB）、
+  33 點全 gc ok＋target_reached（兩份 JSONL 逐點核對）、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
 
 ## 2. 四條驗收條件對現狀
 
