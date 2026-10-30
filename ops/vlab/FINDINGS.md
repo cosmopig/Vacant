@@ -341,3 +341,16 @@ within_caps=True、all_caps_sum 228.25 MiB ≤ 256 MiB**。
   1.94 MB／quarantine 0 B）的 ≥3 倍，長期超限時應調大常數並留記錄，不該靠量具假裝沒事。
 - e002 全臂最終**已完成**（10/30 17:0x）：五臂各 34/34、四量具全 rc=0、Holm 4 組校正後
   p_holm 皆＝1.0 全數未達統計顯著（誠實記錄、不作過度宣稱）；全臂回寫完成（disk_top_priority §5-4）。
+
+## 2026-10-30 · 主軸 1 · e003_opencode_smoke 4 格 GO（OpenCode 真實 agent 串接，第 1 組客觀證據）
+
+**設定**：gemma-4-12b-it-qat、opencode 真實 agent（`opencode run`）、2 題（pg_pig_latin、pg_affine_cipher）×1 rep、
+A（無 Vacant）／C（`vacant install`，vacant_sha=1ada835b）、900 s/格；冒煙 GO/NO-GO，非成效量測。
+**來源**：`ops/vlab/runs_e003_opencode_smoke/AUDIT.json`（opencode_cell_audit：4 格 complete、bad=[]）＋
+同目錄 `REPORT.{json,md}`（infra=[]、A 1/2、C 1/2）＋`/srv/vlab/done/04_e003_opencode_smoke.json`（failed_cells=[]）。
+**能說**：四條預註冊判準全成立、判定 GO——4/4 格正常結束無 infra（affine A 格 rc=124 逾時但有 score、非 infra）；
+C 臂 2 格 install_rc=0、vacant_home.tgz 含 events.jsonl、trace 鏈 16+75 筆 seq 連續且 prev_hash 重算相符、
+review 25+143 全 allow；A 臂 2 格零 Vacant 資料。成本（描述）：合計 105 呼叫／2,206,668 tokens（C 臂 85／1,950,990）。
+**不能說**：不能說「Vacant 讓 OpenCode 結果變好／變差」——2 題×1 rep，pass 率（A 1/2 vs C 1/2）與 A/C 差異被本包明言排除在判準外；
+trace 僅鏈結構重算（H-3/H-4 口徑），未驗簽章與完整性；不外推到其他模型／題庫。
+**下一步**：GO ⇒ OpenCode 通用多輪評測盤（對齊 e002 五臂結構）另開獨立預註冊封包（本包 §3.5）。

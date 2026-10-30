@@ -1,0 +1,43 @@
+{
+  "exp": "e003_opencode_smoke",
+  "cells_scored": 4,
+  "infra": [],
+  "per_arm": {
+    "A": {
+      "n": 2,
+      "pass": 1,
+      "rate": 0.5,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 1,
+      "mean_wall_s": 480.6,
+      "vacant_sha": []
+    },
+    "C": {
+      "n": 2,
+      "pass": 1,
+      "rate": 0.5,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 0,
+      "mean_wall_s": 358.8,
+      "vacant_sha": [
+        "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+      ]
+    }
+  },
+  "paired": {
+    "A_vs_C": {
+      "pairs": 2,
+      "A_only": 1,
+      "C_only": 1,
+      "mcnemar_p_two_sided": 1.0,
+      "distinct_tasks": 2,
+      "tasks_net_positive": 1,
+      "tasks_net_negative": 1
+    }
+  },
+  "rescore_checked": true,
+  "rescore_mismatch": [],
+  "note": "只由原始格子重算；pass=None 的格子是 infra，不進分母。p 值假設配對獨立——同題重複時看 distinct_tasks 與 tasks_net_*。"
+}

@@ -1,0 +1,126 @@
+{
+ "tool": "opencode_cell_audit",
+ "n_cells": 4,
+ "bad": [],
+ "cells": [
+  {
+   "cell": "polyglot_py-pg_affine_cipher-opencode-A-r1",
+   "state": "complete",
+   "ok": true,
+   "unknown": [],
+   "arm": "A",
+   "agent_rc": 124,
+   "wall_s": 900.0,
+   "events": {
+    "model_calls": 12,
+    "input_tokens": 169702,
+    "output_tokens": 12591,
+    "total_tokens": 182293,
+    "tool_calls": 12,
+    "tools": {
+     "glob": 1,
+     "bash": 4,
+     "read": 3,
+     "write": 4
+    }
+   }
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-opencode-C-r1",
+   "state": "complete",
+   "ok": true,
+   "unknown": [],
+   "arm": "C",
+   "agent_rc": 0,
+   "wall_s": 140.9,
+   "events": {
+    "model_calls": 13,
+    "input_tokens": 139083,
+    "output_tokens": 3627,
+    "total_tokens": 142710,
+    "tool_calls": 12,
+    "tools": {
+     "glob": 1,
+     "bash": 4,
+     "read": 3,
+     "write": 3,
+     "edit": 1
+    }
+   },
+   "vacant": {
+    "review": {
+     "n": 25,
+     "actions": {
+      "allow": 25
+     },
+     "denied": 0
+    },
+    "trace": {
+     "chain": ".vacant/trace/projects/f53b52ad6d21cceb/chain.ndjson",
+     "n_entries": 16,
+     "seq_ok": true,
+     "prev_link": "ok"
+    }
+   }
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-opencode-A-r1",
+   "state": "complete",
+   "ok": true,
+   "unknown": [],
+   "arm": "A",
+   "agent_rc": 0,
+   "wall_s": 61.1,
+   "events": {
+    "model_calls": 8,
+    "input_tokens": 69901,
+    "output_tokens": 3484,
+    "total_tokens": 73385,
+    "tool_calls": 7,
+    "tools": {
+     "glob": 1,
+     "bash": 2,
+     "read": 2,
+     "write": 2
+    }
+   }
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-opencode-C-r1",
+   "state": "complete",
+   "ok": true,
+   "unknown": [],
+   "arm": "C",
+   "agent_rc": 0,
+   "wall_s": 576.6,
+   "events": {
+    "model_calls": 72,
+    "input_tokens": 1779788,
+    "output_tokens": 28492,
+    "total_tokens": 1808280,
+    "tool_calls": 71,
+    "tools": {
+     "glob": 1,
+     "bash": 17,
+     "read": 3,
+     "write": 50
+    }
+   },
+   "vacant": {
+    "review": {
+     "n": 143,
+     "actions": {
+      "allow": 143
+     },
+     "denied": 0
+    },
+    "trace": {
+     "chain": ".vacant/trace/projects/f53b52ad6d21cceb/chain.ndjson",
+     "n_entries": 75,
+     "seq_ok": true,
+     "prev_link": "ok"
+    }
+   }
+  }
+ ]
+}
