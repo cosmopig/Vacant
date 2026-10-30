@@ -506,4 +506,27 @@ def test_envelope_compliance_cli_normal_pass_and_out_file(tmp_path: Path, capsys
     assert '"verdict": "PASS"' in (tmp_path / "out.json").read_text(encoding="utf-8")
 
 
+def test_noncode_cell_audit_cli_table_and_out_file(tmp_path: Path, capsys) -> None:
+    """noncode_cell_audit CLI：有格子資料時 --table 印人讀表格至 stdout＋JSON 另存 --out 檔案、main 回 0。
+
+    與既有缺格子 exit 1（test_noncode_cell_audit_cli_missing_cells_exit_code）形成雙向契約。
+    """
+    cell = tmp_path / "runs" / "exp_nc" / "cell1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"suite": "dabstep", "task": "t1", "arm": "C"}), encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    rc = noncode_cell_audit.main([
+        "exp_nc", "--base", str(tmp_path / "runs"),
+        "--table", "--out", str(tmp_path / "out.json"),
+    ])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    data = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
+    assert data["cells"][0]["cell"] == "cell1"
+    out = capsys.readouterr().out
+    assert "cell" in out
+    assert "zero_ran" in out
+
+
 
