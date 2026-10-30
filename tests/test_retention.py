@@ -1636,3 +1636,13 @@ def test_compact_logs_missing_dir_safe(tmp_path: Path) -> None:
     """compact_logs：狀態目錄不存在（無 intake/hooks 與 trace/projects）時安全回傳零釋放字典、不拋異常。"""
     rep = retention.compact_logs(tmp_path / "nonexistent")
     assert rep == {"bytes_freed": 0, "logs_compacted": 0}
+
+
+def test_compact_session_hooks_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_session_hooks：possess/hooks 目錄不存在時安全回傳零釋放統計字典、不拋異常。"""
+    rep = retention.compact_session_hooks(tmp_path / "nonexistent")
+    assert rep["bytes_before"] == 0
+    assert rep["files_before"] == 0
+    assert rep["bytes_freed"] == 0
+    assert rep["files_removed"] == 0
+    assert rep["files_truncated"] == 0
