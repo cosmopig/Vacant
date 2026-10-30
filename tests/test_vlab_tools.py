@@ -717,3 +717,14 @@ def test_growth_report_cli_out_file(tmp_path: Path) -> None:
     data = json.loads(out.read_text(encoding="utf-8"))
     assert data["verdict"] == "PASS"
     assert data["n_points"] == 3
+
+
+def test_holm_e002_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
+    # P20261030_1146-2（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具常規回歸）：CLI 空資料契約。
+    # 實驗目錄無 REPORT.json 且無原始格子可重算時，main 須把「無事可做」警示寫到
+    # stderr 並回傳 exit code 1（fail-open 的對偶：無事可做不是 PASS，也不是崩潰）。
+    empty_base = tmp_path / "runs"
+    (empty_base / "exp_empty").mkdir(parents=True)
+    rc = holm_e002.main(["exp_empty", "--base", str(empty_base)])
+    assert rc == 1
+    assert "無事可做" in capsys.readouterr().err
