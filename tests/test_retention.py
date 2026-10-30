@@ -1515,3 +1515,22 @@ def test_cli_vacant_gc_verify_corrupted_chain_exit_code(tmp_path, capsys):
     assert out["verify_ok"] is False
     assert out["verified_projects"] == 1
     assert any("broken_proj" in e for e in out["verify_errors"])
+
+
+def test_verify_trace_chains_missing_or_empty_projects_dir(tmp_path):
+    """ASSIGNMENT 驗收 (c)：全新安裝／空狀態目錄——verify_trace_chains 安全回傳 (0, True, [])。
+
+    1) trace/projects 不存在：不崩潰、不拋 FileNotFoundError，回傳 (0, True, [])。
+    2) trace/projects 存在但內部無專案：同樣回傳 (0, True, [])。
+    """
+    empty_vh = tmp_path / "empty_vh"
+    empty_vh.mkdir()  # 完全空白目錄（未建立 trace 目錄）
+    count, ok, errs = retention.verify_trace_chains(root=empty_vh)
+    assert count == 0
+    assert ok is True
+    assert errs == []
+    (empty_vh / "trace" / "projects").mkdir(parents=True)  # 存在但內部無專案
+    count, ok, errs = retention.verify_trace_chains(root=empty_vh)
+    assert count == 0
+    assert ok is True
+    assert errs == []
