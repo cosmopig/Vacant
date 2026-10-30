@@ -1800,3 +1800,19 @@ def test_sweep_to_target_missing_dir_safe(tmp_path: Path) -> None:
     assert res["hard_keep_bytes"] == 0
     assert res["aborted"] is False
     assert not missing_obj.exists()
+
+
+def test_retention_human_bytes_formatting() -> None:
+    # <1024 -> integer B
+    assert retention._human_bytes(0) == "0 B"
+    assert retention._human_bytes(512) == "512 B"
+    assert retention._human_bytes(1023) == "1023 B"
+    # <1MB -> 1 decimal KB
+    assert retention._human_bytes(1024) == "1.0 KB"
+    assert retention._human_bytes(1536) == "1.5 KB"
+    assert retention._human_bytes(1024 * 1024 - 1).endswith("KB")
+    # <1GB -> 2 decimals MB
+    assert retention._human_bytes(1024 * 1024) == "1.00 MB"
+    assert retention._human_bytes(int(2.5 * 1024 * 1024)) == "2.50 MB"
+    # else -> 2 decimals GB
+    assert retention._human_bytes(1024 * 1024 * 1024) == "1.00 GB"
