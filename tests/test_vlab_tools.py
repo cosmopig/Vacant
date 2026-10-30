@@ -12,6 +12,7 @@ from ops.vlab.tools import (
     envelope_compliance,
     growth_report,
     holm_e002,
+    noncode_cell_audit,
     p02_carm_audit,
     vacant_growth_log,
 )
@@ -302,6 +303,12 @@ def test_dabstep_subset_report_selftest() -> None:
     # 主軸 4（dabstep 資料分析題）：非程式題子集統計量具的離線自測（含預註冊 §3 p 值自校準）
     # 納入常規回歸，守住 McNemar 計算邏輯與 pair 排除規則（pending/infra 不進 p 值）。
     assert dabstep_subset_report.main(["--selftest"]) == 0
+
+
+def test_noncode_cell_audit_selftest() -> None:
+    # 主軸 4（通用任務 noncode 資料分析題驗證）：noncode 審計量具的離線自測
+    # 納入常規回歸，守住 zero/delivery 證據抽取與表格解析不變量。
+    assert noncode_cell_audit.main(["--selftest"]) == 0
 
 
 
