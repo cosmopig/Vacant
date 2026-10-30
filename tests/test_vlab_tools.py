@@ -1029,3 +1029,14 @@ def test_e002_wiring_gauge_cli_missing_exp_dir_error(tmp_path: Path) -> None:
         e002_wiring_gauge.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
     assert "找不到執行目錄" in str(excinfo.value)
     assert "nonexistent_exp" in str(excinfo.value)
+
+
+def test_holm_e002_cli_missing_exp_dir_error(tmp_path: Path, capsys) -> None:
+    # P20261030_1628-4（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具 CLI 防禦契約）：
+    # 傳入不存在之實驗目錄時，main 須向 stderr 輸出帶「無事可做：」與實驗目錄名
+    # 之明確提示，並以 exit code 1 安全退出——不產生未攔截之崩潰或假 0 輸出。
+    rc = holm_e002.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "無事可做" in err
+    assert "nonexistent_exp" in err
