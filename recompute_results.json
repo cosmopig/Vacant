@@ -1,0 +1,38 @@
+[
+  {
+    "cell": "polyglot_py-pg_affine_cipher-opencode-A-r1",
+    "n_model_calls": 0,
+    "successes": 0,
+    "timeouts": 0,
+    "infra_failures": 0,
+    "score_pass": false,
+    "has_events": true
+  },
+  {
+    "cell": "polyglot_py-pg_pig_latin-opencode-C-r1",
+    "n_model_calls": 0,
+    "successes": 0,
+    "timeouts": 0,
+    "infra_failures": 0,
+    "score_pass": false,
+    "has_events": true
+  },
+  {
+    "cell": "polyglot_py-pg_affine_cipher-opencode-C-r1",
+    "n_model_calls": 0,
+    "successes": 0,
+    "timeouts": 0,
+    "infra_failures": 0,
+    "score_pass": true,
+    "has_events": true
+  },
+  {
+    "cell": "polyglot_py-pg_pig_latin-opencode-A-r1",
+    "n_model_calls": 0,
+    "successes": 0,
+    "timeouts": 0,
+    "infra_failures": 0,
+    "score_pass": true,
+    "has_events": true
+  }
+]
