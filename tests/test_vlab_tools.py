@@ -867,6 +867,21 @@ def test_envelope_compliance_cli_selftest_and_missing_exp_error(capsys) -> None:
     assert "需要 <exp>" in capsys.readouterr().err
 
 
+def test_e002_wiring_gauge_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # P20261030_1334-3：e002_wiring_gauge CLI --selftest 旗標與缺參數防禦契約
+    # （ASSIGNMENT 主軸 3 收官四量具之一）：--selftest 執行自檢並回傳 0、stdout
+    # 含 "SELFTEST PASS"；未給 <exp> 且無 --selftest 時 ap.error 安全報錯
+    # SystemExit(2)、stderr 含 "exp 或 --selftest 必給其一"。
+    # 見 ops/vlab/tools/e002_wiring_gauge.py main L182-186。
+    rc = e002_wiring_gauge.main(["--selftest"])
+    assert rc == 0
+    assert "SELFTEST PASS" in capsys.readouterr().out
+    with pytest.raises(SystemExit) as excinfo:
+        e002_wiring_gauge.main([])
+    assert excinfo.value.code == 2
+    assert "exp 或 --selftest 必給其一" in capsys.readouterr().err
+
+
 def test_growth_report_cli_human_output(tmp_path: Path, capsys) -> None:
     # P20261030_1334-2：growth_report CLI 人讀文字輸出與退出碼 0 契約（ASSIGNMENT 🔴最優先 驗收(a)）。
     # 未帶 --json 時 main 印 human(base) 文字報表（ops/vlab/tools/growth_report.py human L219-242），
