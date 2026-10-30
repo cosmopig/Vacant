@@ -1557,3 +1557,26 @@ def test_cli_vacant_gc_verify_corrupted_chain_human_output_and_exit_code(tmp_pat
     assert "驗證失敗 ✗" in out
     assert "bad_proj" in out
     assert "1 個專案簽章鏈 驗證失敗 ✗" in out
+
+
+def test_compact_vrun_dir_attempt_workspaces_and_missing_dir(tmp_path):
+    # 1) 目標目錄不存在：安全回傳 0 位元組 / 0 檔案，不崩潰
+    missing = retention.compact_vrun_dir(tmp_path / "nonexistent")
+    assert missing == {"bytes_freed": 0, "files_removed": 0}
+
+    # 2) 含收據之執行目錄：清理 _attempt_*_ws 重試工作區，保留 receipts_*.ndjson
+    run_dir = tmp_path / "runs"
+    t1 = run_dir / "t1"
+    for name in ("_attempt_1_ws", "_attempt_2_ws"):
+        ws = t1 / name
+        ws.mkdir(parents=True)
+        (ws / "tmp.py").write_text("x = 1\n", encoding="utf-8")
+    receipts = t1 / "receipts_run.ndjson"
+    receipts.write_text("{\"attempt\": 1}\n", encoding="utf-8")
+
+    res = retention.compact_vrun_dir(run_dir, dry_run=False)
+    assert res["files_removed"] >= 2
+    assert not (t1 / "_attempt_1_ws").exists()
+    assert not (t1 / "_attempt_2_ws").exists()
+    assert receipts.is_file()
+    assert receipts.read_text(encoding="utf-8") == "{\"attempt\": 1}\n"
