@@ -775,6 +775,107 @@ def test_envelope_accounting_flags_fixed_component_overrun(env):
     assert envl["within_envelope"] is False
 
 
+def test_envelope_counted_components_have_named_total_caps():
+    """round 192（ASSIGNMENT 🔴 最優先；packet §4 誠實缺口→程式不變量）：
+    count-based 組件（trace/projects 步鏈＋索引、intake、quarantine）此前只有
+    計數制／每檔機制上限、**沒有總位元組上限**——檔案數／專案數／步數隨時間
+    累積時，這些分組可無上限增長，而量具偵測不到。round 192 起每個 count-based
+    組件都必須有命名總位元組上限（`COMPONENT_TOTAL_CAPS`），且**所有**命名位元組
+    上限（機制上限＋總上限）加總仍 ≤ 穩態封頂——否則「加總」超出封頂、封頂變
+    紙面數字。純常數斷言，不碰磁碟。"""
+    caps = retention.COMPONENT_TOTAL_CAPS
+    # 三個 count-based 分組都必須在冊
+    for name in ("trace", "intake", "quarantine"):
+        msg = f"{name}：count-based 分組必須有命名總位元組上限（§4 缺口："
+        "無總上限的計數制量具偵測不到長期增長）"
+        assert name in caps and isinstance(caps[name], int) and caps[name] > 0, msg
+    # trace 的總上限 ≥ objects 機制上限（含 projects 子上限）
+    assert caps["trace"] > retention.DEFAULT_TRACE_BUDGET_BYTES, (
+        "trace 總上限必須大於 objects 機制上限：trace/projects 步鏈不在 objects 預算內")
+    # 所有命名位元組上限加總仍 ≤ 穩態封頂（round 176 不變量的 round 192 擴充）
+    mech = sum(b for _, kind, b, _ in retention.ENVELOPE_COMPONENTS
+               if kind in ("bytes", "fixed") and b)
+    extra = caps["trace"] - retention.DEFAULT_TRACE_BUDGET_BYTES  # projects 子上限
+    s = mech + extra + caps["intake"] + caps["quarantine"]
+    assert s <= retention.STABLE_ENVELOPE_BYTES, (
+        f"所有命名位元組上限加總 {s} B 超出穩態封頂 {retention.STABLE_ENVELOPE_BYTES} B")
+
+
+def test_envelope_accounting_flags_counted_component_overrun(env):
+    """round 192（packet §4「有界但無 byte cap」→ 收口）：count-based 分組
+    （intake／quarantine）實際位元組長過命名總上限 ⇒ 量具必須點名（`overrun`
+    含該組件、`within_caps` False）、封頂量具不得宣稱「在封頂內」；只報告、
+    不刪除（fail-open：這些分組的回收路徑是計數制／每檔截斷，Vacant 不因越限
+    就刪自己語義不認得的檔）。"""
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    (vh / "intake").mkdir(parents=True, exist_ok=True)
+    (vh / "quarantine").mkdir(parents=True, exist_ok=True)
+
+    ok = retention.envelope_accounting(vh)
+    assert ok["within_caps"] is True
+    assert ok["overrun"] == {}
+
+    # intake 越限：8 MiB 總上限＋16 KiB 洩漏
+    cap_in = retention.DEFAULT_INTAKE_TOTAL_CAP_BYTES
+    leak_in = vh / "intake" / "hook_log_leak.txt"
+    leak_in.write_bytes(b"x" * (cap_in + 16 * 1024))
+    bad_in = retention.envelope_accounting(vh)
+    assert bad_in["within_caps"] is False
+    assert "intake" in bad_in["overrun"]
+    assert bad_in["overrun"]["intake"]["bytes"] > cap_in
+    assert bad_in["overrun"]["intake"]["cap_bytes"] == cap_in
+
+    # quarantine 越限：16 MiB 總上限＋16 KiB 洩漏
+    cap_q = retention.DEFAULT_QUARANTINE_TOTAL_CAP_BYTES
+    leak_q = vh / "quarantine" / "task_x" / "decision_leak.bin"
+    leak_q.parent.mkdir(parents=True, exist_ok=True)
+    leak_q.write_bytes(b"y" * (cap_q + 16 * 1024))
+    bad = retention.envelope_accounting(vh)
+    assert bad["within_caps"] is False
+    assert "quarantine" in bad["overrun"]
+    assert bad["overrun"]["quarantine"]["bytes"] > cap_q
+    assert bad["overrun"]["quarantine"]["cap_bytes"] == cap_q
+    # 只報告、不刪除（fail-open）
+    assert leak_in.is_file() and leak_q.is_file()
+
+    # 封頂量具同報：count-based 面越限時不得宣稱「在封頂內」
+    envl = retention.usage_report()["envelope"]
+    assert envl["accounting"]["within_caps"] is False
+    assert envl["within_envelope"] is False
+
+
+def test_envelope_accounting_flags_trace_projects_overrun(env):
+    """round 192（packet §4：trace/projects 步鏈＋索引「有界但無 byte cap」→ 收口）：
+    `trace/` 整體長過命名總上限（objects 64 MiB ＋ projects 32 MiB）⇒ 量具點名
+    （`overrun` 含 `trace`、`within_caps` False）；只報告、不刪除（fail-open：
+    projects 步鏈是記責記錄，GC 向來不碰 chain.ndjson——越限是量具的事，不是
+    回收路徑的事）。"""
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    _seed_trace_project(env, name="proj_over")
+    pd = vh / "trace" / "projects"
+    assert pd.is_dir()
+    target = sorted(pd.iterdir())[0]
+
+    ok = retention.envelope_accounting(vh)
+    assert ok["within_caps"] is True
+
+    cap = retention.COMPONENT_TOTAL_CAPS["trace"]
+    # 只把 trace 頂過 96 MiB 總上限（objects 為空，projects 寫 cap+16K 必超）
+    big = target / "chain_bloat.ndjson"
+    big.write_bytes(b"z" * (cap + 16 * 1024))
+    bad = retention.envelope_accounting(vh)
+    assert bad["within_caps"] is False
+    assert "trace" in bad["overrun"]
+    assert bad["overrun"]["trace"]["bytes"] > cap
+    assert bad["overrun"]["trace"]["cap_bytes"] == cap
+    # 只報告、不刪除（fail-open：步鏈是記責記錄）
+    assert big.is_file()
+
+    envl = retention.usage_report()["envelope"]
+    assert envl["accounting"]["within_caps"] is False
+    assert envl["within_envelope"] is False
+
+
 def test_usage_envelope_fail_open_missing_home(tmp_path, monkeypatch, capsys):
     """state 目錄不存在時封頂量具仍要給得出（total=0、在內），不崩（fail-open）。"""
     monkeypatch.setenv("VACANT_HOME", str(tmp_path / "nope"))

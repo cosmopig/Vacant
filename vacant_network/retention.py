@@ -19,6 +19,14 @@ Vacant 的幾個路徑會在磁碟上留下副本；每一塊都有留存上限�
    `DEFAULT_MAX_LOG_BYTES`（2 MiB，保留最新一半完整行）。
 5. **wire 中介記錄（`$VACANT_HOME/possess/proxyd/wire`）**：`compact_wire` 依
    `DEFAULT_WIRE_BODY_BYTES`（96 MiB）／`DEFAULT_WIRE_INDEX_BYTES`（8 MiB）上限回收最舊。
+6. **count-based 分組的命名總上限（round 192，packet §4 誠實缺口收口）**：
+   `trace/projects`（步鏈＋步索引）、`intake`、`quarantine` 上面只有**機制**上限
+   （50 步回收／2 MiB 每檔／每 task 2 裁決），檔案數／專案數／步數隨時間累積時仍可
+   長期增長；round 192 起各有一條命名**總**位元組上限（`COMPONENT_TOTAL_CAPS`：
+   projects 32 MiB／intake 8 MiB／quarantine 16 MiB），越限由
+   `envelope_accounting.overrun` 點名、`vacant usage` 報告——只報告、不刪除
+   （fail-open；步鏈是記責記錄，向來不在回收路徑內）。所有命名上限加總仍
+   ≤ `STABLE_ENVELOPE_BYTES`（256 MiB）。
 
 ## 為什麼清理不會弄壞簽章鏈（究責紅線）
 
@@ -133,6 +141,24 @@ DEFAULT_GROWTH_LOG_BYTES = 256 * 1024  # 256 KiB ≈ 400+ 筆/日 × 數月
 # 只報告、不刪除（fail-open：Vacant 不刪自己語義不認得的增長）。
 DEFAULT_FIXED_COMPONENT_BYTES = 1024 * 1024  # 1 MiB
 
+# round 192（ASSIGNMENT 🔴 最優先；packet §4「count-based 分組有界但無 byte cap」
+# → 收口）：count-based 分組只有**機制**上限（計數制／每檔截斷），檔案數／專案數／
+# 步數隨時間累積時仍可能長期增長，而量具偵測不到。這裡給每個 count-based 分組一個
+# 命名**總位元組上限**——量具越限時點名（`envelope_accounting.overrun`），只報告、
+# 不刪除（fail-open：這些分組的回收路徑是計數制／每檔截斷，越限是量具的事，不是
+# 回收路徑的事；trace/projects 步鏈更是記責記錄，GC 向來不碰 chain.ndjson）。
+DEFAULT_TRACE_PROJECTS_CAP_BYTES = 32 * 1024 * 1024   # trace/projects：步鏈＋步索引（50 步計數制回收＋總警報）
+DEFAULT_INTAKE_TOTAL_CAP_BYTES = 8 * 1024 * 1024      # intake 總（2 MiB/檔機制＋總警報）
+DEFAULT_QUARANTINE_TOTAL_CAP_BYTES = 16 * 1024 * 1024  # quarantine 總（每 task 2 裁決機制＋總警報）
+
+#: 每個 count-based 分組的**整體** top-level 位元組上限（量具警報線；非回收觸發線）。
+#: trace 的總上限＝objects 機制上限（64 MiB）＋ projects 子上限（32 MiB）。
+COMPONENT_TOTAL_CAPS: dict[str, int] = {
+    "trace": DEFAULT_TRACE_BUDGET_BYTES + DEFAULT_TRACE_PROJECTS_CAP_BYTES,
+    "intake": DEFAULT_INTAKE_TOTAL_CAP_BYTES,
+    "quarantine": DEFAULT_QUARANTINE_TOTAL_CAP_BYTES,
+}
+
 # 2026-10-29 round 176（ASSIGNMENT 🔴 最優先「用量有上限」；packet
 # ops/packets/disk_top_priority.md §4 誠實缺口「總計封頂本身不是一條程式保證，
 # 只是一個可驗算的加總」→ 本輪把它變成程式可驗的不變量）：
@@ -147,15 +173,18 @@ ENVELOPE_COMPONENTS: tuple[tuple[str, str, int | None, str], ...] = (
     # (top-level 名, 上限類型, 位元組值（count 為計數；bytes/fixed 為位元組上限）, 註記)
     ("trace", "bytes", DEFAULT_TRACE_BUDGET_BYTES,
      "objects 位元組硬上限（env VACANT_TRACE_BUDGET_BYTES 可覆寫、0＝關）；"
-     "projects 是步索引（keep 50 步）＋其 blob 歸 objects"),
+     "projects 是步索引（keep 50 步）＋其 blob 歸 objects；"
+     "整體總上限＝objects＋projects 子 32 MiB（COMPONENT_TOTAL_CAPS，round 192 §4 收口）"),
     ("possess", "bytes", DEFAULT_WIRE_BODY_BYTES + DEFAULT_WIRE_INDEX_BYTES,
      "wire body 96 MiB＋index 8 MiB 位元組硬上限（env 可覆寫）；hooks 2 MiB/檔；"
      "bin/state.json 為固定安裝面"),
     ("intake", "per_file", DEFAULT_MAX_LOG_BYTES,
      "hook 日誌 2 MiB/檔（compact_logs）；keys/ledger/trust/store/tasks 為計數制"
-     "（帳本裁決，DEFAULT_KEEP_DECISIONS/每 task）"),
+     "（帳本裁決，DEFAULT_KEEP_DECISIONS/每 task）；整體總上限 8 MiB"
+     "（COMPONENT_TOTAL_CAPS，round 192 §4 收口）"),
     ("quarantine", "count", DEFAULT_KEEP_DECISIONS,
-     "每 task 保留 2 裁決（compact_quarantine）；單 blob ≤ MAX_BLOB 8 MiB"),
+     "每 task 保留 2 裁決（compact_quarantine）；單 blob ≤ MAX_BLOB 8 MiB；"
+     "整體總上限 16 MiB（COMPONENT_TOTAL_CAPS，round 192 §4 收口）"),
     ("adapters", "fixed", DEFAULT_FIXED_COMPONENT_BYTES,
      "安裝面（install.json／hook 註冊），不增長；命名上限 1 MiB（round 190 §4 收口："
      "增長越限時量具點名，不刪除）"),
@@ -179,39 +208,55 @@ def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
       components                  各 top-level 組件現行位元組數
       unaccounted                 註冊表外的 top-level 名（按名排序）
       accounting_complete         unaccounted 為空（帳目完整）
-      fixed_overrun               越過命名上限的 fixed 組件 {name: {bytes, cap_bytes}}
+      overrun                     越過命名總上限的組件 {name: {bytes, cap_bytes}}
+                                  （round 192：fixed ＋ count-based 分組都在內）
+      within_caps                 沒有組件越限（「固定不增長」與計數制長期增長都由量具盯住）
+      fixed_overrun               overrun 中 fixed 組件的子集（round 190 欄位，保持同義）
       fixed_within_caps           沒有 fixed 組件越限（「固定不增長」由量具盯住）
       byte_caps_sum               位元組硬上限分組的加總（bytes ＋ fixed 類型）
       byte_caps_sum_within_envelope  該加總 ≤ STABLE_ENVELOPE_BYTES（封頂不是紙面數字）
+      all_caps_sum                **所有**命名位元組上限加總（機制上限＋總上限，
+                                  round 192：count-based 分組也在內）
+      all_caps_sum_within_envelope  該加總 ≤ STABLE_ENVELOPE_BYTES（封頂不是紙面數字）
     """
     r = pathlib.Path(root)
     known = {name for name, *_ in ENVELOPE_COMPONENTS}
     fixed_caps = {name: cap for name, kind, cap, _ in ENVELOPE_COMPONENTS
                   if kind == "fixed" and cap}
+    # round 192：每個 top-level 組件的**有效總上限**＝機制上限（bytes/fixed）或
+    # COMPONENT_TOTAL_CAPS 的總上限（count-based 分組），兩者取較大者（trace＝96 MiB）。
+    total_caps: dict[str, int] = {name: cap for name, kind, cap, _ in ENVELOPE_COMPONENTS
+                                  if kind in ("bytes", "fixed") and cap}
+    total_caps.update(COMPONENT_TOTAL_CAPS)
     components: list[dict[str, Any]] = []
     unaccounted: list[str] = []
-    fixed_overrun: dict[str, dict[str, int]] = {}
+    overrun: dict[str, dict[str, int]] = {}
     if r.is_dir():
         for entry in sorted(r.iterdir(), key=lambda p: p.name):
             if entry.name in known:
                 comp = {"name": entry.name, "bytes": _tree_size(entry)}
-                cap = fixed_caps.get(entry.name)
+                cap = total_caps.get(entry.name)
                 if cap is not None and comp["bytes"] > cap:
-                    fixed_overrun[entry.name] = {"bytes": comp["bytes"],
-                                                 "cap_bytes": cap}
+                    overrun[entry.name] = {"bytes": comp["bytes"], "cap_bytes": cap}
                 components.append(comp)
             else:
                 unaccounted.append(entry.name)
+    fixed_overrun = {name: v for name, v in overrun.items() if name in fixed_caps}
     byte_caps_sum = sum(b for _, kind, b, _ in ENVELOPE_COMPONENTS
                         if kind in ("bytes", "fixed") and b)
+    all_caps_sum = sum(total_caps.values())
     return {
         "components": components,
         "unaccounted": unaccounted,
         "accounting_complete": not unaccounted,
+        "overrun": overrun,
+        "within_caps": not overrun,
         "fixed_overrun": fixed_overrun,
         "fixed_within_caps": not fixed_overrun,
         "byte_caps_sum": byte_caps_sum,
         "byte_caps_sum_within_envelope": byte_caps_sum <= STABLE_ENVELOPE_BYTES,
+        "all_caps_sum": all_caps_sum,
+        "all_caps_sum_within_envelope": all_caps_sum <= STABLE_ENVELOPE_BYTES,
     }
 
 #: 自動 gc 的守門參數（零設定：沒有這些參數也要安全）。
@@ -1765,14 +1810,15 @@ def usage_report(
             )
             out["envelope"] = {
                 "planned_steady_state_bytes": STABLE_ENVELOPE_BYTES,
-                "note": ("各分組上限的加總（trace 64 MiB ＋ wire body 96 MiB ＋ wire index 8 MiB"
-                         "＋日誌 2 MiB/檔＋計數制分組＋固定安裝面 1 MiB/件），不是一條單一開關；"
-                         "每個 top-level 組件都須有命名上限（accounting.unaccounted 為空、"
-                         "accounting.fixed_within_caps 為真才算帳目完整）；口徑與理由見"
-                         " ops/packets/disk_top_priority.md §3/§4"),
+                "note": ("各分組上限的加總（trace objects 64 MiB ＋ projects 子 32 MiB ＋"
+                         "wire body 96 MiB ＋ wire index 8 MiB＋intake 總 8 MiB＋"
+                         "quarantine 總 16 MiB＋日誌 2 MiB/檔＋固定安裝面 1 MiB/件），"
+                         "不是一條單一開關；每個 top-level 組件都須有命名上限"
+                         "（accounting.unaccounted 為空、accounting.within_caps 為真才算帳目完整）；"
+                         "口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
                 "total_bytes": total,
                 "within_envelope": (total <= STABLE_ENVELOPE_BYTES) and within_groups
-                and acct["accounting_complete"] and acct["fixed_within_caps"],
+                and acct["accounting_complete"] and acct["within_caps"],
                 "pct_of_envelope": round(100.0 * total / STABLE_ENVELOPE_BYTES, 2),
                 "groups": groups,
                 "accounting": acct,
@@ -1866,6 +1912,8 @@ def usage_main(argv: list[str] | None = None) -> int:
             mark = "✓ 在封頂內"
         elif unacc:
             mark = "⚠ 帳目不完整（有無命名上限的 top-level 組件）"
+        elif acct.get("overrun"):
+            mark = "⚠ 有組件超命名上限（只報告、不刪除）"
         else:
             mark = "⚠ 超封頂（vacant gc --auto 會逐組收縮）"
         print(f"  穩態封頂    : 總計 {h(envl['total_bytes'])} / {_capfmt(cap)}（{envl['pct_of_envelope']}%）{mark}")
@@ -1880,6 +1928,9 @@ def usage_main(argv: list[str] | None = None) -> int:
         if unacc:
             print(f"    ⚠ 無命名上限的組件: {', '.join(unacc)}（只報告、不刪除；"
                   "新增 top-level 寫入必須在 retention.ENVELOPE_COMPONENTS 註冊）")
+        for name, v in (acct.get("overrun") or {}).items():
+            print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
+                  "（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS）")
         print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
               "（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:
