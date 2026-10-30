@@ -1913,3 +1913,37 @@ def test_auto_gc_target_bytes_override_safe(tmp_path: Path) -> None:
     assert rep["ok"] is True
     assert rep["trace"]["target"]["target_bytes"] == 32 * 1024 * 1024
     assert rep["trace"]["target"]["target_reached"] is True
+
+
+def test_compact_wire_dry_run_safe(tmp_path: Path) -> None:
+    """compact_wire：dry_run=True 預覽只統計預計釋放位元組數與行數，
+    絕不實際刪除超額 body 或截斷超額 index.jsonl（2026-10-30 1643-1）。"""
+    wdir = tmp_path / "custom_vh" / "possess" / "proxyd" / "wire"
+    wdir.mkdir(parents=True)
+
+    b1 = wdir / "call1.req.bin"
+    b2 = wdir / "call2.resp.bin"
+    b1.write_bytes(b"A" * 500)
+    b2.write_bytes(b"B" * 600)
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(b1, (past, past))
+    os.utime(b2, (past + 1000.0, past + 1000.0))
+
+    ip = wdir / "index.jsonl"
+    index_raw = ("item\n" * 1000).encode("utf-8")  # 5000 位元組 > 2000 上限
+    ip.write_bytes(index_raw)
+
+    rep = retention.compact_wire(
+        tmp_path / "custom_vh",
+        max_body_bytes=400, max_index_bytes=2000, dry_run=True)
+    # dry-run：body 只累加預計釋放統計
+    assert rep["body_bytes_freed"] > 0
+    assert rep["body_files_removed"] >= 1
+    # dry-run：絕不實際刪除 body 檔
+    assert b1.is_file()
+    assert b2.is_file()
+    # dry-run：index 只計算預計釋放位元組數與行數
+    assert rep["index_bytes_freed"] > 0
+    assert rep["index_lines_dropped"] > 0
+    # dry-run：index.jsonl 內容逐字未變、未被截斷
+    assert ip.read_bytes() == index_raw
