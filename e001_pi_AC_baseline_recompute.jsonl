@@ -1,0 +1,12 @@
+{"arm": "A", "task": "1871", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "C", "task": "pg_react", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "C", "task": "1871", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "A", "task": "pg_forth", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "A", "task": "pg_poker", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "C", "task": "pg_sgf_parsing", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "A", "task": "pg_sgf_parsing", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "A", "task": "pg_pig_latin", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "C", "task": "pg_pig_latin", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "C", "task": "pg_zipper", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "A", "task": "pg_zipper", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
+{"arm": "A", "task": "pg_food_chain", "n": 1, "pass": 0.0, "rate": 0.0, "avg_calls_per_success": 0, "avg_tokens_per_success": 0, "mean_wall_s": 1800.0}
