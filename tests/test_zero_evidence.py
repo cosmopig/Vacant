@@ -851,3 +851,18 @@ def test_extract_test_hint_more_than_four_failures_count_summary(env):
     assert hint.startswith("test_t6")                # 最後一個失敗測試仍為主體（相容舊行為）
     assert "+5 other failing tests" in hint          # len(others)==5 > 4 → 計數摘要分支
     assert len(hint) <= 240                          # 不膨脹、格式不破損
+
+
+def test_extract_test_hint_unittest_more_than_four_failures_count_summary(env):
+    """unittest 格式（`FAIL: name (module.Class)`）多失敗計數摘要（2026-10-30，審查指示 §四-4【P1】）：
+    6 個失敗測試（test_u1..test_u6）時，agent 須獲知「+5 other failing tests」概況，
+    且 hint 維持 ≤240 字元，避免真實 agent 被大量失敗訊息擠爆窗口。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = "\n".join([f"FAIL: test_u{i} (tests.TestClass)" for i in range(1, 7)]
+                    + ["AssertionError: expected False got True"])
+    hint = _extract_test_hint(out, "FAILED (failures=6)")
+    assert hint is not None
+    assert hint.startswith("test_u6")                # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "+5 other failing tests" in hint          # len(others)==5 > 4 → 計數摘要分支
+    assert "AssertionError" in hint                  # 斷言訊息仍附帶
+    assert len(hint) <= 240                          # 不膨脹窗口
