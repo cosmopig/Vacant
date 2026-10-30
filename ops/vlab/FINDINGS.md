@@ -354,3 +354,14 @@ review 25+143 全 allow；A 臂 2 格零 Vacant 資料。成本（描述）：�
 **不能說**：不能說「Vacant 讓 OpenCode 結果變好／變差」——2 題×1 rep，pass 率（A 1/2 vs C 1/2）與 A/C 差異被本包明言排除在判準外；
 trace 僅鏈結構重算（H-3/H-4 口徑），未驗簽章與完整性；不外推到其他模型／題庫。
 **下一步**：GO ⇒ OpenCode 通用多輪評測盤（對齊 e002 五臂結構）另開獨立預註冊封包（本包 §3.5）。
+
+## 2026-10-30 · 主軸 1 · e004_opencode_polyglot 170 格五臂全盤發射（預註冊＋排程事實，未含結果）
+
+**發射**：2026-10-30 20:40:56 labd「開始 e004_opencode_polyglot：170 格」（/srv/vlab/labd.log）；佇列檔
+`ops/vlab/queue/05_e004_opencode_polyglot.json`（sha256=d5f401170a653b9727e31ea10b804da17e02909705aa9bd97bc0322dbba6dea1、
+發射 commit 3a2b0b74）已自 queue/ 移入 /srv/vlab/running/ 執行中。
+**結構**：A/C/H/M/S 各 34 題 polyglot_py（170 格）、agent=opencode、1800 s/格、頂層 vacant_sha=12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1；
+H/M/S 臂 env.VLAB_APPEND_SYSTEM 沿用 e002 臂檔（round 355 抽樣核對）。
+**預註冊**：封包 `ops/vlab/packets/e004_opencode_polyglot.md`（commit 11663a95）——判定＝Holm 4 組校正 α=0.05＋2×A 成本紅線、
+M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
+**口徑**：此段僅為發射與排程事實；1004 完賽前無結果數據、不預填、不宣稱；完賽後以 opencode_cell_audit 審計 170 格，再依封包 §3 判定。
