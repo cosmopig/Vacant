@@ -941,3 +941,13 @@ def test_disk_report_cli_selftest_and_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "需要 <exp>（或 --selftest）" in err
+
+
+def test_dabstep_subset_report_cli_missing_exp_error(capsys) -> None:
+    # 未給 exp 且無 --selftest 時 ap.error → SystemExit(2)、stderr 含
+    # "exp 需要（或 --selftest）"（dabstep_subset_report.py main L276-277）。
+    with pytest.raises(SystemExit) as excinfo:
+        dabstep_subset_report.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "exp 需要（或 --selftest）" in err
