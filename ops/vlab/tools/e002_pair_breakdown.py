@@ -4,8 +4,11 @@
 對應審查 20261030_1759 第四節指示 4 與 ASSIGNMENT 主軸 3。對 run 目錄
 （預設 /srv/vlab/runs/e002_hypothesis_arms）各格 cell.json＋score.json：
   - A/C 配對分類：both / C_only / A_only / neither；任一侧缺格或 pass 未測 → incomplete；
+分工：p02_carm_audit.py 驗「逐題紀錄是否存在」（線路/證據完整度），本量具驗
+「題目級機制介入差異」（A/C 配對＋C 臂閘門介入分佈）；review 證據源相同
+（vacant_home.tgz 內 chain.ndjson），refuse 詞彙與其對齊。
   - C 臂 review 歷史（自 vacant_home.tgz 內 chain.ndjson 的 review 條目，
-    payload.action=="continue" 記為 refuse）：
+    payload.action ∈ {"continue","refuse"} 記為 refuse；無 review 條目＝NO_EVIDENCE/UNKNOWN）：
       gate_salvaged    有 refuse 且最終 pass；
       first_pass       無 refuse 且 pass；
       refused_not_saved 有 refuse 但未過；never_refused 無 refuse 未過；
@@ -49,7 +52,10 @@ def _cell_parts(name: str) -> tuple[str, str] | None:
 
 
 def _c_refuses(cell: Path) -> int | None:
-    """唯讀 vacant_home.tgz：chain.ndjson 中 review(action=continue) 次數；None=UNKNOWN。"""
+    """唯讀 vacant_home.tgz：chain.ndjson 中 review(action∈continue/refuse) 次數；None=UNKNOWN。
+
+    詞彙對齊 p02_carm_audit.criteria（review_allow/review_continue/review_refuse 三分）：
+    擋回＝continue 或 refuse。"""
     tgz = cell / "vacant_home.tgz"
     if not tgz.is_file():
         return None
@@ -73,7 +79,7 @@ def _c_refuses(cell: Path) -> int | None:
                         continue
                     if isinstance(e, dict) and e.get("type") == "review":
                         p = e.get("payload")
-                        if isinstance(p, dict) and p.get("action") == "continue":
+                        if isinstance(p, dict) and p.get("action") in ("continue", "refuse"):
                             refuses += 1
     except (tarfile.TarError, OSError):
         return None  # 讀不了 → UNKNOWN，不編造
@@ -138,8 +144,9 @@ def analyze_e002(run_dir: Path) -> dict:
         "pairs_AC": pair,
         "c_review": c_rev,
         "timed_out": {**timed, "hm_distribution": hm},
-        "note": ("refuses=chain.ndjson 中 review(action=continue) 次數；c_review unknown＝無 vacant_home.tgz 或無 "
-                 "chain.ndjson（UNKNOWN，非 0）；incomplete＝A/C 任一侧缺格或 pass 未測；"
+        "note": ("refuses=chain.ndjson 中 review(action∈continue/refuse) 次數（詞彙對齊 p02_carm_audit）；"
+                 "c_review unknown＝無 vacant_home.tgz 或無 chain.ndjson（UNKNOWN，非 0）；"
+                 "incomplete＝A/C 任一侧缺格或 pass 未測；"
                  "hm_distribution＝H/M timed_out 格的 wall_s/timeout_s"),
     }
 
@@ -181,18 +188,22 @@ def selftest() -> int:
         _mk_cell(base, "mock-t4-pi-C-r1", p=False)
         _mk_cell(base, "mock-t5-pi-H-r1", p=False, timed_out=True, wall_s=1800.0, timeout_s=1800)
         _mk_cell(base, "mock-t5-pi-M-r1", p=False, timed_out=True, wall_s=1795.0, timeout_s=1800)
+        # t6：僅 C 格（A 缺 → incomplete）且 review action=="refuse" 亦計 refuse（詞彙對齊 p02_carm_audit）
+        _mk_chain_tgz(_mk_cell(base, "mock-t6-pi-C-r1", p=True),
+                      [{"type": "review", "payload": {"action": "refuse"}},
+                       {"type": "review", "payload": {"action": "allow"}}])
         r = analyze_e002(base)
         assert r["pairs_AC"]["both"] == ["t1"] and r["pairs_AC"]["C_only"] == ["t2"], r["pairs_AC"]
         assert r["pairs_AC"]["A_only"] == ["t3"] and r["pairs_AC"]["neither"] == ["t4"], r["pairs_AC"]
-        assert r["pairs_AC"]["incomplete"] == [], r["pairs_AC"]
-        assert r["c_review"]["gate_salvaged"] == ["t1"] and r["c_review"]["first_pass"] == ["t2"], r["c_review"]
+        assert r["pairs_AC"]["incomplete"] == ["t6"], r["pairs_AC"]
+        assert r["c_review"]["gate_salvaged"] == ["t1", "t6"] and r["c_review"]["first_pass"] == ["t2"], r["c_review"]
         assert r["c_review"]["refused_not_saved"] == ["t3"], r["c_review"]
         assert r["c_review"]["unknown"] == ["t4"] and r["c_review"]["never_refused"] == [], r["c_review"]
         assert r["timed_out"]["H"] == ["t5"] and r["timed_out"]["M"] == ["t5"], r["timed_out"]
         assert r["timed_out"]["A"] == [] and r["timed_out"]["C"] == [] and r["timed_out"]["S"] == []
         hm = r["timed_out"]["hm_distribution"]
         assert [h["wall_s"] for h in hm] == [1800.0, 1795.0] and all(h["timeout_s"] == 1800 for h in hm), hm
-        assert r["n_cells"] == 10 and r["n_cells_per_arm"] == {"A": 4, "C": 4, "H": 1, "M": 1, "S": 0}, r
+        assert r["n_cells"] == 11 and r["n_cells_per_arm"] == {"A": 4, "C": 5, "H": 1, "M": 1, "S": 0}, r
     print("OK")
     return 0
 
