@@ -117,6 +117,14 @@ def audit_vacant_home(tgz) -> dict:
     return out
 
 
+def _arm_from_name(name: str) -> str | None:
+    """從格子目錄名解析 arm：<suite>-<task>-<agent>-<arm>-<rep>，arm＝倒數第二個 token。
+    .infra-<ts> 隔離尾綴（cell.py 加）先剝掉，否則倒數第二個 token 是 rN.infra 而非臂。
+    少於 2 個 token 解析失敗 → None。"""
+    parts = name.split(".infra-", 1)[0].split("-")
+    return parts[-2] if len(parts) >= 2 else None
+
+
 def audit_cell(cell_path) -> dict:
     """審計一個格子（唯讀）→ JSON 可序列化 dict。未完成格＝state=incomplete＋NA（p02 規矩）。"""
     cell = Path(cell_path)
@@ -129,8 +137,8 @@ def audit_cell(cell_path) -> dict:
         state = None
     if state is not None:
         return {"cell": cell.name, "state": state, "ok": None, "unknown": [],
-                "arm": None, "agent_rc": None, "wall_s": None, "events": None, "vacant": None,
-                "score_pass": None}
+                "arm": _arm_from_name(cell.name), "agent_rc": None, "wall_s": None, "events": None,
+                "vacant": None, "score_pass": None}
     meta = json.loads(cj.read_text(encoding="utf-8"))
     rec: dict = {"cell": cell.name, "state": "complete", "ok": True, "unknown": [], "score_pass": None}
     rec.update(arm=meta.get("arm"), agent_rc=meta.get("agent_rc"), wall_s=meta.get("wall_s"))
@@ -199,7 +207,9 @@ def summarize(recs: list) -> dict:
             d["tokens_vs_A"] = d["tokens_per_success"] / base["tokens_per_success"] if d["tokens_per_success"] else None
             d["over_2x_A_cost"] = (d["calls_vs_A"] is not None and d["calls_vs_A"] > 2) or \
                                  (d["tokens_vs_A"] is not None and d["tokens_vs_A"] > 2)
-    return {"per_arm": per_arm}
+    return {"per_arm": per_arm,
+            "incomplete_cells": sum(1 for r in recs if r.get("state") == "incomplete"),
+            "quarantined_cells": sum(1 for r in recs if r.get("state") == "quarantined_infra")}
 
 
 def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False, score_pass: bool | None = None,
@@ -274,7 +284,9 @@ def selftest() -> bool:
                 and c["vacant"]["trace"]["prev_link"] == "ok"
                 and t["vacant"]["trace"]["prev_link"] == "broken" and t["ok"] is False
                 and i["state"] == "incomplete" and i["ok"] is None and i["events"] is None
-                and i["unknown"] == []
+                and i["unknown"] == [] and i["arm"] == "A"
+                and payload["summary"]["incomplete_cells"] == 1
+                and payload["summary"]["quarantined_cells"] == 0
                 and a["score_pass"] is True and c["score_pass"] is True
                 and t["score_pass"] is False and f["score_pass"] is False and i["score_pass"] is None
                 and m["score_pass"] is True and m2["score_pass"] is False
