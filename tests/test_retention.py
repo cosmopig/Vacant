@@ -1621,3 +1621,12 @@ def test_compact_quarantine_missing_dir_and_orphan_objects(tmp_path) -> None:
     res = retention.compact_quarantine(tmp_path / "custom_vh", dry_run=False, orphan_grace_s=0.0)
     assert res["files_removed"] >= 1
     assert not obj_file.is_file()
+
+
+def test_compact_wire_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_wire：wire 捕獲目錄不存在時安全回傳零釋放統計字典、不拋異常。"""
+    rep = retention.compact_wire(tmp_path / "nonexistent")
+    assert rep["body_bytes_freed"] == 0
+    assert rep["body_files_removed"] == 0
+    assert rep["index_bytes_freed"] == 0
+    assert rep["index_lines_dropped"] == 0
