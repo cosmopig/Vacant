@@ -1309,3 +1309,29 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
     assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
     assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件
+
+
+def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_2331-2（ASSIGNMENT「研發工具需納入回歸測試」）：e006 預註冊假說判定量具 e006_verdict
+    # （cb7e3447）納入常規回歸——selftest、--report/--audit/--json CLI、四項假說判定結構（mock 只活在 tmp_path，不讀寫 /srv/vlab/runs 真實資料）。
+    from ops.vlab.tools import e006_verdict
+
+    assert e006_verdict.selftest() == 0
+    capsys.readouterr()  # 排空殘留，保持 --selftest stdout 乾淨
+    rc = e006_verdict.main(["--selftest"])
+    assert rc == 0 and "e006_verdict selftest PASS" in capsys.readouterr().out
+
+    rep = tmp_path / "REPORT.json"
+    rep.write_text(json.dumps(e006_verdict._mock_report()), encoding="utf-8")
+    aud = tmp_path / "audit.json"
+    aud.write_text(json.dumps(e006_verdict._mock_audit(5)), encoding="utf-8")
+    capsys.readouterr()
+    rc = e006_verdict.main(["--report", str(rep), "--audit", str(aud), "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    # 四項假說判定全部在案、各帶判定態；mock 期望態（Holm m=4：C/M 顯著、H/S 不顯著；M 有第二 agent 證據）。
+    hyp = out["hypotheses"]
+    assert {"H-acc", "H-review(H)", "H-review(M)", "H-stakes(a)"} <= set(hyp)
+    assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件
