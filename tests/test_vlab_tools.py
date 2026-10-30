@@ -1126,3 +1126,66 @@ def test_envelope_compliance_cli_override_envelope_fail(tmp_path: Path, capsys) 
     data = json.loads(capsys.readouterr().out)
     assert data["verdict"] == "FAIL"
     assert data["envelope_source"] == f"command-line --envelope {5 * 1024 * 1024}"
+
+
+def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
+    # P20261030_1851-1（ASSIGNMENT 主軸 3：e002 A/C 臂題目級機制差異量具）：
+    # selftest 以合成 mock 格驗證配對分類（both/C_only/A_only/neither）、C 臂 review
+    # （gate_salvaged/first_pass/refused_not_saved/unknown）與 H/M 逾時分佈；
+    # smoke 驗證 analyze_e002 輸出形狀與 CLI --json 契約（唯讀、無 tgz → UNKNOWN）。
+    from ops.vlab.tools import e002_pair_breakdown
+
+    assert e002_pair_breakdown.selftest() == 0
+    capsys.readouterr()  # 排空 selftest 的 "OK"，保持 --json stdout 純 JSON
+
+    exp = tmp_path / "exp_pb"
+    for name, p in (("pb-t1-pi-A-r1", True), ("pb-t1-pi-C-r1", True),
+                    ("pb-t2-pi-A-r1", False), ("pb-t2-pi-C-r1", True)):
+        d = exp / name
+        d.mkdir(parents=True)
+        (d / "cell.json").write_text(
+            json.dumps({"task": name.split("-")[1], "timed_out": False,
+                        "wall_s": 10.0, "timeout_s": 60}), encoding="utf-8")
+        (d / "score.json").write_text(json.dumps({"pass": p}), encoding="utf-8")
+
+    r = e002_pair_breakdown.analyze_e002(exp)
+    assert r["tool"] == "e002_pair_breakdown"
+    assert r["n_cells"] == 4 and r["n_cells_per_arm"] == {"A": 2, "C": 2, "H": 0, "M": 0, "S": 0}
+    assert r["pairs_AC"]["both"] == ["t1"] and r["pairs_AC"]["C_only"] == ["t2"], r["pairs_AC"]
+    assert r["pairs_AC"]["A_only"] == [] and r["pairs_AC"]["neither"] == [] and r["pairs_AC"]["incomplete"] == []
+    assert r["c_review"]["unknown"] == ["t1", "t2"]  # 無 vacant_home.tgz → UNKNOWN，非 0
+    assert r["c_review"]["gate_salvaged"] == [] and r["c_review"]["first_pass"] == []
+    assert r["timed_out"]["A"] == [] and r["timed_out"]["C"] == []
+    assert r["timed_out"]["hm_distribution"] == []
+
+    rc = e002_pair_breakdown.main(["exp_pb", "--base", str(tmp_path), "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["tool"] == "e002_pair_breakdown" and out["pairs_AC"]["both"] == ["t1"]
+
+    rc = e002_pair_breakdown.main(["missing_exp", "--base", str(tmp_path)])
+    assert rc == 2
+    assert "找不到 run 目錄" in capsys.readouterr().err
+
+
+def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_2008-1（ASSIGNMENT「研發工具需納入回歸測試」＋ GPT 審查 P1-1 同時量成本）：
+    # OpenCode 格子唯讀審計量具 opencode_cell_audit（成本 ＋ C 臂 Vacant 證據）納入常規回歸：
+    # (a) selftest() 須通過（合成 A/C/tamper/incomplete mock 格，含破壞對照）；
+    # (b) CLI --selftest 回 0 且 stdout 含 "selftest PASS"；
+    # (c) --runs-dir 指空目錄回 0，stdout 為 JSON 且 n_cells=0、bad=[]、cells=[]。
+    # 只測既有工具，核心零改動。
+    from ops.vlab.tools import opencode_cell_audit
+
+    assert opencode_cell_audit.selftest() is True
+
+    capsys.readouterr()  # 排空殘留，保持 --selftest stdout 乾淨
+    rc = opencode_cell_audit.main(["--selftest"])
+    assert rc == 0
+    assert "selftest PASS" in capsys.readouterr().out
+
+    rc = opencode_cell_audit.main(["--runs-dir", str(tmp_path), "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["tool"] == "opencode_cell_audit"
+    assert out["n_cells"] == 0 and out["bad"] == [] and out["cells"] == []

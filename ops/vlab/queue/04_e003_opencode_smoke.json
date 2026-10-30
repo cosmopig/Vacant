@@ -1,0 +1,38 @@
+{
+  "exp": "e003_opencode_smoke",
+  "packet": "/home/user1/dev/ops/packets/e003_opencode_smoke.md",
+  "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1",
+  "timeout": 900,
+  "cells": [
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_pig_latin",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "A",
+      "rep": 1
+    },
+    {
+      "suite": "polyglot_py",
+      "task": "pg_affine_cipher",
+      "agent": "opencode",
+      "arm": "C",
+      "rep": 1,
+      "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1"
+    }
+  ]
+}

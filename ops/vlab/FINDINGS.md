@@ -142,6 +142,40 @@ REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
   觸發預註冊 `>2×A` 成本紅線，依 `e002.md` §4 記為「不划算」。
 - A/C/H/M/S 五臂 34/34 完賽（A 18/34、C 22/34、S 20/34、H 15/34、M 15/34）——
   這些是**已確立事實**（完賽與配對數字），Holm 校正後四組 p_holm 皆＝1.0。
+- e002 A/C 題級機制差異剖析（2026-10-30；`ops/vlab/tools/e002_pair_breakdown.py`
+  → `ops/vlab/runs_e002_hypothesis_arms/PAIR_BREAKDOWN.json`；170 格／34 題；100% 由原始格
+  推導、無人工臆測）：
+  - C_only 7 題＝**2 題閘門擋回後挽救（gate_salvaged）**（pg_list_ops、pg_react：C 臂 chain.ndjson 有
+    review 擋回紀錄、最終過）＋**5 題初次即過（first_pass）**（pg_bowling、pg_connect、pg_pig_latin、
+    pg_transpose、pg_wordy：無擋回紀錄）。
+  - A_only 3 題全部是 C 臂**閘門擋回後仍未挽救（修改失敗）（refused_not_saved）**：pg_hangman 同時為 C 臂
+    逾時（wall 1800s）；pg_bottle_song、pg_food_chain 為非逾時的修改失敗。
+  - 詞彙＝`PAIR_BREAKDOWN.json` `c_review` 四類（34 題全歸類、unknown＝0）：gate_salvaged 4（C 過、含
+    both 2 題 pg_beer_song/pg_robot_name）、first_pass 18、refused_not_saved 8、never_refused 4
+    （pg_forth、pg_grep、pg_sgf_parsing、pg_zipper；其中 3 題為 C 臂逾時）。
+  - H/M 逾時分佈：H 11 題＋M 8 題共 19 題**全部** wall_s＝1800.0（全數撞 1800s 封頂，
+    無提前逾時）。
+  - H/M 逾時題目分佈與突破 2×A 成本紅線的機制歸因（2026-10-30；來源＝`PAIR_BREAKDOWN.json`
+    `timed_out.hm_distribution`＋同題原始格 `cell.json` `metrics`，100% 由原始資料推導）：
+    - 分佈：**交集 4 題**（pg_bowling、pg_paasio、pg_poker、pg_wordy）、H 獨有 7 題
+      （pg_go_counting、pg_grep、pg_hangman、pg_list_ops、pg_pig_latin、pg_transpose、pg_zebra_puzzle）、
+      M 獨有 4 題（pg_dominoes、pg_food_chain、pg_forth、pg_zipper）；19 題全部 wall_s＝1800.0＝timeout_s 封頂。
+    - 同題對照（15 題聯集、各臂各 15 格）：A 766 呼叫／20,639,578 入 token／7 逾時／4 過；
+      C 896／24,125,134／3 逾時／7 過；H 1584／50,233,743／11 逾時／2 過；
+      M 1143／33,772,462／8 逾時／3 過。A 臂自身即 7 逾時、15 題敗 11 → **逾時集中於長篇演算法長任務**
+      （對全臂皆難）；同題上 H 消耗 2.07×A 呼叫／2.43×A 入 token、M 1.49×／1.64×，且全數撞 1800s 封頂。
+    - 機制歸因（與臂定義及逐題資料一致；描述性，非因果證明）：H 臂做事方式指引
+      （`ops/vlab/arms/e002_H.md`：先規劃→執行測試自檢／讀失敗／修正／重跑→最後檢查）與
+      M 臂強制第二 agent 審查（`ops/vlab/arms/e002_M.md`：交件前開第二 agent 挑錯→修正→重跑測試）
+      皆為每題追加審查／修正輪次，在這些困難長任務上過度消耗輪次與 context，19 題全撞 1800s 封頂而逾時；
+      且 tokens_per_success＝總 token÷成功數，H/M 同題 token 更多、成功更少（15/34 vs A 18/34）
+      → H 2.49×A、M 2.05×A（下界、未含子 agent 端點成本；`WIRING_GAUGE.json`：M 臂 34 格僅 14 格有第二
+      agent 啟動證據）皆突破 2×A token 紅線，依預註冊判準記「不划算」。
+    - 口徑：逐題可回查原始格 `metrics`（可究責）；不推翻上方 Holm 結論（四組皆未顯著）。
+  - 自洽核對：C 臂 22 過＝4 gate_salvaged＋18 first_pass；12 敗＝8 refused_not_saved＋4
+    never_refused（4 題中 3 題為 C 逾時）；A 敗 16＝C_only 7＋neither 9。
+  - 口徑：這是**描述性、可究責的機制記錄**（每題可回查 PAIR_BREAKDOWN.json）；
+    不推翻上方 Holm 結論（四組皆未顯著），也不得讀成「閘門有效／無效」。
 
 **不能說**：
 - 兩批 C 臂的 Vacant build **不同**（`dd2c6746` vs `cf62d258`）：跨批比較是
@@ -160,7 +194,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 30 點跨 44.2h（2026-10-28T20:20 → 2026-10-30T16:32）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 32 點跨 46.5h（2026-10-28T20:20 → 2026-10-30T18:51）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -192,6 +226,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/30 14:18 | 59.1 MiB | 41.6 MiB | 706 | ok, true |
 | 10/30 15:19 | 60.0 MiB | 42.4 MiB | 718 | ok, true |
 | 10/30 16:32 | 61.8 MiB | 44.0 MiB | 948 | ok, true |
+| 10/30 18:51 | 54.1 MiB | 36.9 MiB | 379 blobs | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
@@ -204,10 +239,13 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   連續 26 個小時點呈現單調緩升（+12.1 MiB），主因是 `compact_trace` 第一階段原先未對
   `unrecorded_change` 檔案 blob 與已過期工作階段之 `prompt` blob 套用 `min_kept_seq` 視窗
   （且未達 64 MiB 前第二階段 `_sweep_to_target` 不啟動）；該視窗漏洞已於 `auto/argon` 修復，
-  在真機 `~/.vacant` 上可立即多回收 8.34 MiB（399 個過期 blob）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 61.8 MiB（24.1%）、
-  最新 trace 44.0 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（30 點、44.2h），不是模擬、不是單點。
+  在真機 `~/.vacant` 上可立即多回收 8.34 MiB（399 個過期 blob）——**10/30 18:50 真機驗證（round 337）**：
+  auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
+  總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,771,218 B（54.1 MiB，gc 後，`~/.vacant/growth.jsonl` 18:50:12 點）；`gc --verify` verify_ok=True（8/8 專案）、
+  `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 54.1 MiB（22.2%）、
+  最新 trace 36.9 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（32 點、46.5h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1

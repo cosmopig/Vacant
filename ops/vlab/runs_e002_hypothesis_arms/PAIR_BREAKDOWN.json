@@ -1,0 +1,269 @@
+{
+  "tool": "e002_pair_breakdown",
+  "run": "/srv/vlab/runs/e002_hypothesis_arms",
+  "n_cells": 170,
+  "n_tasks_AC": 34,
+  "n_cells_per_arm": {
+    "A": 34,
+    "C": 34,
+    "H": 34,
+    "M": 34,
+    "S": 34
+  },
+  "pairs_AC": {
+    "both": [
+      "pg_affine_cipher",
+      "pg_beer_song",
+      "pg_book_store",
+      "pg_dominoes",
+      "pg_dot_dsl",
+      "pg_grade_school",
+      "pg_phone_number",
+      "pg_pov",
+      "pg_proverb",
+      "pg_robot_name",
+      "pg_simple_linked_list",
+      "pg_tree_building",
+      "pg_two_bucket",
+      "pg_variable_length_quantity",
+      "pg_zebra_puzzle"
+    ],
+    "C_only": [
+      "pg_bowling",
+      "pg_connect",
+      "pg_list_ops",
+      "pg_pig_latin",
+      "pg_react",
+      "pg_transpose",
+      "pg_wordy"
+    ],
+    "A_only": [
+      "pg_bottle_song",
+      "pg_food_chain",
+      "pg_hangman"
+    ],
+    "neither": [
+      "pg_forth",
+      "pg_go_counting",
+      "pg_grep",
+      "pg_paasio",
+      "pg_poker",
+      "pg_rest_api",
+      "pg_scale_generator",
+      "pg_sgf_parsing",
+      "pg_zipper"
+    ],
+    "incomplete": []
+  },
+  "c_review": {
+    "gate_salvaged": [
+      "pg_beer_song",
+      "pg_list_ops",
+      "pg_react",
+      "pg_robot_name"
+    ],
+    "first_pass": [
+      "pg_affine_cipher",
+      "pg_book_store",
+      "pg_bowling",
+      "pg_connect",
+      "pg_dominoes",
+      "pg_dot_dsl",
+      "pg_grade_school",
+      "pg_phone_number",
+      "pg_pig_latin",
+      "pg_pov",
+      "pg_proverb",
+      "pg_simple_linked_list",
+      "pg_transpose",
+      "pg_tree_building",
+      "pg_two_bucket",
+      "pg_variable_length_quantity",
+      "pg_wordy",
+      "pg_zebra_puzzle"
+    ],
+    "refused_not_saved": [
+      "pg_bottle_song",
+      "pg_food_chain",
+      "pg_go_counting",
+      "pg_hangman",
+      "pg_paasio",
+      "pg_poker",
+      "pg_rest_api",
+      "pg_scale_generator"
+    ],
+    "never_refused": [
+      "pg_forth",
+      "pg_grep",
+      "pg_sgf_parsing",
+      "pg_zipper"
+    ],
+    "unknown": []
+  },
+  "timed_out": {
+    "A": [
+      "pg_bowling",
+      "pg_connect",
+      "pg_forth",
+      "pg_grep",
+      "pg_list_ops",
+      "pg_pig_latin",
+      "pg_transpose",
+      "pg_zipper"
+    ],
+    "C": [
+      "pg_forth",
+      "pg_grep",
+      "pg_hangman",
+      "pg_sgf_parsing"
+    ],
+    "H": [
+      "pg_bowling",
+      "pg_go_counting",
+      "pg_grep",
+      "pg_hangman",
+      "pg_list_ops",
+      "pg_paasio",
+      "pg_pig_latin",
+      "pg_poker",
+      "pg_transpose",
+      "pg_wordy",
+      "pg_zebra_puzzle"
+    ],
+    "M": [
+      "pg_bowling",
+      "pg_dominoes",
+      "pg_food_chain",
+      "pg_forth",
+      "pg_paasio",
+      "pg_poker",
+      "pg_wordy",
+      "pg_zipper"
+    ],
+    "S": [
+      "pg_bowling",
+      "pg_grep",
+      "pg_paasio",
+      "pg_poker",
+      "pg_react",
+      "pg_sgf_parsing"
+    ],
+    "hm_distribution": [
+      {
+        "arm": "H",
+        "task": "pg_bowling",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_go_counting",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_grep",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_hangman",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_list_ops",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_paasio",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_pig_latin",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_poker",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_transpose",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_wordy",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "H",
+        "task": "pg_zebra_puzzle",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_bowling",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_dominoes",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_food_chain",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_forth",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_paasio",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_poker",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_wordy",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      },
+      {
+        "arm": "M",
+        "task": "pg_zipper",
+        "wall_s": 1800.0,
+        "timeout_s": 1800
+      }
+    ]
+  },
+  "note": "refuses=chain.ndjson 中 review(action∈continue/refuse) 次數（詞彙對齊 p02_carm_audit）；c_review unknown＝無 vacant_home.tgz 或無 chain.ndjson（UNKNOWN，非 0）；incomplete＝A/C 任一侧缺格或 pass 未測；hm_distribution＝H/M timed_out 格的 wall_s/timeout_s"
+}
