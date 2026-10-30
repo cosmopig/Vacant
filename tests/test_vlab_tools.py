@@ -836,3 +836,16 @@ def test_holm_e002_cli_absent_arm_committed_fixture(tmp_path: Path, capsys) -> N
     assert doc["m"] == 1
     assert "C" in doc["pairs"]
     assert "S" in doc["absent_pairs"]
+
+
+def test_growth_report_cli_selftest_flag(capsys) -> None:
+    # P20261030_1317-2：growth_report CLI --selftest 旗標契約（ASSIGNMENT 🔴最優先 驗收(a)）：
+    # 非 --json 印出 "selftest: OK" 且 exit 0；--json 靜默（無字串輸出）且 exit 0。
+    # 守護量具 CLI 入口防偽防崩潰；growth_report.main 的 selftest 分支見其 L303-310。
+    rc = growth_report.main(["--selftest"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "selftest: OK" in out.strip()
+    rc = growth_report.main(["--selftest", "--json"])
+    assert rc == 0
+    assert capsys.readouterr().out.strip() == ""
