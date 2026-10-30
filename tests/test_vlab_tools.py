@@ -1249,6 +1249,21 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert {"second_agent_verified_cells", "second_agent_unknown_cells"} <= set(m)
     assert m["second_agent_verified_cells"] == 1 and m["second_agent_unknown_cells"] == 0
 
+    # P20261030_2213-2（ASSIGNMENT「研發工具需納入回歸測試」＋審查第 2 條；核心已於 7392cf52 落）：
+    # 未完成格與頂層統計回歸——於既有 runs-dir 追加一個無 cell.json 子目錄 mock-opencode-A-incomplete →
+    # main --runs-dir：該格由目錄名解析 arm=="A"（倒數第二 token，剝 .infra- 尾綴）且 state=="incomplete"、ok 全 NA；
+    # 頂層 summary 具 incomplete_cells／quarantined_cells 欄位且計數正確；incomplete 格不計入 bad／退出碼（p02 規矩）。
+    (tmp_path / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(tmp_path), "--json"])
+    assert rc == 1  # bad 仍僅 cell-M-noagent（前段）；incomplete 格不影響退出碼
+    out = json.loads(capsys.readouterr().out)
+    assert "mock-opencode-A-incomplete" not in out["bad"]
+    inc = {c["cell"]: c for c in out["cells"]}["mock-opencode-A-incomplete"]
+    assert inc["arm"] == "A" and inc["state"] == "incomplete" and inc["ok"] is None and inc["events"] is None
+    assert "incomplete_cells" in out["summary"] and "quarantined_cells" in out["summary"]
+    assert out["summary"]["incomplete_cells"] >= 1 and out["summary"]["quarantined_cells"] == 0
+
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
