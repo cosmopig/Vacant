@@ -89,8 +89,8 @@ repo 內子集檔為同源 commit 版）＋ 上兩節。
 
 ## 2026-10-29 · e002_hypothesis_arms · polyglot_py A/C/H/M 完賽、S 進行中（主軸 4 追蹤）
 
-**狀態**（2026-10-30 15:0x 更新）：e002 進行中——A/C/H/M 四臂各 34/34 完成，S 臂 21/34 進行中
-（REPORT.json `infra` 8 格不進分母；`cells_scored`＝157）。
+**狀態**（2026-10-30 15:49 更新）：e002 進行中——A/C/H/M 四臂各 34/34 完成，S 臂 23/34 進行中
+（REPORT.json `infra` 10 格不進分母；`cells_scored`＝159）。
 預註冊確認線（Holm 4 組比較，`ops/packets/e002.md` §4）待 S 臂完成後才能對
 H-stakes 等預註冊假設做校正判準。
 **本節只有客觀觀察，不是判定。**
@@ -112,7 +112,7 @@ A 65.72 呼叫/成功・1,550,104 token/成功・逾時 8，C 67.95 呼叫/成�
 3,180,187 token/成功・逾時 8（皆取自 REPORT.json `per_arm.{H,M}`）。
 跨臂配對（REPORT.json `paired`）：A_vs_H A_only＝5、H_only＝2、McNemar exact 雙側
 p＝0.4531（未達顯著）；A_vs_M A_only＝6、M_only＝3、McNemar exact 雙側 p＝0.5078
-（未達顯著；distinct_tasks＝34）。S 臂 21/34 進行中（A_vs_S 配對 21、A_only＝2、S_only＝2、
+（未達顯著；distinct_tasks＝34）。S 臂 23/34 進行中（A_vs_S 配對 23、A_only＝2、S_only＝3、
 p＝1.0，皆中間值，不作結論）。
 
 **跨批一致性（兩批 A/C，非重現論證）**：
@@ -202,7 +202,7 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   e002 實驗；更高並發／更多 repo 需重新量（H-12 同口徑）。
 - e002 全臂尚未完成：四量具（report.py --rescore／e002_wiring_gauge／
   envelope_compliance／p02_carm_audit）對已完成臂 rc=0（A/C/H/M 四臂各 34/34 完成，
-  S 臂 21/34 進行中；C 臂 34/34 `vacant_home_bytes` 已最終回寫，A/H/M/S 臂不裝 Vacant 故依設計 N/A），
+  S 臂 23/34 進行中；C 臂 34/34 `vacant_home_bytes` 已最終回寫，A/H/M/S 臂不裝 Vacant 故依設計 N/A），
   **全臂最終分析回寫要等 S 臂完成**（disk_top_priority §5-4）。
 
 ## 2026-10-29 · 主軸 2 ·「fixed 安裝面也有命名上限」（packet §4 誠實缺口收口）
@@ -284,5 +284,5 @@ within_caps=True、all_caps_sum 228.25 MiB ≤ 256 MiB**。
   `trace/projects/chain.ndjson` 是記責記錄，GC 向來不碰，這是語義決定不是漏做。
 - 32/8/16 MiB 是**警報上限**不是硬刪上限：選值＝現行實測（projects 5.46 MB／intake
   1.94 MB／quarantine 0 B）的 ≥3 倍，長期超限時應調大常數並留記錄，不該靠量具假裝沒事。
-- e002 全臂最終仍**未完成**：A/C/H/M 四臂各 34/34 已完成、S 臂 21/34 進行中（rc=0）；
+- e002 全臂最終仍**未完成**：A/C/H/M 四臂各 34/34 已完成、S 臂 23/34 進行中（rc=0）；
   全臂回寫等 S 臂完成（disk_top_priority §5-4）。
