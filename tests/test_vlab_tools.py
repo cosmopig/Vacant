@@ -346,4 +346,27 @@ def test_envelope_compliance_cli(tmp_path: Path, capsys) -> None:
     assert '"envelope_bytes": 268435456' in out
 
 
+def test_growth_report_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_0921-1（ASSIGNMENT 驗收 a：~/.vacant 增長量具守護）：CLI 入口
+    # main(["--home", ..., "--ops-data", ..., "--json"]) 接收合格資料（跨 26h 的 3 點、
+    # 未超穩態封頂、最新 gc status=ok）時須回 0 且 stdout 為合法 JSON：
+    # verdict=PASS 且 n_points=3（自動化腳本調用量具的命令列契約）。
+    home = tmp_path / "home"
+    home.mkdir()
+    pt = lambda ts, total: json.dumps({"ts": ts, "total_bytes": total,
+                                       "per_dir_bytes": {"trace": total // 2},
+                                       "gc_last": {"status": "ok", "target_reached": True}})
+    (home / "growth.jsonl").write_text("\n".join([
+        pt("2026-10-28T00:00:00+0000", 20 * 1024 * 1024),
+        pt("2026-10-28T12:00:00+0000", 30 * 1024 * 1024),
+        pt("2026-10-29T02:00:00+0000", 40 * 1024 * 1024)]) + "\n", encoding="utf-8")
+    (tmp_path / "empty_ops").mkdir()
+    rc = growth_report.main(["--home", str(home),
+                             "--ops-data", str(tmp_path / "empty_ops"), "--json"])
+    assert rc == 0
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "PASS"
+    assert data["n_points"] == 3
+
+
 
