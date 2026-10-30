@@ -1084,3 +1084,15 @@ def test_dabstep_subset_report_cli_selftest_flag(capsys) -> None:
     assert rc == 0
     out = capsys.readouterr().out
     assert "SELFTEST PASS" in out
+
+
+def test_vacant_growth_log_cli_missing_home_json(tmp_path: Path, capsys) -> None:
+    # P20261030_1733-4（ASSIGNMENT 🔴最優先 驗收 (a)：真機成長序列記錄量具治理）：
+    # --home 指向不存在的狀態目錄且帶 --json 時，vacant_growth_log.main
+    # （snapshot L40-47 / main L77-80）須安全解析、回 0、stdout JSON 含
+    # total_bytes=0 與 note="home missing"——防禦無效目錄崩潰，核心零改動。
+    rc = vacant_growth_log.main(["--home", str(tmp_path / "nonexistent_home"), "--json"])
+    assert rc == 0
+    rec = json.loads(capsys.readouterr().out)
+    assert rec["total_bytes"] == 0
+    assert rec["note"] == "home missing"
