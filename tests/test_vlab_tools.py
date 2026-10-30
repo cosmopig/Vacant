@@ -747,3 +747,15 @@ def test_holm_e002_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
     assert data["schema"] == "vacant.holm/1"
     assert data["m"] == 1
     assert "vacant.holm/1" in capsys.readouterr().out
+
+
+def test_holm_e002_cli_baseline_arm_error(capsys) -> None:
+    # P20261030_1202-2（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具邊界守護）：CLI 基線臂契約。
+    # --arms 包含基線臂 A 時，argparse 解析階段須立即報錯（exit 2、stderr 點名原因），
+    # 防止把基準對照組誤納入多重校正集。
+    try:
+        holm_e002.main(["exp_any", "--arms", "A,C"])
+        assert False, "expected SystemExit"
+    except SystemExit as exc:
+        assert exc.code == 2
+    assert "A 是基線臂，不進校正組" in capsys.readouterr().err
