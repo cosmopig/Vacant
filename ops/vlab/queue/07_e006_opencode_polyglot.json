@@ -1,6 +1,6 @@
 {
   "exp": "e006_opencode_polyglot",
-  "packet": "/home/user1/dev/ops/packets/e004_opencode_polyglot.md",
+  "packet": "/home/user1/dev/ops/packets/e006_opencode_polyglot.md",
   "cells": [
     {
       "suite": "polyglot_py",
