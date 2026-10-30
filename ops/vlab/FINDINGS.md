@@ -194,7 +194,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 32 點跨 46.5h（2026-10-28T20:20 → 2026-10-30T18:51）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 34 點跨 48.65h（2026-10-28T20:20 → 2026-10-30T20:59）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -227,12 +227,14 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/30 15:19 | 60.0 MiB | 42.4 MiB | 718 | ok, true |
 | 10/30 16:32 | 61.8 MiB | 44.0 MiB | 948 | ok, true |
 | 10/30 18:51 | 54.1 MiB | 36.9 MiB | 379 blobs | ok, true |
+| 10/30 19:55 | 54.3 MiB | 37.0 MiB | 378 blobs | ok, true |
+| 10/30 20:59 | 55.1 MiB | 37.7 MiB | 450 blobs | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
 round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 
-**能說**（2026-10-30 16:3x 真機 `growth_report.py` verdict=PASS，rc=0）：
+**能說**（2026-10-30 20:5x 真機 `growth_report.py` verdict=PASS，rc=0）：
 - **一天長多少：24h 視窗最大增長 16.3 MiB**（2G repo 全日開發＋e002 實驗負載下）。
 - 範圍 35.2–82.3 MiB：峰值 82.3 MiB 是 10/28 20:20 舊日累積，次日 gc 削至 35.2 MiB；
   惟 10/29 14:46（49.7 MiB / trace 32.3 MiB）至 10/30 16:32（61.8 MiB / trace 44.0 MiB）
@@ -243,9 +245,9 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
   總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,771,218 B（54.1 MiB，gc 後，`~/.vacant/growth.jsonl` 18:50:12 點）；`gc --verify` verify_ok=True（8/8 專案）、
   `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 54.1 MiB（22.2%）、
-  最新 trace 36.9 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（32 點、46.5h），不是模擬、不是單點。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 55.1 MiB（21.5%）、
+  最新 trace 37.7 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（34 點、48.65h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
@@ -354,3 +356,14 @@ review 25+143 全 allow；A 臂 2 格零 Vacant 資料。成本（描述）：�
 **不能說**：不能說「Vacant 讓 OpenCode 結果變好／變差」——2 題×1 rep，pass 率（A 1/2 vs C 1/2）與 A/C 差異被本包明言排除在判準外；
 trace 僅鏈結構重算（H-3/H-4 口徑），未驗簽章與完整性；不外推到其他模型／題庫。
 **下一步**：GO ⇒ OpenCode 通用多輪評測盤（對齊 e002 五臂結構）另開獨立預註冊封包（本包 §3.5）。
+
+## 2026-10-30 · 主軸 1 · e004_opencode_polyglot 170 格五臂全盤發射（預註冊＋排程事實，未含結果）
+
+**發射**：2026-10-30 20:40:56 labd「開始 e004_opencode_polyglot：170 格」（/srv/vlab/labd.log）；佇列檔
+`ops/vlab/queue/05_e004_opencode_polyglot.json`（sha256=d5f401170a653b9727e31ea10b804da17e02909705aa9bd97bc0322dbba6dea1、
+發射 commit 3a2b0b74）已自 queue/ 移入 /srv/vlab/running/ 執行中。
+**結構**：A/C/H/M/S 各 34 題 polyglot_py（170 格）、agent=opencode、1800 s/格、頂層 vacant_sha=12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1；
+H/M/S 臂 env.VLAB_APPEND_SYSTEM 沿用 e002 臂檔（round 355 抽樣核對）。
+**預註冊**：封包 `ops/vlab/packets/e004_opencode_polyglot.md`（commit 11663a95）——判定＝Holm 4 組校正 α=0.05＋2×A 成本紅線、
+M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
+**口徑**：此段僅為發射與排程事實；1004 完賽前無結果數據、不預填、不宣稱；完賽後以 opencode_cell_audit 審計 170 格，再依封包 §3 判定。
