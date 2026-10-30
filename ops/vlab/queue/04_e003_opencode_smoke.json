@@ -1,6 +1,8 @@
 {
   "exp": "e003_opencode_smoke",
   "packet": "/home/user1/dev/ops/packets/e003_opencode_smoke.md",
+  "vacant_sha": "12d1dc2a61592193a7c13a2b236dc5aa8f24e6d1",
+  "timeout": 900,
   "cells": [
     {
       "suite": "polyglot_py",
