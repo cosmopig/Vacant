@@ -457,8 +457,6 @@ def test_disk_report_cli_table_and_out_file(tmp_path: Path, capsys) -> None:
     out = capsys.readouterr().out
     assert "arm" in out
     assert "home min" in out
-
-
 def test_no_leading_hyphen_files_in_repo_root() -> None:
     """Repo 根目錄不得存在以 '-' 開頭的檔案（如 -findings.md），否則 *.md / * 萬用字元展開時會觸發 POSIX 參數注入。"""
     repo_root = Path(__file__).resolve().parent.parent
@@ -548,5 +546,148 @@ def test_e002_carm_failures_cli_and_zero_rounds_accounting(tmp_path: Path, capsy
     assert by_task["pg_unknown"]["stop_checks"] is None
 
 
+def test_envelope_compliance_cli_over_envelope_fail_exit_code(tmp_path: Path, capsys) -> None:
+    """envelope_compliance CLI：C 臂格子 vacant_home_bytes 超標（300MiB > 256MiB）→ verdict FAIL、main 回 1（不假裝通過）。"""
+    cell = tmp_path / "runs" / "exp_over" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 300 * 1024 * 1024}), encoding="utf-8")
+    rc = envelope_compliance.main(["exp_over", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "FAIL"
 
 
+def test_dabstep_subset_report_cli_normal_run_and_files(tmp_path: Path, capsys) -> None:
+    """dabstep_subset_report CLI：有 1 個 C 臂 scored 格子 → main 回 0、--out/--md 皆產出、stdout JSON n_cells/n_scored 皆 1。"""
+    cell = tmp_path / "runs" / "exp_dab" / "cell1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"suite": "dabstep", "task": "t1", "arm": "C"}), encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    rc = dabstep_subset_report.main([
+        "exp_dab", "--base", str(tmp_path / "runs"),
+        "--out", str(tmp_path / "out.json"),
+        "--md", str(tmp_path / "out.md"),
+    ])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    assert (tmp_path / "out.md").is_file()
+    data = json.loads(capsys.readouterr().out)
+    assert data["n_cells"] == 1
+    assert data["n_scored"] == 1
+
+
+def test_envelope_compliance_cli_normal_pass_and_out_file(tmp_path: Path, capsys) -> None:
+    """envelope_compliance CLI：C 臂格子 vacant_home_bytes 合規（100MiB ≤ 256MiB）→ verdict PASS、main 回 0、--out 另存 JSON。"""
+    cell = tmp_path / "runs" / "exp_pass" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 100 * 1024 * 1024}), encoding="utf-8")
+    rc = envelope_compliance.main([
+        "exp_pass", "--base", str(tmp_path / "runs"),
+        "--out", str(tmp_path / "out.json"),
+    ])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    assert '"verdict": "PASS"' in capsys.readouterr().out
+    assert '"verdict": "PASS"' in (tmp_path / "out.json").read_text(encoding="utf-8")
+
+
+def test_noncode_cell_audit_cli_table_and_out_file(tmp_path: Path, capsys) -> None:
+    """noncode_cell_audit CLI：有格子資料時 --table 印人讀表格至 stdout＋JSON 另存 --out 檔案、main 回 0。
+
+    與既有缺格子 exit 1（test_noncode_cell_audit_cli_missing_cells_exit_code）形成雙向契約。
+    """
+    cell = tmp_path / "runs" / "exp_nc" / "cell1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"suite": "dabstep", "task": "t1", "arm": "C"}), encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    rc = noncode_cell_audit.main([
+        "exp_nc", "--base", str(tmp_path / "runs"),
+        "--table", "--out", str(tmp_path / "out.json"),
+    ])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    data = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
+    assert data["cells"][0]["cell"] == "cell1"
+    out = capsys.readouterr().out
+    assert "cell" in out
+    assert "zero_ran" in out
+
+
+def test_vacant_growth_log_cli_append_and_overwrite(tmp_path: Path, capsys) -> None:
+    """vacant_growth_log CLI：--out 寫 JSONL 快照、stdout 印 recorded、main 回 0；同一分鐘重複跑覆蓋最後一筆（防濫記），不追加第二行。"""
+    h = tmp_path / "home"
+    (h / "trace" / "objects").mkdir(parents=True)
+    (h / "trace" / "objects" / "blob0").write_text("x", encoding="utf-8")
+    out_log = tmp_path / "data" / "growth.jsonl"
+
+    rc = vacant_growth_log.main(["--home", str(h), "--out", str(out_log)])
+    assert rc == 0
+    assert out_log.is_file()
+    lines = out_log.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 1
+    rec = json.loads(lines[0])
+    assert rec["total_bytes"] >= 1
+    assert "recorded" in capsys.readouterr().out
+
+    # 同一分鐘內重複執行：覆蓋最後一筆，行數維持 1（防濫記契約）
+    rc = vacant_growth_log.main(["--home", str(h), "--out", str(out_log)])
+    assert rc == 0
+    assert len(out_log.read_text(encoding="utf-8").splitlines()) == 1
+
+
+
+
+
+def test_e002_wiring_gauge_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
+    """e002_wiring_gauge CLI：給定無格子之實驗目錄，main 輸出 {"error": "no cells"} 至 stderr 且回傳 1（輸入缺失之命令列邊界契約）。"""
+    (tmp_path / "runs" / "exp_empty").mkdir(parents=True)
+
+    rc = e002_wiring_gauge.main(["exp_empty", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    assert "no cells" in capsys.readouterr().err
+
+
+def test_p02_carm_audit_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
+    good = tmp_path / "runs" / "exp_p02" / "polyglot_py-pg_demo-pi-C-r1"
+    good.mkdir(parents=True)
+    (good / "cell.json").write_text(json.dumps(
+        {"suite": "polyglot_py", "arm": "C", "agent_rc": 0, "timed_out": False, "install_rc": 0}),
+        encoding="utf-8")
+    (good / "score.json").write_text(json.dumps(
+        {"pass": True, "tests_passed": 1, "tests_total": 1}), encoding="utf-8")
+    (good / "vacant_home.tgz").write_bytes(b"")
+    out = tmp_path / "out.json"
+    rc = p02_carm_audit.main(["exp_p02", "--base", str(tmp_path / "runs"),
+                             "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["n_cells"] == 1
+    assert "\"n_cells\": 1" in capsys.readouterr().out
+
+
+def test_e002_wiring_gauge_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
+    """e002_wiring_gauge CLI：A/C 格皆合法且無線路 FAIL 時，main 回 0 且 --out 另存可解析 JSON（與缺格 exit 1 契約閉環）。"""
+    a = tmp_path / "runs" / "exp_w" / "polyglot_py-task1-pi-A-r1-g1"
+    a.mkdir(parents=True)
+    (a / "cell.json").write_text(json.dumps(
+        {"arm": "A", "agent_rc": 0, "timed_out": False, "append_system": None}), encoding="utf-8")
+    (a / "score.json").write_text(json.dumps({"pass": True, "tests_total": 2}), encoding="utf-8")
+    c = tmp_path / "runs" / "exp_w" / "polyglot_py-task1-pi-C-r1-g2"
+    c.mkdir(parents=True)
+    (c / "cell.json").write_text(json.dumps(
+        {"arm": "C", "agent_rc": 0, "timed_out": False, "append_system": None, "install_rc": 0}),
+        encoding="utf-8")
+    (c / "score.json").write_text(json.dumps({"pass": True, "tests_total": 2}), encoding="utf-8")
+    (c / "vacant_home.tgz").write_bytes(b"")
+    out = tmp_path / "out.json"
+    rc = e002_wiring_gauge.main(["exp_w", "--base", str(tmp_path / "runs"), "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["n_cells"] == 2
+    assert "\"n_cells\": 2" in capsys.readouterr().out

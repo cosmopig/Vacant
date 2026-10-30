@@ -1425,3 +1425,14 @@ def test_verify_trace_chains_detects_corrupted_chain(tmp_path, monkeypatch):
     assert ok is False
     assert len(errs) == 1
     assert "corrupted_proj" in errs[0]
+
+
+def test_verify_trace_chains_valid_chain_passes(env):
+    """ASSIGNMENT 🔴最優先驗收(c)正對照：具合法 Ed25519 簽章鏈的病歷專案，
+    verify_trace_chains 必須回 (count=1, ok=True, errors=[])——與損毀鏈負對照
+    (test_verify_trace_chains_detects_corrupted_chain) 形成雙向契約閉環。"""
+    _seed_trace_project(env, name="valid_proj", n_files=1)
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 1
+    assert ok is True
+    assert errs == []
