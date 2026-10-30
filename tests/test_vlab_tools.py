@@ -1048,3 +1048,18 @@ def test_envelope_compliance_cli_missing_exp_dir_error(tmp_path: Path, capsys) -
     err = capsys.readouterr().err
     assert "輸入不可讀：" in err
     assert "nonexistent_exp" in err
+
+
+def test_growth_report_cli_missing_sources_human_unknown_exit_code(tmp_path: Path, capsys) -> None:
+    # P20261030_1659-3（ASSIGNMENT 🔴最優先 驗收 (a)：真機成長跨日序列量具防禦契約）：
+    # 指定不存在之 home 與 ops-data 目錄時，growth_report.main（L305-320）
+    # 在非 --json 終端人讀模式下回傳 exit code 1（verdict != "PASS"），
+    # 且 stdout 完整印出 human(base)（L218-223）的 UNKNOWN 標記、原因及
+    # 缺少數據來源提示（sources: （無））——不崩潰、不假 PASS。
+    rc = growth_report.main(["--home", str(tmp_path / "nonexistent_home"),
+                             "--ops-data", str(tmp_path / "nonexistent_ops")])
+    assert rc == 1
+    out = capsys.readouterr().out
+    assert out.startswith("UNKNOWN：")
+    assert "sources: （無）" in out
+    assert "missing:" in out
