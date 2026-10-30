@@ -1491,3 +1491,27 @@ def test_record_growth_point_dedup_and_invalid_line_handling(tmp_path):
     lines = (custom_vh / "growth.jsonl").read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) == 1
     assert json.loads(lines[0])["home"] == str(custom_vh.resolve())
+
+
+def test_cli_vacant_gc_verify_corrupted_chain_exit_code(tmp_path, capsys):
+    """ASSIGNMENT 🔴最優先驗收(c)：`vacant gc --verify` 遇損毀簽章鏈→回傳 exit code 1，
+    `--json` 含 "verify_ok": false 與含損毀專案名之 verify_errors——拒絕假 PASS；
+    該專案仍計入 verified_projects（已掃描、驗證失敗）。"""
+    vh = tmp_path / "vh"
+    pdir = vh / "trace" / "projects" / "broken_proj"
+    pdir.mkdir(parents=True)
+    (pdir / "chain.ndjson").write_text("bad chain\n", encoding="utf-8")
+    saved = os.environ.get("VACANT_WORK")
+    os.environ["VACANT_WORK"] = str(tmp_path / "work_empty")  # hermetic：gc 不觸及真實工作目錄
+    try:
+        rc = retention.main(["gc", "--state-dir", str(vh), "--verify", "--json"])
+    finally:
+        if saved is None:
+            os.environ.pop("VACANT_WORK", None)
+        else:
+            os.environ["VACANT_WORK"] = saved
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["verify_ok"] is False
+    assert out["verified_projects"] == 1
+    assert any("broken_proj" in e for e in out["verify_errors"])
