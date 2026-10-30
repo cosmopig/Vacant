@@ -944,3 +944,13 @@ def test_noncode_cell_audit_cli_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "需要 <exp>（或 --selftest）" in err
+
+
+def test_holm_e002_cli_missing_exp_error(capsys) -> None:
+    # 未給必填 positional `exp` 時 argparse 自動以 exit code 2 終止、stderr 含
+    # "required: exp"（holm_e002.py main L136-137 ap.add_argument("exp")）。
+    with pytest.raises(SystemExit) as excinfo:
+        holm_e002.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "required: exp" in err
