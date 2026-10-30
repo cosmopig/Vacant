@@ -173,7 +173,7 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 - **一天長多少：24h 視窗最大增長 16.3 MiB**（2G repo 全日開發＋e002 實驗負載下）。
 - 穩態鋸齒 35–82 MiB：峰值 82.3 MiB 是 10/28 20:20 舊日累積，次日 gc 削至 35.2 MiB
   後在 50 MiB 附近走平——**不是線性增長，回收在真實使用裡生效**（20 點全 gc ok＋target_reached）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 52.7 MiB（20.6%）、
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 54.5 MiB（21.3%）、
   最新 trace 37.1 MiB ≤ 64 MiB 上限。
 - 這是**真機 `~/.vacant`** 的跨日序列（20 點、35.88h），不是模擬、不是單點。
 
@@ -240,15 +240,17 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 - e002 **C 臂未通過 12 題型態分析**（round 207 回寫；來源＝`ops/vlab/tools/e002_carm_failures.py`
   EXIT=0 客觀輸出：34 格中 12 格未通過＝4 逾時＋8 未收斂，22+12＝34 與上條 22/34 口徑一致）：
   - **4 逾時格**（agent rc=124 牆鐘逾時；測試進度為 score.json 記錄值）：**forth 52/54、grep 17/25、
-    hangman 5/7、sgf_parsing 17/23**（hangman 最後 hint：`test_after_10_failures_the_game_is_over:
-    'ongoing' != 'lose'`）。**react 實為 PASS 格**（score.json `pass=true`、14/14），不屬逾時題——
+    hangman 5/7、sgf_parsing 17/23**（其中 forth/grep/sgf_parsing 為 `stop_checks=0, rejections=0` 未及收件即逾時；
+    hangman 為 `stop_checks=1, rejections=1`，被退回 1 次後於重試中逾時，最後 hint：`test_after_10_failures_the_game_is_over:
+    AssertionError: 'ongoing' != 'lose'`）。**react 實為 PASS 格**（score.json `pass=true`、14/14），不屬逾時題——
     更正先前審查指示「第 4 逾時題為 react」之誤記，實為 **sgf_parsing**。
   - **8 未收斂格**（agent rc=0、測試未過）：bottle_song 1/7、food_chain 3/10、go_counting 10/11、
     paasio 23/25、poker 33/37、rest_api 6/9、scale_generator 12/17、zipper 9/14。
-  - 退回次數：其中 7 格退回 1 次（rejections=1、1 round 後仍 open，最後 hint 為
-    「step N (python3 -m unittest X_test.py) had failed」）；**zipper 無 rounds 記錄，退回次數
-    誠實記為 UNKNOWN**（工具註明 rejections=null＝UNKNOWN 不是 0）——既不寫「退回 1 次」
-    也不寫「未退回」。
+  - 退回次數：其中 7 格退回 1 次（`stop_checks=2, rejections=1`，1 round 後仍 open，最後 hint 為
+    「step N (python3 -m unittest X_test.py) had failed」）；**zipper 為 `stop_checks=1, rejections=0`**
+    （`vacant_home.tgz` 內 `events.jsonl`、`chain.ndjson` 與 `delivery.json` 明確記錄 `action="allow", rounds_used=0`，
+    因 `021c8924` 修補前 `python3 zipper_test.py` 跑 0 測試 exit 0，zerostop 見 `findings=[]` 放行並 unlink 暫存 `rounds_*.json`；
+    已修補 `e002_carm_failures.py` 讀取 `events.jsonl`/`chain.ndjson`，不再誤報為 UNKNOWN）。
   - 口徑：本條是失敗格客觀型態記錄（哪題、測試進度、退回次數、最後 hint），可查證、可重算
     （重跑該工具即得同輸出）；不作為「C 臂較好」的證據，也不證明任何成效。
 **證據**：`tests/test_retention.py::test_envelope_counted_components_have_named_total_caps`＋

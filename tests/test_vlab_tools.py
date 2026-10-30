@@ -8,6 +8,7 @@ from pathlib import Path
 from ops.vlab.tools import (
     dabstep_subset_report,
     disk_report,
+    e002_carm_failures,
     e002_wiring_gauge,
     envelope_compliance,
     growth_report,
@@ -456,6 +457,96 @@ def test_disk_report_cli_table_and_out_file(tmp_path: Path, capsys) -> None:
     out = capsys.readouterr().out
     assert "arm" in out
     assert "home min" in out
+
+
+def test_no_leading_hyphen_files_in_repo_root() -> None:
+    """Repo 根目錄不得存在以 '-' 開頭的檔案（如 -findings.md），否則 *.md / * 萬用字元展開時會觸發 POSIX 參數注入。"""
+    repo_root = Path(__file__).resolve().parent.parent
+    bad = [p.name for p in repo_root.iterdir() if p.name.startswith("-")]
+    assert bad == [], f"Leading-hyphen files in repo root break shell globs: {bad}"
+
+
+def test_e002_carm_failures_cli_and_zero_rounds_accounting(tmp_path: Path, capsys) -> None:
+    """e002_carm_failures：
+    1) --selftest 回傳 0；缺目錄回傳 exit 2（非 SystemExit 字串導致的 1）；
+    2) 當 vacant_home.tgz 的 events.jsonl / chain.ndjson 已明確記錄 stop/review rounds_used=0
+       （因 zerostop 在無 finding 時會 unlink 暫存的 rounds_*.json，如 pg_zipper），
+       rejections 必須算為 0（int）且 stop_checks=1，不得誤報為 null (UNKNOWN)；
+    3) 牆鐘逾時未觸發 stop 的格（events.jsonl 存在但無 stop 事件），rejections=0 且 stop_checks=0；
+    4) 真正缺 vacant_home.tgz 的格，rejections 與 stop_checks 誠實為 None (UNKNOWN)。
+    """
+    assert e002_carm_failures.main(["--selftest"]) == 0
+    capsys.readouterr()
+
+    rc_missing = e002_carm_failures.main(["--base", str(tmp_path / "no_such_base")])
+    assert rc_missing == 2
+    assert "找不到 run 目錄" in capsys.readouterr().err
+
+    run = tmp_path / "runs" / "e002_hypothesis_arms"
+    # (a) 0 rejections with stop check (like pg_zipper: rounds_*.json absent, events.jsonl & chain.ndjson have rounds_used=0)
+    c_zero = run / "polyglot_py-pg_zipper-pi-C-r1"
+    c_zero.mkdir(parents=True)
+    (c_zero / "cell.json").write_text(
+        json.dumps({"task": "pg_zipper", "timed_out": False, "agent_rc": 0, "wall_s": 100.0}),
+        encoding="utf-8",
+    )
+    (c_zero / "score.json").write_text(
+        json.dumps({"pass": False, "tests_passed": 9, "tests_total": 14}),
+        encoding="utf-8",
+    )
+    with tarfile.open(c_zero / "vacant_home.tgz", "w:gz") as tf:
+        ev_bytes = (json.dumps({
+            "agent": "pi", "event": "stop", "kind": "stop", "action": "allow",
+            "zero": {"ran": True, "rounds_used": 0, "left_open": 0}, "zero_ran": True,
+        }) + "\n").encode("utf-8")
+        ti = tarfile.TarInfo(".vacant/intake/hooks/events.jsonl")
+        ti.size = len(ev_bytes)
+        tf.addfile(ti, io.BytesIO(ev_bytes))
+        deliv_bytes = json.dumps({"findings": [], "unverified": [], "deliverables": ["zipper.py"]}).encode("utf-8")
+        ti2 = tarfile.TarInfo(".vacant/trace/projects/p1/delivery.json")
+        ti2.size = len(deliv_bytes)
+        tf.addfile(ti2, io.BytesIO(deliv_bytes))
+
+    # (b) timeout before any stop check (like pg_forth: events.jsonl has tool events only)
+    c_to = run / "polyglot_py-pg_forth-pi-C-r1"
+    c_to.mkdir(parents=True)
+    (c_to / "cell.json").write_text(
+        json.dumps({"task": "pg_forth", "timed_out": True, "agent_rc": 124, "wall_s": 1800.0}),
+        encoding="utf-8",
+    )
+    (c_to / "score.json").write_text(
+        json.dumps({"pass": False, "tests_passed": 52, "tests_total": 54}),
+        encoding="utf-8",
+    )
+    with tarfile.open(c_to / "vacant_home.tgz", "w:gz") as tf:
+        ev_bytes = (json.dumps({"agent": "pi", "event": "pre_tool", "kind": "pre_tool", "action": "allow"}) + "\n").encode("utf-8")
+        ti = tarfile.TarInfo(".vacant/intake/hooks/events.jsonl")
+        ti.size = len(ev_bytes)
+        tf.addfile(ti, io.BytesIO(ev_bytes))
+
+    # (c) missing vacant_home.tgz -> truly UNKNOWN (None)
+    c_unk = run / "polyglot_py-pg_unknown-pi-C-r1"
+    c_unk.mkdir(parents=True)
+    (c_unk / "cell.json").write_text(
+        json.dumps({"task": "pg_unknown", "timed_out": False, "agent_rc": 0, "wall_s": 10.0}),
+        encoding="utf-8",
+    )
+    (c_unk / "score.json").write_text(
+        json.dumps({"pass": False, "tests_passed": 0, "tests_total": 5}),
+        encoding="utf-8",
+    )
+
+    rc = e002_carm_failures.main(["--base", str(tmp_path / "runs")])
+    assert rc == 0
+    rep = json.loads(capsys.readouterr().out)
+    by_task = {c["task"]: c for c in rep["cells"]}
+    assert by_task["pg_zipper"]["rejections"] == 0
+    assert by_task["pg_zipper"]["stop_checks"] == 1
+    assert by_task["pg_forth"]["rejections"] == 0
+    assert by_task["pg_forth"]["stop_checks"] == 0
+    assert by_task["pg_unknown"]["rejections"] is None
+    assert by_task["pg_unknown"]["stop_checks"] is None
+
 
 
 
