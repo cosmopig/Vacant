@@ -1264,6 +1264,20 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert "incomplete_cells" in out["summary"] and "quarantined_cells" in out["summary"]
     assert out["summary"]["incomplete_cells"] >= 1 and out["summary"]["quarantined_cells"] == 0
 
+    # P20261030_2230-2（ASSIGNMENT「研發工具需納入回歸測試」＋審查第 2 條第 3 點；核心已於 a9ae02d3 落）：
+    # 隔離崩潰格 bad 判定回歸——獨立 crash_runs 下僅一格 .infra-test-opencode-H-r1 →
+    # main --runs-dir：bad 精確含該隔離格、quarantined_cells==1、n_cells==1、rc==1
+    # （存在 infra 崩潰格時不得 bad:[]＋exit 0；quarantined_cells 在 summary 頂層欄位）。
+    crash_runs = tmp_path / "crash_runs"
+    crash_runs.mkdir()
+    (crash_runs / ".infra-test-opencode-H-r1").mkdir()  # .infra- 隔離目錄 → quarantined_infra（確定崩潰 → bad）
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(crash_runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == [".infra-test-opencode-H-r1"]
+    assert out["summary"]["quarantined_cells"] == 1 and out["n_cells"] == 1
+
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
