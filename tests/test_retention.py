@@ -1979,3 +1979,86 @@ def test_compact_logs_dry_run_safe(tmp_path: Path) -> None:
     # dry-run：超額輪次檔案原樣保留、未被刪除
     assert r1.is_file()
     assert r2.is_file()
+
+
+def test_compact_trace_expires_old_unrecorded_changes_and_prompts_beyond_keep_steps(env):
+    """compact_trace：超過 keep_recent_steps 視窗（seq < min_kept_seq）的舊 unrecorded_change
+    中間檔案版本與已無保留步驟之舊工作階段 prompt/transcript blob 必須隨視窗過期回收，
+    不可永久釘死在 keep_shas 造成長期使用單調洩漏；同時近期保留步驟的追緝（input / agent）
+    不受舊工作階段已回收 prompt 影響，且 Ed25519 簽章鏈保持完整。"""
+    from vacant_network.trace.blame import blame_location
+    from vacant_network.trace.locate import Location
+
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ws = env / "work" / "window_expiry"
+    ws.mkdir(parents=True)
+    (ws / "app.py").write_text("v0 = 0\n")
+    (ws / "ext.txt").write_text("ext_init\n")
+
+    rec = Recorder(ws)
+    rec.baseline()
+    s_old = Actor("claude", "s_old")
+    s_new = Actor("claude", "s_new")
+
+    old_prompt_txt = "old session prompt " + ("P" * 20_000)
+    old_prompt_sha = hashlib.sha256(old_prompt_txt.encode("utf-8")).hexdigest()
+    rec.prompt(old_prompt_txt, session="s_old", source="user")
+
+    # 舊工作階段前的外部未記錄修改（產生 unrecorded_change 的中間版本 ext_old_v1）
+    ext_old_v1 = "ext_v1\n" + ("U" * 20_000)
+    ext_old_v1_sha = hashlib.sha256(ext_old_v1.encode("utf-8")).hexdigest()
+    (ws / "ext.txt").write_text(ext_old_v1)
+
+    app_v1 = "v1 = 1\n" + ("A" * 20_000) + "\n"
+    app_v1_sha = hashlib.sha256(app_v1.encode("utf-8")).hexdigest()
+    rec.pre("t1", s_old, "Write", {"file_path": str(ws / "app.py"), "content": "v1"})
+    (ws / "app.py").write_text(app_v1)
+    rec.post("t1", s_old, "Write", {"file_path": str(ws / "app.py"), "content": "v1"}, "ok")
+
+    # 再次外部修改 ext.txt，使 ext_old_v1 成為不再存於工作區的歷史中間版本
+    (ws / "ext.txt").write_text("ext_v2_live\n")
+    app_v2 = "v2 = 2\n" + ("B" * 20_000) + "\n"
+    rec.pre("t2", s_old, "Write", {"file_path": str(ws / "app.py"), "content": "v2"})
+    (ws / "app.py").write_text(app_v2)
+    rec.post("t2", s_old, "Write", {"file_path": str(ws / "app.py"), "content": "v2"}, "ok")
+
+    assert rec.blobs.has(old_prompt_sha)
+    assert rec.blobs.has(ext_old_v1_sha)
+    assert rec.blobs.has(app_v1_sha)
+
+    # 新工作階段（位於 keep_recent_steps=2 視窗內）
+    new_prompt_txt = "new session prompt magic_val = 888888\n" + ("N" * 10_000)
+    new_prompt_sha = hashlib.sha256(new_prompt_txt.encode("utf-8")).hexdigest()
+    rec.prompt(new_prompt_txt, session="s_new", source="user")
+
+    app_v3 = "v3 = 1\n" + ("C" * 10_000) + "\n"
+    app_v3_sha = hashlib.sha256(app_v3.encode("utf-8")).hexdigest()
+    rec.pre("t3", s_new, "Write", {"file_path": str(ws / "app.py"), "content": "v3"})
+    (ws / "app.py").write_text(app_v3)
+    rec.post("t3", s_new, "Write", {"file_path": str(ws / "app.py"), "content": "v3"}, "ok")
+
+    app_v4 = "v3 = 1\nmagic_val = 888888\ninvented_val = 999999\n"
+    app_v4_sha = hashlib.sha256(app_v4.encode("utf-8")).hexdigest()
+    rec.pre("t4", s_new, "Edit", {"file_path": str(ws / "app.py"), "new_string": "magic_val = 888888\ninvented_val = 999999"})
+    (ws / "app.py").write_text(app_v4)
+    rec.post("t4", s_new, "Edit", {"file_path": str(ws / "app.py"), "new_string": "magic_val = 888888\ninvented_val = 999999"}, "ok")
+
+    dry = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=True)
+    res = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=False)
+    assert dry["bytes_freed"] == res["bytes_freed"] >= 60_000
+    assert not rec.blobs.has(old_prompt_sha), "已滑出保留視窗的舊工作階段 prompt 應被回收"
+    assert not rec.blobs.has(ext_old_v1_sha), "已滑出保留視窗的舊 unrecorded_change 中間版本應被回收"
+    assert not rec.blobs.has(app_v1_sha), "已滑出保留視窗的舊步驟檔案版本應被回收"
+    assert rec.blobs.has(new_prompt_sha), "保留步驟所屬工作階段的 prompt 必須保留"
+    assert rec.blobs.has(app_v3_sha)
+    assert rec.blobs.has(app_v4_sha)
+
+    ok, msg = rec.verify()
+    assert ok, msg
+
+    tr = Trace(rec)
+    b_input = blame_location(tr, Location("app.py", line=2, value="888888"))
+    assert b_input["state"] == "located" and b_input["fault_class"] == "input"
+    b_agent = blame_location(tr, Location("app.py", line=3, value="999999"))
+    assert b_agent["state"] == "located" and b_agent["fault_class"] == "agent"
+

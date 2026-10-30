@@ -1,0 +1,137 @@
+{
+  "exp": "e002_hypothesis_arms",
+  "cells_scored": 170,
+  "infra": [
+    {
+      "cell": "polyglot_py-pg_hangman-pi-C-r1.infra-20261029T132004",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_react-pi-M-r1.infra-20261030T054304",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_react-pi-S-r1.infra-20261030T142617",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_rest_api-pi-M-r1.infra-20261030T062044",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_rest_api-pi-S-r1.infra-20261030T152129",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_rest_api-pi-S-r1.infra-20261030T153739",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_scale_generator-pi-A-r1.infra-20261029T084712",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_transpose-pi-M-r1.infra-20261030T074023",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_transpose-pi-M-r1.infra-20261030T081124",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    }
+  ],
+  "per_arm": {
+    "A": {
+      "n": 34,
+      "pass": 18,
+      "rate": 0.5294,
+      "calls_per_success": 65.72,
+      "tokens_per_success": 1550104,
+      "timeouts": 8,
+      "mean_wall_s": 730.2,
+      "vacant_sha": []
+    },
+    "C": {
+      "n": 34,
+      "pass": 22,
+      "rate": 0.6471,
+      "calls_per_success": 67.95,
+      "tokens_per_success": 1716779,
+      "timeouts": 4,
+      "mean_wall_s": 638.0,
+      "vacant_sha": [
+        "cf62d258d250c43fb4a40d20b9fbc2b189083e05"
+      ]
+    },
+    "H": {
+      "n": 34,
+      "pass": 15,
+      "rate": 0.4412,
+      "calls_per_success": 130.2,
+      "tokens_per_success": 3858922,
+      "timeouts": 11,
+      "mean_wall_s": 799.9,
+      "vacant_sha": []
+    },
+    "M": {
+      "n": 34,
+      "pass": 15,
+      "rate": 0.4412,
+      "calls_per_success": 116.13,
+      "tokens_per_success": 3180187,
+      "timeouts": 8,
+      "mean_wall_s": 812.8,
+      "vacant_sha": []
+    },
+    "S": {
+      "n": 34,
+      "pass": 20,
+      "rate": 0.5882,
+      "calls_per_success": 71.65,
+      "tokens_per_success": 1782990,
+      "timeouts": 6,
+      "mean_wall_s": 670.2,
+      "vacant_sha": []
+    }
+  },
+  "paired": {
+    "A_vs_C": {
+      "pairs": 34,
+      "A_only": 3,
+      "C_only": 7,
+      "mcnemar_p_two_sided": 0.3438,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 7,
+      "tasks_net_negative": 3
+    },
+    "A_vs_H": {
+      "pairs": 34,
+      "A_only": 5,
+      "H_only": 2,
+      "mcnemar_p_two_sided": 0.4531,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 2,
+      "tasks_net_negative": 5
+    },
+    "A_vs_M": {
+      "pairs": 34,
+      "A_only": 6,
+      "M_only": 3,
+      "mcnemar_p_two_sided": 0.5078,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 3,
+      "tasks_net_negative": 6
+    },
+    "A_vs_S": {
+      "pairs": 34,
+      "A_only": 3,
+      "S_only": 5,
+      "mcnemar_p_two_sided": 0.7266,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 5,
+      "tasks_net_negative": 3
+    }
+  },
+  "rescore_checked": true,
+  "rescore_mismatch": [],
+  "note": "只由原始格子重算；pass=None 的格子是 infra，不進分母。p 值假設配對獨立——同題重複時看 distinct_tasks 與 tasks_net_*。"
+}
