@@ -621,32 +621,10 @@ class Blamer:
                         break
                     if tool_kind(j.tool) == "agent" and j.ctx[:2] == s.ctx[:2] and not j.ctx[2]:
                         out.append(("spawn_input", j, self.t.input_text(j), None))
-        me = f"{s.actor.get('platform')}:{s.actor.get('session')}"
         for p in self.t.prompts:
-            if int(p.get("seq", 0)) >= s.seq:
+            if int(p.get("seq", 0)) >= s.seq or not self._prompt_for_step(p, s):
                 continue
             src = str(p.get("source") or "user")
-            if src not in _TASK_SOURCES:
-                # Vacant 自己的回饋（引了錯值與應有的值）、agent 自己排的提示（它自己的話）、平台自己說不是人的
-                # 訊息：都不是「任務說的」——當成來源就等於替 agent 洗掉錯（2026-09-25）
-                continue
-            psess = str(p.get("session"))
-            if psess == "*":
-                # 「任何工作階段」只有舊病歷裡 `vacant do` 自己記的任務訊息用過；掛鉤記的提示不可以是它
-                # （2026-09-25 審查 C1：偽造一則 `session_id="*"` 的「人打的」曾經成了每個工作階段的任務訊息）
-                if src != "vacant do":
-                    continue
-            elif psess.startswith("do:"):
-                # `vacant do` 那一跑的任務訊息：只對那一跑開出來的工作階段算數（審查 C4：`--in-place` 的任務
-                # 訊息曾經對專案裡之後每一個無關的工作階段都算數）
-                if me not in self.t.do_sessions.get(psess[3:], set()):
-                    continue
-            elif psess != str(s.actor.get("session")):
-                continue
-            if src == "parent_agent" and not s.actor.get("agent"):
-                continue
-            if src == "parent_agent" and p.get("agent") and p.get("agent") != s.actor.get("agent"):
-                continue                       # 另一個子 agent 收到的任務說明
             kind = {"subagent_result": "subagent_result", "parent_agent": "spawn_prompt",
                     "other_actor": "other_actor"}.get(src, "prompt")
             fake_seq = int(p.get("seq", 0))
@@ -655,6 +633,32 @@ class Blamer:
         out.sort(key=lambda x: -(x[1].seq if x[1] is not None else
                                  (x[3] or {}).get("seq", 0) if isinstance(x[3], dict) else 0))
         return out
+
+    def _prompt_for_step(self, p: dict[str, Any], s: Step) -> bool:
+        src = str(p.get("source") or "user")
+        if src not in _TASK_SOURCES:
+            # Vacant 自己的回饋（引了錯值與應有的值）、agent 自己排的提示（它自己的話）、平台自己說不是人的
+            # 訊息：都不是「任務說的」——當成來源就等於替 agent 洗掉錯（2026-09-25）
+            return False
+        psess = str(p.get("session"))
+        if psess == "*":
+            # 「任何工作階段」只有舊病歷裡 `vacant do` 自己記的任務訊息用過；掛鉤記的提示不可以是它
+            # （2026-09-25 審查 C1：偽造一則 `session_id="*"` 的「人打的」曾經成了每個工作階段的任務訊息）
+            if src != "vacant do":
+                return False
+        elif psess.startswith("do:"):
+            # `vacant do` 那一跑的任務訊息：只對那一跑開出來的工作階段算數（審查 C4：`--in-place` 的任務
+            # 訊息曾經對專案裡之後每一個無關的工作階段都算數）
+            me = f"{s.actor.get('platform')}:{s.actor.get('session')}"
+            if me not in self.t.do_sessions.get(psess[3:], set()):
+                return False
+        elif psess != str(s.actor.get("session")):
+            return False
+        if src == "parent_agent" and not s.actor.get("agent"):
+            return False
+        if src == "parent_agent" and p.get("agent") and p.get("agent") != s.actor.get("agent"):
+            return False                       # 另一個子 agent 收到的任務說明
+        return True
 
     def _rel(self, ref: Any, cwd: str | None = None) -> str | None:
         if not ref or not isinstance(ref, str):
@@ -980,6 +984,7 @@ class Blamer:
             for j in self.t.steps
         ) or any(
             int(p.get("seq", 0)) < s.seq and p.get("text_blob")
+            and self._prompt_for_step(p, s)
             and self.t.blob_text(p.get("text_blob")) is None
             for p in self.t.prompts
         ):
