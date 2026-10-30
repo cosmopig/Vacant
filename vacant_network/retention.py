@@ -1,4 +1,4 @@
-"""retention — **磁碟空間與資料留存治理**：清掉過程留下的巨量工作區副本與孤立物件，**不動任何簽章鏈**。
+"""retention — **磁碟空間或資料留存治理**：清掉過程留下的巨量工作區副本或孤立物件，**不動任何簽章鏈**。
 
 這支在架構裡承重什麼：
 Vacant 的幾個路徑會在磁碟上留下副本；每一塊都有留存上限或回收路徑：
@@ -9,10 +9,10 @@ Vacant 的幾個路徑會在磁碟上留下副本；每一塊都有留存上限�
    `VACANT_TRACE_BUDGET_BYTES` 可覆寫）上限約束，超標由 `_sweep_to_target` 回收最舊。
    （本 docstring 曾在 round 142 前描述舊的「全量複製 ≤ 8 MB」行為，round 166 修正為現行行為——
    人類 10/28 回報的主因引用正是這段過時文字。）
-2. **收件隔離區（`$VACANT_HOME/quarantine/`）**：每次 `vacant check`（含掛鉤在 Stop 的檢查）與 `vacant submit`
+2. **收件隔離區（`$VACANT_HOME/quarantine/`）**：每次 `vacant check`（含掛鉤在 Stop 的檢查）或 `vacant submit`
    都會把繳付物再凍結一份進 `quarantine/objects/`；`compact_quarantine` 只留每 task 最近
    `DEFAULT_KEEP_DECISIONS`（2）次決策，其餘回收。
-3. **一次性工作區（`~/.vacant-work/<task>/<run>/ws*`）與 `vacant run` 暫存（`_frozen_ws`／`_origin_ws`）**：
+3. **一次性工作區（`~/.vacant-work/<task>/<run>/ws*`）或 `vacant run` 暫存（`_frozen_ws`／`_origin_ws`）**：
    每次重試都完整複製整個專案；`compact_work`／`compact_vrun_dir` 只留每 task 最近 `DEFAULT_KEEP_RUNS`（3）
    次並剝離 workspace，簽章鏈引用的 receipts／attestation 保留。
 4. **掛鉤追加日誌（`$VACANT_HOME/intake/hooks/*.jsonl`、`*.log`）**：`compact_logs` 把單檔截在
@@ -30,13 +30,13 @@ Vacant 的幾個路徑會在磁碟上留下副本；每一塊都有留存上限�
 
 ## 為什麼清理不會弄壞簽章鏈（究責紅線）
 
-`Recorder`（`chain.ndjson`）、`Ledger`（`ledger.ndjson`）與 `vrun`（`receipts_*.ndjson`）簽在鏈上的都是
+`Recorder`（`chain.ndjson`）、`Ledger`（`ledger.ndjson`）或 `vrun`（`receipts_*.ndjson`）簽在鏈上的都是
 **內容的 SHA-256 摘要**（`pre_index`、`post_index`、`input_blob`、`output_blob`、`artifact_sha256`、
 `workspace_tree_sha256`），而不是把檔案位元組塞進簽章鏈本身：
-- `Recorder.verify()` 與 `Recorder.verify_since()` 只驗 `chain.ndjson` 與 `head.json`，完全不讀 `objects/`。
-- 未被任何步驟改動過、且目前仍在工作區原位（SHA-256 經重算吻合）的檔案，`Trace.file_text` 與
+- `Recorder.verify()` 或 `Recorder.verify_since()` 只驗 `chain.ndjson` 或 `head.json`，完全不讀 `objects/`。
+- 未被任何步驟改動過、且目前仍在工作區原位（SHA-256 經重算吻合）的檔案，`Trace.file_text` 或
   `workspace.materialize` 可直接從工作區讀取並核對雜湊，無須在 `trace/objects/` 留一份重複副本。
-- 收件帳本只保留最新接受／放行／待審與最近 N 次決策的候選物件，其餘中間 `check` 或舊退回的隔離物件
+- 收件帳本只保留最新接受／放行／待審或最近 N 次決策的候選物件，其餘中間 `check` 或舊退回的隔離物件
   可直接回收，帳本簽章鏈照常通過。
 
 ## 誠實邊界
@@ -45,10 +45,10 @@ Vacant 的幾個路徑會在磁碟上留下副本；每一塊都有留存上限�
    `materialize` 重建出當時的檔案內容；那一步的簽章、寫入清單（路徑＋前後 sha256）仍在 `chain.ndjson`。
    若之後對已被清掉中間版本的古老步驟跑 `blame`，`Trace` 會誠實標記該狀態 `unreadable`（`UNOBSERVED`），
    絕不會把過錯栽給別的步驟。
-2. 預設保留最新回合與最近 `keep_recent_steps`（預設 50 步）的全部索引與修改版本，因此當下與近期的
+2. 預設保留最新回合或最近 `keep_recent_steps`（預設 50 步）的全部索引或修改版本，因此當下或近期的
    `zerostop`、`evidence`、`blame`、`delivery.md` 行為 100% 不變。
 
-## 自動回收（零設定）與用量檢視
+## 自動回收（零設定）或用量檢視
 
 - `auto_gc`：零設定自動 gc——**單例鎖（flock，持鎖行程死掉時由 OS 自動釋放）＋頻率限制
   （預設一小時一次）＋時間預算（預設 30 秒，在下一個迴圈邊界停下；已刪的都是簽章鏈不引用的
@@ -79,7 +79,7 @@ DEFAULT_KEEP_SET_ASIDE = 3
 DEFAULT_MAX_LOG_BYTES = 2 * 1024 * 1024  # 2 MB
 # round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在此窗口內的專案視為「活躍」，
 # gc 保留其「未變動且工作區原檔 bit 相同」的 live 背景 blob（下次修改所需的 before
-# 版本；回收它們只買回 I/O、超時與失觀，省不下任何持久磁碟）。預設 7 天。
+# 版本；回收它們只買回 I/O、超時或失觀，省不下任何持久磁碟）。預設 7 天。
 DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 
 # 2026-10-28 Axis 2（取代 round 72 的「保留活躍專案 before 版本」）：
@@ -94,7 +94,7 @@ DEFAULT_ACTIVE_WINDOW_S = 7 * 86400.0
 # （本專案實測 5.97 MiB，2026-10-28 round 145）；未變動檔副本（同專案 63.18 MiB）
 # 由讀端工作區回退兜底，超標時 sweep 優先回收、零損失。
 # round 145 另修 `_sweep_to_target` 計數 bug（只數候選不數硬底 ⇒ 69.15 MiB 現狀
-# 下 sweep 空轉），見同檔 round 145 註記與 tests/test_retention.py 回歸測試。
+# 下 sweep 空轉），見同檔 round 145 註記或 tests/test_retention.py 回歸測試。
 DEFAULT_TRACE_BUDGET_BYTES = 64 * 1024 * 1024
 
 # 2026-10-28 Axis 2 最優先（人類點名：~/.vacant 用量沒有上限）：
@@ -111,7 +111,7 @@ DEFAULT_WIRE_BODY_BYTES = 96 * 1024 * 1024
 #: 超過時保留最新完整行（一半上限），更早行的證據誠實 UNKNOWN（不是 0、不是 PASS）。
 DEFAULT_WIRE_INDEX_BYTES = 8 * 1024 * 1024
 #: possess/hooks 每 session 一個事件 jsonl（canary／session_start…，attest 對帳用）。
-#: 單檔 2 MiB 上限（與 intake 日誌同口徑）；只保留最新 N 個 session，更早的誠實 UNKNOWN。
+#: 單檔 2 MiB 上限（或 intake 日誌同口徑）；只保留最新 N 個 session，更早的誠實 UNKNOWN。
 DEFAULT_HOOKS_MAX_FILE_BYTES = 2 * 1024 * 1024
 DEFAULT_HOOKS_KEEP_SESSIONS = 200
 
@@ -127,7 +127,7 @@ STABLE_ENVELOPE_BYTES = 256 * 1024 * 1024
 # 2026-10-29 round 186（ASSIGNMENT 🔴 最優先驗收 4(a)/(b)：「量它從零開始一天長多少」）：
 # 此前成長量測靠人手跑 ops/vlab/tools/vacant_growth_log.py（~/dev/ops/data/vacant_growth.jsonl）。
 # 現行 auto gc 每次真跑（至多每小時一次、≤24 筆/日）就自動記一筆用量點進
-# $VACANT_HOME/growth.jsonl——零設定、fail-open、schema 與 ops 工具同欄位可併排。
+# $VACANT_HOME/growth.jsonl——零設定、fail-open、schema 或 ops 工具同欄位可併排。
 # 量具本身也須有上限（否則封頂自我矛盾）：位元組硬上限，保留最新、淘汰最舊。
 DEFAULT_GROWTH_LOG_BYTES = 256 * 1024  # 256 KiB ≈ 400+ 筆/日 × 數月
 
@@ -210,7 +210,7 @@ def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
       accounting_complete         unaccounted 為空（帳目完整）
       overrun                     越過命名總上限的組件 {name: {bytes, cap_bytes}}
                                   （round 192：fixed ＋ count-based 分組都在內）
-      within_caps                 沒有組件越限（「固定不增長」與計數制長期增長都由量具盯住）
+      within_caps                 沒有組件越限（「固定不增長」或計數制長期增長都由量具盯住）
       fixed_overrun               overrun 中 fixed 組件的子集（round 190 欄位，保持同義）
       fixed_within_caps           沒有 fixed 組件越限（「固定不增長」由量具盯住）
       byte_caps_sum               位元組硬上限分組的加總（bytes ＋ fixed 類型）
@@ -487,7 +487,7 @@ def compact_trace(
     active_window_s: float | None = DEFAULT_ACTIVE_WINDOW_S,
     target_bytes: int | None = None,
 ) -> dict[str, Any]:
-    """清理 `$VACANT_HOME/trace/` 下多餘的物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。
+    """清理 `$VACANT_HOME/trace/` 下多餘的物件或過期的擱置鏈，不動 `chain.ndjson` 或 `head.json`。
 
     `target_bytes`（2026-10-28 Axis 2）：常規回收後若版本庫仍大於此位元組數，再按
     「工作區冗餘 → 最舊舊版本」的順序回收（見 `_sweep_to_target`）：讀取端回退
@@ -495,7 +495,7 @@ def compact_trace(
 
     round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在 `active_window_s` 內（預設
     7 天）的**活躍專案**，其「未變動且工作區原檔 bit 相同」的 live 背景 blob 正是那些
-    檔案下次被修改時所需的 before 版本，對它回收只買回 I/O、超時與失觀（下一次掃描
+    檔案下次被修改時所需的 before 版本，對它回收只買回 I/O、超時或失觀（下一次掃描
     如數重存），故予以保留；**非活躍專案**（超出窗口）照舊回收。`active_window_s=None`
     表示無活躍窗口（全部照舊回收）；`0.0` 等於「無任何專案活躍」。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
@@ -503,7 +503,7 @@ def compact_trace(
     obj_root = troot / "objects"
     proj_root = troot / "projects"
     if not troot.is_dir():
-        # 必須與完整回傳同形（round 164：缺 `kept_blobs`/`aborted` 會讓 `vacant gc`
+        # 必須或完整回傳同形（round 164：缺 `kept_blobs`/`aborted` 會讓 `vacant gc`
         # 的人類輸出在新狀態目錄上 KeyError）
         return {"bytes_freed": 0, "files_removed": 0, "projects_scanned": 0,
                 "kept_blobs": 0, "aborted": False}
@@ -613,7 +613,7 @@ def compact_trace(
             if not chain_file.is_file():
                 continue
 
-            # round 72：活躍邊界（以鏈上活動的磁碟時間為準；與本檔其他 max_age 判斷同用 mtime）
+            # round 72：活躍邊界（以鏈上活動的磁碟時間為準；或本檔其他 max_age 判斷同用 mtime）
             project_active = False
             if active_window_s is not None:
                 last_activity = 0.0
@@ -802,7 +802,7 @@ def compact_trace(
 
             # 索引裡出現的檔案內容：
             # 若檔案曾被改動過、或工作區已不在／內容已變 ⇒ 留在版本庫；
-            # 若檔案從頭到尾未被任何步驟改動，且目前工作區原檔大小與 sha256 完全相同 ⇒
+            # 若檔案從頭到尾未被任何步驟改動，且目前工作區原檔大小或 sha256 完全相同 ⇒
             # 工作區本身就是這份內容，版本庫裡的重複副本可安全回收。
             seen_idx_entries: dict[tuple[str, str], bool] = {}
             for idx_sha in list(active_indices):
@@ -912,7 +912,7 @@ def compact_quarantine(
     dry_run: bool = False,
     budget: _Budget | None = None,
 ) -> dict[str, Any]:
-    """清理 `$VACANT_HOME/quarantine/` 裡未被帳本最新裁決／放行引用的候選清單與隔離物件。"""
+    """清理 `$VACANT_HOME/quarantine/` 裡未被帳本最新裁決／放行引用的候選清單或隔離物件。"""
     sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
     store_roots = [p for p in (sroot / "intake" / "store", sroot / "quarantine") if p.is_dir()]
     if not store_roots:
@@ -1163,7 +1163,7 @@ def compact_vrun_dir(
     dry_run: bool = False,
     budget: _Budget | None = None,
 ) -> dict[str, Any]:
-    """清理 `vacant run` 留下的 `_frozen_ws`、`_origin_ws` 與 `wire_RUN-ON` 原始請求包，
+    """清理 `vacant run` 留下的 `_frozen_ws`、`_origin_ws` 或 `wire_RUN-ON` 原始請求包，
     **保留 `receipts_*.ndjson`、`attestation.json`、`result.json`**，使 `verify_run_receipts` 100% 維持通過。"""
     base = pathlib.Path(run_dir).resolve()
     if not base.is_dir():
@@ -1381,7 +1381,7 @@ def compact_wire(
       被刪 body 的內容誠實 UNKNOWN（journal 的 sha256 仍在）。
     - `index.jsonl`：中介日誌（`vrun/attest.read_relay_calls`／requests_seen 對帳）。
       超過 `max_index_bytes` 時保留最新完整行（一半上限、至少 4 KB）原子重寫；
-      更早行的證據誠實 UNKNOWN。常駐 proxy 每通以 `open("a")` 追記，gc 重寫與它
+      更早行的證據誠實 UNKNOWN。常駐 proxy 每通以 `open("a")` 追記，gc 重寫或它
       競爭時最多丟少量行（fail-open：證據缺失＝UNKNOWN，不損毀、不會偽成 PASS）。
     - 任何 OSError 跳過不拋（fail-open）。
     """
@@ -1529,7 +1529,7 @@ def compact_session_hooks(
 def _growth_snapshot(sroot: pathlib.Path) -> dict[str, Any]:
     """round 186：算一筆 `~/.vacant` 用量快照（唯讀；出錯照拋，由呼叫端 fail-open）。
 
-    schema 與 `ops/vlab/tools/vacant_growth_log.py` 同欄位（ts/home/total_bytes/
+    schema 或 `ops/vlab/tools/vacant_growth_log.py` 同欄位（ts/home/total_bytes/
     per_dir_bytes/objects_files/gc_last），另加 `source` 標明來源；兩份 JSONL 可併排。
     """
     rec: dict[str, Any] = {
@@ -1674,7 +1674,7 @@ def auto_gc(
             })
             if aborted := body.get("aborted"):
                 body["status"] = "ok_partial"
-            # 寫回頻與報告（原子寫）
+            # 寫回頻或報告（原子寫）
             summary = {"ts": t0, "elapsed_s": body["elapsed_s"], "bytes_freed": body["bytes_freed"],
                        "files_removed": body["files_removed"], "status": body["status"]}
             with contextlib.suppress(OSError):
@@ -1773,7 +1773,7 @@ def usage_report(
             "override_env": ["VACANT_WIRE_BODY_BYTES", "VACANT_WIRE_INDEX_BYTES"],
         }
         # 2026-10-29 round 168（ASSIGNMENT 🔴 最優先、驗收條件 1 → 常規量具）：
-        # 穩態封頂＝各分組上限的**加總**（STABLE_ENVELOPE_BYTES；口徑與理由見
+        # 穩態封頂＝各分組上限的**加總**（STABLE_ENVELOPE_BYTES；口徑或理由見
         # ops/packets/disk_top_priority.md §3/§4）＋各分組餘量。⚠ 它不是一條程式
         # 保證的單一硬上限——`note` 必須自報這一點，避免被讀成單一開關。
         # 量具失敗不阻報告其餘部分（fail-open）。
@@ -1815,7 +1815,7 @@ def usage_report(
                          "quarantine 總 16 MiB＋日誌 2 MiB/檔＋固定安裝面 1 MiB/件），"
                          "不是一條單一開關；每個 top-level 組件都須有命名上限"
                          "（accounting.unaccounted 為空、accounting.within_caps 為真才算帳目完整）；"
-                         "口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
+                         "口徑或理由見 ops/packets/disk_top_priority.md §3/§4"),
                 "total_bytes": total,
                 "within_envelope": (total <= STABLE_ENVELOPE_BYTES) and within_groups
                 and acct["accounting_complete"] and acct["within_caps"],
@@ -1930,7 +1930,7 @@ def usage_main(argv: list[str] | None = None) -> int:
                   "新增 top-level 寫入必須在 retention.ENVELOPE_COMPONENTS 註冊）")
         for name, v in (acct.get("overrun") or {}).items():
             print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
-                  f"（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 與 "
+                  f"（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 或 "
                   f"retention.ENVELOPE_COMPONENTS）")
         print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
               "（ops/packets/disk_top_priority.md §3/§4）")
@@ -1980,7 +1980,7 @@ def _parse_size(s: str) -> int:
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="vacant gc",
-        description="清理 Vacant 留下的工作區副本、未改動檔案副本、舊隔離物件與過大日誌（保留所有簽章鏈可驗）",
+        description="清理 Vacant 留下的工作區副本、未改動檔案副本、舊隔離物件或過大日誌（保留所有簽章鏈可驗）",
     )
     ap.add_argument("--state-dir", type=pathlib.Path, default=None,
                     help="Vacant 狀態根目錄（預設 $VACANT_HOME 或 ~/.vacant）")
@@ -1995,9 +1995,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--max-age-days", type=float, default=None,
                     help="只清理早於 N 天的非必要物件（預設立即清理冗餘副本）")
     ap.add_argument("--target-bytes", type=_parse_size, default=None, metavar="N",
-                    help="把 trace 版本庫壓到 N 位元組以下（如 256M／1G）：先回收與工作區"
+                    help="把 trace 版本庫壓到 N 位元組以下（如 256M／1G）：先回收或工作區"
                          "冗餘的 blob，再最舊優先回收舊版本；讀取端取不回誠實 UNKNOWN，"
-                         "簽章鏈與必須保留物件不動（2026-10-28 Axis 2）")
+                         "簽章鏈或必須保留物件不動（2026-10-28 Axis 2）")
     ap.add_argument("--older-than-hours", type=float, default=None,
                     help="只清理超過指定小時數的非必要物件（例如 0.5 代表 30 分鐘前）")
     ap.add_argument("--verify", action="store_true",
