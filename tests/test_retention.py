@@ -1692,3 +1692,16 @@ def test_envelope_accounting_missing_dir_safe(tmp_path: Path) -> None:
     assert acct["within_caps"] is True
     assert acct["fixed_within_caps"] is True
     assert acct["byte_caps_sum_within_envelope"] is True
+
+
+def test_auto_gc_dry_run_missing_dir_safe(tmp_path: Path) -> None:
+    """auto_gc：狀態目錄不存在＋dry_run=True 時，經 gc_all(dry_run=True) 安全回傳——
+    status="dry_run"、ok=True、bytes_freed=0、files_removed=0——不建目錄、不拋異常
+    （ASSIGNMENT 🔴最優先 驗收 (c)；retention.py 核心零改動）。"""
+    p = tmp_path / "nonexistent_vh"
+    rep = retention.auto_gc(root=p, dry_run=True)
+    assert rep["status"] == "dry_run"
+    assert rep["ok"] is True
+    assert rep["bytes_freed"] == 0
+    assert rep["files_removed"] == 0
+    assert not p.exists()
