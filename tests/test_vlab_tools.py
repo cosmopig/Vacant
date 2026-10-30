@@ -865,3 +865,32 @@ def test_envelope_compliance_cli_selftest_and_missing_exp_error(capsys) -> None:
         envelope_compliance.main([])
     assert excinfo.value.code == 2
     assert "需要 <exp>" in capsys.readouterr().err
+
+
+def test_growth_report_cli_human_output(tmp_path: Path, capsys) -> None:
+    # P20261030_1334-2：growth_report CLI 人讀文字輸出與退出碼 0 契約（ASSIGNMENT 🔴最優先 驗收(a)）。
+    # 未帶 --json 時 main 印 human(base) 文字報表（ops/vlab/tools/growth_report.py human L219-242），
+    # verdict=PASS 時回傳 0（main L315-317）。假 home 寫入跨 26h 的 3 點合格序列（未超標、gc status=ok）。
+    home = tmp_path / "fx_home"
+    home.mkdir()
+    MiB = 1024 * 1024
+
+    def _point(ts: str, total: int, trace: int) -> str:
+        return json.dumps({"ts": ts, "home": str(home), "total_bytes": total,
+                           "per_dir_bytes": {"trace": trace, "possess": 1000},
+                           "objects_files": 10,
+                           "gc_last": {"status": "ok", "target_reached": True}})
+
+    (home / "growth.jsonl").write_text(
+        "\n".join([
+            _point("2026-10-28T00:00:00+0000", 20 * MiB, 10 * MiB),
+            _point("2026-10-28T12:00:00+0000", 30 * MiB, 15 * MiB),
+            _point("2026-10-29T02:00:00+0000", 40 * MiB, 20 * MiB),
+        ]) + "\n", encoding="utf-8")
+
+    rc = growth_report.main(["--home", str(home), "--ops-data", str(tmp_path / "empty_ops")])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "verdict: PASS" in out
+    assert "「一天長多少」" in out
+    assert "封頂:" in out
