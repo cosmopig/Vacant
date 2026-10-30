@@ -376,4 +376,11 @@ def test_disk_report_cli_empty_dir_exit_code(tmp_path: Path, capsys) -> None:
     assert "找不到任何 cell.json" in capsys.readouterr().err
 
 
+def test_dabstep_subset_report_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
+    (tmp_path / "runs" / "exp_none").mkdir(parents=True)
+    rc = dabstep_subset_report.main(["exp_none", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    assert "no dabstep cells under" in capsys.readouterr().err
+
+
 
