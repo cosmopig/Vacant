@@ -1096,3 +1096,16 @@ def test_vacant_growth_log_cli_missing_home_json(tmp_path: Path, capsys) -> None
     rec = json.loads(capsys.readouterr().out)
     assert rec["total_bytes"] == 0
     assert rec["note"] == "home missing"
+
+
+def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, capsys) -> None:
+    # P20261030_1749-3（ASSIGNMENT 主軸 4：通用任務評估量具防禦契約治理）：
+    # --suite 篩選後無相符題目 cell 時，noncode_cell_audit.main
+    # （main L479-482）須向 stderr 輸出明確錯誤訊息並回 1，不拋未攔截異常，核心零改動。
+    exp = tmp_path / "exp_filter"
+    exp.mkdir(parents=True)
+    rc = noncode_cell_audit.main(["exp_filter", "--base", str(tmp_path), "--suite", "nonexistent_suite"])
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "找不到任何 cell.json" in err
+    assert "（--suite=nonexistent_suite）" in err
