@@ -1075,3 +1075,12 @@ def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> N
     assert rc == 2
     err = capsys.readouterr().err
     assert "no cells" in err
+
+
+def test_dabstep_subset_report_cli_selftest_flag(capsys) -> None:
+    # 主軸 4（dabstep 資料分析題 CLI 契約）：dabstep_subset_report.main 帶 --selftest
+    # 旗標時執行離線自檢，stdout 輸出包含 SELFTEST PASS 且 exit code 為 0，免除外部目錄依賴。
+    rc = dabstep_subset_report.main(["--selftest"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "SELFTEST PASS" in out
