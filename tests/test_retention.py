@@ -1388,6 +1388,23 @@ def test_auto_gc_resolves_symlinked_vacant_home(tmp_path, monkeypatch):
     assert (real_vh / "growth.jsonl").exists()
 
 
+def test_verify_trace_chains_resolves_symlinked_vacant_home(tmp_path, monkeypatch):
+    """ASSIGNMENT 🔴最優先驗收(a)(c)＋審查指示 §四-1：$VACANT_HOME 為 symlink 時，
+    verify_trace_chains 必須透過 _resolve_state_dir 解析到實體狀態目錄；
+    trace 專案目錄不存在時回 (0, True, [])——symlink 根不得被當成找不到
+    專案目錄或誤判失敗。"""
+    real_vh = tmp_path / "real_vacant"
+    real_vh.mkdir(parents=True)
+    sym_vh = tmp_path / "sym_vacant"
+    sym_vh.symlink_to(real_vh)
+    monkeypatch.setenv("VACANT_HOME", str(sym_vh))
+
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 0
+    assert ok is True
+    assert errs == []
+
+
 
 
 
