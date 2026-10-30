@@ -1772,3 +1772,210 @@ def test_compact_vrun_dir_dry_run_safe(tmp_path: Path) -> None:
     assert res["files_removed"] > 0
     assert junk.is_file()
     assert (run_dir / "result.json").is_file()
+
+
+def test_retention_main_gc_dry_run_human_output_safe(tmp_path, capsys):
+    """`vacant gc --dry-run` 指定不存在目錄：安全回傳 0、人讀輸出完整呈現預覽模式標記
+    與各模組 0 釋放統計、絕不建立目錄（ASSIGNMENT 🔴最優先 驗收 (c)；核心零改動）。"""
+    missing_vh = tmp_path / "nonexistent_vh"
+    rc = retention.main(["gc", "--dry-run", "--state-dir", str(missing_vh)])
+    assert rc == 0
+    assert not missing_vh.exists()
+    out = capsys.readouterr().out
+    assert "（預覽 --dry-run，未刪除） 釋放空間：0 B" in out
+    assert "trace 版本庫   : 釋放 0 B" in out
+
+
+def test_sweep_to_target_missing_dir_safe(tmp_path: Path) -> None:
+    """_sweep_to_target 物件庫目錄不存在：安全回傳完整結構字典（target_reached=True、零釋放）、
+    絕不拋出異常、絕不建立目錄（ASSIGNMENT 🔴最優先 驗收 (c)；核心零改動）。"""
+    missing_obj = tmp_path / "nonexistent_obj"
+    res = retention._sweep_to_target(missing_obj, keep_shas=set(), redundant_live=set(),
+                                     target_bytes=1024, dry_run=True)
+    assert res["target_bytes"] == 1024
+    assert res["bytes_freed"] == 0
+    assert res["files_removed"] == 0
+    assert res["bytes_remaining"] == 0
+    assert res["target_reached"] is True
+    assert res["hard_keep_bytes"] == 0
+    assert res["aborted"] is False
+    assert not missing_obj.exists()
+
+
+def test_retention_human_bytes_formatting() -> None:
+    # <1024 -> integer B
+    assert retention._human_bytes(0) == "0 B"
+    assert retention._human_bytes(512) == "512 B"
+    assert retention._human_bytes(1023) == "1023 B"
+    # <1MB -> 1 decimal KB
+    assert retention._human_bytes(1024) == "1.0 KB"
+    assert retention._human_bytes(1536) == "1.5 KB"
+    assert retention._human_bytes(1024 * 1024 - 1).endswith("KB")
+    # <1GB -> 2 decimals MB
+    assert retention._human_bytes(1024 * 1024) == "1.00 MB"
+    assert retention._human_bytes(int(2.5 * 1024 * 1024)) == "2.50 MB"
+    # else -> 2 decimals GB
+    assert retention._human_bytes(1024 * 1024 * 1024) == "1.00 GB"
+
+
+def test_retention_resolve_budget_env_and_fallback(monkeypatch) -> None:
+    # (env, default constant, resolver, "0"/"-1" expected value, positive literal)
+    cases = (
+        ("VACANT_TRACE_BUDGET_BYTES", retention.DEFAULT_TRACE_BUDGET_BYTES, retention._resolve_auto_budget, None, "1048576"),
+        ("VACANT_WIRE_BODY_BYTES", retention.DEFAULT_WIRE_BODY_BYTES, retention._resolve_wire_body_budget, 0, "2097152"),
+        ("VACANT_WIRE_INDEX_BYTES", retention.DEFAULT_WIRE_INDEX_BYTES, retention._resolve_wire_index_budget, 0, "4194304"),
+    )
+    for name, default, fn, zero, pos in cases:
+        monkeypatch.delenv(name, raising=False)
+        assert fn() == default
+        for off in ("0", "-1"):
+            monkeypatch.setenv(name, off)
+            got = fn()
+            assert (got is None) if zero is None else got == zero
+        monkeypatch.setenv(name, pos)
+        assert fn() == int(pos)
+        monkeypatch.setenv(name, "invalid")
+        assert fn() == default
+
+
+def test_compact_work_dry_run_safe(tmp_path: Path) -> None:
+    """P20261030_1547-2：compact_work dry_run=True 只統計預估釋放，絕不實際刪除。
+
+    同 task 兩筆 run（run1 舊、run2 新），keep_runs_per_task=1 下 run1/ws
+    會被列為待回收：bytes_freed / files_removed 有預估，但 junk.bin 與目錄都還在。
+    """
+    wroot = tmp_path / "work"
+    run1_ws = wroot / "t1" / "run1" / "ws"
+    run1_ws.mkdir(parents=True)
+    junk = run1_ws / "junk.bin"
+    junk.write_bytes(b"x" * 1000)
+    (wroot / "t1" / "run2" / "ws").mkdir(parents=True)
+
+    res = retention.compact_work(wroot, keep_runs_per_task=1, dry_run=True)
+
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] > 0
+    assert res["runs_scanned"] == 2
+    assert junk.is_file()
+    assert run1_ws.is_dir()
+
+
+def test_compact_quarantine_dry_run_safe(tmp_path: Path) -> None:
+    """compact_quarantine：dry_run=True 只統計 bytes_freed/files_removed、絕不實際刪除孤兒隔離物件。"""
+    qroot = tmp_path / "custom_vh" / "quarantine"
+    obj_file = qroot / "objects" / "ab" / "orphan_blob"
+    obj_file.parent.mkdir(parents=True)
+    obj_file.write_bytes(b"orphan data\n")
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(obj_file, (past, past))
+    (qroot / "candidates").mkdir()
+
+    res = retention.compact_quarantine(tmp_path / "custom_vh", dry_run=True, orphan_grace_s=0.0)
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] >= 1
+    assert obj_file.is_file()
+
+
+def test_compact_session_hooks_dry_run_safe(tmp_path: Path) -> None:
+    """compact_session_hooks：dry_run=True 只統計 bytes_freed/files_removed/files_truncated，
+    絕不實際刪除超額舊 session 檔案、亦不截斷過大保留 session 檔案（2026-10-30 1628-1）。"""
+    hdir = tmp_path / "custom_vh" / "possess" / "hooks"
+    hdir.mkdir(parents=True)
+    old_sess = hdir / "pi_old.jsonl"
+    old_sess.write_text("old line\n" * 10, encoding="utf-8")
+    new_sess = hdir / "pi_new.jsonl"
+    new_sess.write_text("line\n" * 100, encoding="utf-8")
+    os.utime(old_sess, (1700000000.0, 1700000000.0))  # 舊 session（超額，刪除候選）
+    os.utime(new_sess, (1700001000.0, 1700001000.0))  # 新 session（保留、過大 → 截斷候選）
+
+    res = retention.compact_session_hooks(tmp_path / "custom_vh", keep_sessions=1,
+                                          max_file_bytes=50, dry_run=True)
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] == 1
+    assert res["files_truncated"] == 1
+    # dry-run：絕不實際刪除
+    assert old_sess.is_file()
+    assert old_sess.read_text(encoding="utf-8") == "old line\n" * 10
+    # dry-run：絕不實際截斷
+    assert new_sess.stat().st_size == len(("line\n" * 100).encode("utf-8"))
+
+
+def test_auto_gc_target_bytes_override_safe(tmp_path: Path) -> None:
+    """auto_gc：傳入顯式 target_bytes 時優先採用該位元組預算（而非回退
+    `_resolve_auto_budget()` 預設 64 MiB），透傳至 gc_all/compact_trace 的 target 回收流程
+    （2026-10-30 1628-2）。"""
+    sroot = tmp_path / "custom_vh"
+    (sroot / "trace" / "objects").mkdir(parents=True)
+
+    rep = retention.auto_gc(sroot, tmp_path / "work", dry_run=True,
+                            target_bytes=32 * 1024 * 1024)
+    assert rep["status"] == "dry_run"
+    assert rep["ok"] is True
+    assert rep["trace"]["target"]["target_bytes"] == 32 * 1024 * 1024
+    assert rep["trace"]["target"]["target_reached"] is True
+
+
+def test_compact_wire_dry_run_safe(tmp_path: Path) -> None:
+    """compact_wire：dry_run=True 預覽只統計預計釋放位元組數與行數，
+    絕不實際刪除超額 body 或截斷超額 index.jsonl（2026-10-30 1643-1）。"""
+    wdir = tmp_path / "custom_vh" / "possess" / "proxyd" / "wire"
+    wdir.mkdir(parents=True)
+
+    b1 = wdir / "call1.req.bin"
+    b2 = wdir / "call2.resp.bin"
+    b1.write_bytes(b"A" * 500)
+    b2.write_bytes(b"B" * 600)
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(b1, (past, past))
+    os.utime(b2, (past + 1000.0, past + 1000.0))
+
+    ip = wdir / "index.jsonl"
+    index_raw = ("item\n" * 1000).encode("utf-8")  # 5000 位元組 > 2000 上限
+    ip.write_bytes(index_raw)
+
+    rep = retention.compact_wire(
+        tmp_path / "custom_vh",
+        max_body_bytes=400, max_index_bytes=2000, dry_run=True)
+    # dry-run：body 只累加預計釋放統計
+    assert rep["body_bytes_freed"] > 0
+    assert rep["body_files_removed"] >= 1
+    # dry-run：絕不實際刪除 body 檔
+    assert b1.is_file()
+    assert b2.is_file()
+    # dry-run：index 只計算預計釋放位元組數與行數
+    assert rep["index_bytes_freed"] > 0
+    assert rep["index_lines_dropped"] > 0
+    # dry-run：index.jsonl 內容逐字未變、未被截斷
+    assert ip.read_bytes() == index_raw
+
+
+def test_compact_logs_dry_run_safe(tmp_path: Path) -> None:
+    """compact_logs dry_run=True 預覽不截斷不刪除：過大日誌只統計 bytes_freed 與 logs_compacted、
+    超額 rounds_*.json 只累加預計釋放位元組數，絕不實際截斷或刪除檔案（2026-10-30 1643-2）。"""
+    hdir = tmp_path / "custom_vh" / "intake" / "hooks"
+    hdir.mkdir(parents=True)
+
+    ev = hdir / "events.jsonl"
+    events_raw = ("entry line data\n" * 500).encode("utf-8")  # 8000 位元組 > 5000 上限
+    ev.write_bytes(events_raw)
+
+    r1 = hdir / "rounds_1.json"
+    r2 = hdir / "rounds_2.json"
+    r1.write_text('{"round": 1}')
+    r2.write_text('{"round": 2}')
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(r1, (past, past))
+    os.utime(r2, (past + 1000.0, past + 1000.0))
+
+    res = retention.compact_logs(
+        tmp_path / "custom_vh",
+        max_log_bytes=5000, keep_rounds_files=1, dry_run=True)
+    # dry-run：只統計預計釋放位元組數與壓縮日誌數
+    assert res["bytes_freed"] > 0
+    assert res["logs_compacted"] == 1
+    # dry-run：過大日誌原樣保留、內容完全未被截斷
+    assert ev.is_file()
+    assert ev.read_bytes() == events_raw
+    # dry-run：超額輪次檔案原樣保留、未被刪除
+    assert r1.is_file()
+    assert r2.is_file()

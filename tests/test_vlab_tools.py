@@ -994,3 +994,72 @@ def test_noncode_cell_audit_cli_missing_exp_dir_error(tmp_path: Path) -> None:
     with pytest.raises(SystemExit) as excinfo:
         noncode_cell_audit.main([no_such, "--base", str(tmp_path / "runs")])
     assert "實驗目錄不存在" in str(excinfo.value.code)
+
+
+def test_dabstep_subset_report_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # 主軸 4（dabstep 子集報告 CLI 契約）：傳入不存在的實驗目錄時，
+    # load_cells（dabstep_subset_report.py L54-68）對 not root.is_dir() 拋
+    # SystemExit(f"runs root not found: {root}")，main（L263-288）不攔截、
+    # 異常外傳——不產生 rc=1 的假「no cells」輸出或未預期崩潰。
+    with pytest.raises(SystemExit) as excinfo:
+        dabstep_subset_report.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert "runs root not found:" in str(excinfo.value)
+    assert "nonexistent_exp" in str(excinfo.value)
+
+
+def test_disk_report_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # P20261030_1547-3（ASSIGNMENT 主軸 2：disk_report CLI 契約治理）：
+    # 傳入不存在的實驗目錄時，collect（disk_report.py L132-143）對
+    # not root.is_dir() 主動拋 SystemExit(f"實驗目錄不存在：{root}")，
+    # main（L213-255）不攔截、異常向上冒泡——不產生 rc=1 的假「no
+    # cells」輸出或未預期崩潰。
+    with pytest.raises(SystemExit) as excinfo:
+        disk_report.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert "實驗目錄不存在：" in str(excinfo.value)
+    assert "nonexistent_exp" in str(excinfo.value)
+
+
+def test_e002_wiring_gauge_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # P20261030_1612-4（ASSIGNMENT 主軸 3：效益差別驗證線路與門禁量具治理）：
+    # 傳入不存在的實驗目錄時，collect（e002_wiring_gauge.py L147-153）對
+    # not run.is_dir() 主動拋 SystemExit(f"找不到執行目錄 {run}")，
+    # main（L174-202）直調 collect、不攔截，異常向上冒泡退出——不產生
+    # 未預期崩潰或假輸出。
+    with pytest.raises(SystemExit) as excinfo:
+        e002_wiring_gauge.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert "找不到執行目錄" in str(excinfo.value)
+    assert "nonexistent_exp" in str(excinfo.value)
+
+
+def test_holm_e002_cli_missing_exp_dir_error(tmp_path: Path, capsys) -> None:
+    # P20261030_1628-4（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具 CLI 防禦契約）：
+    # 傳入不存在之實驗目錄時，main 須向 stderr 輸出帶「無事可做：」與實驗目錄名
+    # 之明確提示，並以 exit code 1 安全退出——不產生未攔截之崩潰或假 0 輸出。
+    rc = holm_e002.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "無事可做" in err
+    assert "nonexistent_exp" in err
+
+
+def test_envelope_compliance_cli_missing_exp_dir_error(tmp_path: Path, capsys) -> None:
+    rc = envelope_compliance.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "輸入不可讀：" in err
+    assert "nonexistent_exp" in err
+
+
+def test_growth_report_cli_missing_sources_human_unknown_exit_code(tmp_path: Path, capsys) -> None:
+    # P20261030_1659-3（ASSIGNMENT 🔴最優先 驗收 (a)：真機成長跨日序列量具防禦契約）：
+    # 指定不存在之 home 與 ops-data 目錄時，growth_report.main（L305-320）
+    # 在非 --json 終端人讀模式下回傳 exit code 1（verdict != "PASS"），
+    # 且 stdout 完整印出 human(base)（L218-223）的 UNKNOWN 標記、原因及
+    # 缺少數據來源提示（sources: （無））——不崩潰、不假 PASS。
+    rc = growth_report.main(["--home", str(tmp_path / "nonexistent_home"),
+                             "--ops-data", str(tmp_path / "nonexistent_ops")])
+    assert rc == 1
+    out = capsys.readouterr().out
+    assert out.startswith("UNKNOWN：")
+    assert "sources: （無）" in out
+    assert "missing:" in out
