@@ -105,15 +105,26 @@
   `--selftest` 本 HEAD 實跑 **PASS rc=0**；e002 live 實跑（純讀、無 `--out`）**rc=0**：C 臂 34/34 complete、`c_installed_FAIL=0`、
   review 30 allow／1 continue／3 NO_EVIDENCE、score 22 pass／12 fail（**與 REPORT.json C 臂 pass=22 一致**）、`tasks_with_complete_record` 31/34
   （3 題 NO_EVIDENCE＝鏈上無 review 條目的誠實記錄，非 FAIL、不影響退出碼）。S 臂 34/34 完賽仍是五量具最終重跑的門（資深審查指示 10/30 第 3 條）。
+- **10/30（16:3x 續記）**：e002 S 臂配對進度更新（report.py 官方重算，`cells_scored`＝161、infra 10 格）：
+  S 臂 **25/34**（14/25 pass、56.0%，中間值不作結論）、A_vs_S 配對 25、A_only＝2、S_only＝3、McNemar p＝1.0；
+  A/C/H/M 四臂 34/34 不變（A 18、C 22、H 15、M 15）。S 臂未滿 34/34——**Holm 4 組校正判定仍待 S 臂完賽**，
+  本輪只更新進度、不宣告假設判定結果（資深審查指示第 3 條）。
+- **10/30（16:3x 續記）**：「一天長多少」跨日序列續記（真機快照 16:32＋`growth_report.py` 真機 verdict **PASS**，rc=0）——
+  序列 2026-10-28T20:20 → 2026-10-30T16:32（**44.2h，30 點**）、24h 視窗最大增長 **17054166 B（16.3 MiB）**、
+  峰值 82.3 MiB（清場前舊日累積之暫超工作集，非穩態違反）、最新 **64827429 B（61.8 MiB）≤ 256 MiB 穩態封頂（24.1%）**、
+  最新 trace 46097192 B（44.0 MiB）≤ 64 MiB、30 點全 gc ok＋target_reached；序列表與「能說」已同步回寫 FINDINGS.md 主軸 2。
+  同輪再驗證 auto/argon `8b4fd154` 合併與 fixture 清理之驗收判準在本 HEAD 全數成立——
+  `test_zero_evidence`（84）＋`test_retention`（76）＋`test_vlab_tools`（54）214 passed rc=0、packet diff rc=0、
+  `tests/fixtures/holm_e002_absent_arm` 不存在（合併自 round 310 起已含於本分支，`git merge --no-edit auto/argon`＝Already up to date）。
 
 ## 2. 四條驗收條件對現狀
 
 | # | 人類要求 | 現狀 | 證據 |
 |---|---|---|---|
-| 1 | 用量有上限；2G repo 用一天不能是 repo 的一半 | **有**（分組硬上限，見 §3 目標數字）＋**round 168 起 `vacant usage` 直接量出「總計 vs 封頂百分比＋各組餘量」**＋**round 176 起帳目完整性也是量具的一部分（無命名上限的 top-level 組件會被点名，且不得宣稱「在封頂內」）**＋**round 178 起「一天長多少」有真機 24h 序列（§1 末筆，4 筆 JSONL）** | 本輪實測 43.08 MB（r166）→ 52.65 MB（r168）→ 48.83 MB（r176）→ 58.2 MiB（10/30 13:17）→ 60.0 MiB（10/30 15:19，均在 256 MiB 內、≤32%）；真機序列峰值 82.3 MiB（10/28 20:20，舊日累積）GC 後 35.2 MiB；`test_usage_envelope_gauge`＋`test_envelope_accounting_*`＋`test_envelope_byte_caps_sum_within_stable`＋fail-open 測試 |
+| 1 | 用量有上限；2G repo 用一天不能是 repo 的一半 | **有**（分組硬上限，見 §3 目標數字）＋**round 168 起 `vacant usage` 直接量出「總計 vs 封頂百分比＋各組餘量」**＋**round 176 起帳目完整性也是量具的一部分（無命名上限的 top-level 組件會被点名，且不得宣稱「在封頂內」）**＋**round 178 起「一天長多少」有真機 24h 序列（§1 末筆，4 筆 JSONL）** | 本輪實測 43.08 MB（r166）→ 52.65 MB（r168）→ 48.83 MB（r176）→ 58.2 MiB（10/30 13:17）→ 60.0 MiB（10/30 15:19）→ 61.8 MiB（10/30 16:32，均在 256 MiB 內、≤32%）；真機序列峰值 82.3 MiB（10/28 20:20，舊日累積）GC 後 35.2 MiB；`test_usage_envelope_gauge`＋`test_envelope_accounting_*`＋`test_envelope_byte_caps_sum_within_stable`＋fail-open 測試 |
 | 2 | 未改動的原位檔不整份複製（記 sha256，需要時回工作區驗 hash） | **有**（10/28 起 scan 不落盤；取不回誠實 UNKNOWN，不崩、不假 PASS） | `workspace.py:156` docstring；`blame.py:837/967`（reclaimed → `unknown`）；測試 `test_gc_rescan_cycle.py:129`、`test_retention.py:203`、`test_trace_rescan.py:122` |
 | 3 | 超預算時 GC 刪到預算以下；刪掉的內容回 UNKNOWN 不崩不 PASS | **有**（`_sweep_to_target` + auto_gc 單例鎖/頻率/時間預算，fail-open） | `retention.py:1098`（64 MiB 解析）、`axis2_budget_64mib.md` dry-run 實測；UNKNOWN 語義三測試 |
-| 4 | 驗收：(a) 真實 `~/.vacant` 前後數字 (b) lab C 組 `vacant_home_bytes` (c) 回收後 verify/blame | **(a) 有**：10/28 前 542 MB（舊碼複製產物）→ 清場（零點 10/28 08:14）→ 跨日序列 42.98h/28 點 82.3→35.2（GC）→…→60.0 MiB（`growth_report.py` 真機 verdict=PASS：24h 視窗最大增長 16.3 MiB、最新 60.0 MiB ≤ 256 MiB 封頂 23.4%、最新 trace 42.4 MiB ≤ 64 MiB、28 點全 gc ok＋target_reached）。**(b) 有**：e001 C 組 60/60 格 vacant_home_bytes：min 27,611 B（27.0 KB）、median 323,938.0 B（316.3 KB）、max 1,146,648 B（1.09 MiB）、gc_fired 57/60（95.0%）；e002 **C 臂最終** 34/34 格 min 29,089／med 105,134／max 316,854 B、1 infra（NA 不進分母）、envelope_compliance verdict＝PASS、rescore mismatch 0（round 192 回寫；18/18 階段值 35,563/161,209/290,622 為中間值）；A/C/H/M 四臂 34/34 已完成、S 臂 23/34 進行中（10/30 15:49 重算；A/H/M/S 臂不裝 Vacant、依設計無 `vacant_home.tgz`）。**(c) 有**：三測試 + axis2_reclaim 實驗 | `axis2_budget_64mib.md`、`axis2_disk.md`、`tests/`（上列＋`test_growth_report_selftest_and_verdict_semantics`）、`~/dev/ops/data/vacant_growth.jsonl`、`~/.vacant/growth.jsonl`、`ops/vlab/tools/{envelope_compliance,growth_report}.py` |
+| 4 | 驗收：(a) 真實 `~/.vacant` 前後數字 (b) lab C 組 `vacant_home_bytes` (c) 回收後 verify/blame | **(a) 有**：10/28 前 542 MB（舊碼複製產物）→ 清場（零點 10/28 08:14）→ 跨日序列 44.2h/30 點 82.3→35.2（GC）→…→61.8 MiB（`growth_report.py` 真機 verdict=PASS：24h 視窗最大增長 16.3 MiB、最新 61.8 MiB ≤ 256 MiB 封頂 24.1%、最新 trace 44.0 MiB ≤ 64 MiB、30 點全 gc ok＋target_reached）。**(b) 有**：e001 C 組 60/60 格 vacant_home_bytes：min 27,611 B（27.0 KB）、median 323,938.0 B（316.3 KB）、max 1,146,648 B（1.09 MiB）、gc_fired 57/60（95.0%）；e002 **C 臂最終** 34/34 格 min 29,089／med 105,134／max 316,854 B、1 infra（NA 不進分母）、envelope_compliance verdict＝PASS、rescore mismatch 0（round 192 回寫；18/18 階段值 35,563/161,209/290,622 為中間值）；A/C/H/M 四臂 34/34 已完成、S 臂 25/34 進行中（10/30 16:32 重算；A/H/M/S 臂不裝 Vacant、依設計無 `vacant_home.tgz`）。**(c) 有**：三測試 + axis2_reclaim 實驗 | `axis2_budget_64mib.md`、`axis2_disk.md`、`tests/`（上列＋`test_growth_report_selftest_and_verdict_semantics`）、`~/dev/ops/data/vacant_growth.jsonl`、`~/.vacant/growth.jsonl`、`ops/vlab/tools/{envelope_compliance,growth_report}.py` |
 
 ## 3. 目標數字（自訂，附理由）
 
@@ -127,7 +138,7 @@
 | 掛鉤日誌（intake） | 2 MiB/檔＋總 **8 MiB**（round 192） | `compact_logs` 截半，保留最新完整行；總上限警報（只報告不刪） | 1.94 MB ✓ |
 | quarantine / work | 計數制（每 task 2 決策 / 3 run）＋ quarantine 總 **16 MiB**（round 192） | `compact_quarantine`／`compact_work`／`compact_vrun_dir`；單 blob ≤ 8 MiB（MAX_BLOB）；總上限警報（只報告不刪） | 0 B ✓ |
 | 固定安裝面（bin/hooks/keys/projects 索引） | 1 MiB/件×4（round 190） | 非增長性；`envelope_accounting.fixed_overrun` 點名越限（只報告不刪） | ~6 MB ✓ |
-| **合計** | **所有命名上限加總 228.25 MiB（round 192：172.25 機制＋32 projects＋8 intake＋16 quarantine）→ 256 MiB 封頂** | `all_caps_sum` ≤ 256 MiB 有常規測試把關 | **60.0 MiB（23.4% of 256，10/30 15:19 真機實測；24h 最大增長 16.3 MiB）** |
+| **合計** | **所有命名上限加總 228.25 MiB（round 192：172.25 機制＋32 projects＋8 intake＋16 quarantine）→ 256 MiB 封頂** | `all_caps_sum` ≤ 256 MiB 有常規測試把關 | **61.8 MiB（24.1% of 256，10/30 16:32 真機實測；24h 最大增長 16.3 MiB）** |
 
 **為什麼使用者可以接受 256 MiB**：
 1. 它對 2 GiB repo 是 **12.5%**——「不該是 repo 的一半」（50%）有 **4 倍餘裕**。
@@ -180,5 +191,5 @@ trace 整體 96 MiB）；`envelope_accounting.overrun` 通用點名越限組件�
    rescore mismatch 0、envelope_compliance verdict=PASS，見 §1 round 192 筆）。
    **仍待（分析 backlog，非磁碟阻塞項）**：e002 S 臂完成時重跑 `report.py --rescore`＋
    `e002_wiring_gauge.py`＋`envelope_compliance.py`＋`p02_carm_audit.py` 四量具，
-   把最終全臂結果回寫（A/C/H/M 四臂 34/34 已完成、S 臂 23/34 進行中（10/30 15:49 重算）、四量具對已完成臂 rc=0；A/H/M/S 臂皆不裝 Vacant、`vacant_sha=null`、無 `vacant_home.tgz`，故 M/S 臂 `vacant_home_bytes` 依設計 N/A，見 §1 round 196。
+   把最終全臂結果回寫（A/C/H/M 四臂 34/34 已完成、S 臂 25/34 進行中（10/30 16:32 重算）、四量具對已完成臂 rc=0；A/H/M/S 臂皆不裝 Vacant、`vacant_sha=null`、無 `vacant_home.tgz`，故 M/S 臂 `vacant_home_bytes` 依設計 N/A，見 §1 round 196。
    p02_carm_audit.py 的 CLI 契約於 10/30 16:1x 補實讀核對、selftest PASS＋e002 live rc=0，見 §1 16:1x 筆）。

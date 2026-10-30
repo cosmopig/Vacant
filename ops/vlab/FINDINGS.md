@@ -89,8 +89,8 @@ repo 內子集檔為同源 commit 版）＋ 上兩節。
 
 ## 2026-10-29 · e002_hypothesis_arms · polyglot_py A/C/H/M 完賽、S 進行中（主軸 4 追蹤）
 
-**狀態**（2026-10-30 15:49 更新）：e002 進行中——A/C/H/M 四臂各 34/34 完成，S 臂 23/34 進行中
-（REPORT.json `infra` 10 格不進分母；`cells_scored`＝159）。
+**狀態**（2026-10-30 16:32 更新）：e002 進行中——A/C/H/M 四臂各 34/34 完成，S 臂 25/34 進行中
+（REPORT.json `infra` 10 格不進分母；`cells_scored`＝161）。
 預註冊確認線（Holm 4 組比較，`ops/packets/e002.md` §4）待 S 臂完成後才能對
 H-stakes 等預註冊假設做校正判準。
 **本節只有客觀觀察，不是判定。**
@@ -112,7 +112,7 @@ A 65.72 呼叫/成功・1,550,104 token/成功・逾時 8，C 67.95 呼叫/成�
 3,180,187 token/成功・逾時 8（皆取自 REPORT.json `per_arm.{H,M}`）。
 跨臂配對（REPORT.json `paired`）：A_vs_H A_only＝5、H_only＝2、McNemar exact 雙側
 p＝0.4531（未達顯著）；A_vs_M A_only＝6、M_only＝3、McNemar exact 雙側 p＝0.5078
-（未達顯著；distinct_tasks＝34）。S 臂 23/34 進行中（A_vs_S 配對 23、A_only＝2、S_only＝3、
+（未達顯著；distinct_tasks＝34）。S 臂 25/34 進行中（A_vs_S 配對 25、A_only＝2、S_only＝3、
 p＝1.0，皆中間值，不作結論）。
 
 **跨批一致性（兩批 A/C，非重現論證）**：
@@ -152,7 +152,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 28 點跨 42.98h（2026-10-28T20:20 → 2026-10-30T15:19）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 30 點跨 44.2h（2026-10-28T20:20 → 2026-10-30T16:32）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -183,18 +183,19 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/30 13:17 | 58.2 MiB | 40.9 MiB | 710 | ok, true |
 | 10/30 14:18 | 59.1 MiB | 41.6 MiB | 706 | ok, true |
 | 10/30 15:19 | 60.0 MiB | 42.4 MiB | 718 | ok, true |
+| 10/30 16:32 | 61.8 MiB | 44.0 MiB | 948 | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
 round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 
-**能說**（2026-10-30 15:5x 真機 `growth_report.py` verdict=PASS，rc=0）：
+**能說**（2026-10-30 16:3x 真機 `growth_report.py` verdict=PASS，rc=0）：
 - **一天長多少：24h 視窗最大增長 16.3 MiB**（2G repo 全日開發＋e002 實驗負載下）。
 - 穩態鋸齒 35–82 MiB：峰值 82.3 MiB 是 10/28 20:20 舊日累積，次日 gc 削至 35.2 MiB
-  後在 50–60 MiB 附近走平——**不是線性增長，回收在真實使用裡生效**（28 點全 gc ok＋target_reached）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 60.0 MiB（23.4%）、
-  最新 trace 42.4 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（28 點、42.98h），不是模擬、不是單點。
+  後在 50–60 MiB 附近走平——**不是線性增長，回收在真實使用裡生效**（30 點全 gc ok＋target_reached）。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 61.8 MiB（24.1%）、
+  最新 trace 44.0 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（30 點、44.2h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
@@ -204,7 +205,7 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   e002 實驗；更高並發／更多 repo 需重新量（H-12 同口徑）。
 - e002 全臂尚未完成：四量具（report.py --rescore／e002_wiring_gauge／
   envelope_compliance／p02_carm_audit）對已完成臂 rc=0（A/C/H/M 四臂各 34/34 完成，
-  S 臂 23/34 進行中；C 臂 34/34 `vacant_home_bytes` 已最終回寫，A/H/M/S 臂不裝 Vacant 故依設計 N/A；
+  S 臂 25/34 進行中；C 臂 34/34 `vacant_home_bytes` 已最終回寫，A/H/M/S 臂不裝 Vacant 故依設計 N/A；
   p02_carm_audit.py 的 CLI 契約 10/30 16:1x 補實讀核對：selftest PASS rc=0、e002 live rc=0，
   C 臂 34/34、c_installed_FAIL=0、score 22 pass／12 fail 與 REPORT.json 一致、tasks_with_complete_record 31/34），
   **全臂最終分析回寫要等 S 臂完成**（disk_top_priority §5-4）。
@@ -288,5 +289,5 @@ within_caps=True、all_caps_sum 228.25 MiB ≤ 256 MiB**。
   `trace/projects/chain.ndjson` 是記責記錄，GC 向來不碰，這是語義決定不是漏做。
 - 32/8/16 MiB 是**警報上限**不是硬刪上限：選值＝現行實測（projects 5.46 MB／intake
   1.94 MB／quarantine 0 B）的 ≥3 倍，長期超限時應調大常數並留記錄，不該靠量具假裝沒事。
-- e002 全臂最終仍**未完成**：A/C/H/M 四臂各 34/34 已完成、S 臂 23/34 進行中（rc=0）；
+- e002 全臂最終仍**未完成**：A/C/H/M 四臂各 34/34 已完成、S 臂 25/34 進行中（rc=0）；
   全臂回寫等 S 臂完成（disk_top_priority §5-4）。
