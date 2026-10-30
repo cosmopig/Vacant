@@ -331,4 +331,19 @@ def test_vacant_growth_log_cli_json_mode(tmp_path: Path, capsys) -> None:
     assert rec["objects_files"] == 1
 
 
+def test_envelope_compliance_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_0906-2（ASSIGNMENT 驗收 b：實驗室格子封頂合規量具）：CLI 入口
+    # main(["<exp>", "--base", ...]) 在空實驗目錄下須回 0 且印出 JSON，其中
+    # verdict=NA（無格子＝誠實狀態，非合規）與 envelope_bytes=256 MiB
+    # （retention.STABLE_ENVELOPE_BYTES 穩態封頂常數，_load_envelope 正常載入）。
+    (tmp_path / "exp_test").mkdir()
+
+    rc = envelope_compliance.main(["exp_test", "--base", str(tmp_path)])
+    assert rc == 0
+
+    out = capsys.readouterr().out
+    assert '"verdict": "NA"' in out
+    assert '"envelope_bytes": 268435456' in out
+
+
 
