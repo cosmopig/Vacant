@@ -2,7 +2,7 @@
  "exp": "e002_hypothesis_arms",
  "base": "/srv/vlab/runs",
  "suite": "polyglot_py",
- "n_cells": 74,
+ "n_cells": 179,
  "expected_tasks": [
   "pg_affine_cipher",
   "pg_beer_song",
@@ -99,6 +99,32 @@
    "test_exec_evidence": null
   },
   {
+   "cell": "polyglot_py-pg_affine_cipher-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_affine_cipher",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_affine_cipher-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_affine_cipher",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_beer_song-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_beer_song",
@@ -170,6 +196,32 @@
    "test_exec_evidence": null
   },
   {
+   "cell": "polyglot_py-pg_beer_song-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_beer_song",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_beer_song-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_beer_song",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_book_store-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_book_store",
@@ -218,6 +270,32 @@
    "task": "pg_book_store",
    "state": "complete",
    "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_book_store-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_book_store",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_book_store-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_book_store",
+   "state": "complete",
+   "arm": "S",
    "infra": "OK",
    "c_installed": null,
    "review": null,
@@ -295,14 +373,40 @@
    "cell": "polyglot_py-pg_bottle_song-pi-H-r1",
    "suite": "polyglot_py",
    "task": "pg_bottle_song",
-   "state": "incomplete",
-   "arm": null,
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
    "c_installed": null,
    "review": null,
    "score": null,
    "test_files_referenced": null,
-   "test_exec_evidence": null,
-   "infra": null
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_bottle_song-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bottle_song",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_bottle_song-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bottle_song",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_bowling-pi-A-r1",
@@ -346,6 +450,45 @@
    "exec_samples": [
     "python3 -m unittest bowling_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bowling",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bowling",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_bowling-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_bowling",
+   "state": "complete",
+   "arm": "S",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_connect-pi-A-r1",
@@ -392,6 +535,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_connect-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_connect",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_connect-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_connect",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_connect-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_connect",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_dominoes-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_dominoes",
@@ -435,6 +617,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_dominoes-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dominoes",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_dominoes-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dominoes",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_dominoes-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dominoes",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_dot_dsl-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_dot_dsl",
@@ -476,6 +697,45 @@
    "exec_samples": [
     "python3 -m unittest dot_dsl_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_dot_dsl-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dot_dsl",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_dot_dsl-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dot_dsl",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_dot_dsl-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_dot_dsl",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_food_chain-pi-A-r1",
@@ -544,6 +804,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_food_chain-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_food_chain",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_food_chain-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_food_chain",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_food_chain-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_food_chain",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_forth-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_forth",
@@ -577,6 +876,45 @@
    "exec_samples": [
     "python3 -m unittest forth_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_forth-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_forth",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_forth-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_forth",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_forth-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_forth",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_go_counting-pi-A-r1",
@@ -645,6 +983,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_go_counting-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_go_counting",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_go_counting-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_go_counting",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_go_counting-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_go_counting",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_grade_school-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_grade_school",
@@ -688,6 +1065,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_grade_school-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grade_school",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_grade_school-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grade_school",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_grade_school-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grade_school",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_grep-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_grep",
@@ -723,6 +1139,45 @@
     "pytest grep_test.py",
     "python3 -m pytest grep_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_grep-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grep",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_grep-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grep",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_grep-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_grep",
+   "state": "complete",
+   "arm": "S",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_hangman-pi-A-r1",
@@ -789,6 +1244,45 @@
    "infra": null
   },
   {
+   "cell": "polyglot_py-pg_hangman-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_hangman",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_hangman-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_hangman",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_hangman-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_hangman",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_list_ops-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_list_ops",
@@ -845,6 +1339,45 @@
    "exec_samples": [
     "python3 -m unittest list_ops_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_list_ops-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_list_ops",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_list_ops-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_list_ops",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_list_ops-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_list_ops",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_paasio-pi-A-r1",
@@ -914,6 +1447,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_paasio-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_paasio",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_paasio-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_paasio",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_paasio-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_paasio",
+   "state": "complete",
+   "arm": "S",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_phone_number-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_phone_number",
@@ -957,6 +1529,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_phone_number-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_phone_number",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_phone_number-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_phone_number",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_phone_number-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_phone_number",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_pig_latin-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_pig_latin",
@@ -998,6 +1609,45 @@
    "exec_samples": [
     "python3 -m unittest pig_latin_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pig_latin",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pig_latin",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_pig_latin-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pig_latin",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_poker-pi-A-r1",
@@ -1067,6 +1717,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_poker-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_poker",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_poker-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_poker",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_poker-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_poker",
+   "state": "complete",
+   "arm": "S",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_pov-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_pov",
@@ -1111,6 +1800,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_pov-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pov",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_pov-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pov",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_pov-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_pov",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_proverb-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_proverb",
@@ -1153,6 +1881,45 @@
     "python3 -m pytest -q proverb_test.py",
     "python3 -m unittest proverb_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_proverb-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_proverb",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_proverb-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_proverb",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_proverb-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_proverb",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_react-pi-A-r1",
@@ -1211,6 +1978,71 @@
    "exec_samples": [
     "python3 -m unittest react_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_react",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_react",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-M-r1.infra-20261030T054304",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_react",
+   "state": "complete",
+   "arm": "S",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_react-pi-S-r1.infra-20261030T142617",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
   },
   {
    "cell": "polyglot_py-pg_rest_api-pi-A-r1",
@@ -1279,6 +2111,84 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_rest_api-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_rest_api",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_rest_api",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-M-r1.infra-20261030T062044",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_rest_api",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-S-r1.infra-20261030T152129",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_rest_api-pi-S-r1.infra-20261030T153739",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
    "cell": "polyglot_py-pg_robot_name-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_robot_name",
@@ -1335,6 +2245,45 @@
    "exec_samples": [
     "python3 -m unittest robot_name_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_robot_name-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_robot_name",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_robot_name-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_robot_name",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_robot_name-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_robot_name",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_scale_generator-pi-A-r1",
@@ -1416,6 +2365,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_scale_generator-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_scale_generator",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_scale_generator-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_scale_generator",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_scale_generator-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_scale_generator",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_sgf_parsing-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_sgf_parsing",
@@ -1449,6 +2437,45 @@
    "exec_samples": [
     "python3 -m unittest sgf_parsing_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_sgf_parsing-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_sgf_parsing",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_sgf_parsing-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_sgf_parsing",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_sgf_parsing-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_sgf_parsing",
+   "state": "complete",
+   "arm": "S",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_simple_linked_list-pi-A-r1",
@@ -1492,6 +2519,45 @@
    "exec_samples": [
     "python3 -m unittest simple_linked_list_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_simple_linked_list-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_simple_linked_list",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_simple_linked_list-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_simple_linked_list",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_simple_linked_list-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_simple_linked_list",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_transpose-pi-A-r1",
@@ -1538,6 +2604,71 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_transpose-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_transpose",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_transpose-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_transpose",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_transpose-pi-M-r1.infra-20261030T074023",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_transpose-pi-M-r1.infra-20261030T081124",
+   "suite": null,
+   "task": null,
+   "state": "quarantined_infra",
+   "arm": null,
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null,
+   "infra": null
+  },
+  {
+   "cell": "polyglot_py-pg_transpose-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_transpose",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_tree_building-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_tree_building",
@@ -1579,6 +2710,45 @@
    "exec_samples": [
     "python3 -m unittest tree_building_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_tree_building-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_tree_building",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_tree_building-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_tree_building",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_tree_building-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_tree_building",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_two_bucket-pi-A-r1",
@@ -1625,6 +2795,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_two_bucket-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_two_bucket",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_two_bucket-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_two_bucket",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_two_bucket-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_two_bucket",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_variable_length_quantity-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_variable_length_quantity",
@@ -1669,6 +2878,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_variable_length_quantity-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_variable_length_quantity",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_variable_length_quantity-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_variable_length_quantity",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_variable_length_quantity-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_variable_length_quantity",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_wordy-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_wordy",
@@ -1711,6 +2959,45 @@
     "python3 -m pytest -q wordy_test.py",
     "python3 -m unittest wordy_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_wordy-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_wordy",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_wordy-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_wordy",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_wordy-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_wordy",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   },
   {
    "cell": "polyglot_py-pg_zebra_puzzle-pi-A-r1",
@@ -1758,6 +3045,45 @@
    ]
   },
   {
+   "cell": "polyglot_py-pg_zebra_puzzle-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zebra_puzzle",
+   "state": "complete",
+   "arm": "H",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_zebra_puzzle-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zebra_puzzle",
+   "state": "complete",
+   "arm": "M",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_zebra_puzzle-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zebra_puzzle",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
    "cell": "polyglot_py-pg_zipper-pi-A-r1",
    "suite": "polyglot_py",
    "task": "pg_zipper",
@@ -1799,6 +3125,45 @@
    "exec_samples": [
     "python3 zipper_test.py"
    ]
+  },
+  {
+   "cell": "polyglot_py-pg_zipper-pi-H-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zipper",
+   "state": "complete",
+   "arm": "H",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_zipper-pi-M-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zipper",
+   "state": "complete",
+   "arm": "M",
+   "infra": "BAD",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
+  },
+  {
+   "cell": "polyglot_py-pg_zipper-pi-S-r1",
+   "suite": "polyglot_py",
+   "task": "pg_zipper",
+   "state": "complete",
+   "arm": "S",
+   "infra": "OK",
+   "c_installed": null,
+   "review": null,
+   "score": null,
+   "test_files_referenced": null,
+   "test_exec_evidence": null
   }
  ],
  "per_task": [
