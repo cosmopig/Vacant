@@ -207,7 +207,7 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   （且未達 64 MiB 前第二階段 `_sweep_to_target` 不啟動）；該視窗漏洞已於 `auto/argon` 修復，
   在真機 `~/.vacant` 上可立即多回收 8.34 MiB（399 個過期 blob）——**10/30 18:50 真機驗證（round 337）**：
   auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
-  總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,752,169 B（54.1 MiB，gc 後）；`gc --verify` verify_ok=True（8/8 專案）、
+  總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,771,218 B（54.1 MiB，gc 後，`~/.vacant/growth.jsonl` 18:50:12 點）；`gc --verify` verify_ok=True（8/8 專案）、
   `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
 - 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 61.8 MiB（24.1%）、
   最新 trace 44.0 MiB ≤ 64 MiB 上限。
