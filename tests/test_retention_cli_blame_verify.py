@@ -133,3 +133,37 @@ def test_blame_human_output_unattributable_after_gc(env, monkeypatch, capsys):
     assert rc == 0, out
     assert "unattributable" in out, out
     assert "reclaimed by gc" in out, out
+
+
+def test_blame_explicit_value_human_output_unattributable_after_gc(env, monkeypatch, capsys):
+    """P20261030_1733-2：GC 回收後帶顯式 --value 的 blame，人讀（非 --json）輸出誠實 unattributable。
+
+    state="UNKNOWN" 僅存於 JSON 視圖；人讀視圖由 fault_class 與 note 呈現，絕不斷言字面 UNKNOWN
+    （同 test_blame_human_output_unattributable_after_gc 之契約）。
+    """
+    vh, ws = pathlib.Path(os.environ["VACANT_HOME"]), env / "work" / "cli_gc_val_human"
+    ws.mkdir(parents=True)
+    (ws / "app.py").write_text("line1 = 100\nline2 = 999\n")
+    rec = Recorder(ws)
+    rec.baseline()
+    s1 = Actor("claude", "s1")
+    s2 = Actor("claude", "s2")
+    rec.pre("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"})
+    (ws / "app.py").write_text("line1 = 200\nline2 = 999\n")
+    rec.post("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"}, "ok")
+    rec.pre("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"})
+    (ws / "app.py").write_text("pad = '" + ("A" * 50_000) + "'\nmagic = 77777\n")
+    rec.post("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"}, "ok")
+    for i in range(3, 7):
+        rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
+        (ws / "app.py").write_text(f"pad = '{chr(65 + i) * 50_000}'\nmagic = 77777\n")
+        rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 3
+    assert res["target"]["bytes_remaining"] <= 60_000
+    monkeypatch.chdir(ws)
+    rc = trace_main(["trace", "blame", "app.py:2", "--value", "magic = 77777"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "unattributable" in out, out
+    assert "reclaimed by gc" in out, out
