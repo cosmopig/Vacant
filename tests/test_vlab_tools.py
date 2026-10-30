@@ -441,4 +441,21 @@ def test_growth_report_cli_over_envelope_fail_exit_code(tmp_path: Path, capsys) 
     assert data["peak_overrun"]["over_stable_envelope"] is True
 
 
+def test_disk_report_cli_table_and_out_file(tmp_path: Path, capsys) -> None:
+    """disk_report CLI：--table 印人讀統計表格（Arm/n/home min 等欄位）＋JSON 完整另存 --out 檔案。"""
+    cell = tmp_path / "runs" / "exp_tbl" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 12345}), encoding="utf-8")
+    rc = disk_report.main(["exp_tbl", "--base", str(tmp_path / "runs"),
+                           "--table", "--out", str(tmp_path / "out.json")])
+    assert rc == 0
+    assert (tmp_path / "out.json").is_file()
+    data = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
+    assert data["n_cells"] == 1
+    out = capsys.readouterr().out
+    assert "arm" in out
+    assert "home min" in out
+
+
 
