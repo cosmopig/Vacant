@@ -1580,3 +1580,24 @@ def test_compact_vrun_dir_attempt_workspaces_and_missing_dir(tmp_path):
     assert not (t1 / "_attempt_2_ws").exists()
     assert receipts.is_file()
     assert receipts.read_text(encoding="utf-8") == "{\"attempt\": 1}\n"
+
+
+def test_compact_work_missing_dir_and_strip_workspaces_preserves_logs(tmp_path):
+    # 1) 目標目錄不存在：安全回傳 0/0/0，不崩潰
+    missing = retention.compact_work(tmp_path / "nonexistent")
+    assert missing == {"bytes_freed": 0, "files_removed": 0, "runs_scanned": 0}
+
+    # 2) strip_workspaces_only=True：舊 run 只回收 ws 工作區，保留輕量日誌
+    wroot = tmp_path / "work"
+    run1_ws = wroot / "t1" / "run1" / "ws"
+    run1_ws.mkdir(parents=True)
+    (run1_ws / "big.bin").write_text("x" * 20_000, encoding="utf-8")
+    log1 = wroot / "t1" / "run1" / "agent_stdout.log"
+    log1.write_text("step 1 done\n", encoding="utf-8")
+    (wroot / "t1" / "run2" / "ws").mkdir(parents=True)
+
+    res = retention.compact_work(wroot, keep_runs_per_task=1, strip_workspaces_only=True, dry_run=False)
+    assert res["files_removed"] >= 1
+    assert not (wroot / "t1" / "run1" / "ws").exists()
+    assert log1.is_file()
+    assert log1.read_text(encoding="utf-8") == "step 1 done\n"
