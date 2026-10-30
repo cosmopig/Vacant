@@ -1646,3 +1646,10 @@ def test_compact_session_hooks_missing_dir_safe(tmp_path: Path) -> None:
     assert rep["bytes_freed"] == 0
     assert rep["files_removed"] == 0
     assert rep["files_truncated"] == 0
+
+
+def test_compact_trace_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_trace：狀態目錄下無 trace 子目錄時安全回傳與完整報告同形的零釋放字典、不拋異常。"""
+    rep = retention.compact_trace(tmp_path / "nonexistent")
+    assert rep == {"bytes_freed": 0, "files_removed": 0, "projects_scanned": 0,
+                   "kept_blobs": 0, "aborted": False}
