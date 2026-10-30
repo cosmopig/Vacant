@@ -1005,3 +1005,15 @@ def test_dabstep_subset_report_cli_missing_exp_dir_error(tmp_path: Path) -> None
         dabstep_subset_report.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
     assert "runs root not found:" in str(excinfo.value)
     assert "nonexistent_exp" in str(excinfo.value)
+
+
+def test_disk_report_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # P20261030_1547-3（ASSIGNMENT 主軸 2：disk_report CLI 契約治理）：
+    # 傳入不存在的實驗目錄時，collect（disk_report.py L132-143）對
+    # not root.is_dir() 主動拋 SystemExit(f"實驗目錄不存在：{root}")，
+    # main（L213-255）不攔截、異常向上冒泡——不產生 rc=1 的假「no
+    # cells」輸出或未預期崩潰。
+    with pytest.raises(SystemExit) as excinfo:
+        disk_report.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert "實驗目錄不存在：" in str(excinfo.value)
+    assert "nonexistent_exp" in str(excinfo.value)
