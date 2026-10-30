@@ -167,3 +167,19 @@ def test_blame_explicit_value_human_output_unattributable_after_gc(env, monkeypa
     assert rc == 0, out
     assert "unattributable" in out, out
     assert "reclaimed by gc" in out, out
+
+
+def test_trace_verify_cli_no_trace_safe(env, monkeypatch, capsys) -> None:
+    """P20261030_1749-2：乾淨工作區（無病歷、無契約）`vacant trace verify` 安全退出。
+
+    rc == 0，輸出含 "no trace for" 與 "nothing to verify"——沒有病歷是「沒有東西可驗」，
+    不是損壞、不是異常（對應 ASSIGNMENT 🔴最優先 驗收 (c)；cmd_verify 既有行為，本票入常規回歸）。
+    """
+    ws = env / "work" / "cli_no_trace"
+    ws.mkdir(parents=True)
+    monkeypatch.chdir(ws)
+    rc = trace_main(["trace", "verify"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "no trace for" in out, out
+    assert "nothing to verify" in out, out
