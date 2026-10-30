@@ -1040,3 +1040,11 @@ def test_holm_e002_cli_missing_exp_dir_error(tmp_path: Path, capsys) -> None:
     err = capsys.readouterr().err
     assert "無事可做" in err
     assert "nonexistent_exp" in err
+
+
+def test_envelope_compliance_cli_missing_exp_dir_error(tmp_path: Path, capsys) -> None:
+    rc = envelope_compliance.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "輸入不可讀：" in err
+    assert "nonexistent_exp" in err
