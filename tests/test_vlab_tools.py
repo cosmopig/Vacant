@@ -416,4 +416,10 @@ def test_noncode_cell_audit_cli_missing_cells_exit_code(tmp_path: Path, capsys) 
     assert "找不到任何 cell.json" in capsys.readouterr().err
 
 
+def test_p02_carm_audit_cli_missing_dir_exit_code(tmp_path: Path, capsys) -> None:
+    rc = p02_carm_audit.main(["non_existent_exp", "--base", str(tmp_path)])
+    assert rc == 2
+    assert "找不到執行目錄" in capsys.readouterr().err
+
+
 
