@@ -1409,3 +1409,19 @@ def test_verify_trace_chains_resolves_symlinked_vacant_home(tmp_path, monkeypatc
 
 
 
+
+
+def test_verify_trace_chains_detects_corrupted_chain(tmp_path, monkeypatch):
+    """ASSIGNMENT 🔴最優先驗收(c)負對照：chain.ndjson 遭損毀時，verify_trace_chains
+    必須誠實回 (count=1, ok=False, errors 點名該專案)——不漏放、不崩潰。"""
+    real_vh = tmp_path / "real_vacant"
+    proj = real_vh / "trace" / "projects" / "corrupted_proj"
+    proj.mkdir(parents=True)
+    (proj / "chain.ndjson").write_text("not a json chain\n", encoding="utf-8")
+    monkeypatch.setenv("VACANT_HOME", str(real_vh))
+
+    count, ok, errs = retention.verify_trace_chains()
+    assert count == 1
+    assert ok is False
+    assert len(errs) == 1
+    assert "corrupted_proj" in errs[0]
