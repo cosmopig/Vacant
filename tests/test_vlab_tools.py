@@ -1017,3 +1017,15 @@ def test_disk_report_cli_missing_exp_dir_error(tmp_path: Path) -> None:
         disk_report.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
     assert "實驗目錄不存在：" in str(excinfo.value)
     assert "nonexistent_exp" in str(excinfo.value)
+
+
+def test_e002_wiring_gauge_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # P20261030_1612-4（ASSIGNMENT 主軸 3：效益差別驗證線路與門禁量具治理）：
+    # 傳入不存在的實驗目錄時，collect（e002_wiring_gauge.py L147-153）對
+    # not run.is_dir() 主動拋 SystemExit(f"找不到執行目錄 {run}")，
+    # main（L174-202）直調 collect、不攔截，異常向上冒泡退出——不產生
+    # 未預期崩潰或假輸出。
+    with pytest.raises(SystemExit) as excinfo:
+        e002_wiring_gauge.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert "找不到執行目錄" in str(excinfo.value)
+    assert "nonexistent_exp" in str(excinfo.value)
