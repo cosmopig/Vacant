@@ -994,3 +994,14 @@ def test_noncode_cell_audit_cli_missing_exp_dir_error(tmp_path: Path) -> None:
     with pytest.raises(SystemExit) as excinfo:
         noncode_cell_audit.main([no_such, "--base", str(tmp_path / "runs")])
     assert "實驗目錄不存在" in str(excinfo.value.code)
+
+
+def test_dabstep_subset_report_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # 主軸 4（dabstep 子集報告 CLI 契約）：傳入不存在的實驗目錄時，
+    # load_cells（dabstep_subset_report.py L54-68）對 not root.is_dir() 拋
+    # SystemExit(f"runs root not found: {root}")，main（L263-288）不攔截、
+    # 異常外傳——不產生 rc=1 的假「no cells」輸出或未預期崩潰。
+    with pytest.raises(SystemExit) as excinfo:
+        dabstep_subset_report.main(["nonexistent_exp", "--base", str(tmp_path / "runs")])
+    assert "runs root not found:" in str(excinfo.value)
+    assert "nonexistent_exp" in str(excinfo.value)
