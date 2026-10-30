@@ -1368,6 +1368,26 @@ def test_usage_report_and_growth_point_resolve_symlinked_vacant_home(tmp_path, m
     assert gp["record"]["total_bytes"] >= 4096
 
 
+def test_auto_gc_resolves_symlinked_vacant_home(tmp_path, monkeypatch):
+    """ASSIGNMENT 🔴最優先驗收(a)＋審查指示 §四-1：$VACANT_HOME 為 symlink 時，
+    auto_gc 必須先解析到實體狀態目錄；gc_report.json／gc.lock／growth.jsonl
+    都要寫進實體目錄，且成長紀錄 `home` 記實體解析路徑、`total_bytes > 0`
+    （symlink 不得被當成根導致 _tree_size 回 0 B、穩態封頂量具失去錨點）。"""
+    real_vh = tmp_path / "real_vacant"
+    real_vh.mkdir(parents=True)
+    sym_vh = tmp_path / "sym_vacant"
+    sym_vh.symlink_to(real_vh)
+    monkeypatch.setenv("VACANT_HOME", str(sym_vh))
+
+    res = retention.auto_gc(force=True)
+    assert res["status"] == "ok"
+    assert res["growth"]["record"]["home"] == str(real_vh.resolve())
+    assert res["growth"]["record"]["total_bytes"] > 0
+    assert (real_vh / retention.AUTO_GC_REPORT_NAME).exists()
+    assert (real_vh / "gc.lock").exists()
+    assert (real_vh / "growth.jsonl").exists()
+
+
 
 
 
