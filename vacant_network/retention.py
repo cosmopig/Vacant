@@ -199,7 +199,15 @@ ENVELOPE_COMPONENTS: tuple[tuple[str, str, int | None, str], ...] = (
 )
 
 
-def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
+def _resolve_state_dir(root: pathlib.Path | str | None = None) -> pathlib.Path:
+    return (pathlib.Path(root) if root is not None else state_dir()).resolve()
+
+
+def _resolve_work_dir(work_root: pathlib.Path | str | None = None) -> pathlib.Path:
+    return (pathlib.Path(work_root) if work_root is not None else work_dir()).resolve()
+
+
+def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any]:
     """round 176：封頂**帳目**——state_dir 的每個 top-level 組件必須在
     ENVELOPE_COMPONENTS 註冊（有名有姓的上限）；不在的列為 `unaccounted`
     （某程式路徑無上限寫了新資料，或外人放檔）→ 封頂量具不得宣稱「在封頂內」。
@@ -219,7 +227,7 @@ def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
                                   round 192：count-based 分組也在內）
       all_caps_sum_within_envelope  該加總 ≤ STABLE_ENVELOPE_BYTES（封頂不是紙面數字）
     """
-    r = pathlib.Path(root)
+    r = _resolve_state_dir(root)
     known = {name for name, *_ in ENVELOPE_COMPONENTS}
     fixed_caps = {name: cap for name, kind, cap, _ in ENVELOPE_COMPONENTS
                   if kind == "fixed" and cap}
@@ -500,7 +508,7 @@ def compact_trace(
     檔案下次被修改時所需的 before 版本，對它回收只買回 I/O、超時與失觀（下一次掃描
     如數重存），故予以保留；**非活躍專案**（超出窗口）照舊回收。`active_window_s=None`
     表示無活躍窗口（全部照舊回收）；`0.0` 等於「無任何專案活躍」。"""
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    sroot = _resolve_state_dir(root)
     troot = sroot / "trace"
     obj_root = troot / "objects"
     proj_root = troot / "projects"
@@ -921,7 +929,7 @@ def compact_quarantine(
     orphan_grace_s: float = 0.0,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/quarantine/` 裡未被帳本最新裁決／放行引用的候選清單與隔離物件。"""
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    sroot = _resolve_state_dir(root)
     store_roots = [p for p in (sroot / "intake" / "store", sroot / "quarantine") if p.is_dir()]
     if not store_roots:
         return {"bytes_freed": 0, "files_removed": 0, "candidates_kept": 0}
@@ -1044,7 +1052,7 @@ def compact_work(
     - 每個 task 超過 `keep_runs_per_task` 的舊執行：移除佔空間的 `ws*` 工作區副本（`strip_workspaces_only=True`
       時保留輕量的 `a*/agent_stdout.log`；`False` 時連同舊 run 目錄一併移除）。
     """
-    base = pathlib.Path(wroot).resolve() if wroot is not None else work_dir()
+    base = _resolve_work_dir(wroot)
     if not base.is_dir():
         return {"bytes_freed": 0, "files_removed": 0, "runs_scanned": 0}
 
@@ -1114,7 +1122,7 @@ def compact_logs(
 ) -> dict[str, Any]:
     """截斷過大的掛鉤追加日誌（保留最新一半的完整行），避免 `events.jsonl`／`errors.jsonl`／`perf.jsonl` 無限膨脹，
     並清理超額的舊 `intake/hooks/rounds_*.json`。"""
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    sroot = _resolve_state_dir(root)
     if max_log_bytes <= 0:
         return {"bytes_freed": 0, "logs_compacted": 0}
 
@@ -1211,7 +1219,7 @@ def compact_vrun_dir(
 
 def verify_trace_chains(root: pathlib.Path | None = None) -> tuple[int, bool, list[str]]:
     """驗證 trace 版本庫下所有專案的簽章鏈（Recorder.verify）。回傳 (驗證專案數, 是否全數通過, 錯誤訊息列表)。"""
-    base = (root or state_dir()) / "trace"
+    base = _resolve_state_dir(root) / "trace"
     pdir = base / "projects"
     if not pdir.is_dir():
         return 0, True, []
@@ -1405,7 +1413,7 @@ def compact_wire(
         max_body_bytes = _resolve_wire_body_budget()
     if max_index_bytes is None:
         max_index_bytes = _resolve_wire_index_budget()
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    sroot = _resolve_state_dir(root)
     wdir = sroot / "possess" / "proxyd" / "wire"
     rep: dict[str, Any] = {
         "wire_dir": str(wdir),
@@ -1485,7 +1493,7 @@ def compact_session_hooks(
     單檔超 `max_file_bytes` 保留最新完整行；session 數超 `keep_sessions` 保留最新。
     被刪 session 的事件誠實 UNKNOWN（不是 0、不是 PASS）。fail-open。
     """
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    sroot = _resolve_state_dir(root)
     hdir = sroot / "possess" / "hooks"
     rep: dict[str, Any] = {
         "hooks_dir": str(hdir),
@@ -1548,6 +1556,7 @@ def _growth_snapshot(sroot: pathlib.Path) -> dict[str, Any]:
     schema 與 `ops/vlab/tools/vacant_growth_log.py` 同欄位（ts/home/total_bytes/
     per_dir_bytes/objects_files/gc_last），另加 `source` 標明來源；兩份 JSONL 可併排。
     """
+    sroot = _resolve_state_dir(sroot)
     rec: dict[str, Any] = {
         "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "home": str(sroot),
@@ -1587,7 +1596,7 @@ def record_growth_point(root: pathlib.Path | None = None) -> dict[str, Any]:
     - **位元組硬上限**（`DEFAULT_GROWTH_LOG_BYTES`）：超標淘汰最舊行、最新行必留；
       無效行直接丟。原子寫入，不半截。
     """
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
+    sroot = _resolve_state_dir(root)
     path = sroot / AUTO_GC_GROWTH_LOG_NAME
     out: dict[str, Any] = {"status": "error", "ok": False, "path": str(path)}
     try:
@@ -1639,8 +1648,8 @@ def auto_gc(
 
     回傳結構：`{"status": "ok"|"skipped_rate_limited"|"skipped_locked"|"error", "ok": bool, ...}`。
     """
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
-    wroot = pathlib.Path(work_root).resolve() if work_root is not None else work_dir()
+    sroot = _resolve_state_dir(root)
+    wroot = _resolve_work_dir(work_root)
     rep: dict[str, Any] = {"status": "error", "ok": False, "state_dir": str(sroot)}
     try:
         if target_bytes is None:
@@ -1725,8 +1734,8 @@ def usage_report(
 
     估算走 `gc_all(dry_run=True)`：只計算不刪除、不取鎖不計頻，失敗不阻（回 `error` 欄位）。
     """
-    sroot = pathlib.Path(root).resolve() if root is not None else state_dir()
-    wroot = pathlib.Path(work_root).resolve() if work_root is not None else work_dir()
+    sroot = _resolve_state_dir(root)
+    wroot = _resolve_work_dir(work_root)
     out: dict[str, Any] = {
         "state_dir": str(sroot),
         "work_dir": str(wroot),

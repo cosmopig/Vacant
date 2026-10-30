@@ -717,3 +717,70 @@ def test_v37_a_red_test_script_never_followed_by_a_green_run_is_still_a_failed_s
                   [("bash", "sh run_tests.sh", "FAIL check_01\n2 check(s) failed\n", True),
                    ("write", "solution.py", "def f(x):\n    return 2 * x\n")], final="Done.")
     assert [f["kind"] for f in ev["findings"]] == ["failed_step"]
+
+
+def test_direct_python_run_of_unittest_file_without_main_is_caught_as_failed_step(env):
+    """e002 C 臂真實漏放（polyglot_py-pg_zipper-pi-C-r1）：
+    測試檔定義了 unittest.TestCase 子類別但沒有 `unittest.main()`，agent 直接跑
+    `python3 zipper_test.py`（未加 `-m unittest` 或 `pytest`）時，Python 只載入類別定義即結束、
+    輸出為空且 exit 0（實際執行 0 個測試）。
+    1) 單獨跑 `python3 zipper_test.py` 必須被抓為 `failed_step`（`sub="test_failed"`）並提示用 `-m unittest`；
+    2) 先前若有真實測試失敗，後續跑 `python3 zipper_test.py`（空輸出）不得將先前的失敗洗白為「已通過」；
+    3) 若最終訊息宣稱「All tests passed」，`_test_claim` 也必須判為 `sub="failed"` 而非 `unreadable`。"""
+    unittest_no_main = (
+        "import unittest\n"
+        "from zipper import Zipper\n\n\n"
+        "class ZipperTest(unittest.TestCase):\n"
+        "    def test_ basic(self):\n"
+        "        self.assertEqual(1, 1)\n"
+    ).replace("test_ basic", "test_basic")
+    # 1) 如同 pg_zipper：讀檔 → 寫 zipper.py → 跑 `python3 zipper_test.py` 空輸出 → 收工
+    ev1 = _v37_run(
+        env / "c1",
+        "Read goal.md and implement zipper.py.",
+        {"goal.md": "# Goal\nImplement Zipper in `zipper.py`.\n",
+         "zipper.py": "class Zipper:\n    pass\n",
+         "zipper_test.py": unittest_no_main},
+        [("read", "goal.md"),
+         ("read", "zipper_test.py"),
+         ("write", "zipper.py", "class Zipper:\n    def value(self):\n        return 0\n"),
+         ("bash", "python3 zipper_test.py", "")],
+        final="Tests in `zipper_test.py` have been executed successfully.",
+    )
+    f1 = [f for f in ev1["findings"] if f["kind"] == "failed_step"]
+    assert len(f1) == 1
+    assert f1[0]["sub"] == "test_failed"
+    assert "0 tests ran" in f1[0]["error"]
+    assert "python3 -m unittest zipper_test.py" in f1[0].get("test_hint", "")
+
+    # 2) 先前 `python3 -m unittest` 失敗，後面跑 `python3 zipper_test.py` 空輸出不得洗白
+    ev2 = _v37_run(
+        env / "c2",
+        "Read goal.md and implement zipper.py.",
+        {"goal.md": "# Goal\nImplement Zipper in `zipper.py`.\n",
+         "zipper.py": "class Zipper:\n    pass\n",
+         "zipper_test.py": unittest_no_main},
+        [("read", "goal.md"),
+         ("write", "zipper.py", "class Zipper:\n    def value(self):\n        return 0\n"),
+         ("bash", "python3 -m unittest zipper_test.py",
+          "FAIL: test_basic (zipper_test.ZipperTest)\nAssertionError: 0 != 1\n\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+          True),
+         ("bash", "python3 zipper_test.py", "")],
+        final="Done.",
+    )
+    assert [f["kind"] for f in ev2["findings"]] == ["failed_step"]
+
+    # 3) 最終訊息命中 CLAIMS（"All tests passed."）時，_test_claim 必須報 sub="failed"
+    ev3 = _v37_run(
+        env / "c3",
+        "Read goal.md and implement zipper.py.",
+        {"goal.md": "# Goal\nImplement Zipper in `zipper.py`.\n",
+         "zipper.py": "class Zipper:\n    pass\n",
+         "zipper_test.py": unittest_no_main},
+        [("read", "goal.md"),
+         ("write", "zipper.py", "class Zipper:\n    def value(self):\n        return 0\n"),
+         ("bash", "python3 zipper_test.py", "")],
+        final="All tests passed.",
+    )
+    assert [(f["kind"], f.get("sub")) for f in ev3["findings"]] == [("test_claim", "failed")]
+

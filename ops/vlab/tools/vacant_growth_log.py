@@ -38,6 +38,7 @@ def _du(p: pathlib.Path) -> int:
 
 
 def snapshot(home: pathlib.Path) -> dict:
+    home = pathlib.Path(home).resolve()
     out = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "home": str(home),
            "total_bytes": 0}
     if not home.is_dir():

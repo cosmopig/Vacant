@@ -1560,21 +1560,101 @@ class Evidence:
                         out.append({"kind": "copy_of_inline", "path": path, "detail": detail})
         return out
 
+    def _noop_unittest_script(self, clean_cmd: str, outp: str,
+                              latest_idx: str | None = None) -> str | None:
+        """直接以 `python3 foo_test.py`（未帶 `-m unittest`／`pytest`）執行含 `unittest.TestCase`
+        但無 `unittest.main()`／頂層執行入口的測試檔時，Python 只載入類別定義即結束（輸出為空、結束碼 0，
+        實際執行 0 個測試；e002 C 臂 `polyglot_py-pg_zipper-pi-C-r1` 真實漏放）。
+        回傳該測試檔名供 `failed_step`／`test_claim` 標記；若非此情形則回 `None`。"""
+        if not clean_cmd or RUNNERS.search(clean_cmd):
+            return None
+        if (outp or "").strip() not in ("", "(no output)"):
+            return None
+        body = _HEREDOC.sub(" ", clean_cmd)
+        targets: list[str] = []
+        for seg in _SEGMENT.split(body):
+            seg = _PREFIX.sub("", seg.strip())
+            words = seg.split()
+            if not words:
+                continue
+            target = None
+            if re.match(r"^python3?(?:\.\d+)?$", words[0]):
+                if any(w in ("-m", "-c") or w.startswith(("-m", "-c")) for w in words[1:]):
+                    continue
+                rest = [w for w in words[1:] if not w.startswith("-")]
+                if rest and _ext(rest[0].strip("'\"")) == ".py":
+                    target = rest[0].strip("'\"")
+            elif words[0].startswith(("./", "/")) and _ext(words[0].strip("'\"")) == ".py":
+                target = words[0].strip("'\"")
+            if target:
+                base = target.rsplit("/", 1)[-1]
+                stem = base.rsplit(".", 1)[0]
+                if TEST_BASENAME.match(stem):
+                    targets.append(target)
+        if not targets:
+            return None
+        idx_map = self.tr.index(latest_idx)
+        for target in targets:
+            rel_cand = target.removeprefix("./")
+            base = rel_cand.rsplit("/", 1)[-1]
+            src: str | None = None
+            for rel in (rel_cand, base, *[k for k in sorted(idx_map) if k.endswith("/" + base)]):
+                if rel in idx_map:
+                    src = self.tr.file_text(latest_idx, rel)
+                    if src is not None:
+                        break
+            if src is None and self.rec.workspace and self.rec.workspace.is_dir():
+                for cand in (self.rec.workspace / rel_cand, self.rec.workspace / base):
+                    try:
+                        if cand.is_file() and not cand.is_symlink():
+                            src = cand.read_text(encoding="utf-8", errors="replace")
+                            break
+                    except OSError:
+                        pass
+            if not src or "unittest.main" in src or "pytest.main" in src:
+                continue
+            try:
+                tree = ast.parse(src)
+            except SyntaxError:
+                continue
+            has_testcase = False
+            has_top_runner = False
+            for node in tree.body:
+                if isinstance(node, ast.ClassDef):
+                    for b in node.bases:
+                        if (isinstance(b, ast.Name) and b.id.endswith("TestCase")) or (
+                            isinstance(b, ast.Attribute) and b.attr.endswith("TestCase")
+                        ):
+                            has_testcase = True
+                elif isinstance(
+                    node,
+                    (ast.If, ast.For, ast.AsyncFor, ast.While, ast.With, ast.AsyncWith, ast.Try, ast.Assert),
+                ):
+                    has_top_runner = True
+                elif isinstance(node, ast.Expr) and not isinstance(node.value, ast.Constant):
+                    has_top_runner = True
+            if has_testcase and not has_top_runner:
+                return base
+        return None
+
     def _test_claim(self, steps: list[Step], delivs: dict[str, tuple[str, str]]
                     ) -> list[dict[str, Any]]:
         m = CLAIMS.search(self.final_text or "")
         if not m:
             return []
         quote = _sentence_around(self.final_text, m.start(), m.end())
+        latest_idx = self.tr.latest_index()
         runs = []
         for s in steps:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
-            if not (RUNNERS.search(cmd) or is_test_script_run(cmd)):
+            clean_cmd = _strip_shell_comments(cmd)
+            if not (RUNNERS.search(clean_cmd) or is_test_script_run(clean_cmd)):
                 continue
             out = self.tr.output_text(s)
-            if s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out):
+            if (s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out)
+                    or self._noop_unittest_script(clean_cmd, out, latest_idx)):
                 runs.append((s, "failed", cmd))
             elif PASS_OUT.search(out) or PASS_OUT_2.search(out):
                 runs.append((s, "passed", cmd))
@@ -1726,6 +1806,7 @@ class Evidence:
     def _failed_steps(self, steps: list[Step], delivs: dict[str, tuple[str, str]],
                       materials: list[str]) -> list[dict[str, Any]]:
         out = []
+        latest_idx = self.tr.latest_index()
         has_test_claim = bool(CLAIMS.search(self.final_text or ""))
         written_scripts = {str(w["path"]).rsplit("/", 1)[-1] for s in steps for w in s.writes
                            if _ext(str(w["path"])) in {".py", ".js", ".ts", ".sh", ".mjs"}}
@@ -1741,9 +1822,14 @@ class Evidence:
             is_runner = bool(RUNNERS.search(clean_cmd))
             is_test_script = is_test_script_run(clean_cmd)
             is_test_cmd = is_runner or is_test_script
+            noop_script = (
+                self._noop_unittest_script(clean_cmd, outp, latest_idx)
+                if (is_test_script and not is_runner and not s.error)
+                else None
+            )
             failed = bool(s.error) or bool(re.search(r"Traceback \(most recent call last\)|"
                                                      r"\bError:|Exception:", outp))
-            if is_test_cmd and (FAIL_OUT.search(outp) or FAIL_OUT_2.search(outp)):
+            if is_test_cmd and (FAIL_OUT.search(outp) or FAIL_OUT_2.search(outp) or noop_script):
                 failed = True
             if failed and _no_match_only(clean_cmd, outp + "\n" + str(s.error or "")):
                 failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
@@ -1759,14 +1845,22 @@ class Evidence:
                        and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
                             or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                        and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
-                       and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in later):
+                       and not FAIL_OUT_2.search(self.tr.output_text(t))
+                       and not self._noop_unittest_script(
+                           _strip_shell_comments(_command_of(self.tr, t)),
+                           self.tr.output_text(t), latest_idx)
+                       for t in later):
                     continue
                 # 若後面還有另一次失敗的測試執行，只報最後一次失敗的測試執行
                 if any(tool_kind(t.tool) == "shell"
                        and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
                             or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                        and (t.error or FAIL_OUT.search(self.tr.output_text(t))
-                            or FAIL_OUT_2.search(self.tr.output_text(t))) for t in later):
+                            or FAIL_OUT_2.search(self.tr.output_text(t))
+                            or self._noop_unittest_script(
+                                _strip_shell_comments(_command_of(self.tr, t)),
+                                self.tr.output_text(t), latest_idx))
+                       for t in later):
                     continue
             runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", clean_cmd)
                            for b in written_scripts)
@@ -1784,7 +1878,8 @@ class Evidence:
             if not (wrote_after or unfixed_after_deliv):
                 continue
             norm = _norm_cmd(cmd)
-            if any(tool_kind(t.tool) == "shell" and _norm_cmd(_command_of(self.tr, t)) == norm
+            if not noop_script and any(
+                   tool_kind(t.tool) == "shell" and _norm_cmd(_command_of(self.tr, t)) == norm
                    and not t.error and not re.search(r"Traceback|\bError:",
                                                      self.tr.output_text(t)) for t in later):
                 continue
@@ -1825,18 +1920,28 @@ class Evidence:
                          or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                     and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
                     and not FAIL_OUT_2.search(self.tr.output_text(t))
+                    and not self._noop_unittest_script(
+                        _strip_shell_comments(_command_of(self.tr, t)),
+                        self.tr.output_text(t), latest_idx)
                     for t in later
                 )
                 if overwritten and has_subsequent_test_pass:
                     continue
             if self.final_text and MENTIONS_FAILURE.search(self.final_text) and not (is_test_cmd and has_code_deliv):
                 continue
-            err = next((ln for ln in reversed(outp.strip().splitlines()) if ln.strip()),
-                       str(s.error or "failed"))
+            if noop_script:
+                err = f"0 tests ran ({noop_script} has unittest.TestCase without unittest.main)"
+            else:
+                err = next((ln for ln in reversed(outp.strip().splitlines()) if ln.strip()),
+                           str(s.error or "failed"))
             item: dict[str, Any] = {"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err}
             if is_test_cmd and has_code_deliv:
                 item["sub"] = "test_failed"
-                hint = _extract_test_hint(outp + "\n" + str(s.error or ""), err=err)
+                hint = (
+                    f"run python3 -m unittest {noop_script} instead of executing {noop_script} directly"
+                    if noop_script
+                    else _extract_test_hint(outp + "\n" + str(s.error or ""), err=err)
+                )
                 if hint:
                     item["test_hint"] = hint
             out.append(item)
