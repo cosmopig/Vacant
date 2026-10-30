@@ -801,3 +801,21 @@ def test_holm_e002_cli_recompute_cells_fallback(tmp_path: Path, capsys) -> None:
     assert rc == 0
     assert '"schema": "vacant.holm/1"' in out
     assert '"source": "recomputed"' in out
+
+
+def test_holm_e002_cli_absent_arm_excluded_from_holm_set(tmp_path: Path, capsys) -> None:
+    # P20261030_1301-4（ASSIGNMENT 主軸 3：e002 缺臂不進校正組之邊界契約）：
+    # 指定臂 S 在 REPORT.json 沒有 A_vs_S 的 p、也沒有原始格子可重算時，main 須將
+    # S 歸入 absent_pairs 排除於 Holm 校正集外（「未測」是 UNKNOWN，不是 p=1.0，
+    # 也不崩潰），C 臂照常校正，m 只數有 p 的組，exit 0。
+    exp_dir = tmp_path / "runs" / "exp_abs"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "REPORT.json").write_text(
+        json.dumps({"paired": {"A_vs_C": {"mcnemar_p_two_sided": 0.04}}}),
+        encoding="utf-8")
+    rc = holm_e002.main(["exp_abs", "--base", str(tmp_path / "runs"), "--arms", "C,S"])
+    doc = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert doc["m"] == 1
+    assert "C" in doc["pairs"]
+    assert "S" in doc["absent_pairs"]
