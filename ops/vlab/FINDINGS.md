@@ -369,3 +369,10 @@ H/M/S 臂 env.VLAB_APPEND_SYSTEM 沿用 e002 臂檔（round 355 抽樣核對）�
 M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **口徑**：此段僅為發射與排程事實；1004 完賽前無結果數據、不預填、不宣稱；原擬完賽後以 opencode_cell_audit 審計 170 格，再依封包 §3 判定——排程已於 2026-10-30 終止，170 格未完賽，無結果判定。
 **機構回退（2026-10-30，終止）**：`/srv/vlab/bin/cell.py:158` 對非 pi agent 且設定 `VLAB_APPEND_SYSTEM` 直接 `raise SystemExit("VLAB_APPEND_SYSTEM 目前只支援 pi")`；H/M/S 臂 102 格（34 題×3 臂）全落在此確定性失敗路徑，labd.log 已實測 12 格 rc=1（20:57–21:22，pg_affine_cipher/beer_song/book_store/bottle_song 各題 H/M/S）。依封包 §4 正式觸發機構回退：排程終止（running/05_e004_opencode_polyglot.json 已移至 done/05_e004_opencode_polyglot.fallback.json，labd 重啟後無 running 工作）、H/M/S 臂不計、infra 格永不回填、無任何結果判定；A 臂 5 格／C 臂 4 格（agent_rc=0，未出分數）為唯一既有數據，pg_bowling C 未完成＝UNKNOWN。複測前需先修 cell.py 對非 pi agent 的 `VLAB_APPEND_SYSTEM` 支援（或改臂檔機制）並冒煙複測。
+
+## 2026-10-30 · 主軸 1 · e005 OpenCode 五臂冒煙完賽（A/C/H/M/S 各 1 格，100% 出 score.json、infra=0，滿足全臂冒煙鐵律）
+
+**背景**：e004（170 格）機構回退暴露 cell.py:158 對非 pi agent 直接 SystemExit；修復 `c76ff988`（cell.py 支援 OpenCode prepend 模式之 DECISION 指引）＋`bf1a9f1a`（e002_M 臂檔第二 agent 審查指令改 `opencode run`，pi -p 保留）。e005＝同一題 pg_affine_cipher 上 A/C/H/M/S 各 1 格（vacant_sha=bf1a9f1a、900 s/格；預註冊封包 `ops/vlab/packets/e005_opencode_five_arm_smoke.md`，round 381 補立）。
+**客觀結果**（來源 REPORT.json＋opencode_cell_audit，round 383 回填）：**5/5 格 complete**（每格皆有 cell.json 與 score.json、pass∈{true,false}）、**infra=0**；H/M/S 三格 `append_system` mode=prepend、agent 實際啟動（model calls 26/12/14），舊 SystemExit 路徑未觸發；A/C/H/S 臂 **score_pass=True**（成本：A 16 calls/209,800 tok、C 13/167,573、H 26/413,461、S 14/158,893），**M 臂 0/1：900 s 逾時 agent_rc=124、無第二 agent 啟動證據，依判準條款記 UNKNOWN**（非負結果、不隱瞞）；C 臂 install_rc=0、vacant_home 79,333 B（含 .vacant/intake/hooks/events.jsonl）、**trace 16 entries PASS**（seq_ok=true、prev_link=ok、review 25 allow/0 denied）。
+**結論**：無確定性 infra 崩潰、fail-open 放行鐵律滿足 → 滿足審查指示 1.4 放行全盤重發射之鐵律（e004 H/M/S 重發射可另開預註冊封包再議）；GO 判準 1/2/3/5 成立、判準 4 記 UNKNOWN，五條未全數建立、冒煙不能全數判 GO；M 臂第二 agent 路徑（bf1a9f1a）在 OpenCode 上未獲驗證，待修複測。
+**口徑**：本條僅為冒煙完賽之客觀事實與審計結論；不寫「證明變好」、不寫「信任」；M 臂 UNKNOWN 照實保留，不升格為 PASS 或「沒有」。
