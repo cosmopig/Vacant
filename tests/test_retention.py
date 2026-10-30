@@ -1772,3 +1772,15 @@ def test_compact_vrun_dir_dry_run_safe(tmp_path: Path) -> None:
     assert res["files_removed"] > 0
     assert junk.is_file()
     assert (run_dir / "result.json").is_file()
+
+
+def test_retention_main_gc_dry_run_human_output_safe(tmp_path, capsys):
+    """`vacant gc --dry-run` 指定不存在目錄：安全回傳 0、人讀輸出完整呈現預覽模式標記
+    與各模組 0 釋放統計、絕不建立目錄（ASSIGNMENT 🔴最優先 驗收 (c)；核心零改動）。"""
+    missing_vh = tmp_path / "nonexistent_vh"
+    rc = retention.main(["gc", "--dry-run", "--state-dir", str(missing_vh)])
+    assert rc == 0
+    assert not missing_vh.exists()
+    out = capsys.readouterr().out
+    assert "（預覽 --dry-run，未刪除） 釋放空間：0 B" in out
+    assert "trace 版本庫   : 釋放 0 B" in out
