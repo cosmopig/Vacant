@@ -109,10 +109,19 @@ def audit_cell(cell_path) -> dict:
         state = None
     if state is not None:
         return {"cell": cell.name, "state": state, "ok": None, "unknown": [],
-                "arm": None, "agent_rc": None, "wall_s": None, "events": None, "vacant": None}
+                "arm": None, "agent_rc": None, "wall_s": None, "events": None, "vacant": None,
+                "score_pass": None}
     meta = json.loads(cj.read_text(encoding="utf-8"))
-    rec: dict = {"cell": cell.name, "state": "complete", "ok": True, "unknown": []}
+    rec: dict = {"cell": cell.name, "state": "complete", "ok": True, "unknown": [], "score_pass": None}
     rec.update(arm=meta.get("arm"), agent_rc=meta.get("agent_rc"), wall_s=meta.get("wall_s"))
+    sp = cell / "score.json"
+    if sp.is_file():
+        try:
+            sc = json.loads(sp.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            sc = None
+        if isinstance(sc, dict) and isinstance(sc.get("pass"), bool):
+            rec["score_pass"] = sc["pass"]
     ev = cell / "events.jsonl"
     if ev.is_file():
         rec["events"] = parse_events(ev)
@@ -136,7 +145,35 @@ def audit_cell(cell_path) -> dict:
     return rec
 
 
-def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False) -> Path:
+def summarize(recs: list) -> dict:
+    """分臂成本彙總（complete 且有 arm）＋ 2×A 成本紅線（e004 封包 §3：calls 或 tokens 任一 > 2×A）。"""
+    arms: dict = {}
+    for r in recs:
+        if r.get("state") != "complete" or not r.get("arm"):
+            continue
+        g = arms.setdefault(r["arm"], {"cells": 0, "pass": 0, "model_calls": 0, "total_tokens": 0})
+        ev = r.get("events") or {}
+        g["cells"] += 1
+        g["pass"] += 1 if r.get("score_pass") is True else 0
+        g["model_calls"] += _i(ev.get("model_calls"))
+        g["total_tokens"] += _i(ev.get("total_tokens"))
+    per_arm: dict = {}
+    for arm, g in sorted(arms.items()):
+        d = dict(g)
+        d["calls_per_success"] = g["model_calls"] / g["pass"] if g["pass"] > 0 else None
+        d["tokens_per_success"] = g["total_tokens"] / g["pass"] if g["pass"] > 0 else None
+        per_arm[arm] = d
+    base = per_arm.get("A")
+    if base and base.get("tokens_per_success"):
+        for d in per_arm.values():
+            d["calls_vs_A"] = d["calls_per_success"] / base["calls_per_success"] if d["calls_per_success"] else None
+            d["tokens_vs_A"] = d["tokens_per_success"] / base["tokens_per_success"] if d["tokens_per_success"] else None
+            d["over_2x_A_cost"] = (d["calls_vs_A"] is not None and d["calls_vs_A"] > 2) or \
+                                 (d["tokens_vs_A"] is not None and d["tokens_vs_A"] > 2)
+    return {"per_arm": per_arm}
+
+
+def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False, score_pass: bool | None = None) -> Path:
     """合成 mock 格子：OpenCode 格式 events.jsonl ＋（C 臂）vacant_home.tgz。"""
     cell = root / name
     cell.mkdir(parents=True)
@@ -170,19 +207,24 @@ def _mock_cell(root: Path, name: str, arm: str, tamper: bool = False) -> Path:
             ch.write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
         with tarfile.open(cell / "vacant_home.tgz", "w:gz") as tf:
             tf.add(home, arcname=".")
+    if score_pass is not None:
+        (cell / "score.json").write_text(json.dumps(
+            {"pass": score_pass, "tests_passed": 2 if score_pass else 0, "tests_total": 2}), encoding="utf-8")
     return cell
 
 
 def selftest() -> bool:
     root = Path(tempfile.mkdtemp(prefix="ocaudit_"))
     try:
-        a = audit_cell(_mock_cell(root, "mock-opencode-A-r1", "A"))
-        c = audit_cell(_mock_cell(root, "mock-opencode-C-r1", "C"))
-        t = audit_cell(_mock_cell(root, "mock-opencode-C-tampered", "C", tamper=True))
+        a = audit_cell(_mock_cell(root, "mock-opencode-A-r1", "A", score_pass=True))
+        c = audit_cell(_mock_cell(root, "mock-opencode-C-r1", "C", score_pass=True))
+        t = audit_cell(_mock_cell(root, "mock-opencode-C-tampered", "C", tamper=True, score_pass=False))
+        f = audit_cell(_mock_cell(root, "mock-opencode-C-nopass", "C", score_pass=False))
         (root / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
         i = audit_cell(root / "mock-opencode-A-incomplete")
         exp_ev = {"model_calls": 2, "input_tokens": 300, "output_tokens": 30,
                   "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}}
+        per_arm = summarize([a, c, t, f, i])["per_arm"]
         return (a["events"] == exp_ev and a["arm"] == "A" and a["ok"] and "vacant" not in a
                 and c["arm"] == "C" and c["ok"] and not c["unknown"]
                 and c["vacant"]["review"] == {"n": 4, "actions": {"allow": 3, "deny": 1}, "denied": 1}
@@ -190,7 +232,18 @@ def selftest() -> bool:
                 and c["vacant"]["trace"]["prev_link"] == "ok"
                 and t["vacant"]["trace"]["prev_link"] == "broken" and t["ok"] is False
                 and i["state"] == "incomplete" and i["ok"] is None and i["events"] is None
-                and i["unknown"] == [])
+                and i["unknown"] == []
+                and a["score_pass"] is True and c["score_pass"] is True
+                and t["score_pass"] is False and f["score_pass"] is False and i["score_pass"] is None
+                and set(per_arm) == {"A", "C"}
+                and per_arm["A"] == {"cells": 1, "pass": 1, "model_calls": 2, "total_tokens": 800,
+                                     "calls_per_success": 2.0, "tokens_per_success": 800.0,
+                                     "calls_vs_A": 1.0, "tokens_vs_A": 1.0, "over_2x_A_cost": False}
+                and per_arm["C"]["cells"] == 3 and per_arm["C"]["pass"] == 1
+                and per_arm["C"]["model_calls"] == 6 and per_arm["C"]["total_tokens"] == 2400
+                and per_arm["C"]["calls_per_success"] == 6.0 and per_arm["C"]["tokens_per_success"] == 2400.0
+                and per_arm["C"]["calls_vs_A"] == 3.0 and per_arm["C"]["tokens_vs_A"] == 3.0
+                and per_arm["C"]["over_2x_A_cost"] is True)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -210,7 +263,8 @@ def main(argv=None) -> int:
     cells = sorted(d for d in a.runs_dir.iterdir() if d.is_dir())
     recs = [audit_cell(c) for c in cells]
     bad = [r["cell"] for r in recs if r.get("state") == "complete" and (not r["ok"] or r["unknown"])]
-    print(json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad, "cells": recs},
+    print(json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad,
+                      "summary": summarize(recs), "cells": recs},
                      ensure_ascii=False, indent=1))
     return 0 if not bad else 1
 
