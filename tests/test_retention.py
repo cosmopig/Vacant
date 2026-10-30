@@ -1653,3 +1653,18 @@ def test_compact_trace_missing_dir_safe(tmp_path: Path) -> None:
     rep = retention.compact_trace(tmp_path / "nonexistent")
     assert rep == {"bytes_freed": 0, "files_removed": 0, "projects_scanned": 0,
                    "kept_blobs": 0, "aborted": False}
+
+
+def test_gc_all_missing_dir_and_verify_safe(tmp_path: Path) -> None:
+    """gc_all：狀態目錄與工作區目錄皆不存在時，綜合各模組清理安全回傳零釋放字典、verify 安全回傳，不崩潰。"""
+    rep = retention.gc_all(
+        root=tmp_path / "nonexistent_vh",
+        work_root=tmp_path / "nonexistent_work",
+        verify=True,
+    )
+    assert rep["bytes_freed"] == 0
+    assert rep["files_removed"] == 0
+    assert rep["aborted"] is False
+    assert rep["verify_ok"] is True
+    assert rep["verified_projects"] == 0
+    assert rep["verify_errors"] == []
