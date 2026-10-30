@@ -691,3 +691,29 @@ def test_e002_wiring_gauge_cli_normal_run_and_out_file(tmp_path: Path, capsys) -
     doc = json.loads(out.read_text(encoding="utf-8"))
     assert doc["n_cells"] == 2
     assert "\"n_cells\": 2" in capsys.readouterr().out
+
+
+def test_growth_report_cli_out_file(tmp_path: Path) -> None:
+    # P20261030_1130-1（ASSIGNMENT 驗收 a：真機用量報告量具守護）：CLI --out 雙通道契約。
+    # 合格序列（跨 26h 的 3 點、未超穩態封頂、最新 gc status=ok）時 main 須回 0，
+    # 且 --out 把完整 JSON 報告寫入指定路徑：可解析、verdict=PASS、n_points=3
+    #（與既有 --json stdout 契約 test_growth_report_cli 形成閉環）。
+    home = tmp_path / "home"
+    home.mkdir()
+    pt = lambda ts, total: json.dumps({"ts": ts, "total_bytes": total,
+                                       "per_dir_bytes": {"trace": total // 2},
+                                       "gc_last": {"status": "ok", "target_reached": True}})
+    (home / "growth.jsonl").write_text("\n".join([
+        pt("2026-10-28T00:00:00+0000", 20 * 1024 * 1024),
+        pt("2026-10-28T12:00:00+0000", 30 * 1024 * 1024),
+        pt("2026-10-29T02:00:00+0000", 40 * 1024 * 1024)]) + "\n", encoding="utf-8")
+    (tmp_path / "empty_ops").mkdir()
+    out = tmp_path / "growth_out.json"
+    rc = growth_report.main(["--home", str(home),
+                             "--ops-data", str(tmp_path / "empty_ops"),
+                             "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["verdict"] == "PASS"
+    assert data["n_points"] == 3
