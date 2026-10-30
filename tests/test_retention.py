@@ -1756,3 +1756,19 @@ def test_retention_parse_size_valid_and_invalid():
     for bad in ("-1", "invalid"):
         with pytest.raises(argparse.ArgumentTypeError):
             retention._parse_size(bad)
+
+
+def test_compact_vrun_dir_dry_run_safe(tmp_path: Path) -> None:
+    """compact_vrun_dir(dry_run=True)：正確回傳預估 bytes_freed/files_removed，
+    但保留 _attempt_*_ws 重試工作區目錄與檔案不刪除（ASSIGNMENT 🔴最優先 驗收 (c)；核心零改動）。"""
+    run_dir = tmp_path / "run_x"
+    ws = run_dir / "_attempt_1_ws"
+    ws.mkdir(parents=True)
+    (run_dir / "result.json").write_text('{"ok": true}')
+    junk = ws / "junk.txt"
+    junk.write_bytes(b"test-bytes-for-dry-run " * 10)
+    res = retention.compact_vrun_dir(run_dir, dry_run=True)
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] > 0
+    assert junk.is_file()
+    assert (run_dir / "result.json").is_file()
