@@ -369,4 +369,11 @@ def test_growth_report_cli(tmp_path: Path, capsys) -> None:
     assert data["n_points"] == 3
 
 
+def test_disk_report_cli_empty_dir_exit_code(tmp_path: Path, capsys) -> None:
+    (tmp_path / "runs" / "empty_exp").mkdir(parents=True)
+    rc = disk_report.main(["empty_exp", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    assert "找不到任何 cell.json" in capsys.readouterr().err
+
+
 
