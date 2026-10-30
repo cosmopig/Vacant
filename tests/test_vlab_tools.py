@@ -12,6 +12,7 @@ from ops.vlab.tools import (
     growth_report,
     holm_e002,
     p02_carm_audit,
+    vacant_growth_log,
 )
 
 
@@ -272,6 +273,28 @@ def test_p02_carm_audit_json_newline_false_preserved_continue_and_suite_filter(t
     assert crit["review_continue"] == 1
     assert crit["review_other"] == 0
     assert p02_carm_audit.selftest() == 0
+
+
+def test_vacant_growth_log_snapshot_resolves_symlink_and_measures_bytes(tmp_path: Path) -> None:
+    # auto/argon symlink 防護：VACANT_HOME 為 symlink 時 snapshot 須解析為真實路徑，
+    # 且 total_bytes / objects_files / gc_last 照常度量（tmp_path 隔離，不碰 ~/.vacant）。
+    real_home = tmp_path / "real_vacant"
+    (real_home / "trace" / "objects").mkdir(parents=True)
+    (real_home / "trace" / "objects" / "ab12").write_text("blob-bytes", encoding="utf-8")
+    (real_home / "gc_report.json").write_text(
+        json.dumps({"status": "ok", "trace": {"target": {"target_reached": True}}}),
+        encoding="utf-8",
+    )
+
+    sym_home = tmp_path / "sym_vacant"
+    sym_home.symlink_to(real_home)
+
+    rec = vacant_growth_log.snapshot(sym_home)
+    assert rec["home"] == str(real_home.resolve())
+    assert rec["total_bytes"] > 0
+    assert rec["objects_files"] == 1
+    assert rec["gc_last"]["status"] == "ok"
+    assert rec["gc_last"]["target_reached"] is True
 
 
 
