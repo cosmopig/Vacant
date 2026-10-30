@@ -1063,3 +1063,15 @@ def test_growth_report_cli_missing_sources_human_unknown_exit_code(tmp_path: Pat
     assert out.startswith("UNKNOWN：")
     assert "sources: （無）" in out
     assert "missing:" in out
+
+
+def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
+    # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
+    # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
+    # （L326-329）須向 stderr 輸出明確 {"error": "no cells"} JSON 錯誤訊息，
+    # 並以 exit code 2 安全退出——不產生未攔截異常或假 0 輸出。
+    (tmp_path / "exp").mkdir()
+    rc = p02_carm_audit.main(["exp", "--base", str(tmp_path), "--suite", "nonexistent_suite"])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "no cells" in err
