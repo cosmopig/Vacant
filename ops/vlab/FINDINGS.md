@@ -145,15 +145,18 @@ REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
 - e002 A/C 題級機制差異剖析（2026-10-30；`ops/vlab/tools/e002_pair_breakdown.py`
   → `ops/vlab/runs_e002_hypothesis_arms/PAIR_BREAKDOWN.json`；170 格／34 題；100% 由原始格
   推導、無人工臆測）：
-  - C_only 7 題＝**2 題閘門擋回後挽救**（pg_list_ops、pg_react：C 臂 chain.ndjson 有
-    review 擋回紀錄、最終過）＋**5 題初次即過**（pg_bowling、pg_connect、pg_pig_latin、
+  - C_only 7 題＝**2 題閘門擋回後挽救（gate_salvaged）**（pg_list_ops、pg_react：C 臂 chain.ndjson 有
+    review 擋回紀錄、最終過）＋**5 題初次即過（first_pass）**（pg_bowling、pg_connect、pg_pig_latin、
     pg_transpose、pg_wordy：無擋回紀錄）。
-  - A_only 3 題全部是 C 臂**閘門擋回後仍未挽救（修改失敗）**：pg_hangman 同時為 C 臂
+  - A_only 3 題全部是 C 臂**閘門擋回後仍未挽救（修改失敗）（refused_not_saved）**：pg_hangman 同時為 C 臂
     逾時（wall 1800s）；pg_bottle_song、pg_food_chain 為非逾時的修改失敗。
+  - 詞彙＝`PAIR_BREAKDOWN.json` `c_review` 四類（34 題全歸類、unknown＝0）：gate_salvaged 4（C 過、含
+    both 2 題 pg_beer_song/pg_robot_name）、first_pass 18、refused_not_saved 8、never_refused 4
+    （pg_forth、pg_grep、pg_sgf_parsing、pg_zipper；其中 3 題為 C 臂逾時）。
   - H/M 逾時分佈：H 11 題＋M 8 題共 19 題**全部** wall_s＝1800.0（全數撞 1800s 封頂，
     無提前逾時）。
-  - 自洽核對：C 臂 22 過＝4 挽救＋18 初次；12 敗＝8 擋回未挽救＋4 未見擋回
-    （4 題中 3 題為 C 逾時）；A 敗 16＝C_only 7＋neither 9。
+  - 自洽核對：C 臂 22 過＝4 gate_salvaged＋18 first_pass；12 敗＝8 refused_not_saved＋4
+    never_refused（4 題中 3 題為 C 逾時）；A 敗 16＝C_only 7＋neither 9。
   - 口徑：這是**描述性、可究責的機制記錄**（每題可回查 PAIR_BREAKDOWN.json）；
     不推翻上方 Holm 結論（四組皆未顯著），也不得讀成「閘門有效／無效」。
 
