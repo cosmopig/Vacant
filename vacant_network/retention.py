@@ -110,7 +110,8 @@ DEFAULT_HOOKS_KEEP_SESSIONS = 200
 # 2026-10-29 round 166 DECISION（ASSIGNMENT 🔴 最優先「用量有上限」，目標數字見
 # ops/packets/disk_top_priority.md §3）：`~/.vacant` 的**穩態封頂**＝各分組上限的
 # 加總（trace 64 MiB ＋ wire body 96 ＋ wire index 8 ＋ 日誌 2 MiB/檔 ＋ 固定安裝面
-# ~10 MiB）。對 2 GiB repo 是 12.5%——「不該是 repo 的一半」有 4 倍餘裕。
+# 1 MiB/組件，round 190 起 fixed 面也有命名上限，見 ENVELOPE_COMPONENTS）。
+# 對 2 GiB repo 是 12.5%——「不該是 repo 的一半」有 4 倍餘裕。
 # ⚠ 誠實口徑（§4）：它是**加總**，不是一條程式保證的單一硬上限；`vacant usage`
 # 的量具輸出必須自報這一點，不得被讀成單一開關。
 STABLE_ENVELOPE_BYTES = 256 * 1024 * 1024
@@ -121,6 +122,16 @@ STABLE_ENVELOPE_BYTES = 256 * 1024 * 1024
 # $VACANT_HOME/growth.jsonl——零設定、fail-open、schema 與 ops 工具同欄位可併排。
 # 量具本身也須有上限（否則封頂自我矛盾）：位元組硬上限，保留最新、淘汰最舊。
 DEFAULT_GROWTH_LOG_BYTES = 256 * 1024  # 256 KiB ≈ 400+ 筆/日 × 數月
+
+# 2026-10-29 round 190（ASSIGNMENT 🔴 最優先「用量有上限」；packet
+# ops/packets/disk_top_priority.md §4 誠實缺口：「`fixed` 類型組件沒有 byte 封頂，
+# 靠『不增長』的語義保證＋實測；若未來某 fixed 組件實際增長，需在此表升級為計數制
+# 或位元組上限」→ 本輪收口）：fixed 安裝面組件（adapters / gc_report.json /
+# gc_last.json / gc.lock）平時是幾 KiB；給它們 1 MiB 的命名位元組上限，留 25 倍餘裕，
+# 但某條程式路徑若開始往固定面寫無上限資料，`envelope_accounting` 會點名
+# （`fixed_overrun`），封頂量具不再宣稱「在封頂內」。fixed 面沒有回收路徑——量具
+# 只報告、不刪除（fail-open：Vacant 不刪自己語義不認得的增長）。
+DEFAULT_FIXED_COMPONENT_BYTES = 1024 * 1024  # 1 MiB
 
 # 2026-10-29 round 176（ASSIGNMENT 🔴 最優先「用量有上限」；packet
 # ops/packets/disk_top_priority.md §4 誠實缺口「總計封頂本身不是一條程式保證，
@@ -133,7 +144,7 @@ DEFAULT_GROWTH_LOG_BYTES = 256 * 1024  # 256 KiB ≈ 400+ 筆/日 × 數月
 # 語義不認得的檔）。新增 state_dir top-level 寫入時，必須在此表註冊並說明上限，
 # 否則常規測試 test_envelope_accounting_* 會紅。
 ENVELOPE_COMPONENTS: tuple[tuple[str, str, int | None, str], ...] = (
-    # (top-level 名, 上限類型, 位元組值（count/fixed 為 None 或計數）, 註記)
+    # (top-level 名, 上限類型, 位元組值（count 為計數；bytes/fixed 為位元組上限）, 註記)
     ("trace", "bytes", DEFAULT_TRACE_BUDGET_BYTES,
      "objects 位元組硬上限（env VACANT_TRACE_BUDGET_BYTES 可覆寫、0＝關）；"
      "projects 是步索引（keep 50 步）＋其 blob 歸 objects"),
@@ -145,10 +156,15 @@ ENVELOPE_COMPONENTS: tuple[tuple[str, str, int | None, str], ...] = (
      "（帳本裁決，DEFAULT_KEEP_DECISIONS/每 task）"),
     ("quarantine", "count", DEFAULT_KEEP_DECISIONS,
      "每 task 保留 2 裁決（compact_quarantine）；單 blob ≤ MAX_BLOB 8 MiB"),
-    ("adapters", "fixed", None, "安裝面（install.json／hook 註冊），不增長"),
-    ("gc_report.json", "fixed", None, "上次 gc 結果，小檔"),
-    ("gc_last.json", "fixed", None, "上次 gc 時間，小檔"),
-    ("gc.lock", "fixed", None, "gc 鎖，0 B"),
+    ("adapters", "fixed", DEFAULT_FIXED_COMPONENT_BYTES,
+     "安裝面（install.json／hook 註冊），不增長；命名上限 1 MiB（round 190 §4 收口："
+     "增長越限時量具點名，不刪除）"),
+    ("gc_report.json", "fixed", DEFAULT_FIXED_COMPONENT_BYTES,
+     "上次 gc 結果，小檔；命名上限 1 MiB（round 190）"),
+    ("gc_last.json", "fixed", DEFAULT_FIXED_COMPONENT_BYTES,
+     "上次 gc 時間，小檔；命名上限 1 MiB（round 190）"),
+    ("gc.lock", "fixed", DEFAULT_FIXED_COMPONENT_BYTES,
+     "gc 鎖，0 B；命名上限 1 MiB（round 190）"),
     ("growth.jsonl", "bytes", DEFAULT_GROWTH_LOG_BYTES,
      "auto gc 用量點（≤1 筆/小時）；位元組硬上限 256 KiB（保留最新、淘汰最舊）"),
 )
@@ -163,25 +179,37 @@ def envelope_accounting(root: pathlib.Path | str) -> dict[str, Any]:
       components                  各 top-level 組件現行位元組數
       unaccounted                 註冊表外的 top-level 名（按名排序）
       accounting_complete         unaccounted 為空（帳目完整）
-      byte_caps_sum               位元組硬上限分組的加總（bytes 類型）
+      fixed_overrun               越過命名上限的 fixed 組件 {name: {bytes, cap_bytes}}
+      fixed_within_caps           沒有 fixed 組件越限（「固定不增長」由量具盯住）
+      byte_caps_sum               位元組硬上限分組的加總（bytes ＋ fixed 類型）
       byte_caps_sum_within_envelope  該加總 ≤ STABLE_ENVELOPE_BYTES（封頂不是紙面數字）
     """
     r = pathlib.Path(root)
     known = {name for name, *_ in ENVELOPE_COMPONENTS}
+    fixed_caps = {name: cap for name, kind, cap, _ in ENVELOPE_COMPONENTS
+                  if kind == "fixed" and cap}
     components: list[dict[str, Any]] = []
     unaccounted: list[str] = []
+    fixed_overrun: dict[str, dict[str, int]] = {}
     if r.is_dir():
         for entry in sorted(r.iterdir(), key=lambda p: p.name):
             if entry.name in known:
-                components.append({"name": entry.name, "bytes": _tree_size(entry)})
+                comp = {"name": entry.name, "bytes": _tree_size(entry)}
+                cap = fixed_caps.get(entry.name)
+                if cap is not None and comp["bytes"] > cap:
+                    fixed_overrun[entry.name] = {"bytes": comp["bytes"],
+                                                 "cap_bytes": cap}
+                components.append(comp)
             else:
                 unaccounted.append(entry.name)
     byte_caps_sum = sum(b for _, kind, b, _ in ENVELOPE_COMPONENTS
-                        if kind == "bytes" and b)
+                        if kind in ("bytes", "fixed") and b)
     return {
         "components": components,
         "unaccounted": unaccounted,
         "accounting_complete": not unaccounted,
+        "fixed_overrun": fixed_overrun,
+        "fixed_within_caps": not fixed_overrun,
         "byte_caps_sum": byte_caps_sum,
         "byte_caps_sum_within_envelope": byte_caps_sum <= STABLE_ENVELOPE_BYTES,
     }
@@ -1738,12 +1766,13 @@ def usage_report(
             out["envelope"] = {
                 "planned_steady_state_bytes": STABLE_ENVELOPE_BYTES,
                 "note": ("各分組上限的加總（trace 64 MiB ＋ wire body 96 MiB ＋ wire index 8 MiB"
-                         "＋日誌 2 MiB/檔＋計數制分組＋固定安裝面），不是一條單一開關；"
-                         "每個 top-level 組件都須有命名上限（accounting.unaccounted 為空才"
-                         "算帳目完整）；口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
+                         "＋日誌 2 MiB/檔＋計數制分組＋固定安裝面 1 MiB/件），不是一條單一開關；"
+                         "每個 top-level 組件都須有命名上限（accounting.unaccounted 為空、"
+                         "accounting.fixed_within_caps 為真才算帳目完整）；口徑與理由見"
+                         " ops/packets/disk_top_priority.md §3/§4"),
                 "total_bytes": total,
                 "within_envelope": (total <= STABLE_ENVELOPE_BYTES) and within_groups
-                and acct["accounting_complete"],
+                and acct["accounting_complete"] and acct["fixed_within_caps"],
                 "pct_of_envelope": round(100.0 * total / STABLE_ENVELOPE_BYTES, 2),
                 "groups": groups,
                 "accounting": acct,

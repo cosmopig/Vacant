@@ -172,3 +172,30 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 - e002 C/H/M/S 臂未全部完成：四量具（report.py --rescore／e002_wiring_gauge／
   envelope_compliance／p02_carm_audit）round 187 對已完成臂 rc=0（A 34/34、C 34/34、
   H 進行中），**最終 C 臂 `vacant_home_bytes` 分佈回寫要等 H/M/S 完成**（disk_top_priority §5-4）。
+
+## 2026-10-29 · 主軸 2 ·「fixed 安裝面也有命名上限」（packet §4 誠實缺口收口）
+
+**改動**（round 190，小改動＋紅燈測試先行）：`ENVELOPE_COMPONENTS` 的 4 個 `fixed`
+組件（adapters / gc_report.json / gc_last.json / gc.lock）從「只有『不增長』的語義
+保證、無命名上限」升級為每個都有命名位元組上限
+`retention.DEFAULT_FIXED_COMPONENT_BYTES`＝1 MiB（平時幾 KiB，25 倍餘裕）；
+`envelope_accounting` 新增 `fixed_overrun`（{name: {bytes, cap_bytes}}）與
+`fixed_within_caps`；`byte_caps_sum` 現在含 fixed 上限（168.25→172.25 MiB ≤ 256 MiB）；
+`usage_report().envelope.within_envelope` 多一個條件 `fixed_within_caps`（fixed 面越限
+＝「固定不增長」被打破，量具不得宣稱在封頂內）。fixed 面沒有回收路徑——量具只報告、
+不刪除（fail-open）。
+**證據**：`tests/test_retention.py::test_envelope_fixed_components_have_named_caps`＋
+`test_envelope_accounting_flags_fixed_component_overrun`（紅燈先行、adapters 灌
+1 MiB+16 KiB 越限點名＋不刪除＋`within_envelope` False）＋
+`test_envelope_byte_caps_sum_within_stable`（加總含 fixed 上限）；
+`tests/test_retention.py` 39 passed；四驗收檔 91 passed（RC=0）。
+**能說**：
+- 「fixed 組件若實際增長」從「要靠人類注意到」變成量具自動點名
+  （`envelope_accounting().fixed_overrun`／`vacant usage` 的 `within_envelope` False）。
+- 真機 `~/.vacant` 實測：`fixed_overrun={}`、`fixed_within_caps=True`、
+  `byte_caps_sum`=172.25 MiB ≤ 256 MiB、`within_envelope=True`（20.09%）。
+**不能說**：
+- 不能說 fixed 面「有回收路徑」——越限時量具只報告，清理仍是人的動作
+  （adapters 是安裝面，Vacant 不刪自己語義不認得的增長）。
+- 1 MiB 是**警報上限**不是硬刪上限：選值＝現行實測（~40 KiB）的 25 倍，
+  若某版本合理增大 adapters，應在此表調大命名上限並留記錄，而非讓量具常紅。

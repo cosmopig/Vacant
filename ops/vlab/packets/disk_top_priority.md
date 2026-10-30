@@ -86,8 +86,13 @@
   （位元組硬上限／每檔上限／計數制／固定不增長），無命名上限的組件會被
   `envelope_accounting` 点名為 `unaccounted`、量具不再宣稱「在封頂內」（只報告不刪除）；
   位元組上限分組的加總（168 MiB）≤ 256 MiB 封頂有常規測試把關。
-  **仍剩**：`fixed` 類型組件（adapters/gc_* 等固定面）沒有 byte 封頂，靠「不增長」的語義
-  保證＋實測（§1 時序）；若未來某 fixed 組件實際增長，需在此表升级为計數制或位元組上限。
+  ~~`fixed` 類型組件（adapters/gc_* 等固定面）沒有 byte 封頂，靠「不增長」的語義
+  保證＋實測~~（**round 190 收口**：4 個 fixed 組件都有命名位元組上限
+  `retention.DEFAULT_FIXED_COMPONENT_BYTES`＝1 MiB（平時幾 KiB、25 倍餘裕）；
+  `envelope_accounting` 新增 `fixed_overrun`／`fixed_within_caps` 點名越限的「固定」面，
+  `within_envelope` 多一個 `fixed_within_caps` 條件；fixed 面沒有回收路徑，量具只報告不刪除；
+  紅燈測試先行＋真機實測 `fixed_overrun={}`、`byte_caps_sum` 168.25→172.25 MiB ≤ 256 MiB；
+  1 MiB 是警報上限不是硬刪上限，合理增大應在此表調大並留記錄）。
 - **計數制分組**（50 步索引、2 決策、3 run）在單檔逼近 MAX_BLOB（8 MiB）時可超過
   小預算；有界但沒有 byte 封頂。
 - 人類 872 MB 的數字是**舊碼 + 清場前**的；不能用來評現行碼（§1 時序）。

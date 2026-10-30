@@ -679,9 +679,10 @@ def test_envelope_byte_caps_sum_within_stable():
     """round 176（packet §4 誠實缺口→程式不變量）：各分組位元組上限的**加總**
     必須 ≤ 穩態封頂——否則「加總」就超出封頂、封頂變成紙面數字。
     純常數斷言，不碰磁碟。"""
-    s = (retention.DEFAULT_TRACE_BUDGET_BYTES
-         + retention.DEFAULT_WIRE_BODY_BYTES
-         + retention.DEFAULT_WIRE_INDEX_BYTES)
+    # round 190：加總含**所有**命名位元組上限（bytes ＋ fixed 組件），
+    # 不只是三大組——fixed 面也有命名上限後，封頂加總的語義才完整。
+    s = sum(b for _, kind, b, _ in retention.ENVELOPE_COMPONENTS
+            if kind in ("bytes", "fixed") and b)
     assert s <= retention.STABLE_ENVELOPE_BYTES, (
         f"分組位元組上限加總 {s} B 超出穩態封頂 {retention.STABLE_ENVELOPE_BYTES} B："
         "「加總」已不是封頂，需調大 STABLE_ENVELOPE_BYTES 或調小分組上限")
@@ -726,6 +727,52 @@ def test_envelope_accounting_flags_unknown_component(env):
     assert envl["within_envelope"] is False, "帳目不完整時不得宣稱在封頂內"
     # 該檔未被刪除（fail-open）
     assert (vh / "mystery_dir" / "blob.bin").is_file()
+
+
+def test_envelope_fixed_components_have_named_caps():
+    """round 190（ASSIGNMENT 🔴 最優先；packet §4 誠實缺口→程式不變量）：
+    `fixed` 類型組件（adapters / gc_report.json / gc_last.json / gc.lock）此前只有
+    「不增長」的語義保證、沒有命名上限——某條程式路徑若開始往固定面寫無上限
+    資料，量具偵測不到，要等人類注意到才算數。round 190 起每個 fixed 組件都必須
+    有命名位元組上限（`DEFAULT_FIXED_COMPONENT_BYTES`），「固定」面真增長時由量具
+    點名。純常數斷言，不碰磁碟。"""
+    fixed = [(n, b) for n, k, b, _ in retention.ENVELOPE_COMPONENTS if k == "fixed"]
+    assert fixed, "ENVELOPE_COMPONENTS 應含 fixed 組件（adapters 等安裝面）"
+    for name, cap in fixed:
+        msg = (f"{name}：fixed 組件必須有命名位元組上限"
+               "（§4 缺口：無上限的「不增長」語義保證量具偵測不到）")
+        assert isinstance(cap, int) and cap > 0, msg + f"；實際={cap!r}"
+
+
+def test_envelope_accounting_flags_fixed_component_overrun(env):
+    """round 190（packet §4：「若未來某 fixed 組件實際增長，需在此表升級為計數制或
+    位元組上限」→ 收口）：`adapters` 安裝面長過命名上限 ⇒ 量具必須點名
+    （`fixed_overrun` 含該組件、`fixed_within_caps` False）、封頂量具不得宣稱
+    「在封頂內」；只報告、不刪除（fail-open：fixed 面沒有回收路徑，Vacant 不刪
+    自己語義不認得的增長）。"""
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    ad = vh / "adapters"
+    ad.mkdir(parents=True, exist_ok=True)
+    (ad / "install.json").write_text("{}", encoding="utf-8")
+    ok = retention.envelope_accounting(vh)
+    assert ok["fixed_within_caps"] is True
+    assert ok["fixed_overrun"] == {}
+
+    cap = retention.DEFAULT_FIXED_COMPONENT_BYTES
+    big = ad / "leak.bin"
+    big.write_bytes(b"x" * (cap + 16 * 1024))
+    bad = retention.envelope_accounting(vh)
+    assert bad["fixed_within_caps"] is False
+    assert "adapters" in bad["fixed_overrun"]
+    assert bad["fixed_overrun"]["adapters"]["bytes"] > cap
+    assert bad["fixed_overrun"]["adapters"]["cap_bytes"] == cap
+    # 只報告、不刪除（fail-open）
+    assert big.is_file()
+
+    # 封頂量具同報：fixed 面越限時不得宣稱「在封頂內」
+    envl = retention.usage_report()["envelope"]
+    assert envl["accounting"]["fixed_within_caps"] is False
+    assert envl["within_envelope"] is False
 
 
 def test_usage_envelope_fail_open_missing_home(tmp_path, monkeypatch, capsys):
