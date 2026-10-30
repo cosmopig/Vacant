@@ -552,3 +552,12 @@ def test_vacant_growth_log_cli_append_and_overwrite(tmp_path: Path, capsys) -> N
 
 
 
+
+
+def test_e002_wiring_gauge_cli_missing_cells_exit_code(tmp_path: Path, capsys) -> None:
+    """e002_wiring_gauge CLI：給定無格子之實驗目錄，main 輸出 {"error": "no cells"} 至 stderr 且回傳 1（輸入缺失之命令列邊界契約）。"""
+    (tmp_path / "runs" / "exp_empty").mkdir(parents=True)
+
+    rc = e002_wiring_gauge.main(["exp_empty", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    assert "no cells" in capsys.readouterr().err
