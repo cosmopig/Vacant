@@ -1858,3 +1858,19 @@ def test_compact_work_dry_run_safe(tmp_path: Path) -> None:
     assert res["runs_scanned"] == 2
     assert junk.is_file()
     assert run1_ws.is_dir()
+
+
+def test_compact_quarantine_dry_run_safe(tmp_path: Path) -> None:
+    """compact_quarantine：dry_run=True 只統計 bytes_freed/files_removed、絕不實際刪除孤兒隔離物件。"""
+    qroot = tmp_path / "custom_vh" / "quarantine"
+    obj_file = qroot / "objects" / "ab" / "orphan_blob"
+    obj_file.parent.mkdir(parents=True)
+    obj_file.write_bytes(b"orphan data\n")
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(obj_file, (past, past))
+    (qroot / "candidates").mkdir()
+
+    res = retention.compact_quarantine(tmp_path / "custom_vh", dry_run=True, orphan_grace_s=0.0)
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] >= 1
+    assert obj_file.is_file()
