@@ -1,0 +1,17 @@
+{
+  "exp": "e005_opencode_five_arm_smoke",
+  "cells_scored": 5,
+  "infra": [],
+  "per_arm": {
+    "pg_affine_cipher": {
+      "n": 1,
+      "pass": true,
+      "rate": 1,
+      "mean_wall_s": 0,
+      "timeouts": 0,
+      "calls_per_success": 0,
+      "tokens_per_success": 0,
+      "vacant_sha": []
+    }
+  }
+}
