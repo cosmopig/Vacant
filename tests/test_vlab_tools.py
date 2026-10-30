@@ -561,3 +561,22 @@ def test_e002_wiring_gauge_cli_missing_cells_exit_code(tmp_path: Path, capsys) -
     rc = e002_wiring_gauge.main(["exp_empty", "--base", str(tmp_path / "runs")])
     assert rc == 1
     assert "no cells" in capsys.readouterr().err
+
+
+def test_p02_carm_audit_cli_normal_run_and_out_file(tmp_path: Path, capsys) -> None:
+    good = tmp_path / "runs" / "exp_p02" / "polyglot_py-pg_demo-pi-C-r1"
+    good.mkdir(parents=True)
+    (good / "cell.json").write_text(json.dumps(
+        {"suite": "polyglot_py", "arm": "C", "agent_rc": 0, "timed_out": False, "install_rc": 0}),
+        encoding="utf-8")
+    (good / "score.json").write_text(json.dumps(
+        {"pass": True, "tests_passed": 1, "tests_total": 1}), encoding="utf-8")
+    (good / "vacant_home.tgz").write_bytes(b"")
+    out = tmp_path / "out.json"
+    rc = p02_carm_audit.main(["exp_p02", "--base", str(tmp_path / "runs"),
+                             "--out", str(out)])
+    assert rc == 0
+    assert out.is_file()
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["n_cells"] == 1
+    assert "\"n_cells\": 1" in capsys.readouterr().out
