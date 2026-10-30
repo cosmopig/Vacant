@@ -1211,3 +1211,22 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     c = out["summary"]["per_arm"]["C"]
     assert c["calls_per_success"] == 4.0 and c["tokens_per_success"] == 2400.0
     assert c["calls_vs_A"] == 2.0 and c["tokens_vs_A"] == 3.0 and c["over_2x_A_cost"] is True
+
+    # P20261030_2110-1（ASSIGNMENT「研發工具需納入回歸測試」）：M 臂第二 agent 證據審計契約納入回歸——
+    # 兩個 M 臂 mock 格（events.jsonl 有 bash 呼叫 opencode 的合格格／無呼叫的欠缺格）→
+    # main --runs-dir：合格格 second_agent_verified=True；欠缺格 second_agent_verified=False、
+    # state 仍 complete、unknown 含 "lacks second agent"、計入 bad → rc=1。
+    opencode_cell_audit._mock_cell(tmp_path, "cell-M-ok", "M",
+                                   bash_command="opencode run --model x --print", score_pass=True)
+    opencode_cell_audit._mock_cell(tmp_path, "cell-M-noagent", "M", score_pass=False)
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(tmp_path), "--json"])
+    assert rc == 1  # 欠缺格 unknown→bad（合格格 A/C/M-ok 不計 bad）
+    out = json.loads(capsys.readouterr().out)
+    mcells = {c["cell"]: c for c in out["cells"]}
+    assert mcells["cell-M-ok"]["second_agent_verified"] is True
+    assert mcells["cell-M-ok"]["ok"] is True and not mcells["cell-M-ok"]["unknown"]
+    assert mcells["cell-M-noagent"]["second_agent_verified"] is False
+    assert mcells["cell-M-noagent"]["state"] == "complete"
+    assert "lacks second agent" in " ".join(mcells["cell-M-noagent"]["unknown"])
+    assert out["bad"] == ["cell-M-noagent"]
