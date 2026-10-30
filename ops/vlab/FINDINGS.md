@@ -155,6 +155,23 @@ REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
     （pg_forth、pg_grep、pg_sgf_parsing、pg_zipper；其中 3 題為 C 臂逾時）。
   - H/M 逾時分佈：H 11 題＋M 8 題共 19 題**全部** wall_s＝1800.0（全數撞 1800s 封頂，
     無提前逾時）。
+  - H/M 逾時題目分佈與突破 2×A 成本紅線的機制歸因（2026-10-30；來源＝`PAIR_BREAKDOWN.json`
+    `timed_out.hm_distribution`＋同題原始格 `cell.json` `metrics`，100% 由原始資料推導）：
+    - 分佈：**交集 4 題**（pg_bowling、pg_paasio、pg_poker、pg_wordy）、H 獨有 7 題
+      （pg_go_counting、pg_grep、pg_hangman、pg_list_ops、pg_pig_latin、pg_transpose、pg_zebra_puzzle）、
+      M 獨有 4 題（pg_dominoes、pg_food_chain、pg_forth、pg_zipper）；19 題全部 wall_s＝1800.0＝timeout_s 封頂。
+    - 同題對照（15 題聯集、各臂各 15 格）：A 766 呼叫／20,639,578 入 token／7 逾時／4 過；
+      C 896／24,125,134／3 逾時／7 過；H 1584／50,233,743／11 逾時／2 過；
+      M 1143／33,772,462／8 逾時／3 過。A 臂自身即 7 逾時、15 題敗 11 → **逾時集中於長篇演算法長任務**
+      （對全臂皆難）；同題上 H 消耗 2.07×A 呼叫／2.43×A 入 token、M 1.49×／1.64×，且全數撞 1800s 封頂。
+    - 機制歸因（與臂定義及逐題資料一致；描述性，非因果證明）：H 臂做事方式指引
+      （`ops/vlab/arms/e002_H.md`：先規劃→執行測試自檢／讀失敗／修正／重跑→最後檢查）與
+      M 臂強制第二 agent 審查（`ops/vlab/arms/e002_M.md`：交件前開第二 agent 挑錯→修正→重跑測試）
+      皆為每題追加審查／修正輪次，在這些困難長任務上過度消耗輪次與 context，19 題全撞 1800s 封頂而逾時；
+      且 tokens_per_success＝總 token÷成功數，H/M 同題 token 更多、成功更少（15/34 vs A 18/34）
+      → H 2.49×A、M 2.05×A（下界、未含子 agent 端點成本；`WIRING_GAUGE.json`：M 臂 34 格僅 14 格有第二
+      agent 啟動證據）皆突破 2×A token 紅線，依預註冊判準記「不划算」。
+    - 口徑：逐題可回查原始格 `metrics`（可究責）；不推翻上方 Holm 結論（四組皆未顯著）。
   - 自洽核對：C 臂 22 過＝4 gate_salvaged＋18 first_pass；12 敗＝8 refused_not_saved＋4
     never_refused（4 題中 3 題為 C 逾時）；A 敗 16＝C_only 7＋neither 9。
   - 口徑：這是**描述性、可究責的機制記錄**（每題可回查 PAIR_BREAKDOWN.json）；
