@@ -1601,3 +1601,23 @@ def test_compact_work_missing_dir_and_strip_workspaces_preserves_logs(tmp_path):
     assert not (wroot / "t1" / "run1" / "ws").exists()
     assert log1.is_file()
     assert log1.read_text(encoding="utf-8") == "step 1 done\n"
+
+
+def test_compact_quarantine_missing_dir_and_orphan_objects(tmp_path) -> None:
+    """compact_quarantine：無隔離區目錄時安全回傳 0/0/0；quarantine/objects 未被候選引用的孤兒物件被安全回收。"""
+    res0 = retention.compact_quarantine(tmp_path / "nonexistent")
+    assert res0["bytes_freed"] == 0
+    assert res0["files_removed"] == 0
+    assert res0["candidates_kept"] == 0
+
+    qroot = tmp_path / "custom_vh" / "quarantine"
+    obj_file = qroot / "objects" / "ab" / "orphan_blob"
+    obj_file.parent.mkdir(parents=True)
+    obj_file.write_bytes(b"orphan data\n")
+    past = 1700000000.0  # 固定過去時間戳（2023-11-14），免依賴 time import
+    os.utime(obj_file, (past, past))
+    (qroot / "candidates").mkdir()
+
+    res = retention.compact_quarantine(tmp_path / "custom_vh", dry_run=False, orphan_grace_s=0.0)
+    assert res["files_removed"] >= 1
+    assert not obj_file.is_file()
