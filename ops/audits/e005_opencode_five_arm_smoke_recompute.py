@@ -4,99 +4,80 @@ import os
 def recompute():
     exp = "e005_opencode_five_arm_smoke"
     base_path = f"/srv/vlab/runs/{exp}"
-    arms = ["polyglot_py-pg_affine_cipher-opencode-A-r1",
-              "polyglot_py-pg_affine_cipher-opencode-C-r1",
-              "polyglot_py-pg_affine_cipher-opencode-H-r1",
-              "polyglot_py-pg_affine_cipher-opencode-M-r1",
-              "polyglot_py-pg_affine_cipher-opencode-S-r1"]
-
+    arms = ["A", "C", "H", "M", "S"]
     results = {}
+
     for arm in arms:
-        arm_path = os.path.join(base_path, arm)
-        cell_file = os.path.join(arm_path, "cell.json")
-        score_file = os.path.join(arm_path, "score.json")
-        events_file = os.path.join(arm_path, "events.jsonl")
+        # Find the directory for this arm
+        dir_name = None
+        for d in os.listdir(base_path):
+            if f"polyglot_py-pg_affine_cipher-opencode-{arm}-r1" in d:
+                dir_name = d
+                break
+        
+        if not dir_name:
+            results[arm] = {"error": "directory not found"}
+            continue
+
+        path = os.path.join(base_path, dir_name)
+        cell_json_path = os.path.join(path, "cell.json")
+        score_json_path = os.path.join(path, "score.json")
+        events_jsonl_path = os.path.join(path, "events.jsonl")
 
         # Read cell.json
-        with open(cell_file, 'r') as f:
-            cell = json.load(f)
-        
-        # Read score.json
-        with open(score_file, 'r') as f:
-            score = json.load(f)
+        try:
+            with open(cell_json_path, 'r') as f:
+                cell = json.load(f)
+        except Exception as e:
+            results[arm] = {"error": f"read cell.json failed: {e}"}
+            continue
 
-        # Count model calls and successes from events.jsonl
+        # Read score.json
+        try:
+            with open(score_json_path, 'r') as f:
+                score = json.load(f)
+        except Exception as e:
+            results[arm] = {"error": f"read score.json failed: {e}"}
+            continue
+
+        # Read events.jsonl (for model calls and timeouts)
         calls = 0
-        successes = 0
+        success_calls = 0
         timeouts = 0
-        total_tokens = 0
-        
-        if os.path.exists(events_file):
-            with open(events_file, 'r') as f:
+        try:
+            with open(events_jsonl_path, 'r') as f:
                 for line in f:
-                    try:
-                        event = json.loads(line)
-                        # Assuming standard event structure where we can identify calls/tokens
-                        # Based on typical vlab events: 
-                        # "type": "model_call" or similar? 
-                        # Let's look at the first few lines to be sure if needed, 
-                        # but usually it's a flat list of events.
-                        if event.get("type") == "model_call":
-                            calls += 1
-                            total_tokens += event.get("tokens", 0)
-                    except:
-                        pass
+                    event = json.loads(line)
+                    if event.get("type") == "model_call":
+                        calls += 1
+                        # Assuming success is indicated by some field or lack of error
+                        # In many cases, we check if it's a successful call
+                        if event.get("status") == "success":
+                            success_calls += 1
+                    if event.get("type") == "timeout":
+                        timeouts += 1
+        except Exception as e:
+            results[arm] = {"error": f"read events.jsonl failed: {e}"}
+            continue
 
         # Determine pass/fail and infra
-        # score.json usually has {"pass": true/false/null}
         pass_val = score.get("pass")
         is_infra = (pass_val is None)
         
-        # M arm timeout check
-        if "M" in arm and score.get("wall_s", 0) >= 900:
-            timeouts += 1
-
+        # Logic for n, pass, timeouts, calls, success_calls
+        n = 1 # Each arm has exactly 1 cell in this smoke test
         results[arm] = {
-            "n": 1,
+            "n": n,
             "pass": pass_val if not is_infra else None,
-            "rate": 1 if (pass_val is True) else (0 if (pass_val is False) else None),
             "timeouts": timeouts,
             "calls": calls,
-            "tokens": total_tokens,
-            "wall_s": score.get("wall_s", 0),
-            "is_infra": is_infra
+            "success_calls": success_calls,
+            "is_infra": is_infra,
+            "cell_json_path": cell_json_path,
+            "score_json_path": score_json_path
         }
 
-    # Aggregate for REPORT format
-    report = {
-        "exp": exp,
-        "cells_scored": sum(1 for r in results.values() if r["pass"] is not None),
-        "infra": [arm for arm, r in results.items() if r["is_infra"]],
-        "per_arm": {}
-    }
-
-    for arm, r in results.items():
-        # Map back to short names for per_arm keys if needed, 
-        # but let's keep full paths or clean them.
-        short_name = arm.split("-")[-4] # e.g., A, C, H, M, S
-        if short_name not in report["per_arm"]:
-            report["per_arm"][short_name] = {}
-        
-        # Match REPORT.json structure roughly
-        report["per_arm"][short_name] = {
-            "n": r["n"],
-            "pass": r["pass"],
-            "rate": r["rate"],
-            "mean_wall_s": r["wall_s"],
-            "timeouts": r["timeouts"],
-            "calls_per_success": 0, # Placeholder as per original report structure
-            "tokens_per_success": 0, # Placeholder
-            "vacant_sha": [] if "C" not in short_name else ["bf1a9f1afb211460b48611f8f28b1d9433985c4a"]
-        }
-
-    with open("recomputed_report.json", "w") as f:
-        json.dump(report, f, indent=2)
-    print("Recomputation complete. Saved to recomputed_report.json")
+    print(json.dumps(results, indent=2))
 
 if __name__ == "__main__":
     recompute()
