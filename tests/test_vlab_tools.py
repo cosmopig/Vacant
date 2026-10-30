@@ -954,3 +954,11 @@ def test_holm_e002_cli_missing_exp_error(capsys) -> None:
     err = capsys.readouterr().err
     assert excinfo.value.code == 2
     assert "required: exp" in err
+
+
+def test_noncode_cell_audit_cli_selftest_flag(capsys) -> None:
+    # --selftest 旗標：離線自測通過 → main 回傳 0、stdout 含 "selftest: PASS"
+    # （noncode_cell_audit.py main L466-476：a.selftest → selftest()；
+    #  selftest() 末 print("selftest:", "PASS" if ok else "FAIL")、return 0 if ok else 2）。
+    assert noncode_cell_audit.main(["--selftest"]) == 0
+    assert "selftest: PASS" in capsys.readouterr().out
