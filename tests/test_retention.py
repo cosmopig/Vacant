@@ -1473,3 +1473,21 @@ def test_verify_trace_chains_explicit_root_and_non_project_dirs(tmp_path):
     assert ok is False
     assert len(errs) == 1
     assert "bad_proj" in errs[0]
+
+
+def test_record_growth_point_dedup_and_invalid_line_handling(tmp_path):
+    """ASSIGNMENT 🔴最優先驗收(a)真機 growth.jsonl 契約：record_growth_point
+    同分鐘同 home 連跑以最新筆覆蓋舊筆（--force 連跑不濫記），且損毀行安全
+    跳過不崩潰——寫入後檔案恰 1 行、兩次回傳 ok 皆 True。"""
+    custom_vh = tmp_path / "custom_vh"
+    custom_vh.mkdir()
+    (custom_vh / "growth.jsonl").write_text("invalid json line\n", encoding="utf-8")
+
+    r1 = retention.record_growth_point(root=custom_vh)
+    r2 = retention.record_growth_point(root=custom_vh)
+    assert r1["ok"] is True
+    assert r2["ok"] is True
+
+    lines = (custom_vh / "growth.jsonl").read_text(encoding="utf-8").strip().splitlines()
+    assert len(lines) == 1
+    assert json.loads(lines[0])["home"] == str(custom_vh.resolve())
