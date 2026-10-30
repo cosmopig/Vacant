@@ -981,3 +981,16 @@ def test_vacant_growth_log_cli_human_output(tmp_path: Path, capsys) -> None:
     assert "growth.jsonl" in out
     assert "B (" in out
     assert "MiB) at " in out
+
+
+def test_noncode_cell_audit_cli_missing_exp_dir_error(tmp_path: Path) -> None:
+    # P20261030_1515-3（ASSIGNMENT 主軸 4：noncode 審計量具 CLI 契約）：
+    # 傳入不存在的實驗目錄名時，collect 在 not root.is_dir() 主動以
+    # SystemExit("實驗目錄不存在：<root>") 終止（noncode_cell_audit.py
+    # collect L253-255），main L476 不攔截、異常外傳——與既有的缺 exp
+    # 位置參數 ap.error(2)（test_noncode_cell_audit_cli_missing_exp_error）
+    # 是不同契約：此處驗「路徑無效」而非「參數缺失」。
+    no_such = "nonexistent_exp"
+    with pytest.raises(SystemExit) as excinfo:
+        noncode_cell_audit.main([no_such, "--base", str(tmp_path / "runs")])
+    assert "實驗目錄不存在" in str(excinfo.value.code)

@@ -1705,3 +1705,70 @@ def test_auto_gc_dry_run_missing_dir_safe(tmp_path: Path) -> None:
     assert rep["bytes_freed"] == 0
     assert rep["files_removed"] == 0
     assert not p.exists()
+
+
+def test_usage_main_missing_dir_safe(tmp_path: Path, capsys) -> None:
+    """usage_main（`vacant usage`）：狀態目錄與工作區目錄皆不存在時，
+    人讀模式 rc==0 且印出標準「Vacant 磁碟用量」＋「✓ 在封頂內」，
+    --json 模式 rc==0 且輸出零用量結構（totals.state_dir==0、
+    envelope.within_envelope==True）——不拋異常
+    （ASSIGNMENT 🔴最優先 驗收 (a)/(c)；retention.py 核心零改動）。"""
+    p_vh = tmp_path / "nonexistent_vh"
+    p_work = tmp_path / "nonexistent_work"
+
+    # 人讀模式
+    rc = retention.usage_main(["--state-dir", str(p_vh), "--work-dir", str(p_work)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Vacant 磁碟用量" in out
+    assert "狀態目錄總計  : 0 B" in out
+    assert "穩態封頂" in out
+    assert "✓ 在封頂內" in out
+
+    # JSON 模式
+    rc = retention.usage_main(["--state-dir", str(p_vh), "--work-dir", str(p_work), "--json"])
+    assert rc == 0
+    rep = json.loads(capsys.readouterr().out)
+    assert rep["totals"]["state_dir"] == 0
+    assert rep["envelope"]["within_envelope"] is True
+
+
+def test_retention_main_auto_dry_run_human_output_safe(tmp_path: Path, capsys) -> None:
+    """retention.main（`vacant gc` CLI）：--auto --dry-run 且狀態目錄不存在時，
+    人讀模式 rc==0、stdout 含「自動 gc 預覽（--dry-run，未刪除）: 可釋放 0 B（0 個檔案）」、
+    不建立目錄、不拋異常（ASSIGNMENT 🔴最優先 驗收 (c)；retention.main 零改動）。"""
+    p = tmp_path / "nonexistent_vh"
+    rc = retention.main(["gc", "--auto", "--dry-run", "--state-dir", str(p)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "自動 gc 預覽（--dry-run，未刪除）: 可釋放 0 B（0 個檔案）" in out
+    assert not p.exists()
+
+import argparse  # noqa: E402  (test_retention_parse_size_valid_and_invalid 用)
+
+
+def test_retention_parse_size_valid_and_invalid():
+    """`vacant gc --target-bytes` 的 _parse_size：整數與 K/M/G 後綴 → 精確位元組數；負數/非數字 → ArgumentTypeError。"""
+    assert retention._parse_size("1024") == 1024
+    assert retention._parse_size("64K") == 64 * 1024
+    assert retention._parse_size("256M") == 256 * 1024 * 1024
+    assert retention._parse_size("1G") == 1024 * 1024 * 1024
+    for bad in ("-1", "invalid"):
+        with pytest.raises(argparse.ArgumentTypeError):
+            retention._parse_size(bad)
+
+
+def test_compact_vrun_dir_dry_run_safe(tmp_path: Path) -> None:
+    """compact_vrun_dir(dry_run=True)：正確回傳預估 bytes_freed/files_removed，
+    但保留 _attempt_*_ws 重試工作區目錄與檔案不刪除（ASSIGNMENT 🔴最優先 驗收 (c)；核心零改動）。"""
+    run_dir = tmp_path / "run_x"
+    ws = run_dir / "_attempt_1_ws"
+    ws.mkdir(parents=True)
+    (run_dir / "result.json").write_text('{"ok": true}')
+    junk = ws / "junk.txt"
+    junk.write_bytes(b"test-bytes-for-dry-run " * 10)
+    res = retention.compact_vrun_dir(run_dir, dry_run=True)
+    assert res["bytes_freed"] > 0
+    assert res["files_removed"] > 0
+    assert junk.is_file()
+    assert (run_dir / "result.json").is_file()
