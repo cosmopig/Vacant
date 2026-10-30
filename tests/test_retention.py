@@ -1630,3 +1630,9 @@ def test_compact_wire_missing_dir_safe(tmp_path: Path) -> None:
     assert rep["body_files_removed"] == 0
     assert rep["index_bytes_freed"] == 0
     assert rep["index_lines_dropped"] == 0
+
+
+def test_compact_logs_missing_dir_safe(tmp_path: Path) -> None:
+    """compact_logs：狀態目錄不存在（無 intake/hooks 與 trace/projects）時安全回傳零釋放字典、不拋異常。"""
+    rep = retention.compact_logs(tmp_path / "nonexistent")
+    assert rep == {"bytes_freed": 0, "logs_compacted": 0}
