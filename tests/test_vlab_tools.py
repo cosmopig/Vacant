@@ -1168,7 +1168,7 @@ def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     assert "找不到 run 目錄" in capsys.readouterr().err
 
 
-def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
+def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatch) -> None:
     # P20261030_2008-1（ASSIGNMENT「研發工具需納入回歸測試」＋ GPT 審查 P1-1 同時量成本）：
     # OpenCode 格子唯讀審計量具 opencode_cell_audit（成本 ＋ C 臂 Vacant 證據）納入常規回歸：
     # (a) selftest() 須通過（合成 A/C/tamper/incomplete mock 格，含破壞對照）；
@@ -1280,6 +1280,26 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2300-2（審查指示第 2 條第 1 點）：.infra- 隔離格之 arm 解析鎖進常規回歸——
     # _arm_from_name 剝 .infra- 前綴後回 "H"，非 None（3f61ec5c 核心已落，此斷言防再犯）。
     assert out["cells"][0]["arm"] == "H"
+
+    # P20261030_2331-4（ASSIGNMENT「研發工具需納入回歸測試」＋審查指示第 2 條；fc69b38b 核心已落）：
+    # exp 位置參數 CLI 解析契約鎖進回歸——monkeypatch 將預設 base /srv/vlab/runs 導向 tmp_path（不碰真實資料）：
+    # --help 退 0；exp 與 --runs-dir 皆缺 → ap.error(2)；exp 有但目錄缺 → ap.error(2)；exp 有效 → 正常審計；--runs-dir 優先於 exp。
+    real_path = opencode_cell_audit.Path
+    monkeypatch.setattr(opencode_cell_audit, "Path",
+                        lambda a=None, *x, **k: tmp_path if a == "/srv/vlab/runs" else real_path(a, *x, **k))
+    for argv, code in ((["--help"], 0), ([], 2), (["zz_p2331_4_missing"], 2)):
+        with pytest.raises(SystemExit) as ex:
+            opencode_cell_audit.main(argv)
+        assert ex.value.code == code
+    pos_runs = tmp_path / "pos_exp"; pos_runs.mkdir()
+    opencode_cell_audit._mock_cell(pos_runs, "cell-A-pos", "A", score_pass=True)
+    capsys.readouterr(); rc = opencode_cell_audit.main(["pos_exp", "--json"])  # exp → 預設 base/<exp> 解析並正常審計
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["n_cells"] == 1 and out["bad"] == [] and out["cells"][0]["cell"] == "cell-A-pos"
+    empty = tmp_path / "pos_empty"; empty.mkdir()
+    capsys.readouterr(); rc = opencode_cell_audit.main(["pos_exp", "--runs-dir", str(empty), "--json"])
+    assert rc == 0 and json.loads(capsys.readouterr().out)["n_cells"] == 0  # --runs-dir 優先於 exp
 
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
