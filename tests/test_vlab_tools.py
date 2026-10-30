@@ -909,3 +909,19 @@ def test_growth_report_cli_human_output(tmp_path: Path, capsys) -> None:
     assert "verdict: PASS" in out
     assert "「一天長多少」" in out
     assert "封頂:" in out
+
+
+def test_p02_carm_audit_cli_selftest_and_missing_exp_error(capsys) -> None:
+    # --selftest 執行自檢並回傳 0（p02_carm_audit.py main L317-318），stdout 解析為 JSON 後
+    # 含 "selftest": "PASS"（selftest L302-304）；未給 exp 且無 --selftest 時 ap.error
+    # → SystemExit(2)、stderr 含 "exp 或 --selftest 必給其一"（main L320）。
+    rc = p02_carm_audit.main(["--selftest"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert json.loads(out)["selftest"] == "PASS"
+
+    with pytest.raises(SystemExit) as excinfo:
+        p02_carm_audit.main([])
+    err = capsys.readouterr().err
+    assert excinfo.value.code == 2
+    assert "exp 或 --selftest 必給其一" in err
