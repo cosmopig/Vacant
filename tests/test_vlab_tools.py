@@ -1245,4 +1245,6 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert audit_json.is_file()
     out = json.loads(audit_json.read_text(encoding="utf-8"))  # 落盤檔可解析為合法 JSON
     m = out["summary"]["per_arm"]["M"]
+    # P20261030_2126-1（2110-4 重發；核心斷言已於 94894736 落）：step 4 字面「具備」——兩欄位存在。
+    assert {"second_agent_verified_cells", "second_agent_unknown_cells"} <= set(m)
     assert m["second_agent_verified_cells"] == 1 and m["second_agent_unknown_cells"] == 0
