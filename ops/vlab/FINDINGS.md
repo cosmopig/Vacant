@@ -142,6 +142,20 @@ REPORT.json `per_arm.C.vacant_sha`＝`cf62d258…`；e001 C 臂＝job 檔
   觸發預註冊 `>2×A` 成本紅線，依 `e002.md` §4 記為「不划算」。
 - A/C/H/M/S 五臂 34/34 完賽（A 18/34、C 22/34、S 20/34、H 15/34、M 15/34）——
   這些是**已確立事實**（完賽與配對數字），Holm 校正後四組 p_holm 皆＝1.0。
+- e002 A/C 題級機制差異剖析（2026-10-30；`ops/vlab/tools/e002_pair_breakdown.py`
+  → `ops/vlab/runs_e002_hypothesis_arms/PAIR_BREAKDOWN.json`；170 格／34 題；100% 由原始格
+  推導、無人工臆測）：
+  - C_only 7 題＝**2 題閘門擋回後挽救**（pg_list_ops、pg_react：C 臂 chain.ndjson 有
+    review 擋回紀錄、最終過）＋**5 題初次即過**（pg_bowling、pg_connect、pg_pig_latin、
+    pg_transpose、pg_wordy：無擋回紀錄）。
+  - A_only 3 題全部是 C 臂**閘門擋回後仍未挽救（修改失敗）**：pg_hangman 同時為 C 臂
+    逾時（wall 1800s）；pg_bottle_song、pg_food_chain 為非逾時的修改失敗。
+  - H/M 逾時分佈：H 11 題＋M 8 題共 19 題**全部** wall_s＝1800.0（全數撞 1800s 封頂，
+    無提前逾時）。
+  - 自洽核對：C 臂 22 過＝4 挽救＋18 初次；12 敗＝8 擋回未挽救＋4 未見擋回
+    （4 題中 3 題為 C 逾時）；A 敗 16＝C_only 7＋neither 9。
+  - 口徑：這是**描述性、可究責的機制記錄**（每題可回查 PAIR_BREAKDOWN.json）；
+    不推翻上方 Holm 結論（四組皆未顯著），也不得讀成「閘門有效／無效」。
 
 **不能說**：
 - 兩批 C 臂的 Vacant build **不同**（`dd2c6746` vs `cf62d258`）：跨批比較是
