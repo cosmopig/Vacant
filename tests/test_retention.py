@@ -1816,3 +1816,23 @@ def test_retention_human_bytes_formatting() -> None:
     assert retention._human_bytes(int(2.5 * 1024 * 1024)) == "2.50 MB"
     # else -> 2 decimals GB
     assert retention._human_bytes(1024 * 1024 * 1024) == "1.00 GB"
+
+
+def test_retention_resolve_budget_env_and_fallback(monkeypatch) -> None:
+    # (env, default constant, resolver, "0"/"-1" expected value, positive literal)
+    cases = (
+        ("VACANT_TRACE_BUDGET_BYTES", retention.DEFAULT_TRACE_BUDGET_BYTES, retention._resolve_auto_budget, None, "1048576"),
+        ("VACANT_WIRE_BODY_BYTES", retention.DEFAULT_WIRE_BODY_BYTES, retention._resolve_wire_body_budget, 0, "2097152"),
+        ("VACANT_WIRE_INDEX_BYTES", retention.DEFAULT_WIRE_INDEX_BYTES, retention._resolve_wire_index_budget, 0, "4194304"),
+    )
+    for name, default, fn, zero, pos in cases:
+        monkeypatch.delenv(name, raising=False)
+        assert fn() == default
+        for off in ("0", "-1"):
+            monkeypatch.setenv(name, off)
+            got = fn()
+            assert (got is None) if zero is None else got == zero
+        monkeypatch.setenv(name, pos)
+        assert fn() == int(pos)
+        monkeypatch.setenv(name, "invalid")
+        assert fn() == default
