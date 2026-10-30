@@ -1705,3 +1705,29 @@ def test_auto_gc_dry_run_missing_dir_safe(tmp_path: Path) -> None:
     assert rep["bytes_freed"] == 0
     assert rep["files_removed"] == 0
     assert not p.exists()
+
+
+def test_usage_main_missing_dir_safe(tmp_path: Path, capsys) -> None:
+    """usage_main（`vacant usage`）：狀態目錄與工作區目錄皆不存在時，
+    人讀模式 rc==0 且印出標準「Vacant 磁碟用量」＋「✓ 在封頂內」，
+    --json 模式 rc==0 且輸出零用量結構（totals.state_dir==0、
+    envelope.within_envelope==True）——不拋異常
+    （ASSIGNMENT 🔴最優先 驗收 (a)/(c)；retention.py 核心零改動）。"""
+    p_vh = tmp_path / "nonexistent_vh"
+    p_work = tmp_path / "nonexistent_work"
+
+    # 人讀模式
+    rc = retention.usage_main(["--state-dir", str(p_vh), "--work-dir", str(p_work)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Vacant 磁碟用量" in out
+    assert "狀態目錄總計  : 0 B" in out
+    assert "穩態封頂" in out
+    assert "✓ 在封頂內" in out
+
+    # JSON 模式
+    rc = retention.usage_main(["--state-dir", str(p_vh), "--work-dir", str(p_work), "--json"])
+    assert rc == 0
+    rep = json.loads(capsys.readouterr().out)
+    assert rep["totals"]["state_dir"] == 0
+    assert rep["envelope"]["within_envelope"] is True
