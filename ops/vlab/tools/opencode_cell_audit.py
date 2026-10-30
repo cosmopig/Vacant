@@ -6,8 +6,8 @@
   （seq 連續、prev_hash 串接以 vacant_network.logbook._entry_hash 重算）。
 誠實規則（與 p02_carm_audit 同規矩）：格未完成（無 cell.json）→ state=incomplete，
 全 NA、不計入退出碼判定；.infra- 隔離目錄 → state=quarantined_infra，同不計入。
-唯讀、不寫任何位置。用法：
-  python3 ops/vlab/tools/opencode_cell_audit.py --runs-dir <dir> [--json]
+唯讀（僅 --out 給定時寫該檔）。用法：
+  python3 ops/vlab/tools/opencode_cell_audit.py --runs-dir <dir> [--json] [--out PATH]
   python3 ops/vlab/tools/opencode_cell_audit.py --selftest
 退出碼：0 全部 OK；1 有格子 FAIL/UNKNOWN；2 selftest 失敗。
 """
@@ -181,6 +181,11 @@ def summarize(recs: list) -> dict:
         g["pass"] += 1 if r.get("score_pass") is True else 0
         g["model_calls"] += _i(ev.get("model_calls"))
         g["total_tokens"] += _i(ev.get("total_tokens"))
+        if r["arm"] == "M":  # e004 封包 §3：M 臂第二 agent 證據分格彙總（verified vs UNKNOWN）
+            g.setdefault("second_agent_verified_cells", 0)
+            g.setdefault("second_agent_unknown_cells", 0)
+            g["second_agent_verified_cells"] += 1 if r.get("second_agent_verified") is True else 0
+            g["second_agent_unknown_cells"] += 1 if r.get("second_agent_verified") is not True else 0
     per_arm: dict = {}
     for arm, g in sorted(arms.items()):
         d = dict(g)
@@ -252,6 +257,13 @@ def selftest() -> bool:
         i = audit_cell(root / "mock-opencode-A-incomplete")
         m = audit_cell(_mock_cell(root, "mock-opencode-M-r1", "M", bash_command="pi run --model x", score_pass=True))
         m2 = audit_cell(_mock_cell(root, "mock-opencode-M-noagent", "M", score_pass=False))
+        for d in root.iterdir():  # _mock_cell 的 C 臂暫存目錄非格子；清掉使 runs-dir 恰為 7 格
+            if d.is_dir() and d.name.endswith("_home"):
+                shutil.rmtree(d, ignore_errors=True)
+        out_path = root / "audit_out.json"  # --out 寫入臨時檔：落盤 JSON 與 stdout 同內容
+        rc = main(["--runs-dir", str(root), "--out", str(out_path)])
+        payload = json.loads(out_path.read_text(encoding="utf-8"))
+        msum = payload["summary"]["per_arm"]["M"]
         exp_ev = {"model_calls": 2, "input_tokens": 300, "output_tokens": 30,
                   "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}, "has_second_agent": False}
         per_arm = summarize([a, c, t, f, i, m, m2])["per_arm"]
@@ -281,7 +293,13 @@ def selftest() -> bool:
                 and per_arm["C"]["over_2x_A_cost"] is True
                 and per_arm["M"] == {"cells": 2, "pass": 1, "model_calls": 4, "total_tokens": 1600,
                                      "calls_per_success": 4.0, "tokens_per_success": 1600.0,
-                                     "calls_vs_A": 2.0, "tokens_vs_A": 2.0, "over_2x_A_cost": False})
+                                     "calls_vs_A": 2.0, "tokens_vs_A": 2.0, "over_2x_A_cost": False,
+                                     "second_agent_verified_cells": 1, "second_agent_unknown_cells": 1}
+                and per_arm["M"]["second_agent_verified_cells"] == 1
+                and per_arm["M"]["second_agent_unknown_cells"] == 1
+                and rc == 1 and payload["n_cells"] == 7
+                and payload["bad"] == ["mock-opencode-C-tampered", "mock-opencode-M-noagent"]
+                and msum["second_agent_verified_cells"] == 1 and msum["second_agent_unknown_cells"] == 1)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -290,6 +308,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="OpenCode 格子唯讀審計（成本 ＋ C 臂 Vacant 證據）")
     ap.add_argument("--runs-dir", type=Path, help="含格子子目錄的目錄（每個格子有 cell.json）")
     ap.add_argument("--json", action="store_true", help="JSON 摘要輸出（預設即 JSON；保留以穩定介面）")
+    ap.add_argument("--out", type=Path, default=None, help="給定且輸出非空時，同步將 JSON 寫入該檔（同 p02_carm_audit）")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
     if a.selftest:
@@ -301,9 +320,12 @@ def main(argv=None) -> int:
     cells = sorted(d for d in a.runs_dir.iterdir() if d.is_dir())
     recs = [audit_cell(c) for c in cells]
     bad = [r["cell"] for r in recs if r.get("state") == "complete" and (not r["ok"] or r["unknown"])]
-    print(json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad,
-                      "summary": summarize(recs), "cells": recs},
-                     ensure_ascii=False, indent=1))
+    text = json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad,
+                       "summary": summarize(recs), "cells": recs},
+                      ensure_ascii=False, indent=1)
+    if a.out is not None and recs:  # 給定且輸出非空才寫檔（同 p02_carm_audit）
+        a.out.write_text(text + "\n", encoding="utf-8")
+    print(text)
     return 0 if not bad else 1
 
 
