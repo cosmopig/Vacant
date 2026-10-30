@@ -1109,3 +1109,20 @@ def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, ca
     err = capsys.readouterr().err
     assert "找不到任何 cell.json" in err
     assert "（--suite=nonexistent_suite）" in err
+
+
+def test_envelope_compliance_cli_override_envelope_fail(tmp_path: Path, capsys) -> None:
+    # P20261030_1749-4（ASSIGNMENT 🔴最優先 驗收 (b)：C 格穩態封頂合規量具 CLI 參數治理）：
+    # CLI 透過 --envelope 顯式覆寫封頂字節數且格子用量超標時，envelope_compliance.main
+    # （main L255-273）須反映命令列來源（envelope_source="command-line --envelope …"）、
+    # verdict 為 FAIL 並回 1——參數來源誠實、超標判 FAIL，核心零改動。
+    cell = tmp_path / "runs" / "exp_override" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 10 * 1024 * 1024}), encoding="utf-8")
+    rc = envelope_compliance.main(["exp_override", "--base", str(tmp_path / "runs"),
+                                  "--envelope", str(5 * 1024 * 1024)])
+    assert rc == 1
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "FAIL"
+    assert data["envelope_source"] == f"command-line --envelope {5 * 1024 * 1024}"
