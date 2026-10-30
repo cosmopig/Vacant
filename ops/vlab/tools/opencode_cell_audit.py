@@ -4,6 +4,8 @@
   tool_calls（outer type tool_use）與工具分佈。
 - C 臂 vacant_home.tgz：review 判定分佈（hooks events 的 action）＋ trace 鏈
   （seq 連續、prev_hash 串接以 vacant_network.logbook._entry_hash 重算）。
+誠實規則（與 p02_carm_audit 同規矩）：格未完成（無 cell.json）→ state=incomplete，
+全 NA、不計入退出碼判定；.infra- 隔離目錄 → state=quarantined_infra，同不計入。
 唯讀、不寫任何位置。用法：
   python3 ops/vlab/tools/opencode_cell_audit.py --runs-dir <dir> [--json]
   python3 ops/vlab/tools/opencode_cell_audit.py --selftest
@@ -96,11 +98,20 @@ def audit_vacant_home(tgz) -> dict:
 
 
 def audit_cell(cell_path) -> dict:
-    """審計一個格子（唯讀）→ JSON 可序列化 dict。"""
+    """審計一個格子（唯讀）→ JSON 可序列化 dict。未完成格＝state=incomplete＋NA（p02 規矩）。"""
     cell = Path(cell_path)
-    rec: dict = {"cell": cell.name, "ok": True, "unknown": []}
     cj = cell / "cell.json"
-    meta = json.loads(cj.read_text(encoding="utf-8")) if cj.is_file() else {}
+    if ".infra-" in cell.name:
+        state = "quarantined_infra"
+    elif not cj.is_file():
+        state = "incomplete"
+    else:
+        state = None
+    if state is not None:
+        return {"cell": cell.name, "state": state, "ok": None, "unknown": [],
+                "arm": None, "agent_rc": None, "wall_s": None, "events": None, "vacant": None}
+    meta = json.loads(cj.read_text(encoding="utf-8"))
+    rec: dict = {"cell": cell.name, "state": "complete", "ok": True, "unknown": []}
     rec.update(arm=meta.get("arm"), agent_rc=meta.get("agent_rc"), wall_s=meta.get("wall_s"))
     ev = cell / "events.jsonl"
     if ev.is_file():
@@ -108,6 +119,7 @@ def audit_cell(cell_path) -> dict:
     else:
         rec["ok"] = False
         rec["unknown"].append("events.jsonl missing")
+
     tgz = cell / "vacant_home.tgz"
     if tgz.is_file():
         v = audit_vacant_home(tgz)
@@ -167,6 +179,8 @@ def selftest() -> bool:
         a = audit_cell(_mock_cell(root, "mock-opencode-A-r1", "A"))
         c = audit_cell(_mock_cell(root, "mock-opencode-C-r1", "C"))
         t = audit_cell(_mock_cell(root, "mock-opencode-C-tampered", "C", tamper=True))
+        (root / "mock-opencode-A-incomplete").mkdir()  # 無 cell.json → incomplete（p02 規矩）
+        i = audit_cell(root / "mock-opencode-A-incomplete")
         exp_ev = {"model_calls": 2, "input_tokens": 300, "output_tokens": 30,
                   "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}}
         return (a["events"] == exp_ev and a["arm"] == "A" and a["ok"] and "vacant" not in a
@@ -174,7 +188,9 @@ def selftest() -> bool:
                 and c["vacant"]["review"] == {"n": 4, "actions": {"allow": 3, "deny": 1}, "denied": 1}
                 and c["vacant"]["trace"]["n_entries"] == 2 and c["vacant"]["trace"]["seq_ok"] is True
                 and c["vacant"]["trace"]["prev_link"] == "ok"
-                and t["vacant"]["trace"]["prev_link"] == "broken" and t["ok"] is False)
+                and t["vacant"]["trace"]["prev_link"] == "broken" and t["ok"] is False
+                and i["state"] == "incomplete" and i["ok"] is None and i["events"] is None
+                and i["unknown"] == [])
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -191,9 +207,9 @@ def main(argv=None) -> int:
         return 0 if ok else 2
     if not a.runs_dir or not a.runs_dir.is_dir():
         ap.error("--runs-dir 必給且存在（或用 --selftest）")
-    cells = sorted(d for d in a.runs_dir.iterdir() if d.is_dir() and (d / "cell.json").is_file())
+    cells = sorted(d for d in a.runs_dir.iterdir() if d.is_dir())
     recs = [audit_cell(c) for c in cells]
-    bad = [r["cell"] for r in recs if not r["ok"] or r["unknown"]]
+    bad = [r["cell"] for r in recs if r.get("state") == "complete" and (not r["ok"] or r["unknown"])]
     print(json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad, "cells": recs},
                      ensure_ascii=False, indent=1))
     return 0 if not bad else 1
