@@ -836,3 +836,18 @@ def test_extract_test_hint_pytest_multiple_failures_priority(env):
     assert "also failing: test_alpha" in hint    # 其餘失敗名字緊接名稱之後、先於長斷言
     # 紅燈：其餘失敗測試名字必在前 120 字元內（長斷言不得把名字擠出截斷窗口）
     assert "test_alpha" in hint[:120]
+
+
+def test_extract_test_hint_more_than_four_failures_count_summary(env):
+    """>4 個其他失敗測試時給計數摘要而非逐一列名（2026-10-30，審查指示 §四-4【P1】）：
+    6 個失敗測試（test_t1..test_t6）時，agent 須獲知「+5 other failing tests」概況，
+    但不得因 5 個測試名字逐一列出而膨脹——hint 維持 ≤240 字元且格式不破損。"""
+    from vacant_network.trace.evidence import _extract_test_hint
+    out = "\n".join(
+        f"FAILED test_calc.py::test_t{i} - AssertionError: {i} != {i + 1}" for i in range(1, 7)
+    ) + "\n"
+    hint = _extract_test_hint(out, err="6 failed")
+    assert hint is not None
+    assert hint.startswith("test_t6")                # 最後一個失敗測試仍為主體（相容舊行為）
+    assert "+5 other failing tests" in hint          # len(others)==5 > 4 → 計數摘要分支
+    assert len(hint) <= 240                          # 不膨脹、格式不破損
