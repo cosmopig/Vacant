@@ -145,7 +145,7 @@ trace 整體 96 MiB）；`envelope_accounting.overrun` 通用點名越限組件�
 4. ~~`vacant_growth.jsonl` 隔天再記一筆，補齊「從零起算」的跨日序列~~（round 187 完成：
    序列 24.55h/6 點、`growth_report.py` 真機 verdict=PASS，見 §1 round 187 筆）。
    ~~**仍待**：e002 C 臂最終 `vacant_home_bytes` 分佈回寫 §2-4(b)~~（**round 192 完成**：
-   C 臂 34/34 格全 PASS、min 29,089／med 105,134／max 316,854 B、1 infra（NA）、
+   C 臂：envelope_compliance 34/34 格 PASS（未超 256 MiB 穩態封頂）、題目 benchmark 評分 22/34 PASS（64.71%）、min 29,089／med 105,134／max 316,854 B、1 infra（NA）、
    rescore mismatch 0、envelope_compliance verdict=PASS，見 §1 round 192 筆）。
    **仍待**：e002 M 臂（5/35 進行中）＋ S 臂（未開始）完成時重跑 `report.py --rescore`＋
    `e002_wiring_gauge.py`＋`envelope_compliance.py`＋`p02_carm_audit.py` 四量具，

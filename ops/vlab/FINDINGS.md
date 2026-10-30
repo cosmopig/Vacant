@@ -219,7 +219,7 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   （`envelope_accounting().overrun`／`vacant usage` 的 `within_envelope` False）。
 - 所有命名位元組上限加總 228.25 MiB ≤ 256 MiB 封頂有常規測試把關
   （`test_envelope_counted_components_have_named_total_caps`）——封頂不再是紙面數字。
-- e002 **C 臂**：envelope_compliance 34 格全 PASS（未超 256 MiB 穩態封頂）、題目 benchmark 評分 22/34 PASS（64.71%）、1 infra（NA 不進分母）、
+- e002 **C 臂最終**：envelope_compliance 34 格全 PASS（未超 256 MiB 穩態封頂）、題目 benchmark 評分 22/34 PASS（64.71%）、1 infra（NA 不進分母）、
   `vacant_home_bytes` min 29,089 B／median 105,134 B／max 316,854 B（≈28.4–309.4 KB/格）、
   rescore mismatch 0、envelope_compliance verdict=PASS、四量具 rc=0（18/18 階段值
   35,563/161,209/290,622 為中間值）。
