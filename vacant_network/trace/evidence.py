@@ -293,7 +293,7 @@ PROBE_CMD = re.compile(r"^\s*(pip3?|python3? -m pip|uv|npm|pnpm|yarn|npx|apt(-ge
                        r"command|type|ls|find|tree|stat|file|wc|du|df|curl|wget|git|echo|pwd|"
                        r"env|printenv|test|\[)\b")
 IMPORT_PROBE = re.compile(r"python3?\s+-c\s+['\"]\s*import\s+[\w., ]+['\"]\s*$")
-RUNNERS = re.compile(r"\b(pytest|python3? -m (unittest|pytest)|unittest|tox|nox|"
+RUNNERS = re.compile(r"\b(pytest|python3?(?:\.\d+)?\s+(?:-\S+\s+)*-m\s+(unittest|pytest)|unittest|tox|nox|"
                      r"(npm|pnpm|yarn)( run)? (test|build|lint|typecheck)|jest|vitest|mocha|"
                      r"go test|cargo (test|build|check)|make (test|check|lint)|mvn|gradle|"
                      r"dotnet test|rspec|phpunit|ctest|bazel test)\b")
@@ -309,7 +309,8 @@ SCRIPT_INTERP = re.compile(r"^(?:(?:ba|z|da)?sh|python3?(?:\.\d+)?|node|nodejs|b
 SCRIPT_EXT = {".sh", ".bash", ".py", ".js", ".mjs", ".cjs", ".ts", ".rb", ".pl"}
 _HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?\n\s*\2\b", re.S)
 _SEGMENT = re.compile(r"&&|\|\||;|\||\n|\$\(|`|\(")
-_PREFIX = re.compile(r"^(?:(?:cd\s+\S+|timeout\s+\S+|time|sudo|nice|env|command|exec|\w+=\S*)\s+)*")
+_PREFIX = re.compile(r"^(?:(?:cd\s+\S+|timeout\s+(?:-\S+\s+)*\S+|time|sudo(?:\s+-\S+)*|nice(?:\s+-\S+)*|env|command|exec|\w+=\S*)\s+)*")
+_WRAPPER = re.compile(r"^(?:(?:uv|poetry|pipenv|pdm|hatch)\s+run|(?:(?:ba|z|da)?sh)\s+-[A-Za-z]*c)\s+['\"]?")
 #: 測試的總結行：失敗要有**非零**的數字（「0 failed」「FAIL: 0」「failures=0」不是失敗）；名詞只收測試的（不收「1 row failed to parse」）
 FAIL_OUT = re.compile(r"(FAILED|failures=[1-9]|errors=[1-9]|Traceback \(most recent call last\)|\bFAIL\b(?!:?\s*0\b)|"
                       r"\b[1-9]\d* failed\b|npm ERR!|error\[E\d+|test result: FAILED|BUILD FAILED|"
@@ -319,6 +320,30 @@ _TEST_NOUN = r"(?:tests?|checks?|cases?|specs?|assertions?|examples?)(?:\(s\))?"
 PASS_OUT_2 = re.compile(r"(\b0 " + _TEST_NOUN + r" failed\b|\ball (?:\d+ )?" + _TEST_NOUN + r" (?:have )?passed\b|"
                         r"\bfail(?:ed|ures?)?:?\s*0\b)", re.I)
 FAIL_OUT_2 = re.compile(r"\b[1-9]\d* " + _TEST_NOUN + r" failed\b", re.I)
+
+
+def is_runner_cmd(cmd: str) -> bool:
+    """這個殼層指令有沒有在分段命令位置執行測試或建置工具（`RUNNERS`）。
+    排除 `printf`／`echo`／`git commit -m`／`grep` 等非執行分段引數文字中的關鍵字誤觸。"""
+    body = _HEREDOC.sub(" ", cmd or "")
+
+    def _mask_quotes(m: re.Match) -> str:
+        pre = body[max(0, m.start() - 25):m.start()]
+        if re.search(r"\b(?:ba|z|da)?sh\s+-[A-Za-z]*c\s*$", pre):
+            return m.group(0)[1:-1]
+        return '""'
+
+    masked = re.sub(r"'[^']*'|\"(?:\\.|[^\"\\])*\"", _mask_quotes, body)
+    for seg in _SEGMENT.split(masked):
+        s = _PREFIX.sub("", seg.strip())
+        while (wm := _WRAPPER.match(s)) is not None:
+            s = _PREFIX.sub("", s[wm.end():].strip())
+        if not s:
+            continue
+        s_norm = re.sub(r"^(?:[\w./~-]+/)+", "", s)
+        if RUNNERS.match(s_norm):
+            return True
+    return False
 
 
 def is_test_script_run(cmd: str) -> bool:
@@ -348,9 +373,12 @@ def is_test_script_run(cmd: str) -> bool:
 MENTIONS_FAILURE = re.compile(r"\b(fail\w*|error\w*|crash\w*|could not|couldn't|did not run|"
                               r"not run|broke|broken)\b|失敗|錯誤", re.I)
 #: 人要求寫出的檔：「寫／存／輸出 … 到 PATH」，或 `output path` 這類標籤下一行的路徑
-OUTPUT_VERB = re.compile(r"\b(write|writes|save|store|put|output|export|generate|create|produce|"
-                         r"place|dump|record|list|寫入|寫到|存到|存成|輸出到|產生)\b", re.I)
-OUTPUT_PREP = re.compile(r"(?:\b(?:to|in|into|as|at)\b|到|至|成)\s*(`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;()]+)")
+OUTPUT_VERB = re.compile(
+    r"(?<![\w./-])(write|writes|save|store|put|output|export|generate|create|produce|"
+    r"place|dump|record|list)(?![\w./-])|(?:寫入|寫到|存到|存成|輸出到|產生)", re.I)
+OUTPUT_PREP = re.compile(
+    r"(?:(?<![\w./-])(?:to|in|into|as|at)(?![\w./-])\s+|(?:到|至|成)\s*)"
+    r"(`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;()]+)")
 OUTPUT_LABEL = re.compile(r"output[ _-]?(?:path|file)\b[^\n]*\n(?:[ \t]*\n)*[ \t]*(`[^`\n]+`|[^\s]+)",
                           re.I)
 #: v3.7：說明檔裡的交付物（`asked_outputs`）。只讀人**要 agent 照著做**的說明檔：檔名本身是說明（contract、spec、task…），
@@ -374,7 +402,20 @@ DOC_LABEL = re.compile(r"(?:^|\n)[ \t]*(?:[-*+][ \t]*)?(?:\*\*)?(?:deliverables?
                        r"[ \t]*[:：]?[ \t]*(`[^`\n]+`|\"[^\"\n]+\"|[^\s,;()]+)", re.I)
 #: 中文的「寫到／存成／放在 X」：動詞本身已經帶了介系詞，路徑緊接在後（v3.7；舊的 `\b` 在中文字之間永遠不成立）
 CJK_OUTPUT = re.compile(r"(?:寫入|寫到|寫在|存到|存成|存在|輸出到|輸出成|放到|放在)\s*(`[^`\n]+`|「[^」\n]+」|\"[^\"\n]+\"|[^\s,;()，。；、]+)")
-FILE_LIKE = re.compile(r"^(?!.*://)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,10}$")
+FILE_LIKE = re.compile(r"^(?!-)(?!.*://)(?!.*/-)[\w./~-]*[\w-]\.[A-Za-z0-9]{1,10}$")
+TMP_FIXTURE_CUE = re.compile(
+    r"\btmp_path\b|\btempdir\b|\bTemporaryDirectory\b|\bmkdtemp\b|\bbasetemp\b|/tmp/|假實驗目錄|臨時目錄|暫存目錄",
+    re.I,
+)
+_TICKET_BLOCK_RE = re.compile(r"={4,}\s*工單[^\n]*={4,}\n(.*?)\n={4,}\s*工單結束\s*={4,}", re.S)
+_HANDOFF_TAIL_RE = re.compile(
+    r"\n(?:上一輪交接（STATE\.md[^\n]*|本機 CI（三個分支 HEAD[^\n]*|\[第\s*\d+\s*輪；.*)\Z",
+    re.S,
+)
+_TICKET_APPENDED_LOG_RE = re.compile(
+    r"\n(?:---\s*\n+)?(?:結果：|卡在：|已完成：|#{1,4}\s*redo\b|redo\s*審查回應).*\Z",
+    re.S,
+)
 DIR_CUE_RE = re.compile(r"\b(?:in|from|under|inside)\s+(?:the\s+)?([A-Za-z0-9_.-]+)\s+"
                         r"(?:directory|folder|dir)\b", re.I)
 AT_TAG_REQ_RE = re.compile(r"@([A-Za-z_][A-Za-z0-9_]*)\[")
@@ -658,7 +699,7 @@ class Evidence:
         if tool_kind(s.tool) != "shell":
             return False
         clean_cmd = _strip_shell_comments(_command_of(self.tr, s))
-        return bool(clean_cmd and (RUNNERS.search(clean_cmd) or is_test_script_run(clean_cmd)))
+        return bool(clean_cmd and (is_runner_cmd(clean_cmd) or is_test_script_run(clean_cmd)))
 
     def _step_test_output(self, s: Step) -> str:
         outp = self.tr.output_text(s)
@@ -774,12 +815,25 @@ class Evidence:
         return out, start_idx
 
     # materials ───────────────────────────────────────────────────────
+    @staticmethod
+    def _task_scope_texts(texts: list[str]) -> list[str]:
+        """從提示詞取出真正代表『本輪任務要求』的區段，過濾循環包裝附加的 STATE.md 交接尾端、
+        本機 CI 狀態列、以及工單完成後附加的 `---\\n結果：...`／`## redo` 記錄，避免跨輪污染。"""
+        out: list[str] = []
+        for text in texts:
+            m = _TICKET_BLOCK_RE.search(text)
+            scoped = m.group(1) if m else text
+            scoped = _HANDOFF_TAIL_RE.sub("", scoped)
+            scoped = _TICKET_APPENDED_LOG_RE.sub("", scoped)
+            out.append(scoped)
+        return out
+
     def _materials_from_texts(self, texts: list[str], start_idx: str | None
                               ) -> tuple[list[str], list[str]]:
         files = sorted(self.tr.index(start_idx))
         root = str(self.rec.workspace)
         named, in_dirs = [], []
-        for text in texts:
+        for text in self._task_scope_texts(texts):
             cued_dirs = {m.group(1).strip("/").removeprefix("./")
                          for m in DIR_CUE_RE.finditer(text)}
             for d_cue in sorted(cued_dirs):
@@ -800,6 +854,13 @@ class Evidence:
                     hits = [f for f in files if f == t or f.endswith("/" + t)]
                     if not hits and "/" not in t:
                         hits = [f for f in files if f.rsplit("/", 1)[-1] == t]
+                    if "/" not in t:
+                        stem = os.path.splitext(t)[0]
+                        if not TEST_BASENAME.match(stem):
+                            hits = [
+                                f for f in hits
+                                if not any(p in ("tests", "fixtures") for p in f.split("/")[:-1])
+                            ]
                     if len(hits) == 1:
                         named.append(hits[0])
                     continue
@@ -922,14 +983,16 @@ class Evidence:
             for pm in OUTPUT_PREP.finditer(window):
                 tok = pm.group(1).strip("`\"'").rstrip(".,;:!?")
                 if FILE_LIKE.match(tok):
-                    # 否定／可有可無／舉例只看句首到這個檔名（「寫到 solution.py，不要印出來」的 not 管的是後面）
-                    if not DOC_NOT_REQUIRED.search(re.sub(r"[*_~]+", "", norm[cut + 1: m.end() + pm.end()])):
+                    # 否定／可有可無／舉例／測試暫存目錄只看句首到這個檔名（「寫到 solution.py，不要印出來」的 not 管的是後面）
+                    clause = re.sub(r"[*_~]+", "", norm[cut + 1: m.end() + pm.end()])
+                    if not DOC_NOT_REQUIRED.search(clause) and not TMP_FIXTURE_CUE.search(clause):
                         found.append(tok)
                     break
         for rx in (DOC_LABEL, CJK_OUTPUT):
             for m in rx.finditer(norm):
                 cut = max(norm.rfind(c, 0, m.start()) for c in ("。", "\n", "；"))
-                if DOC_NOT_REQUIRED.search(norm[cut + 1: m.end()]):
+                clause = norm[cut + 1: m.end()]
+                if DOC_NOT_REQUIRED.search(clause) or TMP_FIXTURE_CUE.search(clause):
                     continue
                 tok = m.group(1).strip("`\"'「」").rstrip(".,;:!?。")
                 if FILE_LIKE.match(tok):
@@ -940,14 +1003,20 @@ class Evidence:
         """人要求寫出的檔：(工作區裡的相對路徑, 人寫的樣子)。只收有副檔名的路徑；專案根以外、
         對不到專案裡任何資料夾的絕對路徑不收（看不到它在不在）。v3.7：中文的「寫到／存成 X」也認（舊的 `\b` 在中文字之間永遠不成立）。"""
         found: list[str] = []
-        for text in prompt_texts:
+        for text in self._task_scope_texts(prompt_texts):
             for m in CJK_OUTPUT.finditer(text):
+                cut = max(text.rfind(c, 0, m.start()) for c in ("。", "\n", "；"))
+                if TMP_FIXTURE_CUE.search(text[cut + 1: m.end()]):
+                    continue
                 tok = m.group(1).strip("`\"'「」").rstrip(".,;:!?。")
                 if FILE_LIKE.match(tok):
                     found.append(tok)
             for m in OUTPUT_VERB.finditer(text):
+                cut = max(text.rfind(c, 0, m.start()) for c in (".", "\n", ";", ":", "!", "?", "。", "；"))
                 window = text[m.end(): m.end() + 140].split("\n\n")[0]
                 for pm in OUTPUT_PREP.finditer(window):
+                    if TMP_FIXTURE_CUE.search(text[cut + 1: m.end() + pm.end()]):
+                        break
                     tok = pm.group(1).strip("`\"'").rstrip(".,;:!?")
                     if FILE_LIKE.match(tok):
                         found.append(tok)
@@ -1619,7 +1688,7 @@ class Evidence:
         但無 `unittest.main()`／頂層執行入口的測試檔時，Python 只載入類別定義即結束（輸出為空、結束碼 0，
         實際執行 0 個測試；e002 C 臂 `polyglot_py-pg_zipper-pi-C-r1` 真實漏放）。
         回傳該測試檔名供 `failed_step`／`test_claim` 標記；若非此情形則回 `None`。"""
-        if not clean_cmd or RUNNERS.search(clean_cmd):
+        if not clean_cmd or is_runner_cmd(clean_cmd):
             return None
         if (outp or "").strip() not in ("", "(no output)"):
             return None
@@ -1703,7 +1772,7 @@ class Evidence:
                 continue
             cmd = _command_of(self.tr, s)
             clean_cmd = _strip_shell_comments(cmd)
-            if not (RUNNERS.search(clean_cmd) or is_test_script_run(clean_cmd)):
+            if not (is_runner_cmd(clean_cmd) or is_test_script_run(clean_cmd)):
                 continue
             out = self.tr.output_text(s)
             if (s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out)
@@ -1872,7 +1941,7 @@ class Evidence:
             cmd = _command_of(self.tr, s)
             clean_cmd = _strip_shell_comments(cmd)
             outp = self.tr.output_text(s)
-            is_runner = bool(RUNNERS.search(clean_cmd))
+            is_runner = is_runner_cmd(clean_cmd)
             is_test_script = is_test_script_run(clean_cmd)
             is_test_cmd = is_runner or is_test_script
             noop_script = (
@@ -1895,7 +1964,7 @@ class Evidence:
                 if has_test_claim:
                     continue
                 if any(tool_kind(t.tool) == "shell"
-                       and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
+                       and (is_runner_cmd(_strip_shell_comments(_command_of(self.tr, t)))
                             or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                        and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
                        and not FAIL_OUT_2.search(self.tr.output_text(t))
@@ -1906,7 +1975,7 @@ class Evidence:
                     continue
                 # 若後面還有另一次失敗的測試執行，只報最後一次失敗的測試執行
                 if any(tool_kind(t.tool) == "shell"
-                       and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
+                       and (is_runner_cmd(_strip_shell_comments(_command_of(self.tr, t)))
                             or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                        and (t.error or FAIL_OUT.search(self.tr.output_text(t))
                             or FAIL_OUT_2.search(self.tr.output_text(t))
@@ -1969,7 +2038,7 @@ class Evidence:
                 )
                 has_subsequent_test_pass = any(
                     tool_kind(t.tool) == "shell"
-                    and (RUNNERS.search(_strip_shell_comments(_command_of(self.tr, t)))
+                    and (is_runner_cmd(_strip_shell_comments(_command_of(self.tr, t)))
                          or is_test_script_run(_strip_shell_comments(_command_of(self.tr, t))))
                     and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
                     and not FAIL_OUT_2.search(self.tr.output_text(t))

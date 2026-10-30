@@ -931,3 +931,117 @@ def test_extract_test_hint_long_other_names_do_not_starve_assertion_and_pytest_f
     assert "AssertionError: assert [1, 2] == [1, 3]" in py_hint
     assert "At index 1 diff: 2 != 3" in py_hint
 
+
+def test_requested_outputs_ignores_hyphenated_slugs_and_tmp_path_fixtures(env):
+    """紅燈（2026-10-30 審查重現，rounds 254–272 真實 dogfood 誤退）：
+    1) 工單檔名 `P20261030_0650-4-record-e002-carm-failures-in-findings.md` 與
+       `P20261030_1202-3-add-record-growth-point-dedup-and-prune-test-to-retention.md`
+       內含 `-record-...-in-findings.md`／`-record-...-to-retention.md`，舊版 `OUTPUT_VERB`＋`OUTPUT_PREP`＋`FILE_LIKE`
+       將連字號當成單字邊界且允許 0 空白與 `-` 開頭檔名，誤抽 `-findings.md` 與 `-retention.md` 為 `missing_output`。
+    2) 測試工單指示「建立假實驗目錄 `exp_dir = tmp_path / "runs" / "exp_abs"`，寫入 `REPORT.json`」或
+       「write `config.json` in `tmp_path`」時，屬於單元測試臨時目錄 fixture，不得誤判為工作區根目錄 `missing_output`。
+    3) 當 repo 存在 `tests/fixtures/.../REPORT.json` 時，提示詞僅提及裸檔名 `REPORT.json`（不含路徑 `/`）
+       不得被 `_materials_from_texts` 綁定至 `tests/fixtures/` 底下而誤報 `unread`。
+    """
+    files = {
+        "ops/vlab/tools/holm_e002.py": "def main(argv=None):\n    return 0\n",
+        "tests/test_vlab_tools.py": "def test_existing():\n    assert True\n",
+        "tests/fixtures/holm_e002_absent_arm/REPORT.json": '{"paired": {}}\n',
+    }
+    a = Agent(_proj(env, files=files))
+    a.ask(
+        "處理工單 P20261030_0650-4-record-e002-carm-failures-in-findings.md 與 "
+        "P20261030_1202-3-add-record-growth-point-dedup-and-prune-test-to-retention.md：\n"
+        "1. 檢視 `ops/vlab/tools/holm_e002.py`，確保無 REPORT.json 時不會崩潰。\n"
+        "2. 在 `tests/test_vlab_tools.py` 新增測試：建立假實驗目錄 `exp_dir = tmp_path / \"runs\" / \"exp_abs\"`，"
+        "寫入 `REPORT.json`（內容為空 paired），並 write `extra.json` to `tmp_path / \"extra.json\"`。"
+    )
+    a.read("ops/vlab/tools/holm_e002.py")
+    a.write(
+        "tests/test_vlab_tools.py",
+        "def test_existing():\n    assert True\n\n"
+        "def test_new(tmp_path):\n"
+        "    (tmp_path / 'REPORT.json').write_text('{}')\n",
+    )
+    a.bash("pytest tests/test_vlab_tools.py -q", "2 passed in 0.03s\n")
+    ev = a.evidence("已完成測試並通過。")
+    assert ev["requested_outputs"] == [], ev["requested_outputs"]
+    assert "tests/fixtures/holm_e002_absent_arm/REPORT.json" not in ev["materials_named"]
+    assert ev["findings"] == [], ev["findings"]
+
+
+def test_ticket_block_and_handoff_tail_do_not_pollute_materials_or_outputs(env):
+    """紅燈（2026-10-30 審查重現，rounds 258–272 自產自續誤退環）：
+    當提示詞包含 `===== 工單 ... ===== ... ===== 工單結束 =====`（或末尾附帶 `本機 CI（三個分支 HEAD...`、
+    `上一輪交接（STATE.md 尾端）：` 以及工單末尾 `---\\n結果：...\\n## redo ...` 歷史紀錄）時，
+    `_materials_from_texts` 與 `requested_outputs` 僅能針對當前任務本體提取點名檔案與要求輸出，
+    不得將 `STATE.md` 尾端或 CI 狀態列出的他輪檔案（如 `vacant_network/retention.py`、`vacant_network/trace/evidence.py`）
+    當成當前任務必讀素材而觸發 `unread` 退回。
+    """
+    files = {
+        "ops/vlab/tools/holm_e002.py": "def main(argv=None):\n    return 0\n",
+        "tests/test_vlab_tools.py": "def test_one():\n    assert True\n",
+        "vacant_network/retention.py": "DEFAULT_TRACE_BUDGET_BYTES = 64 * 1024 * 1024\n",
+        "tests/test_retention.py": "def test_ret():\n    assert True\n",
+        "vacant_network/trace/evidence.py": "# evidence checker\n",
+    }
+    a = Agent(_proj(env, files=files))
+    a.ask(
+        "這一輪只做下面這張工單，不做別的事。\n\n"
+        "===== 工單 /home/user1/dev/ops/tickets/qwen/doing/P20261030_1301-3.md =====\n"
+        "# 新增 holm_e002 測試\n"
+        "- 位置：`ops/vlab/tools/holm_e002.py` 與 `tests/test_vlab_tools.py`\n"
+        "- 步驟：檢視 `ops/vlab/tools/holm_e002.py`，在 `tests/test_vlab_tools.py` 補測試。\n"
+        "---\n"
+        "結果：commit 43aca726\n"
+        "## redo 270-r1 回應\n"
+        "- 點名檔 `vacant_network/retention.py` 與 `tests/test_retention.py` 屬上輪語彙，寫入 `handoff_ghost.md` 非本單要求。\n"
+        "===== 工單結束 =====\n\n"
+        "[第 270 輪；2026-10-30 13:18:00]\n"
+        "本機 CI（三個分支 HEAD；合併規則見 ASSIGNMENT「合併前看 CI」）：\n"
+        "🔴 auto/worker 30c5c4da：失敗：tests/test_retention.py::test_usage_report\n\n"
+        "上一輪交接（STATE.md 尾端）：\n"
+        "## round 269-r1 · 實證：已開啟 vacant_network/trace/evidence.py、vacant_network/retention.py 與 tests/test_retention.py，寫入 ghost_out.json。\n"
+    )
+    a.read("ops/vlab/tools/holm_e002.py")
+    a.read("tests/test_vlab_tools.py")
+    a.write("tests/test_vlab_tools.py", "def test_one():\n    assert True\n\ndef test_two():\n    assert True\n")
+    a.bash("pytest tests/test_vlab_tools.py -q", "2 passed in 0.02s\n")
+    ev = a.evidence("已完成工單測試。")
+    assert ev["materials_named"] == ["ops/vlab/tools/holm_e002.py", "tests/test_vlab_tools.py"]
+    assert ev["requested_outputs"] == []
+    assert ev["findings"] == [], ev["findings"]
+
+
+def test_runners_only_match_command_position_not_printf_or_git_commit(env):
+    """紅燈（2026-10-30 審查重現，round 271-r1 seq 5744 誤判與漏報）：
+    `RUNNERS` 只認殼層分段命令位置（含 `.venv/bin/python -m pytest`、`uv run pytest`、`bash -lc "pytest"` 等），
+    不認 `printf`、`echo`、`git commit -m`、`grep` 參數文字中出現的 `pytest`/`unittest`：
+    1) 跑 `pytest` 失敗後，若只跑了 `printf "...pytest..."` 或 `git commit -m "...pytest..."`（exit 0），
+       不得將其當成「後續測試已通過」而吞掉 `failed_step`（`sub="test_failed"`）與 `test_claim`（`sub="failed"`）。
+    2) 跑 `.venv/bin/python -m pytest` 通過後，若後續 `printf "...pytest..." && git add ...` 因 git 報錯退出，
+       不得將該非測試指令誤判為 `failed_step`（`sub="test_failed"`）。
+    """
+    a1 = Agent(_proj(env, name="p_fn", files={"solution.py": "def add(a, b): return 0\n"}))
+    a1.ask("Fix solution.py so pytest passes.")
+    a1.write("solution.py", "def add(a, b): return a - b\n")
+    a1.bash(
+        "pytest -q",
+        "FAILED test_sol.py::test_add - AssertionError: assert -1 == 3\n1 failed in 0.02s\n",
+        error=True,
+    )
+    a1.bash('printf "updated pytest case\\n" >> notes.txt && git commit -m "wip pytest"', "ok\n")
+    ev_claim = a1.evidence("All tests now pass.")
+    assert any(f["kind"] == "test_claim" and f.get("sub") == "failed" for f in ev_claim["findings"]), ev_claim["findings"]
+    ev_noclaim = a1.evidence("Done.")
+    assert any(f["kind"] == "failed_step" and f.get("sub") == "test_failed" for f in ev_noclaim["findings"]), ev_noclaim["findings"]
+
+    a2 = Agent(_proj(env, name="p_fp", files={"solution.py": "def add(a, b): return 0\n"}))
+    a2.ask("Fix solution.py so pytest passes.")
+    a2.write("solution.py", "def add(a, b): return a + b\n")
+    a2.bash(".venv/bin/python -m pytest -q", "1 passed in 0.02s\n")
+    a2.bash('printf "pytest --basetemp ran ok\\n" >> notes.txt && git -C Vacant add ops/tickets/done.md', "fatal: pathspec outside repo\n", error=True)
+    ev_fp = a2.evidence("All tests now pass.")
+    assert not any(f["kind"] == "failed_step" for f in ev_fp["findings"]), ev_fp["findings"]
+
+
