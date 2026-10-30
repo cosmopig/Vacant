@@ -1324,6 +1324,51 @@ def test_usage_overrun_hint_guides_to_both_caps_registries(env, capsys):
     assert "retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS" in out
 
 
+def test_usage_report_and_growth_point_resolve_symlinked_vacant_home(tmp_path, monkeypatch, capsys):
+    """當 ~/.vacant（或 $VACANT_HOME / $VACANT_WORK）是指向其他分割區或目錄的 symlink 時，
+    usage_report、vacant usage CLI 與 record_growth_point 必須先 resolve 根目錄，
+    不可讓 _tree_size 將根目錄當成 symlink 回傳 0 B 而導致 totals.state_dir=0、
+    envelope.total_bytes=0 與 growth.jsonl total_bytes=0。"""
+    real_vh = tmp_path / "real_vacant"
+    real_vh.mkdir(parents=True)
+    sym_vh = tmp_path / "sym_vacant"
+    sym_vh.symlink_to(real_vh)
+
+    real_wk = tmp_path / "real_work"
+    real_wk.mkdir(parents=True)
+    sym_wk = tmp_path / "sym_work"
+    sym_wk.symlink_to(real_wk)
+
+    monkeypatch.setenv("VACANT_HOME", str(sym_vh))
+    monkeypatch.setenv("VACANT_WORK", str(sym_wk))
+
+    odir = sym_vh / "trace" / "objects" / "ab"
+    odir.mkdir(parents=True)
+    (odir / ("b" * 64)).write_bytes(b"x" * 4096)
+    (sym_wk / "run1").mkdir(parents=True)
+    (sym_wk / "run1" / "artifact.bin").write_bytes(b"y" * 2048)
+
+    rep = retention.usage_report(with_estimate=False)
+    assert rep["state_dir"] == str(real_vh.resolve())
+    assert rep["work_dir"] == str(real_wk.resolve())
+    assert rep["totals"]["state_dir"] >= 4096
+    assert rep["totals"]["work_dir"] >= 2048
+    assert rep["envelope"]["total_bytes"] == rep["totals"]["state_dir"] + rep["totals"]["work_dir"]
+
+    rc = cli.main(["usage", "--no-estimate", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert out["state_dir"] == str(real_vh.resolve())
+    assert out["totals"]["state_dir"] >= 4096
+    assert out["envelope"]["total_bytes"] >= 6144
+
+    gp = retention.record_growth_point()
+    assert gp["ok"] is True
+    assert gp["record"]["home"] == str(real_vh.resolve())
+    assert gp["record"]["total_bytes"] >= 4096
+
+
+
 
 
 
