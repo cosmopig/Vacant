@@ -6,6 +6,7 @@ import io
 from pathlib import Path
 
 from ops.vlab.tools import (
+    dabstep_subset_report,
     disk_report,
     e002_wiring_gauge,
     envelope_compliance,
@@ -295,6 +296,12 @@ def test_vacant_growth_log_snapshot_resolves_symlink_and_measures_bytes(tmp_path
     assert rec["objects_files"] == 1
     assert rec["gc_last"]["status"] == "ok"
     assert rec["gc_last"]["target_reached"] is True
+
+
+def test_dabstep_subset_report_selftest() -> None:
+    # 主軸 4（dabstep 資料分析題）：非程式題子集統計量具的離線自測（含預註冊 §3 p 值自校準）
+    # 納入常規回歸，守住 McNemar 計算邏輯與 pair 排除規則（pending/infra 不進 p 值）。
+    assert dabstep_subset_report.main(["--selftest"]) == 0
 
 
 
