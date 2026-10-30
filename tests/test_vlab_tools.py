@@ -1063,3 +1063,66 @@ def test_growth_report_cli_missing_sources_human_unknown_exit_code(tmp_path: Pat
     assert out.startswith("UNKNOWN：")
     assert "sources: （無）" in out
     assert "missing:" in out
+
+
+def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
+    # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
+    # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
+    # （L326-329）須向 stderr 輸出明確 {"error": "no cells"} JSON 錯誤訊息，
+    # 並以 exit code 2 安全退出——不產生未攔截異常或假 0 輸出。
+    (tmp_path / "exp").mkdir()
+    rc = p02_carm_audit.main(["exp", "--base", str(tmp_path), "--suite", "nonexistent_suite"])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "no cells" in err
+
+
+def test_dabstep_subset_report_cli_selftest_flag(capsys) -> None:
+    # 主軸 4（dabstep 資料分析題 CLI 契約）：dabstep_subset_report.main 帶 --selftest
+    # 旗標時執行離線自檢，stdout 輸出包含 SELFTEST PASS 且 exit code 為 0，免除外部目錄依賴。
+    rc = dabstep_subset_report.main(["--selftest"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "SELFTEST PASS" in out
+
+
+def test_vacant_growth_log_cli_missing_home_json(tmp_path: Path, capsys) -> None:
+    # P20261030_1733-4（ASSIGNMENT 🔴最優先 驗收 (a)：真機成長序列記錄量具治理）：
+    # --home 指向不存在的狀態目錄且帶 --json 時，vacant_growth_log.main
+    # （snapshot L40-47 / main L77-80）須安全解析、回 0、stdout JSON 含
+    # total_bytes=0 與 note="home missing"——防禦無效目錄崩潰，核心零改動。
+    rc = vacant_growth_log.main(["--home", str(tmp_path / "nonexistent_home"), "--json"])
+    assert rc == 0
+    rec = json.loads(capsys.readouterr().out)
+    assert rec["total_bytes"] == 0
+    assert rec["note"] == "home missing"
+
+
+def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, capsys) -> None:
+    # P20261030_1749-3（ASSIGNMENT 主軸 4：通用任務評估量具防禦契約治理）：
+    # --suite 篩選後無相符題目 cell 時，noncode_cell_audit.main
+    # （main L479-482）須向 stderr 輸出明確錯誤訊息並回 1，不拋未攔截異常，核心零改動。
+    exp = tmp_path / "exp_filter"
+    exp.mkdir(parents=True)
+    rc = noncode_cell_audit.main(["exp_filter", "--base", str(tmp_path), "--suite", "nonexistent_suite"])
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "找不到任何 cell.json" in err
+    assert "（--suite=nonexistent_suite）" in err
+
+
+def test_envelope_compliance_cli_override_envelope_fail(tmp_path: Path, capsys) -> None:
+    # P20261030_1749-4（ASSIGNMENT 🔴最優先 驗收 (b)：C 格穩態封頂合規量具 CLI 參數治理）：
+    # CLI 透過 --envelope 顯式覆寫封頂字節數且格子用量超標時，envelope_compliance.main
+    # （main L255-273）須反映命令列來源（envelope_source="command-line --envelope …"）、
+    # verdict 為 FAIL 並回 1——參數來源誠實、超標判 FAIL，核心零改動。
+    cell = tmp_path / "runs" / "exp_override" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 10 * 1024 * 1024}), encoding="utf-8")
+    rc = envelope_compliance.main(["exp_override", "--base", str(tmp_path / "runs"),
+                                  "--envelope", str(5 * 1024 * 1024)])
+    assert rc == 1
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "FAIL"
+    assert data["envelope_source"] == f"command-line --envelope {5 * 1024 * 1024}"
