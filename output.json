@@ -1,0 +1,92 @@
+{
+  "per_arm": {
+    "A": {
+      "n": 15,
+      "pass": 7,
+      "rate": 0.4666666666666667,
+      "timeouts": 0,
+      "calls_per_success": 45.714285714285715,
+      "tokens_per_success": 805755.0,
+      "total_calls": 320,
+      "total_tokens": 5640285
+    },
+    "S": {
+      "n": 14,
+      "pass": 5,
+      "rate": 0.35714285714285715,
+      "timeouts": 0,
+      "calls_per_success": 63.8,
+      "tokens_per_success": 1188669.8,
+      "total_calls": 319,
+      "total_tokens": 5943349
+    },
+    "H": {
+      "n": 14,
+      "pass": 6,
+      "rate": 0.42857142857142855,
+      "timeouts": 0,
+      "calls_per_success": 67.0,
+      "tokens_per_success": 1633672.1666666667,
+      "total_calls": 402,
+      "total_tokens": 9802033
+    },
+    "C": {
+      "n": 15,
+      "pass": 7,
+      "rate": 0.4666666666666667,
+      "timeouts": 0,
+      "calls_per_success": 54.42857142857143,
+      "tokens_per_success": 1112505.857142857,
+      "total_calls": 381,
+      "total_tokens": 7787541
+    },
+    "M": {
+      "n": 14,
+      "pass": 6,
+      "rate": 0.42857142857142855,
+      "timeouts": 0,
+      "calls_per_success": 67.0,
+      "tokens_per_success": 2130282.3333333335,
+      "total_calls": 402,
+      "total_tokens": 12781694
+    }
+  },
+  "paired": {
+    "A_vs_C": {
+      "A_only": 2,
+      "X_only": 2,
+      "distinct_tasks": 15,
+      "pairs": 15,
+      "tasks_net_negative": 2,
+      "tasks_net_positive": 2,
+      "mcnemar_p_two_sided": 1.0
+    },
+    "A_vs_H": {
+      "A_only": 2,
+      "X_only": 1,
+      "distinct_tasks": 14,
+      "pairs": 14,
+      "tasks_net_negative": 2,
+      "tasks_net_positive": 1,
+      "mcnemar_p_two_sided": 1.0
+    },
+    "A_vs_M": {
+      "A_only": 2,
+      "X_only": 1,
+      "distinct_tasks": 14,
+      "pairs": 14,
+      "tasks_net_negative": 2,
+      "tasks_net_positive": 1,
+      "mcnemar_p_two_sided": 1.0
+    },
+    "A_vs_S": {
+      "A_only": 3,
+      "X_only": 1,
+      "distinct_tasks": 14,
+      "pairs": 14,
+      "tasks_net_negative": 3,
+      "tasks_net_positive": 1,
+      "mcnemar_p_two_sided": 0.625
+    }
+  }
+}
