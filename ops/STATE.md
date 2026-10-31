@@ -20,3 +20,10 @@
 - DECISION: 驗收指令首路徑 dev/ops/… 係 ~/dev 相對、次路徑 repo 相對（基準點混用），在 repo 內逐字執行會 diff rc=2｜兩路徑指向同一對檔案且語義無歧義，屬路徑基準點筆誤而非驗收壞掉；用絕對路徑等效執行並已註明於工單檔尾，未走 bounced。
 - 沒驗證：dbe8fd50 CI 未出（純文檔 1 行）；e006 全盤未完賽（C 臂 4 格中 1 infra、REPORT cells_scored=15），正式判定仍待全盤完賽。
 - 下一步：查 /srv/vlab/done 之 07_e006_* 格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+
+## round 422 (2026-10-31 01:2x) · P20261031_0105-4 同步真機增長序列第 38 點至 FINDINGS 主軸 2（結案）
+- 主軸：ASSIGNMENT 主軸 2（紀錄檔真實管理）＋🔴最優先用量上限；人類在 FINDINGS 主軸 2 看到 38 點跨 52.79h 序列。
+- 做了：FINDINGS.md 主軸 2 四處更新（1 檔 +5/−4）：37 點/51.75h→38 點/52.79h（→2026-10-31T01:07）、序列表追加「10/31 01:07｜57.6 MiB｜39.6 MiB｜435 blobs｜ok, true」、最新 57.2 MiB（22.3%）/trace 39.3 MiB→57.6 MiB（22.5%）/39.6 MiB、跨日序列括注（37 點、51.75h）→（38 點、52.79h）；「不能說」邊界、主軸 1、e002 條目零改動。
+- 驗證：數字先實核（~/.vacant/growth.jsonl 末筆 ts=01:07:43、total 60405994 B、trace 41490752 B、objects 435、gc ok/true；growth_report.py --json n_points=38、span 52.79h、verdict PASS、rc=0）；驗收 grep「38 點跨 52.79h」命中行 197、grep「10/31 01:07」命中行 235、rc=0（改前 0 行 rc=1）；commit a0867439；工單→done/、doing/ 0 張。
+- 沒驗證：a0867439 CI 未出（純文檔 5 行）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
