@@ -104,3 +104,9 @@
 - 驗證：驗收鏈 rc=0（pytest -v 末行「1 passed, 93 deselected in 0.05s」；-q 此環境吞 summary 行、退出碼 0、grep 命中行 2147）；整檔 94 測試全過 rc=0；e006_verdict.selftest PASS；語義實查（L139 NOT_ESTABLISHED 分支＝sig False 必達，Holm 後 p_holm≥0.20；L143-147 C 成本 0.9×A⇒over=False⇒not_worth_it False）；本輪 + 行無「信任／證明變好」；commit c133054a。
 - 沒驗證：c133054a 與前數 commit CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽後之 REPORT.json＋e006_verdict.py。
 - 下一步：監控 c133054a/6f8fe94f/04434d7e/58c330d6/a14609bb/eca004c8 CI 與 e006 進度/infra 重試；pg_grep 及 FINDINGS 剩餘同步照 open/ 新工單；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 510 (2026-10-31 07:1x) · P20261031_0706-2 e006 第 13 格 pg_grep C 臂真實用量同步至 disk_top_priority §2 驗收總覽 4(b)（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 4(b) 實驗室格子 C 組用量）＋資深審查指示第 2 條。
+- 做了：ops/vlab/packets/disk_top_priority.md 行 166（§2 4(b)）三處（+1/-1 行）——「e006 …C 臂 12 格實測（進行中）」→「13 格實測（進行中）」、⑫ pg_grade_school 後追加「⑬ pg_grep vacant_home_bytes 152,604 B（149.0 KB）、vacant_objects_bytes 80,017 B（78.1 KB）、ratio_of_envelope 0.000568；」、「C 臂 12 格 min/med/max」→「C 臂 13 格 min 32,165／med 121,652／max 255,721 B」、「pg_grade_school 10/31 06:13 完賽」→「pg_grep 10/31 06:23 完賽」；1-12 格數據、4(a)、其他小節未動；外部副本 cp 同步 bit-identical；工單→done/、doing/ 0 張。
+- 驗證：改前兩驗收 grep 均 rc=1（前提成立）；數據本輪實核 cell.json（vacant_home_bytes=152604、vacant_objects_bytes=80017、finished 2026-10-31T06:23:25+0000、vacant_sha=bf1a9f1a）＋13 格 min 32,165/med 121,652（第 7/13）/max 255,721 重算一致；改後驗收鏈 rc=0（兩 grep 均命中行 166、diff 無輸出 rc=0 bit-identical）；+ 行無「信任／證明變好」（grep rc=1）；commit 0376b1d8。
+- 沒驗證：0376b1d8 CI 未出；§3 合計列與 FINDINGS 未含第 13 格（非本單範圍，留後續工單）；e006 170 格未完賽（C 臂 13/34），正式判定仍待全盤完賽後之 REPORT.json＋e006_verdict.py。
+- 下一步：監控 0376b1d8/30decd31/6f8fe94f/04434d7e/58c330d6 CI 與 e006 進度/infra 重試；§3/FINDINGS 第 13 格及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
