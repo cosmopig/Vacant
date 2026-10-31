@@ -1492,6 +1492,18 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert e006_verdict.main(["bad_audit_e006", "--runs-dir", str(tmp_path), "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["audit"] is None
 
+    # P20261031_0224-3（ASSIGNMENT 研發工具回歸守護＋資深審查指示第 3 條）：人讀模式（未帶 --json）
+    # 帶 --out 落盤契約回歸——stdout 為人讀文字、stderr 印 "# wrote"、--out 檔為合法 JSON 且含 H-acc。
+    hv = tmp_path / "human_verdict.json"
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(hv)]) == 0
+    err = capsys.readouterr()
+    assert "e006_verdict m=" in err.out
+    assert "# wrote" in err.err
+    assert hv.is_file()
+    data = json.loads(hv.read_text(encoding="utf-8"))
+    assert "H-acc" in data["hypotheses"]
+
 
 def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     # 驗證當 REPORT.json 中 calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵），
