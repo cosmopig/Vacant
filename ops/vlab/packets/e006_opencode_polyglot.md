@@ -66,4 +66,27 @@
 
 ## 5. 實際結果與判準核對
 
-> 留空待賽後回填（依 e005 先例）：數字一律以 `REPORT.json`（report.py）＋ `opencode_cell_audit` 審計為準；通過率、成本、判定核對全部賽後補入（另 commit，**不預填**）。
+**數據來源**（數字一律以下列為準，非記憶值）：`REPORT.json`（report.py；`cells_scored=170`、infra 0 格未重跑、7 次模型崩潰已重跑並保留格）＋ `opencode_cell_audit`（`incomplete=0`）＋ `e006_verdict.py`（Holm–Bonferroni α=0.05）。口徑為「可究責／有根據／誠實記錄」，不寫「信任」，不寫「證明變好」。
+
+**五臂實測**（每臂 34 題；成本為相對 A 臂基線的倍數，與結果一起報告）：
+
+| 臂 | 通過率 | calls/成功 | tokens/成功 |
+|---|---|---|---|
+| A（基線） | 14/34（41.2%） | 1.00×（基線） | 1.00×（基線） |
+| C（究責） | 17/34（50.0%） | 1.28× | 1.69× |
+| H（自檢指引） | 10/34（29.4%） | 2.15× | 2.95× |
+| M（第二 agent 審查） | 15/34（44.1%） | 1.26× | 1.89× |
+| S（利害提示） | 12/34（35.3%） | 3.91× | 4.45× |
+
+**四組假設核對**（確認線為 Holm 校正後 p<0.05；未校正 p 只作描述）：
+
+| 假設 | 臂 | 判定 | 證據 |
+|---|---|---|---|
+| H-acc（究責） | C | **NOT_ESTABLISHED** | p_raw=0.4531、p_holm=1.0，不顯著 ⇒ 未建立（不是負結果）；成本 ≤2×A（calls 1.28×／tokens 1.69×），未觸發 not_worth_it |
+| H-review(H)（自檢指引） | H | **NOT_ESTABLISHED** | p_raw=0.2891、p_holm=1.0，不顯著 ⇒ 未建立；成本 >2×A（calls 2.15×／tokens 2.95×）判 not_worth_it |
+| H-review(M)（第二 agent 審查） | M | **UNKNOWN** | 無真第二 agent 證據（events.jsonl 無 cell 自身 agent 第二實例／subagent 工具呼叫），依預註冊 §3 條款誠實降級記 UNKNOWN——量不到，不是負結果；e005 已 UNKNOWN 一次，e006 再缺仍記 UNKNOWN、不計臂失敗、報告中註記為機制訊號 |
+| H-stakes(a)（利害提示） | S | **NOT_ESTABLISHED** | p_raw=0.7266、p_holm=1.0，不顯著 ⇒ 未建立；成本 >2×A（calls 3.91×／tokens 4.45×）判 not_worth_it；標註「只是講、無真實後果」，禁止寫「利害提示無用」 |
+
+**成本紅線**：成本必須與結果一起報告（見上表）；H、S 成本 >2×A 且通過率未顯著提升 ⇒ 記「不划算」。M 臂成本指標是**下界**（審查者呼叫在獨立 agent 行程，不在 cell 的 events.jsonl）。
+
+**邊界與口徑**：模型為 gemma-4-12b 本地量化（H-12 類邊界）：結果不外推到別的模型／預算／任務庫。NOT_ESTABLISHED 是「未建立」，不是「無效」；UNKNOWN 是「量不到」，不是負結果。
