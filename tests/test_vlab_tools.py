@@ -3533,3 +3533,26 @@ def test_e004_verdict_m_missing_paired_not_worth_it_none() -> None:
     assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
     assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
     assert "配對缺失、未測" in r["hypotheses"]["H-review(M)"]["reason"]
+
+
+def test_e006_verdict_h_cost_within_cap_not_established() -> None:
+    # 驗證 e006_verdict：H 臂（審查提示臂）calls（13.5 = 1.35×A）與 tokens（1500.0 = 1.5×A）
+    # 均在 2×A 紅線內（成本合格、未超標），但成效未顯著提升（p=1.0、A_only=2 = H_only=2 方向非正）時：
+    # cost_redline_2xA.arms["H"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-review(H) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））——工單 P20261031_1518-3
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 19, "A_only": 2, "H_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["H"] = {"calls_per_success": 13.5, "tokens_per_success": 1500.0}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["calls_vs_A"] == 1.35
+    assert r["cost_redline_2xA"]["arms"]["H"]["tokens_vs_A"] == 1.5
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False  # 未超標臂非不划算
+    h = r["hypotheses"]["H-review(H)"]
+    assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
