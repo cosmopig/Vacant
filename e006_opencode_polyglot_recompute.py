@@ -1,12 +1,20 @@
 import json
 import os
 from pathlib import Path
+import math
 
 def _i(x) -> int:
     try:
         return int(x)
     except (TypeError, ValueError):
         return 0
+
+def mcnemar(b: int, c: int) -> float:
+    n = b + c
+    if n == 0: return 1.0
+    k = min(b, c)
+    p = sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n
+    return min(1.0, 2 * p)
 
 def main():
     exp_dir = Path("/srv/vlab/runs/e006_opencode_polyglot")
@@ -38,7 +46,6 @@ def main():
         total_tokens = 0
         
         for p in paths:
-            n += 1
             score_file = p / "score.json"
             events_file = p / "events.jsonl"
             
@@ -53,6 +60,7 @@ def main():
 
             if is_infra: continue
 
+            n += 1
             with open(score_file, 'r') as f:
                 score_data = json.load(f)
                 if score_data.get("pass"):
@@ -130,18 +138,15 @@ def main():
             final_paired[key]["X_only"] += x_only
             final_paired[key]["distinct_tasks"] += min_len
             final_paired[key]["pairs"] += min_len
-            final_paired[key]["tasks_net_positive"] += a_only
-            final_paired[key]["tasks_net_negative"] += x_only
+            final_paired[key]["tasks_net_positive"] += x_only
+            final_paired[key]["tasks_net_negative"] += a_only
 
     for key in final_paired:
         res = final_paired[key]
-        a, c = res["X_only"], res["A_only"]
         # McNemar's p-value for 2x2 table (exact)
         # a = X only (X pass, A fail), c = A only (A pass, X fail)
-        # b = both pass, d = both fail. pairs = a+b+c+d
-        # We don't have b and d easily without knowing which ones are "both".
-        # But we can estimate or use 1.0 if small.
-        final_paired[key]["mcnemar_p_two_sided"] = 1.0
+        a, c = res["X_only"], res["A_only"]
+        final_paired[key]["mcnemar_p_two_sided"] = mcnemar(a, c)
 
     print(json.dumps({"per_arm": results, "paired": final_paired}, indent=2))
 
