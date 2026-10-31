@@ -194,7 +194,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 35 點跨 49.7h（2026-10-28T20:20 → 2026-10-30T22:02）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 37 點跨 51.75h（2026-10-28T20:20 → 2026-10-31T00:05）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -230,6 +230,8 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/30 19:55 | 54.3 MiB | 37.0 MiB | 378 blobs | ok, true |
 | 10/30 20:59 | 55.1 MiB | 37.7 MiB | 450 blobs | ok, true |
 | 10/30 22:02 | 55.8 MiB | 38.2 MiB | 404 blobs | ok, true |
+| 10/30 23:03 | 56.4 MiB | 38.6 MiB | 443 blobs | ok, true |
+| 10/31 00:05 | 57.2 MiB | 39.3 MiB | 457 blobs | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
@@ -246,9 +248,9 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
   總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,771,218 B（54.1 MiB，gc 後，`~/.vacant/growth.jsonl` 18:50:12 點）；`gc --verify` verify_ok=True（8/8 專案）、
   `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 55.8 MiB（21.8%）、
-  最新 trace 38.2 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（35 點、49.7h），不是模擬、不是單點。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 57.2 MiB（22.3%）、
+  最新 trace 39.3 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（37 點、51.75h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
@@ -376,3 +378,20 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **客觀結果**（來源 REPORT.json＋opencode_cell_audit，round 383 回填）：**5/5 格 complete**（每格皆有 cell.json 與 score.json、pass∈{true,false}）、**infra=0**；H/M/S 三格 `append_system` mode=prepend、agent 實際啟動（model calls 26/12/14），舊 SystemExit 路徑未觸發；A/C/H/S 臂 **score_pass=True**（成本：A 16 calls/209,800 tok、C 13/167,573、H 26/413,461、S 14/158,893），**M 臂 0/1：900 s 逾時 agent_rc=124、無第二 agent 啟動證據，依判準條款記 UNKNOWN**（非負結果、不隱瞞）；C 臂 install_rc=0、vacant_home 79,333 B（含 .vacant/intake/hooks/events.jsonl）、**trace 16 entries PASS**（seq_ok=true、prev_link=ok、review 25 allow/0 denied）。
 **結論**：無確定性 infra 崩潰、fail-open 放行鐵律滿足 → 滿足審查指示 1.4 放行全盤重發射之鐵律（e004 H/M/S 重發射可另開預註冊封包再議）；GO 判準 1/2/3/5 成立、判準 4 記 UNKNOWN，五條未全數建立、冒煙不能全數判 GO；M 臂第二 agent 路徑（bf1a9f1a）在 OpenCode 上未獲驗證，待修複測。
 **口徑**：本條僅為冒煙完賽之客觀事實與審計結論；不寫「證明變好」、不寫「信任」；M 臂 UNKNOWN 照實保留，不升格為 PASS 或「沒有」。
+
+## 2026-10-30 · 主軸 1 · e006_opencode_polyglot 五臂全盤發射（34 題 polyglot_py × A/C/H/M/S ＝ 170 格、排程中）
+
+**發射**：2026-10-30 23:16:50 labd「開始 e006_opencode_polyglot：170 格」（/srv/vlab/labd.log 第 76 行）；佇列檔 `07_e006_opencode_polyglot.json` 已自 queue/ 移入 /srv/vlab/running/（執行中）。
+**結構**：34 題 polyglot_py × A/C/H/M/S（170 格）、agent=opencode、1800 s/格；頂層與 C 臂 vacant_sha=bf1a9f1afb211460b48611f8f28b1d9433985c4a；H/M/S 臂 env.VLAB_APPEND_SYSTEM → /srv/vlab/arms/e002_{H,M,S}.md 前置（prepend）模式（c76ff988；e005 冒煙 5/5 已驗證、舊 SystemExit 路徑未觸發）；M 臂為 e005 UNKNOWN 路徑之複測樣本（900 s 逾時 → 本盤 1800 s）。
+**預註冊**：封包 `ops/vlab/packets/e006_opencode_polyglot.md`（發射前寫死判準）——4 假設 H-acc / H-review(H) / H-review(M) / H-stakes(a)、Holm–Bonferroni（4 組 A_vs_X）α=0.05 為確認線＋2×A 成本紅線；M 臂需 events.jsonl 有真第二 agent 證據，缺則降級記 UNKNOWN（不是負結果）；infra 格永不回填。
+**口徑**：此條僅為發射與排程事實；排程中、無結果數據、不預填、不宣稱；全盤完賽後以 `opencode_cell_audit.py` 審計 170 格、`e006_verdict.py` 依封包 §3 判定（數字以 REPORT.json 為準、成本與結果同報）。
+
+## 2026-10-31 · 主軸 2 · OpenCode 真實 agent C 臂用量實測（e003/e005/e006 全數通過 256 MiB 穩態封頂，最高 164 KB，≤ 0.07%）
+
+**客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨三個 run 共 **5 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 2/2，FAIL 0、NA 0）：
+- e003_opencode_smoke（2 格）：pg_affine_cipher **65,551 B（64.0 KB）**、pg_pig_latin **167,361 B（163.4 KB）**；
+- e005_opencode_five_arm_smoke（1 格）：pg_affine_cipher **79,333 B（77.5 KB）**；
+- e006_opencode_polyglot（2 格，本盤進行中）：pg_affine_cipher **49,903 B（48.7 KB）**、pg_beer_song **116,444 B（113.7 KB）**。
+
+5 格實測全部落在 49,903 B（48.7 KB）至 167,361 B（163.4 KB）之間，全部低於 256 MiB（268,435,456 B）穩態封頂；最高格 167,361 B 佔封頂 **0.0623%**（≤ 0.07%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 25,829–76,219 B，皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
+**口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）進行中，本條不預填未完成格數據，正式判定仍以全盤完賽後之 REPORT.json＋`e006_verdict.py` 為準；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。

@@ -144,15 +144,23 @@ def test_envelope_compliance_verdicts_infra_skip_and_exit_codes(tmp_path: Path) 
     mk("c_noev", {"arm": "C"})  # 無 vacant_home_bytes → NO_EVIDENCE，不判 FAIL
     mk("a_na", {"arm": "A"})    # 設計上沒裝 Vacant 的臂 → NA
     mk(".infra-c_x", {"arm": "C", "vacant_home_bytes": env + 999})  # 重試副檔 → 跳過
+    mk("suite-task-opencode-M-r1", None)  # 未完成格（無 cell.json），arm 由目錄名解析
 
     out = envelope_compliance.evaluate(tmp_path, "exp_env", env, "test")
     by = {c["cell"]: c for c in out["cells"]}
-    assert out["n_cells"] == 4  # infra 副檔留痕、不計入
+    assert out["n_cells"] == 5  # infra 副檔留痕、不計入；未完成格計入（NA 不影響判定）
     assert by["c_pass"]["compliance"] == "PASS"
     assert by["c_fail"]["compliance"] == "FAIL"
     assert by["c_noev"]["compliance"] == "NO_EVIDENCE"
     assert by["a_na"]["compliance"] == "NA"
     assert by[".infra-c_x"].get("skipped")  # 不可被計入任何判定
+    # 未完成格：arm 由目錄名（<suite>-<task>-<agent>-<arm>-<rep> 倒數第二 token）解析，
+    # 不得落 by_arm["?"]（77f0823f 前的行為；回歸鎖）
+    assert by["suite-task-opencode-M-r1"]["arm"] == "M"
+    assert by["suite-task-opencode-M-r1"]["state"] == "incomplete"
+    assert by["suite-task-opencode-M-r1"]["compliance"] == "NA"
+    assert "M" in out["by_arm"]
+    assert "?" not in out["by_arm"]
     assert out["verdict"] == "FAIL"
     assert out["by_arm"]["C"]["verdict"] == "FAIL"
     assert out["by_arm"]["A"]["verdict"] == "NA"
@@ -1168,7 +1176,7 @@ def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     assert "找不到 run 目錄" in capsys.readouterr().err
 
 
-def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
+def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatch) -> None:
     # P20261030_2008-1（ASSIGNMENT「研發工具需納入回歸測試」＋ GPT 審查 P1-1 同時量成本）：
     # OpenCode 格子唯讀審計量具 opencode_cell_audit（成本 ＋ C 臂 Vacant 證據）納入常規回歸：
     # (a) selftest() 須通過（合成 A/C/tamper/incomplete mock 格，含破壞對照）；
@@ -1281,6 +1289,26 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # _arm_from_name 剝 .infra- 前綴後回 "H"，非 None（3f61ec5c 核心已落，此斷言防再犯）。
     assert out["cells"][0]["arm"] == "H"
 
+    # P20261030_2331-4（ASSIGNMENT「研發工具需納入回歸測試」＋審查指示第 2 條；fc69b38b 核心已落）：
+    # exp 位置參數 CLI 解析契約鎖進回歸——monkeypatch 將預設 base /srv/vlab/runs 導向 tmp_path（不碰真實資料）：
+    # --help 退 0；exp 與 --runs-dir 皆缺 → ap.error(2)；exp 有但目錄缺 → ap.error(2)；exp 有效 → 正常審計；--runs-dir 優先於 exp。
+    real_path = opencode_cell_audit.Path
+    monkeypatch.setattr(opencode_cell_audit, "Path",
+                        lambda a=None, *x, **k: tmp_path if a == "/srv/vlab/runs" else real_path(a, *x, **k))
+    for argv, code in ((["--help"], 0), ([], 2), (["zz_p2331_4_missing"], 2)):
+        with pytest.raises(SystemExit) as ex:
+            opencode_cell_audit.main(argv)
+        assert ex.value.code == code
+    pos_runs = tmp_path / "pos_exp"; pos_runs.mkdir()
+    opencode_cell_audit._mock_cell(pos_runs, "cell-A-pos", "A", score_pass=True)
+    capsys.readouterr(); rc = opencode_cell_audit.main(["pos_exp", "--json"])  # exp → 預設 base/<exp> 解析並正常審計
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["n_cells"] == 1 and out["bad"] == [] and out["cells"][0]["cell"] == "cell-A-pos"
+    empty = tmp_path / "pos_empty"; empty.mkdir()
+    capsys.readouterr(); rc = opencode_cell_audit.main(["pos_exp", "--runs-dir", str(empty), "--json"])
+    assert rc == 0 and json.loads(capsys.readouterr().out)["n_cells"] == 0  # --runs-dir 優先於 exp
+
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
@@ -1309,3 +1337,46 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
     assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
     assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件
+
+
+def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
+    # P20261030_2331-2（ASSIGNMENT「研發工具需納入回歸測試」）：e006 預註冊假說判定量具 e006_verdict
+    # （cb7e3447）納入常規回歸——selftest、--report/--audit/--json CLI、四項假說判定結構（mock 只活在 tmp_path，不讀寫 /srv/vlab/runs 真實資料）。
+    from ops.vlab.tools import e006_verdict
+
+    assert e006_verdict.selftest() == 0
+    capsys.readouterr()  # 排空殘留，保持 --selftest stdout 乾淨
+    rc = e006_verdict.main(["--selftest"])
+    assert rc == 0 and "e006_verdict selftest PASS" in capsys.readouterr().out
+
+    rep = tmp_path / "REPORT.json"
+    rep.write_text(json.dumps(e006_verdict._mock_report()), encoding="utf-8")
+    aud = tmp_path / "audit.json"
+    aud.write_text(json.dumps(e006_verdict._mock_audit(5)), encoding="utf-8")
+    capsys.readouterr()
+    rc = e006_verdict.main(["--report", str(rep), "--audit", str(aud), "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    # 四項假說判定全部在案、各帶判定態；mock 期望態（Holm m=4：C/M 顯著、H/S 不顯著；M 有第二 agent 證據）。
+    hyp = out["hypotheses"]
+    assert {"H-acc", "H-review(H)", "H-review(M)", "H-stakes(a)"} <= set(hyp)
+    assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件
+
+    # P20261031_0002-4（ASSIGNMENT「研發工具需納入回歸測試」）：exp 位置參數與 CLI 契約回歸。
+    # (a) 未傳參數（無 exp、無 --report）→ argparse error → SystemExit(2)。
+    with pytest.raises(SystemExit) as exc:
+        e006_verdict.main([])
+    assert exc.value.code == 2
+    # (b) 不存在之 exp 名稱 → REPORT.json 缺失 → rc=1（無事可做）。
+    capsys.readouterr()
+    assert e006_verdict.main(["mock_nonexistent", "--runs-dir", str(tmp_path)]) == 1
+    # (c) exp 位置參數解析：tmp_path/exp_mock 下 REPORT.json＋AUDIT.json → rc=0 且 --out 落盤。
+    em = tmp_path / "exp_mock"; em.mkdir()
+    (em / "REPORT.json").write_text(json.dumps(e006_verdict._mock_report()), encoding="utf-8")
+    (em / "AUDIT.json").write_text(json.dumps(e006_verdict._mock_audit(5)), encoding="utf-8")
+    outp = tmp_path / "out.json"
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(outp), "--json"]) == 0
+    assert outp.is_file()

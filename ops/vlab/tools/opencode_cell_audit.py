@@ -9,6 +9,7 @@
 計入 bad（退出碼 1）：infra 崩潰是確定崩潰，不是「未知」。
 唯讀（僅 --out 給定時寫該檔）。用法：
   python3 ops/vlab/tools/opencode_cell_audit.py --runs-dir <dir> [--json] [--out PATH]
+  python3 ops/vlab/tools/opencode_cell_audit.py <exp> [--json] [--out PATH]   # 預設路徑 /srv/vlab/runs/<exp>
   python3 ops/vlab/tools/opencode_cell_audit.py --selftest
 退出碼：0 全部 OK；1 有格子 FAIL/UNKNOWN 或存在 quarantined_infra；2 selftest 失敗。
 """
@@ -283,6 +284,11 @@ def selftest() -> bool:
         exp_ev = {"model_calls": 2, "input_tokens": 300, "output_tokens": 30,
                   "total_tokens": 800, "tool_calls": 3, "tools": {"read": 2, "bash": 1}, "has_second_agent": False}
         per_arm = summarize([a, c, t, f, i, m, m2, q])["per_arm"]
+        try:
+            main(["nonexistent_mock_exp"])
+            exp_pos = False
+        except SystemExit as e:  # exp 位置參數 → 預設路徑 /srv/vlab/runs/<exp> 不存在 → ap.error 退出碼 2
+            exp_pos = e.code == 2
         return (a["events"] == exp_ev and a["arm"] == "A" and a["ok"] and "vacant" not in a
                 and c["arm"] == "C" and c["ok"] and not c["unknown"]
                 and c["vacant"]["review"] == {"n": 4, "actions": {"allow": 3, "deny": 1}, "denied": 1}
@@ -319,13 +325,15 @@ def selftest() -> bool:
                 and per_arm["M"]["second_agent_unknown_cells"] == 1
                 and rc == 1 and payload["n_cells"] == 8
                 and payload["bad"] == [".infra-mock-opencode-crash-H-r1", "mock-opencode-C-tampered", "mock-opencode-M-noagent"]
-                and msum["second_agent_verified_cells"] == 1 and msum["second_agent_unknown_cells"] == 1)
+                and msum["second_agent_verified_cells"] == 1 and msum["second_agent_unknown_cells"] == 1
+                and exp_pos)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="OpenCode 格子唯讀審計（成本 ＋ C 臂 Vacant 證據）")
+    ap.add_argument("exp", nargs="?", default=None, help="實驗名稱（預設路徑 /srv/vlab/runs/<exp>）")
     ap.add_argument("--runs-dir", type=Path, help="含格子子目錄的目錄（每個格子有 cell.json）")
     ap.add_argument("--json", action="store_true", help="JSON 摘要輸出（預設即 JSON；保留以穩定介面）")
     ap.add_argument("--out", type=Path, default=None, help="給定且輸出非空時，同步將 JSON 寫入該檔（同 p02_carm_audit）")
@@ -335,9 +343,14 @@ def main(argv=None) -> int:
         ok = selftest()
         print("opencode_cell_audit selftest " + ("PASS" if ok else "FAIL"))
         return 0 if ok else 2
-    if not a.runs_dir or not a.runs_dir.is_dir():
-        ap.error("--runs-dir 必給且存在（或用 --selftest）")
-    cells = sorted(d for d in a.runs_dir.iterdir() if d.is_dir())
+    runs_dir = a.runs_dir
+    if runs_dir is None and a.exp is not None:
+        runs_dir = Path("/srv/vlab/runs") / a.exp
+    if runs_dir is None:
+        ap.error("需指定 exp 位置參數或 --runs-dir（或用 --selftest）")
+    if not runs_dir.is_dir():
+        ap.error(f"runs-dir 不存在：{runs_dir}（或用 --selftest）")
+    cells = sorted(d for d in runs_dir.iterdir() if d.is_dir())
     recs = [audit_cell(c) for c in cells]
     bad = [r["cell"] for r in recs if r.get("state") == "quarantined_infra" or (r.get("state") == "complete" and (not r["ok"] or r["unknown"]))]
     text = json.dumps({"tool": "opencode_cell_audit", "n_cells": len(recs), "bad": bad,
