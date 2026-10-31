@@ -1,14 +1,3 @@
-import json
-import os
-from pathlib import Path
-import math
-
-def _i(x) -> int:
-    try:
-        return int(x)
-    except (TypeError, ValueError):
-        return 0
-
 def mcnemar(b: int, c: int) -> float:
     n = b + c
     if n == 0: return 1.0
