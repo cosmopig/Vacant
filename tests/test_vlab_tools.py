@@ -1122,6 +1122,23 @@ def test_vacant_growth_log_cli_missing_home_json(tmp_path: Path, capsys) -> None
     assert rec["note"] == "home missing"
 
 
+def test_vacant_growth_log_cli_missing_home_append(tmp_path: Path, capsys) -> None:
+    # P20261031_0255-1（ASSIGNMENT 🔴最優先 驗收 (a)：真機成長序列記錄量具治理）：
+    # --home 指向不存在的狀態目錄且以 --out 落盤追加時，vacant_growth_log.main
+    # （L86-99）須 mkdir parents 安全建立目標檔、寫入含 note="home missing" 之
+    # 記錄、stdout 含 "recorded " 與 "0 B (0.0 MiB)" 並回 0——核心零改動。
+    out_file = tmp_path / "out" / "growth.jsonl"
+    rc = vacant_growth_log.main(["--home", str(tmp_path / "nope_home"),
+                                 "--out", str(out_file)])
+    assert rc == 0
+    assert out_file.is_file()
+    lines = out_file.read_text(encoding="utf-8").splitlines()
+    assert json.loads(lines[0])["note"] == "home missing"
+    out = capsys.readouterr().out
+    assert "recorded " in out
+    assert "0 B (0.0 MiB)" in out
+
+
 def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1749-3（ASSIGNMENT 主軸 4：通用任務評估量具防禦契約治理）：
     # --suite 篩選後無相符題目 cell 時，noncode_cell_audit.main
