@@ -263,7 +263,18 @@ def main(argv=None):
     if a.selftest:
         return selftest()
     runs = Path(a.runs_dir)
-    rpath = Path(a.report) if a.report else (runs / a.exp / "REPORT.json" if a.exp else None)
+    rpath = Path(a.report) if a.report else None
+    if rpath is None and a.exp:
+        repo_r = Path("ops/vlab") / f"runs_{a.exp}" / "REPORT.json"
+        srv_r = runs / a.exp / "REPORT.json"
+        if a.runs_dir == "/srv/vlab/runs" and repo_r.is_file():
+            rpath = repo_r
+        elif srv_r.is_file():
+            rpath = srv_r
+        elif repo_r.is_file():
+            rpath = repo_r
+        else:
+            rpath = srv_r
     if rpath is None:
         ap.error("需要 exp 位置參數或 --report")
     if not rpath.is_file():
@@ -276,7 +287,21 @@ def main(argv=None):
         print(f"REPORT.json 格式不符：{e}", file=sys.stderr)
         return 2
     audit_summary = None
-    apath = Path(a.audit) if a.audit else runs / (a.exp or "") / "AUDIT.json"
+    if a.audit:
+        apath = Path(a.audit)
+    elif a.exp:
+        repo_a = Path("ops/vlab") / f"runs_{a.exp}" / "AUDIT.json"
+        srv_a = runs / a.exp / "AUDIT.json"
+        if a.runs_dir == "/srv/vlab/runs" and repo_a.is_file():
+            apath = repo_a
+        elif srv_a.is_file():
+            apath = srv_a
+        elif repo_a.is_file():
+            apath = repo_a
+        else:
+            apath = srv_a
+    else:
+        apath = runs / "AUDIT.json"
     if apath.is_file():
         try:
             audit_summary = json.loads(apath.read_text())
