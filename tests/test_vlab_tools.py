@@ -4507,3 +4507,36 @@ def test_e004_verdict_c_partial_dimension_cost_missing_reason() -> None:
     assert "A 臂與 C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
     # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
     assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None
+
+
+def test_growth_report_exact_total_cap_boundary_pass(tmp_path: Path, capsys) -> None:
+    # P20261031_1809-5（ASSIGNMENT 🔴最優先 驗收(a)：長效監度量具守護）：growth.jsonl
+    # 2 點跨 24h（≥20h 門檻）、gc 健全（status=ok、target_reached=true）、最新點 trace
+    # 健全（32 MiB，遠在 64 MiB 上限內），且最新點 total **恰好等於** 256 MiB 穩態封頂
+    #（268,435,456 B、壓線不超）時，封頂判定是嚴格大於（> 才是超標、≤ 即合規）——
+    # growth_report.report() 須判 verdict=PASS（壓線不超，絕不誤判 FAIL）、
+    # peak_overrun.over_stable_envelope 為 False（峰值＝封頂、未超）、reason 載明
+    # 「≤ 封頂 268435456 B」；CLI --json 以退出碼 0 安全退出。
+    # 與 test_growth_report_exact_cap_plus_one_byte_fail（超 1 byte 判 FAIL）構成
+    # 完全對稱的 total 穩態封頂臨界邊界閉環，鎖進常規回歸。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 24h（≥ MIN_EVIDENCE_HOURS=20h 門檻）；最新點 total 恰好壓線封頂
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 100 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T00:00:00+0000", "total_bytes": 256 * 1024 * 1024,  # 268,435,456 B＝封頂，恰好壓線（≤ 即合規）
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},  # 遠在 64 MiB trace 上限內
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS"  # total 恰好＝封頂（≤ 合規），絕不誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is False  # 峰值＝封頂、未超
+    assert "≤ 封頂 268435456 B" in r["reason"]  # reason 誠實載明壓線合規口徑
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # PASS 時 CLI 安全退出碼 0
