@@ -2809,3 +2809,21 @@ def test_e006_verdict_missing_counts_not_worth_it_none() -> None:
     assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
     assert "配對計數缺失（量不到方向）" in r["hypotheses"]["H-acc"]["reason"]
     assert "不顯著" not in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_missing_counts_not_worth_it_none() -> None:
+    # 驗證 e004_verdict 在 C 臂配對計數缺失（A_only 為 None、量不到方向）但 p 顯著、成本超標時，
+    # 因方向量不到，not_worth_it 不可妄斷為「不划算」，必須誠實記 None；H-acc 記 UNKNOWN——工單 P20261031_1109-3
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 20, "A_only": None, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0  # 2.5×A，超 2×A 紅線
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None  # 量不到方向 ⇒ 不妄斷「不划算」
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對計數缺失（量不到方向）" in r["hypotheses"]["H-acc"]["reason"]
+    assert "不顯著" not in r["hypotheses"]["H-acc"]["reason"]
