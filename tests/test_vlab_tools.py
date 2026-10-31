@@ -2316,3 +2316,25 @@ def test_e006_verdict_partial_dimension_cost_missing_reason() -> None:
     assert "A 臂與 C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
     # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
     assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_both_arms_cost_missing() -> None:
+    # 驗證 e004_verdict 雙臂成本皆缺失（A 臂與 C 臂 calls/tokens 皆 None）、C 臂配對顯著
+    # （p=0.001、C_only=10 > A_only=0）⇒ H-acc state=="CONFIRMED_COST_UNKNOWN" 且理由精確
+    # 指出「A 臂與 C 臂成本缺失」（雙主體）、不誤報單主體（工單 P20261031_0903-1）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著（Holm 後仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 C 臂成本皆缺失（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["C"]["calls_per_success"] = None
+    rep["per_arm"]["C"]["tokens_per_success"] = None
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 C 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]
+    # 雙主體精確化：不得誤報單主體「A 臂成本缺失」（非子串，可安全 not-in 斷言）
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
