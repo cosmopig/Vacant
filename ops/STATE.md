@@ -45,3 +45,9 @@
 - 驗證：先實核契約（e004_verdict.py:252-255 AUDIT 讀取 try/except Exception→audit_summary=None、L259 r["audit"]=None；audit 缺失→M 臂降級 UNKNOWN 已在 selftest #6 覆蓋）；驗收 pytest -k test_e004_verdict_selftest_and_cli → 1 passed, 68 deselected rc=0；grep bad_audit_e004 命中行 1397/1401（改前 0 行 rc=1）；全檔 test_vlab_tools.py 69 passed rc=0；無 CR 字元；commit fadca6b9；工單→done/、doing/ 0 張。
 - 沒驗證：fadca6b9 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+## round 443 (2026-10-31 02:5x) · P20261031_0240-2 真機增長序列第 39 點同步至 disk_top_priority §3 目標數字合計列（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收條件 1 & 4(a)）：§3 目標數字表「合計」列本輪實測同步至第 39 點。
+- 做了：disk_top_priority.md §3 合計列本輪實測（1 檔 +1/−1）：61.8 MiB（24.1%、10/30 16:32）→**57.6 MiB（22.5% of 256、10/31 02:09 真機實測；24h 最大增長 16.3 MiB）**；外部副本 ~/dev/ops/packets/ 同步 bit-identical；§1/§2 歷史點（61.8 MiB＝10/30 16:32 過去點）依工單明令不改。
+- 驗證：改前 grep 0 行 rc=1（前提成立）；改後驗收原句 grep 命中行 176 rc=0＋diff -u 兩份無輸出 rc=0（工單註「行 175」實為行 176，偏 1）；git diff 僅 1 檔 1 行；無「信任／證明變好」；commit 19285f51；工單→done/、doing/ 0 張。
+- 沒驗證：19285f51 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 e006 進度與 infra 重試；第 40 點/新 C 臂格出現即同步三件套（§1 時序＋§2/§3 總覽合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
