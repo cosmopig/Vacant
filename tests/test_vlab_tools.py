@@ -2910,3 +2910,24 @@ def test_growth_report_gc_status_not_ok_fail(tmp_path: Path, capsys) -> None:
     capsys.readouterr()  # 排空殘留
     rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
     assert rc == 1
+
+
+def test_e004_verdict_m_not_worth_it() -> None:
+    # 驗證 e004_verdict：M 臂（多 agent）成本超標（calls 30.0 = 3.0×A，超 2×A 紅線）
+    # 且成效未達顯著（p=0.45 且 A_only=4 > M_only=2 方向非正）時：
+    # cost_redline_2xA.arms["M"].over_2x_A_cost 精確判定為 True、not_worth_it 精確判定為
+    # True（成本必須與結果一起報告）、H-review(M) 假說態為 UNKNOWN（無第二 agent 證據 ⇒
+    # 記 UNKNOWN，量不到不是負結果）——工單 P20261031_1156-2
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 15, "A_only": 4, "M_only": 2, "mcnemar_p_two_sided": 0.45}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["M"]["calls_per_success"] = 30.0  # 3.0×A，超 2×A 紅線
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is True  # 成本超標且未顯著提升 ⇒ 不划算
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "無第二 agent 證據" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "記 UNKNOWN" in r["hypotheses"]["H-review(M)"]["reason"]
