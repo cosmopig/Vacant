@@ -144,3 +144,9 @@
 - 驗證：驗收鏈 rc=0（pytest 1 passed, 164 deselected、grep 命中行 3685、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 165 項 rc=0；git diff 1 檔 +27；commit 14273f65（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
 - 沒驗證：14273f65 CI 未出；本單僅鎖 _mock_report 契約（mock 場景），未以 e004 真機 REPORT.json 重放本場景。
 - 下一步：監控 14273f65/1fb25ebd/8f1d3b59/4992200f/077315d9 CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
+## round 660 (2026-10-31 16:3x) · P20261031_1619-1 e004_verdict H 臂顯著但成本缺失 ⇒ CONFIRMED_COST_UNKNOWN 且 not_worth_it=None 誠實契約測試（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效綁定紅線）；e004_verdict 與 e006_verdict 同構（diff 僅 schema/notes/承接註記差異），e006 同款契約（round 657）補 e004 側入常規回歸。
+- 做了：tests/test_vlab_tools.py 檔尾（行 3765）新增 test_e004_verdict_h_confirmed_cost_unknown（24 行：H_only=10>A_only=0、p=0.001；A 10.0/1000.0 健全；H None/None＋audit_summary=None）；e004_verdict.py 核心邏輯與既有測試未動、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（pytest 1 passed、grep 命中行 3765、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 168 項 rc=0；git diff 1 檔 +24；commit fb75b56b（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
+- 沒驗證：fb75b56b CI 未出；僅 mock 場景鎖契約，未以 e004 真機 REPORT.json 重放（e004 為已完賽舊 run，無新 REPORT 可重放）；0.0 成本⇒「免費」判定缺口仍未處理（round 657 BACKLOG，e004/e006 同款）。
+- 下一步：監控 fb75b56b/efee8385/4fb25f38/12e5b672 CI；照 open/ 續做；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
