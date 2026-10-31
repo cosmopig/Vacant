@@ -1880,6 +1880,23 @@ def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
 
 
+def test_e006_verdict_effective_but_expensive() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm 顯著、C_only > A_only 但成本 > 2×A（成本比 2.5）時，
+    # 判定 H-acc 為 EFFECTIVE_BUT_EXPENSIVE（顯著但成本 > 2×A ⇒ 有效但昂貴）——成效與成本綁定判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂配對顯著：A_only=0, C_only=10, p=0.001
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本紅線：A calls_per_success=10.0，C calls_per_success=25.0（成本比 2.5 > 2.0 觸發 2×A 紅線）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "EFFECTIVE_BUT_EXPENSIVE"
+    assert "顯著但成本 > 2×A ⇒ 有效但昂貴" in r["hypotheses"]["H-acc"]["reason"]
+
+
 def test_e004_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     # 驗證 e004_verdict 同樣具備從 audit_summary 補齊真實成本並判定 2×A 紅線能力。
     from ops.vlab.tools import e004_verdict
