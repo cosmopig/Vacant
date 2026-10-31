@@ -1405,3 +1405,62 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert "e006_verdict m=" in txt
     assert "H-acc" in txt
     assert "cost(2×A 紅線)" in txt
+
+
+def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
+    # 驗證當 REPORT.json 中 calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵），
+    # evaluate_hypotheses 能從 audit_summary 補齊真實成本並判定 2×A 紅線。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 2, "C_only": 2, "mcnemar_p_two_sided": 1.0}
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+
+    aud = {"summary": {"per_arm": {
+        "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+        "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+        "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+        "M": {"second_agent_verified_cells": 5, "second_agent_unknown_cells": 15,
+              "calls_per_success": 10.0, "tokens_per_success": 500.0},
+        "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0},
+    }}}
+
+    r = e006_verdict.evaluate_hypotheses(rep, aud)
+    cost = r["cost_redline_2xA"]["arms"]
+    assert cost["C"]["over_2x_A_cost"] is False
+    assert cost["C"]["not_worth_it"] is False
+    assert cost["H"]["over_2x_A_cost"] is True
+    assert cost["H"]["not_worth_it"] is True
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+
+
+def test_e004_verdict_audit_cost_fallback(tmp_path: Path) -> None:
+    # 驗證 e004_verdict 同樣具備從 audit_summary 補齊真實成本並判定 2×A 紅線能力。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 2, "C_only": 2, "mcnemar_p_two_sided": 1.0}
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+
+    aud = {"summary": {"per_arm": {
+        "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+        "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+        "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+        "M": {"second_agent_verified_cells": 5, "second_agent_unknown_cells": 15,
+              "calls_per_success": 10.0, "tokens_per_success": 500.0},
+        "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0},
+    }}}
+
+    r = e004_verdict.evaluate_hypotheses(rep, aud)
+    cost = r["cost_redline_2xA"]["arms"]
+    assert cost["C"]["over_2x_A_cost"] is False
+    assert cost["C"]["not_worth_it"] is False
+    assert cost["H"]["over_2x_A_cost"] is True
+    assert cost["H"]["not_worth_it"] is True
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+
+
