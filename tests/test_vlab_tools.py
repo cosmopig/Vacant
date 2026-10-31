@@ -2204,3 +2204,24 @@ def test_e006_verdict_x_arm_cost_missing_reason() -> None:
     assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
     assert "C 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]
     assert "A 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e006_verdict_s_confirmed() -> None:
+    # 驗證 e006_verdict 在 S 臂（利害提示臂）McNemar 配對 Holm 後顯著（S_only=10 > A_only=1、
+    # p=0.005 ⇒ p_holm=0.02 < 0.05）且成本 ≤ 2×A（12.0 ≤ 2×10.0）時，判定 H-stakes(a) 為
+    # state=="CONFIRMED"（reason 含「Holm 後顯著、X_only > A_only、成本 ≤ 2×A」且
+    # significant_at_alpha is True）且必保留綁定注記「利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）」
+    # 且成本紅線 not_worth_it is False——利害假說正向成效時的判定契約與警示注記契約鎖進常規回歸（工單 P20261031_0746-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂顯著且成本受限：S_only=10 > A_only=1、p=0.005（Holm 後仍顯著）；成本 12.0（A 臂 10.0）
+    rep["paired"]["A_vs_S"] = {"pairs": 20, "A_only": 1, "S_only": 10, "mcnemar_p_two_sided": 0.005}
+    rep["per_arm"]["S"]["calls_per_success"] = 12.0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
+    assert r["hypotheses"]["H-stakes(a)"]["significant_at_alpha"] is True
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
