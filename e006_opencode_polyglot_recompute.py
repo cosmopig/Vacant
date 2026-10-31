@@ -2,6 +2,12 @@ import json
 import os
 from pathlib import Path
 
+def _i(x) -> int:
+    try:
+        return int(x)
+    except (TypeError, ValueError):
+        return 0
+
 def main():
     exp_dir = Path("/srv/vlab/runs/e006_opencode_polyglot")
     arms = []
@@ -57,8 +63,12 @@ def main():
                     for line in f:
                         try:
                             ev = json.loads(line)
-                            total_calls += ev.get("calls", 0)
-                            total_tokens += ev.get("tokens", 0)
+                            t = ev.get("type")
+                            part = ev.get("part") if isinstance(ev.get("part"), dict) else {}
+                            if t in ("step_finish", "step-finish"):
+                                tk = part.get("tokens") or ev.get("tokens") or {}
+                                total_calls += 1
+                                total_tokens += _i(tk.get("total"))
                             if ev.get("timeout"):
                                 timeouts += 1
                         except: pass
