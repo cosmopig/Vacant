@@ -1169,6 +1169,23 @@ def test_envelope_compliance_cli_override_envelope_fail(tmp_path: Path, capsys) 
     assert data["envelope_source"] == f"command-line --envelope {5 * 1024 * 1024}"
 
 
+def test_envelope_compliance_all_non_c_arms_na(tmp_path: Path, capsys) -> None:
+    # P20261031_0255-3（ASSIGNMENT 🔴最優先 驗收 (b)：實驗室格子封頂合規量具治理）：
+    # 目錄下僅有 A 臂等對照格（設計上沒裝 Vacant、超出封頂口徑）時，
+    # envelope_compliance.main（L256-290；_cell_state L106-108／_verdict L82-89）
+    # 須誠實回傳 verdict NA 且 exit 0（不誤判 FAIL）——核心零改動。
+    exp_dir = tmp_path / "runs" / "exp_a_only" / "cell_a1"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "cell.json").write_text(
+        json.dumps({"arm": "A", "agent_rc": 0, "timed_out": False}), encoding="utf-8")
+    rc = envelope_compliance.main(["exp_a_only", "--base", str(tmp_path / "runs")])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["verdict"] == "NA"
+    assert out["by_arm"]["A"]["verdict"] == "NA"
+    assert out["n_cells"] == 1
+
+
 def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     # P20261030_1851-1（ASSIGNMENT 主軸 3：e002 A/C 臂題目級機制差異量具）：
     # selftest 以合成 mock 格驗證配對分類（both/C_only/A_only/neither）、C 臂 review
