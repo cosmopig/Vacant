@@ -192,3 +192,9 @@
 - 驗證：驗收鏈 rc=0（改前 grep「35 格 complete」rc=1 符合工單預期、改後四 grep 全命中、末行 ACCEPTANCE_OK）；git diff 1 檔 3 行；commit 4c7f9718（branch auto/qwen27b、status 乾淨）。
 - 沒驗證：4c7f9718 CI 未出（純文件 3 行）；c32 原始數值未獨立複核（依工單提供值，與 2118-4／2157-1 同源）；e006 列首 31→32 格未改（待裁示）；pg_zipper-C／zipper H/M/S 未完賽、e006 最終判定仍待（UNKNOWN/NOT_ESTABLISHED 不隱瞞）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查。
 - 下一步：open/ 續做（2157-3 c33→§1 時序、2157-4/5 e006/e004 M 臂雙臂成本缺失契約測試）；e006 列首 31→32 格待規劃者裁示（或下批工單明列）；pg_zipper-C 及 zipper H/M/S 完賽→逐格同步＋法定收尾（rescore→audit→verdict→回填）；e007 smoke 結果→查過關→發射 e008 或修 infra；監控 4c7f9718 CI。
+## round 745 (2026-10-31 22:3x) · P20261031_2213-5-sync-57-points-growth-to-priority-timeline.md（結案）
+- 主軸：ASSIGNMENT 🔴最優先 驗收(a) 用量上限 真機長效增長序列；真機增長序列第 57 點（72.50h、68,512,481 B／65.3 MiB／25.5% 穩態封頂、trace 50,190,526 B／47.9 MiB≤64 MiB／501 blobs、PASS）同步 disk_top_priority.md §1 時序。
+- 做了：disk_top_priority.md 行 184（第 56 點條目後）追加 1 行第 57 點條目（口徑「客觀事實／長效監測持續進行」，無「信任／證明變好」）；cp /home/user1/dev/ops/packets/ bit-identical；未動 1-56 點、§2 表格、§3 常數、Python 程式碼；工單回填 3 行結果並移 done/、doing/ 0 張。
+- 驗證：改前 grep「57 點跨 72.50h」rc=1（符合工單預期）；改後驗收鏈 rc=0（cmp 外部副本無輸出＋grep 命中行 184＋末行 ACCEPTANCE_OK）；git diff 1 檔 1 行（行 184）；commit 94bf1be3（branch auto/qwen27b、status 乾淨）。
+- 沒驗證：94bf1be3 CI 未出（純文件 1 行）；68,512,481 B／50,190,526 B／501 blobs 原始數值未獨立複核（依工單提供值）；pg_zipper H/M/S 臂未完賽、e006 最終判定仍待（UNKNOWN/NOT_ESTABLISHED 不隱瞞）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查。
+- 下一步：open/ 續做（doing/ 已 0 張、等 open/ 或新工單）；zipper H/M/S 完賽→逐格同步＋法定收尾（rescore→audit→verdict→回填，不隱瞞 UNKNOWN/NOT_ESTABLISHED）；e007 smoke 結果→查過關→發射 e008 或修 infra；監控 94bf1be3/4d6f3e06 CI。
