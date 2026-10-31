@@ -74,6 +74,14 @@ DABench 30 道資料分析題上，裝 Vacant 是否改變通過率？成本多�
 - full `e008_dabench_pi_AC`（60 格＝30 題×A/C×1 rep）：完賽 →
   `report.py e008_dabench_pi_AC --rescore` → 回填 §5 結果＋FINDINGS.md（可說/不可說）。
 
+### 6.1 smoke 實測結果（2026-10-31 22:58 完賽，過關）
+- 來源：`REPORT.json`（ops/vlab/runs_e007_dabench_smoke/REPORT.json，rescore_checked=true；cost 數字同列）。
+- cells_scored=4，0 infra，0 timeout。
+- A 臂 2/2（100.0%，calls 16.0，tokens 323,163，mean wall 66.0s）。
+- C 臂 2/2（100.0%，calls 124.0，tokens 3,390,335，mean wall 718.0s，vacant_sha=9071b9f1）。
+- 配對 A_vs_C：2 題平手（McNemar p=1.0；A_only=0、C_only=0）。
+- 判準（§6）：非全 infra、非全逾時、4 格皆出分且全 PASS（高於 ≥1 格出分門檻）→ smoke 判定過關。
+
 ## 7. 限制
 - 單模型（12B 量化）、單 agent（pi）、1 rep、n=30；數字不遷移到其他模型/預算（H-12 同構）。
 - scorer 隱蔽（root）：只见 pass/fail 與 answer_exists，不能解釋格內失敗原因（機制記錄除外）。

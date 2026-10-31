@@ -414,3 +414,14 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 
 37 格實測全部落在 29,824 B（29.1 KB）至 255,721 B（249.7 KB）之間，全部低於 256 MiB（268,435,456 B）穩態封頂；最高格 255,721 B 佔封頂 **0.0953%**（≤ 0.096%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 12,982–216,705 B（pg_connect 為 63,949 B），皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
 **口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）進行中，本條不預填未完成格數據，正式判定仍以全盤完賽後之 REPORT.json＋`e006_verdict.py` 為準；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。
+
+## 2026-10-31 · 主軸 3 · e006 OpenCode 五臂全盤完賽成效與成本判定（H-acc/H-review(H)/H-stakes(a) NOT_ESTABLISHED，H-review(M) UNKNOWN，H/S 越過 2×A 成本紅線）
+
+**規格**：OpenCode、34 題 polyglot_py × A/C/H/M/S 五臂＝170 格全盤完賽（0 未重跑 infra、7 歷史重跑保留 infra，AUDIT.json incomplete_cells=0）；預註冊判準見封包 `ops/vlab/packets/e006_opencode_polyglot.md` §3（Holm–Bonferroni 4 組 α=0.05＋2×A 成本紅線）。
+**通過率與成本**（成本與結果一起報告；來源 REPORT.json cells_scored=170）：A 對照 14/34（41.2%）、C 究責 17/34（50.0%，1.28× calls／1.69× tokens）、H 自檢 10/34（29.4%，2.15× calls／2.95× tokens）、M 第二 agent 15/34（44.1%，1.26× calls／1.89× tokens）、S 利害 12/34（35.3%，3.91× calls／4.45× tokens）。
+**判定結論**（依 e006 預註冊判準、`e006_verdict.py` 實跑）：
+- **H-acc 判 NOT_ESTABLISHED**（Holm p=1.0 未顯著；C 臂成本在 2×A 內）；
+- **H-review(H) 判 NOT_ESTABLISHED**（Holm p=1.0 未顯著，且 calls/tokens 均超 2×A 紅線判「不划算」）；
+- **H-review(M) 依預註冊條款誠實判 UNKNOWN**（events.jsonl 無真第二 agent 啟動證據，量不到非負結果）；
+- **H-stakes(a) 判 NOT_ESTABLISHED**（Holm p=1.0 未顯著，且 calls/tokens 均超 2×A 紅線判「不划算」；標註「只是講、無真實後果」，禁止寫「利害提示無用」）。
+**口徑**：可究責／有根據／誠實記錄；不寫「信任」、不寫「證明變好」；NOT_ESTABLISHED 是「未建立」、不是「無效」，UNKNOWN 是「量不到」、不是負結果；模型為本地量化（H-12 類邊界），結果不外推到其他模型／預算／任務庫。
