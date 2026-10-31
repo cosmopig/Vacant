@@ -2122,3 +2122,23 @@ def test_e006_verdict_missing_paired_unknown() -> None:
     assert "配對缺失、未測（不進 Holm 集）——UNKNOWN，不是沒有" in r["hypotheses"]["H-stakes(a)"]["reason"]
     assert r["hypotheses"]["H-stakes(a)"]["p_raw"] is None
     assert r["m_in_holm_set"] == 3
+
+
+def test_e006_verdict_direction_negative_not_established() -> None:
+    # 驗證 e006_verdict 在 S 臂 McNemar Holm 顯著（p=0.001）但 A_only > S_only（10 > 0、
+    # 對照組優於實驗組、方向非正）時，判定 H-stakes(a) 為 state=="NOT_ESTABLISHED"
+    # （reason 含「不顯著（或方向非正）⇒ 未建立（不是負結果）」）且 S 臂綁定注記（note 含
+    # 「利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）」）——
+    # 方向非正時絕不誤發 CONFIRMED 之判定防呆鎖進常規回歸（工單 P20261031_0618-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂顯著但方向非正：A_only=10 > S_only=0，p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_S"] = {"pairs": 10, "A_only": 10, "S_only": 0, "mcnemar_p_two_sided": 0.001}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
+    assert r["hypotheses"]["H-stakes(a)"]["significant_at_alpha"] is True
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
