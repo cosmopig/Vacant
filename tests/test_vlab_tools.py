@@ -2415,3 +2415,19 @@ def test_e004_verdict_partial_dimension_cost_missing_reason() -> None:
     assert "A 臂與 C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
     # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
     assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_not_worth_it() -> None:
+    # 驗證 e004_verdict 在實驗臂 H 成本超標（mock calls 25.0 = 2.5×A，超 2×A 紅線）
+    # 且未顯著提升（A_only=8 > H_only=3、p=0.20 不顯著）時，
+    # cost_redline_2xA.arms["H"].over_2x_A_cost 為 True、not_worth_it 精確判定 True，
+    # 且 H 臂假設態為 NOT_ESTABLISHED（未建立，不是負結果）（工單 P20261031_0921-3）。
+    from ops.vlab.tools import e004_verdict
+
+    r = e004_verdict.evaluate_hypotheses(e004_verdict._mock_report(), audit_summary=None)
+    # H 臂成本超標：calls 25.0 > 2×10.0 ⇒ 過紅線
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    # 成本超標且未顯著提升 ⇒ 不划算（成本必須與成效一起報告）
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True
+    # 不顯著（p=0.20）且方向非正（H_only=3 < A_only=8）⇒ 未建立（不是負結果）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "NOT_ESTABLISHED"
