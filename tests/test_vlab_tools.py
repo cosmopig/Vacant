@@ -1393,6 +1393,14 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     line_fb = next(l for l in capsys.readouterr().out.splitlines() if "cost(2×A 紅線)" in l)
     assert "over=False" in line_fb and "calls=None tokens=None" not in line_fb
 
+    # P20261031_0153-4（ASSIGNMENT「研發工具需納入回歸測試」）：AUDIT.json 損壞（not json）→ 容錯回退 audit=None、rc=0 契約回歸。
+    bad_aud = tmp_path / "bad_audit_e004"; bad_aud.mkdir()
+    (bad_aud / "REPORT.json").write_text(json.dumps(e004_verdict._mock_report()), encoding="utf-8")
+    (bad_aud / "AUDIT.json").write_text("corrupt json", encoding="utf-8")
+    capsys.readouterr()
+    assert e004_verdict.main(["bad_audit_e004", "--runs-dir", str(tmp_path), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["audit"] is None
+
 
 def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2331-2（ASSIGNMENT「研發工具需納入回歸測試」）：e006 預註冊假說判定量具 e006_verdict
