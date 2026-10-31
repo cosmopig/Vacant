@@ -120,6 +120,8 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
              "A_only": a_only, "X_only": x_only, "cost_over_2x_A": cost["arms"][x]["over_2x_A_cost"]}
         if p is None:
             e.update(state="UNKNOWN", reason="配對缺失、未測（不進 Holm 集）——UNKNOWN，不是沒有")
+        elif a_only is None or x_only is None:
+            e.update(state="UNKNOWN", reason="配對計數缺失（量不到方向）——UNKNOWN，不是沒有")
         elif x == "M" and not ev["evidence_present"]:
             e.update(state="UNKNOWN", second_agent=ev,
                      reason="無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN（量不到，不是負結果）；"
@@ -128,7 +130,7 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
             if x == "M":
                 e["second_agent"] = ev
             over = e["cost_over_2x_A"]
-            if sig and a_only is not None and x_only is not None and x_only > a_only:
+            if sig and x_only > a_only:
                 if over is True:
                     e.update(state="EFFECTIVE_BUT_EXPENSIVE", reason="顯著但成本 > 2×A ⇒ 有效但昂貴")
                 elif over is None:
@@ -156,9 +158,15 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
         hyp[HYP[x]] = e
     for x in ARMS:  # 成本紅線：>2×A 且未顯著提升 ⇒ 不划算（成本必須與結果一起報告）
         h = hyp[HYP[x]]
-        improved = h["significant_at_alpha"] and (h["X_only"] or 0) > (h["A_only"] or 0)
+        if h["A_only"] is None or h["X_only"] is None:
+            improved = False if not h["significant_at_alpha"] else None
+        else:
+            improved = h["significant_at_alpha"] and h["X_only"] > h["A_only"]
         o = cost["arms"][x]["over_2x_A_cost"]
-        cost["arms"][x]["not_worth_it"] = None if o is None else (bool(o) and not improved)
+        if o is None or (o is True and improved is None):
+            cost["arms"][x]["not_worth_it"] = None
+        else:
+            cost["arms"][x]["not_worth_it"] = bool(o) and not improved
     return {"schema": "vacant.e006_verdict/1", "alpha": alpha, "m_in_holm_set": len(order), "holm_impl": impl,
             "cost_redline_2xA": cost, "hypotheses": hyp,
             "notes": ["不顯著 ⇒ 未建立（不是負結果）；顯著但成本 > 2×A ⇒「有效但昂貴」",

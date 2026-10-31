@@ -116,3 +116,15 @@
 - 驗證：驗收鏈現行 rc=0（兩 grep 均命中行 150「第 15 格 08:29 完賽／pg_list_ops vacant_home_bytes 74,556 B」、diff -u 無輸出、末行 ACCEPTANCE_OK）；git status 乾淨（repo 零 diff）；工單→done/、doing/ 0 張。
 - 沒驗證：17e47195（空 commit；重算自 .git/objects/17/e4719534… 物件檔＋HEAD parent 欄一致）CI 未出；未另跑 envelope_compliance 複核 c15 實測數字（沿用 0833-3 同源實測值）；e006 170 格未完賽（C 臂 15/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
 - 下一步：照 open/ 新工單續做；監控 17e47195（重算自 .git/objects/17/e4719534… 物件檔＋HEAD parent 欄一致）/976b3ec4/2c48452e CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 588 (2026-10-31 12:2x) · P20261031_1211-2 e006 第 19 格 pg_poker C 臂用量同步 disk_top_priority §2 驗收總覽 4(b)（結案）
+- 主軸：ASSIGNMENT 🔴最優先 驗收 4(b) 實驗室格子 C 組用量＋資深審查指示第 2 條。
+- 做了：ops/vlab/packets/disk_top_priority.md 行 172 三處改動（標題「C 臂 18 格實測（進行中）」→「19 格」；⑱ 後追加 ⑲ pg_poker vacant_home_bytes 44,014 B（43.0 KB）、vacant_objects_bytes 25,002 B（24.4 KB）、ratio_of_envelope 0.000164；統計 18→19 格、med 124,742→121,652 B（19 值排序中位數核對一致）、末尾追加 pg_poker 10/31 12:12 完賽）；1-18 格歷史數據未覆蓋、其他小節未動；cp 同步外部副本 bit-identical；工單→done/、doing/ 0 張。
+- 驗證：驗收鏈 rc=0（兩 grep 均命中行 172、diff -u 無輸出、末行 ACCEPTANCE_OK）；git diff 1 file ±1 行（git show 64e3250a26fa5cac）、無「信任／證明變好」；commit 64e3250a26fa5cac92c8d14753954bc9f8d41985（全 SHA 自 repo 重算：git rev-parse --verify 64e3250a → 64e3250a26fa5cac…，git log --oneline 核對為 HEAD~1、訊息開頭 P20261031_1211-2；branch auto/qwen27b）。
+- 沒驗證：64e3250a26fa5cac CI 未出；pg_poker 數字依工單給定（未回 /srv/vlab/runs 重算 cell.json）；e006 剩餘格進度未查。
+- 下一步：監控 64e3250a26fa5cac/191f0f0a/61f021ed/826e5a44/5c5ef944 CI 與 e006 剩餘格進度/infra 重試；e006 全盤完賽→report.py --rescore→opencode_cell_audit --out→verdict --audit→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 新工單續做。
+## round 601 (2026-10-31 13:1x) · P20261031_1258-2 e006_verdict S 臂呼叫與 tokens 雙維超標 not_worth_it 契約測試（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成效與成本綁定紅線）；S 臂（利害提示）e006 實測雙維成本失控（3.91×A / 4.45×A）且成效未提升的客觀判定防線鎖進常規回歸。
+- 做了：tests/test_vlab_tools.py 檔尾新增 test_e006_verdict_s_dual_overrun_not_worth_it（+24 行純新增、1 檔、未動既有測試與 e006_verdict.py）：S 臂 calls 39.1=3.91×A、tokens 4450.0=4.45×A 雙維均超 2×A 紅線、p=0.2188 且 A_only=5>S_only=1 方向非正 ⇒ over_2x_A_cost=True、not_worth_it=True、H-stakes(a)=NOT_ESTABLISHED（reason 含「不顯著（或方向非正）⇒ 未建立（不是負結果）」）、note 守住 KS-1 鐵律「利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」」。
+- 驗證：改前 pytest -k 0 collected rc=5（前提成立）；改後驗收鏈 rc=0（pytest 1 passed, 139 deselected＋grep 命中行 3142＋末行 ACCEPTANCE_OK）；全檔 140 passed rc=0；git diff 1 file +24、無「信任／證明變好」（0 命中）；commit 844d48f6（status 乾淨、branch auto/qwen27b）；工單→done/、doing/ 0 張。
+- 沒驗證：844d48f6 CI 未出；本單僅鎖 mock 契約（_mock_report 場景），未以 e006 全盤真機數據重跑。
+- 下一步：監控 844d48f6/7668706f/4d4381f8/059d4f21/027d360f/070e211d/df17561e/77062470/4fd3eb6e/b8f3f713 CI 與 e006 剩餘格進度/infra 重試；照 open/ 新工單續做；e006 全盤完賽→report.py --rescore→opencode_cell_audit --out→verdict --audit→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
