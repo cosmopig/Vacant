@@ -3403,3 +3403,31 @@ def test_growth_report_single_point_unknown(tmp_path: Path, capsys) -> None:
     capsys.readouterr()  # 排空殘留
     rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
     assert rc == 1
+
+
+def test_growth_report_boundary_span_20h_pass(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：2 點跨度恰好 20.0h（MIN_EVIDENCE_HOURS 臨界值，≥ 門檻）、
+    # gc_last 均 ok、用量合格時：report() 必須精確判 verdict="PASS"（不誤判 UNKNOWN）、
+    # 最新 total ≤ 封頂上限、最新 trace ≤ trace 上限（即 within-caps）、CLI --json 以 exit code 0 成功退出
+    # ——真機用量量具在 20.0h 臨界跨度的客觀判定邊界——工單 P20261031_1400-1
+    # 註：工單原文斷言 r["within_caps"] is True；report() 輸出無 within_caps 鍵（grep 核實），
+    # 故以既有鍵鎖等義的 within-caps 數值關係（PASS 本身已要求這兩條，此处明示鎖定）。
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T20:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS", r
+    assert r["n_points"] == 2, r
+    assert abs(r["span_hours"] - 20.0) < 1e-4, r
+    assert r["latest_total_bytes"] <= r["caps"]["stable_envelope_bytes"], r  # within-caps：total ≤ 封頂
+    assert r["per_dir_latest_bytes"]["trace"] <= r["caps"]["trace_budget_bytes"], r  # within-caps：trace ≤ 上限
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0
