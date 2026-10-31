@@ -2649,3 +2649,23 @@ def test_e004_verdict_confirmed_cost_unknown() -> None:
     assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None
     assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
     assert "顯著且方向為正，但成本紅線量不到（A 臂成本缺失）" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_s_not_worth_it() -> None:
+    # 驗證 e004_verdict 在實驗臂 S 成本超標（mock calls 30.0 = 3.0×A，超 2×A 紅線）且未顯著提升（A_only=5 > S_only=2、p=0.45）時，
+    # cost_redline_2xA.arms["S"].over_2x_A_cost 為 True、not_worth_it 精確判定 True、且 S 臂假說態為 NOT_ESTABLISHED（未建立，不是負結果）
+    # ——成效未建立且成本超標時之「不划算」判定防線鎖進 e004 常規回歸（工單 P20261031_1023-5）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # S 臂未顯著提升（p=0.45、A_only=5 > S_only=2、方向非正）且成本超標（calls 30.0 = 3.0×A，A=10.0）
+    rep["paired"]["A_vs_S"] = {"pairs": 15, "A_only": 5, "S_only": 2, "mcnemar_p_two_sided": 0.45}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["S"]["calls_per_success"] = 30.0
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # calls 30.0 > 2×10.0 ⇒ 過紅線；成本超標且未顯著提升 ⇒ 不划算（成本必須與成效一起報告）
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is True
+    # 不顯著（或方向非正）⇒ 未建立（不是負結果）
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-stakes(a)"]["reason"]
