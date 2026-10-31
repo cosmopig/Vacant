@@ -1,79 +1,76 @@
 import json
-from pathlib import Path
+import os
 
 def recompute():
-    exp = "e007_dabench_smoke"
-    base_path = Path(f"/srv/vlab/runs/{exp}")
-    arms = [d for d in base_path.iterdir() if d.is_dir()]
+    exp_path = "/srv/vlab/runs/e007_dabench_smoke"
+    per_arm = {}
     
-    results = {}
-    for arm in arms:
-        arm_name = arm.name
-        cell_file = arm / "cell.json"
-        score_file = arm / "score.json"
-        events_file = arm / "events.jsonl"
+    # Get all folders that are arms
+    folders = [f for f in os.listdir(exp_path) if os.path.isdir(os.path.join(exp_path, f))]
+    
+    for folder in folders:
+        folder_path = os.path.join(exp_path, folder)
+        cell_file = os.path.join(folder_path, "cell.json")
+        score_file = os.path.join(folder_path, "score.json")
+        events_file = os.path.join(folder_path, "events.jsonl")
         
-        if not cell_file.exists():
+        if not (os.path.exists(cell_file) and os.path.exists(score_file)):
             continue
-            
+
         with open(cell_file, 'r') as f:
-            data = json.load(f)
-            
-        cells = [data] if "cells" not in data else data["cells"]
-
-        n = 0
-        pass_count = 0
-        timeouts = 0
-        calls_total = 0
-        tokens_total = 0
-        calls_success = 0
-        tokens_success = 0
-        infra_count = 0
+            cells = json.load(f)
+        with open(score_file, 'r') as f:
+            scores = json.load(f)
         
+        # Denominator is cells where score["pass"] is NOT None
+        valid_tasks = []
         for cell in cells:
-            n += 1
-            # Check if it's infra (score.pass is null)
-            # In this experiment, score seems to be a separate file or missing from cell.json
-            # Let's check the score_file instead for "pass"
-            if score_file.exists():
-                with open(score_file, 'r') as f:
-                    score_data = json.load(f)
-                    is_infra = score_data.get("pass") is None
-            else:
-                is_infra = False # Default if no score file
+            if not isinstance(cell, dict): continue
+            tid = cell.get("task_id")
+            s = scores.get(tid)
+            if s and s.get("pass") is not None:
+                valid_tasks.append(cell)
+        
+        n = len(valid_tasks)
+        passed = sum(1 for v in valid_tasks if scores[v["task_id"]]["pass"] is True)
+        failed = sum(1 for v in valid_tasks if scores[v["task_id"]]["pass"] is False)
+        rate = passed / n if n > 0 else 0
+        
+        calls = []
+        timeouts = 0
+        tokens = 0
+        wall_s = 0
+        
+        if os.path.exists(events_file):
+            with open(events_file, 'r') as f:
+                for line in f:
+                    event = json.loads(line)
+                    if event.get("type") == "model_call":
+                        calls.append(event)
+                    elif event.get("type") == "timeout":
+                        timeouts += 1
+        
+        # Also check cell for some metrics if they are there (like wall_s or tokens)
+        for cell in cells:
+            if not isinstance(cell, dict): continue
+            tid = cell.get("task_id")
+            if tid and scores[tid].get("pass") is True:
+                wall_s += cell.get("wall_s", 0)
+                tokens += cell.get("metrics", {}).get("output_tokens", 0)
 
-            if is_infra:
-                infra_count += 1
-                continue
-            
-            metrics = cell.get("metrics", {})
-            calls_total += metrics.get("model_calls", 0)
-            tokens_total += metrics.get("input_tokens", 0) + metrics.get("output_tokens", 0)
-            
-            # Success is agent_rc == 0
-            if cell.get("agent_rc") == 0:
-                pass_count += 1
-                calls_success += metrics.get("model_calls", 0)
-                tokens_success += metrics.get("input_tokens", 0) + metrics.get("output_tokens", 0)
-            else:
-                # Failed but not infra
-                pass
-            
-            if cell.get("timed_out"):
-                timeouts += 1
-
-        results[arm_name] = {
+        per_arm[folder] = {
             "n": n,
-            "pass": pass_count,
+            "pass": passed,
+            "fail": failed,
+            "rate": rate,
+            "calls": calls,
             "timeouts": timeouts,
-            "calls_total": calls_total,
-            "tokens_total": tokens_total,
-            "calls_success": calls_success,
-            "tokens_success": tokens_success,
-            "infra": infra_count
+            "tokens": tokens,
+            "wall_s": wall_s,
+            "valid_tasks": valid_tasks
         }
 
-    print(json.dumps(results, indent=2))
+    print(json.dumps(per_arm, indent=2))
 
 if __name__ == "__main__":
     recompute()
