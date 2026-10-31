@@ -158,7 +158,9 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
         hyp[HYP[x]] = e
     for x in ARMS:  # 成本紅線：>2×A 且未顯著提升 ⇒ 不划算（成本必須與結果一起報告）
         h = hyp[HYP[x]]
-        if h["A_only"] is None or h["X_only"] is None:
+        if h["p_raw"] is None:
+            improved = None
+        elif h["A_only"] is None or h["X_only"] is None:
             improved = False if not h["significant_at_alpha"] else None
         else:
             improved = h["significant_at_alpha"] and h["X_only"] > h["A_only"]

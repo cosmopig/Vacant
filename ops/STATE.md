@@ -128,3 +128,25 @@
 - 驗證：改前 pytest -k 0 collected rc=5（前提成立）；改後驗收鏈 rc=0（pytest 1 passed, 139 deselected＋grep 命中行 3142＋末行 ACCEPTANCE_OK）；全檔 140 passed rc=0；git diff 1 file +24、無「信任／證明變好」（0 命中）；commit 844d48f6（status 乾淨、branch auto/qwen27b）；工單→done/、doing/ 0 張。
 - 沒驗證：844d48f6 CI 未出；本單僅鎖 mock 契約（_mock_report 場景），未以 e006 全盤真機數據重跑。
 - 下一步：監控 844d48f6/7668706f/4d4381f8/059d4f21/027d360f/070e211d/df17561e/77062470/4fd3eb6e/b8f3f713 CI 與 e006 剩餘格進度/infra 重試；照 open/ 新工單續做；e006 全盤完賽→report.py --rescore→opencode_cell_audit --out→verdict --audit→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 626 (2026-10-31 14:4x) · P20261031_1431-2 50 點真機增長序列里程碑續記 disk_top_priority §1（結案）
+- 主軸：🔴最優先驗收 4(a) 真機 ~/.vacant 前後用量與成長；真機增長序列累積至第 50 點（跨 65.20h）突破 50 點長效監測里程碑。
+- 做了：ops/vlab/packets/disk_top_priority.md 行 165 單行新增（13:32 續記 50 點里程碑：50 點跨 65.20h、66,701,796 B（63.6 MiB ≤ 256 MiB 24.8
+## round 626 (2026-10-31 14:4x) · P20261031_1431-2 50 點真機增長序列里程碑續記 disk_top_priority §1（結案）
+- 主軸：🔴最優先驗收 4(a) 真機 ~/.vacant 前後用量與成長；真機增長序列累積至第 50 點（跨 65.20h）突破 50 點長效監測里程碑。
+- 做了：ops/vlab/packets/disk_top_priority.md 行 165 單行新增（13:32 續記 50 點里程碑：50 點跨 65.20h、66,701,796 B（63.6 MiB ≤ 256 MiB 24.8%）、trace 48,183,117 B（46.0 MiB ≤ 64 MiB）、trace 472 blobs、gc_last ok＋target_reached、verdict PASS）＋cp 外部副本 ~/dev/ops/packets/；1-49 點歷史未覆蓋、其他分區未動、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（grep "13:32 續記" 命中行 165、cmp 無輸出、末行 ACCEPTANCE_OK）；git diff 1 檔 1+；commit 60bcb34a（status 乾淨、branch auto/qwen27b）；工單→done/、doing/ 0 張。
+- 沒驗證：60bcb34a CI 未出；50 點用量數字依工單給定值轉錄，未重跑 growth_report.py 自 ~/.vacant 重算。
+- 下一步：監控 60bcb34a/18a7aa2b/3470383d CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 新工單續做。
+## round 654 (2026-10-31 16:0x) · P20261031_1549-5 e004_verdict M 臂成本 2×A 內且成效未顯著 ⇒ not_worth_it=False／NOT_ESTABLISHED 誠實契約測試（結案）
+- 主軸：ASSIGNMENT 主軸3（效益差別驗證／成效與成本綁定紅線）；e004 M 臂（模型仲裁臂）未超標時不誤判「不划算」、NOT_ESTABLISHED 非負結果、有第二 agent 證據不降級 UNKNOWN，與 e006 對稱，入常規回歸。
+- 做了：tests/test_vlab_tools.py 檔尾（行 3685）新增 test_e004_verdict_m_cost_within_cap_not_established（25 行函式體＋2 空行，A_vs_M p=1.0/A_only=2/M_only=2＋A 10.0/1000.0 vs M 13.0/1400.0＋_mock_audit(5) 證據）；先對 e004_verdict.py L49-175 實分支確認（cc=1.3/tt=1.4⇒over=False；evidence_present=True；Holm adj(M)=1.0 非顯著⇒NOT_ESTABLISHED；o=False⇒not_worth_it=False；理由字串同 e006 L158）再寫斷言；e004 核心邏輯與既有測試未動。
+- 驗證：驗收鏈 rc=0（pytest 1 passed, 164 deselected、grep 命中行 3685、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 165 項 rc=0；git diff 1 檔 +27；commit 14273f65（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
+- 沒驗證：14273f65 CI 未出；本單僅鎖 _mock_report 契約（mock 場景），未以 e004 真機 REPORT.json 重放本場景。
+- 下一步：監控 14273f65/1fb25ebd/8f1d3b59/4992200f/077315d9 CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
+## round 660 (2026-10-31 16:3x) · P20261031_1619-1 e004_verdict H 臂顯著但成本缺失 ⇒ CONFIRMED_COST_UNKNOWN 且 not_worth_it=None 誠實契約測試（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效綁定紅線）；e004_verdict 與 e006_verdict 同構（diff 僅 schema/notes/承接註記差異），e006 同款契約（round 657）補 e004 側入常規回歸。
+- 做了：tests/test_vlab_tools.py 檔尾（行 3765）新增 test_e004_verdict_h_confirmed_cost_unknown（24 行：H_only=10>A_only=0、p=0.001；A 10.0/1000.0 健全；H None/None＋audit_summary=None）；e004_verdict.py 核心邏輯與既有測試未動、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（pytest 1 passed、grep 命中行 3765、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 168 項 rc=0；git diff 1 檔 +24；commit 16ca3d16（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
+- 沒驗證：16ca3d16 CI 未出；僅 mock 場景鎖契約，未以 e004 真機 REPORT.json 重放（e004 為已完賽舊 run，無新 REPORT 可重放）；0.0 成本⇒「免費」判定缺口仍未處理（round 657 BACKLOG，e004/e006 同款）。
+- 下一步：監控 16ca3d16/efee8385/4fb25f38/12e5b672 CI；照 open/ 續做；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。

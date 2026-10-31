@@ -3277,3 +3277,594 @@ def test_e006_verdict_h_tokens_not_worth_it() -> None:
     h = r["hypotheses"]["H-review(H)"]
     assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_e004_verdict_h_tokens_not_worth_it() -> None:
+    # 驗證 e004_verdict：H 臂（審查指引）calls（12.0 = 1.2×A）未超 2×A 紅線，但 tokens（2500.0 = 2.5×A）
+    # 超 2×A 紅線（單維超標即屬成本失控）、且成效未顯著提升（p=0.45、A_only=6 > H_only=2 方向非正）時：
+    # over_2x_A_cost 精確判定為 True、not_worth_it 精確判定為 True（超標且未顯著提升 ⇒ 不划算）、
+    # H-review(H) 假說態為 NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））——工單 P20261031_1313-4
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 16, "A_only": 6, "H_only": 2, "mcnemar_p_two_sided": 0.45}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["H"] = {"calls_per_success": 12.0, "tokens_per_success": 2500.0}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["calls_vs_A"] == 1.2  # calls 1.2×A 未超標
+    assert r["cost_redline_2xA"]["arms"]["H"]["tokens_vs_A"] == 2.5  # tokens 2.5×A 超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True  # 單維超標即屬成本失控
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True  # 超標且未顯著提升 ⇒ 不划算
+    h = r["hypotheses"]["H-review(H)"]
+    assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_growth_report_insufficient_span_unknown(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：序列點數滿足（2 點、gc_last 均 ok），但時間跨度僅 10h（<20h 門檻）時：
+    # report() 精確判 verdict="UNKNOWN"、reason 載明「還量不出來」與「門檻 ≥2 點且 ≥20h」
+    #（觀察時長不足 ⇒ 長多少量不出來，不偽判 PASS 也非 FAIL），CLI --json 以 exit code 1 安全退出——
+    # 真機用量量具的誠實邊界——工單 P20261031_1313-5
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T10:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert "還量不出來" in r["reason"], r
+    assert "門檻 ≥2 點且 ≥20h" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
+
+
+def test_growth_report_trace_cap_missing_unknown(tmp_path: Path, monkeypatch, capsys) -> None:
+    # 驗證 growth_report：跨日序列證據足（2 點跨 25h ≥ 20h 門檻）、gc_last 均 ok、
+    # 但 TRACE_BUDGET_BYTES 缺失（ENVELOPE_BYTES 正常）時：report() 精確判 verdict="UNKNOWN"、
+    # reason 載明「上限常數取不到」（序列有，但對不上產品上限，不判 PASS），
+    # CLI --json 以 exit code 1 安全退出——真機用量量具在任一上限常數缺失時不偽判 PASS——工單 P20261031_1328-2
+    monkeypatch.setattr(growth_report, "TRACE_BUDGET_BYTES", None)  # 模擬 trace 預算常數取不到
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-29T01:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert "上限常數取不到" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
+
+
+def test_e006_verdict_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e006_verdict 在配對缺失（未測量 A_vs_C）但 C 臂成本超標時，
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須為 None
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    del rep["paired"]["A_vs_C"]
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0  # 2.5×A
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e004_verdict 在配對缺失（未測量 A_vs_C）但 C 臂成本超標時，
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須為 None
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    del rep["paired"]["A_vs_C"]
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0  # 2.5×A
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_growth_report_single_point_unknown(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：輸入僅有單一成長點記錄（n_points=1，span_hours=None）時，
+    # 增長趨勢無法衡量：report() 精確判 verdict="UNKNOWN"，理由載明「證據不足：n_points=1,
+    # span_hours=None（門檻 ≥2 點且 ≥20h）——『一天長多少』還量不出來」，
+    # CLI --json 以 exit code 1 安全退出——單點資料絕不偽判 PASS 的誠實邊界——工單 P20261031_1344-5
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-31T14:00:00", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert r["n_points"] == 1, r
+    assert r["span_hours"] is None, r
+    assert "證據不足：n_points=1, span_hours=None" in r["reason"], r
+    assert "門檻 ≥2 點且 ≥20h" in r["reason"], r
+    assert "還量不出來" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
+
+
+def test_growth_report_boundary_span_20h_pass(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：2 點跨度恰好 20.0h（MIN_EVIDENCE_HOURS 臨界值，≥ 門檻）、
+    # gc_last 均 ok、用量合格時：report() 必須精確判 verdict="PASS"（不誤判 UNKNOWN）、
+    # 最新 total ≤ 封頂上限、最新 trace ≤ trace 上限（即 within-caps）、CLI --json 以 exit code 0 成功退出
+    # ——真機用量量具在 20.0h 臨界跨度的客觀判定邊界——工單 P20261031_1400-1
+    # 註：工單原文斷言 r["within_caps"] is True；report() 輸出無 within_caps 鍵（grep 核實），
+    # 故以既有鍵鎖等義的 within-caps 數值關係（PASS 本身已要求這兩條，此处明示鎖定）。
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T20:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS", r
+    assert r["n_points"] == 2, r
+    assert abs(r["span_hours"] - 20.0) < 1e-4, r
+    assert r["latest_total_bytes"] <= r["caps"]["stable_envelope_bytes"], r  # within-caps：total ≤ 封頂
+    assert r["per_dir_latest_bytes"]["trace"] <= r["caps"]["trace_budget_bytes"], r  # within-caps：trace ≤ 上限
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0
+
+
+def test_e006_verdict_h_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e006_verdict 在 H 臂（審查提示臂）配對缺失（未測量 A_vs_H）但該臂成本超標（25.0=2.5×A）時，
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # H 假說 state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在審查提示臂配對缺失時不偽判
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    del rep["paired"]["A_vs_H"]  # 配對缺失（未測）
+    rep["per_arm"]["H"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-review(H)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_e004_verdict_h_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e004_verdict 在 H 臂（審查提示臂）配對缺失（未測量 A_vs_H）但該臂成本超標（25.0=2.5×A）時：
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # H 假說 state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在審查提示臂配對缺失時不偽判
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    del rep["paired"]["A_vs_H"]  # 配對缺失（未測）
+    rep["per_arm"]["H"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-review(H)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_e006_verdict_s_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e006_verdict 在 S 臂（利害提示臂）配對缺失（未測量 A_vs_S）但該臂成本超標（25.0=2.5×A）時：
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # S 假說 H-stakes(a) state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在利害提示臂配對缺失時不偽判
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    del rep["paired"]["A_vs_S"]  # 配對缺失（未測）
+    rep["per_arm"]["S"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-stakes(a)"]["reason"]
+
+
+def test_e004_verdict_s_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e004_verdict 在 S 臂（利害提示臂）配對缺失（未測量 A_vs_S）但該臂成本超標（25.0=2.5×A）時：
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # S 假說 H-stakes(a) state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在利害提示臂配對缺失時不偽判
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    del rep["paired"]["A_vs_S"]  # 配對缺失（未測）
+    rep["per_arm"]["S"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-stakes(a)"]["reason"]
+
+
+def test_e006_verdict_m_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e006_verdict 在 M 臂（第二 agent 審查臂）配對缺失（未測量 A_vs_M）但該臂成本超標（25.0=2.5×A）時：
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # M 假說 H-review(M) state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在審查臂配對缺失時不偽判
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    del rep["paired"]["A_vs_M"]  # 配對缺失（未測）
+    rep["per_arm"]["M"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-review(M)"]["reason"]
+
+
+def test_e004_verdict_m_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e004_verdict 在 M 臂（第二 agent 審查臂）配對缺失（未測量 A_vs_M）但該臂成本超標（25.0=2.5×A）時：
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # M 假說 H-review(M) state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在審查臂配對缺失時不偽判
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    del rep["paired"]["A_vs_M"]  # 配對缺失（未測）
+    rep["per_arm"]["M"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-review(M)"]["reason"]
+
+
+def test_e006_verdict_h_cost_within_cap_not_established() -> None:
+    # 驗證 e006_verdict：H 臂（審查提示臂）calls（13.5 = 1.35×A）與 tokens（1500.0 = 1.5×A）
+    # 均在 2×A 紅線內（成本合格、未超標），但成效未顯著提升（p=1.0、A_only=2 = H_only=2 方向非正）時：
+    # cost_redline_2xA.arms["H"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-review(H) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））——工單 P20261031_1518-3
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 19, "A_only": 2, "H_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["H"] = {"calls_per_success": 13.5, "tokens_per_success": 1500.0}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["calls_vs_A"] == 1.35
+    assert r["cost_redline_2xA"]["arms"]["H"]["tokens_vs_A"] == 1.5
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False  # 未超標臂非不划算
+    h = r["hypotheses"]["H-review(H)"]
+    assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_growth_report_historical_peak_over_envelope_pass(tmp_path: Path, capsys) -> None:
+    # 歷史峰值曾暫超穩態封頂（280 MiB > 256 MiB 軟上限）、最新點經 GC 回收已降至封頂內
+    # （50 MiB ≤ 256 MiB）且最新 gc ok：verdict 精確判 PASS（歷史暫超不誤判 FAIL——
+    # 封頂是軟上限、disk_top_priority §1 誠實邊界），peak_overrun 仍如實 True；CLI --json exit 0。
+    MiB = 1024 * 1024
+    home = tmp_path / "hist_peak"
+    home.mkdir()
+
+    def _point(ts: str, total: int) -> str:
+        return json.dumps({"ts": ts, "home": str(home), "total_bytes": total,
+                           "gc_last": {"status": "ok", "target_reached": True}})
+
+    (home / "growth.jsonl").write_text(
+        _point("2026-10-28T00:00:00+0000", 280 * MiB) + "\n"
+        + _point("2026-10-29T02:00:00+0000", 50 * MiB) + "\n", encoding="utf-8")
+    r = growth_report.report(home=home, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS", r  # 歷史暫超不得誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is True  # 歷史暫超如實可見
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(home), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # PASS ⇒ 退出碼 0
+
+
+def test_e004_verdict_h_cost_within_cap_not_established() -> None:
+    # 驗證 e004_verdict：H 臂（審查臂）calls（13.5 = 1.35×A）與 tokens（1500.0 = 1.5×A）
+    # 均在 2×A 紅線內（成本合格、未超標），但成效未顯著提升（p=1.0、A_only=2 = H_only=2 方向非正）時：
+    # cost_redline_2xA.arms["H"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-review(H) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））——與 e006 同型對稱契約，
+    # 工單 P20261031_1533-3
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 19, "A_only": 2, "H_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["H"] = {"calls_per_success": 13.5, "tokens_per_success": 1500.0}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["calls_vs_A"] == 1.35
+    assert r["cost_redline_2xA"]["arms"]["H"]["tokens_vs_A"] == 1.5
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False  # 未超標臂非不划算
+    h = r["hypotheses"]["H-review(H)"]
+    assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_e006_verdict_s_cost_within_cap_not_established() -> None:
+    # 驗證 e006_verdict：S 臂（利害提示臂）calls（14.0 = 1.4×A）與 tokens（1600.0 = 1.6×A）
+    # 均在 2×A 紅線內（成本合格、未超標），但成效未顯著提升（p=1.0、A_only=2 = S_only=2 方向非正）時：
+    # cost_redline_2xA.arms["S"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-stakes(a) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））、note 保留 KS-1 措辭鐵律，
+    # 嚴防將未超標臂誤判為不划算——工單 P20261031_1533-4
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_S"] = {"pairs": 19, "A_only": 2, "S_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["S"] = {"calls_per_success": 14.0, "tokens_per_success": 1600.0}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["calls_vs_A"] == 1.4
+    assert r["cost_redline_2xA"]["arms"]["S"]["tokens_vs_A"] == 1.6
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False  # 未超標臂非不划算
+    s = r["hypotheses"]["H-stakes(a)"]
+    assert s["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in s["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in s["note"]
+
+
+def test_e004_verdict_s_cost_within_cap_not_established() -> None:
+    # 驗證 e004_verdict：S 臂（利害提示臂）calls（14.0 = 1.4×A）與 tokens（1600.0 = 1.6×A）
+    # 均在 2×A 紅線內（成本合格、未超標），但成效未顯著提升（p=1.0、A_only=2 = S_only=2 方向非正）時：
+    # cost_redline_2xA.arms["S"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-stakes(a) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））、note 保留 KS-1 措辭鐵律，
+    # 嚴防將未超標臂誤判為不划算——工單 P20261031_1533-5
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_S"] = {"pairs": 19, "A_only": 2, "S_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["S"] = {"calls_per_success": 14.0, "tokens_per_success": 1600.0}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["calls_vs_A"] == 1.4
+    assert r["cost_redline_2xA"]["arms"]["S"]["tokens_vs_A"] == 1.6
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False  # 未超標臂非不划算
+    s = r["hypotheses"]["H-stakes(a)"]
+    assert s["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in s["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in s["note"]
+
+
+def test_e006_verdict_m_cost_within_cap_not_established() -> None:
+    # 驗證 e006_verdict：M 臂（模型仲裁臂）calls（13.0 = 1.3×A）與 tokens（1400.0 = 1.4×A）
+    # 均在 2×A 紅線內（成本合格、未超標），且具備第二 agent 審計證據（verified_cells=5 ≥ 1），
+    # 但成效未顯著提升（p=1.0、A_only=2 = M_only=2 方向非正）時：
+    # cost_redline_2xA.arms["M"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-review(M) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））且因有第二 agent 證據
+    # 不降級 UNKNOWN，嚴防將成本合格臂誤判為不划算——工單 P20261031_1549-3
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 19, "A_only": 2, "M_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["M"] = {"calls_per_success": 13.0, "tokens_per_success": 1400.0}
+    audit_summary = e006_verdict._mock_audit(5)  # 第二 agent 審計證據（evidence_present=True）
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=audit_summary)
+    assert r["cost_redline_2xA"]["arms"]["M"]["calls_vs_A"] == 1.3
+    assert r["cost_redline_2xA"]["arms"]["M"]["tokens_vs_A"] == 1.4
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False  # 未超標臂非不划算
+    m = r["hypotheses"]["H-review(M)"]
+    assert m["second_agent"]["evidence_present"] is True  # 有第二 agent 證據，不降級 UNKNOWN
+    assert m["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in m["reason"]
+
+
+def test_e004_verdict_m_cost_within_cap_not_established() -> None:
+    # 驗證 e004_verdict：M 臂（模型仲裁臂）calls（13.0 = 1.3×A）與 tokens（1400.0 = 1.4×A）
+    # 均在 2×A 紅線內（成本合格、未超標），且具備第二 agent 審計證據（verified_cells=5 ≥ 1），
+    # 但成效未顯著提升（p=1.0、A_only=2 = M_only=2 方向非正）時：
+    # cost_redline_2xA.arms["M"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-review(M) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））且因有第二 agent 證據
+    # 不降級 UNKNOWN，嚴防將成本合格臂誤判為不划算——工單 P20261031_1549-5
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 19, "A_only": 2, "M_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["M"] = {"calls_per_success": 13.0, "tokens_per_success": 1400.0}
+    audit_summary = e004_verdict._mock_audit(5)  # 第二 agent 審計證據（evidence_present=True）
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit_summary)
+    assert r["cost_redline_2xA"]["arms"]["M"]["calls_vs_A"] == 1.3
+    assert r["cost_redline_2xA"]["arms"]["M"]["tokens_vs_A"] == 1.4
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False  # 未超標臂非不划算
+    m = r["hypotheses"]["H-review(M)"]
+    assert m["second_agent"]["evidence_present"] is True  # 有第二 agent 證據，不降級 UNKNOWN
+    assert m["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in m["reason"]
+
+
+def test_e006_verdict_h_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict：H 臂（人類審查提示臂）McNemar 配對 Holm 後顯著（H_only=10 > A_only=0、
+    # p=0.001 ⇒ p_holm=0.004 < 0.05、方向為正）但 H 臂成本缺失（calls/tokens 為 None 且無 audit 可補）
+    # 時，成本紅線量不到（over_2x_A_cost is None，不判違規也不判過）、not_worth_it 誠實記為
+    # None（成效雖建立但成本失聯，無法斷定划算與否，嚴防偽判 False 或 True）、H-review(H) 假說態
+    # 誠實判定 CONFIRMED_COST_UNKNOWN 且理由精確指認「H 臂成本缺失」——成本失聯時成效不得單獨
+    # 升格 CONFIRMED 之契約鎖進常規回歸（工單 P20261031_1604-3）
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # H 臂顯著且方向為正：H_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # H 臂成本缺失（量不到、無 audit 可補；同系列既有成本缺失測試皆以 None 表示缺失）
+    rep["per_arm"]["H"] = {"calls_per_success": None, "tokens_per_success": None}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_growth_report_exact_cap_boundary_pass(tmp_path: Path, capsys) -> None:
+    # P20261031_1604-5（ASSIGNMENT 🔴最優先 驗收(a)：長效監測量具守護）：最新點
+    # total 恰好壓線 256 MiB 穩態封頂（268,435,456 B）、trace 恰好壓線 64 MiB 上限
+    # （67,108,864 B）時，封頂/上限判定是嚴格大於（>）——剛好等於上限是合規點，
+    # growth_report.report() 須精確判 verdict=PASS（不把壓線合規點誤判為 FAIL）、
+    # peak_overrun.over_stable_envelope 為 False（峰值＝封頂、未超）；CLI --json 退出碼 0。
+    # 邊界條件誠實精確：上限是封頂（soft ceiling），壓線不是違規。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 25h（≥ MIN_EVIDENCE_HOURS=20h 門檻）；最新點恰好壓線兩上限
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 200 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T01:00:00+0000", "total_bytes": 256 * 1024 * 1024,  # 268,435,456 B＝256 MiB
+          "per_dir_bytes": {"trace": 64 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS"  # 恰好壓線＝合規，不誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is False  # 峰值＝封頂、未超
+
+    capsys.readouterr()
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # 壓線合規點 CLI 退出碼 0
+
+
+def test_e004_verdict_h_confirmed_cost_unknown() -> None:
+    # 驗證 e004_verdict：H 臂（人類審查提示臂）McNemar 配對 Holm 後顯著（H_only=10 > A_only=0、
+    # p=0.001 ⇒ Holm 後仍顯著、方向為正）但 H 臂成本缺失（calls/tokens 為 None 且無 audit 可補）
+    # 時，成本紅線量不到（over_2x_A_cost is None，不判違規也不判過）、not_worth_it 誠實記為
+    # None（成效雖建立但成本失聯，無法斷定划算與否，嚴防偽判 False 或 True）、H-review(H) 假說態
+    # 誠實判定 CONFIRMED_COST_UNKNOWN 且理由精確指認「H 臂成本缺失」——成本失聯時成效不得單獨
+    # 升格 CONFIRMED 之契約鎖進常規回歸（工單 P20261031_1619-1）
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # H 臂顯著且方向為正：H_only=10 > A_only=0、p=0.001
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # H 臂成本缺失（量不到、無 audit 可補；同系列既有成本缺失測試皆以 None 表示缺失）
+    rep["per_arm"]["H"] = {"calls_per_success": None, "tokens_per_success": None}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_growth_report_span_below_20h_unknown(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：序列點數滿足（2 點、gc_last 均 ok）、用量在封頂內，但時間跨度僅 19.9h
+    #（2026-10-28T00:00:00→19:54:00，恰低於 MIN_EVIDENCE_HOURS=20h 臨界門檻 0.1h）時：
+    # report() 精確判 verdict="UNKNOWN"、span_hours=19.9、reason 載明「門檻 ≥2 點且 ≥20h」
+    # 與「還量不出來」（不偽判 PASS 也非 FAIL）；CLI --json 以 exit code 1 安全退出——
+    # 時長未滿 20h 邊界的客觀嚴格判定（工單 P20261031_1619-2）
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T19:54:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert r["span_hours"] == 19.9, r
+    assert "門檻 ≥2 點且 ≥20h" in r["reason"], r
+    assert "還量不出來" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
+
+
+def test_e006_verdict_s_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict：S 臂（生存值提示臂）McNemar 配對 Holm 後顯著（S_only=10 > A_only=0、
+    # p=0.001 ⇒ Holm 後仍顯著、方向為正）但 S 臂成本缺失（calls/tokens 為 None 且無 audit 可補）
+    # 時，成本紅線量不到（over_2x_A_cost is None，不判違規也不判過）、not_worth_it 誠實記為
+    # None（成效雖建立但成本失聯，無法斷定划算與否，嚴防偽判 False 或 True）、H-stakes(a) 假說態
+    # 誠實判定 CONFIRMED_COST_UNKNOWN 且理由精確指認「S 臂成本缺失」、note 保留鐵律 KS-1 警語
+    #「利害 (a) 只是講、無真實後果」——成本失聯時成效不得單獨升格 CONFIRMED 之契約鎖進常規回歸
+    #（工單 P20261031_1619-3）
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂顯著且方向為正：S_only=10 > A_only=0、p=0.001
+    rep["paired"]["A_vs_S"] = {"pairs": 20, "A_only": 0, "S_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # S 臂成本缺失（量不到、無 audit 可補；同系列既有成本缺失測試皆以 None 表示缺失）
+    rep["per_arm"]["S"] = {"calls_per_success": None, "tokens_per_success": None}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "顯著且方向為正，但成本紅線量不到（S 臂成本缺失）" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "利害 (a) 只是講、無真實後果" in r["hypotheses"]["H-stakes(a)"]["note"]  # 鐵律 KS-1 警語保留
+
+
+def test_growth_report_exact_cap_plus_one_byte_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_1635-1（ASSIGNMENT 🔴最優先 驗收(a)：長效監度量具守護）：最新點
+    # total 恰好超 256 MiB 穩態封頂 1 byte（268,435,457 B＝268,435,456 B＋1 B、壓線超
+    # 1 byte）、trace 32 MiB 在 64 MiB 上限內、gc 健全（status=ok、target_reached=true）
+    # 時，封頂/上限判定是嚴格大於（>）——超 1 byte 就是超，growth_report.report() 須
+    # 精確判 verdict=FAIL（超標 1 byte 絕不偽判 PASS）、
+    # peak_overrun.over_stable_envelope 為 True（峰值超封頂）、reason 精確指認
+    # 「latest total 268435457 B > 穩態封頂 268435456 B」；CLI --json 退出碼 1。
+    # 與壓線合規測試（1604-5）構成完整的對稱精確邊界守護。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 25h（≥ MIN_EVIDENCE_HOURS=20h 門檻）；最新點超封頂 1 byte、trace 未超上限
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 200 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T01:00:00+0000", "total_bytes": 256 * 1024 * 1024 + 1,  # 268,435,457 B＝封頂＋1
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},  # 32 MiB < 64 MiB 上限，未超
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"  # 超封頂 1 byte＝超標，絕不偽判 PASS
+    assert r["peak_overrun"]["over_stable_envelope"] is True  # 峰值超封頂
+    assert "latest total 268435457 B > 穩態封頂 268435456 B" in r["reason"]  # reason 精確指認超標點
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1  # FAIL 時 CLI 退出碼 1
