@@ -3628,3 +3628,28 @@ def test_e006_verdict_s_cost_within_cap_not_established() -> None:
     assert s["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in s["reason"]
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in s["note"]
+
+
+def test_e004_verdict_s_cost_within_cap_not_established() -> None:
+    # 驗證 e004_verdict：S 臂（利害提示臂）calls（14.0 = 1.4×A）與 tokens（1600.0 = 1.6×A）
+    # 均在 2×A 紅線內（成本合格、未超標），但成效未顯著提升（p=1.0、A_only=2 = S_only=2 方向非正）時：
+    # cost_redline_2xA.arms["S"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-stakes(a) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））、note 保留 KS-1 措辭鐵律，
+    # 嚴防將未超標臂誤判為不划算——工單 P20261031_1533-5
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_S"] = {"pairs": 19, "A_only": 2, "S_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["S"] = {"calls_per_success": 14.0, "tokens_per_success": 1600.0}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["calls_vs_A"] == 1.4
+    assert r["cost_redline_2xA"]["arms"]["S"]["tokens_vs_A"] == 1.6
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False  # 未超標臂非不划算
+    s = r["hypotheses"]["H-stakes(a)"]
+    assert s["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in s["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in s["note"]
