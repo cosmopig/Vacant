@@ -1397,3 +1397,11 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     capsys.readouterr()
     assert e006_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(outp), "--json"]) == 0
     assert outp.is_file()
+
+    # P20261031_0018-5（ASSIGNMENT「研發工具需納入回歸測試」）：預設終端人讀模式（未帶 --json）契約回歸。
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_mock", "--runs-dir", str(tmp_path)]) == 0
+    txt = capsys.readouterr().out
+    assert "e006_verdict m=" in txt
+    assert "H-acc" in txt
+    assert "cost(2×A 紅線)" in txt
