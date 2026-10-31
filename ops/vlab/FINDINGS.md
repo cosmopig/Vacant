@@ -384,3 +384,13 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **結構**：34 題 polyglot_py × A/C/H/M/S（170 格）、agent=opencode、1800 s/格；頂層與 C 臂 vacant_sha=bf1a9f1afb211460b48611f8f28b1d9433985c4a；H/M/S 臂 env.VLAB_APPEND_SYSTEM → /srv/vlab/arms/e002_{H,M,S}.md 前置（prepend）模式（c76ff988；e005 冒煙 5/5 已驗證、舊 SystemExit 路徑未觸發）；M 臂為 e005 UNKNOWN 路徑之複測樣本（900 s 逾時 → 本盤 1800 s）。
 **預註冊**：封包 `ops/vlab/packets/e006_opencode_polyglot.md`（發射前寫死判準）——4 假設 H-acc / H-review(H) / H-review(M) / H-stakes(a)、Holm–Bonferroni（4 組 A_vs_X）α=0.05 為確認線＋2×A 成本紅線；M 臂需 events.jsonl 有真第二 agent 證據，缺則降級記 UNKNOWN（不是負結果）；infra 格永不回填。
 **口徑**：此條僅為發射與排程事實；排程中、無結果數據、不預填、不宣稱；全盤完賽後以 `opencode_cell_audit.py` 審計 170 格、`e006_verdict.py` 依封包 §3 判定（數字以 REPORT.json 為準、成本與結果同報）。
+
+## 2026-10-31 · 主軸 2 · OpenCode 真實 agent C 臂用量實測（e003/e005/e006 全數通過 256 MiB 穩態封頂，最高 164 KB，≤ 0.07%）
+
+**客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨三個 run 共 **5 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 2/2，FAIL 0、NA 0）：
+- e003_opencode_smoke（2 格）：pg_affine_cipher **65,551 B（64.0 KB）**、pg_pig_latin **167,361 B（163.4 KB）**；
+- e005_opencode_five_arm_smoke（1 格）：pg_affine_cipher **79,333 B（77.5 KB）**；
+- e006_opencode_polyglot（2 格，本盤進行中）：pg_affine_cipher **49,903 B（48.7 KB）**、pg_beer_song **116,444 B（113.7 KB）**。
+
+5 格實測全部落在 49,903 B（48.7 KB）至 167,361 B（163.4 KB）之間，全部低於 256 MiB（268,435,456 B）穩態封頂；最高格 167,361 B 佔封頂 **0.0623%**（≤ 0.07%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 25,829–76,219 B，皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
+**口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）進行中，本條不預填未完成格數據，正式判定仍以全盤完賽後之 REPORT.json＋`e006_verdict.py` 為準；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。
