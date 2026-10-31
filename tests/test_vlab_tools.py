@@ -3113,3 +3113,27 @@ def test_e004_verdict_h_not_worth_it() -> None:
     h = r["hypotheses"]["H-review(H)"]
     assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_growth_report_gc_last_missing_fail(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：跨日序列證據足（2 點跨 25h ≥ 20h 門檻）、最新點用量在上限內，
+    # 但最新點不帶 gc_last 欄位（無 GC 回收證據）→ verdict="FAIL" 且 reason 載明「非 ok」；
+    # CLI --json 以 exit code 1 安全退出。真機增長量具在缺少 GC 證據時絕不偽判 PASS——工單 P20261031_1258-1
+    assert growth_report.ENVELOPE_BYTES is not None  # 量具與產品同來源；import 不到時量具自己降級 UNKNOWN
+    assert growth_report.TRACE_BUDGET_BYTES is not None
+    def _point(ts: str, total: int, tr: int, gc: dict | None) -> str:
+        p = {"ts": ts, "home": str(tmp_path), "total_bytes": total, "per_dir_bytes": {"trace": tr}}
+        if gc is not None:
+            p["gc_last"] = gc
+        return json.dumps(p)
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    (seq_dir / "growth.jsonl").write_text(
+        _point("2026-10-28T00:00:00+0000", 20 * 1024 * 1024, 10 * 1024 * 1024, {"status": "ok", "target_reached": True}) + "\n"
+        + _point("2026-10-29T01:00:00+0000", 30 * 1024 * 1024, 15 * 1024 * 1024, None) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL", r
+    assert "非 ok" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
