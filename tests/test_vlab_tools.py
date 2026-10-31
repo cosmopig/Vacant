@@ -1393,6 +1393,22 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatc
     assert json.loads(out_pos.read_text(encoding="utf-8"))["n_cells"] == 1
 
 
+def test_opencode_cell_audit_cli_missing_args_and_dir_error(tmp_path: Path) -> None:
+    # P20261031_0311-3（ASSIGNMENT 主軸 1＋審查指示第 3 條＋研發工具回歸守護）：
+    # opencode_cell_audit 參數防呆契約鎖進常規回歸——缺 exp/--runs-dir 與指向不存在目錄時
+    # 一律 argparse error（SystemExit code 2），不得崩潰或靜默放行。
+    from ops.vlab.tools import opencode_cell_audit
+    with pytest.raises(SystemExit) as exc:
+        opencode_cell_audit.main([])  # exp 與 --runs-dir 皆缺
+    assert exc.value.code == 2
+    with pytest.raises(SystemExit) as exc:
+        opencode_cell_audit.main(["--runs-dir", str(tmp_path / "nonexistent")])  # --runs-dir 不存在
+    assert exc.value.code == 2
+    with pytest.raises(SystemExit) as exc:
+        opencode_cell_audit.main(["nonexistent_exp_xyz"])  # exp 有但目錄不存在
+    assert exc.value.code == 2
+
+
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
     # （523236d3）納入常規回歸——--selftest、--report/--audit/--json CLI、四項假說判定結構與 M 臂第二 agent 證據。
