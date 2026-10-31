@@ -154,3 +154,10 @@
 - 驗證：驗收鏈 rc=0（pytest 1 passed、180 deselected；grep 命中行 4118；末行 ACCEPTANCE_OK；e006_verdict 家族 44 項＋test_vlab_tools.py 全檔 181 項全過；e006 --selftest OK；git diff 1 檔 +31）；commit 786b8eac（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
 - 沒驗證：786b8eac CI 未出（需下輪確認 🟢）；本輪未跑全倉 4639 測試（以 test_vlab_tools.py 全檔 181 項＋驗收鏈＋selftest 為據）。
 - 下一步：監控 786b8eac/37728e62/6ddd7c69/7d9c72d6 CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
+
+## round 678 (2026-10-31 17:3x) · P20261031_1722-2 e006 第 26 格 pg_sgf_parsing C 臂真實用量同步至 disk_top_priority §2 驗收總覽表格（結案）
+- 主軸：ASSIGNMENT 🔴最優先 驗收 (b) lab C 組 vacant_home_bytes 真實用量；P20261031_1722-1 續記 §1 時序後，閉環把 e006 OpenCode 第 26 格客觀事實進入頂層驗收總覽（25 格→26 格）。
+- 做了：ops/vlab/packets/disk_top_priority.md §2 表格行 4(b)（行 181）3 處替換（1 行）：標題「C 臂 25 格實測（進行中）」→「26 格實測（進行中）」；㉕ 後追加「㉖ pg_sgf_parsing vacant_home_bytes 109,716 B（107.1 KB）、vacant_objects_bytes 75,146 B（73.4 KB）、ratio_of_envelope 0.000409」；「25 格 min 32,165／med 127,832／max 255,721」→「26 格 min 32,165／med 124,742／max 255,721」；完賽清單末尾追加「pg_sgf_parsing 10/31 17:13 完賽」；cp 同步 ~/dev/ops/packets/ 外部副本；未動 1-25 格、未動 (a)(c) 與其他章節、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（grep "pg_sgf_parsing" 命中 154（§1）與 181（§2）、grep「C 臂 26 格」命中 181、cmp 無輸出、末行 ACCEPTANCE_OK）；commit 3bf3dff9（1 檔 1 行、status 乾淨、branch auto/qwen27b）；工單已回填 3 行結果並移 done/、doing/ 0 張。
+- 沒驗證：3bf3dff9 CI 未出（需下輪確認 🟢）；表格實際落行 181（工單期望 180，因上輪 §1 追加 1 行而下移，仍在 175-182 範圍內、grep 全命中）。
+- 下一步：監控 3bf3dff9/36bcc1bc/51afb699/6ddd7c69/7d9c72d6/37728e62 CI；e006 若續賽（第 27 格起）→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
