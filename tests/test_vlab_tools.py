@@ -2520,3 +2520,26 @@ def test_e004_verdict_s_confirmed() -> None:
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
     # 成本合格且顯著提升 ⇒ 不是「不划算」
     assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
+
+
+def test_e004_verdict_h_confirmed() -> None:
+    # 驗證 e004_verdict 在 H 臂（交件前審查之自檢指引臂）配對顯著（p=0.005、Holm 校正後 0.02 < 0.05、H_only=10 > A_only=1）
+    # 且成本合格（A calls=10.0、H calls=12.0 = 1.2×A ≤ 2×A 紅線、mock tokens 1.0×A 亦 ≤ 2×A）時，
+    # H-review(H) 判定 state=="CONFIRMED"、cost_over_2x_A is False、not_worth_it is False——
+    # 成效顯著且成本合格之 H 臂「已確認」判定契約鎖進 e004 常規回歸（工單 P20261031_0952-1）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # H 臂配對顯著（p=0.005，Holm 校正後仍 < 0.05；H_only=10 > A_only=1 方向為正）
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 1, "H_only": 10, "mcnemar_p_two_sided": 0.005}
+    # 成本合格：A 臂 calls=10.0（mock tokens=1000.0）；H 臂 calls=12.0（1.2×A ≤ 2.0 紅線、mock tokens=1.0×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["H"]["calls_per_success"] = 12.0
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著＋方向為正＋成本 ≤ 2×A（calls 1.2×、tokens 1.0×皆量到）⇒ 已確認（成本與成效一起報告）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-review(H)"]["reason"]
+    assert r["hypotheses"]["H-review(H)"]["cost_over_2x_A"] is False
+    # 成本合格且顯著提升 ⇒ 不是「不划算」
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False
