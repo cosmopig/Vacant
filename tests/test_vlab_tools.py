@@ -4540,3 +4540,22 @@ def test_growth_report_exact_total_cap_boundary_pass(tmp_path: Path, capsys) -> 
     rc = growth_report.main(["--home", str(seq_dir),
                              "--ops-data", str(tmp_path / "none"), "--json"])
     assert rc == 0  # PASS 時 CLI 安全退出碼 0
+
+
+def test_envelope_compliance_exact_cap_boundary_pass(tmp_path: Path, capsys) -> None:
+    """envelope_compliance CLI：C 臂格子 vacant_home_bytes 恰好等於 256 MiB 穩態封頂（268,435,456 B）壓線 → 邊界 ≤ 即合規判 PASS、ratio 1.0、main 回 0。
+
+    與既有 test_envelope_compliance_cli_normal_pass_and_out_file（100MiB 遠低於封頂）
+    構成「遠低於／恰好壓線」的封頂邊界閉環，鎖進常規回歸。
+    """
+    cell = tmp_path / "runs" / "exp_exact_pass" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 256 * 1024 * 1024}), encoding="utf-8")
+    capsys.readouterr()  # 排空殘留
+    rc = envelope_compliance.main(["exp_exact_pass", "--base", str(tmp_path / "runs")])
+    assert rc == 0  # 壓線（≤ 封頂）合規 → CLI 安全退出碼 0
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "PASS"
+    assert data["cells"][0]["compliance"] == "PASS"  # 恰好＝封頂，絕不誤判 FAIL
+    assert data["cells"][0]["ratio_of_envelope"] == 1.0  # 268,435,456 / 268,435,456
