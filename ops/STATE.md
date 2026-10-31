@@ -97,3 +97,10 @@
 - 補記（round 505 審查 redo）：已實際查驗 ops/vlab/tools/e006_verdict.py（277 行；git log 末筆 1329c57a 早於 round 501，本會話未修改）——L133 CONFIRMED 系三態皆以 x_only > a_only 為門檻（方向非正結構性不可達）、L139 NOT_ESTABLISHED＋reason 字面、L141 S 臂 note 字面、L121 sig＝p_holm<alpha（本場景 0.004）、L143-147 not_worth_it（over=False⇒False）；模組 selftest PASS；工單場景實跑 state=NOT_ESTABLISHED／sig True／not_worth_it False 全符。
 - 沒驗證：58c330d6/a14609bb/eca004c8/8f1b41cc CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
 - 下一步：監控 58c330d6/a14609bb/eca004c8/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 508 (2026-10-31 07:1x) · P20261031_0650-3 e006_verdict 未達顯著判定 NOT_ESTABLISHED 契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證與「成效方向為正」判定防線）＋「不顯著未建立」鐵律。
+- 做了：tests/test_vlab_tools.py 檔尾（行 2147）新增 test_e006_verdict_not_significant_not_established（+19 行、僅 1 檔）——mock C 臂 A_vs_C（C_only=6>A_only=2、p=0.20）斷言 H-acc state==NOT_ESTABLISHED、reason 含「不顯著（或方向非正）⇒ 未建立（不是負結果）」、significant_at_alpha is False、C not_worth_it is False；未動 e006_verdict.py 與其他測試；工單追加結果 3 行、mv 至 done/、doing/ 0 張。
+- 驗證：驗收鏈 rc=0（pytest -v 末行「1 passed, 93 deselected in 0.05s」；-q 此環境吞 summary 行、退出碼 0、grep 命中行 2147）；整檔 94 測試全過 rc=0；e006_verdict.selftest PASS；語義實查（L139 NOT_ESTABLISHED 分支＝sig False 必達，Holm 後 p_holm≥0.20；L143-147 C 成本 0.9×A⇒over=False⇒not_worth_it False）；本輪 + 行無「信任／證明變好」；commit c133054a。
+- 沒驗證：c133054a 與前數 commit CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽後之 REPORT.json＋e006_verdict.py。
+- 下一步：監控 c133054a/6f8fe94f/04434d7e/58c330d6/a14609bb/eca004c8 CI 與 e006 進度/infra 重試；pg_grep 及 FINDINGS 剩餘同步照 open/ 新工單；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
