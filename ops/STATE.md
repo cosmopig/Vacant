@@ -131,9 +131,6 @@
 
 ## round 626 (2026-10-31 14:4x) · P20261031_1431-2 50 點真機增長序列里程碑續記 disk_top_priority §1（結案）
 - 主軸：🔴最優先驗收 4(a) 真機 ~/.vacant 前後用量與成長；真機增長序列累積至第 50 點（跨 65.20h）突破 50 點長效監測里程碑。
-- 做了：ops/vlab/packets/disk_top_priority.md 行 165 單行新增（13:32 續記 50 點里程碑：50 點跨 65.20h、66,701,796 B（63.6 MiB ≤ 256 MiB 24.8
-## round 626 (2026-10-31 14:4x) · P20261031_1431-2 50 點真機增長序列里程碑續記 disk_top_priority §1（結案）
-- 主軸：🔴最優先驗收 4(a) 真機 ~/.vacant 前後用量與成長；真機增長序列累積至第 50 點（跨 65.20h）突破 50 點長效監測里程碑。
 - 做了：ops/vlab/packets/disk_top_priority.md 行 165 單行新增（13:32 續記 50 點里程碑：50 點跨 65.20h、66,701,796 B（63.6 MiB ≤ 256 MiB 24.8%）、trace 48,183,117 B（46.0 MiB ≤ 64 MiB）、trace 472 blobs、gc_last ok＋target_reached、verdict PASS）＋cp 外部副本 ~/dev/ops/packets/；1-49 點歷史未覆蓋、其他分區未動、無「信任／證明變好」。
 - 驗證：驗收鏈 rc=0（grep "13:32 續記" 命中行 165、cmp 無輸出、末行 ACCEPTANCE_OK）；git diff 1 檔 1+；commit 60bcb34a（status 乾淨、branch auto/qwen27b）；工單→done/、doing/ 0 張。
 - 沒驗證：60bcb34a CI 未出；50 點用量數字依工單給定值轉錄，未重跑 growth_report.py 自 ~/.vacant 重算。

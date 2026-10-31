@@ -69,7 +69,12 @@ def cost_redline(per_arm, audit_per_arm=None):
                 c = num(aud_x.get("calls_per_success"))
             if t is None or t == 0.0:
                 t = num(aud_x.get("tokens_per_success"))
-        cc, tt = (c / bc) if (c is not None and bc) else None, (t / bt) if (t is not None and bt) else None
+        c_val = c if (c and c > 0) else None
+        t_val = t if (t and t > 0) else None
+        bc_val = bc if (bc and bc > 0) else None
+        bt_val = bt if (bt and bt > 0) else None
+        cc = (c_val / bc_val) if (c_val is not None and bc_val is not None) else None
+        tt = (t_val / bt_val) if (t_val is not None and bt_val is not None) else None
         co, to = (cc > 2.0) if cc is not None else None, (tt > 2.0) if tt is not None else None
         over = True if (co is True or to is True) else (False if (co is False and to is False) else None)
         out[x] = {"calls_vs_A": cc, "tokens_vs_A": tt, "over_2x_A_cost": over, "not_worth_it": None}
