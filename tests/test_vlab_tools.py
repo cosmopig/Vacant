@@ -3556,3 +3556,26 @@ def test_e006_verdict_h_cost_within_cap_not_established() -> None:
     h = r["hypotheses"]["H-review(H)"]
     assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_growth_report_historical_peak_over_envelope_pass(tmp_path: Path, capsys) -> None:
+    # 歷史峰值曾暫超穩態封頂（280 MiB > 256 MiB 軟上限）、最新點經 GC 回收已降至封頂內
+    # （50 MiB ≤ 256 MiB）且最新 gc ok：verdict 精確判 PASS（歷史暫超不誤判 FAIL——
+    # 封頂是軟上限、disk_top_priority §1 誠實邊界），peak_overrun 仍如實 True；CLI --json exit 0。
+    MiB = 1024 * 1024
+    home = tmp_path / "hist_peak"
+    home.mkdir()
+
+    def _point(ts: str, total: int) -> str:
+        return json.dumps({"ts": ts, "home": str(home), "total_bytes": total,
+                           "gc_last": {"status": "ok", "target_reached": True}})
+
+    (home / "growth.jsonl").write_text(
+        _point("2026-10-28T00:00:00+0000", 280 * MiB) + "\n"
+        + _point("2026-10-29T02:00:00+0000", 50 * MiB) + "\n", encoding="utf-8")
+    r = growth_report.report(home=home, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS", r  # 歷史暫超不得誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is True  # 歷史暫超如實可見
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(home), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # PASS ⇒ 退出碼 0
