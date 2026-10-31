@@ -94,5 +94,6 @@
 - 主軸：ASSIGNMENT 主軸 3（效益差別驗證與「成效方向為正」判定防線）＋「不顯著或方向非正未建立」鐵律。
 - 做了：DECISION 重覆單如實結案、不重改測試檔｜本單為 P20261031_0618-3 同內容重排之重覆單，工作已由 round 501 commit 58c330d6 提交；本輪無新增程式碼改動（tests/test_vlab_tools.py 未動、git status 乾淨）；重讀行 2127-2144 確認測試體與工單逐條一致（mock A_vs_S A_only=10/S_only=0/p=0.001、5 斷言齊備）；工單追加結果 3 行並 mv 至 done/、doing/ 0 張。
 - 驗證：驗收鏈如實 rc=0（pytest 1 passed, 92 deselected in 0.05s；grep 命中行 2127）；測試體與工單逐條一致（state==NOT_ESTABLISHED、reason/note 字面、significant_at_alpha is True、not_worth_it is False）；本輪新增行無「信任／證明變好」。
+- 補記（round 505 審查 redo）：已實際查驗 ops/vlab/tools/e006_verdict.py（277 行；git log 末筆 1329c57a 早於 round 501，本會話未修改）——L133 CONFIRMED 系三態皆以 x_only > a_only 為門檻（方向非正結構性不可達）、L139 NOT_ESTABLISHED＋reason 字面、L141 S 臂 note 字面、L121 sig＝p_holm<alpha（本場景 0.004）、L143-147 not_worth_it（over=False⇒False）；模組 selftest PASS；工單場景實跑 state=NOT_ESTABLISHED／sig True／not_worth_it False 全符。
 - 沒驗證：58c330d6/a14609bb/eca004c8/8f1b41cc CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
 - 下一步：監控 58c330d6/a14609bb/eca004c8/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
