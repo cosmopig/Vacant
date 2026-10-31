@@ -1401,6 +1401,18 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert e004_verdict.main(["bad_audit_e004", "--runs-dir", str(tmp_path), "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["audit"] is None
 
+    # P20261031_0240-3（ASSIGNMENT「研發工具需納入回歸測試」）：人讀模式（未帶 --json）＋--out 落盤 CLI 契約回歸。
+    # (f) exp_mock 人讀＋--out → rc=0、stdout 為人讀文字（e004_verdict m= 標頭）、stderr 含「# wrote」、
+    #     落盤檔為合法 JSON 且頂層 hypotheses 含 "H-acc"。
+    hum = tmp_path / "human_verdict_e004.json"
+    capsys.readouterr()
+    assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(hum)]) == 0
+    hum_out = capsys.readouterr()
+    assert "e004_verdict m=" in hum_out.out
+    assert "# wrote" in hum_out.err
+    humj = json.loads(hum.read_text(encoding="utf-8"))
+    assert "H-acc" in humj["hypotheses"]
+
 
 def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2331-2（ASSIGNMENT「研發工具需納入回歸測試」）：e006 預註冊假說判定量具 e006_verdict
