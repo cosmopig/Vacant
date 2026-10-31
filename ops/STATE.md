@@ -147,3 +147,10 @@
 - 驗證：驗收鏈 rc=0（pytest 1 passed、grep 命中行 3765、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 168 項 rc=0；git diff 1 檔 +24；commit 16ca3d16（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
 - 沒驗證：16ca3d16 CI 未出；僅 mock 場景鎖契約，未以 e004 真機 REPORT.json 重放（e004 為已完賽舊 run，無新 REPORT 可重放）；0.0 成本⇒「免費」判定缺口仍未處理（round 657 BACKLOG，e004/e006 同款）。
 - 下一步：監控 16ca3d16/efee8385/4fb25f38/12e5b672 CI；照 open/ 續做；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 675 (2026-10-31 17:2x) · P20261031_1707-3 e006_verdict M 臂 0.0 成本視為缺失判 CONFIRMED_COST_UNKNOWN 且保留 second_agent 證據契約測試（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效綁定紅線）；把「M 臂 0.0/0.0 成本須視為缺失（非免費）、判 CONFIRMED_COST_UNKNOWN、保留 second_agent 證據」鎖進常規回歸（與 round 672 e006 S 臂 0.0、既有 M 臂 None 缺失 1635-3 對稱）。
+- 做了：tests/test_vlab_tools.py 檔尾新增 test_e006_verdict_m_zero_cost_treated_as_missing_confirmed_cost_unknown（+31 行，碰 1 檔）：M 臂顯著（M_only=10 > A_only=0, p=0.001）、A 臂成本 10.0/1000.0、M 臂 0.0/0.0、_mock_audit(5) ⇒ 斷言 calls_vs_A/tokens_vs_A/over_2x_A_cost/not_worth_it 皆 None、H-review(M)=CONFIRMED_COST_UNKNOWN、reason 含「M 臂成本缺失」、second_agent.evidence_present=True；未動既有測試與 e006_verdict.py 核心邏輯、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（pytest 1 passed、180 deselected；grep 命中行 4118；末行 ACCEPTANCE_OK；e006_verdict 家族 44 項＋test_vlab_tools.py 全檔 181 項全過；e006 --selftest OK；git diff 1 檔 +31）；commit 786b8eac（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
+- 沒驗證：786b8eac CI 未出（需下輪確認 🟢）；本輪未跑全倉 4639 測試（以 test_vlab_tools.py 全檔 181 項＋驗收鏈＋selftest 為據）。
+- 下一步：監控 786b8eac/37728e62/6ddd7c69/7d9c72d6 CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
