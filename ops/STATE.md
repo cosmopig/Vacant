@@ -20,3 +20,54 @@
 - DECISION: 驗收指令首路徑 dev/ops/… 係 ~/dev 相對、次路徑 repo 相對（基準點混用），在 repo 內逐字執行會 diff rc=2｜兩路徑指向同一對檔案且語義無歧義，屬路徑基準點筆誤而非驗收壞掉；用絕對路徑等效執行並已註明於工單檔尾，未走 bounced。
 - 沒驗證：dbe8fd50 CI 未出（純文檔 1 行）；e006 全盤未完賽（C 臂 4 格中 1 infra、REPORT cells_scored=15），正式判定仍待全盤完賽。
 - 下一步：查 /srv/vlab/done 之 07_e006_* 格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+
+## round 422 (2026-10-31 01:2x) · P20261031_0105-4 同步真機增長序列第 38 點至 FINDINGS 主軸 2（結案）
+- 主軸：ASSIGNMENT 主軸 2（紀錄檔真實管理）＋🔴最優先用量上限；人類在 FINDINGS 主軸 2 看到 38 點跨 52.79h 序列。
+- 做了：FINDINGS.md 主軸 2 四處更新（1 檔 +5/−4）：37 點/51.75h→38 點/52.79h（→2026-10-31T01:07）、序列表追加「10/31 01:07｜57.6 MiB｜39.6 MiB｜435 blobs｜ok, true」、最新 57.2 MiB（22.3%）/trace 39.3 MiB→57.6 MiB（22.5%）/39.6 MiB、跨日序列括注（37 點、51.75h）→（38 點、52.79h）；「不能說」邊界、主軸 1、e002 條目零改動。
+- 驗證：數字先實核（~/.vacant/growth.jsonl 末筆 ts=01:07:43、total 60405994 B、trace 41490752 B、objects 435、gc ok/true；growth_report.py --json n_points=38、span 52.79h、verdict PASS、rc=0）；驗收 grep「38 點跨 52.79h」命中行 197、grep「10/31 01:07」命中行 235、rc=0（改前 0 行 rc=1）；commit a0867439；工單→done/、doing/ 0 張。
+- 沒驗證：a0867439 CI 未出（純文檔 5 行）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+## round 428 (2026-10-31 01:5x) · P20261031_0136-1 合併 auto/argon 1329c57a 成本紅線修復（結案：工單建於 427 輪合併之前，本輪驗收複核＋結案）
+- 主軸：本輪焦點工單（資深審查 #1 最優先合併）＋「合併前看 CI」（輪首 CI：auto/argon 1329c57a 🟢 4467 passed／收集 4536 ≥ auto/qwen27b HEAD 收集 4534）。
+- 做了：核實工單（01:36 建）早於 427 輪（01:4x）完成之合併（8ce9813d）與回歸（25a3527a）；本輪照工單原文跑驗收：`git merge --no-edit auto/argon` → "Already up to date." rc=0（no-op、不產生新 commit）；`git merge-base --is-ancestor 1329c57a HEAD` rc=0；`git diff auto/argon HEAD -- ops/vlab/tools/e004_verdict.py ops/vlab/tools/e006_verdict.py` 空（argon 實作原樣、零手動重寫）；argon 2 新測試（test_e006/e004_verdict_audit_cost_fallback）＋427 輪 1（test_audit_out_feeds_verdict_audit_chain）俱在。
+- 驗證：驗收 `pytest tests/test_vlab_tools.py -q` rc=0、collect 69／69 全綠（工單期「68 passed」係 427 輪前快照：66+argon 2=68、再+427 輪 1=69，為超集且全綠，非驗收壞）；e006_verdict.py::cost_redline（L49 audit_per_arm 回退、not_worth_it L75/L147）與 argon 一致；本輪結案記錄 commit 見下（ops/STATE.md 1 檔）。
+- 沒驗證：8ce9813d/25a3527a CI 未出（輪首 auto/qwen27b 25a3527a「還沒跑完」）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 e006 進度與 infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；C 臂新格/第 39 點出現即同步三件套。
+## round 430 (2026-10-31 02:1x) · P20261031_0153-2 e004_verdict audit 成本補齊 CLI 契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT「研發工具需納入回歸測試」＋審查指示第 1 條：REPORT.json 成本 0.0/0 時經 AUDIT.json 補齊真實成本之 CLI 契約鎖入 e004 回歸。
+- 做了：tests/test_vlab_tools.py::test_e004_verdict_selftest_and_cli 末尾（bad_report_e004 斷言後）追加 16 行（1 檔 +16/−0）：exp_fb_e004/ 下 _mock_report() 各臂 calls=0.0/tokens=0 之 REPORT.json ＋ 五臂真實成本之 AUDIT.json（M 含 second_agent 證據）；main(["exp_fb_e004","--runs-dir",…])==0；cost(2×A 紅線) 行含 over=False、不含 calls=None tokens=None。e004_verdict.py 與他函式零改動。
+- 驗證：先實核契約（e004_verdict.py:49-83 cost_redline 零值回退、L163-166 render 行形、L250-256 AUDIT.json 路徑）；首次跑驗收 StopIteration（紅字 红/線 字形差）→ 修正為 紅線 後綠；驗收 pytest -k test_e004_verdict_selftest_and_cli → 1 passed rc=0；grep exp_fb_e004 命中 2 行 rc=0（改前 0 行 rc=1）；全檔 test_vlab_tools.py rc=0（69 測試）；無 CR 字元；commit e95b69a3；工單→done/、doing/ 0 張。
+- 沒驗證：e95b69a3 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+## round 432 (2026-10-31 02:2x) · P20261031_0153-4 e004_verdict 損壞 AUDIT 容錯回退契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT「研發工具需納入回歸測試」＋資深審查指示第 1/3 條（e004/e006 判定工具同族守護：審計檔異常時不崩潰、容錯回退）。
+- 做了：tests/test_vlab_tools.py::test_e004_verdict_selftest_and_cli 末尾追加 7 行（1 檔 +7/−0）：bad_audit_e004 下正常 REPORT.json＋AUDIT.json 寫 "corrupt json"，斷言 main(["bad_audit_e004","--runs-dir",…,"--json"]) == 0 且 json 輸出 audit is None；e004_verdict.py 原始碼、既有測試邏輯、他函式零改動。
+- 驗證：先實核契約（e004_verdict.py:252-255 AUDIT 讀取 try/except Exception→audit_summary=None、L259 r["audit"]=None；audit 缺失→M 臂降級 UNKNOWN 已在 selftest #6 覆蓋）；驗收 pytest -k test_e004_verdict_selftest_and_cli → 1 passed, 68 deselected rc=0；grep bad_audit_e004 命中行 1397/1401（改前 0 行 rc=1）；全檔 test_vlab_tools.py 69 passed rc=0；無 CR 字元；commit fadca6b9；工單→done/、doing/ 0 張。
+- 沒驗證：fadca6b9 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+## round 443 (2026-10-31 02:5x) · P20261031_0240-2 真機增長序列第 39 點同步至 disk_top_priority §3 目標數字合計列（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收條件 1 & 4(a)）：§3 目標數字表「合計」列本輪實測同步至第 39 點。
+- 做了：disk_top_priority.md §3 合計列本輪實測（1 檔 +1/−1）：61.8 MiB（24.1%、10/30 16:32）→**57.6 MiB（22.5% of 256、10/31 02:09 真機實測；24h 最大增長 16.3 MiB）**；外部副本 ~/dev/ops/packets/ 同步 bit-identical；§1/§2 歷史點（61.8 MiB＝10/30 16:32 過去點）依工單明令不改。
+- 驗證：改前 grep 0 行 rc=1（前提成立）；改後驗收原句 grep 命中行 176 rc=0＋diff -u 兩份無輸出 rc=0（工單註「行 175」實為行 176，偏 1）；git diff 僅 1 檔 1 行；無「信任／證明變好」；commit 19285f51；工單→done/、doing/ 0 張。
+- 沒驗證：19285f51 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 e006 進度與 infra 重試；第 40 點/新 C 臂格出現即同步三件套（§1 時序＋§2/§3 總覽合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 454 (2026-10-31 03:3x) · P20261031_0311-5 growth_report trend 趨勢計算語義與單點容錯契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 (a)「一天長多少」長效監測量具守護）＋研發工具回歸守護。
+- 做了：tests/test_vlab_tools.py +20（1 檔）：test_growth_report_load_points_dedup_and_invalid_lines 後新增 test_growth_report_trend_semantics——單點 span_hours=0.0、max_24h_growth_bytes=None（UNKNOWN 素材，非 PASS/非「沒有」）、net_growth_bytes=0、per_dir_peak_bytes 峰值保留；多點 12h 跨距 max_24h=1500、peak_total_bytes=2500。growth_report.py 核心零改動、他測試函式零改動。
+- 驗證：先實讀 growth_report.py trend() L98-135 確認契約（<2 點 max_24h=None、span_h round(…,2)、per_dir_peak 取 max）；改前 grep 0 行 rc=1＋pytest rc=5（工單前提成立）；驗收 pytest -k 單測 rc=0＋grep 命中行 826（工單「行 813 附近」為約數、驗收指令本身通過）；全檔 75 passed rc=0；commit b812dff5；工單→done/、doing/ 0 張。
+- 沒驗證：b812dff5 CI 未出（輪首 auto/qwen27b CI 還沒跑完）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 b812dff5 CI 與 e006 進度/infra 重試；第 41 點出現即同步三件套（§1 時序＋§2 總覽＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 455 (2026-10-31 03:3x) · P20261031_0326-1 真機增長序列第 40 點同步至 disk_top_priority §3 目標數字合計列（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 1 & 4(a) ~/.vacant 穩態上限與目標數字實測跨表對齊）。
+- 做了：ops/vlab/packets/disk_top_priority.md §3 行 177「合計」列本輪實測欄 57.6 MiB/22.5%/02:09→58.0 MiB/22.7%/10/31 03:11（1 行）；cp 同步 ~/dev/ops/packets 副本 bit-identical；§1/§2 與他分區上限零改動；工單→done/、doing/ 0 張。
+- 驗證：改前 grep 新串 0 行 rc=1 且舊串全檔僅行 177 1 處（工單前提成立）；驗收 grep 精確命中行 177＋diff -u 無輸出 rc=0；git diff 僅 1 檔 1 行；無「信任／證明變好」措辭；commit 7a41dd9b。
+- 沒驗證：7a41dd9b CI 未出；本輪未重跑 growth_report.py --json 複核數字（與 round 450/451/453 四件套同源，皆為工單已載 10/31 03:11 實測值）；e006 170 格未完賽。
+- 下一步：監控 7a41dd9b CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 456 (2026-10-31 03:3x) · P20261031_0326-2 opencode_cell_audit C 臂缺失 vacant_home 標記 bad 與退出碼契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 主軸 1（OpenCode 真實 agent 串接）＋審查指示第 3 條（e006 收尾量具工具契約）＋研發工具回歸守護。
+- 做了：tests/test_vlab_tools.py +27 行（1 檔）：test_opencode_cell_audit_cli_missing_args_and_dir_error 後新增 test_opencode_cell_audit_c_arm_missing_vacant_home_bad——獨立 c_runs/tmp 下 C 臂格（cell.json/events.jsonl/score.json、刻意無 vacant_home.tgz）→ main --runs-dir rc==1、bad==[cell]、ok is False、unknown 含 "vacant_home.tgz missing (arm C)"。opencode_cell_audit.py 核心零改動、他測試函式零改動。
+- 驗證：先實讀 opencode_cell_audit.py L179-181/L355-362 確認契約（C 臂缺 tgz→ok=False＋unknown append；bad 非空→return 1）；驗收 pytest -k 單測 rc=0（1 passed）＋grep 命中行 1432（工單「行 1433 附近」為約數）；全檔 76 測試 rc=0；無「信任／證明變好」措辭（新增段 0 處）；commit 3deb4809；工單→done/、doing/ 0 張。
+- 沒驗證：3deb4809 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 3deb4809 CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。

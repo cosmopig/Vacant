@@ -78,7 +78,7 @@ def test_envelope_compliance_selftest() -> None:
     assert envelope_compliance.selftest() == 0
 
 
-def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path) -> None:
+def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path, capsys) -> None:
     """growth_report（主軸 2「一天長多少」量具）：selftest 紅綠對照＋判定口徑。
 
     紅燈（不能假 PASS）：
@@ -127,6 +127,22 @@ def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path) -> None:
     assert r["verdict"] == "PASS", r
     # 24h 視窗最大增長：00:00→12:00(+10MiB)、12:00→02:00(+10MiB)；00:00→02:00(+26h) 出窗
     assert r["max_24h_growth_bytes"] == 10 * 1024 * 1024, r
+
+    # CLI 回歸：--selftest / 判定退出碼（0=PASS、1=FAIL或UNKNOWN）/ --out 落盤
+    capsys.readouterr()  # 排空殘留
+    assert growth_report.main(["--selftest"]) == 0
+    assert "selftest: OK" in capsys.readouterr().out
+    # FAIL：上一段「over」序列（最新點超穩態封頂）→ 退出碼 1
+    assert growth_report.main(
+        ["--home", str(tmp_path / "over"), "--ops-data", str(tmp_path / "nope2"), "--json"]
+    ) == 1
+    # PASS＋--out 落盤：檔存在且 verdict == PASS
+    gr_out = tmp_path / "gr_out.json"
+    assert growth_report.main(
+        ["--home", str(tmp_path / "ok"), "--ops-data", str(tmp_path / "nope2"), "--out", str(gr_out)]
+    ) == 0
+    assert gr_out.is_file()
+    assert json.loads(gr_out.read_text(encoding="utf-8"))["verdict"] == "PASS"
 
 
 def test_envelope_compliance_verdicts_infra_skip_and_exit_codes(tmp_path: Path) -> None:
@@ -703,6 +719,19 @@ def test_e002_wiring_gauge_cli_normal_run_and_out_file(tmp_path: Path, capsys) -
     assert "\"n_cells\": 2" in capsys.readouterr().out
 
 
+def test_e002_wiring_gauge_cli_fail_exit_code(tmp_path: Path, capsys) -> None:
+    """e002_wiring_gauge CLI：C 格缺 vacant_home.tgz（線路破壞）→ main 回 1 且 criteria.c_gate_C.FAIL==1（線路中斷退出碼 1 契約）。"""
+    bad = tmp_path / "runs" / "exp_bad" / "polyglot_py-pg_bad-pi-C-r1"
+    bad.mkdir(parents=True)
+    (bad / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 0}), encoding="utf-8")
+    (bad / "score.json").write_text(json.dumps({"pass": True, "tests_total": 1}), encoding="utf-8")
+    # 刻意不建立 vacant_home.tgz（觸發 c_gate FAIL）
+    rc = e002_wiring_gauge.main(["exp_bad", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["criteria"]["c_gate_C"]["FAIL"] == 1
+
+
 def test_growth_report_cli_out_file(tmp_path: Path) -> None:
     # P20261030_1130-1（ASSIGNMENT 驗收 a：真機用量報告量具守護）：CLI --out 雙通道契約。
     # 合格序列（跨 26h 的 3 點、未超穩態封頂、最新 gc status=ok）時 main 須回 0，
@@ -792,6 +821,26 @@ def test_growth_report_load_points_dedup_and_invalid_lines(tmp_path: Path) -> No
     assert [p["total_bytes"] for p in pts] == [1000, 2000]
     dup = next(p for p in pts if p["total_bytes"] == 1000)
     assert dup["_src"] == str(f1)
+
+
+def test_growth_report_trend_semantics() -> None:
+    # P20261031_0311-5（ASSIGNMENT 🔴最優先 驗收 (a)：「一天長多少」長效監測量具之趨勢計算語義與單點容錯契約）。
+    # 單點：span_hours=0.0、max_24h=None 為 UNKNOWN 素材（非 PASS/非「沒有」）、net_growth=0、per_dir 峰值保留。
+    p1 = [{"ts": "2026-10-28T00:00:00+0000", "total_bytes": 1000, "per_dir_bytes": {"trace": 800}}]
+    t1 = growth_report.trend(p1)
+    assert t1["n_points"] == 1
+    assert t1["span_hours"] == 0.0
+    assert t1["max_24h_growth_bytes"] is None
+    assert t1["net_growth_bytes"] == 0
+    assert t1["per_dir_peak_bytes"]["trace"] == 800
+    # 多點 24h 視窗：12h 跨距取最大正向增長；peak_total_bytes 為序列峰值。
+    p2 = p1 + [{"ts": "2026-10-28T12:00:00+0000", "total_bytes": 2500, "per_dir_bytes": {"trace": 1500}}]
+    t2 = growth_report.trend(p2)
+    assert t2["n_points"] == 2
+    assert t2["span_hours"] == 12.0
+    assert t2["max_24h_growth_bytes"] == 1500
+    assert t2["peak_total_bytes"] == 2500
+    assert t2["net_growth_bytes"] == 1500
 
 
 def test_holm_e002_cli_recompute_cells_fallback(tmp_path: Path, capsys) -> None:
@@ -1073,6 +1122,22 @@ def test_growth_report_cli_missing_sources_human_unknown_exit_code(tmp_path: Pat
     assert "missing:" in out
 
 
+def test_growth_report_cli_missing_sources_out_file(tmp_path: Path) -> None:
+    # P20261031_0342-1（ASSIGNMENT 🔴最優先 驗收 4(a)：真機成長量具無數據來源時的落盤契約）：
+    # 指定不存在的 home 與 ops-data 目錄且帶 --out 旗標時，growth_report.main（L297-322）
+    # 須將 verdict=UNKNOWN、sources=[] 的合法 JSON 完整落盤到 out 檔（L316-318），
+    # 並以 exit code 1 安全退出（verdict != "PASS"）——不崩潰、不假 PASS，落盤檔完整可解析。
+    out_file = tmp_path / "unknown_report.json"
+    rc = growth_report.main(["--home", str(tmp_path / "nonexistent_home"),
+                             "--ops-data", str(tmp_path / "nonexistent_ops"),
+                             "--out", str(out_file)])
+    assert rc == 1
+    assert out_file.is_file()
+    data = json.loads(out_file.read_text(encoding="utf-8"))
+    assert data["verdict"] == "UNKNOWN"
+    assert data["sources"] == []
+
+
 def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
     # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
@@ -1106,6 +1171,57 @@ def test_vacant_growth_log_cli_missing_home_json(tmp_path: Path, capsys) -> None
     assert rec["note"] == "home missing"
 
 
+def test_vacant_growth_log_cli_missing_home_append(tmp_path: Path, capsys) -> None:
+    # P20261031_0255-1（ASSIGNMENT 🔴最優先 驗收 (a)：真機成長序列記錄量具治理）：
+    # --home 指向不存在的狀態目錄且以 --out 落盤追加時，vacant_growth_log.main
+    # （L86-99）須 mkdir parents 安全建立目標檔、寫入含 note="home missing" 之
+    # 記錄、stdout 含 "recorded " 與 "0 B (0.0 MiB)" 並回 0——核心零改動。
+    out_file = tmp_path / "out" / "growth.jsonl"
+    rc = vacant_growth_log.main(["--home", str(tmp_path / "nope_home"),
+                                 "--out", str(out_file)])
+    assert rc == 0
+    assert out_file.is_file()
+    lines = out_file.read_text(encoding="utf-8").splitlines()
+    assert json.loads(lines[0])["note"] == "home missing"
+    out = capsys.readouterr().out
+    assert "recorded " in out
+    assert "0 B (0.0 MiB)" in out
+
+
+def test_vacant_growth_log_corrupt_gc_report_fallback(tmp_path: Path) -> None:
+    # P20261031_0326-3（ASSIGNMENT 🔴最優先 驗收 4(a) 真機成長量具守護＋研發工具回歸守護）：
+    # snapshot 遭遇損壞的 gc_report.json（非合法 JSON）時須容錯略過——
+    # json.loads 拋 JSONDecodeError（ValueError 子類）被 except (OSError, ValueError) 捕獲
+    # （vacant_growth_log.py L57-63）、不崩潰、仍正確度量 total_bytes 與子目錄用量，
+    # 且 main --json 回 0——核心零改動。
+    home = tmp_path / "home"
+    (home / "trace").mkdir(parents=True)
+    (home / "trace" / "blob.txt").write_text("12345", encoding="utf-8")
+    (home / "gc_report.json").write_text("corrupted json not valid\n", encoding="utf-8")
+    rec = vacant_growth_log.snapshot(home)
+    assert rec["total_bytes"] == 30  # blob 5 B + gc_report 25 B
+    assert rec["per_dir_bytes"]["trace"] == 5
+    assert "gc_last" not in rec
+    rc = vacant_growth_log.main(["--home", str(home), "--json"])
+    assert rc == 0
+
+
+def test_vacant_growth_log_corrupt_out_file_fallback(tmp_path: Path) -> None:
+    # P20261031_0342-2（ASSIGNMENT 🔴最優先 驗收 4(a) 真機用量記錄器容錯守護＋研發工具回歸守護）：
+    # --out 指向之檔案末行非合法 JSON 時，main（L95-101）json.loads 拋
+    # JSONDecodeError（ValueError 子類）被 except ValueError 捕獲、容錯追加新快照
+    # 記錄、不崩潰且回 0——核心零改動。
+    home = tmp_path / "home"
+    home.mkdir()
+    out_file = tmp_path / "corrupt_growth.jsonl"
+    out_file.write_text("corrupt last line not json\n", encoding="utf-8")
+    rc = vacant_growth_log.main(["--home", str(home), "--out", str(out_file)])
+    assert rc == 0
+    lines = out_file.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    assert "total_bytes" in json.loads(lines[-1])
+
+
 def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1749-3（ASSIGNMENT 主軸 4：通用任務評估量具防禦契約治理）：
     # --suite 篩選後無相符題目 cell 時，noncode_cell_audit.main
@@ -1134,6 +1250,23 @@ def test_envelope_compliance_cli_override_envelope_fail(tmp_path: Path, capsys) 
     data = json.loads(capsys.readouterr().out)
     assert data["verdict"] == "FAIL"
     assert data["envelope_source"] == f"command-line --envelope {5 * 1024 * 1024}"
+
+
+def test_envelope_compliance_all_non_c_arms_na(tmp_path: Path, capsys) -> None:
+    # P20261031_0255-3（ASSIGNMENT 🔴最優先 驗收 (b)：實驗室格子封頂合規量具治理）：
+    # 目錄下僅有 A 臂等對照格（設計上沒裝 Vacant、超出封頂口徑）時，
+    # envelope_compliance.main（L256-290；_cell_state L106-108／_verdict L82-89）
+    # 須誠實回傳 verdict NA 且 exit 0（不誤判 FAIL）——核心零改動。
+    exp_dir = tmp_path / "runs" / "exp_a_only" / "cell_a1"
+    exp_dir.mkdir(parents=True)
+    (exp_dir / "cell.json").write_text(
+        json.dumps({"arm": "A", "agent_rc": 0, "timed_out": False}), encoding="utf-8")
+    rc = envelope_compliance.main(["exp_a_only", "--base", str(tmp_path / "runs")])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["verdict"] == "NA"
+    assert out["by_arm"]["A"]["verdict"] == "NA"
+    assert out["n_cells"] == 1
 
 
 def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
@@ -1174,6 +1307,30 @@ def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     rc = e002_pair_breakdown.main(["missing_exp", "--base", str(tmp_path)])
     assert rc == 2
     assert "找不到 run 目錄" in capsys.readouterr().err
+
+    # P20261031_0255-2（ASSIGNMENT 主軸 3＋量具契約鎖定）：--out 落盤與預設人讀輸出契約。
+    out_file = tmp_path / "pb_out.json"
+    rc = e002_pair_breakdown.main(["exp_pb", "--base", str(tmp_path), "--out", str(out_file)])
+    assert rc == 0
+    assert out_file.is_file()
+    assert json.loads(out_file.read_text(encoding="utf-8"))["tool"] == "e002_pair_breakdown"
+    assert "已寫入" in capsys.readouterr().err
+
+    rc = e002_pair_breakdown.main(["exp_pb", "--base", str(tmp_path)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "pair both: 1 t1" in out
+    assert "c_review unknown: 2 t1 t2" in out
+
+
+def test_e002_pair_breakdown_cli_selftest(capsys) -> None:
+    # P20261031_0326-4（ASSIGNMENT 主軸 3＋研發工具回歸守護）：e002 機制差異量具 CLI --selftest
+    # 離線自檢契約——免外部目錄依賴，rc==0 且 stdout 含 "OK"。
+    from ops.vlab.tools import e002_pair_breakdown
+    capsys.readouterr()
+    rc = e002_pair_breakdown.main(["--selftest"])
+    assert rc == 0
+    assert "OK" in capsys.readouterr().out
 
 
 def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatch) -> None:
@@ -1308,6 +1465,55 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatc
     empty = tmp_path / "pos_empty"; empty.mkdir()
     capsys.readouterr(); rc = opencode_cell_audit.main(["pos_exp", "--runs-dir", str(empty), "--json"])
     assert rc == 0 and json.loads(capsys.readouterr().out)["n_cells"] == 0  # --runs-dir 優先於 exp
+    # P20261031_0120-2（ASSIGNMENT「研發工具需納入回歸測試」＋審查指示第 3 條）：exp 位置參數搭配 --out 落盤契約鎖進回歸。
+    out_pos = tmp_path / "out_pos_audit.json"
+    capsys.readouterr()
+    assert opencode_cell_audit.main(["pos_exp", "--out", str(out_pos)]) == 0
+    assert out_pos.is_file()
+    assert json.loads(out_pos.read_text(encoding="utf-8"))["n_cells"] == 1
+
+
+def test_opencode_cell_audit_cli_missing_args_and_dir_error(tmp_path: Path) -> None:
+    # P20261031_0311-3（ASSIGNMENT 主軸 1＋審查指示第 3 條＋研發工具回歸守護）：
+    # opencode_cell_audit 參數防呆契約鎖進常規回歸——缺 exp/--runs-dir 與指向不存在目錄時
+    # 一律 argparse error（SystemExit code 2），不得崩潰或靜默放行。
+    from ops.vlab.tools import opencode_cell_audit
+    with pytest.raises(SystemExit) as exc:
+        opencode_cell_audit.main([])  # exp 與 --runs-dir 皆缺
+    assert exc.value.code == 2
+    with pytest.raises(SystemExit) as exc:
+        opencode_cell_audit.main(["--runs-dir", str(tmp_path / "nonexistent")])  # --runs-dir 不存在
+    assert exc.value.code == 2
+    with pytest.raises(SystemExit) as exc:
+        opencode_cell_audit.main(["nonexistent_exp_xyz"])  # exp 有但目錄不存在
+    assert exc.value.code == 2
+
+
+def test_opencode_cell_audit_c_arm_missing_vacant_home_bad(tmp_path: Path, capsys) -> None:
+    # P20261031_0326-2（ASSIGNMENT 主軸 1 OpenCode 真實 agent 串接＋審查指示第 3 條 e006 收尾量具工具契約）：
+    # C 臂格子缺失 vacant_home.tgz 時嚴格記 ok=False、unknown 含 "vacant_home.tgz missing (arm C)"、
+    # 計入 bad 清單且 main 回傳 exit 1——C 臂 Vacant 必須落盤的不可妥協鐵律鎖進常規回歸。
+    # 只測既有工具，核心零改動。mock 格只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    from ops.vlab.tools import opencode_cell_audit
+
+    c_runs = tmp_path / "c_runs"
+    c_runs.mkdir()
+    cell = c_runs / "polyglot_py-task1-opencode-C-r1"
+    cell.mkdir()
+    (cell / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 0, "wall_s": 10.0}), encoding="utf-8")
+    (cell / "events.jsonl").write_text(
+        json.dumps({"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 100}}}) + "\n",
+        encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    # 刻意不建 vacant_home.tgz——C 臂 Vacant 證據缺失是確定欠缺，不是「未知」。
+
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(c_runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == ["polyglot_py-task1-opencode-C-r1"]
+    assert out["cells"][0]["ok"] is False
+    assert "vacant_home.tgz missing (arm C)" in out["cells"][0]["unknown"]
 
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
@@ -1354,6 +1560,58 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     capsys.readouterr()
     assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(outp), "--json"]) == 0
     assert outp.is_file()
+    # P20261031_0049-3（ASSIGNMENT「研發工具需納入回歸測試」）：預設終端人讀模式（未帶 --json）CLI 契約回歸。
+    # (d) exp 位置參數＋無 --json → rc=0，且首行排版穩定（e004_verdict m= 標頭在案）。
+    capsys.readouterr()
+    assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path)]) == 0
+    assert "e004_verdict m=" in capsys.readouterr().out
+    # P20261031_0120-4（ASSIGNMENT「研發工具需納入回歸測試」）：REPORT.json 格式不符 → 退出碼 2 契約回歸。
+    # (e) 損壞之 REPORT.json（not json）→ rc=2，且 stderr 含「REPORT.json 格式不符」。
+    bad_rep = tmp_path / "bad_report_e004"
+    bad_rep.mkdir()
+    (bad_rep / "REPORT.json").write_text("not json", encoding="utf-8")
+    capsys.readouterr()
+    assert e004_verdict.main(["bad_report_e004", "--runs-dir", str(tmp_path)]) == 2
+    assert "REPORT.json 格式不符" in capsys.readouterr().err
+
+    # P20261031_0153-2（ASSIGNMENT「研发工具需纳入回归测试」）：REPORT.json 各臂 calls/tokens 为 0.0/0
+    # 时，由 AUDIT.json 补齐真实成本——rc=0、cost 行含 over=False、无 calls=None tokens=None。
+    fb = tmp_path / "exp_fb_e004"; fb.mkdir()
+    rep_fb = e004_verdict._mock_report()
+    for arm in rep_fb["per_arm"]:
+        rep_fb["per_arm"][arm].update(calls_per_success=0.0, tokens_per_success=0)
+    (fb / "REPORT.json").write_text(json.dumps(rep_fb), encoding="utf-8")
+    (fb / "AUDIT.json").write_text(json.dumps({"summary": {"per_arm": {
+        "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+        "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+        "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+        "M": {"calls_per_success": 10.0, "tokens_per_success": 500.0,
+              "second_agent_verified_cells": 5, "second_agent_unknown_cells": 15},
+        "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0}}}}), encoding="utf-8")
+    capsys.readouterr()
+    assert e004_verdict.main(["exp_fb_e004", "--runs-dir", str(tmp_path)]) == 0
+    line_fb = next(l for l in capsys.readouterr().out.splitlines() if "cost(2×A 紅線)" in l)
+    assert "over=False" in line_fb and "calls=None tokens=None" not in line_fb
+
+    # P20261031_0153-4（ASSIGNMENT「研發工具需納入回歸測試」）：AUDIT.json 損壞（not json）→ 容錯回退 audit=None、rc=0 契約回歸。
+    bad_aud = tmp_path / "bad_audit_e004"; bad_aud.mkdir()
+    (bad_aud / "REPORT.json").write_text(json.dumps(e004_verdict._mock_report()), encoding="utf-8")
+    (bad_aud / "AUDIT.json").write_text("corrupt json", encoding="utf-8")
+    capsys.readouterr()
+    assert e004_verdict.main(["bad_audit_e004", "--runs-dir", str(tmp_path), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["audit"] is None
+
+    # P20261031_0240-3（ASSIGNMENT「研發工具需納入回歸測試」）：人讀模式（未帶 --json）＋--out 落盤 CLI 契約回歸。
+    # (f) exp_mock 人讀＋--out → rc=0、stdout 為人讀文字（e004_verdict m= 標頭）、stderr 含「# wrote」、
+    #     落盤檔為合法 JSON 且頂層 hypotheses 含 "H-acc"。
+    hum = tmp_path / "human_verdict_e004.json"
+    capsys.readouterr()
+    assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(hum)]) == 0
+    hum_out = capsys.readouterr()
+    assert "e004_verdict m=" in hum_out.out
+    assert "# wrote" in hum_out.err
+    humj = json.loads(hum.read_text(encoding="utf-8"))
+    assert "H-acc" in humj["hypotheses"]
 
 
 def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
@@ -1405,3 +1663,185 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert "e006_verdict m=" in txt
     assert "H-acc" in txt
     assert "cost(2×A 紅線)" in txt
+
+    # P20261031_0120-3（ASSIGNMENT「研發工具需納入回歸測試」）：REPORT.json 格式不符 → 退出碼 2 契約回歸。
+    bad_rep = tmp_path / "bad_report"
+    bad_rep.mkdir()
+    (bad_rep / "REPORT.json").write_text("not json", encoding="utf-8")
+    capsys.readouterr()
+    assert e006_verdict.main(["bad_report", "--runs-dir", str(tmp_path)]) == 2
+    assert "REPORT.json 格式不符" in capsys.readouterr().err
+
+    # P20261031_0153-1（ASSIGNMENT「研發工具需納入回歸測試」）：e006_verdict 命令列下、REPORT.json 各臂
+    # calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵）時，由 AUDIT.json 補齊真實成本，
+    # 人讀輸出印出非 None 成本比與紅線判定（over=False 在案、無 calls=None tokens=None）。
+    fb = tmp_path / "exp_fb_e006"; fb.mkdir()
+    rep_fb = e006_verdict._mock_report()
+    for arm in rep_fb["per_arm"]:
+        rep_fb["per_arm"][arm]["calls_per_success"] = 0.0
+        rep_fb["per_arm"][arm]["tokens_per_success"] = 0
+    (fb / "REPORT.json").write_text(json.dumps(rep_fb), encoding="utf-8")
+    (fb / "AUDIT.json").write_text(json.dumps({
+        "summary": {"per_arm": {
+            "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+            "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+            "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+            "M": {"calls_per_success": 10.0, "tokens_per_success": 500.0,
+                  "second_agent_verified_cells": 5, "second_agent_unknown_cells": 15},
+            "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0}}}}), encoding="utf-8")
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_fb_e006", "--runs-dir", str(tmp_path)]) == 0
+    out_fb = capsys.readouterr().out
+    line_fb = next(l for l in out_fb.splitlines() if "cost(2×A 紅線)" in l)
+    assert "over=False" in line_fb and "calls=None tokens=None" not in line_fb
+
+    # P20261031_0153-3（ASSIGNMENT「研發工具需納入回歸測試」）：AUDIT.json 內容損壞（not json）
+    # → 容錯回退 audit=None、主流程不崩潰（退出碼 0）契約回歸。
+    bad_aud = tmp_path / "bad_audit_e006"; bad_aud.mkdir()
+    (bad_aud / "REPORT.json").write_text(json.dumps(e006_verdict._mock_report()), encoding="utf-8")
+    (bad_aud / "AUDIT.json").write_text("corrupt json", encoding="utf-8")
+    capsys.readouterr()
+    assert e006_verdict.main(["bad_audit_e006", "--runs-dir", str(tmp_path), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["audit"] is None
+
+    # P20261031_0224-3（ASSIGNMENT 研發工具回歸守護＋資深審查指示第 3 條）：人讀模式（未帶 --json）
+    # 帶 --out 落盤契約回歸——stdout 為人讀文字、stderr 印 "# wrote"、--out 檔為合法 JSON 且含 H-acc。
+    hv = tmp_path / "human_verdict.json"
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(hv)]) == 0
+    err = capsys.readouterr()
+    assert "e006_verdict m=" in err.out
+    assert "# wrote" in err.err
+    assert hv.is_file()
+    data = json.loads(hv.read_text(encoding="utf-8"))
+    assert "H-acc" in data["hypotheses"]
+
+
+def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
+    # 驗證當 REPORT.json 中 calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵），
+    # evaluate_hypotheses 能從 audit_summary 補齊真實成本並判定 2×A 紅線。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 2, "C_only": 2, "mcnemar_p_two_sided": 1.0}
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+
+    aud = {"summary": {"per_arm": {
+        "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+        "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+        "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+        "M": {"second_agent_verified_cells": 5, "second_agent_unknown_cells": 15,
+              "calls_per_success": 10.0, "tokens_per_success": 500.0},
+        "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0},
+    }}}
+
+    r = e006_verdict.evaluate_hypotheses(rep, aud)
+    cost = r["cost_redline_2xA"]["arms"]
+    assert cost["C"]["over_2x_A_cost"] is False
+    assert cost["C"]["not_worth_it"] is False
+    assert cost["H"]["over_2x_A_cost"] is True
+    assert cost["H"]["not_worth_it"] is True
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+
+
+def test_e004_verdict_audit_cost_fallback(tmp_path: Path) -> None:
+    # 驗證 e004_verdict 同樣具備從 audit_summary 補齊真實成本並判定 2×A 紅線能力。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 2, "C_only": 2, "mcnemar_p_two_sided": 1.0}
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+
+    aud = {"summary": {"per_arm": {
+        "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+        "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+        "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+        "M": {"second_agent_verified_cells": 5, "second_agent_unknown_cells": 15,
+              "calls_per_success": 10.0, "tokens_per_success": 500.0},
+        "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0},
+    }}}
+
+    r = e004_verdict.evaluate_hypotheses(rep, aud)
+    cost = r["cost_redline_2xA"]["arms"]
+    assert cost["C"]["over_2x_A_cost"] is False
+    assert cost["C"]["not_worth_it"] is False
+    assert cost["H"]["over_2x_A_cost"] is True
+    assert cost["H"]["not_worth_it"] is True
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+
+
+def test_audit_out_feeds_verdict_audit_chain(tmp_path: Path, capsys) -> None:
+    # 審查指示第 3 條（e006 完賽收尾驗收流程）鏈式契約：
+    # opencode_cell_audit --out 落盤的 AUDIT.json（頂層 summary.per_arm）須能直接餵 e006_verdict
+    # （--audit 預設讀 runs/<exp>/AUDIT.json）；REPORT.json 成本為 0.0（OpenCode 無 cell.json
+    # metrics 特徵）時，2×A 成本紅線須由 audit 實測值補齊而非全 None。
+    # 兩量具是 e006/e004 收尾法定量具，彼此形狀契約（audit 輸出＝verdict 輸入）須受回歸守護。
+    from ops.vlab.tools import opencode_cell_audit, e006_verdict
+
+    exp_dir = tmp_path / "runs" / "exp_chain"
+    exp_dir.mkdir(parents=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-A-r1", "A", score_pass=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-C-r1", "C", score_pass=True)
+
+    # REPORT.json 成本全 0（OpenCode 無 cell.json metrics 特徵）
+    rep = e006_verdict._mock_report()
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+    (exp_dir / "REPORT.json").write_text(json.dumps(rep), encoding="utf-8")
+
+    audit_json = exp_dir / "AUDIT.json"
+    capsys.readouterr()  # 排空殘留，保持 --out stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(exp_dir), "--out", str(audit_json)])
+    assert rc == 0
+    assert audit_json.is_file()
+
+    capsys.readouterr()
+    rc = e006_verdict.main(["exp_chain", "--runs-dir", str(tmp_path / "runs"), "--json"])
+    assert rc == 0
+    r = json.loads(capsys.readouterr().out)
+    cost = r["cost_redline_2xA"]
+    assert cost["A_base"]["calls_per_success"] == 2.0      # audit 補齊（mock A：2 呼叫／800 tokens）
+    assert cost["A_base"]["tokens_per_success"] == 800.0
+    assert cost["arms"]["C"]["calls_vs_A"] == 1.0          # audit 補齊（mock C：同 2 呼叫／800 tokens）
+    assert cost["arms"]["C"]["over_2x_A_cost"] is False
+    assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
+
+
+def test_audit_out_feeds_e004_verdict_chain(tmp_path: Path, capsys) -> None:
+    # 審查指示第 1/3 條（e004/e006 收尾判定量具同族守護）鏈式契約：
+    # opencode_cell_audit --out 落盤的 AUDIT.json（頂層 summary.per_arm）須能直接餵 e004_verdict
+    # （--audit 預設讀 runs/<exp>/AUDIT.json）；REPORT.json 成本為 0.0/0（OpenCode 無 cell.json
+    # metrics 特徵）時，2×A 成本紅線須由 audit 實測值補齊而非全 None。
+    from ops.vlab.tools import opencode_cell_audit, e004_verdict
+
+    exp_dir = tmp_path / "runs" / "exp_chain_e004"
+    exp_dir.mkdir(parents=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-A-r1", "A", score_pass=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-C-r1", "C", score_pass=True)
+
+    # REPORT.json 成本全 0.0/0（OpenCode 無 cell.json metrics 特徵）
+    rep = e004_verdict._mock_report()
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+    (exp_dir / "REPORT.json").write_text(json.dumps(rep), encoding="utf-8")
+
+    audit_json = exp_dir / "AUDIT.json"
+    capsys.readouterr()  # 排空殘留，保持 --out stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(exp_dir), "--out", str(audit_json)])
+    assert rc == 0
+    assert audit_json.is_file()
+
+    capsys.readouterr()
+    rc = e004_verdict.main(["exp_chain_e004", "--runs-dir", str(tmp_path / "runs"), "--json"])
+    assert rc == 0
+    r = json.loads(capsys.readouterr().out)
+    cost = r["cost_redline_2xA"]
+    assert cost["A_base"]["calls_per_success"] == 2.0      # audit 補齊（mock A：2 呼叫／800 tokens）
+    assert cost["arms"]["C"]["over_2x_A_cost"] is False
+    assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」

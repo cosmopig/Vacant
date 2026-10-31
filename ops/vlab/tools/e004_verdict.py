@@ -46,15 +46,29 @@ def holm_adjust(pvals):
         return adj, "inline (step-down)"
 
 
-def cost_redline(per_arm):
-    """各臂 vs A 的成本比；over_2x_A_cost：True/False/None（None = 有維度量不到，不判違規也不判過）。"""
+def cost_redline(per_arm, audit_per_arm=None):
+    """各臂 vs A 的成本比；over_2x_A_cost：True/False/None（None = 有維度量不到，不判違規也不判過）。
+    若 REPORT.json 成本為 0.0 或缺失（如 OpenCode 無 cell.json metrics），可由 audit_per_arm 補充。
+    """
     a = per_arm.get("A") if isinstance(per_arm.get("A"), dict) else {}
     bc, bt = num(a.get("calls_per_success")), num(a.get("tokens_per_success"))
+    if (not bc or not bt) and isinstance(audit_per_arm, dict):
+        aud_a = audit_per_arm.get("A") if isinstance(audit_per_arm.get("A"), dict) else {}
+        if not bc:
+            bc = num(aud_a.get("calls_per_success"))
+        if not bt:
+            bt = num(aud_a.get("tokens_per_success"))
     base = {"calls_per_success": bc, "tokens_per_success": bt}
     out = {}
     for x in ARMS:
         d = per_arm.get(x) if isinstance(per_arm.get(x), dict) else {}
         c, t = num(d.get("calls_per_success")), num(d.get("tokens_per_success"))
+        if (c is None or t is None or c == 0.0 or t == 0.0) and isinstance(audit_per_arm, dict):
+            aud_x = audit_per_arm.get(x) if isinstance(audit_per_arm.get(x), dict) else {}
+            if c is None or c == 0.0:
+                c = num(aud_x.get("calls_per_success"))
+            if t is None or t == 0.0:
+                t = num(aud_x.get("tokens_per_success"))
         cc, tt = (c / bc) if (c is not None and bc) else None, (t / bt) if (t is not None and bt) else None
         co, to = (cc > 2.0) if cc is not None else None, (tt > 2.0) if tt is not None else None
         over = True if (co is True or to is True) else (False if (co is False and to is False) else None)
@@ -91,7 +105,9 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
     if order:
         corr, impl = holm_adjust([raw[x] for x in order])
         adj.update(zip(order, corr))
-    cost = cost_redline(per_arm)
+    aud_s = audit_summary.get("summary") if isinstance(audit_summary, dict) and "summary" in audit_summary else audit_summary
+    aud_arm = aud_s.get("per_arm") if isinstance(aud_s, dict) else None
+    cost = cost_redline(per_arm, aud_arm)
     ev = m_evidence(audit_summary)
     hyp = {}
     for x in ARMS:
@@ -127,7 +143,7 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
         h = hyp[HYP[x]]
         improved = h["significant_at_alpha"] and (h["X_only"] or 0) > (h["A_only"] or 0)
         o = cost["arms"][x]["over_2x_A_cost"]
-        cost["arms"][x]["not_worth_it"] = None if o is None else (not improved)
+        cost["arms"][x]["not_worth_it"] = None if o is None else (bool(o) and not improved)
     return {"schema": "vacant.e004_verdict/1", "alpha": alpha, "m_in_holm_set": len(order), "holm_impl": impl,
             "cost_redline_2xA": cost, "hypotheses": hyp,
             "notes": ["不顯著 ⇒ 未建立（不是負結果）；顯著但成本 > 2×A ⇒「有效但昂貴」",
