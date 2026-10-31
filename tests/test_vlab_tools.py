@@ -4422,3 +4422,34 @@ def test_e004_verdict_a_zero_cost_missing_confirmed_cost_unknown() -> None:
     assert "A 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]  # 理由精確指認缺失臂（單主體 A）
     assert "C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]  # C 臂健全，不誤標
     assert "A 臂與 C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]  # 非雙主體缺失
+
+
+def test_growth_report_exact_trace_cap_boundary_pass(tmp_path: Path, capsys) -> None:
+    # P20261031_1809-1（ASSIGNMENT 🔴最優先 驗收(a)：長效監度量具守護）：growth.jsonl
+    # 2 點跨 24h（≥20h 門檻）、gc 健全（status=ok、target_reached=true）、最新點 total
+    # 健全（150 MiB，遠在 256 MiB 穩態封頂內），且最新點 trace **恰好等於** 64 MiB 上限
+    #（67,108,864 B、壓線不超）時，判定邊界是嚴格大於（> 才是超標、≤ 即合規）——
+    # growth_report.report() 須判 verdict=PASS（壓線不超，絕不誤判 FAIL）、
+    # peak_overrun.over_stable_envelope 為 False；CLI --json 以退出碼 0 安全退出。
+    # 與 test_growth_report_exact_trace_cap_plus_one_byte_fail（超 1 byte 判 FAIL）
+    # 構成完全對稱的 trace 硬上限臨界邊界閉環，鎖進常規回歸。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 24h（≥ MIN_EVIDENCE_HOURS=20h 門檻）；最新點 total 在封頂內、trace 恰好壓線
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 100 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T00:00:00+0000", "total_bytes": 150 * 1024 * 1024,  # 150 MiB < 256 MiB 封頂，未超
+          "per_dir_bytes": {"trace": 64 * 1024 * 1024},  # 67,108,864 B＝trace 上限，恰好壓線（≤ 即合規）
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS"  # trace 恰好＝上限（≤ 合規），絕不誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is False  # 峰值 150 MiB 在 256 MiB 封頂內
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # PASS 時 CLI 安全退出碼 0
