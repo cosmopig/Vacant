@@ -2571,3 +2571,22 @@ def test_e004_verdict_m_with_evidence_confirmed() -> None:
     assert r["hypotheses"]["H-review(M)"]["cost_over_2x_A"] is False
     # 成本合格且顯著提升 ⇒ 不是「不划算」
     assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False
+
+
+def test_e004_verdict_missing_paired_unknown() -> None:
+    # 驗證 e004_verdict 在 C 臂配對缺失（A_vs_C=None ⇒ p 為 None、不進 Holm 集）時，H-acc 必須記 state=="UNKNOWN"（未測，不是沒有）、
+    # 理由含「配對缺失、未測（不進 Holm 集）」、p_raw/p_holm 皆 None、m_in_holm_set 排除未測臂（4→3）——配對缺失時誠實記 UNKNOWN 之判定防線鎖進 e004 常規回歸（工單 P20261031_0952-3）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = None  # C 臂配對缺失（未測）
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 配對缺失 ⇒ UNKNOWN（未測，不是沒有），不崩潰
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測（不進 Holm 集）" in r["hypotheses"]["H-acc"]["reason"]
+    # p_raw / p_holm 皆為 None（未測，不是 p=1.0）
+    assert r["hypotheses"]["H-acc"]["p_raw"] is None
+    assert r["hypotheses"]["H-acc"]["p_holm"] is None
+    # Holm 調整集排除未測 C 臂：m 由 4 降為 3
+    assert r["m_in_holm_set"] == 3
