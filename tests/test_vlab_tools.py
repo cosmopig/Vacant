@@ -3208,3 +3208,27 @@ def test_e006_verdict_c_cost_within_cap_not_established() -> None:
     c = r["hypotheses"]["H-acc"]
     assert c["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in c["reason"]
+
+
+def test_growth_report_caps_missing_unknown(tmp_path: Path, monkeypatch, capsys) -> None:
+    # 驗證 growth_report：跨日序列證據足（2 點跨 25h ≥ 20h 門檻）、gc_last 均 ok、
+    # 但產品上限常數缺失（ENVELOPE_BYTES=None）時：report() 精確判 verdict="UNKNOWN"、
+    # reason 載明「上限常數取不到」（序列有、但對不上產品上限，不判 PASS），
+    # CLI --json 以 exit code 1 安全退出——真機增長量具在依賴缺失時絕不偽判 PASS——工單 P20261031_1313-1
+    monkeypatch.setattr(growth_report, "ENVELOPE_BYTES", None)  # 模擬 vacant_network.retention import 失敗
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-29T01:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert "上限常數取不到" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
