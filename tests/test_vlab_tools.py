@@ -2761,3 +2761,33 @@ def test_e006_verdict_m_not_worth_it() -> None:
     assert m["state"] == "UNKNOWN"                                        # 第二 agent 證據仍缺 ⇒ 記 UNKNOWN（不計臂失敗）
     assert "無第二 agent 證據" in m["reason"] and "記 UNKNOWN" in m["reason"]
     assert m["second_agent"]["evidence_present"] is False
+
+
+def test_e004_verdict_missing_counts_unknown() -> None:
+    # 驗證 e004_verdict 在 p 顯著但配對計數缺失（A_only 或 X_only 為 None）時，
+    # 絕不誤判為 NOT_ESTABLISHED 或宣稱「不顯著」，必須誠實記 UNKNOWN（量不到方向）
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": None, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is True
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對計數缺失（量不到方向）" in r["hypotheses"]["H-acc"]["reason"]
+    assert "不顯著" not in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e006_verdict_missing_counts_unknown() -> None:
+    # 驗證 e006_verdict 在 p 顯著但配對計數缺失（A_only 或 X_only 為 None）時，
+    # 絕不誤判為 NOT_ESTABLISHED 或宣稱「不顯著」，必須誠實記 UNKNOWN（量不到方向）
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 10, "C_only": None, "mcnemar_p_two_sided": 0.001}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is True
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對計數缺失（量不到方向）" in r["hypotheses"]["H-acc"]["reason"]
+    assert "不顯著" not in r["hypotheses"]["H-acc"]["reason"]
