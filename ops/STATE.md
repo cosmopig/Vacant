@@ -138,3 +138,9 @@
 - 驗證：驗收鏈 rc=0（grep "13:32 續記" 命中行 165、cmp 無輸出、末行 ACCEPTANCE_OK）；git diff 1 檔 1+；commit 60bcb34a（status 乾淨、branch auto/qwen27b）；工單→done/、doing/ 0 張。
 - 沒驗證：60bcb34a CI 未出；50 點用量數字依工單給定值轉錄，未重跑 growth_report.py 自 ~/.vacant 重算。
 - 下一步：監控 60bcb34a/18a7aa2b/3470383d CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 新工單續做。
+## round 654 (2026-10-31 16:0x) · P20261031_1549-5 e004_verdict M 臂成本 2×A 內且成效未顯著 ⇒ not_worth_it=False／NOT_ESTABLISHED 誠實契約測試（結案）
+- 主軸：ASSIGNMENT 主軸3（效益差別驗證／成效與成本綁定紅線）；e004 M 臂（模型仲裁臂）未超標時不誤判「不划算」、NOT_ESTABLISHED 非負結果、有第二 agent 證據不降級 UNKNOWN，與 e006 對稱，入常規回歸。
+- 做了：tests/test_vlab_tools.py 檔尾（行 3685）新增 test_e004_verdict_m_cost_within_cap_not_established（25 行函式體＋2 空行，A_vs_M p=1.0/A_only=2/M_only=2＋A 10.0/1000.0 vs M 13.0/1400.0＋_mock_audit(5) 證據）；先對 e004_verdict.py L49-175 實分支確認（cc=1.3/tt=1.4⇒over=False；evidence_present=True；Holm adj(M)=1.0 非顯著⇒NOT_ESTABLISHED；o=False⇒not_worth_it=False；理由字串同 e006 L158）再寫斷言；e004 核心邏輯與既有測試未動。
+- 驗證：驗收鏈 rc=0（pytest 1 passed, 164 deselected、grep 命中行 3685、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 165 項 rc=0；git diff 1 檔 +27；commit 14273f65（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
+- 沒驗證：14273f65 CI 未出；本單僅鎖 _mock_report 契約（mock 場景），未以 e004 真機 REPORT.json 重放本場景。
+- 下一步：監控 14273f65/1fb25ebd/8f1d3b59/4992200f/077315d9 CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
