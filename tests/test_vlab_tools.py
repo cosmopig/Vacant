@@ -2142,3 +2142,22 @@ def test_e006_verdict_direction_negative_not_established() -> None:
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
     assert r["hypotheses"]["H-stakes(a)"]["significant_at_alpha"] is True
     assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
+
+
+def test_e006_verdict_not_significant_not_established() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm-adjusted p 值未達統計顯著（p_raw=0.20、
+    # p_holm≥0.20 >= 0.05）但方向為正（C_only=6 > A_only=2）時，判定 H-acc 為
+    # state=="NOT_ESTABLISHED"（reason 含「不顯著（或方向非正）⇒ 未建立（不是負結果）」）
+    # 且 significant_at_alpha is False、成本紅線 not_worth_it is False——
+    # 未達顯著時絕不誤發 CONFIRMED 之判定防呆鎖進常規回歸（工單 P20261031_0650-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂方向為正但未達統計顯著：C_only=6 > A_only=2，p=0.20（Holm 後仍 >= 0.05）
+    rep["paired"]["A_vs_C"] = {"pairs": 20, "A_only": 2, "C_only": 6, "mcnemar_p_two_sided": 0.20}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
+    assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is False
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
