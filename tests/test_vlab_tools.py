@@ -1206,6 +1206,22 @@ def test_vacant_growth_log_corrupt_gc_report_fallback(tmp_path: Path) -> None:
     assert rc == 0
 
 
+def test_vacant_growth_log_corrupt_out_file_fallback(tmp_path: Path) -> None:
+    # P20261031_0342-2（ASSIGNMENT 🔴最優先 驗收 4(a) 真機用量記錄器容錯守護＋研發工具回歸守護）：
+    # --out 指向之檔案末行非合法 JSON 時，main（L95-101）json.loads 拋
+    # JSONDecodeError（ValueError 子類）被 except ValueError 捕獲、容錯追加新快照
+    # 記錄、不崩潰且回 0——核心零改動。
+    home = tmp_path / "home"
+    home.mkdir()
+    out_file = tmp_path / "corrupt_growth.jsonl"
+    out_file.write_text("corrupt last line not json\n", encoding="utf-8")
+    rc = vacant_growth_log.main(["--home", str(home), "--out", str(out_file)])
+    assert rc == 0
+    lines = out_file.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    assert "total_bytes" in json.loads(lines[-1])
+
+
 def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1749-3（ASSIGNMENT 主軸 4：通用任務評估量具防禦契約治理）：
     # --suite 篩選後無相符題目 cell 時，noncode_cell_audit.main
