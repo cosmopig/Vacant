@@ -3784,3 +3784,47 @@ def test_e004_verdict_h_confirmed_cost_unknown() -> None:
     assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
     assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_e006_verdict_h_zero_cost_treated_as_missing_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict：當 H 臂成效顯著提升（H_only=10 > A_only=0, p=0.001），
+    # 但 REPORT.json 中 H 臂成本為 0.0/0.0（OpenCode 無 metrics 特徵，且無 audit 補充）時，
+    # 量具必須將 0.0 成本視為「成本缺失（量不到）」，而非免費（0 元）；
+    # calls_vs_A 與 tokens_vs_A 須為 None，over_2x_A_cost 須為 None（不判過亦不判違規），
+    # not_worth_it 須為 None（無法斷言划算與否，嚴防偽判 False 或 True），
+    # 假說態須為 CONFIRMED_COST_UNKNOWN，理由精確載明「H 臂成本缺失」，嚴禁偽判 CONFIRMED。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["H"] = {"calls_per_success": 0.0, "tokens_per_success": 0.0}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["calls_vs_A"] is None
+    assert r["cost_redline_2xA"]["arms"]["H"]["tokens_vs_A"] is None
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_e004_verdict_h_zero_cost_treated_as_missing_confirmed_cost_unknown() -> None:
+    # 驗證 e004_verdict：與 e006 對稱，當 H 臂成效顯著提升但 REPORT.json 成本為 0.0/0.0 時，
+    # 0.0 成本必須視為「成本缺失」，嚴防將 0.0 當作實數 0 成本而誤判 over_2x_A_cost=False
+    # 或升格 CONFIRMED。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["H"] = {"calls_per_success": 0.0, "tokens_per_success": 0.0}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["calls_vs_A"] is None
+    assert r["cost_redline_2xA"]["arms"]["H"]["tokens_vs_A"] is None
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
