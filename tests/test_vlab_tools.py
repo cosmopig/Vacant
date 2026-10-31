@@ -823,6 +823,26 @@ def test_growth_report_load_points_dedup_and_invalid_lines(tmp_path: Path) -> No
     assert dup["_src"] == str(f1)
 
 
+def test_growth_report_trend_semantics() -> None:
+    # P20261031_0311-5（ASSIGNMENT 🔴最優先 驗收 (a)：「一天長多少」長效監測量具之趨勢計算語義與單點容錯契約）。
+    # 單點：span_hours=0.0、max_24h=None 為 UNKNOWN 素材（非 PASS/非「沒有」）、net_growth=0、per_dir 峰值保留。
+    p1 = [{"ts": "2026-10-28T00:00:00+0000", "total_bytes": 1000, "per_dir_bytes": {"trace": 800}}]
+    t1 = growth_report.trend(p1)
+    assert t1["n_points"] == 1
+    assert t1["span_hours"] == 0.0
+    assert t1["max_24h_growth_bytes"] is None
+    assert t1["net_growth_bytes"] == 0
+    assert t1["per_dir_peak_bytes"]["trace"] == 800
+    # 多點 24h 視窗：12h 跨距取最大正向增長；peak_total_bytes 為序列峰值。
+    p2 = p1 + [{"ts": "2026-10-28T12:00:00+0000", "total_bytes": 2500, "per_dir_bytes": {"trace": 1500}}]
+    t2 = growth_report.trend(p2)
+    assert t2["n_points"] == 2
+    assert t2["span_hours"] == 12.0
+    assert t2["max_24h_growth_bytes"] == 1500
+    assert t2["peak_total_bytes"] == 2500
+    assert t2["net_growth_bytes"] == 1500
+
+
 def test_holm_e002_cli_recompute_cells_fallback(tmp_path: Path, capsys) -> None:
     # P20261030_1301-3（ASSIGNMENT 主軸 3：e002 多重檢驗校正量具回退重算路徑）：
     # 無 REPORT.json 但存在原始格子（A 臂與 C 臂 score.json）時，main 須從格子
