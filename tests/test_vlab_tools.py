@@ -3784,3 +3784,29 @@ def test_e004_verdict_h_confirmed_cost_unknown() -> None:
     assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
     assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_growth_report_span_below_20h_unknown(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：序列點數滿足（2 點、gc_last 均 ok）、用量在封頂內，但時間跨度僅 19.9h
+    #（2026-10-28T00:00:00→19:54:00，恰低於 MIN_EVIDENCE_HOURS=20h 臨界門檻 0.1h）時：
+    # report() 精確判 verdict="UNKNOWN"、span_hours=19.9、reason 載明「門檻 ≥2 點且 ≥20h」
+    # 與「還量不出來」（不偽判 PASS 也非 FAIL）；CLI --json 以 exit code 1 安全退出——
+    # 時長未滿 20h 邊界的客觀嚴格判定（工單 P20261031_1619-2）
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T19:54:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert r["span_hours"] == 19.9, r
+    assert "門檻 ≥2 點且 ≥20h" in r["reason"], r
+    assert "還量不出來" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
