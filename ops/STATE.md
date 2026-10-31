@@ -204,3 +204,10 @@
 - 驗證：驗收鏈 rc=0（grep pg_zipper 命中行 162、grep「累計 34 格 min 29,824 B」命中、cmp 外部副本無輸出、末行 ACCEPTANCE_OK）；4d6f3e06 已含該行（git log 核過）；本輪無 repo 內容改動（重複工單，避免製造重覆行）。
 - 沒驗證：4d6f3e06 CI 未出（純文件 1 行）；213,193 B 原始數值未獨立複核（依工單提供值）；zipper H/M/S 臂未完賽、e006 最終判定仍待（UNKNOWN/NOT_ESTABLISHED 不隱瞞）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查。
 - 下一步：open/ 續做（doing/ 已 0 張、等 open/ 或新工單）；zipper H/M/S 完賽→逐格同步＋法定收尾（rescore→audit→verdict→回填，不隱瞞 UNKNOWN/NOT_ESTABLISHED）；e007 smoke 結果→查過關→發射 e008 或修 infra；監控 4d6f3e06/94bf1be3 CI。
+
+## round 746 (2026-10-31 22:4x) · P20261031_2228-3-audit-e006-full-run-and-commit-evidence.md（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效同報）；e006 170 格完賽後全盤審計證據入庫。
+- 做了：report.py e006 --rescore（0 mismatch）→ mkdir ops/vlab/runs_e006_opencode_polyglot/ → opencode_cell_audit.py --out AUDIT.json（rc=1 為預期：7 infra 格＋M 臂缺審查者）→ cp REPORT.json 入 repo；未動 /srv/vlab 程式、未改兩 JSON 內容；工單回填 3 行移 done/、doing/ 0 張。
+- 驗證：驗收鏈 rc=0（兩檔非空、incomplete_cells=0、末行 ACCEPTANCE_OK）；AUDIT.json 177 格＝170 complete＋7 infra，五臂各 34 格，成本口徑在 AUDIT.json（H/M over_2x_A_cost=true、M 臂 34 格 second_agent UNKNOWN）；REPORT.json cells_scored=170、rescore_mismatch=0；commit 96d2f6ed（branch auto/qwen27b、status 乾淨）。
+- 沒驗證：96d2f6ed CI 未出；REPORT.json per_arm calls/tokens=0（report.py 成本欄位未載入，成本以 AUDIT.json 為準，未修）；e006 最終 verdict 未出（待後續工單，不隱瞞）。
+- 下一步：e006 verdict 工單（依 AUDIT.json 五臂成本＋p 值誠實判定）；open/ 續做；e007 smoke→e008 或修 infra；監控 96d2f6ed CI。
