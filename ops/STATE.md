@@ -64,3 +64,10 @@
 - 驗證：改前 grep 新串 0 行 rc=1 且舊串全檔僅行 177 1 處（工單前提成立）；驗收 grep 精確命中行 177＋diff -u 無輸出 rc=0；git diff 僅 1 檔 1 行；無「信任／證明變好」措辭；commit 7a41dd9b。
 - 沒驗證：7a41dd9b CI 未出；本輪未重跑 growth_report.py --json 複核數字（與 round 450/451/453 四件套同源，皆為工單已載 10/31 03:11 實測值）；e006 170 格未完賽。
 - 下一步：監控 7a41dd9b CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 456 (2026-10-31 03:3x) · P20261031_0326-2 opencode_cell_audit C 臂缺失 vacant_home 標記 bad 與退出碼契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 主軸 1（OpenCode 真實 agent 串接）＋審查指示第 3 條（e006 收尾量具工具契約）＋研發工具回歸守護。
+- 做了：tests/test_vlab_tools.py +27 行（1 檔）：test_opencode_cell_audit_cli_missing_args_and_dir_error 後新增 test_opencode_cell_audit_c_arm_missing_vacant_home_bad——獨立 c_runs/tmp 下 C 臂格（cell.json/events.jsonl/score.json、刻意無 vacant_home.tgz）→ main --runs-dir rc==1、bad==[cell]、ok is False、unknown 含 "vacant_home.tgz missing (arm C)"。opencode_cell_audit.py 核心零改動、他測試函式零改動。
+- 驗證：先實讀 opencode_cell_audit.py L179-181/L355-362 確認契約（C 臂缺 tgz→ok=False＋unknown append；bad 非空→return 1）；驗收 pytest -k 單測 rc=0（1 passed）＋grep 命中行 1432（工單「行 1433 附近」為約數）；全檔 76 測試 rc=0；無「信任／證明變好」措辭（新增段 0 處）；commit 3deb4809；工單→done/、doing/ 0 張。
+- 沒驗證：3deb4809 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 3deb4809 CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
