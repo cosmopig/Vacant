@@ -168,3 +168,9 @@
 - 驗證：pytest test_unittest_driver_p0_pin 22 passed＋test_p02_star_test_discovery 12 passed＋test_vlab_tools 196 passed；e004/e006 --selftest PASS；同步驗收鏈 grep（行 156/184/408）＋cmp OK＋ACCEPTANCE_OK；git status 乾淨、branch auto/qwen27b；無「信任／證明變好」。
 - 沒驗證：4e2a9ac9／cf3bed46 CI 未出（需下輪核 🟢）；async 釘住測試以 driver 實跑輸出對照斷言（driver 源未動、driver 指紋測試仍綠）；auto/worker 分支紅燈（tests/test_statusboard.py::test_reading_everything_leaves_vacant_home_byte_identical）未調查（非本輪範圍，阻塞 auto/worker 合併）。
 - 下一步：監控 e006 剩餘（A/C 各 6、H/M 各 6、S 7 格）→全盤完賽後 rescore→opencode_cell_audit→e006_verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；核 4e2a9ac9／cf3bed46 CI；auto/worker 紅燈診斷（下輪）；照 open/ 新工單續做。
+## round 708 (2026-10-31 19:4x) · P20261031_1927-1-sync-e006-c28-usage-to-priority-timeline（結案，重复工單）
+- 主軸：ASSIGNMENT 🔴最優先 驗收 (b) lab C 組 vacant_home_bytes 真實用量——e006 第 28 格 pg_transpose C 臂完賽（10/31 19:24）用量續記 disk_top_priority §1 時序＋外部副本同步。
+- 做了：查證工單工作內容已由 cf3bed46（round 712／P20261031_1926-2）完成——§1 時序行 156 已有第 28 格 pg_transpose 條目（vacant_home_bytes 172,472 B／objects 85,191 B／ratio 0.000643／累計 28 格 min 32,165／med 124,742／max 255,721 B、10/31 19:24 完賽）、§2 4(b) 表格與 FINDINGS 主軸 2 已同步 28 格、外部副本已同步（cmp rc=0）；本輪未重複追加、未改寫條目（守工單「不要做」紅線），只重跑完整驗收鏈確認後結案。
+- 驗證：驗收鏈 rc=0（grep pg_transpose 命中行 156＋行 184、grep「累計 28 格」命中行 156、cmp 無輸出、末行 ACCEPTANCE_OK）；git status 乾淨、branch auto/qwen27b；工單已回填結果並移 done/、doing/ 0 張。
+- DECISION：不改寫條目為工單樣例的 ratio 0.000642／max 0.095%｜同一實測（172,472/268,435,456=0.000642508；255,721/268,435,456=0.095263%）的兩種取整；已提交的 0.000643／0.096% 在 §1（行 156）／§2（行 184）／FINDINGS（行 411）三處一致，驗收不檢查該值，改寫反而破壞 §2 一致性並違反「不要修改 §2 表格」——選不改（最保守、可逆）。
+- 下一步：監控 83185760／cf3bed46 CI（需核 🟢）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 複查；e006 剩餘臂格完賽→rescore→audit→verdict→packet/FINDINGS 回填（不隱瞞 UNKNOWN／NOT_ESTABLISHED）；照 open/ 續做。
