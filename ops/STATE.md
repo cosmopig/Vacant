@@ -27,3 +27,9 @@
 - 驗證：數字先實核（~/.vacant/growth.jsonl 末筆 ts=01:07:43、total 60405994 B、trace 41490752 B、objects 435、gc ok/true；growth_report.py --json n_points=38、span 52.79h、verdict PASS、rc=0）；驗收 grep「38 點跨 52.79h」命中行 197、grep「10/31 01:07」命中行 235、rc=0（改前 0 行 rc=1）；commit a0867439；工單→done/、doing/ 0 張。
 - 沒驗證：a0867439 CI 未出（純文檔 5 行）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+## round 428 (2026-10-31 01:5x) · P20261031_0136-1 合併 auto/argon 1329c57a 成本紅線修復（結案：工單建於 427 輪合併之前，本輪驗收複核＋結案）
+- 主軸：本輪焦點工單（資深審查 #1 最優先合併）＋「合併前看 CI」（輪首 CI：auto/argon 1329c57a 🟢 4467 passed／收集 4536 ≥ auto/qwen27b HEAD 收集 4534）。
+- 做了：核實工單（01:36 建）早於 427 輪（01:4x）完成之合併（8ce9813d）與回歸（25a3527a）；本輪照工單原文跑驗收：`git merge --no-edit auto/argon` → "Already up to date." rc=0（no-op、不產生新 commit）；`git merge-base --is-ancestor 1329c57a HEAD` rc=0；`git diff auto/argon HEAD -- ops/vlab/tools/e004_verdict.py ops/vlab/tools/e006_verdict.py` 空（argon 實作原樣、零手動重寫）；argon 2 新測試（test_e006/e004_verdict_audit_cost_fallback）＋427 輪 1（test_audit_out_feeds_verdict_audit_chain）俱在。
+- 驗證：驗收 `pytest tests/test_vlab_tools.py -q` rc=0、collect 69／69 全綠（工單期「68 passed」係 427 輪前快照：66+argon 2=68、再+427 輪 1=69，為超集且全綠，非驗收壞）；e006_verdict.py::cost_redline（L49 audit_per_arm 回退、not_worth_it L75/L147）與 argon 一致；本輪結案記錄 commit 見下（ops/STATE.md 1 檔）。
+- 沒驗證：8ce9813d/25a3527a CI 未出（輪首 auto/qwen27b 25a3527a「還沒跑完」）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 e006 進度與 infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；C 臂新格/第 39 點出現即同步三件套。
