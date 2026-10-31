@@ -4053,3 +4053,32 @@ def test_e006_verdict_s_zero_cost_treated_as_missing_confirmed_cost_unknown() ->
     assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "S 臂成本缺失" in r["hypotheses"]["H-stakes(a)"]["reason"]  # 理由精確指認缺失臂
     assert "利害 (a) 只是講、無真實後果" in r["hypotheses"]["H-stakes(a)"]["note"]  # 鐵律 KS-1 警語保留
+
+
+def test_e004_verdict_s_zero_cost_treated_as_missing_confirmed_cost_unknown() -> None:
+    # 驗證 e004_verdict：S 臂（生存值提示臂）McNemar 配對顯著（S_only=10 > A_only=0、p=0.001
+    # ⇒ 方向為正）但 REPORT.json 中 S 臂成本為 0.0/0.0（無 metrics 特徵、無 audit 可補）時，
+    # 量具必須嚴格將 0.0 視為「成本缺失（量不到）」，而非免費（0 元）；
+    # calls_vs_A 與 tokens_vs_A 須為 None，over_2x_A_cost 須為 None（不判過亦不判違規）、
+    # not_worth_it 須為 None（無法斷言划算與否，嚴防偽判 False 或 True），H-stakes(a) 假說態
+    # 誠實判定 CONFIRMED_COST_UNKNOWN、理由精確指認「S 臂成本缺失」，同時 note 保留鐵律 KS-1
+    # 警語「利害 (a) 只是講、無真實後果」——0.0 成本邊界與 KS-1 警語契約鎖進常規回歸
+    #（工單 P20261031_1707-1，與 e006 S 臂 P20261031_1651-5 對稱）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # S 臂顯著且方向為正：S_only=10 > A_only=0、p=0.001
+    rep["paired"]["A_vs_S"] = {"pairs": 20, "A_only": 0, "S_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # S 臂成本為 0.0/0.0（無 metrics 特徵；須被量具視為缺失，而非實數 0 成本）
+    rep["per_arm"]["S"] = {"calls_per_success": 0.0, "tokens_per_success": 0.0}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["calls_vs_A"] is None  # 0.0 視為缺失（量不到），不是 0 成本比
+    assert r["cost_redline_2xA"]["arms"]["S"]["tokens_vs_A"] is None  # 同上
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "S 臂成本缺失" in r["hypotheses"]["H-stakes(a)"]["reason"]  # 理由精確指認缺失臂
+    assert "利害 (a) 只是講、無真實後果" in r["hypotheses"]["H-stakes(a)"]["note"]  # 鐵律 KS-1 警語保留
