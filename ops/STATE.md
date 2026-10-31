@@ -198,3 +198,9 @@
 - 驗證：改前 grep「57 點跨 72.50h」rc=1（符合工單預期）；改後驗收鏈 rc=0（cmp 外部副本無輸出＋grep 命中行 184＋末行 ACCEPTANCE_OK）；git diff 1 檔 1 行（行 184）；commit 94bf1be3（branch auto/qwen27b、status 乾淨）。
 - 沒驗證：94bf1be3 CI 未出（純文件 1 行）；68,512,481 B／50,190,526 B／501 blobs 原始數值未獨立複核（依工單提供值）；pg_zipper H/M/S 臂未完賽、e006 最終判定仍待（UNKNOWN/NOT_ESTABLISHED 不隱瞞）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查。
 - 下一步：open/ 續做（doing/ 已 0 張、等 open/ 或新工單）；zipper H/M/S 完賽→逐格同步＋法定收尾（rescore→audit→verdict→回填，不隱瞞 UNKNOWN/NOT_ESTABLISHED）；e007 smoke 結果→查過關→發射 e008 或修 infra；監控 94bf1be3/4d6f3e06 CI。
+## round 746 (2026-10-31 22:3x) · P20261031_2228-1-sync-e006-c34-usage-to-priority-timeline.md（結案·重複工單）
+- 主軸：ASSIGNMENT 🔴最優先 驗收(b) 實驗室格子 C 組 vacant_home_bytes；e006 第 34 格 pg_zipper C 臂真實用量續記 §1 歷史時序＋外部副本同步——接手前已於 round 744（P20261031_2213-4、commit 4d6f3e06）完成，本單為重複工單。
+- 做了：核實 §1 行 162 已含工單指定逐字條目（213,193 B／131,979 B／0.000794、累計 34 格 min 29,824 B／med 119,048 B／max 255,721 B）；未重複追加、未動 1-33 格、§2 表格與常數章節；工單回填結果 1 行並移 done/、doing/ 0 張；口徑「客觀事實／遠低於封頂」，無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（grep pg_zipper 命中行 162、grep「累計 34 格 min 29,824 B」命中、cmp 外部副本無輸出、末行 ACCEPTANCE_OK）；4d6f3e06 已含該行（git log 核過）；本輪無 repo 內容改動（重複工單，避免製造重覆行）。
+- 沒驗證：4d6f3e06 CI 未出（純文件 1 行）；213,193 B 原始數值未獨立複核（依工單提供值）；zipper H/M/S 臂未完賽、e006 最終判定仍待（UNKNOWN/NOT_ESTABLISHED 不隱瞞）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查。
+- 下一步：open/ 續做（doing/ 已 0 張、等 open/ 或新工單）；zipper H/M/S 完賽→逐格同步＋法定收尾（rescore→audit→verdict→回填，不隱瞞 UNKNOWN/NOT_ESTABLISHED）；e007 smoke 結果→查過關→發射 e008 或修 infra；監控 4d6f3e06/94bf1be3 CI。
