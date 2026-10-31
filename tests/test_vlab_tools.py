@@ -1165,6 +1165,33 @@ def test_growth_report_gc_target_not_reached_fail(tmp_path: Path, capsys) -> Non
     assert rc == 1
 
 
+def test_growth_report_latest_trace_over_cap_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_0431-3（ASSIGNMENT 🔴最優先 驗收條件 1「用量真的有上限：trace 版本庫硬上限
+    # 64 MiB」＋驗收 4(a)「一天長多少」長效監測量具守護）：
+    # 序列證據足（2 點跨 25h ≥ 20h 門檻）、最新點總計在穩態封頂內（80 MiB ≤ 256 MiB）、
+    # 最新 gc 點 status=ok 且 target_reached=true，但最新點 trace=70 MiB 超過
+    # TRACE_BUDGET_BYTES（64 MiB）時，growth_report.report（L191-192）須判 verdict=FAIL
+    # 且理由載明「> trace 上限」；main 帶 --json 時以 exit code 1 安全退出——不崩潰、不假 PASS。
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    p1 = {"ts": "2026-10-29T00:00:00+00:00", "total_bytes": 10 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 5 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-30T01:00:00+00:00", "total_bytes": 80 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 70 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1, ensure_ascii=False) + "\n" + json.dumps(p2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"
+    assert "trace 上限" in r["reason"]
+    capsys.readouterr()
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"),
+                             "--json"])
+    assert rc == 1
+
+
 def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
     # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
