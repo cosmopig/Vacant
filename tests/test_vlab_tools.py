@@ -2880,3 +2880,33 @@ def test_e004_verdict_c_not_worth_it() -> None:
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is True  # 成本超標且未顯著提升 ⇒ 不划算
     assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_growth_report_gc_status_not_ok_fail(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：跨日序列證據足（2 點跨 25h ≥ 20h 門檻）、最新點總用量與 trace
+    # 用量均在上限內，但最新 gc 點 status="error"（非 ok、GC 執行異常）→ verdict="FAIL"
+    # 且 reason 精確載明「非 ok」；CLI --json 以 exit code 1 安全退出。真機用量量具在 GC
+    # 失敗時絕不誤報 PASS——工單 P20261031_1156-1
+    env = growth_report.ENVELOPE_BYTES
+    assert env is not None  # 量具與產品同來源；import 不到時量具自己降級 UNKNOWN
+    assert growth_report.TRACE_BUDGET_BYTES is not None
+
+    def _point(ts: str, total: int, tr: int, gc: dict) -> str:
+        return json.dumps({"ts": ts, "home": str(tmp_path), "total_bytes": total,
+                           "per_dir_bytes": {"trace": tr}, "gc_last": gc})
+
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    (seq_dir / "growth.jsonl").write_text(
+        _point("2026-10-28T00:00:00+0000", 20 * 1024 * 1024, 10 * 1024 * 1024,
+               {"status": "ok", "target_reached": True}) + "\n"
+        + _point("2026-10-29T01:00:00+0000", 30 * 1024 * 1024, 15 * 1024 * 1024,
+                 {"status": "error", "target_reached": False}) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL", r
+    assert "非 ok" in r["reason"], r
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
