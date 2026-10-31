@@ -4205,3 +4205,33 @@ def test_e006_verdict_c_zero_cost_treated_as_missing_confirmed_cost_unknown() ->
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
     assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "C 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]  # 理由精確指認缺失臂
+
+
+def test_growth_report_exact_span_boundary_pass(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：序列點數滿足（2 點、gc_last 均 ok）、用量在封頂內，且時間跨度
+    # 恰好等於 MIN_EVIDENCE_HOURS=20.0h（2026-10-28T00:00:00→20:00:00，壓線臨界門檻）時：
+    # span_ok 判定為 True（span_hours >= 20.0，邊界含等於、不誤判 <20h 的 UNKNOWN 也非 FAIL）、
+    # report() 判定 verdict="PASS"、span_hours=20.0、n_points=2、peak_overrun 未超穩態封頂、
+    # reason 載明「2 點跨 20.0h」與最新用量在封頂內；CLI --json 以 exit code 0 退出——
+    # 長效監測量具 20h 臨界壓線合規邊界鎖進常規回歸（工單 P20261031_1722-5，
+    # 與 test_growth_report_span_below_20h_unknown 的 19.9h 側對稱）
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T20:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS", r
+    assert r["span_hours"] == 20.0, r
+    assert r["n_points"] == 2, r
+    assert r["peak_overrun"]["over_stable_envelope"] is False, r
+    assert "2 點跨 20.0h" in r["reason"], r
+    assert "≤ 封頂" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0
