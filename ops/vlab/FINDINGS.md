@@ -377,3 +377,10 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **客觀結果**（來源 REPORT.json＋opencode_cell_audit，round 383 回填）：**5/5 格 complete**（每格皆有 cell.json 與 score.json、pass∈{true,false}）、**infra=0**；H/M/S 三格 `append_system` mode=prepend、agent 實際啟動（model calls 26/12/14），舊 SystemExit 路徑未觸發；A/C/H/S 臂 **score_pass=True**（成本：A 16 calls/209,800 tok、C 13/167,573、H 26/413,461、S 14/158,893），**M 臂 0/1：900 s 逾時 agent_rc=124、無第二 agent 啟動證據，依判準條款記 UNKNOWN**（非負結果、不隱瞞）；C 臂 install_rc=0、vacant_home 79,333 B（含 .vacant/intake/hooks/events.jsonl）、**trace 16 entries PASS**（seq_ok=true、prev_link=ok、review 25 allow/0 denied）。
 **結論**：無確定性 infra 崩潰、fail-open 放行鐵律滿足 → 滿足審查指示 1.4 放行全盤重發射之鐵律（e004 H/M/S 重發射可另開預註冊封包再議）；GO 判準 1/2/3/5 成立、判準 4 記 UNKNOWN，五條未全數建立、冒煙不能全數判 GO；M 臂第二 agent 路徑（bf1a9f1a）在 OpenCode 上未獲驗證，待修複測。
 **口徑**：本條僅為冒煙完賽之客觀事實與審計結論；不寫「證明變好」、不寫「信任」；M 臂 UNKNOWN 照實保留，不升格為 PASS 或「沒有」。
+
+## 2026-10-30 · 主軸 1 · e006_opencode_polyglot 五臂全盤發射（34 題 polyglot_py × A/C/H/M/S ＝ 170 格、排程中）
+
+**發射**：2026-10-30 23:16:50 labd「開始 e006_opencode_polyglot：170 格」（/srv/vlab/labd.log 第 76 行）；佇列檔 `07_e006_opencode_polyglot.json` 已自 queue/ 移入 /srv/vlab/running/（執行中）。
+**結構**：34 題 polyglot_py × A/C/H/M/S（170 格）、agent=opencode、1800 s/格；頂層與 C 臂 vacant_sha=bf1a9f1afb211460b48611f8f28b1d9433985c4a；H/M/S 臂 env.VLAB_APPEND_SYSTEM → /srv/vlab/arms/e002_{H,M,S}.md 前置（prepend）模式（c76ff988；e005 冒煙 5/5 已驗證、舊 SystemExit 路徑未觸發）；M 臂為 e005 UNKNOWN 路徑之複測樣本（900 s 逾時 → 本盤 1800 s）。
+**預註冊**：封包 `ops/vlab/packets/e006_opencode_polyglot.md`（發射前寫死判準）——4 假設 H-acc / H-review(H) / H-review(M) / H-stakes(a)、Holm–Bonferroni（4 組 A_vs_X）α=0.05 為確認線＋2×A 成本紅線；M 臂需 events.jsonl 有真第二 agent 證據，缺則降級記 UNKNOWN（不是負結果）；infra 格永不回填。
+**口徑**：此條僅為發射與排程事實；排程中、無結果數據、不預填、不宣稱；全盤完賽後以 `opencode_cell_audit.py` 審計 170 格、`e006_verdict.py` 依封包 §3 判定（數字以 REPORT.json 為準、成本與結果同報）。
