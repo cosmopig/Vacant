@@ -171,11 +171,16 @@ def audit_cell(cell_path) -> dict:
         v = audit_vacant_home(tgz)
         rec["vacant"] = v
         if v.get("review") is None:
+            if rec["arm"] == "C":
+                rec["ok"] = False
             rec["unknown"].append("review missing (hooks events unreadable)")
         tr = v.get("trace")
         if tr and (tr.get("prev_link") in ("broken", "unknown") or tr.get("seq_ok") is False):
             rec["ok"] = False
             rec["unknown"].append(f"trace {tr.get('prev_link')}")
+        elif tr is None and rec["arm"] == "C":
+            rec["ok"] = False
+            rec["unknown"].append("trace missing (chain.ndjson unreadable or absent)")
     elif rec["arm"] == "C":
         rec["ok"] = False
         rec["unknown"].append("vacant_home.tgz missing (arm C)")
