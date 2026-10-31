@@ -2844,3 +2844,20 @@ def test_e006_verdict_missing_counts_insignificant_not_worth_it_true() -> None:
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is True  # 成本超標且未改善 ⇒ 不划算
     assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
     assert "配對計數缺失（量不到方向）" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_missing_counts_insignificant_not_worth_it_true() -> None:
+    # 驗證 e004_verdict 在 C 臂配對計數缺失（A_only 為 None）且 p 不顯著（0.40、未改善）且成本超標時，
+    # 不顯著⇒未改善，成本超標且未改善 ⇒ 不划算，not_worth_it 精確判定為 True；H-acc 記 UNKNOWN（量不到方向）——工單 P20261031_1140-3
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 20, "A_only": None, "C_only": 2, "mcnemar_p_two_sided": 0.40}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0  # 2.5×A，超 2×A 紅線
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is True  # 成本超標且未改善 ⇒ 不划算
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對計數缺失（量不到方向）" in r["hypotheses"]["H-acc"]["reason"]
