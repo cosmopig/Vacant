@@ -2225,3 +2225,23 @@ def test_e006_verdict_s_confirmed() -> None:
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
     assert r["hypotheses"]["H-stakes(a)"]["significant_at_alpha"] is True
     assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
+
+
+def test_e006_verdict_h_confirmed() -> None:
+    # 驗證 e006_verdict 在 H 臂（外部提示指引臂）McNemar 配對 Holm 後顯著（H_only=10 > A_only=1、
+    # p=0.005 ⇒ p_holm=0.02 < 0.05）且成本 ≤ 2×A（12.0 ≤ 2×10.0）時，判定 H-review(H) 為
+    # state=="CONFIRMED"（reason 含「Holm 後顯著、X_only > A_only、成本 ≤ 2×A」且
+    # significant_at_alpha is True）且成本紅線 not_worth_it is False——
+    # harness 假說正向成效時精確判定 CONFIRMED 與成本合規之契約鎖進常規回歸（工單 P20261031_0816-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # H 臂顯著且成本受限：H_only=10 > A_only=1、p=0.005（Holm 後仍顯著）；成本 12.0（A 臂 10.0）
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 1, "H_only": 10, "mcnemar_p_two_sided": 0.005}
+    rep["per_arm"]["H"]["calls_per_success"] = 12.0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-review(H)"]["reason"]
+    assert r["hypotheses"]["H-review(H)"]["significant_at_alpha"] is True
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False
