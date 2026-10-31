@@ -2476,3 +2476,22 @@ def test_e004_verdict_confirmed() -> None:
     assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
     # 成本合格且顯著提升 ⇒ 不是「不划算」
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
+
+
+def test_e004_verdict_m_missing_evidence_unknown() -> None:
+    # 驗證 e004_verdict 在 M 臂（第二 agent 審查臂）無第二 agent 執行證據（audit_summary=None）時，
+    # 即使 M 臂配對顯著（p=0.001、M_only=10 > A_only=0），H-review(M) 仍必須降級記 state=="UNKNOWN"，
+    # 且理由含「無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN」——
+    # M 臂無真實第二 agent 證據時誠實記 UNKNOWN（量不到，不是負結果）之判定防線鎖進 e004 常規回歸（工單 P20261031_0936-4）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # M 臂配對顯著（p=0.001，M_only=10 > A_only=0）
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 無第二 agent 證據 ⇒ UNKNOWN（量不到，不是負結果），不因配對顯著而升級判定
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN" in r["hypotheses"]["H-review(M)"]["reason"]
+    # 證據欄位：evidence_present 為 False（audit_summary=None ⇒ source=no_audit）
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is False
