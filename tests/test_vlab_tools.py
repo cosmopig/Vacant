@@ -3922,3 +3922,31 @@ def test_e006_verdict_m_confirmed_cost_unknown() -> None:
     assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "顯著且方向為正，但成本紅線量不到（M 臂成本缺失）" in r["hypotheses"]["H-review(M)"]["reason"]
     assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 臂保留第二 agent 證據
+
+
+def test_e004_verdict_m_confirmed_cost_unknown() -> None:
+    # 驗證 e004_verdict：M 臂（第二 agent 審查臂）McNemar 配對顯著（M_only=10 > A_only=0、
+    # p=0.001 ⇒ 方向為正）但 M 臂成本缺失（calls/tokens 為 None 且 audit 無成本維度可補）時，成本
+    # 紅線量不到（over_2x_A_cost is None，不判違規也不判過）、not_worth_it 誠實記為 None
+    #（成效雖建立但成本失聯，無法斷定划算與否，嚴防偽判 False 或 True）、H-review(M) 假說態誠實判定
+    # CONFIRMED_COST_UNKNOWN 且理由精確指認「M 臂成本缺失」，同時 second_agent 結構保留第二 agent
+    # 證據（evidence_present is True，verified_cells=5≥1）——成本失聯時成效不得單獨升格 CONFIRMED、
+    # 且 M 臂證據誠實契約鎖進常規回歸（工單 P20261031_1635-4，與 e006 M 臂 P20261031_1635-3 對稱）
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # M 臂顯著且方向為正：M_only=10 > A_only=0、p=0.001
+    rep["paired"]["A_vs_M"] = {"pairs": 20, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # M 臂成本缺失（量不到、無 audit 成本維度可補；同系列既有成本缺失測試皆以 None 表示缺失）
+    rep["per_arm"]["M"] = {"calls_per_success": None, "tokens_per_success": None}
+    # audit 提供真第二 agent 證據（verified=5≥1 ⇒ evidence_present=True），但無成本維度
+    audit_summary = e004_verdict._mock_audit(5)
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit_summary)
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "顯著且方向為正，但成本紅線量不到（M 臂成本缺失）" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 臂保留第二 agent 證據
