@@ -2104,3 +2104,21 @@ def test_e006_verdict_confirmed() -> None:
     assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-acc"]["reason"]
     assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
+
+
+def test_e006_verdict_missing_paired_unknown() -> None:
+    # 驗證 e006_verdict 在 S 臂配對缺失（A_vs_S=None ⇒ p_raw is None、不進 Holm 集）
+    # 時，判定 H-stakes(a) 為 state=="UNKNOWN"（reason 含「配對缺失、未測（不進 Holm 集）
+    # ——UNKNOWN，不是沒有」）且 m_in_holm_set 由 4 降為 3——「不假 PASS、證據不足
+    # UNKNOWN（不是沒有）」的判定契約鎖進常規回歸（工單 P20261031_0603-4）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂配對設為缺失
+    rep["paired"]["A_vs_S"] = None
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測（不進 Holm 集）——UNKNOWN，不是沒有" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert r["hypotheses"]["H-stakes(a)"]["p_raw"] is None
+    assert r["m_in_holm_set"] == 3
