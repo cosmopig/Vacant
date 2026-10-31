@@ -682,3 +682,48 @@ def test_case_failure_plus_instance_teardown_failure_does_not_duplicate_case():
     assert "body stdout" in c["output"] and "teardown stdout" in c["output"], c
 
 
+# ---------------------------------------------------------------------------
+# P0-1 checklist「async」釘住（GPT 審查 2026-10-28：全部含好/壞對照）
+# ---------------------------------------------------------------------------
+#
+# CPython unittest 對 `async def test_*` 只**調用**、從不 await（RuntimeWarning:
+# coroutine was never awaited）：方法體**一次都沒跑**，案例卻回報 pass。
+# 與「expectedFailure 靜默當 PASS」同類洞——沒跑過的案例不可計入 PASS。
+#
+# driver 的 round-51 守衛：async 方法葉子**顯式紅**（`ok=False,
+# kind="protocol"`、message 點出 async），同檔 sync 案例照常執行並逐案例
+# 記錄，driver 正常收尾（end marker、rc=0），整體判定 FAIL。
+# 這裡釘住「不可靜默通過」＋「不誤傷同檔 sync 案例」兩面。
+
+ASYNC_NEVER_AWAITED_FILE = """import unittest
+
+
+class T(unittest.TestCase):
+    async def test_async_ok_body(self):
+        assert 1 + 1 == 2
+
+    def test_sync(self):
+        assert True
+"""
+
+
+def test_async_method_never_silently_passes():
+    """`async def` 測試方法（方法體若執行會成功）⇒ 不可靜默當 PASS：
+    該案例顯式紅（`ok=False, kind="protocol"`、message 點出 async 未被
+    await），整體 `all_pass` False（fail-closed）；同檔 sync 案例照常執行
+    並記為 pass（async 守衛不得誤傷）；driver 正常收尾（end marker、
+    complete、rc=0），不是 driver 崩潰式紅。"""
+    res = _run(ASYNC_NEVER_AWAITED_FILE)
+    cases = {c["case"]: c for c in _cases(res)}
+    a = cases.get("T.test_async_ok_body")
+    assert a is not None, res
+    assert a["ok"] is False, a
+    assert a["kind"] == "protocol", a
+    assert "async" in a["message"].lower(), a
+    assert cases["T.test_sync"]["ok"] is True, cases["T.test_sync"]
+    f = _file(res)
+    assert res["all_pass"] is False, res
+    assert (f["passed"], f["total"]) == (1, 2), f
+    assert f["complete"] is True and f["end_marker"] is True and f["rc"] == 0, f
+
+

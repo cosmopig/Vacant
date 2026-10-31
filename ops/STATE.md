@@ -131,9 +131,6 @@
 
 ## round 626 (2026-10-31 14:4x) · P20261031_1431-2 50 點真機增長序列里程碑續記 disk_top_priority §1（結案）
 - 主軸：🔴最優先驗收 4(a) 真機 ~/.vacant 前後用量與成長；真機增長序列累積至第 50 點（跨 65.20h）突破 50 點長效監測里程碑。
-- 做了：ops/vlab/packets/disk_top_priority.md 行 165 單行新增（13:32 續記 50 點里程碑：50 點跨 65.20h、66,701,796 B（63.6 MiB ≤ 256 MiB 24.8
-## round 626 (2026-10-31 14:4x) · P20261031_1431-2 50 點真機增長序列里程碑續記 disk_top_priority §1（結案）
-- 主軸：🔴最優先驗收 4(a) 真機 ~/.vacant 前後用量與成長；真機增長序列累積至第 50 點（跨 65.20h）突破 50 點長效監測里程碑。
 - 做了：ops/vlab/packets/disk_top_priority.md 行 165 單行新增（13:32 續記 50 點里程碑：50 點跨 65.20h、66,701,796 B（63.6 MiB ≤ 256 MiB 24.8%）、trace 48,183,117 B（46.0 MiB ≤ 64 MiB）、trace 472 blobs、gc_last ok＋target_reached、verdict PASS）＋cp 外部副本 ~/dev/ops/packets/；1-49 點歷史未覆蓋、其他分區未動、無「信任／證明變好」。
 - 驗證：驗收鏈 rc=0（grep "13:32 續記" 命中行 165、cmp 無輸出、末行 ACCEPTANCE_OK）；git diff 1 檔 1+；commit 60bcb34a（status 乾淨、branch auto/qwen27b）；工單→done/、doing/ 0 張。
 - 沒驗證：60bcb34a CI 未出；50 點用量數字依工單給定值轉錄，未重跑 growth_report.py 自 ~/.vacant 重算。
@@ -150,3 +147,30 @@
 - 驗證：驗收鏈 rc=0（pytest 1 passed、grep 命中行 3765、末行 ACCEPTANCE_OK）；tests/test_vlab_tools.py 全檔 168 項 rc=0；git diff 1 檔 +24；commit 16ca3d16（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
 - 沒驗證：16ca3d16 CI 未出；僅 mock 場景鎖契約，未以 e004 真機 REPORT.json 重放（e004 為已完賽舊 run，無新 REPORT 可重放）；0.0 成本⇒「免費」判定缺口仍未處理（round 657 BACKLOG，e004/e006 同款）。
 - 下一步：監控 16ca3d16/efee8385/4fb25f38/12e5b672 CI；照 open/ 續做；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 675 (2026-10-31 17:2x) · P20261031_1707-3 e006_verdict M 臂 0.0 成本視為缺失判 CONFIRMED_COST_UNKNOWN 且保留 second_agent 證據契約測試（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效綁定紅線）；把「M 臂 0.0/0.0 成本須視為缺失（非免費）、判 CONFIRMED_COST_UNKNOWN、保留 second_agent 證據」鎖進常規回歸（與 round 672 e006 S 臂 0.0、既有 M 臂 None 缺失 1635-3 對稱）。
+- 做了：tests/test_vlab_tools.py 檔尾新增 test_e006_verdict_m_zero_cost_treated_as_missing_confirmed_cost_unknown（+31 行，碰 1 檔）：M 臂顯著（M_only=10 > A_only=0, p=0.001）、A 臂成本 10.0/1000.0、M 臂 0.0/0.0、_mock_audit(5) ⇒ 斷言 calls_vs_A/tokens_vs_A/over_2x_A_cost/not_worth_it 皆 None、H-review(M)=CONFIRMED_COST_UNKNOWN、reason 含「M 臂成本缺失」、second_agent.evidence_present=True；未動既有測試與 e006_verdict.py 核心邏輯、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（pytest 1 passed、180 deselected；grep 命中行 4118；末行 ACCEPTANCE_OK；e006_verdict 家族 44 項＋test_vlab_tools.py 全檔 181 項全過；e006 --selftest OK；git diff 1 檔 +31）；commit 786b8eac（status 乾淨、branch auto/qwen27b）；工單 done/、doing/ 0 張。
+- 沒驗證：786b8eac CI 未出（需下輪確認 🟢）；本輪未跑全倉 4639 測試（以 test_vlab_tools.py 全檔 181 項＋驗收鏈＋selftest 為據）。
+- 下一步：監控 786b8eac/37728e62/6ddd7c69/7d9c72d6 CI；e006 若續賽→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
+
+## round 678 (2026-10-31 17:3x) · P20261031_1722-2 e006 第 26 格 pg_sgf_parsing C 臂真實用量同步至 disk_top_priority §2 驗收總覽表格（結案）
+- 主軸：ASSIGNMENT 🔴最優先 驗收 (b) lab C 組 vacant_home_bytes 真實用量；P20261031_1722-1 續記 §1 時序後，閉環把 e006 OpenCode 第 26 格客觀事實進入頂層驗收總覽（25 格→26 格）。
+- 做了：ops/vlab/packets/disk_top_priority.md §2 表格行 4(b)（行 181）3 處替換（1 行）：標題「C 臂 25 格實測（進行中）」→「26 格實測（進行中）」；㉕ 後追加「㉖ pg_sgf_parsing vacant_home_bytes 109,716 B（107.1 KB）、vacant_objects_bytes 75,146 B（73.4 KB）、ratio_of_envelope 0.000409」；「25 格 min 32,165／med 127,832／max 255,721」→「26 格 min 32,165／med 124,742／max 255,721」；完賽清單末尾追加「pg_sgf_parsing 10/31 17:13 完賽」；cp 同步 ~/dev/ops/packets/ 外部副本；未動 1-25 格、未動 (a)(c) 與其他章節、無「信任／證明變好」。
+- 驗證：驗收鏈 rc=0（grep "pg_sgf_parsing" 命中 154（§1）與 181（§2）、grep「C 臂 26 格」命中 181、cmp 無輸出、末行 ACCEPTANCE_OK）；commit 3bf3dff9（1 檔 1 行、status 乾淨、branch auto/qwen27b）；工單已回填 3 行結果並移 done/、doing/ 0 張。
+- 沒驗證：3bf3dff9 CI 未出（需下輪確認 🟢）；表格實際落行 181（工單期望 180，因上輪 §1 追加 1 行而下移，仍在 175-182 範圍內、grep 全命中）。
+- 下一步：監控 3bf3dff9/36bcc1bc/51afb699/6ddd7c69/7d9c72d6/37728e62 CI；e006 若續賽（第 27 格起）→rescore→audit→verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 續做。
+
+## round 712 (2026-10-31 19:2x) · P20261031_1926-1/-2 GPT 審查 P0-1 async 釘住＋e006 第 28 格同步＋argon 合併驗收核實（結案）
+- 主軸：GPT 審查 P0（unittest driver／`*_test.py` 探索）收口＋ASSIGNMENT 🔴最優先驗收 4(b)（e006 C 臂真實用量續記）＋審查指令 #1（argon ea5d8f57 合併驗收）核實。
+- 做了：① 審查 #1 核實：auto/qwen27b 已含 ea5d8f57（經 merge ea76a0d5），tests/test_vlab_tools.py **196 passed**、`e004_verdict.py --selftest` PASS、`e006_verdict.py --selftest` PASS——0.0 成本⇒缺失⇒CONFIRMED_COST_UNKNOWN 契約已在場（BACKLOG 該項轉收口）。② tests/test_unittest_driver_p0_pin.py 檔尾新增 test_async_method_never_silently_passes（P0-1 checklist 最後缺口：`async def test_*` 方法體若執行會成功也不得靜默當 PASS——顯式 ok=False／kind=protocol／message 點出 async，all_pass False；同檔 sync 案例照常記 pass 不誤傷；driver 正常收尾 end_marker/complete/rc=0）→22 項全綠；P0-2 覆蓋實查已備（tests/test_p02_star_test_discovery.py 12 項全綠：發現、helper 角色、來源隔離、無 no_suite 假成功）。③ e006 第 28 格 pg_transpose C 臂用量 172,472 B（168.4 KB）／objects 85,191 B（83.2 KB）／ratio 0.000643（10/31 19:24 完賽）同步 disk_top_priority §1 時序＋§2 4(b) 表格（27→28 格、med 121,652→124,742 B、min/max 不變）＋FINDINGS 主軸 2（30→31 格）＋~/dev/ops/packets/ 外部副本。④ e006 監控（審查 #3）：A 28／C 28／H 27／M 27／S 27 完賽、beer_song-M＋transpose-H 運行中；8 infra 格全為 model_error（pg_list_ops C×2/H×1/S×2、hangman-M、affine-A），全部經 labd 自動重試恢復（list_ops 各臂已完賽），無系統性崩潰；計分格內逾時 A3/C2/H1/M4/S1。⑤ /home/user1/dev/ops/BACKLOG.md：e006_verdict 0.0 成本缺口→[x] 收口（argon 修補已合併＋兩側契約全綠）；e006 完賽收尾項進度→28 格。
+- 驗證：pytest test_unittest_driver_p0_pin 22 passed＋test_p02_star_test_discovery 12 passed＋test_vlab_tools 196 passed；e004/e006 --selftest PASS；同步驗收鏈 grep（行 156/184/408）＋cmp OK＋ACCEPTANCE_OK；git status 乾淨、branch auto/qwen27b；無「信任／證明變好」。
+- 沒驗證：4e2a9ac9／cf3bed46 CI 未出（需下輪核 🟢）；async 釘住測試以 driver 實跑輸出對照斷言（driver 源未動、driver 指紋測試仍綠）；auto/worker 分支紅燈（tests/test_statusboard.py::test_reading_everything_leaves_vacant_home_byte_identical）未調查（非本輪範圍，阻塞 auto/worker 合併）。
+- 下一步：監控 e006 剩餘（A/C 各 6、H/M 各 6、S 7 格）→全盤完賽後 rescore→opencode_cell_audit→e006_verdict→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；核 4e2a9ac9／cf3bed46 CI；auto/worker 紅燈診斷（下輪）；照 open/ 新工單續做。
+## round 708 (2026-10-31 19:4x) · P20261031_1927-1-sync-e006-c28-usage-to-priority-timeline（結案，重复工單）
+- 主軸：ASSIGNMENT 🔴最優先 驗收 (b) lab C 組 vacant_home_bytes 真實用量——e006 第 28 格 pg_transpose C 臂完賽（10/31 19:24）用量續記 disk_top_priority §1 時序＋外部副本同步。
+- 做了：查證工單工作內容已由 cf3bed46（round 712／P20261031_1926-2）完成——§1 時序行 156 已有第 28 格 pg_transpose 條目（vacant_home_bytes 172,472 B／objects 85,191 B／ratio 0.000643／累計 28 格 min 32,165／med 124,742／max 255,721 B、10/31 19:24 完賽）、§2 4(b) 表格與 FINDINGS 主軸 2 已同步 28 格、外部副本已同步（cmp rc=0）；本輪未重複追加、未改寫條目（守工單「不要做」紅線），只重跑完整驗收鏈確認後結案。
+- 驗證：驗收鏈 rc=0（grep pg_transpose 命中行 156＋行 184、grep「累計 28 格」命中行 156、cmp 無輸出、末行 ACCEPTANCE_OK）；git status 乾淨、branch auto/qwen27b；工單已回填結果並移 done/、doing/ 0 張。
+- DECISION：不改寫條目為工單樣例的 ratio 0.000642／max 0.095%｜數字出處：vacant_home_bytes 172,472 B 與 max 255,721 B 讀自 ops/vlab/packets/disk_top_priority.md 行 156；穩態封頂 268,435,456 B＝256×1024×1024（同檔行 156 與 tests/test_vlab_tools.py:3749 均記「256 MiB」＝268,435,456 B）；172,472/268,435,456＝0.000642508…（python3 計算，全值 0.00064250826835…）、255,721/268,435,456×100＝0.095263%…（python3 計算，全值 0.09526349604…%）——工單 0.000642／0.095% 與已提交 0.000643／0.096% 皆為此兩計算值的取整；已提交的 0.000643／0.096% 在 §1（行 156）／§2（行 184）／FINDINGS（行 411）三處一致，驗收不檢查該值，改寫反而破壞 §2 一致性並違反「不要修改 §2 表格」——選不改（最保守、可逆）。
+- 下一步：監控 83185760／cf3bed46 CI（需核 🟢）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 複查；e006 剩餘臂格完賽→rescore→audit→verdict→packet/FINDINGS 回填（不隱瞞 UNKNOWN／NOT_ESTABLISHED）；照 open/ 續做。

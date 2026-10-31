@@ -183,3 +183,109 @@ def test_trace_verify_cli_no_trace_safe(env, monkeypatch, capsys) -> None:
     assert rc == 0, out
     assert "no trace for" in out, out
     assert "nothing to verify" in out, out
+
+
+def test_blame_recent_step_remains_located_after_gc(env, monkeypatch, capsys):
+    """P20261031_1809-2：GC 回收舊版本後，保留視窗內的近期步驟引入的新值仍可精確定位。
+
+    對應 ASSIGNMENT 🔴最優先 驗收 (c)「trace verify／blame 在回收後仍成立」的正向半邊：
+    t1-t2 引入的舊版本 pad／magic 被 `retention.compact_trace` 回收後，blame 誠實回 UNKNOWN
+    （同檔既有測試）；而保留視窗內最新步驟 t6 在 app.py 第 3 行引入的
+    `active_token = "active_999"`，`vacant trace blame app.py:3` 仍須精確定位——
+    JSON 視圖 state == "located"、fault_class == "agent"、退出碼 0，人讀視圖不誤報
+    "unattributable"。GC 不該把「近期可追緝」也一併抹掉。
+    """
+    vh, ws = pathlib.Path(os.environ["VACANT_HOME"]), env / "work" / "cli_gc_recent"
+    ws.mkdir(parents=True)
+    (ws / "app.py").write_text("line1 = 100\nline2 = 999\n")
+    rec = Recorder(ws)
+    rec.baseline()
+    s1 = Actor("claude", "s1")
+    s2 = Actor("claude", "s2")
+    # t1-t2：舊版本的 pad 與 magic（之後各步保留 magic，pad 逐次改寫；這些舊版本會被回收）
+    rec.pre("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"})
+    (ws / "app.py").write_text("line1 = 200\nline2 = 999\n")
+    rec.post("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"}, "ok")
+    rec.pre("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"})
+    (ws / "app.py").write_text("pad = '" + ("A" * 50_000) + "'\nmagic = 77777\n")
+    rec.post("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"}, "ok")
+    # t3-t5：後續修改（pad 改寫、magic 保留），產生 ~150 KB 歷史版本
+    for i in range(3, 6):
+        rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
+        (ws / "app.py").write_text(f"pad = '{chr(65 + i) * 50_000}'\nmagic = 77777\n")
+        rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
+    # t6：保留視窗內的最新步驟，在第 3 行引入 active_token
+    rec.pre("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'})
+    (ws / "app.py").write_text(
+        f"pad = '{chr(65 + 6) * 50_000}'\nmagic = 77777\nactive_token = \"active_999\"\n")
+    rec.post("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'}, "ok")
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000)
+    assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 4
+    assert res["target"]["bytes_remaining"] <= 120_000
+    ok, msg = rec.verify()
+    assert ok, msg
+    monkeypatch.chdir(ws)
+    rc = trace_main(["trace", "blame", "app.py:3", "--json"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    b = json.loads(out)
+    assert b["state"] == "located", b
+    assert b["fault_class"] == "agent", b
+    # 人讀視圖：近期步驟一樣可定位，不誤報 unattributable
+    rc = trace_main(["trace", "blame", "app.py:3"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "unattributable" not in out, out
+
+
+def test_blame_evicted_step_unknown_contrast_after_gc(env, monkeypatch, capsys):
+    """P20261031_1856-2：同一個 GC 工作區，被回收的歷史舊版本行誠實回 UNKNOWN/unattributable。
+
+    對應 ASSIGNMENT 🔴最優先 驗收 (c)「trace verify／blame 在回收後仍成立」的遠期誠實半邊，
+    與 test_blame_recent_step_remains_located_after_gc（app.py:3 判定 located）構成同一個 GC
+    工作區「近期可追、遠期誠實」的完整對照：app.py:2（t2 引入的 magic 行，隨 t1-t4 被
+    sweep 回收）的 blame --json 須誠實回 state == "UNKNOWN"、fault_class == "unattributable"
+    且 note 載明 "reclaimed by gc"；人讀視圖包含 "unattributable"。不誣賴保留視窗內的步驟。
+    """
+    vh, ws = pathlib.Path(os.environ["VACANT_HOME"]), env / "work" / "cli_gc_evicted"
+    ws.mkdir(parents=True)
+    (ws / "app.py").write_text("line1 = 100\nline2 = 999\n")
+    rec = Recorder(ws)
+    rec.baseline()
+    s1 = Actor("claude", "s1")
+    s2 = Actor("claude", "s2")
+    # t1-t2：舊版本的 pad 與 magic（magic 在第 2 行；之後各步保留 magic，這些舊版本會被回收）
+    rec.pre("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"})
+    (ws / "app.py").write_text("line1 = 200\nline2 = 999\n")
+    rec.post("t1", s1, "Edit", {"file_path": str(ws / "app.py"), "new_string": "line1 = 200"}, "ok")
+    rec.pre("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"})
+    (ws / "app.py").write_text("pad = '" + ("A" * 50_000) + "'\nmagic = 77777\n")
+    rec.post("t2", s1, "Write", {"file_path": str(ws / "app.py"), "content": "magic = 77777\n"}, "ok")
+    # t3-t6：後續修改（pad 改寫、magic 保留；t6 另在第 3 行引入 active_token），產生 ~150 KB
+    for i in range(3, 6):
+        rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
+        (ws / "app.py").write_text(f"pad = '{chr(65 + i) * 50_000}'\nmagic = 77777\n")
+        rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
+    rec.pre("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'})
+    (ws / "app.py").write_text(
+        f"pad = '{chr(65 + 6) * 50_000}'\nmagic = 77777\nactive_token = \"active_999\"\n")
+    rec.post("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'}, "ok")
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000)
+    assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 4
+    assert res["target"]["bytes_remaining"] <= 120_000
+    ok, msg = rec.verify()
+    assert ok, msg
+    monkeypatch.chdir(ws)
+    # JSON 視圖：被回收的歷史行誠實 UNKNOWN / unattributable，note 載明 reclaimed by gc
+    rc = trace_main(["trace", "blame", "app.py:2", "--json"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    b = json.loads(out)
+    assert b["state"] == "UNKNOWN", b
+    assert b["fault_class"] == "unattributable", b
+    assert "reclaimed by gc" in b["note"], b
+    # 人讀視圖：一樣誠實 unattributable
+    rc = trace_main(["trace", "blame", "app.py:2"])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "unattributable" in out, out
