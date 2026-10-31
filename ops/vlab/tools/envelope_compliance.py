@@ -13,7 +13,8 @@
   只讀 runs 下的 cell.json，不碰 cell.py / labd.py / report.py（共用量具零改動）。
 
 誠實規則（對照不變量 5：看不到的東西是 UNKNOWN/無證據，不是 PASS 也不是「沒有」）：
-  - 格未完成（無 cell.json）→ NA（不計入任何分組的合規判斷）。
+  - 格未完成（無 cell.json）→ NA（不計入任何分組的合規判斷）；arm 由目錄名解析
+    （<suite>-<task>-<agent>-<arm>-<rep> 倒數第二 token；解析不出才落 by_arm["?"]）。
   - A／H／M／S 臂＝設計上沒裝 Vacant，超出封頂口徑 → NA（不是 FAIL）。
   - C 格 cell.json 無 vacant_home_bytes（或類型異常）→ NO_EVIDENCE，不判 FAIL
     （分不清「cell.py 沒量到」與「真的沒長」；那是 cell.py 的缺口，另案）。
@@ -68,6 +69,16 @@ def _load_json(path: Path):
         return None
 
 
+def _arm_from_name(name: str) -> str | None:
+    """從格子目錄名解析 arm：<suite>-<task>-<agent>-<arm>-<rep>，arm＝倒數第二個 token。
+    .infra- 前綴與 .infra-<ts> 尾綴先剝掉；少於 2 個 token → None。
+    與 opencode_cell_audit._arm_from_name 同邏輯（本腳本是獨立量具，不跨工具 import）。"""
+    if name.startswith(".infra-"):
+        name = name[7:]
+    parts = name.split(".infra-", 1)[0].split("-")
+    return parts[-2] if len(parts) >= 2 else None
+
+
 def _verdict(states: list[str]) -> str:
     if "FAIL" in states:
         return "FAIL"
@@ -84,7 +95,8 @@ def _cell_state(cell: Path, envelope: int) -> dict:
         return {"cell": name, "skipped": "infra-retry 副檔，不計入"}
     cj = _load_json(cell / "cell.json")
     if cj is None:
-        return {"cell": name, "arm": None, "state": "incomplete",
+        return {"cell": name, "arm": _arm_from_name(name),  # 解析不出維持 None
+                "state": "incomplete",
                 "compliance": "NA", "vacant_home_bytes": None,
                 "note": "格未完成（無 cell.json）"}
     arm = str(cj.get("arm") or "")
@@ -189,6 +201,7 @@ def selftest() -> int:
         mk("h_na", {"arm": "H", "append_system": {"sha256": "a" * 64}})
         mk("s_na", {"arm": "S"})
         mk("incomplete", None)
+        mk("polyglot_py-pg_task-opencode-M-r1", None)
         (root / ".infra-c_x").mkdir()
         (root / ".infra-c_x" / "cell.json").write_text(json.dumps(
             {"arm": "C", "vacant_home_bytes": env_default + 999}), encoding="utf-8")
@@ -201,7 +214,7 @@ def selftest() -> int:
         check("infra 副檔被跳過（留痕、不計入）",
               bool(by[".infra-c_x"]["skipped"])
               and bool(by["c_pass.infra-20261028T192916"]["skipped"])
-              and out["n_cells"] == 8
+              and out["n_cells"] == 9
               and by["c_pass"]["compliance"] == "PASS")
         check("PASS 判定", by["c_pass"]["compliance"] == "PASS")
         check("FAIL 判定（超封頂）", by["c_fail"]["compliance"] == "FAIL")
@@ -211,6 +224,12 @@ def selftest() -> int:
         check("H 臂 NA", by["h_na"]["compliance"] == "NA")
         check("S 臂 NA", by["s_na"]["compliance"] == "NA")
         check("未完成 NA", by["incomplete"]["compliance"] == "NA")
+        m_cell = "polyglot_py-pg_task-opencode-M-r1"
+        check("未完成格從目錄名解析 arm=M 且不落 by_arm['?']",
+              by[m_cell]["arm"] == "M"
+              and by[m_cell]["compliance"] == "NA"
+              and out["by_arm"]["M"]["n_cells"] == 1
+              and out["by_arm"]["?"]["n_cells"] == 1)  # '?' 只剩舊 'incomplete' 格
         check("整體 verdict=FAIL（有 c_fail）", out["verdict"] == "FAIL")
         check("C 分組 verdict=FAIL", out["by_arm"]["C"]["verdict"] == "FAIL")
         check("A 分組 verdict=NA", out["by_arm"]["A"]["verdict"] == "NA")
