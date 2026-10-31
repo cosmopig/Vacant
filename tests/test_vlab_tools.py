@@ -3707,3 +3707,27 @@ def test_e004_verdict_m_cost_within_cap_not_established() -> None:
     assert m["second_agent"]["evidence_present"] is True  # 有第二 agent 證據，不降級 UNKNOWN
     assert m["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in m["reason"]
+
+
+def test_e006_verdict_h_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict：H 臂（人類審查提示臂）McNemar 配對 Holm 後顯著（H_only=10 > A_only=0、
+    # p=0.001 ⇒ p_holm=0.004 < 0.05、方向為正）但 H 臂成本缺失（calls/tokens 為 None 且無 audit 可補）
+    # 時，成本紅線量不到（over_2x_A_cost is None，不判違規也不判過）、not_worth_it 誠實記為
+    # None（成效雖建立但成本失聯，無法斷定划算與否，嚴防偽判 False 或 True）、H-review(H) 假說態
+    # 誠實判定 CONFIRMED_COST_UNKNOWN 且理由精確指認「H 臂成本缺失」——成本失聯時成效不得單獨
+    # 升格 CONFIRMED 之契約鎖進常規回歸（工單 P20261031_1604-3）
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # H 臂顯著且方向為正：H_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # H 臂成本缺失（量不到、無 audit 可補；同系列既有成本缺失測試皆以 None 表示缺失）
+    rep["per_arm"]["H"] = {"calls_per_success": None, "tokens_per_success": None}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
