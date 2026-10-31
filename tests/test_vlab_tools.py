@@ -1354,6 +1354,11 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     capsys.readouterr()
     assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(outp), "--json"]) == 0
     assert outp.is_file()
+    # P20261031_0049-3（ASSIGNMENT「研發工具需納入回歸測試」）：預設終端人讀模式（未帶 --json）CLI 契約回歸。
+    # (d) exp 位置參數＋無 --json → rc=0，且首行排版穩定（e004_verdict m= 標頭在案）。
+    capsys.readouterr()
+    assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path)]) == 0
+    assert "e004_verdict m=" in capsys.readouterr().out
 
 
 def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
