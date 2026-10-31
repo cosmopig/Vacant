@@ -1138,6 +1138,60 @@ def test_growth_report_cli_missing_sources_out_file(tmp_path: Path) -> None:
     assert data["sources"] == []
 
 
+def test_growth_report_gc_target_not_reached_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_0358-4（ASSIGNMENT 🔴最優先 驗收條件 3「超預算時 GC 刪到預算以下；刪掉的
+    # 東西追緝時回 UNKNOWN、不崩、不當 PASS」＋驗收 4(a)「一天長多少」長效監測量具守護）：
+    # 序列證據足（2 點跨 25h ≥ 20h 門檻）、最新點用量在封頂內，但最新 gc 點
+    # status=ok 而 target_reached=false（回收未證實在真實使用裡生效）時，
+    # growth_report.report（L195-196）須判 verdict=FAIL 且理由載明「target_reached 非 true」；
+    # main 帶 --json 時以 exit code 1 安全退出——不崩潰、不假 PASS。
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    p1 = {"ts": "2026-10-29T00:00:00+00:00", "total_bytes": 10 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 5 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-30T01:00:00+00:00", "total_bytes": 12 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 6 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": False}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1, ensure_ascii=False) + "\n" + json.dumps(p2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"
+    assert "target_reached 非 true" in r["reason"]
+    capsys.readouterr()
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"),
+                             "--json"])
+    assert rc == 1
+
+
+def test_growth_report_latest_trace_over_cap_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_0431-3（ASSIGNMENT 🔴最優先 驗收條件 1「用量真的有上限：trace 版本庫硬上限
+    # 64 MiB」＋驗收 4(a)「一天長多少」長效監測量具守護）：
+    # 序列證據足（2 點跨 25h ≥ 20h 門檻）、最新點總計在穩態封頂內（80 MiB ≤ 256 MiB）、
+    # 最新 gc 點 status=ok 且 target_reached=true，但最新點 trace=70 MiB 超過
+    # TRACE_BUDGET_BYTES（64 MiB）時，growth_report.report（L191-192）須判 verdict=FAIL
+    # 且理由載明「> trace 上限」；main 帶 --json 時以 exit code 1 安全退出——不崩潰、不假 PASS。
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    p1 = {"ts": "2026-10-29T00:00:00+00:00", "total_bytes": 10 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 5 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-30T01:00:00+00:00", "total_bytes": 80 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 70 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1, ensure_ascii=False) + "\n" + json.dumps(p2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"
+    assert "trace 上限" in r["reason"]
+    capsys.readouterr()
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"),
+                             "--json"])
+    assert rc == 1
+
+
 def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
     # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
@@ -1516,6 +1570,118 @@ def test_opencode_cell_audit_c_arm_missing_vacant_home_bad(tmp_path: Path, capsy
     assert "vacant_home.tgz missing (arm C)" in out["cells"][0]["unknown"]
 
 
+def test_opencode_cell_audit_incomplete_cells_not_bad(tmp_path: Path, capsys) -> None:
+    # P20261031_0342-4（ASSIGNMENT 主軸 1 OpenCode 真實 agent 串接＋審查指示第 3 條 e006 收尾量具工具契約
+    # ＋研發工具回歸守護）：opencode_cell_audit 子目錄缺 cell.json 時標記 state=incomplete、
+    # 不誤入 bad 清單、main 回傳 exit 0——進行中／未完成實驗格在唯讀審計時受嚴格合規保護的防呆契約
+    # （同 p02 規矩：未完成＝UNKNOWN，不是 PASS 也不是「沒有」）鎖進常規回歸。
+    # 只測既有工具，核心零改動。mock 格只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    from ops.vlab.tools import opencode_cell_audit
+
+    runs_dir = tmp_path / "runs_incomplete"
+    runs_dir.mkdir()
+    (runs_dir / "inc_cell").mkdir()  # 刻意不寫 cell.json——代表未完成格（p02 規矩）
+
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(runs_dir), "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == []
+    assert out["n_cells"] == 1 and out["cells"][0]["state"] == "incomplete"
+
+
+def test_opencode_cell_audit_c_arm_missing_trace_chain_bad(tmp_path: Path, capsys) -> None:
+    # 審查發現缺陷：C 臂有 vacant_home.tgz 但缺少 trace 記錄（chain.ndjson 缺失或無法讀取）時，
+    # 審計量具必須嚴格記 ok=False、unknown 含 "trace missing (chain.ndjson unreadable or absent)"、
+    # 計入 bad 清單且 main 回傳 exit 1，防範 C 臂 trace 鏈缺失被靜默放行。
+    import tarfile
+    from ops.vlab.tools import opencode_cell_audit
+
+    c_runs = tmp_path / "c_runs_notrace"
+    c_runs.mkdir()
+    cell = c_runs / "polyglot_py-task2-opencode-C-r1"
+    cell.mkdir()
+    (cell / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 0, "wall_s": 10.0}), encoding="utf-8")
+    (cell / "events.jsonl").write_text(
+        json.dumps({"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 100}}}) + "\n",
+        encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+
+    # 建立有 hooks events 但刻意不建 chain.ndjson 的 vacant_home.tgz
+    home = tmp_path / "home_notrace"
+    (home / ".vacant/intake/hooks").mkdir(parents=True)
+    (home / ".vacant/intake/hooks/events.jsonl").write_text(
+        json.dumps({"event": "prompt", "action": "allow"}) + "\n",
+        encoding="utf-8")
+    with tarfile.open(cell / "vacant_home.tgz", "w:gz") as tf:
+        tf.add(home, arcname=".")
+
+    capsys.readouterr()
+    rc = opencode_cell_audit.main(["--runs-dir", str(c_runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == ["polyglot_py-task2-opencode-C-r1"]
+    assert out["cells"][0]["ok"] is False
+    assert "trace missing (chain.ndjson unreadable or absent)" in out["cells"][0]["unknown"]
+
+
+def test_opencode_cell_audit_missing_events_bad(tmp_path: Path, capsys) -> None:
+    # P20261031_0431-4（ASSIGNMENT 主軸 1 OpenCode 真實 agent 串接量具守護＋資深審查指示第 3 條）：
+    # 審計完整格子（cell.json 存在）時若缺少 events.jsonl（模型調用軌跡缺失），opencode_cell_audit
+    # 必須嚴格標記 ok=False、unknown 含 "events.jsonl missing"、計入 bad 清單且 main 回傳 exit 1，
+    # 防範調用軌跡缺失被靜默放行。只測既有工具，核心零改動。
+    # mock 格只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    from ops.vlab.tools import opencode_cell_audit
+
+    runs = tmp_path / "runs_noevents"
+    runs.mkdir()
+    cell = runs / "polyglot_py-task1-opencode-A-r1"
+    cell.mkdir()
+    (cell / "cell.json").write_text(json.dumps({"arm": "A", "agent_rc": 0, "wall_s": 5.0}), encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    # 刻意不寫 events.jsonl——模型調用軌跡缺失
+
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == [cell.name]
+    assert out["cells"][0]["ok"] is False
+    assert "events.jsonl missing" in out["cells"][0]["unknown"]
+
+
+def test_opencode_cell_audit_missing_review_bad(tmp_path: Path, capsys) -> None:
+    # P20261031_0446-3（ASSIGNMENT 主軸 1 OpenCode 真實 agent 串接量具守護＋資深審查指示第 3 條）：
+    # 審計完整格子（C 臂、events.jsonl 存在）時若 vacant_home.tgz 內缺失 review（hooks events
+    # 無法讀取或不存在），opencode_cell_audit 必須嚴格標記 ok=False、unknown 含
+    # "review missing (hooks events unreadable)"、計入 bad 清單且 main 回傳 exit 1，
+    # 防範 C 臂 review 軌跡缺失被靜默放行。只測既有工具，核心零改動。
+    # mock 格只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    import tarfile
+    from ops.vlab.tools import opencode_cell_audit
+
+    runs = tmp_path / "runs_noreview"
+    runs.mkdir()
+    cell = runs / "polyglot_py-task3-opencode-C-r1"
+    cell.mkdir()
+    (cell / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 0, "wall_s": 5.0}), encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+    (cell / "events.jsonl").write_text(
+        json.dumps({"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 100}}}) + "\n",
+        encoding="utf-8")
+    # 空的 vacant_home.tgz——裡面沒有 .vacant/intake/hooks/events.jsonl（review 軌跡缺失）
+    with tarfile.open(cell / "vacant_home.tgz", "w:gz"):
+        pass
+
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == [cell.name]
+    assert out["cells"][0]["ok"] is False
+    assert "review missing (hooks events unreadable)" in out["cells"][0]["unknown"]
+
+
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
     # （523236d3）納入常規回歸——--selftest、--report/--audit/--json CLI、四項假說判定結構與 M 臂第二 agent 證據。
@@ -1746,6 +1912,23 @@ def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
 
 
+def test_e006_verdict_effective_but_expensive() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm 顯著、C_only > A_only 但成本 > 2×A（成本比 2.5）時，
+    # 判定 H-acc 為 EFFECTIVE_BUT_EXPENSIVE（顯著但成本 > 2×A ⇒ 有效但昂貴）——成效與成本綁定判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂配對顯著：A_only=0, C_only=10, p=0.001
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本紅線：A calls_per_success=10.0，C calls_per_success=25.0（成本比 2.5 > 2.0 觸發 2×A 紅線）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "EFFECTIVE_BUT_EXPENSIVE"
+    assert "顯著但成本 > 2×A ⇒ 有效但昂貴" in r["hypotheses"]["H-acc"]["reason"]
+
+
 def test_e004_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     # 驗證 e004_verdict 同樣具備從 audit_summary 補齊真實成本並判定 2×A 紅線能力。
     from ops.vlab.tools import e004_verdict
@@ -1812,6 +1995,25 @@ def test_audit_out_feeds_verdict_audit_chain(tmp_path: Path, capsys) -> None:
     assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
 
 
+def test_e006_verdict_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm 顯著且 C_only > A_only，但 A 臂成本缺失（0.0/0、
+    # 無 audit 可補）使 2×A 成本紅線量不到時，判定 H-acc 為 CONFIRMED_COST_UNKNOWN
+    # （顯著且方向為正，但成本紅線量不到——量不到，不是過、也不是違規）——成效與成本邊綁定判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂配對顯著：A_only=0, C_only=10, p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本缺失：0.0/0 ⇒ 2×A 成本紅線量不到（audit_summary=None 無補齊）
+    rep["per_arm"]["A"]["calls_per_success"] = 0.0
+    rep["per_arm"]["A"]["tokens_per_success"] = 0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None  # 量不到：不判違規也不判過
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "顯著且方向為正，但成本紅線量不到（A 臂成本缺失）" in r["hypotheses"]["H-acc"]["reason"]
+
+
 def test_audit_out_feeds_e004_verdict_chain(tmp_path: Path, capsys) -> None:
     # 審查指示第 1/3 條（e004/e006 收尾判定量具同族守護）鏈式契約：
     # opencode_cell_audit --out 落盤的 AUDIT.json（頂層 summary.per_arm）須能直接餵 e004_verdict
@@ -1845,3 +2047,98 @@ def test_audit_out_feeds_e004_verdict_chain(tmp_path: Path, capsys) -> None:
     assert cost["A_base"]["calls_per_success"] == 2.0      # audit 補齊（mock A：2 呼叫／800 tokens）
     assert cost["arms"]["C"]["over_2x_A_cost"] is False
     assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
+
+
+def test_e006_verdict_m_missing_evidence_unknown() -> None:
+    # 驗證 e006_verdict 在 M 臂（第二 agent 審查臂）配對顯著（M_only > A_only、p<alpha）但無
+    # 第二 agent 證據（audit_summary=None ⇒ events.jsonl 缺失或無實質 review 記錄）時，
+    # 假說狀態降級判定為 UNKNOWN（量不到，不是負結果）——多 agent 審查機制的邊界在回歸
+    # 測試中被守護：配對再顯著，量不到第二 agent 審查就不謊報成效。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # M 臂配對顯著：A_only=0, M_only=10, p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is False
+
+
+def test_e006_verdict_not_worth_it() -> None:
+    # 驗證 e006_verdict 在 H 臂成本超標（calls_per_success 25.0 vs A 臂 10.0 ⇒ 2.5×A，
+    # 超過 2×A 紅線）且配對未顯著提升（A_vs_H：A_only=8 / H_only=3、p=0.20，Holm 後仍
+    # ≥ alpha）時，判定 cost["arms"]["H"]["not_worth_it"] is True（成本 > 2×A 且未顯著
+    # 提升 ⇒ 不划算）——成效與成本綁定的判定契約鎖進常規回歸：只報成功率不報成本＝沒做完。
+    # 註：e006 的 H 臂假說鍵名為 H-review(H)（HYP 對應，e002 口徑稱 H-harness）；
+    # 工單 P20261031_0547-4 步驟 5 寫 "H-harness(H)"，以模組實際鍵名斷言、不隱瞞差異。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # _mock_report 現值即工單所述：H 臂 calls_per_success 25.0（A 臂 10.0，2.5×A > 2×A
+    # 紅線）；A_vs_H 配對 A_only=8 / H_only=3、mcnemar_p_two_sided=0.20（不顯著）。
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True
+    assert r["hypotheses"]["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+
+
+def test_e006_verdict_confirmed() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm 顯著（p=0.001）且 C_only > A_only（10 > 0）、
+    # 成本 ≤ 2×A（C calls 12.0 vs A 10.0 ⇒ 1.2×A）時，判定 H-acc 為 CONFIRMED
+    # （reason 含「Holm 後顯著、X_only > A_only、成本 ≤ 2×A」且 not_worth_it is False）
+    # ——成效與成本綁定的正向判定契約鎖進常規回歸（工單 P20261031_0603-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂配對顯著：A_only=0, C_only=10, p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本未超 2×A：C calls 12.0 vs A 10.0（1.2×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 12.0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-acc"]["reason"]
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
+
+
+def test_e006_verdict_missing_paired_unknown() -> None:
+    # 驗證 e006_verdict 在 S 臂配對缺失（A_vs_S=None ⇒ p_raw is None、不進 Holm 集）
+    # 時，判定 H-stakes(a) 為 state=="UNKNOWN"（reason 含「配對缺失、未測（不進 Holm 集）
+    # ——UNKNOWN，不是沒有」）且 m_in_holm_set 由 4 降為 3——「不假 PASS、證據不足
+    # UNKNOWN（不是沒有）」的判定契約鎖進常規回歸（工單 P20261031_0603-4）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂配對設為缺失
+    rep["paired"]["A_vs_S"] = None
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測（不進 Holm 集）——UNKNOWN，不是沒有" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert r["hypotheses"]["H-stakes(a)"]["p_raw"] is None
+    assert r["m_in_holm_set"] == 3
+
+
+def test_e006_verdict_direction_negative_not_established() -> None:
+    # 驗證 e006_verdict 在 S 臂 McNemar Holm 顯著（p=0.001）但 A_only > S_only（10 > 0、
+    # 對照組優於實驗組、方向非正）時，判定 H-stakes(a) 為 state=="NOT_ESTABLISHED"
+    # （reason 含「不顯著（或方向非正）⇒ 未建立（不是負結果）」）且 S 臂綁定注記（note 含
+    # 「利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）」）——
+    # 方向非正時絕不誤發 CONFIRMED 之判定防呆鎖進常規回歸（工單 P20261031_0618-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂顯著但方向非正：A_only=10 > S_only=0，p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_S"] = {"pairs": 10, "A_only": 10, "S_only": 0, "mcnemar_p_two_sided": 0.001}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
+    assert r["hypotheses"]["H-stakes(a)"]["significant_at_alpha"] is True
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False

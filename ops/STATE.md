@@ -71,3 +71,29 @@
 - 驗證：先實讀 opencode_cell_audit.py L179-181/L355-362 確認契約（C 臂缺 tgz→ok=False＋unknown append；bad 非空→return 1）；驗收 pytest -k 單測 rc=0（1 passed）＋grep 命中行 1432（工單「行 1433 附近」為約數）；全檔 76 測試 rc=0；無「信任／證明變好」措辭（新增段 0 處）；commit 3deb4809；工單→done/、doing/ 0 張。
 - 沒驗證：3deb4809 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：監控 3deb4809 CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 499 (2026-10-31 06:2x) · P20261031_0603-4 e006_verdict 配對缺失判定 UNKNOWN 契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證）＋「不假 PASS / 證據不足 UNKNOWN、不是沒有」鐵律。
+- 做了：tests/test_vlab_tools.py 檔尾新增 test_e006_verdict_missing_paired_unknown（+18 行，行 2109）——_mock_report 後 rep["paired"]["A_vs_S"]=None，evaluate_hypotheses(audit_summary=None) 斷言 H-stakes(a) state==UNKNOWN、reason 含「配對缺失、未測（不進 Holm 集）——UNKNOWN，不是沒有」、p_raw is None、m_in_holm_set==3（4→3）；e006_verdict 核心零改動、未碰其他測試函式；工單→done/、doing/ 0 張。
+- 驗證：改前驗收 grep 0 命中＋pytest rc=5（無收集，前提成立）；改後驗收 rc=0（-k 1 passed、最後一行 `.[100%]`，grep 命中行 2109）；全檔 92 passed rc=0（91+1）；git diff 1 檔 +18、+ 行無「信任／證明變好」（grep 0 命中）；commit cfd5ea35。
+- 沒驗證：cfd5ea35 CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 11/34），正式判定仍待全盤完賽。
+- 下一步：監控 cfd5ea35/482766df/1c46a428/c4672106/35aa4b9d CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 499 (2026-10-31 06:2x) · P20261031_0618-1 e006 第 12 格 pg_grade_school C 臂真實用量同步至 disk_top_priority §1 追蹤時序（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 4(b) 實驗室格子 C 組用量）＋資深審查指示第 2 條。
+- 做了：ops/vlab/packets/disk_top_priority.md §1 追蹤時序行 150 +1/-1（標題「第 11 格 05:45」→「第 12 格 06:13」、C 臂 11→12 格、pg_go_counting 後追加 pg_grade_school vacant_home_bytes 58,767 B（57.4 KB，vacant_objects_bytes 31,795 B，ratio 0.000219，10/31 06:13 完賽）、min/med/max 統計與「12 格全在 256 MiB 穩態封頂」11→12）；外部副本 cp 同步；工單→done/、doing/ 0 張。
+- 驗證：改前驗收 grep 0 命中（前提成立）；數據本輪實核 cell.json（58767/31795、finished 2026-10-31T06:13:56+0000、vacant_sha=bf1a9f1a…、58767/268435456=0.000219、58767/1024=57.4 KB 自洽）；改後兩 grep 均命中行 150、diff 無輸出 rc=0（bit-identical）；med 121,652 沿用 repo 慣例 vs[len//2]（envelope_compliance.py:144，12 格 index 6=121652）；+ 行無「信任／證明變好」；commit e1715724。
+- 沒驗證：e1715724 CI 未出；第 13 格 pg_grep（06:23 完賽、152,604 B）不在本單範圍未同步；envelope_compliance 未重跑（新格 ratio 遠低於 0.096% 封頂口徑，沿用既有 PASS 口徑）；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽。
+- 下一步：監控 e1715724/cfd5ea35/482766df/1c46a428/c4672106/35aa4b9d CI 與 e006 進度/infra 重試；pg_grep 及後續格照新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 503 (2026-10-31 06:4x) · P20261031_0634-1 e006 第 12 格 pg_grade_school C 臂真實用量同步至 FINDINGS 主軸 2（重覆單，如實結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 4(b) 實驗室格子 C 組用量）＋資深審查指示第 2 條。
+- 做了：本單已由 round 502 結案（工作由 eca004c8 完成、commit 訊息即以本工單檔名開頭），本輪為重新排隊之重覆單；DECISION：重覆單如實結案、不再改 FINDINGS.md｜工作已提交且驗收鏈已通過，重改只會加噪與覆蓋風險；本輪重驗驗收鏈（三 grep 分別命中行 396/399/401、rc=0×3）；工單追加結果 3 行並 mv 至 done/（覆蓋舊 done 副本；舊副本有 1 行畸形截斷，新塊引用同一 eca004c8、資訊無損失）；doing/ 0 張。
+- 驗證：驗收全鏈 rc=0（行 396「15 格 complete…e006 12 格」／行 399「（12 格，本盤進行中）…pg_grade_school **58,767 B（57.4 KB）**」／行 401「15 格實測全部落在」）；數據與 round 502 實核 cell.json 一致（58767/31795 B、57.4 KB、ratio 0.000219、10/31 06:13 完賽）；本輪追加結果 3 行無「信任／證明變好」（檔案唯一命中為工單「不要做」指令原文，非本輪新增）。
+- 沒驗證：eca004c8 CI 未出；第 13 格 pg_grep（06:23 完賽、152,604 B）未同步（不在本單範圍，open/ P20261031_0634-5 待新工單）；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽後之 REPORT.json＋e006_verdict.py。
+- 下一步：監控 eca004c8/58c330d6/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 505 (2026-10-31 06:5x) · P20261031_0634-3 e006_verdict 方向非正判定 NOT_ESTABLISHED 契約納入常規回歸（重覆單如實結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證與「成效方向為正」判定防線）＋「不顯著或方向非正未建立」鐵律。
+- 做了：DECISION 重覆單如實結案、不重改測試檔｜本單為 P20261031_0618-3 同內容重排之重覆單，工作已由 round 501 commit 58c330d6 提交；本輪無新增程式碼改動（tests/test_vlab_tools.py 未動、git status 乾淨）；重讀行 2127-2144 確認測試體與工單逐條一致（mock A_vs_S A_only=10/S_only=0/p=0.001、5 斷言齊備）；工單追加結果 3 行並 mv 至 done/、doing/ 0 張。
+- 驗證：驗收鏈如實 rc=0（pytest 1 passed, 92 deselected in 0.05s；grep 命中行 2127）；測試體與工單逐條一致（state==NOT_ESTABLISHED、reason/note 字面、significant_at_alpha is True、not_worth_it is False）；本輪新增行無「信任／證明變好」。
+- 補記（round 505 審查 redo）：已實際查驗 ops/vlab/tools/e006_verdict.py（277 行；git log 末筆 1329c57a 早於 round 501，本會話未修改）——L133 CONFIRMED 系三態皆以 x_only > a_only 為門檻（方向非正結構性不可達）、L139 NOT_ESTABLISHED＋reason 字面、L141 S 臂 note 字面、L121 sig＝p_holm<alpha（本場景 0.004）、L143-147 not_worth_it（over=False⇒False）；模組 selftest PASS；工單場景實跑 state=NOT_ESTABLISHED／sig True／not_worth_it False 全符。
+- 沒驗證：58c330d6/a14609bb/eca004c8/8f1b41cc CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
+- 下一步：監控 58c330d6/a14609bb/eca004c8/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
