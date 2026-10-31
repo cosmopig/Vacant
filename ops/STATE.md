@@ -213,7 +213,7 @@
 - 下一步：e006 verdict 工單（依 AUDIT.json 五臂成本＋p 值誠實判定）；open/ 續做；e007 smoke→e008 或修 infra；監控 96d2f6ed CI。
 ## round 753 (2026-10-31 22:5x) · P20261031_2243-3-record-e006-verdict-to-findings.md（結案）
 - 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效綁定紅線）＋資深審查指示 3（e006 收尾第 4 步）；e006 OpenCode 五臂全盤 170 格成效與成本判定誠實記錄入 FINDINGS.md。
-- 做了：ops/vlab/FINDINGS.md 檔尾追加 11 行條目（行 418 起）：## 2026-10-31 · 主軸 3 · e006 OpenCode 五臂全盤完賽成效與成本判定（H-acc/H-review(H)/H-stakes(a) NOT_ESTABLISHED，H-review(M) UNKNOWN，H/S 越過 2×A 成本紅線）——規格（170 格、AUDIT incomplete=0）、通過率與成本（A 14/34、C 17/34 1.28×/1.69×、H 10/34 2.15×/2.95×、M 15/34 1.26×/1.89×、S 12/34 3.91×/4.45×）、四組假設判定；純追加、未動既有條目與 Python 程式碼；口徑「可究責／有根據／誠實記錄」，無「信任／證明變好」；工單回填 3 行結果移 done/、doing/ 0 張。
+- 做了：ops/vlab/FINDINGS.md 檔尾追加 11 行條目（行 418 起）：## 2026-10-31 · 主軸 3 · e006 OpenCode 五臂全盤完賽成效與成本判定（H-acc/H-review(H)/H-stakes(a) NOT_ESTABLISHED，H-review(M) UNKNOWN，H/M 越過 2×A 成本紅線）——規格（170 格、AUDIT incomplete=0）、通過率與成本（A 14/34、C 17/34 0.96×/1.06×、H 10/34 1.94×/2.48×、M 15/34 1.49×/2.02×、S 12/34 1.31×/1.36×；成本紅線判定依全量審計 177 格：H/M 超 2×A、C/S 未超；round 760 依審查修正，原 29 格快照口徑已廢）、四組假設判定；純追加、未動既有條目與 Python 程式碼；口徑「可究責／有根據／誠實記錄」，無「信任／證明變好」；工單回填 3 行結果移 done/、doing/ 0 張。
 - 驗證：驗收鏈 rc=0（改前 grep rc=1 符合預期、改後兩 grep 命中行 418/423、末行 ACCEPTANCE_OK）；git diff 1 檔 11 行純插入；commit 8daf0865（branch auto/qwen27b、status 乾淨）；數值與 e006 封包 §5（a1b137da 回填、已對 REPORT.json/AUDIT.json/e006_verdict.py 核對）交叉一致。
 - 沒驗證：8daf0865 CI 未出（純文件 11 行）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查；e007 smoke 結果未查。
 - 下一步：open/ 續做（doing/ 0 張、等 open/ 或新工單）；e007 smoke→查過關→發射 e008 或修 infra；監控 8daf0865/a1b137da/9c5d40cd CI。
