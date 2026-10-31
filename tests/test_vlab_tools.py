@@ -1172,6 +1172,24 @@ def test_vacant_growth_log_cli_missing_home_append(tmp_path: Path, capsys) -> No
     assert "0 B (0.0 MiB)" in out
 
 
+def test_vacant_growth_log_corrupt_gc_report_fallback(tmp_path: Path) -> None:
+    # P20261031_0326-3（ASSIGNMENT 🔴最優先 驗收 4(a) 真機成長量具守護＋研發工具回歸守護）：
+    # snapshot 遭遇損壞的 gc_report.json（非合法 JSON）時須容錯略過——
+    # json.loads 拋 JSONDecodeError（ValueError 子類）被 except (OSError, ValueError) 捕獲
+    # （vacant_growth_log.py L57-63）、不崩潰、仍正確度量 total_bytes 與子目錄用量，
+    # 且 main --json 回 0——核心零改動。
+    home = tmp_path / "home"
+    (home / "trace").mkdir(parents=True)
+    (home / "trace" / "blob.txt").write_text("12345", encoding="utf-8")
+    (home / "gc_report.json").write_text("corrupted json not valid\n", encoding="utf-8")
+    rec = vacant_growth_log.snapshot(home)
+    assert rec["total_bytes"] == 30  # blob 5 B + gc_report 25 B
+    assert rec["per_dir_bytes"]["trace"] == 5
+    assert "gc_last" not in rec
+    rc = vacant_growth_log.main(["--home", str(home), "--json"])
+    assert rc == 0
+
+
 def test_noncode_cell_audit_cli_no_matching_suite_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1749-3（ASSIGNMENT 主軸 4：通用任務評估量具防禦契約治理）：
     # --suite 篩選後無相符題目 cell 時，noncode_cell_audit.main
