@@ -51,3 +51,10 @@
 - 驗證：改前 grep 0 行 rc=1（前提成立）；改後驗收原句 grep 命中行 176 rc=0＋diff -u 兩份無輸出 rc=0（工單註「行 175」實為行 176，偏 1）；git diff 僅 1 檔 1 行；無「信任／證明變好」；commit 19285f51；工單→done/、doing/ 0 張。
 - 沒驗證：19285f51 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：監控 e006 進度與 infra 重試；第 40 點/新 C 臂格出現即同步三件套（§1 時序＋§2/§3 總覽合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 454 (2026-10-31 03:3x) · P20261031_0311-5 growth_report trend 趨勢計算語義與單點容錯契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 (a)「一天長多少」長效監測量具守護）＋研發工具回歸守護。
+- 做了：tests/test_vlab_tools.py +20（1 檔）：test_growth_report_load_points_dedup_and_invalid_lines 後新增 test_growth_report_trend_semantics——單點 span_hours=0.0、max_24h_growth_bytes=None（UNKNOWN 素材，非 PASS/非「沒有」）、net_growth_bytes=0、per_dir_peak_bytes 峰值保留；多點 12h 跨距 max_24h=1500、peak_total_bytes=2500。growth_report.py 核心零改動、他測試函式零改動。
+- 驗證：先實讀 growth_report.py trend() L98-135 確認契約（<2 點 max_24h=None、span_h round(…,2)、per_dir_peak 取 max）；改前 grep 0 行 rc=1＋pytest rc=5（工單前提成立）；驗收 pytest -k 單測 rc=0＋grep 命中行 826（工單「行 813 附近」為約數、驗收指令本身通過）；全檔 75 passed rc=0；commit b812dff5；工單→done/、doing/ 0 張。
+- 沒驗證：b812dff5 CI 未出（輪首 auto/qwen27b CI 還沒跑完）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：監控 b812dff5 CI 與 e006 進度/infra 重試；第 41 點出現即同步三件套（§1 時序＋§2 總覽＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
