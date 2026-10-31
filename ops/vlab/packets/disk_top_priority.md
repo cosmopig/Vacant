@@ -149,6 +149,7 @@
   `gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0（續記，不覆蓋 20:59 之 48h 里程碑紀錄）。
 - **10/31（00:0x 續記，第 4 格 00:41 完賽）**：e006 OpenCode 五臂全盤 C 臂 4 格實測——pg_affine_cipher vacant_home_bytes 49,903 B（48.7 KB）、pg_beer_song 116,444 B（113.7 KB），vacant_objects_bytes 分別為 25,829 B 與 76,219 B，ratio 分別為 0.000186 與 0.000434；pg_book_store vacant_home_bytes 50,155 B（49.0 KB，vacant_objects_bytes 31,139 B，ratio 0.000187，10/31 00:22 完賽）；pg_bottle_song vacant_home_bytes 56,104 B（54.8 KB，vacant_objects_bytes 30,511 B，ratio 0.000209，10/31 00:41 完賽），4 格 min 49,903／med 56,104／max 116,444 B，envelope_compliance verdict 均為 PASS（最高 0.043% 封頂），4 格全在 256 MiB 穩態封頂的 0.043% 以內。
 - **10/31（00:05 續記，工單 P20261031_0018-1）**：`growth_report.py --json` 實測：**37 點跨 51.75h**（2026-10-28T20:20 → 2026-10-31T00:05），長效監測持續進行；最新 **59,974,658 B（57.2 MiB）≤ 256 MiB 穩態封頂（22.3%）**、24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **41,211,032 B（39.3 MiB ≤ 64 MiB）**、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
+- **10/31（01:07 續記，工單 P20261031_0105-2）**：`growth_report.py --json` 實測：**38 點跨 52.79h**（2026-10-28T20:20 → 2026-10-31T01:07），長效監測持續進行；最新 **60,405,994 B（57.6 MiB）≤ 256 MiB 穩態封頂（22.5%）**、24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **41,490,752 B（39.6 MiB ≤ 64 MiB）**、trace 435 blobs、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
 
 ## 2. 四條驗收條件對現狀
 
