@@ -1489,3 +1489,41 @@ def test_e004_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     assert cost["H"]["over_2x_A_cost"] is True
     assert cost["H"]["not_worth_it"] is True
     assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+
+
+def test_audit_out_feeds_verdict_audit_chain(tmp_path: Path, capsys) -> None:
+    # 審查指示第 3 條（e006 完賽收尾驗收流程）鏈式契約：
+    # opencode_cell_audit --out 落盤的 AUDIT.json（頂層 summary.per_arm）須能直接餵 e006_verdict
+    # （--audit 預設讀 runs/<exp>/AUDIT.json）；REPORT.json 成本為 0.0（OpenCode 無 cell.json
+    # metrics 特徵）時，2×A 成本紅線須由 audit 實測值補齊而非全 None。
+    # 兩量具是 e006/e004 收尾法定量具，彼此形狀契約（audit 輸出＝verdict 輸入）須受回歸守護。
+    from ops.vlab.tools import opencode_cell_audit, e006_verdict
+
+    exp_dir = tmp_path / "runs" / "exp_chain"
+    exp_dir.mkdir(parents=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-A-r1", "A", score_pass=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-C-r1", "C", score_pass=True)
+
+    # REPORT.json 成本全 0（OpenCode 無 cell.json metrics 特徵）
+    rep = e006_verdict._mock_report()
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+    (exp_dir / "REPORT.json").write_text(json.dumps(rep), encoding="utf-8")
+
+    audit_json = exp_dir / "AUDIT.json"
+    capsys.readouterr()  # 排空殘留，保持 --out stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(exp_dir), "--out", str(audit_json)])
+    assert rc == 0
+    assert audit_json.is_file()
+
+    capsys.readouterr()
+    rc = e006_verdict.main(["exp_chain", "--runs-dir", str(tmp_path / "runs"), "--json"])
+    assert rc == 0
+    r = json.loads(capsys.readouterr().out)
+    cost = r["cost_redline_2xA"]
+    assert cost["A_base"]["calls_per_success"] == 2.0      # audit 補齊（mock A：2 呼叫／800 tokens）
+    assert cost["A_base"]["tokens_per_success"] == 800.0
+    assert cost["arms"]["C"]["calls_vs_A"] == 1.0          # audit 補齊（mock C：同 2 呼叫／800 tokens）
+    assert cost["arms"]["C"]["over_2x_A_cost"] is False
+    assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
