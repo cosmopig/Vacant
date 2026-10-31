@@ -1374,6 +1374,25 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert e004_verdict.main(["bad_report_e004", "--runs-dir", str(tmp_path)]) == 2
     assert "REPORT.json 格式不符" in capsys.readouterr().err
 
+    # P20261031_0153-2（ASSIGNMENT「研发工具需纳入回归测试」）：REPORT.json 各臂 calls/tokens 为 0.0/0
+    # 时，由 AUDIT.json 补齐真实成本——rc=0、cost 行含 over=False、无 calls=None tokens=None。
+    fb = tmp_path / "exp_fb_e004"; fb.mkdir()
+    rep_fb = e004_verdict._mock_report()
+    for arm in rep_fb["per_arm"]:
+        rep_fb["per_arm"][arm].update(calls_per_success=0.0, tokens_per_success=0)
+    (fb / "REPORT.json").write_text(json.dumps(rep_fb), encoding="utf-8")
+    (fb / "AUDIT.json").write_text(json.dumps({"summary": {"per_arm": {
+        "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+        "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+        "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+        "M": {"calls_per_success": 10.0, "tokens_per_success": 500.0,
+              "second_agent_verified_cells": 5, "second_agent_unknown_cells": 15},
+        "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0}}}}), encoding="utf-8")
+    capsys.readouterr()
+    assert e004_verdict.main(["exp_fb_e004", "--runs-dir", str(tmp_path)]) == 0
+    line_fb = next(l for l in capsys.readouterr().out.splitlines() if "cost(2×A 紅線)" in l)
+    assert "over=False" in line_fb and "calls=None tokens=None" not in line_fb
+
 
 def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2331-2（ASSIGNMENT「研發工具需納入回歸測試」）：e006 預註冊假說判定量具 e006_verdict
