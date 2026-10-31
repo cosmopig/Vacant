@@ -1516,6 +1516,26 @@ def test_opencode_cell_audit_c_arm_missing_vacant_home_bad(tmp_path: Path, capsy
     assert "vacant_home.tgz missing (arm C)" in out["cells"][0]["unknown"]
 
 
+def test_opencode_cell_audit_incomplete_cells_not_bad(tmp_path: Path, capsys) -> None:
+    # P20261031_0342-4（ASSIGNMENT 主軸 1 OpenCode 真實 agent 串接＋審查指示第 3 條 e006 收尾量具工具契約
+    # ＋研發工具回歸守護）：opencode_cell_audit 子目錄缺 cell.json 時標記 state=incomplete、
+    # 不誤入 bad 清單、main 回傳 exit 0——進行中／未完成實驗格在唯讀審計時受嚴格合規保護的防呆契約
+    # （同 p02 規矩：未完成＝UNKNOWN，不是 PASS 也不是「沒有」）鎖進常規回歸。
+    # 只測既有工具，核心零改動。mock 格只活在 tmp_path（不讀寫 /srv/vlab/runs 真實資料）。
+    from ops.vlab.tools import opencode_cell_audit
+
+    runs_dir = tmp_path / "runs_incomplete"
+    runs_dir.mkdir()
+    (runs_dir / "inc_cell").mkdir()  # 刻意不寫 cell.json——代表未完成格（p02 規矩）
+
+    capsys.readouterr()  # 排空殘留，保持 --runs-dir stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(runs_dir), "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == []
+    assert out["n_cells"] == 1 and out["cells"][0]["state"] == "incomplete"
+
+
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
     # （523236d3）納入常規回歸——--selftest、--report/--audit/--json CLI、四項假說判定結構與 M 臂第二 agent 證據。
