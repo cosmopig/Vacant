@@ -2415,3 +2415,196 @@ def test_e004_verdict_partial_dimension_cost_missing_reason() -> None:
     assert "A 臂與 C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
     # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
     assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_not_worth_it() -> None:
+    # 驗證 e004_verdict 在實驗臂 H 成本超標（mock calls 25.0 = 2.5×A，超 2×A 紅線）
+    # 且未顯著提升（A_only=8 > H_only=3、p=0.20 不顯著）時，
+    # cost_redline_2xA.arms["H"].over_2x_A_cost 為 True、not_worth_it 精確判定 True，
+    # 且 H 臂假設態為 NOT_ESTABLISHED（未建立，不是負結果）（工單 P20261031_0921-3）。
+    from ops.vlab.tools import e004_verdict
+
+    r = e004_verdict.evaluate_hypotheses(e004_verdict._mock_report(), audit_summary=None)
+    # H 臂成本超標：calls 25.0 > 2×10.0 ⇒ 過紅線
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    # 成本超標且未顯著提升 ⇒ 不划算（成本必須與成效一起報告）
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True
+    # 不顯著（p=0.20）且方向非正（H_only=3 < A_only=8）⇒ 未建立（不是負結果）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+
+
+def test_e004_verdict_effective_but_expensive() -> None:
+    # 驗證 e004_verdict 在實驗臂 C 配對顯著（p=0.001、Holm 後仍顯著、C_only=10 > A_only=0）
+    # 但成本超標（A calls=10.0、C calls=25.0 = 2.5×A，超 2×A 紅線）時，
+    # H-acc state=="EFFECTIVE_BUT_EXPENSIVE" 且理由含「顯著但成本 > 2×A ⇒ 有效但昂貴」——
+    # 成效顯著但成本超標時之「有效但昂貴」判定防線鎖進 e004 常規回歸（工單 P20261031_0936-2）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著（p=0.001，Holm 校正後 0.004 < 0.05 仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本超標：A 臂 calls=10.0、C 臂 calls=25.0（2.5×A > 2.0 紅線）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # C 臂成本超標：calls 25.0 > 2×10.0 ⇒ 過紅線
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    # 顯著＋方向為正（C_only=10 > A_only=0）＋成本超標 ⇒ 有效但昂貴（成本必須與成效一起報告）
+    assert r["hypotheses"]["H-acc"]["state"] == "EFFECTIVE_BUT_EXPENSIVE"
+    assert "顯著但成本 > 2×A ⇒ 有效但昂貴" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_confirmed() -> None:
+    # 驗證 e004_verdict 在實驗臂 C 配對顯著（p=0.001、Holm 後仍顯著、C_only=10 > A_only=0）
+    # 且成本合格（A calls=10.0、C calls=12.0 = 1.2×A ≤ 2×A 紅線、tokens 比 0.9 ≤ 2×A）時，
+    # H-acc state=="CONFIRMED"、cost_over_2x_A 為 False、not_worth_it 為 False——
+    # 成效顯著且成本合格之「已確認」正向判定契約鎖進 e004 常規回歸（工單 P20261031_0936-3）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著（p=0.001，Holm 校正後 0.004 < 0.05 仍顯著，C_only=10 > A_only=0）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本合格：A 臂 calls=10.0（mock tokens=1000.0）；C 臂 calls=12.0（1.2×A ≤ 2.0 紅線、mock tokens=900.0 = 0.9×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 12.0
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著＋方向為正＋成本 ≤ 2×A（calls 1.2×、tokens 0.9×皆量到）⇒ 已確認（成本與成效一起報告）
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-acc"]["reason"]
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+    # 成本合格且顯著提升 ⇒ 不是「不划算」
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
+
+
+def test_e004_verdict_m_missing_evidence_unknown() -> None:
+    # 驗證 e004_verdict 在 M 臂（第二 agent 審查臂）無第二 agent 執行證據（audit_summary=None）時，
+    # 即使 M 臂配對顯著（p=0.001、M_only=10 > A_only=0），H-review(M) 仍必須降級記 state=="UNKNOWN"，
+    # 且理由含「無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN」——
+    # M 臂無真實第二 agent 證據時誠實記 UNKNOWN（量不到，不是負結果）之判定防線鎖進 e004 常規回歸（工單 P20261031_0936-4）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # M 臂配對顯著（p=0.001，M_only=10 > A_only=0）
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 無第二 agent 證據 ⇒ UNKNOWN（量不到，不是負結果），不因配對顯著而升級判定
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN" in r["hypotheses"]["H-review(M)"]["reason"]
+    # 證據欄位：evidence_present 為 False（audit_summary=None ⇒ source=no_audit）
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is False
+
+
+def test_e004_verdict_s_confirmed() -> None:
+    # 驗證 e004_verdict 在 S 臂（H-stakes(a)）配對顯著（p=0.005、Holm 後仍顯著、S_only=10 > A_only=1）
+    # 且成本合格（A calls=10.0、S calls=12.0 = 1.2×A ≤ 2×A 紅線）時，假說 state=="CONFIRMED"，
+    # 但「利害 (a) 只是講」注記必須精確綁定——state 是 CONFIRMED 不改變「只是講、無真實後果」的契約——
+    # 且 not_worth_it 為 False（成本合格且顯著提升）。KS-1 措辭鐵律在此鎖進 e004 常規回歸
+    # （工單 P20261031_0936-5）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # S 臂配對顯著（p=0.005，Holm 校正後仍 < 0.05；S_only=10 > A_only=1 方向為正）
+    rep["paired"]["A_vs_S"] = {"pairs": 20, "A_only": 1, "S_only": 10, "mcnemar_p_two_sided": 0.005}
+    # 成本合格：A 臂 calls=10.0（mock tokens=1000.0）；S 臂 calls=12.0（1.2×A ≤ 2.0 紅線、mock tokens=900.0 = 0.9×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["S"]["calls_per_success"] = 12.0
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著＋方向為正＋成本 ≤ 2×A ⇒ 已確認（成本與成效一起報告）
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    # KS-1：S 臂（H-stakes(a)）即使 CONFIRMED，「只是講」注記仍精確綁定——未建立 ≠「利害提示無用」
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
+    # 成本合格且顯著提升 ⇒ 不是「不划算」
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
+
+
+def test_e004_verdict_h_confirmed() -> None:
+    # 驗證 e004_verdict 在 H 臂（交件前審查之自檢指引臂）配對顯著（p=0.005、Holm 校正後 0.02 < 0.05、H_only=10 > A_only=1）
+    # 且成本合格（A calls=10.0、H calls=12.0 = 1.2×A ≤ 2×A 紅線、mock tokens 1.0×A 亦 ≤ 2×A）時，
+    # H-review(H) 判定 state=="CONFIRMED"、cost_over_2x_A is False、not_worth_it is False——
+    # 成效顯著且成本合格之 H 臂「已確認」判定契約鎖進 e004 常規回歸（工單 P20261031_0952-1）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # H 臂配對顯著（p=0.005，Holm 校正後仍 < 0.05；H_only=10 > A_only=1 方向為正）
+    rep["paired"]["A_vs_H"] = {"pairs": 20, "A_only": 1, "H_only": 10, "mcnemar_p_two_sided": 0.005}
+    # 成本合格：A 臂 calls=10.0（mock tokens=1000.0）；H 臂 calls=12.0（1.2×A ≤ 2.0 紅線、mock tokens=1.0×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["H"]["calls_per_success"] = 12.0
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著＋方向為正＋成本 ≤ 2×A（calls 1.2×、tokens 1.0×皆量到）⇒ 已確認（成本與成效一起報告）
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-review(H)"]["reason"]
+    assert r["hypotheses"]["H-review(H)"]["cost_over_2x_A"] is False
+    # 成本合格且顯著提升 ⇒ 不是「不划算」
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False
+
+
+def test_e004_verdict_m_with_evidence_confirmed() -> None:
+    # 驗證 e004_verdict 在 M 臂（第二 agent 審查臂）具備第二 agent 執行證據（verified=10 ≥ 1）
+    # 且配對顯著（p=0.005、Holm 校正後 0.02 < 0.05、M_only=10 > A_only=1）
+    # 且成本合格（A calls=10.0、M calls=12.0 = 1.2×A ≤ 2×A 紅線、mock tokens 0.9×A 亦 ≤ 2×A）時，
+    # H-review(M) 判定 state=="CONFIRMED" 且 second_agent.evidence_present is True——
+    # 具備真實第二 agent 證據且成效顯著之正向判定防線鎖進 e004 常規回歸（工單 P20261031_0952-2）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # M 臂配對顯著（p=0.005，Holm 校正後仍 < 0.05；M_only=10 > A_only=1 方向為正）
+    rep["paired"]["A_vs_M"] = {"pairs": 20, "A_only": 1, "M_only": 10, "mcnemar_p_two_sided": 0.005}
+    # 成本合格：A 臂 calls=10.0（mock tokens=1000.0）；M 臂 calls=12.0（1.2×A ≤ 2.0 紅線、mock tokens=900.0 = 0.9×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["M"]["calls_per_success"] = 12.0
+
+    # 第二 agent 證據：verified=10（≥1 ⇒ evidence_present）；10 格未量到（UNKNOWN 欄位，不阻擋判定）
+    audit = e004_verdict._mock_audit(verified=10)
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    # 顯著＋方向為正＋成本 ≤ 2×A（calls 1.2×、tokens 0.9×皆量到）＋第二 agent 證據在 ⇒ 已確認
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-review(M)"]["reason"]
+    # 證據欄位：evidence_present 為 True（audit_summary 含 M 臂 verified_cells=10 ≥ 1）
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is True
+    assert r["hypotheses"]["H-review(M)"]["cost_over_2x_A"] is False
+    # 成本合格且顯著提升 ⇒ 不是「不划算」
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False
+
+
+def test_e004_verdict_missing_paired_unknown() -> None:
+    # 驗證 e004_verdict 在 C 臂配對缺失（A_vs_C=None ⇒ p 為 None、不進 Holm 集）時，H-acc 必須記 state=="UNKNOWN"（未測，不是沒有）、
+    # 理由含「配對缺失、未測（不進 Holm 集）」、p_raw/p_holm 皆 None、m_in_holm_set 排除未測臂（4→3）——配對缺失時誠實記 UNKNOWN 之判定防線鎖進 e004 常規回歸（工單 P20261031_0952-3）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = None  # C 臂配對缺失（未測）
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 配對缺失 ⇒ UNKNOWN（未測，不是沒有），不崩潰
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測（不進 Holm 集）" in r["hypotheses"]["H-acc"]["reason"]
+    # p_raw / p_holm 皆為 None（未測，不是 p=1.0）
+    assert r["hypotheses"]["H-acc"]["p_raw"] is None
+    assert r["hypotheses"]["H-acc"]["p_holm"] is None
+    # Holm 調整集排除未測 C 臂：m 由 4 降為 3
+    assert r["m_in_holm_set"] == 3
+
+
+def test_e004_verdict_direction_negative_not_established() -> None:
+    # 驗證 e004_verdict 在 C 臂配對顯著（p=0.001、Holm 校正後 0.004 < 0.05）但方向非正（A_only=10 > C_only=0、裝了比沒裝還差）時，
+    # H-acc 絕不得記 CONFIRMED、必須記 NOT_ESTABLISHED（未建立，不是負結果）、理由含「不顯著（或方向非正）⇒ 未建立（不是負結果）」——
+    # 人類能看見成效倒退時絕不誤發 CONFIRMED 之安全判定防線鎖進 e004 常規回歸（工單 P20261031_0952-4）。
+    from ops.vlab.tools import e004_verdict
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著（p=0.001、Holm 校正後 0.004 < 0.05）但方向非正：A_only=10 > C_only=0（裝了比沒裝還差）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 10, "C_only": 0, "mcnemar_p_two_sided": 0.001}
+    # 成本量得到（A 臂 calls=10.0、C 臂 calls=10.0＝A、未破紅線；方向防線與成本無關）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 10.0
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著但方向非正 ⇒ 絕不 CONFIRMED，必須記 NOT_ESTABLISHED（未建立，不是負結果）
+    assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is True
+    assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
