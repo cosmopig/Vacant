@@ -4321,3 +4321,34 @@ def test_e004_verdict_dual_zero_cost_missing_confirmed_cost_unknown() -> None:
     assert "顯著且方向為正，但成本紅線量不到（A 臂與 C 臂成本缺失）" == r["hypotheses"]["H-acc"]["reason"]
     assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None  # 雙臂皆量不到（嚴防除以零）
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了
+
+
+def test_growth_report_exact_total_and_trace_caps_boundary_pass(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：序列時間跨度足（2 點跨 24h ≥ 20h 門檻）、gc 健全（status=ok、
+    # target_reached=true），且最新點 total 恰好等於 256 MiB 穩態封頂（268,435,456 B）、
+    # trace 恰好等於 64 MiB trace 上限（67,108,864 B）時：判定是嚴格大於（> 才是超標、
+    # ≤ 即合規）——壓線不超——report() 須判 verdict="PASS"（不誤判 FAIL）、
+    # peak_overrun.over_stable_envelope 為 False（峰值恰在封頂內）、reason 載明
+    # 「≤ 封頂 268435456 B」；CLI --json 以 exit code 0 安全退出——
+    # 最新點雙上限臨界壓線合格邊界鎖進常規回歸（工單 P20261031_1753-1，
+    # 與 test_growth_report_both_total_and_trace_cap_plus_one_byte_fail 的雙超標 1 byte 判 FAIL 對稱）
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000",
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-29T00:00:00+0000",
+                      "total_bytes": 256 * 1024 * 1024,  # 268,435,456 B＝穩態封頂（恰等於）
+                      "per_dir_bytes": {"trace": 64 * 1024 * 1024},  # 67,108,864 B＝trace 上限（恰等於）
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS", r  # 雙上限皆恰好壓線＝合規，不誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is False, r  # 峰值恰在封頂內
+    assert "≤ 封頂 268435456 B" in r["reason"], r  # 理由載明壓線在封頂內
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # PASS 時 CLI 退出碼 0
