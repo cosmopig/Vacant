@@ -1475,6 +1475,15 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     line_fb = next(l for l in out_fb.splitlines() if "cost(2×A 紅線)" in l)
     assert "over=False" in line_fb and "calls=None tokens=None" not in line_fb
 
+    # P20261031_0153-3（ASSIGNMENT「研發工具需納入回歸測試」）：AUDIT.json 內容損壞（not json）
+    # → 容錯回退 audit=None、主流程不崩潰（退出碼 0）契約回歸。
+    bad_aud = tmp_path / "bad_audit_e006"; bad_aud.mkdir()
+    (bad_aud / "REPORT.json").write_text(json.dumps(e006_verdict._mock_report()), encoding="utf-8")
+    (bad_aud / "AUDIT.json").write_text("corrupt json", encoding="utf-8")
+    capsys.readouterr()
+    assert e006_verdict.main(["bad_audit_e006", "--runs-dir", str(tmp_path), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["audit"] is None
+
 
 def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     # 驗證當 REPORT.json 中 calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵），
