@@ -2142,3 +2142,24 @@ def test_e006_verdict_direction_negative_not_established() -> None:
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
     assert r["hypotheses"]["H-stakes(a)"]["significant_at_alpha"] is True
     assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is False
+
+
+def test_e006_verdict_x_arm_cost_missing_reason() -> None:
+    # 驗證 e006_verdict 在 A 臂成本健全，但實驗臂（C 臂）自身成本缺失（calls/tokens 為 None/0）
+    # 導致 2×A 成本量不到時，判定理由精確反映「C 臂成本缺失」而非誤報「A 臂成本缺失」。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本健全
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["A"]["tokens_per_success"] = 1000.0
+    # C 臂成本缺失
+    rep["per_arm"]["C"]["calls_per_success"] = None
+    rep["per_arm"]["C"]["tokens_per_success"] = None
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "C 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]
+
