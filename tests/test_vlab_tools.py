@@ -719,6 +719,19 @@ def test_e002_wiring_gauge_cli_normal_run_and_out_file(tmp_path: Path, capsys) -
     assert "\"n_cells\": 2" in capsys.readouterr().out
 
 
+def test_e002_wiring_gauge_cli_fail_exit_code(tmp_path: Path, capsys) -> None:
+    """e002_wiring_gauge CLI：C 格缺 vacant_home.tgz（線路破壞）→ main 回 1 且 criteria.c_gate_C.FAIL==1（線路中斷退出碼 1 契約）。"""
+    bad = tmp_path / "runs" / "exp_bad" / "polyglot_py-pg_bad-pi-C-r1"
+    bad.mkdir(parents=True)
+    (bad / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 0}), encoding="utf-8")
+    (bad / "score.json").write_text(json.dumps({"pass": True, "tests_total": 1}), encoding="utf-8")
+    # 刻意不建立 vacant_home.tgz（觸發 c_gate FAIL）
+    rc = e002_wiring_gauge.main(["exp_bad", "--base", str(tmp_path / "runs")])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["criteria"]["c_gate_C"]["FAIL"] == 1
+
+
 def test_growth_report_cli_out_file(tmp_path: Path) -> None:
     # P20261030_1130-1（ASSIGNMENT 驗收 a：真機用量報告量具守護）：CLI --out 雙通道契約。
     # 合格序列（跨 26h 的 3 點、未超穩態封頂、最新 gc status=ok）時 main 須回 0，
