@@ -3379,3 +3379,27 @@ def test_e004_verdict_missing_paired_not_worth_it_none() -> None:
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None
     assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
     assert "配對缺失、未測" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_growth_report_single_point_unknown(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：輸入僅有單一成長點記錄（n_points=1，span_hours=None）時，
+    # 增長趨勢無法衡量：report() 精確判 verdict="UNKNOWN"，理由載明「證據不足：n_points=1,
+    # span_hours=None（門檻 ≥2 點且 ≥20h）——『一天長多少』還量不出來」，
+    # CLI --json 以 exit code 1 安全退出——單點資料絕不偽判 PASS 的誠實邊界——工單 P20261031_1344-5
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-31T14:00:00", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert r["n_points"] == 1, r
+    assert r["span_hours"] is None, r
+    assert "證據不足：n_points=1, span_hours=None" in r["reason"], r
+    assert "門檻 ≥2 點且 ≥20h" in r["reason"], r
+    assert "還量不出來" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
