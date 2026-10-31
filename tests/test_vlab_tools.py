@@ -1586,3 +1586,38 @@ def test_audit_out_feeds_verdict_audit_chain(tmp_path: Path, capsys) -> None:
     assert cost["arms"]["C"]["calls_vs_A"] == 1.0          # audit 補齊（mock C：同 2 呼叫／800 tokens）
     assert cost["arms"]["C"]["over_2x_A_cost"] is False
     assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
+
+
+def test_audit_out_feeds_e004_verdict_chain(tmp_path: Path, capsys) -> None:
+    # 審查指示第 1/3 條（e004/e006 收尾判定量具同族守護）鏈式契約：
+    # opencode_cell_audit --out 落盤的 AUDIT.json（頂層 summary.per_arm）須能直接餵 e004_verdict
+    # （--audit 預設讀 runs/<exp>/AUDIT.json）；REPORT.json 成本為 0.0/0（OpenCode 無 cell.json
+    # metrics 特徵）時，2×A 成本紅線須由 audit 實測值補齊而非全 None。
+    from ops.vlab.tools import opencode_cell_audit, e004_verdict
+
+    exp_dir = tmp_path / "runs" / "exp_chain_e004"
+    exp_dir.mkdir(parents=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-A-r1", "A", score_pass=True)
+    opencode_cell_audit._mock_cell(exp_dir, "mock-opencode-C-r1", "C", score_pass=True)
+
+    # REPORT.json 成本全 0.0/0（OpenCode 無 cell.json metrics 特徵）
+    rep = e004_verdict._mock_report()
+    for arm in rep["per_arm"]:
+        rep["per_arm"][arm]["calls_per_success"] = 0.0
+        rep["per_arm"][arm]["tokens_per_success"] = 0
+    (exp_dir / "REPORT.json").write_text(json.dumps(rep), encoding="utf-8")
+
+    audit_json = exp_dir / "AUDIT.json"
+    capsys.readouterr()  # 排空殘留，保持 --out stdout 乾淨
+    rc = opencode_cell_audit.main(["--runs-dir", str(exp_dir), "--out", str(audit_json)])
+    assert rc == 0
+    assert audit_json.is_file()
+
+    capsys.readouterr()
+    rc = e004_verdict.main(["exp_chain_e004", "--runs-dir", str(tmp_path / "runs"), "--json"])
+    assert rc == 0
+    r = json.loads(capsys.readouterr().out)
+    cost = r["cost_redline_2xA"]
+    assert cost["A_base"]["calls_per_success"] == 2.0      # audit 補齊（mock A：2 呼叫／800 tokens）
+    assert cost["arms"]["C"]["over_2x_A_cost"] is False
+    assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
