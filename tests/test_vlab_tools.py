@@ -2161,3 +2161,26 @@ def test_e006_verdict_not_significant_not_established() -> None:
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
     assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is False
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
+
+
+def test_e006_verdict_m_with_evidence_confirmed() -> None:
+    # 驗證 e006_verdict 在 M 臂具備真第二 agent 審查證據（audit_summary 中
+    # second_agent_verified_cells >= 1）、McNemar 配對 Holm 後顯著（M_only=10 > A_only=1、
+    # p=0.005 ⇒ p_holm=0.02 < 0.05）且成本 ≤ 2×A（12.0 ≤ 2×10.0）時，判定 H-review(M) 為
+    # state=="CONFIRMED"（reason 含「Holm 後顯著、X_only > A_only、成本 ≤ 2×A」且
+    # second_agent.evidence_present is True）且成本紅線 not_worth_it is False——
+    # 多 agent 審查成效判定在證據完備時能客觀給出 CONFIRMED 之契約鎖進常規回歸（工單 P20261031_0722-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # M 臂顯著且成本受限：M_only=10 > A_only=1、p=0.005（Holm 後仍顯著）；成本 12.0（A 臂 10.0）
+    rep["paired"]["A_vs_M"] = {"pairs": 20, "A_only": 1, "M_only": 10, "mcnemar_p_two_sided": 0.005}
+    rep["per_arm"]["M"]["calls_per_success"] = 12.0
+    # audit_summary 含 M 臂審查證據：verified=3 >= 1 ⇒ evidence_present
+    audit_s = {"summary": {"per_arm": {"M": {"second_agent_verified_cells": 3, "second_agent_unknown_cells": 0}}}}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=audit_s)
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is True
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False
