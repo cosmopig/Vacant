@@ -131,7 +131,21 @@ def evaluate_hypotheses(report_data, audit_summary, alpha: float = 0.05):
                 if over is True:
                     e.update(state="EFFECTIVE_BUT_EXPENSIVE", reason="顯著但成本 > 2×A ⇒ 有效但昂貴")
                 elif over is None:
-                    e.update(state="CONFIRMED_COST_UNKNOWN", reason="顯著且方向為正，但成本紅線量不到（A 臂成本缺失）")
+                    a_missing = (not cost["A_base"]["calls_per_success"] and not cost["A_base"]["tokens_per_success"])
+                    d_arm = per_arm.get(x) if isinstance(per_arm.get(x), dict) else {}
+                    aud_arm_d = aud_arm.get(x) if isinstance(aud_arm, dict) else None
+                    x_calls = num(d_arm.get("calls_per_success")) or (num(aud_arm_d.get("calls_per_success")) if isinstance(aud_arm_d, dict) else None)
+                    x_tok = num(d_arm.get("tokens_per_success")) or (num(aud_arm_d.get("tokens_per_success")) if isinstance(aud_arm_d, dict) else None)
+                    x_missing = (not x_calls and not x_tok)
+                    if a_missing and x_missing:
+                        who = f"A 臂與 {x} 臂成本缺失"
+                    elif a_missing:
+                        who = "A 臂成本缺失"
+                    elif x_missing:
+                        who = f"{x} 臂成本缺失"
+                    else:
+                        who = "成本維度不全"
+                    e.update(state="CONFIRMED_COST_UNKNOWN", reason=f"顯著且方向為正，但成本紅線量不到（{who}）")
                 else:
                     e.update(state="CONFIRMED", reason="Holm 後顯著、X_only > A_only、成本 ≤ 2×A")
             else:
