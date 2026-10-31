@@ -4605,3 +4605,304 @@ def test_e006_verdict_h_partial_dimension_cost_missing_reason() -> None:
     assert "A 臂與 H 臂成本缺失" not in r["hypotheses"]["H-review(H)"]["reason"]
     # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
     assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_h_partial_dimension_cost_missing_reason() -> None:
+    # P20261031_1945-3（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e004_verdict 在基準 A 臂成本
+    # 健全（calls=10.0/tokens=1000.0）、實驗 H 臂成本維度不全（calls=12.0 有、tokens=None 缺測）
+    # 且 H 臂配對顯著（p=0.001、H_only=10 > A_only=0）時，calls 比 1.2 ≤ 2.0、tokens 比量不到
+    # ⇒ over_2x_A_cost 為 None；H-review(H) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確指認
+    # 「成本維度不全」——非任一臂全維度缺失，不得誤標「A 臂成本缺失」/「H 臂成本缺失」/
+    # 「A 臂與 H 臂成本缺失」（與 C 臂 1809-4 完全對稱、與 e006 1912-4 完全對稱）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_H"] = {"pairs": 10, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0    # A 臂成本健全（基準）
+    rep["per_arm"]["A"]["tokens_per_success"] = 1000.0
+    rep["per_arm"]["H"]["calls_per_success"] = 12.0    # H 臂成本維度不全：calls 有、tokens 缺測
+    rep["per_arm"]["H"]["tokens_per_success"] = None
+
+    audit = e004_verdict._mock_audit(0)
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "成本維度不全" in r["hypotheses"]["H-review(H)"]["reason"]
+    assert "H 臂成本缺失" not in r["hypotheses"]["H-review(H)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(H)"]["reason"]
+    assert "A 臂與 H 臂成本缺失" not in r["hypotheses"]["H-review(H)"]["reason"]
+    # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None
+
+
+def test_e006_verdict_s_partial_dimension_cost_missing_reason() -> None:
+    # P20261031_1945-4（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e006_verdict 在基準 A 臂成本
+    # 健全（calls=10.0/tokens=1000.0）、實驗 S 臂成本維度不全（calls=12.0 有、tokens=None 缺測）
+    # 且 S 臂配對顯著（p=0.001、S_only=10 > A_only=0）時，calls 比 1.2 ≤ 2.0、tokens 比量不到
+    # ⇒ over_2x_A_cost 為 None；H-stakes(a) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確指認
+    # 「成本維度不全」——非任一臂全維度缺失，不得誤標「S 臂成本缺失」/「A 臂成本缺失」/
+    # 「A 臂與 S 臂成本缺失」（與 C 臂 4458、H 臂 4583 完全對稱，補齊 e006 S 臂單側維度不全判定）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_S"] = {"pairs": 10, "A_only": 0, "S_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0    # A 臂成本健全（基準）
+    rep["per_arm"]["A"]["tokens_per_success"] = 1000.0
+    rep["per_arm"]["S"]["calls_per_success"] = 12.0    # S 臂成本維度不全：calls 有、tokens 缺測
+    rep["per_arm"]["S"]["tokens_per_success"] = None
+
+    audit = e006_verdict._mock_audit(0)
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "成本維度不全" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "S 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "A 臂與 S 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_s_partial_dimension_cost_missing_reason() -> None:
+    # P20261031_2001-3（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e004_verdict 在基準 A 臂成本
+    # 健全（calls=10.0/tokens=1000.0）、實驗 S 臂成本維度不全（calls=12.0 有、tokens=None 缺測）
+    # 且 S 臂配對顯著（p=0.001、S_only=10 > A_only=0）時，calls 比 1.2 ≤ 2.0、tokens 比量不到
+    # ⇒ over_2x_A_cost 為 None；H-stakes(a) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確指認
+    # 「成本維度不全」——非任一臂全維度缺失，不得誤標「S 臂成本缺失」/「A 臂成本缺失」/
+    # 「A 臂與 S 臂成本缺失」（與 C 臂 4485、H 臂 4610、e006 S 臂 4637 完全對稱，補齊 e004 S 臂
+    # 單側維度不全判定）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_S"] = {"pairs": 10, "A_only": 0, "S_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0    # A 臂成本健全（基準）
+    rep["per_arm"]["A"]["tokens_per_success"] = 1000.0
+    rep["per_arm"]["S"]["calls_per_success"] = 12.0    # S 臂成本維度不全：calls 有、tokens 缺測
+    rep["per_arm"]["S"]["tokens_per_success"] = None
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=e004_verdict._mock_audit(0))
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "成本維度不全" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "S 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "A 臂與 S 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is None
+
+
+def test_e006_verdict_m_partial_dimension_cost_missing_reason() -> None:
+    # P20261031_2017-4（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e006_verdict 在基準 A 臂成本
+    # 健全（calls=10.0/tokens=1000.0）、實驗 M 臂成本維度不全（calls=12.0 有、tokens=None 缺測）
+    # 且 M 臂配對顯著（p=0.001、M_only=10 > A_only=0）、audit 審查證據健全（verified_cells=5）
+    # 時，calls 比 1.2 ≤ 2.0、tokens 比量不到 ⇒ over_2x_A_cost 為 None；H-review(M) 誠實判
+    # CONFIRMED_COST_UNKNOWN，reason 精確指認「成本維度不全」——非任一臂全維度缺失，不得誤標
+    # 「M 臂成本缺失」/「A 臂成本缺失」/「A 臂與 M 臂成本缺失」（與 C 臂 4458、H 臂 4583、
+    # S 臂 4637 完全對稱，補齊 e006 4 臂單側維度不全判定閉環）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0    # A 臂成本健全（基準）
+    rep["per_arm"]["A"]["tokens_per_success"] = 1000.0
+    rep["per_arm"]["M"]["calls_per_success"] = 12.0    # M 臂成本維度不全：calls 有、tokens 缺測
+    rep["per_arm"]["M"]["tokens_per_success"] = None
+
+    audit = e006_verdict._mock_audit(5)               # M 臂審查證據健全：verified_cells=5
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "成本維度不全" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "M 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "A 臂與 M 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_m_partial_dimension_cost_missing_reason() -> None:
+    # P20261031_2032-3（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e004_verdict 在基準 A 臂成本
+    # 健全（calls=10.0/tokens=1000.0）、實驗 M 臂成本維度不全（calls=12.0 有、tokens=None 缺測）
+    # 且 M 臂配對顯著（p=0.001、M_only=10 > A_only=0）、audit 審查證據健全（verified_cells=5）
+    # 時，calls 比 1.2 ≤ 2.0、tokens 比量不到 ⇒ over_2x_A_cost 為 None；H-review(M) 誠實判
+    # CONFIRMED_COST_UNKNOWN，reason 精確指認「成本維度不全」——非任一臂全維度缺失，不得誤標
+    # 「M 臂成本缺失」/「A 臂成本缺失」/「A 臂與 M 臂成本缺失」（與 e004 C 臂 4485、H 臂 4610、
+    # S 臂 4664 及 e006 M 臂 4691 完全對稱，補齊 e004 4 臂單側維度不全判定閉環）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0    # A 臂成本健全（基準）
+    rep["per_arm"]["A"]["tokens_per_success"] = 1000.0
+    rep["per_arm"]["M"]["calls_per_success"] = 12.0    # M 臂成本維度不全：calls 有、tokens 缺測
+    rep["per_arm"]["M"]["tokens_per_success"] = None
+
+    audit = e004_verdict._mock_audit(5)               # M 臂審查證據健全：verified_cells=5
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "成本維度不全" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "M 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    assert "A 臂與 M 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    # 成本紅線：tokens 比缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is None
+
+
+def test_e006_verdict_h_both_arms_cost_missing() -> None:
+    # P20261031_2047-3（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e006_verdict 在基準 A 臂
+    # 與實驗 H 臂之 calls/tokens 成本皆缺失（皆為 None）、H 臂配對顯著（p=0.001、
+    # H_only=10 > A_only=0）時，H-review(H) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確
+    # 指認雙主體「A 臂與 H 臂成本缺失」、不誤標單主體「A 臂成本缺失」、不偽判 CONFIRMED；
+    # over_2x_A_cost 為 None（量不到 ⇒ 不判違規也不判過）——與 C 臂 2250 測試完全對稱，
+    # 補齊 e006 H 臂雙主體成本缺失判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # H 臂配對顯著：H_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_H"] = {"pairs": 10, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 H 臂成本皆為 None（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["H"]["calls_per_success"] = None
+    rep["per_arm"]["H"]["tokens_per_success"] = None
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 H 臂成本缺失" in r["hypotheses"]["H-review(H)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(H)"]["reason"]
+    # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_h_both_arms_cost_missing() -> None:
+    # P20261031_2103-3（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e004_verdict 在基準 A 臂
+    # 與實驗 H 臂之 calls/tokens 成本皆缺失（皆為 None）、H 臂配對顯著（p=0.001、
+    # H_only=10 > A_only=0）時，H-review(H) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確
+    # 指認雙主體「A 臂與 H 臂成本缺失」、不誤標單主體「A 臂成本缺失」、不偽判 CONFIRMED；
+    # over_2x_A_cost 為 None（量不到 ⇒ 不判違規也不判過）——與 C 臂 2321 測試完全對稱，
+    # 補齊 e004 H 臂雙主體成本缺失判定契約。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # H 臂配對顯著：H_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_H"] = {"pairs": 10, "A_only": 0, "H_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 H 臂成本皆為 None（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["H"]["calls_per_success"] = None
+    rep["per_arm"]["H"]["tokens_per_success"] = None
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 H 臂成本缺失" in r["hypotheses"]["H-review(H)"]["reason"]
+    # 雙主體精確化：不得誤報單主體「A 臂成本缺失」（非子串，可安全 not-in 斷言）
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(H)"]["reason"]
+    # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is None
+
+
+def test_e006_verdict_s_both_arms_cost_missing() -> None:
+    # P20261031_2103-5（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e006_verdict 在基準 A 臂
+    # 與實驗 S 臂之 calls/tokens 成本皆缺失（皆為 None）、S 臂配對顯著（p=0.001、
+    # S_only=10 > A_only=0）時，H-stakes(a) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確
+    # 指認雙主體「A 臂與 S 臂成本缺失」、不誤標單主體「A 臂成本缺失」、不偽判 CONFIRMED；
+    # over_2x_A_cost 為 None（量不到 ⇒ 不判違規也不判過）——與 C 臂 2250、H 臂測試完全對稱，
+    # 補齊 e006 S 臂雙主體成本缺失判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # S 臂配對顯著：S_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_S"] = {"pairs": 10, "A_only": 0, "S_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 S 臂成本皆為 None（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["S"]["calls_per_success"] = None
+    rep["per_arm"]["S"]["tokens_per_success"] = None
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 S 臂成本缺失" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_s_both_arms_cost_missing() -> None:
+    # P20261031_2118-5（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e004_verdict 在基準 A 臂
+    # 與實驗 S 臂之 calls/tokens 成本皆缺失（皆為 None）、S 臂配對顯著（p=0.001、
+    # S_only=10 > A_only=0）時，H-stakes(a) 誠實判 CONFIRMED_COST_UNKNOWN，reason 精確
+    # 指認雙主體「A 臂與 S 臂成本缺失」、不誤標單主體「A 臂成本缺失」、不偽判 CONFIRMED；
+    # over_2x_A_cost 為 None（量不到 ⇒ 不判違規也不判過）——與 C 臂 2321、H 臂 4773、
+    # e006 S 臂 4800 測試完全對稱，補齊 e004 S 臂雙主體成本缺失判定契約。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # S 臂配對顯著：S_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_S"] = {"pairs": 10, "A_only": 0, "S_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 S 臂成本皆為 None（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["S"]["calls_per_success"] = None
+    rep["per_arm"]["S"]["tokens_per_success"] = None
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 S 臂成本缺失" in r["hypotheses"]["H-stakes(a)"]["reason"]
+    # 雙主體精確化：不得誤報單主體「A 臂成本缺失」（非子串，可安全 not-in 斷言）
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-stakes(a)"]["reason"]
+    # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is None
+
+
+def test_e006_verdict_m_both_arms_cost_missing() -> None:
+    # P20261031_2157-4（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e006_verdict 在基準 A 臂
+    # 與實驗 M 臂之 calls/tokens 成本皆缺失（皆為 None）、M 臂配對顯著（p=0.001、
+    # M_only=10 > A_only=0）且 audit 有第二 agent 證據時，H-review(M) 誠實判
+    # CONFIRMED_COST_UNKNOWN，reason 精確指認雙主體「A 臂與 M 臂成本缺失」、不誤標
+    # 單主體「A 臂成本缺失」、不偽判 CONFIRMED；over_2x_A_cost 為 None（量不到 ⇒
+    # 不判違規也不判過）——與 C 臂 2250、H 臂 4747、S 臂 4800 測試完全對稱，
+    # 補齊 e006 M 臂雙主體成本缺失判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # M 臂配對顯著：M_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 M 臂成本皆為 None（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["M"]["calls_per_success"] = None
+    rep["per_arm"]["M"]["tokens_per_success"] = None
+
+    # M 臂需第二 agent 證據（_mock_audit(5)：verified=5 ≥ 1）；跳過 audit 會誤落無證據 UNKNOWN
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=e006_verdict._mock_audit(5))
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 M 臂成本缺失" in r["hypotheses"]["H-review(M)"]["reason"]
+    # 雙主體精確化：不得誤報單主體「A 臂成本缺失」（非子串，可安全 not-in 斷言）
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is None
+
+
+def test_e004_verdict_m_both_arms_cost_missing() -> None:
+    # P20261031_2213-3（ASSIGNMENT 主軸 3：成本與成效綁定紅線）：e004_verdict 在基準 A 臂
+    # 與實驗 M 臂之 calls/tokens 成本皆缺失（皆為 None）、M 臂配對顯著（p=0.001、
+    # M_only=10 > A_only=0）且 audit 有第二 agent 證據時，H-review(M) 誠實判
+    # CONFIRMED_COST_UNKNOWN，reason 精確指認雙主體「A 臂與 M 臂成本缺失」、不誤標
+    # 單主體「A 臂成本缺失」、不偽判 CONFIRMED；over_2x_A_cost 為 None（量不到 ⇒
+    # 不判違規也不判過）——與 C 臂 2321、H 臂 4773、S 臂 4826 測試完全對稱，
+    # 補齊 e004 全臂雙主體成本缺失判定矩陣。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # M 臂配對顯著：M_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂與 M 臂成本皆為 None（皆量不到）
+    rep["per_arm"]["A"]["calls_per_success"] = None
+    rep["per_arm"]["A"]["tokens_per_success"] = None
+    rep["per_arm"]["M"]["calls_per_success"] = None
+    rep["per_arm"]["M"]["tokens_per_success"] = None
+
+    # M 臂需第二 agent 證據（_mock_audit(5)：verified=5 ≥ 1）；跳過 audit 會誤落無證據 UNKNOWN
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=e004_verdict._mock_audit(5))
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "A 臂與 M 臂成本缺失" in r["hypotheses"]["H-review(M)"]["reason"]
+    # 雙主體精確化：不得誤報單主體「A 臂成本缺失」（非子串，可安全 not-in 斷言）
+    assert "A 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
+    # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is None

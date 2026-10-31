@@ -1,0 +1,129 @@
+{
+  "exp": "e006_opencode_polyglot",
+  "cells_scored": 170,
+  "infra": [
+    {
+      "cell": "polyglot_py-pg_affine_cipher-opencode-A-r1.infra-20261030T232028",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_hangman-opencode-M-r1.infra-20261031T071444",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-opencode-C-r1.infra-20261031T081820",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-opencode-C-r1.infra-20261031T082348",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-opencode-H-r1.infra-20261031T083231",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-opencode-S-r1.infra-20261031T092141",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "polyglot_py-pg_list_ops-opencode-S-r1.infra-20261031T092621",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    }
+  ],
+  "per_arm": {
+    "A": {
+      "n": 34,
+      "pass": 14,
+      "rate": 0.4118,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 3,
+      "mean_wall_s": 463.9,
+      "vacant_sha": []
+    },
+    "C": {
+      "n": 34,
+      "pass": 17,
+      "rate": 0.5,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 2,
+      "mean_wall_s": 397.2,
+      "vacant_sha": [
+        "bf1a9f1afb211460b48611f8f28b1d9433985c4a"
+      ]
+    },
+    "H": {
+      "n": 34,
+      "pass": 10,
+      "rate": 0.2941,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 1,
+      "mean_wall_s": 473.5,
+      "vacant_sha": []
+    },
+    "M": {
+      "n": 34,
+      "pass": 15,
+      "rate": 0.4412,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 4,
+      "mean_wall_s": 656.7,
+      "vacant_sha": []
+    },
+    "S": {
+      "n": 34,
+      "pass": 12,
+      "rate": 0.3529,
+      "calls_per_success": 0.0,
+      "tokens_per_success": 0,
+      "timeouts": 1,
+      "mean_wall_s": 384.7,
+      "vacant_sha": []
+    }
+  },
+  "paired": {
+    "A_vs_C": {
+      "pairs": 34,
+      "A_only": 2,
+      "C_only": 5,
+      "mcnemar_p_two_sided": 0.4531,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 5,
+      "tasks_net_negative": 2
+    },
+    "A_vs_H": {
+      "pairs": 34,
+      "A_only": 6,
+      "H_only": 2,
+      "mcnemar_p_two_sided": 0.2891,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 2,
+      "tasks_net_negative": 6
+    },
+    "A_vs_M": {
+      "pairs": 34,
+      "A_only": 2,
+      "M_only": 3,
+      "mcnemar_p_two_sided": 1.0,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 3,
+      "tasks_net_negative": 2
+    },
+    "A_vs_S": {
+      "pairs": 34,
+      "A_only": 5,
+      "S_only": 3,
+      "mcnemar_p_two_sided": 0.7266,
+      "distinct_tasks": 34,
+      "tasks_net_positive": 3,
+      "tasks_net_negative": 5
+    }
+  },
+  "rescore_checked": true,
+  "rescore_mismatch": [],
+  "note": "只由原始格子重算；pass=None 的格子是 infra，不進分母。p 值假設配對獨立——同題重複時看 distinct_tasks 與 tasks_net_*。"
+}

@@ -194,7 +194,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 54 點跨 69.34h（2026-10-28T20:20 → 2026-10-31T17:40）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 56 點跨 71.5h（2026-10-28T20:20 → 2026-10-31T19:50）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -249,6 +249,8 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/31 15:39 | 65.0 MiB | 47.1 MiB | 477 blobs | ok, true |
 | 10/31 16:40 | 65.4 MiB | 47.4 MiB | 478 blobs | ok, true |
 | 10/31 17:40 | 65.1 MiB | 47.9 MiB | 486 blobs | ok, true |
+| 10/31 18:49 | 65.1 MiB | 47.9 MiB | 477 blobs | ok, true |
+| 10/31 19:50 | 64.8 MiB | 47.4 MiB | 495 blobs | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
@@ -265,9 +267,9 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
   總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,771,218 B（54.1 MiB，gc 後，`~/.vacant/growth.jsonl` 18:50:12 點）；`gc --verify` verify_ok=True（8/8 專案）、
   `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 65.1 MiB（25.4%）、
-  最新 trace 47.9 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（54 點、69.34h），不是模擬、不是單點。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 64.8 MiB（25.3%）、
+  最新 trace 47.4 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（56 點、71.5h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
@@ -405,10 +407,10 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 
 ## 2026-10-31 · 主軸 2 · OpenCode 真實 agent C 臂用量實測（e003/e005/e006 全數通過 256 MiB 穩態封頂，最高 255.7 KB，≤ 0.096%）
 
-**客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨三個 run 共 **31 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 28 格，FAIL 0、NA 0）：
+**客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨三個 run 共 **37 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 34 格，FAIL 0、NA 0）：
 - e003_opencode_smoke（2 格）：pg_affine_cipher **65,551 B（64.0 KB）**、pg_pig_latin **167,361 B（163.4 KB）**；
 - e005_opencode_five_arm_smoke（1 格）：pg_affine_cipher **79,333 B（77.5 KB）**；
-- e006_opencode_polyglot（28 格，本盤進行中）：pg_affine_cipher **49,903 B（48.7 KB）**、pg_beer_song **116,444 B（113.7 KB）**、pg_book_store **50,155 B（49.0 KB）**、pg_bottle_song **56,104 B（54.8 KB）**、pg_bowling **179,682 B（175.5 KB）**、pg_connect **127,832 B（124.8 KB）**、pg_dominoes **32,165 B（31.4 KB）**、pg_dot_dsl **121,652 B（118.8 KB）**、pg_food_chain **135,113 B（131.9 KB）**、pg_forth **255,721 B（249.7 KB）**、pg_go_counting **153,712 B（150.1 KB）**、pg_grade_school **58,767 B（57.4 KB）**、pg_grep **152,604 B（149.0 KB）**、pg_hangman **149,590 B（146.1 KB）**、pg_list_ops **74,556 B（72.8 KB）**、pg_paasio **204,559 B（199.8 KB）**、pg_phone_number **68,663 B（67.1 KB）**、pg_pig_latin **231,295 B（225.9 KB）**、pg_poker **44,014 B（43.0 KB）**、pg_pov **135,449 B（132.3 KB）**、pg_proverb **38,085 B（37.2 KB）**、pg_react **129,828 B（126.8 KB）**、pg_rest_api **182,696 B（178.4 KB）**、pg_robot_name **69,948 B（68.3 KB）**、pg_scale_generator **157,747 B（154.1 KB）**、pg_sgf_parsing **109,716 B（107.1 KB）**、pg_simple_linked_list **95,077 B（92.8 KB）**、pg_transpose **172,472 B（168.4 KB）**。
+- e006_opencode_polyglot（34 格，全盤 C 臂完賽）：pg_affine_cipher **49,903 B（48.7 KB）**、pg_beer_song **116,444 B（113.7 KB）**、pg_book_store **50,155 B（49.0 KB）**、pg_bottle_song **56,104 B（54.8 KB）**、pg_bowling **179,682 B（175.5 KB）**、pg_connect **127,832 B（124.8 KB）**、pg_dominoes **32,165 B（31.4 KB）**、pg_dot_dsl **121,652 B（118.8 KB）**、pg_food_chain **135,113 B（131.9 KB）**、pg_forth **255,721 B（249.7 KB）**、pg_go_counting **153,712 B（150.1 KB）**、pg_grade_school **58,767 B（57.4 KB）**、pg_grep **152,604 B（149.0 KB）**、pg_hangman **149,590 B（146.1 KB）**、pg_list_ops **74,556 B（72.8 KB）**、pg_paasio **204,559 B（199.8 KB）**、pg_phone_number **68,663 B（67.1 KB）**、pg_pig_latin **231,295 B（225.9 KB）**、pg_poker **44,014 B（43.0 KB）**、pg_pov **135,449 B（132.3 KB）**、pg_proverb **38,085 B（37.2 KB）**、pg_react **129,828 B（126.8 KB）**、pg_rest_api **182,696 B（178.4 KB）**、pg_robot_name **69,948 B（68.3 KB）**、pg_scale_generator **157,747 B（154.1 KB）**、pg_sgf_parsing **109,716 B（107.1 KB）**、pg_simple_linked_list **95,077 B（92.8 KB）**、pg_transpose **172,472 B（168.4 KB）**、pg_tree_building **35,759 B（34.9 KB）**、pg_two_bucket **32,354 B（31.6 KB）**、pg_variable_length_quantity **39,211 B（38.3 KB）**、pg_wordy **129,131 B（126.1 KB）**、pg_zebra_puzzle **29,824 B（29.1 KB）**、pg_zipper **213,193 B（208.2 KB）**。
 
-31 格實測全部落在 32,165 B（31.4 KB）至 255,721 B（249.7 KB）之間，全部低於 256 MiB（268,435,456 B）穩態封頂；最高格 255,721 B 佔封頂 **0.0953%**（≤ 0.096%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 12,982–216,705 B（pg_connect 為 63,949 B），皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
+37 格實測全部落在 29,824 B（29.1 KB）至 255,721 B（249.7 KB）之間，全部低於 256 MiB（268,435,456 B）穩態封頂；最高格 255,721 B 佔封頂 **0.0953%**（≤ 0.096%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 12,982–216,705 B（pg_connect 為 63,949 B），皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
 **口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）進行中，本條不預填未完成格數據，正式判定仍以全盤完賽後之 REPORT.json＋`e006_verdict.py` 為準；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。
