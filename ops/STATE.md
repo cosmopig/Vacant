@@ -116,3 +116,9 @@
 - 驗證：驗收鏈現行 rc=0（兩 grep 均命中行 150「第 15 格 08:29 完賽／pg_list_ops vacant_home_bytes 74,556 B」、diff -u 無輸出、末行 ACCEPTANCE_OK）；git status 乾淨（repo 零 diff）；工單→done/、doing/ 0 張。
 - 沒驗證：17e47195（空 commit；重算自 .git/objects/17/e4719534… 物件檔＋HEAD parent 欄一致）CI 未出；未另跑 envelope_compliance 複核 c15 實測數字（沿用 0833-3 同源實測值）；e006 170 格未完賽（C 臂 15/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
 - 下一步：照 open/ 新工單續做；監控 17e47195（重算自 .git/objects/17/e4719534… 物件檔＋HEAD parent 欄一致）/976b3ec4/2c48452e CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 588 (2026-10-31 12:2x) · P20261031_1211-2 e006 第 19 格 pg_poker C 臂用量同步 disk_top_priority §2 驗收總覽 4(b)（結案）
+- 主軸：ASSIGNMENT 🔴最優先 驗收 4(b) 實驗室格子 C 組用量＋資深審查指示第 2 條。
+- 做了：ops/vlab/packets/disk_top_priority.md 行 172 三處改動（標題「C 臂 18 格實測（進行中）」→「19 格」；⑱ 後追加 ⑲ pg_poker vacant_home_bytes 44,014 B（43.0 KB）、vacant_objects_bytes 25,002 B（24.4 KB）、ratio_of_envelope 0.000164；統計 18→19 格、med 124,742→121,652 B（19 值排序中位數核對一致）、末尾追加 pg_poker 10/31 12:12 完賽）；1-18 格歷史數據未覆蓋、其他小節未動；cp 同步外部副本 bit-identical；工單→done/、doing/ 0 張。
+- 驗證：驗收鏈 rc=0（兩 grep 均命中行 172、diff -u 無輸出、末行 ACCEPTANCE_OK）；git diff 1 file ±1 行（git show 64e3250a）、無「信任／證明變好」；commit 64e3250a（branch auto/qwen27b）。
+- 沒驗證：64e3250a CI 未出；pg_poker 數字依工單給定（未回 /srv/vlab/runs 重算 cell.json）；e006 剩餘格進度未查。
+- 下一步：監控 64e3250a/191f0f0a/61f021ed/826e5a44/5c5ef944 CI 與 e006 剩餘格進度/infra 重試；e006 全盤完賽→report.py --rescore→opencode_cell_audit --out→verdict --audit→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 新工單續做。
