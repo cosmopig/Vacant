@@ -2064,3 +2064,22 @@ def test_e006_verdict_m_missing_evidence_unknown() -> None:
     assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
     assert "無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN" in r["hypotheses"]["H-review(M)"]["reason"]
     assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is False
+
+
+def test_e006_verdict_not_worth_it() -> None:
+    # 驗證 e006_verdict 在 H 臂成本超標（calls_per_success 25.0 vs A 臂 10.0 ⇒ 2.5×A，
+    # 超過 2×A 紅線）且配對未顯著提升（A_vs_H：A_only=8 / H_only=3、p=0.20，Holm 後仍
+    # ≥ alpha）時，判定 cost["arms"]["H"]["not_worth_it"] is True（成本 > 2×A 且未顯著
+    # 提升 ⇒ 不划算）——成效與成本綁定的判定契約鎖進常規回歸：只報成功率不報成本＝沒做完。
+    # 註：e006 的 H 臂假說鍵名為 H-review(H)（HYP 對應，e002 口徑稱 H-harness）；
+    # 工單 P20261031_0547-4 步驟 5 寫 "H-harness(H)"，以模組實際鍵名斷言、不隱瞞差異。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # _mock_report 現值即工單所述：H 臂 calls_per_success 25.0（A 臂 10.0，2.5×A > 2×A
+    # 紅線）；A_vs_H 配對 A_only=8 / H_only=3、mcnemar_p_two_sided=0.20（不顯著）。
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True
+    assert r["hypotheses"]["H-review(H)"]["state"] == "NOT_ESTABLISHED"
