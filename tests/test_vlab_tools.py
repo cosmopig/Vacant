@@ -1363,3 +1363,20 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert hyp["H-acc"]["state"] == "CONFIRMED" and hyp["H-review(H)"]["state"] == "NOT_ESTABLISHED"
     assert hyp["H-review(M)"]["state"] == "CONFIRMED" and hyp["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
     assert hyp["H-review(M)"]["second_agent"]["evidence_present"] is True  # M 判定以真第二 agent 證據為條件
+
+    # P20261031_0002-4（ASSIGNMENT「研發工具需納入回歸測試」）：exp 位置參數與 CLI 契約回歸。
+    # (a) 未傳參數（無 exp、無 --report）→ argparse error → SystemExit(2)。
+    with pytest.raises(SystemExit) as exc:
+        e006_verdict.main([])
+    assert exc.value.code == 2
+    # (b) 不存在之 exp 名稱 → REPORT.json 缺失 → rc=1（無事可做）。
+    capsys.readouterr()
+    assert e006_verdict.main(["mock_nonexistent", "--runs-dir", str(tmp_path)]) == 1
+    # (c) exp 位置參數解析：tmp_path/exp_mock 下 REPORT.json＋AUDIT.json → rc=0 且 --out 落盤。
+    em = tmp_path / "exp_mock"; em.mkdir()
+    (em / "REPORT.json").write_text(json.dumps(e006_verdict._mock_report()), encoding="utf-8")
+    (em / "AUDIT.json").write_text(json.dumps(e006_verdict._mock_audit(5)), encoding="utf-8")
+    outp = tmp_path / "out.json"
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_mock", "--runs-dir", str(tmp_path), "--out", str(outp), "--json"]) == 0
+    assert outp.is_file()
