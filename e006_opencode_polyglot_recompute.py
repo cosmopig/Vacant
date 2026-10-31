@@ -60,11 +60,11 @@ def main():
 
             if is_infra: continue
 
-            n += 1
             with open(score_file, 'r') as f:
                 score_data = json.load(f)
                 if score_data.get("pass"):
                     pass_count += 1
+            n += 1
             
             if events_file.exists():
                 with open(events_file, 'r') as f:
