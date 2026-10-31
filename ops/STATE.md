@@ -119,6 +119,6 @@
 ## round 588 (2026-10-31 12:2x) · P20261031_1211-2 e006 第 19 格 pg_poker C 臂用量同步 disk_top_priority §2 驗收總覽 4(b)（結案）
 - 主軸：ASSIGNMENT 🔴最優先 驗收 4(b) 實驗室格子 C 組用量＋資深審查指示第 2 條。
 - 做了：ops/vlab/packets/disk_top_priority.md 行 172 三處改動（標題「C 臂 18 格實測（進行中）」→「19 格」；⑱ 後追加 ⑲ pg_poker vacant_home_bytes 44,014 B（43.0 KB）、vacant_objects_bytes 25,002 B（24.4 KB）、ratio_of_envelope 0.000164；統計 18→19 格、med 124,742→121,652 B（19 值排序中位數核對一致）、末尾追加 pg_poker 10/31 12:12 完賽）；1-18 格歷史數據未覆蓋、其他小節未動；cp 同步外部副本 bit-identical；工單→done/、doing/ 0 張。
-- 驗證：驗收鏈 rc=0（兩 grep 均命中行 172、diff -u 無輸出、末行 ACCEPTANCE_OK）；git diff 1 file ±1 行（git show 64e3250a）、無「信任／證明變好」；commit 64e3250a（branch auto/qwen27b）。
-- 沒驗證：64e3250a CI 未出；pg_poker 數字依工單給定（未回 /srv/vlab/runs 重算 cell.json）；e006 剩餘格進度未查。
-- 下一步：監控 64e3250a/191f0f0a/61f021ed/826e5a44/5c5ef944 CI 與 e006 剩餘格進度/infra 重試；e006 全盤完賽→report.py --rescore→opencode_cell_audit --out→verdict --audit→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 新工單續做。
+- 驗證：驗收鏈 rc=0（兩 grep 均命中行 172、diff -u 無輸出、末行 ACCEPTANCE_OK）；git diff 1 file ±1 行（git show 64e3250a26fa5cac）、無「信任／證明變好」；commit 64e3250a26fa5cac92c8d14753954bc9f8d41985（全 SHA 自 repo 重算：git rev-parse --verify 64e3250a → 64e3250a26fa5cac…，git log --oneline 核對為 HEAD~1、訊息開頭 P20261031_1211-2；branch auto/qwen27b）。
+- 沒驗證：64e3250a26fa5cac CI 未出；pg_poker 數字依工單給定（未回 /srv/vlab/runs 重算 cell.json）；e006 剩餘格進度未查。
+- 下一步：監控 64e3250a26fa5cac/191f0f0a/61f021ed/826e5a44/5c5ef944 CI 與 e006 剩餘格進度/infra 重試；e006 全盤完賽→report.py --rescore→opencode_cell_audit --out→verdict --audit→packet 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；照 open/ 新工單續做。
