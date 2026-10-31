@@ -1,9 +1,19 @@
+import json
+import math
+from pathlib import Path
+
 def mcnemar(b: int, c: int) -> float:
     n = b + c
     if n == 0: return 1.0
     k = min(b, c)
     p = sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n
     return min(1.0, 2 * p)
+
+def _i(val):
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return 0
 
 def main():
     exp_dir = Path("/srv/vlab/runs/e006_opencode_polyglot")
@@ -127,6 +137,7 @@ def main():
             final_paired[key]["X_only"] += x_only
             final_paired[key]["distinct_tasks"] += min_len
             final_paired[key]["pairs"] += min_len
+            # Corrected: positive is X only, negative is A only
             final_paired[key]["tasks_net_positive"] += x_only
             final_paired[key]["tasks_net_negative"] += a_only
 
