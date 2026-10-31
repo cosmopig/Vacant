@@ -1416,3 +1416,11 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert "e006_verdict m=" in txt
     assert "H-acc" in txt
     assert "cost(2×A 紅線)" in txt
+
+    # P20261031_0120-3（ASSIGNMENT「研發工具需納入回歸測試」）：REPORT.json 格式不符 → 退出碼 2 契約回歸。
+    bad_rep = tmp_path / "bad_report"
+    bad_rep.mkdir()
+    (bad_rep / "REPORT.json").write_text("not json", encoding="utf-8")
+    capsys.readouterr()
+    assert e006_verdict.main(["bad_report", "--runs-dir", str(tmp_path)]) == 2
+    assert "REPORT.json 格式不符" in capsys.readouterr().err
