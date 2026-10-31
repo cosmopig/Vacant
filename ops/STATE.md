@@ -58,3 +58,9 @@
 - 驗證：先實讀 growth_report.py trend() L98-135 確認契約（<2 點 max_24h=None、span_h round(…,2)、per_dir_peak 取 max）；改前 grep 0 行 rc=1＋pytest rc=5（工單前提成立）；驗收 pytest -k 單測 rc=0＋grep 命中行 826（工單「行 813 附近」為約數、驗收指令本身通過）；全檔 75 passed rc=0；commit b812dff5；工單→done/、doing/ 0 張。
 - 沒驗證：b812dff5 CI 未出（輪首 auto/qwen27b CI 還沒跑完）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：監控 b812dff5 CI 與 e006 進度/infra 重試；第 41 點出現即同步三件套（§1 時序＋§2 總覽＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 455 (2026-10-31 03:3x) · P20261031_0326-1 真機增長序列第 40 點同步至 disk_top_priority §3 目標數字合計列（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 1 & 4(a) ~/.vacant 穩態上限與目標數字實測跨表對齊）。
+- 做了：ops/vlab/packets/disk_top_priority.md §3 行 177「合計」列本輪實測欄 57.6 MiB/22.5%/02:09→58.0 MiB/22.7%/10/31 03:11（1 行）；cp 同步 ~/dev/ops/packets 副本 bit-identical；§1/§2 與他分區上限零改動；工單→done/、doing/ 0 張。
+- 驗證：改前 grep 新串 0 行 rc=1 且舊串全檔僅行 177 1 處（工單前提成立）；驗收 grep 精確命中行 177＋diff -u 無輸出 rc=0；git diff 僅 1 檔 1 行；無「信任／證明變好」措辭；commit 7a41dd9b。
+- 沒驗證：7a41dd9b CI 未出；本輪未重跑 growth_report.py --json 複核數字（與 round 450/451/453 四件套同源，皆為工單已載 10/31 03:11 實測值）；e006 170 格未完賽。
+- 下一步：監控 7a41dd9b CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
