@@ -39,3 +39,9 @@
 - 驗證：先實核契約（e004_verdict.py:49-83 cost_redline 零值回退、L163-166 render 行形、L250-256 AUDIT.json 路徑）；首次跑驗收 StopIteration（紅字 红/線 字形差）→ 修正為 紅線 後綠；驗收 pytest -k test_e004_verdict_selftest_and_cli → 1 passed rc=0；grep exp_fb_e004 命中 2 行 rc=0（改前 0 行 rc=1）；全檔 test_vlab_tools.py rc=0（69 測試）；無 CR 字元；commit e95b69a3；工單→done/、doing/ 0 張。
 - 沒驗證：e95b69a3 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
+## round 432 (2026-10-31 02:2x) · P20261031_0153-4 e004_verdict 損壞 AUDIT 容錯回退契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT「研發工具需納入回歸測試」＋資深審查指示第 1/3 條（e004/e006 判定工具同族守護：審計檔異常時不崩潰、容錯回退）。
+- 做了：tests/test_vlab_tools.py::test_e004_verdict_selftest_and_cli 末尾追加 7 行（1 檔 +7/−0）：bad_audit_e004 下正常 REPORT.json＋AUDIT.json 寫 "corrupt json"，斷言 main(["bad_audit_e004","--runs-dir",…,"--json"]) == 0 且 json 輸出 audit is None；e004_verdict.py 原始碼、既有測試邏輯、他函式零改動。
+- 驗證：先實核契約（e004_verdict.py:252-255 AUDIT 讀取 try/except Exception→audit_summary=None、L259 r["audit"]=None；audit 缺失→M 臂降級 UNKNOWN 已在 selftest #6 覆蓋）；驗收 pytest -k test_e004_verdict_selftest_and_cli → 1 passed, 68 deselected rc=0；grep bad_audit_e004 命中行 1397/1401（改前 0 行 rc=1）；全檔 test_vlab_tools.py 69 passed rc=0；無 CR 字元；commit fadca6b9；工單→done/、doing/ 0 張。
+- 沒驗證：fadca6b9 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
