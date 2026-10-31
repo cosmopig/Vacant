@@ -174,7 +174,7 @@
 | 掛鉤日誌（intake） | 2 MiB/檔＋總 **8 MiB**（round 192） | `compact_logs` 截半，保留最新完整行；總上限警報（只報告不刪） | 1.94 MB ✓ |
 | quarantine / work | 計數制（每 task 2 決策 / 3 run）＋ quarantine 總 **16 MiB**（round 192） | `compact_quarantine`／`compact_work`／`compact_vrun_dir`；單 blob ≤ 8 MiB（MAX_BLOB）；總上限警報（只報告不刪） | 0 B ✓ |
 | 固定安裝面（bin/hooks/keys/projects 索引） | 1 MiB/件×4（round 190） | 非增長性；`envelope_accounting.fixed_overrun` 點名越限（只報告不刪） | ~6 MB ✓ |
-| **合計** | **所有命名上限加總 228.25 MiB（round 192：172.25 機制＋32 projects＋8 intake＋16 quarantine）→ 256 MiB 封頂** | `all_caps_sum` ≤ 256 MiB 有常規測試把關 | **57.6 MiB（22.5% of 256，10/31 02:09 真機實測；24h 最大增長 16.3 MiB）** |
+| **合計** | **所有命名上限加總 228.25 MiB（round 192：172.25 機制＋32 projects＋8 intake＋16 quarantine）→ 256 MiB 封頂** | `all_caps_sum` ≤ 256 MiB 有常規測試把關 | **58.0 MiB（22.7% of 256，10/31 03:11 真機實測；24h 最大增長 16.3 MiB）** |
 
 **為什麼使用者可以接受 256 MiB**：
 1. 它對 2 GiB repo 是 **12.5%**——「不該是 repo 的一半」（50%）有 **4 倍餘裕**。
