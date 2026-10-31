@@ -2083,3 +2083,24 @@ def test_e006_verdict_not_worth_it() -> None:
     assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
     assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True
     assert r["hypotheses"]["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+
+
+def test_e006_verdict_confirmed() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm 顯著（p=0.001）且 C_only > A_only（10 > 0）、
+    # 成本 ≤ 2×A（C calls 12.0 vs A 10.0 ⇒ 1.2×A）時，判定 H-acc 為 CONFIRMED
+    # （reason 含「Holm 後顯著、X_only > A_only、成本 ≤ 2×A」且 not_worth_it is False）
+    # ——成效與成本綁定的正向判定契約鎖進常規回歸（工單 P20261031_0603-3）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂配對顯著：A_only=0, C_only=10, p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本未超 2×A：C calls 12.0 vs A 10.0（1.2×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 12.0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-acc"]["reason"]
+    assert r["hypotheses"]["H-acc"]["cost_over_2x_A"] is False
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
