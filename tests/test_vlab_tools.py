@@ -1433,6 +1433,29 @@ def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     assert e006_verdict.main(["bad_report", "--runs-dir", str(tmp_path)]) == 2
     assert "REPORT.json 格式不符" in capsys.readouterr().err
 
+    # P20261031_0153-1（ASSIGNMENT「研發工具需納入回歸測試」）：e006_verdict 命令列下、REPORT.json 各臂
+    # calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵）時，由 AUDIT.json 補齊真實成本，
+    # 人讀輸出印出非 None 成本比與紅線判定（over=False 在案、無 calls=None tokens=None）。
+    fb = tmp_path / "exp_fb_e006"; fb.mkdir()
+    rep_fb = e006_verdict._mock_report()
+    for arm in rep_fb["per_arm"]:
+        rep_fb["per_arm"][arm]["calls_per_success"] = 0.0
+        rep_fb["per_arm"][arm]["tokens_per_success"] = 0
+    (fb / "REPORT.json").write_text(json.dumps(rep_fb), encoding="utf-8")
+    (fb / "AUDIT.json").write_text(json.dumps({
+        "summary": {"per_arm": {
+            "A": {"calls_per_success": 20.0, "tokens_per_success": 1000.0},
+            "C": {"calls_per_success": 15.0, "tokens_per_success": 800.0},
+            "H": {"calls_per_success": 50.0, "tokens_per_success": 3000.0},
+            "M": {"calls_per_success": 10.0, "tokens_per_success": 500.0,
+                  "second_agent_verified_cells": 5, "second_agent_unknown_cells": 15},
+            "S": {"calls_per_success": 18.0, "tokens_per_success": 900.0}}}}), encoding="utf-8")
+    capsys.readouterr()
+    assert e006_verdict.main(["exp_fb_e006", "--runs-dir", str(tmp_path)]) == 0
+    out_fb = capsys.readouterr().out
+    line_fb = next(l for l in out_fb.splitlines() if "cost(2×A 紅線)" in l)
+    assert "over=False" in line_fb and "calls=None tokens=None" not in line_fb
+
 
 def test_e006_verdict_audit_cost_fallback(tmp_path: Path) -> None:
     # 驗證當 REPORT.json 中 calls/tokens 為 0.0/0（OpenCode 無 cell.json metrics 特徵），
