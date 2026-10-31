@@ -33,3 +33,9 @@
 - 驗證：驗收 `pytest tests/test_vlab_tools.py -q` rc=0、collect 69／69 全綠（工單期「68 passed」係 427 輪前快照：66+argon 2=68、再+427 輪 1=69，為超集且全綠，非驗收壞）；e006_verdict.py::cost_redline（L49 audit_per_arm 回退、not_worth_it L75/L147）與 argon 一致；本輪結案記錄 commit 見下（ops/STATE.md 1 檔）。
 - 沒驗證：8ce9813d/25a3527a CI 未出（輪首 auto/qwen27b 25a3527a「還沒跑完」）；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：監控 e006 進度與 infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）；C 臂新格/第 39 點出現即同步三件套。
+## round 430 (2026-10-31 02:1x) · P20261031_0153-2 e004_verdict audit 成本補齊 CLI 契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT「研發工具需納入回歸測試」＋審查指示第 1 條：REPORT.json 成本 0.0/0 時經 AUDIT.json 補齊真實成本之 CLI 契約鎖入 e004 回歸。
+- 做了：tests/test_vlab_tools.py::test_e004_verdict_selftest_and_cli 末尾（bad_report_e004 斷言後）追加 16 行（1 檔 +16/−0）：exp_fb_e004/ 下 _mock_report() 各臂 calls=0.0/tokens=0 之 REPORT.json ＋ 五臂真實成本之 AUDIT.json（M 含 second_agent 證據）；main(["exp_fb_e004","--runs-dir",…])==0；cost(2×A 紅線) 行含 over=False、不含 calls=None tokens=None。e004_verdict.py 與他函式零改動。
+- 驗證：先實核契約（e004_verdict.py:49-83 cost_redline 零值回退、L163-166 render 行形、L250-256 AUDIT.json 路徑）；首次跑驗收 StopIteration（紅字 红/線 字形差）→ 修正為 紅線 後綠；驗收 pytest -k test_e004_verdict_selftest_and_cli → 1 passed rc=0；grep exp_fb_e004 命中 2 行 rc=0（改前 0 行 rc=1）；全檔 test_vlab_tools.py rc=0（69 測試）；無 CR 字元；commit e95b69a3；工單→done/、doing/ 0 張。
+- 沒驗證：e95b69a3 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
+- 下一步：查 /srv/vlab/done 之 e006 完賽格；全盤完賽跑 e006_verdict＋opencode_cell_audit 出判定；M 臂 34 格出分即複測樣本。
