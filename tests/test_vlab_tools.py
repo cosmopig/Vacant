@@ -1122,6 +1122,22 @@ def test_growth_report_cli_missing_sources_human_unknown_exit_code(tmp_path: Pat
     assert "missing:" in out
 
 
+def test_growth_report_cli_missing_sources_out_file(tmp_path: Path) -> None:
+    # P20261031_0342-1（ASSIGNMENT 🔴最優先 驗收 4(a)：真機成長量具無數據來源時的落盤契約）：
+    # 指定不存在的 home 與 ops-data 目錄且帶 --out 旗標時，growth_report.main（L297-322）
+    # 須將 verdict=UNKNOWN、sources=[] 的合法 JSON 完整落盤到 out 檔（L316-318），
+    # 並以 exit code 1 安全退出（verdict != "PASS"）——不崩潰、不假 PASS，落盤檔完整可解析。
+    out_file = tmp_path / "unknown_report.json"
+    rc = growth_report.main(["--home", str(tmp_path / "nonexistent_home"),
+                             "--ops-data", str(tmp_path / "nonexistent_ops"),
+                             "--out", str(out_file)])
+    assert rc == 1
+    assert out_file.is_file()
+    data = json.loads(out_file.read_text(encoding="utf-8"))
+    assert data["verdict"] == "UNKNOWN"
+    assert data["sources"] == []
+
+
 def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
     # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
