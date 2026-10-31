@@ -2629,3 +2629,23 @@ def test_e004_verdict_not_significant_not_established() -> None:
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
     # 成本 ≤ 2×A（0.9×A）⇒ 不是「不划算」（not_worth_it 為 False，不是 None）
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
+
+
+def test_e004_verdict_confirmed_cost_unknown() -> None:
+    # 驗證 e004_verdict 在 C 臂配對顯著（p=0.001、Holm 校正後 0.004 < 0.05）且方向為正（C_only=10 > A_only=0）時，
+    # 若基準 A 臂成本缺失（calls=0.0 / tokens=0、audit_summary=None）使 2×A 成本紅線量不到，H-acc 必須記
+    # CONFIRMED_COST_UNKNOWN（顯著且方向為正，但成本紅線量不到——量不到，不是過、也不是違規）、over_2x_A_cost 為 None、
+    # reason 指出「顯著且方向為正，但成本紅線量不到（A 臂成本缺失）」——成效與成本綁定之判定防線鎖進 e004 常規回歸（工單 P20261031_1023-3）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著且方向為正：p=0.001（m=4 Holm 校正後 0.004 < 0.05）、C_only=10 > A_only=0
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本缺失：0.0/0 ⇒ 2×A 成本紅線量不到（不判過、不判違規）
+    rep["per_arm"]["A"]["calls_per_success"] = 0.0
+    rep["per_arm"]["A"]["tokens_per_success"] = 0
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著且方向為正但成本量不到 ⇒ CONFIRMED_COST_UNKNOWN（不是 CONFIRMED）；over_2x_A_cost 為 None（量不到，不是過也不是違規）
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "顯著且方向為正，但成本紅線量不到（A 臂成本缺失）" in r["hypotheses"]["H-acc"]["reason"]
