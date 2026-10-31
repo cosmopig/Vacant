@@ -170,6 +170,7 @@
 - **10/31（14:38 續記，工單 P20261031_1446-2）**：`growth_report.py --json` 實測：**51 點跨 66.30h**（2026-10-28T20:20 → 2026-10-31T14:38），長效監測持續進行；最新 **67,426,519 B（64.3 MiB）≤ 256 MiB 穩態封頂（25.1%）**、24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **48,774,461 B（46.5 MiB ≤ 64 MiB）**、trace 481 blobs、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
 - **10/31（15:39 續記，工單 P20261031_1549-1）**：`growth_report.py --json` 實測：**52 點跨 67.31h**（2026-10-28T20:20 → 2026-10-31T15:39），長效監測持續進行；最新 **68,187,561 B（65.0 MiB）≤ 256 MiB 穩態封頂（25.4%）**、24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **49,417,878 B（47.1 MiB ≤ 64 MiB）**、trace 477 blobs、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
 - **10/31（16:40 續記，工單 P20261031_1651-1）**：`growth_report.py --json` 實測：**53 點跨 68.34h**（2026-10-28T20:20 → 2026-10-31T16:40），長效監測持續進行；最新 **68,566,294 B（65.4 MiB）≤ 256 MiB 穩態封頂（25.5%）**、24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **49,665,255 B（47.4 MiB ≤ 64 MiB）**、trace 478 blobs、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
+- **10/31（17:40 續記，工單 P20261031_1737-1）**：`growth_report.py --json` 實測：**54 點跨 69.34h**（2026-10-28T20:20 → 2026-10-31T17:40），長效監測持續進行；最新 **68,243,806 B（65.1 MiB）≤ 256 MiB 穩態封頂（25.4%）**、24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **50,255,340 B（47.9 MiB ≤ 64 MiB）**、trace 486 blobs、`gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0。
 
 ## 2. 四條驗收條件對現狀
 
