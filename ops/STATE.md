@@ -83,3 +83,9 @@
 - 驗證：改前驗收 grep 0 命中（前提成立）；數據本輪實核 cell.json（58767/31795、finished 2026-10-31T06:13:56+0000、vacant_sha=bf1a9f1a…、58767/268435456=0.000219、58767/1024=57.4 KB 自洽）；改後兩 grep 均命中行 150、diff 無輸出 rc=0（bit-identical）；med 121,652 沿用 repo 慣例 vs[len//2]（envelope_compliance.py:144，12 格 index 6=121652）；+ 行無「信任／證明變好」；commit e1715724。
 - 沒驗證：e1715724 CI 未出；第 13 格 pg_grep（06:23 完賽、152,604 B）不在本單範圍未同步；envelope_compliance 未重跑（新格 ratio 遠低於 0.096% 封頂口徑，沿用既有 PASS 口徑）；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽。
 - 下一步：監控 e1715724/cfd5ea35/482766df/1c46a428/c4672106/35aa4b9d CI 與 e006 進度/infra 重試；pg_grep 及後續格照新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 503 (2026-10-31 06:4x) · P20261031_0634-1 e006 第 12 格 pg_grade_school C 臂真實用量同步至 FINDINGS 主軸 2（重覆單，如實結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 4(b) 實驗室格子 C 組用量）＋資深審查指示第 2 條。
+- 做了：本單已由 round 502 結案（工作由 eca004c8 完成、commit 訊息即以本工單檔名開頭），本輪為重新排隊之重覆單；DECISION：重覆單如實結案、不再改 FINDINGS.md｜工作已提交且驗收鏈已通過，重改只會加噪與覆蓋風險；本輪重驗驗收鏈（三 grep 分別命中行 396/399/401、rc=0×3）；工單追加結果 3 行並 mv 至 done/（覆蓋舊 done 副本；舊副本有 1 行畸形截斷，新塊引用同一 eca004c8、資訊無損失）；doing/ 0 張。
+- 驗證：驗收全鏈 rc=0（行 396「15 格 complete…e006 12 格」／行 399「（12 格，本盤進行中）…pg_grade_school **58,767 B（57.4 KB）**」／行 401「15 格實測全部落在」）；數據與 round 502 實核 cell.json 一致（58767/31795 B、57.4 KB、ratio 0.000219、10/31 06:13 完賽）；本輪追加結果 3 行無「信任／證明變好」（檔案唯一命中為工單「不要做」指令原文，非本輪新增）。
+- 沒驗證：eca004c8 CI 未出；第 13 格 pg_grep（06:23 完賽、152,604 B）未同步（不在本單範圍，open/ P20261031_0634-5 待新工單）；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽後之 REPORT.json＋e006_verdict.py。
+- 下一步：監控 eca004c8/58c330d6/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
