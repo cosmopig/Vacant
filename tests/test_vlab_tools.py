@@ -1365,6 +1365,14 @@ def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     capsys.readouterr()
     assert e004_verdict.main(["exp_mock", "--runs-dir", str(tmp_path)]) == 0
     assert "e004_verdict m=" in capsys.readouterr().out
+    # P20261031_0120-4（ASSIGNMENT「研發工具需納入回歸測試」）：REPORT.json 格式不符 → 退出碼 2 契約回歸。
+    # (e) 損壞之 REPORT.json（not json）→ rc=2，且 stderr 含「REPORT.json 格式不符」。
+    bad_rep = tmp_path / "bad_report_e004"
+    bad_rep.mkdir()
+    (bad_rep / "REPORT.json").write_text("not json", encoding="utf-8")
+    capsys.readouterr()
+    assert e004_verdict.main(["bad_report_e004", "--runs-dir", str(tmp_path)]) == 2
+    assert "REPORT.json 格式不符" in capsys.readouterr().err
 
 
 def test_e006_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
