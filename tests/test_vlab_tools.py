@@ -4082,3 +4082,34 @@ def test_e004_verdict_s_zero_cost_treated_as_missing_confirmed_cost_unknown() ->
     assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "S 臂成本缺失" in r["hypotheses"]["H-stakes(a)"]["reason"]  # 理由精確指認缺失臂
     assert "利害 (a) 只是講、無真實後果" in r["hypotheses"]["H-stakes(a)"]["note"]  # 鐵律 KS-1 警語保留
+
+def test_growth_report_both_total_and_trace_cap_plus_one_byte_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_1707-2（ASSIGNMENT 🔴最優先 驗收(a)）：growth.jsonl 最新點 total 恰好超
+    # 256 MiB 穩態封頂 1 byte（268,435,457 B）且 trace 恰好超 64 MiB 硬上限 1 byte
+    #（67,108,865 B）、gc 健全（status=ok、target_reached=true）時，判定是嚴格大於（>）
+    #——超 1 byte 就是超——growth_report.report() 須精確判 verdict=FAIL（雙超標絕不
+    # 偽判 PASS）、peak_overrun.over_stable_envelope 為 True（峰值超封頂）、reason
+    # 同時精確指認 total 超標與 trace 超標兩項；CLI --json 退出碼 1。與單項超標測試
+    #（1635-1 total／1635-5 trace）構成雙重超標精確邊界守護。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 25h（≥ MIN_EVIDENCE_HOURS=20h）；最新點 total 與 trace 皆超標 1 byte
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 100 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T01:00:00+0000", "total_bytes": 256 * 1024 * 1024 + 1,  # 268,435,457 B＝封頂＋1
+          "per_dir_bytes": {"trace": 64 * 1024 * 1024 + 1},  # 67,108,865 B＝trace 上限＋1 byte
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"  # 雙超標各 1 byte＝超標，絕不偽判 PASS
+    assert r["peak_overrun"]["over_stable_envelope"] is True  # 峰值超封頂
+    assert "latest total 268435457 B > 穩態封頂 268435456 B" in r["reason"]  # 精確指認 total 超標
+    assert "latest trace 67108865 B > trace 上限 67108864 B" in r["reason"]  # 精確指認 trace 超標
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1  # FAIL 時 CLI 退出碼 1
