@@ -1208,6 +1208,20 @@ def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     assert rc == 2
     assert "找不到 run 目錄" in capsys.readouterr().err
 
+    # P20261031_0255-2（ASSIGNMENT 主軸 3＋量具契約鎖定）：--out 落盤與預設人讀輸出契約。
+    out_file = tmp_path / "pb_out.json"
+    rc = e002_pair_breakdown.main(["exp_pb", "--base", str(tmp_path), "--out", str(out_file)])
+    assert rc == 0
+    assert out_file.is_file()
+    assert json.loads(out_file.read_text(encoding="utf-8"))["tool"] == "e002_pair_breakdown"
+    assert "已寫入" in capsys.readouterr().err
+
+    rc = e002_pair_breakdown.main(["exp_pb", "--base", str(tmp_path)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "pair both: 1 t1" in out
+    assert "c_review unknown: 2 t1 t2" in out
+
 
 def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatch) -> None:
     # P20261030_2008-1（ASSIGNMENT「研發工具需納入回歸測試」＋ GPT 審查 P1-1 同時量成本）：
