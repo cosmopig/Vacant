@@ -3137,3 +3137,27 @@ def test_growth_report_gc_last_missing_fail(tmp_path: Path, capsys) -> None:
     capsys.readouterr()  # 排空殘留
     rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
     assert rc == 1
+
+
+def test_e006_verdict_s_dual_overrun_not_worth_it() -> None:
+    # 驗證 e006_verdict：S 臂（利害提示）calls（39.1 = 3.91×A）與 tokens（4450.0 = 4.45×A）
+    # 雙維度均超 2×A 紅線，且成效未顯著提升（p=0.2188、A_only=5 > S_only=1 方向非正）時：
+    # cost_redline_2xA.arms["S"].over_2x_A_cost 精確判定為 True（成本紅線嚴格守護）、
+    # not_worth_it 精確判定為 True（成本必須與成效一起報告）、H-stakes(a) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））、note 守住 KS-1 措辭鐵律——工單 P20261031_1258-2
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_S"] = {"pairs": 19, "A_only": 5, "S_only": 1, "mcnemar_p_two_sided": 0.2188}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["S"] = {"calls_per_success": 39.1, "tokens_per_success": 4450.0}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["S"]["calls_vs_A"] == 3.91
+    assert r["cost_redline_2xA"]["arms"]["S"]["tokens_vs_A"] == 4.45
+    assert r["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is True  # calls 與 tokens 雙維度均超紅線
+    assert r["cost_redline_2xA"]["arms"]["S"]["not_worth_it"] is True  # 成本超標且未顯著提升 ⇒ 不划算
+    s = r["hypotheses"]["H-stakes(a)"]
+    assert s["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in s["reason"]
+    assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in s["note"]
