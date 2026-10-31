@@ -194,7 +194,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 `STABLE_ENVELOPE_BYTES` 256 MiB；證據不足＝UNKNOWN 不假 PASS；
 `tests/test_vlab_tools.py::test_growth_report_selftest_and_verdict_semantics` 紅綠對照在內）。
 **序列**（兩份 JSONL 併排去重）：`~/.vacant/growth.jsonl`（round 186 起 auto gc
-每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 46 點跨 61.02h（2026-10-28T20:20 → 2026-10-31T09:21）：
+每次真跑自動記）＋ `~/dev/ops/data/vacant_growth.jsonl`（手動快照）＝ 47 點跨 62.10h（2026-10-28T20:20 → 2026-10-31T10:26）：
 
 | ts | 總計 | trace | objects | gc |
 |---|---|---|---|---|
@@ -241,6 +241,7 @@ import `vacant_network.retention`＝`DEFAULT_TRACE_BUDGET_BYTES` 64 MiB、
 | 10/31 07:18 | 60.2 MiB | 42.5 MiB | 469 blobs | ok, true |
 | 10/31 08:21 | 60.7 MiB | 42.7 MiB | 413 blobs | ok, true |
 | 10/31 09:21 | 60.9 MiB | 43.8 MiB | 407 blobs | ok, true |
+| 10/31 10:26 | 61.6 MiB | 44.3 MiB | 461 blobs | ok, true |
 
 零點＝10/28 08:14 人工清場（ASSIGNMENT 備份 `1003 D:/vlab_backup/vacant_data_20261028_0814.tgz`，
 sha256 `49e8be1b…4068`）；10/28 08:16 舊碼（round 139 store-on-copy）曾回灌 542 MB / 17,097 blobs，
@@ -257,9 +258,9 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
   auto_gc 實測釋放 9,482,666 B（9.04 MiB、974 檔、trace 948→378 blobs 保留、ok＋target_reached），
   總計 64,827,429 B（61.8 MiB，16:32 點）→ 56,771,218 B（54.1 MiB，gc 後，`~/.vacant/growth.jsonl` 18:50:12 點）；`gc --verify` verify_ok=True（8/8 專案）、
   `growth_report.py` verdict=PASS；前後數字全見 disk_top_priority.md §1（10/30 18:51 續記）。
-- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 60.9 MiB（23.8%）、
-  最新 trace 43.8 MiB ≤ 64 MiB 上限。
-- 這是**真機 `~/.vacant`** 的跨日序列（46 點、61.02h），不是模擬、不是單點。
+- 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 61.6 MiB（24.1%）、
+  最新 trace 44.3 MiB ≤ 64 MiB 上限。
+- 這是**真機 `~/.vacant`** 的跨日序列（47 點、62.10h），不是模擬、不是單點。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
