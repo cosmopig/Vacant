@@ -2590,3 +2590,21 @@ def test_e004_verdict_missing_paired_unknown() -> None:
     assert r["hypotheses"]["H-acc"]["p_holm"] is None
     # Holm 調整集排除未測 C 臂：m 由 4 降為 3
     assert r["m_in_holm_set"] == 3
+
+
+def test_e004_verdict_direction_negative_not_established() -> None:
+    # 驗證 e004_verdict 在 C 臂配對顯著（p=0.001、Holm 校正後 0.004 < 0.05）但方向非正（A_only=10 > C_only=0、裝了比沒裝還差）時，
+    # H-acc 絕不得記 CONFIRMED、必須記 NOT_ESTABLISHED（未建立，不是負結果）、理由含「不顯著（或方向非正）⇒ 未建立（不是負結果）」——
+    # 人類能看見成效倒退時絕不誤發 CONFIRMED 之安全判定防線鎖進 e004 常規回歸（工單 P20261031_0952-4）。
+    from ops.vlab.tools import e004_verdict
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著（p=0.001、Holm 校正後 0.004 < 0.05）但方向非正：A_only=10 > C_only=0（裝了比沒裝還差）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 10, "C_only": 0, "mcnemar_p_two_sided": 0.001}
+    # 成本量得到（A 臂 calls=10.0、C 臂 calls=10.0＝A、未破紅線；方向防線與成本無關）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 10.0
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 顯著但方向非正 ⇒ 絕不 CONFIRMED，必須記 NOT_ESTABLISHED（未建立，不是負結果）
+    assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is True
+    assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
