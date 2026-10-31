@@ -4265,3 +4265,31 @@ def test_e004_verdict_c_zero_cost_treated_as_missing_confirmed_cost_unknown() ->
     assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
     assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "C 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]  # 理由精確指認缺失臂
+
+
+def test_e006_verdict_dual_zero_cost_missing_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict：基準 A 臂與實驗 C 臂成本同時為 0.0/0.0（皆缺失、audit 亦無成本維度可補）、
+    # C 臂配對顯著且方向為正（C_only=10 > A_only=0、p=0.001）時，量具須將雙臂 0.0 一律視為
+    # 「成本缺失（量不到）」而非免費（0 元）：over_2x_A_cost 與 not_worth_it 皆須為 None
+    # （不判過亦不判違規、嚴防除以零或偽升格 CONFIRMED），H-acc 假說態誠實判定
+    # CONFIRMED_COST_UNKNOWN，且理由精確指認雙主體「A 臂與 C 臂成本缺失」——
+    # 不誤標單主體「A 臂成本缺失」或「C 臂成本缺失」；雙臂 0.0 成本缺失精確指認
+    # 邊界鎖進常規回歸（工單 P20261031_1737-5，對應 e004 C 臂 P20261031_1737-3 之 e006 對稱契約）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂顯著且方向為正：C_only=10 > A_only=0、p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 基準 A 臂成本為 0.0/0.0（無 metrics 特徵；須被量具視為缺失，而非實數 0 成本）
+    rep["per_arm"]["A"] = {"calls_per_success": 0.0, "tokens_per_success": 0.0}
+    # 實驗 C 臂成本亦為 0.0/0.0（雙臂皆缺失）
+    rep["per_arm"]["C"] = {"calls_per_success": 0.0, "tokens_per_success": 0.0}
+    # audit 無第二 agent 證據（verified=0）、亦無成本維度可補
+    audit = e006_verdict._mock_audit(0)
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "A 臂與 C 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]  # 雙主體缺失，非單臂
+    assert "顯著且方向為正，但成本紅線量不到（A 臂與 C 臂成本缺失）" == r["hypotheses"]["H-acc"]["reason"]
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None  # 雙臂皆量不到（嚴防除以零）
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了
