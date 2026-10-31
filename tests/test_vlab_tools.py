@@ -4352,3 +4352,38 @@ def test_growth_report_exact_total_and_trace_caps_boundary_pass(tmp_path: Path, 
     capsys.readouterr()  # 排空殘留
     rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
     assert rc == 0  # PASS 時 CLI 退出碼 0
+
+
+def test_e006_verdict_a_zero_cost_missing_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict：C 臂（H-acc 究責臂）McNemar 配對顯著（C_only=10 > A_only=0、p=0.001
+    # ⇒ 方向為正）但 REPORT.json 中基準 A 臂成本為 0.0/0.0（無 metrics、無 audit 可補）時，
+    # 量具必須嚴格將 A 臂 0.0 視為「成本缺失（量不到）」，而非免費（0 元）；
+    # C 臂 calls_vs_A 與 tokens_vs_A 須為 None，over_2x_A_cost 須為 None（不判過亦不判違規）、
+    # not_worth_it 須為 None（無法斷言划算與否，嚴防偽判 False 或 True），H-acc 假說態
+    # 誠實判定 CONFIRMED_COST_UNKNOWN、理由精確指認單主體「A 臂成本缺失」——
+    # 不誤標「C 臂成本缺失」或雙主體「A 臂與 C 臂成本缺失」——A 臂 0.0 成本單主體
+    # 精確邊界契約鎖進常規回歸，嚴防單邊 0.0 成本導致除以零或偽升格 CONFIRMED
+    # （工單 P20261031_1753-2，與 C 臂 test_e006_verdict_c_zero_cost_treated_as_missing_
+    # confirmed_cost_unknown／雙臂 test_e006_verdict_dual_zero_cost_missing_confirmed_cost_
+    # unknown 對稱；A 臂 None 側見 test_e006_verdict_a_arm_cost_missing_reason）。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂顯著且方向為正：C_only=10 > A_only=0、p=0.001
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本為 0.0/0.0（無 metrics；須被量具視為缺失，而非實數 0 成本）
+    rep["per_arm"]["A"] = {"calls_per_success": 0.0, "tokens_per_success": 0.0}
+    # C 臂成本健全
+    rep["per_arm"]["C"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    # audit 無第二 agent 證據（verified=0）、亦無成本維度可補
+    audit = e006_verdict._mock_audit(0)
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    assert r["cost_redline_2xA"]["arms"]["C"]["calls_vs_A"] is None  # A 基準 0.0＝缺失，C/A 比量不到（嚴防除以零）
+    assert r["cost_redline_2xA"]["arms"]["C"]["tokens_vs_A"] is None  # 同上
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None  # 成本紅線量不到（不判違規也不判過）
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
+    assert "A 臂成本缺失" in r["hypotheses"]["H-acc"]["reason"]  # 理由精確指認缺失臂（單主體 A）
+    assert "C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]  # C 臂健全，不誤標
+    assert "A 臂與 C 臂成本缺失" not in r["hypotheses"]["H-acc"]["reason"]  # 非雙主體缺失
