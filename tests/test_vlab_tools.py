@@ -3185,3 +3185,36 @@ def test_e004_verdict_s_dual_overrun_not_worth_it() -> None:
     assert s["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in s["reason"]
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in s["note"]
+
+
+def test_e006_verdict_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e006_verdict 在配對缺失（未測量 A_vs_C）但 C 臂成本超標時，
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須為 None
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    del rep["paired"]["A_vs_C"]
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0  # 2.5×A
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e004_verdict 在配對缺失（未測量 A_vs_C）但 C 臂成本超標時，
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須為 None
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    del rep["paired"]["A_vs_C"]
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0  # 2.5×A
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is None
+    assert r["hypotheses"]["H-acc"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-acc"]["reason"]
+
