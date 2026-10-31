@@ -4559,3 +4559,22 @@ def test_envelope_compliance_exact_cap_boundary_pass(tmp_path: Path, capsys) -> 
     assert data["verdict"] == "PASS"
     assert data["cells"][0]["compliance"] == "PASS"  # 恰好＝封頂，絕不誤判 FAIL
     assert data["cells"][0]["ratio_of_envelope"] == 1.0  # 268,435,456 / 268,435,456
+
+
+def test_envelope_compliance_exact_cap_plus_one_byte_fail(tmp_path: Path, capsys) -> None:
+    """envelope_compliance CLI：C 臂格子 vacant_home_bytes 恰好超過 256 MiB 穩態封頂 1 byte（268,435,457 B）→ 邊界為嚴格大於即違規，超標 1 byte 絕不包庇。
+
+    斷言 cells[0].compliance == "FAIL"、note 含「超過穩態封頂」、整體 verdict == "FAIL"、
+    CLI main 安全退出回 1（不假裝通過）。與 1856-5（壓線判 PASS）構成完全對稱的臨界邊界閉環。
+    """
+    cell = tmp_path / "runs" / "exp_exact_fail" / "cell_c1"
+    cell.mkdir(parents=True)
+    (cell / "cell.json").write_text(
+        json.dumps({"arm": "C", "vacant_home_bytes": 256 * 1024 * 1024 + 1}), encoding="utf-8")
+    capsys.readouterr()  # 排空殘留
+    rc = envelope_compliance.main(["exp_exact_fail", "--base", str(tmp_path / "runs")])
+    assert rc == 1  # 超標 1 byte 即違規 → CLI 安全退出碼 1
+    data = json.loads(capsys.readouterr().out)
+    assert data["verdict"] == "FAIL"
+    assert data["cells"][0]["compliance"] == "FAIL"  # 268,435,457 > 268,435,456，嚴超即 FAIL
+    assert "超過穩態封頂" in data["cells"][0]["note"]
