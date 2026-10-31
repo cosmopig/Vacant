@@ -219,9 +219,9 @@ def test_blame_recent_step_remains_located_after_gc(env, monkeypatch, capsys):
     (ws / "app.py").write_text(
         f"pad = '{chr(65 + 6) * 50_000}'\nmagic = 77777\nactive_token = \"active_999\"\n")
     rec.post("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
-    assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 3
-    assert res["target"]["bytes_remaining"] <= 60_000
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000)
+    assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 4
+    assert res["target"]["bytes_remaining"] <= 120_000
     ok, msg = rec.verify()
     assert ok, msg
     monkeypatch.chdir(ws)
