@@ -3731,3 +3731,32 @@ def test_e006_verdict_h_confirmed_cost_unknown() -> None:
     assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成本失聯：划算與否都斷定不了（嚴防偽判 False/True）
     assert r["hypotheses"]["H-review(H)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "顯著且方向為正，但成本紅線量不到（H 臂成本缺失）" in r["hypotheses"]["H-review(H)"]["reason"]
+
+
+def test_growth_report_exact_cap_boundary_pass(tmp_path: Path, capsys) -> None:
+    # P20261031_1604-5（ASSIGNMENT 🔴最優先 驗收(a)：長效監測量具守護）：最新點
+    # total 恰好壓線 256 MiB 穩態封頂（268,435,456 B）、trace 恰好壓線 64 MiB 上限
+    # （67,108,864 B）時，封頂/上限判定是嚴格大於（>）——剛好等於上限是合規點，
+    # growth_report.report() 須精確判 verdict=PASS（不把壓線合規點誤判為 FAIL）、
+    # peak_overrun.over_stable_envelope 為 False（峰值＝封頂、未超）；CLI --json 退出碼 0。
+    # 邊界條件誠實精確：上限是封頂（soft ceiling），壓線不是違規。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 25h（≥ MIN_EVIDENCE_HOURS=20h 門檻）；最新點恰好壓線兩上限
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 200 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T01:00:00+0000", "total_bytes": 256 * 1024 * 1024,  # 268,435,456 B＝256 MiB
+          "per_dir_bytes": {"trace": 64 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "PASS"  # 恰好壓線＝合規，不誤判 FAIL
+    assert r["peak_overrun"]["over_stable_envelope"] is False  # 峰值＝封頂、未超
+
+    capsys.readouterr()
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 0  # 壓線合規點 CLI 退出碼 0
