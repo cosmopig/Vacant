@@ -1291,6 +1291,16 @@ def test_e002_pair_breakdown_selftest_and_smoke(tmp_path: Path, capsys) -> None:
     assert "c_review unknown: 2 t1 t2" in out
 
 
+def test_e002_pair_breakdown_cli_selftest(capsys) -> None:
+    # P20261031_0326-4（ASSIGNMENT 主軸 3＋研發工具回歸守護）：e002 機制差異量具 CLI --selftest
+    # 離線自檢契約——免外部目錄依賴，rc==0 且 stdout 含 "OK"。
+    from ops.vlab.tools import e002_pair_breakdown
+    capsys.readouterr()
+    rc = e002_pair_breakdown.main(["--selftest"])
+    assert rc == 0
+    assert "OK" in capsys.readouterr().out
+
+
 def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatch) -> None:
     # P20261030_2008-1（ASSIGNMENT「研發工具需納入回歸測試」＋ GPT 審查 P1-1 同時量成本）：
     # OpenCode 格子唯讀審計量具 opencode_cell_audit（成本 ＋ C 臂 Vacant 證據）納入常規回歸：
