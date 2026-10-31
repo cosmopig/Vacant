@@ -2431,3 +2431,25 @@ def test_e004_verdict_not_worth_it() -> None:
     assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is True
     # 不顯著（p=0.20）且方向非正（H_only=3 < A_only=8）⇒ 未建立（不是負結果）
     assert r["hypotheses"]["H-review(H)"]["state"] == "NOT_ESTABLISHED"
+
+
+def test_e004_verdict_effective_but_expensive() -> None:
+    # 驗證 e004_verdict 在實驗臂 C 配對顯著（p=0.001、Holm 後仍顯著、C_only=10 > A_only=0）
+    # 但成本超標（A calls=10.0、C calls=25.0 = 2.5×A，超 2×A 紅線）時，
+    # H-acc state=="EFFECTIVE_BUT_EXPENSIVE" 且理由含「顯著但成本 > 2×A ⇒ 有效但昂貴」——
+    # 成效顯著但成本超標時之「有效但昂貴」判定防線鎖進 e004 常規回歸（工單 P20261031_0936-2）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # C 臂配對顯著（p=0.001，Holm 校正後 0.004 < 0.05 仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # 成本超標：A 臂 calls=10.0、C 臂 calls=25.0（2.5×A > 2.0 紅線）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["C"]["calls_per_success"] = 25.0
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # C 臂成本超標：calls 25.0 > 2×10.0 ⇒ 過紅線
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is True
+    # 顯著＋方向為正（C_only=10 > A_only=0）＋成本超標 ⇒ 有效但昂貴（成本必須與成效一起報告）
+    assert r["hypotheses"]["H-acc"]["state"] == "EFFECTIVE_BUT_EXPENSIVE"
+    assert "顯著但成本 > 2×A ⇒ 有效但昂貴" in r["hypotheses"]["H-acc"]["reason"]
