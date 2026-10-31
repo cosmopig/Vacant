@@ -3680,3 +3680,30 @@ def test_e006_verdict_m_cost_within_cap_not_established() -> None:
     assert m["second_agent"]["evidence_present"] is True  # 有第二 agent 證據，不降級 UNKNOWN
     assert m["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in m["reason"]
+
+
+def test_e004_verdict_m_cost_within_cap_not_established() -> None:
+    # 驗證 e004_verdict：M 臂（模型仲裁臂）calls（13.0 = 1.3×A）與 tokens（1400.0 = 1.4×A）
+    # 均在 2×A 紅線內（成本合格、未超標），且具備第二 agent 審計證據（verified_cells=5 ≥ 1），
+    # 但成效未顯著提升（p=1.0、A_only=2 = M_only=2 方向非正）時：
+    # cost_redline_2xA.arms["M"].over_2x_A_cost 精確判定為 False、not_worth_it 精確判定為 False
+    # （未超標臂非不划算——成本必須與成效一起報告）、H-review(M) 假說態為
+    # NOT_ESTABLISHED（不顯著（或方向非正）⇒ 未建立（不是負結果））且因有第二 agent 證據
+    # 不降級 UNKNOWN，嚴防將成本合格臂誤判為不划算——工單 P20261031_1549-5
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 19, "A_only": 2, "M_only": 2, "mcnemar_p_two_sided": 1.0}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["M"] = {"calls_per_success": 13.0, "tokens_per_success": 1400.0}
+    audit_summary = e004_verdict._mock_audit(5)  # 第二 agent 審計證據（evidence_present=True）
+
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit_summary)
+    assert r["cost_redline_2xA"]["arms"]["M"]["calls_vs_A"] == 1.3
+    assert r["cost_redline_2xA"]["arms"]["M"]["tokens_vs_A"] == 1.4
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is False  # calls 與 tokens 均未超 2×A 紅線
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False  # 未超標臂非不划算
+    m = r["hypotheses"]["H-review(M)"]
+    assert m["second_agent"]["evidence_present"] is True  # 有第二 agent 證據，不降級 UNKNOWN
+    assert m["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in m["reason"]
