@@ -71,3 +71,9 @@
 - 驗證：先實讀 opencode_cell_audit.py L179-181/L355-362 確認契約（C 臂缺 tgz→ok=False＋unknown append；bad 非空→return 1）；驗收 pytest -k 單測 rc=0（1 passed）＋grep 命中行 1432（工單「行 1433 附近」為約數）；全檔 76 測試 rc=0；無「信任／證明變好」措辭（新增段 0 處）；commit 3deb4809；工單→done/、doing/ 0 張。
 - 沒驗證：3deb4809 CI 未出；e006 170 格未完賽（/srv/vlab/done 無 07_e006_*），正式判定仍待全盤完賽。
 - 下一步：監控 3deb4809 CI 與 e006 進度/infra 重試；第 41 點出現即同步四件套（§1 時序＋§2 總覽＋§3 合計＋FINDINGS）；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 499 (2026-10-31 06:2x) · P20261031_0603-4 e006_verdict 配對缺失判定 UNKNOWN 契約納入常規回歸（結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證）＋「不假 PASS / 證據不足 UNKNOWN、不是沒有」鐵律。
+- 做了：tests/test_vlab_tools.py 檔尾新增 test_e006_verdict_missing_paired_unknown（+18 行，行 2109）——_mock_report 後 rep["paired"]["A_vs_S"]=None，evaluate_hypotheses(audit_summary=None) 斷言 H-stakes(a) state==UNKNOWN、reason 含「配對缺失、未測（不進 Holm 集）——UNKNOWN，不是沒有」、p_raw is None、m_in_holm_set==3（4→3）；e006_verdict 核心零改動、未碰其他測試函式；工單→done/、doing/ 0 張。
+- 驗證：改前驗收 grep 0 命中＋pytest rc=5（無收集，前提成立）；改後驗收 rc=0（-k 1 passed、最後一行 `.[100%]`，grep 命中行 2109）；全檔 92 passed rc=0（91+1）；git diff 1 檔 +18、+ 行無「信任／證明變好」（grep 0 命中）；commit cfd5ea35。
+- 沒驗證：cfd5ea35 CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 11/34），正式判定仍待全盤完賽。
+- 下一步：監控 cfd5ea35/482766df/1c46a428/c4672106/35aa4b9d CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
