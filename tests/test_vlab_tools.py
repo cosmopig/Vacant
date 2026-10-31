@@ -1308,6 +1308,12 @@ def test_opencode_cell_audit_selftest_and_cli(tmp_path: Path, capsys, monkeypatc
     empty = tmp_path / "pos_empty"; empty.mkdir()
     capsys.readouterr(); rc = opencode_cell_audit.main(["pos_exp", "--runs-dir", str(empty), "--json"])
     assert rc == 0 and json.loads(capsys.readouterr().out)["n_cells"] == 0  # --runs-dir 優先於 exp
+    # P20261031_0120-2（ASSIGNMENT「研發工具需納入回歸測試」＋審查指示第 3 條）：exp 位置參數搭配 --out 落盤契約鎖進回歸。
+    out_pos = tmp_path / "out_pos_audit.json"
+    capsys.readouterr()
+    assert opencode_cell_audit.main(["pos_exp", "--out", str(out_pos)]) == 0
+    assert out_pos.is_file()
+    assert json.loads(out_pos.read_text(encoding="utf-8"))["n_cells"] == 1
 
 
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
