@@ -89,3 +89,10 @@
 - 驗證：驗收全鏈 rc=0（行 396「15 格 complete…e006 12 格」／行 399「（12 格，本盤進行中）…pg_grade_school **58,767 B（57.4 KB）**」／行 401「15 格實測全部落在」）；數據與 round 502 實核 cell.json 一致（58767/31795 B、57.4 KB、ratio 0.000219、10/31 06:13 完賽）；本輪追加結果 3 行無「信任／證明變好」（檔案唯一命中為工單「不要做」指令原文，非本輪新增）。
 - 沒驗證：eca004c8 CI 未出；第 13 格 pg_grep（06:23 完賽、152,604 B）未同步（不在本單範圍，open/ P20261031_0634-5 待新工單）；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽後之 REPORT.json＋e006_verdict.py。
 - 下一步：監控 eca004c8/58c330d6/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+
+## round 505 (2026-10-31 06:5x) · P20261031_0634-3 e006_verdict 方向非正判定 NOT_ESTABLISHED 契約納入常規回歸（重覆單如實結案）
+- 主軸：ASSIGNMENT 主軸 3（效益差別驗證與「成效方向為正」判定防線）＋「不顯著或方向非正未建立」鐵律。
+- 做了：DECISION 重覆單如實結案、不重改測試檔｜本單為 P20261031_0618-3 同內容重排之重覆單，工作已由 round 501 commit 58c330d6 提交；本輪無新增程式碼改動（tests/test_vlab_tools.py 未動、git status 乾淨）；重讀行 2127-2144 確認測試體與工單逐條一致（mock A_vs_S A_only=10/S_only=0/p=0.001、5 斷言齊備）；工單追加結果 3 行並 mv 至 done/、doing/ 0 張。
+- 驗證：驗收鏈如實 rc=0（pytest 1 passed, 92 deselected in 0.05s；grep 命中行 2127）；測試體與工單逐條一致（state==NOT_ESTABLISHED、reason/note 字面、significant_at_alpha is True、not_worth_it is False）；本輪新增行無「信任／證明變好」。
+- 沒驗證：58c330d6/a14609bb/eca004c8/8f1b41cc CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
+- 下一步：監控 58c330d6/a14609bb/eca004c8/8f1b41cc CI 與 e006 進度/infra 重試；pg_grep 及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
