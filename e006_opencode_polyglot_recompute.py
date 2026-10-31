@@ -63,7 +63,7 @@ def main():
                 score_data = json.load(f)
                 if score_data.get("pass"):
                     pass_count += 1
-            n += 1
+            if not is_infra: n += 1
             
             if events_file.exists():
                 with open(events_file, 'r') as f:
