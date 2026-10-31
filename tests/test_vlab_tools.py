@@ -2047,3 +2047,20 @@ def test_audit_out_feeds_e004_verdict_chain(tmp_path: Path, capsys) -> None:
     assert cost["A_base"]["calls_per_success"] == 2.0      # audit 補齊（mock A：2 呼叫／800 tokens）
     assert cost["arms"]["C"]["over_2x_A_cost"] is False
     assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
+
+
+def test_e006_verdict_m_missing_evidence_unknown() -> None:
+    # 驗證 e006_verdict 在 M 臂（第二 agent 審查臂）配對顯著（M_only > A_only、p<alpha）但無
+    # 第二 agent 證據（audit_summary=None ⇒ events.jsonl 缺失或無實質 review 記錄）時，
+    # 假說狀態降級判定為 UNKNOWN（量不到，不是負結果）——多 agent 審查機制的邊界在回歸
+    # 測試中被守護：配對再顯著，量不到第二 agent 審查就不謊報成效。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # M 臂配對顯著：A_only=0, M_only=10, p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_M"] = {"pairs": 10, "A_only": 0, "M_only": 10, "mcnemar_p_two_sided": 0.001}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["hypotheses"]["H-review(M)"]["state"] == "UNKNOWN"
+    assert "無第二 agent 證據 ⇒ 降級「提示式自檢」、記 UNKNOWN" in r["hypotheses"]["H-review(M)"]["reason"]
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is False
