@@ -77,3 +77,9 @@
 - 驗證：改前驗收 grep 0 命中＋pytest rc=5（無收集，前提成立）；改後驗收 rc=0（-k 1 passed、最後一行 `.[100%]`，grep 命中行 2109）；全檔 92 passed rc=0（91+1）；git diff 1 檔 +18、+ 行無「信任／證明變好」（grep 0 命中）；commit cfd5ea35。
 - 沒驗證：cfd5ea35 CI 未出；本測試鎖判定契約（mock 資料）非實測；e006 170 格未完賽（C 臂 11/34），正式判定仍待全盤完賽。
 - 下一步：監控 cfd5ea35/482766df/1c46a428/c4672106/35aa4b9d CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+## round 499 (2026-10-31 06:2x) · P20261031_0618-1 e006 第 12 格 pg_grade_school C 臂真實用量同步至 disk_top_priority §1 追蹤時序（結案）
+- 主軸：ASSIGNMENT 🔴最優先（驗收 4(b) 實驗室格子 C 組用量）＋資深審查指示第 2 條。
+- 做了：ops/vlab/packets/disk_top_priority.md §1 追蹤時序行 150 +1/-1（標題「第 11 格 05:45」→「第 12 格 06:13」、C 臂 11→12 格、pg_go_counting 後追加 pg_grade_school vacant_home_bytes 58,767 B（57.4 KB，vacant_objects_bytes 31,795 B，ratio 0.000219，10/31 06:13 完賽）、min/med/max 統計與「12 格全在 256 MiB 穩態封頂」11→12）；外部副本 cp 同步；工單→done/、doing/ 0 張。
+- 驗證：改前驗收 grep 0 命中（前提成立）；數據本輪實核 cell.json（58767/31795、finished 2026-10-31T06:13:56+0000、vacant_sha=bf1a9f1a…、58767/268435456=0.000219、58767/1024=57.4 KB 自洽）；改後兩 grep 均命中行 150、diff 無輸出 rc=0（bit-identical）；med 121,652 沿用 repo 慣例 vs[len//2]（envelope_compliance.py:144，12 格 index 6=121652）；+ 行無「信任／證明變好」；commit e1715724。
+- 沒驗證：e1715724 CI 未出；第 13 格 pg_grep（06:23 完賽、152,604 B）不在本單範圍未同步；envelope_compliance 未重跑（新格 ratio 遠低於 0.096% 封頂口徑，沿用既有 PASS 口徑）；e006 170 格未完賽（C 臂 12/34），正式判定仍待全盤完賽。
+- 下一步：監控 e1715724/cfd5ea35/482766df/1c46a428/c4672106/35aa4b9d CI 與 e006 進度/infra 重試；pg_grep 及後續格照新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
