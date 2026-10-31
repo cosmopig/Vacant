@@ -1995,6 +1995,25 @@ def test_audit_out_feeds_verdict_audit_chain(tmp_path: Path, capsys) -> None:
     assert cost["arms"]["C"]["not_worth_it"] is False      # 未超標臂＝未建立，不是「不划算」
 
 
+def test_e006_verdict_confirmed_cost_unknown() -> None:
+    # 驗證 e006_verdict 在 C 臂 McNemar Holm 顯著且 C_only > A_only，但 A 臂成本缺失（0.0/0、
+    # 無 audit 可補）使 2×A 成本紅線量不到時，判定 H-acc 為 CONFIRMED_COST_UNKNOWN
+    # （顯著且方向為正，但成本紅線量不到——量不到，不是過、也不是違規）——成效與成本邊綁定判定契約。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    # C 臂配對顯著：A_only=0, C_only=10, p=0.001（Holm 後仍顯著）
+    rep["paired"]["A_vs_C"] = {"pairs": 10, "A_only": 0, "C_only": 10, "mcnemar_p_two_sided": 0.001}
+    # A 臂成本缺失：0.0/0 ⇒ 2×A 成本紅線量不到（audit_summary=None 無補齊）
+    rep["per_arm"]["A"]["calls_per_success"] = 0.0
+    rep["per_arm"]["A"]["tokens_per_success"] = 0
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["C"]["over_2x_A_cost"] is None  # 量不到：不判違規也不判過
+    assert r["hypotheses"]["H-acc"]["state"] == "CONFIRMED_COST_UNKNOWN"
+    assert "顯著且方向為正，但成本紅線量不到（A 臂成本缺失）" in r["hypotheses"]["H-acc"]["reason"]
+
+
 def test_audit_out_feeds_e004_verdict_chain(tmp_path: Path, capsys) -> None:
     # 審查指示第 1/3 條（e004/e006 收尾判定量具同族守護）鏈式契約：
     # opencode_cell_audit --out 落盤的 AUDIT.json（頂層 summary.per_arm）須能直接餵 e004_verdict
