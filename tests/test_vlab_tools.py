@@ -3019,3 +3019,27 @@ def test_e004_verdict_s_tokens_not_worth_it() -> None:
     assert r["hypotheses"]["H-stakes(a)"]["state"] == "NOT_ESTABLISHED"
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-stakes(a)"]["reason"]
     assert "利害 (a) 只是講、無真實後果；未建立 ≠「利害提示無用」（禁止這樣寫）" in r["hypotheses"]["H-stakes(a)"]["note"]
+
+
+def test_e006_verdict_m_tokens_not_worth_it() -> None:
+    # 驗證 e006_verdict：M 臂（多 agent）calls 未超標（12.0 = 1.2×A ≤ 2×A）但 tokens 超標
+    # （2500.0 = 2.5×A > 2×A 紅線）且成效未顯著提升（p=0.45、A_only=4 > M_only=2 方向非正）時：
+    # cost_redline_2xA.arms["M"].over_2x_A_cost 精確判定為 True（tokens 單一維度超標亦嚴格
+    # 守護成本紅線）、not_worth_it 精確判定為 True（成本必須與成效一起報告）、H-review(M) 假說態為
+    # UNKNOWN（無第二 agent 證據、記 UNKNOWN；量不到，不是負結果）——工單 P20261031_1242-2
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 15, "A_only": 4, "M_only": 2, "mcnemar_p_two_sided": 0.45}
+    rep["per_arm"]["A"] = {"calls_per_success": 10.0, "tokens_per_success": 1000.0}
+    rep["per_arm"]["M"] = {"calls_per_success": 12.0, "tokens_per_success": 2500.0}
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["M"]["calls_vs_A"] == 1.2
+    assert r["cost_redline_2xA"]["arms"]["M"]["tokens_vs_A"] == 2.5
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is True  # tokens 單一維度超標亦守紅線
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is True  # 成本超標且未顯著提升 ⇒ 不划算
+    m = r["hypotheses"]["H-review(M)"]
+    assert m["state"] == "UNKNOWN"  # 無第二 agent 證據 ⇒ 記 UNKNOWN（量不到，不是負結果）
+    assert "無第二 agent 證據" in m["reason"] and "記 UNKNOWN" in m["reason"]
+    assert m["second_agent"]["evidence_present"] is False
