@@ -3836,3 +3836,35 @@ def test_e006_verdict_s_confirmed_cost_unknown() -> None:
     assert r["hypotheses"]["H-stakes(a)"]["state"] == "CONFIRMED_COST_UNKNOWN"  # 成效建立但成本失聯，不得升格 CONFIRMED
     assert "顯著且方向為正，但成本紅線量不到（S 臂成本缺失）" in r["hypotheses"]["H-stakes(a)"]["reason"]
     assert "利害 (a) 只是講、無真實後果" in r["hypotheses"]["H-stakes(a)"]["note"]  # 鐵律 KS-1 警語保留
+
+
+def test_growth_report_exact_cap_plus_one_byte_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_1635-1（ASSIGNMENT 🔴最優先 驗收(a)：長效監度量具守護）：最新點
+    # total 恰好超 256 MiB 穩態封頂 1 byte（268,435,457 B＝268,435,456 B＋1 B、壓線超
+    # 1 byte）、trace 32 MiB 在 64 MiB 上限內、gc 健全（status=ok、target_reached=true）
+    # 時，封頂/上限判定是嚴格大於（>）——超 1 byte 就是超，growth_report.report() 須
+    # 精確判 verdict=FAIL（超標 1 byte 絕不偽判 PASS）、
+    # peak_overrun.over_stable_envelope 為 True（峰值超封頂）、reason 精確指認
+    # 「latest total 268435457 B > 穩態封頂 268435456 B」；CLI --json 退出碼 1。
+    # 與壓線合規測試（1604-5）構成完整的對稱精確邊界守護。
+    seq_dir = tmp_path / "home"
+    seq_dir.mkdir()
+    # 2 點跨 25h（≥ MIN_EVIDENCE_HOURS=20h 門檻）；最新點超封頂 1 byte、trace 未超上限
+    p1 = {"ts": "2026-10-30T00:00:00+0000", "total_bytes": 200 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-31T01:00:00+0000", "total_bytes": 256 * 1024 * 1024 + 1,  # 268,435,457 B＝封頂＋1
+          "per_dir_bytes": {"trace": 32 * 1024 * 1024},  # 32 MiB < 64 MiB 上限，未超
+          "gc_last": {"status": "ok", "target_reached": True}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1) + "\n" + json.dumps(p2) + "\n", encoding="utf-8")
+
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"  # 超封頂 1 byte＝超標，絕不偽判 PASS
+    assert r["peak_overrun"]["over_stable_envelope"] is True  # 峰值超封頂
+    assert "latest total 268435457 B > 穩態封頂 268435456 B" in r["reason"]  # reason 精確指認超標點
+
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir),
+                             "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1  # FAIL 時 CLI 退出碼 1
