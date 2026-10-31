@@ -78,7 +78,7 @@ def test_envelope_compliance_selftest() -> None:
     assert envelope_compliance.selftest() == 0
 
 
-def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path) -> None:
+def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path, capsys) -> None:
     """growth_report（主軸 2「一天長多少」量具）：selftest 紅綠對照＋判定口徑。
 
     紅燈（不能假 PASS）：
@@ -127,6 +127,22 @@ def test_growth_report_selftest_and_verdict_semantics(tmp_path: Path) -> None:
     assert r["verdict"] == "PASS", r
     # 24h 視窗最大增長：00:00→12:00(+10MiB)、12:00→02:00(+10MiB)；00:00→02:00(+26h) 出窗
     assert r["max_24h_growth_bytes"] == 10 * 1024 * 1024, r
+
+    # CLI 回歸：--selftest / 判定退出碼（0=PASS、1=FAIL或UNKNOWN）/ --out 落盤
+    capsys.readouterr()  # 排空殘留
+    assert growth_report.main(["--selftest"]) == 0
+    assert "selftest: OK" in capsys.readouterr().out
+    # FAIL：上一段「over」序列（最新點超穩態封頂）→ 退出碼 1
+    assert growth_report.main(
+        ["--home", str(tmp_path / "over"), "--ops-data", str(tmp_path / "nope2"), "--json"]
+    ) == 1
+    # PASS＋--out 落盤：檔存在且 verdict == PASS
+    gr_out = tmp_path / "gr_out.json"
+    assert growth_report.main(
+        ["--home", str(tmp_path / "ok"), "--ops-data", str(tmp_path / "nope2"), "--out", str(gr_out)]
+    ) == 0
+    assert gr_out.is_file()
+    assert json.loads(gr_out.read_text(encoding="utf-8"))["verdict"] == "PASS"
 
 
 def test_envelope_compliance_verdicts_infra_skip_and_exit_codes(tmp_path: Path) -> None:
