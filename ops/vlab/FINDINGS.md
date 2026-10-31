@@ -392,7 +392,7 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **預註冊**：封包 `ops/vlab/packets/e006_opencode_polyglot.md`（發射前寫死判準）——4 假設 H-acc / H-review(H) / H-review(M) / H-stakes(a)、Holm–Bonferroni（4 組 A_vs_X）α=0.05 為確認線＋2×A 成本紅線；M 臂需 events.jsonl 有真第二 agent 證據，缺則降級記 UNKNOWN（不是負結果）；infra 格永不回填。
 **口徑**：此條僅為發射與排程事實；排程中、無結果數據、不預填、不宣稱；全盤完賽後以 `opencode_cell_audit.py` 審計 170 格、`e006_verdict.py` 依封包 §3 判定（數字以 REPORT.json 為準、成本與結果同報）。
 
-## 2026-10-31 · 主軸 2 · OpenCode 真實 agent C 臂用量實測（e003/e005/e006 全數通過 256 MiB 穩態封頂，最高 175.5 KB，≤ 0.07%）
+## 2026-10-31 · 主軸 2 · OpenCode 真實 agent C 臂用量實測（e003/e005/e006 全數通過 256 MiB 穩態封頂，最高 255.7 KB，≤ 0.096%）
 
 **客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨三個 run 共 **17 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 14 格，FAIL 0、NA 0）：
 - e003_opencode_smoke（2 格）：pg_affine_cipher **65,551 B（64.0 KB）**、pg_pig_latin **167,361 B（163.4 KB）**；
