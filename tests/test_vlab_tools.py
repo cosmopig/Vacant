@@ -3431,3 +3431,20 @@ def test_growth_report_boundary_span_20h_pass(tmp_path: Path, capsys) -> None:
     capsys.readouterr()  # 排空殘留
     rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
     assert rc == 0
+
+
+def test_e006_verdict_h_missing_paired_not_worth_it_none() -> None:
+    # 驗證 e006_verdict 在 H 臂（審查提示臂）配對缺失（未測量 A_vs_H）但該臂成本超標（25.0=2.5×A）時，
+    # 通過率提升根本未測（量不到），不能偽判為「未顯著提升」，not_worth_it 必須誠實記為 None，
+    # H 假說 state=="UNKNOWN" 且理由載明「配對缺失、未測」——成效與成本綁定邊界在審查提示臂配對缺失時不偽判
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    del rep["paired"]["A_vs_H"]  # 配對缺失（未測）
+    rep["per_arm"]["H"]["calls_per_success"] = 25.0  # 2.5×A 成本超標
+
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["H"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is None  # 成效未測 ⇒ 不判「不划算」也不判「划算」
+    assert r["hypotheses"]["H-review(H)"]["state"] == "UNKNOWN"
+    assert "配對缺失、未測" in r["hypotheses"]["H-review(H)"]["reason"]
