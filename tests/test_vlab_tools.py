@@ -144,15 +144,23 @@ def test_envelope_compliance_verdicts_infra_skip_and_exit_codes(tmp_path: Path) 
     mk("c_noev", {"arm": "C"})  # 無 vacant_home_bytes → NO_EVIDENCE，不判 FAIL
     mk("a_na", {"arm": "A"})    # 設計上沒裝 Vacant 的臂 → NA
     mk(".infra-c_x", {"arm": "C", "vacant_home_bytes": env + 999})  # 重試副檔 → 跳過
+    mk("suite-task-opencode-M-r1", None)  # 未完成格（無 cell.json），arm 由目錄名解析
 
     out = envelope_compliance.evaluate(tmp_path, "exp_env", env, "test")
     by = {c["cell"]: c for c in out["cells"]}
-    assert out["n_cells"] == 4  # infra 副檔留痕、不計入
+    assert out["n_cells"] == 5  # infra 副檔留痕、不計入；未完成格計入（NA 不影響判定）
     assert by["c_pass"]["compliance"] == "PASS"
     assert by["c_fail"]["compliance"] == "FAIL"
     assert by["c_noev"]["compliance"] == "NO_EVIDENCE"
     assert by["a_na"]["compliance"] == "NA"
     assert by[".infra-c_x"].get("skipped")  # 不可被計入任何判定
+    # 未完成格：arm 由目錄名（<suite>-<task>-<agent>-<arm>-<rep> 倒數第二 token）解析，
+    # 不得落 by_arm["?"]（77f0823f 前的行為；回歸鎖）
+    assert by["suite-task-opencode-M-r1"]["arm"] == "M"
+    assert by["suite-task-opencode-M-r1"]["state"] == "incomplete"
+    assert by["suite-task-opencode-M-r1"]["compliance"] == "NA"
+    assert "M" in out["by_arm"]
+    assert "?" not in out["by_arm"]
     assert out["verdict"] == "FAIL"
     assert out["by_arm"]["C"]["verdict"] == "FAIL"
     assert out["by_arm"]["A"]["verdict"] == "NA"
