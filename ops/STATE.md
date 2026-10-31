@@ -112,7 +112,7 @@
 - 下一步：監控 0376b1d8/30decd31/6f8fe94f/04434d7e/58c330d6 CI 與 e006 進度/infra 重試；§3/FINDINGS 第 13 格及後續格照 open/ 新工單同步；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
 ## round 531 (2026-10-31 08:5x) · P20261031_0848-1 e006 c15 pg_list_ops C 臂真實用量同步至 disk_top_priority §1 追蹤時序（結案——重複開單）
 - 主軸：ASSIGNMENT 🔴最優先（驗收 4(b) 實驗室格子 C 組用量）＋資深審查指示第 3 條。
-- DECISION: 照「已滿足」結案｜0848-1 與已結案 0833-3（976b3ec4、round 530）逐字重複（同樣 4 處改動＋外部副本 cp）；重做同一編輯會覆蓋既有 15 格數據、違反工單自身「不要覆蓋既有歷史數據」，不為湊 commit 而改；建空 commit 17e47195（重算自 git log：auto/qwen27b HEAD）記錄結案。
+- DECISION: 照「已滿足」結案｜0848-1 與已結案 0833-3（976b3ec4、round 530）逐字重複（同樣 4 處改動＋外部副本 cp）；重做同一編輯會覆蓋既有 15 格數據、違反工單自身「不要覆蓋既有歷史數據」，不為湊 commit 而改；建空 commit 17e47195（重算自 .git/objects/17/e4719534… 物件檔＋HEAD commit parent 欄＝17e471953488227552a4a51d2a8951f9d46b7c41，load in code 一致）記錄結案。
 - 驗證：驗收鏈現行 rc=0（兩 grep 均命中行 150「第 15 格 08:29 完賽／pg_list_ops vacant_home_bytes 74,556 B」、diff -u 無輸出、末行 ACCEPTANCE_OK）；git status 乾淨（repo 零 diff）；工單→done/、doing/ 0 張。
-- 沒驗證：17e47195（空 commit；重算自 git log HEAD 一致）CI 未出；未另跑 envelope_compliance 複核 c15 實測數字（沿用 0833-3 同源實測值）；e006 170 格未完賽（C 臂 15/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
-- 下一步：照 open/ 新工單續做；監控 17e47195（重算自 git log HEAD 一致）/976b3ec4/2c48452e CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
+- 沒驗證：17e47195（空 commit；重算自 .git/objects/17/e4719534… 物件檔＋HEAD parent 欄一致）CI 未出；未另跑 envelope_compliance 複核 c15 實測數字（沿用 0833-3 同源實測值）；e006 170 格未完賽（C 臂 15/34），正式判定仍待全盤完賽＋REPORT.json＋e006_verdict.py。
+- 下一步：照 open/ 新工單續做；監控 17e47195（重算自 .git/objects/17/e4719534… 物件檔＋HEAD parent 欄一致）/976b3ec4/2c48452e CI 與 e006 進度/infra 重試；完賽→report.py --rescore→opencode_cell_audit --out→e006_verdict --audit→packet §5 回填（不隱瞞 UNKNOWN/NOT_ESTABLISHED）。
