@@ -2543,3 +2543,31 @@ def test_e004_verdict_h_confirmed() -> None:
     assert r["hypotheses"]["H-review(H)"]["cost_over_2x_A"] is False
     # 成本合格且顯著提升 ⇒ 不是「不划算」
     assert r["cost_redline_2xA"]["arms"]["H"]["not_worth_it"] is False
+
+
+def test_e004_verdict_m_with_evidence_confirmed() -> None:
+    # 驗證 e004_verdict 在 M 臂（第二 agent 審查臂）具備第二 agent 執行證據（verified=10 ≥ 1）
+    # 且配對顯著（p=0.005、Holm 校正後 0.02 < 0.05、M_only=10 > A_only=1）
+    # 且成本合格（A calls=10.0、M calls=12.0 = 1.2×A ≤ 2×A 紅線、mock tokens 0.9×A 亦 ≤ 2×A）時，
+    # H-review(M) 判定 state=="CONFIRMED" 且 second_agent.evidence_present is True——
+    # 具備真實第二 agent 證據且成效顯著之正向判定防線鎖進 e004 常規回歸（工單 P20261031_0952-2）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # M 臂配對顯著（p=0.005，Holm 校正後仍 < 0.05；M_only=10 > A_only=1 方向為正）
+    rep["paired"]["A_vs_M"] = {"pairs": 20, "A_only": 1, "M_only": 10, "mcnemar_p_two_sided": 0.005}
+    # 成本合格：A 臂 calls=10.0（mock tokens=1000.0）；M 臂 calls=12.0（1.2×A ≤ 2.0 紅線、mock tokens=900.0 = 0.9×A）
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["M"]["calls_per_success"] = 12.0
+
+    # 第二 agent 證據：verified=10（≥1 ⇒ evidence_present）；10 格未量到（UNKNOWN 欄位，不阻擋判定）
+    audit = e004_verdict._mock_audit(verified=10)
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=audit)
+    # 顯著＋方向為正＋成本 ≤ 2×A（calls 1.2×、tokens 0.9×皆量到）＋第二 agent 證據在 ⇒ 已確認
+    assert r["hypotheses"]["H-review(M)"]["state"] == "CONFIRMED"
+    assert "Holm 後顯著、X_only > A_only、成本 ≤ 2×A" in r["hypotheses"]["H-review(M)"]["reason"]
+    # 證據欄位：evidence_present 為 True（audit_summary 含 M 臂 verified_cells=10 ≥ 1）
+    assert r["hypotheses"]["H-review(M)"]["second_agent"]["evidence_present"] is True
+    assert r["hypotheses"]["H-review(M)"]["cost_over_2x_A"] is False
+    # 成本合格且顯著提升 ⇒ 不是「不划算」
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is False
