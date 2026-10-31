@@ -2743,3 +2743,21 @@ def test_e006_verdict_c_not_worth_it() -> None:
     # 不顯著（或方向非正）⇒ 未建立（不是負結果）
     assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e006_verdict_m_not_worth_it() -> None:
+    # 臂 M（多 agent）成本超標（mock calls 30.0 = 3.0×A，超 2×A 紅線）且未顯著提升（A_only=4 > M_only=2、p=0.45）時，
+    # over_2x_A_cost／not_worth_it 精確判定 True、H-review(M) 態 UNKNOWN（第二 agent 證據仍缺；量不到，不是負結果）——工單 P20261031_1053-4。
+    from ops.vlab.tools import e006_verdict
+
+    rep = e006_verdict._mock_report()
+    rep["paired"]["A_vs_M"] = {"pairs": 15, "A_only": 4, "M_only": 2, "mcnemar_p_two_sided": 0.45}
+    rep["per_arm"]["A"]["calls_per_success"] = 10.0
+    rep["per_arm"]["M"]["calls_per_success"] = 30.0
+    r = e006_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is True
+    assert r["cost_redline_2xA"]["arms"]["M"]["not_worth_it"] is True   # 成本超標且未顯著提升 ⇒ 不划算（成本必須與成效一起報告）
+    m = r["hypotheses"]["H-review(M)"]
+    assert m["state"] == "UNKNOWN"                                        # 第二 agent 證據仍缺 ⇒ 記 UNKNOWN（不計臂失敗）
+    assert "無第二 agent 證據" in m["reason"] and "記 UNKNOWN" in m["reason"]
+    assert m["second_agent"]["evidence_present"] is False
