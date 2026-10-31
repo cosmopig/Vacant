@@ -2608,3 +2608,24 @@ def test_e004_verdict_direction_negative_not_established() -> None:
     assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is True
     assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
+
+
+def test_e004_verdict_not_significant_not_established() -> None:
+    # 驗證 e004_verdict 在 C 臂配對方向為正（C_only=6 > A_only=2）但 McNemar Holm-adjusted p 值未達顯著
+    # （p_raw=0.20、m=4 Holm 校正後 0.60 ≥ 0.05）時，H-acc 必須記 NOT_ESTABLISHED（未建立，不是負結果）、
+    # 理由含「不顯著（或方向非正）⇒ 未建立（不是負結果）」、significant_at_alpha is False、
+    # 成本量得到且未破 2×A 紅線時 not_worth_it is False（不是「不划算」）——
+    # 未達顯著絕不誤發 CONFIRMED 之安全判定防線鎖進 e004 常規回歸（工單 P20261031_1007-3）。
+    from ops.vlab.tools import e004_verdict
+
+    rep = e004_verdict._mock_report()
+    # C 臂方向為正（C_only=6 > A_only=2）但 p_raw=0.20：m=4 Holm 校正後 0.60 ≥ 0.05 ⇒ 未達顯著
+    rep["paired"]["A_vs_C"] = {"pairs": 20, "A_only": 2, "C_only": 6, "mcnemar_p_two_sided": 0.20}
+    # 成本量得到且未破紅線：mock 預設 A calls=10.0/tokens=1000.0、C calls=9.0(0.9×A)/tokens=900.0(0.9×A)
+    r = e004_verdict.evaluate_hypotheses(rep, audit_summary=None)
+    # 方向為正但未達顯著 ⇒ 絕不 CONFIRMED，必須記 NOT_ESTABLISHED（未建立，不是負結果）
+    assert r["hypotheses"]["H-acc"]["significant_at_alpha"] is False
+    assert r["hypotheses"]["H-acc"]["state"] == "NOT_ESTABLISHED"
+    assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in r["hypotheses"]["H-acc"]["reason"]
+    # 成本 ≤ 2×A（0.9×A）⇒ 不是「不划算」（not_worth_it 為 False，不是 None）
+    assert r["cost_redline_2xA"]["arms"]["C"]["not_worth_it"] is False
