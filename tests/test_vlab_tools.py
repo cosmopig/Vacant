@@ -1138,6 +1138,33 @@ def test_growth_report_cli_missing_sources_out_file(tmp_path: Path) -> None:
     assert data["sources"] == []
 
 
+def test_growth_report_gc_target_not_reached_fail(tmp_path: Path, capsys) -> None:
+    # P20261031_0358-4（ASSIGNMENT 🔴最優先 驗收條件 3「超預算時 GC 刪到預算以下；刪掉的
+    # 東西追緝時回 UNKNOWN、不崩、不當 PASS」＋驗收 4(a)「一天長多少」長效監測量具守護）：
+    # 序列證據足（2 點跨 25h ≥ 20h 門檻）、最新點用量在封頂內，但最新 gc 點
+    # status=ok 而 target_reached=false（回收未證實在真實使用裡生效）時，
+    # growth_report.report（L195-196）須判 verdict=FAIL 且理由載明「target_reached 非 true」；
+    # main 帶 --json 時以 exit code 1 安全退出——不崩潰、不假 PASS。
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    p1 = {"ts": "2026-10-29T00:00:00+00:00", "total_bytes": 10 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 5 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": True}}
+    p2 = {"ts": "2026-10-30T01:00:00+00:00", "total_bytes": 12 * 1024 * 1024,
+          "per_dir_bytes": {"trace": 6 * 1024 * 1024},
+          "gc_last": {"status": "ok", "target_reached": False}}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps(p1, ensure_ascii=False) + "\n" + json.dumps(p2, ensure_ascii=False) + "\n",
+        encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "FAIL"
+    assert "target_reached 非 true" in r["reason"]
+    capsys.readouterr()
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"),
+                             "--json"])
+    assert rc == 1
+
+
 def test_p02_carm_audit_cli_no_matching_cells_error(tmp_path: Path, capsys) -> None:
     # P20261030_1717-3（ASSIGNMENT 主軸 3：C 臂記責完整性量具防禦契約）：
     # 實驗目錄存在但經 --suite 過濾後無相符題目 cell 時，p02_carm_audit.main
