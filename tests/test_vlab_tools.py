@@ -1563,6 +1563,41 @@ def test_opencode_cell_audit_incomplete_cells_not_bad(tmp_path: Path, capsys) ->
     assert out["n_cells"] == 1 and out["cells"][0]["state"] == "incomplete"
 
 
+def test_opencode_cell_audit_c_arm_missing_trace_chain_bad(tmp_path: Path, capsys) -> None:
+    # 審查發現缺陷：C 臂有 vacant_home.tgz 但缺少 trace 記錄（chain.ndjson 缺失或無法讀取）時，
+    # 審計量具必須嚴格記 ok=False、unknown 含 "trace missing (chain.ndjson unreadable or absent)"、
+    # 計入 bad 清單且 main 回傳 exit 1，防範 C 臂 trace 鏈缺失被靜默放行。
+    import tarfile
+    from ops.vlab.tools import opencode_cell_audit
+
+    c_runs = tmp_path / "c_runs_notrace"
+    c_runs.mkdir()
+    cell = c_runs / "polyglot_py-task2-opencode-C-r1"
+    cell.mkdir()
+    (cell / "cell.json").write_text(json.dumps({"arm": "C", "agent_rc": 0, "wall_s": 10.0}), encoding="utf-8")
+    (cell / "events.jsonl").write_text(
+        json.dumps({"type": "step_finish", "part": {"type": "step-finish", "tokens": {"total": 100}}}) + "\n",
+        encoding="utf-8")
+    (cell / "score.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+
+    # 建立有 hooks events 但刻意不建 chain.ndjson 的 vacant_home.tgz
+    home = tmp_path / "home_notrace"
+    (home / ".vacant/intake/hooks").mkdir(parents=True)
+    (home / ".vacant/intake/hooks/events.jsonl").write_text(
+        json.dumps({"event": "prompt", "action": "allow"}) + "\n",
+        encoding="utf-8")
+    with tarfile.open(cell / "vacant_home.tgz", "w:gz") as tf:
+        tf.add(home, arcname=".")
+
+    capsys.readouterr()
+    rc = opencode_cell_audit.main(["--runs-dir", str(c_runs), "--json"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["bad"] == ["polyglot_py-task2-opencode-C-r1"]
+    assert out["cells"][0]["ok"] is False
+    assert "trace missing (chain.ndjson unreadable or absent)" in out["cells"][0]["unknown"]
+
+
 def test_e004_verdict_selftest_and_cli(tmp_path: Path, capsys) -> None:
     # P20261030_2142-1（ASSIGNMENT「研發工具需納入回歸測試」）：e004 預註冊假說判定量具 e004_verdict
     # （523236d3）納入常規回歸——--selftest、--report/--audit/--json CLI、四項假說判定結構與 M 臂第二 agent 證據。
