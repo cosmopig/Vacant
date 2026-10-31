@@ -3299,3 +3299,27 @@ def test_e004_verdict_h_tokens_not_worth_it() -> None:
     h = r["hypotheses"]["H-review(H)"]
     assert h["state"] == "NOT_ESTABLISHED"  # 未建立 ≠ 負結果
     assert "不顯著（或方向非正）⇒ 未建立（不是負結果）" in h["reason"]
+
+
+def test_growth_report_insufficient_span_unknown(tmp_path: Path, capsys) -> None:
+    # 驗證 growth_report：序列點數滿足（2 點、gc_last 均 ok），但時間跨度僅 10h（<20h 門檻）時：
+    # report() 精確判 verdict="UNKNOWN"、reason 載明「還量不出來」與「門檻 ≥2 點且 ≥20h」
+    #（觀察時長不足 ⇒ 長多少量不出來，不偽判 PASS 也非 FAIL），CLI --json 以 exit code 1 安全退出——
+    # 真機用量量具的誠實邊界——工單 P20261031_1313-5
+    seq_dir = tmp_path / "seq"
+    seq_dir.mkdir()
+    gc_ok = {"status": "ok", "target_reached": True}
+    (seq_dir / "growth.jsonl").write_text(
+        json.dumps({"ts": "2026-10-28T00:00:00+0000", "home": str(tmp_path),
+                    "total_bytes": 20 * 1024 * 1024, "per_dir_bytes": {"trace": 10 * 1024 * 1024},
+                    "gc_last": gc_ok}) + "\n"
+        + json.dumps({"ts": "2026-10-28T10:00:00+0000", "home": str(tmp_path),
+                      "total_bytes": 30 * 1024 * 1024, "per_dir_bytes": {"trace": 15 * 1024 * 1024},
+                      "gc_last": gc_ok}) + "\n", encoding="utf-8")
+    r = growth_report.report(home=seq_dir, ops_data=tmp_path / "none")
+    assert r["verdict"] == "UNKNOWN", r
+    assert "還量不出來" in r["reason"], r
+    assert "門檻 ≥2 點且 ≥20h" in r["reason"], r
+    capsys.readouterr()  # 排空殘留
+    rc = growth_report.main(["--home", str(seq_dir), "--ops-data", str(tmp_path / "none"), "--json"])
+    assert rc == 1
