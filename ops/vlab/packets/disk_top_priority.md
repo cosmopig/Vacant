@@ -147,6 +147,7 @@
   最新 **59,098,678 B（56.4 MiB）≤ 256 MiB 穩態封頂（22.0%）**、
   24h 視窗最大增長 17,054,166 B（16.3 MiB）、最新 trace **40,504,181 B（38.6 MiB ≤ 64 MiB）**、trace 443 blobs、
   `gc_last` status=ok＋target_reached=true；verdict **PASS** rc=0（續記，不覆蓋 20:59 之 48h 里程碑紀錄）。
+- **10/31（00:0x 續記）**：e006 OpenCode 五臂全盤 C 臂前 2 格實測——pg_affine_cipher vacant_home_bytes 49,903 B（48.7 KB）、pg_beer_song 116,444 B（113.7 KB），vacant_objects_bytes 分別為 25,829 B 與 76,219 B，ratio 分別為 0.000186 與 0.000434，envelope_compliance verdict 均為 PASS；2 格全在 256 MiB 穩態封頂的 0.043% 以內。
 
 ## 2. 四條驗收條件對現狀
 
