@@ -26,3 +26,15 @@ C 組 `~/.vacant` 在 repo 級工作區（299M、6,541 檔案）上的真實用�
 **驗收線**（見 `ops/vlab/packets/e010_bigwork.md` §5）：C-r1 `vacant_home_bytes`
 ≤256MiB 穩態封頂、且 <0.5× workspace（149.5M＝299M÷2，對已記錄之 du 值 299M 的純算術；stage 實值 300M 時為 150M）；envelope_compliance verdict=PASS；
 任一量不到＝UNKNOWN，不寫 PASS。
+
+## round 841 重驗（2026-11-01；e010 開跑前）
+- venv 凍結核實：`/srv/vlab/vacant/683bbb83b277d39beb8f4d3fb61c7eeb99e9064f/venv/pyvenv.cfg`＝
+  `include-system-site-packages = false`（舊行為，cell.py 改動前建好）；`cell.py:41` early-return
+  保證已建 venv 不會被重建（重建將走 `cell.py:56` `--system-site-packages`，會污染 e010 量具）。
+- 驗收量具重驗：`ops/vlab/tools/envelope_compliance.py --selftest` 16/16 PASS（本輪重跑）；
+  e008 dry-run C 30/30 PASS（max 231,785 B≈0.22 MiB；envelope_source＝
+  `vacant_network.retention.STABLE_ENVELOPE_BYTES` 268,435,456 B）——量具在真實數據上可用；
+  <150 MiB 口徑（0.5×workspace）以 `--envelope 157286400` 可跑。
+- 排程與磁碟：labd PAR=1＋queue 串行（`/srv/vlab/labd.log:100-101` 13:36:18）→ e010 在 e009
+  完賽後跑；free 5.6G ≥ 4G 護欄（`/srv/vlab/state/disk.json` 19:1x `paused=false`）。
+- 結論：§5 驗收線的量具與前提就緒；e010 完賽前一切判定維持 UNKNOWN。
