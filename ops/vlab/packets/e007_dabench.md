@@ -75,6 +75,11 @@ DABench 30 道資料分析題上，裝 Vacant 是否改變通過率？成本多�
 - 成本（與結果同報）：A 12.9 呼叫／194,278 tokens／mean wall 71.9 s；C 20.81 呼叫（1.61×A）／389,494 tokens（2.00×A）／mean wall 121.2 s（重試循環開銷，e007 smoke 初探同向）。
 - 判定（依預註冊解讀分支 1/3）：此 30 題資料分析通用任務上**通用任務無可測影響**（p=0.5 未顯著、唯二分歧對為跨跑隨機差異、非機制歸因）、邊際收益遞減，**不發射 databench 同設計複測**，資源轉主軸 2。
 
+### 5.2 A_only 2 格逐格因果複查（2026-11-01 round 825；只讀既有證據 score.json／delivery.json／delivery.md／cell.json、0 新算力、不改變 §5.1 判定）
+- dab_039（A 過、C 掛 missing 0/1）：C 格 delivery.md（Vacant 交付筆記）已記「Still open after 2 round(s): step 6 (python3 solution.py) had failed」等 4 條失敗執行、「answer.txt (asked for in the request) did not exist」——偵測命中，但 mode=evidence 為建議級、不阻擋回合結束 → 計分 missing（C 格 27 呼叫／977,053 input tokens／448.9 s）。§5.1 分支 3「events.jsonl 無 kickback/unsourced」為真但不完整：偵測結果在 delivery.json／delivery.md，不在 events.jsonl。
+- dab_378（A 過 8/8、C 掛 6/8 psaq 0.75）：C 格 delivery.md「8 checked — 8 found in what the task read or ran」——值溯源檢查全過，但 scorer 仍判 2/8 值錯。溯源建立「值有出處」，不建立「值正確」（H-2 同形邊界）。
+- 含義：§5.1「無可測影響」判定不變；機制的兩條能力邊界由此具體化（過程偵測＝記錄層無阻擋力；值溯源＝非正確性檢查）。主軸 4 若再投入，應測「阻擋級」（controller 形態能否擋下 dab_039 型缺失交付）而非同設計複測——需新預註冊＋審查工單，本輪不發射（e009 運行中＋e010 排隊、不搶占 1004）。
+
 ## 6. 發射與驗收
 - smoke `e007_dabench_smoke`（4 格：dab_035/dab_039 × A/C）：
   過關＝非全 infra、非全逾時、≥1 格出分（pass 或 fail 皆可）→ 發 e008 full；

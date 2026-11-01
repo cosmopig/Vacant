@@ -449,3 +449,11 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **用量**（主軸 2 客觀用量事實）：C 臂 30 格 vacant_home_bytes min 33,994 B、max 231,785 B（dab_732）、最高佔封頂 0.0863% ≤ 256 MiB 穩態封頂、envelope_compliance verdict=PASS（見 2026-10-31 主軸 2 條目 69 格口徑）。
 **判定結論**（依預註冊解讀分支 1/3）：純究責機制因缺乏內容語意判定能力，在通用資料分析任務上無顯著成效（通用任務無可測影響）；C 臂成本 1.61×~2.00× A 臂（重試成本翻倍）；邊際收益遞減，不發射 databench 同設計複測，資源轉主軸 2。
 **口徑**：可究責／有根據／誠實記錄；不寫「信任」、不寫「證明變好」；p=0.5 低力是「未顯著」，不是「證明等價」、也不是負結果；模型為本地量化（H-12 類邊界），結果不外推到其他模型／預算／題庫。
+
+## 2026-11-01 · 主軸 4 · e008 A_only 2 格逐格因果複查（為何通用資料分析任務上無成效：1 格檢測命中但僅建議級、1 格溯源通過但答案仍錯）
+**規格與來源**：同 e008 全量條目（本檔 2026-11-01 主軸 4 條目；/srv/vlab/runs/e008_dabench_pi_AC）；本條目只讀既有證據（score.json／delivery.json／delivery.md／cell.json）做 A_only 2 格（dab_039、dab_378）的逐格複查，0 新算力、不改變 e008 判定；補充「分支 3」只查了 events.jsonl 的 kickback/unsourced 事件（確無），未讀 delivery.json／delivery.md（Vacant 交付筆記）——本條目補上這塊。
+**dab_039（A 過、C 掛：status=missing 0/1）**：C 格 delivery.md 明確記錄「Still open after 2 round(s): step 6 (python3 solution.py) had failed」等 4 條失敗執行、「answer.txt (asked for in the request) did not exist」——計分器判 missing，而 Vacant 交付筆記早已把「answer.txt 不存在」寫進 Not verified。機制偵測命中，但 mode=evidence 為建議級（筆記結語自述「it does not say whether the answer is right」），不阻擋交付；agent 照常結束回合（Turn ended 2026-10-31T23:40:29）→ C 格 27 呼叫／977,053 input tokens／448.9 s 後計分 missing。
+**dab_378（A 過 8/8、C 掛 6/8 psaq 0.75）**：C 格 delivery.md「Values in the lines written this turn: 8 checked — 8 found in what the task read or ran」——值溯源檢查全過（8 值都能追到 agent 讀過／跑過的資料），但隱藏計分器仍判 2/8 值錯。這是「通過檢查 ≠ 答案正確」的邊界（H-2 同形）：溯源建立「值有出處」，不建立「值正確」。
+**因果歸納**（精確化 e008 條目「缺乏內容語意判定能力」一句）：在兩個分歧格中——(1) dab_039：機制的過程偵測命中（失敗執行＋缺失交付物）但停在記錄層，無阻擋力；(2) dab_378：機制的正向檢查（值溯源）通過，內容仍錯。30 任務中 28 格 A/C 結果相同，2 格分歧均 A 勝；C 臂成本 1.61× 呼叫／2.00× tokens／1.69× wall（每成功）。
+**口徑**：可說——DABench 30 任務上，accountability 未改變結果（2 格分歧均 A 勝、p=0.5 低力），且其唯一「抓到」的一格（dab_039）停在記錄層而非阻擋層；另一格（dab_378）顯示溯源檢查通過不等於正確。不可說——不能斷言「Vacant 對所有通用任務無用」（單模型、單 harness、30 題、H-12 邊界）；dab_039 的建議級偵測是「機制在場且命中」，不是「機制無用」——它記下了問題，但該層設計上不攔截（見 AGENTS.md §1：enforcement 在 acceptance 時、需 controller 形態才對子行程有束縛力）。
+**對下一步的意義**（不改變 e008 預註冊決定）：「不發射 databench 同設計複測」仍成立；若主軸 4 再投入，應測「阻擋級」（controller／門控能否擋下 dab_039 型缺失交付）而非再加一題庫同設計重複——那是新實驗、需新預註冊與審查工單，本輪不發射（1004 上 e009 運行中＋e010 排隊中，不搶占）。
