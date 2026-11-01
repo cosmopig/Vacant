@@ -389,7 +389,12 @@ def _sweep_to_target(
 
 
 def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
-    """回傳 `(釋放位元組數, 刪除檔案數)`。"""
+    """回傳 `(釋放位元組數, 刪除檔案數)`。
+
+    誠實約束（round 826 發現①）：只計「確實消失」的位元組。刪除失敗（unlink/rmtree
+    被 OSError 吞掉）⇒ 回傳 `(0, 0)`，寧少報、下次 gc 再收斂，絕不高估 freed
+    而誤報 target_reached（872M 實測首跑曾高估 7,527,563 B）。
+    """
     if not p.exists() and not p.is_symlink():
         return 0, 0
     if p.is_file() or p.is_symlink():
@@ -397,6 +402,8 @@ def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
         if not dry_run:
             with contextlib.suppress(OSError):
                 p.unlink(missing_ok=True)
+            if p.exists() or p.is_symlink():
+                return 0, 0  # unlink 失敗：不計入 freed
         return sz, 1
     sz, count = 0, 0
     for root, _dirs, files in os.walk(p, followlinks=False):
@@ -410,6 +417,8 @@ def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
                 with contextlib.suppress(OSError):
                     q.chmod(0o700)
         shutil.rmtree(p, ignore_errors=True)
+        if p.exists() or p.is_symlink():
+            return 0, 0  # rmtree 未清乾淨：不計入 freed
     return sz, max(1, count)
 
 
