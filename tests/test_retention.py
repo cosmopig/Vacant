@@ -2062,3 +2062,39 @@ def test_compact_trace_expires_old_unrecorded_changes_and_prompts_beyond_keep_st
     b_agent = blame_location(tr, Location("app.py", line=3, value="999999"))
     assert b_agent["state"] == "located" and b_agent["fault_class"] == "agent"
 
+
+def test_remove_path_unlink_failure_not_counted_freed(tmp_path, monkeypatch):
+    """round 826 發現①（BACKLOG gc instrument）：unlink 失敗被 suppress(OSError) 吞掉
+    卻仍回傳 (sz, 1) → gc 報告高估 freed、誤報 target_reached（872M 實測首跑
+    bytes_remaining 比盤上 du 少 7,527,563 B）。
+
+    修後：刪除失敗 ⇒ 回傳 (0, 0)、檔案仍在、不計入 freed（保守方向＝寧少報、
+    下次 gc 再收斂，絕不少於盤上）。
+    """
+    f = tmp_path / "obj.bin"
+    f.write_bytes(b"x" * 1234)
+
+    def _raise(self, *a, **k):
+        raise PermissionError(13, "Permission denied", str(self))
+
+    monkeypatch.setattr(pathlib.Path, "unlink", _raise)
+    freed, count = retention._remove_path(f, dry_run=False)
+    assert (freed, count) == (0, 0), "unlink 失敗不得計為已釋放"
+    assert f.exists() and f.stat().st_size == 1234
+
+
+def test_remove_path_rmtree_failure_not_counted_freed(tmp_path, monkeypatch):
+    """同上的目錄分支：shutil.rmtree(ignore_errors=True) 刪不動時，
+    仍回傳 (sz, 1) → 同樣高估 freed。修後：目錄仍在 ⇒ 回傳 (0, 0)。"""
+    d = tmp_path / "sub"
+    d.mkdir()
+    (d / "a.txt").write_bytes(b"y" * 500)
+
+    def _noop(target, **k):
+        pass  # 模擬 rmtree(ignore_errors=True) 刪不動（權限失敗被靜默吞掉）
+
+    monkeypatch.setattr(retention.shutil, "rmtree", _noop)
+    freed, count = retention._remove_path(d, dry_run=False)
+    assert (freed, count) == (0, 0), "rmtree 失敗不得計為已釋放"
+    assert d.exists() and (d / "a.txt").exists()
+
