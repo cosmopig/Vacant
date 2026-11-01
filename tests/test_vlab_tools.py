@@ -4906,3 +4906,19 @@ def test_e004_verdict_m_both_arms_cost_missing() -> None:
     assert "A 臂成本缺失" not in r["hypotheses"]["H-review(M)"]["reason"]
     # 成本紅線：雙臂皆缺測 ⇒ over_2x_A_cost 為 None（量不到，不判違規也不判過）
     assert r["cost_redline_2xA"]["arms"]["M"]["over_2x_A_cost"] is None
+
+
+def test_e006_verdict_repo_runs_precedence(capsys) -> None:
+    # 缺陷回歸測試：當未顯式指定 --audit 時，若 repo 內已入庫 ops/vlab/runs_<exp>/AUDIT.json，
+    # e006_verdict 應優先讀取 repo 內之完賽全量審計，而非依賴外部 /srv/vlab/runs 下未同步的舊快照。
+    from ops.vlab.tools import e006_verdict
+
+    capsys.readouterr()
+    rc = e006_verdict.main(["e006_opencode_polyglot", "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    # 完賽 170 格審計中 A 臂 calls_per_success 實測為 54.5714...（舊快照為 34.0）
+    base_calls = out["cost_redline_2xA"]["A_base"]["calls_per_success"]
+    assert base_calls is not None and abs(base_calls - 54.57142857142857) < 1e-4
+    # 完賽真實 S 臂 calls=1.31x, tokens=1.36x，未超 2xA 紅線（over_2x_A_cost 為 False，舊快照誤判為 True）
+    assert out["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is False

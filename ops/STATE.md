@@ -217,3 +217,10 @@
 - 驗證：驗收鏈 rc=0（改前 grep rc=1 符合預期、改後兩 grep 命中行 418/423、末行 ACCEPTANCE_OK）；git diff 1 檔 11 行純插入；commit 8daf0865（branch auto/qwen27b、status 乾淨）；數值與 e006 封包 §5（a1b137da 回填、已對 REPORT.json/AUDIT.json/e006_verdict.py 核對）交叉一致。
 - 沒驗證：8daf0865 CI 未出（純文件 11 行）；auto/worker 0c5d5124 🔴 test_reading_everything_leaves_vacant_home_byte_identical 仍待複查；e007 smoke 結果未查。
 - 下一步：open/ 續做（doing/ 0 張、等 open/ 或新工單）；e007 smoke→查過關→發射 e008 或修 infra；監控 8daf0865/a1b137da/9c5d40cd CI。
+
+## round 760 (2026-10-31 23:5x) · 資深審查 4 項指示（指令 1–4）＋ 本輪焦點快掃
+- 主軸：資深審查 4 項優先指示（覆蓋本輪原焦點）：①merge auto/argon 1ceb9936、②更新 /srv e006 AUDIT.json、③發射 e008 DABench 60 格、④修正 e006 各臂成本口徑；本輪焦點（~/.vacant 用量無上界）僅做快掃取證。
+- 做了：② /srv/vlab/runs/e006_opencode_polyglot/AUDIT.json ← repo 全量審計 177 格版（cmp 位元一致；舊 29 格快照 17732B 被替換）；③ /srv/vlab/queue/09_e008_dabench_pi_AC.json（30 題×A/C×1 重複、agent=pi、vacant_sha=9071b9f1、labd 23:25:48 開始 60 格）；④ e006 成本口徑三處修正（STATE round 753 記錄、FINDINGS e006 條目、e006 封包 §5）依全量審計：C 0.96×/1.06× 與 S 1.31×/1.36× 未超 2×A 紅線、H tok 2.48× 與 M tok 2.02× 超，舊 29 格快照口徑（1.28×/1.69×、2.15×/2.95×、1.26×/1.89×、3.91×/4.45×、H/S 越過）已廢、各處標註「round 760 依審查修正」，commit 3d60d094；① auto/argon 1ceb9936 CI 🟢（4611 passed、70 skipped）→ merge 82e1d5f8（e006/e004_verdict.py 優先 repo AUDIT.json＋FINDINGS 點 57「57 點跨 72.50h」同步＋1 測試）。
+- 驗證：merge 後 e006_verdict --json：A_base.calls_per_success=54.5714、arms.S.over_2x_A_cost=false（calls 1.31×/tok 1.36×）、H/M over_2x_A_cost=true（tok 2.48×/2.02×）、H-acc/H-review(H)/H-stakes(a) NOT_ESTABLISHED、H-review(M) UNKNOWN；grep「57 點跨 72.50h」命中行 197；e008 隊列 60 格驗證＋labd 開始日誌；註：審查字面檢查 d['summary']['cells'] 在 AUDIT.json schema 不存在（實際鍵 n_cells=177、len(cells)=177，已驗證），實質條件成立。
+- 沒驗證：82e1d5f8（merge 後）CI 未跑；e008 60 格結果（進行中、PAR=2）；~/.vacant 用量上界深工（本次僅快掃：82M＝trace 54M＋possess 26M＋intake 2.5M、6149 檔；growth.jsonl 顯示 ~69MB 穩態振盪、最近 auto_gc 放 4.2M/677 檔；retention 設計＋真機成長量測留後續）。
+- 下一步：監控 82e1d5f8 CI＋e008 進度→report→e008 封包回填；~/.vacant 用量上界（ASSIGNMENT 最優先：retention 設計／GC 真機量測）；auto/worker a208d8c9 CI 未出。
