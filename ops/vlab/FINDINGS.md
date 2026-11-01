@@ -420,7 +420,7 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 - e008_dabench_pi_AC（通用資料分析題全盤 30 格，11/1 01:22 完賽）：vacant_home_bytes min **33,994 B（33.2 KB）**、med 72,561 B（70.9 KB，30 格 vacant_home_bytes 之 statistics.median＝(63,817＋81,305)／2）、max **231,785 B（226.3 KB，dab_732）**；vacant_objects_bytes 介於 6,912–183,697 B（max 在 dab_732）；最高佔封頂 **0.0863%** ≤ 256 MiB 穩態封頂、envelope_compliance verdict=PASS（vacant_sha=9071b9f1；/srv/vlab/runs/e008_dabench_pi_AC cell.json 實測）。
 
 69 格實測全部落在 29,824 B（29.1 KB）至 296,898 B（289.9 KB）之間，全部低於 256 MiB 穩態封頂；最高格 296,898 B 佔封頂 **0.1106%**（≤ 0.12%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 12,982–216,705 B（pg_connect 為 63,949 B），皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
-**口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）進行中，本條不預填未完成格數據，正式判定仍以全盤完賽後之 REPORT.json＋`e006_verdict.py` 為準；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。
+**口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）已於 2026-10-31 完賽，正式成效與成本判定已記入 2026-10-31 主軸 3 條目（數字以 REPORT.json＋`e006_verdict.py` 為準），本條不重複該判定；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。
 
 ## 2026-10-31 · 主軸 3 · e006 OpenCode 五臂全盤完賽成效與成本判定（H-acc/H-review(H)/H-stakes(a) NOT_ESTABLISHED，H-review(M) UNKNOWN，H/M 越過 2×A 成本紅線，C/S 成本在 2×A 內）
 
