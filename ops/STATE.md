@@ -208,7 +208,7 @@
 ## round 746 (2026-10-31 22:4x) · P20261031_2228-3-audit-e006-full-run-and-commit-evidence.md（結案）
 - 主軸：ASSIGNMENT 主軸 3（效益差別驗證／成本與成效同報）；e006 170 格完賽後全盤審計證據入庫。
 - 做了：report.py e006 --rescore（0 mismatch）→ mkdir ops/vlab/runs_e006_opencode_polyglot/ → opencode_cell_audit.py --out AUDIT.json（rc=1 為預期：7 infra 格＋M 臂缺審查者）→ cp REPORT.json 入 repo；未動 /srv/vlab 程式、未改兩 JSON 內容；工單回填 3 行移 done/、doing/ 0 張。
-- 驗證：驗收鏈 rc=0（兩檔非空、incomplete_cells=0、末行 ACCEPTANCE_OK）；AUDIT.json 177 格＝170 complete＋7 infra，五臂各 34 格，成本口徑在 AUDIT.json（H/M over_2x_A_cost=true、M 臂 34 格 second_agent UNKNOWN）；REPORT.json cells_scored=170、rescore_mismatch=0；commit 96d2f6ed（branch auto/qwen27b、status 乾淨）。
+- 驗證：驗收鏈 rc=0（兩檔非空、incomplete_cells=0、末行 ACCEPTANCE_OK）；AUDIT.json 177 格＝170 complete＋7 infra，五臂各 34 格，成本口徑在 AUDIT.json（依全量審計：C 臂 calls 0.96×/tok 1.06× 與 S 臂 calls 1.31×/tok 1.36× 均未超 2×A 成本紅線；H 臂 tok 2.48× 與 M 臂 tok 2.02× 超過 2×A 紅線；M 臂 34 格 second_agent UNKNOWN；round 772 依資深審查校正，原「H/M over_2x_A_cost=true」略語已廢）；REPORT.json cells_scored=170、rescore_mismatch=0；commit 96d2f6ed（branch auto/qwen27b、status 乾淨）。
 - 沒驗證：96d2f6ed CI 未出；REPORT.json per_arm calls/tokens=0（report.py 成本欄位未載入，成本以 AUDIT.json 為準，未修）；e006 最終 verdict 未出（待後續工單，不隱瞞）。
 - 下一步：e006 verdict 工單（依 AUDIT.json 五臂成本＋p 值誠實判定）；open/ 續做；e007 smoke→e008 或修 infra；監控 96d2f6ed CI。
 ## round 753 (2026-10-31 22:5x) · P20261031_2243-3-record-e006-verdict-to-findings.md（結案）
