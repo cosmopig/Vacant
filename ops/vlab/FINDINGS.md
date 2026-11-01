@@ -274,6 +274,7 @@ round 142 起 store-on-change＋64 MiB 預算後才出現上表序列。
 - 全程 ≤ 256 MiB 穩態封頂的 32%（82.3/256）；最新 65.4 MiB（25.5%）、
   最新 trace 47.6 MiB ≤ 64 MiB 上限。
 - 這是**真機 `~/.vacant`** 的跨日序列（60 點、75.65h），不是模擬、不是單點。
+- **驗收 (c) 真機閉環（11/1 01:1x，round 772）**：gc 回收後 `vacant trace verify` OK（16515 entries、rc=0）、`vacant trace blame` 舊值 → `unattributable`／UNKNOWN（已回收工作區狀態不可讀，不崩、不假 PASS）——ASSIGNMENT 四驗收 (a)(b)(c) 皆有真機證據（disk_top_priority.md §1 末筆）。
 
 **不能說**：
 - 不能說「上限永遠不會被觸發」：64 MiB 是 trace objects 的**軟**上限（disk_top_priority §1
