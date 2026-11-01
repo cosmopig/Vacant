@@ -1,0 +1,60 @@
+{
+  "exp": "e008_dabench_pi_AC",
+  "cells_scored": 60,
+  "infra": [
+    {
+      "cell": "dabench-dab_144-pi-C-r1.infra-20261031T235913",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "dabench-dab_588-pi-A-r1.infra-20261101T003029",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "dabench-dab_688-pi-A-r1.infra-20261101T005315",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    },
+    {
+      "cell": "dabench-dab_688-pi-A-r1.infra-20261101T005616",
+      "why": "模型崩潰（已重跑，這是保留的那一次）"
+    }
+  ],
+  "per_arm": {
+    "A": {
+      "n": 30,
+      "pass": 29,
+      "rate": 0.9667,
+      "calls_per_success": 12.9,
+      "tokens_per_success": 194278,
+      "timeouts": 0,
+      "mean_wall_s": 71.9,
+      "vacant_sha": []
+    },
+    "C": {
+      "n": 30,
+      "pass": 27,
+      "rate": 0.9,
+      "calls_per_success": 20.81,
+      "tokens_per_success": 389494,
+      "timeouts": 0,
+      "mean_wall_s": 121.2,
+      "vacant_sha": [
+        "9071b9f1bdfc25275bb7f1a6502205beaa4d8cad"
+      ]
+    }
+  },
+  "paired": {
+    "A_vs_C": {
+      "pairs": 30,
+      "A_only": 2,
+      "C_only": 0,
+      "mcnemar_p_two_sided": 0.5,
+      "distinct_tasks": 30,
+      "tasks_net_positive": 0,
+      "tasks_net_negative": 2
+    }
+  },
+  "rescore_checked": true,
+  "rescore_mismatch": [],
+  "note": "只由原始格子重算；pass=None 的格子是 infra，不進分母。p 值假設配對獨立——同題重複時看 distinct_tasks 與 tasks_net_*。"
+}

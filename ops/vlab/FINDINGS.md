@@ -410,15 +410,16 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **預註冊**：封包 `ops/vlab/packets/e006_opencode_polyglot.md`（發射前寫死判準）——4 假設 H-acc / H-review(H) / H-review(M) / H-stakes(a)、Holm–Bonferroni（4 組 A_vs_X）α=0.05 為確認線＋2×A 成本紅線；M 臂需 events.jsonl 有真第二 agent 證據，缺則降級記 UNKNOWN（不是負結果）；infra 格永不回填。
 **口徑**：此條僅為發射與排程事實；排程中、無結果數據、不預填、不宣稱；全盤完賽後以 `opencode_cell_audit.py` 審計 170 格、`e006_verdict.py` 依封包 §3 判定（數字以 REPORT.json 為準、成本與結果同報）。
 
-## 2026-10-31 · 主軸 2 · 真實 agent C 臂用量實測（e003/e005/e006/e007 全數通過 256 MiB 穩態封頂，最高 289.9 KB，≤ 0.12%）
+## 2026-10-31 · 主軸 2 · 真實 agent C 臂用量實測（e003/e005/e006/e007/e008 全數通過 256 MiB 穩態封頂，最高 289.9 KB，≤ 0.12%）
 
-**客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨四個 run 共 **39 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 34 格、e007 2/2，FAIL 0、NA 0）：
+**客觀用量事實**（來源：各格 `cell.json` 之 `vacant_home_bytes`／`vacant_objects_bytes`＋`ops/vlab/tools/envelope_compliance.py` 實跑，2026-10-31 00:1x 核實）：OpenCode 真實 agent、Vacant 介入之 C 臂，跨五個 run 共 **69 格 complete，envelope_compliance C 臂 verdict 全數 PASS**（e003 2/2、e005 1/1、e006 34 格、e007 2/2、e008 30 格，FAIL 0、NA 0）：
 - e003_opencode_smoke（2 格）：pg_affine_cipher **65,551 B（64.0 KB）**、pg_pig_latin **167,361 B（163.4 KB）**；
 - e005_opencode_five_arm_smoke（1 格）：pg_affine_cipher **79,333 B（77.5 KB）**；
 - e006_opencode_polyglot（34 格，全盤 C 臂完賽）：pg_affine_cipher **49,903 B（48.7 KB）**、pg_beer_song **116,444 B（113.7 KB）**、pg_book_store **50,155 B（49.0 KB）**、pg_bottle_song **56,104 B（54.8 KB）**、pg_bowling **179,682 B（175.5 KB）**、pg_connect **127,832 B（124.8 KB）**、pg_dominoes **32,165 B（31.4 KB）**、pg_dot_dsl **121,652 B（118.8 KB）**、pg_food_chain **135,113 B（131.9 KB）**、pg_forth **255,721 B（249.7 KB）**、pg_go_counting **153,712 B（150.1 KB）**、pg_grade_school **58,767 B（57.4 KB）**、pg_grep **152,604 B（149.0 KB）**、pg_hangman **149,590 B（146.1 KB）**、pg_list_ops **74,556 B（72.8 KB）**、pg_paasio **204,559 B（199.8 KB）**、pg_phone_number **68,663 B（67.1 KB）**、pg_pig_latin **231,295 B（225.9 KB）**、pg_poker **44,014 B（43.0 KB）**、pg_pov **135,449 B（132.3 KB）**、pg_proverb **38,085 B（37.2 KB）**、pg_react **129,828 B（126.8 KB）**、pg_rest_api **182,696 B（178.4 KB）**、pg_robot_name **69,948 B（68.3 KB）**、pg_scale_generator **157,747 B（154.1 KB）**、pg_sgf_parsing **109,716 B（107.1 KB）**、pg_simple_linked_list **95,077 B（92.8 KB）**、pg_transpose **172,472 B（168.4 KB）**、pg_tree_building **35,759 B（34.9 KB）**、pg_two_bucket **32,354 B（31.6 KB）**、pg_variable_length_quantity **39,211 B（38.3 KB）**、pg_wordy **129,131 B（126.1 KB）**、pg_zebra_puzzle **29,824 B（29.1 KB）**、pg_zipper **213,193 B（208.2 KB）**。
 - e007_dabench_smoke（通用資料分析題 2 格）：dab_035 **292,140 B（285.3 KB）**、dab_039 **296,898 B（289.9 KB）**（同格 vacant_objects_bytes 分別為 49,073 B 與 121,583 B，最高佔封頂 0.11% ≤ 256 MiB 穩態封頂）。
+- e008_dabench_pi_AC（通用資料分析題全盤 30 格，11/1 01:22 完賽）：vacant_home_bytes min **33,994 B（33.2 KB）**、med 72,561 B（70.9 KB，30 格 vacant_home_bytes 之 statistics.median＝(63,817＋81,305)／2）、max **231,785 B（226.3 KB，dab_732）**；vacant_objects_bytes 介於 6,912–183,697 B（max 在 dab_732）；最高佔封頂 **0.0863%** ≤ 256 MiB 穩態封頂、envelope_compliance verdict=PASS（vacant_sha=9071b9f1；/srv/vlab/runs/e008_dabench_pi_AC cell.json 實測）。
 
-39 格實測全部落在 29,824 B（29.1 KB）至 296,898 B（289.9 KB）之間，全部低於 256 MiB 穩態封頂；最高格 296,898 B 佔封頂 **0.1106%**（≤ 0.12%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 12,982–216,705 B（pg_connect 為 63,949 B），皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
+69 格實測全部落在 29,824 B（29.1 KB）至 296,898 B（289.9 KB）之間，全部低於 256 MiB 穩態封頂；最高格 296,898 B 佔封頂 **0.1106%**（≤ 0.12%）。同格 `vacant_objects_bytes`（Vacant 自身物件檔）介於 12,982–216,705 B（pg_connect 為 63,949 B），皆小於對應 `vacant_home_bytes`（home 另含 .vacant/intake/hooks/events.jsonl 等安裝面，見 e005 條目）。
 **口徑**：本條僅為 C 臂已完成格之客觀磁碟用量事實，不寫「信任」、不寫「證明變好」、不作成效宣稱；e006 全盤（170 格）進行中，本條不預填未完成格數據，正式判定仍以全盤完賽後之 REPORT.json＋`e006_verdict.py` 為準；256 MiB 為穩態封頂（定義見 2026-10-30 主軸 1 條目），單格 PASS 是 ASSIGNMENT 條件 1 的必要條件，不是合規的全部證據。
 
 ## 2026-10-31 · 主軸 3 · e006 OpenCode 五臂全盤完賽成效與成本判定（H-acc/H-review(H)/H-stakes(a) NOT_ESTABLISHED，H-review(M) UNKNOWN，H/M 越過 2×A 成本紅線，C/S 成本在 2×A 內）
@@ -438,3 +439,13 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **成效**：A 臂 2/2（100.0%）、C 臂 2/2（100.0%）、0 infra；配對 A_vs_C：2 題平手（McNemar p=1.0，A_only=0、C_only=0）；4 格皆出分且全 PASS（高於 ≥1 格出分門檻），依封包 §6.1 判定冒煙過關 GO。
 **成本初探**（數字以 REPORT.json 為準，成本與結果一起報告）：A 16.0 呼叫／323,163 tokens，C 124.0 呼叫（7.75×A）／3,390,335 tokens（10.49×A）；C 臂 mean wall 718.0 s 對 A 臂 66.0 s。初探顯示通用資料分析題在 Vacant 介入下因重試循環產生顯著算力開銷，全盤對照留待 e008 60 格（30 題 × A/C）全盤對照檢驗。
 **口徑**：可究責／有根據／誠實記錄；不寫「信任」、不寫「證明變好」；本條為冒煙層級之成效與成本初探，不是成效結論，不外推到其他模型／預算／題庫（H-12 類邊界）。
+
+## 2026-11-01 · 主軸 4 · e008 DABench 全盤資料分析題完賽成效與成本判定（A 29/30、C 27/30、p=0.5，C 臂成本 1.61×~2.00× A 臂，通用任務無可測影響，不發射同設計複測）
+
+**規格與來源**：DABench 通用資料分析題全盤，60 格（30 題 × A/C × 1 rep、agent=pi、C 臂 vacant_sha=9071b9f1）2026-11-01 01:22 完賽；來源為 /srv/vlab/runs/e008_dabench_pi_AC（REPORT.json，rescore_checked=true、rescore_mismatch=0 格、infra 4 格不進分母），位元一致入庫 ops/vlab/runs_e008_dabench_pi_AC/；預註冊判定準則見封包 `ops/vlab/packets/e007_dabench.md` §5（本輪回填 §5.1）。
+**成效**：A 臂 29/30（96.67%）、C 臂 27/30（90.0%）；配對 A_vs_C：30 對（30 題）、A_only=2（dab_039、dab_378）、C_only=0、McNemar two-sided p=0.5（低力、描述性為主）。
+**分支 3 逐格查**（A_only 2 格）：均未逾時（wall 448.9 s／116.7 s，限 1800 s）、events.jsonl 無 kickback/unsourced 事件 → 記「跨跑隨機差異、非機制歸因」。
+**成本**（數字以 REPORT.json 為準、與結果同報）：A 12.9 呼叫／成功、194,278 tokens／成功、mean wall 71.9 s；C 20.81 呼叫／成功（1.61×A）、389,494 tokens／成功（2.00×A）、mean wall 121.2 s；C 臂重試循環開銷與 e007 smoke 初探（7.75×／10.49×）同向。
+**用量**（主軸 2 客觀用量事實）：C 臂 30 格 vacant_home_bytes min 33,994 B、max 231,785 B（dab_732）、最高佔封頂 0.0863% ≤ 256 MiB 穩態封頂、envelope_compliance verdict=PASS（見 2026-10-31 主軸 2 條目 69 格口徑）。
+**判定結論**（依預註冊解讀分支 1/3）：純究責機制因缺乏內容語意判定能力，在通用資料分析任務上無顯著成效（通用任務無可測影響）；C 臂成本 1.61×~2.00× A 臂（重試成本翻倍）；邊際收益遞減，不發射 databench 同設計複測，資源轉主軸 2。
+**口徑**：可究責／有根據／誠實記錄；不寫「信任」、不寫「證明變好」；p=0.5 低力是「未顯著」，不是「證明等價」、也不是負結果；模型為本地量化（H-12 類邊界），結果不外推到其他模型／預算／題庫。
