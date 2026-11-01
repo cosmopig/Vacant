@@ -6,10 +6,10 @@
 - **問題**：repo 級工作區（299M／6,541 檔案，≈10/28 事件 2G／23,594 快照的 28% 規模）上，
   現行版本（683bbb83）的 C 臂 `~/.vacant` 實際長多大？
 - **假說 H**：現行 retention（trace 64MiB 上限／穩態 256MiB 封頂＋自動 GC）把 C 臂
-  `vacant_home_bytes` 壓在 ≤256MiB，且 <0.5× workspace（149.5M）——即 10/28 事件
+  `vacant_home_bytes` 壓在 ≤256MiB，且 <0.5× workspace（149.5M＝299M÷2，對已記錄之 du 值 299M 的純算術；stage 實值 300M 時為 150M）——即 10/28 事件
   （872M≈0.44× repo）的失敗模式在新版本不復發。
 - **推翻條件**：任一 C 格 `vacant_home_bytes` >256MiB（封頂在真機環境未生效）或
-  ≥149.5M（「不能是 repo 的一半大」驗收線破）⇒ H 不成立。
+  ≥149.5M（＝299M÷2 純算術；stage 實值 300M 時為 150M）（「不能是 repo 的一半大」驗收線破）⇒ H 不成立。
 - **什麼算沒用／量不到**：格子 infra、`vacant_home_bytes` 缺失 ⇒ UNKNOWN，不寫 PASS。
 
 ## 2. 基線與負對照
@@ -34,7 +34,7 @@
 - 原始格子：`/srv/vlab/runs/e010_bigwork_pi_AC/`
 
 ## 5. 實際結果（完賽後回填；只引用 REPORT.json／cell.json）
-- [ ] C-r1 `vacant_home_bytes` ≤256MiB 且 <149.5M（0.5× workspace）
+- [ ] C-r1 `vacant_home_bytes` ≤256MiB 且 <149.5M（0.5× workspace＝299M÷2 純算術；stage 實值 300M 時為 150M）
 - [ ] `vacant_objects_bytes` 與 `vacant_home_bytes` 落盤可核
 - [ ] `report.py e010_bigwork_pi_AC --rescore` 0 格不一致（score 為完成信號，A/C 各 1 格）
 - [ ] `envelope_compliance.py e010_bigwork_pi_AC` verdict=PASS
