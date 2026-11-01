@@ -44,7 +44,7 @@ from ..intake import keys as _keys
 from . import blame as B
 from . import feedback as F
 from .locate import Location
-from .recorder import Recorder
+from .recorder import MixedSignerRefused, Recorder
 
 
 def _workspace(args: argparse.Namespace) -> tuple[pathlib.Path, Any]:
@@ -349,10 +349,19 @@ def _blame_where(ws: pathlib.Path, c: Any, where: str, value: str | None) -> dic
     return B.blame_location(B.Trace(Recorder(ws)), Location(rel, line, value=value), contract=c)
 
 
+def _mutate(fn: Any, *args: Any, **kw: Any) -> Any:
+    """會被拒的寫入（混簽章鏈）給清楚錯誤＋rc 2，不是 traceback（2026-11-01 第 826 輪）。"""
+    try:
+        return fn(*args, **kw)
+    except MixedSignerRefused as e:
+        print(f"vacant trace: {e}", file=sys.stderr)
+        raise SystemExit(2)
+
+
 def cmd_blame(args: argparse.Namespace) -> int:
     ws, c = _workspace(args)
     rec = Recorder(ws)
-    rec.checkpoint("blame")          # 行號要對得上現在的檔
+    _mutate(rec.checkpoint, "blame")          # 行號要對得上現在的檔
     b = _blame_where(ws, c, args.where, args.value)
     if args.json:
         print(json.dumps(b, ensure_ascii=False, indent=1, default=str))
@@ -379,8 +388,8 @@ def cmd_flag(args: argparse.Namespace) -> int:
             return 2
         doc = _keys.sign_doc(owner, {"kind": "dismiss", "finding_id": args.dismiss,
                                      "reason": args.note or "", "ts": time.time()})
-        ref = rec.append("flag", {"flag_id": "d_" + args.dismiss, "dismisses": args.dismiss,
-                                  "signed": doc})
+        ref = _mutate(rec.append, "flag", {"flag_id": "d_" + args.dismiss, "dismisses": args.dismiss,
+                                           "signed": doc})
         from . import actors as A
         if A.dismiss(A.ActorBook(), args.dismiss, args.note or ""):
             rec.append("consequence", {"kind": "dismiss", "finding_id": args.dismiss})
@@ -401,9 +410,9 @@ def cmd_flag(args: argparse.Namespace) -> int:
     doc = _keys.sign_doc(owner, {"kind": "flag", "flag_id": fid, "location": loc.to_json(),
                                  "note": args.note or "", "file_sha256": content_sha,
                                  "ts": time.time()})
-    rec.append("flag", {"flag_id": fid, "location": loc.to_json(), "note": args.note or "",
-                        "file_sha256": content_sha, "signed": doc, "status": "open"})
-    rec.checkpoint("flag")
+    _mutate(rec.append, "flag", {"flag_id": fid, "location": loc.to_json(), "note": args.note or "",
+                                 "file_sha256": content_sha, "signed": doc, "status": "open"})
+    _mutate(rec.checkpoint, "flag")
     b = B.blame_location(B.Trace(rec), loc, contract=c)
     b["claim"] = f"flag:{fid}"
     rec.append("finding", {"finding_id": fid, "status": "open", "from_flag": True, **{
@@ -482,7 +491,7 @@ def cmd_actors(args: argparse.Namespace) -> int:
 
 def cmd_rescan(args: argparse.Namespace) -> int:
     ws, _c = _workspace(args)
-    out = Recorder(ws).rescan()
+    out = _mutate(Recorder(ws).rescan)
     if getattr(args, "json", False):
         print(json.dumps(out, ensure_ascii=False, indent=1, default=str))
     if out.get("rescanned"):

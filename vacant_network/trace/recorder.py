@@ -208,6 +208,14 @@ def _explains_own_writes(pend: dict[str, Any]) -> bool:
     return bool(pend.get("pre_index")) and not pend.get("bound_index")
 
 
+class MixedSignerRefused(RuntimeError):
+    """病歷鏈已存在、但它的簽章者不是本機這把金（例如還原了舊狀態目錄、本機金已丟）。
+
+    用另一把金寫進去＝混簽章鏈：`verify` 以 genesis 的簽者驗全鏈，整條就不可驗了。
+    拒的是**寫入**（保持單簽章鏈 intact）；掛鉤路徑捕獲此例外後照舊放行（fail-open，誠實邊界 1）。
+    """
+
+
 class Recorder:
     """一個專案（工作區根目錄）的追緝紀錄。所有方法都是行程安全的（檔案鎖）。"""
 
@@ -292,6 +300,16 @@ class Recorder:
             # 第一次簽：本機的簽章者要在收件端清單上，`vacant trace verify` 才驗得過（recorder#3）
             _keys.ensure_local()
         ident = _keys.load_or_create("verifier")
+        if book.entries:
+            # 鏈已存在：簽章者若是另一把金，寫進去＝混簽章鏈、整條不可驗（2026-11-01 第 826 輪發現）⇒ 拒寫，
+            # 鏈保持 intact。genesis 沒有 signer 欄（舊版病歷）⇒ 判定不出來＝UNKNOWN，不擋寫入（fail-open）。
+            gen_signer = (book.entries[0].payload or {}).get("signer")
+            if gen_signer and str(gen_signer) != _keys.pub_hex(ident):
+                raise MixedSignerRefused(
+                    f"trace chain {self.chain_path} was signed by a different key "
+                    f"({str(gen_signer)[:16]}\u2026); refusing to append with this machine's key "
+                    f"({_keys.pub_hex(ident)[:16]}\u2026) \u2014 appending would make the whole chain "
+                    f"unverifiable. The chain is left intact: restore the original key or use a fresh state dir.")
         ts = int(time.time() * 1000)
         new: list[LogEntry] = []
         if not book.entries:

@@ -165,3 +165,82 @@ def test_vacant_state_dir_inside_workspace_is_not_traced(tmp_path, monkeypatch):
     e = rec.post("t", MAIN, "Write", {}, "")
     assert [w["path"] for w in e["writes"]] == ["a"]
     assert all(not p.startswith(".vh") for p in W.scan(ws, skip=rec.skip))
+
+
+def test_refuses_to_append_when_chain_signer_differs(tmp_path, monkeypatch):
+    """病歷鏈是另一把金簽的（還原舊狀態目錄、本機金丟了）：現在寫進去＝混簽章鏈、整條不可驗
+    ⇒ 拒寫、鏈原封不動（2026-11-01 第 826 輪 mixed-signer 發現；誠實邊界：拒的是寫入，不是使用者）。"""
+    import shutil
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    keys.init_local()
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "f.txt").write_text("1\n")
+    rec = R.Recorder(ws)
+    rec.pre("t1", MAIN, "Read", {"file_path": "f.txt"})
+    rec.post("t1", MAIN, "Read", {"file_path": "f.txt"}, "1")
+    ok, why = rec.verify()
+    assert ok, why
+    before = rec.chain_path.read_bytes()
+    n_before = len(rec.events())
+
+    shutil.rmtree(vh / "intake" / "keys")            # 備份只有病歷、沒有金：load_or_create 會生一把新的
+    rec2 = R.Recorder(ws)
+    (ws / "f.txt").write_text("1\n2\n")              # 製造未記錄缺口 → 觸發 append
+    with pytest.raises(R.MixedSignerRefused):
+        rec2.checkpoint("test")
+    assert rec2.chain_path.read_bytes() == before    # 鏈原封不動
+    assert len(rec2.events()) == n_before
+    ok2, why2 = rec2.verify()
+    assert ok2, why2                                 # 原鏈照樣可用原簽者驗過
+
+
+def test_append_allowed_when_genesis_signer_unknown(tmp_path, monkeypatch):
+    """舊版病歷（genesis 沒有 signer 欄）：簽者判定不出來＝UNKNOWN，不擋寫入（fail-open，不變量 2）。"""
+    import shutil
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    keys.init_local()
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "f.txt").write_text("1\n")
+    rec = R.Recorder(ws)
+    rec.pre("t1", MAIN, "Read", {"file_path": "f.txt"})
+    rec.post("t1", MAIN, "Read", {"file_path": "f.txt"}, "1")
+    n_before = len(rec.events())
+    lines = rec.chain_path.read_text(encoding="utf-8").splitlines(keepends=True)
+    g = json.loads(lines[0])
+    g["payload"].pop("signer", None)                 # 模擬沒有 signer 欄的舊病歷
+    rec.chain_path.write_text(
+        json.dumps(g, ensure_ascii=False, sort_keys=True) + "\n" + "".join(lines[1:]),
+        encoding="utf-8")
+    shutil.rmtree(vh / "intake" / "keys")
+    rec2 = R.Recorder(ws)
+    (ws / "f.txt").write_text("1\n2\n")
+    rec2.checkpoint("test")                          # 不得拋
+    assert len(rec2.events()) == n_before + 1
+
+
+def test_hook_trace_fail_open_on_mixed_signer(tmp_path, monkeypatch):
+    """掛鉤路徑遇拒寫：只記錯、不影響裁決、agent 不被擋（掛鉤永遠放行）。"""
+    import shutil
+    from vacant_network.adapters import hook
+    from vacant_network.adapters.hookpolicy import HookEvent
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    monkeypatch.setenv("VACANT_TRACE", "1")
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
+    keys.init_local()
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "f.txt").write_text("1\n")
+    rec = R.Recorder(ws)
+    rec.pre("t1", MAIN, "Read", {"file_path": "f.txt"})
+    rec.post("t1", MAIN, "Read", {"file_path": "f.txt"}, "1")
+    before = rec.chain_path.read_bytes()
+    shutil.rmtree(vh / "intake" / "keys")
+    ev = HookEvent(agent="claude", kind="pre_tool", cwd=str(ws), session_id="s1")
+    payload = {"tool_name": "Read", "tool_input": {"file_path": "f.txt"}, "session_id": "s1"}
+    hook._trace("claude", "PreToolUse", payload, ev, None, None)   # 不得拋
+    assert rec.chain_path.read_bytes() == before                    # 鏈原封不動
