@@ -327,7 +327,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         from ..intake import flow
         from .stopcheck import localize
         res = flow.check(c, c.base_dir)
-        localize(c, res, cwd=str(ws), why_open="on request")
+        _mutate(localize, c, res, cwd=str(ws), why_open="on request")
     rp = rec.dir / "report.md"
     if not rp.is_file():
         if c is None:
@@ -392,7 +392,7 @@ def cmd_flag(args: argparse.Namespace) -> int:
                                            "signed": doc})
         from . import actors as A
         if A.dismiss(A.ActorBook(), args.dismiss, args.note or ""):
-            rec.append("consequence", {"kind": "dismiss", "finding_id": args.dismiss})
+            _mutate(rec.append, "consequence", {"kind": "dismiss", "finding_id": args.dismiss})
         print(f"dismissed {args.dismiss} (trace entry {ref['seq']})")
         return 0
     if not args.where:
@@ -415,7 +415,7 @@ def cmd_flag(args: argparse.Namespace) -> int:
     _mutate(rec.checkpoint, "flag")
     b = B.blame_location(B.Trace(rec), loc, contract=c)
     b["claim"] = f"flag:{fid}"
-    rec.append("finding", {"finding_id": fid, "status": "open", "from_flag": True, **{
+    _mutate(rec.append, "finding", {"finding_id": fid, "status": "open", "from_flag": True, **{
         k: b.get(k) for k in ("claim", "location", "value", "state", "fault_class",
                               "confidence", "layer", "step", "source", "candidates", "note")}})
     if args.json:

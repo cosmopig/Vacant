@@ -244,3 +244,68 @@ def test_hook_trace_fail_open_on_mixed_signer(tmp_path, monkeypatch):
     payload = {"tool_name": "Read", "tool_input": {"file_path": "f.txt"}, "session_id": "s1"}
     hook._trace("claude", "PreToolUse", payload, ev, None, None)   # 不得拋
     assert rec.chain_path.read_bytes() == before                    # 鏈原封不動
+
+
+def test_torn_genesis_is_repaired_and_recording_continues(tmp_path, monkeypatch):
+    """創世筆寫到一半被砍（當機、磁碟滿）：_repair_tail 截短後檔案成 0 位元組，
+    _tail 不得因 json.loads(b'') 拋 JSONDecodeError，應安全退回空帳本並重新開始紀錄。"""
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    rec = R.Recorder(ws)
+    rec.chain_path.parent.mkdir(parents=True, exist_ok=True)
+    rec.chain_path.write_bytes(b'{"schema": "trace/v1", "torn_genesis')
+    e = rec.append("coverage", {"action": "recovery"})
+    assert e["seq"] >= 1
+    assert any(ev["type"] == "coverage" and ev.get("torn_tail_bytes") for ev in rec.events())
+    ok, why = rec.verify()
+    assert ok, why
+
+
+def test_empty_chain_file_returns_empty_book_and_recovers(tmp_path, monkeypatch):
+    """病歷鏈檔案為 0 位元組（touch 或異常中斷殘留）：_tail 不得拋 JSONDecodeError。"""
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    rec = R.Recorder(ws)
+    rec.chain_path.parent.mkdir(parents=True, exist_ok=True)
+    rec.chain_path.write_bytes(b"")
+    e = rec.append("coverage", {"action": "clean_start"})
+    assert e["seq"] == 2  # genesis + coverage
+    assert [ev["type"] for ev in rec.events()] == ["trace_genesis", "coverage"]
+    ok, why = rec.verify()
+    assert ok, why
+
+
+def test_cmd_report_check_exits_cleanly_on_mixed_signer(tmp_path, monkeypatch, capsys):
+    """vacant trace report --check 遇到混簽章時應由 _mutate 捕獲給出清晰錯誤與 rc=2，而不是崩潰 traceback。"""
+    import shutil
+    from vacant_network.trace.cli import main as trace_main
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    keys.init_local()
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / ".vacant").mkdir()
+    contract_data = {
+        "schema": "vacant-contract/1",
+        "task_id": "t1",
+        "claims": [{"id": "c1", "verifier": "exists", "params": {"paths": ["f.txt"]}}],
+    }
+    (ws / ".vacant" / "contract.json").write_text(json.dumps(contract_data))
+    (ws / "f.txt").write_text("1\n")
+    rec = R.Recorder(ws)
+    rec.pre("t1", MAIN, "Read", {"file_path": "f.txt"})
+    rec.post("t1", MAIN, "Read", {"file_path": "f.txt"}, "1")
+    shutil.rmtree(vh / "intake" / "keys")
+    (ws / "f.txt").write_text("2\n")  # unrecorded change triggering checkpoint in localize
+    monkeypatch.chdir(ws)
+    with pytest.raises(SystemExit) as exc:
+        trace_main(["trace", "report", "--check"])
+    assert exc.value.code == 2
+    err = capsys.readouterr().err
+    assert "vacant trace: trace chain" in err
+    assert "refusing to append" in err
+
