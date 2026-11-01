@@ -4938,3 +4938,28 @@ def test_findings_axis2_usage_title_consistency() -> None:
         # 標題應涵蓋已入庫之 e007 且反映最新最大用量（289.9 KB / ≤ 0.12%）
         assert "289.9 KB" in title or "296,898" in title, f"標題未同步反映 39 格最大用量: {title}"
 
+
+def test_findings_axis2_69_cells_content_accuracy() -> None:
+    # 缺陷回歸測試：FINDINGS.md 主軸 2 69 格客觀用量事實必須精確反映多 agent 與實際物件範圍，
+    # 1. 內文不得將涵蓋 pi agent (e007/e008) 的 69 格誤稱為單一的「OpenCode 真實 agent」；
+    # 2. 69 格 vacant_objects_bytes 範圍不得停留在庫存 39 格舊下界 12,982 B，必須納入 e008 實測之 6,912 B；
+    # 3. 口徑段不得殘留「e006 全盤（170 格）進行中」過期陳述。
+    findings_path = Path("ops/vlab/FINDINGS.md")
+    assert findings_path.is_file()
+    content = findings_path.read_text()
+    
+    # 1. 檢查 69 格前置主語
+    assert "OpenCode 真實 agent、Vacant 介入之 C 臂，跨五個 run 共 **69 格 complete" not in content, \
+        "69 格實測包含 pi (e007/e008)，不應表述為單一 OpenCode 真實 agent"
+    
+    # 2. 檢查 69 格 vacant_objects_bytes 範圍
+    assert "12,982–216,705 B" not in content, \
+        "vacant_objects_bytes 範圍殘留 39 格舊下界 12,982 B，未更新為 69 格全集下界 6,912 B"
+    assert "6,912–216,705 B" in content or "6,912" in content, \
+        "vacant_objects_bytes 範圍未包含實際最小值 6,912 B"
+
+    # 3. 檢查口徑段過期陳述
+    assert "e006 全盤（170 格）進行中" not in content, \
+        "口徑段殘留過期陳述「e006 全盤（170 格）進行中」"
+
+
