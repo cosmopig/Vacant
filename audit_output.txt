@@ -1,0 +1,53 @@
+Complete: 37
+Infra: 0
+In Progress: 0
+
+Anomalies:
+polyglot_py-pg_affine_cipher-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_affine_cipher-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_beer_song-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_beer_song-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_book_store-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_book_store-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_bottle_song-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_bottle_song-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_bowling-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_bowling-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_connect-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_connect-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_dominoes-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_dominoes-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_dot_dsl-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_dot_dsl-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_food_chain-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_food_chain-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_forth-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_forth-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_go_counting-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_go_counting-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_grade_school-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_grade_school-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_grep-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_grep-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_hangman-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_hangman-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_list_ops-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_list_ops-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_paasio-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_paasio-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_phone_number-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_phone_number-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_pig_latin-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+polyglot_py-pg_pig_latin-pi-C-r2: arm/rep (C/2) mismatch with dir name (C/2)
+polyglot_py-pg_poker-pi-A-r2: arm/rep (A/2) mismatch with dir name (A/2)
+
+L002 Early Signals (PARTIAL):
+Question             | A Pass?  | C Pass? 
+---------------------------------------------
+pg_bowling           | No       | No      
+pg_connect           | No       | No      
+pg_list_ops          | No       | No      
+pg_pig_latin         | Yes      | Yes     
+pg_react             | N/A      | N/A     
+pg_transpose         | N/A      | N/A     
+pg_wordy             | N/A      | N/A     
