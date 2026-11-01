@@ -67,6 +67,14 @@ DABench 30 道資料分析題上，裝 Vacant 是否改變通過率？成本多�
 - 不讀 hidden 題內容解釋任何格。
 - 無法判定的格是 UNKNOWN，非 PASS、非「不存在」。
 
+### 5.1 e008 full 實測結果（2026-11-01 01:22 完賽；數據源 `ops/vlab/runs_e008_dabench_pi_AC/REPORT.json`，`--rescore` 0 格不一致、位元一致入庫）
+- cells_scored=60（30 題 × A/C × 1 rep）；infra 4 格不進分母（模型崩潰、已重跑保留，細目見 REPORT.json）。
+- A 臂 29/30（96.67%）；C 臂 27/30（90.0%）。
+- 配對 A_vs_C：30 對（30 題）、A_only=2（dab_039、dab_378）、C_only=0、McNemar two-sided p=0.5（低力，描述性為主）。
+- 分支 3 逐格查（A_only 2 格）：均未逾時（dab_039 C wall 448.9 s、dab_378 C wall 116.7 s，限 1800 s）、events.jsonl 無 kickback/unsourced 事件 → 記「跨跑隨機差異、非機制歸因」。
+- 成本（與結果同報）：A 12.9 呼叫／194,278 tokens／mean wall 71.9 s；C 20.81 呼叫（1.61×A）／389,494 tokens（2.00×A）／mean wall 121.2 s（重試循環開銷，e007 smoke 初探同向）。
+- 判定（依預註冊解讀分支 1/3）：此 30 題資料分析通用任務上**通用任務無可測影響**（p=0.5 未顯著、唯二分歧對為跨跑隨機差異、非機制歸因）、邊際收益遞減，**不發射 databench 同設計複測**，資源轉主軸 2。
+
 ## 6. 發射與驗收
 - smoke `e007_dabench_smoke`（4 格：dab_035/dab_039 × A/C）：
   過關＝非全 infra、非全逾時、≥1 格出分（pass 或 fail 皆可）→ 發 e008 full；
