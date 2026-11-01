@@ -4922,3 +4922,19 @@ def test_e006_verdict_repo_runs_precedence(capsys) -> None:
     assert base_calls is not None and abs(base_calls - 54.57142857142857) < 1e-4
     # 完賽真實 S 臂 calls=1.31x, tokens=1.36x，未超 2xA 紅線（over_2x_A_cost 為 False，舊快照誤判為 True）
     assert out["cost_redline_2xA"]["arms"]["S"]["over_2x_A_cost"] is False
+
+
+def test_findings_axis2_usage_title_consistency() -> None:
+    # 缺陷回歸測試：FINDINGS.md 主軸 2 真實 agent C 臂用量實測標題必須與內文 39 格實測數據一致，
+    # 不得殘留舊庫存 37 格之「最高 255.7 KB，≤ 0.096%」過期口徑。
+    findings_path = Path("ops/vlab/FINDINGS.md")
+    assert findings_path.is_file()
+    lines = findings_path.read_text().splitlines()
+    target_titles = [l for l in lines if "主軸 2 ·" in l and "C 臂用量實測" in l]
+    assert len(target_titles) >= 1
+    for title in target_titles:
+        assert "255.7 KB" not in title, f"標題殘留過期用量數值 255.7 KB: {title}"
+        assert "0.096%" not in title, f"標題殘留過期封頂比例 0.096%: {title}"
+        # 標題應涵蓋已入庫之 e007 且反映最新最大用量（289.9 KB / ≤ 0.12%）
+        assert "289.9 KB" in title or "296,898" in title, f"標題未同步反映 39 格最大用量: {title}"
+
