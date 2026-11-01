@@ -261,6 +261,8 @@ class Recorder:
             return Logbook()
         with self.chain_path.open("rb") as f:
             first = f.readline()
+            if not first.strip():
+                return Logbook()
             f.seek(0, os.SEEK_END)
             end = f.tell()
             back = min(end, 1 << 16)
@@ -270,11 +272,15 @@ class Recorder:
                 if len(lines) > 1 or back == end:
                     break
                 back = min(end, back * 4)
-        entries = [LogEntry.from_json(json.loads(first))]
-        last = LogEntry.from_json(json.loads(lines[-1]))
-        if last.seq != entries[0].seq:
-            entries.append(last)
-        return Logbook(entries)
+        try:
+            entries = [LogEntry.from_json(json.loads(first))]
+            last = LogEntry.from_json(json.loads(lines[-1]))
+            if last.seq != entries[0].seq:
+                entries.append(last)
+            return Logbook(entries)
+        except (json.JSONDecodeError, ValueError, KeyError):
+            book, _ = self._book()
+            return book
 
     def _repair_tail(self) -> dict[str, Any] | None:
         """寫到一半被砍（當機、磁碟滿）留下的半行：搬到旁邊的檔、截掉，之後照常接鏈——
