@@ -430,3 +430,10 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 - **H-review(M) 依預註冊條款誠實判 UNKNOWN**（events.jsonl 無真第二 agent 啟動證據，量不到非負結果）；
 - **H-stakes(a) 判 NOT_ESTABLISHED**（Holm p=1.0 未顯著；S 臂成本 1.31× calls／1.36× tokens 在 2×A 紅線內、「不划算」不適用；標註「只是講、無真實後果」，禁止寫「利害提示無用」）。
 **口徑**：可究責／有根據／誠實記錄；不寫「信任」、不寫「證明變好」；NOT_ESTABLISHED 是「未建立」、不是「無效」，UNKNOWN 是「量不到」、不是負結果；模型為本地量化（H-12 類邊界），結果不外推到其他模型／預算／任務庫。
+
+## 2026-10-31 · 主軸 4 · e007 DABench smoke 資料分析題冒煙成效與成本初探（A 2/2、C 2/2，0 infra，過關判定 GO）
+
+**規格與來源**：DABench 通用資料分析題冒煙，4 格完賽（dab_035／dab_039 × A/C，agent=pi，C 臂 vacant_sha=9071b9f1）；來源為 /srv/vlab/runs/e007_dabench_smoke（REPORT.json，rescore_checked=true、cells_scored=4、0 infra、0 timeout），與助手複核報告核對一致；預註冊判定準則見封包 `ops/vlab/packets/e007_dabench.md` §6。
+**成效**：A 臂 2/2（100.0%）、C 臂 2/2（100.0%）、0 infra；配對 A_vs_C：2 題平手（McNemar p=1.0，A_only=0、C_only=0）；4 格皆出分且全 PASS（高於 ≥1 格出分門檻），依封包 §6.1 判定冒煙過關 GO。
+**成本初探**（數字以 REPORT.json 為準，成本與結果一起報告）：A 16.0 呼叫／323,163 tokens，C 124.0 呼叫（7.75×A）／3,390,335 tokens（10.49×A）；C 臂 mean wall 718.0 s 對 A 臂 66.0 s。初探顯示通用資料分析題在 Vacant 介入下因重試循環產生顯著算力開銷，全盤對照留待 e008 60 格（30 題 × A/C）全盤對照檢驗。
+**口徑**：可究責／有根據／誠實記錄；不寫「信任」、不寫「證明變好」；本條為冒煙層級之成效與成本初探，不是成效結論，不外推到其他模型／預算／題庫（H-12 類邊界）。
