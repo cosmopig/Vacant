@@ -478,3 +478,29 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **裁決結論**：L002＝**撤案**（NOT_MET、不改產品）；L003＝**選項 0**（不改產品）——選項 2/1 觸發條件皆不成立、不可達；已合併修法（auto/argon `a72731b5` exit clause、merge `ded8d08c`）以 `git revert -m 1 ded8d08c`＝**c9d88378** 撤出 auto/qwen27b（含紅燈測試 `test_test_failed_nudge_exit_clause_aligned`）；revert 後 `tests/test_universal_and_coding_upgrades.py` 38 passed、`tests/test_r529_queue_scheduler.py` 綠、全量 pytest 見 round 868 STATE；e012 **不發射**（工單 R20261102_0310-1 失效移 done/、staged queue 檔保留未 cp）。
 **口徑**：可說——同 34 題兩次重複，C 單次領先縮小（64.7%→54.5%）、7 題 C-only win 未重複、p=1.0 低力；六目標題逾時方向在兩次重複間翻轉。不可說——不能斷言「Vacant 對程式題無效」（單模型、單 harness、34 題 × 2 次、H-12 類邊界；p=1.0 是「未顯著」不是「證明等價」）；nudge 方向偏轉（F-2/F-3）是事實記錄，主解為採樣變異、(b) 機制未被反證、只判「非主因」。
 **對下一步的意義**：L002/L003 結案（不帶入產品）；下一步＝L001（e011 dabench smoke 12 格，2026-11-02 08:42:41 起跑）→ 完賽 `~/dev/ops/audits/e011_l001_smoke_recompute.py`（C1–C4 照 L001 §3）→ 留或撤；其後 e010（2 格、主軸 2 驗收 (b)）。
+
+## 2026-11-02 · 主軸 4 · L001 結案（KEEP）：e011 dabench smoke 12 格，e008 兩題翻轉未復現（dab_039 兩臂皆過、dab_378 兩臂 8/8）；根因＝lab C 臂 venv 缺 pandas/scipy（量具 artifact），cell.py 修改保留、零產品改動
+
+**規格與來源**：12 格（6 題 × A/C、DABench、agent=pi、1800 s/格、C 臂 vacant_sha=f2b79012）2026-11-02 09:29:37 完賽（labd 12 格、0 失敗）；來源 /srv/vlab/runs/e011_l001_dabench_smoke（REPORT.json rescore_checked=true、重新評分不一致 0 格）；預註冊判定＝L001 §3（C1 環境等效／C2 翻轉修復／C3 無新害／C4 成本 sanity，先於修改寫下）；判定器 `audits/e011_l001_smoke_recompute.py` 本輪實跑 **exit 0＝KEEP**（C1∧C2∧C3∧C4 全 PASS）＋ `report.py e011_l001_dabench_smoke --rescore`。
+
+**成效**（數字以 REPORT.json 為準）：A 5/6（83.33%）、C 6/6（100%）；配對 6、A_only=0、C_only=1（＝dab_426：A 側 no_items 缺答案、C 過）；e008 的 2 題 A_only（dab_039、dab_378）在 e011 **未復現**（dab_039 兩臂皆過、dab_378 兩臂 8/8）；McNemar p=1.0（低力、描述性）。
+
+**成本**（與結果同報）：呼叫/成功 A 46.2 vs C 11.67；token/成功 A 1,035,112 vs C 100,772；逾時 A 1／C 0；4 對照格 C/A 呼叫數比 0.57／0.80／1.00／1.14（C4 門檻 ≤1.5 全達）。
+
+**裁決結論**（依 L001 §3 判定規則，C1∧C2∧C3 全達 → KEEP）：e008 的兩題翻轉是 **lab 量具 artifact**——C 臂 venv 建時無 `--system-site-packages`（cell.py:52 舊行為）、pandas/scipy 不可用＋bwrap 無網路補不進（dab_039-C e008 events 有 27 次 pandas/scipy ModuleNotFoundError＝grep 實點、e011 同格 0 次），不是產品機制「把對改錯」（e008 兩格中產品唯一可見干預＝dab_039 的 2 次 advisory 退回、內容為實、不擋交付、C 格從未有「對的答案」被改）。cell.py 修改（`--system-site-packages`、DECISION_20261101_L001_CARM_VENV.md）**保留**；**零產品改動**（vacant_network/ 本輪零 diff）。
+
+**對 2026-11-01 e008 條目的更正**（凍結規則：實驗完賽後隨結果一次同步）：本檔 2026-11-01 條目 L447「分支 3 逐格查（A_only 2 格）：……events.jsonl 無 kickback/unsourced 事件 → 記『跨跑隨機差異、非機制歸因』」與 L454「『分支 3』只查了 events.jsonl 的 kickback/unsourced 事件（確無）」——**「確無」對 dab_039 不符**：`grep -c vacant-check dabench-dab_039-pi-C-r1/events.jsonl`＝2（第 322／330 行、逐字原文見 L001 F-1、事實陳述＋advisory）；dab_378 確為 0。該兩格的「跨跑隨機差異、非機制歸因」措辭被 e011 取代：根因是 lab C 臂環境（缺套件）而非隨機差異；機制的 2 次 advisory 退回是事實（偵測命中、記錄層、非阻擋層），此點不變。
+
+**口徑**：可說——DABench 6 題 smoke 上 C 6/6 vs A 5/6、e008 兩題翻轉未復現、根因為量具 artifact（C 臂 venv 缺 pandas/scipy）、修改保留；不可說——「Vacant 對資料題有用」（n=6、p=1.0 低力、單模型單 harness、H-12 邊界）；dab_426 是 A 側 flake（no_items）不是 C 贏的機制證據。
+
+**對下一步的意義**：L001 結案（步驟 1–6、裁決 KEEP）；下一循環＝L004（候選格 pg_grep-C-r2：e009 C 敗＋逾時＋C/A token 10.93×／呼叫 6.88×＋Vacant 零訊息，見 loop/L004.md）。
+
+## 2026-11-02 · 主軸 2 · e010 大工作區格完賽（bw_repo_readme、300M／6,543 檔 workspace）：C 臂 vacant_home 1.03 MiB ≪ 150 MiB 封頂，驗收 (b) PASS
+
+**規格與來源**：2 格（bw_repo_readme × A/C、agent=pi）2026-11-02 09:31:01 完賽（labd 2 格、0 失敗）；來源 /srv/vlab/runs/e010_bigwork_pi_AC（兩臂 pass=true、score.json note＝"completion signal only; usage numbers are in cell.json"）；審計 `audits/e010_bigwork_audit.md`（`envelope_compliance.py --envelope 157286400`、verdict=PASS）。
+
+**數字**：C 臂 vacant_home_bytes **1,077,331 B（~1.03 MiB）**、vacant_objects_bytes 1,062,407 B；封頂 157,286,400 B（150 MiB＝0.5×workspace）ratio **0.006849**；同 ≤ 268,435,456 B（256 MiB 穩態封頂）；A 臂 NA（此臂設計上沒裝 Vacant、超出封頂口徑）。
+
+**裁決**：ASSIGNMENT 驗收 (b)「實驗室格子 C 組的 vacant_home_bytes＋一個大工作區的格子」＝**PASS**——300M／6,543 檔大工作區下 Vacant 自身用量 1.03 MiB，與 69 格實測區間（29.1–289.9 KB，2026-10-31 條目）同量級、未隨 workspace 尺寸成長。
+
+**口徑**：可說——單格封頂合規（1.03 MiB ≪ 150 MiB）；不可說——「用量有上限」的完整意義（ASSIGNMENT 驗收 (a) 真機 ~/.vacant 前後數字與 (c) 回收後 verify/blame 為另兩條證據、見 2026-11-01 GC 實測條目；單格 PASS 是必要條件、不是合規的全部）。
