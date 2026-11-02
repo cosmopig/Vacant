@@ -129,8 +129,10 @@ def cmd_install(args) -> int:
     if skipped:
         print(f"  not found on this machine: {', '.join(skipped)} (skipped; `vacant install "
               f"--force` writes their config anyway)")
-    # 零設定（產品原則）：裝了就有作用；人自己改過 mode 就不動它
+    # 零設定（產品原則）：裝了就有作用；人自己改過 mode 就不動它；明確傳 --mode 才改
     m.data.setdefault("mode", "evidence")
+    if getattr(args, "mode", None):
+        m.data["mode"] = args.mode
     # 回合預算提醒預設關（v3.6）；人明確說要才開、說不要才關，沒說就不動上一次的選擇
     if getattr(args, "budget_reminder", None) is not None:
         m.data["budget_reminder"] = bool(args.budget_reminder)
@@ -282,6 +284,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="also install the optional model-traffic proxy (`vacant possess`)")
     p.add_argument("--skill", action="store_true",
                    help="also add Vacant's skill file (it becomes part of the agent's prompt)")
+    from . import mode as _mode
+    p.add_argument("--mode", choices=list(_mode.MODES), default=None,
+                   help="feedback level after install (default evidence): block keeps sending the "
+                        "work back until the requested file exists")
     p.add_argument("--budget-reminder", action=argparse.BooleanOptionalAction, default=None,
                    help="remind the agent to write the requested file when its stated turn budget is "
                         "nearly used up (off by default: in the preregistered local batch, more of the "

@@ -81,6 +81,31 @@ def test_hook_steps_in_a_contractless_project_land_in_a_chain_only_when_installe
     assert list((env / "vh").rglob("chain.ndjson"))
 
 
+def test_current_mode_reads_block(env, monkeypatch):
+    """e014 §3：block 是一等模式（manifest 與測試 env 都讀得到、不 fallback 成 evidence）。"""
+    _manifest({"agents": {}, "mode": "block"})
+    assert current_mode() == "block"
+    monkeypatch.setenv("VACANT_MODE", "evidence")
+    assert current_mode() == "evidence"
+    monkeypatch.setenv("VACANT_MODE", "off")
+    assert current_mode() == "off"
+
+
+def test_install_writes_mode_block(env):
+    """使用者真的會輸入的安裝旗標（產品原則 3；e014 §3.2）。"""
+    assert acli.main(["install", "--agents", "pi", "--force", "--mode", "block"]) == 0
+    data = json.loads((INS.state_root() / "install.json").read_text())
+    assert data["mode"] == "block"
+
+
+def test_install_without_mode_flag_keeps_a_mode_the_person_set(env):
+    """預設不變：人已經選過 block，重裝不加 --mode 不把它蓋回 evidence（setdefault 現行為）。"""
+    _manifest({"agents": {}, "mode": "block"})
+    assert acli.main(["install", "--agents", "pi", "--force"]) == 0
+    data = json.loads((INS.state_root() / "install.json").read_text())
+    assert data["mode"] == "block"
+
+
 def test_install_writes_mode_and_no_skill_by_default(env, capsys):
     rc = acli.main(["install", "--agents", "pi", "--force"])
     assert rc == 0

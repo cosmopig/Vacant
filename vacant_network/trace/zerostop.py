@@ -182,7 +182,7 @@ def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str, 
     if where is None:
         return {}
     record: dict[str, Any] = {"zero": {"ran": False, "why": "untraceable_cwd"}}
-    if mode != "evidence" or not render:
+    if mode not in ("evidence", "block") or not render:
         return record
     try:
         if session_id and agent in TOLD_DEDUPE_AGENTS:
@@ -275,24 +275,36 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
                              "findings": [_compact(f) for f in findings][:30],
                              "resolved": resolved, **({"last_turn_error": True} if error_stop else {})}
     how = [ERROR_STOP_LINE] if error_stop else None
-    if mode == "evidence" and pushable and used < ZERO_MAX_ROUNDS:
+    # block（e014 §3，DABStep missing_output 的 blocking level）：要求的檔存在之前 session 不得結束
+    # ——missing_output 不受回合上限；其他發現維持 evidence 預算（block 只放寬缺檔，不放寬全部）。
+    # mode == "evidence" 時 send 就是 pushable、條件與之前完全相同（行為字節不變）。
+    if mode == "block":
+        within = used < ZERO_MAX_ROUNDS
+        send = [f for f in pushable if f.get("kind") == "missing_output"]
+        if within:
+            send += [f for f in pushable if f.get("kind") != "missing_output"]
+        do_continue = bool(send)
+    else:
+        send = pushable
+        do_continue = mode == "evidence" and bool(pushable) and used < ZERO_MAX_ROUNDS
+    if do_continue:
         n = _bump_round(session_id, zc)
         # 「還剩幾回合」這一句屬於回合預算提醒（v3.6.1：提醒預設關時不送；只剩一回合只退回缺檔的收窄照舊）
         from ..adapters.mode import budget_reminder_on
-        text, withheld = review.render(pushable, actor_tokens=_actor_tokens(rec),
+        text, withheld = review.render(send, actor_tokens=_actor_tokens(rec),
                                        previous_open=set(sess.get("open") or []),
                                        budget_note=review.turns_left_note(turns_left, budget)
                                        if last_turn and budget_reminder_on() else "")
         sess.setdefault("rounds", []).append({"round": n, "findings":
-                                              [_compact(f) for f in pushable]})
-        sess["open"] = sorted(f["finding_id"] for f in pushable)
+                                              [_compact(f) for f in send]})
+        sess["open"] = sorted(f["finding_id"] for f in send)
         _put_session(rec, key, sess)
-        event.update(action="continue", round=n, sent=[f["finding_id"] for f in pushable],
+        event.update(action="continue", round=n, sent=[f["finding_id"] for f in send],
                      withheld=withheld, **({"turns_left": turns_left, "budget": budget}
                                            if last_turn else {}))
         rec.append("review", event)
         _write_note(rec, key, res, sess, mode, in_progress=True, context=how)
-        return "continue", text, {"zero": {"ran": True, "round": n, "sent": len(pushable),
+        return "continue", text, {"zero": {"ran": True, "round": n, "sent": len(send),
                                            "withheld": withheld}}
     if not findings:
         _rounds_file(session_id, zc).unlink(missing_ok=True)
@@ -304,7 +316,7 @@ def _decide(rec: Recorder, agent: str, session_id: str | None, session: str,
     sess["open"] = []
     _put_session(rec, key, sess)
     # 還在的都寫進說明（含回合用完之後才不再退回的「沒打開」）；觀察模式另外列
-    left = findings if mode == "evidence" else []
+    left = findings if mode in ("evidence", "block") else []
     event.update(action="allow", rounds_used=used, left_open=[f["finding_id"] for f in left])
     rec.append("review", event)
     note = _write_note(rec, key, res, sess, mode, left_open=left, rounds_used=used, context=how)
@@ -779,7 +791,8 @@ def _check_after_end(rec: Recorder, agent: str, session_id: str | None, key: str
     findings = res.get("findings") or []
     extra = [f"{f.get('path')} exists on disk, but no recorded step wrote it; its content was not checked"
              for f in on_disk]
-    note = _write_note(rec, key, res, sess, mode, left_open=findings if mode == "evidence" else [],
+    note = _write_note(rec, key, res, sess, mode,
+                       left_open=findings if mode in ("evidence", "block") else [],
                        rounds_used=_rounds_used(session_id, scope(rec.workspace)), after_end=said,
                        extra_unverified=extra)
     rec.append("ended", {"session": key, "window_start": start, "turn": turn, "budget": budget,
