@@ -1,0 +1,98 @@
+[
+  {
+    "task": "dab_378",
+    "arm": "A",
+    "pass": true,
+    "wall_s": 150.7,
+    "model_calls": 14,
+    "input_tokens": 79145
+  },
+  {
+    "task": "dab_378",
+    "arm": "C",
+    "pass": true,
+    "wall_s": 176.1,
+    "model_calls": 16,
+    "input_tokens": 95087
+  },
+  {
+    "task": "dab_426",
+    "arm": "A",
+    "pass": false,
+    "wall_s": 100.3,
+    "model_calls": 15,
+    "input_tokens": 325898
+  },
+  {
+    "task": "dab_426",
+    "arm": "C",
+    "pass": true,
+    "wall_s": 118.8,
+    "model_calls": 12,
+    "input_tokens": 273783
+  },
+  {
+    "task": "dab_039",
+    "arm": "A",
+    "pass": true,
+    "wall_s": 1800.0,
+    "model_calls": 172,
+    "input_tokens": 4506733
+  },
+  {
+    "task": "dab_039",
+    "arm": "C",
+    "pass": true,
+    "wall_s": 235.7,
+    "model_calls": 17,
+    "input_tokens": 81889
+  },
+  {
+    "task": "dab_725",
+    "arm": "A",
+    "pass": true,
+    "wall_s": 44.8,
+    "model_calls": 14,
+    "input_tokens": 103074
+  },
+  {
+    "task": "dab_725",
+    "arm": "C",
+    "pass": true,
+    "wall_s": 37.9,
+    "model_calls": 8,
+    "input_tokens": 16025
+  },
+  {
+    "task": "dab_218",
+    "arm": "A",
+    "pass": true,
+    "wall_s": 18.8,
+    "model_calls": 9,
+    "input_tokens": 17641
+  },
+  {
+    "task": "dab_218",
+    "arm": "C",
+    "pass": true,
+    "wall_s": 41.5,
+    "model_calls": 9,
+    "input_tokens": 17641
+  },
+  {
+    "task": "dab_517",
+    "arm": "A",
+    "pass": true,
+    "wall_s": 36.3,
+    "model_calls": 7,
+    "input_tokens": 106820
+  },
+  {
+    "task": "dab_517",
+    "arm": "C",
+    "pass": true,
+    "wall_s": 52.6,
+    "model_calls": 8,
+    "input_tokens": 108688
+  }
+]
