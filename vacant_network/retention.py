@@ -164,7 +164,8 @@ COMPONENT_TOTAL_CAPS: dict[str, int] = {
 #: （COMPONENT_TOTAL_CAPS）；`envelope_accounting` 只量 `trace` 整體 ⇒ projects
 #: 越過子上限而 trace 仍在總限內時是量具盲區（真機實例：
 #: ~/.vacant/trace/projects 39 MB、trace 總 69 MB ＜ 96 MiB ⇒ 量具報
-#: within_caps True）。子上限越限由 `envelope_accounting.sub_overrun` 點名；
+#: within_caps True）。子上限越限由 `envelope_accounting` 回傳的 `sub_overrun` 鍵
+#: 點名（`vacant usage`／`usage_report` 人讀輸出同點名）；
 #: 只報告、不刪除（fail-open：步鏈是記責記錄，GC 向來不碰 chain.ndjson）。
 SUBDIR_TOTAL_CAPS: dict[str, int] = {
     "trace/projects": DEFAULT_TRACE_PROJECTS_CAP_BYTES,

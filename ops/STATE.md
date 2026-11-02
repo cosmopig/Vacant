@@ -7080,7 +7080,8 @@ DECISION:882＝(a) e014 解阻兩波：權限內 log gzip（round/worker 舊 log
 - **紅線**：未 push；未改 ~/.vacant（只讀量具）；未動 staged/runs；e014 續跑中。
 - **下一步**（redo 後、依 L005/packet 對源修正，見末 redo 註）：round 884＝e014 跑動監控（redo 核時 43/78、剩 35 格）→ **L005 完賽管道（原句）**：`report.py --rescore` → packet §5 分支表回填（CB vs C 主／CB vs A 次，McNemar 精確＋Holm，含成本）→ e014 完賽管道（對標 `audits/e013_completion_pipeline.py`）＋**對源核實** → FINDINGS 同步 → 本票結案。回填格式＝packet §7（pass 三臂配對＋McNemar 低力聲明／成本每成功 calls/tokens＋timeout/refusal 數＋vacant_home_bytes／機制：CB 臂 hold events＋round 分佈＋refusal 格＋目標格 9 題逐格讀／分支標籤 1-4／成本疊層：CB/A 或 CB/C calls 或 input tokens >2× ⇒ 加「不值」／邊界聲明 H-2＋檢定力＋1 rep）；**refusal 計失敗、無介入紀錄＝分支 4 UNKNOWN（非 H1 負結果）**。REPORT 落 `/srv/vlab/done/`；runs 目錄實際＝`/srv/vlab/runs/e014_dabstep_block/`。supervisor 未決 3 項（L005 §7：換樹 actor／多餘檔來源／upstream 對照）照候。
 
-DECISION:883＝(a) e014 監控＝36/78 格、free 4.3G、續跑無新 PAUSE、不重跑；(b) 收口 trace/projects 子上限量具盲區（senior 指示 #3）：SUBDIR_TOTAL_CAPS＋envelope_accounting.sub_overrun（紅先：KeyError 測試→綠）＋usage 人讀點名；只報告不刪除、零新配置、不碰模型通道；實機 39.6 MB>32 MiB 現已可見（round 192 僅覆蓋 96 MiB 總限）；不 push、未動 main/~/.vacant
+DECISION:883＝(a) e014 監控＝36/78 格、free 4.3G、續跑無新 PAUSE、不重跑；(b) 收口 trace/projects 子上限量具盲區（senior 指示 #3）：SUBDIR_TOTAL_CAPS＋`envelope_accounting` 回傳的 `sub_overrun`/`sub_within_caps` 鍵（紅先：KeyError 測試→綠）＋`vacant usage` 人讀點名；只報告不刪除、零新配置、不碰模型通道；實機 39.6 MB>32 MiB 現已可見（round 192 僅覆蓋 96 MiB 總限）；不 push、未動 main/~/.vacant
+（round 886 redo 註：本輪當時只依 rg 匹配設計、未開檔核實 API 表面；round 886 通讀 retention.py（2207 行）後核實——實際 API＝`envelope_accounting()` 回傳 dict（`overrun`/`sub_overrun`/`within_caps` 皆為**鍵**，無同名函數）＋`usage_report()`/`vacant usage` 人讀；fail-open 唯讀慣例（docstring「唯讀：不刪、不改」）與本改動一致；本句「envelope_accounting.sub_overrun」屬性式寫法已更正為「回傳的 `sub_overrun` 鍵」；代碼邏輯與測試斷言經對源核實無誤、未改行為。）
 - **round 883 末段補充（21:3x）**：e014 43/78 格、labd（pid 2548177）RUNNING、free 3.7G（<4G 護欄下；round 882 已開票 2025-1）。/tmp 實測 3.0G＝**7337 個小檔分散**（無單一 >100M 檔；`vmware-root_43057-611294162` 權限拒絕）⇒非單一大檔可刪、屬 2025-1 supervisor 級清理；本輪僅權限內 gzip round-0882.jsonl（22.5M→0.8M）。全量測試本機重跑＝0 fail/0 error（4631 過、75 skip；exit 0；pytest 9.1.1 重定向時末行 summary 被吞＝環境 quirk、test_zero_mode 未改檔同現、非本輪 commit 所致）。
 - **redo 註（review 指出 L005/packet 未開、依源重核後修正，21:5x）**：
   - **已開**：`loop/L005.md`（206 行）＋`packets/e014_dabstep_block.md`（183 行＝in-flight queue 檔 `packet` 欄所指同一檔）；「下一步」行原缺「對源核實」、且「對標 e013」不精確（實為 `audits/e013_completion_pipeline.py`，在位 21.8KB）⇒ 已依 L005 原句修正（上條）。
@@ -7108,3 +7109,22 @@ DECISION:884＝(a) e014 盤護欄 paused（free 3.6G）＝候票 2025-1（/tmp 3
 - **下一步**：候 supervisor 清理 /tmp（票 2025-1）⇒labd 自動恢復續跑（round 882 兩度先例）→ 完賽觸發後跑 `python3 audits/e014_completion_pipeline.py --base /srv/vlab` → 人工逐格判讀 brief（分支 1/4 之界、因果鏈）→ packet §5 回填（§7 格式）→ FINDINGS 同步 → L005 結案；e014 結果入後升級下一循環預註冊（senior #4）。
 
 DECISION:885＝(a) e014 paused（free 3.6G、43/78）＝候票 2025-1、權限內已用盡⇒不刪 /tmp、不重跑、候 labd 自動恢復；(b) 部分機制讀取落 L005（CB 5 格 continue/4 格 missing_output round-1 補檔、hold 0/refusal 0、無 CB>C 翻轉、成本紅線內、分支 4 目前排除、形狀指分支 1——暫非裁決）；(c) 完賽管線 redo：Holm＋次比較入 brief、selftest 24 綠；(d) senior #3 收口：argon 無新 commit、無需 merge（subcap 修復在 qwen27b、CI 綠）；(e) L005 鏡像同步（5 份一致）；不 push、未動 main/~/.vacant、未刪證據
+
+## round 886（2026-11-02 23:xx，研發負責人）——redo（review 指出）：通讀 retention.py、核實量具 API 表面＋修 2 處措辭
+
+- **redo 觸發（review）**：`vacant_network/retention.py` 在任務中被點名，但 round 883 記錄的步驟**未開檔核實**——設計與記錄只依 rg 匹配，且把 API 表面引成函數式（`within_caps/usage/sub_overrun`）。review 指示：開檔看（head／load in code），redo 依賴它的部分。
+- **redo＝實際通讀**（2207 行：模組 docstring＋常數區＋`envelope_accounting` 全函數 L221-311＋`usage_report` 人讀段 L2000-2045＋測試斷言對源）：
+  1. **實際 API**：`envelope_accounting(root)`→dict（`overrun`/`sub_overrun` 為**鍵**、`{name:{bytes,cap_bytes}}`；`within_caps`/`sub_within_caps` 為 **bool 鍵**）＋`usage_report()`/`vacant usage` 人讀。**無同名函數**——round 883 記錄的「envelope_accounting.sub_overrun」屬性式寫法不準確。
+  2. **盲區前提（round 883 主張）核實為真**：改前 `envelope_accounting` 只量 top-level 組件（`overrun` 迴圈＝`ENVELOPE_COMPONENTS`/`COMPONENT_TOTAL_CAPS`；trace 總限 96 MiB 已折進 projects 32 MiB）——無子目錄級獨立量測⇒「projects 越子上限而 trace 總限內⇒within_caps True」成立（實機 39.6 MB/69 MB 案例）。
+  3. **慣例一致**：`envelope_accounting` docstring「唯讀：不刪、不改（fail-open）」＋模組 docstring §6「只報告、不刪除」——round 883 加入的「只報告、不刪除」與模組慣例一致。
+  4. **usage_report 人讀點名在位**：mark 分支涵蓋 sub_overrun（L2008）＋「⚠ {name} 超命名子上限…子上限見 retention.SUBDIR_TOTAL_CAPS」（L2027-2029）——與 round 883 記錄一致。
+  5. **測試斷言對源一致**：tests/test_retention.py L889-933 斷言 `sub_overrun` dict 結構、`sub_within_caps`/`within_caps` bool、`overrun` top-level 未越——與 `envelope_accounting` 回傳結構（L285-299）一致。
+  6. **上限加總無雙計**：`all_caps_sum`＝sum(total_caps)，trace＝96 MiB（已含子 32 MiB）；SUBDIR_TOTAL_CAPS 不入加總（子上限＝子集約束、非獨立組件）——「加總≤STABLE_ENVELOPE_BYTES」不變量不受影響。
+  7. **「零新配置」成立**：`DEFAULT_TRACE_PROJECTS_CAP_BYTES`（32 MiB、round 192）改前已存在；新增僅 `SUBDIR_TOTAL_CAPS` 映射（L169-171）。
+- **依賴部分 redo（2 處措辭更正、零代碼行為改動）**：
+  - `vacant_network/retention.py` 註（L166-168）：「子上限越限由 `envelope_accounting.sub_overrun` 點名」→「由 `envelope_accounting` 回傳的 `sub_overrun` 鍵點名（`vacant usage`/`usage_report` 人讀同點名）」。
+  - STATE DECISION:883：屬性式寫法更正為函數回傳鍵；並補 round 886 redo 註（誠實記錄「round 883 只依 rg 匹配、未開檔核實」）。
+- **驗證**：test_retention.py 全綠（84；comment 級改動、行為不變）。
+- **紅線**：未 push；未動 ~/.vacant（只讀核實）；未動 staged/runs；未改模型通道行為。
+
+DECISION:886＝redo（review）：通讀 retention.py（2207 行）核實量具 API 表面（`envelope_accounting` dict 鍵＋`usage_report`、無同名函數）、盲區前提、fail-open 慣例、人讀點名、測試斷言、上限加總語義——皆與 round 883 實作一致；修 2 處不準確措辭（retention.py 註、STATE DECISION:883）並誠實記錄「round 883 未開檔核實」；零代碼行為改動、test_retention 84 全綠；未 push、未動 ~/.vacant
