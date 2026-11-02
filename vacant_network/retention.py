@@ -159,6 +159,17 @@ COMPONENT_TOTAL_CAPS: dict[str, int] = {
     "quarantine": DEFAULT_QUARANTINE_TOTAL_CAP_BYTES,
 }
 
+#: round 883（senior 指示 #3，2026-11-02）：count-based 子目錄的命名**子上限**。
+#: trace/projects 的 32 MiB 子上限此前只折進 trace 的 96 MiB 總上限
+#: （COMPONENT_TOTAL_CAPS）；`envelope_accounting` 只量 `trace` 整體 ⇒ projects
+#: 越過子上限而 trace 仍在總限內時是量具盲區（真機實例：
+#: ~/.vacant/trace/projects 39 MB、trace 總 69 MB ＜ 96 MiB ⇒ 量具報
+#: within_caps True）。子上限越限由 `envelope_accounting.sub_overrun` 點名；
+#: 只報告、不刪除（fail-open：步鏈是記責記錄，GC 向來不碰 chain.ndjson）。
+SUBDIR_TOTAL_CAPS: dict[str, int] = {
+    "trace/projects": DEFAULT_TRACE_PROJECTS_CAP_BYTES,
+}
+
 # 2026-10-29 round 176（ASSIGNMENT 🔴 最優先「用量有上限」；packet
 # ops/packets/disk_top_priority.md §4 誠實缺口「總計封頂本身不是一條程式保證，
 # 只是一個可驗算的加總」→ 本輪把它變成程式可驗的不變量）：
@@ -218,7 +229,11 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
       accounting_complete         unaccounted 為空（帳目完整）
       overrun                     越過命名總上限的組件 {name: {bytes, cap_bytes}}
                                   （round 192：fixed ＋ count-based 分組都在內）
+      sub_overrun                 越過命名子上限的子目錄 {rel: {bytes, cap_bytes}}
+                                  （round 883：SUBDIR_TOTAL_CAPS，例 trace/projects 32 MiB）
+      sub_within_caps             沒有子目錄越子上限（round 883）
       within_caps                 沒有組件越限（「固定不增長」與計數制長期增長都由量具盯住）
+                                  ＋沒有子目錄越子上限（round 883）
       fixed_overrun               overrun 中 fixed 組件的子集（round 190 欄位，保持同義）
       fixed_within_caps           沒有 fixed 組件越限（「固定不增長」由量具盯住）
       byte_caps_sum               位元組硬上限分組的加總（bytes ＋ fixed 類型）
@@ -239,6 +254,9 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
     components: list[dict[str, Any]] = []
     unaccounted: list[str] = []
     overrun: dict[str, dict[str, int]] = {}
+    # round 883：子目錄子上限（SUBDIR_TOTAL_CAPS）——top-level 總限量不到
+    # trace/projects 這種「總限內但子上限外」的增長，這裡單獨量、單獨點名。
+    sub_overrun: dict[str, dict[str, int]] = {}
     if r.is_dir():
         for entry in sorted(r.iterdir(), key=lambda p: p.name):
             if entry.name in known:
@@ -249,6 +267,13 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
                 components.append(comp)
             else:
                 unaccounted.append(entry.name)
+        for rel, cap in sorted(SUBDIR_TOTAL_CAPS.items()):
+            sub = r / rel
+            if not sub.exists():
+                continue
+            b = _tree_size(sub)
+            if b > cap:
+                sub_overrun[rel] = {"bytes": b, "cap_bytes": cap}
     fixed_overrun = {name: v for name, v in overrun.items() if name in fixed_caps}
     byte_caps_sum = sum(b for _, kind, b, _ in ENVELOPE_COMPONENTS
                         if kind in ("bytes", "fixed") and b)
@@ -258,7 +283,9 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
         "unaccounted": unaccounted,
         "accounting_complete": not unaccounted,
         "overrun": overrun,
-        "within_caps": not overrun,
+        "sub_overrun": sub_overrun,
+        "sub_within_caps": not sub_overrun,
+        "within_caps": not overrun and not sub_overrun,
         "fixed_overrun": fixed_overrun,
         "fixed_within_caps": not fixed_overrun,
         "byte_caps_sum": byte_caps_sum,
@@ -1978,7 +2005,7 @@ def usage_main(argv: list[str] | None = None) -> int:
             mark = "✓ 在封頂內"
         elif unacc:
             mark = "⚠ 帳目不完整（有無命名上限的 top-level 組件）"
-        elif acct.get("overrun"):
+        elif acct.get("overrun") or acct.get("sub_overrun"):
             mark = "⚠ 有組件超命名上限（只報告、不刪除）"
         else:
             mark = "⚠ 超封頂（vacant gc --auto 會逐組收縮）"
@@ -1997,6 +2024,9 @@ def usage_main(argv: list[str] | None = None) -> int:
         for name, v in (acct.get("overrun") or {}).items():
             print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
                   "（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS）")
+        for name, v in (acct.get("sub_overrun") or {}).items():
+            print(f"    ⚠ {name} 超命名子上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
+                  "（只報告、不刪除；子上限見 retention.SUBDIR_TOTAL_CAPS）")
         print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
               "（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:
