@@ -944,6 +944,20 @@ def test_checkpoint_restore_records_chain_event_and_only_restores_on_regression(
     assert (p3 / "solution.py").read_text() == "def f():\n    return 'v3_untested_fix'\n"
 
 
+def test_test_failed_nudge_exit_clause_aligned():
+    """L003: `failed_step/test_failed` must provide an exit clause (`or say in the final message that it failed`),
+    aligned with `failed_step` general branch and `test_claim` branches, preventing 12B agents from looping until timeout."""
+    from vacant_network.trace import review
+
+    f = {"finding_id": "z_exit_clause", "kind": "failed_step", "step": 5,
+         "cmd": "python3 -m unittest t.py", "sub": "test_failed",
+         "error": "FAILED (failures=1)"}
+    line = review.line_for(f)
+    assert "or say in the final message that it failed" in line, (
+        f"test_failed branch missing exit clause: {line!r}")
+
+
+
 
 
 
