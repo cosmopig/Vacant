@@ -468,3 +468,53 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 **本輪發現 1（gc 單次報告與盤上短暫不一致，已收斂）**：第一次 gc 報告 bytes_remaining 268,428,654 B，但當下 objects 盤上 du 275,956,217 B（差恰 7,527,563 B；整體 state dir 差在 19 B 內）；第二次 gc 再刪 122 檔／7,937,646 B 後**盤上 == 帳目完全一致**（268,018,571 B = bytes_remaining）、目標達成、aborted=false。根因未完全確定（可辩护假設：① `_remove_path` 的 `contextlib.suppress(OSError)` 吞掉 unlink 失敗卻仍計為已釋放（`return sz, 1`，`retention.py`）；② 一時性跨目錄 hardlink 使 du 雙算——跑後 1 時 total 281,154,579 < objects＋projects 288,671,501，du -sb 唯一數學自洽解释；跑後 2 已無 hardlink）。影響方向＝單次報告可能高估 freed／誤報 target_reached，下次 gc 收斂；跟進已入 BACKLOG（instrument `_remove_path`：unlink 失敗要記錄＋不計入 freed）。
 **本輪發現 2（測試產物＋操作教訓，非產品缺陷）**：以 cwd=~/dev/Vacant＋VACANT_HOME=fx 跑 `vacant trace blame` 時，CLI 觀測往 fx 的 b0a568dfe7dbe3b0 專案鏈（＝ live ~/dev/Vacant 工作區在備份中的鏈）append 了一條 `unrecorded_change`，簽章者非該鏈原 signer（CLI 防護正確拒絕讀取 live 簽章金鑰，無法證實是哪把金鑰）→ 該鏈其後單-signer 驗證轉 FAIL（144/145）。教訓：**勿以舊備份 state dir 當 VACANT_HOME 跑觀測類 CLI 命令**（會把現行金鑰條目寫進舊鏈）；mixed-signer 鏈／跨 state dir 寫入設計題已入 BACKLOG。
 **口徑**：可說——人類 10/28 抱怨的原始 872M 場景，GC 實測回收 65.8%、objects 壓到 256 MiB 目標下、被刪內容 blame 誠實轉 UNKNOWN（不崩不假 PASS）、鏈完整性 145/145 驗證通過；不可說——signer 信任（備份無 trust.json，UNKNOWN）、「兩跑收斂」不等於「單跑帳目恆等於盤上」（本輪發現 1 的根因未完全確定，已入 BACKLOG 跟進）。
+
+## 2026-11-02 · 主軸 4 · e009（e002 A/C 同 sha 重複）完賽成效與成本＋L002/L003 裁決（A 17/34、C 18/33、p=1.0；e002 7 題 C-only win 未重複 0/7 ⇒ L002 NOT_MET 撤案；L003 方向翻轉 ⇒ 選項 0 不改產品、e012 不發射）
+
+**規格與來源**：68 格（34 題 × A/C × 2 rep、polyglot_py、agent=pi、1800 s/格、C 臂 vacant_sha=cf62d258 與 e002 同）2026-11-02 08:42:41 labd 完賽（68 格、失敗 1＝pg_react-C 終態 rc=3、67/68 出分）；來源 /srv/vlab/runs/e009_replicate_e002_AC（REPORT.json rescore_checked=true、重新評分不一致 0 格；41 個 .infra-* 快照跨 17 格＝保留崩潰實例、大多後續重試出分）；預註冊判定準則＝封包 `~/dev/ops/packets/e009_replicate_e002_AC.md`（兩次合併算配對、不准只報有利的那一次）＋ L002 §3／L003 §3；管線輸出 `~/dev/ops/e009_outputs/`（8 txt，`e009_completion_pipeline.py` exit 0）。
+**成效**：A 17/34（50.0%）、C 18/33（54.5%）；配對 33（33 題）、只有 A 過 3、只有 C 過 4、McNemar two-sided p=1.0（低力、描述性）。e002 為 A 18/34（52.9%）、C 22/34（64.7%）、p=0.34；依預註冊合併兩次：e002 的 7 題 C-only win（bowling／connect／list_ops／transpose／pig_latin／react／wordy）在 e009 **0/7 未重複**（含 react-C 終態缺分＝非任一方勝）⇒ **L2-C1 NOT_MET**（P1=P2=0/7 < 4/7、exit 30、cells_present 13/14）：7 題 C-only win 主要為抽樣差、無可歸因機制。
+**成本**（數字以 REPORT.json 為準、與結果同報）：A 59.06 呼叫/成功、1,247,853 tokens/成功；C 73.22 呼叫/成功（1.24×A）、1,927,484 tokens/成功（1.55×A）；逾時 A 6/34、C 10/33（C 逾時集含 e002 六目標題 6/6）。
+**L003 交叉**（round 862 預註冊決策圖，三條件機械映射）：六目標題（bowling/connect/forth/grep/list_ops/poker）逾時方向 e002 A 5/6 vs C 2/6 → e009 **A 1/6 vs C 6/6＝翻轉**（F-7）；C 逾時不集中在 nudge 格（預註冊 nudge 格 2/10＝20%；6 收 nudge 格中 4 格收 nudge 後仍在預算內出分、含 go_counting-C 5 次 nudge）⇒ (b) 單次 nudge 延長非主因、(a) 模型盲迴圈採樣變異為主解（(b) 兩格方向偏轉留記錄、未被反證）。
+**裁決結論**：L002＝**撤案**（NOT_MET、不改產品）；L003＝**選項 0**（不改產品）——選項 2/1 觸發條件皆不成立、不可達；已合併修法（auto/argon `a72731b5` exit clause、merge `ded8d08c`）以 `git revert -m 1 ded8d08c`＝**c9d88378** 撤出 auto/qwen27b（含紅燈測試 `test_test_failed_nudge_exit_clause_aligned`）；revert 後 `tests/test_universal_and_coding_upgrades.py` 38 passed、`tests/test_r529_queue_scheduler.py` 綠、全量 pytest 見 round 868 STATE；e012 **不發射**（工單 R20261102_0310-1 失效移 done/、staged queue 檔保留未 cp）。
+**口徑**：可說——同 34 題兩次重複，C 單次領先縮小（64.7%→54.5%）、7 題 C-only win 未重複、p=1.0 低力；六目標題逾時方向在兩次重複間翻轉。不可說——不能斷言「Vacant 對程式題無效」（單模型、單 harness、34 題 × 2 次、H-12 類邊界；p=1.0 是「未顯著」不是「證明等價」）；nudge 方向偏轉（F-2/F-3）是事實記錄，主解為採樣變異、(b) 機制未被反證、只判「非主因」。
+**對下一步的意義**：L002/L003 結案（不帶入產品）；下一步＝L001（e011 dabench smoke 12 格，2026-11-02 08:42:41 起跑）→ 完賽 `~/dev/ops/audits/e011_l001_smoke_recompute.py`（C1–C4 照 L001 §3）→ 留或撤；其後 e010（2 格、主軸 2 驗收 (b)）。
+
+## 2026-11-02 · 主軸 4 · L001 結案（KEEP）：e011 dabench smoke 12 格，e008 兩題翻轉未復現（dab_039 兩臂皆過、dab_378 兩臂 8/8）；根因＝lab C 臂 venv 缺 pandas/scipy（量具 artifact），cell.py 修改保留、零產品改動
+
+**規格與來源**：12 格（6 題 × A/C、DABench、agent=pi、1800 s/格、C 臂 vacant_sha=f2b79012）2026-11-02 09:29:37 完賽（labd 12 格、0 失敗）；來源 /srv/vlab/runs/e011_l001_dabench_smoke（REPORT.json rescore_checked=true、重新評分不一致 0 格）；預註冊判定＝L001 §3（C1 環境等效／C2 翻轉修復／C3 無新害／C4 成本 sanity，先於修改寫下）；判定器 `audits/e011_l001_smoke_recompute.py` 本輪實跑 **exit 0＝KEEP**（C1∧C2∧C3∧C4 全 PASS）＋ `report.py e011_l001_dabench_smoke --rescore`。
+
+**成效**（數字以 REPORT.json 為準）：A 5/6（83.33%）、C 6/6（100%）；配對 6、A_only=0、C_only=1（＝dab_426：A 側 no_items 缺答案、C 過）；e008 的 2 題 A_only（dab_039、dab_378）在 e011 **未復現**（dab_039 兩臂皆過、dab_378 兩臂 8/8）；McNemar p=1.0（低力、描述性）。
+
+**成本**（與結果同報）：呼叫/成功 A 46.2 vs C 11.67；token/成功 A 1,035,112 vs C 100,772；逾時 A 1／C 0；4 對照格 C/A 呼叫數比 0.57／0.80／1.00／1.14（C4 門檻 ≤1.5 全達）。
+
+**裁決結論**（依 L001 §3 判定規則，C1∧C2∧C3 全達 → KEEP）：e008 的兩題翻轉是 **lab 量具 artifact**——C 臂 venv 建時無 `--system-site-packages`（cell.py:52 舊行為）、pandas/scipy 不可用＋bwrap 無網路補不進（dab_039-C e008 events 有 27 次 pandas/scipy ModuleNotFoundError＝grep 實點、e011 同格 0 次），不是產品機制「把對改錯」（e008 兩格中產品唯一可見干預＝dab_039 的 2 次 advisory 退回、內容為實、不擋交付、C 格從未有「對的答案」被改）。cell.py 修改（`--system-site-packages`、DECISION_20261101_L001_CARM_VENV.md）**保留**；**零產品改動**（vacant_network/ 本輪零 diff）。
+
+**對 2026-11-01 e008 條目的更正**（凍結規則：實驗完賽後隨結果一次同步）：本檔 2026-11-01 條目 L447「分支 3 逐格查（A_only 2 格）：……events.jsonl 無 kickback/unsourced 事件 → 記『跨跑隨機差異、非機制歸因』」與 L454「『分支 3』只查了 events.jsonl 的 kickback/unsourced 事件（確無）」——**「確無」對 dab_039 不符**：`grep -c vacant-check dabench-dab_039-pi-C-r1/events.jsonl`＝2（第 322／330 行、逐字原文見 L001 F-1、事實陳述＋advisory）；dab_378 確為 0。該兩格的「跨跑隨機差異、非機制歸因」措辭被 e011 取代：根因是 lab C 臂環境（缺套件）而非隨機差異；機制的 2 次 advisory 退回是事實（偵測命中、記錄層、非阻擋層），此點不變。
+
+**口徑**：可說——DABench 6 題 smoke 上 C 6/6 vs A 5/6、e008 兩題翻轉未復現、根因為量具 artifact（C 臂 venv 缺 pandas/scipy）、修改保留；不可說——「Vacant 對資料題有用」（n=6、p=1.0 低力、單模型單 harness、H-12 邊界）；dab_426 是 A 側 flake（no_items）不是 C 贏的機制證據。
+
+**對下一步的意義**：L001 結案（步驟 1–6、裁決 KEEP）；下一循環＝L004（候選格 pg_grep-C-r2：e009 C 敗＋逾時＋C/A token 10.93×／呼叫 6.88×＋Vacant 零訊息，見 loop/L004.md）。
+
+## 2026-11-02 · 主軸 2 · e010 大工作區格完賽（bw_repo_readme、300M／6,543 檔 workspace）：C 臂 vacant_home 1.03 MiB ≪ 150 MiB 封頂，驗收 (b) PASS
+
+**規格與來源**：2 格（bw_repo_readme × A/C、agent=pi）2026-11-02 09:31:01 完賽（labd 2 格、0 失敗）；來源 /srv/vlab/runs/e010_bigwork_pi_AC（兩臂 pass=true、score.json note＝"completion signal only; usage numbers are in cell.json"）；審計 `audits/e010_bigwork_audit.md`（`envelope_compliance.py --envelope 157286400`、verdict=PASS）。
+
+**數字**：C 臂 vacant_home_bytes **1,077,331 B（~1.03 MiB）**、vacant_objects_bytes 1,062,407 B；封頂 157,286,400 B（150 MiB＝0.5×workspace）ratio **0.006849**；同 ≤ 268,435,456 B（256 MiB 穩態封頂）；A 臂 NA（此臂設計上沒裝 Vacant、超出封頂口徑）。
+
+**裁決**：ASSIGNMENT 驗收 (b)「實驗室格子 C 組的 vacant_home_bytes＋一個大工作區的格子」＝**PASS**——300M／6,543 檔大工作區下 Vacant 自身用量 1.03 MiB，與 69 格實測區間（29.1–289.9 KB，2026-10-31 條目）同量級、未隨 workspace 尺寸成長。
+
+**口徑**：可說——單格封頂合規（1.03 MiB ≪ 150 MiB）；不可說——「用量有上限」的完整意義（ASSIGNMENT 驗收 (a) 真機 ~/.vacant 前後數字與 (c) 回收後 verify/blame 為另兩條證據、見 2026-11-01 GC 實測條目；單格 PASS 是必要條件、不是合規的全部）。
+
+## 2026-11-02 · 主軸 4 · e013 DABench 全盤（30 題）A/C 完賽成效與成本判定＋L004 裁決（分支 4）（A 28/30、C 27/30、p=1.0；C 臂成本 0.54× calls／0.42× tokens 低於 A 臂；vacant_home 峰值 161.5 KiB；H2 成立；零產品改動、L004 結案）
+- **實驗**：e013_dabench_pi_AC_full（DABench 30 題×A/C×pi×1 rep＝60 格；gemma-4-12b-it-qat@100.86.226.21:1234；vacant_sha c8167271＝現行基線、與 CI 綠 argon 86bd10de 產品碼 byte-identical；L001 venv 修復在位；PAR 1；timeout 1800s；round 870 發射、round 875 完賽）。
+- **完賽**：60/60 出分、infra 0 格、`report.py --rescore` 重新評分不一致 0 格（管線 `e013_completion_pipeline.py` exit 0、rescore_mismatch=[]、crosscheck_ok=true；產物 /srv/vlab/e013_outputs/）。
+- **結果（主軸 4）**：A **28/30**（93.3%）vs C **27/30**（90.0%）；A_only={dab_055, dab_426}、C_only={dab_427}；McNemar exact 雙側 **p=1.0**（n=30 對、1 rep、低力預聲明）。e008（A 29/30、C 27/30、p=0.5）與本次分歧對不同題（e008 A_only=dab_039/dab_378、本次=dab_055/dab_426）＝跨跑採樣/環境差異的又一實例。
+- **成本（主軸 3，C/A 同報）**：calls/成功 C 14.41 vs A 26.93（**C/A=0.54×**）；tokens/成功 C 244,937 vs A 583,095（**C/A=0.42×**）；逾時 0/0；mean wall C 90.7s vs A 71.5s（1.27×）；C 臂 zero_ran 率 30/30（stop 事件 30/30）。e008 的「每成功 1.61× calls／2.00× tokens」在本次全盤複測**未重現**（本次 0.54×／0.42×）；兩跑環境不同（e008 C 臂 venv 缺 pandas/scipy＝L001 根因、e011 已修）與 build 不同，成本差原因**不於此歸因**（無對照消融），只報同口徑數字。
+- **主軸 2（C 臂收納）**：vacant_home_bytes 峰值 **165,414 B（≈161.5 KiB，n=30）**≪ 256 MiB 穩態封頂（同 ≤ 256 MiB；e010 大工作區 1.03 MiB 基線內；69 格實測區間 29.1–289.9 KB 上緣附近、未超）。
+- **H2（翻轉修復）**：dab_039 A pass／C pass；dab_378 A pass／C pass ⇒ **H2 成立**——e008 兩題翻轉＝環境 artifact 確認（L001 根因＝C 臂 venv 缺 pandas/scipy；cell.py 修復保留、e011 smoke 12 格＋本次全盤複核皆未復現）。
+- **機制邊界（e007 §5.2 先例）**：C 臂機制＝mode=evidence **記錄層、無阻擋力**；本次 C 臂損失 2 格（dab_055/dab_426）hooks stop 皆 action=allow、zero_ran=true、findings=[]、vacant-check=0、delivery checked=6/unverified=[] ⇒ **無機制介入紀錄** ⇒ 不歸因機制（packet 分支 4：記「採樣/環境差異」）。dab_378 型邊界仍成立：溯源建立「值有出處」不建立「值正確」（H-2 同形）。
+- **口徑——可說**：在 DABench 30 題、gemma-4-12b-it-qat、pi 上，Vacant 對答案正確性**無可測效應**（McNemar p=1.0、1 rep、低力），C 臂成本**低於** A 臂（calls 0.54×／tokens 0.42×）、vacant_home 峰值 161.5 KiB 封頂內；e008 兩題翻轉已修復（環境 artifact 確認）。
+- **口徑——不可說**：「Vacant 對資料題有效/無效」（單模型單 harness 單題組、1 rep、H-12 類邊界；p 是未顯著、非證明等價）；「機制把對改錯」（C 臂損失格無介入紀錄、無紀錄支持歸因）；跨模型/跨 harness/跨題組推廣（H-12）。
+- **裁決**：L004 **結案**（round 875）＝packet §4 **分支 4**（C<A 且無介入紀錄→採樣/環境差異、誠實記錄、不歸因機制）；H0 成立／H1 被否／H2 成立；零產品碼改動（分支 1/2/4 皆「不改產品」路徑）。分支標籤說明：senior 指示 #1 預設分支 1，但分支 1 預註冊條件「分歧對各 ≤1 或對稱」不被實際值（2/1、不對稱）滿足⇒標籤從預註冊機械映射（不事後挑數）；實質結論一致（見 loop/L004.md §4）。
+- **對下一步**：主軸 4 若再投入＝測「阻擋級」（controller 形態能否擋下 dab_039 型缺失交付）而非同設計複測（e007 §5.2 原文）——需新預註冊＋審查工單；本輪不發射。
+- **證據**：/srv/vlab/runs/e013_dabench_pi_AC_full/REPORT.json（rescore 後）＋REPORT.md；/srv/vlab/e013_outputs/{brief.json,pipeline_report.json,rescore.stdout.txt,REPORT.json}；~/dev/ops/audits/e013_dabench_pi_AC_full.md（助手票 R20261102_1321-1、round 875 補更正註記）；loop/L004.md §4–§6。
