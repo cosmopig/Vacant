@@ -28,6 +28,12 @@ def env(tmp_path, monkeypatch):
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("VACANT_HOME", str(tmp_path / "vh"))
+    # 背景 auto-gc 子程（stop/session_end 掛鉤派生、start_new_session、繼承本環境的 VACANT_HOME）
+    # 會在快照視窗內寫 gc.lock/auto_gc.log/state.json，使「讀端 byte-identical」變成競態 flake
+    # （round 897 全量實測命中：CI 綠、本機偶紅、單跑綠）。用 hook 文件化的測試開關關掉
+    # （hook.py:225「可關：VACANT_HOOK_NO_GC=1（測試／特殊環境）」；同 test_trace_recorder.py:233、
+    # test_xpath_sources.py:52 先例）——本檔無任何測試依賴 auto-gc 觸發（grep 零引用）。
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
     for k in ("VACANT_TRACE", "VACANT_MODE", "VACANT_HOOK_NO_STOP", "VACANT_FEEDBACK_MODE",
               "CLAUDE_CONFIG_DIR", "CODEX_HOME", "XDG_CONFIG_HOME", "PI_CODING_AGENT_DIR"):
         monkeypatch.delenv(k, raising=False)

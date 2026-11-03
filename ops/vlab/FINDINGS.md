@@ -518,3 +518,16 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 - **裁決**：L004 **結案**（round 875）＝packet §4 **分支 4**（C<A 且無介入紀錄→採樣/環境差異、誠實記錄、不歸因機制）；H0 成立／H1 被否／H2 成立；零產品碼改動（分支 1/2/4 皆「不改產品」路徑）。分支標籤說明：senior 指示 #1 預設分支 1，但分支 1 預註冊條件「分歧對各 ≤1 或對稱」不被實際值（2/1、不對稱）滿足⇒標籤從預註冊機械映射（不事後挑數）；實質結論一致（見 loop/L004.md §4）。
 - **對下一步**：主軸 4 若再投入＝測「阻擋級」（controller 形態能否擋下 dab_039 型缺失交付）而非同設計複測（e007 §5.2 原文）——需新預註冊＋審查工單；本輪不發射。
 - **證據**：/srv/vlab/runs/e013_dabench_pi_AC_full/REPORT.json（rescore 後）＋REPORT.md；/srv/vlab/e013_outputs/{brief.json,pipeline_report.json,rescore.stdout.txt,REPORT.json}；~/dev/ops/audits/e013_dabench_pi_AC_full.md（助手票 R20261102_1321-1、round 875 補更正註記）；loop/L004.md §4–§6。
+
+## 2026-11-03 · 主軸 4 · e014 DABStep blocking-level 完賽：CB vs C 完全對稱（14/14、零分歧對）、CB 成本 0.52×A／0.89×C（A 13/26、C 14/26、CB 14/26；三配對 McNemar p=1.0、Holm 皆 1.0；CB 臂 12 次 continue 皆 round≤2、0 hold、0 refusal；分支 1/4 之間⇒人工裁決）
+- **實驗**：e014_dabstep_block（DABStep 26 題×A/C/CB×pi×1 rep＝78 格；gemma-4-12b-it-qat@1004；vacant_sha `7c304639`（block mode 實作、CI 綠 4628 passed）；A＝不裝、C＝`--mode evidence`、CB＝`--mode block`；timeout 1800s；round 880 發射、round 897 完賽）。
+- **完賽**：78/78 出分、infra 0 格、`report.py --rescore` 不一致 0 格（管線 `audits/e014_completion_pipeline.py` exit 0；產物 /srv/vlab/e014_outputs/brief.json）。
+- **結果（主比較 CB vs C）**：C **14/26**（53.85%）vs CB **14/26**（53.85%）；**CB_only=0、C_only=0（零分歧對）**、McNemar exact 雙側 **p=1.0**。次比較：A 13/26 vs C 14/26（A_only=1〔task 17〕、C_only=2、p=1.0）；A 13/26 vs CB 14/26（A_only=1〔task 17〕、CB_only=2、p=1.0）。三配對 Holm–Bonferroni 皆 **p=1.0**。1 rep、26 對——檢定力極低（1/1→p=1.0；2/0→p=0.5），主要讀法＝描述性＋方向。
+- **成本（同口徑＝report.py：分子含該臂所有出分格〔含失敗格〕、tokens=input+output）**：calls/成功 A **69.23**／C **40.43**／CB **36.14**；tokens/成功 A **1,835,838**／C **1,035,576**／CB **918,975**；比值 C/A **0.584×/0.564×**、CB/A **0.522×/0.501×**、CB/C **0.894×/0.887×**——**皆 ≤2× 紅線**（cost_ok）。逾時 A=1、C=1、CB=0。
+- **機制（CB 臂逐格）**：9/26 格有 continue、**12 次 continue 全部 round≤2**、**0 hold**（round≥3）、**0 refusal**（無 wall≥1800s＋末次 continue 格）；9 題目標格：task 22 三臂全過、task 17 僅 A 過（＝A_vs_C／A_vs_CB 唯一 A_only）、其餘 7 題三臂全敗。
+- **裁決**（round 894 資深審查兼研發總監，見 loop/L005.md round-894 段）：**H1（blocking>evidence）在 DABStep 上被否定**（無增量翻轉、CB=C=14/26）；落在 packet §5「分支 1/4 之間」裁決區（有 12 次 continue 介入但無 hold/refusal、增量為 0）。管線 branch_hint 同判「§5 分支表無嚴格對應分支⇒人工裁決」——round 894 已裁。
+- **邊界（隨結論必報）**：H-2 同構——blocking level 查交件存在（missing_output）、不判內容正確（內容裁判＝隱藏 scorer；被 hold 後內容仍錯＝fail、非產品 bug）；1 rep 低力（上）；單模型單 harness 單題組（H-12、不外推）。
+- **口徑——可說**：在 DABStep 26 題、gemma-4-12b-it-qat、pi、1 rep 下，blocking 臂與 evidence 臂通過率**完全相同**（14/14、零分歧對）、CB 成本為 A 的 0.52× calls／0.50× tokens、C 的 0.89×；機制有輕度介入（12 次 round≤2 continue）但無升級到 hold/refusal。
+- **口徑——不可說**：「blocking 普遍無效/有效」（單題組單模型 1 rep、H-12；p=1.0 是未顯著、非證明等價）；「accountability 無效」（記錄端 e013 分支 4＋消費端 e014 皆在噪音內＝方向性證據、非裁定）；跨模型/題組/rep 推廣（H-12）。
+- **對下一步**：核心研究問題三假說中，記錄端（e013）與消費端（e014）已測；**H-multi-review（真第二代理）仍為唯一 UNKNOWN**（e006 M 臂無真第二 agent 證據）——下一循環預註冊候選（見 ~/dev/ops/staging/next_cycle_research_packet_draft_r875.md round 897 段）。
+- **證據**：/srv/vlab/runs/e014_dabstep_block/REPORT.{json,md}；/srv/vlab/e014_outputs/brief.json；~/dev/ops/audits/e014_completion_pipeline.py（29 selftest 綠）；~/dev/ops/packets/e014_dabstep_block.md §1–§7；loop/L005.md。
