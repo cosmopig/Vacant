@@ -451,6 +451,124 @@ def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
     return sz, max(1, count)
 
 
+def _sealed_volume_meta(p: pathlib.Path) -> tuple[int, int, int] | None:
+    """封印卷（明文或 .gz）→ (first_seq, last_seq, bytes)。尾行是 seal 筆，
+    其 payload 帶 first_seq/last_seq（Phase A 封印語義）；讀不出 ⇒ None（跳過，不刪）。"""
+    try:
+        if p.name.endswith(".gz"):
+            import gzip
+            with gzip.open(p, "rt", encoding="utf-8", errors="replace") as f:
+                lines = f.read().splitlines()
+        else:
+            lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+        lines = [x for x in lines if x.strip()]
+        if len(lines) < 2:
+            return None
+        seal = json.loads(lines[-1])
+        pl = seal.get("payload") or {}
+        fs, ls = pl.get("first_seq"), pl.get("last_seq")
+        if fs is None or ls is None:
+            fs, ls = int(json.loads(lines[0]).get("seq", 1)), int(seal.get("seq", 1))
+        return int(fs), int(ls), _file_size(p)
+    except Exception:  # noqa: BLE001——讀不出的卷不回收（fail-open），原因記上報表
+        return None
+
+
+def _reclaim_sealed_volumes_to_target(
+    proj_root: pathlib.Path,
+    target_bytes: int,
+    current_bytes: int,
+    *,
+    keep_recent_volumes: int = DEFAULT_KEEP_SET_ASIDE,
+    dry_run: bool = False,
+    budget: _Budget | None = None,
+) -> dict[str, Any]:
+    """L3 預算回收（DECISION_20261103 §3.4；Phase C）。僅在「有明確預算且 objects
+    回收後仍超」時由 `compact_trace` 呼叫——無預算 ⇒ 本函數不執行（零刪除，C5）。
+
+    跨專案按 mtime 最舊封印卷優先回收；**絕不動**活動卷、卷 1（創世）、每專案最近
+    `keep_recent_volumes` 卷（鏡 `DEFAULT_KEEP_SET_ASIDE=3`）。每筆回收先簽一筆
+    `volume_reclaimed`（卷名、first_seq–last_seq、位元組、預算）上該專案活動鏈，
+    再刪卷；簽章失敗（如混簽章鏈 MixedSignerRefused）⇒ 還原已刪檔案、跳過該卷——
+    沒有無簽章的回收（§3.4：回收動作本身入鏈記責）。回收後 `verify` 對缺卷區間
+    報 UNKNOWN（Phase A 語義，本函數不改裁定出口）。
+    """
+    from .trace.recorder import Recorder
+
+    cands: list[tuple[int, str, pathlib.Path, pathlib.Path]] = []
+    for pdir in sorted(proj_root.iterdir()):
+        if not pdir.is_dir():
+            continue
+        vols: list[tuple[int, pathlib.Path]] = []
+        for q in pdir.iterdir():
+            if not q.is_file() or not q.name.startswith("chain-"):
+                continue
+            stem = q.name.removeprefix("chain-")
+            if stem.endswith(".ndjson.gz"):
+                num_str = stem.removesuffix(".ndjson.gz")
+            elif stem.endswith(".ndjson"):
+                num_str = stem.removesuffix(".ndjson")
+            else:
+                continue
+            if num_str.isdigit():
+                vols.append((int(num_str), q))
+        if len(vols) <= keep_recent_volumes:
+            continue
+        vols.sort(key=lambda x: x[0])
+        protected = {1} | {num for num, _q in vols[-keep_recent_volumes:]}
+        for num, q in vols:
+            if num in protected:
+                continue
+            with contextlib.suppress(OSError):
+                cands.append((q.stat().st_mtime_ns, pdir.name, pdir, q))
+    cands.sort(key=lambda t: (t[0], t[1]))
+
+    actual: list[dict[str, Any]] = []
+    would: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    freed = 0
+    for _mtime, _pname, pdir, vol in cands:
+        if current_bytes - freed <= target_bytes:
+            break
+        if budget is not None and budget.expired():
+            skipped.append({"volume": vol.name, "why": "budget_expired"})
+            continue
+        meta = _sealed_volume_meta(vol)
+        if meta is None:
+            skipped.append({"volume": vol.name, "why": "unreadable_volume"})
+            continue
+        fs, ls, size = meta
+        if dry_run:
+            would.append({"volume": vol.name, "first_seq": fs, "last_seq": ls, "bytes": size})
+            freed += size
+            continue
+        payload = {"schema": "vacant-trace/1", "volume": vol.name,
+                   "first_seq": fs, "last_seq": ls, "bytes": size,
+                   "reason": "budget", "target_bytes": target_bytes}
+        try:
+            backed = vol.read_bytes()
+            vol.unlink()
+            # Recorder 以目錄直掛（同 verify_trace_chains 先例）：不需反推 workspace。
+            rec = Recorder(pdir, root=proj_root.parent)
+            rec.dir = pdir
+            rec.chain_path = pdir / "chain.ndjson"
+            rec.state_path = pdir / "state.json"
+            try:
+                rec.append("volume_reclaimed", payload)
+            except Exception:  # noqa: BLE001——簽不成 ⇒ 不刪（fail-open，無無簽章回收）
+                vol.write_bytes(backed)
+                skipped.append({"volume": vol.name, "why": "signing_refused"})
+                continue
+        except OSError as e:
+            skipped.append({"volume": vol.name, "why": f"unlink_failed: {e.__class__.__name__}"})
+            continue
+        freed += size
+        actual.append({"volume": vol.name, "first_seq": fs, "last_seq": ls, "bytes": size})
+    return {"volumes_reclaimed": len(actual), "reclaimed_volumes": actual,
+            "would_reclaim": would, "skipped_volumes": skipped,
+            "bytes_freed": freed if not dry_run else 0}
+
+
 def _index_base_sha(blobs: W.Blobs, idx_sha: str | None) -> str | None:
     """若 `idx_sha` 是差異索引，回傳它指向的關鍵幀 `base` sha256。"""
     if not idx_sha or ":" in idx_sha or not blobs.has(idx_sha):
@@ -1004,15 +1122,30 @@ def compact_trace(
         if target["aborted"]:
             aborted = True
 
+    # ── Phase C（L3 預算回收，DECISION_20261103 §3.4）────────────────────────────
+    # 僅當有明確預算且 objects 回收後整棵 trace 樹仍超：回收最舊封印卷（活動/卷 1/
+    # 最近 N 卷絕不動），每筆先簽 volume_reclaimed 再刪。無預算 ⇒ 不執行（C5 零刪除）。
+    reclaim_rep: dict[str, Any] | None = None
+    if target_bytes is not None and target_bytes >= 0 and proj_root.is_dir():
+        cur = _tree_size(troot)
+        if cur > target_bytes:
+            reclaim_rep = _reclaim_sealed_volumes_to_target(
+                proj_root, int(target_bytes), cur, dry_run=dry_run, budget=budget)
+
     rep = {
-        "bytes_freed": bytes_freed + (target["bytes_freed"] if target else 0),
-        "files_removed": files_removed + (target["files_removed"] if target else 0),
+        "bytes_freed": bytes_freed + (target["bytes_freed"] if target else 0)
+                       + (reclaim_rep["bytes_freed"] if reclaim_rep else 0),
+        "files_removed": files_removed + (target["files_removed"] if target else 0)
+                         + (reclaim_rep["volumes_reclaimed"] if reclaim_rep else 0),
         "projects_scanned": projects_scanned,
         "kept_blobs": len(keep_shas),
         "aborted": aborted,
+        "volumes_reclaimed": reclaim_rep["volumes_reclaimed"] if reclaim_rep else 0,
     }
     if target is not None:
         rep["target"] = target
+    if reclaim_rep is not None:
+        rep["reclaim"] = reclaim_rep
     return rep
 
 

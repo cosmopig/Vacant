@@ -430,6 +430,11 @@ def chain30k(tmp_path_factory):
     try:
         keys.init_local()
         rec = R.Recorder(ws)
+        # C1＝封印（L1）語義的驗收；L2 冷壓縮是 Phase B 的驗收層（test_stepchain_phaseb.py，
+        # 含「損 .gz⇒BROKEN」負控制）。Phase B 預設 compact_on_seal=True 會把新封印卷改成
+        # .gz，使 C1 的明文 .ndjson 負控制（改中段卷/刪 seal 行）失去作用對象——與 Phase A
+        # 四測試同式 pin compact_on_seal=False 隔離語義（round 893 commit 0d67771c 先例）。
+        rec.compact_on_seal = False
         m30 = R.Actor("g1", "s1")
         rec.pre("w", m30, "Write", {"file_path": "f.txt"})
         rec.post("w", m30, "Write", {"file_path": "f.txt"}, "ok")
@@ -475,11 +480,19 @@ def chain30k(tmp_path_factory):
 
 
 def _fresh_home_copy(chain30k, tmp_path, label):
-    """把 30k 鏈專案目錄複製到新 home（負控制用；不動共享鏈）。回傳 (rec, name)。"""
+    """把 30k 鏈專案目錄複製到新 home（負控制用；不動共享鏈）。回傳 (rec, name)。
+
+    連同 `intake/`（`trust.json` accepted-signer 清單＋金鑰狀態）一起複製：`verify`
+    以簽名者公鑰對清單，新 home 沒有它會回「trace signer is not on the
+    accepted-signer list」——那是環境缺失，不是負控制要斷言的 BROKEN 族（會把真
+    BROKEN 偽裝成環境錯誤）。"""
     name = chain30k["rec"].dir.name
     new_home = tmp_path / label
     (new_home / "trace" / "projects").mkdir(parents=True)
     shutil.copytree(chain30k["rec"].dir, new_home / "trace" / "projects" / name)
+    src = chain30k["home"] / "intake"
+    if src.is_dir():
+        shutil.copytree(src, new_home / "intake")
     old = os.environ.get("VACANT_HOME")
     os.environ["VACANT_HOME"] = str(new_home)
     return R.Recorder(chain30k["ws"]), name, old
