@@ -215,3 +215,44 @@ tests/test_trace*.py）綠＋全量套件 ≥ 基線（4,634 passed / 4,703 coll
 - 「存量不強遷」⇒即時省空間只限新封印卷；存量回收＝顯式動作（不預設）。
 - 本節是**規劃**、非實作（迴路規則「不改產品行為」）；實作開工時機＝全量對照綠（CI b8dd9c92/
   8d2a2173 收口）且 e014 不再撞磁碟（現 free 65G、無撞）。
+
+## 10. 結案（round 898，2026-11-03）——Phase A/B/C 實作完成、C1–C6 逐項核驗
+
+**狀態**：三層設計（§3）全數實作並經資深審查（argon 48a97de3 三修已審查、CI 綠後 merge 入
+auto/qwen27b `5368fee2`）。C1–C5 **達標**；C6 **部分達標**（見下表，append P99 未達＝
+`xfail(strict=False)` 誠實記錄、**不宣稱達標**——round 897 先例）。
+
+**證據（全部可重現）**：
+- 目標測試簇（round 898 本輪實跑、auto/qwen27b merge 後 HEAD）：`tests/test_stepchain_sealing.py`
+  ＋`test_stepchain_phaseb.py`＋`test_stepchain_phasec.py`＋`test_stepchain_c2_realchain.py`＋
+  `test_retention.py`＋`test_retention_cli_blame_verify.py`＋`test_twin_vm_retention.py`＋
+  `test_statusboard.py`＋`test_trace_recorder.py`＝**195 passed、1 skipped、1 xfailed（185 s，exit 0）**。
+- 三名邊界用例皆在綠集內：同號雙胞胎容錯＝`test_stepchain_sealing_set_aside_moves_gz_twins`＋
+  `test_c4_reclaim_sealed_volume_twins_removes_both_and_preserves_recency_window`；損壞 `.gz`
+  fail-open＝`test_phase_b_corrupt_gz_does_not_crash_gc_or_usage_report`＋
+  `test_phase_b_tail_corrupted_last_file_handles_eoferror`；回收後 UNKNOWN 斷言＝
+  `test_c4_verify_unknown_after_reclaim_not_true_no_exception`。
+- C2 真鏈實測 receipt：`ops/stepchain/c2_receipt_round895.json`（2 條真鏈——`b0a568dfe7dbe3b0`
+  21,859 筆、`535f1510326fb03a` 16,007 筆——升級前後 `verify` 皆 OK 且可追加，`all_pass: true`）；
+  round 898 複跑 `ops/stepchain/c2_realchain_acceptance.py --selfcheck` **exit 0**（all_pass true）。
+- CI：argon `48a97de3` **綠**（4663 passed / 0 failed / 收集 4734 ≥ 基線 4732、1 xfail＝C6 P99
+  誠實記錄）；merge commit `5368fee2` 之 CI 由本機 CI 循環接續（規則：合併前看 CI＝argon 綠已核）。
+- 參數落定：`DEFAULT_VOLUME_MAX_BYTES = 2 MiB`（R4 以「2 MiB 為起點」收口）；
+  `DEFAULT_KEEP_SET_ASIDE = 3`（C4 recency 窗）。
+
+**C1–C6 逐項核驗**（對 §5 預註冊判準）：
+
+| 判準 | 狀態 | 證據 |
+|---|---|---|
+| **C1 分卷** | ✅ 達標 | `test_stepchain_sealing_c1_volume_split_and_verify`＋G1 四測試（30k 無單檔超限、verify/verify_since OK、改中間卷⇒BROKEN、刪 seal 行⇒BROKEN）綠 |
+| **C2 向後相容** | ✅ 達標 | 2 條真鏈 receipt（上）＋`test_stepchain_c2_backward_compatibility`＋argon 48a97de3 補 `.gz` 卷識別後 round 898 複跑 selfcheck exit 0 |
+| **C3 壓縮** | ✅ 達標 | phaseb 六測試綠（.gz verify OK、損壞⇒BROKEN 非 UNKNOWN、比≥3×、活動卷永不壓、fail-open、混裝艦隊） |
+| **C4 回收** | ✅ 達標 | phasec 綠：只回收 recency 窗外封印卷、回收後 verify⇒UNKNOWN（非 True、非例外）、`volume_reclaimed` 在鏈有簽章、dry-run 零動作、argon 48a97de3 雙胞胎全數移除＋取鎖 |
+| **C5 零設定/fail-open** | ✅ 達標 | `test_c5_no_budget_zero_deletion`＋`test_c5_fresh_state_dir_gc_runs_clean` 綠；無預算＝零刪除 |
+| **C6 成本** | ⚠️ **部分達標** | `test_g3_c6_verify_30k_under_5s` **綠**（30k 步 verify 實測 2.9 s ≤ 5 s）；`test_g3_c6_append_p99_delta_le_10pct` **未達**（round 895 實測 +49.7% > 10%，`xfail(strict=False)`、reason 明載 NOT MET）——**不宣稱達標**，留作開放項 |
+
+**結案語（連同引用）**：步鏈無界增長治理三層（分卷封印／冷壓縮／預算回收）已實作、測試與
+CI 全綠、C1–C5 達標結案；**C6 append P99 增量 ≤10% 未達（實測 +49.7%）、僅 verify ≤5 s
+達標**——引本文任何「結案」時必須連帶此句。H-3（completeness）邊界與 §4 非目標不變。
+未達項（C6 P99）的後續：屬實作層效能調優、不阻結案語義（P99 增量來自封印門檻附近的
+局部行為、非正確性問題）；若後續量產發現 append 延遲為痛點，另開票、先定判準再調參。
