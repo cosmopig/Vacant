@@ -531,3 +531,12 @@ M 臂第二 agent 證據否則 UNKNOWN；機構回退與限制見封包 §4。
 - **口徑——不可說**：「blocking 普遍無效/有效」（單題組單模型 1 rep、H-12；p=1.0 是未顯著、非證明等價）；「accountability 無效」（記錄端 e013 分支 4＋消費端 e014 皆在噪音內＝方向性證據、非裁定）；跨模型/題組/rep 推廣（H-12）。
 - **對下一步**：核心研究問題三假說中，記錄端（e013）與消費端（e014）已測；**H-multi-review（真第二代理）仍為唯一 UNKNOWN**（e006 M 臂無真第二 agent 證據）——下一循環預註冊候選（見 ~/dev/ops/staging/next_cycle_research_packet_draft_r875.md round 897 段）。
 - **證據**：/srv/vlab/runs/e014_dabstep_block/REPORT.{json,md}；/srv/vlab/e014_outputs/brief.json；~/dev/ops/audits/e014_completion_pipeline.py（29 selftest 綠）；~/dev/ops/packets/e014_dabstep_block.md §1–§7；loop/L005.md。
+
+## 2026-11-03 · 主軸 3/4 · e015 H-multi-review（真第二代理）Phase 1 完成：NOT_BETTER_THAN_RANDOM（X＝15/16 BAD 側 P＝17/65536≈0.0003 達第一 α；Y＝7/15 GOOD 側 P＝22819/32768≈0.696 未達第二 α；Holm 第二道未過＝單側命中⇒**非 EFFECTIVE**；Phase 2 依預註冊不發射；零產品改動）
+- **實驗**：e015_h_multi_review——32 交件（16 GOOD＋16 BAD 植入）經獨立 reviewer（gemma-4-12b-it-qat@1004、獨立 pi 會話、單層）判定 ACCEPT/REJECT；預註冊＝`~/dev/ops/packets/e015_h_multi_review.md`（X≥13/16、Y≥13/15、Holm 兩道、4 態狀態表、6 發射門）；rounds 898–900；發射 11/03 11:15 UTC、完成 11:23（447s、0 infra 失敗、32/32 出分；1 格 reviewer 輸出 UNPARSED＝缺證據、剔出 GOOD 分母 n_good=15）。
+- **裁決**（`/srv/vlab/runs/e015_h_multi_review/VERDICT.json` state=NOT_BETTER_THAN_RANDOM）：**H-multi-review 在 12B reviewer 條件下於機制層被否**——reviewer 抓壞交件 15/16（單側顯著），但把好交件錯拒 9/15（Y=7/15 未達）⇒**整體不優於隨機**，不具備「交付前獨立審查層」的兩側品質；Phase 2（quorum/多 reviewer）未發射（預註冊條件未滿足）。
+- **成本**：32 格、447s、0 infra；每格 usage（input/output tokens、model_calls）存於 `/srv/vlab/runs/e015_h_multi_review/reviewer/<cell>/stdout.json`＋cell.json。本實驗是機制層兩側 gauge、非 A/C 通過率比較，無 2×A 紅線適用。
+- **口徑——可說**：在 12B reviewer／pi／本 32 交件集下，獨立審查層的壞交件攔截率 15/16（P≈0.0003）、好交件接受率 7/15（P≈0.696），按預註冊狀態表整體判定 NOT_BETTER_THAN_RANDOM（非「無效」，亦非「有效」）；不進 Phase 2。
+- **口徑——不可說**：「multi-agent 有害」（無方向守衛、AMEND1 先例）；「multi-agent 無效」（單模型 reviewer、單交件集、1 rep、H-12）；「換強 reviewer 就會有效」（本裁決限 12B 條件；若要試＝新 packet、新預註冊、不複用本結果）；跨 harness/題組/rep 推廣（H-12）。
+- **證據鏈**：VERDICT.{json,md}（sha256 d0e29884…/d84a0077…）；`~/dev/ops/audits/e015_h_multi_review.md`；`~/dev/ops/audits/e015_verdict_pipeline.py`（selftest 12 項綠、stdlib、可重跑）；32/32 收據 prompt 逐字＝packet §2.2.1 模板＋逐格指令（prompt_sha256＋instruction_sha256 對上、31/32 stdout_sha256 對上）；發射前 6 門全綠（含全量 4665 passed＝baseline）。
+- **核心研究問題狀態更新**：三假說皆已測——H-acc（記錄端 e013 分支 4＋消費端 e014 H1 被否：方向性證據、非裁定）；H-harness（e002/e006：不優且更貴）；**H-multi（本條：12B 條件下被否）**。⇒ 下一循環轉「C>A 格子機制讀」（ASSIGNMENT 循環第 1 步）＝`~/dev/ops/loop/L006.md`：最穩 C>A 格 pg_list_ops（e001/e002/e006 三次 C_only、跨兩 harness）在 e001＋e002 留有 failed_step 預交付審查介入紀錄（唯一有機制因果紀錄的穩定 C>A 格）；L006 §4 已預註冊消融實驗 e016（A／C／C-nf）判準。
