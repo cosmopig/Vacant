@@ -147,3 +147,55 @@ def test_stepchain_c2_backward_compatibility(env):
 
     ok, why = rec.verify()
     assert ok, f"Verify after sealing legacy chain failed: {why}"
+
+def test_stepchain_sealing_gc_preserves_blobs_in_sealed_volumes(tmp_path, monkeypatch):
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    keys.init_local(vh)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "data.csv").write_text("col\nval\n")
+
+    rec = R.Recorder(ws)
+    rec.volume_max_entries = 4
+
+    # 在第一卷產生一個較大的 output blob（觸發 _fit 存進 objects/）
+    large_output = "LARGE_OUTPUT_IN_VOL_1_" + ("X" * 10000)
+    rec.pre("t0", MAIN, "Write", {"file_path": "f0.txt"})
+    (ws / "f0.txt").write_text("content 0\n")
+    rec.post("t0", MAIN, "Write", {"file_path": "f0.txt"}, large_output)
+
+    # 寫入後續步驟，把第一卷封印，產生新卷
+    for i in range(1, 10):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+
+    pdir = rec.dir
+    vols = sorted(pdir.glob("chain-*.ndjson"))
+    assert len(vols) >= 2
+
+    # 檢查第一卷是否包含 output_blob
+    vol1_lines = (pdir / "chain-000001.ndjson").read_text(encoding="utf-8").splitlines()
+    vol1_blobs = []
+    for l in vol1_lines:
+        row = json.loads(l)
+        pl = row.get("payload") or {}
+        if "output_blob" in pl:
+            vol1_blobs.append(pl["output_blob"])
+    assert vol1_blobs, "Vol 1 must contain output_blob"
+    target_blob = vol1_blobs[0]
+    target_blob_file = vh / "trace" / "objects" / target_blob[:2] / target_blob
+    assert target_blob_file.is_file(), "Target blob must exist before GC"
+
+    from vacant_network.retention import compact_trace, usage_report
+    # 執行 compact_trace，不應誤刪第一卷的 output_blob
+    compact_trace(vh)
+    assert target_blob_file.is_file(), "Target blob in sealed volume must NOT be deleted by GC"
+
+    # 檢查 usage_report 是否正確統計了多卷的總事件數
+    rep = usage_report(root=vh)
+    projects = rep.get("projects") or []
+    assert len(projects) == 1
+    # 總事件數應大於等於 12 步事件＋genesis＋seals
+    assert projects[0].get("chain_events", 0) >= 12, f"chain_events underreported: {projects[0]}"

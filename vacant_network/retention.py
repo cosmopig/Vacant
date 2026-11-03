@@ -656,29 +656,57 @@ def compact_trace(
                                     keep_shas.add(ib)
                                     structural_shas.add(ib)
 
-            chain_file = pdir / "chain.ndjson"
-            if not chain_file.is_file():
+            # 支援分卷封印（DECISION_20261103 §3.3/§7 R2）：掃描全部殘存封印卷＋活動卷
+            vols: list[tuple[int, pathlib.Path]] = []
+            for q in pdir.iterdir():
+                if q.is_file() and q.name.startswith("chain-"):
+                    stem = q.name.removeprefix("chain-")
+                    if stem.endswith(".ndjson.gz"):
+                        num_str = stem.removesuffix(".ndjson.gz")
+                    elif stem.endswith(".ndjson"):
+                        num_str = stem.removesuffix(".ndjson")
+                    else:
+                        continue
+                    if num_str.isdigit():
+                        vols.append((int(num_str), q))
+            vols.sort(key=lambda x: x[0])
+            chain_files = [q for _, q in vols]
+            active_chain = pdir / "chain.ndjson"
+            if active_chain.is_file():
+                chain_files.append(active_chain)
+
+            if not chain_files:
                 continue
 
             # round 72：活躍邊界（以鏈上活動的磁碟時間為準；與本檔其他 max_age 判斷同用 mtime）
             project_active = False
             if active_window_s is not None:
                 last_activity = 0.0
-                for _name in ("chain.ndjson", "state.json", "head.json"):
+                for f in chain_files:
+                    with contextlib.suppress(OSError):
+                        last_activity = max(last_activity, f.stat().st_mtime)
+                for _name in ("state.json", "head.json"):
                     with contextlib.suppress(OSError):
                         last_activity = max(last_activity, (pdir / _name).stat().st_mtime)
                 project_active = last_activity > 0 and (now - last_activity) < active_window_s
 
             events: list[dict[str, Any]] = []
-            with contextlib.suppress(OSError):
-                for ln in chain_file.read_text(encoding="utf-8", errors="replace").splitlines():
-                    if not ln.strip():
-                        continue
-                    with contextlib.suppress(ValueError):
-                        row = json.loads(ln)
-                        if isinstance(row, dict):
-                            events.append({"seq": row.get("seq", 0), "type": row.get("type"),
-                                           **(row.get("payload") or {})})
+            for cf in chain_files:
+                with contextlib.suppress(OSError):
+                    if cf.name.endswith(".gz"):
+                        import gzip
+                        with gzip.open(cf, "rt", encoding="utf-8", errors="replace") as gz_f:
+                            lines = gz_f.readlines()
+                    else:
+                        lines = cf.read_text(encoding="utf-8", errors="replace").splitlines()
+                    for ln in lines:
+                        if not ln.strip():
+                            continue
+                        with contextlib.suppress(ValueError):
+                            row = json.loads(ln)
+                            if isinstance(row, dict):
+                                events.append({"seq": row.get("seq", 0), "type": row.get("type"),
+                                               **(row.get("payload") or {})})
 
             # 找出初始索引、最後一則使用者提示的起點、以及保留視窗內的步驟與修改檔案版本
             initial_idx: str | None = None
@@ -1295,7 +1323,9 @@ def verify_trace_chains(root: pathlib.Path | None = None) -> tuple[int, bool, li
     count = 0
     errors = []
     for p in sorted(pdir.iterdir()):
-        if not p.is_dir() or not (p / "chain.ndjson").is_file():
+        if not p.is_dir():
+            continue
+        if not (p / "chain.ndjson").is_file() and not any(p.glob("chain-*.ndjson*")):
             continue
         count += 1
         try:
@@ -1931,13 +1961,24 @@ def usage_report(
                     meta = json.loads((p / "project.json").read_text(encoding="utf-8"))
                     if isinstance(meta, dict) and meta.get("workspace"):
                         info["workspace"] = str(meta["workspace"])
-                chain_f = p / "chain.ndjson"
-                if chain_f.is_file():
+                chain_files_to_count = []
+                for q in p.iterdir():
+                    if q.is_file():
+                        if q.name == "chain.ndjson" or (q.name.startswith("chain-") and (q.name.endswith(".ndjson") or q.name.endswith(".ndjson.gz"))):
+                            chain_files_to_count.append(q)
+                total_events = 0
+                for q in chain_files_to_count:
                     with contextlib.suppress(OSError):
-                        info["chain_events"] = sum(
-                            1 for ln in chain_f.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
+                        if q.name.endswith(".gz"):
+                            import gzip
+                            with gzip.open(q, "rt", encoding="utf-8", errors="replace") as gz_f:
+                                total_events += sum(1 for ln in gz_f if ln.strip())
+                        else:
+                            total_events += sum(1 for ln in q.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
+                if chain_files_to_count:
+                    info["chain_events"] = total_events
                 try:
-                    mts = [q.stat().st_mtime for q in (p, chain_f)] if chain_f.is_file() else [p.stat().st_mtime]
+                    mts = [q.stat().st_mtime for q in chain_files_to_count] if chain_files_to_count else [p.stat().st_mtime]
                     info["last_activity"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(max(mts)))
                 except OSError:
                     pass
