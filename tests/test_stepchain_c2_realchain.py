@@ -62,3 +62,40 @@ def test_g2_live_reaccept_on_local_copy():
     for name in ("b0a568dfe7dbe3b0", "535f1510326fb03a"):
         assert by[name]["status"] == "PASS", f"{name}: {by[name].get('why_status')}"
         assert by[name]["verify_before"]["ok"] and by[name]["verify_after"]["ok"]
+
+
+def test_c2_acceptance_handles_compressed_gz_chains(tmp_path):
+    """C2 驗收程式必須支援 Phase B 壓縮之 .gz 鏈（chain-000001.ndjson.gz）。"""
+    from vacant_network.trace import recorder as R
+    from vacant_network.intake import keys
+    import ops.stepchain.c2_realchain_acceptance as c2
+
+    vh = tmp_path / "home"
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    old = os.environ.get("VACANT_HOME")
+    os.environ["VACANT_HOME"] = str(vh)
+    try:
+        keys.init_local()
+        rec = R.Recorder(ws)
+        rec.compact_on_seal = True  # Phase B 預設壓縮！
+        rec.volume_max_entries = 4
+        m = R.Actor("c2_test", "s1")
+        for i in range(10):
+            rec.pre(f"t{i}", m, "Write", {"file_path": f"f{i}.txt"})
+            (ws / f"f{i}.txt").write_text("ok")
+            rec.post(f"t{i}", m, "Write", {"file_path": f"f{i}.txt"}, "ok")
+        assert (rec.dir / "chain-000001.ndjson.gz").is_file()
+        assert not (rec.dir / "chain-000001.ndjson").is_file()
+
+        receipt = c2._accept_one(rec.dir, "test_gz")
+        assert receipt["status"] == "PASS", f"C2 must pass on compressed chain: {receipt}"
+        assert receipt["verify_before"]["ok"] is True
+        assert receipt["verify_after"]["ok"] is True
+        assert receipt["format_before"] == "volumes"
+    finally:
+        if old is not None:
+            os.environ["VACANT_HOME"] = old
+        else:
+            os.environ.pop("VACANT_HOME", None)
+

@@ -492,78 +492,96 @@ def _reclaim_sealed_volumes_to_target(
     再刪卷；簽章失敗（如混簽章鏈 MixedSignerRefused）⇒ 還原已刪檔案、跳過該卷——
     沒有無簽章的回收（§3.4：回收動作本身入鏈記責）。回收後 `verify` 對缺卷區間
     報 UNKNOWN（Phase A 語義，本函數不改裁定出口）。
+    同號雙胞胎（明文+.gz 共存半殘態）必須以卷號為單位**全數**移除，不得殘留任一檔；
+    保護窗亦以不重複卷號計，不因雙胞胎縮小保護窗。
     """
-    from .trace.recorder import Recorder
+    from .trace.recorder import Recorder, _volume_num
 
-    cands: list[tuple[int, str, pathlib.Path, pathlib.Path]] = []
+    cands: list[tuple[int, str, pathlib.Path, int, list[pathlib.Path]]] = []
     for pdir in sorted(proj_root.iterdir()):
         if not pdir.is_dir():
             continue
-        vols: list[tuple[int, pathlib.Path]] = []
+        num_to_files: dict[int, list[pathlib.Path]] = {}
         for q in pdir.iterdir():
-            if not q.is_file() or not q.name.startswith("chain-"):
+            if not q.is_file():
                 continue
-            stem = q.name.removeprefix("chain-")
-            if stem.endswith(".ndjson.gz"):
-                num_str = stem.removesuffix(".ndjson.gz")
-            elif stem.endswith(".ndjson"):
-                num_str = stem.removesuffix(".ndjson")
-            else:
-                continue
-            if num_str.isdigit():
-                vols.append((int(num_str), q))
-        if len(vols) <= keep_recent_volumes:
+            vnum = _volume_num(q.name)
+            if vnum is not None:
+                num_to_files.setdefault(vnum, []).append(q)
+        distinct_nums = sorted(num_to_files.keys())
+        if len(distinct_nums) <= keep_recent_volumes:
             continue
-        vols.sort(key=lambda x: x[0])
-        protected = {1} | {num for num, _q in vols[-keep_recent_volumes:]}
-        for num, q in vols:
+        protected = {1} | set(distinct_nums[-keep_recent_volumes:])
+        for num in distinct_nums:
             if num in protected:
                 continue
-            with contextlib.suppress(OSError):
-                cands.append((q.stat().st_mtime_ns, pdir.name, pdir, q))
+            files = num_to_files[num]
+            mtimes = []
+            for f in files:
+                with contextlib.suppress(OSError):
+                    mtimes.append(f.stat().st_mtime_ns)
+            mtime = min(mtimes) if mtimes else 0
+            cands.append((mtime, pdir.name, pdir, num, files))
     cands.sort(key=lambda t: (t[0], t[1]))
 
     actual: list[dict[str, Any]] = []
     would: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
     freed = 0
-    for _mtime, _pname, pdir, vol in cands:
+    for _mtime, _pname, pdir, _num, files in cands:
         if current_bytes - freed <= target_bytes:
             break
+        primary = next((f for f in files if f.name.endswith(".ndjson")), files[0])
         if budget is not None and budget.expired():
-            skipped.append({"volume": vol.name, "why": "budget_expired"})
+            skipped.append({"volume": primary.name, "why": "budget_expired"})
             continue
-        meta = _sealed_volume_meta(vol)
+        meta = _sealed_volume_meta(primary)
         if meta is None:
-            skipped.append({"volume": vol.name, "why": "unreadable_volume"})
+            # 若 primary 讀不出，嘗試同卷其他檔（如 .gz）
+            for alt in files:
+                if alt != primary:
+                    meta = _sealed_volume_meta(alt)
+                    if meta is not None:
+                        primary = alt
+                        break
+        if meta is None:
+            skipped.append({"volume": primary.name, "why": "unreadable_volume"})
             continue
-        fs, ls, size = meta
+        fs, ls, _ = meta
+        vol_total_size = sum(_file_size(f) for f in files)
         if dry_run:
-            would.append({"volume": vol.name, "first_seq": fs, "last_seq": ls, "bytes": size})
-            freed += size
+            would.append({"volume": primary.name, "first_seq": fs, "last_seq": ls, "bytes": vol_total_size})
+            freed += vol_total_size
             continue
-        payload = {"schema": "vacant-trace/1", "volume": vol.name,
-                   "first_seq": fs, "last_seq": ls, "bytes": size,
+        payload = {"schema": "vacant-trace/1", "volume": primary.name,
+                   "first_seq": fs, "last_seq": ls, "bytes": vol_total_size,
                    "reason": "budget", "target_bytes": target_bytes}
-        try:
-            backed = vol.read_bytes()
-            vol.unlink()
-            # Recorder 以目錄直掛（同 verify_trace_chains 先例）：不需反推 workspace。
-            rec = Recorder(pdir, root=proj_root.parent)
-            rec.dir = pdir
-            rec.chain_path = pdir / "chain.ndjson"
-            rec.state_path = pdir / "state.json"
+        rec = Recorder(pdir, root=proj_root.parent)
+        rec.dir = pdir
+        rec.chain_path = pdir / "chain.ndjson"
+        rec.state_path = pdir / "state.json"
+        with rec._lock():
+            backed: list[tuple[pathlib.Path, bytes]] = []
             try:
-                rec.append("volume_reclaimed", payload)
-            except Exception:  # noqa: BLE001——簽不成 ⇒ 不刪（fail-open，無無簽章回收）
-                vol.write_bytes(backed)
-                skipped.append({"volume": vol.name, "why": "signing_refused"})
+                for f in files:
+                    backed.append((f, f.read_bytes()))
+                for f in files:
+                    f.unlink()
+                try:
+                    rec._append("volume_reclaimed", payload)
+                except Exception:  # noqa: BLE001——簽不成 ⇒ 還原全部檔案（fail-open）
+                    for f, data in backed:
+                        f.write_bytes(data)
+                    skipped.append({"volume": primary.name, "why": "signing_refused"})
+                    continue
+            except OSError as e:
+                for f, data in backed:
+                    if not f.exists():
+                        f.write_bytes(data)
+                skipped.append({"volume": primary.name, "why": f"unlink_failed: {e.__class__.__name__}"})
                 continue
-        except OSError as e:
-            skipped.append({"volume": vol.name, "why": f"unlink_failed: {e.__class__.__name__}"})
-            continue
-        freed += size
-        actual.append({"volume": vol.name, "first_seq": fs, "last_seq": ls, "bytes": size})
+        freed += vol_total_size
+        actual.append({"volume": primary.name, "first_seq": fs, "last_seq": ls, "bytes": vol_total_size})
     return {"volumes_reclaimed": len(actual), "reclaimed_volumes": actual,
             "would_reclaim": would, "skipped_volumes": skipped,
             "bytes_freed": freed if not dry_run else 0}
