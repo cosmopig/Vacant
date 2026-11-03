@@ -172,3 +172,48 @@ def test_phase_b_mixed_fleet(env):
     assert okv, whv
     ok2, why2 = rec.verify()
     assert ok2, why2
+
+
+def test_phase_b_corrupt_gz_does_not_crash_gc_or_usage_report(tmp_path, monkeypatch):
+    """損壞的 .gz 封印卷引發 zlib.error / EOFError 時，GC (compact_trace) 與 usage_report 必須 fail-open 不崩潰。"""
+    from vacant_network.retention import compact_trace, usage_report
+
+    vh = tmp_path / "vh"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    pdir = vh / "trace" / "projects" / "p1"
+    pdir.mkdir(parents=True)
+    objdir = vh / "trace" / "objects"
+    objdir.mkdir(parents=True)
+
+    # 構造損壞 deflate stream 的 .gz 封印卷（解壓拋出 zlib.error）
+    data = b'{"seq": 1, "type": "trace_genesis", "payload": {"file_path": "foo.txt"}}\n' * 50
+    gz = gzip.compress(data)
+    b = bytearray(gz)
+    b[30] ^= 0xFF
+    (pdir / "chain-000001.ndjson.gz").write_bytes(bytes(b))
+
+    # compact_trace 不得上拋 zlib.error
+    compact_trace(vh)
+
+    # usage_report 不得上拋 zlib.error 且不應中斷每專案統計
+    rep = usage_report(vh)
+    assert not rep.get("error"), f"usage_report encountered unhandled error: {rep.get('error')}"
+    projects = rep.get("projects") or []
+    assert len(projects) == 1, "project should be listed even if .gz is corrupt"
+
+
+def test_phase_b_tail_corrupted_last_file_handles_eoferror(env):
+    """當最後一個封印卷為截斷的 .gz 時，_tail 必須捕獲 EOFError 並安全降級，不得崩潰。"""
+    ws, rec = env
+    pdir = rec.dir
+    pdir.mkdir(parents=True, exist_ok=True)
+
+    # 構造截斷尾部造成 EOFError 的 .gz 檔作為唯一卷
+    data = b'{"seq": 1, "type": "trace_genesis", "payload": {}}\n' * 20
+    gz_bytes = gzip.compress(data)
+    (pdir / "chain-000001.ndjson.gz").write_bytes(gz_bytes[:-6])
+
+    # 調用 _tail()，必須優雅降級不崩潰上拋 EOFError
+    book = rec._tail()
+    assert isinstance(book, R.Logbook)
+

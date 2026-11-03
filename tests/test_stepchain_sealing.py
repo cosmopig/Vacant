@@ -245,3 +245,46 @@ def test_stepchain_b1_volume_number_gap_must_not_overwrite(env):
         f"B1: new seal must go to {expected_new} (max existing + 1); got sealed={sealed_now}")
     tail = [json.loads(x) for x in (pdir / expected_new).read_text(encoding="utf-8").splitlines() if x.strip()]
     assert tail[-1]["type"] == "volume_seal", "new volume must end with its volume_seal"
+
+
+def test_stepchain_sealing_set_aside_multivolume(env):
+    """set_aside 必須一併處理所有封印卷（chain-*.ndjson / chain-*.ndjson.gz）。
+
+    若只搬移活動卷 chain.ndjson，舊損壞封印卷仍留存於專案目錄中，
+    下一次寫入建立新創世鏈後 verify 仍會載入舊封印卷導致永久 BROKEN，
+    違反 set_aside '不能讓一條壞掉的鏈讓專案從此每一次都查不了' 之契約。"""
+    ws, rec = env
+    rec.volume_max_entries = 4
+    rec.compact_on_seal = False
+
+    for i in range(10):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+
+    pdir = rec.dir
+    vols = list(pdir.glob("chain-*.ndjson"))
+    assert len(vols) >= 2, f"need >= 2 sealed volumes, got {len(vols)}"
+
+    # 竄改第一卷內容
+    vols[0].write_bytes(b"tampered\n")
+    ok, why = rec.verify()
+    assert not ok, "verify must fail after tampering sealed volume"
+
+    # 呼叫 set_aside 救回專案
+    res = rec.set_aside(why)
+    assert res, "set_aside must return a non-empty name"
+
+    # 目錄下不應再殘存任何活動封印卷
+    remaining_sealed = list(pdir.glob("chain-*.ndjson"))
+    assert not remaining_sealed, f"sealed volumes must be set aside, got: {remaining_sealed}"
+    assert not (pdir / "chain.ndjson").exists(), "active chain must be set aside"
+
+    # 新寫入一筆事件，應成功建立全新創世並通過 verify
+    rec.pre("t_after", MAIN, "Write", {"file_path": "after.txt"})
+    (ws / "after.txt").write_text("after\n")
+    rec.post("t_after", MAIN, "Write", {"file_path": "after.txt"}, "ok")
+
+    ok2, why2 = rec.verify()
+    assert ok2, f"verify must pass after set_aside and fresh start, but failed: {why2}"
+

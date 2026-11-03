@@ -390,7 +390,7 @@ class Recorder:
             if last.seq != entries[0].seq:
                 entries.append(last)
             return Logbook(entries)
-        except (OSError, zlib.error, json.JSONDecodeError, ValueError, KeyError):
+        except (OSError, EOFError, zlib.error, json.JSONDecodeError, ValueError, KeyError):
             book, _ = self._book()
             return book
 
@@ -1354,18 +1354,28 @@ class Recorder:
     def set_aside(self, why: str) -> str:
         """病歷驗不過：把舊的鏈與鏈頭**改名留著**（不刪、不改內容），下一筆從新的創世開始。
         回舊鏈的新檔名。零設定的回合結束用——沒有收件端帳本可記 `trace_broken`，
-        不能讓一條壞掉的鏈讓這個專案從此每一次都查不了。"""
+        不能讓一條壞掉的鏈讓這個專案從此每一次都查不了。
+        支援多卷封印鏈（DECISION_20261103 Phase A/B）：包含所有封印卷一併改名留存。"""
         with self._lock():
-            if not self.chain_path.is_file():
+            vols = self._sealed_volume_paths()
+            if not self.chain_path.is_file() and not vols:
                 return ""
             stamp = int(time.time() * 1000)
-            name = f"chain.set-aside.{stamp}.ndjson"
-            os.replace(self.chain_path, self.dir / name)
+            names: list[str] = []
+            for vp in vols:
+                target_name = f"chain.set-aside.{stamp}.{vp.name}"
+                os.replace(vp, self.dir / target_name)
+                names.append(target_name)
+            name = ""
+            if self.chain_path.is_file():
+                name = f"chain.set-aside.{stamp}.ndjson"
+                os.replace(self.chain_path, self.dir / name)
+                names.append(name)
             head = self.dir / "head.json"
             if head.is_file():
                 os.replace(head, self.dir / f"head.set-aside.{stamp}.json")
             atomic_write_text(self.dir / f"chain.set-aside.{stamp}.why.txt", str(why)[:2000] + "\n")
-        return name
+        return name or (names[0] if names else "")
 
 
 def main(argv: list[str] | None = None) -> int:

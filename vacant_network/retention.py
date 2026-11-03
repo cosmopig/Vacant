@@ -67,6 +67,7 @@ import shutil
 import sys
 import time
 from typing import Any
+import zlib
 
 from .atomic import atomic_write_text
 from .intake.statepaths import state_dir, work_dir
@@ -692,7 +693,7 @@ def compact_trace(
 
             events: list[dict[str, Any]] = []
             for cf in chain_files:
-                with contextlib.suppress(OSError):
+                with contextlib.suppress(OSError, EOFError, zlib.error):
                     if cf.name.endswith(".gz"):
                         import gzip
                         with gzip.open(cf, "rt", encoding="utf-8", errors="replace") as gz_f:
@@ -1968,7 +1969,7 @@ def usage_report(
                             chain_files_to_count.append(q)
                 total_events = 0
                 for q in chain_files_to_count:
-                    with contextlib.suppress(OSError):
+                    with contextlib.suppress(OSError, EOFError, zlib.error):
                         if q.name.endswith(".gz"):
                             import gzip
                             with gzip.open(q, "rt", encoding="utf-8", errors="replace") as gz_f:
