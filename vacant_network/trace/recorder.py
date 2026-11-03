@@ -366,7 +366,11 @@ class Recorder:
                 vol_lines = [x for x in raw_bytes.split(b"\n") if x.strip()]
                 if vol_lines:
                     vols = self._sealed_volume_paths()
-                    next_vol_num = len(vols) + 1
+                    # 卷號＝max(既有卷號)+1，絕不用 len(卷數)+1：卷號出現缺口（Phase C 預算回收、
+                    # 整卷遺失後必然發生）時 len+1 會與既有卷號碰撞，os.replace 直接覆蓋已封印卷＝
+                    # 資料毀損（round 891 審查 B1；tests/test_stepchain_sealing.py B1 測試為證）。
+                    _nums = [int(p.name.removeprefix("chain-").removesuffix(".ndjson")) for p in vols]
+                    next_vol_num = (max(_nums) if _nums else 0) + 1
                     sealed_name = f"chain-{next_vol_num:06d}.ndjson"
                     vol_entries = [LogEntry.from_json(json.loads(x)) for x in vol_lines]
                     first_e, last_e = vol_entries[0], vol_entries[-1]

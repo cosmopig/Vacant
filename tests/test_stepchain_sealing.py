@@ -199,3 +199,44 @@ def test_stepchain_sealing_gc_preserves_blobs_in_sealed_volumes(tmp_path, monkey
     assert len(projects) == 1
     # 總事件數應大於等於 12 步事件＋genesis＋seals
     assert projects[0].get("chain_events", 0) >= 12, f"chain_events underreported: {projects[0]}"
+
+
+def test_stepchain_b1_volume_number_gap_must_not_overwrite(env):
+    """B1（round 891 審查，DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW §7 門 3）：
+    新封印卷號必須＝max(既有卷號)+1。若以 len(既有卷)+1，卷號出現缺口（Phase C 預算回收
+    或整卷遺失後必然發生）時 len+1 會等於某既有卷號，os.replace 直接覆蓋已封印卷＝資料毀損。
+    本測試：移除最小卷號（回收/遺失語義，與本檔負控制 3 同形）後續寫觸發新封印；
+    既有最大卷號必須逐位元組不動，新封印必須落入 max+1（碰撞會同名覆蓋最大卷，故以最大卷為哨兵）。"""
+    ws, rec = env
+    rec.volume_max_entries = 4
+
+    for i in range(12):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+
+    pdir = rec.dir
+    sealed = sorted(pdir.glob("chain-*.ndjson"), key=lambda p: p.name)
+    assert len(sealed) >= 2, f"need >=2 sealed volumes, got {len(sealed)}"
+    top = sealed[-1]  # 既有最大卷號
+    top_bytes = top.read_bytes()
+    top_num = int(top.name.removeprefix("chain-").removesuffix(".ndjson"))
+
+    # 移除最小卷號⇒卷號出現缺口（len 少 1，len+1 將等於某既有卷號）
+    sealed[0].unlink()
+
+    for i in range(12, 24):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+
+    sealed_now = sorted(p.name for p in pdir.glob("chain-*.ndjson"))
+    assert top.read_bytes() == top_bytes, (
+        f"B1: existing sealed volume {top.name} was OVERWRITTEN "
+        f"(next_vol_num=len+1 collides with an existing volume number when a gap exists); "
+        f"sealed={sealed_now}")
+    expected_new = f"chain-{top_num + 1:06d}.ndjson"
+    assert (pdir / expected_new).is_file(), (
+        f"B1: new seal must go to {expected_new} (max existing + 1); got sealed={sealed_now}")
+    tail = [json.loads(x) for x in (pdir / expected_new).read_text(encoding="utf-8").splitlines() if x.strip()]
+    assert tail[-1]["type"] == "volume_seal", "new volume must end with its volume_seal"
