@@ -174,3 +174,44 @@ objects 已回收得只剩 433 KB（資深審實測）；32 MiB 子上限是報�
   授權內手段（gzip 三檔舊圓誌＋清 pycache，free 3.7G→3.8G）不足以過 4.0G 閾，繼續等監督者清
   /tmp（票 `R20261102_2025-1`）；不空轉、不刪權外。
 - 真機 `~/.vacant` 100M（10-28 清零後 6 天），本設計 §1 即以其實測為據。
+
+## 9. Phase B 規劃（round 892——資深指示 #3「Phase A merge 後規劃 Phase B」，Phase A 已 merge 586cea71 後起草）
+
+**前置**：Phase A 已 merge 入 auto/qwen27b（`586cea71`）；B1 已收口（`b8dd9c92`）；
+G1–G4 仍為 **Phase C** blocker——Phase B 不受其阻（Phase B 只動已封印卷、不觸回收/UNKNOWN 裁定出口），
+亦不解除 Phase C 之阻。
+
+**範圍（§3.3＋C3）**：gzip 已封印卷（`chain-NNNNNN.ndjson` → `chain-NNNNNN.ndjson.gz`）、活動卷永不壓；
+驗章端 gunzip 後照舊驗（seal payload `sha256_prefix`＝未壓縮流的哈希⇒**零語義變化**）；
+stdlib `gzip`（零新依賴）；fail-open（壓縮失敗⇒留原檔、記錄原因、不擋）。
+
+**介面（建議形、實作輪定案）**：
+- **讀端**：trace 層卷 reader 依副檔名分流（`.gz` ⇒ `gzip.open(..., "rt")`、否則現行路徑）；
+  卷列舉（`_sealed_volume_paths()` 類）同列 `.ndjson` 與 `.ndjson.gz`。
+  （Phase A R2 的 GC keep-set 掃描已含 `.gz` 前瞻——`af3c1d14`、round 891 審查確認正確⇒GC 側零改動。）
+- **壓縮**：`compact_sealed_volume(project_dir, vol_path)`（best-effort）：寫 temp→
+  **gunzip 回讀逐位元組對源**→`os.replace`→刪原檔；任何例外⇒留原檔、回原因、不上拋。
+- **觸發**：**封印時**（`recorder.py` seal 分支、seal 行 flush 後對該卷 best-effort 壓縮、fail-open）
+  ——即時界磁碟、無新必填設定。**存量不強遷**：既有明文封印卷照讀（C2 向後相容）、不自動壓縮
+  （保守；dogfood 21.6MB 存量若要回收空間＝顯式呼叫、不入預設路徑——C5 精神）。
+
+**TDD 順序（先寫失敗測試、逐條紅→綠）**：
+1. **B-T1** `test_phase_b_gz_volume_verifies_ok`：封印→壓縮→刪明文→`verify`⇒OK、行内容与明文版逐筆一致
+   （現行無 .gz reader⇒必紅＝本相第一期紅）。
+2. **B-T2** `test_phase_b_corrupt_gz_is_broken_not_unknown`：.gz 翻 1 位元組⇒`verify`⇒BROKEN 族
+   （ok=False 且原因分類**不得**為 UNKNOWN）——C3。
+3. **B-T3** `test_phase_b_ratio_ge_3x`：合成 JSON 鏈壓縮比實測 ≥3×——C3（預期 3–8×、§3.3）。
+4. **B-T4** `test_phase_b_active_volume_never_compressed`：壓縮後活動卷仍明文、仍可 append。
+5. **B-T5** `test_phase_b_fail_open`：壓縮失敗（源檔唯讀/滿盤模擬）⇒原檔原封＋無例外上拋＋append/verify 照常。
+6. **B-T6** `test_phase_b_mixed_fleet`：明文封印卷＋.gz 封印卷共存⇒verify OK；
+   Phase A 驗收集合（含 B1 卷號缺口測試）全綠（回歸）。
+
+**驗收（C3＋house 規則）**：B-T1–T6 綠＋Phase A 驗收命令（test_stepchain_sealing＋test_retention＋
+tests/test_trace*.py）綠＋全量套件 ≥ 基線（4,634 passed / 4,703 collected、CI af3c1d14 口徑）＋提交。
+
+**邊界（連同引用）**：
+- 壓縮是空間優化、非完整性增強：完整性仍來自 seal payload（Phase A）；.gz 只是傳輸形，
+  驗章語義＝驗未壓縮流；損壞 .gz⇒BROKEN、非 UNKNOWN（C3）。
+- 「存量不強遷」⇒即時省空間只限新封印卷；存量回收＝顯式動作（不預設）。
+- 本節是**規劃**、非實作（迴路規則「不改產品行為」）；實作開工時機＝全量對照綠（CI b8dd9c92/
+  8d2a2173 收口）且 e014 不再撞磁碟（現 free 65G、無撞）。
