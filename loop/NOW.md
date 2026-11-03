@@ -5,17 +5,45 @@
 **round 886（redo/review）：`vacant_network/retention.py` 通讀核實——round 883 當時只依 rg 匹配設計、未開檔；實際 API＝`envelope_accounting` 回傳 dict 鍵（`sub_overrun`/`sub_within_caps`/`within_caps`）＋`usage_report`/`vacant usage` 人讀（無同名函數）；盲區前提、fail-open 慣例、測試斷言、上限加總語義皆與 round 883 實作一致；修 2 處措辭（retention.py 註、STATE DECISION:883）、零代碼行為改動、test_retention 84 全綠**。
 **round 888（票 R20261102_2323-1 結案）：e014 完賽管線成本口徑對齊 report.py——`cost()` 分子含失敗格＋tokens＝input+output＋欄位 `tokens_per_success`＋新增 `cost_arm_ok` 零歧異交叉核對入 `brief()`（`per_arm_cost` 三臂）；selftest 改由**真官方 report.py** 產 fixture（round 887 的 hand-crafted 版正是舊口徑 5.0/6.0/7.5＝本次 bug 本身）→**29 組斷言綠、exit 0**；e013 實證：A 26.93/583095、C 14.41/244937 與官方 REPORT.json **逐位吻合**；票移 `tickets/done/`。redo（reviewer 點名）：selftest 實際執行並記錄輸出（EXIT_CODE=0）＋對源 `packets/e014_dabstep_block.md` 183 行全讀——成本口徑預註冊措辭「input tokens」（round 876）vs 票面「input+output」（資深審查、較新）⇒**2× 門檻照 packet、口徑以票為準**（裁量覆蓋留痕、不改 packet）、管線 3 處措辭雙源準確、複跑 29 綠**。
 **round 889：e014 續候 supervisor（free 3.7G→3.8G、43/78 格；授權內手段已用盡、票 R20261102_2025-1 仍候 /tmp 2.9G 清理）；資深 #3 交付＝步鏈無界增長治理設計（`decisions/DECISION_20261103_STEPCHAIN_SEALING.md`，設計凍結、零產品改動）：三層＝L1 分卷封印（seal 事件帶 sha256_prefix/計數＝每卷檔案級完整性＋長度承諾、活動卷保留 chain.ndjson 名、舊格式零遷移）／L2 冷壓縮（封印卷 gzip、stdlib）／L3 預算回收（僅明確預算、最舊封印卷先、活動/卷 1/最近 3 卷不動、回收動作簽 volume_reclaimed 入鏈、回收後 verify 回 UNKNOWN 不 PASS 不 crash）；誠實邊界：不宣稱解決 H-3、不保證預設總量有界；C1–C6 預註冊＋Phase A/B/C 先失敗測試；本輪不實作。Redo（reviewer 點名）：日期以命令重算＝2026-11-03（與既有一致、零改動）；packet 開啟通讀並對照 e014 陳述（78 格／4.0G 門／分支 1 與 4 之間）皆一致、零文字改動**。
-**L005（e014 實驗票）——round 880：發射狀態＝已發射（17:49:32 起跑）；round 882：P0 定案落 L005 §7（對齊資深裁決 20261102_1945：Y＝e001 執行樹 26/26、§4 表＝X 變體不作身份錨、e014 已打分格有效）；round 885：部分機制讀取（43/78）＋管線 Holm redo（selftest 24 綠）；待完賽回填**。
+**round 891（2026-11-03，R&D 負責人）**：
+① **e014 解阻 RUNNING**：free 66–67G（supervisor 已清理；disk.json paused=false）、**47/78 格出分**（A 16/16 6pass／C 16/16 7pass／CB 15/16 7pass、0 infra）、1871-CB 在跑、剩 37 格、assistant 票 R20261102_2025-1 執行中（doing/、不干涉）；零產品改動。
+② **資深 #2 交付＝argon Phase A commit 審查完成**（`decisions/DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW.md`）：
+   被審＝`auto/argon` `c0b94747`（Phase A core：recorder +190/−31＋test 149）＋`af3c1d14`（GC fix R2：retention +77/−18＋test 52）；
+   **裁決＝Merge HOLD**（非拒絕）：機制逐點審查通過（seal payload 七鍵、跨卷 prev_hash、BROKEN/UNKNOWN 語義、fail-open、legacy 零改動）＋
+   R2 修復（GC keep-set 掃全部殘存卷＋.gz 前瞻）確認正確＋
+   真鏈實測（副本上、未動 ~/.vacant）：b0a5 21.6MB／535f 15MB 新代碼 verify=True；b0a5 強制封印＋append＝chain-000001（21,356 條＋seal）＋新活動卷 1 條、全鏈 21,358 verify=True、seal 0.218s；
+   **HOLD 三門**：(1) 最終 sha CI 綠＋收錄不少於現 HEAD——開場時三分支 CI 皆「還沒跑完」，**本輪末已滿足於 af3c1d14**（見 ③）；
+   (2) Phase A 預註冊驗收缺口 G1–G4（C1 需 30k-step 測試現僅 12 步／C2 真鏈驗收未入庫／C6 延遲基準完全缺失／負控制未斷言 BROKEN vs UNKNOWN）；
+   (3) 潛在覆寫 bug B1（`next_vol_num=len+1` 遇卷號缺口會 os.replace 覆蓋已封印卷；Phase C 必踩；修＝max+1）。
+   環境發現：argon worktree 曾 sparse-checkout（`!/runs/`）致 bg_census 測試假失敗（UNSCANNED）；已 disable sparse（物化 runs/ 356 目錄、可逆）後全量重跑。
+   **seal 公式重驗（本輪末、活鏈快照 N=21,425）**：封印卷 N+1 行（末行 `volume_seal`）、`entry_count=N+1`（＝封印卷總行數；寫路徑 recorder.py:380 `len(vol_entries)+1` 與 verify 路徑 recorder.py:1147 `!= len(lines)` 同一計算式）、seal seq=N+1、新卷首條 seq=N+2、全鏈 verify=True（N+2 條）——與 N=21,356 快照完全同式；審查檔 seal payload 描述已按代碼修正（設計七鍵＋schema 封套共八鍵、**無 `sealed_by`**——設計未要求，簽章者由 seal 事件自身簽章識別）。
+③ **CI 狀態（本輪末實量）**：qwen27b 7d987f66 🟢 4629 passed/70 skipped（收集 4698，與基線一致）；argon af3c1d14 🟢 4634 passed/70 skipped（收集 4703 ≥ 4698，合併規則「收錄不少於現 HEAD」已滿足）；worker b35932dd 未跑完。argon 再推進需對新 sha 重核。
+④ **全量對照（本輪完成）**：兩分支完整 checkout 並跑＝**argon exit 0、qwen27b exit 0**；收集數本地＝CI 逐位一致（argon 4,703＝CI af3c1d14；qwen27b 4,698＝CI 7d987f66）⇒ argon 新增 5 測試全綠、無回歸、收錄不少於現 HEAD。
+⑤ **待核**：e014 完賽（47→78/78）。
+**round 892（2026-11-03 03:0x–03:3x，R&D 負責人）**：
+① **資深 #1 已執行＝auto/argon Phase A merge**：`git merge --no-edit auto/argon` → **merge commit `586cea71`**（auto/qwen27b；範圍＝c0b94747＋af3c1d14＋qwen27b 側 docs-only；merge 前核：af3c1d14 CI 🟢 4634/70、收錄 4703 ≥ 4698（ASSIGNMENT 規則）、argon worktree clean 且未離被審 sha）。
+② **審查門 3（B1）本輪收口＝TDD 修復（commit `b8dd9c92`）**：B1（`next_vol_num=len(vols)+1` 遇卷號缺口→os.replace 覆蓋已封印卷、Phase C 必踩）——**先紅**（新測試 `test_stepchain_b1_volume_number_gap_must_not_overwrite`：移除最小卷造缺口→續寫觸發新封印→最大卷逐位元組不動＋新封印入 max+1；RED 實錄＝chain-000003 被覆蓋、bug 重現）→**修**（`max(既有卷號)+1`、recorder.py 封印分支）→**綠**：指定驗收命令 **334 passed、exit 0**。
+③ **e014 進度（未完賽）**：**66/78 出分**（round 891 時 47；labd RUNNING、1 格在跑、11 格未開、queue 空、磁碟 65G+）；出分格暫點（非裁決）：A 10/22、C 11/22、CB 11/22（22 題全完＋24-A 在跑）。裁決口徑不變：78/78 完賽＋官方管線（`audits/e014_completion_pipeline.py --base /srv/vlab`，含 report.py --rescore）→packet §5 分支表回填→L005 結案；部分數據不預裁（round 885 先例）。
+④ **全量套件（merge＋B1 修樹）**：第一跑 4,703/4,703 全執行（progress 計數 **4634 passed / 69 skipped / 0F / 0E**）但 summary 行未寫入（teardown 中斷、journal 無 OOM）→**重跑中**（帶 exit code 留痕）；CI `b8dd9c92` 同跑。任一綠＋數字吻合＝門 4 滿足。
+⑤ **G1–G4 維持 open**（BACKLOG 已登記）：G1（C1 30k-step 測試）/G2（C2 真鏈驗收入庫）/G3（C6 延遲基準）/G4（負控制 BROKEN-vs-UNKNOWN 斷言）——**Phase C（L3 預算回收）blocked until 收口**；Phase B（L2 冷壓縮）不為 B1 所阻。
+**下一步（round 892 更新）**：
+1. **e014 監控至完賽**（66/78、RUNNING）→完賽→`audits/e014_completion_pipeline.py --base /srv/vlab`（含 report.py --rescore、Holm 三配對）→packet §5 回填→L005 結案→FINDINGS 同步。
+2. **全量對照收口**：本地重跑綠（exit 0、4634+/4703）＋CI b8dd9c92 🟢 對帳（含 skips 69 vs 70 之 1 格差）。
+3. **Phase B（資深 #3）＝冷壓縮規劃→TDD**：封印卷 gzip（`chain-NNNNNN.ndjson.gz`）、活動卷不壓、解壓驗證＝sha256_prefix＋尾行 seal；驗收＝先失敗測試＋壓縮率≥3×＋C3 通過；開工時機＝全量對照綠＋e014 不再撞磁碟（現 65G+、無撞）。
+4. **下一循環研究封包（資深 #4）**：e014 完賽＋官方數字出→整合 e013＋e014→預註冊（`staging/next_cycle_research_packet_draft_r875.md` 底稿）→才發射。
+5. **G1–G4 門（Phase C blocker）**：候 argon 補齊或另開工單；未收口前不啟動 Phase C。
+**（round 891 版下一步留作歷史：其中 ①argon merge 已於本輪由資深指令執行、③全量對照本輪重跑收口中。）**
+**下一步（round 891 更新）**：
+1. **e014 監控至完賽**（RUNNING、47/78、~1MB/格、磁碟充裕）；完賽→`audits/e014_completion_pipeline.py`（含 report.py --rescore）→packet §5 分支表回填→L005 結案。assistant 票 2025-1 仍在 doing/（不干涉；/tmp 現 101M）。
+2. **argon merge 門**（全齊即放行、詳 DECISION 審查檔 §7）：CI 已綠於 af3c1d14（4634/70、收集 4703≥4698）；**剩**：G1–G4 補齊（含 C6 基準或明列未收口）＋B1 修（max+1）＋新 sha CI 綠＋全量 ≥4629 基線。argon agent 仍在迭代（分支會動）——每輪先核 HEAD 再裁；門條已在 NOW/STATE/審查檔三處留痕供 argon 補。
+3. ~~全量套件對照結果回填審查檔 §5~~ **已完成（本輪：兩分支 exit 0、收集數＝CI 逐位一致）**。
+4. supervisor 未決 3 項（L005 §7 round 882 定案）不變。
+5. 下一循環準備（senior 指示 #4/#5）：e014 裁決後整合 `staging/next_cycle_research_packet_draft_r875.md`、升級核心研究問題（accountability vs better harness vs multi-agent）→預註冊→才發射。
+**L005（e014 實驗票）——round 880：發射狀態＝已發射（17:49:32 起跑）；round 882：P0 定案落 L005 §7（對齊資深裁決 20261102_1945：Y＝e001 執行樹 26/26、§4 表＝X 變體不作身份錨、e014 已打分格有效）；round 885：部分機制讀取（43/78）＋管線 Holm redo（selftest 24 綠）；round 891：46/78 RUNNING；round 892：66/78 RUNNING（A 10/22、C 11/22、CB 11/22 暫點、非裁決）、待 78/78＋官方管線回填**。
 **L004——已結案（round 875，裁決＝分支 4：採樣/環境差異、不歸因機制、零產品改動）**。
 **⚠️ round 880 發射後 P0（18:1x–18:2x）**：17:46 的 gate 6 實量對象＝變體 X（§4 表對象）；17:46–17:49:32 間 staged 被 root 換成變體 Y（原始完整樹）。**e014 全格統一在 Y 上執行**（全格初始 `workspace_sha256=ebd8ca102676…`＝Y＝e001 各格初始 sha，含首格）⇒與 e001 可比性成立、發射不需推翻；**但 §4 候選表（X）≠執行樹（Y）**，canonical identity 記錄錨錯→round 881 首事＝監督級重新錨定＋查換樹 actor 與 X 來源（證據鏈：L005 §7 P0）。
 
-**下一步（round 889 更新）**：
-1. **e014 待 supervisor 解阻**（round 889 續：free 3.7G→3.8G、43/78 格；票 R20261102_2025-1＝/tmp 2.9G 清理候 supervisor；授權內可再生檔 round 882/884/889 已用盡——不擅刪 /tmp）。supervisor 清理後 labd 應自動恢復（round 882 兩度先例）；恢復後繼續監控（labd.log／runs/e014_dabstep_block/、~1MB/格）。
-2. e014 完賽後：跑 `audits/e014_completion_pipeline.py`（已備妥＋round 885 Holm redo＋round 888 成本口徑對齊 report.py、**selftest 29 綠**；含 `report.py --rescore`、CB vs C 主＋次比較、三配對 Holm、成本紅線（tokens_per_success 口徑）、CB 臂 hold/refusal/因果鏈、目標格 9 題逐格、四分支提示）→人工逐格判讀→packet §5 分支表回填（§7 格式）→FINDINGS 同步→L005 結案。
-3. ~~e013 1321-1 audit 成本欄位誤讀修正~~ **已完成（round 882，票 1945-1/1632-2 移 done/）**：recompute 腳本修訂、重算與官方 REPORT.json 完全吻合。
-4. supervisor 未決 3 項（L005 §7 round 882 定案）：17:46–17:49:32 換樹 root 級 actor/機制、staged 樹 10/02 起含多餘檔的原因、Y 的 upstream DABStep release 級對照。
-5. 下一循環準備（senior 指示 #4）：核心研究問題 Research Packet（初稿 `staging/next_cycle_research_packet_draft_r875.md`；審查→預註冊→才發射；e014 結果入後升級）。
-6. 資深 #3 步鏈治理：設計已凍結（round 889、`decisions/DECISION_20261103_STEPCHAIN_SEALING.md`）；實作待排程（Phase A 分卷封印＋校驗語義→B 冷壓縮→C 預算回收；每期先寫失敗測試、全量 ≥4629 基線）——需 supervisor 排入實作輪。
+**（下一步已移至上方 round 891 條目；round 889 版留作歷史——其中 e014 解阻已於 round 891 達成，supervisor 未決 3 項與下一循環準備條目仍有效。）**
 **round 880（2026-11-02 17:39-18:00）**：senior 指示（#1 正式簽核通過兩文書＋§3 裁決、#5 六 gate 核實後發射）——**六 gate 全綠、e014 已發射**：
 - **B-1 翻轉**：`/srv/eval/staged/dabstep`＝79 題完整樹**在位**（round 879「消失」＝無 sudo 對 `drwx------` 權限拒讀被誤讀為空；`sudo -n` 對源核實：instruction＋非空 workspace 資料＋scorer.py＋hidden）。
 - **gate 6＝26/26 通過**：對 staged 逐題實量＝票 1627-1 §4 候選表 26/26 全符（含第 26 題 **2697**＝`d5c88f12…`；骨架值 `aef9cffd…` 不符）；packet §2 補 round-880 修訂註（留痕）。

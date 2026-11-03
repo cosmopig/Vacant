@@ -1,5 +1,36 @@
 # STATE.md — 交接契約（每個 session 開始先讀這支，結尾更新這支）
 
+## round 892（2026-11-03）——資深 #1 merge 已執行（586cea71）＋審查門 3 B1 TDD 收口（b8dd9c92）＋e014 66/78
+- **Merge（資深 #1 指令）**：auto/argon `af3c1d14`（Phase A `c0b94747`＋GC fix R2 `af3c1d14`）→ **merge commit `586cea71`**（auto/qwen27b；merge 前核：af3c1d14 CI 🟢 4634/70、收錄 4703 ≥ 4698（ASSIGNMENT 規則）、argon worktree clean 且未離被審 sha）；指定驗收命令 `pytest tests/test_stepchain_sealing.py tests/test_retention.py tests/test_trace*.py -q`＝333 passed（B1 修前）。
+- **B1（round 891 審查門 3）收口＝TDD**：`next_vol_num=len(既有卷)+1` 遇卷號缺口→`os.replace` 覆蓋已封印卷（Phase C 必踩）——**先紅**（新測試 `test_stepchain_b1_volume_number_gap_must_not_overwrite`：移除最小卷造缺口→續寫觸發新封印→最大卷逐位元組不動＋新封印入 max+1；RED 實錄＝chain-000003 被覆蓋、bug 重現）→**修**（`vacant_network/trace/recorder.py` 封印分支改 `max(既有卷號)+1`）→**綠**：驗收命令 **334 passed、exit 0**；commit **`b8dd9c92`**。
+- **已驗證**：驗收命令 333→334 passed、exit 0；merge＋B1 修樹本地全量第一跑＝4,703/4,703 全執行（progress 計數 4,634 passed / 69 skipped / 0F / 0E）但 summary 行未寫入（teardown 中斷、journal 無 OOM、progress 無 F/E）→**重跑中**（帶 exit code 留痕）；CI `b8dd9c92` 同跑（任一綠＋數字吻合＝審查門 4 滿足）。
+- **未驗證**：CI b8dd9c92 🟢；本地全量 summary＋exit 0；e014 完賽（**66/78 出分**、1 格在跑＝24-A、11 格未開＝24-C/CB＋25×3＋26×3＋2697×3；暫點非裁決：A 10/22、C 11/22、CB 11/22）。
+- **文檔**：審查檔 `decisions/DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW.md` **§9 補記**（Vacant）、`loop/NOW.md` round 892 條、`loop/L005.md` round 892 段、`BACKLOG.md` 新增「步鏈分卷封印」節（G1–G4＋Phase B/C 狀態）、本條。
+- **待下輪**：① e014 78/78 → `audits/e014_completion_pipeline.py --base /srv/vlab`（含 report.py --rescore＋Holm 三配對）→packet §5 回填→L005 結案→FINDINGS 同步；② 全量對照收口（本地重跑綠＋CI b8dd9c92 綠、含 skips 69 vs 70 對帳）；③ Phase B（L2 冷壓縮）TDD 啟動（資深 #3；驗收＝先失敗測試＋壓縮率≥3×＋C3 通過）；④ 下一循環研究封包（資深 #4：e014 裁決後整合 e013＋e014 預註冊）；⑤ G1–G4（Phase C blocker）候 argon 補齊或另開工單。
+- **紅線**：產品改動僅 B1 修＋1 測試（其餘零）；未動 ~/.vacant；staged/runs 未動（runs 只讀點數）；未讀 hidden/scorer；未 push（迴圈輪末自動推）；未動 main；未刪權外。
+
+### DECISION
+- `DECISION:round 892 argon Phase A merge 已執行` — 資深 round 892 指示 #1 明確下令 merge `af3c1d14`（晚於 round 891 HOLD 裁決、權位更高）⇒執行（merge `586cea71`）。HOLD 三門：門 1（CI）已滿足於 af3c1d14；門 3（B1）本輪 TDD 收口（先紅重現覆蓋→`max+1` 修→334 綠）；門 2（G1–G4）未收口、已登記 BACKLOG——**Phase C（L3 預算回收）blocked until 收口**，Phase B（L2 冷壓縮）不為 B1 所阻。HOLD 證據不作廢、續作 Phase C 門（審查檔 §9 補記）。
+- `DECISION:round 892 B1 修法＝max(既有卷號)+1（非 len+1、非跳號重排）` — 卷號缺口下 len+1 撞既有卷號、os.replace 覆蓋已封印卷（RED 實錄）；max+1 與缺口無關、嚴格遞增、無缺口時行為不變（max+1≡len+1）；TDD 先紅後綠、334 passed。
+- `DECISION:round 892 e014 仍不裁決` — 66/78 非完賽；暫點（A 10/22、C 11/22、CB 11/22）僅快照；裁決以 78/78＋官方管線（report.py --rescore＋三配對 Holm）為準（續 round 885/891 先例）。
+
+## round 891（2026-11-03）——e014 解阻 RUNNING（47/78）＋argon Phase A commit 審查完成（Merge HOLD）
+- **senior 指示 4 條**：#1 e014 解阻完賽（进行中：supervisor 已清理磁碟、labd 01:55:40 在跑、**47/78 出分**＝A 16/16 6pass／C 16/16 7pass／CB 15/16 7pass、0 infra、1871-CB 在跑、剩 37 格）；#2 argon commit 審查後 merge（**審查完成**、裁決 Merge HOLD、見下）；#3 步鏈治理（argon 已在 auto/argon 實作 Phase A、本輪即審查對象）；#4 下一循環研究問題預註冊（e014 裁決後整合 draft r875）。
+- **#2 審查（資深點名交付）**：被審 `auto/argon` `c0b94747`（Phase A core）＋`af3c1d14`（GC fix R2）——
+  **裁決＝Merge HOLD（非拒絕）**。機制逐點審查**通過**（seal payload 七鍵／跨卷 prev_hash／BROKEN vs UNKNOWN 語義／fail-open／legacy 零改動／無新必填設定）；R2 GC 修復（keep-set 掃全部殘存卷＋.gz 前瞻）**確認正確**；真鏈實測（**副本**上、未動 ~/.vacant）：b0a5 21.6MB＋535f 15MB 新代碼 verify=True、b0a5 強制封印＋append 全鏈 21,358 verify=True、seal 0.218s。
+  **HOLD 三門**（全齊即放行）：① 最終 sha CI 🟢＋收錄測試數不少於現 HEAD——**截至本輪末已滿足於 af3c1d14**（🟢 4634 passed/70 skipped、收集 4703 ≥ qwen27b 4698；qwen27b 7d987f66 🟢 4629/70 與基線一致；worker b35932dd 未跑完）——argon 再推進需對新 sha 重核；② Phase A 預註冊驗收缺口 **G1–G4**（C1 需 30k-step 測試、現僅 12 步；C2 真鏈驗收未入庫；C6 append P99 ≤10%／verify ≤5s 基準完全缺失；負控制未斷言 BROKEN vs UNKNOWN）；③ **B1 潛在覆寫 bug**（`next_vol_num=len(vols)+1` 遇卷號缺口會 `os.replace` 覆蓋已封印卷；Phase A 不可達、**Phase C 必踩**；修＝`max(既存)+1`）。
+  全文＝`decisions/DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW.md`（Vacant repo auto/qwen27b）。
+- **環境發現（已處理）**：`~/dev/wt/argon` 曾 sparse-checkout（`/*`＋`!/runs/`、省 825MB）⇒`test_appendix_bg_census_r480` 假失敗（UNSCANNED；同測試 qwen27b 完整 checkout 綠）。已 `git sparse-checkout disable`（物化 runs/ 356 目錄、**可逆**、磁碟 66G 充裕）後全量重跑；若 argon agent 依賴稀疏狀態省磁碟，注意此改動。
+- **全量套件對照（本輪完成）**：兩分支完整 checkout 並跑＝**argon exit 0、qwen27b exit 0**（0 失敗）；收集數本地＝CI 逐位一致（argon 4,703＝CI af3c1d14、qwen27b 4,698＝CI 7d987f66）⇒ argon 新增 5 測試全綠、無回歸、收錄不少於現 HEAD；已回填審查檔 §5。
+- **文檔**：`decisions/DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW.md`（Vacant、auto/qwen27b）、`loop/NOW.md` round 891 條、`loop/L005.md` round 891 段、本條。
+- **待下輪**：① ~~全量套件結果回填~~ 已完成；② argon 若再推進（補 G1–G4／B1）需對新 sha 重核 CI；③ e014 完賽（47→78/78）→`audits/e014_completion_pipeline.py`（含 report.py --rescore）→packet §5 回填→L005 結案；④ argon merge 門核對（剩：G1–G4＋B1＋新 sha CI 綠）；⑤ assistant 票 R20261102_2025-1 仍在 doing/（不干涉）。
+- **紅線**：零產品改動（審查文檔除外）；未動 ~/.vacant（真鏈實測全在 /tmp 副本）；未動 staged/runs 證據；未讀 hidden/scorer；未 push；未動 main；未刪權外。
+
+### DECISION
+- `DECISION:round 891 argon Phase A merge HOLD` — 機制審查通過（含真鏈實測）但預註冊驗收 C1/C2/C6 未以入庫測試收據落地（G1–G4）、最終 sha CI 未綠、B1 潛在覆寫 bug 未修；ASSIGNMENT 合併規則（CI 綠＋收錄測試數不少於現 HEAD）未滿足⇒不 merge、記錄門條待齊。非拒絕：無實質設計問題、三門齊即可放行。
+- `DECISION:round 891 argon worktree sparse-checkout disable` — bg_census 測試在稀疏 worktree 假失敗（UNSCANNED、同測試 qwen27b 綠）；物化 runs/ 825MB 使本地全量＝CI 同環境；可逆（`git sparse-checkout set /* !/runs/`）、磁碟 66G 充裕⇒執行並留痕。
+- `DECISION:round 891 e014 不提前裁決` — 47/78 非完賽；局部數據（CB 7/15 pass 等）僅快照、裁決以 78/78＋官方 report.py --rescore 管線為準（ASSIGNMENT：禁止用局部數據提前裁決分支）。
+
 ## round 879（2026-11-02，主軸 4 consumption side）——e014 senior 審查已過、但三阻斷擋住發射、本輪不發射（保守）＋ L005 開立＋票升級
 - **senior 指示 5 條**（round 879 提示）：#1 senior 審查通過（gate 1）✓、#2 vacant_sha＝7c304639 確認✓、#3 開 L005＋同步 NOW✓、#4 核實 cell.py CB 行✓（`cell.py:155-156` `if a.arm == "CB": inst += ["--mode","block"]`，只 CB 臂加、A/C 零改動、py_compile 過；`--mode block` 實作＋`test_install_writes_mode_block`/`test_current_mode_reads_block` 在 7c304639、CI 覆蓋）、#5 落盤 78 格 queue 檔發射——**被三阻斷擋住、本輪不發射**。
 - **B-1（P0、本輪新發現）e001 完整題樹消失**：cell.py 讀取的 `/srv/eval/staged/dabstep`（e001 所跑、有 workspace 資料）已不在（`/srv/eval/staged/` 空；`/srv/eval` `drwx------ root root`）。只剩骨架 `/tmp/bm_tasks/dabstep`（79 題、每題 `instruction.txt`＋**空** `workspace/`）。**e001 對源**：`runs/e001_pi_AC_baseline/dabstep-1-pi-C-r1/cell.json` `workspace_sha256=ebd8ca10…`（非空）＋`score.json pass=true` ⇒ e001 跑的是有資料的完整樹、非骨架。⇒ 以骨架 stage 再發射＝與 e001 不可比的另一個實驗（空 workspace、資料題無資料），會把「無資料」誤讀成「blocking 無效」（packet §1 邊界/H-2 同構禁止的誤歸因）。需 /srv/eval 所有方（supervisor）恢復或裁定骨架＝新實驗。
@@ -7128,3 +7159,48 @@ DECISION:885＝(a) e014 paused（free 3.6G、43/78）＝候票 2025-1、權限�
 - **紅線**：未 push；未動 ~/.vacant（只讀核實）；未動 staged/runs；未改模型通道行為。
 
 DECISION:886＝redo（review）：通讀 retention.py（2207 行）核實量具 API 表面（`envelope_accounting` dict 鍵＋`usage_report`、無同名函數）、盲區前提、fail-open 慣例、人讀點名、測試斷言、上限加總語義——皆與 round 883 實作一致；修 2 處不準確措辭（retention.py 註、STATE DECISION:883）並誠實記錄「round 883 未開檔核實」；零代碼行為改動、test_retention 84 全綠；未 push、未動 ~/.vacant
+
+## Round 887（2026-11-02 23:3x）——e014 候 supervisor 續；argon 審查收口；CI 綠
+> **reviewer redo 註（2026-11-02 夜）**：本輪原記錄引用了 `ops/vlab/packets/e014_dabstep_block.md` 與 `vacant_network/retention.py` 但未在記錄步驟中開啟；兩檔已於本輪開啟（packet 183 行全讀、retention.py 關鍵段逐行核），相依部分已 redo（見 e014 條與 argon 條尾）。
+- e014：43/78 仍 PAUSE（labd 4G 護欄、free 3.6–3.9G 波動）；/tmp 2.9G＝646M 近 3 次 retention 測試跑（pytest-27/28/29、可再生）＋~2.2G 歷次小 scratch（7353 目錄項）；票 2025-1 已記 round 887 明細候 supervisor。**完賽 pipeline redo（packet 對源核）**：`audits/e014_completion_pipeline.py` 對 packet §5 四分支觸發條件（「discordant 各≤1 或 ≤2/2 對稱」「≥1 hold 或 refusal」「每 CB_only pair 因果鏈」「零 continue⇒UNKNOWN」）、成本疊層（CB/A 或 CB/C calls 或 input tokens >2×⇒「不值」）、refusal（wall≥1800s 或 timed_out＋最後 continue）、hold（round≥3 continue）、目標格 9 題、§7 回填欄位——**全數在位、語義一致**；唯一缺口＝§7「邊界聲明（H-2、檢定力、1 rep）」之 H-2 句（交件存在 vs 內容正確、e001 實例 1/9）不在 brief⇒補 `boundary` 欄位（packet §1 原文措辭）＋selftest 第 25 斷言，**25 組全綠**（實跑 /srv/vlab 仍未觸發、exit 10 正確）；另校正 round 885「目前形勢指分支 1」：依 §5 分支表，目前（continue 5 皆 round≤2、hold 0、refusal 0、0/0 對稱）＝「**分支 1/4 之間⇒人工裁決**」（分支 1 需 ≥1 hold 或 refusal；分支 4 需零 continue；pipeline 兩路皆有機械映射）；完賽判定仍以全 78 格為準。
+- argon 審查（資深「審過再 merge」）：2 個 WIP commit（d36a7967 L005 +129/-3、6c2379c5 STATE +63）皆 docs-only，且最終樹與 qwen27b tip **byte-identical**（git diff --quiet）⇒**無需 merge**（空 diff 合併＝純歷史噪音＋多一次 CI）；CI d36a7967 綠 4629 佐證。**redo 補直接對源**：現 tip c84ee590 `vacant_network/retention.py`＝L170 `SUBDIR_TOTAL_CAPS={'trace/projects':32MiB}`（註記含真機盲區實例：projects 39MB、trace 總 69MB<96MiB 舊量具誤報 within_caps True）、L258–289 `envelope_accounting` 唯讀＋`sub_overrun` 計入 `within_caps`、L2009–2030 `usage_report` 人讀點名「只報告、不刪除」⇒資深 #3 收口有直接對源（byte-identical 亦覆蓋 argon 側同檔）。
+- CI：qwen27b tip c84ee590 ✅ 綠（4629 passed/0 failed、11:21、23:33 完）；argon tip 09da5447 在跑（內容同 c84ee590、預期綠）；worker d7949696 綠 4622。
+- DECISION:887＝argon 無產品碼、無內容差（byte-identical）⇒不 merge（supervisor 若欲分支統一可空 merge、可逆）；e014 續候 supervisor 清 /tmp（權限外、紅線），free ≥ 4G 時 labd 自動續跑。＋redo（reviewer 點名兩檔未開）：packet 183 行全讀＋retention.py 關鍵段逐行核⇒結論不變（無需 merge、#3 已收口）、pipeline 補 H-2 邊界欄位（selftest 25 綠）、校正「分支 1 指向」為「分支 1/4 之間⇒人工裁決」；零產品代碼改動、未 push。
+
+## round 888（2026-11-02，研發負責人）——工單 R20261102_2323-1 結案：e014 完賽管線成本口徑對齊 report.py（selftest 29 綠＋e013 零歧異）
+- **任務（senior #2／票 R20261102_2323-1）**：`audits/e014_completion_pipeline.py` 成本計量兩處偏差——分子過濾失敗格（`if p is not True: continue`）＋漏計 output_tokens，與官方量具 `/srv/vlab/bin/report.py` 口徑矛盾（review 以 e013 數據量化：A 低估 1.04 calls/23,637 tokens、C 低估 1.04 calls/22,579 tokens）。
+- **修復**：
+  1. `cost()` 改為 report.py 同式：分子＝該臂所有出分格（含失敗格）`model_calls`＋`input_tokens+output_tokens` 總和；infra/缺分（pass=None）不進分子分母；分母＝成功格數。欄位 `input_tokens_per_success`→`tokens_per_success`（與 REPORT.json 同名）；ratio 鍵 `input_tokens`→`tokens`；branch_hint 成本措辭同步。
+  2. 新增 `cost_arm_ok()` 零歧異交叉核對（本地未四捨五入 per-success vs REPORT.json per-arm；容差＝report.py 四捨五入粒度 calls ≤0.011／tokens ≤0.51；pass 數不一致⇒False）＋`brief()` crosscheck 增 `per_arm_cost`（A/C/CB 三臂、含雙側數值）。
+  3. **selftest 強化（關鍵）**：REPORT.json fixture 改由**真官方 report.py** 產生（`importlib` 載入 `/srv/vlab/bin/report.py`、monkey-patch 其模組層 `V` 指 fixture 目錄、不傳 --rescore）——round 887 的 hand-crafted 版正是舊口徑 5.0/6.0/7.5（即本次 bug 本身），由真量具產 fixture 杜絕語義漂移；fixture 出分格補 `wall_s`（report.py `mean_wall_s`/`timeouts` 求和需數值）、4 格補 `output_tokens`（驗證分子含失敗格＋tokens 含 output）；斷言 25→**29**（新 26＝真 report.py 產出 per_arm 口徑 23.0/251000、12.5/137000、19.5/208250；27＝三臂零歧異全 ok）。
+  4. 順帶修 fixture builder `_mk_cell` 預設 `timed_out=None→False`：report.py 對 `timed_out:null` 求和會 TypeError（真 `cell.py:174` 寫 False、實格無影響、僅 fixture 路徑；留註在源）。
+- **驗收（兩判準全數達成）**：
+  - `python3 audits/e014_completion_pipeline.py --selftest`→**`SELFTEST PASS（29 組斷言…）`、exit 0**。
+  - e013 數據本地重算（新口徑）A `26.93 / 583095`、C `14.41 / 244937`——與 `/srv/vlab/runs/e013_dabench_pi_AC_full/REPORT.json` per_arm **逐位吻合**（`cost_arm_ok` A/C 均 True）。
+  - 附證：e014 現行 43 格實跑 `cost()`：A 56.17/1,483,817（6 成功）、C 40.71/1,149,492（7）、CB 28.71/655,587（7）；CB/C 0.705×/0.57×、CB/A 0.511×/0.442×⇒cost_ok=True。（**部分數據、非裁決**；完賽以官方 REPORT 為準。）
+- **文檔**：票 `R20261102_2323-1` 結案記錄＋移 `tickets/done/`；本條；NOW.md。
+- **紅線**：未 push；未動 main/~/.vacant；未讀 hidden/scorer；未改產品；未刪證據（runs/、/tmp 未動）。
+- **e014 現狀不變**：43/78 PAUSE（磁碟護欄 free≈3.7G<4.0G、票 R20261102_2025-1 候 supervisor）；完賽觸發後跑 `--base /srv/vlab` 出 brief（成本欄位即本輪新口徑）。
+- **Redo（reviewer 點名兩項、round 888 redo）**：
+  1. **selftest 實際執行並記錄輸出**：`--selftest`→`SELFTEST PASS（29 組斷言…）`、**EXIT_CODE=0**（redo 後複跑同結果）。
+  2. **對源 `packets/e014_dabstep_block.md`（183 行全讀）**：發現成本口徑預註冊措辭與票面口徑之差——packet §2/§5 預註冊原文＝「CB/A 或 CB/C calls 或 **input tokens** >2×⇒不值」（round 876、先於票）；票（資深審查、較新）明令 tokens＝input+output（report.py 口徑）。⇒ **2× 門檻照 packet、tokens 口徑以票為準**（裁量覆蓋留痕、非事後改 packet——packet 明文「結果出來前不可改」，未動）；管線 3 處措辭（docstring L20-22、cost() 紅線註 L309-310、cost_note L369-372）修正為雙源準確；§7 欄位 generic「tokens」與 `tokens_per_success` 一致✓、§5 四分支/H-2/目標格與管線現態一致✓；selftest 複跑 29 綠、exit 0。
+
+DECISION:888＝工單 R20261102_2323-1 結案：cost() 口徑對齊 report.py（分子含失敗格、tokens=input+output、欄位 tokens_per_success）＋cost_arm_ok 零歧異交叉核對入 brief＋selftest 由真 report.py 產 fixture（29 斷言綠、exit 0）＋e013 實證逐位吻合官方 REPORT.json（A 26.93/583095、C 14.41/244937）；修 fixture builder timed_out 預設（report.py null 求和崩、真格無影響）；票移 done/；未 push、未動 main/~/.vacant、未讀 hidden/scorer、未刪證據；e014 續候 supervisor（票 2025-1）
+＋redo（reviewer 點名）：selftest 實際執行並記錄輸出（EXIT_CODE=0）；對源 packet 183 行全讀——成本口徑預註冊措辭「input tokens」（round 876）vs 票面「input+output」（資深審查、較新）⇒2× 門檻照 packet、口徑以票為準（裁量覆蓋留痕、不改 packet）、管線 3 處措辭雙源準確、複跑 29 綠
+
+
+## round 889（2026-11-03 00:5x，研發負責人）——資深 #3 步鏈無界增長治理：設計凍結（零產品改動）；e014 續候 supervisor
+- **資深 #3 交付**：`decisions/DECISION_20261103_STEPCHAIN_SEALING.md`——三層設計（侵入性遞增、可獨立實作）：
+  1. **L1 分卷封印**：活動卷保留 `chain.ndjson` 名（現行讀寫端無縫相容）；append 觸發 lazy 封印（預設 2MiB/2,000 筆）——尾追加 `volume_seal` 事件（sha256_prefix＝除 seal 行外整卷字節流 sha256、first_seq/last_seq/entry_count/last_entry_hash）⇒fsync⇒os.replace 改名 `chain-NNNNNN.ndjson`；新卷首筆 prev_hash＝seal 筆 hash（邏輯鏈不斷）；舊格式（單 chain.ndjson 無 seal）＝單一活動卷、零遷移；單簽章者規則不變。
+  2. **L2 冷壓縮**：只壓已封印卷（不可變）→`chain-NNNNNN.ndjson.gz`（gzip stdlib、零新依賴、預期 3–8×）；活動卷永不壓；gunzip 後照舊驗 seal。
+  3. **L3 預算回收**：**僅明確預算**（target_bytes/flag）、永不預設；最舊封印卷先；永不動活動卷/卷 1（創世）/最近 3 卷（鏡 DEFAULT_KEEP_SET_ASIDE=3）；回收動作簽 `volume_reclaimed` 入鏈（回收本身也記責）；GC blob keep-set 掃描改掃全部殘存卷（retention.py:659 現只讀 chain.ndjson）。
+  - **校驗語義**：按卷序 walk＋跨卷 prev_hash＋逐卷 seal 驗章（entry_count/last_entry_hash/sha256_prefix＝每卷檔案級完整性＋長度承諾）；**新裁定 UNKNOWN（reclaimed/missing）與 BROKEN 區分、絕不返回 True**；負控制：改 sealed 卷一筆⇒BROKEN、刪 seal 行⇒BROKEN（非 UNKNOWN）、損 .gz⇒BROKEN。
+  - **誠實邊界**：不宣稱解決 H-3（seal 與本鏈同金簽、非 exogenous；外生錨仍是收件端帳本＋head.json）；不保證 projects/ 預設總量有界（預設有界＝單檔增長有界＋增速有界；總量有界需明確預算）；不引入多簽章者。
+  - **驗收判準 C1–C6 預註冊**（合成 30k 步無單檔越限＋verify/verify_since OK＋負控制；兩條真鏈升級前後一致；壓縮比≥3×；回收後 UNKNOWN 非 True 非例外；零設定 fail-open；append P99 增量≤10%、verify≤5s）。
+  - **實作分期**：Phase A（L1＋校驗）→B（L2）→C（L3）；每期先寫失敗測試→實作→全量 ≥4629 基線→提交。**本輪不實作**（迴路規則「不改產品行為」）。
+- **證據（本輪實測、2026-11-03 00:48 UTC、只讀）**：~/.vacant 100M（10-28 清零後 6 天）；trace/projects 39M（資深審 38.02MB 一致）；objects 33M；單檔最大 `b0a568dfe7dbe3b0/chain.ndjson`＝21.6MB/21,216 筆（均 1.02KB/筆；genesis workspace=/home/user1/dev/Vacant＝本倉庫自己的 dogfood 專案、本迴路在喂大它）；lock 10-28 08:16 建⇒增速≈3.8MB/天、≈3,700 筆/天；GC「完全無能為力」＝步鏈不在任何回收路徑（retention.py:537 docstring/149/169「步鏈是記責記錄、GC 向來不碰 chain.ndjson」）＋objects 已收剩 433KB（資深審實測）＋32MiB 子上限只報告（:170/:234）。
+- **e014**：仍 PAUSE（43/78、`/srv/vlab/running/` 在位）；本輪授權內清理 free 3.7G→3.8G（gzip 三檔舊圓誌 0883–0885＋清 pycache、皆可再生）；不足以過 4.0G⇒續候 supervisor 清 /tmp（票 R20261102_2025-1、/tmp 2.9G）；round 882 先例＝free≥4G 時 labd 自動恢復；裁決狀態不變（分支 1/4 之間⇒人工裁決、round 887 校正）。
+- **紅線**：零產品代碼改動（本輪規則）；未動 ~/.vacant（只讀實測）；未動 staged/runs；未讀 hidden/scorer；未 push；未動 main；僅刪授權內可再生檔（舊圓誌、pycache）。
+
+DECISION:889＝資深 #3 步鏈無界增長治理：採納分卷封印＋冷壓縮＋預算回收三層設計（UNKNOWN 語義、C1–C6 預註冊、Phase A/B/C 先失敗測試）為目標形態，**設計凍結於本輪、本輪不實作**（迴路規則「不改產品行為」）；e014 續候 supervisor（票 2025-1、free 3.8G<4.0G、授權內手段已用盡）；零產品改動、未 push、未動 main/~/.vacant
+＋redo（reviewer 點名、2 項、2026-11-03）：① 日期「20261103」以命令重算 `date -u`＝2026-11-03（packet 建立 2026-11-02＋round 888＝2026-11-02 佐證）⇒DECISION_20261103 全部日期 token（標題/日期/實測 2026-11-03 00:48 UTC）與重算值一致，檔案未改（已寫即重算值）；② packet `ops/vlab/packets/e014_dabstep_block.md` 本次開啟通讀（183 行；5 鏡像 md5 aa5ad840 一致）並對照三文檔 round 889 e014 陳述：「78 格」↔§2（26 題×3 臂×1 rep）、「free 3.8G<4.0G」↔§6 發射門＋live disk.json（3.8、paused）、分支 1 與 4 之間↔§5 分支表（continue 5/hold 0/refusal 0）、「43/78」↔round 885 狀態＋queue 檔 78 格結構——皆與源一致、零文字改動、無新事實

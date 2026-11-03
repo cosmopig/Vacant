@@ -122,3 +122,37 @@ round 891 已 `git sparse-checkout disable`（物化 `runs/` 356 目錄、可逆
 - 「機制審查通過」不意味著「Phase A 完成」——完成＝設計 §五 C1–C6 全數以測試收據落地。
 - C6 的 ≤10% 延遲門檻目前**沒有數據**；任何「Phase A 已完賽」的表述都屬不實，
   直到 G3 補齊或明列未收口。
+
+## 9. Round 892 補記（2026-11-03，執行記錄——審查者本人執行）
+
+**§7 門狀態更新（round 892）**：
+
+1. **門 1（CI＋收錄數）**：維持已滿足於 `af3c1d14`（🟢 4,634/70、收錄 4,703 ≥ 4,698）；
+   merge 後最終 HEAD＝`b8dd9c92`（含 B1 修），其 CI 在跑（ci.sh 跟 HEAD）。
+2. **門 2（G1–G4）**：**仍 open**——已登記 BACKLOG（新增「步鏈分卷封印」節）；
+   Phase A 驗收（設計 §五 C1–C6）未完成；**Phase C（L3 預算回收）blocked until 收口**
+   （Phase C 正是製造卷號缺口的路徑、B1 缺陷由它觸發——B1 已修，但 G1–G4 的驗收缺口仍擋 Phase C）。
+3. **門 3（B1）**：**已收口（round 892，commit `b8dd9c92`，TDD 先紅後綠）**：
+   - 先紅：新測試 `tests/test_stepchain_sealing.py::test_stepchain_b1_volume_number_gap_must_not_overwrite`
+     （移除最小卷號製造缺口＝回收/遺失語義，與本檔負控制 3 同形→續寫觸發新封印→
+     既有最大卷號必須逐位元組不動＋新封印落入 max+1 且尾行 volume_seal）。
+   - RED 實錄（修前）：新封印碰撞 `chain-000003.ndjson`、`os.replace` **覆蓋已封印卷**
+     ——§6 預測的「len+1 撞既有卷號」路徑重現，bug 確認。
+   - 修：`vacant_network/trace/recorder.py` 封印分支 `next_vol_num=len(vols)+1` →
+     `max(既有卷號)+1`（註記引用 B1）。
+   - GREEN：指定驗收命令（test_stepchain_sealing＋test_retention＋tests/test_trace*.py）
+     ＝**334 passed、exit 0**（333＋本新測試）。
+4. **門 4（全量套件）**：merge＋B1 修樹本地全量第一跑＝4,703/4,703 全部執行完
+   （progress 點線計數 **4,634 passed / 69 skipped / 0F / 0E**），但終結 summary 行未寫入
+   （進程於 teardown 中斷、journal 無 OOM 記錄、progress 無 F/E）→**重跑中**（帶 exit code 留痕）；
+   CI `b8dd9c92` 同跑。兩者之一綠＋數字吻合即滿足。skips 69（本地）vs 70（CI af3c1d14）＝
+   1 個環境相關 skip 差，留待重跑／CI 對帳。
+
+**裁決更新**：資深 round 892 指示 #1 明確下令 merge `af3c1d14`（晚於本 HOLD 裁決、權位更高）⇒
+**已執行：merge commit `586cea71`**（auto/qwen27b；範圍＝c0b94747＋af3c1d14，qwen27b 側 docs-only）。
+本 HOLD 裁決與全部證據**不作廢**：G1–G4 續作 Phase A 驗收補齊項＋Phase C 門（§8 不變）。
+
+**誠實邊界（續）**：「Phase A 已 merge」≠「Phase A 驗收完成」——C1–C6 仍欠 G1–G4
+（尤其 G3 延遲基準零數據）；在此之前任何「Phase A 完成／已完賽」表述屬不實。
+Phase B（L2 冷壓縮）不為 B1 所阻（B1 只影響封印卷號命名、不影響壓縮）；
+資深 #3「Phase A merge 後規劃 Phase B」之前提已滿足，Phase B 驗收（先失敗測試＋壓縮率≥3×＋C3 通過）待執行。
