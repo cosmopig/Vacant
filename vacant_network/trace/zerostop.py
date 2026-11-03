@@ -208,10 +208,22 @@ def untraceable(agent: str, session_id: str | None, cwd: str | None, mode: str, 
     return record
 
 
+def failed_step_review_on() -> bool:
+    """failed_step(test_failed) 的交件前退回開沒開（預設開）。`VACANT_FAILED_STEP_REVIEW=0` ⇒ 關：
+    這類發現不退回 agent（chain 的 `findings`、交件說明的 left_open、觀察模式與其餘行為都不變）。
+    預設未設時決定與之前**位元組級相同**（invariant：無問題時與沒裝 Vacant 的路徑一致）；
+    讀取環境出錯一律回預設（fail-open，絕不擋任何一跑）。e016 C-nf 消融臂用它。"""
+    try:
+        return os.environ.get("VACANT_FAILED_STEP_REVIEW", "").strip().lower() != "0"
+    except Exception:  # noqa: BLE001 — 失敗一律回預設
+        return True
+
+
 def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) -> list[dict[str, Any]]:
     """這一次檢查要退回給 agent 的發現（其餘只進交件說明）。純函式：離線重播（`ops/eval/colab_replay/`）用同一份。
     - 「點名的檔沒打開」只退一回合（`UNREAD_MAX_ROUNDS`）。
-    - 「測試失敗」同對話內最多只退一回合（`TEST_FAILED_MAX_ROUNDS`），避免 12B 模型在同一對話內無效死循環。
+    - 「測試失敗」同對話內最多只退一回合（`TEST_FAILED_MAX_ROUNDS`），避免 12B 模型在同一對話內無效死循環；
+      `VACANT_FAILED_STEP_REVIEW=0` 時這類發現完全不退回（e016 C-nf 消融臂；見 `failed_step_review_on`）。
     - **v3.7：模型錯誤結束的回合一律不退回**（只寫給人）。那不是 agent 說做完，是模型那一側壞掉；u274 的缺檔退回 31 跑裡
       16 跑是這樣觸發的，之後 0 對、13 跑撞時限沒交、3 跑交錯（`decisions/conclusions/CONCLUSION_20260928_NOCAP_UNSEEN_U274.md`）。"""
     if error_stop:
@@ -232,8 +244,9 @@ def pushable_for(findings: list[dict[str, Any]], used: int, error_stop: bool) ->
             continue
         if k == "unread" and used >= UNREAD_MAX_ROUNDS:
             continue
-        if k == "failed_step" and f.get("sub") == "test_failed" and used >= TEST_FAILED_MAX_ROUNDS:
-            continue
+        if k == "failed_step" and f.get("sub") == "test_failed":
+            if not failed_step_review_on() or used >= TEST_FAILED_MAX_ROUNDS:
+                continue
         out.append(f)
     return out
 
