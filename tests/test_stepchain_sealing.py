@@ -288,3 +288,47 @@ def test_stepchain_sealing_set_aside_multivolume(env):
     ok2, why2 = rec.verify()
     assert ok2, f"verify must pass after set_aside and fresh start, but failed: {why2}"
 
+
+def test_stepchain_sealing_set_aside_moves_gz_twins(env):
+    """set_aside 必須一併搬走與明文同號的 `.gz` 卷（compact 半殘態：明文＋.gz 共存）。
+
+    `compact_sealed_volume`（recorder.py:248-281）在 os.replace 後、刪原檔前失敗/中斷會留下
+    `chain-NNNNNN.ndjson`＋`chain-NNNNNN.ndjson.gz` 共存——`_sealed_volume_paths` 的 docstring
+    （recorder.py:305-323）明文承認此態存在且取明文。set_aside 若只依該去重 helper 搬明文，
+    殘留 `.gz` 會使新創世鏈的 verify 永久 BROKEN，違反 set_aside「不能讓一條壞掉的鏈讓專案
+    從此每一次都查不了」之契約。"""
+    import gzip as _gz
+
+    ws, rec = env
+    rec.volume_max_entries = 4
+    rec.compact_on_seal = False
+
+    for i in range(6):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+
+    pdir = rec.dir
+    vols = sorted(pdir.glob("chain-*.ndjson"))
+    assert vols, f"need at least one sealed volume, got {sorted(pdir.iterdir())}"
+
+    # 構造 compact 半殘態：第一卷的同號 .gz 在位（內容＝該卷明文之 gzip）
+    v0 = vols[0]
+    (v0.with_name(v0.name + ".gz")).write_bytes(_gz.compress(v0.read_bytes()))
+    assert (v0.with_name(v0.name + ".gz")).is_file(), "precondition: .gz twin exists"
+
+    res = rec.set_aside("test: gz twin must be set aside")
+    assert res, "set_aside must return a non-empty name"
+
+    remaining = [p.name for p in pdir.iterdir()
+                 if p.name.startswith("chain-") and
+                 (p.name.endswith(".ndjson") or p.name.endswith(".ndjson.gz"))]
+    assert not remaining, f"all sealed volumes (incl. .gz twins) must be set aside, got: {remaining}"
+
+    # 新創世鏈必須能正常 verify
+    rec.pre("t_after", MAIN, "Write", {"file_path": "after.txt"})
+    (ws / "after.txt").write_text("after\n")
+    rec.post("t_after", MAIN, "Write", {"file_path": "after.txt"}, "ok")
+    ok2, why2 = rec.verify()
+    assert ok2, f"verify must pass after set_aside and fresh start, but failed: {why2}"
+

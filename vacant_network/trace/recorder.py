@@ -1355,9 +1355,18 @@ class Recorder:
         """病歷驗不過：把舊的鏈與鏈頭**改名留著**（不刪、不改內容），下一筆從新的創世開始。
         回舊鏈的新檔名。零設定的回合結束用——沒有收件端帳本可記 `trace_broken`，
         不能讓一條壞掉的鏈讓這個專案從此每一次都查不了。
-        支援多卷封印鏈（DECISION_20261103 Phase A/B）：包含所有封印卷一併改名留存。"""
+        支援多卷封印鏈（DECISION_20261103 Phase A/B）：包含所有封印卷一併改名留存。
+        注意：不用 `_sealed_volume_paths`（它同號明文＋.gz 去重取明文）——`compact_sealed_volume`
+        的半殘態（os.replace 後、刪原檔前失敗/中斷）會留下同號明文＋`.gz` 共存；set_aside 必須
+        **全數**搬走（不刪、不改內容），否則殘留 `.gz` 會讓新創世鏈永久 BROKEN。"""
         with self._lock():
-            vols = self._sealed_volume_paths()
+            if not self.dir.is_dir():
+                vols: list[pathlib.Path] = []
+            else:
+                vols = sorted(
+                    p for p in self.dir.iterdir()
+                    if p.is_file() and _volume_num(p.name) is not None
+                )
             if not self.chain_path.is_file() and not vols:
                 return ""
             stamp = int(time.time() * 1000)
