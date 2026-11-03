@@ -1,6 +1,102 @@
 # 現在做哪一個循環
 
-**目前活躍：e014（DABStep 26 題 × A/C/CB＝78 格；CB＝`--mode block`）——**round 880 已發射（2026-11-02 17:49:32，labd 串行 78 格在跑）；round 881 起磁碟護欄 PAUSE（19/78 格）⇒**round 882 權限內釋放磁碟（log gzip＋pycache，3.8→4.1G）⇒labd 19:47 自動恢復續跑**：六 gate 全綠（senior 正式審查通過＋CI 綠＋磁碟＋queue 空＋sha 7c304639＝HEAD＋gate 6 逐題 26/26＝1627-1 §4 表）；round 879 B-1「題樹消失」經核實＝**無 sudo 權限拒讀誤讀**（完整樹在位、`sudo -n` 對源核實）；票 R20261102_1627-1 已結案（資深裁決廢止 §4 表、移 done/）、R20261102_1632-1（骨架 stage、題單 27≠2697）結案勿執行**。
+**round 910（2026-11-03 20:25–21:0x，R&D 負責人）**：e016 仍進行中⇒不阻塞監控；senior #1 驗收判準於現行樹複核 PASS＋**CI 1e78dfe9 綠⇒round 909 合併驗收閉合**（三分支同收錄 4741）。
+① **e016 attempt-2（不阻塞）**：20/102 格在位（19 出分）；pg_dominoes A 完、C 在跑（~20:31 起、ppid=labd 1007597）；18:19 後 0 新 infra（bowling A 兩次重試後出分）；單 labd（vacant-labd active）＋單 cell 程＝无双分派；盤餘 63.3G／paused=false／queue 空；自 16:15 起跑 pace ~13 分/格⇒ETA 明日下午（~14:0x）。
+② **senior #1 驗收（於 1e78dfe9 複核、兩判準皆達＝PASS）**：兩 fix 在位（:132 `endswith("-r1")`、:140-141 done/16_ 存在判定）；`python3 ops/audits/e016_verdict_pipeline.py --selftest`＝ALL OK（7 組）RC=0；live run＝`INCOMPLETE: 只到 20/102 格在位（等 job 結束再判決）`RC=10——輸出已完成格數＝現行實際 20（非 0）。
+③ **CI 閉合（round 909 合併驗收最後一門）**：auto/qwen27b **1e78dfe9 綠**（4670 passed／0 failed／0 errors／71 skipped／收集 4741／pytest_rc=0、`ci/1e78dfe9….json`）——收集數 4741＝argon c9a811fe＝worker 69c50dba（cherry-pick 兩檔非測試檔⇒收錄數不變）⇒「CI 綠＋收錄不少於」合併規則全數滿足。
+④ **紅線**：零發射（e016 為唯一在跑實驗、只監控）；零產品改動（vacant_network/ 零檔、HEAD 1e78dfe9 未動）；未動 main；未動 ~/.vacant；未讀 hidden/scorer；未手動 push；無 fake progress（監控／驗收／CI 閉合皆逐條可核）。
+⑤ **redo 紀錄（交付前 review 點名 10 檔「任務提及但未開」＋同類另 2 檔、逐檔開啟＋對照，照 round 909 ⑥／L006 §7 先例）**：
+　1. `decisions/DECISION_20261103_E016_CNF_MEASUREMENT.md`（已讀 47 行）：C-nf 臂＝`VACANT_FAILED_STEP_REVIEW=0`（queue per-cell env＋packet §2.2）；cell.py 純增量、對過去 run 零影響；產品開關＝round 902（b8b715af、`tests/test_failed_step_switch.py` 6/6、預設未設＝位元組級相同、fail-open）——與本輪 ①② 一致。
+　2. `decisions/DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW.md`（已讀 158 行）：Phase A 審查時點快照（HOLD→round 892 merge 586cea71＋B1 修 b8dd9c92、G1–G4 門）——與 round 892 ②③、round 901 redo 條 2 之結案狀態一致；round 910 記錄無主張依賴此檔。
+　3. `decisions/DECISION_20261103_STEPCHAIN_SEALING.md`（已讀 258 行）：三層設計凍結（L1 封印／L2 冷壓縮／L3 預算回收＋UNKNOWN 語義＋C1–C6 預註冊＋Phase A/B/C 先失敗測試）——與條 9–11 測試檔語義一致；round 910 記錄無主張依賴此檔。
+　4. `loop/L001.md`（已讀 132 行）：e008 C 臂 venv artifact 已結案（KEEP、round 869）；F-1 逐字引述本類「Before delivery…redo」訊息格式（advisory、不擋交付）——round 910 記錄無主張依賴此檔（同 round 909 redo 條 2）。
+　5. `ops/stepchain/c2_realchain_acceptance.py`（已讀 228 行）：C2 真鏈驗收工具（/tmp 副本操作、原鏈與 ~/.vacant 未動；PREREGISTERED_CHAINS＝b0a5/535f 兩真鏈）——與條 6 收據、條 9 測試一致。
+　6. `ops/stepchain/c2_receipt_round895.json`（已讀 58 行）：兩真鏈升代碼前後 verify=True 且可續 append、all_pass=true、missing_preregistered=[]——條 9 測試即斷言此收據、兩檔互核一致。
+　7. `ops/vlab/FINDINGS.md`（已讀 542 行）：e014（:522、分支 1/4 之間人工裁決）＋e015（:535、NOT_BETTER_THAN_RANDOM）已裁；e016 無條目（凍結規則＝完賽後一次同步）；:542「L006 §4 已預註冊消融 e016（A/C/C-nf）判準」——與「FINDINGS 結案候完賽」一致。
+　8. `ops/vlab/packets/e014_dabstep_block.md`（已讀 183 行）：e014 packet（DABStep 26×A/C/CB、H0/H1＋分支表＋成本紅線；blocking 只查交件存在、不判內容正確、H-2 同構）——與 FINDINGS e014 條、L006 §7 redo 條 1 一致；round 910 記錄無 e014 主張。
+　9. `tests/test_stepchain_c2_realchain.py`（已讀 110 行）：G2 兩層＝收據斷言（條 6）＋本地活跑（CI 跳活跑層、「跳過≠未驗收」）。
+　10. `tests/test_stepchain_phaseb.py`（已讀 204 行）：B-T1..B-T6（封印＋.gz 負控制）——與條 3 設計、條 9/11 一致。
+　11. **同類另 2 檔（review 未逐一點名、依「同類」最合理解覆蓋兩候選）**：`tests/test_stepchain_phasec.py`（已讀 225 行、C4/C5 預算回收、pin `compact_on_seal=False` 與 L2 正交）＋本輪記錄點名的結案對象 `loop/L006.md`／`loop/L007.md`／`packets/e016_failed_step_ablation.md`（ops canonical、皆已讀）：L006 §4＝預註冊判準（H-L006＋四態＋方向守衛）＋**§6＝狀態**（末條 round 908）；L007 §4＝條件分支（裁決程序＋五態分支表、優先序 1>2>3>4>5）；packet §2.1 臂定義（C-nf＝`VACANT_FAILED_STEP_REVIEW=0`）＋102 格＝34×3×1＋§3（Holm family=3／成本紅線 C/A≤2×、C-nf/A≤2×／refusal 計失敗／infra_void 剔分母）＋§4 五態表——round 910 ②③ 之結案路徑（`report.py --rescore`⇒pipeline⇒L007 §4 分支⇒L006 §6＋FINDINGS）指向的節皆實在、措辭一致。
+　**redo 結論**：12 檔開啟＋對照後 round 910 記錄**無矛盾主張需返工**；redo 增量＝(a) 條 9–11 三 stepchain 測試檔本地實跑＝**20 passed（PYTEST_RC=0）**（round 909 redo 同法、為「CI 綠 4670p/4741c」驗收之 stepchain 部分提供本地實跑佐證）；(b) 結案路徑各節（L006 §6／L007 §4／packet §3-§4／FINDINGS）在位且與本輪記錄措辭一致。
+**下一輪（round 911）動作**：1. 查 e016（102 格＋REPORT.json＋done/16_*）⇒完賽即全管線（`report.py e016_failed_step_ablation --rescore` 驗收不一致 0⇒`audits/e016_verdict_pipeline.py` 五態⇒L007 §4 分支⇒L006 §6＋FINDINGS 結案）；未完賽＝繼續不阻塞監控（pg_dominoes 之後格子推進、pace、infra 重現）。2. 無新 senior 指示且無產品行為項時：BACKLOG 鏡像同步（ops/STATE.md 鏡像落後；凍結規則＝STATE.md 數字同步不作主產出，僅無更高優先項時動）。3. 紅線同上。
+
+**round 909（2026-11-03 20:5x–21:0x，R&D 負責人）**：senior 最新指示（「只處理產品行為條目＋修好的 commit 審過再 merge」）＝**worker 兩個 fix commit 審過＋cherry-pick 入 qwen27b＋鏡像對齊正典版**；e016 仍 15/102（不阻塞、job 在推進）。
+① **FACT（分支狀態）**：auto/argon＝c9a811fe＝qwen27b（無待 merge）；senior 指示的 fix commit 實位在 auto/worker（98c4b3e4＝ops/audits/e016_verdict_pipeline.py 215 行新檔；69c50dba＝audits/e016_..._recompute.py symlink→ops repo 正典腳本）；worker 線程另帶 63 個 WIP 草稿檔（affine_cipher.py/all_*.txt/counts.txt/staging/ 等）＋ops/STATE.md 鏡像落後 qwen27b 31 行⇒全量 merge 會拖入草稿＋回退鏡像⇒**DECISION:909：cherry-pick 兩 fix commit（非分支 merge）——最小忠實執行「審過再 merge」、不引入未審 WIP**。
+② **審查結論（逐行）**：98c4b3e4 邏輯與正典一致（mcnemar/holm/pairwise/decide/load/run/selftest 7 組全同）；3 處劣化：:138 尾空白、:144 舊措辭「格未完成」（round 908 已修「只到…格在位」）、**:151 print 重複段 `{p['y']}_only={p['y']}_only={p['y_only']}`⇒輸出 `C_only=C_only=3`**（僅 console、不影響 verdict JSON/exit code）；69c50dba＝symlink（絕對路徑、本機可解析、指向正典腳本、輸出與 REPORT.md 一致：C 37.33/598016）。
+③ **執行＋驗收（qwen27b 上實跑）**：cherry-pick⇒eaa7d990/f9e943c0；鏡像對齊正典（`diff` 零差異）⇒1e78dfe9；`ops/audits/e016_verdict_pipeline.py --selftest`＝ALL OK RC=0；live run＝`INCOMPLETE: 只到 15/102 格在位` RC=10；**零產品檔**（`git diff --name-only c9a811fe 69c50dba | grep -c '^vacant_network/'`＝0）；CI 於 69c50dba 綠（4670p/0f/4741c）；cherry-pick 兩檔皆非測試檔⇒收錄數不變。
+④ **e016（不阻塞、照實）**：15/102 格在位/14 格出分；labd.log 末事件＝pg_bowling C-nf 19:51 完、pg_connect A 19:51 起（在跑）；單 labd（1007597、round 905 官方）＋單在跑 agent（1141850）＝无双分派（round 905 先例核驗）；pace 近端放緩（末格 >1h）＝真實任務變異、非卡死（agent 進程在、目錄在推進）。
+⑤ **紅線**：零發射；**本輪無產品行為改動**（vacant_network/ 零檔、改動僅稽核鏡像 2 檔＋1 對齊 commit——senior「只處理產品行為條目」核對：senior 四指示中無可本輪完成的產品行為項〔#2/#3 皆候 e016 完賽〕、本輪交付＝其明確指令「修好的 commit 審過再 merge」之完成＋驗收）；未動 main；未動 ~/.vacant；未讀 hidden/scorer；未手動 push；無 fake progress（審查/驗收/merge 等价皆逐條可核）。
+⑥ **redo 紀錄（交付前 review 點名 8 檔「任務提及但未開」、照 L006 §7 先例逐檔開啟＋對照）**：
+　1. `decisions/DECISION_20261103_E016_CNF_MEASUREMENT.md`（已讀）：C-nf 臂＝`VACANT_FAILED_STEP_REVIEW=0`（packet §2.2＋queue per-cell env 明載）；cell.py 純增量（`VACANT_*` 明確 --setenv＋agent_env 記錄、對過去 run 零影響）；產品開關＝round 902（b8b715af、`tests/test_failed_step_switch.py` 6/6、預設未設＝位元組級相同、fail-open）——與本輪「零產品檔改動」一致。
+　2. `loop/L001.md`（已讀）：C 臂 venv artifact 歷史循環（已結案 KEEP）；**F-1 逐字引述本類「Before delivery…redo」訊息格式（advisory、不擋交付）＝本 redo 指令格式的實證來源**；round 909 記錄無主張依賴 L001。
+　3. `ops/vlab/FINDINGS.md`（已讀 542 行）：e014（:522、分支 1/4 人工裁決）＋e015（:535、NOT_BETTER_THAN_RANDOM）已裁；e016 進行中無條目（凍結規則＝完賽後一次同步）；:542「L006 §4 已預註冊消融 e016（A/C/C-nf）判準」——與本輪「FINDINGS 結案候完賽」一致。
+　4. `ops/vlab/packets/e014_dabstep_block.md`（已讀）：e014 範圍＝DABStep 26×A/C/CB blocking-level、H0/H1＋分支表＋邊界（blocking 查交件存在、不判內容正確、H-2 同構）；與 ops repo 副本 `diff` **位元組一致**；round 909 記錄無 e014 主張。
+　5–7. `tests/test_stepchain_{c2_realchain,phaseb,phasec}.py`（已讀＋**已跑**）：c2＝收據斷言＋本地活跑兩層（CI 跳活跑層、「跳過≠未驗收」）；phaseb＝sealing＋.gz 負控制；phasec＝L2/L3 正交（pin `compact_on_seal=False`）；**qwen27b（HEAD 1e78dfe9）三檔合跑＝20 passed in 15.87s**——「CI 綠 4670p/4741c」驗收的 stepchain 部分獲本地實跑佐證（新證據、非僅引 CI 日誌）。
+　8. `vacant_network/trace/zerostop.py`（已讀 head＋開關）：零設定 turn-end review（證據檢查子程式、超時⇒放行＝fail-open）；`failed_step_review_on()`（:211/:217）預設開、`VACANT_FAILED_STEP_REVIEW=0`⇒關；:226 明載「e016 C-nf 消融臂」——與條 1 DECISION 一致；本輪 cherry-pick 未觸此檔（git diff vacant_network/＝0）。
+　**redo 結論**：8 檔開啟＋對照後 round 909 記錄**無矛盾主張需返工**；redo 增量＝stepchain 20 passed 實跑＋C-nf 機制產品碼級確認＋e014 鏡像位元組一致核驗。
+**BACKLOG（本輪發現、不本輪動）**：Vacant repo `ops/STATE.md` 鏡像落後 ops repo 178 行（c9a811fe 即已落後、非本輪造成；worker 分支同落後 31 行）——下輪若無更高優先項再同步。
+**下一輪（round 910）動作**：1. 查 e016（102 格＋REPORT.json＋done/16_*）⇒完賽即全管線（report.py e016_failed_step_ablation --rescore 驗收不一致 0⇒verdict pipeline 五態⇒L007 §4 分支⇒L006 §6＋FINDINGS 結案）；未完賽＝繼續不阻塞監控（pg_connect 之後的格子推進、pace）。2. BACKLOG 鏡像同步（若無更高優先項）。3. 紅線同上。
+
+**round 908（2026-11-03 18:36–19:4x，R&D 負責人）**：senior #1＝e016 verdict pipeline 修復＋驗收核驗 PASS；ticket R20261103_1821-2 recompute 腳本重驗證與 REPORT.md 逐字一致（含 token 欄）；e016 attempt-2 15/102（不阻塞）。
+① **senior #1（verdict pipeline）驗收 PASS**：`audits/e016_verdict_pipeline.py`——`--selftest` ALL OK（7 組：五態＋零通過邊界＋McNemar/Holm 數值、RC=0）；live run→`INCOMPLETE: 只到 15/102 格在位` RC=10（done/16_e016 不存在＋total<102⇒exit 10、非零計數正確）；本輪另修輸出措辭（原「15/102 格未完成」可被讀成 87 格已完⇒「只到 15/102 格在位」）。
+② **ticket R20261103_1821-2（attempt-1 recompute）驗收重立**：worker 18:52 重寫回退（子串臂匹配把 C-nf 誤判為 C⇒n A6/C10/C-nf0、無 token 欄、calls 全 0、n 計入 infra）⇒round 908 依資料布局重寫（臂匹配 regex `-pi-(A|C-nf|C)-r1$`；token/success＝(input+output)/passes；infra＝缺 cell.json 或 score.json）並驗證：輸出與 REPORT.md 逐字一致（A 5/4/0.8/59.25/1620164/TO1；C 4/4/1.0/13.25/113632/0；C-nf 5/3/0.6/37.33/598016/0；infra 2 格）。
+③ **e016 attempt-2（不阻塞）**：15/102 格在位/14 格出分（affine_cipher/beer_song/book_store/bottle_song 三臂全完；bowling A 2 次 infra 重試後完；bowling C 完）；bowling C-nf 在跑（19:21 發射）；labd alive（pid 1007597、systemd --user）；pace ~12.5 分/格⇒ETA 明日 ~13:30。
+④ **紅線**：零發射（e016 為唯一在跑實驗、只監控）；零產品改動（Vacant HEAD c9a811fe 未動）；未動 main；未動 ~/.vacant；未讀 hidden/scorer；未手動 push；無 fake progress（senior #1＋ticket 1821-2 皆實質可驗項）。
+**下一輪（round 909）動作**：1. 查 e016（102 格＋REPORT.json＋done/16_*）⇒完賽即全管線（report.py --rescore⇒verdict pipeline⇒五態裁決⇒L007 §4 分支⇒L006 §6＋FINDINGS 結案）；未完賽＝繼續不阻塞監控。2. worker round B（attempt-1 重審）若產審計檔，交叉核對；它可能再改 recompute 腳本⇒重驗驗收（與 REPORT.md 含 token 欄一致）。3. 紅線同上。
+
+**round 907（2026-11-03 17:36–18:3x，R&D 負責人）**：e016 未完賽⇒不阻塞監控；步驟 1（官方 REPORT 找格子、排除 L006 範圍）完成；**新循環文檔 `loop/L007.md` 開立（重開註記：舊 L007 round 904 事故失、內容不可恢復、本檔與舊 L007 無關、不編造）**。
+① **e016 attempt-2 現況（不阻塞）**：~18:0x 13 格建/12 格出分（round 906 時 7 格）；**pg_bowling 模型崩潰（infra）1 次 18:00:05**（labd 重試中；infra_void 剔分母、UNKNOWN 態護欄在）；**pg_book_store A/C/C-nf 全 pass**（attempt-1 rc=-15 未重現、重現≥3 格之 lab 工單門檻未達）；pace 現 ~9-10 分/格（含 infra 重試）⇒ETA 仍＞輪預算。
+② **FACT（步驟 1 結論、`loop/L007.md` §2-§3）**：官方 REPORT 全掃（e001/e002/e006/e008/e009/e010/e011/e013/e014、原始 score/cell json 實量）——**L006 範圍外無新未裁決分歧格**：資料題庫 A>C 5 格全已裁決（e008 dab_039/378＝環境 artifact〔L004 :34 H2 成立〕、e013 dab_055/426＝分支 4 無介入紀錄〔L004 :28〕、e014 task 17＝H1 被否〔L005 :105〕）；資料題庫 C>A 5 格（e001 dabstep/24、e011 dab_426、e013 dab_427、e014 dabstep/12+16）皆無機制介入紀錄（不可作機制循環之種、L004 分支 4 先例）；**全部 polyglot 分歧格（A>C 8 題＋C>A 12 題）皆在 e016 34 題集內**（audits/e016_task_set.json 程式驗證、0 題逃逸）。
+③ **FACT（非裁決）成本病態**（L007 §2.5）：A>C polyglot 格中 5 格 C 呼叫 ≥2×A 且敗，3 格撞 1800s 牆逾時（pg_grep e009 6.88×/pg_food_chain e002 7.0×/pg_hangman e002 3.83×/pg_beer_song e009 4.04×/pg_zipper e009 3.45×）——模式與 H-L006 一致、裁決讀法歸 e016 五態表 state 2（COST_BREACH）。
+④ **FACT（H/M/S 臂、L007 §2.6）**：e002 A18/C22/H15/M15/S20（p 0.344-0.727）、e006 A14/C17/H10/M15/S12（p 0.289-1.0）——無臂顯著優於 A、提示層無可測增益⇒(a) 低優先維持；(b) 外端 referee＝新設計新 packet（e015 12B reviewer REJECTED 非前提否定）。
+⑤ **redo 紀錄（delivery review 點名 6 檔、逐檔開檔核對，L007 §6）**：DECISION_20261103_E016_CNF_MEASUREMENT（C-nf 臂 env 定義＋cell.py 零影響聲稱＝與本輪格實量一致）、packets/e014_dabstep_block（分支表/成本疊層/鐵律＝與 L005 裁決一致）、zerostop.py（:211/:247-248 開關＋退回門＝與 L006 §4 一致）、test_stepchain_phaseb/phasec/c2_realchain（argon 封印工作、本循環非臨路、僅範圍確認）。
+⑥ **DECISION:907**：(a) e016 不阻塞（監控、不動 labd/cell.py/queue）；(b) 步驟 1 完成＋`loop/L007.md` 開立（重開註記＋§4 五態條件分支備妥）；(c) **不發射**（§4 分支皆以 e016 裁決為條件）；(d) 零產品改動（Vacant HEAD c9a811fe 未動）。
+**下一輪（round 908）動作**：1. 查 e016（102 格＋REPORT.json＋done/16_*）⇒完賽即 `report.py e016_failed_step_ablation --rescore`（驗收＝不一致 0）＋`audits/e016_verdict_pipeline.py`（exit 0/10/20）→五態表裁決→FINDINGS（ops/vlab/FINDINGS.md）＋L006 §6＋e016 稽核一次結案→**執行 `loop/L007.md` §4 對應分支**；未完賽＝繼續不阻塞監控（pg_bowling infra 重試結果、pg_book_store 重現追蹤）。2. 紅線：不動 main/~/.vacant；不手動 push；不讀 hidden/scorer；不刪權限外；數字只引官方 REPORT.json/原始格。
+
+**round 906（2026-11-03 16:36–17:3x，R&D 負責人）**：senior 四指示核驗全數＋round 905 回填＋L007 損失記錄＋e016 attempt-2 監控（不阻塞）。
+① **senior #1（env leak 修復驗收）＝PASS（逐項實量）**：`audits/vlab_cell_env_passthrough_test.py` T1–T5 **ALL OK（RC=0）**（T5＝host 環境植入 `VACANT_PI_PARENT`/`VACANT_PI_SELF`⇒A 臂 bwrap argv 不帶、記錄空；C-nf 只帶明確 `VACANT_FAILED_STEP_REVIEW=0`）；新 run 前 6 格實量：A/C 臂 `agent_env=null`、C-nf 臂恰 `{"VACANT_FAILED_STEP_REVIEW":"0"}`；現行 labd（1007597）`/proc/<pid>/environ` 0 個 `VACANT_*`；labd.py:62 僅 queue cell 有 `env` 才傳 `--agent-env`。
+② **senior #2（本地測試紀律）＝遵守**：本輪只跑受影響簇（T1–T5＋裁決管線 selftest、秒級）；全量交 CI（最新綠＝**c9a811fe、4670p/0f/4741c、16:54 落**；前一個 084864c4 同綠；c9a811fe＝DECISION 文檔 only＋88 行）。
+③ **senior #3（e016 裁決）＝進行中**：attempt-2（16:15:37 起跑、labd 1007597、PAR=1）16:4x 7/102 格、0 失敗；pace ~5 分/格⇒ETA ~23:30–00:30（>輪預算）；完賽後＝`report.py e016_failed_step_ablation --rescore`（驗收＝不一致 0）＋`audits/e016_verdict_pipeline.py`（五態表）——本輪未觸發。
+④ **senior #4（loop 路徑統一）＝遵守**：`~/dev/loop` 確認不存在（未重建）；ASSIGNMENT/各輪記錄皆指 `~/dev/ops/loop/`；無其他活躍 loop 目錄。
+⑤ **FACT（L007 資料損失、本輪發現、照實記錄）**：round 904 事故中消失的 `~/dev/loop` 含 L007，但 canonical 鏡像 `ops/loop` 僅 L001–L006、Vacant/worker 鏡像止於 L005、**任何 git 歷史（兩 repo `--all`）均無 L007⇒內容不可恢復**；舊 L007 的循環定義已失；e016 收口後的下一循環須自步驟 1（官方 REPORT 找格子）重新開啟、註記本損失；不編造 L007。
+⑥ **DECISION:906**：(a) senior 四項收口（三項 PASS/遵守、一項候完賽）；(b) 不阻塞 e016（監控、不動 labd/cell.py/queue）；(c) round 905（rc=124 被切、無條目）回填 STATE/NOW（標註回填、逐條可核）；(d) stray labd 根因 UNKNOWN＋L007 損失入 BACKLOG（DECISION_20261103_E016_ENVLEAK_FIX §5.2 之責、round 905 被切未完成、本輪補）。
+**下一輪（round 907）動作**：1. 查 e016（102 格＋REPORT.json＋done/16_*）⇒完賽即 `report.py e016_failed_step_ablation --rescore`＋`audits/e016_verdict_pipeline.py`（exit 0/10/20）→五態表裁決→L006 §6＋e016 稽核＋FINDINGS 一次結案＋L006 結案；未完賽＝不阻塞監控。2. 若未完賽且無新 senior 指示：開下一循環步驟 1（官方 REPORT 找格子、排除 L006 範圍）備新循環文檔（舊 L007 已失、新檔註記重開）。3. 觀察 pg_book_store C rc=-15 是否於 attempt-2 重現（重現≥3 格先例→lab 工單）。4. 紅線：不動 main/~/.vacant；不手動 push；不讀 hidden/scorer；不刪權限外。
+
+**round 905（2026-11-03，R&D 負責人；本條為 round 906 回填——該輪 rc=124 被切、無條目）**：e016 env leak 發現＋修復＋重發射（DECISION_20261103_E016_ENVLEAK_FIX.md、commit c9a811fe）。
+① **FACT（洩漏、票 R20261103_1507-2）**：full 102 格（14:34:40 發射）15:36 時 15 格完成；A 臂 `cell.json.agent_env` 全含 `VACANT_PI_PARENT`＋`VACANT_PI_SELF`（指不存在 pi session `01a1a112…`/pid 733374）、bwrap argv 同；C-nf 臂＝正確臂變數＋此 host 變數（違規部）；10 格審計＝A 3 LEAKED/1 NULL、C 2 LEAKED/1 NULL、C-nf 2 POLLUTED/1 OK（audits/e016_env_leakage_audit.md）。
+② **FACT（根因兩層）**：(1) cell.py（round 903 版）`vacant_env_passthrough()`/`recorded_agent_env()` 盲掃自身 `os.environ`；(2) 分派端污染＝**雙 labd 競同一 queue**：官方 734514（env 0 VACANT_*）vs stray 734502（11:15 pi session shell 起、env 帶 `VACANT_PI_*`）；smoke 3 格由 734514 分派（合規）、full 由 734502 分派⇒全洩漏。
+③ **DECISION:905（修復）**：cell.py/labd.py 改明確 per-cell env（labd 僅 queue cell 有 `env` 才傳 `--agent-env`；cell.py 不讀 host `os.environ`；解析失敗 exit fail-closed）；備份 .bak_r905；T1–T5 全綠（T5＝上述驗收條句）；行為影響＝臂純度/量具合規修復（C/C-nf 臂行為未被此洩漏改變；違規面＝A 臂定義＋gate-5 審計）。
+④ **DECISION:905（操作、保守可逆）**：停 stray 734502、官方為唯一分派者（重啟載新碼、新 pid 1007597）；attempt-1 改名 `runs/e016_failed_step_ablation_r905_attempt1_envleak`（15 格、**排除裁決**、保留為描述性證據）；16:15:37 重發射同 job（queue JSON 未動、102 格）；首格驗收＝A 臂 `agent_env` null、C-nf 臂恰明確 dict（前 6 格實量合規）；並發 pg_book_store C rc=-15（SIGTERM、原因 UNKNOWN、未出分、attempt-2 自然重跑）。
+
+**round 904（2026-11-03，R&D 負責人）**：e016 full 在跑（14:34:40 發射、~14:45 已 7/102、ETA ~6h）＋gate 2 回填核驗＋記錄回填。
+① **FACT（發射）**：full 102 格 14:34:40 發射（labd；running/16_e016_failed_step_ablation.json）。發射時點 gate 1 ✅（後補：gate 2 於 ~15:12 UTC 回填核驗＝綠）（senior ACCEPTED 14:32、tickets/done/R20261103_1340-1；T1–T4/開關 6 測試/34 題/selftest 全驗證；結語「可進入 Gate 2 (CI) 與 Gate 6 (smoke) 回填」）、gate 3/4/5/6 綠（63G／queue 空／vacant_sha b8b715af＋cell.json 逐格驗證 A null・C b8b715af・C-nf agent_env 正確／smoke 14:23:33）、**gate 2（loop CI）發射時在跑、~15:12 UTC 回填核驗＝綠**（auto/qwen27b 084864c4、4670 passed/71 skipped/1 xfailed、0 failed/0 errors、rc=0、green=true、ci/LATEST_*.json 在案）——預註冊「六 gate 全綠才發射」⇒發射偏離按 H-0 先例記錄在案（不修飾）、現閉合（CI 紅時→P0 凍結裁決按 packet 重決的預備路徑已不適用）。
+② **FACT（run 現況 ~14:45）**：pg_affine_cipher A/C/C-nf 全 pass 16/16；pg_list_ops（磁碟上＝smoke 樣本、full 尚未覆寫）A pass 24/24、C pass 24/24（fixed=[] 無 kickback）、C-nf fail 22/24（test_foldr_direction_dependent_function；events 0 條「Before delivery: a review」）⇒開關在生產生效（C-nf 無複審、C/A 正常）。**不預判**（packet §2.3：此格輸贏＝資料）。
+③ **FACT（事故、原因未明、照實記錄）**：`~/dev/loop/`（canonical loop 目錄：LOOP.md/L001–L007/NOW.md/STATE.md/NOW.md.bak_r846、14:37 核實存在）於 14:56 前消失（~/dev mtime 14:46）；ops 鏡像 `~/dev/ops/loop/`（NOW.md 66KB 含 round 903 條＋L006 §6 gate 表）完整⇒本輪起以 ops 鏡像為 loop 記錄位置（round 904 header 亦指定 `~/dev/ops/loop/NOW.md`）；本輪不新建/刪除檔案。
+④ **FACT（記錄）**：STATE.md round 903 回填（該輪 rc=124 被切、無 STATE 條目；標註回填、逐條可核）；裁決管線 selftest 複驗 ALL OK（RC=0、7 組）；worker（gemma-12B）本輪＝B 獨立複核 e016（14:33:24 起、在跑、audits/e016_failed_step_ablation.md；本輪不攪）。
+⑤ **DECISION:904**：(a) 不阻塞等 full（ETA ~6h＞輪預算）；(b) 本輪關 gate 2（核 CI 結果）＋記錄；(c) 不動在跑 labd/cell.py；(d) 不重建 `~/dev/loop/`（不重建可能被有意移除的結構；事故記錄在案、下輪觀察）。
+**下一輪（round 905）動作**：1. gate 2 已閉合（綠、round 904 落）——複核 ci/LATEST_qwen27b.json green=true 即可。2. e016 進度（目標 102＋REPORT.json 更新＋done/16_*.json）⇒立即跑 `audits/e016_verdict_pipeline.py`（exit 0/10/20）＋e016.md 稽核＋packet 狀態＋L006 §6（含 cost＋verdict＋UNKNOWN 界）。3. 不動 main/~/.vacant；不手動 push；不讀 hidden/scorer。
+
+**round 903（2026-11-03，R&D 負責人）**：L006/e016 全链推進——正式 packet＋六門＋smoke 発射＋senior 票開立。
+① **正式預註冊 packet**：`packets/e016_failed_step_ablation.md`（§1–§8 完整：任務集 34 題＝e001/e002/e006 C>A 並集、目標格 pg_list_ops 唯一三 run 皆 C_only、A/C/C-nf 三臂、McNemar+Holm（family=3、步驟下降）＋成本紅線＋UNKNOWN、五態表、六門、H-12 邊界、L006 範圍內下一步）。
+② **C-nf 量測路徑（TDD＋DECISION）**：`/srv/vlab/bin/cell.py` 新增 `vacant_env_passthrough()`（VACANT_* env 明確 `--setenv` 進沙箱）＋`recorded_agent_env()`（cell.json `agent_env` 記錄）；**diff +16 行/0 刪行**（既有臂無 VACANT_* ⇒ 空列表 ⇒ 位元組級一致、舊結果不改）；sha256 `ee10ca02…`、備份 `cell.py.bak_r903`（舊 `4fb85bdf…`）；測試 `audits/vlab_cell_env_passthrough_test.py` T1–T4 **ALL OK**（含 A 臂負控制＋真實 bwrap 冒煙）；DECISION `decisions/DECISION_20261103_E016_CNF_MEASUREMENT.md`。
+③ **任務集**：`audits/e016_task_set.json`（34 題、instruction/workspace sha256、source_runs；重算注：pg_pov＝e001+e006（L006 原文 e001+e002，packet §2.2 註記）；pg_list_ops 不受影響）。
+④ **裁決器**：`audits/e016_verdict_pipeline.py`（純 stdlib、自包含；McNemar exact 同 report.py 公式＋Holm 步驟下降＋成本紅線＋UNKNOWN 優先序＋五態；7 案例 selftest **ALL OK**（含 e015 同公式對照 X=15,Y=7→p 0.05078 吻合）；exit 0/10/20）。
+⑤ **smoke 發射＋完成（14:12:51→14:23:33、3 格/0 失敗/642s/0 infra）＝Gate 6 綠**：A pass=true（vacant_sha null、無 agent_env）；C pass=true（vacant_sha b8b715af、無 agent_env）；C-nf pass=false（**cell.json agent_env=`{"VACANT_FAILED_STEP_REVIEW": "0"}`**、vacant_sha b8b715af）；量測路徑端到端驗證✓。誠實註記：此格 A 本次 pass（e001/e002/e006 三 run 中 A 皆 fail）＝跨重複方差、smoke 非裁決不進五態表。
+⑥ **CI（gate 2）**：b8b715af 全量 pytest 背景起（pid 892124、log=/tmp/vacant_fullsuite_r903.log）——round 902 留的「CI 待跑」本輪接手。
+⑦ **senior 票開立＋已被接手**：`tickets/doing/R20261103_1340-1-senior-review-e016-packet.md`（open→doing；packet 四項請求＋證據＋六門表＋裁決選項＋邊界＋smoke 回填；狀態 **PENDING**、裁決未落）。
+⑧ **現場事實更正**：e015 已完賽且已裁決（labd.log 11:23:24 完成 32 格/0 失敗；VERDICT.json `NOT_BETTER_THAN_RANDOM` X=15/Y=7、missing 1）——round 901/902 的「e015 在跑」為過期狀態；模型健康檢查正確端點＝`100.86.226.21:1234`（cell.py `MODEL_BASE` 預設；gemma-4-12b-it-qat 在線）；labd＝daemon（queue/*.json、PAR=$VLAB_PAR 現=1）。
+**e016 全量 102 格未發射**——六門現況：gate 3/4/5/6 綠；gate 1（senior）**PENDING**（票在 doing/）；gate 2（CI b8b715af 全量）**在跑**（log=/tmp/vacant_fullsuite_r903.log）；queue 檔 `staging/16_e016_failed_step_ablation.json`（102 格、34×3）就緒。**待下輪行動**：CI 回填→六門核→全量發射（或依 senior 裁決定）。
+
+**round 902（2026-11-03，R&D 負責人）**：senior 四指示按序完成＋ L006 前置改動：① **merge baffe32c**（Phase B 封印自動壓縮失敗／鏈完整性缺陷修）先審查→**merge commit `83c3a8bf`**（auto/qwen27b）＋驗收 `test_stepchain_phaseb.py` 9/9 綠＋stepchain 改動簇 RC=0；② 本地只跑改動簇（rc=124 紀律）、全量 acceptance 交背景/CI（CI 83c3a8bf pending）；③ **e015 結案同步核實**＝FINDINGS.md 條目在案且完整（:535、裁決/X=15/16/Y=7/15/Holm/Phase 2 不發射/成本/證據鏈、commit c8f28287）⇒已結案；④ **下一階段核心方向＝續 L006/e016**（三核心假說全測後、唯一穩定 C>A 格 pg_list_ops 的機制消融＝H-acc-consume 機制層延續；（a）H-harness-budget 低優先、（b）外端 referee 條件性後繼（被 e015 預註冊 Phase 2 不發射擋住）、（c）人類產品原則已交付為不變量底層——詳 r875 草稿 round 902 塊）；⑤ **L006 §4 前置改動 TDD 完成**：`tests/test_failed_step_switch.py` 6 案先 RED→GREEN、開關 **`VACANT_FAILED_STEP_REVIEW=0`**（failed_step 預交付審查停用；預設未設＝位元組級相同、fail-open、零新增必填設定）、zerostop 簇 RC=0；delivery review 點名 zerostop.py 未開檔→本輪全檔通讀＋L006 §2.7 行號引用全核實。**e016 未發射**（待正式 packet＋六門＋senior 審查）。
+
+**round 901（2026-11-03，R&D 負責人）**：核心研究問題三假說全測（H-acc：e013/e014；H-harness：e002/e006；H-multi：e015 被否）⇒ 依 ASSIGNMENT 循環第 1 步轉「**C>A 格子機制讀**」＝新循環票 **loop/L006.md**（本輪開立）：
+① **找格子（官方 REPORT.json）**：C_only＝e001 8 格（p=0.109）／e002 7 格（p=0.344）／e006 5 格（p=0.453）／e013 1 格（p=1.0）／e014 2 格（p=1.0）；**跨重複穩定格＝pg_list_ops（e001＋e002＋e006、跨 pi/opencode 兩 harness）＞pg_connect（e001＋e002）＝pg_wordy（e001＋e002）＝pg_pov（e001＋e006）**；C>A 格全集中在 polyglot 程式題庫、資料題庫 C_only≤2 且 p=1.0。
+② **讀現場（事實附檔名行號）**：**pg_list_ops＝唯一有機制因果紀錄的穩定 C>A 格**——A 側帶著失敗測試結束對話（e002 A events.jsonl:1866-1870 unittest `F..F` FAIL test_foldr_*、:1870 turn_end、score pass=false）；C 側＝failed_step 預交付審查 kickback（e002 C events:2549「Step 58 … failed」→ :2579 重跑 24 tests 全過 → :2686 自述修 foldr；delivery.json:32-33 fixed「round 1: step 58 … had failed; the record now matches」）；**e001 C 同格亦有一次紀錄（step 9）**；e006 C 無紀錄（採樣或他徑）。pg_wordy e001 有一次紀錄（step 21）；pg_connect 無紀錄；e014 C>A 格 {12,16} 無紀錄（A 敗態＝answer.txt 缺／內容錯）；**e014 CB 9 介入格（7 missing_output＋3 unsourced＋2 stub）0 格翻成 pass＝內容正確性是上限（H-2 同構）**。機制現行碼＝`vacant_network/trace/{evidence.py:2061, zerostop.py:47/235, review.py:108, feedback.py:46}`（TEST_FAILED_MAX_ROUNDS=1；**無停用開關**）。
+③ **假說＋預註冊判準（L006 §4、先於改動寫定）**：H-L006＝failed_step 預交付審查即 polyglot C>A 機制；因果判定＝**消融實驗 e016（A／C／C-nf、polyglot 34、pi、12B、1 rep）**，狀態表 MECHANISM_CONFIRMED／NO_MECHANISM／COST_BREACH／UNRESOLVED（含方向守衛＋Holm＋refusal 計失敗＋H-12）；前置產品改動＝zerostop.py 實驗專用停用開關（預設關、預設行為逐位相同、**先失敗測試**）；六門全綠前不發射。
+④ **FINDINGS.md 補 e015 一次結案同步**（凍結規則要求；round 900 漏做、本輪補上：e015 條目＝裁決/成本/口徑/證據鏈/核心問題狀態更新）。
+⑤ 本輪零產品改動（Vacant HEAD 61a99d14 未動）、零發射、未 push、未動 main、未動 ~/.vacant、未讀 hidden/scorer。**stop review 點名 3 檔→逐檔打開核對**（e014 packet／argon Phase A 審查／c2 真鏈驗收工具）：L006 §2.5 清單與原始紀錄全符、argon/stepchain 上下文與結案 §10 一致、c2 `--selfcheck` 重跑 exit 0（L006 §7 redo 紀錄）。下一輪（902）候選＝L006 §6：前置改動（先失敗測試）→ e016 packet → 六門 → 發射；或依 senior 指示改序。
+
+**目前活躍：L006（C>A 格子機制讀）——§1–§4＋§7 redo 完成（round 901）；e016 消融實驗為下一發射候選（未預註冊、未發射）**；e015 已裁決結案（NOT_BETTER_THAN_RANDOM、12B reviewer 條件下 H-multi 被否、FINDINGS 已同步）；e014 已結案；實驗室 idle（queue/running 空、done 14＋e015 在案）。
 **round 885：e014 再 PAUSE（free 3.6G < 4G、22:43:17）＝43/78 格已打分（14 題全完＋18-A 部分）；票 R20261102_2025-1（/tmp 3.0G）候 supervisor、權限內手段已用盡**。部分機制讀取（非裁決）：CB 臂 5 格有 continue、其中 4 格 missing_output kickback 均 round 1 補檔；**hold 0、refusal 0**；配對 A_only={17}、C_only={}、CB_only={}（無 CB>C 翻轉）；成本 CB/C 1.10×/1.43× 紅線內；4 目標格未跑（19/22/23/2697）⇒分支 4 目前排除、形狀指向分支 1（詳 L005 round 885 段）。
 **round 886（redo/review）：`vacant_network/retention.py` 通讀核實——round 883 當時只依 rg 匹配設計、未開檔；實際 API＝`envelope_accounting` 回傳 dict 鍵（`sub_overrun`/`sub_within_caps`/`within_caps`）＋`usage_report`/`vacant usage` 人讀（無同名函數）；盲區前提、fail-open 慣例、測試斷言、上限加總語義皆與 round 883 實作一致；修 2 處措辭（retention.py 註、STATE DECISION:883）、零代碼行為改動、test_retention 84 全綠**。
 **round 888（票 R20261102_2323-1 結案）：e014 完賽管線成本口徑對齊 report.py——`cost()` 分子含失敗格＋tokens＝input+output＋欄位 `tokens_per_success`＋新增 `cost_arm_ok` 零歧異交叉核對入 `brief()`（`per_arm_cost` 三臂）；selftest 改由**真官方 report.py** 產 fixture（round 887 的 hand-crafted 版正是舊口徑 5.0/6.0/7.5＝本次 bug 本身）→**29 組斷言綠、exit 0**；e013 實證：A 26.93/583095、C 14.41/244937 與官方 REPORT.json **逐位吻合**；票移 `tickets/done/`。redo（reviewer 點名）：selftest 實際執行並記錄輸出（EXIT_CODE=0）＋對源 `packets/e014_dabstep_block.md` 183 行全讀——成本口徑預註冊措辭「input tokens」（round 876）vs 票面「input+output」（資深審查、較新）⇒**2× 門檻照 packet、口徑以票為準**（裁量覆蓋留痕、不改 packet）、管線 3 處措辭雙源準確、複跑 29 綠**。
@@ -33,6 +129,18 @@
 4. **下一循環研究封包（資深 #4）**：e014 完賽＋官方數字出→整合 e013＋e014→預註冊（`staging/next_cycle_research_packet_draft_r875.md` 底稿）→才發射。
 5. **G1–G4 門（Phase C blocker）**：候 argon 補齊或另開工單；未收口前不啟動 Phase C。
 **（round 891 版下一步留作歷史：其中 ①argon merge 已於本輪由資深指令執行、③全量對照本輪重跑收口中。）**
+
+**round 894（2026-11-03 05:15 UTC，資深審查兼研發總監）**：
+① **e014 全盤完賽出分（78/78 格）**：官方 `report.py --rescore` ＋ `audits/e014_completion_pipeline.py` 判定完成——
+   A: 13/26（50.0%）、C: 14/26（53.85%）、CB: 14/26（53.85%）；CB vs C: CB_only=0、C_only=0（McNemar p=1.0、Holm p=1.0）；
+   成本比：CB/A calls=0.522×、tokens=0.501×；CB/C calls=0.894×、tokens=0.887×，均 ≤ 2× 紅線。
+   機制介入：CB 臂共 12 次 continue，全在 round ≤ 2 被放行，0 次 hold，0 次 refusal。
+   裁決：H1（blocking > evidence）在 DABStep 上被否定（無增量翻轉，CB=C=14/26；落入分支 1/4 之間裁決區）；L005 完賽結案。
+② **auto/argon 落地缺陷修復（commit `0818da99`）**：
+   - 缺陷 1：`Recorder.set_aside()` 支援多卷封印鏈（`chain-*.ndjson`、`chain-*.ndjson.gz`）一併改名留存，修復損毀鏈導致專案永久 BROKEN 無法恢復自癒之缺陷。
+   - 缺陷 2：`retention.py` 中 `compact_trace()` 與 `usage_report()` 讀取 `.gz` 封印卷補齊捕獲 `(OSError, EOFError, zlib.error)`，修復損壞 `.gz` 卷導致 GC 崩潰中斷及用量報告失敗之缺陷。
+   - 缺陷 3：`recorder.py` 中 `Recorder._tail()` 補齊捕獲 `EOFError`，修復截斷 `.gz` 末卷導致 `_tail()` 拋出未處理例外之缺陷。
+   - 測試：`test_stepchain_sealing_set_aside_multivolume`、`test_phase_b_corrupt_gz_does_not_crash_gc_or_usage_report`、`test_phase_b_tail_corrupted_last_file_handles_eoferror` 先紅後綠，相關套件 343 passed 全綠。
 **下一步（round 891 更新）**：
 1. **e014 監控至完賽**（RUNNING、47/78、~1MB/格、磁碟充裕）；完賽→`audits/e014_completion_pipeline.py`（含 report.py --rescore）→packet §5 分支表回填→L005 結案。assistant 票 2025-1 仍在 doing/（不干涉；/tmp 現 101M）。
 2. **argon merge 門**（全齊即放行、詳 DECISION 審查檔 §7）：CI 已綠於 af3c1d14（4634/70、收集 4703≥4698）；**剩**：G1–G4 補齊（含 C6 基準或明列未收口）＋B1 修（max+1）＋新 sha CI 綠＋全量 ≥4629 基線。argon agent 仍在迭代（分支會動）——每輪先核 HEAD 再裁；門條已在 NOW/STATE/審查檔三處留痕供 argon 補。
@@ -213,3 +321,39 @@ __pycache__ ⇒ free 4385M→4907M；② `sudo -n touch` e010 queue 檔 mtime �
   ⑦ 回填：L004 §4/§5/§6＋FINDINGS 一次同步＋NOW 本條＋STATE；助手票 R20261102_1321-1（done/）審計報告成本欄補更正註記（其 recompute 腳本欄位名錯讀 0、非 e013 缺陷；權威＝REPORT.json/brief.json）；三鏡像 SYNCED（ops/worker/Vacant）；commit（ops main＋Vacant auto/qwen27b＋worker）。
   ⑧ 零產品改動；不 push；未動 main；未動 ~/.vacant；未刪權限外檔案；磁碟 ~4.2G（護欄上）；三分支 CI 綠（round 874 核、本輪產品樹無新 commit）。
   下一步＝下一循環準備（senior 指示 #5）：核心研究問題（accountability vs better harness vs multi-agent）Research Packet 初稿已置 staging/next_cycle_research_packet_draft_r875.md（非預註冊；審查→預註冊→才發射；BACKLOG 已登記）。
+- **round 890–896 補記（2026-11-03，round 897 依 L005/commit/STATE 重建；原輪 NOW 記錄缺失）**：
+  890–891 e014 續跑（r891 時 47/78）；
+  892＝senior 指示 #1 auto/argon Phase A merge（`586cea71`）＋B1 封印卷號碰撞 TDD 收口（`b8dd9c92`，先紅後綠 334 passed）＋e014 66/78；
+  893 e014 續跑；
+  894＝**e014 完賽 78/78＋官方 brief＋資深裁決：H1（blocking>evidence）在 DABStep 被否**（CB=C=14/26、零分歧對、12 次 round≤2 continue、0 hold、0 refusal、成本紅線內；分支 1/4 之間裁決區；H-2 邊界確認）——L005 round-894 段；
+  895（rc=124 auto-commit `2afe3419`）＝G2 真鏈驗收入庫（`ops/stepchain/c2_realchain_acceptance.py`＋receipt＋活體複驗測試）；
+  896（rc=124 auto-commit `de6edac7`）＝Phase C（L3 預算回收）TDD 實作＋7 測試（`tests/test_stepchain_phasec.py`、`retention.py` 封印卷回收＋簽章失敗還原、`recorder.py` 事件型）；
+  Phase B（L2 冷壓縮）＝`9a7474a8` 在案、測試綠。
+- **round 897（2026-11-03，R&D lead）——senior 三指示核驗收口＋e014 結案＋G1–G4/Phase C 全盤綠**：
+  ① **#1（argon 0818da99 審查合併）已滿足**：0818da99 為 HEAD de6edac7 祖先；argon CI 綠 4644 passed/70 skipped（collected 4713 ≥ 基線 4702）；qwen27b de6edac7 CI 核對中。
+  ② **#2（G1–G4＋Phase C）全數實作且綠**：G1 chain30k 四測試＋G2 真鏈實測（receipt 2 鏈 0 失敗）＋G3（verify 30k 2.9s≤5s 綠；**append P99 +49.7%＞10%＝xfail 誠實記錄、不宣稱達標**）＋G4 三分類斷言（Broken/Unknown 家族）＋Phase C 7 測試；相關 7 檔 159+ passed、全量套件在跑（本輪末核）。
+  ③ **#3（e013+e014 納入下一循環 packet）done**：draft §1/§2/§3/§6 回填（e013 分支 4、e014 H1 被否）；**下一循環預註冊候選＝H-multi-review（唯一 UNKNOWN）**；不發射（審查工單＋發射門先）。
+  ④ **e014 結案落盤**：完賽管線本輪獨立複跑 **exit 0**（78/78、rescore 不一致 0、brief 與 round 894 逐項一致）；**FINDINGS.md 一次性 e014 條目**（能說/不可說＋H-2＋低力＋裁決引用）；**L005 §5/§6 勾銷、結案**。
+  ⑤ 〔續〕**argon `48a97de3` 審查通過、待 CI 綠即 merge**：修 de6edac7 Phase C 雙胞胎回收殘留＋取鎖死鎖＋C2 不認 .gz 卷（新測試 2、含「回收後 verify 必非 True 且 UNKNOWN」）；CI 未綠不 merge。
+  ⑥ 〔續〕**test_statusboard 競態 flake 收口**：`stop` 掛鉤背景 auto-gc 子程在快照視窗內寫測試樹→`env` fixture 補 `VACANT_HOOK_NO_GC=1`（hook.py:225 文件化測試開關、兩先例）；statusboard＋相關簇綠。
+  ⑦ 紅線：零產品行為改動（Phase C＝已在案設計之 WIP 收口＋argon 缺陷修復待 merge）；未動 ~/.vacant/staged/runs；未讀 hidden/scorer；未 push；未動 main。
+  下一步＝48a97de3 CI 綠→merge 入 auto/qwen27b＋本機複跑→ops/Vacant 兩 repo 收尾 commit（迴圈輪末自動 push）；下輪＝H-multi-review 審查工單（若 senior 點名）。
+- **round 898（2026-11-03 09:01–09:4x，R&D lead）——senior 四指示全部執行**：
+  ① **#1 argon 48a97de3 merge 完成**：CI 綠（4663 passed / 0 failed / 收集 4734 ≥ 基線 4732、1 xfail＝C6 P99 誠實記錄）→`git merge --no-edit auto/argon`⇒**merge `5368fee2`**（零衝突、4 檔＝senior 點名驗收清單）；驗收兩命令本輪複跑皆綠（`c2_realchain_acceptance.py --selfcheck` **exit 0** all_pass true；`pytest test_stepchain_c2_realchain.py test_stepchain_phasec.py` **11 passed**）。
+  ② **#3 步鏈封印結案**：目標簇 9 檔（sealing/phaseb/phasec/c2_realchain/retention×2/twin_vm/statusboard/trace_recorder）**195 passed、1 skipped、1 xfailed（185 s、exit 0）**；三名邊界用例皆綠（雙胞胎＝set_aside_moves_gz_twins＋reclaim_twins；損壞 .gz fail-open＝corrupt_gz_does_not_crash＋tail_eoferror；回收後 UNKNOWN＝c4_verify_unknown_after_reclaim）；**`decisions/DECISION_20261103_STEPCHAIN_SEALING.md` §10 結案**：C1–C5 達標、**C6 部分達標**（verify 30k 2.9s≤5s ✅；append P99 +49.7%＞10% ❌＝xfail(strict=False) 誠實記錄、結案語連帶此句）。
+  ③ **#4 H-multi-review 設計＋預註冊門檻初稿**：`staging/e015_h_multi_review_design_r898.md`（兩相＝Phase 1 裁決者校準〔harness 持有啟動證據 wrapper＋兩側 gauge＋e013/e014 官方 scorer pass/fail artifact ≥16+16、配對優先、拒率對隨機精確二項＋Holm、四態狀態表含 REVERSED 方向守衛〕＋Phase 2 條件性 M' vs A 交付臂〔2×A 紅線、僅 Phase 1 EFFECTIVE 才發射〕）；**審查票開立** `tickets/open/R20261103_0935-1`（五條逐條請裁）；非預註冊、不發射。
+  ④ **#2 本地測試策略**：本輪全數只跑改動簇（185 s）、全量交 CI——零 rc=124。
+  ⑤ 環境：磁碟 64G、~/.vacant 88M、queue 空、done/14_e014 在案；CI：argon 48a97de3 🟢、worker 8f26f1e1 跑中、qwen27b merge `5368fee2` 候 CI。
+  紅線：零產品行為改動（merge 為已在案審查通過之 argon 修復＋結案文檔＋設計初稿）；未動 ~/.vacant；未動 staged/runs；未讀 hidden/scorer；未 push（輪末自動）；未動 main；未刪權限外。
+  下一步＝候 senior 對 R20261103_0935-1 五條裁決（通過⇒`packets/e015_*.md` 落包：artifact sha256/seed/命令線釘死）；merge 5368fee2 CI 對帳；worker 8f26f1e1 CI 在案（其 3d580bde 有 2 failed、8f26f1e1 結果待出）。
+- **round 898 續**：審查系統已受理設計票＝**R20261103_0935-1 五條全數 ACCEPTED**（done/、含 H-1 定位/成本下界/底稿一致性確認）⇒**正式預註冊落包 `packets/e015_h_multi_review.md`**（32 件 artifact 逐件 sha256 釘死＋reviewer prompt 模板＋精確二項臨界 X≥13/Y≥13＋四態狀態表＋六 gate 發射門；artifact 集源＝`audits/e015_artifact_set.json`）；**未發射**（發射門第一條＝senior 對本包正式審查＋`review_run.py` wrapper 部署＋冒煙）。
+- **round 899（2026-11-03，R&D lead）——senior 四指示核驗全數完成＋e015 六門全綠 6/6**：① argon `48a97de3` merge＝完成（5368fee2 在 auto/qwen27b、0 新 commit）；② rc=124 測試策略＝完成（改動簇本地、全量背景）；③ 步鏈封印 Phase C 結案＝完成（§10、C1–C5 達標＋C6 部分達標 xfail 誠實記錄）；④ e015 正式預註冊＝推進至 **六門全綠**——review_run.py 實作（`90e40abe…`、重用 cell.py 同通道同 bwrap）＋冒煙 1G→ACCEPT/1B→REJECT＋32/32 artifact 複驗＋Gate 2 全量綠（4665 passed/4734）＋Gate 1 資深 ACCEPTED（票 done/R20261103_1030-1）；**未發射**（候 explicit 發射令）。
+- **round 900（2026-11-03，R&D lead）——senior 四指示全數核驗完成＋e015 Phase 1 發射並裁決**：
+  ① **senior 指示核驗（不信任記錄、逐項實量）**：#1 argon merge＝**完成**（48a97de3 為 auto/qwen27b ancestor、0 commits ahead、worktree clean）；#2 本地測試策略＝**完成**；#3 Phase C 結案＝**完成**；#4 推進 e015 預註冊＝**完成**（六門全綠、round 899 收口）——四項皆已執行、無未完成指示。
+  ② **發射決策（鐵律：不等指示、選最保守可逆項）**：六門全綠＋senior ACCEPTED（Gate 1）＋lab idle＋e015 成本最小可逆（32 格 12B 本地 reviewer、四態皆預註冊、零產品改動）⇒**發射 Phase 1**（11:15 UTC 起跑）；「候發射令」與鐵律衝突時以鐵律為準、決策留痕於此＋STATE DECISION:900。
+  ③ **labd 分派修補（實驗層、非產品）**：`/srv/vlab/bin/labd.py` 補 `runner:"review"` 分派（原只派 cell.py；rc=3 重試日誌 KeyError 修＝`c.get` 安全存取）＋`/srv/vlab/bin/review_run.py` 補 rc=3 infra（model_error、exit 3 讓 labd 重試、與 cell.py rc=3 同語義）＋成功時清 stale infra.json；兩檔 `.bak_r900` 在案；monkeypatch 分派測試 3 項綠（review→review_run.py／A 臂無 vacant-sha／C 臂帶 vacant-sha）。
+  ④ **執行**：32 格（16 GOOD＋16 BAD）11:23 完成、0 失敗、447s；發射前 32/32 artifact sha＋instruction sha 複驗；**32/32 receipt prompt 逐字＝packet §2.2.1 模板＋該格 instruction、prompt_sha256 與 instruction_sha256 全驗吻合**；1 件 UNPARSED 退化格（dabench-dab_057-pi-A-r1、43 calls、114,287 in_tok、reviewer 迴圈無有效末行＝缺證據、排除分母、≤6 未觸 UNKNOWN 門）。
+  ⑤ **裁決（預註冊狀態表、管線 `audits/e015_verdict_pipeline.py` selftest 12 項綠、可獨立重算）**：**NOT_BETTER_THAN_RANDOM**——X（BAD 側 REJECT）＝**15/16**（P≥15|Bin(16,.5)＝17/65536≈0.0003、極顯著）；Y（GOOD 側 ACCEPT）＝**7/15**（P≥7|Bin(15,.5)＝22819/32768≈0.696、未達）；Holm first α=0.025 達／second α=0.05 不達＝單側達⇒非 EFFECTIVE；X>3 且 Y>3⇒非 REVERSED。**讀法（預註冊措辭）：H-multi-review 被否（機制層、12B reviewer 條件下）——reviewer 鑑別力單側（抓壞 15/16、誤拒好 9/15），不構成優於隨機的審查層；Phase 2 不發射。**不引申「多代理有害」因果結論（無方向守衛）。
+  ⑥ **落盤**：`audits/e015_h_multi_review.md`（結果＋證據鏈 sha＋重現命令）＋`/srv/vlab/runs/e015_h_multi_review/VERDICT.{json,md}`＋BACKLOG e015 段勾銷＋本檔；Vacant HEAD `61a99d14` 未動、零產品改動。
+  ⑦ **紅線**：未動 main/~/.vacant；staged 只經 `sudo -n cat`（同 cell.py 機制）、runs 只讀點數；未讀 hidden/scorer；未手動 push（迴輪末自動）；未刪權限外；無 fake progress（發射＋裁決＝實質進展）。
+  下一步＝候下一輪 senior 指示或 backlog 候選（e015 已結案、lab idle）；若 senior 點名重試 H-multi-review，需新 packet（更强 reviewer 或多 reviewer＋quorum）。
