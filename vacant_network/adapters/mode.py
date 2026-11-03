@@ -14,6 +14,11 @@
 
 `observe`＝照樣記錄、照樣寫交件說明，但不把任何文字送回 agent。
 
+`block`（2026-11-02，`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md` 的 blocking level；
+`ops/packets/e014_dabstep_block.md` §3）＝ evidence 加上：「要求的檔不存在」在檔案寫出來之前
+持續退回（不受 `ZERO_MAX_ROUNDS` 上限）；其他發現的退回仍維持 evidence 的兩回合預算。
+安裝：`vacant install --mode block`（預設仍是 `evidence`）。
+
 誠實邊界：讀不到 `install.json`（權限、壞掉的 JSON）⇒ 當成 `evidence`，因為檔案存在代表人裝過；
 這一次的檢查若因此出錯，由掛鉤的「失敗一律放行」接住。
 
@@ -27,7 +32,7 @@ from __future__ import annotations
 import json
 import os
 
-MODES = ("off", "observe", "evidence")
+MODES = ("off", "observe", "evidence", "block")
 
 
 def current_mode() -> str:

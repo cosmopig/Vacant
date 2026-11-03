@@ -108,8 +108,7 @@ def line_for(f: dict[str, Any], budget_note: str = "") -> str:
         if f.get("sub") == "test_failed":
             hint = f" ({q(f['test_hint'], 120)})" if f.get("test_hint") else ""
             return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\"{hint} and no later "
-                    f"test run passed. Fix the implementation and re-run the tests, or say in the "
-                    f"final message that it failed.")
+                    f"test run passed. Fix the implementation and re-run the tests.")
         return (f"- Step {f['step']} ({q(f['cmd'], 60)}) failed: \"{q(f['error'])}\". The "
                 f"deliverable was written after it without that output. Fix and re-run it, or say "
                 f"in the final message that it failed.")

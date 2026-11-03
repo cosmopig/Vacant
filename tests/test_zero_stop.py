@@ -178,6 +178,73 @@ def test_an_unopened_named_file_is_sent_back_only_once(env, inproc):
     assert "Still open after 1 round(s)" in _note(p)
 
 
+# ── block mode（e014 §3：missing_output 未解⇒session 不得結束；其他 findings 維持 evidence 預算）──
+
+BLOCK_ASK = ("Answer by referencing files in `data/`.\n"
+             "When you have computed the final answer, write ONLY the final answer to `answer.txt`.")
+
+
+def test_block_mode_holds_session_when_missing_output_unresolved(env, inproc):
+    """evidence 兩回合後放行；block 在要求的檔不存在時持續 hold（round 計數照記、可審計）。"""
+    _install("block")
+    p = _proj(env)
+    (p / "data" / "payments.csv").write_text("id,country\n1,NL\n")
+    a = Agent(p)
+    a.ask(BLOCK_ASK)
+    a.bash("head data/payments.csv", "id,country\n1,NL\n")
+    for i in range(4):
+        d = a.stop()
+        assert d["decision"] == "block" and "answer.txt" in d["reason"], (i, d)
+    evs = [e for e in Recorder(p).events() if e["type"] == "review"]
+    assert [e.get("action") for e in evs] == ["continue"] * 4
+    assert [e.get("round") for e in evs] == [1, 2, 3, 4]
+
+
+def test_block_mode_allows_when_missing_output_resolved(env, inproc):
+    _install("block")
+    p = _proj(env)
+    (p / "data" / "payments.csv").write_text("id,country\n1,NL\n")
+    a = Agent(p)
+    a.ask(BLOCK_ASK)
+    a.bash("head data/payments.csv", "id,country\n1,NL\n")
+    assert a.stop()["decision"] == "block"
+    a.write("answer.txt", "NL\n")
+    d2 = a.stop("The answer is NL.")
+    assert "decision" not in d2
+    kinds = [e.get("action") for e in Recorder(p).events() if e["type"] == "review"]
+    assert kinds == ["continue", "allow"]
+
+
+def test_block_mode_other_findings_keep_evidence_budget(env, inproc):
+    """unsourced 在 block 下仍最多退回兩回合（block 只放寬 missing_output，不放寬其他）。"""
+    _install("block")
+    p = _proj(env)
+    a = Agent(p)
+    a.ask(ASK)
+    a.write("report.md", "Total amount: 5,200\n")
+    assert a.stop()["decision"] == "block"
+    a.write("report.md", "Total amount: 5,300\n")
+    assert a.stop()["decision"] == "block"
+    a.write("report.md", "Total amount: 5,400\n")
+    d3 = a.stop()
+    assert "decision" not in d3
+    assert "Still open after 2 round(s)" in _note(p)
+
+
+def test_block_mode_fail_open_on_error(env, monkeypatch):
+    """check 子行程任何錯誤⇒仍 allow（fail-open 不變式對 block 一樣成立）。"""
+    _install("block")
+    p = _proj(env)
+    a = Agent(p)
+    a.ask(ASK)
+    a.write("report.md", "Total amount: 5,200\n")
+
+    def boom(req):
+        raise RuntimeError("check crashed")
+    monkeypatch.setattr(zerostop, "_run_child", boom)
+    assert a.stop() == {"systemMessage": zerostop.DID_NOT_RUN}
+
+
 def test_a_new_request_from_the_person_starts_the_rounds_again(env, inproc):
     _install()
     p = _proj(env)

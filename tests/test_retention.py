@@ -885,6 +885,53 @@ def test_envelope_accounting_flags_trace_projects_overrun(env):
     assert envl["within_envelope"] is False
 
 
+def test_envelope_accounting_flags_trace_projects_subcap_overrun(env, capsys):
+    """round 883（senior 指示 #3，2026-11-02）：trace/projects 有自己的 32 MiB
+    子上限（DEFAULT_TRACE_PROJECTS_CAP_BYTES），但舊量具只量 `trace` 整體
+    （96 MiB 總上限）⇒ projects 越過子上限而 trace 仍在總限內時是量具盲區
+    （真機實例：~/.vacant/trace/projects 39 MB、trace 總 69 MB < 96 MiB ⇒
+    量具報 within_caps True）。量具必須點名 `trace/projects`（sub_overrun、
+    within_caps False）、封頂量具不得宣稱「在封頂內」；只報告、不刪除
+    （fail-open：步鏈是記責記錄，GC 向來不碰 chain.ndjson）。"""
+    vh = pathlib.Path(os.environ["VACANT_HOME"])
+    _seed_trace_project(env, name="subcap")
+    pd = vh / "trace" / "projects"
+    target = sorted(pd.iterdir())[0]
+
+    ok = retention.envelope_accounting(vh)
+    assert ok["sub_overrun"] == {}
+    assert ok["sub_within_caps"] is True
+    assert ok["within_caps"] is True
+
+    # 只把 trace/projects 頂過 32 MiB 子上限：objects 為空、trace 整體 ≈32 MiB
+    # ＜ 96 MiB 總上限 ⇒ 舊量具會報「在限內」（盲區）
+    cap = retention.DEFAULT_TRACE_PROJECTS_CAP_BYTES
+    big = target / "chain_bloat_sub.ndjson"
+    big.write_bytes(b"q" * (cap + 16 * 1024))
+    bad = retention.envelope_accounting(vh)
+    assert bad["within_caps"] is False
+    assert bad["sub_within_caps"] is False
+    assert "trace/projects" in bad["sub_overrun"]
+    assert bad["sub_overrun"]["trace/projects"]["bytes"] > cap
+    assert bad["sub_overrun"]["trace/projects"]["cap_bytes"] == cap
+    # top-level trace 未達 96 MiB 總上限：點名的是子上限，不是總限替代
+    assert bad["overrun"].get("trace", {}).get("bytes", 0) \
+        <= retention.COMPONENT_TOTAL_CAPS["trace"]
+    # 只報告、不刪除（fail-open：步鏈是記責記錄）
+    assert big.is_file()
+
+    # 封頂量具同報：子上限越限時不得宣稱「在封頂內」
+    envl = retention.usage_report()["envelope"]
+    assert envl["accounting"]["within_caps"] is False
+    assert envl["within_envelope"] is False
+
+    # 人讀輸出必須點名 trace/projects（子上限越限的點名）
+    rc = cli.main(["usage"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "trace/projects" in out, "人讀輸出缺 trace/projects 子上限點名：\n" + out
+
+
 def test_usage_envelope_fail_open_missing_home(tmp_path, monkeypatch, capsys):
     """state 目錄不存在時封頂量具仍要給得出（total=0、在內），不崩（fail-open）。"""
     monkeypatch.setenv("VACANT_HOME", str(tmp_path / "nope"))

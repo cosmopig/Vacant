@@ -67,6 +67,7 @@ import shutil
 import sys
 import time
 from typing import Any
+import zlib
 
 from .atomic import atomic_write_text
 from .intake.statepaths import state_dir, work_dir
@@ -159,6 +160,18 @@ COMPONENT_TOTAL_CAPS: dict[str, int] = {
     "quarantine": DEFAULT_QUARANTINE_TOTAL_CAP_BYTES,
 }
 
+#: round 883（senior 指示 #3，2026-11-02）：count-based 子目錄的命名**子上限**。
+#: trace/projects 的 32 MiB 子上限此前只折進 trace 的 96 MiB 總上限
+#: （COMPONENT_TOTAL_CAPS）；`envelope_accounting` 只量 `trace` 整體 ⇒ projects
+#: 越過子上限而 trace 仍在總限內時是量具盲區（真機實例：
+#: ~/.vacant/trace/projects 39 MB、trace 總 69 MB ＜ 96 MiB ⇒ 量具報
+#: within_caps True）。子上限越限由 `envelope_accounting` 回傳的 `sub_overrun` 鍵
+#: 點名（`vacant usage`／`usage_report` 人讀輸出同點名）；
+#: 只報告、不刪除（fail-open：步鏈是記責記錄，GC 向來不碰 chain.ndjson）。
+SUBDIR_TOTAL_CAPS: dict[str, int] = {
+    "trace/projects": DEFAULT_TRACE_PROJECTS_CAP_BYTES,
+}
+
 # 2026-10-29 round 176（ASSIGNMENT 🔴 最優先「用量有上限」；packet
 # ops/packets/disk_top_priority.md §4 誠實缺口「總計封頂本身不是一條程式保證，
 # 只是一個可驗算的加總」→ 本輪把它變成程式可驗的不變量）：
@@ -218,7 +231,11 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
       accounting_complete         unaccounted 為空（帳目完整）
       overrun                     越過命名總上限的組件 {name: {bytes, cap_bytes}}
                                   （round 192：fixed ＋ count-based 分組都在內）
+      sub_overrun                 越過命名子上限的子目錄 {rel: {bytes, cap_bytes}}
+                                  （round 883：SUBDIR_TOTAL_CAPS，例 trace/projects 32 MiB）
+      sub_within_caps             沒有子目錄越子上限（round 883）
       within_caps                 沒有組件越限（「固定不增長」與計數制長期增長都由量具盯住）
+                                  ＋沒有子目錄越子上限（round 883）
       fixed_overrun               overrun 中 fixed 組件的子集（round 190 欄位，保持同義）
       fixed_within_caps           沒有 fixed 組件越限（「固定不增長」由量具盯住）
       byte_caps_sum               位元組硬上限分組的加總（bytes ＋ fixed 類型）
@@ -239,6 +256,9 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
     components: list[dict[str, Any]] = []
     unaccounted: list[str] = []
     overrun: dict[str, dict[str, int]] = {}
+    # round 883：子目錄子上限（SUBDIR_TOTAL_CAPS）——top-level 總限量不到
+    # trace/projects 這種「總限內但子上限外」的增長，這裡單獨量、單獨點名。
+    sub_overrun: dict[str, dict[str, int]] = {}
     if r.is_dir():
         for entry in sorted(r.iterdir(), key=lambda p: p.name):
             if entry.name in known:
@@ -249,6 +269,13 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
                 components.append(comp)
             else:
                 unaccounted.append(entry.name)
+        for rel, cap in sorted(SUBDIR_TOTAL_CAPS.items()):
+            sub = r / rel
+            if not sub.exists():
+                continue
+            b = _tree_size(sub)
+            if b > cap:
+                sub_overrun[rel] = {"bytes": b, "cap_bytes": cap}
     fixed_overrun = {name: v for name, v in overrun.items() if name in fixed_caps}
     byte_caps_sum = sum(b for _, kind, b, _ in ENVELOPE_COMPONENTS
                         if kind in ("bytes", "fixed") and b)
@@ -258,7 +285,9 @@ def envelope_accounting(root: pathlib.Path | str | None = None) -> dict[str, Any
         "unaccounted": unaccounted,
         "accounting_complete": not unaccounted,
         "overrun": overrun,
-        "within_caps": not overrun,
+        "sub_overrun": sub_overrun,
+        "sub_within_caps": not sub_overrun,
+        "within_caps": not overrun and not sub_overrun,
         "fixed_overrun": fixed_overrun,
         "fixed_within_caps": not fixed_overrun,
         "byte_caps_sum": byte_caps_sum,
@@ -420,6 +449,142 @@ def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
         if p.exists() or p.is_symlink():
             return 0, 0  # rmtree 未清乾淨：不計入 freed
     return sz, max(1, count)
+
+
+def _sealed_volume_meta(p: pathlib.Path) -> tuple[int, int, int] | None:
+    """封印卷（明文或 .gz）→ (first_seq, last_seq, bytes)。尾行是 seal 筆，
+    其 payload 帶 first_seq/last_seq（Phase A 封印語義）；讀不出 ⇒ None（跳過，不刪）。"""
+    try:
+        if p.name.endswith(".gz"):
+            import gzip
+            with gzip.open(p, "rt", encoding="utf-8", errors="replace") as f:
+                lines = f.read().splitlines()
+        else:
+            lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+        lines = [x for x in lines if x.strip()]
+        if len(lines) < 2:
+            return None
+        seal = json.loads(lines[-1])
+        pl = seal.get("payload") or {}
+        fs, ls = pl.get("first_seq"), pl.get("last_seq")
+        if fs is None or ls is None:
+            fs, ls = int(json.loads(lines[0]).get("seq", 1)), int(seal.get("seq", 1))
+        return int(fs), int(ls), _file_size(p)
+    except Exception:  # noqa: BLE001——讀不出的卷不回收（fail-open），原因記上報表
+        return None
+
+
+def _reclaim_sealed_volumes_to_target(
+    proj_root: pathlib.Path,
+    target_bytes: int,
+    current_bytes: int,
+    *,
+    keep_recent_volumes: int = DEFAULT_KEEP_SET_ASIDE,
+    dry_run: bool = False,
+    budget: _Budget | None = None,
+) -> dict[str, Any]:
+    """L3 預算回收（DECISION_20261103 §3.4；Phase C）。僅在「有明確預算且 objects
+    回收後仍超」時由 `compact_trace` 呼叫——無預算 ⇒ 本函數不執行（零刪除，C5）。
+
+    跨專案按 mtime 最舊封印卷優先回收；**絕不動**活動卷、卷 1（創世）、每專案最近
+    `keep_recent_volumes` 卷（鏡 `DEFAULT_KEEP_SET_ASIDE=3`）。每筆回收先簽一筆
+    `volume_reclaimed`（卷名、first_seq–last_seq、位元組、預算）上該專案活動鏈，
+    再刪卷；簽章失敗（如混簽章鏈 MixedSignerRefused）⇒ 還原已刪檔案、跳過該卷——
+    沒有無簽章的回收（§3.4：回收動作本身入鏈記責）。回收後 `verify` 對缺卷區間
+    報 UNKNOWN（Phase A 語義，本函數不改裁定出口）。
+    同號雙胞胎（明文+.gz 共存半殘態）必須以卷號為單位**全數**移除，不得殘留任一檔；
+    保護窗亦以不重複卷號計，不因雙胞胎縮小保護窗。
+    """
+    from .trace.recorder import Recorder, _volume_num
+
+    cands: list[tuple[int, str, pathlib.Path, int, list[pathlib.Path]]] = []
+    for pdir in sorted(proj_root.iterdir()):
+        if not pdir.is_dir():
+            continue
+        num_to_files: dict[int, list[pathlib.Path]] = {}
+        for q in pdir.iterdir():
+            if not q.is_file():
+                continue
+            vnum = _volume_num(q.name)
+            if vnum is not None:
+                num_to_files.setdefault(vnum, []).append(q)
+        distinct_nums = sorted(num_to_files.keys())
+        if len(distinct_nums) <= keep_recent_volumes:
+            continue
+        protected = {1} | set(distinct_nums[-keep_recent_volumes:])
+        for num in distinct_nums:
+            if num in protected:
+                continue
+            files = num_to_files[num]
+            mtimes = []
+            for f in files:
+                with contextlib.suppress(OSError):
+                    mtimes.append(f.stat().st_mtime_ns)
+            mtime = min(mtimes) if mtimes else 0
+            cands.append((mtime, pdir.name, pdir, num, files))
+    cands.sort(key=lambda t: (t[0], t[1]))
+
+    actual: list[dict[str, Any]] = []
+    would: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    freed = 0
+    for _mtime, _pname, pdir, _num, files in cands:
+        if current_bytes - freed <= target_bytes:
+            break
+        primary = next((f for f in files if f.name.endswith(".ndjson")), files[0])
+        if budget is not None and budget.expired():
+            skipped.append({"volume": primary.name, "why": "budget_expired"})
+            continue
+        meta = _sealed_volume_meta(primary)
+        if meta is None:
+            # 若 primary 讀不出，嘗試同卷其他檔（如 .gz）
+            for alt in files:
+                if alt != primary:
+                    meta = _sealed_volume_meta(alt)
+                    if meta is not None:
+                        primary = alt
+                        break
+        if meta is None:
+            skipped.append({"volume": primary.name, "why": "unreadable_volume"})
+            continue
+        fs, ls, _ = meta
+        vol_total_size = sum(_file_size(f) for f in files)
+        if dry_run:
+            would.append({"volume": primary.name, "first_seq": fs, "last_seq": ls, "bytes": vol_total_size})
+            freed += vol_total_size
+            continue
+        payload = {"schema": "vacant-trace/1", "volume": primary.name,
+                   "first_seq": fs, "last_seq": ls, "bytes": vol_total_size,
+                   "reason": "budget", "target_bytes": target_bytes}
+        rec = Recorder(pdir, root=proj_root.parent)
+        rec.dir = pdir
+        rec.chain_path = pdir / "chain.ndjson"
+        rec.state_path = pdir / "state.json"
+        with rec._lock():
+            backed: list[tuple[pathlib.Path, bytes]] = []
+            try:
+                for f in files:
+                    backed.append((f, f.read_bytes()))
+                for f in files:
+                    f.unlink()
+                try:
+                    rec._append("volume_reclaimed", payload)
+                except Exception:  # noqa: BLE001——簽不成 ⇒ 還原全部檔案（fail-open）
+                    for f, data in backed:
+                        f.write_bytes(data)
+                    skipped.append({"volume": primary.name, "why": "signing_refused"})
+                    continue
+            except OSError as e:
+                for f, data in backed:
+                    if not f.exists():
+                        f.write_bytes(data)
+                skipped.append({"volume": primary.name, "why": f"unlink_failed: {e.__class__.__name__}"})
+                continue
+        freed += vol_total_size
+        actual.append({"volume": primary.name, "first_seq": fs, "last_seq": ls, "bytes": vol_total_size})
+    return {"volumes_reclaimed": len(actual), "reclaimed_volumes": actual,
+            "would_reclaim": would, "skipped_volumes": skipped,
+            "bytes_freed": freed if not dry_run else 0}
 
 
 def _index_base_sha(blobs: W.Blobs, idx_sha: str | None) -> str | None:
@@ -628,29 +793,57 @@ def compact_trace(
                                     keep_shas.add(ib)
                                     structural_shas.add(ib)
 
-            chain_file = pdir / "chain.ndjson"
-            if not chain_file.is_file():
+            # 支援分卷封印（DECISION_20261103 §3.3/§7 R2）：掃描全部殘存封印卷＋活動卷
+            vols: list[tuple[int, pathlib.Path]] = []
+            for q in pdir.iterdir():
+                if q.is_file() and q.name.startswith("chain-"):
+                    stem = q.name.removeprefix("chain-")
+                    if stem.endswith(".ndjson.gz"):
+                        num_str = stem.removesuffix(".ndjson.gz")
+                    elif stem.endswith(".ndjson"):
+                        num_str = stem.removesuffix(".ndjson")
+                    else:
+                        continue
+                    if num_str.isdigit():
+                        vols.append((int(num_str), q))
+            vols.sort(key=lambda x: x[0])
+            chain_files = [q for _, q in vols]
+            active_chain = pdir / "chain.ndjson"
+            if active_chain.is_file():
+                chain_files.append(active_chain)
+
+            if not chain_files:
                 continue
 
             # round 72：活躍邊界（以鏈上活動的磁碟時間為準；與本檔其他 max_age 判斷同用 mtime）
             project_active = False
             if active_window_s is not None:
                 last_activity = 0.0
-                for _name in ("chain.ndjson", "state.json", "head.json"):
+                for f in chain_files:
+                    with contextlib.suppress(OSError):
+                        last_activity = max(last_activity, f.stat().st_mtime)
+                for _name in ("state.json", "head.json"):
                     with contextlib.suppress(OSError):
                         last_activity = max(last_activity, (pdir / _name).stat().st_mtime)
                 project_active = last_activity > 0 and (now - last_activity) < active_window_s
 
             events: list[dict[str, Any]] = []
-            with contextlib.suppress(OSError):
-                for ln in chain_file.read_text(encoding="utf-8", errors="replace").splitlines():
-                    if not ln.strip():
-                        continue
-                    with contextlib.suppress(ValueError):
-                        row = json.loads(ln)
-                        if isinstance(row, dict):
-                            events.append({"seq": row.get("seq", 0), "type": row.get("type"),
-                                           **(row.get("payload") or {})})
+            for cf in chain_files:
+                with contextlib.suppress(OSError, EOFError, zlib.error):
+                    if cf.name.endswith(".gz"):
+                        import gzip
+                        with gzip.open(cf, "rt", encoding="utf-8", errors="replace") as gz_f:
+                            lines = gz_f.readlines()
+                    else:
+                        lines = cf.read_text(encoding="utf-8", errors="replace").splitlines()
+                    for ln in lines:
+                        if not ln.strip():
+                            continue
+                        with contextlib.suppress(ValueError):
+                            row = json.loads(ln)
+                            if isinstance(row, dict):
+                                events.append({"seq": row.get("seq", 0), "type": row.get("type"),
+                                               **(row.get("payload") or {})})
 
             # 找出初始索引、最後一則使用者提示的起點、以及保留視窗內的步驟與修改檔案版本
             initial_idx: str | None = None
@@ -947,15 +1140,30 @@ def compact_trace(
         if target["aborted"]:
             aborted = True
 
+    # ── Phase C（L3 預算回收，DECISION_20261103 §3.4）────────────────────────────
+    # 僅當有明確預算且 objects 回收後整棵 trace 樹仍超：回收最舊封印卷（活動/卷 1/
+    # 最近 N 卷絕不動），每筆先簽 volume_reclaimed 再刪。無預算 ⇒ 不執行（C5 零刪除）。
+    reclaim_rep: dict[str, Any] | None = None
+    if target_bytes is not None and target_bytes >= 0 and proj_root.is_dir():
+        cur = _tree_size(troot)
+        if cur > target_bytes:
+            reclaim_rep = _reclaim_sealed_volumes_to_target(
+                proj_root, int(target_bytes), cur, dry_run=dry_run, budget=budget)
+
     rep = {
-        "bytes_freed": bytes_freed + (target["bytes_freed"] if target else 0),
-        "files_removed": files_removed + (target["files_removed"] if target else 0),
+        "bytes_freed": bytes_freed + (target["bytes_freed"] if target else 0)
+                       + (reclaim_rep["bytes_freed"] if reclaim_rep else 0),
+        "files_removed": files_removed + (target["files_removed"] if target else 0)
+                         + (reclaim_rep["volumes_reclaimed"] if reclaim_rep else 0),
         "projects_scanned": projects_scanned,
         "kept_blobs": len(keep_shas),
         "aborted": aborted,
+        "volumes_reclaimed": reclaim_rep["volumes_reclaimed"] if reclaim_rep else 0,
     }
     if target is not None:
         rep["target"] = target
+    if reclaim_rep is not None:
+        rep["reclaim"] = reclaim_rep
     return rep
 
 
@@ -1267,7 +1475,9 @@ def verify_trace_chains(root: pathlib.Path | None = None) -> tuple[int, bool, li
     count = 0
     errors = []
     for p in sorted(pdir.iterdir()):
-        if not p.is_dir() or not (p / "chain.ndjson").is_file():
+        if not p.is_dir():
+            continue
+        if not (p / "chain.ndjson").is_file() and not any(p.glob("chain-*.ndjson*")):
             continue
         count += 1
         try:
@@ -1903,13 +2113,24 @@ def usage_report(
                     meta = json.loads((p / "project.json").read_text(encoding="utf-8"))
                     if isinstance(meta, dict) and meta.get("workspace"):
                         info["workspace"] = str(meta["workspace"])
-                chain_f = p / "chain.ndjson"
-                if chain_f.is_file():
-                    with contextlib.suppress(OSError):
-                        info["chain_events"] = sum(
-                            1 for ln in chain_f.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
+                chain_files_to_count = []
+                for q in p.iterdir():
+                    if q.is_file():
+                        if q.name == "chain.ndjson" or (q.name.startswith("chain-") and (q.name.endswith(".ndjson") or q.name.endswith(".ndjson.gz"))):
+                            chain_files_to_count.append(q)
+                total_events = 0
+                for q in chain_files_to_count:
+                    with contextlib.suppress(OSError, EOFError, zlib.error):
+                        if q.name.endswith(".gz"):
+                            import gzip
+                            with gzip.open(q, "rt", encoding="utf-8", errors="replace") as gz_f:
+                                total_events += sum(1 for ln in gz_f if ln.strip())
+                        else:
+                            total_events += sum(1 for ln in q.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip())
+                if chain_files_to_count:
+                    info["chain_events"] = total_events
                 try:
-                    mts = [q.stat().st_mtime for q in (p, chain_f)] if chain_f.is_file() else [p.stat().st_mtime]
+                    mts = [q.stat().st_mtime for q in chain_files_to_count] if chain_files_to_count else [p.stat().st_mtime]
                     info["last_activity"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(max(mts)))
                 except OSError:
                     pass
@@ -1978,7 +2199,7 @@ def usage_main(argv: list[str] | None = None) -> int:
             mark = "✓ 在封頂內"
         elif unacc:
             mark = "⚠ 帳目不完整（有無命名上限的 top-level 組件）"
-        elif acct.get("overrun"):
+        elif acct.get("overrun") or acct.get("sub_overrun"):
             mark = "⚠ 有組件超命名上限（只報告、不刪除）"
         else:
             mark = "⚠ 超封頂（vacant gc --auto 會逐組收縮）"
@@ -1997,6 +2218,9 @@ def usage_main(argv: list[str] | None = None) -> int:
         for name, v in (acct.get("overrun") or {}).items():
             print(f"    ⚠ {name} 超命名上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
                   "（只報告、不刪除；上限見 retention.COMPONENT_TOTAL_CAPS 或 ENVELOPE_COMPONENTS）")
+        for name, v in (acct.get("sub_overrun") or {}).items():
+            print(f"    ⚠ {name} 超命名子上限: {h(v['bytes'])} / {h(v['cap_bytes'])}"
+                  "（只報告、不刪除；子上限見 retention.SUBDIR_TOTAL_CAPS）")
         print("    └ 封頂＝各分組上限的加總，不是一條單一開關；每個 top-level 組件都須有命名上限"
               "（ops/packets/disk_top_priority.md §3/§4）")
     for pj in rep.get("projects", [])[:10]:
