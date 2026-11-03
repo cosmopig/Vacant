@@ -30,11 +30,13 @@
 from __future__ import annotations
 
 import dataclasses
+import gzip
 import hashlib
 import json
 import os
 import pathlib
 import time
+import zlib
 from typing import Any
 
 from ..atomic import atomic_write_text, file_lock
@@ -219,6 +221,66 @@ class MixedSignerRefused(RuntimeError):
     """
 
 
+def _volume_num(name: str) -> int | None:
+    """從卷檔名取出卷號（`chain-NNNNNN.ndjson` 或 `chain-NNNNNN.ndjson.gz`）；畸形回 None。
+
+    活動卷 `chain.ndjson` 沒有 `chain-` 前綴⇒不是分卷（Phase B：活動卷永不封印、永不壓縮）。"""
+    if not name.startswith("chain-"):
+        return None
+    for suffix in (".ndjson.gz", ".ndjson"):
+        if name.endswith(suffix):
+            stem = name[len("chain-"):-len(suffix)]
+            return int(stem) if stem.isdigit() else None
+    return None
+
+
+def _volume_bytes(p: pathlib.Path) -> bytes:
+    """讀一個封印卷全量：`.gz` 解 gzip（Phase B L2 冷壓縮；seal payload 的 `sha256_prefix`
+    是**未壓縮**流的哈希，gunzip 後照舊驗＝零語義變化）；明文照讀。
+    讀不出（損壞的 .gz 等）上拋 OSError/EOFError——由呼叫端裁定：`verify()` 報 BROKEN 族、
+    `_book()`／`_tail()` 降級為空讀（讀路徑永不崩潰）。"""
+    if p.name.endswith(".gz"):
+        with gzip.open(p, "rb") as f:
+            return f.read()
+    return p.read_bytes()
+
+
+def compact_sealed_volume(vol_path: str | os.PathLike) -> tuple[bool, str]:
+    """Phase B（L2 冷壓縮，DECISION_20261103_STEPCHAIN_SEALING.md §9）：把一個**已封印**卷 gzip。
+
+    `chain-NNNNNN.ndjson` → `chain-NNNNNN.ndjson.gz`。best-effort、fail-open（C5 精神）：
+    任何失敗⇒原檔原封、回原因、不上拋。寫 temp→gunzip 回讀逐位元組對源→`os.replace`→刪原檔。
+    seal payload 的 `sha256_prefix` 是**未壓縮**流的哈希⇒驗章端 gunzip 後照舊驗＝零語義變化。
+    活動卷（`chain.ndjson`）永不壓縮；已存在的 `.gz` 永不覆蓋（保守）。
+    回 `(ok, detail)`。"""
+    tmp: pathlib.Path | None = None
+    try:
+        vol_path = pathlib.Path(vol_path)
+        if _volume_num(vol_path.name) is None or not vol_path.name.endswith(".ndjson"):
+            return False, f"refused: not a sealed volume (got {vol_path.name!r})"
+        final = vol_path.with_name(vol_path.name + ".gz")
+        if final.exists():
+            return False, f"refused: {final.name} already exists"
+        src = vol_path.read_bytes()
+        tmp = vol_path.with_name(f".{vol_path.name}.gz.tmp")
+        with open(tmp, "wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", mtime=0) as f:
+            f.write(src)
+        with gzip.open(tmp, "rb") as f:
+            if f.read() != src:
+                raise ValueError("gunzip roundtrip mismatch")
+        os.replace(tmp, final)
+        tmp = None
+        os.unlink(vol_path)
+        return True, f"{vol_path.name} -> {final.name}"
+    except Exception as e:  # fail-open：壓縮失敗留原檔，絕不擋寫入
+        try:
+            if tmp is not None and tmp.is_file():
+                tmp.unlink()
+        except OSError:
+            pass
+        return False, f"{type(e).__name__}: {e}"
+
+
 class Recorder:
     """一個專案（工作區根目錄）的追緝紀錄。所有方法都是行程安全的（檔案鎖）。"""
 
@@ -236,17 +298,29 @@ class Recorder:
         self._idx_cache: dict[str, W.Index] = {}
         self.volume_max_bytes: int = DEFAULT_VOLUME_MAX_BYTES
         self.volume_max_entries: int | None = DEFAULT_VOLUME_MAX_ENTRIES
+        # Phase B（L2 冷壓縮）：封印當下對新封印卷 best-effort gzip（fail-open）；可關（測試顯式
+        # 壓縮路徑／營運回退）；既有明文卷永不強遷（C2 向後相容）。
+        self.compact_on_seal = True
 
     def _sealed_volume_paths(self) -> list[pathlib.Path]:
+        """按卷號排序列舉封印卷：明文與 `.gz`（Phase B L2）都算。
+
+        同一卷號明文與 `.gz` 共存時**取明文**（保守：壓縮失敗會留明文＋殘 `.gz`，
+        取明文使 verify 不受半殘狀態影響；`.gz` 只在明文已移除後才被讀）。"""
         if not self.dir.is_dir():
             return []
-        vols: list[tuple[int, pathlib.Path]] = []
+        best: dict[int, pathlib.Path] = {}
         for p in self.dir.iterdir():
-            if p.is_file() and p.name.startswith("chain-") and p.name.endswith(".ndjson"):
-                num_str = p.name.removeprefix("chain-").removesuffix(".ndjson")
-                if num_str.isdigit():
-                    vols.append((int(num_str), p))
-        return [p for _, p in sorted(vols, key=lambda x: x[0])]
+            if not p.is_file():
+                continue
+            num = _volume_num(p.name)
+            if num is None:
+                continue
+            cur = best.get(num)
+            if cur is not None and p.name.endswith(".gz") and not cur.name.endswith(".gz"):
+                continue    # 已有明文：取明文
+            best[num] = p
+        return [best[k] for k in sorted(best)]
 
     # ── state ────────────────────────────────────────────────────────
     def _state(self) -> dict[str, Any]:
@@ -279,11 +353,15 @@ class Recorder:
         if not first_file.is_file():
             return Logbook()
         try:
-            with first_file.open("rb") as f:
-                first = f.readline()
-                if not first.strip():
-                    return Logbook()
-        except OSError:
+            if first_file.name.endswith(".gz"):
+                with gzip.open(first_file, "rb") as f:
+                    first = f.readline()
+            else:
+                with first_file.open("rb") as f:
+                    first = f.readline()
+            if not first.strip():
+                return Logbook()
+        except (OSError, EOFError, zlib.error):
             return Logbook()
 
         last_file = self.chain_path if self.chain_path.is_file() else (vols[-1] if vols else None)
@@ -291,22 +369,28 @@ class Recorder:
             return Logbook()
 
         try:
-            with last_file.open("rb") as f:
-                f.seek(0, os.SEEK_END)
-                end = f.tell()
-                back = min(end, 1 << 16)
-                while True:
-                    f.seek(end - back)
-                    lines = f.read(back).rstrip(b"\n").split(b"\n")
-                    if len(lines) > 1 or back == end:
-                        break
-                    back = min(end, back * 4)
+            if last_file.name.endswith(".gz"):
+                raw = _volume_bytes(last_file)
+                lines = [x for x in raw.split(b"\n") if x.strip()]
+            else:
+                with last_file.open("rb") as f:
+                    f.seek(0, os.SEEK_END)
+                    end = f.tell()
+                    back = min(end, 1 << 16)
+                    while True:
+                        f.seek(end - back)
+                        lines = f.read(back).rstrip(b"\n").split(b"\n")
+                        if len(lines) > 1 or back == end:
+                            break
+                        back = min(end, back * 4)
+            if not lines:
+                return Logbook()
             entries = [LogEntry.from_json(json.loads(first))]
             last = LogEntry.from_json(json.loads(lines[-1]))
             if last.seq != entries[0].seq:
                 entries.append(last)
             return Logbook(entries)
-        except (OSError, json.JSONDecodeError, ValueError, KeyError):
+        except (OSError, zlib.error, json.JSONDecodeError, ValueError, KeyError):
             book, _ = self._book()
             return book
 
@@ -369,7 +453,7 @@ class Recorder:
                     # 卷號＝max(既有卷號)+1，絕不用 len(卷數)+1：卷號出現缺口（Phase C 預算回收、
                     # 整卷遺失後必然發生）時 len+1 會與既有卷號碰撞，os.replace 直接覆蓋已封印卷＝
                     # 資料毀損（round 891 審查 B1；tests/test_stepchain_sealing.py B1 測試為證）。
-                    _nums = [int(p.name.removeprefix("chain-").removesuffix(".ndjson")) for p in vols]
+                    _nums = [n for n in (_volume_num(p.name) for p in vols) if n is not None]
                     next_vol_num = (max(_nums) if _nums else 0) + 1
                     sealed_name = f"chain-{next_vol_num:06d}.ndjson"
                     vol_entries = [LogEntry.from_json(json.loads(x)) for x in vol_lines]
@@ -391,7 +475,19 @@ class Recorder:
                         f.flush()
                         os.fsync(f.fileno())
                     os.replace(self.chain_path, self.dir / sealed_name)
-                    book = Logbook([book.entries[0], seal_e])
+                    # Phase B（L2 冷壓縮）：對剛封印的卷 best-effort gzip（fail-open：失敗⇒留明文卷、
+                    # 原因記上鏈、不擋寫入）。sha256_prefix 是未壓縮流的哈希⇒gunzip 後照舊驗＝零語義變化。
+                    # 存量不強遷：只壓新封印卷；既有明文卷照讀（C2 向後相容）。
+                    if self.compact_on_seal:
+                        compact_ok, compact_detail = compact_sealed_volume(self.dir / sealed_name)
+                        if compact_ok:
+                            book = Logbook([book.entries[0], seal_e])
+                        else:
+                            book = Logbook([book.entries[0], seal_e])
+                            book.append("coverage", {"schema": TRACE_SCHEMA, "volume_compress": sealed_name,
+                                                     "ok": False, "reason": compact_detail}, ident, ts_ms=ts)
+                    else:
+                        book = Logbook([book.entries[0], seal_e])
 
         new: list[LogEntry] = []
         if not book.entries:
@@ -1063,7 +1159,12 @@ class Recorder:
         entries: list[LogEntry] = []
         last_torn = 0
         for idx, p in enumerate(all_files):
-            data = p.read_bytes() if p.is_file() else b""
+            try:
+                data = _volume_bytes(p) if p.is_file() else b""
+            except (OSError, EOFError, zlib.error):
+                # 讀不出的卷（損壞 .gz 等）在此跳過——權威裁定是 verify() 的逐卷封印檢查
+                # （會報 BROKEN 族）；讀路徑（events 等）不因它崩潰。
+                data = b""
             torn = 0
             if data and not data.endswith(b"\n"):
                 cut = data.rfind(b"\n") + 1
@@ -1130,9 +1231,15 @@ class Recorder:
         # 1) 分卷連續性與封印驗證
         for idx, vp in enumerate(vols, start=1):
             expected_name = f"chain-{idx:06d}.ndjson"
-            if vp.name != expected_name:
-                return False, f"UNKNOWN: volume sequence broken (expected {expected_name}, got {vp.name}; missing volume)"
-            raw = vp.read_bytes()
+            if vp.name not in (expected_name, expected_name + ".gz"):
+                return False, f"UNKNOWN: volume sequence broken (expected {expected_name}[.gz], got {vp.name}; missing volume)"
+            try:
+                raw = _volume_bytes(vp)
+            except (OSError, EOFError, zlib.error) as e:
+                # 損壞的 .gz 是**内容**失敗（BROKEN 族），不是缺卷（UNKNOWN）（C3／B-T2）
+                # 注意：zlib.error 不是 OSError 的子類（round 893 實測：翻位元組觸發
+                # “invalid distance”時它單獨上拋），必須顯式捕獲。
+                return False, f"sealed volume {vp.name} is corrupted (unreadable: {type(e).__name__})"
             lines = [x for x in raw.split(b"\n") if x.strip()]
             if not lines:
                 return False, f"sealed volume {vp.name} is empty"

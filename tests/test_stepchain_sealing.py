@@ -29,6 +29,7 @@ def test_stepchain_sealing_c1_volume_split_and_verify(env):
     ws, rec = env
     # 設定較小的封印門檻便於快速測試
     rec.volume_max_entries = 5
+    rec.compact_on_seal = False    # Phase A 語義：封印卷維持明文（.gz 路徑由 test_stepchain_phaseb 覆蓋）
 
     # 寫入 12 個 step 事件
     for i in range(12):
@@ -77,6 +78,7 @@ def test_stepchain_sealing_c1_volume_split_and_verify(env):
 def test_stepchain_sealing_negative_controls(env):
     ws, rec = env
     rec.volume_max_entries = 4
+    rec.compact_on_seal = False    # Phase A 語義：封印卷維持明文（.gz 路徑由 test_stepchain_phaseb 覆蓋）
 
     for i in range(8):
         rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
@@ -123,6 +125,7 @@ def test_stepchain_sealing_negative_controls(env):
 
 def test_stepchain_c2_backward_compatibility(env):
     ws, rec = env
+    rec.compact_on_seal = False    # Phase A 語義：封印卷維持明文（.gz 路徑由 test_stepchain_phaseb 覆蓋）
     # 建立舊版無封印的單一 chain.ndjson
     for i in range(3):
         rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
@@ -158,6 +161,7 @@ def test_stepchain_sealing_gc_preserves_blobs_in_sealed_volumes(tmp_path, monkey
 
     rec = R.Recorder(ws)
     rec.volume_max_entries = 4
+    rec.compact_on_seal = False    # Phase A 語義：封印卷維持明文（.gz 路徑由 test_stepchain_phaseb 覆蓋）
 
     # 在第一卷產生一個較大的 output blob（觸發 _fit 存進 objects/）
     large_output = "LARGE_OUTPUT_IN_VOL_1_" + ("X" * 10000)
@@ -209,7 +213,8 @@ def test_stepchain_b1_volume_number_gap_must_not_overwrite(env):
     既有最大卷號必須逐位元組不動，新封印必須落入 max+1（碰撞會同名覆蓋最大卷，故以最大卷為哨兵）。"""
     ws, rec = env
     rec.volume_max_entries = 4
-
+    rec.compact_on_seal = False    # Phase A 語義：封印卷維持明文（.gz 路徑由 test_stepchain_phaseb 覆蓋）
+    
     for i in range(12):
         rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
         (ws / f"f{i}.txt").write_text(f"content {i}\n")
