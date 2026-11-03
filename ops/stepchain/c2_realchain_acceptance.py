@@ -54,25 +54,29 @@ def _project_dirs(vacant_home: Path) -> list[Path]:
 def _read_genesis(project_dir: Path) -> tuple[str | None, str | None]:
     """找創世筆（type=trace_genesis），回傳 (workspace, signer)。
 
-    舊格式：chain.ndjson 首行。已分卷：chain-000001.ndjson 首行（卷 1 必含創世）。
+    舊格式：chain.ndjson 首行。已分卷：chain-000001.ndjson[.gz] 首行（卷 1 必含創世）。
     """
     import json as _json
     candidates = []
-    legacy = project_dir / "chain.ndjson"
-    vol1 = project_dir / "chain-000001.ndjson"
-    if legacy.exists():
-        candidates.append(legacy)
-    if vol1.exists():
-        candidates.append(vol1)
+    for name in ("chain-000001.ndjson", "chain-000001.ndjson.gz", "chain.ndjson"):
+        p = project_dir / name
+        if p.is_file():
+            candidates.append(p)
     for path in candidates:
-        with open(path, "r", encoding="utf-8") as f:
-            try:
-                first = _json.loads(f.readline())
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                continue
+        try:
+            if path.name.endswith(".gz"):
+                import gzip
+                with gzip.open(path, "rt", encoding="utf-8", errors="replace") as f:
+                    first_line = f.readline()
+            else:
+                with open(path, "r", encoding="utf-8", errors="replace") as f:
+                    first_line = f.readline()
+            first = _json.loads(first_line)
             if first.get("type") == "trace_genesis":
                 p = first.get("payload") or {}
                 return p.get("workspace"), p.get("signer")
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError, EOFError):
+            continue
     return None, None
 
 
@@ -81,7 +85,7 @@ def _accept_one(project_dir: Path, stamp: str) -> dict:
     receipt: dict = {
         "project": project_dir.name,
         "files_before": {p.name: p.stat().st_size for p in project_dir.iterdir()
-                         if p.name.endswith(".ndjson")},
+                         if p.name.endswith(".ndjson") or p.name.endswith(".ndjson.gz")},
     }
     ws, signer = _read_genesis(project_dir)
     receipt["genesis_workspace"] = ws
@@ -111,7 +115,7 @@ def _accept_one(project_dir: Path, stamp: str) -> dict:
 
             # 舊格式（無封印卷）→ volume_max_bytes=1 強制封印；已分卷 → 直接追加。
             legacy = not any((home / "trace" / "projects" / project_dir.name / n).exists()
-                             for n in ("chain-000001.ndjson",))
+                             for n in ("chain-000001.ndjson", "chain-000001.ndjson.gz"))
             receipt["format_before"] = "legacy_single_chain" if legacy else "volumes"
             if legacy:
                 rec.volume_max_bytes = 1
@@ -125,7 +129,7 @@ def _accept_one(project_dir: Path, stamp: str) -> dict:
             receipt["verify_after"] = {"ok": ok1, "why": why1}
             files_after = {p.name: p.stat().st_size for p in
                            (home / "trace" / "projects" / project_dir.name).iterdir()
-                           if p.name.endswith(".ndjson")}
+                           if p.name.endswith(".ndjson") or p.name.endswith(".ndjson.gz")}
             receipt["files_after"] = files_after
             receipt["status"] = "PASS" if (ok0 and ok1) else "FAIL"
             receipt["why_status"] = (

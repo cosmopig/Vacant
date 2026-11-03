@@ -195,3 +195,31 @@ def test_c5_fresh_state_dir_gc_runs_clean(tmp_path, monkeypatch):
     rep = retention.gc_all(target_bytes=1)
     assert isinstance(rep, dict) and rep is not None
     assert "bytes_freed" in rep and "files_removed" in rep
+
+
+def test_c4_reclaim_sealed_volume_twins_removes_both_and_preserves_recency_window(multi_volume):
+    """C4 缺陷防護：封印卷存有明文+.gz 雙胞胎殘態時，回收該卷必須同時移除雙胞胎兩者，
+    不得殘留任一檔；且雙胞胎不得縮小最近 keep_recent_volumes 保護窗。"""
+    import gzip
+    mv = multi_volume
+    rec = mv["rec"]
+    v2 = rec.dir / "chain-000002.ndjson"
+    v2_gz = rec.dir / "chain-000002.ndjson.gz"
+    assert v2.is_file()
+    v2_gz.write_bytes(gzip.compress(v2.read_bytes()))
+    # 模擬壓縮中斷半殘態：明文較舊、.gz 較新
+    os.utime(v2, (1000, 1000))
+    os.utime(v2_gz, (2000, 2000))
+
+    proj_root = mv["home"] / "trace" / "projects"
+    cur = 100_000
+    target = cur - v2.stat().st_size // 2
+    res = retention._reclaim_sealed_volumes_to_target(proj_root, target, cur)
+    assert res["volumes_reclaimed"] == 1
+    assert not v2.exists(), "chain-000002.ndjson must be reclaimed"
+    assert not v2_gz.exists(), "chain-000002.ndjson.gz twin must also be reclaimed, not left behind"
+    ok, why = rec.verify()
+    assert not ok, "after reclaiming volume 2, verify must not return True"
+    assert "UNKNOWN" in why.upper()
+
+
