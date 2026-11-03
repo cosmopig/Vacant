@@ -49,7 +49,10 @@ TRACE_SCHEMA = "vacant-trace/1"
 EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_change",
                          "transcript", "session_closed", "finding", "flag", "coverage",
                          "consequence", "prompt", "review", "nudge", "ended",
-                         "checkpoint_restore"})
+                         "checkpoint_restore", "volume_seal"})
+#: 分卷封印預設門檻（DECISION_20261103_STEPCHAIN_SEALING.md Phase A）
+DEFAULT_VOLUME_MAX_BYTES = 2 * 1024 * 1024
+DEFAULT_VOLUME_MAX_ENTRIES = 2000
 MAX_OUTPUT_BLOB = 2 * 1024 * 1024
 #: 一個步驟開著超過這麼久還沒等到 `post`，就當它不會來了（和 Stop 掛鉤的上限同一個數量級）
 STALE_S = 900.0
@@ -231,6 +234,19 @@ class Recorder:
         #: 在掛鉤裡用時由 `capture.py` 設成 `HOOK_SCAN_S`；命令列與 `vacant do` 不設（沒有上限）
         self.scan_deadline_s: float | None = None
         self._idx_cache: dict[str, W.Index] = {}
+        self.volume_max_bytes: int = DEFAULT_VOLUME_MAX_BYTES
+        self.volume_max_entries: int | None = DEFAULT_VOLUME_MAX_ENTRIES
+
+    def _sealed_volume_paths(self) -> list[pathlib.Path]:
+        if not self.dir.is_dir():
+            return []
+        vols: list[tuple[int, pathlib.Path]] = []
+        for p in self.dir.iterdir():
+            if p.is_file() and p.name.startswith("chain-") and p.name.endswith(".ndjson"):
+                num_str = p.name.removeprefix("chain-").removesuffix(".ndjson")
+                if num_str.isdigit():
+                    vols.append((int(num_str), p))
+        return [p for _, p in sorted(vols, key=lambda x: x[0])]
 
     # ── state ────────────────────────────────────────────────────────
     def _state(self) -> dict[str, Any]:
@@ -256,29 +272,41 @@ class Recorder:
         return file_lock(self.dir / "lock", timeout=timeout)
 
     def _tail(self) -> Logbook:
-        """只讀創世與最後一筆（接鏈只需要這兩筆；整條讀進來每一步都是 O(n)）。"""
-        if not self.chain_path.is_file():
+        """只讀創世與最後一筆（接鏈只需要這兩筆；整條讀進來每一步都是 O(n)）。
+        分卷時：創世取自卷 1（或單一活動卷）首行；最後一筆取自當前活動卷（或最後一卷）尾行。"""
+        vols = self._sealed_volume_paths()
+        first_file = vols[0] if vols else self.chain_path
+        if not first_file.is_file():
             return Logbook()
-        with self.chain_path.open("rb") as f:
-            first = f.readline()
-            if not first.strip():
-                return Logbook()
-            f.seek(0, os.SEEK_END)
-            end = f.tell()
-            back = min(end, 1 << 16)
-            while True:
-                f.seek(end - back)
-                lines = f.read(back).rstrip(b"\n").split(b"\n")
-                if len(lines) > 1 or back == end:
-                    break
-                back = min(end, back * 4)
         try:
+            with first_file.open("rb") as f:
+                first = f.readline()
+                if not first.strip():
+                    return Logbook()
+        except OSError:
+            return Logbook()
+
+        last_file = self.chain_path if self.chain_path.is_file() else (vols[-1] if vols else None)
+        if not last_file or not last_file.is_file():
+            return Logbook()
+
+        try:
+            with last_file.open("rb") as f:
+                f.seek(0, os.SEEK_END)
+                end = f.tell()
+                back = min(end, 1 << 16)
+                while True:
+                    f.seek(end - back)
+                    lines = f.read(back).rstrip(b"\n").split(b"\n")
+                    if len(lines) > 1 or back == end:
+                        break
+                    back = min(end, back * 4)
             entries = [LogEntry.from_json(json.loads(first))]
             last = LogEntry.from_json(json.loads(lines[-1]))
             if last.seq != entries[0].seq:
                 entries.append(last)
             return Logbook(entries)
-        except (json.JSONDecodeError, ValueError, KeyError):
+        except (OSError, json.JSONDecodeError, ValueError, KeyError):
             book, _ = self._book()
             return book
 
@@ -317,6 +345,50 @@ class Recorder:
                     f"({_keys.pub_hex(ident)[:16]}\u2026) \u2014 appending would make the whole chain "
                     f"unverifiable. The chain is left intact: restore the original key or use a fresh state dir.")
         ts = int(time.time() * 1000)
+
+        # ── 封印檢查（DECISION_20261103 §3.1 分卷封印 Phase A）───────────────
+        if self.chain_path.is_file() and book.entries:
+            should_seal = False
+            try:
+                sz = self.chain_path.stat().st_size
+                if sz >= self.volume_max_bytes:
+                    should_seal = True
+                elif self.volume_max_entries is not None:
+                    with self.chain_path.open("rb") as f:
+                        line_count = sum(1 for ln in f if ln.strip())
+                    if line_count >= self.volume_max_entries:
+                        should_seal = True
+            except OSError:
+                should_seal = False
+
+            if should_seal:
+                raw_bytes = self.chain_path.read_bytes()
+                vol_lines = [x for x in raw_bytes.split(b"\n") if x.strip()]
+                if vol_lines:
+                    vols = self._sealed_volume_paths()
+                    next_vol_num = len(vols) + 1
+                    sealed_name = f"chain-{next_vol_num:06d}.ndjson"
+                    vol_entries = [LogEntry.from_json(json.loads(x)) for x in vol_lines]
+                    first_e, last_e = vol_entries[0], vol_entries[-1]
+                    sha_prefix = hashlib.sha256(raw_bytes).hexdigest()
+                    seal_payload = {
+                        "schema": TRACE_SCHEMA,
+                        "sealed_file": sealed_name,
+                        "sha256_prefix": sha_prefix,
+                        "first_seq": first_e.seq,
+                        "last_seq": last_e.seq,
+                        "entry_count": len(vol_entries) + 1,
+                        "last_entry_hash": last_e.hash(),
+                        "sealed_at_ms": ts,
+                    }
+                    seal_e = book.append("volume_seal", seal_payload, ident, ts_ms=ts)
+                    with self.chain_path.open("ab") as f:
+                        f.write(canonical_bytes(seal_e.to_json()) + b"\n")
+                        f.flush()
+                        os.fsync(f.fileno())
+                    os.replace(self.chain_path, self.dir / sealed_name)
+                    book = Logbook([book.entries[0], seal_e])
+
         new: list[LogEntry] = []
         if not book.entries:
             new.append(book.append("trace_genesis",
@@ -976,14 +1048,31 @@ class Recorder:
 
     # ── reading back ─────────────────────────────────────────────────
     def _book(self) -> tuple[Logbook, int]:
-        """整條鏈；尾巴那半行（寫到一半被砍）不算，回傳它的位元組數。"""
-        data = self.chain_path.read_bytes() if self.chain_path.is_file() else b""
-        torn = 0
-        if data and not data.endswith(b"\n"):
-            cut = data.rfind(b"\n") + 1
-            torn, data = len(data) - cut, data[:cut]
-        entries = [LogEntry.from_json(json.loads(x)) for x in data.split(b"\n") if x.strip()]
-        return Logbook(entries), torn
+        """整條鏈（跨所有已封印卷與活動卷）；尾巴那半行（寫到一半被砍）不算，回傳它的位元組數。"""
+        vols = self._sealed_volume_paths()
+        all_files = list(vols)
+        if self.chain_path.is_file():
+            all_files.append(self.chain_path)
+        if not all_files:
+            return Logbook(), 0
+
+        entries: list[LogEntry] = []
+        last_torn = 0
+        for idx, p in enumerate(all_files):
+            data = p.read_bytes() if p.is_file() else b""
+            torn = 0
+            if data and not data.endswith(b"\n"):
+                cut = data.rfind(b"\n") + 1
+                torn, data = len(data) - cut, data[:cut]
+                if idx == len(all_files) - 1:
+                    last_torn = torn
+            for x in data.split(b"\n"):
+                if x.strip():
+                    try:
+                        entries.append(LogEntry.from_json(json.loads(x)))
+                    except Exception:
+                        pass
+        return Logbook(entries), last_torn
 
     def _read_head(self) -> dict[str, Any] | None:
         try:
@@ -1018,22 +1107,60 @@ class Recorder:
         return book, torn, head
 
     def events(self) -> list[dict[str, Any]]:
-        if not self.chain_path.is_file():
+        vols = self._sealed_volume_paths()
+        if not vols and not self.chain_path.is_file():
             return []
         return [{"seq": e.seq, "type": e.type, "ts_ms": e.ts_ms, "hash": e.hash(),
                  **(e.payload or {})} for e in self._book()[0].entries]
 
     def verify(self, trust: _keys.Trust | None = None,
                anchor: dict[str, Any] | None = None) -> tuple[bool, str]:
-        """簽章鏈＋未簽章的 `head.json`＋（有給的話）**收件端簽過的帳本**裡的鏈頭錨點
-        （`{"seq", "hash"}`，由 `stopcheck.ledger_anchor` 讀出）。`head.json` 和鏈在同一個目錄、
-        沒有簽章，連它一起截掉就對不出來；錨點在另一條簽章鏈上，截短或換掉病歷都對得出來（K3）。"""
+        """簽章鏈＋未簽章的 `head.json`＋（有給的話）**收件端簽過的帳本**裡的鏈頭錨點。
+        支援多卷封印鏈（DECISION_20261103 Phase A）：驗每卷 seal 行、長度與前綴雜湊；
+        缺失卷裁定 UNKNOWN（非 True、非崩潰）。"""
         from ..identity import PublicIdentity
-        if not self.chain_path.is_file():
+        vols = self._sealed_volume_paths()
+        if not vols and not self.chain_path.is_file():
             return False, "no trace"
+
+        # 1) 分卷連續性與封印驗證
+        for idx, vp in enumerate(vols, start=1):
+            expected_name = f"chain-{idx:06d}.ndjson"
+            if vp.name != expected_name:
+                return False, f"UNKNOWN: volume sequence broken (expected {expected_name}, got {vp.name}; missing volume)"
+            raw = vp.read_bytes()
+            lines = [x for x in raw.split(b"\n") if x.strip()]
+            if not lines:
+                return False, f"sealed volume {vp.name} is empty"
+            try:
+                seal_obj = json.loads(lines[-1])
+                seal_e = LogEntry.from_json(seal_obj)
+            except Exception:
+                return False, f"sealed volume {vp.name} tail is malformed"
+            if seal_e.type != "volume_seal":
+                return False, f"sealed volume {vp.name} does not end with volume_seal"
+            pl = seal_e.payload or {}
+            cut = raw.rfind(b"\n", 0, len(raw) - 1)
+            prefix_bytes = raw[:cut + 1] if cut >= 0 else b""
+            if hashlib.sha256(prefix_bytes).hexdigest() != pl.get("sha256_prefix"):
+                return False, f"sealed volume {vp.name} sha256_prefix mismatch (tampered or truncated)"
+            if pl.get("entry_count") != len(lines):
+                return False, f"sealed volume {vp.name} entry_count mismatch"
+            if len(lines) >= 2:
+                try:
+                    prev_obj = json.loads(lines[-2])
+                    prev_e = LogEntry.from_json(prev_obj)
+                    if pl.get("last_entry_hash") != prev_e.hash():
+                        return False, f"sealed volume {vp.name} last_entry_hash mismatch"
+                except Exception:
+                    return False, f"sealed volume {vp.name} prior entry malformed"
+
         book, torn, head = self._consistent_snapshot()
         if not book.entries:
             return False, "trace chain is empty"
+        if book.entries[0].type != "trace_genesis":
+            return False, "UNKNOWN: initial volume missing (trace_genesis not found)"
+
         signer = (book.entries[0].payload or {}).get("signer")
         t = trust or _keys.Trust.load()
         name = t.name_of("verifier", str(signer))
@@ -1072,7 +1199,8 @@ class Recorder:
         ⚠ 記號存在病歷旁邊、沒有簽章：它只省時間，不是證據——能改病歷的也能改記號，
         這一層防的是壞掉（寫到一半、磁碟、手動編輯），不是有心人（那一層是收件端的帳本錨點）。"""
         from ..identity import PublicIdentity
-        if not self.chain_path.is_file():
+        vols = self._sealed_volume_paths()
+        if not vols and not self.chain_path.is_file():
             return False, "no trace", None
         book, torn, head = self._consistent_snapshot()
         es = book.entries
