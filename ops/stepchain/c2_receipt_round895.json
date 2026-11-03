@@ -1,0 +1,58 @@
+{
+ "schema": "vacant.c2-realchain/1",
+ "ran_at": "20261103T063935",
+ "vacant_home": "/home/user1/.vacant",
+ "scope": "preregistered",
+ "chains": [
+  {
+   "project": "b0a568dfe7dbe3b0",
+   "files_before": {
+    "chain.ndjson": 455094,
+    "chain-000001.ndjson": 21904465
+   },
+   "genesis_workspace": "/home/user1/dev/Vacant",
+   "genesis_signer": "f0ea1e1b6be0a9d4…",
+   "verify_before": {
+    "ok": true,
+    "why": "21856 entries"
+   },
+   "format_before": "volumes",
+   "append_ms": 10.0,
+   "verify_after": {
+    "ok": true,
+    "why": "21859 entries"
+   },
+   "files_after": {
+    "chain.ndjson": 457039,
+    "chain-000001.ndjson": 21904465
+   },
+   "status": "PASS",
+   "why_status": "verify identical (True) before/after upgrade and appendable"
+  },
+  {
+   "project": "535f1510326fb03a",
+   "files_before": {
+    "chain.ndjson": 16421909
+   },
+   "genesis_workspace": "/home/user1/dev/wt/worker",
+   "genesis_signer": "f0ea1e1b6be0a9d4…",
+   "verify_before": {
+    "ok": true,
+    "why": "16001 entries"
+   },
+   "format_before": "legacy_single_chain",
+   "append_ms": 382.6,
+   "verify_after": {
+    "ok": true,
+    "why": "16007 entries"
+   },
+   "files_after": {
+    "chain.ndjson": 949
+   },
+   "status": "PASS",
+   "why_status": "verify identical (True) before/after upgrade and appendable"
+  }
+ ],
+ "missing_preregistered": [],
+ "all_pass": true
+}

@@ -1,7 +1,20 @@
-"""步鏈分卷封印與校驗語義測試（DECISION_20261103_STEPCHAIN_SEALING.md Phase A：C1, C2）。"""
+"""步鏈分卷封印與校驗語義測試（DECISION_20261103_STEPCHAIN_SEALING.md Phase A：C1, C2, C6）。
+
+G1–G4 補口（round 891 審查 DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW §3）：
+- G1＝C1 的 30k-step 規模測試（本檔 chain30k fixture＋G1 測試）。
+- G3＝C6 基準（30k-step verify ≤5s 實測；append P99 增量實測＋xfail 記錄未達）。
+- G4＝負控制族別斷言（BROKEN 族 vs UNKNOWN 族）。
+- G2＝真鏈驗收入庫（tests/test_stepchain_c2_realchain.py＋ops/stepchain/）。
+"""
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+
 import pytest
 
 from vacant_network.intake import keys
@@ -332,3 +345,272 @@ def test_stepchain_sealing_set_aside_moves_gz_twins(env):
     ok2, why2 = rec.verify()
     assert ok2, f"verify must pass after set_aside and fresh start, but failed: {why2}"
 
+
+
+# ── G4 負控制（C1–C6 預註冊）：BROKEN 族與 UNKNOWN 族必須可區分、皆非 True ─────────
+# Phase A 的 test_stepchain_sealing_negative_controls 已斷言「verify 失敗」；
+# 本組補上預註冊要求的**族別**斷言：篡改/刪 seal 行＝BROKEN 族（非 UNKNOWN），
+# 卷缺失＝UNKNOWN 族。損 .gz⇒BROKEN 非 UNKNOWN 見 test_stepchain_phaseb.py B-T2。
+def test_g4_tamper_is_broken_family_not_unknown(env):
+    """改封印卷一筆 ⇒ BROKEN 族（非 UNKNOWN、非 True）——C1–C6 預註冊負控制。"""
+    ws, rec = env
+    rec.volume_max_entries = 4
+    rec.compact_on_seal = False
+    for i in range(8):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+    first_vol = sorted(rec.dir.glob("chain-*.ndjson"))[0]
+    assert rec.verify()[0]
+    lines = first_vol.read_text().splitlines()
+    row = dict(json.loads(lines[1]))
+    row["payload"]["tampered"] = True
+    lines[1] = json.dumps(row)
+    first_vol.write_text("\n".join(lines) + "\n")
+    ok, why = rec.verify()
+    assert not ok, "tampered sealed volume must not verify True"
+    assert "UNKNOWN" not in why.upper(), f"tamper is BROKEN-family, not missing: {why}"
+
+
+def test_g4_delete_seal_line_is_broken_family_not_unknown(env):
+    """刪封印卷的 seal 行 ⇒ BROKEN 族（非 UNKNOWN、非 True）——C1–C6 預註冊負控制。"""
+    ws, rec = env
+    rec.volume_max_entries = 4
+    rec.compact_on_seal = False
+    for i in range(8):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+    first_vol = sorted(rec.dir.glob("chain-*.ndjson"))[0]
+    assert rec.verify()[0]
+    lines = first_vol.read_text().splitlines()
+    assert json.loads(lines[-1])["type"] == "volume_seal"
+    first_vol.write_text("\n".join(lines[:-1]) + "\n")   # 刪 seal 行
+    ok, why = rec.verify()
+    assert not ok, "seal line deleted must not verify True"
+    assert "UNKNOWN" not in why.upper(), f"seal deletion is BROKEN-family: {why}"
+
+
+def test_g4_missing_volume_is_unknown_family(env):
+    """封印卷缺失 ⇒ UNKNOWN 族（非 True）——C1–C6 預註冊負控制（L3 回收後即此形）。"""
+    ws, rec = env
+    rec.volume_max_entries = 4
+    rec.compact_on_seal = False
+    for i in range(8):
+        rec.pre(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"})
+        (ws / f"f{i}.txt").write_text(f"content {i}\n")
+        rec.post(f"t{i}", MAIN, "Write", {"file_path": f"f{i}.txt"}, "ok")
+    vols = sorted(rec.dir.glob("chain-*.ndjson"))
+    assert len(vols) >= 2, f"need >=2 sealed volumes, got {vols}"
+    assert rec.verify()[0]
+    vols[0].unlink()                                        # 最舊封印卷缺失（模擬 L3 回收）
+    ok, why = rec.verify()
+    assert not ok, "missing volume must not verify True"
+    assert "UNKNOWN" in why.upper(), f"missing volume must be UNKNOWN-family: {why}"
+
+
+# ── G1（C1 規模）＋G3（C6 基準）────────────────────────────────────────────────
+# C1 預註冊：合成 30k 步專案、無單檔 > VOLUME_MAX_BYTES、verify OK、verify_since 跨卷 OK、
+# 篡改中段卷 ⇒ BROKEN、刪 seal 行 ⇒ BROKEN（非 UNKNOWN）。
+# C6 預註冊：append P99 延遲增量 ≤10%（前後對照）；30k 步鏈 verify ≤5 s。
+# 誠實邊界：30k 步 build 在本機約 4 分鐘（每筆 append fsync 為設計使然）——這是
+# 預註冊規模的驗收成本，不另設跳過/縮小開關（縮小＝驗收打折）。
+
+STEPS_30K = 30_000
+
+
+@pytest.fixture(scope="module")
+def chain30k(tmp_path_factory):
+    """30k-step 合成專案（C1 規模），build 一次、G1/G3 共用。回傳度量 dict。"""
+    vh = tmp_path_factory.mktemp("chain30k")
+    ws = vh / "ws"
+    ws.mkdir()
+    old = os.environ.get("VACANT_HOME")
+    os.environ["VACANT_HOME"] = str(vh)
+    try:
+        keys.init_local()
+        rec = R.Recorder(ws)
+        m30 = R.Actor("g1", "s1")
+        rec.pre("w", m30, "Write", {"file_path": "f.txt"})
+        rec.post("w", m30, "Write", {"file_path": "f.txt"}, "ok")
+        t0 = time.perf_counter()
+        step_ms = []
+        for i in range(STEPS_30K):
+            ta = time.perf_counter()
+            rec.pre(f"t{i}", m30, "Write", {"file_path": f"f{i % 7}.txt"})
+            rec.post(f"t{i}", m30, "Write", {"file_path": f"f{i % 7}.txt"}, "ok")
+            step_ms.append((time.perf_counter() - ta) * 1000)
+        build_s = time.perf_counter() - t0
+        ok, why = rec.verify()
+        t_v = time.perf_counter()
+        ok_v, why_v = rec.verify()
+        verify_s = time.perf_counter() - t_v
+        ok_vs, why_vs, _mark = rec.verify_since(None)
+        # 每個 .ndjson 檔的最大單行（＝單筆最大尺寸；封印最遲可超上限一筆）
+        per_file = {}
+        for p in rec.dir.iterdir():
+            if p.name.endswith(".ndjson"):
+                maxline = 0
+                with open(p, "rb") as f:
+                    for line in f:
+                        if len(line) > maxline:
+                            maxline = len(line)
+                per_file[p.name] = {"bytes": p.stat().st_size, "max_line": maxline}
+        step_ms.sort()
+        yield {
+            "rec": rec, "ws": ws, "home": vh,
+            "build_s": build_s,
+            "step_ms_p50": step_ms[len(step_ms) // 2],
+            "step_ms_p99": step_ms[int(len(step_ms) * 0.99)],
+            "verify_ok": ok, "verify_why": why,
+            "verify_s": verify_s,
+            "verify_since_ok": ok_vs, "verify_since_why": why_vs,
+            "per_file": per_file,
+        }
+    finally:
+        if old is not None:
+            os.environ["VACANT_HOME"] = old
+        else:
+            os.environ.pop("VACANT_HOME", None)
+
+
+def _fresh_home_copy(chain30k, tmp_path, label):
+    """把 30k 鏈專案目錄複製到新 home（負控制用；不動共享鏈）。回傳 (rec, name)。"""
+    name = chain30k["rec"].dir.name
+    new_home = tmp_path / label
+    (new_home / "trace" / "projects").mkdir(parents=True)
+    shutil.copytree(chain30k["rec"].dir, new_home / "trace" / "projects" / name)
+    old = os.environ.get("VACANT_HOME")
+    os.environ["VACANT_HOME"] = str(new_home)
+    return R.Recorder(chain30k["ws"]), name, old
+
+
+def _restore_home(old):
+    if old is not None:
+        os.environ["VACANT_HOME"] = old
+    else:
+        os.environ.pop("VACANT_HOME", None)
+
+
+def test_g1_c1_no_single_file_over_volume_max(chain30k):
+    """C1：無單檔 > VOLUME_MAX_BYTES。封印檢查＝`sz >= 上限` 或 `行數 >= 上限`，
+    故單檔至多超上限**一筆**（跨過門檻的那筆）；以該檔最大單行為界。"""
+    per_file = chain30k["per_file"]
+    sealed = {n: v for n, v in per_file.items() if n.startswith("chain-")}
+    assert len(sealed) >= 10, f"30k steps should seal many volumes, got {len(sealed)}"
+    for name, v in per_file.items():
+        bound = R.DEFAULT_VOLUME_MAX_BYTES + v["max_line"]
+        assert v["bytes"] <= bound, (
+            f"{name} = {v['bytes']} B exceeds VOLUME_MAX_BYTES + one entry ({bound} B)")
+
+
+def test_g1_c1_verify_and_verify_since_ok(chain30k):
+    """C1：`vacant trace verify` OK＋verify_since 跨卷 OK（30k 步、多卷）。"""
+    assert chain30k["verify_ok"], f"verify failed on 30k-step chain: {chain30k['verify_why']}"
+    assert chain30k["verify_since_ok"], chain30k["verify_since_why"]
+    # CLI 路徑（C1 點名 `vacant trace verify`）：cwd＝專案 ws、VACANT_HOME＝該 home
+    r = subprocess.run(
+        [sys.executable, "-m", "vacant_network.cli", "trace", "verify"],
+        cwd=str(chain30k["ws"]),
+        env={**os.environ, "VACANT_HOME": str(chain30k["home"])},
+        capture_output=True, text=True, timeout=120,
+    )
+    assert r.returncode == 0, f"vacant trace verify CLI: rc={r.returncode}\n{r.stdout[-400:]}\n{r.stderr[-400:]}"
+
+
+def test_g1_c1_tamper_middle_volume_is_broken_family(chain30k, tmp_path):
+    """C1 負控制：篡改**中段卷**一筆 ⇒ BROKEN 族（非 UNKNOWN、非 True）。"""
+    rec, _name, old = _fresh_home_copy(chain30k, tmp_path, "tamper_home")
+    try:
+        vols = sorted(rec.dir.glob("chain-*.ndjson"))
+        assert len(vols) >= 3, f"need >=3 sealed volumes for a middle one, got {len(vols)}"
+        assert rec.verify()[0], "precondition: chain verifies before tamper"
+        mid = vols[len(vols) // 2]
+        lines = mid.read_text(encoding="utf-8").splitlines()
+        idx = len(lines) // 2
+        row = dict(json.loads(lines[idx]))
+        row["payload"]["tampered_by_test"] = True
+        lines[idx] = json.dumps(row)
+        mid.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        ok, why = rec.verify()
+        assert not ok, "tampered middle volume must not verify True"
+        assert "UNKNOWN" not in why.upper(), f"tamper is BROKEN-family, not missing: {why}"
+    finally:
+        _restore_home(old)
+
+
+def test_g1_c1_delete_middle_seal_line_is_broken_family(chain30k, tmp_path):
+    """C1 負控制：刪**中段卷**的 seal 行 ⇒ BROKEN 族（非 UNKNOWN、非 True）。"""
+    rec, _name, old = _fresh_home_copy(chain30k, tmp_path, "noseal_home")
+    try:
+        vols = sorted(rec.dir.glob("chain-*.ndjson"))
+        assert len(vols) >= 3, f"need >=3 sealed volumes for a middle one, got {len(vols)}"
+        assert rec.verify()[0], "precondition: chain verifies before seal deletion"
+        mid = vols[len(vols) // 2]
+        lines = mid.read_text(encoding="utf-8").splitlines()
+        assert json.loads(lines[-1])["type"] == "volume_seal"
+        mid.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")   # 刪 seal 行
+        ok, why = rec.verify()
+        assert not ok, "middle volume seal line deleted must not verify True"
+        assert "UNKNOWN" not in why.upper(), f"seal deletion is BROKEN-family: {why}"
+    finally:
+        _restore_home(old)
+
+
+def test_g3_c6_verify_30k_under_5s(chain30k):
+    """C6：30k 步鏈 verify ≤5 s（round 895 實測 ≈2.9 s）。"""
+    assert chain30k["verify_ok"], chain30k["verify_why"]
+    assert chain30k["verify_s"] <= 5.0, (
+        f"30k-step verify took {chain30k['verify_s']:.2f}s > 5s (C6)")
+
+
+# C6 append P99 增量：round 895 實測（本機、3000 步 A/B）＝base p99 5.81 ms vs
+# after p99 8.71 ms ⇒ 增量 49.7% ＞ 10% 門檻——**未達**。成因（同輪 cProfile）：
+# 封印事件本體（~55 ms/次、每 ~2000 筆一次）＋接近門檻時每次 append 的 O(檔大小)
+# 行數掃描（6–9 ms 尾）。按 round 891 審查 §3 G3 的選項（「實測數據或明列未收口」），
+# 此處以實測＋xfail 記錄；**Phase A 不因本項宣告完成**（誠實邊界，見該審查 §8）。
+# 縮小尺度說明：P99 尾由封印門檻附近的局部行為決定，3000 步 A/B 與 30k 步同形；
+# 30k 步的 after 分布另見 chain30k fixture 的 step_ms_p99。
+@pytest.mark.xfail(
+    strict=False,
+    reason=("C6 append-P99 delta <=10% NOT MET on round-895 measurement "
+            "(3000-step A/B: base p99 5.81ms vs after p99 8.71ms = +49.7%; "
+            "seal event ~55ms + O(file-size) per-append scan near threshold). "
+            "Recorded per round-891 review G3 alternative; Phase A not declared complete on C6."),
+)
+def test_g3_c6_append_p99_delta_le_10pct(tmp_path):
+    """C6：append P99 延遲增量 ≤10%（前後對照）。before＝封印關閉（inf/None），
+    after＝預設封印。同機、同荷、3000 步（尾局部性，見上方註）。"""
+
+    def _p99_ms(n_steps, sealing):
+        vh = tmp_path / ("ab_after" if sealing else "ab_base")
+        ws = vh / "ws"
+        ws.mkdir(parents=True)
+        old = os.environ.get("VACANT_HOME")
+        os.environ["VACANT_HOME"] = str(vh)
+        try:
+            keys.init_local()
+            rec = R.Recorder(ws)
+            if not sealing:
+                rec.volume_max_bytes = float("inf")
+                rec.volume_max_entries = None
+            m = R.Actor("g3", "s1")
+            for i in range(5):
+                rec.pre(f"w{i}", m, "Write", {"file_path": "f.txt"})
+                rec.post(f"w{i}", m, "Write", {"file_path": "f.txt"}, "ok")
+            times = []
+            for i in range(n_steps):
+                t0 = time.perf_counter()
+                rec.pre(f"t{i}", m, "Write", {"file_path": f"f{i % 5}.txt"})
+                rec.post(f"t{i}", m, "Write", {"file_path": f"f{i % 5}.txt"}, "ok")
+                times.append((time.perf_counter() - t0) * 1000)
+        finally:
+            _restore_home(old)
+        times.sort()
+        return times[int(len(times) * 0.99)]
+
+    base = _p99_ms(3000, sealing=False)
+    after = _p99_ms(3000, sealing=True)
+    delta = (after - base) / base
+    assert delta <= 0.10, (
+        f"C6 P99 delta {delta * 100:.1f}% > 10% (base {base:.2f}ms, after {after:.2f}ms)")
