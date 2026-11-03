@@ -217,3 +217,28 @@ def test_phase_b_tail_corrupted_last_file_handles_eoferror(env):
     book = rec._tail()
     assert isinstance(book, R.Logbook)
 
+
+def test_phase_b_automatic_compact_failure_fails_open_with_intact_chain(env, monkeypatch):
+    """封印當下自動壓縮失敗（fail-open）時，coverage 記責事件必須確實落盤寫入鏈，
+    不得遺失導致後續事件 prev_hash 斷鏈；verify 必須保持 OK。"""
+    ws, rec = env
+    rec.volume_max_entries = 4
+    rec.compact_on_seal = True
+
+    # 模擬 compact_sealed_volume 壓縮失敗（例如磁碟配額或格式拒絕）
+    monkeypatch.setattr(R, "compact_sealed_volume", lambda p: (False, "simulated compression failure"))
+
+    _fill(rec, ws, 8)
+
+    # 驗證鏈未斷
+    ok, why = rec.verify()
+    assert ok, f"verify failed after automatic compact failure: {why}"
+
+    # 驗證 coverage 事件確實落盤並出現在鏈上
+    evs = rec.events()
+    covs = [e for e in evs if e.get("type") == "coverage" and e.get("volume_compress")]
+    assert len(covs) >= 1, "coverage event for failed compression must be recorded on disk"
+    assert covs[0]["ok"] is False
+    assert covs[0]["reason"] == "simulated compression failure"
+
+

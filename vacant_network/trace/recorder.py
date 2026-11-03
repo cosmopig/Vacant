@@ -429,6 +429,7 @@ class Recorder:
                     f"({_keys.pub_hex(ident)[:16]}\u2026) \u2014 appending would make the whole chain "
                     f"unverifiable. The chain is left intact: restore the original key or use a fresh state dir.")
         ts = int(time.time() * 1000)
+        new: list[LogEntry] = []
 
         # ── 封印檢查（DECISION_20261103 §3.1 分卷封印 Phase A）───────────────
         if self.chain_path.is_file() and book.entries:
@@ -478,18 +479,14 @@ class Recorder:
                     # Phase B（L2 冷壓縮）：對剛封印的卷 best-effort gzip（fail-open：失敗⇒留明文卷、
                     # 原因記上鏈、不擋寫入）。sha256_prefix 是未壓縮流的哈希⇒gunzip 後照舊驗＝零語義變化。
                     # 存量不強遷：只壓新封印卷；既有明文卷照讀（C2 向後相容）。
+                    book = Logbook([book.entries[0], seal_e])
                     if self.compact_on_seal:
                         compact_ok, compact_detail = compact_sealed_volume(self.dir / sealed_name)
-                        if compact_ok:
-                            book = Logbook([book.entries[0], seal_e])
-                        else:
-                            book = Logbook([book.entries[0], seal_e])
-                            book.append("coverage", {"schema": TRACE_SCHEMA, "volume_compress": sealed_name,
-                                                     "ok": False, "reason": compact_detail}, ident, ts_ms=ts)
-                    else:
-                        book = Logbook([book.entries[0], seal_e])
+                        if not compact_ok:
+                            cov_e = book.append("coverage", {"schema": TRACE_SCHEMA, "volume_compress": sealed_name,
+                                                             "ok": False, "reason": compact_detail}, ident, ts_ms=ts)
+                            new.append(cov_e)
 
-        new: list[LogEntry] = []
         if not book.entries:
             new.append(book.append("trace_genesis",
                                    {"schema": TRACE_SCHEMA, "workspace": str(self.workspace),
