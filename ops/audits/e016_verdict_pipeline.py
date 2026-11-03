@@ -135,20 +135,20 @@ def load(runs_root: pathlib.Path, exp: str) -> tuple[list[dict], int, int]:
 
 def run(runs_root: pathlib.Path, exp: str) -> dict:
     rows, total, missing = load(runs_root, exp)
-    
+
     # Job completion check logic
     done_file = "/srv/vlab/done/16_e016_failed_step_ablation.json"
     is_done = pathlib.Path(done_file).exists() or (total >= N_CELLS)
 
     if total < N_CELLS and not is_done:
-        print(f"INCOMPLETE: {total}/{N_CELLS} 格未完成（等 job 結束再判決）")
+        print(f"INCOMPLETE: 只到 {total}/{N_CELLS} 格在位（等 job 結束再判決）")
         sys.exit(10)
     v = decide(rows, total, missing)
     out = pathlib.Path(__file__).parent / f"{exp}_verdict.json"
     out.write_text(json.dumps(v, ensure_ascii=False, indent=2))
     print(f"{v['state']}  ({v['why']})  -> {out}")
     for p in v.get("pairs", []):
-        print(f"  {p['x']} vs {p['y']}: pairs={p['pairs']} {p['x']}_only={p['x_only']} {p['y']}_only={p['y']}_only={p['y_only']} p_raw={p['p_raw']:.4f} holm={'SIG' if p['holm_significant'] else 'ns'}")
+        print(f"  {p['x']} vs {p['y']}: pairs={p['pairs']} {p['x']}_only={p['x_only']} {p['y']}_only={p['y_only']} p_raw={p['p_raw']:.4f} holm={'SIG' if p['holm_significant'] else 'ns'}")
     for a in ARMS:
         c = v.get("costs", {}).get(a, {})
         print(f"  cost {a}: n={c.get('n')} pass={c.get('pass')} calls/success={c.get('calls_per_success')} tok/success={c.get('tokens_per_success')}")
